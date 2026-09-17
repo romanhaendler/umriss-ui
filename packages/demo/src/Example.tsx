@@ -16,10 +16,17 @@
    coloured. It lives in `CopyButton.tsx`, because the import line in the page
    head needs the same one.
 
-   An example that shows a file beside itself gets tabs, and Copy takes the one
-   in front: two tabs mean two things to copy, and a button that always copied
-   the first would be a lie on the second. An example showing nothing - which
-   is nearly all of them - has no tab bar at all. */
+   An example that shows a file beside itself gets a row of buttons, and Copy
+   takes the file in front: two of them mean two things to copy, and a button
+   that always copied the first would be a lie on the second. An example
+   showing nothing - which is nearly all of them - has no such row at all.
+
+   They are buttons and not ARIA tabs. The tabs pattern owes a `tabpanel`, one
+   stop in the tab order with arrow keys inside it, and `aria-controls` on
+   every tab; what is here is a group of buttons that swap what one block
+   shows, every one of them reachable by Tab, and `aria-pressed` saying which
+   is in front. Claiming the role without the pattern would promise a screen
+   reader keys that do not work. */
 
 import { useMemo, useState } from "react";
 import { highlight } from "sugar-high";
@@ -49,14 +56,13 @@ function CodeBlock({ files }: { files: readonly ExampleFile[] }) {
     <div className="codeBlock">
       <div className="codeBar">
         {files.length > 1 ? (
-          <span className="codeTabs" role="tablist">
+          <span className="codeTabs" role="group" aria-label="Files of this example">
             {files.map((file, index) => (
               <button
                 key={file.name}
                 type="button"
-                role="tab"
                 className="codeTab"
-                aria-selected={file === front}
+                aria-pressed={file === front}
                 onClick={() => setShown(index)}
               >
                 {file.name}

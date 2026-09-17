@@ -30,44 +30,42 @@ function canvasOf(example: Locator, layer: Layer): Locator {
   return example.locator("[data-schedule-plot] canvas").nth(layer === "data" ? 0 : 1);
 }
 
-/** How many pixels of a rectangle carry any paint at all. */
-export async function painted(example: Locator, layer: Layer, rect: Rect): Promise<number> {
+/** The bytes of a rectangle, and the rectangle as the canvas really holds it.
+
+    One reading for all of them: the canvas is sized at the device's pixel
+    ratio while the caller counts in CSS pixels, and the conversion is a place
+    to get wrong once rather than four times. Everything is counted inside the
+    browser - an 800 by 200 plot at two device pixels a side is over two
+    million numbers, and none of them has to cross into the test. */
+async function bytesOf(example: Locator, layer: Layer, rect: Rect): Promise<{ data: number[]; pixels: number }> {
   return await canvasOf(example, layer).evaluate((canvas, box) => {
     const element = canvas as HTMLCanvasElement;
     const ctx = element.getContext("2d");
     if (ctx === null) throw new Error("no 2d context");
-    /* The canvas is sized at the device's pixel ratio; the caller counts in
-       CSS pixels. */
     const ratio = element.width / element.clientWidth;
-    const x = Math.round(box.x * ratio);
-    const y = Math.round(box.y * ratio);
     const w = Math.max(1, Math.round(box.width * ratio));
     const h = Math.max(1, Math.round(box.height * ratio));
-    const data = ctx.getImageData(x, y, w, h).data;
-    let count = 0;
-    for (let i = 3; i < data.length; i += 4) if (data[i]! > 8) count++;
-    return count;
+    const data = ctx.getImageData(Math.round(box.x * ratio), Math.round(box.y * ratio), w, h).data;
+    return { data: [...data], pixels: w * h };
   }, rect);
+}
+
+/** How many pixels of a rectangle carry any paint at all. */
+export async function painted(example: Locator, layer: Layer, rect: Rect): Promise<number> {
+  const { data } = await bytesOf(example, layer, rect);
+  let count = 0;
+  for (let i = 3; i < data.length; i += 4) if (data[i]! > 8) count++;
+  return count;
 }
 
 /** The share of a rectangle that carries paint, from 0 to 1 - the measure for
     "hollow", "filled" and "drawn back", which a raw count cannot give without
     the reader working out the area as well. */
 export async function paintedShare(example: Locator, layer: Layer, rect: Rect): Promise<number> {
-  return await canvasOf(example, layer).evaluate((canvas, box) => {
-    const element = canvas as HTMLCanvasElement;
-    const ctx = element.getContext("2d");
-    if (ctx === null) throw new Error("no 2d context");
-    const ratio = element.width / element.clientWidth;
-    const x = Math.round(box.x * ratio);
-    const y = Math.round(box.y * ratio);
-    const w = Math.max(1, Math.round(box.width * ratio));
-    const h = Math.max(1, Math.round(box.height * ratio));
-    const data = ctx.getImageData(x, y, w, h).data;
-    let count = 0;
-    for (let i = 3; i < data.length; i += 4) if (data[i]! > 8) count++;
-    return count / (w * h);
-  }, rect);
+  const { data, pixels } = await bytesOf(example, layer, rect);
+  let count = 0;
+  for (let i = 3; i < data.length; i += 4) if (data[i]! > 8) count++;
+  return count / pixels;
 }
 
 export interface Point {
@@ -79,14 +77,8 @@ export interface Point {
     left. Alpha is the canvas' own: nothing drawn is a zero there, and the
     surface a reader sees through it belongs to the CSS beneath. */
 export async function rgba(example: Locator, layer: Layer, point: Point): Promise<[number, number, number, number]> {
-  return await canvasOf(example, layer).evaluate((canvas, at) => {
-    const element = canvas as HTMLCanvasElement;
-    const ctx = element.getContext("2d");
-    if (ctx === null) throw new Error("no 2d context");
-    const ratio = element.width / element.clientWidth;
-    const d = ctx.getImageData(Math.round(at.x * ratio), Math.round(at.y * ratio), 1, 1).data;
-    return [d[0]!, d[1]!, d[2]!, d[3]!] as [number, number, number, number];
-  }, point);
+  const { data } = await bytesOf(example, layer, { ...point, width: 1, height: 1 });
+  return [data[0]!, data[1]!, data[2]!, data[3]!];
 }
 
 /** The paint at a point as one comparable value - for asking whether two

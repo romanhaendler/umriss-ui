@@ -87,6 +87,12 @@ rail - and the hit, the transports and the findings on it.
   order until now, and the chevron is the first thing it does. It has a focus
   ring of its own (ADR-0021) and the guard names it.
 - axe runs on the new chapter: `lane-groups` is in the accessibility sample.
+- **"Nothing in its own way" covers the group headers** - added after a review
+  found this ticket's own acceptance unmet and unrecorded. A header's ROW is
+  the clipping box and its label, count and chevron are the overlays in it:
+  "a header never leaves its row", which is what the spec's Testing Decisions
+  ask for. Not the header COLUMN - a header below the fold is scrolled to, not
+  lost, and marking the column made the check fail on a truth.
 - All schedule suites: **283 passed**, 135 skipped. Unit: 191.
 
 ### Pictures

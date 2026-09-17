@@ -83,20 +83,10 @@ export function slotAt(view: Viewport, lane: string): Slot | null {
   return slot === null ? null : { ...slot, top: slot.top - view.scrollY };
 }
 
-/** The top of a lane on the plot. */
-export function laneTop(view: Viewport, lane: string): number {
-  return (slotOf(view.rows, lane)?.top ?? 0) - view.scrollY;
-}
-
 /** The lane under a y, or null off every lane - a group's head and the inset
     of a miniature are both "no lane". */
 export function laneAt(view: Viewport, y: number): string | null {
   return laneAtY(view.rows, y + view.scrollY);
-}
-
-/** The bottom of everything laid out, in plot coordinates. */
-export function rowsBottom(view: Viewport): number {
-  return view.rows.height - view.scrollY;
 }
 
 export function subtaskBox(view: Viewport, subtask: Subtask, lane: string, slot: Slot, depth: number): SubtaskBox {
