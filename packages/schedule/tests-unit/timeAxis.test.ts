@@ -1,5 +1,6 @@
 /* The time axis of the schedule: the fine step for a zoom, the ticks of the
-   fine band, the days of the coarse band, zoom and pan (schedule 03).
+   fine band, the days of the coarse band, zoom and pan (schedule 03). Snapping
+   has its own file, `snap.test.ts`.
 
    The time zone is Europe/Berlin (vitest.config.ts). Expected instants are
    written as ISO text with their offset - the independent source - and the
@@ -8,7 +9,6 @@
 import { describe, expect, it } from "vitest";
 import { DAY, HOUR, MINUTE } from "@umriss-ui/charts";
 import { days, fineStep, fineTicks, panDomain, zoomDomain } from "../src/timeAxis";
-import { snapTime } from "../src/snap";
 
 const t = (iso: string) => Date.parse(iso);
 
@@ -116,22 +116,5 @@ describe("zoomDomain", () => {
 describe("panDomain", () => {
   it("moves both ends by the same amount", () => {
     expect(panDomain([10 * MINUTE, 70 * MINUTE], -5 * MINUTE)).toEqual([5 * MINUTE, 65 * MINUTE]);
-  });
-});
-
-describe("snapTime", () => {
-  it("snaps onto the nearest quarter hour", () => {
-    expect(snapTime(t("2026-03-17T08:07:00+01:00"), 15 * MINUTE)).toBe(t("2026-03-17T08:00:00+01:00"));
-    expect(snapTime(t("2026-03-17T08:08:00+01:00"), 15 * MINUTE)).toBe(t("2026-03-17T08:15:00+01:00"));
-  });
-
-  it("snaps a shift raster onto local time, not UTC", () => {
-    expect(snapTime(t("2026-03-17T13:10:00+01:00"), 8 * HOUR)).toBe(t("2026-03-17T16:00:00+01:00"));
-    expect(snapTime(t("2026-07-17T09:10:00+02:00"), 8 * HOUR)).toBe(t("2026-07-17T08:00:00+02:00"));
-  });
-
-  it("leaves a time as it is without a raster", () => {
-    const at = t("2026-03-17T08:07:31+01:00");
-    expect(snapTime(at, 0)).toBe(at);
   });
 });

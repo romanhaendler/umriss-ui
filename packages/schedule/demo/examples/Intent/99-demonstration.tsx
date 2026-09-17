@@ -22,17 +22,26 @@ const QUARTER = 15 * 60_000;
 
 type Menu = { interaction: ScheduleInteraction; subtask: Subtask | null };
 
+type Plan = { steps: readonly Subtask[]; log: readonly string[] };
+
+const START: Plan = { steps: STEPS, log: [] };
+
+/* One drop can report two intents - a move and a lane - one after the other.
+   Each is applied to the plan as the previous one left it: a functional update,
+   not the plan this render happened to see. */
+function applied(plan: Plan, intent: Intent, cascade: boolean): Plan {
+  const pushed = cascade ? ripple(plan.steps, MOVES, intent) : [];
+  const steps = [intent, ...pushed].reduce((data, change) => data.map((step) => applyIntent(step, change)), plan.steps);
+  const line = `${intent.kind} ${intent.subtask}${pushed.length > 0 ? `, pushed ${pushed.length}` : ""}`;
+  return { steps, log: [line, ...plan.log].slice(0, 4) };
+}
+
 export default function Demonstration() {
-  const [steps, setSteps] = useState<readonly Subtask[]>(STEPS);
+  const [plan, setPlan] = useState<Plan>(START);
   const [cascade, setCascade] = useState(true);
   const [menu, setMenu] = useState<Menu | null>(null);
-  const [log, setLog] = useState<string[]>([]);
 
-  const apply = (intent: Intent) => {
-    const pushed = cascade ? ripple(steps, MOVES, intent) : [];
-    setSteps([intent, ...pushed].reduce((data, change) => data.map((step) => applyIntent(step, change)), steps));
-    setLog((lines) => [`${intent.kind} ${intent.subtask}${pushed.length > 0 ? `, pushed ${pushed.length}` : ""}`, ...lines].slice(0, 4));
-  };
+  const apply = (intent: Intent) => setPlan((current) => applied(current, intent, cascade));
 
   const onInteraction = (interaction: ScheduleInteraction) => {
     if (interaction.type !== "contextmenu") return;
@@ -40,7 +49,7 @@ export default function Demonstration() {
     setMenu({ interaction, subtask });
   };
 
-  const found = findings(steps, MOVES);
+  const found = findings(plan.steps, MOVES);
   const target = menu?.subtask ?? null;
 
   return (
@@ -58,7 +67,7 @@ export default function Demonstration() {
           <Lane key={station.id} id={station.id} label={station.label} />
         ))}
         <Transports data={MOVES} />
-        <Subtasks data={steps} tasks={ORDERS} />
+        <Subtasks data={plan.steps} tasks={ORDERS} />
       </Schedule>
       <ContextMenu
         open={menu !== null}
@@ -82,7 +91,7 @@ export default function Demonstration() {
             </MenuItem>
           </>
         ) : (
-          <MenuItem onSelect={() => setSteps(STEPS)}>Reset the plan</MenuItem>
+          <MenuItem onSelect={() => setPlan(START)}>Reset the plan</MenuItem>
         )}
       </ContextMenu>
       <Text size="sm" tone="secondary" data-findings-summary>
@@ -90,7 +99,7 @@ export default function Demonstration() {
         {found.lateTransports.length === 1 ? "late transport" : "late transports"}
       </Text>
       <Text size="xs" mono tone="muted" data-intent-log>
-        {log.length === 0 ? "Drag a subtask, or right-click one" : log.join(" · ")}
+        {plan.log.length === 0 ? "Drag a subtask, or right-click one" : plan.log.join(" · ")}
       </Text>
     </Stack>
   );

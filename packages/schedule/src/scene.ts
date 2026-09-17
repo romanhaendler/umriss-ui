@@ -37,9 +37,9 @@ import {
   xOf,
   type SubtaskBox,
   type TransportPath,
-  type View,
+  type Viewport,
 } from "./geometry";
-import type { Intent, IntentKind, Subtask, Task, Transport } from "./model";
+import { occupied, type Intent, type IntentKind, type Subtask, type Task, type Transport } from "./model";
 import { snapTime } from "./snap";
 import { days, fineStep, fineTicks, panDomain, zoomDomain, type ZoomLimits } from "./timeAxis";
 
@@ -364,10 +364,10 @@ export class ScheduleScene {
   getServerSnapshot = (): ScheduleSnapshot => EMPTY_SNAPSHOT;
 
   /* ==================================================================== */
-  /* View                                                                  */
+  /* Viewport                                                                  */
   /* ==================================================================== */
 
-  private view(): View {
+  private view(): Viewport {
     return {
       scale: new LinearScale(this.domain, [0, this.width]),
       calendar: this.options.calendar,
@@ -512,7 +512,11 @@ export class ScheduleScene {
     const { x, y } = this.local(event.clientX, event.clientY);
     const grip = (event.target as Element | null)?.closest?.("[data-grip]")?.getAttribute("data-grip");
     const selected = this.selectedSubtask !== null ? this.subtaskById.get(this.selectedSubtask) ?? null : null;
-    if ((grip === "setup" || grip === "teardown") && selected !== null) {
+    if (event.pointerType === "touch") {
+      /* Touch pans and pinches; editing by touch is not part of this version
+         (spec, Out of Scope), so a finger on a subtask pans as well. */
+      this.gesture = { kind: "pending", pointerId: event.pointerId, x0: x, y0: y, mode: "pan", subtask: null };
+    } else if ((grip === "setup" || grip === "teardown") && selected !== null) {
       this.gesture = { kind: "pending", pointerId: event.pointerId, x0: x, y0: y, mode: grip, subtask: selected };
     } else {
       this.gesture = { kind: "pending", pointerId: event.pointerId, x0: x, y0: y, ...this.modeAt(x, y) };
@@ -730,17 +734,19 @@ export class ScheduleScene {
     const s = gesture.subtask;
     const step = this.snapStep();
     const intents = this.options.intents;
-    const at = snapTime(this.timeAt(x), step);
+    const at = this.snapInside(this.timeAt(x), step);
     switch (gesture.mode) {
       case "move": {
         let from = s.from;
-        if (intents.includes("move")) {
+        /* A drag straight across the lanes asks for no new time: snapping a
+           start that lies off the raster would report a move nobody made. */
+        if (intents.includes("move") && Math.abs(x - gesture.x0) >= CLICK_SLOP) {
           const calendar = this.options.calendar;
           const delta = this.view().scale.fromPx(x) - this.view().scale.fromPx(gesture.x0);
           const start = toOperatingTimeClamped(s.from, calendar) + delta;
           const total = calendarFrom(calendar);
           const wall = total.intervals.length === 0 ? start : toWallClock(Math.max(0, Math.min(total.total, start)), total);
-          from = snapTime(wall, step);
+          from = this.snapInside(wall, step);
         }
         const laneId = intents.includes("lane") ? (this.laneIdAt(Math.max(0, Math.min(this.lanes.length * this.options.laneHeight - this.scrollY - 1, y))) ?? s.lane) : s.lane;
         return { ...s, from, to: from + (s.to - s.from), lane: laneId };
@@ -754,6 +760,16 @@ export class ScheduleScene {
       case "teardown":
         return { ...s, teardown: Math.max(0, at - s.to) };
     }
+  }
+
+  /** Snapped - and, where the raster lands in time the calendar removes, moved
+      on to the seam, where time counts again. An intent never asks for a time
+      the plant does not run. */
+  private snapInside(time: number, step: number): number {
+    const snapped = snapTime(time, step);
+    const calendar = calendarFrom(this.options.calendar);
+    if (calendar.intervals.length === 0) return snapped;
+    return toWallClock(toOperatingTimeClamped(snapped, calendar), calendar);
   }
 
   private intentsOf(original: Subtask, ghost: Subtask, mode: EditMode): Intent[] {
@@ -781,22 +797,22 @@ export class ScheduleScene {
     return { overlaps: overlaps(assessed).filter(own), late: lateTransports(assessed, touching) };
   }
 
-  private ghostBox(view: View, ghost: Subtask): SubtaskBox | null {
+  private ghostBox(view: Viewport, ghost: Subtask): SubtaskBox | null {
     const lane = this.laneIndex.get(ghost.lane);
     return lane === undefined ? null : subtaskBox(view, ghost, lane, 0);
   }
 
-  private ghostSummary(view: View, gesture: Extract<Gesture, { kind: "edit" }>): ScheduleSnapshot["ghost"] {
+  private ghostSummary(view: Viewport, gesture: Extract<Gesture, { kind: "edit" }>): ScheduleSnapshot["ghost"] {
     const box = this.ghostBox(view, gesture.ghost);
     if (box === null) return null;
     const found = this.ghostFindings(gesture.ghost);
     const outer = gesture.mode === "setup" || gesture.mode === "teardown";
-    const ghost = gesture.ghost;
+    const shown = outer ? occupied(gesture.ghost) : gesture.ghost;
     return {
       x: outer ? box.outerFrom : box.mainFrom,
       y: box.y,
-      from: outer ? ghost.from - (ghost.setup ?? 0) : ghost.from,
-      to: outer ? ghost.to + (ghost.teardown ?? 0) : ghost.to,
+      from: shown.from,
+      to: shown.to,
       overlap: found.overlaps.length > 0,
       late: found.late.length > 0,
     };
@@ -871,7 +887,7 @@ export class ScheduleScene {
     this.drawOverlay(overlay, view, colours);
   }
 
-  private drawGrid(ctx: CanvasRenderingContext2D, view: View, colours: Colours): void {
+  private drawGrid(ctx: CanvasRenderingContext2D, view: Viewport, colours: Colours): void {
     const snapshot = this.snapshot;
     ctx.lineWidth = 1;
     ctx.strokeStyle = colours.line;
@@ -965,7 +981,7 @@ export class ScheduleScene {
     }
   }
 
-  private drawOverlap(ctx: CanvasRenderingContext2D, view: View, overlap: Overlap, colours: Colours): void {
+  private drawOverlap(ctx: CanvasRenderingContext2D, view: Viewport, overlap: Overlap, colours: Colours): void {
     const lane = this.laneIndex.get(overlap.lane);
     if (lane === undefined) return;
     const x0 = xOf(view, overlap.from);
@@ -989,7 +1005,7 @@ export class ScheduleScene {
     }
   }
 
-  private drawOverlay(ctx: CanvasRenderingContext2D, view: View, colours: Colours): void {
+  private drawOverlay(ctx: CanvasRenderingContext2D, view: Viewport, colours: Colours): void {
     const hover = this.hoverHit;
     if (this.gesture.kind !== "edit") {
       if (hover.kind === "subtask") {

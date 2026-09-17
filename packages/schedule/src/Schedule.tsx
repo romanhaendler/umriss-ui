@@ -31,6 +31,7 @@ import { useFormats, useWording } from "@umriss-ui/core";
 import { ScheduleContext } from "./context";
 import { ScheduleScene, type ScheduleInteraction } from "./scene";
 import type { Intent, IntentKind } from "./model";
+import type { ZoomLimits } from "./timeAxis";
 import styles from "./Schedule.module.css";
 
 export interface ScheduleProps {
@@ -50,7 +51,7 @@ export interface ScheduleProps {
   calendar?: CalendarInput;
   /** The narrowest and widest time span zoom may reach, in milliseconds.
       Default: one hour to 28 days. */
-  zoomLimits?: { min: number; max: number };
+  zoomLimits?: ZoomLimits;
   /** The raster a drag lands on: `"ticks"` - the fine band's current step -,
       a step in milliseconds, or `false` for none. It shapes the ghost and the
       intent, never the data. */
