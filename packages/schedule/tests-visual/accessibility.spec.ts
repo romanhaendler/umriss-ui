@@ -33,7 +33,7 @@ test("a page with every code block open is accessible", async ({ page }, testInf
 /* The context menu of the demonstration is portalled to the body, outside
    every page block - it is checked where it lands. */
 test("the demonstration's context menu is accessible", async ({ page }, testInfo) => {
-  await open(page, "intent");
+  await open(page, "demonstration");
   const plot = page.locator('[data-example="demonstration"] [data-schedule-plot]');
   await plot.scrollIntoViewIfNeeded();
   const box = (await plot.boundingBox())!;

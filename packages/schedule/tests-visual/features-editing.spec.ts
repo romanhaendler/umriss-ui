@@ -14,7 +14,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("a drag shows the ghost with its findings before the drop, and reports the intent after it", async ({ page }) => {
-  await openExample(page, "intent", "move-and-lane");
+  await openExample(page, "move-and-lane", "move-and-lane");
   const example = page.locator('[data-example="move-and-lane"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
 
@@ -43,7 +43,7 @@ test("a drag shows the ghost with its findings before the drop, and reports the 
 });
 
 test("a drop on another lane reports a lane intent", async ({ page }) => {
-  await openExample(page, "intent", "move-and-lane");
+  await openExample(page, "move-and-lane", "move-and-lane");
   const example = page.locator('[data-example="move-and-lane"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
 
@@ -57,7 +57,7 @@ test("a drop on another lane reports a lane intent", async ({ page }) => {
 });
 
 test("a drag held at the edge pans the plot along, and the drop lands beyond what was in view", async ({ page }) => {
-  await openExample(page, "intent", "move-and-lane");
+  await openExample(page, "move-and-lane", "move-and-lane");
   const example = page.locator('[data-example="move-and-lane"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
 
@@ -77,7 +77,7 @@ test("a drag held at the edge pans the plot along, and the drop lands beyond wha
 });
 
 test("Escape cancels a drag: the ghost goes, and nothing is reported", async ({ page }) => {
-  await openExample(page, "intent", "move-and-lane");
+  await openExample(page, "move-and-lane", "move-and-lane");
   const example = page.locator('[data-example="move-and-lane"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
 
@@ -107,7 +107,7 @@ test("a schedule without intents starts no drag: pressing a subtask pans", async
 });
 
 test("setup grips appear on the selected subtask, and dragging one changes the setup", async ({ page }) => {
-  await openExample(page, "intent", "stretch-setup-teardown");
+  await openExample(page, "stretch", "stretch-setup-teardown");
   const example = page.locator('[data-example="stretch-setup-teardown"]');
   const plot = await plotOf(page, example, [at(6), at(13, 30)]);
   const grips = example.locator("[data-grip]");
@@ -134,7 +134,7 @@ test("setup grips appear on the selected subtask, and dragging one changes the s
 });
 
 test("stretching the main time at its edge reports a stretch", async ({ page }) => {
-  await openExample(page, "intent", "stretch-setup-teardown");
+  await openExample(page, "stretch", "stretch-setup-teardown");
   const example = page.locator('[data-example="stretch-setup-teardown"]');
   const plot = await plotOf(page, example, [at(6), at(13, 30)]);
   const grips = example.locator("[data-grip]");
@@ -154,7 +154,7 @@ test("stretching the main time at its edge reports a stretch", async ({ page }) 
 });
 
 test("the demonstration: a right-click opens the context menu, and an entry changes the plan through an intent", async ({ page }) => {
-  await openExample(page, "intent", "demonstration");
+  await openExample(page, "demonstration", "demonstration");
   const example = page.locator('[data-example="demonstration"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
   const summary = example.locator("[data-findings-summary]");
@@ -176,7 +176,7 @@ test("the demonstration: a right-click opens the context menu, and an entry chan
 });
 
 test("a drag on the shift raster lands on a shift change", async ({ page }) => {
-  await openExample(page, "intent", "snapping");
+  await openExample(page, "snapping", "snapping");
   const example = page.locator('[data-example="snapping"]');
   /* The curing runs 06:00 to 14:00; the upper schedule shows 04:00 to
      midnight and snaps to 06:00, 14:00, 22:00. */
@@ -194,7 +194,7 @@ test("a drag on the shift raster lands on a shift change", async ({ page }) => {
 });
 
 test("the demonstration shifts a whole order through one intent per stop", async ({ page }) => {
-  await openExample(page, "intent", "demonstration");
+  await openExample(page, "demonstration", "demonstration");
   const example = page.locator('[data-example="demonstration"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
   const summary = example.locator("[data-findings-summary]");
@@ -213,7 +213,7 @@ test("the demonstration shifts a whole order through one intent per stop", async
 });
 
 test("work dragged in from a list shows its ghost and is reported as a place intent", async ({ page }) => {
-  await openExample(page, "intent", "drag-in");
+  await openExample(page, "placing", "drag-in");
   const example = page.locator('[data-example="drag-in"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
   const ghost = example.locator("[data-ghost]");
@@ -238,7 +238,7 @@ test("work dragged in from a list shows its ghost and is reported as a place int
 });
 
 test("a drag from a list that leaves the lanes places nothing", async ({ page }) => {
-  await openExample(page, "intent", "drag-in");
+  await openExample(page, "placing", "drag-in");
   const example = page.locator('[data-example="drag-in"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
 
@@ -274,7 +274,7 @@ test("a drag into a removed night stops at the seam where time counts again", as
 });
 
 test("Escape during a drag from outside places nothing", async ({ page }) => {
-  await openExample(page, "intent", "drag-in");
+  await openExample(page, "placing", "drag-in");
   const example = page.locator('[data-example="drag-in"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
 
@@ -293,7 +293,7 @@ test("Escape during a drag from outside places nothing", async ({ page }) => {
 });
 
 test("a drag from outside held at the edge pans the plot along", async ({ page }) => {
-  await openExample(page, "intent", "drag-in");
+  await openExample(page, "placing", "drag-in");
   const example = page.locator('[data-example="drag-in"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
 
@@ -311,7 +311,7 @@ test("a drag from outside held at the edge pans the plot along", async ({ page }
 });
 
 test("the ghost's label stays inside the plot, even on the topmost lane", async ({ page }) => {
-  await openExample(page, "intent", "move-and-lane");
+  await openExample(page, "move-and-lane", "move-and-lane");
   const example = page.locator('[data-example="move-and-lane"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
 
@@ -333,7 +333,7 @@ test("the ghost's label stays inside the plot, even on the topmost lane", async 
 });
 
 test("the ghost's label stays inside the plot at the right edge of the plan", async ({ page }) => {
-  await openExample(page, "intent", "move-and-lane");
+  await openExample(page, "move-and-lane", "move-and-lane");
   const example = page.locator('[data-example="move-and-lane"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
 
@@ -348,8 +348,8 @@ test("the ghost's label stays inside the plot at the right edge of the plan", as
 });
 
 test("a lane a subtask may not go to refuses the drop, and the ghost stays where it may", async ({ page }) => {
-  await openExample(page, "intent", "where-it-may-go");
-  const example = page.locator('[data-example="where-it-may-go"]');
+  await openExample(page, "where-it-may-go", "within");
+  const example = page.locator('[data-example="within"]');
   const plot = await plotOf(page, example, [at(6, 30), at(15)]);
   const ghost = example.locator("[data-ghost]");
   const last = example.locator("[data-last-move]");
@@ -371,8 +371,8 @@ test("a lane a subtask may not go to refuses the drop, and the ghost stays where
 });
 
 test("the same subtask may still be moved in time, and onto the lane it fits", async ({ page }) => {
-  await openExample(page, "intent", "where-it-may-go");
-  const example = page.locator('[data-example="where-it-may-go"]');
+  await openExample(page, "where-it-may-go", "within");
+  const example = page.locator('[data-example="within"]');
   const plot = await plotOf(page, example, [at(6, 30), at(15)]);
 
   /* Press 2 to press 1: allowed, and reported. */
@@ -385,8 +385,8 @@ test("the same subtask may still be moved in time, and onto the lane it fits", a
 });
 
 test("a drag from a list holds its ghost on the last lane that allowed it", async ({ page }) => {
-  await openExample(page, "intent", "where-it-may-go");
-  const example = page.locator('[data-example="where-it-may-go"]');
+  await openExample(page, "where-it-may-go", "from-outside");
+  const example = page.locator('[data-example="from-outside"]');
   const plot = await plotOf(page, example, [at(6, 30), at(15)]);
   const ghost = example.locator("[data-ghost]");
 
@@ -397,18 +397,19 @@ test("a drag from a list holds its ghost on the last lane that allowed it", asyn
   await expect(ghost).toBeVisible();
   await expect(ghost).not.toHaveAttribute("data-refused", "");
 
-  /* Then over the welding bay, which it does not fit: the ghost stays on press
-     1 and says why. */
+  /* Then over the welding bay, which it does not fit. On the way the pointer
+     crosses press 2, which the mould DOES fit, so that is where the ghost was
+     last allowed - and that is where it stays. */
   await page.mouse.move(plot.x(12), plot.y("weld"), { steps: 6 });
   await expect(ghost).toHaveAttribute("data-refused", "");
   await expect(ghost).toContainText("Not this lane");
   const box = (await ghost.boundingBox())!;
-  expect(box.y).toBeLessThan(plot.y("press-2"));
+  expect(box.y).toBeLessThan(plot.y("weld") - LANE_HEIGHT / 2);
 
   /* And the drop lands where the ghost stood, because the ghost is the promise
      of where a drop lands - here as in a drag inside the plot. */
   await page.mouse.up();
-  await expect(example.locator("[data-last-move]")).toHaveText("mould: place");
+  await expect(example.locator("[data-last-place]")).toHaveText("mould: place on press-2");
 });
 
 /* ------------------------------------------------------------------ */
@@ -416,8 +417,8 @@ test("a drag from a list holds its ghost on the last lane that allowed it", asyn
 /* ------------------------------------------------------------------ */
 
 test("the lanes a subtask may not go to are marked the moment the drag begins", async ({ page }) => {
-  await openExample(page, "intent", "where-it-may-go");
-  const example = page.locator('[data-example="where-it-may-go"]');
+  await openExample(page, "where-it-may-go", "within");
+  const example = page.locator('[data-example="within"]');
   const plot = await plotOf(page, example, [at(6, 30), at(15)]);
   const weld = example.locator('[data-lane="weld"]');
 
@@ -443,8 +444,8 @@ test("the lanes a subtask may not go to are marked the moment the drag begins", 
 });
 
 test("over a refused lane the cursor says so, and says otherwise again on leaving it", async ({ page }) => {
-  await openExample(page, "intent", "where-it-may-go");
-  const example = page.locator('[data-example="where-it-may-go"]');
+  await openExample(page, "where-it-may-go", "within");
+  const example = page.locator('[data-example="within"]');
   const plot = await plotOf(page, example, [at(6, 30), at(15)]);
   const surface = example.locator("[data-schedule-plot]");
 
@@ -459,8 +460,8 @@ test("over a refused lane the cursor says so, and says otherwise again on leavin
 });
 
 test("a line ties the held ghost to the pointer it is not following", async ({ page }) => {
-  await openExample(page, "intent", "where-it-may-go");
-  const example = page.locator('[data-example="where-it-may-go"]');
+  await openExample(page, "where-it-may-go", "within");
+  const example = page.locator('[data-example="within"]');
   const plot = await plotOf(page, example, [at(6, 30), at(15)]);
   const ghost = example.locator("[data-ghost]");
 
@@ -483,8 +484,8 @@ test("a line ties the held ghost to the pointer it is not following", async ({ p
 });
 
 test("a refused lane costs the lane and not the move in time", async ({ page }) => {
-  await openExample(page, "intent", "where-it-may-go");
-  const example = page.locator('[data-example="where-it-may-go"]');
+  await openExample(page, "where-it-may-go", "within");
+  const example = page.locator('[data-example="within"]');
   const plot = await plotOf(page, example, [at(6, 30), at(15)]);
 
   /* Down onto the welding bay AND an hour earlier: the lane is refused, the
@@ -499,8 +500,8 @@ test("a refused lane costs the lane and not the move in time", async ({ page }) 
 });
 
 test("a drag from outside is marked and refused in the same language", async ({ page }) => {
-  await openExample(page, "intent", "where-it-may-go");
-  const example = page.locator('[data-example="where-it-may-go"]');
+  await openExample(page, "where-it-may-go", "from-outside");
+  const example = page.locator('[data-example="from-outside"]');
   const plot = await plotOf(page, example, [at(6, 30), at(15)]);
   const weld = example.locator('[data-lane="weld"]');
 
