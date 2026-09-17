@@ -11,7 +11,7 @@
    expression got for free. */
 
 import { describe, expect, it } from "vitest";
-import { layOutRows, rowAt, slotOf, type GroupNode, type RowsInput } from "../src/rows";
+import { effectiveCollapsed, layOutRows, rowAt, slotOf, type GroupNode, type RowsInput } from "../src/rows";
 
 const LANE_HEIGHT = 44;
 
@@ -292,5 +292,46 @@ describe("what it refuses to invent", () => {
 
   it("answers nothing for a lane it does not have", () => {
     expect(slotOf(layOutRows(flat(2)), "nowhere")).toBeNull();
+  });
+});
+
+describe("what a gesture holds open", () => {
+  /* A drag that rests over a folded group opens it for the gesture and lets go
+     when the gesture ends. The one thing worth being sure of without a pointer
+     is that the caller's list goes in unchanged and comes out unchanged: the
+     application did not fold anything, so it must never be told that it did
+     (schedule-lane-groups 10). */
+  it("leaves the caller's list alone", () => {
+    const callers = new Set(["hall", "line"]);
+    const shown = effectiveCollapsed(callers, new Set(["line"]));
+    expect([...callers]).toEqual(["hall", "line"]);
+    expect([...shown]).toEqual(["hall"]);
+  });
+
+  it("gives back the same set where nothing is held open", () => {
+    const callers = new Set(["hall"]);
+    expect(effectiveCollapsed(callers, new Set())).toBe(callers);
+  });
+
+  it("ignores a group that is not folded anyway", () => {
+    expect([...effectiveCollapsed(new Set(["hall"]), new Set(["nowhere"]))]).toEqual(["hall"]);
+  });
+
+  it("lays out as if the group were open", () => {
+    const plan = (open: string[]) =>
+      layOutRows({
+        lanes: [
+          { id: "a", parent: "hall" },
+          { id: "b", parent: "hall" },
+          { id: "c", parent: undefined },
+        ],
+        groups: [group("hall")],
+        collapsed: effectiveCollapsed(new Set(["hall"]), new Set(open)),
+        laneHeight: LANE_HEIGHT,
+      });
+    expect(plan([]).rows.map((r) => r.kind)).toEqual(["miniature", "lane"]);
+    /* Held open: real rows, so there is a real lane to drop on. */
+    expect(plan(["hall"]).rows.map((r) => r.kind)).toEqual(["groupHead", "lane", "lane", "lane"]);
+    expect(slotOf(plan(["hall"]), "a")!.miniature).toBe(false);
   });
 });

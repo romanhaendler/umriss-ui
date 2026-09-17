@@ -240,6 +240,26 @@ export function layOutRows(input: RowsInput): Rows {
   return { rows, slots, height: y };
 }
 
+/** What is folded while a gesture holds some groups open.
+
+    A drag that rests over a folded group opens it FOR THE GESTURE: the rows
+    are laid out again, the ghost goes on, and at the end of the gesture the
+    transient set is dropped and the group closes. The caller's list is never
+    touched and no change is reported, because the application did not fold
+    anything - a planner reached into a drawer and let it shut (ADR-0025).
+
+    Pure, so that the one thing worth being sure of can be checked without a
+    pointer: the caller's list goes in unchanged and comes out unchanged. */
+export function effectiveCollapsed(
+  collapsed: ReadonlySet<string>,
+  openForGesture: ReadonlySet<string>,
+): ReadonlySet<string> {
+  if (openForGesture.size === 0) return collapsed;
+  const out = new Set<string>();
+  for (const group of collapsed) if (!openForGesture.has(group)) out.add(group);
+  return out;
+}
+
 /** The row a y lies in, or null outside every row. A binary search over the
     prefix sums the layout already produced. */
 export function rowAt(rows: Rows, y: number): Row | null {

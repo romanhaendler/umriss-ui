@@ -2,7 +2,7 @@
    drag and asserts the findings shown on the ghost and the reported intent -
    not the pixel mechanics in between. Light only. */
 
-import { test, expect } from "@playwright/test";
+import { test, expect, type Locator } from "@playwright/test";
 import { overlayOffenders } from "@umriss-ui/demo/checks/overlays";
 import { openExample } from "./navigation";
 import { painted } from "./pixels";
@@ -534,4 +534,99 @@ test("a drag from outside is marked and refused in the same language", async ({ 
 
   await page.mouse.up();
   await expect(weld).not.toHaveAttribute("data-refused", "");
+});
+
+/* ------------------------------------------------------------------ */
+/* Dragging over a fold (schedule-lane-groups 10)                       */
+/* ------------------------------------------------------------------ */
+
+/** The folded group's row, in plot coordinates. */
+async function foldedRow(example: Locator, group: string): Promise<{ top: number; height: number }> {
+  return await example.locator("[data-schedule-headers]").first().evaluate((headers, id) => {
+    let top = 0;
+    for (const node of headers.querySelectorAll("[data-row]")) {
+      const height = node.getBoundingClientRect().height;
+      if (node.getAttribute("data-group") === id && node.getAttribute("data-row") === "miniature") return { top, height };
+      top += height;
+    }
+    throw new Error(`no folded group \`${id}\` here`);
+  }, group);
+}
+
+test("resting a drag over a folded group opens it, and the drop lands on a real lane inside", async ({ page }) => {
+  await openExample(page, "lane-groups", "the-miniature");
+  const example = page.locator('[data-example="the-miniature"]');
+  const plot = await plotOf(page, example, [at(6), at(16)]);
+  const row = await foldedRow(example, "hall");
+  const lanes = () => example.locator("[data-schedule-headers] [data-lane]");
+
+  /* Folded, the hall has no lanes of its own. */
+  await expect(lanes()).toHaveCount(2);
+
+  /* A drag from the paint shop, held over the hall. A miniature is no drop
+     target, so nothing lands until it opens - and it opens because the pointer
+     rested, not because it crossed. */
+  await page.mouse.move(plot.x(14), plot.y("paint"));
+  await page.mouse.down();
+  await page.mouse.move(plot.x(14), plot.box.y + row.top + row.height / 2, { steps: 6 });
+  await expect.poll(async () => await lanes().count(), { timeout: 4000 }).toBe(4);
+  await expect(example.locator('[data-schedule-headers] [data-lane="mill"]')).toHaveCount(1);
+});
+
+test("what a gesture opened, it closes again - and the application is never told", async ({ page }) => {
+  await openExample(page, "lane-groups", "the-miniature");
+  const example = page.locator('[data-example="the-miniature"]');
+  const plot = await plotOf(page, example, [at(6), at(16)]);
+  const row = await foldedRow(example, "hall");
+  const lanes = () => example.locator("[data-schedule-headers] [data-lane]");
+
+  await page.mouse.move(plot.x(14), plot.y("paint"));
+  await page.mouse.down();
+  await page.mouse.move(plot.x(14), plot.box.y + row.top + row.height / 2, { steps: 6 });
+  await expect.poll(async () => await lanes().count(), { timeout: 4000 }).toBe(4);
+
+  /* Dropped on the lathe, which is the first lane of the hall. The intent
+     names the REAL lane - a group is never a lane (ADR-0025). */
+  const after = await plotOf(page, example, [at(6), at(16)]);
+  await page.mouse.move(plot.x(14), after.y("lathe"), { steps: 4 });
+  await page.mouse.up();
+
+  /* And the hall folds again by itself: the application did not fold anything,
+     so its own list is untouched and it hears nothing. The example passes
+     `onCollapsedGroupsChange` straight into its state, so the group coming
+     back is the proof. */
+  await expect.poll(async () => await lanes().count(), { timeout: 4000 }).toBe(2);
+  await expect(example.getByRole("button", { name: /Unfold group: Hall A/ })).toHaveCount(1);
+});
+
+test("Escape closes what the gesture opened", async ({ page }) => {
+  await openExample(page, "lane-groups", "the-miniature");
+  const example = page.locator('[data-example="the-miniature"]');
+  const plot = await plotOf(page, example, [at(6), at(16)]);
+  const row = await foldedRow(example, "hall");
+  const lanes = () => example.locator("[data-schedule-headers] [data-lane]");
+
+  await page.mouse.move(plot.x(14), plot.y("paint"));
+  await page.mouse.down();
+  await page.mouse.move(plot.x(14), plot.box.y + row.top + row.height / 2, { steps: 6 });
+  await expect.poll(async () => await lanes().count(), { timeout: 4000 }).toBe(4);
+
+  await page.keyboard.press("Escape");
+  await expect.poll(async () => await lanes().count(), { timeout: 4000 }).toBe(2);
+  await page.mouse.up();
+});
+
+test("crossing a folded group does not open it", async ({ page }) => {
+  await openExample(page, "lane-groups", "the-miniature");
+  const example = page.locator('[data-example="the-miniature"]');
+  const plot = await plotOf(page, example, [at(6), at(16)]);
+  const lanes = () => example.locator("[data-schedule-headers] [data-lane]");
+
+  /* From the saw at the top straight past the hall to the paint shop: the
+     pointer never rests, so the drawer stays shut. */
+  await page.mouse.move(plot.x(7), plot.y("saw"));
+  await page.mouse.down();
+  await page.mouse.move(plot.x(7), plot.y("paint"), { steps: 10 });
+  await expect(lanes()).toHaveCount(2);
+  await page.mouse.up();
 });
