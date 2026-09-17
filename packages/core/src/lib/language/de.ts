@@ -260,4 +260,5 @@ export const GERMAN_WORDING: Wording = {
   scheduleRoute: (from, to) => `${from} → ${to}`,
   scheduleOverlapWith: (other) => `Überschneidung mit ${other}`,
   scheduleLateBy: (amount) => `Transport verspätet, ${amount} zu knapp`,
+  scheduleLaneRefused: "Nicht diese Zeile",
 };

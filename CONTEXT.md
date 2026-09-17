@@ -621,12 +621,15 @@ about focus can change. Same word, two questions, so the word is not reused.
 _Avoid_: aktiv, active, selected, gewählt, Werkzeugzustand
 
 **Refusal**:
-What a **Resting place** the dock does not fit into answers with: the outline the
-dock would have there, drawn in material and edge rather than in a warning
-colour, and said once in the status line. It is not an error — a wide, flat host
-with no room for a standing dock is nobody's mistake — which is why it is neither
-a warning nor an alarm, and why the place is never travelled to and then
-corrected.
+What a place a drag may not land in answers with, drawn in material and edge
+rather than in a warning colour and said once in words. The **Dock** refuses a
+**Resting place** it does not fit into: the outline it would have there, and a
+line in the status line. The **Schedule** refuses a **Lane** a **Subtask** may
+not go to: the **Ghost** stays on the last lane that was allowed and its label
+says so. Neither is an error — a wide, flat host with no room for a standing
+dock is nobody's mistake, and a mould that fits one press is nobody's either —
+which is why a refusal is neither a warning nor an alarm, and why the place is
+never travelled to and then corrected.
 _Avoid_: error, Fehler, warning, invalid, rejection
 
 ### Tables
