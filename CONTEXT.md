@@ -801,6 +801,83 @@ because `#/stack-und-grid` carried a German word in an address that no
 component name put there.
 
 
+### The schedule
+
+The vocabulary of `@umriss-ui/schedule`, the fourth package — fixed in
+`.scratch/schedule/` before the package exists, which is this glossary's own
+rule: a term appears when a decision has fixed its meaning. The schedule speaks
+the charts words where they already hold: a **Lane** is the same strip of a y
+domain — here one machine or station, named by its **Lane header** — and an
+**Overlap** is the same finding, drawn offset and never packed. What is new is
+that the intervals carry meaning: where a charts **Span** is an interval and
+nothing more, a **Subtask** has parts and belongs to a **Task**.
+
+**Schedule**:
+The component that shows subtasks on lanes over time: lane headers at the left,
+a coarse axis band above the plot area and a fine one below it, the subtasks
+and transports painted on canvas. It is not a **Chart** — that word owns a plot
+area with series — though it is built in its image and on its arithmetic.
+_Avoid_: Gantt, timeline, Plantafel, planning board, Diagramm
+
+**Task**:
+One whole undertaking: subtasks in a fixed order across several lanes, joined
+by transports. It is never drawn as a thing of its own — it shows as the colour
+its subtasks share, which the caller assigns, and in selection, which always
+takes the whole task: every subtask and every transport of it.
+_Avoid_: Auftrag, job, order, Vorgang
+
+**Subtask**:
+The drawn interval: a main time on one lane, with an optional **Setup** before
+it and a **Teardown** after it. It is what the pointer hits, a drag moves and
+an overlap stands between. It is not a **Span**: a span has an extent and
+nothing else, a subtask has three parts and a task it belongs to.
+_Avoid_: entry, Eintrag, activity, Arbeitsgang, task as the drawn thing
+
+**Setup** / **Teardown**:
+The preparation before a subtask's main time and the clearing after it
+(Rüsten, Abrüsten). Both occupy the lane — an overlap that only touches a
+setup is still an overlap — and each is changed on its own, never only as a
+consequence of the main time moving.
+_Avoid_: Vorlaufzeit/Nachlaufzeit as identifiers, lead/lag, run-in/run-out
+
+**Transport**:
+A task's move between two of its subtasks: from one, to the next, with a
+duration of its own. It is drawn as the line between the two, and where each
+end anchors — at the main time, or beyond the setup or teardown — is declared
+per transport. A transport always runs from an end to a start; there is no
+other kind of connection.
+_Avoid_: dependency, link, connection, arrow, edge, Verbindung
+
+**Late transport**:
+A transport whose duration does not fit between its subtasks: the successor
+starts before the predecessor's end plus the transport's duration. Like an
+**Overlap** it is drawn and reported and never resolved by the schedule — the
+finding is the point. It is not a **Violation**: that word judges a control
+chart's sequence.
+_Avoid_: conflict, Konflikt, violation, error
+
+**Lane header**:
+The label at the left edge naming what a lane is. The run of lane headers
+stands outside the plot area and holds still while the plot pans and zooms. It
+is the schedule's counterpart of the table's **Row header** and shares neither
+word — a lane is not a row.
+_Avoid_: row header, Zeilenkopf, sidebar, y axis label
+
+**Intent**:
+What the schedule reports when an interaction asks for a change: move this
+subtask, stretch its main time, change its setup, put it on another lane. The
+schedule draws what it is given and changes nothing itself; whether an intent
+becomes data is the caller's decision (ADR-0023).
+_Avoid_: change event, mutation, edit, command
+
+**Ghost**:
+The picture of an intent while its drag is in flight, drawn beside the
+unchanged data and assessed like data — an overlap or late transport the drop
+would create shows before the drop. When the drag ends the ghost goes and the
+intent is reported.
+_Avoid_: preview, drag image, Vorschau
+
+
 ## Module and directory names
 
 A file's name is an identifier too, and these are the ones where the obvious
