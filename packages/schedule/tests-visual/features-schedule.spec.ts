@@ -6,7 +6,7 @@
 import { test, expect, type Locator, type Page } from "@playwright/test";
 import { overlayOffenders } from "@umriss-ui/demo/checks/overlays";
 import { openExample } from "./navigation";
-import { colour, distanceFrom, paintedShare, rgba } from "./pixels";
+import { colour, distanceFrom, painted, paintedShare, rgba } from "./pixels";
 import { DAY_OF_PLAN, LANE_HEIGHT, LANES, at, plotOf } from "./plot";
 
 test.beforeEach(async ({ page }) => {
@@ -565,4 +565,69 @@ test("three statements on one bar stay three statements", async ({ page }) => {
      that reads, in either theme. A single luminance threshold got this wrong
      and put white on a salmon bar; the contrast is measured instead. */
   expect(await on("all-three")).toBe("light");
+});
+
+/* ------------------------------------------------------------------ */
+/* Hover is not selection (schedule-lane-groups 03)                     */
+/* ------------------------------------------------------------------ */
+
+test("hovering a selected bar still shows something, because the two are different kinds of mark", async ({ page }) => {
+  await openExample(page, "schedule", "selection");
+  const example = page.locator('[data-example="selection"]');
+  const plot = await plotOf(page, example, DAY_OF_PLAN);
+
+  /* A-2043 is selected from the start: its stop on the press, 06:30 to 08:00.
+     Selection outlines it; hover washes it. Both at once has to be visible,
+     which two outlines of the same colour never were. */
+  const onBar = { x: Math.round(plot.x(7) - plot.box.x), y: LANE_HEIGHT * LANES.press + LANE_HEIGHT / 2 };
+  const before = await rgba(example, "overlay", onBar);
+
+  await page.mouse.move(plot.x(7), plot.y(LANES.press));
+  await expect(example.locator("[data-schedule-tooltip]")).toBeVisible();
+  expect(await distanceFrom(example, "overlay", onBar, before)).toBeGreaterThan(10);
+
+  /* And it goes when the pointer does. */
+  await page.mouse.move(plot.box.x + 4, plot.box.y + 4);
+  await expect.poll(async () => await distanceFrom(example, "overlay", onBar, before)).toBe(0);
+});
+
+test("the subtask that was clicked is told from its task's other bars", async ({ page }) => {
+  await openExample(page, "schedule", "selection");
+  const example = page.locator('[data-example="selection"]');
+  const plot = await plotOf(page, example, DAY_OF_PLAN);
+
+  /* A-2043 has three stops, and selection takes all of them. The one that was
+     CLICKED carries the heavier outline, because the grips belong to it and a
+     task with three stops would otherwise offer no way to tell which.
+
+     Measured on one and the same bar - the stop on the press - in both roles:
+     first clicked, then a sibling after another stop of the same task was
+     clicked. Everything else about that column is then identical, so what is
+     left of the difference is the outline's weight. */
+  const column = {
+    x: Math.round(plot.x(7) - plot.box.x),
+    y: LANE_HEIGHT * LANES.press,
+    width: 3,
+    height: LANE_HEIGHT,
+  };
+  const idle = async () => {
+    await page.mouse.move(plot.box.x + 4, plot.box.y + 4);
+    await expect(example.locator("[data-schedule-tooltip]")).toHaveCount(0);
+  };
+
+  await page.mouse.click(plot.x(7), plot.y(LANES.press));
+  await expect(example.locator("[data-selected-order]")).toContainText("a-2043-1");
+  await idle();
+  const asClicked = await painted(example, "data", column);
+
+  /* The stop on the paint shop, 12:00 to 14:00 - the same task, so the press
+     bar stays selected and becomes a sibling. */
+  await page.mouse.click(plot.x(13), plot.y(LANES.paint));
+  await expect(example.locator("[data-selected-order]")).toContainText("a-2043-3");
+  await idle();
+  const asSibling = await painted(example, "data", column);
+
+  expect(asClicked).toBeGreaterThan(asSibling);
+  /* And a sibling is still outlined: the whole task is selected. */
+  expect(asSibling).toBeGreaterThan(LANE_HEIGHT);
 });
