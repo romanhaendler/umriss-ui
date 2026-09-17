@@ -62,9 +62,28 @@ drag shows a **ghost** with the findings the drop would create, and ends in an
 ```
 
 `intents` lists what the application handles; without it the schedule is
-read-only. Dependent subtasks never move by themselves: `ripple` computes the
-cascade for the application to apply, or not. `findings`, `overlaps` and
-`lateTransports` return what the schedule draws as data.
+read-only. A drag near the edge of the plot pans the plot along, and `snap`
+takes the tick raster, a step, or a step with an offset - shifts at 06:00,
+14:00 and 22:00 are eight hours offset by six.
+
+Dependent subtasks never move by themselves: `ripple` computes the cascade for
+the application to apply, or not, and `shiftTask` the moves of a whole order.
+`findings`, `overlaps` and `lateTransports` return what the schedule draws as
+data.
+
+Work that is not on the plan is dragged in from any list of the application,
+with the platform's drag and drop: the application says what it is dragging in
+`placing`, the drop reports a `place` intent, and `subtaskFromPlace` builds the
+subtask under the application's own id.
+
+## Reading and moving
+
+A tooltip on a hovered subtask or transport names the order, the times, setup
+and teardown and the findings; `tooltip` replaces its content or switches it
+off. `now` draws the present across the lanes. The wheel scrolls the lanes and
+releases the page at their end, Ctrl or ⌘ and a pinch zoom, Shift pans;
+`onDomainChange` reports the visible span, and a ref handle turns a client
+point into a time and a lane and back.
 
 ## Where to read on
 
