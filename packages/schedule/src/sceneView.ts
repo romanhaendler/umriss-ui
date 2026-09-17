@@ -27,6 +27,7 @@ import {
 } from "./geometry";
 import type { IntentKind, Subtask, Transport } from "./model";
 import type { SceneData } from "./sceneData";
+import type { SnapRaster } from "./snap";
 import { days, fineStep, fineTicks, panDomain, zoomDomain, type ZoomLimits } from "./timeAxis";
 
 /** What a pointer is on. */
@@ -40,7 +41,7 @@ export interface SceneOptions {
   readonly laneHeight: number;
   readonly calendar: CalendarInput;
   readonly zoomLimits: ZoomLimits;
-  readonly snap: "ticks" | number | false;
+  readonly snap: "ticks" | number | SnapRaster | false;
   readonly intents: readonly IntentKind[];
   /** The present, as a wall-clock instant, or null for no now line. */
   readonly now: number | null;

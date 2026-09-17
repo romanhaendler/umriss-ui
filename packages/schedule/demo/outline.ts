@@ -72,7 +72,7 @@ export const OUTLINE: readonly Rubric[] = [
         name: "ripple",
         sentence: "The cascade as arithmetic: the moves that push every successor whose transport no longer fits - for the application to run, or not.",
         types: [],
-        exports: ["ripple", "applyIntent"],
+        exports: ["ripple", "shiftTask", "applyIntent"],
       },
     ],
   },
