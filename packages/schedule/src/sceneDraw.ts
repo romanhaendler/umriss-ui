@@ -44,6 +44,21 @@ export function resolveSceneColours(root: Element, data: SceneData): Colours {
   };
 }
 
+/** Whether a colour is dark enough that text on it should be light.
+
+    The sRGB relative luminance of the resolved colour - the canvas gets a
+    value like "rgb(37, 99, 235)" back from the theme, and a label lying on it
+    has to be readable in both schemes without a caller saying so. */
+export function isDark(colour: string): boolean {
+  const parts = colour.match(/[\d.]+/g);
+  if (parts === null || parts.length < 3) return true;
+  const [r, g, b] = parts.slice(0, 3).map((part) => {
+    const channel = Number(part) / 255;
+    return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+  }) as [number, number, number];
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b < 0.45;
+}
+
 /** Sizes a canvas to the plot at the device's pixel ratio and clears it. */
 export function prepareCanvas(canvas: HTMLCanvasElement | null, width: number, height: number): CanvasRenderingContext2D | null {
   if (canvas === null) return null;

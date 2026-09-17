@@ -15,7 +15,11 @@
    2. **Apart.** No two overlays that carry the same `data-schedule-overlay`
       value intersect - two labels of the same kind over one another are two
       labels nobody can read. Overlays of different kinds may: a tooltip is
-      meant to cover what it explains.
+      meant to cover what it explains. An overlay that says
+      `data-schedule-may-cover` is exempt from this one, and the element says
+      why at its site: a label that IS its bar intersects another exactly when
+      the two bars do, and two bars over one another are an **Overlap** - a
+      finding the schedule draws on purpose and never packs away.
 
    It reads only boxes, so it says nothing about the canvas underneath. The
    pictures carry that, and the geometry has its own unit tests.
@@ -68,6 +72,7 @@ export async function overlayOffenders(page: Page): Promise<string[]> {
         const example = element.closest("[data-example], [data-block]");
         return {
           kind: element.getAttribute("data-schedule-overlay") ?? "",
+          mayCover: element.hasAttribute("data-schedule-may-cover"),
           where: example?.getAttribute("data-example") ?? example?.getAttribute("data-block") ?? "?",
           text: (element.textContent ?? "").trim().slice(0, 24),
           box: box(element),
@@ -95,7 +100,7 @@ export async function overlayOffenders(page: Page): Promise<string[]> {
     for (let j = i + 1; j < found.length; j++) {
       const a = found[i]!;
       const b = found[j]!;
-      if (a.kind !== b.kind || a.where !== b.where) continue;
+      if (a.kind !== b.kind || a.where !== b.where || a.mayCover || b.mayCover) continue;
       if (intersects(a.box, b.box)) {
         offenders.push(`${a.where}: two ${a.kind} cover each other - "${a.text}" and "${b.text}"`);
       }
