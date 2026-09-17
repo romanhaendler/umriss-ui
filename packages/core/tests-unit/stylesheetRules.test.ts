@@ -51,31 +51,45 @@ describe("offendersIn", () => {
 
 const run = (css: string) => postcss([ownBox()]).process(css, { from: undefined }).css;
 
+/** The selectors the step gave a rule of their own. */
+const boxed = (css: string) =>
+  [...run(css).matchAll(/([^{}]+)\{ box-sizing: border-box; \}/g)].map((m) => m[1]!.trim());
+
 describe("ownBox", () => {
-  it.each([".a", ".a:hover", ".a::before", ".a input", ".a > .b", ".a[data-open]"])("gives %s border-box", (selector) => {
-    expect(run(`${selector} { color: red; }`)).toContain("box-sizing: border-box");
+  it("gives every class of the stylesheet a rule of its own", () => {
+    expect(boxed(".a { color: red; }")).toEqual([".a"]);
+    expect(boxed(".a:hover > .b::before { color: red; }")).toEqual([".a", ".b"]);
   });
 
-  it.each([".a > *", ".a *", ".a > *::after", ".a :focus-visible", ":root", "html", "body", "*"])(
-    "leaves %s alone - it is not an own element",
-    (selector) => {
-      expect(run(`${selector} { color: red; }`)).not.toContain("box-sizing");
-    },
-  );
-
-  it("gives only the own selectors of a mixed list border-box, without touching the rule", () => {
-    const out = run(".a > *, .b { color: red; }");
-    expect(out).toContain(".b { box-sizing: border-box; }");
-    expect(out).toContain(".a > *, .b { color: red; }");
+  it("reaches a class that only ever stands in a compound selector", () => {
+    expect(boxed('.verdict[data-verdict="warning"] .value { color: red; }')).toEqual([".verdict", ".value"]);
   });
 
-  it("respects a box-sizing the stylesheet declares for that selector anywhere", () => {
-    const out = run(".a { box-sizing: content-box; }\n.a { color: red; }");
-    expect(out.match(/box-sizing/g)).toHaveLength(1);
+  it("gives an own element named by type its full selector, never a bare type", () => {
+    expect(boxed(".field input { color: red; }")).toEqual([".field", ".field input"]);
   });
 
-  it("gives a selector border-box once, however many rules it has", () => {
-    expect(run(".a { color: red; }\n.a { margin: 0; }").match(/box-sizing/g)).toHaveLength(1);
+  it.each([".a > *", ".a *", ".a > *::after", ".a :focus-visible"])("never gives %s's subject a box - it is the caller's", (selector) => {
+    expect(boxed(`${selector} { color: red; }`)).toEqual([".a"]);
+  });
+
+  it.each([":root", "html", "body", "*", "[data-x]"])("leaves %s alone", (selector) => {
+    expect(run(`${selector} { color: red; }`)).not.toContain("box-sizing");
+  });
+
+  it("does not read a class inside brackets as one of the stylesheet's", () => {
+    expect(boxed(".a:not(.b) { color: red; }")).toEqual([".a"]);
+  });
+
+  it("respects a box-sizing the stylesheet declares for a class", () => {
+    expect(boxed(".a { box-sizing: content-box; }\n.a > .b { color: red; }")).toEqual([".b"]);
+  });
+
+  it("gives each class one rule, at the head of its layer, before every rule of the stylesheet", () => {
+    const out = run("@layer umriss.components {\n  .a { color: red; }\n  @media (hover: none) { .a .b { margin: 0; } }\n}");
+    expect(out.match(/box-sizing/g)).toHaveLength(2);
+    expect(out.indexOf("box-sizing")).toBeLessThan(out.indexOf("color: red"));
+    expect(out.indexOf(".b { box-sizing")).toBeLessThan(out.indexOf("@media"));
   });
 
   it("does not touch the steps of a keyframes block", () => {

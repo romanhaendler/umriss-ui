@@ -1,0 +1,74 @@
+/* The table's share of what every component carries itself (ADR-0021): the
+   text context of its surfaces, the focus ring of what it makes focusable, and
+   the scrollbars of its scroll containers.
+
+   The same classes and values as `packages/core/src/styles/own.module.css` -
+   written out a second time, because the table enters core only by its public
+   entry (ADR-0016) and a stylesheet in core's source is not part of it. Should
+   the two drift, the pictures of the table show it first. */
+
+@layer umriss.tokens, umriss.base, umriss.components;
+
+/* The text context lies one layer below the components: whatever a component
+   sets itself - its size, its colour - wins, whichever order the bundler puts
+   the two stylesheets in. `composes` guarantees the class, not the order. */
+@layer umriss.base {
+  .text {
+    font-family: var(--u-font-sans);
+    font-size: var(--u-text-md);
+    line-height: var(--u-leading-normal);
+    color: var(--u-color-text);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* A text field's cursor carries the accent - colour for interactive things
+     only. */
+  .field {
+    caret-color: var(--u-color-accent);
+  }
+
+  /* Slim, themed scrollbars on the component's own scroll containers - never
+     on the page's. */
+  .scroll {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--u-color-text) 25%, transparent) transparent;
+  }
+
+  .scroll::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  .scroll::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--u-color-text) 22%, transparent);
+    border-radius: var(--u-radius-full);
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+
+  .scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+/* The ring lies with the components and wins through its pseudo-class: a
+   component's own `box-shadow` (an edge, a hover) must not hide the focus. */
+@layer umriss.components {
+  .ring:focus-visible {
+    outline: none;
+    box-shadow: var(--u-focus-ring);
+  }
+
+  /* Browser autofill does not destroy the paper look. With the components,
+     like the ring: it has to beat a field's own `box-shadow`. */
+  .field:-webkit-autofill,
+  .field:-webkit-autofill:hover,
+  .field:-webkit-autofill:focus {
+    -webkit-box-shadow:
+      inset 0 0 0 1000px var(--u-color-surface),
+      0 0 0 1px var(--u-edge-color-strong);
+    -webkit-text-fill-color: var(--u-color-text);
+    caret-color: var(--u-color-accent);
+  }
+}

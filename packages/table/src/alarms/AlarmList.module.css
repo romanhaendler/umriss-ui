@@ -2,6 +2,7 @@
 
 @layer umriss.components {
   .list {
+    composes: text from "../own.module.css";
     display: flex;
     flex-direction: column;
     gap: var(--u-space-3);
