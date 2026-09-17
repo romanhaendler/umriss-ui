@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Build outputs (regenerable: pnpm build / pnpm --filter <pkg> build:demo)
+dist/
+dist-demo/
+
+# The assembled GitHub Pages site (pnpm build:pages); the workflow builds it anew.
+site/
+
+# Generated props tables of the demo. They come into being on every
+# `build:demo` and `dev` out of `src/`; a checked-in generation would drift
+# away from its source, and the whole mechanism is built against exactly that.
+packages/*/demo/.generated/
+
+# Test artefacts. The screenshot baselines under
+# packages/*/tests-visual/**-snapshots/ are deliberately NOT ignored -
+# they are checked in, as docs/testing.md says.
+test-results/
+playwright-report/
+blob-report/
+.playwright/
+
+# Operating system and editor
+.DS_Store
+*.log
+
+# Worktrees of the agent sessions. Every parallel ticket runs in one; they are
+# checkouts of this repository, never content of it.
+.claude/worktrees/

@@ -1,0 +1,125 @@
+/* Typographic primitives. Every class here is exactly one token - which is
+   why there are no in-between values and no exceptions. */
+
+.text,
+.heading {
+  margin: 0;
+  font-family: var(--u-font-sans);
+  line-height: var(--u-leading-normal);
+  color: var(--u-color-text);
+}
+
+.heading {
+  line-height: var(--u-leading-tight);
+  text-wrap: balance;
+}
+
+/* ---- Sizes ---- */
+
+.size-xs {
+  font-size: var(--u-text-xs);
+}
+.size-sm {
+  font-size: var(--u-text-sm);
+}
+.size-md {
+  font-size: var(--u-text-md);
+}
+.size-lg {
+  font-size: var(--u-text-lg);
+}
+.size-xl {
+  font-size: var(--u-text-xl);
+}
+.size-2xl {
+  font-size: var(--u-text-2xl);
+}
+
+/* ---- Weights ---- */
+
+.weight-regular {
+  font-weight: var(--u-weight-regular);
+}
+.weight-medium {
+  font-weight: var(--u-weight-medium);
+}
+.weight-semibold {
+  font-weight: var(--u-weight-semibold);
+}
+
+/* ---- Colour: the three text colours, no others ---- */
+
+.tone-default {
+  color: var(--u-color-text);
+}
+.tone-secondary {
+  color: var(--u-color-text-secondary);
+}
+.tone-muted {
+  color: var(--u-color-text-muted);
+}
+
+/* ---- Letter spacing: the three values of the token set, and normal ---- */
+
+.tracking-normal {
+  letter-spacing: normal;
+}
+.tracking-tight {
+  letter-spacing: var(--u-tracking-tight);
+}
+.tracking-display {
+  letter-spacing: var(--u-tracking-display);
+}
+/* Letterspaced capitals - eyebrows and table headers. */
+.tracking-caps {
+  letter-spacing: var(--u-tracking-caps);
+  text-transform: uppercase;
+}
+
+/* ---- Line height: the two values of the token set ---- */
+
+.leading-normal {
+  line-height: var(--u-leading-normal);
+}
+.leading-tight {
+  line-height: var(--u-leading-tight);
+}
+
+/* For the heading, which derives its letter spacing from its size. */
+.trackingDisplay {
+  letter-spacing: var(--u-tracking-display);
+}
+
+.trackingTight {
+  letter-spacing: var(--u-tracking-tight);
+}
+
+/* ---- Mono: numbers stacked exactly ---- */
+
+.mono {
+  font-family: var(--u-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------------ */
+/* Link - the accent, because it is interactive                        */
+/* ------------------------------------------------------------------ */
+
+.link {
+  color: var(--u-color-accent-text);
+  text-decoration: none;
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: 1px;
+  border-radius: var(--u-radius-xs);
+  transition: color var(--u-transition);
+}
+
+.link:hover {
+  color: var(--u-color-accent-hover);
+  text-decoration: underline;
+}
+
+.link:focus-visible {
+  outline: none;
+  box-shadow: var(--u-focus-ring);
+}

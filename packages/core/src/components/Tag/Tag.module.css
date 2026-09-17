@@ -1,0 +1,111 @@
+/* Removable label. Looks similar to the badge, but is a control - hence the
+   focus ring and a press point on the glyph. */
+
+.group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--u-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--u-space-1);
+  height: 22px;
+  padding: 0 var(--u-space-2);
+  border-radius: var(--u-radius-sm);
+  font-size: var(--u-text-xs);
+  font-weight: var(--u-weight-medium);
+  line-height: 1;
+  white-space: nowrap;
+  transition: box-shadow var(--u-transition);
+}
+
+.removable {
+  padding-right: var(--u-space-1);
+  cursor: default;
+}
+
+.removable:focus-visible {
+  outline: none;
+  box-shadow: var(--u-focus-ring);
+}
+
+.disabled {
+  opacity: 0.5;
+}
+
+.text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---- Tones: the same surfaces as with the badge ---- */
+
+.neutral {
+  background: var(--u-color-surface-sunken);
+  color: var(--u-color-text-secondary);
+}
+
+.accent {
+  background: var(--u-color-accent-subtle);
+  color: var(--u-color-accent-text);
+}
+
+.success {
+  background: var(--u-color-success-subtle);
+  color: var(--u-color-success);
+}
+
+.warning {
+  background: var(--u-color-warning-subtle);
+  color: var(--u-color-warning);
+}
+
+.danger {
+  background: var(--u-color-danger-subtle);
+  color: var(--u-color-danger);
+}
+
+/* ---- Removing: quiet at rest, clear on hover and focus ---- */
+
+.remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: none;
+  border-radius: var(--u-radius-xs);
+  background: none;
+  color: inherit;
+  opacity: 0.45;
+  cursor: pointer;
+  transition:
+    opacity var(--u-transition),
+    background-color var(--u-transition);
+}
+
+/* The group reacts, not the single key - the same gesture as with the quiet
+   steppers. */
+.tag:hover .remove,
+.tag:focus-visible .remove {
+  opacity: 1;
+}
+
+.remove:hover {
+  background: color-mix(in srgb, currentColor 14%, transparent);
+}
+
+/* Press point only on the glyph, never on the surface. */
+.remove:active svg {
+  transform: scale(0.8);
+}
+
+.remove svg {
+  transition: transform var(--u-transition);
+}

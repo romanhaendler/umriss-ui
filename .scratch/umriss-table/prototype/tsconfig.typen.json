@@ -1,0 +1,12 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "types": [],
+    "paths": {
+      "react": ["../../../packages/ui/node_modules/@types/react/index.d.ts"],
+      "react/jsx-runtime": ["../../../packages/ui/node_modules/@types/react/jsx-runtime.d.ts"]
+    }
+  },
+  "include": ["typen"]
+}

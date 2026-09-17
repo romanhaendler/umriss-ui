@@ -1,0 +1,79 @@
+{
+  "name": "@umriss-ui/core",
+  "version": "0.1.0",
+  "description": "A React component library for data-dense applications - precise, quiet, professional.",
+  "license": "MIT",
+  "author": "Roman Händler",
+  "homepage": "https://romanhaendler.github.io/umriss-ui/core/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/romanhaendler/umriss-ui.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/romanhaendler/umriss-ui/issues"
+  },
+  "keywords": [
+    "react",
+    "components",
+    "ui",
+    "umriss",
+    "design-system"
+  ],
+  "type": "module",
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "main": "./dist/core.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/core.js"
+    },
+    "./wording/de": {
+      "types": "./dist/de.d.ts",
+      "import": "./dist/wording/de.js"
+    },
+    "./styles.css": "./dist/core.css"
+  },
+  "scripts": {
+    "props": "node --disable-warning=ExperimentalWarning --experimental-strip-types demo/props.ts",
+    "readme": "node --disable-warning=ExperimentalWarning --experimental-strip-types demo/tooling/readmeTable.ts",
+    "predev": "pnpm run props",
+    "dev": "vite --config vite.demo.config.ts",
+    "build": "vite build",
+    "prebuild:demo": "pnpm run props",
+    "build:demo": "vite build --config vite.demo.config.ts",
+    "pretypecheck": "pnpm run props && pnpm run readme",
+    "typecheck": "tsc --noEmit",
+    "preview:demo": "vite preview --config vite.demo.config.ts --port 4173 --strictPort",
+    "test:unit": "vitest run",
+    "prepublishOnly": "pnpm run typecheck && pnpm run build"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "devDependencies": {
+    "@fontsource/geist-mono": "^5.3.0",
+    "@fontsource/geist-sans": "^5.3.0",
+    "@umriss-ui/demo": "workspace:*",
+    "@types/node": "^22.20.2",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "typescript": "^5.6.3",
+    "vite": "^6.0.0",
+    "vite-plugin-dts": "^4.3.0"
+  }
+}

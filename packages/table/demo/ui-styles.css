@@ -1,0 +1,10 @@
+/* In place of `@umriss-ui/core/styles.css` (vite.demo.config.ts): the token and
+   base layer from the source of @umriss-ui/core. The styles of the components
+   come with their own modules.
+
+   This is the one place where a demo reaches into the neighbouring package by
+   path. It is deliberate, it is named in `docs/testing.md` under Conventions,
+   and the alias in `vite.demo.config.ts` is what puts this file here. The same
+   file stands in `packages/charts/demo/` for the same reason. */
+@import "../../core/src/styles/tokens.css";
+@import "../../core/src/styles/global.css";

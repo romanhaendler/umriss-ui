@@ -1,0 +1,166 @@
+.input {
+  height: var(--u-control-height);
+  padding: 0 var(--u-space-3);
+  border: none;
+  border-radius: var(--u-radius-md);
+  background: var(--u-color-surface);
+  box-shadow: var(--u-edge-strong);
+  font-family: var(--u-font-sans);
+  font-size: var(--u-text-sm);
+  color: var(--u-color-text);
+  transition: box-shadow var(--u-transition);
+  width: 100%;
+}
+
+.input::placeholder {
+  color: var(--u-color-text-muted);
+}
+
+.input:hover:not(:disabled):not(:focus-visible) {
+  box-shadow: 0 0 0 1px var(--u-color-edge-hover);
+}
+
+.input:focus-visible {
+  box-shadow:
+    0 0 0 1px var(--u-color-accent),
+    var(--u-focus-ring);
+}
+
+.input:disabled {
+  background: var(--u-color-surface-sunken);
+  color: var(--u-color-text-muted);
+  cursor: not-allowed;
+}
+
+.sm {
+  height: var(--u-control-height-sm);
+  font-size: var(--u-text-xs);
+  border-radius: var(--u-radius-sm);
+}
+
+.numeric {
+  text-align: right;
+  font-family: var(--u-font-mono);
+  font-size: 0.75rem;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+.invalid,
+.invalid:hover:not(:disabled):not(:focus-visible) {
+  box-shadow: 0 0 0 1px var(--u-color-danger);
+}
+
+.invalid:focus-visible {
+  box-shadow:
+    0 0 0 1px var(--u-color-danger),
+    0 0 0 4px color-mix(in srgb, var(--u-color-danger) 18%, transparent);
+}
+
+/* ------------------------------------------------------------------
+   The clearable variant: the wrapper carries the edge and the focus,
+   the cross fades in gently and clears without losing the focus.
+   ------------------------------------------------------------------ */
+
+.wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--u-space-1);
+  width: 100%;
+  height: var(--u-control-height);
+  padding: 0 var(--u-space-2) 0 var(--u-space-3);
+  border-radius: var(--u-radius-md);
+  background: var(--u-color-surface);
+  box-shadow: var(--u-edge-strong);
+  transition: box-shadow var(--u-transition);
+}
+
+.wrapper:hover:not(.wrapperDisabled):not(:focus-within) {
+  box-shadow: 0 0 0 1px var(--u-color-edge-hover);
+}
+
+.wrapper:focus-within {
+  box-shadow:
+    0 0 0 1px var(--u-color-accent),
+    var(--u-focus-ring);
+}
+
+.wrapperSm {
+  height: var(--u-control-height-sm);
+  border-radius: var(--u-radius-sm);
+}
+
+.wrapperInvalid,
+.wrapperInvalid:hover:not(.wrapperDisabled):not(:focus-within) {
+  box-shadow: 0 0 0 1px var(--u-color-danger);
+}
+
+.wrapperInvalid:focus-within {
+  box-shadow:
+    0 0 0 1px var(--u-color-danger),
+    0 0 0 4px color-mix(in srgb, var(--u-color-danger) 18%, transparent);
+}
+
+.wrapperDisabled {
+  background: var(--u-color-surface-sunken);
+}
+
+.inner {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: none;
+  padding: 0;
+  font-family: var(--u-font-sans);
+  font-size: var(--u-text-sm);
+  color: var(--u-color-text);
+}
+
+.inner::placeholder {
+  color: var(--u-color-text-muted);
+}
+
+.inner:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.wrapperSm .inner {
+  font-size: var(--u-text-xs);
+}
+
+.clear {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: none;
+  background: none;
+  border-radius: var(--u-radius-full);
+  color: var(--u-color-text-muted);
+  cursor: pointer;
+  animation: clearIn var(--u-duration-fast) var(--u-ease-out);
+  transition:
+    background-color var(--u-transition),
+    color var(--u-transition);
+}
+
+.clear:hover {
+  background: var(--u-color-surface-sunken);
+  color: var(--u-color-text);
+}
+
+@keyframes clearIn {
+  from {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clear {
+    animation: none;
+  }
+}

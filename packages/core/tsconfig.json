@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "verbatimModuleSyntax": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": [
+      "vite/client",
+      "node"
+    ],
+    "allowImportingTsExtensions": true,
+    "paths": {
+      "@umriss-ui/core": [
+        "./src/index.ts"
+      ],
+      "@umriss-ui/core/wording/de": [
+        "./src/lib/language/de.ts"
+      ]
+    }
+  },
+  "include": [
+    "src",
+    "demo",
+    "tests-unit",
+    "tests-visual"
+  ]
+}

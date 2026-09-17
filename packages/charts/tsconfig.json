@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    /* The demo runs against the SOURCE of @umriss-ui/core, not against its
+       dist: dist is not checked in, and a typecheck that needs a build first
+       lies on every fresh clone. `src/` imports none of it - the lint holds
+       that (R-1.2, ADR-0020). */
+    "paths": {
+      "@umriss-ui/core": ["../core/src/index.ts"]
+    },
+    /* The demo and its generator run in Node as well (`demo/props.ts`). */
+    "types": ["vite/client", "node"],
+    "allowImportingTsExtensions": true
+  },
+  "include": ["src", "demo", "tests-unit", "tests-visual"]
+}

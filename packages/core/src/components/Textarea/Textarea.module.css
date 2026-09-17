@@ -1,0 +1,92 @@
+/* Multi-line input. The edge as a shadow, as with every control - no
+   border property. */
+
+.textarea {
+  display: block;
+  width: 100%;
+  min-height: calc(var(--u-control-height) * 2);
+  padding: var(--u-space-2) var(--u-space-3);
+  border: none;
+  border-radius: var(--u-radius-md);
+  background: var(--u-color-surface);
+  box-shadow: var(--u-edge-strong);
+  color: var(--u-color-text);
+  font-family: var(--u-font-sans);
+  font-size: var(--u-text-sm);
+  line-height: var(--u-leading-normal);
+  transition:
+    box-shadow var(--u-transition),
+    background-color var(--u-transition);
+}
+
+.textarea::placeholder {
+  color: var(--u-color-text-muted);
+}
+
+.textarea:hover:not(:disabled):not(:focus-visible) {
+  box-shadow: 0 0 0 1px var(--u-color-edge-hover);
+}
+
+.textarea:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 1px var(--u-color-accent),
+    var(--u-focus-ring);
+}
+
+.textarea:disabled {
+  background: var(--u-color-surface-sunken);
+  color: var(--u-color-text-muted);
+  cursor: not-allowed;
+}
+
+.sm {
+  min-height: calc(var(--u-control-height-sm) * 2);
+  padding: var(--u-space-1) var(--u-space-2);
+  border-radius: var(--u-radius-sm);
+  font-size: var(--u-text-xs);
+}
+
+.invalid {
+  box-shadow: 0 0 0 1px var(--u-color-danger);
+}
+
+.invalid:focus-visible {
+  box-shadow:
+    0 0 0 1px var(--u-color-danger),
+    0 0 0 4px color-mix(in srgb, var(--u-color-danger) 18%, transparent);
+}
+
+/* ------------------------------------------------------------------ */
+/* Character count                                                     */
+/* ------------------------------------------------------------------ */
+
+.wrapper {
+  display: block;
+  position: relative;
+}
+
+/* Sits in the lower right inner edge. The room for it comes from the
+   field's inner spacing and not from a line of its own - otherwise the
+   layout would jump as it appears and disappears. */
+.wrapper .textarea {
+  padding-bottom: var(--u-space-6);
+}
+
+.count {
+  position: absolute;
+  right: var(--u-space-3);
+  bottom: var(--u-space-2);
+  font-family: var(--u-font-mono);
+  font-size: var(--u-text-xs);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--u-color-text-muted);
+  pointer-events: none;
+  transition: color var(--u-transition);
+}
+
+/* Exceeded: the number carries the message, not a second element. */
+.countOver {
+  color: var(--u-color-danger);
+}

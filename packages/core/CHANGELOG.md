@@ -1,0 +1,849 @@
+# Changes to `@umriss-ui/core`
+
+This document describes what changes for **callers** of the package: exports,
+props, behaviour. The journal of the repository (`docs/journal.md`) describes
+something else — what was worked on here, including
+rebuilds, tests and decisions that are invisible from outside. The two therefore
+do not run in parallel: an entry there can be missing here because it changed
+nothing about the contract; and one sentence here can summarise three entries
+there.
+
+**The numbers.** The middle digit rises when something is added; the last one
+when something is repaired. As long as the first digit is `0`, no number
+promises compatibility — which is why a rule stronger than the figure applies as
+well: **whatever changes existing behaviour stands under a heading "Changed" of
+its own**, no matter which digit rose. Whoever reads only one section before an
+upgrade reads that one.
+
+**Names read forwards.** Where an entry below describes a name that has since
+been renamed, it is named here as it is called today; string literals, and
+names of things that were removed rather than renamed, stand as they stood.
+
+**The count started again at publication.** `0.1.0` is the first version for the
+registry. Before it, the package counted up to `0.10.0` inside this repository
+without ever being published; those entries stand below under **internal**
+numbers (`internal 0.9.0`), and where another document of this repository names
+a `core` version from before the first publication, it means that internal number.
+Of those, `internal 0.1.0` to `internal 0.3.0` were reconstructed afterwards — the
+package stood at `0.1.0` the whole time, because it had exactly one caller and that
+caller lay in the same repository — and are grouped by unit of delivery, not by
+commit.
+
+## Target environment: applications that render in the browser
+
+The library is aimed at client-side rendered applications. The markers a
+server-rendering framework expects at the client boundary (`"use client"` at the
+head of the modules) are missing **on purpose**. That is a decision, not an
+omission.
+
+The reason: practically every component of the package holds state, hangs on
+focus, pointer events or layout measurement, and on the server would be nothing
+but a shell. The annotations would therefore enable nothing that is missing
+today — they would open a guarantee (this package runs under server rendering)
+that nobody checks and that breaks silently at the first extension. Server-side
+rendering is not on the plan; should it ever arrive, it will be decided as a
+delivery of its own and noted here.
+
+For the caller that means: in an application with server rendering, the
+components of this package belong behind a client boundary of their own — a
+module on the caller's side that carries `"use client"` and imports from there.
+
+---
+
+## 0.1.0 – First publication (Sep. 2026)
+
+The first version published to npm, under the tag `latest`. It is the state described by
+every internal entry below, up to and including `internal 0.10.0`; nothing about
+exports, props or behaviour changed for the publication itself.
+
+- **Installable from the registry:** `pnpm add @umriss-ui/core`. The German
+  wording ships as `@umriss-ui/core/wording/de` (ADR-0019), the stylesheet as
+  `@umriss-ui/core/styles.css`.
+- **The demo is online** at <https://romanhaendler.github.io/umriss-ui/core/>.
+- **The version number was reset** from the internal `0.10.0` to `0.1.0` — see
+  **The count started again at publication** above.
+
+---
+
+## internal 0.10.0 – The seam of a button group (Sep. 2026)
+
+Appearance only; no export, prop or behaviour moves. The number stays where it
+is.
+
+### Fixed
+
+- **A `ButtonGroup` drew two lines at every seam instead of one.** Every button
+  draws its own edge, and it draws it on all four sides. Inside the group the
+  two edges that face one another land exactly where the seam already is: a line
+  over the full height, running hard into the rounded outline, beside the inset
+  hairline that was meant to be the only line there. Three buttons read as three
+  boxes shoved together rather than as one control. The edges that face into the
+  group are now cut away; the edge above and below stays, because that is where
+  the outline of the group comes from, and the first and the last button keep
+  their outer side, rounded corner and all.
+- **Groups of `primary` or `ghost` buttons are unchanged.** The repair takes away
+  the edge a button happens to have rather than drawing a new one, so a variant
+  that carries no edge gains none here. Visible in the demo: the seam of the
+  ghost group always looked the way the secondary group now does.
+- **Keyboard focus keeps its whole ring.** It stands four pixels out, and the cut
+  would have sheared it off on exactly the sides that face into the group, so
+  focus lifts the cut. Hover does not need to: its edge is one pixel and would
+  stand where the seam already is.
+
+## internal 0.10.0 – The provider explains itself (Sep. 2026)
+
+Documentation only; no export, prop or behaviour moves. The number stays where
+it is.
+
+### Fixed
+
+- **`<UmrissProvider wording={GERMAN_WORDING}>` was never valid.** The provider
+  takes `language`, and the wording sits inside it:
+  `language={{ wording: GERMAN_WORDING }}`. The wrong form stood in the header of
+  `src/lib/language/de.ts` — the file a reader imports the German wording from —
+  and in the entry below. The README always had it right. Both are corrected.
+
+### Added
+
+- **Four props that land in a generated table now carry their JSDoc**:
+  `UmrissProviderProps.portalTarget`, `.toast` and `.children`, and
+  `LanguageOptions.formats`. They appear in a props table for the first time,
+  because `UmrissProvider` has a demo page for the first time.
+- **The demo has a page for the provider**, with a worked example of taking the
+  German wording whole and one of overriding entries and formats singly. Where
+  the register was described before, it can now be read off two pictures.
+
+## internal 0.10.0 – One language, one scope (Sep. 2026)
+
+Delivery report for `.scratch/english-and-umriss-ui/spec.md`. The number does not
+move: nothing was ever published under it, and this is a rename rather than a
+release.
+
+### Changed
+
+- **The package is called `@umriss-ui/core`** and its directory is
+  `packages/core`. The npm scope moved from `@umriss/*` to `@umriss-ui/*`, the
+  org actually secured for this library; the sibling packages are
+  `@umriss-ui/table` and `@umriss-ui/charts`. Nothing was ever published under
+  the old names — all three returned 404 from the registry — so there is no
+  alias and no deprecation window. An import line changes from `@umriss/ui` to
+  `@umriss-ui/core`, and the stylesheet from `@umriss/ui/styles.css` to
+  `@umriss-ui/core/styles.css`. Nothing else about a call changes.
+  **`core` means the package you install first**, not a layer everything sits
+  on: `@umriss-ui/charts` depends on nothing and will keep depending on nothing
+  (ADR-0016).
+- **Every identifier and every document is English** (ADR-0018, which supersedes
+  ADR-0015 and its carve-out that props are English while identifiers are
+  German). For the twenty-one names that cross the package boundary this is a
+  rename of the public surface, carried out in one commit: the wording is
+  `Wording` and the formats are `Formats`, `SpracheProvider` is
+  `LanguageProvider` with `useWording`, `useFormats` and `mergeLanguage`,
+  `STANDARD_WORTLAUT` and `STANDARD_FORMATE` are `DEFAULT_WORDING` and
+  `DEFAULT_FORMATS`, the limit model is `Limit`, `LimitSet`, `Assessment`,
+  `Verdict`, `Severity`, `Side`, `assess` and `verdictWeight`, freshness is
+  `Freshness`, `FreshnessAges`, `freshness`, `age`, `cadence` and `useFreshness`,
+  the window arithmetic is `visibleWindow`, `scrollForRow`, `useVirtual`,
+  `VirtualRows` and `VirtualOptions`, and the density hook is `useDensityFor`.
+  The long prose headers that carry the design reasoning were translated, not
+  shortened. Deprecated aliases were considered and rejected: they were right for
+  the prop renames of ADR-0015, because there were callers; here there are none.
+- **English is the default wording, German ships as a subpath** (ADR-0019).
+  `DEFAULT_WORDING` is English, entry for entry, and every label the library
+  draws without being told otherwise is now English. The German that used to be
+  the default is unchanged — down to the thin spaces — and is exported as
+  `@umriss-ui/core/wording/de`:
+
+  ```tsx
+  import { GERMAN_WORDING } from "@umriss-ui/core/wording/de";
+
+  <UmrissProvider language={{ wording: GERMAN_WORDING }}>
+  ```
+
+  Both are typed `Wording`, so an entry added to the interface and forgotten in
+  the other language is a compile error rather than a missing label on a screen.
+  Semantic drift between the two cannot be caught by anything and is accepted as
+  the price of shipping two. A subpath and not a second entry in the main export:
+  an application that never imports it never pays for it.
+- **The formats are still `de-DE`.** `DEFAULT_FORMATS` groups and separates
+  numbers, dates and percentages the German way, so the default currently renders
+  English words around German digits — "43 of 1.204", a date as "17.03.2026".
+  This was left alone on purpose and not for lack of noticing: a locale is not a
+  language, changing it moves every number, date and percentage in the library,
+  and `en-GB` and `en-US` disagree about dates, so a library whose audience is
+  unknown arguably should not pick either. The seam already works — the
+  `UmrissProvider` takes `formats` — and ADR-0019 records the state rather than
+  hiding it.
+
+### Otherwise
+
+The licence is MIT, and a `LICENSE` file ships in the package. No behaviour
+changed anywhere in this delivery: where a rename revealed a defect it was
+written down and fixed in a commit of its own, never folded into the rename.
+
+### Changed — the values, not only the names
+
+The first pass renamed identifiers and left the values they hold standing. A
+value is read as often as the name that holds it — in the DOM, in a selector, in
+a screenshot's file name — so these moved too, each with every consumer:
+
+- **`Place` is `"top" | "right" | "bottom" | "left"`.** It was `"oben" |
+  "rechts" | "unten" | "links"`, and it stands in the DOM as `data-place`. The
+  wording registers translate it: the German one answers "oben" where the English
+  one answers "top".
+- **The limit model.** `Verdict` is `"ok" | "unknown" | "warning" | "alarm"`,
+  `Severity` is `"warning" | "alarm"`, `Side` is `"upper" | "lower"`, and the
+  fields are `value`, `side`, `severity`, `limits`, `target`, `verdict`, `limit`,
+  `excess`, `deviation`. ADR-0006 holds this model twice, once in each package,
+  so core, `@umriss-ui/charts`, the shared case table and the runtime conformance
+  test moved in one commit. `data-urteil` is `data-verdict`.
+- **`Freshness` is `"fresh" | "stale" | "lost"`** and its two ages are `stale`
+  and `lost`. `data-aktualitaet` is `data-freshness`.
+- **`useVirtual`** takes `{ rowHeight, overscan }` and gives back `from`, `to`,
+  `fillerBefore`, `fillerAfter`, `count`, `showRow`, `onScroll`.
+- **`DateRange` is `{ from, to }`** and a `RangePreset` carries a `range`. A
+  preset's key is now its wording key (`today`, `last7Days`).
+- **The dock's eight tokens** are `--u-dock-tool`, `-grip`, `-gap`, `-padding`,
+  `-margin`, `-grip-travel`, `-refusal-surface`, `-refusal-duration`. Three of
+  them are read back at runtime, so whoever overrides them changes from how many
+  tools on a side edge the dock refuses.
+
+### Fixed
+
+- **Virtualisation measured no row in `@umriss-ui/table`.** `useVirtual`
+  re-measures the row height on a real row; it looked for `[data-zeile]`, which
+  only the tree writes — the table writes `data-row`. The row height therefore
+  stayed at the starting value the caller passes, and the filler rows were sized
+  against it. Both attributes are `data-row` now.
+
+## internal 0.10.0 – What the table toolbar says (Sep. 2026)
+
+Delivery report for `.scratch/table-filters/spec.md`: the entries of the wording
+that `@umriss-ui/table` reads for its column filters. The components of this
+package do not change.
+
+### Changed
+
+- **`resetAll` says "Reset"** instead of "Reset everything". The button now
+  stands in the table toolbar beside the ratio "43 of 1.204", where "everything"
+  says nothing the place does not say already; in the empty body it does the same
+  thing and is therefore called the same.
+- **`removeConditionNamed` no longer begins with "Filter"**: "Remove Line:
+  Line 1". Beside it now stands a second button for the same condition, and both
+  are built alike.
+
+### Added
+
+- **`editConditionNamed`**: the name of a condition that opens its filter —
+  "Edit Line: Line 1, Line 2".
+- **`moreValues`**: the rest of a long list within a condition — "+1".
+- **The range filter of the table**: `filterFrom` and `filterTo` label its two
+  fields, `rangeFromTo`, `rangeFrom` and `rangeTo` name its condition —
+  "100–500", "from 100", "to 500" — and `rangeInvalid` says that "From" lies
+  behind "To".
+
+### Removed
+
+- **`sucheBedingung`**, which had no English successor and is simply gone: the
+  search no longer appears as a condition beside the field that already shows it.
+
+## internal 0.9.0 – The table moves out (Sep. 2026)
+
+Delivery report for `.scratch/umriss-table/issues/14-remove-table-from-ui.md`.
+The table and the alarm list now stand in **`@umriss-ui/table`** (ADR-0016,
+ADR-0017). There, columns are elements typed against their rows, and the table
+renders its rows itself — so a reordering in the model is on the screen as well.
+The new package takes `@umriss-ui/core` as a peer and reads its provider, formats
+and wording; one `UmrissProvider` configures both packages.
+
+With this number appear the two sections below it as well, which had been
+unpublished until now.
+
+### Changed
+
+- **The table and the alarm list are no longer in this package**, and three
+  entries of the wording are struck. Whoever imports or overrides them no longer
+  translates after the upgrade; what went where stands under "Removed". The
+  section "Where the library contradicted itself" further down appears with the
+  same number and has entries of its own under "Changed".
+
+### Removed
+
+- **The table**: `Table`, `Th`, `Td`, `TableToolbar`, `TablePagination`,
+  `TableEmpty`, `TableSkeletonRows`, `TableFilter`, `TableFilterList`,
+  `TableFilterStrip`, `TableExpandButton`, `TableRowDetail`, `TableRowActions`,
+  `TableVirtualBody`, `TableVirtualRow` with their props types and
+  `SortDirection`, `TableActiveFilter`, `TableFilterOption`; the model
+  `tableModel`, `column`, `sum` with `Column`, `SortLevel`, `TableInput`,
+  `TableProjection`; the companion `useCompanion` with `Companion`,
+  `CompanionOptions`, `Sort`; `asCsv`; `alsSuchparameter` and `ausSuchparametern`
+  with `TableView` and `AusSuchparameternOptionen`; `useTableSelection` with
+  `TableSelection`.
+  **Instead** `@umriss-ui/table`. Some names exist there again, in a new shape:
+  `useTable(rows, options)` gives out `Table`, `Column` and the remaining parts
+  instead of taking a column field; `column` builds a preset for `Column`;
+  `alsSuchparameter`, `ausSuchparametern`, `useTableSelection` and their types
+  are unchanged. The export is `t.asCsv()` and the part `Export`.
+- **`AlarmList` and `alarmModel`** with `acknowledge`, `countAcknowledgeable`,
+  `countInWindow`, `frequencyByType`, `detectFlood`, `nextLifecycleState`,
+  `isStanding`, `isAcknowledged`, `isDone`, `hasReturned`, `priorityRank`,
+  `PRIORITIES`, `ALARM_COLUMNS`, `alarmColumns`, `DEFAULT_ORDER` and their types.
+  **Instead** the same names out of `@umriss-ui/table`; the props of the alarm
+  list are called `view`, `selection`, `onAcknowledge`, `asOf` and `freshness`
+  there.
+- **Three entries of the wording** that only the old table read:
+  `zeileAufklappen`, `zeileZuklappen`, `filterEntfernen`. `@umriss-ui/table`
+  names the same buttons after the row (`expandRowNamed`, `collapseRowNamed`,
+  `removeConditionNamed`). A provider that overrides the three no longer
+  translates. All remaining entries of the table stay here (umriss-table 04).
+
+### Stays
+
+- The window arithmetic (`visibleWindow`, `scrollForRow`, `useVirtual`) and
+  `useDensityFor` — the `TreeView` uses the one, every part with a density of its
+  own the other, and `@umriss-ui/table` both.
+
+## internal 0.9.0 – What the table needs from outside (Sep. 2026)
+
+Delivery report for `.scratch/umriss-table/spec.md`, ticket 04. The table moves
+to `@umriss-ui/table` (ADR-0016); what it used to read from inside is now
+reachable from outside. Ticket 04 removed nothing; the table itself went with
+ticket 14 (the section above).
+
+### Added
+
+- **The window arithmetic as an export of its own:** `visibleWindow`,
+  `scrollForRow`, `useVirtual` and their types `RowWindow`, `WindowInput`,
+  `RowPlacement`, `VirtualRows`, `VirtualOptions`. The arithmetic and the types
+  previously came out only through the export of the table, the hook not at all;
+  the `TreeView` goes on using them.
+- **`useDensityFor`** – the density of a part: its own statement, otherwise the
+  density expressly set on the `UmrissProvider`, otherwise its own default.
+  Unlike `useDensity()` it tells "the provider says comfortable" apart from
+  "nobody says anything".
+- **Wording for `@umriss-ui/table`**, in a section of the directory of its own:
+  `columns`, `arrangeColumns`, `columnForward`, `columnBackward`, `exportLabel`,
+  `exportFileName`, `tableSearchPlaceholder`, `tableSearchLabel`,
+  `sucheBedingung`, `filterColumn`, `selectRow`, `selectAllRows`,
+  `expandRowNamed`, `collapseRowNamed`, `rowActions`, `rowAction`,
+  `rowActionsMenu`, `cellAbsentValue`, `booleanYes`, `booleanNo`, `footerSum`,
+  `footerAverage`, `entries`, `selectedCount`, `noEntries`,
+  `nothingMatchesFilters`. They stand here and not in the new package, so that
+  one `UmrissProvider` switches the wording of both packages with one statement.
+  (`sucheBedingung` went again with 0.10.0.)
+
+## internal 0.9.0 – Where the library contradicted itself (Sep. 2026)
+
+Delivery report for `.scratch/library-audit/spec.md`.
+
+### Changed
+
+**`Modal` and `CommandPalette` report `onClose` exactly once.** Until now every
+gesture — cross, escape, background — arrived twice: once out of the gesture and
+once more through the native `close` event that the exit triggered at the end.
+Whoever counts on the closing, logs it or shows a message now sees one. A closing
+the browser itself triggers still arrives.
+
+**`Wording.zeitraumMitZeitPlatzhalter` is gone.** It never named a placeholder
+but the panel of the `DateTimeRangePicker`. In its place come two entries of
+their own: `dateTimeRangePanel` for the panel and `dateTimeRangeClear` for its
+clear ×, which until now shared `dateRangeClear` with the `DateRangePicker`.
+Whoever overrode the old entry gets a type error and rewrites it to
+`dateTimeRangePanel`.
+
+**`Wording` has five new required fields**, because five texts stood in the
+components past the directory: `filterReset` and `filterDone` (the buttons in the
+`TableFilter`), `multiSelectSummary` (the "3 / 12" in the panel of the
+`MultiSelect`), `columnAcknowledgement` and `columnAge` (the two columns of the
+alarm model that the list does not show). Whoever overrides partially notices
+nothing; whoever builds a complete `Wording` object gets type errors.
+
+**A `Toast` with `tone="danger"` or `"warning"` announces itself as `alert`.**
+Until now the shared region carried `role="status"` for every tone, and an error
+was more polite there than the same error in the `Alert`. The region now has two
+live areas that stand before the first message arrives — `status` for the polite
+tones, `alert` for warning and error — and every message lands in the one for its
+tone, by the same table as for the `Alert`. On the screen the order stays the one
+the messages came in.
+
+**`FormField required` sets `aria-required`.** The comment had always promised
+it; only the asterisk was set. Now `Input`, `Select`, `Textarea`, `NumberInput`,
+`Combobox`, `RadioGroup` and `Checkbox` carry it — out of the same context they
+take `aria-describedby` and `aria-invalid` from. The triggers of the pickers and
+of the `MultiSelect` are buttons and do not carry it: there it would not be a
+permitted attribute.
+
+**Ids that arise out of the caller's values have a different format.**
+`Tab`/`TabPanel`, the options of the `RadioGroup`, the boxes of the `TreeView`
+and groups as well as rows of the `CommandPalette` no longer build their ids out
+of the raw value: a space in it broke `aria-labelledby`, and two trees on one
+page handed out the same id. Whoever read one of these ids from outside — in a
+test, say — now reads a different one; it was never promised.
+
+**The danger `Button` writes dark on light in the dark theme.** White measured
+3.68:1 on the lighter danger surface of the dark theme; the type is now
+`--u-color-on-danger` and turns the polarity like the accent. In the light theme
+it stays white. The accessibility check no longer tolerates the pair.
+
+**The scrim behind the `Modal` is `--u-color-scrim`.** It had a value of its own
+and dimmed in the dark theme with the light one; in the light theme it is now as
+light as behind the command palette.
+
+**`UmrissProvider dichte` takes effect.** The setting was read by nothing. Now it
+sets `data-dichte` at the root and is the default for the `density` of `Table`
+and `AlarmList` (`"comfortable"` means `"regular"`). A provider without `dichte`
+changes nothing — the alarm list then stays compact.
+
+**The `Textarea` shows its focus ring at `:focus-visible`**, like every field
+beside it; the hover edge of `Textarea` and `RadioGroup` is that of the remaining
+fields.
+
+**A `Tooltip` inside a `Modal` is visible.** It portalled to the body and thereby
+lay behind the dialog — and with it every tooltip of a `Dock` inside one. It now
+takes the same rule as the `Popover`: nearest `<dialog>`, then the `portalTarget`
+of the `UmrissProvider`, then the body. With a `portalTarget` in the provider it
+therefore lands there outside a dialog as well, instead of at the body.
+
+**Enter in the time field commits in the `DateTimePicker` too**, as it already
+did in the `DateTimeRangePicker`.
+
+**A row of the `CommandPalette` is chosen only with the primary button.** A
+right-click had already chosen.
+
+**`wording.presets` reaches the `DateTimeRangePicker` as well.** It built its
+quick select out of the German constant and passed over an override that the
+`DateRangePicker` had long been taking.
+
+### New
+
+**Five tokens:** `--u-color-on-danger`, `--u-color-danger-active`,
+`--u-color-edge-hover`, `--u-duration-exit` and `--u-duration-exit-collapse`. The
+two durations fall to zero under reduced motion; `Modal` and `Toast` read them at
+runtime instead of carrying the figure a second time.
+
+**`alarmColumns(wording)`** labels the columns of the alarm model out of a
+wording, and `AlarmInput.columns` takes them. The labelling lands in the
+projection's `columns` and from there in the column menu and the CSV header row.
+`ALARM_COLUMNS` remains as the default labelling and is the same as
+`alarmColumns(DEFAULT_WORDING)`.
+
+### Fixed
+
+**"Now" in the `DateTimePicker` means now.** In the second 02:30 of the clock
+change it gave out the first, an hour too early.
+
+**An instant keeps its occurrence when reopened.** `DateTimePicker` and
+`DateTimeRangePicker` opened a value that was the later occurrence of a doubled
+hour as the earlier one; the next "apply" then shifted it by an hour.
+
+**An `onInput` of one's own on the `Textarea` no longer takes anything away from
+it.** It was spread after the library's and replaced it; the counter and the
+growing then stood still. Both now run one after the other, the caller's first.
+
+**The comments the props table shows say what the code does.** `NumberInput`
+clamps every reported value, not only on blur; the default page sizes of the
+`TablePagination` are 10, 25 and 50.
+
+## internal 0.8.0 – A strip above the surface (Sep. 2026)
+
+Delivery report for `.scratch/floating-dock/spec.md`.
+
+### New
+
+**`<Dock>` – the tools of a surface, above it instead of beside it.** A strip of
+characters that lies above *one* host surface and carries the actions for it. It
+belongs to its host and never to the screen: two charts side by side have two
+docks, and neither claims to act on the other. It is rendered into a positioned
+container:
+
+```tsx
+<div style={{ position: "relative" }}>
+  <MyChart />
+  <Dock
+    tools={[{ id: "raster", label: "Grid", icon: <GridGlyph /> }, …]}
+    defaultPlace="unten"
+    mode={mode}
+    onUse={(id) => …}
+  />
+</div>
+```
+
+**Four resting places, and nothing in between.** `"oben" | "rechts" | "unten" |
+"links"`, controlled (`place` / `onPlaceChange`) or uncontrolled
+(`defaultPlace`, default `"unten"`). The dock is moved by its **grip**: dragging
+snaps into the edge whose zone the pointer reaches, and the four arrow keys on
+the grip are those same four places — absolute and not relative. Corners are not
+resting places: a corner names no orientation. Why the dock *snaps* while being
+dragged instead of following stands in ADR-0013; why the change of orientation is
+animated by hand, in ADR-0014.
+
+**A place without room refuses visibly.** Nine tools lie, with the tokens
+shipped, as 316 × 40 and stand as 40 × 316; on a wide, flat surface the first
+fits and the second does not. Such places are not offered — the zone shows the
+outline the dock would have there, instead of quietly doing nothing. If the host
+becomes so small that the *current* place no longer fits, the dock goes to the
+next one that does and reports that through `onPlaceChange`. No overflow menu, no
+shrinking, no scrolling.
+
+The one limit of that, spoken out: if the strip fits in **neither** orientation
+any more, the dock stays where it is and juts out beyond its host. There is then
+no place to give way to, and the alternatives — shrink, scroll, collapse — are
+one and all expressly rejected. Whoever puts a dock into a surface that can
+become smaller than the strip is long had better hide it.
+
+**The mode belongs to the caller.** `mode` names at most one tool and without a
+statement is *none* — a dock whose tools simply fire has no mode, and none is
+preset to the first tool either. `onUse(id)` reports every taking;
+`onModeChange(id)` reports the same event narrowed to "that would be a different
+mode", and whether the taken `id` is a mode at all is for the application to
+decide.
+
+**Three more characters in the set:** `GripGlyph`, `GridGlyph`, `MeasureGlyph` —
+drawn according to the specification in `packages/core/docs/glyphs.md`.
+
+**New tokens:** `--u-dock-tool`, `--u-dock-grip`, `--u-dock-gap`,
+`--u-dock-padding`, `--u-dock-margin`, `--u-dock-grip-travel`. They are not merely
+style: the component reads them back at runtime, because the question "does this
+place fit" is a calculation over exactly these values. Whoever changes them
+thereby also changes from how many tools on a side edge refuses.
+
+**`TableToolbar` stays what it is.** It is a strip *in the flow* above a table —
+it takes room instead of covering, and it does not move. Nothing about it
+changes, and it is not deprecated.
+
+## internal 0.7.0 – A window for searching (Sep. 2026)
+
+Delivery report for `.scratch/command-palette/spec.md`.
+
+### New
+
+**`<CommandPalette>` – one list, one term, one window.** Controlled like the
+modal (`open`, `onClose`); the opening remains the application's decision. An
+item is `{ id, label, group?, icon?, weight? }`, and what is chosen is the `id` —
+whether that leads to a jump or to something being executed is for the caller to
+decide. Exactly that keeps **places and commands under one term** instead of
+under two.
+
+**The resting state belongs to the caller.** Without a statement the palette
+shows nothing before the first character — a search field and not a menu, and
+only so is the growth movement producible at all. Whoever wants something
+standing there passes `restingItems`:
+
+```tsx
+<CommandPalette items={ALL} restingItems={recentlyUsed} … />
+```
+
+A **list** and not a switch, because the interesting question is not "all or
+none" but "which". Whoever really wants to show everything writes
+`restingItems={items}`; whoever wants to show the five most recently used can do
+that too — and a `showAll` could not. With long lists, "all" is anyway exactly
+the state this component abolished.
+
+The rows stand in **your** order and without markings: without a term there is no
+rank and nothing to mark. Everything else — arrow keys, enter, escape, the
+pointer rule — applies unchanged.
+
+There is **no `placeholder` prop**. Every visible text — placeholder, window
+name, empty line, key hints down to the legend "Esc" — comes out of the
+`Wording`. A second way to set the same text is worse than one.
+
+Functionally it stays small, on purpose: **one** list as a prop. No sources, no
+asynchrony, no preview, no "top hit", no memory. What is missing is reach — and
+none of it is visible.
+
+**The finder finds subsequences, not substrings.** `dtp` finds
+`DateTimePicker`. A hit at the start of a word beats one in the middle of a word,
+a contiguous run beats a scattered one, the shorter name beats the longer at
+equal quality; the group name is searched along and ranks below every find in a
+name. The matched characters are drawn in the accent — a find that no substring
+explains has to let itself be seen to be one. The formula itself is internal;
+what is promised is the **order**.
+
+`weight` is the hook for frequency or recency: it is added to the rank last. The
+library expressly keeps **no memory** for it — remembering is the application's
+business.
+
+**`useCommandPaletteShortcut(onOpen)`.** Binds ⌘K/Ctrl+K and `/`, including the
+rule that every caller otherwise rediscovers through a bug report: `/` does
+**not** open while the focus stands in an input, a textarea or a
+`contenteditable`.
+
+**Three new tokens, public** – so that overlays of one's own meet the palette
+instead of guessing at it: `--u-radius-xl` (18px, one step above the card),
+`--u-color-material` with `--u-color-material-fallback` and `--u-material-blur`
+(the translucent surface with its opaque substitute colour), and
+`--u-color-scrim` (the dimming behind an overlay). Both themes have values of
+their own; the dark one is chosen by eye and did not come about by inverting.
+
+The alpha of the material is a **floor**: the opaque colour beneath it carries
+the legibility alone, the translucency supplies atmosphere and never contrast.
+Whoever lowers the value gets a panel whose type is legible by luck. The reason
+stands in `docs/adr/0012-a-translucent-material-needs-a-floor.md`. Where
+`backdrop-filter` is missing or switched off, the pane falls back to the opaque
+colour — quieter than intended, in every other respect right. The existing
+overlays of the library do **not** move along; that is a decision of its own with
+consequences of its own for the baselines.
+
+### Changed
+
+**`Wording` has ten new required fields** for the palette: `palettePlaceholder`,
+`paletteField`, `palettePanel`, `paletteList`, `paletteNoFinds`,
+`paletteFindCount`, `paletteHintMove`, `paletteHintChoose`, `paletteHintClose`,
+`paletteKeyEsc`. As before: whoever overrides **partially** notices nothing;
+whoever has built a complete `Wording` object gets type errors.
+
+They are deliberately entries of **their own** and not those of the combobox. Its
+`noMatches` stays where it is: the palette finds *finds*, and the word "hit" is
+taken in the glossary for the point detection of the charts. Two meanings under
+one grep are exactly what the directory exists against.
+
+Nothing changes in the behaviour of existing components. Modal and palette share
+the entrance and exit choreography of the native `<dialog>` internally; the
+times, the escape behaviour and the background rule of the modal are unchanged,
+and the shared hook is not part of the public interface.
+
+## internal 0.6.0 – The value, the alarm and its age (Aug. 2026)
+
+Delivery report for `.scratch/judging-values/spec.md`,
+`.scratch/shopfloor-instruments/spec.md` and
+`.scratch/plant-at-a-glance/spec.md`, this package's share.
+
+### New
+
+**The limit is a rule, not a colour.** `assess()`, `verdictWeight()` and the
+types `Limit`, `LimitSet`, `Assessment`, `Verdict`, `Severity`, `Side`. A limit
+is a value, a side and a severity; a target is something else and is never
+violated, only missed. The assessment has **four** outcomes — `ok`, `unbekannt`,
+`warnung`, `alarm` — and the fourth is the reason for the module: an absent value
+must not look like a good one. No `null` return value, because that invites a
+`?? "ok"` at the call site. A violation is **beyond** a limit, not on it.
+
+The same module also stands in `@umriss-ui/charts` — written twice, on purpose,
+justified in ADR-0006 and held together by a conformance test. For callers that
+means: a tile and the chart beneath it never contradict each other about the same
+figure, and `@umriss-ui/core` brings no canvas library along for it.
+
+**`<Stat>` – the tile that reads its value.** Value, unit, label, optionally a
+target, limits, a history and an as-of time. It gets **no `tone`**: the rule is
+pulled out of the call site, and a tone prop would push it back. It has **no
+trend arrow**: a direction out of two points of a noisy signal is noise with an
+arrowhead. It says its verdict as a **word**, not only as a colour. Without
+limits it passes no verdict at all. There is deliberately no `StatRow`: a row of
+tiles is a layout problem, and `<Stat>` aligns its inside itself.
+
+**`<AlarmList>` and `alarmModel` – the lifecycle of an alarm.** The library takes
+alarms in and generates none (ADR-0009). The lifecycle state is **one field with
+four values**, not two booleans — otherwise every list loses the third: came,
+went, and nobody saw it. On top of that: the default order priority →
+acknowledgement → time, the frequency per alarm type, flood detection, a return
+threshold (dead band) and bulk acknowledgement through the known selection
+helper. A flood is **marked, never suppressed**. The model composes with
+`tableModel`; all previous guarantees go on holding.
+
+**Freshness is a different axis from the verdict.** `freshness()`, `age()`,
+`cadence()` and the hook `useFreshness()`. Three states out of two thresholds:
+`frisch`, `alt`, `abgerissen`. **A stale value keeps its verdict** (ADR-0010) —
+it does not become "unknown", because when the connection drops exactly what the
+human then needs would otherwise be lost. The cadence derives from the
+thresholds; a tile that goes stale after five minutes does not tick sixty times a
+minute.
+
+`Formats` gains `relative(ms)` — "vor 3 Minuten", in the coarsest unit that still
+works out. (The formats are `de-DE`; see the entry at the top.)
+
+### Changed
+
+**`Wording` has new required fields** – some thirty, for assessment, freshness
+and the alarm list. Whoever overrides the wording **partially**, as foreseen
+(`<LanguageProvider wording={{ … }}>`), notices nothing of it: the statement was
+and remains `Partial`. Whoever has built a complete `Wording` object themselves
+gets type errors and adds the new entries — or writes
+`{ ...DEFAULT_WORDING, …own }`, which is the better way anyway.
+
+## internal 0.5.0 – Configurable, very large, checked (Aug. 2026)
+
+### New
+
+**Formats and wording are overridable.** `LanguageProvider`, `useFormats()`,
+`useWording()`, `mergeLanguage()` as well as the defaults `DEFAULT_FORMATS` and
+`DEFAULT_WORDING`. The wording is a **directory of entries**, named after what
+they label — not a translation call. Whoever leaves an entry out gets the default
+text, never a key name and never an empty string. At this point German was still
+the only shipped language; since 0.10.0 English is the default and German ships
+as `@umriss-ui/core/wording/de` (ADR-0019).
+
+**One place to configure.** `UmrissProvider` holds exactly five things: `theme`
+(`"light" | "dark" | "system"`, where "system" subscribes and takes a change at
+runtime along), `dichte`, `portalTarget`, `toast` and `language`. With them
+`useUmriss()`, `useDensity()`, `usePortalTarget()`, `useToastConfig()`.
+
+**Virtualisation of very large tables.** `useTable(…, { virtual: { zeilenHoehe }
+})`, `<Table virtual={…}>`, `TableVirtualBody`, `TableVirtualRow` and the pure
+functions `visibleWindow` / `scrollForRow`. The sticky header and the sticky
+first column stay; the keyboard reaches rows that were never rendered.
+
+**A character set.** `CrossGlyph`, `PlusGlyph`, `MinusGlyph` – with a written-down
+specification and a list of the characters that deviate from it (`packages/core/docs/glyphs.md`).
+The set has grown since; what it holds today and what deviates stands in that
+file, which is the actual deliverable.
+
+`Meter` takes `label`.
+
+### Changed
+
+**The provider is voluntary.** Without it every component behaves **exactly as
+before**. That is tested, not claimed: one component of every sort that reads
+configuration at all.
+
+**The row actions of the table are visible.** They lay at `opacity: 0.4` at rest
+and thereby came to about **1.6:1** — by WCAG no longer readable text. Now `0.9`.
+**That is a visible change**: whoever uses the action column sees it more clearly
+at rest than before.
+
+**`Meter` carries an accessible name.** Without a `label` it says "Fill level".
+Before, the role `meter` had no name at all.
+
+**A disabled `Tag` reports that in the accessibility tree** (`aria-disabled`), no
+longer only through a CSS class.
+
+**Virtualisation switches paging off.** Whoever sets `virtual` gets no pages:
+`pageSize` and `setPage` stay without effect, and the view carries neither `page`
+nor `pageSize`. Both at once would be a control that contradicts itself.
+
+Otherwise nothing changes about the contract. All formatters give out character
+for character the same as before — the checks for that were written **before** the
+move — and the glyph migration is pixel-identical.
+
+## internal 0.4.0 – Eight parts of the foundation (Aug. 2026)
+
+The first version counted as it happened rather than reconstructed afterwards.
+
+### New
+
+| Export | Purpose |
+|---|---|
+| `Textarea` | multi-line input; `autoGrow` with `maxRows`, `showCount` |
+| `RadioGroup` | one out of few, with an explanatory line per option |
+| `Alert` | a message that stays — five tones, optionally dismissible |
+| `Tag`, `TagGroup` | a removable label; the group navigates with arrow keys |
+| `Divider` | a separating line as a layout primitive, horizontal/vertical, with a label |
+| `VisuallyHidden` | text only for the screen reader; `focusable` for skip links |
+| `ButtonGroup`, `SplitButton` | buttons that belong together; a main action plus variants |
+| `Text`, `Heading`, `Link` | typography on the token scale |
+
+Two peculiarities that stand out at the call: `Heading` separates outline level
+from size, so that nobody picks the wrong level in order to get the right size.
+And the tone of the `Alert` determines its aria role, not the caller — the two
+urgent tones interrupt the screen reader, the rest do not.
+
+### Changed
+
+Nothing. No existing component was touched, no prop changed its meaning. This
+release is purely additive.
+
+### Otherwise
+
+The package gets this changelog and a `prepublishOnly` step that runs the type
+check and the build — a package that does not build can no longer be published by
+accident. Nothing about the delivered content changes.
+
+## internal 0.3.0 – The table as a surface, part one (Aug. 2026)
+
+### New
+
+| Export | What it is |
+|---|---|
+| `asCsv` | the filtered set as delimiter-separated text |
+| `alsSuchparameter`, `ausSuchparametern` | the view as a link and back |
+| `orderColumns` | column order, shared with the companion |
+
+`Column` carries two new fields: `label` (column menu, CSV header row) and
+`hideable` — `false` for columns that identify the row. `TableInput` takes
+`hidden` and `order`; `TableProjection` gives the visible columns back in order,
+and `columnCount` derives from that. `useTable` gains `sortRankOf`,
+`toggleColumn`, `columnChoices`, `setOrder`, `initialView` and `view`.
+
+`asCsv` returns text and triggers no download; file name and timestamp belong to
+the application. Likewise the library does not write the address bar itself —
+which is why the package hangs on no routing library.
+
+### Changed
+
+- **The sort is an ordered list of levels** instead of a single one. The model
+  still accepts a single level; existing calling code stays valid and yields the
+  same order. What is new is the behaviour *with* a modifier key: without it, one
+  actuation replaces the list and turns up/down as before; with it, it appends,
+  turns, and at the end of the cycle takes itself out again.
+- **`Th` reports the modifier key to `onSort`** as a second parameter and shows
+  the rank from two levels on. Whoever calls `onSort` with a one-parameter
+  handler notices nothing of it.
+- **Hiding does not reset the page.** Unlike search, sort and page size it does
+  not change the set of rows. Hiding is pure presentation: the pipeline goes on
+  working with all columns, so that a sort by a hidden column is preserved.
+
+### Without a version of its own
+
+Into the same period falls a rebuild of the two range pickers: the preset column,
+the month pair, the calendar configuration and the trigger now lie in shared,
+package-internal parts. For the caller nothing changes about it — no prop, no
+commit moment, no two-click rule, no class name — which is why it gets no number
+here.
+
+## internal 0.2.0 – Popover, and the logic behind the bodies (Aug. 2026)
+
+### New
+
+- **`Popover`** – the one dismissible, anchored surface: portal, position,
+  outside click, escape with focus return, travelling along while scrolling,
+  stacking order, entrance. Eight panel modules in the package have lain on it
+  since; whoever builds anchored surfaces of their own can take the same
+  primitive.
+- **`DateTimePicker` has `size`** – of the four pickers it was the only one
+  missing it.
+- **`Th` gains `column`** and passes the identifier on to `onSort`.
+- The stacking order is a token scale (`--u-z-popover`, `--u-z-toast`,
+  `--u-z-tooltip`) and thereby shiftable from outside. A surface inside a
+  `<dialog>` portals there and no longer lies behind it.
+
+### Changed
+
+This release corrects behaviour that one may have arranged oneself around. The
+list in full:
+
+- **`NumberInput` reports a clamped value on every route.** Previously a key
+  press gave out the unclamped value while blur and stepping gave the clamped one
+  — one prop with two contracts that the caller could not tell apart. The text in
+  the field still stays untouched while typing.
+- **`DatePicker` "today" gives out local midnight.** The grid already did; the
+  button supplied the time of day with it.
+- **`DateTimePicker` "now" goes through the time-zone resolution.** It was the
+  only way around it.
+- **The choice between two identical wall-clock times** (the doubled hour at the
+  end of summer time) **applies per day.** Previously it was reset only on
+  opening.
+- **Clearing while the panel is open closes it** – in all four pickers.
+  Previously a panel stayed standing that was filled out of a deleted value.
+- **`TablePagination` clamps internally.** Without hits it said "page 1 of 1"
+  while "next" was disabled.
+
+### Otherwise
+
+The checkable logic of the components has since lain in modules of its own
+(German number notation, the month grid, the clock change, date and time formats,
+option lists, scale projection, position arithmetic, the table model). They are
+not part of the public interface; all that is visible of it is that these parts
+are now checked one by one.
+
+## internal 0.1.0 – Takeover state (Aug. 2026)
+
+The state the package came into this repository with.
+
+What is delivered is an ESM bundle, type declarations and a stylesheet under
+`@umriss-ui/core/styles.css`; `react` and `react-dom` from version 18 on are peer
+dependencies. Contained are Badge, Button, Card, Checkbox, Combobox, DataViz, the
+four date and time pickers, EmptyState, FormField, Input, Layout, Menu, Modal,
+MultiSelect, NumberInput, Select, Skeleton, Spinner, Table, Tabs, Toast, Tooltip
+and `useTableSelection`.
+
+The number was a placeholder figure, not a statement — it stood for "delivered
+once", not for a state one can update against. From 0.4.0 on, the rule above
+applies.
