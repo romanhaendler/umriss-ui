@@ -35,6 +35,7 @@ export interface ScheduleInteraction {
 
 export interface SceneHandlers {
   onIntent?: (intent: Intent) => void;
+  onDomainChange?: (domain: readonly [number, number]) => void;
   onInteraction?: (interaction: ScheduleInteraction) => void;
   onSelectedTaskChange?: (task: string | null) => void;
 }
@@ -50,6 +51,9 @@ export interface GestureHost {
   select(task: string | null, subtask: string | null): void;
   /** The view moved: lay out, publish, draw. */
   viewChanged(): void;
+  /** The planner panned or zoomed: as `viewChanged`, and the visible span is
+      reported. */
+  viewMoved(): void;
   /** Only interaction state changed: publish and draw. */
   interactionChanged(): void;
 }
@@ -209,7 +213,7 @@ export class SceneGestures {
       if (this.gesture.kind === "pinch") {
         const distance = this.touchDistance();
         if (distance > 0 && this.gesture.distance > 0 && this.host.view.zoomAt(this.touchCentre(), this.gesture.distance / distance)) {
-          this.host.viewChanged();
+          this.host.viewMoved();
         }
         this.gesture = { kind: "pinch", distance };
         return;
@@ -229,7 +233,7 @@ export class SceneGestures {
     }
     const current = this.gesture;
     if (current.kind === "pan" && current.pointerId === event.pointerId) {
-      if (this.host.view.pan(current.lastX - x, current.lastY - y)) this.host.viewChanged();
+      if (this.host.view.pan(current.lastX - x, current.lastY - y)) this.host.viewMoved();
       this.gesture = { ...current, lastX: x, lastY: y };
       return;
     }
@@ -285,7 +289,7 @@ export class SceneGestures {
       const dy = autoPanSpeed(y, view.height);
       if ((dx === 0 && dy === 0) || !view.pan(dx, dy)) return;
       this.gesture = { ...gesture, ghost: this.ghostFor(gesture, x, y) };
-      this.host.viewChanged();
+      this.host.viewMoved();
       this.panFrame = requestAnimationFrame(step);
     };
     this.panFrame = requestAnimationFrame(step);
@@ -350,18 +354,18 @@ export class SceneGestures {
       event.preventDefault();
       /* A pinch sends small deltas, a mouse wheel large ones. */
       const rate = Math.abs(dy) < 50 ? 0.01 : 0.0015;
-      if (view.zoomAt(x, Math.exp(dy * rate))) this.host.viewChanged();
+      if (view.zoomAt(x, Math.exp(dy * rate))) this.host.viewMoved();
       return;
     }
     if (Math.abs(dx) > Math.abs(dy) || event.shiftKey) {
       event.preventDefault();
-      if (view.pan(event.shiftKey && dx === 0 ? dy : dx, 0)) this.host.viewChanged();
+      if (view.pan(event.shiftKey && dx === 0 ? dy : dx, 0)) this.host.viewMoved();
       return;
     }
     const room = dy > 0 ? view.maxScroll() - view.scrollY : view.scrollY;
     if (dy === 0 || room <= 0) return;
     event.preventDefault();
-    if (view.pan(0, dy)) this.host.viewChanged();
+    if (view.pan(0, dy)) this.host.viewMoved();
   }
 
   private click(clientX: number, clientY: number, x: number, y: number): void {

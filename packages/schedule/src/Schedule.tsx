@@ -18,7 +18,9 @@
    text. */
 
 import {
+  forwardRef,
   useEffect,
+  useImperativeHandle,
   useLayoutEffect,
   useRef,
   useState,
@@ -73,6 +75,10 @@ export interface ScheduleProps {
   selectedTask?: string | null;
   /** Called when a click selects a task or clears the selection. */
   onSelectedTaskChange?: (task: string | null) => void;
+  /** The visible time span after the planner panned or zoomed, as two
+      wall-clock instants - for keeping a second schedule or a chart in step. A
+      span handed in through `initialDomain` is not reported back. */
+  onDomainChange?: (domain: readonly [number, number]) => void;
   /** The tooltip on a hovered subtask or transport: its order, its times, its
       parts and its findings. `false` switches it off; a function receives
       what the pointer rests on and returns content of the application's own. */
@@ -95,7 +101,19 @@ const WALL_CLOCK: CalendarInput = [];
 /** Half the width of a time label, and a little more. */
 const LABEL_MARGIN = 20;
 
-export function Schedule(props: ScheduleProps): ReactNode {
+/** What a schedule offers a caller imperatively: the arithmetic between a
+    point on the screen and a time on a lane. Everything else is props. */
+export interface ScheduleHandle {
+  /** The time and the lane at a client point, or null outside the plot. */
+  positionAt: (clientX: number, clientY: number) => { time: number; lane: string | null } | null;
+  /** The client point of a time - on the middle of a lane where one is named -
+      or null while the schedule is not on screen. */
+  clientPointOf: (time: number, lane?: string) => { x: number; y: number } | null;
+  /** The visible span, as two wall-clock instants. */
+  visibleDomain: () => readonly [number, number];
+}
+
+export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Schedule(props, ref): ReactNode {
   const {
     ariaLabel,
     initialDomain,
@@ -110,6 +128,7 @@ export function Schedule(props: ScheduleProps): ReactNode {
     onInteraction,
     selectedTask,
     onSelectedTaskChange,
+    onDomainChange,
     tooltip,
     now,
     className,
@@ -158,8 +177,18 @@ export function Schedule(props: ScheduleProps): ReactNode {
   }, [scene, domainFrom, domainTo, laneHeight, calendar, limitMin, limitMax, snapKind, snapStep, snapOffset, intents, nowAt]);
 
   useEffect(() => {
-    scene.setHandlers({ onIntent, onInteraction, onSelectedTaskChange });
-  }, [scene, onIntent, onInteraction, onSelectedTaskChange]);
+    scene.setHandlers({ onIntent, onInteraction, onSelectedTaskChange, onDomainChange });
+  }, [scene, onIntent, onInteraction, onSelectedTaskChange, onDomainChange]);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      positionAt: (clientX, clientY) => scene.positionAt(clientX, clientY),
+      clientPointOf: (time, lane) => scene.clientPointOf(time, lane),
+      visibleDomain: () => scene.visibleDomain(),
+    }),
+    [scene],
+  );
 
   useEffect(() => {
     scene.setControlledTask(selectedTask);
@@ -314,4 +343,4 @@ export function Schedule(props: ScheduleProps): ReactNode {
       {children}
     </ScheduleContext.Provider>
   );
-}
+});

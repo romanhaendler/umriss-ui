@@ -236,3 +236,35 @@ test("the now line stands at the present", async ({ page }) => {
   expect(box.x + box.width / 2).toBeCloseTo(plot.x(10, 30), -1);
   await expect(page.locator('[data-example="first-schedule"] [data-now]')).toHaveCount(0);
 });
+
+test("two schedules move together, and the span is reported", async ({ page }) => {
+  await openExample(page, "schedule", "in-step");
+  const example = page.locator('[data-example="in-step"]');
+  const span = example.locator("[data-span]");
+  await expect(span).toHaveText("05:30 – 18:00");
+
+  const upper = example.locator("[data-schedule-plot]").first();
+  const box = (await upper.boundingBox())!;
+  const noonBelow = () => example.locator("[data-schedule-ticks]").nth(1).locator("span span", { hasText: "12:00" });
+  const before = (await noonBelow().boundingBox())!.x;
+
+  /* Panned on the upper plan, on its last lane where nothing is drawn. */
+  await page.mouse.move(box.x + box.width * 0.5, box.y + box.height - 8);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width * 0.5 - 120, box.y + box.height - 8, { steps: 8 });
+  await page.mouse.up();
+
+  /* The lower plan followed, and the span says where they stand. */
+  await expect.poll(async () => (await noonBelow().boundingBox())!.x).toBeCloseTo(before - 120, -1);
+  await expect(span).not.toHaveText("05:30 – 18:00");
+});
+
+test("the handle places the application's own mark at a time", async ({ page }) => {
+  await openExample(page, "schedule", "in-step");
+  const example = page.locator('[data-example="in-step"]');
+  const plot = await plotOf(page, example, DAY_OF_PLAN);
+  const pin = example.locator("[data-pin]");
+  const box = (await pin.boundingBox())!;
+  /* `clientPointOf(14:00)` - the pin stands over the 14:00 of the upper plan. */
+  expect(box.x + box.width / 2).toBeCloseTo(plot.x(14), -1);
+});

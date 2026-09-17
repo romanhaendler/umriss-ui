@@ -17,7 +17,8 @@
 
    The data is the caller's and stays as it came (ADR-0023). */
 
-import { HOUR, subscribeTheme } from "@umriss-ui/charts";
+import { HOUR, calendarFrom, subscribeTheme, toWallClock } from "@umriss-ui/charts";
+import { laneTop, xOf } from "./geometry";
 import type { LateTransport } from "./findings";
 import type { Subtask, Task, Transport } from "./model";
 import { SceneData, type LaneConfig, type LayerConfig } from "./sceneData";
@@ -114,6 +115,7 @@ export class ScheduleScene {
   private overlayCanvas: HTMLCanvasElement | null = null;
   private colours: Colours | null = null;
   private frame = 0;
+  private domainFrame = 0;
   private unsubscribeTheme: (() => void) | null = null;
   private snapshot: ScheduleSnapshot = EMPTY_SNAPSHOT;
   private readonly listeners = new Set<() => void>();
@@ -127,6 +129,10 @@ export class ScheduleScene {
       selectedSubtask: () => this.selected,
       select: (task, subtask) => this.select(task, subtask),
       viewChanged: () => this.viewChanged(),
+      viewMoved: () => {
+        this.viewChanged();
+        this.reportDomain();
+      },
       interactionChanged: () => this.interactionChanged(),
     });
   }
@@ -191,7 +197,8 @@ export class ScheduleScene {
     this.unsubscribeTheme?.();
     this.unsubscribeTheme = null;
     if (this.frame !== 0) cancelAnimationFrame(this.frame);
-    this.frame = 0;
+    if (this.domainFrame !== 0) cancelAnimationFrame(this.domainFrame);
+    this.frame = this.domainFrame = 0;
     this.root = this.plot = this.dataCanvas = this.overlayCanvas = null;
   }
 
@@ -289,6 +296,50 @@ export class ScheduleScene {
       x,
       y,
     };
+  }
+
+  /** The visible span, as two wall-clock instants. */
+  visibleDomain(): [number, number] {
+    const calendar = calendarFrom(this.view.options.calendar);
+    const wall = (v: number) =>
+      calendar.intervals.length === 0 ? v : toWallClock(Math.max(0, Math.min(calendar.total, v)), calendar);
+    return [wall(this.view.domain[0]), wall(this.view.domain[1])];
+  }
+
+  /** Reported once per frame, however many wheel steps a planner turns - and
+      only for their gestures: a span handed in from outside is not news to the
+      caller who handed it in, and reporting it would let two schedules
+      synchronised with each other feed one another for ever. */
+  private reportDomain(): void {
+    if (this.domainFrame !== 0 || typeof requestAnimationFrame !== "function") {
+      if (typeof requestAnimationFrame !== "function") this.handlersNow.onDomainChange?.(this.visibleDomain());
+      return;
+    }
+    this.domainFrame = requestAnimationFrame(() => {
+      this.domainFrame = 0;
+      this.handlersNow.onDomainChange?.(this.visibleDomain());
+    });
+  }
+
+  /** The time and the lane at a client point, or null outside the plot. */
+  positionAt(clientX: number, clientY: number): { time: number; lane: string | null } | null {
+    const rect = this.plot?.getBoundingClientRect();
+    if (rect === undefined) return null;
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+    if (x < 0 || y < 0 || x > rect.width || y > rect.height) return null;
+    return { time: this.view.timeAt(x), lane: this.view.laneIdAt(y) };
+  }
+
+  /** The client point of a time, on a lane's middle where one is named, or
+      null while the schedule is not on screen. */
+  clientPointOf(time: number, lane?: string): { x: number; y: number } | null {
+    const rect = this.plot?.getBoundingClientRect();
+    if (rect === undefined) return null;
+    const viewport = this.view.viewport();
+    const index = lane === undefined ? undefined : this.data.laneIndex.get(lane);
+    const y = index === undefined ? 0 : laneTop(viewport, index) + this.view.options.laneHeight / 2;
+    return { x: rect.left + xOf(viewport, time), y: rect.top + y };
   }
 
   private requestDraw(): void {
