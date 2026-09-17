@@ -29,23 +29,23 @@
 
 /** Everything the library knows about formatting. */
 export interface Formats {
-  /** Date as displayed: 17.03.2026 */
+  /** Date as displayed: 17/03/2026 */
   date: (d: Date) => string;
-  /** Short form without the year, in the range footer: 17.03. */
+  /** Short form without the year, in the range footer: 17/03 */
   dateShort: (d: Date) => string;
-  /** The calendar's month header: März 2026 */
+  /** The calendar's month header: March 2026 */
   month: (d: Date) => string;
-  /** Accessible name of a calendar cell: Dienstag, 17. März 2026 */
+  /** Accessible name of a calendar cell: Tuesday, 17 March 2026 */
   dateLong: (d: Date) => string;
   /** Time of day, optionally with seconds: 09:05 or 09:05:03 */
   time: (d: Date, withSeconds: boolean) => string;
-  /** Date and time together: 17.03.2026, 09:05 */
+  /** Date and time together: 17/03/2026, 09:05 */
   dateTime: (d: Date, withSeconds: boolean) => string;
   /** Short form of the UTC offset: GMT+2 */
   offset: (d: Date) => string;
   /**
-   * A number in German notation. Without a digit count the value stands to the
-   * tenth decimal place; with one it is padded and rounded to exactly that
+   * A number in the set's notation. Without a digit count the value stands to
+   * the tenth decimal place; with one it is padded and rounded to exactly that
    * many places.
    */
   number: (n: number, decimals?: number) => string;
@@ -57,9 +57,9 @@ export interface Formats {
   count: (n: number) => string;
   /** A share from 0 to 1 as whole per cent: 74 % */
   percent: (share: number) => string;
-  /** The ordering of two texts by German collation. */
+  /** The ordering of two texts by the set's collation. */
   compareText: (a: string, b: string) => number;
-  /** An elapsed duration as a phrase: "vor 3 Minuten".
+  /** An elapsed duration as a phrase: "3 minutes ago".
       The amount comes in milliseconds, counted back from now. */
   relative: (ms: number) => string;
 }

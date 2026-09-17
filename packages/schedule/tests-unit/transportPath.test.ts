@@ -1,7 +1,7 @@
 /* How a transport is drawn: the route between its two ends and where on the
    bars those ends sit (schedule-legibility 04).
 
-   The route decides the shape, the anchor decides the corner - and neither
+   The route decides the shape, the attach decides the corner - and neither
    decides whether the transport is late: that is what `leaves` and `arrives`
    are for, and these tests never touch them. */
 
@@ -38,46 +38,53 @@ const fromSecond = subtaskBox(view, subtask("e", "two", 0, 20), 1, 0);
 
 const move: Transport = { id: "x", from: "a", to: "b", duration: 5 * MIN };
 
-const middle = (box: { y: number; height: number }) => Math.round(box.y + box.height / 2);
+/* The fixture, worked out by hand: lanes are forty pixels high, a bar is
+   nineteen of them and sits ten below the lane's top. So lane 1 holds its bar
+   over the rows 50 … 68, lane 2 over 90 … 108, lane 0 over 10 … 28 - and the
+   middles are 60, 100 and 20. A line that attaches to an edge attaches to the
+   last ROW of the bar, not to the boundary beneath it. */
+const LANE_ONE = { top: 50, bottom: 68, middle: 60 };
+const LANE_TWO = { top: 90, bottom: 108, middle: 100 };
+const LANE_ZERO = { top: 10, bottom: 28, middle: 20 };
 
-describe("the centre anchor", () => {
+describe("the centre attach", () => {
   it("leaves and arrives at the middle of both bars", () => {
-    const path = transportPath(view, move, fromSecond, below, { route: "curve", anchor: "centre", ends: "dot" });
-    expect(path.y1).toBe(middle(fromSecond));
-    expect(path.y2).toBe(middle(below));
+    const path = transportPath(view, move, fromSecond, below, { route: "curve", attach: "centre", ends: "dot" });
+    expect(path.y1).toBe(LANE_ONE.middle);
+    expect(path.y2).toBe(LANE_TWO.middle);
   });
 });
 
-describe("the nearest anchor", () => {
+describe("the nearest attach", () => {
   /* A pixel inside the bar, not on its boundary: a line centred on the
      boundary lies beside the bar and reads as a gap. */
   it("leaves at the bottom edge and arrives at the top edge where the next stop lies below", () => {
-    const path = transportPath(view, move, fromSecond, below, { route: "curve", anchor: "nearest", ends: "dot" });
-    expect(path.y1).toBe(Math.round(fromSecond.y + fromSecond.height - 1));
-    expect(path.y2).toBe(Math.round(below.y + 1));
+    const path = transportPath(view, move, fromSecond, below, { route: "curve", attach: "nearest", ends: "dot" });
+    expect(path.y1).toBe(LANE_ONE.bottom);
+    expect(path.y2).toBe(LANE_TWO.top + 1);
   });
 
   it("mirrors that where the next stop lies above", () => {
-    const path = transportPath(view, move, fromSecond, above, { route: "curve", anchor: "nearest", ends: "dot" });
-    expect(path.y1).toBe(Math.round(fromSecond.y + 1));
-    expect(path.y2).toBe(Math.round(above.y + above.height - 1));
+    const path = transportPath(view, move, fromSecond, above, { route: "curve", attach: "nearest", ends: "dot" });
+    expect(path.y1).toBe(LANE_ONE.top + 1);
+    expect(path.y2).toBe(LANE_ZERO.bottom);
   });
 
   it("touches the bar at both ends, never a pixel beside it", () => {
-    const path = transportPath(view, move, fromSecond, below, { route: "straight", anchor: "nearest", ends: "dot" });
-    expect(path.y1).toBeGreaterThanOrEqual(fromSecond.y);
-    expect(path.y1).toBeLessThanOrEqual(fromSecond.y + fromSecond.height - 1);
-    expect(path.y2).toBeGreaterThanOrEqual(below.y);
-    expect(path.y2).toBeLessThanOrEqual(below.y + below.height - 1);
+    const path = transportPath(view, move, fromSecond, below, { route: "straight", attach: "nearest", ends: "dot" });
+    expect(path.y1).toBeGreaterThanOrEqual(LANE_ONE.top);
+    expect(path.y1).toBeLessThanOrEqual(LANE_ONE.bottom);
+    expect(path.y2).toBeGreaterThanOrEqual(LANE_TWO.top);
+    expect(path.y2).toBeLessThanOrEqual(LANE_TWO.bottom);
   });
 
   it("keeps to the middle within one lane, where there is no nearer corner", () => {
-    const path = transportPath(view, move, fromSecond, sameLane, { route: "curve", anchor: "nearest", ends: "dot" });
-    expect(path.y1).toBe(middle(fromSecond));
-    expect(path.y2).toBe(middle(sameLane));
+    const path = transportPath(view, move, fromSecond, sameLane, { route: "curve", attach: "nearest", ends: "dot" });
+    expect(path.y1).toBe(LANE_ONE.middle);
+    expect(path.y2).toBe(LANE_ONE.middle);
   });
 
-  it("is shorter than the centre anchor between two lanes", () => {
+  it("is shorter than the centre attach between two lanes", () => {
     const length = (points: readonly number[]) => {
       let total = 0;
       for (let i = 0; i + 3 < points.length; i += 2) {
@@ -85,21 +92,21 @@ describe("the nearest anchor", () => {
       }
       return total;
     };
-    const centre = transportPath(view, move, fromSecond, below, { route: "straight", anchor: "centre", ends: "dot" });
-    const nearest = transportPath(view, move, fromSecond, below, { route: "straight", anchor: "nearest", ends: "dot" });
+    const centre = transportPath(view, move, fromSecond, below, { route: "straight", attach: "centre", ends: "dot" });
+    const nearest = transportPath(view, move, fromSecond, below, { route: "straight", attach: "nearest", ends: "dot" });
     expect(length(nearest.points)).toBeLessThan(length(centre.points));
   });
 });
 
 describe("the routes", () => {
   it("draws a straight line as its two ends and nothing between", () => {
-    const path = transportPath(view, move, first, below, { route: "straight", anchor: "centre", ends: "dot" });
+    const path = transportPath(view, move, first, below, { route: "straight", attach: "centre", ends: "dot" });
     expect(path.kind).toBe("straight");
     expect(path.points).toEqual([path.x1, path.y1, path.x2, path.y2]);
   });
 
   it("draws an orthogonal route in axis-parallel segments", () => {
-    const path = transportPath(view, move, first, below, { route: "orthogonal", anchor: "centre", ends: "dot" });
+    const path = transportPath(view, move, first, below, { route: "orthogonal", attach: "centre", ends: "dot" });
     expect(path.kind).toBe("orthogonal");
     for (let i = 0; i + 3 < path.points.length; i += 2) {
       const horizontal = path.points[i + 1] === path.points[i + 3];
@@ -111,7 +118,7 @@ describe("the routes", () => {
   });
 
   it("samples the curve into a polyline that starts and ends on its ends", () => {
-    const path = transportPath(view, move, first, below, { route: "curve", anchor: "centre", ends: "dot" });
+    const path = transportPath(view, move, first, below, { route: "curve", attach: "centre", ends: "dot" });
     expect(path.kind).toBe("curve");
     expect(path.points.length).toBeGreaterThan(8);
     expect(path.points.slice(0, 2)).toEqual([path.x1, path.y1]);
@@ -121,17 +128,17 @@ describe("the routes", () => {
 
 describe("the ends", () => {
   it("carry a dot unless the schedule says otherwise", () => {
-    expect(transportPath(view, move, first, below, { route: "curve", anchor: "centre", ends: "dot" }).ends).toBe("dot");
-    expect(transportPath(view, move, first, below, { route: "curve", anchor: "centre", ends: "none" }).ends).toBe("none");
+    expect(transportPath(view, move, first, below, { route: "curve", attach: "centre", ends: "dot" }).ends).toBe("dot");
+    expect(transportPath(view, move, first, below, { route: "curve", attach: "centre", ends: "none" }).ends).toBe("none");
   });
 });
 
 describe("a transport of its own mind", () => {
-  it("overrides the schedule's route, anchor and ends", () => {
-    const own: Transport = { ...move, route: "straight", anchor: "nearest", ends: "none" };
-    const path = transportPath(view, own, fromSecond, below, { route: "curve", anchor: "centre", ends: "dot" });
+  it("overrides the schedule's route, attach and ends", () => {
+    const own: Transport = { ...move, route: "straight", attach: "nearest", ends: "none" };
+    const path = transportPath(view, own, fromSecond, below, { route: "curve", attach: "centre", ends: "dot" });
     expect(path.kind).toBe("straight");
     expect(path.ends).toBe("none");
-    expect(path.y1).toBe(Math.round(fromSecond.y + fromSecond.height - 1));
+    expect(path.y1).toBe(LANE_ONE.bottom);
   });
 });

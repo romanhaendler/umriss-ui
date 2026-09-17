@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Stack, Text } from "@umriss-ui/core";
-import { Lane, Schedule, Subtasks, applyIntent } from "../../../src";
-import type { Intent, Subtask, Task } from "../../../src";
+import { Card, Stack, Text } from "@umriss-ui/core";
+import { Lane, Schedule, Subtasks, applyIntent, subtaskFromPlace } from "../../../src";
+import type { Intent, PlacingItem, Subtask, Task } from "../../../src";
 
 export const title = "Where a subtask may go";
 
@@ -16,7 +16,11 @@ export const title = "Where a subtask may go";
 
    It narrows `"lane"`; it does not enable it. Dragging in time keeps working
    for everything below - a restriction on the lane is not a restriction on the
-   clock. */
+   clock.
+
+   It holds for work dragged in from outside as well: the mould beside the plan
+   is asked about with the key and task the application declared, and the
+   welding bay refuses it before it can be dropped there. */
 
 const at = (hours: number, minutes = 0) => new Date(2026, 2, 17, hours, minutes).getTime();
 
@@ -37,22 +41,51 @@ const START: Subtask[] = [
    anywhere. A real plant reads this off its own master data. */
 const mayGo = (subtask: Subtask, lane: string) => subtask.task !== "bound" || PRESSES.includes(lane);
 
+const WAITING: PlacingItem & { label: string } = {
+  item: "mould",
+  label: "Mould A-77 · 2 h",
+  task: "bound",
+  duration: 2 * 60 * 60_000,
+};
+
 export default function WhereItMayGo() {
   const [work, setWork] = useState<readonly Subtask[]>(START);
+  const [placing, setPlacing] = useState<PlacingItem | null>(null);
   const [last, setLast] = useState("Drag the moulded part onto the welding bay");
 
   const onIntent = (intent: Intent) => {
+    if (intent.kind === "place") {
+      setWork((current) => [...current, subtaskFromPlace(intent, `${intent.item}-${current.length}`)]);
+      setLast(`${intent.item}: place`);
+      return;
+    }
     setWork((current) => current.map((s) => applyIntent(s, intent)));
-    setLast(`${intent.kind === "place" ? intent.item : intent.subtask}: ${intent.kind}`);
+    setLast(`${intent.subtask}: ${intent.kind}`);
   };
 
   return (
     <Stack gap={3}>
+      <Card>
+        <div
+          draggable
+          data-waiting={WAITING.item}
+          onDragStart={(event) => {
+            event.dataTransfer.setData("text/plain", WAITING.item);
+            event.dataTransfer.effectAllowed = "copy";
+            setPlacing(WAITING);
+          }}
+          onDragEnd={() => setPlacing(null)}
+          style={{ cursor: "grab" }}
+        >
+          <Text size="sm">{WAITING.label}</Text>
+        </div>
+      </Card>
       <Schedule
         ariaLabel="Two presses and a welding bay"
         initialDomain={[at(6, 30), at(15)]}
         height={190}
-        intents={["move", "lane"]}
+        intents={["move", "lane", "place"]}
+        placing={placing}
         canMoveTo={mayGo}
         onIntent={onIntent}
       >

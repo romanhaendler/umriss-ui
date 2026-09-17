@@ -382,3 +382,30 @@ test("the same subtask may still be moved in time, and onto the lane it fits", a
   await page.mouse.up();
   await expect(example.locator("[data-last-move]")).toHaveText("moulded: lane");
 });
+
+test("a drag from a list holds its ghost on the last lane that allowed it", async ({ page }) => {
+  await openExample(page, "intent", "where-it-may-go");
+  const example = page.locator('[data-example="where-it-may-go"]');
+  const plot = await plotOf(page, example, [at(6, 30), at(15)]);
+  const ghost = example.locator("[data-ghost]");
+
+  /* First over press 1, which the mould fits: the ghost stands there. */
+  await example.locator('[data-waiting="mould"]').hover();
+  await page.mouse.down();
+  await page.mouse.move(plot.x(12), plot.y(0), { steps: 6 });
+  await expect(ghost).toBeVisible();
+  await expect(ghost).not.toHaveAttribute("data-refused", "");
+
+  /* Then over the welding bay, which it does not fit: the ghost stays on press
+     1 and says why. */
+  await page.mouse.move(plot.x(12), plot.y(2), { steps: 6 });
+  await expect(ghost).toHaveAttribute("data-refused", "");
+  await expect(ghost).toContainText("Not this lane");
+  const box = (await ghost.boundingBox())!;
+  expect(box.y).toBeLessThan(plot.y(1));
+
+  /* And the drop lands where the ghost stood, because the ghost is the promise
+     of where a drop lands - here as in a drag inside the plot. */
+  await page.mouse.up();
+  await expect(example.locator("[data-last-move]")).toHaveText("mould: place");
+});

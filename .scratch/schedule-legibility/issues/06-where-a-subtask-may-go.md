@@ -42,3 +42,26 @@ Spec: `.scratch/schedule-legibility/spec.md` (user stories 25–31, "Where a sub
 new wording entry, `docs/testing.md` gained the check and three pure modules,
 `CONTEXT.md` widened **Refusal**, the README gained "What a bar says", and the
 journal carries the delivery entry.
+
+**Review follow-up** (two-axis review after 06):
+
+- **Standards:** the German refusal said "Nicht diese Zeile" - `Zeile` is on the
+  **Lane**'s _Avoid_ list - and reads "Nicht hierher" now. `anchor` became
+  `attach`, so that the word keeps meaning what a transport connects. The
+  glossary gained **Bar label**, **Appearance** and **Route**. `placeGhost` is a
+  query again, not a query with a hidden command. `channels()` reads a resolved
+  colour once for both readers, `inView` culls in one place, `HATCH_STEP`,
+  `FADE_SPAN` and `DARK_BELOW` are named with their reasons, `resolveAppearance`
+  names its fourth case instead of falling into it, and `separatorsOf` is
+  exported where ADR-0024 points at it.
+- **Tests that restated the implementation** now carry the fixture's geometry
+  written out - lane 1 holds its bar over the rows 50 to 68, and a line
+  attaches to the last row, not to the boundary beneath it - and the label rule
+  is checked at 63 and 64 pixels with the constant asserted beside them.
+- **Spec:** a drag from outside keeps its ghost on the last lane that allowed
+  it and shows the refusal there, instead of losing the ghost; the muted bar's
+  label is the slim bar it lies on (`barRect`, shared by the drawing and the
+  label); the stale German examples in the `Formats` interface are English.
+- **The one place the reviewers and the code disagreed on purpose** is written
+  into the spec's deviations: a refused drop lands where the ghost stands.
+- 160 browser tests, 1,950 unit tests, lint and typecheck green.

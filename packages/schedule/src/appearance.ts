@@ -40,7 +40,7 @@ export function resolveAppearance(appearance: readonly SubtaskAppearance[] | und
       dashed = false;
     } else if (one === "muted") {
       muted = true;
-    } else {
+    } else if (one === "open") {
       open = true;
     }
   }

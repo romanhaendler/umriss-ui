@@ -34,7 +34,7 @@ import { ScheduleContext } from "./context";
 import { ScheduleScene, type PlacingItem, type ScheduleInteraction, type ScheduleTooltipTarget } from "./scene";
 import { DEFAULT_LANE_HEIGHT } from "./sceneView";
 import { ScheduleTooltipContent } from "./ScheduleTooltip";
-import type { Intent, IntentKind, Subtask, TransportAnchor, TransportEnds, TransportRoute } from "./model";
+import type { Intent, IntentKind, Subtask, TransportAttachment, TransportEnds, TransportRoute } from "./model";
 import type { ZoomLimits } from "./timeAxis";
 import type { SnapRaster } from "./snap";
 import styles from "./Schedule.module.css";
@@ -107,7 +107,7 @@ export interface ScheduleProps {
 
       It changes the picture and never a finding: whether a transport is late
       follows from its `leaves` and `arrives` alone. */
-  anchor?: TransportAnchor;
+  attach?: TransportAttachment;
   /** Whether a transport's two ends carry a dot (`"dot"`, the default) or the
       line stands alone (`"none"`). The dot says where the line is anchored - a
       help while a plan is being read, and noise in a plan full of short moves.
@@ -172,7 +172,7 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
     onDomainChange,
     placing,
     route = "curve",
-    anchor = "centre",
+    attach = "centre",
     ends = "dot",
     label,
     tooltip,
@@ -217,10 +217,10 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
     lastDomain.current = key;
     const raster = snapKind ?? { step: snapStep ?? 0, offset: snapOffset ?? 0 };
     scene.setOptions(
-      { laneHeight, calendar, zoomLimits: { min: limitMin, max: limitMax }, snap: raster, intents, now: nowAt, route, anchor, ends },
+      { laneHeight, calendar, zoomLimits: { min: limitMin, max: limitMax }, snap: raster, intents, now: nowAt, route, attach, ends },
       fresh ? [domainFrom, domainTo] : null,
     );
-  }, [scene, domainFrom, domainTo, laneHeight, calendar, limitMin, limitMax, snapKind, snapStep, snapOffset, intents, nowAt, route, anchor, ends]);
+  }, [scene, domainFrom, domainTo, laneHeight, calendar, limitMin, limitMax, snapKind, snapStep, snapOffset, intents, nowAt, route, attach, ends]);
 
   useEffect(() => {
     scene.setHandlers({ onIntent, canMoveTo, onInteraction, onSelectedTaskChange, onDomainChange });

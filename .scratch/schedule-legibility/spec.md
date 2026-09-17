@@ -220,6 +220,40 @@ Six pieces, each optional except the last two:
 - The charts' and the table's own use of the formats beyond what the locale
   change forces.
 
+## Deviations, decided during delivery
+
+Recorded here because a delivered spec is read backwards (`CONTRIBUTING.md`):
+
+- **`ends` is a third drawing option**, beside `route` and `attach`: Roman
+  asked for the dot at a transport's ends to be optional while the ticket was
+  being built. Same shape as the other two, and the Out of Scope line it brushes
+  ("route kinds beyond the three named") is about kinds of route, not about
+  whether an end carries a dot.
+- **`anchor` is called `attach`.** A transport already has two anchors -
+  `leaves` and `arrives` - which decide what it connects and therefore whether
+  it is late, and the tree has an **Anchor** of its own. The drawing option says
+  where the line touches the bar, and that is a third meaning the word cannot
+  carry.
+- **`progress` is a rail, not a filled share**, and **`muted` is drawn slim,
+  not faint**: a faint fill already means a **Setup** or a **Teardown** here, so
+  neither would have been distinguishable from a run-out time. Roman found it in
+  the first picture; the example now carries a real setup beside both.
+- **Story 38 is answered by construction and measured once, not by the
+  check.** A bar label is given its bar's width, so it cannot be wider; the
+  browser test measures the label's box against the example's own declared
+  times, which is the independent source. The check would have compared the
+  label to a number the same code wrote.
+- **Story 39 does not hold for bar labels.** A label IS its bar, so two labels
+  intersect exactly when two bars do - which is an **Overlap**, drawn on
+  purpose and never packed away. The labels say so themselves
+  (`data-schedule-may-cover`) and the invariant holds for every other overlay.
+- **A refused drop lands where the ghost stands.** The spec said a refused drop
+  reports nothing; the ghost, meanwhile, stays on the last lane that was
+  allowed. Both cannot hold at once, and the ghost wins: it is the promise of
+  where a drop lands, in a drag from outside as in one inside. Nothing is
+  reported where no ghost stands at all - off the lanes, or when no lane ever
+  allowed the work.
+
 ## Further Notes
 
 - The two defects behind this spec are already repaired (`a9099a4`): the ghost
