@@ -17,26 +17,53 @@
 
    The data is the caller's and stays as it came (ADR-0023). */
 
+import type { ReactNode } from "react";
 import { HOUR, calendarFrom, subscribeTheme, toWallClock } from "@umriss-ui/charts";
 import { resolveAppearance } from "./appearance";
 import { slotAt, xOf } from "./geometry";
-import { SceneData, type LaneConfig, type LayerConfig, type ScheduleTooltipTarget } from "./sceneData";
+import { SceneData, type GroupConfig, type LaneConfig, type LayerConfig, type ScheduleTooltipTarget } from "./sceneData";
 import type { Subtask } from "./model";
 import { barFace, drawData, drawOverlay, prepareCanvas, resolveSceneColours, type Colours } from "./sceneDraw";
 import { barLabelBox, inView } from "./geometry";
 import { SceneGestures, type GhostSummary, type PlacingItem, type SceneHandlers } from "./sceneGestures";
 import { DEFAULT_LANE_HEIGHT, SceneView, type SceneOptions } from "./sceneView";
 
-export type { LaneConfig, LayerConfig, ScheduleTooltipTarget } from "./sceneData";
+export type { GroupConfig, LaneConfig, LayerConfig, ScheduleTooltipTarget } from "./sceneData";
 export type { SceneOptions, ScheduleHit } from "./sceneView";
 export type { SceneHandlers, ScheduleInteraction, PlacingItem } from "./sceneGestures";
+
+/** One row's header, as the DOM renders it. */
+export interface ScheduleHeader {
+  /** The row's own key - a lane id or a group id; they cannot collide, because
+      a group is never a lane (ADR-0025). */
+  readonly key: string;
+  readonly kind: "lane" | "groupHead" | "miniature";
+  /** The lane this row is, where it is one. */
+  readonly lane: string | undefined;
+  /** The group this row is, where it is one. */
+  readonly group: string | undefined;
+  readonly label: ReactNode;
+  /** How deep it lies, for the indent of its header. */
+  readonly depth: number;
+  /** The groups this row lies inside, outermost first. */
+  readonly within: readonly string[];
+  /** How many real lanes it holds - a lane holds itself. */
+  readonly lanes: number;
+  /** Whether this group is folded; undefined for a lane. */
+  readonly collapsed: boolean | undefined;
+  readonly top: number;
+  readonly height: number;
+}
 
 export interface ScheduleSnapshot {
   readonly width: number;
   readonly height: number;
   readonly laneHeight: number;
   readonly scrollY: number;
-  readonly lanes: readonly LaneConfig[];
+  /** One entry per ROW of the plot, in the order they stand: a lane's header,
+      an open group's head, or a folded group's one row. What a header shows
+      and where it sits follows from this and from nothing else. */
+  readonly headers: readonly ScheduleHeader[];
   /** The days of the coarse band: where they lie and what they are. */
   readonly days: readonly { readonly start: number; readonly x: number; readonly width: number }[];
   /** The ticks of the fine band, and the step they stand on. */
@@ -70,7 +97,7 @@ const EMPTY_SNAPSHOT: ScheduleSnapshot = {
   height: 0,
   laneHeight: DEFAULT_LANE_HEIGHT,
   scrollY: 0,
-  lanes: [],
+  headers: [],
   days: [],
   ticks: [],
   step: HOUR,
@@ -92,6 +119,11 @@ export class ScheduleScene {
   private controlledTask: string | null | undefined = undefined;
   private ownTask: string | null = null;
   private selected: string | null = null;
+  /** Which **Lane group**s are folded. Controlled where the caller passes a
+      list, kept here otherwise - the shape `selectedTask` has. Folding changes
+      the view and not the plan, so it is no **Intent** (ADR-0025). */
+  private controlledCollapsed: readonly string[] | undefined = undefined;
+  private ownCollapsed: readonly string[] = [];
 
   private root: HTMLElement | null = null;
   private plot: HTMLElement | null = null;
@@ -128,6 +160,9 @@ export class ScheduleScene {
   registerLane = (config: LaneConfig): number => this.data.registerLane(config);
   updateLane = (id: number, config: LaneConfig): void => this.data.updateLane(id, config);
   unregisterLane = (id: number): void => this.data.unregisterLane(id);
+  registerGroup = (config: GroupConfig): number => this.data.registerGroup(config);
+  updateGroup = (id: number, config: GroupConfig): void => this.data.updateGroup(id, config);
+  unregisterGroup = (id: number): void => this.data.unregisterGroup(id);
   registerLayer = (config: LayerConfig): number => this.data.registerLayer(config);
   updateLayer = (id: number, config: LayerConfig): void => this.data.updateLayer(id, config);
   unregisterLayer = (id: number): void => this.data.unregisterLayer(id);
@@ -145,6 +180,33 @@ export class ScheduleScene {
   setPlacing(placing: PlacingItem | null): void {
     this.placing = placing;
     if (placing === null) this.gestures.clearPlacing();
+  }
+
+  /** `undefined`: the scene keeps the folded groups itself. */
+  setCollapsedGroups(groups: readonly string[] | undefined): void {
+    if (groups === this.controlledCollapsed) return;
+    this.controlledCollapsed = groups;
+    this.viewChanged();
+  }
+
+  /** The uncontrolled starting point, taken once. */
+  setDefaultCollapsedGroups(groups: readonly string[]): void {
+    this.ownCollapsed = groups;
+    this.viewChanged();
+  }
+
+  get collapsedGroups(): readonly string[] {
+    return this.controlledCollapsed ?? this.ownCollapsed;
+  }
+
+  /** Folds or unfolds one group. The caller's list is never written to: where
+      the state is controlled, only the report goes out. */
+  toggleGroup(group: string): void {
+    const now = this.collapsedGroups;
+    const next = now.includes(group) ? now.filter((g) => g !== group) : [...now, group];
+    if (this.controlledCollapsed === undefined) this.ownCollapsed = next;
+    this.handlersNow.onCollapsedGroupsChange?.(next);
+    this.viewChanged();
   }
 
   /** `undefined`: the scene keeps the selection itself. */
@@ -219,6 +281,7 @@ export class ScheduleScene {
   /* ---------------------------------------------------------------- */
 
   private viewChanged(): void {
+    this.view.collapsed = new Set(this.collapsedGroups);
     if (this.data.rebuild()) {
       this.colours = null;
       if (this.selected !== null && !this.data.subtaskById.has(this.selected)) this.selected = null;
@@ -246,7 +309,7 @@ export class ScheduleScene {
       height: view.height,
       laneHeight: view.options.laneHeight,
       scrollY: view.scrollY,
-      lanes: this.data.lanes,
+      headers: this.headers(),
       ...view.bands(),
       ghost: this.gestures.ghostSummary(),
       grips,
@@ -256,6 +319,28 @@ export class ScheduleScene {
       bars: this.bars(),
     };
     for (const listener of this.listeners) listener();
+  }
+
+  /** One header per row, with what it says and where it sits. The scroll is
+      not taken off here: the header column is moved as a whole, as it always
+      was, so that a header and its row cannot drift apart by a rounding. */
+  private headers(): readonly ScheduleHeader[] {
+    const labelOfLane = new Map(this.data.lanes.map((lane) => [lane.id, lane.label] as const));
+    const labelOfGroup = new Map(this.data.groups.map((group) => [group.id, group.label] as const));
+    const collapsed = new Set(this.collapsedGroups);
+    return this.view.rows.rows.map((row) => ({
+      key: row.lane ?? row.group ?? "",
+      kind: row.kind,
+      lane: row.lane,
+      group: row.group,
+      label: (row.lane !== undefined ? labelOfLane.get(row.lane) : labelOfGroup.get(row.group ?? "")) ?? row.lane ?? row.group ?? "",
+      depth: row.depth,
+      within: row.within,
+      lanes: row.lanes,
+      collapsed: row.group === undefined ? undefined : collapsed.has(row.group),
+      top: row.top,
+      height: row.height,
+    }));
   }
 
   /** The bars a label could stand in: the visible part of every main time,

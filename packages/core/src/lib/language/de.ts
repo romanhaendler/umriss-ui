@@ -261,4 +261,7 @@ export const GERMAN_WORDING: Wording = {
   scheduleOverlapWith: (other) => `Überschneidung mit ${other}`,
   scheduleLateBy: (amount) => `Transport verspätet, ${amount} zu knapp`,
   scheduleLaneRefused: "Nicht hierher",
+  scheduleFoldGroup: "Gruppe einklappen",
+  scheduleUnfoldGroup: "Gruppe ausklappen",
+  scheduleLaneCount: (count) => (count === 1 ? "1 Bahn" : `${count} Bahnen`),
 };

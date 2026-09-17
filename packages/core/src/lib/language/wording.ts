@@ -379,6 +379,13 @@ export interface Wording {
   scheduleLateBy: (amount: string) => string;
   /** On the ghost of a drag over a lane the subtask may not go to. */
   scheduleLaneRefused: string;
+  /** The chevron of a lane group's header, which folds it into one row and
+      unfolds it again. The group's own label stands beside the button, so the
+      name is what the ACTION is, not which group it acts on. */
+  scheduleFoldGroup: string;
+  scheduleUnfoldGroup: string;
+  /** How many lanes a group holds, beside its name in the header. */
+  scheduleLaneCount: (count: number) => string;
 }
 
 /** The instance shipped by default. English; German is `GERMAN_WORDING` in
@@ -604,4 +611,7 @@ export const DEFAULT_WORDING: Wording = {
   scheduleOverlapWith: (other) => `Overlap with ${other}`,
   scheduleLateBy: (amount) => `Late transport, ${amount} short`,
   scheduleLaneRefused: "Not this lane",
+  scheduleFoldGroup: "Fold group",
+  scheduleUnfoldGroup: "Unfold group",
+  scheduleLaneCount: (count) => (count === 1 ? "1 lane" : `${count} lanes`),
 };

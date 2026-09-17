@@ -14,6 +14,19 @@ import type { ScheduleHit } from "./sceneView";
 export interface LaneConfig {
   readonly id: string;
   readonly label: ReactNode;
+  /** The **Lane group** it sits in, where it was declared inside one. The
+      group gives it through context; a lane never names its group itself
+      (ADR-0025). */
+  readonly parent?: string;
+}
+
+/** A **Lane group**: structure over the lanes and never a lane itself. It
+    holds `Lane`s and other groups, to any depth. */
+export interface GroupConfig {
+  readonly id: string;
+  readonly label: ReactNode;
+  /** The group it sits in, where it was declared inside one. */
+  readonly parent?: string;
 }
 
 export type LayerConfig =
@@ -23,10 +36,13 @@ export type LayerConfig =
 export class SceneData {
   private nextId = 1;
   private readonly laneEntries = new Map<number, LaneConfig>();
+  private readonly groupEntries = new Map<number, GroupConfig>();
   private readonly layerEntries = new Map<number, LayerConfig>();
   private dirty = true;
 
   lanes: LaneConfig[] = [];
+  /** The groups in registration order. */
+  groups: GroupConfig[] = [];
   laneIndex = new Map<string, number>();
   /** The layers in registration order - the drawing order. */
   layers: LayerConfig[] = [];
@@ -56,6 +72,24 @@ export class SceneData {
 
   unregisterLane(id: number): void {
     this.laneEntries.delete(id);
+    this.touch();
+  }
+
+  registerGroup(config: GroupConfig): number {
+    const id = this.nextId++;
+    this.groupEntries.set(id, config);
+    this.touch();
+    return id;
+  }
+
+  updateGroup(id: number, config: GroupConfig): void {
+    if (this.groupEntries.get(id) === config) return;
+    this.groupEntries.set(id, config);
+    this.touch();
+  }
+
+  unregisterGroup(id: number): void {
+    this.groupEntries.delete(id);
     this.touch();
   }
 
@@ -89,6 +123,7 @@ export class SceneData {
     this.dirty = false;
     const inOrder = <C>(entries: Map<number, C>) => [...entries.keys()].sort((a, b) => a - b).map((id) => entries.get(id)!);
     this.lanes = inOrder(this.laneEntries);
+    this.groups = inOrder(this.groupEntries);
     this.laneIndex = new Map(this.lanes.map((lane, i) => [lane.id, i] as const));
     this.layers = inOrder(this.layerEntries);
     this.subtasks = [];
