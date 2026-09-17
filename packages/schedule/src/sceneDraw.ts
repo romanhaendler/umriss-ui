@@ -12,7 +12,7 @@ import {
   CAP,
   CAP_INSET,
   inView,
-  laneTop,
+  slotAt,
   subtaskBox,
   transportPath,
   xOf,
@@ -21,6 +21,7 @@ import {
   type Viewport,
 } from "./geometry";
 import { resolveAppearance, type ResolvedAppearance } from "./appearance";
+import { slotOf } from "./rows";
 import type { Subtask } from "./model";
 import type { SceneData } from "./sceneData";
 import type { ScheduleHit, SceneView } from "./sceneView";
@@ -202,11 +203,10 @@ function drawRefusedLanes(
 ): void {
   if (lanes.size === 0) return;
   const { width, height } = input.view;
-  const laneHeight = input.view.options.laneHeight;
   for (const id of lanes) {
-    const index = input.data.laneIndex.get(id);
-    if (index === undefined) continue;
-    const top = laneTop(viewport, index);
+    const slot = slotAt(viewport, id);
+    if (slot === null) continue;
+    const { top, height: laneHeight } = slot;
     if (top + laneHeight < 0 || top > height) continue;
     ctx.globalAlpha = 0.6;
     ctx.fillStyle = input.colours.surface;
@@ -241,8 +241,9 @@ function drawTether(
 
 /** Where the ghost is drawn: on its lane, without an offset. */
 export function ghostBox(input: Pick<DrawInput, "data">, viewport: Viewport, ghost: Subtask): SubtaskBox | null {
-  const lane = input.data.laneIndex.get(ghost.lane);
-  return lane === undefined ? null : subtaskBox(viewport, ghost, lane, 0);
+  void input;
+  const slot = slotOf(viewport.rows, ghost.lane);
+  return slot === null ? null : subtaskBox(viewport, ghost, ghost.lane, slot, 0);
 }
 
 function drawGrid(ctx: CanvasRenderingContext2D, input: DrawInput, viewport: Viewport): void {
@@ -255,8 +256,10 @@ function drawGrid(ctx: CanvasRenderingContext2D, input: DrawInput, viewport: Vie
     ctx.moveTo(tick.x + 0.5, 0);
     ctx.lineTo(tick.x + 0.5, height);
   }
-  for (let i = 1; i <= input.data.lanes.length; i++) {
-    const y = laneTop(viewport, i) - 0.5;
+  /* One line under every row - a lane's, a group's head, a miniature's. For a
+     flat plan that is the same set of lines the multiplication drew. */
+  for (const row of viewport.rows.rows) {
+    const y = row.top + row.height - viewport.scrollY - 0.5;
     if (y < 0 || y > height) continue;
     ctx.moveTo(0, y);
     ctx.lineTo(width, y);
@@ -593,14 +596,14 @@ function drawTransport(ctx: CanvasRenderingContext2D, input: DrawInput, path: Tr
 }
 
 function drawOverlap(ctx: CanvasRenderingContext2D, input: DrawInput, viewport: Viewport, overlap: Overlap): void {
-  const lane = input.data.laneIndex.get(overlap.lane);
-  if (lane === undefined) return;
+  const slot = slotAt(viewport, overlap.lane);
+  if (slot === null) return;
   const x0 = xOf(viewport, overlap.from);
   const x1 = Math.max(x0 + 2, xOf(viewport, overlap.to));
-  const top = laneTop(viewport, lane);
+  const top = slot.top;
   ctx.fillStyle = input.colours.alarm;
   ctx.globalAlpha = 0.14;
-  ctx.fillRect(x0, top + 1, x1 - x0, input.view.options.laneHeight - 2);
+  ctx.fillRect(x0, top + 1, x1 - x0, slot.height - 2);
   ctx.globalAlpha = 1;
   ctx.fillRect(x0, top + 1, x1 - x0, 3);
 }

@@ -839,6 +839,26 @@ its subtasks share, which the caller assigns, and in selection, which always
 takes the whole task: every subtask and every transport of it.
 _Avoid_: Auftrag, job, order, Vorgang
 
+**Lane group**:
+Structure over the **Lane**s and never a lane itself: `<LaneGroup>` around
+lanes and other groups, to any depth, so that the plan follows the plant —
+hall, line, machine. Nothing sits on a group. A **Subtask** names a lane, a
+**Transport** connects two subtasks, a finding belongs to a lane, `canMoveTo`
+is asked about a lane and every **Intent** names one; none of them can name a
+group, and none of them changes when a group is folded. Folding changes the
+view and not the plan, which is why it is not an intent (ADR-0025).
+_Avoid_: parent lane, super-lane, Gruppenbahn, category, swimlane group
+
+**Miniature**:
+What a folded **Lane group** shows: every lane in it as a thin strip, at a
+smaller scale, with its work in the tasks' own colours. It is the real work,
+smaller — not a summary, not a packing, not a utilisation band. Transports
+arrive at a strip, findings show on the row, and a strip can be hovered and
+selected: folding costs a planner detail and never access. Both standing
+sentences hold inside one — a lane is still a machine, and an **Overlap** is
+still not packed, because a change of SCALE moves nothing.
+_Avoid_: summary, collapsed lane, aggregate, Übersichtszeile, roll-up
+
 **Subtask**:
 The drawn interval: a main time on one lane, with an optional **Setup** before
 it and a **Teardown** after it. It is what the pointer hits, a drag moves and
