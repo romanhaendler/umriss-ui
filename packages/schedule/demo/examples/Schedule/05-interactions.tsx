@@ -17,7 +17,8 @@ export const title = "What the pointer reports";
 
 const describe = (interaction: ScheduleInteraction): string => {
   const { hit } = interaction;
-  const time = new Date(interaction.time).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+  /* To the nearest minute: a pixel is about a minute wide here. */
+  const time = new Date(Math.round(interaction.time / 60_000) * 60_000).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
   const target =
     hit.kind === "subtask"
       ? `subtask ${hit.subtask.id} (${hit.part})`

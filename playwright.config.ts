@@ -1,5 +1,6 @@
 /* Shared Playwright setup of the monorepo (R-1.3).
-   - Three demos, three servers: core on 4173, charts on 4174, table on 4175.
+   - Four demos, four servers: core on 4173, charts on 4174, table on 4175,
+     schedule on 4176.
    - Screenshot comparisons run against the real demo build (vite preview),
      not against the dev server.
    - Light/dark via colorScheme emulation: all three demos initialise their
@@ -48,6 +49,13 @@ export default defineConfig({
       reuseExistingServer: !process.env.CI,
       timeout: 180_000,
     },
+    {
+      command:
+        "pnpm --filter @umriss-ui/schedule build:demo && pnpm --filter @umriss-ui/schedule preview:demo",
+      port: 4176,
+      reuseExistingServer: !process.env.CI,
+      timeout: 180_000,
+    },
   ],
   projects: [
     {
@@ -79,6 +87,16 @@ export default defineConfig({
       name: "table-dark",
       testDir: "packages/table/tests-visual",
       use: { baseURL: "http://localhost:4175", colorScheme: "dark" },
+    },
+    {
+      name: "schedule-light",
+      testDir: "packages/schedule/tests-visual",
+      use: { baseURL: "http://localhost:4176", colorScheme: "light" },
+    },
+    {
+      name: "schedule-dark",
+      testDir: "packages/schedule/tests-visual",
+      use: { baseURL: "http://localhost:4176", colorScheme: "dark" },
     },
   ],
 });

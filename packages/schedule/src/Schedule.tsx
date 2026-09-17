@@ -188,7 +188,7 @@ export function Schedule(props: ScheduleProps): ReactNode {
         style={{ height: `${height}px`, gridTemplateColumns: `${headerWidth}px minmax(0, 1fr)`, ...style }}
       >
         <div className={styles.corner} />
-        <div className={styles.dayBand} aria-hidden="true">
+        <div className={styles.dayBand} aria-hidden="true" data-schedule-days="">
           {snapshot.days.map((day) => {
             /* The label stands at the visible start of its day: a day that began
                before the view still says which day it is. */
@@ -203,7 +203,7 @@ export function Schedule(props: ScheduleProps): ReactNode {
             );
           })}
         </div>
-        <div className={styles.headers}>
+        <div className={styles.headers} data-schedule-headers="">
           <div className={styles.headerRun} style={{ transform: `translateY(${-snapshot.scrollY}px)` }}>
             {snapshot.lanes.map((lane) => (
               <div key={lane.id} className={styles.header} style={{ height: `${snapshot.laneHeight}px` }} data-lane={lane.id}>
@@ -215,6 +215,7 @@ export function Schedule(props: ScheduleProps): ReactNode {
         <div
           ref={plotRef}
           className={styles.plot}
+          data-schedule-plot=""
           style={{ cursor: snapshot.cursor }}
           onPointerDown={(event) => scene.pointerDown(event.nativeEvent)}
           onPointerMove={(event) => scene.pointerMove(event.nativeEvent)}
@@ -248,7 +249,7 @@ export function Schedule(props: ScheduleProps): ReactNode {
           )}
         </div>
         <div className={styles.corner} />
-        <div className={styles.tickBand} aria-hidden="true">
+        <div className={styles.tickBand} aria-hidden="true" data-schedule-ticks="">
           {snapshot.ticks.map((tick) => (
             <span key={tick.wallClock} className={styles.tick} style={{ left: `${tick.x}px` }}>
               {/* A label that would be cut by the band's edge is left out; its
