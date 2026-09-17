@@ -8,8 +8,11 @@ import { ADDRESSES } from "./outline";
 export const DEMO = buildDemo({
   packageName: "@umriss-ui/schedule",
   addresses: ADDRESSES,
-  examples: import.meta.glob<{ default?: unknown; title?: unknown }>("./examples/*/*.tsx", { eager: true }),
+  examples: import.meta.glob<{ default?: unknown; title?: unknown; shows?: unknown }>("./examples/*/*.tsx", { eager: true }),
   sources: import.meta.glob<string>("./examples/*/*.tsx", { eager: true, query: "?raw", import: "default" }),
+  /* What an example may name in `shows`: the demo's own files beside the
+     examples - here, the plant the demonstration is built on. */
+  beside: import.meta.glob<string>("./*.ts", { eager: true, query: "?raw", import: "default" }),
   why: import.meta.glob<{ default?: unknown }>("./why/*.tsx", { eager: true }),
   props,
 });

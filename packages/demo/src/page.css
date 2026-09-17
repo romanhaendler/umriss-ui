@@ -273,6 +273,37 @@
   color: var(--u-color-text-secondary);
 }
 
+/* An example that shows a file beside itself: one tab per file, where the
+   language label otherwise stands. The tab in front is the one Copy takes. */
+.codeTabs {
+  display: flex;
+  gap: var(--u-space-1);
+  min-width: 0;
+  overflow: hidden;
+}
+
+.codeTab {
+  padding: 2px var(--u-space-2);
+  border: none;
+  border-radius: var(--u-radius-sm);
+  background: transparent;
+  font-family: var(--u-font-mono);
+  font-size: 11px;
+  color: var(--u-color-text-secondary);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.codeTab:hover {
+  color: var(--u-color-text);
+}
+
+.codeTab[aria-selected="true"] {
+  background: var(--u-color-surface);
+  box-shadow: var(--u-edge);
+  color: var(--u-color-text);
+}
+
 .codeCopy {
   padding: 3px var(--u-space-3);
   border: none;

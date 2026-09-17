@@ -7,8 +7,11 @@
    any further transformation: no reformatting, no re-indenting, no stripping
    of comments.
 
-   1. The `title` export falls away. It is the demo's bookkeeping and is no
-      business of the reader's.
+   1. The demo's own bookkeeping falls away: `title`, and `shows` where an
+      example names a file to show beside itself. Neither is any business of
+      the reader's, and a pasted file carrying them would carry two exports
+      that mean nothing outside this demo. One rule with two members, not two
+      rules - what falls away is exactly what the demo put there.
 
    2. The library path `"../../../src"` becomes the demo's package name -
       `"@umriss-ui/core"` or `"@umriss-ui/table"`. That is the one point where
@@ -39,35 +42,45 @@ export function asPackage(source: string, packageName: string): string {
 /* One spelling. Both demos export `title` (english-and-umriss-ui 10 and 12);
    the alternation that bridged them is gone. */
 const TITLE_START = /^export const title\b/;
+const SHOWS_START = /^export const shows\b/;
 
-/** Removes the `title` export - even where it runs over several lines.
-
-    Throws when there is none. An example file without a title would be
-    "undefined" in the sidebar and in the palette, and a silent placeholder
-    there is worse than a loud failure at load time. */
-export function withoutTitle(source: string): string {
-  const lines = source.split("\n");
-  const start = lines.findIndex((line) => TITLE_START.test(line));
-  if (start === -1) {
-    throw new Error(
-      "An example file without `export const title` – without a title the example has no name.",
-    );
-  }
+/** Removes one `export const …` and the blank line that separated it, even
+    where it runs over several lines. Says whether it found one. */
+function withoutExport(lines: string[], start: RegExp): string[] | null {
+  const from = lines.findIndex((line) => start.test(line));
+  if (from === -1) return null;
 
   /* Up to the semicolon at the end of a line: that covers the single-line
      form and the wrapped one, without parsing the source for it. */
-  let end = start;
+  let end = from;
   while (end < lines.length && !lines[end]!.trimEnd().endsWith(";")) end += 1;
 
-  const before = lines.slice(0, start);
+  const before = lines.slice(0, from);
   const after = lines.slice(end + 1);
   /* The blank line that separated the export from the rest would otherwise
      pass as a double blank line. */
   while (after.length > 0 && after[0]!.trim() === "") after.shift();
   while (before.length > 0 && before[before.length - 1]!.trim() === "") before.pop();
 
-  const joined = [...before, ...(before.length > 0 && after.length > 0 ? [""] : []), ...after];
-  return `${joined.join("\n").replace(/\s+$/, "")}\n`;
+  return [...before, ...(before.length > 0 && after.length > 0 ? [""] : []), ...after];
+}
+
+/** Removes the demo's own bookkeeping: the `title` export, and the `shows`
+    export where there is one.
+
+    Throws when there is no title. An example file without one would be
+    "undefined" in the sidebar and in the palette, and a silent placeholder
+    there is worse than a loud failure at load time. `shows` is optional and
+    simply not there for nearly every example. */
+export function withoutTitle(source: string): string {
+  let lines = withoutExport(source.split("\n"), TITLE_START);
+  if (lines === null) {
+    throw new Error(
+      "An example file without `export const title` – without a title the example has no name.",
+    );
+  }
+  lines = withoutExport(lines, SHOWS_START) ?? lines;
+  return `${lines.join("\n").replace(/\s+$/, "")}\n`;
 }
 
 /** What stands in the code block: the file, without its title, with the package name. */

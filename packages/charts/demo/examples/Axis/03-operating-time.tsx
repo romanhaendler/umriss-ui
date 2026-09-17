@@ -12,6 +12,10 @@ import { WEEK_CALENDAR, weekData, type WeekPoint } from "../../data";
 
 export const title = "Operating time axis";
 
+/* The plant this is drawn from stands in the second tab, so that the
+   example can be copied whole. */
+export const shows = ["../../data.ts"];
+
 const weekdayAndTime = (v: number) =>
   new Date(v).toLocaleString("en-GB", { weekday: "short", hour: "2-digit", minute: "2-digit" });
 

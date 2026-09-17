@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { Stack, Text } from "@umriss-ui/core";
 import { Lane, Schedule, Subtasks, Transports } from "../../../src";
-import type { ScheduleInteraction } from "../../../src";
-import { DAY_OF_PLAN, MOVES, ORDERS, STATIONS, STEPS } from "../../data";
+import type { ScheduleInteraction, Subtask, Task, Transport } from "../../../src";
 
 export const title = "What the pointer reports";
 
@@ -18,6 +17,30 @@ export const title = "What the pointer reports";
    `onSelectedTaskChange` is the second line below: a click reports the task it
    selected together with the stop it hit, and clicking another stop of the same
    task reports again. */
+
+const at = (hours: number, minutes = 0) => new Date(2026, 2, 17, hours, minutes).getTime();
+const min = (n: number) => n * 60_000;
+
+const DAY_OF_PLAN: readonly [number, number] = [at(5, 30), at(18)];
+
+
+const STATIONS = [
+  { id: "saw", label: "Saw 1" },
+  { id: "mill", label: "Mill" },
+];
+
+const ORDERS: readonly Task[] = [
+  { id: "a-2041", name: "A-2041 Housing", color: "light-dark(#2563eb, #6b9bff)" },
+];
+
+const STEPS: readonly Subtask[] = [
+  { id: "a-2041-1", task: "a-2041", lane: "saw", from: at(6), to: at(7), setup: min(15), teardown: min(10) },
+  { id: "a-2041-2", task: "a-2041", lane: "mill", from: at(8), to: at(10, 30), setup: min(30), teardown: min(15) },
+];
+
+const MOVES: readonly Transport[] = [
+  { id: "t-2041-1", from: "a-2041-1", to: "a-2041-2", duration: min(10) },
+];
 
 const describe = (interaction: ScheduleInteraction): string => {
   const { hit } = interaction;
@@ -43,7 +66,7 @@ export default function Interactions() {
       <Schedule
         ariaLabel="Plan of Tuesday, 17 March"
         initialDomain={DAY_OF_PLAN}
-        height={380}
+        height={152}
         onInteraction={(interaction) => setLast(describe(interaction))}
         onSelectedTaskChange={(task, subtask) => setSelected(task === null ? "nothing selected" : `${task} at ${subtask ?? "-"}`)}
       >

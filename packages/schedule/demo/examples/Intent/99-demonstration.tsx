@@ -6,6 +6,14 @@ import { DAY_OF_PLAN, MOVES, ORDERS, STATIONS, STEPS } from "../../data";
 
 export const title = "Demonstration: the plan in the planner's hands";
 
+/* The one example that does not carry its own data. A demonstration is a whole
+   plant - seven stations, six orders and their moves through a Tuesday - and
+   ninety lines of it in this file would bury the thing it demonstrates. It is
+   shown instead: `data.ts` stands in the second tab of the code view, so a
+   reader sees it and can copy both. That is the named exception the check
+   allows, and the only one in this demo. */
+export const shows = ["../../data.ts"];
+
 /* The whole recipe, as an application writes it.
 
    The plan lives in the application's state. The schedule draws it, a drag
