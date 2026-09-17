@@ -32,7 +32,8 @@ const START: Plan = { steps: STEPS, log: [] };
 function applied(plan: Plan, intent: Intent, cascade: boolean): Plan {
   const pushed = cascade ? ripple(plan.steps, MOVES, intent) : [];
   const steps = [intent, ...pushed].reduce((data, change) => data.map((step) => applyIntent(step, change)), plan.steps);
-  const line = `${intent.kind} ${intent.subtask}${pushed.length > 0 ? `, pushed ${pushed.length}` : ""}`;
+  const subject = intent.kind === "place" ? intent.item : intent.subtask;
+  const line = `${intent.kind} ${subject}${pushed.length > 0 ? `, pushed ${pushed.length}` : ""}`;
   return { steps, log: [line, ...plan.log].slice(0, 4) };
 }
 
