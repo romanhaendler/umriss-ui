@@ -209,3 +209,44 @@ test("the demonstration shifts a whole order through one intent per stop", async
      flange's setup. */
   await expect(summary).toHaveText("2 overlaps, 1 late transport");
 });
+
+test("work dragged in from a list shows its ghost and is reported as a place intent", async ({ page }) => {
+  await openExample(page, "intent", "drag-in");
+  const example = page.locator('[data-example="drag-in"]');
+  const plot = await plotOf(page, example, DAY_OF_PLAN);
+  const ghost = example.locator("[data-ghost]");
+  const last = example.locator("[data-last-place]");
+  await expect(last).toHaveText("Drag an order onto a lane");
+
+  /* The plate takes four hours; dropped on the press at 09:00 it collides with
+     the flange that holds the press from 09:05. */
+  await example.locator('[data-waiting="a-2049"]').hover();
+  await page.mouse.down();
+  await page.mouse.move(plot.x(8), plot.y(LANES.press), { steps: 6 });
+  await page.mouse.move(plot.x(9), plot.y(LANES.press), { steps: 6 });
+  await expect(ghost).toContainText("09:00–13:00");
+  await expect(ghost).toContainText("Overlap");
+  await expect(ghost).toHaveAttribute("data-findings", /overlap/);
+  /* Nothing is on the plan while the drag is in flight. */
+  await expect(last).toHaveText("Drag an order onto a lane");
+
+  await page.mouse.up();
+  await expect(ghost).toHaveCount(0);
+  await expect(last).toHaveText("place a-2049 on press as a-2049-1");
+});
+
+test("a drag from a list that leaves the lanes places nothing", async ({ page }) => {
+  await openExample(page, "intent", "drag-in");
+  const example = page.locator('[data-example="drag-in"]');
+  const plot = await plotOf(page, example, DAY_OF_PLAN);
+
+  await example.locator('[data-waiting="a-2048"]').hover();
+  await page.mouse.down();
+  await page.mouse.move(plot.x(10), plot.y(LANES.saw), { steps: 6 });
+  await expect(example.locator("[data-ghost]")).toBeVisible();
+  /* Below the last lane there is no lane to place it on. */
+  await page.mouse.move(plot.x(10), plot.box.y + plot.box.height - 2, { steps: 6 });
+  await expect(example.locator("[data-ghost]")).toHaveCount(0);
+  await page.mouse.up();
+  await expect(example.locator("[data-last-place]")).toHaveText("Drag an order onto a lane");
+});

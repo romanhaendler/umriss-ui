@@ -31,7 +31,7 @@ import {
 import { DAY, HOUR, type CalendarInput } from "@umriss-ui/charts";
 import { useFormats, useWording } from "@umriss-ui/core";
 import { ScheduleContext } from "./context";
-import { ScheduleScene, type ScheduleInteraction, type ScheduleTooltipTarget } from "./scene";
+import { ScheduleScene, type PlacingItem, type ScheduleInteraction, type ScheduleTooltipTarget } from "./scene";
 import { ScheduleTooltipContent } from "./ScheduleTooltip";
 import type { Intent, IntentKind } from "./model";
 import type { ZoomLimits } from "./timeAxis";
@@ -82,6 +82,12 @@ export interface ScheduleProps {
       wall-clock instants - for keeping a second schedule or a chart in step. A
       span handed in through `initialDomain` is not reported back. */
   onDomainChange?: (domain: readonly [number, number]) => void;
+  /** What the application is dragging in from outside while it drags it - its
+      key, task, the length of its main time, its setup and teardown. The
+      browser hands the dragged data over only on the drop, so the ghost before
+      it can only come from here: set it on your own `dragstart`, clear it on
+      `dragend`. Without `"place"` in `intents` no drop is accepted. */
+  placing?: PlacingItem | null;
   /** The tooltip on a hovered subtask or transport: its order, its times, its
       parts and its findings. `false` switches it off; a function receives
       what the pointer rests on and returns content of the application's own. */
@@ -132,6 +138,7 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
     selectedTask,
     onSelectedTaskChange,
     onDomainChange,
+    placing,
     tooltip,
     now,
     className,
@@ -196,6 +203,10 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
   useEffect(() => {
     scene.setControlledTask(selectedTask);
   }, [scene, selectedTask]);
+
+  useEffect(() => {
+    scene.setPlacing(placing ?? null);
+  }, [scene, placing]);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -285,6 +296,14 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
           onPointerCancel={(event) => scene.pointerCancel(event.nativeEvent)}
           onPointerLeave={() => scene.pointerLeave()}
           onContextMenu={(event) => scene.contextMenu(event.nativeEvent)}
+          onDragOver={(event) => scene.dragOver(event.nativeEvent)}
+          onDrop={(event) => scene.drop(event.nativeEvent)}
+          onDragLeave={(event) => {
+            /* Only when the drag really left the plot - crossing one of its own
+               children fires a leave too. */
+            const next = event.nativeEvent.relatedTarget;
+            if (!(next instanceof Node) || !event.currentTarget.contains(next)) scene.dragLeave();
+          }}
         >
           <canvas ref={dataRef} className={styles.layer} aria-hidden="true" />
           <canvas ref={overlayRef} className={styles.layer} aria-hidden="true" />

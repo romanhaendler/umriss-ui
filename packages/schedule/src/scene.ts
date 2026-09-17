@@ -23,12 +23,12 @@ import type { LateTransport } from "./findings";
 import type { Subtask, Task, Transport } from "./model";
 import { SceneData, type LaneConfig, type LayerConfig } from "./sceneData";
 import { drawData, drawOverlay, prepareCanvas, resolveSceneColours, type Colours } from "./sceneDraw";
-import { SceneGestures, type GhostSummary, type SceneHandlers } from "./sceneGestures";
+import { SceneGestures, type GhostSummary, type PlacingItem, type SceneHandlers } from "./sceneGestures";
 import { SceneView, type SceneOptions } from "./sceneView";
 
 export type { LaneConfig, LayerConfig } from "./sceneData";
 export type { SceneOptions, ScheduleHit } from "./sceneView";
-export type { SceneHandlers, ScheduleInteraction } from "./sceneGestures";
+export type { SceneHandlers, ScheduleInteraction, PlacingItem } from "./sceneGestures";
 
 /** What a tooltip is about: the hovered subtask or transport, with what the
     schedule knows about it. */
@@ -105,6 +105,7 @@ export class ScheduleScene {
   readonly gestures: SceneGestures;
 
   private handlersNow: SceneHandlers = {};
+  private placing: PlacingItem | null = null;
   private controlledTask: string | null | undefined = undefined;
   private ownTask: string | null = null;
   private selected: string | null = null;
@@ -155,6 +156,12 @@ export class ScheduleScene {
 
   setHandlers(handlers: SceneHandlers): void {
     this.handlersNow = handlers;
+  }
+
+  /** What the application says it is dragging in, while it drags it. */
+  setPlacing(placing: PlacingItem | null): void {
+    this.placing = placing;
+    if (placing === null) this.gestures.clearPlacing();
   }
 
   /** `undefined`: the scene keeps the selection itself. */
@@ -383,5 +390,8 @@ export class ScheduleScene {
   pointerLeave = (): void => this.gestures.pointerLeave();
   contextMenu = (event: MouseEvent): void => this.gestures.contextMenu(event);
   wheel = (event: WheelEvent): void => this.gestures.wheel(event);
+  dragOver = (event: DragEvent): void => this.gestures.dragOver(event, this.placing);
+  drop = (event: DragEvent): void => this.gestures.drop(event);
+  dragLeave = (): void => this.gestures.clearPlacing();
   cancelEdit = (): boolean => this.gestures.cancelEdit();
 }
