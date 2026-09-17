@@ -13,18 +13,19 @@ repaired, and **whatever changes existing behaviour stands under a heading
 renamed, it is named here as it is called today; names that were removed stand
 as they stood.
 
-**Release candidates.** `0.2.0-rc.0` is the first version for the registry, under
-the tag `next` rather than `latest`: `pnpm add @umriss-ui/table@next @umriss-ui/core`.
-`0.1.0` was never published. Where an entry below names a `@umriss-ui/core`
+**Release candidates.** `0.2.0-rc.0` was the first version on the registry and
+`0.2.0-rc.1` is the current one, under the tag `next`:
+`pnpm add @umriss-ui/table@next @umriss-ui/core`. `0.1.0` was never published. Where an entry below names a `@umriss-ui/core`
 version, it is one of the internal numbers from before core's first publication
 as `0.1.0` (see core's changelog).
 
 ---
 
-## 0.2.0-rc.0 – Styles that load themselves, and touch nothing else
+## 0.2.0-rc.1 – Styles that load themselves, and touch nothing else (Sep. 2026)
 
 Delivery report for `.scratch/styles-without-side-effects/spec.md`, the table's
-share (ADR-0021).
+share (ADR-0021). It takes `@umriss-ui/core` `0.2.0` as its peer: the table's
+styles read the tokens that `@umriss-ui/core` now loads by itself.
 
 ### Changed
 

@@ -9,9 +9,9 @@ hard outlines or effects.
 
 | Package | Version | What it is | npm tag |
 |---|---|---|---|
-| [`@umriss-ui/core`](packages/core/README.md) | 0.1.0 | The component library — forms, overlays, structure, the tree, the dock, the command palette. The package you install first | `latest` |
-| [`@umriss-ui/charts`](packages/charts/README.md) | 0.3.0-rc.0 | Canvas charts — few kinds, drawn well. Depends on nothing but React | `next` (release candidate) |
-| [`@umriss-ui/table`](packages/table/README.md) | 0.2.0-rc.0 | The table, declared the way it reads: columns as JSX, typed against their rows. Takes `@umriss-ui/core` as a peer | `next` (release candidate) |
+| [`@umriss-ui/core`](packages/core/README.md) | 0.2.0 | The component library — forms, overlays, structure, the tree, the dock, the command palette. The package you install first | `latest` |
+| [`@umriss-ui/charts`](packages/charts/README.md) | 0.3.0-rc.1 | Canvas charts — few kinds, drawn well. Depends on nothing but React | `next` (release candidate) |
+| [`@umriss-ui/table`](packages/table/README.md) | 0.2.0-rc.1 | The table, declared the way it reads: columns as JSX, typed against their rows. Takes `@umriss-ui/core` as a peer | `next` (release candidate) |
 | `@umriss-ui/demo` | — | The private shell all three demos are built from | never |
 
 `core` names the package you install first, not a layer the others sit on:
@@ -86,11 +86,11 @@ from the component.
 ## Maturity
 
 Every package is `0.x`, and while the first digit is `0` no version number
-promises compatibility. `@umriss-ui/core` is released as `0.1.0` under `latest`;
+promises compatibility. `@umriss-ui/core` is released under `latest`;
 the numbers it counted inside this repository before that stand in its changelog
 as *internal* ones. `@umriss-ui/charts` and `@umriss-ui/table` are release
 candidates under the tag `next` (`pnpm add @umriss-ui/charts@next`); as long as
-no released version of either exists, npm points `latest` at the candidate as
+no released version of either exists, `latest` points at the newest candidate as
 well, because the registry does not allow a package without one. What changes
 for a caller stands in that package's own `CHANGELOG.md`, and whatever changes
 existing behaviour stands there under a heading of its own.

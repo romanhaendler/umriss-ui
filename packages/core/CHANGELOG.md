@@ -50,10 +50,12 @@ module on the caller's side that carries `"use client"` and imports from there.
 
 ---
 
-## 0.1.0 – Styles that load themselves, and touch nothing else (Sep. 2026)
+## 0.2.0 – Styles that load themselves, and touch nothing else (Sep. 2026)
 
 Delivery report for `.scratch/styles-without-side-effects/spec.md` (ADR-0021).
-It lands before the first publication, so the number does not move.
+The second version on the registry. The middle digit rises because `theme`
+leaves `UmrissProvider` and the base layer leaves the stylesheet - read
+**Changed** before upgrading from `0.1.0`.
 
 ### Changed
 

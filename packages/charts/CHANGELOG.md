@@ -21,14 +21,15 @@ specs; the document itself came into being only with
 `library-audit` 08. They are grouped by unit of delivery, not by commit, and were
 never published.
 
-**Release candidates.** `0.3.0-rc.0` is the first version for the registry, under
-the tag `next` rather than `latest`: `pnpm add @umriss-ui/charts@next`. A release
+**Release candidates.** `0.3.0-rc.0` was the first version on the registry and
+`0.3.0-rc.1` is the current one, under the tag `next`:
+`pnpm add @umriss-ui/charts@next`. A release
 candidate promises nothing a `0.x` does not already fail to promise; it says the
 interface is still expected to move before `0.3.0`.
 
 ---
 
-## 0.3.0-rc.0 – Styles that load themselves, and touch nothing else (Sep. 2026)
+## 0.3.0-rc.1 – Styles that load themselves, and touch nothing else (Sep. 2026)
 
 Delivery report for `.scratch/styles-without-side-effects/spec.md`, the charts'
 share (ADR-0021).
