@@ -18,13 +18,15 @@ mechanics.
 
 * **`latest`** is what `pnpm add @umriss-ui/<package>` installs. Only a released
   version goes there.
-* **`next`** carries release candidates (`0.3.0-rc.0`). `charts` and `table`
+* **`next`** carries release candidates (`0.3.0-rc.1`). `charts` and `table`
   have `publishConfig.tag: "next"` in their manifests, so a publish of those two
   cannot land on `latest` by accident — with one exception the registry makes:
   the very first version of a package gets `latest` as well, because a package
-  without `latest` does not exist. It stays there until a released version
-  replaces it. When one of them is released, that line
-  comes out of its manifest in the same commit as the version.
+  without `latest` does not exist. It stays there when the next candidate goes
+  to `next` — so as long as no released version exists, `latest` is moved to
+  each new candidate by hand (step 5), or a plain `pnpm add` keeps installing the
+  first one. When one of them is released, the `tag` line comes out of its
+  manifest in the same commit as the version.
 
 Every manifest has `publishConfig.access: "public"` — a scoped package is
 otherwise published as private, and the org would refuse it.
@@ -34,10 +36,16 @@ otherwise published as private, and the org would refuse it.
 Always with **pnpm**, never with `npm publish`: the manifests carry
 `workspace:` ranges (`@umriss-ui/table` takes `@umriss-ui/core` as
 `workspace:^`), and only `pnpm publish` rewrites them into real ranges.
-`prepublishOnly` runs typecheck and build before anything is uploaded.
+`prepublishOnly` runs typecheck, build and `check:dist` before anything is
+uploaded — the last holds the built package to ADR-0021: the JavaScript imports
+its stylesheet, the stylesheet begins with the layer order and selects only the
+library's own elements.
 
 1. The version in `packages/<package>/package.json` and a heading of that number
-   in its `CHANGELOG.md`, in one commit on `main`.
+   in its `CHANGELOG.md`, in one commit on `main`, pushed. `pnpm publish` refuses
+   a tree that is dirty, not on `main` or behind the remote. Publish `core` before
+   `table` when both move: the table's peer range is rewritten to core's version
+   in the workspace.
 2. `pnpm lint && pnpm typecheck && pnpm test:unit && pnpm test:visual` — green.
 3. Look at what would be uploaded:
    ```bash
@@ -47,9 +55,14 @@ Always with **pnpm**, never with `npm publish`: the manifests carry
    ```bash
    pnpm --filter @umriss-ui/core publish
    ```
-5. Tag the commit and push the tag:
+5. For a release candidate of a package that has no released version yet, move
+   `latest` along:
    ```bash
-   git tag core-v0.1.0 && git push origin core-v0.1.0
+   npm dist-tag add @umriss-ui/charts@0.3.0-rc.1 latest
+   ```
+6. Tag the commit and push the tag:
+   ```bash
+   git tag core-v0.2.0 && git push origin core-v0.2.0
    ```
    One tag per package, `<dir>-v<version>`, because the three packages count
    independently.
@@ -65,5 +78,5 @@ A version that went out wrong is deprecated, not unpublished — a published
 number can never be used again:
 
 ```bash
-npm deprecate @umriss-ui/core@0.1.0 "Broken build, use 0.1.1"
+npm deprecate @umriss-ui/core@0.2.0 "Broken build, use 0.2.1"
 ```
