@@ -4,7 +4,7 @@
      .root            grid; carries the accessible name and the text context
        .corner        above the lane headers
        .dayBand       the coarse band: local days          (holds still)
-       .headers       the lane headers, real text          (scrolls with the lanes only)
+       .headers       one header per ROW, real text        (scrolls with the lanes only)
        .plot          catches the pointer
          canvas       data: grid, transports, subtasks, findings, selection
          canvas       overlay: hover and the ghost
@@ -13,8 +13,17 @@
        .corner
        .tickBand      the fine band: adaptive time ticks   (holds still)
 
+   `data-row` on a header is the one place the layout's private word reaches
+   the DOM, and it is here because an application styling beside the schedule
+   has to be able to tell the three apart: `lane` is a machine's own row,
+   `groupHead` the slim line of an open **Lane group**, `miniature` the one row
+   a folded group becomes. The word ROW is `rows.ts`'s and says what the plot
+   lays out; a **Lane** is still a machine (ADR-0025). A lane's header also
+   carries `data-lane`, a group's `data-group`, and a lane a drag may not go to
+   carries `data-refused` for as long as that drag runs.
+
    Canvas access happens only inside effects. The canvas is hidden from
-   assistive technology; the root names the schedule and the lane headers are
+   assistive technology; the root names the schedule and the headers are
    text. */
 
 import {
