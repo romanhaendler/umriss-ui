@@ -1,0 +1,681 @@
+/* The table of @umriss-ui/table. The rules come from Table.module.css in
+   @umriss-ui/core and keep its tokens and its reasons; new are the frame that
+   carries the table's children, the cell of an absent value, the sticky row
+   header column and the column menu. */
+
+/* ---- Frame ----------------------------------------------------------- */
+
+.frame {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border-radius: var(--u-radius-md);
+  background: var(--u-color-surface);
+  box-shadow: var(--u-edge);
+}
+
+/* The table's children stand in the flow of the frame, as if they stood
+   directly inside it: columns are invisible, the toolbar sits on top. */
+.children {
+  display: contents;
+}
+
+.scroll {
+  overflow: auto;
+  min-width: 0;
+}
+
+.footerTarget {
+  display: contents;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--u-text-sm);
+}
+
+/* ---- Header ---------------------------------------------------------- */
+
+.th {
+  position: relative;
+  padding: var(--u-space-2) var(--u-space-2);
+  background: var(--u-color-surface);
+  border-bottom: 1px solid var(--u-hairline-strong);
+  text-align: left;
+  font-size: var(--u-text-xs);
+  font-weight: var(--u-weight-medium);
+  letter-spacing: var(--u-tracking-caps);
+  text-transform: uppercase;
+  color: var(--u-color-text-secondary);
+  white-space: nowrap;
+}
+
+.sticky .th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+/* ---- Cells ----------------------------------------------------------- */
+
+.td {
+  padding: var(--u-space-2) var(--u-space-2);
+  border-bottom: 1px solid var(--u-hairline);
+  color: var(--u-color-text);
+  vertical-align: middle;
+  text-align: left;
+  font-weight: var(--u-weight-regular);
+}
+
+/* The row header cell is a th and therefore carries bold and centring by
+   default; it is meant to look like its neighbours and only be called
+   something else. */
+.rowHeader {
+  font-weight: var(--u-weight-medium);
+}
+
+.table tbody tr:last-child .td {
+  border-bottom: none;
+}
+
+.table tbody tr {
+  transition: background-color var(--u-transition);
+}
+
+.table tbody tr:hover .td {
+  background: var(--u-color-surface-sunken);
+}
+
+.compact .td {
+  padding: var(--u-space-1) var(--u-space-2);
+  font-size: var(--u-text-xs);
+}
+
+.th:first-child,
+.td:first-child {
+  padding-left: var(--u-space-3);
+}
+
+.th:last-child,
+.td:last-child {
+  padding-right: var(--u-space-3);
+}
+
+.numeric {
+  text-align: right;
+}
+
+.td.numeric {
+  font-family: var(--u-font-mono);
+  font-size: 0.75rem;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* An absent value: a muted dash, not a zero and not an empty field. */
+.absent {
+  color: var(--u-color-text-muted);
+}
+
+.striped tbody tr:nth-child(even) .td {
+  background: color-mix(in srgb, var(--u-color-surface-sunken) 55%, var(--u-color-surface));
+}
+
+/* ---- Control cells: selection and expander --------------------------- */
+
+/* Exactly 34 px, because the sticky offsets are calculated from it
+   (CONTROL_CELL_WIDTH in parts.tsx). A pixel width would not hold that: if
+   every column has a `width` and the table is wider than their sum, the
+   automatic table layout distributes the surplus over every column with a
+   pixel width, the control cells included – `max-width` does not apply to a
+   cell – and the sticky row header would slide over the expander when
+   scrolling sideways. A percentage width gets no surplus as long as other
+   columns exist; `min-width` holds it at 34 px (table-demo,
+   features-browser.spec.ts). */
+.control {
+  width: 0.1%;
+  min-width: 34px;
+  box-sizing: border-box;
+  padding-right: 0;
+}
+
+/* ---- Sticky row header column ---------------------------------------- */
+
+.stickyCell {
+  position: sticky;
+  z-index: 2;
+  background: var(--u-color-surface);
+}
+
+.sticky .th.stickyCell {
+  z-index: 3;
+}
+
+/* ---- Sorting --------------------------------------------------------- */
+
+.sortButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--u-space-1);
+  margin: calc(-1 * var(--u-space-2)) calc(-1 * var(--u-space-3));
+  padding: var(--u-space-2) var(--u-space-3);
+  border: none;
+  background: none;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition: color var(--u-transition);
+}
+
+.numeric .sortButton {
+  flex-direction: row-reverse;
+}
+
+.sortButton:hover {
+  color: var(--u-color-text);
+}
+
+.sortIndicator {
+  display: inline-flex;
+  align-items: center;
+  opacity: 0;
+  transition: opacity var(--u-transition);
+}
+
+.sortArrow {
+  transition: transform var(--u-transition);
+}
+
+.sortArrowDesc {
+  transform: rotate(180deg);
+}
+
+.sortButton:hover .sortIndicator {
+  opacity: 0.45;
+}
+
+.sortActive,
+.sortButton:hover .sortActive {
+  opacity: 1;
+  color: var(--u-color-accent);
+}
+
+.sortRank {
+  font-family: var(--u-font-mono);
+  font-size: var(--u-text-xs);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--u-color-accent);
+}
+
+.thFlex {
+  display: flex;
+  align-items: center;
+  gap: var(--u-space-1);
+}
+
+.numeric .thFlex {
+  justify-content: flex-end;
+}
+
+/* ---- Footer row ------------------------------------------------------ */
+
+.table tfoot .td {
+  border-top: 1px solid var(--u-hairline-strong);
+  border-bottom: none;
+  background: var(--u-color-surface);
+  font-weight: var(--u-weight-semibold);
+}
+
+/* The sign of the arithmetic before the number: a sum or an average. The word
+   for it the screen reader hears. */
+.footerKind {
+  margin-right: var(--u-space-1);
+  color: var(--u-color-text-muted);
+  font-weight: var(--u-weight-regular);
+}
+
+/* ---- Empty and loading ----------------------------------------------- */
+
+.emptyCell {
+  padding: 0;
+  border-bottom: none;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--u-space-2);
+  padding: var(--u-space-8) var(--u-space-4);
+  text-align: center;
+  font-size: var(--u-text-sm);
+  color: var(--u-color-text-muted);
+}
+
+.emptyTitle {
+  margin: 0;
+  font-size: var(--u-text-md);
+  font-weight: var(--u-weight-semibold);
+  color: var(--u-color-text);
+}
+
+.skeleton {
+  display: block;
+  height: 10px;
+  border-radius: var(--u-radius-full);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--u-color-text) 8%, transparent) 0%,
+    color-mix(in srgb, var(--u-color-text) 4%, transparent) 50%,
+    color-mix(in srgb, var(--u-color-text) 8%, transparent) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  from { background-position: 130% 0; }
+  to { background-position: -70% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+    background: color-mix(in srgb, var(--u-color-text) 8%, transparent);
+  }
+}
+
+/* ---- Toolbar, pagination bar ----------------------------------------- */
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--u-space-2) var(--u-space-4);
+  padding: var(--u-space-2) var(--u-space-3);
+  border-bottom: 1px solid var(--u-hairline);
+}
+
+/* Every group is at least as tall as a small button: a toolbar carrying only
+   conditions and the ratio must not grow when "reset" appears with the first
+   keystroke (table-filters D1). */
+.toolbarGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--u-space-2);
+  min-width: 0;
+  min-height: var(--u-control-height-sm);
+}
+
+.toolbarInfo {
+  font-size: var(--u-text-xs);
+  color: var(--u-color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--u-space-4);
+  padding: var(--u-space-2) var(--u-space-3);
+  border-top: 1px solid var(--u-hairline);
+  font-size: var(--u-text-sm);
+  color: var(--u-color-text-secondary);
+}
+
+.paginationControls {
+  display: flex;
+  align-items: center;
+  gap: var(--u-space-2);
+}
+
+.pageSize {
+  display: flex;
+  align-items: center;
+  gap: var(--u-space-2);
+  margin-right: var(--u-space-3);
+  font-size: var(--u-text-xs);
+}
+
+.pageSize > * {
+  width: 64px;
+}
+
+.paginationStatus {
+  margin-right: var(--u-space-2);
+  font-family: var(--u-font-mono);
+  font-size: var(--u-text-xs);
+  letter-spacing: -0.01em;
+}
+
+/* ---- Column filters --------------------------------------------------- */
+
+.filterButton {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: none;
+  border-radius: var(--u-radius-xs);
+  color: var(--u-color-text-muted);
+  cursor: pointer;
+  transition:
+    background-color var(--u-transition),
+    color var(--u-transition);
+}
+
+.filterButton:hover {
+  background: var(--u-color-surface-sunken);
+  color: var(--u-color-text);
+}
+
+.filterActive,
+.filterActive:hover {
+  color: var(--u-color-accent);
+}
+
+.filterPanel {
+  min-width: 200px;
+  max-width: 280px;
+  background: var(--u-color-surface);
+  border-radius: var(--u-radius-md);
+  box-shadow: var(--u-shadow-overlay);
+  padding: var(--u-space-3);
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: var(--u-weight-regular);
+  color: var(--u-color-text);
+}
+
+.filterContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--u-space-2);
+  max-height: 260px;
+  overflow: auto;
+  padding: 2px;
+  margin: -2px;
+}
+
+.filterFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--u-space-2);
+  margin-top: var(--u-space-3);
+  padding-top: var(--u-space-3);
+  border-top: 1px solid var(--u-hairline);
+}
+
+/* The secondary type and not the muted one: the label stands on the tag's
+   surface, and there the muted type would not hold 4.5:1 in any theme
+   (3.09:1 light, 3.74:1 dark – found by the demo's accessibility check).
+   The tolerated pairs apply to the page surface, not to this one. */
+.filterLabel {
+  color: var(--u-color-text-secondary);
+  font-weight: var(--u-weight-regular);
+}
+
+.filterLabel::after {
+  content: ":";
+  margin-right: 0.25em;
+}
+
+.filterValue {
+  color: var(--u-color-text);
+}
+
+/* The ratio "43 of 1,204". The status remains in the document even when empty
+   (toolbar.tsx); empty it takes no space. */
+.filteredCount {
+  flex: none;
+  font-family: var(--u-font-mono);
+  font-size: var(--u-text-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--u-color-text-muted);
+  white-space: nowrap;
+}
+
+/* ---- The range filter ------------------------------------------------ */
+
+.rangeFields {
+  display: flex;
+  gap: var(--u-space-2);
+}
+
+.rangeFields > * {
+  flex: 1;
+  min-width: 0;
+}
+
+.rangePeriod {
+  min-width: 240px;
+}
+
+/* ---- Conditions in the table toolbar --------------------------------- */
+
+.conditions {
+  min-width: 0;
+}
+
+/* The tag's content is a button - without an appearance of its own: surface,
+   type and height belong to the tag. */
+.conditionButton {
+  display: inline-flex;
+  align-items: center;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* The tag clips its content; a focus ring on the button would be invisible. It
+   therefore stands on the tag. */
+.conditionButton:focus-visible {
+  outline: none;
+}
+
+.condition:has(.conditionButton:focus-visible) {
+  box-shadow: var(--u-focus-ring);
+}
+
+/* ---- Column menu ----------------------------------------------------- */
+
+.columnsPanel {
+  min-width: 240px;
+  background: var(--u-color-surface);
+  border-radius: var(--u-radius-md);
+  box-shadow: var(--u-shadow-overlay);
+  padding: var(--u-space-2);
+}
+
+.columnsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--u-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.columnsEntry {
+  display: flex;
+  align-items: center;
+  gap: var(--u-space-2);
+  padding: var(--u-space-1) var(--u-space-1);
+}
+
+.columnsEntry > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.move {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: var(--u-radius-xs);
+  background: none;
+  color: var(--u-color-text-secondary);
+  cursor: pointer;
+  transition:
+    background-color var(--u-transition),
+    color var(--u-transition);
+}
+
+.move:hover:not(:disabled) {
+  background: var(--u-color-surface-sunken);
+  color: var(--u-color-text);
+}
+
+.move:focus-visible {
+  outline: none;
+  box-shadow: var(--u-focus-ring);
+}
+
+.move:disabled {
+  color: var(--u-color-text-muted);
+  cursor: default;
+  opacity: 0.5;
+}
+
+/* ---- Row detail ------------------------------------------------------ */
+
+.expander {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  border-radius: var(--u-radius-xs);
+  background: none;
+  color: var(--u-color-text-muted);
+  cursor: pointer;
+  transition:
+    color var(--u-transition),
+    background-color var(--u-transition);
+}
+
+.expander:hover {
+  background: var(--u-color-surface-sunken);
+  color: var(--u-color-text);
+}
+
+.expander:focus-visible {
+  outline: none;
+  box-shadow: var(--u-focus-ring);
+}
+
+.expander svg {
+  transition: transform var(--u-duration-fast) var(--u-ease-out);
+}
+
+.expanderOpen svg {
+  transform: rotate(90deg);
+}
+
+.detailRow > .detailCell {
+  padding: var(--u-space-4);
+  background: var(--u-color-surface-sunken);
+  box-shadow: inset 0 -1px 0 var(--u-hairline);
+}
+
+/* ---- Row actions: the quiet gesture ---------------------------------- */
+
+.actionsCell {
+  width: 1%;
+  white-space: nowrap;
+  text-align: right;
+}
+
+/* At rest the secondary type, on hover OR focus within the row the accent
+   - the same solution as in @umriss-ui/core, with the same reason: opacity is
+   the wrong lever, because every readable value makes the gesture
+   disappear. */
+.actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--u-space-1);
+}
+
+.actions button {
+  color: var(--u-color-text-secondary);
+  transition: color var(--u-transition);
+}
+
+tbody tr:hover .actions button,
+tbody tr:focus-within .actions button {
+  color: var(--u-color-accent-text);
+}
+
+/* ---- Column widths --------------------------------------------------- */
+
+.grip {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 9px;
+  z-index: 1;
+  cursor: col-resize;
+  touch-action: none;
+  user-select: none;
+}
+
+.grip::after {
+  content: "";
+  position: absolute;
+  top: 20%;
+  bottom: 20%;
+  right: var(--u-space-1);
+  width: 1px;
+  background: var(--u-color-accent);
+  opacity: 0;
+  transition: opacity var(--u-transition);
+}
+
+.grip:hover::after {
+  opacity: 1;
+}
+
+/* ---- Virtualisation -------------------------------------------------- */
+
+.striped .virtualBody tr:nth-child(even) .td {
+  background: none;
+}
+
+.striped .virtualBody tr[data-even] .td {
+  background: color-mix(in srgb, var(--u-color-surface-sunken) 55%, var(--u-color-surface));
+}
+
+.virtualRow:focus-visible {
+  outline: 2px solid var(--u-color-accent);
+  outline-offset: -2px;
+}
+
+.fillerRow {
+  pointer-events: none;
+}
+
+.fillerRow td {
+  padding: 0;
+  border: 0;
+}

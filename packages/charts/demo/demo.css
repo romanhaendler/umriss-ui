@@ -1,0 +1,58 @@
+/* What belongs to this demo alone.
+
+   Everything that used to stand here about surfaces, type and colour is gone:
+   the demo runs in the shared shell now (ADR-0020) and takes the tokens and the
+   base layer of @umriss-ui/core, like the other two. What is left is what only a
+   chart example needs - a resizable host, a pair of charts side by side, the
+   benchmark's controls and its measurements.
+
+   The `--u-*` fallbacks that used to stand here simulated a host application
+   with a token set of its own, so that the fallback cascade of R-1.6 was
+   visibly exercised. That evidence did not disappear with them: it is checked
+   in `tests-unit/themeFallbackConformance.test.ts`, against the light token
+   rather than against a look. */
+
+/* A host a reader can drag - the chart measures what it finds, and redraws. */
+.resizable {
+  resize: horizontal;
+  overflow: hidden;
+  min-width: 280px;
+  max-width: 100%;
+  margin-bottom: var(--u-space-3);
+  padding-bottom: 4px;
+}
+
+.side-by-side {
+  display: flex;
+  gap: var(--u-space-4);
+  margin-top: var(--u-space-3);
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+.narrow { width: 260px; }
+
+/* The custom tooltip of the "configuration" example (render prop). */
+.custom-tooltip { display: flex; flex-direction: column; gap: 2px; font-size: var(--u-font-size-xs); }
+.custom-tooltip strong { font-weight: 600; }
+
+/* The benchmark's controls and its measurements. */
+.demo-actions { display: flex; gap: var(--u-space-2); margin-bottom: var(--u-space-2); flex-wrap: wrap; }
+
+.metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 28px;
+  margin: var(--u-space-3) 0 4px;
+}
+.metrics div { display: flex; flex-direction: column; gap: 2px; }
+.metrics dt {
+  font-size: var(--u-font-size-xs);
+  letter-spacing: 0.02em;
+  color: var(--u-color-text-muted);
+}
+.metrics dd {
+  margin: 0;
+  font-family: var(--u-font-mono);
+  font-size: var(--u-font-size-sm);
+  font-variant-numeric: tabular-nums;
+}

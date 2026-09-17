@@ -1,0 +1,52 @@
+{
+  "Montagen nach 5 Neurendern (2 Spalten)": {
+    "effekt": 2,
+    "layout": 2,
+    "render": 2
+  },
+  "Kopfzellen im ersten Bild / am Ende (Abo layout)": {
+    "effekt": "2 / 2",
+    "layout": "2 / 2",
+    "render": "2 / 2"
+  },
+  "Passive Effekte vor der Mikroaufgabe (Abo layout)": {
+    "effekt": 2,
+    "layout": 2,
+    "render": 0
+  },
+  "Kopfzellen im ersten Bild / am Ende (Abo extern)": {
+    "effekt": "0 / 2",
+    "layout": "0 / 2",
+    "render": "2 / 2"
+  },
+  "Passive Effekte vor der Mikroaufgabe (Abo extern)": {
+    "effekt": 0,
+    "layout": 0,
+    "render": 0
+  },
+  "Koerper-Renders je Aufrufer-Update": {
+    "effekt": 2,
+    "layout": 2,
+    "render": 1
+  },
+  "Huelle: Koerper-Renders Aufrufer / Huelle": {
+    "effekt": "2 / 1",
+    "layout": "2 / 1",
+    "render": "1 / 1"
+  },
+  "Einschub in der Mitte": {
+    "effekt": "Name,Ort,Menge",
+    "layout": "Name,Ort,Menge",
+    "render": "Name,Ort,Menge"
+  },
+  "Strict: Anfang | umgeordnet | versteckt | Einschub": {
+    "effekt": "Name,Menge | Menge,Name | Menge | Menge,Ort",
+    "layout": "Name,Menge | Menge,Name | Menge | Menge,Ort",
+    "render": "Name,Menge | Menge,Name | Menge | Menge,Ort"
+  },
+  "Erste Zeile nach Sortierung": {
+    "effekt": "Aurora",
+    "layout": "Aurora",
+    "render": "Aurora"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "name": "@umriss-ui/demo",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The shell of the demos of @umriss-ui/core, @umriss-ui/charts and @umriss-ui/table: pages, examples with their source, props tables from the source code. Never published.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./outline": "./src/outline.ts",
+    "./tooling/props": "./src/tooling/props.ts",
+    "./tooling/propsReader": "./src/tooling/propsReader.ts",
+    "./tooling/fileName": "./src/tooling/fileName.ts",
+    "./tooling/source": "./src/tooling/source.ts",
+    "./shell.css": "./src/shell.css",
+    "./page.css": "./src/page.css",
+    "./checks/navigation": "./checks/navigation.ts",
+    "./checks/pages": "./checks/pages.ts",
+    "./checks/shell": "./checks/shell.ts",
+    "./checks/page": "./checks/page.ts",
+    "./checks/accessibility": "./checks/accessibility.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test:unit": "vitest run"
+  },
+  "dependencies": {
+    "sugar-high": "^2.4.0",
+    "typescript": "^5.6.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.2",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "vite": "^6.0.0"
+  }
+}

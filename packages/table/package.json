@@ -1,0 +1,78 @@
+{
+  "name": "@umriss-ui/table",
+  "version": "0.2.0-rc.0",
+  "description": "The umriss table - declared the way it reads: columns as JSX, typed against their rows.",
+  "license": "MIT",
+  "author": "Roman Händler",
+  "homepage": "https://romanhaendler.github.io/umriss-ui/table/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/romanhaendler/umriss-ui.git",
+    "directory": "packages/table"
+  },
+  "bugs": {
+    "url": "https://github.com/romanhaendler/umriss-ui/issues"
+  },
+  "keywords": [
+    "react",
+    "components",
+    "ui",
+    "umriss",
+    "table",
+    "data-grid"
+  ],
+  "type": "module",
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "tag": "next"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "main": "./dist/table.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/table.js"
+    },
+    "./styles.css": "./dist/table.css"
+  },
+  "scripts": {
+    "props": "node --disable-warning=ExperimentalWarning --experimental-strip-types demo/props.ts",
+    "predev": "pnpm run props",
+    "dev": "vite --config vite.demo.config.ts",
+    "build": "vite build",
+    "prebuild:demo": "pnpm run props",
+    "build:demo": "vite build --config vite.demo.config.ts",
+    "pretypecheck": "pnpm run props",
+    "typecheck": "tsc --noEmit",
+    "preview:demo": "vite preview --config vite.demo.config.ts --port 4175 --strictPort",
+    "test:unit": "vitest run",
+    "prepublishOnly": "pnpm run typecheck && pnpm run build"
+  },
+  "peerDependencies": {
+    "@umriss-ui/core": "workspace:^",
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "devDependencies": {
+    "@fontsource/geist-mono": "^5.3.0",
+    "@fontsource/geist-sans": "^5.3.0",
+    "@umriss-ui/demo": "workspace:*",
+    "@umriss-ui/core": "workspace:*",
+    "@types/node": "^22.20.2",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "typescript": "^5.6.3",
+    "vite": "^6.0.0",
+    "vite-plugin-dts": "^4.3.0"
+  }
+}

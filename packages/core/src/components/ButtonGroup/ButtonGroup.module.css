@@ -1,0 +1,107 @@
+/* A group of buttons. Square inside, rounded outside, a hairline between them.
+
+   The seam is a shadow and not a border: a border would change the height of
+   the buttons and shift them against the other controls beside them. */
+
+.group {
+  display: inline-flex;
+  align-items: stretch;
+}
+
+.group > * {
+  position: relative;
+  border-radius: 0;
+}
+
+.group > *:first-child {
+  border-top-left-radius: var(--u-radius-md);
+  border-bottom-left-radius: var(--u-radius-md);
+}
+
+.group > *:last-child {
+  border-top-right-radius: var(--u-radius-md);
+  border-bottom-right-radius: var(--u-radius-md);
+}
+
+/* Every button draws its own edge, and it draws it on all four sides (`Button`,
+   `box-shadow`). Inside the group the two edges that face one another land
+   exactly where the seam already is - a line over the full height, next to the
+   inset hairline below, so that a group reads as three boxes shoved together
+   rather than as one control. The clip cuts those two edges away and keeps the
+   one above and below, which is where the outline of the group comes from; the
+   outer sides of the first and the last button keep theirs, rounded corner and
+   all.
+
+   It has to be the clip and not a different edge: the clip takes away the edge
+   a button happens to have, without giving one to a button that has none -
+   `primary` and `ghost` carry no edge and must not gain one here. */
+.group > * {
+  clip-path: inset(-1px 0);
+}
+
+.group > *:first-child {
+  clip-path: inset(-1px 0 -1px -1px);
+}
+
+.group > *:last-child {
+  clip-path: inset(-1px -1px -1px 0);
+}
+
+/* A group of one has no seam and therefore nothing to cut away. */
+.group > *:only-child {
+  clip-path: none;
+}
+
+/* The seam: a line on the left of every button but the first. It lies in the
+   tone of the text, so that it stays visible on every variant. */
+.group > * + *::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 15%;
+  bottom: 15%;
+  width: 1px;
+  background: color-mix(in srgb, currentColor 22%, transparent);
+  pointer-events: none;
+}
+
+/* The press point of the single button would tear the group apart. */
+.group > *:active:not(:disabled) {
+  transform: none;
+}
+
+/* The pressed or focused button comes to the front, so that its focus ring is
+   not clipped by its neighbour. */
+.group > *:hover,
+.group > *:focus-visible {
+  z-index: 1;
+}
+
+/* The focus ring stands four pixels out, and the clip above would shear it off
+   on exactly the sides that face into the group. Focus therefore lifts the
+   clip. Hover does not: its edge is one pixel and would stand where the seam
+   already is - the very line this clip exists to remove. */
+.group > *:focus-visible {
+  clip-path: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* SplitButton                                                         */
+/* ------------------------------------------------------------------ */
+
+/* The trigger carries only the glyph and therefore needs no width for
+   text. */
+.split .trigger {
+  padding-left: var(--u-space-2);
+  padding-right: var(--u-space-2);
+}
+
+.arrow {
+  transition: transform var(--u-duration-fast) var(--u-ease-out);
+}
+
+/* Open: the arrow turns - the only motion here, and it explains a change of
+   state. */
+.split .trigger[aria-expanded="true"] .arrow {
+  transform: rotate(180deg);
+}

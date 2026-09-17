@@ -1,0 +1,490 @@
+/* A page: head, example, code block, props table, "Why it is like this".
+
+   Everything that stands on a page - not only the example. The cut against the
+   shell is the one between frame and content: `shell.css` has the header bar,
+   the sidebar and the overview; what lies between them stands here.
+
+   The code block's colours come from the tokens and not from a foreign editor
+   theme. `sugar-high` sets each mark's colour as `var(--sh-…)`; those ten names
+   stand here and nothing else. Six of them really carry a distinction, the rest
+   is text - the same restraint with which `tokens.css` speaks about motion:
+   what means nothing is not coloured in.
+
+   No fixed hex in this file. What stands here holds in both themes, because the
+   tokens underneath change and not these rules. */
+
+/* ---------------- Page head ---------------- */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--u-space-8);
+}
+
+.pageHead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--u-space-2);
+}
+
+.pageRubric {
+  margin: 0;
+  font-size: var(--u-text-xs);
+  font-weight: var(--u-weight-semibold);
+  letter-spacing: var(--u-tracking-caps);
+  text-transform: uppercase;
+  color: var(--u-color-accent-text);
+}
+
+.pageName {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1.15;
+  font-weight: var(--u-weight-semibold);
+  letter-spacing: var(--u-tracking-display);
+  color: var(--u-color-text);
+}
+
+.pageSentence {
+  margin: 0;
+  max-width: 68ch;
+  font-size: var(--u-text-md);
+  color: var(--u-color-text-secondary);
+}
+
+.pageEmpty {
+  margin: 0;
+  padding: var(--u-space-5);
+  border-radius: var(--u-radius-md);
+  background: var(--u-color-surface-sunken);
+  font-size: var(--u-text-sm);
+  color: var(--u-color-text-secondary);
+}
+
+/* The line one copies. It looks like code, because it is code. */
+.importLine {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--u-space-4);
+  margin-top: var(--u-space-2);
+  padding: var(--u-space-2) var(--u-space-2) var(--u-space-2) var(--u-space-4);
+  border-radius: var(--u-radius-md);
+  background: var(--u-color-surface-sunken);
+  box-shadow: var(--u-edge);
+  overflow-x: auto;
+}
+
+.importLine code {
+  font-family: var(--u-font-mono);
+  font-size: var(--u-text-sm);
+  color: var(--u-color-text);
+  white-space: nowrap;
+}
+
+/* ---------------- Abschnitte ---------------- */
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--u-space-5);
+}
+
+.sectionHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--u-space-4);
+  padding-bottom: var(--u-space-2);
+  border-bottom: 1px solid var(--u-edge-color);
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: var(--u-text-xs);
+  font-weight: var(--u-weight-semibold);
+  letter-spacing: var(--u-tracking-caps);
+  text-transform: uppercase;
+  color: var(--u-color-text-secondary);
+}
+
+.codeToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--u-space-2);
+  font-size: var(--u-text-xs);
+  color: var(--u-color-text-secondary);
+  cursor: pointer;
+}
+
+.codeToggle input {
+  accent-color: var(--u-color-accent);
+  margin: 0;
+}
+
+/* ---------------- Ein Beispiel ---------------- */
+
+.example {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--u-radius-md);
+  box-shadow: var(--u-edge);
+  background: var(--u-color-surface);
+  overflow: hidden;
+  /* The sticky header must not lie on the example after a jump. Without this
+     margin every jump lands too high by the header's height. */
+  scroll-margin-top: 76px;
+}
+
+.exampleHead {
+  display: flex;
+  align-items: center;
+  gap: var(--u-space-3);
+  padding: var(--u-space-3) var(--u-space-4);
+  border-bottom: 1px solid var(--u-edge-color);
+}
+
+.exampleTitle {
+  margin: 0;
+  font-size: var(--u-text-sm);
+  font-weight: var(--u-weight-medium);
+  color: var(--u-color-text);
+}
+
+.exampleMark {
+  padding: 1px var(--u-space-2);
+  border-radius: var(--u-radius-full);
+  background: var(--u-color-accent-subtle);
+  font-size: 11px;
+  letter-spacing: var(--u-tracking-caps);
+  text-transform: uppercase;
+  color: var(--u-color-accent-text);
+}
+
+.exampleToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--u-space-2);
+  margin-left: auto;
+  padding: 3px var(--u-space-2);
+  border: none;
+  border-radius: var(--u-radius-sm);
+  background: transparent;
+  font: inherit;
+  font-size: var(--u-text-xs);
+  color: var(--u-color-text-secondary);
+  cursor: pointer;
+}
+
+.exampleToggle:hover {
+  color: var(--u-color-text);
+  background: var(--u-color-surface-sunken);
+}
+
+.exampleToggle:focus-visible {
+  outline: none;
+  box-shadow: var(--u-focus-ring);
+}
+
+.exampleToggle svg {
+  transform: rotate(0deg);
+  transition: transform var(--u-transition);
+}
+
+.exampleToggle svg[data-open] {
+  transform: rotate(90deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .exampleToggle svg {
+    transition: none;
+  }
+}
+
+/* The stage carries the surface and not the page ground.
+
+   It once stood on `--u-color-bg`, on the thought that a building block in an
+   application stands on the page ground. The price was measurable:
+   `--u-color-text-muted` - help texts, units, labels - misses on that ground the
+   bound it just holds on the surface (tests-unit/contrast.test.ts, and the
+   exception in accessibility.spec.ts). The separation from the head is carried
+   by the line above it anyway; widening an exception for two per cent of
+   lightness would be the wrong trade. */
+.exampleStage {
+  padding: var(--u-space-5);
+  background: var(--u-color-surface);
+}
+
+/* A demonstration is a small application and not a handful of props: it gets
+   the whole frame and no padding that constricts it. */
+.example[data-demonstration] .exampleStage {
+  padding: var(--u-space-4);
+}
+
+/* The mark after a jump: brief, once, and without motion for anyone who does
+   not want it. */
+[data-highlight] {
+  animation: highlight 1.4s var(--u-ease-out);
+}
+
+@keyframes highlight {
+  0%,
+  55% {
+    box-shadow: 0 0 0 2px var(--u-color-accent);
+  }
+  100% {
+    box-shadow: 0 0 0 2px transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-highlight] {
+    animation: none;
+    box-shadow: 0 0 0 2px var(--u-color-accent);
+  }
+}
+
+/* ---------------- Der Codeblock ---------------- */
+
+.codeBlock {
+  border-top: 1px solid var(--u-edge-color);
+  background: var(--u-color-surface-sunken);
+}
+
+.codeBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--u-space-2) var(--u-space-2) var(--u-space-2) var(--u-space-4);
+}
+
+.codeLanguage {
+  font-family: var(--u-font-mono);
+  font-size: 11px;
+  letter-spacing: var(--u-tracking-caps);
+  text-transform: uppercase;
+  color: var(--u-color-text-secondary);
+}
+
+.codeCopy {
+  padding: 3px var(--u-space-3);
+  border: none;
+  border-radius: var(--u-radius-sm);
+  background: var(--u-color-surface);
+  box-shadow: var(--u-edge);
+  font: inherit;
+  font-size: var(--u-text-xs);
+  color: var(--u-color-text-secondary);
+  cursor: pointer;
+}
+
+.codeCopy:hover {
+  color: var(--u-color-text);
+}
+
+.codeCopy:focus-visible {
+  outline: none;
+  box-shadow: var(--u-focus-ring);
+}
+
+.codeCopy[data-state="copied"] {
+  color: var(--u-color-success);
+}
+
+.codeCopy[data-state="failed"] {
+  color: var(--u-color-text-muted);
+}
+
+.code {
+  margin: 0;
+  padding: 0 var(--u-space-4) var(--u-space-4);
+  overflow-x: auto;
+  font-family: var(--u-font-mono);
+  font-size: var(--u-text-xs);
+  line-height: 1.75;
+  color: var(--u-color-text-secondary);
+  tab-size: 2;
+}
+
+/* The ten marks of `sugar-high`, mapped onto tokens - by hand, because there
+   are ten of them and because every line of it is a decision.
+
+   Four of them carry a distinction: the accent for keywords and JSX elements,
+   the success tone for strings, the second text colour for comments, properties
+   and punctuation, the full one for identifiers. More would be an editor theme
+   and not information.
+
+   `--u-color-text-muted` is expressly NOT here. The token is recorded as an
+   exception to 4.5:1 because it carries labels and units and never body text
+   (tests-unit/contrast.test.ts). In a code block everything is body text -
+   including the comments, and those above all: here they are the explanation. */
+.code {
+  --sh-keyword: var(--u-color-accent-text);
+  --sh-string: var(--u-color-success);
+  --sh-comment: var(--u-color-text-secondary);
+  --sh-class: var(--u-color-text);
+  --sh-entity: var(--u-color-accent-text);
+  --sh-property: var(--u-color-text-secondary);
+  --sh-identifier: var(--u-color-text);
+  --sh-jsxliterals: var(--u-color-text);
+  --sh-sign: var(--u-color-text-secondary);
+  --sh-space: var(--u-color-text-secondary);
+}
+
+/* ---------------- API-Tabelle ---------------- */
+
+.apiBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--u-space-2);
+}
+
+.apiTitle {
+  margin: 0;
+  font-size: var(--u-text-sm);
+  font-weight: var(--u-weight-medium);
+}
+
+.apiTitle code {
+  font-family: var(--u-font-mono);
+  color: var(--u-color-text);
+}
+
+.apiInherited {
+  margin: 0;
+  font-size: var(--u-text-xs);
+  color: var(--u-color-text-secondary);
+}
+
+.apiInherited code,
+.apiOrigin code {
+  font-family: var(--u-font-mono);
+}
+
+.apiOrigin {
+  color: var(--u-color-text-muted);
+}
+
+/* A wide table scrolls in a box of its own and not the page. The box needs a
+   tab stop, or the keyboard cannot reach its right-hand part - a finding of the
+   accessibility check. */
+.apiRole {
+  overflow-x: auto;
+  border-radius: var(--u-radius-md);
+  box-shadow: var(--u-edge);
+}
+
+.apiTable {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--u-color-surface);
+  font-size: var(--u-text-xs);
+}
+
+.apiTable th,
+.apiTable td {
+  padding: var(--u-space-2) var(--u-space-3);
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--u-hairline);
+}
+
+.apiTable thead th {
+  font-size: 11px;
+  font-weight: var(--u-weight-semibold);
+  letter-spacing: var(--u-tracking-caps);
+  text-transform: uppercase;
+  color: var(--u-color-text-muted);
+  white-space: nowrap;
+}
+
+.apiTable tbody th {
+  font-weight: var(--u-weight-regular);
+  white-space: nowrap;
+}
+
+.apiTable tbody th code {
+  font-family: var(--u-font-mono);
+  color: var(--u-color-text);
+}
+
+.apiTable td {
+  color: var(--u-color-text-secondary);
+  max-width: 46ch;
+}
+
+.apiTable tbody tr:last-child th,
+.apiTable tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.apiType {
+  font-family: var(--u-font-mono);
+  color: var(--u-color-accent-text);
+  overflow-wrap: anywhere;
+}
+
+.apiRequired {
+  margin-left: 2px;
+  color: var(--u-color-danger);
+}
+
+/* ---------------- Warum so ---------------- */
+
+.why {
+  max-width: 72ch;
+  font-size: var(--u-text-sm);
+  line-height: 1.7;
+  color: var(--u-color-text-secondary);
+}
+
+.why h3 {
+  margin: var(--u-space-5) 0 var(--u-space-2);
+  font-size: var(--u-text-md);
+  font-weight: var(--u-weight-semibold);
+  letter-spacing: var(--u-tracking-tight);
+  color: var(--u-color-text);
+}
+
+.why h3:first-child {
+  margin-top: 0;
+}
+
+.why p,
+.why ul {
+  margin: 0 0 var(--u-space-3);
+}
+
+.why li {
+  margin-bottom: var(--u-space-2);
+}
+
+.why code {
+  font-family: var(--u-font-mono);
+  font-size: 0.92em;
+  color: var(--u-color-text);
+}
+
+.why strong {
+  color: var(--u-color-text);
+  font-weight: var(--u-weight-medium);
+}
+
+/* Links between pages - the three pickers point at the value contract, which
+   stands with `DatePicker`. Without this rule the browser would fall back on its
+   own blue, and the demo allows itself nothing the library does not offer. */
+.why a {
+  color: var(--u-color-accent-text);
+  text-decoration-color: color-mix(in srgb, var(--u-color-accent-text) 40%, transparent);
+  text-underline-offset: 2px;
+  border-radius: var(--u-radius-xs);
+}
+
+.why a:hover {
+  text-decoration-color: currentColor;
+}
+
+.why a:focus-visible {
+  outline: none;
+  box-shadow: var(--u-focus-ring);
+}

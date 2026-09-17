@@ -1,0 +1,355 @@
+/* Deterministic, generic number series (R-6.2).
+   Seed-based, so that screenshots are stable; deliberately without any subject
+   matter. */
+
+export interface Point {
+  t: number;
+  a: number;
+  b: number;
+  c: number;
+  d: number | null;
+}
+
+/** A small LCG - reproducible across runs and platforms. */
+export function random(seed: number): () => number {
+  let s = seed >>> 0;
+  return () => {
+    s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+    return s / 4294967296;
+  };
+}
+
+/** A series with four channels; channel d contains a deliberate gap (R-2.5). */
+export function series(seed: number, n: number, gap = false): Point[] {
+  const r = random(seed);
+  const points: Point[] = new Array<Point>(n);
+  let a = 50;
+  let b = 30;
+  let c = 70;
+  let d = 45;
+  const gapFrom = Math.floor(n * 0.42);
+  const gapTo = Math.floor(n * 0.55);
+  for (let i = 0; i < n; i++) {
+    a += (r() - 0.5) * 6;
+    b += (r() - 0.48) * 4;
+    c += (r() - 0.52) * 5;
+    d += (r() - 0.5) * 7;
+    points[i] = {
+      t: i,
+      a,
+      b,
+      c,
+      d: gap && i >= gapFrom && i <= gapTo ? null : d,
+    };
+  }
+  return points;
+}
+
+export interface DualPoint {
+  t: number;
+  small: number;
+  large: number;
+  medium: number;
+}
+
+/** Two to three series with clearly different extents. */
+export function dualSeries(seed: number, n: number): DualPoint[] {
+  const r = random(seed);
+  const points: DualPoint[] = new Array<DualPoint>(n);
+  let small = 21;
+  let large = 128000;
+  let medium = 640;
+  for (let i = 0; i < n; i++) {
+    small += (r() - 0.5) * 0.9;
+    large += (r() - 0.5) * 9000;
+    medium += (r() - 0.5) * 40;
+    points[i] = { t: 2000 + i, small, large, medium };
+  }
+  return points;
+}
+
+export interface LoadPoint {
+  t: number;
+  s1: number;
+  s2: number;
+  s3: number;
+}
+
+/** Data set for the benchmark example: three series of any length. */
+export function load(seed: number, n: number): LoadPoint[] {
+  const r = random(seed);
+  const points: LoadPoint[] = new Array<LoadPoint>(n);
+  let s1 = 100;
+  let s2 = 60;
+  let s3 = 140;
+  for (let i = 0; i < n; i++) {
+    s1 += r() - 0.5;
+    s2 += (r() - 0.5) * 0.8;
+    s3 += (r() - 0.5) * 1.2;
+    points[i] = { t: i, s1, s2, s3 };
+  }
+  return points;
+}
+
+export interface MixedPoint {
+  t: number;
+  inflow: number;
+  outflow: number;
+  stock: number;
+  /** A corridor with a deliberate gap - the fill gets a hole there. */
+  corridorLower: number | null;
+  corridorUpper: number | null;
+  sample: number;
+}
+
+/** Data set of the mixed example: two bar series, a corridor as a band area with a
+    gap, a line above it and samples as a scatter. Few periods, so that individual
+    bars stay visible. */
+export function mixed(seed: number, n: number): MixedPoint[] {
+  const r = random(seed);
+  const points: MixedPoint[] = new Array<MixedPoint>(n);
+  let stock = 62;
+  const gapFrom = Math.floor(n * 0.45);
+  const gapTo = Math.floor(n * 0.62);
+  for (let i = 0; i < n; i++) {
+    const inflow = 30 + r() * 25;
+    const outflow = 22 + r() * 20;
+    stock += (inflow - outflow) * 0.35;
+    const inGap = i >= gapFrom && i <= gapTo;
+    points[i] = {
+      t: i + 1,
+      inflow,
+      outflow,
+      stock,
+      corridorLower: inGap ? null : stock - 9 - r() * 3,
+      corridorUpper: inGap ? null : stock + 9 + r() * 3,
+      sample: stock + (r() - 0.5) * 26,
+    };
+  }
+  return points;
+}
+
+/* ---------------------------------------------------------------------------
+   Data of the operation instruments.
+
+   Up to here every series in this file is deliberately without subject matter
+   (R-6.2): a curve is a curve, and "Series A" says enough. From here on that no
+   longer works. A state band without states, a Pareto without fault reasons and a
+   control chart without a measurement series show nothing - with these instruments
+   the meaning IS the subject. What remains is the other half of the rule, and that
+   is the important one: everything here is seed-based and therefore identical
+   across runs and platforms.
+   --------------------------------------------------------------------------- */
+
+export const HOUR_MS = 3_600_000;
+export const DAY_MS = 24 * HOUR_MS;
+
+/** Monday, 16 March 2026, 00:00 local time - the anchor of every time series
+    below. */
+export const WEEK_START = new Date("2026-03-16T00:00:00").getTime();
+
+export interface StatePoint {
+  t: number;
+  /** A code in PLANT_STATES. */
+  m1: number;
+  m2: number;
+  /** A machine without a report: a gap stands here. */
+  m3: number | null;
+  temperature: number;
+}
+
+/** The closed set of states of the demo. The order is the code. */
+export const PLANT_STATES = [
+  { label: "Production", color: "#2f7d51" },
+  { label: "Setup", color: "#c08a2e" },
+  { label: "Fault", color: "#b4483f" },
+  { label: "Maintenance", color: "#5b6b8c" },
+] as const;
+
+/** One shift of three machines: states per quarter of an hour, plus a temperature
+    curve on the same x axis - that is what shows why the band sits in the same
+    chart and not beside it. */
+export function shift(seed: number, n: number): StatePoint[] {
+  const r = random(seed);
+  const points: StatePoint[] = new Array<StatePoint>(n);
+  const start = WEEK_START + 6 * HOUR_MS;
+  let m1 = 0;
+  let m2 = 0;
+  let m3: number | null = 0;
+  let temperature = 806;
+  for (let i = 0; i < n; i++) {
+    if (r() < 0.16) m1 = Math.floor(r() * 4);
+    if (r() < 0.12) m2 = Math.floor(r() * 3);
+    // From a point on, machine 3 reports nothing any more: the band gets a hole,
+    // and a hole is not a colour for "unknown".
+    if (i > n * 0.62 && i < n * 0.78) m3 = null;
+    else if (r() < 0.1) m3 = Math.floor(r() * 3);
+    temperature += (r() - 0.5) * 9 + (m1 === 2 ? 6 : -0.6);
+    points[i] = {
+      t: start + i * 15 * 60_000,
+      m1,
+      m2,
+      m3,
+      temperature,
+    };
+  }
+  return points;
+}
+
+export interface Measurement {
+  n: number;
+  value: number;
+}
+
+/** Individual values of a feature inspection. The process runs cleanly and then
+    begins to drift - in such a way that the run rule fires and not only the
+    outlier rule. */
+export function measurements(seed: number, n: number): Measurement[] {
+  const r = random(seed);
+  const points: Measurement[] = new Array<Measurement>(n);
+  for (let i = 0; i < n; i++) {
+    const drift = i > n * 0.68 ? (i - n * 0.68) * 0.05 : 0;
+    const outlier = i === Math.floor(n * 0.42) ? 0.9 : 0;
+    points[i] = { n: i, value: 12.5 + (r() - 0.5) * 0.34 + drift + outlier };
+  }
+  return points;
+}
+
+export interface DowntimeReason {
+  name: string;
+  value: number;
+}
+
+/** Downtime reasons of one week, in an arbitrary input order - the sorting is the
+    job of the Pareto module, not of the data. */
+export const DOWNTIME_REASONS: readonly DowntimeReason[] = [
+  { name: "Tool breakage", value: 34 },
+  { name: "Material shortage", value: 128 },
+  { name: "Setup over plan", value: 96 },
+  { name: "Sensor fault", value: 21 },
+  { name: "Coolant", value: 12 },
+  { name: "Operator error", value: 47 },
+  { name: "Power dip", value: 8 },
+  { name: "Labeller", value: 6 },
+  { name: "Conveyor", value: 5 },
+  { name: "Small part", value: 3 },
+];
+
+export interface CellPoint {
+  /** Hour of the day. */
+  hour: number;
+  /** The row: the machine. */
+  machine: number;
+  /** Overall equipment effectiveness in per cent; null = no measurement. */
+  oee: number | null;
+}
+
+export const MACHINES = [
+  "Press 1",
+  "Press 2",
+  "Mill 3",
+  "Mill 4",
+  "Furnace 1",
+  "Furnace 2",
+  "Assembly A",
+  "Assembly B",
+] as const;
+
+/** Machine × hour. One machine has a bad hour, one whole hour is bad everywhere -
+    only the difference makes the matrix worth reading. And a few cells are
+    missing: a hole, not a zero. */
+export function utilizationMatrix(seed: number): CellPoint[] {
+  const r = random(seed);
+  const cells: CellPoint[] = [];
+  for (let m = 0; m < MACHINES.length; m++) {
+    for (let h = 0; h < 24; h++) {
+      let oee: number | null = 62 + r() * 32;
+      if (m === 3 && h > 9 && h < 15) oee = 18 + r() * 12; // one machine
+      if (h === 21) oee = 24 + r() * 10; // one hour, everywhere
+      if (m === 6 && h > 1 && h < 5) oee = null; // no measurement
+      cells.push({ hour: h, machine: m, oee });
+    }
+  }
+  return cells;
+}
+
+export interface Job {
+  job: string;
+  /** The lane: the resource. */
+  resource: number;
+  from: number;
+  /** Missing = still running. */
+  to: number | null;
+}
+
+export const RESOURCES = ["Press 1", "Mill 3", "Furnace 1", "Assembly A"] as const;
+
+/** One day of a schedule with exactly the three things that distinguish a span
+    from a state band: an overlap (two jobs on one machine - the finding for whose
+    sake somebody opens the schedule), a gap (idle time) and an open span (still
+    running). */
+export const SCHEDULE: readonly Job[] = (() => {
+  const t = (hour: number) => WEEK_START + hour * HOUR_MS;
+  return [
+    { job: "A-4711", resource: 0, from: t(6), to: t(10.5) },
+    // Double booking on Press 1 - deliberately, and deliberately visible.
+    { job: "A-4712", resource: 0, from: t(9.5), to: t(13) },
+    { job: "A-4713", resource: 0, from: t(15), to: t(18) }, // idle time before it
+    { job: "B-201", resource: 1, from: t(6), to: t(12) },
+    { job: "B-202", resource: 1, from: t(12), to: t(17.5) },
+    { job: "C-88", resource: 2, from: t(7), to: t(9) },
+    { job: "C-89", resource: 2, from: t(11), to: t(14) },
+    { job: "C-90", resource: 2, from: t(16), to: null }, // still running
+    { job: "M-31", resource: 3, from: t(6.5), to: t(11) },
+    { job: "M-32", resource: 3, from: t(13), to: t(19) },
+  ];
+})();
+
+export interface WeekPoint {
+  t: number;
+  output: number;
+}
+
+/** A working week: values only during the shifts. On a wall clock axis this chart
+    would consist, for a good forty per cent, of flat lines over an empty hall. */
+export function week(seed: number): WeekPoint[] {
+  const r = random(seed);
+  const points: WeekPoint[] = [];
+  let value = 420;
+  for (let day = 0; day < 5; day++) {
+    for (let quarter = 0; quarter < 4 * 16; quarter++) {
+      const hour = 6 + quarter / 4;
+      value += (r() - 0.5) * 26;
+      points.push({
+        t: WEEK_START + day * DAY_MS + hour * HOUR_MS,
+        output: value,
+      });
+    }
+  }
+  return points;
+}
+
+/** The operating calendar to go with it: Monday to Friday, 6 to 22 o'clock. */
+export const WEEK_CALENDAR = Array.from({ length: 5 }, (_, day) => ({
+  from: WEEK_START + day * DAY_MS + 6 * HOUR_MS,
+  to: WEEK_START + day * DAY_MS + 22 * HOUR_MS,
+}));
+
+/* ---------------------------------------------------------------------------
+   The series the examples show.
+
+   They stand here and not in the example files because several examples share
+   one of them - `basicData` is the course in three examples - and because R-6.2
+   wants one seed per series, not one per place it is drawn. An example imports
+   what it needs; nobody inlines a second generator.
+   --------------------------------------------------------------------------- */
+
+export const basicData = series(42, 120);
+export const multiData = series(7, 90, true);
+export const configData = series(1312, 24);
+export const axesData = dualSeries(99, 60);
+export const mixedData = mixed(2026, 14);
+export const shiftData = shift(4711, 64);
+export const measurementData = measurements(815, 90);
+export const matrixData = utilizationMatrix(23);
+export const weekData = week(1963);

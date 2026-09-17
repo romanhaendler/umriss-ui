@@ -1,0 +1,263 @@
+# What is tested, and how
+
+The test standing of the workspace: which layer proves what, where the checkable
+seam lies, the conventions a new test follows, and what is known to be open.
+
+How to run any of it stands in `CONTRIBUTING.md` — this document does not repeat
+the commands.
+
+Since ADR-0020 all three demos run in the same shell, the private package
+`@umriss-ui/demo`: forty pages in core, fourteen in charts, twelve in table.
+
+What is photographed and checked stands in **one** place per demo,
+`packages/<package>/tests-visual/pages.ts`. It counts nothing off but derives:
+the pages from `demo/outline.ts`, the examples from the files under
+`demo/examples/`. There is therefore no state in which an example is rendered but
+not photographed.
+
+## Layers
+
+
+| Layer | Tool | Place | Status |
+|---|---|---|---|
+| Unit tests of the charts (ticks, scale, layout, hit, materialisation, scene, bar geometry, **limit, state, cells, spans, control chart, Pareto, operating time, limits and bands in the scene**) | vitest | packages/charts/tests-unit/ | green |
+| jsdom smoke test of the charts demo (every page, every example, the package by name in the source) + SSR test | vitest | packages/charts/tests-unit/ | green |
+| jsdom smoke test of the core demo | vitest | packages/core/tests-unit/ | green |
+| jsdom smoke test of the table demo: every page with its tables, every example with a title, the package by name in the source | vitest | packages/table/tests-unit/demo-smoke.test.tsx | green |
+| The shell's tooling: props reader against fixtures (inherited DOM props, generics, gaps, **type alias as an intersection, union with a discriminant, conditional helper type, call signatures**), source rewriting for both package names | vitest | packages/demo/tests-unit/ | green |
+| Unit tests of core (number, options, grid, scale, time, range, value contract, popover geometry, textarea measurement, token contrast, row window, formats characterisation, tree model, limit, limit conformance, freshness, the command palette's searcher, **the dock's resting places**) | vitest | packages/core/tests-unit/ | green |
+| Unit tests of @umriss-ui/table: the model (table model, CSV, selection, companion, alarm model – taken over with their tests from @umriss-ui/core, the original left with umriss-table 14), value rules, absent values in the model | vitest | packages/table/tests-unit/ | green |
+| Component tests of @umriss-ui/table: registration and order, hiding and reordering across head, body and foot, defaults per value type under a provider with foreign formats, the toolbar with the column filters' conditions (including the ones a table sets up for itself), column menu, pre-filter, list, range and custom filter, export, paging, row detail and actions, widths, virtualisation, initial state from a view, verdict column, alarm list with its density, toolbar and list filter from the provider's wording and formats | vitest + Testing Library | packages/table/tests-unit/ | green; what jsdom cannot see is checked by the package's demo in the browser |
+| Type tests of @umriss-ui/table: what must compile and what must not (`@ts-expect-error`) | tsc (`pnpm typecheck`) | packages/table/tests-unit/types.test-d.tsx | green; an expected error that fails to appear makes the type check fail |
+| Stylesheet guard: no colour value by hand, no duration outside a reduced-motion block except the named ones, no `--u-` variable in a module, no copied hover edge (`stylesheets.test.ts`, reads the modules as text) | vitest | packages/core/tests-unit/ | green; six named durations, each with a reason |
+| Wording guard: no German text in a component's JSX node or prop, bypassing the wording (`wordingSource.test.ts`, reads the sources through the TypeScript parser) | vitest | packages/core/tests-unit/ | green; the exception list is empty |
+| Behaviour tests of Popover, Tooltip, Modal, Toast (role follows tone), the four date pickers (now, reopening, Enter, presets), month pair, RadioGroup, Tag, SplitButton, Alert, the language seam, the root provider with `useDensityFor`, the tree (keyboard, screen reader, ticking, search, virtualisation), Stat, command palette and **Dock** | vitest + Testing Library | packages/core/tests-unit/ | green |
+| Screenshot comparisons (page heads and examples × light/dark) | Playwright | packages/*/tests-visual/screenshots.spec.ts (core, charts, table) | baselines checked in (darwin); green for core and table, **and not reproducible for the charts' examples – see Known open**; one image per example with the code **collapsed**, one per page from the head to the first example; plus two images outside the loop, the command palette's open window searching and in its populated resting state – the topmost layer is in no example – and the **dock's four resting places**, because the loop only photographs the one it starts at |
+| Interaction tests of the charts | Playwright | packages/charts/tests-visual/features-interaction.spec.ts | green |
+| Operating the demo shell (outline, jumps, palette, addresses) | Playwright | packages/*/tests-visual/features-shell.spec.ts | green; **one** suite at the shell (`packages/demo/checks/shell.ts`), which calls each of the three demos with its own pages and terms – with axe and the palette's rules that jsdom cannot express (a resting pointer, the resting state, the material). Charts had a shell and a suite of its own until ADR-0020; beside the shared call there stands the one promise that is charts' own – the benchmark does not run on the front door |
+| Interaction tests of core | Playwright | packages/core/tests-visual/features-basics.spec.ts | green |
+| Operating a page (code switch, page switch, copy button) | Playwright | packages/{core,table}/tests-visual/features-page.spec.ts → `packages/demo/checks/page.ts` | green; the copy test checks what really lies on the clipboard – none of which can be expressed in jsdom |
+| Interaction tests of the table: conditions in the toolbar, multi-sort, row detail, row actions, widths, width in the view, sorting, search with a footer, selection across all pages, paging, bulk action; virtualisation | Playwright | packages/table/tests-visual/features-table.spec.ts, features-virtual.spec.ts | green; the counterparts of the suites that ran in core until umriss-table 14, promise for promise |
+| The table's position stays put while one searches, filters and resets (table-filters D1) | Playwright | packages/table/tests-visual/features-table.spec.ts (`@both-themes`) | green; measures the table's head in both themes – a toolbar that grows a line taller moves it in only one |
+| What jsdom cannot prove about the table: a sticky row header behind selection and expanders, a silent gesture as a computed colour, focus in the column menu, the download and its content, reordering moves head, body and foot | Playwright | packages/table/tests-visual/features-browser.spec.ts | green; on its first run the first test found control cells growing wider than their sticky offsets |
+| Interaction tests of the tree | Playwright | packages/core/tests-visual/features-tree.spec.ts | green |
+| Interaction tests of the dock | Playwright | packages/core/tests-visual/features-dock.spec.ts | green; drag, refusal, change and reduced motion – none of it observable in jsdom |
+| Accessibility check of a sample of pages (axe, WCAG 2.1 AA) | Playwright | packages/{core,charts,table}/tests-visual/accessibility.spec.ts | green; three individually justified colour pairs tolerated – the list stands once, at the shell (`packages/demo/checks/accessibility.ts`), and holds for all three demos, none added for the charts – plus one run each with every code block open |
+
+## Pure modules (the checkable seam)
+
+
+Since the three operations packages the same holds for `@umriss-ui/charts`; the
+table below lists both packages. The limit stands **twice**, once in each package
+– that is deliberate and argued in ADR-0006, and a conformance test in
+`packages/core/tests-unit/limitConformance.test.ts` runs both versions from one
+case table and holds them against each other. `themeFallbackConformance.test.ts`
+runs in the same direction: it holds the charts' substitute colours – the literal
+in `charts.css` and `FALLBACK_THEME` – against the light token, with one named
+exception for muted text.
+
+The logic that can be checked without a DOM lies deliberately outside the React
+bodies. Placement follows ownership: with the module it belongs to, and in
+`src/lib/` only once two or more need it.
+
+| Module | Content |
+|---|---|
+| `NumberInput/number.ts` | German notation: reading, formatting, clamping, counting |
+| `lib/options.ts` | option lists: filtering, set operations, navigation |
+| `DatePicker/grid.ts` | the month grid, the range band, the keyboard step |
+| `DatePicker/time.ts` | the clock change (`ok \| missing \| duplicate`) |
+| `DatePicker/range.ts` | presets, day counting, the two-month window, the pair's calendar configuration |
+| `DatePicker/format.ts` | date and time formats, in one place |
+| `DatePicker/contract.ts` | the value contract: `day` or `instant` |
+| `DataViz/scale.ts` | projection and clamping of the marks |
+| `Popover/position.ts` | clamping and flipping, pure arithmetic |
+| `table/model/tableModel.ts` | filter → sort → page, column order and visibility |
+| `table/model/csv.ts` | the filtered set as delimiter-separated text |
+| `lib/virtual.ts` | a row's visible window and scroll target |
+| `Dock/place.ts` | the zone under the pointer, the strip's length, the space required, arrow → resting place |
+| `lib/language/formats.ts` | date, time, number, percentage, collation, relative duration |
+| `lib/limit.ts` | limit, target value, assessment – four outcomes |
+| `lib/freshness.ts` | reading → fresh \| stale \| disconnected, and the cadence for it |
+| `table/alarms/alarmModel.ts` | lifecycle, order, frequency, flood, return band |
+| `table/values.ts` | absent, the kind of a value, text without children, sort and export value, footer |
+| `lib/language/wording.ts` | every text the library emits |
+| `Textarea/measure.ts` | the character counter and height clamping |
+| `styles/tokens.css` (checked, not executed) | contrast of the token pairs, both themes |
+| `charts/limit.ts` | the same rule, a second house (ADR-0006) |
+| `charts/state.ts` | the segment boundary and the segment under the pointer |
+| `charts/cells.ts` | the cell edge in two dimensions, a hit inside the cell |
+| `charts/spans.ts` | end, open, depth of overlap, hit |
+| `charts/controlLimits.ts` | control limits, zones, four rule violations |
+| `charts/pareto.ts` | sort, accumulate, collect the remainder, cutoff |
+| `charts/operatingTime.ts` | wall clock ↔ operating time, breaks, ticks, clamped position |
+
+The time zone is pinned to `Europe/Berlin` in `packages/core/vitest.config.ts`
+and `packages/table/vitest.config.ts`: the clock-change tests check concrete
+transitions (29.03.2026 forward, 25.10.2026 back).
+
+## Conventions
+
+
+* Screenshots run against the real demo build (`vite preview`), never against the
+  dev server.
+* Light and dark through the Playwright projects (colorScheme emulation); both
+  demos initialise their theme from `prefers-color-scheme`.
+* The clock is frozen in every test (`page.clock.setFixedTime`, 17.03.2026
+  10:30). Where a hook reads the clock – freshness does, that is its job – it
+  stands still in the jsdom test too (`vi.useFakeTimers`).
+* A page carries `data-block`, an example `data-example`. Neither list is
+  maintained but derived (`pages.ts`): a new example file is a new image, without
+  anything being added anywhere. An image without a baseline fails instead of
+  being skipped silently.
+* One page of @umriss-ui/table's demo shows many tables. No test reaches
+  page-wide for `th` or `tbody tr`; whoever means a particular one writes that
+  into the selector (`[data-example="vorfuehrung"]`). The fault was always in
+  the selector, and in @umriss-ui/core's old table page it only came to light
+  through the second table.
+* Photographs are taken only with the code **collapsed**. An open code block
+  would tie the baseline to the source, and a renamed variable in an example
+  would become an image diff.
+* The charts' benchmark example is excluded from the screenshots (R-5.1). It is
+  the one gap in a derived list, and it carries its rule at the place where it is
+  made (`packages/charts/tests-visual/pages.ts`).
+* **A demo resolves the neighbouring package's stylesheet from source, and that
+  is the one path exception.** `@umriss-ui/core/styles.css` exists only after a
+  build, so the demos of `@umriss-ui/table` and `@umriss-ui/charts` alias it to a
+  two-line `demo/ui-styles.css` that imports the token and base layer out of
+  `packages/core/src/styles/`. The lint forbids exactly this route for `.ts` and
+  `.tsx` and cannot see it in CSS; the reason stands in both files and in the
+  alias that puts them there (`vite.demo.config.ts`).
+* The demo data of the operations instruments carries domain reference – a state
+  band without states and a Pareto without fault reasons show nothing. The other
+  half of R-6.2 holds unchanged and is the more important one: everything is
+  seed-based and identical across runs and platforms.
+* Interaction tests run only in the light project – they are behaviour tests, not
+  appearance tests.
+* Demo data is seed-based and deterministic (R-6.2); the interaction tests check
+  concrete values at known positions.
+* Unit tests build their own fixtures, never the demo data – otherwise the suite
+  breaks on a changed demo line.
+* Expected values come from an independent source: weekdays from the system
+  calendar, clock changes from the real transitions, notation from the rule –
+  never from the implementation's own arithmetic.
+
+**German that is the subject and not a leftover.** Five test files keep German
+fixtures on purpose, and a sweep must leave them alone:
+
+- `defaults.test.tsx` and `tableModel.test.ts` sort a row named **Änderung**.
+  The test exists to show that German collation files Ä with A; renamed to
+  "Change" it checks nothing.
+- `treeModel.test.ts`, `treeSearchAndSize.test.tsx` and
+  `treeInteraction.test.tsx` encode **letters**: the type-ahead jumps on "a",
+  "ge" has to tell *Gemischt* from *Gesperrt*, and a search for "a" must reach
+  *Anlagen*, *Einzelblatt* and *Archiv* but not *Leer*.
+- `toolbarWording.test.tsx` and `wordingSource.test.ts` assert the German
+  **wording** itself.
+
+Translating the first five took nine tests' subject away before it was noticed.
+The rule: before renaming a fixture, ask whether the test measures the value or
+measures a property *of* the value.
+
+On the command palette's translucent material (ADR-0012): the contrast test
+cannot assess it – a value with alpha has no known ground. It holds the type
+against the opaque substitute colour underneath instead, that is against the
+genuinely worst case one can compute; that the pane really carries the material
+is checked by `features-shell.spec.ts` through the computed style. The open
+question of whether a blurred image stays stable from run to run is answered: it
+did across repeated runs, and the baseline is checked in.
+
+The screenshot baselines are platform-specific (a suffix in the filename). On a
+platform other than darwin, `pnpm test:visual:update` produces that platform's
+baselines; they are checked in as well.
+
+## The demo shows one page at a time – tests navigate
+
+
+There is **one** view: a sidebar, a page in the content. There is deliberately no
+second mode rendering everything one below the other – that would be a second
+truth about the same page, and the tests would then have checked something nobody
+gets to see.
+
+Tests therefore go where a person would go too:
+`packages/core/tests-visual/navigation.ts` provides `open(page, pageId)` and
+`openExample(page, pageId, exampleId)` and takes the address from
+`demo/outline.ts` – the only place that knows the address format. The rubric is
+deliberately **not** in the address: it sorts the sidebar and means nothing
+inside the library, so a re-sorting must not break a link (CONTEXT.md, "Rubric").
+
+`open` waits for three things: the fonts, the page's visibility, and **the end of
+the jump highlight**. The third is not caution but a finding: under load, axe
+measured an intermediate colour of the running animation and reported a
+long-tolerated colour pair as a new finding.
+
+## The order of exports is part of the appearance
+
+
+`src/index.ts` determines the order in which the module styles land in the
+bundle, and two rules of equal specificity are decided by order. Filing two new
+exports alphabetically moved the table images by two pixels – and it was caught
+by exactly the assurance that exists for it: **no existing baseline moves.** New
+exports therefore stand at the end of the file, with a note there. Whoever
+re-sorts them should expect baselines to wander.
+
+On the dock (floating-dock): here the counterpart to "pure modules" is expressly
+what does **not** stand in jsdom. Without layout there are no zones (jsdom
+reports every element as zero-sized), so no space requirement and no refusal
+either; and without `Element.animate` no change of orientation. The arithmetic
+therefore stands without a DOM in `dockPlace.test.ts`, the gesture in the browser
+in `features-dock.spec.ts`, and what remains in jsdom is exactly what a person
+would observe on the tree: tab stops, arrow keys, marking, announcement. So that
+the drag can be reproduced there at all, `setup.ts` carries two polyfills –
+jsdom has no `PointerEvent` at all, and no pointer capture either.
+
+## Known open
+
+* **The charts' example pictures do not reproduce, and that is new.** Two to
+  four of the twenty-seven differ from run to run – a different set each time, by
+  371 to 2338 pixels, which is a ratio of 0.001 to 0.006 against the workspace
+  bound of 0.001. The differences sit on the numeric tick labels and along the
+  marks.
+
+  It is not a settling race, and that was established rather than assumed. Three
+  waits were tried in `packages/charts/tests-visual/navigation.ts`: two frames,
+  then the plot rectangles holding still (rounded, then at full precision), then
+  two consecutive frames that are pixel-identical on every canvas. None of them
+  changed the outcome. The decisive measurement was `--repeat-each=3`: **inside
+  one run** the same picture passes one repeat and fails the next, so the
+  variance is in the rasterisation and not in when the picture is taken.
+
+  What changed to bring it on: until ADR-0020 the charts demo drew in a fixed
+  1080-pixel column in `system-ui`, and its 26 baselines were stable at the same
+  bound. In the shared shell the column is laid out against a sidebar and the
+  labels are set in Geist, so the marks and the DOM labels no longer land on the
+  same pixel grid.
+
+  Three ways out, none of them taken yet, because each is a decision and not a
+  repair: **round the scene's measurements and the canvas backing to whole device
+  pixels** in `packages/charts/src` – the root fix, its own ticket, and it
+  rebaselines charts once more; **a named exception** raising the bound for the
+  two charts projects with the measurement written at it – which `CONTEXT.md`
+  argues against, since taking on an exception is allowed and softening the bound
+  is not; or **photograph the charts pages at the page head only** and let
+  `features-interaction.spec.ts` carry the marks, which it already does through
+  the canvas pixels rather than through a picture.
+
+* ~~Two interaction tests fail on the hidden checkbox `input`.~~ **Done
+  (table-surface, Aug. 2026).** The finding was not a defect of the checkbox but
+  of the two tests: they clicked the input, which lies invisibly beneath the
+  decorative spans. A person hits the drawn box, and that belongs to the
+  enclosing `<label>` – a click on it toggles the input natively. Two lines, and
+  the Playwright suite has been fully green since. Whoever operates a checkbox in
+  a test aims at the label, not at the input.
+* The popover position is only checked as pure arithmetic, not through the
+  element: jsdom reports every element as zero-sized, and there is no layout
+  there. Dismissal, focus and roles do run in jsdom.
+* The tooltip takes its geometry from the primitive (`align: "center"`,
+  `side: "top"`) and, since library-audit 01, its portal rule as well – the same
+  function `portalTargetFor` (dialog, then the setting, then the body), so that a
+  tooltip inside a modal no longer sits behind the dialog. It does not take the
+  element: it has neither focus nor dismissal, its entrance is a different one,
+  and on scrolling it disappears instead of travelling along. The remaining
+  difference is therefore only behaviour, not a layer.
+* jsdom is pinned to ^26: jsdom 30 pulls a pure ESM package in through
+  `require()`, which does not load on Node 22.11 and prevented every vitest run.

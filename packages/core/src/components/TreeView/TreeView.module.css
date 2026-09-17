@@ -1,0 +1,142 @@
+/* Tree: rows as in a list, level as indentation.
+
+   The indentation comes from a computed size and not from nesting - the
+   accessibility layer is flat so that later only what stands in the scroll
+   area can be rendered (ADR-0004). */
+
+.tree {
+  --tree-indent: var(--u-space-4);
+  display: flex;
+  flex-direction: column;
+  font-size: var(--u-text-sm);
+  color: var(--u-color-text);
+}
+
+.tree:focus {
+  outline: none;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--u-space-1);
+  min-height: var(--u-control-height-sm);
+  padding-right: var(--u-space-2);
+  padding-left: calc(var(--u-space-1) + var(--tree-level, 0) * var(--tree-indent));
+  border-radius: var(--u-radius-sm);
+  cursor: default;
+  transition: background-color var(--u-transition);
+}
+
+.row:hover {
+  background: var(--u-color-surface-sunken);
+}
+
+/* The active node and a checked one are two different states and therefore
+   look different (ADR-0003): the active one carries the surface, a checked
+   one its tick. */
+.active {
+  background: var(--u-color-accent-subtle);
+  color: var(--u-color-accent-text);
+}
+
+.row:focus-visible {
+  outline: none;
+  box-shadow: var(--u-focus-ring);
+}
+
+/* Present only for the path's sake: dimmed, so that the real matches stand
+   out. */
+.pathOnly {
+  color: var(--u-color-text-muted);
+}
+
+.chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: var(--u-color-text-secondary);
+  border-radius: var(--u-radius-xs);
+  transition: transform var(--u-duration-fast) var(--u-ease-out);
+}
+
+.chevronOpen {
+  transform: rotate(90deg);
+}
+
+/* A leaf and an empty branch get the same space, but no sign - the empty
+   branch still stays recognisable as a branch, because it carries the dot. */
+.placeholder {
+  flex: none;
+  width: 16px;
+  height: 16px;
+}
+
+.emptyDot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: var(--u-color-text-muted);
+}
+
+.emptyDot::after {
+  content: "";
+  width: 3px;
+  height: 3px;
+  border-radius: var(--u-radius-full);
+  background: currentColor;
+}
+
+.check {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.content {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chevron,
+  .row {
+    transition-duration: 0ms;
+  }
+}
+
+.noMatches {
+  margin: 0;
+  padding: var(--u-space-3) var(--u-space-2);
+  color: var(--u-color-text-muted);
+  font-size: var(--u-text-sm);
+}
+
+/* Virtualised: the root is the scroll area. The caller sets the height -
+   without it there would be nothing to scroll -, and that is why none stands
+   here: setting it would be a prescription to every layout the component does
+   not know. */
+.scrolls {
+  overflow-y: auto;
+}
+
+/* Disabled: visible, navigable, but the box does not react. Dimmed like a
+   signpost, but for a different reason - hence its own class and not a
+   shared one. */
+.disabled {
+  color: var(--u-color-text-muted);
+}
+
+.loading {
+  flex: none;
+  margin-left: var(--u-space-2);
+  color: var(--u-color-text-muted);
+}

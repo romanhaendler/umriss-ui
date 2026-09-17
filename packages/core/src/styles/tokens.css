@@ -1,0 +1,294 @@
+/* ============================================================
+   Umriss UI - design tokens - the "Ink & Paper" concept
+
+   Light as the default. An almost monochrome system: ink (#171717)
+   on paper (#fafafa/#ffffff). Borders are 1 px shadows without
+   offset ("edge"); depth comes from multi-step shadow stacks with
+   one job per step. A single accent (petrol), for interactive
+   things and nothing else. Numbers run in Geist Mono.
+
+   Theming: <html data-theme="dark"> activates the dark theme;
+   the primary button reverses its polarity there (light on dark).
+   ============================================================ */
+
+:root {
+  color-scheme: light;
+
+  /* ---- Neutral: Tinte & Papier ---- */
+  --u-color-bg: #fafafa;
+  --u-color-surface: #ffffff;
+  --u-color-surface-sunken: #f4f4f5;
+  --u-color-text: #171717;
+  --u-color-text-secondary: #565656;
+  --u-color-text-muted: #8b8b8b;
+
+  /* ---- Edges as shadows (instead of borders) ---- */
+  --u-edge-color: rgba(23, 23, 23, 0.08);
+  --u-edge-color-strong: rgba(23, 23, 23, 0.17);
+  --u-edge: 0 0 0 1px var(--u-edge-color);
+  --u-edge-strong: 0 0 0 1px var(--u-edge-color-strong);
+  --u-hairline: rgba(23, 23, 23, 0.06);        /* inner dividing lines */
+  /* The edge of a field under the pointer. It stood seven times as the same
+     mixture across the modules, and twice as muted text beside them. */
+  --u-color-edge-hover: color-mix(in srgb, var(--u-color-text) 30%, transparent);
+  --u-hairline-strong: rgba(23, 23, 23, 0.12); /* e.g. under table heads */
+
+  /* ---- Ink as interaction (the primary button) ---- */
+  --u-color-primary-bg: #171717;
+  --u-color-primary-fg: #ffffff;
+  --u-color-primary-hover: #2e2e2e;
+  --u-color-primary-active: #000000;
+
+  /* ---- Accent (petrol) - interactive things only ---- */
+  --u-color-accent: #0e7d72;
+  --u-color-accent-hover: #0a685f;
+  --u-color-accent-active: #085a52;
+  --u-color-accent-subtle: #e9f4f2;
+  --u-color-accent-text: #0b6a61;
+  --u-color-on-accent: #ffffff;
+  /* Type on the danger surface - it stood as #ffffff inside the button, and so
+     slipped past every check (library-audit 07). */
+  --u-color-on-danger: #ffffff;
+
+  /* ---- Semantics (muted) ---- */
+  --u-color-success: #217a4b;
+  --u-color-success-subtle: #e8f2ec;
+  /* Darkened from #9a6700: on its own pale surface the old value reached only
+     4.24:1 and so missed the 4.5:1 for normal text. Found by the accessibility
+     check, once the demo finally ran with tokens (see demo/main.tsx). Now
+     4.97:1. */
+  --u-color-warning: #8a5c00;
+  --u-color-warning-subtle: #f7efdb;
+  --u-color-danger: #b13636;
+  --u-color-danger-hover: #9a2c2c;
+  /* Pressed: darker in the light theme. As a mixture rather than a value, so
+     that it follows the ground; the dark theme turns the direction round. */
+  --u-color-danger-active: color-mix(in srgb, var(--u-color-danger) 85%, #000000);
+  --u-color-danger-subtle: #f8eaea;
+
+  /* ---- Focus: a soft accent glow ---- */
+  --u-focus-ring: 0 0 0 4px color-mix(in srgb, var(--u-color-accent) 20%, transparent);
+
+  /* ---- Typography ---- */
+  --u-font-sans: "Geist Sans", "Geist", -apple-system, "Segoe UI", system-ui, sans-serif;
+  --u-font-mono: "Geist Mono", ui-monospace, "Cascadia Mono", "Consolas", monospace;
+
+  --u-text-xs: 0.6875rem;
+  --u-text-sm: 0.8125rem;
+  --u-text-md: 0.875rem;
+  --u-text-lg: 1rem;
+  --u-text-xl: 1.1875rem;
+  --u-text-2xl: 1.5rem;
+
+  --u-leading-tight: 1.3;
+  --u-leading-normal: 1.5;
+
+  --u-weight-regular: 400;
+  --u-weight-medium: 500;
+  --u-weight-semibold: 600;
+
+  --u-tracking-caps: 0.07em;
+  --u-tracking-display: -0.022em; /* large titles: slightly compressed */
+  --u-tracking-tight: -0.011em;   /* medium titles (cards, dialogs) */
+
+  /* ---- Spacing and shape ---- */
+  --u-space-1: 4px;
+  --u-space-2: 8px;
+  --u-space-3: 12px;
+  --u-space-4: 16px;
+  --u-space-5: 20px;
+  --u-space-6: 24px;
+  --u-space-7: 32px;
+  --u-space-8: 40px;
+
+  --u-radius-xs: 4px;
+  --u-radius-sm: 6px;
+  --u-radius-md: 8px;
+  --u-radius-lg: 12px;
+  /* One step above the card, for the command palette. It is meant to be a
+     system window and not a form panel, and the radius plays its part in that.
+     Both themes share it - shape is not a question of theme. The sequence
+     4-6-8-12-18 continues the factor of 1.5 of the steps above. */
+  --u-radius-xl: 18px;
+  --u-radius-full: 999px;
+
+  --u-control-height: 32px;
+  --u-control-height-sm: 26px;
+
+  /* ---- Dock (floating-dock) ----
+
+     A dock's measurements stand here and not only in the module, because the
+     component READS THEM BACK at runtime: whether a resting place fits is a
+     calculation over exactly these values (Dock/place.ts), and a second copy of
+     them in JavaScript would be one that stops being true at some point.
+     Whoever changes them here also changes how many tools it takes for a side
+     edge to be refused - and that is as it should be.
+
+     The travel of the grip is the knob to turn when the gesture feels lifeless:
+     ADR-0013 lets the grip follow the pointer and not the dock, and if that
+     looks broken rather than like resistance, this value grows - the dock does
+     not become movable. */
+  --u-dock-tool: 30px;        /* edge length of one tool */
+  --u-dock-grip: 18px;        /* extent of the grip along the strip */
+  --u-dock-gap: 2px;          /* gap between two tools */
+  --u-dock-padding: 5px;      /* padding at the ends */
+  --u-dock-margin: 16px;      /* air between strip and host edge */
+  --u-dock-grip-travel: 6px;  /* how far the grip may follow the pointer */
+
+  /* The refusal: the outline the dock would have at a place it does not fit.
+     The same material, half as present - no warning colour, because nothing has
+     gone wrong here.
+
+     The duration deliberately does NOT stand in the `--u-duration-*` scale and
+     therefore does not fall to zero under `prefers-reduced-motion`: it measures
+     how long a statement stays readable, not how long a movement lasts. Whoever
+     switches motion off does not mean to switch a refusal off. It is needed only
+     for the keyboard - with the pointer the refusal ends as soon as it leaves
+     the zone. */
+  --u-dock-refusal-surface: color-mix(in srgb, var(--u-color-material-fallback) 55%, transparent);
+  --u-dock-refusal-duration: 1400ms;
+
+  /* ---- Shadow stacks: every step has one job ----
+     Card:    edge - contact with the ground - soft depth
+     Overlay: edge - near shadow - depth                    */
+  --u-shadow-card:
+    var(--u-edge),
+    0 1px 2px rgba(23, 23, 23, 0.04),
+    0 8px 24px -12px rgba(23, 23, 23, 0.14);
+  --u-shadow-overlay:
+    var(--u-edge),
+    0 4px 8px rgba(23, 23, 23, 0.06),
+    0 24px 48px -16px rgba(23, 23, 23, 0.24);
+
+  /* ---- Translucent material and scrim (ADR-0012) ----
+
+     An overlay meant to be a window ABOVE the application and not a card
+     WITHIN it needs two things: the page behind it must be sensed, and it must
+     never stay readable.
+
+     The alpha value is a FLOOR and not a matter of taste: the opaque colour
+     carries legibility on its own, the transparency delivers atmosphere and
+     never contrast. A panel that looks prettier at 0.55 is one whose type is
+     legible by luck. The floor is open upwards, and in the light theme it lies
+     higher than strictly necessary - see below.
+
+     Three tokens, because there are three jobs:
+     - `-fallback` is the opaque colour underneath. It is really painted where
+       `backdrop-filter` is missing or switched off, and it is what the contrast
+       test checks (see tests-unit/contrast.test.ts).
+     - `--u-color-material` is the same colour with the floor alpha.
+     - `--u-material-blur` softens what shows through. Decoration under the same
+       rule: the blur does not make the type legible.
+
+     The scrim dims the page behind an overlay. Until now it stood as a
+     `color-mix` in the demo - that is, in exactly the place where nobody finds a
+     token later. Dark gets its own values, chosen by eye: inverting a light
+     surface lands wrong, because light type over a dark blur tolerates far less
+     transparency than the other way round. */
+  /* The numbers were looked at, not calculated. The first attempt (scrim 0.38,
+     alpha 0.78) was wrong in the light theme: the scrim pressed the whole page
+     to a middling grey, the panel landed above it at around #e9e9e9, and instead
+     of a window above the application there stood a grey slab within it. It was
+     legible - the floor held - but it looked like a fault. Now the scrim dims
+     less and the panel covers more, and the distance between the two carries the
+     step. The dark theme needed no such correction: there the lightness already
+     separates them. */
+  --u-color-material-fallback: #fdfdfe;
+  --u-color-material: rgba(253, 253, 254, 0.86);
+  --u-material-blur: 24px;
+  --u-color-scrim: rgba(23, 23, 23, 0.30);
+
+  /* ---- Motion: explains a change of state, does not decorate ---- */
+  --u-transition: 120ms ease-out;          /* micro: hover, colour */
+  --u-ease-out: cubic-bezier(0.22, 1, 0.36, 1); /* decisive, landing softly */
+  --u-duration-fast: 140ms;                /* popovers, short distances */
+  --u-duration-medium: 240ms;              /* overlays, layout changes */
+  /* Exits. They stood twice - as a number in the code waiting for the end, and
+     in the stylesheet drawing the movement - and for the toast the two had
+     drifted ten milliseconds apart. The code reads this token now (library-audit
+     07). The vocabulary for entrance and exit is `visuelle-wertigkeit` 02; until
+     then, two names for two numbers. */
+  --u-duration-exit: 160ms;                /* a sheet takes its leave: modal */
+  --u-duration-exit-collapse: 200ms;       /* a message goes and its place closes */
+}
+
+/* ============================================================
+   The dark theme (an option, not the default).
+   The primary button reverses polarity: light on dark.
+   ============================================================ */
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --u-color-bg: #0f0f10;
+  --u-color-surface: #161618;
+  --u-color-surface-sunken: #1e1e21;
+  --u-color-text: #ededed;
+  --u-color-text-secondary: #a5a5ab;
+  --u-color-text-muted: #77777e;
+
+  --u-edge-color: rgba(255, 255, 255, 0.10);
+  --u-edge-color-strong: rgba(255, 255, 255, 0.20);
+  --u-hairline: rgba(255, 255, 255, 0.07);
+  --u-hairline-strong: rgba(255, 255, 255, 0.14);
+
+  --u-color-primary-bg: #ededed;
+  --u-color-primary-fg: #171717;
+  --u-color-primary-hover: #ffffff;
+  --u-color-primary-active: #d6d6d6;
+
+  --u-color-accent: #17a292;
+  --u-color-accent-hover: #1cb5a3;
+  --u-color-accent-active: #128d7f;
+  --u-color-accent-subtle: #142e2b;
+  --u-color-accent-text: #4cc4b5;
+  --u-color-on-accent: #072522;
+  /* White measures only 3.68:1 on the lighter danger surface. The polarity
+     turns as it does for the accent: dark type on a light ground. */
+  --u-color-on-danger: #2b0f0d;
+  --u-color-danger-active: color-mix(in srgb, var(--u-color-danger) 85%, #ffffff);
+
+  --u-color-success: #4fae7c;
+  --u-color-success-subtle: #16241d;
+  --u-color-warning: #d0a24d;
+  --u-color-warning-subtle: #2b2415;
+  --u-color-danger: #d0655c;
+  --u-color-danger-hover: #da7a72;
+  --u-color-danger-subtle: #2f1b1d;
+
+  /* Chosen by eye, not derived from the light theme: the alpha floor lies
+     higher here, because light type over a dark blur tolerates markedly less
+     transparency. */
+  --u-color-material-fallback: #1f1f23;
+  --u-color-material: rgba(31, 31, 35, 0.82);
+  --u-color-scrim: rgba(0, 0, 0, 0.60);
+
+  --u-shadow-card:
+    var(--u-edge),
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    0 8px 24px -12px rgba(0, 0, 0, 0.6);
+  --u-shadow-overlay:
+    var(--u-edge),
+    0 4px 8px rgba(0, 0, 0, 0.4),
+    0 24px 48px -16px rgba(0, 0, 0, 0.7);
+}
+
+/* Stacking order. Scattered literals stood here before (900 for panels, 1000
+   toast, 1100 tooltip), which is how a menu inside a modal ended up behind the
+   dialog. Popovers now portal into the nearest <dialog> ancestor, and this scale
+   orders the rest. */
+:root {
+  --u-z-popover: 900;
+  --u-z-toast: 1000;
+  --u-z-tooltip: 1100;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --u-transition: 0ms;
+    --u-duration-fast: 0ms;
+    --u-duration-medium: 0ms;
+    --u-duration-exit: 0ms;
+    --u-duration-exit-collapse: 0ms;
+  }
+}
