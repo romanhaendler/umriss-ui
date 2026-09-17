@@ -49,16 +49,26 @@ describe("the centre anchor", () => {
 });
 
 describe("the nearest anchor", () => {
+  /* A pixel inside the bar, not on its boundary: a line centred on the
+     boundary lies beside the bar and reads as a gap. */
   it("leaves at the bottom edge and arrives at the top edge where the next stop lies below", () => {
     const path = transportPath(view, move, fromSecond, below, { route: "curve", anchor: "nearest", ends: "dot" });
-    expect(path.y1).toBe(Math.round(fromSecond.y + fromSecond.height));
-    expect(path.y2).toBe(Math.round(below.y));
+    expect(path.y1).toBe(Math.round(fromSecond.y + fromSecond.height - 1));
+    expect(path.y2).toBe(Math.round(below.y + 1));
   });
 
   it("mirrors that where the next stop lies above", () => {
     const path = transportPath(view, move, fromSecond, above, { route: "curve", anchor: "nearest", ends: "dot" });
-    expect(path.y1).toBe(Math.round(fromSecond.y));
-    expect(path.y2).toBe(Math.round(above.y + above.height));
+    expect(path.y1).toBe(Math.round(fromSecond.y + 1));
+    expect(path.y2).toBe(Math.round(above.y + above.height - 1));
+  });
+
+  it("touches the bar at both ends, never a pixel beside it", () => {
+    const path = transportPath(view, move, fromSecond, below, { route: "straight", anchor: "nearest", ends: "dot" });
+    expect(path.y1).toBeGreaterThanOrEqual(fromSecond.y);
+    expect(path.y1).toBeLessThanOrEqual(fromSecond.y + fromSecond.height - 1);
+    expect(path.y2).toBeGreaterThanOrEqual(below.y);
+    expect(path.y2).toBeLessThanOrEqual(below.y + below.height - 1);
   });
 
   it("keeps to the middle within one lane, where there is no nearer corner", () => {
@@ -122,6 +132,6 @@ describe("a transport of its own mind", () => {
     const path = transportPath(view, own, fromSecond, below, { route: "curve", anchor: "centre", ends: "dot" });
     expect(path.kind).toBe("straight");
     expect(path.ends).toBe("none");
-    expect(path.y1).toBe(Math.round(fromSecond.y + fromSecond.height));
+    expect(path.y1).toBe(Math.round(fromSecond.y + fromSecond.height - 1));
   });
 });

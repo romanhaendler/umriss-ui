@@ -169,11 +169,16 @@ const STUB = 10;
     below me? - so a line between two lanes leaves the lower edge of the upper
     bar and meets the upper edge of the lower one. Within one lane there is no
     nearer edge, so both anchors mean the middle: a move that changes nothing
-    but time stays in its lane. */
+    but time stays in its lane.
+
+    The edge is a pixel INSIDE the bar, not the boundary itself. A bar drawn
+    from `y` over `height` fills the rows `y … y + height - 1`, and a line
+    centred on `y + height` lies entirely below the last of them - which reads
+    as a hairline gap between the line and the bar it leaves. */
 function anchorY(anchor: TransportAnchor, box: SubtaskBox, other: SubtaskBox): number {
   const middle = Math.round(box.y + box.height / 2);
   if (anchor === "centre" || other.laneIndex === box.laneIndex) return middle;
-  return Math.round(other.laneIndex > box.laneIndex ? box.y + box.height : box.y);
+  return Math.round(other.laneIndex > box.laneIndex ? box.y + box.height - 1 : box.y + 1);
 }
 
 export function transportPath(

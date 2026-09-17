@@ -65,6 +65,14 @@ export interface ScheduleProps {
   /** The intents the caller handles. Each one enables its interaction; none
       leaves a read-only schedule (ADR-0023). */
   intents?: readonly IntentKind[];
+  /** Whether a subtask may go to a lane - asked while a drag runs and again at
+      the drop. Without it every lane is open; with it a drag across a forbidden
+      lane leaves the ghost where it last stood and shows a refusal, and a
+      refused drop reports nothing. It narrows `"lane"`; it does not enable it.
+
+      It is asked for work dragged in from outside as well, with the key and
+      task the application declared in `placing`. */
+  canMoveTo?: (subtask: Subtask, lane: string) => boolean;
   /** Called once per intent when a drag ends. The data changes only if the
       caller changes it. */
   onIntent?: (intent: Intent) => void;
@@ -157,6 +165,7 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
     snap = "ticks",
     intents = NO_INTENTS,
     onIntent,
+    canMoveTo,
     onInteraction,
     selectedTask,
     onSelectedTaskChange,
@@ -214,8 +223,8 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
   }, [scene, domainFrom, domainTo, laneHeight, calendar, limitMin, limitMax, snapKind, snapStep, snapOffset, intents, nowAt, route, anchor, ends]);
 
   useEffect(() => {
-    scene.setHandlers({ onIntent, onInteraction, onSelectedTaskChange, onDomainChange });
-  }, [scene, onIntent, onInteraction, onSelectedTaskChange, onDomainChange]);
+    scene.setHandlers({ onIntent, canMoveTo, onInteraction, onSelectedTaskChange, onDomainChange });
+  }, [scene, onIntent, canMoveTo, onInteraction, onSelectedTaskChange, onDomainChange]);
 
   useImperativeHandle(
     ref,
@@ -434,6 +443,7 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
               data-ghost=""
               data-schedule-overlay="ghost label"
               data-findings={[ghost.overlap ? "overlap" : "", ghost.late ? "late-transport" : ""].filter(Boolean).join(" ")}
+              data-refused={ghost.refused ? "" : undefined}
               style={{
                 left: `${ghostAt.x}px`,
                 top: `${ghostAt.y}px`,
@@ -441,6 +451,7 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
               }}
             >
               {wording.scheduleGhostTimes(formats.time(new Date(ghost.from), false), formats.time(new Date(ghost.to), false))}
+              {ghost.refused && <span className={styles.refusal}>{wording.scheduleLaneRefused}</span>}
               {ghost.overlap && <span className={styles.finding}>{wording.scheduleOverlap}</span>}
               {ghost.late && <span className={styles.finding}>{wording.scheduleLateTransport}</span>}
             </span>

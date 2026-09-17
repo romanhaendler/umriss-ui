@@ -345,3 +345,40 @@ test("the ghost's label stays inside the plot at the right edge of the plan", as
   expect(box.x + box.width).toBeLessThanOrEqual(plot.box.x + plot.box.width);
   await page.mouse.up();
 });
+
+test("a lane a subtask may not go to refuses the drop, and the ghost stays where it may", async ({ page }) => {
+  await openExample(page, "intent", "where-it-may-go");
+  const example = page.locator('[data-example="where-it-may-go"]');
+  const plot = await plotOf(page, example, [at(6, 30), at(15)]);
+  const ghost = example.locator("[data-ghost]");
+  const last = example.locator("[data-last-move]");
+
+  /* The moulded part fits the two presses only; the welding bay is the third
+     lane. Dragged onto it, the ghost stays on press 2 and says why. */
+  await page.mouse.move(plot.x(10, 30), plot.y(1));
+  await page.mouse.down();
+  await page.mouse.move(plot.x(10, 30), plot.y(2), { steps: 8 });
+  await expect(ghost).toBeVisible();
+  await expect(ghost).toHaveAttribute("data-refused", "");
+  await expect(ghost).toContainText("Not this lane");
+  /* Still on press 2 - the lane it was allowed to be on. */
+  const box = (await ghost.boundingBox())!;
+  expect(box.y).toBeLessThan(plot.y(2) - 10);
+
+  await page.mouse.up();
+  await expect(last).toHaveText("Drag the moulded part onto the welding bay");
+});
+
+test("the same subtask may still be moved in time, and onto the lane it fits", async ({ page }) => {
+  await openExample(page, "intent", "where-it-may-go");
+  const example = page.locator('[data-example="where-it-may-go"]');
+  const plot = await plotOf(page, example, [at(6, 30), at(15)]);
+
+  /* Press 2 to press 1: allowed, and reported. */
+  await page.mouse.move(plot.x(10, 30), plot.y(1));
+  await page.mouse.down();
+  await page.mouse.move(plot.x(10, 30), plot.y(0), { steps: 8 });
+  await expect(example.locator("[data-ghost]")).not.toHaveAttribute("data-refused", "");
+  await page.mouse.up();
+  await expect(example.locator("[data-last-move]")).toHaveText("moulded: lane");
+});

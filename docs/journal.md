@@ -17,6 +17,37 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Sep. 2026 — schedule-legibility: a plan one can read
+
+*For a caller: bars can carry text, transports have routes and anchors, bars
+have appearances and a progress rail, and `canMoveTo` narrows where a drag may
+land. The schedule's changelog carries the lines.*
+
+Delivery report for `.scratch/schedule-legibility/spec.md`, tickets 02–06.
+Ticket 01 (the formats) has its own entry below.
+
+- **The check came before the features**, deliberately: `overlays.ts` walks
+  every page and holds two invariants - every overlay inside its clipping box,
+  no two labels of a kind over each other - and it was shown to fail on the
+  defect it was written for before anything was built on top of it.
+- **It earned its keep the same afternoon.** With the bar labels in, it
+  reported two labels covering each other on the mill. They do, because their
+  bars do, and that is the overlap the demo plans on purpose: a label IS its
+  bar, so the "apart" invariant does not apply to it, and the element says so
+  itself.
+- **Two appearances were redrawn on Roman's objection:** a faint fill already
+  means a setup or a teardown, so "another shift" and "65 per cent done" could
+  not be told from a run-out time. Muted is drawn slim at full colour now, and
+  progress runs as a rail along the bar.
+- **The glossary decided a colour.** The schedule's refusal was first drawn in
+  the danger colour; `CONTEXT.md` says a **Refusal** is not an error and wears
+  no warning colour, which is why the dock's does not. The schedule's does not
+  either now, and the entry names both.
+- **Two hours went to the pictures**, and both lessons are in
+  `docs/testing.md`: a reused preview server serves the build it was started
+  with, and `--update-snapshots=missing` does not renew a picture that already
+  exists. Either one makes a change look as though it had not taken effect.
+
 ## Sep. 2026 — schedule-legibility: English formats first
 
 *For a caller: `DEFAULT_FORMATS` is English, German ships as `GERMAN_FORMATS`
