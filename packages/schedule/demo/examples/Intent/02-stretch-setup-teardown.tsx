@@ -28,7 +28,7 @@ export default function StretchSetupTeardown() {
   return (
     <Schedule
       ariaLabel="A shaft on the lathe and the grinder"
-      initialDomain={[at(7), at(13, 30)]}
+      initialDomain={[at(6), at(13, 30)]}
       height={150}
       intents={["stretch", "setup", "teardown"]}
       onIntent={(intent) => setWork((current) => current.map((s) => applyIntent(s, intent)))}

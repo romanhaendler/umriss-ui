@@ -12,7 +12,9 @@ export const title = "A day in the plant";
    10:00, and the bracket cannot reach the paint shop in time. They are drawn,
    offset and marked, and nothing moves them.
 
-   Drag the background to pan, turn the wheel to zoom. `Transports` is declared
+   Drag the background to pan in both directions. The wheel scrolls the lanes
+   and, once they are at their end, the page; Ctrl or ⌘ with the wheel, or a
+   pinch, zooms; Shift with the wheel pans through time. `Transports` is declared
    before `Subtasks`, so its lines run beneath the bars. */
 export default function FirstSchedule() {
   return (

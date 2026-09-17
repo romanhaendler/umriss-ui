@@ -52,6 +52,26 @@ test("a drop on another lane reports a lane intent", async ({ page }) => {
   await expect(example.locator("[data-last-intent]")).toHaveText(JSON.stringify({ kind: "lane", subtask: "a-2046-2", lane: "paint" }));
 });
 
+test("a drag held at the edge pans the plot along, and the drop lands beyond what was in view", async ({ page }) => {
+  await openExample(page, "intent", "move-and-lane");
+  const example = page.locator('[data-example="move-and-lane"]');
+  const plot = await plotOf(page, example, DAY_OF_PLAN);
+
+  await page.mouse.move(plot.x(13, 45), plot.y(LANES.mill));
+  await page.mouse.down();
+  await page.mouse.move(plot.box.x + plot.box.width - 4, plot.y(LANES.mill), { steps: 8 });
+  /* Held still at the right edge: the plot pans until the ghost starts after
+     the 18:00 the view ended at. */
+  await expect
+    .poll(async () => (await example.locator("[data-ghost]").textContent()) ?? "", { timeout: 5000 })
+    .toMatch(/^(19|2\d):\d\d–/);
+  await page.mouse.up();
+
+  const intent = JSON.parse((await example.locator("[data-last-intent]").textContent()) ?? "{}") as { kind: string; from: number };
+  expect(intent.kind).toBe("move");
+  expect(intent.from).toBeGreaterThan(at(18));
+});
+
 test("Escape cancels a drag: the ghost goes, and nothing is reported", async ({ page }) => {
   await openExample(page, "intent", "move-and-lane");
   const example = page.locator('[data-example="move-and-lane"]');
@@ -85,7 +105,7 @@ test("a schedule without intents starts no drag: pressing a subtask pans", async
 test("setup grips appear on the selected subtask, and dragging one changes the setup", async ({ page }) => {
   await openExample(page, "intent", "stretch-setup-teardown");
   const example = page.locator('[data-example="stretch-setup-teardown"]');
-  const plot = await plotOf(page, example, [at(7), at(13, 30)]);
+  const plot = await plotOf(page, example, [at(6), at(13, 30)]);
   const grips = example.locator("[data-grip]");
   await expect(grips).toHaveCount(0);
 
@@ -112,7 +132,7 @@ test("setup grips appear on the selected subtask, and dragging one changes the s
 test("stretching the main time at its edge reports a stretch", async ({ page }) => {
   await openExample(page, "intent", "stretch-setup-teardown");
   const example = page.locator('[data-example="stretch-setup-teardown"]');
-  const plot = await plotOf(page, example, [at(7), at(13, 30)]);
+  const plot = await plotOf(page, example, [at(6), at(13, 30)]);
   const grips = example.locator("[data-grip]");
 
   /* The grinding ends at 12:30; drag its end to 13:00, then select it to read
