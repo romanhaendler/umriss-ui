@@ -22,21 +22,21 @@ function renderAxis(axis: AxisLayout, limits: readonly LimitLabel[]): ReactNode 
   return (
     <div
       key={axis.key}
-      className={`kc-axis kc-axis-${orientation} kc-axis-${position}`}
+      className={`uc-axis uc-axis-${orientation} uc-axis-${position}`}
       style={bandStyle}
       data-axis={axis.id}
     >
-      <span className="kc-axis-line" />
+      <span className="uc-axis-line" />
       {axis.ticks.map((tick) => {
         // Anchor on whole pixels: that coincides exactly with the grid line on
         // the canvas, which is aligned to half pixels (R-3.5).
         if (orientation === "y") {
           const anchor = Math.round(tick.px - band.y);
           return (
-            <span key={tick.value} className="kc-tick" style={{ top: `${anchor}px` }}>
-              <span className="kc-tick-mark" />
+            <span key={tick.value} className="uc-tick" style={{ top: `${anchor}px` }}>
+              <span className="uc-tick-mark" />
               <span
-                className="kc-tick-label"
+                className="uc-tick-label"
                 style={{ [position === "left" ? "right" : "left"]: `${offset}px` }}
               >
                 {tick.label}
@@ -46,10 +46,10 @@ function renderAxis(axis: AxisLayout, limits: readonly LimitLabel[]): ReactNode 
         }
         const anchor = Math.round(tick.px - band.x);
         return (
-          <span key={tick.value} className="kc-tick" style={{ left: `${anchor}px` }}>
-            <span className="kc-tick-mark" />
+          <span key={tick.value} className="uc-tick" style={{ left: `${anchor}px` }}>
+            <span className="uc-tick-mark" />
             <span
-              className="kc-tick-label"
+              className="uc-tick-label"
               style={{
                 left: `${Math.round(tick.labelLeft - band.x) - anchor}px`,
                 [position === "top" ? "bottom" : "top"]: `${offset}px`,
@@ -65,7 +65,7 @@ function renderAxis(axis: AxisLayout, limits: readonly LimitLabel[]): ReactNode 
       {axis.breaks.map((px, i) => (
         <span
           key={`break-${i}`}
-          className="kc-break"
+          className="uc-break"
           style={{ left: `${Math.round(px - band.x)}px` }}
           aria-hidden="true"
         />
@@ -76,7 +76,7 @@ function renderAxis(axis: AxisLayout, limits: readonly LimitLabel[]): ReactNode 
         orientation === "y" ? (
           <span
             key={`limit-${g.id}`}
-            className="kc-limit-label"
+            className="uc-limit-label"
             data-severity={g.severity}
             data-role={g.role}
             style={{ top: `${Math.round(g.px - band.y)}px` }}
@@ -86,7 +86,7 @@ function renderAxis(axis: AxisLayout, limits: readonly LimitLabel[]): ReactNode 
         ) : (
           <span
             key={`limit-${g.id}`}
-            className="kc-limit-label"
+            className="uc-limit-label"
             data-severity={g.severity}
             data-role={g.role}
             style={{
@@ -99,7 +99,7 @@ function renderAxis(axis: AxisLayout, limits: readonly LimitLabel[]): ReactNode 
         ),
       )}
       {axis.label !== undefined && axis.label !== "" && (
-        <span className="kc-axis-title">{axis.label}</span>
+        <span className="uc-axis-title">{axis.label}</span>
       )}
     </div>
   );
@@ -114,7 +114,7 @@ export function AxesHtml({ scene }: { scene: ChartScene }): ReactNode {
   const { layout } = snapshot;
   if (layout.plot.width <= 0 || layout.plot.height <= 0) return null;
   return (
-    <div className="kc-axes">
+    <div className="uc-axes">
       {layout.axes.map((axis) =>
         renderAxis(
           axis,

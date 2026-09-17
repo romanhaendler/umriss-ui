@@ -23,7 +23,7 @@ export class TextMeasurer {
     if (this.span !== null) return this.span;
     if (typeof document === "undefined") return null;
     const span = document.createElement("span");
-    span.className = "kc-measure";
+    span.className = "uc-measure";
     span.setAttribute("aria-hidden", "true");
     this.root.appendChild(span);
     this.span = span;
@@ -37,7 +37,7 @@ export class TextMeasurer {
     if (cached !== undefined) return cached;
     const span = this.ensure();
     if (span === null) return EMPTY;
-    span.className = `kc-measure ${className}`;
+    span.className = `uc-measure ${className}`;
     span.textContent = text;
     const rect = span.getBoundingClientRect();
     const size: TextSize = { width: rect.width, height: rect.height };

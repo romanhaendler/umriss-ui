@@ -10,7 +10,7 @@
       computes a font family other than the stage's - which is the browser
       default, so an element that shows it inherited it.
    2. **Own box.** Every element carrying a class of the library - a CSS module
-      class of core or table, or a `uc-`/`kc-` class of the charts - computes
+      class of core or table, or a `uc-` class of the charts - computes
       `box-sizing: border-box`.
    3. **Visible focus.** Tabbing through an example, every element that takes
       the focus shows it: its `box-shadow` or `outline`, or that of an ancestor
@@ -66,7 +66,7 @@ async function ownType(page: Page): Promise<string[]> {
 async function ownBox(page: Page): Promise<string[]> {
   return page.evaluate((describe) => {
     const name = new Function(`return ${describe}`)() as (el: Element) => string;
-    const LIBRARY = /(^|\s)(_[A-Za-z][\w]*_[a-z0-9]{5}_\d+|[uk]c-[\w-]+)(\s|$)/;
+    const LIBRARY = /(^|\s)(_[A-Za-z][\w]*_[a-z0-9]{5}_\d+|uc-[\w-]+)(\s|$)/;
     const found: string[] = [];
     for (const example of document.querySelectorAll<HTMLElement>("[data-example]")) {
       for (const el of example.querySelectorAll<HTMLElement>(".exampleStage *")) {

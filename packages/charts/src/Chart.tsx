@@ -1,12 +1,12 @@
 /* Chart<T> - container and ChartScene provider (4.1, R-2.1, R-2.8-R-2.10).
 
    Structure of the DOM:
-     .kc-root      flex column; the --uc-* variables live here (theme root)
-       .kc-plot    reference area of all pixel coordinates; catches the mouse events
-         canvas.kc-layer-series   series and grid
-         canvas.kc-layer-overlay  crosshair and hover markers
-         .kc-axes                 axes, ticks, titles (HTML)
-         .kc-tooltip              tooltip (HTML)
+     .uc-root      flex column; the --uc-* variables live here (theme root)
+       .uc-plot    reference area of all pixel coordinates; catches the mouse events
+         canvas.uc-layer-series   series and grid
+         canvas.uc-layer-overlay  crosshair and hover markers
+         .uc-axes                 axes, ticks, titles (HTML)
+         .uc-tooltip              tooltip (HTML)
        <Legend/>   optional, placed above or below the plot area through CSS order
 
    Canvas access happens exclusively inside effects (SSR-safe, R-7.4).
@@ -162,7 +162,7 @@ export function Chart<T>(props: ChartProps<T>): ReactNode {
   };
 
   const onPointerMove = (e: ReactPointerEvent<HTMLDivElement>): void => {
-    // offsetX/offsetY are already relative to .kc-plot - no
+    // offsetX/offsetY are already relative to .uc-plot - no
     // getBoundingClientRect and no allocation in the hover path (R-5.4).
     scene.pointerMove(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
   };
@@ -171,7 +171,7 @@ export function Chart<T>(props: ChartProps<T>): ReactNode {
     <ChartContext.Provider value={scene}>
       <div
         ref={rootRef}
-        className={className ? `kc-root ${className}` : "kc-root"}
+        className={className ? `uc-root ${className}` : "uc-root"}
         style={containerStyle}
       >
         {/* The image is the plot area, not the root: the root contains the
@@ -180,14 +180,14 @@ export function Chart<T>(props: ChartProps<T>): ReactNode {
             (library-audit 05). */}
         <div
           ref={plotRef}
-          className="kc-plot"
+          className="uc-plot"
           role="img"
           aria-label={ariaLabel}
           onPointerMove={onPointerMove}
           onPointerLeave={() => scene.pointerLeave()}
         >
-          <canvas ref={seriesRef} className="kc-layer-series" aria-hidden="true" />
-          <canvas ref={overlayRef} className="kc-layer-overlay" aria-hidden="true" />
+          <canvas ref={seriesRef} className="uc-layer-series" aria-hidden="true" />
+          <canvas ref={overlayRef} className="uc-layer-overlay" aria-hidden="true" />
           <AxesHtml scene={scene} />
           <TooltipHtml scene={scene} />
         </div>
