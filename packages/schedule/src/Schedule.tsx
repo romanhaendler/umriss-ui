@@ -33,6 +33,7 @@ import { ScheduleScene, type ScheduleInteraction, type ScheduleTooltipTarget } f
 import { ScheduleTooltipContent } from "./ScheduleTooltip";
 import type { Intent, IntentKind } from "./model";
 import type { ZoomLimits } from "./timeAxis";
+import type { SnapRaster } from "./snap";
 import styles from "./Schedule.module.css";
 
 export interface ScheduleProps {
@@ -53,10 +54,11 @@ export interface ScheduleProps {
   /** The narrowest and widest time span zoom may reach, in milliseconds.
       Default: one hour to 28 days. */
   zoomLimits?: ZoomLimits;
-  /** The raster a drag lands on: `"ticks"` - the fine band's current step -,
-      a step in milliseconds, or `false` for none. It shapes the ghost and the
-      intent, never the data. */
-  snap?: "ticks" | number | false;
+  /** The raster a drag lands on: `"ticks"` - the fine band's current step -, a
+      step in milliseconds from local midnight, a step with an offset (shifts at
+      06:00, 14:00 and 22:00 are eight hours offset by six), or `false` for none.
+      It shapes the ghost and the intent, never the data. */
+  snap?: "ticks" | number | SnapRaster | false;
   /** The intents the caller handles. Each one enables its interaction; none
       leaves a read-only schedule (ADR-0023). */
   intents?: readonly IntentKind[];
@@ -127,6 +129,11 @@ export function Schedule(props: ScheduleProps): ReactNode {
   const limitMin = zoomLimits?.min ?? DEFAULT_LIMITS.min;
   const limitMax = zoomLimits?.max ?? DEFAULT_LIMITS.max;
   const lastDomain = useRef<string | null>(null);
+  /* A raster written inline is a new object on every render; its two numbers
+     are what counts. */
+  const snapStep = typeof snap === "object" ? snap.step : null;
+  const snapOffset = typeof snap === "object" ? snap.offset : null;
+  const snapKind = typeof snap === "object" ? null : snap;
 
   /* `now={true}` follows the clock: read at mount, then once a minute. A
      schedule that switches `now` on later shows the clock of its mount until
@@ -143,11 +150,12 @@ export function Schedule(props: ScheduleProps): ReactNode {
     const key = `${domainFrom}|${domainTo}`;
     const fresh = lastDomain.current !== key;
     lastDomain.current = key;
+    const raster = snapKind ?? { step: snapStep ?? 0, offset: snapOffset ?? 0 };
     scene.setOptions(
-      { laneHeight, calendar, zoomLimits: { min: limitMin, max: limitMax }, snap, intents, now: nowAt },
+      { laneHeight, calendar, zoomLimits: { min: limitMin, max: limitMax }, snap: raster, intents, now: nowAt },
       fresh ? [domainFrom, domainTo] : null,
     );
-  }, [scene, domainFrom, domainTo, laneHeight, calendar, limitMin, limitMax, snap, intents, nowAt]);
+  }, [scene, domainFrom, domainTo, laneHeight, calendar, limitMin, limitMax, snapKind, snapStep, snapOffset, intents, nowAt]);
 
   useEffect(() => {
     scene.setHandlers({ onIntent, onInteraction, onSelectedTaskChange });

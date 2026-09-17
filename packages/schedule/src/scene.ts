@@ -225,6 +225,7 @@ export class ScheduleScene {
       if (this.selected !== null && !this.data.subtaskById.has(this.selected)) this.selected = null;
     }
     this.view.layout();
+    this.gestures.refreshHover();
     this.interactionChanged();
   }
 

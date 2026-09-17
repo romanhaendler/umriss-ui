@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Checkbox, ContextMenu, MenuItem, MenuSeparator, Stack, Text } from "@umriss-ui/core";
-import { Lane, Schedule, Subtasks, Transports, applyIntent, findings, ripple } from "../../../src";
+import { Lane, Schedule, Subtasks, Transports, applyIntent, findings, ripple, shiftTask } from "../../../src";
 import type { Intent, ScheduleInteraction, Subtask } from "../../../src";
 import { DAY_OF_PLAN, MOVES, ORDERS, STATIONS, STEPS } from "../../data";
 
@@ -16,7 +16,7 @@ export const title = "Demonstration: the plan in the planner's hands";
    A right-click opens `ContextMenu` from @umriss-ui/core at the pointer: the
    schedule reports the interaction with its target and position and knows
    nothing of the menu. The entries act on the data the same way a drag does -
-   through intents. */
+   through intents; moving the whole order is `shiftTask`, one move per stop. */
 
 const QUARTER = 15 * 60_000;
 
@@ -84,6 +84,9 @@ export default function Demonstration() {
             </MenuItem>
             <MenuItem onSelect={() => apply({ kind: "move", subtask: target.id, from: target.from + QUARTER, to: target.to + QUARTER })}>
               Later by a quarter hour
+            </MenuItem>
+            <MenuItem onSelect={() => shiftTask(plan.steps, target.task, QUARTER).forEach(apply)}>
+              The whole order later by a quarter hour
             </MenuItem>
             <MenuSeparator />
             <MenuItem onSelect={() => apply({ kind: "setup", subtask: target.id, setup: 0 })} disabled={(target.setup ?? 0) === 0}>
