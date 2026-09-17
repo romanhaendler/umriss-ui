@@ -40,3 +40,5 @@ Spec: `.scratch/styles-without-side-effects/spec.md` · ADR-0021
 - **`box-sizing` step, reworked (in `scripts/styles/ownBox.ts`, tests in core).** The own-box check named `VerdictColumn`'s `.value` and the virtual body: classes that only ever stand in compound selectors (`.verdict[data-verdict="warning"] .value`), so the first version gave them a box only in that state. Every class a stylesheet names now gets a rule of its own at the head of its layer, and a subject named by type keeps its full selector. The table's own `box-sizing` line stays - it is declared, and the step leaves it alone.
 - **Loose example text:** none in the table demo.
 - **Result:** all 46 table pictures that were red after 01 are green in both themes without a renewed baseline. All 12 table pages pass the three checks. Core, rerun after the change to the step, stayed green: 590 passed across both packages and both themes.
+
+**Review follow-up** (see the spec's Comments): the table's copy of the shared classes is gone - it composes `#own-styles` like core; a focus guard reads the table's sources too.

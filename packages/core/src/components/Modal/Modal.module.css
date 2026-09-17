@@ -6,7 +6,7 @@
 
 @layer umriss.components {
   .dialog {
-    composes: text from "../../styles/own.module.css";
+    composes: text from "#own-styles";
     border: none;
     margin: 0;
     padding: 24px;
@@ -130,6 +130,7 @@
   }
 
   .close {
+    composes: ring from "#own-styles";
     flex: none;
     display: inline-flex;
     align-items: center;
@@ -159,8 +160,7 @@
   }
 
   .body {
-
-    composes: scroll from "../../styles/own.module.css";
+    composes: scroll from "#own-styles";
     /* flex-basis auto, NOT 0: the content has to enter the height calculation,
        otherwise the modal collapses onto header + footer. */
     flex: 1 1 auto;

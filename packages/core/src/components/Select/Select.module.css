@@ -2,7 +2,7 @@
 
 @layer umriss.components {
   .wrapper {
-    composes: text from "../../styles/own.module.css";
+    composes: text from "#own-styles";
     position: relative;
     display: inline-flex;
     width: 100%;

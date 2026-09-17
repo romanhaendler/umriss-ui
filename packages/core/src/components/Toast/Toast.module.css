@@ -2,7 +2,7 @@
 
 @layer umriss.components {
   .region {
-    composes: text from "../../styles/own.module.css";
+    composes: text from "#own-styles";
     position: fixed;
     right: var(--u-space-5);
     bottom: var(--u-space-5);
@@ -132,6 +132,7 @@
   }
 
   .close {
+    composes: ring from "#own-styles";
     flex: none;
     display: inline-flex;
     align-items: center;

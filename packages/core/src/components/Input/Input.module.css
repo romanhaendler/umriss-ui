@@ -2,7 +2,7 @@
 
 @layer umriss.components {
   .input {
-    composes: field from "../../styles/own.module.css";
+    composes: field from "#own-styles";
     height: var(--u-control-height);
     padding: 0 var(--u-space-3);
     border: none;
@@ -67,8 +67,7 @@
      ------------------------------------------------------------------ */
 
   .wrapper {
-
-    composes: text from "../../styles/own.module.css";
+    composes: text from "#own-styles";
     display: inline-flex;
     align-items: center;
     gap: var(--u-space-1);

@@ -1,5 +1,6 @@
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
+import { ownStyles } from "../../scripts/styles/ownStyles.ts";
 import { fileURLToPath } from "node:url";
 
 /* The same time zone as in @umriss-ui/core: the formats of the language seam
@@ -7,7 +8,7 @@ import { fileURLToPath } from "node:url";
 process.env.TZ = "Europe/Berlin";
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), ownStyles()],
   resolve: {
     /* The tests run against the source of @umriss-ui/core - for the same
        reason as the typecheck (tsconfig.json). */

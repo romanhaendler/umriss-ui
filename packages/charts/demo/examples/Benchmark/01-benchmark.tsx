@@ -96,12 +96,13 @@ export default function Benchmark() {
     <>
       <div className="demo-actions">
         {SIZES.map((n) => (
-          <button key={n} onClick={() => loadPoints(n)}>
+          <button key={n} className="demo-button" onClick={() => loadPoints(n)}>
             {n.toLocaleString("en-US")} points
           </button>
         ))}
-        <button onClick={() => setLive((v) => !v)}>{live ? "Stop live" : "Live"}</button>
+        <button className="demo-button" onClick={() => setLive((v) => !v)}>{live ? "Stop live" : "Live"}</button>
         <button
+          className="demo-button"
           data-role="mode"
           onClick={() => setMode((m) => (m === "lines" ? "mixed" : "lines"))}
         >

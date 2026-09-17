@@ -9,8 +9,7 @@
   /* ---- Frame ----------------------------------------------------------- */
 
   .frame {
-
-    composes: text from "./own.module.css";
+    composes: text from "#own-styles";
     display: flex;
     flex-direction: column;
     min-width: 0;
@@ -26,8 +25,7 @@
   }
 
   .scroll {
-
-    composes: scroll from "./own.module.css";
+    composes: scroll from "#own-styles";
     overflow: auto;
     min-width: 0;
   }
@@ -45,8 +43,7 @@
   /* ---- Header ---------------------------------------------------------- */
 
   .th {
-
-    composes: ring from "./own.module.css";
+    composes: ring from "#own-styles";
     position: relative;
     padding: var(--u-space-2) var(--u-space-2);
     background: var(--u-color-surface);
@@ -164,8 +161,7 @@
   /* ---- Sorting --------------------------------------------------------- */
 
   .sortButton {
-
-    composes: ring from "./own.module.css";
+    composes: ring from "#own-styles";
     display: inline-flex;
     align-items: center;
     gap: var(--u-space-1);
@@ -303,8 +299,7 @@
   /* ---- Toolbar, pagination bar ----------------------------------------- */
 
   .toolbar {
-
-    composes: text from "./own.module.css";
+    composes: text from "#own-styles";
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -332,8 +327,7 @@
   }
 
   .pagination {
-
-    composes: text from "./own.module.css";
+    composes: text from "#own-styles";
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -372,8 +366,7 @@
   /* ---- Column filters --------------------------------------------------- */
 
   .filterButton {
-
-    composes: ring from "./own.module.css";
+    composes: ring from "#own-styles";
     flex: none;
     display: inline-flex;
     align-items: center;
@@ -414,8 +407,7 @@
   }
 
   .filterContent {
-
-    composes: scroll from "./own.module.css";
+    composes: scroll from "#own-styles";
     display: flex;
     flex-direction: column;
     gap: var(--u-space-2);

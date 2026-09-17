@@ -10,7 +10,7 @@
 
 @layer umriss.components {
   .alert {
-    composes: text from "../../styles/own.module.css";
+    composes: text from "#own-styles";
     display: flex;
     align-items: flex-start;
     gap: var(--u-space-3);

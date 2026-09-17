@@ -2,7 +2,7 @@
 
 @layer umriss.components {
   .badge {
-    composes: text from "../../styles/own.module.css";
+    composes: text from "#own-styles";
     display: inline-flex;
     align-items: center;
     gap: 6px;

@@ -6,7 +6,7 @@
 
 @layer umriss.components {
   .field {
-    composes: text from "../../styles/own.module.css";
+    composes: text from "#own-styles";
     position: relative; /* frame of reference for the invisible measuring row */
     display: flex;
     align-items: center;
@@ -133,6 +133,7 @@
 
   /* "+N": opens the panel directly in the selected scope. */
   .counter {
+    composes: ring from "#own-styles";
     flex: none;
     display: inline-flex;
     align-items: center;
@@ -216,6 +217,7 @@
   }
 
   .scope {
+    composes: ring from "#own-styles";
     height: 22px;
     padding: 0 var(--u-space-3);
     border: none;
@@ -268,8 +270,7 @@
   }
 
   .list {
-
-    composes: scroll from "../../styles/own.module.css";
+    composes: scroll from "#own-styles";
     display: flex;
     flex-direction: column;
     max-height: 260px;

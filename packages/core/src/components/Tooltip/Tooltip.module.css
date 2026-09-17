@@ -2,7 +2,7 @@
 
 @layer umriss.components {
   .tooltip {
-    composes: text from "../../styles/own.module.css";
+    composes: text from "#own-styles";
     position: fixed;
     z-index: var(--u-z-tooltip);
     max-width: 260px;

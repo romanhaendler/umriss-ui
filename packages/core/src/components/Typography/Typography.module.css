@@ -5,11 +5,11 @@
 
 @layer umriss.components {
   .text {
-    composes: text from "../../styles/own.module.css";
+    composes: text from "#own-styles";
   }
 
   .heading {
-    composes: text from "../../styles/own.module.css";
+    composes: text from "#own-styles";
   }
 
   .text,

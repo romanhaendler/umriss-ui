@@ -24,7 +24,7 @@ export default function Sizes() {
           <Line accessor={(d: Point) => d.a} name="Series A" />
         </Chart>
       </div>
-      <button onClick={() => setCollapsed((v) => !v)}>{collapsed ? "Expand" : "Collapse"}</button>
+      <button className="demo-button" onClick={() => setCollapsed((v) => !v)}>{collapsed ? "Expand" : "Collapse"}</button>
       {!collapsed && (
         <div className="side-by-side">
           <Chart data={basicData} width={420} height={180} ariaLabel="Fixed size">

@@ -11,7 +11,7 @@
 
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { offendersIn } from "./styles/rules.ts";
+import { beginsWithLayerOrder, offendersIn } from "./styles/rules.ts";
 
 const [entry, stylesheet] = process.argv.slice(2);
 if (!entry || !stylesheet) {
@@ -24,7 +24,7 @@ const js = readFileSync(join("dist", entry), "utf8");
 if (!js.startsWith(`import "./${stylesheet}";`)) problems.push(`dist/${entry} does not import ./${stylesheet} first`);
 
 const css = readFileSync(join("dist", stylesheet), "utf8");
-if (!/^@layer\s+umriss\.tokens\s*,\s*umriss\.base\s*,\s*umriss\.components\s*;/.test(css)) {
+if (!beginsWithLayerOrder(css)) {
   problems.push(`dist/${stylesheet} does not begin with the layer order`);
 }
 for (const offender of offendersIn(css)) problems.push(`dist/${stylesheet}: ${offender}`);

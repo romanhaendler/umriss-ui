@@ -2,15 +2,14 @@
 
 @layer umriss.components {
   .wrapper {
-    composes: text from "../../styles/own.module.css";
+    composes: text from "#own-styles";
     position: relative;
     display: inline-flex;
     width: 100%;
   }
 
   .input {
-
-    composes: field from "../../styles/own.module.css";
+    composes: field from "#own-styles";
     height: var(--u-control-height);
     padding: 0 var(--u-space-7) 0 var(--u-space-3);
     border: none;
@@ -69,8 +68,7 @@
   }
 
   .list {
-
-    composes: scroll from "../../styles/own.module.css";
+    composes: scroll from "#own-styles";
     max-height: 240px;
     overflow: auto;
     display: flex;

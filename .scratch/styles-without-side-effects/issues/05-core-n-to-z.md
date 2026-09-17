@@ -54,3 +54,5 @@ under 03's Comments that belong to this ticket.
 - **Field / scroll** on NumberInput, Textarea, Modal body, MultiSelect list and TreeView's scroll container.
 - **The check's sibling rule:** Checkbox and RadioGroup ring the box beside their hidden input (`.input:focus-visible + .box`). The focus check now reads the next sibling too, instead of tolerating both.
 - **Result:** every picture of these components is green in both themes, without a renewed baseline, and their pages pass the three checks.
+
+**Review follow-up** (see the spec's Comments): the shared classes moved to `scripts/styles/own.module.css` (`#own-styles`); the close buttons of Modal and Toast took `ring`; `VisuallyHidden` takes `text` on the focusable skip link only.
