@@ -64,23 +64,37 @@ function readVar(style: CSSStyleDeclaration, name: string, fallback: string): st
   return v === "" ? fallback : v;
 }
 
-function readTheme(root: Element): ResolvedTheme {
-  const style = getComputedStyle(root);
+/** Runs `read` with a hidden probe inside `root` that resolves a CSS colour to
+    its computed value - or gives the value back as it stands where no
+    resolution comes back - and removes the probe afterwards. */
+function withProbe<R>(root: Element, read: (resolve: (value: string) => string) => R): R {
   const probe = root.ownerDocument.createElement("span");
   probe.setAttribute("aria-hidden", "true");
   probe.style.position = "absolute";
   probe.style.visibility = "hidden";
   root.appendChild(probe);
-
-  const readColour = (name: string, fallback: string): string => {
-    const text = readVar(style, name, fallback);
-    if (text === fallback) return fallback;
-    probe.style.color = `var(${name})`;
-    const resolved = getComputedStyle(probe).color;
-    return resolved === "" || resolved.startsWith("var(") ? text : resolved;
-  };
-
   try {
+    return read((value) => {
+      probe.style.color = "";
+      probe.style.color = value;
+      const resolved = getComputedStyle(probe).color;
+      return resolved === "" || resolved.startsWith("var(") ? value : resolved;
+    });
+  } finally {
+    probe.remove();
+  }
+}
+
+function readTheme(root: Element): ResolvedTheme {
+  const style = getComputedStyle(root);
+  return withProbe(root, (resolve) => {
+    const readColour = (name: string, fallback: string): string => {
+      const text = readVar(style, name, fallback);
+      if (text === fallback) return fallback;
+      const resolved = resolve(`var(${name})`);
+      return resolved === `var(${name})` ? text : resolved;
+    };
+
     const series: string[] = [];
     for (let i = 1; i <= 6; i++) {
       series.push(readColour(`--uc-series-${i}`, FALLBACK_THEME.series[i - 1] ?? "#2563eb"));
@@ -97,9 +111,7 @@ function readTheme(root: Element): ResolvedTheme {
       fontMono: readVar(style, "--uc-font-mono", FALLBACK_THEME.fontMono),
       series,
     };
-  } finally {
-    probe.remove();
-  }
+  });
 }
 
 function ensureObserver(): void {
@@ -126,24 +138,11 @@ export function resolveColours<K extends string>(
   colours: Readonly<Record<K, string>>,
 ): Record<K, string> {
   ensureObserver();
-  const probe = root.ownerDocument.createElement("span");
-  probe.setAttribute("aria-hidden", "true");
-  probe.style.position = "absolute";
-  probe.style.visibility = "hidden";
-  root.appendChild(probe);
-  try {
+  return withProbe(root, (resolve) => {
     const resolved = {} as Record<K, string>;
-    for (const key of Object.keys(colours) as K[]) {
-      const value = colours[key];
-      probe.style.color = "";
-      probe.style.color = value;
-      const computed = getComputedStyle(probe).color;
-      resolved[key] = computed === "" || computed.startsWith("var(") ? value : computed;
-    }
+    for (const key of Object.keys(colours) as K[]) resolved[key] = resolve(colours[key]);
     return resolved;
-  } finally {
-    probe.remove();
-  }
+  });
 }
 
 /** Resolved theme for a chart root element (cached, generation-safe). */

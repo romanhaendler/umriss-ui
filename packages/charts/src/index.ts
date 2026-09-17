@@ -13,7 +13,7 @@ export { ControlChart, type ControlChartProps } from "./ControlChart";
 export { XAxis, YAxis, type XAxisProps, type YAxisProps } from "./Axis";
 export { Legend, type LegendProps } from "./Legend";
 export { Tooltip, type TooltipProps } from "./Tooltip";
-export { invalidateTheme, resolveColours, subscribeTheme, type ResolvedTheme } from "./theme";
+export { invalidateTheme, type ResolvedTheme } from "./theme";
 export { LinearScale } from "./scale";
 
 /* The pure modules: they are the actual worth of the four instruments, and a
@@ -54,7 +54,6 @@ export {
   calendarFrom,
   toOperatingTime,
   toWallClock,
-  toOperatingTimeClamped,
   mapSeries,
   removedIntervals,
   breaks,
@@ -104,3 +103,10 @@ export type {
   TooltipHit,
   TooltipPoint,
 } from "./types";
+
+/* What @umriss-ui/schedule takes from here (ADR-0022): the canvas colour
+   resolution for colours that are not the chart palette, and the clamped
+   mapping into operating time. At the end, by the workspace's rule for new
+   exports - neither brings a stylesheet, so no picture could move. */
+export { resolveColours, subscribeTheme } from "./theme";
+export { toOperatingTimeClamped } from "./operatingTime";

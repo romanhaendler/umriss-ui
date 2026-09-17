@@ -19,33 +19,22 @@ function useScene(componentName: string): ScheduleScene {
   return scene;
 }
 
-export function useLane(config: LaneConfig): void {
-  const scene = useScene("Lane");
-  const idRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    idRef.current = scene.registerLane(config);
-    return () => {
-      if (idRef.current !== null) scene.unregisterLane(idRef.current);
-      idRef.current = null;
-    };
-    // Registration only on mount or a change of scene; config updates below.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [scene]);
-
-  useEffect(() => {
-    if (idRef.current !== null) scene.updateLane(idRef.current, config);
-  });
-}
-
-export function useLayer(componentName: string, config: LayerConfig): void {
+/** Register on mount, deregister on unmount, update the entry on every
+    render - for a lane and for a layer alike. */
+function useRegistration<C>(
+  componentName: string,
+  config: C,
+  register: (scene: ScheduleScene, config: C) => number,
+  update: (scene: ScheduleScene, id: number, config: C) => void,
+  unregister: (scene: ScheduleScene, id: number) => void,
+): void {
   const scene = useScene(componentName);
   const idRef = useRef<number | null>(null);
 
   useEffect(() => {
-    idRef.current = scene.registerLayer(config);
+    idRef.current = register(scene, config);
     return () => {
-      if (idRef.current !== null) scene.unregisterLayer(idRef.current);
+      if (idRef.current !== null) unregister(scene, idRef.current);
       idRef.current = null;
     };
     // Registration only on mount or a change of scene; config updates below.
@@ -53,6 +42,14 @@ export function useLayer(componentName: string, config: LayerConfig): void {
   }, [scene]);
 
   useEffect(() => {
-    if (idRef.current !== null) scene.updateLayer(idRef.current, config);
+    if (idRef.current !== null) update(scene, idRef.current, config);
   });
+}
+
+export function useLane(config: LaneConfig): void {
+  useRegistration("Lane", config, (s, c) => s.registerLane(c), (s, id, c) => s.updateLane(id, c), (s, id) => s.unregisterLane(id));
+}
+
+export function useLayer(componentName: string, config: LayerConfig): void {
+  useRegistration(componentName, config, (s, c) => s.registerLayer(c), (s, id, c) => s.updateLayer(id, c), (s, id) => s.unregisterLayer(id));
 }
