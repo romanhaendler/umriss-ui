@@ -55,3 +55,5 @@ under 03's Comments that belong to this ticket.
 - **Loose example text:** `commandpalette--shortcut` wrote a raw `<input>` with inline styles. It is `Input size="sm"` now. Its two baselines and the two resting-state palette baselines were renewed, each diff looked at: the field, the 2px shift below it, and the stale name and version.
 - **Tolerated in the own-base check** (`packages/core/tests-visual/own-base.spec.ts`): `shortcut › input`, the palette's field, which carries no ring by design (the shell check asserts it).
 - **Result:** all 375 core browser tests green in both themes - 99 red pictures after 01 became 0, and every core page passes the three checks.
+
+**Review follow-up** (see the spec's Comments): the shared classes moved to `scripts/styles/own.module.css` (`#own-styles`); the calendar's days and month arrows, the presets and MultiSelect's scopes and counter took `ring`; `Divider` takes `text` on its label only; the palette's renewed baselines are named in the spec's Testing Decisions.

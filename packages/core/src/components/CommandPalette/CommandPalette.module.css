@@ -5,7 +5,7 @@
 
 @layer umriss.components {
   .dialog {
-    composes: text from "../../styles/own.module.css";
+    composes: text from "#own-styles";
     border: none;
     margin: 0;
     padding: 0 var(--u-space-4);
@@ -84,8 +84,7 @@
   /* ---------------- The field ---------------- */
 
   .field {
-
-    composes: field from "../../styles/own.module.css";
+    composes: field from "#own-styles";
     flex: none;
     height: 56px;
     padding: 0 var(--u-space-5);
@@ -145,8 +144,7 @@
   /* ---------------- The list of finds ---------------- */
 
   .list {
-
-    composes: scroll from "../../styles/own.module.css";
+    composes: scroll from "#own-styles";
     /* About eight rows, then it scrolls: a window that grows past the edge of the
        screen with the find is no longer one. */
     max-height: 320px;

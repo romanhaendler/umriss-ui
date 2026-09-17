@@ -2,7 +2,7 @@
 
 @layer umriss.components {
   .card {
-    composes: text from "../../styles/own.module.css";
+    composes: text from "#own-styles";
     background: var(--u-color-surface);
     border: none;
     border-radius: var(--u-radius-lg);
@@ -77,8 +77,7 @@
   }
 
   .collapseButton {
-
-    composes: ring from "../../styles/own.module.css";
+    composes: ring from "#own-styles";
     border: none;
     background: none;
     padding: var(--u-space-1) var(--u-space-2);

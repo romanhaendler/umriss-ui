@@ -1,13 +1,18 @@
 /* What every component used to take from the page and now carries itself
-   (ADR-0021): the text context of its surface, the focus ring of what it
-   makes focusable, the caret and autofill look of its text fields and the
-   scrollbars of its scroll containers. The values are the ones `html` and `body` carried in the
+   (ADR-0021): the text context of its surface, the focus ring of what it makes
+   focusable, the caret and autofill look of its text fields and the scrollbars of
+   its scroll containers. The values are the ones `html` and `body` carried in the
    old base layer, so nothing a picture shows moves.
 
-   Components take them with `composes: text`, `ring`, `field` or `scroll` on
-   their own class - one place for the values, and no selector that reaches beyond the
-   element that asked for them. Pure layout (Stack, Grid) takes neither: a
-   caller's text inside it keeps the caller's type. */
+   Components take them with `composes: text from "#own-styles"` - or `ring`,
+   `field`, `scroll` - on their own class: one place for the values, and no
+   selector that reaches beyond the element that asked for them. Pure layout
+   (Stack, Grid) takes neither: a caller's text inside it keeps the caller's type.
+
+   It stands here, beside the build steps, and not in one package: core and the
+   table both take it, and the table enters core only by its public entry
+   (ADR-0016). `ownStyles()` resolves `#own-styles` to this file in every build,
+   demo and unit test, and each package's bundle carries its own compiled copy. */
 
 @layer umriss.tokens, umriss.base, umriss.components;
 

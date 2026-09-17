@@ -1,10 +1,10 @@
 /* What belongs to this demo alone.
 
-   Everything that used to stand here about surfaces, type and colour is gone:
-   the demo runs in the shared shell now (ADR-0020) and takes the tokens and the
-   base layer of @umriss-ui/core, like the other two. What is left is what only a
-   chart example needs - a resizable host, a pair of charts side by side, the
-   benchmark's controls and its measurements.
+   Everything that used to stand here about surfaces, type and colour is gone: the
+   demo runs in the shared shell now (ADR-0020) and takes the tokens of
+   @umriss-ui/core, like the other two - there is no base layer (ADR-0021). What
+   is left is what only a chart example needs - a resizable host, a pair of charts
+   side by side, the benchmark's controls and its measurements.
 
    The `--u-*` fallbacks that used to stand here simulated a host application
    with a token set of its own, so that the fallback cascade of R-1.6 was
@@ -32,13 +32,29 @@
 .narrow { width: 260px; }
 
 /* The custom tooltip of the "configuration" example (render prop). */
-.custom-tooltip { display: flex; flex-direction: column; gap: 2px; font-size: var(--u-font-size-xs); }
+.custom-tooltip { display: flex; flex-direction: column; gap: 2px; font-size: var(--u-text-xs); }
 .custom-tooltip strong { font-weight: 600; }
 
-/* The benchmark's controls and its measurements. */
+/* The demo's own controls and the benchmark's measurements. They are markup of
+   the demo, not of the package - which ships no buttons - and they stand on the
+   example stage, which page.css puts on the browser's defaults. So they carry
+   their type and their focus ring here, as a component of the library would
+   (ADR-0021). */
 .demo-actions { display: flex; gap: var(--u-space-2); margin-bottom: var(--u-space-2); flex-wrap: wrap; }
 
+.demo-button {
+  font-family: var(--u-font-sans);
+  font-size: var(--u-text-sm);
+}
+
+.demo-button:focus-visible {
+  outline: none;
+  box-shadow: var(--u-focus-ring);
+}
+
 .metrics {
+  font-family: var(--u-font-sans);
+  color: var(--u-color-text);
   display: flex;
   flex-wrap: wrap;
   gap: 4px 28px;
@@ -46,13 +62,13 @@
 }
 .metrics div { display: flex; flex-direction: column; gap: 2px; }
 .metrics dt {
-  font-size: var(--u-font-size-xs);
+  font-size: var(--u-text-xs);
   letter-spacing: 0.02em;
   color: var(--u-color-text-muted);
 }
 .metrics dd {
   margin: 0;
   font-family: var(--u-font-mono);
-  font-size: var(--u-font-size-sm);
+  font-size: var(--u-text-sm);
   font-variant-numeric: tabular-nums;
 }

@@ -36,18 +36,58 @@ export interface OwnBaseProbes {
   tolerated?: Readonly<Record<string, string>>;
 }
 
-/** A short, stable name for an element: its tag, its first class without the
-    module hash, and the start of its text. */
-const DESCRIBE = `(el) => {
-  const cls = [...el.classList][0];
-  const name = cls ? "." + cls.replace(/^_(.+)_[a-z0-9]{5}_\\d+$/, "$1") : "";
-  const text = (el.textContent || "").trim().replace(/\\s+/g, " ").slice(0, 24);
-  return el.tagName.toLowerCase() + name + (text ? ' "' + text + '"' : "");
-}`;
+/** What the probes share inside the page, installed once per page. */
+interface Probe {
+  /** A short, stable name for an element: its tag, its first class without the
+      module hash, and the start of its text. */
+  describe(el: Element): string;
+  /** The focus indication of an element, of its ancestors inside the stage and
+      of its next sibling - a visually hidden input rings the box drawn beside
+      it (`.input:focus-visible + .box`). The browser's own ring
+      (`outline-style: auto`) does not count: it is what an element shows when
+      the component brought nothing, and it is not the library's ring. */
+  indication(el: Element): string;
+  /** The Tab walk through one example: the element focused last, what it
+      showed while focused, and every element already visited. */
+  walk: { previous: Element | null; focused: string; seen: WeakSet<Element> };
+}
+
+declare global {
+  interface Window {
+    __ownBase?: Probe;
+  }
+}
+
+function installProbe(): void {
+  window.__ownBase = {
+    describe(el) {
+      const first = [...el.classList][0];
+      const name = first ? "." + first.replace(/^_(.+)_[a-z0-9]{5}_\d+$/, "$1") : "";
+      const text = (el.textContent ?? "").trim().replace(/\s+/g, " ").slice(0, 24);
+      return el.tagName.toLowerCase() + name + (text ? ` "${text}"` : "");
+    },
+    indication(el) {
+      const stage = el.closest(".exampleStage");
+      const around: Element[] = el.nextElementSibling ? [el.nextElementSibling] : [];
+      for (let node: Element | null = el; node && node !== stage; node = node.parentElement) around.push(node);
+      return around
+        .map((node) => {
+          const style = getComputedStyle(node);
+          const outline =
+            style.outlineStyle === "auto" || style.outlineStyle === "none"
+              ? "none"
+              : `${style.outlineStyle} ${style.outlineWidth} ${style.outlineColor}`;
+          return `${style.boxShadow}|${outline}`;
+        })
+        .join("/");
+    },
+    walk: { previous: null, focused: "", seen: new WeakSet() },
+  };
+}
 
 async function ownType(page: Page): Promise<string[]> {
-  return page.evaluate((describe) => {
-    const name = new Function(`return ${describe}`)() as (el: Element) => string;
+  return page.evaluate(() => {
+    const probe = window.__ownBase!;
     const found: string[] = [];
     for (const example of document.querySelectorAll<HTMLElement>("[data-example]")) {
       const stage = example.querySelector<HTMLElement>(".exampleStage");
@@ -56,46 +96,27 @@ async function ownType(page: Page): Promise<string[]> {
       for (const el of stage.querySelectorAll<HTMLElement>("*")) {
         const ownText = [...el.childNodes].some((n) => n.nodeType === Node.TEXT_NODE && n.textContent!.trim() !== "");
         if (!ownText || el.getClientRects().length === 0) continue;
-        if (getComputedStyle(el).fontFamily === stageFont) found.push(`${example.dataset.example} › ${name(el)}`);
+        if (getComputedStyle(el).fontFamily === stageFont) found.push(`${example.dataset.example} › ${probe.describe(el)}`);
       }
     }
     return found;
-  }, DESCRIBE);
+  });
 }
 
 async function ownBox(page: Page): Promise<string[]> {
-  return page.evaluate((describe) => {
-    const name = new Function(`return ${describe}`)() as (el: Element) => string;
-    const LIBRARY = /(^|\s)(_[A-Za-z][\w]*_[a-z0-9]{5}_\d+|uc-[\w-]+)(\s|$)/;
+  return page.evaluate(() => {
+    const probe = window.__ownBase!;
+    const LIBRARY = /(^|\s)(_[A-Za-z]\w*_[a-z0-9]{5}_\d+|uc-[\w-]+)(\s|$)/;
     const found: string[] = [];
     for (const example of document.querySelectorAll<HTMLElement>("[data-example]")) {
       for (const el of example.querySelectorAll<HTMLElement>(".exampleStage *")) {
         if (!LIBRARY.test(el.getAttribute("class") ?? "")) continue;
-        if (getComputedStyle(el).boxSizing !== "border-box") found.push(`${example.dataset.example} › ${name(el)}`);
+        if (getComputedStyle(el).boxSizing !== "border-box") found.push(`${example.dataset.example} › ${probe.describe(el)}`);
       }
     }
     return found;
-  }, DESCRIBE);
+  });
 }
-
-/** The focus indication of an element, of its ancestors inside the stage and
-    of its next sibling - a visually hidden input rings the box drawn beside it
-    (`.input:focus-visible + .box`). The browser's own ring
-    (`outline-style: auto`) does not count: it is what an element shows when
-    the component brought nothing, and it is not the library's ring. */
-const INDICATION = `(el) => {
-  const stage = el.closest(".exampleStage");
-  const out = [];
-  const around = [el.nextElementSibling];
-  for (let n = el; n && n !== stage; n = n.parentElement) around.push(n);
-  for (const n of around) {
-    if (!n) continue;
-    const s = getComputedStyle(n);
-    const outline = s.outlineStyle === "auto" || s.outlineStyle === "none" ? "none" : s.outlineStyle + " " + s.outlineWidth + " " + s.outlineColor;
-    out.push(s.boxShadow + "|" + outline);
-  }
-  return out.join("/");
-}`;
 
 /* Tab moves the focus on, and that is the comparison: the indication an
    element shows while it has the focus, against the one it shows once Tab has
@@ -111,32 +132,27 @@ async function visibleFocus(page: Page): Promise<string[]> {
     if ((await example.locator(".exampleStage").count()) === 0) continue;
     await example.locator(".exampleToggle").first().focus();
     await page.evaluate(() => {
-      (window as unknown as { __focusProbe: unknown }).__focusProbe = { prev: null, focused: "", seen: new WeakSet() };
+      window.__ownBase!.walk = { previous: null, focused: "", seen: new WeakSet() };
     });
     for (let step = 0; step < 80; step++) {
       await page.keyboard.press("Tab");
-      const { verdict, done } = await page.evaluate(
-        ({ exampleId, indication, describe }) => {
-          const read = new Function(`return ${indication}`)() as (el: Element) => string;
-          const name = new Function(`return ${describe}`)() as (el: Element) => string;
-          const probe = (window as unknown as {
-            __focusProbe: { prev: Element | null; focused: string; seen: WeakSet<Element> };
-          }).__focusProbe;
-          const verdict = probe.prev ? { name: name(probe.prev), shows: read(probe.prev) !== probe.focused } : null;
-          const el = document.activeElement;
-          const stage = el?.closest(".exampleStage");
-          const inside = !!el && !!stage && stage.closest("[data-example]")?.getAttribute("data-example") === exampleId;
-          if (!inside || probe.seen.has(el!)) {
-            probe.prev = null;
-            return { verdict, done: true };
-          }
-          probe.seen.add(el!);
-          probe.prev = el;
-          probe.focused = read(el!);
-          return { verdict, done: false };
-        },
-        { exampleId: id, indication: INDICATION, describe: DESCRIBE },
-      );
+      const { verdict, done } = await page.evaluate((exampleId) => {
+        const probe = window.__ownBase!;
+        const { walk } = probe;
+        const verdict = walk.previous
+          ? { name: probe.describe(walk.previous), shows: probe.indication(walk.previous) !== walk.focused }
+          : null;
+        const el = document.activeElement;
+        const inside = !!el && el.closest(".exampleStage")?.closest("[data-example]")?.getAttribute("data-example") === exampleId;
+        if (!el || !inside || walk.seen.has(el)) {
+          walk.previous = null;
+          return { verdict, done: true };
+        }
+        walk.seen.add(el);
+        walk.previous = el;
+        walk.focused = probe.indication(el);
+        return { verdict, done: false };
+      }, id);
       if (verdict && !verdict.shows) found.push(`${id} › ${verdict.name}`);
       if (done) break;
     }
@@ -159,6 +175,7 @@ export function checkOwnBase(p: OwnBaseProbes): void {
     for (const pageId of p.pages) {
       test(`${pageId}: text in its own type, own elements in border-box, focus visible`, async ({ page }) => {
         await p.open(page, pageId);
+        await page.evaluate(installProbe);
         const offenders = {
           type: untolerated(await ownType(page)),
           box: untolerated(await ownBox(page)),

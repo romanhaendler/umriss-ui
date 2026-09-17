@@ -20,7 +20,7 @@
 
 @layer umriss.components {
   .root {
-    composes: text from "../../styles/own.module.css";
+    composes: text from "#own-styles";
     position: absolute;
     inset: 0;
     pointer-events: none;
@@ -128,8 +128,7 @@
   }
 
   .grip {
-
-    composes: ring from "../../styles/own.module.css";
+    composes: ring from "#own-styles";
     display: flex;
     align-items: center;
     justify-content: center;
@@ -156,8 +155,7 @@
   /* ---------------- The tools ---------------- */
 
   .tool {
-
-    composes: ring from "../../styles/own.module.css";
+    composes: ring from "#own-styles";
     flex: none;
     display: flex;
     align-items: center;

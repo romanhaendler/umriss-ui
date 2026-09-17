@@ -6,7 +6,7 @@
 
 @layer umriss.components {
   .group {
-    composes: text from "../../styles/own.module.css";
+    composes: text from "#own-styles";
     display: flex;
     flex-direction: column;
     gap: var(--u-space-3);

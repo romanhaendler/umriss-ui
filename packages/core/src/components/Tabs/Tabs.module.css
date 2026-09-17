@@ -2,7 +2,7 @@
 
 @layer umriss.components {
   .list {
-    composes: text from "../../styles/own.module.css";
+    composes: text from "#own-styles";
     position: relative;
     display: flex;
     gap: var(--u-space-5);
@@ -22,8 +22,7 @@
   }
 
   .tab {
-
-    composes: ring from "../../styles/own.module.css";
+    composes: ring from "#own-styles";
     position: relative;
     padding: var(--u-space-2) 2px;
     border: none;
@@ -50,10 +49,8 @@
   }
 
   .panel {
-
-    composes: text from "../../styles/own.module.css";
-
-    composes: ring from "../../styles/own.module.css";
+    composes: text from "#own-styles";
+    composes: ring from "#own-styles";
     padding-top: var(--u-space-4);
   }
 }

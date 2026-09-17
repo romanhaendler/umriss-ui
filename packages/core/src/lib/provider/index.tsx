@@ -1,12 +1,13 @@
 /* One place where the library can be configured.
 
-   It holds exactly four things: the density, the portal target for overlays,
-   the setting for toasts, and the configuration of formats and wording. No
-   more. It holds no theme: light and dark are the application's `color-scheme`,
-   which the tokens follow on their own (ADR-0021) - and it writes nothing onto
-   the document, because a provider that did would reach beyond its subtree. The moment it can set the default variant of a button it
-   is no longer a small decision but a second interface beside the components'
-   own props - and two ways of saying the same thing are worse than one.
+   It holds exactly four things: the density, the portal target for overlays, the
+   setting for toasts, and the configuration of formats and wording. No more. It
+   holds no theme: light and dark are the application's `color-scheme`, which the
+   tokens follow on their own (ADR-0021) - and it writes nothing onto the
+   document, because a provider that did would reach beyond its subtree. The
+   moment it can set the default variant of a button it is no longer a small
+   decision but a second interface beside the components' own props - and two ways
+   of saying the same thing are worse than one.
 
    The more important rule stands beside it: it is optional, and its absence is
    the tested normal case. Every component renders and behaves without it

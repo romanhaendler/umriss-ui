@@ -157,7 +157,8 @@ html.dark { color-scheme: dark; }   /* most theme libraries do this already */
   component already sets part of it (`Tooltip`, `Modal`), it is completed, not
   duplicated.
 - **Who does not:** pure layout — `Stack`, `Grid` (`Layout.module.css`),
-  `Divider` without a label, `VisuallyHidden`, `Skeleton`, `Spinner`. A caller's
+  `Divider` without a label, `VisuallyHidden` (its focusable skip link, which
+  shows, does), `Skeleton`, `Spinner`. A caller's
   text placed in a `Stack` keeps the caller's type.
 - **Containers pass it on, deliberately.** A caller's text inside `Card`,
   `Modal`, `Popover` or `Alert` inherits that component's text context. That is
@@ -195,9 +196,12 @@ html.dark { color-scheme: dark; }   /* most theme libraries do this already */
 
 - `packages/*/demo/main.tsx` and the charts/table `demo/ui-styles.css` stop
   importing `global.css`. The demo **page** — `html`, `body` — gets no font,
-  colour, box model or background from anywhere: browser defaults. The shell's
-  own chrome (`shell.css`, `page.css`) sets its type and surfaces on its own
-  classes, like a component would.
+  colour or background from anywhere: browser defaults. The shell's own chrome
+  (`shell.css`, `page.css`) sets its type and surfaces on its own classes, like a
+  component would, and `.exampleStage` puts every example back on the browser's
+  type. *(Amended in review: the demo, being an application, sets its own page
+  margin, `body { margin: 0 }` — a page decision like any application's. What has
+  to stand on defaults is the example stage, and it does.)*
 - The theme switch of the three demo apps sets `document.documentElement.style.
   colorScheme` instead of `data-theme`, and the charts demo's
   `invalidateTheme()` call stays until ticket 07 makes it unnecessary.
@@ -228,8 +232,13 @@ html.dark { color-scheme: dark; }   /* most theme libraries do this already */
   that the same styles apply, scoped instead of global — so after ticket 01 the
   baselines are **not** renewed in bulk. Every red screenshot is a dependency to
   fix in 04–07. A baseline may only be renewed where a ticket names the image and
-  the reason (the loose-text examples, above), with the before/after compared by
-  eye.
+  the reason, with the before/after compared by eye. The reasons this effort
+  admits: a loose-text example rewritten (above); a picture whose text the ticket
+  changes on purpose (02: the provider's page head loses "theme"); a baseline
+  found stale — showing a former name or version — when the picture is red for
+  this effort's reasons anyway (04: the palette's resting state). *(Amended in
+  review: the last two were renewed first and named here afterwards; the tickets'
+  Comments carry each diff's description.)*
 - **Ticket 03 adds three browser checks** to `packages/demo/checks/`, run by all
   three demos:
   1. *Own text context* — within every example, no element that renders text has
@@ -313,3 +322,36 @@ dependency that happens to look identical.
 deviations from this spec are recorded where they apply: the third layer
 `umriss.base` (Implementation Decisions › Layers, and ADR-0021), and squircle
 corners added by a build step, `ownCorners`, instead of in 38 modules (tickets 04/05).
+
+**Review follow-up.** A two-axis review (standards, spec) after delivery found
+21 points; every one is resolved:
+
+- *Focus.* Seven focusable elements still leaned on the old page-wide ring —
+  the calendar's days and month arrows, the range presets, MultiSelect's scopes
+  and counter, the close buttons of Modal and Toast. The browser check cannot
+  reach them while their panels are closed, so a unit guard in core and table
+  (`focusGuard.test.ts`, reading `scripts/styles/focus.ts`) now reads every
+  element in the tab order from the source; all seven take `ring`.
+- *Box.* `ownBox` gives every class's `::before` and `::after` their box again,
+  as the page-wide rule did.
+- *Rules.* `offendersIn` refuses `html`, `body` and `:root` anywhere in a
+  selector, not only on their own; the layer names stand once (`LAYERS`,
+  `LAYER_ORDER`, `beginsWithLayerOrder`), and `check-dist.ts` uses them;
+  `inKeyframes` stands once; a line that added a selector twice is gone.
+- *One source for the shared classes.* The table's copy of core's
+  `own.module.css` is gone: both packages compose `#own-styles`,
+  `scripts/styles/own.module.css`, which `ownStyles()` — now a Vite plugin in
+  every build, demo and unit-test config — resolves beside the build steps.
+- *Text context.* `VisuallyHidden` takes it on the focusable skip link only;
+  `Divider` on its label only.
+- *Charts demo.* Its own controls and the benchmark's measurements carry their
+  type and ring in `demo.css` instead of being tolerated; the fix brought to
+  light three sizes the demo had named with tokens that do not exist
+  (`--u-font-size-*` for `--u-text-*`).
+- *The check.* `ownBase.ts` installs one probe per page as real code instead of
+  functions kept as strings.
+- *Documents.* `CONTEXT.md` **Provider** and **Theme** follow the decision;
+  over-long comment lines introduced by this effort are wrapped.
+- *Deviation recorded:* `ownCorners` writes `corner-shape: squircle` without the
+  old `@supports` wrapper — a browser without the property discards the
+  declaration, which is the same result with one rule less.

@@ -3,24 +3,21 @@
    every element of the application; this step reaches the elements that carry
    a class of the stylesheet - and nothing a caller placed inside them.
 
-   Every class the stylesheet names gets a rule of its own, `.value { box-sizing:
-   border-box }`, however it is used: `.verdict[data-verdict] .value` is the only
-   rule some classes have, and the element carries its class in every state. A
-   subject named by type or attribute (`.field input`) gets its full selector,
-   because a bare `input` would be the page's. A subject that is `*` or a bare
-   pseudo-class is the caller's content and gets nothing.
+   Every class the stylesheet names gets a rule of its own - `.value,
+   .value::before, .value::after { box-sizing: border-box }`, the pseudo-elements
+   included as the page-wide rule included them - however it is used:
+   `.verdict[data-verdict] .value` is the only rule some classes have, and the
+   element carries its class in every state. A subject named by type or attribute
+   (`.field input`) gets its full selector, because a bare `input` would be the
+   page's. A subject that is `*` or a bare pseudo-class is the caller's content
+   and gets nothing.
 
    The class rules stand at the head of the layer the class first appears in,
    before every rule of the stylesheet, so whatever a stylesheet declares itself
    wins; a class the stylesheet gives a `box-sizing` of its own is skipped. */
 
 import type { AtRule, Container, Declaration, Plugin, Rule } from "postcss";
-import { classesOf, namesAClass, subject, subjectIsOwn } from "./selectors.ts";
-
-const inKeyframes = (rule: Rule) => {
-  const parent = rule.parent;
-  return parent?.type === "atrule" && /keyframes$/i.test((parent as AtRule).name);
-};
+import { classesOf, inKeyframes, namesAClass, subject, subjectIsOwn } from "./selectors.ts";
 
 /** The layer block a rule stands in, or the stylesheet itself. */
 function headOf(rule: Rule): Container {
@@ -38,10 +35,7 @@ export function ownBox(): Plugin {
       const declared = new Set<string>();
       root.walkDecls("box-sizing", (decl) => {
         if (decl.parent?.type !== "rule") return;
-        for (const s of (decl.parent as Rule).selectors) {
-          declared.add(s.trim());
-          if (/^\.[\w-]+$/.test(s.trim())) declared.add(s.trim());
-        }
+        for (const selector of (decl.parent as Rule).selectors) declared.add(selector.trim());
       });
 
       const given = new Set<string>();
@@ -53,7 +47,7 @@ export function ownBox(): Plugin {
       };
 
       root.walkRules((rule) => {
-        if (inKeyframes(rule) || given.has(rule.selector)) return;
+        if (inKeyframes(rule)) return;
         const head = headOf(rule);
         for (const raw of rule.selectors) {
           const selector = raw.trim();
@@ -61,7 +55,7 @@ export function ownBox(): Plugin {
           for (const name of classesOf(selector)) {
             if (declared.has(name) || given.has(name)) continue;
             given.add(name);
-            const node = box(name);
+            const node = box(`${name}, ${name}::before, ${name}::after`);
             const last = lastAt.get(head);
             if (last) last.after(node);
             else head.prepend(node);
@@ -78,6 +72,7 @@ export function ownBox(): Plugin {
   };
 }
 ownBox.postcss = true;
+
 /* Squircle corners on the library's own elements (ADR-0021). The base layer
    set `corner-shape: squircle` on `*` inside `@supports`, which reached every
    rounded element of the application. This step gives it to every own rule that
