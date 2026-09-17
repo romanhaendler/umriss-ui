@@ -78,9 +78,9 @@ export function xOf(view: Viewport, instant: number): number {
 
 /** Where a lane is drawn on the plot, scroll included - its own row, or its
     strip inside a folded group. Null for a lane this plot does not have. */
-export function slotAt(view: Viewport, lane: string): { top: number; height: number; miniature: boolean } | null {
+export function slotAt(view: Viewport, lane: string): Slot | null {
   const slot = slotOf(view.rows, lane);
-  return slot === null ? null : { top: slot.top - view.scrollY, height: slot.height, miniature: slot.miniature };
+  return slot === null ? null : { ...slot, top: slot.top - view.scrollY };
 }
 
 /** The top of a lane on the plot. */
@@ -166,6 +166,10 @@ export function barLabelBox(
   box: SubtaskBox,
   plotWidth: number,
 ): { x: number; width: number; y: number; height: number } | null {
+  /* A strip of a miniature carries no word at all: three pixels of height
+     hold no text, and a label floating over a folded group would name work
+     the reader cannot see the shape of. */
+  if (box.miniature) return null;
   /* Fixed work is capped at both ends, and a word must not lie on a mark - the
      hatch across a bar's face was taken away for exactly that reason. So the
      label of a capped bar begins after its cap and stops before the other
