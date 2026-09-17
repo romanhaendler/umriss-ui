@@ -110,6 +110,7 @@ The table and the alarm list are not part of this package. They live in
 | `ConfirmDialog` | a compact confirmation dialog, `tone="danger"` for destructive actions, loading state |
 | `ToastProvider` / `useToast` | stacked status messages at the bottom right, four tones, auto-dismiss, `aria-live` |
 | `Menu` / `MenuItem` / `MenuSeparator` | a dropdown menu with a portal panel, arrow-key navigation, `tone="danger"` |
+| `ContextMenu` | the same menu opened at a point in the viewport - for a right-click on a surface that is not a button; controlled, focus returns to where it was |
 | `Tooltip` | help text on hover and keyboard focus, inverted (ink surface), portal |
 | `Tabs` / `TabList` / `Tab` / `TabPanel` | controlled tabs with an ink underline and arrow-key control |
 | `Skeleton` | a loading placeholder (bar or circle) with a discreet pulse |

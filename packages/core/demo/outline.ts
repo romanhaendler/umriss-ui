@@ -295,6 +295,13 @@ export const OUTLINE: readonly Rubric[] = [
         exports: ["Menu", "MenuItem", "MenuSeparator"],
       },
       {
+        id: "contextmenu",
+        name: "ContextMenu",
+        sentence: "The same menu, opened at a point instead of under a trigger - for a right-click on something that is not a button.",
+        types: ["ContextMenuProps"],
+        exports: ["ContextMenu", "MenuItem", "MenuSeparator"],
+      },
+      {
         id: "modal",
         name: "Modal",
         sentence: "A window above the page that holds focus until it is answered.",
