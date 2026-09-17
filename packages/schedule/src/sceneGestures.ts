@@ -10,7 +10,7 @@ import { calendarFrom, toOperatingTimeClamped, toWallClock } from "@umriss-ui/ch
 import { autoPanSpeed } from "./autoPan";
 import { lateTransports, overlaps, type LateTransport, type Overlap } from "./findings";
 import { edgeAt, partAt } from "./geometry";
-import { occupied, type Intent, type Subtask } from "./model";
+import { occupied, type Intent, type PlaceIntent, type Subtask } from "./model";
 import type { SceneData } from "./sceneData";
 import { ghostBox, type GhostDrawing } from "./sceneDraw";
 import type { ScheduleHit, SceneView } from "./sceneView";
@@ -60,8 +60,29 @@ export interface GestureHost {
 
 type EditMode = "move" | "stretch-from" | "stretch-to" | "setup" | "teardown";
 
+/** What the application says it is dragging in, while it drags it
+    (schedule-refinement 07): the browser hands over the dragged data only on
+    the drop, so the ghost before the drop can only come from the caller. */
+export interface PlacingItem {
+  /** The caller's key for the dragged item; it comes back in the intent. */
+  readonly item: string;
+  /** The task the work belongs to. */
+  readonly task: string;
+  /** How long its main time is. */
+  readonly duration: number;
+  /** The setup it brings. */
+  readonly setup?: number;
+  /** The teardown it brings. */
+  readonly teardown?: number;
+}
+
+/** The id the ghost of a drag from outside carries while it is in flight. It
+    is never data: the placed subtask gets the caller's id (`subtaskFromPlace`). */
+const PLACING = "\u0000placing";
+
 type Gesture =
   | { kind: "none" }
+  | { kind: "place"; ghost: Subtask; item: PlacingItem }
   | { kind: "pending"; pointerId: number; x0: number; y0: number; mode: EditMode | "pan"; subtask: Subtask | null }
   | { kind: "pan"; pointerId: number; lastX: number; lastY: number }
   /* `t0` is the operating time the drag took hold at - not a pixel, because
@@ -117,7 +138,7 @@ export class SceneGestures {
   /* ---------------------------------------------------------------- */
 
   get editing(): boolean {
-    return this.gesture.kind === "edit";
+    return this.gesture.kind === "edit" || this.gesture.kind === "place";
   }
 
   /** No press, pan, pinch or drag in flight. */
@@ -126,18 +147,19 @@ export class SceneGestures {
   }
 
   ghostDrawing(): GhostDrawing | null {
-    if (this.gesture.kind !== "edit") return null;
-    const found = this.ghostFindings(this.gesture.ghost);
-    return { ghost: this.gesture.ghost, overlaps: found.overlaps, late: found.late };
+    const gesture = this.gesture;
+    if (gesture.kind !== "edit" && gesture.kind !== "place") return null;
+    const found = this.ghostFindings(gesture.ghost);
+    return { ghost: gesture.ghost, overlaps: found.overlaps, late: found.late };
   }
 
   ghostSummary(): GhostSummary | null {
     const gesture = this.gesture;
-    if (gesture.kind !== "edit") return null;
+    if (gesture.kind !== "edit" && gesture.kind !== "place") return null;
     const box = ghostBox(this.host, this.host.view.viewport(), gesture.ghost);
     if (box === null) return null;
     const found = this.ghostFindings(gesture.ghost);
-    const outer = gesture.mode === "setup" || gesture.mode === "teardown";
+    const outer = gesture.kind === "edit" && (gesture.mode === "setup" || gesture.mode === "teardown");
     const shown = outer ? occupied(gesture.ghost) : gesture.ghost;
     return {
       x: outer ? box.outerFrom : box.mainFrom,
@@ -323,9 +345,10 @@ export class SceneGestures {
     this.setHover({ kind: "nothing" }, "nothing");
   }
 
-  /** Escape while a drag is in flight: the ghost goes, and nothing is reported. */
+  /** Escape while a drag is in flight: the ghost goes, and nothing is reported.
+      It ends a drag from outside as it ends one inside. */
   cancelEdit(): boolean {
-    if (this.gesture.kind !== "edit") return false;
+    if (this.gesture.kind !== "edit" && this.gesture.kind !== "place") return false;
     this.stopAutoPan();
     this.gesture = { kind: "none" };
     this.cursor = "default";
@@ -418,6 +441,67 @@ export class SceneGestures {
   /* Ghost and intents                                                 */
   /* ---------------------------------------------------------------- */
 
+  /* ---------------------------------------------------------------- */
+  /* Dragging work in from outside                                     */
+  /* ---------------------------------------------------------------- */
+
+  /** An HTML drag over the plot. While the caller has declared what it is
+      dragging and handles the place intent, the drop is accepted and a ghost
+      shows where the work would land. */
+  dragOver(event: DragEvent, placing: PlacingItem | null): void {
+    const view = this.host.view;
+    if (placing === null || !view.options.intents.includes("place")) return;
+    const { x, y } = this.local(event.clientX, event.clientY);
+    const lane = view.laneIdAt(y);
+    if (lane === null) {
+      this.clearPlacing();
+      return;
+    }
+    event.preventDefault();
+    if (event.dataTransfer !== null) event.dataTransfer.dropEffect = "copy";
+    const from = this.snapInside(view.timeAt(x), this.snapStep());
+    const ghost: Subtask = {
+      id: PLACING,
+      task: placing.task,
+      lane,
+      from,
+      to: from + placing.duration,
+      ...(placing.setup === undefined ? {} : { setup: placing.setup }),
+      ...(placing.teardown === undefined ? {} : { teardown: placing.teardown }),
+    };
+    this.gesture = { kind: "place", ghost, item: placing };
+    this.host.interactionChanged();
+  }
+
+  /** The drop: the place intent, and the ghost goes. Off every lane, or with
+      nothing declared, nothing is reported. */
+  drop(event: DragEvent): void {
+    const gesture = this.gesture;
+    if (gesture.kind !== "place") return;
+    event.preventDefault();
+    const { ghost, item } = gesture;
+    this.gesture = { kind: "none" };
+    this.host.interactionChanged();
+    const intent: PlaceIntent = {
+      kind: "place",
+      item: item.item,
+      task: ghost.task,
+      lane: ghost.lane,
+      from: ghost.from,
+      to: ghost.to,
+      ...(ghost.setup === undefined ? {} : { setup: ghost.setup }),
+      ...(ghost.teardown === undefined ? {} : { teardown: ghost.teardown }),
+    };
+    this.host.handlers().onIntent?.(intent);
+  }
+
+  /** The drag left the plot, or the application stopped dragging. */
+  clearPlacing(): void {
+    if (this.gesture.kind !== "place") return;
+    this.gesture = { kind: "none" };
+    this.host.interactionChanged();
+  }
+
   private snapStep(): SnapRaster {
     const snap = this.host.view.options.snap;
     if (snap === "ticks") return { step: this.host.view.step(), offset: 0 };
@@ -486,10 +570,12 @@ export class SceneGestures {
     return intents;
   }
 
-  /** The findings the ghost would create, assessed as if it were data. */
+  /** The findings the ghost would create, assessed as if it were data - the
+      ghost of a drag from outside is added to the data, the ghost of a drag
+      inside it replaces the subtask it came from. */
   private ghostFindings(ghost: Subtask): { overlaps: Overlap[]; late: LateTransport[] } {
     const data = this.host.data;
-    const assessed = data.subtasks.map((s) => (s.id === ghost.id ? ghost : s));
+    const assessed = ghost.id === PLACING ? [...data.subtasks, ghost] : data.subtasks.map((s) => (s.id === ghost.id ? ghost : s));
     const own = (o: Overlap) => o.first === ghost.id || o.second === ghost.id;
     const touching = data.transports.filter((t) => t.from === ghost.id || t.to === ghost.id);
     return { overlaps: overlaps(assessed).filter(own), late: lateTransports(assessed, touching) };

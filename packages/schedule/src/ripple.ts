@@ -21,6 +21,10 @@ export function ripple(
   transports: readonly Transport[],
   intent: Intent,
 ): MoveIntent[] {
+  /* A place intent pushes nothing: the subtask it asks for does not exist yet,
+     and until the caller has created it and named its transports there is no
+     successor to push. Run `ripple` again over the data that has it. */
+  if (intent.kind === "place") return [];
   const current = new Map(subtasks.map((s) => [s.id, applyIntent(s, intent)] as const));
   const leaving = new Map<string, Transport[]>();
   for (const transport of transports) {

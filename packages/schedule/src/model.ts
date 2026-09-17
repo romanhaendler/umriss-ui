@@ -124,10 +124,32 @@ export interface LaneIntent {
   readonly lane: string;
 }
 
+/** Put work on the plan that was not on it: the answer to a drag from outside
+    the schedule (schedule-refinement 07). It carries no subtask id - there is
+    no subtask yet; the caller creates one, with its own identity, from
+    `subtaskFromPlace`. */
+export interface PlaceIntent {
+  readonly kind: "place";
+  /** The caller's key for the dragged item, as it declared it while dragging. */
+  readonly item: string;
+  /** The task the work belongs to. */
+  readonly task: string;
+  /** The lane it was dropped on. */
+  readonly lane: string;
+  /** Where its main time would start. */
+  readonly from: number;
+  /** Where its main time would end. */
+  readonly to: number;
+  /** The setup it was declared with. */
+  readonly setup?: number;
+  /** The teardown it was declared with. */
+  readonly teardown?: number;
+}
+
 /** What the schedule reports when an interaction asks for a change. Every
     intent carries the values it asks for, not a difference: two intents of one
     drop - a move and a lane - give the same data in either order. */
-export type Intent = MoveIntent | StretchIntent | SetupIntent | TeardownIntent | LaneIntent;
+export type Intent = MoveIntent | StretchIntent | SetupIntent | TeardownIntent | LaneIntent | PlaceIntent;
 
 /** The names of the intents - the editing API of the schedule. */
 export type IntentKind = Intent["kind"];
@@ -135,7 +157,9 @@ export type IntentKind = Intent["kind"];
 /** The subtask as the intent asks for it. An intent for another subtask leaves
     it as it is. */
 export function applyIntent<S extends Subtask>(subtask: S, intent: Intent): S {
-  if (intent.subtask !== subtask.id) return subtask;
+  /* A place intent has no subtask to apply it to: creating one is the caller's
+     act, with the caller's identity (`subtaskFromPlace`). */
+  if (intent.kind === "place" || intent.subtask !== subtask.id) return subtask;
   switch (intent.kind) {
     case "move":
     case "stretch":
@@ -147,4 +171,17 @@ export function applyIntent<S extends Subtask>(subtask: S, intent: Intent): S {
     case "lane":
       return { ...subtask, lane: intent.lane };
   }
+}
+
+/** The subtask a place intent asks for, under an id the caller chooses. */
+export function subtaskFromPlace(intent: PlaceIntent, id: string): Subtask {
+  return {
+    id,
+    task: intent.task,
+    lane: intent.lane,
+    from: intent.from,
+    to: intent.to,
+    ...(intent.setup === undefined ? {} : { setup: intent.setup }),
+    ...(intent.teardown === undefined ? {} : { teardown: intent.teardown }),
+  };
 }

@@ -2,16 +2,17 @@
 
 export { Schedule, type ScheduleProps, type ScheduleHandle } from "./Schedule";
 export { Lane, Subtasks, Transports, type LaneProps, type SubtasksProps, type TransportsProps } from "./parts";
-export type { ScheduleHit, ScheduleInteraction, ScheduleTooltipTarget } from "./scene";
+export type { ScheduleHit, ScheduleInteraction, ScheduleTooltipTarget, PlacingItem } from "./scene";
 
 /* The pure modules: the arithmetic a caller runs over its own data - the
    findings as data, and the cascade the schedule never applies itself. */
-export { applyIntent, arrival, departure, occupied } from "./model";
+export { applyIntent, arrival, departure, occupied, subtaskFromPlace } from "./model";
 export type {
   Intent,
   IntentKind,
   LaneIntent,
   MoveIntent,
+  PlaceIntent,
   SetupIntent,
   StretchIntent,
   Subtask,
