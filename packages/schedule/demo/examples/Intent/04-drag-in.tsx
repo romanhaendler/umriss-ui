@@ -30,22 +30,28 @@ const WAITING: readonly (PlacingItem & { label: string })[] = [
 ];
 
 export default function DragIn() {
-  const [steps, setSteps] = useState<readonly Subtask[]>(STEPS);
+  const [plan, setPlan] = useState<{ steps: readonly Subtask[]; placed: number; last: string }>({
+    steps: STEPS,
+    placed: 0,
+    last: "Drag an order onto a lane",
+  });
   const [placing, setPlacing] = useState<PlacingItem | null>(null);
-  const [placed, setPlaced] = useState(0);
-  const [last, setLast] = useState("Drag an order onto a lane");
 
-  const onIntent = (intent: Intent) => {
-    if (intent.kind === "place") {
-      const id = `${intent.item}-${placed + 1}`;
-      setPlaced(placed + 1);
-      setSteps((current) => [...current, subtaskFromPlace(intent, id)]);
-      setLast(`place ${intent.item} on ${intent.lane} as ${id}`);
-      return;
-    }
-    setSteps((current) => current.map((step) => applyIntent(step, intent)));
-    setLast(`${intent.kind} ${intent.subtask}`);
-  };
+  /* One functional update, so that a second intent in the same tick - and the
+     counter the new id is built from - starts from the plan the first left. */
+  const onIntent = (intent: Intent) =>
+    setPlan((current) => {
+      if (intent.kind !== "place") {
+        return { ...current, steps: current.steps.map((step) => applyIntent(step, intent)), last: `${intent.kind} ${intent.subtask}` };
+      }
+      const placed = current.placed + 1;
+      const id = `${intent.item}-${placed}`;
+      return {
+        steps: [...current.steps, subtaskFromPlace(intent, id)],
+        placed,
+        last: `place ${intent.item} on ${intent.lane} as ${id}`,
+      };
+    });
 
   return (
     <Stack gap={3}>
@@ -80,10 +86,10 @@ export default function DragIn() {
           <Lane key={station.id} id={station.id} label={station.label} />
         ))}
         <Transports data={MOVES} />
-        <Subtasks data={steps} tasks={ORDERS} />
+        <Subtasks data={plan.steps} tasks={ORDERS} />
       </Schedule>
       <Text size="sm" mono tone="secondary" data-last-place>
-        {last}
+        {plan.last}
       </Text>
     </Stack>
   );
