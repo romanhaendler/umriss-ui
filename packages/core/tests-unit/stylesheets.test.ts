@@ -56,22 +56,13 @@ const ALLOWED_DURATIONS: Readonly<Record<string, string>> = {
     "The press point - shorter than any token. It has a block for reduced motion; it gets a name with visuelle-wertigkeit 02.",
 };
 
-/** Offenders ADR-0021 still tolerates in tokens.css, each with its reason. */
-const TOLERATED_IN_TOKENS: Readonly<Record<string, string>> = {
-  ":root: declares color-scheme, not only custom properties":
-    "The theme still hangs on the document; styles-without-side-effects 02 moves it to light-dark().",
-  ':root[data-theme="dark"]: declares color-scheme, not only custom properties': "The same, for the dark block.",
-};
-
 describe("Stylesheets of the library (ADR-0021)", () => {
   it("begin with the layer order and keep every rule inside a layer of the library", () => {
     const offenders = [...entries(), ["tokens.css", TOKENS] as const].flatMap(([file, text]) => [
       ...(text.includes(LAYER_ORDER) ? [] : [`${file}: no layer order statement`]),
       ...offendersIn(text).map((offender) => `${file}: ${offender}`),
     ]);
-    const tolerated = (offender: string) =>
-      offender.startsWith("tokens.css: ") && offender.slice("tokens.css: ".length) in TOLERATED_IN_TOKENS;
-    expect(offenders.filter((offender) => !tolerated(offender))).toEqual([]);
+    expect(offenders).toEqual([]);
   });
 });
 

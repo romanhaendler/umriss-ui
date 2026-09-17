@@ -22,7 +22,10 @@ function useTheme(): [Theme, (t: Theme) => void] {
   );
 
   useEffect(() => {
-    document.documentElement.dataset.theme = theme;
+    /* The way an application switches its mode: `color-scheme` on the root.
+       The tokens follow it through light-dark() (ADR-0021) - there is no
+       attribute of the library to set beside it. */
+    document.documentElement.style.colorScheme = theme;
   }, [theme]);
 
   return [theme, setTheme];

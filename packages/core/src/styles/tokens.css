@@ -7,67 +7,72 @@
    one job per step. A single accent (petrol), for interactive
    things and nothing else. Numbers run in Geist Mono.
 
-   Theming: <html data-theme="dark"> activates the dark theme;
-   the primary button reverses its polarity there (light on dark).
+   Theming: a token with two values is written once,
+   light-dark(<light>, <dark>), and follows the `color-scheme` the
+   element inherits from the application - the library sets it nowhere
+   (ADR-0021). The primary button reverses its polarity in the dark
+   theme (light on dark).
    ============================================================ */
 
 @layer umriss.tokens, umriss.components;
 
 @layer umriss.tokens {
   :root {
-    color-scheme: light;
-
     /* ---- Neutral: Tinte & Papier ---- */
-    --u-color-bg: #fafafa;
-    --u-color-surface: #ffffff;
-    --u-color-surface-sunken: #f4f4f5;
-    --u-color-text: #171717;
-    --u-color-text-secondary: #565656;
-    --u-color-text-muted: #8b8b8b;
+    --u-color-bg: light-dark(#fafafa, #0f0f10);
+    --u-color-surface: light-dark(#ffffff, #161618);
+    --u-color-surface-sunken: light-dark(#f4f4f5, #1e1e21);
+    --u-color-text: light-dark(#171717, #ededed);
+    --u-color-text-secondary: light-dark(#565656, #a5a5ab);
+    --u-color-text-muted: light-dark(#8b8b8b, #77777e);
 
     /* ---- Edges as shadows (instead of borders) ---- */
-    --u-edge-color: rgba(23, 23, 23, 0.08);
-    --u-edge-color-strong: rgba(23, 23, 23, 0.17);
+    --u-edge-color: light-dark(rgba(23, 23, 23, 0.08), rgba(255, 255, 255, 0.10));
+    --u-edge-color-strong: light-dark(rgba(23, 23, 23, 0.17), rgba(255, 255, 255, 0.20));
     --u-edge: 0 0 0 1px var(--u-edge-color);
     --u-edge-strong: 0 0 0 1px var(--u-edge-color-strong);
-    --u-hairline: rgba(23, 23, 23, 0.06);        /* inner dividing lines */
+    --u-hairline: light-dark(rgba(23, 23, 23, 0.06), rgba(255, 255, 255, 0.07));        /* inner dividing lines */
     /* The edge of a field under the pointer. It stood seven times as the same
        mixture across the modules, and twice as muted text beside them. */
     --u-color-edge-hover: color-mix(in srgb, var(--u-color-text) 30%, transparent);
-    --u-hairline-strong: rgba(23, 23, 23, 0.12); /* e.g. under table heads */
+    --u-hairline-strong: light-dark(rgba(23, 23, 23, 0.12), rgba(255, 255, 255, 0.14)); /* e.g. under table heads */
 
     /* ---- Ink as interaction (the primary button) ---- */
-    --u-color-primary-bg: #171717;
-    --u-color-primary-fg: #ffffff;
-    --u-color-primary-hover: #2e2e2e;
-    --u-color-primary-active: #000000;
+    --u-color-primary-bg: light-dark(#171717, #ededed);
+    --u-color-primary-fg: light-dark(#ffffff, #171717);
+    --u-color-primary-hover: light-dark(#2e2e2e, #ffffff);
+    --u-color-primary-active: light-dark(#000000, #d6d6d6);
 
     /* ---- Accent (petrol) - interactive things only ---- */
-    --u-color-accent: #0e7d72;
-    --u-color-accent-hover: #0a685f;
-    --u-color-accent-active: #085a52;
-    --u-color-accent-subtle: #e9f4f2;
-    --u-color-accent-text: #0b6a61;
-    --u-color-on-accent: #ffffff;
+    --u-color-accent: light-dark(#0e7d72, #17a292);
+    --u-color-accent-hover: light-dark(#0a685f, #1cb5a3);
+    --u-color-accent-active: light-dark(#085a52, #128d7f);
+    --u-color-accent-subtle: light-dark(#e9f4f2, #142e2b);
+    --u-color-accent-text: light-dark(#0b6a61, #4cc4b5);
+    --u-color-on-accent: light-dark(#ffffff, #072522);
     /* Type on the danger surface - it stood as #ffffff inside the button, and so
        slipped past every check (library-audit 07). */
-    --u-color-on-danger: #ffffff;
+    /* Dark: White measures only 3.68:1 on the lighter danger surface. The polarity
+       turns as it does for the accent: dark type on a light ground. */
+    --u-color-on-danger: light-dark(#ffffff, #2b0f0d);
 
     /* ---- Semantics (muted) ---- */
-    --u-color-success: #217a4b;
-    --u-color-success-subtle: #e8f2ec;
+    --u-color-success: light-dark(#217a4b, #4fae7c);
+    --u-color-success-subtle: light-dark(#e8f2ec, #16241d);
     /* Darkened from #9a6700: on its own pale surface the old value reached only
        4.24:1 and so missed the 4.5:1 for normal text. Found by the accessibility
        check, once the demo finally ran with tokens (see demo/main.tsx). Now
        4.97:1. */
-    --u-color-warning: #8a5c00;
-    --u-color-warning-subtle: #f7efdb;
-    --u-color-danger: #b13636;
-    --u-color-danger-hover: #9a2c2c;
+    --u-color-warning: light-dark(#8a5c00, #d0a24d);
+    --u-color-warning-subtle: light-dark(#f7efdb, #2b2415);
+    --u-color-danger: light-dark(#b13636, #d0655c);
+    --u-color-danger-hover: light-dark(#9a2c2c, #da7a72);
     /* Pressed: darker in the light theme. As a mixture rather than a value, so
        that it follows the ground; the dark theme turns the direction round. */
-    --u-color-danger-active: color-mix(in srgb, var(--u-color-danger) 85%, #000000);
-    --u-color-danger-subtle: #f8eaea;
+    --u-color-danger-active:
+      color-mix(in srgb,
+      var(--u-color-danger) 85%, light-dark(#000000, #ffffff));
+    --u-color-danger-subtle: light-dark(#f8eaea, #2f1b1d);
 
     /* ---- Focus: a soft accent glow ---- */
     --u-focus-ring: 0 0 0 4px color-mix(in srgb, var(--u-color-accent) 20%, transparent);
@@ -156,12 +161,12 @@
        Overlay: edge - near shadow - depth                    */
     --u-shadow-card:
       var(--u-edge),
-      0 1px 2px rgba(23, 23, 23, 0.04),
-      0 8px 24px -12px rgba(23, 23, 23, 0.14);
+      0 1px 2px light-dark(rgba(23, 23, 23, 0.04), rgba(0, 0, 0, 0.4)),
+      0 8px 24px -12px light-dark(rgba(23, 23, 23, 0.14), rgba(0, 0, 0, 0.6));
     --u-shadow-overlay:
       var(--u-edge),
-      0 4px 8px rgba(23, 23, 23, 0.06),
-      0 24px 48px -16px rgba(23, 23, 23, 0.24);
+      0 4px 8px light-dark(rgba(23, 23, 23, 0.06), rgba(0, 0, 0, 0.4)),
+      0 24px 48px -16px light-dark(rgba(23, 23, 23, 0.24), rgba(0, 0, 0, 0.7));
 
     /* ---- Translucent material and scrim (ADR-0012) ----
 
@@ -196,10 +201,13 @@
        less and the panel covers more, and the distance between the two carries the
        step. The dark theme needed no such correction: there the lightness already
        separates them. */
-    --u-color-material-fallback: #fdfdfe;
-    --u-color-material: rgba(253, 253, 254, 0.86);
+    /* Dark: Chosen by eye, not derived from the light theme: the alpha floor lies
+       higher here, because light type over a dark blur tolerates markedly less
+       transparency. */
+    --u-color-material-fallback: light-dark(#fdfdfe, #1f1f23);
+    --u-color-material: light-dark(rgba(253, 253, 254, 0.86), rgba(31, 31, 35, 0.82));
     --u-material-blur: 24px;
-    --u-color-scrim: rgba(23, 23, 23, 0.30);
+    --u-color-scrim: light-dark(rgba(23, 23, 23, 0.30), rgba(0, 0, 0, 0.60));
 
     /* ---- Motion: explains a change of state, does not decorate ---- */
     --u-transition: 120ms ease-out;          /* micro: hover, colour */
@@ -220,61 +228,6 @@
      The primary button reverses polarity: light on dark.
      ============================================================ */
 
-  :root[data-theme="dark"] {
-    color-scheme: dark;
-
-    --u-color-bg: #0f0f10;
-    --u-color-surface: #161618;
-    --u-color-surface-sunken: #1e1e21;
-    --u-color-text: #ededed;
-    --u-color-text-secondary: #a5a5ab;
-    --u-color-text-muted: #77777e;
-
-    --u-edge-color: rgba(255, 255, 255, 0.10);
-    --u-edge-color-strong: rgba(255, 255, 255, 0.20);
-    --u-hairline: rgba(255, 255, 255, 0.07);
-    --u-hairline-strong: rgba(255, 255, 255, 0.14);
-
-    --u-color-primary-bg: #ededed;
-    --u-color-primary-fg: #171717;
-    --u-color-primary-hover: #ffffff;
-    --u-color-primary-active: #d6d6d6;
-
-    --u-color-accent: #17a292;
-    --u-color-accent-hover: #1cb5a3;
-    --u-color-accent-active: #128d7f;
-    --u-color-accent-subtle: #142e2b;
-    --u-color-accent-text: #4cc4b5;
-    --u-color-on-accent: #072522;
-    /* White measures only 3.68:1 on the lighter danger surface. The polarity
-       turns as it does for the accent: dark type on a light ground. */
-    --u-color-on-danger: #2b0f0d;
-    --u-color-danger-active: color-mix(in srgb, var(--u-color-danger) 85%, #ffffff);
-
-    --u-color-success: #4fae7c;
-    --u-color-success-subtle: #16241d;
-    --u-color-warning: #d0a24d;
-    --u-color-warning-subtle: #2b2415;
-    --u-color-danger: #d0655c;
-    --u-color-danger-hover: #da7a72;
-    --u-color-danger-subtle: #2f1b1d;
-
-    /* Chosen by eye, not derived from the light theme: the alpha floor lies
-       higher here, because light type over a dark blur tolerates markedly less
-       transparency. */
-    --u-color-material-fallback: #1f1f23;
-    --u-color-material: rgba(31, 31, 35, 0.82);
-    --u-color-scrim: rgba(0, 0, 0, 0.60);
-
-    --u-shadow-card:
-      var(--u-edge),
-      0 1px 2px rgba(0, 0, 0, 0.4),
-      0 8px 24px -12px rgba(0, 0, 0, 0.6);
-    --u-shadow-overlay:
-      var(--u-edge),
-      0 4px 8px rgba(0, 0, 0, 0.4),
-      0 24px 48px -16px rgba(0, 0, 0, 0.7);
-  }
 
   /* Stacking order. Scattered literals stood here before (900 for panels, 1000
      toast, 1100 tooltip), which is how a menu inside a modal ended up behind the

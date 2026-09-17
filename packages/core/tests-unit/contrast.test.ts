@@ -24,31 +24,26 @@ import { describe, expect, it } from "vitest";
 
 type Theme = ReadonlyMap<string, string>;
 
-const escape = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-/* Collects the hex declarations of all blocks with exactly this selector. No
-   CSS parser: the blocks in tokens.css contain no nested braces, so "up to the
-   next closing brace" is enough. Everything that is not a hex value (shadows,
-   measures, color-mix) drops out here - contrast is defined only over opaque
-   colours. */
-function readBlock(selector: string): Map<string, string> {
+/* The hex values of one theme out of the `:root` block. A token with two values
+   stands there as `light-dark(<light>, <dark>)` (ADR-0021); one with a single
+   value is the same in both themes. No CSS parser: the block contains no nested
+   braces, so "up to the next closing brace" is enough. Everything that is not a
+   hex value (shadows, measures, color-mix) drops out here - contrast is defined
+   only over opaque colours. */
+function readTheme(which: "light" | "dark"): Map<string, string> {
   const values = new Map<string, string>();
-  const head = new RegExp(`${escape(selector)}\\s*\\{`, "g");
-  for (let match = head.exec(STYLESHEET); match; match = head.exec(STYLESHEET)) {
-    const start = match.index + match[0].length;
-    const end = STYLESHEET.indexOf("}", start);
-    const body = STYLESHEET.slice(start, end === -1 ? undefined : end);
-    for (const line of body.matchAll(/(--[\w-]+)\s*:\s*(#[0-9a-fA-F]{3,8})\s*;/g)) {
-      values.set(line[1]!, line[2]!.toLowerCase());
-    }
+  const start = STYLESHEET.indexOf(":root {") + ":root {".length;
+  const body = STYLESHEET.slice(start, STYLESHEET.indexOf("}", start));
+  const HEX = "#[0-9a-fA-F]{3,8}";
+  for (const line of body.matchAll(new RegExp(`(--[\\w-]+)\\s*:\\s*(?:(${HEX})|light-dark\\(\\s*(${HEX})\\s*,\\s*(${HEX})\\s*\\))\\s*;`, "g"))) {
+    const value = line[2] ?? (which === "light" ? line[3] : line[4]);
+    values.set(line[1]!, value!.toLowerCase());
   }
   return values;
 }
 
-/* Light is the default; dark overrides only what it sets anew - exactly as in
-   the browser, where :root[data-theme="dark"] builds on :root. */
-const LIGHT: Theme = readBlock(":root");
-const DARK: Theme = new Map([...LIGHT, ...readBlock(':root[data-theme="dark"]')]);
+const LIGHT: Theme = readTheme("light");
+const DARK: Theme = readTheme("dark");
 
 const THEMES = [
   ["light", LIGHT],
