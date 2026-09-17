@@ -52,7 +52,8 @@ module on the caller's side that carries `"use client"` and imports from there.
 
 ## Unreleased – The context menu (Sep. 2026)
 
-From `.scratch/schedule/spec.md`, ticket 01.
+From `.scratch/schedule/spec.md`, ticket 01, and
+`.scratch/schedule-refinement/spec.md`, ticket 03.
 
 ### Added
 
@@ -61,9 +62,11 @@ From `.scratch/schedule/spec.md`, ticket 01.
   `onOpenChange`, `position` in client coordinates, `ariaLabel`), built on
   `Popover`, with `MenuItem`, `MenuSeparator` and the menu's keyboard. The focus
   returns to where it stood when the menu opened.
-- **Wording:** `scheduleOverlap`, `scheduleLateTransport` and
-  `scheduleGhostTimes`, for `@umriss-ui/schedule`, in both shipped wordings. An
-  application that hands in a whole `Wording` object of its own adds the three.
+- **Wording:** `scheduleOverlap`, `scheduleLateTransport`,
+  `scheduleGhostTimes`, `scheduleSetup`, `scheduleTeardown`,
+  `scheduleTransport`, `scheduleRoute`, `scheduleOverlapWith` and
+  `scheduleLateBy`, for `@umriss-ui/schedule`, in both shipped wordings. An
+  application that hands in a whole `Wording` object of its own adds the nine.
 
 ---
 

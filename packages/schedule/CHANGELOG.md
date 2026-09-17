@@ -14,6 +14,55 @@ under a heading "Changed" of its own, no matter which digit rose.
 
 ---
 
+## Unreleased – The schedule in daily use (Sep. 2026)
+
+Delivery report for `.scratch/schedule-refinement/spec.md`, tickets 01–09.
+Read **Changed** first: the wheel does something else now.
+
+### Changed
+
+- **The wheel scrolls the lanes** and lets the page scroll on once they are at
+  their end. **Ctrl or ⌘ with the wheel, and a pinch, zoom**; a horizontal
+  wheel or Shift with a vertical one pans through time. Before this, every
+  wheel movement zoomed, which trapped the wheel on a long page and left
+  twenty lanes unreachable by it.
+- **`onSelectedTaskChange` carries the clicked subtask** as a second argument
+  (null for a click on a transport or on nothing), and is called again when
+  another subtask of the same task is clicked. A caller that reads only the
+  first argument is unaffected.
+
+### Added
+
+- **A tooltip** on a hovered subtask or transport: the order, the stop, its
+  times, setup and teardown, the transport's route and duration, and the
+  findings on it. `tooltip={false}` switches it off; a function replaces its
+  content and receives a `ScheduleTooltipTarget` with the findings.
+- **`now`** draws a line across the lanes at the present: `true` follows the
+  clock by the minute, an instant fixes it there. Off by default.
+- **A drag near the edge of the plot pans the plot along**, faster the closer
+  to the edge, so a subtask reaches a time that was not in view in one
+  gesture.
+- **`snap` takes a raster with an offset** (`{ step, offset }`): shifts at
+  06:00, 14:00 and 22:00 are eight hours offset by six. A snapped time that
+  would land in time an operating calendar removes moves on to the seam, so an
+  intent never asks for a time the plant does not run.
+- **`shiftTask(subtasks, task, by)`** returns one move intent per stop of a
+  task - the whole order moved, distances kept.
+- **The place intent and `placing`:** work that is not on the plan can be
+  dragged in from any list, with the platform's drag and drop. The application
+  declares what it is dragging in `placing` while it drags; a drop on a lane
+  reports `{ kind: "place", item, task, lane, from, to, setup, teardown }`.
+  `subtaskFromPlace(intent, id)` builds the subtask, `applyIntent` leaves the
+  data alone for it, and `ripple` pushes nothing until the subtask exists.
+  Without `"place"` in `intents` no drop is accepted.
+- **`onDomainChange`** reports the visible span after the planner pans or
+  zooms - for keeping a second schedule, or a chart's time axis, in step. A
+  span handed in through `initialDomain` is not reported back.
+- **A ref handle** (`ScheduleHandle`): `positionAt(clientX, clientY)`,
+  `clientPointOf(time, lane?)`, `visibleDomain()`.
+
+---
+
 ## 0.1.0-rc.0 – The schedule (Sep. 2026)
 
 Delivery report for `.scratch/schedule/spec.md` (ADR-0022, ADR-0023). Not yet
