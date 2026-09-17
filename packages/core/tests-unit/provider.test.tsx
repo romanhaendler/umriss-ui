@@ -5,12 +5,11 @@
    step-by-step adoption of the library hangs on - one component from each sort
    that reads configuration at all.
 
-   The `density` prop and the `data-density` attribute were German until
-   english-and-umriss-ui 31 - `dichte` and `data-dichte`, the last public
-   German left in the library. */
+   The `density` prop was German until english-and-umriss-ui 31 - `dichte`, the
+   last public German left in the library. */
 
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import { act, render, screen } from "@testing-library/react";
 import { useRef } from "react";
 import { UmrissProvider, useDensityFor } from "../src/lib/provider";
 import { Popover } from "../src/components/Popover";
@@ -42,10 +41,6 @@ function ToastSample({ duration }: { duration?: number }) {
     </button>
   );
 }
-
-afterEach(() => {
-  delete document.documentElement.dataset.theme;
-});
 
 describe("Without a provider – the checked normal case", () => {
   it("labels an input as before", () => {
@@ -94,108 +89,29 @@ describe("Without a provider – the checked normal case", () => {
     }
   });
 
-  it("does not touch the theme attribute", () => {
-    render(<Spinner />);
-    expect(document.documentElement.dataset.theme).toBeUndefined();
-  });
 });
 
-describe("Theme", () => {
-  it("sets the attribute the tokens listen to", async () => {
-    render(
-      <UmrissProvider theme="dark">
-        <Spinner />
-      </UmrissProvider>,
-    );
-    await waitFor(() => expect(document.documentElement.dataset.theme).toBe("dark"));
+/* ADR-0021: the provider holds no theme and writes nothing onto the document.
+   It once set `data-theme` and `data-density` on <html> - a provider mounted
+   deep in an application reached the whole page, and nothing read the
+   density attribute at all. Light and dark are the application's
+   `color-scheme` now; the density travels through context. */
+describe("The document stays as the application left it", () => {
+  const snapshot = () => ({
+    attributes: [...document.documentElement.attributes].map((a) => `${a.name}=${a.value}`).sort(),
+    style: document.documentElement.getAttribute("style"),
   });
 
-  it("leaves the attribute alone where no theme is given", async () => {
-    document.documentElement.dataset.theme = "light";
-    render(
-      <UmrissProvider>
-        <Spinner />
-      </UmrissProvider>,
-    );
-    await waitFor(() => expect(document.documentElement.dataset.theme).toBe("light"));
-  });
-
-  it("puts back on teardown what stood there before", async () => {
-    document.documentElement.dataset.theme = "light";
+  it("is not written to by a provider with every setting given, nor by its teardown", () => {
+    const before = snapshot();
     const { unmount } = render(
-      <UmrissProvider theme="dark">
+      <UmrissProvider density="compact" portalTarget={document.body} toast={{ duration: 1000 }} language={{}}>
         <Spinner />
       </UmrissProvider>,
     );
-    await waitFor(() => expect(document.documentElement.dataset.theme).toBe("dark"));
+    expect(snapshot()).toEqual(before);
     unmount();
-    expect(document.documentElement.dataset.theme).toBe("light");
-  });
-});
-
-describe('Theme "system" – following means subscribing', () => {
-  let dark = false;
-  const listeners = new Set<() => void>();
-
-  beforeEach(() => {
-    dark = false;
-    listeners.clear();
-    /* `matches` as a getter, not as a value: a real MediaQueryList reads the
-       state anew on every access, and that is exactly what the listener relies
-       on. A frozen value would have checked a promise here that the browser
-       does not make at all. */
-    vi.stubGlobal("matchMedia", (query: string) => ({
-      get matches() {
-        return query.includes("dark") && dark;
-      },
-      media: query,
-      addEventListener: (_: string, fn: () => void) => listeners.add(fn),
-      removeEventListener: (_: string, fn: () => void) => listeners.delete(fn),
-      addListener: () => {},
-      removeListener: () => {},
-      dispatchEvent: () => false,
-      onchange: null,
-    }));
-  });
-
-  afterEach(() => {
-    vi.unstubAllGlobals();
-  });
-
-  it("takes the setting at the start", async () => {
-    dark = true;
-    render(
-      <UmrissProvider theme="system">
-        <Spinner />
-      </UmrissProvider>,
-    );
-    await waitFor(() => expect(document.documentElement.dataset.theme).toBe("dark"));
-  });
-
-  it("takes a change at runtime along", async () => {
-    render(
-      <UmrissProvider theme="system">
-        <Spinner />
-      </UmrissProvider>,
-    );
-    await waitFor(() => expect(document.documentElement.dataset.theme).toBe("light"));
-
-    act(() => {
-      dark = true;
-      listeners.forEach((fn) => fn());
-    });
-    expect(document.documentElement.dataset.theme).toBe("dark");
-  });
-
-  it("unsubscribes again on teardown", async () => {
-    const { unmount } = render(
-      <UmrissProvider theme="system">
-        <Spinner />
-      </UmrissProvider>,
-    );
-    await waitFor(() => expect(listeners.size).toBe(1));
-    unmount();
-    expect(listeners.size).toBe(0);
+    expect(snapshot()).toEqual(before);
   });
 });
 
@@ -338,42 +254,19 @@ const read = () => document.querySelector("[data-probe]")?.getAttribute("data-pr
 
 /* library-audit 07: the setting was dead. `Density` and `useDensity` existed,
    nobody read them - a provider with `density="compact"` changed nothing. Since
-   then the attribute stands beside `data-theme`, and a component reads the
-   setting with `useDensityFor` as the default of its `density`. A compact set of
-   tokens does not exist with that; that is work package B.13.
+   then a component reads the setting with `useDensityFor` as the default of its
+   `density`. The `data-density` attribute that came with it is gone again
+   (ADR-0021): no stylesheet ever read it. A compact set of tokens does not exist
+   with that; that is work package B.13.
 
    The two readers this was checked against - table and alarm list - have stood
    in @umriss-ui/table since umriss-table 14 and carry their cases there
    (`breiten.test.tsx`, `alarmList.test.tsx`). What stays here is what
-   @umriss-ui/core promises itself: the attribute, and the hook through which
-   every component reads the setting. The delicate case stays the first one: a
-   component that is compact of its own accord must not be pulled to "regular"
-   by a provider that says nothing. */
+   @umriss-ui/core promises itself: the hook through which every component reads
+   the setting. The delicate case stays the first one: a component that is
+   compact of its own accord must not be pulled to "regular" by a provider that
+   says nothing. */
 describe("Density", () => {
-  afterEach(() => {
-    delete document.documentElement.dataset.density;
-  });
-
-  it("writes data-density where a density is configured, and puts it back on teardown", () => {
-    const { unmount } = render(
-      <UmrissProvider density="compact">
-        <span />
-      </UmrissProvider>,
-    );
-    expect(document.documentElement.dataset.density).toBe("compact");
-    unmount();
-    expect(document.documentElement.dataset.density).toBeUndefined();
-  });
-
-  it("writes nothing where nothing is configured", () => {
-    render(
-      <UmrissProvider>
-        <span />
-      </UmrissProvider>,
-    );
-    expect(document.documentElement.dataset.density).toBeUndefined();
-  });
-
   it("gives a component below it the configured density", () => {
     render(
       <UmrissProvider density="compact">

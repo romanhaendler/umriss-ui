@@ -10,8 +10,8 @@ export default function WhyUmrissProvider() {
         shorter code a mandatory provider would allow.
       </p>
       <p>
-        It holds five things and no more: theme, density, portal target for overlays, the setting
-        for toasts, and formats and wording. The moment it could set the default variant of a
+        It holds four things and no more: density, portal target for overlays, the setting for
+        toasts, and formats and wording. The moment it could set the default variant of a
         button it would be a second interface beside the components&rsquo; own props - and two ways
         of saying the same thing are worse than one.
       </p>
@@ -60,13 +60,15 @@ export default function WhyUmrissProvider() {
         the wording, because the locale of the formats is a decision about a different object.
       </p>
 
-      <h3>Why theme and density are not photographed here</h3>
+      <h3>Why it holds no theme</h3>
       <p>
-        Both write on the root element - <code>data-theme</code> and <code>data-density</code>, the
-        attributes the token layers already listen to. An example that set them would not colour its
-        own block but the whole page around it, and the picture taken of it would be a picture of
-        the demo and not of the provider. They are in the table below, and the theme switch in the
-        header of this demo is the running proof.
+        Light and dark are the application&rsquo;s <code>color-scheme</code>. Every token with two
+        values is written <code>light-dark(&hellip;)</code> and follows the scheme its element
+        inherits, so an application switches its mode once, the way it already does, and the
+        components follow. A provider that set the mode would be a second switch - and it would
+        have to write onto the document, reaching far beyond its own subtree. It writes nothing
+        there (ADR-0021). The theme switch in the header of this demo sets{" "}
+        <code>color-scheme</code> and nothing else, and is the running proof.
       </p>
     </>
   );

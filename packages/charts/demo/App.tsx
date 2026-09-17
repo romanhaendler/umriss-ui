@@ -20,13 +20,16 @@ function useTheme(): [Theme, (t: Theme) => void] {
   );
 
   useEffect(() => {
-    document.documentElement.dataset.theme = theme;
+    /* The way an application switches its mode: `color-scheme` on the root.
+       The tokens follow it through light-dark() (ADR-0021) - there is no
+       attribute of the library to set beside it. */
+    document.documentElement.style.colorScheme = theme;
     /* The charts cache their resolved theme colours: they are read once out of
        the stylesheet and then drawn from memory, because reading a computed
-       style per frame is not free. The theme module picks the attribute up
-       through a MutationObserver, and this call is the explicit path that goes
-       with it. Without one of the two the demo switches to dark and draws the
-       old colours. */
+       style per frame is not free. The theme module picks a change on the root
+       up through a MutationObserver, and this call is the explicit path that
+       goes with it. Without one of the two the demo switches to dark and draws
+       the old colours. */
     invalidateTheme();
   }, [theme]);
 

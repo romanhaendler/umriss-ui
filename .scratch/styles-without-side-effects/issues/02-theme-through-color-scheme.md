@@ -1,6 +1,6 @@
 # 02 — Light and dark through `color-scheme`
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Blocked by: 01
@@ -44,3 +44,14 @@ Spec: `.scratch/styles-without-side-effects/spec.md` ("Theme") · ADR-0021
   a `Card` shows the card dark inside a light page; noted under Comments.
 
 ## Comments
+
+**Delivered.**
+
+- `tokens.css` holds one `:root` block. The 34 dark declarations are folded in as `light-dark(<light>, <dark>)`; the two shadows carry one `light-dark()` per colour, the rest of their structure is shared. Both comments of the dark block stand beside their tokens, marked "Dark:". `color-scheme` is gone from the file, and with it the guard's exception from 01; `dist/core.css` now passes `check:dist`.
+- `UmrissProvider` holds four things. `theme` (prop, config field, the `Theme` type) and both document effects are removed; nothing else in `src` read `theme`. `provider.test.tsx` lost the seven theme cases and the two `data-density` cases and gained one: a provider with every setting, and its teardown, leave the attributes and the style of `<html>` exactly as they were.
+- `contrast.test.ts` reads light and dark out of the pairs; `themeFallbackConformance.test.ts` reads the light half.
+- The three demo apps switch with `document.documentElement.style.colorScheme`. The provider's demo page no longer mentions a theme; its "Why" explains `color-scheme` instead.
+- **Pictures.** Against 01's run nothing in core or table moved: every `ui-dark`/`table-dark` picture that was green is green, the dark theme now coming from `color-scheme`. Two baselines were renewed on purpose - `page-umrissprovider` light and dark, whose sentence lost "theme" (diff looked at: only that line moved).
+- **Expected red until 07:** the charts. `theme.ts` reads `--uc-*` as text and now gets `light-dark(…)`, which a canvas cannot draw - 13 pictures and `switching the theme changes the axis and series colours without a reload`. That is exactly 07's canvas step.
+- The scoped check, run as a throwaway Playwright test against the built core demo (not committed): `color-scheme: dark` set on the stage of the first `Card` example turned the card's background from `rgb(255, 255, 255)` to `rgb(22, 22, 24)` - the dark surface - while the shell around it stayed `rgb(250, 250, 250)`.
+- `pnpm lint`, `pnpm typecheck`, `pnpm test:unit` green (core 974 after the removed cases, table 370, charts 395, demo 29).

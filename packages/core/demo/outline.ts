@@ -45,7 +45,7 @@ export const OUTLINE: readonly Rubric[] = [
       {
         id: "umrissprovider",
         name: "UmrissProvider",
-        sentence: "One place for theme, density, portal target, toasts and language - and it stays optional, because every component already works without it.",
+        sentence: "One place for density, portal target, toasts and language - and it stays optional, because every component already works without it.",
         types: ["UmrissProviderProps", "LanguageOptions"],
         exports: ["UmrissProvider", "LanguageProvider", "useWording", "useFormats"],
       },
