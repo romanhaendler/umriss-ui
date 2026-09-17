@@ -78,11 +78,76 @@
   .header {
     display: flex;
     align-items: center;
-    padding: 0 var(--u-space-3);
+    gap: var(--u-space-2);
+    /* The left padding is set per header: one step of indent per level of the
+       group tree. */
+    padding-right: var(--u-space-3);
     border-bottom: 1px solid var(--u-hairline);
     overflow: hidden;
     white-space: nowrap;
+  }
+
+  .headerLabel {
+    min-width: 0;
+    overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  /* A group's head is a slim line and must not read as a lane: it carries the
+     group's name and says nothing about time. */
+  .header[data-row="groupHead"],
+  .header[data-row="miniature"] {
+    font-weight: var(--u-weight-medium);
+  }
+
+  .headerCount {
+    flex: none;
+    color: var(--u-color-text-muted);
+    font-size: var(--u-text-xs);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* The fold control is a real button: reachable by keyboard, and a screen
+     reader says whether the group is open. */
+  .chevron {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    padding: 0;
+    border: none;
+    border-radius: var(--u-radius-xs);
+    background: transparent;
+    color: var(--u-color-text-secondary);
+    cursor: pointer;
+  }
+
+  .chevron:hover {
+    color: var(--u-color-text);
+  }
+
+  /* The first thing this component puts into the tab order, so it is also the
+     first that has to show the focus itself (ADR-0021). */
+  .chevron:focus-visible {
+    outline: none;
+    box-shadow: var(--u-focus-ring);
+    color: var(--u-color-text);
+  }
+
+  .chevron svg {
+    transition: transform var(--u-duration-fast) var(--u-ease-standard);
+  }
+
+  .chevron svg[data-open] {
+    transform: rotate(90deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .chevron svg {
+      transition: none;
+    }
   }
 
   /* A lane the work being dragged may not go to, for the run of that drag. The

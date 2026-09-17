@@ -77,6 +77,8 @@ export class SceneView {
      not in the data, because a row's height comes from a view option; every y
      in the package reads it. */
   rows: Rows = layOutRows({ lanes: [], groups: [], collapsed: new Set(), laneHeight: DEFAULT_LANE_HEIGHT });
+  /** The folded groups, as the scene holds them. */
+  collapsed: ReadonlySet<string> = new Set();
   boxes: SubtaskBox[] = [];
   boxById = new Map<string, SubtaskBox>();
   paths: TransportPath[] = [];
@@ -122,12 +124,10 @@ export class SceneView {
 
   /** Lays the rows out, clamps the scroll, and lays the data out anew. */
   layout(): void {
-    /* No group exists yet (schedule-lane-groups 08 declares them), so the tree
-       is flat and this is exactly the arithmetic it replaces. */
     this.rows = layOutRows({
-      lanes: this.data.lanes.map((lane) => ({ id: lane.id, parent: undefined })),
-      groups: [],
-      collapsed: new Set(),
+      lanes: this.data.lanes,
+      groups: this.data.groups,
+      collapsed: this.collapsed,
       laneHeight: this.options.laneHeight,
     });
     this.scrollY = Math.max(0, Math.min(this.maxScroll(), this.scrollY));
