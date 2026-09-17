@@ -8,9 +8,22 @@
 import postcss from "postcss";
 import { describe, expect, it } from "vitest";
 import { ownBox, ownCorners } from "../../../scripts/styles/ownBox.ts";
-import { LAYER_ORDER, offendersIn } from "../../../scripts/styles/rules.ts";
+import { LAYER_ORDER, beginsWithLayerOrder, offendersIn } from "../../../scripts/styles/rules.ts";
 
 const layered = (body: string) => `${LAYER_ORDER}\n@layer umriss.components {\n${body}\n}`;
+
+describe("beginsWithLayerOrder", () => {
+  it("accepts the order statement first, after comments, and minified", () => {
+    expect(beginsWithLayerOrder(`/* head */\n${LAYER_ORDER}\n.a {}`)).toBe(true);
+    expect(beginsWithLayerOrder("@layer umriss.tokens,umriss.base,umriss.components;@layer umriss.base{}")).toBe(true);
+  });
+
+  it("refuses a stylesheet whose first statement is anything else", () => {
+    expect(beginsWithLayerOrder(".a {}\n" + LAYER_ORDER)).toBe(false);
+    expect(beginsWithLayerOrder("@layer umriss.components, umriss.tokens;")).toBe(false);
+    expect(beginsWithLayerOrder("")).toBe(false);
+  });
+});
 
 describe("offendersIn", () => {
   it("accepts a layered stylesheet of class rules", () => {
@@ -32,6 +45,17 @@ describe("offendersIn", () => {
     },
   );
 
+  it.each(["body .a", "html.dark .a", ":root .a", ".a:is(html *)"])(
+    "names %s, which hangs a rule of its own element on the page",
+    (selector) => {
+      expect(offendersIn(layered(`${selector} { color: red; }`))).toEqual([`${selector}: selects beyond the library's own elements`]);
+    },
+  );
+
+  it("does not mistake a class named like an element for one", () => {
+    expect(offendersIn(layered(".body .html-like { color: red; }"))).toEqual([]);
+  });
+
   it("checks every selector of a list on its own", () => {
     expect(offendersIn(layered(".a, body { margin: 0; }"))).toEqual(["body: selects beyond the library's own elements"]);
   });
@@ -51,14 +75,21 @@ describe("offendersIn", () => {
 
 const run = (css: string) => postcss([ownBox()]).process(css, { from: undefined }).css;
 
-/** The selectors the step gave a rule of their own. */
+/** The selectors the step gave border-box, without the pseudo-elements it adds
+    to every class (checked on their own below). */
 const boxed = (css: string) =>
-  [...run(css).matchAll(/([^{}]+)\{ box-sizing: border-box; \}/g)].map((m) => m[1]!.trim());
+  [...run(css).matchAll(/([^{}]+)\{ box-sizing: border-box; \}/g)]
+    .flatMap((m) => m[1]!.split(",").map((s) => s.trim()))
+    .filter((s) => !s.includes("::"));
 
 describe("ownBox", () => {
   it("gives every class of the stylesheet a rule of its own", () => {
     expect(boxed(".a { color: red; }")).toEqual([".a"]);
     expect(boxed(".a:hover > .b::before { color: red; }")).toEqual([".a", ".b"]);
+  });
+
+  it("gives a class's ::before and ::after the same box, as the page-wide rule did", () => {
+    expect(run(".a { color: red; }")).toContain(".a, .a::before, .a::after { box-sizing: border-box; }");
   });
 
   it("reaches a class that only ever stands in a compound selector", () => {

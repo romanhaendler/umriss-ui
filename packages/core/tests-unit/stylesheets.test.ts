@@ -14,7 +14,7 @@
 
 import { describe, expect, it } from "vitest";
 import TOKENS from "../src/styles/tokens.css?raw";
-import OWN from "../src/styles/own.module.css?raw";
+import OWN from "../../../scripts/styles/own.module.css?raw";
 import { LAYER_ORDER, offendersIn } from "../../../scripts/styles/rules.ts";
 
 const STYLES = import.meta.glob("../src/components/**/*.module.css", {

@@ -14,8 +14,7 @@
   }
 
   .tag {
-
-    composes: text from "../../styles/own.module.css";
+    composes: text from "#own-styles";
     display: inline-flex;
     align-items: center;
     gap: var(--u-space-1);

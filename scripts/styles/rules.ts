@@ -3,18 +3,22 @@
    library rendered. Shared by the unit guards of each package and the dist
    check, so that source and build are held to one definition. */
 
-import postcss, { type AtRule, type ChildNode, type Rule } from "postcss";
-import { namesAClass } from "./selectors.ts";
+import postcss, { type ChildNode } from "postcss";
+import { inKeyframes, namesAClass, namesThePage } from "./selectors.ts";
+
+/** The library's cascade layers, lowest first. */
+export const LAYERS = ["umriss.tokens", "umriss.base", "umriss.components"] as const;
 
 /** The order statement every shipped stylesheet begins with. */
-export const LAYER_ORDER = "@layer umriss.tokens, umriss.base, umriss.components;";
+export const LAYER_ORDER = `@layer ${LAYERS.join(", ")};`;
 
-const LAYERS = new Set(["umriss.tokens", "umriss.base", "umriss.components"]);
-
-const inKeyframes = (rule: Rule) => {
-  const parent = rule.parent;
-  return parent?.type === "atrule" && /keyframes$/i.test((parent as AtRule).name);
-};
+/** Whether the first statement of a stylesheet - after comments, written out
+    or minified - is the layer order. */
+export function beginsWithLayerOrder(css: string): boolean {
+  const first = postcss.parse(css).nodes.find((node) => node.type !== "comment");
+  if (first?.type !== "atrule" || first.name !== "layer" || first.nodes) return false;
+  return first.params.split(",").map((name) => name.trim()).join(", ") === LAYERS.join(", ");
+}
 
 /** Each offender as "<selector or at-rule>: <reason>". Empty when the
     stylesheet obeys both rules. */
@@ -26,7 +30,7 @@ export function offendersIn(css: string): string[] {
     if (node.type === "comment") continue;
     if (node.type === "atrule" && node.name === "layer") {
       if (!node.nodes) continue; // the order statement
-      if (!LAYERS.has(node.params.trim())) offenders.push(`@layer ${node.params.trim()}: not a layer of the library`);
+      if (!(LAYERS as readonly string[]).includes(node.params.trim())) offenders.push(`@layer ${node.params.trim()}: not a layer of the library`);
       continue;
     }
     const label = node.type === "rule" ? node.selector : node.type === "atrule" ? `@${node.name} ${node.params}`.trim() : node.type;
@@ -36,7 +40,7 @@ export function offendersIn(css: string): string[] {
   root.walkRules((rule) => {
     if (inKeyframes(rule)) return;
     for (const selector of rule.selectors) {
-      if (/:root\b/.test(selector)) {
+      if (selector.trim() === ":root") {
         rule.each((child) => {
           if (child.type === "decl" && !child.prop.startsWith("--")) {
             offenders.push(`${selector}: declares ${child.prop}, not only custom properties`);
@@ -44,7 +48,9 @@ export function offendersIn(css: string): string[] {
         });
         continue;
       }
-      if (!namesAClass(selector)) offenders.push(`${selector}: selects beyond the library's own elements`);
+      if (!namesAClass(selector) || namesThePage(selector)) {
+        offenders.push(`${selector}: selects beyond the library's own elements`);
+      }
     }
   });
 

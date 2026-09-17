@@ -5,7 +5,7 @@
 
 @layer umriss.components {
   .textarea {
-    composes: field from "../../styles/own.module.css";
+    composes: field from "#own-styles";
     display: block;
     width: 100%;
     min-height: calc(var(--u-control-height) * 2);
@@ -66,8 +66,7 @@
   /* ------------------------------------------------------------------ */
 
   .wrapper {
-
-    composes: text from "../../styles/own.module.css";
+    composes: text from "#own-styles";
     display: block;
     position: relative;
   }

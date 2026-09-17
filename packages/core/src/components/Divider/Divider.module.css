@@ -5,7 +5,6 @@
 
 @layer umriss.components {
   .divider {
-    composes: text from "../../styles/own.module.css";
     --_color: var(--u-hairline);
     flex: none;
   }
@@ -49,7 +48,10 @@
     background: var(--_color);
   }
 
+  /* Only a labelled divider renders text, so only its label takes a text
+     context; a bare line takes none. */
   .label {
+    composes: text from "#own-styles";
     flex: none;
     font-size: var(--u-text-xs);
     font-weight: var(--u-weight-medium);

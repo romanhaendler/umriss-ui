@@ -8,7 +8,7 @@
 
 @layer umriss.components {
   .tree {
-    composes: text from "../../styles/own.module.css";
+    composes: text from "#own-styles";
     --tree-indent: var(--u-space-4);
     display: flex;
     flex-direction: column;
@@ -129,7 +129,7 @@
      here: setting it would be a prescription to every layout the component does
      not know. */
   .scrolls {
-    composes: scroll from "../../styles/own.module.css";
+    composes: scroll from "#own-styles";
     overflow-y: auto;
   }
 

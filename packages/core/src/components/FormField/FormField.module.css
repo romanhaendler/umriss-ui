@@ -2,7 +2,7 @@
 
 @layer umriss.components {
   .field {
-    composes: text from "../../styles/own.module.css";
+    composes: text from "#own-styles";
     display: flex;
     flex-direction: column;
     gap: var(--u-space-1);

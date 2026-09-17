@@ -1,5 +1,6 @@
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
+import { ownStyles } from "../../scripts/styles/ownStyles.ts";
 import { fileURLToPath } from "node:url";
 
 /* Pin the time zone: the daylight-saving tests check concrete transitions
@@ -8,7 +9,7 @@ import { fileURLToPath } from "node:url";
 process.env.TZ = "Europe/Berlin";
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), ownStyles()],
   resolve: {
     /* As in the demo build (vite.demo.config.ts): the shell fetches
        @umriss-ui/core by its package name, and here that is our own source. */

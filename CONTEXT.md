@@ -53,7 +53,7 @@ sizes, line heights, durations, easing curves, radii and shadows. A token with
 a light and a dark value is written once, `light-dark(<light>, <dark>)`, and
 follows the `color-scheme` its element inherits (ADR-0021). An application
 overrides a token by declaring it outside a layer.
-_Avoid_: theme attribute — there is none; light and dark are `color-scheme`
+_Avoid_: theme attribute — see **Theme**
 
 **Own element**:
 An element a component rendered and put one of its own classes on — as opposed
@@ -65,8 +65,9 @@ it has a radius, squircle corners.
 **Text context**:
 What an element sets for the text inside it: font family, size, line height,
 colour and smoothing. Every component that renders text, and every portalled
-panel, sets its own through `composes: text` (`src/styles/own.module.css`, in the
-layer `umriss.base`, so the component's own values win). Pure layout — `Stack`,
+panel, sets its own through `composes: text from "#own-styles"`
+(`scripts/styles/own.module.css`, in the layer `umriss.base`, so the component's
+own values win). Pure layout — `Stack`,
 `Grid` — sets none. Text a caller places inside a component that has one takes it
 on; that is the component deciding for its own surface, not for the page.
 
@@ -118,9 +119,11 @@ an unqualified "state canon" reads as a canon of those.
 ### How the library is built
 
 **Provider**:
-The root context holding the application-wide decisions: theme, density, portal
-target for overlays, toast configuration, formats and wording. Optional — every
-component works without it, on the defaults.
+The root context holding the application-wide decisions: density, portal target
+for overlays, toast configuration, formats and wording. Optional — every
+component works without it, on the defaults. It holds no **Theme** and writes
+nothing onto the document; its settings reach its subtree through context
+(ADR-0021).
 _Avoid_: root, configuration
 
 **Wording**:
@@ -133,9 +136,13 @@ content, and that is deliberately accepted (ADR-0019).
 _Avoid_: translation, i18n, locale strings
 
 **Theme**:
-Light or dark, chosen at the root element. Light is the default. To be
-distinguished: a theme *explicitly chosen* and one *followed*, which tracks the
-system setting.
+Light or dark: the `color-scheme` an element inherits from the application.
+Light is the default — an application that sets nothing stays light. To be
+distinguished: a theme *explicitly chosen* (`color-scheme: dark`) and one
+*followed* (`color-scheme: light dark`), which tracks the system setting. The
+library chooses neither and sets `color-scheme` nowhere (ADR-0021); its tokens
+answer either through `light-dark()`.
+_Avoid_: theme attribute, `data-theme`
 
 
 ### Checking

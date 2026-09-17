@@ -41,8 +41,22 @@ had been leaning on.
   adds squircle corners after every own radius. `importOwnCss` puts the
   stylesheet import at the head of the entry chunk. `check-dist.ts` holds the
   built package to the same rules before a publish.
-- **The components carry the rest**, from one module each in core and table
-  (`own.module.css`): `text`, `ring`, `field`, `scroll`, taken with `composes`.
+- **The components carry the rest**, from one shared module,
+  `scripts/styles/own.module.css`, which core and table compose as
+  `#own-styles`: `text`, `ring`, `field`, `scroll`. The table first carried a
+  copy of core's; the review found that a copy only pictures could keep in step,
+  and the lint forbids the table to read core's source even in a test - so the
+  classes moved beside the build steps, where both packages already reach.
+- **Review follow-up.** The two-axis review found seven focusable elements still
+  leaning on the old page-wide ring - the calendar's days and month arrows, the
+  range presets, MultiSelect's scopes and counter, the close buttons of Modal and
+  Toast - which the browser check cannot reach while their panels are closed. A
+  unit guard in core and table (`scripts/styles/focus.ts`) now reads every
+  element in the tab order from the source. The same review had the box step give
+  `::before`/`::after` their box again, the rule guard refuse `html`, `body` and
+  `:root` inside compound selectors, and the charts demo style its own controls
+  instead of tolerating them - which also brought to light three tokens the demo
+  had named wrongly all along (`--u-font-size-*` for `--u-text-*`).
 - **A third layer was not planned.** `composes` fixes the class but not the order
   of the rules, and the shared text context landed after a badge's own size and
   colour. `umriss.base`, one layer below the components, made the order

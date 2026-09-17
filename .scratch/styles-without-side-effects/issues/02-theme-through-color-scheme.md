@@ -55,3 +55,5 @@ Spec: `.scratch/styles-without-side-effects/spec.md` ("Theme") · ADR-0021
 - **Expected red until 07:** the charts. `theme.ts` reads `--uc-*` as text and now gets `light-dark(…)`, which a canvas cannot draw - 13 pictures and `switching the theme changes the axis and series colours without a reload`. That is exactly 07's canvas step.
 - The scoped check, run as a throwaway Playwright test against the built core demo (not committed): `color-scheme: dark` set on the stage of the first `Card` example turned the card's background from `rgb(255, 255, 255)` to `rgb(22, 22, 24)` - the dark surface - while the shell around it stayed `rgb(250, 250, 250)`.
 - `pnpm lint`, `pnpm typecheck`, `pnpm test:unit` green (core 974 after the removed cases, table 370, charts 395, demo 29).
+
+**Review follow-up** (see the spec's Comments): the renewal of `page-umrissprovider` is now named in the spec's Testing Decisions.

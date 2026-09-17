@@ -64,9 +64,11 @@ It lands before the first publication, so the number does not move.
   `::selection`, `input`/`textarea` and the page's scrollbars are gone. An
   application that relied on them for its own page - margin, font, background,
   box model, selection colour - sets them itself. Every component carries what it
-  needs: its text context, `box-sizing` and squircle corners on its own elements,
-  a focus ring on what it makes focusable, caret, autofill look and scrollbars on
-  its own fields and scroll containers.
+  needs: its text context, `box-sizing` and squircle corners on its own elements
+  and their `::before`/`::after`, a focus ring on every element it puts into the
+  tab order (the calendar's days and month arrows, the range presets and the
+  close buttons of `Modal` and `Toast` included), caret, autofill look and
+  scrollbars on its own fields and scroll containers.
 - **Cascade layers.** Every rule lies in `umriss.tokens`, `umriss.base` or
   `umriss.components`. CSS an application writes outside a layer wins over the
   library whatever its specificity and loading order, and a token is overridden

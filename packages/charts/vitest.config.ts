@@ -1,9 +1,10 @@
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
+import { ownStyles } from "../../scripts/styles/ownStyles.ts";
 import { fileURLToPath } from "node:url";
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), ownStyles()],
   resolve: {
     /* The demo runs in the shared shell since ADR-0020, and the shell takes
        @umriss-ui/core. The jsdom smoke test of the demo therefore resolves it -
