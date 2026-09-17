@@ -72,6 +72,9 @@ export interface Row {
 export interface Slot {
   readonly top: number;
   readonly height: number;
+  /** The innermost group this lane sits in - for the hairline a miniature
+      draws where one inner group ends and the next begins. */
+  readonly group: string | undefined;
   /** Whether this is a strip inside a folded group. What is drawn there is the
       work at a smaller scale and nothing else - no appearance, no label, no
       rail - and no grips are published for a box in one. */
@@ -168,7 +171,13 @@ export function layOutRows(input: RowsInput): Rows {
     const room = height - 2 * MINIATURE_INSET;
     const strip = Math.max(MIN_STRIP, Math.floor(room / inside.length));
     inside.forEach((id, i) => {
-      slots.set(id, { top: at.top + MINIATURE_INSET + i * strip, height: strip, miniature: true });
+      const chain = chains.get(id) ?? [];
+      slots.set(id, {
+        top: at.top + MINIATURE_INSET + i * strip,
+        height: strip,
+        miniature: true,
+        group: chain[chain.length - 1],
+      });
     });
     folding = null;
   };
@@ -219,7 +228,12 @@ export function layOutRows(input: RowsInput): Rows {
     }
 
     push({ kind: "lane", lane: lane.id, group: chain[chain.length - 1], depth: chain.length, within: chain, lanes: 1, height: laneHeight });
-    slots.set(lane.id, { top: rows[rows.length - 1]!.top, height: laneHeight, miniature: false });
+    slots.set(lane.id, {
+      top: rows[rows.length - 1]!.top,
+      height: laneHeight,
+      miniature: false,
+      group: chain[chain.length - 1],
+    });
   }
   closeFold();
 
