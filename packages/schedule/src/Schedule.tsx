@@ -73,8 +73,11 @@ export interface ScheduleProps {
   /** The selected task, controlled. Leave it out and the schedule keeps the
       selection itself. */
   selectedTask?: string | null;
-  /** Called when a click selects a task or clears the selection. */
-  onSelectedTaskChange?: (task: string | null) => void;
+  /** Called when a click selects a task or clears the selection, with the
+      subtask that was clicked - null where the click was on a transport or on
+      nothing. It is called again when another subtask of the same task is
+      clicked. */
+  onSelectedTaskChange?: (task: string | null, subtask: string | null) => void;
   /** The visible time span after the planner panned or zoomed, as two
       wall-clock instants - for keeping a second schedule or a chart in step. A
       span handed in through `initialDomain` is not reported back. */
