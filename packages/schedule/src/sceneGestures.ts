@@ -37,7 +37,7 @@ export interface SceneHandlers {
   onIntent?: (intent: Intent) => void;
   onDomainChange?: (domain: readonly [number, number]) => void;
   onInteraction?: (interaction: ScheduleInteraction) => void;
-  onSelectedTaskChange?: (task: string | null) => void;
+  onSelectedTaskChange?: (task: string | null, subtask: string | null) => void;
 }
 
 /** What the gestures need from the scene they belong to. */

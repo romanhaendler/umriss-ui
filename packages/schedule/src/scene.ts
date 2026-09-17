@@ -169,11 +169,13 @@ export class ScheduleScene {
   }
 
   private select(task: string | null, subtask: string | null): void {
+    const changed = task !== this.selectedTask || subtask !== this.selected;
     this.selected = subtask;
-    if (task !== this.selectedTask) {
-      if (this.controlledTask === undefined) this.ownTask = task;
-      this.handlersNow.onSelectedTaskChange?.(task);
-    }
+    if (task !== this.selectedTask && this.controlledTask === undefined) this.ownTask = task;
+    /* Reported when either changes: a click on another stop of the same order
+       is news to a caller showing the stop, and the task alone would not say
+       so. */
+    if (changed) this.handlersNow.onSelectedTaskChange?.(task, subtask);
     this.interactionChanged();
   }
 

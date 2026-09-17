@@ -161,7 +161,7 @@ test("hover, click and right-click report their target", async ({ page }) => {
   await expect(status).toHaveText("click: subtask a-2041-1 (main) at 06:30");
 });
 
-test("a click selects the whole task, a click on nothing clears it", async ({ page }) => {
+test("a click selects the whole task with the stop it hit, and a click on nothing clears it", async ({ page }) => {
   await openExample(page, "schedule", "selection");
   const example = page.locator('[data-example="selection"]');
   const selected = example.locator("[data-selected-order]");
@@ -170,7 +170,11 @@ test("a click selects the whole task, a click on nothing clears it", async ({ pa
 
   /* The shaft's second subtask, on lathe 1 at 10:00. */
   await page.mouse.click(plot.x(10), plot.y(LANES.lathe1));
-  await expect(selected).toHaveText("Selected: A-2042 Shaft");
+  await expect(selected).toHaveText("Selected: A-2042 Shaft, at a-2042-2");
+
+  /* Another stop of the same order: the task does not change, the stop does. */
+  await page.mouse.click(plot.x(8), plot.y(LANES.saw));
+  await expect(selected).toHaveText("Selected: A-2042 Shaft, at a-2042-1");
 
   await page.mouse.click(plot.x(17), plot.y(LANES.saw));
   await expect(selected).toHaveText("Selected: nothing");
