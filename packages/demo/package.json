@@ -18,7 +18,8 @@
     "./checks/pages": "./checks/pages.ts",
     "./checks/shell": "./checks/shell.ts",
     "./checks/page": "./checks/page.ts",
-    "./checks/accessibility": "./checks/accessibility.ts"
+    "./checks/accessibility": "./checks/accessibility.ts",
+    "./checks/ownBase": "./checks/ownBase.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
