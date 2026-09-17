@@ -3,6 +3,7 @@
    not the pixel mechanics in between. Light only. */
 
 import { test, expect } from "@playwright/test";
+import { overlayOffenders } from "@umriss-ui/demo/checks/overlays";
 import { openExample } from "./navigation";
 import { DAY_OF_PLAN, LANES, at, plotOf } from "./plot";
 
@@ -320,11 +321,11 @@ test("the ghost's label stays inside the plot, even on the topmost lane", async 
   await page.mouse.move(plot.x(8), plot.y(LANES.saw), { steps: 6 });
   const label = example.locator("[data-ghost]");
   await expect(label).toBeVisible();
+  /* The same invariant the check of schedule-legibility 02 walks the pages
+     with - here in the one moment a static page cannot reach: a drag in
+     flight. */
+  expect(await overlayOffenders(page)).toEqual([]);
   const box = (await label.boundingBox())!;
-  expect(box.y).toBeGreaterThanOrEqual(plot.box.y);
-  expect(box.y + box.height).toBeLessThanOrEqual(plot.box.y + plot.box.height);
-  expect(box.x).toBeGreaterThanOrEqual(plot.box.x);
-  expect(box.x + box.width).toBeLessThanOrEqual(plot.box.x + plot.box.width);
   /* Under the bar, not over the lane above it. */
   expect(box.y).toBeGreaterThan(plot.y(LANES.saw));
   await page.mouse.up();

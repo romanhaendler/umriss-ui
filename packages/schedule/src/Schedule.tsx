@@ -311,7 +311,7 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
         style={{ height: `${height}px`, gridTemplateColumns: `${headerWidth}px minmax(0, 1fr)`, ...style }}
       >
         <div className={styles.corner} />
-        <div className={styles.dayBand} aria-hidden="true" data-schedule-days="">
+        <div className={styles.dayBand} aria-hidden="true" data-schedule-days="" data-schedule-clip="day band">
           {snapshot.days.map((day) => {
             /* The label stands at the visible start of its day: a day that began
                before the view still says which day it is. */
@@ -319,7 +319,7 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
             const visible = Math.min(day.x + day.width, snapshot.width) - Math.max(day.x, 0);
             return (
               <span key={day.start} className={styles.day} style={{ left: `${day.x}px`, width: `${day.width}px` }}>
-                <span className={styles.dayLabel} style={{ marginLeft: `${hidden}px` }}>
+                <span className={styles.dayLabel} data-schedule-overlay="day label" style={{ marginLeft: `${hidden}px` }}>
                   {dayLabel(day.start, visible)}
                 </span>
               </span>
@@ -339,6 +339,7 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
           ref={plotRef}
           className={styles.plot}
           data-schedule-plot=""
+          data-schedule-clip="plot"
           style={{ cursor: snapshot.cursor }}
           onPointerDown={(event) => scene.pointerDown(event.nativeEvent)}
           onPointerMove={(event) => scene.pointerMove(event.nativeEvent)}
@@ -361,6 +362,7 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
             <span
               key={grip.kind}
               data-grip={grip.kind}
+              data-schedule-overlay={`${grip.kind} grip`}
               aria-hidden="true"
               className={styles.grip}
               style={{ left: `${grip.x}px`, top: `${grip.y}px`, height: `${grip.height}px` }}
@@ -372,6 +374,7 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
               role="tooltip"
               className={styles.tooltip}
               data-schedule-tooltip=""
+              data-schedule-overlay="tooltip"
               style={{
                 left: `${tooltipAt.x}px`,
                 top: `${tooltipAt.y}px`,
@@ -386,6 +389,7 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
               ref={ghostRef}
               className={styles.ghostLabel}
               data-ghost=""
+              data-schedule-overlay="ghost label"
               data-findings={[ghost.overlap ? "overlap" : "", ghost.late ? "late-transport" : ""].filter(Boolean).join(" ")}
               style={{
                 left: `${ghostAt.x}px`,
@@ -400,14 +404,14 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
           )}
         </div>
         <div className={styles.corner} />
-        <div className={styles.tickBand} aria-hidden="true" data-schedule-ticks="">
-          {snapshot.now !== null && <span className={styles.now} data-now="" style={{ left: `${snapshot.now}px` }} />}
+        <div className={styles.tickBand} aria-hidden="true" data-schedule-ticks="" data-schedule-clip="time band">
+          {snapshot.now !== null && <span className={styles.now} data-now="" data-schedule-overlay="now mark" style={{ left: `${snapshot.now}px` }} />}
           {snapshot.ticks.map((tick) => (
             <span key={tick.wallClock} className={styles.tick} style={{ left: `${tick.x}px` }}>
               {/* A label that would be cut by the band's edge is left out; its
                   line stays. */}
               {tick.x >= LABEL_MARGIN && tick.x <= snapshot.width - LABEL_MARGIN && (
-                <span className={styles.tickLabel}>
+                <span className={styles.tickLabel} data-schedule-overlay="time label">
                   {snapshot.step >= DAY ? formats.dateShort(new Date(tick.wallClock)) : formats.time(new Date(tick.wallClock), false)}
                 </span>
               )}
