@@ -588,6 +588,15 @@ test("a bar fades at whichever edge of the view it passes", async ({ page }) => 
   const farLeft = await distanceFrom(example, "data", { x: 11, y: mid("began") }, solidLeft);
   expect(nearLeft).toBeGreaterThan(farLeft);
   expect(farLeft).toBeGreaterThan(0);
+
+  /* And a bar that passes NEITHER edge carries no fade: the fade says "the
+     edge of the screen is not the end of this work", and both of this one's
+     ends are in view. It matters beyond tidiness - the painting order lets a
+     fade eat a FIXED bar's cap, which is the truth at the view's edge and a
+     lie anywhere else. */
+  const solidWhole = await rgba(example, "data", { x: Math.round(plot.x(8, 30) - plot.box.x), y: mid("whole") });
+  const atItsEnd = { x: Math.round(plot.x(10) - plot.box.x) - 3, y: mid("whole") };
+  expect(await distanceFrom(example, "data", atItsEnd, solidWhole)).toBe(0);
 });
 
 test("three statements on one bar stay three statements", async ({ page }) => {
@@ -933,4 +942,25 @@ test("a strip can be hovered and selected, and carries neither label nor grips",
      by three pixels - and no label on one either. */
   await expect(example.locator("[data-grip]")).toHaveCount(0);
   await expect(example.locator("[data-bar-label]")).toHaveCount(0);
+});
+
+test("a late transport into a folded group is marked on its row", async ({ page }) => {
+  await openExample(page, "lane-groups", "the-miniature");
+  const example = page.locator('[data-example="the-miniature"]');
+  const plot = await plotOf(page, example, [at(6), at(16)]);
+  const row = await miniatureOf(example, "hall");
+
+  /* The housing leaves the saw at 08:15 and takes twenty minutes; the mill's
+     setup had to begin at 08:30. Five minutes short, and those five minutes
+     are what the row marks. A line between two strips is a few pixels of a few
+     pixels, so the row says it instead. */
+  const onRow = { x: Math.round(plot.x(8, 31) - plot.box.x), y: row.top + 1, width: 4, height: 3 };
+  expect(await paintedShare(example, "data", onRow)).toBe(1);
+  /* And it is the danger tone, not a grid line: an hour with nothing short
+     carries the one and not the other. Asked by colour rather than by a share,
+     because a four-pixel box with a time tick through it is a quarter
+     painted. */
+  const alarm = await colour(example, "data", { x: onRow.x, y: onRow.y + 1 });
+  expect(await colour(example, "data", { x: Math.round(plot.x(14) - plot.box.x), y: onRow.y + 1 })).not.toBe(alarm);
+  expect(await colour(example, "data", { x: Math.round(plot.x(7) - plot.box.x), y: onRow.y + 1 })).not.toBe(alarm);
 });

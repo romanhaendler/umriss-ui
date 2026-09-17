@@ -205,6 +205,12 @@ export class SceneView {
     return toWallClock(Math.max(0, Math.min(calendar.total, operating)), calendar);
   }
 
+  /** The lane at a y, strips included: what the pointer is ON.
+
+      One line, and it stays a line of its own: it is one of the three
+      questions this object answers about a y - this one, `dropLaneIdAt` and
+      `foldedGroupAt` - and a caller that reached through `viewport()` for it
+      would be depending on the layout rather than asking the view. */
   laneIdAt(y: number): string | null {
     return laneAt(this.viewport(), y);
   }

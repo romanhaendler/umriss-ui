@@ -144,6 +144,7 @@ export function drawData(ctx: CanvasRenderingContext2D, input: DrawInput): void 
     }
   }
   for (const overlap of data.overlaps) drawOverlap(ctx, input, viewport, overlap);
+  drawLateInFolds(ctx, input, viewport);
   drawSelection(ctx, input);
 }
 
@@ -164,7 +165,7 @@ export function drawOverlay(ctx: CanvasRenderingContext2D, input: DrawInput): vo
   /* Under everything the drag draws: the lanes this work may not go to are a
      property of the plot while the gesture runs, not of the ghost. */
   drawRefusedLanes(ctx, input, viewport, input.ghost.refusedLanes);
-  const box = ghostBox(input, viewport, ghost);
+  const box = ghostBox(viewport, ghost);
   if (box === null) return;
   for (const overlap of overlaps) drawOverlap(ctx, input, viewport, overlap);
   const lateIds = new Set(late.map((l) => l.transport));
@@ -240,8 +241,7 @@ function drawTether(
 }
 
 /** Where the ghost is drawn: on its lane, without an offset. */
-export function ghostBox(input: Pick<DrawInput, "data">, viewport: Viewport, ghost: Subtask): SubtaskBox | null {
-  void input;
+export function ghostBox(viewport: Viewport, ghost: Subtask): SubtaskBox | null {
   const slot = slotOf(viewport.rows, ghost.lane);
   return slot === null ? null : subtaskBox(viewport, ghost, ghost.lane, slot, 0);
 }
@@ -267,16 +267,15 @@ function drawGrid(ctx: CanvasRenderingContext2D, input: DrawInput, viewport: Vie
   /* Inside a folded group, a hairline where one inner group ends and the next
      begins: a miniature is the plant at a smaller scale, and the structure is
      part of the plant. */
-  for (const [lane, slot] of viewport.rows.slots) {
-    if (!slot.miniature) continue;
-    const next = [...viewport.rows.slots].find(([, other]) => other.miniature && other.top === slot.top + slot.height);
-    if (next === undefined || next[1].group === slot.group) continue;
-    void lane;
+  const strips = [...viewport.rows.slots.values()].filter((slot) => slot.miniature).sort((a, b) => a.top - b.top);
+  strips.forEach((slot, i) => {
+    const next = strips[i + 1];
+    if (next === undefined || next.top !== slot.top + slot.height || next.group === slot.group) return;
     const y = slot.top + slot.height - viewport.scrollY - 0.5;
-    if (y < 0 || y > height) continue;
+    if (y < 0 || y > height) return;
     ctx.moveTo(0, y);
     ctx.lineTo(width, y);
-  }
+  });
   ctx.stroke();
   ctx.strokeStyle = colours.lineStrong;
   ctx.beginPath();
@@ -555,9 +554,14 @@ function hatch(
     screen on both sides, and a bar that began before the view was saying
     nothing at all about it.
 
-    Where the bar passes neither edge, the fade lies at its own right end: the
-    statement belongs to the WORK, and it must not disappear because the zoom
-    happens to show all of the bar. */
+    Where the bar passes NEITHER edge there is no fade at all. It was tempting
+    to fade its own end instead - the statement belongs to the work, after all -
+    and that was wrong: the painting order puts the fade after the caps so that
+    a FIXED bar running past the view loses its cap there, which is the
+    statement ("there is no end to mark"). A bar wholly in view has an end, and
+    eating its cap would have made a true picture into a false one. An `open`
+    bar that passes no edge says nothing about an edge, because there is none
+    for it to say anything about. */
 function fadeOpen(
   ctx: CanvasRenderingContext2D,
   box: SubtaskBox,
@@ -573,7 +577,6 @@ function fadeOpen(
   /* Opaque where the bar leaves the picture, clear a span further in. */
   if (before) fadeFrom(ctx, 0, span, top, height, surface, 1);
   if (beyond) fadeFrom(ctx, plotWidth, -span, top, height, surface, 1);
-  if (!before && !beyond) fadeFrom(ctx, box.mainTo, -span, top, height, surface, 1);
 }
 
 /** A band of the surface colour, opaque at `edge` and gone `span` pixels away
@@ -633,6 +636,34 @@ function drawTransport(ctx: CanvasRenderingContext2D, input: DrawInput, path: Tr
       ctx.arc(x, y, isLate ? 3 : 2.5, 0, Math.PI * 2);
       ctx.fill();
     }
+  }
+}
+
+/** A late transport whose arrival lies inside a folded group, marked on that
+    group's row.
+
+    A line between two strips is a few pixels of a few pixels, and the thing a
+    planner must not miss is that this order cannot be delivered on time.
+    Folding is a planner tidying the view and must never be a planner hiding a
+    finding (ADR-0025), so the row says it the way a lane's own overlap says
+    it: the danger tone, at the top, over the time that is short. */
+function drawLateInFolds(ctx: CanvasRenderingContext2D, input: DrawInput, viewport: Viewport): void {
+  const { data } = input;
+  if (data.lateById.size === 0) return;
+  ctx.fillStyle = input.colours.alarm;
+  for (const late of data.lateById.values()) {
+    const transport = data.transports.find((t) => t.id === late.transport);
+    const to = transport === undefined ? undefined : data.subtaskById.get(transport.to);
+    if (to === undefined) continue;
+    const slot = slotAt(viewport, to.lane);
+    if (slot === null || !slot.miniature) continue;
+    const row = rowAt(viewport.rows, slot.top + viewport.scrollY);
+    if (row === null) continue;
+    /* The time that is missing: from when it had to have arrived to when it
+       can. */
+    const x0 = xOf(viewport, late.arrival);
+    const x1 = Math.max(x0 + 2, xOf(viewport, late.arrival + late.shortBy));
+    ctx.fillRect(x0, row.top - viewport.scrollY + 1, x1 - x0, 3);
   }
 }
 

@@ -26,10 +26,14 @@ never hides a finding.
 Both standing sentences of this component are cited here because a fold is
 exactly where they would be tempting to break, and they are not broken:
 
-- **A lane is not a row.** The word *row* exists inside the layout module and
-  nowhere in the API: a row is what the plot lays out — a lane's row, a group's
-  head, a miniature — and a lane is still a machine. Every real lane resolves
-  to a **slot**: its own row, or its strip inside a miniature.
+- **A lane is not a row.** The word *row* is the layout module's: a row is what
+  the plot lays out — a lane's row, a group's head, a miniature — and a lane is
+  still a machine. It is in no exported name, no prop and no intent. It reaches
+  the outside in exactly one place, `data-row` on a header, and that is
+  deliberate: an application styling beside the schedule has to be able to tell
+  a machine's row from a group's slim head from a folded group's one row, and
+  there is no other honest word for what those three are. Every real lane
+  resolves to a **slot**: its own row, or its strip inside a miniature.
 - **An overlap is never packed into sub-lanes.** A miniature is a change of
   SCALE, not an arrangement: every bar keeps the time it has and the strip its
   lane has, at a smaller size. Nothing is moved to make anything fit.
