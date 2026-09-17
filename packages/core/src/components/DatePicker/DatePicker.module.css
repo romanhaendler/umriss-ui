@@ -1,4 +1,4 @@
-@layer umriss.tokens, umriss.components;
+@layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.components {
   .trigger {
@@ -74,6 +74,7 @@
      widest time row (from/to with seconds) fits exactly under its month column -
      panels thereby have their final width from the start and never jump. */
   .panel {
+    composes: text from "../../styles/own.module.css";
     --_calendar-month: 266px;
     width: calc(var(--_calendar-month) + 2 * var(--u-space-3));
     padding: var(--u-space-3);
@@ -232,6 +233,8 @@
   }
 
   .timeField {
+
+    composes: field from "../../styles/own.module.css";
     width: 26px;
     border: none;
     background: none;
@@ -337,6 +340,7 @@
   /* A wrapper around the trigger, so that the clearing cross can sit as a sibling
      element (a button inside a button would be invalid). */
   .triggerWrap {
+    composes: text from "../../styles/own.module.css";
     position: relative;
     display: block;
     width: 100%;
@@ -390,6 +394,8 @@
   }
 
   .rangePanel {
+
+    composes: text from "../../styles/own.module.css";
     width: auto;
   }
 

@@ -1,7 +1,8 @@
-@layer umriss.tokens, umriss.components;
+@layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.components {
   .empty {
+    composes: text from "../../styles/own.module.css";
     display: flex;
     flex-direction: column;
     align-items: center;

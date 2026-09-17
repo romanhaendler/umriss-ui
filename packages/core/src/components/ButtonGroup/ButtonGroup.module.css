@@ -3,7 +3,7 @@
    The seam is a shadow and not a border: a border would change the height of
    the buttons and shift them against the other controls beside them. */
 
-@layer umriss.tokens, umriss.components;
+@layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.components {
   .group {

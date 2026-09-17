@@ -1,10 +1,11 @@
 /* Multi-line input. The edge as a shadow, as with every control - no
    border property. */
 
-@layer umriss.tokens, umriss.components;
+@layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.components {
   .textarea {
+    composes: field from "../../styles/own.module.css";
     display: block;
     width: 100%;
     min-height: calc(var(--u-control-height) * 2);
@@ -65,6 +66,8 @@
   /* ------------------------------------------------------------------ */
 
   .wrapper {
+
+    composes: text from "../../styles/own.module.css";
     display: block;
     position: relative;
   }

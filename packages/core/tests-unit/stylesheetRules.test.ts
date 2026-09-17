@@ -7,7 +7,7 @@
 
 import postcss from "postcss";
 import { describe, expect, it } from "vitest";
-import { ownBox } from "../../../scripts/styles/ownBox.ts";
+import { ownBox, ownCorners } from "../../../scripts/styles/ownBox.ts";
 import { LAYER_ORDER, offendersIn } from "../../../scripts/styles/rules.ts";
 
 const layered = (body: string) => `${LAYER_ORDER}\n@layer umriss.components {\n${body}\n}`;
@@ -80,5 +80,23 @@ describe("ownBox", () => {
 
   it("does not touch the steps of a keyframes block", () => {
     expect(run("@keyframes spin { from { rotate: 0deg; } }")).not.toContain("box-sizing");
+  });
+});
+
+const corners = (css: string) => postcss([ownCorners()]).process(css, { from: undefined }).css;
+
+describe("ownCorners", () => {
+  it("gives an own element with a radius squircle corners, right after the radius", () => {
+    expect(corners(".a { border-radius: 4px; color: red; }")).toBe(".a { border-radius: 4px; corner-shape: squircle; color: red; }");
+  });
+
+  it("counts the longhands of the radius", () => {
+    expect(corners(".a { border-top-left-radius: 4px; }")).toContain("corner-shape: squircle");
+  });
+
+  it("leaves a rule without a radius, a caller's element and a declared corner shape alone", () => {
+    expect(corners(".a { color: red; }")).not.toContain("corner-shape");
+    expect(corners(".a > * { border-radius: 4px; }")).not.toContain("corner-shape");
+    expect(corners(".a { border-radius: 4px; corner-shape: round; }").match(/corner-shape/g)).toHaveLength(1);
   });
 });

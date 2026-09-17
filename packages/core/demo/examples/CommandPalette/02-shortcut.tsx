@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { CommandPalette, Stack, Text, useCommandPaletteShortcut } from "../../../src";
+import { CommandPalette, Input, Stack, Text, useCommandPaletteShortcut } from "../../../src";
 
 export const title = "The shortcut: useCommandPaletteShortcut";
 
@@ -27,21 +27,12 @@ export default function Shortcut() {
       <Text size="sm" tone="secondary">
         Cmd-K or "/" opens the palette - in the field beside it, "/" stays a slash.
       </Text>
-      <input
+      <Input
+        size="sm"
         aria-label="Here a slash stays a slash"
         value={text}
         onChange={(event) => setText(event.target.value)}
         placeholder={'Type "/" here'}
-        style={{
-          height: 32,
-          padding: "0 var(--u-space-3)",
-          borderRadius: "var(--u-radius-md)",
-          border: "1px solid var(--u-edge-color)",
-          background: "var(--u-color-surface)",
-          color: "var(--u-color-text)",
-          font: "inherit",
-          fontSize: "var(--u-text-sm)",
-        }}
       />
       <CommandPalette
         open={open}

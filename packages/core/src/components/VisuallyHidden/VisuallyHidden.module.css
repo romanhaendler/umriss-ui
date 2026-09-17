@@ -1,10 +1,11 @@
 /* Invisible, but readable aloud. Clip rather than shift: a shift by -9999px
    scrolls the page sideways in right-to-left contexts. */
 
-@layer umriss.tokens, umriss.components;
+@layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.components {
   .hidden {
+    composes: text from "../../styles/own.module.css";
     position: absolute;
     width: 1px;
     height: 1px;

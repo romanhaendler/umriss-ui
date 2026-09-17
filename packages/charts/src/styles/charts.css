@@ -8,7 +8,7 @@
    A dark mode arises from this by itself; the library contains no dark mode code
    of its own (R-1.8). */
 
-@layer umriss.tokens, umriss.components;
+@layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.components {
   .kc-root {

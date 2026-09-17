@@ -1,10 +1,11 @@
 /* The dialog itself is an invisible full-screen container and carries the
    scrim; the visible surface is .pane. */
 
-@layer umriss.tokens, umriss.components;
+@layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.components {
   .dialog {
+    composes: text from "../../styles/own.module.css";
     border: none;
     margin: 0;
     padding: 0 var(--u-space-4);
@@ -83,6 +84,8 @@
   /* ---------------- The field ---------------- */
 
   .field {
+
+    composes: field from "../../styles/own.module.css";
     flex: none;
     height: 56px;
     padding: 0 var(--u-space-5);
@@ -141,6 +144,8 @@
   /* ---------------- The list of finds ---------------- */
 
   .list {
+
+    composes: scroll from "../../styles/own.module.css";
     /* About eight rows, then it scrolls: a window that grows past the edge of the
        screen with the find is no longer one. */
     max-height: 320px;

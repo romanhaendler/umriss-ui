@@ -1,7 +1,7 @@
 /* Removable label. Looks similar to the badge, but is a control - hence the
    focus ring and a press point on the glyph. */
 
-@layer umriss.tokens, umriss.components;
+@layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.components {
   .group {
@@ -14,6 +14,8 @@
   }
 
   .tag {
+
+    composes: text from "../../styles/own.module.css";
     display: inline-flex;
     align-items: center;
     gap: var(--u-space-1);
