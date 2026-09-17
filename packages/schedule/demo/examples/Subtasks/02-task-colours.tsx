@@ -6,7 +6,7 @@ export const title = "Colour is the task's";
 /* Every subtask of a task shares one colour, and the colour is the caller's:
    any CSS colour, a token of the application, a `light-dark()` pair. Here it
    means the order's priority rather than the order itself - two rush orders in
-   one colour, the rest quiet.
+   the danger colour, the rest in the accent.
 
    A subtask whose task is not in `tasks` is drawn muted: it is on the plan, and
    nobody said what it is. */
@@ -16,7 +16,7 @@ const at = (hours: number, minutes = 0) => new Date(2026, 2, 17, hours, minutes)
 const TASKS: Task[] = [
   { id: "rush-1", color: "var(--u-color-danger)" },
   { id: "rush-2", color: "var(--u-color-danger)" },
-  { id: "normal", color: "var(--u-color-text-muted)" },
+  { id: "normal", color: "var(--u-color-accent)" },
 ];
 
 const WORK: Subtask[] = [
