@@ -11,6 +11,7 @@ import { autoPanSpeed } from "./autoPan";
 import { lateTransports, overlaps, type LateTransport, type Overlap } from "./findings";
 import { edgeAt, partAt } from "./geometry";
 import { occupied, type Intent, type PlaceIntent, type Subtask } from "./model";
+import { refusedLanes } from "./refusal";
 import type { SceneData } from "./sceneData";
 import { ghostBox, type GhostDrawing } from "./sceneDraw";
 import type { ScheduleHit, SceneView } from "./sceneView";
@@ -83,15 +84,22 @@ export interface PlacingItem {
     is never data: the placed subtask gets the caller's id (`subtaskFromPlace`). */
 const PLACING = "\u0000placing";
 
+/* `refused` is the set of lanes the dragged work may not go to, asked once when
+   the gesture took hold and carried by the gesture itself - so it cannot
+   outlive it (`refusal.ts`). */
 type Gesture =
   | { kind: "none" }
-  | { kind: "place"; ghost: Subtask; item: PlacingItem }
+  | { kind: "place"; ghost: Subtask; item: PlacingItem; refused: ReadonlySet<string> }
   | { kind: "pending"; pointerId: number; x0: number; y0: number; mode: EditMode | "pan"; subtask: Subtask | null }
   | { kind: "pan"; pointerId: number; lastX: number; lastY: number }
   /* `t0` is the operating time the drag took hold at - not a pixel, because
      auto-pan moves the scale under a drag in flight. */
-  | { kind: "edit"; pointerId: number; mode: EditMode; subtask: Subtask; t0: number; ghost: Subtask }
+  | { kind: "edit"; pointerId: number; mode: EditMode; subtask: Subtask; t0: number; ghost: Subtask; refused: ReadonlySet<string> }
   | { kind: "pinch"; distance: number };
+
+/** No lane refused - the answer for every gesture that cannot change a lane at
+    all, and the value a gesture starts from. */
+const NONE_REFUSED: ReadonlySet<string> = new Set<string>();
 
 /** What the pointer is on, as one comparable value: hover is drawn and
     reported when this changes, not on every movement. */
@@ -116,6 +124,10 @@ export interface GhostSummary {
   /** The pointer stands over a lane this subtask may not go to; the ghost
       stayed where it was allowed. */
   readonly refused: boolean;
+  /** Every lane this work may not go to, for the whole run of the gesture -
+      the ids, so that an application can mark its own parts beside the plot
+      the way the schedule marks the lanes. */
+  readonly refusedLanes: readonly string[];
   readonly x: number;
   readonly y: number;
   /** The height of the bar the label belongs to, so the label can go under it
@@ -139,6 +151,9 @@ export class SceneGestures {
       to. It is a fact about the pointer and not about the ghost, which stayed
       where it was allowed. */
   private refused = false;
+  /** Where the pointer stands on the plot while a drag is in flight - what the
+      tether is drawn to, since the ghost is not following it. */
+  private dragPoint = { x: 0, y: 0 };
   hover: ScheduleHit = { kind: "nothing" };
   /** Where the pointer rests on the plot while nothing is being dragged. */
   hoverPoint = { x: 0, y: 0 };
@@ -163,7 +178,16 @@ export class SceneGestures {
     const gesture = this.gesture;
     if (gesture.kind !== "edit" && gesture.kind !== "place") return null;
     const found = this.ghostFindings(gesture.ghost, this.ghostHome(gesture));
-    return { ghost: gesture.ghost, overlaps: found.overlaps, late: found.late };
+    return {
+      ghost: gesture.ghost,
+      overlaps: found.overlaps,
+      late: found.late,
+      refusedLanes: gesture.refused,
+      /* The tether is drawn only while the pointer really stands on a refused
+         lane: the marked lanes say where the work may not go, the tether says
+         that the ghost is held on purpose right now. */
+      tether: this.refused ? this.dragPoint : null,
+    };
   }
 
   ghostSummary(): GhostSummary | null {
@@ -176,6 +200,7 @@ export class SceneGestures {
     const shown = outer ? occupied(gesture.ghost) : gesture.ghost;
     return {
       refused: this.refused,
+      refusedLanes: [...gesture.refused],
       x: outer ? box.outerFrom : box.mainFrom,
       y: box.y,
       height: box.height,
@@ -227,9 +252,19 @@ export class SceneGestures {
   }
 
   /** May this subtask go to this lane? Without a rule from the caller, every
-      lane is open. */
+      lane is open. Asked at a drop, where the answer has to be current; while
+      a drag runs, the held set answers instead. */
   private allowed(subtask: Subtask, lane: string): boolean {
     return this.host.handlers().canMoveTo?.(subtask, lane) ?? true;
+  }
+
+  /** The lanes this work may not go to, for the gesture that is beginning. A
+      gesture that cannot change a lane at all asks nothing: the intents the
+      caller handles decide whether the question exists. */
+  private askRefused(subtask: Subtask, home: string | null): ReadonlySet<string> {
+    if (!this.host.view.options.intents.includes(home === null ? "place" : "lane")) return NONE_REFUSED;
+    const lanes = this.host.data.lanes.map((lane) => lane.id);
+    return refusedLanes(lanes, subtask, home, this.host.handlers().canMoveTo);
   }
 
   /** What a press at a point would start, given the intents the caller handles. */
@@ -270,7 +305,17 @@ export class SceneGestures {
         this.setCursor("grabbing");
       } else {
         const t0 = this.host.view.viewport().scale.fromPx(gesture.x0);
-        this.gesture = { kind: "edit", pointerId: gesture.pointerId, mode: gesture.mode, subtask: gesture.subtask, t0, ghost: gesture.subtask };
+        this.gesture = {
+          kind: "edit",
+          pointerId: gesture.pointerId,
+          mode: gesture.mode,
+          subtask: gesture.subtask,
+          t0,
+          ghost: gesture.subtask,
+          /* Asked here, once, and drawn from the first frame of the drag: the
+             lanes that are closed are marked before the pointer reaches one. */
+          refused: gesture.mode === "move" ? this.askRefused(gesture.subtask, gesture.subtask.lane) : NONE_REFUSED,
+        };
         this.setCursor(gesture.mode === "move" ? "grabbing" : "ew-resize");
       }
     }
@@ -283,7 +328,11 @@ export class SceneGestures {
     }
     if (current.kind === "edit" && current.pointerId === event.pointerId) {
       this.lastClient = { x: event.clientX, y: event.clientY };
+      this.dragPoint = { x, y };
       this.gesture = { ...current, ghost: this.ghostFor(current, x, y) };
+      /* The hand learns what the eye may have missed: over a refused lane the
+         cursor says no, and says it again as soon as the pointer leaves. */
+      this.setCursor(this.refused ? "not-allowed" : current.mode === "move" ? "grabbing" : "ew-resize");
       this.host.interactionChanged();
       this.autoPan();
       return;
@@ -311,11 +360,17 @@ export class SceneGestures {
     } else if (gesture.kind === "edit" && gesture.pointerId === event.pointerId) {
       this.stopAutoPan();
       this.gesture = { kind: "none" };
-      /* Asked again at the drop: the caller's rule may have changed while the
-         drag ran, and a refused drop reports nothing at all. */
-      const refused =
-        gesture.ghost.lane !== gesture.subtask.lane && !this.allowed(gesture.subtask, gesture.ghost.lane);
-      const intents = refused ? [] : this.intentsOf(gesture.subtask, gesture.ghost, gesture.mode);
+      /* The ghost never stands on a refused lane - it stayed where it was
+         allowed - so what is reported is what the planner saw. The rule is
+         asked once more all the same, because it may have changed while the
+         drag ran; where it now turns the lane down, the LANE is dropped and
+         the move in time survives. One refusal costs the planner one half of
+         the gesture, not both. */
+      const kept =
+        gesture.ghost.lane === gesture.subtask.lane || this.allowed(gesture.subtask, gesture.ghost.lane);
+      const intents = this.intentsOf(gesture.subtask, gesture.ghost, gesture.mode).filter(
+        (intent) => kept || intent.kind !== "lane",
+      );
       this.refused = false;
       this.cursor = "default";
       this.host.interactionChanged();
@@ -339,10 +394,11 @@ export class SceneGestures {
       if (dx === 0 && dy === 0) return;
       const panned = view.pan(dx, dy);
       if (!panned.moved) return;
+      this.dragPoint = { x, y };
       if (gesture.kind === "edit") {
         this.gesture = { ...gesture, ghost: this.ghostFor(gesture, x, y) };
       } else {
-        const wanted = this.placeGhost(gesture.item, x, y);
+        const wanted = this.placeGhost(gesture.item, x, y, gesture.refused);
         this.refused = wanted.refused;
         this.gesture = { ...gesture, ghost: wanted.ghost ?? gesture.ghost };
       }
@@ -386,6 +442,7 @@ export class SceneGestures {
     if (this.gesture.kind !== "edit" && this.gesture.kind !== "place") return false;
     this.stopAutoPan();
     this.gesture = { kind: "none" };
+    this.refused = false;
     this.cursor = "default";
     this.host.interactionChanged();
     return true;
@@ -490,16 +547,30 @@ export class SceneGestures {
       return;
     }
     event.preventDefault();
-    if (event.dataTransfer !== null) event.dataTransfer.dropEffect = "copy";
-    const wanted = this.placeGhost(placing, x, y);
+    /* Asked at the first `dragOver` and held from there: before that moment
+       there is no gesture to hold an answer for. */
+    const refused =
+      this.gesture.kind === "place" ? this.gesture.refused : this.askRefused(this.askedFor(placing, x, y), null);
+    const wanted = this.placeGhost(placing, x, y, refused);
     this.refused = wanted.refused;
+    this.setCursor(wanted.refused ? "not-allowed" : "default");
     /* Refused, and the drag already stands somewhere allowed: the ghost stays
        there and says why, exactly as a drag inside the plot does. */
     const standing = this.gesture.kind === "place" ? this.gesture.ghost : null;
     const ghost = wanted.ghost ?? (wanted.refused ? standing : null);
+    /* The drop effect follows the GHOST and not the pointer. A ghost is the
+       promise of where a drop lands (schedule-refinement 07), and the browser
+       would break that promise if it were told "none" here: it then delivers
+       no drop at all, and a release over a refused lane would place nothing
+       while the ghost still stood on a lane that allowed it. So "none" is said
+       exactly when nothing WOULD be placed - when no ghost stands anywhere -
+       and the refusal itself is said in the three channels that do not cost
+       the gesture: the marked lanes, the cursor and the tether. */
+    if (event.dataTransfer !== null) event.dataTransfer.dropEffect = ghost === null ? "none" : "copy";
     if (ghost === null) return;
     this.lastClient = { x: event.clientX, y: event.clientY };
-    this.gesture = { kind: "place", ghost, item: placing };
+    this.dragPoint = { x, y };
+    this.gesture = { kind: "place", ghost, item: placing, refused };
     this.host.interactionChanged();
     /* Held at an edge, a drag from outside pans the plot along as one inside
        it does - and a native drag stops sending events when it holds still, so
@@ -510,13 +581,27 @@ export class SceneGestures {
   /** The ghost of a drag from outside at a point on the plot: none off the
       lanes, and none where the caller refuses that lane - which the answer
       says apart, because the two mean different things to the drag. */
-  private placeGhost(placing: PlacingItem, x: number, y: number): { ghost: Subtask | null; refused: boolean } {
+  private placeGhost(
+    placing: PlacingItem,
+    x: number,
+    y: number,
+    refused: ReadonlySet<string>,
+  ): { ghost: Subtask | null; refused: boolean } {
     const lane = this.host.view.laneIdAt(Math.max(0, Math.min(this.host.view.lanesBottom(), y)));
     if (lane === null) return { ghost: null, refused: false };
-    const from = this.snapInside(this.host.view.timeAt(x), this.snapStep());
-    const asked: Subtask = {
-      /* The caller's key for the dragged item, not the internal sentinel: the
-         rule is asked about the thing the application is dragging. */
+    /* Work dragged in may not land where placed work may not go either. */
+    if (refused.has(lane)) return { ghost: null, refused: true };
+    return { ghost: { ...this.askedFor(placing, x, y), id: PLACING }, refused: false };
+  }
+
+  /** The dragged item as a subtask, under the caller's key for it - not the
+      internal sentinel: the rule is asked about the thing the application says
+      it is dragging, and the ghost only afterwards takes the sentinel. */
+  private askedFor(placing: PlacingItem, x: number, y: number): Subtask {
+    const view = this.host.view;
+    const lane = view.laneIdAt(Math.max(0, Math.min(view.lanesBottom(), y))) ?? "";
+    const from = this.snapInside(view.timeAt(x), this.snapStep());
+    return {
       id: placing.item,
       task: placing.task,
       lane,
@@ -525,9 +610,6 @@ export class SceneGestures {
       ...(placing.setup === undefined ? {} : { setup: placing.setup }),
       ...(placing.teardown === undefined ? {} : { teardown: placing.teardown }),
     };
-    /* Work dragged in may not land where placed work may not go either. */
-    if (!this.allowed(asked, lane)) return { ghost: null, refused: true };
-    return { ghost: { ...asked, id: PLACING }, refused: false };
   }
 
   /** The drop: the place intent, and the ghost goes. Off every lane, or with
@@ -539,7 +621,14 @@ export class SceneGestures {
     const { ghost, item } = gesture;
     this.stopAutoPan();
     this.gesture = { kind: "none" };
+    this.refused = false;
+    this.cursor = "default";
     this.host.interactionChanged();
+    /* Asked again at the drop, as a drag within the plot asks: the held set
+       may be a moment old, and a rule that changed while the drag ran holds
+       either way. There is no other half to save here - a place is one intent -
+       so a refusal at the drop reports nothing. */
+    if (!this.allowed({ ...ghost, id: item.item }, ghost.lane)) return;
     const intent: PlaceIntent = {
       kind: "place",
       item: item.item,
@@ -559,6 +648,7 @@ export class SceneGestures {
       runs. */
   clearPlacing(): void {
     this.refused = false;
+    this.cursor = "default";
     if (this.gesture.kind !== "place") return;
     this.stopAutoPan();
     this.gesture = { kind: "none" };
@@ -600,8 +690,9 @@ export class SceneGestures {
           const wanted = view.laneIdAt(Math.max(0, Math.min(view.lanesBottom(), y))) ?? lane;
           /* A lane the subtask may not go to is refused, and the ghost stays
              where it last stood: a planner always sees where a drop would
-             land, and never somewhere it could not. */
-          this.refused = wanted !== lane && !this.allowed(s, wanted);
+             land, and never somewhere it could not. The set was asked when the
+             drag took hold and is only read here. */
+          this.refused = gesture.refused.has(wanted);
           if (!this.refused) lane = wanted;
         } else {
           this.refused = false;

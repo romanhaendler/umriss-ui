@@ -102,6 +102,11 @@ export interface GhostDrawing {
   readonly ghost: Subtask;
   readonly overlaps: readonly Overlap[];
   readonly late: readonly LateTransport[];
+  /** The lanes this work may not go to, for the whole run of the gesture. */
+  readonly refusedLanes: ReadonlySet<string>;
+  /** The pointer, while it stands on a refused lane and the ghost therefore
+      is not following it; null otherwise. */
+  readonly tether: { readonly x: number; readonly y: number } | null;
 }
 
 export interface DrawInput {
@@ -149,6 +154,9 @@ export function drawOverlay(ctx: CanvasRenderingContext2D, input: DrawInput): vo
     return;
   }
   const { ghost, overlaps, late } = input.ghost;
+  /* Under everything the drag draws: the lanes this work may not go to are a
+     property of the plot while the gesture runs, not of the ghost. */
+  drawRefusedLanes(ctx, input, viewport, input.ghost.refusedLanes);
   const box = ghostBox(input, viewport, ghost);
   if (box === null) return;
   for (const overlap of overlaps) drawOverlap(ctx, input, viewport, overlap);
@@ -168,6 +176,60 @@ export function drawOverlay(ctx: CanvasRenderingContext2D, input: DrawInput): vo
   ctx.lineWidth = 1;
   ctx.setLineDash([3, 2]);
   ctx.strokeRect(box.outerFrom + 0.5, box.y + 0.5, Math.max(1, box.outerTo - box.outerFrom - 1), box.height - 1);
+  ctx.setLineDash([]);
+  if (input.ghost.tether !== null) drawTether(ctx, input, box, input.ghost.tether);
+}
+
+/** The lanes a drag in flight may not put its work on: drawn back under a wash
+    of the surface, and hatched.
+
+    The hatch is here and nowhere else on the plot. "Not available" is what a
+    hatch says on a plan - which is a statement about a PLACE, not about a bar,
+    and the bars gave it up for that reason (schedule-lane-groups 02). No
+    warning colour: a mould that fits one press is nobody's mistake
+    (CONTEXT.md, **Refusal**). */
+function drawRefusedLanes(
+  ctx: CanvasRenderingContext2D,
+  input: DrawInput,
+  viewport: Viewport,
+  lanes: ReadonlySet<string>,
+): void {
+  if (lanes.size === 0) return;
+  const { width, height } = input.view;
+  const laneHeight = input.view.options.laneHeight;
+  for (const id of lanes) {
+    const index = input.data.laneIndex.get(id);
+    if (index === undefined) continue;
+    const top = laneTop(viewport, index);
+    if (top + laneHeight < 0 || top > height) continue;
+    ctx.globalAlpha = 0.6;
+    ctx.fillStyle = input.colours.surface;
+    ctx.fillRect(0, top, width, laneHeight);
+    ctx.globalAlpha = 1;
+    hatch(ctx, 0, top, width, laneHeight, input.colours.muted, 0.7, REFUSED_HATCH_STEP, 1);
+  }
+}
+
+/** The line from the held ghost to the pointer it is not following: a hairline,
+    dashed, from the nearest point of the ghost's box. Without it a ghost that
+    has stopped moving reads as one that is stuck; with it, a planner sees that
+    it is being held, and by what. */
+function drawTether(
+  ctx: CanvasRenderingContext2D,
+  input: DrawInput,
+  box: SubtaskBox,
+  pointer: { readonly x: number; readonly y: number },
+): void {
+  const x = Math.max(box.outerFrom, Math.min(box.outerTo, pointer.x));
+  const y = Math.max(box.y, Math.min(box.y + box.height, pointer.y));
+  if (Math.hypot(pointer.x - x, pointer.y - y) < 2) return;
+  ctx.strokeStyle = input.colours.text;
+  ctx.lineWidth = 1;
+  ctx.setLineDash([2, 3]);
+  ctx.beginPath();
+  ctx.moveTo(x + 0.5, y + 0.5);
+  ctx.lineTo(pointer.x + 0.5, pointer.y + 0.5);
+  ctx.stroke();
   ctx.setLineDash([]);
 }
 
@@ -297,31 +359,35 @@ function drawSubtask(ctx: CanvasRenderingContext2D, input: DrawInput, box: Subta
   }
 }
 
-/** The distance between two lines of the hatch, and how far a bar that runs on
-    fades into the surface - both in pixels. */
+/** The distance between two lines of the hatch on a bar and on a refused lane -
+    the lane's is the finer of the two, because it runs the whole width of the
+    plot - and how far a bar that runs on fades into the surface. All in
+    pixels. */
 const HATCH_STEP = 7;
+const REFUSED_HATCH_STEP = 6;
 const FADE_SPAN = 16;
 
-/** Diagonal lines in the surface colour, clipped to the main time: the mark of
-    work that may not be moved. */
+/** Diagonal lines, clipped to a rectangle. */
 function hatch(
   ctx: CanvasRenderingContext2D,
   from: number,
   top: number,
   width: number,
   height: number,
-  surface: string,
+  colour: string,
   weight: number,
+  step = HATCH_STEP,
+  lineWidth = 2,
 ): void {
   ctx.save();
   ctx.beginPath();
   ctx.rect(from, top, width, height);
   ctx.clip();
   ctx.globalAlpha = 0.5 * weight;
-  ctx.strokeStyle = surface;
-  ctx.lineWidth = 2;
+  ctx.strokeStyle = colour;
+  ctx.lineWidth = lineWidth;
   ctx.beginPath();
-  for (let x = from - height; x < from + width + height; x += HATCH_STEP) {
+  for (let x = from - height; x < from + width + height; x += step) {
     ctx.moveTo(x, top + height);
     ctx.lineTo(x + height, top);
   }

@@ -22,6 +22,7 @@ import {
   useEffect,
   useImperativeHandle,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
   useSyncExternalStore,
@@ -65,10 +66,15 @@ export interface ScheduleProps {
   /** The intents the caller handles. Each one enables its interaction; none
       leaves a read-only schedule (ADR-0023). */
   intents?: readonly IntentKind[];
-  /** Whether a subtask may go to a lane - asked while a drag runs and again at
-      the drop. Without it every lane is open; with it a drag across a forbidden
-      lane leaves the ghost where it last stood and shows a refusal, and a
-      refused drop reports nothing. It narrows `"lane"`; it does not enable it.
+  /** Whether a subtask may go to a lane. Without it every lane is open; it
+      narrows `"lane"`, it does not enable it.
+
+      Asked once per lane when a drag takes hold, and asked again at the drop.
+      The lanes it turns down are marked from the first frame of the drag - a
+      planner sees the refusal before meeting it - and over one of them the
+      ghost stays on the last lane that was allowed, the cursor says no and a
+      line ties the ghost to the pointer. A refused lane costs the lane and
+      nothing else: a drop after it still reports the move in time.
 
       It is asked for work dragged in from outside as well, with the key and
       task the application declared in `placing`. */
@@ -286,6 +292,7 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
   };
 
   const ghost = snapshot.ghost;
+  const refused = useMemo(() => new Set(ghost?.refusedLanes ?? []), [ghost?.refusedLanes]);
 
   /* The ghost's label stands above its bar, and under it in the topmost lane:
      the plot clips what leaves it, and a label a planner cannot read is worse
@@ -364,7 +371,17 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
         <div className={styles.headers} data-schedule-headers="">
           <div className={styles.headerRun} style={{ transform: `translateY(${-snapshot.scrollY}px)` }}>
             {snapshot.lanes.map((lane) => (
-              <div key={lane.id} className={styles.header} style={{ height: `${snapshot.laneHeight}px` }} data-lane={lane.id}>
+              <div
+                key={lane.id}
+                className={styles.header}
+                style={{ height: `${snapshot.laneHeight}px` }}
+                data-lane={lane.id}
+                /* The header says it too, for the whole run of a drag: the
+                   plot marks the lane, the header marks its name - and an
+                   application styling beside the schedule reads the same
+                   attribute. */
+                data-refused={refused.has(lane.id) ? "" : undefined}
+              >
                 {lane.label}
               </div>
             ))}

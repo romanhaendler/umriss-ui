@@ -5,7 +5,8 @@
 import { test, expect } from "@playwright/test";
 import { overlayOffenders } from "@umriss-ui/demo/checks/overlays";
 import { openExample } from "./navigation";
-import { DAY_OF_PLAN, LANES, at, plotOf } from "./plot";
+import { painted } from "./pixels";
+import { DAY_OF_PLAN, LANE_HEIGHT, LANES, at, plotOf } from "./plot";
 
 test.beforeEach(async ({ page }) => {
   test.skip(test.info().project.name.endsWith("dark"), "a behaviour test runs once (light)");
@@ -408,4 +409,128 @@ test("a drag from a list holds its ghost on the last lane that allowed it", asyn
      of where a drop lands - here as in a drag inside the plot. */
   await page.mouse.up();
   await expect(example.locator("[data-last-move]")).toHaveText("mould: place");
+});
+
+/* ------------------------------------------------------------------ */
+/* A refusal one can see (schedule-lane-groups 01)                      */
+/* ------------------------------------------------------------------ */
+
+test("the lanes a subtask may not go to are marked the moment the drag begins", async ({ page }) => {
+  await openExample(page, "intent", "where-it-may-go");
+  const example = page.locator('[data-example="where-it-may-go"]');
+  const plot = await plotOf(page, example, [at(6, 30), at(15)]);
+  const weld = example.locator('[data-lane="weld"]');
+
+  await expect(weld).not.toHaveAttribute("data-refused", "");
+
+  /* The drag takes hold on press 2 and has not left it. The welding bay is
+     already marked: nobody has to try a lane to learn it is closed. */
+  await page.mouse.move(plot.x(10, 30), plot.y(1));
+  await page.mouse.down();
+  await page.mouse.move(plot.x(10, 45), plot.y(1), { steps: 6 });
+  await expect(example.locator("[data-ghost]")).toBeVisible();
+  await expect(weld).toHaveAttribute("data-refused", "");
+  await expect(example.locator('[data-lane="press-1"]')).not.toHaveAttribute("data-refused", "");
+
+  /* And the lane itself is drawn back and hatched, while press 1 - which the
+     mould fits - is left alone. */
+  const lane = (top: number) => ({ x: 4, y: top + 6, width: 60, height: LANE_HEIGHT - 12 });
+  expect(await painted(example, "overlay", lane(2 * LANE_HEIGHT))).toBeGreaterThan(0);
+  expect(await painted(example, "overlay", lane(0))).toBe(0);
+
+  await page.mouse.up();
+  await expect(weld).not.toHaveAttribute("data-refused", "");
+});
+
+test("over a refused lane the cursor says so, and says otherwise again on leaving it", async ({ page }) => {
+  await openExample(page, "intent", "where-it-may-go");
+  const example = page.locator('[data-example="where-it-may-go"]');
+  const plot = await plotOf(page, example, [at(6, 30), at(15)]);
+  const surface = example.locator("[data-schedule-plot]");
+
+  await page.mouse.move(plot.x(10, 30), plot.y(1));
+  await page.mouse.down();
+  await page.mouse.move(plot.x(10, 30), plot.y(2), { steps: 8 });
+  await expect(surface).toHaveCSS("cursor", "not-allowed");
+
+  await page.mouse.move(plot.x(10, 30), plot.y(0), { steps: 8 });
+  await expect(surface).toHaveCSS("cursor", "grabbing");
+  await page.mouse.up();
+});
+
+test("a line ties the held ghost to the pointer it is not following", async ({ page }) => {
+  await openExample(page, "intent", "where-it-may-go");
+  const example = page.locator('[data-example="where-it-may-go"]');
+  const plot = await plotOf(page, example, [at(6, 30), at(15)]);
+  const ghost = example.locator("[data-ghost]");
+
+  /* Measured on press 2, in the gap between the ghost's bar and the boundary
+     of the welding bay: that strip lies on a lane which is NOT refused, so
+     nothing but the tether can paint it. */
+  const x = plot.x(10, 30) - plot.box.x;
+  const strip = { x: x - 2, y: 2 * LANE_HEIGHT - 5, width: 5, height: 4 };
+
+  await page.mouse.move(plot.x(10, 30), plot.y(1));
+  await page.mouse.down();
+  await page.mouse.move(plot.x(10, 30), plot.y(0), { steps: 8 });
+  await expect(ghost).not.toHaveAttribute("data-refused", "");
+  expect(await painted(example, "overlay", strip)).toBe(0);
+
+  await page.mouse.move(plot.x(10, 30), plot.y(2), { steps: 8 });
+  await expect(ghost).toHaveAttribute("data-refused", "");
+  expect(await painted(example, "overlay", strip)).toBeGreaterThan(0);
+  await page.mouse.up();
+});
+
+test("a refused lane costs the lane and not the move in time", async ({ page }) => {
+  await openExample(page, "intent", "where-it-may-go");
+  const example = page.locator('[data-example="where-it-may-go"]');
+  const plot = await plotOf(page, example, [at(6, 30), at(15)]);
+
+  /* Down onto the welding bay AND an hour earlier: the lane is refused, the
+     hour is not. One refusal must not cost the other half of the gesture. */
+  await page.mouse.move(plot.x(10, 30), plot.y(1));
+  await page.mouse.down();
+  await page.mouse.move(plot.x(9, 30), plot.y(2), { steps: 10 });
+  await expect(example.locator("[data-ghost]")).toHaveAttribute("data-refused", "");
+  await page.mouse.up();
+
+  await expect(example.locator("[data-last-move]")).toHaveText("moulded: move");
+});
+
+test("a drag from outside is marked and refused in the same language", async ({ page }) => {
+  await openExample(page, "intent", "where-it-may-go");
+  const example = page.locator('[data-example="where-it-may-go"]');
+  const plot = await plotOf(page, example, [at(6, 30), at(15)]);
+  const weld = example.locator('[data-lane="weld"]');
+
+  /* The browser's own answer to a drag, read after the schedule gave it:
+     React listens on the root container, so a listener on the document runs
+     last. */
+  await page.evaluate(() => {
+    const window_ = window as unknown as { lastDropEffect?: string };
+    document.addEventListener("dragover", (event) => {
+      window_.lastDropEffect = (event as DragEvent).dataTransfer?.dropEffect;
+    });
+  });
+  const dropEffect = () => page.evaluate(() => (window as unknown as { lastDropEffect?: string }).lastDropEffect);
+
+  /* The welding bay is marked as soon as the drag reaches the plot, exactly as
+     it is for a drag inside it. */
+  await example.locator('[data-waiting="mould"]').hover();
+  await page.mouse.down();
+  await page.mouse.move(plot.x(12), plot.y(0), { steps: 6 });
+  await expect(weld).toHaveAttribute("data-refused", "");
+  await expect(example.locator("[data-ghost]")).toBeVisible();
+  expect(await dropEffect()).toBe("copy");
+
+  /* And back over the welding bay it stays "copy": the ghost still stands on
+     press 1, and a ghost is the promise of where a drop lands. The refusal is
+     said in the marks, not by taking the gesture away. */
+  await page.mouse.move(plot.x(12), plot.y(2), { steps: 6 });
+  await expect(example.locator("[data-ghost]")).toHaveAttribute("data-refused", "");
+  expect(await dropEffect()).toBe("copy");
+
+  await page.mouse.up();
+  await expect(weld).not.toHaveAttribute("data-refused", "");
 });
