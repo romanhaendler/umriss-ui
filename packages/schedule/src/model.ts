@@ -5,6 +5,8 @@
    duration milliseconds - the unit `Date.now()` has, and the one
    @umriss-ui/charts' time arithmetic speaks. */
 
+import type { SubtaskAppearance } from "./appearance";
+
 /** One whole undertaking. It is never drawn as a thing of its own: it shows as
     the colour its subtasks share, and in selection, which takes all of it. */
 export interface Task {
@@ -36,6 +38,14 @@ export interface Subtask {
   readonly teardown?: number;
   /** What the subtask is called, where the schedule names it. */
   readonly name?: string;
+  /** What the bar says besides its colour: `"provisional"`, `"fixed"`,
+      `"muted"`, `"open"`. Several hold at once; `"provisional"` and `"fixed"`
+      contradict, and the later one in the list wins. */
+  readonly appearance?: readonly SubtaskAppearance[];
+  /** The share of the work that is done, from 0 to 1, drawn as a filled part
+      of the bar. Without it nothing is claimed - an empty bar and a bar at
+      zero per cent are two different statements. */
+  readonly progress?: number;
 }
 
 /** A task's move between two of its subtasks: always from an end to a start. */
