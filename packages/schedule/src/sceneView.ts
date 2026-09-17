@@ -42,6 +42,8 @@ export interface SceneOptions {
   readonly zoomLimits: ZoomLimits;
   readonly snap: "ticks" | number | false;
   readonly intents: readonly IntentKind[];
+  /** The present, as a wall-clock instant, or null for no now line. */
+  readonly now: number | null;
 }
 
 export class SceneView {
@@ -51,6 +53,7 @@ export class SceneView {
     zoomLimits: { min: HOUR, max: 28 * DAY },
     snap: "ticks",
     intents: [],
+    now: null,
   };
   domain: [number, number] = [0, DAY];
   scrollY = 0;
@@ -129,6 +132,14 @@ export class SceneView {
       ticks: fineTicks(this.domain, step, calendar).map((tick) => ({ wallClock: tick.wallClock, x: Math.round(scale.toPx(tick.operatingTime)) })),
       step,
     };
+  }
+
+  /** The now line's x, or null where there is none or it lies outside the plot. */
+  nowX(): number | null {
+    const now = this.options.now;
+    if (now === null || this.width <= 0) return null;
+    const x = Math.round(this.viewport().scale.toPx(toOperatingTimeClamped(now, this.options.calendar)));
+    return x >= 0 && x <= this.width ? x : null;
   }
 
   hitAt(x: number, y: number): ScheduleHit {
