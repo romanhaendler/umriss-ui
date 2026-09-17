@@ -1,0 +1,59 @@
+.panel {
+  min-width: 180px;
+  max-width: 280px;
+  display: flex;
+  flex-direction: column;
+  padding: var(--u-space-1);
+  background: var(--u-color-surface);
+  border-radius: var(--u-radius-md);
+  box-shadow: var(--u-shadow-overlay);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--u-space-2);
+  width: 100%;
+  padding: var(--u-space-2) var(--u-space-3);
+  border: none;
+  background: none;
+  border-radius: var(--u-radius-sm);
+  font-family: var(--u-font-sans);
+  font-size: var(--u-text-sm);
+  text-align: left;
+  color: var(--u-color-text);
+  cursor: pointer;
+  transition: background-color var(--u-transition);
+}
+
+.item:hover,
+.item:focus-visible {
+  background: var(--u-color-surface-sunken);
+  box-shadow: none;
+}
+
+.item:disabled {
+  color: var(--u-color-text-muted);
+  cursor: not-allowed;
+  background: none;
+}
+
+.danger {
+  color: var(--u-color-danger);
+}
+
+.danger:hover,
+.danger:focus-visible {
+  background: var(--u-color-danger-subtle);
+}
+
+.separator {
+  height: 1px;
+  margin: var(--u-space-1) var(--u-space-2);
+  background: var(--u-hairline);
+}
+
+/* Inner shell: carries the keyboard handling and the list. */
+.content {
+  display: contents;
+}

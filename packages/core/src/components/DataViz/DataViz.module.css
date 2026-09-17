@@ -1,0 +1,52 @@
+.meter {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--u-space-2);
+  width: 100%;
+  min-width: 90px;
+}
+
+.track {
+  flex: 1;
+  height: 6px;
+  border-radius: var(--u-radius-full);
+  background: var(--u-color-surface-sunken);
+  overflow: hidden; /* the fill has no shadow - clipping is harmless here */
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--u-radius-full);
+  transition: width var(--u-duration-medium) var(--u-ease-out);
+}
+
+.neutral { background: var(--u-color-text-muted); }
+.accent { background: var(--u-color-accent); }
+.success { background: var(--u-color-success); }
+.warning { background: var(--u-color-warning); }
+.danger { background: var(--u-color-danger); }
+
+.meterLabel {
+  flex: none;
+  min-width: 4ch;
+  text-align: right;
+  font-family: var(--u-font-mono);
+  font-size: 0.71875rem;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  color: var(--u-color-text-secondary);
+}
+
+.sparkline {
+  display: inline-flex;
+  color: var(--u-color-text-secondary);
+}
+
+.sparklineAccent {
+  color: var(--u-color-accent);
+}
+
+.sparklineDot {
+  fill: var(--u-color-accent);
+}

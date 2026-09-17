@@ -1,0 +1,578 @@
+.trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--u-space-2);
+  width: 100%;
+  height: var(--u-control-height);
+  padding: 0 var(--u-space-3);
+  border: none;
+  border-radius: var(--u-radius-md);
+  background: var(--u-color-surface);
+  box-shadow: var(--u-edge-strong);
+  font-family: var(--u-font-sans);
+  font-size: var(--u-text-sm);
+  color: var(--u-color-text);
+  cursor: pointer;
+  transition: box-shadow var(--u-transition);
+}
+
+.trigger:hover:not(:disabled):not(:focus-visible) {
+  box-shadow: 0 0 0 1px var(--u-color-edge-hover);
+}
+
+.trigger:focus-visible {
+  box-shadow:
+    0 0 0 1px var(--u-color-accent),
+    var(--u-focus-ring);
+}
+
+.trigger:disabled {
+  background: var(--u-color-surface-sunken);
+  color: var(--u-color-text-muted);
+  cursor: not-allowed;
+}
+
+.sm {
+  height: var(--u-control-height-sm);
+  font-size: var(--u-text-xs);
+  border-radius: var(--u-radius-sm);
+}
+
+.invalid,
+.invalid:hover:not(:disabled):not(:focus-visible) {
+  box-shadow: 0 0 0 1px var(--u-color-danger);
+}
+
+.value {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: var(--u-font-mono);
+  font-size: 0.75rem;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+.placeholder {
+  font-family: var(--u-font-sans);
+  font-size: var(--u-text-sm);
+  color: var(--u-color-text-muted);
+}
+
+.icon {
+  flex: none;
+  color: var(--u-color-text-muted);
+}
+
+/* Panel */
+/* One month width for all calendar components. It is measured so that even the
+   widest time row (from/to with seconds) fits exactly under its month column -
+   panels thereby have their final width from the start and never jump. */
+.panel {
+  --_calendar-month: 266px;
+  width: calc(var(--_calendar-month) + 2 * var(--u-space-3));
+  padding: var(--u-space-3);
+  background: var(--u-color-surface);
+  border-radius: var(--u-radius-md);
+  box-shadow: var(--u-shadow-overlay);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--u-space-2);
+  margin-bottom: var(--u-space-2);
+}
+
+.month {
+  font-size: var(--u-text-sm);
+  font-weight: var(--u-weight-semibold);
+}
+
+.page {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: none;
+  border-radius: var(--u-radius-sm);
+  color: var(--u-color-text-secondary);
+  cursor: pointer;
+  transition: background-color var(--u-transition);
+}
+
+.page:hover {
+  background: var(--u-color-surface-sunken);
+  color: var(--u-color-text);
+}
+
+.weekdays,
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.weekdays {
+  margin-bottom: var(--u-space-1);
+}
+
+.weekdays span {
+  text-align: center;
+  font-size: var(--u-text-xs);
+  font-weight: var(--u-weight-medium);
+  letter-spacing: var(--u-tracking-caps);
+  text-transform: uppercase;
+  color: var(--u-color-text-muted);
+  padding: var(--u-space-1) 0;
+}
+
+.day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  border: none;
+  background: none;
+  border-radius: var(--u-radius-sm);
+  font-family: var(--u-font-mono);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--u-color-text);
+  cursor: pointer;
+  transition:
+    background-color var(--u-transition),
+    color var(--u-transition);
+}
+
+.day:hover {
+  background: var(--u-color-surface-sunken);
+}
+
+.otherMonth {
+  color: var(--u-color-text-muted);
+}
+
+.today {
+  box-shadow: inset 0 0 0 1px var(--u-color-accent);
+  color: var(--u-color-accent-text);
+}
+
+/* The chosen day: ink. */
+.selected,
+.selected:hover {
+  background: var(--u-color-primary-bg);
+  color: var(--u-color-primary-fg);
+  box-shadow: none;
+}
+
+.foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--u-space-2);
+  padding-top: var(--u-space-2);
+  border-top: 1px solid var(--u-hairline);
+}
+
+/* ------------------------------------------------------------------
+   DateTimePicker: the time row and the daylight-saving hints
+   ------------------------------------------------------------------ */
+
+.timeRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--u-space-3);
+  margin-top: var(--u-space-2);
+  padding-top: var(--u-space-2);
+  border-top: 1px solid var(--u-hairline);
+}
+
+.timeLabel {
+  font-size: var(--u-text-xs);
+  font-weight: var(--u-weight-medium);
+  letter-spacing: var(--u-tracking-caps);
+  text-transform: uppercase;
+  color: var(--u-color-text-secondary);
+}
+
+.timeGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--u-space-1);
+}
+
+/* The time field with its integrated stepper column - the same construction as
+   on the NumberInput: the edge on the wrapper, the stepper flush inside, a
+   hairline separation. Clipping is harmless: the children have no shadow, and
+   the wrapper's edge stays untouched. */
+.timeFieldWrap {
+  display: inline-flex;
+  align-items: stretch;
+  height: var(--u-control-height-sm);
+  border-radius: var(--u-radius-sm);
+  background: var(--u-color-surface);
+  box-shadow: var(--u-edge-strong);
+  overflow: hidden;
+  transition: box-shadow var(--u-transition);
+}
+
+.timeFieldWrap:focus-within {
+  box-shadow:
+    0 0 0 1px var(--u-color-accent),
+    var(--u-focus-ring);
+}
+
+.timeField {
+  width: 26px;
+  border: none;
+  background: none;
+  padding: 0;
+  text-align: center;
+  font-family: var(--u-font-mono);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--u-color-text);
+}
+
+.timeField:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Quiet time steppers: ghost chevrons without dividing lines, damped at rest.
+   The fade-in hangs on the TIME GROUP, not on the single field: on entering the
+   time block all steppers fade in with ONE quiet movement (the same gesture as
+   on the NumberInput), instead of flaring up in pairs while wandering across
+   hh:mm:ss. */
+.timeStepper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+  padding-right: 3px;
+}
+
+.timeStepper button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 13px;
+  padding: 0;
+  border: none;
+  border-radius: var(--u-radius-sm);
+  background: transparent;
+  color: var(--u-color-text-secondary);
+  opacity: 0.4;
+  cursor: pointer;
+  touch-action: none;
+  transition:
+    opacity var(--u-transition),
+    background-color var(--u-transition),
+    color var(--u-transition);
+}
+
+/* Press feedback only on the glyph, not on the button surface: the two stacked,
+   flat buttons would visibly wobble when the surface is scaled. This way only
+   the chevron contracts briefly - the same quiet gesture as on the minus/plus
+   buttons. */
+.timeStepper button svg {
+  transition: transform var(--u-transition);
+}
+
+.timeGroup:hover .timeStepper button,
+.timeGroup:focus-within .timeStepper button {
+  opacity: 1;
+}
+
+.timeStepper button:hover {
+  background: var(--u-color-surface-sunken);
+  color: var(--u-color-text);
+}
+
+.timeStepper button:active svg {
+  transform: scale(0.8);
+}
+
+.timeSeparator {
+  font-family: var(--u-font-mono);
+  font-size: 0.75rem;
+  color: var(--u-color-text-muted);
+}
+
+.dstHint {
+  margin: var(--u-space-2) 0 0;
+  font-size: var(--u-text-xs);
+  line-height: var(--u-leading-normal);
+  color: var(--u-color-warning);
+}
+
+.dstChoice {
+  display: flex;
+  flex-direction: column;
+  gap: var(--u-space-2);
+}
+
+.dstButtons {
+  display: flex;
+  gap: var(--u-space-2);
+}
+
+.footLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--u-space-1);
+}
+
+
+/* A wrapper around the trigger, so that the clearing cross can sit as a sibling
+   element (a button inside a button would be invalid). */
+.triggerWrap {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+/* The clearing cross on the trigger: invisible at rest, it fades in on hover or
+   focus and sits to the left of the calendar/clock icon. */
+.triggerClear {
+  position: absolute;
+  top: 50%;
+  right: calc(var(--u-space-3) + 13px + var(--u-space-2));
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  border-radius: var(--u-radius-full);
+  background: transparent;
+  color: var(--u-color-text-muted);
+  opacity: 0;
+  pointer-events: none;
+  cursor: pointer;
+  transition:
+    opacity var(--u-transition),
+    background-color var(--u-transition),
+    color var(--u-transition);
+}
+
+.triggerWrap:hover .triggerClear,
+.triggerWrap:focus-within .triggerClear {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.triggerClear:hover {
+  background: var(--u-color-surface-sunken);
+  color: var(--u-color-text);
+}
+
+
+/* ------------------------------------------------------------------
+   DateRangePicker: the two-month panel, the presets, the range band
+   ------------------------------------------------------------------ */
+
+.rangeDash {
+  margin: 0 0.4em;
+  color: var(--u-color-text-muted);
+}
+
+.rangePanel {
+  width: auto;
+}
+
+/* The right-hand side (the month pair, the time row and the hints): a fixed
+   width out of two months - even long hint texts cannot widen it. */
+.rangeRight {
+  width: calc(2 * var(--_calendar-month) + var(--u-space-4));
+}
+
+.rangeBody {
+  display: flex;
+  align-items: stretch;
+  gap: var(--u-space-3);
+}
+
+.presetColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 128px;
+  padding-right: var(--u-space-3);
+  border-right: 1px solid var(--u-hairline);
+}
+
+.preset {
+  padding: var(--u-space-1) var(--u-space-2);
+  border: none;
+  background: none;
+  border-radius: var(--u-radius-sm);
+  text-align: left;
+  font-family: var(--u-font-sans);
+  font-size: var(--u-text-sm);
+  color: var(--u-color-text);
+  cursor: pointer;
+  transition:
+    background-color var(--u-transition),
+    color var(--u-transition);
+}
+
+.preset:hover {
+  background: var(--u-color-surface-sunken);
+}
+
+.presetActive,
+.presetActive:hover {
+  background: var(--u-color-accent-subtle);
+  color: var(--u-color-accent-text);
+  font-weight: var(--u-weight-medium);
+}
+
+.monthPair {
+  display: flex;
+  gap: var(--u-space-4);
+}
+
+.monthColumn {
+  flex: none;
+  width: var(--_calendar-month);
+}
+
+/* A spacer where a paging arrow is hidden - the month name thereby stays exactly
+   centred in both heads. */
+.pageSpacer {
+  width: 24px;
+  height: 24px;
+}
+
+/* An empty cell instead of a day from another month in the two-month view. */
+.dayEmpty {
+  height: 32px;
+}
+
+/* The range band: the days in between as a quiet surface, the end points in ink.
+   Inside the band the roundings are dropped, so that one continuous surface
+   arises; only the outer edges are rounded. */
+.inRange,
+.inRange:hover {
+  background: var(--u-color-accent-subtle);
+  border-radius: 0;
+}
+
+.inRange:hover {
+  background: color-mix(in srgb, var(--u-color-accent) 18%, var(--u-color-surface));
+}
+
+.rangeFrom,
+.rangeFrom:hover,
+.rangeTo,
+.rangeTo:hover,
+.rangeSingle,
+.rangeSingle:hover {
+  background: var(--u-color-primary-bg);
+  color: var(--u-color-primary-fg);
+  box-shadow: none;
+}
+
+.rangeFrom {
+  border-radius: var(--u-radius-sm) 0 0 var(--u-radius-sm);
+}
+
+.rangeTo {
+  border-radius: 0 var(--u-radius-sm) var(--u-radius-sm) 0;
+}
+
+/* The preview (the end not yet clicked): the band half transparent, the possible
+   end as an outline instead of filled - clearly readable as "not yet
+   decided". */
+.inPreview,
+.inPreview:hover {
+  background: color-mix(in srgb, var(--u-color-accent) 9%, var(--u-color-surface));
+}
+
+.previewEnd,
+.previewEnd:hover {
+  background: color-mix(in srgb, var(--u-color-accent) 9%, var(--u-color-surface));
+  color: var(--u-color-accent-text);
+  box-shadow: inset 0 0 0 1px var(--u-color-accent);
+}
+
+.footNote {
+  font-size: var(--u-text-xs);
+  color: var(--u-color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* ------------------------------------------------------------------
+   DateTimeRangePicker: the time row below the month pair
+   ------------------------------------------------------------------ */
+
+.rangeRight {
+  display: flex;
+  flex-direction: column;
+}
+
+/* The time row: two halves, exactly below the two month columns (the same width,
+   the same gap). Within each half the label and the date sit on the left and the
+   time flush on the right - the full panel width is used, nothing hangs in the
+   air. */
+.timeRangeRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--u-space-4);
+  margin-top: var(--u-space-2);
+  padding-top: var(--u-space-2);
+  border-top: 1px solid var(--u-hairline);
+}
+
+.timeHalf {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--u-space-2);
+  min-width: 0;
+}
+
+.timeHalfHead {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--u-space-2);
+  white-space: nowrap;
+}
+
+.timeDate {
+  font-family: var(--u-font-mono);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--u-color-text);
+}
+
+.footNoteRight {
+  flex: 1;
+  text-align: right;
+  margin-right: var(--u-space-2);
+}
+
+.timeFieldDisabled {
+  background: var(--u-color-surface-sunken);
+}
+
+.timeFieldDisabled .timeField {
+  color: var(--u-color-text-muted);
+  cursor: not-allowed;
+}
+
+.timeStepper button:disabled {
+  cursor: default;
+  opacity: 0.18;
+}

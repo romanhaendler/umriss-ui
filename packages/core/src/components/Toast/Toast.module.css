@@ -1,0 +1,163 @@
+.region {
+  position: fixed;
+  right: var(--u-space-5);
+  bottom: var(--u-space-5);
+  z-index: var(--u-z-toast);
+  display: flex;
+  flex-direction: column;
+  max-width: min(92vw, 380px);
+}
+
+/* The two live regions carry no layout of their own: their messages stand as
+   members of the region one below the other, ordered through `order`. */
+.live {
+  display: contents;
+}
+
+/* Every entry collapses on leaving (1fr → 0fr), so that the remaining
+   messages move up gently. Deliberately NO overflow:hidden – our edges are
+   shadows and would otherwise be cut off as grey rectangles behind the
+   rounded corners. The leaving message may overlap briefly; it fades out at
+   the same time, so that stays invisible. */
+.itemWrap {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows var(--u-duration-exit-collapse) var(--u-ease-out);
+}
+
+.itemWrapLeaving {
+  grid-template-rows: 0fr;
+}
+
+.itemInner {
+  min-height: 0;
+  padding-top: var(--u-space-2);
+  transition: padding-top var(--u-duration-exit-collapse) var(--u-ease-out);
+}
+
+.itemWrapLeaving .itemInner {
+  padding-top: 0;
+}
+
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--u-space-3);
+  padding: var(--u-space-3) var(--u-space-4);
+  background: var(--u-color-surface);
+  border-radius: var(--u-radius-lg);
+  box-shadow: var(--u-shadow-overlay);
+  animation: toastIn var(--u-duration-medium) var(--u-ease-out);
+  /* Leaving through a transition – does not collide with the entrance animation. */
+  transition:
+    opacity var(--u-duration-exit-collapse) ease-in,
+    transform var(--u-duration-exit-collapse) ease-in;
+}
+
+.itemWrapLeaving .toast {
+  opacity: 0;
+  transform: translateX(16px);
+  pointer-events: none;
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Tone icon: the splash of colour of the message. */
+.icon {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--u-radius-full);
+  margin-top: 1px;
+}
+
+.neutral {
+  background: var(--u-color-surface-sunken);
+  color: var(--u-color-text-secondary);
+}
+
+.success {
+  background: var(--u-color-success-subtle);
+  color: var(--u-color-success);
+}
+
+.warning {
+  background: var(--u-color-warning-subtle);
+  color: var(--u-color-warning);
+}
+
+.danger {
+  background: var(--u-color-danger-subtle);
+  color: var(--u-color-danger);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+  padding-top: 3px;
+}
+
+.title {
+  margin: 0;
+  font-size: var(--u-text-sm);
+  font-weight: var(--u-weight-semibold);
+  line-height: var(--u-leading-tight);
+  color: var(--u-color-text);
+}
+
+.descriptionText {
+  margin: 0;
+  font-size: var(--u-text-sm);
+  line-height: var(--u-leading-normal);
+  color: var(--u-color-text-secondary);
+}
+
+.close {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  margin: 1px -6px 0 0;
+  border: none;
+  background: none;
+  border-radius: var(--u-radius-sm);
+  color: var(--u-color-text-muted);
+  cursor: pointer;
+  transition:
+    background-color var(--u-transition),
+    color var(--u-transition);
+}
+
+.close:hover {
+  background: var(--u-color-surface-sunken);
+  color: var(--u-color-text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation: none;
+    transition: none;
+  }
+
+  .itemWrap,
+  .itemInner {
+    transition: none;
+  }
+}

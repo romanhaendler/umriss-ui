@@ -1,0 +1,76 @@
+# 01 — Closing the vocabulary, and the check that holds it
+
+Status: ready-for-agent
+
+Spec: `.scratch/visuelle-wertigkeit/spec.md`
+
+## Scope
+
+A check that answers exactly one question per site: *is there a raw value here
+where a token should stand?* Plus the resolution of the sites that would turn it
+red today.
+
+**Checked** in the component stylesheets: colours, font sizes, line heights,
+durations, timing curves, radii, shadows.
+
+**Not checked** are spacing, paddings, widths and heights. This omission is the
+central decision of the spec and not a convenience: a check that turns
+`padding: 7px 5px` in combobox, select and multiselect red destroys optical
+corrections. The 57 off-grid values stay where they are.
+
+Today's finding, which the check has to collect:
+
+- **2 raw hex values** in `Button.module.css` (`#ffffff`, `#000000`)
+- **10 font sizes outside the token set**: `0.75rem` eight times
+  (DatePicker 5×, Input, NumberInput, Table), `0.71875rem` twice (DataViz,
+  NumberInput)
+- **5× `line-height: 1`** raw
+- **6 raw motion values** of 58 declarations: `modalOut 160ms ease-in`,
+  `backdropOut 160ms ease-in`, `backdropIn … ease-out` (duration tokenised,
+  curve raw), `rotate 700ms linear`, `shimmer 1.6s ease-in-out` (2×).
+
+With motion the situation is **not** that anyone worked around tokens: all 39
+`transition` declarations reference tokens (8× `var(--u-ease-out)`,
+28× `var(--u-transition)`, 3× `none`). The six raw values stand where the
+vocabulary offers no name — exit and continuous process. They therefore **cannot
+be resolved in this ticket**, but only with the extended set from ticket 02.
+
+The font sizes are decided **per site**: either pulled onto an existing size or —
+if they denote a real, recurring role — taken on as a seventh token. `0.75rem`
+stands in eight places and is thus a serious candidate for a token;
+`0.71875rem` in two places rather not. No blanket rule.
+
+The check for durations and curves is **written here and skipped for now**, with
+a reference to 02; 02 extends the token set, resolves the six sites and
+activates the check. To activate it here would mean entering six exceptions for
+a state that is fixed one ticket later.
+
+## Acceptance
+
+- A unit test following the pattern of `tests-unit/kontrast.test.ts`: stylesheets
+  come in as text via Vite's `?raw`, through a glob over the component
+  stylesheets. No CSS parser, no file system, no browser.
+- The error message names file and property per site, so that it is itself the
+  work list.
+- Exceptions are named, carry a reason and stand **in the test**, not in a
+  document beside it. Taking on an exception is permitted; softening the
+  threshold is not.
+- The check makes **no** statement about spacing, paddings, widths or heights. A
+  test that did so is to be rejected.
+- Write the test first, while it is red, then work off the sites.
+- No screenshot baseline moves in this ticket. The two hex values and the font
+  sizes are to be replaced by tokens that yield **the same value**; if something
+  moves, the replacement was not value-identical and is corrected rather than
+  rebuilt. (A new token for `0.75rem` carries exactly `0.75rem`.)
+
+## Notes
+
+First of the five. Mechanical, low-risk, and the precondition for 02 to 05 not
+working around the token layer again.
+
+The stock is better with the colours and the motion than it looks at first
+glance — the token layer is adhered to. The check secures this state rather than
+establishing it. Its real value lies with the ten font sizes, where the set is
+genuinely open today, and in the fact that in future a motion without a matching
+token forces a token rather than a raw value — the way it did not happen with
+`modalOut` and `rotate`.

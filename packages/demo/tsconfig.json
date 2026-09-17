@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["vite/client", "node"],
+    "allowImportingTsExtensions": true,
+    /* The shell takes @umriss-ui/core through the public entry, checked against
+       the source - as @umriss-ui/table does (its own tsconfig). The package does
+       not name @umriss-ui/core as a dependency: core hangs off the shell as a dev
+       dependency, and one cycle between two workspace packages is one too many.
+       Whoever uses the shell brings @umriss-ui/core with them. */
+    "paths": {
+      "@umriss-ui/core": ["../core/src/index.ts"]
+    }
+  },
+  "include": ["src", "pruefung", "tests-unit"]
+}

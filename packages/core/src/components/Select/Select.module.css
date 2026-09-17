@@ -1,0 +1,105 @@
+.wrapper {
+  position: relative;
+  display: inline-flex;
+  width: 100%;
+}
+
+.select {
+  appearance: none;
+  height: var(--u-control-height);
+  padding: 0 var(--u-space-7) 0 var(--u-space-3);
+  border: none;
+  border-radius: var(--u-radius-md);
+  background-color: var(--u-color-surface);
+  box-shadow: var(--u-edge-strong);
+  font-family: var(--u-font-sans);
+  font-size: var(--u-text-sm);
+  color: var(--u-color-text);
+  cursor: pointer;
+  transition: box-shadow var(--u-transition);
+  width: 100%;
+}
+
+.select:hover:not(:disabled):not(:focus-visible) {
+  box-shadow: 0 0 0 1px var(--u-color-edge-hover);
+}
+
+.select:focus-visible {
+  box-shadow:
+    0 0 0 1px var(--u-color-accent),
+    var(--u-focus-ring);
+}
+
+.select:disabled {
+  background-color: var(--u-color-surface-sunken);
+  color: var(--u-color-text-muted);
+  cursor: not-allowed;
+}
+
+.sm {
+  height: var(--u-control-height-sm);
+  font-size: var(--u-text-xs);
+  border-radius: var(--u-radius-sm);
+}
+
+.invalid,
+.invalid:hover:not(:disabled):not(:focus-visible) {
+  box-shadow: 0 0 0 1px var(--u-color-danger);
+}
+
+.chevron {
+  position: absolute;
+  right: var(--u-space-3);
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid var(--u-color-text-secondary);
+  border-bottom: 1.5px solid var(--u-color-text-secondary);
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
+}
+
+.select:disabled ~ .chevron {
+  border-color: var(--u-color-text-muted);
+}
+
+/* Reserves room for the clearing × to the left of the chevron. */
+.selectClearable {
+  padding-right: calc(var(--u-space-7) + 20px);
+}
+
+/* Clearing ×: invisible at rest, fades in on hover/focus. */
+.clear {
+  position: absolute;
+  top: 50%;
+  right: calc(var(--u-space-3) + 7px + var(--u-space-2));
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  border-radius: var(--u-radius-full);
+  background: transparent;
+  color: var(--u-color-text-muted);
+  opacity: 0;
+  pointer-events: none;
+  cursor: pointer;
+  transition:
+    opacity var(--u-transition),
+    background-color var(--u-transition),
+    color var(--u-transition);
+}
+
+.wrapper:hover .clear,
+.wrapper:focus-within .clear {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.clear:hover {
+  background: var(--u-color-surface-sunken);
+  color: var(--u-color-text);
+}

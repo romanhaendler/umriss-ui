@@ -1,0 +1,392 @@
+/* The shell: header bar, sidebar, overview.
+
+   The page content itself - examples, code blocks, props tables - stands in
+   `page.css`.
+
+   The jump palette has no styles here any more: it is `CommandPalette` from the
+   library and brings its own (`command-palette` 07).
+
+   Every colour, spacing and radius comes from the tokens - the demo allows
+   itself nothing the library does not offer. */
+
+.shell {
+  min-height: 100vh;
+  background: var(--u-color-bg);
+}
+
+/* ---------------- Kopfleiste ---------------- */
+
+.shellHead {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: var(--u-space-4);
+  height: 56px;
+  padding: 0 var(--u-space-5);
+  border-bottom: 1px solid var(--u-edge-color);
+  /* The background is slightly translucent: content underneath stays faintly
+     perceptible while the bar holds its place. */
+  background: color-mix(in srgb, var(--u-color-surface) 82%, transparent);
+  backdrop-filter: saturate(160%) blur(10px);
+}
+
+.shellMark {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--u-space-2);
+  text-decoration: none;
+  color: inherit;
+  border-radius: var(--u-radius-sm);
+}
+
+.shellMark:focus-visible {
+  outline: none;
+  box-shadow: var(--u-focus-ring);
+}
+
+.shellMarkName {
+  font-size: var(--u-text-sm);
+  font-weight: var(--u-weight-semibold);
+  letter-spacing: var(--u-tracking-tight);
+  color: var(--u-color-text);
+}
+
+.shellVersion {
+  font-family: var(--u-font-mono);
+  font-size: var(--u-text-xs);
+  color: var(--u-color-text-secondary);
+}
+
+/* The way into search looks like a field and is a button - that is the shape
+   every documentation site is read with straight away. */
+.shellSearch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--u-space-4);
+  width: 260px;
+  height: 32px;
+  padding: 0 var(--u-space-2) 0 var(--u-space-3);
+  border: none;
+  border-radius: var(--u-radius-md);
+  background: var(--u-color-surface-sunken);
+  box-shadow: var(--u-edge);
+  color: var(--u-color-text-secondary);
+  font: inherit;
+  font-size: var(--u-text-sm);
+  text-align: left;
+  cursor: pointer;
+  transition: box-shadow var(--u-transition);
+}
+
+.shellSearch:hover {
+  box-shadow: var(--u-edge-strong);
+}
+
+.shellSearch:focus-visible {
+  outline: none;
+  box-shadow: var(--u-focus-ring);
+}
+
+.shellKbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: var(--u-radius-xs);
+  background: var(--u-color-surface);
+  box-shadow: var(--u-edge);
+  font-family: var(--u-font-mono);
+  font-size: 11px;
+  line-height: 1;
+  color: var(--u-color-text-secondary);
+}
+
+.shellActions {
+  display: flex;
+  align-items: center;
+  gap: var(--u-space-3);
+  margin-left: auto;
+}
+
+.shellLink {
+  font-size: var(--u-text-xs);
+  color: var(--u-color-text-secondary);
+  text-decoration: none;
+  border-radius: var(--u-radius-xs);
+}
+
+.shellLink:hover {
+  color: var(--u-color-text);
+  text-decoration: underline;
+}
+
+.shellLink:focus-visible {
+  outline: none;
+  box-shadow: var(--u-focus-ring);
+}
+
+/* ---------------- Body: bar + content ---------------- */
+
+.shellBody {
+  display: grid;
+  grid-template-columns: 244px minmax(0, 1fr);
+}
+
+
+/* The bar is a shadow step of its own and sits, in colour, between the two it
+   separates: above the content, below the header bar. */
+.rail {
+  background: color-mix(in srgb, var(--u-color-surface) 55%, var(--u-color-bg));
+  position: sticky;
+  top: 56px;
+  align-self: start;
+  height: calc(100vh - 56px);
+  overflow-y: auto;
+  padding: var(--u-space-5) var(--u-space-3) var(--u-space-8);
+  border-right: 1px solid var(--u-edge-color);
+}
+
+.railRubric + .railRubric {
+  margin-top: var(--u-space-5);
+}
+
+/* A rubric is a HEADING and not a button: it sorts the bar, but has no address
+   and no page of its own. Something that looks like a button and does nothing
+   when pressed is worse than something that does not look like one. */
+.railHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0;
+  padding: var(--u-space-1) var(--u-space-3);
+  font-size: var(--u-text-xs);
+  font-weight: var(--u-weight-semibold);
+  letter-spacing: var(--u-tracking-caps);
+  text-transform: uppercase;
+  color: var(--u-color-text-secondary);
+}
+
+/* The count stands beside a heading and not inside a card: the muted tone
+   misses the bound on the bar's ground. It is small enough to stay quiet even
+   in the second text colour. */
+.railCount {
+  font-family: var(--u-font-mono);
+  font-size: 11px;
+  font-weight: var(--u-weight-regular);
+  letter-spacing: 0;
+  color: var(--u-color-text-secondary);
+}
+
+.railList {
+  margin: var(--u-space-1) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* The line on the left is the track the group hangs from; the active entry
+   thickens it at its own place. No box, no fill - the bar is to stay quiet. */
+.railEntry {
+  display: block;
+  width: 100%;
+  padding: 5px var(--u-space-3);
+  border: none;
+  border-left: 2px solid var(--u-hairline);
+  background: transparent;
+  font: inherit;
+  font-size: var(--u-text-sm);
+  text-align: left;
+  color: var(--u-color-text-secondary);
+  cursor: pointer;
+  transition: color var(--u-transition), border-color var(--u-transition);
+}
+
+.railEntry:hover {
+  color: var(--u-color-text);
+  border-left-color: var(--u-edge-color-strong);
+}
+
+/* The line on the left is the track the rubric hangs from; the active page
+   thickens it at its own place. No box, no fill - the bar is to stay quiet,
+   even with forty-six rows in it. */
+.railEntry[data-active] {
+  color: var(--u-color-text);
+  font-weight: var(--u-weight-medium);
+  border-left-color: var(--u-color-accent);
+}
+
+.railEntry:focus-visible {
+  outline: none;
+  box-shadow: var(--u-focus-ring);
+}
+
+/* ---------------- Content column ---------------- */
+
+.shellContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--u-space-7);
+  max-width: 1080px;
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--u-space-8) var(--u-space-6);
+  min-width: 0;
+}
+
+/* ---------------- Overview ---------------- */
+
+.overview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--u-space-2);
+}
+
+.overviewEyebrow {
+  margin: 0;
+  font-size: var(--u-text-xs);
+  font-weight: var(--u-weight-semibold);
+  letter-spacing: var(--u-tracking-caps);
+  text-transform: uppercase;
+  color: var(--u-color-accent-text);
+}
+
+.overviewTitle {
+  margin: 0;
+  font-size: 34px;
+  line-height: 1.15;
+  font-weight: var(--u-weight-semibold);
+  letter-spacing: var(--u-tracking-display);
+}
+
+.overviewSentence {
+  margin: 0;
+  max-width: 62ch;
+  font-size: var(--u-text-md);
+  color: var(--u-color-text-secondary);
+}
+
+.overviewCount {
+  margin: var(--u-space-2) 0 var(--u-space-4);
+  font-size: var(--u-text-sm);
+  color: var(--u-color-text-secondary);
+}
+
+.overviewCount strong {
+  font-family: var(--u-font-mono);
+  font-size: var(--u-text-lg);
+  font-weight: var(--u-weight-medium);
+  color: var(--u-color-text);
+}
+
+.overviewGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--u-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rubricCard {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    "rank name"
+    "rank sentence"
+    "chips chips";
+  gap: 2px var(--u-space-3);
+  /* Without this the grid spreads the surplus height across the rows, and the
+     sentences of two cards sit side by side on different lines. */
+  align-content: start;
+  width: 100%;
+  height: 100%;
+  padding: var(--u-space-4);
+  border: none;
+  border-radius: var(--u-radius-md);
+  background: var(--u-color-surface);
+  box-shadow: var(--u-edge);
+  font: inherit;
+  text-align: left;
+}
+
+.rubricCardRank {
+  grid-area: rank;
+  align-self: start;
+  font-family: var(--u-font-mono);
+  font-size: var(--u-text-xs);
+  color: var(--u-color-accent-text);
+}
+
+.rubricCardName {
+  grid-area: name;
+  font-size: var(--u-text-md);
+  font-weight: var(--u-weight-medium);
+  color: var(--u-color-text);
+}
+
+.rubricCardSentence {
+  grid-area: sentence;
+  font-size: var(--u-text-xs);
+  line-height: 1.5;
+  color: var(--u-color-text-secondary);
+}
+
+.rubricCardChips {
+  grid-area: chips;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: var(--u-space-3);
+}
+
+/* The chips are buttons and not the card: a card clickable as a whole would
+   lead somewhere - and the rubric has no address. The chip has one, so the chip
+   carries the click. */
+.rubricCardChip {
+  padding: 2px var(--u-space-2);
+  border: none;
+  border-radius: var(--u-radius-full);
+  background: var(--u-color-surface-sunken);
+  font: inherit;
+  font-size: 11px;
+  color: var(--u-color-text-secondary);
+  cursor: pointer;
+  transition: color var(--u-transition), background var(--u-transition);
+}
+
+.rubricCardChip:hover {
+  color: var(--u-color-text);
+  background: var(--u-color-accent-subtle);
+}
+
+.rubricCardChip:focus-visible {
+  outline: none;
+  box-shadow: var(--u-focus-ring);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rubricCardChip {
+    transition: none;
+  }
+}
+
+/* ---------------- Narrow windows ---------------- */
+
+@media (max-width: 900px) {
+  .shellBody {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .rail {
+    position: static;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--u-edge-color);
+  }
+  .shellSearch {
+    width: 160px;
+  }
+}
