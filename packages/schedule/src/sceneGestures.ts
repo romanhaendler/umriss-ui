@@ -7,6 +7,7 @@
    the host lays out, publishes and draws when told that something changed. */
 
 import { calendarFrom, toOperatingTimeClamped, toWallClock } from "@umriss-ui/charts";
+import { autoPanSpeed } from "./autoPan";
 import { lateTransports, overlaps, type LateTransport, type Overlap } from "./findings";
 import { edgeAt, partAt } from "./geometry";
 import { occupied, type Intent, type Subtask } from "./model";
@@ -59,7 +60,9 @@ type Gesture =
   | { kind: "none" }
   | { kind: "pending"; pointerId: number; x0: number; y0: number; mode: EditMode | "pan"; subtask: Subtask | null }
   | { kind: "pan"; pointerId: number; lastX: number; lastY: number }
-  | { kind: "edit"; pointerId: number; mode: EditMode; subtask: Subtask; x0: number; ghost: Subtask }
+  /* `t0` is the operating time the drag took hold at - not a pixel, because
+     auto-pan moves the scale under a drag in flight. */
+  | { kind: "edit"; pointerId: number; mode: EditMode; subtask: Subtask; t0: number; ghost: Subtask }
   | { kind: "pinch"; distance: number };
 
 /** Movement below which a press is a click. */
@@ -79,6 +82,10 @@ export class SceneGestures {
   private gesture: Gesture = { kind: "none" };
   private readonly touches = new Map<number, { x: number; y: number }>();
   private hoverKey = "nothing";
+  /** The last pointer of a drag, in client coordinates, and the frame that
+      pans along while it is near an edge. */
+  private lastClient = { x: 0, y: 0 };
+  private panFrame = 0;
   hover: ScheduleHit = { kind: "nothing" };
   cursor = "default";
 
@@ -193,7 +200,8 @@ export class SceneGestures {
         this.gesture = { kind: "pan", pointerId: gesture.pointerId, lastX: gesture.x0, lastY: gesture.y0 };
         this.setCursor("grabbing");
       } else {
-        this.gesture = { kind: "edit", pointerId: gesture.pointerId, mode: gesture.mode, subtask: gesture.subtask, x0: gesture.x0, ghost: gesture.subtask };
+        const t0 = this.host.view.viewport().scale.fromPx(gesture.x0);
+        this.gesture = { kind: "edit", pointerId: gesture.pointerId, mode: gesture.mode, subtask: gesture.subtask, t0, ghost: gesture.subtask };
         this.setCursor(gesture.mode === "move" ? "grabbing" : "ew-resize");
       }
     }
@@ -204,8 +212,10 @@ export class SceneGestures {
       return;
     }
     if (current.kind === "edit" && current.pointerId === event.pointerId) {
+      this.lastClient = { x: event.clientX, y: event.clientY };
       this.gesture = { ...current, ghost: this.ghostFor(current, x, y) };
       this.host.interactionChanged();
+      this.autoPan();
       return;
     }
     if (current.kind === "none") this.hoverAt(event.clientX, event.clientY, x, y);
@@ -229,12 +239,39 @@ export class SceneGestures {
       this.setCursor("default");
       this.hoverAt(event.clientX, event.clientY, x, y);
     } else if (gesture.kind === "edit" && gesture.pointerId === event.pointerId) {
+      this.stopAutoPan();
       this.gesture = { kind: "none" };
       const intents = this.intentsOf(gesture.subtask, gesture.ghost, gesture.mode);
       this.cursor = "default";
       this.host.interactionChanged();
       for (const intent of intents) this.host.handlers().onIntent?.(intent);
     }
+  }
+
+  /** While a drag is in flight near an edge, pans along once per frame and
+      moves the ghost with the view. Stops by itself when the drag ends or the
+      pointer leaves the zone. */
+  private autoPan(): void {
+    if (this.panFrame !== 0 || typeof requestAnimationFrame !== "function") return;
+    const step = () => {
+      this.panFrame = 0;
+      const gesture = this.gesture;
+      if (gesture.kind !== "edit") return;
+      const view = this.host.view;
+      const { x, y } = this.local(this.lastClient.x, this.lastClient.y);
+      const dx = autoPanSpeed(x, view.width);
+      const dy = autoPanSpeed(y, view.height);
+      if ((dx === 0 && dy === 0) || !view.pan(dx, dy)) return;
+      this.gesture = { ...gesture, ghost: this.ghostFor(gesture, x, y) };
+      this.host.viewChanged();
+      this.panFrame = requestAnimationFrame(step);
+    };
+    this.panFrame = requestAnimationFrame(step);
+  }
+
+  private stopAutoPan(): void {
+    if (this.panFrame !== 0) cancelAnimationFrame(this.panFrame);
+    this.panFrame = 0;
   }
 
   pointerCancel(event: PointerEvent): void {
@@ -251,6 +288,7 @@ export class SceneGestures {
   /** Escape while a drag is in flight: the ghost goes, and nothing is reported. */
   cancelEdit(): boolean {
     if (this.gesture.kind !== "edit") return false;
+    this.stopAutoPan();
     this.gesture = { kind: "none" };
     this.cursor = "default";
     this.host.interactionChanged();
@@ -264,19 +302,32 @@ export class SceneGestures {
     this.report("contextmenu", this.host.view.hitAt(x, y), event.clientX, event.clientY, x, y);
   }
 
+  /** The wheel, as every scrolling area has it (schedule-refinement 02):
+      vertical scrolls the lanes, and lets the page scroll on once they are at
+      their end; Ctrl or ⌘ zooms - a trackpad pinch arrives as a wheel with
+      Ctrl -; horizontal or Shift pans through time. */
   wheel(event: WheelEvent): void {
-    event.preventDefault();
     const view = this.host.view;
     const { x } = this.local(event.clientX, event.clientY);
     const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? view.height : 1;
     const dx = event.deltaX * unit;
     const dy = event.deltaY * unit;
-    if (!event.ctrlKey && (Math.abs(dx) > Math.abs(dy) || event.shiftKey)) {
+    if (event.ctrlKey || event.metaKey) {
+      event.preventDefault();
+      /* A pinch sends small deltas, a mouse wheel large ones. */
+      const rate = Math.abs(dy) < 50 ? 0.01 : 0.0015;
+      if (view.zoomAt(x, Math.exp(dy * rate))) this.host.viewChanged();
+      return;
+    }
+    if (Math.abs(dx) > Math.abs(dy) || event.shiftKey) {
+      event.preventDefault();
       if (view.pan(event.shiftKey && dx === 0 ? dy : dx, 0)) this.host.viewChanged();
       return;
     }
-    /* A pinch on a trackpad arrives as a wheel with ctrlKey and small deltas. */
-    if (view.zoomAt(x, Math.exp(dy * (event.ctrlKey ? 0.01 : 0.0015)))) this.host.viewChanged();
+    const room = dy > 0 ? view.maxScroll() - view.scrollY : view.scrollY;
+    if (dy === 0 || room <= 0) return;
+    event.preventDefault();
+    if (view.pan(0, dy)) this.host.viewChanged();
   }
 
   private click(clientX: number, clientY: number, x: number, y: number): void {
@@ -347,10 +398,11 @@ export class SceneGestures {
         let from = s.from;
         /* A drag straight across the lanes asks for no new time: snapping a
            start that lies off the raster would report a move nobody made. */
-        if (intents.includes("move") && Math.abs(x - gesture.x0) >= CLICK_SLOP) {
+        const scale = view.viewport().scale;
+        const delta = scale.fromPx(x) - gesture.t0;
+        if (intents.includes("move") && Math.abs(delta * scale.m) >= CLICK_SLOP) {
           const calendar = calendarFrom(view.options.calendar);
-          const scale = view.viewport().scale;
-          const start = toOperatingTimeClamped(s.from, calendar) + scale.fromPx(x) - scale.fromPx(gesture.x0);
+          const start = toOperatingTimeClamped(s.from, calendar) + delta;
           const wall = calendar.intervals.length === 0 ? start : toWallClock(Math.max(0, Math.min(calendar.total, start)), calendar);
           from = this.snapInside(wall, step);
         }

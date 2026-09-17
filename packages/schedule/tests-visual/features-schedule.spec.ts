@@ -24,12 +24,14 @@ async function tickPositions(example: Locator): Promise<Record<string, number>> 
   return out;
 }
 
-async function wheel(page: Page, x: number, y: number, deltaY: number, times: number) {
+async function wheel(page: Page, x: number, y: number, deltaY: number, times: number, modifier?: "Control") {
   await page.mouse.move(x, y);
+  if (modifier) await page.keyboard.down(modifier);
   for (let i = 0; i < times; i++) {
     await page.mouse.wheel(0, deltaY);
     await page.waitForTimeout(30);
   }
+  if (modifier) await page.keyboard.up(modifier);
 }
 
 test("the schedule carries its name, and the lane headers are text", async ({ page }) => {
@@ -47,22 +49,54 @@ test("the day band names the day, and the fine band steps in hours", async ({ pa
   expect(await tickLabels(example)).toEqual(expect.arrayContaining(["06:00", "07:00", "12:00", "17:00"]));
 });
 
-test("zooming in with the wheel steps the fine band down to the quarter hour", async ({ page }) => {
+test("zooming in with Ctrl and the wheel steps the fine band down to the quarter hour", async ({ page }) => {
   await openExample(page, "schedule", "first-schedule");
   const example = page.locator('[data-example="first-schedule"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
-  await wheel(page, plot.x(10), plot.y(LANES.qa), -120, 25);
+  await wheel(page, plot.x(10), plot.y(LANES.qa), -120, 25, "Control");
   await expect.poll(async () => (await tickLabels(example)).some((label) => label.endsWith(":15"))).toBe(true);
   /* The instant under the pointer kept its place: 10:00 is still in view. */
   expect(await tickLabels(example)).toContain("10:00");
 });
 
-test("zooming out steps the fine band up past the hour", async ({ page }) => {
+test("zooming out with Ctrl and the wheel steps the fine band up past the hour", async ({ page }) => {
   await openExample(page, "schedule", "first-schedule");
   const example = page.locator('[data-example="first-schedule"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
-  await wheel(page, plot.x(12), plot.y(LANES.qa), 120, 12);
+  await wheel(page, plot.x(12), plot.y(LANES.qa), 120, 12, "Control");
   await expect.poll(async () => (await tickLabels(example)).includes("07:00")).toBe(false);
+});
+
+test("the plain wheel does not zoom, and scrolls the page where the lanes fit", async ({ page }) => {
+  await openExample(page, "schedule", "first-schedule");
+  const example = page.locator('[data-example="first-schedule"]');
+  const plot = await plotOf(page, example, DAY_OF_PLAN);
+  const labels = await tickLabels(example);
+  const pageBefore = await page.evaluate(() => document.scrollingElement!.scrollTop);
+  await wheel(page, plot.x(10), plot.y(LANES.qa), 120, 3);
+  expect(await tickLabels(example)).toEqual(labels);
+  await expect.poll(() => page.evaluate(() => document.scrollingElement!.scrollTop)).toBeGreaterThan(pageBefore);
+});
+
+test("the wheel scrolls the lanes, and lets the page scroll on at their end", async ({ page }) => {
+  await openExample(page, "schedule", "many-lanes");
+  const example = page.locator('[data-example="many-lanes"]');
+  const headers = example.locator("[data-schedule-headers]");
+  const last = headers.getByText("Cell 20");
+  const plot = example.locator("[data-schedule-plot]");
+  const box = (await plot.boundingBox())!;
+  const frame = (await headers.boundingBox())!;
+  const scrollTop = () => page.evaluate(() => document.scrollingElement!.scrollTop);
+
+  /* Twenty lanes of 32 pixels in a plot of about 244: some 400 pixels to go. */
+  const pageBefore = await scrollTop();
+  await wheel(page, box.x + box.width / 2, box.y + box.height / 2, 100, 2);
+  expect(await scrollTop()).toBe(pageBefore);
+
+  await wheel(page, box.x + box.width / 2, box.y + box.height / 2, 100, 6);
+  const moved = (await last.boundingBox())!;
+  expect(moved.y + moved.height).toBeLessThanOrEqual(frame.y + frame.height + 1);
+  await expect.poll(scrollTop).toBeGreaterThan(pageBefore);
 });
 
 test("panning moves the time, and the headers and bands hold still", async ({ page }) => {
