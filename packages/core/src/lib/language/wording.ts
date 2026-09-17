@@ -377,6 +377,8 @@ export interface Wording {
   scheduleOverlapWith: (other: string) => string;
   /** "Late transport, 15 min short" - the amount from `minutesShort`. */
   scheduleLateBy: (amount: string) => string;
+  /** On the ghost of a drag over a lane the subtask may not go to. */
+  scheduleLaneRefused: string;
 }
 
 /** The instance shipped by default. English; German is `GERMAN_WORDING` in
@@ -601,4 +603,5 @@ export const DEFAULT_WORDING: Wording = {
   scheduleRoute: (from, to) => `${from} → ${to}`,
   scheduleOverlapWith: (other) => `Overlap with ${other}`,
   scheduleLateBy: (amount) => `Late transport, ${amount} short`,
+  scheduleLaneRefused: "Not this lane",
 };

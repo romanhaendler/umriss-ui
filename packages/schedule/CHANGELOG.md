@@ -14,6 +14,37 @@ under a heading "Changed" of its own, no matter which digit rose.
 
 ---
 
+## Unreleased – A plan one can read (Sep. 2026)
+
+Delivery report for `.scratch/schedule-legibility/spec.md`, tickets 01–06.
+The formats of `@umriss-ui/core` became English in the same delivery
+(ADR-0024), which is what the dates and numbers of a schedule follow.
+
+### Added
+
+- **`label`** writes a line into every bar: the order, the article, whatever a
+  planner reads first. It is real DOM text, cut off with an ellipsis where the
+  bar is too narrow, left out where nothing would be readable, and held at the
+  view's edge for a bar that began before it. Its colour follows the brightness
+  of the bar's.
+- **`route`, `anchor` and `ends`** decide how a transport is drawn: a curve, a
+  straight line or orthogonal segments; from the middle of a bar or from the
+  edge facing the other stop; with or without a dot at each end. All three are
+  options of the schedule and all three are overridable per transport. They
+  change the picture and never a finding - `leaves` and `arrives` alone decide
+  whether a transport is late.
+- **`appearance` and `progress` on a subtask:** `"provisional"` (a dashed
+  outline), `"fixed"` (a hatch), `"muted"` (drawn slim), `"open"` (fading where
+  it continues past the view), and a share of the work that is done, drawn as a
+  rail along the bar. Each is a pattern or an outline and not only a colour, and
+  none of them uses the faint fill that means a setup or a teardown.
+- **`canMoveTo(subtask, lane)`** narrows where a drag may land. The ghost stays
+  on the last lane that was allowed and says "Not this lane"; a refused drop
+  reports nothing. It is asked for work dragged in from outside as well. Two
+  wording entries come with it.
+
+---
+
 ## Unreleased – The schedule in daily use (Sep. 2026)
 
 Delivery report for `.scratch/schedule-refinement/spec.md`, tickets 01–09.

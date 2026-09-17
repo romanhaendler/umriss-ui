@@ -128,6 +128,13 @@
     color: var(--u-color-danger-subtle);
   }
 
+  /* A refused lane is not an error - a mould that fits one press is nobody's
+     mistake - so it wears no warning colour, as the dock's refusal wears none
+     (CONTEXT.md, **Refusal**). The word says it, in the label's own type. */
+  .refusal {
+    font-weight: var(--u-weight-semibold);
+  }
+
   .tooltip {
     position: absolute;
     z-index: 1;

@@ -62,7 +62,9 @@ drag shows a **ghost** with the findings the drop would create, and ends in an
 ```
 
 `intents` lists what the application handles; without it the schedule is
-read-only. A drag near the edge of the plot pans the plot along, and `snap`
+read-only. `canMoveTo(subtask, lane)` narrows it: a drag across a lane the
+subtask may not go to leaves the ghost where it was allowed and shows a
+refusal, and a refused drop reports nothing. A drag near the edge of the plot pans the plot along, and `snap`
 takes the tick raster, a step, or a step with an offset - shifts at 06:00,
 14:00 and 22:00 are eight hours offset by six.
 
@@ -75,6 +77,15 @@ Work that is not on the plan is dragged in from any list of the application,
 with the platform's drag and drop: the application says what it is dragging in
 `placing`, the drop reports a `place` intent, and `subtaskFromPlace` builds the
 subtask under the application's own id.
+
+## What a bar says
+
+`label` writes a line into every bar, cut off where the bar is too narrow and
+left out where nothing would be readable. `appearance` adds what a colour
+cannot say - `"provisional"`, `"fixed"`, `"muted"`, `"open"` - and `progress`
+draws the share that is done as a rail along the bar. `route`, `anchor` and
+`ends` decide how a transport is drawn, per schedule or per transport, without
+touching what a finding says.
 
 ## Reading and moving
 

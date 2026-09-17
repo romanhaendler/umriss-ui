@@ -96,7 +96,7 @@ From `.scratch/schedule/spec.md`, ticket 01, and
   `onOpenChange`, `position` in client coordinates, `ariaLabel`), built on
   `Popover`, with `MenuItem`, `MenuSeparator` and the menu's keyboard. The focus
   returns to where it stood when the menu opened.
-- **Wording:** `scheduleOverlap`, `scheduleLateTransport`,
+- **Wording:** `scheduleLaneRefused`, `scheduleOverlap`, `scheduleLateTransport`,
   `scheduleGhostTimes`, `scheduleSetup`, `scheduleTeardown`,
   `scheduleTransport`, `scheduleRoute`, `scheduleOverlapWith` and
   `scheduleLateBy`, for `@umriss-ui/schedule`, in both shipped wordings. An
