@@ -17,6 +17,109 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Sep. 2026 — schedule-lane-groups: lanes that fold
+
+*For a caller: `<LaneGroup>` and a folded group's miniature, every appearance
+drawn differently, a refusal that is seen before it is met, and a demo cut by
+feature. The schedule's changelog carries the lines.*
+
+Delivery report for `.scratch/schedule-lane-groups/spec.md`, tickets 01–11.
+
+- **The layout stopped multiplying.** `src/rows.ts` turns the lanes, the groups
+  and the folded set into ROWS with a `top` and a `height`, and gives every
+  real lane a SLOT — its own row, or its strip inside a miniature. Everything
+  that needed a y reads it: the bars, the transports' ends, the grid, the
+  overlaps, the grips, the refused lanes and both directions of the handle.
+  Written test-first, because every y in the package comes from it, and the
+  first thing its 21 tests ask is that a FLAT plan lays out exactly as
+  `laneIndex * laneHeight` did. It did: **not one baseline moved** in that
+  ticket.
+
+  *Row* is the module's private word and appears nowhere in the API. "A lane is
+  not a row" is a standing sentence of this component, and a layout that called
+  them the same thing would have broken it by accident.
+
+- **Three defects the code could not show and the picture could.** A cap flush
+  with a bar's end is not a mark — on a light page it reads as the bar starting
+  three pixels later, and the dark scheme had the same problem with the other
+  colour; the caps sit inside now. A bar label lay ON the cap, which is exactly
+  the complaint that took the hatch off the bar's face. And the label's
+  contrast rule — one luminance threshold — was wrong for a mid-tone bar, which
+  a muted bar is by construction: it is measured against both candidate colours
+  now, and needs no tuning in either theme.
+
+  All three were found by rendering the example and looking at it, twice at
+  eight times magnification. The lesson is cheap to write down and was not
+  cheap to learn: for a ticket whose deliverable is a PICTURE, reading the
+  diff is not the check.
+
+- **A test that passed for the wrong reason, twice.** One claimed a ghost stays
+  on press 1 and compared against the MIDDLE of press 2 — true of a bar on
+  press 2 as well. Another aimed at a cap and hit the anti-aliased edge of the
+  bar beside it. Both were rewritten against what they meant.
+
+- **`tests-visual/pixels.ts`** is new: `painted`, `paintedShare`, `rgba`,
+  `colour` and `distanceFrom` count and compare paint inside a rectangle of a
+  plot's canvas, counted in the browser so that two million numbers never cross
+  into the test. It is what lets a promise about a DRAWING be a test —
+  "hollow", "capped", "faded at the left", "a rail that stops at the main
+  time" — instead of a snapshot that only says something changed.
+
+- **`plot.ts` stopped multiplying too.** It named lanes instead of numbering
+  them (04) and then read each row's height from the header the plot really
+  rendered (08). The second change found a defect the first would have hidden:
+  with a group's slim head above them the rows are no longer all 44 pixels.
+
+- **The demo was re-cut by feature**, from seven chapters to twenty-eight. The
+  renames are verified twice — every example moved with `git mv` and unedited,
+  and ten baselines are byte-identical under their new name. The five that
+  re-rendered were compared pixel by pixel first: the plot is byte-identical
+  and every difference sits in anti-aliased TEXT, which is the drift
+  `docs/testing.md` already records for the charts and which has now reached
+  the schedule because its examples moved to different scroll positions.
+
+- **Every example carries its own data.** `@umriss-ui/demo/checks/ownData`
+  holds it: an example may import the package's `src` and bare npm specifiers,
+  and whatever else it needs it SHOWS beside itself as a second tab of the code
+  view. Run before the repair it named all 25 offenders, in the two demos that
+  had them; `core` and `table` passed untouched. The charts' thirteen examples
+  are repaired the way the check allows and their code is copyable for the
+  first time.
+
+### Decisions
+
+1. **`dropEffect` follows the ghost, not the pointer** — the spec asked for
+   `"none"` over a refused lane, and the platform then delivers no `drop` event
+   at all, which would have broken the standing promise that a ghost is where a
+   drop lands. Roman's call, recorded in ticket 01.
+2. **The spring-open delay stayed a constant.** Making it injectable would have
+   put a 600-millisecond animation delay into the public surface of
+   `<Schedule>` to save four tests two seconds each.
+3. **`ResolvedAppearance.hatched` keeps its name** although the hatch left the
+   bars, because the spec said `resolveAppearance` stays as it is. Its doc now
+   names the channel it really owns.
+
+### Open
+
+- **`onDomainChange` and `initialDomain` can stand a frame apart.** Two
+  schedules in step disagree by about one move of a drag while it runs: the
+  span is reported once per frame and handed back as the other's
+  `initialDomain`, and the round trip through React arrives after the plan has
+  moved on. Found by a test written for something else, recorded in ticket 04,
+  belongs to no ticket of this spec.
+- **A muted bar and a setup are the closest pair in the picture.** 50 per cent
+  of the task colour against 28, distinguishable and guarded by a measured
+  distance — but if "without doubt" is not met, the number to move is the mix
+  in `barFace` and nothing else.
+
+### Evidence
+
+`pnpm typecheck`, `pnpm lint` (0 errors) — clean. Unit: 196 in the schedule,
+1959 across the workspace. `pnpm test:visual` for the schedule: **293 green**,
+143 skipped (the behaviour tests run light only). Baselines: 70 at the start,
+132 at the end — 18 byte-identical under new names, and every renewal counted
+and named in its ticket.
+
 ## Sep. 2026 — schedule-legibility: a plan one can read
 
 *For a caller: bars can carry text, transports have routes and anchors, bars

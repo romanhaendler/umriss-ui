@@ -1,6 +1,6 @@
 # One language for the bars, a refusal one can see, a demo one can copy, and lanes that fold
 
-Status: ready-for-agent
+Status: done
 Date:   2026-09-17
 Origin: Roman's review after `schedule-legibility` was delivered - the bar
 appearances "do not fit and are not thought through", a refused move is not
@@ -10,6 +10,31 @@ decisions below were taken with him on the same day: the collapsed group shows
 a **miniature**, groups nest to **any depth**, the bar system proposed here goes
 into the spec **directly** (no prototype round), and every example **carries its
 own data**.
+
+## Delivered
+
+All eleven tickets, each with its own commit and its own delivery report in
+`issues/`. What was decided along the way and is not in the spec:
+
+1. **`dropEffect` follows the ghost and not the pointer.** The spec asked for
+   `"none"` over a refused lane; the platform then delivers no `drop` event at
+   all, and a release over a refused lane would have placed nothing while the
+   ghost still stood somewhere allowed. Roman chose: the ghost stays the
+   promise. Ticket 01.
+2. **The spring-open delay stayed a constant**, against the spec's "the timer
+   is given to the scene like `now`". Ticket 10 says why and names the cheaper
+   door if the wait becomes a cost.
+3. **The fifth why page moved from 06 to 09**, where the miniature it describes
+   exists.
+4. **`where-it-may-go` has two examples**, not one: the refusal within the plot
+   and the same rule for work dragged in. Ticket 06 says what to cut if that
+   reads as teaching drag-in twice.
+5. **`ResolvedAppearance.hatched` keeps its name**, as the spec instructed, and
+   its doc now names the channel it really owns. Ticket 02 flags it.
+
+Two findings that belong to no ticket of this spec and are recorded rather than
+fixed: `onDomainChange` and `initialDomain` can stand a frame apart (ticket 04),
+and a muted bar is the closest thing in the picture to a setup (ticket 02).
 
 ## Problem Statement
 
