@@ -29,6 +29,22 @@ interface is still expected to move before `0.3.0`.
 
 ---
 
+## Unreleased – Arithmetic with a second consumer (Sep. 2026)
+
+From `.scratch/schedule/spec.md` (ADR-0022): `@umriss-ui/schedule` takes its
+time arithmetic from here, so what it uses is public now.
+
+### Added
+
+- **`resolveColours(root, colours)`** — any CSS colours, tokens and
+  `light-dark()` included, resolved to values a canvas can draw in the scheme
+  that applies at `root`. **`subscribeTheme(notify)`** tells a canvas when to
+  resolve again.
+- **`toOperatingTimeClamped`** — wall clock to operating time without `NaN`: a
+  time in removed time lands on its seam.
+
+---
+
 ## 0.3.0-rc.1 – Styles that load themselves, and touch nothing else (Sep. 2026)
 
 Delivery report for `.scratch/styles-without-side-effects/spec.md`, the charts'

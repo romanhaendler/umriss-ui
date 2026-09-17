@@ -1,6 +1,6 @@
 # 06 — Controlled editing: ghost, intents, grips, snapping
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Blocked by: 05
@@ -23,3 +23,15 @@ Spec: user stories 14–17, 19, 20, 29 · ADR-0023
   move unless the demo applies it.
 
 ## Comments
+
+**Delivered** (d452d68; browser suite 39d766b).
+
+- A body drag with `move` and/or `lane`; edges (5 px) with `stretch`; grips in
+  DOM (`data-grip`) on the selected subtask with `setup`/`teardown`. One intent
+  per changed property; nothing when nothing changed.
+- The ghost label (`data-ghost`) carries the times and the finding words from
+  core's wording (`scheduleOverlap`, `scheduleLateTransport`,
+  `scheduleGhostTimes`, English and German), and `data-findings`.
+- `features-editing.spec.ts`, 7 tests, including the demonstration.
+- Not done: a snap raster with an offset of its own (06:00/14:00/22:00 shifts).
+  `snap` lies on local multiples of the step; the snapping example says so.

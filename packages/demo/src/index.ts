@@ -1,6 +1,6 @@
 /* The shell of the demos (table-demo, decision A).
 
-   A private package, never published. All three packages use it from their
+   A private package, never published. All four packages use it from their
    `demo/` directories and browser suites, never from `src/` - the lint holds
    that. It itself takes only the public entry of @umriss-ui/core; that charts'
    demo may take it too is ADR-0020. */

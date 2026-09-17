@@ -50,6 +50,23 @@ module on the caller's side that carries `"use client"` and imports from there.
 
 ---
 
+## Unreleased – The context menu (Sep. 2026)
+
+From `.scratch/schedule/spec.md`, ticket 01.
+
+### Added
+
+- **`ContextMenu`** — the menu opened at a point instead of under a trigger, for
+  a right-click on a surface that is not a button. Controlled (`open`,
+  `onOpenChange`, `position` in client coordinates, `ariaLabel`), built on
+  `Popover`, with `MenuItem`, `MenuSeparator` and the menu's keyboard. The focus
+  returns to where it stood when the menu opened.
+- **Wording:** `scheduleOverlap`, `scheduleLateTransport` and
+  `scheduleGhostTimes`, for `@umriss-ui/schedule`, in both shipped wordings. An
+  application that hands in a whole `Wording` object of its own adds the three.
+
+---
+
 ## 0.2.0 – Styles that load themselves, and touch nothing else (Sep. 2026)
 
 Delivery report for `.scratch/styles-without-side-effects/spec.md` (ADR-0021).
