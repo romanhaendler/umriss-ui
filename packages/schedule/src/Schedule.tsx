@@ -34,7 +34,7 @@ import { ScheduleContext } from "./context";
 import { ScheduleScene, type PlacingItem, type ScheduleInteraction, type ScheduleTooltipTarget } from "./scene";
 import { DEFAULT_LANE_HEIGHT } from "./sceneView";
 import { ScheduleTooltipContent } from "./ScheduleTooltip";
-import type { Intent, IntentKind, Subtask } from "./model";
+import type { Intent, IntentKind, Subtask, TransportAnchor, TransportEnds, TransportRoute } from "./model";
 import type { ZoomLimits } from "./timeAxis";
 import type { SnapRaster } from "./snap";
 import styles from "./Schedule.module.css";
@@ -89,6 +89,22 @@ export interface ScheduleProps {
       it can only come from here: set it on your own `dragstart`, clear it on
       `dragend`. Without `"place"` in `intents` no drop is accepted. */
   placing?: PlacingItem | null;
+  /** How the transports are drawn: a `"curve"` that leaves and arrives
+      forwards, a `"straight"` line, or `"orthogonal"` segments. A transport may
+      say otherwise for itself. */
+  route?: TransportRoute;
+  /** Where a transport's ends sit on their bars: the `"centre"` of both, or the
+      `"nearest"` edge - which is the shortest line between two stops. Within
+      one lane both mean the middle. A transport may say otherwise for itself.
+
+      It changes the picture and never a finding: whether a transport is late
+      follows from its `leaves` and `arrives` alone. */
+  anchor?: TransportAnchor;
+  /** Whether a transport's two ends carry a dot (`"dot"`, the default) or the
+      line stands alone (`"none"`). The dot says where the line is anchored - a
+      help while a plan is being read, and noise in a plan full of short moves.
+      A transport may say otherwise for itself. */
+  ends?: TransportEnds;
   /** What stands written in a bar: a function from a subtask to a line of
       text, or nothing for bars without text. The text is cut off with an
       ellipsis where the bar is too narrow for it and left out where even that
@@ -146,6 +162,9 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
     onSelectedTaskChange,
     onDomainChange,
     placing,
+    route = "curve",
+    anchor = "centre",
+    ends = "dot",
     label,
     tooltip,
     now,
@@ -189,10 +208,10 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
     lastDomain.current = key;
     const raster = snapKind ?? { step: snapStep ?? 0, offset: snapOffset ?? 0 };
     scene.setOptions(
-      { laneHeight, calendar, zoomLimits: { min: limitMin, max: limitMax }, snap: raster, intents, now: nowAt },
+      { laneHeight, calendar, zoomLimits: { min: limitMin, max: limitMax }, snap: raster, intents, now: nowAt, route, anchor, ends },
       fresh ? [domainFrom, domainTo] : null,
     );
-  }, [scene, domainFrom, domainTo, laneHeight, calendar, limitMin, limitMax, snapKind, snapStep, snapOffset, intents, nowAt]);
+  }, [scene, domainFrom, domainTo, laneHeight, calendar, limitMin, limitMax, snapKind, snapStep, snapOffset, intents, nowAt, route, anchor, ends]);
 
   useEffect(() => {
     scene.setHandlers({ onIntent, onInteraction, onSelectedTaskChange, onDomainChange });

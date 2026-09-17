@@ -54,7 +54,30 @@ export interface Transport {
   /** Where it arrives: at the start of the main time, or before the setup.
       Default `"setup"` - the part must be there before the machine is set up. */
   readonly arrives?: "main" | "setup";
+  /** How this one is drawn, where it is not drawn like the rest. It changes
+      the picture and never the finding: whether a transport is late follows
+      from `leaves` and `arrives` alone. */
+  readonly route?: TransportRoute;
+  /** Where on the bars this one's ends sit, where they do not sit like the
+      rest. Also picture only. */
+  readonly anchor?: TransportAnchor;
+  /** Whether this one's ends are marked with a dot, where it is not marked
+      like the rest. Also picture only. */
+  readonly ends?: TransportEnds;
 }
+
+/** How a transport is drawn between its two ends: a curve that leaves and
+    arrives forwards, a straight line, or axis-parallel segments. */
+export type TransportRoute = "curve" | "straight" | "orthogonal";
+
+/** Where on its bars a transport's ends sit: the middle of both, or the corner
+    that faces the other stop - which is the shortest line between them. */
+export type TransportAnchor = "centre" | "nearest";
+
+/** Whether a transport's two ends carry a dot. The dot says where the line is
+    anchored, which is worth saying while a plan is being read and is noise in a
+    plan full of short moves - so it is the caller's choice. */
+export type TransportEnds = "dot" | "none";
 
 /** The interval a subtask occupies on its lane: setup and teardown included. */
 export function occupied(subtask: Subtask): { from: number; to: number } {
