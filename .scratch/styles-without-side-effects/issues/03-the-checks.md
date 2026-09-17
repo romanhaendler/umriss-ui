@@ -1,6 +1,6 @@
 # 03 — The checks: own text, own box, visible focus
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Blocked by: 01
@@ -44,3 +44,19 @@ so 04–07 can work from the output.
   focus style is removed) is caught by check 3; noted, not committed.
 
 ## Comments
+
+**Delivered.**
+
+- `packages/demo/checks/ownBase.ts` (`checkOwnBase`), exported as `@umriss-ui/demo/checks/ownBase`, and one `own-base.spec.ts` per demo that passes every page except the overview. One test per page, light project only, with reduced motion and the demos' fixed clock. The assertion is `{ type, box, focus }` against three empty lists, so a failure prints every offender as `<example> › <element "text">`.
+- **Own type** compares each element with text of its own against the computed `font-family` of its `.exampleStage`, which page.css puts on the browser default.
+- **Own box** reads every element whose class matches a CSS-module class (`_<local>_<hash>_<line>`, the demo build's naming) or `uc-`/`kc-`.
+- **Visible focus** starts at the example's code toggle and presses Tab until the focus leaves the example. It compares an element's `box-shadow`/`outline` - its own and its ancestors' inside the stage, so a `:focus-within` wrapper counts - while focused and after Tab has moved on. No `blur()`, so no component handler runs that a user would not trigger.
+- **Found while building it:** a first version counted the browser's own ring (`outline-style: auto`) as an indication, and passed `Button`, which has no ring of its own since 01. The browser's ring does not count now. That was the "deliberately broken probe" of the acceptance, and a real one: on the button page the check now names all seven buttons.
+- **Offenders after 03** (light, 66 pages; 17 green, 49 red). Pages / own type / own box / visible focus:
+  - 04: 20 pages, 118 / 0 / 45
+  - 05: 15 pages, 143 / 0 / 21
+  - 06: 12 pages, 594 / 15 / 200
+  - 07: 2 pages, 4 / 0 / 6
+  The full list stands in `.scratch/styles-without-side-effects/offenders-03.md`.
+- **For 08 (`docs/testing.md`):** add the own-base checks to the list of shared checks: what each asks, that they run light only, and that the example stage stands on browser defaults on purpose.
+- `pnpm lint`, `pnpm typecheck` green; no unit test changed.
