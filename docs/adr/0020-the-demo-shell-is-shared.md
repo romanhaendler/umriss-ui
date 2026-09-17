@@ -61,3 +61,6 @@ bent around a piece of evidence the lint rule already carries.
 * `@umriss-ui/demo` is the shell for three demos, not two; its description and
   the lint message that named charts' own shell are corrected with it.
 * Reversing this costs an afternoon: the alternative above is the route back.
+* *Added Sep. 2026:* the shell has carried a fourth demo since
+  `@umriss-ui/schedule` (ADR-0022). The title's "three" is the count at the time
+  of the decision; nothing in the decision depends on it.

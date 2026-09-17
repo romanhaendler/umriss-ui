@@ -1,6 +1,6 @@
 # 02 — `@umriss-ui/schedule`: the package and its demo shell
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Blocked by: none
@@ -27,3 +27,19 @@ Spec: `.scratch/schedule/spec.md` ("Package", "Styling", "Demo") · ADR-0022
 - `pnpm --filter @umriss-ui/schedule build && check:dist` passes.
 
 ## Comments
+
+**Delivered** (d452d68, with 03–06: the files were written together).
+
+- `packages/schedule` after the table's pattern; `check:dist` passes and the
+  bundle imports `@umriss-ui/core` and `@umriss-ui/charts` instead of inlining
+  them. README and CHANGELOG came with 08.
+- Lint: the schedule takes both peers by the public entry only; `NO_SCHEDULE`
+  on core, charts, table and the shell. Found on the way: the block forbidding
+  the table to charts matched `packages/charts/src/**` as well and, as a later
+  block of the same rule, replaced the R-1.2 ban on core there - an import of
+  core in charts' `src` passed `pnpm lint`. The block now ignores `src/`; a probe
+  file fails as it should.
+- Charts publishes `resolveColours`, `subscribeTheme`, `toOperatingTimeClamped`
+  (tests in `theme.jsdom.test.ts`).
+- Port 4176, projects `schedule-light`/`schedule-dark`, `pnpm dev:schedule`,
+  `build:pages`.

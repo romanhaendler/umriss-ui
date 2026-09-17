@@ -12,11 +12,13 @@ hard outlines or effects.
 | [`@umriss-ui/core`](packages/core/README.md) | 0.2.0 | The component library — forms, overlays, structure, the tree, the dock, the command palette. The package you install first | `latest` |
 | [`@umriss-ui/charts`](packages/charts/README.md) | 0.3.0-rc.1 | Canvas charts — few kinds, drawn well. Depends on nothing but React | `next` (release candidate) |
 | [`@umriss-ui/table`](packages/table/README.md) | 0.2.0-rc.1 | The table, declared the way it reads: columns as JSX, typed against their rows. Takes `@umriss-ui/core` as a peer | `next` (release candidate) |
-| `@umriss-ui/demo` | — | The private shell all three demos are built from | never |
+| [`@umriss-ui/schedule`](packages/schedule/README.md) | 0.1.0-rc.0 | The schedule: subtasks on lanes over time, with transports, findings and controlled editing. Takes `@umriss-ui/core` and `@umriss-ui/charts` as peers | `next` (not yet published) |
+| `@umriss-ui/demo` | — | The private shell all four demos are built from | never |
 
 `core` names the package you install first, not a layer the others sit on:
-`@umriss-ui/charts` depends on nothing and will keep depending on nothing, and
-`@umriss-ui/table` enters `core` by its public entry only (ADR-0016).
+`@umriss-ui/charts` depends on nothing and will keep depending on nothing,
+`@umriss-ui/table` enters `core` by its public entry only (ADR-0016), and
+`@umriss-ui/schedule` enters `core` and `charts` the same way (ADR-0022).
 
 ## Quick start
 
@@ -54,7 +56,8 @@ Firefox 120, Safari 17.5 or newer — the tokens use `light-dark()`.
 Online at **<https://romanhaendler.github.io/umriss-ui/>** —
 [core](https://romanhaendler.github.io/umriss-ui/core/),
 [charts](https://romanhaendler.github.io/umriss-ui/charts/),
-[table](https://romanhaendler.github.io/umriss-ui/table/). Rebuilt on every push
+[table](https://romanhaendler.github.io/umriss-ui/table/),
+[schedule](https://romanhaendler.github.io/umriss-ui/schedule/). Rebuilt on every push
 to `main` (`.github/workflows/pages.yml`); `pnpm build:pages` assembles the same
 site locally into `site/`.
 
@@ -65,6 +68,7 @@ pnpm install
 pnpm dev:core      # port 4173
 pnpm dev:charts    # port 4174
 pnpm dev:table     # port 4175
+pnpm dev:schedule  # port 4176
 ```
 
 The demo **is** the documentation for the components. Every page shows running
@@ -89,7 +93,7 @@ Every package is `0.x`, and while the first digit is `0` no version number
 promises compatibility. `@umriss-ui/core` is released under `latest`;
 the numbers it counted inside this repository before that stand in its changelog
 as *internal* ones. `@umriss-ui/charts` and `@umriss-ui/table` are release
-candidates under the tag `next` (`pnpm add @umriss-ui/charts@next`); as long as
+candidates, `@umriss-ui/schedule` one that has not been published yet, under the tag `next` (`pnpm add @umriss-ui/charts@next`); as long as
 no released version of either exists, `latest` points at the newest candidate as
 well, because the registry does not allow a package without one. What changes
 for a caller stands in that package's own `CHANGELOG.md`, and whatever changes
