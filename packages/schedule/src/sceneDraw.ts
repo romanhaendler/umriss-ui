@@ -9,6 +9,7 @@
 import { resolveColours, removedIntervals } from "@umriss-ui/charts";
 import type { LateTransport, Overlap } from "./findings";
 import { laneTop, subtaskBox, transportPath, xOf, type SubtaskBox, type TransportPath, type Viewport } from "./geometry";
+import { resolveAppearance } from "./appearance";
 import type { Subtask } from "./model";
 import type { SceneData } from "./sceneData";
 import type { ScheduleHit, SceneView } from "./sceneView";
@@ -208,7 +209,16 @@ function drawNow(ctx: CanvasRenderingContext2D, input: DrawInput): void {
 function drawSubtask(ctx: CanvasRenderingContext2D, input: DrawInput, box: SubtaskBox, alpha: number): void {
   const { view, colours } = input;
   if (box.outerTo < 0 || box.outerFrom > view.width || box.y + box.height < 0 || box.y > view.height) return;
+  const look = resolveAppearance(box.subtask.appearance);
   const colour = colours.tasks.get(box.subtask.task) ?? colours.muted;
+
+  /* Muted is drawn SLIM, not faint: a faint bar would read as a setup, which
+     is exactly what a faint fill means everywhere else in this picture. Half
+     the height, the whole colour - another shift's work, unmistakably lesser
+     and unmistakably not a setup. */
+  const height = look.muted ? Math.max(7, Math.round(box.height / 2)) : box.height;
+  const top = look.muted ? box.y + Math.round((box.height - height) / 2) : box.y;
+
   ctx.fillStyle = colour;
   ctx.strokeStyle = colour;
   ctx.lineWidth = 1;
@@ -220,19 +230,108 @@ function drawSubtask(ctx: CanvasRenderingContext2D, input: DrawInput, box: Subta
   ] as const) {
     if (to <= from) continue;
     ctx.globalAlpha = 0.28 * alpha;
-    ctx.fillRect(from, box.y, to - from, box.height);
+    ctx.fillRect(from, top, to - from, height);
     ctx.globalAlpha = alpha;
-    ctx.strokeRect(from + 0.5, box.y + 0.5, to - from - 1, box.height - 1);
+    ctx.strokeRect(from + 0.5, top + 0.5, to - from - 1, height - 1);
   }
-  ctx.globalAlpha = alpha;
-  ctx.fillRect(box.mainFrom, box.y, Math.max(1, box.mainTo - box.mainFrom), box.height);
+
+  const width = Math.max(1, box.mainTo - box.mainFrom);
+  ctx.globalAlpha = look.dashed ? alpha * 0.45 : alpha;
+  ctx.fillRect(box.mainFrom, top, width, height);
+
+  if (look.hatched) hatch(ctx, box.mainFrom, top, width, height, colours.surface, alpha);
+
+  /* Progress is a rail along the bottom of the bar, not a lighter remainder:
+     a lighter part of a bar is a setup or a teardown in this picture, and a
+     planner must not have to ask which of the two a pale end is. */
+  const share = box.subtask.progress;
+  if (share !== undefined) {
+    const done = Math.round(width * Math.max(0, Math.min(1, share)));
+    const rail = Math.min(4, Math.max(2, Math.round(height / 6)));
+    ctx.globalAlpha = 0.35 * alpha;
+    ctx.fillStyle = isDark(colour) ? colours.surface : colours.text;
+    ctx.fillRect(box.mainFrom, top + height - rail, width, rail);
+    ctx.globalAlpha = alpha;
+    if (done > 0) ctx.fillRect(box.mainFrom, top + height - rail, done, rail);
+    ctx.fillStyle = colour;
+  }
+
+  if (look.dashed) {
+    /* Planned, not released: the outline says it, and it survives a colour a
+       caller chose badly. */
+    ctx.globalAlpha = alpha;
+    ctx.setLineDash([4, 3]);
+    ctx.strokeRect(box.mainFrom + 0.5, top + 0.5, width - 1, height - 1);
+    ctx.setLineDash([]);
+  }
+
+  if (look.open) fadeEnd(ctx, box, top, height, colours.surface, view.width);
   ctx.globalAlpha = 1;
   /* An offset bar lies over the one it covers; an edge in the surface colour
      keeps the two apart. */
   if (box.depth > 0 && alpha === 1) {
     ctx.strokeStyle = colours.surface;
-    ctx.strokeRect(box.outerFrom - 0.5, box.y - 0.5, box.outerTo - box.outerFrom + 1, box.height + 1);
+    ctx.strokeRect(box.outerFrom - 0.5, top - 0.5, box.outerTo - box.outerFrom + 1, height + 1);
   }
+}
+
+/** Diagonal lines in the surface colour, clipped to the main time: the mark of
+    work that may not be moved. */
+function hatch(
+  ctx: CanvasRenderingContext2D,
+  from: number,
+  top: number,
+  width: number,
+  height: number,
+  surface: string,
+  weight: number,
+): void {
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(from, top, width, height);
+  ctx.clip();
+  ctx.globalAlpha = 0.5 * weight;
+  ctx.strokeStyle = surface;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let x = from - height; x < from + width + height; x += 7) {
+    ctx.moveTo(x, top + height);
+    ctx.lineTo(x + height, top);
+  }
+  ctx.stroke();
+  ctx.restore();
+}
+
+/** The end of a bar that continues past what is drawn: it fades into the
+    surface instead of ending in an edge a reader would take for its end - and
+    it fades at the edge of the VIEW where the bar's own end lies beyond it,
+    because that is the edge a reader would misread. */
+function fadeEnd(
+  ctx: CanvasRenderingContext2D,
+  box: SubtaskBox,
+  top: number,
+  height: number,
+  surface: string,
+  plotWidth: number,
+): void {
+  const end = Math.min(box.mainTo, plotWidth);
+  const width = Math.max(1, end - box.mainFrom);
+  const span = Math.min(16, width);
+  const gradient = ctx.createLinearGradient(end - span, 0, end, 0);
+  gradient.addColorStop(0, withAlpha(surface, 0));
+  gradient.addColorStop(1, withAlpha(surface, 1));
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = gradient;
+  ctx.fillRect(end - span, top, span, height);
+}
+
+/** A resolved colour with an alpha of its own. The theme hands back
+    "rgb(…)" or "rgba(…)"; a gradient needs both ends as real colours. */
+function withAlpha(colour: string, alpha: number): string {
+  const parts = colour.match(/[\d.]+/g);
+  if (parts === null || parts.length < 3) return colour;
+  const [r, g, b] = parts;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
 function drawTransport(ctx: CanvasRenderingContext2D, input: DrawInput, path: TransportPath, emphasised: boolean, late?: boolean): void {
