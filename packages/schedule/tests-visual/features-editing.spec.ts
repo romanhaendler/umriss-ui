@@ -270,3 +270,40 @@ test("a drag into a removed night stops at the seam where time counts again", as
   await page.mouse.move(box.x + box.width * 0.37, box.y + 22);
   await expect(example.locator("[data-schedule-tooltip]")).toContainText("06:00–09:30");
 });
+
+test("Escape during a drag from outside places nothing", async ({ page }) => {
+  await openExample(page, "intent", "drag-in");
+  const example = page.locator('[data-example="drag-in"]');
+  const plot = await plotOf(page, example, DAY_OF_PLAN);
+
+  await example.locator('[data-waiting="a-2047"]').hover();
+  await page.mouse.down();
+  await page.mouse.move(plot.x(12), plot.y(LANES.qa), { steps: 6 });
+  await expect(example.locator("[data-ghost]")).toBeVisible();
+
+  /* The browser delivers no key events while it runs a drag of its own: Escape
+     ends that drag, and the schedule hears it as the leave and the `dragend`
+     the browser sends. */
+  await page.keyboard.press("Escape");
+  await expect(example.locator("[data-ghost]")).toHaveCount(0);
+  await page.mouse.up();
+  await expect(example.locator("[data-last-place]")).toHaveText("Drag an order onto a lane");
+});
+
+test("a drag from outside held at the edge pans the plot along", async ({ page }) => {
+  await openExample(page, "intent", "drag-in");
+  const example = page.locator('[data-example="drag-in"]');
+  const plot = await plotOf(page, example, DAY_OF_PLAN);
+
+  await example.locator('[data-waiting="a-2048"]').hover();
+  await page.mouse.down();
+  await page.mouse.move(plot.x(12), plot.y(LANES.qa), { steps: 4 });
+  await page.mouse.move(plot.box.x + plot.box.width - 4, plot.y(LANES.qa), { steps: 6 });
+  /* Held still at the right edge: the plot pans until the ghost starts after
+     the 18:00 the view ended at. */
+  await expect
+    .poll(async () => (await example.locator("[data-ghost]").textContent()) ?? "", { timeout: 5000 })
+    .toMatch(/^(19|2\d):\d\d–/);
+  await page.mouse.up();
+  await expect(example.locator("[data-last-place]")).toContainText("place a-2048 on qa");
+});

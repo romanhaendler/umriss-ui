@@ -28,10 +28,11 @@ import {
   type CSSProperties,
   type ReactNode,
 } from "react";
-import { DAY, HOUR, type CalendarInput } from "@umriss-ui/charts";
+import { DAY, HOUR, MINUTE, type CalendarInput } from "@umriss-ui/charts";
 import { useFormats, useWording } from "@umriss-ui/core";
 import { ScheduleContext } from "./context";
 import { ScheduleScene, type PlacingItem, type ScheduleInteraction, type ScheduleTooltipTarget } from "./scene";
+import { DEFAULT_LANE_HEIGHT } from "./sceneView";
 import { ScheduleTooltipContent } from "./ScheduleTooltip";
 import type { Intent, IntentKind } from "./model";
 import type { ZoomLimits } from "./timeAxis";
@@ -127,7 +128,7 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
     ariaLabel,
     initialDomain,
     height = 400,
-    laneHeight = 44,
+    laneHeight = DEFAULT_LANE_HEIGHT,
     headerWidth = 160,
     calendar = WALL_CLOCK,
     zoomLimits,
@@ -170,7 +171,7 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
   const [clock, setClock] = useState(() => Date.now());
   useEffect(() => {
     if (now !== true) return;
-    const timer = setInterval(() => setClock(Date.now()), 60_000);
+    const timer = setInterval(() => setClock(Date.now()), MINUTE);
     return () => clearInterval(timer);
   }, [now]);
   const nowAt = now === true ? clock : typeof now === "number" ? now : null;
@@ -251,6 +252,34 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
 
   const ghost = snapshot.ghost;
 
+  /* The tooltip is placed from its measured size, not from a guess: beside the
+     pointer where there is room, on the other side where there is not, and
+     clamped into the plot either way - the plot clips what leaves it. */
+  const tooltipRef = useRef<HTMLSpanElement | null>(null);
+  const [tooltipAt, setTooltipAt] = useState({ x: 0, y: 0, at: "" });
+  const point = snapshot.tooltip;
+  /* The pointer and the target together: while the placing belongs to another
+     point, the tooltip is not shown - a tooltip placed a frame later would
+     flash in the corner of the plot first. */
+  const pointKey = point === null ? "" : `${point.x}:${point.y}:${point.target.kind}`;
+  useLayoutEffect(() => {
+    const element = tooltipRef.current;
+    if (point === null || element === null) return;
+    const gap = 12;
+    const place = (at: number, size: number, extent: number) => {
+      const after = at + gap;
+      const before = at - gap - size;
+      const chosen = after + size <= extent - 4 || before < 4 ? after : before;
+      return Math.max(4, Math.min(chosen, extent - size - 4));
+    };
+    const next = {
+      x: place(point.x, element.offsetWidth, snapshot.width),
+      y: place(point.y, element.offsetHeight, snapshot.height),
+      at: pointKey,
+    };
+    setTooltipAt((current) => (current.x === next.x && current.y === next.y && current.at === next.at ? current : next));
+  }, [point, pointKey, snapshot.width, snapshot.height]);
+
   return (
     <ScheduleContext.Provider value={scene}>
       <div
@@ -318,16 +347,14 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
           ))}
           {tooltip !== false && snapshot.tooltip !== null && (
             <span
+              ref={tooltipRef}
               role="tooltip"
               className={styles.tooltip}
               data-schedule-tooltip=""
               style={{
-                left: `${snapshot.tooltip.x}px`,
-                top: `${snapshot.tooltip.y}px`,
-                /* Beside the pointer, on the side with more room. */
-                transform: `translate(${snapshot.tooltip.x > snapshot.width * 0.6 ? "calc(-100% - 12px)" : "12px"}, ${
-                  snapshot.tooltip.y > snapshot.height * 0.55 ? "calc(-100% - 12px)" : "12px"
-                })`,
+                left: `${tooltipAt.x}px`,
+                top: `${tooltipAt.y}px`,
+                visibility: tooltipAt.at === pointKey ? undefined : "hidden",
               }}
             >
               {typeof tooltip === "function" ? tooltip(snapshot.tooltip.target) : <ScheduleTooltipContent target={snapshot.tooltip.target} />}

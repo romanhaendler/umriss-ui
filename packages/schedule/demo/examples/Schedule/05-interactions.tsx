@@ -13,7 +13,11 @@ export const title = "What the pointer reports";
    menu, show a detail, fill a status line like this one.
 
    While `onInteraction` is set, a right-click opens no browser menu - the
-   application is expected to answer it. */
+   application is expected to answer it.
+
+   `onSelectedTaskChange` is the second line below: a click reports the task it
+   selected together with the stop it hit, and clicking another stop of the same
+   task reports again. */
 
 const describe = (interaction: ScheduleInteraction): string => {
   const { hit } = interaction;
@@ -32,6 +36,7 @@ const describe = (interaction: ScheduleInteraction): string => {
 
 export default function Interactions() {
   const [last, setLast] = useState("Move the pointer over the plan");
+  const [selected, setSelected] = useState("nothing selected");
 
   return (
     <Stack gap={3}>
@@ -40,6 +45,7 @@ export default function Interactions() {
         initialDomain={DAY_OF_PLAN}
         height={380}
         onInteraction={(interaction) => setLast(describe(interaction))}
+        onSelectedTaskChange={(task, subtask) => setSelected(task === null ? "nothing selected" : `${task} at ${subtask ?? "-"}`)}
       >
         {STATIONS.map((station) => (
           <Lane key={station.id} id={station.id} label={station.label} />
@@ -49,6 +55,9 @@ export default function Interactions() {
       </Schedule>
       <Text size="sm" mono tone="secondary" data-last-interaction>
         {last}
+      </Text>
+      <Text size="sm" mono tone="secondary" data-selection>
+        {selected}
       </Text>
     </Stack>
   );

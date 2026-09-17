@@ -47,9 +47,14 @@ export interface SceneOptions {
   readonly now: number | null;
 }
 
+/** The height of a lane where a caller names none. It stands here because the
+    view is what reads it; the component and the empty snapshot take it from
+    here rather than writing 44 a second and third time. */
+export const DEFAULT_LANE_HEIGHT = 44;
+
 export class SceneView {
   options: SceneOptions = {
-    laneHeight: 44,
+    laneHeight: DEFAULT_LANE_HEIGHT,
     calendar: [],
     zoomLimits: { min: HOUR, max: 28 * DAY },
     snap: "ticks",
@@ -89,6 +94,11 @@ export class SceneView {
 
   maxScroll(): number {
     return Math.max(0, this.data.lanes.length * this.options.laneHeight - this.height);
+  }
+
+  /** The lowest y that still lies on a lane. */
+  lanesBottom(): number {
+    return this.data.lanes.length * this.options.laneHeight - this.scrollY - 1;
   }
 
   /** The fine band's step at the current zoom. */
@@ -176,13 +186,16 @@ export class SceneView {
     return index >= 0 ? this.data.lanes[index]!.id : null;
   }
 
-  /** Pans by pixels; says whether anything moved. */
-  pan(dx: number, dy: number): boolean {
-    const before = `${this.domain[0]}|${this.scrollY}`;
-    const span = this.domain[1] - this.domain[0];
+  /** Pans by pixels. Says what moved: the span through time, the lanes, or
+      neither - a scroll through the lanes is no news about the time. */
+  pan(dx: number, dy: number): { moved: boolean; time: boolean } {
+    const from = this.domain[0];
+    const scrolled = this.scrollY;
+    const span = this.domain[1] - from;
     if (this.width > 0 && dx !== 0) this.domain = panDomain(this.domain, (dx / this.width) * span);
     this.scrollY = Math.max(0, Math.min(this.maxScroll(), this.scrollY + dy));
-    return before !== `${this.domain[0]}|${this.scrollY}`;
+    const time = this.domain[0] !== from;
+    return { moved: time || this.scrollY !== scrolled, time };
   }
 
   /** Zooms around a plot x; says whether the span changed. */

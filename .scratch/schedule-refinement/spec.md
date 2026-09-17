@@ -330,6 +330,25 @@ browser checks are written.
   application's.
 - The charts' non-reproducible example pictures.
 
+## Deviations, decided during delivery
+
+Recorded here because the spec is read backwards as a delivery record
+(`CONTRIBUTING.md`):
+
+- **The handle has three methods, not two.** `visibleDomain()` joined
+  `positionAt` and `clientPointOf`: an application that keeps a chart in step
+  needs the span at mount too, before any gesture has reported one.
+- **The now line also carries a mark in the fine axis band.** The spec put it
+  on the canvas only. The band is where a reader looks for a time, and it is
+  the one part of the line a test can observe without reading pixels.
+- **The tooltip follows the pointer along its target** rather than standing at
+  the target. It is what the charts' tooltip does, and on a bar that is wider
+  than the screen a tooltip pinned to the bar can be off-screen.
+- **Escape on a drag from outside is the browser's.** No key events are
+  delivered while a native drag runs; Escape ends that drag, and the schedule
+  hears the leave and the `dragend` it sends. The behaviour is the one the
+  story asked for; the mechanism is not the one the decision assumed.
+
 ## Further Notes
 
 - The two ideas parked after the first delivery - the selected subtask and the
