@@ -19,11 +19,12 @@ mechanics.
 * **`latest`** is what `pnpm add @umriss-ui/<package>` installs. Only a released
   version goes there.
 * **`next`** carries release candidates (`0.3.0-rc.1`). `charts` and `table`
-  have `publishConfig.tag: "next"` in their manifests, so a publish of those two
-  cannot land on `latest` by accident — with one exception the registry makes:
-  the very first version of a package gets `latest` as well, because a package
-  without `latest` does not exist. It stays there when the next candidate goes
-  to `next` — so as long as no released version exists, `latest` is moved to
+  carry `publishConfig.tag: "next"` in their manifests, but **pnpm 9.14.4 does
+  not pass it on**: a dry run of `pnpm publish` announces `latest` for both. A
+  candidate is therefore published with `--tag next` written out (step 4). The
+  very first version of a package gets `latest` as well, because a package
+  without `latest` does not exist, and it stays there when the next candidate
+  goes to `next` — so as long as no released version exists, `latest` is moved to
   each new candidate by hand (step 5), or a plain `pnpm add` keeps installing the
   first one. When one of them is released, the `tag` line comes out of its
   manifest in the same commit as the version.
@@ -47,13 +48,17 @@ library's own elements.
    `table` when both move: the table's peer range is rewritten to core's version
    in the workspace.
 2. `pnpm lint && pnpm typecheck && pnpm test:unit && pnpm test:visual` — green.
-3. Look at what would be uploaded:
+3. Look at what would be uploaded - the dry run runs `prepublishOnly` and the
+   git checks as well, and names the tag it would use:
    ```bash
    pnpm --filter @umriss-ui/core publish --dry-run
+   pnpm --filter @umriss-ui/charts publish --dry-run --tag next
    ```
-4. Publish (npm asks for the one-time password of the account):
+4. Publish (npm asks for the one-time password of the account). A release
+   candidate always with `--tag next`:
    ```bash
    pnpm --filter @umriss-ui/core publish
+   pnpm --filter @umriss-ui/charts publish --tag next
    ```
 5. For a release candidate of a package that has no released version yet, move
    `latest` along:
