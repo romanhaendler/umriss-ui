@@ -102,6 +102,30 @@ export function edgeAt(box: SubtaskBox, x: number, y: number, reach = 5): "from"
   return toFrom <= toTo ? "from" : "to";
 }
 
+/** The narrowest bar that still gets a label.
+
+    Measured, not guessed: at the type size the labels are set in, a 47-pixel
+    bar showed "A-…" - a letter and an ellipsis, which says less than nothing
+    and costs a reader a glance. Sixty-four pixels hold about seven characters,
+    which is an order number. Below that the bar stays silent, and the tooltip
+    answers instead. */
+export const MIN_LABEL_WIDTH = 64;
+
+/** Where a bar's label lies, or null where there is no room for one.
+
+    The label belongs to the main time - the setup is not the work - and to the
+    VISIBLE part of it: a bar that began before the view keeps its label at the
+    view's edge, the way the day band keeps its date. */
+export function barLabelBox(
+  box: SubtaskBox,
+  plotWidth: number,
+): { x: number; width: number; y: number; height: number } | null {
+  const x = Math.max(box.mainFrom, 0);
+  const width = Math.min(box.mainTo, plotWidth) - x;
+  if (width < MIN_LABEL_WIDTH) return null;
+  return { x, width, y: box.y, height: box.height };
+}
+
 /** A transport as drawn: a curve from its departure to its arrival, and the
     points it is hit along. */
 export interface TransportPath {

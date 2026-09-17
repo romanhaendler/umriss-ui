@@ -34,7 +34,7 @@ import { ScheduleContext } from "./context";
 import { ScheduleScene, type PlacingItem, type ScheduleInteraction, type ScheduleTooltipTarget } from "./scene";
 import { DEFAULT_LANE_HEIGHT } from "./sceneView";
 import { ScheduleTooltipContent } from "./ScheduleTooltip";
-import type { Intent, IntentKind } from "./model";
+import type { Intent, IntentKind, Subtask } from "./model";
 import type { ZoomLimits } from "./timeAxis";
 import type { SnapRaster } from "./snap";
 import styles from "./Schedule.module.css";
@@ -89,6 +89,12 @@ export interface ScheduleProps {
       it can only come from here: set it on your own `dragstart`, clear it on
       `dragend`. Without `"place"` in `intents` no drop is accepted. */
   placing?: PlacingItem | null;
+  /** What stands written in a bar: a function from a subtask to a line of
+      text, or nothing for bars without text. The text is cut off with an
+      ellipsis where the bar is too narrow for it and left out where even that
+      would say nothing; a bar that began before the view keeps its text at the
+      view's edge. */
+  label?: (subtask: Subtask) => string;
   /** The tooltip on a hovered subtask or transport: its order, its times, its
       parts and its findings. `false` switches it off; a function receives
       what the pointer rests on and returns content of the application's own. */
@@ -140,6 +146,7 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
     onSelectedTaskChange,
     onDomainChange,
     placing,
+    label,
     tooltip,
     now,
     className,
@@ -368,6 +375,23 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
               style={{ left: `${grip.x}px`, top: `${grip.y}px`, height: `${grip.height}px` }}
             />
           ))}
+          {label !== undefined &&
+            snapshot.bars.map((bar) => (
+              <span
+                key={bar.subtask.id}
+                className={styles.barLabel}
+                data-bar-label={bar.subtask.id}
+                data-schedule-overlay="bar label"
+                /* A label is its bar: two of them intersect exactly when two
+                   bars do, and that is an overlap - a finding, drawn on
+                   purpose (CONTEXT.md, **Overlap**). */
+                data-schedule-may-cover=""
+                data-on={bar.dark ? "dark" : "light"}
+                style={{ left: `${bar.x}px`, top: `${bar.y}px`, width: `${bar.width}px`, height: `${bar.height}px` }}
+              >
+                <span className={styles.barLabelText}>{label(bar.subtask)}</span>
+              </span>
+            ))}
           {tooltip !== false && snapshot.tooltip !== null && (
             <span
               ref={tooltipRef}

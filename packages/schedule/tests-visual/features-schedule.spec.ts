@@ -4,6 +4,7 @@
    pixel mechanics in between. Light only: behaviour, not appearance. */
 
 import { test, expect, type Locator, type Page } from "@playwright/test";
+import { overlayOffenders } from "@umriss-ui/demo/checks/overlays";
 import { openExample } from "./navigation";
 import { DAY_OF_PLAN, LANES, plotOf } from "./plot";
 
@@ -324,4 +325,63 @@ test("the operating calendar holds through pan and zoom: no removed hour gets a 
 
   await wheel(page, box.x + box.width * 0.5, box.y + box.height - 8, -120, 10, "Control");
   expect(removed(await tickLabels(example))).toEqual([]);
+});
+
+test("a bar says what the caller writes into it, cut off where it must be", async ({ page }) => {
+  await openExample(page, "subtasks", "bar-labels");
+  const example = page.locator('[data-example="bar-labels"]');
+  const plot = await plotOf(page, example, DAY_OF_PLAN);
+
+  /* The housing's milling runs 08:00 to 10:30 - room for the whole name. */
+  const wide = example.locator('[data-bar-label="a-2041-2"]');
+  await expect(wide).toHaveText("A-2041 Housing");
+  const fits = await wide.evaluate((el) => {
+    const text = el.firstElementChild as HTMLElement;
+    return text.scrollWidth <= text.clientWidth;
+  });
+  expect(fits).toBe(true);
+
+  /* The flange on the press runs an hour and a quarter: room for a label, not
+     for the whole name, so it is cut. */
+  const narrow = example.locator('[data-bar-label="a-2044-2"]');
+  const cut = await narrow.evaluate((el) => {
+    const text = el.firstElementChild as HTMLElement;
+    return text.scrollWidth > text.clientWidth;
+  });
+  expect(cut).toBe(true);
+
+  /* The housing's inspection is forty-five minutes: too narrow for a label
+     that would say anything, so it stays silent and the tooltip answers. */
+  await expect(example.locator('[data-bar-label="a-2041-3"]')).toHaveCount(0);
+
+  /* The label lies within its bar: the box is the bar's visible main time. */
+  const box = (await wide.boundingBox())!;
+  expect(box.x).toBeCloseTo(plot.x(8), -1);
+  expect(box.x + box.width).toBeCloseTo(plot.x(10, 30), -1);
+
+  /* Zoomed out, the short subtasks lose their text rather than wear a row of
+     dots: half an hour of inspection is then a few pixels wide. */
+  const before = await example.locator("[data-bar-label]").count();
+  await wheel(page, plot.x(12), plot.y(LANES.qa), 120, 8, "Control");
+  await expect.poll(async () => example.locator("[data-bar-label]").count()).toBeLessThan(before);
+  await expect(example.locator('[data-bar-label="a-2046-3"]')).toHaveCount(0);
+});
+
+test("a bar that began before the view keeps its label at the edge", async ({ page }) => {
+  await openExample(page, "subtasks", "bar-labels");
+  const example = page.locator('[data-example="bar-labels"]');
+  const plot = await plotOf(page, example, DAY_OF_PLAN);
+  const label = example.locator('[data-bar-label="a-2041-2"]');
+
+  /* Panned until the milling starts left of the view: its label follows to
+     the edge instead of leaving with it. */
+  await page.mouse.move(plot.x(8), plot.y(LANES.qa));
+  await page.mouse.down();
+  await page.mouse.move(plot.x(8) - 200, plot.y(LANES.qa), { steps: 8 });
+  await page.mouse.up();
+
+  const box = (await label.boundingBox())!;
+  expect(box.x).toBeCloseTo(plot.box.x, 0);
+  await expect(label).toHaveText("A-2041 Housing");
+  expect(await overlayOffenders(page)).toEqual([]);
 });
