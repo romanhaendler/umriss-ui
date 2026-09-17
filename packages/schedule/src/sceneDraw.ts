@@ -122,6 +122,9 @@ export interface DrawInput {
   readonly colours: Colours;
   readonly bands: { readonly days: readonly { x: number }[]; readonly ticks: readonly { x: number }[] };
   readonly selectedTask: string | null;
+  /** The subtask the last click was on, where it belongs to the selected task.
+      Selection takes a whole task; this says which of its bars was touched. */
+  readonly selectedSubtask: string | null;
   readonly hover: ScheduleHit;
   readonly ghost: GhostDrawing | null;
 }
@@ -144,16 +147,12 @@ export function drawData(ctx: CanvasRenderingContext2D, input: DrawInput): void 
 }
 
 export function drawOverlay(ctx: CanvasRenderingContext2D, input: DrawInput): void {
-  const { view, colours, hover } = input;
+  const { view, hover } = input;
   const viewport = view.viewport();
   if (input.ghost === null) {
     if (hover.kind === "subtask") {
       const box = view.boxById.get(hover.subtask.id);
-      if (box !== undefined) {
-        ctx.strokeStyle = colours.text;
-        ctx.lineWidth = 1;
-        ctx.strokeRect(box.outerFrom - 1.5, box.y - 1.5, box.outerTo - box.outerFrom + 3, box.height + 3);
-      }
+      if (box !== undefined) drawHover(ctx, input, box);
     } else if (hover.kind === "transport") {
       const path = view.paths.find((p) => p.transport === hover.transport);
       if (path !== undefined) drawTransport(ctx, input, path, true);
@@ -606,13 +605,43 @@ function drawOverlap(ctx: CanvasRenderingContext2D, input: DrawInput, viewport: 
   ctx.fillRect(x0, top + 1, x1 - x0, 3);
 }
 
+/** Hover is a WASH over the bar; selection is an outline. Two different kinds
+    of mark, so that they can be seen at once: hovering a selected bar used to
+    draw a one-pixel outline inside a two-pixel one of the same colour, which
+    is to say it showed nothing at all.
+
+    The wash takes the colour the bar's LABEL takes (`barFace`), which is the
+    colour that reads on this bar: a dark bar is lightened, a light one is
+    darkened, and a hollow one - which has nothing to lighten - is greyed by
+    the page's own ink. One rule, and it is a rule the picture already had. */
+function drawHover(ctx: CanvasRenderingContext2D, input: DrawInput, box: SubtaskBox): void {
+  const { colours } = input;
+  const look = resolveAppearance(box.subtask.appearance);
+  const face = barFace(look, colours.tasks.get(box.subtask.task) ?? colours.muted, colours);
+  ctx.globalAlpha = HOVER_WASH;
+  ctx.fillStyle = face.onDark ? colours.onAccent : colours.text;
+  ctx.fillRect(box.outerFrom, box.y, Math.max(1, box.outerTo - box.outerFrom), box.height);
+  ctx.globalAlpha = 1;
+}
+
+/** How much of the wash lies on a hovered bar. Low enough that the bar keeps
+    its colour and its label keeps its contrast; high enough to be seen under
+    an outline. */
+const HOVER_WASH = 0.2;
+
+/** Selection takes a whole task, and one of its bars was the one clicked. That
+    bar's outline is the heavier of the two, so that a planner knows which bar
+    the grips belong to - the grips are the selected SUBTASK'S, and a task with
+    six stops would otherwise offer no way to tell which. */
 function drawSelection(ctx: CanvasRenderingContext2D, input: DrawInput): void {
   const task = input.selectedTask;
   if (task === null) return;
   ctx.strokeStyle = input.colours.text;
-  ctx.lineWidth = 2;
   for (const box of input.view.boxes) {
     if (box.subtask.task !== task) continue;
-    ctx.strokeRect(box.outerFrom - 1, box.y - 1, box.outerTo - box.outerFrom + 2, box.height + 2);
+    const clicked = box.subtask.id === input.selectedSubtask;
+    ctx.lineWidth = clicked ? 2 : 1;
+    const out = clicked ? 1 : 0.5;
+    ctx.strokeRect(box.outerFrom - out, box.y - out, box.outerTo - box.outerFrom + 2 * out, box.height + 2 * out);
   }
 }

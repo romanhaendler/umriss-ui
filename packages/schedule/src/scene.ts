@@ -365,6 +365,7 @@ export class ScheduleScene {
       colours: this.colours,
       bands: this.snapshot,
       selectedTask: this.selectedTask,
+      selectedSubtask: this.selected,
       hover: this.gestures.hover,
       ghost: this.gestures.ghostDrawing(),
     };
