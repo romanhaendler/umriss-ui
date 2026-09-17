@@ -2,10 +2,11 @@
    that one follows no tokens. The input stays where it is and carries focus
    and keyboard; what is visible is the drawn surface. */
 
-@layer umriss.tokens, umriss.components;
+@layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.components {
   .group {
+    composes: text from "../../styles/own.module.css";
     display: flex;
     flex-direction: column;
     gap: var(--u-space-3);

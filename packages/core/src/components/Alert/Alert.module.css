@@ -6,10 +6,11 @@
    symbol a 2px edge on the left carries the tone - the same gesture as the
    active entry in the command list. */
 
-@layer umriss.tokens, umriss.components;
+@layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.components {
   .alert {
+    composes: text from "../../styles/own.module.css";
     display: flex;
     align-items: flex-start;
     gap: var(--u-space-3);

@@ -7,9 +7,9 @@ import postcss, { type AtRule, type ChildNode, type Rule } from "postcss";
 import { namesAClass } from "./selectors.ts";
 
 /** The order statement every shipped stylesheet begins with. */
-export const LAYER_ORDER = "@layer umriss.tokens, umriss.components;";
+export const LAYER_ORDER = "@layer umriss.tokens, umriss.base, umriss.components;";
 
-const LAYERS = new Set(["umriss.tokens", "umriss.components"]);
+const LAYERS = new Set(["umriss.tokens", "umriss.base", "umriss.components"]);
 
 const inKeyframes = (rule: Rule) => {
   const parent = rule.parent;

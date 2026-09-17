@@ -14,6 +14,7 @@
 
 import { describe, expect, it } from "vitest";
 import TOKENS from "../src/styles/tokens.css?raw";
+import OWN from "../src/styles/own.module.css?raw";
 import { LAYER_ORDER, offendersIn } from "../../../scripts/styles/rules.ts";
 
 const STYLES = import.meta.glob("../src/components/**/*.module.css", {
@@ -58,7 +59,7 @@ const ALLOWED_DURATIONS: Readonly<Record<string, string>> = {
 
 describe("Stylesheets of the library (ADR-0021)", () => {
   it("begin with the layer order and keep every rule inside a layer of the library", () => {
-    const offenders = [...entries(), ["tokens.css", TOKENS] as const].flatMap(([file, text]) => [
+    const offenders = [...entries(), ["tokens.css", TOKENS] as const, ["own.module.css", OWN] as const].flatMap(([file, text]) => [
       ...(text.includes(LAYER_ORDER) ? [] : [`${file}: no layer order statement`]),
       ...offendersIn(text).map((offender) => `${file}: ${offender}`),
     ]);

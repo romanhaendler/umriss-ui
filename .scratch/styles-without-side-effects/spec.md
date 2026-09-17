@@ -77,7 +77,7 @@ html.dark { color-scheme: dark; }   /* most theme libraries do this already */
 ```
 
 1. **The JavaScript imports its stylesheet** — in all three packages.
-2. **Every rule lies in `@layer umriss.tokens` or `@layer umriss.components`.**
+2. **Every rule lies in `@layer umriss.tokens`, `umriss.base` or `umriss.components`.**
 3. **No rule selects what the library did not render.** `global.css` is gone.
 4. **Components carry what they took from it**: `box-sizing` on their own
    elements, a text context where they render text or open a panel, a
@@ -105,9 +105,14 @@ html.dark { color-scheme: dark; }   /* most theme libraries do this already */
 ### Layers
 
 - Every stylesheet the library ships starts with the order statement
-  `@layer umriss.tokens, umriss.components;` — core, table and charts alike, so
-  the order is fixed whichever package's CSS arrives first. Tokens go in
-  `umriss.tokens`, everything else in `umriss.components`.
+  `@layer umriss.tokens, umriss.base, umriss.components;` — core, table and
+  charts alike, so the order is fixed whichever package's CSS arrives first.
+  Tokens go in `umriss.tokens`; the shared text context, caret and scrollbars in
+  `umriss.base`; everything else in `umriss.components`. *(Amended during 04:
+  `umriss.base` did not exist in the first draft. `composes` guarantees the
+  class but not the order of the rules, and a shared text context landed after a
+  badge's own size and colour. One layer below the components makes the order
+  irrelevant.)*
 - In CSS modules the layer is written in the source file (`@layer
   umriss.components { … }` around the rules), not added by the build, so that
   the demo — which reads sources — runs exactly what ships.

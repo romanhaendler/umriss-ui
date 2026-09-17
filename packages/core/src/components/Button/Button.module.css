@@ -1,7 +1,9 @@
-@layer umriss.tokens, umriss.components;
+@layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.components {
   .button {
+    composes: ring from "../../styles/own.module.css";
+    composes: text from "../../styles/own.module.css";
     display: inline-flex;
     align-items: center;
     justify-content: center;

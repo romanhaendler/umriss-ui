@@ -14,7 +14,7 @@
    theme (light on dark).
    ============================================================ */
 
-@layer umriss.tokens, umriss.components;
+@layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.tokens {
   :root {

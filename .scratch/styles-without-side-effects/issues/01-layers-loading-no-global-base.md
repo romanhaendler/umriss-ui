@@ -14,7 +14,7 @@ Spec: `.scratch/styles-without-side-effects/spec.md` · ADR-0021
    own `./<name>.css` as the first statement. `dist/wording/de.js` imports
    nothing. A dist check (e.g. `scripts/check-dist.mjs`) runs in each package's
    `prepublishOnly` after the build and fails if the import is missing, if the
-   CSS does not start with `@layer umriss.tokens, umriss.components;`, or if it
+   CSS does not start with `@layer umriss.tokens, umriss.base, umriss.components;`, or if it
    contains a forbidden selector (spec, "No rule outside the library's own
    elements").
 2. **Layers.** `tokens.css` → `@layer umriss.tokens { … }` (the dark block

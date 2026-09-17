@@ -1,10 +1,11 @@
 /* The dividing line. The line itself is a background and not a border - that
    way it stays 1px even where the browser rounds. */
 
-@layer umriss.tokens, umriss.components;
+@layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.components {
   .divider {
+    composes: text from "../../styles/own.module.css";
     --_color: var(--u-hairline);
     flex: none;
   }

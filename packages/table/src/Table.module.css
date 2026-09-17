@@ -3,7 +3,7 @@
    carries the table's children, the cell of an absent value, the sticky row
    header column and the column menu. */
 
-@layer umriss.tokens, umriss.components;
+@layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.components {
   /* ---- Frame ----------------------------------------------------------- */

@@ -16,10 +16,11 @@
    for what lies above the whole application; a dock lies above exactly one
    surface. */
 
-@layer umriss.tokens, umriss.components;
+@layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.components {
   .root {
+    composes: text from "../../styles/own.module.css";
     position: absolute;
     inset: 0;
     pointer-events: none;
@@ -127,6 +128,8 @@
   }
 
   .grip {
+
+    composes: ring from "../../styles/own.module.css";
     display: flex;
     align-items: center;
     justify-content: center;
@@ -153,6 +156,8 @@
   /* ---------------- The tools ---------------- */
 
   .tool {
+
+    composes: ring from "../../styles/own.module.css";
     flex: none;
     display: flex;
     align-items: center;

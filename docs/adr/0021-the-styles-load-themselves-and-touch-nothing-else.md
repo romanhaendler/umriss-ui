@@ -35,9 +35,11 @@ bundler from shaking the import away. `@umriss-ui/core/styles.css` stays as an
 export for setups that link stylesheets by hand; it is no longer required.
 
 **Everything the library writes lies in cascade layers**, `@layer umriss.tokens,
-umriss.components`. CSS an application writes outside a layer wins over every
-rule of the library, whatever its specificity and whatever the order of loading.
-A token is overridden with `:root { --u-color-accent: … }`.
+umriss.base, umriss.components` — the tokens, the text context components share
+(below every component's own rules, so a component's size or colour always
+wins), and the components. CSS an application writes outside a layer wins over
+every rule of the library, whatever its specificity and whatever the order of
+loading. A token is overridden with `:root { --u-color-accent: … }`.
 
 **No rule of the library selects anything it did not render.** There is no
 `global.css`. No selector targets `html`, `body`, `*` or a native element outside

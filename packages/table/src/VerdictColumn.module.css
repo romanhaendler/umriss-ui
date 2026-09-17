@@ -1,6 +1,6 @@
 /* The verdict column. Colour is the addition; glyph and word carry the verdict. */
 
-@layer umriss.tokens, umriss.components;
+@layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.components {
   .verdict {
