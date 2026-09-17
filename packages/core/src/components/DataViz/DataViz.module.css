@@ -1,52 +1,56 @@
-.meter {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--u-space-2);
-  width: 100%;
-  min-width: 90px;
-}
+@layer umriss.tokens, umriss.components;
 
-.track {
-  flex: 1;
-  height: 6px;
-  border-radius: var(--u-radius-full);
-  background: var(--u-color-surface-sunken);
-  overflow: hidden; /* the fill has no shadow - clipping is harmless here */
-}
+@layer umriss.components {
+  .meter {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--u-space-2);
+    width: 100%;
+    min-width: 90px;
+  }
 
-.fill {
-  display: block;
-  height: 100%;
-  border-radius: var(--u-radius-full);
-  transition: width var(--u-duration-medium) var(--u-ease-out);
-}
+  .track {
+    flex: 1;
+    height: 6px;
+    border-radius: var(--u-radius-full);
+    background: var(--u-color-surface-sunken);
+    overflow: hidden; /* the fill has no shadow - clipping is harmless here */
+  }
 
-.neutral { background: var(--u-color-text-muted); }
-.accent { background: var(--u-color-accent); }
-.success { background: var(--u-color-success); }
-.warning { background: var(--u-color-warning); }
-.danger { background: var(--u-color-danger); }
+  .fill {
+    display: block;
+    height: 100%;
+    border-radius: var(--u-radius-full);
+    transition: width var(--u-duration-medium) var(--u-ease-out);
+  }
 
-.meterLabel {
-  flex: none;
-  min-width: 4ch;
-  text-align: right;
-  font-family: var(--u-font-mono);
-  font-size: 0.71875rem;
-  letter-spacing: -0.01em;
-  font-variant-numeric: tabular-nums;
-  color: var(--u-color-text-secondary);
-}
+  .neutral { background: var(--u-color-text-muted); }
+  .accent { background: var(--u-color-accent); }
+  .success { background: var(--u-color-success); }
+  .warning { background: var(--u-color-warning); }
+  .danger { background: var(--u-color-danger); }
 
-.sparkline {
-  display: inline-flex;
-  color: var(--u-color-text-secondary);
-}
+  .meterLabel {
+    flex: none;
+    min-width: 4ch;
+    text-align: right;
+    font-family: var(--u-font-mono);
+    font-size: 0.71875rem;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+    color: var(--u-color-text-secondary);
+  }
 
-.sparklineAccent {
-  color: var(--u-color-accent);
-}
+  .sparkline {
+    display: inline-flex;
+    color: var(--u-color-text-secondary);
+  }
 
-.sparklineDot {
-  fill: var(--u-color-accent);
+  .sparklineAccent {
+    color: var(--u-color-accent);
+  }
+
+  .sparklineDot {
+    fill: var(--u-color-accent);
+  }
 }

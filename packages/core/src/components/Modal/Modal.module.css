@@ -1,182 +1,187 @@
 /* The dialog itself is an invisible full-screen container; the visible modal
    surface is .sheet. Free space distributes itself over two flexible spacers
    in the golden ratio (38 : 62). */
-.dialog {
-  border: none;
-  margin: 0;
-  padding: 24px;
-  width: 100vw;
-  max-width: 100vw;
-  height: 100dvh;
-  max-height: 100dvh;
-  background: transparent;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
 
-/* IMPORTANT: display:flex above overrides the browser's display:none for
-   closed dialogs – without this rule the content would lie visible in the
-   page flow. */
-.dialog:not([open]) {
-  display: none;
-}
+@layer umriss.tokens, umriss.components;
 
-.spacerTop {
-  flex: 38 38 0px;
-  min-height: 0;
-}
-
-.spacerBottom {
-  flex: 62 62 0px;
-  min-height: 0;
-}
-
-.sheet {
-  flex: none;
-  display: flex;
-  flex-direction: column;
-  width: min(100%, var(--_width));
-  max-height: 100%;
-  background: var(--u-color-surface);
-  color: var(--u-color-text);
-  border-radius: var(--u-radius-lg);
-  box-shadow: var(--u-shadow-overlay);
-}
-
-.sm { --_width: 400px; }
-.md { --_width: 520px; }
-.lg { --_width: 720px; }
-
-.dialog::backdrop {
-  /* The theme's scrim. Here stood a value of its own, and the dark theme
-     dimmed with the light one's (library-audit 07). */
-  background: var(--u-color-scrim);
-}
-
-/* Entrance: grows minimally out of the depth. Exit: backwards. */
-.dialog[open] .sheet {
-  animation: modalIn var(--u-duration-medium) var(--u-ease-out);
-}
-
-.dialog[data-closing] .sheet {
-  animation: modalOut var(--u-duration-exit) ease-in forwards;
-}
-
-.dialog[open]::backdrop {
-  animation: backdropIn var(--u-duration-medium) ease-out;
-}
-
-.dialog[data-closing]::backdrop {
-  animation: backdropOut var(--u-duration-exit) ease-in forwards;
-}
-
-@keyframes modalIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px) scale(0.97);
+@layer umriss.components {
+  .dialog {
+    border: none;
+    margin: 0;
+    padding: 24px;
+    width: 100vw;
+    max-width: 100vw;
+    height: 100dvh;
+    max-height: 100dvh;
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
-}
 
-@keyframes modalOut {
-  to {
-    opacity: 0;
-    transform: translateY(4px) scale(0.98);
+  /* IMPORTANT: display:flex above overrides the browser's display:none for
+     closed dialogs – without this rule the content would lie visible in the
+     page flow. */
+  .dialog:not([open]) {
+    display: none;
   }
-}
 
-@keyframes backdropIn {
-  from { opacity: 0; }
-}
+  .spacerTop {
+    flex: 38 38 0px;
+    min-height: 0;
+  }
 
-@keyframes backdropOut {
-  to { opacity: 0; }
-}
+  .spacerBottom {
+    flex: 62 62 0px;
+    min-height: 0;
+  }
 
-/* Header */
-.header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--u-space-4);
-  padding: var(--u-space-5) var(--u-space-5) 0;
-}
+  .sheet {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    width: min(100%, var(--_width));
+    max-height: 100%;
+    background: var(--u-color-surface);
+    color: var(--u-color-text);
+    border-radius: var(--u-radius-lg);
+    box-shadow: var(--u-shadow-overlay);
+  }
 
-.headerText {
-  display: flex;
-  flex-direction: column;
-  gap: var(--u-space-1);
-  min-width: 0;
-}
+  .sm { --_width: 400px; }
+  .md { --_width: 520px; }
+  .lg { --_width: 720px; }
 
-.title {
-  margin: 0;
-  font-size: var(--u-text-lg);
-  font-weight: var(--u-weight-semibold);
-  letter-spacing: var(--u-tracking-tight);
-  line-height: var(--u-leading-tight);
-}
+  .dialog::backdrop {
+    /* The theme's scrim. Here stood a value of its own, and the dark theme
+       dimmed with the light one's (library-audit 07). */
+    background: var(--u-color-scrim);
+  }
 
-.description {
-  margin: 0;
-  font-size: var(--u-text-sm);
-  line-height: var(--u-leading-normal);
-  color: var(--u-color-text-secondary);
-}
+  /* Entrance: grows minimally out of the depth. Exit: backwards. */
+  .dialog[open] .sheet {
+    animation: modalIn var(--u-duration-medium) var(--u-ease-out);
+  }
 
-.close {
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  margin: -4px -6px 0 0;
-  border: none;
-  background: none;
-  border-radius: var(--u-radius-sm);
-  color: var(--u-color-text-muted);
-  cursor: pointer;
-  transition:
-    background-color var(--u-transition),
-    color var(--u-transition);
-}
+  .dialog[data-closing] .sheet {
+    animation: modalOut var(--u-duration-exit) ease-in forwards;
+  }
 
-.close:hover {
-  background: var(--u-color-surface-sunken);
-  color: var(--u-color-text);
-}
+  .dialog[open]::backdrop {
+    animation: backdropIn var(--u-duration-medium) ease-out;
+  }
 
-/* Body & footer */
-.header,
-.footer {
-  flex: none;
-}
-
-.body {
-  /* flex-basis auto, NOT 0: the content has to enter the height calculation,
-     otherwise the modal collapses onto header + footer. */
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow: auto;
-  overscroll-behavior: contain;
-  padding: var(--u-space-4) var(--u-space-5);
-  font-size: var(--u-text-md);
-  line-height: var(--u-leading-normal);
-}
-
-.footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--u-space-2);
-  padding: var(--u-space-2) var(--u-space-5) var(--u-space-5);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .dialog[open] .sheet,
-  .dialog[data-closing] .sheet,
-  .dialog[open]::backdrop,
   .dialog[data-closing]::backdrop {
-    animation: none;
+    animation: backdropOut var(--u-duration-exit) ease-in forwards;
+  }
+
+  @keyframes modalIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px) scale(0.97);
+    }
+  }
+
+  @keyframes modalOut {
+    to {
+      opacity: 0;
+      transform: translateY(4px) scale(0.98);
+    }
+  }
+
+  @keyframes backdropIn {
+    from { opacity: 0; }
+  }
+
+  @keyframes backdropOut {
+    to { opacity: 0; }
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--u-space-4);
+    padding: var(--u-space-5) var(--u-space-5) 0;
+  }
+
+  .headerText {
+    display: flex;
+    flex-direction: column;
+    gap: var(--u-space-1);
+    min-width: 0;
+  }
+
+  .title {
+    margin: 0;
+    font-size: var(--u-text-lg);
+    font-weight: var(--u-weight-semibold);
+    letter-spacing: var(--u-tracking-tight);
+    line-height: var(--u-leading-tight);
+  }
+
+  .description {
+    margin: 0;
+    font-size: var(--u-text-sm);
+    line-height: var(--u-leading-normal);
+    color: var(--u-color-text-secondary);
+  }
+
+  .close {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    margin: -4px -6px 0 0;
+    border: none;
+    background: none;
+    border-radius: var(--u-radius-sm);
+    color: var(--u-color-text-muted);
+    cursor: pointer;
+    transition:
+      background-color var(--u-transition),
+      color var(--u-transition);
+  }
+
+  .close:hover {
+    background: var(--u-color-surface-sunken);
+    color: var(--u-color-text);
+  }
+
+  /* Body & footer */
+  .header,
+  .footer {
+    flex: none;
+  }
+
+  .body {
+    /* flex-basis auto, NOT 0: the content has to enter the height calculation,
+       otherwise the modal collapses onto header + footer. */
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+    padding: var(--u-space-4) var(--u-space-5);
+    font-size: var(--u-text-md);
+    line-height: var(--u-leading-normal);
+  }
+
+  .footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--u-space-2);
+    padding: var(--u-space-2) var(--u-space-5) var(--u-space-5);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dialog[open] .sheet,
+    .dialog[data-closing] .sheet,
+    .dialog[open]::backdrop,
+    .dialog[data-closing]::backdrop {
+      animation: none;
+    }
   }
 }

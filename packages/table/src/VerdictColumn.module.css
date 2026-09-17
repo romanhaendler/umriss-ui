@@ -1,36 +1,40 @@
 /* The verdict column. Colour is the addition; glyph and word carry the verdict. */
 
-.verdict {
-  display: inline-flex;
-  align-items: baseline;
-  justify-content: flex-end;
-  gap: var(--u-space-1);
-}
+@layer umriss.tokens, umriss.components;
 
-.glyph {
-  font-size: 0.7em;
-  line-height: 1;
-}
+@layer umriss.components {
+  .verdict {
+    display: inline-flex;
+    align-items: baseline;
+    justify-content: flex-end;
+    gap: var(--u-space-1);
+  }
 
-.verdict[data-verdict="ok"] .glyph {
-  color: var(--u-color-text-muted);
-}
+  .glyph {
+    font-size: 0.7em;
+    line-height: 1;
+  }
 
-.verdict[data-verdict="unknown"] .glyph,
-.verdict[data-verdict="unknown"] .value {
-  color: var(--u-color-text-muted);
-}
+  .verdict[data-verdict="ok"] .glyph {
+    color: var(--u-color-text-muted);
+  }
 
-.verdict[data-verdict="warning"] .glyph,
-.verdict[data-verdict="warning"] .excess {
-  color: var(--u-color-warning);
-}
+  .verdict[data-verdict="unknown"] .glyph,
+  .verdict[data-verdict="unknown"] .value {
+    color: var(--u-color-text-muted);
+  }
 
-.verdict[data-verdict="alarm"] .glyph,
-.verdict[data-verdict="alarm"] .excess {
-  color: var(--u-color-danger);
-}
+  .verdict[data-verdict="warning"] .glyph,
+  .verdict[data-verdict="warning"] .excess {
+    color: var(--u-color-warning);
+  }
 
-.excess {
-  font-size: 0.9em;
+  .verdict[data-verdict="alarm"] .glyph,
+  .verdict[data-verdict="alarm"] .excess {
+    color: var(--u-color-danger);
+  }
+
+  .excess {
+    font-size: 0.9em;
+  }
 }

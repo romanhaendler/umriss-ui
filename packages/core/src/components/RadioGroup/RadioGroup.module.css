@@ -2,134 +2,138 @@
    that one follows no tokens. The input stays where it is and carries focus
    and keyboard; what is visible is the drawn surface. */
 
-.group {
-  display: flex;
-  flex-direction: column;
-  gap: var(--u-space-3);
-}
+@layer umriss.tokens, umriss.components;
 
-.horizontal {
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: var(--u-space-5);
-}
+@layer umriss.components {
+  .group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--u-space-3);
+  }
 
-.option {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--u-space-2);
-  cursor: pointer;
-}
+  .horizontal {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--u-space-5);
+  }
 
-.disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
+  .option {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--u-space-2);
+    cursor: pointer;
+  }
 
-/* The input lies invisibly on the dot: that way it stays clickable and
-   focusable without its appearance coming through. */
-.input {
-  position: absolute;
-  width: 16px;
-  height: 16px;
-  margin: 0;
-  opacity: 0;
-  cursor: inherit;
-}
+  .disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
 
-.dot {
-  position: relative;
-  flex: none;
-  width: 16px;
-  height: 16px;
-  margin-top: 1px;
-  border-radius: var(--u-radius-full);
-  background: var(--u-color-surface);
-  box-shadow: var(--u-edge-strong);
-  transition:
-    box-shadow var(--u-transition),
-    background-color var(--u-transition);
-}
+  /* The input lies invisibly on the dot: that way it stays clickable and
+     focusable without its appearance coming through. */
+  .input {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    opacity: 0;
+    cursor: inherit;
+  }
 
-/* The chosen dot: ink with a light core, no tick, no colour - the accent
-   stays reserved for the focus. */
-.dot::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  margin: auto;
-  width: 6px;
-  height: 6px;
-  border-radius: var(--u-radius-full);
-  background: var(--u-color-primary-fg);
-  transform: scale(0);
-  transition: transform var(--u-duration-fast) var(--u-ease-out);
-}
+  .dot {
+    position: relative;
+    flex: none;
+    width: 16px;
+    height: 16px;
+    margin-top: 1px;
+    border-radius: var(--u-radius-full);
+    background: var(--u-color-surface);
+    box-shadow: var(--u-edge-strong);
+    transition:
+      box-shadow var(--u-transition),
+      background-color var(--u-transition);
+  }
 
-.input:checked + .dot {
-  background: var(--u-color-primary-bg);
-  box-shadow: none;
-}
+  /* The chosen dot: ink with a light core, no tick, no colour - the accent
+     stays reserved for the focus. */
+  .dot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 6px;
+    height: 6px;
+    border-radius: var(--u-radius-full);
+    background: var(--u-color-primary-fg);
+    transform: scale(0);
+    transition: transform var(--u-duration-fast) var(--u-ease-out);
+  }
 
-.input:checked + .dot::after {
-  transform: scale(1);
-}
+  .input:checked + .dot {
+    background: var(--u-color-primary-bg);
+    box-shadow: none;
+  }
 
-.option:hover .input:not(:disabled):not(:checked) + .dot {
-  box-shadow: 0 0 0 1px var(--u-color-edge-hover);
-}
+  .input:checked + .dot::after {
+    transform: scale(1);
+  }
 
-.input:focus-visible + .dot {
-  box-shadow: var(--u-edge-strong), var(--u-focus-ring);
-}
+  .option:hover .input:not(:disabled):not(:checked) + .dot {
+    box-shadow: 0 0 0 1px var(--u-color-edge-hover);
+  }
 
-.input:checked:focus-visible + .dot {
-  box-shadow: var(--u-focus-ring);
-}
+  .input:focus-visible + .dot {
+    box-shadow: var(--u-edge-strong), var(--u-focus-ring);
+  }
 
-.texts {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
+  .input:checked:focus-visible + .dot {
+    box-shadow: var(--u-focus-ring);
+  }
 
-.label {
-  font-size: var(--u-text-sm);
-  line-height: var(--u-leading-normal);
-  color: var(--u-color-text);
-}
+  .texts {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
 
-/* The line of explanation is the reason this component exists - which is
-   why it has room and is not squeezed onto one line. */
-.description {
-  font-size: var(--u-text-xs);
-  line-height: var(--u-leading-normal);
-  color: var(--u-color-text-muted);
-  max-width: 52ch;
-}
+  .label {
+    font-size: var(--u-text-sm);
+    line-height: var(--u-leading-normal);
+    color: var(--u-color-text);
+  }
 
-/* ---- Small size ---- */
+  /* The line of explanation is the reason this component exists - which is
+     why it has room and is not squeezed onto one line. */
+  .description {
+    font-size: var(--u-text-xs);
+    line-height: var(--u-leading-normal);
+    color: var(--u-color-text-muted);
+    max-width: 52ch;
+  }
 
-.sm {
-  gap: var(--u-space-2);
-}
+  /* ---- Small size ---- */
 
-.sm .dot {
-  width: 14px;
-  height: 14px;
-}
+  .sm {
+    gap: var(--u-space-2);
+  }
 
-.sm .input {
-  width: 14px;
-  height: 14px;
-}
+  .sm .dot {
+    width: 14px;
+    height: 14px;
+  }
 
-.sm .dot::after {
-  width: 5px;
-  height: 5px;
-}
+  .sm .input {
+    width: 14px;
+    height: 14px;
+  }
 
-.sm .label {
-  font-size: var(--u-text-xs);
+  .sm .dot::after {
+    width: 5px;
+    height: 5px;
+  }
+
+  .sm .label {
+    font-size: var(--u-text-xs);
+  }
 }

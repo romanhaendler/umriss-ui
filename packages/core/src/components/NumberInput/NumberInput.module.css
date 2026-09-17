@@ -1,132 +1,136 @@
-.wrapper {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--u-space-2);
-  width: 100%;
-  height: var(--u-control-height);
-  padding: 0 var(--u-space-1) 0 var(--u-space-3);
-  border-radius: var(--u-radius-md);
-  background: var(--u-color-surface);
-  box-shadow: var(--u-edge-strong);
-  transition: box-shadow var(--u-transition);
-}
+@layer umriss.tokens, umriss.components;
 
-.wrapper:hover:not(.disabled):not(:focus-within) {
-  box-shadow: 0 0 0 1px var(--u-color-edge-hover);
-}
+@layer umriss.components {
+  .wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--u-space-2);
+    width: 100%;
+    height: var(--u-control-height);
+    padding: 0 var(--u-space-1) 0 var(--u-space-3);
+    border-radius: var(--u-radius-md);
+    background: var(--u-color-surface);
+    box-shadow: var(--u-edge-strong);
+    transition: box-shadow var(--u-transition);
+  }
 
-.wrapper:focus-within {
-  box-shadow:
-    0 0 0 1px var(--u-color-accent),
-    var(--u-focus-ring);
-}
+  .wrapper:hover:not(.disabled):not(:focus-within) {
+    box-shadow: 0 0 0 1px var(--u-color-edge-hover);
+  }
 
-.sm {
-  height: var(--u-control-height-sm);
-  border-radius: var(--u-radius-sm);
-}
+  .wrapper:focus-within {
+    box-shadow:
+      0 0 0 1px var(--u-color-accent),
+      var(--u-focus-ring);
+  }
 
-.invalid,
-.invalid:hover:not(.disabled):not(:focus-within) {
-  box-shadow: 0 0 0 1px var(--u-color-danger);
-}
+  .sm {
+    height: var(--u-control-height-sm);
+    border-radius: var(--u-radius-sm);
+  }
 
-.invalid:focus-within {
-  box-shadow:
-    0 0 0 1px var(--u-color-danger),
-    0 0 0 4px color-mix(in srgb, var(--u-color-danger) 18%, transparent);
-}
+  .invalid,
+  .invalid:hover:not(.disabled):not(:focus-within) {
+    box-shadow: 0 0 0 1px var(--u-color-danger);
+  }
 
-.disabled {
-  background: var(--u-color-surface-sunken);
-}
+  .invalid:focus-within {
+    box-shadow:
+      0 0 0 1px var(--u-color-danger),
+      0 0 0 4px color-mix(in srgb, var(--u-color-danger) 18%, transparent);
+  }
 
-.input {
-  flex: 1;
-  min-width: 0;
-  border: none;
-  background: none;
-  padding: 0;
-  text-align: right;
-  font-family: var(--u-font-mono);
-  font-size: 0.75rem;
-  letter-spacing: -0.01em;
-  font-variant-numeric: tabular-nums;
-  color: var(--u-color-text);
-}
+  .disabled {
+    background: var(--u-color-surface-sunken);
+  }
 
-.input:focus-visible {
-  outline: none;
-  box-shadow: none;
-}
+  .input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: none;
+    padding: 0;
+    text-align: right;
+    font-family: var(--u-font-mono);
+    font-size: 0.75rem;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+    color: var(--u-color-text);
+  }
 
-.input:disabled {
-  color: var(--u-color-text-muted);
-  cursor: not-allowed;
-}
+  .input:focus-visible {
+    outline: none;
+    box-shadow: none;
+  }
 
-.sm .input {
-  font-size: 0.71875rem;
-}
+  .input:disabled {
+    color: var(--u-color-text-muted);
+    cursor: not-allowed;
+  }
 
-.adornment {
-  flex: none;
-  font-size: var(--u-text-sm);
-  color: var(--u-color-text-muted);
-  user-select: none;
-}
+  .sm .input {
+    font-size: 0.71875rem;
+  }
 
-/* Quiet steppers: two ghost buttons −/+ without dividing lines. Damped at
-   rest, fully present on hover or focus of the field – at rest the field
-   stays a clean input, its operation shows itself as one approaches. */
-.stepper {
-  flex: none;
-  display: flex;
-  align-items: center;
-  gap: 2px;
-}
+  .adornment {
+    flex: none;
+    font-size: var(--u-text-sm);
+    color: var(--u-color-text-muted);
+    user-select: none;
+  }
 
-.stepper button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 22px;
-  padding: 0;
-  border: none;
-  border-radius: var(--u-radius-sm);
-  background: transparent;
-  color: var(--u-color-text-secondary);
-  opacity: 0.4;
-  cursor: pointer;
-  touch-action: none;
-  transition:
-    opacity var(--u-transition),
-    background-color var(--u-transition),
-    color var(--u-transition),
-    transform var(--u-transition);
-}
+  /* Quiet steppers: two ghost buttons −/+ without dividing lines. Damped at
+     rest, fully present on hover or focus of the field – at rest the field
+     stays a clean input, its operation shows itself as one approaches. */
+  .stepper {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
 
-.sm .stepper button {
-  width: 18px;
-  height: 19px;
-}
+  .stepper button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 22px;
+    padding: 0;
+    border: none;
+    border-radius: var(--u-radius-sm);
+    background: transparent;
+    color: var(--u-color-text-secondary);
+    opacity: 0.4;
+    cursor: pointer;
+    touch-action: none;
+    transition:
+      opacity var(--u-transition),
+      background-color var(--u-transition),
+      color var(--u-transition),
+      transform var(--u-transition);
+  }
 
-.wrapper:hover .stepper button:not(:disabled),
-.wrapper:focus-within .stepper button:not(:disabled) {
-  opacity: 1;
-}
+  .sm .stepper button {
+    width: 18px;
+    height: 19px;
+  }
 
-.stepper button:hover:not(:disabled) {
-  background: var(--u-color-surface-sunken);
-  color: var(--u-color-text);
-}
+  .wrapper:hover .stepper button:not(:disabled),
+  .wrapper:focus-within .stepper button:not(:disabled) {
+    opacity: 1;
+  }
 
-.stepper button:active:not(:disabled) {
-  transform: scale(0.9);
-}
+  .stepper button:hover:not(:disabled) {
+    background: var(--u-color-surface-sunken);
+    color: var(--u-color-text);
+  }
 
-.stepper button:disabled {
-  cursor: default;
-  opacity: 0.18;
+  .stepper button:active:not(:disabled) {
+    transform: scale(0.9);
+  }
+
+  .stepper button:disabled {
+    cursor: default;
+    opacity: 0.18;
+  }
 }

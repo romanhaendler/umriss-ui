@@ -1,240 +1,245 @@
 /* The dialog itself is an invisible full-screen container and carries the
    scrim; the visible surface is .pane. */
-.dialog {
-  border: none;
-  margin: 0;
-  padding: 0 var(--u-space-4);
-  width: 100vw;
-  max-width: 100vw;
-  height: 100dvh;
-  max-height: 100dvh;
-  display: flex;
-  justify-content: center;
-  /* Without this the pane stretches to the full height and the foot floats at
-     the bottom edge of the screen. */
-  align-items: flex-start;
-  /* In the upper third, where a search window belongs: the eye is at the
-     field, and below it there is room to grow. */
-  padding-top: 14vh;
-  background: var(--u-color-scrim);
-  color: var(--u-color-text);
-  overflow: hidden;
-}
 
-/* IMPORTANT: the display:flex above overrides the browser's display:none for
-   closed dialogs - without this rule the content would lie visibly in the page
-   flow. */
-.dialog:not([open]) {
-  display: none;
-}
+@layer umriss.tokens, umriss.components;
 
-/* The scrim lies on the dialog and not here: a surface that uses
-   `backdrop-filter` must be able to blur it along with everything else, and the
-   dialog's backdrop lies in the wrong place for that. */
-.dialog::backdrop {
-  background: transparent;
-}
+@layer umriss.components {
+  .dialog {
+    border: none;
+    margin: 0;
+    padding: 0 var(--u-space-4);
+    width: 100vw;
+    max-width: 100vw;
+    height: 100dvh;
+    max-height: 100dvh;
+    display: flex;
+    justify-content: center;
+    /* Without this the pane stretches to the full height and the foot floats at
+       the bottom edge of the screen. */
+    align-items: flex-start;
+    /* In the upper third, where a search window belongs: the eye is at the
+       field, and below it there is room to grow. */
+    padding-top: 14vh;
+    background: var(--u-color-scrim);
+    color: var(--u-color-text);
+    overflow: hidden;
+  }
 
-.pane {
-  flex: none;
-  display: flex;
-  flex-direction: column;
-  width: min(680px, 100%);
-  max-height: 72vh;
-  border-radius: var(--u-radius-xl);
-  box-shadow: var(--u-shadow-overlay);
-  overflow: hidden;
-  /* The opaque substitute colour stands first and stays wherever
-     `backdrop-filter` is missing or switched off. The window is then quieter
-     than intended and right in every other respect. */
-  background: var(--u-color-material-fallback);
-}
+  /* IMPORTANT: the display:flex above overrides the browser's display:none for
+     closed dialogs - without this rule the content would lie visibly in the page
+     flow. */
+  .dialog:not([open]) {
+    display: none;
+  }
 
-@supports (backdrop-filter: blur(1px)) {
+  /* The scrim lies on the dialog and not here: a surface that uses
+     `backdrop-filter` must be able to blur it along with everything else, and the
+     dialog's backdrop lies in the wrong place for that. */
+  .dialog::backdrop {
+    background: transparent;
+  }
+
   .pane {
-    background: var(--u-color-material);
-    /* Blur only, no saturation. The usual recipe for this effect appends a
-       `saturate()`; here it was tried out and deleted again. The difference
-       measured was below the threshold of the screenshot comparison - which was
-       to be expected, because the greys of this system are almost achromatic
-       and saturation has nothing to turn on grey. A filter that does nothing is
-       one a later reader takes to be necessary. And ADR-0012 names exactly two
-       components of the material: alpha and blur. */
-    backdrop-filter: blur(var(--u-material-blur));
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    width: min(680px, 100%);
+    max-height: 72vh;
+    border-radius: var(--u-radius-xl);
+    box-shadow: var(--u-shadow-overlay);
+    overflow: hidden;
+    /* The opaque substitute colour stands first and stays wherever
+       `backdrop-filter` is missing or switched off. The window is then quieter
+       than intended and right in every other respect. */
+    background: var(--u-color-material-fallback);
   }
-}
 
-/* The entrance: short, out of the depth. No exit - see CommandPalette.tsx. */
-.dialog[open] .pane {
-  animation: paletteEnter var(--u-duration-fast) var(--u-ease-out);
-}
-
-@keyframes paletteEnter {
-  from {
-    opacity: 0;
-    transform: scale(0.96);
+  @supports (backdrop-filter: blur(1px)) {
+    .pane {
+      background: var(--u-color-material);
+      /* Blur only, no saturation. The usual recipe for this effect appends a
+         `saturate()`; here it was tried out and deleted again. The difference
+         measured was below the threshold of the screenshot comparison - which was
+         to be expected, because the greys of this system are almost achromatic
+         and saturation has nothing to turn on grey. A filter that does nothing is
+         one a later reader takes to be necessary. And ADR-0012 names exactly two
+         components of the material: alpha and blur. */
+      backdrop-filter: blur(var(--u-material-blur));
+    }
   }
-}
 
-/* ---------------- The field ---------------- */
+  /* The entrance: short, out of the depth. No exit - see CommandPalette.tsx. */
+  .dialog[open] .pane {
+    animation: paletteEnter var(--u-duration-fast) var(--u-ease-out);
+  }
 
-.field {
-  flex: none;
-  height: 56px;
-  padding: 0 var(--u-space-5);
-  border: none;
-  background: transparent;
-  font: inherit;
-  font-family: var(--u-font-sans);
-  font-size: var(--u-text-2xl);
-  font-weight: var(--u-weight-regular);
-  letter-spacing: var(--u-tracking-tight);
-  color: var(--u-color-text);
-}
+  @keyframes paletteEnter {
+    from {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+  }
 
-.field::placeholder {
-  color: var(--u-color-text-muted);
-}
+  /* ---------------- The field ---------------- */
 
-/* No focus ring: the pane IS the focus indicator. A ring around a field that
-   makes up the whole window draws a frame around a frame.
+  .field {
+    flex: none;
+    height: 56px;
+    padding: 0 var(--u-space-5);
+    border: none;
+    background: transparent;
+    font: inherit;
+    font-family: var(--u-font-sans);
+    font-size: var(--u-text-2xl);
+    font-weight: var(--u-weight-regular);
+    letter-spacing: var(--u-tracking-tight);
+    color: var(--u-color-text);
+  }
 
-   Both lines are needed, and the second is the more important one. The base
-   layer sets the ring in global.css as a `box-shadow` and not as an `outline`;
-   `outline: none` alone therefore left it standing. Exactly one side of it
-   remained visible: the field fills the pane across its width, and
-   `overflow: hidden` cut the ring away on the left, the right and the top. What
-   was left was a four pixel high bar in the accent below the field - which read
-   as a very thick, coloured dividing line, in the place where a hairline
-   belongs. */
-.field:focus,
-.field:focus-visible {
-  outline: none;
-  box-shadow: none;
-}
+  .field::placeholder {
+    color: var(--u-color-text-muted);
+  }
 
-/* ---------------- Growing ---------------- */
+  /* No focus ring: the pane IS the focus indicator. A ring around a field that
+     makes up the whole window draws a frame around a frame.
 
-.bodyWrap {
-  flex: 0 1 auto;
-  min-height: 0;
-  overflow: hidden;
-  transition: height var(--u-duration-fast) var(--u-ease-out);
-}
+     Both lines are needed, and the second is the more important one. The base
+     layer sets the ring in global.css as a `box-shadow` and not as an `outline`;
+     `outline: none` alone therefore left it standing. Exactly one side of it
+     remained visible: the field fills the pane across its width, and
+     `overflow: hidden` cut the ring away on the left, the right and the top. What
+     was left was a four pixel high bar in the accent below the field - which read
+     as a very thick, coloured dividing line, in the place where a hairline
+     belongs. */
+  .field:focus,
+  .field:focus-visible {
+    outline: none;
+    box-shadow: none;
+  }
 
-.body {
-  display: flex;
-  flex-direction: column;
-  border-top: 1px solid var(--u-hairline);
-}
+  /* ---------------- Growing ---------------- */
 
-/* In the resting state nothing stands here - then no line either, otherwise
-   the window would be one pixel more than "only the field". */
-.body:empty {
-  border-top: none;
-}
+  .bodyWrap {
+    flex: 0 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    transition: height var(--u-duration-fast) var(--u-ease-out);
+  }
 
-/* ---------------- The list of finds ---------------- */
+  .body {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--u-hairline);
+  }
 
-.list {
-  /* About eight rows, then it scrolls: a window that grows past the edge of the
-     screen with the find is no longer one. */
-  max-height: 320px;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding: var(--u-space-2);
-}
+  /* In the resting state nothing stands here - then no line either, otherwise
+     the window would be one pixel more than "only the field". */
+  .body:empty {
+    border-top: none;
+  }
 
-.groupHeading {
-  padding: var(--u-space-3) var(--u-space-3) var(--u-space-1);
-  font-size: var(--u-text-xs);
-  font-weight: var(--u-weight-medium);
-  letter-spacing: var(--u-tracking-caps);
-  text-transform: uppercase;
-  color: var(--u-color-text-secondary);
-}
+  /* ---------------- The list of finds ---------------- */
 
-.row {
-  display: flex;
-  align-items: center;
-  gap: var(--u-space-3);
-  height: 38px;
-  padding: 0 var(--u-space-3);
-  border-radius: var(--u-radius-md);
-  font-size: var(--u-text-md);
-  cursor: pointer;
-}
+  .list {
+    /* About eight rows, then it scrolls: a window that grows past the edge of the
+       screen with the find is no longer one. */
+    max-height: 320px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: var(--u-space-2);
+  }
 
-.rowActive {
-  background: var(--u-color-accent-subtle);
-}
+  .groupHeading {
+    padding: var(--u-space-3) var(--u-space-3) var(--u-space-1);
+    font-size: var(--u-text-xs);
+    font-weight: var(--u-weight-medium);
+    letter-spacing: var(--u-tracking-caps);
+    text-transform: uppercase;
+    color: var(--u-color-text-secondary);
+  }
 
-.icon {
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px;
-  color: var(--u-color-text-secondary);
-}
+  .row {
+    display: flex;
+    align-items: center;
+    gap: var(--u-space-3);
+    height: 38px;
+    padding: 0 var(--u-space-3);
+    border-radius: var(--u-radius-md);
+    font-size: var(--u-text-md);
+    cursor: pointer;
+  }
 
-.name {
-  flex: 1 1 auto;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: var(--u-color-text);
-}
+  .rowActive {
+    background: var(--u-color-accent-subtle);
+  }
 
-/* The matched characters. They are the reason why a find which no substring
-   explains still looks like a reason. */
-.mark {
-  color: var(--u-color-accent-text);
-  font-weight: var(--u-weight-semibold);
-}
+  .icon {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    color: var(--u-color-text-secondary);
+  }
 
-.group {
-  flex: none;
-  font-size: var(--u-text-xs);
-  color: var(--u-color-text-secondary);
-}
+  .name {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--u-color-text);
+  }
 
-.noFinds {
-  margin: 0;
-  padding: var(--u-space-4) var(--u-space-5);
-  font-size: var(--u-text-md);
-  color: var(--u-color-text-secondary);
-}
+  /* The matched characters. They are the reason why a find which no substring
+     explains still looks like a reason. */
+  .mark {
+    color: var(--u-color-accent-text);
+    font-weight: var(--u-weight-semibold);
+  }
 
-/* ---------------- The foot ---------------- */
+  .group {
+    flex: none;
+    font-size: var(--u-text-xs);
+    color: var(--u-color-text-secondary);
+  }
 
-.footer {
-  flex: none;
-  display: flex;
-  gap: var(--u-space-4);
-  padding: var(--u-space-2) var(--u-space-4);
-  border-top: 1px solid var(--u-hairline);
-  font-size: var(--u-text-xs);
-  color: var(--u-color-text-secondary);
-}
+  .noFinds {
+    margin: 0;
+    padding: var(--u-space-4) var(--u-space-5);
+    font-size: var(--u-text-md);
+    color: var(--u-color-text-secondary);
+  }
 
-.footer span {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--u-space-1);
-}
+  /* ---------------- The foot ---------------- */
 
-.key {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
-  border-radius: var(--u-radius-xs);
-  background: var(--u-color-surface-sunken);
-  font-family: var(--u-font-sans);
-  font-size: var(--u-text-xs);
-  color: var(--u-color-text-secondary);
+  .footer {
+    flex: none;
+    display: flex;
+    gap: var(--u-space-4);
+    padding: var(--u-space-2) var(--u-space-4);
+    border-top: 1px solid var(--u-hairline);
+    font-size: var(--u-text-xs);
+    color: var(--u-color-text-secondary);
+  }
+
+  .footer span {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--u-space-1);
+  }
+
+  .key {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border-radius: var(--u-radius-xs);
+    background: var(--u-color-surface-sunken);
+    font-family: var(--u-font-sans);
+    font-size: var(--u-text-xs);
+    color: var(--u-color-text-secondary);
+  }
 }

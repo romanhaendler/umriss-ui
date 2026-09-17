@@ -3,115 +3,119 @@
    to know about it. That is why there is no StatRow – a row of tiles is a
    layout problem, and this package already has a layout module for that. */
 
-.stat {
-  display: grid;
-  grid-template-rows: auto auto auto;
-  gap: var(--u-space-1);
-  align-content: start;
-  padding: var(--u-space-4);
-  border: 1px solid var(--u-edge-color);
-  border-radius: var(--u-radius-md);
-  background: var(--u-color-surface);
-  min-width: 0;
-}
+@layer umriss.tokens, umriss.components;
 
-.label {
-  font-size: var(--u-text-xs);
-  font-weight: var(--u-weight-medium);
-  color: var(--u-color-text-secondary);
-  letter-spacing: 0.01em;
-}
+@layer umriss.components {
+  .stat {
+    display: grid;
+    grid-template-rows: auto auto auto;
+    gap: var(--u-space-1);
+    align-content: start;
+    padding: var(--u-space-4);
+    border: 1px solid var(--u-edge-color);
+    border-radius: var(--u-radius-md);
+    background: var(--u-color-surface);
+    min-width: 0;
+  }
 
-.valueRow {
-  display: flex;
-  align-items: baseline;
-  gap: var(--u-space-1);
-  min-width: 0;
-}
+  .label {
+    font-size: var(--u-text-xs);
+    font-weight: var(--u-weight-medium);
+    color: var(--u-color-text-secondary);
+    letter-spacing: 0.01em;
+  }
 
-/* Tabular figures: a value that changes in place must not shift its
-   neighbours. */
-.value {
-  font-family: var(--u-font-mono);
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
-  font-size: var(--u-text-2xl);
-  font-weight: var(--u-weight-medium);
-  line-height: 1.1;
-  color: var(--u-color-text);
-}
+  .valueRow {
+    display: flex;
+    align-items: baseline;
+    gap: var(--u-space-1);
+    min-width: 0;
+  }
 
-.unit {
-  font-size: var(--u-text-sm);
-  color: var(--u-color-text-secondary);
-}
+  /* Tabular figures: a value that changes in place must not shift its
+     neighbours. */
+  .value {
+    font-family: var(--u-font-mono);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+    font-size: var(--u-text-2xl);
+    font-weight: var(--u-weight-medium);
+    line-height: 1.1;
+    color: var(--u-color-text);
+  }
 
-/* The verdict stands there as a WORD, not only as a colour. Colour alone
-   carries no meaning, and the accessibility check says so too. */
-.verdict {
-  font-size: var(--u-text-xs);
-  line-height: 1.3;
-}
+  .unit {
+    font-size: var(--u-text-sm);
+    color: var(--u-color-text-secondary);
+  }
 
-.verdict[data-verdict="ok"] {
-  color: var(--u-color-success);
-}
+  /* The verdict stands there as a WORD, not only as a colour. Colour alone
+     carries no meaning, and the accessibility check says so too. */
+  .verdict {
+    font-size: var(--u-text-xs);
+    line-height: 1.3;
+  }
 
-.verdict[data-verdict="warning"] {
-  color: var(--u-color-warning);
-}
+  .verdict[data-verdict="ok"] {
+    color: var(--u-color-success);
+  }
 
-.verdict[data-verdict="alarm"] {
-  color: var(--u-color-danger);
-  font-weight: var(--u-weight-medium);
-}
+  .verdict[data-verdict="warning"] {
+    color: var(--u-color-warning);
+  }
 
-.verdict[data-verdict="unknown"] {
-  color: var(--u-color-text-secondary);
-}
+  .verdict[data-verdict="alarm"] {
+    color: var(--u-color-danger);
+    font-weight: var(--u-weight-medium);
+  }
 
-/* The edge carries the verdict along: it stands out at a glance without the
-   tile itself becoming loud. */
-.stat[data-verdict="warning"] {
-  border-color: var(--u-color-warning);
-}
+  .verdict[data-verdict="unknown"] {
+    color: var(--u-color-text-secondary);
+  }
 
-.stat[data-verdict="alarm"] {
-  border-color: var(--u-color-danger);
-  background: var(--u-color-danger-subtle);
-}
+  /* The edge carries the verdict along: it stands out at a glance without the
+     tile itself becoming loud. */
+  .stat[data-verdict="warning"] {
+    border-color: var(--u-color-warning);
+  }
 
-.stat[data-verdict="unknown"] .value {
-  color: var(--u-color-text-secondary);
-}
+  .stat[data-verdict="alarm"] {
+    border-color: var(--u-color-danger);
+    background: var(--u-color-danger-subtle);
+  }
 
-.deviation {
-  font-size: var(--u-text-xs);
-  color: var(--u-color-text-secondary);
-}
+  .stat[data-verdict="unknown"] .value {
+    color: var(--u-color-text-secondary);
+  }
 
-.history {
-  margin-top: var(--u-space-1);
-}
+  .deviation {
+    font-size: var(--u-text-xs);
+    color: var(--u-color-text-secondary);
+  }
 
-.asOf {
-  display: flex;
-  gap: var(--u-space-2);
-  font-size: var(--u-text-xs);
-  color: var(--u-color-text-secondary);
-}
+  .history {
+    margin-top: var(--u-space-1);
+  }
 
-/* A stale value stays readable and keeps its verdict – what is dimmed is the
-   line that speaks about the age, not the value. */
-.asOf[data-freshness="stale"] {
-  color: var(--u-color-warning);
-}
+  .asOf {
+    display: flex;
+    gap: var(--u-space-2);
+    font-size: var(--u-text-xs);
+    color: var(--u-color-text-secondary);
+  }
 
-.asOf[data-freshness="lost"] {
-  color: var(--u-color-danger);
-  font-weight: var(--u-weight-medium);
-}
+  /* A stale value stays readable and keeps its verdict – what is dimmed is the
+     line that speaks about the age, not the value. */
+  .asOf[data-freshness="stale"] {
+    color: var(--u-color-warning);
+  }
 
-.age {
-  color: var(--u-color-text-secondary);
+  .asOf[data-freshness="lost"] {
+    color: var(--u-color-danger);
+    font-weight: var(--u-weight-medium);
+  }
+
+  .age {
+    color: var(--u-color-text-secondary);
+  }
 }

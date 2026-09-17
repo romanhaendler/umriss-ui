@@ -2,19 +2,19 @@ import "@fontsource/geist-sans/400.css";
 import "@fontsource/geist-sans/500.css";
 import "@fontsource/geist-sans/600.css";
 import "@fontsource/geist-mono/400.css";
-/* Fetch the token and base layer explicitly.
+/* Fetch the tokens explicitly.
 
-   It does stand at the head of `src/index.ts`, but the demo build never took
-   it along: `package.json` declares only CSS files side-effectful, so Rollup
-   is allowed to cut away the body of the barrel when only `ToastProvider` is
-   used out of it - and with the body, those two imports. The consequence: the
-   demo ran without its `:root` tokens, every `var(--u-...)` was invalid, and
-   the screenshots showed an unstyled page (light and dark byte-identical).
+   They do stand at the head of `src/index.ts`, but the demo reads the sources,
+   and its build never took them along: `package.json` declares only CSS files
+   side-effectful, so Rollup is allowed to cut away the body of the barrel when
+   only `ToastProvider` is used out of it - and with the body, that import. The
+   consequence once: the demo ran without its `:root` tokens and the screenshots
+   showed an unstyled page. A caller of the built package needs no such line -
+   `dist/core.js` imports its stylesheet itself (ADR-0021).
 
-   An application that uses the package fetches `@umriss-ui/core/styles.css`
-   itself as well. The demo now does the same. */
+   There is no base layer to fetch any more: the page around the examples gets
+   nothing from the library, which is what the screenshots prove. */
 import "../src/styles/tokens.css";
-import "../src/styles/global.css";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { ToastProvider } from "../src";

@@ -1,111 +1,115 @@
-.wrapper {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--u-space-2);
-  cursor: pointer;
-  user-select: none;
-}
+@layer umriss.tokens, umriss.components;
 
-.input {
-  position: absolute;
-  opacity: 0;
-  width: 1px;
-  height: 1px;
-}
-
-.box {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
-  flex: none;
-  border: none;
-  border-radius: var(--u-radius-xs);
-  background: var(--u-color-surface);
-  box-shadow: var(--u-edge-strong);
-  color: var(--u-color-on-accent);
-  transition:
-    background-color var(--u-transition),
-    border-color var(--u-transition);
-}
-
-.check {
-  width: 10px;
-  height: 8px;
-  opacity: 0;
-}
-
-/* The tick is drawn, not faded in - slowly enough that one can watch the
-   line. */
-.check path {
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  transition: stroke-dashoffset 320ms var(--u-ease-out) 60ms;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .check path {
-    transition: none;
+@layer umriss.components {
+  .wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--u-space-2);
+    cursor: pointer;
+    user-select: none;
   }
-}
 
-.input:checked + .box .check path {
-  stroke-dashoffset: 0;
-}
+  .input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+  }
 
-.input:checked + .box {
-  background: var(--u-color-accent);
-  box-shadow: 0 0 0 1px var(--u-color-accent);
-}
+  .box {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    flex: none;
+    border: none;
+    border-radius: var(--u-radius-xs);
+    background: var(--u-color-surface);
+    box-shadow: var(--u-edge-strong);
+    color: var(--u-color-on-accent);
+    transition:
+      background-color var(--u-transition),
+      border-color var(--u-transition);
+  }
 
-.input:checked + .box .check {
-  opacity: 1;
-}
+  .check {
+    width: 10px;
+    height: 8px;
+    opacity: 0;
+  }
 
-.dash {
-  position: absolute;
-  width: 8px;
-  height: 1.8px;
-  border-radius: var(--u-radius-full);
-  background: currentColor;
-  opacity: 0;
-}
+  /* The tick is drawn, not faded in - slowly enough that one can watch the
+     line. */
+  .check path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    transition: stroke-dashoffset 320ms var(--u-ease-out) 60ms;
+  }
 
-.input:indeterminate + .box {
-  background: var(--u-color-accent);
-  box-shadow: 0 0 0 1px var(--u-color-accent);
-}
+  @media (prefers-reduced-motion: reduce) {
+    .check path {
+      transition: none;
+    }
+  }
 
-.input:indeterminate + .box .dash {
-  opacity: 1;
-}
+  .input:checked + .box .check path {
+    stroke-dashoffset: 0;
+  }
 
-.input:indeterminate + .box .check {
-  opacity: 0;
-}
+  .input:checked + .box {
+    background: var(--u-color-accent);
+    box-shadow: 0 0 0 1px var(--u-color-accent);
+  }
 
-.input:focus-visible + .box {
-  box-shadow:
-    0 0 0 1px var(--u-color-accent),
-    var(--u-focus-ring);
-}
+  .input:checked + .box .check {
+    opacity: 1;
+  }
 
-.input:disabled + .box {
-  background: var(--u-color-surface-sunken);
-  box-shadow: var(--u-edge);
-}
+  .dash {
+    position: absolute;
+    width: 8px;
+    height: 1.8px;
+    border-radius: var(--u-radius-full);
+    background: currentColor;
+    opacity: 0;
+  }
 
-.input:disabled ~ .label {
-  color: var(--u-color-text-muted);
-}
+  .input:indeterminate + .box {
+    background: var(--u-color-accent);
+    box-shadow: 0 0 0 1px var(--u-color-accent);
+  }
 
-.wrapper:has(.input:disabled) {
-  cursor: not-allowed;
-}
+  .input:indeterminate + .box .dash {
+    opacity: 1;
+  }
 
-.label {
-  font-size: var(--u-text-sm);
-  line-height: var(--u-leading-tight);
+  .input:indeterminate + .box .check {
+    opacity: 0;
+  }
+
+  .input:focus-visible + .box {
+    box-shadow:
+      0 0 0 1px var(--u-color-accent),
+      var(--u-focus-ring);
+  }
+
+  .input:disabled + .box {
+    background: var(--u-color-surface-sunken);
+    box-shadow: var(--u-edge);
+  }
+
+  .input:disabled ~ .label {
+    color: var(--u-color-text-muted);
+  }
+
+  .wrapper:has(.input:disabled) {
+    cursor: not-allowed;
+  }
+
+  .label {
+    font-size: var(--u-text-sm);
+    line-height: var(--u-leading-tight);
+  }
 }

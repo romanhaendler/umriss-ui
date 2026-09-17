@@ -1,111 +1,115 @@
 /* Removable label. Looks similar to the badge, but is a control - hence the
    focus ring and a press point on the glyph. */
 
-.group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--u-space-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
+@layer umriss.tokens, umriss.components;
 
-.tag {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--u-space-1);
-  height: 22px;
-  padding: 0 var(--u-space-2);
-  border-radius: var(--u-radius-sm);
-  font-size: var(--u-text-xs);
-  font-weight: var(--u-weight-medium);
-  line-height: 1;
-  white-space: nowrap;
-  transition: box-shadow var(--u-transition);
-}
+@layer umriss.components {
+  .group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--u-space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
 
-.removable {
-  padding-right: var(--u-space-1);
-  cursor: default;
-}
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--u-space-1);
+    height: 22px;
+    padding: 0 var(--u-space-2);
+    border-radius: var(--u-radius-sm);
+    font-size: var(--u-text-xs);
+    font-weight: var(--u-weight-medium);
+    line-height: 1;
+    white-space: nowrap;
+    transition: box-shadow var(--u-transition);
+  }
 
-.removable:focus-visible {
-  outline: none;
-  box-shadow: var(--u-focus-ring);
-}
+  .removable {
+    padding-right: var(--u-space-1);
+    cursor: default;
+  }
 
-.disabled {
-  opacity: 0.5;
-}
+  .removable:focus-visible {
+    outline: none;
+    box-shadow: var(--u-focus-ring);
+  }
 
-.text {
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+  .disabled {
+    opacity: 0.5;
+  }
 
-/* ---- Tones: the same surfaces as with the badge ---- */
+  .text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 
-.neutral {
-  background: var(--u-color-surface-sunken);
-  color: var(--u-color-text-secondary);
-}
+  /* ---- Tones: the same surfaces as with the badge ---- */
 
-.accent {
-  background: var(--u-color-accent-subtle);
-  color: var(--u-color-accent-text);
-}
+  .neutral {
+    background: var(--u-color-surface-sunken);
+    color: var(--u-color-text-secondary);
+  }
 
-.success {
-  background: var(--u-color-success-subtle);
-  color: var(--u-color-success);
-}
+  .accent {
+    background: var(--u-color-accent-subtle);
+    color: var(--u-color-accent-text);
+  }
 
-.warning {
-  background: var(--u-color-warning-subtle);
-  color: var(--u-color-warning);
-}
+  .success {
+    background: var(--u-color-success-subtle);
+    color: var(--u-color-success);
+  }
 
-.danger {
-  background: var(--u-color-danger-subtle);
-  color: var(--u-color-danger);
-}
+  .warning {
+    background: var(--u-color-warning-subtle);
+    color: var(--u-color-warning);
+  }
 
-/* ---- Removing: quiet at rest, clear on hover and focus ---- */
+  .danger {
+    background: var(--u-color-danger-subtle);
+    color: var(--u-color-danger);
+  }
 
-.remove {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
-  padding: 0;
-  border: none;
-  border-radius: var(--u-radius-xs);
-  background: none;
-  color: inherit;
-  opacity: 0.45;
-  cursor: pointer;
-  transition:
-    opacity var(--u-transition),
-    background-color var(--u-transition);
-}
+  /* ---- Removing: quiet at rest, clear on hover and focus ---- */
 
-/* The group reacts, not the single key - the same gesture as with the quiet
-   steppers. */
-.tag:hover .remove,
-.tag:focus-visible .remove {
-  opacity: 1;
-}
+  .remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    padding: 0;
+    border: none;
+    border-radius: var(--u-radius-xs);
+    background: none;
+    color: inherit;
+    opacity: 0.45;
+    cursor: pointer;
+    transition:
+      opacity var(--u-transition),
+      background-color var(--u-transition);
+  }
 
-.remove:hover {
-  background: color-mix(in srgb, currentColor 14%, transparent);
-}
+  /* The group reacts, not the single key - the same gesture as with the quiet
+     steppers. */
+  .tag:hover .remove,
+  .tag:focus-visible .remove {
+    opacity: 1;
+  }
 
-/* Press point only on the glyph, never on the surface. */
-.remove:active svg {
-  transform: scale(0.8);
-}
+  .remove:hover {
+    background: color-mix(in srgb, currentColor 14%, transparent);
+  }
 
-.remove svg {
-  transition: transform var(--u-transition);
+  /* Press point only on the glyph, never on the surface. */
+  .remove:active svg {
+    transform: scale(0.8);
+  }
+
+  .remove svg {
+    transition: transform var(--u-transition);
+  }
 }

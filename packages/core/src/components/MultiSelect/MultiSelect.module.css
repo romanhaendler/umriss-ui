@@ -1,292 +1,297 @@
 /* The field is a container (not a <button>), so that the chips can be real,
    clickable remove buttons. It always stays on ONE line and at control
    height – no matter how many elements are chosen. */
-.field {
-  position: relative; /* frame of reference for the invisible measuring row */
-  display: flex;
-  align-items: center;
-  gap: var(--u-space-2);
-  width: 100%;
-  height: var(--u-control-height);
-  padding-left: var(--u-space-3);
-  border-radius: var(--u-radius-md);
-  background: var(--u-color-surface);
-  box-shadow: var(--u-edge-strong);
-  cursor: pointer;
-  transition: box-shadow var(--u-transition);
-  overflow: hidden;
-}
 
-.field:hover:not(.fieldDisabled):not(:focus-within) {
-  box-shadow: 0 0 0 1px var(--u-color-edge-hover);
-}
+@layer umriss.tokens, umriss.components;
 
-.field:focus-within {
-  box-shadow:
-    0 0 0 1px var(--u-color-accent),
-    var(--u-focus-ring);
-}
-
-.invalid,
-.invalid:hover:not(.fieldDisabled):not(:focus-within) {
-  box-shadow: 0 0 0 1px var(--u-color-danger);
-}
-
-.fieldDisabled {
-  background: var(--u-color-surface-sunken);
-  cursor: not-allowed;
-}
-
-.placeholder {
-  font-family: var(--u-font-sans);
-  font-size: var(--u-text-sm);
-  color: var(--u-color-text-muted);
-}
-
-.summary {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: var(--u-space-2);
-  min-width: 0;
-  overflow: hidden;
-}
-
-/* Invisible measuring row: all chips at their natural width. */
-.measure {
-  position: absolute;
-  top: 0;
-  left: 0;
-  visibility: hidden;
-  pointer-events: none;
-  width: max-content;
-  max-width: none;
-  overflow: visible;
-}
-
-.measure .chipLabel {
-  max-width: none;
-}
-
-/* Chip = remove button: the × appears on hovering over it (on devices
-   without hover permanently), and the width stays constant while it does. */
-.chip {
-  flex: 0 1 auto;
-  min-width: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--u-space-1);
-  height: 20px;
-  padding: 0 var(--u-space-2);
-  border: none;
-  border-radius: var(--u-radius-sm);
-  background: var(--u-color-surface-sunken);
-  font-family: var(--u-font-sans);
-  font-size: var(--u-text-xs);
-  font-weight: var(--u-weight-medium);
-  color: var(--u-color-text);
-  cursor: pointer;
-  transition:
-    background-color var(--u-transition),
-    color var(--u-transition);
-}
-
-.chip:hover:not(:disabled),
-.chip:focus-visible {
-  background: var(--u-color-danger-subtle);
-  color: var(--u-color-danger);
-}
-
-.chip:disabled {
-  cursor: not-allowed;
-}
-
-.chipLabel {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.chipX {
-  flex: none;
-  display: inline-flex;
-  opacity: 0;
-  transition: opacity var(--u-transition);
-}
-
-.chip:hover .chipX,
-.chip:focus-visible .chipX {
-  opacity: 1;
-}
-
-@media (hover: none) {
-  .chipX {
-    opacity: 0.7;
+@layer umriss.components {
+  .field {
+    position: relative; /* frame of reference for the invisible measuring row */
+    display: flex;
+    align-items: center;
+    gap: var(--u-space-2);
+    width: 100%;
+    height: var(--u-control-height);
+    padding-left: var(--u-space-3);
+    border-radius: var(--u-radius-md);
+    background: var(--u-color-surface);
+    box-shadow: var(--u-edge-strong);
+    cursor: pointer;
+    transition: box-shadow var(--u-transition);
+    overflow: hidden;
   }
-}
 
-/* "+N": opens the panel directly in the selected scope. */
-.counter {
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  height: 20px;
-  padding: 0 var(--u-space-2);
-  border: none;
-  border-radius: var(--u-radius-full);
-  background: var(--u-color-accent-subtle);
-  color: var(--u-color-accent-text);
-  font-family: var(--u-font-mono);
-  font-size: var(--u-text-xs);
-  letter-spacing: -0.01em;
-  cursor: pointer;
-  transition: background-color var(--u-transition);
-}
+  .field:hover:not(.fieldDisabled):not(:focus-within) {
+    box-shadow: 0 0 0 1px var(--u-color-edge-hover);
+  }
 
-.counter:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--u-color-accent) 18%, var(--u-color-surface));
-}
+  .field:focus-within {
+    box-shadow:
+      0 0 0 1px var(--u-color-accent),
+      var(--u-focus-ring);
+  }
 
-/* Main button: carries focus, ARIA and the chevron; when empty it fills the
-   field. */
-.main {
-  flex: none;
-  align-self: stretch;
-  display: flex;
-  align-items: center;
-  gap: var(--u-space-2);
-  padding: 0 var(--u-space-3) 0 var(--u-space-1);
-  border: none;
-  background: none;
-  font-family: var(--u-font-sans);
-  font-size: var(--u-text-sm);
-  color: inherit;
-  cursor: pointer;
-}
+  .invalid,
+  .invalid:hover:not(.fieldDisabled):not(:focus-within) {
+    box-shadow: 0 0 0 1px var(--u-color-danger);
+  }
 
-.main:disabled {
-  cursor: not-allowed;
-  color: var(--u-color-text-muted);
-}
+  .fieldDisabled {
+    background: var(--u-color-surface-sunken);
+    cursor: not-allowed;
+  }
 
-.main:focus-visible {
-  outline: none;
-  box-shadow: none; /* the ring lies on the field (:focus-within) */
-}
+  .placeholder {
+    font-family: var(--u-font-sans);
+    font-size: var(--u-text-sm);
+    color: var(--u-color-text-muted);
+  }
 
-.mainEmpty {
-  flex: 1;
-  justify-content: space-between;
-  padding-left: 0;
-}
+  .summary {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--u-space-2);
+    min-width: 0;
+    overflow: hidden;
+  }
 
-.chevron {
-  flex: none;
-  width: 7px;
-  height: 7px;
-  border-right: 1.5px solid var(--u-color-text-secondary);
-  border-bottom: 1.5px solid var(--u-color-text-secondary);
-  transform: translateY(-2px) rotate(45deg);
-}
+  /* Invisible measuring row: all chips at their natural width. */
+  .measure {
+    position: absolute;
+    top: 0;
+    left: 0;
+    visibility: hidden;
+    pointer-events: none;
+    width: max-content;
+    max-width: none;
+    overflow: visible;
+  }
 
-/* ---------------- Panel ---------------- */
+  .measure .chipLabel {
+    max-width: none;
+  }
 
-.panel {
-  background: var(--u-color-surface);
-  border-radius: var(--u-radius-md);
-  box-shadow: var(--u-shadow-overlay);
-  padding: var(--u-space-3);
-}
+  /* Chip = remove button: the × appears on hovering over it (on devices
+     without hover permanently), and the width stays constant while it does. */
+  .chip {
+    flex: 0 1 auto;
+    min-width: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--u-space-1);
+    height: 20px;
+    padding: 0 var(--u-space-2);
+    border: none;
+    border-radius: var(--u-radius-sm);
+    background: var(--u-color-surface-sunken);
+    font-family: var(--u-font-sans);
+    font-size: var(--u-text-xs);
+    font-weight: var(--u-weight-medium);
+    color: var(--u-color-text);
+    cursor: pointer;
+    transition:
+      background-color var(--u-transition),
+      color var(--u-transition);
+  }
 
-/* Scope switch: the list always keeps its natural order – "selected" is the
-   pure reviewing scope. */
-.scopes {
-  display: inline-flex;
-  gap: 2px;
-  padding: 2px;
-  margin-top: var(--u-space-2);
-  background: var(--u-color-surface-sunken);
-  border-radius: var(--u-radius-sm);
-}
+  .chip:hover:not(:disabled),
+  .chip:focus-visible {
+    background: var(--u-color-danger-subtle);
+    color: var(--u-color-danger);
+  }
 
-.scope {
-  height: 22px;
-  padding: 0 var(--u-space-3);
-  border: none;
-  background: none;
-  border-radius: var(--u-radius-xs);
-  font-family: var(--u-font-sans);
-  font-size: var(--u-text-xs);
-  font-weight: var(--u-weight-medium);
-  color: var(--u-color-text-secondary);
-  cursor: pointer;
-  transition:
-    background-color var(--u-transition),
-    color var(--u-transition),
-    box-shadow var(--u-transition);
-}
+  .chip:disabled {
+    cursor: not-allowed;
+  }
 
-.scope:hover {
-  color: var(--u-color-text);
-}
+  .chipLabel {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 
-.scopeActive {
-  background: var(--u-color-surface);
-  box-shadow: var(--u-edge);
-  color: var(--u-color-text);
-}
+  .chipX {
+    flex: none;
+    display: inline-flex;
+    opacity: 0;
+    transition: opacity var(--u-transition);
+  }
 
-.qol {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--u-space-2);
-  margin-top: var(--u-space-2);
-  padding-bottom: var(--u-space-2);
-  border-bottom: 1px solid var(--u-hairline);
-}
+  .chip:hover .chipX,
+  .chip:focus-visible .chipX {
+    opacity: 1;
+  }
 
-.qolButtons {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  margin-left: calc(-1 * var(--u-space-2));
-}
+  @media (hover: none) {
+    .chipX {
+      opacity: 0.7;
+    }
+  }
 
-.count {
-  flex: none;
-  font-family: var(--u-font-mono);
-  font-size: var(--u-text-xs);
-  letter-spacing: -0.01em;
-  color: var(--u-color-text-secondary);
-}
+  /* "+N": opens the panel directly in the selected scope. */
+  .counter {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    height: 20px;
+    padding: 0 var(--u-space-2);
+    border: none;
+    border-radius: var(--u-radius-full);
+    background: var(--u-color-accent-subtle);
+    color: var(--u-color-accent-text);
+    font-family: var(--u-font-mono);
+    font-size: var(--u-text-xs);
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    transition: background-color var(--u-transition);
+  }
 
-.list {
-  display: flex;
-  flex-direction: column;
-  max-height: 260px;
-  overflow: auto;
-  margin-top: var(--u-space-1);
-  /* The edges of the checkboxes are shadows and lie outside the box –
-     without inner padding, overflow would cut them off at the margins. */
-  padding: 2px;
-}
+  .counter:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--u-color-accent) 18%, var(--u-color-surface));
+  }
 
-.option {
-  width: 100%;
-  padding: var(--u-space-2);
-  border-radius: var(--u-radius-sm);
-  transition: background-color var(--u-transition);
-}
+  /* Main button: carries focus, ARIA and the chevron; when empty it fills the
+     field. */
+  .main {
+    flex: none;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    gap: var(--u-space-2);
+    padding: 0 var(--u-space-3) 0 var(--u-space-1);
+    border: none;
+    background: none;
+    font-family: var(--u-font-sans);
+    font-size: var(--u-text-sm);
+    color: inherit;
+    cursor: pointer;
+  }
 
-.option:hover {
-  background: var(--u-color-surface-sunken);
-}
+  .main:disabled {
+    cursor: not-allowed;
+    color: var(--u-color-text-muted);
+  }
 
-.empty {
-  padding: var(--u-space-4) var(--u-space-3);
-  font-size: var(--u-text-sm);
-  color: var(--u-color-text-muted);
-  text-align: center;
+  .main:focus-visible {
+    outline: none;
+    box-shadow: none; /* the ring lies on the field (:focus-within) */
+  }
+
+  .mainEmpty {
+    flex: 1;
+    justify-content: space-between;
+    padding-left: 0;
+  }
+
+  .chevron {
+    flex: none;
+    width: 7px;
+    height: 7px;
+    border-right: 1.5px solid var(--u-color-text-secondary);
+    border-bottom: 1.5px solid var(--u-color-text-secondary);
+    transform: translateY(-2px) rotate(45deg);
+  }
+
+  /* ---------------- Panel ---------------- */
+
+  .panel {
+    background: var(--u-color-surface);
+    border-radius: var(--u-radius-md);
+    box-shadow: var(--u-shadow-overlay);
+    padding: var(--u-space-3);
+  }
+
+  /* Scope switch: the list always keeps its natural order – "selected" is the
+     pure reviewing scope. */
+  .scopes {
+    display: inline-flex;
+    gap: 2px;
+    padding: 2px;
+    margin-top: var(--u-space-2);
+    background: var(--u-color-surface-sunken);
+    border-radius: var(--u-radius-sm);
+  }
+
+  .scope {
+    height: 22px;
+    padding: 0 var(--u-space-3);
+    border: none;
+    background: none;
+    border-radius: var(--u-radius-xs);
+    font-family: var(--u-font-sans);
+    font-size: var(--u-text-xs);
+    font-weight: var(--u-weight-medium);
+    color: var(--u-color-text-secondary);
+    cursor: pointer;
+    transition:
+      background-color var(--u-transition),
+      color var(--u-transition),
+      box-shadow var(--u-transition);
+  }
+
+  .scope:hover {
+    color: var(--u-color-text);
+  }
+
+  .scopeActive {
+    background: var(--u-color-surface);
+    box-shadow: var(--u-edge);
+    color: var(--u-color-text);
+  }
+
+  .qol {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--u-space-2);
+    margin-top: var(--u-space-2);
+    padding-bottom: var(--u-space-2);
+    border-bottom: 1px solid var(--u-hairline);
+  }
+
+  .qolButtons {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: calc(-1 * var(--u-space-2));
+  }
+
+  .count {
+    flex: none;
+    font-family: var(--u-font-mono);
+    font-size: var(--u-text-xs);
+    letter-spacing: -0.01em;
+    color: var(--u-color-text-secondary);
+  }
+
+  .list {
+    display: flex;
+    flex-direction: column;
+    max-height: 260px;
+    overflow: auto;
+    margin-top: var(--u-space-1);
+    /* The edges of the checkboxes are shadows and lie outside the box –
+       without inner padding, overflow would cut them off at the margins. */
+    padding: 2px;
+  }
+
+  .option {
+    width: 100%;
+    padding: var(--u-space-2);
+    border-radius: var(--u-radius-sm);
+    transition: background-color var(--u-transition);
+  }
+
+  .option:hover {
+    background: var(--u-color-surface-sunken);
+  }
+
+  .empty {
+    padding: var(--u-space-4) var(--u-space-3);
+    font-size: var(--u-text-sm);
+    color: var(--u-color-text-muted);
+    text-align: center;
+  }
 }

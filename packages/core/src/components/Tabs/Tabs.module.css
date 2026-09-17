@@ -1,48 +1,52 @@
-.list {
-  position: relative;
-  display: flex;
-  gap: var(--u-space-5);
-  border-bottom: 1px solid var(--u-hairline-strong);
-}
+@layer umriss.tokens, umriss.components;
 
-/* The ink underline glides to the active tab instead of jumping. */
-.indicator {
-  position: absolute;
-  bottom: -1px;
-  height: 2px;
-  background: var(--u-color-text);
-  border-radius: var(--u-radius-full);
-  transition:
-    left var(--u-duration-medium) var(--u-ease-out),
-    width var(--u-duration-medium) var(--u-ease-out);
-}
+@layer umriss.components {
+  .list {
+    position: relative;
+    display: flex;
+    gap: var(--u-space-5);
+    border-bottom: 1px solid var(--u-hairline-strong);
+  }
 
-.tab {
-  position: relative;
-  padding: var(--u-space-2) 2px;
-  border: none;
-  background: none;
-  font-family: var(--u-font-sans);
-  font-size: var(--u-text-sm);
-  font-weight: var(--u-weight-medium);
-  color: var(--u-color-text-secondary);
-  cursor: pointer;
-  transition: color var(--u-transition);
-}
+  /* The ink underline glides to the active tab instead of jumping. */
+  .indicator {
+    position: absolute;
+    bottom: -1px;
+    height: 2px;
+    background: var(--u-color-text);
+    border-radius: var(--u-radius-full);
+    transition:
+      left var(--u-duration-medium) var(--u-ease-out),
+      width var(--u-duration-medium) var(--u-ease-out);
+  }
 
-.tab:hover {
-  color: var(--u-color-text);
-}
+  .tab {
+    position: relative;
+    padding: var(--u-space-2) 2px;
+    border: none;
+    background: none;
+    font-family: var(--u-font-sans);
+    font-size: var(--u-text-sm);
+    font-weight: var(--u-weight-medium);
+    color: var(--u-color-text-secondary);
+    cursor: pointer;
+    transition: color var(--u-transition);
+  }
 
-.tab:disabled {
-  color: var(--u-color-text-muted);
-  cursor: not-allowed;
-}
+  .tab:hover {
+    color: var(--u-color-text);
+  }
 
-.tab[aria-selected="true"] {
-  color: var(--u-color-text);
-}
+  .tab:disabled {
+    color: var(--u-color-text-muted);
+    cursor: not-allowed;
+  }
 
-.panel {
-  padding-top: var(--u-space-4);
+  .tab[aria-selected="true"] {
+    color: var(--u-color-text);
+  }
+
+  .panel {
+    padding-top: var(--u-space-4);
+  }
 }
