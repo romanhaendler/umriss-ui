@@ -112,6 +112,40 @@ function ensureObserver(): void {
   }
 }
 
+/** Any number of CSS colours - a token, `light-dark(…)`, `var(--…)`, a
+    literal - resolved to values a canvas can draw, in the scheme that applies
+    at `root`. The same probe `resolveTheme` uses, for a canvas of a
+    neighbouring package (ADR-0022): the schedule draws its subtasks with the
+    colours of @umriss-ui/core and of its caller, not with the chart palette.
+
+    Not cached: the caller keeps the result and reads anew when
+    `subscribeTheme` tells it to. Where no resolution comes back (a DOM
+    without a style engine), a colour is given back as it stands. */
+export function resolveColours<K extends string>(
+  root: Element,
+  colours: Readonly<Record<K, string>>,
+): Record<K, string> {
+  ensureObserver();
+  const probe = root.ownerDocument.createElement("span");
+  probe.setAttribute("aria-hidden", "true");
+  probe.style.position = "absolute";
+  probe.style.visibility = "hidden";
+  root.appendChild(probe);
+  try {
+    const resolved = {} as Record<K, string>;
+    for (const key of Object.keys(colours) as K[]) {
+      const value = colours[key];
+      probe.style.color = "";
+      probe.style.color = value;
+      const computed = getComputedStyle(probe).color;
+      resolved[key] = computed === "" || computed.startsWith("var(") ? value : computed;
+    }
+    return resolved;
+  } finally {
+    probe.remove();
+  }
+}
+
 /** Resolved theme for a chart root element (cached, generation-safe). */
 export function resolveTheme(root: Element): ResolvedTheme {
   ensureObserver();
@@ -129,7 +163,10 @@ export function invalidateTheme(): void {
   for (const notify of subscribers) notify();
 }
 
-/** Internal API: scenes subscribe to theme invalidations. */
+/** Subscribe to theme invalidations - a switch of `color-scheme` on the
+    document, the system's preference, or `invalidateTheme()`. The scenes of
+    the charts use it, and so does any canvas that resolved its colours with
+    `resolveColours`. Returns the unsubscribe. */
 export function subscribeTheme(notify: () => void): () => void {
   subscribers.add(notify);
   return () => {

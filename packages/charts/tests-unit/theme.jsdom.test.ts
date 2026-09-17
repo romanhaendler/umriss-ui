@@ -12,7 +12,7 @@
    a reload` (features-interaction.spec.ts). */
 
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { FALLBACK_THEME, invalidateTheme, resolveTheme } from "../src/theme";
+import { FALLBACK_THEME, invalidateTheme, resolveColours, resolveTheme, subscribeTheme } from "../src/theme";
 
 const TOKENS: Record<string, string> = {
   "--uc-color-axis": "light-dark(#000000, #ffffff)",
@@ -76,5 +76,31 @@ describe("resolveTheme", () => {
     const root = document.body.appendChild(document.createElement("div"));
     resolveTheme(root);
     expect(root.childNodes).toHaveLength(0);
+  });
+});
+
+describe("resolveColours - the resolution for a canvas that is not a chart", () => {
+  it("resolves any CSS colour through the element it is given", () => {
+    browserUnder("dark");
+    const root = document.body.appendChild(document.createElement("div"));
+    const colours = resolveColours(root, { edge: "var(--uc-color-axis)", mark: "var(--uc-series-1)" });
+    expect(colours).toEqual({ edge: "rgb(255, 255, 255)", mark: "rgb(238, 238, 238)" });
+    expect(root.childNodes).toHaveLength(0);
+  });
+
+  it("gives a value back as it stands where no resolution comes back", () => {
+    browserUnder("light");
+    const root = document.body.appendChild(document.createElement("div"));
+    expect(resolveColours(root, { plain: "var(--nowhere)" })).toEqual({ plain: "var(--nowhere)" });
+  });
+
+  it("tells a subscriber when the theme was invalidated, until it unsubscribes", () => {
+    const notified = vi.fn();
+    const unsubscribe = subscribeTheme(notified);
+    invalidateTheme();
+    expect(notified).toHaveBeenCalledTimes(1);
+    unsubscribe();
+    invalidateTheme();
+    expect(notified).toHaveBeenCalledTimes(1);
   });
 });

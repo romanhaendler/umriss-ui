@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    /* The check runs against the SOURCE of both peers, not against their dist:
+       dist is not checked in, and a typecheck that needs a build first lies on
+       every fresh clone. What is imported is nevertheless only the public
+       entry points - the lint holds that fast (ADR-0022). */
+    "paths": {
+      "@umriss-ui/core": ["../core/src/index.ts"],
+      "@umriss-ui/core/wording/de": ["../core/src/lib/language/de.ts"],
+      "@umriss-ui/charts": ["../charts/src/index.ts"]
+    },
+    /* The demo and its generator run in Node as well (`demo/props.ts`). */
+    "types": ["vite/client", "node"],
+    "allowImportingTsExtensions": true
+  },
+  "include": ["src", "tests-unit", "demo", "tests-visual"]
+}

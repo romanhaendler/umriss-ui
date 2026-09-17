@@ -1,0 +1,131 @@
+@layer umriss.tokens, umriss.base, umriss.components;
+
+@layer umriss.components {
+  .root {
+    composes: text from "#own-styles";
+    display: grid;
+    grid-template-rows: 28px minmax(0, 1fr) 28px;
+    width: 100%;
+    font-size: var(--u-text-sm);
+    background: var(--u-color-surface);
+    box-shadow: var(--u-edge);
+    border-radius: var(--u-radius-md);
+    overflow: hidden;
+    font-variant-numeric: tabular-nums;
+    user-select: none;
+  }
+
+  .corner {
+    background: var(--u-color-surface);
+  }
+
+  .dayBand,
+  .tickBand {
+    position: relative;
+    overflow: hidden;
+    color: var(--u-color-text-muted);
+    font-size: var(--u-text-xs);
+  }
+
+  .dayBand {
+    border-bottom: 1px solid var(--u-hairline-strong);
+  }
+
+  .tickBand {
+    border-top: 1px solid var(--u-hairline-strong);
+  }
+
+  .day {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    border-left: 1px solid var(--u-hairline-strong);
+    overflow: hidden;
+  }
+
+  .dayLabel {
+    position: absolute;
+    left: var(--u-space-2);
+    top: 50%;
+    transform: translateY(-50%);
+    white-space: nowrap;
+    color: var(--u-color-text);
+    font-weight: var(--u-weight-medium);
+  }
+
+  .tick {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--u-hairline);
+  }
+
+  .tickLabel {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translate(-50%, -50%);
+    white-space: nowrap;
+  }
+
+  .headers {
+    position: relative;
+    overflow: hidden;
+    border-right: 1px solid var(--u-hairline-strong);
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    padding: 0 var(--u-space-3);
+    border-bottom: 1px solid var(--u-hairline);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .plot {
+    position: relative;
+    overflow: hidden;
+    touch-action: none;
+  }
+
+  .layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    pointer-events: none;
+  }
+
+  .grip {
+    position: absolute;
+    width: 9px;
+    margin-left: -4px;
+    border-radius: var(--u-radius-xs);
+    background: var(--u-color-surface);
+    box-shadow: inset 0 0 0 1.5px var(--u-color-text);
+    cursor: ew-resize;
+  }
+
+  .ghostLabel {
+    position: absolute;
+    transform: translateY(calc(-100% - 4px));
+    display: inline-flex;
+    gap: var(--u-space-2);
+    padding: 1px var(--u-space-2);
+    border-radius: var(--u-radius-sm);
+    background: var(--u-color-text);
+    color: var(--u-color-surface);
+    font-size: var(--u-text-xs);
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .finding {
+    font-weight: var(--u-weight-semibold);
+    color: var(--u-color-danger-subtle);
+  }
+}
