@@ -252,6 +252,27 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
 
   const ghost = snapshot.ghost;
 
+  /* The ghost's label stands above its bar, and under it in the topmost lane:
+     the plot clips what leaves it, and a label a planner cannot read is worse
+     than one on the other side. Measured like the tooltip, for the same
+     reason. */
+  const ghostRef = useRef<HTMLSpanElement | null>(null);
+  const [ghostAt, setGhostAt] = useState({ x: 0, y: 0, at: "" });
+  const ghostKey = ghost === null ? "" : `${ghost.x}:${ghost.y}:${ghost.from}:${ghost.to}:${ghost.overlap}:${ghost.late}`;
+  useLayoutEffect(() => {
+    const element = ghostRef.current;
+    if (ghost === null || element === null) return;
+    const gap = 4;
+    const above = ghost.y - element.offsetHeight - gap;
+    const below = ghost.y + ghost.height + gap;
+    const next = {
+      x: Math.max(2, Math.min(ghost.x, snapshot.width - element.offsetWidth - 2)),
+      y: above >= 2 ? above : Math.min(below, snapshot.height - element.offsetHeight - 2),
+      at: ghostKey,
+    };
+    setGhostAt((current) => (current.x === next.x && current.y === next.y && current.at === next.at ? current : next));
+  }, [ghost, ghostKey, snapshot.width, snapshot.height]);
+
   /* The tooltip is placed from its measured size, not from a guess: beside the
      pointer where there is room, on the other side where there is not, and
      clamped into the plot either way - the plot clips what leaves it. */
@@ -362,10 +383,15 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
           )}
           {ghost !== null && (
             <span
+              ref={ghostRef}
               className={styles.ghostLabel}
               data-ghost=""
               data-findings={[ghost.overlap ? "overlap" : "", ghost.late ? "late-transport" : ""].filter(Boolean).join(" ")}
-              style={{ left: `${ghost.x}px`, top: `${ghost.y}px` }}
+              style={{
+                left: `${ghostAt.x}px`,
+                top: `${ghostAt.y}px`,
+                visibility: ghostAt.at === ghostKey ? undefined : "hidden",
+              }}
             >
               {wording.scheduleGhostTimes(formats.time(new Date(ghost.from), false), formats.time(new Date(ghost.to), false))}
               {ghost.overlap && <span className={styles.finding}>{wording.scheduleOverlap}</span>}

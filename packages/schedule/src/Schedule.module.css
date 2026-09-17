@@ -112,7 +112,6 @@
 
   .ghostLabel {
     position: absolute;
-    transform: translateY(calc(-100% - 4px));
     display: inline-flex;
     gap: var(--u-space-2);
     padding: 1px var(--u-space-2);

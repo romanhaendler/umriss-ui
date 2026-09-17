@@ -112,6 +112,9 @@ const CLICK_SLOP = 3;
 export interface GhostSummary {
   readonly x: number;
   readonly y: number;
+  /** The height of the bar the label belongs to, so the label can go under it
+      where there is no room above. */
+  readonly height: number;
   readonly from: number;
   readonly to: number;
   readonly overlap: boolean;
@@ -164,6 +167,7 @@ export class SceneGestures {
     return {
       x: outer ? box.outerFrom : box.mainFrom,
       y: box.y,
+      height: box.height,
       from: shown.from,
       to: shown.to,
       overlap: found.overlaps.length > 0,
