@@ -50,6 +50,40 @@ module on the caller's side that carries `"use client"` and imports from there.
 
 ---
 
+## 0.1.0 – Styles that load themselves, and touch nothing else (Sep. 2026)
+
+Delivery report for `.scratch/styles-without-side-effects/spec.md` (ADR-0021).
+It lands before the first publication, so the number does not move.
+
+### Changed
+
+- **No stylesheet import any more.** `dist/core.js` imports its own stylesheet;
+  `import { Button } from "@umriss-ui/core"` is the whole setup.
+  `@umriss-ui/core/styles.css` stays exported and is optional.
+- **No base layer.** The rules on `html`, `body`, `*`, `:focus-visible`,
+  `::selection`, `input`/`textarea` and the page's scrollbars are gone. An
+  application that relied on them for its own page - margin, font, background,
+  box model, selection colour - sets them itself. Every component carries what it
+  needs: its text context, `box-sizing` and squircle corners on its own elements,
+  a focus ring on what it makes focusable, caret, autofill look and scrollbars on
+  its own fields and scroll containers.
+- **Cascade layers.** Every rule lies in `umriss.tokens`, `umriss.base` or
+  `umriss.components`. CSS an application writes outside a layer wins over the
+  library whatever its specificity and loading order, and a token is overridden
+  with `:root { --u-… }`.
+- **Light and dark are `color-scheme`.** Tokens with two values are
+  `light-dark(<light>, <dark>)`. `:root[data-theme="dark"]` is gone and
+  `color-scheme` is no longer set on `:root`: an application sets
+  `color-scheme` (most theme libraries already do), and one that sets nothing
+  stays light.
+- **`UmrissProvider` has no `theme`** - the prop, `UmrissConfig.theme` and the
+  `Theme` type are removed - and it writes nothing onto the document any more,
+  including the `data-density` attribute no stylesheet read. `density` works as
+  before, through context.
+- **Browsers:** Chrome 123, Firefox 120, Safari 17.5 or newer (`light-dark()`).
+
+---
+
 ## 0.1.0 – First publication (Sep. 2026)
 
 The first version published to npm, under the tag `latest`. It is the state described by

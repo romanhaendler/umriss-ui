@@ -17,6 +17,54 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Sep. 2026 — styles-without-side-effects: one import, no side effects
+
+*For a caller: no stylesheet import, no base layer, cascade layers, light and dark
+through `color-scheme`, `UmrissProvider` without `theme`, charts classes `uc-*`.
+The three changelogs carry the lines.*
+
+Delivery report for `.scratch/styles-without-side-effects/spec.md`, tickets
+01–08 (ADR-0021).
+
+The question was asked plainly: why does a caller import a stylesheet at all, and
+why does importing one button change the page? The measured answer before the
+work: the JavaScript loaded no CSS, and `global.css` styled `html`, `body`, `*`,
+the focus of everything, the selection and the page's scrollbars. `tokens.css`
+set `color-scheme` on `:root`, and the provider wrote `data-theme` and
+`data-density` onto `<html>`. An experiment with `global.css` emptied kept every
+behaviour test green and moved 412 screenshots, which showed what the components
+had been leaning on.
+
+- **The build does the mechanical part.** `scripts/styles/` holds the rules and
+  three build steps. `ownBox` gives every class of a stylesheet `border-box`,
+  and a type-named subject its full selector, never a caller's `*`. `ownCorners`
+  adds squircle corners after every own radius. `importOwnCss` puts the
+  stylesheet import at the head of the entry chunk. `check-dist.ts` holds the
+  built package to the same rules before a publish.
+- **The components carry the rest**, from one module each in core and table
+  (`own.module.css`): `text`, `ring`, `field`, `scroll`, taken with `composes`.
+- **A third layer was not planned.** `composes` fixes the class but not the order
+  of the rules, and the shared text context landed after a badge's own size and
+  colour. `umriss.base`, one layer below the components, made the order
+  irrelevant.
+- **The demos became the proof.** Their example stages stand on the browser's
+  defaults, and three checks ask the computed style for what a picture cannot
+  see: own type, own box, visible focus. The focus check first counted the
+  browser's own ring and passed every `Button`, which had lost its ring with the
+  base layer. It no longer counts that ring, and it found all seven.
+- **The charts resolve canvas colours through a probe element**, because a
+  `light-dark()` token reads back as text. Their demo no longer calls
+  `invalidateTheme()`: the observer on `<html>` catches the switch.
+- **Found on the way:** the baselines of the command palette's resting state
+  still showed the library's former name and an old version. They had passed
+  under the comparison threshold since the rename, and were renewed after a look
+  at the diff.
+
+Pictures renewed on purpose, each diff looked at: the provider's page head
+(its sentence lost "theme"), `commandpalette--shortcut` (a raw `<input>` became
+`Input`) and the palette's resting state. Every other picture is pixel-identical
+to its baseline, apart from the charts' known-open non-reproducibility.
+
 ## Sep. 2026 — first-publication: core goes to npm, the demos go online
 
 *For a caller: `@umriss-ui/core` goes to the registry as `0.1.0`; `@umriss-ui/charts`

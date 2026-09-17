@@ -21,6 +21,26 @@ as `0.1.0` (see core's changelog).
 
 ---
 
+## 0.2.0-rc.0 – Styles that load themselves, and touch nothing else
+
+Delivery report for `.scratch/styles-without-side-effects/spec.md`, the table's
+share (ADR-0021).
+
+### Changed
+
+- **No stylesheet imports any more.** `dist/table.js` imports its own
+  stylesheet, and `@umriss-ui/core` imports core's. `@umriss-ui/table/styles.css`
+  stays exported and is optional.
+- **Cascade layers, own elements only.** The table's rules lie in
+  `umriss.base` and `umriss.components` and select only its own elements. The
+  frame, toolbar, pagination and alarm list carry their text context; sort
+  button, filter button and focusable header cell carry the focus ring; the
+  scroll containers their scrollbars.
+- **Light and dark follow the application's `color-scheme`**, through core's
+  tokens.
+
+---
+
 ## 0.2.0-rc.0 – One language, one scope
 
 Delivery report for `.scratch/english-and-umriss-ui/spec.md`, the table's share.

@@ -48,8 +48,27 @@ glossary's own rule prescribes when two live concepts want the same word.
 
 **Token**:
 A named value of the design layer, declared as a CSS property with the prefix
-`--u-`. The only source for colours, type sizes, line heights, durations, easing
-curves, radii and shadows.
+`--u-` on `:root`, in the layer `umriss.tokens`. The only source for colours, type
+sizes, line heights, durations, easing curves, radii and shadows. A token with
+a light and a dark value is written once, `light-dark(<light>, <dark>)`, and
+follows the `color-scheme` its element inherits (ADR-0021). An application
+overrides a token by declaring it outside a layer.
+_Avoid_: theme attribute — there is none; light and dark are `color-scheme`
+
+**Own element**:
+An element a component rendered and put one of its own classes on — as opposed
+to content a caller placed inside the component. The library's stylesheets
+select own elements only: `.field input` is one, `.stack > *` is the caller's
+(ADR-0021). The build gives every own element `box-sizing: border-box` and, where
+it has a radius, squircle corners.
+
+**Text context**:
+What an element sets for the text inside it: font family, size, line height,
+colour and smoothing. Every component that renders text, and every portalled
+panel, sets its own through `composes: text` (`src/styles/own.module.css`, in the
+layer `umriss.base`, so the component's own values win). Pure layout — `Stack`,
+`Grid` — sets none. Text a caller places inside a component that has one takes it
+on; that is the component deciding for its own surface, not for the page.
 
 **Vocabulary**:
 The set of tokens together with the rule that components reference them instead
