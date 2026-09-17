@@ -238,4 +238,7 @@ export const GERMAN_WORDING: Wording = {
   moreActions: "Weitere Aktionen",
   remove: "Entfernen",
   removeTag: (beschriftung) => `${beschriftung} entfernen`,
+  scheduleOverlap: "Überschneidung",
+  scheduleLateTransport: "Transport verspätet",
+  scheduleGhostTimes: (from, to) => `${from}–${to}`,
 };

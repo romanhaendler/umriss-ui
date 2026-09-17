@@ -13,7 +13,7 @@ export { ControlChart, type ControlChartProps } from "./ControlChart";
 export { XAxis, YAxis, type XAxisProps, type YAxisProps } from "./Axis";
 export { Legend, type LegendProps } from "./Legend";
 export { Tooltip, type TooltipProps } from "./Tooltip";
-export { invalidateTheme, type ResolvedTheme } from "./theme";
+export { invalidateTheme, resolveColours, subscribeTheme, type ResolvedTheme } from "./theme";
 export { LinearScale } from "./scale";
 
 /* The pure modules: they are the actual worth of the four instruments, and a
@@ -54,6 +54,7 @@ export {
   calendarFrom,
   toOperatingTime,
   toWallClock,
+  toOperatingTimeClamped,
   mapSeries,
   removedIntervals,
   breaks,

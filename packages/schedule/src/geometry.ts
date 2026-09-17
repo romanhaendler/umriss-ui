@@ -1,0 +1,158 @@
+/* Where things lie on the plot: subtask boxes, transport paths, and what a
+   pointer at a point hits.
+
+   Every horizontal position goes through the scale (ADR-0001) from OPERATING
+   time: a wall-clock instant is mapped through the calendar first, and one in
+   removed time lands on the seam it collapses onto. Positions are rounded to
+   whole pixels, so a fill and the hairline beside it meet on the same pixel
+   instead of blending into a colour of their own - the measure against the
+   charts' non-reproducible pictures (docs/testing.md, Known open).
+
+   Free of the DOM and of the canvas. */
+
+import { toOperatingTimeClamped, type CalendarInput, type Scale } from "@umriss-ui/charts";
+import { arrival, departure, type Subtask, type Transport } from "./model";
+
+/** What the geometry needs to know about the view. */
+export interface View {
+  /** Operating time → pixel, across the plot's width. */
+  readonly scale: Scale;
+  readonly calendar: CalendarInput;
+  /** Height of one lane in pixels. */
+  readonly laneHeight: number;
+  /** How far the lanes are scrolled up, in pixels. */
+  readonly scrollY: number;
+}
+
+/** Distance of a bar from the edges of its lane, before any offset. */
+export const BAR_INSET = 6;
+/** How far each level of overlap moves a bar down, and the deepest level that
+    still moves it: the bar is made short enough that the deepest one stays in
+    its lane. */
+export const DEPTH_STEP = 3;
+export const MAX_DEPTH = 3;
+
+/** A subtask as drawn: its three parts along x, its bar along y. */
+export interface SubtaskBox {
+  readonly subtask: Subtask;
+  readonly laneIndex: number;
+  /** How many earlier subtasks it covers on its lane - its offset level. */
+  readonly depth: number;
+  readonly y: number;
+  readonly height: number;
+  /** Start of the setup, start and end of the main time, end of the teardown. */
+  readonly outerFrom: number;
+  readonly mainFrom: number;
+  readonly mainTo: number;
+  readonly outerTo: number;
+}
+
+/** The pixel of a wall-clock instant. */
+export function xOf(view: View, instant: number): number {
+  return Math.round(view.scale.toPx(toOperatingTimeClamped(instant, view.calendar)));
+}
+
+/** The top of a lane on the plot. */
+export function laneTop(view: View, laneIndex: number): number {
+  return laneIndex * view.laneHeight - view.scrollY;
+}
+
+/** The lane under a y, or -1 outside every lane. */
+export function laneAt(view: View, y: number, laneCount: number): number {
+  const index = Math.floor((y + view.scrollY) / view.laneHeight);
+  return index >= 0 && index < laneCount ? index : -1;
+}
+
+export function subtaskBox(view: View, subtask: Subtask, laneIndex: number, depth: number): SubtaskBox {
+  const height = Math.max(4, view.laneHeight - 2 * BAR_INSET - MAX_DEPTH * DEPTH_STEP);
+  /* Depth 0 sits centred in its lane; each level below moves down by a step. */
+  const top = laneTop(view, laneIndex) + Math.floor((view.laneHeight - height) / 2);
+  return {
+    subtask,
+    laneIndex,
+    depth,
+    y: top + Math.min(depth, MAX_DEPTH) * DEPTH_STEP,
+    height,
+    outerFrom: xOf(view, subtask.from - (subtask.setup ?? 0)),
+    mainFrom: xOf(view, subtask.from),
+    mainTo: xOf(view, subtask.to),
+    outerTo: xOf(view, subtask.to + (subtask.teardown ?? 0)),
+  };
+}
+
+/** The part of a subtask a point hits, or null. A bar narrower than a few
+    pixels is widened for the pointer, or a short subtask could not be hit. */
+export function partAt(box: SubtaskBox, x: number, y: number): "setup" | "main" | "teardown" | null {
+  if (y < box.y || y > box.y + box.height) return null;
+  const slack = Math.max(0, (6 - (box.outerTo - box.outerFrom)) / 2);
+  if (x < box.outerFrom - slack || x > box.outerTo + slack) return null;
+  if (x < box.mainFrom) return "setup";
+  if (x > box.mainTo) return "teardown";
+  return "main";
+}
+
+/** Which edge of the main time a point is on, within `reach` pixels. */
+export function edgeAt(box: SubtaskBox, x: number, y: number, reach = 5): "from" | "to" | null {
+  if (y < box.y || y > box.y + box.height) return null;
+  const toFrom = Math.abs(x - box.mainFrom);
+  const toTo = Math.abs(x - box.mainTo);
+  if (Math.min(toFrom, toTo) > reach) return null;
+  /* On a bar narrower than both reaches, the nearer edge wins. */
+  return toFrom <= toTo ? "from" : "to";
+}
+
+/** A transport as drawn: a curve from its departure to its arrival, and the
+    points it is hit along. */
+export interface TransportPath {
+  readonly transport: Transport;
+  readonly x1: number;
+  readonly y1: number;
+  readonly x2: number;
+  readonly y2: number;
+  /** The two control points of the cubic curve. */
+  readonly c1x: number;
+  readonly c2x: number;
+  /** The curve sampled into a polyline, for the hit. */
+  readonly points: readonly number[];
+}
+
+export function transportPath(view: View, transport: Transport, from: SubtaskBox, to: SubtaskBox): TransportPath {
+  const x1 = xOf(view, departure(transport, from.subtask));
+  const x2 = xOf(view, arrival(transport, to.subtask));
+  const y1 = Math.round(from.y + from.height / 2);
+  const y2 = Math.round(to.y + to.height / 2);
+  /* A curve that leaves forwards and arrives forwards, even where the arrival
+     lies before the departure - a late transport then loops back, which is the
+     picture of what it is. */
+  const bend = Math.max(14, Math.abs(x2 - x1) / 2);
+  const c1x = x1 + bend;
+  const c2x = x2 - bend;
+  const points: number[] = [];
+  for (let i = 0; i <= 16; i++) {
+    const t = i / 16;
+    const u = 1 - t;
+    points.push(
+      u * u * u * x1 + 3 * u * u * t * c1x + 3 * u * t * t * c2x + t * t * t * x2,
+      u * u * u * y1 + 3 * u * u * t * y1 + 3 * u * t * t * y2 + t * t * t * y2,
+    );
+  }
+  return { transport, x1, y1, x2, y2, c1x, c2x, points };
+}
+
+/** Distance from a point to a transport's curve, in pixels. */
+export function distanceTo(path: TransportPath, x: number, y: number): number {
+  let best = Infinity;
+  const p = path.points;
+  for (let i = 0; i + 3 < p.length; i += 2) {
+    const ax = p[i]!;
+    const ay = p[i + 1]!;
+    const bx = p[i + 2]!;
+    const by = p[i + 3]!;
+    const dx = bx - ax;
+    const dy = by - ay;
+    const length = dx * dx + dy * dy;
+    const t = length === 0 ? 0 : Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / length));
+    best = Math.min(best, Math.hypot(x - (ax + t * dx), y - (ay + t * dy)));
+  }
+  return best;
+}
