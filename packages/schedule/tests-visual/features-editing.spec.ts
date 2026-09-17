@@ -25,6 +25,8 @@ test("a drag shows the ghost with its findings before the drop, and reports the 
 
   const ghost = example.locator("[data-ghost]");
   await expect(ghost).toBeVisible();
+  /* The tooltip steps aside while a drag is in flight. */
+  await expect(example.locator("[data-schedule-tooltip]")).toHaveCount(0);
   await expect(ghost).toContainText("10:00–11:30");
   await expect(ghost).toContainText("Overlap");
   await expect(ghost).toHaveAttribute("data-findings", /overlap/);

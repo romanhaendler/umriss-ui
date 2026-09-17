@@ -367,6 +367,16 @@ export interface Wording {
   /** The new times on the ghost: "08:15–10:00" - the times come from the
       formats. */
   scheduleGhostTimes: (from: string, to: string) => string;
+  /** The parts of a subtask and a transport, named in the tooltip. */
+  scheduleSetup: string;
+  scheduleTeardown: string;
+  scheduleTransport: string;
+  /** "A-2041-1 → A-2041-2": where a transport goes. */
+  scheduleRoute: (from: string, to: string) => string;
+  /** "Overlap with A-2043-2" - the other subtask on the lane. */
+  scheduleOverlapWith: (other: string) => string;
+  /** "Late transport, 15 min short" - the amount from `minutesShort`. */
+  scheduleLateBy: (amount: string) => string;
 }
 
 /** The instance shipped by default. English; German is `GERMAN_WORDING` in
@@ -585,4 +595,10 @@ export const DEFAULT_WORDING: Wording = {
   scheduleOverlap: "Overlap",
   scheduleLateTransport: "Late transport",
   scheduleGhostTimes: (from, to) => `${from}–${to}`,
+  scheduleSetup: "Setup",
+  scheduleTeardown: "Teardown",
+  scheduleTransport: "Transport",
+  scheduleRoute: (from, to) => `${from} → ${to}`,
+  scheduleOverlapWith: (other) => `Overlap with ${other}`,
+  scheduleLateBy: (amount) => `Late transport, ${amount} short`,
 };

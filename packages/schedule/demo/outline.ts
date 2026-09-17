@@ -29,7 +29,7 @@ export const OUTLINE: readonly Rubric[] = [
         id: "schedule",
         name: "Schedule",
         sentence: "Subtasks on lanes over time, with a day band above and adaptive time ticks below - panned and zoomed, with the headers and bands holding still.",
-        types: ["ScheduleProps"],
+        types: ["ScheduleProps", "ScheduleTooltipTarget"],
         exports: ["Schedule", "Lane", "Subtasks", "Transports"],
       },
       {

@@ -29,7 +29,8 @@ import {
 import { DAY, HOUR, type CalendarInput } from "@umriss-ui/charts";
 import { useFormats, useWording } from "@umriss-ui/core";
 import { ScheduleContext } from "./context";
-import { ScheduleScene, type ScheduleInteraction } from "./scene";
+import { ScheduleScene, type ScheduleInteraction, type ScheduleTooltipTarget } from "./scene";
+import { ScheduleTooltipContent } from "./ScheduleTooltip";
 import type { Intent, IntentKind } from "./model";
 import type { ZoomLimits } from "./timeAxis";
 import styles from "./Schedule.module.css";
@@ -70,6 +71,13 @@ export interface ScheduleProps {
   selectedTask?: string | null;
   /** Called when a click selects a task or clears the selection. */
   onSelectedTaskChange?: (task: string | null) => void;
+  /** The tooltip on a hovered subtask or transport: its order, its times, its
+      parts and its findings. `false` switches it off; a function receives
+      what the pointer rests on and returns content of the application's own. */
+  tooltip?: false | ((target: ScheduleTooltipTarget) => ReactNode);
+  /** A line marking the present across the lanes: `true` follows the clock by
+      the minute, an instant fixes it there. Off by default. */
+  now?: boolean | number;
   /** Goes to the root element. */
   className?: string;
   /** Goes to the root element. */
@@ -100,6 +108,8 @@ export function Schedule(props: ScheduleProps): ReactNode {
     onInteraction,
     selectedTask,
     onSelectedTaskChange,
+    tooltip,
+    now,
     className,
     style,
     children,
@@ -118,15 +128,25 @@ export function Schedule(props: ScheduleProps): ReactNode {
   const limitMax = zoomLimits?.max ?? DEFAULT_LIMITS.max;
   const lastDomain = useRef<string | null>(null);
 
+  /* `now={true}` follows the clock: read at mount, then once a minute. */
+  const [clock, setClock] = useState(() => Date.now());
+  useEffect(() => {
+    if (now !== true) return;
+    setClock(Date.now());
+    const timer = setInterval(() => setClock(Date.now()), 60_000);
+    return () => clearInterval(timer);
+  }, [now]);
+  const nowAt = now === true ? clock : typeof now === "number" ? now : null;
+
   useLayoutEffect(() => {
     const key = `${domainFrom}|${domainTo}`;
     const fresh = lastDomain.current !== key;
     lastDomain.current = key;
     scene.setOptions(
-      { laneHeight, calendar, zoomLimits: { min: limitMin, max: limitMax }, snap, intents },
+      { laneHeight, calendar, zoomLimits: { min: limitMin, max: limitMax }, snap, intents, now: nowAt },
       fresh ? [domainFrom, domainTo] : null,
     );
-  }, [scene, domainFrom, domainTo, laneHeight, calendar, limitMin, limitMax, snap, intents]);
+  }, [scene, domainFrom, domainTo, laneHeight, calendar, limitMin, limitMax, snap, intents, nowAt]);
 
   useEffect(() => {
     scene.setHandlers({ onIntent, onInteraction, onSelectedTaskChange });
@@ -236,6 +256,23 @@ export function Schedule(props: ScheduleProps): ReactNode {
               style={{ left: `${grip.x}px`, top: `${grip.y}px`, height: `${grip.height}px` }}
             />
           ))}
+          {tooltip !== false && snapshot.tooltip !== null && (
+            <span
+              role="tooltip"
+              className={styles.tooltip}
+              data-schedule-tooltip=""
+              style={{
+                left: `${snapshot.tooltip.x}px`,
+                top: `${snapshot.tooltip.y}px`,
+                /* Beside the pointer, on the side with more room. */
+                transform: `translate(${snapshot.tooltip.x > snapshot.width * 0.6 ? "calc(-100% - 12px)" : "12px"}, ${
+                  snapshot.tooltip.y > snapshot.height * 0.55 ? "calc(-100% - 12px)" : "12px"
+                })`,
+              }}
+            >
+              {typeof tooltip === "function" ? tooltip(snapshot.tooltip.target) : <ScheduleTooltipContent target={snapshot.tooltip.target} />}
+            </span>
+          )}
           {ghost !== null && (
             <span
               className={styles.ghostLabel}
@@ -251,6 +288,7 @@ export function Schedule(props: ScheduleProps): ReactNode {
         </div>
         <div className={styles.corner} />
         <div className={styles.tickBand} aria-hidden="true" data-schedule-ticks="">
+          {snapshot.now !== null && <span className={styles.now} data-now="" style={{ left: `${snapshot.now}px` }} />}
           {snapshot.ticks.map((tick) => (
             <span key={tick.wallClock} className={styles.tick} style={{ left: `${tick.x}px` }}>
               {/* A label that would be cut by the band's edge is left out; its

@@ -2,7 +2,7 @@
 
 export { Schedule, type ScheduleProps } from "./Schedule";
 export { Lane, Subtasks, Transports, type LaneProps, type SubtasksProps, type TransportsProps } from "./parts";
-export type { ScheduleHit, ScheduleInteraction } from "./scene";
+export type { ScheduleHit, ScheduleInteraction, ScheduleTooltipTarget } from "./scene";
 
 /* The pure modules: the arithmetic a caller runs over its own data - the
    findings as data, and the cascade the schedule never applies itself. */

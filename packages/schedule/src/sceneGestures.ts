@@ -87,6 +87,8 @@ export class SceneGestures {
   private lastClient = { x: 0, y: 0 };
   private panFrame = 0;
   hover: ScheduleHit = { kind: "nothing" };
+  /** Where the pointer rests on the plot while nothing is being dragged. */
+  hoverPoint = { x: 0, y: 0 };
   cursor = "default";
 
   constructor(private readonly host: GestureHost) {}
@@ -97,6 +99,11 @@ export class SceneGestures {
 
   get editing(): boolean {
     return this.gesture.kind === "edit";
+  }
+
+  /** No press, pan, pinch or drag in flight. */
+  get idle(): boolean {
+    return this.gesture.kind === "none";
   }
 
   ghostDrawing(): GhostDrawing | null {
@@ -350,7 +357,12 @@ export class SceneGestures {
             : "nothing";
     const { mode } = this.modeAt(x, y);
     this.setCursor(mode === "move" ? "grab" : mode === "stretch-from" || mode === "stretch-to" ? "ew-resize" : "default");
-    if (key === this.hoverKey) return;
+    this.hoverPoint = { x, y };
+    if (key === this.hoverKey) {
+      /* The tooltip follows the pointer along its target. */
+      if (hit.kind === "subtask" || hit.kind === "transport") this.host.interactionChanged();
+      return;
+    }
     this.setHover(hit, key);
     this.report("hover", hit, clientX, clientY, x, y);
   }

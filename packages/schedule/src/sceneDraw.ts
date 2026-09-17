@@ -20,6 +20,7 @@ const TOKENS = {
   muted: "var(--u-color-text-muted)",
   alarm: "var(--u-color-danger)",
   surface: "var(--u-color-surface)",
+  accent: "var(--u-color-accent)",
 } as const;
 
 export type Colours = Record<keyof typeof TOKENS, string> & { readonly tasks: ReadonlyMap<string, string> };
@@ -38,6 +39,7 @@ export function resolveSceneColours(root: Element, data: SceneData): Colours {
     muted: resolved.muted!,
     alarm: resolved.alarm!,
     surface: resolved.surface!,
+    accent: resolved.accent!,
     tasks,
   };
 }
@@ -78,6 +80,7 @@ export function drawData(ctx: CanvasRenderingContext2D, input: DrawInput): void 
   const { data, view } = input;
   const viewport = view.viewport();
   drawGrid(ctx, input, viewport);
+  drawNow(ctx, input);
   for (const layer of data.layers) {
     const own = new Set<unknown>(layer.data);
     if (layer.kind === "transports") {
@@ -173,6 +176,15 @@ function drawGrid(ctx: CanvasRenderingContext2D, input: DrawInput, viewport: Vie
     ctx.stroke();
     ctx.setLineDash([]);
   }
+}
+
+/* The present, across the lanes: above the grid, beneath the work - a subtask
+   that runs now is in front of the line, not crossed out by it. */
+function drawNow(ctx: CanvasRenderingContext2D, input: DrawInput): void {
+  const x = input.view.nowX();
+  if (x === null) return;
+  ctx.fillStyle = input.colours.accent;
+  ctx.fillRect(x, 0, 2, input.view.height);
 }
 
 function drawSubtask(ctx: CanvasRenderingContext2D, input: DrawInput, box: SubtaskBox, alpha: number): void {
