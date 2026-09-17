@@ -1,28 +1,32 @@
-.tooltip {
-  position: fixed;
-  z-index: var(--u-z-tooltip);
-  max-width: 260px;
-  padding: var(--u-space-1) var(--u-space-3);
-  background: var(--u-color-text);
-  color: var(--u-color-bg);
-  border-radius: var(--u-radius-sm);
-  font-family: var(--u-font-sans);
-  font-size: var(--u-text-xs);
-  font-weight: var(--u-weight-medium);
-  line-height: var(--u-leading-normal);
-  pointer-events: none;
-  animation: tooltipIn var(--u-duration-fast) var(--u-ease-out);
-}
+@layer umriss.tokens, umriss.components;
 
-/* .above/.below no longer carry a shift - the position comes computed from
-   computePosition. The classes remain as hooks for the entrance. */
-@keyframes tooltipIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@media (prefers-reduced-motion: reduce) {
+@layer umriss.components {
   .tooltip {
-    animation: none;
+    position: fixed;
+    z-index: var(--u-z-tooltip);
+    max-width: 260px;
+    padding: var(--u-space-1) var(--u-space-3);
+    background: var(--u-color-text);
+    color: var(--u-color-bg);
+    border-radius: var(--u-radius-sm);
+    font-family: var(--u-font-sans);
+    font-size: var(--u-text-xs);
+    font-weight: var(--u-weight-medium);
+    line-height: var(--u-leading-normal);
+    pointer-events: none;
+    animation: tooltipIn var(--u-duration-fast) var(--u-ease-out);
+  }
+
+  /* .above/.below no longer carry a shift - the position comes computed from
+     computePosition. The classes remain as hooks for the entrance. */
+  @keyframes tooltipIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tooltip {
+      animation: none;
+    }
   }
 }

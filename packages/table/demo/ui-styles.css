@@ -1,5 +1,6 @@
-/* In place of `@umriss-ui/core/styles.css` (vite.demo.config.ts): the token and
-   base layer from the source of @umriss-ui/core. The styles of the components
+/* In place of `@umriss-ui/core/styles.css` (vite.demo.config.ts): the tokens
+   from the source of @umriss-ui/core - there is no base layer any more
+   (ADR-0021). The styles of the components
    come with their own modules.
 
    This is the one place where a demo reaches into the neighbouring package by
@@ -7,4 +8,3 @@
    and the alias in `vite.demo.config.ts` is what puts this file here. The same
    file stands in `packages/charts/demo/` for the same reason. */
 @import "../../core/src/styles/tokens.css";
-@import "../../core/src/styles/global.css";

@@ -53,7 +53,8 @@
     "typecheck": "tsc --noEmit",
     "preview:demo": "vite preview --config vite.demo.config.ts --port 4175 --strictPort",
     "test:unit": "vitest run",
-    "prepublishOnly": "pnpm run typecheck && pnpm run build"
+    "prepublishOnly": "pnpm run typecheck && pnpm run build && pnpm run check:dist",
+    "check:dist": "node --disable-warning=ExperimentalWarning --experimental-strip-types ../../scripts/check-dist.ts table.js table.css"
   },
   "peerDependencies": {
     "@umriss-ui/core": "workspace:^",

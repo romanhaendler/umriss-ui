@@ -1,78 +1,82 @@
-.list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--u-space-3);
-  min-width: 0;
-}
+@layer umriss.tokens, umriss.components;
 
-.bar {
-  display: flex;
-  align-items: center;
-  gap: var(--u-space-3);
-  flex-wrap: wrap;
-}
+@layer umriss.components {
+  .list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--u-space-3);
+    min-width: 0;
+  }
 
-.heading {
-  font-size: var(--u-text-sm);
-  font-weight: var(--u-weight-semibold);
-  color: var(--u-color-text);
-}
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: var(--u-space-3);
+    flex-wrap: wrap;
+  }
 
-.filler {
-  flex: 1 1 auto;
-}
+  .heading {
+    font-size: var(--u-text-sm);
+    font-weight: var(--u-weight-semibold);
+    color: var(--u-color-text);
+  }
 
-.asOf {
-  font-size: var(--u-text-xs);
-  color: var(--u-color-text-secondary);
-}
+  .filler {
+    flex: 1 1 auto;
+  }
 
-.asOf[data-freshness="stale"] {
-  color: var(--u-color-warning);
-}
+  .asOf {
+    font-size: var(--u-text-xs);
+    color: var(--u-color-text-secondary);
+  }
 
-.asOf[data-freshness="lost"] {
-  color: var(--u-color-danger);
-  font-weight: var(--u-weight-medium);
-}
+  .asOf[data-freshness="stale"] {
+    color: var(--u-color-warning);
+  }
 
-/* The live region is visible: the number of standing unacknowledged alarms is
-   the one figure everyone in a control room looks for anyway. Hiding it would
-   mean giving it only to those who use a screen reader. */
-.live {
-  font-size: var(--u-text-xs);
-  color: var(--u-color-text-secondary);
-}
+  .asOf[data-freshness="lost"] {
+    color: var(--u-color-danger);
+    font-weight: var(--u-weight-medium);
+  }
 
-.label {
-  font-weight: var(--u-weight-medium);
-}
+  /* The live region is visible: the number of standing unacknowledged alarms is
+     the one figure everyone in a control room looks for anyway. Hiding it would
+     mean giving it only to those who use a screen reader. */
+  .live {
+    font-size: var(--u-text-xs);
+    color: var(--u-color-text-secondary);
+  }
 
-.counter {
-  margin-left: var(--u-space-2);
-}
+  .label {
+    font-weight: var(--u-weight-medium);
+  }
 
-.lifecycle {
-  font-size: var(--u-text-xs);
-}
+  .counter {
+    margin-left: var(--u-space-2);
+  }
 
-.empty {
-  color: var(--u-color-text-secondary);
-}
+  .lifecycle {
+    font-size: var(--u-text-xs);
+  }
 
-/* A standing unacknowledged alarm carries a strong edge – it is the one
-   somebody has to walk over to. The edge is an addition to the word in the
-   lifecycle column, not a replacement for it. */
-.row[data-lifecycle="standing-unacknowledged"] td:first-child {
-  box-shadow: inset 3px 0 0 var(--u-color-danger);
-}
+  .empty {
+    color: var(--u-color-text-secondary);
+  }
 
-/* Came and went again without anybody seeing it: the state an ordinary list
-   loses. Here it is marked, not hidden. */
-.row[data-lifecycle="cleared-unacknowledged"] td:first-child {
-  box-shadow: inset 3px 0 0 var(--u-color-warning);
-}
+  /* A standing unacknowledged alarm carries a strong edge – it is the one
+     somebody has to walk over to. The edge is an addition to the word in the
+     lifecycle column, not a replacement for it. */
+  .row[data-lifecycle="standing-unacknowledged"] td:first-child {
+    box-shadow: inset 3px 0 0 var(--u-color-danger);
+  }
 
-.row[data-lifecycle="cleared-acknowledged"] {
-  color: var(--u-color-text-secondary);
+  /* Came and went again without anybody seeing it: the state an ordinary list
+     loses. Here it is marked, not hidden. */
+  .row[data-lifecycle="cleared-unacknowledged"] td:first-child {
+    box-shadow: inset 3px 0 0 var(--u-color-warning);
+  }
+
+  .row[data-lifecycle="cleared-acknowledged"] {
+    color: var(--u-color-text-secondary);
+  }
 }

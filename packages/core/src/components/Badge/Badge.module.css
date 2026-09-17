@@ -1,53 +1,57 @@
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 20px;
-  padding: 0 var(--u-space-2);
-  border-radius: var(--u-radius-sm);
-  font-size: var(--u-text-xs);
-  font-weight: var(--u-weight-medium);
-  letter-spacing: 0.01em;
-  line-height: 1;
-  white-space: nowrap;
-}
+@layer umriss.tokens, umriss.components;
 
-.pill {
-  border-radius: var(--u-radius-full);
-  padding: 0 var(--u-space-3);
-}
+@layer umriss.components {
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 20px;
+    padding: 0 var(--u-space-2);
+    border-radius: var(--u-radius-sm);
+    font-size: var(--u-text-xs);
+    font-weight: var(--u-weight-medium);
+    letter-spacing: 0.01em;
+    line-height: 1;
+    white-space: nowrap;
+  }
 
-/* A small status dot - it gives the label a quiet anchor point. */
-.badge::before {
-  content: "";
-  width: 5px;
-  height: 5px;
-  border-radius: var(--u-radius-full);
-  background: currentColor;
-  opacity: 0.75;
-}
+  .pill {
+    border-radius: var(--u-radius-full);
+    padding: 0 var(--u-space-3);
+  }
 
-.neutral {
-  background: var(--u-color-surface-sunken);
-  color: var(--u-color-text-secondary);
-}
+  /* A small status dot - it gives the label a quiet anchor point. */
+  .badge::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    border-radius: var(--u-radius-full);
+    background: currentColor;
+    opacity: 0.75;
+  }
 
-.accent {
-  background: var(--u-color-accent-subtle);
-  color: var(--u-color-accent-text);
-}
+  .neutral {
+    background: var(--u-color-surface-sunken);
+    color: var(--u-color-text-secondary);
+  }
 
-.success {
-  background: var(--u-color-success-subtle);
-  color: var(--u-color-success);
-}
+  .accent {
+    background: var(--u-color-accent-subtle);
+    color: var(--u-color-accent-text);
+  }
 
-.warning {
-  background: var(--u-color-warning-subtle);
-  color: var(--u-color-warning);
-}
+  .success {
+    background: var(--u-color-success-subtle);
+    color: var(--u-color-success);
+  }
 
-.danger {
-  background: var(--u-color-danger-subtle);
-  color: var(--u-color-danger);
+  .warning {
+    background: var(--u-color-warning-subtle);
+    color: var(--u-color-warning);
+  }
+
+  .danger {
+    background: var(--u-color-danger-subtle);
+    color: var(--u-color-danger);
+  }
 }

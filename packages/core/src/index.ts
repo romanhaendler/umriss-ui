@@ -1,5 +1,4 @@
 import "./styles/tokens.css";
-import "./styles/global.css";
 
 export * from "./components/Alert";
 export * from "./components/Badge";

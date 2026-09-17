@@ -15,184 +15,189 @@
    sits in, and expressly does not belong in the `--u-z-*` scale. That one is
    for what lies above the whole application; a dock lies above exactly one
    surface. */
-.root {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
 
-/* ---------------- The strip ---------------- */
+@layer umriss.tokens, umriss.components;
 
-.strip {
-  position: absolute;
-  pointer-events: auto;
-  display: flex;
-  /* flex-start and not center - and that is not a matter of taste.
-
-     During the transition (ticket 04) the strip travels towards its width and
-     height. If the children stood centred, their position would hang on the
-     size being animated: they would jerk across while they are travelling
-     along, and the measured FLIP paths would be wrong for every intermediate
-     frame. Aligned at the start they hang only on the padding - and because the
-     strip is `max-content` large, "at the start" in the resting state stands
-     exactly where "centred" would stand. */
-  align-items: flex-start;
-  gap: var(--u-dock-gap);
-  padding: var(--u-dock-padding);
-  width: max-content;
-  height: max-content;
-  border-radius: var(--u-radius-xl);
-  box-shadow: var(--u-shadow-overlay);
-  color: var(--u-color-text);
-  /* The opaque substitute colour stands first and unconditionally (ADR-0012).
-     Where `backdrop-filter` is missing, the dock is a closed pane and right in
-     every other respect. */
-  background: var(--u-color-material-fallback);
-}
-
-@supports (backdrop-filter: blur(1px)) {
-  .strip {
-    background: var(--u-color-material);
-    backdrop-filter: blur(var(--u-material-blur));
+@layer umriss.components {
+  .root {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
   }
-}
 
-/* The four resting places - ONCE, and they hold for the strip as for the
-   refusal. The refusal shows exactly the outline the dock would have at that
-   place; written twice the two would drift apart at some point, and the
-   announced outline would then lie somewhere other than the dock it
-   announces.
+  /* ---------------- The strip ---------------- */
 
-   Centred through `inset: 0` and automatic margins and NOT through
-   `translate(-50%)`: the `transform` belongs to the transition, and a centring
-   that occupied it would be exactly the line at which ADR-0014 fails. */
-.root [data-place="top"],
-.root [data-place="bottom"] {
-  flex-direction: row;
-  left: 0;
-  right: 0;
-  margin-inline: auto;
-}
+  .strip {
+    position: absolute;
+    pointer-events: auto;
+    display: flex;
+    /* flex-start and not center - and that is not a matter of taste.
 
-.root [data-place="top"] {
-  top: var(--u-dock-margin);
-}
+       During the transition (ticket 04) the strip travels towards its width and
+       height. If the children stood centred, their position would hang on the
+       size being animated: they would jerk across while they are travelling
+       along, and the measured FLIP paths would be wrong for every intermediate
+       frame. Aligned at the start they hang only on the padding - and because the
+       strip is `max-content` large, "at the start" in the resting state stands
+       exactly where "centred" would stand. */
+    align-items: flex-start;
+    gap: var(--u-dock-gap);
+    padding: var(--u-dock-padding);
+    width: max-content;
+    height: max-content;
+    border-radius: var(--u-radius-xl);
+    box-shadow: var(--u-shadow-overlay);
+    color: var(--u-color-text);
+    /* The opaque substitute colour stands first and unconditionally (ADR-0012).
+       Where `backdrop-filter` is missing, the dock is a closed pane and right in
+       every other respect. */
+    background: var(--u-color-material-fallback);
+  }
 
-.root [data-place="bottom"] {
-  bottom: var(--u-dock-margin);
-}
+  @supports (backdrop-filter: blur(1px)) {
+    .strip {
+      background: var(--u-color-material);
+      backdrop-filter: blur(var(--u-material-blur));
+    }
+  }
 
-.root [data-place="left"],
-.root [data-place="right"] {
-  flex-direction: column;
-  top: 0;
-  bottom: 0;
-  margin-block: auto;
-}
+  /* The four resting places - ONCE, and they hold for the strip as for the
+     refusal. The refusal shows exactly the outline the dock would have at that
+     place; written twice the two would drift apart at some point, and the
+     announced outline would then lie somewhere other than the dock it
+     announces.
 
-.root [data-place="left"] {
-  left: var(--u-dock-margin);
-}
+     Centred through `inset: 0` and automatic margins and NOT through
+     `translate(-50%)`: the `transform` belongs to the transition, and a centring
+     that occupied it would be exactly the line at which ADR-0014 fails. */
+  .root [data-place="top"],
+  .root [data-place="bottom"] {
+    flex-direction: row;
+    left: 0;
+    right: 0;
+    margin-inline: auto;
+  }
 
-.root [data-place="right"] {
-  right: var(--u-dock-margin);
-}
+  .root [data-place="top"] {
+    top: var(--u-dock-margin);
+  }
 
-/* ---------------- The grip ---------------- */
+  .root [data-place="bottom"] {
+    bottom: var(--u-dock-margin);
+  }
 
-/* The slot is what the transition moves; the button inside it is what follows
-   the pointer. Two elements, because there are two `transform`s - and the
-   transition must not overwrite the grip's travel. */
-.gripSlot {
-  flex: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--u-dock-tool);
-  height: var(--u-dock-tool);
-}
+  .root [data-place="left"],
+  .root [data-place="right"] {
+    flex-direction: column;
+    top: 0;
+    bottom: 0;
+    margin-block: auto;
+  }
 
-[data-place="top"] > .gripSlot,
-[data-place="bottom"] > .gripSlot {
-  width: var(--u-dock-grip);
-}
+  .root [data-place="left"] {
+    left: var(--u-dock-margin);
+  }
 
-[data-place="left"] > .gripSlot,
-[data-place="right"] > .gripSlot {
-  height: var(--u-dock-grip);
-}
+  .root [data-place="right"] {
+    right: var(--u-dock-margin);
+  }
 
-.grip {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  padding: 0;
-  border: none;
-  border-radius: var(--u-radius-sm);
-  background: transparent;
-  color: var(--u-color-text-muted);
-  cursor: grab;
-  touch-action: none;
-}
+  /* ---------------- The grip ---------------- */
 
-.grip:hover {
-  color: var(--u-color-text-secondary);
-}
+  /* The slot is what the transition moves; the button inside it is what follows
+     the pointer. Two elements, because there are two `transform`s - and the
+     transition must not overwrite the grip's travel. */
+  .gripSlot {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--u-dock-tool);
+    height: var(--u-dock-tool);
+  }
 
-.grip[data-dragging] {
-  cursor: grabbing;
-  color: var(--u-color-text);
-}
+  [data-place="top"] > .gripSlot,
+  [data-place="bottom"] > .gripSlot {
+    width: var(--u-dock-grip);
+  }
 
-/* ---------------- The tools ---------------- */
+  [data-place="left"] > .gripSlot,
+  [data-place="right"] > .gripSlot {
+    height: var(--u-dock-grip);
+  }
 
-.tool {
-  flex: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--u-dock-tool);
-  height: var(--u-dock-tool);
-  padding: 0;
-  border: none;
-  border-radius: var(--u-radius-md);
-  background: transparent;
-  color: var(--u-color-text-secondary);
-  cursor: pointer;
-  transition: background var(--u-transition), color var(--u-transition);
-}
+  .grip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: none;
+    border-radius: var(--u-radius-sm);
+    background: transparent;
+    color: var(--u-color-text-muted);
+    cursor: grab;
+    touch-action: none;
+  }
 
-.tool:hover:not(:disabled) {
-  background: var(--u-color-surface-sunken);
-  color: var(--u-color-text);
-}
+  .grip:hover {
+    color: var(--u-color-text-secondary);
+  }
 
-.tool:disabled {
-  color: var(--u-color-text-muted);
-  cursor: default;
-}
+  .grip[data-dragging] {
+    cursor: grabbing;
+    color: var(--u-color-text);
+  }
 
-/* The mode - the one accent that does exactly its job: marking an interaction
-   decision that stays put. No enlargement: that is the one property of the
-   model this library expressly does not adopt. */
-.inMode,
-.inMode:hover:not(:disabled) {
-  background: var(--u-color-accent-subtle);
-  color: var(--u-color-accent);
-}
+  /* ---------------- The tools ---------------- */
 
-/* ---------------- The refusal ---------------- */
+  .tool {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--u-dock-tool);
+    height: var(--u-dock-tool);
+    padding: 0;
+    border: none;
+    border-radius: var(--u-radius-md);
+    background: transparent;
+    color: var(--u-color-text-secondary);
+    cursor: pointer;
+    transition: background var(--u-transition), color var(--u-transition);
+  }
 
-/* A place the dock does not fit into refuses visibly. It shows the outline the
-   dock would have there - in material and edge, not in a warning colour.
-   Nothing has gone wrong here: a wide, flat host without room for a standing
-   dock is not a mistake anybody made. */
-.refusal {
-  position: absolute;
-  pointer-events: none;
-  border-radius: var(--u-radius-xl);
-  box-shadow: var(--u-edge-strong);
-  background: var(--u-dock-refusal-surface);
+  .tool:hover:not(:disabled) {
+    background: var(--u-color-surface-sunken);
+    color: var(--u-color-text);
+  }
+
+  .tool:disabled {
+    color: var(--u-color-text-muted);
+    cursor: default;
+  }
+
+  /* The mode - the one accent that does exactly its job: marking an interaction
+     decision that stays put. No enlargement: that is the one property of the
+     model this library expressly does not adopt. */
+  .inMode,
+  .inMode:hover:not(:disabled) {
+    background: var(--u-color-accent-subtle);
+    color: var(--u-color-accent);
+  }
+
+  /* ---------------- The refusal ---------------- */
+
+  /* A place the dock does not fit into refuses visibly. It shows the outline the
+     dock would have there - in material and edge, not in a warning colour.
+     Nothing has gone wrong here: a wide, flat host without room for a standing
+     dock is not a mistake anybody made. */
+  .refusal {
+    position: absolute;
+    pointer-events: none;
+    border-radius: var(--u-radius-xl);
+    box-shadow: var(--u-edge-strong);
+    background: var(--u-dock-refusal-surface);
+  }
 }
