@@ -68,9 +68,11 @@ export interface Transport {
       the picture and never the finding: whether a transport is late follows
       from `leaves` and `arrives` alone. */
   readonly route?: TransportRoute;
-  /** Where on the bars this one's ends sit, where they do not sit like the
-      rest. Also picture only. */
-  readonly anchor?: TransportAnchor;
+  /** Where on the bars this one's line attaches, where it does not attach like
+      the rest. Also picture only, and not to be confused with the two anchors
+      above: those say what the transport connects, this says where the line
+      touches. */
+  readonly attach?: TransportAttachment;
   /** Whether this one's ends are marked with a dot, where it is not marked
       like the rest. Also picture only. */
   readonly ends?: TransportEnds;
@@ -80,9 +82,14 @@ export interface Transport {
     arrives forwards, a straight line, or axis-parallel segments. */
 export type TransportRoute = "curve" | "straight" | "orthogonal";
 
-/** Where on its bars a transport's ends sit: the middle of both, or the corner
-    that faces the other stop - which is the shortest line between them. */
-export type TransportAnchor = "centre" | "nearest";
+/** Where on its bars a transport's line attaches: the middle of both, or the
+    edge that faces the other stop - which is the shortest line between them.
+
+    Deliberately not called an anchor: a transport already HAS two anchors
+    (`leaves`, `arrives`), and those decide what it connects and therefore
+    whether it is late. This decides where the line touches, and nothing else.
+    The tree has an **Anchor** of its own as well (CONTEXT.md). */
+export type TransportAttachment = "centre" | "nearest";
 
 /** Whether a transport's two ends carry a dot. The dot says where the line is
     anchored, which is worth saying while a plan is being read and is noise in a

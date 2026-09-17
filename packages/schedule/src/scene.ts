@@ -22,7 +22,7 @@ import { laneTop, xOf } from "./geometry";
 import { SceneData, type LaneConfig, type LayerConfig, type ScheduleTooltipTarget } from "./sceneData";
 import type { Subtask } from "./model";
 import { drawData, drawOverlay, isDark, prepareCanvas, resolveSceneColours, type Colours } from "./sceneDraw";
-import { barLabelBox } from "./geometry";
+import { barLabelBox, inView } from "./geometry";
 import { SceneGestures, type GhostSummary, type PlacingItem, type SceneHandlers } from "./sceneGestures";
 import { DEFAULT_LANE_HEIGHT, SceneView, type SceneOptions } from "./sceneView";
 
@@ -264,14 +264,13 @@ export class ScheduleScene {
     const view = this.view;
     if (view.width <= 0) return [];
     const colours = this.colours;
-    const bars: ScheduleSnapshot["bars"] = view.boxes.flatMap((box) => {
-      if (box.y + box.height < 0 || box.y > view.height) return [];
+    return view.boxes.flatMap((box) => {
+      if (!inView(box, view.width, view.height)) return [];
       const place = barLabelBox(box, view.width);
       if (place === null) return [];
       const colour = colours?.tasks.get(box.subtask.task);
       return [{ subtask: box.subtask, ...place, dark: colour === undefined ? true : isDark(colour) }];
     });
-    return bars;
   }
 
   private tooltip(): ScheduleSnapshot["tooltip"] {

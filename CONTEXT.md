@@ -894,6 +894,32 @@ yet. Creating one is the caller's act, with the caller's identity, as every
 other intent leaves the data to the caller (ADR-0023).
 _Avoid_: create, add, new, insert, Anlegen
 
+**Bar label**:
+The line of text a caller writes into a **Subtask**'s bar. It lies on the main
+time, because the setup is not the work; it is cut off where the bar is too
+narrow and left out where nothing readable would fit — a letter and an ellipsis
+say less than nothing. It is real text in the DOM, as every other thing a reader
+has to read in this library is.
+_Avoid_: caption, title, Beschriftung as the drawn thing, tooltip
+
+**Appearance**:
+What a bar says besides its colour, from a closed list: `provisional` work that
+is planned and not released, `fixed` work that may not be moved, `muted` work
+that is not this reader's, and an `open` end where work continues past what is
+drawn. Each is a pattern or an outline and never only a colour, and none of
+them is the faint fill that already means a **Setup** or a **Teardown**. A
+**Progress** share is drawn beside them as a rail along the bar, for the same
+reason.
+_Avoid_: style, variant, state, Zustand, status
+
+**Route**:
+How a **Transport** is drawn between its two ends — a curve, a straight line or
+orthogonal segments — together with where its line attaches to the bars and
+whether its ends carry a dot. It is the picture and nothing else: what a
+transport connects, and therefore whether it is a **Late transport**, is said by
+its two anchors alone.
+_Avoid_: path as the API word, shape, style, Linienführung
+
 **Now line**:
 The line across the lanes at the present moment, with a mark where it meets the
 fine axis band. It is off unless a caller asks for it, and it is a statement

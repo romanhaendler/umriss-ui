@@ -87,3 +87,8 @@ export const useFormats = (): Formats => useLanguage().formats;
 
 /** Only the wording. */
 export const useWording = (): Wording => useLanguage().wording;
+
+/* The two characters a notation separates with, for a caller who replaced
+   `number` and has to read its own output back (ADR-0024). */
+export { separatorsOf, DEFAULT_SEPARATORS } from "./formats";
+export type { Separators } from "./formats";

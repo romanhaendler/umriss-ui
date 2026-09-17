@@ -11,13 +11,14 @@
    Free of the DOM and of the canvas. */
 
 import { toOperatingTimeClamped, type CalendarInput, type Scale } from "@umriss-ui/charts";
+import { resolveAppearance } from "./appearance";
 import {
   arrival,
   departure,
   occupied,
   type Subtask,
   type Transport,
-  type TransportAnchor,
+  type TransportAttachment,
   type TransportEnds,
   type TransportRoute,
 } from "./model";
@@ -111,6 +112,20 @@ export function edgeAt(box: SubtaskBox, x: number, y: number, reach = 5): "from"
   return toFrom <= toTo ? "from" : "to";
 }
 
+/** Whether any part of a subtask's box lies within the plot. */
+export function inView(box: SubtaskBox, plotWidth: number, plotHeight: number): boolean {
+  return box.outerTo >= 0 && box.outerFrom <= plotWidth && box.y + box.height >= 0 && box.y <= plotHeight;
+}
+
+/** Where a bar is actually drawn within its box: `"muted"` work is drawn slim
+    (`sceneDraw.ts`), and its label has to be the bar it lies on and not the box
+    the bar could have filled. One rule, read by the drawing and by the label. */
+export function barRect(box: SubtaskBox): { top: number; height: number } {
+  const slim = resolveAppearance(box.subtask.appearance).muted;
+  const height = slim ? Math.max(7, Math.round(box.height / 2)) : box.height;
+  return { top: slim ? box.y + Math.round((box.height - height) / 2) : box.y, height };
+}
+
 /** The narrowest bar that still gets a label.
 
     Measured, not guessed: at the type size the labels are set in, a 47-pixel
@@ -132,14 +147,15 @@ export function barLabelBox(
   const x = Math.max(box.mainFrom, 0);
   const width = Math.min(box.mainTo, plotWidth) - x;
   if (width < MIN_LABEL_WIDTH) return null;
-  return { x, width, y: box.y, height: box.height };
+  const rect = barRect(box);
+  return { x, width, y: rect.top, height: rect.height };
 }
 
 /** How the transports of a schedule are drawn, where a transport does not say
     otherwise. */
 export interface TransportStyle {
   readonly route: TransportRoute;
-  readonly anchor: TransportAnchor;
+  readonly attach: TransportAttachment;
   readonly ends: TransportEnds;
 }
 
@@ -164,7 +180,7 @@ export interface TransportPath {
 /** How far an orthogonal route runs straight out of its bar before it turns. */
 const STUB = 10;
 
-/** The y of an end, by the anchor: the middle of the bar, or the edge facing
+/** The y of an end, by the attach: the middle of the bar, or the edge facing
     the other stop. Both ends ask the same question - does the other one lie
     below me? - so a line between two lanes leaves the lower edge of the upper
     bar and meets the upper edge of the lower one. Within one lane there is no
@@ -175,9 +191,9 @@ const STUB = 10;
     from `y` over `height` fills the rows `y … y + height - 1`, and a line
     centred on `y + height` lies entirely below the last of them - which reads
     as a hairline gap between the line and the bar it leaves. */
-function anchorY(anchor: TransportAnchor, box: SubtaskBox, other: SubtaskBox): number {
+function attachY(attach: TransportAttachment, box: SubtaskBox, other: SubtaskBox): number {
   const middle = Math.round(box.y + box.height / 2);
-  if (anchor === "centre" || other.laneIndex === box.laneIndex) return middle;
+  if (attach === "centre" || other.laneIndex === box.laneIndex) return middle;
   return Math.round(other.laneIndex > box.laneIndex ? box.y + box.height - 1 : box.y + 1);
 }
 
@@ -189,12 +205,12 @@ export function transportPath(
   style: TransportStyle,
 ): TransportPath {
   const route = transport.route ?? style.route;
-  const anchor = transport.anchor ?? style.anchor;
+  const attach = transport.attach ?? style.attach;
   const ends = transport.ends ?? style.ends;
   const x1 = xOf(view, departure(transport, from.subtask));
   const x2 = xOf(view, arrival(transport, to.subtask));
-  const y1 = anchorY(anchor, from, to);
-  const y2 = anchorY(anchor, to, from);
+  const y1 = attachY(attach, from, to);
+  const y2 = attachY(attach, to, from);
 
   if (route === "straight") {
     return { transport, kind: route, ends, x1, y1, x2, y2, c1x: x1, c2x: x2, points: [x1, y1, x2, y2] };
