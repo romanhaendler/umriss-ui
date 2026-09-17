@@ -55,6 +55,17 @@ and a release would place nothing, `"copy"` otherwise. The refusal is said in
 the three channels that cost the gesture nothing: the marked lanes, the cursor
 and the tether.
 
+### What that decision costs, said plainly
+
+User story 15 asks for "the same marks and the **'no drop' cursor**" on a drag
+from outside. The marks, the tether and the CSS cursor are all there; the
+NATIVE cursor is not, and cannot be - during an HTML5 drag the browser draws it
+from `dropEffect`, and `dropEffect` is what had to stay "copy" for the ghost to
+keep its promise. So the Problem Statement's "a drag from outside even shows
+the 'copy' cursor while it is refused" is answered in three channels and not in
+that one. The alternative was a release that places nothing while the ghost
+stands on a lane that allows it, and Roman chose against it.
+
 ### Tests
 
 - Unit: 7 new, `tests-unit/refusal.test.ts`. Package: 15 files, 138 green.

@@ -32,6 +32,38 @@ All eleven tickets, each with its own commit and its own delivery report in
 5. **`ResolvedAppearance.hatched` keeps its name**, as the spec instructed, and
    its doc now names the channel it really owns. Ticket 02 flags it.
 
+### What the review changed
+
+`/code-review` ran both axes over the eleven commits and found four things the
+delivery had got wrong. All four are repaired:
+
+- **The group headers were not under "nothing in its own way"**, which the
+  Testing Decisions ask for by name. A header's row is the clipping box now.
+- **A late transport inside a folded group was not marked on its row** (user
+  story 31 says "an overlap or a late transport"). It is.
+- **An `open` bar that passes neither edge faded at its own end.** The table
+  says "at whichever edge of the view the bar passes", and the deviation had a
+  cost the deviation had not seen: the fixed painting order then let the fade
+  eat a `fixed` bar's cap where there really was an end to mark. The spec's
+  letter is restored.
+- **Ticket 04 claimed Out of Scope demanded the change to the charts' demo.**
+  It does not; what forced it was the check being called by all four suites.
+  The report says so now, with what to undo if the call was wrong.
+
+Three vocabulary clashes the review found were settled in `CONTEXT.md` and
+ADR-0025 rather than in the code: **Page** now says a page is a component where
+a package is a shelf of components and a FEATURE where it is one component with
+two dozen things to say; **Grip** qualifies its `_Avoid_: handle` against
+`ScheduleHandle`, which is not a grip and not drawn; and ADR-0025 stops
+claiming *row* appears nowhere in the API, because `data-row` is on a header on
+purpose.
+
+One it found and could not settle: **`ResolvedAppearance.hatched`** is a public
+name that now means capped ends, and the entry **Appearance** says a hatch
+means a refused lane. The spec forbade renaming it ("`resolveAppearance` stays
+as it is"), so it stands, flagged in ticket 02 and here. It is one rename away
+from consistent.
+
 Two findings that belong to no ticket of this spec and are recorded rather than
 fixed: `onDomainChange` and `initialDomain` can stand a frame apart (ticket 04),
 and a muted bar is the closest thing in the picture to a setup (ticket 02).

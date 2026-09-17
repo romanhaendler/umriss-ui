@@ -610,7 +610,12 @@ places. The **Schedule** has two per selected **Subtask**, at the outer edges
 of its **Setup** and **Teardown**, and they appear on selection only — a plan
 where every bar bristles with grips is a plan nobody can read. One word,
 because it is one gesture: press the small thing to move the big one.
-_Avoid_: Anfasser, handle, Ziehfläche, Titelleiste
+_Avoid_: Anfasser, handle, Ziehfläche, Titelleiste — for the drawn thing. The
+**Schedule** has a `ScheduleHandle` as well, and it is not a grip and not drawn
+at all: it is what a component offers a caller imperatively, the arithmetic
+between a point on the screen and a time on a lane. Two live concepts, so the
+word stands with the qualifier the glossary's own rule prescribes — a *grip* is
+taken hold of, a *handle* is held by the code.
 
 **Mode**:
 The tool a dock currently stands in, at most one, and absent by default — a
@@ -745,12 +750,25 @@ examples and "Why it is like this" texts.
 **Page**:
 Everything the demo says about one thing a reader looks up, at one address. A
 page is the unit of the demo: the sidebar lists pages, the palette finds pages,
-an address names a page. That thing is a component, with one exception: a
-concept that several components share and none owns may have its own page —
+an address names a page.
+
+What that thing is depends on how many things the package has to say. Where a
+package is a shelf of components, a page is a component — with one exception: a
+concept that several components share and none owns may have its own page.
 **Filter** is one, because a list filter, a range filter and a filter the
 application writes itself are one subject that would otherwise be scattered
-over `Column` and `Table`. A page still names one thing; a page covering three
-unrelated components would be a page nobody could link to.
+over `Column` and `Table`.
+
+Where a package is ONE component with two dozen things to say, a page is a
+**feature**. That is the schedule: pages by component would have been four, and
+seven of its subjects would have shared one — a reader who came for the now
+line would have read past pan, zoom, the tooltip and the selection to reach it.
+So *Now line*, *Bar labels*, *Snapping* and the rest are pages, and the outline
+is the table of contents of the component
+(`.scratch/schedule-lane-groups/spec.md`, "The demo").
+
+Either way a page names ONE thing and one only; a page covering three unrelated
+subjects would be a page nobody could link to.
 
 A page carries a **"Why it is like this"** where there was a real decision, and
 otherwise not at all: where an ADR answers the question the section links it

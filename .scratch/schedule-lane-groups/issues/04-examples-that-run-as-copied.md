@@ -57,10 +57,19 @@ one:
 - `schedule`, 12 offenders, including `Intent/99-demonstration.tsx › ../../data`
 - `core` and `table` passed untouched - neither had a shared fixture.
 
-`charts` is repaired the way the check allows and the spec's Out of Scope
-demands (the other demos' structure is not this spec's): each of its thirteen
-examples now **shows** `data.ts` as a second tab. Its code is copyable for the
-first time, and nothing about its structure moved.
+`charts` is repaired the way the check allows: each of its thirteen examples now
+**shows** `data.ts` as a second tab. Its code is copyable for the first time and
+nothing about its structure moved.
+
+**The warrant, stated honestly** (a review caught this report claiming the
+opposite): the spec does not ask for it. It says of the shell's new feature
+"No other demo uses it yet", and Out of Scope lists "the other three demos'
+structure". What forced the change is this ticket's own instruction that the
+check is "called by all four demos' suites" - charts had thirteen fixture
+imports, so either it declares them or its suite is red. Declaring them is the
+smaller of the two, and it touches no structure. If the intent was that charts
+keeps its fixture, the change to undo is the `shows` line in those thirteen
+files and the call in `packages/charts/tests-visual/own-data.spec.ts`.
 
 ### Feature specs
 

@@ -205,7 +205,7 @@ export class SceneGestures {
   ghostSummary(): GhostSummary | null {
     const gesture = this.gesture;
     if (gesture.kind !== "edit" && gesture.kind !== "place") return null;
-    const box = ghostBox(this.host, this.host.view.viewport(), gesture.ghost);
+    const box = ghostBox(this.host.view.viewport(), gesture.ghost);
     if (box === null) return null;
     const found = this.ghostFindings(gesture.ghost, this.ghostHome(gesture));
     const outer = gesture.kind === "edit" && (gesture.mode === "setup" || gesture.mode === "teardown");
@@ -302,6 +302,13 @@ export class SceneGestures {
     if (view.openForGesture.size === 0) return;
     view.openForGesture = new Set();
     this.host.viewChanged();
+  }
+
+  /** The lane a drop at this y would land on, with the y held inside the rows -
+      a drag carried past the last lane still aims at the last lane. */
+  private onLane(y: number): string | null {
+    const view = this.host.view;
+    return view.dropLaneIdAt(Math.max(0, Math.min(view.lanesBottom(), y)));
   }
 
   /** May this subtask go to this lane? Without a rule from the caller, every
@@ -610,7 +617,13 @@ export class SceneGestures {
     /* Asked at the first `dragOver` and held from there: before that moment
        there is no gesture to hold an answer for. */
     const refused =
-      this.gesture.kind === "place" ? this.gesture.refused : this.askRefused(this.askedFor(placing, x, y), null);
+      this.gesture.kind === "place"
+        ? this.gesture.refused
+        : /* Work dragged in sits on no lane until it is dropped. Where the
+             pointer is not over one either, the rule is asked about an item
+             whose own lane is empty - which is the truth of it: `canMoveTo`
+             is asked ABOUT a lane, and the one this item is on is none. */
+          this.askRefused(this.askedFor(placing, this.onLane(y) ?? "", x), null);
     const wanted = this.placeGhost(placing, x, y, refused);
     this.refused = wanted.refused;
     this.setCursor(wanted.refused ? "not-allowed" : "default");
@@ -647,20 +660,18 @@ export class SceneGestures {
     y: number,
     refused: ReadonlySet<string>,
   ): { ghost: Subtask | null; refused: boolean } {
-    const lane = this.host.view.dropLaneIdAt(Math.max(0, Math.min(this.host.view.lanesBottom(), y)));
+    const lane = this.onLane(y);
     if (lane === null) return { ghost: null, refused: false };
     /* Work dragged in may not land where placed work may not go either. */
     if (refused.has(lane)) return { ghost: null, refused: true };
-    return { ghost: { ...this.askedFor(placing, x, y), id: PLACING }, refused: false };
+    return { ghost: { ...this.askedFor(placing, lane, x), id: PLACING }, refused: false };
   }
 
   /** The dragged item as a subtask, under the caller's key for it - not the
       internal sentinel: the rule is asked about the thing the application says
       it is dragging, and the ghost only afterwards takes the sentinel. */
-  private askedFor(placing: PlacingItem, x: number, y: number): Subtask {
-    const view = this.host.view;
-    const lane = view.dropLaneIdAt(Math.max(0, Math.min(view.lanesBottom(), y))) ?? "";
-    const from = this.snapInside(view.timeAt(x), this.snapStep());
+  private askedFor(placing: PlacingItem, lane: string, x: number): Subtask {
+    const from = this.snapInside(this.host.view.timeAt(x), this.snapStep());
     return {
       id: placing.item,
       task: placing.task,
@@ -749,7 +760,7 @@ export class SceneGestures {
         }
         let lane = gesture.ghost.lane;
         if (intents.includes("lane")) {
-          const wanted = view.dropLaneIdAt(Math.max(0, Math.min(view.lanesBottom(), y))) ?? lane;
+          const wanted = this.onLane(y) ?? lane;
           /* A lane the subtask may not go to is refused, and the ghost stays
              where it last stood: a planner always sees where a drop would
              land, and never somewhere it could not. The set was asked when the

@@ -441,6 +441,12 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
                 data-lane={header.lane}
                 data-group={header.group}
                 data-row={header.kind}
+                /* A header's ROW is the box its contents may not leave. Not
+                   the column: a header below the fold is scrolled to, not
+                   lost. What this catches is a label, a count or a chevron
+                   that outgrew its own row - a group's head is slim, and a
+                   slim row is where that happens first. */
+                data-schedule-clip={`header ${header.kind}`}
                 /* The header says it too, for the whole run of a drag: the
                    plot marks the lane, the header marks its name - and an
                    application styling beside the schedule reads the same
@@ -451,6 +457,7 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
                   <button
                     type="button"
                     className={styles.chevron}
+                    data-schedule-overlay="fold control"
                     aria-expanded={header.collapsed === false}
                     aria-controls={(controlledBy.get(header.group) ?? [rowId(header)]).join(" ")}
                     aria-label={`${header.collapsed === true ? wording.scheduleUnfoldGroup : wording.scheduleFoldGroup}: ${typeof header.label === "string" ? header.label : header.group}`}
@@ -461,9 +468,11 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
                     </svg>
                   </button>
                 )}
-                <span className={styles.headerLabel}>{header.label}</span>
+                <span className={styles.headerLabel} data-schedule-overlay="header label">
+                  {header.label}
+                </span>
                 {header.kind !== "lane" && (
-                  <span className={styles.headerCount} data-lane-count={header.lanes}>
+                  <span className={styles.headerCount} data-schedule-overlay="lane count" data-lane-count={header.lanes}>
                     {wording.scheduleLaneCount(header.lanes)}
                   </span>
                 )}

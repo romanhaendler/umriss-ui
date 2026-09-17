@@ -27,7 +27,7 @@ test("the demonstration shows its plant in a second tab, and Copy takes the tab 
 
   const example = page.locator('[data-example="demonstration"]');
   await example.getByRole("button", { name: "Code" }).click();
-  const tabs = example.getByRole("tab");
+  const tabs = example.getByRole("group", { name: "Files of this example" }).getByRole("button");
   await expect(tabs).toHaveText(["01-demonstration.tsx", "data.ts"]);
 
   /* The example itself is in front, and Copy takes it. */
@@ -57,6 +57,6 @@ test("an example that shows nothing has no tabs at all", async ({ page }) => {
   await openExample(page, "schedule", "first-schedule");
   const example = page.locator('[data-example="first-schedule"]');
   await example.getByRole("button", { name: "Code" }).click();
-  await expect(example.getByRole("tab")).toHaveCount(0);
+  await expect(example.getByRole("group", { name: "Files of this example" })).toHaveCount(0);
   await expect(example.locator(".codeLanguage")).toHaveText("tsx");
 });

@@ -1,12 +1,16 @@
 /* The rows of a plot: a tree of lane groups and a set of folded ones, turned
    into what is actually laid out from top to bottom (ADR-0025).
 
-   ROW is this module's private word and appears nowhere in the API. A **Lane**
-   is a machine; a row is what the plot lays out - a lane's row, an open
-   group's slim head, or the one row a folded group becomes. The distinction is
-   the whole reason the word exists here: "a lane is not a row" is a standing
-   sentence of this component, and a layout that called them the same thing
-   would break it by accident.
+   ROW is this module's word. A **Lane** is a machine; a row is what the plot
+   lays out - a lane's row, an open group's slim head, or the one row a folded
+   group becomes. The distinction is the whole reason the word exists here: "a
+   lane is not a row" is a standing sentence of this component, and a layout
+   that called them the same thing would break it by accident.
+
+   It is in no exported name, no prop and no intent. It reaches the outside in
+   exactly one place, `data-row` on a lane header, and that is deliberate and
+   written down (ADR-0025): an application styling beside the schedule has to
+   be able to tell the three apart.
 
    Every real lane resolves to a SLOT: its own row where it has one, or its
    strip inside a miniature where its group is folded. Everything that needs a

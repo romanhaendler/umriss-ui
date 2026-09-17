@@ -298,7 +298,13 @@
   color: var(--u-color-text);
 }
 
-.codeTab[aria-selected="true"] {
+.codeTab:focus-visible {
+  outline: none;
+  box-shadow: var(--u-focus-ring);
+  color: var(--u-color-text);
+}
+
+.codeTab[aria-pressed="true"] {
   background: var(--u-color-surface);
   box-shadow: var(--u-edge);
   color: var(--u-color-text);

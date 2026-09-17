@@ -32,7 +32,10 @@ Spec: `.scratch/schedule-lane-groups/spec.md` (user stories 29–32, 39, 41)
   not something to stretch by three pixels.
 - **A finding is marked twice**: on the strip, and on the ROW. Folding is a
   planner tidying the view and must never be a planner hiding a finding, and a
-  three-pixel strip is not where an alarm can live alone.
+  three-pixel strip is not where an alarm can live alone. That holds for BOTH
+  findings - user story 31 says "an overlap **or a late transport**", and the
+  late transport was missing until a review caught it: `drawLateInFolds` marks
+  the time that is short on the row of the group the move arrives in.
 - **Inner groups show as a hairline** between the strips where one inner group
   ends and the next begins: the structure is part of the plant, at a smaller
   scale like everything else in there.
