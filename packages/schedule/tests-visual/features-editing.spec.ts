@@ -254,7 +254,7 @@ test("a drag from a list that leaves the lanes places nothing", async ({ page })
 });
 
 test("a drag into a removed night stops at the seam where time counts again", async ({ page }) => {
-  await openExample(page, "schedule", "operating-calendar");
+  await openExample(page, "time-axis", "operating-calendar");
   const example = page.locator('[data-example="operating-calendar"]');
   const plot = example.locator("[data-schedule-plot]");
   const box = (await plot.boundingBox())!;

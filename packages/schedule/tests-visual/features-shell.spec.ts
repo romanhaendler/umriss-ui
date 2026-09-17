@@ -9,7 +9,7 @@ checkShell({
   chip: { name: "Subtasks", pageId: "subtasks", absent: ["schedule", "ripple"] },
   rail: { name: "Transports", pageId: "transports", rubricId: "drawing" },
   neighbours: [
-    { name: "Lane", pageId: "lane" },
+    { name: "Lanes", pageId: "lane" },
     { name: "Subtasks", pageId: "subtasks" },
   ],
   deepLink: { pageId: "findings", absent: "schedule" },
