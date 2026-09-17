@@ -16,9 +16,34 @@ import { ALL_PAGES } from "../demo/outline";
 
 const EXAMPLES = DEMO.examples;
 
-/** Named exceptions: pages without a props table, each with its reason. */
+/** Named exceptions: pages without a props table, each with its reason.
+
+    Most of them share one. Since the demo was cut by feature
+    (schedule-lane-groups 05 and 06) a chapter is one thing `<Schedule>` can
+    do, and the props that do it are props of `<Schedule>` - whose table stands
+    once, on *First schedule*. Repeating that table on thirteen chapters would
+    be thirteen copies of one thing to keep true, and a reader who wants the
+    whole surface has one page to go to. */
+const A_CHAPTER = "A feature of `<Schedule>`; its props stand once, in `ScheduleProps` on *First schedule*.";
+
 const WITHOUT_TABLE: Readonly<Record<string, string>> = {
   ripple: "A function with positional parameters of types documented on their own pages - it has no props.",
+  "time-axis": A_CHAPTER,
+  "pan-and-zoom": A_CHAPTER,
+  "now-line": A_CHAPTER,
+  "bar-labels": A_CHAPTER,
+  appearances: A_CHAPTER,
+  overlap: A_CHAPTER,
+  routes: A_CHAPTER,
+  selection: A_CHAPTER,
+  "linked-schedules": A_CHAPTER,
+  handle: A_CHAPTER,
+  "move-and-lane": A_CHAPTER,
+  stretch: A_CHAPTER,
+  snapping: A_CHAPTER,
+  placing: A_CHAPTER,
+  "where-it-may-go": A_CHAPTER,
+  demonstration: A_CHAPTER,
 };
 
 /** Renders, and gives back the node together with its teardown – the teardown

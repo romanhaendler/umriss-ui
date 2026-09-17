@@ -25,6 +25,7 @@ import {
   type TransportPath,
   type Viewport,
 } from "./geometry";
+import { layOutRows, slotOf, type Rows } from "./rows";
 import type { IntentKind, Subtask, Transport, TransportAttachment, TransportEnds, TransportRoute } from "./model";
 import type { SceneData } from "./sceneData";
 import type { SnapRaster } from "./snap";
@@ -72,6 +73,10 @@ export class SceneView {
   scrollY = 0;
   width = 0;
   height = 0;
+  /* What is laid out from top to bottom (`rows.ts`). It is derived here and
+     not in the data, because a row's height comes from a view option; every y
+     in the package reads it. */
+  rows: Rows = layOutRows({ lanes: [], groups: [], collapsed: new Set(), laneHeight: DEFAULT_LANE_HEIGHT });
   boxes: SubtaskBox[] = [];
   boxById = new Map<string, SubtaskBox>();
   paths: TransportPath[] = [];
@@ -96,16 +101,17 @@ export class SceneView {
       calendar: this.options.calendar,
       laneHeight: this.options.laneHeight,
       scrollY: this.scrollY,
+      rows: this.rows,
     };
   }
 
   maxScroll(): number {
-    return Math.max(0, this.data.lanes.length * this.options.laneHeight - this.height);
+    return Math.max(0, this.rows.height - this.height);
   }
 
   /** The lowest y that still lies on a lane. */
   lanesBottom(): number {
-    return this.data.lanes.length * this.options.laneHeight - this.scrollY - 1;
+    return this.rows.height - this.scrollY - 1;
   }
 
   /** The fine band's step at the current zoom. */
@@ -114,16 +120,24 @@ export class SceneView {
     return fineStep(this.width > 0 ? span / this.width : span);
   }
 
-  /** Clamps the scroll and lays the data out anew. */
+  /** Lays the rows out, clamps the scroll, and lays the data out anew. */
   layout(): void {
+    /* No group exists yet (schedule-lane-groups 08 declares them), so the tree
+       is flat and this is exactly the arithmetic it replaces. */
+    this.rows = layOutRows({
+      lanes: this.data.lanes.map((lane) => ({ id: lane.id, parent: undefined })),
+      groups: [],
+      collapsed: new Set(),
+      laneHeight: this.options.laneHeight,
+    });
     this.scrollY = Math.max(0, Math.min(this.maxScroll(), this.scrollY));
     const view = this.viewport();
     this.boxes = [];
     this.boxById = new Map();
     for (const subtask of this.data.subtasks) {
-      const lane = this.data.laneIndex.get(subtask.lane);
-      if (lane === undefined) continue;
-      const box = subtaskBox(view, subtask, lane, this.data.depth.get(subtask.id) ?? 0);
+      const slot = slotOf(this.rows, subtask.lane);
+      if (slot === null) continue;
+      const box = subtaskBox(view, subtask, subtask.lane, slot, this.data.depth.get(subtask.id) ?? 0);
       this.boxes.push(box);
       this.boxById.set(subtask.id, box);
     }
@@ -176,8 +190,8 @@ export class SceneView {
       }
     }
     if (nearest !== null) return { kind: "transport", transport: nearest.transport };
-    const lane = laneAt(this.viewport(), y, this.data.lanes.length);
-    return lane >= 0 ? { kind: "lane", lane: this.data.lanes[lane]!.id } : { kind: "nothing" };
+    const lane = laneAt(this.viewport(), y);
+    return lane !== null ? { kind: "lane", lane } : { kind: "nothing" };
   }
 
   /** The wall-clock time at a plot x; within the calendar's extent. */
@@ -189,8 +203,7 @@ export class SceneView {
   }
 
   laneIdAt(y: number): string | null {
-    const index = laneAt(this.viewport(), y, this.data.lanes.length);
-    return index >= 0 ? this.data.lanes[index]!.id : null;
+    return laneAt(this.viewport(), y);
   }
 
   /** Pans by pixels. Says what moved: the span through time, the lanes, or

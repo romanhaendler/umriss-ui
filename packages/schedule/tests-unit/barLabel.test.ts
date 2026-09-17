@@ -11,7 +11,8 @@ import type { SubtaskBox } from "../src/geometry";
 function box(mainFrom: number, mainTo: number, extra: Partial<SubtaskBox> = {}): SubtaskBox {
   return {
     subtask: { id: "s", task: "t", lane: "l", from: 0, to: 0 },
-    laneIndex: 0,
+    lane: "l",
+    miniature: false,
     depth: 0,
     y: 10,
     height: 23,
