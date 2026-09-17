@@ -11,7 +11,7 @@
 @layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.components {
-  .kc-root {
+  .uc-root {
     --uc-color-axis: var(--u-edge-color-strong, rgba(23, 23, 23, 0.17));
     --uc-color-grid: var(--u-hairline, rgba(23, 23, 23, 0.06));
     --uc-color-text: var(--u-color-text-muted, #71717a);
@@ -63,107 +63,107 @@
     font-feature-settings: "tnum" 1;
   }
 
-  .kc-plot {
+  .uc-plot {
     position: relative;
     flex: 1 1 auto;
     min-height: 0;
     min-width: 0;
   }
 
-  .kc-plot > canvas {
+  .uc-plot > canvas {
     position: absolute;
     inset: 0;
     display: block;
-    pointer-events: none; /* .kc-plot catches the mouse events (R-2.8) */
+    pointer-events: none; /* .uc-plot catches the mouse events (R-2.8) */
   }
 
   /* ---------------- Axes (HTML, no canvas text) ---------------- */
 
-  .kc-axes {
+  .uc-axes {
     position: absolute;
     inset: 0;
     pointer-events: none;
   }
 
-  .kc-axis {
+  .uc-axis {
     position: absolute;
   }
 
-  .kc-axis-line {
+  .uc-axis-line {
     position: absolute;
     background: var(--uc-color-axis);
   }
 
-  .kc-axis-y > .kc-axis-line {
+  .uc-axis-y > .uc-axis-line {
     top: 0;
     width: 1px;
     height: 100%;
   }
-  .kc-axis-left > .kc-axis-line {
+  .uc-axis-left > .uc-axis-line {
     right: 0;
   }
-  .kc-axis-right > .kc-axis-line {
+  .uc-axis-right > .uc-axis-line {
     left: 0;
   }
 
-  .kc-axis-x > .kc-axis-line {
+  .uc-axis-x > .uc-axis-line {
     left: 0;
     width: 100%;
     height: 1px;
   }
-  .kc-axis-bottom > .kc-axis-line {
+  .uc-axis-bottom > .uc-axis-line {
     top: 0;
   }
-  .kc-axis-top > .kc-axis-line {
+  .uc-axis-top > .uc-axis-line {
     bottom: 0;
   }
 
-  .kc-tick {
+  .uc-tick {
     position: absolute;
   }
 
-  .kc-axis-y > .kc-tick {
+  .uc-axis-y > .uc-tick {
     left: 0;
     right: 0;
     height: 1px;
   }
 
-  .kc-axis-x > .kc-tick {
+  .uc-axis-x > .uc-tick {
     top: 0;
     bottom: 0;
     width: 1px;
   }
 
-  .kc-tick-mark {
+  .uc-tick-mark {
     position: absolute;
     background: var(--uc-color-axis);
   }
 
-  .kc-axis-y > .kc-tick > .kc-tick-mark {
+  .uc-axis-y > .uc-tick > .uc-tick-mark {
     top: 0;
     width: 5px;
     height: 1px;
   }
-  .kc-axis-left > .kc-tick > .kc-tick-mark {
+  .uc-axis-left > .uc-tick > .uc-tick-mark {
     right: 0;
   }
-  .kc-axis-right > .kc-tick > .kc-tick-mark {
+  .uc-axis-right > .uc-tick > .uc-tick-mark {
     left: 0;
   }
 
-  .kc-axis-x > .kc-tick > .kc-tick-mark {
+  .uc-axis-x > .uc-tick > .uc-tick-mark {
     left: 0;
     width: 1px;
     height: 5px;
   }
-  .kc-axis-bottom > .kc-tick > .kc-tick-mark {
+  .uc-axis-bottom > .uc-tick > .uc-tick-mark {
     top: 0;
   }
-  .kc-axis-top > .kc-tick > .kc-tick-mark {
+  .uc-axis-top > .uc-tick > .uc-tick-mark {
     bottom: 0;
   }
 
-  .kc-tick-label {
+  .uc-tick-label {
     position: absolute;
     white-space: pre;
     font-size: var(--uc-size-tick);
@@ -173,18 +173,18 @@
   }
 
   /* Ticks of the y axes sit on the line, labels centred to them (R-4.16). */
-  .kc-axis-y > .kc-tick > .kc-tick-label {
+  .uc-axis-y > .uc-tick > .uc-tick-label {
     top: 50%;
     transform: translateY(-50%);
   }
-  .kc-axis-left > .kc-tick > .kc-tick-label {
+  .uc-axis-left > .uc-tick > .uc-tick-label {
     text-align: right;
   }
-  .kc-axis-right > .kc-tick > .kc-tick-label {
+  .uc-axis-right > .uc-tick > .uc-tick-label {
     text-align: left;
   }
 
-  .kc-axis-title {
+  .uc-axis-title {
     position: absolute;
     white-space: pre;
     font-size: var(--uc-size-title);
@@ -193,35 +193,35 @@
     color: var(--uc-color-text);
   }
 
-  .kc-axis-x > .kc-axis-title {
+  .uc-axis-x > .uc-axis-title {
     left: 0;
     right: 0;
     text-align: center;
   }
-  .kc-axis-bottom > .kc-axis-title {
+  .uc-axis-bottom > .uc-axis-title {
     bottom: 0;
   }
-  .kc-axis-top > .kc-axis-title {
+  .uc-axis-top > .uc-axis-title {
     top: 0;
   }
 
   /* Y titles stand rotated outside their axis (R-4.16). */
-  .kc-axis-y > .kc-axis-title {
+  .uc-axis-y > .uc-axis-title {
     top: 50%;
     writing-mode: vertical-rl;
   }
-  .kc-axis-left > .kc-axis-title {
+  .uc-axis-left > .uc-axis-title {
     left: 0;
     transform: translateY(-50%) rotate(180deg);
   }
-  .kc-axis-right > .kc-axis-title {
+  .uc-axis-right > .uc-axis-title {
     right: 0;
     transform: translateY(-50%);
   }
 
   /* ---------------- Legend (R-4.11) ---------------- */
 
-  .kc-legend {
+  .uc-legend {
     display: flex;
     flex-wrap: wrap;
     gap: 4px 14px;
@@ -230,24 +230,24 @@
     color: var(--uc-color-text);
   }
 
-  .kc-legend-top {
+  .uc-legend-top {
     order: -1;
     padding-bottom: 8px;
   }
 
-  .kc-legend-bottom {
+  .uc-legend-bottom {
     order: 1;
     padding-top: 8px;
   }
 
-  .kc-legend-item {
+  .uc-legend-item {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     cursor: default;
   }
 
-  .kc-legend-chip {
+  .uc-legend-chip {
     display: inline-block;
     width: 10px;
     height: 10px;
@@ -256,7 +256,7 @@
 
   /* ---------------- Tooltip (R-4.8, R-4.9) ---------------- */
 
-  .kc-tooltip {
+  .uc-tooltip {
     position: absolute;
     top: 0;
     left: 0;
@@ -275,7 +275,7 @@
     color: var(--uc-color-text);
   }
 
-  .kc-tooltip-head {
+  .uc-tooltip-head {
     font-family: var(--uc-font-mono);
     font-size: 11.5px;
     letter-spacing: 0.01em;
@@ -284,35 +284,35 @@
     border-bottom: 1px solid var(--uc-color-grid);
   }
 
-  .kc-tooltip-list {
+  .uc-tooltip-list {
     display: grid;
     grid-template-columns: auto 1fr auto;
     gap: 3px 8px;
     align-items: center;
   }
 
-  .kc-tooltip-row {
+  .uc-tooltip-row {
     display: contents;
   }
 
-  .kc-tooltip-chip {
+  .uc-tooltip-chip {
     width: 8px;
     height: 8px;
     border-radius: 2px;
   }
 
-  .kc-tooltip-name {
+  .uc-tooltip-name {
     white-space: nowrap;
   }
 
-  .kc-tooltip-value {
+  .uc-tooltip-value {
     font-family: var(--uc-font-mono);
     text-align: right;
     white-space: nowrap;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .kc-tooltip {
+    .uc-tooltip {
       transition: none;
     }
   }
@@ -321,7 +321,7 @@
      Must have the same font resolution as the real labels; the positioning of the
      label rules is reset here. */
 
-  .kc-measure {
+  .uc-measure {
     position: absolute;
     top: 0;
     left: 0;
@@ -339,7 +339,7 @@
      Both are axis decoration and therefore HTML like the ticks: same font, same
      theme, same overflow behaviour, and no text on the canvas (R-2.8). */
 
-  .kc-limit-label {
+  .uc-limit-label {
     position: absolute;
     font-size: var(--uc-size-tick);
     line-height: 1.25;
@@ -352,36 +352,36 @@
     padding: 0 2px;
   }
 
-  .kc-limit-label[data-severity="warning"] {
+  .uc-limit-label[data-severity="warning"] {
     color: var(--uc-color-warning);
   }
 
-  .kc-limit-label[data-severity="alarm"] {
+  .uc-limit-label[data-severity="alarm"] {
     color: var(--uc-color-alarm);
   }
 
   /* A calculated limit is labelled neutrally: it claims nothing about good or bad,
      it says what the process otherwise does. */
-  .kc-limit-label[data-role="control"],
-  .kc-limit-label[data-role="zone"] {
+  .uc-limit-label[data-role="control"],
+  .uc-limit-label[data-role="zone"] {
     color: var(--uc-color-text);
   }
 
-  .kc-axis-y .kc-limit-label {
+  .uc-axis-y .uc-limit-label {
     transform: translateY(-50%);
   }
 
-  .kc-axis-left .kc-limit-label {
+  .uc-axis-left .uc-limit-label {
     right: 9px;
   }
 
-  .kc-axis-right .kc-limit-label {
+  .uc-axis-right .uc-limit-label {
     left: 9px;
   }
 
   /* A break says: time was removed here. Two strokes, the way an interrupted axis
      carries them in every textbook. */
-  .kc-break {
+  .uc-break {
     position: absolute;
     top: 0;
     width: 7px;
@@ -390,8 +390,8 @@
     color: var(--uc-color-text);
   }
 
-  .kc-break::before,
-  .kc-break::after {
+  .uc-break::before,
+  .uc-break::after {
     content: "";
     position: absolute;
     top: 0;
@@ -402,11 +402,11 @@
     transform: skewX(-20deg);
   }
 
-  .kc-break::before {
+  .uc-break::before {
     left: 1px;
   }
 
-  .kc-break::after {
+  .uc-break::after {
     left: 4px;
   }
 }

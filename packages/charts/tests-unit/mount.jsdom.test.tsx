@@ -46,29 +46,29 @@ describe("Mount in jsdom", () => {
       await new Promise<void>((r) => requestAnimationFrame(() => r()));
     });
 
-    const container = host.querySelector(".kc-root");
+    const container = host.querySelector(".uc-root");
     expect(container).not.toBeNull();
     expect(container?.querySelectorAll("canvas")).toHaveLength(2);
     expect(container?.querySelectorAll("canvas[aria-hidden='true']")).toHaveLength(2);
     // The legend renders the registered series.
-    expect(host.querySelectorAll(".kc-legend-item")).toHaveLength(2);
+    expect(host.querySelectorAll(".uc-legend-item")).toHaveLength(2);
 
     /* library-audit 05: `role="img"` stood on the root, and the root contains the
        legend. The descendants of an image are presentational to a screen reader -
        which made the only operable element of the chart unreachable. The image is
        now the plot area. */
-    const plot = host.querySelector(".kc-plot");
+    const plot = host.querySelector(".uc-plot");
     expect(container?.hasAttribute("role")).toBe(false);
     expect(plot?.getAttribute("role")).toBe("img");
     expect(plot?.getAttribute("aria-label")).toBe("jsdom test");
-    for (const entry of host.querySelectorAll(".kc-legend-item")) {
+    for (const entry of host.querySelectorAll(".uc-legend-item")) {
       expect(plot?.contains(entry)).toBe(false);
     }
 
     await act(async () => {
       root.unmount();
     });
-    expect(host.querySelector(".kc-root")).toBeNull();
+    expect(host.querySelector(".uc-root")).toBeNull();
   });
 
 });

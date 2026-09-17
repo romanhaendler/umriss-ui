@@ -69,7 +69,7 @@ case table and that test therefore moved in a single commit; a divergence stays 
 red test and not a report from the field.
 
 `--uc-color-alarm` is unchanged. What moved beside the model is
-`.kc-limit-label[data-severity="warnung"]`, which now reads `"warning"` — the
+`.uc-limit-label[data-severity="warnung"]`, which now reads `"warning"` — the
 same word `tone` has carried all along.
 
 ## 0.3.0-rc.0 – Where the library contradicted itself (Sep. 2026)
@@ -104,10 +104,10 @@ on first mounting as before in JSX order, after that a returning series gets its
 colour back. A series without a `name` still takes the colour of its position and
 warns in DEV when that shifts. Drawing happens unchanged in registration order.
 
-**`role="img"` and `aria-label` stand at the plot area** (`.kc-plot`), no longer
+**`role="img"` and `aria-label` stand at the plot area** (`.uc-plot`), no longer
 at the root. The root contains the legend, and the descendants of an image are
 presentation to a screen reader — the legend was unreachable. Whoever looked for
-the role at `.kc-root` finds it one level deeper.
+the role at `.uc-root` finds it one level deeper.
 
 ### New
 

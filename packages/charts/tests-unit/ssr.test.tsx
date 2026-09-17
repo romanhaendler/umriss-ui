@@ -10,9 +10,9 @@ describe("SSR", () => {
     const html = renderToString(
       <Chart data={[]} ariaLabel="SSR test" height={200} />,
     );
-    expect(html).toContain("kc-root");
-    expect(html).toContain("kc-layer-series");
-    expect(html).toContain("kc-layer-overlay");
+    expect(html).toContain("uc-root");
+    expect(html).toContain("uc-layer-series");
+    expect(html).toContain("uc-layer-overlay");
     expect(html).toContain('role="img"');
   });
 });

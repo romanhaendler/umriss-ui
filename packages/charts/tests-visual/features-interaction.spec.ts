@@ -38,7 +38,7 @@ async function pointAt(
   fx: number,
   fy: number,
 ): Promise<void> {
-  const box = await example.locator(".kc-plot").first().boundingBox();
+  const box = await example.locator(".uc-plot").first().boundingBox();
   if (box === null) throw new Error("plot area not found");
   await page.mouse.move(box.x + box.width * fx, box.y + box.height * fy);
   await page.waitForTimeout(150);
@@ -48,10 +48,10 @@ test("a hover shows the crosshair and a tooltip with every series", async ({ pag
   await openExample(page, "line", "multi-series");
   const example = page.locator('[data-example="multi-series"]');
   await example.scrollIntoViewIfNeeded();
-  expect(await occupiedPixels(example, "kc-layer-overlay")).toBe(0);
+  expect(await occupiedPixels(example, "uc-layer-overlay")).toBe(0);
 
   await pointAt(page, example, 0.98, 0.4);
-  const tooltip = example.locator(".kc-tooltip");
+  const tooltip = example.locator(".uc-tooltip");
   await expect(tooltip).toHaveCSS("opacity", "1");
   const text = await tooltip.innerText();
   for (const name of ["Series A", "Series B", "Series C", "Series D (with a gap)"]) {
@@ -61,7 +61,7 @@ test("a hover shows the crosshair and a tooltip with every series", async ({ pag
   expect(text).toContain("26.933");
   expect(text).toContain("64.265");
   // The crosshair and the markers lie on the overlay layer.
-  expect(await occupiedPixels(example, "kc-layer-overlay")).toBeGreaterThan(0);
+  expect(await occupiedPixels(example, "uc-layer-overlay")).toBeGreaterThan(0);
 });
 
 test("the gap series is missing at the place of the gap", async ({ page }) => {
@@ -69,7 +69,7 @@ test("the gap series is missing at the place of the gap", async ({ page }) => {
   const example = page.locator('[data-example="multi-series"]');
   await example.scrollIntoViewIfNeeded();
   await pointAt(page, example, 0.45, 0.5);
-  const text = await example.locator(".kc-tooltip").innerText();
+  const text = await example.locator(".uc-tooltip").innerText();
   expect(text).toContain("Series A");
   expect(text).toContain("Series B");
   expect(text).toContain("Series C");
@@ -82,16 +82,16 @@ test("the tooltip flips to the left at the right edge", async ({ page }) => {
   await example.scrollIntoViewIfNeeded();
 
   await pointAt(page, example, 0.3, 0.5);
-  const left = await example.locator(".kc-tooltip").boundingBox();
+  const left = await example.locator(".uc-tooltip").boundingBox();
   const crosshairLeft = await example
-    .locator(".kc-tooltip")
+    .locator(".uc-tooltip")
     .evaluate((el) => el.style.transform);
 
   // 0.98 still lies inside the plot area; the outer padding does not belong to it
   // and deliberately ends the hover (R-4.10).
   await pointAt(page, example, 0.98, 0.5);
-  const right = await example.locator(".kc-tooltip").boundingBox();
-  const plot = await example.locator(".kc-plot").boundingBox();
+  const right = await example.locator(".uc-tooltip").boundingBox();
+  const plot = await example.locator(".uc-plot").boundingBox();
   if (left === null || right === null || plot === null) throw new Error("boxes missing");
 
   expect(crosshairLeft).not.toBe("");
@@ -106,12 +106,12 @@ test("the mouse leaves the plot area - the overlay is empty", async ({ page }) =
   const example = page.locator('[data-example="multi-series"]');
   await example.scrollIntoViewIfNeeded();
   await pointAt(page, example, 0.5, 0.5);
-  expect(await occupiedPixels(example, "kc-layer-overlay")).toBeGreaterThan(0);
+  expect(await occupiedPixels(example, "uc-layer-overlay")).toBeGreaterThan(0);
 
   await page.mouse.move(2, 2);
   await page.waitForTimeout(200);
-  expect(await occupiedPixels(example, "kc-layer-overlay")).toBe(0);
-  await expect(example.locator(".kc-tooltip")).toHaveCSS("opacity", "0");
+  expect(await occupiedPixels(example, "uc-layer-overlay")).toBe(0);
+  await expect(example.locator(".uc-tooltip")).toHaveCSS("opacity", "0");
 });
 
 test("multiple axes: values per axis space, right labels right of the marks", async ({
@@ -123,7 +123,7 @@ test("multiple axes: values per axis space, right labels right of the marks", as
   await pointAt(page, example, 0.5, 0.5);
 
   // Every series reads from its own y axis: three clearly separated magnitudes.
-  const values = await example.locator(".kc-tooltip .kc-tooltip-value").allInnerTexts();
+  const values = await example.locator(".uc-tooltip .uc-tooltip-value").allInnerTexts();
   const numbers = values.map((t) => Number(t.replace(/,/g, "")));
   expect(numbers).toHaveLength(3);
   const [small, large, medium] = numbers as [number, number, number];
@@ -134,16 +134,16 @@ test("multiple axes: values per axis space, right labels right of the marks", as
   expect(medium).toBeLessThan(1_000);
 
   // R-4.16: the tick labels of a right y axis stand to the right of their marks.
-  const right = example.locator('.kc-axis-right[data-axis="large"] .kc-tick').first();
-  const mark = await right.locator(".kc-tick-mark").boundingBox();
-  const label = await right.locator(".kc-tick-label").boundingBox();
+  const right = example.locator('.uc-axis-right[data-axis="large"] .uc-tick').first();
+  const mark = await right.locator(".uc-tick-mark").boundingBox();
+  const label = await right.locator(".uc-tick-label").boundingBox();
   if (mark === null || label === null) throw new Error("tick not found");
   expect(label.x).toBeGreaterThan(mark.x + mark.width - 1);
 
   // … and to the left of them on the left axis.
-  const leftAxis = example.locator('.kc-axis-left[data-axis="small"] .kc-tick').first();
-  const markL = await leftAxis.locator(".kc-tick-mark").boundingBox();
-  const labelL = await leftAxis.locator(".kc-tick-label").boundingBox();
+  const leftAxis = example.locator('.uc-axis-left[data-axis="small"] .uc-tick').first();
+  const markL = await leftAxis.locator(".uc-tick-mark").boundingBox();
+  const labelL = await leftAxis.locator(".uc-tick-label").boundingBox();
   if (markL === null || labelL === null) throw new Error("tick not found");
   expect(labelL.x + labelL.width).toBeLessThanOrEqual(markL.x + 1);
 });
@@ -158,7 +158,7 @@ test("container resize: collapsing and expanding without an error", async ({ pag
 
   const example = page.locator('[data-example="sizes"]');
   await example.scrollIntoViewIfNeeded();
-  const before = await example.locator(".kc-plot").first().boundingBox();
+  const before = await example.locator(".uc-plot").first().boundingBox();
 
   await example.getByRole("button", { name: "Collapse" }).click();
   await page.waitForTimeout(200);
@@ -166,10 +166,10 @@ test("container resize: collapsing and expanding without an error", async ({ pag
   await example.getByRole("button", { name: "Expand" }).click();
   await page.waitForTimeout(200);
 
-  const after = await example.locator(".kc-plot").first().boundingBox();
+  const after = await example.locator(".uc-plot").first().boundingBox();
   if (before === null || after === null) throw new Error("plot area missing");
   expect(Math.round(after.width)).toBe(Math.round(before.width));
-  expect(await occupiedPixels(example, "kc-layer-series")).toBeGreaterThan(0);
+  expect(await occupiedPixels(example, "uc-layer-series")).toBeGreaterThan(0);
   expect(errors).toEqual([]);
 });
 
@@ -179,9 +179,9 @@ test("switching the theme changes the axis and series colours without a reload",
   await example.scrollIntoViewIfNeeded();
 
   const labelColor = () =>
-    example.locator(".kc-tick-label").first().evaluate((el) => getComputedStyle(el).color);
+    example.locator(".uc-tick-label").first().evaluate((el) => getComputedStyle(el).color);
   const layerSignature = () =>
-    example.locator("canvas.kc-layer-series").evaluate((el) => {
+    example.locator("canvas.uc-layer-series").evaluate((el) => {
       const canvas = el as HTMLCanvasElement;
       const ctx = canvas.getContext("2d");
       if (ctx === null) return "";
@@ -202,7 +202,7 @@ test("switching the theme changes the axis and series colours without a reload",
   expect(await labelColor()).not.toBe(colorBefore);
   expect(await layerSignature()).not.toBe(signatureBefore);
   // No reload: the demo is still the same page.
-  await expect(example.locator("canvas.kc-layer-series")).toBeVisible();
+  await expect(example.locator("canvas.uc-layer-series")).toBeVisible();
 });
 
 /** The mean y position of every pixel of one exact colour on the overlay, as a
@@ -215,7 +215,7 @@ async function markerPosition(
   b: number,
 ): Promise<number> {
   return example
-    .locator("canvas.kc-layer-overlay")
+    .locator("canvas.uc-layer-overlay")
     .first()
     .evaluate(
       (el, color) => {
@@ -254,7 +254,7 @@ test("the mixed example: the tooltip carries every series kind", async ({ page }
   const example = page.locator('[data-example="mixed"]');
   await example.scrollIntoViewIfNeeded();
   await pointAt(page, example, 0.8, 0.5);
-  const text = await example.locator(".kc-tooltip").innerText();
+  const text = await example.locator(".uc-tooltip").innerText();
   // Bars, a band area, a line and a scatter at one position, in one chart.
   for (const name of ["Inflow", "Outflow", "Corridor", "Stock", "Samples"]) {
     expect(text).toContain(name);
@@ -271,11 +271,11 @@ test("the mixed example: the bar marker follows the value, not the foot", async 
   // Two periods with clearly different inflow. If the marker sat at the foot of
   // the bar - the baseline 0 - it would lie in the same place both times.
   await pointAt(page, example, 0.22, 0.5);
-  const smallValue = valueOf(await example.locator(".kc-tooltip").innerText(), "Inflow");
+  const smallValue = valueOf(await example.locator(".uc-tooltip").innerText(), "Inflow");
   const smallPosition = await markerPosition(example, 37, 99, 235);
 
   await pointAt(page, example, 0.78, 0.5);
-  const largeValue = valueOf(await example.locator(".kc-tooltip").innerText(), "Inflow");
+  const largeValue = valueOf(await example.locator(".uc-tooltip").innerText(), "Inflow");
   const largePosition = await markerPosition(example, 37, 99, 235);
 
   expect(smallPosition).toBeGreaterThan(0);
@@ -299,7 +299,7 @@ const MACHINES = ["Furnace 1", "Press 2", "Mill 3"];
 /** What the tooltip says at a place; empty when it says nothing. */
 async function tooltipText(page: Page, example: Locator, fx: number, fy: number): Promise<string> {
   await pointAt(page, example, fx, fy);
-  const tooltip = example.locator(".kc-tooltip").first();
+  const tooltip = example.locator(".uc-tooltip").first();
   if ((await tooltip.count()) === 0) return "";
   const visible = await tooltip.evaluate((el) => getComputedStyle(el).opacity);
   return visible === "1" ? await tooltip.innerText() : "";
@@ -372,8 +372,8 @@ test("control chart: everything lies on the series layer, nothing on the overlay
   await openExample(page, "controlchart", "control-chart");
   const example = page.locator('[data-example="control-chart"]');
   await example.scrollIntoViewIfNeeded();
-  expect(await occupiedPixels(example, "kc-layer-series")).toBeGreaterThan(0);
-  expect(await occupiedPixels(example, "kc-layer-overlay")).toBe(0);
+  expect(await occupiedPixels(example, "uc-layer-series")).toBeGreaterThan(0);
+  expect(await occupiedPixels(example, "uc-layer-overlay")).toBe(0);
 });
 
 test("schedule: at the far right only the open span is still running", async ({ page }) => {
