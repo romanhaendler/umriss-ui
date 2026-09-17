@@ -7,11 +7,11 @@ import { open, openExample } from "./navigation";
 checkPage({
   open,
   openExample,
-  pageId: "schedule",
-  examples: ["first-schedule", "many-lanes", "operating-calendar"],
-  other: { name: "Lane", pageId: "lane" },
+  pageId: "appearances",
+  examples: ["provisional", "fixed", "muted"],
+  other: { name: "Lanes", pageId: "lane" },
   packageName: "@umriss-ui/schedule",
-  importLine: 'import { Schedule, Lane, Subtasks, Transports } from "@umriss-ui/schedule";',
+  importLine: 'import { Subtasks, resolveAppearance } from "@umriss-ui/schedule";',
 });
 
 /* ------------------------------------------------------------------ */
