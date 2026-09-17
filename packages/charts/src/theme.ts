@@ -1,11 +1,22 @@
 /* Theme module (R-1.7):
    Canvas knows no CSS variables. The resolved values are read **once** per chart
-   root through getComputedStyle and cached as a ResolvedTheme. Invalidation:
-   (a) a global MutationObserver on document.documentElement
-       (attribute and class changes, e.g. switching data-theme),
-   (b) the explicit invalidateTheme() API.
+   root and cached as a ResolvedTheme. Invalidation:
+   (a) a global MutationObserver on document.documentElement (attribute
+       changes - a `style="color-scheme: dark"`, a `class="dark"`, a `data-*`
+       an application switches its mode with),
+   (b) a subscription to `prefers-color-scheme`, for an application that
+       follows the system with `color-scheme: light dark`,
+   (c) the explicit invalidateTheme() API, for a switch on another ancestor.
    After an invalidation all subscribers read anew and trigger a redraw.
-   getComputedStyle never runs inside the draw loop - only here, outside it. */
+   getComputedStyle never runs inside the draw loop - only here, outside it.
+
+   A colour is not read as the variable's text: a token written
+   `light-dark(<light>, <dark>)` (ADR-0021) comes back as exactly that, and a
+   canvas ignores it. Each colour is set on a probe element inside the chart
+   root as `color: var(--uc-…)` and read back as the computed `color`, which
+   the browser resolves in the scheme that applies there. Where no resolution
+   comes back (a DOM without a style engine), the variable's text is used, as
+   before. */
 
 export interface ResolvedTheme {
   colorAxis: string;
@@ -55,22 +66,40 @@ function readVar(style: CSSStyleDeclaration, name: string, fallback: string): st
 
 function readTheme(root: Element): ResolvedTheme {
   const style = getComputedStyle(root);
-  const series: string[] = [];
-  for (let i = 1; i <= 6; i++) {
-    series.push(readVar(style, `--uc-series-${i}`, FALLBACK_THEME.series[i - 1] ?? "#2563eb"));
-  }
-  return {
-    colorAxis: readVar(style, "--uc-color-axis", FALLBACK_THEME.colorAxis),
-    colorGrid: readVar(style, "--uc-color-grid", FALLBACK_THEME.colorGrid),
-    colorText: readVar(style, "--uc-color-text", FALLBACK_THEME.colorText),
-    colorBg: readVar(style, "--uc-color-bg", FALLBACK_THEME.colorBg),
-    colorWarning: readVar(style, "--uc-color-warning", FALLBACK_THEME.colorWarning),
-    colorAlarm: readVar(style, "--uc-color-alarm", FALLBACK_THEME.colorAlarm),
-    colorOk: readVar(style, "--uc-color-ok", FALLBACK_THEME.colorOk),
-    font: readVar(style, "--uc-font", FALLBACK_THEME.font),
-    fontMono: readVar(style, "--uc-font-mono", FALLBACK_THEME.fontMono),
-    series,
+  const probe = root.ownerDocument.createElement("span");
+  probe.setAttribute("aria-hidden", "true");
+  probe.style.position = "absolute";
+  probe.style.visibility = "hidden";
+  root.appendChild(probe);
+
+  const readColour = (name: string, fallback: string): string => {
+    const text = readVar(style, name, fallback);
+    if (text === fallback) return fallback;
+    probe.style.color = `var(${name})`;
+    const resolved = getComputedStyle(probe).color;
+    return resolved === "" || resolved.startsWith("var(") ? text : resolved;
   };
+
+  try {
+    const series: string[] = [];
+    for (let i = 1; i <= 6; i++) {
+      series.push(readColour(`--uc-series-${i}`, FALLBACK_THEME.series[i - 1] ?? "#2563eb"));
+    }
+    return {
+      colorAxis: readColour("--uc-color-axis", FALLBACK_THEME.colorAxis),
+      colorGrid: readColour("--uc-color-grid", FALLBACK_THEME.colorGrid),
+      colorText: readColour("--uc-color-text", FALLBACK_THEME.colorText),
+      colorBg: readColour("--uc-color-bg", FALLBACK_THEME.colorBg),
+      colorWarning: readColour("--uc-color-warning", FALLBACK_THEME.colorWarning),
+      colorAlarm: readColour("--uc-color-alarm", FALLBACK_THEME.colorAlarm),
+      colorOk: readColour("--uc-color-ok", FALLBACK_THEME.colorOk),
+      font: readVar(style, "--uc-font", FALLBACK_THEME.font),
+      fontMono: readVar(style, "--uc-font-mono", FALLBACK_THEME.fontMono),
+      series,
+    };
+  } finally {
+    probe.remove();
+  }
 }
 
 function ensureObserver(): void {
@@ -78,6 +107,9 @@ function ensureObserver(): void {
   if (typeof MutationObserver === "undefined" || typeof document === "undefined") return;
   observer = new MutationObserver(() => invalidateTheme());
   observer.observe(document.documentElement, { attributes: true });
+  if (typeof window !== "undefined" && typeof window.matchMedia === "function") {
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", () => invalidateTheme());
+  }
 }
 
 /** Resolved theme for a chart root element (cached, generation-safe). */

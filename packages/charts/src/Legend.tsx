@@ -29,15 +29,15 @@ function LegendInner({
   );
   if (snapshot.series.length === 0) return null;
   return (
-    <div className={`kc-legend kc-legend-${placement}`}>
+    <div className={`uc-legend uc-legend-${placement}`}>
       {snapshot.series.map((item) => (
         <span
           key={item.id}
-          className="kc-legend-item"
+          className="uc-legend-item"
           onPointerEnter={() => scene.setHighlight(item.seriesId)}
           onPointerLeave={() => scene.setHighlight(null)}
         >
-          <span className="kc-legend-chip" style={{ background: item.color }} />
+          <span className="uc-legend-chip" style={{ background: item.color }} />
           {item.name}
         </span>
       ))}

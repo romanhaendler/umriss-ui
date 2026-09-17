@@ -33,8 +33,8 @@ export const TITLE_GAP = 4;
 /** A band shrinks only once it is at least this much too large (R-3.4). */
 export const HYSTERESIS = 8;
 
-export const CLASS_TICK = "kc-tick-label";
-export const CLASS_TITLE = "kc-axis-title";
+export const CLASS_TICK = "uc-tick-label";
+export const CLASS_TITLE = "uc-axis-title";
 
 export interface AxisInput {
   /** Unique key: orientation + id. */

@@ -50,7 +50,7 @@ async function twoFrames(page: Page): Promise<void> {
     to notice that something changed, not what. */
 async function drawing(page: Page): Promise<string> {
   return page.evaluate(() => {
-    const plots = [...document.querySelectorAll(".kc-plot")].map((el) => {
+    const plots = [...document.querySelectorAll(".uc-plot")].map((el) => {
       const r = el.getBoundingClientRect();
       return `${r.x}:${r.y}:${r.width}:${r.height}`;
     });

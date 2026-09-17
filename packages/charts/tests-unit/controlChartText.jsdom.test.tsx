@@ -80,7 +80,7 @@ async function render(content: ReactNode): Promise<HTMLElement> {
 }
 
 const legend = (host: HTMLElement) =>
-  [...host.querySelectorAll(".kc-legend-item")].map((e) => e.textContent ?? "");
+  [...host.querySelectorAll(".uc-legend-item")].map((e) => e.textContent ?? "");
 
 describe("ControlChart - no text brought along", () => {
   it("does not label the control limits without a value", async () => {

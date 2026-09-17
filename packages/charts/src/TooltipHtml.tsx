@@ -46,20 +46,20 @@ export function TooltipHtml({ scene }: { scene: ChartScene }): ReactNode {
   const hover = snapshot.hover;
 
   return (
-    <div className="kc-tooltip" ref={bindRef} role="presentation">
+    <div className="uc-tooltip" ref={bindRef} role="presentation">
       {hover === null
         ? null
         : snapshot.tooltip.render !== undefined
           ? snapshot.tooltip.render(hover.hit)
           : (
               <>
-                <div className="kc-tooltip-head">{snapshot.xLabel}</div>
-                <div className="kc-tooltip-list">
+                <div className="uc-tooltip-head">{snapshot.xLabel}</div>
+                <div className="uc-tooltip-list">
                   {hover.hit.points.map((point) => (
-                    <div className="kc-tooltip-row" key={`${point.seriesName}-${point.index}`}>
-                      <span className="kc-tooltip-chip" style={{ background: point.color }} />
-                      <span className="kc-tooltip-name">{point.seriesName}</span>
-                      <span className="kc-tooltip-value">{valueText(point)}</span>
+                    <div className="uc-tooltip-row" key={`${point.seriesName}-${point.index}`}>
+                      <span className="uc-tooltip-chip" style={{ background: point.color }} />
+                      <span className="uc-tooltip-name">{point.seriesName}</span>
+                      <span className="uc-tooltip-value">{valueText(point)}</span>
                     </div>
                   ))}
                 </div>
