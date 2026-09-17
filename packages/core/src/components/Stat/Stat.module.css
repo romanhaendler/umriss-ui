@@ -3,10 +3,11 @@
    to know about it. That is why there is no StatRow – a row of tiles is a
    layout problem, and this package already has a layout module for that. */
 
-@layer umriss.tokens, umriss.components;
+@layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.components {
   .stat {
+    composes: text from "../../styles/own.module.css";
     display: grid;
     grid-template-rows: auto auto auto;
     gap: var(--u-space-1);

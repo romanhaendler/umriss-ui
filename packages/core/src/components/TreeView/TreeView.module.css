@@ -4,10 +4,11 @@
    accessibility layer is flat so that later only what stands in the scroll
    area can be rendered (ADR-0004). */
 
-@layer umriss.tokens, umriss.components;
+@layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.components {
   .tree {
+    composes: text from "../../styles/own.module.css";
     --tree-indent: var(--u-space-4);
     display: flex;
     flex-direction: column;
@@ -128,6 +129,7 @@
      here: setting it would be a prescription to every layout the component does
      not know. */
   .scrolls {
+    composes: scroll from "../../styles/own.module.css";
     overflow-y: auto;
   }
 

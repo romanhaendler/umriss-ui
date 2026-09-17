@@ -78,14 +78,18 @@ async function ownBox(page: Page): Promise<string[]> {
   }, DESCRIBE);
 }
 
-/** The focus indication of an element and its ancestors inside the stage.
-    The browser's own ring (`outline-style: auto`) does not count: it is what
-    an element shows when the component brought nothing, and it is not the
-    library's ring. */
+/** The focus indication of an element, of its ancestors inside the stage and
+    of its next sibling - a visually hidden input rings the box drawn beside it
+    (`.input:focus-visible + .box`). The browser's own ring
+    (`outline-style: auto`) does not count: it is what an element shows when
+    the component brought nothing, and it is not the library's ring. */
 const INDICATION = `(el) => {
   const stage = el.closest(".exampleStage");
   const out = [];
-  for (let n = el; n && n !== stage; n = n.parentElement) {
+  const around = [el.nextElementSibling];
+  for (let n = el; n && n !== stage; n = n.parentElement) around.push(n);
+  for (const n of around) {
+    if (!n) continue;
     const s = getComputedStyle(n);
     const outline = s.outlineStyle === "auto" || s.outlineStyle === "none" ? "none" : s.outlineStyle + " " + s.outlineWidth + " " + s.outlineColor;
     out.push(s.boxShadow + "|" + outline);

@@ -9,7 +9,7 @@
    rule is inserted in front of the first rule of each selector, as a rule of
    its own, so no declaration a stylesheet wrote is touched. */
 
-import type { AtRule, Plugin, Rule } from "postcss";
+import type { AtRule, Declaration, Plugin, Rule } from "postcss";
 import { namesAClass, subjectIsOwn } from "./selectors.ts";
 
 const inKeyframes = (rule: Rule) => {
@@ -43,3 +43,29 @@ export function ownBox(): Plugin {
   };
 }
 ownBox.postcss = true;
+
+/* Squircle corners on the library's own elements (ADR-0021). The base layer
+   set `corner-shape: squircle` on `*` inside `@supports`, which reached every
+   rounded element of the application. This step gives it to every own rule that
+   sets a radius, right after the radius; a browser without `corner-shape`
+   ignores the declaration and keeps round corners, as before. */
+export function ownCorners(): Plugin {
+  return {
+    postcssPlugin: "umriss-own-corners",
+    Once(root) {
+      root.walkRules((rule) => {
+        if (inKeyframes(rule)) return;
+        if (!rule.selectors.every((s) => namesAClass(s) && subjectIsOwn(s))) return;
+        let hasShape = false;
+        let lastRadius: Declaration | undefined;
+        rule.each((node) => {
+          if (node.type !== "decl") return;
+          if (node.prop === "corner-shape") hasShape = true;
+          if (/^border(-[a-z]+)*-radius$/.test(node.prop)) lastRadius = node;
+        });
+        if (!hasShape && lastRadius) lastRadius.after({ prop: "corner-shape", value: "squircle", raws: { before: " ", between: ": " } });
+      });
+    },
+  };
+}
+ownCorners.postcss = true;

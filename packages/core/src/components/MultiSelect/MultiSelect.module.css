@@ -2,10 +2,11 @@
    clickable remove buttons. It always stays on ONE line and at control
    height – no matter how many elements are chosen. */
 
-@layer umriss.tokens, umriss.components;
+@layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.components {
   .field {
+    composes: text from "../../styles/own.module.css";
     position: relative; /* frame of reference for the invisible measuring row */
     display: flex;
     align-items: center;
@@ -267,6 +268,8 @@
   }
 
   .list {
+
+    composes: scroll from "../../styles/own.module.css";
     display: flex;
     flex-direction: column;
     max-height: 260px;

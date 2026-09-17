@@ -1,7 +1,8 @@
-@layer umriss.tokens, umriss.components;
+@layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.components {
   .region {
+    composes: text from "../../styles/own.module.css";
     position: fixed;
     right: var(--u-space-5);
     bottom: var(--u-space-5);

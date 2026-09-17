@@ -1,13 +1,16 @@
-@layer umriss.tokens, umriss.components;
+@layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.components {
   .wrapper {
+    composes: text from "../../styles/own.module.css";
     position: relative;
     display: inline-flex;
     width: 100%;
   }
 
   .input {
+
+    composes: field from "../../styles/own.module.css";
     height: var(--u-control-height);
     padding: 0 var(--u-space-7) 0 var(--u-space-3);
     border: none;
@@ -66,6 +69,8 @@
   }
 
   .list {
+
+    composes: scroll from "../../styles/own.module.css";
     max-height: 240px;
     overflow: auto;
     display: flex;

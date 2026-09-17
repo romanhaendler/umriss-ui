@@ -8,4 +8,8 @@ import { PAGES } from "./pages";
 checkOwnBase({
   open,
   pages: PAGES.filter((pageId) => pageId !== "overview"),
+  tolerated: {
+    "shortcut › input":
+      "The palette's field carries no ring on purpose: the pane is the focus indicator (checked in packages/demo/checks/shell.ts, 'the field carries no focus ring').",
+  },
 });

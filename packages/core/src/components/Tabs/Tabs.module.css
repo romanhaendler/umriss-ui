@@ -1,7 +1,8 @@
-@layer umriss.tokens, umriss.components;
+@layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.components {
   .list {
+    composes: text from "../../styles/own.module.css";
     position: relative;
     display: flex;
     gap: var(--u-space-5);
@@ -21,6 +22,8 @@
   }
 
   .tab {
+
+    composes: ring from "../../styles/own.module.css";
     position: relative;
     padding: var(--u-space-2) 2px;
     border: none;
@@ -47,6 +50,10 @@
   }
 
   .panel {
+
+    composes: text from "../../styles/own.module.css";
+
+    composes: ring from "../../styles/own.module.css";
     padding-top: var(--u-space-4);
   }
 }

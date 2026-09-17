@@ -1,7 +1,8 @@
-@layer umriss.tokens, umriss.components;
+@layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.components {
   .input {
+    composes: field from "../../styles/own.module.css";
     height: var(--u-control-height);
     padding: 0 var(--u-space-3);
     border: none;
@@ -66,6 +67,8 @@
      ------------------------------------------------------------------ */
 
   .wrapper {
+
+    composes: text from "../../styles/own.module.css";
     display: inline-flex;
     align-items: center;
     gap: var(--u-space-1);

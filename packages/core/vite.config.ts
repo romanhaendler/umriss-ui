@@ -2,7 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import dts from "vite-plugin-dts";
 import { importOwnCss } from "../../scripts/styles/importOwnCss.ts";
-import { ownBox } from "../../scripts/styles/ownBox.ts";
+import { ownBox, ownCorners } from "../../scripts/styles/ownBox.ts";
 
 export default defineConfig({
   /* `rollupTypes` gathers the types of each entry into ONE file, and flatly at
@@ -12,8 +12,9 @@ export default defineConfig({
      `exports["./wording/de"].types` in the package.json points at
      `./dist/de.d.ts` and not there. */
   plugins: [react(), dts({ include: ["src"], rollupTypes: true }), importOwnCss("core.js", "core.css")],
-  /* box-sizing on the library's own elements, and only there (ADR-0021). */
-  css: { postcss: { plugins: [ownBox()] } },
+  /* box-sizing and squircle corners on the library's own elements, and only
+     there (ADR-0021). */
+  css: { postcss: { plugins: [ownBox(), ownCorners()] } },
   build: {
     /* Two entries: the library, and the German wording as `./wording/de`. The
        second is a subpath rather than a name in the barrel so that an

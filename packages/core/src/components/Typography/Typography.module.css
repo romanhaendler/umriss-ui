@@ -1,9 +1,17 @@
 /* Typographic primitives. Every class here is exactly one token - which is
    why there are no in-between values and no exceptions. */
 
-@layer umriss.tokens, umriss.components;
+@layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.components {
+  .text {
+    composes: text from "../../styles/own.module.css";
+  }
+
+  .heading {
+    composes: text from "../../styles/own.module.css";
+  }
+
   .text,
   .heading {
     margin: 0;

@@ -1,7 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { fileURLToPath } from "node:url";
-import { ownBox } from "../../scripts/styles/ownBox.ts";
+import { ownBox, ownCorners } from "../../scripts/styles/ownBox.ts";
 
 /* The demo of @umriss-ui/table (table-demo). It runs against the source of
    @umriss-ui/core, as the typecheck and the unit tests do (tsconfig.json,
@@ -10,9 +10,9 @@ import { ownBox } from "../../scripts/styles/ownBox.ts";
 export default defineConfig({
   root: "demo",
   plugins: [react()],
-  /* The same box model the library build gives its own elements (ADR-0021):
-     the demo runs the sources, and it has to run what ships. */
-  css: { postcss: { plugins: [ownBox()] } },
+  /* The same box model and corners the library build gives its own elements
+     (ADR-0021): the demo runs the sources, and it has to run what ships. */
+  css: { postcss: { plugins: [ownBox(), ownCorners()] } },
   resolve: {
     alias: [
       { find: /^@umriss-ui\/core$/, replacement: fileURLToPath(new URL("../core/src/index.ts", import.meta.url)) },

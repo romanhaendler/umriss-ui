@@ -1,6 +1,6 @@
 # 04 — The components carry their own base: core A–M
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Blocked by: 01, 03
@@ -41,3 +41,17 @@ under 03's Comments that belong to this ticket.
   not, with the reason.
 
 ## Comments
+
+**Delivered.** Worked together with 05 on the shared module, and reported separately.
+
+- **One place for the values:** `packages/core/src/styles/own.module.css`. Components take `text`, `ring`, `field` and `scroll` with `composes` on their own class. `text`, the caret (`field`) and `scroll` lie in `umriss.base`, one layer below the components. `ring` and the autofill look lie in `umriss.components` and win through their pseudo-classes. The shared module is under the same guard as the component modules.
+- **Deviation from the spec, recorded there and in ADR-0021: a third layer, `umriss.base`.** With `text` first in `umriss.components`, 28 core pictures stayed red. The badge was the clearest case: `composes` guarantees the class, not the order of the rules, and the shared text context landed after the badge's own size and colour. One layer lower makes the order irrelevant. The order statement in every stylesheet, `rules.ts` and `check-dist.ts` changed with it.
+- **Deviation: corners by the build.** Squircle corners were not in 04/05's modules but a build step, `ownCorners` in `scripts/styles/ownBox.ts`, beside `ownBox` and with tests of its own. The palette's corners were the only picture that showed it, and 38 modules would otherwise have repeated a line after every radius.
+- **Found on the way, not caused by this effort:** the baselines `The command palette's window in the resting state` (light, dark) still showed "Kontur UI 0.9.0" and "KonturProvider". They had passed under the comparison threshold since the rename.
+
+- **Text context** on Alert, Badge, Button, Card, Checkbox, Combobox, CommandPalette (dialog), DataViz (meter, sparkline), DatePicker (trigger, panel, range panel), Divider, Dock, EmptyState, FormField and Input. The font smoothing, not only the family, turned out to be inherited: a primary button's light label differed from its baseline until `Button` took `text`.
+- **Ring** on Button, Card's collapse button, and the Dock's grip and tools.
+- **Field / scroll** on Input, Combobox (field and list), CommandPalette (field and list) and the pickers' time fields.
+- **Loose example text:** `commandpalette--shortcut` wrote a raw `<input>` with inline styles. It is `Input size="sm"` now. Its two baselines and the two resting-state palette baselines were renewed, each diff looked at: the field, the 2px shift below it, and the stale name and version.
+- **Tolerated in the own-base check** (`packages/core/tests-visual/own-base.spec.ts`): `shortcut › input`, the palette's field, which carries no ring by design (the shell check asserts it).
+- **Result:** all 375 core browser tests green in both themes - 99 red pictures after 01 became 0, and every core page passes the three checks.

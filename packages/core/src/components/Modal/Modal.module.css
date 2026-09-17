@@ -2,10 +2,11 @@
    surface is .sheet. Free space distributes itself over two flexible spacers
    in the golden ratio (38 : 62). */
 
-@layer umriss.tokens, umriss.components;
+@layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.components {
   .dialog {
+    composes: text from "../../styles/own.module.css";
     border: none;
     margin: 0;
     padding: 24px;
@@ -158,6 +159,8 @@
   }
 
   .body {
+
+    composes: scroll from "../../styles/own.module.css";
     /* flex-basis auto, NOT 0: the content has to enter the height calculation,
        otherwise the modal collapses onto header + footer. */
     flex: 1 1 auto;
