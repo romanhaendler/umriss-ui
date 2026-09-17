@@ -134,7 +134,10 @@ export function drawOverlay(ctx: CanvasRenderingContext2D, input: DrawInput): vo
     if (transport.from !== ghost.id && transport.to !== ghost.id) continue;
     const other = view.boxById.get(transport.from === ghost.id ? transport.to : transport.from);
     if (other === undefined) continue;
-    const path = transport.from === ghost.id ? transportPath(viewport, transport, box, other) : transportPath(viewport, transport, other, box);
+    const path =
+      transport.from === ghost.id
+        ? transportPath(viewport, transport, box, other, view.options)
+        : transportPath(viewport, transport, other, box, view.options);
     drawTransport(ctx, input, path, true, lateIds.has(transport.id));
   }
   drawSubtask(ctx, input, box, 0.55);
@@ -244,16 +247,24 @@ function drawTransport(ctx: CanvasRenderingContext2D, input: DrawInput, path: Tr
   ctx.setLineDash(isLate ? [4, 3] : []);
   ctx.beginPath();
   ctx.moveTo(path.x1, path.y1);
-  ctx.bezierCurveTo(path.c1x, path.y1, path.c2x, path.y2, path.x2, path.y2);
+  if (path.kind === "curve") {
+    ctx.bezierCurveTo(path.c1x, path.y1, path.c2x, path.y2, path.x2, path.y2);
+  } else {
+    /* Straight and orthogonal are drawn as the polyline they are hit along:
+       one line, one truth. */
+    for (let i = 2; i + 1 < path.points.length; i += 2) ctx.lineTo(path.points[i]!, path.points[i + 1]!);
+  }
   ctx.stroke();
   ctx.setLineDash([]);
-  for (const [x, y] of [
-    [path.x1, path.y1],
-    [path.x2, path.y2],
-  ] as const) {
-    ctx.beginPath();
-    ctx.arc(x, y, isLate ? 3 : 2.5, 0, Math.PI * 2);
-    ctx.fill();
+  if (path.ends === "dot") {
+    for (const [x, y] of [
+      [path.x1, path.y1],
+      [path.x2, path.y2],
+    ] as const) {
+      ctx.beginPath();
+      ctx.arc(x, y, isLate ? 3 : 2.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
   }
 }
 
