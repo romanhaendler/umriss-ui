@@ -17,6 +17,37 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Sep. 2026 — schedule-legibility: English formats first
+
+*For a caller: `DEFAULT_FORMATS` is English, German ships as `GERMAN_FORMATS`
+beside the German wording, and `NumberInput` reads the notation it writes.
+core's changelog carries the lines.*
+
+Delivery report for `.scratch/schedule-legibility/spec.md`, ticket 01
+(ADR-0024). The rest of that spec - text in the bars, transport routes, bar
+styling, where a subtask may go, and the check against the picture being in its
+own way - follows in tickets 02–06.
+
+- **The question had been open since ADR-0019**, which made the wording English
+  and said so of the formats: "the locale of the formats is a decision about a
+  different object and deserves its own". Roman asked why the schedule's dates
+  were German; this is the answer, and `en-GB` keeps the day first and the clock
+  at 24 hours, the two things an operations screen is read wrongly without.
+- **One set per locale.** `formatsFor(locale)` replaced twelve hard-wired
+  `de-DE` tags; `DEFAULT_FORMATS` is its English instance and `GERMAN_FORMATS`
+  its German one, shipped behind the subpath that already carried the German
+  wording.
+- **A defect the change would have caused, prevented:** `NumberInput` parsed a
+  dot as a thousands separator by hand, so under English notation it would have
+  read its own output wrongly. The separators are measured off the formats now
+  (`separatorsOf`), which also holds for a notation an application replaced.
+- **39 pictures moved** - 2 in core, 21 in the schedule, 16 in the table - and
+  three charts pictures were **restored** after the bulk renewal: the charts
+  write their axis labels with their own formatter, so nothing of theirs could
+  move, and what the renewal had caught was the known flutter. Checked by
+  restoring them and running the charts projects again, where a different three
+  failed.
+
 ## Sep. 2026 — schedule-refinement: the schedule in daily use
 
 *For a caller: the wheel and the selection callback changed; tooltip, now line,

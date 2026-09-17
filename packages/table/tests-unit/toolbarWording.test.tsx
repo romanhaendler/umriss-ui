@@ -13,7 +13,7 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { LanguageProvider } from "@umriss-ui/core";
-import { GERMAN_WORDING } from "@umriss-ui/core/wording/de";
+import { GERMAN_FORMATS, GERMAN_WORDING } from "@umriss-ui/core/wording/de";
 import { Pagination, Search, Toolbar, useTable } from "../src";
 import type { Table } from "../src";
 
@@ -53,9 +53,9 @@ function TableWithSearch() {
 }
 
 describe("Table toolbar and list filter from the wording", () => {
-  it("writes the ratio in German notation without a provider", () => {
+  it("writes the ratio in the default notation without a provider", () => {
     render(<TableWithSearch />);
-    expect(screen.getByRole("status").textContent).toBe("43 of 1.204");
+    expect(screen.getByRole("status").textContent).toBe("43 of 1,204");
   });
 
   it("carries an overridden formatter into the table toolbar", () => {
@@ -73,7 +73,7 @@ describe("Table toolbar and list filter from the wording", () => {
         <TableWithSearch />
       </LanguageProvider>,
     );
-    expect(screen.getByRole("status").textContent).toBe("43/1.204");
+    expect(screen.getByRole("status").textContent).toBe("43/1,204");
   });
 
   it("labels the buttons of the list filter from the wording", () => {
@@ -112,11 +112,13 @@ describe("Table toolbar and list filter from the wording", () => {
     expect(screen.getByRole("button", { name: "Alles zurücksetzen" })).toBeTruthy();
   });
 
-  /* ADR-0019: German is shipped behind the subpath. One mount holds that wire
-     from a consumer's side, written the way an application writes it. */
-  it("renders the ratio in German when the German wording is handed in", () => {
+  /* ADR-0019 and ADR-0024: German is shipped behind the subpath, wording and
+     formats together. One mount holds that wire from a consumer's side,
+     written the way an application writes it - and it takes both halves,
+     because the sentence is German and so is the number in it. */
+  it("renders the ratio in German when the German language is handed in", () => {
     render(
-      <LanguageProvider wording={GERMAN_WORDING}>
+      <LanguageProvider wording={GERMAN_WORDING} formats={GERMAN_FORMATS}>
         <TableWithSearch />
       </LanguageProvider>,
     );

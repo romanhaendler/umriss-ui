@@ -980,11 +980,13 @@ exceptions are `von`, `bis` and `ab`, which also stand in the German sentences �
 and those are replaced only in parameter position and inside `${…}`.
 `pageOfPages` still reads `Seite ${page} von ${total}`.
 
-**Two output conventions are German and are not names.** `DEFAULT_FORMATS` is
-`de-DE` throughout — date, time, number, per cent, collation, the relative
-phrase — and the CSV export writes `ja`/`nein`, which `values.ts` argues are
-data rather than labels, "lower case, the way a spreadsheet filters them". Both
-are product decisions about output and want their own ticket, not a rename.
+**One output convention is still German and is not a name.** `DEFAULT_FORMATS`
+was `de-DE` throughout until ADR-0024 made it English and shipped
+`GERMAN_FORMATS` beside the German wording. What stays German is the CSV
+export: the decimal comma and the semicolon, argued in `model/csv.ts`, and
+`ja`/`nein`, which `values.ts` argues are data rather than labels, "lower case,
+the way a spreadsheet filters them". It is a machine format for a spreadsheet
+and wants its own ticket, not a rename.
 
 Four names the table needed and this file did not have. **Projection** is the
 model's computed output — visible columns, the filtered set, the page — and is

@@ -52,12 +52,15 @@ export default function WhyUmrissProvider() {
         business.
       </p>
 
-      <h3>The formats are a register of their own</h3>
+      <h3>The formats are a register of their own, and English too</h3>
       <p>
-        <code>DEFAULT_FORMATS</code> writes dates, numbers and durations in <code>de-DE</code>,
-        whatever the wording says. The mixture is visible - an English wording over German number
-        notation renders &bdquo;43 of 1.204&ldquo; - and it is left standing rather than folded into
-        the wording, because the locale of the formats is a decision about a different object.
+        <code>DEFAULT_FORMATS</code> writes dates, numbers and durations in <code>en-GB</code> on a
+        24-hour clock, and <code>GERMAN_FORMATS</code> ships behind the same subpath as the German
+        wording, so a German application takes both halves of its language in one import line
+        (ADR-0024). They stay two registers all the same: an application may replace a single
+        formatter and keep every word, or hand in a wording and keep the notation. What that looked
+        like when the two disagreed - an English wording over German notation, &bdquo;43 of
+        1.204&ldquo; - is why the decision was made.
       </p>
 
       <h3>Why it holds no theme</h3>

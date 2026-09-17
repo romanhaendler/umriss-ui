@@ -75,9 +75,9 @@ describe("the four verdicts", () => {
   it("shows the excess where a limit is violated", () => {
     const { container } = render(<Log />);
     const cells = container.querySelectorAll("tbody [data-verdict]");
-    expect(cells[0]!.textContent).toContain("12,5");
-    expect(cells[0]!.textContent).toContain("+0,5");
-    expect(cells[3]!.textContent).toContain("+0,3");
+    expect(cells[0]!.textContent).toContain("12.5");
+    expect(cells[0]!.textContent).toContain("+0.5");
+    expect(cells[3]!.textContent).toContain("+0.3");
     expect(cells[1]!.textContent).not.toContain("+");
   });
 });
@@ -100,6 +100,9 @@ describe("Sorting and exporting", () => {
   it("exports the value, not the verdict", () => {
     render(<Log />);
     const lines = current!.asCsv().replace("﻿", "").split("\r\n");
+    /* The export keeps its decimal comma and its semicolon: that is a machine
+       format for a spreadsheet, argued in `model/csv.ts`, and it never went
+       through the display formats - so ADR-0024 did not move it. */
     expect(lines).toEqual(["Feature;Value", "Alarm;12,5", "OK;9,5", "Empty;", "Warning;10,3", "Not a number;"]);
   });
 });

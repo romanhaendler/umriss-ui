@@ -96,9 +96,9 @@ describe("Points in time", () => {
   it("names two days of the same year with one year", () => {
     const { container } = render(<List />);
     act(() => current!.setFilter("due", { from: new Date(2026, 8, 1), to: new Date(2026, 8, 30) }));
-    expect(container.textContent).toContain("01.09.–30.09.2026");
+    expect(container.textContent).toContain("01/09–30/09/2026");
     act(() => current!.setFilter("due", { from: new Date(2025, 11, 1), to: new Date(2026, 8, 30) }));
-    expect(container.textContent).toContain("01.12.2025–30.09.2026");
+    expect(container.textContent).toContain("01/12/2025–30/09/2026");
   });
 
   it("takes a bound with a time of day as its day", () => {

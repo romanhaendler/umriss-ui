@@ -55,7 +55,10 @@ typed `Wording`, entry by entry or whole, and the library neither selects a
 language nor knows what one is. Two ship because the second was already written,
 not because shipping languages is something this library does.
 
-**The formats did not move.** They are a register of their own, and
+**The formats did not move.** *(Superseded in September 2026 by ADR-0024,
+which made them English and shipped the German ones beside the German wording.
+The paragraph stands as it was written, because the question it left open is
+the one ADR-0024 answers.)* They are a register of their own, and
 `DEFAULT_FORMATS` writes dates, numbers and durations in `de-DE` whatever the
 wording says. The mixture is visible — an English default wording over German
 number notation renders "43 of 1.204" — and it is left standing here rather than

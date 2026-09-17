@@ -50,7 +50,41 @@ module on the caller's side that carries `"use client"` and imports from there.
 
 ---
 
-## Unreleased – The context menu (Sep. 2026)
+## Unreleased – English formats, and the context menu (Sep. 2026)
+
+### Changed
+
+- **The formats are English.** `DEFAULT_FORMATS` writes `en-GB` on a 24-hour
+  clock: `17/03/2026`, `09:05`, `1,234.5`, `74%`, "3 minutes ago", and English
+  collation. Until now it wrote `de-DE` whatever the wording said (ADR-0024;
+  ADR-0019 left this decision open on purpose).
+- **German ships as a pair.** `GERMAN_FORMATS` stands beside `GERMAN_WORDING`
+  behind `@umriss-ui/core/wording/de`, so a German application takes both
+  halves of its language in one import:
+  `language={{ wording: GERMAN_WORDING, formats: GERMAN_FORMATS }}`. An
+  application that hands in the wording alone now gets German words over
+  English notation - which is what the library shipped before, and why the
+  decision was made.
+- **`NumberInput` reads the notation it writes.** Its parser no longer assumes
+  a German dot and comma; the separators are measured off the formats
+  (`separatorsOf`), so a field under any notation - including one an
+  application replaced - reads its own output back. `parseNumber` and
+  `filterInput` take the separators as a last argument, defaulting to the
+  default notation.
+- **What did not move:** the CSV export of `@umriss-ui/table` keeps its decimal
+  comma and its semicolon (a machine format for a spreadsheet, argued at its
+  site), and the German test fixtures that measure a property *of* German stay
+  German.
+
+### Added
+
+- **`formatsFor(locale)`** builds a complete `Formats` for a locale - the
+  product's options (day first, two digits, 24-hour clock, per cent without
+  decimals) over the locale's separators and words.
+- **`separatorsOf(formats)`** and `DEFAULT_SEPARATORS`: the group and decimal
+  separator a notation writes, measured rather than declared.
+
+## The context menu (Sep. 2026)
 
 From `.scratch/schedule/spec.md`, ticket 01, and
 `.scratch/schedule-refinement/spec.md`, ticket 03.
