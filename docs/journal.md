@@ -9,13 +9,39 @@ This document records what was *worked on in this repository* — rebuilds,
 tests, findings and decisions that are invisible from outside. What changes for
 a **caller** of a package stands in that package's own changelog
 (`packages/core/CHANGELOG.md`, `packages/table/CHANGELOG.md`,
-`packages/charts/CHANGELOG.md`). The two deliberately do not run in parallel:
+`packages/charts/CHANGELOG.md`, `packages/schedule/CHANGELOG.md`). The two deliberately do not run in parallel:
 an entry there can be missing here because it was no work of its own, and one
 sentence here can summarise three entries there.
 
 **Names read forwards.** Entries that describe a name which has since been renamed
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
+
+## Sep. 2026 — schedule: a fourth package
+
+*For a caller: `@umriss-ui/schedule` is new; core gains `ContextMenu` and three
+wording entries; charts publishes `resolveColours`, `subscribeTheme` and
+`toOperatingTimeClamped`. The changelogs carry the lines.*
+
+Delivery report for `.scratch/schedule/spec.md`, tickets 01–08 (ADR-0022,
+ADR-0023).
+
+- **The first dependency on charts.** The schedule takes the scale, the time
+  steps, the operating calendar and the canvas colour resolution from charts'
+  public entry, and core's styling regime, provider and wording from core's. The
+  lint holds both directions. Wiring it up found a hole in the lint beside it:
+  the configuration block that forbids charts' demo to import the table also
+  matched `packages/charts/src/**`, and as a later block of the same rule it
+  replaced the R-1.2 ban on core there. The block now leaves `src/` out.
+- **Pictures that reproduce.** Every position reaches the canvas through
+  `Math.round`, and the fifty schedule baselines passed three consecutive runs -
+  evidence for the root fix `docs/testing.md` names for the charts.
+- **Editing through the seam.** The browser suite drags, reads the ghost's
+  label for its times and findings, and compares the reported intent as JSON;
+  nothing in it reads a pixel.
+- **Baselines moved in core:** the overview and the palette window, both of
+  which had still shown the former brand; the new `ContextMenu` page added its
+  own.
 
 ## Sep. 2026 — styles-without-side-effects: one import, no side effects
 

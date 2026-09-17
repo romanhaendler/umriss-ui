@@ -69,7 +69,7 @@ library's own elements.
    ```bash
    git tag core-v0.2.0 && git push origin core-v0.2.0
    ```
-   One tag per package, `<dir>-v<version>`, because the three packages count
+   One tag per package, `<dir>-v<version>`, because the packages count
    independently.
 
 Promoting a release candidate that already stands on the registry to `latest`

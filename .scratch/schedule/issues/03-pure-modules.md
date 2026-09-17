@@ -1,6 +1,6 @@
 # 03 — The pure modules: domain, findings, ripple, time axis, snapping
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Blocked by: 02
@@ -29,3 +29,15 @@ Spec: `.scratch/schedule/spec.md` ("Domain model", "Findings", "Ripple", "Axes a
   source, written first.
 
 ## Comments
+
+**Delivered** (d452d68).
+
+- `model.ts` also carries the intents and `applyIntent`, so that `ripple`
+  returns intents a caller applies with the same function a drop uses.
+  Transport anchors default to the outer pair (`teardown`, `setup`).
+- `findings.test.ts` 15, `ripple.test.ts` 9, `timeAxis.test.ts` 17 (with
+  `snapTime`), each written before its module. Expected instants are ISO text
+  with offsets, including the clock change of 29.03.2026.
+- `fineStep` uses charts' `timeStep`, clamped to quarter hour and day; ticks
+  and days go through charts' calendar mapping; the local offset is taken at
+  the instant, so rasters lie on local time.

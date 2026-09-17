@@ -6,8 +6,9 @@ seam lies, the conventions a new test follows, and what is known to be open.
 How to run any of it stands in `CONTRIBUTING.md` — this document does not repeat
 the commands.
 
-Since ADR-0020 all three demos run in the same shell, the private package
-`@umriss-ui/demo`: forty pages in core, fourteen in charts, twelve in table.
+Since ADR-0020 the demos run in the same shell, the private package
+`@umriss-ui/demo` - four of them since ADR-0022: forty-one pages in core,
+fourteen in charts, twelve in table, eight in schedule.
 
 What is photographed and checked stands in **one** place per demo,
 `packages/<package>/tests-visual/pages.ts`. It counts nothing off but derives:
@@ -25,6 +26,8 @@ not photographed.
 | jsdom smoke test of the core demo | vitest | packages/core/tests-unit/ | green |
 | jsdom smoke test of the table demo: every page with its tables, every example with a title, the package by name in the source | vitest | packages/table/tests-unit/demo-smoke.test.tsx | green |
 | The shell's tooling: props reader against fixtures (inherited DOM props, generics, gaps, **type alias as an intersection, union with a discriminant, conditional helper type, call signatures**), source rewriting for both package names | vitest | packages/demo/tests-unit/ | green |
+| Unit tests of @umriss-ui/schedule: findings (overlap per lane with setup and teardown, offset depth, late transport by its anchors), ripple (push by what is missing, down a chain, never earlier, the intent's own subtask untouched, a cycle ends), the time axis (fine step from the quarter hour to the day, local ticks and days across the clock change, the operating calendar, zoom around a point, pan), snapping on local time | vitest | packages/schedule/tests-unit/ | green |
+| jsdom smoke test of the schedule demo (every page, every example, the package by name in the source) and the package's guards - style rules, focus, wording | vitest | packages/schedule/tests-unit/ | green; one named exception: the `ripple` page has no props table |
 | Unit tests of core (number, options, grid, scale, time, range, value contract, popover geometry, textarea measurement, token contrast, row window, formats characterisation, tree model, limit, limit conformance, freshness, the command palette's searcher, **the dock's resting places**) | vitest | packages/core/tests-unit/ | green |
 | Unit tests of @umriss-ui/table: the model (table model, CSV, selection, companion, alarm model – taken over with their tests from @umriss-ui/core, the original left with umriss-table 14), value rules, absent values in the model | vitest | packages/table/tests-unit/ | green |
 | Component tests of @umriss-ui/table: registration and order, hiding and reordering across head, body and foot, defaults per value type under a provider with foreign formats, the toolbar with the column filters' conditions (including the ones a table sets up for itself), column menu, pre-filter, list, range and custom filter, export, paging, row detail and actions, widths, virtualisation, initial state from a view, verdict column, alarm list with its density, toolbar and list filter from the provider's wording and formats | vitest + Testing Library | packages/table/tests-unit/ | green; what jsdom cannot see is checked by the package's demo in the browser |
@@ -33,10 +36,12 @@ not photographed.
 | Style rules (ADR-0021): every shipped stylesheet begins with the layer order, keeps every rule inside `umriss.tokens`, `umriss.base` or `umriss.components`, and selects only its own elements; the build steps `ownBox`/`ownCorners` and the dist check | vitest, node | `packages/core/tests-unit/stylesheetRules.test.ts`, the guards of core, table and charts, `scripts/check-dist.ts` (`prepublishOnly`) | green |
 | Focus guard (ADR-0021): every element a component puts into the tab order - native controls, a `tabIndex` other than a literal `-1`, arrow-key focus via `data-nav` - has a focus style of its own in its stylesheets; read from the source, so closed panels are covered | vitest | `packages/{core,table}/tests-unit/focusGuard.test.ts`, reading `scripts/styles/focus.ts` | green; the elements the reading cannot see stand in the guard with their reason |
 | Wording guard: no German text in a component's JSX node or prop, bypassing the wording (`wordingSource.test.ts`, reads the sources through the TypeScript parser) | vitest | packages/core/tests-unit/ | green; the exception list is empty |
-| Behaviour tests of Popover, Tooltip, Modal, Toast (role follows tone), the four date pickers (now, reopening, Enter, presets), month pair, RadioGroup, Tag, SplitButton, Alert, the language seam, the root provider with `useDensityFor`, the tree (keyboard, screen reader, ticking, search, virtualisation), Stat, command palette and **Dock** | vitest + Testing Library | packages/core/tests-unit/ | green |
-| Screenshot comparisons (page heads and examples × light/dark) | Playwright | packages/*/tests-visual/screenshots.spec.ts (core, charts, table) | baselines checked in (darwin); green for core and table, **and not reproducible for the charts' examples – see Known open**; one image per example with the code **collapsed**, one per page from the head to the first example; plus two images outside the loop, the command palette's open window searching and in its populated resting state – the topmost layer is in no example – and the **dock's four resting places**, because the loop only photographs the one it starts at |
+| Behaviour tests of ContextMenu (opening at a point, keyboard cycle, focus return, portal), Popover, Tooltip, Modal, Toast (role follows tone), the four date pickers (now, reopening, Enter, presets), month pair, RadioGroup, Tag, SplitButton, Alert, the language seam, the root provider with `useDensityFor`, the tree (keyboard, screen reader, ticking, search, virtualisation), Stat, command palette and **Dock** | vitest + Testing Library | packages/core/tests-unit/ | green |
+| Screenshot comparisons (page heads and examples × light/dark) | Playwright | packages/*/tests-visual/screenshots.spec.ts (core, charts, table, schedule) | baselines checked in (darwin); green for core, table and schedule, **and not reproducible for the charts' examples – see Known open**; one image per example with the code **collapsed**, one per page from the head to the first example; plus two images outside the loop, the command palette's open window searching and in its populated resting state – the topmost layer is in no example – and the **dock's four resting places**, because the loop only photographs the one it starts at |
 | Interaction tests of the charts | Playwright | packages/charts/tests-visual/features-interaction.spec.ts | green |
-| Operating the demo shell (outline, jumps, palette, addresses) | Playwright | packages/*/tests-visual/features-shell.spec.ts | green; **one** suite at the shell (`packages/demo/checks/shell.ts`), which calls each of the three demos with its own pages and terms – with axe and the palette's rules that jsdom cannot express (a resting pointer, the resting state, the material). Charts had a shell and a suite of its own until ADR-0020; beside the shared call there stands the one promise that is charts' own – the benchmark does not run on the front door |
+| Behaviour of the schedule: its name and lane headers as text, the day band and the fine band's step under zoom, pan in both directions with headers and bands holding still, hover, click and right-click with their target, task-wide selection | Playwright | packages/schedule/tests-visual/features-schedule.spec.ts | green |
+| Editing through the seam (ADR-0023): the ghost's times and findings before the drop, the reported move and lane intents after it, Escape, a read-only schedule that pans instead, setup grips on selection, stretch, and the demonstration's context menu changing the plan through an intent | Playwright | packages/schedule/tests-visual/features-editing.spec.ts | green; asserts what is reported and what the DOM says, never pixels |
+| Operating the demo shell (outline, jumps, palette, addresses) | Playwright | packages/*/tests-visual/features-shell.spec.ts | green; **one** suite at the shell (`packages/demo/checks/shell.ts`), which calls each of the four demos with its own pages and terms – with axe and the palette's rules that jsdom cannot express (a resting pointer, the resting state, the material). Charts had a shell and a suite of its own until ADR-0020; beside the shared call there stands the one promise that is charts' own – the benchmark does not run on the front door |
 | Own base (ADR-0021): every example's text in a type of its own, every element with a library class in `border-box`, every element that takes the keyboard focus showing the library's ring (the browser's own ring does not count) | Playwright | `packages/demo/checks/ownBase.ts`, called by `packages/*/tests-visual/own-base.spec.ts` with every page; light only | green; the tolerated offenders stand in the spec files with their reason |
 | Interaction tests of core | Playwright | packages/core/tests-visual/features-basics.spec.ts | green |
 | Operating a page (code switch, page switch, copy button) | Playwright | packages/{core,table}/tests-visual/features-page.spec.ts → `packages/demo/checks/page.ts` | green; the copy test checks what really lies on the clipboard – none of which can be expressed in jsdom |
@@ -45,7 +50,7 @@ not photographed.
 | What jsdom cannot prove about the table: a sticky row header behind selection and expanders, a silent gesture as a computed colour, focus in the column menu, the download and its content, reordering moves head, body and foot | Playwright | packages/table/tests-visual/features-browser.spec.ts | green; on its first run the first test found control cells growing wider than their sticky offsets |
 | Interaction tests of the tree | Playwright | packages/core/tests-visual/features-tree.spec.ts | green |
 | Interaction tests of the dock | Playwright | packages/core/tests-visual/features-dock.spec.ts | green; drag, refusal, change and reduced motion – none of it observable in jsdom |
-| Accessibility check of a sample of pages (axe, WCAG 2.1 AA) | Playwright | packages/{core,charts,table}/tests-visual/accessibility.spec.ts | green; three individually justified colour pairs tolerated – the list stands once, at the shell (`packages/demo/checks/accessibility.ts`), and holds for all three demos, none added for the charts – plus one run each with every code block open |
+| Accessibility check of a sample of pages (axe, WCAG 2.1 AA) | Playwright | packages/{core,charts,table,schedule}/tests-visual/accessibility.spec.ts | green; three individually justified colour pairs tolerated – the list stands once, at the shell (`packages/demo/checks/accessibility.ts`), and holds for all four demos, none added for the charts or the schedule – plus one run each with every code block open |
 
 ## Pure modules (the checkable seam)
 
@@ -93,9 +98,14 @@ bodies. Placement follows ownership: with the module it belongs to, and in
 | `charts/controlLimits.ts` | control limits, zones, four rule violations |
 | `charts/pareto.ts` | sort, accumulate, collect the remainder, cutoff |
 | `charts/operatingTime.ts` | wall clock ↔ operating time, breaks, ticks, clamped position |
+| `schedule/findings.ts` | overlaps per lane, offset depth, late transports |
+| `schedule/ripple.ts` | the cascade over successors, as moves |
+| `schedule/timeAxis.ts` | fine step, local ticks and days through the calendar, zoom and pan |
+| `schedule/snap.ts` | a time onto a raster in local time |
+| `schedule/geometry.ts` (checked in the browser) | subtask boxes on whole pixels, transport curves, the hit |
 
-The time zone is pinned to `Europe/Berlin` in `packages/core/vitest.config.ts`
-and `packages/table/vitest.config.ts`: the clock-change tests check concrete
+The time zone is pinned to `Europe/Berlin` in `packages/core/vitest.config.ts`,
+`packages/table/vitest.config.ts` and `packages/schedule/vitest.config.ts`: the clock-change tests check concrete
 transitions (29.03.2026 forward, 25.10.2026 back).
 
 ## Conventions
@@ -240,6 +250,11 @@ jsdom has no `PointerEvent` at all, and no pointer capture either.
   bound. In the shared shell the column is laid out against a sidebar and the
   labels are set in Geist, so the marks and the DOM labels no longer land on the
   same pixel grid.
+
+  **The schedule is evidence for the first way.** Its canvas draws on the same
+  kind of plot, in the same shell and font, and every position goes through
+  `Math.round` before it reaches the canvas (`packages/schedule/src/geometry.ts`);
+  its fifty pictures passed three consecutive runs without a difference.
 
   Three ways out, none of them taken yet, because each is a decision and not a
   repair: **round the scene's measurements and the canvas backing to whole device

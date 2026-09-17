@@ -1,6 +1,6 @@
 /* A demo, as the shell receives it.
 
-   The shell is the same for all three packages (ADR-0020); what makes a demo a
+   The shell is the same for all four packages (ADR-0020); what makes a demo a
    particular one comes in here: the outline, the examples, the
    generated tables, the "Warum so" texts and the package name a reader takes
    the package under.
