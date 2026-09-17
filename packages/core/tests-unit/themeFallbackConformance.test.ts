@@ -55,14 +55,26 @@ const EXCEPTIONS: Partial<Record<Field, string>> = {
 const withoutComments = (css: string) => css.replace(/\/\*[\s\S]*?\*\//g, "");
 const same = (value: string) => value.toLowerCase().replace(/\s+/g, "");
 
-/** The declarations of the first `:root {` block - the light theme. */
+/** The light half of `light-dark(<light>, <dark>)`, or the value itself. */
+function lightOf(value: string): string {
+  if (!value.startsWith("light-dark(")) return value;
+  let depth = 0;
+  for (let i = "light-dark(".length; i < value.length; i++) {
+    if (value[i] === "(") depth++;
+    if (value[i] === ")") depth--;
+    if (value[i] === "," && depth === 0) return value.slice("light-dark(".length, i).trim();
+  }
+  return value;
+}
+
+/** The light theme out of the `:root {` block (ADR-0021: one block, both themes). */
 function lightTheme(): Map<string, string> {
   const css = withoutComments(TOKENS);
   const start = css.indexOf(":root {");
   const body = css.slice(start + ":root {".length, css.indexOf("}", start));
   const values = new Map<string, string>();
   for (const [, name, value] of body.matchAll(/(--[\w-]+)\s*:\s*([^;]+);/g)) {
-    values.set(name as string, (value as string).trim());
+    values.set(name as string, lightOf((value as string).trim()));
   }
   return values;
 }
