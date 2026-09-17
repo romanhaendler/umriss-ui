@@ -272,3 +272,56 @@ test("the handle places the application's own mark at a time", async ({ page }) 
   /* `clientPointOf(14:00)` - the pin stands over the 14:00 of the upper plan. */
   expect(box.x + box.width / 2).toBeCloseTo(plot.x(14), -1);
 });
+
+test.describe("touch", () => {
+  test.use({ hasTouch: true });
+
+  test("a pinch zooms the time scale", async ({ page, context }) => {
+    await openExample(page, "schedule", "first-schedule");
+    const example = page.locator('[data-example="first-schedule"]');
+    const plot = await plotOf(page, example, DAY_OF_PLAN);
+    const before = (await tickLabels(example)).length;
+
+    /* Two fingers, spread apart: Chromium turns the touches into pointer
+       events of type "touch", which is what the schedule listens to. There is
+       no multi-touch API in Playwright, so the events come through the
+       protocol. */
+    const cdp = await context.newCDPSession(page);
+    const middle = plot.y(LANES.qa);
+    const touch = (type: "touchStart" | "touchMove" | "touchEnd", points: readonly number[]) =>
+      cdp.send("Input.dispatchTouchEvent", {
+        type,
+        touchPoints: points.map((x, id) => ({ x, y: middle, id })),
+      });
+
+    await touch("touchStart", [plot.x(10), plot.x(12)]);
+    for (let step = 1; step <= 6; step++) {
+      await touch("touchMove", [plot.x(10) - step * 25, plot.x(12) + step * 25]);
+      await page.waitForTimeout(30);
+    }
+    await touch("touchEnd", []);
+
+    /* Fewer hours in the same width: the fine band shows fewer labels than the
+       twelve and a half hours did, and the quarter hours appear. */
+    await expect.poll(async () => (await tickLabels(example)).some((label) => label.endsWith(":30") || label.endsWith(":15"))).toBe(true);
+    expect((await tickLabels(example)).length).toBeLessThanOrEqual(before + 4);
+  });
+});
+
+test("the operating calendar holds through pan and zoom: no removed hour gets a tick", async ({ page }) => {
+  await openExample(page, "schedule", "operating-calendar");
+  const example = page.locator('[data-example="operating-calendar"]');
+  const removed = (labels: readonly string[]) => labels.filter((l) => /^(00|01|02|03|04|05|23):/.test(l));
+  expect(removed(await tickLabels(example))).toEqual([]);
+
+  const plot = example.locator("[data-schedule-plot]");
+  const box = (await plot.boundingBox())!;
+  await page.mouse.move(box.x + box.width * 0.5, box.y + box.height - 8);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width * 0.2, box.y + box.height - 8, { steps: 8 });
+  await page.mouse.up();
+  expect(removed(await tickLabels(example))).toEqual([]);
+
+  await wheel(page, box.x + box.width * 0.5, box.y + box.height - 8, -120, 10, "Control");
+  expect(removed(await tickLabels(example))).toEqual([]);
+});
