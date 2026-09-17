@@ -213,6 +213,13 @@
 .exampleStage {
   padding: var(--u-space-5);
   background: var(--u-color-surface);
+  /* Nothing of the shell's type reaches an example: font, size, line height
+     and colour go back to the browser's defaults. A component has to carry its
+     own (ADR-0021), and one that does not shows it here, in its screenshot. */
+  font: initial;
+  color: initial;
+  -webkit-font-smoothing: auto;
+  text-rendering: auto;
 }
 
 /* A demonstration is a small application and not a handful of props: it gets

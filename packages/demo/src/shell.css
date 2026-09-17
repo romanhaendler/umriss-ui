@@ -9,9 +9,24 @@
    Every colour, spacing and radius comes from the tokens - the demo allows
    itself nothing the library does not offer. */
 
+/* The demo is an application, and this is its base: the page margin and the
+   type of the shell's own chrome. The library brings neither (ADR-0021) - and
+   the examples do not get this type either: `.exampleStage` in page.css puts
+   them back on the browser's defaults, so that a component which leans on
+   its surroundings shows it in its screenshot. */
+body {
+  margin: 0;
+}
+
 .shell {
   min-height: 100vh;
   background: var(--u-color-bg);
+  font-family: var(--u-font-sans);
+  font-size: var(--u-text-md);
+  line-height: var(--u-leading-normal);
+  color: var(--u-color-text);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 /* ---------------- Kopfleiste ---------------- */

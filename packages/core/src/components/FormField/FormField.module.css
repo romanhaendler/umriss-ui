@@ -1,33 +1,37 @@
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--u-space-1);
-  min-width: 0;
-}
+@layer umriss.tokens, umriss.components;
 
-.label {
-  font-size: var(--u-text-sm);
-  font-weight: var(--u-weight-medium);
-  color: var(--u-color-text);
-  line-height: var(--u-leading-tight);
-}
+@layer umriss.components {
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--u-space-1);
+    min-width: 0;
+  }
 
-.required {
-  margin-left: 2px;
-  color: var(--u-color-danger);
-}
+  .label {
+    font-size: var(--u-text-sm);
+    font-weight: var(--u-weight-medium);
+    color: var(--u-color-text);
+    line-height: var(--u-leading-tight);
+  }
 
-.message {
-  margin: 0;
-  font-size: var(--u-text-xs);
-  line-height: var(--u-leading-tight);
-}
+  .required {
+    margin-left: 2px;
+    color: var(--u-color-danger);
+  }
 
-.hint {
-  color: var(--u-color-text-muted);
-}
+  .message {
+    margin: 0;
+    font-size: var(--u-text-xs);
+    line-height: var(--u-leading-tight);
+  }
 
-.error {
-  color: var(--u-color-danger);
-  font-weight: var(--u-weight-medium);
+  .hint {
+    color: var(--u-color-text-muted);
+  }
+
+  .error {
+    color: var(--u-color-danger);
+    font-weight: var(--u-weight-medium);
+  }
 }

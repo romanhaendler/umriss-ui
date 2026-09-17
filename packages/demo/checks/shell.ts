@@ -236,8 +236,9 @@ test("the resting pointer does not take the tick away from the keyboard", async 
 });
 
 test("the field carries no focus ring", async ({ page }) => {
-  /* The pane IS the focus indicator. The base layer sets the ring in
-     global.css as a `box-shadow`, not as an `outline` - so an `outline: none`
+  /* The pane IS the focus indicator. The base layer set the ring in
+     global.css as a `box-shadow`, not as an `outline` (it is gone since
+     ADR-0021, the lesson is not) - so an `outline: none`
      alone left it standing, and because the field fills the pane's width,
      `overflow: hidden` cut it away left, right and top. What remained was a
      four-pixel bar in the accent colour under the field, looking like a very

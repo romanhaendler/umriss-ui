@@ -1,104 +1,108 @@
-.card {
-  background: var(--u-color-surface);
-  border: none;
-  border-radius: var(--u-radius-lg);
-  box-shadow: var(--u-shadow-card);
-  overflow: hidden;
-}
+@layer umriss.tokens, umriss.components;
 
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--u-space-4);
-  padding: var(--u-space-3) var(--u-space-4);
-}
+@layer umriss.components {
+  .card {
+    background: var(--u-color-surface);
+    border: none;
+    border-radius: var(--u-radius-lg);
+    box-shadow: var(--u-shadow-card);
+    overflow: hidden;
+  }
 
-.divider {
-  border-bottom: 1px solid var(--u-hairline);
-}
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--u-space-4);
+    padding: var(--u-space-3) var(--u-space-4);
+  }
 
-/* Without a divider the white space carries the hierarchy - the body moves
-   closer to the head, so that no doubled gap appears. */
-.header:not(.divider) + .body:not(.flush),
-.header:not(.divider) + .collapse .body:not(.flush) {
-  padding-top: var(--u-space-1);
-}
+  .divider {
+    border-bottom: 1px solid var(--u-hairline);
+  }
 
-/* Collapsing: the height is animated through grid-template-rows 1fr to 0fr. */
-.collapse {
-  display: grid;
-  grid-template-rows: 1fr;
-  transition: grid-template-rows var(--u-duration-medium) var(--u-ease-out);
-}
+  /* Without a divider the white space carries the hierarchy - the body moves
+     closer to the head, so that no doubled gap appears. */
+  .header:not(.divider) + .body:not(.flush),
+  .header:not(.divider) + .collapse .body:not(.flush) {
+    padding-top: var(--u-space-1);
+  }
 
-.collapsed {
-  grid-template-rows: 0fr;
-}
+  /* Collapsing: the height is animated through grid-template-rows 1fr to 0fr. */
+  .collapse {
+    display: grid;
+    grid-template-rows: 1fr;
+    transition: grid-template-rows var(--u-duration-medium) var(--u-ease-out);
+  }
 
-.collapseInner {
-  overflow: hidden;
-  min-height: 0;
-}
+  .collapsed {
+    grid-template-rows: 0fr;
+  }
 
-.headerText {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
+  .collapseInner {
+    overflow: hidden;
+    min-height: 0;
+  }
 
-.eyebrow {
-  font-size: var(--u-text-xs);
-  font-weight: var(--u-weight-medium);
-  letter-spacing: var(--u-tracking-caps);
-  text-transform: uppercase;
-  color: var(--u-color-text-muted);
-}
+  .headerText {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
 
-.title {
-  margin: 0;
-  font-size: var(--u-text-lg);
-  font-weight: var(--u-weight-semibold);
-  letter-spacing: var(--u-tracking-tight);
-  line-height: var(--u-leading-tight);
-  color: var(--u-color-text);
-}
+  .eyebrow {
+    font-size: var(--u-text-xs);
+    font-weight: var(--u-weight-medium);
+    letter-spacing: var(--u-tracking-caps);
+    text-transform: uppercase;
+    color: var(--u-color-text-muted);
+  }
 
-.headerRight {
-  display: flex;
-  align-items: center;
-  gap: var(--u-space-2);
-  flex: none;
-}
+  .title {
+    margin: 0;
+    font-size: var(--u-text-lg);
+    font-weight: var(--u-weight-semibold);
+    letter-spacing: var(--u-tracking-tight);
+    line-height: var(--u-leading-tight);
+    color: var(--u-color-text);
+  }
 
-.collapseButton {
-  border: none;
-  background: none;
-  padding: var(--u-space-1) var(--u-space-2);
-  font-family: var(--u-font-sans);
-  font-size: var(--u-text-xs);
-  font-weight: var(--u-weight-medium);
-  color: var(--u-color-accent-text);
-  cursor: pointer;
-  border-radius: var(--u-radius-sm);
-  transition: background-color var(--u-transition);
-}
+  .headerRight {
+    display: flex;
+    align-items: center;
+    gap: var(--u-space-2);
+    flex: none;
+  }
 
-.collapseButton:hover {
-  background: var(--u-color-accent-subtle);
-}
+  .collapseButton {
+    border: none;
+    background: none;
+    padding: var(--u-space-1) var(--u-space-2);
+    font-family: var(--u-font-sans);
+    font-size: var(--u-text-xs);
+    font-weight: var(--u-weight-medium);
+    color: var(--u-color-accent-text);
+    cursor: pointer;
+    border-radius: var(--u-radius-sm);
+    transition: background-color var(--u-transition);
+  }
 
-.body {
-  padding: var(--u-space-4);
-}
+  .collapseButton:hover {
+    background: var(--u-color-accent-subtle);
+  }
 
-.flush {
-  padding: 0;
-}
+  .body {
+    padding: var(--u-space-4);
+  }
 
-.flush > :global(*) {
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
+  .flush {
+    padding: 0;
+  }
+
+  .flush > :global(*) {
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
 }

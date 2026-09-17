@@ -2,27 +2,31 @@
    appearance and inner workings stay in the components' stylesheets.
    Before this, @keyframes panelIn was defined five times. */
 
-.panel {
-  position: fixed;
-  z-index: var(--u-z-popover);
-  animation: panelIn var(--u-duration-fast) var(--u-ease-out);
-}
+@layer umriss.tokens, umriss.components;
 
-/* Flipped upwards: the entrance mirrors with it. */
-.above {
-  animation-name: panelInAbove;
-}
-
-@keyframes panelIn {
-  from {
-    opacity: 0;
-    transform: translateY(-6px);
+@layer umriss.components {
+  .panel {
+    position: fixed;
+    z-index: var(--u-z-popover);
+    animation: panelIn var(--u-duration-fast) var(--u-ease-out);
   }
-}
 
-@keyframes panelInAbove {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
+  /* Flipped upwards: the entrance mirrors with it. */
+  .above {
+    animation-name: panelInAbove;
+  }
+
+  @keyframes panelIn {
+    from {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+  }
+
+  @keyframes panelInAbove {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
   }
 }
