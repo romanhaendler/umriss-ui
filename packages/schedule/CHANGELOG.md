@@ -14,6 +14,43 @@ under a heading "Changed" of its own, no matter which digit rose.
 
 ---
 
+## Unreleased – One language for the bars (Sep. 2026)
+
+Delivery report for `.scratch/schedule-lane-groups/spec.md`, in progress.
+
+### Changed
+
+- **Every appearance is drawn differently.** The words a caller writes are
+  unchanged and so is `resolveAppearance`; the picture is not. Each statement
+  now owns exactly one property of the drawing, so that several on one bar stay
+  several statements:
+  - `"provisional"` is **hollow** - no fill at all, the surface shows through,
+    with its dashed outline in the task colour at full weight. It used to be a
+    45-per-cent fill, which read as a setup; empty is not faint.
+  - `"fixed"` carries a **cap at each end** of the main time, three pixels, in
+    the colour the bar's label takes, set just inside the end. The hatch across
+    its face is gone: it lay under the label, and it was the loudest mark in
+    the picture for the calmest statement.
+  - `"muted"` is at **full height** in the task colour mixed half into the
+    surface, opaque and without an outline. It used to be drawn at half height,
+    which read as a different kind of thing and cost it its label.
+  - `"open"` **fades at whichever edge of the view** the bar passes, left as
+    well as right. A bar that began before the view used to say nothing at all.
+- **A `progress` rail** lies within the main time and above the bar's lower
+  edge. It measures the work, so it stops where the main time does.
+- **A hatch now means one thing only**: a lane a drag may not put its work on.
+  It is no longer a mark on any bar.
+- **A refused lane is visible before it is met.** The lanes `canMoveTo` turns
+  down are marked from the first frame of a drag - drawn back and hatched, and
+  their headers with them (`[data-lane][data-refused]`, to style beside the
+  schedule). Over one of them the cursor says no and a hairline ties the ghost
+  to the pointer it is not following.
+- **A refused lane no longer costs the whole gesture.** A drop after one still
+  reports the move in time; only the lane change is dropped. `canMoveTo` is
+  asked once per lane when a drag takes hold, and again at the drop.
+
+---
+
 ## Unreleased – A plan one can read (Sep. 2026)
 
 Delivery report for `.scratch/schedule-legibility/spec.md`, tickets 01–06.

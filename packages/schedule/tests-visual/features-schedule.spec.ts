@@ -6,7 +6,8 @@
 import { test, expect, type Locator, type Page } from "@playwright/test";
 import { overlayOffenders } from "@umriss-ui/demo/checks/overlays";
 import { openExample } from "./navigation";
-import { DAY_OF_PLAN, LANES, plotOf } from "./plot";
+import { colour, distanceFrom, paintedShare, rgba } from "./pixels";
+import { DAY_OF_PLAN, LANE_HEIGHT, LANES, at, plotOf } from "./plot";
 
 test.beforeEach(async ({ page }) => {
   test.skip(test.info().project.name.endsWith("dark"), "a behaviour test runs once (light)");
@@ -384,4 +385,184 @@ test("a bar that began before the view keeps its label at the edge", async ({ pa
   expect(box.x).toBeCloseTo(plot.box.x, 0);
   await expect(label).toHaveText("A-2041 Housing");
   expect(await overlayOffenders(page)).toEqual([]);
+});
+
+/* ------------------------------------------------------------------ */
+/* One channel per statement (schedule-lane-groups 02)                  */
+/* ------------------------------------------------------------------ */
+
+/* The appearances are the one thing about the schedule that IS the picture, so
+   these read the pixels the plot actually put down. The rectangles are worked
+   out from the example's own lanes and times, as `plot.ts` works out a point a
+   person would aim at.
+
+   A bar sits centred in its lane, `laneHeight - 2 * BAR_INSET - MAX_DEPTH *
+   DEPTH_STEP` high - 23 of 44 - so its middle band is a safe place to ask
+   about, and a strip a few pixels wide is enough to tell a filled face from an
+   empty one. */
+const APPEARANCE_DOMAIN = [at(6, 30), at(11)] as const;
+/** The middle third of a bar on the lane with this index, over an hour of it. */
+const face = (plot: { x: (h: number, m?: number) => number; box: { x: number } }, lane: number, hour: number) => ({
+  x: plot.x(hour) - plot.box.x,
+  y: lane * LANE_HEIGHT + LANE_HEIGHT / 2 - 4,
+  width: plot.x(hour + 1) - plot.x(hour),
+  height: 8,
+});
+
+test("a provisional bar is hollow, and a released one is not", async ({ page }) => {
+  await openExample(page, "subtasks", "appearances");
+  const example = page.locator('[data-example="appearances"]');
+  const plot = await plotOf(page, example, APPEARANCE_DOMAIN);
+
+  /* Lane 0 is released work, lane 1 provisional - both 07:00 to 10:00, so the
+     same strip of each is asked about.
+
+     Hollow is not "nothing at all": the grid's time ticks run the height of
+     the plot beneath the bars, and a bar with no fill lets them through. That
+     is the picture being right, not the test being loose - a hollow bar shows
+     what is behind it, which is what hollow means. */
+  expect(await paintedShare(example, "data", face(plot, 0, 8))).toBeGreaterThan(0.95);
+  expect(await paintedShare(example, "data", face(plot, 1, 8))).toBeLessThan(0.05);
+});
+
+test("a fixed bar is marked at its ends and keeps its face clear", async ({ page }) => {
+  await openExample(page, "subtasks", "appearances");
+  const example = page.locator('[data-example="appearances"]');
+  const plot = await plotOf(page, example, APPEARANCE_DOMAIN);
+
+  /* Lane 2, 07:00 to 10:00. The cap is three pixels in the colour the label
+     takes, sitting two pixels INSIDE the end and framed by the bar's own
+     colour. Flush with the end it was no mark at all: a light cap at the start
+     of a bar on a light page reads as the bar beginning a little later. */
+  const y = LANE_HEIGHT * 2 + LANE_HEIGHT / 2;
+  const spot = (x: number) => ({ x: Math.round(x - plot.box.x), y });
+  const faceColour = await colour(example, "data", spot(plot.x(8, 30)));
+
+  expect(await colour(example, "data", spot(plot.x(7)))).toBe(faceColour);
+  expect(await colour(example, "data", spot(plot.x(7) + 3))).not.toBe(faceColour);
+  expect(await colour(example, "data", spot(plot.x(10) - 1))).toBe(faceColour);
+  expect(await colour(example, "data", spot(plot.x(10) - 4))).not.toBe(faceColour);
+
+  /* And between the caps the face is one colour throughout: no hatch. The
+     hatch left the bars in this ticket and went to the refused lane, where
+     "not available" is what it says. */
+  for (const hour of [8, 9]) expect(await colour(example, "data", spot(plot.x(hour)))).toBe(faceColour);
+  expect(await paintedShare(example, "data", face(plot, 2, 8))).toBeGreaterThan(0.95);
+});
+
+test("muted work is a paler colour at full height, and cannot be read as a setup", async ({ page }) => {
+  await openExample(page, "subtasks", "appearances");
+  const example = page.locator('[data-example="appearances"]');
+  const plot = await plotOf(page, example, APPEARANCE_DOMAIN);
+
+  /* Lane 3 carries another shift's work from 07:00 with half an hour of setup
+     before it: the two lie side by side in one picture, which is the only way
+     to prove they cannot be confused. */
+  const y = LANE_HEIGHT * 3 + LANE_HEIGHT / 2;
+  const onBar = { x: Math.round(plot.x(8) - plot.box.x), y };
+  const inSetup = { x: Math.round(plot.x(6, 45) - plot.box.x), y };
+
+  /* Full height: the bar's top rows are painted. A half-height bar - which is
+     what muted used to be - would leave them empty. */
+  expect(await paintedShare(example, "data", { x: onBar.x, y: LANE_HEIGHT * 3 + 12, width: 20, height: 3 })).toBe(1);
+
+  /* And a different colour from the setup beside it, by a margin and not by a
+     rounding: user story 4 asks for "without doubt", so the test asks for a
+     distance and not merely for inequality. */
+  expect(await distanceFrom(example, "data", onBar, await rgba(example, "data", inSetup))).toBeGreaterThan(50);
+
+  /* Nor is it simply the task colour - that is the whole point of the
+     channel. */
+  const plain = { x: onBar.x, y: LANE_HEIGHT / 2 };
+  expect(await distanceFrom(example, "data", onBar, await rgba(example, "data", plain))).toBeGreaterThan(50);
+});
+
+test("the progress rail lies within the main time and stops at its end", async ({ page }) => {
+  await openExample(page, "subtasks", "appearances");
+  const example = page.locator('[data-example="appearances"]');
+  const plot = await plotOf(page, example, APPEARANCE_DOMAIN);
+
+  /* Lane 4: 07:00 to 10:00 at 65 per cent, with half an hour of teardown after
+     it. The rail is a mark ON the bar, so it lies above the bar's own bottom
+     edge - and it measures the WORK, so it must stop where the main time
+     does. */
+  const bottom = LANE_HEIGHT * 4 + LANE_HEIGHT / 2 + 11 - 4;
+  const done = plot.x(7) + 0.65 * (plot.x(10) - plot.x(7));
+  const spot = (x: number) => ({ x: x - plot.box.x, y: bottom });
+
+  const onWork = await colour(example, "data", spot(plot.x(8)));
+  const stillToDo = await colour(example, "data", spot(done + 20));
+  const underTeardown = await colour(example, "data", spot(plot.x(10, 15)));
+  /* Done, still to do, and the teardown: three different things at that
+     height. If the rail ran on, the last two would be one. */
+  expect(onWork).not.toBe(stillToDo);
+  expect(underTeardown).not.toBe(onWork);
+  expect(underTeardown).not.toBe(stillToDo);
+
+  /* And it is inset: the bar's lowest row is the bar, not the rail. */
+  const lowest = { x: plot.x(8) - plot.box.x, y: LANE_HEIGHT * 4 + LANE_HEIGHT / 2 + 10 };
+  expect(await colour(example, "data", lowest)).not.toBe(onWork);
+});
+
+test("a bar fades at whichever edge of the view it passes", async ({ page }) => {
+  await openExample(page, "subtasks", "appearances");
+  const example = page.locator('[data-example="appearances"]');
+  const width = (await example.locator("[data-schedule-plot]").boundingBox())!.width;
+
+  /* Lane 5 runs past the right edge, lane 6 began before the left one. A fade
+     is a gradient into the surface, so the test asks how far each place stands
+     from the bar's own solid colour: further, the nearer the edge. */
+  const mid = (lane: number) => lane * LANE_HEIGHT + LANE_HEIGHT / 2;
+
+  const solidRight = await rgba(example, "data", { x: width - 60, y: mid(5) });
+  const near = await distanceFrom(example, "data", { x: width - 2, y: mid(5) }, solidRight);
+  const far = await distanceFrom(example, "data", { x: width - 12, y: mid(5) }, solidRight);
+  expect(near).toBeGreaterThan(far);
+  expect(far).toBeGreaterThan(0);
+
+  const solidLeft = await rgba(example, "data", { x: 60, y: mid(6) });
+  const nearLeft = await distanceFrom(example, "data", { x: 1, y: mid(6) }, solidLeft);
+  const farLeft = await distanceFrom(example, "data", { x: 11, y: mid(6) }, solidLeft);
+  expect(nearLeft).toBeGreaterThan(farLeft);
+  expect(farLeft).toBeGreaterThan(0);
+});
+
+test("three statements on one bar stay three statements", async ({ page }) => {
+  await openExample(page, "subtasks", "combinations");
+  const example = page.locator('[data-example="combinations"]');
+  const plot = await plotOf(page, example, APPEARANCE_DOMAIN);
+  const width = (await example.locator("[data-schedule-plot]").boundingBox())!.width;
+
+  /* Lane 0: another shift's, fixed, and running past the right edge. The
+     saturation says the first, a cap at 07:00 says the second, the fade at the
+     right edge says the third - and the fade is what takes the cap that would
+     have stood at the bar's own end, which lies outside the view. */
+  const mid = LANE_HEIGHT / 2;
+  const cap = await colour(example, "data", { x: Math.round(plot.x(7) + 3 - plot.box.x), y: mid });
+  const faceColour = await colour(example, "data", { x: Math.round(plot.x(9) - plot.box.x), y: mid });
+  expect(cap).not.toBe(faceColour);
+
+  const solid = await rgba(example, "data", { x: width - 60, y: mid });
+  expect(await distanceFrom(example, "data", { x: width - 2, y: mid }, solid)).toBeGreaterThan(
+    await distanceFrom(example, "data", { x: width - 12, y: mid }, solid),
+  );
+
+  /* Lane 2 was given provisional then fixed: the later word wins, so it is
+     capped and its face is filled. Lane 3 was given them the other way round
+     and is hollow. */
+  expect(await paintedShare(example, "data", face(plot, 2, 8))).toBeGreaterThan(0.95);
+  expect(await paintedShare(example, "data", face(plot, 3, 8))).toBeLessThan(0.05);
+
+  /* And no bar loses its label to an appearance. The hollow ones lie on the
+     surface, so their text is the page's own; the filled ones take whatever
+     reads on their fill. */
+  const on = async (id: string) => await example.locator(`[data-bar-label="${id}"]`).getAttribute("data-on");
+  expect(await on("reopened")).toBe("light");
+  expect(await on("planned")).toBe("light");
+  expect(await on("settled")).toBe("dark");
+  /* A muted bar is the task colour mixed half into the surface, which lands in
+     the middle of the range - and there the page's own text colour is the one
+     that reads, in either theme. A single luminance threshold got this wrong
+     and put white on a salmon bar; the contrast is measured instead. */
+  expect(await on("all-three")).toBe("light");
 });

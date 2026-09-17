@@ -14,15 +14,26 @@
 /** The appearances a caller may give a subtask. */
 export type SubtaskAppearance = "provisional" | "fixed" | "muted" | "open";
 
-/** What the drawing needs to know, with the contradiction already settled. */
+/** What the drawing needs to know, with the contradiction already settled.
+
+    The four names are the ones this module was born with, and they are kept so
+    that a caller's code does not change because a picture did. Two of them are
+    now named after a drawing they no longer use, and the channel each one
+    really owns stands beside it (`sceneDraw.ts`, "ONE CHANNEL PER
+    STATEMENT"). */
 export interface ResolvedAppearance {
-  /** A dashed outline: planned, not released. */
+  /** `provisional`: the FILL - none at all, so the surface shows through, with
+      a dashed outline in the task colour. Planned, not released. */
   readonly dashed: boolean;
-  /** A hatch: fixed, not to be moved. */
+  /** `fixed`: the ENDS - a cap at each end of the main time. Not a hatch any
+      more; a hatch now says "not available" of a refused lane, and the name is
+      kept only so that this type did not change with the picture. */
   readonly hatched: boolean;
-  /** Drawn back: another shift's, another crew's. */
+  /** `muted`: the SATURATION - the task colour mixed half into the surface,
+      opaque and at full height. Another shift's, another crew's. */
   readonly muted: boolean;
-  /** No end edge on the side it continues past. */
+  /** `open`: the FADE, where the bar passes the edge of the view. It goes on
+      past what is drawn. */
   readonly open: boolean;
 }
 

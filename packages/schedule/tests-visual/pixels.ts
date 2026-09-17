@@ -69,3 +69,41 @@ export async function paintedShare(example: Locator, layer: Layer, rect: Rect): 
     return count / (w * h);
   }, rect);
 }
+
+export interface Point {
+  readonly x: number;
+  readonly y: number;
+}
+
+/** The four channels at a point of a canvas, in CSS pixels from the plot's top
+    left. Alpha is the canvas' own: nothing drawn is a zero there, and the
+    surface a reader sees through it belongs to the CSS beneath. */
+export async function rgba(example: Locator, layer: Layer, point: Point): Promise<[number, number, number, number]> {
+  return await canvasOf(example, layer).evaluate((canvas, at) => {
+    const element = canvas as HTMLCanvasElement;
+    const ctx = element.getContext("2d");
+    if (ctx === null) throw new Error("no 2d context");
+    const ratio = element.width / element.clientWidth;
+    const d = ctx.getImageData(Math.round(at.x * ratio), Math.round(at.y * ratio), 1, 1).data;
+    return [d[0]!, d[1]!, d[2]!, d[3]!] as [number, number, number, number];
+  }, point);
+}
+
+/** The paint at a point as one comparable value - for asking whether two
+    places carry the same thing without the test having to know the theme's
+    values. */
+export async function colour(example: Locator, layer: Layer, point: Point): Promise<string> {
+  return (await rgba(example, layer, point)).join(",");
+}
+
+/** How far the paint at a point stands from a colour, over all four channels.
+    A fade is a gradient, so this is how a test says "further along it". */
+export async function distanceFrom(
+  example: Locator,
+  layer: Layer,
+  point: Point,
+  from: readonly [number, number, number, number],
+): Promise<number> {
+  const here = await rgba(example, layer, point);
+  return here.reduce((sum, value, i) => sum + Math.abs(value - from[i]!), 0);
+}

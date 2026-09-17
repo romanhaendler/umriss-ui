@@ -18,10 +18,11 @@
    The data is the caller's and stays as it came (ADR-0023). */
 
 import { HOUR, calendarFrom, subscribeTheme, toWallClock } from "@umriss-ui/charts";
+import { resolveAppearance } from "./appearance";
 import { laneTop, xOf } from "./geometry";
 import { SceneData, type LaneConfig, type LayerConfig, type ScheduleTooltipTarget } from "./sceneData";
 import type { Subtask } from "./model";
-import { drawData, drawOverlay, isDark, prepareCanvas, resolveSceneColours, type Colours } from "./sceneDraw";
+import { barFace, drawData, drawOverlay, prepareCanvas, resolveSceneColours, type Colours } from "./sceneDraw";
 import { barLabelBox, inView } from "./geometry";
 import { SceneGestures, type GhostSummary, type PlacingItem, type SceneHandlers } from "./sceneGestures";
 import { DEFAULT_LANE_HEIGHT, SceneView, type SceneOptions } from "./sceneView";
@@ -268,8 +269,16 @@ export class ScheduleScene {
       if (!inView(box, view.width, view.height)) return [];
       const place = barLabelBox(box, view.width);
       if (place === null) return [];
-      const colour = colours?.tasks.get(box.subtask.task);
-      return [{ subtask: box.subtask, ...place, dark: colour === undefined ? true : isDark(colour) }];
+      /* What the label lies on, asked of the drawing itself: a hollow bar is
+         the surface and takes the text colour, a muted one is the mix and not
+         the task colour. One answer, so the label and the caps beside it can
+         never disagree (`barFace`). */
+      const colour = colours === null ? undefined : colours.tasks.get(box.subtask.task);
+      const dark =
+        colour === undefined || colours === null
+          ? true
+          : barFace(resolveAppearance(box.subtask.appearance), colour, colours).onDark;
+      return [{ subtask: box.subtask, ...place, dark }];
     });
   }
 
@@ -337,7 +346,15 @@ export class ScheduleScene {
 
   private draw(): void {
     if (this.root === null) return;
-    this.colours ??= resolveSceneColours(this.root, this.data);
+    if (this.colours === null) {
+      this.colours = resolveSceneColours(this.root, this.data);
+      /* Publish again, now that the colours are known. A bar label's contrast
+         follows what its bar is actually painted in (`bars`), and the theme
+         can only be read once the scene is bound - which is after the first
+         snapshot went out. Without this, every label kept the contrast of the
+         first publish, when nothing had a colour yet. */
+      this.publish();
+    }
     const { width, height } = this.view;
     const data = prepareCanvas(this.dataCanvas, width, height);
     const overlay = prepareCanvas(this.overlayCanvas, width, height);

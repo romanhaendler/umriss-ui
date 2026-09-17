@@ -36,6 +36,11 @@ export interface Viewport {
 
 /** Distance of a bar from the edges of its lane, before any offset. */
 export const BAR_INSET = 6;
+/** How wide the cap of a fixed bar is and how far it sits in from the bar's
+    end and edges. They stand here rather than with the drawing because the
+    LABEL has to know them too: a mark and a word must not share a place. */
+export const CAP = 3;
+export const CAP_INSET = 2;
 /** How far each level of overlap moves a bar down, and the deepest level that
     still moves it: the bar is made short enough that the deepest one stays in
     its lane. */
@@ -117,15 +122,6 @@ export function inView(box: SubtaskBox, plotWidth: number, plotHeight: number): 
   return box.outerTo >= 0 && box.outerFrom <= plotWidth && box.y + box.height >= 0 && box.y <= plotHeight;
 }
 
-/** Where a bar is actually drawn within its box: `"muted"` work is drawn slim
-    (`sceneDraw.ts`), and its label has to be the bar it lies on and not the box
-    the bar could have filled. One rule, read by the drawing and by the label. */
-export function barRect(box: SubtaskBox): { top: number; height: number } {
-  const slim = resolveAppearance(box.subtask.appearance).muted;
-  const height = slim ? Math.max(7, Math.round(box.height / 2)) : box.height;
-  return { top: slim ? box.y + Math.round((box.height - height) / 2) : box.y, height };
-}
-
 /** The narrowest bar that still gets a label.
 
     Measured, not guessed: at the type size the labels are set in, a 47-pixel
@@ -144,11 +140,18 @@ export function barLabelBox(
   box: SubtaskBox,
   plotWidth: number,
 ): { x: number; width: number; y: number; height: number } | null {
-  const x = Math.max(box.mainFrom, 0);
-  const width = Math.min(box.mainTo, plotWidth) - x;
+  /* Fixed work is capped at both ends, and a word must not lie on a mark - the
+     hatch across a bar's face was taken away for exactly that reason. So the
+     label of a capped bar begins after its cap and stops before the other
+     one. */
+  const capped = resolveAppearance(box.subtask.appearance).hatched ? CAP_INSET + CAP + 1 : 0;
+  const x = Math.max(box.mainFrom + capped, 0);
+  const width = Math.min(box.mainTo - capped, plotWidth) - x;
   if (width < MIN_LABEL_WIDTH) return null;
-  const rect = barRect(box);
-  return { x, width, y: rect.top, height: rect.height };
+  /* The whole height, always: since schedule-lane-groups 02 no appearance
+     changes what a bar MEASURES. Muted work says it in saturation, not in
+     height, so every bar keeps its label at its full size. */
+  return { x, width, y: box.y, height: box.height };
 }
 
 /** How the transports of a schedule are drawn, where a transport does not say

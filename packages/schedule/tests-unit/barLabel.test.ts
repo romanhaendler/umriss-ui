@@ -5,7 +5,7 @@
    its label at the view's edge, the way the day band keeps its date. */
 
 import { describe, expect, it } from "vitest";
-import { MIN_LABEL_WIDTH, barLabelBox } from "../src/geometry";
+import { CAP, MIN_LABEL_WIDTH, barLabelBox } from "../src/geometry";
 import type { SubtaskBox } from "../src/geometry";
 
 function box(mainFrom: number, mainTo: number, extra: Partial<SubtaskBox> = {}): SubtaskBox {
@@ -24,13 +24,28 @@ function box(mainFrom: number, mainTo: number, extra: Partial<SubtaskBox> = {}):
 }
 
 describe("barLabelBox", () => {
-  it("is the bar as it is drawn: a muted bar is slim, and so is its label", () => {
+  it("keeps its full height, whatever the bar says besides its colour", () => {
+    /* Until schedule-lane-groups 02 a muted bar was drawn at half height and
+       its label shrank with it. Muted now says it in SATURATION, so no
+       appearance takes height from a label any more. */
     const plain = barLabelBox(box(100, 300), 800)!;
-    const muted = barLabelBox(box(100, 300, { subtask: { id: "s", task: "t", lane: "l", from: 0, to: 0, appearance: ["muted"] } }), 800)!;
-    expect(muted.height).toBeLessThan(plain.height);
-    expect(muted.y).toBeGreaterThan(plain.y);
-    /* Centred in the same box, so the two share a middle within a pixel. */
-    expect(Math.abs(muted.y + muted.height / 2 - (plain.y + plain.height / 2))).toBeLessThanOrEqual(1);
+    for (const appearance of [["muted"], ["provisional"], ["open"], ["muted", "open"]] as const) {
+      const marked = barLabelBox(box(100, 300, { subtask: { id: "s", task: "t", lane: "l", from: 0, to: 0, appearance: [...appearance] } }), 800)!;
+      expect(marked).toEqual(plain);
+    }
+  });
+
+  it("steps aside for the caps of a fixed bar", () => {
+    /* A word must not lie on a mark - the hatch across a bar's face was taken
+       away for that reason, and a cap must not walk into the same mistake. */
+    const fixed = barLabelBox(box(100, 300, { subtask: { id: "s", task: "t", lane: "l", from: 0, to: 0, appearance: ["fixed"] } }), 800)!;
+    expect(fixed.x).toBeGreaterThan(100 + CAP);
+    expect(fixed.x + fixed.width).toBeLessThan(300 - CAP);
+    /* It is an inset and nothing more: the height is untouched, and the two
+       ends give up the same. */
+    expect(fixed.y).toBe(10);
+    expect(fixed.height).toBe(23);
+    expect(fixed.x - 100).toBe(300 - (fixed.x + fixed.width));
   });
 
   it("lies on the main time, not on the setup or the teardown", () => {
