@@ -1,7 +1,9 @@
 /* Snapping: a wall-clock time onto a raster (ADR-0023).
 
-   The raster lies on LOCAL time: a shift raster of eight hours means 06:00,
-   14:00, 22:00 on the plant's clock, never on UTC's. The offset is the local
+   The raster lies on LOCAL time, counted from local midnight: a raster of two
+   hours means 06:00, 08:00, 10:00 on the plant's clock, never on UTC's. A raster
+   with an offset of its own - shifts at 06:00, 14:00, 22:00 - is not offered
+   yet. The offset is the local
    one at the instant itself, so a raster keeps its hours across a clock change.
    Snapping shapes the ghost and therefore the intent - never the stored data. */
 

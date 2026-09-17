@@ -11,10 +11,10 @@
    Free of the DOM and of the canvas. */
 
 import { toOperatingTimeClamped, type CalendarInput, type Scale } from "@umriss-ui/charts";
-import { arrival, departure, type Subtask, type Transport } from "./model";
+import { arrival, departure, occupied, type Subtask, type Transport } from "./model";
 
 /** What the geometry needs to know about the view. */
-export interface View {
+export interface Viewport {
   /** Operating time → pixel, across the plot's width. */
   readonly scale: Scale;
   readonly calendar: CalendarInput;
@@ -48,35 +48,36 @@ export interface SubtaskBox {
 }
 
 /** The pixel of a wall-clock instant. */
-export function xOf(view: View, instant: number): number {
+export function xOf(view: Viewport, instant: number): number {
   return Math.round(view.scale.toPx(toOperatingTimeClamped(instant, view.calendar)));
 }
 
 /** The top of a lane on the plot. */
-export function laneTop(view: View, laneIndex: number): number {
+export function laneTop(view: Viewport, laneIndex: number): number {
   return laneIndex * view.laneHeight - view.scrollY;
 }
 
 /** The lane under a y, or -1 outside every lane. */
-export function laneAt(view: View, y: number, laneCount: number): number {
+export function laneAt(view: Viewport, y: number, laneCount: number): number {
   const index = Math.floor((y + view.scrollY) / view.laneHeight);
   return index >= 0 && index < laneCount ? index : -1;
 }
 
-export function subtaskBox(view: View, subtask: Subtask, laneIndex: number, depth: number): SubtaskBox {
+export function subtaskBox(view: Viewport, subtask: Subtask, laneIndex: number, depth: number): SubtaskBox {
   const height = Math.max(4, view.laneHeight - 2 * BAR_INSET - MAX_DEPTH * DEPTH_STEP);
   /* Depth 0 sits centred in its lane; each level below moves down by a step. */
   const top = laneTop(view, laneIndex) + Math.floor((view.laneHeight - height) / 2);
+  const outer = occupied(subtask);
   return {
     subtask,
     laneIndex,
     depth,
     y: top + Math.min(depth, MAX_DEPTH) * DEPTH_STEP,
     height,
-    outerFrom: xOf(view, subtask.from - (subtask.setup ?? 0)),
+    outerFrom: xOf(view, outer.from),
     mainFrom: xOf(view, subtask.from),
     mainTo: xOf(view, subtask.to),
-    outerTo: xOf(view, subtask.to + (subtask.teardown ?? 0)),
+    outerTo: xOf(view, outer.to),
   };
 }
 
@@ -116,7 +117,7 @@ export interface TransportPath {
   readonly points: readonly number[];
 }
 
-export function transportPath(view: View, transport: Transport, from: SubtaskBox, to: SubtaskBox): TransportPath {
+export function transportPath(view: Viewport, transport: Transport, from: SubtaskBox, to: SubtaskBox): TransportPath {
   const x1 = xOf(view, departure(transport, from.subtask));
   const x2 = xOf(view, arrival(transport, to.subtask));
   const y1 = Math.round(from.y + from.height / 2);

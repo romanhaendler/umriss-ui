@@ -23,3 +23,4 @@ export { findings, lateTransports, overlaps } from "./findings";
 export type { Findings, LateTransport, Overlap } from "./findings";
 export { ripple } from "./ripple";
 export { snapTime } from "./snap";
+export type { ZoomLimits } from "./timeAxis";
