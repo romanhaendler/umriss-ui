@@ -12,6 +12,10 @@ import { RESOURCES, SCHEDULE, type Job } from "../../data";
 
 export const title = "Schedule";
 
+/* The plant this is drawn from stands in the second tab, so that the
+   example can be copied whole. */
+export const shows = ["../../data.ts"];
+
 const timeOfDay = (v: number) =>
   new Date(v).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 

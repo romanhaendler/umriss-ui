@@ -12,6 +12,10 @@ import { basicData, type Point } from "../../data";
 
 export const title = "Size and resize";
 
+/* The plant this is drawn from stands in the second tab, so that the
+   example can be copied whole. */
+export const shows = ["../../data.ts"];
+
 export default function Sizes() {
   const [collapsed, setCollapsed] = useState(false);
 

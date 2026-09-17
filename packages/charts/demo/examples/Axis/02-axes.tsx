@@ -11,6 +11,10 @@ import { axesData, type DualPoint } from "../../data";
 
 export const title = "Multiple axes";
 
+/* The plant this is drawn from stands in the second tab, so that the
+   example can be copied whole. */
+export const shows = ["../../data.ts"];
+
 export default function Axes() {
   return (
     <Chart data={axesData} height={340} ariaLabel="Three extents on three y axes">

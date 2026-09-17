@@ -18,6 +18,10 @@ import { load, random, type LoadPoint } from "../../data";
 
 export const title = "Benchmark";
 
+/* The plant this is drawn from stands in the second tab, so that the
+   example can be copied whole. */
+export const shows = ["../../data.ts"];
+
 const SIZES = [1_000, 100_000, 1_000_000] as const;
 const WINDOW = 400;
 

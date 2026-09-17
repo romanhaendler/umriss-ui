@@ -6,7 +6,7 @@ import { test, expect } from "@playwright/test";
 import { overlayOffenders } from "@umriss-ui/demo/checks/overlays";
 import { openExample } from "./navigation";
 import { painted } from "./pixels";
-import { DAY_OF_PLAN, LANE_HEIGHT, LANES, at, plotOf } from "./plot";
+import { DAY_OF_PLAN, LANE_HEIGHT, at, plotOf } from "./plot";
 
 test.beforeEach(async ({ page }) => {
   test.skip(test.info().project.name.endsWith("dark"), "a behaviour test runs once (light)");
@@ -20,10 +20,10 @@ test("a drag shows the ghost with its findings before the drop, and reports the 
 
   /* A-2046 on the mill, 13:00 to 14:30 - dragged three hours earlier, onto the
      time A-2043 holds the mill. */
-  await page.mouse.move(plot.x(13, 45), plot.y(LANES.mill));
+  await page.mouse.move(plot.x(13, 45), plot.y("mill"));
   await page.mouse.down();
-  await page.mouse.move(plot.x(12), plot.y(LANES.mill), { steps: 5 });
-  await page.mouse.move(plot.x(10, 45), plot.y(LANES.mill), { steps: 5 });
+  await page.mouse.move(plot.x(12), plot.y("mill"), { steps: 5 });
+  await page.mouse.move(plot.x(10, 45), plot.y("mill"), { steps: 5 });
 
   const ghost = example.locator("[data-ghost]");
   await expect(ghost).toBeVisible();
@@ -47,10 +47,10 @@ test("a drop on another lane reports a lane intent", async ({ page }) => {
   const example = page.locator('[data-example="move-and-lane"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
 
-  await page.mouse.move(plot.x(13, 45), plot.y(LANES.mill));
+  await page.mouse.move(plot.x(13, 45), plot.y("mill"));
   await page.mouse.down();
-  await page.mouse.move(plot.x(13, 45), plot.y(LANES.press), { steps: 5 });
-  await page.mouse.move(plot.x(13, 45), plot.y(LANES.paint), { steps: 5 });
+  await page.mouse.move(plot.x(13, 45), plot.y("press"), { steps: 5 });
+  await page.mouse.move(plot.x(13, 45), plot.y("paint"), { steps: 5 });
   await page.mouse.up();
 
   await expect(example.locator("[data-last-intent]")).toHaveText(JSON.stringify({ kind: "lane", subtask: "a-2046-2", lane: "paint" }));
@@ -61,9 +61,9 @@ test("a drag held at the edge pans the plot along, and the drop lands beyond wha
   const example = page.locator('[data-example="move-and-lane"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
 
-  await page.mouse.move(plot.x(13, 45), plot.y(LANES.mill));
+  await page.mouse.move(plot.x(13, 45), plot.y("mill"));
   await page.mouse.down();
-  await page.mouse.move(plot.box.x + plot.box.width - 4, plot.y(LANES.mill), { steps: 8 });
+  await page.mouse.move(plot.box.x + plot.box.width - 4, plot.y("mill"), { steps: 8 });
   /* Held still at the right edge: the plot pans until the ghost starts after
      the 18:00 the view ended at. */
   await expect
@@ -81,9 +81,9 @@ test("Escape cancels a drag: the ghost goes, and nothing is reported", async ({ 
   const example = page.locator('[data-example="move-and-lane"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
 
-  await page.mouse.move(plot.x(13, 45), plot.y(LANES.mill));
+  await page.mouse.move(plot.x(13, 45), plot.y("mill"));
   await page.mouse.down();
-  await page.mouse.move(plot.x(11), plot.y(LANES.mill), { steps: 5 });
+  await page.mouse.move(plot.x(11), plot.y("mill"), { steps: 5 });
   await expect(example.locator("[data-ghost]")).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(example.locator("[data-ghost]")).toHaveCount(0);
@@ -98,9 +98,9 @@ test("a schedule without intents starts no drag: pressing a subtask pans", async
   const noon = example.locator("[data-schedule-ticks] span span", { hasText: "12:00" });
   const before = (await noon.boundingBox())!.x;
 
-  await page.mouse.move(plot.x(13, 45), plot.y(LANES.mill));
+  await page.mouse.move(plot.x(13, 45), plot.y("mill"));
   await page.mouse.down();
-  await page.mouse.move(plot.x(13, 45) - 100, plot.y(LANES.mill), { steps: 5 });
+  await page.mouse.move(plot.x(13, 45) - 100, plot.y("mill"), { steps: 5 });
   await expect(example.locator("[data-ghost]")).toHaveCount(0);
   await page.mouse.up();
   expect((await noon.boundingBox())!.x).toBeCloseTo(before - 100, -1);
@@ -114,7 +114,7 @@ test("setup grips appear on the selected subtask, and dragging one changes the s
   await expect(grips).toHaveCount(0);
 
   /* The turning, 08:00 to 10:00 with half an hour of setup. */
-  await page.mouse.click(plot.x(9), plot.y(0));
+  await page.mouse.click(plot.x(9), plot.y("lathe"));
   await expect(grips).toHaveCount(2);
   const setup = example.locator('[data-grip="setup"]');
   const before = (await setup.boundingBox())!;
@@ -141,13 +141,13 @@ test("stretching the main time at its edge reports a stretch", async ({ page }) 
 
   /* The grinding ends at 12:30; drag its end to 13:00, then select it to read
      where its teardown grip - at the end, with no teardown - now stands. */
-  await page.mouse.move(plot.x(12, 30), plot.y(1));
+  await page.mouse.move(plot.x(12, 30), plot.y("grinder"));
   await page.mouse.down();
-  await page.mouse.move(plot.x(13), plot.y(1), { steps: 6 });
+  await page.mouse.move(plot.x(13), plot.y("grinder"), { steps: 6 });
   await expect(example.locator("[data-ghost]")).toContainText("11:00–13:00");
   await page.mouse.up();
 
-  await page.mouse.click(plot.x(11, 30), plot.y(1));
+  await page.mouse.click(plot.x(11, 30), plot.y("grinder"));
   await expect(grips).toHaveCount(2);
   const teardown = (await example.locator('[data-grip="teardown"]').boundingBox())!;
   expect(teardown.x + teardown.width / 2).toBeCloseTo(plot.x(13), -1);
@@ -161,7 +161,7 @@ test("the demonstration: a right-click opens the context menu, and an entry chan
   await expect(summary).toHaveText("1 overlap, 1 late transport");
 
   /* The bracket in the paint shop, noon: its transport from the mill is late. */
-  await page.mouse.click(plot.x(13), plot.y(LANES.paint), { button: "right" });
+  await page.mouse.click(plot.x(13), plot.y("paint"), { button: "right" });
   const menu = page.getByRole("menu", { name: "Actions for a-2043-3" });
   await expect(menu).toBeVisible();
   const menuBox = (await menu.boundingBox())!;
@@ -182,14 +182,14 @@ test("a drag on the shift raster lands on a shift change", async ({ page }) => {
      midnight and snaps to 06:00, 14:00, 22:00. */
   const plot = await plotOf(page, example, [at(4), at(24)], 110 - 56);
 
-  await page.mouse.move(plot.x(10), plot.y(0));
+  await page.mouse.move(plot.x(10), plot.y("oven"));
   await page.mouse.down();
-  await page.mouse.move(plot.x(16), plot.y(0), { steps: 8 });
+  await page.mouse.move(plot.x(16), plot.y("oven"), { steps: 8 });
   /* Six hours of pointer become eight: the raster decides, not the pointer. */
   await expect(example.locator("[data-ghost]").first()).toContainText("14:00–22:00");
   await page.mouse.up();
 
-  await page.mouse.move(plot.x(18), plot.y(0));
+  await page.mouse.move(plot.x(18), plot.y("oven"));
   await expect(example.locator("[data-schedule-tooltip]").first()).toContainText("14:00–22:00");
 });
 
@@ -200,7 +200,7 @@ test("the demonstration shifts a whole order through one intent per stop", async
   const summary = example.locator("[data-findings-summary]");
   await expect(summary).toHaveText("1 overlap, 1 late transport");
 
-  await page.mouse.click(plot.x(13), plot.y(LANES.paint), { button: "right" });
+  await page.mouse.click(plot.x(13), plot.y("paint"), { button: "right" });
   const menu = page.getByRole("menu", { name: "Actions for a-2043-3" });
   await menu.getByRole("menuitem", { name: "The whole order later by a quarter hour" }).click();
 
@@ -224,8 +224,8 @@ test("work dragged in from a list shows its ghost and is reported as a place int
      the flange that holds the press from 09:05. */
   await example.locator('[data-waiting="a-2049"]').hover();
   await page.mouse.down();
-  await page.mouse.move(plot.x(8), plot.y(LANES.press), { steps: 6 });
-  await page.mouse.move(plot.x(9), plot.y(LANES.press), { steps: 6 });
+  await page.mouse.move(plot.x(8), plot.y("press"), { steps: 6 });
+  await page.mouse.move(plot.x(9), plot.y("press"), { steps: 6 });
   await expect(ghost).toContainText("09:00–13:00");
   await expect(ghost).toContainText("Overlap");
   await expect(ghost).toHaveAttribute("data-findings", /overlap/);
@@ -244,7 +244,7 @@ test("a drag from a list that leaves the lanes places nothing", async ({ page })
 
   await example.locator('[data-waiting="a-2048"]').hover();
   await page.mouse.down();
-  await page.mouse.move(plot.x(10), plot.y(LANES.saw), { steps: 6 });
+  await page.mouse.move(plot.x(10), plot.y("saw"), { steps: 6 });
   await expect(example.locator("[data-ghost]")).toBeVisible();
   /* Below the last lane there is no lane to place it on. */
   await page.mouse.move(plot.x(10), plot.box.y + plot.box.height - 2, { steps: 6 });
@@ -280,7 +280,7 @@ test("Escape during a drag from outside places nothing", async ({ page }) => {
 
   await example.locator('[data-waiting="a-2047"]').hover();
   await page.mouse.down();
-  await page.mouse.move(plot.x(12), plot.y(LANES.qa), { steps: 6 });
+  await page.mouse.move(plot.x(12), plot.y("qa"), { steps: 6 });
   await expect(example.locator("[data-ghost]")).toBeVisible();
 
   /* The browser delivers no key events while it runs a drag of its own: Escape
@@ -299,8 +299,8 @@ test("a drag from outside held at the edge pans the plot along", async ({ page }
 
   await example.locator('[data-waiting="a-2048"]').hover();
   await page.mouse.down();
-  await page.mouse.move(plot.x(12), plot.y(LANES.qa), { steps: 4 });
-  await page.mouse.move(plot.box.x + plot.box.width - 4, plot.y(LANES.qa), { steps: 6 });
+  await page.mouse.move(plot.x(12), plot.y("qa"), { steps: 4 });
+  await page.mouse.move(plot.box.x + plot.box.width - 4, plot.y("qa"), { steps: 6 });
   /* Held still at the right edge: the plot pans until the ghost starts after
      the 18:00 the view ended at. */
   await expect
@@ -317,9 +317,9 @@ test("the ghost's label stays inside the plot, even on the topmost lane", async 
 
   /* The housing on the saw, the first lane: above its bar there is no room for
      a label, so it belongs under it - and inside the plot either way. */
-  await page.mouse.move(plot.x(6, 30), plot.y(LANES.saw));
+  await page.mouse.move(plot.x(6, 30), plot.y("saw"));
   await page.mouse.down();
-  await page.mouse.move(plot.x(8), plot.y(LANES.saw), { steps: 6 });
+  await page.mouse.move(plot.x(8), plot.y("saw"), { steps: 6 });
   const label = example.locator("[data-ghost]");
   await expect(label).toBeVisible();
   /* The same invariant the check of schedule-legibility 02 walks the pages
@@ -328,7 +328,7 @@ test("the ghost's label stays inside the plot, even on the topmost lane", async 
   expect(await overlayOffenders(page)).toEqual([]);
   const box = (await label.boundingBox())!;
   /* Under the bar, not over the lane above it. */
-  expect(box.y).toBeGreaterThan(plot.y(LANES.saw));
+  expect(box.y).toBeGreaterThan(plot.y("saw"));
   await page.mouse.up();
 });
 
@@ -339,9 +339,9 @@ test("the ghost's label stays inside the plot at the right edge of the plan", as
 
   /* The inspection of A-2045 ends the day at 16:30; dragged to the right edge
      its label would hang out of the plot. */
-  await page.mouse.move(plot.x(16), plot.y(LANES.qa));
+  await page.mouse.move(plot.x(16), plot.y("qa"));
   await page.mouse.down();
-  await page.mouse.move(plot.box.x + plot.box.width - 20, plot.y(LANES.qa), { steps: 6 });
+  await page.mouse.move(plot.box.x + plot.box.width - 20, plot.y("qa"), { steps: 6 });
   const box = (await example.locator("[data-ghost]").boundingBox())!;
   expect(box.x + box.width).toBeLessThanOrEqual(plot.box.x + plot.box.width);
   await page.mouse.up();
@@ -356,15 +356,15 @@ test("a lane a subtask may not go to refuses the drop, and the ghost stays where
 
   /* The moulded part fits the two presses only; the welding bay is the third
      lane. Dragged onto it, the ghost stays on press 2 and says why. */
-  await page.mouse.move(plot.x(10, 30), plot.y(1));
+  await page.mouse.move(plot.x(10, 30), plot.y("press-2"));
   await page.mouse.down();
-  await page.mouse.move(plot.x(10, 30), plot.y(2), { steps: 8 });
+  await page.mouse.move(plot.x(10, 30), plot.y("weld"), { steps: 8 });
   await expect(ghost).toBeVisible();
   await expect(ghost).toHaveAttribute("data-refused", "");
   await expect(ghost).toContainText("Not this lane");
   /* Still on press 2 - the lane it was allowed to be on. */
   const box = (await ghost.boundingBox())!;
-  expect(box.y).toBeLessThan(plot.y(2) - 10);
+  expect(box.y).toBeLessThan(plot.y("weld") - 10);
 
   await page.mouse.up();
   await expect(last).toHaveText("Drag the moulded part onto the welding bay");
@@ -376,9 +376,9 @@ test("the same subtask may still be moved in time, and onto the lane it fits", a
   const plot = await plotOf(page, example, [at(6, 30), at(15)]);
 
   /* Press 2 to press 1: allowed, and reported. */
-  await page.mouse.move(plot.x(10, 30), plot.y(1));
+  await page.mouse.move(plot.x(10, 30), plot.y("press-2"));
   await page.mouse.down();
-  await page.mouse.move(plot.x(10, 30), plot.y(0), { steps: 8 });
+  await page.mouse.move(plot.x(10, 30), plot.y("press-1"), { steps: 8 });
   await expect(example.locator("[data-ghost]")).not.toHaveAttribute("data-refused", "");
   await page.mouse.up();
   await expect(example.locator("[data-last-move]")).toHaveText("moulded: lane");
@@ -393,17 +393,17 @@ test("a drag from a list holds its ghost on the last lane that allowed it", asyn
   /* First over press 1, which the mould fits: the ghost stands there. */
   await example.locator('[data-waiting="mould"]').hover();
   await page.mouse.down();
-  await page.mouse.move(plot.x(12), plot.y(0), { steps: 6 });
+  await page.mouse.move(plot.x(12), plot.y("press-1"), { steps: 6 });
   await expect(ghost).toBeVisible();
   await expect(ghost).not.toHaveAttribute("data-refused", "");
 
   /* Then over the welding bay, which it does not fit: the ghost stays on press
      1 and says why. */
-  await page.mouse.move(plot.x(12), plot.y(2), { steps: 6 });
+  await page.mouse.move(plot.x(12), plot.y("weld"), { steps: 6 });
   await expect(ghost).toHaveAttribute("data-refused", "");
   await expect(ghost).toContainText("Not this lane");
   const box = (await ghost.boundingBox())!;
-  expect(box.y).toBeLessThan(plot.y(1));
+  expect(box.y).toBeLessThan(plot.y("press-2"));
 
   /* And the drop lands where the ghost stood, because the ghost is the promise
      of where a drop lands - here as in a drag inside the plot. */
@@ -425,9 +425,9 @@ test("the lanes a subtask may not go to are marked the moment the drag begins", 
 
   /* The drag takes hold on press 2 and has not left it. The welding bay is
      already marked: nobody has to try a lane to learn it is closed. */
-  await page.mouse.move(plot.x(10, 30), plot.y(1));
+  await page.mouse.move(plot.x(10, 30), plot.y("press-2"));
   await page.mouse.down();
-  await page.mouse.move(plot.x(10, 45), plot.y(1), { steps: 6 });
+  await page.mouse.move(plot.x(10, 45), plot.y("press-2"), { steps: 6 });
   await expect(example.locator("[data-ghost]")).toBeVisible();
   await expect(weld).toHaveAttribute("data-refused", "");
   await expect(example.locator('[data-lane="press-1"]')).not.toHaveAttribute("data-refused", "");
@@ -448,12 +448,12 @@ test("over a refused lane the cursor says so, and says otherwise again on leavin
   const plot = await plotOf(page, example, [at(6, 30), at(15)]);
   const surface = example.locator("[data-schedule-plot]");
 
-  await page.mouse.move(plot.x(10, 30), plot.y(1));
+  await page.mouse.move(plot.x(10, 30), plot.y("press-2"));
   await page.mouse.down();
-  await page.mouse.move(plot.x(10, 30), plot.y(2), { steps: 8 });
+  await page.mouse.move(plot.x(10, 30), plot.y("weld"), { steps: 8 });
   await expect(surface).toHaveCSS("cursor", "not-allowed");
 
-  await page.mouse.move(plot.x(10, 30), plot.y(0), { steps: 8 });
+  await page.mouse.move(plot.x(10, 30), plot.y("press-1"), { steps: 8 });
   await expect(surface).toHaveCSS("cursor", "grabbing");
   await page.mouse.up();
 });
@@ -470,13 +470,13 @@ test("a line ties the held ghost to the pointer it is not following", async ({ p
   const x = plot.x(10, 30) - plot.box.x;
   const strip = { x: x - 2, y: 2 * LANE_HEIGHT - 5, width: 5, height: 4 };
 
-  await page.mouse.move(plot.x(10, 30), plot.y(1));
+  await page.mouse.move(plot.x(10, 30), plot.y("press-2"));
   await page.mouse.down();
-  await page.mouse.move(plot.x(10, 30), plot.y(0), { steps: 8 });
+  await page.mouse.move(plot.x(10, 30), plot.y("press-1"), { steps: 8 });
   await expect(ghost).not.toHaveAttribute("data-refused", "");
   expect(await painted(example, "overlay", strip)).toBe(0);
 
-  await page.mouse.move(plot.x(10, 30), plot.y(2), { steps: 8 });
+  await page.mouse.move(plot.x(10, 30), plot.y("weld"), { steps: 8 });
   await expect(ghost).toHaveAttribute("data-refused", "");
   expect(await painted(example, "overlay", strip)).toBeGreaterThan(0);
   await page.mouse.up();
@@ -489,9 +489,9 @@ test("a refused lane costs the lane and not the move in time", async ({ page }) 
 
   /* Down onto the welding bay AND an hour earlier: the lane is refused, the
      hour is not. One refusal must not cost the other half of the gesture. */
-  await page.mouse.move(plot.x(10, 30), plot.y(1));
+  await page.mouse.move(plot.x(10, 30), plot.y("press-2"));
   await page.mouse.down();
-  await page.mouse.move(plot.x(9, 30), plot.y(2), { steps: 10 });
+  await page.mouse.move(plot.x(9, 30), plot.y("weld"), { steps: 10 });
   await expect(example.locator("[data-ghost]")).toHaveAttribute("data-refused", "");
   await page.mouse.up();
 
@@ -519,7 +519,7 @@ test("a drag from outside is marked and refused in the same language", async ({ 
      it is for a drag inside it. */
   await example.locator('[data-waiting="mould"]').hover();
   await page.mouse.down();
-  await page.mouse.move(plot.x(12), plot.y(0), { steps: 6 });
+  await page.mouse.move(plot.x(12), plot.y("press-1"), { steps: 6 });
   await expect(weld).toHaveAttribute("data-refused", "");
   await expect(example.locator("[data-ghost]")).toBeVisible();
   expect(await dropEffect()).toBe("copy");
@@ -527,7 +527,7 @@ test("a drag from outside is marked and refused in the same language", async ({ 
   /* And back over the welding bay it stays "copy": the ghost still stands on
      press 1, and a ghost is the promise of where a drop lands. The refusal is
      said in the marks, not by taking the gesture away. */
-  await page.mouse.move(plot.x(12), plot.y(2), { steps: 6 });
+  await page.mouse.move(plot.x(12), plot.y("weld"), { steps: 6 });
   await expect(example.locator("[data-ghost]")).toHaveAttribute("data-refused", "");
   expect(await dropEffect()).toBe("copy");
 

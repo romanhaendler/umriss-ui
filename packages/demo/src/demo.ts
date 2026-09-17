@@ -34,6 +34,10 @@ export interface DemoSources {
   examples: Record<string, ExampleModule>;
   /** The same glob with `query: "?raw", import: "default"`. */
   sources: Record<string, string>;
+  /** The source of the files an example may show BESIDE itself - a raw glob
+      over whatever a demo allows to be named in `shows`. Left out where no
+      example shows anything. */
+  beside?: Record<string, string>;
   /** `import.meta.glob("./warum/*.tsx", { eager: true })` */
   why: Record<string, { default?: unknown }>;
   /** The generated `props.json`. */
@@ -72,6 +76,7 @@ export function buildDemo(sources: DemoSources): Demo {
     examples: readExamples(sources.examples, sources.sources, {
       pages: sources.addresses.ALL_PAGES,
       packageName: sources.packageName,
+      beside: sources.beside,
     }),
     /* The JSON file is generated; its literal type says nothing the
        generating type does not say better. */
