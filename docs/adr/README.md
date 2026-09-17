@@ -1,6 +1,6 @@
 # Decisions
 
-Twenty-one decisions, each one written where it was made and kept afterwards. An
+Twenty-three decisions, each one written where it was made and kept afterwards. An
 ADR here is not an announcement: it states the question, the alternatives that
 were real at the time, and what the decision costs — which is what makes it
 worth reading a year later, when the code has changed and the reasoning has not.
@@ -35,5 +35,7 @@ half a later reader needs most. Exactly one is superseded today.
 | [0019](0019-two-wordings-ship-english-is-the-default.md) | Two wordings ship, and English is the default | accepted | language |
 | [0020](0020-the-demo-shell-is-shared.md) | The demo shell is shared by all three demos, and R-1.2 binds the package source | accepted | architecture |
 | [0021](0021-the-styles-load-themselves-and-touch-nothing-else.md) | The styles load themselves, and they touch nothing else | accepted | architecture |
+| [0022](0022-the-schedule-is-a-package-that-depends-on-core-and-charts.md) | The schedule is a package, and it depends on `@umriss-ui/core` and `@umriss-ui/charts` | accepted | architecture |
+| [0023](0023-editing-is-controlled-the-schedule-reports-intents.md) | Editing is controlled: the schedule reports intents | accepted | schedule |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).
