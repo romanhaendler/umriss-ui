@@ -11,7 +11,16 @@
    Free of the DOM and of the canvas. */
 
 import { toOperatingTimeClamped, type CalendarInput, type Scale } from "@umriss-ui/charts";
-import { arrival, departure, occupied, type Subtask, type Transport } from "./model";
+import {
+  arrival,
+  departure,
+  occupied,
+  type Subtask,
+  type Transport,
+  type TransportAnchor,
+  type TransportEnds,
+  type TransportRoute,
+} from "./model";
 
 /** What the geometry needs to know about the view. */
 export interface Viewport {
@@ -126,26 +135,76 @@ export function barLabelBox(
   return { x, width, y: box.y, height: box.height };
 }
 
-/** A transport as drawn: a curve from its departure to its arrival, and the
-    points it is hit along. */
+/** How the transports of a schedule are drawn, where a transport does not say
+    otherwise. */
+export interface TransportStyle {
+  readonly route: TransportRoute;
+  readonly anchor: TransportAnchor;
+  readonly ends: TransportEnds;
+}
+
+/** A transport as drawn: its two ends, the shape between them, and the polyline
+    it is hit along - the same line that is drawn. */
 export interface TransportPath {
   readonly transport: Transport;
+  readonly kind: TransportRoute;
+  /** Whether its ends carry a dot. */
+  readonly ends: TransportEnds;
   readonly x1: number;
   readonly y1: number;
   readonly x2: number;
   readonly y2: number;
-  /** The two control points of the cubic curve. */
+  /** The two control points of the cubic curve; only a curve has them. */
   readonly c1x: number;
   readonly c2x: number;
-  /** The curve sampled into a polyline, for the hit. */
+  /** The drawn line as a polyline, for the hit. */
   readonly points: readonly number[];
 }
 
-export function transportPath(view: Viewport, transport: Transport, from: SubtaskBox, to: SubtaskBox): TransportPath {
+/** How far an orthogonal route runs straight out of its bar before it turns. */
+const STUB = 10;
+
+/** The y of an end, by the anchor: the middle of the bar, or the edge facing
+    the other stop. Both ends ask the same question - does the other one lie
+    below me? - so a line between two lanes leaves the lower edge of the upper
+    bar and meets the upper edge of the lower one. Within one lane there is no
+    nearer edge, so both anchors mean the middle: a move that changes nothing
+    but time stays in its lane. */
+function anchorY(anchor: TransportAnchor, box: SubtaskBox, other: SubtaskBox): number {
+  const middle = Math.round(box.y + box.height / 2);
+  if (anchor === "centre" || other.laneIndex === box.laneIndex) return middle;
+  return Math.round(other.laneIndex > box.laneIndex ? box.y + box.height : box.y);
+}
+
+export function transportPath(
+  view: Viewport,
+  transport: Transport,
+  from: SubtaskBox,
+  to: SubtaskBox,
+  style: TransportStyle,
+): TransportPath {
+  const route = transport.route ?? style.route;
+  const anchor = transport.anchor ?? style.anchor;
+  const ends = transport.ends ?? style.ends;
   const x1 = xOf(view, departure(transport, from.subtask));
   const x2 = xOf(view, arrival(transport, to.subtask));
-  const y1 = Math.round(from.y + from.height / 2);
-  const y2 = Math.round(to.y + to.height / 2);
+  const y1 = anchorY(anchor, from, to);
+  const y2 = anchorY(anchor, to, from);
+
+  if (route === "straight") {
+    return { transport, kind: route, ends, x1, y1, x2, y2, c1x: x1, c2x: x2, points: [x1, y1, x2, y2] };
+  }
+
+  if (route === "orthogonal") {
+    /* Out of the bar, across, and in again. The turn lies halfway between the
+       stub and the arrival, so two transports of neighbouring stops do not
+       share a vertical. */
+    const out = x1 + STUB;
+    const turn = y1 === y2 ? out : Math.round((out + x2) / 2);
+    const points = y1 === y2 ? [x1, y1, x2, y2] : [x1, y1, turn, y1, turn, y2, x2, y2];
+    return { transport, kind: route, ends, x1, y1, x2, y2, c1x: x1, c2x: x2, points };
+  }
+
   /* A curve that leaves forwards and arrives forwards, even where the arrival
      lies before the departure - a late transport then loops back, which is the
      picture of what it is. */
@@ -161,7 +220,7 @@ export function transportPath(view: Viewport, transport: Transport, from: Subtas
       u * u * u * y1 + 3 * u * u * t * y1 + 3 * u * t * t * y2 + t * t * t * y2,
     );
   }
-  return { transport, x1, y1, x2, y2, c1x, c2x, points };
+  return { transport, kind: "curve", ends, x1, y1, x2, y2, c1x, c2x, points };
 }
 
 /** Distance from a point to a transport's curve, in pixels. */

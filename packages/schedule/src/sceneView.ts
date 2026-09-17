@@ -25,7 +25,7 @@ import {
   type TransportPath,
   type Viewport,
 } from "./geometry";
-import type { IntentKind, Subtask, Transport } from "./model";
+import type { IntentKind, Subtask, Transport, TransportAnchor, TransportEnds, TransportRoute } from "./model";
 import type { SceneData } from "./sceneData";
 import type { SnapRaster } from "./snap";
 import { days, fineStep, fineTicks, panDomain, zoomDomain, type ZoomLimits } from "./timeAxis";
@@ -45,6 +45,10 @@ export interface SceneOptions {
   readonly intents: readonly IntentKind[];
   /** The present, as a wall-clock instant, or null for no now line. */
   readonly now: number | null;
+  /** How the transports are drawn, where one does not say otherwise. */
+  readonly route: TransportRoute;
+  readonly anchor: TransportAnchor;
+  readonly ends: TransportEnds;
 }
 
 /** The height of a lane where a caller names none. It stands here because the
@@ -60,6 +64,9 @@ export class SceneView {
     snap: "ticks",
     intents: [],
     now: null,
+    route: "curve",
+    anchor: "centre",
+    ends: "dot",
   };
   domain: [number, number] = [0, DAY];
   scrollY = 0;
@@ -125,7 +132,7 @@ export class SceneView {
       const from = this.boxById.get(transport.from);
       const to = this.boxById.get(transport.to);
       if (from === undefined || to === undefined) continue;
-      this.paths.push(transportPath(view, transport, from, to));
+      this.paths.push(transportPath(view, transport, from, to, this.options));
     }
   }
 

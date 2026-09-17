@@ -35,3 +35,4 @@ export { subtaskFromPlace } from "./model";
 export type { PlaceIntent } from "./model";
 export { shiftTask } from "./shiftTask";
 export type { SnapRaster } from "./snap";
+export type { TransportAnchor, TransportEnds, TransportRoute } from "./model";
