@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Card, Stack, Text } from "@umriss-ui/core";
-import { Lane, Schedule, Subtasks, applyIntent, subtaskFromPlace } from "../../../src";
-import type { Intent, PlacingItem, Subtask, Task } from "../../../src";
+import { Stack, Text } from "@umriss-ui/core";
+import { Lane, Schedule, Subtasks, applyIntent } from "../../../src";
+import type { Intent, Subtask, Task } from "../../../src";
 
-export const title = "Where a subtask may go";
+export const title = "A rule of the plant, seen before it is met";
 
 /* Not every stop may go on every machine. A mould fits one press, a part that
    has been set up may move in time but not to another station, and a plant
@@ -25,10 +25,9 @@ export const title = "Where a subtask may go";
    for everything below - a restriction on the lane is not a restriction on the
    clock.
 
-   It holds for work dragged in from outside as well: the mould beside the plan
-   is asked about with the key and task the application declared, and the
-   welding bay is marked for it exactly as it is for the part already on the
-   plan. */
+   This example drags a part that is already on the plan. The same rule holds
+   for work dragged in from a list - that is the next example; how a drag from
+   outside is set up at all is its own chapter, *Placing from outside*. */
 
 const at = (hours: number, minutes = 0) => new Date(2026, 2, 17, hours, minutes).getTime();
 
@@ -49,51 +48,25 @@ const START: Subtask[] = [
    anywhere. A real plant reads this off its own master data. */
 const mayGo = (subtask: Subtask, lane: string) => subtask.task !== "bound" || PRESSES.includes(lane);
 
-const WAITING: PlacingItem & { label: string } = {
-  item: "mould",
-  label: "Mould A-77 · 2 h",
-  task: "bound",
-  duration: 2 * 60 * 60_000,
-};
-
 export default function WhereItMayGo() {
   const [work, setWork] = useState<readonly Subtask[]>(START);
-  const [placing, setPlacing] = useState<PlacingItem | null>(null);
   const [last, setLast] = useState("Drag the moulded part onto the welding bay");
 
+  /* Only `move` and `lane` are enabled, so only those two arrive - but the
+     type is the whole union, and a `place` has no subtask to name. */
   const onIntent = (intent: Intent) => {
-    if (intent.kind === "place") {
-      setWork((current) => [...current, subtaskFromPlace(intent, `${intent.item}-${current.length}`)]);
-      setLast(`${intent.item}: place`);
-      return;
-    }
+    if (intent.kind === "place") return;
     setWork((current) => current.map((s) => applyIntent(s, intent)));
     setLast(`${intent.subtask}: ${intent.kind}`);
   };
 
   return (
     <Stack gap={3}>
-      <Card>
-        <div
-          draggable
-          data-waiting={WAITING.item}
-          onDragStart={(event) => {
-            event.dataTransfer.setData("text/plain", WAITING.item);
-            event.dataTransfer.effectAllowed = "copy";
-            setPlacing(WAITING);
-          }}
-          onDragEnd={() => setPlacing(null)}
-          style={{ cursor: "grab" }}
-        >
-          <Text size="sm">{WAITING.label}</Text>
-        </div>
-      </Card>
       <Schedule
         ariaLabel="Two presses and a welding bay"
         initialDomain={[at(6, 30), at(15)]}
         height={190}
-        intents={["move", "lane", "place"]}
-        placing={placing}
+        intents={["move", "lane"]}
         canMoveTo={mayGo}
         onIntent={onIntent}
       >

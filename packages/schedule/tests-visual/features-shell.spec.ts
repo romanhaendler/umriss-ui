@@ -5,7 +5,7 @@
 import { checkShell } from "@umriss-ui/demo/checks/shell";
 
 checkShell({
-  notOnTheFrontDoor: ["schedule", "intent"],
+  notOnTheFrontDoor: ["schedule", "move-and-lane"],
   chip: { name: "Subtasks", pageId: "subtasks", absent: ["schedule", "ripple"] },
   rail: { name: "Transports", pageId: "transports", rubricId: "drawing" },
   neighbours: [
@@ -14,7 +14,7 @@ checkShell({
   ],
   deepLink: { pageId: "findings", absent: "schedule" },
   example: { pageId: "transports", id: "late-transport", title: "A transport that cannot arrive in time", pageName: "Transports" },
-  palettePage: { query: "ripple", name: "ripple", pageId: "ripple", rubricName: "Editing" },
+  palettePage: { query: "ripple", name: "Ripple", pageId: "ripple", rubricName: "Editing" },
   abbreviation: { query: "sbt", find: "Subtasks", glyphs: ["S", "bt"] },
   pointer: { wide: "s", narrow: "late" },
 });
