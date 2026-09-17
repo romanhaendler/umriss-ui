@@ -175,3 +175,64 @@ test("a click selects the whole task, a click on nothing clears it", async ({ pa
   await page.mouse.click(plot.x(17), plot.y(LANES.saw));
   await expect(selected).toHaveText("Selected: nothing");
 });
+
+test("resting on a subtask shows its order, times, parts and findings", async ({ page }) => {
+  await openExample(page, "schedule", "first-schedule");
+  const example = page.locator('[data-example="first-schedule"]');
+  const plot = await plotOf(page, example, DAY_OF_PLAN);
+  const tooltip = example.locator("[data-schedule-tooltip]");
+  await expect(tooltip).toHaveCount(0);
+
+  /* The bracket in the paint shop, noon to 14:00: its transport from the mill
+     is fifteen minutes short. */
+  await page.mouse.move(plot.x(13), plot.y(LANES.paint));
+  await expect(tooltip).toBeVisible();
+  await expect(tooltip).toContainText("A-2043 Bracket");
+  await expect(tooltip).toContainText("12:00–14:00");
+  await expect(tooltip).toContainText("Setup 20 min");
+  await expect(tooltip).toContainText("Teardown 20 min");
+  await expect(tooltip).toContainText("Late transport, 15 min short");
+
+  /* The housing on the mill shares its time with the bracket's milling. */
+  await page.mouse.move(plot.x(9), plot.y(LANES.mill));
+  await expect(tooltip).toContainText("A-2041 Housing");
+  await expect(tooltip).toContainText("Overlap with a-2043-2");
+
+  await page.mouse.move(plot.x(17), plot.y(LANES.saw));
+  await expect(tooltip).toHaveCount(0);
+});
+
+test("resting on a transport names its route, its duration and that it is late", async ({ page }) => {
+  await openExample(page, "schedule", "first-schedule");
+  const example = page.locator('[data-example="first-schedule"]');
+  const plot = await plotOf(page, example, DAY_OF_PLAN);
+  /* The bracket's move from the mill (11:30) to the paint shop's setup (11:40):
+     a symmetric curve passes through the middle of its two ends. */
+  await page.mouse.move((plot.x(11, 30) + plot.x(11, 40)) / 2, plot.y(LANES.press));
+  const tooltip = example.locator("[data-schedule-tooltip]");
+  await expect(tooltip).toContainText("a-2043-2 → a-2043-3");
+  await expect(tooltip).toContainText("Transport 25 min");
+  await expect(tooltip).toContainText("Late transport, 15 min short");
+});
+
+test("an application's own tooltip content replaces the default", async ({ page }) => {
+  await openExample(page, "schedule", "own-tooltip");
+  const example = page.locator('[data-example="own-tooltip"]');
+  const plot = await plotOf(page, example, DAY_OF_PLAN);
+  await page.mouse.move(plot.x(13), plot.y(LANES.paint));
+  const tooltip = example.locator("[data-schedule-tooltip]");
+  await expect(tooltip).toContainText("Northworks");
+  await expect(tooltip).toContainText("1 finding");
+  await expect(tooltip).not.toContainText("12:00–14:00");
+});
+
+test("the now line stands at the present", async ({ page }) => {
+  await openExample(page, "schedule", "now-line");
+  const example = page.locator('[data-example="now-line"]');
+  const plot = await plotOf(page, example, DAY_OF_PLAN);
+  const mark = example.locator("[data-now]");
+  const box = (await mark.boundingBox())!;
+  /* The clock is frozen at 10:30. */
+  expect(box.x + box.width / 2).toBeCloseTo(plot.x(10, 30), -1);
+  await expect(page.locator('[data-example="first-schedule"] [data-now]')).toHaveCount(0);
+});

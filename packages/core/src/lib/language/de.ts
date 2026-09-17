@@ -241,4 +241,10 @@ export const GERMAN_WORDING: Wording = {
   scheduleOverlap: "Überschneidung",
   scheduleLateTransport: "Transport verspätet",
   scheduleGhostTimes: (from, to) => `${from}–${to}`,
+  scheduleSetup: "Rüsten",
+  scheduleTeardown: "Abrüsten",
+  scheduleTransport: "Transport",
+  scheduleRoute: (from, to) => `${from} → ${to}`,
+  scheduleOverlapWith: (other) => `Überschneidung mit ${other}`,
+  scheduleLateBy: (amount) => `Transport verspätet, ${amount} zu knapp`,
 };
