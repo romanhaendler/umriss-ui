@@ -1,6 +1,6 @@
 /* @umriss-ui/schedule - subtasks on lanes over time (ADR-0022, ADR-0023). */
 
-export { Schedule, type ScheduleProps } from "./Schedule";
+export { Schedule, type ScheduleProps, type ScheduleHandle } from "./Schedule";
 export { Lane, Subtasks, Transports, type LaneProps, type SubtasksProps, type TransportsProps } from "./parts";
 export type { ScheduleHit, ScheduleInteraction, ScheduleTooltipTarget } from "./scene";
 
