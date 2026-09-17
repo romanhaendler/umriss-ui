@@ -1,4 +1,5 @@
-import { Lane, Schedule, Subtasks, Transports } from "../../../src";
+import { useState } from "react";
+import { Lane, Schedule, Subtasks, Transports, applyIntent } from "../../../src";
 import type { Subtask, Task, Transport } from "../../../src";
 
 export const title = "Nights cut out of the axis";
@@ -11,7 +12,11 @@ export const title = "Nights cut out of the axis";
 
    The calendar is a list of intervals and nothing more. Deriving it from a
    shift plan with its holidays is the application's business - the schedule
-   draws what the list says. */
+   draws what the list says.
+
+   Editing follows the calendar: drag the casting into the night and the ghost
+   stops at the seam where time counts again, so an intent never asks for a
+   time the plant does not run. */
 
 const at = (day: number, hours: number, minutes = 0) => new Date(2026, 2, 16 + day, hours, minutes).getTime();
 
@@ -31,13 +36,21 @@ const MOVES: Transport[] = [
 ];
 
 export default function OperatingCalendar() {
+  const [steps, setSteps] = useState<readonly Subtask[]>(STEPS);
   return (
-    <Schedule ariaLabel="Three days of casting, nights removed" initialDomain={[at(0, 6), at(2, 22)]} calendar={SHIFTS} height={220}>
+    <Schedule
+      ariaLabel="Three days of casting, nights removed"
+      initialDomain={[at(0, 6), at(2, 22)]}
+      calendar={SHIFTS}
+      height={220}
+      intents={["move"]}
+      onIntent={(intent) => setSteps((current) => current.map((step) => applyIntent(step, intent)))}
+    >
       <Lane id="foundry" label="Foundry" />
       <Lane id="fettling" label="Fettling" />
       <Lane id="machining" label="Machining" />
       <Transports data={MOVES} />
-      <Subtasks data={STEPS} tasks={TASKS} />
+      <Subtasks data={steps} tasks={TASKS} />
     </Schedule>
   );
 }

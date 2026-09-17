@@ -250,3 +250,23 @@ test("a drag from a list that leaves the lanes places nothing", async ({ page })
   await page.mouse.up();
   await expect(example.locator("[data-last-place]")).toHaveText("Drag an order onto a lane");
 });
+
+test("a drag into a removed night stops at the seam where time counts again", async ({ page }) => {
+  await openExample(page, "schedule", "operating-calendar");
+  const example = page.locator('[data-example="operating-calendar"]');
+  const plot = example.locator("[data-schedule-plot]");
+  const box = (await plot.boundingBox())!;
+
+  /* The pouring runs 18:00 to 21:30 on the foundry, the first lane; the plant
+     stops at 22:00 and starts again at 06:00. Dragged to the right it can only
+     land on the seam - 06:00 of the next morning. */
+  await page.mouse.move(box.x + box.width * 0.28, box.y + 22);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width * 0.355, box.y + 22, { steps: 8 });
+  await expect(example.locator("[data-ghost]")).toContainText("06:00–09:30");
+  await page.mouse.up();
+
+  /* And the plan took it: the pouring now starts in the morning. */
+  await page.mouse.move(box.x + box.width * 0.37, box.y + 22);
+  await expect(example.locator("[data-schedule-tooltip]")).toContainText("06:00–09:30");
+});

@@ -149,7 +149,7 @@ export class SceneGestures {
   ghostDrawing(): GhostDrawing | null {
     const gesture = this.gesture;
     if (gesture.kind !== "edit" && gesture.kind !== "place") return null;
-    const found = this.ghostFindings(gesture.ghost);
+    const found = this.ghostFindings(gesture.ghost, this.ghostHome(gesture));
     return { ghost: gesture.ghost, overlaps: found.overlaps, late: found.late };
   }
 
@@ -158,7 +158,7 @@ export class SceneGestures {
     if (gesture.kind !== "edit" && gesture.kind !== "place") return null;
     const box = ghostBox(this.host, this.host.view.viewport(), gesture.ghost);
     if (box === null) return null;
-    const found = this.ghostFindings(gesture.ghost);
+    const found = this.ghostFindings(gesture.ghost, this.ghostHome(gesture));
     const outer = gesture.kind === "edit" && (gesture.mode === "setup" || gesture.mode === "teardown");
     const shown = outer ? occupied(gesture.ghost) : gesture.ghost;
     return {
@@ -570,14 +570,29 @@ export class SceneGestures {
     return intents;
   }
 
+  /** The lane the ghost came from - the only other lane a drag can touch. */
+  private ghostHome(gesture: Extract<Gesture, { kind: "edit" | "place" }>): string {
+    return gesture.kind === "edit" ? gesture.subtask.lane : gesture.ghost.lane;
+  }
+
   /** The findings the ghost would create, assessed as if it were data - the
       ghost of a drag from outside is added to the data, the ghost of a drag
-      inside it replaces the subtask it came from. */
-  private ghostFindings(ghost: Subtask): { overlaps: Overlap[]; late: LateTransport[] } {
+      inside it replaces the subtask it came from.
+
+      Only the two lanes a drag can touch are assessed, the one the ghost is
+      over and the one it came from: an overlap is a finding of one lane, and
+      every other lane's overlaps are the ones already assessed. That is what
+      keeps a plan of hundreds of tasks fluid while a drag runs, since this is
+      computed on every pointer movement. */
+  private ghostFindings(ghost: Subtask, home: string): { overlaps: Overlap[]; late: LateTransport[] } {
     const data = this.host.data;
-    const assessed = ghost.id === PLACING ? [...data.subtasks, ghost] : data.subtasks.map((s) => (s.id === ghost.id ? ghost : s));
+    const onLane = (s: Subtask) => s.lane === ghost.lane || s.lane === home;
+    const others = data.subtasks.filter((s) => s.id !== ghost.id && onLane(s));
+    const assessed = [...others, ghost];
     const own = (o: Overlap) => o.first === ghost.id || o.second === ghost.id;
+    /* A transport is judged against both its ends, wherever they lie. */
     const touching = data.transports.filter((t) => t.from === ghost.id || t.to === ghost.id);
-    return { overlaps: overlaps(assessed).filter(own), late: lateTransports(assessed, touching) };
+    const ends = ghost.id === PLACING ? data.subtasks : data.subtasks.map((s) => (s.id === ghost.id ? ghost : s));
+    return { overlaps: overlaps(assessed).filter(own), late: lateTransports(ends, touching) };
   }
 }
