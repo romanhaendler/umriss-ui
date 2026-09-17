@@ -12,6 +12,7 @@
 
 import { toOperatingTimeClamped, type CalendarInput, type Scale } from "@umriss-ui/charts";
 import { resolveAppearance } from "./appearance";
+import { laneAtY, slotOf, type Rows, type Slot } from "./rows";
 import {
   arrival,
   departure,
@@ -32,6 +33,11 @@ export interface Viewport {
   readonly laneHeight: number;
   /** How far the lanes are scrolled up, in pixels. */
   readonly scrollY: number;
+  /** What is laid out from top to bottom, and where every lane sits in it
+      (`rows.ts`). Every y in the package comes from here: the multiplication
+      of a lane index by a lane height is gone, because a folded group is one
+      row and its lanes are strips inside it (ADR-0025). */
+  readonly rows: Rows;
 }
 
 /** Distance of a bar from the edges of its lane, before any offset. */
@@ -50,7 +56,10 @@ export const MAX_DEPTH = 3;
 /** A subtask as drawn: its three parts along x, its bar along y. */
 export interface SubtaskBox {
   readonly subtask: Subtask;
-  readonly laneIndex: number;
+  /** The lane it sits on. */
+  readonly lane: string;
+  /** Whether it is drawn as a strip inside a folded group. */
+  readonly miniature: boolean;
   /** How many earlier subtasks it covers on its lane - its offset level. */
   readonly depth: number;
   readonly y: number;
@@ -67,27 +76,44 @@ export function xOf(view: Viewport, instant: number): number {
   return Math.round(view.scale.toPx(toOperatingTimeClamped(instant, view.calendar)));
 }
 
+/** Where a lane is drawn on the plot, scroll included - its own row, or its
+    strip inside a folded group. Null for a lane this plot does not have. */
+export function slotAt(view: Viewport, lane: string): { top: number; height: number; miniature: boolean } | null {
+  const slot = slotOf(view.rows, lane);
+  return slot === null ? null : { top: slot.top - view.scrollY, height: slot.height, miniature: slot.miniature };
+}
+
 /** The top of a lane on the plot. */
-export function laneTop(view: Viewport, laneIndex: number): number {
-  return laneIndex * view.laneHeight - view.scrollY;
+export function laneTop(view: Viewport, lane: string): number {
+  return (slotOf(view.rows, lane)?.top ?? 0) - view.scrollY;
 }
 
-/** The lane under a y, or -1 outside every lane. */
-export function laneAt(view: Viewport, y: number, laneCount: number): number {
-  const index = Math.floor((y + view.scrollY) / view.laneHeight);
-  return index >= 0 && index < laneCount ? index : -1;
+/** The lane under a y, or null off every lane - a group's head and the inset
+    of a miniature are both "no lane". */
+export function laneAt(view: Viewport, y: number): string | null {
+  return laneAtY(view.rows, y + view.scrollY);
 }
 
-export function subtaskBox(view: Viewport, subtask: Subtask, laneIndex: number, depth: number): SubtaskBox {
-  const height = Math.max(4, view.laneHeight - 2 * BAR_INSET - MAX_DEPTH * DEPTH_STEP);
+/** The bottom of everything laid out, in plot coordinates. */
+export function rowsBottom(view: Viewport): number {
+  return view.rows.height - view.scrollY;
+}
+
+export function subtaskBox(view: Viewport, subtask: Subtask, lane: string, slot: Slot, depth: number): SubtaskBox {
+  /* Per SLOT and no longer per lane height: a strip inside a folded group is
+     a few pixels tall, and a bar on it has to be too. */
+  const inset = slot.miniature ? 0 : BAR_INSET;
+  const offset = slot.miniature ? 0 : MAX_DEPTH * DEPTH_STEP;
+  const height = Math.max(slot.miniature ? 1 : 4, slot.height - 2 * inset - offset);
   /* Depth 0 sits centred in its lane; each level below moves down by a step. */
-  const top = laneTop(view, laneIndex) + Math.floor((view.laneHeight - height) / 2);
+  const top = slot.top - view.scrollY + Math.floor((slot.height - height) / 2);
   const outer = occupied(subtask);
   return {
     subtask,
-    laneIndex,
+    lane,
+    miniature: slot.miniature,
     depth,
-    y: top + Math.min(depth, MAX_DEPTH) * DEPTH_STEP,
+    y: top + (slot.miniature ? 0 : Math.min(depth, MAX_DEPTH) * DEPTH_STEP),
     height,
     outerFrom: xOf(view, outer.from),
     mainFrom: xOf(view, subtask.from),
@@ -196,8 +222,11 @@ const STUB = 10;
     as a hairline gap between the line and the bar it leaves. */
 function attachY(attach: TransportAttachment, box: SubtaskBox, other: SubtaskBox): number {
   const middle = Math.round(box.y + box.height / 2);
-  if (attach === "centre" || other.laneIndex === box.laneIndex) return middle;
-  return Math.round(other.laneIndex > box.laneIndex ? box.y + box.height - 1 : box.y + 1);
+  /* Slots' tops rather than lane indices: a bar inside a folded group and one
+     on a lane below it are still "the other lies below me", and a lane index
+     could not say so once the two are not both rows. */
+  if (attach === "centre" || other.y === box.y) return middle;
+  return Math.round(other.y > box.y ? box.y + box.height - 1 : box.y + 1);
 }
 
 export function transportPath(

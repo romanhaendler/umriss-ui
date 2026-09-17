@@ -19,7 +19,7 @@
 
 import { HOUR, calendarFrom, subscribeTheme, toWallClock } from "@umriss-ui/charts";
 import { resolveAppearance } from "./appearance";
-import { laneTop, xOf } from "./geometry";
+import { slotAt, xOf } from "./geometry";
 import { SceneData, type LaneConfig, type LayerConfig, type ScheduleTooltipTarget } from "./sceneData";
 import type { Subtask } from "./model";
 import { barFace, drawData, drawOverlay, prepareCanvas, resolveSceneColours, type Colours } from "./sceneDraw";
@@ -331,8 +331,10 @@ export class ScheduleScene {
     const rect = this.plot?.getBoundingClientRect();
     if (rect === undefined) return null;
     const viewport = this.view.viewport();
-    const index = lane === undefined ? undefined : this.data.laneIndex.get(lane);
-    const y = index === undefined ? 0 : laneTop(viewport, index) + this.view.options.laneHeight / 2;
+    /* The SLOT: a lane inside a folded group answers with the middle of its
+       strip, so a caller's pin keeps pointing at the work (ADR-0025). */
+    const slot = lane === undefined ? null : slotAt(viewport, lane);
+    const y = slot === null ? 0 : slot.top + slot.height / 2;
     return { x: rect.left + xOf(viewport, time), y: rect.top + y };
   }
 

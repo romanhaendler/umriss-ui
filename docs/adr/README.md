@@ -38,5 +38,6 @@ half a later reader needs most. Exactly one is superseded today.
 | [0022](0022-the-schedule-is-a-package-that-depends-on-core-and-charts.md) | The schedule is a package, and it depends on `@umriss-ui/core` and `@umriss-ui/charts` | accepted | architecture |
 | [0023](0023-editing-is-controlled-the-schedule-reports-intents.md) | Editing is controlled: the schedule reports intents | accepted | schedule |
 | [0024](0024-the-formats-are-english-german-is-freight.md) | The formats are English, and German is freight | accepted | language |
+| [0025](0025-a-lane-group-is-structure-over-lanes-never-a-lane.md) | A lane group is structure over lanes, never a lane | accepted | schedule |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).

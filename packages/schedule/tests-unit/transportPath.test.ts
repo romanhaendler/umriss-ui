@@ -9,17 +9,27 @@ import { describe, expect, it } from "vitest";
 import { LinearScale } from "@umriss-ui/charts";
 import { subtaskBox, transportPath } from "../src/geometry";
 import type { Viewport } from "../src/geometry";
+import { layOutRows, slotOf } from "../src/rows";
 import type { Subtask, Transport } from "../src/model";
 
 const MIN = 60_000;
 const at = (minutes: number) => Date.UTC(2026, 2, 17, 6, 0) + minutes * MIN;
 
-/* Ten pixels to the minute, four lanes of forty. */
+/* Ten pixels to the minute, three lanes of forty - flat, so the rows are
+   exactly what the multiplication gave (`rows.ts`). */
+const rows = layOutRows({
+  lanes: [{ id: "one", parent: undefined }, { id: "two", parent: undefined }, { id: "three", parent: undefined }],
+  groups: [],
+  collapsed: new Set(),
+  laneHeight: 40,
+});
+
 const view: Viewport = {
   scale: new LinearScale([at(0), at(100)], [0, 1000]),
   calendar: [],
   laneHeight: 40,
   scrollY: 0,
+  rows,
 };
 
 const subtask = (id: string, lane: string, from: number, to: number): Subtask => ({
@@ -30,11 +40,13 @@ const subtask = (id: string, lane: string, from: number, to: number): Subtask =>
   to: at(to),
 });
 
-const first = subtaskBox(view, subtask("a", "one", 0, 20), 0, 0);
-const below = subtaskBox(view, subtask("b", "three", 40, 60), 2, 0);
-const above = subtaskBox(view, subtask("c", "one", 40, 60), 0, 0);
-const sameLane = subtaskBox(view, subtask("d", "two", 40, 60), 1, 0);
-const fromSecond = subtaskBox(view, subtask("e", "two", 0, 20), 1, 0);
+const boxOn = (s: Subtask) => subtaskBox(view, s, s.lane, slotOf(rows, s.lane)!, 0);
+
+const first = boxOn(subtask("a", "one", 0, 20));
+const below = boxOn(subtask("b", "three", 40, 60));
+const above = boxOn(subtask("c", "one", 40, 60));
+const sameLane = boxOn(subtask("d", "two", 40, 60));
+const fromSecond = boxOn(subtask("e", "two", 0, 20));
 
 const move: Transport = { id: "x", from: "a", to: "b", duration: 5 * MIN };
 
