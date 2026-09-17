@@ -307,3 +307,40 @@ test("a drag from outside held at the edge pans the plot along", async ({ page }
   await page.mouse.up();
   await expect(example.locator("[data-last-place]")).toContainText("place a-2048 on qa");
 });
+
+test("the ghost's label stays inside the plot, even on the topmost lane", async ({ page }) => {
+  await openExample(page, "intent", "move-and-lane");
+  const example = page.locator('[data-example="move-and-lane"]');
+  const plot = await plotOf(page, example, DAY_OF_PLAN);
+
+  /* The housing on the saw, the first lane: above its bar there is no room for
+     a label, so it belongs under it - and inside the plot either way. */
+  await page.mouse.move(plot.x(6, 30), plot.y(LANES.saw));
+  await page.mouse.down();
+  await page.mouse.move(plot.x(8), plot.y(LANES.saw), { steps: 6 });
+  const label = example.locator("[data-ghost]");
+  await expect(label).toBeVisible();
+  const box = (await label.boundingBox())!;
+  expect(box.y).toBeGreaterThanOrEqual(plot.box.y);
+  expect(box.y + box.height).toBeLessThanOrEqual(plot.box.y + plot.box.height);
+  expect(box.x).toBeGreaterThanOrEqual(plot.box.x);
+  expect(box.x + box.width).toBeLessThanOrEqual(plot.box.x + plot.box.width);
+  /* Under the bar, not over the lane above it. */
+  expect(box.y).toBeGreaterThan(plot.y(LANES.saw));
+  await page.mouse.up();
+});
+
+test("the ghost's label stays inside the plot at the right edge of the plan", async ({ page }) => {
+  await openExample(page, "intent", "move-and-lane");
+  const example = page.locator('[data-example="move-and-lane"]');
+  const plot = await plotOf(page, example, DAY_OF_PLAN);
+
+  /* The inspection of A-2045 ends the day at 16:30; dragged to the right edge
+     its label would hang out of the plot. */
+  await page.mouse.move(plot.x(16), plot.y(LANES.qa));
+  await page.mouse.down();
+  await page.mouse.move(plot.box.x + plot.box.width - 20, plot.y(LANES.qa), { steps: 6 });
+  const box = (await example.locator("[data-ghost]").boundingBox())!;
+  expect(box.x + box.width).toBeLessThanOrEqual(plot.box.x + plot.box.width);
+  await page.mouse.up();
+});
