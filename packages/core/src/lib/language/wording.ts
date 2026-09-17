@@ -357,6 +357,16 @@ export interface Wording {
   remove: string;
   /** The cross on a tag with text content. */
   removeTag: (beschriftung: string) => string;
+
+  /* -------- @umriss-ui/schedule ------------------------------------ */
+  /* The schedule's entries stand here for the table's reason: one provider
+     switches every package with one value (schedule 06). */
+  /** The two findings, named on the ghost of a drag. */
+  scheduleOverlap: string;
+  scheduleLateTransport: string;
+  /** The new times on the ghost: "08:15–10:00" - the times come from the
+      formats. */
+  scheduleGhostTimes: (from: string, to: string) => string;
 }
 
 /** The instance shipped by default. English; German is `GERMAN_WORDING` in
@@ -572,4 +582,7 @@ export const DEFAULT_WORDING: Wording = {
   moreActions: "More actions",
   remove: "Remove",
   removeTag: (beschriftung) => `Remove ${beschriftung}`,
+  scheduleOverlap: "Overlap",
+  scheduleLateTransport: "Late transport",
+  scheduleGhostTimes: (from, to) => `${from}–${to}`,
 };

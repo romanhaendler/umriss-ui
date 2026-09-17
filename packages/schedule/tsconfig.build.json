@@ -1,0 +1,7 @@
+{
+  /* For the build's type declarations: without the paths onto the sources of
+     the peers. Otherwise the build would write their types into ours; this
+     way they point at the packages, the way a caller installs them. */
+  "extends": "../../tsconfig.base.json",
+  "include": ["src"]
+}

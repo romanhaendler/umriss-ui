@@ -2,8 +2,9 @@
 // Its most important rules are the directions between the packages:
 // @umriss-ui/charts imports nothing from @umriss-ui/core (acceptance point 3 of
 // the charts handoff) - in `src/`, which is what is published (ADR-0020); its
-// demo runs in the shared shell and may - and the table depends on
-// @umriss-ui/core, never the other way round (ADR-0016).
+// demo runs in the shared shell and may - the table depends on
+// @umriss-ui/core, never the other way round (ADR-0016), and the schedule on
+// @umriss-ui/core and @umriss-ui/charts, and nothing on it (ADR-0022).
 import tseslint from "typescript-eslint";
 import reactHooks from "eslint-plugin-react-hooks";
 
@@ -14,6 +15,7 @@ const PACKAGES = [
   "packages/charts/**/*.{ts,tsx}",
   "packages/core/**/*.{ts,tsx}",
   "packages/table/**/*.{ts,tsx}",
+  "packages/schedule/**/*.{ts,tsx}",
   "packages/demo/**/*.{ts,tsx}",
 ];
 
@@ -28,6 +30,12 @@ const NO_SHELL = {
 const NO_TABLE = {
   group: ["@umriss-ui/table", "@umriss-ui/table/*"],
   message: "@umriss-ui/table depends on @umriss-ui/core, not the other way round (ADR-0016).",
+};
+
+/* Nobody imports the schedule either: it sits on core and charts. */
+const NO_SCHEDULE = {
+  group: ["@umriss-ui/schedule", "@umriss-ui/schedule/*"],
+  message: "@umriss-ui/schedule depends on @umriss-ui/core and @umriss-ui/charts, not the other way round (ADR-0022).",
 };
 
 export default [
@@ -61,22 +69,24 @@ export default [
                 "@umriss-ui/charts is standalone: no import from @umriss-ui/core (R-1.2).",
             },
             NO_TABLE,
+            NO_SCHEDULE,
           ],
         },
       ],
     },
   },
   {
-    /* Nobody imports the table, the demo included. */
+    /* Nobody imports the table or the schedule, the demo included. */
     files: ["packages/charts/**/*.{ts,tsx}"],
+    ignores: ["packages/charts/src/**"],
     rules: {
-      "no-restricted-imports": ["error", { patterns: [NO_TABLE] }],
+      "no-restricted-imports": ["error", { patterns: [NO_TABLE, NO_SCHEDULE] }],
     },
   },
   {
     files: ["packages/core/**/*.{ts,tsx}"],
     rules: {
-      "no-restricted-imports": ["error", { patterns: [NO_TABLE] }],
+      "no-restricted-imports": ["error", { patterns: [NO_TABLE, NO_SCHEDULE] }],
     },
   },
   {
@@ -111,6 +121,40 @@ export default [
               group: ["@umriss-ui/charts", "@umriss-ui/charts/*"],
               message: "@umriss-ui/table depends on @umriss-ui/core only (ADR-0016).",
             },
+            NO_SCHEDULE,
+          ],
+        },
+      ],
+    },
+  },
+  {
+    /* The schedule takes both peers through their public entries only - no
+       subpath beyond the declared exports, no relative route into a
+       neighbouring package (ADR-0022). */
+    files: ["packages/schedule/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: [
+                "@umriss-ui/core/*",
+                "!@umriss-ui/core/styles.css",
+                "!@umriss-ui/core/wording",
+                "!@umriss-ui/core/wording/de",
+              ],
+              message: "@umriss-ui/schedule imports only the public entry of @umriss-ui/core (ADR-0022).",
+            },
+            {
+              group: ["@umriss-ui/charts/*", "!@umriss-ui/charts/styles.css"],
+              message: "@umriss-ui/schedule imports only the public entry of @umriss-ui/charts (ADR-0022).",
+            },
+            {
+              group: ["**/core/src/**", "**/charts/src/**", "**/packages/core/**", "**/packages/charts/**", "../../core/**", "../core/**", "../../charts/**", "../charts/**"],
+              message: "@umriss-ui/schedule does not reach into a neighbouring package by path (ADR-0022).",
+            },
+            NO_TABLE,
           ],
         },
       ],
@@ -144,6 +188,7 @@ export default [
               message: "@umriss-ui/demo does not reach into a package by path; a demo gives it what it needs.",
             },
             NO_TABLE,
+            NO_SCHEDULE,
           ],
         },
       ],
