@@ -150,9 +150,9 @@ export function Schedule(props: ScheduleProps): ReactNode {
       if (box !== undefined) scene.resize(box.width, box.height);
     });
     observer.observe(plot);
-    /* The wheel zooms, and the page must not scroll with it: a listener that
-       can prevent the default has to be registered as not passive, which React
-       does not do. */
+    /* The wheel zooms, pans and scrolls the lanes, and the page must not scroll
+       with it while it does: a listener that can prevent the default has to be
+       registered as not passive, which React does not do. */
     const onWheel = (event: WheelEvent) => scene.wheel(event);
     plot.addEventListener("wheel", onWheel, { passive: false });
     const onKey = (event: KeyboardEvent) => {
