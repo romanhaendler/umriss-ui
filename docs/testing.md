@@ -30,11 +30,13 @@ not photographed.
 | Component tests of @umriss-ui/table: registration and order, hiding and reordering across head, body and foot, defaults per value type under a provider with foreign formats, the toolbar with the column filters' conditions (including the ones a table sets up for itself), column menu, pre-filter, list, range and custom filter, export, paging, row detail and actions, widths, virtualisation, initial state from a view, verdict column, alarm list with its density, toolbar and list filter from the provider's wording and formats | vitest + Testing Library | packages/table/tests-unit/ | green; what jsdom cannot see is checked by the package's demo in the browser |
 | Type tests of @umriss-ui/table: what must compile and what must not (`@ts-expect-error`) | tsc (`pnpm typecheck`) | packages/table/tests-unit/types.test-d.tsx | green; an expected error that fails to appear makes the type check fail |
 | Stylesheet guard: no colour value by hand, no duration outside a reduced-motion block except the named ones, no `--u-` variable in a module, no copied hover edge (`stylesheets.test.ts`, reads the modules as text) | vitest | packages/core/tests-unit/ | green; six named durations, each with a reason |
+| Style rules (ADR-0021): every shipped stylesheet begins with the layer order, keeps every rule inside `umriss.tokens`, `umriss.base` or `umriss.components`, and selects only its own elements; the build steps `ownBox`/`ownCorners` and the dist check | vitest, node | `packages/core/tests-unit/stylesheetRules.test.ts`, the guards of core, table and charts, `scripts/check-dist.ts` (`prepublishOnly`) | green |
 | Wording guard: no German text in a component's JSX node or prop, bypassing the wording (`wordingSource.test.ts`, reads the sources through the TypeScript parser) | vitest | packages/core/tests-unit/ | green; the exception list is empty |
 | Behaviour tests of Popover, Tooltip, Modal, Toast (role follows tone), the four date pickers (now, reopening, Enter, presets), month pair, RadioGroup, Tag, SplitButton, Alert, the language seam, the root provider with `useDensityFor`, the tree (keyboard, screen reader, ticking, search, virtualisation), Stat, command palette and **Dock** | vitest + Testing Library | packages/core/tests-unit/ | green |
 | Screenshot comparisons (page heads and examples × light/dark) | Playwright | packages/*/tests-visual/screenshots.spec.ts (core, charts, table) | baselines checked in (darwin); green for core and table, **and not reproducible for the charts' examples – see Known open**; one image per example with the code **collapsed**, one per page from the head to the first example; plus two images outside the loop, the command palette's open window searching and in its populated resting state – the topmost layer is in no example – and the **dock's four resting places**, because the loop only photographs the one it starts at |
 | Interaction tests of the charts | Playwright | packages/charts/tests-visual/features-interaction.spec.ts | green |
 | Operating the demo shell (outline, jumps, palette, addresses) | Playwright | packages/*/tests-visual/features-shell.spec.ts | green; **one** suite at the shell (`packages/demo/checks/shell.ts`), which calls each of the three demos with its own pages and terms – with axe and the palette's rules that jsdom cannot express (a resting pointer, the resting state, the material). Charts had a shell and a suite of its own until ADR-0020; beside the shared call there stands the one promise that is charts' own – the benchmark does not run on the front door |
+| Own base (ADR-0021): every example's text in a type of its own, every element with a library class in `border-box`, every element that takes the keyboard focus showing the library's ring (the browser's own ring does not count) | Playwright | `packages/demo/checks/ownBase.ts`, called by `packages/*/tests-visual/own-base.spec.ts` with every page; light only | green; the tolerated offenders stand in the spec files with their reason |
 | Interaction tests of core | Playwright | packages/core/tests-visual/features-basics.spec.ts | green |
 | Operating a page (code switch, page switch, copy button) | Playwright | packages/{core,table}/tests-visual/features-page.spec.ts → `packages/demo/checks/page.ts` | green; the copy test checks what really lies on the clipboard – none of which can be expressed in jsdom |
 | Interaction tests of the table: conditions in the toolbar, multi-sort, row detail, row actions, widths, width in the view, sorting, search with a footer, selection across all pages, paging, bulk action; virtualisation | Playwright | packages/table/tests-visual/features-table.spec.ts, features-virtual.spec.ts | green; the counterparts of the suites that ran in core until umriss-table 14, promise for promise |
@@ -100,8 +102,14 @@ transitions (29.03.2026 forward, 25.10.2026 back).
 
 * Screenshots run against the real demo build (`vite preview`), never against the
   dev server.
-* Light and dark through the Playwright projects (colorScheme emulation); both
-  demos initialise their theme from `prefers-color-scheme`.
+* Light and dark through the Playwright projects (colorScheme emulation); the
+  demos initialise their theme from `prefers-color-scheme` and switch it with
+  `color-scheme` on the root, as an application does.
+* **The examples stand on the browser's defaults.** The shell gives its own
+  chrome a type (`.shell`), and `.exampleStage` resets font, colour and smoothing
+  to the browser's (`page.css`); the library has no base layer (ADR-0021). A
+  component that leans on its surroundings shows it in its screenshot, and the
+  own-base checks catch what a picture cannot see.
 * The clock is frozen in every test (`page.clock.setFixedTime`, 17.03.2026
   10:30). Where a hook reads the clock – freshness does, that is its job – it
   stands still in the jsdom test too (`vi.useFakeTimers`).
@@ -123,7 +131,7 @@ transitions (29.03.2026 forward, 25.10.2026 back).
 * **A demo resolves the neighbouring package's stylesheet from source, and that
   is the one path exception.** `@umriss-ui/core/styles.css` exists only after a
   build, so the demos of `@umriss-ui/table` and `@umriss-ui/charts` alias it to a
-  two-line `demo/ui-styles.css` that imports the token and base layer out of
+  short `demo/ui-styles.css` that imports the tokens out of
   `packages/core/src/styles/`. The lint forbids exactly this route for `.ts` and
   `.tsx` and cannot see it in CSS; the reason stands in both files and in the
   alias that puts them there (`vite.demo.config.ts`).

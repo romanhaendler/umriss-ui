@@ -107,8 +107,9 @@
      makes up the whole window draws a frame around a frame.
 
      Both lines are needed, and the second is the more important one. The base
-     layer sets the ring in global.css as a `box-shadow` and not as an `outline`;
-     `outline: none` alone therefore left it standing. Exactly one side of it
+     layer that once ringed everything (gone since ADR-0021) did it as a
+     `box-shadow` and not as an `outline`; `outline: none` alone therefore left
+     it standing. Exactly one side of it
      remained visible: the field fills the pane across its width, and
      `overflow: hidden` cut the ring away on the left, the right and the top. What
      was left was a four pixel high bar in the accent below the field - which read

@@ -15,10 +15,6 @@ module with tests of its own.
 pnpm add @umriss-ui/table@next @umriss-ui/core
 ```
 
-The fonts are the application's, as for `@umriss-ui/core`: Geist is loaded with
-`@fontsource/geist-sans` and `@fontsource/geist-mono`, and without it the tokens
-fall back to the system fonts.
-
 The table is a **release candidate**, published under the tag `next` (and, as
 long as no released version exists, under `latest` too — npm insists on one); the
 core it takes as a peer is the released `@umriss-ui/core`.
@@ -31,8 +27,6 @@ React 18 or 19 as a peer as well.
 
 ```tsx
 import { useTable } from "@umriss-ui/table";
-import "@umriss-ui/core/styles.css";
-import "@umriss-ui/table/styles.css";
 
 interface Order {
   number: string;
@@ -64,16 +58,17 @@ right-aligned in the provider's notation and sortable. `rowHeader` makes the
 order number the name of the row — for a screen reader, and for the sticky
 column.
 
-## The stylesheets
+## Styles
 
-```ts
-import "@umriss-ui/core/styles.css";
-import "@umriss-ui/table/styles.css";
-```
-
-Both are needed, and the order is part of the appearance: the core stylesheet
-carries the tokens and the base layer the table's own styles read. Neither
-package's JavaScript loads CSS of its own, so the application imports both.
+Nothing to import. `dist/table.js` loads its own stylesheet, and
+`@umriss-ui/core` — which the table imports — loads core's, with the tokens the
+table's styles read. Both touch nothing but their own elements and lie in the
+layers `umriss.tokens`, `umriss.base` and `umriss.components`, so an
+application's CSS wins and every token can be overridden; light and dark follow
+the application's `color-scheme`; fonts are the application's (Geist
+recommended). The details stand in the README of `@umriss-ui/core`, under
+**Styles**. `@umriss-ui/table/styles.css` stays exported for setups that link
+stylesheets by hand.
 
 ## What it can do
 

@@ -21,25 +21,33 @@ hard outlines or effects.
 ## Quick start
 
 ```bash
-pnpm add @umriss-ui/core @fontsource/geist-sans @fontsource/geist-mono
+pnpm add @umriss-ui/core
 ```
 
 ```tsx
 import { Button, Card } from "@umriss-ui/core";
-import "@umriss-ui/core/styles.css";
-// The package ships no fonts; the application loads Geist itself.
-// Without it the tokens fall back to the system fonts.
-import "@fontsource/geist-sans/400.css";
-import "@fontsource/geist-sans/500.css";
-import "@fontsource/geist-sans/600.css";
-import "@fontsource/geist-mono/400.css";
 ```
 
-The stylesheet import is not optional and not a formality. `styles.css` is the
-package's one stylesheet: the tokens, the base layer and the styles of every
-component, built from `src/styles/tokens.css`, `src/styles/global.css` and the
-components' CSS modules. The JavaScript loads no CSS of its own, so without that
-line every `var(--u-…)` is invalid and the interface appears unstyled.
+That is the whole setup. The package's JavaScript loads its own stylesheet, and
+that stylesheet touches nothing but the library's own elements: no rule on
+`html`, `body` or `*`, no `color-scheme` on the document (ADR-0021). Everything
+lies in the cascade layers `umriss.tokens`, `umriss.base` and
+`umriss.components`, so an application's own CSS always wins, and every token
+can be overridden:
+
+```css
+:root {
+  --u-font-sans: "Inter", system-ui, sans-serif;
+  --u-color-accent: #0f766e;
+}
+```
+
+**Light and dark** follow the standard `color-scheme` the application sets —
+most theme switchers already do; one of your own writes
+`html.dark { color-scheme: dark }`. **Fonts** are not loaded: Geist is
+recommended and used when present (`@fontsource/geist-sans`,
+`@fontsource/geist-mono`), the system fonts otherwise. **Browsers:** Chrome 123,
+Firefox 120, Safari 17.5 or newer — the tokens use `light-dark()`.
 
 ## The demos
 

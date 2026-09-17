@@ -24,15 +24,10 @@ React 18 or 19 as a peer, and nothing else. `@umriss-ui/core` is **not** a
 dependency and not a peer dependency — if an application uses both packages, it
 does so because it chose to, not because this one required it (ADR-0020).
 
-No fonts are shipped either. The charts use Geist when the application loads it
-(`@fontsource/geist-sans`, `@fontsource/geist-mono`) and the system fonts
-otherwise.
-
 ## The smallest chart that runs
 
 ```tsx
 import { Chart, Line, XAxis, YAxis, Tooltip } from "@umriss-ui/charts";
-import "@umriss-ui/charts/styles.css";
 
 interface Point {
   t: number;
@@ -61,15 +56,22 @@ export function Course() {
 A series is an element, not an entry in a configuration object: the order in the
 JSX decides what lies over what, and at the same time the palette colour.
 
-## The stylesheet
+## Styles
 
-```ts
-import "@umriss-ui/charts/styles.css";
-```
+Nothing to import. `dist/charts.js` loads its own stylesheet; the axes, ticks,
+legend and tooltip are DOM and take their values from it, and only the series
+are drawn on canvas. The stylesheet touches nothing but the chart's own `uc-`
+elements and lies in the layer `umriss.components`, so an application's CSS
+wins. `@umriss-ui/charts/styles.css` stays exported for setups that link
+stylesheets by hand.
 
-The axes, ticks, legend and tooltip are DOM and take their values from the
-stylesheet; only the series themselves are drawn on canvas. The JavaScript loads
-no CSS of its own, so the application imports the stylesheet itself.
+**Colours** come from `--uc-*` variables that fall back to the tokens of
+`@umriss-ui/core` where they exist and to literals where they do not. **Light and
+dark** follow the application's `color-scheme`: the canvas colours are resolved
+anew when the root element's attributes or the system preference change;
+`invalidateTheme()` covers a switch made on another ancestor. **Fonts** are not
+loaded: Geist when the application has it, the system fonts otherwise.
+**Browsers:** Chrome 123, Firefox 120, Safari 17.5 or newer.
 
 ## What it can do
 

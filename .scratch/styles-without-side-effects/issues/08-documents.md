@@ -1,6 +1,6 @@
 # 08 — The documents follow
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Blocked by: 02, 03, 04, 05, 06, 07
@@ -41,3 +41,13 @@ Spec: `.scratch/styles-without-side-effects/spec.md` · ADR-0021
   each package and run `tsc --noEmit`; do not commit it).
 
 ## Comments
+
+**Delivered.**
+
+- **READMEs:** the root and core READMEs show one import. Core's has a **Styles** section (loading, no side effects, layers and overriding, `color-scheme` with the one-line switch, fonts as the application's with Geist recommended, the browser floor), and its `UmrissProvider` row no longer names a theme. Table and charts drop their stylesheet imports from the smallest examples and point to the same rules. The code examples of all three READMEs typecheck (a scratch file per package, not committed).
+- **Changelogs:** a "Styles that load themselves" section with **Changed** in each package, under the numbers they already carry. Charts names the `kc-` → `uc-` rename for callers who wrote selectors against the DOM.
+- **`CONTEXT.md`:** **Token** (layer, `light-dark()`, overriding, `_Avoid_: theme attribute`); new **Own element** and **Text context**.
+- **`docs/design-language.md`:** the dark theme is `color-scheme`; squircles and the connoisseur's details are scoped to the library's own elements, and the text selection is the application's.
+- **`docs/testing.md`:** rows for the style rules and the own-base checks, the convention that examples stand on browser defaults, and `ui-styles.css` importing only the tokens.
+- **`docs/journal.md`:** the delivery entry.
+- **Acceptance greps:** `styles.css` in documents outside `.scratch/` stands only as the optional export, in changelog history and in ADR-0021's "before". `data-theme` stands only in ADR-0021, the journal, core's changelog entry and a test comment that says it is gone.

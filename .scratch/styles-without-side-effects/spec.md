@@ -1,6 +1,6 @@
 # Spec: The styles load themselves, and touch nothing else
 
-Status: ready-for-agent
+Status: done
 
 Origin: session of 17 Sep 2026, after the first publication was prepared and
 before anything went to the registry. The brief, in the words it was given in:
@@ -306,3 +306,10 @@ page base from the demos turns that experiment into the permanent state: from
 then on a component that starts leaning on the page again turns a picture red.
 The three checks of ticket 03 cover what a picture cannot see — focus, and a
 dependency that happens to look identical.
+
+## Comments
+
+**Delivered**, tickets 01–08, each with its report under its own Comments. Two
+deviations from this spec are recorded where they apply: the third layer
+`umriss.base` (Implementation Decisions › Layers, and ADR-0021), and squircle
+corners added by a build step, `ownCorners`, instead of in 38 modules (tickets 04/05).
