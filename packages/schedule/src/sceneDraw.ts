@@ -9,7 +9,8 @@
 import { resolveColours, removedIntervals } from "@umriss-ui/charts";
 import type { LateTransport, Overlap } from "./findings";
 import {
-  barRect,
+  CAP,
+  CAP_INSET,
   inView,
   laneTop,
   subtaskBox,
@@ -19,7 +20,7 @@ import {
   type TransportPath,
   type Viewport,
 } from "./geometry";
-import { resolveAppearance } from "./appearance";
+import { resolveAppearance, type ResolvedAppearance } from "./appearance";
 import type { Subtask } from "./model";
 import type { SceneData } from "./sceneData";
 import type { ScheduleHit, SceneView } from "./sceneView";
@@ -32,6 +33,9 @@ const TOKENS = {
   alarm: "var(--u-color-danger)",
   surface: "var(--u-color-surface)",
   accent: "var(--u-color-accent)",
+  /* What text and marks take ON a filled bar - the same token the bar labels
+     use in CSS, so a cap and the label beside it are one colour. */
+  onAccent: "var(--u-color-on-accent)",
 } as const;
 
 export type Colours = Record<keyof typeof TOKENS, string> & { readonly tasks: ReadonlyMap<string, string> };
@@ -51,6 +55,7 @@ export function resolveSceneColours(root: Element, data: SceneData): Colours {
     alarm: resolved.alarm!,
     surface: resolved.surface!,
     accent: resolved.accent!,
+    onAccent: resolved.onAccent!,
     tasks,
   };
 }
@@ -64,22 +69,24 @@ function channels(colour: string): [number, number, number] | null {
   return [Number(parts[0]), Number(parts[1]), Number(parts[2])];
 }
 
-/** Below this luminance a colour counts as dark and text on it is set light.
-    It lies above the middle on purpose: a mid-blue carries white better than
-    it carries black. */
-const DARK_BELOW = 0.45;
-
-/** Whether a colour is dark enough that text on it should be light - the sRGB
-    relative luminance, so that a label reads in both schemes without a caller
-    saying so. */
-export function isDark(colour: string): boolean {
+/** The sRGB relative luminance of a resolved colour, 0 to 1. */
+function luminance(colour: string): number {
   const rgb = channels(colour);
-  if (rgb === null) return true;
+  if (rgb === null) return 0;
   const [r, g, b] = rgb.map((value) => {
     const channel = value / 255;
     return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
   }) as [number, number, number];
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b < DARK_BELOW;
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+/** The contrast ratio between two resolved colours, 1 to 21 - the measure
+    WCAG defines, used here to CHOOSE between two candidates rather than to
+    judge either of them. */
+function contrast(a: string, b: string): number {
+  const x = luminance(a);
+  const y = luminance(b);
+  return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
 }
 
 /** Sizes a canvas to the plot at the device's pixel ratio and clears it. */
@@ -290,24 +297,101 @@ function drawNow(ctx: CanvasRenderingContext2D, input: DrawInput): void {
   ctx.fillRect(x, 0, 2, input.view.height);
 }
 
+/** What a bar's face actually is, once its appearance has had its say - and
+    what colour text and marks lying ON it have to take.
+
+    `fill` is null for a hollow bar: provisional work paints nothing at all over
+    the surface. That is precisely what tells it from a setup, which is a FAINT
+    fill of the task colour - faint is not empty, and the two must never be
+    read for one another.
+
+    Muted work is the task colour mixed half into the surface, OPAQUE. Opaque,
+    because transparency is the setup's channel; and it carries no outline,
+    because an outline is the setup's edge. Another shift's work and one
+    shift's preparation can then not be confused in either direction - the
+    distinction Roman objected to once, settled in the material. */
+export function barFace(
+  look: ResolvedAppearance,
+  colour: string,
+  colours: Pick<Colours, "surface" | "text" | "onAccent">,
+): { fill: string | null; onDark: boolean } {
+  /* A hollow bar IS the surface, so what lies on it takes the page's own text
+     colour - which is what `onDark: false` asks the label's CSS for. */
+  if (look.dashed) return { fill: null, onDark: false };
+  const fill = look.muted ? mix(colour, colours.surface, 0.5) : colour;
+  /* Which of the two colours a label may take reads better on this fill -
+     measured, not decided by a threshold. A single luminance threshold worked
+     only as long as every bar was a saturated task colour; a muted bar is that
+     colour mixed half into the surface and lands in the middle, where one
+     theme wants the light answer and the other the dark one. Asking which of
+     the two actually contrasts is right in both, and needs no tuning. */
+  return { fill, onDark: contrast(fill, colours.onAccent) > contrast(fill, colours.text) };
+}
+
+/** Two resolved colours mixed, opaquely - not an alpha over the surface, which
+    would be transparency, which is the setup's channel. */
+function mix(a: string, b: string, t: number): string {
+  const x = channels(a);
+  const y = channels(b);
+  if (x === null || y === null) return a;
+  const at = (i: 0 | 1 | 2) => Math.round(x[i] + (y[i] - x[i]) * t);
+  return `rgb(${at(0)}, ${at(1)}, ${at(2)})`;
+}
+
+/** How far the progress rail sits in from the bar's bottom edge, in pixels.
+    The cap's width and inset stand in `geometry.ts`, because a bar's label has
+    to keep clear of them. */
+const RAIL_INSET = 2;
+
+/* ONE CHANNEL PER STATEMENT (schedule-lane-groups 02).
+
+   Everything a bar has to say besides its colour owns exactly one property of
+   the drawing, and no property says two things:
+
+     setup, teardown   a faint fill    28 per cent of the task colour, edged
+     provisional       the fill        none - the surface shows through
+     fixed             the ends        a cap at each end of the main time
+     muted             the saturation  the task colour, half mixed into surface
+     progress          a rail          inside the main time, above the bottom
+     open              a fade          where the bar passes the view's edge
+
+   The hatch is NOT among them any more. It left the bars in this ticket and
+   went to the refused lane (`drawRefusedLanes`), where "not available" is what
+   a hatch says on a plan. A mark that means two things means neither.
+
+   THE ORDER OF PAINTING IS FIXED, and it is this:
+
+     1 fill   2 rail   3 caps   4 fade   5 outline
+
+   The fade comes after the caps on purpose: a fixed bar that runs past the
+   view loses its cap at that edge, and that is exactly the statement - there
+   is no end there to mark. The outline comes after the fade, because a dashed
+   outline is the whole identity of a provisional bar and must not be eaten by
+   it; a provisional bar whose outline faded away would read as released work.
+
+   Adding a sixth statement means finding a sixth CHANNEL, not a sixth
+   invention. */
 function drawSubtask(ctx: CanvasRenderingContext2D, input: DrawInput, box: SubtaskBox, alpha: number): void {
   const { view, colours } = input;
   if (!inView(box, view.width, view.height)) return;
   const look = resolveAppearance(box.subtask.appearance);
   const colour = colours.tasks.get(box.subtask.task) ?? colours.muted;
+  const face = barFace(look, colour, colours);
+  /* The whole box: no appearance changes what a bar measures any more. */
+  const top = box.y;
+  const height = box.height;
+  const width = Math.max(1, box.mainTo - box.mainFrom);
+  /* What reads on this bar - the label's colour, and so the caps' and the
+     rail's. On a hollow bar that is the text colour, because a hollow bar is
+     the surface. */
+  const on = face.onDark ? colours.onAccent : colours.text;
 
-  /* Muted is drawn SLIM, not faint: a faint bar would read as a setup, which
-     is exactly what a faint fill means everywhere else in this picture. Half
-     the height, the whole colour - another shift's work, unmistakably lesser
-     and unmistakably not a setup. The rule stands in `geometry.ts`, because a
-     bar's label has to lie on the bar as it is drawn. */
-  const { top, height } = barRect(box);
-
+  /* 1. Fill. Setup and teardown first: the task's colour, faint, with its
+        edge - preparation reads as belonging to the work, and as not being
+        it. Then the face of the main time, or nothing where it is hollow. */
+  ctx.lineWidth = 1;
   ctx.fillStyle = colour;
   ctx.strokeStyle = colour;
-  ctx.lineWidth = 1;
-  /* Setup and teardown: the task's colour, faint, with its edge - preparation
-     reads as belonging to the work, and as not being it. */
   for (const [from, to] of [
     [box.outerFrom, box.mainFrom],
     [box.mainTo, box.outerTo],
@@ -318,38 +402,65 @@ function drawSubtask(ctx: CanvasRenderingContext2D, input: DrawInput, box: Subta
     ctx.globalAlpha = alpha;
     ctx.strokeRect(from + 0.5, top + 0.5, to - from - 1, height - 1);
   }
-
-  const width = Math.max(1, box.mainTo - box.mainFrom);
-  ctx.globalAlpha = look.dashed ? alpha * 0.45 : alpha;
-  ctx.fillRect(box.mainFrom, top, width, height);
-
-  if (look.hatched) hatch(ctx, box.mainFrom, top, width, height, colours.surface, alpha);
-
-  /* Progress is a rail along the bottom of the bar, not a lighter remainder:
-     a lighter part of a bar is a setup or a teardown in this picture, and a
-     planner must not have to ask which of the two a pale end is. */
-  const share = box.subtask.progress;
-  if (share !== undefined) {
-    const done = Math.round(width * Math.max(0, Math.min(1, share)));
-    const rail = Math.min(4, Math.max(2, Math.round(height / 6)));
-    ctx.globalAlpha = 0.35 * alpha;
-    ctx.fillStyle = isDark(colour) ? colours.surface : colours.text;
-    ctx.fillRect(box.mainFrom, top + height - rail, width, rail);
+  if (face.fill !== null) {
     ctx.globalAlpha = alpha;
-    if (done > 0) ctx.fillRect(box.mainFrom, top + height - rail, done, rail);
-    ctx.fillStyle = colour;
+    ctx.fillStyle = face.fill;
+    ctx.fillRect(box.mainFrom, top, width, height);
   }
 
-  if (look.dashed) {
-    /* Planned, not released: the outline says it, and it survives a colour a
-       caller chose badly. */
+  /* 2. Rail. Progress measures the WORK, so it lies within the main time and
+        stops at its end - a rail running on under the teardown would measure
+        the clearing away as well. It sits in from the bottom edge, so that it
+        is a mark ON the bar and not the bar's own lower edge. */
+  const share = box.subtask.progress;
+  if (share !== undefined) {
+    const rail = Math.min(4, Math.max(2, Math.round(height / 6)));
+    const y = top + height - rail - RAIL_INSET;
+    const done = Math.round(width * Math.max(0, Math.min(1, share)));
+    /* On a hollow bar the rail takes the TASK colour, not the colour text
+       takes: a full-strength text colour on an empty bar is the loudest thing
+       in the picture, for the quietest statement in it. The task colour is
+       what a hollow bar is already drawn in, and the rail belongs to the bar. */
+    ctx.fillStyle = face.fill === null ? colour : on;
+    ctx.globalAlpha = 0.3 * alpha;
+    ctx.fillRect(box.mainFrom, y, width, rail);
     ctx.globalAlpha = alpha;
+    if (done > 0) ctx.fillRect(box.mainFrom, y, done, rail);
+  }
+
+  /* 3. Caps. Fixed work is marked at its ENDS and not across its face: the
+        face belongs to the label, and the statement is about where the work
+        begins and ends - that is where it is nailed down.
+
+        The caps sit INSIDE the bar, framed by its own colour on three sides.
+        Flush with the ends they were invisible: a light cap at the start of a
+        bar on a light page reads as the bar beginning a few pixels later, not
+        as a mark, and the dark scheme has the same problem with the other
+        colour. A mark on a bar has to be surrounded by the bar. */
+  if (look.hatched) {
+    const cap = Math.max(1, Math.min(CAP, Math.floor((width - 2 * CAP_INSET) / 3)));
+    const inset = width >= 4 * cap ? CAP_INSET : 0;
+    const shrink = height >= 4 * CAP_INSET ? CAP_INSET : 0;
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = on;
+    ctx.fillRect(box.mainFrom + inset, top + shrink, cap, height - 2 * shrink);
+    ctx.fillRect(box.mainTo - inset - cap, top + shrink, cap, height - 2 * shrink);
+  }
+
+  /* 4. Fade. */
+  if (look.open) fadeOpen(ctx, box, top, height, colours.surface, view.width);
+
+  /* 5. Outline. */
+  if (look.dashed) {
+    /* Planned, not released: with no fill of its own, the outline is the bar,
+       and it survives a colour a caller chose badly. Full weight in the task
+       colour, so a hollow bar is still that order's. */
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = colour;
     ctx.setLineDash([4, 3]);
     ctx.strokeRect(box.mainFrom + 0.5, top + 0.5, width - 1, height - 1);
     ctx.setLineDash([]);
   }
-
-  if (look.open) fadeEnd(ctx, box, top, height, colours.surface, view.width);
   ctx.globalAlpha = 1;
   /* An offset bar lies over the one it covers; an edge in the surface colour
      keeps the two apart. */
@@ -395,11 +506,16 @@ function hatch(
   ctx.restore();
 }
 
-/** The end of a bar that continues past what is drawn: it fades into the
-    surface instead of ending in an edge a reader would take for its end - and
-    it fades at the edge of the VIEW where the bar's own end lies beyond it,
-    because that is the edge a reader would misread. */
-function fadeEnd(
+/** A bar that goes on past what is drawn fades into the surface instead of
+    ending in an edge a reader would take for its end - at EITHER edge of the
+    view, not only the right one. An edge of the screen is an edge of the
+    screen on both sides, and a bar that began before the view was saying
+    nothing at all about it.
+
+    Where the bar passes neither edge, the fade lies at its own right end: the
+    statement belongs to the WORK, and it must not disappear because the zoom
+    happens to show all of the bar. */
+function fadeOpen(
   ctx: CanvasRenderingContext2D,
   box: SubtaskBox,
   top: number,
@@ -407,15 +523,33 @@ function fadeEnd(
   surface: string,
   plotWidth: number,
 ): void {
-  const end = Math.min(box.mainTo, plotWidth);
-  const width = Math.max(1, end - box.mainFrom);
-  const span = Math.min(FADE_SPAN, width);
-  const gradient = ctx.createLinearGradient(end - span, 0, end, 0);
-  gradient.addColorStop(0, withAlpha(surface, 0));
-  gradient.addColorStop(1, withAlpha(surface, 1));
+  const before = box.mainFrom < 0;
+  const beyond = box.mainTo > plotWidth;
+  const visible = Math.max(1, Math.min(box.mainTo, plotWidth) - Math.max(box.mainFrom, 0));
+  const span = Math.min(FADE_SPAN, visible);
+  /* Opaque where the bar leaves the picture, clear a span further in. */
+  if (before) fadeFrom(ctx, 0, span, top, height, surface, 1);
+  if (beyond) fadeFrom(ctx, plotWidth, -span, top, height, surface, 1);
+  if (!before && !beyond) fadeFrom(ctx, box.mainTo, -span, top, height, surface, 1);
+}
+
+/** A band of the surface colour, opaque at `edge` and gone `span` pixels away
+    from it; a negative span runs to the left. */
+function fadeFrom(
+  ctx: CanvasRenderingContext2D,
+  edge: number,
+  span: number,
+  top: number,
+  height: number,
+  surface: string,
+  alpha: number,
+): void {
+  const gradient = ctx.createLinearGradient(edge, 0, edge + span, 0);
+  gradient.addColorStop(0, withAlpha(surface, alpha));
+  gradient.addColorStop(1, withAlpha(surface, 0));
   ctx.globalAlpha = 1;
   ctx.fillStyle = gradient;
-  ctx.fillRect(end - span, top, span, height);
+  ctx.fillRect(Math.min(edge, edge + span), top, Math.abs(span), height);
 }
 
 /** A resolved colour with an alpha of its own. The theme hands back

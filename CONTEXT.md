@@ -911,10 +911,21 @@ _Avoid_: caption, title, Beschriftung as the drawn thing, tooltip
 What a bar says besides its colour, from a closed list: `provisional` work that
 is planned and not released, `fixed` work that may not be moved, `muted` work
 that is not this reader's, and an `open` end where work continues past what is
-drawn. Each is a pattern or an outline and never only a colour, and none of
-them is the faint fill that already means a **Setup** or a **Teardown**. A
-**Progress** share is drawn beside them as a rail along the bar, for the same
-reason.
+drawn.
+
+Each owns exactly ONE property of the drawing, and no property says two things.
+`provisional` owns the fill and has none, so the surface shows through;
+`fixed` owns the ends and carries a cap inside each of them; `muted` owns the
+saturation and is the task colour mixed half into the surface, at full height,
+opaque and unoutlined; `open` owns the fade, at whichever edge of the view the
+bar passes. A **Progress** share owns a rail, inside the main time and above
+the bar's lower edge. The faint, outlined fill belongs to a **Setup** and a
+**Teardown** and to nothing else — which is why provisional work is empty
+rather than pale, and another shift's is a paler colour rather than a
+transparent one. A hatch says none of these: it says a **Lane** is not
+available, and only during a **Refusal**.
+
+Adding a statement means finding a channel, not inventing a mark.
 _Avoid_: style, variant, state, Zustand, status
 
 **Route**:
