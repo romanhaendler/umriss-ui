@@ -123,6 +123,11 @@ function keyOf(hit: ScheduleHit): string {
 /** Movement below which a press is a click. */
 const CLICK_SLOP = 3;
 
+/** How long a drag has to rest over a folded group before it opens for the
+    gesture. Long enough that crossing one on the way somewhere else does not
+    open it, short enough that a planner who meant it does not wonder. */
+const SPRING_OPEN_AFTER = 600;
+
 /** The ghost's label, as the DOM reads it. */
 export interface GhostSummary {
   /** The pointer stands over a lane this subtask may not go to; the ghost
@@ -158,6 +163,9 @@ export class SceneGestures {
   /** Where the pointer stands on the plot while a drag is in flight - what the
       tether is drawn to, since the ghost is not following it. */
   private dragPoint = { x: 0, y: 0 };
+  /** The folded group the pointer is resting over, and the timer that will
+      open it for this gesture. */
+  private resting: { group: string; timer: ReturnType<typeof setTimeout> } | null = null;
   hover: ScheduleHit = { kind: "nothing" };
   /** Where the pointer rests on the plot while nothing is being dragged. */
   hoverPoint = { x: 0, y: 0 };
@@ -255,6 +263,47 @@ export class SceneGestures {
     this.host.plotElement()?.setPointerCapture?.(event.pointerId);
   }
 
+  /** A drag over a folded group: resting on one opens it for the GESTURE.
+
+      Crossing one on the way somewhere else must not open it, so the timer
+      starts when the pointer arrives and is thrown away when it leaves. What
+      opens is a set the scene holds for the gesture; the caller's list is
+      never written to and no change is reported, because the application did
+      not fold anything (ADR-0025). */
+  private restOver(y: number): void {
+    const view = this.host.view;
+    const group = view.foldedGroupAt(y);
+    if (group === this.resting?.group) return;
+    this.stopResting();
+    if (group === null) return;
+    this.resting = {
+      group,
+      timer: setTimeout(() => {
+        this.resting = null;
+        view.openForGesture = new Set([...view.openForGesture, group]);
+        /* The rows change under the drag: the layout runs again, and the
+           refused lanes of the gesture are drawn where the lanes now are. The
+           held SET needs nothing - it is lane ids, and the lanes did not
+           change. */
+        this.host.viewChanged();
+      }, SPRING_OPEN_AFTER),
+    };
+  }
+
+  private stopResting(): void {
+    if (this.resting !== null) clearTimeout(this.resting.timer);
+    this.resting = null;
+  }
+
+  /** The end of a gesture: whatever it held open, it lets go of. */
+  private closeGestureFolds(): void {
+    this.stopResting();
+    const view = this.host.view;
+    if (view.openForGesture.size === 0) return;
+    view.openForGesture = new Set();
+    this.host.viewChanged();
+  }
+
   /** May this subtask go to this lane? Without a rule from the caller, every
       lane is open. Asked at a drop, where the answer has to be current; while
       a drag runs, the held set answers instead. */
@@ -333,6 +382,7 @@ export class SceneGestures {
     if (current.kind === "edit" && current.pointerId === event.pointerId) {
       this.lastClient = { x: event.clientX, y: event.clientY };
       this.dragPoint = { x, y };
+      this.restOver(y);
       this.gesture = { ...current, ghost: this.ghostFor(current, x, y) };
       /* The hand learns what the eye may have missed: over a refused lane the
          cursor says no, and says it again as soon as the pointer leaves. */
@@ -363,6 +413,7 @@ export class SceneGestures {
       this.hoverAt(event.clientX, event.clientY, x, y);
     } else if (gesture.kind === "edit" && gesture.pointerId === event.pointerId) {
       this.stopAutoPan();
+      this.closeGestureFolds();
       this.gesture = { kind: "none" };
       /* The ghost never stands on a refused lane - it stayed where it was
          allowed - so what is reported is what the planner saw. The rule is
@@ -419,6 +470,7 @@ export class SceneGestures {
 
   pointerCancel(event: PointerEvent): void {
     this.touches.delete(event.pointerId);
+    this.closeGestureFolds();
     this.cancelEdit();
     this.gesture = { kind: "none" };
   }
@@ -445,6 +497,7 @@ export class SceneGestures {
   cancelEdit(): boolean {
     if (this.gesture.kind !== "edit" && this.gesture.kind !== "place") return false;
     this.stopAutoPan();
+    this.closeGestureFolds();
     this.gesture = { kind: "none" };
     this.refused = false;
     this.cursor = "default";
@@ -546,11 +599,14 @@ export class SceneGestures {
     const view = this.host.view;
     if (placing === null || !view.options.intents.includes("place")) return;
     const { x, y } = this.local(event.clientX, event.clientY);
-    if (view.laneIdAt(y) === null) {
+    /* Off the rows entirely - not merely over a folded group, which is where
+       resting opens one. */
+    if (view.laneIdAt(y) === null && view.foldedGroupAt(y) === null) {
       this.clearPlacing();
       return;
     }
     event.preventDefault();
+    this.restOver(y);
     /* Asked at the first `dragOver` and held from there: before that moment
        there is no gesture to hold an answer for. */
     const refused =
@@ -591,7 +647,7 @@ export class SceneGestures {
     y: number,
     refused: ReadonlySet<string>,
   ): { ghost: Subtask | null; refused: boolean } {
-    const lane = this.host.view.laneIdAt(Math.max(0, Math.min(this.host.view.lanesBottom(), y)));
+    const lane = this.host.view.dropLaneIdAt(Math.max(0, Math.min(this.host.view.lanesBottom(), y)));
     if (lane === null) return { ghost: null, refused: false };
     /* Work dragged in may not land where placed work may not go either. */
     if (refused.has(lane)) return { ghost: null, refused: true };
@@ -603,7 +659,7 @@ export class SceneGestures {
       it is dragging, and the ghost only afterwards takes the sentinel. */
   private askedFor(placing: PlacingItem, x: number, y: number): Subtask {
     const view = this.host.view;
-    const lane = view.laneIdAt(Math.max(0, Math.min(view.lanesBottom(), y))) ?? "";
+    const lane = view.dropLaneIdAt(Math.max(0, Math.min(view.lanesBottom(), y))) ?? "";
     const from = this.snapInside(view.timeAt(x), this.snapStep());
     return {
       id: placing.item,
@@ -624,6 +680,7 @@ export class SceneGestures {
     event.preventDefault();
     const { ghost, item } = gesture;
     this.stopAutoPan();
+    this.closeGestureFolds();
     this.gesture = { kind: "none" };
     this.refused = false;
     this.cursor = "default";
@@ -653,6 +710,7 @@ export class SceneGestures {
   clearPlacing(): void {
     this.refused = false;
     this.cursor = "default";
+    this.closeGestureFolds();
     if (this.gesture.kind !== "place") return;
     this.stopAutoPan();
     this.gesture = { kind: "none" };
@@ -691,7 +749,7 @@ export class SceneGestures {
         }
         let lane = gesture.ghost.lane;
         if (intents.includes("lane")) {
-          const wanted = view.laneIdAt(Math.max(0, Math.min(view.lanesBottom(), y))) ?? lane;
+          const wanted = view.dropLaneIdAt(Math.max(0, Math.min(view.lanesBottom(), y))) ?? lane;
           /* A lane the subtask may not go to is refused, and the ghost stays
              where it last stood: a planner always sees where a drop would
              land, and never somewhere it could not. The set was asked when the
