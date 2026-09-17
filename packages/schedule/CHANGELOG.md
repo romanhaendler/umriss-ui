@@ -14,9 +14,51 @@ under a heading "Changed" of its own, no matter which digit rose.
 
 ---
 
-## Unreleased – One language for the bars (Sep. 2026)
+## Unreleased – Lanes that fold, and one language for the bars (Sep. 2026)
 
-Delivery report for `.scratch/schedule-lane-groups/spec.md`, in progress.
+Delivery report for `.scratch/schedule-lane-groups/spec.md`, tickets 01–11.
+
+### Added
+
+- **`<LaneGroup id label>`** puts structure over the lanes — halls, lines,
+  machine groups, to any depth. It is declared by composition, so a group reads
+  in JSX as it reads in the plant, and a lane never names its group.
+
+  A group is **never a lane** (ADR-0025). Nothing sits on it: a subtask names a
+  machine, a finding belongs to a machine, `canMoveTo` is asked about a machine
+  and every intent names one. Folding a group changes none of it.
+
+  ```tsx
+  <Schedule …>
+    <LaneGroup id="hall-a" label="Hall A">
+      <LaneGroup id="turning" label="Turning line">
+        <Lane id="lathe-1" label="Lathe 1" />
+        <Lane id="lathe-2" label="Lathe 2" />
+      </LaneGroup>
+      <Lane id="press-1" label="Press 1" />
+    </LaneGroup>
+    <Lane id="paint" label="Paint shop" />
+  </Schedule>
+  ```
+- **`collapsedGroups`, `defaultCollapsedGroups` and `onCollapsedGroupsChange`**
+  say which groups are folded — controlled, with an uncontrolled default: the
+  shape `selectedTask` has. It is **not an intent**. Folding says what is on
+  screen and nothing about the plan, so a caller that applies every intent it
+  receives will never find a fold among them.
+- **A folded group shows a miniature**: every lane in it as a thin strip, at a
+  smaller scale, with its work in the tasks' own colours. Transports arrive at
+  a strip, a finding inside a fold is marked on the strip and on the row, and a
+  strip can be hovered, tooltipped and selected. A strip carries no appearance,
+  no bar label, no progress rail and no grips — that is what unfolding is for.
+- **The header of a group** carries a chevron button with `aria-expanded` and
+  `aria-controls`, the group's label and how many lanes it holds; children
+  indent one step per level. It is the first thing the schedule puts into the
+  tab order, and it has a focus ring of its own. Two wording entries in English
+  and in `@umriss-ui/core/wording/de`, plus the lane count.
+- **A drag held over a folded group opens it** after a moment, so work can be
+  moved into a group without preparing the view first. It closes again when the
+  drag ends, and the caller's list is never written to — the application did
+  not fold anything, and hears nothing.
 
 ### Changed
 
@@ -48,6 +90,9 @@ Delivery report for `.scratch/schedule-lane-groups/spec.md`, in progress.
 - **A refused lane no longer costs the whole gesture.** A drop after one still
   reports the move in time; only the lane change is dropped. `canMoveTo` is
   asked once per lane when a drag takes hold, and again at the drop.
+- **`ScheduleHandle` answers for a folded lane** with its strip:
+  `clientPointOf` and `positionAt` read the place a lane is actually drawn, so
+  a caller's own marks keep pointing at the work when a group folds.
 
 ---
 

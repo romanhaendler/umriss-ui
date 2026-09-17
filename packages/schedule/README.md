@@ -87,6 +87,37 @@ draws the share that is done as a rail along the bar. `route`, `anchor` and
 `ends` decide how a transport is drawn, per schedule or per transport, without
 touching what a finding says.
 
+Each appearance owns exactly **one** property of the drawing, so several on one
+bar stay several statements: `"provisional"` the fill (none at all, the surface
+shows through), `"fixed"` the ends (a cap inside each), `"muted"` the
+saturation (the task colour half mixed into the surface, at full height), and
+`"open"` a fade at whichever edge of the view the bar passes. `progress` owns a
+rail inside the main time. The faint, outlined fill belongs to a setup and a
+teardown and to nothing else.
+
+## Lanes that fold
+
+`<LaneGroup>` puts halls, lines and machine groups over the lanes, to any
+depth. A group is structure and never a lane: nothing sits on it, no finding is
+reported for it, and no intent names it (ADR-0025).
+
+```tsx
+<LaneGroup id="hall-a" label="Hall A">
+  <LaneGroup id="turning" label="Turning line">
+    <Lane id="lathe-1" label="Lathe 1" />
+    <Lane id="lathe-2" label="Lathe 2" />
+  </LaneGroup>
+  <Lane id="press-1" label="Press 1" />
+</LaneGroup>
+```
+
+Folded, a group becomes one row showing a **miniature** — every lane in it as a
+thin strip, the real work smaller. Transports still arrive at the right strip,
+findings are still marked, and a strip can still be hovered and selected:
+folding costs a planner detail and never access. `collapsedGroups`,
+`defaultCollapsedGroups` and `onCollapsedGroupsChange` put the state in the
+application's hands; it is a view state, never an intent.
+
 ## Reading and moving
 
 A tooltip on a hovered subtask or transport names the order, the times, setup
@@ -102,5 +133,6 @@ point into a time and a lane and back.
   shows running examples with their source and the props generated from `src/`.
 * [`CHANGELOG.md`](CHANGELOG.md) — what changes for a caller.
 * The vocabulary — **Task**, **Subtask**, **Setup**, **Teardown**,
-  **Transport**, **Late transport**, **Lane header**, **Intent**, **Ghost** —
-  stands in the workspace's `CONTEXT.md`, section "The schedule".
+  **Transport**, **Late transport**, **Lane header**, **Lane group**,
+  **Miniature**, **Intent**, **Ghost** — stands in the workspace's
+  `CONTEXT.md`, section "The schedule".
