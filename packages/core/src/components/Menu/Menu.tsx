@@ -14,7 +14,45 @@ interface MenuContextValue {
   close: () => void;
 }
 
-const MenuContext = createContext<MenuContextValue | null>(null);
+/* Internal: `ContextMenu` provides the same context and the same keyboard
+   handling, so that its entries close it the way they close a menu. Neither
+   leaves the package - `index.ts` names what does. */
+export const MenuContext = createContext<MenuContextValue | null>(null);
+
+/** Arrow keys, Home and End over the enabled entries; Tab closes. */
+export function handleMenuKeyDown(
+  event: ReactKeyboardEvent<HTMLElement>,
+  panel: HTMLElement | null,
+  close: () => void,
+) {
+  const items = Array.from(panel?.querySelectorAll<HTMLButtonElement>('[role="menuitem"]:not([disabled])') ?? []);
+  if (items.length === 0) return;
+  const index = items.findIndex((item) => item === document.activeElement);
+
+  switch (event.key) {
+    case "ArrowDown":
+      event.preventDefault();
+      items[(index + 1) % items.length]?.focus();
+      break;
+    case "ArrowUp":
+      event.preventDefault();
+      items[(index - 1 + items.length) % items.length]?.focus();
+      break;
+    case "Home":
+      event.preventDefault();
+      items[0]?.focus();
+      break;
+    case "End":
+      event.preventDefault();
+      items[items.length - 1]?.focus();
+      break;
+    case "Tab":
+      close();
+      break;
+    default:
+      break;
+  }
+}
 
 /* ------------------------------------------------------------------ */
 /* Menu – dropdown menu with a portal panel and keyboard handling.     */
@@ -48,37 +86,8 @@ export function Menu({ trigger, children, align = "start" }: MenuProps) {
       ?.focus();
   }, [open]);
 
-  const handlePanelKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
-    const items = Array.from(
-      panelRef.current?.querySelectorAll<HTMLButtonElement>('[role="menuitem"]:not([disabled])') ?? [],
-    );
-    if (items.length === 0) return;
-    const index = items.findIndex((item) => item === document.activeElement);
-
-    switch (event.key) {
-      case "ArrowDown":
-        event.preventDefault();
-        items[(index + 1) % items.length]?.focus();
-        break;
-      case "ArrowUp":
-        event.preventDefault();
-        items[(index - 1 + items.length) % items.length]?.focus();
-        break;
-      case "Home":
-        event.preventDefault();
-        items[0]?.focus();
-        break;
-      case "End":
-        event.preventDefault();
-        items[items.length - 1]?.focus();
-        break;
-      case "Tab":
-        setOpen(false);
-        break;
-      default:
-        break;
-    }
-  };
+  const handlePanelKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) =>
+    handleMenuKeyDown(event, panelRef.current, () => setOpen(false));
 
   const triggerProps = trigger.props;
 
