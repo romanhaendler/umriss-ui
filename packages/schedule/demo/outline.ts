@@ -12,11 +12,12 @@
    component - a reader looks up "Bar labels" and finds a page about bar
    labels, with one example per feature on it.
 
-   The rubrics answer three different questions a planner's application asks in
-   turn: what the schedule DRAWS, what a reader may take OUT of it, how it is
-   EDITED, and what it FINDS. `Intent` stays a page although it is a type and
-   not a component: it is the editing API (ADR-0023), and a reader looks it up
-   by that name.
+   The rubrics answer four questions a planner's application asks in turn: what
+   the schedule DRAWS, what a reader takes OUT of it, how it is EDITED, and
+   what it FINDS. There is no page called after the `Intent` type any more:
+   every editing chapter is about the intents it raises, and a reader looking
+   for "how do I move a bar" looks up *Move and lane*, not a type name
+   (ADR-0023 stands behind all of them).
 
    What is NOT here: the examples. They come from the files under
    `demo/examples/` and from nothing else - the folder is named like the page,
@@ -160,18 +161,53 @@ export const OUTLINE: readonly Rubric[] = [
     sentence: "Direct manipulation that changes nothing by itself: the schedule reports, the application decides.",
     pages: [
       {
-        id: "intent",
-        name: "Intent",
-        sentence: "What a drag asks for - move, lane, stretch, setup, teardown - shown as a ghost with live findings and reported when it ends.",
+        id: "move-and-lane",
+        name: "Move and lane",
+        sentence: "Dragging a subtask through time and onto another lane - the ghost while it is in flight, the intents when it ends.",
         types: [],
-        exports: ["Schedule", "applyIntent", "snapTime"],
+        exports: ["Schedule", "applyIntent"],
+      },
+      {
+        id: "stretch",
+        name: "Stretch, setup, teardown",
+        sentence: "The other three edits: the edges of the main time, and the two grips a selected subtask offers for its preparation.",
+        types: [],
+        exports: ["Schedule", "applyIntent"],
+      },
+      {
+        id: "snapping",
+        name: "Snapping",
+        sentence: "The raster a drag lands on - the axis' own step, a duration, or a shift pattern with an offset.",
+        types: [],
+        exports: ["Schedule", "snapTime"],
+      },
+      {
+        id: "placing",
+        name: "Placing from outside",
+        sentence: "Work that is not on the plan yet, dragged in from a list beside it with the browser's own drag and drop.",
+        types: [],
+        exports: ["Schedule", "subtaskFromPlace"],
+      },
+      {
+        id: "where-it-may-go",
+        name: "Where a subtask may go",
+        sentence: "The lanes a piece of work may not go to, marked before the pointer arrives and refused without a warning colour.",
+        types: [],
+        exports: ["Schedule"],
       },
       {
         id: "ripple",
-        name: "ripple",
+        name: "Ripple",
         sentence: "The cascade as arithmetic: the moves that push every successor whose transport no longer fits - for the application to run, or not.",
         types: [],
         exports: ["ripple", "shiftTask", "applyIntent"],
+      },
+      {
+        id: "demonstration",
+        name: "Demonstration",
+        sentence: "A whole plant in a planner's hands: a context menu, the cascade, the findings, and every intent the schedule reports.",
+        types: [],
+        exports: ["Schedule", "findings", "ripple", "shiftTask"],
       },
     ],
   },
@@ -182,7 +218,7 @@ export const OUTLINE: readonly Rubric[] = [
     pages: [
       {
         id: "findings",
-        name: "findings",
+        name: "Findings as data",
         sentence: "Overlaps on a lane and late transports, computed from the data - to list, count and act on.",
         types: ["Overlap", "LateTransport"],
         exports: ["findings", "overlaps", "lateTransports"],

@@ -19,7 +19,7 @@ export type { ExampleAddress };
 
 export const EXAMPLE_ADDRESSES: readonly ExampleAddress[] = exampleAddresses(EXAMPLES_DIR);
 
-/** A sample for the accessibility check: the overview, the component's own page
-    with its lane headers in markup, the editing page with the demonstration and
-    its context menu, and the findings listed as text. */
-export const SAMPLE = ["overview", "schedule", "lane", "intent", "findings"] as const;
+/** A sample for the accessibility check: the overview, the first schedule, the
+    lanes with their headers in markup, the demonstration with its context menu,
+    and the findings listed as text. */
+export const SAMPLE = ["overview", "schedule", "lane", "demonstration", "findings"] as const;
