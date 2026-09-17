@@ -85,6 +85,13 @@
     text-overflow: ellipsis;
   }
 
+  /* A lane the work being dragged may not go to, for the run of that drag. The
+     plot draws the lane back and hatches it; the header has one channel and
+     uses it. No warning colour on either (CONTEXT.md, **Refusal**). */
+  .header[data-refused] {
+    color: var(--u-color-text-muted);
+  }
+
   .plot {
     position: relative;
     overflow: hidden;

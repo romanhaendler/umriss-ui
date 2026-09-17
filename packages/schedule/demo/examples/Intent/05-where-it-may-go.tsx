@@ -9,10 +9,17 @@ export const title = "Where a subtask may go";
    has been set up may move in time but not to another station, and a plant
    knows both - the schedule does not.
 
-   `canMoveTo` asks the application, per subtask and lane, while the drag runs
-   and again at the drop. The ghost stays on the last lane that was allowed, so
-   a planner always sees where the drop would land, and the label says why it
-   is not following. A refused drop reports nothing at all.
+   `canMoveTo` asks the application, once per lane when the drag takes hold and
+   again at the drop. The lanes it turns down are marked from the first frame:
+   drawn back and hatched, their headers with them, so that nobody has to try a
+   lane to learn it is closed. Over one of them the ghost stays on the last
+   lane that was allowed, the cursor says no, and a line ties the ghost to the
+   pointer it is not following - it is being held, not stuck.
+
+   A refusal costs the lane and nothing else. Drop after it and the move in
+   time is still reported: one rule of the plant must not take away the other
+   half of a gesture. And none of it wears a warning colour, because a mould
+   that fits one press is nobody's mistake.
 
    It narrows `"lane"`; it does not enable it. Dragging in time keeps working
    for everything below - a restriction on the lane is not a restriction on the
@@ -20,7 +27,8 @@ export const title = "Where a subtask may go";
 
    It holds for work dragged in from outside as well: the mould beside the plan
    is asked about with the key and task the application declared, and the
-   welding bay refuses it before it can be dropped there. */
+   welding bay is marked for it exactly as it is for the part already on the
+   plan. */
 
 const at = (hours: number, minutes = 0) => new Date(2026, 2, 17, hours, minutes).getTime();
 
