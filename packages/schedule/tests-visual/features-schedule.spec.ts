@@ -448,10 +448,13 @@ test("a bar that began before the view keeps its label at the edge", async ({ pa
    empty one. */
 const APPEARANCE_DOMAIN = [at(6, 30), at(11)] as const;
 
+/** The middle of a lane's row, in plot coordinates. */
+const middleOf = (plot: Plot, lane: string) => plot.row(lane).top + plot.row(lane).height / 2;
+
 /** The middle third of a bar on a lane, over an hour of it. */
 const face = (plot: Plot, lane: string, hour: number) => ({
   x: plot.x(hour) - plot.box.x,
-  y: plot.index(lane) * LANE_HEIGHT + LANE_HEIGHT / 2 - 4,
+  y: middleOf(plot, lane) - 4,
   width: plot.x(hour + 1) - plot.x(hour),
   height: 8,
 });
@@ -459,7 +462,7 @@ const face = (plot: Plot, lane: string, hour: number) => ({
 /** A point in the middle of a lane, at a time. */
 const spotOn = (plot: Plot, lane: string, hour: number, minutes = 0) => ({
   x: Math.round(plot.x(hour, minutes) - plot.box.x),
-  y: plot.index(lane) * LANE_HEIGHT + LANE_HEIGHT / 2,
+  y: middleOf(plot, lane),
 });
 
 test("a provisional bar is hollow, and a released one is not", async ({ page }) => {
@@ -521,7 +524,7 @@ test("muted work is a paler colour at full height, and cannot be read as a setup
   /* Full height: the bar's top rows are painted. A half-height bar - which is
      what muted used to be - would leave them empty. */
   expect(
-    await paintedShare(example, "data", { x: onBar.x, y: plot.index("theirs") * LANE_HEIGHT + 12, width: 20, height: 3 }),
+    await paintedShare(example, "data", { x: onBar.x, y: plot.row("theirs").top + 12, width: 20, height: 3 }),
   ).toBe(1);
 
   /* And a different colour from the setup beside it, by a margin and not by a
@@ -542,7 +545,7 @@ test("the progress rail lies within the main time and stops at its end", async (
   /* 07:00 to 10:00 at 65 per cent, with half an hour of teardown after it. The
      rail is a mark ON the bar, so it lies above the bar's own bottom edge -
      and it measures the WORK, so it must stop where the main time does. */
-  const bottom = plot.index("started") * LANE_HEIGHT + LANE_HEIGHT / 2 + 11 - 4;
+  const bottom = middleOf(plot, "started") + 11 - 4;
   const done = plot.x(7) + 0.65 * (plot.x(10) - plot.x(7));
   const spot = (x: number) => ({ x: Math.round(x - plot.box.x), y: bottom });
 
@@ -556,11 +559,11 @@ test("the progress rail lies within the main time and stops at its end", async (
   expect(underTeardown).not.toBe(stillToDo);
 
   /* And it is inset: the bar's lowest row is the bar, not the rail. */
-  const lowest = { x: Math.round(plot.x(8) - plot.box.x), y: plot.index("started") * LANE_HEIGHT + LANE_HEIGHT / 2 + 10 };
+  const lowest = { x: Math.round(plot.x(8) - plot.box.x), y: middleOf(plot, "started") + 10 };
   expect(await colour(example, "data", lowest)).not.toBe(onWork);
 
   /* A bar that says nothing about progress carries no rail at all. */
-  const quiet = { x: Math.round(plot.x(8) - plot.box.x), y: plot.index("unclaimed") * LANE_HEIGHT + LANE_HEIGHT / 2 + 7 };
+  const quiet = { x: Math.round(plot.x(8) - plot.box.x), y: middleOf(plot, "unclaimed") + 7 };
   expect(await colour(example, "data", quiet)).toBe(await colour(example, "data", spotOn(plot, "unclaimed", 8)));
 });
 
@@ -569,7 +572,7 @@ test("a bar fades at whichever edge of the view it passes", async ({ page }) => 
   const example = page.locator('[data-example="open"]');
   const plot = await plotOf(page, example, APPEARANCE_DOMAIN);
   const width = (await example.locator("[data-schedule-plot]").boundingBox())!.width;
-  const mid = (lane: string) => plot.index(lane) * LANE_HEIGHT + LANE_HEIGHT / 2;
+  const mid = (lane: string) => middleOf(plot, lane);
 
   /* One bar runs past the right edge, one began before the left one. A fade is
      a gradient into the surface, so the test asks how far each place stands
@@ -690,4 +693,136 @@ test("the subtask that was clicked is told from its task's other bars", async ({
   expect(asClicked).toBeGreaterThan(asSibling);
   /* And a sibling is still outlined: the whole task is selected. */
   expect(asSibling).toBeGreaterThan(LANE_HEIGHT);
+});
+
+/* ------------------------------------------------------------------ */
+/* Lane groups (schedule-lane-groups 08)                                */
+/* ------------------------------------------------------------------ */
+
+test("a group is structure over lanes: a head above them, and its lanes in the order they were declared", async ({ page }) => {
+  await openExample(page, "lane-groups", "a-group");
+  const example = page.locator('[data-example="a-group"]');
+  const headers = example.locator("[data-schedule-headers] [data-row]");
+
+  await expect(headers).toHaveCount(5);
+  await expect(headers.nth(0)).toHaveAttribute("data-row", "groupHead");
+  await expect(headers.nth(0)).toContainText("Press shop");
+  await expect(headers.nth(0)).toContainText("2 lanes");
+  /* The lanes, in the order the example declared them - group or no group. */
+  const lanes = await example.locator("[data-schedule-headers] [data-lane]").evaluateAll((n) => n.map((e) => e.getAttribute("data-lane")));
+  expect(lanes).toEqual(["press-1", "press-2", "weld", "paint"]);
+});
+
+test("the fold control is a real button, and says whether its group is open", async ({ page }) => {
+  await openExample(page, "lane-groups", "a-group");
+  const example = page.locator('[data-example="a-group"]');
+  const chevron = example.getByRole("button", { name: /Fold group: Press shop/ });
+
+  await expect(chevron).toHaveAttribute("aria-expanded", "true");
+  /* What it controls exists: the rows that lie inside the group. */
+  const controls = (await chevron.getAttribute("aria-controls"))!.split(" ");
+  expect(controls.length).toBeGreaterThan(0);
+  /* By attribute, not by `#id`: React's own ids carry characters a CSS
+     selector would have to escape. */
+  for (const id of controls) await expect(page.locator(`[id="${id}"]`)).toHaveCount(1);
+
+  await chevron.click();
+  const folded = example.getByRole("button", { name: /Unfold group: Press shop/ });
+  await expect(folded).toHaveAttribute("aria-expanded", "false");
+  /* One row for the whole group, and its lanes have none of their own. */
+  await expect(example.locator("[data-schedule-headers] [data-row]")).toHaveCount(3);
+  await expect(example.locator('[data-schedule-headers] [data-lane="press-1"]')).toHaveCount(0);
+  /* And it still controls something that exists - the miniature's row. */
+  for (const id of (await folded.getAttribute("aria-controls"))!.split(" ")) {
+    await expect(page.locator(`[id="${id}"]`)).toHaveCount(1);
+  }
+});
+
+test("a group folds by keyboard, because the control is a button", async ({ page }) => {
+  await openExample(page, "lane-groups", "a-group");
+  const example = page.locator('[data-example="a-group"]');
+  const chevron = example.getByRole("button", { name: /group: Press shop/ });
+
+  await chevron.focus();
+  await expect(chevron).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(example.getByRole("button", { name: /Unfold group: Press shop/ })).toHaveAttribute("aria-expanded", "false");
+  await page.keyboard.press("Space");
+  await expect(example.getByRole("button", { name: /Fold group: Press shop/ })).toHaveAttribute("aria-expanded", "true");
+});
+
+test("groups fold from outside, and the state is the application's", async ({ page }) => {
+  await openExample(page, "lane-groups", "controlled");
+  const example = page.locator('[data-example="controlled"]');
+  const readout = example.locator("[data-folded]");
+
+  await expect(readout).toHaveText("welding");
+  await example.locator("[data-fold-all]").click();
+  await expect(readout).toHaveText("presses, welding");
+  await expect(example.locator("[data-schedule-headers] [data-lane]")).toHaveCount(0);
+
+  await example.locator("[data-unfold-all]").click();
+  await expect(readout).toHaveText("nothing folded");
+  await expect(example.locator("[data-schedule-headers] [data-lane]")).toHaveCount(4);
+
+  /* And the chevron reports to the application rather than deciding for it. */
+  await example.getByRole("button", { name: /Fold group: Press shop/ }).click();
+  await expect(readout).toHaveText("presses");
+});
+
+test("an inner group keeps its state while the outer one is folded", async ({ page }) => {
+  await openExample(page, "lane-groups", "nesting");
+  const example = page.locator('[data-example="nesting"]');
+  const rows = () => example.locator("[data-schedule-headers] [data-row]");
+
+  /* Hall A holds a turning line of three and a press: two heads and four
+     lanes, plus the paint shop outside. */
+  await expect(rows()).toHaveCount(7);
+  /* Folded, the line is one row: the hall's head, that row, the press and the
+     paint shop. */
+  await example.getByRole("button", { name: /Fold group: Turning line/ }).click();
+  await expect(rows()).toHaveCount(4);
+
+  /* Fold the hall around it, then open the hall again: the line is still
+     folded, because folding the hall never touched the line's own state. */
+  await example.getByRole("button", { name: /Fold group: Hall A/ }).click();
+  await expect(rows()).toHaveCount(2);
+  await example.getByRole("button", { name: /Unfold group: Hall A/ }).click();
+  await expect(rows()).toHaveCount(4);
+  await expect(example.getByRole("button", { name: /Unfold group: Turning line/ })).toHaveCount(1);
+});
+
+test("a subtask on a folded lane is drawn on no other row", async ({ page }) => {
+  await openExample(page, "lane-groups", "a-group");
+  const example = page.locator('[data-example="a-group"]');
+  const plot = await plotOf(page, example, [at(6), at(15)]);
+
+  /* The welding bay's bar, 10:00 to 12:00, before and after the press shop
+     folds. Its row moves up by what the two press lanes gave back, and
+     nothing of the presses' work is drawn on it. */
+  const at11 = Math.round(plot.x(11) - plot.box.x);
+  expect(
+    await paintedShare(example, "data", { x: at11, y: middleOf(plot, "weld") - 4, width: 20, height: 8 }),
+  ).toBeGreaterThan(0.9);
+
+  await example.getByRole("button", { name: /Fold group: Press shop/ }).click();
+  const after = await plotOf(page, example, [at(6), at(15)]);
+  /* The welding bay moved up: the two press lanes gave their rows back. */
+  expect(after.index("weld")).toBe(0);
+  expect(middleOf(after, "weld")).toBeLessThan(middleOf(plot, "weld"));
+  /* Its own bar came with it. */
+  expect(
+    await paintedShare(example, "data", { x: at11, y: middleOf(after, "weld") - 4, width: 20, height: 8 }),
+  ).toBeGreaterThan(0.9);
+  /* And at 07:30 the presses are busy while the welding bay is not: its row
+     has to be empty there. The press shop's work stayed in the press shop's
+     row. */
+  expect(
+    await paintedShare(example, "data", {
+      x: Math.round(after.x(7, 30) - after.box.x),
+      y: middleOf(after, "weld") - 4,
+      width: 20,
+      height: 8,
+    }),
+  ).toBeLessThan(0.05);
 });

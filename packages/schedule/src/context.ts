@@ -7,9 +7,20 @@
    throw: a lane that silently draws nothing is a lane nobody finds. */
 
 import { createContext, useContext, useEffect, useRef } from "react";
-import type { LaneConfig, LayerConfig, ScheduleScene } from "./scene";
+import type { GroupConfig, LaneConfig, LayerConfig, ScheduleScene } from "./scene";
 
 export const ScheduleContext = createContext<ScheduleScene | null>(null);
+
+/** The **Lane group** a child is declared inside, or null at the top level.
+
+    A lane never names its group: the group gives its id downwards, so that a
+    group reads in JSX as it reads in the plant and moving a lane between
+    groups is moving a line of JSX (ADR-0025). */
+export const LaneGroupContext = createContext<string | null>(null);
+
+export function useLaneGroup(): string | null {
+  return useContext(LaneGroupContext);
+}
 
 function useScene(componentName: string): ScheduleScene {
   const scene = useContext(ScheduleContext);
@@ -48,6 +59,10 @@ function useRegistration<C>(
 
 export function useLane(config: LaneConfig): void {
   useRegistration("Lane", config, (s, c) => s.registerLane(c), (s, id, c) => s.updateLane(id, c), (s, id) => s.unregisterLane(id));
+}
+
+export function useLaneGroupRegistration(config: GroupConfig): void {
+  useRegistration("LaneGroup", config, (s, c) => s.registerGroup(c), (s, id, c) => s.updateGroup(id, c), (s, id) => s.unregisterGroup(id));
 }
 
 export function useLayer(componentName: string, config: LayerConfig): void {

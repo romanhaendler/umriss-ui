@@ -38,3 +38,8 @@ export type { SnapRaster } from "./snap";
 export type { TransportAttachment, TransportEnds, TransportRoute } from "./model";
 export { resolveAppearance } from "./appearance";
 export type { ResolvedAppearance, SubtaskAppearance } from "./appearance";
+
+/* What `schedule-lane-groups` added: the lane groups (ADR-0025), at the end by
+   the workspace's rule for new exports. */
+export { LaneGroup } from "./parts";
+export type { LaneGroupProps } from "./parts";

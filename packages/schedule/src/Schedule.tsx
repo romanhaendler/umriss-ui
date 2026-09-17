@@ -21,6 +21,7 @@ import {
   forwardRef,
   useEffect,
   useImperativeHandle,
+  useId,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -93,6 +94,20 @@ export interface ScheduleProps {
       nothing. It is called again when another subtask of the same task is
       clicked. */
   onSelectedTaskChange?: (task: string | null, subtask: string | null) => void;
+  /** The **Lane group**s that are folded, controlled. Leave it out and the
+      schedule keeps them itself, starting from `defaultCollapsedGroups`.
+
+      Folding changes the view and not the plan, which is why it is no intent:
+      a caller that applies every intent it receives must never find a fold
+      among them (ADR-0025). A folded outer group hides the inner ones without
+      their entries leaving the list, so unfolding it gives back the view that
+      was there. */
+  collapsedGroups?: readonly string[];
+  /** Which groups are folded when the schedule mounts, where the schedule
+      keeps the state itself. Ignored while `collapsedGroups` is given. */
+  defaultCollapsedGroups?: readonly string[];
+  /** Called with the whole list when the planner folds or unfolds a group. */
+  onCollapsedGroupsChange?: (groups: readonly string[]) => void;
   /** The visible time span after the planner panned or zoomed, as two
       wall-clock instants - for keeping a second schedule or a chart in step. A
       span handed in through `initialDomain` is not reported back. */
@@ -175,6 +190,9 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
     onInteraction,
     selectedTask,
     onSelectedTaskChange,
+    collapsedGroups,
+    defaultCollapsedGroups,
+    onCollapsedGroupsChange,
     onDomainChange,
     placing,
     route = "curve",
@@ -189,6 +207,9 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
   } = props;
 
   const [scene] = useState(() => new ScheduleScene());
+  /* One id per schedule, so that two on a page do not both claim
+     `#…-group-presses` for their chevron's `aria-controls`. */
+  const plotId = useId();
   const rootRef = useRef<HTMLDivElement | null>(null);
   const plotRef = useRef<HTMLDivElement | null>(null);
   const dataRef = useRef<HTMLCanvasElement | null>(null);
@@ -229,8 +250,20 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
   }, [scene, domainFrom, domainTo, laneHeight, calendar, limitMin, limitMax, snapKind, snapStep, snapOffset, intents, nowAt, route, attach, ends]);
 
   useEffect(() => {
-    scene.setHandlers({ onIntent, canMoveTo, onInteraction, onSelectedTaskChange, onDomainChange });
-  }, [scene, onIntent, canMoveTo, onInteraction, onSelectedTaskChange, onDomainChange]);
+    scene.setHandlers({ onIntent, canMoveTo, onInteraction, onSelectedTaskChange, onCollapsedGroupsChange, onDomainChange });
+  }, [scene, onIntent, canMoveTo, onInteraction, onSelectedTaskChange, onCollapsedGroupsChange, onDomainChange]);
+
+  /* The default is taken once, at the mount: after that the state is the
+     scene's, and a caller who wants to move it uses `collapsedGroups`. */
+  const firstDefault = useRef(defaultCollapsedGroups);
+  useEffect(() => {
+    const first = firstDefault.current;
+    if (first !== undefined) scene.setDefaultCollapsedGroups(first);
+  }, [scene]);
+
+  useEffect(() => {
+    scene.setCollapsedGroups(collapsedGroups);
+  }, [scene, collapsedGroups]);
 
   useImperativeHandle(
     ref,
@@ -292,6 +325,26 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
   };
 
   const ghost = snapshot.ghost;
+  /* What a group's chevron controls: every row that lies inside it - its heads
+     and lanes while it is open, its one miniature row while it is folded. The
+     ids therefore point at elements that exist either way, which is what a
+     disclosure has to promise. */
+  /* By the row's own key and NOT by its kind: a group's head and its folded
+     miniature are the same row in two states, and a key that changed with the
+     state would unmount the chevron on every fold - which takes the keyboard
+     focus away from the hand that just pressed it. */
+  const rowId = (header: { key: string }) => `${plotId}-row-${header.key}`;
+  const controlledBy = useMemo(() => {
+    const byGroup = new Map<string, string[]>();
+    for (const header of snapshot.headers) {
+      for (const group of header.within) {
+        if (header.kind === "groupHead" && group === header.group) continue;
+        byGroup.set(group, [...(byGroup.get(group) ?? []), rowId(header)]);
+      }
+    }
+    return byGroup;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [snapshot.headers, plotId]);
   const refused = useMemo(() => new Set(ghost?.refusedLanes ?? []), [ghost?.refusedLanes]);
 
   /* The ghost's label stands above its bar, and under it in the topmost lane:
@@ -370,19 +423,41 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
         </div>
         <div className={styles.headers} data-schedule-headers="">
           <div className={styles.headerRun} style={{ transform: `translateY(${-snapshot.scrollY}px)` }}>
-            {snapshot.lanes.map((lane) => (
+            {snapshot.headers.map((header) => (
               <div
-                key={lane.id}
+                key={header.key}
+                id={rowId(header)}
                 className={styles.header}
-                style={{ height: `${snapshot.laneHeight}px` }}
-                data-lane={lane.id}
+                style={{ height: `${header.height}px`, paddingLeft: `calc(var(--u-space-3) + ${header.depth} * var(--u-space-3))` }}
+                data-lane={header.lane}
+                data-group={header.group}
+                data-row={header.kind}
                 /* The header says it too, for the whole run of a drag: the
                    plot marks the lane, the header marks its name - and an
                    application styling beside the schedule reads the same
                    attribute. */
-                data-refused={refused.has(lane.id) ? "" : undefined}
+                data-refused={header.lane !== undefined && refused.has(header.lane) ? "" : undefined}
               >
-                {lane.label}
+                {header.kind !== "lane" && header.group !== undefined && (
+                  <button
+                    type="button"
+                    className={styles.chevron}
+                    aria-expanded={header.collapsed === false}
+                    aria-controls={(controlledBy.get(header.group) ?? [rowId(header)]).join(" ")}
+                    aria-label={`${header.collapsed === true ? wording.scheduleUnfoldGroup : wording.scheduleFoldGroup}: ${typeof header.label === "string" ? header.label : header.group}`}
+                    onClick={() => scene.toggleGroup(header.group!)}
+                  >
+                    <svg viewBox="0 0 10 10" width="9" height="9" aria-hidden="true" data-open={header.collapsed === false ? "" : undefined}>
+                      <path d="M3.5 1.5 7 5l-3.5 3.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </button>
+                )}
+                <span className={styles.headerLabel}>{header.label}</span>
+                {header.kind !== "lane" && (
+                  <span className={styles.headerCount} data-lane-count={header.lanes}>
+                    {wording.scheduleLaneCount(header.lanes)}
+                  </span>
+                )}
               </div>
             ))}
           </div>

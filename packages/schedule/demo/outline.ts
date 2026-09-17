@@ -49,6 +49,13 @@ export const OUTLINE: readonly Rubric[] = [
         exports: ["Lane"],
       },
       {
+        id: "lane-groups",
+        name: "Lane groups",
+        sentence: "Halls, lines and machine groups over the lanes - to any depth, and folded into one row when a planner wants the part they work on.",
+        types: ["LaneGroupProps"],
+        exports: ["LaneGroup", "Lane"],
+      },
+      {
         id: "time-axis",
         name: "Time axis and calendar",
         sentence: "The two bands, and the operating calendar that cuts the hours the plant does not run out of the axis.",

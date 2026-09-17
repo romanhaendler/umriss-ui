@@ -23,14 +23,14 @@
 export interface LaneNode {
   readonly id: string;
   /** The group it belongs to, or none for a lane at the top level. */
-  readonly parent: string | undefined;
+  readonly parent?: string | undefined;
 }
 
 /** A group, as the layout needs it. A group holding no lane at all is dropped:
     a head with nothing under it says nothing and costs a planner a line. */
 export interface GroupNode {
   readonly id: string;
-  readonly parent: string | undefined;
+  readonly parent?: string | undefined;
 }
 
 export interface RowsInput {
@@ -57,6 +57,11 @@ export interface Row {
   readonly group: string | undefined;
   /** How deep it lies in the tree, for the indent of its header. */
   readonly depth: number;
+  /** The groups it lies inside, outermost first - its own group included where
+      it is one. A group's chevron controls exactly the rows that name it here,
+      which is what lets `aria-controls` point at elements that exist whether
+      the group is open or folded. */
+  readonly within: readonly string[];
   /** How many real lanes lie under it - what a group's header says. */
   readonly lanes: number;
   readonly top: number;
@@ -187,17 +192,33 @@ export function layOutRows(input: RowsInput): Rows {
     for (const g of chain.slice(shared)) {
       open.push(g);
       if (g === folded) break;
-      push({ kind: "groupHead", lane: undefined, group: g, depth: open.length - 1, lanes: (held.get(g) ?? []).length, height: GROUP_HEAD_HEIGHT });
+      push({
+        kind: "groupHead",
+        lane: undefined,
+        group: g,
+        depth: open.length - 1,
+        within: [...open],
+        lanes: (held.get(g) ?? []).length,
+        height: GROUP_HEAD_HEIGHT,
+      });
     }
 
     if (folded !== undefined) {
       const depth = chain.indexOf(folded);
-      const row = push({ kind: "miniature", lane: undefined, group: folded, depth, lanes: (held.get(folded) ?? []).length, height: laneHeight });
+      const row = push({
+        kind: "miniature",
+        lane: undefined,
+        group: folded,
+        depth,
+        within: chain.slice(0, depth + 1),
+        lanes: (held.get(folded) ?? []).length,
+        height: laneHeight,
+      });
       folding = { group: folded, row, lanes: [lane.id] };
       continue;
     }
 
-    push({ kind: "lane", lane: lane.id, group: chain[chain.length - 1], depth: chain.length, lanes: 1, height: laneHeight });
+    push({ kind: "lane", lane: lane.id, group: chain[chain.length - 1], depth: chain.length, within: chain, lanes: 1, height: laneHeight });
     slots.set(lane.id, { top: rows[rows.length - 1]!.top, height: laneHeight, miniature: false });
   }
   closeFold();
