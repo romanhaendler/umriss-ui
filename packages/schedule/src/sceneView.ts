@@ -25,7 +25,7 @@ import {
   type TransportPath,
   type Viewport,
 } from "./geometry";
-import { layOutRows, slotOf, type Rows } from "./rows";
+import { effectiveCollapsed, layOutRows, rowAt, slotOf, type Rows } from "./rows";
 import type { IntentKind, Subtask, Transport, TransportAttachment, TransportEnds, TransportRoute } from "./model";
 import type { SceneData } from "./sceneData";
 import type { SnapRaster } from "./snap";
@@ -79,6 +79,9 @@ export class SceneView {
   rows: Rows = layOutRows({ lanes: [], groups: [], collapsed: new Set(), laneHeight: DEFAULT_LANE_HEIGHT });
   /** The folded groups, as the scene holds them. */
   collapsed: ReadonlySet<string> = new Set();
+  /** The groups a gesture in flight holds open. Dropped when it ends; the
+      caller's list never learns of it. */
+  openForGesture: ReadonlySet<string> = new Set();
   boxes: SubtaskBox[] = [];
   boxById = new Map<string, SubtaskBox>();
   paths: TransportPath[] = [];
@@ -127,7 +130,7 @@ export class SceneView {
     this.rows = layOutRows({
       lanes: this.data.lanes,
       groups: this.data.groups,
-      collapsed: this.collapsed,
+      collapsed: effectiveCollapsed(this.collapsed, this.openForGesture),
       laneHeight: this.options.laneHeight,
     });
     this.scrollY = Math.max(0, Math.min(this.maxScroll(), this.scrollY));
@@ -204,6 +207,25 @@ export class SceneView {
 
   laneIdAt(y: number): string | null {
     return laneAt(this.viewport(), y);
+  }
+
+  /** The lane a DROP at this y would land on.
+
+      A **Miniature** is no drop target. A strip is three pixels of a machine's
+      whole day, and a drop aimed at one would be a guess; resting over the
+      group opens it for the gesture instead, and then there is a real lane to
+      aim at. Hover, the tooltip and selection do read a strip - they cost
+      nothing if they are a pixel out. */
+  dropLaneIdAt(y: number): string | null {
+    const row = rowAt(this.rows, y + this.scrollY);
+    if (row === null || row.kind !== "lane") return null;
+    return row.lane ?? null;
+  }
+
+  /** The folded group a y lies over, or null. */
+  foldedGroupAt(y: number): string | null {
+    const row = rowAt(this.rows, y + this.scrollY);
+    return row !== null && row.kind === "miniature" ? (row.group ?? null) : null;
   }
 
   /** Pans by pixels. Says what moved: the span through time, the lanes, or
