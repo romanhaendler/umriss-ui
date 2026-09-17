@@ -165,10 +165,47 @@ test("the demonstration: a right-click opens the context menu, and an entry chan
   const menuBox = (await menu.boundingBox())!;
   expect(Math.abs(menuBox.x - plot.x(13))).toBeLessThan(12);
 
-  await menu.getByRole("menuitem", { name: "Later by a quarter hour" }).click();
+  await menu.getByRole("menuitem", { name: "Later by a quarter hour", exact: true }).click();
   await expect(menu).toHaveCount(0);
   await expect(example.locator("[data-intent-log]")).toContainText("move a-2043-3");
   /* Later by a quarter hour the transport fits - and the teardown now reaches
      into the flange's setup: the fix of one finding is visible as the next. */
   await expect(summary).toHaveText("2 overlaps, 0 late transports");
+});
+
+test("a drag on the shift raster lands on a shift change", async ({ page }) => {
+  await openExample(page, "intent", "snapping");
+  const example = page.locator('[data-example="snapping"]');
+  /* The curing runs 06:00 to 14:00; the upper schedule shows 04:00 to
+     midnight and snaps to 06:00, 14:00, 22:00. */
+  const plot = await plotOf(page, example, [at(4), at(24)], 110 - 56);
+
+  await page.mouse.move(plot.x(10), plot.y(0));
+  await page.mouse.down();
+  await page.mouse.move(plot.x(16), plot.y(0), { steps: 8 });
+  /* Six hours of pointer become eight: the raster decides, not the pointer. */
+  await expect(example.locator("[data-ghost]").first()).toContainText("14:00–22:00");
+  await page.mouse.up();
+
+  await page.mouse.move(plot.x(18), plot.y(0));
+  await expect(example.locator("[data-schedule-tooltip]").first()).toContainText("14:00–22:00");
+});
+
+test("the demonstration shifts a whole order through one intent per stop", async ({ page }) => {
+  await openExample(page, "intent", "demonstration");
+  const example = page.locator('[data-example="demonstration"]');
+  const plot = await plotOf(page, example, DAY_OF_PLAN);
+  const summary = example.locator("[data-findings-summary]");
+  await expect(summary).toHaveText("1 overlap, 1 late transport");
+
+  await page.mouse.click(plot.x(13), plot.y(LANES.paint), { button: "right" });
+  const menu = page.getByRole("menu", { name: "Actions for a-2043-3" });
+  await menu.getByRole("menuitem", { name: "The whole order later by a quarter hour" }).click();
+
+  const log = example.locator("[data-intent-log]");
+  for (const stop of ["a-2043-1", "a-2043-2", "a-2043-3"]) await expect(log).toContainText(`move ${stop}`);
+  /* Every stop moved by the same amount, so the transports still fit as they
+     did - the late one is still late, and the teardown now reaches into the
+     flange's setup. */
+  await expect(summary).toHaveText("2 overlaps, 1 late transport");
 });

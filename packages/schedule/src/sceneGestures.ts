@@ -14,7 +14,7 @@ import { occupied, type Intent, type Subtask } from "./model";
 import type { SceneData } from "./sceneData";
 import { ghostBox, type GhostDrawing } from "./sceneDraw";
 import type { ScheduleHit, SceneView } from "./sceneView";
-import { snapTime } from "./snap";
+import { snapTime, type SnapRaster } from "./snap";
 
 /** A pointer interaction, reported with its target and its position. */
 export interface ScheduleInteraction {
@@ -64,6 +64,21 @@ type Gesture =
      auto-pan moves the scale under a drag in flight. */
   | { kind: "edit"; pointerId: number; mode: EditMode; subtask: Subtask; t0: number; ghost: Subtask }
   | { kind: "pinch"; distance: number };
+
+/** What the pointer is on, as one comparable value: hover is drawn and
+    reported when this changes, not on every movement. */
+function keyOf(hit: ScheduleHit): string {
+  switch (hit.kind) {
+    case "subtask":
+      return `subtask:${hit.subtask.id}:${hit.part}`;
+    case "transport":
+      return `transport:${hit.transport.id}`;
+    case "lane":
+      return `lane:${hit.lane}`;
+    default:
+      return "nothing";
+  }
+}
 
 /** Movement below which a press is a click. */
 const CLICK_SLOP = 3;
@@ -287,6 +302,18 @@ export class SceneGestures {
     this.gesture = { kind: "none" };
   }
 
+  /** Reads the hover anew where the pointer already is - after the data
+      changed under it. A drop that moves a subtask changes what lies under the
+      pointer without the pointer moving, and a tooltip still naming the old
+      times would be a lie. Nothing is reported: no interaction happened. */
+  refreshHover(): void {
+    if (!this.idle || this.hoverKey === "nothing") return;
+    const { x, y } = this.hoverPoint;
+    const hit = this.host.view.hitAt(x, y);
+    this.hover = hit;
+    this.hoverKey = keyOf(hit);
+  }
+
   pointerLeave(): void {
     if (this.gesture.kind !== "none") return;
     this.setHover({ kind: "nothing" }, "nothing");
@@ -347,14 +374,7 @@ export class SceneGestures {
 
   private hoverAt(clientX: number, clientY: number, x: number, y: number): void {
     const hit = this.host.view.hitAt(x, y);
-    const key =
-      hit.kind === "subtask"
-        ? `subtask:${hit.subtask.id}:${hit.part}`
-        : hit.kind === "transport"
-          ? `transport:${hit.transport.id}`
-          : hit.kind === "lane"
-            ? `lane:${hit.lane}`
-            : "nothing";
+    const key = keyOf(hit);
     const { mode } = this.modeAt(x, y);
     this.setCursor(mode === "move" ? "grab" : mode === "stretch-from" || mode === "stretch-to" ? "ew-resize" : "default");
     this.hoverPoint = { x, y };
@@ -394,9 +414,11 @@ export class SceneGestures {
   /* Ghost and intents                                                 */
   /* ---------------------------------------------------------------- */
 
-  private snapStep(): number {
+  private snapStep(): SnapRaster {
     const snap = this.host.view.options.snap;
-    return snap === "ticks" ? this.host.view.step() : snap === false ? 0 : snap;
+    if (snap === "ticks") return { step: this.host.view.step(), offset: 0 };
+    if (snap === false) return { step: 0, offset: 0 };
+    return typeof snap === "number" ? { step: snap, offset: 0 } : snap;
   }
 
   private ghostFor(gesture: Extract<Gesture, { kind: "edit" }>, x: number, y: number): Subtask {
@@ -423,9 +445,9 @@ export class SceneGestures {
         return { ...s, from, to: from + (s.to - s.from), lane };
       }
       case "stretch-from":
-        return { ...s, from: Math.min(at, s.to - Math.max(step, 60_000)) };
+        return { ...s, from: Math.min(at, s.to - Math.max(step.step, 60_000)) };
       case "stretch-to":
-        return { ...s, to: Math.max(at, s.from + Math.max(step, 60_000)) };
+        return { ...s, to: Math.max(at, s.from + Math.max(step.step, 60_000)) };
       case "setup":
         return { ...s, setup: Math.max(0, s.from - at) };
       case "teardown":
@@ -436,7 +458,7 @@ export class SceneGestures {
   /** Snapped - and, where the raster lands in time the calendar removes, moved
       on to the seam, where time counts again. An intent never asks for a time
       the plant does not run. */
-  private snapInside(time: number, step: number): number {
+  private snapInside(time: number, step: SnapRaster): number {
     const snapped = snapTime(time, step);
     const calendar = calendarFrom(this.host.view.options.calendar);
     if (calendar.intervals.length === 0) return snapped;
