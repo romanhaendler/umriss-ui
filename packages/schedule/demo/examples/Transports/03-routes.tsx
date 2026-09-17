@@ -1,14 +1,14 @@
 import { Stack, Text } from "@umriss-ui/core";
 import { Lane, Schedule, Subtasks, Transports } from "../../../src";
-import type { Subtask, Task, Transport, TransportAnchor, TransportEnds, TransportRoute } from "../../../src";
+import type { Subtask, Task, Transport, TransportAttachment, TransportEnds, TransportRoute } from "../../../src";
 
 export const title = "How a line is drawn";
 
-/* The same four stops, drawn four ways. `route` gives the shape and `anchor`
+/* The same four stops, drawn four ways. `route` gives the shape and `attach`
    the place on the bar where a line begins and ends; both are options of the
    schedule, and a transport may say otherwise for itself.
 
-   `anchor="nearest"` is the interesting one: a line leaves the edge of the bar
+   `attach="nearest"` is the interesting one: a line leaves the edge of the bar
    that faces its destination - the lower edge when the next stop lies below,
    the upper one when it lies above - so a five-minute move between two
    neighbouring lanes is drawn as the short line it is instead of swinging out
@@ -37,22 +37,22 @@ const STEPS: Subtask[] = [
 const MOVES: Transport[] = [
   { id: "to-mill", from: "saw", to: "mill", duration: min(20) },
   { id: "to-press", from: "mill", to: "press", duration: min(20) },
-  /* Back up to the saw's lane: the anchor decides which edges this one meets. */
+  /* Back up to the saw's lane: the attach decides which edges this one meets. */
   { id: "to-check", from: "press", to: "check", duration: min(20) },
 ];
 
-function Variant({ route, anchor, ends = "dot" }: { route: TransportRoute; anchor: TransportAnchor; ends?: TransportEnds }) {
+function Variant({ route, attach, ends = "dot" }: { route: TransportRoute; attach: TransportAttachment; ends?: TransportEnds }) {
   return (
     <Stack gap={1}>
       <Text size="xs" tone="muted" mono>
-        route=&quot;{route}&quot; anchor=&quot;{anchor}&quot; ends=&quot;{ends}&quot;
+        route=&quot;{route}&quot; attach=&quot;{attach}&quot; ends=&quot;{ends}&quot;
       </Text>
       <Schedule
-        ariaLabel={`A frame through three stations, drawn ${route} from the ${anchor}`}
+        ariaLabel={`A frame through three stations, drawn ${route} from the ${attach}`}
         initialDomain={[at(6, 30), at(13, 30)]}
         height={190}
         route={route}
-        anchor={anchor}
+        attach={attach}
         ends={ends}
       >
         <Lane id="saw" label="Saw" />
@@ -68,11 +68,11 @@ function Variant({ route, anchor, ends = "dot" }: { route: TransportRoute; ancho
 export default function Routes() {
   return (
     <Stack gap={4}>
-      <Variant route="curve" anchor="centre" />
-      <Variant route="curve" anchor="nearest" />
-      <Variant route="straight" anchor="nearest" />
-      <Variant route="orthogonal" anchor="nearest" />
-      <Variant route="straight" anchor="nearest" ends="none" />
+      <Variant route="curve" attach="centre" />
+      <Variant route="curve" attach="nearest" />
+      <Variant route="straight" attach="nearest" />
+      <Variant route="orthogonal" attach="nearest" />
+      <Variant route="straight" attach="nearest" ends="none" />
     </Stack>
   );
 }

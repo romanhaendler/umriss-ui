@@ -339,10 +339,13 @@ export class SceneGestures {
       if (dx === 0 && dy === 0) return;
       const panned = view.pan(dx, dy);
       if (!panned.moved) return;
-      this.gesture =
-        gesture.kind === "edit"
-          ? { ...gesture, ghost: this.ghostFor(gesture, x, y) }
-          : { ...gesture, ghost: this.placeGhost(gesture.item, x, y) ?? gesture.ghost };
+      if (gesture.kind === "edit") {
+        this.gesture = { ...gesture, ghost: this.ghostFor(gesture, x, y) };
+      } else {
+        const wanted = this.placeGhost(gesture.item, x, y);
+        this.refused = wanted.refused;
+        this.gesture = { ...gesture, ghost: wanted.ghost ?? gesture.ghost };
+      }
       this.host.viewMoved(panned.time);
       this.panFrame = requestAnimationFrame(step);
     };
@@ -488,7 +491,12 @@ export class SceneGestures {
     }
     event.preventDefault();
     if (event.dataTransfer !== null) event.dataTransfer.dropEffect = "copy";
-    const ghost = this.placeGhost(placing, x, y);
+    const wanted = this.placeGhost(placing, x, y);
+    this.refused = wanted.refused;
+    /* Refused, and the drag already stands somewhere allowed: the ghost stays
+       there and says why, exactly as a drag inside the plot does. */
+    const standing = this.gesture.kind === "place" ? this.gesture.ghost : null;
+    const ghost = wanted.ghost ?? (wanted.refused ? standing : null);
     if (ghost === null) return;
     this.lastClient = { x: event.clientX, y: event.clientY };
     this.gesture = { kind: "place", ghost, item: placing };
@@ -499,27 +507,27 @@ export class SceneGestures {
     this.autoPan();
   }
 
-  /** The ghost of a drag from outside at a point on the plot, or null off the
-      lanes. */
-  private placeGhost(placing: PlacingItem, x: number, y: number): Subtask | null {
-    const wanted = this.host.view.laneIdAt(Math.max(0, Math.min(this.host.view.lanesBottom(), y)));
-    if (wanted === null) return null;
+  /** The ghost of a drag from outside at a point on the plot: none off the
+      lanes, and none where the caller refuses that lane - which the answer
+      says apart, because the two mean different things to the drag. */
+  private placeGhost(placing: PlacingItem, x: number, y: number): { ghost: Subtask | null; refused: boolean } {
+    const lane = this.host.view.laneIdAt(Math.max(0, Math.min(this.host.view.lanesBottom(), y)));
+    if (lane === null) return { ghost: null, refused: false };
     const from = this.snapInside(this.host.view.timeAt(x), this.snapStep());
     const asked: Subtask = {
       /* The caller's key for the dragged item, not the internal sentinel: the
          rule is asked about the thing the application is dragging. */
       id: placing.item,
       task: placing.task,
-      lane: wanted,
+      lane,
       from,
       to: from + placing.duration,
       ...(placing.setup === undefined ? {} : { setup: placing.setup }),
       ...(placing.teardown === undefined ? {} : { teardown: placing.teardown }),
     };
     /* Work dragged in may not land where placed work may not go either. */
-    this.refused = !this.allowed(asked, wanted);
-    if (this.refused) return null;
-    return { ...asked, id: PLACING };
+    if (!this.allowed(asked, lane)) return { ghost: null, refused: true };
+    return { ghost: { ...asked, id: PLACING }, refused: false };
   }
 
   /** The drop: the place intent, and the ghost goes. Off every lane, or with

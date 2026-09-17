@@ -25,7 +25,7 @@ import {
   type TransportPath,
   type Viewport,
 } from "./geometry";
-import type { IntentKind, Subtask, Transport, TransportAnchor, TransportEnds, TransportRoute } from "./model";
+import type { IntentKind, Subtask, Transport, TransportAttachment, TransportEnds, TransportRoute } from "./model";
 import type { SceneData } from "./sceneData";
 import type { SnapRaster } from "./snap";
 import { days, fineStep, fineTicks, panDomain, zoomDomain, type ZoomLimits } from "./timeAxis";
@@ -47,7 +47,7 @@ export interface SceneOptions {
   readonly now: number | null;
   /** How the transports are drawn, where one does not say otherwise. */
   readonly route: TransportRoute;
-  readonly anchor: TransportAnchor;
+  readonly attach: TransportAttachment;
   readonly ends: TransportEnds;
 }
 
@@ -65,7 +65,7 @@ export class SceneView {
     intents: [],
     now: null,
     route: "curve",
-    anchor: "centre",
+    attach: "centre",
     ends: "dot",
   };
   domain: [number, number] = [0, DAY];
@@ -209,8 +209,8 @@ export class SceneView {
   zoomAt(x: number, factor: number): boolean {
     if (this.width <= 0 || !Number.isFinite(factor)) return false;
     const before = this.domain;
-    const anchor = this.viewport().scale.fromPx(x);
-    this.domain = zoomDomain(this.domain, anchor, factor, this.options.zoomLimits);
+    const attach = this.viewport().scale.fromPx(x);
+    this.domain = zoomDomain(this.domain, attach, factor, this.options.zoomLimits);
     return before[0] !== this.domain[0] || before[1] !== this.domain[1];
   }
 }

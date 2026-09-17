@@ -8,7 +8,17 @@
 
 import { resolveColours, removedIntervals } from "@umriss-ui/charts";
 import type { LateTransport, Overlap } from "./findings";
-import { laneTop, subtaskBox, transportPath, xOf, type SubtaskBox, type TransportPath, type Viewport } from "./geometry";
+import {
+  barRect,
+  inView,
+  laneTop,
+  subtaskBox,
+  transportPath,
+  xOf,
+  type SubtaskBox,
+  type TransportPath,
+  type Viewport,
+} from "./geometry";
 import { resolveAppearance } from "./appearance";
 import type { Subtask } from "./model";
 import type { SceneData } from "./sceneData";
@@ -45,19 +55,31 @@ export function resolveSceneColours(root: Element, data: SceneData): Colours {
   };
 }
 
-/** Whether a colour is dark enough that text on it should be light.
-
-    The sRGB relative luminance of the resolved colour - the canvas gets a
-    value like "rgb(37, 99, 235)" back from the theme, and a label lying on it
-    has to be readable in both schemes without a caller saying so. */
-export function isDark(colour: string): boolean {
+/** The three channels of a resolved colour, or null where it is not one the
+    theme resolved - the canvas gets values like "rgb(37, 99, 235)" back, and
+    two places here have to take them apart. */
+function channels(colour: string): [number, number, number] | null {
   const parts = colour.match(/[\d.]+/g);
-  if (parts === null || parts.length < 3) return true;
-  const [r, g, b] = parts.slice(0, 3).map((part) => {
-    const channel = Number(part) / 255;
+  if (parts === null || parts.length < 3) return null;
+  return [Number(parts[0]), Number(parts[1]), Number(parts[2])];
+}
+
+/** Below this luminance a colour counts as dark and text on it is set light.
+    It lies above the middle on purpose: a mid-blue carries white better than
+    it carries black. */
+const DARK_BELOW = 0.45;
+
+/** Whether a colour is dark enough that text on it should be light - the sRGB
+    relative luminance, so that a label reads in both schemes without a caller
+    saying so. */
+export function isDark(colour: string): boolean {
+  const rgb = channels(colour);
+  if (rgb === null) return true;
+  const [r, g, b] = rgb.map((value) => {
+    const channel = value / 255;
     return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
   }) as [number, number, number];
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b < 0.45;
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b < DARK_BELOW;
 }
 
 /** Sizes a canvas to the plot at the device's pixel ratio and clears it. */
@@ -208,16 +230,16 @@ function drawNow(ctx: CanvasRenderingContext2D, input: DrawInput): void {
 
 function drawSubtask(ctx: CanvasRenderingContext2D, input: DrawInput, box: SubtaskBox, alpha: number): void {
   const { view, colours } = input;
-  if (box.outerTo < 0 || box.outerFrom > view.width || box.y + box.height < 0 || box.y > view.height) return;
+  if (!inView(box, view.width, view.height)) return;
   const look = resolveAppearance(box.subtask.appearance);
   const colour = colours.tasks.get(box.subtask.task) ?? colours.muted;
 
   /* Muted is drawn SLIM, not faint: a faint bar would read as a setup, which
      is exactly what a faint fill means everywhere else in this picture. Half
      the height, the whole colour - another shift's work, unmistakably lesser
-     and unmistakably not a setup. */
-  const height = look.muted ? Math.max(7, Math.round(box.height / 2)) : box.height;
-  const top = look.muted ? box.y + Math.round((box.height - height) / 2) : box.y;
+     and unmistakably not a setup. The rule stands in `geometry.ts`, because a
+     bar's label has to lie on the bar as it is drawn. */
+  const { top, height } = barRect(box);
 
   ctx.fillStyle = colour;
   ctx.strokeStyle = colour;
@@ -275,6 +297,11 @@ function drawSubtask(ctx: CanvasRenderingContext2D, input: DrawInput, box: Subta
   }
 }
 
+/** The distance between two lines of the hatch, and how far a bar that runs on
+    fades into the surface - both in pixels. */
+const HATCH_STEP = 7;
+const FADE_SPAN = 16;
+
 /** Diagonal lines in the surface colour, clipped to the main time: the mark of
     work that may not be moved. */
 function hatch(
@@ -294,7 +321,7 @@ function hatch(
   ctx.strokeStyle = surface;
   ctx.lineWidth = 2;
   ctx.beginPath();
-  for (let x = from - height; x < from + width + height; x += 7) {
+  for (let x = from - height; x < from + width + height; x += HATCH_STEP) {
     ctx.moveTo(x, top + height);
     ctx.lineTo(x + height, top);
   }
@@ -316,7 +343,7 @@ function fadeEnd(
 ): void {
   const end = Math.min(box.mainTo, plotWidth);
   const width = Math.max(1, end - box.mainFrom);
-  const span = Math.min(16, width);
+  const span = Math.min(FADE_SPAN, width);
   const gradient = ctx.createLinearGradient(end - span, 0, end, 0);
   gradient.addColorStop(0, withAlpha(surface, 0));
   gradient.addColorStop(1, withAlpha(surface, 1));
@@ -328,10 +355,9 @@ function fadeEnd(
 /** A resolved colour with an alpha of its own. The theme hands back
     "rgb(…)" or "rgba(…)"; a gradient needs both ends as real colours. */
 function withAlpha(colour: string, alpha: number): string {
-  const parts = colour.match(/[\d.]+/g);
-  if (parts === null || parts.length < 3) return colour;
-  const [r, g, b] = parts;
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  const rgb = channels(colour);
+  if (rgb === null) return colour;
+  return `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha})`;
 }
 
 function drawTransport(ctx: CanvasRenderingContext2D, input: DrawInput, path: TransportPath, emphasised: boolean, late?: boolean): void {
