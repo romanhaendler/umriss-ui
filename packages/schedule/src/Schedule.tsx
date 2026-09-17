@@ -128,11 +128,12 @@ export function Schedule(props: ScheduleProps): ReactNode {
   const limitMax = zoomLimits?.max ?? DEFAULT_LIMITS.max;
   const lastDomain = useRef<string | null>(null);
 
-  /* `now={true}` follows the clock: read at mount, then once a minute. */
+  /* `now={true}` follows the clock: read at mount, then once a minute. A
+     schedule that switches `now` on later shows the clock of its mount until
+     the next minute - no second render just for that. */
   const [clock, setClock] = useState(() => Date.now());
   useEffect(() => {
     if (now !== true) return;
-    setClock(Date.now());
     const timer = setInterval(() => setClock(Date.now()), 60_000);
     return () => clearInterval(timer);
   }, [now]);
