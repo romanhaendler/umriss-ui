@@ -21,7 +21,7 @@ import {
   type Viewport,
 } from "./geometry";
 import { resolveAppearance, type ResolvedAppearance } from "./appearance";
-import { slotOf } from "./rows";
+import { rowAt, slotOf } from "./rows";
 import type { Subtask } from "./model";
 import type { SceneData } from "./sceneData";
 import type { ScheduleHit, SceneView } from "./sceneView";
@@ -264,6 +264,19 @@ function drawGrid(ctx: CanvasRenderingContext2D, input: DrawInput, viewport: Vie
     ctx.moveTo(0, y);
     ctx.lineTo(width, y);
   }
+  /* Inside a folded group, a hairline where one inner group ends and the next
+     begins: a miniature is the plant at a smaller scale, and the structure is
+     part of the plant. */
+  for (const [lane, slot] of viewport.rows.slots) {
+    if (!slot.miniature) continue;
+    const next = [...viewport.rows.slots].find(([, other]) => other.miniature && other.top === slot.top + slot.height);
+    if (next === undefined || next[1].group === slot.group) continue;
+    void lane;
+    const y = slot.top + slot.height - viewport.scrollY - 0.5;
+    if (y < 0 || y > height) continue;
+    ctx.moveTo(0, y);
+    ctx.lineTo(width, y);
+  }
   ctx.stroke();
   ctx.strokeStyle = colours.lineStrong;
   ctx.beginPath();
@@ -297,6 +310,30 @@ function drawNow(ctx: CanvasRenderingContext2D, input: DrawInput): void {
   if (x === null) return;
   ctx.fillStyle = input.colours.accent;
   ctx.fillRect(x, 0, 2, input.view.height);
+}
+
+/** A bar on a strip of a **Miniature**: the main time in the task's colour,
+    the setup and the teardown faint, and nothing else.
+
+    Nothing else on purpose. A folded group is a change of SCALE and not a
+    second kind of picture, and at three or four pixels an appearance, a label
+    or a progress rail would be a mark nobody can read - or worse, one somebody
+    misreads. What a strip promises is where the work is and whose it is; the
+    rest is what unfolding is for (ADR-0025). */
+function drawStrip(ctx: CanvasRenderingContext2D, input: DrawInput, box: SubtaskBox, alpha: number): void {
+  const colour = input.colours.tasks.get(box.subtask.task) ?? input.colours.muted;
+  ctx.fillStyle = colour;
+  for (const [from, to] of [
+    [box.outerFrom, box.mainFrom],
+    [box.mainTo, box.outerTo],
+  ] as const) {
+    if (to <= from) continue;
+    ctx.globalAlpha = 0.28 * alpha;
+    ctx.fillRect(from, box.y, to - from, box.height);
+  }
+  ctx.globalAlpha = alpha;
+  ctx.fillRect(box.mainFrom, box.y, Math.max(1, box.mainTo - box.mainFrom), box.height);
+  ctx.globalAlpha = 1;
 }
 
 /** What a bar's face actually is, once its appearance has had its say - and
@@ -376,6 +413,10 @@ const RAIL_INSET = 2;
 function drawSubtask(ctx: CanvasRenderingContext2D, input: DrawInput, box: SubtaskBox, alpha: number): void {
   const { view, colours } = input;
   if (!inView(box, view.width, view.height)) return;
+  if (box.miniature) {
+    drawStrip(ctx, input, box, alpha);
+    return;
+  }
   const look = resolveAppearance(box.subtask.appearance);
   const colour = colours.tasks.get(box.subtask.task) ?? colours.muted;
   const face = barFace(look, colour, colours);
@@ -600,12 +641,19 @@ function drawOverlap(ctx: CanvasRenderingContext2D, input: DrawInput, viewport: 
   if (slot === null) return;
   const x0 = xOf(viewport, overlap.from);
   const x1 = Math.max(x0 + 2, xOf(viewport, overlap.to));
-  const top = slot.top;
   ctx.fillStyle = input.colours.alarm;
   ctx.globalAlpha = 0.14;
-  ctx.fillRect(x0, top + 1, x1 - x0, slot.height - 2);
+  ctx.fillRect(x0, slot.top + 1, x1 - x0, Math.max(1, slot.height - 2));
   ctx.globalAlpha = 1;
-  ctx.fillRect(x0, top + 1, x1 - x0, 3);
+  ctx.fillRect(x0, slot.top + 1, x1 - x0, Math.min(3, Math.max(1, slot.height - 1)));
+  /* Inside a folded group the mark goes on the ROW as well. Folding is a
+     planner tidying the view; it must never be a planner hiding a finding
+     (ADR-0025), and a three-pixel strip is not where an alarm can live
+     alone. */
+  if (slot.miniature) {
+    const row = rowAt(viewport.rows, slot.top + viewport.scrollY);
+    if (row !== null) ctx.fillRect(x0, row.top - viewport.scrollY + 1, x1 - x0, 3);
+  }
 }
 
 /** Hover is a WASH over the bar; selection is an outline. Two different kinds

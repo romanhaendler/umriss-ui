@@ -647,7 +647,9 @@ test("hovering a selected bar still shows something, because the two are differe
 
   await page.mouse.move(plot.x(7), plot.y("press"));
   await expect(example.locator("[data-schedule-tooltip]")).toBeVisible();
-  expect(await distanceFrom(example, "overlay", onBar, before)).toBeGreaterThan(10);
+  /* Polled: the overlay is redrawn in a frame of its own, and under load that
+     frame can arrive after the tooltip's element does. */
+  await expect.poll(async () => await distanceFrom(example, "overlay", onBar, before)).toBeGreaterThan(10);
 
   /* And it goes when the pointer does. */
   await page.mouse.move(plot.box.x + 4, plot.box.y + 4);
@@ -825,4 +827,110 @@ test("a subtask on a folded lane is drawn on no other row", async ({ page }) => 
       height: 8,
     }),
   ).toBeLessThan(0.05);
+});
+
+/* ------------------------------------------------------------------ */
+/* The miniature (schedule-lane-groups 09)                              */
+/* ------------------------------------------------------------------ */
+
+/** The miniature's row of the example, in plot coordinates. It has no
+    `data-lane`, so it is found by its group. */
+async function miniatureOf(example: Locator, group: string): Promise<{ top: number; height: number }> {
+  return await example.locator("[data-schedule-headers]").first().evaluate((headers, id) => {
+    let top = 0;
+    for (const node of headers.querySelectorAll("[data-row]")) {
+      const height = node.getBoundingClientRect().height;
+      if (node.getAttribute("data-group") === id && node.getAttribute("data-row") === "miniature") return { top, height };
+      top += height;
+    }
+    throw new Error(`no folded group \`${id}\` here`);
+  }, group);
+}
+
+test("a folded group draws the work of every lane in it", async ({ page }) => {
+  await openExample(page, "lane-groups", "the-miniature");
+  const example = page.locator('[data-example="the-miniature"]');
+  const plot = await plotOf(page, example, [at(6), at(16)]);
+  const row = await miniatureOf(example, "hall");
+
+  /* The lathe runs 07:00 to 09:00 and the mill 09:00 to 11:30 - two lanes, two
+     strips, one above the other inside the one row. */
+  const upper = { x: Math.round(plot.x(8) - plot.box.x), y: row.top + row.height * 0.3, width: 12, height: 3 };
+  const lower = { x: Math.round(plot.x(10) - plot.box.x), y: row.top + row.height * 0.7, width: 12, height: 3 };
+  expect(await paintedShare(example, "data", upper)).toBe(1);
+  expect(await paintedShare(example, "data", lower)).toBe(1);
+  /* And each keeps its own hours: at 10:00 the lathe is done, so its strip is
+     empty there but for the grid's time ticks, which run the height of the
+     plot behind everything. */
+  expect(await paintedShare(example, "data", { ...upper, x: lower.x })).toBeLessThan(0.2);
+});
+
+test("a transport into a folded group arrives at the strip of its lane", async ({ page }) => {
+  await openExample(page, "lane-groups", "the-miniature");
+  const example = page.locator('[data-example="the-miniature"]');
+  const plot = await plotOf(page, example, [at(6), at(16)]);
+  const row = await miniatureOf(example, "hall");
+
+  /* The housing leaves the saw at 08:15 and reaches the mill's setup at 08:30.
+     The mill is the LOWER of the two strips, so the line has to come down past
+     the middle of the row - not stop at its top edge, which is where a lane
+     index would have put it. */
+  const between = {
+    x: Math.round(plot.x(8, 30) - plot.box.x) - 6,
+    y: Math.round(row.top + row.height * 0.55),
+    width: 12,
+    height: 6,
+  };
+  expect(await painted(example, "data", between)).toBeGreaterThan(0);
+});
+
+test("a finding inside a folded group is marked on its row", async ({ page }) => {
+  await openExample(page, "lane-groups", "the-miniature");
+  const example = page.locator('[data-example="the-miniature"]');
+  const plot = await plotOf(page, example, [at(6), at(16)]);
+  const row = await miniatureOf(example, "hall");
+
+  /* The two orders claim the mill from 10:45 to 11:30. A three-pixel strip is
+     not where an alarm can live alone, so the mark goes on the ROW as well -
+     folding is a planner tidying the view, never a planner hiding a finding. */
+  const onRow = { x: Math.round(plot.x(11) - plot.box.x), y: row.top + 1, width: 10, height: 3 };
+  const quiet = { ...onRow, x: Math.round(plot.x(7) - plot.box.x) };
+  expect(await paintedShare(example, "data", onRow)).toBe(1);
+  /* An hour where nothing overlaps carries nothing there but the grid's ticks,
+     and in a different colour: the mark is the danger tone. */
+  expect(await paintedShare(example, "data", quiet)).toBeLessThan(0.2);
+  expect(await colour(example, "data", { x: onRow.x, y: onRow.y + 1 })).not.toBe(
+    await colour(example, "data", { x: quiet.x, y: quiet.y + 1 }),
+  );
+});
+
+test("a strip can be hovered and selected, and carries neither label nor grips", async ({ page }) => {
+  await openExample(page, "lane-groups", "the-miniature");
+  const example = page.locator('[data-example="the-miniature"]');
+  const plot = await plotOf(page, example, [at(6), at(16)]);
+  const row = await miniatureOf(example, "hall");
+  const onMill = { x: plot.box.x + plot.x(10) - plot.box.x, y: plot.box.y + row.top + row.height * 0.7 };
+
+  /* Folding costs detail, never access: the tooltip names the stop. */
+  await page.mouse.move(onMill.x, onMill.y);
+  await expect(example.locator("[data-schedule-tooltip]")).toContainText("A-2041 Housing");
+
+  /* And a click takes its whole task, here across a folded group and the saw
+     outside it: the saw's bar gains an outline it did not have. */
+  const edgeOfSaw = {
+    x: Math.round(plot.x(7) - plot.box.x),
+    y: plot.row("saw").top + 6,
+    width: 10,
+    height: 6,
+  };
+  await page.mouse.move(plot.box.x + 4, plot.box.y + 4);
+  const before = await painted(example, "data", edgeOfSaw);
+  await page.mouse.click(onMill.x, onMill.y);
+  await page.mouse.move(plot.box.x + 4, plot.box.y + 4);
+  await expect.poll(async () => await painted(example, "data", edgeOfSaw)).toBeGreaterThan(before);
+
+  /* No grips on a strip - a bar three pixels high is not something to stretch
+     by three pixels - and no label on one either. */
+  await expect(example.locator("[data-grip]")).toHaveCount(0);
+  await expect(example.locator("[data-bar-label]")).toHaveCount(0);
 });

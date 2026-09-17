@@ -300,7 +300,10 @@ export class ScheduleScene {
     const view = this.view;
     const selected = this.selected !== null ? view.boxById.get(this.selected) : undefined;
     const grips: { kind: "setup" | "teardown"; x: number; y: number; height: number }[] = [];
-    if (selected !== undefined && !this.gestures.editing && selected.subtask.task === this.selectedTask) {
+    /* No grips on a strip: a bar three pixels high is not something to stretch
+       by three pixels, and the grips belong to a subtask a planner can see
+       (ADR-0025). */
+    if (selected !== undefined && !selected.miniature && !this.gestures.editing && selected.subtask.task === this.selectedTask) {
       if (view.options.intents.includes("setup")) grips.push({ kind: "setup", x: selected.outerFrom, y: selected.y, height: selected.height });
       if (view.options.intents.includes("teardown")) grips.push({ kind: "teardown", x: selected.outerTo, y: selected.y, height: selected.height });
     }
