@@ -1,6 +1,6 @@
 # Decisions
 
-Nineteen decisions, each one written where it was made and kept afterwards. An
+Twenty-one decisions, each one written where it was made and kept afterwards. An
 ADR here is not an announcement: it states the question, the alternatives that
 were real at the time, and what the decision costs — which is what makes it
 worth reading a year later, when the code has changed and the reasoning has not.
@@ -33,5 +33,7 @@ half a later reader needs most. Exactly one is superseded today.
 | [0017](0017-columns-are-declared-by-composition.md) | Columns are declared by composition and bound through the hook | accepted | architecture |
 | [0018](0018-everything-is-english.md) | Everything is English | accepted — supersedes ADR-0015 | language |
 | [0019](0019-two-wordings-ship-english-is-the-default.md) | Two wordings ship, and English is the default | accepted | language |
+| [0020](0020-the-demo-shell-is-shared.md) | The demo shell is shared by all three demos, and R-1.2 binds the package source | accepted | architecture |
+| [0021](0021-the-styles-load-themselves-and-touch-nothing-else.md) | The styles load themselves, and they touch nothing else | accepted | architecture |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).
