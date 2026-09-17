@@ -625,11 +625,16 @@ What a place a drag may not land in answers with, drawn in material and edge
 rather than in a warning colour and said once in words. The **Dock** refuses a
 **Resting place** it does not fit into: the outline it would have there, and a
 line in the status line. The **Schedule** refuses a **Lane** a **Subtask** may
-not go to: the **Ghost** stays on the last lane that was allowed and its label
-says so. Neither is an error — a wide, flat host with no room for a standing
-dock is nobody's mistake, and a mould that fits one press is nobody's either —
-which is why a refusal is neither a warning nor an alarm, and why the place is
-never travelled to and then corrected.
+not go to, and says so before the pointer arrives: the lanes that are closed
+are drawn back and hatched from the first frame of the drag, their headers with
+them; over one of them the cursor says no, the **Ghost** stays on the last lane
+that was allowed, and a hairline ties it to the pointer it is not following, so
+that a held ghost is not read as a stuck one. Neither is an error — a wide, flat
+host with no room for a standing dock is nobody's mistake, and a mould that fits
+one press is nobody's either — which is why a refusal is neither a warning nor
+an alarm, and why the place is never travelled to and then corrected. And a
+refusal costs only what it refuses: a drop after a refused lane still reports
+the move in time.
 _Avoid_: error, Fehler, warning, invalid, rejection
 
 ### Tables
