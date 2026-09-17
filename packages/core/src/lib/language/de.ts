@@ -1,4 +1,5 @@
-/* The German wording, shipped as `@umriss-ui/core/wording/de`.
+/* The German wording and the German formats, shipped as
+   `@umriss-ui/core/wording/de`.
 
    It was the default until the library moved to an English scope, and it is
    kept because it was already written and already reviewed: throwing away a
@@ -15,16 +16,28 @@
    than its English counterpart — and that is accepted as the price of shipping
    two.
 
+   Since ADR-0024 the formats travel with it: the library's default notation is
+   English, and `GERMAN_FORMATS` is the second half of what a German
+   application needs. Both come from one import line, because a language is one
+   decision even though it is two registers.
+
    Use it whole, or entry by entry:
 
-       import { GERMAN_WORDING } from "@umriss-ui/core/wording/de";
+       import { GERMAN_WORDING, GERMAN_FORMATS } from "@umriss-ui/core/wording/de";
 
-       <UmrissProvider language={{ wording: GERMAN_WORDING }}>
+       <UmrissProvider language={{ wording: GERMAN_WORDING, formats: GERMAN_FORMATS }}>
 
    The texts below are unchanged from when they were the default, down to the
    thin spaces. */
 
+import { formatsFor } from "./formats";
+import type { Formats } from "./formats";
 import type { Wording } from "./wording";
+
+/** The German notation: 17.03.2026, 09:05, 1.204,5, "vor 3 Minuten" - and
+    German collation, which files Ä with A. The clock is 24-hour here as it is
+    in the default; that never was a question of language. */
+export const GERMAN_FORMATS: Formats = formatsFor("de-DE");
 
 /** The German instance. Complete, because it is typed `Wording`. */
 export const GERMAN_WORDING: Wording = {

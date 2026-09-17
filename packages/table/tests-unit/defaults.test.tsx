@@ -182,9 +182,9 @@ describe("Export", () => {
     expect(lines[1]).toBe("10;Cirrus;0,5;ja;K-2;2");
   });
 
-  it("without a provider the cell writes German", () => {
+  it("without a provider the cell writes the default notation", () => {
     const { container } = render(<Log />);
-    // The German notation, written by hand - not through the formatter the cell itself uses.
-    expect(cell(container, 0, "amount").textContent).toBe("1.204,5");
+    // The notation written by hand - not through the formatter the cell uses.
+    expect(cell(container, 0, "amount").textContent).toBe("1,204.5");
   });
 });

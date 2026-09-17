@@ -47,7 +47,7 @@ describe("Reopening a later value", () => {
   it("DateTimePicker: Apply gives back the same instant", () => {
     const onChange = vi.fn();
     render(<DateTimePicker value={LATER_0230} onChange={onChange} />);
-    openPanel("25.10.2026, 02:30");
+    openPanel("25/10/2026, 02:30");
     fireEvent.click(screen.getByRole("button", { name: "Apply" }));
     expect((lastValue(onChange) as Date).getTime()).toBe(LATER_0230.getTime());
   });
@@ -55,7 +55,7 @@ describe("Reopening a later value", () => {
   it("DateTimePicker: the earlier one stays the earlier one", () => {
     const onChange = vi.fn();
     render(<DateTimePicker value={EARLIER_0230} onChange={onChange} />);
-    openPanel("25.10.2026, 02:30");
+    openPanel("25/10/2026, 02:30");
     fireEvent.click(screen.getByRole("button", { name: "Apply" }));
     expect((lastValue(onChange) as Date).getTime()).toBe(EARLIER_0230.getTime());
   });
@@ -65,7 +65,7 @@ describe("Reopening a later value", () => {
     // 02:30 CEST to 02:45 CET: the start earlier, the end later.
     const to = new Date("2026-10-25T01:45:00Z");
     render(<DateTimeRangePicker value={{ from: EARLIER_0230, to }} onChange={onChange} presets={[]} />);
-    fireEvent.click(screen.getByRole("button", { name: /25\.10\.2026, 02:30/ }));
+    fireEvent.click(screen.getByRole("button", { name: /25\/10\/2026, 02:30/ }));
     fireEvent.click(screen.getByRole("button", { name: "Apply" }));
     const range = lastValue(onChange) as { from: Date; to: Date };
     expect(range.from.getTime()).toBe(EARLIER_0230.getTime());
@@ -78,7 +78,7 @@ describe("Enter in the time field", () => {
     const onChange = vi.fn();
     const value = new Date(2026, 5, 15, 10, 15);
     render(<DateTimePicker value={value} onChange={onChange} />);
-    openPanel("15.06.2026, 10:15");
+    openPanel("15/06/2026, 10:15");
     fireEvent.keyDown(screen.getByLabelText("Minute"), { key: "Enter" });
     expect(onChange).toHaveBeenCalledTimes(1);
     expect((lastValue(onChange) as Date).getTime()).toBe(value.getTime());

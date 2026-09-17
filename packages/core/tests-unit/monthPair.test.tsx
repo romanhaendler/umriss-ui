@@ -25,14 +25,14 @@ const build = (view: Date) =>
 describe("MonthPair", () => {
   it("shows the left month and the month following it", () => {
     build(new Date(2026, 5, 1));
-    expect(screen.getByText("Juni 2026")).toBeTruthy();
-    expect(screen.getByText("Juli 2026")).toBeTruthy();
+    expect(screen.getByText("June 2026")).toBeTruthy();
+    expect(screen.getByText("July 2026")).toBeTruthy();
   });
 
   it("gets across the turn of the year", () => {
     build(new Date(2026, 11, 1));
-    expect(screen.getByText("Dezember 2026")).toBeTruthy();
-    expect(screen.getByText("Januar 2027")).toBeTruthy();
+    expect(screen.getByText("December 2026")).toBeTruthy();
+    expect(screen.getByText("January 2027")).toBeTruthy();
   });
 
   /* Only the left month carries the back arrow, only the right one the forward

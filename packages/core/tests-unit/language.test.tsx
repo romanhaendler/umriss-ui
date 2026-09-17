@@ -54,7 +54,9 @@ describe("mergeLanguage – overriding entry by entry", () => {
       formats: { date: (d) => `Tag ${d.getDate()}` },
     });
     expect(formats.date(new Date(2026, 2, 17))).toBe("Tag 17");
-    expect(formats.number(1234.5, 1)).toBe("1.234,5");
+    /* The default notation is English since ADR-0024; what is not replaced
+       stays as it is. */
+    expect(formats.number(1234.5, 1)).toBe("1,234.5");
   });
 
   it("lets function entries keep their arguments", () => {
