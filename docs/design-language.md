@@ -49,42 +49,41 @@ grid collapse – and pause their countdown for as long as the mouse rests on
 them. `prefers-reduced-motion` switches every choreography off – the duration
 tokens then fall to 0 ms.
 
-**Squircles.** Where the browser supports `corner-shape`, every rounding is drawn
-as a superellipse ("squircle", as Apple does it) rather than as a circular arc –
-a progressive refinement with no risk for older browsers.
+**Squircles.** Where the browser supports `corner-shape`, every rounding of the
+library's own elements is drawn as a superellipse ("squircle", as Apple does it)
+rather than as a circular arc – a progressive refinement with no risk for older
+browsers. The build adds it after every radius (`scripts/styles/ownBox.ts`); an
+application's own rounded elements stay as the application drew them.
 
-**Details for the connoisseur.** The text cursor in input fields is petrol
-(`caret-color`), and so is the text selection; scrollbars are slim and follow the
-theme; browser autofill keeps the paper look including its edge.
+**Details for the connoisseur.** The text cursor in the library's input fields is
+petrol (`caret-color`); the scrollbars of its scroll containers are slim and
+follow the theme; browser autofill keeps the paper look including its edge. The
+text selection and the page's scrollbars are the application's: the library
+styles nothing it did not render (ADR-0021).
 
-Every value lives as a CSS custom property (`--u-*`) in `src/styles/tokens.css`.
+Every value lives as a CSS custom property (`--u-*`) in `src/styles/tokens.css`, in
+the cascade layer `umriss.tokens`; an application overrides it outside a layer.
 Components reach for tokens only – never for raw values.
 
 ## Dark theme
 
-The dark theme is activated globally through an attribute on the root element;
-every token is overridden there and all components follow automatically:
+The dark theme is the standard `color-scheme`, not an attribute of the library.
+Every token with two values is written `light-dark(<light>, <dark>)`, and every
+component follows the scheme its element inherits:
 
-```html
-<html data-theme="dark">
+```css
+html.dark { color-scheme: dark; }        /* a switch of the application's own */
+:root { color-scheme: light dark; }      /* or: follow the system */
 ```
 
-Switching at runtime, or following the system setting:
-
-```ts
-// explicitly
-document.documentElement.dataset.theme = "dark"; // or "light"
-
-// follow the system preference
-const mq = window.matchMedia("(prefers-color-scheme: dark)");
-document.documentElement.dataset.theme = mq.matches ? "dark" : "light";
-mq.addEventListener("change", (e) => {
-  document.documentElement.dataset.theme = e.matches ? "dark" : "light";
-});
-```
+Theme libraries (`next-themes`, Bootstrap's `data-bs-theme`, Mantine, MUI,
+DaisyUI) set `color-scheme` themselves, so the components follow them with no
+line at all. An application that sets nothing stays light, and a part of a page
+can be dark on its own (`style="color-scheme: dark"`). The library sets
+`color-scheme` nowhere (ADR-0021).
 
 The decision whether to follow the system setting or to store a user's wish lies
-deliberately with the application – the library only provides the token layers.
+deliberately with the application – the library only provides the token values.
 Principles of the dark theme: no pure black, "sunken" surfaces are lighter than
 the surface (the layer logic is preserved), accent and semantic colours are
 lightened but stay muted. The primary button reverses its polarity: light

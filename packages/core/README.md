@@ -10,7 +10,7 @@ once for all three packages in [`../../docs/design-language.md`](../../docs/desi
 ## Use
 
 ```bash
-pnpm add @umriss-ui/core @fontsource/geist-sans @fontsource/geist-mono
+pnpm add @umriss-ui/core
 ```
 
 The demo is the documentation: <https://romanhaendler.github.io/umriss-ui/core/>.
@@ -18,27 +18,56 @@ In an application:
 
 ```tsx
 import { Button, Card } from "@umriss-ui/core";
-import "@umriss-ui/core/styles.css";
-// The package ships no fonts; the application loads Geist itself.
-// Without it the tokens fall back to the system fonts.
-import "@fontsource/geist-sans/400.css";
-import "@fontsource/geist-sans/500.css";
-import "@fontsource/geist-sans/600.css";
-import "@fontsource/geist-mono/400.css";
 ```
 
-## Loading the styles
+Nothing else is required.
 
-The package ships exactly one stylesheet, and the application imports it itself:
+## Styles
 
-```ts
-import "@umriss-ui/core/styles.css";
+**They load themselves.** `dist/core.js` imports its stylesheet, and the
+manifest marks CSS as a side effect, so a bundler keeps it. The stylesheet stays
+exported as `@umriss-ui/core/styles.css` for setups that link stylesheets by
+hand; nobody has to import it.
+
+**They touch nothing else** (ADR-0021). No rule selects `html`, `body`, `*` or a
+native element of the page, and the only rules on `:root` declare the tokens.
+Each component carries what it needs itself: its type, `box-sizing` on its own
+elements, a focus ring on what it makes focusable. A caller's content inside
+`Stack` or `Grid` keeps the caller's type.
+
+**Everything can be overridden.** The library's rules lie in three cascade
+layers, `umriss.tokens`, `umriss.base` and `umriss.components`, and CSS written
+outside a layer wins over all of them, whatever the order of loading:
+
+```css
+:root {
+  --u-font-sans: "Inter", system-ui, sans-serif;
+  --u-color-accent: #0f766e;
+}
 ```
 
-It holds everything: the tokens (`src/styles/tokens.css`), the base layer
-(`src/styles/global.css`) and the styles of every component, gathered from their
-CSS modules at build time. The JavaScript loads no CSS of its own, so without
-this line every `var(--u-…)` is invalid and the interface appears unstyled.
+**Light and dark follow the application's `color-scheme`.** Every token with
+two values is written `light-dark(<light>, <dark>)`. An application that
+switches its mode with a theme library usually sets `color-scheme` already;
+one with a switch of its own writes one line, which its native controls need
+anyway:
+
+```css
+html.dark { color-scheme: dark; }
+:root { color-scheme: light dark; } /* or: follow the system */
+```
+
+An application that sets nothing stays light. A part of a page can be dark on
+its own (`<aside style="color-scheme: dark">`).
+
+**Fonts are the application's.** The tokens name Geist first and end in the
+system fonts; nothing is loaded. Geist is recommended — `@fontsource/geist-sans`
+(400, 500, 600) and `@fontsource/geist-mono` (400) — and any other face is one
+token away.
+
+**Browsers:** Chrome 123, Firefox 120, Safari 17.5 or newer. `light-dark()` is
+older nowhere; an older browser discards the tokens and shows the interface
+unstyled.
 
 ## Wording
 
@@ -94,7 +123,7 @@ The table and the alarm list are not part of this package. They live in
 | `Badge` | a status label with a dot, five tones; slightly rounded by default, `pill` for counters |
 | `NumberInput` | numeric input in the notation the formats seam provides, today German (comma, thousands dots on leaving the field), `decimals` (0 = whole numbers), `min`/`max`, arrow keys with Shift ×10, an integrated spinner column at the right inner edge, `prefix`/`suffix` adornments (€, %) |
 | `Meter` | a narrow fill bar (0–1) with a mono percentage label, five tones – for utilisation in cells; `label` names what is being measured |
-| `UmrissProvider` | one place to set things: theme (`light`/`dark`/`system`, where following means subscribing), density, portal target, toasts, language. **Optional** – without it everything behaves as it does unconfigured |
+| `UmrissProvider` | one place to set things: density, portal target, toasts, language. **Optional** – without it everything behaves as it does unconfigured. It holds no theme (light and dark are the application's `color-scheme`) and writes nothing onto the document |
 | `LanguageProvider` / `useFormats` / `useWording` | formatting and wording as an overridable seam; the wording is a directory of entries, not a translation call. English is the default, German ships as `@umriss-ui/core/wording/de` |
 | `Dock` | a tool strip over *one* surface: four named resting places at the edges of the host, moved by the grip (dragging snaps, the four arrow keys are the four places), orientation follows the edge; translucent material like the palette; a place without room refuses visibly; `mode` marks at most one tool and belongs to the caller |
 | `DateRangePicker` | a period in two clicks across two chained months: backwards is allowed (the ends swap silently), a preview band on hovering, quick choices from the wording |
@@ -126,7 +155,9 @@ The table and the alarm list are not part of this package. They live in
 3. Keyboard operation and `aria` attributes are part of the definition of done.
 4. No business logic: a mapping such as "status X is green" is the application's
    to make.
-5. Tokens only, no raw values. A new value is created as a token first.
+5. Tokens only, no raw values. A new value is created as a token first. No
+   selector reaches beyond the component's own elements, and every rule lies in
+   a layer (ADR-0021; the guards in `tests-unit/stylesheets.test.ts` hold it).
 6. Everything is English – identifiers, props and prose (ADR-0018, which
    reversed ADR-0015). What still stands from ADR-0015 is the spelling of the
    accessible name: it is `aria-label` where it names the root element, and

@@ -28,6 +28,28 @@ interface is still expected to move before `0.3.0`.
 
 ---
 
+## 0.3.0-rc.0 – Styles that load themselves, and touch nothing else (Sep. 2026)
+
+Delivery report for `.scratch/styles-without-side-effects/spec.md`, the charts'
+share (ADR-0021).
+
+### Changed
+
+- **No stylesheet import any more.** `dist/charts.js` imports its own
+  stylesheet; `@umriss-ui/charts/styles.css` stays exported and is optional.
+- **The classes are `uc-*`.** Every `kc-*` class of the DOM - `.kc-root`,
+  `.kc-plot`, `.kc-axis`, `.kc-tooltip` and the rest - is `uc-*`. A selector an
+  application wrote against them changes its prefix.
+- **Cascade layer.** The rules lie in `umriss.components` and select only the
+  chart's own elements.
+- **Light and dark follow `color-scheme`.** Canvas colours are resolved through
+  the browser, so a `light-dark()` token draws in the scheme that applies. The
+  resolved theme is read anew when an attribute of `<html>` changes (a
+  `style="color-scheme: …"`, a class) or the system preference does;
+  `invalidateTheme()` stays for a switch on another ancestor.
+
+---
+
 ## 0.3.0-rc.0 – One language, one scope (Sep. 2026)
 
 Delivery report for `.scratch/english-and-umriss-ui/spec.md`, the charts' share.
