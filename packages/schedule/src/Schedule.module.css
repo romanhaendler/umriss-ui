@@ -170,4 +170,35 @@
     border-right: 5px solid transparent;
     border-top: 6px solid var(--u-color-accent);
   }
+
+  /* A label in a bar: it is the bar's width, so it can only be cut off, never
+     spill over - and it lies on a colour the caller chose, so its own colour
+     follows that colour's brightness. */
+  .barLabel {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    padding: 0 var(--u-space-1);
+    overflow: hidden;
+    font-size: var(--u-text-xs);
+    line-height: var(--u-leading-tight);
+    pointer-events: none;
+  }
+
+  /* The text carries the cutting-off, not the box: `text-overflow` needs a
+     block that overflows, and the box is a flex container that centres. */
+  .barLabelText {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .barLabel[data-on="dark"] {
+    color: var(--u-color-on-accent);
+  }
+
+  .barLabel[data-on="light"] {
+    color: var(--u-color-text);
+  }
 }

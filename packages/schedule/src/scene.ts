@@ -20,7 +20,9 @@
 import { HOUR, calendarFrom, subscribeTheme, toWallClock } from "@umriss-ui/charts";
 import { laneTop, xOf } from "./geometry";
 import { SceneData, type LaneConfig, type LayerConfig, type ScheduleTooltipTarget } from "./sceneData";
-import { drawData, drawOverlay, prepareCanvas, resolveSceneColours, type Colours } from "./sceneDraw";
+import type { Subtask } from "./model";
+import { drawData, drawOverlay, isDark, prepareCanvas, resolveSceneColours, type Colours } from "./sceneDraw";
+import { barLabelBox } from "./geometry";
 import { SceneGestures, type GhostSummary, type PlacingItem, type SceneHandlers } from "./sceneGestures";
 import { DEFAULT_LANE_HEIGHT, SceneView, type SceneOptions } from "./sceneView";
 
@@ -49,6 +51,17 @@ export interface ScheduleSnapshot {
   readonly tooltip: { readonly target: ScheduleTooltipTarget; readonly x: number; readonly y: number } | null;
   /** The now line's x on the plot, or null. */
   readonly now: number | null;
+  /** The visible main time of every subtask in view, for the labels a caller
+      writes into the bars. */
+  readonly bars: readonly {
+    readonly subtask: Subtask;
+    readonly x: number;
+    readonly width: number;
+    readonly y: number;
+    readonly height: number;
+    /** Whether the bar's colour is dark, so its label needs light text. */
+    readonly dark: boolean;
+  }[];
 }
 
 const EMPTY_SNAPSHOT: ScheduleSnapshot = {
@@ -65,6 +78,7 @@ const EMPTY_SNAPSHOT: ScheduleSnapshot = {
   cursor: "default",
   tooltip: null,
   now: null,
+  bars: [],
 };
 
 export class ScheduleScene {
@@ -238,8 +252,26 @@ export class ScheduleScene {
       cursor: this.gestures.cursor,
       tooltip: this.tooltip(),
       now: view.nowX(),
+      bars: this.bars(),
     };
     for (const listener of this.listeners) listener();
+  }
+
+  /** The bars a label could stand in: the visible part of every main time,
+      with the contrast its colour calls for. Computed on every publish, which
+      is what lets a label follow a bar while the plot pans. */
+  private bars(): ScheduleSnapshot["bars"] {
+    const view = this.view;
+    if (view.width <= 0) return [];
+    const colours = this.colours;
+    const bars: ScheduleSnapshot["bars"] = view.boxes.flatMap((box) => {
+      if (box.y + box.height < 0 || box.y > view.height) return [];
+      const place = barLabelBox(box, view.width);
+      if (place === null) return [];
+      const colour = colours?.tasks.get(box.subtask.task);
+      return [{ subtask: box.subtask, ...place, dark: colour === undefined ? true : isDark(colour) }];
+    });
+    return bars;
   }
 
   private tooltip(): ScheduleSnapshot["tooltip"] {

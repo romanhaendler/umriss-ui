@@ -10,6 +10,15 @@ Since ADR-0020 the demos run in the same shell, the private package
 `@umriss-ui/demo` - four of them since ADR-0022: forty-one pages in core,
 fourteen in charts, twelve in table, eight in schedule.
 
+**A rendering constant changed and the picture did not?** Then the preview
+build is stale. `playwright.config.ts` reuses a running server outside CI, and
+a reused server serves the `dist-demo` it was started with - so a renewal can
+write the OLD picture and the next run compares it against the old build and
+passes. It cost an hour in `schedule-legibility` 03, where the minimum width of
+a bar label moved twice without the picture following. The remedy is one
+command: `rm -rf packages/<package>/dist-demo` before the run, or kill the
+preview server on its port.
+
 **A picture can move because the page grew.** A screenshot of one example is
 taken where that example happens to lie, and a new example above it moves the
 one below to another scroll offset - where a canvas lands on other half pixels
