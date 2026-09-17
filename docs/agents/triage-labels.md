@@ -15,8 +15,7 @@ The skills speak in terms of five canonical triage roles. This file maps those r
 canonical roles all describe work that has yet to happen, so none of them fits a
 spec whose implementation has shipped — and leaving such a spec on
 `ready-for-agent` is how an agent ends up re-implementing something that already
-exists. A spec marked `done` carries a `Delivered:` line naming the commits that
-implemented it. Specs are kept rather than deleted: they are the written record
+exists. A spec marked `done` carries its delivery report under `## Comments`. Specs are kept rather than deleted: they are the written record
 of why the code looks the way it does.
 
 When a skill mentions a role (e.g. "apply the AFK-ready triage label"), use the corresponding label string from this table.
