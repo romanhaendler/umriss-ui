@@ -600,11 +600,16 @@ orientation, so the dock would have to invent one.
 _Avoid_: Position, Koordinate, Ecke, slot, anchor, Andockpunkt
 
 **Grip**:
-The one part of a dock that moves it. Everything else in the strip is a tool,
-so without it every press would be ambiguous between taking a tool and moving
-the dock, and that ambiguity could only be settled by a drag threshold. It is
-also the single keyboard stop from which the dock is moved: four arrow keys,
-four resting places.
+The part of a component a drag takes hold of, where the thing being dragged is
+not itself the whole target. The **Dock** has one, and it is the one part that
+moves it: everything else in the strip is a tool, so without it every press
+would be ambiguous between taking a tool and moving the dock, and that
+ambiguity could only be settled by a drag threshold; it is also the single
+keyboard stop from which the dock is moved, four arrow keys for four resting
+places. The **Schedule** has two per selected **Subtask**, at the outer edges
+of its **Setup** and **Teardown**, and they appear on selection only — a plan
+where every bar bristles with grips is a plan nobody can read. One word,
+because it is one gesture: press the small thing to move the big one.
 _Avoid_: Anfasser, handle, Ziehfläche, Titelleiste
 
 **Mode**:
@@ -874,8 +879,24 @@ _Avoid_: change event, mutation, edit, command
 The picture of an intent while its drag is in flight, drawn beside the
 unchanged data and assessed like data — an overlap or late transport the drop
 would create shows before the drop. When the drag ends the ghost goes and the
-intent is reported.
+intent is reported. A drag from outside the schedule has one too: there the
+ghost is the work that is not on the plan yet.
 _Avoid_: preview, drag image, Vorschau
+
+**Place**:
+The **Intent** of work that was not on the plan: the answer to a drag from a
+list of unplanned orders onto a lane. It names the lane, the times and the
+caller's key for the dragged item, and it carries no subtask — there is none
+yet. Creating one is the caller's act, with the caller's identity, as every
+other intent leaves the data to the caller (ADR-0023).
+_Avoid_: create, add, new, insert, Anlegen
+
+**Now line**:
+The line across the lanes at the present moment, with a mark where it meets the
+fine axis band. It is off unless a caller asks for it, and it is a statement
+about the clock, never about the data: nothing is drawn differently for lying
+behind it. A plan on a wall screen follows it by the minute.
+_Avoid_: current time indicator, today marker, Zeitmarke, playhead
 
 
 ## Module and directory names

@@ -17,6 +17,37 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Sep. 2026 — schedule-refinement: the schedule in daily use
+
+*For a caller: the wheel and the selection callback changed; tooltip, now line,
+auto-pan, shift raster, whole-order shift, the place intent with drag from
+outside, the domain report and a ref handle are new; core gains six wording
+entries. The two changelogs carry the lines.*
+
+Delivery report for `.scratch/schedule-refinement/spec.md`, tickets 01–09.
+
+- **The scene was divided first**, because everything else touched it: one
+  thousand lines doing six things became registration and data, view and
+  layout, drawing, gestures, and a scene that joins them. Nothing was allowed
+  to change while it happened - the ticket's acceptance was that no test and no
+  baseline moved, and none did.
+- **The wheel now behaves like every other scrolling area.** Zooming on every
+  wheel movement had trapped the wheel on a long page and left twenty lanes
+  unreachable by it. Ctrl, ⌘ and the pinch zoom instead; the plain wheel scrolls
+  the lanes and stops preventing the default once they are at their end.
+- **Two bugs the work turned up.** A drag anchored on the pixel it started at,
+  which auto-pan moves under it - it anchors on the operating time now. And
+  after a drop the hover was not read anew, so the tooltip named the times a
+  subtask had before it moved until the pointer moved again.
+- **A picture moved for a reason worth writing down:** the demonstration's,
+  because a new example above it made the page longer and the canvas landed on
+  other half pixels. Measured on three repeats and confirmed by removing the
+  new example again; the finding stands in `docs/testing.md`.
+- **The dock's word grew a second home.** The schedule's setup and teardown
+  grips are the dock's gesture - press the small thing to move the big one - so
+  `CONTEXT.md` widens **Grip** rather than inventing a second word for it.
+  **Place** and **Now line** are new there.
+
 ## Sep. 2026 — schedule: a fourth package
 
 *For a caller: `@umriss-ui/schedule` is new; core gains `ContextMenu` and three
