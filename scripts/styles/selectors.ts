@@ -48,3 +48,14 @@ export function subject(selector: string): string {
 export function subjectIsOwn(selector: string): boolean {
   return /^[.#[A-Za-z]/.test(subject(selector));
 }
+
+/** The classes the selector names outside any brackets, in order, each once. */
+export function classesOf(selector: string): string[] {
+  const masked = blankNested(selector);
+  const found: string[] = [];
+  for (const match of masked.matchAll(/\.[A-Za-z_-][\w-]*/g)) {
+    const name = selector.slice(match.index, match.index + match[0].length);
+    if (!found.includes(name)) found.push(name);
+  }
+  return found;
+}
