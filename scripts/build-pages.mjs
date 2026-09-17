@@ -23,7 +23,7 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SITE = join(ROOT, "site");
-const PACKAGES = ["core", "charts", "table"];
+const PACKAGES = ["core", "charts", "table", "schedule"];
 
 rmSync(SITE, { recursive: true, force: true });
 mkdirSync(SITE, { recursive: true });
