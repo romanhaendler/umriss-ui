@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { Card, Stack, Text } from "@umriss-ui/core";
 import { Lane, Schedule, Subtasks, Transports, applyIntent, subtaskFromPlace } from "../../../src";
-import type { Intent, PlacingItem, Subtask } from "../../../src";
-import { DAY_OF_PLAN, MOVES, ORDERS, STATIONS, STEPS } from "../../data";
+import type { Intent, PlacingItem, Subtask, Task, Transport } from "../../../src";
 
 export const title = "Dragging unplanned work onto the plan";
 
@@ -20,6 +19,35 @@ export const title = "Dragging unplanned work onto the plan";
    The drop reports a `place` intent: the key the application gave the item, the
    task, the lane and the times. It creates no subtask itself - the id is the
    application's, and `subtaskFromPlace` builds the subtask from the intent. */
+
+const at = (hours: number, minutes = 0) => new Date(2026, 2, 17, hours, minutes).getTime();
+const min = (n: number) => n * 60_000;
+
+const DAY_OF_PLAN: readonly [number, number] = [at(5, 30), at(18)];
+
+
+const STATIONS = [
+  { id: "saw", label: "Saw 1" },
+  { id: "press", label: "Press 2" },
+  { id: "qa", label: "Inspection" },
+];
+
+const ORDERS: readonly Task[] = [
+  { id: "a-2041", name: "A-2041 Housing", color: "light-dark(#2563eb, #6b9bff)" },
+  { id: "a-2043", name: "A-2043 Bracket", color: "light-dark(#c2410c, #f08a52)" },
+  { id: "a-2044", name: "A-2044 Flange", color: "light-dark(#7c3aed, #a98bfa)" },
+];
+
+const STEPS: readonly Subtask[] = [
+  { id: "a-2041-1", task: "a-2041", lane: "saw", from: at(6), to: at(7), setup: min(15), teardown: min(10) },
+  { id: "a-2043-1", task: "a-2043", lane: "press", from: at(6, 30), to: at(8), setup: min(30), teardown: min(15) },
+  { id: "a-2044-2", task: "a-2044", lane: "press", from: at(9, 30), to: at(10, 45), setup: min(25) },
+  { id: "a-2041-3", task: "a-2041", lane: "qa", from: at(11, 30), to: at(12, 15) },
+];
+
+const MOVES: readonly Transport[] = [
+  { id: "t-2041-3", from: "a-2041-1", to: "a-2041-3", duration: min(20) },
+];
 
 const HOUR = 3_600_000;
 
@@ -77,7 +105,7 @@ export default function DragIn() {
       <Schedule
         ariaLabel="Plan of Tuesday, 17 March, with unplanned work beside it"
         initialDomain={DAY_OF_PLAN}
-        height={380}
+        height={196}
         intents={["place", "move", "lane"]}
         placing={placing}
         onIntent={onIntent}

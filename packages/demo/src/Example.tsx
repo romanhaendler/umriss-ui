@@ -14,12 +14,17 @@
 
    The copy button copies exactly what stands there - the same string that is
    coloured. It lives in `CopyButton.tsx`, because the import line in the page
-   head needs the same one. */
+   head needs the same one.
+
+   An example that shows a file beside itself gets tabs, and Copy takes the one
+   in front: two tabs mean two things to copy, and a button that always copied
+   the first would be a lie on the second. An example showing nothing - which
+   is nearly all of them - has no tab bar at all. */
 
 import { useMemo, useState } from "react";
 import { highlight } from "sugar-high";
 import { CopyButton } from "./CopyButton";
-import type { Example as ExampleData } from "./tooling/examples";
+import type { Example as ExampleData, ExampleFile } from "./tooling/examples";
 
 function Chevron({ open }: { open: boolean }) {
   return (
@@ -36,13 +41,32 @@ function Chevron({ open }: { open: boolean }) {
   );
 }
 
-function CodeBlock({ source }: { source: string }) {
-  const highlighted = useMemo(() => highlight(source), [source]);
+function CodeBlock({ files }: { files: readonly ExampleFile[] }) {
+  const [shown, setShown] = useState(0);
+  const front = files[Math.min(shown, files.length - 1)]!;
+  const highlighted = useMemo(() => highlight(front.source), [front.source]);
   return (
     <div className="codeBlock">
       <div className="codeBar">
-        <span className="codeLanguage">tsx</span>
-        <CopyButton text={source} />
+        {files.length > 1 ? (
+          <span className="codeTabs" role="tablist">
+            {files.map((file, index) => (
+              <button
+                key={file.name}
+                type="button"
+                role="tab"
+                className="codeTab"
+                aria-selected={file === front}
+                onClick={() => setShown(index)}
+              >
+                {file.name}
+              </button>
+            ))}
+          </span>
+        ) : (
+          <span className="codeLanguage">tsx</span>
+        )}
+        <CopyButton text={front.source} />
       </div>
       {/* The source comes from our own directory and from a highlighter that
           only puts marks around it - no input from outside. */}
@@ -109,7 +133,7 @@ export function Example({ example, allOpen }: ExampleProps) {
       <div className="exampleCode" id={codeId} hidden={!open}>
         {/* Render it only once it is visible: forty highlighted blocks on one
             page, none of them open, are forty trees for nothing. */}
-        {open && <CodeBlock source={example.source} />}
+        {open && <CodeBlock files={example.files} />}
       </div>
     </section>
   );

@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Stack, Text } from "@umriss-ui/core";
 import { Lane, Schedule, Subtasks } from "../../../src";
-import type { ScheduleHandle } from "../../../src";
-import { DAY_OF_PLAN, ORDERS, STATIONS, STEPS } from "../../data";
+import type { ScheduleHandle, Subtask, Task } from "../../../src";
 
 export const title = "Two schedules in step";
 
@@ -18,6 +17,38 @@ export const title = "Two schedules in step";
    The pin above the upper plan is the application's own DOM, placed with the
    schedule's handle: `clientPointOf` gives the client point of a time, and
    `positionAt` the time and lane at a point. */
+
+const at = (hours: number, minutes = 0) => new Date(2026, 2, 17, hours, minutes).getTime();
+const min = (n: number) => n * 60_000;
+
+const DAY_OF_PLAN: readonly [number, number] = [at(5, 30), at(18)];
+
+
+const STATIONS = [
+  { id: "saw", label: "Saw 1" },
+  { id: "lathe-1", label: "Lathe 1" },
+  { id: "mill", label: "Mill" },
+  { id: "press", label: "Press 2" },
+  { id: "paint", label: "Paint shop" },
+  { id: "qa", label: "Inspection" },
+];
+
+const ORDERS: readonly Task[] = [
+  { id: "a-2041", name: "A-2041 Housing", color: "light-dark(#2563eb, #6b9bff)" },
+  { id: "a-2042", name: "A-2042 Shaft", color: "light-dark(#0d9488, #3cc7b8)" },
+  { id: "a-2043", name: "A-2043 Bracket", color: "light-dark(#c2410c, #f08a52)" },
+];
+
+const STEPS: readonly Subtask[] = [
+  { id: "a-2041-1", task: "a-2041", lane: "saw", from: at(6), to: at(7), setup: min(15), teardown: min(10) },
+  { id: "a-2041-2", task: "a-2041", lane: "mill", from: at(8), to: at(10, 30), setup: min(30), teardown: min(15) },
+  { id: "a-2041-3", task: "a-2041", lane: "qa", from: at(11, 30), to: at(12, 15) },
+  { id: "a-2042-1", task: "a-2042", lane: "saw", from: at(7, 30), to: at(8, 15), setup: min(10) },
+  { id: "a-2042-2", task: "a-2042", lane: "lathe-1", from: at(9), to: at(11), setup: min(20), teardown: min(15) },
+  { id: "a-2043-1", task: "a-2043", lane: "press", from: at(6, 30), to: at(8), setup: min(30), teardown: min(15) },
+  { id: "a-2043-2", task: "a-2043", lane: "mill", from: at(10), to: at(11, 30), setup: min(15) },
+  { id: "a-2043-3", task: "a-2043", lane: "paint", from: at(12), to: at(14), setup: min(20), teardown: min(20) },
+];
 
 const MACHINES = STATIONS.slice(0, 4);
 const ON_MACHINES = STEPS.filter((step) => MACHINES.some((machine) => machine.id === step.lane));
@@ -60,7 +91,7 @@ export default function InStep() {
         ))}
         <Subtasks data={ON_MACHINES} tasks={ORDERS} />
       </Schedule>
-      <Schedule ariaLabel="The rest of the plant, the same hours" initialDomain={domain} height={200} onDomainChange={setDomain}>
+      <Schedule ariaLabel="The rest of the plant, the same hours" initialDomain={domain} height={152} onDomainChange={setDomain}>
         {REST.map((machine) => (
           <Lane key={machine.id} id={machine.id} label={machine.label} />
         ))}

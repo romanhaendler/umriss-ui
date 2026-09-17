@@ -20,6 +20,7 @@
     "./checks/page": "./checks/page.ts",
     "./checks/accessibility": "./checks/accessibility.ts",
     "./checks/ownBase": "./checks/ownBase.ts",
+    "./checks/ownData": "./checks/ownData.ts",
     "./checks/overlays": "./checks/overlays.ts"
   },
   "scripts": {
