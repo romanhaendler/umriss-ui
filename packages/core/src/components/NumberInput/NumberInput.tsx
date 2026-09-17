@@ -13,6 +13,7 @@ import {
 import type { NumberConstraints } from "./number";
 import styles from "./NumberInput.module.css";
 import { useFormats, useWording } from "../../lib/language";
+import { separatorsOf } from "../../lib/language/formats";
 import { MinusGlyph, PlusGlyph } from "../../lib/glyphs";
 
 export interface NumberInputProps
@@ -84,6 +85,10 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
      comment in number.ts claimed without it being true. */
   const formats = useFormats();
   const write = (value: number) => formats.number(value, decimals);
+  /* The field reads the notation it writes: an application that replaced the
+     number format changed both halves at once (ADR-0024). */
+  const separators = useMemo(() => separatorsOf(formats), [formats]);
+  const read = (raw: string) => parseNumber(raw, separators);
   const isInvalid = invalid ?? field?.invalid ?? false;
   const constraints = useMemo<NumberConstraints>(() => ({ min, max, decimals }), [min, max, decimals]);
 
@@ -118,7 +123,7 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
   valueRef.current = value;
 
   const stepBy = (direction: 1 | -1, factor = 1) => {
-    const base = parseNumber(textRef.current) ?? valueRef.current ?? 0;
+    const base = read(textRef.current) ?? valueRef.current ?? 0;
     commit(stepNumber(base, direction, step, factor));
   };
 
@@ -149,7 +154,7 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
     repeat(400);
   };
 
-  const current = parseNumber(text) ?? value;
+  const current = read(text) ?? value;
   const canIncrease = !disabled && (max === undefined || current === null || current < max);
   const canDecrease = !disabled && (min === undefined || current === null || current > min);
 
@@ -197,11 +202,11 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
         className={styles.input}
         value={text}
         onChange={(event) => {
-          const raw = filterInput(event.target.value, constraints);
+          const raw = filterInput(event.target.value, constraints, separators);
           setText(raw);
           /* One contract for every route: what goes out is clamped. The
              text stays local so that typing does not stutter over it. */
-          const parsed = parseNumber(raw);
+          const parsed = read(raw);
           onChange(parsed === null ? null : clampNumber(parsed, constraints));
         }}
         onKeyDown={handleKeyDown}
@@ -210,7 +215,7 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
           setFocused(false);
           // Adopt the actual field content, not the state (which may be one
           // render stale) – the same safeguard as in the TimeField.
-          commit(parseNumber(event.currentTarget.value));
+          commit(read(event.currentTarget.value));
         }}
         {...rest}
       />

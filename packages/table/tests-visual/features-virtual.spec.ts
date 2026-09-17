@@ -38,7 +38,7 @@ test("renders a fraction of the rows", async ({ page }) => {
   const rendered = await example(page).locator("[data-row]").count();
   expect(rendered).toBeGreaterThan(0);
   expect(rendered).toBeLessThan(60);
-  await expect(example(page)).toContainText("of 20.000 rendered");
+  await expect(example(page)).toContainText("of 20,000 rendered");
 });
 
 test("the scrollbar measures the full set", async ({ page }) => {

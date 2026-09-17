@@ -1,18 +1,27 @@
-/* German number notation (pure logic seams). The expected values come from
-   the notation rule itself - the dot separates thousands, the comma
-   separates decimals -, not from the way the implementation computes. */
+/* Reading and writing a number (pure logic seams). The expected values come
+   from the notation rule itself - in the default notation the comma separates
+   thousands and the dot the decimals, in the German one the other way round
+   (ADR-0024) -, not from the way the implementation computes.
+
+   Both notations stand here, because the field has to read what it writes and
+   the parser takes the notation it is given. */
 
 import { describe, expect, it } from "vitest";
 import { clampNumber, filterInput, formatNumber, parseNumber, stepNumber } from "../src/components/NumberInput/number";
+import { separatorsOf } from "../src/lib/language/formats";
+import { GERMAN_FORMATS } from "../src/lib/language/de";
 
-describe("parseNumber – German notation", () => {
+/* The German notation, as an application takes it (ADR-0024). */
+const GERMAN = separatorsOf(GERMAN_FORMATS);
+
+describe("parseNumber – the default notation", () => {
   const cases: ReadonlyArray<[string, number | null]> = [
     // [input, expected value]
     ["42", 42],
     ["-5", -5],
-    ["0,5", 0.5],
-    ["1.234,50", 1234.5],
-    ["1.234.567,89", 1234567.89],
+    ["0.5", 0.5],
+    ["1,234.50", 1234.5],
+    ["1,234,567.89", 1234567.89],
     ["  42  ", 42],
     ["", null],
     ["-", null],
@@ -23,6 +32,29 @@ describe("parseNumber – German notation", () => {
       expect(parseNumber(input)).toBe(expected);
     });
   }
+
+  it("reads back what the default notation writes", () => {
+    expect(parseNumber(formatNumber(1234567.89, 2))).toBe(1234567.89);
+  });
+});
+
+describe("parseNumber – the German notation", () => {
+  const cases: ReadonlyArray<[string, number | null]> = [
+    ["0,5", 0.5],
+    ["1.234,50", 1234.5],
+    ["1.234.567,89", 1234567.89],
+    ["-5", -5],
+    ["", null],
+  ];
+  for (const [input, expected] of cases) {
+    it(`"${input}" → ${expected}`, () => {
+      expect(parseNumber(input, GERMAN)).toBe(expected);
+    });
+  }
+
+  it("reads back what the German notation writes", () => {
+    expect(parseNumber(GERMAN_FORMATS.number(1234567.89, 2), GERMAN)).toBe(1234567.89);
+  });
 });
 
 describe("clampNumber – constraints and decimal places", () => {
@@ -65,9 +97,17 @@ describe("filterInput – permitted characters per configuration", () => {
     expect(filterInput("12a3", {})).toBe("123");
   });
 
-  it("permits the comma only where there are decimal places", () => {
-    expect(filterInput("1,5", { decimals: 2 })).toBe("1,5");
-    expect(filterInput("1,5", { decimals: 0 })).toBe("15");
+  it("permits the decimal separator only where there are decimal places", () => {
+    expect(filterInput("1.5", { decimals: 2 })).toBe("1.5");
+    expect(filterInput("1.5", { decimals: 0 })).toBe("15");
+  });
+
+  it("permits the separators of the notation it is given", () => {
+    expect(filterInput("1.234,5", { decimals: 2 }, GERMAN)).toBe("1.234,5");
+    /* The default notation's dot is the German notation's group separator, so
+       it stays - and its comma is the decimal separator a place count can
+       forbid. */
+    expect(filterInput("1.234,5", { decimals: 0 }, GERMAN)).toBe("1.2345");
   });
 
   it("permits the minus only where negative values are possible", () => {
@@ -76,15 +116,15 @@ describe("filterInput – permitted characters per configuration", () => {
     expect(filterInput("-5", { min: 0 })).toBe("5");
   });
 
-  it("leaves thousands dots standing", () => {
-    expect(filterInput("1.234,50", { decimals: 2 })).toBe("1.234,50");
+  it("leaves group separators standing", () => {
+    expect(filterInput("1,234.50", { decimals: 2 })).toBe("1,234.50");
   });
 });
 
-describe("formatNumber – output in German notation", () => {
-  it("sets the thousands dot and the decimal comma", () => {
-    expect(formatNumber(1234.5, 2)).toBe("1.234,50");
-    expect(formatNumber(1234567.89, 2)).toBe("1.234.567,89");
+describe("formatNumber – output in the default notation", () => {
+  it("sets the group comma and the decimal dot", () => {
+    expect(formatNumber(1234.5, 2)).toBe("1,234.50");
+    expect(formatNumber(1234567.89, 2)).toBe("1,234,567.89");
   });
 
   it("rounds to the required places", () => {

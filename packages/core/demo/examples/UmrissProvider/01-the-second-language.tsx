@@ -1,6 +1,6 @@
 import { Combobox, Grid, UmrissProvider, Stack, Stat, Text } from "../../../src";
 import type { LimitSet } from "../../../src";
-import { GERMAN_WORDING } from "@umriss-ui/core/wording/de";
+import { GERMAN_FORMATS, GERMAN_WORDING } from "@umriss-ui/core/wording/de";
 
 export const title = "The second language, taken whole";
 
@@ -19,10 +19,12 @@ export const title = "The second language, taken whole";
    formats and wording are one of them; `LanguageProvider` is the same seam
    alone, for a section rather than an application.
 
-   What does NOT move is the notation. The formats are a register of their own
-   and write `de-DE` on both sides - which is why the English half says "1.284"
-   and not "1,284". The mixture is visible on purpose; a locale is not a
-   language. */
+   The notation travels with it. Wording and formats are two registers, and
+   since ADR-0024 both halves of German come out of the same import: the left
+   side writes "1,284" and 17/03/2026, the right one "1.284" and 17.03.2026.
+   Hand in only the wording and you get German words over English notation -
+   which is what this library shipped until that decision, and what it looked
+   like is exactly why it was made. */
 
 const FURNACE: LimitSet = {
   target: 800,
@@ -63,9 +65,9 @@ export default function TheSecondLanguage() {
       </Stack>
       <Stack gap={2}>
         <Text size="xs" tone="muted">
-          language=&#123;&#123; wording: GERMAN_WORDING &#125;&#125;
+          language=&#123;&#123; wording: GERMAN_WORDING, formats: GERMAN_FORMATS &#125;&#125;
         </Text>
-        <UmrissProvider language={{ wording: GERMAN_WORDING }}>
+        <UmrissProvider language={{ wording: GERMAN_WORDING, formats: GERMAN_FORMATS }}>
           <Surface />
         </UmrissProvider>
       </Stack>

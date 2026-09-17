@@ -67,7 +67,7 @@ describe("The four verdicts asOf there as a word", () => {
 describe("Value, unit and deviation", () => {
   it("shows value and unit separately", () => {
     render(<Stat label="Auslastung" value={82.4} unit="%" decimals={1} />);
-    expect(screen.getByText("82,4")).toBeTruthy();
+    expect(screen.getByText("82.4")).toBeTruthy();
     expect(screen.getByText("%")).toBeTruthy();
   });
 

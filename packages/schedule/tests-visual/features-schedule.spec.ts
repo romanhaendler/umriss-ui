@@ -45,7 +45,7 @@ test("the schedule carries its name, and the lane headers are text", async ({ pa
 test("the day band names the day, and the fine band steps in hours", async ({ page }) => {
   await openExample(page, "schedule", "first-schedule");
   const example = page.locator('[data-example="first-schedule"]');
-  await expect(example.locator("[data-schedule-days]")).toContainText("17. März 2026");
+  await expect(example.locator("[data-schedule-days]")).toContainText("17 March 2026");
   expect(await tickLabels(example)).toEqual(expect.arrayContaining(["06:00", "07:00", "12:00", "17:00"]));
 });
 

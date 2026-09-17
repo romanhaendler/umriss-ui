@@ -143,7 +143,7 @@ test.describe("Table › demonstration", () => {
     await expect(dataRows(page)).toHaveCount(2);
     await expect(dataRows(page).first()).toContainText("Northworks");
     // 1,250 + 560: the sum of the filtered set, not of every row.
-    await expect(table(page).locator("tfoot [data-footer='sum']")).toContainText("1.810");
+    await expect(table(page).locator("tfoot [data-footer='sum']")).toContainText("1,810");
   });
 
   test("The box in the header selects the filtered set across all pages", async ({ page }) => {
