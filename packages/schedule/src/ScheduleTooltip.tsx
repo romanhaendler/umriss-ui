@@ -4,11 +4,10 @@
    @umriss-ui/core, so one provider switches it with everything else. */
 
 import type { ReactNode } from "react";
+import { MINUTE } from "@umriss-ui/charts";
 import { useFormats, useWording } from "@umriss-ui/core";
 import type { ScheduleTooltipTarget } from "./scene";
 import styles from "./Schedule.module.css";
-
-const MINUTE = 60_000;
 
 export function ScheduleTooltipContent({ target }: { target: ScheduleTooltipTarget }): ReactNode {
   const formats = useFormats();

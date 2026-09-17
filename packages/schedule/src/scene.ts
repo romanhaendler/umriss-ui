@@ -19,46 +19,14 @@
 
 import { HOUR, calendarFrom, subscribeTheme, toWallClock } from "@umriss-ui/charts";
 import { laneTop, xOf } from "./geometry";
-import type { LateTransport } from "./findings";
-import type { Subtask, Task, Transport } from "./model";
-import { SceneData, type LaneConfig, type LayerConfig } from "./sceneData";
+import { SceneData, type LaneConfig, type LayerConfig, type ScheduleTooltipTarget } from "./sceneData";
 import { drawData, drawOverlay, prepareCanvas, resolveSceneColours, type Colours } from "./sceneDraw";
 import { SceneGestures, type GhostSummary, type PlacingItem, type SceneHandlers } from "./sceneGestures";
-import { SceneView, type SceneOptions } from "./sceneView";
+import { DEFAULT_LANE_HEIGHT, SceneView, type SceneOptions } from "./sceneView";
 
-export type { LaneConfig, LayerConfig } from "./sceneData";
+export type { LaneConfig, LayerConfig, ScheduleTooltipTarget } from "./sceneData";
 export type { SceneOptions, ScheduleHit } from "./sceneView";
 export type { SceneHandlers, ScheduleInteraction, PlacingItem } from "./sceneGestures";
-
-/** What a tooltip is about: the hovered subtask or transport, with what the
-    schedule knows about it. */
-export type ScheduleTooltipTarget =
-  | {
-      /** A subtask is hovered. */
-      readonly kind: "subtask";
-      /** The hovered subtask. */
-      readonly subtask: Subtask;
-      /** Its task, where the tasks name it. */
-      readonly task: Task | undefined;
-      /** The subtasks it overlaps with on its lane. */
-      readonly overlapping: readonly Subtask[];
-      /** The late transports leaving or reaching it. */
-      readonly lateTransports: readonly LateTransport[];
-    }
-  | {
-      /** A transport is hovered. */
-      readonly kind: "transport";
-      /** The hovered transport. */
-      readonly transport: Transport;
-      /** Its task, where the tasks name it. */
-      readonly task: Task | undefined;
-      /** The subtask it leaves. */
-      readonly from: Subtask | undefined;
-      /** The subtask it reaches. */
-      readonly to: Subtask | undefined;
-      /** Its finding, where it is late. */
-      readonly late: LateTransport | undefined;
-    };
 
 export interface ScheduleSnapshot {
   readonly width: number;
@@ -86,7 +54,7 @@ export interface ScheduleSnapshot {
 const EMPTY_SNAPSHOT: ScheduleSnapshot = {
   width: 0,
   height: 0,
-  laneHeight: 44,
+  laneHeight: DEFAULT_LANE_HEIGHT,
   scrollY: 0,
   lanes: [],
   days: [],
@@ -130,9 +98,9 @@ export class ScheduleScene {
       selectedSubtask: () => this.selected,
       select: (task, subtask) => this.select(task, subtask),
       viewChanged: () => this.viewChanged(),
-      viewMoved: () => {
+      viewMoved: (time) => {
         this.viewChanged();
-        this.reportDomain();
+        if (time) this.reportDomain();
       },
       interactionChanged: () => this.interactionChanged(),
     });
@@ -276,35 +244,11 @@ export class ScheduleScene {
 
   private tooltip(): ScheduleSnapshot["tooltip"] {
     const hover = this.gestures.hover;
-    if (!this.gestures.idle || (hover.kind !== "subtask" && hover.kind !== "transport")) return null;
-    const data = this.data;
+    if (!this.gestures.idle) return null;
+    const target = this.data.tooltipTargetFor(hover);
+    if (target === null) return null;
     const { x, y } = this.gestures.hoverPoint;
-    if (hover.kind === "subtask") {
-      const id = hover.subtask.id;
-      const overlapping = data.overlaps
-        .filter((o) => o.first === id || o.second === id)
-        .map((o) => data.subtaskById.get(o.first === id ? o.second : o.first))
-        .filter((s): s is Subtask => s !== undefined);
-      const lateTransports = data.transports
-        .filter((t) => t.from === id || t.to === id)
-        .map((t) => data.lateById.get(t.id))
-        .filter((l): l is LateTransport => l !== undefined);
-      return { target: { kind: "subtask", subtask: hover.subtask, task: data.tasks.get(hover.subtask.task), overlapping, lateTransports }, x, y };
-    }
-    const transport = hover.transport;
-    const task = data.taskOfTransport(transport);
-    return {
-      target: {
-        kind: "transport",
-        transport,
-        task: task !== null ? data.tasks.get(task) : undefined,
-        from: data.subtaskById.get(transport.from),
-        to: data.subtaskById.get(transport.to),
-        late: data.lateById.get(transport.id),
-      },
-      x,
-      y,
-    };
+    return { target, x, y };
   }
 
   /** The visible span, as two wall-clock instants. */
@@ -320,10 +264,11 @@ export class ScheduleScene {
       caller who handed it in, and reporting it would let two schedules
       synchronised with each other feed one another for ever. */
   private reportDomain(): void {
-    if (this.domainFrame !== 0 || typeof requestAnimationFrame !== "function") {
-      if (typeof requestAnimationFrame !== "function") this.handlersNow.onDomainChange?.(this.visibleDomain());
+    if (typeof requestAnimationFrame !== "function") {
+      this.handlersNow.onDomainChange?.(this.visibleDomain());
       return;
     }
+    if (this.domainFrame !== 0) return;
     this.domainFrame = requestAnimationFrame(() => {
       this.domainFrame = 0;
       this.handlersNow.onDomainChange?.(this.visibleDomain());

@@ -9,6 +9,7 @@
 import type { ReactNode } from "react";
 import { lateTransports, overlapDepth, overlaps, type LateTransport, type Overlap } from "./findings";
 import type { Subtask, Task, Transport } from "./model";
+import type { ScheduleHit } from "./sceneView";
 
 export interface LaneConfig {
   readonly id: string;
@@ -112,4 +113,62 @@ export class SceneData {
   taskOfTransport(transport: Transport): string | null {
     return this.subtaskById.get(transport.from)?.task ?? null;
   }
+
+  /** What a tooltip is about: the hovered subtask or transport with what this
+      data knows about it - its task, and the findings it stands in. */
+  tooltipTargetFor(hit: ScheduleHit): ScheduleTooltipTarget | null {
+    if (hit.kind === "subtask") {
+      const id = hit.subtask.id;
+      const overlapping = this.overlaps
+        .filter((o) => o.first === id || o.second === id)
+        .map((o) => this.subtaskById.get(o.first === id ? o.second : o.first))
+        .filter((s): s is Subtask => s !== undefined);
+      const lateTransports = this.transports
+        .filter((t) => t.from === id || t.to === id)
+        .map((t) => this.lateById.get(t.id))
+        .filter((l): l is LateTransport => l !== undefined);
+      return { kind: "subtask", subtask: hit.subtask, task: this.tasks.get(hit.subtask.task), overlapping, lateTransports };
+    }
+    if (hit.kind !== "transport") return null;
+    const transport = hit.transport;
+    const task = this.taskOfTransport(transport);
+    return {
+      kind: "transport",
+      transport,
+      task: task !== null ? this.tasks.get(task) : undefined,
+      from: this.subtaskById.get(transport.from),
+      to: this.subtaskById.get(transport.to),
+      late: this.lateById.get(transport.id),
+    };
+  }
 }
+
+/** What a tooltip is about: the hovered subtask or transport, with what the
+    schedule knows about it. */
+export type ScheduleTooltipTarget =
+  | {
+      /** A subtask is hovered. */
+      readonly kind: "subtask";
+      /** The hovered subtask. */
+      readonly subtask: Subtask;
+      /** Its task, where the tasks name it. */
+      readonly task: Task | undefined;
+      /** The subtasks it overlaps with on its lane. */
+      readonly overlapping: readonly Subtask[];
+      /** The late transports leaving or reaching it. */
+      readonly lateTransports: readonly LateTransport[];
+    }
+  | {
+      /** A transport is hovered. */
+      readonly kind: "transport";
+      /** The hovered transport. */
+      readonly transport: Transport;
+      /** Its task, where the tasks name it. */
+      readonly task: Task | undefined;
+      /** The subtask it leaves. */
+      readonly from: Subtask | undefined;
+      /** The subtask it reaches. */
+      readonly to: Subtask | undefined;
+      /** Its finding, where it is late. */
+      readonly late: LateTransport | undefined;
+    };

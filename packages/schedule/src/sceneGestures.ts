@@ -6,7 +6,7 @@
    and reported when its target changes. Nothing here writes data or draws:
    the host lays out, publishes and draws when told that something changed. */
 
-import { calendarFrom, toOperatingTimeClamped, toWallClock } from "@umriss-ui/charts";
+import { MINUTE, calendarFrom, toOperatingTimeClamped, toWallClock } from "@umriss-ui/charts";
 import { autoPanSpeed } from "./autoPan";
 import { lateTransports, overlaps, type LateTransport, type Overlap } from "./findings";
 import { edgeAt, partAt } from "./geometry";
@@ -51,9 +51,9 @@ export interface GestureHost {
   select(task: string | null, subtask: string | null): void;
   /** The view moved: lay out, publish, draw. */
   viewChanged(): void;
-  /** The planner panned or zoomed: as `viewChanged`, and the visible span is
-      reported. */
-  viewMoved(): void;
+  /** The planner panned or zoomed. As `viewChanged`; where the span through
+      time changed, it is reported as well. */
+  viewMoved(time: boolean): void;
   /** Only interaction state changed: publish and draw. */
   interactionChanged(): void;
 }
@@ -235,7 +235,7 @@ export class SceneGestures {
       if (this.gesture.kind === "pinch") {
         const distance = this.touchDistance();
         if (distance > 0 && this.gesture.distance > 0 && this.host.view.zoomAt(this.touchCentre(), this.gesture.distance / distance)) {
-          this.host.viewMoved();
+          this.host.viewMoved(true);
         }
         this.gesture = { kind: "pinch", distance };
         return;
@@ -255,7 +255,8 @@ export class SceneGestures {
     }
     const current = this.gesture;
     if (current.kind === "pan" && current.pointerId === event.pointerId) {
-      if (this.host.view.pan(current.lastX - x, current.lastY - y)) this.host.viewMoved();
+      const panned = this.host.view.pan(current.lastX - x, current.lastY - y);
+      if (panned.moved) this.host.viewMoved(panned.time);
       this.gesture = { ...current, lastX: x, lastY: y };
       return;
     }
@@ -304,14 +305,19 @@ export class SceneGestures {
     const step = () => {
       this.panFrame = 0;
       const gesture = this.gesture;
-      if (gesture.kind !== "edit") return;
+      if (gesture.kind !== "edit" && gesture.kind !== "place") return;
       const view = this.host.view;
       const { x, y } = this.local(this.lastClient.x, this.lastClient.y);
       const dx = autoPanSpeed(x, view.width);
       const dy = autoPanSpeed(y, view.height);
-      if ((dx === 0 && dy === 0) || !view.pan(dx, dy)) return;
-      this.gesture = { ...gesture, ghost: this.ghostFor(gesture, x, y) };
-      this.host.viewMoved();
+      if (dx === 0 && dy === 0) return;
+      const panned = view.pan(dx, dy);
+      if (!panned.moved) return;
+      this.gesture =
+        gesture.kind === "edit"
+          ? { ...gesture, ghost: this.ghostFor(gesture, x, y) }
+          : { ...gesture, ghost: this.placeGhost(gesture.item, x, y) ?? gesture.ghost };
+      this.host.viewMoved(panned.time);
       this.panFrame = requestAnimationFrame(step);
     };
     this.panFrame = requestAnimationFrame(step);
@@ -377,18 +383,20 @@ export class SceneGestures {
       event.preventDefault();
       /* A pinch sends small deltas, a mouse wheel large ones. */
       const rate = Math.abs(dy) < 50 ? 0.01 : 0.0015;
-      if (view.zoomAt(x, Math.exp(dy * rate))) this.host.viewMoved();
+      if (view.zoomAt(x, Math.exp(dy * rate))) this.host.viewMoved(true);
       return;
     }
     if (Math.abs(dx) > Math.abs(dy) || event.shiftKey) {
       event.preventDefault();
-      if (view.pan(event.shiftKey && dx === 0 ? dy : dx, 0)) this.host.viewMoved();
+      const panned = view.pan(event.shiftKey && dx === 0 ? dy : dx, 0);
+      if (panned.moved) this.host.viewMoved(panned.time);
       return;
     }
     const room = dy > 0 ? view.maxScroll() - view.scrollY : view.scrollY;
     if (dy === 0 || room <= 0) return;
     event.preventDefault();
-    if (view.pan(0, dy)) this.host.viewMoved();
+    const scrolled = view.pan(0, dy);
+    if (scrolled.moved) this.host.viewMoved(scrolled.time);
   }
 
   private click(clientX: number, clientY: number, x: number, y: number): void {
@@ -438,10 +446,6 @@ export class SceneGestures {
   }
 
   /* ---------------------------------------------------------------- */
-  /* Ghost and intents                                                 */
-  /* ---------------------------------------------------------------- */
-
-  /* ---------------------------------------------------------------- */
   /* Dragging work in from outside                                     */
   /* ---------------------------------------------------------------- */
 
@@ -452,15 +456,30 @@ export class SceneGestures {
     const view = this.host.view;
     if (placing === null || !view.options.intents.includes("place")) return;
     const { x, y } = this.local(event.clientX, event.clientY);
-    const lane = view.laneIdAt(y);
-    if (lane === null) {
+    if (view.laneIdAt(y) === null) {
       this.clearPlacing();
       return;
     }
     event.preventDefault();
     if (event.dataTransfer !== null) event.dataTransfer.dropEffect = "copy";
-    const from = this.snapInside(view.timeAt(x), this.snapStep());
-    const ghost: Subtask = {
+    const ghost = this.placeGhost(placing, x, y);
+    if (ghost === null) return;
+    this.lastClient = { x: event.clientX, y: event.clientY };
+    this.gesture = { kind: "place", ghost, item: placing };
+    this.host.interactionChanged();
+    /* Held at an edge, a drag from outside pans the plot along as one inside
+       it does - and a native drag stops sending events when it holds still, so
+       the frame loop is what carries it. */
+    this.autoPan();
+  }
+
+  /** The ghost of a drag from outside at a point on the plot, or null off the
+      lanes. */
+  private placeGhost(placing: PlacingItem, x: number, y: number): Subtask | null {
+    const lane = this.host.view.laneIdAt(Math.max(0, Math.min(this.host.view.lanesBottom(), y)));
+    if (lane === null) return null;
+    const from = this.snapInside(this.host.view.timeAt(x), this.snapStep());
+    return {
       id: PLACING,
       task: placing.task,
       lane,
@@ -469,8 +488,6 @@ export class SceneGestures {
       ...(placing.setup === undefined ? {} : { setup: placing.setup }),
       ...(placing.teardown === undefined ? {} : { teardown: placing.teardown }),
     };
-    this.gesture = { kind: "place", ghost, item: placing };
-    this.host.interactionChanged();
   }
 
   /** The drop: the place intent, and the ghost goes. Off every lane, or with
@@ -480,6 +497,7 @@ export class SceneGestures {
     if (gesture.kind !== "place") return;
     event.preventDefault();
     const { ghost, item } = gesture;
+    this.stopAutoPan();
     this.gesture = { kind: "none" };
     this.host.interactionChanged();
     const intent: PlaceIntent = {
@@ -495,12 +513,20 @@ export class SceneGestures {
     this.host.handlers().onIntent?.(intent);
   }
 
-  /** The drag left the plot, or the application stopped dragging. */
+  /** The drag left the plot, or the application stopped dragging - which is
+      also how Escape arrives: the browser ends its own drag and sends a leave
+      and a `dragend`, since it delivers no key events while a native drag
+      runs. */
   clearPlacing(): void {
     if (this.gesture.kind !== "place") return;
+    this.stopAutoPan();
     this.gesture = { kind: "none" };
     this.host.interactionChanged();
   }
+
+  /* ---------------------------------------------------------------- */
+  /* Ghost and intents                                                 */
+  /* ---------------------------------------------------------------- */
 
   private snapStep(): SnapRaster {
     const snap = this.host.view.options.snap;
@@ -528,14 +554,13 @@ export class SceneGestures {
           const wall = calendar.intervals.length === 0 ? start : toWallClock(Math.max(0, Math.min(calendar.total, start)), calendar);
           from = this.snapInside(wall, step);
         }
-        const bottom = this.host.data.lanes.length * view.options.laneHeight - view.scrollY - 1;
-        const lane = intents.includes("lane") ? (view.laneIdAt(Math.max(0, Math.min(bottom, y))) ?? s.lane) : s.lane;
+        const lane = intents.includes("lane") ? (view.laneIdAt(Math.max(0, Math.min(view.lanesBottom(), y))) ?? s.lane) : s.lane;
         return { ...s, from, to: from + (s.to - s.from), lane };
       }
       case "stretch-from":
-        return { ...s, from: Math.min(at, s.to - Math.max(step.step, 60_000)) };
+        return { ...s, from: Math.min(at, s.to - Math.max(step.step, MINUTE)) };
       case "stretch-to":
-        return { ...s, to: Math.max(at, s.from + Math.max(step.step, 60_000)) };
+        return { ...s, to: Math.max(at, s.from + Math.max(step.step, MINUTE)) };
       case "setup":
         return { ...s, setup: Math.max(0, s.from - at) };
       case "teardown":
