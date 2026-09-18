@@ -28,7 +28,7 @@ and a capitalised filename is reserved for the names the ecosystem knows.
 | was | is |
 |---|---|
 | `TESTS.md` | [`testing.md`](testing.md) — and the runbook half of it, [`../CONTRIBUTING.md`](../CONTRIBUTING.md) |
-| `CHANGELOG.md` (repository root) | [`journal.md`](journal.md) — the three package changelogs keep their name and their place |
+| `CHANGELOG.md` (repository root) | [`journal.md`](journal.md) — the package changelogs keep their name and their place |
 | `packages/core/GLYPHS.md` | [`../packages/core/docs/glyphs.md`](../packages/core/docs/glyphs.md) |
 | `packages/core/TREE.md` | [`../packages/core/docs/capabilities-tree.md`](../packages/core/docs/capabilities-tree.md) |
 | `packages/charts/STATUS.md` | [`../packages/charts/docs/capabilities.md`](../packages/charts/docs/capabilities.md) |

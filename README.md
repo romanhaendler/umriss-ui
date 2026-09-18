@@ -7,13 +7,16 @@ hard outlines or effects.
 
 ## The packages
 
-| Package | Version | What it is | npm tag |
-|---|---|---|---|
-| [`@umriss-ui/core`](packages/core/README.md) | 0.2.0 | The component library — forms, overlays, structure, the tree, the dock, the command palette. The package you install first | `latest` |
-| [`@umriss-ui/charts`](packages/charts/README.md) | 0.3.0-rc.1 | Canvas charts — few kinds, drawn well. Depends on nothing but React | `next` (release candidate) |
-| [`@umriss-ui/table`](packages/table/README.md) | 0.2.0-rc.1 | The table, declared the way it reads: columns as JSX, typed against their rows. Takes `@umriss-ui/core` as a peer | `next` (release candidate) |
-| [`@umriss-ui/schedule`](packages/schedule/README.md) | 0.1.0-rc.0 | The schedule: subtasks on lanes over time, with transports, findings and controlled editing. Takes `@umriss-ui/core` and `@umriss-ui/charts` as peers | `next` (not yet published) |
-| `@umriss-ui/demo` | — | The private shell all four demos are built from | never |
+| Package | Version | What it is |
+|---|---|---|
+| [`@umriss-ui/core`](packages/core/README.md) | 0.3.1 | The component library — forms, overlays, structure, the tree, the dock, the command palette. The package you install first |
+| [`@umriss-ui/charts`](packages/charts/README.md) | 0.3.1 | Canvas charts — few kinds, drawn well. Depends on nothing but React |
+| [`@umriss-ui/table`](packages/table/README.md) | 0.2.1 | The table, declared the way it reads: columns as JSX, typed against their rows. Takes `@umriss-ui/core` as a peer |
+| [`@umriss-ui/schedule`](packages/schedule/README.md) | 0.1.1 | The schedule: subtasks on lanes over time, with transports, findings and controlled editing. Takes `@umriss-ui/core` and `@umriss-ui/charts` as peers |
+| `@umriss-ui/demo` | — | The private shell all four demos are built from. Never published |
+
+All four published packages are released under the npm tag `latest`, so a plain
+`pnpm add` installs them.
 
 `core` names the package you install first, not a layer the others sit on:
 `@umriss-ui/charts` depends on nothing and will keep depending on nothing,
@@ -90,14 +93,12 @@ from the component.
 ## Maturity
 
 Every package is `0.x`, and while the first digit is `0` no version number
-promises compatibility. `@umriss-ui/core` is released under `latest`;
-the numbers it counted inside this repository before that stand in its changelog
-as *internal* ones. `@umriss-ui/charts` and `@umriss-ui/table` are release
-candidates, `@umriss-ui/schedule` one that has not been published yet, under the tag `next` (`pnpm add @umriss-ui/charts@next`); as long as
-no released version of either exists, `latest` points at the newest candidate as
-well, because the registry does not allow a package without one. What changes
-for a caller stands in that package's own `CHANGELOG.md`, and whatever changes
-existing behaviour stands there under a heading of its own.
+promises compatibility. All four are released under `latest`. The release
+candidates of `charts`, `table` and `schedule` stand in their changelogs, and so
+do the numbers `core` counted inside this repository before its first release,
+as *internal* ones. What changes for a caller stands in that package's own
+`CHANGELOG.md`, and whatever changes existing behaviour stands there under a
+heading of its own.
 
 ## Licence
 

@@ -1,6 +1,6 @@
 # Decisions
 
-Twenty-four decisions, each one written where it was made and kept afterwards. An
+Twenty-five decisions, each one written where it was made and kept afterwards. An
 ADR here is not an announcement: it states the question, the alternatives that
 were real at the time, and what the decision costs — which is what makes it
 worth reading a year later, when the code has changed and the reasoning has not.

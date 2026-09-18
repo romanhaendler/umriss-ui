@@ -50,6 +50,19 @@ module on the caller's side that carries `"use client"` and imports from there.
 
 ---
 
+## 0.3.1 – The README catches up (Sep. 2026)
+
+Nothing in the code changed. The README that shipped with `0.3.0` still said
+the formats default to German notation, and so did the line on `NumberInput`;
+both describe ADR-0024 now, with the import that takes `GERMAN_FORMATS` beside
+`GERMAN_WORDING`.
+
+The `0.3.0` entry below listed `formatsFor(locale)` as added. It is not
+exported — it builds `DEFAULT_FORMATS` and `GERMAN_FORMATS` inside the package
+and nothing else — and the entry is gone.
+
+---
+
 ## 0.3.0 – English formats, and the context menu (Sep. 2026)
 
 ### Changed
@@ -78,9 +91,6 @@ module on the caller's side that carries `"use client"` and imports from there.
 
 ### Added
 
-- **`formatsFor(locale)`** builds a complete `Formats` for a locale - the
-  product's options (day first, two digits, 24-hour clock, per cent without
-  decimals) over the locale's separators and words.
 - **`separatorsOf(formats)`** and `DEFAULT_SEPARATORS`: the group and decimal
   separator a notation writes, measured rather than declared.
 - **Three wording entries for `@umriss-ui/schedule`'s lane groups**:
@@ -89,11 +99,12 @@ module on the caller's side that carries `"use client"` and imports from there.
   `Wording` of its own gains three required entries — which the type says, at
   compile time, as it is meant to (ADR-0019).
 
-### The first release that is not a candidate
+### Released together
 
-`@umriss-ui/core` was already on `latest`; `@umriss-ui/charts` and
-`@umriss-ui/schedule` join it with this delivery, and the three are released
-together because the schedule stands on both.
+`@umriss-ui/core` was already on `latest`; `@umriss-ui/charts`,
+`@umriss-ui/table` and `@umriss-ui/schedule` join it with this delivery, and
+the four are released together: the schedule stands on core and charts, and the
+table's candidate peered on `^0.2.0` and would have refused this core.
 
 ## The context menu (Sep. 2026)
 
