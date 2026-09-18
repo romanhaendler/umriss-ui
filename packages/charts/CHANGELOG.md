@@ -21,15 +21,15 @@ specs; the document itself came into being only with
 `library-audit` 08. They are grouped by unit of delivery, not by commit, and were
 never published.
 
-**Release candidates.** `0.3.0-rc.0` was the first version on the registry and
-`0.3.0-rc.1` is the current one, under the tag `next`:
-`pnpm add @umriss-ui/charts@next`. A release
-candidate promises nothing a `0.x` does not already fail to promise; it says the
-interface is still expected to move before `0.3.0`.
+**Release candidates.** `0.3.0-rc.0` and `0.3.0-rc.1` were the two versions on
+the registry, under the tag `next`. With `0.3.0` that is over: the tag is gone
+and `pnpm add @umriss-ui/charts` is the whole install line. A release candidate
+promised nothing a `0.x` does not already fail to promise; it said the
+interface was still expected to move before `0.3.0`.
 
 ---
 
-## Unreleased – Arithmetic with a second consumer (Sep. 2026)
+## 0.3.0 – Arithmetic with a second consumer (Sep. 2026)
 
 From `.scratch/schedule/spec.md` (ADR-0022): `@umriss-ui/schedule` takes its
 time arithmetic from here, so what it uses is public now.
@@ -42,6 +42,14 @@ time arithmetic from here, so what it uses is public now.
   resolve again.
 - **`toOperatingTimeClamped`** — wall clock to operating time without `NaN`: a
   time in removed time lands on its seam.
+
+### No longer a release candidate
+
+The tag `next` is gone: `0.3.0` publishes to `latest`, and
+`pnpm add @umriss-ui/charts` is the whole install line. Nothing in the package
+changed for that — the candidates 0.3.0-rc.0 and 0.3.0-rc.1 are what this is,
+with the arithmetic above added for `@umriss-ui/schedule`, which now stands on
+it in a released version of its own.
 
 ---
 

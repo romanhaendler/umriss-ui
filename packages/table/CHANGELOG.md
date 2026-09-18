@@ -13,11 +13,27 @@ repaired, and **whatever changes existing behaviour stands under a heading
 renamed, it is named here as it is called today; names that were removed stand
 as they stood.
 
-**Release candidates.** `0.2.0-rc.0` was the first version on the registry and
-`0.2.0-rc.1` is the current one, under the tag `next`:
-`pnpm add @umriss-ui/table@next @umriss-ui/core`. `0.1.0` was never published. Where an entry below names a `@umriss-ui/core`
-version, it is one of the internal numbers from before core's first publication
-as `0.1.0` (see core's changelog).
+**Release candidates.** `0.2.0-rc.0` and `0.2.0-rc.1` were the two versions on
+the registry, under the tag `next`. With `0.2.0` that is over:
+`pnpm add @umriss-ui/table @umriss-ui/core` is the whole install line. `0.1.0`
+was never published. Where an entry below names a `@umriss-ui/core` version, it
+is one of the internal numbers from before core's first publication as `0.1.0`
+(see core's changelog).
+
+---
+
+## 0.2.0 – The first release (Sep. 2026)
+
+No longer a release candidate: the tag `next` is gone and
+`pnpm add @umriss-ui/table @umriss-ui/core` is the whole install line.
+
+**Nothing in the package changed for it.** The source of `0.2.0` is the source
+of `0.2.0-rc.1`, line for line. What moved is outside it: `@umriss-ui/core`
+released `0.3.0`, and the candidate on the registry peers on `^0.2.0` — so an
+application taking both would have been told they do not fit. They do; the
+range was simply older than the core beside it. Released together with
+`@umriss-ui/core` 0.3.0, `@umriss-ui/charts` 0.3.0 and `@umriss-ui/schedule`
+0.1.0, and peering on `^0.3.0`.
 
 ---
 

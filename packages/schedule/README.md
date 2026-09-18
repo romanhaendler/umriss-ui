@@ -11,7 +11,7 @@ the plan underneath them.
 ## Install
 
 ```bash
-pnpm add @umriss-ui/schedule@next @umriss-ui/core @umriss-ui/charts@next
+pnpm add @umriss-ui/schedule @umriss-ui/core @umriss-ui/charts
 ```
 
 Both `@umriss-ui/core` and `@umriss-ui/charts` are **peer dependencies**
