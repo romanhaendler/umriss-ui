@@ -15,6 +15,14 @@ moves from here under the rule above.
 
 ---
 
+## 0.1.1 – The README catches up (Sep. 2026)
+
+Nothing in the code changed. The README names the online demo, the design
+language and the licence, as the other three packages do. The peer ranges are
+`^0.3.1` on `@umriss-ui/core` and `@umriss-ui/charts`, released beside it.
+
+---
+
 ## 0.1.0 – The first release (Sep. 2026)
 
 No longer a release candidate: the tag `next` is gone, `pnpm add

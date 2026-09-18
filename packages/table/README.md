@@ -15,10 +15,6 @@ module with tests of its own.
 pnpm add @umriss-ui/table @umriss-ui/core
 ```
 
-The table is a **release candidate**, published under the tag `next` (and, as
-long as no released version exists, under `latest` too — npm insists on one); the
-core it takes as a peer is the released `@umriss-ui/core`.
-
 `@umriss-ui/core` is a **peer dependency** (ADR-0016): the table reads its
 provider, its formats and its wording, and enters it by the public entry only.
 React 18 or 19 as a peer as well.
@@ -95,7 +91,7 @@ stylesheets by hand.
   `src/`.
 * [`CHANGELOG.md`](CHANGELOG.md) — what changes for a caller.
 * [`../../docs/design-language.md`](../../docs/design-language.md) — the design
-  language all three packages share.
+  language all four packages share.
 * [`../core/README.md`](../core/README.md) — the component library underneath.
 
 ## Licence

@@ -5,7 +5,7 @@ Guiding idea: **precise and quiet, with palpable quality** – depth comes from
 soft shadows and fine light edges, not from hard outlines or effects.
 
 The design language — "Ink & Paper", the dark theme, motion — is written down
-once for all three packages in [`../../docs/design-language.md`](../../docs/design-language.md).
+once for all four packages in [`../../docs/design-language.md`](../../docs/design-language.md).
 
 ## Use
 
@@ -82,8 +82,18 @@ import { GERMAN_WORDING } from "@umriss-ui/core/wording/de";
 ```
 
 Both objects are typed `Wording`, so a missing entry is a compile error rather
-than a gap that shows up in the interface (ADR-0018, ADR-0019). The formats are
-a separate seam and still default to German notation.
+than a gap that shows up in the interface (ADR-0018, ADR-0019).
+
+The formats — dates, numbers, durations — are a seam of their own. The default
+is English notation on a 24-hour clock (`17/03/2026`, `09:05`, `1,234.5`), and
+the same subpath ships `GERMAN_FORMATS` beside the German wording, so a German
+application takes both halves of its language in one import (ADR-0024):
+
+```tsx
+import { GERMAN_FORMATS, GERMAN_WORDING } from "@umriss-ui/core/wording/de";
+
+<UmrissProvider language={{ wording: GERMAN_WORDING, formats: GERMAN_FORMATS }}>…</UmrissProvider>;
+```
 
 ## Components
 
@@ -122,7 +132,7 @@ The table and the alarm list are not part of this package. They live in
 | `MultiSelect` | multiple selection: the field always stays on one line and measures the space (as many chips as fit, the rest as "+N"); chips are remove buttons (hover shows ×, a click deletes, backspace deletes the last, roving tabindex with arrow keys), and the "+N" counter opens the selected view directly; a panel with a search field (autofocus, Enter toggles the first hit), a view switch "all \| selected (N)" (the list always in natural order, deselected rows stay visible in the selected view until the view changes), and all/none/invert acting on the filtered set of the active view |
 | `Card` / `CardHeader` / `CardBody` | panels with an eyebrow, actions, optionally collapsible; `flush` for borderless tables; a dividing line under the head only through `divider` (for borderless data) – otherwise white space carries the hierarchy |
 | `Badge` | a status label with a dot, five tones; slightly rounded by default, `pill` for counters |
-| `NumberInput` | numeric input in the notation the formats seam provides, today German (comma, thousands dots on leaving the field), `decimals` (0 = whole numbers), `min`/`max`, arrow keys with Shift ×10, an integrated spinner column at the right inner edge, `prefix`/`suffix` adornments (€, %) |
+| `NumberInput` | numeric input in the notation the formats seam provides (group separators on leaving the field; it reads back what it writes, whatever the notation), `decimals` (0 = whole numbers), `min`/`max`, arrow keys with Shift ×10, an integrated spinner column at the right inner edge, `prefix`/`suffix` adornments (€, %) |
 | `Meter` | a narrow fill bar (0–1) with a mono percentage label, five tones – for utilisation in cells; `label` names what is being measured |
 | `UmrissProvider` | one place to set things: density, portal target, toasts, language. **Optional** – without it everything behaves as it does unconfigured. It holds no theme (light and dark are the application's `color-scheme`) and writes nothing onto the document |
 | `LanguageProvider` / `useFormats` / `useWording` | formatting and wording as an overridable seam; the wording is a directory of entries, not a translation call. English is the default, German ships as `@umriss-ui/core/wording/de` |

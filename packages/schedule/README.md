@@ -129,10 +129,17 @@ point into a time and a lane and back.
 
 ## Where to read on
 
-* The demo — `pnpm dev:schedule` (port 4176) — is the documentation: every page
-  shows running examples with their source and the props generated from `src/`.
+* The demo: <https://romanhaendler.github.io/umriss-ui/schedule/>, or locally
+  `pnpm dev:schedule` (port 4176). It is the documentation — every page shows
+  running examples with their source and the props table generated from `src/`.
 * [`CHANGELOG.md`](CHANGELOG.md) — what changes for a caller.
 * The vocabulary — **Task**, **Subtask**, **Setup**, **Teardown**,
   **Transport**, **Late transport**, **Lane header**, **Lane group**,
   **Miniature**, **Intent**, **Ghost** — stands in the workspace's
   `CONTEXT.md`, section "The schedule".
+* [`../../docs/design-language.md`](../../docs/design-language.md) — the design
+  language all four packages share.
+
+## Licence
+
+MIT — see [`LICENSE`](LICENSE).

@@ -100,7 +100,7 @@ scale, horizontal bars — stands in the same record, with the reason.
 * [`docs/capabilities.md`](docs/capabilities.md) — every capability with the
   level at which it is proved.
 * [`../../docs/design-language.md`](../../docs/design-language.md) — the design
-  language all three packages share.
+  language all four packages share.
 
 ## Licence
 
