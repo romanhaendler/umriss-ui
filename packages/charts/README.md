@@ -13,12 +13,8 @@ lint rule over `packages/charts/src/**` holds that fast.
 ## Install
 
 ```bash
-pnpm add @umriss-ui/charts@next
+pnpm add @umriss-ui/charts
 ```
-
-The package is a **release candidate**, published under the tag `next`. As long
-as no released version exists, npm points `latest` at the candidate too — a plain
-`pnpm add @umriss-ui/charts` installs it as well.
 
 React 18 or 19 as a peer, and nothing else. `@umriss-ui/core` is **not** a
 dependency and not a peer dependency — if an application uses both packages, it
