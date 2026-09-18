@@ -18,16 +18,15 @@ mechanics.
 
 * **`latest`** is what `pnpm add @umriss-ui/<package>` installs. Only a released
   version goes there.
-* **`next`** carries release candidates (`0.3.0-rc.1`). `charts` and `table`
-  carry `publishConfig.tag: "next"` in their manifests, but **pnpm 9.14.4 does
-  not pass it on**: a dry run of `pnpm publish` announces `latest` for both. A
-  candidate is therefore published with `--tag next` written out (step 4). The
-  very first version of a package gets `latest` as well, because a package
-  without `latest` does not exist, and it stays there when the next candidate
-  goes to `next` — so as long as no released version exists, `latest` is moved to
-  each new candidate by hand (step 5), or a plain `pnpm add` keeps installing the
-  first one. When one of them is released, the `tag` line comes out of its
-  manifest in the same commit as the version.
+* **`next`** carries release candidates (`0.3.0-rc.1`); at the moment it
+  carries nothing, because every package is released. A candidate is published
+  with `--tag next` written out (step 4): `publishConfig.tag` in a manifest does
+  not help, because **pnpm 9.14.4 does not pass it on** — a dry run announced
+  `latest` regardless. The very first version of a package gets `latest` as
+  well, because a package without `latest` does not exist, and it stays there
+  when the next candidate goes to `next` — so as long as no released version
+  exists, `latest` is moved to each new candidate by hand (step 5), or a plain
+  `pnpm add` keeps installing the first one.
 
 Every manifest has `publishConfig.access: "public"` — a scoped package is
 otherwise published as private, and the org would refuse it.

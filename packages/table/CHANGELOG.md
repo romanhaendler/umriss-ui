@@ -22,6 +22,14 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.2.1 – The README catches up (Sep. 2026)
+
+Nothing in the code changed. The README that shipped with `0.2.0` still called
+the table a release candidate under the tag `next`; that paragraph is gone. The
+peer range on `@umriss-ui/core` is `^0.3.1`, the core released beside it.
+
+---
+
 ## 0.2.0 – The first release (Sep. 2026)
 
 No longer a release candidate: the tag `next` is gone and

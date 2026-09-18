@@ -29,6 +29,13 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## 0.3.1 – The README catches up (Sep. 2026)
+
+Nothing in the code changed; the README counts four packages sharing the design
+language, not three.
+
+---
+
 ## 0.3.0 – Arithmetic with a second consumer (Sep. 2026)
 
 From `.scratch/schedule/spec.md` (ADR-0022): `@umriss-ui/schedule` takes its
