@@ -50,7 +50,7 @@ module on the caller's side that carries `"use client"` and imports from there.
 
 ---
 
-## Unreleased – English formats, and the context menu (Sep. 2026)
+## 0.3.0 – English formats, and the context menu (Sep. 2026)
 
 ### Changed
 
@@ -83,6 +83,17 @@ module on the caller's side that carries `"use client"` and imports from there.
   decimals) over the locale's separators and words.
 - **`separatorsOf(formats)`** and `DEFAULT_SEPARATORS`: the group and decimal
   separator a notation writes, measured rather than declared.
+- **Three wording entries for `@umriss-ui/schedule`'s lane groups**:
+  `scheduleFoldGroup`, `scheduleUnfoldGroup` and `scheduleLaneCount(count)`,
+  in English and in `GERMAN_WORDING`. An application that supplies a complete
+  `Wording` of its own gains three required entries — which the type says, at
+  compile time, as it is meant to (ADR-0019).
+
+### The first release that is not a candidate
+
+`@umriss-ui/core` was already on `latest`; `@umriss-ui/charts` and
+`@umriss-ui/schedule` join it with this delivery, and the three are released
+together because the schedule stands on both.
 
 ## The context menu (Sep. 2026)
 

@@ -12,7 +12,7 @@ module with tests of its own.
 ## Install
 
 ```bash
-pnpm add @umriss-ui/table@next @umriss-ui/core
+pnpm add @umriss-ui/table @umriss-ui/core
 ```
 
 The table is a **release candidate**, published under the tag `next` (and, as

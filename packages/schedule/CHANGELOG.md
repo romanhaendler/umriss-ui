@@ -9,12 +9,28 @@ when something is repaired. As long as the first digit is `0`, no number
 promises compatibility — which is why whatever changes existing behaviour stands
 under a heading "Changed" of its own, no matter which digit rose.
 
-**Release candidates.** The package starts as a release candidate under the tag
-`next`: the interface is expected to move before `0.1.0`.
+**Release candidates.** The package started as a release candidate under the
+tag `next`. With `0.1.0` it is released: the tag is gone, and the interface
+moves from here under the rule above.
 
 ---
 
-## Unreleased – Lanes that fold, and one language for the bars (Sep. 2026)
+## 0.1.0 – The first release (Sep. 2026)
+
+No longer a release candidate: the tag `next` is gone, `pnpm add
+@umriss-ui/schedule` is the whole install line, and `@umriss-ui/core` and
+`@umriss-ui/charts` are released versions too. What the candidate `0.1.0-rc.0`
+was is still here; three deliveries stand on top of it, newest first, each with
+its own report below.
+
+The numbers keep their meaning from here: the middle digit rises when something
+is added, the last one when something is repaired, and whatever changes
+existing behaviour stands under a heading "Changed" of its own. As long as the
+first digit is `0`, no number promises compatibility.
+
+---
+
+## Lanes that fold, and one language for the bars (Sep. 2026)
 
 Delivery report for `.scratch/schedule-lane-groups/spec.md`, tickets 01–11.
 
@@ -96,7 +112,7 @@ Delivery report for `.scratch/schedule-lane-groups/spec.md`, tickets 01–11.
 
 ---
 
-## Unreleased – A plan one can read (Sep. 2026)
+## A plan one can read (Sep. 2026)
 
 Delivery report for `.scratch/schedule-legibility/spec.md`, tickets 01–06.
 The formats of `@umriss-ui/core` became English in the same delivery
@@ -127,7 +143,7 @@ The formats of `@umriss-ui/core` became English in the same delivery
 
 ---
 
-## Unreleased – The schedule in daily use (Sep. 2026)
+## The schedule in daily use (Sep. 2026)
 
 Delivery report for `.scratch/schedule-refinement/spec.md`, tickets 01–09.
 Read **Changed** first: the wheel does something else now.
