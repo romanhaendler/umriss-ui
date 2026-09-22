@@ -127,6 +127,17 @@ describe("spanIndex - which span lies under the pointer", () => {
     expect(spanIndex(from, to, oneLane(2), 2, 9, 0, 1, 100)).toBe(0);
   });
 
+  it("hits a covering span where it is drawn, moved by its depth", () => {
+    // Two spans on lane 0, height 1; the second is drawn half a unit lower.
+    const from = f(0, 2);
+    const to = f(10, 8);
+    const depth = new Int32Array([0, 1]);
+    // Above the moved span only the first one is seen - and hit.
+    expect(spanIndex(from, to, oneLane(2), 2, 5, 0.3, 1, 100, depth, -0.5)).toBe(0);
+    // Below lane 0's own edge the moved span still lies.
+    expect(spanIndex(from, to, oneLane(2), 2, 5, -0.8, 1, 100, depth, -0.5)).toBe(1);
+  });
+
   it("counts the beginning to the span and the end no longer", () => {
     // The same boundary rule as in the state band: a boundary belongs to whatever
     // begins there. Otherwise a point would belong to two abutting spans.

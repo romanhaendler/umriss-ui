@@ -286,6 +286,7 @@ export class Registry {
   removeColumn(key: string) {
     if (!this.columns.entries.delete(key)) return;
     this.signatures.delete(key);
+    this.kinds.delete(key);
     this.structure++;
   }
 

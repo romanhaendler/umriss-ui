@@ -136,7 +136,7 @@ function Body({
   /* The number BEFORE the action – and the same set the action then acts on.
      The selection may contain ids the current filter hides; if one counted over
      the filtered set and acknowledged over the whole selection, "acknowledge 2
-     alarms" would asOf on a button that acknowledges ten. Here the cut is made
+     alarms" would stand on a button that acknowledges ten. Here the cut is made
      once and both are fed from it.
 
      Whether a confirmation comes of it the application decides – a confirmation
@@ -183,6 +183,7 @@ function Body({
       </div>
 
       <Table
+        ariaLabel={wording.alarms}
         selectable={selection !== undefined}
         density={density}
         stickyHeader

@@ -66,6 +66,14 @@ describe("computePosition – vertical", () => {
     expect(pos.flipped).toBe(false);
   });
 
+  it("is pulled into the window when it fits on neither side", () => {
+    // 500 high: 262 below the anchor, 294 above it - neither is enough.
+    const pos = computePosition(anchor(200, 300), { width: 300, height: 500 }, VIEWPORT);
+    expect(pos.top).toBe(800 - 500 - 8);
+    // Taller than the window: the top edge stays in it.
+    expect(computePosition(anchor(200, 300), { width: 300, height: 900 }, VIEWPORT).top).toBe(8);
+  });
+
   it("takes the measured panel height seriously", () => {
     const tight = computePosition(anchor(200, 600), { width: 300, height: 150 }, VIEWPORT);
     const tall = computePosition(anchor(200, 600), { width: 300, height: 400 }, VIEWPORT);

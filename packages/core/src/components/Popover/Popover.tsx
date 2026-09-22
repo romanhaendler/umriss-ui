@@ -121,10 +121,13 @@ export function Popover({
       panel.style.width = `${width}px`;
     }
 
+    // The exact size, not offsetWidth/-Height: those round, and half a pixel
+    // decided whether a panel at the window's edge fitted or stuck out.
+    const size = panel.getBoundingClientRect();
     setPosition(
       computePosition(
         anchorRect,
-        { width: panel.offsetWidth, height: panel.offsetHeight },
+        { width: size.width, height: size.height },
         { width: window.innerWidth, height: window.innerHeight },
         { align, offset },
       ),
@@ -161,7 +164,12 @@ export function Popover({
       if (!isInside(event.target as Node)) close(false);
     };
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") close(true);
+      if (event.key !== "Escape") return;
+      /* Escape closes the panel and nothing more: without this a menu in a
+         modal took the modal down with it, because the same key is the
+         dialog's close request. */
+      event.preventDefault();
+      close(true);
     };
 
     // One recomputation per frame instead of one per scroll event.
@@ -205,8 +213,12 @@ export function Popover({
       style={{
         top: position?.top ?? 0,
         left: position?.left ?? 0,
-        // Do not show before the first measurement, or it flashes in the top left.
-        visibility: position ? undefined : "hidden",
+        /* Not shown before the first measurement, or it flashes in the top
+           left. Transparent and not `visibility: hidden`: a hidden panel takes
+           no focus, and the first opening of a menu lost its move to the first
+           entry exactly then. The measurement runs before painting, so the
+           transparent pass is never seen. */
+        opacity: position ? undefined : 0,
       }}
     >
       <FormFieldBoundary>{children}</FormFieldBoundary>

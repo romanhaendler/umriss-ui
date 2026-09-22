@@ -12,6 +12,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import {
+  DatePicker,
   DateRangePicker,
   DateTimePicker,
   DateTimeRangePicker,
@@ -108,5 +109,31 @@ describe("An overridden preset", () => {
     openPanel("Select range");
     expect(screen.getByText("Today")).toBeTruthy();
     expect(screen.queryByText("Heute")).toBeNull();
+  });
+});
+
+/* The grid has one tab stop, on the active day. Paging used to leave that day
+   in the month paged away from, and with it the stop: after the arrow buttons
+   Tab went past the grid. The active day now travels along. */
+describe("Paging with the arrows", () => {
+  it("takes the active day - and the tab stop - into the new month", () => {
+    render(<DatePicker value={new Date(2026, 0, 31)} onChange={vi.fn()} />);
+    openPanel("31/01/2026");
+    const next = screen.getByRole("button", { name: "Next month" });
+    next.focus();
+    fireEvent.click(next);
+    const stop = document.querySelector<HTMLButtonElement>('[role="dialog"] button[tabindex="0"]');
+    expect(stop?.getAttribute("aria-label")).toBe("Saturday, 28 February 2026");
+    // The focus stays on the arrow that paged.
+    expect(document.activeElement).toBe(next);
+  });
+
+  it("leaves the focus on the arrow in a range picker too", () => {
+    render(<DateRangePicker value={null} onChange={vi.fn()} />);
+    openPanel("Select range");
+    const next = screen.getByRole("button", { name: "Next month" });
+    next.focus();
+    fireEvent.click(next);
+    expect(document.activeElement).toBe(next);
   });
 });

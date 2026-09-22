@@ -53,6 +53,9 @@ export function TreeView<K, S extends Key = string>({
   children,
   className,
   onKeyDown,
+  onFocus,
+  onBlur,
+  onScroll,
   ...rest
 }: TreeViewProps<K, S>): ReactNode {
   const wording = useWording();
@@ -199,15 +202,24 @@ export function TreeView<K, S extends Key = string>({
       role="tree"
       aria-label={ariaLabel}
       className={cx(styles.tree, rowWindow !== undefined && styles.scrolls, className)}
+      {...rest}
+      /* After `rest` and composed with the caller's, as `onKeyDown` already
+         was: a caller's `onFocus` or `onBlur` used to replace the tracking the
+         focus-follows-the-active-node rule hangs on, and an `onScroll` the
+         row window. */
       onKeyDown={onKey}
-      onScroll={rowWindow?.onScroll}
-      onFocus={() => {
+      onScroll={(e) => {
+        onScroll?.(e);
+        rowWindow?.onScroll();
+      }}
+      onFocus={(e) => {
+        onFocus?.(e);
         hasFocus.current = true;
       }}
       onBlur={(e) => {
+        onBlur?.(e);
         if (!e.currentTarget.contains(e.relatedTarget as Node | null)) hasFocus.current = false;
       }}
-      {...rest}
     >
       {rowWindow !== undefined && rowWindow.fillerBefore > 0 ? (
         <div aria-hidden="true" style={{ height: rowWindow.fillerBefore }} />

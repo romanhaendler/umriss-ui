@@ -295,4 +295,19 @@ describe("Dock - the drag on the grip", () => {
     drag(780, 200);
     expect(placeNow()).toBe("bottom");
   });
+
+  /* Its Escape listener sits on the window. Unmounted in the middle of a drag,
+     the dock used to leave it there, and a later Escape reported a place for
+     a dock that no longer existed. */
+  it("ends with the dock when it unmounts in the middle", () => {
+    const reported = vi.fn();
+    const { unmount } = render(<Harness onPlaceChange={reported} />);
+    giveHostAnArea();
+    fireEvent.pointerDown(grip(), { pointerId: 1, button: 0, clientX: 400, clientY: 380 });
+    drag(780, 200);
+    unmount();
+    reported.mockClear();
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(reported).not.toHaveBeenCalled();
+  });
 });

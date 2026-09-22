@@ -89,7 +89,12 @@ export function Tooltip({ content, children, delay = 300 }: TooltipProps) {
     <>
       {cloneElement(children, {
         ref: targetRef,
-        "aria-describedby": open ? id : (childProps["aria-describedby"] as string | undefined),
+        /* Added to the child's own description, not put in its place: a field's
+           hint went silent for as long as the tooltip stood. */
+        "aria-describedby":
+          [childProps["aria-describedby"] as string | undefined, open ? id : undefined]
+            .filter(Boolean)
+            .join(" ") || undefined,
         onPointerEnter: (event: PointerEvent) => {
           (childProps.onPointerEnter as ((e: PointerEvent) => void) | undefined)?.(event);
           show();

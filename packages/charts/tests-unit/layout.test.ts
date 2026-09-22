@@ -113,6 +113,22 @@ describe("computeLayout - the ground plan", () => {
     });
   });
 
+  it("widens a y band for a limit label longer than its ticks", () => {
+    const layout = computeLayout({
+      width: 500,
+      height: 300,
+      padding: { top: 8, right: 8, bottom: 8, left: 8 },
+      axes: [
+        axis({ id: "y", orientation: "y", position: "left", tickFormat: fixed("AAA"), limitLabels: ["Warning"] }),
+        axis({ id: "x", orientation: "x", position: "bottom" }),
+      ],
+      measure,
+      hysteresis: new Map(),
+    });
+    // "Warning": 49px plus the label's 2px padding on either side.
+    expect(layout.plot.x).toBe(8 + TICK_LEN + TICK_GAP + 49 + 4);
+  });
+
   it("occupies all four sides at once", () => {
     const layout = computeLayout({
       width: 600,

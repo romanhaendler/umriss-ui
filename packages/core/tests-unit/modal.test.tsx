@@ -92,3 +92,23 @@ describe("Modal – onClose exactly once", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 });
+
+/* A <dialog> takes no name from its content. The header's heading names the
+   window only through the reference - without it a screen reader said
+   "dialog" and nothing more, whatever the header promised. */
+describe("Modal – named by its header", () => {
+  it("carries the title as its accessible name", () => {
+    render(<Fixture onClose={vi.fn()} />);
+    const title = document.getElementById(dialog().getAttribute("aria-labelledby") ?? "");
+    expect(title?.textContent).toBe("Title");
+  });
+
+  it("gives way to a name of the caller's", () => {
+    render(
+      <Modal open onClose={vi.fn()} aria-labelledby="own">
+        <ModalHeader title="Title" />
+      </Modal>,
+    );
+    expect(dialog().getAttribute("aria-labelledby")).toBe("own");
+  });
+});

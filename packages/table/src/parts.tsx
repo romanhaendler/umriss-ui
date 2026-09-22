@@ -330,7 +330,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
   const sticks = (e: ColumnEntry) => stickyRowHeader && e === header;
 
   const rows = projection.visible;
-  const hasFooter = columns.some((e) => e.spec.footer);
+  const footerShown = !loading && columns.some((e) => e.spec.footer);
   const restricted = snapshot.search !== "" || Object.keys(snapshot.filter).length > 0;
 
   const renderRow = (row: unknown, index: number, absolute: number) => (
@@ -403,8 +403,9 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
       <table
         aria-label={ariaLabel}
         /* With virtualisation not every row stands in the document; plus one
-           for the header row, which counts per ARIA. */
-        aria-rowcount={virtual ? projection.filtered.length + 1 : undefined}
+           for the header row and one for the footer row, which count per ARIA. */
+        aria-rowcount={virtual ? projection.filtered.length + 1 + (footerShown ? 1 : 0) : undefined}
+        aria-busy={loading || undefined}
         className={cx(
           styles.table,
           resolvedDensity === "compact" && styles.compact,
@@ -413,7 +414,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
         )}
       >
         <thead>
-          <tr>
+          <tr aria-rowindex={virtual ? 1 : undefined}>
             {selectable && (
               <th
                 scope="col"
@@ -452,9 +453,9 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
           </tr>
         </thead>
         {body}
-        {hasFooter && !loading && (
+        {footerShown && (
           <tfoot>
-            <tr>
+            <tr aria-rowindex={virtual ? projection.filtered.length + 2 : undefined}>
               {Array.from({ length: controlColumns }, (_, i) => (
                 <td
                   key={i}
@@ -548,12 +549,20 @@ function HeaderCell({
     if (!cell || !headerRow || !table) return;
     const index = Array.from(headerRow.children).indexOf(cell);
     const count = headerRow.children.length;
+    /* Measured without the width it has now, and without the surplus a full
+       width table hands its columns: a cell is never narrower than its width,
+       so a widened column would only ever grow. */
+    const before = { cell: cell.style.width, table: table.style.width };
+    cell.style.width = "";
+    table.style.width = "auto";
     let widest = 0;
     for (const tableRow of Array.from(table.rows)) {
       if (tableRow.cells.length !== count) continue;
       const c = tableRow.cells[index];
       if (c) widest = Math.max(widest, c.scrollWidth);
     }
+    cell.style.width = before.cell;
+    table.style.width = before.table;
     if (widest > 0) snapshot.setWidth(id, Math.max(MIN, widest + 1));
   };
 

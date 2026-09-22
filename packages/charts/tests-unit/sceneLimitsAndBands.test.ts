@@ -285,6 +285,22 @@ describe("Extra channels exist only where a kind needs them (ADR-0011)", () => {
     });
     expect(s.axisExtent("x", "x")).toEqual([0, 6]);
   });
+
+  it("widens the y extent anew when the height of a span changes", () => {
+    const s = makeScene();
+    const span: SpanSeriesConfig = {
+      kind: "span",
+      accessor: (d) => (d as Row).a,
+      to: (d) => (d as Row).to,
+      xAxisId: "x",
+      yAxisId: "y",
+      height: 2,
+    };
+    const id = s.registerSeries(span);
+    expect(s.axisExtent("y", "y")).toEqual([9, 31]);
+    s.updateSeries(id, { ...span, height: 4 });
+    expect(s.axisExtent("y", "y")).toEqual([8, 32]);
+  });
 });
 
 describe("Degenerate cases that look like an empty chart", () => {

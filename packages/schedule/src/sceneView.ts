@@ -94,9 +94,18 @@ export class SceneView {
     const calendarChanged = options.calendar !== this.options.calendar;
     const previous = this.options.calendar;
     this.options = options;
-    if (initialDomain !== null || calendarChanged) {
-      const wall = initialDomain ?? [toWallClock(this.domain[0], previous), toWallClock(this.domain[1], previous)];
-      this.domain = [toOperatingTimeClamped(wall[0], options.calendar), toOperatingTimeClamped(wall[1], options.calendar)];
+    if (initialDomain !== null) {
+      this.domain = [toOperatingTimeClamped(initialDomain[0], options.calendar), toOperatingTimeClamped(initialDomain[1], options.calendar)];
+    } else if (calendarChanged) {
+      /* A view panned past the old calendar's ends has no wall clock there; the
+         distance beyond the end is carried over as it is, or the domain would
+         become NaN. */
+      const old = calendarFrom(previous);
+      const carry = (v: number) => {
+        const inside = old.intervals.length === 0 ? v : Math.max(0, Math.min(old.total, v));
+        return toOperatingTimeClamped(toWallClock(inside, old), options.calendar) + (v - inside);
+      };
+      this.domain = [carry(this.domain[0]), carry(this.domain[1])];
     }
   }
 

@@ -1,4 +1,4 @@
-import { cloneElement, createContext, useContext, useEffect, useId, useRef, useState } from "react";
+import { cloneElement, createContext, useCallback, useContext, useId, useRef, useState } from "react";
 import type {
   ButtonHTMLAttributes,
   KeyboardEvent as ReactKeyboardEvent,
@@ -19,7 +19,10 @@ interface MenuContextValue {
    leaves the package - `index.ts` names what does. */
 export const MenuContext = createContext<MenuContextValue | null>(null);
 
-/** Arrow keys, Home and End over the enabled entries; Tab closes. */
+/** Arrow keys, Home and End over the enabled entries; Tab closes. `close`
+    gives the focus back to where the menu came from, and the Tab then moves on
+    from there - left in the panel, the portal at the end of the page sent it
+    to the top of the page. */
 export function handleMenuKeyDown(
   event: ReactKeyboardEvent<HTMLElement>,
   panel: HTMLElement | null,
@@ -70,7 +73,7 @@ export interface MenuProps {
 export function Menu({ trigger, children, align = "start" }: MenuProps) {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
   const panelId = useId();
 
   const closeMenu = () => {
@@ -78,16 +81,17 @@ export function Menu({ trigger, children, align = "start" }: MenuProps) {
     triggerRef.current?.focus();
   };
 
-  // On opening, on to the first selectable entry.
-  useEffect(() => {
-    if (!open) return;
-    panelRef.current
-      ?.querySelector<HTMLButtonElement>('[role="menuitem"]:not([disabled])')
-      ?.focus();
-  }, [open]);
+  /* On opening, on to the first selectable entry - as soon as the panel
+     stands, the way `ContextMenu` does it. An effect on `open` ran before the
+     popover had found its portal target, so the first opening of a menu left
+     the focus on the trigger. */
+  const attachPanel = useCallback((node: HTMLDivElement | null) => {
+    panelRef.current = node;
+    node?.querySelector<HTMLButtonElement>('[role="menuitem"]:not([disabled])')?.focus();
+  }, []);
 
   const handlePanelKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) =>
-    handleMenuKeyDown(event, panelRef.current, () => setOpen(false));
+    handleMenuKeyDown(event, panelRef.current, closeMenu);
 
   const triggerProps = trigger.props;
 
@@ -112,7 +116,7 @@ export function Menu({ trigger, children, align = "start" }: MenuProps) {
         id={panelId}
         className={styles.panel}
       >
-        <div ref={panelRef} className={styles.content} onKeyDown={handlePanelKeyDown}>
+        <div ref={attachPanel} className={styles.content} onKeyDown={handlePanelKeyDown}>
           <MenuContext.Provider value={{ close: closeMenu }}>{children}</MenuContext.Provider>
         </div>
       </Popover>
@@ -132,7 +136,7 @@ export interface MenuItemProps extends Omit<ButtonHTMLAttributes<HTMLButtonEleme
   tone?: "default" | "danger";
 }
 
-export function MenuItem({ onSelect, tone = "default", className, children, ...rest }: MenuItemProps) {
+export function MenuItem({ onSelect, tone = "default", className, children, onClick, ...rest }: MenuItemProps) {
   const menu = useContext(MenuContext);
 
   return (
@@ -141,11 +145,14 @@ export function MenuItem({ onSelect, tone = "default", className, children, ...r
       role="menuitem"
       tabIndex={-1}
       className={cx(styles.item, tone === "danger" && styles.danger, className)}
-      onClick={() => {
+      {...rest}
+      /* Composed, not overridden by `rest`: a caller's `onClick` used to take
+         the closing away from the entry. */
+      onClick={(event) => {
+        onClick?.(event);
         onSelect?.();
         menu?.close();
       }}
-      {...rest}
     >
       {children}
     </button>

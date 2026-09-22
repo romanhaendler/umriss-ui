@@ -82,6 +82,16 @@ describe("Popover – Escape and focus", () => {
     expect(document.activeElement).toBe(screen.getByText("Trigger"));
   });
 
+  /* The same key is the close request of a <dialog>: without the default
+     prevented, a menu in a modal took the modal down with it. */
+  it("keeps Escape to itself", () => {
+    render(<Setup />);
+    const escape = new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true });
+    fireEvent(document, escape);
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(escape.defaultPrevented).toBe(true);
+  });
+
   it("does not give the focus back when that was declined", () => {
     render(<Setup restoreFocus={false} />);
     fireEvent.keyDown(document, { key: "Escape" });

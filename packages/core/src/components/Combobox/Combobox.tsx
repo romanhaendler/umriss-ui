@@ -95,6 +95,8 @@ export function Combobox<T extends string = string>({
   }, [open, activeIndex]);
 
   const handleKeyDown = (event: ReactKeyboardEvent<HTMLInputElement>) => {
+    // An input method's own keys (Enter ends the composition) are not ours.
+    if (event.nativeEvent.isComposing) return;
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {
       event.preventDefault();
       if (!open) {

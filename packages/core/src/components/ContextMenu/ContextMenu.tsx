@@ -82,7 +82,7 @@ export function ContextMenu({ open, onOpenChange, position, ariaLabel, children 
         <div
           ref={attachPanel}
           className={styles.content}
-          onKeyDown={(event: ReactKeyboardEvent<HTMLDivElement>) => handleMenuKeyDown(event, panelRef.current, () => onOpenChange(false))}
+          onKeyDown={(event: ReactKeyboardEvent<HTMLDivElement>) => handleMenuKeyDown(event, panelRef.current, close)}
         >
           <MenuContext.Provider value={{ close }}>{children}</MenuContext.Provider>
         </div>

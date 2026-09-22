@@ -29,6 +29,31 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## 0.3.2 – Phones, touch and a review (Sep. 2026)
+
+### Fixed
+
+- **A tap shows the tooltip.** On a touch screen the tap that lands on the plot
+  shows what lies there, and the finger lifting no longer takes it away again;
+  a tap outside the plot ends it.
+- **A limit's label fits its y axis band.** The band is as wide as the widest
+  limit label on it, so a label such as "Warning limit" is no longer clipped at
+  the edge of the chart and no longer covers the tick labels.
+- **The tooltip follows new data under a resting pointer.** Live data or a
+  resize moved the series away beneath the hover marker, and the tooltip went on
+  naming the values of before; the hit is now asked again with every new layout.
+- **A web font that arrives late re-measures the axes.** Labels measured in the
+  fallback font no longer overflow their band once the real font is there.
+- **A resize there and back within one frame** lands on the last size, not the
+  first.
+- **A span's `height`** now widens the y axis anew when it changes, and a
+  covering span is hit where it is drawn - moved within its lane - not where it
+  would lie unmoved.
+- `LegendProps.placement` said the legend stands below the plot without a
+  value; it stands above it, as it always did.
+
+---
+
 ## 0.3.1 – The README catches up (Sep. 2026)
 
 Nothing in the code changed; the README counts four packages sharing the design

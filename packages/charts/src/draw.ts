@@ -10,7 +10,7 @@
    - 1-px lines lie on half pixels, so that they are crisp at DPR 1. */
 
 import { segmentEnd } from "./state";
-import { isOpen, spanEnd } from "./spans";
+import { DEPTH_OFFSET, isOpen, spanEnd } from "./spans";
 import type { AxisLayout } from "./layout";
 import type { ResolvedTheme } from "./theme";
 import type { HoverState, Rect, Scale } from "./types";
@@ -478,7 +478,7 @@ function drawSpans(ctx: CanvasRenderingContext2D, item: SpanDrawItem): void {
   const ends = item.x1;
   const depth = item.depth;
   const heightPx = Math.abs(item.height * ym);
-  const offsetPx = heightPx * 0.28;
+  const offsetPx = heightPx * DEPTH_OFFSET;
 
   const filled = new Path2D();
   const open = new Path2D();

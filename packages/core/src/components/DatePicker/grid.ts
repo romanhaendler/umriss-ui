@@ -6,6 +6,11 @@
 export const startOfMonth = (d: Date) => new Date(d.getFullYear(), d.getMonth(), 1);
 export const addDays = (d: Date, n: number) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
 export const addMonths = (d: Date, n: number) => new Date(d.getFullYear(), d.getMonth() + n, 1);
+/** The same day `n` months on; the 31st becomes the last day of a shorter month. */
+export const shiftMonth = (d: Date, n: number) => {
+  const lastDay = new Date(d.getFullYear(), d.getMonth() + n + 1, 0).getDate();
+  return new Date(d.getFullYear(), d.getMonth() + n, Math.min(d.getDate(), lastDay));
+};
 export const sameDay = (a: Date | null, b: Date | null) =>
   !!a && !!b && a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 export const dayOnly = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
