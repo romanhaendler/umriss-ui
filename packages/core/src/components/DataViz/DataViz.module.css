@@ -45,6 +45,9 @@
   .sparkline {
     composes: text from "#own-styles";
     display: inline-flex;
+    /* Its drawing has a fixed width: squeezed in a row, it drew over its
+       neighbours instead of letting them wrap. */
+    flex: none;
     color: var(--u-color-text-secondary);
   }
 

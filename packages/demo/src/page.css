@@ -420,6 +420,9 @@
 
 .apiTable {
   width: 100%;
+  /* Narrower, the type column broke after every letter: the table scrolls in
+     its box instead. */
+  min-width: 36rem;
   border-collapse: collapse;
   background: var(--u-color-surface);
   font-size: var(--u-text-xs);
@@ -531,4 +534,11 @@
 .why a:focus-visible {
   outline: none;
   box-shadow: var(--u-focus-ring);
+}
+
+/* A long identifier in the prose breaks where it has to: on a phone it ran
+   out of the page otherwise. */
+.page p code,
+.page li code {
+  overflow-wrap: anywhere;
 }

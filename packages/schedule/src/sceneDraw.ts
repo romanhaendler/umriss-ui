@@ -512,11 +512,8 @@ function drawSubtask(ctx: CanvasRenderingContext2D, input: DrawInput, box: Subta
   }
 }
 
-/** The distance between two lines of the hatch on a bar and on a refused lane -
-    the lane's is the finer of the two, because it runs the whole width of the
-    plot - and how far a bar that runs on fades into the surface. All in
-    pixels. */
-const HATCH_STEP = 7;
+/** The distance between two lines of the hatch on a refused lane, and how far
+    a bar that runs on fades into the surface. Both in pixels. */
 const REFUSED_HATCH_STEP = 6;
 const FADE_SPAN = 16;
 
@@ -529,8 +526,8 @@ function hatch(
   height: number,
   colour: string,
   weight: number,
-  step = HATCH_STEP,
-  lineWidth = 2,
+  step: number,
+  lineWidth: number,
 ): void {
   ctx.save();
   ctx.beginPath();

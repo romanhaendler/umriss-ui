@@ -521,3 +521,18 @@ describe("useCommandPaletteShortcut", () => {
     expect(second).toHaveBeenCalledTimes(1);
   });
 });
+
+/* An input method (Japanese, Chinese, Korean) ends its composition with Enter.
+   That Enter belongs to the input method: the palette used to take it as a
+   choice, before the word typed had even arrived. */
+describe("CommandPalette – an input method's Enter", () => {
+  it("chooses nothing while a composition runs", () => {
+    const onChoose = vi.fn();
+    render(<Harness onChoose={onChoose} />);
+    type("tab");
+    fireEvent.keyDown(field(), { key: "Enter", isComposing: true });
+    expect(onChoose).not.toHaveBeenCalled();
+    fireEvent.keyDown(field(), { key: "Enter" });
+    expect(onChoose).toHaveBeenCalledWith("table");
+  });
+});

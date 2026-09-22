@@ -52,6 +52,9 @@ export function Course() {
 A series is an element, not an entry in a configuration object: the order in the
 JSX decides what lies over what, and at the same time the palette colour.
 
+On a touch screen a tap shows the tooltip, and a tap on empty plot or outside
+the chart takes it away; a finger swiping over the chart scrolls the page.
+
 ## Styles
 
 Nothing to import. `dist/charts.js` loads its own stylesheet; the axes, ticks,

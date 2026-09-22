@@ -127,9 +127,14 @@ export function Chart<T>(props: ChartProps<T>): ReactNode {
     // Leaving the window ends the hover just as pointerleave does (R-4.10).
     const onBlur = (): void => scene.pointerLeave();
     window.addEventListener("blur", onBlur);
+    const onTapOutside = (e: PointerEvent): void => {
+      if (!plot.contains(e.target as Node)) scene.pointerLeave();
+    };
+    document.addEventListener("pointerdown", onTapOutside);
 
     return () => {
       window.removeEventListener("blur", onBlur);
+      document.removeEventListener("pointerdown", onTapOutside);
       observer.disconnect();
       scene.unbind();
     };
@@ -184,7 +189,13 @@ export function Chart<T>(props: ChartProps<T>): ReactNode {
           role="img"
           aria-label={ariaLabel}
           onPointerMove={onPointerMove}
-          onPointerLeave={() => scene.pointerLeave()}
+          // A touch has no hover: the tap shows the tooltip, and the leave that
+          // follows every lifted finger would take it straight away again. A
+          // tap on empty plot ends it, as does one outside (the effect above).
+          onPointerDown={onPointerMove}
+          onPointerLeave={(e) => {
+            if (e.pointerType !== "touch") scene.pointerLeave();
+          }}
         >
           <canvas ref={seriesRef} className="uc-layer-series" aria-hidden="true" />
           <canvas ref={overlayRef} className="uc-layer-overlay" aria-hidden="true" />

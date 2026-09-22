@@ -146,7 +146,7 @@ export interface TagProps extends Omit<HTMLAttributes<HTMLSpanElement>, "onRemov
 }
 
 export const Tag = forwardRef<HTMLSpanElement, TagProps>(function Tag(
-  { tone = "neutral", children, onRemove, removeLabel, disabled = false, className, ...rest },
+  { tone = "neutral", children, onRemove, removeLabel, disabled = false, className, onKeyDown, ...rest },
   ref,
 ) {
   const inGroup = useContext(TagGroupContext);
@@ -176,8 +176,11 @@ export const Tag = forwardRef<HTMLSpanElement, TagProps>(function Tag(
     if (neighbour) requestAnimationFrame(() => neighbour.focus());
   };
 
+  /* Composed with the caller's, as the group does it: `rest` used to replace
+     it, and Delete and Backspace removed nothing any more. */
   const handleKeyDown = (event: ReactKeyboardEvent<HTMLSpanElement>) => {
-    if (!removable) return;
+    onKeyDown?.(event);
+    if (event.defaultPrevented || !removable) return;
     if (event.key === "Backspace" || event.key === "Delete") {
       event.preventDefault();
       removeWithFocus(event.currentTarget);
@@ -197,7 +200,6 @@ export const Tag = forwardRef<HTMLSpanElement, TagProps>(function Tag(
       /* Inside the group, the group manages the tab stop – here stands only
          the initial value, so that nothing blinks before the first effect. */
       tabIndex={removable ? (inGroup ? -1 : 0) : undefined}
-      onKeyDown={handleKeyDown}
       className={cx(
         styles.tag,
         styles[tone],
@@ -206,6 +208,7 @@ export const Tag = forwardRef<HTMLSpanElement, TagProps>(function Tag(
         className,
       )}
       {...rest}
+      onKeyDown={handleKeyDown}
     >
       <span className={styles.text}>{children}</span>
       {removable && (

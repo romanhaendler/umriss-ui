@@ -15,6 +15,35 @@ moves from here under the rule above.
 
 ---
 
+## 0.1.2 – Phones, touch and a review (Sep. 2026)
+
+### Changed
+
+- **The lane headers take at most 40 % of the schedule.** `headerWidth` is
+  now `min(headerWidth px, 40%)`, so that on a phone the plot keeps the larger
+  part.
+- **The wheel over the lane headers scrolls the lanes**, as it does over the
+  plot; Ctrl or ⌘ there zooms around the plot's first instant.
+- **A finger's tap may wander ten pixels** and still select; the mouse keeps
+  its three.
+
+### Fixed
+
+- A pinch that ends with one finger still down pans on with that finger,
+  instead of doing nothing until it is lifted; a third finger no longer breaks
+  the pinch.
+- A pan ended by `pointercancel` gives the cursor back.
+- A schedule unmounted during a drag stops its auto-pan and the timer of a
+  folded group it rested over; before, the auto-pan ran on and kept reporting
+  `onDomainChange`.
+- A new `calendar` - an inline array counts, being new on every render - under
+  a view panned past the old calendar's ends no longer turns the domain into
+  NaN and the plot blank.
+- A lane or group id containing a space no longer breaks the fold control's
+  `aria-controls`.
+
+---
+
 ## 0.1.1 – The README catches up (Sep. 2026)
 
 Nothing in the code changed. The README names the online demo, the design

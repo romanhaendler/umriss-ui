@@ -50,6 +50,90 @@ module on the caller's side that carries `"use client"` and imports from there.
 
 ---
 
+## 0.3.2 – Phones, touch and a review (Sep. 2026)
+
+### Changed
+
+- **A handler a caller hands in runs beside the component's own instead of
+  replacing it.** `Tab` took an `onClick`, `MenuItem` an `onClick`, `TabList`,
+  `Tag` and `RadioGroup` an `onKeyDown`, `NumberInput` an `onFocus`, `onBlur`
+  and `onKeyDown`, and `TreeView` an `onFocus`, `onBlur` and `onScroll` through
+  their spread props - and with them the component's own work: a tab that did
+  not switch, an entry that left its menu open, a tag Delete did not remove, a
+  radio group the arrows did not move, a tree whose focus stopped following the
+  active node. `NumberInput` was the sharpest case: a form library's `onBlur`
+  took the commit on leaving, and the field then counted as focused for good
+  and took no value from outside any more. The caller's handler now runs first;
+  where a key handler calls `preventDefault()`, the component leaves that key
+  alone.
+- **Paging a calendar takes the active day along.** The arrow buttons of all
+  four pickers move the active day - which carries the grid's one tab stop - by
+  the same month, the 31st landing on the last day of a shorter month. Left
+  behind in the month paged away from, it took the stop with it, and Tab went
+  past the grid. The focus stays on the arrow that paged.
+
+### Fixed
+
+- **A popover never leaves the window.** Its panel is capped at the window with
+  eight pixels of air (`max-width: calc(100vw - 16px)`, `max-height:
+  calc(100dvh - 16px)`) and scrolls in itself beyond that; a panel that fits
+  neither above nor below its trigger is pulled into the window, over the
+  trigger if need be, instead of hanging out of it.
+- **A popover measures its panel exactly.** It read the rounded
+  `offsetWidth`/`offsetHeight`, and half a pixel decided whether a panel at the
+  window's edge fitted or stuck out.
+- **The range pickers fit a phone.** Below 760px the presets of
+  `DateRangePicker` and `DateTimeRangePicker` stand above the months as a row;
+  below 600px the two months stand one below the other.
+- **The × of `Select` and of the pickers stands on a touch screen.** It faded
+  in on hover, which a finger has not; on `(hover: none)` it now stands whenever
+  there is a value.
+- **`Sparkline` keeps its width in a flex row.** It shrank with the row; it is
+  now `flex: none`.
+- **Escape closes the popover and nothing more.** A menu, picker or select panel
+  inside a `Modal` took the modal down with it, because the same key is the
+  dialog's close request. The popover now keeps the key to itself.
+- **The first opening moves the focus as well.** `Menu` and `ContextMenu` put
+  the focus on their first entry, `MultiSelect` into its search and the pickers
+  onto the active day - but not on the first opening of each: the panel was
+  hidden (`visibility: hidden`) until its first measurement, and a hidden
+  element takes no focus. It is now transparent for that pass, which is never
+  painted. `Menu` and `MultiSelect` also moved their focus in an effect that ran
+  before the panel stood; they now do it the moment it arrives, as `ContextMenu`
+  already did.
+- **Tab out of an open menu goes on from the trigger.** The panel is portalled
+  to the end of the page, and a Tab from an entry went to the top of the page.
+  `Menu` and `ContextMenu` now give the focus back first, and the Tab moves on
+  from there.
+- **`Modal` is named by its header.** `ModalHeader`'s `title` promised to name
+  the window for the screen reader; a `<dialog>` takes no name from its
+  content, so it said only "dialog". The dialog now points at the heading with
+  `aria-labelledby` - an `aria-labelledby` or `aria-label` of the caller's still
+  wins.
+- **An uncontrolled `RadioGroup` is entered at its choice.** It wrote a tab stop
+  on the initial option and, since no render follows a choice, kept it there:
+  Tab came back to the initial option rather than the chosen one. Uncontrolled,
+  it now leaves the tab stop to the browser's own rule for radio groups.
+- **`Tooltip` adds to its target's description.** While it stood, it replaced
+  the target's own `aria-describedby`, and a field's hint went silent.
+- **An input method's Enter chooses nothing.** In `CommandPalette`, `Combobox`
+  and the search of `MultiSelect`, the Enter that ends a composition (Japanese,
+  Chinese, Korean) was taken as a choice.
+- **`NumberInput` writes its first value in the notation of the formats.** The
+  first render used the default notation and the next one corrected it, so an
+  application with `GERMAN_FORMATS` saw `1,234.5` for a frame. Its description
+  still spoke of German notation as well; it names the formats now.
+- **The line under the chosen tab follows a late font.** It was measured before
+  the font had loaded and stood a pixel or two beside its tab until the window
+  changed size; it is measured again once the fonts are ready.
+- **A `Dock` unmounted in the middle of a drag ends the drag.** Its Escape
+  listener on the window outlived it, and a later Escape reported a place for a
+  dock that no longer existed.
+- **`Alert`'s `dismissLabel` names its real default** - the wording's "Close
+  message", not "Close".
+
+---
+
 ## 0.3.1 – The README catches up (Sep. 2026)
 
 Nothing in the code changed. The README that shipped with `0.3.0` still said

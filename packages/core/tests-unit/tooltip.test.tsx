@@ -52,6 +52,24 @@ describe("Tooltip", () => {
     expect(target.getAttribute("aria-describedby")).toBe(tooltip.id);
   });
 
+  it("keeps the target's own description beside its own", () => {
+    render(
+      <>
+        <Tooltip content="Hint">
+          <button aria-describedby="own">Target</button>
+        </Tooltip>
+        <p id="own">Own</p>
+      </>,
+    );
+    const target = screen.getByText("Target");
+    fireEvent.focus(target);
+    show();
+    const tooltip = screen.getByRole("tooltip");
+    expect(target.getAttribute("aria-describedby")).toBe(`own ${tooltip.id}`);
+    fireEvent.blur(target);
+    expect(target.getAttribute("aria-describedby")).toBe("own");
+  });
+
   it("closes on Escape", () => {
     render(
       <Tooltip content="Hint">

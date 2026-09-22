@@ -333,6 +333,11 @@ export const Dock = forwardRef<HTMLDivElement, DockProps>(function Dock(
   /* The pointer (ticket 03)                                           */
   /* ---------------------------------------------------------------- */
 
+  /* The drag in progress, so that unmounting ends it: its Escape listener sits
+     on the window and would otherwise outlive the dock. */
+  const endDrag = useRef<(() => void) | null>(null);
+  useEffect(() => () => endDrag.current?.(), []);
+
   const onGripPointerDown = (event: PointerEvent<HTMLButtonElement>) => {
     const grip = event.currentTarget;
     if (event.button !== 0) return;
@@ -380,6 +385,7 @@ export const Dock = forwardRef<HTMLDivElement, DockProps>(function Dock(
     };
 
     const cleanUp = () => {
+      endDrag.current = null;
       /* First unsubscribe, then release - as at the table's column grip in
          @umriss-ui/table: on `pointercancel` the pointer is already free and
          `releasePointerCapture` would throw. */
@@ -416,6 +422,7 @@ export const Dock = forwardRef<HTMLDivElement, DockProps>(function Dock(
     grip.addEventListener("pointerup", ended);
     grip.addEventListener("pointercancel", ended);
     window.addEventListener("keydown", onKeyDuringDrag, true);
+    endDrag.current = cleanUp;
   };
 
   /* ---------------------------------------------------------------- */

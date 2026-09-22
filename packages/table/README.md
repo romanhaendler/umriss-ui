@@ -54,6 +54,9 @@ right-aligned in the provider's notation and sortable. `rowHeader` makes the
 order number the name of the row — for a screen reader, and for the sticky
 column.
 
+A table wider than its place scrolls in its own frame, never the page; on a
+phone the toolbar and the paging bar wrap instead of running out of it.
+
 ## Styles
 
 Nothing to import. `dist/table.js` loads its own stylesheet, and

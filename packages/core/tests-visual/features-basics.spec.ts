@@ -83,6 +83,9 @@ test("ContextMenu flips and stays inside the window at its edge", async ({ page 
   });
   const menu = page.getByRole("menu", { name: "Actions for the surface" });
   await expect(menu).toBeVisible();
+  // Where it comes to rest: the entrance slides it 6px, and a box measured
+  // mid-slide lies outside by just that.
+  await menu.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
   const panel = (await menu.boundingBox())!;
   expect(panel.x + panel.width).toBeLessThanOrEqual(viewport.width);
   expect(panel.y + panel.height).toBeLessThanOrEqual(viewport.height);

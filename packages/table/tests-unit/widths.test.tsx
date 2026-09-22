@@ -103,6 +103,18 @@ describe("Column width", () => {
     fireEvent.doubleClick(grip);
     expect(cell.style.width).toBe("174px");
   });
+
+  it("a double click fits a widened column back down: it measures without the width it has", () => {
+    const { container } = render(<List />);
+    const { cell, grip } = gripAndCell(container);
+    /* A cell is never narrower than its width - measured with it, a widened
+       column only ever grew. */
+    vi.spyOn(HTMLElement.prototype, "scrollWidth", "get").mockImplementation(function (this: HTMLElement) {
+      return cell.style.width === "" ? 73 : 400;
+    });
+    fireEvent.doubleClick(grip);
+    expect(cell.style.width).toBe("74px");
+  });
 });
 
 describe("Sticky parts and density", () => {
@@ -167,6 +179,8 @@ describe("Virtualisation", () => {
     // 100 px / 20 px = 5 rows, one of them cut off, four buffer rows below.
     expect(data).toHaveLength(10);
     expect(container.querySelector("table")!.getAttribute("aria-rowcount")).toBe("1001");
+    // The header row is there, so it says which one it is.
+    expect(container.querySelector("thead tr")!.getAttribute("aria-rowindex")).toBe("1");
     expect(screen.queryByRole("navigation")).toBeNull();
   });
 

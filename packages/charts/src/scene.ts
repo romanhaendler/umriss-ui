@@ -41,7 +41,7 @@ import {
 import { nearestIndex } from "./hit";
 import { segmentEnd, segmentIndex } from "./state";
 import { cellSize, cellIndex, measureSpacing } from "./cells";
-import { isOpen, spanEnd, spanIndex, overlapDepth } from "./spans";
+import { DEPTH_OFFSET, isOpen, spanEnd, spanIndex, overlapDepth } from "./spans";
 import { assess } from "./limit";
 import { inRemovedTime, toOperatingTimeClamped } from "./operatingTime";
 import {
@@ -196,8 +196,8 @@ function listEqual(a: readonly number[] | undefined, b: readonly number[] | unde
 }
 
 /** Everything materialisation reads: the y accessor, the data reference, the
-    baseline and the series kind - the kind, because it decides about the baseline
-    and the step. If any of that changes, the channels are stale and have to come
+    baseline, the height of a span and the series kind - the kind, because it
+    decides about the baseline and the step. If any of that changes, the channels are stale and have to come
     into being anew; a field comparison alone is not enough here. */
 function materialEqual(previous: SeriesConfig, next: SeriesConfig): boolean {
   return (
@@ -206,8 +206,14 @@ function materialEqual(previous: SeriesConfig, next: SeriesConfig): boolean {
     previous.data === next.data &&
     fnEqual(baselineOf(previous), baselineOf(next)) &&
     fnEqual(valueChannelOf(previous), valueChannelOf(next)) &&
-    fnEqual(xEndOf(previous), xEndOf(next))
+    fnEqual(xEndOf(previous), xEndOf(next)) &&
+    // The height of a span widens its y extent, and the extent is made here.
+    spanHeightOf(previous) === spanHeightOf(next)
   );
+}
+
+function spanHeightOf(config: SeriesConfig): number | undefined {
+  return config.kind === "span" ? config.height : undefined;
 }
 
 /** The value channel, where the kind has one (ADR-0011). */
@@ -928,9 +934,18 @@ export class ChartScene {
       this.measurer?.clear();
       this.markLayoutDirty();
     });
+    // A web font that arrives after the first layout makes every measured label
+    // wider than its band: measure anew once it is there.
+    const fonts = typeof document === "undefined" ? undefined : document.fonts;
+    fonts?.addEventListener?.("loadingdone", this.onFontsLoaded);
     this.theme = null;
     this.markLayoutDirty();
   }
+
+  private readonly onFontsLoaded = (): void => {
+    this.measurer?.clear();
+    this.markLayoutDirty();
+  };
 
   bindTooltip(el: HTMLElement | null): void {
     this.tooltipEl = el;
@@ -947,6 +962,9 @@ export class ChartScene {
     this.dprMedia = null;
     this.unsubscribeTheme?.();
     this.unsubscribeTheme = null;
+    if (typeof document !== "undefined") {
+      document.fonts?.removeEventListener?.("loadingdone", this.onFontsLoaded);
+    }
     this.measurer?.remove();
     this.measurer = null;
     this.container = null;
@@ -969,7 +987,9 @@ export class ChartScene {
 
   /** Called by the ResizeObserver; coalesced onto one rAF (R-2.10). */
   requestResize(cssWidth: number, cssHeight: number): void {
-    if (cssWidth === this.cssWidth && cssHeight === this.cssHeight) return;
+    // Against the size still to come, not the one applied: a resize there and
+    // back within one frame would otherwise leave the "there" pending.
+    if (cssWidth === (this.pendingWidth ?? this.cssWidth) && cssHeight === (this.pendingHeight ?? this.cssHeight)) return;
     this.pendingWidth = cssWidth;
     this.pendingHeight = cssHeight;
     this.markLayoutDirty();
@@ -1044,6 +1064,13 @@ export class ChartScene {
       this.updateLayout();
       this.layoutDirty = false;
       this.pushLayoutSnapshot();
+      // New data or a new layout under a resting pointer: the hit it had names
+      // old values at old pixels. Ask again at the same place.
+      if (this.hover !== null) {
+        const { mouseX, mouseY } = this.hover;
+        this.hoverKey = "";
+        this.pointerMove(mouseX, mouseY);
+      }
     }
     if (this.seriesDirty) {
       this.drawSeriesLayer();
@@ -1145,6 +1172,13 @@ export class ChartScene {
         tickFormat: c.tickFormat,
         tickValues: c.ticks,
         calendar: c.calendar,
+        limitLabels:
+          c.orientation === "y"
+            ? this.limitsInOrder()
+                .map((l) => l.config)
+                .filter((l) => l.orientation === "y" && l.axisId === c.id && l.label !== undefined && l.label !== "")
+                .map((l) => l.label as string)
+            : undefined,
       });
     }
     this.layout = computeLayout({
@@ -1740,6 +1774,10 @@ export class ChartScene {
         targetY,
         height,
         domainEnd,
+        entry.depth,
+        // The drawing moves a covering span down the screen; in lane units that
+        // way carries the sign of the y scale's slope.
+        DEPTH_OFFSET * height * Math.sign(yAxis.scale.m),
       );
       if (index < 0) return null;
       const from = mat.x[index] as number;

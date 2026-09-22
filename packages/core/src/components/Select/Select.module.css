@@ -103,6 +103,14 @@
     pointer-events: auto;
   }
 
+  /* A finger has no hover: without one the × stands whenever there is a value. */
+  @media (hover: none) {
+    .clear {
+      opacity: 1;
+      pointer-events: auto;
+    }
+  }
+
   .clear:hover {
     background: var(--u-color-surface-sunken);
     color: var(--u-color-text);

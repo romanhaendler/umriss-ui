@@ -4,7 +4,7 @@
    Thursday. The week starts on Monday. */
 
 import { describe, expect, it } from "vitest";
-import { bandBounds, viewFollows, monthGrid, addDays, dayStep } from "../src/components/DatePicker/grid";
+import { bandBounds, viewFollows, monthGrid, addDays, dayStep, shiftMonth } from "../src/components/DatePicker/grid";
 
 const iso = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -109,5 +109,17 @@ describe("dayStep and viewFollows - the arrow keys", () => {
 
   it("recognises the turn of the year even with the same month", () => {
     expect(viewFollows(day(2027, 6, 1), day(2026, 6, 1))).toBe(true);
+  });
+});
+
+describe("shiftMonth", () => {
+  it("keeps the day of the month", () => {
+    expect(iso(shiftMonth(new Date(2026, 8, 22), 1))).toBe("2026-10-22");
+    expect(iso(shiftMonth(new Date(2026, 0, 15), -1))).toBe("2025-12-15");
+  });
+
+  it("takes the last day of a shorter month", () => {
+    expect(iso(shiftMonth(new Date(2026, 0, 31), 1))).toBe("2026-02-28");
+    expect(iso(shiftMonth(new Date(2024, 2, 31), -1))).toBe("2024-02-29");
   });
 });

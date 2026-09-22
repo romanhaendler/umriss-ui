@@ -122,8 +122,11 @@ application's hands; it is a view state, never an intent.
 
 A tooltip on a hovered subtask or transport names the order, the times, setup
 and teardown and the findings; `tooltip` replaces its content or switches it
-off. `now` draws the present across the lanes. The wheel scrolls the lanes and
-releases the page at their end, Ctrl or ⌘ and a pinch zoom, Shift pans;
+off. `now` draws the present across the lanes. The wheel over the schedule,
+lane headers included, scrolls the lanes and releases the page at their end,
+Ctrl or ⌘ and a pinch zoom, Shift pans; on a touch screen one finger pans and a
+tap selects. The lane headers take at most 40 % of the width, so that on a
+phone the plot keeps the larger part;
 `onDomainChange` reports the visible span, and a ref handle turns a client
 point into a time and a lane and back.
 

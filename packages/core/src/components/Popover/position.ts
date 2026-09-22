@@ -63,7 +63,13 @@ export function computePosition(
      better. */
   const flipped = spacePreferred < panel.height && spaceOther >= panel.height;
   const above = (side === "top") !== flipped;
-  const top = above ? anchor.top - offset - panel.height : anchor.bottom + offset;
+  const hanging = above ? anchor.top - offset - panel.height : anchor.bottom + offset;
+  /* Where it fits on neither side (a tall panel on a phone), it is pulled into
+     the window instead of hanging out of it - over the anchor if need be. A
+     panel taller than the window keeps its top edge; the panel's own
+     max-height lets it scroll. */
+  const fits = spacePreferred >= panel.height || spaceOther >= panel.height;
+  const top = fits ? hanging : Math.max(margin, Math.min(hanging, viewport.height - panel.height - margin));
 
   const raw =
     align === "end"

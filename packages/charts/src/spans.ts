@@ -26,6 +26,11 @@
    - End before beginning means "data error": it is not swapped round.
    The last two cover no interval; they therefore cover nothing and are not hit. */
 
+/** How far a covering span is moved within its lane, per depth, as a fraction
+    of its height - the drawing and the hit test share it, so that what is hit
+    is what is seen. */
+export const DEPTH_OFFSET = 0.28;
+
 /** The end calculated with: the one given, and where none is given, the end of
     the axis domain. */
 export function spanEnd(to: number, domainEnd: number): number {
@@ -97,7 +102,11 @@ export function overlapDepth(
     Linear, not binary: spans are not assumed sorted - they may cover one
     another, and then there is no order over which a binary search could
     conclude. One pointer hit per movement over a lane full of jobs is not worth
-    that. */
+    that.
+
+    `depth` and `depthShift` place a covering span where it is drawn: moved by
+    its depth times the shift, in lane units. Without them every span sits on
+    its lane. */
 export function spanIndex(
   from: Float64Array,
   to: Float64Array,
@@ -107,10 +116,12 @@ export function spanIndex(
   targetLane: number,
   laneHeight: number,
   domainEnd: number,
+  depth: Int32Array | null = null,
+  depthShift = 0,
 ): number {
   const half = laneHeight / 2;
   for (let i = n - 1; i >= 0; i--) {
-    const s = lane[i] as number;
+    const s = (lane[i] as number) + (depth === null ? 0 : (depth[i] as number) * depthShift);
     // A schedule has many lanes. Without the lane condition the span registered
     // last would catch everything lying anywhere beneath it.
     if (!(Math.abs(s - targetLane) <= half)) continue;

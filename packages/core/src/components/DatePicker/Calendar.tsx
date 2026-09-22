@@ -9,6 +9,7 @@ import {
   monthGrid,
   addMonths,
   addDays,
+  shiftMonth,
   dayStep,
   beforeDay,
 } from "./grid";
@@ -108,6 +109,14 @@ export function Calendar({
     }
   };
 
+  /* Paging takes the active day along. It carries the grid's one tab stop,
+     and left behind in the month paged away from it took that stop with it:
+     after the arrow buttons, Tab went past the grid. */
+  const page = (months: number) => {
+    onView(addMonths(view, months));
+    onActive(shiftMonth(active, months));
+  };
+
   const days = monthGrid(view);
   const referenceDay = today ?? new Date();
 
@@ -120,7 +129,7 @@ export function Calendar({
         {withoutPrevious ? (
           <span className={styles.pageSpacer} aria-hidden="true" />
         ) : (
-          <button type="button" className={styles.page} aria-label={wording.previousMonth} onClick={() => onView(addMonths(view, -1))}>
+          <button type="button" className={styles.page} aria-label={wording.previousMonth} onClick={() => page(-1)}>
             <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">
               <path d="M6.4 1.8 3.2 5l3.2 3.2" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -130,7 +139,7 @@ export function Calendar({
         {withoutNext ? (
           <span className={styles.pageSpacer} aria-hidden="true" />
         ) : (
-          <button type="button" className={styles.page} aria-label={wording.nextMonth} onClick={() => onView(addMonths(view, 1))}>
+          <button type="button" className={styles.page} aria-label={wording.nextMonth} onClick={() => page(1)}>
             <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">
               <path d="M3.6 1.8 6.8 5 3.6 8.2" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
