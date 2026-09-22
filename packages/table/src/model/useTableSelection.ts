@@ -5,10 +5,11 @@ export interface TableSelection<T extends string | number> {
   selected: ReadonlySet<T>;
   isSelected: (id: T) => boolean;
   toggle: (id: T) => void;
-  /** Selects all the keys passed in, or clears the selection. */
+  /** Selects all the keys passed in - or, when all of them are selected
+      already, deselects them. Keys outside them stay as they are. */
   toggleAll: () => void;
   clear: () => void;
-  /** true when every currently visible key is selected. */
+  /** true when every key passed in is selected. */
   allSelected: boolean;
   /** true when some - but not all - are selected. */
   someSelected: boolean;

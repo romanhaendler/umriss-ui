@@ -120,8 +120,11 @@ function keyOf(hit: ScheduleHit): string {
   }
 }
 
-/** Movement below which a press is a click. */
+/** Movement below which a press is a click. A finger is less exact than a
+    mouse: a tap wanders a few pixels, and with the mouse's slop it would pan
+    instead of selecting. */
 const CLICK_SLOP = 3;
+const TOUCH_SLOP = 10;
 
 /** How long a drag has to rest over a folded group before it opens for the
     gesture. Long enough that crossing one on the way somewhere else does not
@@ -241,9 +244,12 @@ export class SceneGestures {
     const { x, y } = this.local(event.clientX, event.clientY);
     if (event.pointerType === "touch") {
       this.touches.set(event.pointerId, { x, y });
-      if (this.touches.size === 2) {
-        this.cancelEdit();
-        this.gesture = { kind: "pinch", distance: this.touchDistance() };
+      /* A third finger joins nothing: the pinch goes on with the first two. */
+      if (this.touches.size >= 2) {
+        if (this.gesture.kind !== "pinch") {
+          this.cancelEdit();
+          this.gesture = { kind: "pinch", distance: this.touchDistance() };
+        }
         return;
       }
     }
@@ -359,7 +365,7 @@ export class SceneGestures {
     }
     const gesture = this.gesture;
     if (gesture.kind === "pending" && gesture.pointerId === event.pointerId) {
-      if (Math.hypot(x - gesture.x0, y - gesture.y0) < CLICK_SLOP) return;
+      if (Math.hypot(x - gesture.x0, y - gesture.y0) < (event.pointerType === "touch" ? TOUCH_SLOP : CLICK_SLOP)) return;
       if (gesture.mode === "pan" || gesture.subtask === null) {
         this.gesture = { kind: "pan", pointerId: gesture.pointerId, lastX: gesture.x0, lastY: gesture.y0 };
         this.setCursor("grabbing");
@@ -405,7 +411,14 @@ export class SceneGestures {
     if (event.pointerType === "touch") {
       this.touches.delete(event.pointerId);
       if (this.gesture.kind === "pinch") {
-        if (this.touches.size < 2) this.gesture = { kind: "none" };
+        /* The finger that stays pans on from where it is, as it would have
+           had it been alone from the start. */
+        const [rest] = this.touches;
+        if (this.touches.size === 1 && rest !== undefined) {
+          this.gesture = { kind: "pan", pointerId: rest[0], lastX: rest[1].x, lastY: rest[1].y };
+        } else if (this.touches.size === 0) {
+          this.gesture = { kind: "none" };
+        }
         return;
       }
     }
@@ -480,6 +493,7 @@ export class SceneGestures {
     this.closeGestureFolds();
     this.cancelEdit();
     this.gesture = { kind: "none" };
+    this.setCursor("default");
   }
 
   /** Reads the hover anew where the pointer already is - after the data
@@ -525,7 +539,9 @@ export class SceneGestures {
       Ctrl -; horizontal or Shift pans through time. */
   wheel(event: WheelEvent): void {
     const view = this.host.view;
-    const { x } = this.local(event.clientX, event.clientY);
+    /* Over the lane headers too, which lie left of the plot: a zoom there
+       holds the plot's first instant still. */
+    const x = Math.max(0, Math.min(view.width, this.local(event.clientX, event.clientY).x));
     const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? view.height : 1;
     const dx = event.deltaX * unit;
     const dy = event.deltaY * unit;

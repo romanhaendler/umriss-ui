@@ -21,7 +21,7 @@ const ROWS = [
 export default function History() {
   return (
     <Stack gap={4}>
-      <Grid columns={2} gap={3}>
+      <Grid minItemWidth="20rem" gap={3}>
         {ROWS.map((row) => (
           <Stack key={row.name} direction="row" gap={3} align="center">
             <Text as="span" size="sm">

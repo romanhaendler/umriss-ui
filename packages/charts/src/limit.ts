@@ -17,10 +17,10 @@
    charts side the caller supplies them. Exactly that is what makes the doubling
    cheap - there is nothing to duplicate but arithmetic.
 
-   The field names and the verdict strings stay German for now. They are the wire
-   format the two packages agree on, pinned by a conformance test that compares
-   both versions structurally at runtime; they move in one commit across core,
-   charts, the case table and that test, or not at all. */
+   The field names and the verdict strings are the wire format the two
+   packages agree on, pinned by a conformance test that compares both versions
+   structurally at runtime; they move in one commit across core, charts, the
+   case table and that test, or not at all. */
 
 /** Whether a limit is an upper or a lower bound. */
 export type Side = "upper" | "lower";

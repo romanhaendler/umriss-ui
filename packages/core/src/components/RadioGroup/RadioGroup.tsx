@@ -67,6 +67,7 @@ export const RadioGroup = forwardRef(function RadioGroup<T extends string>(
     disabled = false,
     name,
     className,
+    onKeyDown,
     ...rest
   }: RadioGroupProps<T>,
   ref: React.ForwardedRef<HTMLDivElement>,
@@ -90,6 +91,10 @@ export const RadioGroup = forwardRef(function RadioGroup<T extends string>(
   /* The arrow keys move and choose at once – that is how the radio pattern
      is meant to work, and the reason why the group has only one tab stop. */
   const handleKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    /* Composed with the caller's: `rest` used to replace it, and the arrow
+       keys then chose nothing. */
+    onKeyDown?.(event);
+    if (event.defaultPrevented) return;
     const forward = event.key === "ArrowDown" || event.key === "ArrowRight";
     const backward = event.key === "ArrowUp" || event.key === "ArrowLeft";
     if (!forward && !backward) return;
@@ -121,19 +126,20 @@ export const RadioGroup = forwardRef(function RadioGroup<T extends string>(
   /* The tab stop sits on the chosen option; where none is chosen, on the
      first selectable one. Otherwise the group would have either no entry at
      all or as many as it has options. */
-  const tabStop = (option: RadioOption<T>, index: number): number => {
+  const tabStop = (option: RadioOption<T>): number | undefined => {
+    /* Uncontrolled, no render follows a choice, so a tab stop written here
+       stayed on the initial option and Tab came back to it rather than to the
+       chosen one. The browser's own rule for a radio group is exactly the
+       one above, and it follows the choice. */
+    if (!controlled) return undefined;
     if (option.disabled || disabled) return -1;
-    if (controlled) {
-      if (value === option.value) return 0;
-      /* On the first selectable one in that case too, where the controlled
-         value points at a disabled option - otherwise the group would have
-         no entry at all and be unreachable with the keyboard. */
-      const chosenReachable = selectable.some((o) => o.value === value);
-      if (!chosenReachable && selectable[0]?.value === option.value) return 0;
-      return -1;
-    }
-    if (defaultValue != null) return defaultValue === option.value ? 0 : -1;
-    return selectable[0]?.value === option.value && index === options.indexOf(option) ? 0 : -1;
+    if (value === option.value) return 0;
+    /* On the first selectable one in that case too, where the controlled
+       value points at a disabled option - otherwise the group would have no
+       entry at all and be unreachable with the keyboard. */
+    const chosenReachable = selectable.some((o) => o.value === value);
+    if (!chosenReachable && selectable[0]?.value === option.value) return 0;
+    return -1;
   };
 
   return (
@@ -159,10 +165,10 @@ export const RadioGroup = forwardRef(function RadioGroup<T extends string>(
         size === "sm" && styles.sm,
         className,
       )}
-      onKeyDown={handleKeyDown}
       {...rest}
+      onKeyDown={handleKeyDown}
     >
-      {options.map((option, index) => {
+      {options.map((option) => {
         /* On its own useId and not on the name: that can come from the
            caller, and neither it nor the value may go raw into an id that
            `aria-describedby` reads (library-audit 04). */
@@ -182,7 +188,7 @@ export const RadioGroup = forwardRef(function RadioGroup<T extends string>(
               name={groupName}
               value={option.value}
               disabled={optionDisabled}
-              tabIndex={tabStop(option, index)}
+              tabIndex={tabStop(option)}
               className={styles.input}
               aria-describedby={descriptionId}
               {...(controlled

@@ -380,6 +380,14 @@
     pointer-events: auto;
   }
 
+  /* A finger has no hover: without one the × stands whenever there is a value. */
+  @media (hover: none) {
+    .triggerClear {
+      opacity: 1;
+      pointer-events: auto;
+    }
+  }
+
   .triggerClear:hover {
     background: var(--u-color-surface-sunken);
     color: var(--u-color-text);
@@ -457,6 +465,34 @@
   .monthColumn {
     flex: none;
     width: var(--_calendar-month);
+  }
+
+  /* Narrow windows: the presets go above the months as a row, and on a phone
+     the two months stand one below the other - side by side they are wider
+     than the window. The panel is fixed to the window, so the window decides. */
+  @media (max-width: 760px) {
+    .rangeBody {
+      flex-direction: column;
+    }
+
+    .presetColumn {
+      flex-direction: row;
+      flex-wrap: wrap;
+      width: auto;
+      padding: 0 0 var(--u-space-2);
+      border-right: none;
+      border-bottom: 1px solid var(--u-hairline);
+    }
+  }
+
+  @media (max-width: 600px) {
+    .monthPair {
+      flex-direction: column;
+    }
+
+    .rangeRight {
+      width: var(--_calendar-month);
+    }
   }
 
   /* A spacer where a paging arrow is hidden - the month name thereby stays exactly

@@ -54,6 +54,9 @@ export interface AxisInput {
   /** Operating calendar; the axis then stands in operating time. The module
       behind it builds a calendar out of the list once and keeps it. */
   calendar?: readonly OperatingInterval[];
+  /** Labels of the limits on a y axis: they stand in its band beside the
+      ticks, so the band is as wide as the widest of both. */
+  limitLabels?: readonly string[];
 }
 
 export interface TickLayout {
@@ -265,6 +268,8 @@ export function computeLayout(input: LayoutInput): LayoutResult {
     const widths = labels.map((t) => measure(t, CLASS_TICK).width);
     let maxWidth = 0;
     for (const b of widths) if (b > maxWidth) maxWidth = b;
+    // A limit label carries 2px padding on either side (its background covers a tick).
+    for (const l of axis.limitLabels ?? []) maxWidth = Math.max(maxWidth, measure(l, CLASS_TICK).width + 4);
     const title =
       axis.label === undefined || axis.label === ""
         ? 0

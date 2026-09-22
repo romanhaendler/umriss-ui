@@ -46,7 +46,7 @@ export function Tabs({ value, onChange, className, children, ...rest }: TabsProp
 /* TabList – the arrow keys switch and activate                        */
 /* ------------------------------------------------------------------ */
 
-export function TabList({ className, children, ...rest }: HTMLAttributes<HTMLDivElement>) {
+export function TabList({ className, children, onKeyDown, ...rest }: HTMLAttributes<HTMLDivElement>) {
   const tabs = useTabs("TabList");
   const listRef = useRef<HTMLDivElement>(null);
   const [indicator, setIndicator] = useState<{ left: number; width: number } | null>(null);
@@ -68,10 +68,22 @@ export function TabList({ className, children, ...rest }: HTMLAttributes<HTMLDiv
 
   useEffect(() => {
     window.addEventListener("resize", measure);
-    return () => window.removeEventListener("resize", measure);
+    /* The font arrives later than the first layout, and the tabs change their
+       width with it: without a second measurement the line stayed a pixel or
+       two beside its tab until the window changed. As in Textarea. */
+    let cancelled = false;
+    void document.fonts?.ready.then(() => {
+      if (!cancelled) measure();
+    });
+    return () => {
+      cancelled = true;
+      window.removeEventListener("resize", measure);
+    };
   }, [measure]);
 
   const handleKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    onKeyDown?.(event);
+    if (event.defaultPrevented) return;
     if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
     const tabs = Array.from(
       event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="tab"]:not([disabled])'),
@@ -90,7 +102,7 @@ export function TabList({ className, children, ...rest }: HTMLAttributes<HTMLDiv
   };
 
   return (
-    <div ref={listRef} role="tablist" className={cx(styles.list, className)} onKeyDown={handleKeyDown} {...rest}>
+    <div ref={listRef} role="tablist" className={cx(styles.list, className)} {...rest} onKeyDown={handleKeyDown}>
       {children}
       {indicator && (
         <span
@@ -112,7 +124,7 @@ export interface TabProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   value: string;
 }
 
-export function Tab({ value, className, children, ...rest }: TabProps) {
+export function Tab({ value, className, children, onClick, ...rest }: TabProps) {
   const tabs = useTabs("Tab");
   const selected = tabs.value === value;
 
@@ -128,8 +140,13 @@ export function Tab({ value, className, children, ...rest }: TabProps) {
       aria-controls={`${tabs.idBase}-panel-${idPart(value)}`}
       tabIndex={selected ? 0 : -1}
       className={cx(styles.tab, className)}
-      onClick={() => tabs.onChange(value)}
       {...rest}
+      /* Composed, not overridden by `rest`: a caller's `onClick` used to take
+         the switching away from the tab. */
+      onClick={(event) => {
+        onClick?.(event);
+        tabs.onChange(value);
+      }}
     >
       {children}
     </button>

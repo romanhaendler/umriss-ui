@@ -9,7 +9,7 @@ import { useChartScene, useLegend } from "./context";
 import type { ChartScene } from "./scene";
 
 export interface LegendProps {
-  /** Which side of the plot area the legend stands on. Without a value, below
+  /** Which side of the plot area the legend stands on. Without a value, above
       it. */
   placement?: "top" | "bottom";
 }

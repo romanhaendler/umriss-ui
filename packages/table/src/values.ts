@@ -24,7 +24,7 @@ export type Footer = "sum" | "avg";
     caller; `empty` means: not a single value present. */
 export type ValueKind = "text" | "number" | "date" | "boolean" | "other" | "empty";
 
-/** A value is absent when it is null, undefined or not a number. Null is a
+/** A value is absent when it is null, undefined or not a number. Zero is a
     value, and so is the empty string. */
 export const isAbsent = (value: unknown): value is null | undefined =>
   value === null || value === undefined || (typeof value === "number" && Number.isNaN(value));

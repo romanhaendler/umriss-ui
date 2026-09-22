@@ -22,6 +22,35 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.2.2 – Phones, touch and a review (Sep. 2026)
+
+### Fixed
+
+- **A table no longer widens the page.** A cell's hidden "No value" for the
+  screen reader was positioned against the page rather than the scroll area and
+  pushed it wider — on a phone the page zoomed out to 758 px. The scroll area
+  now holds it.
+- **Toolbar and pagination bar wrap on narrow screens** instead of running out
+  of the frame.
+- **The width grip can be hit with a finger**: on a coarse pointer it is 16 px
+  wide and faintly visible, since there is no hover to reveal it.
+- **"Fit to content" fits a widened column back down.** A double click on the
+  grip (or Alt+Home) measured the cells at the width they had, and a cell is
+  never narrower than that — a column dragged wide only ever grew. It now
+  measures without that width.
+- **A virtualised table counts its rows fully for a screen reader**: the header
+  row carries `aria-rowindex="1"`, and a footer row counts towards
+  `aria-rowcount` and says where it stands.
+- **A loading table says so**: `aria-busy` while `loading` is set.
+- **The alarm list's table has a name**, the list's heading ("Alarms").
+- **Export keeps its download address alive for a moment** instead of revoking
+  it straight after the click — some browsers (Safari among them) fetch it only
+  afterwards and got no file.
+- The doc comments of `Search` and `Export` named the German defaults; they name
+  the English ones now.
+
+---
+
 ## 0.2.1 – The README catches up (Sep. 2026)
 
 Nothing in the code changed. The README that shipped with `0.2.0` still called

@@ -17,6 +17,53 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Sep. 2026 — Phones and touch, then a review of all four packages
+
+*For a caller: core 0.3.2, charts 0.3.2, table 0.2.2, schedule 0.1.2 - each
+changelog carries the lines.*
+
+- **Measured, not guessed.** Every page of the four demos was opened at 390px
+  in a phone context (touch, `isMobile`) by throwaway scripts: what leaves the
+  window, what leaves its example, and what every popup trigger opens. Found:
+  a `VisuallyHidden` in a table cell escaped the table's scroll box and widened
+  the whole page to 758px (the phone zoomed out); the range pickers' panels
+  were 572-712px wide; the table's toolbar and paging bar ran out of the frame;
+  a limit label was cut at the plot's edge (on the desktop as well); the chart
+  tooltip never came on a tap; the clear buttons faded in on hover only.
+- **The shell.** On a narrow window the outline stands below the page, not
+  forty entries above it; the props table scrolls in its box instead of
+  breaking a type after every letter; long `<code>` in the prose breaks.
+- **The review.** Four agents read one package each for defects that need no
+  decision; what they fixed stands in the changelogs, each fix with a test.
+- **The charts' example pictures** fail in a different handful on every run -
+  the known open point in `testing.md`; the baselines were renewed once for the
+  intended changes (limit labels in the y band, re-measuring after web fonts).
+
+**Open, each needing a decision:**
+
+- core: the toast timer does not pause on keyboard focus; `Tooltip` overwrites
+  its child's `ref`; the card's collapse button is named only "Show"/"Hide";
+  Tab out of a picker or `MultiSelect` panel leaves it open; the menu trigger
+  does not open on ArrowDown; `ModalHeader`'s `description` is not wired to
+  `aria-describedby`; the tab underline does not follow a label that changes
+  width; German internal identifiers (`beimSchliessen`, `anker`, ...).
+- charts: legend highlight by pointer only; hover reports points outside a
+  fixed domain; x-axis limit labels reserve no room; `Area`/`Bar` have no
+  `tone`; the DEV sortedness check sees only the first series; the tooltip has
+  no `max-width`; no data alternative for screen readers.
+- table: `ReturnBand.direction` is `"obere" | "untere"` (ADR-0018); CSV writes
+  German regardless of the wording; CSV formula injection; no sort affordance
+  and no multi-sort on touch; search on number and date columns matches the
+  raw value; row detail and virtualisation do not combine; PageUp/PageDown in a
+  virtualised table; a search of only spaces counts as active.
+- schedule: no tooltip on touch; lanes mounted later go to the bottom; the
+  tooltip is cut on a narrow plot and names no date; a transport's heading
+  shows its own id when its task is missing; an `initialDomain` wholly outside
+  the calendar collapses.
+- Touch targets: checkboxes (16px), the table's expander and filter buttons
+  (20px) and the schedule's fold chevron (16px) are below 24px and rely on the
+  spacing exception of WCAG 2.5.8.
+
 ## Sep. 2026 — schedule-lane-groups: lanes that fold
 
 *For a caller: `<LaneGroup>` and a folded group's miniature, every appearance

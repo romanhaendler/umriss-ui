@@ -395,11 +395,15 @@ body {
   .shellBody {
     grid-template-columns: minmax(0, 1fr);
   }
+  /* Below the page, not above it: on a phone the outline is forty entries
+     long and pushed every page out of sight. The search in the bar is the way
+     to another page up there, and a change of page starts at the top. */
   .rail {
+    order: 1;
     position: static;
     height: auto;
     border-right: none;
-    border-bottom: 1px solid var(--u-edge-color);
+    border-top: 1px solid var(--u-edge-color);
   }
   .shellSearch {
     width: 160px;

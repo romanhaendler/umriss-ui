@@ -122,12 +122,13 @@ export function DateRangePicker({
     applyRange(draftFrom, day);
   };
 
-  // The keyboard: the focus follows the active day across both months.
+  // The keyboard: the focus follows the active day across both months - from a
+  // day only, so that paging leaves it on the arrow that paged.
   useEffect(() => {
     if (!open) return;
     const panel = panelRef.current;
     if (!panel) return;
-    if (!panel.contains(document.activeElement)) return;
+    if (!document.activeElement?.closest(`.${styles.grid}`)) return;
     panel.querySelector<HTMLButtonElement>('[data-active="true"]')?.focus();
   }, [active, open]);
 

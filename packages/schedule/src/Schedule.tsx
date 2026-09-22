@@ -60,7 +60,8 @@ export interface ScheduleProps {
   height?: number;
   /** Height of one lane in pixels. */
   laneHeight?: number;
-  /** Width of the lane headers in pixels. */
+  /** Width of the lane headers in pixels - at most 40 % of the schedule, so
+      that on a phone the plot keeps the larger part. */
   headerWidth?: number;
   /** An operating calendar: the intervals in which time counts. Nights and
       weekends outside them are cut out of the axis. Default: the wall clock. */
@@ -308,16 +309,17 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
     observer.observe(plot);
     /* The wheel zooms, pans and scrolls the lanes, and the page must not scroll
        with it while it does: a listener that can prevent the default has to be
-       registered as not passive, which React does not do. */
+       registered as not passive, which React does not do. On the root and not
+       the plot, so that the wheel over a lane's name scrolls the lanes too. */
     const onWheel = (event: WheelEvent) => scene.wheel(event);
-    plot.addEventListener("wheel", onWheel, { passive: false });
+    root.addEventListener("wheel", onWheel, { passive: false });
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape" && scene.cancelEdit()) event.preventDefault();
     };
     window.addEventListener("keydown", onKey);
     return () => {
       window.removeEventListener("keydown", onKey);
-      plot.removeEventListener("wheel", onWheel);
+      root.removeEventListener("wheel", onWheel);
       observer.disconnect();
       scene.unbind();
     };
@@ -342,7 +344,9 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
      miniature are the same row in two states, and a key that changed with the
      state would unmount the chevron on every fold - which takes the keyboard
      focus away from the hand that just pressed it. */
-  const rowId = (header: { key: string }) => `${plotId}-row-${header.key}`;
+  /* Encoded, because an id may hold no space and a lane's may: `aria-controls`
+     is a list split at spaces. */
+  const rowId = (header: { key: string }) => `${plotId}-row-${encodeURIComponent(header.key)}`;
   const controlledBy = useMemo(() => {
     const byGroup = new Map<string, string[]>();
     for (const header of snapshot.headers) {
@@ -412,7 +416,7 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
         role="figure"
         aria-label={ariaLabel}
         className={className ? `${styles.root} ${className}` : styles.root}
-        style={{ height: `${height}px`, gridTemplateColumns: `${headerWidth}px minmax(0, 1fr)`, ...style }}
+        style={{ height: `${height}px`, gridTemplateColumns: `min(${headerWidth}px, 40%) minmax(0, 1fr)`, ...style }}
       >
         <div className={styles.corner} />
         <div className={styles.dayBand} aria-hidden="true" data-schedule-days="" data-schedule-clip="day band">

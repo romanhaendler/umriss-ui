@@ -1,4 +1,4 @@
-import { createContext, useContext, useRef } from "react";
+import { createContext, useContext, useId, useRef } from "react";
 import { useDialogChoreography } from "../../lib/dialogChoreography";
 import type { DialogHTMLAttributes, HTMLAttributes, MouseEvent, ReactNode } from "react";
 import { cx } from "../../lib/cx";
@@ -7,6 +7,8 @@ import { useWording } from "../../lib/language";
 
 interface ModalContextValue {
   onClose: () => void;
+  /** The id the header's heading carries - the dialog is named by it. */
+  titleId: string;
 }
 
 const ModalContext = createContext<ModalContextValue | null>(null);
@@ -41,6 +43,7 @@ export function Modal({
   ...rest
 }: ModalProps) {
   const sheetRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
   /* Exit after `--u-duration-exit`: a sheet of paper taking its leave. The
      name stands here and not in the hook, because it belongs to the Modal -
      the palette chooses the same routine without an exit. Here `160` stood
@@ -64,6 +67,10 @@ export function Modal({
       onClose={handleDialogClose}
       onCancel={handleDialogCancel}
       onMouseDown={handleBackdropClick}
+      /* The heading of the header names the window. A <dialog> takes no name
+         from its content, so without this it said only "dialog" - what the
+         header's `title` promises is only true with the reference. */
+      aria-labelledby={titleId}
       {...rest}
     >
       {/* Free space distributes itself in the golden ratio (38 : 62) above and
@@ -71,7 +78,7 @@ export function Modal({
           the full height – above as well as below. */}
       <div className={styles.spacerTop} aria-hidden="true" />
       <div ref={sheetRef} className={cx(styles.sheet, styles[size])}>
-        <ModalContext.Provider value={{ onClose }}>{children}</ModalContext.Provider>
+        <ModalContext.Provider value={{ onClose, titleId }}>{children}</ModalContext.Provider>
       </div>
       <div className={styles.spacerBottom} aria-hidden="true" />
     </dialog>
@@ -99,7 +106,9 @@ export function ModalHeader({ title, description, hideClose = false, className, 
   return (
     <div className={cx(styles.header, className)} {...rest}>
       <div className={styles.headerText}>
-        <h2 className={styles.title}>{title}</h2>
+        <h2 id={modal?.titleId} className={styles.title}>
+          {title}
+        </h2>
         {description && <p className={styles.description}>{description}</p>}
       </div>
       {!hideClose && (

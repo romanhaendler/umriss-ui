@@ -81,7 +81,6 @@ export function MultiSelect<T extends string = string>({
 
   const fieldRef = useRef<HTMLDivElement>(null);
   const mainRef = useRef<HTMLButtonElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const panelId = useId();
@@ -101,9 +100,12 @@ export function MultiSelect<T extends string = string>({
     searchRef.current?.focus();
   };
 
-  useEffect(() => {
-    if (open) searchRef.current?.focus();
-  }, [open]);
+  /* Into the search as soon as the panel stands. An effect on `open` ran
+     before the popover had found its portal target, so the first opening
+     left the focus on the trigger. */
+  const attachPanel = useCallback((node: HTMLDivElement | null) => {
+    if (node) searchRef.current?.focus();
+  }, []);
 
   /* ---- Base of the list: natural order, never re-sorted ---- */
   const base = useMemo(
@@ -137,6 +139,8 @@ export function MultiSelect<T extends string = string>({
     Array.from(listRef.current?.querySelectorAll<HTMLInputElement>("input:not(:disabled)") ?? []);
 
   const handleSearchKeyDown = (event: ReactKeyboardEvent<HTMLInputElement>) => {
+    // An input method's own keys (Enter ends the composition) are not ours.
+    if (event.nativeEvent.isComposing) return;
     if (event.key === "ArrowDown") {
       event.preventDefault();
       optionInputs()[0]?.focus();
@@ -371,7 +375,7 @@ export function MultiSelect<T extends string = string>({
         id={panelId}
         className={styles.panel}
       >
-          <div ref={panelRef}>
+          <div ref={attachPanel}>
               <Input
                 ref={searchRef}
                 size="sm"

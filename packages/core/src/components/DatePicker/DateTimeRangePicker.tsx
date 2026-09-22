@@ -213,14 +213,15 @@ export function DateTimeRangePicker({
   };
 
   // The keyboard: the focus follows the active day across both months - but only
-  // as long as the focus lies in the calendar (not in time fields).
+  // as long as the focus lies on a day (not in time fields, not on the paging
+  // arrows).
   useEffect(() => {
     if (!open) return;
     const panel = panelRef.current;
     if (!panel) return;
     const focus = document.activeElement;
     if (!focus || !panel.contains(focus)) return;
-    if (focus instanceof HTMLInputElement || focus === applyRef.current) return;
+    if (!focus.closest(`.${styles.grid}`)) return;
     panel.querySelector<HTMLButtonElement>('[data-active="true"]')?.focus();
   }, [active, open]);
 

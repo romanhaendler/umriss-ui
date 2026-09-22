@@ -80,9 +80,9 @@ export function Toolbar({ children, className, of }: ToolbarProps) {
 /* ----------------------------------------------------------------- Search */
 
 export interface SearchProps {
-  /** The placeholder in the field; without it "Suchen …" from the wording. */
+  /** The placeholder in the field; without it "Search …" from the wording. */
   placeholder?: string;
-  /** Accessible name; without it "Tabelle durchsuchen". */
+  /** Accessible name; without it "Search table" from the wording. */
   "aria-label"?: string;
   /** Classes on the field. */
   className?: string;
@@ -237,7 +237,7 @@ export function ColumnMenu({ of }: ColumnMenuProps) {
 /* ----------------------------------------------------------------- Export */
 
 export interface ExportProps {
-  /** File name of the download. Without it the one from the wording ("tabelle.csv"). */
+  /** File name of the download. Without it the one from the wording ("table.csv"). */
   filename?: string;
   /** Gets the text instead of triggering a file. */
   onExport?: (text: string) => void;
@@ -264,7 +264,9 @@ export function Export({ filename, onExport, of }: ExportProps) {
     anchor.href = url;
     anchor.download = filename ?? wording.exportFileName;
     anchor.click();
-    setTimeout(() => URL.revokeObjectURL(url), 0);
+    /* Not at once: some browsers (Safari among them) fetch the address only
+       after the click has returned, and a revoked one yields no file. */
+    setTimeout(() => URL.revokeObjectURL(url), 10_000);
   };
 
   return (

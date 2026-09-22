@@ -311,6 +311,8 @@ export function CommandPalette({
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    // An input method's own keys (Enter ends the composition) are not ours.
+    if (event.nativeEvent.isComposing) return;
     if (event.key === "ArrowDown") {
       event.preventDefault();
       move(1);

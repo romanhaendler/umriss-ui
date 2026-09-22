@@ -248,6 +248,9 @@ export class ScheduleScene {
   }
 
   unbind(): void {
+    /* A drag cut short by an unmount: its auto-pan frames and the timer of a
+       fold it rests over would otherwise run on without a plot. */
+    this.gestures.cancelEdit();
     this.unsubscribeTheme?.();
     this.unsubscribeTheme = null;
     if (this.frame !== 0) cancelAnimationFrame(this.frame);

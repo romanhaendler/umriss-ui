@@ -106,6 +106,17 @@ describe("RadioGroup – exactly one tab stop", () => {
     render(<RadioGroup options={OPTIONS} value="standard" onChange={vi.fn()} />);
     expect(radio("Freight").getAttribute("tabindex")).toBe("-1");
   });
+
+  /* Uncontrolled, no render follows a choice: a tab stop written by the group
+     stayed on the initial option. The browser's own rule for a radio group -
+     Tab lands on the checked one - follows the choice, so none is written. */
+  it("leaves the tab stop to the browser where it is uncontrolled", () => {
+    render(<RadioGroup options={OPTIONS} defaultValue="express" onChange={vi.fn()} />);
+    fireEvent.click(radio("Standard"));
+    for (const option of OPTIONS) {
+      expect(radio(option.label).hasAttribute("tabindex")).toBe(false);
+    }
+  });
 });
 
 describe("RadioGroup – the arrow keys move and choose", () => {

@@ -24,8 +24,11 @@
     display: contents;
   }
 
+  /* Positioned so that absolute descendants (a VisuallyHidden in a cell) are
+     clipped by it - otherwise they escape to the page and widen it. */
   .scroll {
     composes: scroll from "#own-styles";
+    position: relative;
     overflow: auto;
     min-width: 0;
   }
@@ -320,6 +323,15 @@
     min-height: var(--u-control-height-sm);
   }
 
+  /* On a phone the search and the buttons beside it are wider than the frame:
+     they wrap there instead of running out of it. Only there - with room, a
+     wrapping group would hand its buttons a line of their own. */
+  @media (max-width: 600px) {
+    .toolbarGroup {
+      flex-wrap: wrap;
+    }
+  }
+
   .toolbarInfo {
     font-size: var(--u-text-xs);
     color: var(--u-color-text-secondary);
@@ -331,7 +343,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--u-space-4);
+    flex-wrap: wrap;
+    gap: var(--u-space-2) var(--u-space-4);
     padding: var(--u-space-2) var(--u-space-3);
     border-top: 1px solid var(--u-hairline);
     font-size: var(--u-text-sm);
@@ -340,6 +353,7 @@
 
   .paginationControls {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: var(--u-space-2);
   }
@@ -665,6 +679,17 @@
 
   .grip:hover::after {
     opacity: 1;
+  }
+
+  /* A finger finds no hover and hits no nine pixels: wider, and visible. */
+  @media (pointer: coarse) {
+    .grip {
+      width: 16px;
+    }
+
+    .grip::after {
+      opacity: 0.4;
+    }
   }
 
   /* ---- Virtualisation -------------------------------------------------- */

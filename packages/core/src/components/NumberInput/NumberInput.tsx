@@ -6,7 +6,6 @@ import {
   clampNumber,
   decimalsAllowed,
   filterInput,
-  formatNumber,
   parseNumber,
   stepNumber,
 } from "./number";
@@ -49,10 +48,10 @@ export interface NumberInputProps
 }
 
 /**
- * Number input in German notation: the comma as the decimal separator,
- * dots as thousands separators (set on leaving, tolerated while typing).
- * The arrow keys count (Shift ×10), min/max clamp on leaving, alignment
- * right in Geist Mono.
+ * Number input in the notation of the formats (`useFormats`): its decimal and
+ * group separators are read and written, the group separators set on leaving
+ * and tolerated while typing. The arrow keys count (Shift ×10), min/max clamp
+ * on leaving, alignment right in Geist Mono.
  *
  * Stepper: quiet −/+ buttons without dividing lines, damped at rest, fully
  * present on hover or focus. Holding one down repeats the step (a short
@@ -73,6 +72,9 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
     disabled,
     className,
     id,
+    onFocus,
+    onBlur,
+    onKeyDown,
     ...rest
   },
   ref,
@@ -92,7 +94,9 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
   const isInvalid = invalid ?? field?.invalid ?? false;
   const constraints = useMemo<NumberConstraints>(() => ({ min, max, decimals }), [min, max, decimals]);
 
-  const [text, setText] = useState(() => (value === null ? "" : formatNumber(value, decimals)));
+  /* In the notation of the formats from the first render on - the effect
+     below would correct it, but only after the default had been painted. */
+  const [text, setText] = useState(() => (value === null ? "" : write(value)));
   const [focused, setFocused] = useState(false);
 
   // Adopt values set from outside, as long as nobody is typing.
@@ -128,6 +132,8 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
   };
 
   const handleKeyDown = (event: ReactKeyboardEvent<HTMLInputElement>) => {
+    onKeyDown?.(event);
+    if (event.defaultPrevented) return;
     if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
     event.preventDefault();
     stepBy(event.key === "ArrowUp" ? 1 : -1, event.shiftKey ? 10 : 1);
@@ -209,15 +215,23 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
           const parsed = read(raw);
           onChange(parsed === null ? null : clampNumber(parsed, constraints));
         }}
+        {...rest}
+        /* After `rest` and composed with the caller's: a form library hands
+           in `onBlur` as a matter of course, and it used to replace the
+           commit on leaving - the field then counted as focused for good and
+           took no value from outside any more. */
         onKeyDown={handleKeyDown}
-        onFocus={() => setFocused(true)}
+        onFocus={(event) => {
+          onFocus?.(event);
+          setFocused(true);
+        }}
         onBlur={(event) => {
+          onBlur?.(event);
           setFocused(false);
           // Adopt the actual field content, not the state (which may be one
           // render stale) – the same safeguard as in the TimeField.
           commit(read(event.currentTarget.value));
         }}
-        {...rest}
       />
       {suffix && <span className={styles.adornment}>{suffix}</span>}
       <span className={styles.stepper}>
