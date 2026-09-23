@@ -205,7 +205,7 @@ const GROUP_TOLERANCE = 4;
 
 let nextRegistration = 0;
 
-function fnEqual(a: unknown, b: unknown): boolean {
+export function fnEqual(a: unknown, b: unknown): boolean {
   if (a === b) return true;
   if (typeof a !== "function" || typeof b !== "function") return false;
   return String(a) === String(b);

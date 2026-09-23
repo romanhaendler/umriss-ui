@@ -77,6 +77,12 @@ From `.scratch/charts-fixes/spec.md`; the findings stand in
   it either - a reading a gap isolates vanished. It now always keeps its marker;
   only `markers="never"` drops it. On an area it is a stroke from its foot to
   its value, with or without an outline.
+- **A control chart reports its violations once per change.** An inline
+  `accessor` or `origin` recomputed the limits on every render, and
+  `onViolations` was called after each - a caller that kept the violations in
+  state rendered forever. The accessor is now compared by its source text, the
+  origin by its values, and `onViolations` is called only when the violations
+  differ in content.
 
 ---
 
