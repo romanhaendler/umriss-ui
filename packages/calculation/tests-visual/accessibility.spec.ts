@@ -34,14 +34,18 @@ test("a page with every code block open is accessible", async ({ page }, testInf
   expect(findings(result), `Code open (${testInfo.project.name})`).toEqual([]);
 });
 
-/* With derivations open: the sunken surface of an open group, text on it, and
-   the falling line - every example starts folded, so the loop never sees it. */
+/* With derivations open and a row hovered: the sunken surface of an open
+   group, the hover band over it, coloured text in a marked row (a stale as-of
+   time) - every tree starts folded and nothing is hovered, so the loop never sees
+   it. */
 test("a calculation with derivations open is accessible", async ({ page }, testInfo) => {
   await openExample(page, "worked-examples", "cost-per-piece");
   const target = page.locator('[data-example="cost-per-piece"]');
-  for (const label of ["Production cost", "Machine time", "Cost price"]) {
+  for (const label of ["Direct material", "Machine time", "Scrap surcharge"]) {
     await target.getByRole("button", { name: `Show how ${label} is derived` }).click();
   }
+  /* The scrap surcharge marks its operands - among them the stale scrap rate. */
+  await target.getByText("Scrap surcharge", { exact: true }).hover();
   const result = await new AxeBuilder({ page }).include('[data-example="cost-per-piece"]').withTags(STANDARDS).analyze();
   expect(findings(result), `Derivations open (${testInfo.project.name})`).toEqual([]);
 });

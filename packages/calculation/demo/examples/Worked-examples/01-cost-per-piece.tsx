@@ -10,8 +10,8 @@ export const title = "The cost per piece of a production order";
    sheet ends in a net and a gross price.
 
    The scrap rate is three days old: its line says so, beside the number, and
-   keeps its verdict. Some fifty quantities, and the reader sees five lines
-   until they choose to see more. */
+   keeps its verdict. Some fifty quantities: the sheet itself stands open, a
+   dozen lines, and every tree in it waits folded until a reader asks. */
 
 const BILL_OF_MATERIAL = [
   { part: "Steel sheet 2 mm", quantity: 1.84, unit: "kg", price: 1.35 },
@@ -55,7 +55,7 @@ export default function CostPerPiece() {
           <Sum label="Machine time" unit="€" decimals={2}>
             {ROUTING.map((step) => (
               <Product key={step.station} label={step.station} unit="€" decimals={2}>
-                <Given label={`Minutes, ${step.station.toLowerCase()}`} value={step.minutes} unit="min" />
+                <Given label={`Minutes, ${step.station.toLowerCase()}`} value={step.minutes} unit="min" decimals={1} />
                 <Quotient label={`Rate per minute, ${step.station.toLowerCase()}`} unit="€/min" decimals={3}>
                   <Given label={`Machine hour rate, ${step.station.toLowerCase()}`} value={step.rate} unit="€/h" />
                   <Given label="Minutes per hour" value={60} unit="min/h" />
@@ -94,7 +94,7 @@ export default function CostPerPiece() {
           </Product>
         </Plus>
         <Interim label="Cost price" unit="€" decimals={2} />
-        <Times label="Profit mark-up" value={1.1} />
+        <Times label="Profit mark-up" value={1.1} decimals={2} />
         <Interim label="Net price per piece" unit="€" decimals={2} target={85} />
         <Times label="VAT factor" value={1.19} />
         <Interim label="Gross price per piece" unit="€" decimals={2} />

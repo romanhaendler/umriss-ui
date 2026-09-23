@@ -48,9 +48,12 @@ Three rules come with the chain:
 - **Only an interim shows the running value.** An operand between two interims
   shows its own number. A running value without a name is a number nobody can
   quote; whoever wants to see it sets an interim.
-- **A chain starts folded to its interims.** Each interim folds the operands
-  since the interim before it, and the sheet of interim results is what a
-  reader sees first.
+- **A chain in view does not fold.** It is the working itself: every line and
+  every interim stands open, as on paper. What a reader should see only on
+  request goes into one line as a tree - a `<Sum>` of contributions held by a
+  `<Minus>` - and folds like any tree. The writer decides, line by line, what
+  is always in view. A chain that is an operand folds as a whole, and opens
+  whole.
 
 And one rule for the tree: **a sum or product of more than four operands shows
 no formula on its line**, only how many operands it has. The operands stand
@@ -69,17 +72,17 @@ medium radius, rows of one height divided by hairlines.
   monospace token only - the library ships no fonts (ADR-0021), and nothing may
   depend on one face's measures.
 - **The outermost statement stands as on paper** and does not fold: a tree's
-  operands with their operators, a chain's interims one under another. The
-  **Result** closes it as its last row on the sunken surface, heavier and larger,
-  its number underlined twice - the accountant's mark for the final figure; without a
-  number, no mark, which would read as an equals sign. A chain's Result is its
-  last interim and opens beneath itself like every interim.
-- **Everything else opens beneath the row that was clicked**, and that row
-  never moves. Row and derivation become one group on the sunken surface; a
-  line in the accent falls from beneath the row's disclosure through the rows
+  operands with their operators, a chain's lines with each interim beneath a
+  rule across its figures. The **Result** closes it as its last row on the
+  sunken surface, heavier, its number underlined twice - the accountant's mark
+  for the final figure; without a number, no mark, which would read as an
+  equals sign.
+- **Every tree below it opens beneath the row that was clicked**, and that
+  row never moves. Row and derivation become one group on the sunken surface;
+  a line in the accent falls from beneath the row's disclosure through the rows
   it opened, and the derivation closes with a rule and "= label" - it says
-  whose it is twice: attached, and by name. In a chain the derivation of an
-  interim starts with the interim before. A group inside a group draws its own
+  whose it is twice: attached, and by name. A chain that is an operand opens
+  the same way, whole. A group inside a group draws its own
   line, and the outer one stays in view to its left. Inside a group there are
   no hairlines: the surface holds the rows together.
 - **The disclosure** is a quiet square with an angle before the label, as the
@@ -108,6 +111,14 @@ medium radius, rows of one height divided by hairlines.
   therefore takes the width it is given; `className` and `style` size the
   surface.
 
+*Amended 23 Sep. 2026:* the first version folded a chain to its interims, so
+that a reader saw the sheet of interim results first. Seen with a payslip -
+gross salary, each deduction with its minus, the net salary once they all
+stand - it hid exactly what a chain is written for: the steps. A chain in view
+now stands open, and folding is the writer's choice per line, through a tree.
+Where nothing in a calculation can fold, no column is kept free for a
+disclosure.
+
 ## Considered Options
 
 **Signs only** — a chain that only adds and subtracts, with multiplication
@@ -134,6 +145,10 @@ accordion - a chevron before every line, each level indenting the whole row -
 and gives tree and chain two looks. **A column per nesting level** (the
 accountant's inner column) is the clearest separation of levels and too wide
 for OEE's three.
+
+**A chain folded to its interims**, the first version, and **a switch for the
+whole chain** ("interims only"). The first hid the steps; the second is a
+setting where the writer already has the finer tool - one line as a tree.
 
 **The chain instead of the tree.** OEE written as a chain loses the one thing a
 tree shows: that availability, performance and quality are three independent

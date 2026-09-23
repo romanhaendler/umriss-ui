@@ -11,6 +11,26 @@ under a heading "Changed" of its own, no matter which digit rose.
 
 ---
 
+## 0.2.0 – A chain stands open (Sep. 2026)
+
+0.1.0 was committed in the repository but never published; this is the first
+version on npm.
+
+### Changed
+
+- **A chain in view no longer folds.** Every line and every interim stands
+  open, as on paper - gross salary, each deduction with its minus, the net
+  salary beneath a rule once they all stand. What should show only on request
+  is written as a tree in one line: a `<Sum>` held by a `<Minus>` folds like
+  any tree and opens beneath its line. A chain that is an operand still folds,
+  as a whole, and opens whole.
+- **No disclosure column where nothing can fold**: a calculation of givens
+  and chains alone starts its labels at the surface's edge.
+- **The hover band on operands** is half the accent's surface instead of a
+  grey, so coloured text in a marked row keeps its contrast.
+
+---
+
 ## 0.1.0 – First release (Sep. 2026)
 
 A calculation a reader can follow and redo: the package evaluates every

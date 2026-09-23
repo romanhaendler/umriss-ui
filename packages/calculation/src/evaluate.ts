@@ -33,9 +33,6 @@ export interface Evaluation {
   verdict?: Verdict;
   /** The worst verdict inside the derivation, the quantity's own excluded. */
   worst?: Verdict;
-  /** The same without the interim before - for an interim whose chain stands
-      in view, where the interim before has a line of its own. */
-  worstSince?: Verdict;
 }
 
 /** The fraction digits a quantity is shown with at most: as the caller says,
@@ -92,7 +89,6 @@ export function evaluate(model: CalculationModel): ReadonlyMap<string, Evaluatio
     let absence: Absence | undefined;
     let approximate = false;
     let worst: Verdict | undefined;
-    let worstSince: Verdict | undefined;
 
     if (quantity.given) {
       const given = quantity.given.value;
@@ -103,7 +99,6 @@ export function evaluate(model: CalculationModel): ReadonlyMap<string, Evaluatio
       for (const { operand, verdict, worst: inside } of operands) {
         const here = operand.reference ? verdict : worse(verdict, inside);
         worst = worse(worst, here);
-        if (!operand.previous) worstSince = worse(worstSince, here);
       }
       absence = operands.find((o) => o.absence)?.absence;
       const divisor = operands[1];
@@ -135,7 +130,6 @@ export function evaluate(model: CalculationModel): ReadonlyMap<string, Evaluatio
       assessment,
       verdict,
       worst,
-      worstSince,
     };
     results.set(key, evaluation);
     return evaluation;
