@@ -102,12 +102,12 @@ Screenshot pages carry their name in brackets.
 
 | Capability | Rule | Proved at |
 |---|---|---|
-| Fill down to baseline 0 when none is given | ADR-0002 | Unit (materialisation, scene) |
-| A band area between two accessors | 4.3 | Screenshot (`mixed`) |
+| Fill down to baseline 0 when none is given | ADR-0002 | Unit (materialisation, scene), Screenshot (`filled`) |
+| A band area between two accessors | 4.3 | Screenshot (`mixed`, `corridor`) |
 | The baseline pulls its Y axis' value range | R-4.13 | Unit (materialisation, scene) |
 | Fill and outline as separate paths | R-2.12 | Screenshot (`mixed`) |
-| A gap produces a hole, not a straight line across it | R-2.5 | Screenshot (`mixed`) |
-| `fillOpacity`, `strokeWidth` | 4.3 | Screenshot (`mixed`, light and dark) |
+| A gap produces a hole, not a straight line across it | R-2.5 | Screenshot (`mixed`, `corridor`) |
+| `fillOpacity`, `strokeWidth` (0 leaves the outline out) | 4.3 | Screenshot (`filled`, `corridor`, light and dark) |
 
 ## `Bar`
 

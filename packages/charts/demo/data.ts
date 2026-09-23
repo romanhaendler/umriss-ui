@@ -336,6 +336,71 @@ export const WEEK_CALENDAR = Array.from({ length: 5 }, (_, day) => ({
 }));
 
 /* ---------------------------------------------------------------------------
+   Data of the kind pages.
+
+   Area, Bar, Scatter and the tooltip each get a page with examples of their
+   own, and each example shows one property. The data is plant data like the
+   instruments' above, and for the same reason: a filled area of "Series A"
+   does not say why it is filled down to 0, a power draw does.
+   --------------------------------------------------------------------------- */
+
+export interface PowerPoint {
+  t: number;
+  /** Power draw of the line in kW. */
+  kw: number;
+}
+
+/** The power draw of one line over the early shift, every five minutes: the
+    start-up, production, the break at half past nine and a setup towards the
+    end. A draw has a natural 0, which is why the area is filled down to it. */
+export function powerDraw(seed: number): PowerPoint[] {
+  const r = random(seed);
+  const start = WEEK_START + 6 * HOUR_MS;
+  const points: PowerPoint[] = [];
+  for (let i = 0; i <= 8 * 12; i++) {
+    const hour = 6 + i / 12;
+    let base = 182;
+    if (hour < 6.5) base = 30 + (hour - 6) * 300; // start-up
+    else if (hour >= 9.5 && hour < 10) base = 42; // break
+    else if (hour >= 12 && hour < 12.75) base = 75; // setup
+    points.push({ t: start + i * 5 * 60_000, kw: base + (r() - 0.5) * 18 });
+  }
+  return points;
+}
+
+export interface CorridorPoint {
+  t: number;
+  /** The corridor the recipe permits; null during the recipe change. */
+  lower: number | null;
+  upper: number | null;
+  /** The measured temperature - always there, also where no corridor is. */
+  temperature: number;
+}
+
+/** A hardening furnace over one shift. The corridor comes from the recipe;
+    during the change from one recipe to the next there is none - a gap, not a
+    corridor of zero width - and the temperature climbs to the new one. */
+export function corridor(seed: number): CorridorPoint[] {
+  const r = random(seed);
+  const start = WEEK_START + 6 * HOUR_MS;
+  const points: CorridorPoint[] = [];
+  let temperature = 842;
+  for (let i = 0; i <= 8 * 12; i++) {
+    const hour = 6 + i / 12;
+    const change = hour >= 10 && hour < 11;
+    const target = hour < 10 ? 840 : 880;
+    temperature += (target - temperature) * 0.12 + (r() - 0.5) * 6;
+    points.push({
+      t: start + i * 5 * 60_000,
+      lower: change ? null : target - 12,
+      upper: change ? null : target + 12,
+      temperature,
+    });
+  }
+  return points;
+}
+
+/* ---------------------------------------------------------------------------
    The series the examples show.
 
    They stand here and not in the example files because several examples share
@@ -353,3 +418,5 @@ export const shiftData = shift(4711, 64);
 export const measurementData = measurements(815, 90);
 export const matrixData = utilizationMatrix(23);
 export const weekData = week(1963);
+export const powerData = powerDraw(612);
+export const corridorData = corridor(1400);
