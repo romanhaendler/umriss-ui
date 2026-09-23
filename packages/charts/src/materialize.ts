@@ -30,9 +30,6 @@ export type Baseline<T> = Accessor<T> | number;
 export interface ExtraChannels<T> {
   /** Value channel of the matrix: the third value per point. */
   value?: Accessor<T>;
-  /** Second x channel of the span: its end. Missing means open (NaN in the
-      channel), not a gap. */
-  xEnd?: Accessor<T>;
   /** Pre-mapping of the x values, before anything calculates. The operating
       calendar comes in here: the scale stays affine, because the channel already
       stands in operating time (ADR-0001).
@@ -65,8 +62,6 @@ export function materializeSeries<T>(
   const y0 = baseAccessor === null ? null : new Float64Array(n);
   const valueAccessor = extra?.value ?? null;
   const w = valueAccessor === null ? null : new Float64Array(n);
-  const endAccessor = extra?.xEnd ?? null;
-  const x1 = endAccessor === null ? null : new Float64Array(n);
   const map = extra?.xMap ?? null;
   const isGap = extra?.xGap ?? null;
   let xMin = Number.POSITIVE_INFINITY;
@@ -91,23 +86,6 @@ export function materializeSeries<T>(
       if (xv < xMin) xMin = xv;
       if (xv > xMax) xMax = xv;
     }
-    if (endAccessor !== null) {
-      const rawEnd = endAccessor(d, i);
-      const eRaw = rawEnd === null || rawEnd === undefined ? Number.NaN : rawEnd;
-      // An open span stays open: the mapping runs only over real ends, so that a
-      // NaN does not turn into a number.
-      const ev = !Number.isFinite(eRaw) || map === null ? eRaw : map(eRaw);
-      (x1 as Float64Array)[i] = ev;
-      // The end pulls the x extent along: otherwise the axis cuts off the last
-      // span, and half a span looks like a short one.
-      // Only a FINITE end: "open" is encoded as NaN or infinity, and infinity as
-      // an extent would collapse the whole axis onto [0, 1], because no finite
-      // range would be left.
-      if (Number.isFinite(ev)) {
-        if (ev < xMin) xMin = ev;
-        if (ev > xMax) xMax = ev;
-      }
-    }
     const raw = calendarGap ? null : yAccessor(d, i);
     const yv = raw === null || raw === undefined ? Number.NaN : raw;
     y[i] = yv;
@@ -128,7 +106,7 @@ export function materializeSeries<T>(
       if (uv > yMax) yMax = uv;
     }
   }
-  return { series: { x, y, y0, w, x1, length: n }, extent: { xMin, xMax, yMin, yMax } };
+  return { series: { x, y, y0, w, length: n }, extent: { xMin, xMax, yMin, yMax } };
 }
 
 /** Index of the first unsorted x value, otherwise -1 (DEV check, R-2.6). */

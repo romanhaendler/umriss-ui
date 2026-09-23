@@ -115,13 +115,6 @@ export const OUTLINE: readonly Rubric[] = [
         types: [],
         exports: ["pareto"],
       },
-      {
-        id: "span",
-        name: "Span",
-        sentence: "Jobs with an explicit end: idle time between two of them is visible, and a double booking stays a conflict instead of becoming a layout.",
-        types: ["SpanProps"],
-        exports: ["Span"],
-      },
     ],
   },
   {

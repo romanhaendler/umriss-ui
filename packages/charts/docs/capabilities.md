@@ -165,18 +165,6 @@ Screenshot pages carry their name in brackets.
 | Colouring as a gradient or from a limit set | ADR-0006 | Screenshot (`matrix`) |
 | The tooltip carries the value, not the row number | R-4.8 | Interaction |
 
-## `Span`
-
-| Capability | Rule | Proved at |
-|---|---|---|
-| An explicit end; without an end, open to the edge | — | Unit (spans), Interaction (at the far right only the open span runs) |
-| Idle time between two spans stays empty | — | Unit (spans) |
-| Overlap is offset within the track, never packed; counted by registration | — | Unit (spans) |
-| A hit only within its own track; where they cover each other, the last registered | R-4.6 | Unit (spans) |
-| The end stands in the second, named X channel | ADR-0011 | Unit (limits and bands in the scene) |
-| An open span does not tear open the X value range | R-4.13 | Unit (limits and bands in the scene) |
-| Rendering in light and dark | — | Screenshot (`schedule`) |
-
 ## `LimitLine` / `LimitBand`
 
 | Capability | Rule | Proved at |

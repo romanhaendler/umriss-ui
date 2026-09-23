@@ -3,6 +3,9 @@
 Status: accepted
 Date:   2026-08
 
+The span and its second x channel were removed with ADR-0026; the value channel
+stands.
+
 The matrix needs a third number per point — the value that decides the colour.
 The span needs a second x — its end. Neither fits the three channels a
 materialised series had.

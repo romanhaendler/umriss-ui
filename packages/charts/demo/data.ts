@@ -273,38 +273,6 @@ export function utilizationMatrix(seed: number): CellPoint[] {
   return cells;
 }
 
-export interface Job {
-  job: string;
-  /** The lane: the resource. */
-  resource: number;
-  from: number;
-  /** Missing = still running. */
-  to: number | null;
-}
-
-export const RESOURCES = ["Press 1", "Mill 3", "Furnace 1", "Assembly A"] as const;
-
-/** One day of a schedule with exactly the three things that distinguish a span
-    from a state band: an overlap (two jobs on one machine - the finding for whose
-    sake somebody opens the schedule), a gap (idle time) and an open span (still
-    running). */
-export const SCHEDULE: readonly Job[] = (() => {
-  const t = (hour: number) => WEEK_START + hour * HOUR_MS;
-  return [
-    { job: "A-4711", resource: 0, from: t(6), to: t(10.5) },
-    // Double booking on Press 1 - deliberately, and deliberately visible.
-    { job: "A-4712", resource: 0, from: t(9.5), to: t(13) },
-    { job: "A-4713", resource: 0, from: t(15), to: t(18) }, // idle time before it
-    { job: "B-201", resource: 1, from: t(6), to: t(12) },
-    { job: "B-202", resource: 1, from: t(12), to: t(17.5) },
-    { job: "C-88", resource: 2, from: t(7), to: t(9) },
-    { job: "C-89", resource: 2, from: t(11), to: t(14) },
-    { job: "C-90", resource: 2, from: t(16), to: null }, // still running
-    { job: "M-31", resource: 3, from: t(6.5), to: t(11) },
-    { job: "M-32", resource: 3, from: t(13), to: t(19) },
-  ];
-})();
-
 export interface WeekPoint {
   t: number;
   output: number;

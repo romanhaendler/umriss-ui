@@ -14,7 +14,6 @@ import type {
   LimitConfig,
   LineSeriesConfig,
   MatrixSeriesConfig,
-  SpanSeriesConfig,
   StateSeriesConfig,
 } from "../src/types";
 
@@ -22,14 +21,13 @@ interface Row {
   t: number;
   a: number;
   z: number;
-  to: number;
   w: number;
 }
 
 const data: Row[] = [
-  { t: 0, a: 10, z: 0, to: 2, w: 5 },
-  { t: 1, a: 20, z: 1, to: 4, w: 9 },
-  { t: 2, a: 30, z: 0, to: 6, w: 1 },
+  { t: 0, a: 10, z: 0, w: 5 },
+  { t: 1, a: 20, z: 1, w: 9 },
+  { t: 2, a: 30, z: 0, w: 1 },
 ];
 
 const xAxis: AxisConfig = {
@@ -218,28 +216,26 @@ describe("The legend of a state series counts states, not series", () => {
   });
 });
 
-describe("Extra channels exist only where a kind needs them (ADR-0011)", () => {
+describe("The value channel exists only where a kind needs it (ADR-0011)", () => {
   const access = (s: ChartScene) => s.seriesInOrder()[0]?.materialized ?? null;
 
-  it("leaves both channels null for a line, an area, a bar and a scatter", () => {
+  it("leaves the value channel null for a line, an area, a bar and a scatter", () => {
     const s = makeScene();
     s.registerSeries(line());
     s.axisExtent("y", "y"); // forces the materialisation
     const mat = access(s);
     expect(mat?.w).toBeNull();
-    expect(mat?.x1).toBeNull();
   });
 
-  it("leaves both channels null for a state series too", () => {
+  it("leaves the value channel null for a state series too", () => {
     const s = makeScene();
     s.registerSeries(stateSeries());
     s.axisExtent("y", "y");
     const mat = access(s);
     expect(mat?.w).toBeNull();
-    expect(mat?.x1).toBeNull();
   });
 
-  it("fills the value channel for the matrix and leaves the second x channel null", () => {
+  it("fills the value channel for the matrix", () => {
     const s = makeScene();
     const matrix: MatrixSeriesConfig = {
       kind: "matrix",
@@ -253,53 +249,6 @@ describe("Extra channels exist only where a kind needs them (ADR-0011)", () => {
     s.axisExtent("y", "y");
     const mat = access(s);
     expect([...(mat?.w ?? [])]).toEqual([5, 9, 1]);
-    expect(mat?.x1).toBeNull();
-  });
-
-  it("fills the second x channel for the span and leaves the value channel null", () => {
-    const s = makeScene();
-    const span: SpanSeriesConfig = {
-      kind: "span",
-      accessor: (d) => (d as Row).a,
-      to: (d) => (d as Row).to,
-      xAxisId: "x",
-      yAxisId: "y",
-    };
-    s.registerSeries(span);
-    s.axisExtent("x", "x");
-    const mat = access(s);
-    expect([...(mat?.x1 ?? [])]).toEqual([2, 4, 6]);
-    expect(mat?.w).toBeNull();
-  });
-
-  it("takes the end of a span into the x extent", () => {
-    // Otherwise the axis cuts off the last span, and half a span looks like a
-    // short one.
-    const s = makeScene();
-    s.registerSeries({
-      kind: "span",
-      accessor: (d) => (d as Row).a,
-      to: (d) => (d as Row).to,
-      xAxisId: "x",
-      yAxisId: "y",
-    });
-    expect(s.axisExtent("x", "x")).toEqual([0, 6]);
-  });
-
-  it("widens the y extent anew when the height of a span changes", () => {
-    const s = makeScene();
-    const span: SpanSeriesConfig = {
-      kind: "span",
-      accessor: (d) => (d as Row).a,
-      to: (d) => (d as Row).to,
-      xAxisId: "x",
-      yAxisId: "y",
-      height: 2,
-    };
-    const id = s.registerSeries(span);
-    expect(s.axisExtent("y", "y")).toEqual([9, 31]);
-    s.updateSeries(id, { ...span, height: 4 });
-    expect(s.axisExtent("y", "y")).toEqual([8, 32]);
   });
 });
 
@@ -314,10 +263,10 @@ describe("Degenerate cases that look like an empty chart", () => {
        Hence this test holds down: what is stored is the MEASURED spacing, even
        when it is zero. That zero is rescued is held down by cells.test.ts. */
     const cells = [
-      { t: 0, a: 0, z: 0, to: 0, w: 5 },
-      { t: 1, a: 0, z: 0, to: 0, w: 9 },
-      { t: 0, a: 2, z: 0, to: 0, w: 1 },
-      { t: 1, a: 2, z: 0, to: 0, w: 3 },
+      { t: 0, a: 0, z: 0, w: 5 },
+      { t: 1, a: 0, z: 0, w: 9 },
+      { t: 0, a: 2, z: 0, w: 1 },
+      { t: 1, a: 2, z: 0, w: 3 },
     ];
     const s = new ChartScene();
     s.setData(cells);
@@ -342,8 +291,8 @@ describe("Degenerate cases that look like an empty chart", () => {
     // invented. The axis widens a point itself (dataDomain/niceDomain), and out of
     // that the drawing code fetches the edge.
     const oneRow = [
-      { t: 0, a: 4, z: 0, to: 0, w: 5 },
-      { t: 1, a: 4, z: 0, to: 0, w: 9 },
+      { t: 0, a: 4, z: 0, w: 5 },
+      { t: 1, a: 4, z: 0, w: 9 },
     ];
     const s = new ChartScene();
     s.setData(oneRow);
@@ -362,28 +311,6 @@ describe("Degenerate cases that look like an empty chart", () => {
     // comes out of it - otherwise the cell would stay zero high.
     expect(dataDomain(4, 4)[1] - dataDomain(4, 4)[0]).toBeGreaterThan(0);
     expect(cellSize(0, dataDomain(4, 4)[1] - dataDomain(4, 4)[0])).toBeGreaterThan(0);
-  });
-
-  it("does not let an open span tear the x extent open", () => {
-    // "Open" is encoded as NaN or infinity. If infinity pulled the extent along, no
-    // finite range would be left and the axis would fall back on its default
-    // [0, 1] - every series on it would be flat.
-    const withOpen = [
-      { t: 0, a: 0, z: 0, to: 5, w: 0 },
-      { t: 2, a: 1, z: 0, to: Number.POSITIVE_INFINITY, w: 0 },
-    ];
-    const s = new ChartScene();
-    s.setData(withOpen);
-    s.registerAxis(xAxis);
-    s.registerAxis(yAxis);
-    s.registerSeries({
-      kind: "span",
-      accessor: (d) => (d as Row).a,
-      to: (d) => (d as Row).to,
-      xAxisId: "x",
-      yAxisId: "y",
-    });
-    expect(s.axisExtent("x", "x")).toEqual([0, 5]);
   });
 });
 

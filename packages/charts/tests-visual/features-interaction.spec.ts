@@ -375,17 +375,3 @@ test("control chart: everything lies on the series layer, nothing on the overlay
   expect(await occupiedPixels(example, "uc-layer-series")).toBeGreaterThan(0);
   expect(await occupiedPixels(example, "uc-layer-overlay")).toBe(0);
 });
-
-test("schedule: at the far right only the open span is still running", async ({ page }) => {
-  await openExample(page, "span", "schedule");
-  // C-90 has no end and runs to the edge; every other job is long since over
-  // there. Where exactly the lane lies, the test does not guess.
-  const example = page.locator('[data-example="schedule"]');
-  await example.scrollIntoViewIfNeeded();
-  let hits = 0;
-  for (let k = 0; k <= 14; k++) {
-    const text = await tooltipText(page, example, 0.97, 0.2 + k * 0.05);
-    if (text.length > 0) hits++;
-  }
-  expect(hits).toBeGreaterThan(0);
-});

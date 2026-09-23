@@ -79,8 +79,8 @@ describe("cellIndex - which cell lies under the pointer", () => {
   });
 
   it("counts an edge to the cell that begins there", () => {
-    // The same boundary rule as in the state band and with the spans: otherwise
-    // the edge would belong to both neighbours.
+    // The same boundary rule as in the state band: otherwise the edge would
+    // belong to both neighbours.
     expect(cellIndex(columns, rows, 6, 0.5, 0, 1, 1)).toBe(1);
     expect(cellIndex(columns, rows, 6, 1.5, 0, 1, 1)).toBe(2);
     expect(cellIndex(columns, rows, 6, 0, 0.5, 1, 1)).toBe(3);

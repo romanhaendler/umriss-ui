@@ -3,9 +3,8 @@
    A state band is a partition of the x axis: a state holds from the x value of
    its point until the x value of the next, and the last segment runs to the end
    of the domain. There are no interstices - every end is the beginning of the
-   next segment. That is exactly where the band differs from a span (see
-   spans.ts), which has explicit ends, leaves gaps between its members and is
-   allowed to overlap; the two are deliberately two modules.
+   next segment. Occupancy with explicit ends, gaps and overlaps is the
+   schedule's (ADR-0026), not a band's.
 
    Deliberately free of the DOM and of the scene, and deliberately without a
    segment list: the drawing code iterates over the indices it has anyway and
