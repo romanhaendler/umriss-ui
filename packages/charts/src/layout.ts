@@ -19,7 +19,7 @@
 
 import { LinearScale } from "./scale";
 import { formatTick } from "./format";
-import { niceDomain, dataDomain, tickStep, ticksFor } from "./ticks";
+import { alignedTicks, niceDomain, dataDomain, tickStep, ticksFor } from "./ticks";
 import {
   breaks as calendarBreaks,
   calendarFrom,
@@ -65,6 +65,8 @@ export interface AxisInput {
       time. The module behind it builds a calendar out of the list once and
       keeps it. */
   calendar?: readonly OperatingInterval[];
+  /** A further y axis: its ticks on the first y axis' grid. */
+  alignTicks?: boolean;
   /** Labels of the limits on a y axis: they stand in its band beside the
       ticks, so the band is as wide as the widest of both. */
   limitLabels?: readonly string[];
@@ -304,11 +306,22 @@ export function computeLayout(input: LayoutInput): LayoutResult {
   const yInterim = new Map<string, Interim>();
   const yWidth = new Map<string, number>();
 
-  for (const axis of [...left, ...right]) {
+  // The first y axis in registration order goes first: an aligned axis takes
+  // its grid.
+  const firstY = axes.find((a) => a.orientation === "y");
+  for (const axis of [...left, ...right].sort((a, b) => (a === firstY ? -1 : b === firstY ? 1 : 0))) {
     const tickCount = axis.tickCount ?? Math.max(2, Math.round(plotHeight / 50));
-    const domain = domainOf(axis, tickCount);
-    const values = tickValuesFor(axis, domain, tickCount);
-    const format = formatterFor(axis, domain, tickCount);
+    const grid = firstY === undefined ? undefined : yInterim.get(firstY.key);
+    // A fixed domain is widened from itself, any other from the extent.
+    const [min, max] = Array.isArray(axis.domainMode) ? domainOf(axis, tickCount) : axis.extent;
+    const aligned =
+      axis.alignTicks === true && axis !== firstY && grid !== undefined
+        ? alignedTicks(min, max, grid.domain, grid.values)
+        : null;
+    const domain = aligned?.domain ?? domainOf(axis, tickCount);
+    const values = aligned?.ticks ?? tickValuesFor(axis, domain, tickCount);
+    const format =
+      aligned === null ? formatterFor(axis, domain, tickCount) : (axis.tickFormat ?? ((v: number) => formatTick(v, aligned.step)));
     const labels = labelsFor(axis, domain, tickCount, values, format);
     const widths = labels.map((t) => measure(t, CLASS_TICK).width);
     let maxWidth = 0;

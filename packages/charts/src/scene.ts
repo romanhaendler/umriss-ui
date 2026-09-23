@@ -673,6 +673,7 @@ export class ChartScene {
       previous.tickCount === config.tickCount &&
       previous.grid === config.grid &&
       previous.time === config.time &&
+      previous.alignTicks === config.alignTicks &&
       listEqual(previous.ticks as number[] | undefined, config.ticks as number[] | undefined) &&
       domainEqual(previous.domain, config.domain) &&
       (previous.onDomainChange === undefined) === (config.onDomainChange === undefined) &&
@@ -884,7 +885,7 @@ export class ChartScene {
       warnOnce(
         "multiple-grids",
         "More than one axis draws grid. Unaligned grids compete visually; " +
-          "there is no tick alignment between axes in V0 (R-4.15).",
+          "`alignTicks` puts a further y axis' ticks on the first one's grid instead (R-4.15).",
       );
     }
   }
@@ -1287,6 +1288,7 @@ export class ChartScene {
         tickValues: c.ticks,
         time: c.time,
         calendar: c.calendar,
+        alignTicks: c.alignTicks,
         limitLabels:
           c.orientation === "y"
             ? this.limitsInOrder()

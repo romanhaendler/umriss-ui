@@ -157,6 +157,8 @@ export interface AxisConfig<T = unknown> {
       materialisation maps wall clock time onto operating time before the scale
       calculates - the scale stays affine (ADR-0001). */
   calendar?: readonly OperatingInterval[];
+  /** y axes only: this axis' ticks on the first y axis' grid. */
+  alignTicks?: boolean;
   /** x axes only: where wheel, drag, pinch and double click propose a
       domain. Without it the axis does not zoom. */
   onDomainChange?: (domain: [number, number]) => void;
