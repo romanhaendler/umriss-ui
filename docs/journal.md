@@ -35,7 +35,13 @@ look; core gains one wording entry - each changelog carries the lines.*
   level; seen in the browser, the clicked line moved away and an open
   derivation no longer looked as if it belonged to anything. Derivations now
   open beneath their line as nested calculations with a bar, closing
-  "= label". Every baseline of the package was renewed.
+  "= label". A third pass, asked for as "polished, without overdoing it",
+  put the statement on a surface of its own in the material of the table and
+  the card: rows of one height, the formula in a column of its own, the
+  Result as the last row, underlined twice, verdicts as core's badges. A
+  fourth pass lowered the last row to the height of every other - its weight
+  is its surface, type and double rule - kept long formulas to one line, and
+  let a derivation fade in. Every baseline of the package was renewed.
 - **The demo grew to six pages and twenty-three examples**, from two numbers
   and a sum to the cost per piece of a production order.
 

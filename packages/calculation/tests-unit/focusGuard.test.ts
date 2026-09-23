@@ -18,8 +18,8 @@ describe("Focus styles of @umriss-ui/calculation (ADR-0021)", () => {
     focusableElements(path.replace("../src/", ""), source),
   );
 
-  it("puts only the disclosure labels into the tab order", () => {
-    expect(elements.map((element) => element.key)).toEqual(["Calculation.tsx button .label"]);
+  it("puts only the disclosure buttons into the tab order", () => {
+    expect(elements.map((element) => element.key)).toEqual(["Calculation.tsx button .disclosure"]);
   });
 
   it("give every element in the tab order a focus style of its own", () => {
