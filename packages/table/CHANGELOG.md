@@ -22,6 +22,16 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.2.4 – Core 0.5.0 (Sep. 2026)
+
+### Changed
+
+- **The table takes `@umriss-ui/core` 0.5.** Nothing in the table changed; the
+  peer range moves to `^0.5.0`, so that it installs beside
+  `@umriss-ui/calculation`, which needs core's new wording.
+
+---
+
 ## 0.2.3 – Core 0.4.0 (Sep. 2026)
 
 ### Changed

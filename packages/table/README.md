@@ -94,7 +94,7 @@ stylesheets by hand.
   `src/`.
 * [`CHANGELOG.md`](CHANGELOG.md) — what changes for a caller.
 * [`../../docs/design-language.md`](../../docs/design-language.md) — the design
-  language all four packages share.
+  language all five packages share.
 * [`../core/README.md`](../core/README.md) — the component library underneath.
 
 ## Licence

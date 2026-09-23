@@ -141,7 +141,7 @@ point into a time and a lane and back.
   **Miniature**, **Intent**, **Ghost** — stands in the workspace's
   `CONTEXT.md`, section "The schedule".
 * [`../../docs/design-language.md`](../../docs/design-language.md) — the design
-  language all four packages share.
+  language all five packages share.
 
 ## Licence
 

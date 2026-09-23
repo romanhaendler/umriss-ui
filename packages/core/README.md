@@ -5,7 +5,7 @@ Guiding idea: **precise and quiet, with palpable quality** – depth comes from
 soft shadows and fine light edges, not from hard outlines or effects.
 
 The design language — "Ink & Paper", the dark theme, motion — is written down
-once for all four packages in [`../../docs/design-language.md`](../../docs/design-language.md).
+once for all five packages in [`../../docs/design-language.md`](../../docs/design-language.md).
 
 ## Use
 

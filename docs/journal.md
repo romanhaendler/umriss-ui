@@ -18,10 +18,20 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Sep. 2026 — Release: calculation 0.1.0, core 0.5.0, table 0.2.4, schedule 0.1.4
+
+- **`@umriss-ui/calculation` 0.1.0**, its first release: tree and chain, the
+  statement on its own surface, six demo pages with twenty-three examples.
+  A last look at every spacing and colour at double size found one fault -
+  the Result's double rule ran under the "≈" - and nothing else.
+- **core 0.5.0** carries the calculation's twenty-two wording entries; table
+  0.2.4 and schedule 0.1.4 only move their peer range to `^0.5.0`, so that
+  all five install side by side.
+
 ## Sep. 2026 — The chain, and a statement instead of an accordion
 
-*For a caller: `@umriss-ui/calculation` (unreleased) gains the chain and a new
-look; core gains one wording entry - each changelog carries the lines.*
+*For a caller: `@umriss-ui/calculation` gains the chain and a new look; core
+gains one wording entry - each changelog carries the lines.*
 
 - **A second form.** A grilling session on the first delivery found the tree
   hard to write and to read for a costing sheet or a long sum
@@ -51,8 +61,8 @@ look; core gains one wording entry - each changelog carries the lines.*
 
 ## Sep. 2026 — A calculation a reader can follow
 
-*For a caller: the new `@umriss-ui/calculation` (unreleased) and new wording
-entries in core (unreleased) - each changelog carries the lines.*
+*For a caller: the new `@umriss-ui/calculation` and new wording entries in
+core - each changelog carries the lines.*
 
 - **A sixth package.** `@umriss-ui/calculation`, on core alone, from a grilling
   session (`.scratch/calculation/spec.md`, ADR-0027): a calculation is written
