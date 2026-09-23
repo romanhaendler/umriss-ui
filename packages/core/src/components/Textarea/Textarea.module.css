@@ -33,9 +33,7 @@
 
   .textarea:focus-visible {
     outline: none;
-    box-shadow:
-      0 0 0 1px var(--u-color-accent),
-      var(--u-focus-ring);
+    box-shadow: var(--u-focus-edge);
   }
 
   .textarea:disabled {
@@ -56,9 +54,7 @@
   }
 
   .invalid:focus-visible {
-    box-shadow:
-      0 0 0 1px var(--u-color-danger),
-      0 0 0 4px color-mix(in srgb, var(--u-color-danger) 18%, transparent);
+    box-shadow: var(--u-focus-edge-danger);
   }
 
   /* ------------------------------------------------------------------ */

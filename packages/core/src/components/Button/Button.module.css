@@ -31,9 +31,16 @@
     transform: scale(0.98);
   }
 
-  .button:disabled {
+  /* Loading locks the button but does not grey it out: it says "running", not
+     "not possible here". Faded to half, the spinner all but vanished - in the
+     dark theme most of all. */
+  .button:disabled:not([aria-busy="true"]) {
     cursor: not-allowed;
     opacity: 0.5;
+  }
+
+  .button[aria-busy="true"] {
+    cursor: progress;
   }
 
   .sm {

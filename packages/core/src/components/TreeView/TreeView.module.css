@@ -143,6 +143,8 @@
   .loading {
     flex: none;
     margin-left: var(--u-space-2);
-    color: var(--u-color-text-muted);
+    /* Secondary, not muted: the track is drawn at a quarter of this colour, and
+       a quarter of muted all but vanished on the dark surface. */
+    color: var(--u-color-text-secondary);
   }
 }

@@ -115,3 +115,35 @@ describe("computePosition – preferred side", () => {
     expect(pos.flipped).toBe(false);
   });
 });
+
+/* On a phone the visible part of the page is not the window: a pinch or the
+   zoom into a small field moves it, and the on-screen keyboard shortens it
+   (the visual viewport). Anchor and panel still count from the window's corner
+   (the layout viewport); the visible rectangle carries its offset in `top` and
+   `left`. */
+describe("computePosition – visible part of the window", () => {
+  // 390 × 400 visible, scrolled 300 down and 40 across inside the window.
+  const VISIBLE = { top: 300, left: 40, width: 390, height: 400 };
+
+  it("does not flip when there is room below inside the visible part", () => {
+    const pos = computePosition(anchor(60, 350), { width: 300, height: 200 }, VISIBLE);
+    expect(pos.flipped).toBe(false);
+    expect(pos.top).toBe(350 + 32 + 6);
+  });
+
+  it("flips when the keyboard covers the room below", () => {
+    const pos = computePosition(anchor(60, 600), { width: 300, height: 200 }, VISIBLE);
+    expect(pos.flipped).toBe(true);
+    expect(pos.top).toBe(600 - 6 - 200);
+  });
+
+  it("clamps to the visible edges, not to the window's", () => {
+    expect(computePosition(anchor(20, 350), { width: 300, height: 200 }, VISIBLE).left).toBe(40 + 8);
+    expect(computePosition(anchor(300, 350), { width: 300, height: 200 }, VISIBLE).left).toBe(40 + 390 - 300 - 8);
+  });
+
+  it("pulls a panel that fits nowhere into the visible part", () => {
+    const pos = computePosition(anchor(60, 450), { width: 300, height: 300 }, VISIBLE);
+    expect(pos.top).toBe(300 + 400 - 300 - 8);
+  });
+});

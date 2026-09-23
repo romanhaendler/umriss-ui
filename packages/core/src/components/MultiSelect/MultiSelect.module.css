@@ -27,14 +27,16 @@
   }
 
   .field:focus-within {
-    box-shadow:
-      0 0 0 1px var(--u-color-accent),
-      var(--u-focus-ring);
+    box-shadow: var(--u-focus-edge);
   }
 
   .invalid,
   .invalid:hover:not(.fieldDisabled):not(:focus-within) {
     box-shadow: 0 0 0 1px var(--u-color-danger);
+  }
+
+  .invalid:focus-within {
+    box-shadow: var(--u-focus-edge-danger);
   }
 
   .fieldDisabled {
