@@ -494,6 +494,24 @@ describe("validate - DEV invariants", () => {
     expect(() => scene.validate()).toThrow(/missing/);
   });
 
+  it("reports a limit with an unknown axis reference, as for a series", () => {
+    // It used to draw nothing, silently.
+    const scene = new ChartScene();
+    scene.registerAxis(xAxis());
+    scene.registerAxis(yAxis());
+    scene.registerSeries(lineSeries());
+    scene.registerLimit({
+      kind: "line",
+      value: 1,
+      axisId: "shift",
+      orientation: "x",
+      severity: "alarm",
+      role: "specification",
+      inExtent: true,
+    });
+    expect(() => scene.validate()).toThrow(/shift/);
+  });
+
   it("warns at an axis without a bound series (R-4.13)", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     const scene = new ChartScene();

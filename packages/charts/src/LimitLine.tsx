@@ -22,7 +22,8 @@ import { useLimit } from "./context";
 import type { LimitBandConfig, LimitLineConfig, LimitRole, Severity } from "./types";
 
 interface CommonProps {
-  /** Axis on which the value lies. */
+  /** Axis on which the value lies. Without one, the axis of the orientation's
+      default id - "y", or "x" for `orientation="x"`. */
   axisId?: string;
   /** Whether the value lies on the x or on the y axis. Without one, y: a limit
       is nearly always a value and not a moment. */
@@ -61,8 +62,8 @@ export interface LimitBandProps extends CommonProps {
 export function LimitLine(props: LimitLineProps): null {
   const {
     value,
-    axisId = "y",
     orientation = "y",
+    axisId = orientation,
     severity = "alarm",
     label,
     color,
@@ -93,8 +94,8 @@ export function LimitBand(props: LimitBandProps): null {
   const {
     from,
     to,
-    axisId = "y",
     orientation = "y",
+    axisId = orientation,
     severity = "warning",
     label,
     color,

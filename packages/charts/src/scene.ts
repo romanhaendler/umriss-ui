@@ -790,6 +790,12 @@ export class ChartScene {
       bound.add(`x:${config.xAxisId}`);
       bound.add(`y:${config.yAxisId}`);
     }
+    for (const { config } of this.limits.values()) {
+      invariant(
+        seen.has(`${config.orientation}:${config.axisId}`),
+        `A limit refers to the unknown ${config.orientation} axis "${config.axisId}" (R-4.12).`,
+      );
+    }
     for (const key of seen) {
       if (!bound.has(key) && this.series.size > 0) {
         warnOnce(
