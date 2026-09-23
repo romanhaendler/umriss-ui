@@ -92,6 +92,8 @@ while the five pages got their examples. Not worked around in the examples.
     legend chip, a CSS `background`, resolves it. So the grouped bar example
     gives the plan a literal (`#94a3b8`) that is merely acceptable in both
     schemes. Resolve `color` through `resolveColours` like the palette.
+    *Resolved: every caller's colour goes through the theme's probe, anew on a
+    scheme change; the example takes `var(--uc-color-text)`.*
 16. A state band's last segment runs to the end of the x domain
     (`src/state.ts:52`, on purpose: the current state is the one read first).
     With the default `domain="nice"` that end is a rounding of the axis, not a
@@ -102,6 +104,9 @@ while the five pages got their examples. Not worked around in the examples.
     reported. Candidates: end the last segment one measured step after its
     point, or at an explicit `until` (default: the last x value of the chart's
     data), never at the padding.
+    *Resolved: the last segment ends at the chart's latest x, one median step
+    past the band's own last point where that is the latest, never beyond the
+    domain; the band's extent reaches that step.*
 
 ### API inconsistencies
 

@@ -98,8 +98,10 @@ export interface AxisLayout {
   domain: readonly [number, number];
   scale: LinearScale;
   ticks: readonly TickLayout[];
-  /** Formatter of this axis; the tooltip labels the x value with it too. */
-  format: (v: number) => string;
+  /** Formatter of this axis; the tooltip labels the x value with it too.
+      `seconds` asks a time axis without a format of its own for the seconds
+      (readings less than a minute apart); every other formatter ignores it. */
+  format: (v: number, seconds?: boolean) => string;
   /** Height of the title text; used as the band width for rotated y titles. */
   titleSize: number;
   /** Places at which the calendar removed time, in pixels. An axis that takes a
@@ -233,10 +235,11 @@ function formatterFor(axis: AxisInput, domain: readonly [number, number], tickCo
     // An operating time axis carries operating time but labels the clock. The
     // caller's formatter therefore gets the point in time it expects - and the
     // same route labels the tooltip later.
-    const format = own ?? timeText;
-    return (v: number) => format(toWallClock(v, calendar));
+    return own !== undefined
+      ? (v: number) => own(toWallClock(v, calendar))
+      : (v: number, seconds?: boolean) => timeText(toWallClock(v, calendar), seconds);
   }
-  if (own !== undefined) return own;
+  if (own !== undefined) return (v: number) => own(v);
   if (axis.time === true) return timeText;
   const step = tickStep(Math.abs(domain[1] - domain[0]), tickCount);
   return (v: number) => formatTick(v, step);
@@ -256,6 +259,11 @@ function labelsFor(
   if (axis.tickFormat !== undefined || (axis.time !== true && calendar === undefined)) return values.map(format);
   const wall = calendar === undefined ? values : values.map((v) => toWallClock(v, calendar));
   return timeLabels(wall, stepOf(domain, tickCount));
+}
+
+/** A label's left edge, moved inside a container of `width` (R-3.3.5). */
+export function insideContainer(left: number, labelWidth: number, width: number): number {
+  return Math.min(Math.max(left, 0), Math.max(0, width - labelWidth));
 }
 
 /** Complete layout calculation; derivable and testable purely from the inputs. */
@@ -429,8 +437,7 @@ export function computeLayout(input: LayoutInput): LayoutResult {
         const px = scale.toPx(value);
         // Collision with the edge (R-3.3.5): the first and last label stay inside
         // the container.
-        const center = px - labelWidth / 2;
-        const labelLeft = Math.min(Math.max(center, 0), Math.max(0, width - labelWidth));
+        const labelLeft = insideContainer(px - labelWidth / 2, labelWidth, width);
         return { value, label, px, labelLeft, labelWidth };
       });
       result.push({

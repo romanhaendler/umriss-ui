@@ -196,10 +196,11 @@ describe("Lanes do not pull their axis", () => {
     expect(s.axisExtent("y", "y")).toEqual([10, 30]);
   });
 
-  it("does contribute the x extent of a state series", () => {
+  it("does contribute the x extent of a state series, one step past its last point", () => {
+    // Its last state ends there (finding 16).
     const s = makeScene();
     s.registerSeries(stateSeries());
-    expect(s.axisExtent("x", "x")).toEqual([0, 2]);
+    expect(s.axisExtent("x", "x")).toEqual([0, 3]);
   });
 });
 

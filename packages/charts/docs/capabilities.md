@@ -80,7 +80,7 @@ Screenshot pages carry their name in brackets.
 | Right and top labels mirror their alignment | R-4.16 | Interaction |
 | The Y title rotated outside, along the axis | R-4.16 | Unit (layout, band width), Screenshot |
 | `time`: ticks on local boundaries from the minute to the month, across a clock change | Q15 | Unit (time axis, under Europe/Berlin) |
-| `time`: labels by level in en-GB, 24 h (`15:00`, `17 Mar`, `Mar 2026`), the date on the first tick of a new day; `tickFormat` for any other language | Q15 | Unit (time axis), Screenshot (`time`) |
+| `time`: labels by level in en-GB, 24 h (`15:00`, `17 Mar`, `Mar 2026`), the date on the first tick and on the first of a new day (the year on a day axis); `tickFormat` for any other language | Q15 | Unit (time axis), Screenshot (`time`) |
 | `time` with `domain="nice"`: widened to the step's local boundaries | Q15 | Unit (time axis) |
 | `time` over less than a minute (an axis without data): no ticks | Q18 | Unit (time axis) |
 | `onDomainChange`: Ctrl/⌘ + wheel and a pinch zoom around the pointer, a drag and a horizontal or Shift wheel pan, a double click proposes the data range; without it nothing zooms and the plain wheel stays the page's | Q19 | Interaction (zoom and pan) |
@@ -166,7 +166,7 @@ Screenshot pages carry their name in brackets.
 | Capability | Rule | Proved at |
 |---|---|---|
 | A state is a number: the index into the state list | ADR-0007 | Unit (scene), type check |
-| A segment from one point to the next, the last to the end of the domain | — | Unit (state) |
+| A segment from one point to the next, the last to the chart's latest reading (one median step past the band's own last point where that is the latest), never beyond the domain | — | Unit (state), Unit (open points in the scene) |
 | A hit: the segment under the pointer; a boundary belongs to the segment that begins there | R-4.6 | Unit (state) |
 | A gap interrupts the band without changing the segments beside it | R-2.5 | Unit (state) |
 | The track in the Y axis' domain units; it does not pull its axis | — | Unit (limits and bands in the scene), Interaction (every track answers for itself), Screenshot (`under-a-course`) |

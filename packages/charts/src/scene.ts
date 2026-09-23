@@ -22,13 +22,14 @@
    pass a new data reference. The same holds for `tickFormat` and the tooltip's
    `render`. */
 
-import { FALLBACK_THEME, resolveTheme, subscribeTheme, type ResolvedTheme } from "./theme";
+import { FALLBACK_THEME, resolveColours, resolveTheme, subscribeTheme, type ResolvedTheme } from "./theme";
 import { DEV, invariant, warnOnce } from "./dev";
 import { TextMeasurer } from "./measure";
 import {
   computeLayout,
   CLASS_TICK,
   EMPTY_LAYOUT,
+  insideContainer,
   type AxisInput,
   type AxisLayout,
   type LayoutResult,
@@ -42,11 +43,11 @@ import {
 } from "./draw";
 import { nearestIndex, nearestPoint } from "./hit";
 import { downsample } from "./downsample";
-import { segmentEnd, segmentIndex } from "./state";
+import { lastSegmentEnd, medianStep, segmentEnd, segmentIndex } from "./state";
 import { cellSize, cellIndex, measureSpacing } from "./cells";
 import { assess } from "./limit";
 import { formatValue } from "./format";
-import { inRemovedTime, toOperatingTimeClamped } from "./operatingTime";
+import { MINUTE, inRemovedTime, toOperatingTimeClamped } from "./operatingTime";
 import {
   axisExtent,
   firstUnsortedIndex,
@@ -99,8 +100,9 @@ interface SeriesEntry {
   extent: Extent | null;
   /** Bars only: the smallest x distance, computed once per materialisation. It
       does not belong in the materialised series - the other series kinds do not
-      need it (ADR-0002). For the matrix the cell width, for the same reason in
-      the same place. */
+      need it (ADR-0002). For the matrix the cell width, for a state band the
+      median distance its last segment runs past its last point, for the same
+      reason in the same place. */
   step: number | null;
   /** Matrix only: the second cell edge. */
   cellHeight: number | null;
@@ -160,6 +162,9 @@ export interface LimitLabel {
   id: number;
   axisKey: string;
   px: number;
+  /** An x limit's label: its left edge in container coordinates, kept inside
+      the container as a tick label is. */
+  labelLeft: number;
   label: string;
   severity: string;
   role: string;
@@ -263,6 +268,21 @@ function calendarEqual(
     later colour than the first. */
 function takesPalette(config: SeriesConfig): boolean {
   return config.kind !== "state" && config.kind !== "matrix";
+}
+
+/** Does a neighbour of the hit lie less than a minute from it? Then the header
+    of a time axis carries the seconds - readings a second apart would
+    otherwise share one header. A property of the data where the pointer is,
+    not of the tick step, which never goes below a minute. */
+function subMinute(hit: Candidate): boolean {
+  const mat = hit.entry.materialized;
+  if (mat === null) return false;
+  const at = mat.x[hit.index] as number;
+  const near = (d: number) => d > 0 && d < MINUTE;
+  return (
+    (hit.index > 0 && near(at - (mat.x[hit.index - 1] as number))) ||
+    (hit.index + 1 < mat.length && near((mat.x[hit.index + 1] as number) - at))
+  );
 }
 
 function listEqual(a: readonly number[] | undefined, b: readonly number[] | undefined): boolean {
@@ -532,6 +552,10 @@ export class ChartScene {
   /* ---------- Theme ---------- */
   private theme: ResolvedTheme | null = null;
   private unsubscribeTheme: (() => void) | null = null;
+  /** A caller's colours - `color`, a state's, a gradient stop - resolved
+      through the theme's probe, once per colour and theme: a canvas ignores a
+      `var(--…)` or a `light-dark(…)` and keeps the previous fillStyle. */
+  private readonly painted = new Map<string, string>();
 
   /* ---------- Layout and interaction ---------- */
   private layout: LayoutResult = EMPTY_LAYOUT;
@@ -968,9 +992,14 @@ export class ChartScene {
         // A lane says where something is drawn, not what the data span. A state
         // band therefore contributes no y extent: otherwise the state code 3
         // would pull the axis onto three machines.
-        entry.step = null;
+        // Its x extent reaches one step past its last point: there its last
+        // state ends where the band reports last (lastSegmentEnd), and a
+        // `domain="data"` would cut it to nothing.
+        const step = medianStep(material.series.x, material.series.length);
+        entry.step = step;
         entry.extent = {
           ...material.extent,
+          xMax: material.extent.xMax + step,
           yMin: Number.POSITIVE_INFINITY,
           yMax: Number.NEGATIVE_INFINITY,
         };
@@ -1019,6 +1048,7 @@ export class ChartScene {
     this.rebindDprWatch();
     this.unsubscribeTheme = subscribeTheme(() => {
       this.theme = null;
+      this.painted.clear();
       this.measurer?.clear();
       this.markLayoutDirty();
     });
@@ -1027,6 +1057,7 @@ export class ChartScene {
     const fonts = typeof document === "undefined" ? undefined : document.fonts;
     fonts?.addEventListener?.("loadingdone", this.onFontsLoaded);
     this.theme = null;
+    this.painted.clear();
     this.markLayoutDirty();
   }
 
@@ -1327,8 +1358,20 @@ export class ChartScene {
 
   /* ================= Series colours and legend entries ================= */
 
+  /** A caller's CSS colour as the canvas can draw it (finding 15). */
+  private paint(color: string): string {
+    const root = this.themeRoot;
+    if (root === null) return color;
+    let resolved = this.painted.get(color);
+    if (resolved === undefined) {
+      resolved = resolveColours(root, { color }).color;
+      this.painted.set(color, resolved);
+    }
+    return resolved;
+  }
+
   private colorFor(entry: SeriesEntry): string {
-    if (entry.config.color !== undefined) return entry.config.color;
+    if (entry.config.color !== undefined) return this.paint(entry.config.color);
     // A band's colours come from its states, a cell's from its colouring.
     if (!takesPalette(entry.config)) return "";
     // A tone is not a colour value but a role: the theme resolves it. Canvas knows
@@ -1425,7 +1468,7 @@ export class ChartScene {
   /* ---------- Limits, ready in pixels ---------- */
 
   private limitColor(config: LimitConfig, theme: ResolvedTheme): string {
-    if (config.color !== undefined) return config.color;
+    if (config.color !== undefined) return this.paint(config.color);
     // A calculated limit carries no severity colour: it does not say "this is
     // bad" but "this is how this process otherwise behaves" (ADR-0008).
     if (config.role === "control") return theme.colorAxis;
@@ -1490,10 +1533,14 @@ export class ChartScene {
         config.kind === "line"
           ? this.limitAt(config, config.value)
           : (this.limitAt(config, config.from) + this.limitAt(config, config.to)) / 2;
+      const px = axis.scale.toPx(value);
+      // As wide as a tick label of its text, and its 2 px padding either side.
+      const width = (this.measurer?.measure(config.label, CLASS_TICK).width ?? 0) + 4;
       out.push({
         id: order,
         axisKey: axis.key,
-        px: axis.scale.toPx(value),
+        px,
+        labelLeft: insideContainer(px, width, this.cssWidth),
         label: config.label,
         severity: config.severity,
         role: config.role,
@@ -1604,15 +1651,15 @@ export class ChartScene {
           items.push({
             ...base,
             kind: "state",
-            colors: config.states.map((z) => z.color),
+            colors: config.states.map((z) => this.paint(z.color)),
             laneTop: lane.top,
             laneBottom: lane.bottom,
-            domainEnd: xAxis.scale.domain[1],
+            lastEnd: this.lastEnd(entry, mat, xAxis),
           });
           break;
         }
         case "matrix": {
-          const colors = matrixColors(config.coloring, this.theme ?? FALLBACK_THEME);
+          const colors = matrixColors(config.coloring, this.theme ?? FALLBACK_THEME).map((c) => this.paint(c));
           items.push({
             ...base,
             kind: "matrix",
@@ -1632,6 +1679,20 @@ export class ChartScene {
       }
     });
     return items;
+  }
+
+  /** Where a band's last state ends: the latest x of the visible series on its
+      x axis, one step past its own last point where that is the latest, never
+      beyond the domain (lastSegmentEnd). */
+  private lastEnd(entry: SeriesEntry, mat: MaterializedSeries, xAxis: AxisLayout): number {
+    let latest = Number.NEGATIVE_INFINITY;
+    for (const e of this.series.values()) {
+      const m = e.materialized;
+      if (m === null || m.length === 0 || e.config.hidden === true || e.config.xAxisId !== entry.config.xAxisId) continue;
+      const x = m.x[m.length - 1] as number;
+      if (x > latest) latest = x;
+    }
+    return lastSegmentEnd(mat.x, mat.length, latest, entry.step ?? 0, xAxis.scale.domain[1]);
   }
 
   /** Lane of a state series in pixels. Without a value the whole domain of its y
@@ -1723,7 +1784,7 @@ export class ChartScene {
       // Written out once per hit, not per movement: a format is not free.
       const xAxisId = hit.primary.entry.config.xAxisId;
       this.hoverKey = key;
-      this.hoverXLabel = this.xLabel(xAxisId, hit.primary.xValue);
+      this.hoverXLabel = this.xLabel(xAxisId, hit.primary.xValue, subMinute(hit.primary));
       this.hoverRows = hit.chosen.map((k) => this.tooltipRow(k, xAxisId));
       this.pushHoverSnapshot();
     }
@@ -2026,9 +2087,9 @@ export class ChartScene {
   }
 
   /** An x value in the format of its x axis - the header's, or a point's own. */
-  private xLabel(xAxisId: string, xValue: number): string {
+  private xLabel(xAxisId: string, xValue: number, seconds = false): string {
     const xAxis = this.findAxis("x", xAxisId);
-    return xAxis === null ? String(xValue) : xAxis.format(xValue);
+    return xAxis === null ? String(xValue) : xAxis.format(xValue, seconds);
   }
 
   /** What the built-in tooltip writes for one hit. A state has a name and no
@@ -2089,7 +2150,8 @@ export class ChartScene {
       const code = mat.y[index] as number;
       if (Number.isNaN(code)) return null; // a hole is no hit
       const from = mat.x[index] as number;
-      const to = segmentEnd(mat.x, n, index, xAxis.scale.domain[1]);
+      const to = segmentEnd(mat.x, n, index, this.lastEnd(entry, mat, xAxis));
+      if (index === n - 1 && !(targetX < to)) return null; // after the last report
       const state = config.states[code | 0];
       return {
         index,
