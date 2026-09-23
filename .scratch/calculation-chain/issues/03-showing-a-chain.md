@@ -1,6 +1,6 @@
 # 03 — The statement look, for tree and chain
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Blocked by: 02
@@ -10,9 +10,11 @@ Spec: "The look", "Folding", "The tree's long operator", "Line",
 ## Scope
 
 - Replace the accordion of the first delivery with the statement look, for
-  the tree and the chain alike: result beneath its operands under a rule, the
-  Result with a double rule; columns label · operator · number · unit; the
-  label as disclosure button, no chevron; the formula in names beneath a
+  the tree and the chain alike: the outermost statement as on paper, every
+  other derivation opening beneath its line as a nested calculation with a
+  bar, closing "= label"; the Result with a double rule; columns label ·
+  operator · number · unit; the label as disclosure button with a quiet
+  angle; the formula in names beneath a
   folded label, "N operands" above four; inner levels indent their label and
   recede to the secondary colour; at most two rows per quantity; content width;
   flat hover band; "≈" in the operator column.

@@ -1,6 +1,6 @@
 # 01 — Reading a chain
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Blocked by: none

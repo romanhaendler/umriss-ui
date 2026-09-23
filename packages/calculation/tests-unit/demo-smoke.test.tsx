@@ -16,8 +16,11 @@ import { ALL_PAGES } from "../demo/outline";
 
 const EXAMPLES = DEMO.examples;
 
-/** Named exceptions: pages without a props table, each with its reason. None. */
-const WITHOUT_TABLE: Readonly<Record<string, string>> = {};
+/** Named exceptions: pages without a props table, each with its reason. */
+const WITHOUT_TABLE: Readonly<Record<string, string>> = {
+  "what-can-go-wrong": "Behaviour of the elements documented on the pages before; it has no props of its own.",
+  "worked-examples": "Worked examples of the elements documented on the pages before; they have no props of their own.",
+};
 
 /** Renders, and gives back the node together with its teardown – the teardown
     belongs to the test: an example that throws only while being cleaned up is

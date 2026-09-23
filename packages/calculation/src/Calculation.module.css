@@ -1,128 +1,264 @@
-/* The calculation: a nested list whose lines put the label and the formulas on
-   the left and the result on the right, in tabular figures, so that results
-   at every depth stand under one another. */
+/* The calculation as a statement of account (ADR-0028, "How it is shown").
+
+   One grid for the whole statement - label, operator, number, unit - and every
+   list, item and line takes its columns through `subgrid`, so that numbers at
+   every depth stand in one column and align on their last digit. The label
+   column grows to a measure and then wraps; the statement is as wide as its
+   content.
+
+   Tokens only, and no font named: the library ships none (ADR-0021). Numbers
+   take the monospace token with tabular figures, so they align in whatever
+   face the application brings. Rules are borders, never characters. */
 
 @layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.components {
   .calculation {
     composes: text from "#own-styles";
+    display: grid;
+    grid-template-columns: fit-content(36rem) auto auto auto;
+    width: fit-content;
+    max-width: 100%;
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .list {
+  .list,
+  .item {
+    display: grid;
+    grid-template-columns: subgrid;
+    grid-column: 1 / -1;
     margin: 0;
-    padding: 0 0 0 var(--u-space-5);
+    padding: 0;
     list-style: none;
   }
 
-  .list[hidden] {
+  /* A derivation, opened beneath the line it belongs to: a nested
+     calculation on the sunken surface, with a bar that hangs from the line's
+     label. Nested derivations stand inside it, each with its own bar - the
+     outer one stays visible to the left, so a reader sees at every line how
+     deep they are and whose derivation it is. */
+  .derivation {
+    --bar: calc((var(--depth, 1) - 1) * var(--u-space-5) + var(--u-space-1));
+    display: grid;
+    grid-template-columns: subgrid;
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: 0 0 var(--u-space-2);
+    list-style: none;
+    background: linear-gradient(
+      to right,
+      transparent var(--bar),
+      var(--u-color-text-muted) var(--bar),
+      var(--u-color-text-muted) calc(var(--bar) + 2px),
+      var(--u-color-surface-sunken) calc(var(--bar) + 2px)
+    );
+  }
+
+  .derivation[hidden] {
     display: none;
   }
 
-  .item {
-    margin: 0;
-  }
-
   .line {
+    position: relative;
     display: grid;
-    grid-template-columns: var(--u-space-5) minmax(0, 1fr) auto 10rem;
+    grid-template-columns: subgrid;
+    grid-column: 1 / -1;
     align-items: baseline;
-    column-gap: var(--u-space-3);
-    padding: var(--u-space-1) var(--u-space-2) var(--u-space-1) 0;
-    border-radius: var(--u-radius-sm);
   }
 
-  /* Hover coupling: the quantity under the pointer or the focus, every place
-     it stands, and its operands. A background, never a verdict's colour. */
+  /* Hover coupling: a flat band across the row - the quantity under the
+     pointer or the focus and every place it stands, and its operands. */
+  .line[data-mark] {
+    --band: var(--u-edge-color);
+    /* From where the label starts: the bars of the derivations around the
+       line stand to its left and must stay in view. */
+    background: linear-gradient(to right, transparent calc(var(--depth, 0) * var(--u-space-5)), var(--band) 0);
+  }
+
   .line[data-mark="use"] {
-    background: var(--u-color-accent-subtle);
+    --band: var(--u-color-accent-subtle);
   }
 
-  .line[data-mark="operand"] {
-    background: var(--u-color-surface-sunken);
-  }
-
-  .toggle {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    align-self: center;
-    width: var(--u-space-5);
-    height: var(--u-space-5);
-    padding: 0;
-    border: none;
-    border-radius: var(--u-radius-xs);
-    background: transparent;
-    color: var(--u-color-text-secondary);
-  }
-
-  button.toggle {
-    cursor: pointer;
-  }
-
-  button.toggle:hover {
-    color: var(--u-color-text);
-  }
-
-  button.toggle:focus-visible {
-    outline: none;
-    box-shadow: var(--u-focus-ring);
-    color: var(--u-color-text);
-  }
-
-  .toggle svg {
-    transition: transform var(--u-duration-fast) var(--u-ease-out);
-  }
-
-  .toggle svg[data-open] {
-    transform: rotate(90deg);
-  }
-
-  .text {
-    display: flex;
-    flex-wrap: wrap;
-    column-gap: var(--u-space-3);
+  /* Only a nested derivation indents, and only its label. */
+  .labelCell {
+    grid-area: 1 / 1;
     min-width: 0;
+    padding: var(--u-space-1) var(--u-space-5) var(--u-space-1) calc(var(--depth, 0) * var(--u-space-5));
   }
 
   .label {
+    font-weight: var(--u-weight-regular);
+    color: var(--u-color-text);
+  }
+
+  /* The label is the disclosure: a report's cross-reference, not a control
+     that shouts. */
+  button.label {
+    display: inline;
+    padding: 0;
+    border: none;
+    border-radius: var(--u-radius-xs);
+    background: none;
+    font: inherit;
+    font-weight: var(--u-weight-medium);
+    color: inherit;
+    text-align: left;
+    text-decoration: underline dotted;
+    text-decoration-color: var(--u-color-text-secondary);
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+
+  button.label:hover {
+    text-decoration-style: solid;
+  }
+
+  button.label:focus-visible {
+    outline: none;
+    box-shadow: var(--u-focus-ring);
+  }
+
+  /* The quiet sign that there is more: an angle after the label, turned down
+     while the derivation is open. */
+  .disclosure {
+    margin-left: var(--u-space-1);
+    vertical-align: middle;
+    color: var(--u-color-text-secondary);
+    transition: transform var(--u-duration-fast) var(--u-ease-out);
+  }
+
+  .disclosure[data-open] {
+    transform: rotate(90deg);
+  }
+
+  /* The line that closes a derivation names its quantity: "= Availability". */
+  .line[data-closing] .label {
     font-weight: var(--u-weight-medium);
   }
 
   .line[data-reference] .label {
-    font-weight: var(--u-weight-regular);
     font-style: italic;
   }
 
-  .formula {
-    color: var(--u-color-text-secondary);
-  }
-
-  .result {
+  .operator,
+  .amount,
+  .unit {
+    padding-top: var(--u-space-1);
+    padding-bottom: var(--u-space-1);
     font-family: var(--u-font-mono);
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum" 1;
-    text-align: right;
     white-space: nowrap;
   }
 
-  .result[data-verdict="unknown"] {
+  .operator {
+    padding-right: var(--u-space-2);
+    text-align: right;
     color: var(--u-color-text-secondary);
   }
 
-  .approximate {
+  .amount {
+    text-align: right;
+  }
+
+  .amount[data-verdict="unknown"] {
     color: var(--u-color-text-secondary);
+  }
+
+  .unit {
+    padding-left: var(--u-space-1);
+    color: var(--u-color-text-secondary);
+  }
+
+  /* Every cell has its place: the rules below lie over the first row, and a
+     cell left to find its own would move aside for them. */
+  .operator {
+    grid-area: 1 / 2;
+  }
+
+  .amount {
+    grid-area: 1 / 3;
+  }
+
+  .unit {
+    grid-area: 1 / 4;
+  }
+
+  /* Rules carry meaning: one over the operator, number and unit columns above
+     the outermost result and above the line that closes a derivation, a
+     double one beneath the Result. Each is ONE
+     element across the three columns - borders on the cells would break
+     wherever the cells' baselines put them at different heights. */
+  .line[data-rule]::before,
+  .line[data-kind="result"]::after {
+    content: "";
+    grid-row: 1;
+    grid-column: 2 / -1;
+    pointer-events: none;
+  }
+
+  .line[data-rule]::before {
+    align-self: start;
+    border-top: 1px solid var(--u-color-text);
+  }
+
+  .line[data-kind="result"]::after {
+    align-self: end;
+    border-bottom: 3px double var(--u-color-text);
+  }
+
+  .line[data-kind="result"] .label,
+  .line[data-kind="result"] > .amount {
+    font-weight: var(--u-weight-semibold);
+  }
+
+  .line[data-kind="derived"] > .amount {
+    font-weight: var(--u-weight-medium);
+  }
+
+  /* An unfolded inner derivation recedes: its numbers, operators and rules in
+     the secondary colour; the outermost statement keeps full colour. */
+  .line[data-inner] > .amount {
+    color: var(--u-color-text-secondary);
+  }
+
+  .line[data-inner][data-rule]::before {
+    border-top-color: var(--u-color-text-secondary);
+  }
+
+  /* The second row: beneath the label what the line says about itself,
+     beneath the number its verdict and target. */
+  .notes {
+    grid-area: 2 / 1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: var(--u-space-3);
+    padding: 0 var(--u-space-5) var(--u-space-1) calc(var(--depth, 0) * var(--u-space-5));
+    font-size: var(--u-text-xs);
+    color: var(--u-color-text-secondary);
+  }
+
+  .notes:empty {
+    padding: 0;
   }
 
   .assessment {
+    grid-area: 2 / 2 / 3 / -1;
     display: flex;
     flex-wrap: wrap;
+    justify-content: flex-end;
     column-gap: var(--u-space-2);
+    padding-bottom: var(--u-space-1);
     font-size: var(--u-text-xs);
     color: var(--u-color-text-secondary);
+    text-align: right;
+  }
+
+  .reason {
+    color: var(--u-color-text);
   }
 
   /* The verdict as a word, as the Stat shows it: colour alone carries no
@@ -140,14 +276,8 @@
     font-weight: var(--u-weight-medium);
   }
 
-  /* The worst verdict inside a folded derivation: quiet, a word in the
-     secondary colour in the label's column - the line keeps its own colour. */
-  .worst {
-    grid-column: 2;
-    font-size: var(--u-text-xs);
-    color: var(--u-color-text-secondary);
-  }
-
+  /* The worst verdict inside a folded derivation: quiet, a dot and a word -
+     the line keeps its own colour. */
   .worst::before {
     content: "● ";
   }
@@ -160,20 +290,6 @@
     color: var(--u-color-danger);
   }
 
-  .notes {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    column-gap: var(--u-space-3);
-    padding: 0 0 var(--u-space-1) calc(var(--u-space-5) + var(--u-space-3));
-    font-size: var(--u-text-xs);
-    color: var(--u-color-text-secondary);
-  }
-
-  .reason {
-    color: var(--u-color-text);
-  }
-
   .freshness[data-freshness="stale"] {
     color: var(--u-color-warning);
   }
@@ -184,7 +300,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .toggle svg {
+    .disclosure {
       transition: none;
     }
   }

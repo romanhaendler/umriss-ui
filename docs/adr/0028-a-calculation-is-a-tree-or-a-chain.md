@@ -55,39 +55,45 @@ Three rules come with the chain:
 And one rule for the tree: **a sum or product of more than four operands shows
 no formula on its line**, only how many operands it has. The operands stand
 directly beneath it; a formula of fifteen terms only repeats them. The
-threshold is fixed, not a prop.
+number is fixed, not a prop.
 
 ## How it is shown
 
 Both forms share one look, and it is a statement of account, not an accordion:
 
-- **A result stands beneath its operands**, under a rule, as on a costing
-  sheet. This turns the reading direction of ADR-0027's tree round: OEE stands
-  last, under availability, performance and quality. The **Result** of the
-  whole calculation carries a double rule beneath it and the heaviest weight.
+- **The outermost statement stands as on paper**: a tree's operands, a rule,
+  the **Result** beneath them with a double rule and the heaviest weight; a
+  chain's interims one under another. It does not fold.
+- **Everything else opens beneath the line that was clicked**, and that line
+  never moves. The derivation is a nested calculation on the sunken surface,
+  with a bar that hangs from the line's label, and it closes with a rule and
+  "= label" - it says whose it is twice: attached, and by name. In a chain
+  the derivation of an interim starts with the interim before. Nested derivations stand inside, each with its own bar, the outer
+  bars staying in view.
 - **Fixed columns**: label, operator, number, unit. The operator stands before
   the number, the number is right-aligned in the monospace token with tabular
   figures, the unit has a column of its own so that numbers align on their
   last digit. The monospace token only - the library ships no fonts
   (ADR-0021), and nothing may depend on one face's measures. "≈" stands in the
   operator column of a result line, which has no operator.
-- **Only a nested level indents, and only its label.** Numbers, operators and
-  rules of an unfolded inner derivation stay in the one number column and
-  recede to the secondary colour; the outermost statement keeps full colour.
-- **Rules carry meaning, not structure**: one rule over the operator and
-  number columns above every derived result, a double rule under the result,
-  no lines between rows.
-- **The label is the disclosure.** No chevron. A folded quantity shows its
-  formula in names beneath the label ("= Run time ÷ Planned production time"),
-  or "15 operands" above the threshold; unfolded it shows none - the operands
-  above it are the formula. The formula in numbers is in the sentence only.
+- **Only a derivation indents, and only its label.** Numbers, operators and
+  rules stay in the one number column and recede to the secondary colour; the
+  outermost statement keeps full colour.
+- **Rules carry meaning, not structure**: one above the outermost result and
+  above every closing line, a double rule under the Result, no lines between
+  rows.
+- **The label is the disclosure**, with a quiet angle after it. A folded
+  quantity shows its formula in names beneath the label ("= Run time ÷
+  Planned production time"), or "15 operands" where there are more than four; open, it
+  shows none - its derivation beneath it is the formula. The formula in
+  numbers is in the sentence only.
 - **At most two rows per quantity**: beneath the label, formula, reason,
   explanation, source, freshness and the caller's aside; beneath the number,
   verdict and target.
 - **As wide as its content**, the label column growing to a measure and then
   wrapping; full width only by the caller's `className`.
-- **Hover coupling is a flat band**, no rounded tiles; a reference keeps its
-  label in italics.
+- **Hover coupling is a flat band** from the label's indent, so that the bars
+  stay in view; a reference keeps its label in italics.
 
 The first two departures from a pure accounting sheet are deliberate: the
 formula beneath a folded label is the reason to unfold it, and the content
@@ -108,7 +114,11 @@ allowed. Rejected for `a + b × c`.
 `<Product sign="×">` reads as nonsense, and the tree's operators would mean two
 things.
 
-**A result above its operands**, as ADR-0027 shipped it. It reads as an
+**Derivations opening upward**, the result beneath its operands at every
+level. It was the first design of this ADR and was dropped on sight: the line
+a reader clicked moved down the screen, and an opened derivation no longer
+looked as if it belonged to anything. **A result above its operands**, as
+ADR-0027 shipped it. It reads as an
 accordion - a chevron before every line, each level indenting the whole row -
 and gives tree and chain two looks. **A column per nesting level** (the
 accountant's inner column) is the clearest separation of levels and too wide
