@@ -44,7 +44,7 @@ Screenshot pages carry their name in brackets.
 | A child outside `Chart`: DEV error, silent in PROD | R-2.3 | Manual |
 | Accessors, generic `T`, a series' own `data` | R-2.4 | Unit (materialisation), Screenshot |
 | `null`/`undefined`/`NaN` = a gap, no joining across it | R-2.5 | Unit (materialisation), Interaction, Screenshot |
-| DEV sortedness check once per data change | R-2.6 | Unit (materialisation) |
+| DEV sortedness check once per data change, for every series with a binary-search hit (not the matrix), naming the series | R-2.6 | Unit (materialisation, scene) |
 | Materialisation into `Float64Array`, once per change | R-2.7 | Unit (materialisation) |
 | An axis' value range comes only from the series bound to it | R-4.13 | Unit (materialisation, scene) |
 | One order across the series kinds (drawing, and the first palette assignment) | R-2.1 | Unit (scene) |

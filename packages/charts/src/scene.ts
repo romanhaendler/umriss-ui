@@ -672,7 +672,6 @@ export class ChartScene {
     if (data === this.data) return;
     this.data = data;
     this.materialsDirty = true;
-    this.sortednessChecked = false; // R-2.6: once per change of data
     for (const entry of this.series.values()) {
       entry.materialized = null;
       entry.extent = null;
@@ -761,8 +760,6 @@ export class ChartScene {
 
   /* ================= Materialisation (R-2.6, R-2.7) ================= */
 
-  private sortednessChecked = false;
-
   private findXAxis(xAxisId: string): AxisConfig | null {
     for (const { config } of this.axes.values()) {
       if (config.orientation === "x" && config.id === xAxisId) return config;
@@ -841,13 +838,16 @@ export class ChartScene {
         entry.extent = material.extent;
       }
 
-      if (!this.sortednessChecked && DEV) {
-        this.sortednessChecked = true;
+      // Once per materialisation, which is once per change of data - for every
+      // series whose hit is a binary search. A matrix runs row-major and hits
+      // linearly: its x values are unsorted by right.
+      if (DEV && config.kind !== "matrix") {
         const index = firstUnsortedIndex(material.series.x, material.series.length);
         if (index >= 0) {
+          const name = config.name ?? "?";
           warnOnce(
-            "x-unsorted",
-            `X values are not sorted ascending (index ${index}). ` +
+            `x-unsorted-${name}`,
+            `Series "${name}": x values are not sorted ascending (index ${index}). ` +
               "Binary search and path building assume sortedness; there is no automatic sorting (R-2.6).",
           );
         }
