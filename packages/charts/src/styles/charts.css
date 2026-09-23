@@ -219,6 +219,17 @@
     transform: translateY(-50%);
   }
 
+  /* A chart with nothing to show says so, in the middle of its plot area. */
+  .uc-empty {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: var(--uc-size-legend);
+    color: var(--uc-color-text);
+  }
+
   /* ---------------- Legend (R-4.11) ---------------- */
 
   .uc-legend {

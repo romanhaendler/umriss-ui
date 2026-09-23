@@ -105,7 +105,7 @@ function renderAxis(axis: AxisLayout, limits: readonly LimitLabel[]): ReactNode 
   );
 }
 
-export function AxesHtml({ scene }: { scene: ChartScene }): ReactNode {
+export function AxesHtml({ scene, empty }: { scene: ChartScene; empty: ReactNode }): ReactNode {
   const snapshot = useSyncExternalStore(
     scene.subscribeLayout,
     scene.getLayoutSnapshot,
@@ -113,8 +113,17 @@ export function AxesHtml({ scene }: { scene: ChartScene }): ReactNode {
   );
   const { layout } = snapshot;
   if (layout.plot.width <= 0 || layout.plot.height <= 0) return null;
+  const { plot } = layout;
   return (
     <div className="uc-axes">
+      {snapshot.empty && (
+        <div
+          className="uc-empty"
+          style={{ left: `${plot.x}px`, top: `${plot.y}px`, width: `${plot.width}px`, height: `${plot.height}px` }}
+        >
+          {empty}
+        </div>
+      )}
       {layout.axes.map((axis) =>
         renderAxis(
           axis,

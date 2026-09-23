@@ -49,6 +49,11 @@ export interface ChartProps<T> {
       here: a height set past the component is a height the scene does not know
       about. */
   style?: CSSProperties;
+  /** Shown in the middle of the plot area when no visible series has a point
+      to show - no data, only gaps, or every series hidden. Axes and frame
+      stay. Without a value "No data"; any other language or wording is the
+      caller's. */
+  empty?: ReactNode;
   /** Instrumentation for the benchmark page (R-5.1); not needed otherwise. */
   onPerf?: (perf: ChartPerf) => void;
   /** The axes, series and companions of this chart. They draw nothing
@@ -67,6 +72,7 @@ export function Chart<T>(props: ChartProps<T>): ReactNode {
     className,
     style,
     onPerf,
+    empty = "No data",
     children,
   } = props;
 
@@ -202,7 +208,7 @@ export function Chart<T>(props: ChartProps<T>): ReactNode {
         >
           <canvas ref={seriesRef} className="uc-layer-series" aria-hidden="true" />
           <canvas ref={overlayRef} className="uc-layer-overlay" aria-hidden="true" />
-          <AxesHtml scene={scene} />
+          <AxesHtml scene={scene} empty={empty} />
           <TooltipHtml scene={scene} />
         </div>
         {children}

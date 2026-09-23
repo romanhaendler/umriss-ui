@@ -67,6 +67,11 @@ From `.scratch/charts-essentials/spec.md`; the decisions stand in
 - **`Legend onToggle(name)`**: with it every entry is a button
   (`aria-pressed`) that hands the caller the series' name, or a state's label.
   Without it the legend is not clickable, as before.
+- **`Chart empty`**: what the plot area says when no visible series has a
+  point to show - no data, only gaps, or every series hidden. Default
+  `"No data"`, centred; axes and frame stay. Before, such a chart drew an
+  empty frame on [0, 1] and said nothing. A time axis over less than a minute
+  - the [0, 1] of an axis without data - draws no ticks.
 
 ---
 
