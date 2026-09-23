@@ -53,6 +53,7 @@ Screenshot pages carry their name in brackets.
 | The baseline enters the value range of its Y axis | R-4.13 | Unit (materialisation, scene) |
 | A fixed domain wins against the widened value range | 4.2 | Unit (layout) |
 | A change of baseline or series kind materialises afresh | R-2.2 | Unit (scene) |
+| `hidden`: not drawn, not hit, not in its axes' extent | Q17 | Unit (scene, jsdom scene), Screenshot (`toggling-legend`) |
 | Functions compared by source text, a native or bound one (`Intl.NumberFormat#format`) by identity; a `calendar` by its intervals | R-2.2 | Unit (jsdom scene, limits and bands in the scene) |
 
 ## `XAxis` / `YAxis`
@@ -247,9 +248,11 @@ Screenshot pages carry their name in brackets.
 
 | Capability | Rule | Proved at |
 |---|---|---|
-| Static, `placement="top" \| "bottom"`, above without one | R-4.11 | Screenshot (`multi-series`, `configuration`, `legend-placement`) |
+| `placement="top" \| "bottom"`, above without one | R-4.11 | Screenshot (`multi-series`, `configuration`, `legend-placement`) |
 | A colour chip plus a name per series | R-4.11 | Unit (jsdom), Screenshot |
 | Hover highlights the series, the others at 0.25 alpha | R-4.11 | Manual |
+| `onToggle(name)`: entries become buttons with `aria-pressed`; without it no button | Q17 | Unit (jsdom legend toggle), Screenshot (`toggling-legend`) |
+| A hidden series keeps its entry, drawn back; a state's entry only when every band showing it is hidden | Q17 | Unit (scene, jsdom legend toggle), Screenshot (`toggling-legend`) |
 
 ## Theme
 

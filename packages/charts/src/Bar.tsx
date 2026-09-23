@@ -24,6 +24,10 @@ export interface BarProps<T> {
       "Series n" and a warning stands in DEV - an unnamed series is a colour
       nobody can look up. */
   name?: string;
+  /** Not drawn, not hit and not counted for its axes' extent - a fixed
+      `domain` keeps the axis still. Its legend entry stays, drawn back.
+      Controlled: the caller sets it, typically from `Legend onToggle`. */
+  hidden?: boolean;
   /** The value as the tooltip writes it; without one the y axis' `tickFormat`,
       then the default. */
   format?: (value: number) => string;
@@ -41,6 +45,7 @@ export function Bar<T>(props: BarProps<T>): null {
     yAxisId = "y",
     data,
     name,
+    hidden,
     format,
     color,
     barWidth = 0.8,
@@ -55,11 +60,12 @@ export function Bar<T>(props: BarProps<T>): null {
         yAxisId,
         data,
         name,
+        hidden,
         format,
         color,
         barWidth,
       }) as BarSeriesConfig,
-    [accessor, xAxisId, yAxisId, data, name, format, color, barWidth],
+    [accessor, xAxisId, yAxisId, data, name, hidden, format, color, barWidth],
   );
 
   useSeries("Bar", config);
