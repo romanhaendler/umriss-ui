@@ -19,12 +19,6 @@ import { ALL_PAGES } from "../demo/outline";
 
 const EXAMPLES = DEMO.examples;
 
-/** The pages that carry no example of their own - each one shown inside a
-    composed example on another page. A named exception (CONTEXT.md): a sixth
-    page without an example is a gap and fails here. */
-const WITHOUT_AN_EXAMPLE: Readonly<Record<string, string>> = {
-};
-
 async function mount(content: ReactNode): Promise<{ host: HTMLDivElement; unmount: () => Promise<void> }> {
   const host = document.createElement("div");
   document.body.appendChild(host);
@@ -100,8 +94,8 @@ describe("The examples as a set", () => {
     }
   });
 
-  it("leaves no page without an example that is not a named exception", () => {
+  it("leave no page without an example", () => {
     const without = ALL_PAGES.filter((s) => !EXAMPLES.some((b) => b.pageId === s.id)).map((s) => s.id);
-    expect(without.sort()).toEqual(Object.keys(WITHOUT_AN_EXAMPLE).sort());
+    expect(without).toEqual([]);
   });
 });
