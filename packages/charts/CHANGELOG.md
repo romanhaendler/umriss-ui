@@ -47,6 +47,11 @@ From `.scratch/charts-fixes/spec.md`; the findings stand in
   fourth. It now gets the first. A series without a `name` counts its position
   among the series that take a colour.
 
+### Added
+
+- **`TooltipPoint.xValue`**: a point's own x value. With several x axes it can
+  differ from the hit's.
+
 ### Fixed
 
 - **The sortedness check sees every series.** In DEV it ran for the first
@@ -58,6 +63,11 @@ From `.scratch/charts-fixes/spec.md`; the findings stand in
   three colours, and the tooltip's chip shows the colour of the cell.
 - **A state several bands share highlights all of them.** Hovering "Fault" in
   the legend of three machines highlighted the first band only.
+- **The tooltip writes a value in its axis' format.** It formatted every value
+  with a fixed default, so beside ticks reading "40 %" the tooltip wrote a
+  bare "42". A value now takes its y axis' `tickFormat`, and the default only
+  without one. A point on another x axis than the header's names its own x
+  value, in its own axis' format, beside its name.
 
 ---
 
