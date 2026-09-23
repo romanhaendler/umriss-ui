@@ -5,6 +5,7 @@ import {
   axisExtent,
   firstUnsortedIndex,
   materializeSeries,
+  visibleExtent,
   type Binding,
 } from "../src/materialize";
 
@@ -253,5 +254,50 @@ describe("axisExtent - the extent per axis out of the bound series (R-4.13)", ()
     expect(axisExtent("y", "left", [{ xAxisId: "x", yAxisId: "left", extent: null }])).toEqual(
       [0, 1],
     );
+  });
+});
+
+/* charts-long-series 02: `YAxis domain="visible"` fits what the x domain
+   shows, not the whole course. */
+describe("visibleExtent", () => {
+  const course = materializeSeries(
+    [
+      { t: 0, a: 5, b: 0 },
+      { t: 1, a: 50, b: 1 },
+      { t: 2, a: 20, b: 2 },
+      { t: 3, a: null, b: 3 },
+      { t: 4, a: 30, b: -4 },
+      { t: 5, a: 90, b: 5 },
+    ] as { t: number; a: number | null; b: number }[],
+    (d) => d.t,
+    (d) => d.a,
+  ).series;
+
+  it("takes the points inside the window, edges included", () => {
+    expect(visibleExtent(course, 2, 4)).toEqual([20, 30]);
+    expect(visibleExtent(course, 1.5, 4.5)).toEqual([20, 30]);
+  });
+
+  it("leaves gaps out", () => {
+    expect(visibleExtent(course, 3, 3)).toEqual([Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]);
+  });
+
+  it("is empty where no point lies inside", () => {
+    expect(visibleExtent(course, 6, 9)).toEqual([Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]);
+    expect(visibleExtent(course, -3, -1)).toEqual([Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]);
+  });
+
+  it("takes a baseline channel along", () => {
+    const corridor = materializeSeries(
+      [
+        { t: 0, a: 5, b: 0 },
+        { t: 1, a: 50, b: -8 },
+        { t: 2, a: 20, b: 2 },
+      ],
+      (d) => d.t,
+      (d) => d.a,
+      (d) => d.b,
+    ).series;
+    expect(visibleExtent(corridor, 1, 2)).toEqual([-8, 50]);
   });
 });

@@ -65,6 +65,7 @@ Screenshot pages carry their name in brackets.
 | Default format through `Intl`, decimals from the step | R-4.1 | Unit (ticks), Screenshot |
 | Tabular figures in every number | acceptance 5 | Screenshot |
 | `domain="nice" \| "data" \| [min,max]` | 4.2 | Unit (ticks, layout), Screenshot (`configuration`) |
+| `YAxis domain="visible"`: the extent of the points inside the fixed x domain, a fixed foot and the limits included; every point where the x domain is not fixed | Q19 | Unit (materialisation, scene), Screenshot (`visible-domain`) |
 | A constant series → domain ±1 | R-4.3 | Unit (ticks) |
 | The zero line stronger than the grid | R-4.2 | Manual |
 | `tickCount`, `tickFormat` | 4.2 | Unit (layout), Screenshot |

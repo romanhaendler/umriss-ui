@@ -42,6 +42,11 @@ From `.scratch/charts-long-series/spec.md`; the decisions stand in
   axis only proposes a domain in its own units; the caller passes it back as
   `domain`, clamped as it likes. Without a handler nothing zooms, and the
   plain wheel always scrolls the page.
+- **`YAxis domain="visible"`**: the extent of what the series show inside
+  their x axis' domain, widened to ticks as `"nice"` is - a zoomed hour gets
+  the hour's range, not the week's. A fixed foot (area, bar) and the limits
+  count as before; where the x domain is not fixed, every point is shown and
+  counts.
 
 ---
 
