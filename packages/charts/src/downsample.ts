@@ -42,7 +42,7 @@ export function downsample(
   }
 
   const kept: number[] = [];
-  const column = new Array<number>(5);
+  const column = new Array<number>(6);
   let i = lo;
   while (i <= hi) {
     const c = Math.floor((x[i] as number) * m + b);
@@ -51,13 +51,17 @@ export function downsample(
     let min = -1;
     let max = -1;
     let gap = -1;
+    let tail = -1;
     for (; i <= hi && Math.floor((x[i] as number) * m + b) === c; i++) {
       const v = y[i] as number;
       if (Number.isNaN(v) || (y0 !== null && Number.isNaN(y0[i] as number))) {
-        // One gap per column keeps the pen up across it.
+        // The first gap of a column keeps the pen up across it, and the first
+        // after its last point keeps the line from bridging to the next data.
         if (gap < 0) gap = i;
+        if (tail < 0) tail = i;
         continue;
       }
+      tail = -1;
       if (first < 0) first = i;
       last = i;
       if (min < 0 || v < (y[min] as number)) min = i;
@@ -69,6 +73,7 @@ export function downsample(
     column[2] = max;
     column[3] = last;
     column[4] = gap;
+    column[5] = tail;
     column.sort((p, q) => p - q);
     let previous = -1;
     for (const k of column) {

@@ -279,11 +279,11 @@ export function violations(
   options: Partial<RuleOptions> = {},
 ): Violation[] {
   const o: RuleOptions = { ...defaultRules, ...options };
-  if (limits.sigma === 0) {
+  if (!(limits.sigma > 0)) {
     warnOnce(
       "control-sigma-zero",
-      "control limits with sigma 0 lie on the centre line - the reference window is constant. " +
-        "Rules 1 and 4 find nothing there; take a window with spread, or a given sigma.",
+      `control limits with sigma ${limits.sigma} span no band - a constant reference window, or a given sigma not above 0. ` +
+        "Rules 1 and 4 find nothing there; take a window with spread, or a positive given sigma.",
     );
   }
   const found: Violation[] = [];

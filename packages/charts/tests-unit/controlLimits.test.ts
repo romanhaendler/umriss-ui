@@ -115,6 +115,15 @@ describe("controlLimits - sigma out of the mean moving range", () => {
     warn.mockRestore();
   });
 
+  it("warns for a given sigma below zero, where the rules find nothing either", async () => {
+    vi.resetModules();
+    const { violations } = await import("../src/controlLimits");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    violations([5, 9], { center: 5, sigma: -1, upper: 2, lower: 8 });
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("sigma"));
+    warn.mockRestore();
+  });
+
   it("yields no numbers for an empty window instead of throwing", () => {
     const g = controlLimits(series, { kind: "referenceWindow", from: 3, to: 3 });
     expect(Number.isNaN(g.center)).toBe(true);

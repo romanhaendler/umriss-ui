@@ -52,6 +52,22 @@ describe("downsample", () => {
     for (let k = 1; k < out.length; k++) expect(out.x[k] as number).toBeGreaterThan(out.x[k - 1] as number);
   });
 
+  it("keeps a trailing gap of a column after its first one", () => {
+    // Column 0 runs gap - points - gap; without the trailing gap the line
+    // would bridge from x=0.5 to the data at x=100.
+    const series: MaterializedSeries = {
+      x: Float64Array.from([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.9, 100, 100.5]),
+      y: Float64Array.from([Number.NaN, 1, 2, 3, 4, 5, Number.NaN, 7, 8]),
+      y0: null,
+      w: null,
+      length: 9,
+    };
+    const out = downsample(series, 0, 100.5, 1, 0, 2);
+    const at100 = [...out.x].indexOf(100);
+    expect(Number.isNaN(out.y[at100 - 1] as number)).toBe(true);
+    expect(Number.isNaN(out.y[0] as number)).toBe(true);
+  });
+
   it("takes a baseline channel along at the same points", () => {
     const ys = Array.from({ length: 300 }, (_, i) => i);
     const y0 = ys.map((v) => -v);
