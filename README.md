@@ -13,7 +13,7 @@ hard outlines or effects.
 | [`@umriss-ui/charts`](packages/charts/README.md) | 0.4.0 | Canvas charts — few kinds, drawn well. Depends on nothing but React |
 | [`@umriss-ui/table`](packages/table/README.md) | 0.2.4 | The table, declared the way it reads: columns as JSX, typed against their rows. Takes `@umriss-ui/core` as a peer |
 | [`@umriss-ui/schedule`](packages/schedule/README.md) | 0.1.4 | The schedule: subtasks on lanes over time, with transports, findings and controlled editing. Takes `@umriss-ui/core` and `@umriss-ui/charts` as peers |
-| [`@umriss-ui/calculation`](packages/calculation/README.md) | 0.1.0 | A calculation a reader can follow and redo: a derivation written as it is shown, evaluated by the library. Takes `@umriss-ui/core` as a peer |
+| [`@umriss-ui/calculation`](packages/calculation/README.md) | 0.2.0 | A calculation a reader can follow and redo: a derivation written as it is shown, evaluated by the library. Takes `@umriss-ui/core` as a peer |
 | `@umriss-ui/demo` | — | The private shell all five demos are built from. Never published |
 
 All five published packages are released under the npm tag `latest`, so a plain

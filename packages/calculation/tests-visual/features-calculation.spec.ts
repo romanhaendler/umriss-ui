@@ -9,15 +9,31 @@ test.skip(({ colorScheme }) => colorScheme === "dark", "behaviour tests once onl
 test("a derivation opens beneath the line that was clicked, and the line does not move", async ({ page }) => {
   await openExample(page, "calculation", "costing-sheet");
   const target = page.locator('[data-example="costing-sheet"]');
-  const button = target.getByRole("button", { name: "Show how Production cost is derived" });
+  const button = target.getByRole("button", { name: "Show how Production overhead is derived" });
   const before = await button.boundingBox();
   await button.click();
   /* Its name says what a click does next, so it is found anew. */
-  const opened = target.getByRole("button", { name: "Hide how Production cost is derived" });
+  const opened = target.getByRole("button", { name: "Hide how Production overhead is derived" });
   const after = await opened.boundingBox();
   expect(after!.y).toBe(before!.y);
   const list = target.locator(`[id="${await opened.getAttribute("aria-controls")}"]`);
   await expect(list).toBeVisible();
   expect((await list.boundingBox())!.y).toBeGreaterThan(after!.y);
-  await expect(list).toContainText("= Production cost");
+  await expect(list).toContainText("= Production overhead");
+});
+
+test("a chain in view stands open: every line and interim, nothing to fold but the trees in its lines", async ({ page }) => {
+  await openExample(page, "chain", "payslip");
+  const target = page.locator('[data-example="payslip"]');
+  for (const line of ["Gross salary", "Income tax", "Church tax", "Net salary", "Travel allowance", "Amount paid out"]) {
+    /* The first place it stands is its line in the chain; later ones are
+       references inside folded trees. */
+    await expect(target.getByText(line, { exact: true }).first()).toBeVisible();
+  }
+  await expect(target.getByRole("list", { name: "Payslip, March" }).getByRole("button")).toHaveCount(1);
+  const pension = target.getByText("Pension insurance", { exact: true });
+  await expect(pension).toBeHidden();
+  await target.getByRole("button", { name: "Show how Social security contributions is derived" }).click();
+  await expect(pension).toBeVisible();
+  await expect(target.getByText("= Social security contributions")).toBeVisible();
 });

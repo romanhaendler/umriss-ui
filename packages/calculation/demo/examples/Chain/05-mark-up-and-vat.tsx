@@ -10,8 +10,8 @@ export default function MarkUpAndVat() {
   return (
     <Calculation aria-label="Price of a spare part">
       <Chain>
-        <Given label="Cost price" value={148.2} unit="€" />
-        <Plus label="Handling" value={12} unit="€" />
+        <Given label="Cost price" value={148.2} unit="€" decimals={2} />
+        <Plus label="Handling" value={12} unit="€" decimals={2} />
         <Interim label="Cost with handling" unit="€" decimals={2} />
         <Times label="Mark-up" value={1.25} />
         <Interim label="Net price" unit="€" decimals={2} />

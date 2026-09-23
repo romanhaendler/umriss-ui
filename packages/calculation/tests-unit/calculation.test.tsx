@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { LanguageProvider } from "@umriss-ui/core";
 import { GERMAN_FORMATS, GERMAN_WORDING } from "@umriss-ui/core/wording/de";
-import { Calculation, Given, Product, Quotient, Sum } from "../src";
+import { Calculation, Chain, Given, Interim, Minus, Product, Quotient, Ref, Sum } from "../src";
 import { costing } from "./costing";
 import { OeeCalculation } from "./oee";
 
@@ -37,39 +37,83 @@ describe("The statement", () => {
     expect(list.getAttribute("style")).toBeNull();
   });
 
+  it("keeps no column for a disclosure where nothing can fold", () => {
+    const { unmount } = render(
+      <Calculation aria-label="Output">
+        <Sum label="Output" unit="pcs">
+          <Given label="Early shift" value={512} unit="pcs" />
+          <Given label="Late shift" value={488} unit="pcs" />
+        </Sum>
+      </Calculation>,
+    );
+    expect(screen.getByRole("list", { name: "Output" }).parentElement!.hasAttribute("data-still")).toBe(true);
+    unmount();
+    render(<OeeCalculation />);
+    expect(screen.getByRole("list", { name: "OEE, early shift" }).parentElement!.hasAttribute("data-still")).toBe(false);
+  });
+
   it("stands a result beneath its operands, with the operator before each number", () => {
     render(<OeeCalculation />);
     expect(rows()).toEqual(["Availability 91.6 %", "× Performance 93.2 %", "× Quality 96 %", "OEE 82 %"]);
     expect(rowOf("OEE").getAttribute("data-kind")).toBe("result");
   });
 
-  it("folds a chain to its interims, and unfolds one by its label", () => {
+  it("stands a chain open, as on paper: its lines, a rule, the interim", () => {
     render(<Calculation>{costing()}</Calculation>);
     expect(rows()).toEqual([
-      "Material cost 2,060.8 €",
-      "Production cost 4,172.8 €",
-      "Cost price 4,798.72 €",
-      "Net offer price 5,182.62 €",
-    ]);
-    fireEvent.click(toggle("Production cost"));
-    expect(rows()).toEqual([
-      "Material cost 2,060.8 €",
-      "Production cost 4,172.8 €",
+      "Direct material 1,840 €",
+      "+ Material overhead 220.8 €",
       "Material cost 2,060.8 €",
       "+ Direct labour 960 €",
       "+ Production overhead 1,152 €",
-      "= Production cost 4,172.8 €",
-      "Cost price 4,798.72 €",
-      "Net offer price 5,182.62 €",
-    ]);
-    expect(formulaOf("Production overhead")).toBe("= Production overhead rate × Direct labour");
-    expect(formulaOf("Production cost")).toBe("");
-    fireEvent.click(toggle("Net offer price"));
-    expect(rows().slice(-4)).toEqual([
-      "Net offer price 5,182.62 €",
+      "Production cost 4,172.8 €",
+      "+ Administration and sales overhead 625.92 €",
       "Cost price 4,798.72 €",
       "× Profit mark-up 1.08",
-      "= Net offer price 5,182.62 €",
+      "Net offer price 5,182.62 €",
+    ]);
+    /* An interim in view does not fold, and carries the rule of its sum. */
+    expect(screen.queryByRole("button", { name: /how Production cost is derived/ })).toBeNull();
+    expect(rowOf("Production cost").getAttribute("data-kind")).toBe("interim");
+    expect(rowOf("Net offer price").getAttribute("data-kind")).toBe("result");
+    /* A tree in a line folds, and opens beneath it. */
+    expect(formulaOf("Production overhead")).toBe("= Production overhead rate × Direct labour");
+    fireEvent.click(toggle("Production overhead"));
+    expect(rows().slice(4, 8)).toEqual([
+      "+ Production overhead 1,152 €",
+      "Production overhead rate 120 %",
+      "× Direct labour 960 €",
+      "= Production overhead 1,152 €",
+    ]);
+  });
+
+  it("folds a chain that is an operand, and opens it whole", () => {
+    render(
+      <Calculation>
+        <Quotient label="Net salary share" format="percent">
+          <Chain>
+            <Given id="gross" label="Gross salary" value={4000} unit="€" />
+            <Minus label="Income tax" value={600} unit="€" />
+            <Interim label="After tax" unit="€" />
+            <Minus label="Contributions" value={800} unit="€" />
+            <Interim label="Net salary" unit="€" />
+          </Chain>
+          <Ref to="gross" />
+        </Quotient>
+      </Calculation>,
+    );
+    expect(rows()).toEqual(["Net salary 2,600 €", "÷ Gross salary 4,000 €", "Net salary share 65 %"]);
+    /* Folded, its head closes nothing: no rule of an interim over it. */
+    expect(rowOf("Net salary").hasAttribute("data-kind")).toBe(false);
+    fireEvent.click(toggle("Net salary"));
+    expect(rows().slice(0, 7)).toEqual([
+      "Net salary 2,600 €",
+      "Gross salary 4,000 €",
+      "− Income tax 600 €",
+      "After tax 3,400 €",
+      "− Contributions 800 €",
+      "= Net salary 2,600 €",
+      "÷ Gross salary 4,000 €",
     ]);
   });
 
@@ -216,7 +260,6 @@ describe("The accessible sentence", () => {
 
   it("reads the lines of a chain with their operator, in English and German", () => {
     const { unmount } = render(<Calculation>{costing()}</Calculation>);
-    fireEvent.click(toggle("Production cost"));
     expect(screen.getByText(/^plus Direct labour/).textContent).toBe("plus Direct labour equals 960 €");
     expect(screen.getByText(/^Production cost equals Material/).textContent).toBe(
       "Production cost equals Material cost plus Direct labour plus Production overhead, equals 2,060.8 € plus 960 € plus 1,152 €, equals 4,172.8 €",

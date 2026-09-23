@@ -10,11 +10,11 @@ export default function UsedTwice() {
   return (
     <Calculation aria-label="Material lost to scrap, week 12">
       <Quotient label="Material lost to scrap" format="percent" decimals={2}>
-        <Product label="Scrap cost" unit="€">
+        <Product label="Scrap cost" unit="€" decimals={2}>
           <Given label="Scrapped parts" value={38} unit="pcs" />
-          <Given id="material" label="Material per part" value={2.8} unit="€" />
+          <Given id="material" label="Material per part" value={2.8} unit="€" decimals={2} />
         </Product>
-        <Product label="Material cost" unit="€">
+        <Product label="Material cost" unit="€" decimals={2}>
           <Given label="Parts made" value={1278} unit="pcs" />
           <Ref to="material" />
         </Product>

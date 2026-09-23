@@ -10,13 +10,13 @@ export default function ShiftCost() {
   return (
     <Calculation aria-label="Cost of the early shift, line 2">
       <Chain>
-        <Given label="Operators" value={1152} unit="€" />
-        <Plus label="Shift supervisor" value={264} unit="€" />
-        <Plus label="Energy" value={418.4} unit="€" />
-        <Plus label="Compressed air" value={96.2} unit="€" />
-        <Plus label="Tooling wear" value={185} unit="€" />
-        <Plus label="Cleaning" value={48} unit="€" />
-        <Minus label="Energy fed back" value={37.6} unit="€" />
+        <Given label="Operators" value={1152} unit="€" decimals={2} />
+        <Plus label="Shift supervisor" value={264} unit="€" decimals={2} />
+        <Plus label="Energy" value={418.4} unit="€" decimals={2} />
+        <Plus label="Compressed air" value={96.2} unit="€" decimals={2} />
+        <Plus label="Tooling wear" value={185} unit="€" decimals={2} />
+        <Plus label="Cleaning" value={48} unit="€" decimals={2} />
+        <Minus label="Energy fed back" value={37.6} unit="€" decimals={2} />
         <Interim label="Cost of the shift" unit="€" decimals={2} />
       </Chain>
     </Calculation>

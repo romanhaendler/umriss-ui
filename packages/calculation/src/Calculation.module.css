@@ -28,6 +28,7 @@
     /* The disclosure's square: the falling line starts at its middle, and
        notes start past it. */
     --disclosure-size: 20px;
+    --disclosure-gap: var(--u-space-2);
     /* Measured against its own width, not the window's: a calculation in a
        side panel is as narrow as one on a phone. A size container has no
        width of its own content, so it takes the width it is given. */
@@ -41,6 +42,16 @@
     margin: 0;
     padding: 0;
     list-style: none;
+  }
+
+  /* Nothing to fold: no column kept free for a disclosure. */
+  .frame[data-still] {
+    --disclosure-size: 0px;
+    --disclosure-gap: 0px;
+  }
+
+  .frame[data-still] .disclosure {
+    display: none;
   }
 
   .list,
@@ -125,9 +136,12 @@
     cursor: pointer;
   }
 
-  /* Hover coupling: a flat band across the whole row. */
+  /* Hover coupling: a flat band across the whole row - the quantity itself in
+     the accent's surface, its operands in half of it. Never darker than the
+     surface below it: coloured text in a marked row (a stale as-of time, a
+     verdict) keeps the contrast it has everywhere else. */
   .line[data-mark] {
-    background: var(--u-edge-color);
+    background: color-mix(in srgb, var(--u-color-accent-subtle) 50%, transparent);
   }
 
   .line[data-mark="use"] {
@@ -149,7 +163,7 @@
     grid-column: 1;
     display: flex;
     align-items: baseline;
-    gap: var(--u-space-2);
+    gap: var(--disclosure-gap);
     min-width: 0;
     padding-left: calc(var(--u-space-3) + var(--depth, 0) * var(--u-space-5));
     padding-right: var(--u-space-5);
@@ -315,6 +329,17 @@
     font-weight: var(--u-weight-medium);
   }
 
+  /* An interim closes the lines above it, as on paper: a rule across its
+     figures. */
+  .line[data-kind="interim"]::before {
+    content: "";
+    grid-row: 1;
+    grid-column: 3 / 6;
+    align-self: start;
+    border-top: 1px solid var(--u-color-text-secondary);
+    pointer-events: none;
+  }
+
   /* The line that closes a derivation, "= Availability", under a rule across
      its figures. */
   .line[data-closing] .label {
@@ -371,7 +396,7 @@
     column-gap: var(--u-space-3);
     margin-top: calc(-1 * var(--u-space-1));
     padding: 0 var(--u-space-4) var(--u-space-2)
-      calc(var(--u-space-3) + var(--depth, 0) * var(--u-space-5) + var(--disclosure-size) + var(--u-space-2));
+      calc(var(--u-space-3) + var(--depth, 0) * var(--u-space-5) + var(--disclosure-size) + var(--disclosure-gap));
     font-size: var(--u-text-xs);
     color: var(--u-color-text-secondary);
   }
@@ -406,7 +431,7 @@
       justify-content: flex-start;
       flex-wrap: wrap;
       padding: 0 var(--u-space-3) var(--u-space-2)
-        calc(var(--u-space-3) + var(--depth, 0) * var(--u-space-5) + var(--disclosure-size) + var(--u-space-2));
+        calc(var(--u-space-3) + var(--depth, 0) * var(--u-space-5) + var(--disclosure-size) + var(--disclosure-gap));
       white-space: normal;
     }
 
