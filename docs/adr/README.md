@@ -41,5 +41,6 @@ half a later reader needs most. Exactly one is superseded today.
 | [0025](0025-a-lane-group-is-structure-over-lanes-never-a-lane.md) | A lane group is structure over lanes, never a lane | accepted | schedule |
 | [0026](0026-span-leaves-charts-occupancy-is-the-schedules.md) | Span leaves charts; occupancy is the schedule's | accepted | charts |
 | [0027](0027-a-calculation-is-written-as-it-is-shown.md) | A calculation is written as it is shown | accepted | calculation |
+| [0028](0028-a-calculation-is-a-tree-or-a-chain.md) | A calculation is a tree or a chain | accepted | calculation |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).

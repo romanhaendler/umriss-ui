@@ -50,3 +50,6 @@ exist), and a cycle through references. A caller's own component wrapping
 development error with a message saying so; `.map` over data inside an operator
 works, because it yields elements, not wrappers. There is one way to declare a
 calculation; a value-based builder beside it would be a second.
+
+*Added 23 Sep. 2026:* ADR-0028 adds a second form, the **Chain**, beside
+the tree written here; the last sentence above now holds per form.
