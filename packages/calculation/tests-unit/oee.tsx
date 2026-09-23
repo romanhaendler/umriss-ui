@@ -1,5 +1,6 @@
 /* The lead case of the spec: OEE of an early shift. Shared by the tests. */
 
+import type { CSSProperties } from "react";
 import { Calculation, Difference, Given, Product, Quotient, Ref } from "../src";
 
 export function oee({ downtime = 38 as number | null, good = 461 } = {}) {
@@ -27,6 +28,14 @@ export function oee({ downtime = 38 as number | null, good = 461 } = {}) {
   );
 }
 
-export function OeeCalculation(props: Parameters<typeof oee>[0]) {
-  return <Calculation aria-label="OEE, early shift">{oee(props)}</Calculation>;
+export function OeeCalculation({
+  className,
+  style,
+  ...props
+}: Parameters<typeof oee>[0] & { className?: string; style?: CSSProperties }) {
+  return (
+    <Calculation aria-label="OEE, early shift" className={className} style={style}>
+      {oee(props)}
+    </Calculation>
+  );
 }

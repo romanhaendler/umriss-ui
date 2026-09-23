@@ -48,3 +48,25 @@ test("Beispiel calculation--oee, opened", async ({ page }, testInfo) => {
   await page.mouse.move(0, 0);
   await expect(target).toHaveScreenshot(`example-calculation--oee-opened-${testInfo.project.name}.png`);
 });
+
+/* Hover across the full row, the falling lines above it: a band that stops
+   short of the left edge, or one that covers a line, shows here. */
+test("Beispiel calculation--oee, hovered", async ({ page }, testInfo) => {
+  await openExample(page, "calculation", "oee");
+  const target = page.locator('[data-example="oee"]');
+  for (const label of ["Availability", "Run time"]) {
+    await target.getByRole("button", { name: `Show how ${label} is derived` }).click();
+  }
+  await target.getByText("Downtime", { exact: true }).hover();
+  await expect(target).toHaveScreenshot(`example-calculation--oee-hovered-${testInfo.project.name}.png`);
+});
+
+/* A phone's width: the component measures itself, not the window. */
+test("Beispiel calculation--oee, narrow", async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 390, height: 900 });
+  await openExample(page, "calculation", "oee");
+  const target = page.locator('[data-example="oee"]');
+  await target.getByRole("button", { name: "Show how Availability is derived" }).click();
+  await page.mouse.move(0, 0);
+  await expect(target).toHaveScreenshot(`example-calculation--oee-narrow-${testInfo.project.name}.png`);
+});
