@@ -18,7 +18,7 @@ vi.mock("../src/context", () => ({
 }));
 
 describe("LimitLine and LimitBand - the default axis", () => {
-  it("binds a limit on the x axis to the x axis", () => {
+  it("leaves the axis to the scene, which takes the first of the orientation", () => {
     registered.length = 0;
     renderToStaticMarkup(
       <>
@@ -27,6 +27,10 @@ describe("LimitLine and LimitBand - the default axis", () => {
         <LimitLine value={90} />
       </>,
     );
-    expect(registered.map((c) => c.axisId)).toEqual(["x", "x", "y"]);
+    expect(registered.map((c) => [c.orientation, c.axisId])).toEqual([
+      ["x", undefined],
+      ["x", undefined],
+      ["y", undefined],
+    ]);
   });
 });

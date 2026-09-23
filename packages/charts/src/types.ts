@@ -229,8 +229,9 @@ export interface Scale {
 export type LimitRole = "specification" | "control" | "zone";
 
 export interface LimitBase {
-  /** Axis on which the value lies. */
-  axisId: string;
+  /** Axis on which the value lies; without one, the first axis of its
+      orientation (charts-fixes 08). */
+  axisId?: string;
   orientation: AxisOrientation;
   severity: Severity;
   role: LimitRole;

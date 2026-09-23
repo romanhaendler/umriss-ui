@@ -85,12 +85,16 @@ export function materializeSeries<T>(
   for (let i = 0; i < n; i++) {
     const d = data[i] as T;
     const xRaw = xAccessor(d, i);
-    const xv = map === null ? xRaw : map(xRaw);
+    // An x that is no place - an infinity or NaN - takes the place of the point
+    // before it (−∞ before the first), so that the channel stays ascending.
+    const placeless = !Number.isFinite(xRaw);
+    const xv = placeless
+      ? i > 0 ? (x[i - 1] as number) : Number.NEGATIVE_INFINITY
+      : map === null ? xRaw : map(xRaw);
     x[i] = xv;
-    // A point in removed time - or at an x that is no place, an infinity -
-    // keeps its position, so that the channel stays ascending, but it counts
+    // Such a point - and one in removed time, which keeps its position - counts
     // neither in the extent nor as a value.
-    const unplaced = !Number.isFinite(xRaw) || (isGap !== null && isGap(xRaw));
+    const unplaced = placeless || (isGap !== null && isGap(xRaw));
     if (!unplaced) {
       if (xv < xMin) xMin = xv;
       if (xv > xMax) xMax = xv;

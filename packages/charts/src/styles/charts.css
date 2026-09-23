@@ -52,6 +52,7 @@
     --uc-size-legend: 12.5px;
     --uc-radius: 6px;
     --uc-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.08);
+    --uc-focus-ring: var(--u-focus-ring, 0 0 0 2px #0e7d72);
 
     position: relative;
     display: flex;
@@ -278,7 +279,7 @@
 
   button.uc-legend-item:focus-visible {
     outline: none;
-    box-shadow: var(--u-focus-ring, 0 0 0 2px #0e7d72);
+    box-shadow: var(--uc-focus-ring);
   }
 
   /* A hidden series keeps its entry, drawn back: the chip faint, the name

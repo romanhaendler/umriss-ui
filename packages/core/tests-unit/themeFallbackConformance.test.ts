@@ -107,4 +107,13 @@ describe("The charts fallback against the tokens", () => {
     }
     expect(same(FALLBACK_THEME[field])).toBe(same(value!));
   });
+  /* The legend's focus ring is CSS only - no field in theme.ts. Its literal is
+     the light token, with the accent it names written out. */
+  it("--uc-focus-ring falls back over --u-focus-ring onto its light value", () => {
+    const ring = chain("--uc-focus-ring");
+    expect(ring?.token).toBe("--u-focus-ring");
+    const accent = LIGHT.get("--u-color-accent") ?? "";
+    const token = (LIGHT.get("--u-focus-ring") ?? "").replace("var(--u-color-accent)", accent);
+    expect(same(ring?.literal ?? "")).toBe(same(token));
+  });
 });

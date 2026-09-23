@@ -86,6 +86,19 @@ describe("materializeSeries", () => {
     expect(Number.isNaN(series.y[4] as number)).toBe(true);
   });
 
+  it("keeps the x channel ascending around an infinite or NaN x", () => {
+    const ts = [Number.NEGATIVE_INFINITY, 1, Number.POSITIVE_INFINITY, 3, Number.NaN, Number.NEGATIVE_INFINITY, 5];
+    const { series, extent } = materializeSeries(
+      ts.map((t) => ({ t, a: 1 })),
+      (d) => d.t,
+      (d) => d.a,
+    );
+    expect(firstUnsortedIndex(series.x, series.length)).toBe(-1);
+    expect(extent.xMin).toBe(1);
+    expect(extent.xMax).toBe(5);
+    expect([0, 2, 4, 5].every((i) => Number.isNaN(series.y[i] as number))).toBe(true);
+  });
+
   it("yields empty arrays for empty data without throwing", () => {
     const { series, extent } = materializeSeries(
       [] as Row[],
