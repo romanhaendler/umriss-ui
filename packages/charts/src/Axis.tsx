@@ -41,7 +41,9 @@ export interface XAxisProps<T> extends CommonProps<T> {
   /** The values are instants (milliseconds since the epoch): ticks on local
       boundaries from the minute to the month, labels by level in en-GB with a
       24-hour clock - `15:00`, `17 Mar`, `Mar 2026` - and the date on the first
-      tick of a new day (`17 Mar 00:00`). Another language is a `tickFormat`,
+      tick and on the first of a new day (`17 Mar 00:00`); a day tick there
+      carries the year. The tooltip's x value carries the seconds where the
+      readings lie less than a minute apart. Another language is a `tickFormat`,
       which is handed the instant. `calendar` implies it. */
   time?: boolean;
   /** Operating calendar: the intervals in which time counts. With it the axis

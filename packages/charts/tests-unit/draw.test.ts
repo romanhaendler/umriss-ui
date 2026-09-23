@@ -5,7 +5,7 @@
    and Path2D record what is done to them, and the test counts it. */
 
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { drawSeriesLayer, type SeriesDrawItem } from "../src/draw";
+import { drawOverlayLayer, drawSeriesLayer, type SeriesDrawItem } from "../src/draw";
 import { LinearScale } from "../src/scale";
 import { FALLBACK_THEME } from "../src/theme";
 
@@ -217,3 +217,38 @@ describe("An area's dash", () => {
   });
 });
 
+
+/* charts-review: at a zoomed edge the nearest reading can lie outside the
+   plot, and the overlay layer is not clipped - its marker stood on the axis. */
+describe("The hover marker", () => {
+  function markers(x: number) {
+    const arcs: number[] = [];
+    const ctx = new Proxy({} as Record<string, unknown>, {
+      get: (_, key) => (key === "arc" ? (ax: number) => arcs.push(ax) : () => undefined),
+      set: () => true,
+    }) as unknown as CanvasRenderingContext2D;
+    drawOverlayLayer(ctx, {
+      width: 400,
+      height: 200,
+      plot: { x: 40, y: 10, width: 300, height: 150 },
+      theme: FALLBACK_THEME,
+      hover: {
+        hit: { xValue: 0, points: [], xPx: x, yPx: 50 },
+        marker: [{ x, y: 50, color: "#000" }],
+        mouseX: 45,
+        mouseY: 50,
+      },
+      syncPx: null,
+    });
+    return arcs;
+  }
+
+  it("is drawn inside the plot", () => {
+    expect(markers(100)).toEqual([100, 100]);
+  });
+
+  it("is not drawn outside it", () => {
+    expect(markers(30)).toEqual([]);
+    expect(markers(345)).toEqual([]);
+  });
+});

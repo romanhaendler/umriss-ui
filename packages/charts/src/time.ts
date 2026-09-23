@@ -93,6 +93,12 @@ export function timeDomain(min: number, max: number, step: TimeStep): [number, n
 }
 
 const CLOCK = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+const CLOCK_SECONDS = new Intl.DateTimeFormat("en-GB", {
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+  hourCycle: "h23",
+});
 const DAY_MONTH = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" });
 const DAY_MONTH_YEAR = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" });
 const MONTH_YEAR = new Intl.DateTimeFormat("en-GB", { month: "short", year: "numeric" });
@@ -100,15 +106,17 @@ const YEAR_ONLY = new Intl.DateTimeFormat("en-GB", { year: "numeric" });
 
 /** An instant with its date and clock: `17 Mar 15:23` - the tooltip's x value,
     and a tick's label where the day has changed. Composed, because en-GB would
-    put a comma between the two. */
-export function timeText(t: number): string {
+    put a comma between the two. With `seconds` the clock carries them:
+    readings less than a minute apart would otherwise share one text. */
+export function timeText(t: number, seconds = false): string {
   if (!Number.isFinite(t)) return "";
-  return `${DAY_MONTH.format(t)} ${CLOCK.format(t)}`;
+  return `${DAY_MONTH.format(t)} ${(seconds ? CLOCK_SECONDS : CLOCK).format(t)}`;
 }
 
-/** The labels of ascending ticks by the step's level. The first tick after a
-    change of the level above carries it: the clock its date, the day its
-    year. */
+/** The labels of ascending ticks by the step's level. The first tick, and the
+    first after a change of the level above, carries it: the clock its date,
+    the day its year - a zoomed axis names its day even where no midnight
+    falls into it. */
 export function timeLabels(ticks: readonly number[], step: TimeStep): string[] {
   return ticks.map((t, i) => {
     const previous = i === 0 ? undefined : new Date(ticks[i - 1] as number);
@@ -116,11 +124,11 @@ export function timeLabels(ticks: readonly number[], step: TimeStep): string[] {
     switch (step.unit) {
       case "minute":
       case "hour":
-        return previous !== undefined && previous.toDateString() !== d.toDateString()
+        return previous === undefined || previous.toDateString() !== d.toDateString()
           ? timeText(t)
           : CLOCK.format(t);
       case "day":
-        return previous !== undefined && previous.getFullYear() !== d.getFullYear()
+        return previous === undefined || previous.getFullYear() !== d.getFullYear()
           ? DAY_MONTH_YEAR.format(t)
           : DAY_MONTH.format(t);
       case "month":

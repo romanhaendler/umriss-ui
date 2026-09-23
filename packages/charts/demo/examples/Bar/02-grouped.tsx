@@ -4,7 +4,8 @@
    `barWidth` is the fraction of the step the whole group takes - so both series
    carry the same value, and a different one would be a DEV warning. The plan
    gets a quiet `color` of its own: it is the reference, and the palette colour
-   goes to what was made. */
+   goes to what was made. A token, so that it follows the colour scheme - the
+   canvas resolves it like the palette. */
 
 import { Bar, Chart, Legend, Tooltip, XAxis, YAxis } from "../../../src";
 import { outputData, type DayOutput } from "../../data";
@@ -24,7 +25,7 @@ export default function Grouped() {
         tickFormat={(v) => outputData[v]?.name ?? ""}
       />
       <YAxis accessor={(d: DayOutput) => d.actual} label="Pieces" />
-      <Bar accessor={(d: DayOutput) => d.planned} name="Planned" color="#94a3b8" barWidth={0.7} />
+      <Bar accessor={(d: DayOutput) => d.planned} name="Planned" color="var(--uc-color-text)" barWidth={0.7} />
       <Bar accessor={(d: DayOutput) => d.actual} name="Made" barWidth={0.7} />
       <Legend placement="top" />
       <Tooltip mode="x" />

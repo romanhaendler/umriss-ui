@@ -43,6 +43,20 @@ From `.scratch/charts-long-series/spec.md`; the decisions stand in
   edge. The picture is the same; three lines of 1,000,000 points draw in about
   8 ms instead of 47. Bars and scatters are never thinned, and the tooltip
   still searches every point.
+- **A caller's colour is resolved for the canvas.** A series' `color`, a
+  state's, a limit's and a gradient stop reached the canvas as the text they
+  were given: `var(--…)` or `light-dark(…)` drew nothing, or in the colour
+  drawn before. They now go through the theme's probe as the palette does,
+  and are resolved anew when the colour scheme changes.
+- **A state band's last state ends at the latest reading.** It ran to the end
+  of the x domain - with `domain="nice"` a rounding of the axis, and with
+  `domain="data"` nothing at all. It now ends at the last x of any visible
+  series on its x axis; where the band reports last, one median step of its
+  own x values after its last point; never beyond the domain. The band's x
+  extent reaches that step too. The last state is no longer hit beyond it.
+- **The first tick of a time axis carries its date.** A clock tick names the
+  day, a day tick the year - a zoomed axis whose first tick is a midnight, or
+  that crosses none, named no day at all.
 
 ### Added
 
@@ -75,6 +89,13 @@ From `.scratch/charts-long-series/spec.md`; the decisions stand in
 - **The cursor sync.** A chart without a `Tooltip` shared no position; it now
   shares the pointer's x. A chart that leaves its group - another `syncId`, or
   unmounted - no longer keeps the crosshair the group last sent it.
+- **An x limit's label stays inside the container** at the right edge, as a
+  tick label does; it ran past it.
+- **No hover marker outside the plot.** At a zoomed edge the nearest reading
+  can lie beyond it, and its marker stood on the axis.
+- **The tooltip header on a time axis carries the seconds** where the
+  readings under the pointer lie less than a minute apart - readings a second
+  apart shared one header. Otherwise it stays `17 Mar 15:23`.
 - **A double click proposes no domain without width.** Over a single point
   the data range is one value; the double click handed it to
   `onDomainChange` all the same, where a wheel step checks for that.

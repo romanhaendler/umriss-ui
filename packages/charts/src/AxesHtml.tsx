@@ -90,7 +90,7 @@ function renderAxis(axis: AxisLayout, limits: readonly LimitLabel[]): ReactNode 
             data-severity={g.severity}
             data-role={g.role}
             style={{
-              left: `${Math.round(g.px - band.x)}px`,
+              left: `${Math.round(g.labelLeft - band.x)}px`,
               [position === "top" ? "bottom" : "top"]: `${offset}px`,
             }}
           >
