@@ -21,15 +21,16 @@ const rowOf = (label: string) => {
   );
   return all.find((row) => !row.closest("ul[hidden]")) ?? all[0]!;
 };
-/** What stands beneath the label. */
-const notesOf = (label: string) => rowOf(label).querySelector(":scope > [class*=notes]")?.textContent ?? "";
+/** The formula a folded row shows beside its label. */
+const formulaOf = (label: string) => rowOf(label).querySelector(":scope > [class*=names]")?.textContent ?? "";
+/** Verdict, target, reason and the worst verdict inside, beside the number. */
+const assessmentOf = (label: string) => rowOf(label).querySelector(":scope > [class*=assessment]")?.textContent ?? "";
 const toggle = (label: string) => screen.getByRole("button", { name: new RegExp(`how ${label} is derived`) });
 
 describe("The statement", () => {
   it("stands a result beneath its operands, with the operator before each number", () => {
     render(<OeeCalculation />);
     expect(rows()).toEqual(["Availability 91.6 %", "× Performance 93.2 %", "× Quality 96 %", "OEE 82 %"]);
-    expect(rowOf("OEE").hasAttribute("data-rule")).toBe(true);
     expect(rowOf("OEE").getAttribute("data-kind")).toBe("result");
   });
 
@@ -52,8 +53,8 @@ describe("The statement", () => {
       "Cost price 4,798.72 €",
       "Net offer price 5,182.62 €",
     ]);
-    expect(notesOf("Production overhead")).toBe("= Production overhead rate × Direct labour");
-    expect(notesOf("Production cost")).toBe("");
+    expect(formulaOf("Production overhead")).toBe("= Production overhead rate × Direct labour");
+    expect(formulaOf("Production cost")).toBe("");
     fireEvent.click(toggle("Net offer price"));
     expect(rows().slice(-4)).toEqual([
       "Net offer price 5,182.62 €",
@@ -76,12 +77,12 @@ describe("The statement", () => {
         </Product>
       </Calculation>,
     );
-    expect(notesOf("Cost per piece")).toBe("5 operands");
+    expect(formulaOf("Cost per piece")).toBe("5 operands");
     expect(screen.getByText(/^Cost per piece equals/).textContent).toBe(
       "Cost per piece equals Steel plus Paint plus Screws plus Energy plus Labour, equals 1 plus 1 plus 1 plus 1 plus 1, equals 5",
     );
     fireEvent.click(toggle("Cost per piece"));
-    expect(notesOf("Cost per piece")).toBe("");
+    expect(formulaOf("Cost per piece")).toBe("");
     expect(rows()).toContain("+ Paint 1");
   });
 
@@ -146,15 +147,15 @@ describe("The statement", () => {
         </Sum>
       </Calculation>,
     );
-    expect(notesOf("Scrap cost")).toContain("Inside: Alarm limit exceeded");
+    expect(assessmentOf("Scrap cost")).toContain("Inside: Alarm limit exceeded");
     fireEvent.click(toggle("Scrap cost"));
-    expect(notesOf("Scrap cost")).not.toContain("Inside");
+    expect(assessmentOf("Scrap cost")).not.toContain("Inside");
   });
 
   it("shows an absent given through to the result, with the reason, never as zero", () => {
     render(<OeeCalculation downtime={null} />);
     expect(rows().at(-1)).toBe("OEE —");
-    expect(notesOf("OEE")).toBe("Downtime is missing");
+    expect(assessmentOf("OEE")).toBe("Downtime is missing");
     expect(rowOf("OEE").querySelector("[aria-hidden]")).not.toBeNull();
     expect(screen.getByText(/^OEE equals/).textContent).toBe(
       "OEE equals Availability times Performance times Quality, equals No value times No value times 96 percent, equals No value, Downtime is missing",
@@ -193,14 +194,14 @@ describe("The accessible sentence", () => {
     );
     const { unmount } = render(thirds);
     expect(screen.getByText(/^Whole equals/).textContent).toBe(
-      "Whole equals Third a plus Third b plus Third c, equals 0.33 plus 0.33 plus 0.33, equals approximately 1",
+      "Whole equals Third a plus Third b plus Third c, equals 0.33 plus 0.33 plus 0.33, equals approximately 1. The rounded figures do not give this exactly; it is computed from the unrounded ones.",
     );
-    expect(rows().at(-1)).toBe("≈ Whole 1");
+    expect(rows().at(-1)).toBe("Whole ≈1");
     unmount();
 
     render(<LanguageProvider wording={GERMAN_WORDING} formats={GERMAN_FORMATS}>{thirds}</LanguageProvider>);
     expect(screen.getByText(/^Whole gleich/).textContent).toBe(
-      "Whole gleich Third a plus Third b plus Third c, gleich 0,33 plus 0,33 plus 0,33, gleich ungefähr 1",
+      "Whole gleich Third a plus Third b plus Third c, gleich 0,33 plus 0,33 plus 0,33, gleich ungefähr 1. Die gerundeten Zahlen ergeben das nicht genau; gerechnet ist mit den ungerundeten.",
     );
   });
 

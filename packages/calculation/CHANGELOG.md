@@ -26,10 +26,12 @@ under a heading "Changed" of its own, no matter which digit rose.
 - **The chain** (ADR-0028): `Chain`, `Plus`, `Minus`, `Times`, `DividedBy` and
   `Interim` — a calculation read top to bottom, each operand worked into the
   value before it, ended by an interim. It mixes with the tree both ways.
-- **The statement look**, for tree and chain alike, replacing the accordion:
-  fixed columns for label, operator, number and unit; the outermost statement
-  as on paper with the Result above a double rule; every derivation opening
-  beneath its line as a nested calculation with a bar, closing "= label"; the
-  label as the disclosure, the formula in names beneath it while folded,
-  "N operands" above four. Everything below the outermost statement now
-  starts folded.
+- **The statement look**, for tree and chain alike, replacing the accordion: a
+  surface in the material of the library's tables and cards, rows of one
+  height, fixed columns for label, names, operator, number, unit and
+  assessment. The outermost statement stands as on paper and closes on the
+  Result as its last row, its number underlined twice. Every other derivation
+  opens beneath its row as one group with it, joined by a falling line, and
+  closes "= label". A folded row shows the formula it hides, or
+  "N operands" above four. The verdict is core's `Badge`; "≈" explains itself
+  in a `Tooltip`. Everything below the outermost statement starts folded.

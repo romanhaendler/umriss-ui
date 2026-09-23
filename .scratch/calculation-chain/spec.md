@@ -102,28 +102,12 @@ The lead case, for the demo and the tests, is a costing sheet:
 - **The tree's long operator.** A sum or product of more than four operands
   shows no formula on its line, only how many operands it has. Fixed, not a
   prop.
-- **The look (ADR-0028, "How it is shown"), for tree and chain alike.** The
-  design session after the grilling settled it; it replaces the accordion the
-  first delivery shipped:
-  - the outermost statement as on paper and not foldable: a tree's operands, a
-    rule, the Result with a double rule; a chain's interims;
-  - every other derivation opens BENEATH the clicked line, which never moves:
-    a nested calculation on the sunken surface with a bar hanging from the
-    label, closing with a rule and "= label"; an interim's derivation starts
-    with the interim before;
-  - columns label · operator · number · unit; numbers right-aligned in the
-    monospace token with tabular figures; "≈" in a result's operator column;
-  - nested levels indent their label only; an unfolded inner derivation's
-    numbers, operators and rules in the secondary colour;
-  - the label is the disclosure button, a quiet angle after it; folded, the
-    formula in names stands beneath it ("15 operands" above four); open,
-    none;
-  - at most two rows per quantity: beneath the label formula, reason,
-    explanation, source, freshness, aside; beneath the number verdict and
-    target - the 10 rem assessment column goes;
-  - as wide as the content, the label column wrapping at a measure;
-  - hover coupling as a flat band, references in italics;
-  - no font named anywhere: tokens only (the library ships no fonts).
+- **The look (ADR-0028, "How it is shown"), for tree and chain alike.** Settled
+  in the design session and twice revised on seeing it rendered: a statement on
+  a surface in the library's material, fixed columns, the Result as the last row
+  underlined twice, derivations opening beneath their row as groups joined by
+  a falling line and closing "= label", the verdict as core's badge, "≈" with
+  a tooltip, tokens only and no font named.
 - **Line.** An operand line shows its operator and its own number. Only an
   interim or a derived result shows the value it stands for.
 - **Accessibility.** The chain is a list; every line keeps its sentence —

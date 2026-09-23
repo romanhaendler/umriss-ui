@@ -80,9 +80,11 @@ in a tree.
   absent too, with the reason; a quotient by zero is absent with its own.
 - **Target and limits** are assessed through core's `assess()`. A folded
   derivation that holds a worse verdict than its line says so, quietly.
-- **The label is the disclosure.** A derivation opens beneath its line as a
-  nested calculation that closes with "= label"; folded, the formula in names
-  stands beneath the label — or how many operands there are, above four.
+- **A statement on a surface**, in the material of the library's tables and
+  cards. A derivation opens beneath its row as one group with it and closes
+  with "= label"; folded, the row shows the formula it hides in names — or how
+  many operands there are, above four. The Result is the last row, its number
+  underlined twice.
 - **Every line is read as one sentence** — "Availability equals Run time
   divided by Planned production time, equals 412 min divided by 450 min,
   equals 91.6 percent" — and every derivation is a disclosure.
