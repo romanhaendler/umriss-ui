@@ -502,3 +502,72 @@ test("zoom: two fingers spread apart zoom in", async ({ page, context }) => {
   await touch("touchEnd", []);
   await expect.poll(async () => (await xLabels(example)).some((l) => HOURS.test(l))).toBe(true);
 });
+
+/* ------------------------------------------------------------------------
+   Cursor sync (charts-long-series 04): three charts of one kiln share
+   `syncId`. The crosshair is found on each overlay as the mean column of its
+   pixels - the hover marker sits on the crosshair, so it does not move it.
+   ------------------------------------------------------------------------ */
+
+/** The crosshair's x in page coordinates, or null where the overlay is empty. */
+async function crosshairX(overlay: Locator): Promise<number | null> {
+  return overlay.evaluate((el) => {
+    const canvas = el as HTMLCanvasElement;
+    const ctx = canvas.getContext("2d");
+    if (ctx === null) return null;
+    const image = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    let sum = 0;
+    let hits = 0;
+    for (let i = 3; i < image.length; i += 4) {
+      if ((image[i] as number) === 0) continue;
+      sum += (i >> 2) % canvas.width;
+      hits++;
+    }
+    if (hits === 0) return null;
+    const box = canvas.getBoundingClientRect();
+    return box.x + ((sum / hits) * box.width) / canvas.width;
+  });
+}
+
+test("cursor sync: every chart draws its crosshair at the pointer's instant, one tooltip", async ({ page }) => {
+  await openExample(page, "chart", "cursor-sync");
+  const example = page.locator('[data-example="cursor-sync"]');
+  await example.scrollIntoViewIfNeeded();
+  const overlays = example.locator("canvas.uc-layer-overlay");
+  const tooltips = example.locator(".uc-tooltip");
+  await expect(overlays).toHaveCount(3);
+
+  const box = await example.locator(".uc-plot").nth(1).boundingBox();
+  if (box === null) throw new Error("plot area not found");
+  await page.mouse.move(box.x + box.width * 0.4, box.y + box.height / 2);
+  await page.waitForTimeout(200);
+
+  const xs = await Promise.all([0, 1, 2].map((k) => crosshairX(overlays.nth(k))));
+  const [top, middle, bottom] = xs;
+  expect(middle).not.toBeNull();
+  // The three plots begin in one column (labels of one width), so one instant
+  // is one x on the page.
+  expect(Math.abs((top ?? 0) - (middle as number))).toBeLessThan(1.5);
+  expect(Math.abs((bottom ?? 0) - (middle as number))).toBeLessThan(1.5);
+  await expect(tooltips.nth(1)).toHaveCSS("opacity", "1");
+  await expect(tooltips.nth(0)).toHaveCSS("opacity", "0");
+  await expect(tooltips.nth(2)).toHaveCSS("opacity", "0");
+
+  await page.mouse.move(2, 2);
+  await page.waitForTimeout(200);
+  for (let k = 0; k < 3; k++) expect(await crosshairX(overlays.nth(k))).toBeNull();
+});
+
+test("cursor sync: one controlled domain zooms all three", async ({ page }) => {
+  await openExample(page, "chart", "cursor-sync");
+  const example = page.locator('[data-example="cursor-sync"]');
+  await example.scrollIntoViewIfNeeded();
+  const bottom = example.locator(".uc-axis-bottom").nth(2).locator(".uc-tick-label");
+  const before = await bottom.allInnerTexts();
+  const box = await example.locator(".uc-plot").first().boundingBox();
+  if (box === null) throw new Error("plot area not found");
+  await zoomIn(page, box.x + box.width / 2, box.y + box.height / 2, 4);
+  const after = await bottom.allInnerTexts();
+  expect(after).not.toEqual(before);
+  expect(after.some((l) => HOURS.test(l))).toBe(true);
+});
