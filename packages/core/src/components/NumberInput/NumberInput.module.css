@@ -20,7 +20,7 @@
   }
 
   .wrapper:focus-within {
-    box-shadow: var(--u-focus-edge);
+    box-shadow: var(--u-focus-ring);
   }
 
   .sm {
@@ -34,7 +34,7 @@
   }
 
   .invalid:focus-within {
-    box-shadow: var(--u-focus-edge-danger);
+    box-shadow: var(--u-focus-ring-danger);
   }
 
   .disabled {
