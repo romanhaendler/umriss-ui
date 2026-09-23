@@ -13,6 +13,7 @@
 import {
   calendarFrom,
   DAY,
+  localOffset,
   MINUTE,
   operatingTimeTicks,
   timeStep,
@@ -21,7 +22,6 @@ import {
   type CalendarInput,
   type OperatingTimeTick,
 } from "@umriss-ui/charts";
-import { localOffset } from "./snap";
 
 /** Nothing removed: the wall clock is the axis. */
 const WALL_CLOCK: CalendarInput = [];

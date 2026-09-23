@@ -201,7 +201,8 @@ Screenshot pages carry their name in brackets.
 |---|---|---|
 | The calendar sorted and merged; empty, reversed and infinite intervals fall away | — | Unit (operating time) |
 | Wall clock ↔ operating time, monotonic; removed time becomes a gap | ADR-0001 | Unit (operating time, limits and bands in the scene) |
-| Ticks in wall-clock time at readable boundaries, mapped afterwards | — | Unit (operating time) |
+| Ticks in wall-clock time at readable boundaries, mapped afterwards; days and half days on local midnight | — | Unit (operating time, layout under Europe/Berlin), Screenshot (`operating-time`) |
+| Explicit `ticks` and x limits named on the wall clock and mapped like the data | — | Unit (layout, limits and bands in the scene, jsdom scene) |
 | One break mark per removed span | — | Unit (operating time), Screenshot (`operating-time`) |
 | Default labelling `dd.MM. HH:mm`, independent of the locale | — | Unit (layout) |
 

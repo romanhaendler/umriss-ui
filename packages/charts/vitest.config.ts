@@ -3,6 +3,10 @@ import react from "@vitejs/plugin-react";
 import { ownStyles } from "../../scripts/styles/ownStyles.ts";
 import { fileURLToPath } from "node:url";
 
+/* The same time zone as in the other three packages: the local day boundaries
+   of an operating-time axis hang on it (charts-fixes 09). */
+process.env.TZ = "Europe/Berlin";
+
 export default defineConfig({
   plugins: [react(), ownStyles()],
   resolve: {

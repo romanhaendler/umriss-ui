@@ -17,9 +17,9 @@
 
    Explicitly not here: deriving the intervals from a shift model. Turning a
    shift plan with its exceptions, holidays and handovers into a list of
-   intervals is a plant data problem and belongs above this library. The same
-   goes for the time zone: whoever wants the day boundaries of a local time
-   passes them as an offset. */
+   intervals is a plant data problem and belongs above this library. The time
+   zone is the machine's: `localOffset` shifts a tick grid onto its local
+   boundaries, as it does the schedule's. */
 
 import { tickStep } from "./ticks";
 
@@ -276,6 +276,13 @@ export function timeStep(span: number, count: number): number {
   const raw = span / Math.max(1, Math.floor(count));
   for (const step of TIME_STEPS) if (step >= raw) return step;
   return DAY * tickStep(raw / DAY, 1);
+}
+
+/** The local offset at an instant, as the shift of a grid that is to lie on
+    local time: `wallClock = offset + k · step`. Taken at one instant, it holds
+    for a grid up to the next clock change. */
+export function localOffset(instant: number): number {
+  return new Date(instant).getTimezoneOffset() * MINUTE;
 }
 
 /** A tick: where it stands on the clock and where it lies on the axis. */

@@ -108,3 +108,6 @@ export type {
    exports - neither brings a stylesheet, so no picture could move. */
 export { resolveColours, subscribeTheme } from "./theme";
 export { toOperatingTimeClamped } from "./operatingTime";
+/* The shift of a tick grid onto local time, moved here from the schedule
+   (charts-fixes 09): the calendar axis stands its days on it as well. */
+export { localOffset } from "./operatingTime";

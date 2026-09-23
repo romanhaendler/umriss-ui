@@ -51,6 +51,9 @@ From `.scratch/charts-fixes/spec.md`; the findings stand in
 
 - **`TooltipPoint.xValue`**: a point's own x value. With several x axes it can
   differ from the hit's.
+- **`localOffset(instant)`**: the time zone's offset at an instant, as the
+  shift of a tick grid onto local time. It moved here from
+  `@umriss-ui/schedule`, which takes it from here now.
 
 ### Fixed
 
@@ -88,6 +91,12 @@ From `.scratch/charts-fixes/spec.md`; the findings stand in
   found none and drew nothing, silently. Without an `axisId` a limit now binds
   to the axis its orientation names - "x" or "y" - and an unknown `axisId` is a
   DEV error, as it is for a series.
+- **The operating-time axis stands on the local clock.** Its day and half-day
+  ticks fell on UTC's midnight and were labelled in local time - "01:00"
+  where a day begins, in CET. They now fall on local midnight and noon. Explicit
+  `ticks` and the value of an x limit are named on the wall clock, like the
+  data, and mapped into operating time as the data are; before, both were taken
+  as operating time and landed far off, or pulled the axis out of shape.
 
 ---
 
