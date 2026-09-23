@@ -1,6 +1,6 @@
 # 01 - Span leaves charts
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Spec: `.scratch/charts-fixes/spec.md` (Q9, Q14, Q25)
@@ -17,3 +17,21 @@ Spec: `.scratch/charts-fixes/spec.md` (Q9, Q14, Q25)
 
 - Typecheck, unit, interaction and screenshot suites green; `grep -rn "Span\b" packages/charts/src` finds nothing of the kind.
 - `@umriss-ui/schedule` builds and its tests stay green (it imports no `Span`).
+
+## Delivery
+
+`Span`, `spans.ts`, the `span` kind, the second x channel `x1` and every span
+branch in `scene.ts`, `draw.ts` and `materialize.ts` are gone; so is `open` in
+a tooltip point's `segment`, which only a span ever set. `measure.ts` had no
+span branch (its "span" is the measuring `<span>`). ADR-0026 written, ADR-0011
+and ADR-0022 point at it, `CONTEXT.md` reworded (Idle and Overlap now stand in
+the schedule section, on subtasks), README says six kinds, `docs/testing.md`
+counts thirteen charts pages. The demo data `SCHEDULE`/`RESOURCES` went with
+the example; the StateBand "why" text now points at the schedule.
+
+Checks: charts typecheck, 390 unit tests, lint green; `@umriss-ui/schedule`
+builds, typechecks and its 202 tests pass. Screenshots: 4 baselines deleted
+(`example-span--schedule`, `page-span`, light and dark), none renewed. The
+charts screenshot suite fails 14-17 example pictures per run on sub-pixel drift
+**with or without this change** (measured on the untouched HEAD: 14), a
+different set each run - more than the "two to four" `docs/testing.md` records.

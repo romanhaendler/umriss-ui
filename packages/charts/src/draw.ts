@@ -10,7 +10,6 @@
    - 1-px lines lie on half pixels, so that they are crisp at DPR 1. */
 
 import { segmentEnd } from "./state";
-import { DEPTH_OFFSET, isOpen, spanEnd } from "./spans";
 import type { AxisLayout } from "./layout";
 import type { ResolvedTheme } from "./theme";
 import type { HoverState, Rect, Scale } from "./types";
@@ -82,19 +81,6 @@ export interface MatrixDrawItem extends DrawBase {
   height: number;
 }
 
-export interface SpanDrawItem extends DrawBase {
-  kind: "span";
-  /** End per span; NaN means open. */
-  x1: Float64Array;
-  /** How many earlier registered spans each one overlaps - the offset within the
-      lane. No packing into sub-lanes: that would hide the conflict, and the
-      conflict is the finding. */
-  depth: Int32Array;
-  /** Height of a span as a fraction of one domain unit of the y axis. */
-  height: number;
-  domainEnd: number;
-}
-
 /** Mirrors the union of the series configuration (types.ts). */
 export type SeriesDrawItem =
   | LineDrawItem
@@ -102,8 +88,7 @@ export type SeriesDrawItem =
   | BarDrawItem
   | ScatterDrawItem
   | StateDrawItem
-  | MatrixDrawItem
-  | SpanDrawItem;
+  | MatrixDrawItem;
 
 /** A limit, ready in pixels. A band carries two edges, a line twice the same
     one. */
@@ -457,63 +442,6 @@ function drawMatrix(ctx: CanvasRenderingContext2D, item: MatrixDrawItem): void {
   }
 }
 
-/* ---------------- Spans ----------------
-
-   Unlike the state band, the end here is explicit. That is exactly why they are
-   two series kinds: a partition can express neither idle time nor an overlap, and
-   both are the interesting thing about a schedule.
-
-   Overlapping spans get a small offset and stay in their lane. Packing them into
-   sub-lanes would turn the conflict into a layout, and the conflict is the
-   finding. */
-
-function drawSpans(ctx: CanvasRenderingContext2D, item: SpanDrawItem): void {
-  const n = item.length;
-  const xm = item.xScale.m;
-  const xb = item.xScale.b;
-  const ym = item.yScale.m;
-  const yb = item.yScale.b;
-  const xs = item.x;
-  const ys = item.y;
-  const ends = item.x1;
-  const depth = item.depth;
-  const heightPx = Math.abs(item.height * ym);
-  const offsetPx = heightPx * DEPTH_OFFSET;
-
-  const filled = new Path2D();
-  const open = new Path2D();
-  for (let i = 0; i < n; i++) {
-    const lane = ys[i] as number;
-    if (Number.isNaN(lane)) continue;
-    const from = xs[i] as number;
-    if (Number.isNaN(from)) continue;
-    const rawEnd = ends[i] as number;
-    const to = spanEnd(rawEnd, item.domainEnd);
-    if (!(to >= from)) continue; // backwards running span: a data error
-    const fromPx = from * xm + xb;
-    const widthPx = Math.max(1, (to - from) * xm);
-    const centerPx = lane * ym + yb + (depth[i] as number) * offsetPx;
-    // Open means NaN *or* infinity - the question has a name, and the name knows
-    // both cases. An inline NaN test knows only one.
-    const path = isOpen(rawEnd) ? open : filled;
-    path.rect(fromPx, centerPx - heightPx / 2, widthPx, heightPx);
-  }
-
-  ctx.fillStyle = item.color;
-  ctx.fill(filled);
-  // An open span is paler and carries an outline: it is still running, and its
-  // end is not a statement but the edge of the chart.
-  ctx.save();
-  ctx.globalAlpha = ctx.globalAlpha * 0.45;
-  ctx.fill(open);
-  ctx.restore();
-  ctx.strokeStyle = item.color;
-  ctx.lineWidth = 1;
-  ctx.setLineDash([3, 2]);
-  ctx.stroke(open);
-  ctx.setLineDash([]);
-}
-
 /* ---------------- Limits ---------------- */
 
 function drawLimits(
@@ -601,9 +529,6 @@ export function drawSeriesLayer(
         break;
       case "matrix":
         drawMatrix(ctx, item);
-        break;
-      case "span":
-        drawSpans(ctx, item);
         break;
     }
   }

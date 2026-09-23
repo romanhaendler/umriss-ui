@@ -11,11 +11,11 @@ export default function WhyStateBand() {
 
       <h3>A band is a partition, and a hole is not a state</h3>
       <p>
-        Every segment ends where the next begins - that is what makes it a band rather than a run
-        of spans. Where a machine reports nothing, a hole stays: there is no colour for
-        &bdquo;unknown&ldquo;, because a fifth colour in the legend would claim a state that was
-        never measured. A thing with an explicit end is a <strong>Span</strong>, and it has a page
-        of its own.
+        Every segment ends where the next begins - that is what makes it a band. Where a machine
+        reports nothing, a hole stays: there is no colour for &bdquo;unknown&ldquo;, because a
+        fifth colour in the legend would claim a state that was never measured. Work with an
+        explicit end - idle time between jobs, two jobs on one machine - is occupancy, and it
+        belongs to <code>@umriss-ui/schedule</code>.
       </p>
     </>
   );

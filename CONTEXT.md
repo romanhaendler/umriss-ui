@@ -439,7 +439,7 @@ The signed distance from the **Target**. Absent when there is no target. It is a
 different number from the **Excess** and never populated from it.
 _Avoid_: Überschreitung, offset, error
 
-### States and spans
+### States and lanes
 
 **State**:
 One of a closed set of named conditions a thing can be in over an interval of
@@ -464,27 +464,10 @@ across charts. It is what makes the same fault the same colour everywhere.
 _Avoid_: legend, palette, enum
 
 **Lane**:
-The strip of an axis' domain a band or a span occupies, expressed in domain
+The strip of an axis' domain a band occupies, expressed in domain
 units. Four machines are one axis with a four-unit domain. There is no lane
 concept beyond the axis: no pixels, no fractions of plot height.
 _Avoid_: row, Zeile, track, swimlane
-
-**Span**:
-An interval on the x axis with an **explicit** end, placed on a lane. This is
-what distinguishes it from a **State series**: a partition implies each end from
-the next start and therefore cannot express **Idle** or **Overlap**, and both are
-real in a schedule. A span with no end is open and runs to the edge.
-_Avoid_: bar, Balken, task, Vorgang as a synonym
-
-**Idle**:
-The gap between two spans on one lane. It stays a gap; nothing is drawn there.
-_Avoid_: Lücke (which is missing data), pause, downtime
-
-**Overlap**:
-Two spans covering the same time on one lane. It is drawn offset within the lane
-and never packed into sub-lanes: packing turns the conflict into a layout, and
-the conflict is the finding.
-_Avoid_: collision, Konflikt as the drawn thing
 
 **Value channel**:
 The third number per point that only the matrix uses; named rather than smuggled
@@ -837,11 +820,12 @@ component name put there.
 The vocabulary of `@umriss-ui/schedule`, the fourth package — fixed in
 `.scratch/schedule/` before the package exists, which is this glossary's own
 rule: a term appears when a decision has fixed its meaning. The schedule speaks
-the charts words where they already hold: a **Lane** is the same strip of a y
-domain — here one machine or station, named by its **Lane header** — and an
-**Overlap** is the same finding, drawn offset and never packed. What is new is
-that the intervals carry meaning: where a charts **Span** is an interval and
-nothing more, a **Subtask** has parts and belongs to a **Task**.
+the charts word where it already holds: a **Lane** is the same strip of a y
+domain — here one machine or station, named by its **Lane header**. What is new
+is that the intervals carry meaning: a **Subtask** has parts and belongs to a
+**Task**. Charts once drew bare intervals on a lane as a `Span`; it was
+removed in favour of the schedule, which draws occupancy with lanes, groups and
+editing (ADR-0026).
 
 **Schedule**:
 The component that shows subtasks on lanes over time: lane headers at the left,
@@ -880,9 +864,20 @@ _Avoid_: summary, collapsed lane, aggregate, Übersichtszeile, roll-up
 **Subtask**:
 The drawn interval: a main time on one lane, with an optional **Setup** before
 it and a **Teardown** after it. It is what the pointer hits, a drag moves and
-an overlap stands between. It is not a **Span**: a span has an extent and
-nothing else, a subtask has three parts and a task it belongs to.
+an overlap stands between. It is not the removed charts `Span`: a span had
+an extent and nothing else, a subtask has three parts and a task it belongs to.
 _Avoid_: entry, Eintrag, activity, Arbeitsgang, task as the drawn thing
+
+**Idle**:
+The gap between two subtasks on one lane. It stays a gap; nothing is drawn
+there.
+_Avoid_: Lücke (which is missing data), pause, downtime
+
+**Overlap**:
+Two subtasks covering the same time on one lane. It is drawn offset within the
+lane and never packed into sub-lanes: packing turns the conflict into a layout,
+and the conflict is the finding.
+_Avoid_: collision, Konflikt as the drawn thing
 
 **Setup** / **Teardown**:
 The preparation before a subtask's main time and the clearing after it
@@ -999,7 +994,7 @@ later reader does not "fix" the name back.
 | `Dock/place.ts` | the arithmetic of the four **Resting places** |
 | `Textarea/measure.ts` | the height calculation, not a design unit of measure |
 | `charts/src/limit.ts` | the limit model, the same word as `core/src/lib/limit.ts` — ADR-0006 keeps the two in step. The component beside it therefore yields the bare word; see **Public names** |
-| `charts/src/bars.ts`, `cells.ts`, `spans.ts`, `controlLimits.ts` | plural or descriptive, because the singular collides with the component file beside it. On a case-insensitive file system an import of `./Bar`, `./Span` or `./ControlChart` resolves to `bar.ts`, `span.ts` or `controlChart.ts`, and TypeScript then reports TS1149 ("differs only in casing") and resolves the wrong module. `cells.ts` recorded this first; the other three follow it |
+| `charts/src/bars.ts`, `cells.ts`, `controlLimits.ts` | plural or descriptive, because the singular collides with the component file beside it. On a case-insensitive file system an import of `./Bar` or `./ControlChart` resolves to `bar.ts` or `controlChart.ts`, and TypeScript then reports TS1149 ("differs only in casing") and resolves the wrong module. `cells.ts` recorded this first; the other two follow it |
 | `charts/src/state.ts` | the geometry of the state band. **State** is the charts' word (ADR-0007), and `StateBand.tsx` differs from it by more than case |
 | `demo/examples/Column/13-wrapper.tsx` | a column that brings its own presentation, taken as `of`; not `shell` — that is the demos' own shell (`@umriss-ui/demo`) |
 
