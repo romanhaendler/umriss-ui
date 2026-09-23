@@ -997,7 +997,7 @@ presentation of a plain ratio, not a unit. A quantity whose operands include an
 itself absent, says why, and is never carried on as zero. A quantity can carry a
 **Target** and **Limits** and is then assessed like any other value.
 _Avoid_: value (which is a table column's), step (which is the charts'
-interpolation), line, Zwischenergebnis, Größe as an identifier
+interpolation), line, Größe as an identifier
 
 **Result**:
 The quantity a **Calculation** exists to answer. Every other quantity is shown
@@ -1012,7 +1012,8 @@ _Avoid_: input (which is a core component), parameter, Eingabe, Ausgangswert
 
 **Operator**:
 How a derived quantity comes from its operands: sum, difference, product or
-quotient, and nothing else. There is no formula text and no operator of the
+quotient, and nothing else. In a **Chain** the same four stand beside each
+operand as plus, minus, times and divided by. There is no formula text and no operator of the
 caller's own, because a written-out operation that the library did not perform
 could say something the number does not.
 _Avoid_: operation (taken twice over: set operations, and how a control is
@@ -1024,8 +1025,9 @@ a quotient is the one taken from or divided.
 _Avoid_: argument, input, Eingang
 
 **Derivation**:
-What stands under a derived quantity: its operands, and theirs in turn, down to
-givens and references. A derivation can be folded away; the quantity above it
+What a derived quantity is computed from: its operands, and theirs in turn, down
+to givens and references. Under an **Interim** it is what the chain holds since the
+interim before it. A derivation can be folded away; the quantity above it
 stays.
 _Avoid_: subtree, breakdown, Teilrechnung
 
@@ -1034,6 +1036,29 @@ The place where a quantity defined elsewhere in the calculation stands as an
 operand. It shows the quantity's name and number, not its derivation, which
 stands once, where the quantity is defined.
 _Avoid_: link, alias, copy
+
+**Tree**:
+The form of a calculation in which every derived quantity holds its operands,
+and they hold theirs. It suits a figure put together from
+ratios and products, such as OEE.
+_Avoid_: nesting, hierarchy, Baum as an identifier
+
+**Chain**:
+The form of a calculation read top to bottom, as on paper: a first quantity,
+then each further operand with its operator, worked into the value before it
+strictly in order, and ended by an **Interim**. There is no precedence; a times
+or divided by therefore stands alone between two named values, so that nobody
+multiplies a number they have not seen. A chain and a tree mix: an operand in a chain can be
+a tree, and a chain can be an operand in a tree.
+_Avoid_: Staffel as an identifier, tape, run, tally, sequence
+
+**Interim**:
+The named value of a **Chain** at the place it stands — Zwischenergebnis. Only
+an interim shows the running value; the operands between two interims show
+their own number. The last interim is the chain's value, and, where the chain
+is the whole calculation, its **Result**.
+_Avoid_: subtotal (after a times it is no sum), checkpoint, carry,
+Zwischensumme
 
 
 ## Module and directory names
