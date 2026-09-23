@@ -194,6 +194,7 @@ Screenshot pages carry their name in brackets.
 | Four rules after Nelson, each switchable off, run lengths as parameters | — | Unit (control limits) |
 | Zone lines at one and two sigma | — | Unit (control limits), Screenshot (`control-chart`) |
 | No text brought along: the labelling of the limits and the name of the violations come from the caller | — | Unit (jsdom, control chart) |
+| A constant reference window (sigma 0): no outlier and no two-of-three, and a DEV warning that the limits are degenerate | — | Unit (control limits) |
 | The violations as data through `onViolations`, once per change of their content; inline accessor and origin recompute nothing | — | Unit (jsdom, control chart violations) |
 
 ## The operating-time axis (`calendar`)
@@ -283,6 +284,14 @@ path segment. Both sizes run without freezing.
 
 The hover stays at 60 FPS in every case. That is the actual statement: it draws
 only the overlay layer, and the series kind changes nothing about that.
+
+The hover path is not free of allocation: the hit test builds a handful of
+small objects per move (candidates, the hit, its key). Measured directly in
+`charts-fixes` 12 - `pointerMove` 20,000 times over three lines in jsdom -
+it costs about 3 µs per move at 1,000, 100,000 and 1,000,000 points alike,
+with no heap growth beyond noise; the count of points does not enter it. That is
+a five-thousandth of a frame, so the objects stay and the comment at the pointer
+handler says so, instead of promising none.
 
 Live mode (10 points/s, a travelling window) holds the width of the left axis band
 constant over 5 s – the hysteresis from R-3.4 works (R-5.3).

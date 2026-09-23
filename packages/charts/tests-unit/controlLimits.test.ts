@@ -3,7 +3,7 @@
    pictorial intuition. Expected values come from the published constant and from
    hand calculation, never from running the implementation. */
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   controlLimits,
   ruleOutlier,
@@ -99,6 +99,20 @@ describe("controlLimits - sigma out of the mean moving range", () => {
       lower: 5,
     });
     expect(violatedIndices(violations([5, 5, 5, 5], g))).toEqual([]);
+  });
+
+  it("finds no outlier and no two-of-three beyond degenerate limits, and says so in DEV", async () => {
+    // charts-fixes 12: a constant reference window has sigma zero, and with the
+    // limits on the centre line every value off it was an outlier. A fresh module:
+    // the flat process above has used up the warning, which comes once.
+    vi.resetModules();
+    const { controlLimits, violations } = await import("../src/controlLimits");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const g = controlLimits([5, 5, 5, 5], { kind: "referenceWindow", from: 0, to: 4 });
+    const found = violations([5, 5, 5, 5, 5.1, 5.2, 4.9], g, { run: false, trend: false });
+    expect(found).toEqual([]);
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("sigma"));
+    warn.mockRestore();
   });
 
   it("yields no numbers for an empty window instead of throwing", () => {
