@@ -23,7 +23,6 @@ const EXAMPLES = DEMO.examples;
     composed example on another page. A named exception (CONTEXT.md): a sixth
     page without an example is a gap and fails here. */
 const WITHOUT_AN_EXAMPLE: Readonly<Record<string, string>> = {
-  area: "drawn in the mixed example on the Chart page - a corridor needs a series beside it to be one",
   bar: "drawn in the mixed example and in the Pareto",
   scatter: "drawn in the mixed example",
   stateband: "drawn in the limits-and-state example, where the lanes stand under the curve they explain",
