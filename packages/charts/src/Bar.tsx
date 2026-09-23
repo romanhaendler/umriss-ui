@@ -33,6 +33,9 @@ export interface BarProps<T> {
   format?: (value: number) => string;
   /** Any CSS colour value; without one the palette --uc-series-N. */
   color?: string;
+  /** A role instead of a colour value; the theme resolves it. `color` beats
+      it. */
+  tone?: "ok" | "warning" | "alarm";
   /** Width as a fraction of the step; just under 1, so that neighbours do not
       touch. Several bar series share this fraction. */
   barWidth?: number;
@@ -48,6 +51,7 @@ export function Bar<T>(props: BarProps<T>): null {
     hidden,
     format,
     color,
+    tone,
     barWidth = 0.8,
   } = props;
 
@@ -63,9 +67,10 @@ export function Bar<T>(props: BarProps<T>): null {
         hidden,
         format,
         color,
+        tone,
         barWidth,
       }) as BarSeriesConfig,
-    [accessor, xAxisId, yAxisId, data, name, hidden, format, color, barWidth],
+    [accessor, xAxisId, yAxisId, data, name, hidden, format, color, tone, barWidth],
   );
 
   useSeries("Bar", config);

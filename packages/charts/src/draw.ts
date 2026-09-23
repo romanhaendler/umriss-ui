@@ -42,6 +42,7 @@ export interface AreaDrawItem extends DrawBase {
   baseline: number;
   fillOpacity: number;
   strokeWidth: number;
+  dash?: readonly number[];
 }
 
 export interface BarDrawItem extends DrawBase {
@@ -318,11 +319,12 @@ function drawArea(ctx: CanvasRenderingContext2D, item: AreaDrawItem): void {
 
   ctx.globalAlpha = item.alpha;
   ctx.strokeStyle = item.color;
-  ctx.setLineDash([]);
   if (item.strokeWidth > 0) {
+    ctx.setLineDash((item.dash ?? []) as number[]);
     ctx.lineWidth = item.strokeWidth;
     ctx.stroke(outline);
   }
+  ctx.setLineDash([]);
   // Even without an outline: a lone point has nothing else to be seen by.
   ctx.lineWidth = Math.max(1, item.strokeWidth);
   ctx.stroke(lone);

@@ -72,6 +72,13 @@ From `.scratch/charts-essentials/spec.md`; the decisions stand in
   `"No data"`, centred; axes and frame stay. Before, such a chart drew an
   empty frame on [0, 1] and said nothing. A time axis over less than a minute
   - the [0, 1] of an axis without data - draws no ticks.
+- **`tone` on `Area`, `Bar` and `ControlChart`**, as on `Line` and
+  `Scatter`: a role the theme resolves. On `ControlChart` it colours the line;
+  the violations stay "alarm".
+- **`Area dash`**: a dash pattern for the outline, in CSS pixels; the fill
+  stays whole.
+- Every size prop's comment names its unit (CSS pixels, a fraction of the
+  step, domain units of the axis).
 
 ---
 

@@ -119,6 +119,8 @@ Screenshot pages carry their name in brackets.
 | A gap produces a hole, not a straight line across it | R-2.5 | Screenshot (`mixed`, `corridor`) |
 | A point between two gaps is a stroke from its foot to its value, with or without an outline | Q23 | Unit (draw) |
 | `fillOpacity`, `strokeWidth` (0 leaves the outline out) | 4.3 | Screenshot (`filled`, `corridor`, light and dark) |
+| `dash` on the outline only; the fill and a lone point's stroke stay solid | Q11 | Unit (draw) |
+| `tone`: a role the theme resolves | Q11 | Unit (jsdom tone) |
 
 ## `Bar`
 
@@ -138,6 +140,7 @@ Screenshot pages carry their name in brackets.
 | Half a step width left and right inside the X value range | ADR-0002 | Unit (scene), Screenshot (`mixed`) |
 | One `Path2D`, one `fill()` per series | R-2.12 | Manual (benchmark) |
 | A gap leaves its bar out | R-2.5 | Screenshot (`mixed`) |
+| `tone`: a role the theme resolves | Q11 | Unit (jsdom tone) |
 | The hover marker sits at the head, not at the foot | R-4.7 | Interaction (`mixed`) |
 
 ## `Scatter`
@@ -204,6 +207,7 @@ Screenshot pages carry their name in brackets.
 | No text brought along: the labelling of the limits and the name of the violations come from the caller | — | Unit (jsdom, control chart) |
 | A constant reference window (sigma 0): no outlier and no two-of-three, and a DEV warning that the limits are degenerate | — | Unit (control limits) |
 | The violations as data through `onViolations`, once per change of their content; inline accessor and origin recompute nothing | — | Unit (jsdom, control chart violations) |
+| `tone` colours the line; the violations stay "alarm" | Q11 | Unit (jsdom tone) |
 
 ## The operating-time axis (`calendar`)
 
