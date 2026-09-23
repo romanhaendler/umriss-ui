@@ -14,7 +14,7 @@
    themselves, and the container data live in the scene, not in the props.
    Requiring that explicitly is more honest than fetching them by a detour. */
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Line } from "./Line";
 import { Scatter } from "./Scatter";
 import { LimitLine } from "./LimitLine";
@@ -27,6 +27,7 @@ import {
   type RuleOptions,
   type Violation,
 } from "./controlLimits";
+import { fnEqual } from "./scene";
 import type { Accessor } from "./types";
 import type { ReactNode } from "react";
 
@@ -69,11 +70,37 @@ export interface ControlChartProps<T> {
   onViolations?: (found: readonly Violation[]) => void;
 }
 
+/** The value of the previous render while it equals the new one. A caller
+    writes accessor and origin inline, and every render hands them over with a
+    new identity - as dependencies of a memo they would recompute the limits on
+    every render. Boxed, because React would call a function it is handed. */
+function useKept<V>(value: V, equal: (a: V, b: V) => boolean): V {
+  const [kept, setKept] = useState({ value });
+  if (kept.value === value || equal(kept.value, value)) return kept.value;
+  setKept({ value });
+  return value;
+}
+
+function originEqual(a: ControlLimitOrigin, b: ControlLimitOrigin): boolean {
+  if (a.kind === "given" && b.kind === "given") return a.center === b.center && a.sigma === b.sigma;
+  if (a.kind === "referenceWindow" && b.kind === "referenceWindow") return a.from === b.from && a.to === b.to;
+  return false;
+}
+
+function violationsEqual(a: readonly Violation[], b: readonly Violation[]): boolean {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    const x = a[i] as Violation;
+    const y = b[i] as Violation;
+    if (x.rule !== y.rule || x.indices.length !== y.indices.length) return false;
+    for (let k = 0; k < x.indices.length; k++) if (x.indices[k] !== y.indices[k]) return false;
+  }
+  return true;
+}
+
 export function ControlChart<T>(props: ControlChartProps<T>): ReactNode {
   const {
-    accessor,
     data,
-    origin,
     xAxisId = "x",
     yAxisId = "y",
     name,
@@ -85,6 +112,9 @@ export function ControlChart<T>(props: ControlChartProps<T>): ReactNode {
     violationName,
     onViolations,
   } = props;
+  // Compared as the scene compares a series' accessor: by source text.
+  const accessor = useKept(props.accessor, fnEqual);
+  const origin = useKept(props.origin, originEqual);
 
   const values = useMemo(() => {
     const out: number[] = [];
@@ -96,9 +126,11 @@ export function ControlChart<T>(props: ControlChartProps<T>): ReactNode {
   }, [data, accessor]);
 
   const limits = useMemo(() => controlLimits(values, origin), [values, origin]);
-  const found = useMemo(
-    () => violations(values, limits, rules ?? {}),
-    [values, limits, rules],
+  // By content: new limits or new rules that find the same violations are no
+  // news to the caller.
+  const found = useKept(
+    useMemo(() => violations(values, limits, rules ?? {}), [values, limits, rules]),
+    violationsEqual,
   );
 
   const marked = useMemo(() => new Set(violatedIndices(found)), [found]);
@@ -106,9 +138,15 @@ export function ControlChart<T>(props: ControlChartProps<T>): ReactNode {
   // Reporting during the render would mean setting the state of another
   // component while rendering - React warns with reason, StrictMode calls it
   // twice, and a discarded render would report all the same.
+  // The callback is read through a ref: an inline one is new on every render,
+  // and a caller that sets state in it would be called again by its own render.
+  const report = useRef(onViolations);
   useEffect(() => {
-    onViolations?.(found);
-  }, [found, onViolations]);
+    report.current = onViolations;
+  }, [onViolations]);
+  useEffect(() => {
+    report.current?.(found);
+  }, [found]);
 
   // The violations are an ordinary scatter over the same data: whatever does not
   // violate is a gap. No new series kind, no new drawing code.

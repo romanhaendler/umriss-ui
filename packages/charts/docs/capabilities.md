@@ -191,7 +191,7 @@ Screenshot pages carry their name in brackets.
 | Four rules after Nelson, each switchable off, run lengths as parameters | — | Unit (control limits) |
 | Zone lines at one and two sigma | — | Unit (control limits), Screenshot (`control-chart`) |
 | No text brought along: the labelling of the limits and the name of the violations come from the caller | — | Unit (jsdom, control chart) |
-| The violations as data through `onViolations` | — | Manual |
+| The violations as data through `onViolations`, once per change of their content; inline accessor and origin recompute nothing | — | Unit (jsdom, control chart violations) |
 
 ## The operating-time axis (`calendar`)
 
