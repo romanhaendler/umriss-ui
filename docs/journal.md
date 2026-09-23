@@ -18,6 +18,27 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Sep. 2026 — The chain, and a statement instead of an accordion
+
+*For a caller: `@umriss-ui/calculation` (unreleased) gains the chain and a new
+look; core gains one wording entry - each changelog carries the lines.*
+
+- **A second form.** A grilling session on the first delivery found the tree
+  hard to write and to read for a costing sheet or a long sum
+  (`.scratch/calculation-chain/spec.md`, ADR-0028): a chain, read top to
+  bottom, with interims; no precedence, so a times stands alone between two
+  named values. Reader and evaluation were extended test first.
+- **A statement, not an accordion.** A design session settled the look for
+  both forms: fixed columns in one grid through `subgrid`, rules as single
+  elements across the number columns, the label as the disclosure. The first
+  version opened derivations upward, the result beneath its operands at every
+  level; seen in the browser, the clicked line moved away and an open
+  derivation no longer looked as if it belonged to anything. Derivations now
+  open beneath their line as nested calculations with a bar, closing
+  "= label". Every baseline of the package was renewed.
+- **The demo grew to six pages and twenty-three examples**, from two numbers
+  and a sum to the cost per piece of a production order.
+
 ## Sep. 2026 — A calculation a reader can follow
 
 *For a caller: the new `@umriss-ui/calculation` (unreleased) and new wording

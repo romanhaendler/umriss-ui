@@ -7,18 +7,31 @@ import { shownOf } from "./evaluate";
 import type { CalculationModel, Operator, Quantity } from "./model";
 
 export interface LineText {
-  /** The number with its unit as shown, or the absent-value mark. */
-  number: string;
-  /** "Run time ÷ Planned production time"; absent on a given or reference. */
+  /** The number as shown, without its unit, or the absent-value mark. */
+  amount: string;
+  /** The unit as shown - "%" for a percentage - where there is one and a
+      number to stand beside. */
+  unit?: string;
+  /** "= Run time ÷ Planned production time", or "15 operands" where there
+      are more than can be written out; absent on a given or reference. */
   names?: string;
-  /** "412 min ÷ 450 min". */
-  numbers?: string;
   /** "below target 85 %", where a target is set and the number known. */
   target?: string;
   /** Why there is no number. */
   reason?: string;
   /** The line read as one sentence. */
   sentence: string;
+}
+
+/** Above this many operands a line shows how many, not a formula of them
+    all: the operands stand beside it anyway (ADR-0028). */
+export const OPERANDS_WRITTEN_OUT = 4;
+
+/** Where a line stands in its parent: the parent's operator, and whether it is
+    taken away. The first operand stands without one. */
+export interface Position {
+  operator: Operator;
+  negated: boolean;
 }
 
 const SYMBOL: Record<Operator, keyof Wording> = {
@@ -48,6 +61,12 @@ export function verdictWord(verdict: Verdict, wording: Wording): string {
   }
 }
 
+/** The operator a line carries in its parent, as symbol or as word. */
+export function operatorText(position: Position, spoken: boolean, wording: Wording): string {
+  const operator = position.negated ? "difference" : position.operator;
+  return wording[(spoken ? WORD : SYMBOL)[operator]] as string;
+}
+
 export function reasonText(absence: Absence, wording: Wording): string {
   return absence.kind === "missing"
     ? wording.calculationMissing(absence.label)
@@ -71,6 +90,7 @@ export function lineText(
   reference: boolean,
   formats: Formats,
   wording: Wording,
+  position?: Position,
 ): LineText {
   const quantity = model.quantities.get(key)!;
   const own = results.get(key)!;
@@ -81,13 +101,24 @@ export function lineText(
         : wording.statAbsentValue
       : withUnit(q, e.shown, formats, spoken ? wording.calculationPercent : "%");
 
-  const formula = (spoken: boolean) => {
+  const formula = (spoken: boolean): { names?: string; numbers?: string } => {
     if (reference || !quantity.operator) return {};
-    const join = ` ${wording[(spoken ? WORD : SYMBOL)[quantity.operator]] as string} `;
-    const operands = quantity.operands.map((o) => model.quantities.get(o.key)!);
+    /* The count stands on the line only; the sentence keeps the formula. */
+    if (!spoken && quantity.operands.length > OPERANDS_WRITTEN_OUT) {
+      return { names: wording.calculationOperandCount(quantity.operands.length) };
+    }
+    const terms = (text: (q: Quantity) => string) =>
+      quantity.operands
+        .map((o, i) => {
+          const q = model.quantities.get(o.key)!;
+          if (i === 0) return text(q);
+          const operator = operatorText({ operator: quantity.operator!, negated: o.negated === true }, spoken, wording);
+          return `${operator} ${text(q)}`;
+        })
+        .join(" ");
     return {
-      names: operands.map((q) => q.label).join(join),
-      numbers: operands.map((q) => number(q, results.get(q.key)!, spoken)).join(join),
+      names: terms((q) => q.label),
+      numbers: terms((q) => number(q, results.get(q.key)!, spoken)),
     };
   };
 
@@ -100,15 +131,17 @@ export function lineText(
     return wording.calculationOnTarget(text);
   };
 
-  const shown = formula(false);
+  const shownNames = formula(false).names;
+  const names = shownNames === undefined || quantity.operands.length > OPERANDS_WRITTEN_OUT ? shownNames : `= ${shownNames}`;
   const spoken = formula(true);
   const reason = own.absence ? reasonText(own.absence, wording) : undefined;
   const equals = ` ${wording.calculationEquals} `;
   const result = own.approximate
     ? `${wording.calculationApproximately} ${number(quantity, own, true)}`
     : number(quantity, own, true);
+  const prefix = position ? `${operatorText(position, true, wording)} ` : "";
   const sentence = [
-    quantity.label + equals + [spoken.names, spoken.numbers, result].filter(Boolean).join(`,${equals}`),
+    prefix + quantity.label + equals + [spoken.names, spoken.numbers, result].filter(Boolean).join(`,${equals}`),
     own.verdict !== undefined && own.verdict !== "unknown" ? verdictWord(own.verdict, wording) : undefined,
     target(true),
     reason,
@@ -116,5 +149,7 @@ export function lineText(
     .filter(Boolean)
     .join(", ");
 
-  return { number: number(quantity, own, false), ...shown, target: target(false), reason, sentence };
+  const unit = own.shown === null ? undefined : quantity.format === "percent" ? "%" : quantity.unit;
+  const amount = own.shown === null ? wording.statAbsentValue : formats.number(own.shown, quantity.decimals);
+  return { amount, unit, names, target: target(false), reason, sentence };
 }

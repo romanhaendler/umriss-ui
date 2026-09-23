@@ -35,3 +35,16 @@ for (const { pageId, exampleId, name } of EXAMPLE_ADDRESSES) {
     await expect(target).toHaveScreenshot(`example-${name}-${testInfo.project.name}.png`);
   });
 }
+
+/* Outside the loop: the loop photographs every example as it starts, folded,
+   and a derivation opened beneath its line - the panel, its bar, the line that
+   closes it, a derivation inside another - is in no example's first picture. */
+test("Beispiel calculation--oee, opened", async ({ page }, testInfo) => {
+  await openExample(page, "calculation", "oee");
+  const target = page.locator('[data-example="oee"]');
+  for (const label of ["Availability", "Run time", "Performance"]) {
+    await target.getByRole("button", { name: `Show how ${label} is derived` }).click();
+  }
+  await page.mouse.move(0, 0);
+  await expect(target).toHaveScreenshot(`example-calculation--oee-opened-${testInfo.project.name}.png`);
+});

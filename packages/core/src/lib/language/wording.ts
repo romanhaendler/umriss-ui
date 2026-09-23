@@ -424,6 +424,9 @@ export interface Wording {
   /** The disclosure button of a derivation, named after the quantity. */
   calculationShowDerivation: (label: string) => string;
   calculationHideDerivation: (label: string) => string;
+  /** On a folded line whose operator has more operands than are written out
+      beneath it (ADR-0028): how many there are. */
+  calculationOperandCount: (count: number) => string;
 }
 
 /** The instance shipped by default. English; German is `GERMAN_WORDING` in
@@ -673,4 +676,5 @@ export const DEFAULT_WORDING: Wording = {
   calculationSource: (source) => `Source: ${source}`,
   calculationShowDerivation: (label) => `Show how ${label} is derived`,
   calculationHideDerivation: (label) => `Hide how ${label} is derived`,
+  calculationOperandCount: (count) => `${count} operands`,
 };
