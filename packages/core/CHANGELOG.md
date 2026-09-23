@@ -50,7 +50,7 @@ module on the caller's side that carries `"use client"` and imports from there.
 
 ---
 
-## Unreleased
+## 0.4.0 – One focus, and fields on the iPhone (Sep. 2026)
 
 ### Changed
 
