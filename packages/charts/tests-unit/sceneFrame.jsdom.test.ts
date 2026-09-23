@@ -7,7 +7,13 @@
 
 import { describe, expect, it } from "vitest";
 import { ChartScene } from "../src/scene";
-import type { AxisConfig, LineSeriesConfig } from "../src/types";
+import type {
+  AxisConfig,
+  LineSeriesConfig,
+  ScatterSeriesConfig,
+  SeriesConfig,
+  StateSeriesConfig,
+} from "../src/types";
 
 interface Row {
   t: number;
@@ -162,6 +168,92 @@ describe("ChartScene across frames", () => {
     const { layout, limits } = scene.getLayoutSnapshot();
     const axis = layout.axes.find((a) => a.orientation === "x");
     expect(limits[0]?.px).toBe(axis?.scale.toPx(10 * HOUR));
+    scene.unbind();
+  });
+});
+
+/* charts-fixes 10: hit testing where bands, cells and points meet. */
+describe("ChartScene - the hit of a band beside points", () => {
+  const band: StateSeriesConfig = {
+    kind: "state",
+    name: "State",
+    accessor: () => 0,
+    states: [{ label: "Production", color: "#2e7d32" }],
+    xAxisId: "x",
+    yAxisId: "y",
+  };
+  const rows = [
+    { t: 0, a: 10 },
+    { t: 5, a: 50 },
+    { t: 10, a: 90 },
+  ];
+
+  function withBand(mode: "x" | "nearest", ...series: SeriesConfig[]) {
+    const root = document.createElement("div");
+    document.body.appendChild(root);
+    const scene = new ChartScene();
+    scene.bind(root, document.createElement("canvas"), document.createElement("canvas"), root);
+    scene.registerAxis(xAxis);
+    scene.registerAxis(yAxis);
+    for (const s of series) scene.registerSeries(s);
+    scene.registerTooltip({ mode });
+    scene.setData(rows);
+    scene.requestResize(400, 300);
+    return scene;
+  }
+
+  function scales(scene: ChartScene) {
+    const axes = scene.getLayoutSnapshot().layout.axes;
+    const x = axes.find((a) => a.orientation === "x");
+    const y = axes.find((a) => a.orientation === "y");
+    if (x === undefined || y === undefined) throw new Error("axes missing");
+    return { x: x.scale, y: y.scale };
+  }
+
+  it("\"nearest\": a point within reach wins over the band under it", async () => {
+    const scene = withBand("nearest", band, line);
+    await frame();
+    const { x, y } = scales(scene);
+    scene.pointerMove(x.toPx(5) + 3, y.toPx(50) + 3);
+    expect(scene.getHoverSnapshot().hover?.hit.points[0]?.seriesName).toBe("A");
+    scene.unbind();
+  });
+
+  it("\"nearest\": the band where no point is within reach", async () => {
+    const scene = withBand("nearest", band, line);
+    await frame();
+    const { x, y } = scales(scene);
+    scene.pointerMove(x.toPx(5) + 3, y.toPx(10));
+    expect(scene.getHoverSnapshot().hover?.hit.points[0]?.seriesName).toBe("State");
+    scene.unbind();
+  });
+
+  it("anchors crosshair and tooltip at the pointer in a chart of bands only", async () => {
+    const scene = withBand("x", band);
+    await frame();
+    const { x, y } = scales(scene);
+    const pointer = x.toPx(7);
+    scene.pointerMove(pointer, y.toPx(50));
+    // Not the section's beginning at t = 0.
+    expect(scene.getHoverSnapshot().hover?.hit.xPx).toBe(pointer);
+    scene.unbind();
+  });
+
+  it("\"nearest\" over a scatter measures x and y", async () => {
+    const scatter: ScatterSeriesConfig = {
+      kind: "scatter",
+      name: "S",
+      accessor: (d) => (d as Row).a,
+      xAxisId: "x",
+      yAxisId: "y",
+      radius: 3,
+    };
+    const scene = withBand("nearest", scatter);
+    await frame();
+    const { x, y } = scales(scene);
+    // Nearer in x to t = 5 (a = 50); nearer in the plane to t = 10 (a = 90).
+    scene.pointerMove(x.toPx(7), y.toPx(90));
+    expect(scene.getHoverSnapshot().hover?.hit.points[0]?.yValue).toBe(90);
     scene.unbind();
   });
 });

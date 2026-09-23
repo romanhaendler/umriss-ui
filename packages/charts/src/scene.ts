@@ -38,7 +38,7 @@ import {
   type LimitDrawItem,
   type SeriesDrawItem,
 } from "./draw";
-import { nearestIndex } from "./hit";
+import { nearestIndex, nearestPoint } from "./hit";
 import { segmentEnd, segmentIndex } from "./state";
 import { cellSize, cellIndex, measureSpacing } from "./cells";
 import { assess } from "./limit";
@@ -202,6 +202,11 @@ const EMPTY_HOVER_SNAPSHOT: HoverSnapshot = {
 
 /** Tolerance within which hits of different series are grouped (R-4.7). */
 const GROUP_TOLERANCE = 4;
+
+/** Under "nearest", a point this close to the pointer wins over a band or a
+    cell under it: the area covers the pointer everywhere, the point is the
+    precise answer. */
+const SNAP_DISTANCE = 12;
 
 let nextRegistration = 0;
 
@@ -1630,7 +1635,7 @@ export class ChartScene {
       // Mouse position in the axis space of this series (R-4.6).
       const targetX = xAxis.scale.fromPx(mouseX);
       const targetY = yAxis.scale.fromPx(mouseY);
-      const hit = this.hitIn(entry, mat, xAxis, yAxis, mouseY, targetX, targetY);
+      const hit = this.hitIn(entry, mat, xAxis, yAxis, mouseY, targetX, targetY, mode);
       if (hit === null) return;
       candidates.push({
         entry,
@@ -1659,15 +1664,24 @@ export class ChartScene {
     let primary = comparable[0] as Candidate;
     if (mode === "nearest") {
       let best = Number.POSITIVE_INFINITY;
-      for (const k of candidates) {
-        // An area covering the pointer is nearer than any point beside it - it is
-        // exactly where the pointing happens.
-        const dx = k.areal ? 0 : k.px - mouseX;
-        const dy = k.areal ? 0 : k.py - mouseY;
+      for (const k of pointLike) {
+        const dx = k.px - mouseX;
+        const dy = k.py - mouseY;
         const d = dx * dx + dy * dy; // Euclidean comparison in pixel space
         if (d < best) {
           best = d;
           primary = k;
+        }
+      }
+      // An area covers the pointer wherever it is hit, so its distance is always
+      // zero - it would beat every point. It answers only where no point is
+      // within reach.
+      if (best > SNAP_DISTANCE * SNAP_DISTANCE) {
+        for (const k of candidates) {
+          if (k.areal) {
+            primary = k;
+            break;
+          }
         }
       }
     } else {
@@ -1704,7 +1718,9 @@ export class ChartScene {
     const hit: TooltipHit = {
       xValue: primary.xValue,
       points,
-      xPx: primary.px,
+      // An area's px is the beginning of its section; the crosshair and the
+      // tooltip stay with the pointer instead.
+      xPx: primary.areal ? mouseX : primary.px,
       yPx: primary.py,
     };
     const state: HoverState = {
@@ -1757,6 +1773,7 @@ export class ChartScene {
     mouseY: number,
     targetX: number,
     targetY: number,
+    mode: "x" | "nearest",
   ): {
     index: number;
     px: number;
@@ -1835,7 +1852,12 @@ export class ChartScene {
       };
     }
 
-    const index = nearestIndex(mat.x, n, targetX);
+    // A scatter's points are not a course: under "nearest" the one the pointer
+    // is at is the nearest in the plane, not the nearest in x.
+    const index =
+      config.kind === "scatter" && mode === "nearest"
+        ? nearestPoint(mat.x, mat.y, n, targetX, targetY, xAxis.scale, yAxis.scale)
+        : nearestIndex(mat.x, n, targetX);
     if (index < 0) return null;
     const yValue = mat.y[index] as number;
     if (Number.isNaN(yValue)) return null; // gaps are no hits (R-4.6)
