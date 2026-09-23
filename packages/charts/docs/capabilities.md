@@ -32,6 +32,7 @@ Screenshot pages carry their name in brackets.
 | Every series kind can be bound to every axis | R-4.12 | Unit (scene) |
 | SSR: `renderToString` does not throw | R-7.4 | Unit (SSR) |
 | `onPerf` instrumentation | R-5.1 | Manual (benchmark page) |
+| `empty`: "No data" or the caller's content, centred in the plot area when no visible series has a point; axes and frame stay | Q18 | Unit (jsdom empty state), Screenshot (`empty`) |
 
 ## Registration, data, materialisation
 
@@ -78,6 +79,7 @@ Screenshot pages carry their name in brackets.
 | `time`: ticks on local boundaries from the minute to the month, across a clock change | Q15 | Unit (time axis, under Europe/Berlin) |
 | `time`: labels by level in en-GB, 24 h (`15:00`, `17 Mar`, `Mar 2026`), the date on the first tick of a new day; `tickFormat` for any other language | Q15 | Unit (time axis), Screenshot (`time`) |
 | `time` with `domain="nice"`: widened to the step's local boundaries | Q15 | Unit (time axis) |
+| `time` over less than a minute (an axis without data): no ticks | Q18 | Unit (time axis) |
 
 ## The layout engine
 
