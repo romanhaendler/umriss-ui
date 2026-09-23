@@ -41,6 +41,11 @@ From `.scratch/charts-fixes/spec.md`; the findings stand in
   groups and editing. With it go `SpanProps`, `SpanSeriesConfig`, the series
   kind `"span"`, the second x channel `x1` of `MaterializedSeries` and
   `open` in a tooltip point's `segment`.
+- **A state band and a matrix take no palette colour.** They colour themselves,
+  and each used up a place of the palette all the same: a line after a state
+  band came out in the palette's second colour, after three bands in its
+  fourth. It now gets the first. A series without a `name` counts its position
+  among the series that take a colour.
 
 ### Fixed
 
@@ -48,6 +53,11 @@ From `.scratch/charts-fixes/spec.md`; the findings stand in
   series only, and warned falsely where that was a matrix, whose cells run
   row-major. It now checks every series but the matrix, once per change of its
   data, and names the series it warns about.
+- **A matrix explains its own colours.** Its legend entry showed a palette
+  colour it never draws; it now shows the gradient's steps or the limit set's
+  three colours, and the tooltip's chip shows the colour of the cell.
+- **A state several bands share highlights all of them.** Hovering "Fault" in
+  the legend of three machines highlighted the first band only.
 
 ---
 
