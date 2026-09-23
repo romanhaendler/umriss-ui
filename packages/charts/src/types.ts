@@ -4,6 +4,10 @@ import type { ReactNode } from "react";
 import type { Assessment, Limit, LimitSet, Side, Severity, Verdict } from "./limit";
 import type { OperatingInterval } from "./operatingTime";
 
+/** Value access of a series. Compared by its source text, not its identity - an
+    inline accessor is new on every render. Known limit: one that reads a
+    changed closure variable under the same text is not run again; pass a new
+    data reference then. A native or bound function is compared by identity. */
 export type Accessor<T> = (d: T, index: number) => number | null | undefined;
 
 /* ---------------- Series ----------------

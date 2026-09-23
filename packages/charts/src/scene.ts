@@ -15,10 +15,12 @@
    on every render. If every new object identity counted as a change, everything
    would be re-materialised on every parent render (unacceptable at a million
    points). That is why updateSeries/updateAxis compare field by field; accessors
-   count as equal when their source text is equal. Known limit: an accessor that
-   reads a changed closure variable without its source text or its data reference
-   changing is not re-materialised - in that case the app must pass a new data
-   reference. */
+   count as equal when their source text is equal - a native or bound function,
+   whose text is "[native code]", by identity. Known limit, not solved (Q10): an
+   accessor that reads a changed closure variable without its source text or its
+   data reference changing is not re-materialised - in that case the app must
+   pass a new data reference. The same holds for `tickFormat` and the tooltip's
+   `render`. */
 
 import { FALLBACK_THEME, resolveTheme, subscribeTheme, type ResolvedTheme } from "./theme";
 import { DEV, invariant, warnOnce } from "./dev";
@@ -213,7 +215,26 @@ let nextRegistration = 0;
 export function fnEqual(a: unknown, b: unknown): boolean {
   if (a === b) return true;
   if (typeof a !== "function" || typeof b !== "function") return false;
-  return String(a) === String(b);
+  const source = String(a);
+  // Every native and every bound function reads "[native code]" - a bound
+  // `Intl.NumberFormat#format` among them. Their text says nothing; identity
+  // does.
+  if (source.includes("[native code]")) return false;
+  return source === String(b);
+}
+
+/** A calendar by its intervals: an inline array is new on every render, and
+    each new one would map every point again. */
+function calendarEqual(
+  a: AxisConfig["calendar"],
+  b: AxisConfig["calendar"],
+): boolean {
+  if (a === b) return true;
+  if (a === undefined || b === undefined || a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i]?.from !== b[i]?.from || a[i]?.to !== b[i]?.to) return false;
+  }
+  return true;
 }
 
 /** A state band and a matrix colour themselves - by state, by cell - and take
@@ -614,7 +635,7 @@ export class ChartScene {
     if (entry === undefined) return;
     const previous = entry.config;
     const accessorEqual =
-      fnEqual(previous.accessor, config.accessor) && previous.calendar === config.calendar;
+      fnEqual(previous.accessor, config.accessor) && calendarEqual(previous.calendar, config.calendar);
     const equal =
       accessorEqual &&
       previous.id === config.id &&

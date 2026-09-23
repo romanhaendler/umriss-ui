@@ -257,3 +257,33 @@ describe("ChartScene - the hit of a band beside points", () => {
     scene.unbind();
   });
 });
+
+/* charts-fixes 11: functions were compared by their source text, and every
+   bound native function reads "function () { [native code] }". */
+describe("ChartScene - change detection of a native function", () => {
+  it("updates the ticks when one bound Intl format replaces another", async () => {
+    const root = document.createElement("div");
+    document.body.appendChild(root);
+    const scene = new ChartScene();
+    scene.bind(root, document.createElement("canvas"), document.createElement("canvas"), root);
+    scene.registerAxis(xAxis);
+    const percent = new Intl.NumberFormat("en-GB", { style: "percent" }).format;
+    const plain = new Intl.NumberFormat("en-GB").format;
+    const y = scene.registerAxis({ ...yAxis, tickFormat: (v) => percent(v) });
+    scene.registerSeries(line);
+    scene.setData([
+      { t: 0, a: 10 },
+      { t: 1, a: 20 },
+    ]);
+    scene.updateAxis(y, { ...yAxis, tickFormat: percent });
+    scene.requestResize(400, 300);
+    await frame();
+    const labels = () =>
+      scene.getLayoutSnapshot().layout.axes.find((a) => a.orientation === "y")?.ticks.map((t) => t.label) ?? [];
+    expect(labels()).toContain("10,000%");
+    scene.updateAxis(y, { ...yAxis, tickFormat: plain });
+    await frame();
+    expect(labels()).toContain("100");
+    scene.unbind();
+  });
+});

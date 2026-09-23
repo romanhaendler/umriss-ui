@@ -104,6 +104,14 @@ From `.scratch/charts-fixes/spec.md`; the findings stand in
   tooltip to the beginning of the section; they now stay with the pointer. And
   a scatter under `"nearest"` was hit by x alone - the sample straight above
   the pointer beat the one beside it; it is now measured in x and y.
+- **Change detection.** An inline `calendar` array is new on every render, and
+  was compared by reference: every render mapped every point again. It is now
+  compared by its intervals. Functions are compared by their source text, and
+  every native or bound function reads the same - two bound
+  `Intl.NumberFormat#format` counted as equal, and swapping one for the other
+  left the axis in the old format. Such a function is now compared by identity.
+  The known limit stays and is now documented at the props: two functions of
+  the same text that read different captured values count as equal.
 
 ---
 
