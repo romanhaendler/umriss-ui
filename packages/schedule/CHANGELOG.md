@@ -15,6 +15,17 @@ moves from here under the rule above.
 
 ---
 
+## 0.1.3 – Core 0.4.0 and charts 0.4.0 (Sep. 2026)
+
+### Changed
+
+- **The schedule takes `@umriss-ui/core` 0.4 and `@umriss-ui/charts` 0.4.**
+  The peer ranges move to `^0.4.0`. The schedule places its day and shift
+  boundaries with the local offset that charts now exports (`localOffset`);
+  its own copy is gone. What it draws is unchanged.
+
+---
+
 ## 0.1.2 – Phones, touch and a review (Sep. 2026)
 
 ### Changed

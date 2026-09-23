@@ -10,9 +10,9 @@ hard outlines or effects.
 | Package | Version | What it is |
 |---|---|---|
 | [`@umriss-ui/core`](packages/core/README.md) | 0.4.0 | The component library — forms, overlays, structure, the tree, the dock, the command palette. The package you install first |
-| [`@umriss-ui/charts`](packages/charts/README.md) | 0.3.2 | Canvas charts — few kinds, drawn well. Depends on nothing but React |
-| [`@umriss-ui/table`](packages/table/README.md) | 0.2.2 | The table, declared the way it reads: columns as JSX, typed against their rows. Takes `@umriss-ui/core` as a peer |
-| [`@umriss-ui/schedule`](packages/schedule/README.md) | 0.1.2 | The schedule: subtasks on lanes over time, with transports, findings and controlled editing. Takes `@umriss-ui/core` and `@umriss-ui/charts` as peers |
+| [`@umriss-ui/charts`](packages/charts/README.md) | 0.4.0 | Canvas charts — few kinds, drawn well. Depends on nothing but React |
+| [`@umriss-ui/table`](packages/table/README.md) | 0.2.3 | The table, declared the way it reads: columns as JSX, typed against their rows. Takes `@umriss-ui/core` as a peer |
+| [`@umriss-ui/schedule`](packages/schedule/README.md) | 0.1.3 | The schedule: subtasks on lanes over time, with transports, findings and controlled editing. Takes `@umriss-ui/core` and `@umriss-ui/charts` as peers |
 | `@umriss-ui/demo` | — | The private shell all four demos are built from. Never published |
 
 All four published packages are released under the npm tag `latest`, so a plain
