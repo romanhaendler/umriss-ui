@@ -25,9 +25,8 @@
   }
 
   .trigger:focus-visible {
-    box-shadow:
-      0 0 0 1px var(--u-color-accent),
-      var(--u-focus-ring);
+    outline: none;
+    box-shadow: var(--u-focus-edge);
   }
 
   .trigger:disabled {
@@ -45,6 +44,10 @@
   .invalid,
   .invalid:hover:not(:disabled):not(:focus-visible) {
     box-shadow: 0 0 0 1px var(--u-color-danger);
+  }
+
+  .invalid:focus-visible {
+    box-shadow: var(--u-focus-edge-danger);
   }
 
   .value {
@@ -229,9 +232,7 @@
   }
 
   .timeFieldWrap:focus-within {
-    box-shadow:
-      0 0 0 1px var(--u-color-accent),
-      var(--u-focus-ring);
+    box-shadow: var(--u-focus-edge);
   }
 
   .timeField {

@@ -9,6 +9,7 @@
   }
 
   .select {
+    composes: field from "#own-styles";
     appearance: none;
     height: var(--u-control-height);
     padding: 0 var(--u-space-7) 0 var(--u-space-3);
@@ -29,9 +30,8 @@
   }
 
   .select:focus-visible {
-    box-shadow:
-      0 0 0 1px var(--u-color-accent),
-      var(--u-focus-ring);
+    outline: none;
+    box-shadow: var(--u-focus-edge);
   }
 
   .select:disabled {
@@ -49,6 +49,10 @@
   .invalid,
   .invalid:hover:not(:disabled):not(:focus-visible) {
     box-shadow: 0 0 0 1px var(--u-color-danger);
+  }
+
+  .invalid:focus-visible {
+    box-shadow: var(--u-focus-edge-danger);
   }
 
   .chevron {

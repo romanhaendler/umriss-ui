@@ -50,6 +50,33 @@ module on the caller's side that carries `"use client"` and imports from there.
 
 ---
 
+## Unreleased
+
+### Changed
+
+- **A focused field shows its edge at two pixels, and nothing else.** Input,
+  Combobox, Select, Textarea, NumberInput, MultiSelect and the pickers dropped
+  the soft glow around the accent edge; an invalid field keeps its danger
+  colour while focused. New tokens: `--u-focus-edge`, `--u-focus-edge-danger`.
+  Buttons, checkboxes and rows keep `--u-focus-ring`.
+- **On a touch screen, fields write at 16px** (`pointer: coarse`). Below that,
+  Safari on iOS zoomed the page into the field and left it zoomed.
+- **A loading button is no longer faded to half.** It stays locked, but at full
+  strength, so its spinner is visible - in the dark theme it all but vanished.
+
+### Fixed
+
+- **Popovers stand in the visible part of the window.** They measured it with
+  `innerWidth`/`innerHeight`; on an iPhone with the page zoomed and the keyboard
+  up, a combobox's list stood above the field and cut off at the left. They now
+  read `visualViewport` and follow it as the keyboard comes and goes. The same
+  measure places the tooltip.
+- **No browser outline beside the focus edge.** Input, Combobox, Select and the
+  DatePicker trigger lacked `outline: none`; Safari drew its blue ring outside
+  the accent edge.
+- **TreeView's loading spinner** takes the secondary text colour instead of the
+  muted one, which was barely visible on the dark surface.
+
 ## 0.3.2 – Phones, touch and a review (Sep. 2026)
 
 ### Changed

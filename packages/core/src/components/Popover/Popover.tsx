@@ -3,7 +3,7 @@ import type { ReactNode, RefObject } from "react";
 import { createPortal } from "react-dom";
 import { cx } from "../../lib/cx";
 import { FormFieldBoundary } from "../FormField";
-import { computePosition } from "./position";
+import { computePosition, visibleViewport } from "./position";
 import type { Align, PopoverPosition } from "./position";
 import styles from "./Popover.module.css";
 import { usePortalTarget } from "../../lib/provider";
@@ -128,7 +128,7 @@ export function Popover({
       computePosition(
         anchorRect,
         { width: size.width, height: size.height },
-        { width: window.innerWidth, height: window.innerHeight },
+        visibleViewport(),
         { align, offset },
       ),
     );
@@ -174,23 +174,31 @@ export function Popover({
 
     // One recomputation per frame instead of one per scroll event.
     let requested = 0;
-    const handleScroll = () => {
-      if (hideOnScroll) {
-        close(false);
-        return;
-      }
+    const reposition = () => {
       if (requested) return;
       requested = requestAnimationFrame(() => {
         requested = 0;
         measure();
       });
     };
+    const handleScroll = () => {
+      if (hideOnScroll) close(false);
+      else reposition();
+    };
+    /* The on-screen keyboard and a zoom change the visible part of the window
+       without a scroll or resize of the window itself: the keyboard comes up
+       only after the field has the focus and the panel already stands. */
+    const visualViewport = window.visualViewport;
 
     document.addEventListener("mousedown", handlePointerDown);
     document.addEventListener("keydown", handleKeyDown);
     window.addEventListener("scroll", handleScroll, true);
     window.addEventListener("resize", handleScroll);
+    visualViewport?.addEventListener("resize", reposition);
+    visualViewport?.addEventListener("scroll", reposition);
     return () => {
+      visualViewport?.removeEventListener("resize", reposition);
+      visualViewport?.removeEventListener("scroll", reposition);
       document.removeEventListener("mousedown", handlePointerDown);
       document.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("scroll", handleScroll, true);
