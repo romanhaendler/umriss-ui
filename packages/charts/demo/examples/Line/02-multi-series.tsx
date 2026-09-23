@@ -1,6 +1,8 @@
 /* Four series, the legend on top, one dashed series and one series with a gap -
    the line is interrupted, not interpolated. A gap is a hole and never a value
-   the chart invents (CONTEXT.md, **Gap**). */
+   the chart invents (CONTEXT.md, **Gap**). The one reading inside the gap has
+   no neighbour to be joined to; it keeps its marker, whatever the number of
+   points. */
 
 import { Chart, Legend, Line, Tooltip, XAxis, YAxis } from "../../../src";
 import { multiData, type Point } from "../../data";

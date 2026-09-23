@@ -72,6 +72,11 @@ From `.scratch/charts-fixes/spec.md`; the findings stand in
   a matrix' value, x - entered the extent, which was then no longer finite, and
   the axis fell back to [0, 1] with every other value pressed against its edge.
   It is now treated like `null` or `NaN`: a gap, outside the extent.
+- **A point between two gaps is drawn.** On a line it was a lone move of the
+  pen and drew nothing, and above 60 points `markers="auto"` drew no marker for
+  it either - a reading a gap isolates vanished. It now always keeps its marker;
+  only `markers="never"` drops it. On an area it is a stroke from its foot to
+  its value, with or without an outline.
 
 ---
 

@@ -30,7 +30,7 @@ export interface LineDrawItem extends DrawBase {
   kind: "line";
   strokeWidth: number;
   dash?: readonly number[];
-  marker: boolean;
+  markers: "auto" | "always" | "never";
 }
 
 export interface AreaDrawItem extends DrawBase {
@@ -162,6 +162,20 @@ function drawGrid(ctx: CanvasRenderingContext2D, input: SeriesLayerInput): void 
 
 /* ---------------- Line (R-2.12, R-4.4, R-4.5) ---------------- */
 
+/** From this number of points on, markers="auto" marks only isolated points
+    (R-4.5). */
+const MARKER_LIMIT = 60;
+
+/** Is the value at i present, with a gap or the edge on either side? Such a
+    point is a lone moveTo in the path - no stroke, no pixel - and only a marker
+    shows it (Q23). */
+function isolated(ys: Float64Array, n: number, i: number): boolean {
+  return (
+    (i === 0 || Number.isNaN(ys[i - 1] as number)) &&
+    (i === n - 1 || Number.isNaN(ys[i + 1] as number))
+  );
+}
+
 function drawLine(ctx: CanvasRenderingContext2D, item: LineDrawItem): void {
   const n = item.length;
   const xm = item.xScale.m;
@@ -199,12 +213,14 @@ function drawLine(ctx: CanvasRenderingContext2D, item: LineDrawItem): void {
   ctx.stroke(path); // exactly one stroke per series (R-2.12)
   ctx.setLineDash([]);
 
-  if (item.marker) {
+  if (item.markers !== "never") {
+    const every = item.markers === "always" || n <= MARKER_LIMIT;
     const r = item.strokeWidth + 1.5;
     const points = new Path2D();
     for (let i = 0; i < n; i++) {
       const value = ys[i] as number;
       if (Number.isNaN(value)) continue;
+      if (!every && !isolated(ys, n, i)) continue;
       const px = (xs[i] as number) * xm + xb;
       const py = value * ym + yb;
       points.moveTo(px + r, py);
@@ -222,7 +238,9 @@ function drawLine(ctx: CanvasRenderingContext2D, item: LineDrawItem): void {
    the baseline gets stroked along.
 
    A gap in either channel ends the current section; the next present point
-   begins a new one. A gap is a hole, not a straight line across it (R-2.5). */
+   begins a new one. A gap is a hole, not a straight line across it (R-2.5).
+   A section of one point has no width to fill: it is a stroke from its foot to
+   its value, or it would not be drawn at all (Q23). */
 
 function drawArea(ctx: CanvasRenderingContext2D, item: AreaDrawItem): void {
   const n = item.length;
@@ -237,6 +255,7 @@ function drawArea(ctx: CanvasRenderingContext2D, item: AreaDrawItem): void {
 
   const fill = new Path2D();
   const outline = new Path2D();
+  const lone = new Path2D();
   let i = 0;
   while (i < n) {
     while (
@@ -255,6 +274,13 @@ function drawArea(ctx: CanvasRenderingContext2D, item: AreaDrawItem): void {
       i++;
     }
     const end = i - 1;
+
+    if (start === end) {
+      const px = (xs[start] as number) * xm + xb;
+      lone.moveTo(px, us === null ? baselinePx : (us[start] as number) * ym + yb);
+      lone.lineTo(px, (ys[start] as number) * ym + yb);
+      continue;
+    }
 
     for (let k = start; k <= end; k++) {
       const px = (xs[k] as number) * xm + xb;
@@ -282,13 +308,16 @@ function drawArea(ctx: CanvasRenderingContext2D, item: AreaDrawItem): void {
   ctx.fillStyle = item.color;
   ctx.fill(fill);
 
+  ctx.globalAlpha = item.alpha;
+  ctx.strokeStyle = item.color;
+  ctx.setLineDash([]);
   if (item.strokeWidth > 0) {
-    ctx.globalAlpha = item.alpha;
-    ctx.strokeStyle = item.color;
     ctx.lineWidth = item.strokeWidth;
-    ctx.setLineDash([]);
     ctx.stroke(outline);
   }
+  // Even without an outline: a lone point has nothing else to be seen by.
+  ctx.lineWidth = Math.max(1, item.strokeWidth);
+  ctx.stroke(lone);
 }
 
 /* ---------------- Bars (ADR-0002) ----------------

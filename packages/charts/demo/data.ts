@@ -19,7 +19,8 @@ export function random(seed: number): () => number {
   };
 }
 
-/** A series with four channels; channel d contains a deliberate gap (R-2.5). */
+/** A series with four channels; channel d contains a deliberate gap (R-2.5),
+    and one reading in the middle of it - a point between two gaps. */
 export function series(seed: number, n: number, gap = false): Point[] {
   const r = random(seed);
   const points: Point[] = new Array<Point>(n);
@@ -29,6 +30,7 @@ export function series(seed: number, n: number, gap = false): Point[] {
   let d = 45;
   const gapFrom = Math.floor(n * 0.42);
   const gapTo = Math.floor(n * 0.55);
+  const lone = Math.floor((gapFrom + gapTo) / 2);
   for (let i = 0; i < n; i++) {
     a += (r() - 0.5) * 6;
     b += (r() - 0.48) * 4;
@@ -39,7 +41,7 @@ export function series(seed: number, n: number, gap = false): Point[] {
       a,
       b,
       c,
-      d: gap && i >= gapFrom && i <= gapTo ? null : d,
+      d: gap && i >= gapFrom && i <= gapTo && i !== lone ? null : d,
     };
   }
   return points;
