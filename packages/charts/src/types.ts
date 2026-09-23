@@ -44,6 +44,8 @@ export interface LineSeriesConfig<T = unknown> extends SeriesBase<T> {
   strokeWidth: number;
   dash?: readonly number[];
   markers: "auto" | "always" | "never";
+  /** Sample-and-hold: each value holds until the next sample. */
+  step?: boolean;
 }
 
 export interface ScatterSeriesConfig<T = unknown> extends SeriesBase<T> {

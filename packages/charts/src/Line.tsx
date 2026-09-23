@@ -34,6 +34,10 @@ export interface LineProps<T> {
       60 points and above that only a point between two gaps - it has no line
       to be seen by - `always`, or `never`, not even that one. */
   markers?: "auto" | "always" | "never";
+  /** Sample-and-hold: each value holds as a horizontal until the next sample
+      and jumps there - a set point, a digital signal. A gap ends the hold at
+      its x. The tooltip reports the sample the hold began with. */
+  step?: boolean;
 }
 
 export function Line<T>(props: LineProps<T>): null {
@@ -49,6 +53,7 @@ export function Line<T>(props: LineProps<T>): null {
     strokeWidth = 1.5,
     dash,
     markers = "auto",
+    step,
   } = props;
 
   const config = useMemo<LineSeriesConfig>(
@@ -66,8 +71,9 @@ export function Line<T>(props: LineProps<T>): null {
         strokeWidth,
         dash,
         markers,
+        step,
       }) as LineSeriesConfig,
-    [accessor, xAxisId, yAxisId, data, name, format, color, tone, strokeWidth, dash, markers],
+    [accessor, xAxisId, yAxisId, data, name, format, color, tone, strokeWidth, dash, markers, step],
   );
 
   useSeries("Line", config);

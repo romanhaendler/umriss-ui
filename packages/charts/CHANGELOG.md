@@ -55,6 +55,10 @@ From `.scratch/charts-essentials/spec.md`; the decisions stand in
   writes it - "806.4 °C" without a render prop. Without it the y axis'
   `tickFormat`, then the default; a matrix' value has no axis format and goes
   to the default. `ControlChart` passes it on to its line and its violations.
+- **`Line step`**: sample-and-hold. Each value holds as a horizontal until
+  the next sample and jumps there - a set point, a digital signal. A gap ends
+  the hold at its x. The tooltip reports the sample the hold began with, not
+  the nearer one after it.
 
 ---
 
