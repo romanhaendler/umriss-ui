@@ -151,6 +151,8 @@ Screenshot pages carry their name in brackets.
 | The track in the Y axis' domain units; it does not pull its axis | — | Unit (limits and bands in the scene), Interaction (every track answers for itself), Screenshot (`under-a-course`) |
 | Without `laneFrom`/`laneTo` the band fills its Y axis' whole domain | — | Screenshot (`shift`) |
 | The legend explains states, not series | R-4.11 | Unit (limits and bands in the scene), Screenshot (`shift`) |
+| A state shared by several bands highlights all of them on legend hover | R-4.11 | Unit (limits and bands in the scene) |
+| No place in the palette: the next line gets the first colour | R-2.1 | Unit (limits and bands in the scene), Screenshot (`under-a-course`, `limits-and-state`) |
 | The tooltip names the state, not its code | R-4.8 | Interaction |
 | Rendering in light and dark | — | Screenshot (`limits-and-state`, `shift`, `under-a-course`) |
 
@@ -164,6 +166,7 @@ Screenshot pages carry their name in brackets.
 | A single row stays a point value range | R-4.13 | Unit (limits and bands in the scene) |
 | Colouring as a gradient or from a limit set | ADR-0006 | Screenshot (`matrix`) |
 | The tooltip carries the value, not the row number | R-4.8 | Interaction |
+| The legend chip shows the gradient's or the limit set's colours, the tooltip chip the cell's; no place in the palette | R-4.11 | Unit (limits and bands in the scene; jsdom scene) |
 
 ## `LimitLine` / `LimitBand`
 

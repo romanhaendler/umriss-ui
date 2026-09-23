@@ -9,6 +9,7 @@ import { describe, expect, it } from "vitest";
 import { ChartScene } from "../src/scene";
 import { dataDomain } from "../src/ticks";
 import { cellSize } from "../src/cells";
+import { FALLBACK_THEME } from "../src/theme";
 import type {
   AxisConfig,
   LimitConfig,
@@ -204,7 +205,17 @@ describe("The legend of a state series counts states, not series", () => {
   it("still highlights the series on hover", () => {
     const s = makeScene();
     const id = s.registerSeries(stateSeries());
-    expect(new Set(s.legendItems().map((i) => i.seriesId))).toEqual(new Set([id]));
+    expect(new Set(s.legendItems().flatMap((i) => i.seriesIds))).toEqual(new Set([id]));
+  });
+
+  /* charts-review, bug 5: three machines share one state list, and hovering
+     "Fault" dimmed two of them - the entry named the first band only. */
+  it("highlights every band that shares a state", () => {
+    const s = makeScene();
+    const first = s.registerSeries(stateSeries({ name: "Machine 1" }));
+    const second = s.registerSeries(stateSeries({ name: "Machine 2" }));
+    const fault = s.legendItems().find((i) => i.name === "Fault");
+    expect(fault?.seriesIds).toEqual([first, second]);
   });
 
   it("keeps the entries of two state series apart", () => {
@@ -213,6 +224,54 @@ describe("The legend of a state series counts states, not series", () => {
     s.registerSeries(stateSeries());
     const ids = s.legendItems().map((i) => i.id);
     expect(new Set(ids).size).toBe(ids.length);
+  });
+});
+
+/* charts-review, bugs 3 and 14: a matrix took a palette colour it never draws
+   into its legend entry, and a state band and a matrix each used up a place of
+   a six-colour palette - the line after them came out in its third colour. */
+describe("A state band and a matrix colour themselves", () => {
+  function matrix(part: Partial<MatrixSeriesConfig> = {}): MatrixSeriesConfig {
+    return {
+      kind: "matrix",
+      name: "OEE",
+      accessor: (d) => (d as Row).a,
+      value: (d) => (d as Row).w,
+      coloring: { kind: "gradient", stops: ["#eeeeee", "#333333"] },
+      xAxisId: "x",
+      yAxisId: "y",
+      ...part,
+    };
+  }
+
+  it("shows a gradient's stops in the matrix' legend entry, not a palette colour", () => {
+    const s = makeScene();
+    s.registerSeries(matrix());
+    const chip = s.legendItems()[0]?.color ?? "";
+    expect(chip).toContain("#eeeeee");
+    expect(chip).toContain("#333333");
+    expect(FALLBACK_THEME.series.some((c) => chip.includes(c))).toBe(false);
+  });
+
+  it("shows the limit set's colours in the legend entry of an assessed matrix", () => {
+    const s = makeScene();
+    s.registerSeries(matrix({ coloring: { kind: "assessment", limits: {} } }));
+    const chip = s.legendItems()[0]?.color ?? "";
+    expect(chip).toContain(FALLBACK_THEME.colorOk);
+    expect(chip).toContain(FALLBACK_THEME.colorWarning);
+    expect(chip).toContain(FALLBACK_THEME.colorAlarm);
+  });
+
+  it("gives the first line after them the first palette colour", () => {
+    const s = makeScene();
+    s.registerSeries(stateSeries({ name: "Machine 1" }));
+    s.registerSeries(matrix());
+    s.registerSeries({ ...line(), name: "Temperature" });
+    s.registerSeries(line());
+    const colors = Object.fromEntries(s.legendItems().map((i) => [i.name, i.color]));
+    expect(colors.Temperature).toBe(FALLBACK_THEME.series[0]);
+    // Without a name the position counts - among the series that take a colour.
+    expect(colors["Series 4"]).toBe(FALLBACK_THEME.series[1]);
   });
 });
 

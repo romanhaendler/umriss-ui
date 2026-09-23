@@ -89,4 +89,42 @@ describe("ChartScene across frames", () => {
     expect(hover?.marker[0]?.y).toBeCloseTo(plot.y + plot.height * 0.3);
     scene.unbind();
   });
+
+  /* charts-review, bug 3: the chip beside a cell's value showed a palette
+     colour the matrix never draws, instead of the cell's own. */
+  it("gives a matrix cell's tooltip chip the cell's colour", async () => {
+    const root = document.createElement("div");
+    document.body.appendChild(root);
+    const scene = new ChartScene();
+    scene.bind(root, document.createElement("canvas"), document.createElement("canvas"), root);
+    scene.registerAxis(xAxis);
+    scene.registerAxis({ ...yAxis, domain: "data" });
+    scene.registerSeries({
+      kind: "matrix",
+      name: "OEE",
+      accessor: (d) => (d as Row).a,
+      value: (d) => (d as Row).t + 2 * (d as Row).a,
+      coloring: { kind: "gradient", stops: ["#000001", "#000002", "#000003", "#000004"] },
+      xAxisId: "x",
+      yAxisId: "y",
+    });
+    scene.registerTooltip({ mode: "x" });
+    scene.setData([
+      { t: 0, a: 0 },
+      { t: 1, a: 0 },
+      { t: 0, a: 1 },
+      { t: 1, a: 1 },
+    ]);
+    scene.requestResize(400, 300);
+    await frame();
+    const axes = scene.getLayoutSnapshot().layout.axes;
+    const x = axes.find((a) => a.orientation === "x");
+    const y = axes.find((a) => a.orientation === "y");
+    // The cell at (1, 1) carries the value 3, the top of the range: the last stop.
+    scene.pointerMove(x?.scale.toPx(1) ?? 0, y?.scale.toPx(1) ?? 0);
+    const point = scene.getHoverSnapshot().hover?.hit.points[0];
+    expect(point?.value).toBe(3);
+    expect(point?.color).toBe("#000004");
+    scene.unbind();
+  });
 });
