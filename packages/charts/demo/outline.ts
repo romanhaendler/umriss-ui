@@ -10,13 +10,6 @@
    are. What those four topics were is a rubric: it sorts the sidebar and stands
    in no address (CONTEXT.md, "Rubric").
 
-   Five pages carry no example of their own - `Area`, `Bar`, `Scatter`,
-   `StateBand` and `Tooltip & Legend` are shown inside the composed examples of
-   other pages, where they have something to be composed with. Their API tables
-   are complete all the same, because those come from `src/`. The smoke test
-   carries that list as a named exception, so that a sixth page without an
-   example fails instead of passing unnoticed.
-
    What is NOT here: the examples. They come from the files under
    `demo/examples/` and from nothing else. */
 
