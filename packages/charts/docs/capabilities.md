@@ -32,6 +32,7 @@ Screenshot pages carry their name in brackets.
 | Every series kind can be bound to every axis | R-4.12 | Unit (scene) |
 | SSR: `renderToString` does not throw | R-7.4 | Unit (SSR) |
 | `onPerf` instrumentation | R-5.1 | Manual (benchmark page) |
+| `syncId`: the pointer's x position, in domain units, shared by every chart of the id - a crosshair in each, the tooltip only under the pointer, cleared when the pointer leaves | Q21 | Interaction (cursor sync) |
 | `empty`: "No data" or the caller's content, centred in the plot area when no visible series has a point; axes and frame stay | Q18 | Unit (jsdom empty state), Screenshot (`empty`) |
 
 ## Registration, data, materialisation
