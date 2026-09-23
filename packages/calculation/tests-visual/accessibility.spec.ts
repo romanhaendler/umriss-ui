@@ -11,7 +11,7 @@ import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { STANDARDS, findings } from "@umriss-ui/demo/checks/accessibility";
 import { SAMPLE } from "./pages";
-import { allWithCode, open } from "./navigation";
+import { allWithCode, open, openExample } from "./navigation";
 
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(new Date("2026-03-17T10:30:00"));
@@ -32,4 +32,16 @@ test("a page with every code block open is accessible", async ({ page }, testInf
   await expect(page.locator('[data-block="calculation"] .codeBlock').first()).toBeVisible();
   const result = await new AxeBuilder({ page }).include('[data-block="calculation"]').withTags(STANDARDS).analyze();
   expect(findings(result), `Code open (${testInfo.project.name})`).toEqual([]);
+});
+
+/* With derivations open: the sunken surface of an open group, text on it, and
+   the falling line - every example starts folded, so the loop never sees it. */
+test("a calculation with derivations open is accessible", async ({ page }, testInfo) => {
+  await openExample(page, "worked-examples", "cost-per-piece");
+  const target = page.locator('[data-example="cost-per-piece"]');
+  for (const label of ["Production cost", "Machine time", "Cost price"]) {
+    await target.getByRole("button", { name: `Show how ${label} is derived` }).click();
+  }
+  const result = await new AxeBuilder({ page }).include('[data-example="cost-per-piece"]').withTags(STANDARDS).analyze();
+  expect(findings(result), `Derivations open (${testInfo.project.name})`).toEqual([]);
 });

@@ -59,45 +59,48 @@ number is fixed, not a prop.
 
 ## How it is shown
 
-Both forms share one look, and it is a statement of account, not an accordion:
+Both forms share one look: a statement on a surface of its own, in the
+material of the library's other data surfaces - the surface colour, the edge, a
+medium radius, rows of one height divided by hairlines.
 
-- **The outermost statement stands as on paper**: a tree's operands, a rule,
-  the **Result** beneath them with a double rule and the heaviest weight; a
-  chain's interims one under another. It does not fold.
-- **Everything else opens beneath the line that was clicked**, and that line
-  never moves. The derivation is a nested calculation on the sunken surface,
-  with a bar that hangs from the line's label, and it closes with a rule and
-  "= label" - it says whose it is twice: attached, and by name. In a chain
-  the derivation of an interim starts with the interim before. Nested derivations stand inside, each with its own bar, the outer
-  bars staying in view.
-- **Fixed columns**: label, operator, number, unit. The operator stands before
-  the number, the number is right-aligned in the monospace token with tabular
-  figures, the unit has a column of its own so that numbers align on their
-  last digit. The monospace token only - the library ships no fonts
-  (ADR-0021), and nothing may depend on one face's measures. "≈" stands in the
-  operator column of a result line, which has no operator.
-- **Only a derivation indents, and only its label.** Numbers, operators and
-  rules stay in the one number column and recede to the secondary colour; the
-  outermost statement keeps full colour.
-- **Rules carry meaning, not structure**: one above the outermost result and
-  above every closing line, a double rule under the Result, no lines between
-  rows.
-- **The label is the disclosure**, with a quiet angle after it. A folded
-  quantity shows its formula in names beneath the label ("= Run time ÷
-  Planned production time"), or "15 operands" where there are more than four; open, it
-  shows none - its derivation beneath it is the formula. The formula in
-  numbers is in the sentence only.
-- **At most two rows per quantity**: beneath the label, formula, reason,
-  explanation, source, freshness and the caller's aside; beneath the number,
-  verdict and target.
-- **As wide as its content**, the label column growing to a measure and then
-  wrapping; full width only by the caller's `className`.
-- **Hover coupling is a flat band** from the label's indent, so that the bars
-  stay in view; a reference keeps its label in italics.
-
-The first two departures from a pure accounting sheet are deliberate: the
-formula beneath a folded label is the reason to unfold it, and the content
-width replaces the leader dots paper needed for its fixed width.
+- **Fixed columns**: label, names, operator, number, unit, assessment. The
+  number is right-aligned in the monospace token with tabular figures, the unit
+  has a column of its own so that numbers align on their last digit. The
+  monospace token only - the library ships no fonts (ADR-0021), and nothing may
+  depend on one face's measures.
+- **The outermost statement stands as on paper** and does not fold: a tree's
+  operands with their operators, a chain's interims one under another. The
+  **Result** closes it as its last row on the sunken surface, heavier and larger,
+  its number underlined twice - the accountant's mark for the final figure; without a
+  number, no mark, which would read as an equals sign. A chain's Result is its
+  last interim and opens beneath itself like every interim.
+- **Everything else opens beneath the row that was clicked**, and that row
+  never moves. Row and derivation become one group on the sunken surface; a
+  line in the accent falls from beneath the row's disclosure through the rows
+  it opened, and the derivation closes with a rule and "= label" - it says
+  whose it is twice: attached, and by name. In a chain the derivation of an
+  interim starts with the interim before. A group inside a group draws its own
+  line, and the outer one stays in view to its left. Inside a group there are
+  no hairlines: the surface holds the rows together.
+- **The disclosure** is a quiet square with an angle before the label, as the
+  library's expanders are; the whole row opens it for the pointer, the button
+  is what the keyboard and a screen reader reach. Leaves keep its width, so
+  every label starts in line. Only a derivation indents, and only its label;
+  its numbers recede to the secondary colour.
+- **A folded row shows the formula it hides**, in names, in a column of its
+  own beside the label ("= Run time ÷ Planned production time"), or how many
+  operands there are where there are more than four. Open, it shows none. The
+  formula in numbers is in the sentence only.
+- **The assessment is a badge**, core's: the verdict's word in its tone, or the
+  reason a number is missing. The target stands beside it in words; the worst
+  verdict inside a folded row as a quiet dot and word. "≈" stands before the
+  number, and its explanation is a tooltip, not a sentence on every row; the
+  row's sentence carries it for a screen reader, as it carries the worst
+  verdict inside a folded row.
+- **At most two rows per quantity**: only what a quantity says about itself -
+  explanation, source, freshness, the caller's aside - stands beneath its label.
+- **Hover coupling is a flat band** from the label's indent, so that the lines
+  of the groups stay in view; a reference keeps its label in italics.
 
 ## Considered Options
 
@@ -117,7 +120,9 @@ things.
 **Derivations opening upward**, the result beneath its operands at every
 level. It was the first design of this ADR and was dropped on sight: the line
 a reader clicked moved down the screen, and an opened derivation no longer
-looked as if it belonged to anything. **A result above its operands**, as
+looked as if it belonged to anything. **Bare text on the page**, the second:
+no surface, uneven rows with notes beneath many of them, every label a dotted
+link - correct, and not the standard of the library it stands in. **A result above its operands**, as
 ADR-0027 shipped it. It reads as an
 accordion - a chevron before every line, each level indenting the whole row -
 and gives tree and chain two looks. **A column per nesting level** (the

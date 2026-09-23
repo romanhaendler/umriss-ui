@@ -3,23 +3,21 @@
    every operation it shows, what stands on the screen cannot disagree with the
    number.
 
-   The look of a statement of account, for tree and chain alike, in fixed
-   columns - label, operator, number, unit. The outermost statement stands as
-   on paper: a tree's operands, a rule, the Result above a double rule; a
-   chain's interims one under another. Everything else is folded, and the label
-   is the disclosure: a derivation opens BENEATH the line that was clicked -
-   the line never moves - as a nested calculation on the sunken surface with a
-   bar that hangs from the line, and it closes with "= label", so that it
-   says whose it is twice: attached, and by name.
+   A statement on a surface of its own, in fixed columns - label, names,
+   operator, number, unit, assessment. The outermost statement stands as on
+   paper and closes on the Result as its last row; everything else is folded,
+   and a derivation opens BENEATH the row that was clicked - the row never
+   moves - as one group with it, closing with "= label", so that it says whose
+   it is twice: attached, and by name.
 
    A nested list: every quantity is an item, its derivation a list inside it.
-   Each line is drawn for the eye and read as one sentence; the drawn parts are
+   Each row is drawn for the eye and read as one sentence; the drawn parts are
    hidden from assistive technology and the sentence from the eye. */
 
 import { useId, useState } from "react";
 import type { CSSProperties, HTMLAttributes, ReactNode } from "react";
-import { AngleGlyph, VisuallyHidden, useFormats, useFreshness, useWording, verdictWeight } from "@umriss-ui/core";
-import type { FreshnessAges, Verdict } from "@umriss-ui/core";
+import { AngleGlyph, Badge, Tooltip, VisuallyHidden, useFormats, useFreshness, useWording, verdictWeight } from "@umriss-ui/core";
+import type { BadgeTone, FreshnessAges, Verdict } from "@umriss-ui/core";
 import { evaluate } from "./evaluate";
 import { readCalculation } from "./model";
 import type { Operand, Quantity } from "./model";
@@ -34,6 +32,9 @@ export interface CalculationProps extends Omit<HTMLAttributes<HTMLUListElement>,
       elsewhere. */
   children: ReactNode;
 }
+
+/** The tone of a verdict's badge - a word beside it always (core's Badge). */
+const TONE: Record<Verdict, BadgeTone> = { ok: "success", unknown: "neutral", warning: "warning", alarm: "danger" };
 
 const cx = (...parts: Array<string | false | undefined>) => parts.filter(Boolean).join(" ");
 
@@ -133,24 +134,9 @@ export function Calculation({ children, className, ...rest }: CalculationProps) 
         : undefined;
     const given = reference ? undefined : quantity.given;
     const operator = place.position ? operatorText(place.position, false, wording) : undefined;
+    /* Beneath the label only what a given or a quantity says about itself;
+       everything else keeps to the row, so that rows keep one height. */
     const notes = [
-      foldable && !isOpen && text.names !== undefined && <span key="names">{text.names}</span>,
-      text.reason !== undefined && (
-        /* It stands in the sentence already. */
-        <span key="reason" className={styles.reason} aria-hidden="true">
-          {text.reason}
-        </span>
-      ),
-      worst !== undefined && (
-        <span key="worst" className={styles.worst} data-verdict={worst}>
-          {wording.calculationWorstInside(verdictWord(worst, wording))}
-        </span>
-      ),
-      own.approximate && !reference && (
-        <span key="approximate" aria-hidden="true">
-          ≈ {wording.calculationApproximateNote}
-        </span>
-      ),
       !reference && quantity.explanation !== undefined && <span key="explanation">{quantity.explanation}</span>,
       given?.source !== undefined && <span key="source">{wording.calculationSource(given.source)}</span>,
       given?.asOf !== undefined &&
@@ -161,64 +147,96 @@ export function Calculation({ children, className, ...rest }: CalculationProps) 
         )),
       !reference && quantity.aside !== undefined && <span key="aside">{quantity.aside}</span>,
     ].filter(Boolean);
-    const assessment = own.verdict !== undefined || text.target !== undefined;
+    const kind = isResult ? "result" : quantity.interim && !reference ? "interim" : undefined;
+
     const line = (
       <div
         className={styles.line}
         style={{ "--depth": place.depth } as CSSProperties}
         data-inner={place.depth > 0 ? "" : undefined}
-        data-kind={isResult ? "result" : derived ? "derived" : undefined}
-        data-rule={statement ? "" : undefined}
-        data-open={isOpen ? "" : undefined}
+        data-kind={kind}
+        data-foldable={foldable ? "" : undefined}
         data-reference={reference ? "" : undefined}
         data-mark={markOf(key, place.parent)}
         onPointerEnter={() => setMarked(key)}
         onPointerLeave={() => setMarked(null)}
         onFocus={() => setMarked(key)}
         onBlur={() => setMarked(null)}
+        /* The whole row opens it for the pointer; the button is what the
+           keyboard and a screen reader reach, and its click arrives here. */
+        onClick={
+          foldable
+            ? () => {
+                /* Selecting a figure to copy it is not asking for its derivation. */
+                if (window.getSelection()?.toString()) return;
+                toggle(key);
+              }
+            : undefined
+        }
       >
-        <VisuallyHidden>{text.sentence}</VisuallyHidden>
+        <VisuallyHidden>
+          {[
+            text.sentence,
+            own.approximate && wording.calculationApproximateNote,
+            worst !== undefined && wording.calculationWorstInside(verdictWord(worst, wording)),
+          ]
+            .filter(Boolean)
+            .join(". ")}
+        </VisuallyHidden>
         <span className={styles.labelCell}>
           {foldable ? (
             <button
               type="button"
-              className={styles.label}
+              className={styles.disclosure}
               aria-expanded={isOpen}
               aria-controls={listId}
               aria-label={(isOpen ? wording.calculationHideDerivation : wording.calculationShowDerivation)(quantity.label)}
-              onClick={() => toggle(key)}
             >
-              {quantity.label}
-              <AngleGlyph className={styles.disclosure} data-open={isOpen ? "" : undefined} />
+              <AngleGlyph data-open={isOpen ? "" : undefined} />
             </button>
           ) : (
-            <span className={styles.label} aria-hidden="true">
-              {quantity.label}
-            </span>
+            <span className={styles.disclosure} aria-hidden="true" />
           )}
+          <span className={styles.label} aria-hidden="true">
+            {quantity.label}
+          </span>
+        </span>
+        <span className={styles.names} aria-hidden="true">
+          {foldable && !isOpen ? text.names : undefined}
         </span>
         <span className={styles.operator} aria-hidden="true">
-          {operator ?? (own.approximate ? "≈" : "")}
+          {operator}
         </span>
         <span className={styles.amount} aria-hidden="true" data-verdict={own.verdict}>
-          {operator !== undefined && own.approximate && "≈ "}
+          {own.approximate && (
+            <Tooltip content={wording.calculationApproximateNote}>
+              <span className={styles.approximate}>≈</span>
+            </Tooltip>
+          )}
           {text.amount}
         </span>
         <span className={styles.unit} aria-hidden="true">
           {text.unit}
         </span>
-        {(notes.length > 0 || assessment) && (
-          <>
-            <span className={styles.notes}>{notes}</span>
-            <span className={styles.assessment} aria-hidden="true">
-              {own.verdict !== undefined && (
-                <span className={styles.verdict} data-verdict={own.verdict}>
-                  {verdictWord(own.verdict, wording)}
-                </span>
-              )}
-              {text.target !== undefined && <span>{text.target}</span>}
+        <span className={styles.assessment} aria-hidden="true">
+          {text.reason !== undefined ? (
+            <Badge>{text.reason}</Badge>
+          ) : (
+            own.verdict !== undefined && <Badge tone={TONE[own.verdict]}>{verdictWord(own.verdict, wording)}</Badge>
+          )}
+          {text.target !== undefined && <span className={styles.target}>{text.target}</span>}
+          {worst !== undefined && (
+            <span className={styles.worst} data-verdict={worst}>
+              {wording.calculationWorstInside(verdictWord(worst, wording))}
             </span>
-          </>
+          )}
+        </span>
+        {notes.length > 0 && (
+          /* A click here - on a link in the aside, on a sparkline - is the
+             caller's, not a fold. */
+          <span className={styles.notes} onClick={(event) => event.stopPropagation()}>
+            {notes}
+          </span>
         )}
       </div>
     );
@@ -234,15 +252,10 @@ export function Calculation({ children, className, ...rest }: CalculationProps) 
 
     return [
       ...beside,
-      <li key={slot} className={styles.item}>
+      <li key={slot} className={styles.item} data-open={isOpen ? "" : undefined} style={{ "--depth": place.depth } as CSSProperties}>
         {line}
         {foldable && (
-          <ul
-            id={listId}
-            className={styles.derivation}
-            style={{ "--depth": inner.depth } as CSSProperties}
-            hidden={!isOpen}
-          >
+          <ul id={listId} className={styles.derivation} hidden={!isOpen}>
             {opening}
             {operands}
             {/* The derivation closes on the quantity it derives - by name, so
@@ -252,15 +265,21 @@ export function Calculation({ children, className, ...rest }: CalculationProps) 
                 className={styles.line}
                 style={{ "--depth": inner.depth } as CSSProperties}
                 data-inner=""
-                data-rule=""
                 data-closing=""
                 data-mark={markOf(key, place.parent)}
               >
                 <span className={styles.labelCell}>
+                  <span className={styles.disclosure} />
                   <span className={styles.label}>= {quantity.label}</span>
                 </span>
-                <span className={styles.operator}>{own.approximate ? "≈" : ""}</span>
+                <span className={styles.names} />
+                <span className={styles.operator} />
                 <span className={styles.amount} data-verdict={own.verdict}>
+                  {own.approximate && (
+                    <Tooltip content={wording.calculationApproximateNote}>
+                      <span className={styles.approximate}>≈</span>
+                    </Tooltip>
+                  )}
                   {text.amount}
                 </span>
                 <span className={styles.unit}>{text.unit}</span>
