@@ -25,6 +25,8 @@ import { lineText, operatorText, verdictWord } from "./present";
 import type { Position } from "./present";
 import styles from "./Calculation.module.css";
 
+/** `className` and `style` size and place the surface; every other attribute -
+    `aria-label` first of all - lands on the list the surface holds. */
 export interface CalculationProps extends Omit<HTMLAttributes<HTMLUListElement>, "children"> {
   /** The result: exactly one quantity - a tree (`<Sum>`, `<Difference>`,
       `<Product>`, `<Quotient>` with their operands, `<Given>` as leaves) or a
@@ -67,7 +69,7 @@ interface Place {
   position?: Position;
 }
 
-export function Calculation({ children, className, ...rest }: CalculationProps) {
+export function Calculation({ children, className, style, ...rest }: CalculationProps) {
   const formats = useFormats();
   const wording = useWording();
   const uid = useId();
@@ -266,7 +268,9 @@ export function Calculation({ children, className, ...rest }: CalculationProps) 
                 style={{ "--depth": inner.depth } as CSSProperties}
                 data-inner=""
                 data-closing=""
-                data-mark={markOf(key, place.parent)}
+                /* Only where its own quantity is meant: as an operand's, the
+                   band would jump from the row to the end of its derivation. */
+                data-mark={marked === key ? "use" : undefined}
               >
                 <span className={styles.labelCell}>
                   <span className={styles.disclosure} />
@@ -292,8 +296,12 @@ export function Calculation({ children, className, ...rest }: CalculationProps) 
   };
 
   return (
-    <ul className={cx(styles.calculation, className)} {...rest}>
-      {items(model.result, false, { depth: 0, flat: true, parent: null }, "r")}
-    </ul>
+    /* The frame is the surface and the container the layout measures itself
+       against; the list inside it is the statement. */
+    <div className={cx(styles.frame, className)} style={style}>
+      <ul className={styles.calculation} {...rest}>
+        {items(model.result, false, { depth: 0, flat: true, parent: null }, "r")}
+      </ul>
+    </div>
   );
 }

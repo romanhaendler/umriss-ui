@@ -28,6 +28,15 @@ const assessmentOf = (label: string) => rowOf(label).querySelector(":scope > [cl
 const toggle = (label: string) => screen.getByRole("button", { name: new RegExp(`how ${label} is derived`) });
 
 describe("The statement", () => {
+  it("puts className and style on the surface, and the label on the list", () => {
+    render(<OeeCalculation className="mine" style={{ maxWidth: 480 }} />);
+    const list = screen.getByRole("list", { name: "OEE, early shift" });
+    const frame = list.parentElement!;
+    expect(frame.className).toContain("mine");
+    expect(frame.style.maxWidth).toBe("480px");
+    expect(list.getAttribute("style")).toBeNull();
+  });
+
   it("stands a result beneath its operands, with the operator before each number", () => {
     render(<OeeCalculation />);
     expect(rows()).toEqual(["Availability 91.6 %", "× Performance 93.2 %", "× Quality 96 %", "OEE 82 %"]);
