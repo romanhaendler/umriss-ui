@@ -42,6 +42,13 @@ From `.scratch/charts-fixes/spec.md`; the findings stand in
   kind `"span"`, the second x channel `x1` of `MaterializedSeries` and
   `open` in a tooltip point's `segment`.
 
+### Fixed
+
+- **The sortedness check sees every series.** In DEV it ran for the first
+  series only, and warned falsely where that was a matrix, whose cells run
+  row-major. It now checks every series but the matrix, once per change of its
+  data, and names the series it warns about.
+
 ---
 
 ## 0.3.2 – Phones, touch and a review (Sep. 2026)
