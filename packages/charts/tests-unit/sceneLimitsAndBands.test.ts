@@ -132,6 +132,16 @@ describe("Limits pull the extent", () => {
     expect(s.axisExtent("y", "y")).toEqual([5, 40]);
   });
 
+  it("binds a limit without axisId to the first axis of its orientation", () => {
+    const s = new ChartScene();
+    s.setData(data);
+    s.registerAxis({ ...xAxis, id: "time" });
+    s.registerAxis(yAxis);
+    s.registerSeries({ ...line(), xAxisId: "time" });
+    s.registerLimit(limit({ value: 9, orientation: "x", axisId: undefined } as Partial<LimitConfig>));
+    expect(s.axisExtent("x", "time")).toEqual([0, 9]);
+  });
+
   it("carries an axis without any series out of its limits alone", () => {
     // A chart whose only content is its limits is degenerate - but not
     // inadmissible, and it must not blow up the extent calculation.

@@ -39,7 +39,7 @@ not photographed.
 
 | Layer | Tool | Place | Status |
 |---|---|---|---|
-| Unit tests of the charts (ticks, scale, layout, hit, materialisation, scene, bar geometry, **limit, state, cells, control chart, Pareto, operating time, limits and bands in the scene**) | vitest | packages/charts/tests-unit/ | green |
+| Unit tests of the charts (ticks, scale, layout, hit, materialisation, scene, bar geometry, **limit, state, cells, control chart, Pareto, operating time, limits and bands in the scene, downsampling, the time axis, the draw calls, the limit's default axis**) and their jsdom tests (legend toggle, empty state, tone, tooltip format, control chart violations, the scene across frames: hover, highlight, cursor sync, double click) | vitest | packages/charts/tests-unit/ | green |
 | jsdom smoke test of the charts demo (every page, every example, the package by name in the source) + SSR test | vitest | packages/charts/tests-unit/ | green |
 | jsdom smoke test of the core demo | vitest | packages/core/tests-unit/ | green |
 | jsdom smoke test of the table demo: every page with its tables, every example with a title, the package by name in the source | vitest | packages/table/tests-unit/demo-smoke.test.tsx | green |
@@ -119,6 +119,9 @@ bodies. Placement follows ownership: with the module it belongs to, and in
 | `charts/controlLimits.ts` | control limits, zones, four rule violations |
 | `charts/pareto.ts` | sort, accumulate, collect the remainder, cutoff |
 | `charts/operatingTime.ts` | wall clock ↔ operating time, breaks, ticks, clamped position |
+| `charts/downsample.ts` | first, min, max and last per pixel column, gaps kept, the window of a zoomed course |
+| `charts/time.ts` | the time step, ticks on local boundaries across the clock change, labels by level |
+| `charts/hit.ts` (`nearestIndex`, `nearestPoint`, `lowerBound`) | the nearest x, the nearest point in pixel space, the first index not below a value |
 | `schedule/findings.ts` | overlaps per lane, offset depth, late transports |
 | `schedule/ripple.ts` | the cascade over successors, as moves |
 | `schedule/timeAxis.ts` | fine step, local ticks and days through the calendar, zoom and pan |

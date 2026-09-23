@@ -5,7 +5,7 @@
    resting pointer. jsdom measures every text as zero and has no 2D context -
    neither matters to the layout or the hit test. */
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { ChartScene } from "../src/scene";
 import type {
   AxisConfig,
@@ -366,6 +366,91 @@ describe("ChartScene - the hit on a downsampled line", () => {
     const point = scene.getHoverSnapshot().hover?.hit.points[0];
     expect(point?.index).toBe(5003);
     expect(point?.yValue).toBe(5003 % 7);
+    scene.unbind();
+  });
+});
+
+/* charts-review: hovering the legend entry of a hidden series dimmed every
+   visible one - the highlight named only what is not drawn. */
+describe("ChartScene - the highlight of a hidden series", () => {
+  it("dims nothing", async () => {
+    const scene = bound();
+    const hidden = scene.registerSeries({ ...line, name: "B", hidden: true });
+    scene.setData([
+      { t: 0, a: 10 },
+      { t: 1, a: 20 },
+    ]);
+    await frame();
+    scene.setHighlight([hidden]);
+    const items = (scene as unknown as { drawItems(): { alpha: number }[] }).drawItems();
+    expect(items.map((i) => i.alpha)).toEqual([1]);
+    scene.unbind();
+  });
+});
+
+/* charts-review: the cursor sync. Only the x position travels (Q21) - with or
+   without a tooltip - and a chart that leaves its group keeps no crosshair of
+   it. */
+describe("ChartScene - cursor sync", () => {
+  const syncedPx = (s: ChartScene) => (s as unknown as { syncedPx(): number | null }).syncedPx();
+
+  async function pair(): Promise<[ChartScene, ChartScene]> {
+    const a = bound();
+    const b = bound();
+    for (const s of [a, b]) {
+      s.setData([
+        { t: 0, a: 10 },
+        { t: 10, a: 20 },
+      ]);
+      s.setSyncId("review-sync");
+    }
+    await frame();
+    return [a, b];
+  }
+
+  it("shares the position of a chart without a tooltip", async () => {
+    const [a, b] = await pair();
+    const plot = a.getLayoutSnapshot().layout.plot;
+    a.pointerMove(plot.x + plot.width / 2, plot.y + plot.height / 2);
+    expect(syncedPx(b)).toBeCloseTo(plot.x + plot.width / 2);
+    a.unbind();
+    b.unbind();
+    a.setSyncId(null);
+    b.setSyncId(null);
+  });
+
+  it("drops the crosshair of a group it leaves", async () => {
+    const [a, b] = await pair();
+    a.registerTooltip({ mode: "x" });
+    await frame();
+    const plot = a.getLayoutSnapshot().layout.plot;
+    a.pointerMove(plot.x + plot.width / 2, plot.y + plot.height / 2);
+    expect(syncedPx(b)).not.toBeNull();
+    b.setSyncId(null);
+    expect(syncedPx(b)).toBeNull();
+    a.unbind();
+    b.unbind();
+    a.setSyncId(null);
+  });
+});
+
+/* charts-review: a double click proposes the data extent - but never one of no
+   width, which no scale can show; the same check a wheel step passes. */
+describe("ChartScene - the double click", () => {
+  it("proposes no extent of a single point", async () => {
+    const onDomainChange = vi.fn();
+    const root = document.createElement("div");
+    document.body.appendChild(root);
+    const scene = new ChartScene();
+    scene.bind(root, document.createElement("canvas"), document.createElement("canvas"), root);
+    scene.registerAxis({ ...xAxis, onDomainChange });
+    scene.registerAxis(yAxis);
+    scene.registerSeries(line);
+    scene.requestResize(400, 300);
+    scene.setData([{ t: 5, a: 10 }]);
+    await frame();
+    scene.doubleClick();
+    expect(onDomainChange).not.toHaveBeenCalled();
     scene.unbind();
   });
 });

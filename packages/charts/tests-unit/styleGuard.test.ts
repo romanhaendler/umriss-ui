@@ -15,4 +15,12 @@ describe("The stylesheet of @umriss-ui/charts (ADR-0021)", () => {
   it("keeps every rule inside a layer of the library and selects only its own elements", () => {
     expect(offendersIn(CHARTS_CSS)).toEqual([]);
   });
+
+  it("couples to core only in a --uc-* declaration (R-1.6)", () => {
+    const css = CHARTS_CSS.replace(/\/\*[\s\S]*?\*\//g, "");
+    const loose = css
+      .split(";")
+      .filter((d) => d.includes("var(--u-") && !/^\s*--uc-[\w-]+\s*:/.test(d.split("{").pop() ?? ""));
+    expect(loose).toEqual([]);
+  });
 });

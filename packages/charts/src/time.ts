@@ -7,7 +7,7 @@
    the whole grid could not do that.
 
    The labels are en-GB with a 24-hour clock, by level: `15:00`, `17 Mar`,
-   `Mar 2026`. Fixed, not the machine's locale: the same axis must look the same
+   `Mar 2026`, `2026`. Fixed, not the machine's locale: the same axis must look the same
    on two computers (library-audit 03). Another language is a `tickFormat`.
 
    Deliberately free of the DOM and of the scene, like operatingTime.ts. */
@@ -96,6 +96,7 @@ const CLOCK = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-dig
 const DAY_MONTH = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" });
 const DAY_MONTH_YEAR = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" });
 const MONTH_YEAR = new Intl.DateTimeFormat("en-GB", { month: "short", year: "numeric" });
+const YEAR_ONLY = new Intl.DateTimeFormat("en-GB", { year: "numeric" });
 
 /** An instant with its date and clock: `17 Mar 15:23` - the tooltip's x value,
     and a tick's label where the day has changed. Composed, because en-GB would
@@ -122,8 +123,10 @@ export function timeLabels(ticks: readonly number[], step: TimeStep): string[] {
         return previous !== undefined && previous.getFullYear() !== d.getFullYear()
           ? DAY_MONTH_YEAR.format(t)
           : DAY_MONTH.format(t);
-      default:
+      case "month":
         return MONTH_YEAR.format(t);
+      default:
+        return YEAR_ONLY.format(t);
     }
   });
 }

@@ -851,8 +851,8 @@ export class ChartScene {
     }
     for (const { config } of this.limits.values()) {
       invariant(
-        seen.has(`${config.orientation}:${config.axisId}`),
-        `A limit refers to the unknown ${config.orientation} axis "${config.axisId}" (R-4.12).`,
+        seen.has(`${config.orientation}:${this.limitAxisId(config)}`),
+        `A limit refers to the unknown ${config.orientation} axis "${this.limitAxisId(config)}" (R-4.12).`,
       );
     }
     for (const key of seen) {
@@ -891,6 +891,15 @@ export class ChartScene {
   }
 
   /* ================= Materialisation (R-2.6, R-2.7) ================= */
+
+  /** A limit's axis: the one it names, or the first of its orientation. */
+  private limitAxisId(config: LimitConfig): string {
+    if (config.axisId !== undefined) return config.axisId;
+    for (const { config: axis } of this.axes.values()) {
+      if (axis.orientation === config.orientation) return axis.id;
+    }
+    return config.orientation;
+  }
 
   private findAxisConfig(orientation: AxisOrientation, id: string): AxisConfig | null {
     for (const { config } of this.axes.values()) {
@@ -1223,7 +1232,7 @@ export class ChartScene {
     const out: number[] = [];
     for (const { config } of this.limits.values()) {
       if (!config.inExtent) continue;
-      if (config.orientation !== orientation || config.axisId !== id) continue;
+      if (config.orientation !== orientation || this.limitAxisId(config) !== id) continue;
       if (config.kind === "line") out.push(this.limitAt(config, config.value));
       else out.push(this.limitAt(config, config.from), this.limitAt(config, config.to));
     }
@@ -1234,7 +1243,7 @@ export class ChartScene {
       axis is named on the wall clock, like the data, and mapped as they are. */
   private limitAt(config: LimitConfig, value: number): number {
     if (config.orientation !== "x") return value;
-    const axis = this.findAxisConfig("x", config.axisId);
+    const axis = this.findAxisConfig("x", this.limitAxisId(config));
     const map = axis === null ? undefined : this.mapFor(axis);
     return map === undefined ? value : map(value);
   }
@@ -1293,7 +1302,7 @@ export class ChartScene {
           c.orientation === "y"
             ? this.limitsInOrder()
                 .map((l) => l.config)
-                .filter((l) => l.orientation === "y" && l.axisId === c.id && l.label !== undefined && l.label !== "")
+                .filter((l) => l.orientation === "y" && this.limitAxisId(l) === c.id && l.label !== undefined && l.label !== "")
                 .map((l) => l.label as string)
             : undefined,
       });
@@ -1442,7 +1451,7 @@ export class ChartScene {
     const out: LimitDrawItem[] = [];
     for (const { config } of this.limitsInOrder()) {
       if ((config.kind === "band") !== band) continue;
-      const axis = this.findAxis(config.orientation, config.axisId);
+      const axis = this.findAxis(config.orientation, this.limitAxisId(config));
       if (axis === null) continue;
       const color = this.limitColor(config, theme);
       const dash = this.limitDash(config);
@@ -1475,7 +1484,7 @@ export class ChartScene {
     const out: LimitLabel[] = [];
     for (const { order, config } of this.limitsInOrder()) {
       if (config.label === undefined || config.label === "") continue;
-      const axis = this.findAxis(config.orientation, config.axisId);
+      const axis = this.findAxis(config.orientation, this.limitAxisId(config));
       if (axis === null) continue;
       const value =
         config.kind === "line"
@@ -1499,6 +1508,9 @@ export class ChartScene {
     const items: SeriesDrawItem[] = [];
     // A hidden bar leaves no empty place in its group.
     const series = this.seriesInOrder().filter((e) => e.config.hidden !== true);
+    // A highlight of nothing drawn - a hidden series' legend entry - dims nothing.
+    const lit = this.highlight;
+    const highlight = lit !== null && series.some((e) => lit.includes(e.order)) ? lit : null;
     // Bars on the same x axis share one step (ADR-0002); one pass over the
     // series, not over the points.
     const groups = barGroups(
@@ -1516,7 +1528,7 @@ export class ChartScene {
       const xAxis = this.findAxis("x", entry.config.xAxisId);
       const yAxis = this.findAxis("y", entry.config.yAxisId);
       if (xAxis === null || yAxis === null) return;
-      const dimmed = this.highlight !== null && !this.highlight.includes(entry.order);
+      const dimmed = highlight !== null && !highlight.includes(entry.order);
       const base: DrawBase = {
         x: mat.x,
         y: mat.y,
@@ -1685,9 +1697,14 @@ export class ChartScene {
   }
 
   pointerMove(x: number, y: number): void {
-    if (this.tooltip === null) return;
     if (!this.inPlot(x, y)) {
       this.pointerLeave();
+      return;
+    }
+    if (this.tooltip === null) {
+      // No hit to snap to - the pointer's own x is what a synced chart shows.
+      const axis = this.layout.axes.find((a) => a.orientation === "x");
+      if (axis !== undefined) this.share({ axisId: axis.id, value: axis.scale.fromPx(x) });
       return;
     }
     const hit = this.hitTest(x, y);
@@ -1853,7 +1870,12 @@ export class ChartScene {
     if (id === this.syncId) return;
     if (this.syncId !== null) {
       this.share(null);
-      syncGroups.get(this.syncId)?.delete(this);
+      const group = syncGroups.get(this.syncId);
+      group?.delete(this);
+      if (group?.size === 0) syncGroups.delete(this.syncId);
+      // The crosshair the old group asked for is no longer this chart's.
+      this.synced = null;
+      this.markOverlayDirty();
     }
     this.syncId = id;
     if (id !== null) {
@@ -1914,9 +1936,9 @@ export class ChartScene {
     return out;
   }
 
-  private propose(next: (domain: readonly [number, number]) => [number, number]): void {
+  private propose(next: (domain: readonly [number, number], axisId: string) => [number, number]): void {
     for (const { config, layout } of this.zoomAxes()) {
-      const domain = next(this.proposed.get(config.id) ?? layout.scale.domain);
+      const domain = next(this.proposed.get(config.id) ?? layout.scale.domain, config.id);
       if (!(domain[1] - domain[0] > 0) || !Number.isFinite(domain[1] - domain[0])) continue;
       this.proposed.set(config.id, domain);
       config.onDomainChange?.(domain);
@@ -1997,11 +2019,10 @@ export class ChartScene {
 
   /** The whole data range: the extent the axis has without a domain. */
   doubleClick(): void {
-    for (const { config } of this.zoomAxes()) {
-      const extent = this.axisExtent("x", config.id);
-      this.proposed.set(config.id, extent);
-      config.onDomainChange?.([extent[0], extent[1]]);
-    }
+    this.propose((_, axisId) => {
+      const [from, to] = this.axisExtent("x", axisId);
+      return [from, to];
+    });
   }
 
   /** An x value in the format of its x axis - the header's, or a point's own. */

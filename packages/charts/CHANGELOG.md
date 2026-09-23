@@ -67,6 +67,18 @@ From `.scratch/charts-long-series/spec.md`; the decisions stand in
   lines, the steps still 1, 2 or 5. One grid then serves two quantities. The
   DEV warning about several grids names it.
 
+### Fixed
+
+- **A downsampled course keeps a gap at the end of a pixel column.** Only the
+  first gap of a column was kept: a column running gap - points - gap lost the
+  second, and the line bridged to data far away.
+- **The cursor sync.** A chart without a `Tooltip` shared no position; it now
+  shares the pointer's x. A chart that leaves its group - another `syncId`, or
+  unmounted - no longer keeps the crosshair the group last sent it.
+- **A double click proposes no domain without width.** Over a single point
+  the data range is one value; the double click handed it to
+  `onDomainChange` all the same, where a wheel step checks for that.
+
 ---
 
 ## Unreleased – What a plant screen expects
@@ -120,6 +132,16 @@ From `.scratch/charts-essentials/spec.md`; the decisions stand in
 - Every size prop's comment names its unit (CSS pixels, a fraction of the
   step, domain units of the axis).
 
+### Fixed
+
+- **Hovering a hidden series' legend entry dims nothing.** It highlighted the
+  series that is not drawn, and every visible one was dimmed.
+- **A time axis over years labels a year as `2026`**, by level, not as
+  `Jan 2026`.
+- **The legend's focus ring couples through `--uc-focus-ring`**, like every
+  other value of the stylesheet, with `--u-focus-ring` and a literal behind
+  it.
+
 ---
 
 ## Unreleased – The charts, corrected
@@ -167,7 +189,11 @@ From `.scratch/charts-fixes/spec.md`; the findings stand in
 - **An infinity is a gap.** `±Infinity` out of any accessor - y, baseline,
   a matrix' value, x - entered the extent, which was then no longer finite, and
   the axis fell back to [0, 1] with every other value pressed against its edge.
-  It is now treated like `null` or `NaN`: a gap, outside the extent.
+  It is now treated like `null` or `NaN`: a gap, outside the extent. An x
+  that is no number - an infinity or `NaN` - takes the place of the point
+  before it, so that the x values stay ascending; in the middle of a series,
+  or as `-Infinity`, it used to raise a false DEV warning about unsorted data
+  and mislead the hit test.
 - **A point between two gaps is drawn.** On a line it was a lone move of the
   pen and drew nothing, and above 60 points `markers="auto"` drew no marker for
   it either - a reading a gap isolates vanished. It now always keeps its marker;
@@ -182,8 +208,8 @@ From `.scratch/charts-fixes/spec.md`; the findings stand in
 - **A limit on the x axis finds its axis.** `LimitLine` and `LimitBand` with
   `orientation="x"` and no `axisId` looked for an axis "y" among the x axes,
   found none and drew nothing, silently. Without an `axisId` a limit now binds
-  to the axis its orientation names - "x" or "y" - and an unknown `axisId` is a
-  DEV error, as it is for a series.
+  to the first axis of its orientation - an `<XAxis id="time">` too - and an
+  unknown `axisId` is a DEV error, as it is for a series.
 - **The operating-time axis stands on the local clock.** Its day and half-day
   ticks fell on UTC's midnight and were labelled in local time - "01:00"
   where a day begins, in CET. They now fall on local midnight and noon. Explicit
@@ -208,7 +234,8 @@ From `.scratch/charts-fixes/spec.md`; the findings stand in
 - **A control chart over a constant reference window finds no outliers.**
   Sigma is 0 there, the limits lie on the centre line, and every value off it
   was an outlier - and two of three beyond "two sigma". Both rules now find
-  nothing without a spread, and DEV warns that the limits are degenerate.
+  nothing without a spread, and DEV warns that the limits are degenerate - for
+  a given sigma of 0 or below as well, where the rules find nothing either.
 - **`Chart.height` says its default.** The comment promised the host's height;
   the default is and was 300.
 - **A matrix buckets its cells once per change**, not on every redraw of the

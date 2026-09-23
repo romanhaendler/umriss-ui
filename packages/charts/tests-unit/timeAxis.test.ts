@@ -81,6 +81,12 @@ describe("timeLabels - by level, en-GB, 24 hours", () => {
     expect(timeLabels([at(1, 1), at(4, 1)], months)).toEqual(["Jan 2026", "Apr 2026"]);
   });
 
+  it("writes a year step as the year alone", () => {
+    const years = timeStepFor(10 * 365 * DAY, 5);
+    const ticks = [new Date(2026, 0, 1).getTime(), new Date(2028, 0, 1).getTime()];
+    expect(timeLabels(ticks, years)).toEqual(["2026", "2028"]);
+  });
+
   it("gives the day the year where the year changes", () => {
     const days = timeStepFor(4 * DAY, 4);
     const turn = [new Date(2026, 11, 31).getTime(), new Date(2027, 0, 1).getTime()];
