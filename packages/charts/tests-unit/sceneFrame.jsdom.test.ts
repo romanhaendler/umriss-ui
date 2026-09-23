@@ -343,3 +343,29 @@ describe("ChartScene - change detection of a native function", () => {
     scene.unbind();
   });
 });
+
+/* charts-long-series 03: a downsampled line draws four points per pixel
+   column, but the tooltip searches the raw data. */
+describe("ChartScene - the hit on a downsampled line", () => {
+  it("names the reading under the pointer, not one the drawing kept", async () => {
+    const root = document.createElement("div");
+    document.body.appendChild(root);
+    const scene = new ChartScene();
+    scene.bind(root, document.createElement("canvas"), document.createElement("canvas"), root);
+    scene.registerAxis(xAxis);
+    scene.registerAxis(yAxis);
+    scene.registerSeries(line);
+    scene.registerTooltip({ mode: "x" });
+    // 10,000 readings in 400 pixels: 25 to a column.
+    scene.setData(Array.from({ length: 10_000 }, (_, t) => ({ t, a: t % 7 })));
+    scene.requestResize(400, 300);
+    await frame();
+    const x = scene.getLayoutSnapshot().layout.axes.find((a) => a.orientation === "x")?.scale;
+    if (x === undefined) throw new Error("x axis missing");
+    scene.pointerMove(x.toPx(5003), 150);
+    const point = scene.getHoverSnapshot().hover?.hit.points[0];
+    expect(point?.index).toBe(5003);
+    expect(point?.yValue).toBe(5003 % 7);
+    scene.unbind();
+  });
+});

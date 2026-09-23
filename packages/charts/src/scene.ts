@@ -41,6 +41,7 @@ import {
   type SeriesDrawItem,
 } from "./draw";
 import { nearestIndex, nearestPoint } from "./hit";
+import { downsample } from "./downsample";
 import { segmentEnd, segmentIndex } from "./state";
 import { cellSize, cellIndex, measureSpacing } from "./cells";
 import { assess } from "./limit";
@@ -1514,6 +1515,15 @@ export class ChartScene {
         alpha: dimmed ? 0.25 : 1,
       };
       const config = entry.config;
+      // A course draws its window, and above two points per pixel column only
+      // what shows (downsample.ts); every other kind draws its points.
+      const course =
+        config.kind === "line" || config.kind === "area"
+          ? downsample(mat, xAxis.scale.domain[0], xAxis.scale.domain[1], xAxis.scale.m, xAxis.scale.b, this.layout.plot.width)
+          : mat;
+      base.x = course.x;
+      base.y = course.y;
+      base.length = course.length;
       switch (config.kind) {
         case "line":
           items.push({
@@ -1529,7 +1539,7 @@ export class ChartScene {
           items.push({
             ...base,
             kind: "area",
-            y0: mat.y0,
+            y0: course.y0,
             baseline: 0,
             fillOpacity: config.fillOpacity,
             strokeWidth: config.strokeWidth,

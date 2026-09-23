@@ -28,6 +28,7 @@ export type { ExampleAddress };
     the gap carries the rule that makes it. */
 const NOT_PHOTOGRAPHED: Readonly<Record<string, string>> = {
   benchmark: "R-5.1: the benchmark measures, and a measurement is not a picture.",
+  "a-week-of-seconds": "R-5.1: it measures the series draw, as the benchmark does.",
 };
 
 export const EXAMPLE_ADDRESSES: readonly ExampleAddress[] = exampleAddresses(EXAMPLES_DIR).filter(
