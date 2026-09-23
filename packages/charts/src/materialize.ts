@@ -2,10 +2,17 @@
 
    Deliberately free of the DOM and of scene state: the draw loop works only on
    the typed arrays produced here, and both functions are directly unit testable
-   that way. Gaps (null/undefined/NaN out of the accessor) are encoded as NaN
-   (R-2.5). */
+   that way. Gaps (null/undefined/NaN/±Infinity out of the accessor) are
+   encoded as NaN (R-2.5). */
 
 import type { Accessor, MaterializedSeries } from "./types";
+
+/** An accessor's value, or NaN for a gap. An infinity is a gap as well: it is no
+    value a chart can place, and in the extent it would leave no finite range -
+    the axis would fall back to [0, 1] and press every other value flat. */
+function valueOf(raw: number | null | undefined): number {
+  return raw === null || raw === undefined || !Number.isFinite(raw) ? Number.NaN : raw;
+}
 
 export interface Extent {
   xMin: number;
@@ -79,28 +86,25 @@ export function materializeSeries<T>(
     const xRaw = xAccessor(d, i);
     const xv = map === null ? xRaw : map(xRaw);
     x[i] = xv;
-    // A point in removed time keeps its position, so that the channel stays
-    // ascending, but it counts neither in the extent nor as a value.
-    const calendarGap = isGap !== null && isGap(xRaw);
-    if (!calendarGap) {
+    // A point in removed time - or at an x that is no place, an infinity -
+    // keeps its position, so that the channel stays ascending, but it counts
+    // neither in the extent nor as a value.
+    const unplaced = !Number.isFinite(xRaw) || (isGap !== null && isGap(xRaw));
+    if (!unplaced) {
       if (xv < xMin) xMin = xv;
       if (xv > xMax) xMax = xv;
     }
-    const raw = calendarGap ? null : yAccessor(d, i);
-    const yv = raw === null || raw === undefined ? Number.NaN : raw;
+    const yv = unplaced ? Number.NaN : valueOf(yAccessor(d, i));
     y[i] = yv;
     // Comparisons with NaN are always false - gaps thereby drop out of the extent.
     if (yv < yMin) yMin = yv;
     if (yv > yMax) yMax = yv;
     if (valueAccessor !== null) {
-      const rawValue = calendarGap ? null : valueAccessor(d, i);
       // A missing value is a hole in the matrix, not a zero.
-      (w as Float64Array)[i] =
-        rawValue === null || rawValue === undefined ? Number.NaN : rawValue;
+      (w as Float64Array)[i] = unplaced ? Number.NaN : valueOf(valueAccessor(d, i));
     }
     if (baseAccessor !== null) {
-      const rawBase = calendarGap ? null : baseAccessor(d, i);
-      const uv = rawBase === null || rawBase === undefined ? Number.NaN : rawBase;
+      const uv = unplaced ? Number.NaN : valueOf(baseAccessor(d, i));
       (y0 as Float64Array)[i] = uv;
       if (uv < yMin) yMin = uv;
       if (uv > yMax) yMax = uv;

@@ -12,7 +12,7 @@ import { useSeries } from "./context";
 import type { Accessor, BarSeriesConfig } from "./types";
 
 export interface BarProps<T> {
-  /** Height; null/undefined/NaN means a gap (R-2.5). */
+  /** Height; null/undefined/NaN/±Infinity means a gap (R-2.5). */
   accessor: Accessor<T>;
   /** Binding to an x axis (R-4.12). */
   xAxisId?: string;

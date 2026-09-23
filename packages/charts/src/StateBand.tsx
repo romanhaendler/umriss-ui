@@ -18,9 +18,9 @@ import { useSeries } from "./context";
 import type { Accessor, StateEntry, StateSeriesConfig } from "./types";
 
 export interface StateBandProps<T> {
-  /** Index of the state in `states`; null/undefined/NaN is a gap - and a gap
-      stays a hole, it gets no colour for "unknown". A colour would be a claim
-      about the interval. */
+  /** Index of the state in `states`; null/undefined/NaN/±Infinity is a gap -
+      and a gap stays a hole, it gets no colour for "unknown". A colour would
+      be a claim about the interval. */
   accessor: Accessor<T>;
   /** The closed set of states, in the order of their codes. */
   states: readonly StateEntry[];
