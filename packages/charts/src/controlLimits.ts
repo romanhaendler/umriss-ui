@@ -23,6 +23,8 @@
    `controlChart.ts` lying beside it. Same reason as bars.ts and cells.ts; see
    CONTEXT.md on module names. */
 
+import { warnOnce } from "./dev";
+
 /** Centre line, estimated spread and the control limits at three sigma. */
 export interface ControlLimits {
   readonly center: number;
@@ -191,6 +193,9 @@ export function ruleOutlier(
   limits: ControlLimits,
 ): number[] {
   const hits: number[] = [];
+  // Without a spread the limits lie on the centre line, and every value off it
+  // would be "beyond" - a statement about the window, not about the value.
+  if (!(limits.sigma > 0)) return hits;
   for (let i = 0; i < values.length; i++) {
     const value = values[i] as number;
     if (value > limits.upper || value < limits.lower) hits.push(i);
@@ -243,6 +248,8 @@ export function ruleTwoOfThree(
   values: readonly number[],
   limits: ControlLimits,
 ): number[] {
+  // The same degenerate zone as for rule 1.
+  if (!(limits.sigma > 0)) return [];
   const upper = limits.center + 2 * limits.sigma;
   const lower = limits.center - 2 * limits.sigma;
   const marked = new Set<number>();
@@ -272,6 +279,13 @@ export function violations(
   options: Partial<RuleOptions> = {},
 ): Violation[] {
   const o: RuleOptions = { ...defaultRules, ...options };
+  if (limits.sigma === 0) {
+    warnOnce(
+      "control-sigma-zero",
+      "control limits with sigma 0 lie on the centre line - the reference window is constant. " +
+        "Rules 1 and 4 find nothing there; take a window with spread, or a given sigma.",
+    );
+  }
   const found: Violation[] = [];
   const take = (rule: RuleName, indices: number[]) => {
     if (indices.length > 0) found.push({ rule, indices });

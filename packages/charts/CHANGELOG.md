@@ -112,6 +112,15 @@ From `.scratch/charts-fixes/spec.md`; the findings stand in
   left the axis in the old format. Such a function is now compared by identity.
   The known limit stays and is now documented at the props: two functions of
   the same text that read different captured values count as equal.
+- **A control chart over a constant reference window finds no outliers.**
+  Sigma is 0 there, the limits lie on the centre line, and every value off it
+  was an outlier - and two of three beyond "two sigma". Both rules now find
+  nothing without a spread, and DEV warns that the limits are degenerate.
+- **`Chart.height` says its default.** The comment promised the host's height;
+  the default is and was 300.
+- **A matrix buckets its cells once per change**, not on every redraw of the
+  series layer - a legend hover redraws it - and its tooltip chip no longer
+  scans every cell on each pointer move.
 
 ---
 
