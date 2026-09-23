@@ -585,6 +585,9 @@ export interface OverlayLayerInput {
   plot: Rect;
   theme: ResolvedTheme;
   hover: HoverState | null;
+  /** The crosshair another chart's pointer asks for (`syncId`); the own
+      hover wins. */
+  syncPx: number | null;
 }
 
 export function drawOverlayLayer(
@@ -593,10 +596,11 @@ export function drawOverlayLayer(
 ): void {
   const { width, height, plot, theme, hover } = input;
   ctx.clearRect(0, 0, width, height);
-  if (hover === null || plot.width <= 0 || plot.height <= 0) return;
+  const at = hover?.hit.xPx ?? input.syncPx;
+  if (at === null || plot.width <= 0 || plot.height <= 0) return;
 
   // Crosshair at the snapped x pixel position (R-4.7).
-  const px = crisp(hover.hit.xPx);
+  const px = crisp(at);
   if (px >= plot.x && px <= plot.x + plot.width) {
     ctx.beginPath();
     ctx.moveTo(px, plot.y);
@@ -609,7 +613,7 @@ export function drawOverlayLayer(
 
   // Hover marker: fill in the series colour, a 2-px ring in the background
   // colour (R-4.5).
-  for (const marker of hover.marker) {
+  for (const marker of hover?.marker ?? []) {
     ctx.beginPath();
     ctx.arc(marker.x, marker.y, 5.5, 0, Math.PI * 2);
     ctx.fillStyle = theme.colorBg;

@@ -54,6 +54,11 @@ export interface ChartProps<T> {
       stay. Without a value "No data"; any other language or wording is the
       caller's. */
   empty?: ReactNode;
+  /** Charts with the same id share the pointer's x position, in domain units:
+      each draws its crosshair there, the tooltip stays with the chart under
+      the pointer. Zoom is not shared - give every chart the same controlled
+      `domain`. */
+  syncId?: string;
   /** Instrumentation for the benchmark page (R-5.1); not needed otherwise. */
   onPerf?: (perf: ChartPerf) => void;
   /** The axes, series and companions of this chart. They draw nothing
@@ -72,6 +77,7 @@ export function Chart<T>(props: ChartProps<T>): ReactNode {
     className,
     style,
     onPerf,
+    syncId,
     empty = "No data",
     children,
   } = props;
@@ -164,6 +170,11 @@ export function Chart<T>(props: ChartProps<T>): ReactNode {
   useEffect(() => {
     scene.setOnPerf(onPerf ?? null);
   }, [scene, onPerf]);
+
+  useEffect(() => {
+    scene.setSyncId(syncId ?? null);
+    return () => scene.setSyncId(null);
+  }, [scene, syncId]);
 
   // Runs after the effects of all children: only then is every axis and series
   // registered (R-4.12, R-4.13).

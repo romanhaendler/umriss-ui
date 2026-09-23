@@ -57,6 +57,11 @@ From `.scratch/charts-long-series/spec.md`; the decisions stand in
   the hour's range, not the week's. A fixed foot (area, bar) and the limits
   count as before; where the x domain is not fixed, every point is shown and
   counts.
+- **`Chart syncId`**: charts with the same id share the pointer's x
+  position, in domain units. Each draws its crosshair there, on its x axis of
+  the same id or its first; the tooltip stays with the chart under the
+  pointer. Zoom is not shared - pass every chart the same controlled
+  `domain`.
 
 ---
 

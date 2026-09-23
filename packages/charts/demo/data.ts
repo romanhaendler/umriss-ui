@@ -541,6 +541,9 @@ export interface KilnPoint {
   gas: number;
   /** Draught in Pa - the kiln runs below the hall's pressure. */
   draught: number;
+  /** Flue gas temperature in °C: the harder the kiln fires, the hotter it
+      leaves. */
+  flue: number;
 }
 
 /** A week of a kiln from Monday midnight, one reading every `step`
@@ -569,11 +572,14 @@ export function kiln(seed: number, step: number): KilnPoint[] {
     const demand = tripped ? 0 : Math.max(0, holding + (target - temperature) * 0.3);
     gas += (demand - gas) * Math.min(1, k * 4);
     temperature += (gas - holding) * k;
+    const shown = temperature + (r() - 0.5) * 4;
+    const reading = Math.max(0, gas + (r() - 0.5) * 1.5);
     points[i] = {
       t: WEEK_START + offset,
-      temperature: temperature + (r() - 0.5) * 4,
-      gas: gas + (r() - 0.5) * 1.5,
+      temperature: shown,
+      gas: reading,
       draught: -8 - gas * 0.12 + (r() - 0.5) * 1.2,
+      flue: 250 + reading * 3,
     };
   }
   return points;

@@ -223,6 +223,16 @@ const SNAP_DISTANCE = 12;
 
 let nextRegistration = 0;
 
+/** Charts that share a `syncId`: the pointer's x position goes to all of
+    them (charts-long-series 04). */
+const syncGroups = new Map<string, Set<ChartScene>>();
+
+/** A shared x position, in the units of the x axis it was read on. */
+interface SyncedX {
+  axisId: string;
+  value: number;
+}
+
 export function fnEqual(a: unknown, b: unknown): boolean {
   if (a === b) return true;
   if (typeof a !== "function" || typeof b !== "function") return false;
@@ -1653,6 +1663,7 @@ export class ChartScene {
       plot: this.layout.plot,
       theme,
       hover: this.hover,
+      syncPx: this.syncedPx(),
     });
     this.positionTooltip();
   }
@@ -1687,6 +1698,8 @@ export class ChartScene {
     this.hover.mouseX = x;
     this.hover.mouseY = y;
     this.markOverlayDirty(); // R-2.11: a hover never touches the series layer
+    const xAxis = this.findAxis("x", hit.primary.entry.config.xAxisId);
+    if (xAxis !== null) this.share({ axisId: xAxis.id, value: xAxis.scale.fromPx(hit.state.hit.xPx) });
     if (key !== this.hoverKey) {
       // Written out once per hit, not per movement: a format is not free.
       const xAxisId = hit.primary.entry.config.xAxisId;
@@ -1698,6 +1711,7 @@ export class ChartScene {
   }
 
   pointerLeave(): void {
+    this.share(null);
     if (this.hover === null && this.hoverKey === "") return;
     this.hover = null;
     this.hoverKey = "";
@@ -1819,6 +1833,50 @@ export class ChartScene {
     };
     const key = chosen.map((k) => `${k.entry.order}:${k.index}`).join("|");
     return { key, state, primary, chosen };
+  }
+
+  /* ---------- Cursor sync (charts-long-series 04) ----------
+
+     Only the x position travels, in domain units: each chart draws its own
+     crosshair there, on its x axis of the same id - or its first -, and the
+     tooltip stays with the chart under the pointer. Zoom is not shared; the
+     caller gives every chart the same controlled domain. */
+
+  private syncId: string | null = null;
+  /** Where another chart's pointer stands; null while none does. */
+  private synced: SyncedX | null = null;
+  private sent: SyncedX | null = null;
+
+  setSyncId(id: string | null): void {
+    if (id === this.syncId) return;
+    if (this.syncId !== null) {
+      this.share(null);
+      syncGroups.get(this.syncId)?.delete(this);
+    }
+    this.syncId = id;
+    if (id !== null) {
+      const group = syncGroups.get(id) ?? new Set<ChartScene>();
+      group.add(this);
+      syncGroups.set(id, group);
+    }
+  }
+
+  private share(x: SyncedX | null): void {
+    if (this.syncId === null || (x?.value === this.sent?.value && x?.axisId === this.sent?.axisId)) return;
+    this.sent = x;
+    for (const other of syncGroups.get(this.syncId) ?? []) {
+      if (other === this) continue;
+      other.synced = x;
+      other.markOverlayDirty();
+    }
+  }
+
+  /** The crosshair a synced position asks for, in this chart's pixels. */
+  private syncedPx(): number | null {
+    const x = this.synced;
+    if (x === null) return null;
+    const axis = this.findAxis("x", x.axisId) ?? this.layout.axes.find((a) => a.orientation === "x") ?? null;
+    return axis === null ? null : axis.scale.toPx(x.value);
   }
 
   /* ---------- Zoom and pan (charts-long-series 01) ----------
