@@ -24,6 +24,9 @@ export interface BarProps<T> {
       "Series n" and a warning stands in DEV - an unnamed series is a colour
       nobody can look up. */
   name?: string;
+  /** The value as the tooltip writes it; without one the y axis' `tickFormat`,
+      then the default. */
+  format?: (value: number) => string;
   /** Any CSS colour value; without one the palette --uc-series-N. */
   color?: string;
   /** Width as a fraction of the step; just under 1, so that neighbours do not
@@ -38,6 +41,7 @@ export function Bar<T>(props: BarProps<T>): null {
     yAxisId = "y",
     data,
     name,
+    format,
     color,
     barWidth = 0.8,
   } = props;
@@ -51,10 +55,11 @@ export function Bar<T>(props: BarProps<T>): null {
         yAxisId,
         data,
         name,
+        format,
         color,
         barWidth,
       }) as BarSeriesConfig,
-    [accessor, xAxisId, yAxisId, data, name, color, barWidth],
+    [accessor, xAxisId, yAxisId, data, name, format, color, barWidth],
   );
 
   useSeries("Bar", config);

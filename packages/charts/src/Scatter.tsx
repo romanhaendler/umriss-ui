@@ -23,6 +23,9 @@ export interface ScatterProps<T> {
       "Series n" and a warning stands in DEV - an unnamed series is a colour
       nobody can look up. */
   name?: string;
+  /** The value as the tooltip writes it; without one the y axis' `tickFormat`,
+      then the default. */
+  format?: (value: number) => string;
   /** Any CSS colour value; without one the palette --uc-series-N. */
   color?: string;
   /** A role instead of a colour value; the theme resolves it. */
@@ -38,6 +41,7 @@ export function Scatter<T>(props: ScatterProps<T>): null {
     yAxisId = "y",
     data,
     name,
+    format,
     color,
     tone,
     radius = 3,
@@ -52,11 +56,12 @@ export function Scatter<T>(props: ScatterProps<T>): null {
         yAxisId,
         data,
         name,
+        format,
         color,
         tone,
         radius,
       }) as ScatterSeriesConfig,
-    [accessor, xAxisId, yAxisId, data, name, color, tone, radius],
+    [accessor, xAxisId, yAxisId, data, name, format, color, tone, radius],
   );
 
   useSeries("Scatter", config);

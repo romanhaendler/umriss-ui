@@ -235,6 +235,7 @@ Screenshot pages carry their name in brackets.
 | A chart of bands or cells only anchors crosshair and tooltip at the pointer | R-4.7 | Unit (jsdom scene) |
 | The built-in tooltip, numbers in mono with tabular figures | R-4.8 | Interaction, Manual |
 | A value in its y axis' `tickFormat`, the default without one; with several x axes each point's own x value in its own axis' format | R-4.8 | Unit (jsdom tooltip) |
+| A series' own `format` before its y axis' `tickFormat`, a matrix' value included; `ControlChart` passes it to its line and its violations | Q16 | Unit (jsdom tooltip, jsdom control chart), Screenshot (`value-format`) |
 | A render prop for one's own content | 4.4 | Screenshot (`configuration`), Manual |
 | 12 px beside the crosshair, flipping at the edge, clamped vertically | R-4.9 | Interaction |
 | Leaving the plot area and a window `blur` end the hover | R-4.10 | Interaction |

@@ -46,6 +46,9 @@ export interface MatrixProps<T> {
       "Series n" and a warning stands in DEV - an unnamed series is a colour
       nobody can look up. */
   name?: string;
+  /** The value as the tooltip writes it; without one the default. The y
+      axis' `tickFormat` writes the row, not the value. */
+  format?: (value: number) => string;
 }
 
 export function Matrix<T>(props: MatrixProps<T>): null {
@@ -57,6 +60,7 @@ export function Matrix<T>(props: MatrixProps<T>): null {
     yAxisId = "y",
     data,
     name,
+    format,
   } = props;
 
   const effectiveColoring = useMemo<MatrixColoring>(
@@ -75,8 +79,9 @@ export function Matrix<T>(props: MatrixProps<T>): null {
         yAxisId,
         data,
         name,
+        format,
       }) as MatrixSeriesConfig,
-    [accessor, value, effectiveColoring, xAxisId, yAxisId, data, name],
+    [accessor, value, effectiveColoring, xAxisId, yAxisId, data, name, format],
   );
 
   useSeries("Matrix", config);

@@ -19,6 +19,9 @@ export interface LineProps<T> {
       "Series n" and a warning stands in DEV - an unnamed series is a colour
       nobody can look up. */
   name?: string;
+  /** The value as the tooltip writes it; without one the y axis' `tickFormat`,
+      then the default. */
+  format?: (value: number) => string;
   /** Any CSS colour value; without one the palette --uc-series-N. */
   color?: string;
   /** A role instead of a colour value; the theme resolves it. */
@@ -40,6 +43,7 @@ export function Line<T>(props: LineProps<T>): null {
     yAxisId = "y",
     data,
     name,
+    format,
     color,
     tone,
     strokeWidth = 1.5,
@@ -56,13 +60,14 @@ export function Line<T>(props: LineProps<T>): null {
         yAxisId,
         data,
         name,
+        format,
         color,
         tone,
         strokeWidth,
         dash,
         markers,
       }) as LineSeriesConfig,
-    [accessor, xAxisId, yAxisId, data, name, color, tone, strokeWidth, dash, markers],
+    [accessor, xAxisId, yAxisId, data, name, format, color, tone, strokeWidth, dash, markers],
   );
 
   useSeries("Line", config);

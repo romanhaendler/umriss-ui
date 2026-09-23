@@ -29,6 +29,30 @@ vi.mock("../src/LimitLine", async (original) => {
   };
 });
 
+/* The same for the line and the scatter: what they are handed, passed on to the
+   real ones. */
+const series = vi.hoisted(() => [] as Array<Record<string, unknown>>);
+vi.mock("../src/Line", async (original) => {
+  const real = await original<typeof import("../src/Line")>();
+  return {
+    ...real,
+    Line: (props: Parameters<typeof real.Line>[0]) => {
+      series.push({ ...props });
+      return real.Line(props);
+    },
+  };
+});
+vi.mock("../src/Scatter", async (original) => {
+  const real = await original<typeof import("../src/Scatter")>();
+  return {
+    ...real,
+    Scatter: (props: Parameters<typeof real.Scatter>[0]) => {
+      series.push({ ...props });
+      return real.Scatter(props);
+    },
+  };
+});
+
 const controlLabels = () =>
   passed.filter((p) => p.role === "control").map((p) => p.label);
 
@@ -51,6 +75,7 @@ afterEach(async () => {
   await teardown?.();
   teardown = null;
   passed.length = 0;
+  series.length = 0;
   vi.restoreAllMocks();
 });
 
@@ -126,5 +151,18 @@ describe("ControlChart - no text brought along", () => {
       />,
     );
     expect(legend(host)).toEqual(["Feature", "Feature out of control"]);
+  });
+});
+
+/* charts-essentials 02: the value format reaches the line - and the violations,
+   which are the same values. */
+describe("ControlChart - the value format", () => {
+  it("passes format on to its line and its violations", async () => {
+    const format = (v: number) => `${v.toFixed(2)} mm`;
+    await render(
+      <ControlChart accessor={(d: Point) => d.value} data={DATA} origin={ORIGIN} name="Feature" format={format} />,
+    );
+    expect(series.length).toBeGreaterThan(0);
+    expect(series.every((props) => props.format === format)).toBe(true);
   });
 });

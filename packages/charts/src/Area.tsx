@@ -24,6 +24,9 @@ export interface AreaProps<T> {
       "Series n" and a warning stands in DEV - an unnamed series is a colour
       nobody can look up. */
   name?: string;
+  /** The value as the tooltip writes it; without one the y axis' `tickFormat`,
+      then the default. */
+  format?: (value: number) => string;
   /** Any CSS colour value; without one the palette --uc-series-N. */
   color?: string;
   /** Opacity of the fill; the outline stays fully opaque. */
@@ -40,6 +43,7 @@ export function Area<T>(props: AreaProps<T>): null {
     yAxisId = "y",
     data,
     name,
+    format,
     color,
     fillOpacity = 0.18,
     strokeWidth = 1.5,
@@ -55,11 +59,12 @@ export function Area<T>(props: AreaProps<T>): null {
         yAxisId,
         data,
         name,
+        format,
         color,
         fillOpacity,
         strokeWidth,
       }) as AreaSeriesConfig,
-    [accessor, baseline, xAxisId, yAxisId, data, name, color, fillOpacity, strokeWidth],
+    [accessor, baseline, xAxisId, yAxisId, data, name, format, color, fillOpacity, strokeWidth],
   );
 
   useSeries("Area", config);
