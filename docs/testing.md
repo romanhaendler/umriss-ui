@@ -260,10 +260,13 @@ jsdom has no `PointerEvent` at all, and no pointer capture either.
 ## Known open
 
 * **The charts' example pictures do not reproduce, and that is new.** Two to
-  four of the twenty-seven differ from run to run – a different set each time, by
+  four of the twenty-seven differed from run to run – a different set each time, by
   371 to 2338 pixels, which is a ratio of 0.001 to 0.006 against the workspace
   bound of 0.001. The differences sit on the numeric tick labels and along the
-  marks.
+  marks. Since the charts-review packages (2026-09-23) the demo has more
+  examples and it is worse: 13 to 24 of the example pictures fail per full run,
+  again a different set each time, a whole plot shifted by a fraction of a pixel
+  (up to a ratio of 0.01); a picture that fails passes on a repeat.
 
   **The same drift reaches the schedule when an example MOVES.** Cutting the
   demo by feature (`schedule-lane-groups` 05) put every example at a different
