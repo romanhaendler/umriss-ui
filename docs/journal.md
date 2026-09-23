@@ -41,7 +41,11 @@ look; core gains one wording entry - each changelog carries the lines.*
   Result as the last row, underlined twice, verdicts as core's badges. A
   fourth pass lowered the last row to the height of every other - its weight
   is its surface, type and double rule - kept long formulas to one line, and
-  let a derivation fade in. Every baseline of the package was renewed.
+  let a derivation fade in. A fifth pass came from a white strip the hover
+  band left at the left edge: every hover, focus and width was then checked in
+  a matrix, the band runs full width under lines that now lie above it, and
+  the component measures its own width for a phone or a side panel. Every
+  baseline of the package was renewed.
 - **The demo grew to six pages and twenty-three examples**, from two numbers
   and a sum to the cost per piece of a production order.
 

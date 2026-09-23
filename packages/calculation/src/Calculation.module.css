@@ -18,13 +18,8 @@
 @layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.components {
-  .calculation {
+  .frame {
     composes: text from "#own-styles";
-    display: grid;
-    grid-template-columns: fit-content(22rem) minmax(0, 1fr) auto auto auto auto;
-    margin: 0;
-    padding: 0;
-    list-style: none;
     font-size: var(--u-text-sm);
     border-radius: var(--u-radius-md);
     background: var(--u-color-surface);
@@ -33,6 +28,19 @@
     /* The disclosure's square: the falling line starts at its middle, and
        notes start past it. */
     --disclosure-size: 20px;
+    /* Measured against its own width, not the window's: a calculation in a
+       side panel is as narrow as one on a phone. A size container has no
+       width of its own content, so it takes the width it is given. */
+    container-type: inline-size;
+    width: 100%;
+  }
+
+  .calculation {
+    display: grid;
+    grid-template-columns: fit-content(22rem) minmax(0, 1fr) auto auto auto auto;
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
 
   .list,
@@ -65,22 +73,29 @@
   /* An open row and its derivation are one group on the sunken surface. A
      line falls from beneath the row's disclosure through everything it
      opened; a group inside a group draws its own, and the outer one stays in
-     view to its left. */
+     view to its left. The line lies ABOVE the rows, so that nothing a row
+     paints - the hover band across its full width - can cover it. */
   .item {
     --fall: calc(var(--u-space-3) + var(--depth, 0) * var(--u-space-5) + var(--disclosure-size) / 2 - 1px);
   }
 
   .derivation {
-    background-image: linear-gradient(
-      to right,
-      transparent var(--fall),
-      var(--u-color-accent) var(--fall),
-      var(--u-color-accent) calc(var(--fall) + 2px),
-      transparent calc(var(--fall) + 2px)
-    );
+    position: relative;
   }
 
-  :not(.derivation) > .item[data-open] > .line,
+  .derivation::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--fall);
+    z-index: 1;
+    width: 2px;
+    background: var(--u-color-accent);
+    pointer-events: none;
+  }
+
+  :not(.derivation) > .item[data-open] > .line:not([data-mark]),
   :not(.derivation) > .item > .derivation {
     background-color: var(--u-color-surface-sunken);
   }
@@ -110,19 +125,13 @@
     cursor: pointer;
   }
 
-  /* Hover coupling: a flat band from where the label starts, so that the
-     lines of the groups around it stay in view. */
+  /* Hover coupling: a flat band across the whole row. */
   .line[data-mark] {
-    --band: var(--u-edge-color);
-    background: linear-gradient(
-      to right,
-      transparent calc(var(--u-space-3) + var(--depth, 0) * var(--u-space-5)),
-      var(--band) 0
-    );
+    background: var(--u-edge-color);
   }
 
   .line[data-mark="use"] {
-    --band: var(--u-color-accent-subtle);
+    background: var(--u-color-accent-subtle);
   }
 
   .labelCell,
@@ -371,6 +380,37 @@
   .freshness[data-freshness="lost"] {
     color: var(--u-color-danger);
     font-weight: var(--u-weight-medium);
+  }
+
+  /* Narrow: the label takes the free width, the names of a folded row give
+     way - they stand in the sentence and, opened, beneath the row - and
+     verdict and target move beneath the label. Numbers keep their column. */
+  @container (max-width: 34rem) {
+    .calculation {
+      grid-template-columns: minmax(0, 1fr) 0 auto auto auto 0;
+    }
+
+    .names {
+      display: none;
+    }
+
+    .labelCell {
+      padding-right: var(--u-space-3);
+    }
+
+    .assessment:not(:empty) {
+      grid-area: 2 / 1 / 3 / -1;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+      padding: 0 var(--u-space-3) var(--u-space-2)
+        calc(var(--u-space-3) + var(--depth, 0) * var(--u-space-5) + var(--disclosure-size) + var(--u-space-2));
+      white-space: normal;
+    }
+
+    .notes {
+      grid-row: 3;
+      grid-column: 1 / -1;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {

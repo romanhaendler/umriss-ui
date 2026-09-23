@@ -99,8 +99,14 @@ medium radius, rows of one height divided by hairlines.
   verdict inside a folded row.
 - **At most two rows per quantity**: only what a quantity says about itself -
   explanation, source, freshness, the caller's aside - stands beneath its label.
-- **Hover coupling is a flat band** from the label's indent, so that the lines
-  of the groups stay in view; a reference keeps its label in italics.
+- **Hover coupling is a flat band across the whole row**; the falling lines
+  lie above the rows, so no band covers them. A closing row lights up only
+  where its own quantity is meant. A reference keeps its label in italics.
+- **The component measures its own width**, not the window's: narrower than
+  34 rem - a phone, a side panel - the names of a folded row give way, the
+  label takes the free width, and verdict and target move beneath it. It
+  therefore takes the width it is given; `className` and `style` size the
+  surface.
 
 ## Considered Options
 
