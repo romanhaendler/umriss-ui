@@ -453,6 +453,21 @@ describe("Operating time axis: the x channel stays ascending", () => {
     expect(y[4]).toBe(14);
   });
 
+  it("maps an x limit into operating time for the extent", () => {
+    // 26 o'clock on the wall is the second shift's second hour: 8 h + 2 h.
+    const s = sceneWithCalendar();
+    s.registerLimit({
+      kind: "line",
+      value: 26 * HOUR,
+      axisId: "x",
+      orientation: "x",
+      severity: "alarm",
+      role: "specification",
+      inExtent: true,
+    });
+    expect(s.axisExtent("x", "x")).toEqual([1 * HOUR, 10 * HOUR]);
+  });
+
   it("does not let removed time into the extent", () => {
     // Otherwise the axis would reach to a seam at which nothing lies.
     const s = sceneWithCalendar();

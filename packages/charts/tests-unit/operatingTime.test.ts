@@ -18,6 +18,7 @@ import {
   HOUR,
   DAY,
   timeStep,
+  localOffset,
 } from "../src/operatingTime";
 
 /** Two early shifts on two days, in hours since a zero point:
@@ -337,5 +338,19 @@ describe("operatingTicks - ticks for an extent in operating time", () => {
   it("yields nothing without a calendar and for a reversed extent", () => {
     expect(operatingTicks([], 0, 16 * HOUR, 8)).toEqual([]);
     expect(operatingTicks(shifts, 16 * HOUR, 0, 8)).toEqual([]);
+  });
+});
+
+/* The tests run under Europe/Berlin (vitest.config.ts). */
+describe("localOffset - the grid's shift onto local time", () => {
+  it("is the time zone's offset at the instant, across the clock change", () => {
+    expect(localOffset(Date.UTC(2026, 0, 15, 12))).toBe(-1 * HOUR);
+    expect(localOffset(Date.UTC(2026, 6, 15, 12))).toBe(-2 * HOUR);
+  });
+
+  it("puts a day's grid on local midnight", () => {
+    const noon = Date.UTC(2026, 0, 15, 12);
+    const ticks = operatingTimeTicks([], noon, noon + DAY, DAY, localOffset(noon));
+    expect(ticks.map((t) => new Date(t.wallClock).getHours())).toEqual([0]);
   });
 });

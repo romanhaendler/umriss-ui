@@ -5,7 +5,7 @@
 
 import { describe, expect, it, vi } from "vitest";
 import CHARTS_CSS from "../src/styles/charts.css?raw";
-import { toWallClock } from "../src/operatingTime";
+import { toOperatingTime, toWallClock } from "../src/operatingTime";
 import {
   BAND_GAP,
   CLASS_TICK,
@@ -427,5 +427,60 @@ describe("computeLayout - the label of an x limit", () => {
     expect(tick.fontSize).toBeDefined();
     expect(tick.lineHeight).toBeDefined();
     expect(declarations(".uc-limit-label")).toEqual(tick);
+  });
+});
+
+/* charts-fixes 09: an operating-time axis stood its day and half-day ticks on
+   UTC's midnight and labelled them in local time - "01:00" under a day change
+   in CET - and took explicit ticks as operating time. The tests run under
+   Europe/Berlin (vitest.config.ts). */
+describe("computeLayout - ticks of an operating-time axis", () => {
+  const HOUR = 3_600_000;
+  const start = new Date(2026, 2, 16, 0, 0).getTime();
+
+  function xAxisOf(calendar: { from: number; to: number }[], part: Partial<AxisInput> = {}) {
+    const total = calendar.reduce((sum, i) => sum + i.to - i.from, 0);
+    return computeLayout({
+      width: 900,
+      height: 300,
+      padding: { top: 8, right: 8, bottom: 8, left: 8 },
+      axes: [
+        axis({
+          id: "x",
+          orientation: "x",
+          position: "bottom",
+          calendar,
+          extent: [0, total],
+          domainMode: "data",
+          ...part,
+        }),
+        axis({ id: "y", orientation: "y", position: "left" }),
+      ],
+      measure,
+      hysteresis: new Map(),
+    });
+  }
+
+  it("stands half-day ticks on local midnight and noon", () => {
+    const layout = xAxisOf([{ from: start, to: start + 72 * HOUR }]);
+    const ticks = find(layout.axes, "x:x").ticks;
+    expect(ticks.length).toBeGreaterThan(2);
+    for (const tick of ticks) {
+      const d = new Date(toWallClock(tick.value, [{ from: start, to: start + 72 * HOUR }]));
+      expect([0, 12]).toContain(d.getHours());
+      expect(d.getMinutes()).toBe(0);
+    }
+  });
+
+  it("takes explicit ticks in wall-clock time and maps them, dropping removed time", () => {
+    const calendar = [
+      { from: start + 6 * HOUR, to: start + 14 * HOUR },
+      { from: start + 30 * HOUR, to: start + 38 * HOUR },
+    ];
+    const wall = [start + 8 * HOUR, start + 20 * HOUR, start + 32 * HOUR];
+    const layout = xAxisOf(calendar, { tickValues: wall });
+    const values = find(layout.axes, "x:x").ticks.map((t) => t.value);
+    expect(values).toEqual([toOperatingTime(wall[0] as number, calendar), toOperatingTime(wall[2] as number, calendar)]);
+    expect(values).toEqual([2 * HOUR, 10 * HOUR]);
   });
 });

@@ -20,7 +20,14 @@
 import { LinearScale } from "./scale";
 import { formatTick } from "./format";
 import { niceDomain, dataDomain, tickStep, ticksFor } from "./ticks";
-import { operatingTicks, breaks as calendarBreaks, toWallClock } from "./operatingTime";
+import {
+  breaks as calendarBreaks,
+  calendarFrom,
+  localOffset,
+  operatingTicks,
+  toOperatingTime,
+  toWallClock,
+} from "./operatingTime";
 import type { OperatingInterval } from "./operatingTime";
 import type { AxisOrientation, AxisPosition, Rect } from "./types";
 import type { TextSize } from "./measure";
@@ -183,12 +190,21 @@ function tickValuesFor(
   domain: readonly [number, number],
   tickCount: number,
 ): number[] {
-  if (axis.tickValues !== undefined) {
-    return axis.tickValues.filter((v) => v >= domain[0] && v <= domain[1]);
-  }
   const calendar = axis.calendar;
-  if (calendar !== undefined && calendar.length > 0) {
-    return operatingTicks(calendar, domain[0], domain[1], tickCount);
+  const timed = calendar !== undefined && calendar.length > 0;
+  if (axis.tickValues !== undefined) {
+    // Named on the clock, like the data; one in removed time has no place.
+    const values = timed ? axis.tickValues.map((v) => toOperatingTime(v, calendar)) : axis.tickValues;
+    return values.filter((v) => v >= domain[0] && v <= domain[1]);
+  }
+  if (timed) {
+    // Days and half days on LOCAL midnight, the time zone's at the domain's
+    // start - the labels are local.
+    // ponytail: one offset for the domain; across a clock change the day ticks
+    // after it sit an hour off. An offset per candidate when that matters.
+    const built = calendarFrom(calendar);
+    const start = toWallClock(Math.min(Math.max(domain[0], 0), built.total), built);
+    return operatingTicks(built, domain[0], domain[1], tickCount, localOffset(start));
   }
   return ticksFor(domain[0], domain[1], tickCount);
 }

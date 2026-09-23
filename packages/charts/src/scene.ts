@@ -1143,10 +1143,19 @@ export class ChartScene {
     for (const { config } of this.limits.values()) {
       if (!config.inExtent) continue;
       if (config.orientation !== orientation || config.axisId !== id) continue;
-      if (config.kind === "line") out.push(config.value);
-      else out.push(config.from, config.to);
+      if (config.kind === "line") out.push(this.limitAt(config, config.value));
+      else out.push(this.limitAt(config, config.from), this.limitAt(config, config.to));
     }
     return out;
+  }
+
+  /** A limit's value in the units of its axis. An x limit on an operating-time
+      axis is named on the wall clock, like the data, and mapped as they are. */
+  private limitAt(config: LimitConfig, value: number): number {
+    if (config.orientation !== "x") return value;
+    const axis = this.findAxisConfig("x", config.axisId);
+    const map = axis === null ? undefined : this.mapFor(axis);
+    return map === undefined ? value : map(value);
   }
 
   /** Pre-mapping of the x values of an axis with an operating calendar. The scale
@@ -1349,14 +1358,14 @@ export class ChartScene {
       if (config.kind === "band") {
         out.push({
           orientation: config.orientation,
-          fromPx: axis.scale.toPx(config.from),
-          toPx: axis.scale.toPx(config.to),
+          fromPx: axis.scale.toPx(this.limitAt(config, config.from)),
+          toPx: axis.scale.toPx(this.limitAt(config, config.to)),
           color,
           band: true,
           dash,
         });
       } else {
-        const px = axis.scale.toPx(config.value);
+        const px = axis.scale.toPx(this.limitAt(config, config.value));
         out.push({
           orientation: config.orientation,
           fromPx: px,
@@ -1377,7 +1386,10 @@ export class ChartScene {
       if (config.label === undefined || config.label === "") continue;
       const axis = this.findAxis(config.orientation, config.axisId);
       if (axis === null) continue;
-      const value = config.kind === "line" ? config.value : (config.from + config.to) / 2;
+      const value =
+        config.kind === "line"
+          ? this.limitAt(config, config.value)
+          : (this.limitAt(config, config.from) + this.limitAt(config, config.to)) / 2;
       out.push({
         id: order,
         axisKey: axis.key,
