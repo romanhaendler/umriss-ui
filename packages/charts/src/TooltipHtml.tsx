@@ -5,19 +5,12 @@
 
 import { useCallback, useEffect, useSyncExternalStore, type ReactNode } from "react";
 import type { ChartScene } from "./scene";
-import { formatValue } from "./format";
-import type { TooltipPoint } from "./types";
 
-/* What stands in the value column. A state has a name and no meaningful number;
-   a matrix has a number that is not its y position. Deciding both here saves
-   every caller a render prop of their own just to keep a state code from being
+/* What stands in the value column - a state's name, a cell's value, every
+   other value in its y axis' format - the scene writes out once per hit
+   (`HoverSnapshot.rows`): it knows the axes. Deciding it there saves every
+   caller a render prop of their own just to keep a state code from being
    shown. */
-function valueText(point: TooltipPoint): string {
-  const label = point.segment?.label;
-  if (label !== undefined && label !== "") return label;
-  if (point.value !== undefined) return formatValue(point.value);
-  return formatValue(point.yValue);
-}
 
 export function TooltipHtml({ scene }: { scene: ChartScene }): ReactNode {
   const snapshot = useSyncExternalStore(
@@ -55,13 +48,21 @@ export function TooltipHtml({ scene }: { scene: ChartScene }): ReactNode {
               <>
                 <div className="uc-tooltip-head">{snapshot.xLabel}</div>
                 <div className="uc-tooltip-list">
-                  {hover.hit.points.map((point) => (
-                    <div className="uc-tooltip-row" key={`${point.seriesName}-${point.index}`}>
-                      <span className="uc-tooltip-chip" style={{ background: point.color }} />
-                      <span className="uc-tooltip-name">{point.seriesName}</span>
-                      <span className="uc-tooltip-value">{valueText(point)}</span>
-                    </div>
-                  ))}
+                  {hover.hit.points.map((point, k) => {
+                    const row = snapshot.rows[k];
+                    return (
+                      <div className="uc-tooltip-row" key={`${point.seriesName}-${point.index}`}>
+                        <span className="uc-tooltip-chip" style={{ background: point.color }} />
+                        <span className="uc-tooltip-name">
+                          {point.seriesName}
+                          {row !== undefined && row.x !== "" ? (
+                            <span className="uc-tooltip-x">{row.x}</span>
+                          ) : null}
+                        </span>
+                        <span className="uc-tooltip-value">{row?.value}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               </>
             )}

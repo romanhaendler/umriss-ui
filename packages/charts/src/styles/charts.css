@@ -305,6 +305,12 @@
     white-space: nowrap;
   }
 
+  /* A point's own x value, where it lies on another x axis than the head's. */
+  .uc-tooltip-x {
+    margin-left: 6px;
+    font-family: var(--uc-font-mono);
+  }
+
   .uc-tooltip-value {
     font-family: var(--uc-font-mono);
     text-align: right;

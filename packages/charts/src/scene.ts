@@ -42,6 +42,7 @@ import { nearestIndex } from "./hit";
 import { segmentEnd, segmentIndex } from "./state";
 import { cellSize, cellIndex, measureSpacing } from "./cells";
 import { assess } from "./limit";
+import { formatValue } from "./format";
 import { inRemovedTime, toOperatingTimeClamped } from "./operatingTime";
 import {
   axisExtent,
@@ -101,6 +102,27 @@ interface SeriesEntry {
   cellHeight: number | null;
 }
 
+/** A series' hit, before the hits are grouped into one tooltip. */
+interface Candidate {
+  entry: SeriesEntry;
+  index: number;
+  color: string;
+  name: string;
+  px: number;
+  py: number;
+  xValue: number;
+  yValue: number;
+  /** Does this hit get a hover marker? Not on a band or a cell: there the
+      mark is the area itself, and a point on it points at nothing. */
+  marked: boolean;
+  /** Does this mark cover an area instead of sitting on a point? A band and a
+      cell lie under the pointer where they cover it - their px is the
+      beginning of the section and not the place being pointed at. */
+  areal: boolean;
+  value?: number;
+  segment?: { from: number; to: number; label: string };
+}
+
 interface AxisEntry {
   order: number;
   config: AxisConfig;
@@ -142,6 +164,15 @@ export interface LayoutSnapshot {
   limits: readonly LimitLabel[];
 }
 
+/** One row of the built-in tooltip, written out once per hit. */
+export interface TooltipRow {
+  /** The value in the format of the point's y axis; a state's name. */
+  value: string;
+  /** The point's x value in the format of its own x axis - empty where that
+      is the x axis of the header. */
+  x: string;
+}
+
 export interface HoverSnapshot {
   version: number;
   hover: HoverState | null;
@@ -149,6 +180,8 @@ export interface HoverSnapshot {
   /** The x value in the format of the hit x axis (the built-in tooltip uses
       it). */
   xLabel: string;
+  /** Parallel to the hit's points. */
+  rows: readonly TooltipRow[];
 }
 
 const EMPTY_LAYOUT_SNAPSHOT: LayoutSnapshot = {
@@ -164,6 +197,7 @@ const EMPTY_HOVER_SNAPSHOT: HoverSnapshot = {
   hover: null,
   tooltip: null,
   xLabel: "",
+  rows: [],
 };
 
 /** Tolerance within which hits of different series are grouped (R-4.7). */
@@ -458,6 +492,7 @@ export class ChartScene {
   private hover: HoverState | null = null;
   private hoverKey = "";
   private hoverXLabel = "";
+  private hoverRows: readonly TooltipRow[] = [];
   private highlight: readonly number[] | null = null;
 
   /* ---------- Snapshots for the HTML layer ---------- */
@@ -794,9 +829,9 @@ export class ChartScene {
 
   /* ================= Materialisation (R-2.6, R-2.7) ================= */
 
-  private findXAxis(xAxisId: string): AxisConfig | null {
+  private findAxisConfig(orientation: AxisOrientation, id: string): AxisConfig | null {
     for (const { config } of this.axes.values()) {
-      if (config.orientation === "x" && config.id === xAxisId) return config;
+      if (config.orientation === orientation && config.id === id) return config;
     }
     return null;
   }
@@ -811,7 +846,7 @@ export class ChartScene {
       }
       const config = entry.config;
       const data = config.data ?? this.data;
-      const xAxis = this.findXAxis(config.xAxisId);
+      const xAxis = this.findAxisConfig("x", config.xAxisId);
       if (xAxis === null) continue; // validate() reports this in DEV
       const material = materializeSeries(
         data,
@@ -1548,8 +1583,11 @@ export class ChartScene {
     this.hover.mouseY = y;
     this.markOverlayDirty(); // R-2.11: a hover never touches the series layer
     if (key !== this.hoverKey) {
+      // Written out once per hit, not per movement: a format is not free.
+      const xAxisId = hit.primary.entry.config.xAxisId;
       this.hoverKey = key;
-      this.hoverXLabel = hit.xLabel;
+      this.hoverXLabel = this.xLabel(xAxisId, hit.primary.xValue);
+      this.hoverRows = hit.chosen.map((k) => this.tooltipRow(k, xAxisId));
       this.pushHoverSnapshot();
     }
   }
@@ -1565,27 +1603,8 @@ export class ChartScene {
   private hitTest(
     mouseX: number,
     mouseY: number,
-  ): { key: string; state: HoverState; xLabel: string } | null {
+  ): { key: string; state: HoverState; primary: Candidate; chosen: readonly Candidate[] } | null {
     const mode = this.tooltip?.mode ?? "x";
-    interface Candidate {
-      entry: SeriesEntry;
-      index: number;
-      color: string;
-      name: string;
-      px: number;
-      py: number;
-      xValue: number;
-      yValue: number;
-      /** Does this hit get a hover marker? Not on a band or a cell: there the
-          mark is the area itself, and a point on it points at nothing. */
-      marked: boolean;
-      /** Does this mark cover an area instead of sitting on a point? A band and a
-          cell lie under the pointer where they cover it - their px is the
-          beginning of the section and not the place being pointed at. */
-      areal: boolean;
-      value?: number;
-      segment?: { from: number; to: number; label: string };
-    }
     const candidates: Candidate[] = [];
     this.seriesInOrder().forEach((entry, i) => {
       const mat = entry.materialized;
@@ -1661,6 +1680,7 @@ export class ChartScene {
     const points: TooltipPoint[] = chosen.map((k) => ({
       seriesName: k.name,
       color: k.color,
+      xValue: k.xValue,
       yValue: k.yValue,
       datum: (k.entry.config.data ?? this.data)[k.index],
       index: k.index,
@@ -1682,9 +1702,31 @@ export class ChartScene {
       mouseY,
     };
     const key = chosen.map((k) => `${k.entry.order}:${k.index}`).join("|");
-    const xAxis = this.findAxis("x", primary.entry.config.xAxisId);
-    const xLabel = xAxis === null ? String(primary.xValue) : xAxis.format(primary.xValue);
-    return { key, state, xLabel };
+    return { key, state, primary, chosen };
+  }
+
+  /** An x value in the format of its x axis - the header's, or a point's own. */
+  private xLabel(xAxisId: string, xValue: number): string {
+    const xAxis = this.findAxis("x", xAxisId);
+    return xAxis === null ? String(xValue) : xAxis.format(xValue);
+  }
+
+  /** What the built-in tooltip writes for one hit. A state has a name and no
+      meaningful number; a cell has a number that is not its y position, and so
+      no y axis' format; every other value is read against its y axis and
+      written in its format. */
+  private tooltipRow(k: Candidate, headerXAxisId: string): TooltipRow {
+    const config = k.entry.config;
+    const label = k.segment?.label;
+    let value: string;
+    if (label !== undefined && label !== "") value = label;
+    else if (k.value !== undefined) value = formatValue(k.value);
+    else {
+      const own = this.findAxisConfig("y", config.yAxisId)?.tickFormat;
+      value = own === undefined ? formatValue(k.yValue) : own(k.yValue);
+    }
+    const x = config.xAxisId === headerXAxisId ? "" : this.xLabel(config.xAxisId, k.xValue);
+    return { value, x };
   }
 
   /** The hit of one series - one different question per kind.
@@ -1835,6 +1877,7 @@ export class ChartScene {
       hover: this.hover,
       tooltip: this.tooltip,
       xLabel: this.hoverXLabel,
+      rows: this.hoverRows,
     };
     for (const notify of this.hoverSubscribers) notify();
   }

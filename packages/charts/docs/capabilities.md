@@ -222,6 +222,7 @@ Screenshot pages carry their name in brackets.
 | Mode `"x"` with 4 px grouping | R-4.7 | Interaction |
 | Mode `"nearest"` | 4.4 | Screenshot (`configuration`), Manual |
 | The built-in tooltip, numbers in mono with tabular figures | R-4.8 | Interaction, Manual |
+| A value in its y axis' `tickFormat`, the default without one; with several x axes each point's own x value in its own axis' format | R-4.8 | Unit (jsdom tooltip) |
 | A render prop for one's own content | 4.4 | Screenshot (`configuration`), Manual |
 | 12 px beside the crosshair, flipping at the edge, clamped vertically | R-4.9 | Interaction |
 | Leaving the plot area and a window `blur` end the hover | R-4.10 | Interaction |

@@ -243,6 +243,9 @@ export interface LegendConfig {
 export interface TooltipPoint<T = unknown> {
   seriesName: string;
   color: string;
+  /** The point's x value on its own x axis - with several x axes it can
+      differ from the hit's. */
+  xValue: number;
   yValue: number;
   datum: T;
   index: number;
