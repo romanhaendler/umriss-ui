@@ -7,7 +7,7 @@
    instant itself, so a raster keeps its hours across a clock change. Snapping
    shapes the ghost and therefore the intent - never the stored data. */
 
-import { MINUTE } from "@umriss-ui/charts";
+import { localOffset } from "@umriss-ui/charts";
 
 /** A raster: a step, and where it starts after local midnight. */
 export interface SnapRaster {
@@ -16,12 +16,6 @@ export interface SnapRaster {
   /** Where the raster starts after local midnight, in milliseconds: six
       hours for shifts that change at 06:00. */
   readonly offset: number;
-}
-
-/** The local offset at an instant, as the shift of a raster that is to lie on
-    local time: `wallClock = offset + k · step`. */
-export function localOffset(instant: number): number {
-  return new Date(instant).getTimezoneOffset() * MINUTE;
 }
 
 /** `time` onto the nearest line of the raster in local time - a step alone

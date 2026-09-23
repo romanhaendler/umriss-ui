@@ -127,4 +127,41 @@ describe("ChartScene across frames", () => {
     expect(point?.color).toBe("#000004");
     scene.unbind();
   });
+
+  it("places an x limit on an operating-time axis in operating time", async () => {
+    const HOUR = 3_600_000;
+    const root = document.createElement("div");
+    document.body.appendChild(root);
+    const scene = new ChartScene();
+    scene.bind(root, document.createElement("canvas"), document.createElement("canvas"), root);
+    scene.registerAxis({
+      ...xAxis,
+      calendar: [
+        { from: 0, to: 8 * HOUR },
+        { from: 24 * HOUR, to: 32 * HOUR },
+      ],
+    });
+    scene.registerAxis(yAxis);
+    scene.registerSeries(line);
+    scene.setData([
+      { t: 0, a: 10 },
+      { t: 32 * HOUR, a: 20 },
+    ]);
+    scene.registerLimit({
+      kind: "line",
+      value: 26 * HOUR,
+      axisId: "x",
+      orientation: "x",
+      severity: "alarm",
+      role: "specification",
+      label: "Changeover",
+      inExtent: true,
+    });
+    scene.requestResize(400, 300);
+    await frame();
+    const { layout, limits } = scene.getLayoutSnapshot();
+    const axis = layout.axes.find((a) => a.orientation === "x");
+    expect(limits[0]?.px).toBe(axis?.scale.toPx(10 * HOUR));
+    scene.unbind();
+  });
 });
