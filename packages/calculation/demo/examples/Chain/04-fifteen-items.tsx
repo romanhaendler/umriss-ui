@@ -2,10 +2,11 @@ import { Calculation, Chain, Given, Interim, Plus } from "../../../src";
 
 export const title = "Fifteen items from data";
 
-/* `.map` over data inside a chain: each cost item becomes a `<Plus>`. The key
-   is what keeps a folded line folded when items come and go. Folded, the
-   interim says how many operands it holds rather than a formula of fifteen
-   terms - they stand above it as soon as it is opened. */
+/* `.map` over data inside a chain: each cost item becomes a `<Plus>`, and all
+   fifteen stand in view above their interim. Where only the total should show
+   until a reader asks, the items go into one line as a `<Sum>` instead - as
+   the payslip does with its contributions; folded, such a line says how many
+   operands it holds rather than a formula of fifteen terms. */
 
 const ITEMS = [
   ["Steel sheet", 412.8],
@@ -30,9 +31,9 @@ export default function FifteenItems() {
   return (
     <Calculation aria-label="Bought-in cost, order A-2052">
       <Chain>
-        <Given label={firstName} value={firstAmount} unit="€" />
+        <Given label={firstName} value={firstAmount} unit="€" decimals={2} />
         {rest.map(([name, amount]) => (
-          <Plus key={name} label={name} value={amount} unit="€" />
+          <Plus key={name} label={name} value={amount} unit="€" decimals={2} />
         ))}
         <Interim label="Bought-in cost" unit="€" decimals={2} />
       </Chain>

@@ -53,22 +53,34 @@ import { Calculation, Difference, Given, Product, Quotient, Ref } from "@umriss-
 A **chain** suits a sheet read top to bottom (ADR-0028). A first quantity,
 then `Plus`, `Minus`, `Times` or `DividedBy`, each working its operand into the
 value before it, strictly in order, and `Interim`s naming the value where they
-stand. It starts folded to its interims:
+stand. A chain stands open, as on paper - each line in view, a rule, the
+interim. What should show only on request goes into one line as a tree, and
+folds:
 
 ```tsx
-<Calculation aria-label="Price of a spare part">
+<Calculation aria-label="Payslip, March">
   <Chain>
-    <Given label="Cost price" value={148.2} unit="€" />
-    <Plus label="Handling" value={12} unit="€" />
-    <Interim label="Cost with handling" unit="€" decimals={2} />
-    <Times label="Mark-up" value={1.25} />
-    <Interim label="Net price" unit="€" decimals={2} />
+    <Given id="gross" label="Gross salary" value={4200} unit="€" />
+    <Minus label="Income tax" value={612.5} unit="€" />
+    <Minus label="Church tax" value={49} unit="€" />
+    <Minus>
+      <Sum label="Social security contributions" unit="€">
+        <Given label="Pension insurance" value={390.6} unit="€" />
+        <Given label="Unemployment insurance" value={54.6} unit="€" />
+        <Given label="Health insurance" value={344.4} unit="€" />
+        <Given label="Long-term care insurance" value={71.4} unit="€" />
+      </Sum>
+    </Minus>
+    <Interim label="Net salary" unit="€" decimals={2} />
+    <Minus label="Capital-forming benefits" value={40} unit="€" />
+    <Plus label="Travel allowance" value={60} unit="€" />
+    <Interim label="Amount paid out" unit="€" decimals={2} />
   </Chain>
 </Calculation>
 ```
 
 The two mix: a line of a chain can hold a tree, and a chain can be an operand
-in a tree.
+in a tree - there it folds, and opens whole.
 
 - **Four operators, and nothing else:** `Sum`, `Product`, `Difference`
   (a − b − c) take two or more operands, `Quotient` exactly two.

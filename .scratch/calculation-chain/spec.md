@@ -97,7 +97,8 @@ The lead case, for the demo and the tests, is a costing sheet:
 - **Evaluation.** Unchanged in kind: full precision, absence with its reason,
   division by zero, the approximation mark computed from the operands as
   shown, assessment through `assess()`.
-- **Folding.** Everything below the outermost statement starts folded. An
+- **Folding.** *(Superseded by the amendment below: a chain in view does not
+  fold.)* Everything below the outermost statement starts folded. An
   interim folds the lines since the interim before it.
 - **The tree's long operator.** A sum or product of more than four operands
   shows no formula on its line, only how many operands it has. Fixed, not a
@@ -179,7 +180,7 @@ All five tickets delivered in one commit.
 - **From the review:**
   - A chain folded away as an operand now carries the worst verdict of all its
     interims; a chain in view shows only what lies since the interim before
-    (`worstSince`).
+    (`worstSince`; *superseded - with chains in view open, the field went again*).
   - The sentence keeps the full formula above four operands, and the visible
     count has no "=".
   - Avoided words are out of the code: `carried` became `previous`, "run" and
@@ -195,3 +196,14 @@ Left open from the review, as judgement calls:
   surface is invisible inside a derivation.
 - An interim's operand count includes the interim before; that is intended,
   since it is a term of the interim's formula.
+
+### Amendment (2026-09-23, after the release commit of 0.1.0)
+
+A chain in view no longer folds (ADR-0028, amended). The payslip showed that
+folding a chain to its interims hides the steps it is written for: gross
+salary, each deduction on its own line with its minus, the net salary once they
+all stand. Folding is now the writer's choice per line - a `<Sum>` of
+contributions held by a `<Minus>` folds like any tree. A chain that is an
+operand folds whole and opens whole. The spec's "Folding" decision above is
+superseded by this; `@umriss-ui/calculation` 0.2.0 carries it.
+

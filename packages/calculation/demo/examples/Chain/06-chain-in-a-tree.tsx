@@ -3,10 +3,10 @@ import { Calculation, Chain, Given, Interim, Minus, Plus, Quotient, Ref } from "
 export const title = "A chain inside a tree";
 
 /* The two forms mix. Here a quotient's numerator is a chain: the net output of
-   a line, from what it made to what could be shipped. Folded, the chain stands
-   for its last interim; opened, it stands indented as a statement of its own,
-   in the secondary colour, above the line it feeds. The denominator is the
-   chain's own first line, referred to by its id. */
+   a line, from what it made to what could be shipped. As an operand the chain
+   folds and stands for its last interim; opened, it stands whole beneath that
+   line, indented, every interim in view. The denominator is the chain's own
+   first line, referred to by its id. */
 export default function ChainInATree() {
   return (
     <Calculation aria-label="Shipping yield, line 4">

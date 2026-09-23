@@ -18,6 +18,23 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Sep. 2026 — calculation 0.2.0: a chain stands open
+
+- **The steps of a chain are what it is for.** Asked where the interim result
+  as a step had gone, a payslip made it plain: folded to its interims, a chain
+  showed the net salary but not the deductions that led to it. A chain in view
+  now stands open - lines, a rule, the interim - and what should show only on
+  request is written as a tree in one line (the social security contributions
+  as a `<Sum>` held by a `<Minus>`). ADR-0028 amended; the payslip is the lead
+  example of the Chain page.
+- **Three rounds of pictures** over every example, light, dark and narrow,
+  found three more things: amounts in one column with mixed places (the
+  examples now fix them), a disclosure column kept free where nothing can
+  fold (dropped), and a grey hover band that took coloured text below the
+  contrast it needs (now half the accent's surface, found by axe with a row
+  hovered, which the check now does on purpose).
+- **Nothing of 0.1.0 reached npm**; 0.2.0 is the first version to publish.
+
 ## Sep. 2026 — Release: calculation 0.1.0, core 0.5.0, table 0.2.4, schedule 0.1.4
 
 - **`@umriss-ui/calculation` 0.1.0**, its first release: tree and chain, the

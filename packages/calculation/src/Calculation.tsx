@@ -5,7 +5,8 @@
 
    A statement on a surface of its own, in fixed columns - label, names,
    operator, number, unit, assessment. The outermost statement stands as on
-   paper and closes on the Result as its last row; everything else is folded,
+   paper and closes on the Result as its last row, and a chain in view stands
+   open, its interims beneath their lines. Every tree below that is folded,
    and a derivation opens BENEATH the row that was clicked - the row never
    moves - as one group with it, closing with "= label", so that it says whose
    it is twice: attached, and by name.
@@ -75,8 +76,8 @@ export function Calculation({ children, className, style, ...rest }: Calculation
   const uid = useId();
   const model = readCalculation(children);
   const results = evaluate(model);
-  /* The component's own, and never touched by data. Everything starts folded:
-     the outermost statement is what a reader sees first (ADR-0028). */
+  /* The component's own, and never touched by data. Every tree below the
+     outermost statement starts folded (ADR-0028). */
   const [open, setOpen] = useState<ReadonlySet<string>>(() => new Set());
   const [marked, setMarked] = useState<string | null>(null);
 
@@ -90,6 +91,10 @@ export function Calculation({ children, className, style, ...rest }: Calculation
   const positionIn = (parent: Quantity, operand: Operand, index: number): Position | undefined =>
     index === 0 || operand.previous ? undefined : { operator: parent.operator!, negated: operand.negated === true };
 
+  /* Whether anything can fold at all: where nothing can, the disclosure's
+     column is not kept free, and the labels start at the surface's edge. */
+  let folds = false;
+
   const markOf = (key: string, parent: string | null) =>
     marked === null ? undefined : key === marked ? "use" : parent === marked ? "operand" : undefined;
 
@@ -102,24 +107,21 @@ export function Calculation({ children, className, style, ...rest }: Calculation
     const text = lineText(model, results, key, reference, formats, wording, place.position);
     const derived = quantity.operator !== undefined && !reference;
     const isResult = key === model.result && !reference;
-    /* The outermost tree stands open for good: its operands above it, as on
-       paper. Everything else folds. */
-    const statement = isResult && derived && !quantity.interim;
+    /* What stands open for good, its operands above it as on paper: the
+       outermost tree, and every interim of a chain in view - a chain is the
+       working itself, and folding it would take away what it is for. Trees in
+       its lines fold, and so does a chain that is an operand. */
+    const statement = derived && (quantity.interim ? place.flat : isResult);
     const foldable = derived && !statement;
     const isOpen = foldable && open.has(key);
+    folds ||= foldable;
     const listId = `${uid}-${key}`;
     const inner: Place = { depth: statement ? place.depth : place.depth + 1, flat: false, parent: key };
     const previous = derived ? quantity.operands.find((o) => o.previous) : undefined;
     const beside = previous && place.flat ? items(previous.key, false, { ...place, parent: key, position: undefined }, `${slot}-c`) : [];
-    /* Inside the derivation, a chain's value before stands first: as one line
-       where the interims of the chain are already in view, or as those
-       interims themselves where they are not (a chain that is an operand in a
-       tree). */
-    const opening = previous
-      ? place.flat
-        ? items(previous.key, true, inner, `${slot}-c`)
-        : items(previous.key, false, { ...inner, flat: true }, `${slot}-c`)
-      : [];
+    /* A chain that is an operand opens whole: the interims before its last
+       stand first in its derivation, open as in any chain in view. */
+    const opening = previous && !place.flat ? items(previous.key, false, { ...inner, flat: true }, `${slot}-c`) : [];
     const operands = derived
       ? quantity.operands.map((operand, index) =>
           operand.previous
@@ -127,12 +129,9 @@ export function Calculation({ children, className, style, ...rest }: Calculation
             : items(operand.key, operand.reference, { ...inner, position: positionIn(quantity, operand, index) }, `${slot}-${index}`),
         )
       : [];
-    /* In a chain in view, the interims before have lines of their own;
-       elsewhere the fold hides the whole chain. */
-    const inside = previous && place.flat ? own.worstSince : own.worst;
     const worst: Verdict | undefined =
-      foldable && !isOpen && inside !== undefined && verdictWeight(inside) > verdictWeight(own.verdict ?? "ok")
-        ? inside
+      foldable && !isOpen && own.worst !== undefined && verdictWeight(own.worst) > verdictWeight(own.verdict ?? "ok")
+        ? own.worst
         : undefined;
     const given = reference ? undefined : quantity.given;
     const operator = place.position ? operatorText(place.position, false, wording) : undefined;
@@ -149,7 +148,9 @@ export function Calculation({ children, className, style, ...rest }: Calculation
         )),
       !reference && quantity.aside !== undefined && <span key="aside">{quantity.aside}</span>,
     ].filter(Boolean);
-    const kind = isResult ? "result" : quantity.interim && !reference ? "interim" : undefined;
+    /* An interim closes the lines above it only where its chain is in view; the
+       folded head of a chain that is an operand has nothing above to close. */
+    const kind = isResult ? "result" : quantity.interim && !reference && place.flat ? "interim" : undefined;
 
     const line = (
       <div
@@ -245,6 +246,7 @@ export function Calculation({ children, className, style, ...rest }: Calculation
 
     if (statement) {
       return [
+        ...beside,
         <li key={slot} className={styles.item}>
           <ul className={styles.list}>{operands}</ul>
           {line}
@@ -295,12 +297,14 @@ export function Calculation({ children, className, style, ...rest }: Calculation
     ];
   };
 
+  const statement = items(model.result, false, { depth: 0, flat: true, parent: null }, "r");
+
   return (
     /* The frame is the surface and the container the layout measures itself
        against; the list inside it is the statement. */
-    <div className={cx(styles.frame, className)} style={style}>
+    <div className={cx(styles.frame, className)} style={style} data-still={folds ? undefined : ""}>
       <ul className={styles.calculation} {...rest}>
-        {items(model.result, false, { depth: 0, flat: true, parent: null }, "r")}
+        {statement}
       </ul>
     </div>
   );

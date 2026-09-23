@@ -6,11 +6,11 @@ export const title = "A costing sheet";
    a costing sheet stands on paper. Each line works its operand into the value
    before it, and an `<Interim>` names that value where it stands.
 
-   The chain starts folded to its interims - the sheet of interim results is
-   what a reader wants first. Click an interim to see the lines that led to it.
+   The chain stands open, as on paper: lines, a rule, the interim, and on.
    A surcharge on an earlier line is a `<Plus>` holding a product with a
-   `<Ref>`: the overhead is 120 % of the direct labour, not of the running
-   value. */
+   `<Ref>` - the overhead is 120 % of the direct labour, not of the running
+   value - and that product is a tree: it folds, showing the formula it hides,
+   and opens beneath its line on a click. */
 export default function CostingSheet() {
   return (
     <Calculation aria-label="Offer price, order A-2041">

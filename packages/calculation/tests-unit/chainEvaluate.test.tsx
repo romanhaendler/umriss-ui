@@ -67,7 +67,7 @@ describe("Evaluating a chain", () => {
     expect(result.approximate).toBe(true);
   });
 
-  it("carries the worst verdict of an interim's own lines, not of the interims before", () => {
+  it("carries the worst verdict up through the interims before", () => {
     const alarm = [{ value: 1, side: "upper" as const, severity: "alarm" as const }];
     const { byLabel } = run(
       <Chain>
@@ -78,9 +78,9 @@ describe("Evaluating a chain", () => {
         <Interim label="Second" />
       </Chain>,
     );
+    /* A chain folded away as an operand hides every interim, so the ones
+       before count too. */
     expect(byLabel("First").worst).toBe("alarm");
-    expect(byLabel("Second").worstSince).toBeUndefined();
-    /* A chain folded away as an operand hides the whole chain, so there it counts. */
     expect(byLabel("Second").worst).toBe("alarm");
   });
 });

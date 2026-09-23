@@ -1027,8 +1027,8 @@ _Avoid_: argument, input, Eingang
 **Derivation**:
 What a derived quantity is computed from: its operands, and theirs in turn, down
 to givens and references. Under an **Interim** it is what the chain holds since the
-interim before it. A derivation can be folded away; the quantity above it
-stays.
+interim before it. A derivation can be folded away, the quantity above it
+staying - except in a **Chain** in view, which is always shown whole.
 _Avoid_: subtree, breakdown, Teilrechnung
 
 **Reference**:
