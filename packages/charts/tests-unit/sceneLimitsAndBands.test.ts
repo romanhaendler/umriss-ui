@@ -468,6 +468,17 @@ describe("Operating time axis: the x channel stays ascending", () => {
     expect(s.axisExtent("x", "x")).toEqual([1 * HOUR, 10 * HOUR]);
   });
 
+  it("does not re-materialise for a calendar of the same intervals", () => {
+    // An inline array is new on every render (charts-fixes 11).
+    const s = sceneWithCalendar();
+    s.axisExtent("x", "x");
+    const before = s.seriesInOrder()[0]?.materialized;
+    expect(before).not.toBeNull();
+    const [entry] = s.axesInOrder();
+    s.updateAxis(entry?.order ?? -1, { ...(entry?.config as AxisConfig), calendar: SHIFT.map((i) => ({ ...i })) });
+    expect(s.seriesInOrder()[0]?.materialized).toBe(before);
+  });
+
   it("does not let removed time into the extent", () => {
     // Otherwise the axis would reach to a seam at which nothing lies.
     const s = sceneWithCalendar();

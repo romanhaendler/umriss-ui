@@ -53,6 +53,7 @@ Screenshot pages carry their name in brackets.
 | The baseline enters the value range of its Y axis | R-4.13 | Unit (materialisation, scene) |
 | A fixed domain wins against the widened value range | 4.2 | Unit (layout) |
 | A change of baseline or series kind materialises afresh | R-2.2 | Unit (scene) |
+| Functions compared by source text, a native or bound one (`Intl.NumberFormat#format`) by identity; a `calendar` by its intervals | R-2.2 | Unit (jsdom scene, limits and bands in the scene) |
 
 ## `XAxis` / `YAxis`
 
@@ -301,5 +302,11 @@ constant over 5 s – the hysteresis from R-3.4 works (R-5.3).
   The set of kinds is closed (no renderer interface for third parties).
 * **Interaction specific to a kind.** No bar hover highlight, no brush, no click
   selection; the hit model is the same for all four kinds.
+* **The closure limit of change detection.** Accessors, `tickFormat` and the
+  tooltip's `render` are compared by their source text, because inline ones are
+  new on every render. Two functions of the same text that read different
+  captured values count as equal: an accessor is not run again, an axis not
+  relabelled. The remedy is a new data reference or a new text; solving it
+  would mean re-running every function on every render (Q10).
 * Open points from section 9: the final package name, the final palette colours,
   the location of the demo, `alignTicks`, axis colouring.
