@@ -33,7 +33,7 @@
 
   .textarea:focus-visible {
     outline: none;
-    box-shadow: var(--u-focus-edge);
+    box-shadow: var(--u-focus-ring);
   }
 
   .textarea:disabled {
@@ -54,7 +54,7 @@
   }
 
   .invalid:focus-visible {
-    box-shadow: var(--u-focus-edge-danger);
+    box-shadow: var(--u-focus-ring-danger);
   }
 
   /* ------------------------------------------------------------------ */

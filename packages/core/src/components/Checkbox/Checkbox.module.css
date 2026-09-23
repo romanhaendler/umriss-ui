@@ -91,9 +91,7 @@
   }
 
   .input:focus-visible + .box {
-    box-shadow:
-      0 0 0 1px var(--u-color-accent),
-      var(--u-focus-ring);
+    box-shadow: var(--u-focus-ring);
   }
 
   .input:disabled + .box {

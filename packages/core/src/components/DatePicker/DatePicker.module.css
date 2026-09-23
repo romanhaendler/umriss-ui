@@ -26,7 +26,7 @@
 
   .trigger:focus-visible {
     outline: none;
-    box-shadow: var(--u-focus-edge);
+    box-shadow: var(--u-focus-ring);
   }
 
   .trigger:disabled {
@@ -47,7 +47,7 @@
   }
 
   .invalid:focus-visible {
-    box-shadow: var(--u-focus-edge-danger);
+    box-shadow: var(--u-focus-ring-danger);
   }
 
   .value {
@@ -232,7 +232,7 @@
   }
 
   .timeFieldWrap:focus-within {
-    box-shadow: var(--u-focus-edge);
+    box-shadow: var(--u-focus-ring);
   }
 
   .timeField {
