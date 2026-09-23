@@ -34,7 +34,7 @@ function LegendInner({
         <span
           key={item.id}
           className="uc-legend-item"
-          onPointerEnter={() => scene.setHighlight(item.seriesId)}
+          onPointerEnter={() => scene.setHighlight(item.seriesIds)}
           onPointerLeave={() => scene.setHighlight(null)}
         >
           <span className="uc-legend-chip" style={{ background: item.color }} />

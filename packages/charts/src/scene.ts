@@ -116,9 +116,12 @@ export interface LegendItem {
       registration number alone is not enough as a key. */
   id: string;
   name: string;
+  /** A CSS background for the chip: a colour, or a matrix' steps side by
+      side. */
   color: string;
-  /** The series highlighted on hover. */
-  seriesId: number;
+  /** The series highlighted on hover - several where state bands share a
+      state. */
+  seriesIds: number[];
 }
 
 /** A labelled limit, ready for the axis band. */
@@ -174,6 +177,13 @@ function fnEqual(a: unknown, b: unknown): boolean {
   if (a === b) return true;
   if (typeof a !== "function" || typeof b !== "function") return false;
   return String(a) === String(b);
+}
+
+/** A state band and a matrix colour themselves - by state, by cell - and take
+    no place in the palette: otherwise the line after them would come out in a
+    later colour than the first. */
+function takesPalette(config: SeriesConfig): boolean {
+  return config.kind !== "state" && config.kind !== "matrix";
 }
 
 function listEqual(a: readonly number[] | undefined, b: readonly number[] | undefined): boolean {
@@ -307,6 +317,66 @@ function matrixColors(coloring: MatrixColoring, theme: ResolvedTheme): readonly 
   return coloring.stops;
 }
 
+/** A legend chip for a colouring: its colours side by side, as hard stops. The
+    matrix draws steps, and its chip shows the same steps - a palette colour
+    there would explain a colour the matrix never draws. */
+function chipOf(colors: readonly string[]): string {
+  const share = 100 / Math.max(1, colors.length);
+  const stops = colors.map((c, k) => `${c} ${k * share}% ${(k + 1) * share}%`);
+  return `linear-gradient(to right, ${stops.join(", ")})`;
+}
+
+/** The value range a gradient spreads over: its own, or that of the data. */
+function gradientRange(
+  w: Float64Array,
+  n: number,
+  range: readonly [number, number] | undefined,
+): readonly [number, number] {
+  let min = range?.[0];
+  let max = range?.[1];
+  if (min === undefined || max === undefined) {
+    min = Number.POSITIVE_INFINITY;
+    max = Number.NEGATIVE_INFINITY;
+    for (let i = 0; i < n; i++) {
+      const v = w[i] as number;
+      if (!Number.isFinite(v)) continue;
+      if (v < min) min = v;
+      if (v > max) max = v;
+    }
+  }
+  return [min, max];
+}
+
+/** Bucket of one value: the index into the palette, -1 for a hole. `min` and
+    `max` are the gradient's range and mean nothing to an assessment. */
+function bucketOf(
+  v: number,
+  coloring: MatrixColoring,
+  count: number,
+  min: number,
+  max: number,
+): number {
+  if (coloring.kind === "assessment") {
+    const b = assess(v, coloring.limits);
+    // Four outcomes, four answers. Folding "unknown" onto the same bucket as
+    // "ok" would be exactly the defect the limit model is written against: a
+    // value nobody has would look like a good one.
+    return b.verdict === "alarm"
+      ? 2
+      : b.verdict === "warning"
+        ? 1
+        : b.verdict === "ok"
+          ? 0
+          : -1; // unknown: a hole, and a hole carries no colour
+  }
+  if (!Number.isFinite(v)) return -1;
+  const span = max - min;
+  // Degenerate span: everything into the middle, instead of dividing by zero.
+  const share = span > 0 ? (v - min) / span : 0.5;
+  const k = Math.floor(share * count);
+  return k < 0 ? 0 : k >= count ? count - 1 : k;
+}
+
 /** Bucket per cell: the index into the palette, -1 for a hole. Once per frame, so
     that the drawing loop calls no function per cell. */
 function matrixBuckets(
@@ -321,47 +391,9 @@ function matrixBuckets(
     buckets.fill(-1);
     return buckets;
   }
-  if (coloring.kind === "assessment") {
-    for (let i = 0; i < n; i++) {
-      const b = assess(w[i] as number, coloring.limits);
-      // Four outcomes, four answers. Folding "unknown" onto the same bucket as
-      // "ok" would be exactly the defect the limit model is written against: a
-      // value nobody has would look like a good one.
-      buckets[i] =
-        b.verdict === "alarm"
-          ? 2
-          : b.verdict === "warning"
-            ? 1
-            : b.verdict === "ok"
-              ? 0
-              : -1; // unknown: a hole, and a hole carries no colour
-    }
-    return buckets;
-  }
-  let min = coloring.range?.[0];
-  let max = coloring.range?.[1];
-  if (min === undefined || max === undefined) {
-    min = Number.POSITIVE_INFINITY;
-    max = Number.NEGATIVE_INFINITY;
-    for (let i = 0; i < n; i++) {
-      const v = w[i] as number;
-      if (!Number.isFinite(v)) continue;
-      if (v < min) min = v;
-      if (v > max) max = v;
-    }
-  }
-  const span = max - min;
-  for (let i = 0; i < n; i++) {
-    const v = w[i] as number;
-    if (!Number.isFinite(v)) {
-      buckets[i] = -1;
-      continue;
-    }
-    // Degenerate span: everything into the middle, instead of dividing by zero.
-    const share = span > 0 ? (v - min) / span : 0.5;
-    const k = Math.floor(share * count);
-    buckets[i] = k < 0 ? 0 : k >= count ? count - 1 : k;
-  }
+  const [min, max] =
+    coloring.kind === "gradient" ? gradientRange(w, n, coloring.range) : [0, 0];
+  for (let i = 0; i < n; i++) buckets[i] = bucketOf(w[i] as number, coloring, count, min, max);
   return buckets;
 }
 
@@ -426,7 +458,7 @@ export class ChartScene {
   private hover: HoverState | null = null;
   private hoverKey = "";
   private hoverXLabel = "";
-  private highlight: number | null = null;
+  private highlight: readonly number[] | null = null;
 
   /* ---------- Snapshots for the HTML layer ---------- */
   private layoutSnapshot: LayoutSnapshot = EMPTY_LAYOUT_SNAPSHOT;
@@ -478,7 +510,7 @@ export class ChartScene {
     this.series.set(id, {
       order: id,
       config,
-      slot: this.slotFor(config.name),
+      slot: takesPalette(config) ? this.slotFor(config.name) : -1,
       lastSlot: null,
       materialized: null,
       extent: null,
@@ -503,7 +535,9 @@ export class ChartScene {
       previous.color === config.color &&
       previous.tone === config.tone &&
       ownFieldsEqual(previous, config);
-    if (previous.name !== config.name && config.name !== undefined) {
+    if (entry.slot < 0 && takesPalette(config)) {
+      entry.slot = this.slotFor(config.name);
+    } else if (previous.name !== config.name && config.name !== undefined && entry.slot >= 0) {
       // A rename takes its colour with it - unless the new name already has a
       // free place; then the name wins.
       const known = this.slotsByName.get(config.name);
@@ -1148,8 +1182,10 @@ export class ChartScene {
 
   /* ================= Series colours and legend entries ================= */
 
-  private colorFor(entry: SeriesEntry, index: number): string {
+  private colorFor(entry: SeriesEntry): string {
     if (entry.config.color !== undefined) return entry.config.color;
+    // A band's colours come from its states, a cell's from its colouring.
+    if (!takesPalette(entry.config)) return "";
     // A tone is not a colour value but a role: the theme resolves it. Canvas knows
     // no CSS variables - a "var(--uc-color-alarm)" in the color prop would
     // silently go black.
@@ -1161,13 +1197,18 @@ export class ChartScene {
     // Before the theme has been read for the first time, the built-in palette
     // carries, so that series never all briefly get the same colour.
     const palette = this.theme?.series ?? FALLBACK_THEME.series;
-    return palette[this.paletteSlot(entry, index) % Math.max(1, palette.length)] ?? FALLBACK_THEME.series[0] ?? "#2563eb";
+    return palette[this.paletteSlot(entry) % Math.max(1, palette.length)] ?? FALLBACK_THEME.series[0] ?? "#2563eb";
   }
 
-  /** Named: the place of the name. Nameless: the index in the registration, as
-      before - and a warning as soon as that shifts underneath it. */
-  private paletteSlot(entry: SeriesEntry, index: number): number {
+  /** Named: the place of the name. Nameless: the position among the series that
+      take a palette place, as before - and a warning as soon as that shifts
+      underneath it. */
+  private paletteSlot(entry: SeriesEntry): number {
     if (entry.config.name !== undefined) return entry.slot;
+    let index = 0;
+    for (const e of this.series.values()) {
+      if (e.order < entry.order && takesPalette(e.config)) index++;
+    }
     if (entry.lastSlot !== null && entry.lastSlot !== index) {
       warnOnce(
         "series-without-name-colour",
@@ -1195,7 +1236,8 @@ export class ChartScene {
     // Three machines share one state list. The legend explains colours, not
     // series - so it explains every colour once. Twelve entries for four states
     // would not be a legend but a list.
-    const seen = new Set<string>();
+    // A band that shares an entry is highlighted with it.
+    const seen = new Map<string, LegendItem>();
     this.seriesInOrder().forEach((entry, i) => {
       const config = entry.config;
       if (config.kind === "state") {
@@ -1203,22 +1245,30 @@ export class ChartScene {
         // a grey box says nothing; the reader wants to know what orange means.
         config.states.forEach((z, k) => {
           const key = `${z.label} ${z.color}`;
-          if (seen.has(key)) return;
-          seen.add(key);
-          out.push({
+          const known = seen.get(key);
+          if (known !== undefined) {
+            if (!known.seriesIds.includes(entry.order)) known.seriesIds.push(entry.order);
+            return;
+          }
+          const item: LegendItem = {
             id: `${entry.order}:${k}`,
             name: z.label,
             color: z.color,
-            seriesId: entry.order,
-          });
+            seriesIds: [entry.order],
+          };
+          seen.set(key, item);
+          out.push(item);
         });
         return;
       }
       out.push({
         id: String(entry.order),
         name: this.nameFor(entry, i),
-        color: this.colorFor(entry, i),
-        seriesId: entry.order,
+        color:
+          config.kind === "matrix"
+            ? chipOf(matrixColors(config.coloring, this.theme ?? FALLBACK_THEME))
+            : this.colorFor(entry),
+        seriesIds: [entry.order],
       });
     });
     return out;
@@ -1317,20 +1367,20 @@ export class ChartScene {
         fraction: e.config.kind === "bar" ? e.config.barWidth : 0,
       })),
     );
-    series.forEach((entry, i) => {
+    series.forEach((entry) => {
       const mat = entry.materialized;
       if (mat === null) return;
       const xAxis = this.findAxis("x", entry.config.xAxisId);
       const yAxis = this.findAxis("y", entry.config.yAxisId);
       if (xAxis === null || yAxis === null) return;
-      const dimmed = this.highlight !== null && this.highlight !== entry.order;
+      const dimmed = this.highlight !== null && !this.highlight.includes(entry.order);
       const base: DrawBase = {
         x: mat.x,
         y: mat.y,
         length: mat.length,
         xScale: xAxis.scale,
         yScale: yAxis.scale,
-        color: this.colorFor(entry, i),
+        color: this.colorFor(entry),
         alpha: dimmed ? 0.25 : 1,
       };
       const config = entry.config;
@@ -1469,9 +1519,9 @@ export class ChartScene {
 
   /* ================= Interaction (4.4) ================= */
 
-  setHighlight(id: number | null): void {
-    if (this.highlight === id) return;
-    this.highlight = id;
+  setHighlight(ids: readonly number[] | null): void {
+    if (this.highlight === ids) return;
+    this.highlight = ids;
     // Not a mousemove path: a redraw of the series layer is allowed here (R-4.11).
     this.markSeriesDirty();
   }
@@ -1552,7 +1602,7 @@ export class ChartScene {
       candidates.push({
         entry,
         index: hit.index,
-        color: hit.color ?? this.colorFor(entry, i),
+        color: hit.color ?? this.colorFor(entry),
         name: this.nameFor(entry, i),
         px: hit.px,
         py: hit.py,
@@ -1707,10 +1757,17 @@ export class ChartScene {
       if (!Number.isFinite(value)) return null; // a hole is no hit
       const xValue = mat.x[index] as number;
       const yValue = mat.y[index] as number;
+      // The chip shows the cell's own colour, bucketed as the drawing does it.
+      const colors = matrixColors(config.coloring, this.theme ?? FALLBACK_THEME);
+      const [min, max] =
+        config.coloring.kind === "gradient" && w !== null
+          ? gradientRange(w, n, config.coloring.range)
+          : [0, 0];
       return {
         index,
         px: xAxis.scale.toPx(xValue),
         py: yAxis.scale.toPx(yValue),
+        color: colors[bucketOf(value, config.coloring, colors.length, min, max)],
         xValue,
         // yValue stays the position on the y axis; the value that carries the
         // colour stands in a field of its own. Colour alone can transport no

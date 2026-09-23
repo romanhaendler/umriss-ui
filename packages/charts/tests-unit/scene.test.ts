@@ -326,11 +326,11 @@ describe("The palette follows the name", () => {
     const first = scene.registerSeries(lineSeries());
     const second = scene.registerSeries(lineSeries());
     scene.registerSeries(lineSeries());
-    const before = new Map(scene.legendItems().map((i) => [i.seriesId, i.color]));
+    const before = new Map(scene.legendItems().map((i) => [i.seriesIds[0], i.color]));
 
     scene.unregisterSeries(first);
     scene.registerSeries(lineSeries());
-    const after = new Map(scene.legendItems().map((i) => [i.seriesId, i.color]));
+    const after = new Map(scene.legendItems().map((i) => [i.seriesIds[0], i.color]));
     scene.legendItems();
 
     // Without a name there is no identity: the second series moves up onto the
