@@ -50,7 +50,7 @@ module on the caller's side that carries `"use client"` and imports from there.
 
 ---
 
-## Unreleased
+## 0.5.0 – The wording of the calculation (Sep. 2026)
 
 ### Added
 
@@ -62,6 +62,8 @@ module on the caller's side that carries `"use client"` and imports from there.
   `calculationSource`, the disclosure labels and `calculationOperandCount`. A
   caller who builds a complete `Wording` of their own has twenty-two entries to
   add.
+
+---
 
 ## 0.4.0 – One focus, and fields on the iPhone (Sep. 2026)
 

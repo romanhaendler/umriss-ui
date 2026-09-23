@@ -11,27 +11,41 @@ under a heading "Changed" of its own, no matter which digit rose.
 
 ---
 
-## Unreleased
+## 0.1.0 – First release (Sep. 2026)
+
+A calculation a reader can follow and redo: the package evaluates every
+operation it shows, so what stands on the screen cannot disagree with the
+number. Takes `@umriss-ui/core` `^0.5.0` as a peer, for its wording.
 
 ### Added
 
-- **`Calculation`** with the elements `Given`, `Sum`, `Difference`, `Product`,
-  `Quotient` and `Ref` (ADR-0027): a derivation written as it is shown,
-  evaluated in full precision, drawn as a nested list of lines with formulas in
-  names and in numbers, folded below the first level, assessed through core,
-  and read as one sentence per line. Absent givens and division by zero
-  propagate with their reason; rounded figures that do not reproduce the
-  result mark it "≈". Needs the calculation wording of the next
-  `@umriss-ui/core`.
+- **`Calculation`** and the **tree** (ADR-0027): `Given`, `Sum`, `Difference`,
+  `Product`, `Quotient` and `Ref`, written as nested elements the way the
+  derivation reads. Full precision throughout, rounding only on the screen.
 - **The chain** (ADR-0028): `Chain`, `Plus`, `Minus`, `Times`, `DividedBy` and
-  `Interim` — a calculation read top to bottom, each operand worked into the
-  value before it, ended by an interim. It mixes with the tree both ways.
-- **The statement look**, for tree and chain alike, replacing the accordion: a
-  surface in the material of the library's tables and cards, rows of one
-  height, fixed columns for label, names, operator, number, unit and
-  assessment. The outermost statement stands as on paper and closes on the
-  Result as its last row, its number underlined twice. Every other derivation
-  opens beneath its row as one group with it, joined by a falling line, and
-  closes "= label". A folded row shows the formula it hides, or
-  "N operands" above four. The verdict is core's `Badge`; "≈" explains itself
-  in a `Tooltip`. Everything below the outermost statement starts folded.
+  `Interim` - a calculation read top to bottom, each operand worked into the
+  value before it, ended by an interim. No precedence: a `Times` or
+  `DividedBy` stands alone between two named values. Tree and chain mix both
+  ways.
+- **Absence and approximation.** A missing given or a division by zero makes
+  every dependent quantity absent, with the reason - never zero. Where the
+  rounded operands do not give the rounded result, the result is marked "≈".
+- **Assessment and freshness** through core: `target` and `limits` on any
+  quantity, `source`, `asOf` and `ages` on a given; the worst verdict inside a
+  folded row stands beside it.
+- **The statement**: a surface in the material of the library's tables and
+  cards, rows of one height, fixed columns for label, names, operator, number,
+  unit and assessment. The outermost statement stands as on paper and closes
+  on the Result, underlined twice. Every other derivation is folded and opens
+  beneath its row, joined to it by a falling line and closing with
+  "= label"; the row never moves. A folded row shows the formula it hides in
+  names, or how many operands there are above four. The verdict is core's
+  `Badge`; "≈" explains itself in a `Tooltip`. Narrower than 34 rem the
+  layout gives the numbers room.
+- **Accessibility**: a nested list, one sentence per row - "Availability
+  equals Run time divided by Planned production time, equals 412 min divided
+  by 450 min, equals 91.6 percent" - and a disclosure button per derivation.
+- **Development errors** on the first render, each saying which and where: a
+  `Ref` to nothing (listing the ids that exist), a circle through references,
+  a wrong operand count, a duplicate id, a component of the caller's own
+  wrapping an element, and every rule of the chain.
