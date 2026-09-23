@@ -240,7 +240,7 @@ Screenshot pages carry their name in brackets.
 
 | Capability | Rule | Proved at |
 |---|---|---|
-| Static, `placement="top" \| "bottom"` | R-4.11 | Screenshot (`multi-series`, `configuration`) |
+| Static, `placement="top" \| "bottom"`, above without one | R-4.11 | Screenshot (`multi-series`, `configuration`, `legend-placement`) |
 | A colour chip plus a name per series | R-4.11 | Unit (jsdom), Screenshot |
 | Hover highlights the series, the others at 0.25 alpha | R-4.11 | Manual |
 

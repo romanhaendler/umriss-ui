@@ -31,7 +31,13 @@
 }
 .narrow { width: 260px; }
 
-/* The custom tooltip of the "configuration" example (render prop). */
+/* Two charts of the same data beside each other, each under a caption that says
+   what differs - a picture cannot show a hover, so the caption has to. */
+.pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--u-space-4); }
+.pair-caption { margin: 0 0 var(--u-space-2); font-family: var(--u-font-sans); font-size: var(--u-text-xs); color: var(--u-color-text-secondary); }
+
+/* The custom tooltips of the "configuration" and "own-content" examples
+   (render prop). */
 .custom-tooltip { display: flex; flex-direction: column; gap: 2px; font-size: var(--u-text-xs); }
 .custom-tooltip strong { font-weight: 600; }
 
