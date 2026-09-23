@@ -11,12 +11,17 @@ import type { OperatingInterval } from "./operatingTime";
 interface CommonProps<T> {
   /** Axis id, through which series bind themselves (R-4.12). */
   id?: string;
-  /** Value access of this axis. */
+  /** Value access of this axis. Compared by its source text, as a series'
+      accessor is (`Accessor`) - with the same closure limit. */
   accessor: (d: T, index: number) => number;
   /** Axis title. */
   label?: string;
   /** Target value; the 1-2-5 algorithm may deviate. */
   tickCount?: number;
+  /** Label of a tick. Compared by its source text: one that reads a changed
+      closure variable under the same text does not relabel the axis - give it
+      a new text or remount. A bound `Intl.NumberFormat#format` is compared by
+      identity. */
   tickFormat?: (v: number) => string;
   domain?: "nice" | "data" | readonly [number, number];
   /** Grid lines; the default follows R-4.15. */
