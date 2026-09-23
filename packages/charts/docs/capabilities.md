@@ -74,6 +74,9 @@ Screenshot pages carry their name in brackets.
 | `position` on all four sides | R-4.16 | Unit (layout), Screenshot (`axes`) |
 | Right and top labels mirror their alignment | R-4.16 | Interaction |
 | The Y title rotated outside, along the axis | R-4.16 | Unit (layout, band width), Screenshot |
+| `time`: ticks on local boundaries from the minute to the month, across a clock change | Q15 | Unit (time axis, under Europe/Berlin) |
+| `time`: labels by level in en-GB, 24 h (`15:00`, `17 Mar`, `Mar 2026`), the date on the first tick of a new day; `tickFormat` for any other language | Q15 | Unit (time axis), Screenshot (`time`) |
+| `time` with `domain="nice"`: widened to the step's local boundaries | Q15 | Unit (time axis) |
 
 ## The layout engine
 
@@ -203,10 +206,10 @@ Screenshot pages carry their name in brackets.
 |---|---|---|
 | The calendar sorted and merged; empty, reversed and infinite intervals fall away | — | Unit (operating time) |
 | Wall clock ↔ operating time, monotonic; removed time becomes a gap | ADR-0001 | Unit (operating time, limits and bands in the scene) |
-| Ticks in wall-clock time at readable boundaries, mapped afterwards; days and half days on local midnight | — | Unit (operating time, layout under Europe/Berlin), Screenshot (`operating-time`) |
+| Ticks in wall-clock time on the time axis' local boundaries, mapped afterwards | — | Unit (time axis, layout under Europe/Berlin), Screenshot (`operating-time`) |
 | Explicit `ticks` and x limits named on the wall clock and mapped like the data | — | Unit (layout, limits and bands in the scene, jsdom scene) |
 | One break mark per removed span | — | Unit (operating time), Screenshot (`operating-time`) |
-| Default labelling `dd.MM. HH:mm`, independent of the locale | — | Unit (layout) |
+| The time axis' labels, independent of the locale; `tickFormat` gets the wall clock | Q15 | Unit (layout, time axis) |
 
 ## `pareto`
 

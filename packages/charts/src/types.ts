@@ -139,6 +139,9 @@ export interface AxisConfig<T = unknown> {
       not numbers but places: the lanes of a state stack, the categories of a
       Pareto. */
   ticks?: readonly number[];
+  /** The values are instants in milliseconds: ticks on local boundaries,
+      labels by level. A calendar implies it. */
+  time?: boolean;
   /** Operating calendar: the intervals in which time counts. With it,
       materialisation maps wall clock time onto operating time before the scale
       calculates - the scale stays affine (ADR-0001). */

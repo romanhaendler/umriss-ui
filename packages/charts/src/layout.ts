@@ -23,11 +23,10 @@ import { niceDomain, dataDomain, tickStep, ticksFor } from "./ticks";
 import {
   breaks as calendarBreaks,
   calendarFrom,
-  localOffset,
-  operatingTicks,
   toOperatingTime,
   toWallClock,
 } from "./operatingTime";
+import { timeDomain, timeLabels, timeStepFor, timeText, timeTicks } from "./time";
 import type { OperatingInterval } from "./operatingTime";
 import type { AxisOrientation, AxisPosition, Rect } from "./types";
 import type { TextSize } from "./measure";
@@ -58,8 +57,11 @@ export interface AxisInput {
   tickFormat?: (v: number) => string;
   /** Fixed tick values instead of the 1-2-5 algorithm. */
   tickValues?: readonly number[];
-  /** Operating calendar; the axis then stands in operating time. The module
-      behind it builds a calendar out of the list once and keeps it. */
+  /** The values are instants: ticks on local boundaries, labels by level. */
+  time?: boolean;
+  /** Operating calendar; the axis then stands in operating time, and carries
+      time. The module behind it builds a calendar out of the list once and
+      keeps it. */
   calendar?: readonly OperatingInterval[];
   /** Labels of the limits on a y axis: they stand in its band beside the
       ticks, so the band is as wide as the widest of both. */
@@ -145,6 +147,16 @@ function stabilize(key: string, needed: number, hysteresis: Map<string, number>)
   return previous;
 }
 
+/** The calendar of an axis; an empty list is none. */
+function calendarOf(axis: AxisInput): readonly OperatingInterval[] | undefined {
+  return axis.calendar !== undefined && axis.calendar.length > 0 ? axis.calendar : undefined;
+}
+
+/** The readable step of a time axis over its domain. */
+function stepOf(domain: readonly [number, number], tickCount: number) {
+  return timeStepFor(domain[1] - domain[0], tickCount);
+}
+
 function domainOf(
   axis: AxisInput,
   tickCount: number,
@@ -160,71 +172,78 @@ function domainOf(
   // milliseconds, and a rounded-up end would lie outside [0, total] - there is no
   // wall clock time back there, and the tick generation needs it. The data span
   // the extent, not the round number.
-  if (axis.calendar !== undefined && axis.calendar.length > 0) return dataDomain(min, max);
-  return mode === "data" ? dataDomain(min, max) : niceDomain(min, max, tickCount);
+  if (calendarOf(axis) !== undefined) return dataDomain(min, max);
+  if (mode === "data") return dataDomain(min, max);
+  // "Nice" on a time axis is the step's local boundary, not a round number of
+  // milliseconds.
+  if (axis.time === true && max > min) return timeDomain(min, max, stepOf([min, max], tickCount));
+  return niceDomain(min, max, tickCount);
 }
 
-/** Default labelling of a time axis: `dd.MM. HH:mm`. Deliberately terse and
-    deliberately without a choice of language: this package has no text layer, and
-    whoever needs a format names one.
+/** The tick values of an axis: named explicitly, on local time, or 1-2-5.
 
-    Set by hand and not through `Intl`: `toLocaleString(undefined, …)` would ask
-    the machine's locale, and the same axis would look different on two computers
-    (library-audit 03). The notation happens to be the same as in the sister
-    package. */
-function timeText(wallClock: number): string {
-  if (!Number.isFinite(wallClock)) return "";
-  const d = new Date(wallClock);
-  const two = (n: number) => String(n).padStart(2, "0");
-  return `${two(d.getDate())}.${two(d.getMonth() + 1)}. ${two(d.getHours())}:${two(d.getMinutes())}`;
-}
-
-/** The tick values of an axis: named explicitly, out of the calendar, or 1-2-5.
-
-    Out of the calendar means: candidates in WALL CLOCK TIME on readable
-    boundaries, throw away those in removed intervals, map the rest. Ticks
-    generated in operating time land in the middle of a shift at 14.5 - an axis
-    nobody can use. */
+    With a calendar: candidates in WALL CLOCK TIME on local boundaries, throw
+    away those in removed intervals, map the rest. Ticks generated in operating
+    time land in the middle of a shift at 14.5 - an axis nobody can use. */
 function tickValuesFor(
   axis: AxisInput,
   domain: readonly [number, number],
   tickCount: number,
 ): number[] {
-  const calendar = axis.calendar;
-  const timed = calendar !== undefined && calendar.length > 0;
+  const calendar = calendarOf(axis);
   if (axis.tickValues !== undefined) {
     // Named on the clock, like the data; one in removed time has no place.
-    const values = timed ? axis.tickValues.map((v) => toOperatingTime(v, calendar)) : axis.tickValues;
+    const values =
+      calendar !== undefined ? axis.tickValues.map((v) => toOperatingTime(v, calendar)) : axis.tickValues;
     return values.filter((v) => v >= domain[0] && v <= domain[1]);
   }
-  if (timed) {
-    // Days and half days on LOCAL midnight, the time zone's at the domain's
-    // start - the labels are local.
-    // ponytail: one offset for the domain; across a clock change the day ticks
-    // after it sit an hour off. An offset per candidate when that matters.
+  if (calendar !== undefined) {
     const built = calendarFrom(calendar);
-    const start = toWallClock(Math.min(Math.max(domain[0], 0), built.total), built);
-    return operatingTicks(built, domain[0], domain[1], tickCount, localOffset(start));
+    const inside = (v: number) => toWallClock(Math.min(Math.max(v, 0), built.total), built);
+    const values: number[] = [];
+    for (const wall of timeTicks(inside(domain[0]), inside(domain[1]), stepOf(domain, tickCount))) {
+      const v = toOperatingTime(wall, built);
+      // Removed time, or the seam an earlier candidate already stands on: two
+      // labels on one pixel are one too many.
+      if (Number.isNaN(v) || v === values[values.length - 1]) continue;
+      if (v >= domain[0] && v <= domain[1]) values.push(v);
+    }
+    return values;
   }
+  if (axis.time === true) return timeTicks(domain[0], domain[1], stepOf(domain, tickCount));
   return ticksFor(domain[0], domain[1], tickCount);
 }
 
 function formatterFor(axis: AxisInput, domain: readonly [number, number], tickCount: number) {
-  const calendar = axis.calendar;
-  if (calendar !== undefined && calendar.length > 0) {
+  const own = axis.tickFormat;
+  const calendar = calendarOf(axis);
+  if (calendar !== undefined) {
     // An operating time axis carries operating time but labels the clock. The
     // caller's formatter therefore gets the point in time it expects - and the
     // same route labels the tooltip later.
-    const own = axis.tickFormat;
-    // Without a formatter of its own, a time and not a number: an operating time
-    // axis carries time by definition, and thirteen-digit milliseconds are
-    // neither readable nor narrow.
-    if (own === undefined) return (v: number) => timeText(toWallClock(v, calendar));
-    return (v: number) => own(toWallClock(v, calendar));
+    const format = own ?? timeText;
+    return (v: number) => format(toWallClock(v, calendar));
   }
-  if (axis.tickFormat !== undefined) return axis.tickFormat;
+  if (own !== undefined) return own;
+  if (axis.time === true) return timeText;
   const step = tickStep(Math.abs(domain[1] - domain[0]), tickCount);
   return (v: number) => formatTick(v, step);
+}
+
+/** The labels of the ticks. A time axis without a format of its own labels by
+    level, and a tick's label depends on the one before it - the date stands on
+    the first tick of a new day - so the labels come as a list. */
+function labelsFor(
+  axis: AxisInput,
+  domain: readonly [number, number],
+  tickCount: number,
+  values: readonly number[],
+  format: (v: number) => string,
+): string[] {
+  const calendar = calendarOf(axis);
+  if (axis.tickFormat !== undefined || (axis.time !== true && calendar === undefined)) return values.map(format);
+  const wall = calendar === undefined ? values : values.map((v) => toWallClock(v, calendar));
+  return timeLabels(wall, stepOf(domain, tickCount));
 }
 
 /** Complete layout calculation; derivable and testable purely from the inputs. */
@@ -280,7 +299,7 @@ export function computeLayout(input: LayoutInput): LayoutResult {
     const domain = domainOf(axis, tickCount);
     const values = tickValuesFor(axis, domain, tickCount);
     const format = formatterFor(axis, domain, tickCount);
-    const labels = values.map(format);
+    const labels = labelsFor(axis, domain, tickCount, values, format);
     const widths = labels.map((t) => measure(t, CLASS_TICK).width);
     let maxWidth = 0;
     for (const b of widths) if (b > maxWidth) maxWidth = b;
@@ -379,9 +398,10 @@ export function computeLayout(input: LayoutInput): LayoutResult {
       const domain = domainOf(axis, tickCount);
       const values = tickValuesFor(axis, domain, tickCount);
       const format = formatterFor(axis, domain, tickCount);
+      const labels = labelsFor(axis, domain, tickCount, values, format);
       const scale = new LinearScale(domain, [plotLeft, plotLeft + plotWidth]);
-      const ticks: TickLayout[] = values.map((value) => {
-        const label = format(value);
+      const ticks: TickLayout[] = values.map((value, i) => {
+        const label = labels[i] ?? "";
         const labelWidth = measure(label, CLASS_TICK).width;
         const px = scale.toPx(value);
         // Collision with the edge (R-3.3.5): the first and last label stay inside
