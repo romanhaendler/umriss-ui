@@ -53,7 +53,8 @@ export interface AxisInput {
   grid: boolean;
   /** Raw extent out of the bound series (independent of the layout). */
   extent: readonly [number, number];
-  domainMode: "nice" | "data" | readonly [number, number];
+  /** "visible" arrives as its extent and is then widened as "nice" is. */
+  domainMode: "nice" | "data" | "visible" | readonly [number, number];
   tickCount?: number;
   tickFormat?: (v: number) => string;
   /** Fixed tick values instead of the 1-2-5 algorithm. */

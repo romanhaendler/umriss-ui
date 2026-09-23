@@ -50,6 +50,7 @@ import {
   axisExtent,
   firstUnsortedIndex,
   materializeSeries,
+  visibleExtent,
   type Baseline,
   type Extent,
 } from "./materialize";
@@ -1175,13 +1176,34 @@ export class ChartScene {
     id: string,
   ): readonly [number, number] {
     if (this.materialsDirty) this.materialize();
+    const visible = orientation === "y" && this.findAxisConfig("y", id)?.domain === "visible";
     const bindings = [...this.series.values()].map((entry) => ({
       xAxisId: entry.config.xAxisId,
       yAxisId: entry.config.yAxisId,
       // A hidden series has no say: the axis fits what is shown.
-      extent: entry.config.hidden === true ? null : entry.extent,
+      extent: entry.config.hidden === true ? null : visible ? this.visibleExtentOf(entry) : entry.extent,
     }));
     return axisExtent(orientation, id, bindings, this.limitValues(orientation, id));
+  }
+
+  /** The extent of what a fixed x domain shows. A domain that is not fixed
+      shows every point - "nice" and "data" both contain the data -, and a band
+      and a cell keep theirs: a lane is no value, a cell's edge no point. */
+  private visibleExtentOf(entry: SeriesEntry): Extent | null {
+    const domain = this.findAxisConfig("x", entry.config.xAxisId)?.domain;
+    const kind = entry.config.kind;
+    if (!Array.isArray(domain) || entry.materialized === null || kind === "state" || kind === "matrix") {
+      return entry.extent;
+    }
+    const [from, to] = domain as readonly [number, number];
+    let [yMin, yMax] = visibleExtent(entry.materialized, from, to);
+    // A fixed foot stands under every point shown, as it does in the extent.
+    const baseline = baselineOf(entry.config);
+    if (typeof baseline === "number" && yMin <= yMax) {
+      yMin = Math.min(yMin, baseline);
+      yMax = Math.max(yMax, baseline);
+    }
+    return { xMin: from, xMax: to, yMin, yMax };
   }
 
   /** The values of the limits that are to pull this axis along. */

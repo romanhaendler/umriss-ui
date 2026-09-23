@@ -23,7 +23,6 @@ interface CommonProps<T> {
       a new text or remount. A bound `Intl.NumberFormat#format` is compared by
       identity. */
   tickFormat?: (v: number) => string;
-  domain?: "nice" | "data" | readonly [number, number];
   /** Grid lines; the default follows R-4.15. */
   grid?: boolean;
   /** Fixed tick values instead of the 1-2-5 algorithm. For axes whose values are
@@ -33,6 +32,9 @@ interface CommonProps<T> {
 }
 
 export interface XAxisProps<T> extends CommonProps<T> {
+  /** `"nice"` widens the data's extent to ticks, `"data"` keeps it, a pair is
+      fixed - the one a zoom passes back. */
+  domain?: "nice" | "data" | readonly [number, number];
   /** Which edge the axis stands at. A second x axis on the opposite edge is how
       a series counts in a unit of its own. */
   position?: "bottom" | "top";
@@ -57,6 +59,11 @@ export interface XAxisProps<T> extends CommonProps<T> {
 }
 
 export interface YAxisProps<T> extends CommonProps<T> {
+  /** As on the x axis, and `"visible"`: what the series show inside their x
+      axis' domain - a zoomed hour gets the hour's range, not the week's -,
+      widened to ticks as `"nice"` is. Where the x domain is not fixed that is
+      every point. */
+  domain?: "nice" | "data" | "visible" | readonly [number, number];
   /** Which edge the axis stands at. Several y axes per side are stacked
       outwards, so that extents of clearly different magnitude stay readable. */
   position?: "left" | "right";

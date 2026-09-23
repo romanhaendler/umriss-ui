@@ -5,6 +5,7 @@
    that way. Gaps (null/undefined/NaN/±Infinity out of the accessor) are
    encoded as NaN (R-2.5). */
 
+import { lowerBound } from "./hit";
 import type { Accessor, MaterializedSeries } from "./types";
 
 /** An accessor's value, or NaN for a gap. An infinity is a gap as well: it is no
@@ -119,6 +120,30 @@ export function firstUnsortedIndex(x: Float64Array, n: number): number {
     if ((x[i] as number) < (x[i - 1] as number)) return i;
   }
   return -1;
+}
+
+/** The y extent of the points whose x lies in [from, to], a baseline channel
+    included and gaps left out; [+∞, −∞] where none does. A binary search to
+    the first, then only the window - x ascending (R-2.6). */
+export function visibleExtent(
+  series: MaterializedSeries,
+  from: number,
+  to: number,
+): [number, number] {
+  const { x, y, y0, length } = series;
+  let min = Number.POSITIVE_INFINITY;
+  let max = Number.NEGATIVE_INFINITY;
+  for (let i = lowerBound(x, length, from); i < length && (x[i] as number) <= to; i++) {
+    const v = y[i] as number;
+    if (v < min) min = v;
+    if (v > max) max = v;
+    if (y0 !== null) {
+      const u = y0[i] as number;
+      if (u < min) min = u;
+      if (u > max) max = u;
+    }
+  }
+  return [min, max];
 }
 
 export interface Binding {
