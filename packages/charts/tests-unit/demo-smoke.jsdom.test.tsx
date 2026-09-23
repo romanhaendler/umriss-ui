@@ -23,7 +23,6 @@ const EXAMPLES = DEMO.examples;
     composed example on another page. A named exception (CONTEXT.md): a sixth
     page without an example is a gap and fails here. */
 const WITHOUT_AN_EXAMPLE: Readonly<Record<string, string>> = {
-  tooltip: "shown in nearly every example; a page of its own would photograph a hover",
 };
 
 async function mount(content: ReactNode): Promise<{ host: HTMLDivElement; unmount: () => Promise<void> }> {
