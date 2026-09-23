@@ -56,6 +56,35 @@ describe("materializeSeries", () => {
     expect(extent).toEqual({ xMin: 0, xMax: 4, yMin: 10, yMax: 30 });
   });
 
+  /* charts-review, bug 7: an infinity entered the extent, the extent was no
+     longer finite, and the axis fell back to [0, 1] - every other value of the
+     chart pressed flat against its edge. */
+  it("treats ±Infinity in any channel as a gap outside the extent", () => {
+    const rows = [
+      { t: 0, a: 10, u: 0, w: 1 },
+      { t: 1, a: Number.POSITIVE_INFINITY, u: 0, w: 1 },
+      { t: 2, a: 30, u: Number.NEGATIVE_INFINITY, w: 1 },
+      { t: 3, a: 20, u: 0, w: Number.POSITIVE_INFINITY },
+      { t: Number.POSITIVE_INFINITY, a: 25, u: 0, w: 1 },
+    ];
+    const { series, extent } = materializeSeries(
+      rows,
+      (d) => d.t,
+      (d) => d.a,
+      (d) => d.u,
+      { value: (d) => d.w },
+    );
+    expect(extent).toEqual({ xMin: 0, xMax: 3, yMin: 0, yMax: 30 });
+    expect(series.y[0]).toBe(10);
+    expect(Number.isNaN(series.y[1] as number)).toBe(true);
+    expect(series.y[2]).toBe(30);
+    expect(Number.isNaN(series.y0?.[2] as number)).toBe(true);
+    expect(series.y[3]).toBe(20);
+    expect(Number.isNaN(series.w?.[3] as number)).toBe(true);
+    // An x that is no place is a gap as well: its value is not drawn.
+    expect(Number.isNaN(series.y[4] as number)).toBe(true);
+  });
+
   it("yields empty arrays for empty data without throwing", () => {
     const { series, extent } = materializeSeries(
       [] as Row[],

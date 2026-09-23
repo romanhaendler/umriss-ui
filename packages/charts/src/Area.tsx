@@ -10,7 +10,7 @@ import { useSeries } from "./context";
 import type { Accessor, AreaSeriesConfig } from "./types";
 
 export interface AreaProps<T> {
-  /** Upper edge; null/undefined/NaN means a gap (R-2.5). */
+  /** Upper edge; null/undefined/NaN/±Infinity means a gap (R-2.5). */
   accessor: Accessor<T>;
   /** Lower edge; without a value the fixed baseline 0. */
   baseline?: Accessor<T>;

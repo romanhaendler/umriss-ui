@@ -18,7 +18,7 @@ export type Accessor<T> = (d: T, index: number) => number | null | undefined;
    for some kinds belongs in their members, not in the base with a comment. */
 
 export interface SeriesBase<T = unknown> {
-  /** Y value; null/undefined/NaN means a gap (R-2.5). */
+  /** Y value; null/undefined/NaN/±Infinity means a gap (R-2.5). */
   accessor: Accessor<T>;
   /** Series-own data; overrides the container data (R-2.4). */
   data?: readonly T[];
@@ -156,7 +156,8 @@ export interface Rect {
 }
 
 /** Materialised series: the draw loop works only on this (R-2.7).
-    Gaps (null/undefined/NaN out of the accessor) are encoded as NaN (R-2.5). */
+    Gaps (null/undefined/NaN/±Infinity out of the accessor) are encoded as NaN
+    (R-2.5). */
 export interface MaterializedSeries {
   x: Float64Array;
   y: Float64Array;
