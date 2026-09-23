@@ -602,3 +602,61 @@ describe("A hidden series", () => {
   });
 });
 
+
+/* charts-long-series 02: `domain="visible"` on a y axis - the extent of what
+   the x domain shows. */
+describe("A y axis on the visible domain", () => {
+  const course = [
+    { t: 0, a: 500 },
+    { t: 1, a: 20 },
+    { t: 2, a: 30 },
+    { t: 3, a: 25 },
+    { t: 4, a: -400 },
+  ];
+
+  function visibleScene(x: AxisConfig["domain"]): ChartScene {
+    const scene = new ChartScene();
+    scene.setData(course);
+    scene.registerAxis({ ...xAxis(), domain: x });
+    scene.registerAxis({ ...yAxis(), domain: "visible" });
+    return scene;
+  }
+
+  it("fits the points inside a fixed x domain", () => {
+    const scene = visibleScene([1, 3]);
+    scene.registerSeries(lineSeries());
+    expect(scene.axisExtent("y", "y")).toEqual([20, 30]);
+  });
+
+  it("fits the whole course where the x domain is not fixed - it shows all of it", () => {
+    const scene = visibleScene("nice");
+    scene.registerSeries(lineSeries());
+    expect(scene.axisExtent("y", "y")).toEqual([-400, 500]);
+  });
+
+  it("keeps a fixed baseline, a hidden series' silence and a limit", () => {
+    const scene = visibleScene([1, 3]);
+    scene.registerSeries(areaSeries());
+    scene.registerSeries(lineSeries({ accessor: (d) => (d as Row).a * 10, hidden: true }));
+    expect(scene.axisExtent("y", "y")).toEqual([0, 30]);
+    scene.registerLimit({
+      kind: "line",
+      axisId: "y",
+      orientation: "y",
+      severity: "alarm",
+      role: "specification",
+      inExtent: true,
+      value: 45,
+    });
+    expect(scene.axisExtent("y", "y")).toEqual([0, 45]);
+  });
+
+  it("follows a new x domain", () => {
+    const scene = visibleScene([1, 3]);
+    const x = scene.axesInOrder()[0];
+    scene.registerSeries(lineSeries());
+    if (x === undefined) throw new Error("no x axis");
+    scene.updateAxis(x.order, { ...x.config, domain: [0, 2] });
+    expect(scene.axisExtent("y", "y")).toEqual([20, 500]);
+  });
+});

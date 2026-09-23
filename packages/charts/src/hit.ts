@@ -24,6 +24,18 @@ export function nearestIndex(x: Float64Array, n: number, target: number): number
   return dHi < dLo ? hi : lo;
 }
 
+/** The first index whose x is not below `v`; n where there is none. */
+export function lowerBound(x: Float64Array, n: number, v: number): number {
+  let lo = 0;
+  let hi = n;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if ((x[mid] as number) < v) lo = mid + 1;
+    else hi = mid;
+  }
+  return lo;
+}
+
 /** Index of the point nearest in pixel space, in x and y - a scatter under
     "nearest", where the point straight above the pointer is not the one it
     points at. -1 where there is none; a gap (NaN in y) is never one. Walks

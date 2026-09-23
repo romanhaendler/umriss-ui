@@ -140,7 +140,9 @@ export interface AxisConfig<T = unknown> {
   label?: string;
   tickCount?: number;
   tickFormat?: (v: number) => string;
-  domain: "nice" | "data" | readonly [number, number];
+  /** "visible" is a y axis' only: the extent of what its series show inside
+      their x axis' domain. */
+  domain: "nice" | "data" | "visible" | readonly [number, number];
   /** undefined = the default per R-4.15 (only the first registered axis per
       orientation). */
   grid?: boolean;
