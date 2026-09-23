@@ -4,7 +4,7 @@ import { createPortal } from "react-dom";
 import { cx } from "../../lib/cx";
 import { usePortalTarget } from "../../lib/provider";
 import { portalTargetFor } from "../../lib/portalTarget";
-import { computePosition } from "../Popover/position";
+import { computePosition, visibleViewport } from "../Popover/position";
 import styles from "./Tooltip.module.css";
 
 export interface TooltipProps {
@@ -59,7 +59,7 @@ export function Tooltip({ content, children, delay = 300 }: TooltipProps) {
     const pos = computePosition(
       rect,
       { width: panel.offsetWidth, height: panel.offsetHeight },
-      { width: window.innerWidth, height: window.innerHeight },
+      visibleViewport(),
       { align: "center", side: "top", offset: 8 },
     );
     setBelow(pos.flipped);

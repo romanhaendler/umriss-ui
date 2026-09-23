@@ -76,6 +76,10 @@
 
     /* ---- Focus: a soft accent glow ---- */
     --u-focus-ring: 0 0 0 4px color-mix(in srgb, var(--u-color-accent) 20%, transparent);
+    /* A field's focus is its own edge, grown to two pixels - no glow around it.
+       Edge and glow side by side read as a second, shadowy border. */
+    --u-focus-edge: 0 0 0 2px var(--u-color-accent);
+    --u-focus-edge-danger: 0 0 0 2px var(--u-color-danger);
 
     /* ---- Typography ---- */
     --u-font-sans: "Geist Sans", "Geist", -apple-system, "Segoe UI", system-ui, sans-serif;

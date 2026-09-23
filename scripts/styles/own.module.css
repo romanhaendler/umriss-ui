@@ -1,7 +1,7 @@
 /* What every component used to take from the page and now carries itself
    (ADR-0021): the text context of its surface, the focus ring of what it makes
-   focusable, the caret and autofill look of its text fields and the scrollbars of
-   its scroll containers. The values are the ones `html` and `body` carried in the
+   focusable, the caret, autofill look and touch size of its fields and the
+   scrollbars of its scroll containers. The values are the ones `html` and `body` carried in the
    old base layer, so nothing a picture shows moves.
 
    Components take them with `composes: text from "#own-styles"` - or `ring`,
@@ -65,6 +65,19 @@
   .ring:focus-visible {
     outline: none;
     box-shadow: var(--u-focus-ring);
+  }
+
+  /* Safari on iOS zooms the page into every text field whose type is smaller
+     than 16px - and every field here is (13px). The zoomed page stayed zoomed,
+     and panels measured against it stood in the wrong place. On a touch screen a
+     field therefore writes at 16px. In px and not rem, against ADR-0021: Safari
+     checks the computed size, and a smaller root font would slip under it again.
+     The doubled class outweighs the size each component sets on its own single
+     class, whichever stylesheet comes last. */
+  @media (pointer: coarse) {
+    .field.field {
+      font-size: 16px;
+    }
   }
 
   /* Browser autofill does not destroy the paper look. With the components,

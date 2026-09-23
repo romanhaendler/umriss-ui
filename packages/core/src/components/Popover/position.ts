@@ -5,7 +5,8 @@
    Before this, the calculation stood in nine versions across the package, with
    four different strategies: sometimes without clamping at the right edge,
    sometimes with, sometimes right-aligned, and exactly once (Tooltip) with
-   flipping. */
+   flipping. The one function that reads the browser, `visibleViewport`,
+   stands at the end and only measures. */
 
 export interface AnchorRect {
   top: number;
@@ -19,6 +20,14 @@ export interface AnchorRect {
 export interface Size {
   width: number;
   height: number;
+}
+
+/** The visible part of the window, counted from the window's corner. `top` and
+    `left` are its offset: on a phone the keyboard and a zoom move and shorten
+    it, while anchor and panel still count from the corner. Default 0. */
+export interface Viewport extends Size {
+  top?: number;
+  left?: number;
 }
 
 export type Align = "start" | "end" | "center";
@@ -48,13 +57,14 @@ export const MARGIN = 8;
 export function computePosition(
   anchor: AnchorRect,
   panel: Size,
-  viewport: Size,
+  viewport: Viewport,
   options: PositionOptions = {},
 ): PopoverPosition {
   const { align = "start", side = "bottom", offset = OFFSET, margin = MARGIN } = options;
 
-  const spaceBelow = viewport.height - anchor.bottom - offset;
-  const spaceAbove = anchor.top - offset;
+  const { top: vTop = 0, left: vLeft = 0 } = viewport;
+  const spaceBelow = vTop + viewport.height - anchor.bottom - offset;
+  const spaceAbove = anchor.top - vTop - offset;
   const spacePreferred = side === "top" ? spaceAbove : spaceBelow;
   const spaceOther = side === "top" ? spaceBelow : spaceAbove;
 
@@ -69,7 +79,7 @@ export function computePosition(
      panel taller than the window keeps its top edge; the panel's own
      max-height lets it scroll. */
   const fits = spacePreferred >= panel.height || spaceOther >= panel.height;
-  const top = fits ? hanging : Math.max(margin, Math.min(hanging, viewport.height - panel.height - margin));
+  const top = fits ? hanging : Math.max(vTop + margin, Math.min(hanging, vTop + viewport.height - panel.height - margin));
 
   const raw =
     align === "end"
@@ -79,7 +89,18 @@ export function computePosition(
         : anchor.left;
   // Clamp at the right edge first, then at the left: if the panel is wider than
   // the viewport, the left edge wins.
-  const left = Math.max(margin, Math.min(raw, viewport.width - panel.width - margin));
+  const left = Math.max(vLeft + margin, Math.min(raw, vLeft + viewport.width - panel.width - margin));
 
   return { top, left, flipped };
+}
+
+/** The visible part of the window, read from the browser. `innerWidth` and
+    `innerHeight` were read before: Safari reports the zoomed-in size there but
+    positions from the unzoomed corner, and neither of them knows the on-screen
+    keyboard - on an iPhone the combobox's list stood above the field and cut
+    off at the left. Where `visualViewport` is missing (jsdom), the window. */
+export function visibleViewport(): Viewport {
+  const v = window.visualViewport;
+  if (!v) return { width: window.innerWidth, height: window.innerHeight };
+  return { top: v.offsetTop, left: v.offsetLeft, width: v.width, height: v.height };
 }
