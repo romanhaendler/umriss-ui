@@ -30,10 +30,10 @@ borders; cards are borderless and carry a multi-step shadow stack in which every
 step has a job (edge · contact with the ground · soft depth). Cards lie like
 paper on a table. Interactive elements stay flat.
 
-**Focus.** On a field, its own edge grows to two pixels in the accent
-(`--u-focus-edge`), in danger when the field is invalid – no glow, and no
-browser outline beside it. On everything else (buttons, checkboxes, rows, links)
-a soft accent glow (20 % opacity, `--u-focus-ring`). Unmistakable, never hard.
+**Focus.** A crisp accent edge of two pixels (`--u-focus-ring`), the same on
+every component – no glow, and no browser outline beside it. On a field it lies
+where the field's edge lies, so the edge seems to grow; an invalid field keeps
+its danger colour (`--u-focus-ring-danger`). Unmistakable, never soft.
 
 **Motion.** Motion explains a change of state; it does not decorate. Micro
 transitions (hover, colour) run in 120 ms; choreographies use

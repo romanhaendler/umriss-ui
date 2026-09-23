@@ -54,11 +54,12 @@ module on the caller's side that carries `"use client"` and imports from there.
 
 ### Changed
 
-- **A focused field shows its edge at two pixels, and nothing else.** Input,
-  Combobox, Select, Textarea, NumberInput, MultiSelect and the pickers dropped
-  the soft glow around the accent edge; an invalid field keeps its danger
-  colour while focused. New tokens: `--u-focus-edge`, `--u-focus-edge-danger`.
-  Buttons, checkboxes and rows keep `--u-focus-ring`.
+- **Focus is a crisp two-pixel accent edge, on every component.**
+  `--u-focus-ring` was a soft 4px glow at 20 %, and fields drew an accent edge
+  inside it; now it is `0 0 0 2px` in the accent, for fields, buttons,
+  checkboxes, radios, tags, rows and links alike. An invalid field keeps its
+  danger colour while focused (new token `--u-focus-ring-danger`). A caller who
+  set `--u-focus-ring` keeps their value.
 - **On a touch screen, fields write at 16px** (`pointer: coarse`). Below that,
   Safari on iOS zoomed the page into the field and left it zoomed.
 - **A loading button is no longer faded to half.** It stays locked, but at full

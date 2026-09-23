@@ -74,12 +74,13 @@
       var(--u-color-danger) 85%, light-dark(#000000, #ffffff));
     --u-color-danger-subtle: light-dark(#f8eaea, #2f1b1d);
 
-    /* ---- Focus: a soft accent glow ---- */
-    --u-focus-ring: 0 0 0 4px color-mix(in srgb, var(--u-color-accent) 20%, transparent);
-    /* A field's focus is its own edge, grown to two pixels - no glow around it.
-       Edge and glow side by side read as a second, shadowy border. */
-    --u-focus-edge: 0 0 0 2px var(--u-color-accent);
-    --u-focus-edge-danger: 0 0 0 2px var(--u-color-danger);
+    /* ---- Focus: a crisp accent edge, two pixels, no glow ----
+       One look for every component. It was a soft 4px glow at 20 %, and on
+       fields an accent edge inside it: the two read as a second, shadowy
+       border. On a field the ring lies where its edge lies, so the edge seems
+       to grow. `-danger` for an invalid field, which keeps its colour. */
+    --u-focus-ring: 0 0 0 2px var(--u-color-accent);
+    --u-focus-ring-danger: 0 0 0 2px var(--u-color-danger);
 
     /* ---- Typography ---- */
     --u-font-sans: "Geist Sans", "Geist", -apple-system, "Segoe UI", system-ui, sans-serif;

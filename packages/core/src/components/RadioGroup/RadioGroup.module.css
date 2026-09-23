@@ -84,7 +84,7 @@
   }
 
   .input:focus-visible + .dot {
-    box-shadow: var(--u-edge-strong), var(--u-focus-ring);
+    box-shadow: var(--u-focus-ring);
   }
 
   .input:checked:focus-visible + .dot {

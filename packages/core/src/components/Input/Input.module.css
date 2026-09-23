@@ -28,7 +28,7 @@
      it, and no outline: Safari drew its own blue ring outside the edge. */
   .input:focus-visible {
     outline: none;
-    box-shadow: var(--u-focus-edge);
+    box-shadow: var(--u-focus-ring);
   }
 
   .input:disabled {
@@ -57,7 +57,7 @@
   }
 
   .invalid:focus-visible {
-    box-shadow: var(--u-focus-edge-danger);
+    box-shadow: var(--u-focus-ring-danger);
   }
 
   /* ------------------------------------------------------------------
@@ -85,7 +85,7 @@
   }
 
   .wrapper:focus-within {
-    box-shadow: var(--u-focus-edge);
+    box-shadow: var(--u-focus-ring);
   }
 
   .wrapperSm {
@@ -100,7 +100,7 @@
   }
 
   .wrapperInvalid:focus-within {
-    box-shadow: var(--u-focus-edge-danger);
+    box-shadow: var(--u-focus-ring-danger);
   }
 
   .wrapperDisabled {
