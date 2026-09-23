@@ -135,3 +135,37 @@ describe("A point between two gaps", () => {
     expect(ops[from + 1]).toEqual(["lineTo", px, yScale.toPx(50)]);
   });
 });
+
+/* charts-essentials 03: a step line holds each sample until the next one - a
+   horizontal, then the jump. A gap ends the hold at its x and lifts the pen. */
+describe("A step line", () => {
+  it("holds each value until the next sample, and until a gap's x", () => {
+    const x = new Float64Array([0, 10, 20, 30, 40]);
+    const y = new Float64Array([10, 50, Number.NaN, 30, 70]);
+    const { stroked } = draw({
+      x,
+      y,
+      kind: "line",
+      length: 5,
+      xScale,
+      yScale,
+      color: "#000",
+      alpha: 1,
+      strokeWidth: 1.5,
+      markers: "never",
+      step: true,
+    });
+    const px = (v: number) => xScale.toPx(v);
+    const py = (v: number) => yScale.toPx(v);
+    expect(stroked[0]?.ops).toEqual([
+      ["moveTo", px(0), py(10)],
+      ["lineTo", px(10), py(10)],
+      ["lineTo", px(10), py(50)],
+      ["lineTo", px(20), py(50)],
+      ["moveTo", px(30), py(30)],
+      ["lineTo", px(40), py(30)],
+      ["lineTo", px(40), py(70)],
+    ]);
+  });
+});
+

@@ -258,6 +258,37 @@ describe("ChartScene - the hit of a band beside points", () => {
   });
 });
 
+/* charts-essentials 03: on a step line the value at the pointer is the sample
+   before it, held - not the nearer sample after it. */
+describe("ChartScene - the hit on a step line", () => {
+  it("stays at the sample the pointer's hold began with", async () => {
+    const root = document.createElement("div");
+    document.body.appendChild(root);
+    const scene = new ChartScene();
+    scene.bind(root, document.createElement("canvas"), document.createElement("canvas"), root);
+    scene.registerAxis(xAxis);
+    scene.registerAxis(yAxis);
+    scene.registerSeries({ ...line, step: true });
+    scene.registerTooltip({ mode: "x" });
+    scene.setData([
+      { t: 0, a: 10 },
+      { t: 5, a: 50 },
+      { t: 10, a: 90 },
+    ]);
+    scene.requestResize(400, 300);
+    await frame();
+    const axes = scene.getLayoutSnapshot().layout.axes;
+    const x = axes.find((a) => a.orientation === "x")?.scale;
+    if (x === undefined) throw new Error("x axis missing");
+    // Nearer to t = 10, but the value held there is the one of t = 5.
+    scene.pointerMove(x.toPx(9), 150);
+    const hit = scene.getHoverSnapshot().hover?.hit;
+    expect(hit?.points[0]?.yValue).toBe(50);
+    expect(hit?.xPx).toBe(x.toPx(5));
+    scene.unbind();
+  });
+});
+
 /* charts-fixes 11: functions were compared by their source text, and every
    bound native function reads "function () { [native code] }". */
 describe("ChartScene - change detection of a native function", () => {

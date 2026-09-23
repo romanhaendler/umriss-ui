@@ -421,6 +421,23 @@ export function planAndActual(seed: number): DayOutput[] {
   return points;
 }
 
+export interface SetPoint {
+  t: number;
+  /** The set point in °C; null while no recipe is loaded. */
+  setPoint: number | null;
+}
+
+/** The set point of the hardening furnace above, logged only when it changes -
+    a raise at 08:30, the recipe change from 10 to 11 o'clock without one, and a
+    last entry at the end of the shift that closes the hold. */
+export const setPoints: readonly SetPoint[] = [
+  { t: WEEK_START + 6 * HOUR_MS, setPoint: 840 },
+  { t: WEEK_START + 8.5 * HOUR_MS, setPoint: 845 },
+  { t: WEEK_START + 10 * HOUR_MS, setPoint: null },
+  { t: WEEK_START + 11 * HOUR_MS, setPoint: 880 },
+  { t: WEEK_START + 14 * HOUR_MS, setPoint: 880 },
+];
+
 export interface ThicknessSample {
   t: number;
   /** Wall thickness in mm. */

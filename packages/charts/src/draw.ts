@@ -31,6 +31,7 @@ export interface LineDrawItem extends DrawBase {
   strokeWidth: number;
   dash?: readonly number[];
   markers: "auto" | "always" | "never";
+  step?: boolean;
 }
 
 export interface AreaDrawItem extends DrawBase {
@@ -185,22 +186,29 @@ function drawLine(ctx: CanvasRenderingContext2D, item: LineDrawItem): void {
   const xs = item.x;
   const ys = item.y;
 
+  const step = item.step === true;
   const path = new Path2D();
   let penDown = false;
+  let held = 0; // a step line's last y in pixels
   for (let i = 0; i < n; i++) {
     const value = ys[i] as number;
+    const px = (xs[i] as number) * xm + xb;
     if (Number.isNaN(value)) {
+      // A held value holds until the gap's x: that sample says it is no longer
+      // known from there, not that it never was.
+      if (step && penDown) path.lineTo(px, held);
       penDown = false; // gap (R-2.5)
       continue;
     }
-    const px = (xs[i] as number) * xm + xb;
     const py = value * ym + yb;
     if (penDown) {
+      if (step) path.lineTo(px, held);
       path.lineTo(px, py);
     } else {
       path.moveTo(px, py);
       penDown = true;
     }
+    held = py;
   }
 
   ctx.strokeStyle = item.color;

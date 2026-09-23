@@ -102,6 +102,8 @@ Screenshot pages carry their name in brackets.
 | Markers `auto` / `always` / `never` | R-4.5 | Screenshot (`configuration`) |
 | A point between two gaps (or a gap and the edge) keeps its marker at any point count; only `never` drops it | R-4.5 | Unit (draw), Screenshot (`multi-series`) |
 | Binding through `xAxisId` / `yAxisId` | R-4.12 | Interaction (`axes`), Screenshot |
+| `step`: sample-and-hold, a gap ends the hold at its x | Q22 | Unit (draw), Screenshot (`step`) |
+| `step`: the tooltip reports the sample the hold began with | Q22 | Unit (jsdom scene) |
 
 ## `Area`
 
