@@ -102,6 +102,9 @@ interface SeriesEntry {
   step: number | null;
   /** Matrix only: the second cell edge. */
   cellHeight: number | null;
+  /** Matrix only: the palette index per cell, once per materialisation and
+      colouring - not per redraw, which a legend hover causes as well. */
+  buckets: Int32Array | null;
 }
 
 /** A series' hit, before the hits are grouped into one tooltip. */
@@ -575,6 +578,7 @@ export class ChartScene {
       extent: null,
       step: null,
       cellHeight: null,
+      buckets: null,
     });
     this.materialsDirty = true;
     this.markLayoutDirty();
@@ -605,11 +609,13 @@ export class ChartScene {
     }
     entry.config = config;
     if (equal) return; // R-2.2: no dirty flag without a change of substance
+    entry.buckets = null; // the colouring may have changed
     if (!dataEqual) {
       entry.materialized = null;
       entry.extent = null;
       entry.step = null;
       entry.cellHeight = null;
+      entry.buckets = null;
       this.materialsDirty = true;
     }
     this.markLayoutDirty();
@@ -655,6 +661,7 @@ export class ChartScene {
         entries.extent = null;
         entries.step = null;
         entries.cellHeight = null;
+        entries.buckets = null;
       }
       this.materialsDirty = true;
     }
@@ -770,6 +777,7 @@ export class ChartScene {
       entry.extent = null;
       entry.step = null;
       entry.cellHeight = null;
+      entry.buckets = null;
     }
     this.markLayoutDirty();
   }
@@ -1527,7 +1535,7 @@ export class ChartScene {
           items.push({
             ...base,
             kind: "matrix",
-            buckets: matrixBuckets(mat, config.coloring, colors.length),
+            buckets: (entry.buckets ??= matrixBuckets(mat, config.coloring, colors.length)),
             colors: colors,
             width: cellSize(
               entry.step ?? 0,
@@ -1853,15 +1861,12 @@ export class ChartScene {
       const yValue = mat.y[index] as number;
       // The chip shows the cell's own colour, bucketed as the drawing does it.
       const colors = matrixColors(config.coloring, this.theme ?? FALLBACK_THEME);
-      const [min, max] =
-        config.coloring.kind === "gradient" && w !== null
-          ? gradientRange(w, n, config.coloring.range)
-          : [0, 0];
+      entry.buckets ??= matrixBuckets(mat, config.coloring, colors.length);
       return {
         index,
         px: xAxis.scale.toPx(xValue),
         py: yAxis.scale.toPx(yValue),
-        color: colors[bucketOf(value, config.coloring, colors.length, min, max)],
+        color: colors[entry.buckets[index] as number],
         xValue,
         // yValue stays the position on the y axis; the value that carries the
         // colour stands in a field of its own. Colour alone can transport no
