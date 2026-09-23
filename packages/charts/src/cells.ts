@@ -3,8 +3,7 @@
    The file is called after the cell and not after the matrix, because <Matrix>
    is the component: on a file system that does not distinguish upper and lower
    case, an import of `./Matrix` would find a `matrix.ts` lying beside it. The
-   same reason gives bars.ts and spans.ts their names; see CONTEXT.md on module
-   names.
+   same reason gives bars.ts its name; see CONTEXT.md on module names.
 
    A matrix sits on two ordinary numeric axes: x is the column, y the row, and
    the colour comes from the value channel. The edge lengths of a cell therefore
@@ -55,8 +54,8 @@ export function cellSize(measured: number, domainSpan: number): number {
 
     A cell is centred on its midpoint, so it covers [x - width/2, x + width/2)
     by [y - height/2, y + height/2). An edge belongs to the cell that begins
-    there - the same boundary rule as in the state band and with the spans, and
-    without it an edge would belong to both neighbours.
+    there - the same boundary rule as in the state band, and without it an edge
+    would belong to both neighbours.
 
     Linear, not binary: the position channels are not sorted (see
     measureSpacing), and no binary search can conclude across two dimensions at

@@ -29,6 +29,21 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## Unreleased – The charts, corrected
+
+From `.scratch/charts-fixes/spec.md`; the findings stand in
+`.scratch/charts-review/spec.md`.
+
+### Changed
+
+- **`Span` is removed** (breaking, ADR-0026). Occupancy - jobs on machines,
+  idle time, double bookings - is drawn by `@umriss-ui/schedule`, with lanes,
+  groups and editing. With it go `SpanProps`, `SpanSeriesConfig`, the series
+  kind `"span"`, the second x channel `x1` of `MaterializedSeries` and
+  `open` in a tooltip point's `segment`.
+
+---
+
 ## 0.3.2 – Phones, touch and a review (Sep. 2026)
 
 ### Fixed

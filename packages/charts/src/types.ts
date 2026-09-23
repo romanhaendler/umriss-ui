@@ -103,23 +103,13 @@ export interface MatrixSeriesConfig<T = unknown> extends SeriesBase<T> {
   coloring: MatrixColoring;
 }
 
-export interface SpanSeriesConfig<T = unknown> extends SeriesBase<T> {
-  kind: "span";
-  /** End of the span on the x axis. Missing means open: the span runs to the end
-      of the domain and is drawn as open. */
-  to: Accessor<T>;
-  /** Height of a span as a fraction of one domain unit of the y axis. */
-  height?: number;
-}
-
 export type SeriesConfig<T = unknown> =
   | LineSeriesConfig<T>
   | AreaSeriesConfig<T>
   | BarSeriesConfig<T>
   | ScatterSeriesConfig<T>
   | StateSeriesConfig<T>
-  | MatrixSeriesConfig<T>
-  | SpanSeriesConfig<T>;
+  | MatrixSeriesConfig<T>;
 
 export type SeriesKind = SeriesConfig["kind"];
 
@@ -178,9 +168,6 @@ export interface MaterializedSeries {
       carry does not belong in the shared type with a comment (ADR-0011). null
       for every kind that does not use it. */
   w: Float64Array | null;
-  /** Second x channel: the end of a span. Named for the same reason.
-      NaN here does not mean a gap but open (ADR-0011). */
-  x1: Float64Array | null;
   length: number;
 }
 
@@ -264,11 +251,11 @@ export interface TooltipPoint<T = unknown> {
       therefore the row. Putting both into one field would be exactly the
       overloading ADR-0011 is written against. */
   value?: number;
-  /** Only for state series and spans: the section being pointed at.
+  /** Only for state series: the section being pointed at.
       A duration does not stand here - it is the difference of two numbers the
       entry already carries, and formatting it would presuppose knowing what the
       x axis means. The caller knows that, not this library. */
-  segment?: { from: number; to: number; label: string; open: boolean };
+  segment?: { from: number; to: number; label: string };
 }
 
 export interface TooltipHit<T = unknown> {

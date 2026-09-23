@@ -8,7 +8,7 @@ the commands.
 
 Since ADR-0020 the demos run in the same shell, the private package
 `@umriss-ui/demo` - four of them since ADR-0022: forty-one pages in core,
-fourteen in charts, twelve in table, eight in schedule.
+thirteen in charts, twelve in table, eight in schedule.
 
 **A rendering constant changed and the picture did not?** Then the preview
 build is stale. `playwright.config.ts` reuses a running server outside CI, and
@@ -39,7 +39,7 @@ not photographed.
 
 | Layer | Tool | Place | Status |
 |---|---|---|---|
-| Unit tests of the charts (ticks, scale, layout, hit, materialisation, scene, bar geometry, **limit, state, cells, spans, control chart, Pareto, operating time, limits and bands in the scene**) | vitest | packages/charts/tests-unit/ | green |
+| Unit tests of the charts (ticks, scale, layout, hit, materialisation, scene, bar geometry, **limit, state, cells, control chart, Pareto, operating time, limits and bands in the scene**) | vitest | packages/charts/tests-unit/ | green |
 | jsdom smoke test of the charts demo (every page, every example, the package by name in the source) + SSR test | vitest | packages/charts/tests-unit/ | green |
 | jsdom smoke test of the core demo | vitest | packages/core/tests-unit/ | green |
 | jsdom smoke test of the table demo: every page with its tables, every example with a title, the package by name in the source | vitest | packages/table/tests-unit/demo-smoke.test.tsx | green |
@@ -116,7 +116,6 @@ bodies. Placement follows ownership: with the module it belongs to, and in
 | `charts/limit.ts` | the same rule, a second house (ADR-0006) |
 | `charts/state.ts` | the segment boundary and the segment under the pointer |
 | `charts/cells.ts` | the cell edge in two dimensions, a hit inside the cell |
-| `charts/spans.ts` | end, open, depth of overlap, hit |
 | `charts/controlLimits.ts` | control limits, zones, four rule violations |
 | `charts/pareto.ts` | sort, accumulate, collect the remainder, cutoff |
 | `charts/operatingTime.ts` | wall clock ↔ operating time, breaks, ticks, clamped position |

@@ -41,7 +41,6 @@ import {
 import { nearestIndex } from "./hit";
 import { segmentEnd, segmentIndex } from "./state";
 import { cellSize, cellIndex, measureSpacing } from "./cells";
-import { DEPTH_OFFSET, isOpen, spanEnd, spanIndex, overlapDepth } from "./spans";
 import { assess } from "./limit";
 import { inRemovedTime, toOperatingTimeClamped } from "./operatingTime";
 import {
@@ -64,7 +63,6 @@ import type {
   LimitConfig,
   MatrixColoring,
   MatrixSeriesConfig,
-  SpanSeriesConfig,
   StateSeriesConfig,
   AxisOrientation,
   BarSeriesConfig,
@@ -101,10 +99,6 @@ interface SeriesEntry {
   step: number | null;
   /** Matrix only: the second cell edge. */
   cellHeight: number | null;
-  /** Spans only: how many earlier registered spans each one overlaps. Computed
-      quadratically and therefore once per materialisation - not per frame, as the
-      drawing loop would do it. */
-  depth: Int32Array | null;
 }
 
 interface AxisEntry {
@@ -176,11 +170,6 @@ const MARKER_LIMIT = 60;
 
 let nextRegistration = 0;
 
-/* Replacement values for the degenerate case; as constants, so that the drawing
-   path allocates nothing. */
-const EMPTY_CHANNEL = new Float64Array(0);
-const EMPTY_DEPTH = new Int32Array(0);
-
 function fnEqual(a: unknown, b: unknown): boolean {
   if (a === b) return true;
   if (typeof a !== "function" || typeof b !== "function") return false;
@@ -196,8 +185,8 @@ function listEqual(a: readonly number[] | undefined, b: readonly number[] | unde
 }
 
 /** Everything materialisation reads: the y accessor, the data reference, the
-    baseline, the height of a span and the series kind - the kind, because it
-    decides about the baseline and the step. If any of that changes, the channels are stale and have to come
+    baseline and the series kind - the kind, because it decides about the
+    baseline and the step. If any of that changes, the channels are stale and have to come
     into being anew; a field comparison alone is not enough here. */
 function materialEqual(previous: SeriesConfig, next: SeriesConfig): boolean {
   return (
@@ -205,25 +194,13 @@ function materialEqual(previous: SeriesConfig, next: SeriesConfig): boolean {
     fnEqual(previous.accessor, next.accessor) &&
     previous.data === next.data &&
     fnEqual(baselineOf(previous), baselineOf(next)) &&
-    fnEqual(valueChannelOf(previous), valueChannelOf(next)) &&
-    fnEqual(xEndOf(previous), xEndOf(next)) &&
-    // The height of a span widens its y extent, and the extent is made here.
-    spanHeightOf(previous) === spanHeightOf(next)
+    fnEqual(valueChannelOf(previous), valueChannelOf(next))
   );
-}
-
-function spanHeightOf(config: SeriesConfig): number | undefined {
-  return config.kind === "span" ? config.height : undefined;
 }
 
 /** The value channel, where the kind has one (ADR-0011). */
 function valueChannelOf(config: SeriesConfig): Accessor<unknown> | undefined {
   return config.kind === "matrix" ? config.value : undefined;
-}
-
-/** The second x channel, where the kind has one (ADR-0011). */
-function xEndOf(config: SeriesConfig): Accessor<unknown> | undefined {
-  return config.kind === "span" ? config.to : undefined;
 }
 
 /** Baseline per series kind; undefined where the kind has none. It enters the
@@ -239,9 +216,7 @@ function baselineOf(config: SeriesConfig): Baseline<unknown> | undefined {
       return 0;
     case "state":
     case "matrix":
-    case "span":
-      // None of the three has a foot: a state is not a height, a cell not a
-      // column, a span an interval on x.
+      // Neither has a foot: a state is not a height, a cell not a column.
       return undefined;
   }
 }
@@ -286,10 +261,6 @@ function ownFieldsEqual(previous: SeriesConfig, next: SeriesConfig): boolean {
     case "matrix": {
       const a = previous as MatrixSeriesConfig;
       return coloringEqual(a.coloring, next.coloring);
-    }
-    case "span": {
-      const a = previous as SpanSeriesConfig;
-      return a.height === next.height;
     }
   }
 }
@@ -513,7 +484,6 @@ export class ChartScene {
       extent: null,
       step: null,
       cellHeight: null,
-      depth: null,
     });
     this.materialsDirty = true;
     this.markLayoutDirty();
@@ -547,7 +517,6 @@ export class ChartScene {
       entry.extent = null;
       entry.step = null;
       entry.cellHeight = null;
-      entry.depth = null;
       this.materialsDirty = true;
     }
     this.markLayoutDirty();
@@ -593,7 +562,6 @@ export class ChartScene {
         entries.extent = null;
         entries.step = null;
         entries.cellHeight = null;
-        entries.depth = null;
       }
       this.materialsDirty = true;
     }
@@ -710,7 +678,6 @@ export class ChartScene {
       entry.extent = null;
       entry.step = null;
       entry.cellHeight = null;
-      entry.depth = null;
     }
     this.markLayoutDirty();
   }
@@ -822,7 +789,6 @@ export class ChartScene {
         baselineOf(config),
         {
           value: valueChannelOf(config),
-          xEnd: xEndOf(config),
           xMap: this.mapFor(xAxis),
           xGap: this.gapFor(xAxis),
         },
@@ -869,25 +835,6 @@ export class ChartScene {
           ...material.extent,
           yMin: Number.POSITIVE_INFINITY,
           yMax: Number.NEGATIVE_INFINITY,
-        };
-      } else if (config.kind === "span") {
-        entry.depth = overlapDepth(
-          material.series.x,
-          material.series.x1 ?? new Float64Array(material.series.length),
-          material.series.length,
-          // The end of the domain is not yet fixed at materialisation time. The
-          // covering of an open span reaches to the end of everything there is -
-          // and that is exactly the value it gets here.
-          material.extent.xMax,
-        );
-        // Half the span height upwards and downwards, so that the topmost and the
-        // bottommost lane are not cut into.
-        const half = (config.height ?? 0.6) / 2;
-        entry.step = null;
-        entry.extent = {
-          ...material.extent,
-          yMin: material.extent.yMin - half,
-          yMax: material.extent.yMax + half,
         };
       } else {
         entry.step = null;
@@ -1468,20 +1415,6 @@ export class ChartScene {
           });
           break;
         }
-        case "span": {
-          items.push({
-            ...base,
-            kind: "span",
-            x1: mat.x1 ?? EMPTY_CHANNEL,
-            // Computed once per materialisation, not per frame: the calculation
-            // is quadratic, and a schedule with five hundred spans is pushed and
-            // pulled like any other chart.
-            depth: entry.depth ?? EMPTY_DEPTH,
-            height: config.height ?? 0.6,
-            domainEnd: xAxis.scale.domain[1],
-          });
-          break;
-        }
       }
     });
     return items;
@@ -1593,15 +1526,15 @@ export class ChartScene {
       py: number;
       xValue: number;
       yValue: number;
-      /** Does this hit get a hover marker? Not on a band, a cell or a span: there
-          the mark is the area itself, and a point on it points at nothing. */
+      /** Does this hit get a hover marker? Not on a band or a cell: there the
+          mark is the area itself, and a point on it points at nothing. */
       marked: boolean;
-      /** Does this mark cover an area instead of sitting on a point? A band, a
-          span and a cell lie under the pointer where they cover it - their px is
-          the beginning of the section and not the place being pointed at. */
+      /** Does this mark cover an area instead of sitting on a point? A band and a
+          cell lie under the pointer where they cover it - their px is the
+          beginning of the section and not the place being pointed at. */
       areal: boolean;
       value?: number;
-      segment?: { from: number; to: number; label: string; open: boolean };
+      segment?: { from: number; to: number; label: string };
     }
     const candidates: Candidate[] = [];
     this.seriesInOrder().forEach((entry, i) => {
@@ -1706,10 +1639,10 @@ export class ChartScene {
 
   /** The hit of one series - one different question per kind.
 
-      Every mark that is a point asks "which point lies nearest". A band, a cell
-      and a span ask "what lies under the pointer", and that is not the same
-      question: for the right half of every segment the nearest point gives the
-      wrong answer. */
+      Every mark that is a point asks "which point lies nearest". A band and a
+      cell ask "what lies under the pointer", and that is not the same question:
+      for the right half of every segment the nearest point gives the wrong
+      answer. */
   private hitIn(
     entry: SeriesEntry,
     mat: MaterializedSeries,
@@ -1728,7 +1661,7 @@ export class ChartScene {
     areal: boolean;
     color?: string;
     value?: number;
-    segment?: { from: number; to: number; label: string; open: boolean };
+    segment?: { from: number; to: number; label: string };
   } | null {
     const config = entry.config;
     const n = mat.length;
@@ -1754,49 +1687,7 @@ export class ChartScene {
         marked: false,
         areal: true,
         color: state?.color,
-        segment: { from, to, label: state?.label ?? "", open: false },
-      };
-    }
-
-    if (config.kind === "span") {
-      const ends = mat.x1;
-      if (ends === null) return null;
-      const domainEnd = xAxis.scale.domain[1];
-      const height = config.height ?? 0.6;
-      // The rule under covering - the one registered last wins - stands in the
-      // pure module and is not written a second time here.
-      const index = spanIndex(
-        mat.x,
-        ends,
-        mat.y,
-        n,
-        targetX,
-        targetY,
-        height,
-        domainEnd,
-        entry.depth,
-        // The drawing moves a covering span down the screen; in lane units that
-        // way carries the sign of the y scale's slope.
-        DEPTH_OFFSET * height * Math.sign(yAxis.scale.m),
-      );
-      if (index < 0) return null;
-      const from = mat.x[index] as number;
-      const lane = mat.y[index] as number;
-      const rawEnd = ends[index] as number;
-      return {
-        index,
-        px: xAxis.scale.toPx(from),
-        py: yAxis.scale.toPx(lane),
-        xValue: from,
-        yValue: lane,
-        marked: false,
-        areal: true,
-        segment: {
-          from,
-          to: spanEnd(rawEnd, domainEnd),
-          label: "",
-          open: isOpen(rawEnd),
-        },
+        segment: { from, to, label: state?.label ?? "" },
       };
     }
 

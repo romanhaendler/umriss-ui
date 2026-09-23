@@ -3,6 +3,9 @@
 Status: accepted
 Date:   2026-09
 
+Charts' `Span`, named below as half a subtask, was removed in favour of the
+schedule (ADR-0026).
+
 The schedule — subtasks on lanes over time, with transports, findings and
 controlled editing (`.scratch/schedule/`) — becomes `@umriss-ui/schedule`, a
 fourth package with two peer dependencies: `@umriss-ui/core`, as the table has

@@ -39,5 +39,6 @@ half a later reader needs most. Exactly one is superseded today.
 | [0023](0023-editing-is-controlled-the-schedule-reports-intents.md) | Editing is controlled: the schedule reports intents | accepted | schedule |
 | [0024](0024-the-formats-are-english-german-is-freight.md) | The formats are English, and German is freight | accepted | language |
 | [0025](0025-a-lane-group-is-structure-over-lanes-never-a-lane.md) | A lane group is structure over lanes, never a lane | accepted | schedule |
+| [0026](0026-span-leaves-charts-occupancy-is-the-schedules.md) | Span leaves charts; occupancy is the schedule's | accepted | charts |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).

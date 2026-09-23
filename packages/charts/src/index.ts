@@ -7,7 +7,6 @@ export { Line, type LineProps } from "./Line";
 export { Scatter, type ScatterProps } from "./Scatter";
 export { StateBand, type StateBandProps } from "./StateBand";
 export { Matrix, DEFAULT_GRADIENT, type MatrixProps } from "./Matrix";
-export { Span, type SpanProps } from "./Span";
 export { LimitLine, LimitBand, type LimitLineProps, type LimitBandProps } from "./LimitLine";
 export { ControlChart, type ControlChartProps } from "./ControlChart";
 export { XAxis, YAxis, type XAxisProps, type YAxisProps } from "./Axis";
@@ -81,7 +80,6 @@ export type {
   LimitRole,
   MatrixColoring,
   MatrixSeriesConfig,
-  SpanSeriesConfig,
   StateSeriesConfig,
   StateEntry,
   AxisConfig,

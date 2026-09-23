@@ -20,8 +20,8 @@
    The file is called after the control limits and not `controlChart.ts`, because
    <ControlChart> is the component: on a file system that does not distinguish
    upper and lower case an import of `./ControlChart` would find a
-   `controlChart.ts` lying beside it. Same reason as bars.ts, cells.ts and
-   spans.ts; see CONTEXT.md on module names. */
+   `controlChart.ts` lying beside it. Same reason as bars.ts and cells.ts; see
+   CONTEXT.md on module names. */
 
 /** Centre line, estimated spread and the control limits at three sigma. */
 export interface ControlLimits {
