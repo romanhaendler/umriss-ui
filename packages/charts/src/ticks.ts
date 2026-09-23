@@ -84,3 +84,47 @@ export function ticksFor(min: number, max: number, count: number): number[] {
   }
   return values;
 }
+
+/** A further axis' ticks on the first axis' grid (Q24): as many ticks as the
+    first has, standing at the same shares of the domain, with a 1-2-5 step -
+    the smallest whose grid holds [min, max]. The domain is widened to fit, and
+    begins and ends where the first one's does, measured in steps: a first axis
+    whose ticks do not fill its domain leaves the same margins here. null
+    without two ticks to take a grid from. */
+export function alignedTicks(
+  min: number,
+  max: number,
+  domain: readonly [number, number],
+  ticks: readonly number[],
+): { domain: [number, number]; ticks: number[]; step: number } | null {
+  const k = ticks.length;
+  const t0 = ticks[0];
+  const tLast = ticks[k - 1];
+  if (k < 2 || t0 === undefined || tLast === undefined || !Number.isFinite(min) || !Number.isFinite(max)) {
+    return null;
+  }
+  const [lo, hi] = min === max ? [min - 1, max + 1] : [min, max];
+  const grid = (tLast - t0) / (k - 1);
+  // The first axis' margins, in steps.
+  const before = (t0 - domain[0]) / grid;
+  const after = (domain[1] - tLast) / grid;
+  const steps = k - 1 + before + after;
+  // Float noise out of the ends: 0.1 + 5 · 0.1 is not 0.6.
+  const clean = (v: number) => normalizeZero(Number(v.toPrecision(12)));
+  let step = tickStep((hi - lo) / steps, 1);
+  for (let i = 0; i < 64; i++) {
+    const tolerance = step * 1e-9;
+    const first = Math.floor((lo + before * step + tolerance) / step) * step;
+    const from = first - before * step;
+    if (from + steps * step >= hi - tolerance) {
+      const digits = decimalsForStep(step);
+      return {
+        domain: [clean(from), clean(from + steps * step)],
+        ticks: Array.from({ length: k }, (_, j) => roundTo(first + j * step, digits)),
+        step,
+      };
+    }
+    step = tickStep(step * 1.5, 1);
+  }
+  return null;
+}

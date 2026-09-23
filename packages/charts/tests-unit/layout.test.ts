@@ -475,3 +475,45 @@ describe("computeLayout - ticks of an operating-time axis", () => {
     expect(values).toEqual([2 * HOUR, 10 * HOUR]);
   });
 });
+
+/* charts-long-series 05: `alignTicks` on a further y axis puts its ticks on
+   the rows of the first y axis' grid. */
+describe("computeLayout - alignTicks", () => {
+  function layout(align: boolean, firstPosition: "left" | "right" = "left") {
+    return computeLayout({
+      width: 600,
+      height: 300,
+      padding: { top: 0, right: 0, bottom: 0, left: 0 },
+      axes: [
+        axis({ id: "x", orientation: "x", position: "bottom" }),
+        axis({ id: "t", orientation: "y", position: firstPosition, extent: [596, 855], grid: true }),
+        axis({ id: "g", orientation: "y", position: firstPosition === "left" ? "right" : "left", extent: [0, 107], alignTicks: align }),
+      ],
+      measure,
+      hysteresis: new Map(),
+    }).axes;
+  }
+
+  it("stands every tick of the aligned axis on a grid row of the first", () => {
+    for (const side of ["left", "right"] as const) {
+      const axes = layout(true, side);
+      const first = find(axes, "y:t").ticks.map((t) => t.px);
+      const aligned = find(axes, "y:g").ticks.map((t) => t.px);
+      expect(aligned).toHaveLength(first.length);
+      aligned.forEach((px, i) => expect(px).toBeCloseTo(first[i] as number, 6));
+    }
+  });
+
+  it("keeps the extent inside and the steps 1-2-5", () => {
+    const g = find(layout(true), "y:g");
+    expect(g.domain[0]).toBeLessThanOrEqual(0);
+    expect(g.domain[1]).toBeGreaterThanOrEqual(107);
+    const step = (g.ticks[1]?.value ?? 0) - (g.ticks[0]?.value ?? 0);
+    expect([1, 2, 5]).toContain(step / 10 ** Math.floor(Math.log10(step)));
+  });
+
+  it("changes nothing without it", () => {
+    const g = find(layout(false), "y:g");
+    expect(g.ticks.map((t) => t.px)).not.toEqual(find(layout(false), "y:t").ticks.map((t) => t.px));
+  });
+});

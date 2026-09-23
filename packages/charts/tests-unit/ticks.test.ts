@@ -2,7 +2,7 @@
    very small steps and constant series. */
 
 import { describe, expect, it } from "vitest";
-import { decimalsForStep, dataDomain, niceDomain, tickStep, ticksFor } from "../src/ticks";
+import { decimalsForStep, dataDomain, niceDomain, tickStep, ticksFor, alignedTicks } from "../src/ticks";
 import { LinearScale } from "../src/scale";
 
 describe("tickStep - the 1-2-5 grid", () => {
@@ -135,5 +135,53 @@ describe("LinearScale", () => {
   it("yields ticks through the same rule as ticksFor", () => {
     const s = new LinearScale([0, 10], [0, 100]);
     expect(s.ticks(5)).toEqual(ticksFor(0, 10, 5));
+  });
+});
+
+/* charts-long-series 05 (Q24): a further axis takes the first axis' tick count
+   and widens its own domain until its ticks fall on that grid. */
+describe("alignedTicks", () => {
+  const first = { domain: [0, 100] as const, ticks: [0, 20, 40, 60, 80, 100] };
+
+  /** Where each tick stands, as a share of its domain. */
+  const shares = (domain: readonly [number, number], ticks: readonly number[]) =>
+    ticks.map((t) => (t - domain[0]) / (domain[1] - domain[0]));
+
+  it("takes the smallest 1-2-5 step whose grid holds the extent", () => {
+    expect(alignedTicks(3, 47, first.domain, first.ticks)).toEqual({
+      domain: [0, 50],
+      ticks: [0, 10, 20, 30, 40, 50],
+      step: 10,
+    });
+    expect(alignedTicks(3, 57, first.domain, first.ticks)?.domain).toEqual([0, 100]);
+    expect(alignedTicks(-12, 7, first.domain, first.ticks)).toEqual({
+      domain: [-15, 10],
+      ticks: [-15, -10, -5, 0, 5, 10],
+      step: 5,
+    });
+  });
+
+  it("writes decimal ticks without floating point noise", () => {
+    expect(alignedTicks(0.12, 0.47, first.domain, first.ticks)).toEqual({
+      domain: [0.1, 0.6],
+      ticks: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6],
+      step: 0.1,
+    });
+  });
+
+  it("lands on a grid that does not fill the first axis' domain", () => {
+    const domain = [2, 98] as const;
+    const ticks = [20, 40, 60, 80];
+    const aligned = alignedTicks(0, 5, domain, ticks);
+    if (aligned === null) throw new Error("no alignment");
+    const want = shares(domain, ticks);
+    shares(aligned.domain, aligned.ticks).forEach((s, i) => expect(s).toBeCloseTo(want[i] as number, 9));
+    expect(aligned.domain[0]).toBeLessThanOrEqual(0);
+    expect(aligned.domain[1]).toBeGreaterThanOrEqual(5);
+  });
+
+  it("widens a constant extent as a nice domain does, and needs two ticks", () => {
+    expect(alignedTicks(7, 7, first.domain, first.ticks)?.domain).toEqual([6, 8.5]);
+    expect(alignedTicks(3, 47, first.domain, [50])).toBeNull();
   });
 });

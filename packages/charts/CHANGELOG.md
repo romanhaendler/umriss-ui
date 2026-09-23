@@ -62,6 +62,10 @@ From `.scratch/charts-long-series/spec.md`; the decisions stand in
   the same id or its first; the tooltip stays with the chart under the
   pointer. Zoom is not shared - pass every chart the same controlled
   `domain`.
+- **`YAxis alignTicks`**: on a further y axis, take the first y axis' tick
+  count and widen this axis' domain until its ticks stand on that one's grid
+  lines, the steps still 1, 2 or 5. One grid then serves two quantities. The
+  DEV warning about several grids names it.
 
 ---
 

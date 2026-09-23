@@ -64,6 +64,11 @@ export interface YAxisProps<T> extends CommonProps<T> {
       widened to ticks as `"nice"` is. Where the x domain is not fixed that is
       every point. */
   domain?: "nice" | "data" | "visible" | readonly [number, number];
+  /** On a further y axis: take the first y axis' tick count and widen this
+      axis' domain until its ticks fall on that one's grid lines, the steps
+      still 1-2-5 - one grid serves both. `tickCount` then does not apply; on
+      the first y axis it changes nothing. */
+  alignTicks?: boolean;
   /** Which edge the axis stands at. Several y axes per side are stacked
       outwards, so that extents of clearly different magnitude stay readable. */
   position?: "left" | "right";
@@ -120,6 +125,7 @@ export function YAxis<T>(props: YAxisProps<T>): null {
     domain = "nice",
     grid,
     ticks,
+    alignTicks,
   } = props;
 
   const config = useMemo<AxisConfig>(
@@ -135,8 +141,9 @@ export function YAxis<T>(props: YAxisProps<T>): null {
         domain,
         grid,
         ticks,
+        alignTicks,
       }) as AxisConfig,
-    [id, position, accessor, label, tickCount, tickFormat, domain, grid, ticks],
+    [id, position, accessor, label, tickCount, tickFormat, domain, grid, ticks, alignTicks],
   );
 
   useAxis("YAxis", config);

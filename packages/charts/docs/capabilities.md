@@ -75,6 +75,7 @@ Screenshot pages carry their name in brackets.
 | A series' unknown axis reference: DEV invariant | R-4.12 | Unit (scene) |
 | An axis with no series bound: DEV warning, domain [0,1] | R-4.13 | Unit (scene) |
 | Grid default: only the first registered axis per orientation | R-4.15 | Screenshot (`axes`), Unit (scene, warning) |
+| `alignTicks` on a further y axis: the first y axis' tick count, its own domain widened until its ticks stand on that grid, steps 1-2-5; margins of a first axis whose ticks do not fill its domain carried over | Q24 | Unit (ticks, layout), Screenshot (`aligned-ticks`) |
 | `position` on all four sides | R-4.16 | Unit (layout), Screenshot (`axes`) |
 | Right and top labels mirror their alignment | R-4.16 | Interaction |
 | The Y title rotated outside, along the axis | R-4.16 | Unit (layout, band width), Screenshot |
