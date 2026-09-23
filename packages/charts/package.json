@@ -1,6 +1,6 @@
 {
   "name": "@umriss-ui/charts",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "description": "Canvas-based chart library - few chart kinds, uncompromisingly clean, high performance.",
   "license": "MIT",
   "author": "Roman Händler",

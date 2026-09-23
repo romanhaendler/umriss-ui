@@ -17,6 +17,33 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Sep. 2026 — The charts examined, and one focus
+
+*For a caller: core 0.4.0, charts 0.4.0, table 0.2.3, schedule 0.1.3 - each
+changelog carries the lines.*
+
+- **The charts, read in full.** A grilling session examined every chart
+  (`.scratch/charts-review/spec.md`): fourteen bugs, the API's gaps, and what a
+  plant screen expects. The work went into four packages, each ticket test
+  first: examples for the five pages that had none (`charts-demo-examples`),
+  the bugs and the removal of `Span` (`charts-fixes`, ADR-0026), time axis,
+  value format, step line, hidden series and empty state
+  (`charts-essentials`), zoom, visible domain, downsampling, cursor sync and
+  `alignTicks` (`charts-long-series`). Keyboard and screen reader
+  (`charts-a11y`) wait for their own grilling.
+- **Two findings from writing the examples** - a caller's `var(--…)` colour
+  drew nothing on the canvas, a state band's last state ran to the axis'
+  padding - were fixed after a two-axis review (standards and spec) of the
+  whole range; its confirmed findings are fixed with a test each.
+- **Core: one focus look** - a two-pixel accent edge on every component - and
+  fields that stay put on an iPhone. Worked on in a session of its own beside
+  the charts; the two met only in the charts' legend, whose focus ring now
+  couples through `--uc-focus-ring`.
+- **The charts' example pictures drift more.** With twice the examples, 13 to
+  30 fail on a full run, a different set each time, each a sub-pixel shift;
+  `testing.md` carries the numbers. Baselines were renewed only where a
+  picture really changed.
+
 ## Sep. 2026 — Phones and touch, then a review of all four packages
 
 *For a caller: core 0.3.2, charts 0.3.2, table 0.2.2, schedule 0.1.2 - each

@@ -22,6 +22,16 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.2.3 – Core 0.4.0 (Sep. 2026)
+
+### Changed
+
+- **The table takes `@umriss-ui/core` 0.4.** Nothing in the table changed; the
+  peer range moves to `^0.4.0`, whose focus is a crisp two-pixel accent edge
+  (see core's changelog) - the table's rows and cells show it.
+
+---
+
 ## 0.2.2 – Phones, touch and a review (Sep. 2026)
 
 ### Fixed

@@ -29,13 +29,31 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
-## Unreleased – Long courses on a plant screen
+## 0.4.0 – The charts examined (Sep. 2026)
 
-From `.scratch/charts-long-series/spec.md`; the decisions stand in
-`.scratch/charts-review/spec.md` (Q12, Q19-Q21, Q24).
+The result of a review of the whole package (`.scratch/charts-review/spec.md`),
+delivered in three parts: the bugs it found and the removal of `Span`
+(`charts-fixes`), what a plant screen expects of a chart
+(`charts-essentials`), and long courses (`charts-long-series`). **`Span` is
+gone** - occupancy is drawn by `@umriss-ui/schedule` (ADR-0026).
 
 ### Changed
 
+- **`Span` is removed** (breaking, ADR-0026). Occupancy - jobs on machines,
+  idle time, double bookings - is drawn by `@umriss-ui/schedule`, with lanes,
+  groups and editing. With it go `SpanProps`, `SpanSeriesConfig`, the series
+  kind `"span"`, the second x channel `x1` of `MaterializedSeries` and
+  `open` in a tooltip point's `segment`.
+- **A state band and a matrix take no palette colour.** They colour themselves,
+  and each used up a place of the palette all the same: a line after a state
+  band came out in the palette's second colour, after three bands in its
+  fourth. It now gets the first. A series without a `name` counts its position
+  among the series that take a colour.
+- **The operating-time axis labels in en-GB by level.** Without a
+  `tickFormat` it wrote every tick as `dd.MM. HH:mm`; it now labels as the
+  time axis does - `15:00`, and the date on the first tick of a new day,
+  `17 Mar 06:00` - and the tooltip's x value as `17 Mar 15:23`. Its ticks
+  stand on the same local boundaries, across a clock change too.
 - **Lines and areas downsample on their own.** Above two points per pixel
   column of the plot they draw four per column - where the course entered it,
   its lowest and highest value, where it left - and a gap in a column stays a
@@ -60,63 +78,11 @@ From `.scratch/charts-long-series/spec.md`; the decisions stand in
 
 ### Added
 
-- **`XAxis onDomainChange`**: zoom and pan, controlled. Ctrl or ⌘ with the
-  wheel - and a pinch - zoom around the pointer; a drag, a horizontal wheel or
-  Shift with the wheel pan; a double click proposes the whole data range. The
-  axis only proposes a domain in its own units; the caller passes it back as
-  `domain`, clamped as it likes. Without a handler nothing zooms, and the
-  plain wheel always scrolls the page.
-- **`YAxis domain="visible"`**: the extent of what the series show inside
-  their x axis' domain, widened to ticks as `"nice"` is - a zoomed hour gets
-  the hour's range, not the week's. A fixed foot (area, bar) and the limits
-  count as before; where the x domain is not fixed, every point is shown and
-  counts.
-- **`Chart syncId`**: charts with the same id share the pointer's x
-  position, in domain units. Each draws its crosshair there, on its x axis of
-  the same id or its first; the tooltip stays with the chart under the
-  pointer. Zoom is not shared - pass every chart the same controlled
-  `domain`.
-- **`YAxis alignTicks`**: on a further y axis, take the first y axis' tick
-  count and widen this axis' domain until its ticks stand on that one's grid
-  lines, the steps still 1, 2 or 5. One grid then serves two quantities. The
-  DEV warning about several grids names it.
-
-### Fixed
-
-- **A downsampled course keeps a gap at the end of a pixel column.** Only the
-  first gap of a column was kept: a column running gap - points - gap lost the
-  second, and the line bridged to data far away.
-- **The cursor sync.** A chart without a `Tooltip` shared no position; it now
-  shares the pointer's x. A chart that leaves its group - another `syncId`, or
-  unmounted - no longer keeps the crosshair the group last sent it.
-- **An x limit's label stays inside the container** at the right edge, as a
-  tick label does; it ran past it.
-- **No hover marker outside the plot.** At a zoomed edge the nearest reading
-  can lie beyond it, and its marker stood on the axis.
-- **The tooltip header on a time axis carries the seconds** where the
-  readings under the pointer lie less than a minute apart - readings a second
-  apart shared one header. Otherwise it stays `17 Mar 15:23`.
-- **A double click proposes no domain without width.** Over a single point
-  the data range is one value; the double click handed it to
-  `onDomainChange` all the same, where a wheel step checks for that.
-
----
-
-## Unreleased – What a plant screen expects
-
-From `.scratch/charts-essentials/spec.md`; the decisions stand in
-`.scratch/charts-review/spec.md` (Q11, Q13, Q15-Q18, Q22).
-
-### Changed
-
-- **The operating-time axis labels in en-GB by level.** Without a
-  `tickFormat` it wrote every tick as `dd.MM. HH:mm`; it now labels as the
-  time axis does - `15:00`, and the date on the first tick of a new day,
-  `17 Mar 06:00` - and the tooltip's x value as `17 Mar 15:23`. Its ticks
-  stand on the same local boundaries, across a clock change too.
-
-### Added
-
+- **`TooltipPoint.xValue`**: a point's own x value. With several x axes it can
+  differ from the hit's.
+- **`localOffset(instant)`**: the time zone's offset at an instant, as the
+  shift of a tick grid onto local time. It moved here from
+  `@umriss-ui/schedule`, which takes it from here now.
 - **`XAxis time`**: the values are instants. Ticks on local boundaries from
   the minute to the month, labels by level in en-GB with a 24-hour clock -
   `15:00`, `17 Mar`, `Mar 2026` - and the date on the first tick of a new
@@ -152,44 +118,26 @@ From `.scratch/charts-essentials/spec.md`; the decisions stand in
   stays whole.
 - Every size prop's comment names its unit (CSS pixels, a fraction of the
   step, domain units of the axis).
-
-### Fixed
-
-- **Hovering a hidden series' legend entry dims nothing.** It highlighted the
-  series that is not drawn, and every visible one was dimmed.
-- **A time axis over years labels a year as `2026`**, by level, not as
-  `Jan 2026`.
-- **The legend's focus ring couples through `--uc-focus-ring`**, like every
-  other value of the stylesheet, with `--u-focus-ring` and a literal behind
-  it.
-
----
-
-## Unreleased – The charts, corrected
-
-From `.scratch/charts-fixes/spec.md`; the findings stand in
-`.scratch/charts-review/spec.md`.
-
-### Changed
-
-- **`Span` is removed** (breaking, ADR-0026). Occupancy - jobs on machines,
-  idle time, double bookings - is drawn by `@umriss-ui/schedule`, with lanes,
-  groups and editing. With it go `SpanProps`, `SpanSeriesConfig`, the series
-  kind `"span"`, the second x channel `x1` of `MaterializedSeries` and
-  `open` in a tooltip point's `segment`.
-- **A state band and a matrix take no palette colour.** They colour themselves,
-  and each used up a place of the palette all the same: a line after a state
-  band came out in the palette's second colour, after three bands in its
-  fourth. It now gets the first. A series without a `name` counts its position
-  among the series that take a colour.
-
-### Added
-
-- **`TooltipPoint.xValue`**: a point's own x value. With several x axes it can
-  differ from the hit's.
-- **`localOffset(instant)`**: the time zone's offset at an instant, as the
-  shift of a tick grid onto local time. It moved here from
-  `@umriss-ui/schedule`, which takes it from here now.
+- **`XAxis onDomainChange`**: zoom and pan, controlled. Ctrl or ⌘ with the
+  wheel - and a pinch - zoom around the pointer; a drag, a horizontal wheel or
+  Shift with the wheel pan; a double click proposes the whole data range. The
+  axis only proposes a domain in its own units; the caller passes it back as
+  `domain`, clamped as it likes. Without a handler nothing zooms, and the
+  plain wheel always scrolls the page.
+- **`YAxis domain="visible"`**: the extent of what the series show inside
+  their x axis' domain, widened to ticks as `"nice"` is - a zoomed hour gets
+  the hour's range, not the week's. A fixed foot (area, bar) and the limits
+  count as before; where the x domain is not fixed, every point is shown and
+  counts.
+- **`Chart syncId`**: charts with the same id share the pointer's x
+  position, in domain units. Each draws its crosshair there, on its x axis of
+  the same id or its first; the tooltip stays with the chart under the
+  pointer. Zoom is not shared - pass every chart the same controlled
+  `domain`.
+- **`YAxis alignTicks`**: on a further y axis, take the first y axis' tick
+  count and widen this axis' domain until its ticks stand on that one's grid
+  lines, the steps still 1, 2 or 5. One grid then serves two quantities. The
+  DEV warning about several grids names it.
 
 ### Fixed
 
@@ -262,6 +210,29 @@ From `.scratch/charts-fixes/spec.md`; the findings stand in
 - **A matrix buckets its cells once per change**, not on every redraw of the
   series layer - a legend hover redraws it - and its tooltip chip no longer
   scans every cell on each pointer move.
+- **Hovering a hidden series' legend entry dims nothing.** It highlighted the
+  series that is not drawn, and every visible one was dimmed.
+- **A time axis over years labels a year as `2026`**, by level, not as
+  `Jan 2026`.
+- **The legend's focus ring couples through `--uc-focus-ring`**, like every
+  other value of the stylesheet, with `--u-focus-ring` and a literal behind
+  it.
+- **A downsampled course keeps a gap at the end of a pixel column.** Only the
+  first gap of a column was kept: a column running gap - points - gap lost the
+  second, and the line bridged to data far away.
+- **The cursor sync.** A chart without a `Tooltip` shared no position; it now
+  shares the pointer's x. A chart that leaves its group - another `syncId`, or
+  unmounted - no longer keeps the crosshair the group last sent it.
+- **An x limit's label stays inside the container** at the right edge, as a
+  tick label does; it ran past it.
+- **No hover marker outside the plot.** At a zoomed edge the nearest reading
+  can lie beyond it, and its marker stood on the axis.
+- **The tooltip header on a time axis carries the seconds** where the
+  readings under the pointer lie less than a minute apart - readings a second
+  apart shared one header. Otherwise it stays `17 Mar 15:23`.
+- **A double click proposes no domain without width.** Over a single point
+  the data range is one value; the double click handed it to
+  `onDomainChange` all the same, where a wheel step checks for that.
 
 ---
 
