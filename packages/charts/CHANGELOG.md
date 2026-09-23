@@ -34,6 +34,16 @@ interface was still expected to move before `0.3.0`.
 From `.scratch/charts-long-series/spec.md`; the decisions stand in
 `.scratch/charts-review/spec.md` (Q12, Q19-Q21, Q24).
 
+### Changed
+
+- **Lines and areas downsample on their own.** Above two points per pixel
+  column of the plot they draw four per column - where the course entered it,
+  its lowest and highest value, where it left - and a gap in a column stays a
+  gap. They draw only the window of the x domain, and one point beyond each
+  edge. The picture is the same; three lines of 1,000,000 points draw in about
+  8 ms instead of 47. Bars and scatters are never thinned, and the tooltip
+  still searches every point.
+
 ### Added
 
 - **`XAxis onDomainChange`**: zoom and pan, controlled. Ctrl or ⌘ with the

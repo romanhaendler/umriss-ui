@@ -109,6 +109,8 @@ Screenshot pages carry their name in brackets.
 | Binding through `xAxisId` / `yAxisId` | R-4.12 | Interaction (`axes`), Screenshot |
 | `step`: sample-and-hold, a gap ends the hold at its x | Q22 | Unit (draw), Screenshot (`step`) |
 | `step`: the tooltip reports the sample the hold began with | Q22 | Unit (jsdom scene) |
+| Downsampling above two points per pixel column: first, min, max and last per column, a gap kept; only the window of the x domain and one point beyond each edge | Q20 | Unit (downsample), Screenshot (`zoom-and-pan`, unchanged by it) |
+| The tooltip searches the raw data, not what the drawing kept | Q20 | Unit (jsdom scene) |
 
 ## `Area`
 
@@ -123,6 +125,7 @@ Screenshot pages carry their name in brackets.
 | `fillOpacity`, `strokeWidth` (0 leaves the outline out) | 4.3 | Screenshot (`filled`, `corridor`, light and dark) |
 | `dash` on the outline only; the fill and a lone point's stroke stay solid | Q11 | Unit (draw) |
 | `tone`: a role the theme resolves | Q11 | Unit (jsdom tone) |
+| Downsampling as the line's, the baseline channel taken at the same points | Q20 | Unit (downsample) |
 
 ## `Bar`
 
@@ -275,7 +278,11 @@ Screenshot pages carry their name in brackets.
 ## Performance (R-5, reference run)
 
 Measured on a current desktop browser (Chromium headless, Apple Silicon), three
-series, without downsampling, through the demo build's benchmark page.
+series, through the demo build's benchmark page - the median of five loads per
+row. Re-measured in `charts-long-series` 03 on one machine on one day, before
+and after the automatic downsampling of lines and areas, so the two columns
+compare; the first reference run's figures were of the same order as the
+"before" column.
 
 **What was measured is stated with it.** The figures of the first reference run
 held for three lines. A filled area and a rectangle per point are different work
@@ -285,19 +292,27 @@ between the two sets.
 Series kinds: **lines** = three `Line`. **Mixed** = one `Bar`, one `Area`, one
 `Line`.
 
-| Data volume | Set | Materialisation | Series draw | FPS on hover |
-|---|---|---|---|---|
-| 3 × 1,000 | lines | 0.3 ms | 0.1 ms | 60 |
-| 3 × 1,000 | mixed | 0.1 ms | 0.3 ms | 60 |
-| 3 × 100,000 | lines | 10.5 ms | 10.8 ms | 60 |
-| 3 × 100,000 | mixed | 8.1 ms | 18.7 ms | 60 |
-| 3 × 1,000,000 | lines | 49.8 ms | 49.6 ms | 60 |
-| 3 × 1,000,000 | mixed | 50.0 ms | 108.2 ms | 60 |
+| Data volume | Set | Materialisation | Series draw | Series draw without downsampling | FPS on hover |
+|---|---|---|---|---|---|
+| 3 × 1,000 | lines | 0.1 ms | 0.1 ms | 0.3 ms | 60 |
+| 3 × 1,000 | mixed | 0.1 ms | 0.3 ms | 0.3 ms | 60 |
+| 3 × 100,000 | lines | 8.3 ms | 2.6 ms | 7.6 ms | 60 |
+| 3 × 100,000 | mixed | 8.8 ms | 8.9 ms | 14.5 ms | 60 |
+| 3 × 1,000,000 | lines | 51.4 ms | 8.2 ms | 47.0 ms | 60 |
+| 3 × 1,000,000 | mixed | 52.2 ms | 57.3 ms | 100.4 ms | 60 |
 
 The acceptance figures from R-5.2 (100k × 3: draw < 25 ms, hover ≥ 55 FPS) are met
-for both sets. At 1 million × 3 the mixed set costs a good twice the pure line
-set – as expected, because there a rectangle is produced per point instead of a
-path segment. Both sizes run without freezing.
+for both sets. At 1,000 points per series nothing is thinned - any plot wider
+than 500 pixels holds them at two per column or fewer - and the figures are the
+same within noise. Above that a line
+costs a pass over its window and a path of four points per column: the pass is
+what is left of the 8 ms at a million. The mixed set keeps its bar, which is
+never thinned - a rectangle per point - and that is most of its 57 ms.
+Materialisation does not change: every accessor still runs once per point.
+
+The second example on the benchmark page, a week of a kiln at one reading a
+second (2 × 604,800 points, zoomable), drew the whole week in 8 to 23 ms and
+a zoomed three quarters of an hour in 0.6 ms.
 
 The hover stays at 60 FPS in every case. That is the actual statement: it draws
 only the overlay layer, and the series kind changes nothing about that.
