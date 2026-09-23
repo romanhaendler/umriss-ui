@@ -254,6 +254,32 @@
     border-radius: 2px;
   }
 
+  /* With onToggle an entry is a button, and looks like the entry it was. */
+  button.uc-legend-item {
+    padding: 0;
+    border: 0;
+    border-radius: 2px;
+    background: none;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  button.uc-legend-item:focus-visible {
+    outline: none;
+    box-shadow: var(--u-focus-ring, 0 0 0 2px #0e7d72);
+  }
+
+  /* A hidden series keeps its entry, drawn back: the chip faint, the name
+     struck through - "off" without giving up the text's contrast. */
+  .uc-legend-item[data-hidden] {
+    text-decoration: line-through;
+  }
+
+  .uc-legend-item[data-hidden] > .uc-legend-chip {
+    opacity: 0.3;
+  }
+
   /* ---------------- Tooltip (R-4.8, R-4.9) ---------------- */
 
   .uc-tooltip {

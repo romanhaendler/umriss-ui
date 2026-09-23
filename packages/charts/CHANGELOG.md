@@ -59,6 +59,14 @@ From `.scratch/charts-essentials/spec.md`; the decisions stand in
   the next sample and jumps there - a set point, a digital signal. A gap ends
   the hold at its x. The tooltip reports the sample the hold began with, not
   the nearer one after it.
+- **`hidden` on `Line`, `Area`, `Bar`, `Scatter`, `StateBand` and `Matrix`**,
+  controlled: a hidden series is not drawn, not hit and does not count for its
+  axes' extent - a fixed `domain` keeps the axis still. Its legend entry stays,
+  struck through with a faint chip. A hidden bar leaves no empty place in its
+  group.
+- **`Legend onToggle(name)`**: with it every entry is a button
+  (`aria-pressed`) that hands the caller the series' name, or a state's label.
+  Without it the legend is not clickable, as before.
 
 ---
 

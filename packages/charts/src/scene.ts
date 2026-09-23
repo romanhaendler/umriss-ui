@@ -143,6 +143,8 @@ export interface LegendItem {
       registration number alone is not enough as a key. */
   id: string;
   name: string;
+  /** Its series is hidden - for a state, every band that shows it. */
+  hidden: boolean;
   /** A CSS background for the chip: a colour, or a matrix' steps side by
       side. */
   color: string;
@@ -599,6 +601,7 @@ export class ChartScene {
       fnEqual(previous.format, config.format) &&
       previous.color === config.color &&
       previous.tone === config.tone &&
+      previous.hidden === config.hidden &&
       ownFieldsEqual(previous, config);
     if (entry.slot < 0 && takesPalette(config)) {
       entry.slot = this.slotFor(config.name);
@@ -1169,7 +1172,8 @@ export class ChartScene {
     const bindings = [...this.series.values()].map((entry) => ({
       xAxisId: entry.config.xAxisId,
       yAxisId: entry.config.yAxisId,
-      extent: entry.extent,
+      // A hidden series has no say: the axis fits what is shown.
+      extent: entry.config.hidden === true ? null : entry.extent,
     }));
     return axisExtent(orientation, id, bindings, this.limitValues(orientation, id));
   }
@@ -1334,11 +1338,13 @@ export class ChartScene {
           const known = seen.get(key);
           if (known !== undefined) {
             if (!known.seriesIds.includes(entry.order)) known.seriesIds.push(entry.order);
+            known.hidden &&= config.hidden === true;
             return;
           }
           const item: LegendItem = {
             id: `${entry.order}:${k}`,
             name: z.label,
+            hidden: config.hidden === true,
             color: z.color,
             seriesIds: [entry.order],
           };
@@ -1350,6 +1356,7 @@ export class ChartScene {
       out.push({
         id: String(entry.order),
         name: this.nameFor(entry, i),
+        hidden: config.hidden === true,
         color:
           config.kind === "matrix"
             ? chipOf(matrixColors(config.coloring, this.theme ?? FALLBACK_THEME))
@@ -1444,7 +1451,8 @@ export class ChartScene {
 
   private drawItems(): SeriesDrawItem[] {
     const items: SeriesDrawItem[] = [];
-    const series = this.seriesInOrder();
+    // A hidden bar leaves no empty place in its group.
+    const series = this.seriesInOrder().filter((e) => e.config.hidden !== true);
     // Bars on the same x axis share one step (ADR-0002); one pass over the
     // series, not over the points.
     const groups = barGroups(
@@ -1661,7 +1669,7 @@ export class ChartScene {
     const candidates: Candidate[] = [];
     this.seriesInOrder().forEach((entry, i) => {
       const mat = entry.materialized;
-      if (mat === null || mat.length === 0) return;
+      if (mat === null || mat.length === 0 || entry.config.hidden === true) return;
       const config = entry.config;
       const xAxis = this.findAxis("x", config.xAxisId);
       const yAxis = this.findAxis("y", config.yAxisId);

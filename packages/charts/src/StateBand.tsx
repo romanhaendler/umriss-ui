@@ -34,6 +34,10 @@ export interface StateBandProps<T> {
       "Series n" and a warning stands in DEV - an unnamed series is a colour
       nobody can look up. */
   name?: string;
+  /** Not drawn, not hit and not counted for its axes' extent - a fixed
+      `domain` keeps the axis still. Its legend entry stays, drawn back.
+      Controlled: the caller sets it, typically from `Legend onToggle`. */
+  hidden?: boolean;
   /** Lower edge of the lane in domain units of the y axis. */
   laneFrom?: number;
   /** Upper edge of the lane in domain units of the y axis. */
@@ -48,6 +52,7 @@ export function StateBand<T>(props: StateBandProps<T>): null {
     yAxisId = "y",
     data,
     name,
+    hidden,
     laneFrom,
     laneTo,
   } = props;
@@ -62,10 +67,11 @@ export function StateBand<T>(props: StateBandProps<T>): null {
         yAxisId,
         data,
         name,
+        hidden,
         laneFrom,
         laneTo,
       }) as StateSeriesConfig,
-    [accessor, states, xAxisId, yAxisId, data, name, laneFrom, laneTo],
+    [accessor, states, xAxisId, yAxisId, data, name, hidden, laneFrom, laneTo],
   );
 
   useSeries("StateBand", config);

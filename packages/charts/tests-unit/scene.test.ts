@@ -553,3 +553,52 @@ describe("Snapshots", () => {
     expect(call).toHaveBeenCalledTimes(1);
   });
 });
+
+/* charts-essentials 04: a hidden series is controlled by the caller. It keeps
+   its legend entry and its colour, and gives up its say in the extent. */
+describe("A hidden series", () => {
+  const rows = [
+    { t: 0, a: 10 },
+    { t: 1, a: 20 },
+  ];
+
+  it("does not count for its axis' extent", () => {
+    const scene = new ChartScene();
+    scene.setData(rows);
+    scene.registerAxis(xAxis());
+    scene.registerAxis(yAxis());
+    scene.registerSeries(lineSeries({ name: "A" }));
+    scene.registerSeries(lineSeries({ name: "B", accessor: (d) => (d as Row).a * 10, hidden: true }));
+    expect(scene.axisExtent("y", "y")).toEqual([10, 20]);
+  });
+
+  it("stays in the legend with its colour, marked hidden", () => {
+    const scene = new ChartScene();
+    scene.setData(rows);
+    scene.registerAxis(xAxis());
+    scene.registerAxis(yAxis());
+    scene.registerSeries(lineSeries({ name: "A", hidden: true }));
+    scene.registerSeries(lineSeries({ name: "B" }));
+    const items = scene.legendItems();
+    expect(items.map((i) => [i.name, i.hidden])).toEqual([
+      ["A", true],
+      ["B", false],
+    ]);
+    expect(items[0]?.color).toBe(FALLBACK_THEME.series[0]);
+  });
+
+  it("hides a state's entry only when every band sharing it is hidden", () => {
+    const scene = new ChartScene();
+    scene.setData(rows);
+    scene.registerAxis(xAxis());
+    scene.registerAxis(yAxis());
+    const states = [{ label: "Run", color: "#0a0" }];
+    const band = { kind: "state" as const, accessor: () => 0, states, xAxisId: "x", yAxisId: "y" };
+    scene.registerSeries({ ...band, name: "M1", hidden: true });
+    const second = scene.registerSeries({ ...band, name: "M2" });
+    expect(scene.legendItems()[0]?.hidden).toBe(false);
+    scene.updateSeries(second, { ...band, name: "M2", hidden: true });
+    expect(scene.legendItems()[0]?.hidden).toBe(true);
+  });
+});
+
