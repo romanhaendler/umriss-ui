@@ -391,3 +391,114 @@ test("scatter under \"nearest\": the hit follows the pointer up and down", async
   }
   expect(changed).toBeGreaterThan(0);
 });
+
+/* ------------------------------------------------------------------------
+   Zoom and pan (charts-long-series 01).
+
+   The axis proposes, the example passes the proposal back: what is checked is
+   the axis the reader sees, its tick labels. A week reads in days; a zoom far
+   enough in reads in hours.
+   ------------------------------------------------------------------------ */
+
+/** The tick labels of an example's bottom x axis, left to right. */
+async function xLabels(example: Locator): Promise<string[]> {
+  return example.locator(".uc-axis-bottom .uc-tick-label").allInnerTexts();
+}
+
+const HOURS = /^\d\d:\d\d$/;
+
+async function openZoom(page: Page): Promise<{ example: Locator; box: { x: number; y: number; width: number; height: number } }> {
+  await openExample(page, "axis", "zoom-and-pan");
+  const example = page.locator('[data-example="zoom-and-pan"]');
+  await example.scrollIntoViewIfNeeded();
+  const box = await example.locator(".uc-plot").first().boundingBox();
+  if (box === null) throw new Error("plot area not found");
+  return { example, box };
+}
+
+async function zoomIn(page: Page, x: number, y: number, steps: number): Promise<void> {
+  await page.mouse.move(x, y);
+  await page.keyboard.down("Control");
+  for (let i = 0; i < steps; i++) {
+    await page.mouse.wheel(0, -400);
+    await page.waitForTimeout(50);
+  }
+  await page.keyboard.up("Control");
+  await page.waitForTimeout(150);
+}
+
+test("zoom: Ctrl with the wheel zooms in around the pointer, a double click shows it all", async ({ page }) => {
+  const { example, box } = await openZoom(page);
+  const week = await xLabels(example);
+  expect(week.some((l) => HOURS.test(l))).toBe(false);
+  // The instant under the pointer, to the minute, as the tooltip's header says it.
+  const header = async () => (await example.locator(".uc-tooltip").innerText()).split("\n")[0]?.slice(0, -1);
+  await pointAt(page, example, 0.5, 0.5);
+  const under = await header();
+
+  await zoomIn(page, box.x + box.width / 2, box.y + box.height / 2, 4);
+  expect((await xLabels(example)).some((l) => HOURS.test(l))).toBe(true);
+  // Around the pointer: the instant under it keeps its place (to ten minutes -
+  // the tooltip snaps to a reading).
+  await pointAt(page, example, 0.5, 0.5);
+  expect(await header()).toBe(under);
+
+  await page.mouse.dblclick(box.x + box.width / 2, box.y + box.height / 2);
+  await expect.poll(() => xLabels(example)).toEqual(week);
+});
+
+test("zoom: a drag pans - to the left shows what comes later", async ({ page }) => {
+  const { example, box } = await openZoom(page);
+  const y = box.y + box.height / 2;
+  await zoomIn(page, box.x + box.width / 2, y, 4);
+  const before = await xLabels(example);
+
+  await page.mouse.move(box.x + box.width * 0.8, y);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width * 0.2, y, { steps: 8 });
+  await page.mouse.up();
+  await page.waitForTimeout(150);
+  const after = await xLabels(example);
+  expect(after).not.toEqual(before);
+  // The first label now is one that stood further right before.
+  expect(before.indexOf(after[0] as string)).toBeGreaterThan(0);
+});
+
+test("zoom: the plain wheel belongs to the page", async ({ page }) => {
+  const { example, box } = await openZoom(page);
+  const before = await xLabels(example);
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.wheel(0, 200);
+  await page.waitForTimeout(150);
+  expect(await xLabels(example)).toEqual(before);
+});
+
+test("zoom: an axis without onDomainChange does not zoom", async ({ page }) => {
+  await openExample(page, "axis", "time");
+  const example = page.locator('[data-example="time"]');
+  await example.scrollIntoViewIfNeeded();
+  const box = await example.locator(".uc-plot").first().boundingBox();
+  if (box === null) throw new Error("plot area not found");
+  const before = await xLabels(example);
+  await zoomIn(page, box.x + box.width / 2, box.y + box.height / 2, 3);
+  expect(await xLabels(example)).toEqual(before);
+});
+
+test("zoom: two fingers spread apart zoom in", async ({ page, context }) => {
+  const { example, box } = await openZoom(page);
+  /* Playwright has no multi-touch API: the touches come through the protocol,
+     and Chromium turns them into pointer events of type "touch" - as in the
+     schedule's pinch test. */
+  const cdp = await context.newCDPSession(page);
+  const y = box.y + box.height / 2;
+  const middle = box.x + box.width / 2;
+  const touch = (type: "touchStart" | "touchMove" | "touchEnd", points: readonly number[]) =>
+    cdp.send("Input.dispatchTouchEvent", { type, touchPoints: points.map((x, id) => ({ x, y, id })) });
+  await touch("touchStart", [middle - 20, middle + 20]);
+  for (let step = 1; step <= 8; step++) {
+    await touch("touchMove", [middle - 20 - step * 40, middle + 20 + step * 40]);
+    await page.waitForTimeout(30);
+  }
+  await touch("touchEnd", []);
+  await expect.poll(async () => (await xLabels(example)).some((l) => HOURS.test(l))).toBe(true);
+});

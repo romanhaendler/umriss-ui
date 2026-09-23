@@ -47,6 +47,13 @@ export interface XAxisProps<T> extends CommonProps<T> {
       removed span gets a break mark. The scale stays affine; the mapping happens
       in materialisation (ADR-0001). */
   calendar?: readonly OperatingInterval[];
+  /** Zoom and pan, controlled: Ctrl or ⌘ with the wheel - and a pinch - zoom
+      around the pointer, a drag, a horizontal wheel or Shift with the wheel pan,
+      a double click proposes the whole data range. Each proposes a domain in
+      the axis' units and changes nothing; the caller passes it back as
+      `domain`, clamped as it likes. Without a handler the axis does not zoom,
+      and the plain wheel always scrolls the page. */
+  onDomainChange?: (domain: [number, number]) => void;
 }
 
 export interface YAxisProps<T> extends CommonProps<T> {
@@ -68,6 +75,7 @@ export function XAxis<T>(props: XAxisProps<T>): null {
     ticks,
     time,
     calendar,
+    onDomainChange,
   } = props;
 
   const config = useMemo<AxisConfig>(
@@ -85,8 +93,9 @@ export function XAxis<T>(props: XAxisProps<T>): null {
         ticks,
         time,
         calendar,
+        onDomainChange,
       }) as AxisConfig,
-    [id, position, accessor, label, tickCount, tickFormat, domain, grid, ticks, time, calendar],
+    [id, position, accessor, label, tickCount, tickFormat, domain, grid, ticks, time, calendar, onDomainChange],
   );
 
   useAxis("XAxis", config);

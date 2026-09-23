@@ -663,6 +663,7 @@ export class ChartScene {
       previous.time === config.time &&
       listEqual(previous.ticks as number[] | undefined, config.ticks as number[] | undefined) &&
       domainEqual(previous.domain, config.domain) &&
+      (previous.onDomainChange === undefined) === (config.onDomainChange === undefined) &&
       fnEqual(previous.tickFormat, config.tickFormat);
     entry.config = config;
     if (equal) return;
@@ -1230,6 +1231,11 @@ export class ChartScene {
 
   private updateLayout(): void {
     const measurer = this.measurer;
+    // A domain proposed before this layout has had its answer.
+    this.proposed.clear();
+    // A zooming chart keeps the horizontal drag and the pinch; the page keeps
+    // the vertical scroll.
+    if (this.container !== null) this.container.style.touchAction = this.hasZoom() ? "pan-y" : "";
     const grid = this.gridDefault();
     const inputs: AxisInput[] = [];
     for (const [id, entry] of [...this.axes.entries()].sort((a, b) => a[1].order - b[1].order)) {
@@ -1781,6 +1787,129 @@ export class ChartScene {
     };
     const key = chosen.map((k) => `${k.entry.order}:${k.index}`).join("|");
     return { key, state, primary, chosen };
+  }
+
+  /* ---------- Zoom and pan (charts-long-series 01) ----------
+
+     The schedule's model, not its code: Ctrl or ⌘ with the wheel zooms - a
+     trackpad pinch arrives as exactly that -, a horizontal wheel or Shift pans,
+     the plain wheel is the page's. A drag pans, two fingers pinch, a double
+     click asks for everything. Nothing here changes a domain: each gesture
+     proposes one to the axis' handler, and the caller passes it back. */
+
+  /** What was last proposed per axis, until a layout has taken the answer: a
+      second wheel step in the same frame builds on the first, not on the
+      domain still drawn. */
+  private readonly proposed = new Map<string, readonly [number, number]>();
+  private readonly pointers = new Map<number, number>();
+  private pinch = 0;
+
+  private hasZoom(): boolean {
+    for (const { config } of this.axes.values()) {
+      if (config.orientation === "x" && config.onDomainChange !== undefined) return true;
+    }
+    return false;
+  }
+
+  /** The x axes a gesture speaks to. */
+  private zoomAxes(): { config: AxisConfig; layout: AxisLayout }[] {
+    const out: { config: AxisConfig; layout: AxisLayout }[] = [];
+    for (const { config } of this.axesInOrder()) {
+      if (config.orientation !== "x" || config.onDomainChange === undefined) continue;
+      const layout = this.findAxis("x", config.id);
+      if (layout !== null) out.push({ config, layout });
+    }
+    return out;
+  }
+
+  private propose(next: (domain: readonly [number, number]) => [number, number]): void {
+    for (const { config, layout } of this.zoomAxes()) {
+      const domain = next(this.proposed.get(config.id) ?? layout.scale.domain);
+      if (!(domain[1] - domain[0] > 0) || !Number.isFinite(domain[1] - domain[0])) continue;
+      this.proposed.set(config.id, domain);
+      config.onDomainChange?.(domain);
+    }
+  }
+
+  /** Zoom by `factor` (below 1 is closer) around a pixel, which keeps its
+      value. */
+  private zoomAt(px: number, factor: number): void {
+    const p = this.layout.plot;
+    const share = p.width > 0 ? Math.min(1, Math.max(0, (px - p.x) / p.width)) : 0.5;
+    this.propose(([from, to]) => {
+      const anchor = from + share * (to - from);
+      const span = (to - from) * factor;
+      return [anchor - share * span, anchor - share * span + span];
+    });
+  }
+
+  /** Pan by a distance in pixels; positive moves the content right. */
+  private panBy(dx: number): void {
+    const width = this.layout.plot.width;
+    if (width <= 0 || dx === 0) return;
+    this.propose(([from, to]) => {
+      const delta = (-dx / width) * (to - from);
+      return [from + delta, to + delta];
+    });
+  }
+
+  wheel(event: WheelEvent): void {
+    if (!this.hasZoom()) return;
+    const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? this.layout.plot.width : 1;
+    const dx = event.deltaX * unit;
+    const dy = event.deltaY * unit;
+    if (event.ctrlKey || event.metaKey) {
+      event.preventDefault();
+      // A pinch sends small deltas, a mouse wheel large ones.
+      this.zoomAt(event.offsetX, Math.exp(dy * (Math.abs(dy) < 50 ? 0.01 : 0.0015)));
+    } else if (Math.abs(dx) > Math.abs(dy) || event.shiftKey) {
+      event.preventDefault();
+      this.panBy(-(event.shiftKey && dx === 0 ? dy : dx));
+    }
+  }
+
+  pointerDown(event: PointerEvent): void {
+    if (!this.hasZoom()) return;
+    if (event.pointerType !== "touch" && event.button !== 0) return;
+    this.pointers.set(event.pointerId, event.offsetX);
+    this.container?.setPointerCapture?.(event.pointerId);
+    if (this.pointers.size === 2) this.pinch = this.pinchWidth();
+  }
+
+  /** A drag pans, two fingers pinch. */
+  drag(event: PointerEvent): void {
+    const last = this.pointers.get(event.pointerId);
+    if (last === undefined) return;
+    this.pointers.set(event.pointerId, event.offsetX);
+    if (this.pointers.size === 1) {
+      this.panBy(event.offsetX - last);
+      return;
+    }
+    const width = this.pinchWidth();
+    if (this.pinch > 0 && width > 0) {
+      const [a = 0, b = 0] = this.pointers.values();
+      this.zoomAt((a + b) / 2, this.pinch / width);
+    }
+    this.pinch = width;
+  }
+
+  pointerUp(event: PointerEvent): void {
+    this.pointers.delete(event.pointerId);
+    this.pinch = this.pinchWidth();
+  }
+
+  private pinchWidth(): number {
+    const [a, b] = this.pointers.values();
+    return a === undefined || b === undefined ? 0 : Math.abs(a - b);
+  }
+
+  /** The whole data range: the extent the axis has without a domain. */
+  doubleClick(): void {
+    for (const { config } of this.zoomAxes()) {
+      const extent = this.axisExtent("x", config.id);
+      this.proposed.set(config.id, extent);
+      config.onDomainChange?.([extent[0], extent[1]]);
+    }
   }
 
   /** An x value in the format of its x axis - the header's, or a point's own. */

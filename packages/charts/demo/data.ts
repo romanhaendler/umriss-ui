@@ -533,6 +533,52 @@ export function hallTemperature(seed: number): HallPoint[] {
   return points;
 }
 
+export interface KilnPoint {
+  t: number;
+  /** Kiln temperature in °C. */
+  temperature: number;
+  /** Gas flow in m³/h. */
+  gas: number;
+  /** Draught in Pa - the kiln runs below the hall's pressure. */
+  draught: number;
+}
+
+/** A week of a kiln from Monday midnight, one reading every `step`
+    milliseconds: 850 °C while the shifts run on weekdays, held at 600 °C at
+    night and over the weekend, the gas following the heat it has to make. On
+    Wednesday at 14:00 the burner trips for twenty minutes. The week has no
+    clock change, so the hour is counted rather than asked of a Date - a week
+    of seconds is 604,800 of them. */
+export function kiln(seed: number, step: number): KilnPoint[] {
+  const r = random(seed);
+  const n = Math.floor((7 * DAY_MS) / step);
+  const points = new Array<KilnPoint>(n);
+  // Ten minutes to answer: the same kiln at any step.
+  const k = Math.min(1, step / 600_000);
+  let temperature = 600;
+  let gas = 22;
+  for (let i = 0; i < n; i++) {
+    const offset = i * step;
+    const day = Math.floor(offset / DAY_MS);
+    const minute = Math.floor((offset % DAY_MS) / 60_000);
+    const running = day < 5 && minute >= 6 * 60 && minute < 22 * 60;
+    const tripped = day === 2 && minute >= 14 * 60 && minute < 14 * 60 + 20;
+    const target = running ? 850 : 600;
+    // What holds the temperature; above it the kiln heats, below it cools.
+    const holding = running ? 38 : 22;
+    const demand = tripped ? 0 : Math.max(0, holding + (target - temperature) * 0.3);
+    gas += (demand - gas) * Math.min(1, k * 4);
+    temperature += (gas - holding) * k;
+    points[i] = {
+      t: WEEK_START + offset,
+      temperature: temperature + (r() - 0.5) * 4,
+      gas: gas + (r() - 0.5) * 1.5,
+      draught: -8 - gas * 0.12 + (r() - 0.5) * 1.2,
+    };
+  }
+  return points;
+}
+
 /* ---------------------------------------------------------------------------
    The series the examples show.
 
@@ -559,3 +605,4 @@ export const thicknessData = wallThickness(88, 36);
 export const weightData = fillWeights(4040, 97, 9);
 export const furnaceData = furnaces(2718);
 export const hallData = hallTemperature(1603);
+export const kilnData = kiln(2024, 60_000);

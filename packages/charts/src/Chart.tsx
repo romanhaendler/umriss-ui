@@ -137,8 +137,13 @@ export function Chart<T>(props: ChartProps<T>): ReactNode {
       if (!plot.contains(e.target as Node)) scene.pointerLeave();
     };
     document.addEventListener("pointerdown", onTapOutside);
+    // Zoom takes the wheel from the page, so the listener cannot be passive -
+    // which React's is.
+    const onWheel = (e: WheelEvent): void => scene.wheel(e);
+    plot.addEventListener("wheel", onWheel, { passive: false });
 
     return () => {
+      plot.removeEventListener("wheel", onWheel);
       window.removeEventListener("blur", onBlur);
       document.removeEventListener("pointerdown", onTapOutside);
       observer.disconnect();
@@ -178,6 +183,7 @@ export function Chart<T>(props: ChartProps<T>): ReactNode {
     // test does allocate: a handful of small objects per move, whatever the
     // point count - about 3 µs per move at 3 × 1,000,000 points, measured, a
     // five-thousandth of a frame. Pooling them would buy nothing visible.
+    scene.drag(e.nativeEvent);
     scene.pointerMove(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
   };
 
@@ -201,7 +207,13 @@ export function Chart<T>(props: ChartProps<T>): ReactNode {
           // A touch has no hover: the tap shows the tooltip, and the leave that
           // follows every lifted finger would take it straight away again. A
           // tap on empty plot ends it, as does one outside (the effect above).
-          onPointerDown={onPointerMove}
+          onPointerDown={(e) => {
+            scene.pointerDown(e.nativeEvent);
+            onPointerMove(e);
+          }}
+          onPointerUp={(e) => scene.pointerUp(e.nativeEvent)}
+          onPointerCancel={(e) => scene.pointerUp(e.nativeEvent)}
+          onDoubleClick={() => scene.doubleClick()}
           onPointerLeave={(e) => {
             if (e.pointerType !== "touch") scene.pointerLeave();
           }}
