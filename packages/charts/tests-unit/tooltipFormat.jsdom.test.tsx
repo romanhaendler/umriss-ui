@@ -101,4 +101,39 @@ describe("The built-in tooltip", () => {
     const points = scene.getHoverSnapshot().hover?.hit.points ?? [];
     expect(points.map((p) => p.xValue)).toEqual([5, 105]);
   });
+
+  /* charts-essentials 02: a value format per series - "°C" without a render
+     prop, and two series on one axis in two notations. */
+  it("formats a value with its series' format before the axis' tickFormat", async () => {
+    const scene = new ChartScene();
+    scene.setData([
+      { t: 0, a: 10 },
+      { t: 1, a: 42 },
+    ]);
+    scene.registerAxis(axis({ id: "x", orientation: "x" }));
+    scene.registerAxis(axis({ id: "y", orientation: "y", accessor: (d) => (d as Row).a, tickFormat: (v) => `${v} %` }));
+    scene.registerSeries(line({ name: "Temperature", format: (v) => `${v.toFixed(1)} °C` }));
+    scene.registerSeries(line({ name: "Load" }));
+    const text = await tooltipAt(scene, 1);
+    expect(text).toContain("42.0 °C");
+    expect(text).toContain("42 %");
+  });
+
+  it("formats a series without an axis format by its own, and a matrix' value too", async () => {
+    const scene = new ChartScene();
+    scene.registerAxis(axis({ id: "x", orientation: "x" }));
+    scene.registerAxis(axis({ id: "y", orientation: "y", accessor: (d) => (d as Row).a }));
+    scene.registerSeries({
+      kind: "matrix",
+      accessor: () => 0,
+      value: (d) => (d as Row).a,
+      coloring: { kind: "gradient", stops: ["#000", "#fff"] },
+      data: [{ t: 0, a: 0.5 }, { t: 1, a: 0.75 }],
+      xAxisId: "x",
+      yAxisId: "y",
+      name: "Utilisation",
+      format: (v) => `${v * 100} per cent`,
+    });
+    expect(await tooltipAt(scene, 1)).toContain("75 per cent");
+  });
 });

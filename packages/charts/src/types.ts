@@ -29,6 +29,9 @@ export interface SeriesBase<T = unknown> {
   xAxisId: string;
   yAxisId: string;
   name?: string;
+  /** The value in the tooltip; before the y axis' `tickFormat`. Compared by its
+      source text, as an accessor is. */
+  format?: (value: number) => string;
   color?: string;
   /** A role instead of a colour value: the theme resolves it, in both themes.
       For series that mean something rather than just being the next one - the
