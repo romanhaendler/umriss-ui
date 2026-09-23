@@ -302,6 +302,7 @@ function ownFieldsEqual(previous: SeriesConfig, next: SeriesConfig): boolean {
       return (
         a.strokeWidth === next.strokeWidth &&
         a.markers === next.markers &&
+        a.step === next.step &&
         listEqual(a.dash as number[] | undefined, next.dash as number[] | undefined)
       );
     }
@@ -1480,6 +1481,7 @@ export class ChartScene {
             strokeWidth: config.strokeWidth,
             dash: config.dash,
             markers: config.markers,
+            step: config.step,
           });
           break;
         case "area":
@@ -1883,10 +1885,14 @@ export class ChartScene {
 
     // A scatter's points are not a course: under "nearest" the one the pointer
     // is at is the nearest in the plane, not the nearest in x.
+    // A step line's value at the pointer is the sample its hold began with,
+    // not the nearer one after it.
     const index =
       config.kind === "scatter" && mode === "nearest"
         ? nearestPoint(mat.x, mat.y, n, targetX, targetY, xAxis.scale, yAxis.scale)
-        : nearestIndex(mat.x, n, targetX);
+        : config.kind === "line" && config.step === true
+          ? segmentIndex(mat.x, n, targetX)
+          : nearestIndex(mat.x, n, targetX);
     if (index < 0) return null;
     const yValue = mat.y[index] as number;
     if (Number.isNaN(yValue)) return null; // gaps are no hits (R-4.6)
