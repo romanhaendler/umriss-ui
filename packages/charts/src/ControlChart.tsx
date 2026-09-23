@@ -48,6 +48,9 @@ export interface ControlChartProps<T> {
       "Series n" and a warning stands in DEV - an unnamed series is a colour
       nobody can look up. */
   name?: string;
+  /** The value as the tooltip writes it - on the line and on the violations;
+      without one the y axis' `tickFormat`, then the default. */
+  format?: (value: number) => string;
   /** Any CSS colour value; without one the palette --uc-series-N. */
   color?: string;
   /** Switchable one by one; run lengths are parameters. */
@@ -104,6 +107,7 @@ export function ControlChart<T>(props: ControlChartProps<T>): ReactNode {
     xAxisId = "x",
     yAxisId = "y",
     name,
+    format,
     color,
     rules,
     zoneLines = true,
@@ -178,7 +182,7 @@ export function ControlChart<T>(props: ControlChartProps<T>): ReactNode {
 
   return (
     <>
-      <Line accessor={accessor} data={data} xAxisId={xAxisId} yAxisId={yAxisId} name={name} color={color} />
+      <Line accessor={accessor} data={data} xAxisId={xAxisId} yAxisId={yAxisId} name={name} format={format} color={color} />
       {usable && (
         <>
           {zoneList.map((z) => (
@@ -210,6 +214,7 @@ export function ControlChart<T>(props: ControlChartProps<T>): ReactNode {
         xAxisId={xAxisId}
         yAxisId={yAxisId}
         name={violationName}
+        format={format}
         tone="alarm"
         radius={4}
       />

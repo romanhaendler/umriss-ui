@@ -595,6 +595,7 @@ export class ChartScene {
       previous.xAxisId === config.xAxisId &&
       previous.yAxisId === config.yAxisId &&
       previous.name === config.name &&
+      fnEqual(previous.format, config.format) &&
       previous.color === config.color &&
       previous.tone === config.tone &&
       ownFieldsEqual(previous, config);
@@ -1775,15 +1776,15 @@ export class ChartScene {
   /** What the built-in tooltip writes for one hit. A state has a name and no
       meaningful number; a cell has a number that is not its y position, and so
       no y axis' format; every other value is read against its y axis and
-      written in its format. */
+      written in its format. A series' own `format` comes before either. */
   private tooltipRow(k: Candidate, headerXAxisId: string): TooltipRow {
     const config = k.entry.config;
     const label = k.segment?.label;
     let value: string;
     if (label !== undefined && label !== "") value = label;
-    else if (k.value !== undefined) value = formatValue(k.value);
+    else if (k.value !== undefined) value = (config.format ?? formatValue)(k.value);
     else {
-      const own = this.findAxisConfig("y", config.yAxisId)?.tickFormat;
+      const own = config.format ?? this.findAxisConfig("y", config.yAxisId)?.tickFormat;
       value = own === undefined ? formatValue(k.yValue) : own(k.yValue);
     }
     const x = config.xAxisId === headerXAxisId ? "" : this.xLabel(config.xAxisId, k.xValue);

@@ -50,6 +50,11 @@ From `.scratch/charts-essentials/spec.md`; the decisions stand in
   day. `domain="nice"` widens to the step's boundaries. A `tickFormat` is
   handed the instant, which is how the axis speaks German. `calendar` implies
   `time`.
+- **`format` on `Line`, `Area`, `Bar`, `Scatter`, `Matrix` and
+  `ControlChart`**: `(value: number) => string`, the value as the tooltip
+  writes it - "806.4 °C" without a render prop. Without it the y axis'
+  `tickFormat`, then the default; a matrix' value has no axis format and goes
+  to the default. `ControlChart` passes it on to its line and its violations.
 
 ---
 
