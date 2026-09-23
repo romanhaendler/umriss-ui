@@ -400,6 +400,57 @@ export function corridor(seed: number): CorridorPoint[] {
   return points;
 }
 
+export interface ShiftScrap {
+  /** The position on the x axis: the shift's index, named by the tickFormat. */
+  shift: number;
+  name: string;
+  /** Scrap in pieces. */
+  scrap: number;
+}
+
+/** Scrap per shift over three days. The night shift runs on fewer hands and
+    scraps more - that is the one thing a reader is to find. */
+export function scrapPerShift(seed: number): ShiftScrap[] {
+  const r = random(seed);
+  const days = ["Mon", "Tue", "Wed"];
+  const shifts = ["early", "late", "night"];
+  return days.flatMap((day, d) =>
+    shifts.map((shift, s) => ({
+      shift: d * 3 + s,
+      name: `${day} ${shift}`,
+      scrap: Math.round((s === 2 ? 38 : 18) + r() * 14),
+    })),
+  );
+}
+
+export interface DayOutput {
+  /** The position on the x axis: the working day's index. */
+  day: number;
+  name: string;
+  /** Pieces planned and made. */
+  planned: number;
+  actual: number;
+}
+
+/** Two working weeks of one line, planned against made. Some days above plan,
+    some below - the deviation has both signs. */
+export function planAndActual(seed: number): DayOutput[] {
+  const r = random(seed);
+  const names = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+  const points: DayOutput[] = [];
+  for (let day = 0; day < 10; day++) {
+    const planned = day % 5 === 4 ? 1600 : 2000;
+    const date = new Date(WEEK_START + (day + 2 * Math.floor(day / 5)) * DAY_MS).getDate();
+    points.push({
+      day,
+      name: `${names[day % 5]} ${date}`,
+      planned,
+      actual: Math.round(planned + (r() - 0.55) * 520),
+    });
+  }
+  return points;
+}
+
 /* ---------------------------------------------------------------------------
    The series the examples show.
 
@@ -420,3 +471,5 @@ export const matrixData = utilizationMatrix(23);
 export const weekData = week(1963);
 export const powerData = powerDraw(612);
 export const corridorData = corridor(1400);
+export const scrapData = scrapPerShift(333);
+export const outputData = planAndActual(1017);

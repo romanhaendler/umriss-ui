@@ -79,6 +79,20 @@ against the code a second time. Line numbers are those of 0.3.2.
     (`src/scene.ts:1458`); the hover path allocates despite R-5.4; with
     `sigma` 0 every value off the centre line is an outlier.
 
+### Found while writing the examples
+
+Appended by `charts-demo-examples` (Q1): what snagged against the API of 0.3.2
+while the five pages got their examples. Not worked around in the examples.
+
+15. A series' `color` is documented as "any CSS colour value", but it reaches
+    the canvas as the text it was given (`src/scene.ts:1205`, `:1283`); only
+    the palette and `tone` go through the theme's probe. `var(--u-…)` or
+    `light-dark(…)` - the only way to name a colour that follows the scheme -
+    is ignored by the canvas, which keeps the previous `fillStyle`, while the
+    legend chip, a CSS `background`, resolves it. So the grouped bar example
+    gives the plan a literal (`#94a3b8`) that is merely acceptable in both
+    schemes. Resolve `color` through `resolveColours` like the palette.
+
 ### API inconsistencies
 
 | Prop | Line | Area | Bar | Scatter | StateBand | Matrix |
