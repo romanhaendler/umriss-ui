@@ -386,6 +386,44 @@ export interface Wording {
   scheduleUnfoldGroup: string;
   /** How many lanes a group holds, beside its name in the header. */
   scheduleLaneCount: (count: number) => string;
+
+  /* -------- @umriss-ui/calculation --------------------------------- */
+  /* The calculation's entries stand here for the table's reason: one provider
+     switches every package with one value. */
+  /** The four operators as symbols in a formula line. */
+  calculationSumSymbol: string;
+  calculationDifferenceSymbol: string;
+  calculationProductSymbol: string;
+  calculationQuotientSymbol: string;
+  /** The same four as words, in the accessible sentence of a line. */
+  calculationSumWord: string;
+  calculationDifferenceWord: string;
+  calculationProductWord: string;
+  calculationQuotientWord: string;
+  /** Between the parts of the sentence: "Availability equals ...". */
+  calculationEquals: string;
+  /** Before a result marked "≈" in the sentence. */
+  calculationApproximately: string;
+  /** Beside a result marked "≈": why the rounded operands do not give it. */
+  calculationApproximateNote: string;
+  /** How a percentage is read out: "91.6 percent". */
+  calculationPercent: string;
+  /** Why a quantity has no number - the label is the given at the root of it,
+      or the divisor that is zero. */
+  calculationMissing: (label: string) => string;
+  calculationDivisionByZero: (label: string) => string;
+  /** The target beside the result, with the target's number and unit. */
+  calculationAboveTarget: (target: string) => string;
+  calculationBelowTarget: (target: string) => string;
+  calculationOnTarget: (target: string) => string;
+  /** The quiet marker on a folded quantity whose derivation holds a worse
+      verdict than its own; the verdict word comes from `verdict*`. */
+  calculationWorstInside: (verdict: string) => string;
+  /** Where a given number came from. */
+  calculationSource: (source: string) => string;
+  /** The disclosure button of a derivation, named after the quantity. */
+  calculationShowDerivation: (label: string) => string;
+  calculationHideDerivation: (label: string) => string;
 }
 
 /** The instance shipped by default. English; German is `GERMAN_WORDING` in
@@ -614,4 +652,25 @@ export const DEFAULT_WORDING: Wording = {
   scheduleFoldGroup: "Fold group",
   scheduleUnfoldGroup: "Unfold group",
   scheduleLaneCount: (count) => (count === 1 ? "1 lane" : `${count} lanes`),
+  calculationSumSymbol: "+",
+  calculationDifferenceSymbol: "−",
+  calculationProductSymbol: "×",
+  calculationQuotientSymbol: "÷",
+  calculationSumWord: "plus",
+  calculationDifferenceWord: "minus",
+  calculationProductWord: "times",
+  calculationQuotientWord: "divided by",
+  calculationEquals: "equals",
+  calculationApproximately: "approximately",
+  calculationApproximateNote: "The rounded figures do not give this exactly; it is computed from the unrounded ones.",
+  calculationPercent: "percent",
+  calculationMissing: (label) => `${label} is missing`,
+  calculationDivisionByZero: (label) => `Division by zero: ${label} is 0`,
+  calculationAboveTarget: (target) => `above target ${target}`,
+  calculationBelowTarget: (target) => `below target ${target}`,
+  calculationOnTarget: (target) => `on target ${target}`,
+  calculationWorstInside: (verdict) => `Inside: ${verdict}`,
+  calculationSource: (source) => `Source: ${source}`,
+  calculationShowDerivation: (label) => `Show how ${label} is derived`,
+  calculationHideDerivation: (label) => `Hide how ${label} is derived`,
 };

@@ -1,6 +1,7 @@
 # Releasing
 
-How a version of `@umriss-ui/core`, `@umriss-ui/charts` or `@umriss-ui/table`
+How a version of `@umriss-ui/core`, `@umriss-ui/charts`, `@umriss-ui/table`,
+`@umriss-ui/schedule` or `@umriss-ui/calculation`
 reaches npm, and how the demos reach GitHub Pages. What a version *means* for a
 caller stands in the package's own `CHANGELOG.md`; this page is only the
 mechanics.

@@ -1,6 +1,6 @@
 # A calculation a reader can follow and redo
 
-Status: ready-for-agent
+Status: done
 Date:   2026-09-23
 Origin: grilling session on a new component for showing calculations step by
 step. Vocabulary in `CONTEXT.md`, "Calculations"; the declaration form in
@@ -173,3 +173,34 @@ Terms introduced for this spec: **Calculation**, **Quantity**, **Result**,
 **Given**, **Operator**, **Operand**, **Derivation**, **Reference** — all in
 `CONTEXT.md`. Deliberately avoided because they are taken: *input* (a core
 component), *operation*, *step*, *value*, *line*.
+
+## Comments
+
+### Delivery report (2026-09-23)
+
+All seven tickets delivered in one commit. `@umriss-ui/calculation` stands at
+`packages/calculation`, on core alone, with its demo on port 4177 (three pages,
+five examples, baselines light and dark, axe clean). Core gained 21 wording
+entries in English and German.
+
+Where the delivery decided something the spec left open:
+
+- **Freshness needs `ages`.** `Given` takes `ages` beside `asOf`, as `Stat`
+  does: core has deliberately no default ages. With `asOf` alone the line shows
+  the time ("As of: 17/03/2026, 10:12").
+- **Default places.** Without `decimals`: one fraction digit for a percentage,
+  at most two for a derived number, a given as given - not padded, so a target
+  of 90 % reads "90 %".
+- **A duplicate `id`** is a development error as well.
+- **Fold state is keyed by React key**, not by position: a `.map` item keeps
+  its fold when items are added before it (found in review).
+- **Focus coupling** comes from the disclosure button, so it reaches derived
+  lines only. Givens and references are not in the tab order; a screen reader
+  gets each line's sentence instead. Making every line focusable would add a
+  tab stop per line.
+- **The worst-verdict marker** reads "Inside: Alarm limit exceeded".
+
+Open from the review, not done: the verdict-to-word switch and the freshness
+word now stand three times (Stat, VerdictColumn/AlarmList, here) and could
+become core exports; no ADR records "the calculation depends on core only"
+the way ADR-0016 does for the table.

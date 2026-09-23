@@ -13,7 +13,8 @@ hard outlines or effects.
 | [`@umriss-ui/charts`](packages/charts/README.md) | 0.4.0 | Canvas charts — few kinds, drawn well. Depends on nothing but React |
 | [`@umriss-ui/table`](packages/table/README.md) | 0.2.3 | The table, declared the way it reads: columns as JSX, typed against their rows. Takes `@umriss-ui/core` as a peer |
 | [`@umriss-ui/schedule`](packages/schedule/README.md) | 0.1.3 | The schedule: subtasks on lanes over time, with transports, findings and controlled editing. Takes `@umriss-ui/core` and `@umriss-ui/charts` as peers |
-| `@umriss-ui/demo` | — | The private shell all four demos are built from. Never published |
+| [`@umriss-ui/calculation`](packages/calculation/README.md) | — | A calculation a reader can follow and redo: a derivation written as it is shown, evaluated by the library. Takes `@umriss-ui/core` as a peer. Not released yet |
+| `@umriss-ui/demo` | — | The private shell all five demos are built from. Never published |
 
 All four published packages are released under the npm tag `latest`, so a plain
 `pnpm add` installs them.
@@ -21,7 +22,8 @@ All four published packages are released under the npm tag `latest`, so a plain
 `core` names the package you install first, not a layer the others sit on:
 `@umriss-ui/charts` depends on nothing and will keep depending on nothing,
 `@umriss-ui/table` enters `core` by its public entry only (ADR-0016), and
-`@umriss-ui/schedule` enters `core` and `charts` the same way (ADR-0022).
+`@umriss-ui/schedule` enters `core` and `charts` the same way (ADR-0022), and
+`@umriss-ui/calculation` enters `core` alone.
 
 ## Quick start
 
@@ -60,7 +62,8 @@ Online at **<https://romanhaendler.github.io/umriss-ui/>** —
 [core](https://romanhaendler.github.io/umriss-ui/core/),
 [charts](https://romanhaendler.github.io/umriss-ui/charts/),
 [table](https://romanhaendler.github.io/umriss-ui/table/),
-[schedule](https://romanhaendler.github.io/umriss-ui/schedule/). Rebuilt on every push
+[schedule](https://romanhaendler.github.io/umriss-ui/schedule/),
+[calculation](https://romanhaendler.github.io/umriss-ui/calculation/). Rebuilt on every push
 to `main` (`.github/workflows/pages.yml`); `pnpm build:pages` assembles the same
 site locally into `site/`.
 
@@ -72,6 +75,7 @@ pnpm dev:core      # port 4173
 pnpm dev:charts    # port 4174
 pnpm dev:table     # port 4175
 pnpm dev:schedule  # port 4176
+pnpm dev:calculation  # port 4177
 ```
 
 The demo **is** the documentation for the components. Every page shows running

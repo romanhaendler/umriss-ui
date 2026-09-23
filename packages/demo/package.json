@@ -2,7 +2,7 @@
   "name": "@umriss-ui/demo",
   "version": "0.0.0",
   "private": true,
-  "description": "The shell of the demos of @umriss-ui/core, @umriss-ui/charts, @umriss-ui/table and @umriss-ui/schedule: pages, examples with their source, props tables from the source code. Never published.",
+  "description": "The shell of the demos of @umriss-ui/core, @umriss-ui/charts, @umriss-ui/table, @umriss-ui/schedule and @umriss-ui/calculation: pages, examples with their source, props tables from the source code. Never published.",
   "license": "UNLICENSED",
   "type": "module",
   "exports": {

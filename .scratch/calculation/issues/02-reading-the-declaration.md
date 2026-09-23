@@ -1,6 +1,6 @@
 # 02 — Reading the declaration
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Blocked by: 01

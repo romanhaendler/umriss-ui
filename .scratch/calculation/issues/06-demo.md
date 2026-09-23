@@ -1,6 +1,6 @@
 # 06 — The demo
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Blocked by: 05

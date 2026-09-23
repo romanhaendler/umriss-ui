@@ -9,13 +9,27 @@ This document records what was *worked on in this repository* — rebuilds,
 tests, findings and decisions that are invisible from outside. What changes for
 a **caller** of a package stands in that package's own changelog
 (`packages/core/CHANGELOG.md`, `packages/table/CHANGELOG.md`,
-`packages/charts/CHANGELOG.md`, `packages/schedule/CHANGELOG.md`). The two deliberately do not run in parallel:
+`packages/charts/CHANGELOG.md`, `packages/schedule/CHANGELOG.md`,
+`packages/calculation/CHANGELOG.md`). The two deliberately do not run in parallel:
 an entry there can be missing here because it was no work of its own, and one
 sentence here can summarise three entries there.
 
 **Names read forwards.** Entries that describe a name which has since been renamed
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
+
+## Sep. 2026 — A calculation a reader can follow
+
+*For a caller: the new `@umriss-ui/calculation` (unreleased) and new wording
+entries in core (unreleased) - each changelog carries the lines.*
+
+- **A sixth package.** `@umriss-ui/calculation`, on core alone, from a grilling
+  session (`.scratch/calculation/spec.md`, ADR-0027): a calculation is written
+  as nested elements, read through its props before rendering, evaluated by
+  the library and shown as a nested list with formulas, folding, hover
+  coupling and one accessible sentence per line. Reader, evaluation and the
+  sentence are pure modules, each tested first; the demo is the fifth on the
+  shared shell, port 4177, with its baselines and axe check.
 
 ## Sep. 2026 — The charts examined, and one focus
 
