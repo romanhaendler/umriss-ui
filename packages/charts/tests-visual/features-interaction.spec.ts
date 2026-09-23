@@ -375,3 +375,19 @@ test("control chart: everything lies on the series layer, nothing on the overlay
   expect(await occupiedPixels(example, "uc-layer-series")).toBeGreaterThan(0);
   expect(await occupiedPixels(example, "uc-layer-overlay")).toBe(0);
 });
+
+test("scatter under \"nearest\": the hit follows the pointer up and down", async ({ page }) => {
+  // Hit by x alone, a pointer moving straight up and down names the same
+  // sample the whole way. In the plane it names the one above near the top and
+  // the one below near the bottom - somewhere along the course the two differ.
+  await openExample(page, "scatter", "measurements");
+  const example = page.locator('[data-example="measurements"]');
+  await example.scrollIntoViewIfNeeded();
+  let changed = 0;
+  for (let fx = 0.1; fx < 0.9; fx += 0.04) {
+    const top = await tooltipText(page, example, fx, 0.15);
+    const bottom = await tooltipText(page, example, fx, 0.75);
+    if (top !== "" && bottom !== "" && top !== bottom) changed++;
+  }
+  expect(changed).toBeGreaterThan(0);
+});
