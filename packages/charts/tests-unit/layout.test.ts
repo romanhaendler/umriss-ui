@@ -48,17 +48,11 @@ function find(axes: readonly AxisLayout[], key: string): AxisLayout {
 /* library-audit 03: the default labelling of an operating time axis ran through
    `toLocaleString(undefined, …)` and thereby depended on the machine - in a
    workspace whose other package nails the notation down. A screenshot from a
-   colleague would not have matched one's own.
-
-   The reference formatter below is built with a FIXED locale on purpose: the
-   library's own notation is `dd.MM. HH:mm` and is set by hand, and de-DE is simply
-   the locale that produces exactly that notation. It is a locale identifier here,
-   not a statement about the language of the library. */
+   colleague would not have matched one's own. Since charts-essentials 01 the
+   notation is en-GB by level, the same as a time axis without a calendar
+   (timeAxis.test.ts) - fixed, never the machine's. */
 describe("computeLayout - operating time without a formatter of its own", () => {
-  const day = new Intl.DateTimeFormat("de-DE", { day: "2-digit", month: "2-digit" });
-  const clock = new Intl.DateTimeFormat("de-DE", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
-
-  it("labels in dd.MM. HH:mm and asks for no locale", () => {
+  it("labels the clock in en-GB and asks for no locale", () => {
     const spy = vi.spyOn(Date.prototype, "toLocaleString");
     const start = new Date(2026, 2, 16, 6, 0).getTime();
     const calendar = [{ from: start, to: start + 16 * 3_600_000 }];
@@ -74,6 +68,7 @@ describe("computeLayout - operating time without a formatter of its own", () => 
           calendar,
           extent: [0, 16 * 3_600_000],
           domainMode: "data",
+          tickCount: 8,
         }),
         axis({ id: "y", orientation: "y", position: "left" }),
       ],
@@ -81,12 +76,8 @@ describe("computeLayout - operating time without a formatter of its own", () => 
       hysteresis: new Map(),
     });
 
-    const ticks = find(layout.axes, "x:x").ticks.filter((t) => t.label !== "");
-    expect(ticks.length).toBeGreaterThan(0);
-    for (const tick of ticks) {
-      const d = new Date(toWallClock(tick.value, calendar));
-      expect(tick.label).toBe(`${day.format(d)} ${clock.format(d)}`);
-    }
+    const labels = find(layout.axes, "x:x").ticks.map((t) => t.label);
+    expect(labels).toEqual(["06:00", "08:00", "10:00", "12:00", "14:00", "16:00", "18:00", "20:00", "22:00"]);
     expect(spy).not.toHaveBeenCalled();
     spy.mockRestore();
   });

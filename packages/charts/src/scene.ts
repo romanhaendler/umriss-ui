@@ -650,6 +650,7 @@ export class ChartScene {
       previous.label === config.label &&
       previous.tickCount === config.tickCount &&
       previous.grid === config.grid &&
+      previous.time === config.time &&
       listEqual(previous.ticks as number[] | undefined, config.ticks as number[] | undefined) &&
       domainEqual(previous.domain, config.domain) &&
       fnEqual(previous.tickFormat, config.tickFormat);
@@ -1234,6 +1235,7 @@ export class ChartScene {
         tickCount: c.tickCount,
         tickFormat: c.tickFormat,
         tickValues: c.ticks,
+        time: c.time,
         calendar: c.calendar,
         limitLabels:
           c.orientation === "y"
