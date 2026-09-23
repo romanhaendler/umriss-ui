@@ -4,7 +4,8 @@
 // the charts handoff) - in `src/`, which is what is published (ADR-0020); its
 // demo runs in the shared shell and may - the table depends on
 // @umriss-ui/core, never the other way round (ADR-0016), and the schedule on
-// @umriss-ui/core and @umriss-ui/charts, and nothing on it (ADR-0022).
+// @umriss-ui/core and @umriss-ui/charts, and nothing on it (ADR-0022); the
+// calculation on @umriss-ui/core only, and nothing on it.
 import tseslint from "typescript-eslint";
 import reactHooks from "eslint-plugin-react-hooks";
 
@@ -16,6 +17,7 @@ const PACKAGES = [
   "packages/core/**/*.{ts,tsx}",
   "packages/table/**/*.{ts,tsx}",
   "packages/schedule/**/*.{ts,tsx}",
+  "packages/calculation/**/*.{ts,tsx}",
   "packages/demo/**/*.{ts,tsx}",
 ];
 
@@ -36,6 +38,12 @@ const NO_TABLE = {
 const NO_SCHEDULE = {
   group: ["@umriss-ui/schedule", "@umriss-ui/schedule/*"],
   message: "@umriss-ui/schedule depends on @umriss-ui/core and @umriss-ui/charts, not the other way round (ADR-0022).",
+};
+
+/* Nor the calculation: it sits on core alone. */
+const NO_CALCULATION = {
+  group: ["@umriss-ui/calculation", "@umriss-ui/calculation/*"],
+  message: "@umriss-ui/calculation depends on @umriss-ui/core, not the other way round.",
 };
 
 export default [
@@ -70,6 +78,7 @@ export default [
             },
             NO_TABLE,
             NO_SCHEDULE,
+            NO_CALCULATION,
           ],
         },
       ],
@@ -80,13 +89,13 @@ export default [
     files: ["packages/charts/**/*.{ts,tsx}"],
     ignores: ["packages/charts/src/**"],
     rules: {
-      "no-restricted-imports": ["error", { patterns: [NO_TABLE, NO_SCHEDULE] }],
+      "no-restricted-imports": ["error", { patterns: [NO_TABLE, NO_SCHEDULE, NO_CALCULATION] }],
     },
   },
   {
     files: ["packages/core/**/*.{ts,tsx}"],
     rules: {
-      "no-restricted-imports": ["error", { patterns: [NO_TABLE, NO_SCHEDULE] }],
+      "no-restricted-imports": ["error", { patterns: [NO_TABLE, NO_SCHEDULE, NO_CALCULATION] }],
     },
   },
   {
@@ -122,6 +131,7 @@ export default [
               message: "@umriss-ui/table depends on @umriss-ui/core only (ADR-0016).",
             },
             NO_SCHEDULE,
+            NO_CALCULATION,
           ],
         },
       ],
@@ -155,6 +165,40 @@ export default [
               message: "@umriss-ui/schedule does not reach into a neighbouring package by path (ADR-0022).",
             },
             NO_TABLE,
+            NO_CALCULATION,
+          ],
+        },
+      ],
+    },
+  },
+  {
+    /* The calculation takes @umriss-ui/core through its public entry only, as
+       the table does (ADR-0016), and no other package. */
+    files: ["packages/calculation/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: [
+                "@umriss-ui/core/*",
+                "!@umriss-ui/core/styles.css",
+                "!@umriss-ui/core/wording",
+                "!@umriss-ui/core/wording/de",
+              ],
+              message: "@umriss-ui/calculation imports only the public entry of @umriss-ui/core.",
+            },
+            {
+              group: ["**/core/src/**", "**/packages/core/**", "../../core/**", "../core/**"],
+              message: "@umriss-ui/calculation does not reach into @umriss-ui/core by path.",
+            },
+            {
+              group: ["@umriss-ui/charts", "@umriss-ui/charts/*"],
+              message: "@umriss-ui/calculation depends on @umriss-ui/core only.",
+            },
+            NO_TABLE,
+            NO_SCHEDULE,
           ],
         },
       ],
@@ -189,6 +233,7 @@ export default [
             },
             NO_TABLE,
             NO_SCHEDULE,
+            NO_CALCULATION,
           ],
         },
       ],

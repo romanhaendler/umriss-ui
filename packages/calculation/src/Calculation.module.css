@@ -1,0 +1,191 @@
+/* The calculation: a nested list whose lines put the label and the formulas on
+   the left and the result on the right, in tabular figures, so that results
+   at every depth stand under one another. */
+
+@layer umriss.tokens, umriss.base, umriss.components;
+
+@layer umriss.components {
+  .calculation {
+    composes: text from "#own-styles";
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .list {
+    margin: 0;
+    padding: 0 0 0 var(--u-space-5);
+    list-style: none;
+  }
+
+  .list[hidden] {
+    display: none;
+  }
+
+  .item {
+    margin: 0;
+  }
+
+  .line {
+    display: grid;
+    grid-template-columns: var(--u-space-5) minmax(0, 1fr) auto 10rem;
+    align-items: baseline;
+    column-gap: var(--u-space-3);
+    padding: var(--u-space-1) var(--u-space-2) var(--u-space-1) 0;
+    border-radius: var(--u-radius-sm);
+  }
+
+  /* Hover coupling: the quantity under the pointer or the focus, every place
+     it stands, and its operands. A background, never a verdict's colour. */
+  .line[data-mark="use"] {
+    background: var(--u-color-accent-subtle);
+  }
+
+  .line[data-mark="operand"] {
+    background: var(--u-color-surface-sunken);
+  }
+
+  .toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+    width: var(--u-space-5);
+    height: var(--u-space-5);
+    padding: 0;
+    border: none;
+    border-radius: var(--u-radius-xs);
+    background: transparent;
+    color: var(--u-color-text-secondary);
+  }
+
+  button.toggle {
+    cursor: pointer;
+  }
+
+  button.toggle:hover {
+    color: var(--u-color-text);
+  }
+
+  button.toggle:focus-visible {
+    outline: none;
+    box-shadow: var(--u-focus-ring);
+    color: var(--u-color-text);
+  }
+
+  .toggle svg {
+    transition: transform var(--u-duration-fast) var(--u-ease-out);
+  }
+
+  .toggle svg[data-open] {
+    transform: rotate(90deg);
+  }
+
+  .text {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: var(--u-space-3);
+    min-width: 0;
+  }
+
+  .label {
+    font-weight: var(--u-weight-medium);
+  }
+
+  .line[data-reference] .label {
+    font-weight: var(--u-weight-regular);
+    font-style: italic;
+  }
+
+  .formula {
+    color: var(--u-color-text-secondary);
+  }
+
+  .result {
+    font-family: var(--u-font-mono);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .result[data-verdict="unknown"] {
+    color: var(--u-color-text-secondary);
+  }
+
+  .approximate {
+    color: var(--u-color-text-secondary);
+  }
+
+  .assessment {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: var(--u-space-2);
+    font-size: var(--u-text-xs);
+    color: var(--u-color-text-secondary);
+  }
+
+  /* The verdict as a word, as the Stat shows it: colour alone carries no
+     meaning. */
+  .verdict[data-verdict="ok"] {
+    color: var(--u-color-success);
+  }
+
+  .verdict[data-verdict="warning"] {
+    color: var(--u-color-warning);
+  }
+
+  .verdict[data-verdict="alarm"] {
+    color: var(--u-color-danger);
+    font-weight: var(--u-weight-medium);
+  }
+
+  /* The worst verdict inside a folded derivation: quiet, a word in the
+     secondary colour in the label's column - the line keeps its own colour. */
+  .worst {
+    grid-column: 2;
+    font-size: var(--u-text-xs);
+    color: var(--u-color-text-secondary);
+  }
+
+  .worst::before {
+    content: "● ";
+  }
+
+  .worst[data-verdict="warning"]::before {
+    color: var(--u-color-warning);
+  }
+
+  .worst[data-verdict="alarm"]::before {
+    color: var(--u-color-danger);
+  }
+
+  .notes {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: var(--u-space-3);
+    padding: 0 0 var(--u-space-1) calc(var(--u-space-5) + var(--u-space-3));
+    font-size: var(--u-text-xs);
+    color: var(--u-color-text-secondary);
+  }
+
+  .reason {
+    color: var(--u-color-text);
+  }
+
+  .freshness[data-freshness="stale"] {
+    color: var(--u-color-warning);
+  }
+
+  .freshness[data-freshness="lost"] {
+    color: var(--u-color-danger);
+    font-weight: var(--u-weight-medium);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .toggle svg {
+      transition: none;
+    }
+  }
+}

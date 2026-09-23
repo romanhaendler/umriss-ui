@@ -1,6 +1,6 @@
 # 05 — Hover coupling and the accessible sentence
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Blocked by: 04

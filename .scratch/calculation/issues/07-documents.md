@@ -1,6 +1,6 @@
 # 07 — The documents follow
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Blocked by: 06

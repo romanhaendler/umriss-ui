@@ -1,7 +1,8 @@
 # umriss
 
-The shared vocabulary of this workspace. All three packages — `@umriss-ui/core`,
-`@umriss-ui/charts` and `@umriss-ui/table` — speak it.
+The shared vocabulary of this workspace. All five published packages —
+`@umriss-ui/core`, `@umriss-ui/charts`, `@umriss-ui/table`,
+`@umriss-ui/schedule` and `@umriss-ui/calculation` — speak it.
 
 The codebase is English throughout: identifiers, file and directory names,
 comments, prose, and the text the library ships. Each term below names one

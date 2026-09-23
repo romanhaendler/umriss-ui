@@ -18,7 +18,7 @@ in [`docs/testing.md`](docs/testing.md); the map of every other document is
 2. `npx playwright install chromium`
 3. `pnpm test:unit && pnpm test:visual`
 
-The third step builds the four demos and takes the screenshot baselines into
+The third step builds the five demos and takes the screenshot baselines into
 comparison; on a platform other than darwin it will report missing baselines,
 which `pnpm test:visual:update` creates and which are then checked in.
 
@@ -26,15 +26,15 @@ which `pnpm test:visual:update` creates and which are then checked in.
 
 
 * `pnpm test:unit` – vitest across all packages, the shell included
-* `pnpm test:visual` – Playwright; builds the four demos and starts
+* `pnpm test:visual` – Playwright; builds the five demos and starts
   `vite preview` automatically (ports 4173 core, 4174 charts, 4175 table,
-  4176 schedule)
-* `pnpm dev:core`, `pnpm dev:charts`, `pnpm dev:table`, `pnpm dev:schedule` – the demos in the dev server
+  4176 schedule, 4177 calculation)
+* `pnpm dev:core`, `pnpm dev:charts`, `pnpm dev:table`, `pnpm dev:schedule`, `pnpm dev:calculation` – the demos in the dev server
 * `pnpm test:visual:update` – create or update baselines
 * `pnpm lint` – among other things the rule "@umriss-ui/charts is standalone: no
   import from @umriss-ui/core (R-1.2)", and the directions of ADR-0016 and
-  ADR-0022: the table and the schedule take their peers by the public entry,
-  and nothing imports either of them.
+  ADR-0022: the table, the schedule and the calculation take their peers by the
+  public entry, and nothing imports any of them.
 
 The accessibility check runs inside the same Playwright suite and needs no
 command of its own. It checks a sample of pages one at a time, in both themes,
@@ -50,7 +50,7 @@ npx playwright test --project=charts-light --project=charts-dark
 ```
 
 The dev servers run on fixed ports: **4173** core, **4174** charts, **4175**
-table, **4176** schedule. The screenshot suites address exactly those, so a port taken by something
+table, **4176** schedule, **4177** calculation. The screenshot suites address exactly those, so a port taken by something
 else is a failing suite rather than a mystery.
 
 ## How work is organised here

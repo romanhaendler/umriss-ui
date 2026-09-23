@@ -219,3 +219,21 @@ describe("The German wording from `@umriss-ui/core/wording/de`", () => {
     expect(screen.getByLabelText("Wird geladen")).toBeTruthy();
   });
 });
+
+/* The calculation's entries (calculation 04): both wordings say something,
+   and the German one says it in German. */
+describe("The wording of @umriss-ui/calculation", () => {
+  it("stands in both wordings", () => {
+    const keys = Object.keys(DEFAULT_WORDING).filter((key) => key.startsWith("calculation"));
+    expect(keys.length).toBe(21);
+    for (const key of keys) {
+      const en = DEFAULT_WORDING[key as keyof typeof DEFAULT_WORDING];
+      const de = GERMAN_WORDING[key as keyof typeof GERMAN_WORDING];
+      const say = (entry: unknown) => (typeof entry === "function" ? entry("X") : entry);
+      expect(say(en), key).toBeTruthy();
+      expect(say(de), key).toBeTruthy();
+    }
+    expect(GERMAN_WORDING.calculationQuotientWord).toBe("geteilt durch");
+    expect(GERMAN_WORDING.calculationMissing("Ausschuss")).toBe("Ausschuss fehlt");
+  });
+});

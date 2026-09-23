@@ -1,0 +1,78 @@
+{
+  "name": "@umriss-ui/calculation",
+  "version": "0.0.0",
+  "description": "The umriss calculation - a derivation written as it is shown, evaluated by the library, folded and read line by line.",
+  "license": "MIT",
+  "author": "Roman Händler",
+  "homepage": "https://romanhaendler.github.io/umriss-ui/calculation/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/romanhaendler/umriss-ui.git",
+    "directory": "packages/calculation"
+  },
+  "bugs": {
+    "url": "https://github.com/romanhaendler/umriss-ui/issues"
+  },
+  "keywords": [
+    "react",
+    "components",
+    "ui",
+    "umriss",
+    "calculation",
+    "derivation"
+  ],
+  "type": "module",
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "main": "./dist/calculation.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/calculation.js"
+    },
+    "./styles.css": "./dist/calculation.css"
+  },
+  "scripts": {
+    "props": "node --disable-warning=ExperimentalWarning --experimental-strip-types demo/props.ts",
+    "predev": "pnpm run props",
+    "dev": "vite --config vite.demo.config.ts",
+    "build": "vite build",
+    "prebuild:demo": "pnpm run props",
+    "build:demo": "vite build --config vite.demo.config.ts",
+    "pretypecheck": "pnpm run props",
+    "typecheck": "tsc --noEmit",
+    "preview:demo": "vite preview --config vite.demo.config.ts --port 4177 --strictPort",
+    "test:unit": "vitest run",
+    "prepublishOnly": "pnpm run typecheck && pnpm run build && pnpm run check:dist",
+    "check:dist": "node --disable-warning=ExperimentalWarning --experimental-strip-types ../../scripts/check-dist.ts calculation.js calculation.css"
+  },
+  "peerDependencies": {
+    "@umriss-ui/core": "workspace:^",
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "devDependencies": {
+    "@fontsource/geist-mono": "^5.3.0",
+    "@fontsource/geist-sans": "^5.3.0",
+    "@umriss-ui/core": "workspace:*",
+    "@umriss-ui/demo": "workspace:*",
+    "@types/node": "^22.20.2",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "typescript": "^5.6.3",
+    "vite": "^6.0.0",
+    "vite-plugin-dts": "^4.3.0"
+  }
+}

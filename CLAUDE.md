@@ -1,6 +1,6 @@
 # umriss
 
-A pnpm workspace with five packages: `packages/core`, `packages/charts`, `packages/table`, `packages/schedule` and `packages/demo`. `@umriss-ui/table` depends on `@umriss-ui/core` (ADR-0016); `@umriss-ui/schedule` depends on `@umriss-ui/core` and `@umriss-ui/charts` (ADR-0022); nothing depends on the table or the schedule, and `@umriss-ui/charts` itself depends on nothing. `@umriss-ui/demo` is the private shell all four demos are built from (ADR-0020); it is never published.
+A pnpm workspace with six packages: `packages/core`, `packages/charts`, `packages/table`, `packages/schedule`, `packages/calculation` and `packages/demo`. `@umriss-ui/table` depends on `@umriss-ui/core` (ADR-0016); `@umriss-ui/schedule` depends on `@umriss-ui/core` and `@umriss-ui/charts` (ADR-0022); `@umriss-ui/calculation` depends on `@umriss-ui/core` only; nothing depends on the table, the schedule or the calculation, and `@umriss-ui/charts` itself depends on nothing. `@umriss-ui/demo` is the private shell all five demos are built from (ADR-0020); it is never published.
 
 Which document answers which question stands in `docs/README.md` — the map over
 everything that is not source.

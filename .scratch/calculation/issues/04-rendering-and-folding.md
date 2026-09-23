@@ -1,6 +1,6 @@
 # 04 — Lines, references and folding
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Blocked by: 03
