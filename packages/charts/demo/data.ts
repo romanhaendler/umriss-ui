@@ -451,6 +451,53 @@ export function planAndActual(seed: number): DayOutput[] {
   return points;
 }
 
+export interface ThicknessSample {
+  t: number;
+  /** Wall thickness in mm. */
+  mm: number;
+}
+
+/** Wall thickness of a pipe, sampled by hand over a shift - whenever the
+    inspector came by, not on a clock. Individual measurements, not a course:
+    nothing was measured between two of them. */
+export function wallThickness(seed: number, n: number): ThicknessSample[] {
+  const r = random(seed);
+  const points: ThicknessSample[] = [];
+  let t = WEEK_START + 6 * HOUR_MS;
+  for (let i = 0; i < n; i++) {
+    t += (4 + r() * 16) * 60_000;
+    points.push({ t, mm: 3.2 + (r() - 0.5) * 0.24 + (r() < 0.08 ? 0.18 : 0) });
+  }
+  return points;
+}
+
+export interface WeightSample {
+  t: number;
+  /** The set point of the fill weight in g. */
+  setPoint: number;
+  /** A sample within tolerance; null where it is an outlier. */
+  sample: number | null;
+  /** A sample outside tolerance; null where it is none. */
+  outlier: number | null;
+}
+
+/** Fill weights of a filling line against their set point, which changes with
+    the product at eleven. A sample further than the tolerance from its set
+    point is an outlier - the two channels never both carry a value. */
+export function fillWeights(seed: number, n: number, tolerance: number): WeightSample[] {
+  const r = random(seed);
+  const points: WeightSample[] = [];
+  const start = WEEK_START + 6 * HOUR_MS;
+  for (let i = 0; i < n; i++) {
+    const t = start + (i * 8 * HOUR_MS) / (n - 1);
+    const setPoint = t < WEEK_START + 11 * HOUR_MS ? 500 : 525;
+    const value = setPoint + (r() - 0.5) * 16 + (r() < 0.06 ? (r() < 0.5 ? -1 : 1) * 14 : 0);
+    const out = Math.abs(value - setPoint) > tolerance;
+    points.push({ t, setPoint, sample: out ? null : value, outlier: out ? value : null });
+  }
+  return points;
+}
+
 /* ---------------------------------------------------------------------------
    The series the examples show.
 
@@ -473,3 +520,5 @@ export const powerData = powerDraw(612);
 export const corridorData = corridor(1400);
 export const scrapData = scrapPerShift(333);
 export const outputData = planAndActual(1017);
+export const thicknessData = wallThickness(88, 36);
+export const weightData = fillWeights(4040, 97, 9);
