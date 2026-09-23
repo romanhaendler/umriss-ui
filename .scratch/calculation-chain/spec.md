@@ -1,6 +1,6 @@
 # A calculation read top to bottom: the chain
 
-Status: ready-for-agent
+Status: done
 Date:   2026-09-23
 Origin: grilling session on the delivered `@umriss-ui/calculation`
 (`.scratch/calculation/`): the tree reads badly for a costing sheet and for a
@@ -97,23 +97,27 @@ The lead case, for the demo and the tests, is a costing sheet:
 - **Evaluation.** Unchanged in kind: full precision, absence with its reason,
   division by zero, the approximation mark computed from the operands as
   shown, assessment through `assess()`.
-- **Folding.** An interim folds the lines since the interim before it. A chain
-  starts folded to its interims. A tree starts as before: the Result's
-  operands shown, each folded.
+- **Folding.** Everything below the outermost statement starts folded. An
+  interim folds the lines since the interim before it.
 - **The tree's long operator.** A sum or product of more than four operands
   shows no formula on its line, only how many operands it has. Fixed, not a
   prop.
 - **The look (ADR-0028, "How it is shown"), for tree and chain alike.** The
   design session after the grilling settled it; it replaces the accordion the
   first delivery shipped:
-  - a result beneath its operands under a rule; the Result with a double rule
-    beneath and the heaviest weight;
+  - the outermost statement as on paper and not foldable: a tree's operands, a
+    rule, the Result with a double rule; a chain's interims;
+  - every other derivation opens BENEATH the clicked line, which never moves:
+    a nested calculation on the sunken surface with a bar hanging from the
+    label, closing with a rule and "= label"; an interim's derivation starts
+    with the interim before;
   - columns label · operator · number · unit; numbers right-aligned in the
     monospace token with tabular figures; "≈" in a result's operator column;
   - nested levels indent their label only; an unfolded inner derivation's
     numbers, operators and rules in the secondary colour;
-  - no chevron: the label is the disclosure button; folded, the formula in
-    names stands beneath it ("15 operands" above four); unfolded, none;
+  - the label is the disclosure button, a quiet angle after it; folded, the
+    formula in names stands beneath it ("15 operands" above four); open,
+    none;
   - at most two rows per quantity: beneath the label formula, reason,
     explanation, source, freshness, aside; beneath the number verdict and
     target - the 10 rem assessment column goes;
@@ -123,7 +127,7 @@ The lead case, for the demo and the tests, is a costing sheet:
 - **Line.** An operand line shows its operator and its own number. Only an
   interim or a derived result shows the value it stands for.
 - **Accessibility.** The chain is a list; every line keeps its sentence —
-  "plus Direct labour, 960 €"; an interim reads "Production cost equals
+  "plus Direct labour equals 960 €"; an interim reads "Production cost equals
   Material cost plus Direct labour plus Production overhead, equals …".
 - **Wording.** Entries in core, English and German, for the operator column's
   words if they differ from the tree's, and "4 operands" for the long operator.
@@ -160,3 +164,50 @@ Terms introduced: **Tree**, **Chain**, **Interim** — in `CONTEXT.md`.
 "Zwischenergebnis" left the avoid list of **Quantity** and is the German word
 for **Interim**. Avoided: *subtotal* (after a times it is no sum), *step*,
 *line* as a term.
+
+## Comments
+
+### Delivery report (2026-09-23)
+
+All five tickets delivered in one commit.
+
+- **Chain.** `Chain`, `Plus`, `Minus`, `Times`, `DividedBy`, `Interim`. The
+  reader turns interims into derived quantities (the interim before as a
+  `previous` operand, a new signed sum for plus and minus). Every rule of
+  ADR-0028 is a development error with a test asserting its message, and so is
+  any prop written beside a child of a line tag.
+- **The look changed during implementation.** The first build followed the
+  design session: every result beneath its operands, derivations opening
+  upward. Seen in the browser, the user found it confusing, because the
+  clicked line moved and an open derivation no longer looked as if it belonged
+  anywhere. Decided then: the outermost statement stays as on paper and does
+  not fold, and every other derivation opens *beneath* its line as a nested
+  calculation on the sunken surface. It has a bar hanging from the label and
+  closes with a rule and "= label"; in a chain it starts with the interim
+  before. ADR-0028 "How it is shown" and this spec say so. A browser test holds
+  that the clicked line does not move, and one picture outside the loop shows
+  OEE with derivations open.
+- **Everything below the outermost statement starts folded**, tree and chain
+  alike.
+- **Demo:** six pages and twenty-three examples, from two numbers and a sum to
+  the cost per piece of a production order. Every baseline of the package is
+  renewed, and axe is clean on every page.
+- **From the review:**
+  - A chain folded away as an operand now carries the worst verdict of all its
+    interims; a chain in view shows only what lies since the interim before
+    (`worstSince`).
+  - The sentence keeps the full formula above four operands, and the visible
+    count has no "=".
+  - Avoided words are out of the code: `carried` became `previous`, "run" and
+    "threshold" are gone.
+  - The spec's example sentence now reads "plus Direct labour equals 960 €",
+    as every line does.
+
+Left open from the review, as judgement calls:
+- The closing row repeats the line's markup.
+- Subtraction has two encodings, `difference` and a sum with a negated operand.
+- `items()` in `Calculation.tsx` is the longest function of the package.
+- The hover band on operands uses the edge token as a fill, because the sunken
+  surface is invisible inside a derivation.
+- An interim's operand count includes the interim before; that is intended,
+  since it is a term of the interim's formula.

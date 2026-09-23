@@ -59,8 +59,9 @@ module on the caller's side that carries `"use client"` and imports from there.
   `calculationApproximately` and the approximation note, `calculationPercent`,
   the two reasons for an absent quantity (`calculationMissing`,
   `calculationDivisionByZero`), the target phrases, the worst-verdict marker,
-  `calculationSource` and the disclosure labels. A caller who builds a
-  complete `Wording` of their own has twenty-one entries to add.
+  `calculationSource`, the disclosure labels and `calculationOperandCount`. A
+  caller who builds a complete `Wording` of their own has twenty-two entries to
+  add.
 
 ## 0.4.0 – One focus, and fields on the iPhone (Sep. 2026)
 

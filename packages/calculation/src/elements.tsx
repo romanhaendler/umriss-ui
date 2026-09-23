@@ -80,3 +80,46 @@ export const Quotient: (props: OperatorProps) => null = () => null;
 
 /** A quantity defined elsewhere in the calculation, standing as an operand. */
 export const Ref: (props: RefProps) => null = () => null;
+
+/* The chain (ADR-0028): read top to bottom, each operand worked into the value
+   before it, strictly in order, ended by an interim. */
+
+export interface ChainProps {
+  /** The operands, top to bottom: a first quantity with no operator, then
+      `Plus`, `Minus`, `Times` and `DividedBy` with their operands and
+      `Interim`s naming the value where they stand. The last line is an
+      `Interim`; a `Times` or `DividedBy` stands alone between two named
+      values. */
+  children?: ReactNode;
+}
+
+export interface ChainOperandProps extends Omit<GivenProps, "label" | "value"> {
+  /** The operand's name, where the line is a given written in place. Left
+      out where the line holds a quantity as its child. */
+  label?: string;
+  /** The operand's number, where the line is a given written in place.
+      Absent as for a `Given`: the line and every interim after it are
+      absent, with the reason. */
+  value?: number | null;
+  /** Instead of `label` and `value`: exactly one quantity - a tree, a
+      `<Ref>` or a `<Chain>`. */
+  children?: ReactNode;
+}
+
+/** A calculation read top to bottom, as on paper. */
+export const Chain: (props: ChainProps) => null = () => null;
+
+/** Adds its operand to the value before it. */
+export const Plus: (props: ChainOperandProps) => null = () => null;
+
+/** Takes its operand from the value before it. */
+export const Minus: (props: ChainOperandProps) => null = () => null;
+
+/** Multiplies the named value before it by its operand. */
+export const Times: (props: ChainOperandProps) => null = () => null;
+
+/** Divides the named value before it by its operand. */
+export const DividedBy: (props: ChainOperandProps) => null = () => null;
+
+/** Names the value of a chain where it stands. */
+export const Interim: (props: QuantityProps) => null = () => null;

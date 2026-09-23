@@ -23,3 +23,13 @@ under a heading "Changed" of its own, no matter which digit rose.
   propagate with their reason; rounded figures that do not reproduce the
   result mark it "≈". Needs the calculation wording of the next
   `@umriss-ui/core`.
+- **The chain** (ADR-0028): `Chain`, `Plus`, `Minus`, `Times`, `DividedBy` and
+  `Interim` — a calculation read top to bottom, each operand worked into the
+  value before it, ended by an interim. It mixes with the tree both ways.
+- **The statement look**, for tree and chain alike, replacing the accordion:
+  fixed columns for label, operator, number and unit; the outermost statement
+  as on paper with the Result above a double rule; every derivation opening
+  beneath its line as a nested calculation with a bar, closing "= label"; the
+  label as the disclosure, the formula in names beneath it while folded,
+  "N operands" above four. Everything below the outermost statement now
+  starts folded.

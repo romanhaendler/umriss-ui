@@ -1,6 +1,6 @@
 # 04 — Worked examples, from simple to very extensive
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Blocked by: 03

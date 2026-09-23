@@ -1,56 +1,116 @@
 import { describe, expect, it } from "vitest";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { LanguageProvider } from "@umriss-ui/core";
 import { GERMAN_FORMATS, GERMAN_WORDING } from "@umriss-ui/core/wording/de";
 import { Calculation, Given, Product, Quotient, Sum } from "../src";
+import { costing } from "./costing";
 import { OeeCalculation } from "./oee";
 
-/** The line of a quantity, found by its accessible sentence. */
-const lineOf = (start: string) => screen.getByText((text) => text.startsWith(`${start} `)).parentElement!;
+/** Every row a reader sees, as "operator label amount unit", top to bottom. */
+const rows = () =>
+  [...document.querySelectorAll("li > div")]
+    .filter((row) => !row.closest("ul[hidden]"))
+    .map((row) => {
+      const cell = (name: string) => row.querySelector(`:scope > [class*="${name}"]`)?.textContent ?? "";
+      return [cell("operator"), cell("labelCell"), cell("amount"), cell("unit")].join(" ").replace(/\s+/g, " ").trim();
+    });
+/** The row of a quantity, found by its label - a visible one first. */
+const rowOf = (label: string) => {
+  const all = [...document.querySelectorAll<HTMLElement>("li > div")].filter(
+    (row) => row.querySelector(":scope > [class*=labelCell]")?.textContent === label,
+  );
+  return all.find((row) => !row.closest("ul[hidden]")) ?? all[0]!;
+};
+/** What stands beneath the label. */
+const notesOf = (label: string) => rowOf(label).querySelector(":scope > [class*=notes]")?.textContent ?? "";
 const toggle = (label: string) => screen.getByRole("button", { name: new RegExp(`how ${label} is derived`) });
 
-describe("Lines", () => {
-  it("shows a derived line with its formula in names and in numbers, and the result", () => {
+describe("The statement", () => {
+  it("stands a result beneath its operands, with the operator before each number", () => {
     render(<OeeCalculation />);
-    const line = lineOf("Availability");
-    expect(line.textContent).toContain("Availability= Run time ÷ Planned production time= 412 min ÷ 450 min91.6 %");
+    expect(rows()).toEqual(["Availability 91.6 %", "× Performance 93.2 %", "× Quality 96 %", "OEE 82 %"]);
+    expect(rowOf("OEE").hasAttribute("data-rule")).toBe(true);
+    expect(rowOf("OEE").getAttribute("data-kind")).toBe("result");
+  });
+
+  it("folds a chain to its interims, and unfolds one by its label", () => {
+    render(<Calculation>{costing()}</Calculation>);
+    expect(rows()).toEqual([
+      "Material cost 2,060.8 €",
+      "Production cost 4,172.8 €",
+      "Cost price 4,798.72 €",
+      "Net offer price 5,182.62 €",
+    ]);
+    fireEvent.click(toggle("Production cost"));
+    expect(rows()).toEqual([
+      "Material cost 2,060.8 €",
+      "Production cost 4,172.8 €",
+      "Material cost 2,060.8 €",
+      "+ Direct labour 960 €",
+      "+ Production overhead 1,152 €",
+      "= Production cost 4,172.8 €",
+      "Cost price 4,798.72 €",
+      "Net offer price 5,182.62 €",
+    ]);
+    expect(notesOf("Production overhead")).toBe("= Production overhead rate × Direct labour");
+    expect(notesOf("Production cost")).toBe("");
+    fireEvent.click(toggle("Net offer price"));
+    expect(rows().slice(-4)).toEqual([
+      "Net offer price 5,182.62 €",
+      "Cost price 4,798.72 €",
+      "× Profit mark-up 1.08",
+      "= Net offer price 5,182.62 €",
+    ]);
+  });
+
+  it("shows the formula in names beneath a folded label, and a count above four operands", () => {
+    render(
+      <Calculation>
+        <Product label="Cost of the order">
+          <Sum label="Cost per piece">
+            {["Steel", "Paint", "Screws", "Energy", "Labour"].map((name) => (
+              <Given key={name} label={name} value={1} />
+            ))}
+          </Sum>
+          <Given label="Pieces" value={10} />
+        </Product>
+      </Calculation>,
+    );
+    expect(notesOf("Cost per piece")).toBe("5 operands");
+    expect(screen.getByText(/^Cost per piece equals/).textContent).toBe(
+      "Cost per piece equals Steel plus Paint plus Screws plus Energy plus Labour, equals 1 plus 1 plus 1 plus 1 plus 1, equals 5",
+    );
+    fireEvent.click(toggle("Cost per piece"));
+    expect(notesOf("Cost per piece")).toBe("");
+    expect(rows()).toContain("+ Paint 1");
   });
 
   it("shows a reference with the referred quantity's label and number, not its derivation", () => {
     render(<OeeCalculation />);
     fireEvent.click(toggle("Performance"));
-    const references = screen.getAllByText("Run time equals 412 min");
-    expect(references).toHaveLength(1);
-    expect(references[0]!.parentElement!.textContent).toBe("Run time equals 412 minRun time412 min");
+    expect(rows().slice(1, 5)).toEqual([
+      "× Performance 93.2 %",
+      "Ideal run time 384 min",
+      "÷ Run time 412 min",
+      "= Performance 93.2 %",
+    ]);
+    expect(rowOf("Run time").hasAttribute("data-reference")).toBe(true);
   });
 
-  it("opens the level under the result and folds everything below", () => {
-    render(<OeeCalculation />);
-    expect(toggle("OEE").getAttribute("aria-expanded")).toBe("true");
-    for (const label of ["Availability", "Performance", "Quality"]) {
-      expect(toggle(label).getAttribute("aria-expanded"), label).toBe("false");
-    }
-    expect(screen.getByText(/^Downtime equals/).closest("ul")!.hidden).toBe(true);
-  });
-
-  it("folds and unfolds, by click and by keyboard, and keeps the state when data changes", () => {
+  it("indents only an inner derivation, and keeps the fold on its quantity when data changes", () => {
     const { rerender } = render(<OeeCalculation />);
-    const availability = toggle("Availability");
-    fireEvent.click(availability);
-    expect(availability.getAttribute("aria-expanded")).toBe("true");
-    const list = document.getElementById(availability.getAttribute("aria-controls")!)!;
-    expect(list.hidden).toBe(false);
-    expect(within(list).getByText(/^Downtime equals 38 min/)).toBeTruthy();
+    fireEvent.click(toggle("Availability"));
+    expect(rowOf("Run time").style.getPropertyValue("--depth")).toBe("1");
+    expect(rowOf("Run time").hasAttribute("data-inner")).toBe(true);
+    expect(rowOf("Downtime").style.getPropertyValue("--depth")).toBe("2");
+    expect(rowOf("Availability").style.getPropertyValue("--depth")).toBe("0");
 
     rerender(<OeeCalculation downtime={50} />);
     expect(toggle("Availability").getAttribute("aria-expanded")).toBe("true");
     expect(toggle("Performance").getAttribute("aria-expanded")).toBe("false");
-
-    availability.focus();
-    fireEvent.click(availability); // a button: Enter and Space arrive as a click
+    const list = document.getElementById(toggle("Availability").getAttribute("aria-controls")!)!;
+    fireEvent.click(toggle("Availability")); // a button: Enter and Space arrive as a click
     expect(list.hidden).toBe(true);
-    fireEvent.click(toggle("OEE"));
-    expect(toggle("OEE").getAttribute("aria-expanded")).toBe("false");
   });
 
   it("keeps a fold on its quantity when an item is added before it", () => {
@@ -86,18 +146,16 @@ describe("Lines", () => {
         </Sum>
       </Calculation>,
     );
-    const line = toggle("Scrap cost").parentElement!;
-    expect(line.querySelector("[data-verdict='alarm']")!.textContent).toBe("Inside: Alarm limit exceeded");
+    expect(notesOf("Scrap cost")).toContain("Inside: Alarm limit exceeded");
     fireEvent.click(toggle("Scrap cost"));
-    expect(line.textContent).not.toContain("Inside");
+    expect(notesOf("Scrap cost")).not.toContain("Inside");
   });
 
   it("shows an absent given through to the result, with the reason, never as zero", () => {
     render(<OeeCalculation downtime={null} />);
-    const result = lineOf("OEE");
-    expect(result.textContent).toContain("—");
-    expect(result.nextElementSibling!.textContent).toBe("Downtime is missing");
-    expect(result.nextElementSibling!.firstElementChild!.getAttribute("aria-hidden")).toBe("true");
+    expect(rows().at(-1)).toBe("OEE —");
+    expect(notesOf("OEE")).toBe("Downtime is missing");
+    expect(rowOf("OEE").querySelector("[aria-hidden]")).not.toBeNull();
     expect(screen.getByText(/^OEE equals/).textContent).toBe(
       "OEE equals Availability times Performance times Quality, equals No value times No value times 96 percent, equals No value, Downtime is missing",
     );
@@ -137,13 +195,25 @@ describe("The accessible sentence", () => {
     expect(screen.getByText(/^Whole equals/).textContent).toBe(
       "Whole equals Third a plus Third b plus Third c, equals 0.33 plus 0.33 plus 0.33, equals approximately 1",
     );
-    expect(lineOf("Whole").textContent).toContain("≈ 1");
+    expect(rows().at(-1)).toBe("≈ Whole 1");
     unmount();
 
     render(<LanguageProvider wording={GERMAN_WORDING} formats={GERMAN_FORMATS}>{thirds}</LanguageProvider>);
     expect(screen.getByText(/^Whole gleich/).textContent).toBe(
       "Whole gleich Third a plus Third b plus Third c, gleich 0,33 plus 0,33 plus 0,33, gleich ungefähr 1",
     );
+  });
+
+  it("reads the lines of a chain with their operator, in English and German", () => {
+    const { unmount } = render(<Calculation>{costing()}</Calculation>);
+    fireEvent.click(toggle("Production cost"));
+    expect(screen.getByText(/^plus Direct labour/).textContent).toBe("plus Direct labour equals 960 €");
+    expect(screen.getByText(/^Production cost equals Material/).textContent).toBe(
+      "Production cost equals Material cost plus Direct labour plus Production overhead, equals 2,060.8 € plus 960 € plus 1,152 €, equals 4,172.8 €",
+    );
+    unmount();
+    render(<LanguageProvider wording={GERMAN_WORDING} formats={GERMAN_FORMATS}><Calculation>{costing()}</Calculation></LanguageProvider>);
+    expect(screen.getByText(/^mal Profit/).textContent).toBe("mal Profit mark-up gleich 1,08");
   });
 
   it("reads the reason of an absent quantity, in German", () => {
@@ -174,18 +244,19 @@ describe("Hover coupling", () => {
         (line) => `${line.getAttribute("data-mark")}: ${line.querySelector("span[class*=label]")!.textContent}`,
       );
 
-    fireEvent.pointerEnter(runTime.parentElement!);
+    fireEvent.pointerEnter(runTime.parentElement!.parentElement!);
     expect(marks()).toEqual([
       "use: Run time",
       "operand: Planned production time",
       "operand: Downtime",
+      "use: = Run time",
       "use: Run time",
     ]);
-    fireEvent.pointerLeave(runTime.parentElement!);
+    fireEvent.pointerLeave(runTime.parentElement!.parentElement!);
     expect(marks()).toEqual([]);
 
     fireEvent.focus(toggle("Quality"));
-    expect(marks()).toEqual(["use: Quality", "operand: Good count", "operand: Total count"]);
+    expect(marks()).toEqual(["use: Quality", "operand: Good count", "operand: Total count", "use: = Quality"]);
     fireEvent.blur(toggle("Quality"));
     expect(marks()).toEqual([]);
   });

@@ -1,9 +1,10 @@
 # @umriss-ui/calculation
 
 A calculation a reader can follow and redo. A plant screen shows a figure — an
-OEE of 82 %, a cost per piece — and this package shows how it came about, line
-by line down to the numbers it came from, each line with its formula in names
-and in numbers and its result. The package **performs every operation it
+OEE of 82 %, a cost per piece — and this package shows how it came about, as a
+statement of account: the operator before each number, the final result above a
+double rule, and every figure opening beneath itself into the calculation it
+came from, down to the numbers at its root. The package **performs every operation it
 shows**, so what stands on the screen cannot disagree with the number.
 
 ## Install
@@ -16,11 +17,11 @@ pnpm add @umriss-ui/calculation @umriss-ui/core
 regime, formats, wording, assessment and freshness from there. React 18 or 19
 as a peer as well.
 
-## Written as it is shown
+## Two forms, written as they are shown
 
-Operators are elements, their children are their operands in order, givens are
-the leaves (ADR-0027). A quantity used twice is defined once and stands
-elsewhere as a `<Ref>`:
+A **tree** suits a figure put together from factors. Operators are elements,
+their children are their operands in order, givens are the leaves (ADR-0027). A
+quantity used twice is defined once and stands elsewhere as a `<Ref>`:
 
 ```tsx
 import { Calculation, Difference, Given, Product, Quotient, Ref } from "@umriss-ui/calculation";
@@ -49,14 +50,39 @@ import { Calculation, Difference, Given, Product, Quotient, Ref } from "@umriss-
 </Calculation>
 ```
 
+A **chain** suits a sheet read top to bottom (ADR-0028). A first quantity,
+then `Plus`, `Minus`, `Times` or `DividedBy`, each working its operand into the
+value before it, strictly in order, and `Interim`s naming the value where they
+stand. It starts folded to its interims:
+
+```tsx
+<Calculation aria-label="Price of a spare part">
+  <Chain>
+    <Given label="Cost price" value={148.2} unit="€" />
+    <Plus label="Handling" value={12} unit="€" />
+    <Interim label="Cost with handling" unit="€" decimals={2} />
+    <Times label="Mark-up" value={1.25} />
+    <Interim label="Net price" unit="€" decimals={2} />
+  </Chain>
+</Calculation>
+```
+
+The two mix: a line of a chain can hold a tree, and a chain can be an operand
+in a tree.
+
 - **Four operators, and nothing else:** `Sum`, `Product`, `Difference`
   (a − b − c) take two or more operands, `Quotient` exactly two.
+- **A chain has no precedence**, so a `Times` or `DividedBy` stands alone
+  between two named values; anything else fails on the first render.
 - **Full precision throughout**; rounding happens only on the screen. Where the
   rounded operands do not give the rounded result, the result carries "≈".
 - **An absent given is never zero.** Every quantity that depends on it is
   absent too, with the reason; a quotient by zero is absent with its own.
 - **Target and limits** are assessed through core's `assess()`. A folded
   derivation that holds a worse verdict than its line says so, quietly.
+- **The label is the disclosure.** A derivation opens beneath its line as a
+  nested calculation that closes with "= label"; folded, the formula in names
+  stands beneath the label — or how many operands there are, above four.
 - **Every line is read as one sentence** — "Availability equals Run time
   divided by Planned production time, equals 412 min divided by 450 min,
   equals 91.6 percent" — and every derivation is a disclosure.

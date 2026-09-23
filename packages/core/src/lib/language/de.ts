@@ -285,4 +285,5 @@ export const GERMAN_WORDING: Wording = {
   calculationSource: (source) => `Quelle: ${source}`,
   calculationShowDerivation: (label) => `Herleitung von ${label} zeigen`,
   calculationHideDerivation: (label) => `Herleitung von ${label} verbergen`,
+  calculationOperandCount: (count) => `${count} Operanden`,
 };

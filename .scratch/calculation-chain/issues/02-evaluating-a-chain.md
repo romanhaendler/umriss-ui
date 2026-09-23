@@ -1,6 +1,6 @@
 # 02 — Evaluating a chain
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Blocked by: 01

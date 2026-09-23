@@ -33,6 +33,9 @@ export interface Evaluation {
   verdict?: Verdict;
   /** The worst verdict inside the derivation, the quantity's own excluded. */
   worst?: Verdict;
+  /** The same without the interim before - for an interim whose chain stands
+      in view, where the interim before has a line of its own. */
+  worstSince?: Verdict;
 }
 
 /** The fraction digits a quantity is shown with at most: as the caller says,
@@ -57,11 +60,13 @@ export function shownOf(quantity: Quantity, value: number): number {
 /** The shown number back as the ratio the operator works on. */
 const asOperand = (quantity: Quantity, shown: number) => (quantity.format === "percent" ? shown / 100 : shown);
 
-function apply(operator: Operator, values: readonly number[]): number {
+/** The operator over the operands in order; in a sum, a negated operand (a
+    chain's `Minus`) is taken away. */
+function apply(operator: Operator, values: readonly number[], negated: readonly boolean[]): number {
   const [first, ...rest] = values as [number, ...number[]];
   switch (operator) {
     case "sum":
-      return rest.reduce((a, b) => a + b, first);
+      return rest.reduce((a, b, i) => (negated[i + 1] ? a - b : a + b), first);
     case "difference":
       return rest.reduce((a, b) => a - b, first);
     case "product":
@@ -87,6 +92,7 @@ export function evaluate(model: CalculationModel): ReadonlyMap<string, Evaluatio
     let absence: Absence | undefined;
     let approximate = false;
     let worst: Verdict | undefined;
+    let worstSince: Verdict | undefined;
 
     if (quantity.given) {
       const given = quantity.given.value;
@@ -95,8 +101,9 @@ export function evaluate(model: CalculationModel): ReadonlyMap<string, Evaluatio
     } else {
       const operands = quantity.operands.map((operand) => ({ operand, ...run(operand.key) }));
       for (const { operand, verdict, worst: inside } of operands) {
-        worst = worse(worst, verdict);
-        if (!operand.reference) worst = worse(worst, inside);
+        const here = operand.reference ? verdict : worse(verdict, inside);
+        worst = worse(worst, here);
+        if (!operand.previous) worstSince = worse(worstSince, here);
       }
       absence = operands.find((o) => o.absence)?.absence;
       const divisor = operands[1];
@@ -104,10 +111,12 @@ export function evaluate(model: CalculationModel): ReadonlyMap<string, Evaluatio
         absence = { kind: "zero", label: model.quantities.get(divisor!.operand.key)!.label };
       }
       if (!absence) {
-        value = apply(quantity.operator!, operands.map((o) => o.value!));
+        const negated = quantity.operands.map((o) => o.negated === true);
+        value = apply(quantity.operator!, operands.map((o) => o.value!), negated);
         const fromShown = apply(
           quantity.operator!,
           operands.map((o) => asOperand(model.quantities.get(o.operand.key)!, o.shown!)),
+          negated,
         );
         approximate = shownOf(quantity, fromShown) !== shownOf(quantity, value);
       }
@@ -126,6 +135,7 @@ export function evaluate(model: CalculationModel): ReadonlyMap<string, Evaluatio
       assessment,
       verdict,
       worst,
+      worstSince,
     };
     results.set(key, evaluation);
     return evaluation;
