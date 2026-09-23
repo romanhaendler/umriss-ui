@@ -4,9 +4,9 @@
    (vitest.config.ts); 29 March 2026 is the spring clock change there. */
 
 import { describe, expect, it } from "vitest";
-import { timeLabels, timeStepFor, timeTicks } from "../src/time";
+import { timeLabels, timeStepFor, timeText, timeTicks } from "../src/time";
 import { CLASS_TICK, computeLayout, type AxisInput, type AxisLayout } from "../src/layout";
-import { DAY, HOUR, MINUTE } from "../src/operatingTime";
+import { DAY, HOUR, MINUTE, toWallClock } from "../src/operatingTime";
 
 const at = (month: number, day: number, hour = 0, minute = 0) =>
   new Date(2026, month - 1, day, hour, minute).getTime();
@@ -58,17 +58,46 @@ describe("timeTicks - candidates on local boundaries", () => {
   });
 });
 
+/* charts-review: day ticks across the autumn clock change - charts-fixes 09
+   left one offset per domain, an hour off after the change. */
+describe("ticks across the autumn clock change (25 Oct 2026)", () => {
+  it("stands day ticks on local midnight on a time axis", () => {
+    const ticks = timeTicks(at(10, 23, 12), at(10, 28, 12), timeStepFor(5 * DAY, 5));
+    expect(ticks.map(clock)).toEqual(["24. 0:00", "25. 0:00", "26. 0:00", "27. 0:00", "28. 0:00"]);
+  });
+
+  it("stands day ticks on local midnight on a calendar axis", () => {
+    const calendar = [{ from: at(10, 23, 12), to: at(10, 28, 12) }];
+    const layout = computeLayout({
+      width: 900,
+      height: 300,
+      padding: { top: 8, right: 8, bottom: 8, left: 8 },
+      axes: [
+        { key: "x:x", id: "x", orientation: "x", position: "bottom", grid: false, extent: [0, 5 * DAY], domainMode: "data", tickCount: 5, calendar },
+        { key: "y:y", id: "y", orientation: "y", position: "left", grid: false, extent: [0, 100], domainMode: "nice" },
+      ],
+      measure: () => ({ width: 30, height: 14 }),
+      hysteresis: new Map(),
+    });
+    const x = layout.axes.find((a) => a.key === "x:x") as AxisLayout;
+    expect(x.ticks.map((t) => clock(toWallClock(t.value, calendar)))).toEqual([
+      "24. 0:00", "25. 0:00", "26. 0:00", "27. 0:00", "28. 0:00",
+    ]);
+    expect(x.ticks.map((t) => t.label)).toEqual(["24 Oct 2026", "25 Oct", "26 Oct", "27 Oct", "28 Oct"]);
+  });
+});
+
 describe("timeLabels - by level, en-GB, 24 hours", () => {
   it("writes the clock, and the date on the first tick of a new day", () => {
     const step = timeStepFor(12 * HOUR, 4);
     const ticks = timeTicks(at(3, 16, 15), at(3, 17, 3), step);
-    expect(timeLabels(ticks, step)).toEqual(["15:00", "18:00", "21:00", "17 Mar 00:00", "03:00"]);
+    expect(timeLabels(ticks, step)).toEqual(["16 Mar 15:00", "18:00", "21:00", "17 Mar 00:00", "03:00"]);
   });
 
   it("carries the date on the first tick after a removed night, wherever it falls", () => {
     const step = timeStepFor(4 * HOUR, 4);
     expect(timeLabels([at(3, 16, 20), at(3, 16, 22), at(3, 17, 6)], step)).toEqual([
-      "20:00",
+      "16 Mar 20:00",
       "22:00",
       "17 Mar 06:00",
     ]);
@@ -76,9 +105,23 @@ describe("timeLabels - by level, en-GB, 24 hours", () => {
 
   it("writes the day, and the month with its year", () => {
     const days = timeStepFor(4 * DAY, 4);
-    expect(timeLabels([at(3, 16), at(3, 17)], days)).toEqual(["16 Mar", "17 Mar"]);
+    expect(timeLabels([at(3, 16), at(3, 17)], days)).toEqual(["16 Mar 2026", "17 Mar"]);
     const months = timeStepFor(365 * DAY, 6);
     expect(timeLabels([at(1, 1), at(4, 1)], months)).toEqual(["Jan 2026", "Apr 2026"]);
+  });
+
+  /* charts-review: a zoomed axis whose first tick was a local midnight named
+     no day at all - the first tick had no tick before it to differ from. */
+  it("gives the first tick the date at its level, a midnight too", () => {
+    const step = timeStepFor(4 * HOUR, 4);
+    expect(timeLabels([at(3, 17), at(3, 17, 1), at(3, 17, 2)], step)).toEqual(["17 Mar 00:00", "01:00", "02:00"]);
+  });
+
+  /* charts-review: readings a second apart shared one header. */
+  it("writes the seconds only when asked", () => {
+    const t = at(3, 17, 15, 23) + 5000;
+    expect(timeText(t)).toBe("17 Mar 15:23");
+    expect(timeText(t, true)).toBe("17 Mar 15:23:05");
   });
 
   it("writes a year step as the year alone", () => {
@@ -90,7 +133,7 @@ describe("timeLabels - by level, en-GB, 24 hours", () => {
   it("gives the day the year where the year changes", () => {
     const days = timeStepFor(4 * DAY, 4);
     const turn = [new Date(2026, 11, 31).getTime(), new Date(2027, 0, 1).getTime()];
-    expect(timeLabels(turn, days)).toEqual(["31 Dec", "1 Jan 2027"]);
+    expect(timeLabels(turn, days)).toEqual(["31 Dec 2026", "1 Jan 2027"]);
   });
 });
 
@@ -121,7 +164,7 @@ describe("computeLayout - a time axis", () => {
   it("widens a nice domain to the step's local boundaries and labels by level", () => {
     const x = xOf({ time: true, extent: [at(3, 16, 7, 20), at(3, 16, 16, 40)], tickCount: 5 });
     expect(x.domain).toEqual([at(3, 16, 6), at(3, 16, 18)]);
-    expect(x.ticks.map((t) => t.label)).toEqual(["06:00", "09:00", "12:00", "15:00", "18:00"]);
+    expect(x.ticks.map((t) => t.label)).toEqual(["16 Mar 06:00", "09:00", "12:00", "15:00", "18:00"]);
   });
 
   it("keeps a data domain as it is", () => {
@@ -154,7 +197,7 @@ describe("computeLayout - a time axis", () => {
       { from: at(3, 17, 6), to: at(3, 17, 22) },
     ];
     const x = xOf({ calendar, extent: [0, 32 * HOUR], domainMode: "data", tickCount: 8 });
-    expect(x.ticks.map((t) => t.label)).toEqual(["06:00", "12:00", "18:00", "17 Mar 06:00", "12:00", "18:00"]);
+    expect(x.ticks.map((t) => t.label)).toEqual(["16 Mar 06:00", "12:00", "18:00", "17 Mar 06:00", "12:00", "18:00"]);
     expect(x.format(4 * HOUR)).toBe("16 Mar 10:00");
   });
 });

@@ -68,8 +68,8 @@ export interface StateDrawItem extends DrawBase {
   /** Lane in pixels - top and bottom, in container coordinates. */
   laneTop: number;
   laneBottom: number;
-  /** End of the x domain: the last segment runs there. */
-  domainEnd: number;
+  /** Where the last segment ends (lastSegmentEnd). */
+  lastEnd: number;
 }
 
 export interface MatrixDrawItem extends DrawBase {
@@ -424,7 +424,7 @@ function drawStateBand(ctx: CanvasRenderingContext2D, item: StateDrawItem): void
     const path = paths[k];
     if (path === undefined) continue; // code outside the state list
     const from = xs[i] as number;
-    const to = segmentEnd(xs, n, i, item.domainEnd);
+    const to = segmentEnd(xs, n, i, item.lastEnd);
     if (!(to > from)) continue;
     path.rect(from * xm + xb, top, (to - from) * xm, height);
     any = true;
@@ -612,8 +612,12 @@ export function drawOverlayLayer(
   }
 
   // Hover marker: fill in the series colour, a 2-px ring in the background
-  // colour (R-4.5).
+  // colour (R-4.5). The overlay is not clipped: a reading beyond a zoomed edge
+  // - the nearest one can lie there - gets no marker on the axis.
   for (const marker of hover?.marker ?? []) {
+    if (marker.x < plot.x || marker.x > plot.x + plot.width || marker.y < plot.y || marker.y > plot.y + plot.height) {
+      continue;
+    }
     ctx.beginPath();
     ctx.arc(marker.x, marker.y, 5.5, 0, Math.PI * 2);
     ctx.fillStyle = theme.colorBg;

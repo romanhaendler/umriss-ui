@@ -5,7 +5,7 @@
    stands here and is not used from there. */
 
 import { describe, expect, it } from "vitest";
-import { segmentEnd, segmentIndex } from "../src/state";
+import { lastSegmentEnd, medianStep, segmentEnd, segmentIndex } from "../src/state";
 import { nearestIndex } from "../src/hit";
 
 function x(...values: number[]): Float64Array {
@@ -124,5 +124,40 @@ describe("Gaps", () => {
     const values = x(0, 10, 20);
     expect(segmentIndex(values, 3, 5)).toBe(0);
     expect(segmentIndex(values, 3, 25)).toBe(2);
+  });
+});
+
+/* charts-review, finding 16: the last segment ran to the end of the padded
+   domain - a state claimed for a time nobody reported, and none at all under
+   `domain="data"`. It ends at the latest x of the chart's data; where that is
+   the band's own last point, one median step after it; never beyond the
+   domain. */
+describe("lastSegmentEnd - where the last state stops", () => {
+  it("ends at the latest x of the chart's data", () => {
+    expect(lastSegmentEnd(x(0, 10, 20), 3, 27, 10, 100)).toBe(27);
+  });
+
+  it("runs one step past the band's own last point where that is the latest", () => {
+    expect(lastSegmentEnd(x(0, 10, 20), 3, 20, 10, 100)).toBe(30);
+  });
+
+  it("never runs beyond the domain", () => {
+    expect(lastSegmentEnd(x(0, 10, 20), 3, 20, 10, 25)).toBe(25);
+    expect(lastSegmentEnd(x(0, 10, 20), 3, 90, 10, 50)).toBe(50);
+  });
+
+  it("gives a single point the domain, having no step", () => {
+    expect(lastSegmentEnd(x(7), 1, 7, 0, 42)).toBe(42);
+  });
+});
+
+describe("medianStep - the band's own rhythm", () => {
+  it("takes the median of the distances, not the smallest", () => {
+    expect(medianStep(x(0, 1, 11, 21, 31), 5)).toBe(10);
+  });
+
+  it("is 0 where there is no distance", () => {
+    expect(medianStep(x(7), 1)).toBe(0);
+    expect(medianStep(x(3, 3), 2)).toBe(0);
   });
 });

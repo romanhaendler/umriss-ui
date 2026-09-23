@@ -44,6 +44,12 @@ export interface StateBandProps<T> {
   laneTo?: number;
 }
 
+/** A band of states: each point's state holds from its x until the next
+    point's. The last one holds until the latest reading of the chart - the
+    last x of any visible series on the same x axis - and where the band itself
+    reports last, one median step of its own x values past its last point;
+    never beyond the x domain. A state is claimed for as long as it was
+    reported, not until the axis' rounded end. */
 export function StateBand<T>(props: StateBandProps<T>): null {
   const {
     accessor,

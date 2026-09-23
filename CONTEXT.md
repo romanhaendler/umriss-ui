@@ -454,8 +454,10 @@ _Avoid_: timeline, Gantt, status strip
 
 **Segment**:
 The run from one point's x to the next point's, painted in that state's colour.
-Derived, never stored. The last segment runs to the end of the axis domain,
-because otherwise the current state — the one read first — would be missing.
+Derived, never stored. The last segment runs to the latest reading of the
+chart — one median step past its own point where the band reports last — never
+beyond the axis domain; without it the current state, the one read first, would
+be missing.
 _Avoid_: Abschnitt, block, interval
 
 **State list**:

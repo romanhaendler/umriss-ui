@@ -460,8 +460,10 @@ test("zoom: a drag pans - to the left shows what comes later", async ({ page }) 
   await page.waitForTimeout(150);
   const after = await xLabels(example);
   expect(after).not.toEqual(before);
-  // The first label now is one that stood further right before.
-  expect(before.indexOf(after[0] as string)).toBeGreaterThan(0);
+  // The first label now is one that stood further right before - by its
+  // clock: the first tick carries its date as well.
+  const clock = (l: string | undefined) => l?.split(" ").pop();
+  expect(before.map(clock).indexOf(clock(after[0]))).toBeGreaterThan(0);
 });
 
 test("zoom: the plain wheel belongs to the page", async ({ page }) => {
