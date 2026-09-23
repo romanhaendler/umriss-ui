@@ -19,6 +19,10 @@ export interface LineProps<T> {
       "Series n" and a warning stands in DEV - an unnamed series is a colour
       nobody can look up. */
   name?: string;
+  /** Not drawn, not hit and not counted for its axes' extent - a fixed
+      `domain` keeps the axis still. Its legend entry stays, drawn back.
+      Controlled: the caller sets it, typically from `Legend onToggle`. */
+  hidden?: boolean;
   /** The value as the tooltip writes it; without one the y axis' `tickFormat`,
       then the default. */
   format?: (value: number) => string;
@@ -47,6 +51,7 @@ export function Line<T>(props: LineProps<T>): null {
     yAxisId = "y",
     data,
     name,
+    hidden,
     format,
     color,
     tone,
@@ -65,6 +70,7 @@ export function Line<T>(props: LineProps<T>): null {
         yAxisId,
         data,
         name,
+        hidden,
         format,
         color,
         tone,
@@ -73,7 +79,7 @@ export function Line<T>(props: LineProps<T>): null {
         markers,
         step,
       }) as LineSeriesConfig,
-    [accessor, xAxisId, yAxisId, data, name, format, color, tone, strokeWidth, dash, markers, step],
+    [accessor, xAxisId, yAxisId, data, name, hidden, format, color, tone, strokeWidth, dash, markers, step],
   );
 
   useSeries("Line", config);

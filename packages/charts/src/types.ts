@@ -37,6 +37,8 @@ export interface SeriesBase<T = unknown> {
       For series that mean something rather than just being the next one - the
       violating points of a control chart, say. `color` beats it. */
   tone?: "ok" | "warning" | "alarm";
+  /** Not drawn, not hit, not in its axes' extent; its legend entry stays. */
+  hidden?: boolean;
 }
 
 export interface LineSeriesConfig<T = unknown> extends SeriesBase<T> {

@@ -24,6 +24,10 @@ export interface AreaProps<T> {
       "Series n" and a warning stands in DEV - an unnamed series is a colour
       nobody can look up. */
   name?: string;
+  /** Not drawn, not hit and not counted for its axes' extent - a fixed
+      `domain` keeps the axis still. Its legend entry stays, drawn back.
+      Controlled: the caller sets it, typically from `Legend onToggle`. */
+  hidden?: boolean;
   /** The value as the tooltip writes it; without one the y axis' `tickFormat`,
       then the default. */
   format?: (value: number) => string;
@@ -43,6 +47,7 @@ export function Area<T>(props: AreaProps<T>): null {
     yAxisId = "y",
     data,
     name,
+    hidden,
     format,
     color,
     fillOpacity = 0.18,
@@ -59,12 +64,13 @@ export function Area<T>(props: AreaProps<T>): null {
         yAxisId,
         data,
         name,
+        hidden,
         format,
         color,
         fillOpacity,
         strokeWidth,
       }) as AreaSeriesConfig,
-    [accessor, baseline, xAxisId, yAxisId, data, name, format, color, fillOpacity, strokeWidth],
+    [accessor, baseline, xAxisId, yAxisId, data, name, hidden, format, color, fillOpacity, strokeWidth],
   );
 
   useSeries("Area", config);

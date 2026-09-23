@@ -289,6 +289,31 @@ describe("ChartScene - the hit on a step line", () => {
   });
 });
 
+/* charts-essentials 04: a hidden series is not drawn, so it is not hit. */
+describe("ChartScene - a hidden series", () => {
+  it("is not in the tooltip", async () => {
+    const root = document.createElement("div");
+    document.body.appendChild(root);
+    const scene = new ChartScene();
+    scene.bind(root, document.createElement("canvas"), document.createElement("canvas"), root);
+    scene.registerAxis(xAxis);
+    scene.registerAxis(yAxis);
+    scene.registerSeries(line);
+    scene.registerSeries({ ...line, name: "Hidden", hidden: true });
+    scene.registerTooltip({ mode: "x" });
+    scene.setData([
+      { t: 0, a: 10 },
+      { t: 5, a: 50 },
+    ]);
+    scene.requestResize(400, 300);
+    await frame();
+    const x = scene.getLayoutSnapshot().layout.axes.find((a) => a.orientation === "x")?.scale;
+    scene.pointerMove(x?.toPx(5) ?? 0, 150);
+    expect(scene.getHoverSnapshot().hover?.hit.points.map((p) => p.seriesName)).toEqual(["A"]);
+    scene.unbind();
+  });
+});
+
 /* charts-fixes 11: functions were compared by their source text, and every
    bound native function reads "function () { [native code] }". */
 describe("ChartScene - change detection of a native function", () => {
