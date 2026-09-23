@@ -1,6 +1,7 @@
 /* Benchmark example (R-5.1 to R-5.3).
 
-   Three series, unoptimised (no downsampling). A hover draws the overlay layer
+   Three series; lines and the area downsample on their own above two points
+   per pixel column (charts-long-series 03). A hover draws the overlay layer
    exclusively - the FPS display proves it. Switchable between three lines and a
    mixed set of a bar, an area and a line.
 
