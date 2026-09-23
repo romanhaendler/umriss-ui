@@ -330,26 +330,48 @@ handler says so, instead of promising none.
 Live mode (10 points/s, a travelling window) holds the width of the left axis band
 constant over 5 s – the hysteresis from R-3.4 works (R-5.3).
 
-## Deliberately open
+## Later
 
-* The non-goals from section 0.1 of the handoff, in so far as they are still open:
-  zoom/pan, animations, time and log scales, downsampling, curve interpolation,
-  an interactive legend, export, full a11y build-out, WebGL.
+Wanted, not yet built (charts-review Q12). Each waits for a caller who needs it.
+
+* **Keyboard and screen reader.** A focus model over the points, a data table as
+  an alternative, a live region; a package of its own (`.scratch/charts-a11y/`),
+  to be settled once zoom has fixed the hit model.
+* **`onSelect`.** A click that reports the hit; the hit model is there, the
+  question of what a selection is (ADR-0003 in core) is not.
 * **Stacking** (stacked bars and areas). It needs more than two Y channels and a
   cross-series summing step; that is a data question and not a drawing one, and it
   deserves a work package of its own.
+* **Box plot.** A kind of its own with five channels; nobody has asked for it
+  on a plant screen yet.
+* **Line colour by limit.** A line that turns alarm-coloured above a limit; today
+  a `LimitBand` and the ControlChart's violations say the same.
+
+## Out
+
+Not planned, because each contradicts a ground rule or buys little for its cost.
+
 * **A category scale.** Bars sit on the numeric X axis (ADR-0002); categories are
   passed as numeric positions with a naming `tickFormat`.
+* **Log scale.** Plant values are read linearly; a log axis breaks the affine
+  scale that the operating-time axis relies on (ADR-0001).
+* **Smoothing.** A curve between samples invents values the plant never
+  measured; `Line step` draws what was held.
+* **Animation.** A chart that moves on every update is harder to read, and the
+  chart redraws once per change, not per frame.
+* **Export.** The canvas is a canvas; a picture of it is the caller's
+  `toDataURL`.
+* **WebGL.** Downsampling keeps a week of seconds under 25 ms in 2D; a second
+  renderer would double every kind.
 * **Horizontal bars.** Bars grow along the Y axis from a baseline on the X axis.
-* **Further series kinds** – step lines, candles, pie, radar, heatmap, box plot.
-  The set of kinds is closed (no renderer interface for third parties).
-* **Interaction specific to a kind.** No bar hover highlight, no brush, no click
-  selection; the hit model is the same for all four kinds.
+* **Pie, radar, candle.** The set of kinds is closed (no renderer interface for
+  third parties); none of the three answers a question of a plant screen.
+
+## Known limits
+
 * **The closure limit of change detection.** Accessors, `tickFormat` and the
   tooltip's `render` are compared by their source text, because inline ones are
   new on every render. Two functions of the same text that read different
   captured values count as equal: an accessor is not run again, an axis not
   relabelled. The remedy is a new data reference or a new text; solving it
   would mean re-running every function on every render (Q10).
-* Open points from section 9: the final package name, the final palette colours,
-  the location of the demo, `alignTicks`, axis colouring.
