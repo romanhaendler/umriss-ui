@@ -250,7 +250,10 @@
     color: var(--u-color-text-secondary);
   }
 
+  /* Its own box: the Result's double rule belongs under the number alone, and
+     an underline reaches every inline child it is not stopped at. */
   .approximate {
+    display: inline-block;
     margin-right: var(--u-space-1);
     color: var(--u-color-text-secondary);
     cursor: help;
