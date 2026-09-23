@@ -53,6 +53,9 @@ export interface ControlChartProps<T> {
   format?: (value: number) => string;
   /** Any CSS colour value; without one the palette --uc-series-N. */
   color?: string;
+  /** A role instead of a colour value for the line; the theme resolves it.
+      The violations are always "alarm". */
+  tone?: "ok" | "warning" | "alarm";
   /** Switchable one by one; run lengths are parameters. */
   rules?: Partial<RuleOptions>;
   /** The faint zone lines at one and two sigma. Rule 4 is about the two-sigma
@@ -109,6 +112,7 @@ export function ControlChart<T>(props: ControlChartProps<T>): ReactNode {
     name,
     format,
     color,
+    tone,
     rules,
     zoneLines = true,
     labelUpper,
@@ -182,7 +186,7 @@ export function ControlChart<T>(props: ControlChartProps<T>): ReactNode {
 
   return (
     <>
-      <Line accessor={accessor} data={data} xAxisId={xAxisId} yAxisId={yAxisId} name={name} format={format} color={color} />
+      <Line accessor={accessor} data={data} xAxisId={xAxisId} yAxisId={yAxisId} name={name} format={format} color={color} tone={tone} />
       {usable && (
         <>
           {zoneList.map((z) => (

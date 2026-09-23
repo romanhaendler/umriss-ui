@@ -169,3 +169,51 @@ describe("A step line", () => {
   });
 });
 
+/* charts-essentials 06: an area's outline takes a dash; the fill and a lone
+   point's stroke stay solid. */
+describe("An area's dash", () => {
+  it("dashes the outline and nothing else", () => {
+    const dashes: number[][] = [];
+    let current: number[] = [];
+    const ctx = new Proxy({} as Record<string, unknown>, {
+      get: (_, key) =>
+        key === "setLineDash"
+          ? (d: number[]) => {
+              current = d;
+            }
+          : key === "stroke"
+            ? () => dashes.push(current)
+            : () => undefined,
+      set: () => true,
+    }) as unknown as CanvasRenderingContext2D;
+    drawSeriesLayer(ctx, {
+      width: 1000,
+      height: 100,
+      plot: { x: 0, y: 0, width: 1000, height: 100 },
+      axes: [],
+      theme: FALLBACK_THEME,
+      series: [
+        {
+          x: new Float64Array([0, 10]),
+          y: new Float64Array([20, 30]),
+          kind: "area",
+          length: 2,
+          xScale,
+          yScale,
+          color: "#000",
+          alpha: 1,
+          y0: null,
+          baseline: 0,
+          fillOpacity: 0.18,
+          strokeWidth: 1.5,
+          dash: [4, 2],
+        },
+      ],
+      limitBands: [],
+      limitLines: [],
+    });
+    // The outline, then the (empty) stroke of lone points.
+    expect(dashes).toEqual([[4, 2], []]);
+  });
+});
+

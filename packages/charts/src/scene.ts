@@ -317,7 +317,8 @@ function ownFieldsEqual(previous: SeriesConfig, next: SeriesConfig): boolean {
       return (
         fnEqual(a.baseline, next.baseline) &&
         a.fillOpacity === next.fillOpacity &&
-        a.strokeWidth === next.strokeWidth
+        a.strokeWidth === next.strokeWidth &&
+        listEqual(a.dash as number[] | undefined, next.dash as number[] | undefined)
       );
     }
     case "bar": {
@@ -1504,6 +1505,7 @@ export class ChartScene {
             baseline: 0,
             fillOpacity: config.fillOpacity,
             strokeWidth: config.strokeWidth,
+            dash: config.dash,
           });
           break;
         case "bar": {
