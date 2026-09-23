@@ -202,8 +202,6 @@ const EMPTY_HOVER_SNAPSHOT: HoverSnapshot = {
 
 /** Tolerance within which hits of different series are grouped (R-4.7). */
 const GROUP_TOLERANCE = 4;
-/** From this number of points on, markers="auto" draws no more markers (R-4.5). */
-const MARKER_LIMIT = 60;
 
 let nextRegistration = 0;
 
@@ -1426,9 +1424,7 @@ export class ChartScene {
             kind: "line",
             strokeWidth: config.strokeWidth,
             dash: config.dash,
-            marker:
-              config.markers === "always" ||
-              (config.markers === "auto" && mat.length <= MARKER_LIMIT),
+            markers: config.markers,
           });
           break;
         case "area":

@@ -27,8 +27,9 @@ export interface LineProps<T> {
   strokeWidth?: number;
   /** Dash pattern as a run of lengths in CSS pixels; without one a solid line. */
   dash?: readonly number[];
-  /** When the individual points are drawn as marks: `auto` from a density at
-      which they no longer run into each other, `always`, `never`. */
+  /** When the individual points are drawn as marks: `auto` every point up to
+      60 points and above that only a point between two gaps - it has no line
+      to be seen by - `always`, or `never`, not even that one. */
   markers?: "auto" | "always" | "never";
 }
 

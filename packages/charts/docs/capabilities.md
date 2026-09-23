@@ -96,6 +96,7 @@ Screenshot pages carry their name in brackets.
 | `strokeWidth`, `dash`, `color` | 4.3 | Screenshot |
 | Palette `--uc-series-N` by name, in order on first mounting | 4.3 | Unit (scene), Screenshot |
 | Markers `auto` / `always` / `never` | R-4.5 | Screenshot (`configuration`) |
+| A point between two gaps (or a gap and the edge) keeps its marker at any point count; only `never` drops it | R-4.5 | Unit (draw), Screenshot (`multi-series`) |
 | Binding through `xAxisId` / `yAxisId` | R-4.12 | Interaction (`axes`), Screenshot |
 
 ## `Area`
@@ -107,6 +108,7 @@ Screenshot pages carry their name in brackets.
 | The baseline pulls its Y axis' value range | R-4.13 | Unit (materialisation, scene) |
 | Fill and outline as separate paths | R-2.12 | Screenshot (`mixed`) |
 | A gap produces a hole, not a straight line across it | R-2.5 | Screenshot (`mixed`, `corridor`) |
+| A point between two gaps is a stroke from its foot to its value, with or without an outline | Q23 | Unit (draw) |
 | `fillOpacity`, `strokeWidth` (0 leaves the outline out) | 4.3 | Screenshot (`filled`, `corridor`, light and dark) |
 
 ## `Bar`
