@@ -354,6 +354,55 @@ describe("The palette follows the name", () => {
   });
 });
 
+/* charts-review, bug 2: the check ran for the first materialised series only,
+   and warned falsely for a matrix, whose x values run row-major and are
+   legitimately unsorted. Freshly imported for the same reason as above. */
+describe("The sortedness check (R-2.6)", () => {
+  const unsorted = (warn: { mock: { calls: unknown[][] } }) =>
+    warn.mock.calls.map(([text]) => String(text)).filter((text) => text.includes("not sorted"));
+
+  it("checks every series and names the one that is unsorted", async () => {
+    vi.resetModules();
+    const { ChartScene: FreshScene } = await import("../src/scene");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const scene = new FreshScene();
+    scene.registerAxis(xAxis());
+    scene.registerAxis(yAxis());
+    scene.registerSeries(lineSeries({ name: "Sorted", data: [{ t: 0, a: 1 }, { t: 1, a: 2 }] }));
+    scene.registerSeries(scatterSeries({ name: "Shuffled", data: [{ t: 1, a: 1 }, { t: 0, a: 2 }] }));
+    scene.axisExtent("x", "x");
+    const warnings = unsorted(warn);
+    expect(warnings).toHaveLength(1);
+    expect(warnings[0]).toContain("Shuffled");
+  });
+
+  it("leaves a row-major matrix alone", async () => {
+    vi.resetModules();
+    const { ChartScene: FreshScene } = await import("../src/scene");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const scene = new FreshScene();
+    scene.setData([
+      { t: 0, a: 0 },
+      { t: 1, a: 0 },
+      { t: 0, a: 1 },
+      { t: 1, a: 1 },
+    ]);
+    scene.registerAxis(xAxis());
+    scene.registerAxis(yAxis());
+    scene.registerSeries({
+      kind: "matrix",
+      name: "Cells",
+      accessor: (d) => (d as Row).a,
+      value: (d) => (d as Row).a,
+      coloring: { kind: "gradient", stops: ["#eee", "#333"] },
+      xAxisId: "x",
+      yAxisId: "y",
+    });
+    scene.axisExtent("x", "x");
+    expect(unsorted(warn)).toEqual([]);
+  });
+});
+
 describe("Registration", () => {
   it("holds the JSX order as the drawing order", () => {
     const scene = new ChartScene();
