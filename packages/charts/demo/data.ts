@@ -498,6 +498,31 @@ export function fillWeights(seed: number, n: number, tolerance: number): WeightS
   return points;
 }
 
+export interface FurnacePoint {
+  t: number;
+  /** Temperatures of the two furnaces in °C. */
+  f1: number;
+  f2: number;
+  /** The set point both run at. */
+  setPoint: number;
+}
+
+/** Two furnaces at one set point over the early shift, every ten minutes -
+    close enough that "which one is it" is a question the tooltip answers. */
+export function furnaces(seed: number): FurnacePoint[] {
+  const r = random(seed);
+  const start = WEEK_START + 6 * HOUR_MS;
+  const points: FurnacePoint[] = [];
+  let f1 = 806;
+  let f2 = 800;
+  for (let i = 0; i <= 8 * 6; i++) {
+    f1 += (808 - f1) * 0.15 + (r() - 0.45) * 5;
+    f2 += (808 - f2) * 0.1 + (r() - 0.55) * 5;
+    points.push({ t: start + i * 10 * 60_000, f1, f2, setPoint: 808 });
+  }
+  return points;
+}
+
 /* ---------------------------------------------------------------------------
    The series the examples show.
 
@@ -522,3 +547,4 @@ export const scrapData = scrapPerShift(333);
 export const outputData = planAndActual(1017);
 export const thicknessData = wallThickness(88, 36);
 export const weightData = fillWeights(4040, 97, 9);
+export const furnaceData = furnaces(2718);
