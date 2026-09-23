@@ -1,6 +1,6 @@
 # 01 — `@umriss-ui/calculation`: the package and its demo shell
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Blocked by: none

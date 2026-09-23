@@ -6,11 +6,12 @@
     "build": "pnpm -r build",
     "build:pages": "node scripts/build-pages.mjs",
     "typecheck": "pnpm -r typecheck",
-    "lint": "eslint --max-warnings 0 packages/charts packages/core packages/table packages/schedule packages/demo",
+    "lint": "eslint --max-warnings 0 packages/charts packages/core packages/table packages/schedule packages/calculation packages/demo",
     "dev:core": "pnpm --filter @umriss-ui/core dev",
     "dev:charts": "pnpm --filter @umriss-ui/charts dev",
     "dev:table": "pnpm --filter @umriss-ui/table dev",
     "dev:schedule": "pnpm --filter @umriss-ui/schedule dev",
+    "dev:calculation": "pnpm --filter @umriss-ui/calculation dev",
     "test:unit": "pnpm -r test:unit",
     "test:visual": "playwright test",
     "test:visual:update": "playwright test --update-snapshots"

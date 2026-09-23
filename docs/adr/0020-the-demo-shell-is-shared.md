@@ -64,3 +64,4 @@ bent around a piece of evidence the lint rule already carries.
 * *Added Sep. 2026:* the shell has carried a fourth demo since
   `@umriss-ui/schedule` (ADR-0022). The title's "three" is the count at the time
   of the decision; nothing in the decision depends on it.
+* *Added 23 Sep. 2026:* and a fifth since `@umriss-ui/calculation`.

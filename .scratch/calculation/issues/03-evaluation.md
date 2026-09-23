@@ -1,6 +1,6 @@
 # 03 — Evaluation
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Blocked by: 02
