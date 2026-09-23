@@ -1,6 +1,6 @@
 # Decisions
 
-Twenty-five decisions, each one written where it was made and kept afterwards. An
+Twenty-seven decisions, each one written where it was made and kept afterwards. An
 ADR here is not an announcement: it states the question, the alternatives that
 were real at the time, and what the decision costs — which is what makes it
 worth reading a year later, when the code has changed and the reasoning has not.
@@ -40,5 +40,6 @@ half a later reader needs most. Exactly one is superseded today.
 | [0024](0024-the-formats-are-english-german-is-freight.md) | The formats are English, and German is freight | accepted | language |
 | [0025](0025-a-lane-group-is-structure-over-lanes-never-a-lane.md) | A lane group is structure over lanes, never a lane | accepted | schedule |
 | [0026](0026-span-leaves-charts-occupancy-is-the-schedules.md) | Span leaves charts; occupancy is the schedule's | accepted | charts |
+| [0027](0027-a-calculation-is-written-as-it-is-shown.md) | A calculation is written as it is shown | accepted | calculation |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).

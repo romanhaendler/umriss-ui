@@ -978,6 +978,62 @@ about the clock, never about the data: nothing is drawn differently for lying
 behind it. A plan on a wall screen follows it by the minute.
 _Avoid_: current time indicator, today marker, Zeitmarke, playhead
 
+### Calculations
+
+**Calculation**:
+The step-by-step derivation of one number from others, shown so that a reader
+can both follow it and redo it. The library evaluates it; a caller never hands in
+a figure the calculation claims to have derived. It is not an invoice, which is
+at most one thing a calculation can compute.
+_Avoid_: Rechnung (which also means invoice), formula, breakdown, worksheet,
+derivation (which is one quantity's)
+
+**Quantity**:
+A named number with a unit inside a **Calculation** — given or derived. Its unit
+is a label the caller writes; nothing converts or checks units, and percent is a
+presentation of a plain ratio, not a unit. A quantity whose operands include an
+**Absent value**, or whose operation has no answer (a division by zero), is
+itself absent, says why, and is never carried on as zero. A quantity can carry a
+**Target** and **Limits** and is then assessed like any other value.
+_Avoid_: value (which is a table column's), step (which is the charts'
+interpolation), line, Zwischenergebnis, Größe as an identifier
+
+**Result**:
+The quantity a **Calculation** exists to answer. Every other quantity is shown
+because the result depends on it.
+_Avoid_: outcome (which is a **Verdict**'s), total, Endergebnis
+
+**Given**:
+A quantity the calculation does not derive: its number comes from the caller,
+and with it, where known, its source and **As-of time**. Every other quantity is
+derived by an **Operator**.
+_Avoid_: input (which is a core component), parameter, Eingabe, Ausgangswert
+
+**Operator**:
+How a derived quantity comes from its operands: sum, difference, product or
+quotient, and nothing else. There is no formula text and no operator of the
+caller's own, because a written-out operation that the library did not perform
+could say something the number does not.
+_Avoid_: operation (taken twice over: set operations, and how a control is
+worked), formula, function, Rechenart
+
+**Operand**:
+A quantity an operator works on, in order — the first operand of a difference or
+a quotient is the one taken from or divided.
+_Avoid_: argument, input, Eingang
+
+**Derivation**:
+What stands under a derived quantity: its operands, and theirs in turn, down to
+givens and references. A derivation can be folded away; the quantity above it
+stays.
+_Avoid_: subtree, breakdown, Teilrechnung
+
+**Reference**:
+The place where a quantity defined elsewhere in the calculation stands as an
+operand. It shows the quantity's name and number, not its derivation, which
+stands once, where the quantity is defined.
+_Avoid_: link, alias, copy
+
 
 ## Module and directory names
 
