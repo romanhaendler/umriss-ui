@@ -97,6 +97,13 @@ From `.scratch/charts-fixes/spec.md`; the findings stand in
   `ticks` and the value of an x limit are named on the wall clock, like the
   data, and mapped into operating time as the data are; before, both were taken
   as operating time and landed far off, or pulled the axis out of shape.
+- **Hit testing where areas and points meet.** Under `mode="nearest"` a state
+  band or a matrix cell under the pointer counted as distance zero and beat
+  every point; a point within 12 px of the pointer now wins, and the area
+  answers where none is. A chart of bands or cells only pinned crosshair and
+  tooltip to the beginning of the section; they now stay with the pointer. And
+  a scatter under `"nearest"` was hit by x alone - the sample straight above
+  the pointer beat the one beside it; it is now measured in x and y.
 
 ---
 

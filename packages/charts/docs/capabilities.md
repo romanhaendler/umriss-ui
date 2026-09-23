@@ -226,6 +226,8 @@ Screenshot pages carry their name in brackets.
 | The crosshair snaps onto the data point | R-4.7 | Interaction (overlay pixels) |
 | Mode `"x"` with 4 px grouping | R-4.7 | Interaction |
 | Mode `"nearest"` | 4.4 | Screenshot (`configuration`), Manual |
+| `"nearest"`: a point within 12 px wins over the band or cell under the pointer; a scatter is measured in x and y | 4.4 | Unit (hit, jsdom scene), Interaction (`measurements`) |
+| A chart of bands or cells only anchors crosshair and tooltip at the pointer | R-4.7 | Unit (jsdom scene) |
 | The built-in tooltip, numbers in mono with tabular figures | R-4.8 | Interaction, Manual |
 | A value in its y axis' `tickFormat`, the default without one; with several x axes each point's own x value in its own axis' format | R-4.8 | Unit (jsdom tooltip) |
 | A render prop for one's own content | 4.4 | Screenshot (`configuration`), Manual |
