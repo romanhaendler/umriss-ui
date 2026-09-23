@@ -54,7 +54,7 @@ export interface LimitLineProps extends CommonProps {
 export interface LimitBandProps extends CommonProps {
   /** Lower edge of the band, in domain units of its axis. */
   from: number;
-  /** Upper edge. A band drawn backwards (`from` above `to`) is drawn between
+  /** Upper edge, in domain units of its axis. A band drawn backwards (`from` above `to`) is drawn between
       the two all the same - the pair is a range, not a direction. */
   to: number;
 }

@@ -63,6 +63,8 @@ export interface AreaSeriesConfig<T = unknown> extends SeriesBase<T> {
   /** Opacity of the fill; the outline stays fully opaque. */
   fillOpacity: number;
   strokeWidth: number;
+  /** Dash pattern of the outline. */
+  dash?: readonly number[];
 }
 
 export interface BarSeriesConfig<T = unknown> extends SeriesBase<T> {

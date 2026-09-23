@@ -33,10 +33,17 @@ export interface AreaProps<T> {
   format?: (value: number) => string;
   /** Any CSS colour value; without one the palette --uc-series-N. */
   color?: string;
-  /** Opacity of the fill; the outline stays fully opaque. */
+  /** A role instead of a colour value; the theme resolves it. `color` beats
+      it. */
+  tone?: "ok" | "warning" | "alarm";
+  /** Opacity of the fill, from 0 to 1; the outline stays fully opaque. */
   fillOpacity?: number;
-  /** Width of the outline along the upper edge; 0 leaves it out. */
+  /** Width of the outline along the upper edge in CSS pixels; 0 leaves it
+      out. */
   strokeWidth?: number;
+  /** Dash pattern of the outline as a run of lengths in CSS pixels; without
+      one a solid outline. The fill stays whole. */
+  dash?: readonly number[];
 }
 
 export function Area<T>(props: AreaProps<T>): null {
@@ -50,8 +57,10 @@ export function Area<T>(props: AreaProps<T>): null {
     hidden,
     format,
     color,
+    tone,
     fillOpacity = 0.18,
     strokeWidth = 1.5,
+    dash,
   } = props;
 
   const config = useMemo<AreaSeriesConfig>(
@@ -67,10 +76,12 @@ export function Area<T>(props: AreaProps<T>): null {
         hidden,
         format,
         color,
+        tone,
         fillOpacity,
         strokeWidth,
+        dash,
       }) as AreaSeriesConfig,
-    [accessor, baseline, xAxisId, yAxisId, data, name, hidden, format, color, fillOpacity, strokeWidth],
+    [accessor, baseline, xAxisId, yAxisId, data, name, hidden, format, color, tone, fillOpacity, strokeWidth, dash],
   );
 
   useSeries("Area", config);
