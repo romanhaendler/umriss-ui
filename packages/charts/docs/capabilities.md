@@ -180,6 +180,8 @@ Screenshot pages carry their name in brackets.
 | It pulls its axis' value range, unless it expressly does not want to | R-4.13 | Unit (limits and bands in the scene) |
 | A band takes up both edges; an axis without a series takes its own from its limits | R-4.13 | Unit (limits and bands in the scene) |
 | No limit in the legend | R-4.11 | Unit (limits and bands in the scene) |
+| Without `axisId` the axis its orientation names; an unknown axis is a DEV error, as for a series | R-4.12 | Unit (limit line, scene) |
+| The label of an x limit stands in the row of the tick labels, set as they are | — | Unit (layout) |
 
 ## `ControlChart`
 

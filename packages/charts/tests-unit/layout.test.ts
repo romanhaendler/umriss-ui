@@ -4,6 +4,7 @@
    expected values are exact independently of font and platform. */
 
 import { describe, expect, it, vi } from "vitest";
+import CHARTS_CSS from "../src/styles/charts.css?raw";
 import { toWallClock } from "../src/operatingTime";
 import {
   BAND_GAP,
@@ -405,5 +406,26 @@ describe("computeLayout - ticks and the edge collision", () => {
       hysteresis: new Map(),
     });
     expect(find(layout.axes, "y:y").domain).toEqual([3.4, 96.6]);
+  });
+});
+
+/* charts-fixes 08: "labels of x limits get no band space". A y limit's label
+   stands beside the ticks and is as wide as it is - the band has to widen for
+   it (above). An x limit's label stands in the row of the tick labels, and that
+   row is one tick line high in every x band. So the label fits exactly when it is
+   set as a tick label is - and that is what holds it, rather than a reservation
+   that would add nothing. */
+describe("computeLayout - the label of an x limit", () => {
+  const declarations = (selector: string) => {
+    const body = CHARTS_CSS.split(`${selector} {`)[1]?.split("}")[0] ?? "";
+    const pick = (property: string) => new RegExp(`${property}:\\s*([^;]+);`).exec(body)?.[1];
+    return { fontSize: pick("font-size"), lineHeight: pick("line-height") };
+  };
+
+  it("is set in the tick labels' size and line height, so the tick row holds it", () => {
+    const tick = declarations(".uc-tick-label");
+    expect(tick.fontSize).toBeDefined();
+    expect(tick.lineHeight).toBeDefined();
+    expect(declarations(".uc-limit-label")).toEqual(tick);
   });
 });

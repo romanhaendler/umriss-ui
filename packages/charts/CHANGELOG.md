@@ -83,6 +83,11 @@ From `.scratch/charts-fixes/spec.md`; the findings stand in
   state rendered forever. The accessor is now compared by its source text, the
   origin by its values, and `onViolations` is called only when the violations
   differ in content.
+- **A limit on the x axis finds its axis.** `LimitLine` and `LimitBand` with
+  `orientation="x"` and no `axisId` looked for an axis "y" among the x axes,
+  found none and drew nothing, silently. Without an `axisId` a limit now binds
+  to the axis its orientation names - "x" or "y" - and an unknown `axisId` is a
+  DEV error, as it is for a series.
 
 ---
 
