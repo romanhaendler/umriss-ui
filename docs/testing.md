@@ -264,7 +264,7 @@ jsdom has no `PointerEvent` at all, and no pointer capture either.
   371 to 2338 pixels, which is a ratio of 0.001 to 0.006 against the workspace
   bound of 0.001. The differences sit on the numeric tick labels and along the
   marks. Since the charts-review packages (2026-09-23) the demo has more
-  examples and it is worse: 13 to 24 of the example pictures fail per full run,
+  examples and it is worse: 13 to 30 of the example pictures fail per full run,
   again a different set each time, a whole plot shifted by a fraction of a pixel
   (up to a ratio of 0.01); a picture that fails passes on a repeat.
 
