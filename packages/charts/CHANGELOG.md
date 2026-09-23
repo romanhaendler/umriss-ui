@@ -29,6 +29,22 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## Unreleased – Long courses on a plant screen
+
+From `.scratch/charts-long-series/spec.md`; the decisions stand in
+`.scratch/charts-review/spec.md` (Q12, Q19-Q21, Q24).
+
+### Added
+
+- **`XAxis onDomainChange`**: zoom and pan, controlled. Ctrl or ⌘ with the
+  wheel - and a pinch - zoom around the pointer; a drag, a horizontal wheel or
+  Shift with the wheel pan; a double click proposes the whole data range. The
+  axis only proposes a domain in its own units; the caller passes it back as
+  `domain`, clamped as it likes. Without a handler nothing zooms, and the
+  plain wheel always scrolls the page.
+
+---
+
 ## Unreleased – What a plant screen expects
 
 From `.scratch/charts-essentials/spec.md`; the decisions stand in

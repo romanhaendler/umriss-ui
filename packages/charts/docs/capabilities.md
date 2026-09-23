@@ -80,6 +80,7 @@ Screenshot pages carry their name in brackets.
 | `time`: labels by level in en-GB, 24 h (`15:00`, `17 Mar`, `Mar 2026`), the date on the first tick of a new day; `tickFormat` for any other language | Q15 | Unit (time axis), Screenshot (`time`) |
 | `time` with `domain="nice"`: widened to the step's local boundaries | Q15 | Unit (time axis) |
 | `time` over less than a minute (an axis without data): no ticks | Q18 | Unit (time axis) |
+| `onDomainChange`: Ctrl/⌘ + wheel and a pinch zoom around the pointer, a drag and a horizontal or Shift wheel pan, a double click proposes the data range; without it nothing zooms and the plain wheel stays the page's | Q19 | Interaction (zoom and pan) |
 
 ## The layout engine
 
