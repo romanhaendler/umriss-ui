@@ -68,6 +68,10 @@ From `.scratch/charts-fixes/spec.md`; the findings stand in
   bare "42". A value now takes its y axis' `tickFormat`, and the default only
   without one. A point on another x axis than the header's names its own x
   value, in its own axis' format, beside its name.
+- **An infinity is a gap.** `±Infinity` out of any accessor - y, baseline,
+  a matrix' value, x - entered the extent, which was then no longer finite, and
+  the axis fell back to [0, 1] with every other value pressed against its edge.
+  It is now treated like `null` or `NaN`: a gap, outside the extent.
 
 ---
 
