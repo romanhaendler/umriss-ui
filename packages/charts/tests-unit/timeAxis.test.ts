@@ -134,6 +134,14 @@ describe("computeLayout - a time axis", () => {
     expect(x.format(at(3, 16, 7))).toBe("16. 7:00");
   });
 
+  /* charts-essentials 05: an axis without data stands on [0, 1] - one
+     millisecond of 1970, which has no readable tick. */
+  it("draws no ticks over less than a minute, as on an empty chart", () => {
+    const x = xOf({ time: true, extent: [0, 1] });
+    expect(x.domain).toEqual([0, 1]);
+    expect(x.ticks).toEqual([]);
+  });
+
   it("labels a calendar axis the same way, dd.MM. is gone", () => {
     const calendar = [
       { from: at(3, 16, 6), to: at(3, 16, 22) },

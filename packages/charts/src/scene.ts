@@ -169,6 +169,8 @@ export interface LayoutSnapshot {
   legend: LegendConfig | null;
   series: readonly LegendItem[];
   limits: readonly LimitLabel[];
+  /** No visible series has a point to show. */
+  empty: boolean;
 }
 
 /** One row of the built-in tooltip, written out once per hit. */
@@ -197,6 +199,8 @@ const EMPTY_LAYOUT_SNAPSHOT: LayoutSnapshot = {
   legend: null,
   series: [],
   limits: [],
+  // Unknown before the first frame: saying "No data" there would flash.
+  empty: false,
 };
 
 const EMPTY_HOVER_SNAPSHOT: HoverSnapshot = {
@@ -1939,6 +1943,20 @@ export class ChartScene {
 
   /* ================= Snapshots for the HTML layer ================= */
 
+  /** Does a visible series have a point to show - a y that is no gap, and for
+      a cell a value? A chart without one says so rather than draw an empty
+      frame on [0, 1]. Stops at the first point found. */
+  private showsAPoint(): boolean {
+    for (const entry of this.series.values()) {
+      const mat = entry.materialized;
+      if (mat === null || entry.config.hidden === true) continue;
+      for (let i = 0; i < mat.length; i++) {
+        if (!Number.isNaN(mat.y[i] as number) && (mat.w === null || Number.isFinite(mat.w[i] as number))) return true;
+      }
+    }
+    return false;
+  }
+
   private pushLayoutSnapshot(): void {
     this.layoutSnapshot = {
       version: this.layoutSnapshot.version + 1,
@@ -1946,6 +1964,7 @@ export class ChartScene {
       legend: this.legend,
       series: this.legendItems(),
       limits: this.limitLabels(),
+      empty: !this.showsAPoint(),
     };
     for (const notify of this.layoutSubscribers) notify();
   }

@@ -23,6 +23,7 @@ import { niceDomain, dataDomain, tickStep, ticksFor } from "./ticks";
 import {
   breaks as calendarBreaks,
   calendarFrom,
+  MINUTE,
   toOperatingTime,
   toWallClock,
 } from "./operatingTime";
@@ -152,6 +153,12 @@ function calendarOf(axis: AxisInput): readonly OperatingInterval[] | undefined {
   return axis.calendar !== undefined && axis.calendar.length > 0 ? axis.calendar : undefined;
 }
 
+/** Does a time axis span its smallest step? Less - the [0, 1] of an axis
+    without data, a millisecond of 1970 - has no tick worth a label. */
+function readable(domain: readonly [number, number]): boolean {
+  return domain[1] - domain[0] >= MINUTE;
+}
+
 /** The readable step of a time axis over its domain. */
 function stepOf(domain: readonly [number, number], tickCount: number) {
   return timeStepFor(domain[1] - domain[0], tickCount);
@@ -174,9 +181,11 @@ function domainOf(
   // the extent, not the round number.
   if (calendarOf(axis) !== undefined) return dataDomain(min, max);
   if (mode === "data") return dataDomain(min, max);
-  // "Nice" on a time axis is the step's local boundary, not a round number of
-  // milliseconds.
-  if (axis.time === true && max > min) return timeDomain(min, max, stepOf([min, max], tickCount));
+  if (axis.time === true) {
+    // "Nice" on a time axis is the step's local boundary, not a round number of
+    // milliseconds - where there is a step to speak of.
+    return readable([min, max]) ? timeDomain(min, max, stepOf([min, max], tickCount)) : dataDomain(min, max);
+  }
   return niceDomain(min, max, tickCount);
 }
 
@@ -210,7 +219,7 @@ function tickValuesFor(
     }
     return values;
   }
-  if (axis.time === true) return timeTicks(domain[0], domain[1], stepOf(domain, tickCount));
+  if (axis.time === true) return readable(domain) ? timeTicks(domain[0], domain[1], stepOf(domain, tickCount)) : [];
   return ticksFor(domain[0], domain[1], tickCount);
 }
 
