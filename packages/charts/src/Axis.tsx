@@ -36,6 +36,12 @@ export interface XAxisProps<T> extends CommonProps<T> {
   /** Which edge the axis stands at. A second x axis on the opposite edge is how
       a series counts in a unit of its own. */
   position?: "bottom" | "top";
+  /** The values are instants (milliseconds since the epoch): ticks on local
+      boundaries from the minute to the month, labels by level in en-GB with a
+      24-hour clock - `15:00`, `17 Mar`, `Mar 2026` - and the date on the first
+      tick of a new day (`17 Mar 00:00`). Another language is a `tickFormat`,
+      which is handed the instant. `calendar` implies it. */
+  time?: boolean;
   /** Operating calendar: the intervals in which time counts. With it the axis
       stands in operating time - weekends and night shifts are out, and every
       removed span gets a break mark. The scale stays affine; the mapping happens
@@ -60,6 +66,7 @@ export function XAxis<T>(props: XAxisProps<T>): null {
     domain = "nice",
     grid,
     ticks,
+    time,
     calendar,
   } = props;
 
@@ -76,9 +83,10 @@ export function XAxis<T>(props: XAxisProps<T>): null {
         domain,
         grid,
         ticks,
+        time,
         calendar,
       }) as AxisConfig,
-    [id, position, accessor, label, tickCount, tickFormat, domain, grid, ticks, calendar],
+    [id, position, accessor, label, tickCount, tickFormat, domain, grid, ticks, time, calendar],
   );
 
   useAxis("XAxis", config);

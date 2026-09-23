@@ -29,6 +29,30 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## Unreleased – What a plant screen expects
+
+From `.scratch/charts-essentials/spec.md`; the decisions stand in
+`.scratch/charts-review/spec.md` (Q11, Q13, Q15-Q18, Q22).
+
+### Changed
+
+- **The operating-time axis labels in en-GB by level.** Without a
+  `tickFormat` it wrote every tick as `dd.MM. HH:mm`; it now labels as the
+  time axis does - `15:00`, and the date on the first tick of a new day,
+  `17 Mar 06:00` - and the tooltip's x value as `17 Mar 15:23`. Its ticks
+  stand on the same local boundaries, across a clock change too.
+
+### Added
+
+- **`XAxis time`**: the values are instants. Ticks on local boundaries from
+  the minute to the month, labels by level in en-GB with a 24-hour clock -
+  `15:00`, `17 Mar`, `Mar 2026` - and the date on the first tick of a new
+  day. `domain="nice"` widens to the step's boundaries. A `tickFormat` is
+  handed the instant, which is how the axis speaks German. `calendar` implies
+  `time`.
+
+---
+
 ## Unreleased – The charts, corrected
 
 From `.scratch/charts-fixes/spec.md`; the findings stand in

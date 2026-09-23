@@ -493,6 +493,29 @@ export function furnaces(seed: number): FurnacePoint[] {
   return points;
 }
 
+export interface HallPoint {
+  t: number;
+  /** Hall temperature in °C. */
+  temperature: number;
+}
+
+/** A day of hall temperature from Monday noon, every quarter hour - warm while
+    the ovens run, cooling through the night. Crosses midnight on purpose. */
+export function hallTemperature(seed: number): HallPoint[] {
+  const r = random(seed);
+  const start = WEEK_START + 12 * HOUR_MS;
+  const points: HallPoint[] = [];
+  let temperature = 24;
+  for (let i = 0; i <= 24 * 4; i++) {
+    const t = start + i * 15 * 60_000;
+    const hour = new Date(t).getHours();
+    const target = hour >= 6 && hour < 22 ? 25 : 18;
+    temperature += (target - temperature) * 0.08 + (r() - 0.5) * 0.4;
+    points.push({ t, temperature });
+  }
+  return points;
+}
+
 /* ---------------------------------------------------------------------------
    The series the examples show.
 
@@ -518,3 +541,4 @@ export const outputData = planAndActual(1017);
 export const thicknessData = wallThickness(88, 36);
 export const weightData = fillWeights(4040, 97, 9);
 export const furnaceData = furnaces(2718);
+export const hallData = hallTemperature(1603);
