@@ -116,14 +116,14 @@ Screenshot pages carry their name in brackets.
 | The step width = the smallest X distance | ADR-0002 | Unit (bars) |
 | Uneven distances: the smallest gap applies | ADR-0002 | Unit (bars) |
 | One point / all X values equal: a substitute from the value range | ADR-0002 | Unit (bars) |
-| `barWidth` as a fraction of the step width | 4.3 | Unit (bars), Screenshot (`mixed`) |
-| Bars on the same X axis stand side by side | ADR-0002 | Unit (bars), Screenshot (`mixed`) |
+| `barWidth` as a fraction of the step width | 4.3 | Unit (bars), Screenshot (`mixed`, `grouped`) |
+| Bars on the same X axis stand side by side | ADR-0002 | Unit (bars), Screenshot (`mixed`, `grouped`) |
 | A group shares the step width and the width fraction | ADR-0002 | Unit (bars) |
 | Different `barWidth` within a group: DEV warning | ADR-0002 | Unit (scene) |
 | The group as a whole centred on the X value | ADR-0002 | Unit (bars) |
 | Grouping in registration order | R-2.1 | Unit (bars) |
 | Bars on other X axes do not count towards the group | ADR-0002 | Unit (bars) |
-| The foot at 0, with 0 inside the Y axis' value range | R-4.13 | Unit (scene) |
+| The foot at 0, with 0 inside the Y axis' value range; negative values hang below it | R-4.13 | Unit (scene), Screenshot (`deviation`) |
 | Half a step width left and right inside the X value range | ADR-0002 | Unit (scene), Screenshot (`mixed`) |
 | One `Path2D`, one `fill()` per series | R-2.12 | Manual (benchmark) |
 | A gap leaves its bar out | R-2.5 | Screenshot (`mixed`) |
@@ -133,8 +133,9 @@ Screenshot pages carry their name in brackets.
 
 | Capability | Rule | Proved at |
 |---|---|---|
-| Points without a connecting path | 4.3 | Screenshot (`mixed`) |
-| `radius` | 4.3 | Screenshot (`mixed`) |
+| Points without a connecting path | 4.3 | Screenshot (`mixed`, `measurements`) |
+| `radius` | 4.3 | Screenshot (`measurements`, `over-a-course`) |
+| `tone`: a role the theme resolves, not a colour value | 4.3 | Screenshot (`over-a-course`, light and dark) |
 | One `Path2D`, one `fill()` per series | R-2.12 | Manual (benchmark) |
 | A gap leaves its point out | R-2.5 | Screenshot (`mixed`) |
 | Deliberately without the line's marker policy | — | type check |
