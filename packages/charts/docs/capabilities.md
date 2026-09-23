@@ -148,10 +148,11 @@ Screenshot pages carry their name in brackets.
 | A segment from one point to the next, the last to the end of the domain | — | Unit (state) |
 | A hit: the segment under the pointer; a boundary belongs to the segment that begins there | R-4.6 | Unit (state) |
 | A gap interrupts the band without changing the segments beside it | R-2.5 | Unit (state) |
-| The track in the Y axis' domain units; it does not pull its axis | — | Unit (limits and bands in the scene), Interaction (every track answers for itself) |
-| The legend explains states, not series | R-4.11 | Unit (limits and bands in the scene) |
+| The track in the Y axis' domain units; it does not pull its axis | — | Unit (limits and bands in the scene), Interaction (every track answers for itself), Screenshot (`under-a-course`) |
+| Without `laneFrom`/`laneTo` the band fills its Y axis' whole domain | — | Screenshot (`shift`) |
+| The legend explains states, not series | R-4.11 | Unit (limits and bands in the scene), Screenshot (`shift`) |
 | The tooltip names the state, not its code | R-4.8 | Interaction |
-| Rendering in light and dark | — | Screenshot (`limits-and-state`) |
+| Rendering in light and dark | — | Screenshot (`limits-and-state`, `shift`, `under-a-course`) |
 
 ## `Matrix`
 

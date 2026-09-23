@@ -92,6 +92,16 @@ while the five pages got their examples. Not worked around in the examples.
     legend chip, a CSS `background`, resolves it. So the grouped bar example
     gives the plan a literal (`#94a3b8`) that is merely acceptable in both
     schemes. Resolve `color` through `resolveColours` like the palette.
+16. A state band's last segment runs to the end of the x domain
+    (`src/state.ts:52`, on purpose: the current state is the one read first).
+    With the default `domain="nice"` that end is a rounding of the axis, not a
+    moment: in the StateBand examples the last report is at 21:45 and the band
+    claims "Maintenance" until 23:26, beside a temperature line that stops at
+    21:45. With `domain="data"` the last segment has width 0 and is not drawn at
+    all. Neither is what the page says - a state is known for as long as it was
+    reported. Candidates: end the last segment one measured step after its
+    point, or at an explicit `until` (default: the last x value of the chart's
+    data), never at the padding.
 
 ### API inconsistencies
 
