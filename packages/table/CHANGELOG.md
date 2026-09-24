@@ -22,6 +22,18 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## Unreleased
+
+### Changed
+
+- **The glyphs keep core's one stroke width** (1.4 per 10 units): the sort
+  arrow, the sortable indicator, the column reordering's arrows and the group
+  fold are a shade lighter, the fold drawn in the nominal box. The row
+  expander is core's `AngleGlyph`. The sort arrow and indicator are now
+  `aria-hidden` themselves, not only through their container.
+
+---
+
 ## 0.3.1 – The focus survives a fold (Sep. 2026)
 
 ### Fixed

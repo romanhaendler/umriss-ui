@@ -143,7 +143,7 @@ The table and the alarm list are not part of this package. They live in
 | `TreeView` / `TreeSearch` / `useTree` | a tree with exactly one active node and optional ticking (cascade, indeterminate, locked, unloaded); arrow keys, type to jump, range selection, virtualisation. The search keeps its term in the tree |
 | `Stat` | a metric: one value, read against its limits – the verdict as a word and a colour, the deviation from the target value, history and freshness |
 | `CommandPalette` / `useCommandPaletteShortcut` | a command palette: subsequence search with rank and highlighted finds, groups, a populated resting state; opens on Ctrl/⌘+K and `/` |
-| `CrossGlyph` / `PlusGlyph` / `MinusGlyph` / `GripGlyph` / `GridGlyph` / `MeasureGlyph` / `AngleGlyph` | the shared character set; specification and list of deviations in `docs/glyphs.md` |
+| `CrossGlyph` / `PlusGlyph` / `MinusGlyph` / `AngleGlyph` / `CalendarGlyph` / `ClockGlyph` / `GripGlyph` / `GridGlyph` / `MeasureGlyph` | the shared character set, one stroke width at one nominal size; specification in `docs/glyphs.md` |
 | `Sparkline` | a miniature history line with an area gradient and an accent end point – for trends in cells |
 | `Spinner` | a functional loading indicator |
 

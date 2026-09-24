@@ -16,6 +16,7 @@ import type { HTMLAttributes, KeyboardEvent as ReactKeyboardEvent, ReactNode } f
 import { cx } from "../../lib/cx";
 import styles from "./Tag.module.css";
 import { useWording } from "../../lib/language";
+import { CrossGlyph } from "../../lib/glyphs";
 
 export type TagTone = "neutral" | "accent" | "success" | "warning" | "danger";
 
@@ -224,15 +225,7 @@ export const Tag = forwardRef<HTMLSpanElement, TagProps>(function Tag(
             removeWithFocus(event.currentTarget.closest("[data-tag]") as HTMLElement | null);
           }}
         >
-          <svg viewBox="0 0 10 10" width="8" height="8" aria-hidden="true">
-            <path
-              d="M1.6 1.6l6.8 6.8M8.4 1.6L1.6 8.4"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-            />
-          </svg>
+          <CrossGlyph size={8} />
         </button>
       )}
     </span>

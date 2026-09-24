@@ -14,6 +14,7 @@ import type { HTMLAttributes, ReactNode } from "react";
 import { cx } from "../../lib/cx";
 import styles from "./Alert.module.css";
 import { useWording } from "../../lib/language";
+import { CrossGlyph } from "../../lib/glyphs";
 import { roleFromTone } from "../../lib/roleFromTone";
 
 export type AlertTone = "neutral" | "accent" | "success" | "warning" | "danger";
@@ -56,15 +57,7 @@ export const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
       </div>
       {onDismiss && (
         <button type="button" aria-label={dismissLabel ?? wording.closeToast} className={styles.close} onClick={onDismiss}>
-          <svg viewBox="0 0 10 10" width="9" height="9" aria-hidden="true">
-            <path
-              d="M1.6 1.6l6.8 6.8M8.4 1.6L1.6 8.4"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-          </svg>
+          <CrossGlyph />
         </button>
       )}
     </div>
