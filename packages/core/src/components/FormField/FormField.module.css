@@ -18,7 +18,7 @@
 
   .required {
     margin-left: 2px;
-    color: var(--u-color-danger);
+    color: var(--u-color-danger-text);
   }
 
   .message {
@@ -32,7 +32,7 @@
   }
 
   .error {
-    color: var(--u-color-danger);
+    color: var(--u-color-danger-text);
     font-weight: var(--u-weight-medium);
   }
 }
