@@ -1,6 +1,6 @@
 {
   "name": "@umriss-ui/schedule",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "The umriss schedule - subtasks on lanes over time, with transports, findings and controlled editing.",
   "license": "MIT",
   "author": "Roman Händler",

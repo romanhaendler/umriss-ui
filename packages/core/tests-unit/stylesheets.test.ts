@@ -374,8 +374,6 @@ const CANON_EXCEPTIONS: Readonly<Record<string, string>> = {
   "core/VisuallyHidden/VisuallyHidden.module.css: .focusable:focus":
     "The skip link: invisible until focused, and focus is what makes it appear as a whole - surface, type and shadow. The ring alone would ring nothing.",
   "core/VisuallyHidden/VisuallyHidden.module.css: .focusable:focus-within": "The same skip link, reached through a focusable child.",
-  "table/Table.module.css: .virtualRow:focus-visible":
-    "The ring's colour and width as an inset outline: a row's outer shadow is cut away left and right by the scroll area it fills, and a <tr> does not paint a box-shadow in every engine.",
   "core/TreeView/TreeView.module.css: .disabled":
     "The row is not disabled, only its checkbox is: the row stays focusable and navigable, and opacity would fade its focus ring with it. The type is muted instead; the checkbox dims by its own disabled state.",
 };
