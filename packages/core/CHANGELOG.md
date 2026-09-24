@@ -47,6 +47,7 @@ commit.
   `forwardRef` components, so the ref also arrives under React 18.
 - **`Tabs` work uncontrolled**: `defaultValue` names the first tab, and the
   tabs switch on their own; `value` and `onChange` are both optional now.
+  Without either, every tab is a tab stop until one is chosen.
 - **`Card` can be controlled**: `collapsed` folds it from outside, and
   `onCollapsedChange` reports the header's button - controlled, the card
   folds once `collapsed` follows; beside `defaultCollapsed` it is a message.
@@ -54,13 +55,17 @@ commit.
 ### Changed
 
 - **What `...rest` may not override.** `Stat` keeps its role and the name it
-  has read, `Meter` its role and `aria-value*`, `Spinner` and `TreeView` their
-  role, even where a caller passes the same attribute. A caller's
-  `aria-label` still names a `Meter` or a `Spinner`.
-- **A caller's handler runs first and can prevent the component's own** on
-  the components that take `...rest` new: `onCancel` and `onMouseDown` of
-  `Modal` and `CommandPalette` (a `preventDefault` keeps the window standing),
-  `onClick` and `onKeyDown` of `MultiSelect`'s field.
+  has read, `Meter` its role and `aria-value*`, `Spinner`, `TreeView`,
+  `TabList`, `TabPanel` and `MenuItem` their role, `Tab` its role, ids and
+  tab stop, even where a caller passes the same attribute. A caller's
+  `aria-label` still names a `Meter`, a `Spinner`, a `Modal` or the
+  `CommandPalette`.
+- **A caller's handler runs first and can prevent the component's own**:
+  `onCancel` and `onMouseDown` of `Modal` and `CommandPalette` (a
+  `preventDefault` keeps the window standing), `onKeyDown` of `Combobox` and
+  `CommandPalette` (heard in the capture phase, before the field inside),
+  `onClick` and `onKeyDown` of `MultiSelect`'s field, and `onClick` of `Tab`
+  and `MenuItem`, which ran first before but could not prevent.
 
 ---
 

@@ -121,7 +121,19 @@ interface FindGroup {
 }
 
 export const CommandPalette = forwardRef<HTMLDialogElement, CommandPaletteProps>(function CommandPalette(
-  { open, onClose, items, onChoose, restingItems, className, onCancel, onMouseDown, ...rest },
+  {
+    open,
+    onClose,
+    items,
+    onChoose,
+    restingItems,
+    className,
+    onCancel,
+    onMouseDown,
+    onKeyDown: callerKeyDown,
+    onKeyDownCapture,
+    ...rest
+  },
   ref,
 ) {
   const wording = useWording();
@@ -311,7 +323,7 @@ export const CommandPalette = forwardRef<HTMLDialogElement, CommandPaletteProps>
 
   const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     // An input method's own keys (Enter ends the composition) are not ours.
-    if (event.nativeEvent.isComposing) return;
+    if (event.nativeEvent.isComposing || event.defaultPrevented) return;
     if (event.key === "ArrowDown") {
       event.preventDefault();
       move(1);
@@ -353,7 +365,13 @@ export const CommandPalette = forwardRef<HTMLDialogElement, CommandPaletteProps>
       aria-label={wording.palettePanel}
       {...rest}
       /* After `rest` and composed with the caller's, as in `Modal` (P3 of
-         core-passthrough). */
+         core-passthrough). The caller's `onKeyDown` listens in the capture
+         phase, as in `Combobox`: the keys land on the field inside, whose
+         handler would otherwise run first. */
+      onKeyDownCapture={(event) => {
+        onKeyDownCapture?.(event);
+        callerKeyDown?.(event);
+      }}
       onClose={() => {
         /* Reports only a close the browser triggered - every gesture of its own
            has already called `onClose`. */

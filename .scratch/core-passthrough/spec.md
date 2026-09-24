@@ -62,3 +62,13 @@ which is what P1 means; `Checkbox`, `NumberInput`, `Select` and `SplitButton`
 keep their earlier split (class on the wrapper, ref and rest on the control)
 and stand in the guard with their reason. No DOM structure changed, and core's
 screenshot and own-base suites are green without a moved baseline.
+
+A two-axis review afterwards found P3 incomplete where keys land on a control
+inside the root: `Combobox` and `CommandPalette` now hear a caller's
+`onKeyDown` in the capture phase, so it runs first and can prevent; `Tab` and
+`MenuItem` honour a prevented `onClick`, and the Tabs and Menu parts keep
+their roles after `rest`. Uncontrolled `Tabs` without `defaultValue` keep
+every tab a tab stop until one is chosen. Left as they are, deliberately: a
+default name (`Modal`'s `aria-labelledby`, the palette's and `Spinner`'s
+`aria-label`) stays replaceable by a caller, and `mergeRefs` makes a new
+callback per render, as the hand-written copies it replaced did.

@@ -462,7 +462,8 @@ export const MultiSelect = forwardRef(function MultiSelect<T extends string = st
               </div>
           </div>
       </Popover>
-    </>  );
+    </>
+  );
 }) as <T extends string = string>(
   props: MultiSelectProps<T> & { ref?: ForwardedRef<HTMLDivElement> },
 ) => ReactElement;
