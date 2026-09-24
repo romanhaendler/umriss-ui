@@ -12,7 +12,7 @@
     font-size: var(--u-text-xs);
     font-weight: var(--u-weight-medium);
     letter-spacing: 0.01em;
-    line-height: 1;
+    line-height: var(--u-leading-none);
     white-space: nowrap;
   }
 

@@ -23,7 +23,7 @@
     border-radius: var(--u-radius-sm);
     font-size: var(--u-text-xs);
     font-weight: var(--u-weight-medium);
-    line-height: 1;
+    line-height: var(--u-leading-none);
     white-space: nowrap;
     transition: box-shadow var(--u-transition);
   }

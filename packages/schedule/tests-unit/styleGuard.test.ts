@@ -1,6 +1,10 @@
 /* The stylesheets of @umriss-ui/schedule read tokens instead of copying them out -
    the same rules as `packages/core/tests-unit/stylesheets.test.ts`, which there
-   reads only the modules of @umriss-ui/core. What is read is the text. */
+   reads only the modules of @umriss-ui/core. What is read is the text.
+
+   Colours, type, motion, radii and shadows are not checked here: the
+   vocabulary check in that same file reads the stylesheets of every package
+   (visuelle-wertigkeit 01). */
 
 import { describe, expect, it } from "vitest";
 import { LAYER_ORDER, offendersIn } from "../../../scripts/styles/rules.ts";
@@ -15,24 +19,6 @@ const entries = () => Object.entries(STYLES).map(([path, text]) => [path.replace
 
 const withoutComments = (css: string) => css.replace(/\/\*[\s\S]*?\*\//g, "");
 
-function withoutReducedMotion(css: string): string {
-  let rest = css;
-  for (let start = rest.search(/@media\s*\(prefers-reduced-motion:\s*reduce\)/); start !== -1; ) {
-    let depth = 0;
-    let end = rest.indexOf("{", start);
-    for (; end < rest.length; end++) {
-      if (rest[end] === "{") depth++;
-      if (rest[end] === "}" && --depth === 0) break;
-    }
-    rest = rest.slice(0, start) + rest.slice(end + 1);
-    start = rest.search(/@media\s*\(prefers-reduced-motion:\s*reduce\)/);
-  }
-  return rest;
-}
-
-/** Raw durations that may stay, as "file: value" - each one with a reason. */
-const ALLOWED_DURATIONS: Readonly<Record<string, string>> = {};
-
 describe("Stylesheets of @umriss-ui/schedule (ADR-0021)", () => {
   it("begin with the layer order and keep every rule inside a layer of the library", () => {
     const offenders = entries().flatMap(([file, text]) => [
@@ -46,30 +32,6 @@ describe("Stylesheets of @umriss-ui/schedule (ADR-0021)", () => {
 describe("Stylesheets of @umriss-ui/schedule", () => {
   it("find any stylesheets at all", () => {
     expect(entries().length).toBeGreaterThan(0);
-  });
-
-  it("write no colour value by hand", () => {
-    const found = entries().flatMap(([file, css]) =>
-      [...withoutComments(css).matchAll(/#[0-9a-fA-F]{3,8}\b|\b(?:rgba?|hsla?)\(/g)].map((t) => `${file}: ${t[0]}`),
-    );
-    expect(found).toEqual([]);
-  });
-
-  it("write no duration by hand, except the named ones", () => {
-    const found = entries().flatMap(([file, css]) =>
-      [...withoutReducedMotion(withoutComments(css)).matchAll(/(?<![\w.-])\d*\.?\d+m?s\b/g)]
-        .map((t) => `${file}: ${t[0]}`)
-        .filter((hit) => !(hit in ALLOWED_DURATIONS)),
-    );
-    expect(found).toEqual([]);
-  });
-
-  it("still carries every allowed duration, and each one with a reason", () => {
-    for (const [hit, reason] of Object.entries(ALLOWED_DURATIONS)) {
-      const [file, value] = hit.split(": ") as [string, string];
-      expect(withoutComments(STYLES[`../src/${file}`] ?? ""), `${hit} is stale`).toContain(value);
-      expect(reason.length).toBeGreaterThan(20);
-    }
   });
 
   it("declare no variable that is named like a token", () => {

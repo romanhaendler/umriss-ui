@@ -97,7 +97,17 @@
     --u-text-lg: 1rem;
     --u-text-xl: 1.1875rem;
     --u-text-2xl: 1.5rem;
+    /* Figures in Geist Mono inside a control or a cell, beside --u-text-sm set
+       in Sans. The mono cut runs wider and taller, so one step down reads as
+       the same size. It stood as 0.75rem in eight places - the date picker's
+       value, days and time fields, the numeric field and input, the table's
+       numeric cells - which is a role, not a coincidence (visuelle-wertigkeit
+       01). */
+    --u-text-mono: 0.75rem;
 
+    /* A box as tall as its type: a badge, a tag, a count, a glyph. The height
+       comes from the control or the padding, and the line adds no leading. */
+    --u-leading-none: 1;
     --u-leading-tight: 1.3;
     --u-leading-normal: 1.5;
 

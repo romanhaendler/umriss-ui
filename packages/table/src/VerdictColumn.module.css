@@ -12,7 +12,7 @@
 
   .glyph {
     font-size: 0.7em;
-    line-height: 1;
+    line-height: var(--u-leading-none);
   }
 
   .verdict[data-verdict="ok"] .glyph {
