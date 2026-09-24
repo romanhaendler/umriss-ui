@@ -44,23 +44,34 @@ export type AggregateFor<W, Z> =
   | (IsDisplayable<W> extends true ? "count" | "distinct" : never)
   | AggregateFunction<W, Z>;
 
+/** What a column's values come to - the props a column carries for it. */
+export interface AggregateOptions<W, Z> {
+  /** What the column's values come to: in the footer over the filtered set,
+      in a group's band over its rows. `"sum"`, `"avg"` for numbers; `"min"`,
+      `"max"` for numbers and points in time; `"range"` for points in time;
+      `"count"`, `"distinct"` for every value with a text form - or a function
+      of one's own. Always from the values, never from other aggregates; absent
+      values count towards nothing. */
+  aggregate?: AggregateFor<W, Z>;
+  /** The share bar under a sum in a group's band – the group's share of the
+      filtered set's sum. On by default. */
+  share?: boolean;
+}
+
 /** `aggregate`, or its old name `footer` - never both. */
 type AggregateProps<W, Z> =
-  | {
-      /** What the column's values come to: in the footer over the filtered
-          set, in a group's header over its rows. Always from the values, never
-          from other aggregates; absent values count towards nothing. */
-      aggregate?: AggregateFor<W, Z>;
+  | (AggregateOptions<W, Z> & {
+      /** The old name of `aggregate` – not together with it. */
       footer?: never;
-      /** The share bar under a sum in a group header; on by default. */
-      share?: boolean;
-    }
+    })
   | {
+      /** Not together with `footer`, its old name. */
       aggregate?: never;
       /** @deprecated Is called `aggregate` now – the same values, and in a
           grouped table the group's as well. The old name goes with the next
           minor version. */
       footer?: FooterFor<W>;
+      /** The share bar under a sum in a group's band. */
       share?: boolean;
     };
 
@@ -483,7 +494,9 @@ export interface TableSnapshot<Z> {
   folded: readonly string[];
   /** Folds a group or unfolds it. A group of one row does not fold. */
   toggleFold: (path: string) => void;
+  /** Folds every group that has more than one row. */
   foldAll: () => void;
+  /** Unfolds every group. */
   unfoldAll: () => void;
   /** The part of the state an application can keep; whatever is at its default is absent. */
   view: TableView;

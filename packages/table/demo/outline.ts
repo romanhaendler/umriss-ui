@@ -62,6 +62,27 @@ export const OUTLINE: readonly Rubric[] = [
     ],
   },
   {
+    id: "grouping",
+    name: "Grouping",
+    sentence: "What rows have in common, read at a glance: groups on up to three levels, and what their values come to.",
+    pages: [
+      {
+        id: "grouping",
+        name: "Grouping",
+        sentence: "Group a table by a column or by a value that is none - bands for the outer levels, a span for the innermost, one line when folded.",
+        types: ["GroupByBase"],
+        exports: ["useTable"],
+      },
+      {
+        id: "aggregate",
+        name: "Aggregate",
+        sentence: "What a column's values come to - in the footer over the filtered set, in a group's band over its rows.",
+        types: ["AggregateOptions"],
+        exports: ["useTable"],
+      },
+    ],
+  },
+  {
     id: "rows",
     name: "Rows",
     sentence: "What hangs on a row without being a column: the detail beneath it and the actions beside it.",

@@ -659,6 +659,193 @@
     color: var(--u-color-text-muted);
   }
 
+  /* ---- Grouped body (table-grouping 04, ADR-0029) ----------------------
+     The relations come from the prototype and bind (spec, "How it looks"):
+     a band is exactly one row high - the row's padding, nothing more; every
+     level has one fold slot of 20 px, so that the text of every level starts
+     on one vertical; and a line is only as strong as the boundary it draws. */
+
+  /* A header band: the sunken tone across the full width. Its only line is
+     the strong one above it; its own edge is its boundary below. */
+  .groupHeader > .td {
+    background: var(--u-color-surface-sunken);
+    border-top: 1px solid var(--u-hairline-strong);
+    border-bottom: none;
+    font-weight: var(--u-weight-medium);
+  }
+
+  .table tbody tr.groupHeader:first-child > .td {
+    border-top: none;
+  }
+
+  /* Under a sticky header the bands stick as well, each level below the one
+     above it; the heights come from the table (parts.tsx, `--u-table-head` and
+     `--u-table-band`). */
+  .sticky tbody tr.groupHeader > .td {
+    position: sticky;
+    top: calc(var(--u-table-head, 0px) + var(--u-band-level, 0) * var(--u-table-band, 0px));
+    z-index: 1;
+  }
+
+  /* The span's value stays in view while its group scrolls, and the next
+     group's first row lays itself over it. */
+  .sticky tbody tr[data-group-first] > .spanCell {
+    position: sticky;
+    top: calc(var(--u-table-head, 0px) + var(--u-band-levels, 0) * var(--u-table-band, 0px));
+  }
+
+  .table tbody tr.groupHeader:hover > .td {
+    background: var(--u-color-surface-sunken);
+  }
+
+  /* A span group begins with the strong hairline across the full width -
+     except right under a band, whose edge is boundary enough. */
+  .table tbody tr[data-group-first] > .td {
+    border-top: 1px solid var(--u-hairline-strong);
+  }
+
+  /* The row before a band gives up its own line: the band's is the boundary. */
+  .table tbody tr:has(+ tr.groupHeader) > .td {
+    border-bottom: none;
+  }
+
+  .table tbody tr.groupHeader + tr[data-group-first] > .td,
+  .table tbody tr[data-group-first]:first-child > .td {
+    border-top: none;
+  }
+
+  /* The span: the group's value beside its rows. It belongs to the group, not
+     to the row - hover lights the row, not the span. */
+  .spanCell {
+    vertical-align: top;
+    font-weight: var(--u-weight-medium);
+    border-bottom: none;
+    box-shadow: inset -1px 0 0 var(--u-hairline);
+  }
+
+  .table tbody tr:hover > .spanCell {
+    background: var(--u-color-surface);
+  }
+
+  .table tbody tr.groupFolded:hover > .spanCell {
+    background: var(--u-color-surface-sunken);
+  }
+
+  .spanValue,
+  .groupLabel {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+  }
+
+  .spanText,
+  .groupValue {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .groupCount {
+    flex: none;
+    margin-left: 6px;
+    font-family: var(--u-font-mono);
+    font-size: 0.6875rem;
+    font-weight: var(--u-weight-regular);
+    font-variant-numeric: tabular-nums;
+    color: var(--u-color-text-muted);
+  }
+
+  /* In the span the count stands right, apart from the value. */
+  .spanValue > .groupCount {
+    margin-left: auto;
+    padding-left: var(--u-space-2);
+  }
+
+  .continued {
+    margin-left: var(--u-space-2);
+    font-size: var(--u-text-xs);
+    font-weight: var(--u-weight-regular);
+    color: var(--u-color-text-muted);
+  }
+
+  /* One fold slot of 20 px on every level: the button, or the empty slot of a
+     group of one row. */
+  .fold,
+  .foldSlot {
+    flex: none;
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+  }
+
+  .foldSlot {
+    display: inline-block;
+  }
+
+  .fold {
+    display: inline-grid;
+    place-items: center;
+    padding: 0;
+    border: none;
+    border-radius: var(--u-radius-xs);
+    background: none;
+    color: var(--u-color-text-secondary);
+    cursor: pointer;
+    transition:
+      color var(--u-transition),
+      background-color var(--u-transition);
+  }
+
+  .fold:hover {
+    color: var(--u-color-text);
+    background: color-mix(in srgb, var(--u-color-text) 8%, transparent);
+  }
+
+  .fold:focus-visible {
+    outline: none;
+    box-shadow: var(--u-focus-ring);
+  }
+
+  .fold svg {
+    transition: transform var(--u-duration-fast) var(--u-ease-out);
+  }
+
+  .foldClosed svg {
+    transform: rotate(-90deg);
+  }
+
+  /* A folded span: the group's aggregates in their columns, the count of its
+     rows muted where the first text column stands. */
+  .groupFolded > .td {
+    font-weight: var(--u-weight-medium);
+  }
+
+  .foldedCount.foldedCount {
+    font-weight: var(--u-weight-regular);
+    color: var(--u-color-text-muted);
+  }
+
+  .aggregateCell {
+    position: relative;
+  }
+
+  /* The share bar hangs from the cell's lower edge and costs no height: the
+     group's share of the filtered set's sum, at most 64 px of ink. */
+  .shareBar {
+    position: absolute;
+    right: var(--u-space-2);
+    bottom: 3px;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--u-color-text);
+    opacity: 0.35;
+  }
+
+  .td:last-child > .shareBar {
+    right: var(--u-space-3);
+  }
+
   /* ---- Row detail ------------------------------------------------------ */
 
   .expander {
