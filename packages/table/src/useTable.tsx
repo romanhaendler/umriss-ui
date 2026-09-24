@@ -295,6 +295,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
   };
   const toggleFold = (path: string) => {
     if (!foldablePaths(b.groups).includes(path)) return;
+    registry.noteFocusBeforeFold();
     setFoldedState((old) => (old.includes(path) ? old.filter((p) => p !== path) : [...old, path]));
   };
 
@@ -330,8 +331,14 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     setGrouping,
     folded,
     toggleFold,
-    foldAll: () => setFoldedState(foldablePaths(b.groups)),
-    unfoldAll: () => setFoldedState([]),
+    foldAll: () => {
+      registry.noteFocusBeforeFold();
+      setFoldedState(foldablePaths(b.groups));
+    },
+    unfoldAll: () => {
+      registry.noteFocusBeforeFold();
+      setFoldedState([]);
+    },
     asCsv: () => csvOf(registry),
     virtual: options.virtual !== undefined,
   };

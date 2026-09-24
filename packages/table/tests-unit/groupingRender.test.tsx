@@ -237,3 +237,45 @@ describe("one level (ADR-0029, Q27)", () => {
     expect(lines(container)[1]!.cells[0]!.textContent).toBe("A-1041");
   });
 });
+
+describe("the focus survives a fold (table-grouping 05)", () => {
+  const fold = (name: string) => screen.getByRole("button", { name });
+  const box = (id: string) => screen.getByRole("checkbox", { name: `Select ${id}` });
+
+  it("hands the focus of a row an outer fold hides to that group's fold", () => {
+    render(<Orders selectable />);
+    box("A-1044").focus();
+    fireEvent.click(fold("Fold Line 1, 6"));
+    expect(document.activeElement).toBe(fold("Unfold Line 1, 6"));
+  });
+
+  it("hands the focus of an inner group's fold to the fold of the group that hides it", () => {
+    render(<Orders />);
+    fold("Fold Otto & Söhne, 3").focus();
+    act(() => current!.toggleFold(JSON.stringify(["value:Line 1"])));
+    expect(document.activeElement).toBe(fold("Unfold Line 1, 6"));
+  });
+
+  it("does so for Fold all, too", () => {
+    render(<Orders selectable />);
+    box("A-1057").focus();
+    act(() => current!.foldAll());
+    expect(document.activeElement).toBe(fold("Unfold Line 2, 4"));
+  });
+
+  it("does so when Alt and an arrow on a sibling's fold fold the level", () => {
+    render(<Orders selectable />);
+    box("A-1044").focus();
+    fireEvent.keyDown(fold("Fold Line 2, 4"), { key: "ArrowLeft", altKey: true });
+    expect(current!.folded).toHaveLength(3);
+    expect(document.activeElement).toBe(fold("Unfold Line 1, 6"));
+  });
+
+  it("leaves a focus outside the folded group where it is", () => {
+    render(<Orders selectable />);
+    const outside = box("A-1043");
+    outside.focus();
+    fireEvent.click(fold("Fold Line 1, 6"));
+    expect(document.activeElement).toBe(outside);
+  });
+});
