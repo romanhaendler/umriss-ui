@@ -73,6 +73,11 @@
       color-mix(in srgb,
       var(--u-color-danger) 85%, light-dark(#000000, #ffffff));
     --u-color-danger-subtle: light-dark(#f8eaea, #2f1b1d);
+    /* Danger as type, beside the surface - the split the accent has with
+       --u-color-accent-text. Dark: the surface value reached only 4.40:1 on the
+       subtle danger surface; this one is lighter and holds 4.5:1 there and on
+       every ground (tone-contrast). Light: the surface value already passes. */
+    --u-color-danger-text: light-dark(#b13636, #d86f66);
 
     /* ---- Focus: a crisp accent edge, two pixels, no glow ----
        One look for every component. It was a soft 4px glow at 20 %, and on

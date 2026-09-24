@@ -50,6 +50,29 @@ module on the caller's side that carries `"use client"` and imports from there.
 
 ---
 
+## Unreleased
+
+### Added
+
+- **`--u-color-danger-text`**, the danger tone as type, beside
+  `--u-color-danger` as surface — the split the accent has long had with
+  `--u-color-accent-text`. It holds 4.5:1 on the subtle danger surface, the
+  surface and the page ground in both themes.
+
+### Changed
+
+- **Danger text reads `--u-color-danger-text`.** In the dark theme it is
+  lighter (`#d86f66` instead of `#d0655c`); the surface value measured only
+  4.40:1 on `--u-color-danger-subtle`. It applies where danger is type: the
+  danger tone of `Badge`, `Tag` and the `Alert` title, the `FormField` error
+  and required mark, the exceeded `Textarea` count, the danger `Menu` item,
+  the removing `MultiSelect` chip, the alarm verdict and the lost freshness of
+  `Stat`. Surfaces, edges, focus rings and the `Toast` icon keep
+  `--u-color-danger`. The light theme is unchanged. A caller who drew danger
+  text with `--u-color-danger` should switch to the new token.
+
+---
+
 ## 0.6.0 – The wording of the grouping (Sep. 2026)
 
 ### Added

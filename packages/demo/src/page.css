@@ -473,7 +473,7 @@
 
 .apiRequired {
   margin-left: 2px;
-  color: var(--u-color-danger);
+  color: var(--u-color-danger-text);
 }
 
 /* ---------------- Warum so ---------------- */

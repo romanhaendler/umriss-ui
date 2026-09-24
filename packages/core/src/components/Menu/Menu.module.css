@@ -42,7 +42,7 @@
   }
 
   .danger {
-    color: var(--u-color-danger);
+    color: var(--u-color-danger-text);
   }
 
   .danger:hover,
