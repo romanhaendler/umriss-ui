@@ -11,7 +11,8 @@ import { describe, expect, it, vi } from "vitest";
 import { useState } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { AlarmList } from "../src";
-import { alarmModel, alarmColumns } from "../src/alarms/alarmModel";
+import { alarmModel, alarmColumns, isHiddenFromOperation } from "../src/alarms/alarmModel";
+import { GERMAN_FORMATS, GERMAN_WORDING } from "@umriss-ui/core/wording/de";
 import type { Alarm, AlarmType } from "../src/alarms/alarmModel";
 import { useTableSelection } from "../src";
 import { UmrissProvider, DEFAULT_WORDING, LanguageProvider, useWording } from "@umriss-ui/core";
@@ -320,5 +321,107 @@ describe("Density of the alarm list", () => {
       </UmrissProvider>,
     );
     expect(tableClass()).toMatch(/compact/);
+  });
+});
+
+/* alarm-standards 02: hidden from operation, never absent. A shelved or
+   out-of-service alarm stays in the list, drawn neutrally with its state as a
+   word, and the list counts them. The German wording is asserted as the
+   subject, not as a leftover. The pinned time zone is Europe/Berlin: the shelf
+   ends 11:00 UTC, which is 12:00 there. */
+describe("Hidden from operation", () => {
+  const HIDDEN: Alarm[] = [
+    {
+      id: "h1",
+      type: "temp",
+      lifecycle: "standing-unacknowledged",
+      raised: NOW - 6 * MIN,
+      availability: "shelved",
+      shelf: { until: NOW + 30 * MIN, by: "M. Keller" },
+    },
+    { id: "h2", type: "pressure", lifecycle: "standing-unacknowledged", raised: NOW - 8 * MIN, availability: "out-of-service" },
+    {
+      id: "h3",
+      type: "filter",
+      lifecycle: "cleared-unacknowledged",
+      raised: NOW - 9 * MIN,
+      cleared: NOW - 7 * MIN,
+      availability: "suppressed-by-design",
+    },
+  ];
+  const withHidden = () => alarmModel({ alarms: [...ALARMS, ...HIDDEN], types: TYPES, asOf: NOW });
+  /** The row by its alarm's label and state: the list puts no id in the DOM. */
+  const rowWith = (word: string) => screen.getByText(word).closest("tr");
+
+  it("keeps each hidden alarm in the list with its state as a word", () => {
+    render(<AlarmList view={withHidden()} />);
+    expect(screen.getByText("Shelved until 12:00 by M. Keller")).toBeTruthy();
+    expect(screen.getByText("Out of service")).toBeTruthy();
+    expect(screen.getByText("Suppressed by design")).toBeTruthy();
+    // The lifecycle still stands beside it: shelving does not change it.
+    expect(screen.getAllByText(DEFAULT_WORDING.lifecycleStandingUnacknowledged)).toHaveLength(3);
+  });
+
+  it("draws a hidden row neutrally: its priority is a word without its colour", () => {
+    render(<AlarmList view={withHidden()} />);
+    const shelved = rowWith("Shelved until 12:00 by M. Keller");
+    const standing = screen.getAllByText(DEFAULT_WORDING.lifecycleStandingUnacknowledged)[0]!.closest("tr");
+    expect(shelved?.getAttribute("data-availability")).toBe("shelved");
+    expect(standing?.getAttribute("data-availability")).toBe("in-service");
+    const badge = (row: Element | null | undefined) =>
+      [...(row?.querySelectorAll("span") ?? [])].find((span) => span.textContent === DEFAULT_WORDING.priorityHigh);
+    expect(badge(shelved)?.className).toMatch(/neutral/);
+    expect(badge(standing)?.className).toMatch(/danger/);
+  });
+
+  it("counts them, and says nothing where there are none", () => {
+    const { rerender } = render(<AlarmList view={withHidden()} />);
+    expect(screen.getByText(DEFAULT_WORDING.hiddenFromOperation(3))).toBeTruthy();
+    rerender(<AlarmList view={projectionOf()} />);
+    expect(screen.queryByText(DEFAULT_WORDING.hiddenFromOperation(0))).toBeNull();
+  });
+
+  it("calls nobody to a hidden alarm", () => {
+    const { container } = render(<AlarmList view={withHidden()} />);
+    expect(container.querySelector("[aria-live]")?.textContent).toBe(DEFAULT_WORDING.standingUnacknowledged(1));
+  });
+
+  it("offers the view as a switch when the application takes it", () => {
+    function View() {
+      const [hiddenOnly, setHiddenOnly] = useState(false);
+      const view = alarmModel(
+        { alarms: [...ALARMS, ...HIDDEN], types: TYPES, asOf: NOW },
+        hiddenOnly ? { filter: (row) => isHiddenFromOperation(row.availability) } : {},
+      );
+      return <AlarmList view={view} hiddenOnly={hiddenOnly} onHiddenOnlyChange={setHiddenOnly} />;
+    }
+    render(<View />);
+    const toggle = screen.getByRole("checkbox", { name: DEFAULT_WORDING.hiddenFromOperation(3) });
+    expect((toggle as HTMLInputElement).checked).toBe(false);
+    // The header row and six alarms.
+    expect(screen.getAllByRole("row")).toHaveLength(7);
+    fireEvent.click(toggle);
+    expect((toggle as HTMLInputElement).checked).toBe(true);
+    // The header row and the three hidden ones.
+    expect(screen.getAllByRole("row")).toHaveLength(4);
+    expect(screen.getByText("Out of service")).toBeTruthy();
+  });
+
+  it("keeps the switch while the view is on, even when nothing is hidden any more", () => {
+    // Otherwise the way back would vanish with the last hidden alarm.
+    render(<AlarmList view={projectionOf()} hiddenOnly onHiddenOnlyChange={() => {}} />);
+    expect(screen.getByRole("checkbox", { name: DEFAULT_WORDING.hiddenFromOperation(0) })).toBeTruthy();
+  });
+
+  it("speaks German from the German wording", () => {
+    render(
+      <LanguageProvider wording={GERMAN_WORDING} formats={GERMAN_FORMATS}>
+        <AlarmList view={withHidden()} />
+      </LanguageProvider>,
+    );
+    expect(screen.getByText("Zurückgestellt bis 12:00 von M. Keller")).toBeTruthy();
+    expect(screen.getByText("Außer Betrieb")).toBeTruthy();
+    expect(screen.getByText("Planmäßig unterdrückt")).toBeTruthy();
+    expect(screen.getByText("Aus der Bedienung genommen: 3")).toBeTruthy();
   });
 });
