@@ -21,14 +21,19 @@ it cannot make a plant conform.
 | The alarm states: normal, unacknowledged, acknowledged, returned to normal while unacknowledged | The **Lifecycle state**: one field with four values - standing/cleared × acknowledged/unacknowledged. Cleared and acknowledged is done and the model's only removal | `alarmModel.ts`, `nextLifecycleState` |
 | A return to normal that nobody acknowledged is still an alarm | The fleeting alarm - came, cleared, unseen - stays in the list with a mark of its own; the reason the state is one field and not two booleans | `alarmModel.ts`, `AlarmList` |
 | The special states, enterable from any state: **Shelved** (operator-initiated, tracked), **Suppressed by design** (logic-driven), **Out of service** | **Availability**, a second field beside the lifecycle and never merged into it; a hidden alarm keeps its lifecycle underneath | `alarmModel.ts`, `availabilityAt` |
-| Shelving is tracked | A shelf has an end and a name (`shelf: { until, by }`); an alarm shelved without either cannot be written down | the `Alarm` type |
-| A shelf ends | It ends by the model's clock: at the as-of time that reaches `until`, the alarm is in service again - no timer | `availabilityAt` |
-| Suppressed and shelved alarms are hidden, not absent | They stay in the list, drawn neutrally with their state as a word, and the list counts them ("Hidden from operation: 3") | `AlarmList` |
+| Shelving is tracked | A shelf has an end and a name (`shelf: { until, by }`); an alarm shelved without either cannot be written down. That a shelf *ends* is umriss's own reading of "tracked", not a quoted requirement: it ends by the model's clock - at the as-of time that reaches `until` the alarm is in service again, with no timer | the `Alarm` type, `availabilityAt` |
 
 The transitions are pure and performed by the application - `shelve`,
 `unshelve`, `takeOutOfService`, `returnToService` - as acknowledging is. A
 shelf never overwrites out of service or suppressed by design: the end of a
-shelf must not put equipment under maintenance back in service.
+shelf must not put equipment under maintenance back in service. Nor does
+taking out of service overwrite suppressed by design: that field is the
+plant's logic's, and a return to service would lose it.
+
+A hidden alarm is still an alarm to the rest of the model: it can be
+acknowledged, and it counts towards frequency, chatter and a flood - a
+marking, never a removal. Only the live figure of standing unacknowledged
+alarms leaves it out, because that figure calls somebody over.
 
 ### What umriss deliberately does not do
 
@@ -61,8 +66,10 @@ shelf must not put equipment under maintenance back in service.
   glyph. A register of every library stylesheet with a verdict colour holds
   what carries its meaning without it
   (`packages/core/tests-unit/verdictColour.test.ts`).
-- **Hidden, not absent.** Shelved and suppressed alarms get a neutral
-  drawing rather than disappearing.
+- **Hidden, not absent.** Shelved and suppressed alarms get their own
+  neutral treatment - "not absent, just deliberately hidden", as the ISA-101
+  source puts it: they stay in the list, drawn neutrally with their state as a
+  word, and the list counts them ("Hidden from operation: 3") - `AlarmList`.
 
 The rule, its check and its limits stand in
 [`design-language.md`](design-language.md), "Colour for the abnormal".

@@ -93,9 +93,9 @@
     box-shadow: inset 3px 0 0 var(--u-color-warning);
   }
 
-  /* On the cells, not the row - the row header among them: the table's cell sets the text colour itself,
-     and a colour on the row never reached it - the rule for the done alarm
-     stood here without effect until alarm-standards 02. */
+  /* A done alarm and a hidden one are muted. The colour stands on the cells,
+     the row header among them, because the table's cells set their own text
+     colour and one on the row would not reach them. */
   .row[data-lifecycle="cleared-acknowledged"] :is(td, th),
   .row:not([data-availability="in-service"]) :is(td, th) {
     color: var(--u-color-text-secondary);
