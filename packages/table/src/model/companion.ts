@@ -15,6 +15,7 @@ import { useCallback, useMemo, useState } from "react";
 import { useTableSelection } from "./useTableSelection";
 import type { TableSelection } from "./useTableSelection";
 import { orderColumns, tableModel } from "./tableModel";
+import { rowsOf } from "./grouping";
 import type { Column, SortLevel, TableInput, TableProjection } from "./tableModel";
 import type { SortDirection } from "./tableModel";
 import type { TableView } from "./view";
@@ -189,7 +190,7 @@ export function useCompanion<Z, K extends string = string>(
       !virtual
         ? projection.visible
         : windowLines
-          ? windowLines.flatMap((l) => (l.kind === "row" ? [l.row] : []))
+          ? rowsOf(windowLines)
           : projection.filtered.slice(rowWindow.from, rowWindow.to),
     [virtual, windowLines, projection.filtered, projection.visible, rowWindow.from, rowWindow.to],
   );

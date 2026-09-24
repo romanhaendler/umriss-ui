@@ -317,3 +317,36 @@ holds A–G, the layouts compared; `final.html` the refined F in three states,
 `#dark` for the dark theme. Its screenshots are the reference for ticket 07.
 
 ## Comments
+
+### Delivery notes (2026-09-24), tickets 01–06 and 08
+
+Deviations from the text above, each decided while building:
+
+- **Groups of a `groupValue` stand by what they hold** (the smallest sort value
+  of their rows), not by the name the function gives them: bands of a number
+  named "Small", "Medium", "Large" stood in the alphabet's order. Q10's
+  "ascending by their grouping value" holds for every other key.
+- **A virtual window does not mark "continued".** Its group headers stick while
+  their group scrolls; the mark is a page's word. A page keeps it.
+- **A range of dates names the year once** ("02/10–14/10"), not "Oct 02 – 14":
+  a month-and-day form would need a format `@umriss-ui/core` does not have.
+- **Folding moves the lines that stay (FLIP)** instead of animating a height -
+  table rows have none; a group a filter empties leaves without an exit motion.
+- **`aggregate="worst"` on the verdict column.** Its value is a reading, and
+  the worst verdict is the aggregate every plant screen wants; a function of
+  one's own would be the same five lines in every application.
+- **The footer shows "min" and "max" as signs** beside Σ and ⌀.
+- Words: the code says **group header** where this spec says "band", and the
+  grouping stands in the table toolbar as a **tag** (the glossary avoids
+  "chip").
+
+Open, for the user to decide:
+
+1. **One level shows no group aggregates until it is folded.** A grouping by
+   one column is all span (ADR-0029), and a span carries its aggregates only
+   when folded. The demo's aggregate examples therefore group by two levels.
+2. **The user groups through `<ColumnMenu>`.** A table without a column menu
+   can be grouped by the application only.
+3. **Groups follow an aggregate on any sort level**, not only the first:
+   the first sort level that speaks about a grouping level or an aggregate
+   decides.

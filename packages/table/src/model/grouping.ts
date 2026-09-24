@@ -8,6 +8,7 @@
    else (ADR-0029). */
 
 import { DEFAULT_FORMATS } from "@umriss-ui/core";
+import type { Formats, Wording } from "@umriss-ui/core";
 import { filterKey, isAbsent } from "../values";
 import type { SortLevel } from "./tableModel";
 
@@ -15,8 +16,8 @@ import type { SortLevel } from "./tableModel";
 export interface GroupLevel<Z> {
   id: string;
   /** The grouping value - the column's value, or what `groupValue` or a date
-      key made of it. Absent values form one group of their own. */
-  key: (row: Z) => unknown;
+      period made of it. Absent values form one group of their own. */
+  value: (row: Z) => unknown;
   /** Where the groups of a key of one's own stand: by the smallest of this
       over their rows. Bands of a number are named "Small", "Large" and
       must not stand in the alphabet's order. */
@@ -28,13 +29,13 @@ export interface GroupLevel<Z> {
 export type AggregateKind = "sum" | "avg" | "min" | "max" | "range" | "count" | "distinct";
 
 /** An aggregate of one's own: the values present and the group's rows. */
-export type AggregateFunction<Z = never> = (values: readonly unknown[], rows: readonly Z[]) => unknown;
+export type OwnAggregate<Z = never> = (values: readonly unknown[], rows: readonly Z[]) => unknown;
 
 /** A column that carries an aggregate, as the pipeline needs it. */
-export interface Aggregated<Z> {
+export interface AggregateColumn<Z> {
   id: string;
   read: (row: Z) => unknown;
-  aggregate: AggregateKind | AggregateFunction<Z>;
+  aggregate: AggregateKind | OwnAggregate<Z>;
 }
 
 const numeric = (value: unknown): number | undefined =>
@@ -46,7 +47,7 @@ const numeric = (value: unknown): number | undefined =>
  * null would be a claim. Always over rows, never over other aggregates: that
  * is what keeps an average of averages from being written.
  */
-export function aggregate<Z>(spec: Aggregated<Z>, rows: readonly Z[]): unknown {
+export function aggregate<Z>(spec: AggregateColumn<Z>, rows: readonly Z[]): unknown {
   const values = rows.map(spec.read).filter((v) => !isAbsent(v) && !(v instanceof Date && Number.isNaN(v.getTime())));
   const kind = spec.aggregate;
   if (typeof kind === "function") return kind(values, rows);
@@ -71,6 +72,10 @@ export function aggregate<Z>(spec: Aggregated<Z>, rows: readonly Z[]): unknown {
   }
 }
 
+/** A grouping has at most this many levels - as there are at most three sort
+    levels; beyond them a table no longer reads. */
+export const MOST_LEVELS = 3;
+
 export interface GroupingInput<Z> {
   /** The levels, the outermost first - at most three. */
   levels: readonly GroupLevel<Z>[];
@@ -80,7 +85,7 @@ export interface GroupingInput<Z> {
       its groups; the rows within a group arrive sorted already. */
   sort?: readonly SortLevel[];
   /** The columns that carry an aggregate; every group computes each of them. */
-  aggregates?: readonly Aggregated<Z>[];
+  aggregates?: readonly AggregateColumn<Z>[];
 }
 
 /** The rows of the filtered set that share one grouping value on one level. */
@@ -118,11 +123,12 @@ export function groupRows<Z>(rows: readonly Z[], input: GroupingInput<Z>): RowGr
   const compareText = input.compareText ?? DEFAULT_FORMATS.compareText;
 
   const divide = (rows: readonly Z[], level: number, parent: readonly string[]): RowGroup<Z>[] => {
+    const keys = new Map<RowGroup<Z>, string[]>();
     const spec = input.levels[level];
     if (!spec) return [];
     const byKey = new Map<string, RowGroup<Z>>();
     for (const row of rows) {
-      const value = spec.key(row);
+      const value = spec.value(row);
       const key = filterKey(value);
       let group = byKey.get(key);
       if (!group) {
@@ -135,6 +141,7 @@ export function groupRows<Z>(rows: readonly Z[], input: GroupingInput<Z>): RowGr
           aggregates: {},
         };
         byKey.set(key, group);
+        keys.set(group, [...parent, key]);
       }
       group.rows.push(row);
     }
@@ -173,7 +180,7 @@ export function groupRows<Z>(rows: readonly Z[], input: GroupingInput<Z>): RowGr
       return comparable(ka) === undefined || comparable(kb) === undefined ? order : order * direction;
     });
     for (const group of groups) {
-      group.groups = divide(group.rows, level + 1, JSON.parse(group.path) as string[]);
+      group.groups = divide(group.rows, level + 1, keys.get(group)!);
     }
     return groups;
   };
@@ -195,14 +202,14 @@ export function livePaths<Z>(groups: readonly RowGroup<Z>[], folded: readonly st
   return folded.filter((path) => all.has(path));
 }
 
-/* --- Date keys ----------------------------------------------------------------- */
+/* --- Date periods ----------------------------------------------------------------- */
 
-export type DateKey = "day" | "week" | "month" | "year";
+export type DatePeriod = "day" | "week" | "month" | "year";
 
 /** A point in time brought to the start of its day, ISO week (Monday), month
     or year - in local time, as the formats show it. */
-export const dateKey =
-  (kind: DateKey) =>
+export const periodStart =
+  (kind: DatePeriod) =>
   (value: unknown): Date | undefined => {
     if (!(value instanceof Date) || Number.isNaN(value.getTime())) return undefined;
     const y = value.getFullYear();
@@ -213,6 +220,27 @@ export const dateKey =
     if (kind === "week") return new Date(y, m, d - ((value.getDay() + 6) % 7));
     return new Date(y, m, d);
   };
+
+/** ISO week number of a Monday-started week. */
+export function isoWeek(date: Date): { week: number; year: number } {
+  const thursday = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 3 - ((date.getDay() + 6) % 7));
+  const firstThursday = new Date(thursday.getFullYear(), 0, 4);
+  const week = 1 + Math.round((thursday.getTime() - firstThursday.getTime()) / 86_400_000 / 7 - ((firstThursday.getDay() + 6) % 7 - 3) / 7);
+  return { week, year: thursday.getFullYear() };
+}
+
+/** A period's name, as its group shows it: the day's date, "Week 42, 2026",
+    the month, the year. Formats and wording arrive as parameters - only a
+    component can read the provider. */
+export function periodText(period: DatePeriod, start: Date, formats: Formats, wording: Wording): string {
+  if (period === "year") return String(start.getFullYear());
+  if (period === "month") return formats.month(start);
+  if (period === "week") {
+    const { week, year } = isoWeek(start);
+    return wording.calendarWeek(week, year);
+  }
+  return formats.date(start);
+}
 
 /* --- Lines ------------------------------------------------------------------- */
 
@@ -282,9 +310,12 @@ export function pageLines<Z>(
   return { lines: withContinuation(slice), page: current, pageCount };
 }
 
+/** The rows among lines - what a page or a window of lines holds. */
+export const rowsOf = <Z,>(lines: readonly Line<Z>[]): Z[] => lines.flatMap((l) => (l.kind === "row" ? [l.row] : []));
+
 /**
  * A run of lines cut out of the middle - a page, a virtual window - with what
- * it begins inside of: the bands of its first line, uncounted and marked
+ * it begins inside of: the group headers of its first line, uncounted and marked
  * continued, and the span's value again on its first row.
  */
 export function withContinuation<Z>(slice: readonly Line<Z>[]): Line<Z>[] {

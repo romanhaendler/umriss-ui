@@ -580,7 +580,7 @@
     opacity: 0.5;
   }
 
-  /* ---- Grouping: the column menu's section and the toolbar's chip ------- */
+  /* ---- Grouping: the column menu's section and the toolbar's tag ------- */
 
   .groupingChoice {
     margin-top: var(--u-space-2);
@@ -641,11 +641,11 @@
     font-variant-numeric: tabular-nums;
   }
 
-  .groupingChip {
+  .groupingTag {
     display: contents;
   }
 
-  .groupingKey {
+  .groupingPrefix {
     margin-right: 0.4em;
     color: var(--u-color-text-secondary);
   }
@@ -661,11 +661,11 @@
 
   /* ---- Grouped body (table-grouping 04, ADR-0029) ----------------------
      The relations come from the prototype and bind (spec, "How it looks"):
-     a band is exactly one row high - the row's padding, nothing more; every
+     a group header is exactly one row high - the row's padding, nothing more; every
      level has one fold slot of 20 px, so that the text of every level starts
      on one vertical; and a line is only as strong as the boundary it draws. */
 
-  /* A header band: the sunken tone across the full width. Its only line is
+  /* A group header: the sunken tone across the full width. Its only line is
      the strong one above it; its own edge is its boundary below. */
   .groupHeader > .td {
     background: var(--u-color-surface-sunken);
@@ -678,17 +678,17 @@
     border-top: none;
   }
 
-  /* Under a sticky header the bands stick as well, each level below the one
+  /* Under a sticky header the group headers stick as well, each level below the one
      above it; the heights come from the table (parts.tsx, `--u-table-head` and
-     `--u-table-band`). */
+     `--u-table-group-header`). */
   .sticky tbody tr.groupHeader > .td {
     position: sticky;
-    top: calc(var(--u-table-head, 0px) + var(--u-band-level, 0) * var(--u-table-band, 0px));
+    top: calc(var(--u-table-head, 0px) + var(--u-header-level, 0) * var(--u-table-group-header, 0px));
     z-index: 1;
   }
 
-  /* The shadow step appears only while content lies beneath a band - the
-     table marks a band that sticks (parts.tsx). A box-shadow on a cell of a
+  /* The shadow step appears only while content lies beneath a group header - the
+     table marks a group header that sticks (parts.tsx). A box-shadow on a cell of a
      collapsed table is not painted in Chromium; a gradient below the cell is. */
   .sticky tbody tr.groupHeader[data-stuck] > .td::after {
     content: "";
@@ -705,7 +705,7 @@
      group's first row lays itself over it. */
   .sticky tbody tr[data-group-first] > .spanCell {
     position: sticky;
-    top: calc(var(--u-table-head, 0px) + var(--u-band-levels, 0) * var(--u-table-band, 0px));
+    top: calc(var(--u-table-head, 0px) + var(--u-header-levels, 0) * var(--u-table-group-header, 0px));
   }
 
   .table tbody tr.groupHeader:hover > .td {
@@ -713,12 +713,12 @@
   }
 
   /* A span group begins with the strong hairline across the full width -
-     except right under a band, whose edge is boundary enough. */
+     except right under a group header, whose edge is boundary enough. */
   .table tbody tr[data-group-first] > .td {
     border-top: 1px solid var(--u-hairline-strong);
   }
 
-  /* The row before a band gives up its own line: the band's is the boundary. */
+  /* The row before a group header gives up its own line: the group header's is the boundary. */
   .table tbody tr:has(+ tr.groupHeader) > .td {
     border-bottom: none;
   }
@@ -764,13 +764,13 @@
     flex: none;
     margin-left: 6px;
     font-family: var(--u-font-mono);
-    font-size: 0.6875rem;
+    font-size: var(--u-text-xs);
     font-weight: var(--u-weight-regular);
     font-variant-numeric: tabular-nums;
     color: var(--u-color-text-muted);
   }
 
-  /* On the band's sunken tone the muted type would not hold 4.5:1 (3.09:1
+  /* On the group header's sunken tone the muted type would not hold 4.5:1 (3.09:1
      light, 3.74:1 dark - the same finding as the filter's label); there the
      count and "continued" take the secondary type. */
   .groupHeader .groupCount,

@@ -22,7 +22,7 @@ import { Button, Checkbox, Input, Popover, Select, useFormats, useWording } from
 import { cx } from "./cx";
 import { useConnection } from "./context";
 import { TableToolbar } from "./toolbar";
-import { GroupingChoice } from "./grouping";
+import { GroupingChoice } from "./groupingChoice";
 import type { PartKind, Registry } from "./registry";
 import { orderColumns } from "./model/tableModel";
 import type { TableRef } from "./types";

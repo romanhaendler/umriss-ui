@@ -18,7 +18,7 @@ import { Button, useFormats, useWording } from "@umriss-ui/core";
 import { resetSearchAndFilters } from "./export";
 import { cx } from "./cx";
 import { Conditions } from "./filter";
-import { GroupingChip } from "./grouping";
+import { GroupingTag } from "./groupingChoice";
 import type { Registry } from "./registry";
 import styles from "./Table.module.css";
 
@@ -57,7 +57,7 @@ export function TableToolbar({
 
     conditions = (
       <>
-        <GroupingChip registry={registry} hook={hook} />
+        <GroupingTag registry={registry} hook={hook} />
         <Conditions registry={registry} hook={hook} />
       </>
     );
