@@ -35,10 +35,11 @@ describe("alarmColumns – the label from the wording", () => {
 
   it("ALARM_COLUMNS is the default wording's shape", () => {
     // The labels before the rebuild, from the module's history - not from its
-    // new definition.
+    // new definition - and "Availability", which alarm-standards 01 added.
     expect(ALARM_COLUMNS.map((s) => s.label)).toEqual([
       "Alarm",
       "State",
+      "Availability",
       "Priority",
       "Acknowledgement",
       "Raised",
@@ -89,7 +90,7 @@ const alarm = (
   type: string,
   lifecycle: LifecycleState,
   raised: number,
-  rest: Partial<Alarm> = {},
+  rest: Pick<Alarm, "cleared" | "acknowledgedAt"> = {},
 ): Alarm => ({ id, type, lifecycle, raised, ...rest });
 
 const ids = (rows: readonly AlarmRow[]) => rows.map((row) => row.id);

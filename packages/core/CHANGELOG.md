@@ -29,6 +29,18 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## Unreleased
+
+### Added
+
+- **The wording of an alarm's availability** (for `@umriss-ui/table`'s alarm
+  model and list), in English and German: `availabilityShelved(until, by)`,
+  `availabilitySuppressedByDesign`, `availabilityOutOfService`,
+  `hiddenFromOperation(count)` and `columnAvailability`. An application with a
+  wording of its own that spells out every key adds these five.
+
+---
+
 ## 0.9.2 – Today's dot, one chevron (Sep. 2026)
 
 ### Changed

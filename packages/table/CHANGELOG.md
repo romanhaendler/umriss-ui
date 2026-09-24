@@ -22,6 +22,45 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## Unreleased
+
+Needs the `@umriss-ui/core` that carries the availability wording (its own
+"Unreleased" section).
+
+### Added
+
+- **Availability, the second field beside the lifecycle** (ISA-18.2's special
+  states): `availability?: "in-service" | "shelved" | "suppressed-by-design" |
+  "out-of-service"` on `Alarm`, never merged into the four lifecycle values.
+  Without a statement an alarm is in service, so existing alarms read as
+  before. A shelved alarm carries `shelf: { until, by }` - and cannot be
+  written without it.
+- **Four pure transitions**, one alarm in and one out, performed by the
+  application: `shelve(alarm, until, by)`, `unshelve`, `takeOutOfService`,
+  `returnToService`. One that does not apply returns the same object. A shelf
+  never overwrites out of service or suppressed by design.
+- **`availabilityAt(alarm, asOf)`**: a shelf that has reached its end is in
+  service again at the as-of time - by the model's clock, not by a timer.
+  `AlarmRow.availability` carries that value.
+- **`isHiddenFromOperation`, `AVAILABILITIES`, the types `Availability` and
+  `Shelf`**, and on the projection **`hiddenFromOperation`**: how many of the
+  filtered set are hidden. The model still removes nothing.
+- **An `availability` column** in `alarmColumns` / `ALARM_COLUMNS` (its label
+  from `wording.columnAvailability`), valued by rank like the priority.
+
+### Changed
+
+- **`DEFAULT_ORDER` begins with availability**: in service above hidden, then
+  priority, acknowledgement and time as before. Only alarms with an
+  availability of their own move.
+- **`standingUnacknowledged` counts only alarms in service.** The live figure
+  calls somebody over; it must not call them to a shelved alarm.
+- **`Alarm` is a type, no longer an interface** - the union with the shelf
+  needs it. `Partial<Alarm>` spread into an `Alarm` no longer compiles; name
+  the fields you mean (`Pick<Alarm, "cleared" | "acknowledgedAt">`).
+
+---
+
 ## 0.3.3 – Depth work on the table (Sep. 2026)
 
 Needs `@umriss-ui/core` 0.9: it reads `--u-tracking-figures`; the peer range moves to `^0.9.0`.
