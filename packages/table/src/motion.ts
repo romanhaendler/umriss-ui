@@ -1,7 +1,7 @@
 /* Motion that explains the grouping (table-grouping 06).
 
    When the grouping or a fold changes, every row that stays travels from where
-   it stood to where it stands now (FLIP), and a line that is new - a band, a
+   it stood to where it stands now (FLIP), and a line that is new - a group header, a
    row that unfolded - settles in. The motion shows WHAT happened: the rows go
    to their group, and flow back when the grouping is lifted.
 
@@ -70,7 +70,7 @@ export function useLineMotion(table: RefObject<HTMLTableElement | null>, trigger
 }
 
 /**
- * A count that counts to its new value when it changes - a band's count while
+ * A count that counts to its new value when it changes - a group header's count while
  * the user filters. Writes into the element directly, so that a running count
  * costs no render; the text the render gives is always the final one.
  */

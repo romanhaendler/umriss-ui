@@ -259,7 +259,7 @@ export interface Wording {
   /** The grouping section of the column menu, and the menu entry per column. */
   grouping: string;
   groupBy: (label: string) => string;
-  /** The chip in the table toolbar: "Grouped by" Line › Customer. */
+  /** The grouping's tag in the table toolbar: "Grouped by" Line › Customer. */
   groupedBy: string;
   removeGrouping: string;
   removeGroupingLevel: (label: string) => string;

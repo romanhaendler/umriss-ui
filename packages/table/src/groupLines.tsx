@@ -1,6 +1,6 @@
 /* The lines of a grouped table (table-grouping 04, ADR-0029).
 
-   A header band heads a group of an outer level: its value and count in the
+   A group header heads a group of an outer level: its value and count in the
    first cell, stretched over every leading column without an aggregate, then
    the group's aggregates in their columns. The innermost level is a span: its
    grouping column stands first and shows the value on the group's first row -
@@ -8,7 +8,7 @@
    cut by a page or a virtual window. Folded, a span is one line.
 
    The relations are the prototype's (.scratch/table-grouping/spec.md, "How it
-   looks"): a band is exactly one row high, every level has one fold slot of
+   looks"): a group header is exactly one row high, every level has one fold slot of
    20 px, and a line is only as strong as the boundary it draws. */
 
 import { useLayoutEffect, useRef } from "react";
@@ -19,33 +19,17 @@ import { cx } from "./cx";
 import { AggregateValue, aggregateIsNumeric } from "./aggregateValue";
 import { useCountTo } from "./motion";
 import type { ColumnEntry, HookSnapshot, Registry } from "./registry";
-import { aggregate } from "./model/grouping";
+import { aggregate, periodText } from "./model/grouping";
 import type { Line, RowGroup } from "./model/grouping";
 import { asText } from "./values";
 import styles from "./Table.module.css";
-
-/** ISO week number of a Monday-started week. */
-function isoWeek(date: Date): { week: number; year: number } {
-  const thursday = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 3 - ((date.getDay() + 6) % 7));
-  const firstThursday = new Date(thursday.getFullYear(), 0, 4);
-  const week = 1 + Math.round((thursday.getTime() - firstThursday.getTime()) / 86_400_000 / 7 - ((firstThursday.getDay() + 6) % 7 - 3) / 7);
-  return { week, year: thursday.getFullYear() };
-}
 
 /** A group's value as text - for the fold's name and wherever no presentation
     stands. */
 export function groupText(entry: ColumnEntry | undefined, value: unknown, formats: Formats, wording: Wording): string {
   if (value === undefined) return wording.groupNoValue;
   const spec = entry?.spec;
-  if (spec?.group && value instanceof Date) {
-    if (spec.group === "year") return String(value.getFullYear());
-    if (spec.group === "month") return formats.month(value);
-    if (spec.group === "week") {
-      const { week, year } = isoWeek(value);
-      return wording.calendarWeek(week, year);
-    }
-    return formats.date(value);
-  }
+  if (spec?.group && value instanceof Date) return periodText(spec.group, value, formats, wording);
   const format = spec?.ownGroupValue ? undefined : spec?.format;
   return asText(value, format, formats, wording) ?? String(value);
 }
@@ -95,6 +79,13 @@ function Fold({
     hook.publicSnapshot.toggleFold(group.path);
   };
   const handleKeyDown = (event: ReactKeyboardEvent<HTMLButtonElement>) => {
+    /* With Alt the arrows fold or unfold every group of the level, as Alt-click does. */
+    if (event.altKey && (event.key === "ArrowLeft" || event.key === "ArrowRight")) {
+      event.preventDefault();
+      registry.requestFoldFocus(group.path);
+      foldSiblings(group, event.key === "ArrowLeft", hook);
+      return;
+    }
     if (event.key === "ArrowRight" && !open) {
       event.preventDefault();
       toggle();
@@ -119,7 +110,11 @@ function Fold({
       aria-expanded={open}
       aria-label={open ? wording.foldGroup(name, count) : wording.unfoldGroup(name, count)}
       onKeyDown={handleKeyDown}
-      onClick={(event) => (event.altKey ? foldSiblings(group, open, hook) : toggle())}
+      onClick={(event) => {
+        if (!event.altKey) return toggle();
+        registry.requestFoldFocus(group.path);
+        foldSiblings(group, open, hook);
+      }}
     >
       <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
         <path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -128,7 +123,7 @@ function Fold({
   );
 }
 
-/** A band's count, counting to its new value while the user filters. */
+/** A group header's count, counting to its new value while the user filters. */
 function Count({ value, formats }: { value: number; formats: Formats }) {
   const node = useRef<HTMLSpanElement>(null);
   useCountTo(node, value, formats.count);
@@ -215,7 +210,7 @@ export function SpanCell({
   );
 }
 
-/** A header band or a folded span: one line for a whole group. */
+/** A group header or a folded span: one line for a whole group. */
 export function GroupLine({
   line,
   index,
@@ -260,7 +255,7 @@ export function GroupLine({
   const header = line.kind === "header";
   const open = header && !hook.publicSnapshot.folded.includes(group.path);
   const single = group.rows.length < 2;
-  /* The leading columns without an aggregate: a band's label stretches over
+  /* The leading columns without an aggregate: a group header's label stretches over
      them, a folded span's "3 entries" stands in them. */
   const leading = columns.findIndex((e) => e.spec.aggregate !== undefined);
   const lead = leading === -1 ? columns.length : leading;
@@ -289,7 +284,7 @@ export function GroupLine({
       data-row={virtual ? absolute : undefined}
       aria-rowindex={virtual ? absolute + 2 : undefined}
       data-index={index}
-      style={header ? ({ "--u-band-level": group.level } as CSSProperties) : undefined}
+      style={header ? ({ "--u-header-level": group.level } as CSSProperties) : undefined}
       aria-level={header ? group.level + 1 : depth}
       aria-expanded={single ? undefined : open}
       aria-posinset={siblings.indexOf(group) + 1 || undefined}

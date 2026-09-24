@@ -20,7 +20,7 @@
 import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import { useFormats } from "@umriss-ui/core";
 import { useCompanion } from "./model/companion";
-import { livePaths } from "./model/grouping";
+import { MOST_LEVELS, livePaths } from "./model/grouping";
 import type { RowGroup } from "./model/grouping";
 import type { TableView } from "./model/view";
 import type { Column } from "./model/tableModel";
@@ -192,14 +192,14 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
   );
   const [foldedState, setFoldedState] = useState<readonly string[]>(() => start?.folded ?? []);
   const registered = registry.orderedColumns().length + registry.groupKeys.entries.size > 0;
-  const groupingNow = registered ? registry.effectiveGrouping(groupingState, rowsUnknown) : groupingState.slice(0, 3);
-  const groupingKey = groupingNow.join("|");
+  const groupingNow = registered ? registry.effectiveGrouping(groupingState, rowsUnknown) : groupingState.slice(0, MOST_LEVELS);
+  const groupingPrefix = groupingNow.join("|");
   const foldedSet = useMemo(() => new Set(foldedState), [foldedState]);
   const model = groupingNow.length ? registry.groupingModel(groupingNow, rowsUnknown) : null;
   const grouping = useMemo(
     () => (model && model.levels.length ? { ...model, folded: foldedSet, compareText: formats.compareText } : undefined),
     // eslint-disable-next-line react-hooks/exhaustive-deps -- the model's identity carries the ids and the columns
-    [model, foldedSet, formats.compareText, groupingKey],
+    [model, foldedSet, formats.compareText, groupingPrefix],
   );
 
   const rowKey = options.rowKey as (row: unknown) => string;

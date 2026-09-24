@@ -2,12 +2,13 @@
 
    The column menu offers every groupable column and every group key; pressing
    one adds a level, pressing it again takes the level away, and at three levels
-   the others wait. The table toolbar carries ONE chip for the grouping - "Grouped
-   by Line › Customer" -, not a chip per level: the order of the levels is what
-   a reader must see, and two chips that look alike say nothing about it. */
+   the others wait. The table toolbar carries ONE tag for the grouping - "Grouped
+   by Line › Customer" -, not a tag per level: the order of the levels is what
+   a reader must see, and two tags that look alike say nothing about it. */
 
 import { Menu, MenuItem, MenuSeparator, Tag, useWording } from "@umriss-ui/core";
 import type { HookSnapshot, Registry } from "./registry";
+import { MOST_LEVELS } from "./model/grouping";
 import styles from "./Table.module.css";
 
 const labelOf = (registry: Registry, hook: HookSnapshot, id: string): string =>
@@ -34,7 +35,7 @@ export function GroupingChoice({ registry, hook }: { registry: Registry; hook: H
               className={styles.groupingOption}
               aria-label={wording.groupBy(label)}
               aria-pressed={active}
-              disabled={!active && grouping.length >= 3}
+              disabled={!active && grouping.length >= MOST_LEVELS}
               onClick={() => setGrouping(active ? grouping.filter((g) => g !== id) : [...grouping, id])}
             >
               {active && (
@@ -51,20 +52,20 @@ export function GroupingChoice({ registry, hook }: { registry: Registry; hook: H
   );
 }
 
-/** The chip in the table toolbar while the table is grouped. */
-export function GroupingChip({ registry, hook }: { registry: Registry; hook: HookSnapshot }) {
+/** The grouping's tag in the table toolbar while the table is grouped. */
+export function GroupingTag({ registry, hook }: { registry: Registry; hook: HookSnapshot }) {
   const wording = useWording();
   const snapshot = hook.publicSnapshot;
   const { grouping } = snapshot;
   if (grouping.length === 0) return null;
   const labels = grouping.map((id) => labelOf(registry, hook, id));
   return (
-    <div role="group" aria-label={wording.groupedBy} className={styles.groupingChip}>
+    <div role="group" aria-label={wording.groupedBy} className={styles.groupingTag}>
       <Tag onRemove={() => snapshot.setGrouping([])} removeLabel={wording.removeGrouping}>
         <Menu
           trigger={
             <button type="button" className={styles.conditionButton}>
-              <span className={styles.groupingKey}>{wording.groupedBy}</span>
+              <span className={styles.groupingPrefix}>{wording.groupedBy}</span>
               {labels.map((label, i) => (
                 <span key={grouping[i]} className={styles.groupingPath}>
                   {i > 0 && (

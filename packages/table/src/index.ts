@@ -32,10 +32,6 @@ export type {
   TableProps,
   VerdictColumnComponent,
   RowAttributes,
-  AggregateOptions,
-  AggregateFunction,
-  GroupByComponent,
-  GroupingKey,
 } from "./types";
 export type { DateFormat, NumberFormat } from "./values";
 
@@ -52,3 +48,6 @@ export type { TableSelection } from "./model/useTableSelection";
 /* The alarm list, expressed in the same interface as any other table
    (umriss-table 13), with its model. */
 export * from "./alarms";
+
+/* Grouping and aggregates (table-grouping). */
+export type { AggregateOptions, AggregateFunction, GroupByComponent, GroupingId } from "./types";
