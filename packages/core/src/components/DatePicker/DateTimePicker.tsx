@@ -9,6 +9,7 @@ import { RangeTrigger } from "./RangeTrigger";
 import { TimeField } from "./TimeField";
 import styles from "./DatePicker.module.css";
 import { useFormats, useWording } from "../../lib/language";
+import { ClockGlyph } from "../../lib/glyphs";
 
 /* The time and daylight-saving logic lies in ./time, the time field in
    ./TimeField. Passed on here so that existing import paths
@@ -150,10 +151,7 @@ export function DateTimePicker({
         hasValue={!!value}
         display={value && formats.dateTime(value, withSeconds)}
         icon={
-          <svg viewBox="0 0 14 14" width="13" height="13" aria-hidden="true" className={styles.icon}>
-            <circle cx="7" cy="7" r="5.6" fill="none" stroke="currentColor" strokeWidth="1.3" />
-            <path d="M7 4v3.2l2.2 1.4" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          <ClockGlyph className={styles.icon} />
         }
         placeholder={placeholderText}
         onClear={() => {

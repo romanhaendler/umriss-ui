@@ -207,7 +207,7 @@ export function Combobox<T extends string = string>({
                     <span className={styles.optionLabel}>{option.label}</span>
                     {option.value === value && (
                       <svg viewBox="0 0 10 8" width="10" height="8" aria-hidden="true">
-                        <path d="M1 4l2.5 2.5L9 1" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M1 4l2.5 2.5L9 1" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     )}
                   </div>
