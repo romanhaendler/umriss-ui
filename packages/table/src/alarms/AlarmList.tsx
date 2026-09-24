@@ -187,6 +187,8 @@ function Body({
      (library-audit 07). */
   const density = useDensityFor(ownDensity, "compact");
 
+  const hiddenCount = wording.hiddenFromOperation(projection.hiddenFromOperation);
+
   return (
     <div className={[styles.list, className].filter(Boolean).join(" ")} {...rest}>
       <div className={styles.bar}>
@@ -209,11 +211,11 @@ function Body({
             className={styles.hidden}
             checked={hiddenOnly}
             onChange={(event) => onHiddenOnlyChange(event.currentTarget.checked)}
-            label={wording.hiddenFromOperation(projection.hiddenFromOperation)}
+            label={hiddenCount}
           />
         ) : (
           projection.hiddenFromOperation > 0 && (
-            <span className={styles.hidden}>{wording.hiddenFromOperation(projection.hiddenFromOperation)}</span>
+            <span className={styles.hidden}>{hiddenCount}</span>
           )
         )}
         <span className={styles.filler} />

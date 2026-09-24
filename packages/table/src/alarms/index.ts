@@ -14,6 +14,10 @@ export {
   hasReturned,
   priorityRank,
   PRIORITIES,
+  ALARM_COLUMNS,
+  alarmColumns,
+  DEFAULT_ORDER,
+  /* alarm-standards 01 - new exports stand at the end (CONTRIBUTING.md). */
   availabilityAt,
   isHiddenFromOperation,
   shelve,
@@ -21,16 +25,11 @@ export {
   takeOutOfService,
   returnToService,
   AVAILABILITIES,
-  ALARM_COLUMNS,
-  alarmColumns,
-  DEFAULT_ORDER,
 } from "./alarmModel";
 export type {
   Alarm,
   AlarmType,
   LifecycleState,
-  Availability,
-  Shelf,
   AlarmRow,
   AlarmProjection,
   AlarmInput,
@@ -42,4 +41,6 @@ export type {
   FloodRule,
   Flood,
   Acknowledgement,
+  Availability,
+  Shelf,
 } from "./alarmModel";

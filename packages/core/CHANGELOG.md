@@ -31,13 +31,15 @@ commit.
 
 ## Unreleased
 
-### Added
+### Changed
 
-- **The wording of an alarm's availability** (for `@umriss-ui/table`'s alarm
-  model and list), in English and German: `availabilityShelved(until, by)`,
-  `availabilitySuppressedByDesign`, `availabilityOutOfService`,
-  `hiddenFromOperation(count)` and `columnAvailability`. An application with a
-  wording of its own that spells out every key adds these five.
+- **Five new keys in `Wording`: the wording of an alarm's availability** (for
+  `@umriss-ui/table`'s alarm model and list), in English and German:
+  `availabilityShelved(until, by)`, `availabilitySuppressedByDesign`,
+  `availabilityOutOfService`, `hiddenFromOperation(count)` and
+  `columnAvailability`. A partial wording passed to the provider is merged as
+  before; an application that implements the whole `Wording` type itself no
+  longer compiles until it adds these five.
 
 ---
 

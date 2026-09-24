@@ -38,7 +38,8 @@ Needs the `@umriss-ui/core` that carries the availability wording (its own
 - **Four pure transitions**, one alarm in and one out, performed by the
   application: `shelve(alarm, until, by)`, `unshelve`, `takeOutOfService`,
   `returnToService`. One that does not apply returns the same object. A shelf
-  never overwrites out of service or suppressed by design.
+  never overwrites out of service or suppressed by design, and taking out of
+  service never overwrites suppressed by design - the plant's logic owns it.
 - **`availabilityAt(alarm, asOf)`**: a shelf that has reached its end is in
   service again at the as-of time - by the model's clock, not by a timer.
   `AlarmRow.availability` carries that value.
