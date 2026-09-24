@@ -15,7 +15,9 @@ moves from here under the rule above.
 
 ---
 
-## Unreleased
+## 0.1.7 – Core 0.8.0: a fold that turns (Sep. 2026)
+
+Needs `@umriss-ui/core` 0.8: it reads core's pressed surfaces and motion tokens; the peer range moves to `^0.8.0`.
 
 ### Changed
 

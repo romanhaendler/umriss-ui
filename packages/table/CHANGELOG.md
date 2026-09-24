@@ -22,7 +22,9 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
-## Unreleased
+## 0.3.2 – Core 0.8.0: the canon of states (Sep. 2026)
+
+Needs `@umriss-ui/core` 0.8: it reads core's pressed surfaces and motion tokens; the peer range moves to `^0.8.0`.
 
 ### Changed
 
