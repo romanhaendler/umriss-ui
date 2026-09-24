@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
-import type { KeyboardEvent as ReactKeyboardEvent } from "react";
+import { forwardRef, useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
+import type { ForwardedRef, HTMLAttributes, KeyboardEvent as ReactKeyboardEvent, ReactElement } from "react";
 import { cx } from "../../lib/cx";
+import { mergeRefs } from "../../lib/mergeRefs";
 import { Button } from "../Button";
 import { Checkbox } from "../Checkbox";
 import { Input } from "../Input";
@@ -21,7 +22,8 @@ export interface MultiSelectOption<T extends string = string> {
   disabled?: boolean;
 }
 
-export interface MultiSelectProps<T extends string = string> {
+export interface MultiSelectProps<T extends string = string>
+  extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
   /** The possibilities, in their natural order. The list never re-sorts –
       not even in the "selected" scope. */
   options: readonly MultiSelectOption<T>[];
@@ -58,16 +60,23 @@ type Scope = "all" | "selected";
  * "selected" scope, rows that have been unticked stay visible until the scope
  * changes, so that nothing jumps away from under the mouse pointer.
  */
-export function MultiSelect<T extends string = string>({
-  options,
-  value,
-  onChange,
-  placeholder,
-  searchPlaceholder,
-  emptyText,
-  disabled = false,
-  invalid,
-}: MultiSelectProps<T>) {
+export const MultiSelect = forwardRef(function MultiSelect<T extends string = string>(
+  {
+    options,
+    value,
+    onChange,
+    placeholder,
+    searchPlaceholder,
+    emptyText,
+    disabled = false,
+    invalid,
+    className,
+    onClick,
+    onKeyDown,
+    ...rest
+  }: MultiSelectProps<T>,
+  ref: ForwardedRef<HTMLDivElement>,
+) {
   const field = useFormField();
   const wording = useWording();
   const placeholderText = placeholder ?? wording.multiSelectPlaceholder;
@@ -179,7 +188,8 @@ export function MultiSelect<T extends string = string>({
     Array.from(fieldRef.current?.querySelectorAll<HTMLElement>("[data-nav]") ?? []);
 
   const handleFieldKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
-    if (disabled) return;
+    onKeyDown?.(event);
+    if (event.defaultPrevented || disabled) return;
     const target = event.target as HTMLElement;
     const navs = navElements();
 
@@ -271,11 +281,16 @@ export function MultiSelect<T extends string = string>({
 
   return (
     <>
+      {/* The caller's ref, class and rest go to the field, the element that
+          carries the ring (P1 of core-passthrough); its handlers run before
+          the field's own and can prevent them (P3). */}
       <div
-        ref={fieldRef}
-        className={cx(styles.field, isInvalid && styles.invalid, disabled && styles.fieldDisabled)}
-        onClick={() => {
-          if (disabled) return;
+        ref={mergeRefs(fieldRef, ref)}
+        className={cx(styles.field, isInvalid && styles.invalid, disabled && styles.fieldDisabled, className)}
+        {...rest}
+        onClick={(event) => {
+          onClick?.(event);
+          if (event.defaultPrevented || disabled) return;
           if (open) {
             setOpen(false);
           } else {
@@ -449,4 +464,6 @@ export function MultiSelect<T extends string = string>({
       </Popover>
     </>
   );
-}
+}) as <T extends string = string>(
+  props: MultiSelectProps<T> & { ref?: ForwardedRef<HTMLDivElement> },
+) => ReactElement;

@@ -1,6 +1,7 @@
-import { cloneElement, createContext, useCallback, useContext, useId, useRef, useState } from "react";
+import { cloneElement, createContext, forwardRef, useCallback, useContext, useId, useRef, useState } from "react";
 import type {
   ButtonHTMLAttributes,
+  HTMLAttributes,
   KeyboardEvent as ReactKeyboardEvent,
   MouseEvent as ReactMouseEvent,
   ReactElement,
@@ -136,20 +137,25 @@ export interface MenuItemProps extends Omit<ButtonHTMLAttributes<HTMLButtonEleme
   tone?: "default" | "danger";
 }
 
-export function MenuItem({ onSelect, tone = "default", className, children, onClick, ...rest }: MenuItemProps) {
+export const MenuItem = forwardRef<HTMLButtonElement, MenuItemProps>(function MenuItem(
+  { onSelect, tone = "default", className, children, onClick, ...rest },
+  ref,
+) {
   const menu = useContext(MenuContext);
 
   return (
     <button
+      ref={ref}
       type="button"
-      role="menuitem"
       tabIndex={-1}
       className={cx(styles.item, tone === "danger" && styles.danger, className)}
       {...rest}
+      role="menuitem"
       /* Composed, not overridden by `rest`: a caller's `onClick` used to take
-         the closing away from the entry. */
+         the closing away from the entry. It runs first and can prevent it. */
       onClick={(event) => {
         onClick?.(event);
+        if (event.defaultPrevented) return;
         onSelect?.();
         menu?.close();
       }}
@@ -157,9 +163,12 @@ export function MenuItem({ onSelect, tone = "default", className, children, onCl
       {children}
     </button>
   );
-}
+});
 
 /** Fine dividing line between groups of menu entries. */
-export function MenuSeparator() {
-  return <div role="separator" className={styles.separator} />;
-}
+export const MenuSeparator = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(function MenuSeparator(
+  { className, ...rest },
+  ref,
+) {
+  return <div ref={ref} className={cx(styles.separator, className)} {...rest} role="separator" />;
+});

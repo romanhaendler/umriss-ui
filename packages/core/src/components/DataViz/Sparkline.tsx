@@ -1,4 +1,4 @@
-import { useId } from "react";
+import { forwardRef, useId } from "react";
 import type { HTMLAttributes } from "react";
 import { cx } from "../../lib/cx";
 import { project } from "./scale";
@@ -17,7 +17,10 @@ export interface SparklineProps extends HTMLAttributes<HTMLSpanElement> {
 }
 
 /** A miniature trend line for table cells; the end point carries the accent. */
-export function Sparkline({ data, width = 96, height = 28, tone = "ink", className, ...rest }: SparklineProps) {
+export const Sparkline = forwardRef<HTMLSpanElement, SparklineProps>(function Sparkline(
+  { data, width = 96, height = 28, tone = "ink", className, ...rest },
+  ref,
+) {
   const id = useId();
   if (data.length < 2) return null;
 
@@ -29,7 +32,7 @@ export function Sparkline({ data, width = 96, height = 28, tone = "ink", classNa
   const [endX, endY] = points[points.length - 1] ?? [0, 0];
 
   return (
-    <span className={cx(styles.sparkline, tone === "accent" && styles.sparklineAccent, className)} {...rest}>
+    <span ref={ref} className={cx(styles.sparkline, tone === "accent" && styles.sparklineAccent, className)} {...rest}>
       <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} aria-hidden="true">
         <defs>
           <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
@@ -50,4 +53,4 @@ export function Sparkline({ data, width = 96, height = 28, tone = "ink", classNa
       </svg>
     </span>
   );
-}
+});

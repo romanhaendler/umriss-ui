@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import type { HTMLAttributes } from "react";
 import { cx } from "../../lib/cx";
 import { clampFraction, percentDisplay } from "./scale";
@@ -27,27 +28,27 @@ export interface MeterProps extends HTMLAttributes<HTMLSpanElement> {
 }
 
 /** A narrow fill-level bar, e.g. for utilisation in table cells. */
-export function Meter({
-  value,
-  tone = "accent",
-  showLabel = true,
-  label,
-  className,
-  ...rest
-}: MeterProps) {
+export const Meter = forwardRef<HTMLSpanElement, MeterProps>(function Meter(
+  { value, tone = "accent", showLabel = true, label, className, ...rest },
+  ref,
+) {
   const formats = useFormats();
   const wording = useWording();
   const fraction = clampFraction(value);
 
   return (
     <span
+      ref={ref}
+      aria-label={rest["aria-labelledby"] ? undefined : (label ?? wording.fillLevel)}
+      className={cx(styles.meter, className)}
+      {...rest}
+      /* After `rest`: the role and the values are computed from `value`, and a
+         caller's attribute would make the bar say something else than it shows
+         (P3 of core-passthrough). */
       role="meter"
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={percentDisplay(value)}
-      aria-label={rest["aria-labelledby"] ? undefined : (label ?? wording.fillLevel)}
-      className={cx(styles.meter, className)}
-      {...rest}
     >
       <span className={styles.track}>
         <span className={cx(styles.fill, styles[tone])} style={{ width: `${fraction * 100}%` }} />
@@ -55,4 +56,4 @@ export function Meter({
       {showLabel && <span className={styles.meterLabel}>{formats.percent(fraction)}</span>}
     </span>
   );
-}
+});
