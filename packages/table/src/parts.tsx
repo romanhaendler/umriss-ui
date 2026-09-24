@@ -51,7 +51,7 @@ import { asText, isAbsent, isRightAligned } from "./values";
 import { withContinuation } from "./model/grouping";
 import type { Line } from "./model/grouping";
 import { GroupLine, SpanCell } from "./groupLines";
-import { Absent, AggregateValue, SIGNED_AGGREGATES, aggregateIsNumeric } from "./aggregateValue";
+import { Absent, AggregateValue, aggregateIsNumeric } from "./aggregateValue";
 import { useLineMotion } from "./motion";
 import styles from "./Table.module.css";
 
@@ -402,11 +402,11 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
   const lines = grouping.length > 0 ? projection.visibleLines : undefined;
   const groupingEntries = lines ? registry.groupingEntries(hook.rows) : [];
   const entryOf = (id: string | undefined) => groupingEntries.find((e) => e.spec.id === id);
-  const spanEntry = lines ? entryOf(grouping.at(-1)) : undefined;
+  const spanEntry = lines && grouping.length > 1 ? entryOf(grouping.at(-1)) : undefined;
   const dataColumns = lines ? columns.filter((e) => !grouping.includes(e.spec.id)) : columns;
 
   const controlColumns = (selectable ? 1 : 0) + (detail ? 1 : 0);
-  const columnCount = controlColumns + (lines ? 1 : 0) + dataColumns.length + (actions.length > 0 ? 1 : 0);
+  const columnCount = controlColumns + (spanEntry ? 1 : 0) + dataColumns.length + (actions.length > 0 ? 1 : 0);
   const rowHeaderLeft = controlColumns * CONTROL_CELL_WIDTH;
   const sticks = (e: ColumnEntry) => stickyRowHeader && e === header;
 
@@ -897,8 +897,8 @@ function Row({
         data-motion={key}
         data-group-first={line?.first ? "" : undefined}
         aria-level={line ? line.parents.length + 1 : undefined}
-        aria-posinset={line ? line.span.rows.indexOf(row) + 1 : undefined}
-        aria-setsize={line ? line.span.rows.length : undefined}
+        aria-posinset={line ? (line.span ?? line.parents.at(-1))!.rows.indexOf(row) + 1 : undefined}
+        aria-setsize={line ? (line.span ?? line.parents.at(-1))!.rows.length : undefined}
         tabIndex={virtual ? (absolute === tabStop ? 0 : -1) : undefined}
         data-even={virtual && absolute % 2 === 1 ? "" : undefined}
         aria-rowindex={virtual ? absolute + 2 : undefined}
@@ -934,8 +934,8 @@ function Row({
             </button>
           </td>
         )}
-        {line && (
-          <SpanCell line={line} entry={spanEntry} sumColumn={columns.find((e) => SIGNED_AGGREGATES.has(e.spec.aggregate as string))} selectable={selectable} registry={registry} hook={hook} formats={formats} wording={wording} />
+        {line && line.span && (
+          <SpanCell line={{ ...line, span: line.span }} entry={spanEntry} selectable={selectable} registry={registry} hook={hook} formats={formats} wording={wording} />
         )}
         {columns.map((e) => (
           <Cell

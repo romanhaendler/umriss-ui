@@ -5,7 +5,7 @@ export const title = "By month: group=\"month\"";
 /* A delivery date grouped as it is would give every day a group of its own.
    `group="month"` brings each date to the start of its month - one word,
    no function. "day", "week" (ISO, Monday first) and "year" work the same
-   way. The cells keep their full date; the span names the month. */
+   way. The cells keep their full date; the group header names the month. */
 
 interface Delivery {
   id: string;

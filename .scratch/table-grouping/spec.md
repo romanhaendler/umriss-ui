@@ -343,9 +343,11 @@ Deviations from the text above, each decided while building:
 Open, for the user to decide:
 
 1. ~~**One level shows no group aggregates until it is folded.**~~ Decided
-   2026-09-24 (Q24, from rendered variants): an open span carries its first
-   signed aggregate at its foot, bottom right on its last row; ADR-0029 records
-   the variants rejected on sight.
+   2026-09-24 (Q24-Q27, each from rendered variants): the outermost level is
+   always a group header carrying every aggregate; one level is a header over
+   plain rows, the span is the innermost of several levels and carries none
+   open. The share bar stands once per header, under the first sum. ADR-0029
+   records the six variants rejected on sight.
 2. **The user groups through `<ColumnMenu>`.** A table without a column menu
    can be grouped by the application only.
 3. **Groups follow an aggregate on any sort level**, not only the first:

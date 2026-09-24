@@ -667,8 +667,16 @@
 
   /* A group header: the sunken tone across the full width. Its only line is
      the strong one above it; its own edge is its boundary below. */
-  .groupHeader > .td {
+  /* The tone is painted once, on the row: painted per cell, the boundary of
+     two cells shows as a faint seam at a fractional zoom (1.5x). A sticking
+     header paints its cells as well - a sticky cell needs a surface of its
+     own. */
+  .groupHeader {
     background: var(--u-color-surface-sunken);
+  }
+
+  .groupHeader > .td {
+    background: none;
     border-top: 1px solid var(--u-hairline-strong);
     border-bottom: none;
     font-weight: var(--u-weight-medium);
@@ -682,6 +690,7 @@
      above it; the heights come from the table (parts.tsx, `--u-table-head` and
      `--u-table-group-header`). */
   .sticky tbody tr.groupHeader > .td {
+    background: var(--u-color-surface-sunken);
     position: sticky;
     top: calc(var(--u-table-head, 0px) + var(--u-header-level, 0) * var(--u-table-group-header, 0px));
     z-index: 1;
@@ -709,6 +718,14 @@
   }
 
   .table tbody tr.groupHeader:hover > .td {
+    background: none;
+  }
+
+  .striped tbody tr.groupHeader > .td {
+    background: none;
+  }
+
+  .sticky tbody tr.groupHeader:hover > .td {
     background: var(--u-color-surface-sunken);
   }
 
@@ -776,25 +793,6 @@
   .groupHeader .groupCount,
   .groupHeader .continued {
     color: var(--u-color-text-secondary);
-  }
-
-  /* The span's aggregate stands at its foot, right-aligned like the count
-     above it: the two frame the group. Absolute, so that the last row keeps
-     its height; the sign reads as in the footer. */
-  .spanCell {
-    position: relative;
-  }
-
-  .spanAggregate {
-    position: absolute;
-    right: var(--u-space-2);
-    bottom: var(--u-space-2);
-    font-family: var(--u-font-mono);
-    font-size: var(--u-text-xs);
-    font-weight: var(--u-weight-medium);
-    font-variant-numeric: tabular-nums;
-    color: var(--u-color-text);
-    white-space: nowrap;
   }
 
   /* In the span the count stands right, apart from the value. */
@@ -888,24 +886,24 @@
     color: var(--u-color-text-muted);
   }
 
-  .aggregateCell {
+  /* The bar hangs from the number, not from the cell: a positioned cell in a
+     collapsed table draws its borders apart from its neighbours', and the band
+     showed a seam where the aggregates began. */
+  .shareHost {
     position: relative;
+    display: inline-block;
   }
 
   /* The share bar hangs from the cell's lower edge and costs no height: the
      group's share of the filtered set's sum, at most 64 px of ink. */
   .shareBar {
     position: absolute;
-    right: var(--u-space-2);
-    bottom: 3px;
+    right: 0;
+    bottom: -5px;
     height: 2px;
     border-radius: 1px;
     background: var(--u-color-text);
     opacity: 0.35;
-  }
-
-  .td:last-child > .shareBar {
-    right: var(--u-space-3);
   }
 
   /* ---- Row detail ------------------------------------------------------ */
