@@ -1,0 +1,56 @@
+# Publishes one package to npm when its tag is pushed: `<dir>-v<version>`,
+# e.g. core-v0.5.0 (docs/releasing.md). No token: npm trusts this workflow
+# through OIDC (Trusted Publishing) and attaches the provenance itself.
+name: Publish
+
+on:
+  push:
+    tags: ['*-v*']
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: npm
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      # Node 24 brings npm 11, which Trusted Publishing needs (>= 11.5.1).
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      - name: Read the tag
+        id: tag
+        run: |
+          dir="${GITHUB_REF_NAME%-v*}"
+          version="${GITHUB_REF_NAME##*-v}"
+          manifest="packages/$dir/package.json"
+          test -f "$manifest" || { echo "::error::No package at packages/$dir"; exit 1; }
+          actual="$(node -p "require('./$manifest').version")"
+          test "$actual" = "$version" || { echo "::error::Tag says $version, $manifest says $actual"; exit 1; }
+          case "$version" in *-*) dist_tag=next ;; *) dist_tag=latest ;; esac
+          echo "dir=$dir" >> "$GITHUB_OUTPUT"
+          echo "dist_tag=$dist_tag" >> "$GITHUB_OUTPUT"
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test:unit
+      - run: pnpm build
+      - run: pnpm run check:dist
+        working-directory: packages/${{ steps.tag.outputs.dir }}
+
+      # pnpm packs (it rewrites the workspace: ranges), npm uploads (pnpm 9
+      # cannot do Trusted Publishing). npm runs no lifecycle scripts on a
+      # tarball, so prepublishOnly's work is the steps above.
+      - name: Publish
+        working-directory: packages/${{ steps.tag.outputs.dir }}
+        run: |
+          pnpm pack
+          npm publish ./*.tgz --tag ${{ steps.tag.outputs.dist_tag }}
