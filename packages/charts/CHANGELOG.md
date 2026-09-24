@@ -43,6 +43,14 @@ interface was still expected to move before `0.3.0`.
   highest and last value of each stretch - and its caption says how many
   readings the rows stand for. The plot keeps its size beneath and is hidden
   while the table is open.
+- **`Chart encoding="marks"`** (charts-alternatives 02): series told apart
+  without colour. Each series takes a dash pattern and a marker shape - a
+  line, an area's outline, a scatter's points - or a hatch across its fill - a
+  bar, an area -, chosen by the same palette place as its colour, the first
+  plain; a caller's own `dash` wins. A state band hatches each state by its
+  place in the state list, a matrix each step of its colouring, a limit band
+  is hatched in its colour. The legend's chips draw the same marks. The
+  default, `"color"`, changes nothing.
 
 ### Changed
 

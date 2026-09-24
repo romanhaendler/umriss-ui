@@ -46,6 +46,7 @@ import { DEFAULT_CHARTS_WORDING, type ChartsWording } from "./wording";
 import { hasCell, nearestPosition, rowEnd, stepCell, stepPosition, type Cell, type Move, type WalkSeries } from "./walk";
 import { downsample, type Course } from "./downsample";
 import { tableRows } from "./table";
+import { hatchFor, marksFor, type Hatch, type MarkerShape, type SeriesMarks } from "./marks";
 import { lastSegmentEnd, medianStep, segmentEnd, segmentIndex } from "./state";
 import { cellSize, cellIndex, measureSpacing } from "./cells";
 import { assess } from "./limit";
@@ -158,6 +159,20 @@ export interface LegendItem {
   /** The series highlighted on hover - several where state bands share a
       state. */
   seriesIds: number[];
+  /** Under encoding by marks (charts-alternatives C3), what the chip shows
+      besides the colour; null where the colour stands alone. */
+  mark: LegendMark | null;
+}
+
+/** A legend chip's marks: a line with its dash and marker (a scatter: the
+    marker alone), or swatches with their hatch - one for a bar or a state, one
+    per step for a matrix. `ground` is the colour a hatch is drawn in across a
+    swatch. */
+export interface LegendMark {
+  dash: readonly number[] | null;
+  marker: MarkerShape | null;
+  swatches: readonly { color: string; hatch: Hatch }[] | null;
+  ground: string;
 }
 
 /** A labelled limit, ready for the axis band. */
@@ -557,6 +572,8 @@ export class ChartScene {
   private legend: LegendConfig | null = null;
   private tooltip: TooltipConfig | null = null;
   private dataTable: { id: string; open: boolean } | null = null;
+  /** `Chart encoding` (charts-alternatives C3). */
+  private encoding: "color" | "marks" = "color";
   private limits = new Map<number, LimitEntry>();
 
   /* ---------- Data and layout inputs ---------- */
@@ -888,6 +905,24 @@ export class ChartScene {
     if (this.dataTable === null) return;
     this.dataTable = { ...this.dataTable, open: !this.dataTable.open };
     this.pushLayoutSnapshot();
+  }
+
+  setEncoding(encoding: "color" | "marks"): void {
+    if (encoding === this.encoding) return;
+    this.encoding = encoding;
+    this.markLayoutDirty();
+  }
+
+  /** Is every series drawn with its marks as well as its colour? */
+  private marked(): boolean {
+    return this.encoding === "marks";
+  }
+
+  /** A series' marks by its palette place - the same place its colour comes
+      from; null without encoding by marks, and for the kinds that take no
+      place (a band and a cell are hatched by state and by step instead). */
+  private marksOf(entry: SeriesEntry): SeriesMarks | null {
+    return this.marked() && takesPalette(entry.config) ? marksFor(this.paletteSlot(entry)) : null;
   }
 
   /** The words the HTML layer writes - the data table's key among them. */
@@ -1544,6 +1579,7 @@ export class ChartScene {
     // would not be a legend but a list.
     // A band that shares an entry is highlighted with it.
     const seen = new Map<string, LegendItem>();
+    const theme = this.theme ?? FALLBACK_THEME;
     this.seriesInOrder().forEach((entry, i) => {
       const config = entry.config;
       if (config.kind === "state") {
@@ -1563,6 +1599,7 @@ export class ChartScene {
             hidden: config.hidden === true,
             color: z.color,
             seriesIds: [entry.order],
+            mark: this.marked() ? { dash: null, marker: null, swatches: [{ color: this.paint(z.color), hatch: hatchFor(k) }], ground: theme.colorBg } : null,
           };
           seen.set(key, item);
           out.push(item);
@@ -1575,12 +1612,36 @@ export class ChartScene {
         hidden: config.hidden === true,
         color:
           config.kind === "matrix"
-            ? chipOf(matrixColors(config.coloring, this.theme ?? FALLBACK_THEME))
+            ? chipOf(matrixColors(config.coloring, theme))
             : this.colorFor(entry),
         seriesIds: [entry.order],
+        mark: this.legendMark(entry, theme),
       });
     });
     return out;
+  }
+
+  /** What a series' chip shows under encoding by marks. */
+  private legendMark(entry: SeriesEntry, theme: ResolvedTheme): LegendMark | null {
+    if (!this.marked()) return null;
+    const config = entry.config;
+    if (config.kind === "matrix") {
+      const swatches = matrixColors(config.coloring, theme).map((c, k) => ({ color: this.paint(c), hatch: hatchFor(k) }));
+      return { dash: null, marker: null, swatches, ground: theme.colorBg };
+    }
+    const marks = this.marksOf(entry);
+    if (marks === null) return null;
+    const color = this.colorFor(entry);
+    switch (config.kind) {
+      case "line":
+        return { dash: config.dash ?? marks.dash, marker: marks.marker, swatches: null, ground: theme.colorBg };
+      case "area":
+        return { dash: config.dash ?? marks.dash, marker: null, swatches: null, ground: theme.colorBg };
+      case "scatter":
+        return { dash: null, marker: marks.marker, swatches: null, ground: theme.colorBg };
+      default:
+        return { dash: null, marker: null, swatches: [{ color, hatch: marks.hatch }], ground: theme.colorBg };
+    }
   }
 
   /* ---------- Limits, ready in pixels ---------- */
@@ -1624,6 +1685,7 @@ export class ChartScene {
           color,
           band: true,
           dash,
+          hatch: this.marked(),
         });
       } else {
         const px = axis.scale.toPx(this.limitAt(config, config.value));
@@ -1694,6 +1756,7 @@ export class ChartScene {
       const yAxis = this.findAxis("y", entry.config.yAxisId);
       if (xAxis === null || yAxis === null) return;
       const dimmed = highlight !== null && !highlight.includes(entry.order);
+      const marks = this.marksOf(entry);
       const base: DrawBase = {
         x: mat.x,
         y: mat.y,
@@ -1719,9 +1782,11 @@ export class ChartScene {
             ...base,
             kind: "line",
             strokeWidth: config.strokeWidth,
-            dash: config.dash,
+            // A dash of the caller's own wins over the one its place gives.
+            dash: config.dash ?? marks?.dash,
             markers: config.markers,
             step: config.step,
+            marker: marks?.marker,
           });
           break;
         case "area":
@@ -1732,7 +1797,8 @@ export class ChartScene {
             baseline: 0,
             fillOpacity: config.fillOpacity,
             strokeWidth: config.strokeWidth,
-            dash: config.dash,
+            dash: config.dash ?? marks?.dash,
+            hatch: marks?.hatch,
           });
           break;
         case "bar": {
@@ -1758,11 +1824,12 @@ export class ChartScene {
             baseline: 0,
             offset: placement.offset,
             width: placement.width,
+            hatch: marks?.hatch,
           });
           break;
         }
         case "scatter":
-          items.push({ ...base, kind: "scatter", radius: config.radius });
+          items.push({ ...base, kind: "scatter", radius: config.radius, marker: marks?.marker });
           break;
         case "state": {
           const lane = this.lanePx(config, yAxis);
@@ -1773,6 +1840,7 @@ export class ChartScene {
             laneTop: lane.top,
             laneBottom: lane.bottom,
             lastEnd: this.lastEnd(entry, mat, xAxis),
+            hatches: this.marked() ? config.states.map((_, k) => hatchFor(k)) : null,
           });
           break;
         }
@@ -1783,6 +1851,7 @@ export class ChartScene {
             kind: "matrix",
             buckets: (entry.buckets ??= matrixBuckets(mat, config.coloring, colors.length)),
             colors: colors,
+            hatches: this.marked() ? colors.map((_, k) => hatchFor(k)) : null,
             width: cellSize(
               entry.step ?? 0,
               xAxis.scale.domain[1] - xAxis.scale.domain[0],
