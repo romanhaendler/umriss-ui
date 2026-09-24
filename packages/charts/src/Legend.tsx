@@ -8,6 +8,7 @@
 
 import { useSyncExternalStore, type ReactNode } from "react";
 import { useChartScene, useLegend } from "./context";
+import { DataKey } from "./DataTable";
 import type { ChartScene } from "./scene";
 
 export interface LegendProps {
@@ -35,7 +36,8 @@ function LegendInner({
     scene.getLayoutSnapshot,
     scene.getLayoutServerSnapshot,
   );
-  if (snapshot.series.length === 0) return null;
+  const table = snapshot.dataTable;
+  if (snapshot.series.length === 0 && table === null) return null;
   return (
     <div className={`uc-legend uc-legend-${placement}`}>
       {snapshot.series.map((item) => {
@@ -67,6 +69,10 @@ function LegendInner({
           </button>
         );
       })}
+      {/* The data table's key stands at the legend's end (charts-alternatives
+          C1): the legend is where a reader looks for what the colours mean,
+          and the table is the other answer to that question. */}
+      {table !== null && <DataKey scene={scene} state={table} />}
     </div>
   );
 }
