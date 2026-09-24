@@ -72,6 +72,17 @@ interface RuntimeColumnProps {
   filter?: ColumnSpec["filter"];
   sortValue?: (value: never) => unknown;
   exportValue?: (value: never) => unknown;
+  groupValue?: (value: never) => unknown;
+  group?: ColumnSpec["group"];
+  groupable?: boolean;
+}
+
+interface RuntimeGroupByProps {
+  id?: string;
+  value: string | ((row: never) => unknown);
+  label: string;
+  groupValue?: (value: never) => unknown;
+  group?: ColumnSpec["group"];
 }
 
 interface RuntimeActionProps {
@@ -87,6 +98,7 @@ export interface Parts {
   RowDetail: (props: { children: (row: never) => ReactNode }) => ReactNode;
   RowActions: (props: { children: ReactNode }) => ReactNode;
   Action: (props: RuntimeActionProps) => ReactNode;
+  GroupBy: (props: RuntimeGroupByProps) => ReactNode;
 }
 
 function specFrom(props: RuntimeColumnProps): ColumnSpec {
@@ -119,6 +131,9 @@ function specFrom(props: RuntimeColumnProps): ColumnSpec {
     filter: props.filter,
     ownSortValue: props.sortValue,
     ownExportValue: props.exportValue,
+    ownGroupValue: props.groupValue,
+    group: props.group,
+    groupable: props.groupable,
   };
 }
 
@@ -245,12 +260,46 @@ export function buildParts(registry: Registry): Parts {
     return <span hidden data-umriss-action={key} />;
   }
 
+  /* --------------------------------------------------------------- GroupBy */
+
+  function GroupBy(props: RuntimeGroupByProps): ReactNode {
+    const key = useId();
+    const field = typeof props.value === "string" ? props.value : undefined;
+    const id = props.id ?? field ?? props.label;
+    const spec: ColumnSpec = {
+      id,
+      label: props.label,
+      value: props.value,
+      rowHeader: false,
+      resizable: false,
+      ownGroupValue: props.groupValue,
+      group: props.group,
+      groupable: true,
+    };
+    // Writes idempotently (registry.ts, guarantee 1).
+    registry.registerGroupKey(key, spec);
+    useLayoutEffect(
+      () => () => {
+        registry.removeGroupKey(key);
+        registry.commit();
+      },
+      [key],
+    );
+    useLayoutEffect(() => {
+      registry.ensureGroupKey(key, spec);
+      registry.checkOrder();
+      registry.commit();
+    });
+    return <span hidden data-umriss-groupkey={key} />;
+  }
+
   /* ----------------------------------------------------------------- Table */
 
   function Table(props: TableProps<unknown>): ReactNode {
-    // Both idempotent (registry.ts, guarantee 1).
+    // All idempotent (registry.ts, guarantee 1).
     registry.beginPass();
     registry.setStickyRowHeader(props.stickyRowHeader === true);
+    registry.setTableGroupable(props.groupable !== false);
     const childrenRef = useRef<HTMLDivElement>(null);
     const [footerTarget, setFooterTarget] = useState<HTMLDivElement | null>(null);
 
@@ -279,7 +328,7 @@ export function buildParts(registry: Registry): Parts {
     );
   }
 
-  const parts: Parts = { Table, Column, RowDetail, RowActions, Action };
+  const parts: Parts = { Table, Column, RowDetail, RowActions, Action, GroupBy };
   link(Table, registry);
   return parts;
 }

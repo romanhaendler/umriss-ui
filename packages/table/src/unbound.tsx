@@ -22,6 +22,7 @@ import { Button, Checkbox, Input, Popover, Select, useFormats, useWording } from
 import { cx } from "./cx";
 import { useConnection } from "./context";
 import { TableToolbar } from "./toolbar";
+import { GroupingChoice } from "./grouping";
 import type { PartKind, Registry } from "./registry";
 import { orderColumns } from "./model/tableModel";
 import type { TableRef } from "./types";
@@ -229,6 +230,7 @@ export function ColumnMenu({ of }: ColumnMenuProps) {
             );
           })}
         </ul>
+        <GroupingChoice registry={registry} hook={hook} />
       </Popover>
     </>
   );

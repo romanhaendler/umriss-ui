@@ -38,7 +38,8 @@ import type { TableSnapshot } from "./types";
 import { warnOnce } from "./dev";
 import { columnKind, sortValue } from "./values";
 import type { Format, ValueKind } from "./values";
-import type { AggregateKind } from "./model/grouping";
+import type { Aggregated, AggregateKind, DateKey, GroupLevel } from "./model/grouping";
+import { dateKey } from "./model/grouping";
 import { filterOf } from "./columnFilter";
 import type { FilterSpec } from "./columnFilter";
 
@@ -68,6 +69,11 @@ export interface ColumnSpec {
   filter?: FilterSpec;
   ownSortValue?: (value: never) => unknown;
   ownExportValue?: (value: never) => unknown;
+  /** What is grouped by, when not the value itself. */
+  ownGroupValue?: (value: never) => unknown;
+  /** Groups a point in time by its day, week, month or year. */
+  group?: DateKey;
+  groupable?: boolean;
 }
 
 export interface ColumnEntry {
@@ -105,6 +111,10 @@ export interface HookSnapshot {
   modelColumns: readonly Column<unknown>[];
   companion: Companion<unknown, string>;
   filter: ((row: unknown) => boolean) | undefined;
+  /** What the table is grouped by, as the model takes it - absent when not. */
+  grouping: TableInput<unknown>["grouping"];
+  /** The folded paths - for a grouping the body resolves itself. */
+  folded: ReadonlySet<string>;
   publicSnapshot: TableSnapshot<unknown>;
   rowKey: (row: unknown) => string;
   /** The provider's formats - the text comparison of the sort comes from there. */
@@ -171,6 +181,9 @@ const signatureOf = (a: ColumnSpec): string =>
     !!a.presentation,
     !!a.ownSortValue,
     !!a.ownExportValue,
+    !!a.ownGroupValue,
+    a.group,
+    a.groupable,
   ]);
 
 const readField = (row: unknown, field: string): unknown =>
@@ -179,6 +192,8 @@ const readField = (row: unknown, field: string): unknown =>
 export class Registry {
   readonly columns = new List<ColumnEntry>("data-umriss-column");
   readonly actions = new List<ActionEntry>("data-umriss-action");
+  /** The group keys: values to group by that are no column. */
+  readonly groupKeys = new List<ColumnEntry>("data-umriss-groupkey");
   private signatures = new Map<string, string>();
 
   /** The row detail: the presentation of the `RowDetail` that registered last. */
@@ -241,6 +256,7 @@ export class Registry {
   beginPass() {
     this.columns.pass = [];
     this.actions.pass = [];
+    this.groupKeys.pass = [];
   }
 
   /** After the commit: check the order against the DOM. */
@@ -248,6 +264,7 @@ export class Registry {
     if (!this.children) return;
     if (this.columns.check(this.children)) this.structure++;
     if (this.actions.check(this.children)) this.structure++;
+    if (this.groupKeys.check(this.children)) this.structure++;
   }
 
   /* --- Columns ------------------------------------------------------------------ */
@@ -271,7 +288,9 @@ export class Registry {
     } else {
       const old = existing.spec;
       if (this.signatures.get(key) !== signature) this.structure++;
-      if (old.value !== spec.value || old.ownSortValue !== spec.ownSortValue) this.values++;
+      if (old.value !== spec.value || old.ownSortValue !== spec.ownSortValue || old.ownGroupValue !== spec.ownGroupValue) {
+        this.values++;
+      }
       if (
         old.presentation !== spec.presentation ||
         old.ownExportValue !== spec.ownExportValue ||
@@ -346,6 +365,121 @@ export class Registry {
 
   rowHeader(): ColumnEntry | undefined {
     return this.orderedColumns().find((e) => e.spec.rowHeader);
+  }
+
+  /* --- Group keys and the grouping ---------------------------------------------- */
+
+  /** A group key registers during the render, as a column does. Idempotent. */
+  registerGroupKey(key: string, spec: ColumnSpec) {
+    const existing = this.groupKeys.entries.get(key);
+    const signature = signatureOf(spec);
+    if (!existing) {
+      const entry: ColumnEntry = {
+        key,
+        spec,
+        read: (row) => {
+          const value = entry.spec.value;
+          return typeof value === "string" ? readField(row, value) : (value as (z: unknown) => unknown)(row);
+        },
+      };
+      this.groupKeys.entries.set(key, entry);
+      this.structure++;
+    } else {
+      if (this.signatures.get(key) !== signature) this.structure++;
+      if (existing.spec.value !== spec.value || existing.spec.ownGroupValue !== spec.ownGroupValue) this.values++;
+      existing.spec = spec;
+    }
+    this.signatures.set(key, signature);
+    this.groupKeys.note(key);
+  }
+
+  ensureGroupKey(key: string, spec: ColumnSpec) {
+    if (!this.groupKeys.entries.has(key)) this.registerGroupKey(key, spec);
+  }
+
+  removeGroupKey(key: string) {
+    if (!this.groupKeys.entries.delete(key)) return;
+    this.signatures.delete(key);
+    this.kinds.delete(key);
+    this.structure++;
+  }
+
+  /** Whether the table lets itself be grouped at all (`<Table groupable>`). */
+  tableGroupable = true;
+
+  setTableGroupable(groupable: boolean) {
+    if (this.tableGroupable === groupable) return;
+    this.tableGroupable = groupable;
+    this.structure++;
+  }
+
+  /** Everything a table can be grouped by: its columns, then its group keys. */
+  groupingEntries(rows: readonly unknown[]): ColumnEntry[] {
+    if (!this.tableGroupable) return [];
+    const seen = new Set<string>();
+    return [...this.orderedColumns(), ...this.groupKeys.ordered()].filter((e) => {
+      if (seen.has(e.spec.id)) return false;
+      seen.add(e.spec.id);
+      const { groupable, ownGroupValue } = e.spec;
+      return groupable ?? (this.kindOf(e, rows) !== "other" || !!ownGroupValue);
+    });
+  }
+
+  /** The ids of a grouping that something groupable carries - at most three,
+      each once. */
+  effectiveGrouping(ids: readonly string[], rows: readonly unknown[]): string[] {
+    const known = new Set(this.groupingEntries(rows).map((e) => e.spec.id));
+    return [...new Set(ids)].filter((id) => known.has(id)).slice(0, 3);
+  }
+
+  private groupingCache: { key: string; levels: GroupLevel<unknown>[]; aggregates: Aggregated<unknown>[] } | null = null;
+
+  /** The levels and aggregates for the model - the same identity as long as
+      nothing changed that they read. */
+  groupingModel(ids: readonly string[], rows: readonly unknown[]): { levels: GroupLevel<unknown>[]; aggregates: Aggregated<unknown>[] } {
+    const key = [ids.join("|"), this.structure, this.values].join(":");
+    if (this.groupingCache?.key === key) return this.groupingCache;
+    const entries = this.groupingEntries(rows);
+    const levels = ids
+      .map((id) => entries.find((e) => e.spec.id === id))
+      .filter((e): e is ColumnEntry => e !== undefined)
+      .map((entry): GroupLevel<unknown> => ({
+        id: entry.spec.id,
+        key: (row) => {
+          const value = entry.read(row);
+          if (value === null || value === undefined) return undefined;
+          const { ownGroupValue, group } = entry.spec;
+          if (ownGroupValue) return ownGroupValue(value as never);
+          if (group) return dateKey(group)(value);
+          return value;
+        },
+      }));
+    const aggregates = this.orderedColumns()
+      .filter((e) => e.spec.aggregate !== undefined)
+      .map(
+        (entry): Aggregated<unknown> => ({
+          id: entry.spec.id,
+          read: entry.read,
+          /* Read with the latest spec on every call: an aggregate of one's own
+             written in the call is a new function on every render. */
+          aggregate:
+            typeof entry.spec.aggregate === "function"
+              ? (values, rows) => (entry.spec.aggregate as (v: unknown, r: unknown) => unknown)(values, rows)
+              : entry.spec.aggregate!,
+        }),
+      );
+    this.groupingCache = { key, levels, aggregates };
+    return this.groupingCache;
+  }
+
+  /** The grouping for the body's own pass: resolved against the columns of
+      this pass, so that even the first frame stands grouped. */
+  private groupingFor(hook: HookSnapshot): TableInput<unknown>["grouping"] {
+    const ids = this.effectiveGrouping(hook.publicSnapshot.grouping, hook.rows);
+    if (ids.length === 0) return undefined;
+    const model = this.groupingModel(ids, hook.rows);
+    if (hook.grouping?.levels === model.levels) return hook.grouping;
+    return { ...model, folded: hook.folded, compareText: hook.formats.compareText };
   }
 
   /* --- The kind of a column ------------------------------------------------------- */
@@ -428,7 +562,10 @@ export class Registry {
     const projection = this.computedProjection();
     if (this.paginates() || this.hook!.companion.virtual) return projection;
     if (this.unpaged?.from !== projection) {
-      this.unpaged = { from: projection, projection: { ...projection, visible: projection.filtered, page: 1, pageCount: 1 } };
+      this.unpaged = {
+        from: projection,
+        projection: { ...projection, visible: projection.filtered, visibleLines: projection.lines, page: 1, pageCount: 1 },
+      };
     }
     return this.unpaged.projection;
   }
@@ -451,11 +588,10 @@ export class Registry {
       pageSize: b.virtual ? 0 : b.pageSize,
       hidden: b.hidden,
       order: b.order,
+      grouping: this.groupingFor(hook),
     };
     const fresh = tableModel(hook.admitted, columns, input);
-    const projection = b.virtual
-      ? { ...fresh, visible: fresh.filtered.slice(b.virtual.from, b.virtual.to) }
-      : fresh;
+    const projection = b.virtual ? windowed(fresh, b.virtual.from, b.virtual.to) : fresh;
     this.projectionCache = { hook, columns, projection };
     return projection;
   }
@@ -500,10 +636,15 @@ export class Registry {
     return this.count("pagination") > 0;
   }
 
-  /** Whether the table puts up a table toolbar of its own. */
+  /** Whether the table puts up a table toolbar of its own - also while it is
+      grouped: the chip that names and removes the grouping needs a place. */
   needsOwnToolbar(): boolean {
     if (this.count("toolbar") > 0) return false;
-    return this.count("search") > 0 || this.orderedColumns().some((e) => filterOf(e.spec.filter) !== undefined);
+    return (
+      this.count("search") > 0 ||
+      this.orderedColumns().some((e) => filterOf(e.spec.filter) !== undefined) ||
+      (this.hook?.publicSnapshot.grouping.length ?? 0) > 0
+    );
   }
 
   /* --- Row detail ------------------------------------------------------------------- */
@@ -561,6 +702,14 @@ export class Registry {
   removeAction(key: string) {
     if (this.actions.entries.delete(key)) this.structure++;
   }
+}
+
+/** The virtual window of a projection: of its lines when it is grouped, of its
+    rows otherwise. */
+export function windowed<Z>(projection: TableProjection<Z>, from: number, to: number): TableProjection<Z> {
+  if (!projection.lines) return { ...projection, visible: projection.filtered.slice(from, to) };
+  const visibleLines = projection.lines.slice(from, to);
+  return { ...projection, visibleLines, visible: visibleLines.flatMap((l) => (l.kind === "row" ? [l.row] : [])) };
 }
 
 /* Which registry belongs to a table: fastened to the hook's stable `Table`, so
