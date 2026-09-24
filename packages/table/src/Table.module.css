@@ -687,6 +687,20 @@
     z-index: 1;
   }
 
+  /* The shadow step appears only while content lies beneath a band - the
+     table marks a band that sticks (parts.tsx). A box-shadow on a cell of a
+     collapsed table is not painted in Chromium; a gradient below the cell is. */
+  .sticky tbody tr.groupHeader[data-stuck] > .td::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    height: 6px;
+    background: linear-gradient(color-mix(in srgb, var(--u-color-text) 9%, transparent), transparent);
+    pointer-events: none;
+  }
+
   /* The span's value stays in view while its group scrolls, and the next
      group's first row lays itself over it. */
   .sticky tbody tr[data-group-first] > .spanCell {
@@ -768,6 +782,20 @@
   .spanValue > .groupCount {
     margin-left: auto;
     padding-left: var(--u-space-2);
+  }
+
+  /* Three levels: a hairline per level at the left, as in the tree view, so
+     that the depth reads without a desert of indentation. */
+  .table[data-depth="3"] tbody tr.groupHeader[data-level="1"] > .td:not(.control),
+  .table[data-depth="3"] tbody tr:not(.groupHeader) > .spanCell {
+    background-image: linear-gradient(var(--u-hairline-strong), var(--u-hairline-strong));
+    background-repeat: no-repeat;
+    background-size: 1px 100%;
+    background-position: calc(var(--u-space-3) + 7px) 0;
+  }
+
+  .table[data-depth="3"] tbody tr.groupHeader[data-level="1"] > .td:not(.control) ~ .td {
+    background-image: none;
   }
 
   /* The box of a span group stands before its fold. */
