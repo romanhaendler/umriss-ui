@@ -404,19 +404,24 @@ export class Registry {
     this.structure++;
   }
 
-  /** The group whose fold takes the focus after its line was drawn anew - a
-      folded span is a new row, and the focus would otherwise be lost. */
-  private pendingFoldFocus: string | null = null;
+  /** The focus a fold may hide: the focused element of a grouped line, the
+      group that line stands in, and its table - noted before the fold, since
+      afterwards the element may be gone and the focus lost. */
+  private focusBeforeFold: { element: Element; group: string; table: Element | null } | null = null;
 
-  requestFoldFocus(path: string) {
-    this.pendingFoldFocus = path;
+  /** Notes where the focus stands - from the event that folds, never in a
+      render. */
+  noteFocusBeforeFold() {
+    const element = document.activeElement;
+    const group = element?.closest<HTMLElement>("tr[data-group]")?.dataset.group;
+    this.focusBeforeFold = element && group !== undefined ? { element, group, table: element.closest("table") } : null;
   }
 
-  /** Whether this group's fold is to take the focus now - once. */
-  takeFoldFocus(path: string): boolean {
-    if (this.pendingFoldFocus !== path) return false;
-    this.pendingFoldFocus = null;
-    return true;
+  /** The focus noted before the last fold - once. */
+  takeFocusBeforeFold() {
+    const noted = this.focusBeforeFold;
+    this.focusBeforeFold = null;
+    return noted;
   }
 
   /** Whether the table lets itself be grouped at all (`<Table groupable>`). */
