@@ -4,7 +4,7 @@ import { cx } from "../../lib/cx";
 import { useFormField } from "../FormField";
 import styles from "./Select.module.css";
 import { useWording } from "../../lib/language";
-import { CrossGlyph } from "../../lib/glyphs";
+import { AngleGlyph, CrossGlyph } from "../../lib/glyphs";
 
 export interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   /** `sm` for dense forms and table rows, `md` otherwise. Not called `size`,
@@ -69,7 +69,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
           <CrossGlyph />
         </button>
       )}
-      <span className={styles.chevron} aria-hidden="true" />
+      <AngleGlyph className={styles.chevron} />
     </span>
   );
 });

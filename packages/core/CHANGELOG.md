@@ -29,6 +29,20 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.9.2 – Today's dot, one chevron (Sep. 2026)
+
+### Changed
+
+- **Today is marked by a dot beneath its figure**, no longer by an outline.
+  The outline read like the keyboard focus beside it; the focus is now the
+  only ring in the calendar. On a chosen day the dot takes the ink's type
+  colour. Applies to all four pickers.
+- **Select, Combobox and MultiSelect draw their chevron with `AngleGlyph`**,
+  turned down: the one stroke width of every glyph, a shade smaller and
+  rounder than the CSS angle it replaces.
+
+---
+
 ## 0.9.1 – Depth work on the pickers and the select family (Sep. 2026)
 
 ### Fixed
