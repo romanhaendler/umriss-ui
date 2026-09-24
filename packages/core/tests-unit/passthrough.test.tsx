@@ -254,3 +254,25 @@ describe("Every exported component passes ref, class, style and the rest through
     expect(container.ownerDocument.querySelectorAll(`[data-probe="${name}"]`)).toHaveLength(1);
   });
 });
+
+/* P3: what `...rest` may not override. The role and the aria attributes a
+   component computes are what it has read; a caller's attribute of the same
+   name would make it say something else than it shows. */
+describe("What the rest may not override", () => {
+  it("Stat keeps the name it has read and its role", () => {
+    const foreign = { role: "note", "aria-label": "Other" } as object;
+    const { container } = render(<core.Stat label="Temperature" value={21} unit="°C" {...foreign} />);
+    const tile = container.firstElementChild!;
+    expect(tile.getAttribute("role")).toBe("group");
+    expect(tile.getAttribute("aria-label")).toBe("Temperature: 21 °C");
+  });
+
+  it("Meter keeps its role and value, and takes a caller's name", () => {
+    const foreign = { role: "img", "aria-valuenow": 99 } as object;
+    const { container } = render(<core.Meter value={0.4} aria-label="Load" {...foreign} />);
+    const meter = container.firstElementChild!;
+    expect(meter.getAttribute("role")).toBe("meter");
+    expect(meter.getAttribute("aria-valuenow")).toBe("40");
+    expect(meter.getAttribute("aria-label")).toBe("Load");
+  });
+});
