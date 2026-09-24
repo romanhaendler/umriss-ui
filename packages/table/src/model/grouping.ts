@@ -17,6 +17,10 @@ export interface GroupLevel<Z> {
   /** The grouping value - the column's value, or what `groupValue` or a date
       key made of it. Absent values form one group of their own. */
   key: (row: Z) => unknown;
+  /** Where the groups of a key of one's own stand: by the smallest of this
+      over their rows. Bands of a number are named "Small", "Large" and
+      must not stand in the alphabet's order. */
+  order?: (row: Z) => unknown;
 }
 
 /** The built-in aggregates. `range` is for points in time: the earliest and
@@ -145,8 +149,17 @@ export function groupRows<Z>(rows: readonly Z[], input: GroupingInput<Z>): RowGr
     );
     const direction = decisive?.direction === "desc" ? -1 : 1;
     const byAggregate = decisive !== undefined && decisive.column !== spec.id ? decisive.column : undefined;
+    const smallest = (group: RowGroup<Z>): unknown => {
+      let best: unknown;
+      for (const row of group.rows) {
+        const value = spec.order!(row);
+        if (comparable(value) === undefined) continue;
+        if (best === undefined || compareKeys(value, best, compareText) < 0) best = value;
+      }
+      return best;
+    };
     const sortKey = (group: RowGroup<Z>): unknown => {
-      if (byAggregate === undefined) return group.value;
+      if (byAggregate === undefined) return spec.order ? smallest(group) : group.value;
       const value = group.aggregates[byAggregate];
       return Array.isArray(value) ? value[0] : value;
     };

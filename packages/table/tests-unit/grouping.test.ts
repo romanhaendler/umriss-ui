@@ -270,3 +270,13 @@ describe("tableModel with a grouping", () => {
     expect(projection.visible).toHaveLength(4);
   });
 });
+
+describe("groups by a value of one's own", () => {
+  it("stand in the order of what they hold, not of their names", () => {
+    const band = (q: number) => (q < 1000 ? "Small" : q < 3000 ? "Medium" : "Large");
+    const size: GroupLevel<Order> = { id: "size", key: (o) => band(o.quantity), order: (o) => o.quantity };
+    expect(groupRows(ORDERS, { levels: [size] }).map((g) => g.value)).toEqual(["Small", "Medium", "Large"]);
+    const down = groupRows(ORDERS, { levels: [size], sort: [{ column: "size", direction: "desc" }] });
+    expect(down.map((g) => g.value)).toEqual(["Large", "Medium", "Small"]);
+  });
+});

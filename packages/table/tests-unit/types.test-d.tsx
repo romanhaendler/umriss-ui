@@ -125,6 +125,8 @@ export function Columns() {
       <Column id="kunde3" value={(a) => a.customer} label="Customer" aggregate={(values) => values[0]}>
         {(k) => k.name}
       </Column>
+      <Column id="rate" value={(a) => a.amount / 100} label="Rate" format="percent" aggregate={(values, rows) => values.reduce((s, v) => s + v, 0) / rows.length} />
+      <Column id="dueOwn" value={(a) => a.due} label="Due" format="date" aggregate={(values) => values[0]} />
       {/* @ts-expect-error a sum on text */}
       <Column value="number" label="Number" aggregate="sum" />
       {/* @ts-expect-error a range on numbers */}
