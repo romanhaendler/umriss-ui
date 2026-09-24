@@ -115,6 +115,18 @@ export function useLegend(componentName: string, config: LegendConfig): void {
   });
 }
 
+/** Registration of the data table (exactly one per chart), under the id its
+    panel carries. */
+export function useDataTable(componentName: string, id: string): void {
+  const scene = useChartScene(componentName);
+
+  useEffect(() => {
+    if (scene === null) return;
+    scene.registerDataTable(id);
+    return () => scene.unregisterDataTable();
+  }, [scene, id]);
+}
+
 /** Registration of the tooltip (exactly one per chart). */
 export function useTooltip(componentName: string, config: TooltipConfig): void {
   const scene = useChartScene(componentName);

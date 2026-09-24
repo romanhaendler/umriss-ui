@@ -274,6 +274,19 @@ Screenshot pages carry their name in brackets.
 | `onToggle(name)`: entries become buttons with `aria-pressed`; without it no button | Q17 | Unit (jsdom legend toggle), Screenshot (`toggling-legend`) |
 | A hidden series keeps its entry, drawn back; a state's entry only when every band showing it is hidden | Q17 | Unit (scene, jsdom legend toggle), Screenshot (`toggling-legend`) |
 
+## `DataTable`
+
+| Capability | Rule | Proved at |
+|---|---|---|
+| A disclosure key "Show data"/"Hide data" with `aria-expanded`, at the end of the legend, on a line of its own without one | charts-alternatives C1 | Unit (jsdom data table), Screenshot (`data-table`, `a-week-as-a-table`) |
+| The table lies over the plot area; the plot keeps its size and is hidden meanwhile | C1 | Screenshot (`open-data-table`, `open-a-week-as-a-table`) |
+| The visible domain only; the x in the first column (the axis `label`, else "Position"), then one column per visible series | C1 | Unit (table, jsdom data table) |
+| Each value in the tooltip's format - the series' `format`, else its y axis' `tickFormat`; a gap and a missing reading leave the cell empty; a state by its name; a corridor by both edges | C1 | Unit (jsdom data table) |
+| The series of one x axis merged on their x; a matrix in a table of its own, by column and row | C1 | Unit (table) |
+| Above 500 rows the downsampled course - first, lowest, highest and last per stretch -, and the caption says from how many readings | C2 | Unit (table, jsdom data table), Screenshot (`open-a-week-as-a-table`) |
+| Column and row headings (`scope`), a caption, the scrolling panel a tab stop of its own; axe clean | C1 | Unit (jsdom data table), Accessibility |
+| Its words from the chart's wording, German beside them | C5 | Unit (table, jsdom data table) |
+
 ## Theme
 
 | Capability | Rule | Proved at |
@@ -341,8 +354,6 @@ constant over 5 s – the hysteresis from R-3.4 works (R-5.3).
 
 Wanted, not yet built (charts-review Q12). Each waits for a caller who needs it.
 
-* **A data table.** The chart's values as a table, on demand, for a reader who
-  wants them all at once rather than walked (charts-a11y Q5).
 * **`onSelect`.** A click that reports the hit; the hit model is there, the
   question of what a selection is (ADR-0003 in core) is not.
 * **Stacking** (stacked bars and areas). It needs more than two Y channels and a

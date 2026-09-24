@@ -44,7 +44,8 @@ import {
 import { lowerBound, nearestIndex, nearestPoint } from "./hit";
 import { DEFAULT_CHARTS_WORDING, type ChartsWording } from "./wording";
 import { hasCell, nearestPosition, rowEnd, stepCell, stepPosition, type Cell, type Move, type WalkSeries } from "./walk";
-import { downsample } from "./downsample";
+import { downsample, type Course } from "./downsample";
+import { tableRows } from "./table";
 import { lastSegmentEnd, medianStep, segmentEnd, segmentIndex } from "./state";
 import { cellSize, cellIndex, measureSpacing } from "./cells";
 import { assess } from "./limit";
@@ -180,6 +181,19 @@ export interface LayoutSnapshot {
   limits: readonly LimitLabel[];
   /** No visible series has a point to show. */
   empty: boolean;
+  /** The registered data table - the id its panel carries, and whether it is
+      open -, or null without one. The legend shows its key. */
+  dataTable: { id: string; open: boolean } | null;
+}
+
+/** One table of the data table: the series of one x axis, or one matrix. Every
+    cell is text already, in the format the tooltip writes. */
+export interface DataTableGroup {
+  key: string;
+  caption: string;
+  columns: readonly string[];
+  /** The first cell of each row is its x - the row's heading. */
+  rows: readonly (readonly string[])[];
 }
 
 /** One row of the built-in tooltip, written out once per hit. */
@@ -210,6 +224,7 @@ const EMPTY_LAYOUT_SNAPSHOT: LayoutSnapshot = {
   limits: [],
   // Unknown before the first frame: saying "No data" there would flash.
   empty: false,
+  dataTable: null,
 };
 
 const EMPTY_HOVER_SNAPSHOT: HoverSnapshot = {
@@ -541,6 +556,7 @@ export class ChartScene {
   private axes = new Map<number, AxisEntry>();
   private legend: LegendConfig | null = null;
   private tooltip: TooltipConfig | null = null;
+  private dataTable: { id: string; open: boolean } | null = null;
   private limits = new Map<number, LimitEntry>();
 
   /* ---------- Data and layout inputs ---------- */
@@ -853,6 +869,32 @@ export class ChartScene {
     this.pushHoverSnapshot();
   }
 
+  /* The data table (charts-alternatives 01) registers like the legend: one per
+     chart. Whether it is open is the scene's, because two elements show it -
+     the key in the legend and the panel. Opening it changes no pixel of the
+     plot, so it only pushes the snapshot. */
+
+  registerDataTable(id: string): void {
+    this.dataTable = { id, open: false };
+    this.pushLayoutSnapshot();
+  }
+
+  unregisterDataTable(): void {
+    this.dataTable = null;
+    this.pushLayoutSnapshot();
+  }
+
+  toggleDataTable(): void {
+    if (this.dataTable === null) return;
+    this.dataTable = { ...this.dataTable, open: !this.dataTable.open };
+    this.pushLayoutSnapshot();
+  }
+
+  /** The words the HTML layer writes - the data table's key among them. */
+  getWording(): ChartsWording {
+    return this.wording;
+  }
+
   /** Series in registration order - the drawing order. The palette follows it
       only on the first mount; after that it follows the name. */
   seriesInOrder(): readonly SeriesEntry[] {
@@ -1133,6 +1175,8 @@ export class ChartScene {
     if (wording === this.wording) return;
     this.wording = wording;
     this.scheduleSummary();
+    // The data table's key and caption are written from it.
+    if (this.dataTable !== null) this.pushLayoutSnapshot();
   }
 
   private themeRoot: HTMLElement | null = null;
@@ -2293,6 +2337,109 @@ export class ChartScene {
     return own === undefined ? formatValue(v) : own(v);
   }
 
+  /* ---------- The data table (charts-alternatives 01) ---------- */
+
+  /** What the data table lists: one table per x axis for the series on it, one
+      per matrix - a matrix has two positions per value, and shares no rows.
+      Only the visible domain, and above the limit its downsampled course
+      (table.ts). Called by the open table, once per layout. */
+  dataTableGroups(): DataTableGroup[] {
+    const all = this.seriesInOrder();
+    // In the order their first series came: a matrix alone, the others by
+    // their x axis.
+    const parts: SeriesEntry[][] = [];
+    const byAxis = new Map<string, SeriesEntry[]>();
+    for (const entry of this.walkable()) {
+      const shared = entry.config.kind === "matrix" ? undefined : byAxis.get(entry.config.xAxisId);
+      if (shared !== undefined) shared.push(entry);
+      else {
+        const part = [entry];
+        parts.push(part);
+        if (entry.config.kind !== "matrix") byAxis.set(entry.config.xAxisId, part);
+      }
+    }
+    return parts.flatMap((entries) => {
+      const first = entries[0] as SeriesEntry;
+      if (first.config.kind === "matrix") return this.matrixTable(first, all) ?? [];
+      return this.courseTable(entries, all) ?? [];
+    });
+  }
+
+  /** The series of one x axis, merged on their x. */
+  private courseTable(entries: readonly SeriesEntry[], all: readonly SeriesEntry[]): DataTableGroup | null {
+    const w = this.wording;
+    const axisId = (entries[0] as SeriesEntry).config.xAxisId;
+    const xAxis = this.findAxis("x", axisId);
+    if (xAxis === null) return null;
+    const [from, to] = xAxis.scale.domain;
+    const rows = tableRows(entries.map((e) => e.materialized as MaterializedSeries), from, to);
+    // Readings less than a minute apart carry their seconds, as the tooltip's
+    // header does - otherwise rows would share one heading.
+    let seconds = false;
+    for (let r = 1; r < rows.x.length && !seconds; r++) {
+      const d = (rows.x[r] as number) - (rows.x[r - 1] as number);
+      seconds = d > 0 && d < MINUTE;
+    }
+    const caption = w.tableCaption(this.xLabel(axisId, from), this.xLabel(axisId, to));
+    return {
+      key: `x:${axisId}`,
+      caption: rows.thinned ? `${caption} ${w.downsampled(rows.readings)}` : caption,
+      columns: [
+        this.findAxisConfig("x", axisId)?.label ?? w.positionColumn,
+        ...entries.map((e) => this.nameFor(e, all.indexOf(e))),
+      ],
+      rows: rows.x.map((x, r) => [
+        this.xLabel(axisId, x, seconds),
+        ...entries.map((e, s) => this.cellText(e, rows.courses[s] as Course, rows.at[r]?.[s] ?? -1)),
+      ]),
+    };
+  }
+
+  /** One cell: empty where the series has no reading there or a gap; a
+      state's name; a corridor's two edges; every other value as the tooltip
+      writes it. */
+  private cellText(entry: SeriesEntry, course: Course, i: number): string {
+    if (i < 0) return "";
+    const v = course.y[i] as number;
+    if (Number.isNaN(v)) return "";
+    const config = entry.config;
+    if (config.kind === "state") return config.states[v | 0]?.label ?? "";
+    const lower = course.y0?.[i];
+    if (lower !== undefined && !Number.isNaN(lower)) return `${this.formatY(entry, lower)} – ${this.formatY(entry, v)}`;
+    return this.formatY(entry, v);
+  }
+
+  /** A matrix' table: its cells inside the visible x domain, by column and
+      row, with their value. */
+  private matrixTable(entry: SeriesEntry, all: readonly SeriesEntry[]): DataTableGroup | null {
+    const mat = entry.materialized;
+    const xAxis = this.findAxis("x", entry.config.xAxisId);
+    const yAxis = this.findAxis("y", entry.config.yAxisId);
+    if (mat === null || mat.w === null || xAxis === null || yAxis === null) return null;
+    const [from, to] = xAxis.scale.domain;
+    const rows: string[][] = [];
+    // ponytail: a matrix is listed whole inside the domain, never thinned - a
+    // grid of cells stays small enough to be drawn one rectangle each; a
+    // matrix of hundreds of thousands of cells would want a limit here too.
+    for (let i = 0; i < mat.length; i++) {
+      const x = mat.x[i] as number;
+      const value = mat.w[i] as number;
+      if (x < from || x > to || !Number.isFinite(value)) continue;
+      rows.push([xAxis.format(x), yAxis.format(mat.y[i] as number), this.formatY(entry, value)]);
+    }
+    const w = this.wording;
+    return {
+      key: `m:${entry.order}`,
+      caption: w.tableCaption(xAxis.format(from), xAxis.format(to)),
+      columns: [
+        this.findAxisConfig("x", entry.config.xAxisId)?.label ?? w.positionColumn,
+        this.findAxisConfig("y", entry.config.yAxisId)?.label ?? w.rowColumn,
+        this.nameFor(entry, all.indexOf(entry)),
+      ],
+      rows,
+    };
+  }
+
   /** After a layout - new data, a new domain -, the keyboard's point goes to
       the nearest position still visible (Q6), or goes away. */
   private reapplyKey(): void {
@@ -2681,6 +2828,7 @@ export class ChartScene {
       series: this.legendItems(),
       limits: this.limitLabels(),
       empty: !this.showsAPoint(),
+      dataTable: this.dataTable,
     };
     for (const notify of this.layoutSubscribers) notify();
   }
