@@ -224,7 +224,11 @@ export function Popover({
       aria-label={ariaLabel}
       className={cx(styles.panel, className)}
       data-closing={closing || undefined}
+      /* A panel that is leaving is gone for assistive technology at once: its
+         fade is for the eye. `inert` takes it out of reach, `aria-hidden` out
+         of the tree - a second dialog beside the one opening would be read. */
       inert={closing || undefined}
+      aria-hidden={closing || undefined}
       style={{
         top: position?.top ?? 0,
         left: position?.left ?? 0,
