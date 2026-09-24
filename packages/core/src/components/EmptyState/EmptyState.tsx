@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import type { HTMLAttributes, ReactNode } from "react";
 import { cx } from "../../lib/cx";
 import styles from "./EmptyState.module.css";
@@ -14,13 +15,16 @@ export interface EmptyStateProps extends Omit<HTMLAttributes<HTMLDivElement>, "t
 }
 
 /** An empty surface as an invitation to act - not as a dead end. */
-export function EmptyState({ title, description, action, icon, className, ...rest }: EmptyStateProps) {
+export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(function EmptyState(
+  { title, description, action, icon, className, ...rest },
+  ref,
+) {
   return (
-    <div className={cx(styles.empty, className)} {...rest}>
+    <div ref={ref} className={cx(styles.empty, className)} {...rest}>
       {icon && <div className={styles.icon}>{icon}</div>}
       <p className={styles.title}>{title}</p>
       {description && <p className={styles.description}>{description}</p>}
       {action && <div className={styles.action}>{action}</div>}
     </div>
   );
-}
+});
