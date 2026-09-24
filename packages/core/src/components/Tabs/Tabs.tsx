@@ -1,7 +1,8 @@
-import { createContext, useCallback, useContext, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
+import { createContext, forwardRef, useCallback, useContext, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import type { ButtonHTMLAttributes, HTMLAttributes, KeyboardEvent as ReactKeyboardEvent } from "react";
 import { cx } from "../../lib/cx";
 import { idPart } from "../../lib/idPart";
+import { mergeRefs } from "../../lib/mergeRefs";
 import styles from "./Tabs.module.css";
 
 interface TabsContextValue {
@@ -21,32 +22,51 @@ function useTabs(component: string): TabsContextValue {
 }
 
 /* ------------------------------------------------------------------ */
-/* Tabs – controlled: value + onChange come from the application.      */
+/* Tabs – controlled through value + onChange, or on their own from   */
+/* defaultValue (rule 2 of the README).                               */
 /* ------------------------------------------------------------------ */
 
-export interface TabsProps extends Omit<HTMLAttributes<HTMLDivElement>, "onChange"> {
-  /** The value of the visible tab. Controlled: `Tabs` remembers nothing,
-      so that the tab can come out of an address. */
-  value: string;
-  /** Receives the value of the chosen tab. */
-  onChange: (value: string) => void;
+export interface TabsProps extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
+  /** The value of the visible tab. Controlled, `Tabs` remember nothing, so
+      that the tab can come out of an address. */
+  value?: string;
+  /** Uncontrolled: the tab that stands first. Afterwards the choice belongs
+      to the tabs - for a switch no address and no handler needs to know. */
+  defaultValue?: string;
+  /** Receives the value of the chosen tab. Controlled, the tab switches only
+      once `value` follows; uncontrolled it is merely a message. */
+  onChange?: (value: string) => void;
 }
 
-export function Tabs({ value, onChange, className, children, ...rest }: TabsProps) {
+export const Tabs = forwardRef<HTMLDivElement, TabsProps>(function Tabs(
+  { value, defaultValue, onChange, className, children, ...rest },
+  ref,
+) {
   const idBase = useId();
+  const [ownValue, setOwnValue] = useState(defaultValue ?? "");
+  const controlled = value !== undefined;
+  const change = (next: string) => {
+    if (!controlled) setOwnValue(next);
+    onChange?.(next);
+  };
 
   return (
-    <div className={className} {...rest}>
-      <TabsContext.Provider value={{ value, onChange, idBase }}>{children}</TabsContext.Provider>
+    <div ref={ref} className={className} {...rest}>
+      <TabsContext.Provider value={{ value: controlled ? value : ownValue, onChange: change, idBase }}>
+        {children}
+      </TabsContext.Provider>
     </div>
   );
-}
+});
 
 /* ------------------------------------------------------------------ */
 /* TabList – the arrow keys switch and activate                        */
 /* ------------------------------------------------------------------ */
 
-export function TabList({ className, children, onKeyDown, ...rest }: HTMLAttributes<HTMLDivElement>) {
+export const TabList = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(function TabList(
+  { className, children, onKeyDown, ...rest },
+  ref,
+) {
   const tabs = useTabs("TabList");
   const listRef = useRef<HTMLDivElement>(null);
   const [indicator, setIndicator] = useState<{ left: number; width: number } | null>(null);
@@ -102,7 +122,13 @@ export function TabList({ className, children, onKeyDown, ...rest }: HTMLAttribu
   };
 
   return (
-    <div ref={listRef} role="tablist" className={cx(styles.list, className)} {...rest} onKeyDown={handleKeyDown}>
+    <div
+      ref={mergeRefs(listRef, ref)}
+      className={cx(styles.list, className)}
+      {...rest}
+      role="tablist"
+      onKeyDown={handleKeyDown}
+    >
       {children}
       {indicator && (
         <span
@@ -113,7 +139,7 @@ export function TabList({ className, children, onKeyDown, ...rest }: HTMLAttribu
       )}
     </div>
   );
-}
+});
 
 /* ------------------------------------------------------------------ */
 /* Tab                                                                 */
@@ -124,34 +150,43 @@ export interface TabProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   value: string;
 }
 
-export function Tab({ value, className, children, onClick, ...rest }: TabProps) {
+export const Tab = forwardRef<HTMLButtonElement, TabProps>(function Tab(
+  { value, className, children, onClick, ...rest },
+  ref,
+) {
   const tabs = useTabs("Tab");
   const selected = tabs.value === value;
+  /* Uncontrolled without `defaultValue` no tab is chosen yet; then every tab
+     is a tab stop, or the list could not be reached from the keyboard. */
+  const noneChosen = tabs.value === "";
 
   return (
     <button
+      ref={ref}
       type="button"
+      className={cx(styles.tab, className)}
+      {...rest}
+      /* After `rest` (P3 of core-passthrough): the role, the ids that tie tab
+         and panel together and the roving tab stop are the tab's own. The
+         value goes into the id masked: `aria-controls` and `aria-labelledby`
+         split at whitespace, and a tab "first page" would otherwise point at
+         two ids that do not exist. */
       role="tab"
-      /* The value goes into the id masked: `aria-controls` and
-         `aria-labelledby` split at whitespace, and a tab "first page" would
-         otherwise point at two ids that do not exist. */
       id={`${tabs.idBase}-tab-${idPart(value)}`}
       aria-selected={selected}
       aria-controls={`${tabs.idBase}-panel-${idPart(value)}`}
-      tabIndex={selected ? 0 : -1}
-      className={cx(styles.tab, className)}
-      {...rest}
+      tabIndex={selected || noneChosen ? 0 : -1}
       /* Composed, not overridden by `rest`: a caller's `onClick` used to take
-         the switching away from the tab. */
+         the switching away from the tab. It runs first and can prevent it. */
       onClick={(event) => {
         onClick?.(event);
-        tabs.onChange(value);
+        if (!event.defaultPrevented) tabs.onChange(value);
       }}
     >
       {children}
     </button>
   );
-}
+});
 
 /* ------------------------------------------------------------------ */
 /* TabPanel                                                            */
@@ -164,20 +199,24 @@ export interface TabPanelProps extends HTMLAttributes<HTMLDivElement> {
   value: string;
 }
 
-export function TabPanel({ value, className, children, ...rest }: TabPanelProps) {
+export const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(function TabPanel(
+  { value, className, children, ...rest },
+  ref,
+) {
   const tabs = useTabs("TabPanel");
   if (tabs.value !== value) return null;
 
   return (
     <div
-      role="tabpanel"
-      id={`${tabs.idBase}-panel-${idPart(value)}`}
-      aria-labelledby={`${tabs.idBase}-tab-${idPart(value)}`}
+      ref={ref}
       tabIndex={0}
       className={cx(styles.panel, className)}
       {...rest}
+      role="tabpanel"
+      id={`${tabs.idBase}-panel-${idPart(value)}`}
+      aria-labelledby={`${tabs.idBase}-tab-${idPart(value)}`}
     >
       {children}
     </div>
   );
-}
+});

@@ -1,4 +1,5 @@
-import { useId, useMemo, useRef, useState } from "react";
+import { forwardRef, useId, useMemo, useRef, useState } from "react";
+import type { HTMLAttributes } from "react";
 import { Button } from "../Button";
 import { Popover } from "../Popover";
 import { useFormField } from "../FormField";
@@ -31,7 +32,8 @@ export type { TimeFieldProps } from "./TimeField";
  * panel applies (the default being the earlier one). A value is reported only
  * with "Apply", "Now" or "Clear", not already on the click on a day.
  */
-export interface DateTimePickerProps {
+export interface DateTimePickerProps
+  extends Omit<HTMLAttributes<HTMLSpanElement>, "onChange" | "defaultValue"> {
   /** The instant; `null` means none. */
   value: Date | null;
   /** Runs only on completion - "Apply", "Now" or "Clear" - and not already on
@@ -54,16 +56,21 @@ export interface DateTimePickerProps {
   clearable?: boolean;
 }
 
-export function DateTimePicker({
-  value,
-  onChange,
-  withSeconds = false,
-  placeholder,
-  disabled = false,
-  size = "md",
-  invalid,
-  clearable = false,
-}: DateTimePickerProps) {
+export const DateTimePicker = forwardRef<HTMLSpanElement, DateTimePickerProps>(function DateTimePicker(
+  {
+    value,
+    onChange,
+    withSeconds = false,
+    placeholder,
+    disabled = false,
+    size = "md",
+    invalid,
+    clearable = false,
+    className,
+    ...rest
+  },
+  ref,
+) {
   const field = useFormField();
   const wording = useWording();
   const formats = useFormats();
@@ -143,6 +150,9 @@ export function DateTimePicker({
   return (
     <>
       <RangeTrigger
+        rootRef={ref}
+        root={rest}
+        className={className}
         wrapRef={wrapRef}
         triggerRef={triggerRef}
         panel={{ id: panelId, open, onToggle: () => (open ? setOpen(false) : openPanel()) }}
@@ -263,4 +273,4 @@ export function DateTimePicker({
       </Popover>
     </>
   );
-}
+});

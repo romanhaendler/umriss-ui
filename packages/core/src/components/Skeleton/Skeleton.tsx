@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import type { HTMLAttributes } from "react";
 import { cx } from "../../lib/cx";
 import styles from "./Skeleton.module.css";
@@ -12,13 +13,17 @@ export interface SkeletonProps extends HTMLAttributes<HTMLSpanElement> {
 }
 
 /** Loading placeholder with a restrained pulse; respects prefers-reduced-motion. */
-export function Skeleton({ width, height, circle = false, className, style, ...rest }: SkeletonProps) {
+export const Skeleton = forwardRef<HTMLSpanElement, SkeletonProps>(function Skeleton(
+  { width, height, circle = false, className, style, ...rest },
+  ref,
+) {
   return (
     <span
+      ref={ref}
       aria-hidden="true"
       className={cx(styles.skeleton, circle && styles.circle, className)}
       style={{ width, height, ...style }}
       {...rest}
     />
   );
-}
+});

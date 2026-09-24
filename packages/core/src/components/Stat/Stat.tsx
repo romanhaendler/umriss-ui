@@ -19,6 +19,7 @@
    connection would take away exactly what a person needs at that moment: the
    last picture they had. */
 
+import { forwardRef } from "react";
 import type { HTMLAttributes } from "react";
 import { cx } from "../../lib/cx";
 import { assess, type LimitSet, type Verdict } from "../../lib/limit";
@@ -104,18 +105,10 @@ function FreshnessLine({
 }
 
 /** Metric tile: one value, read against its limits. */
-export function Stat({
-  label,
-  value,
-  unit,
-  decimals,
-  limits,
-  history,
-  asOf,
-  ages,
-  className,
-  ...rest
-}: StatProps) {
+export const Stat = forwardRef<HTMLDivElement, StatProps>(function Stat(
+  { label, value, unit, decimals, limits, history, asOf, ages, className, ...rest },
+  ref,
+) {
   const formats = useFormats();
   const wording = useWording();
 
@@ -144,11 +137,15 @@ export function Stat({
 
   return (
     <div
+      ref={ref}
+      className={cx(styles.stat, className)}
+      {...rest}
+      /* After `rest`: the name and the verdict are what the tile has read, and
+         a caller's attribute would contradict what it shows (P3 of
+         core-passthrough). */
       role="group"
       aria-label={name}
       data-verdict={showsVerdict ? verdict : undefined}
-      className={cx(styles.stat, className)}
-      {...rest}
     >
       <span className={styles.label}>{label}</span>
       <span className={styles.valueRow}>
@@ -171,4 +168,4 @@ export function Stat({
       )}
     </div>
   );
-}
+});

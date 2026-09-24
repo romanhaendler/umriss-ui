@@ -1,4 +1,4 @@
-import { createContext, useContext, useId } from "react";
+import { createContext, forwardRef, useContext, useId } from "react";
 import type { HTMLAttributes, ReactNode } from "react";
 import { cx } from "../../lib/cx";
 import styles from "./FormField.module.css";
@@ -51,23 +51,17 @@ export interface FormFieldProps extends HTMLAttributes<HTMLDivElement> {
   fieldId?: string;
 }
 
-export function FormField({
-  label,
-  hint,
-  error,
-  required = false,
-  fieldId,
-  className,
-  children,
-  ...rest
-}: FormFieldProps) {
+export const FormField = forwardRef<HTMLDivElement, FormFieldProps>(function FormField(
+  { label, hint, error, required = false, fieldId, className, children, ...rest },
+  ref,
+) {
   const generatedId = useId();
   const id = fieldId ?? generatedId;
   const messageId = `${id}-message`;
   const hasMessage = Boolean(error ?? hint);
 
   return (
-    <div className={cx(styles.field, className)} {...rest}>
+    <div ref={ref} className={cx(styles.field, className)} {...rest}>
       <label className={styles.label} htmlFor={id}>
         {label}
         {required && (
@@ -88,4 +82,4 @@ export function FormField({
       )}
     </div>
   );
-}
+});

@@ -1,4 +1,5 @@
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { forwardRef, useEffect, useId, useMemo, useRef, useState } from "react";
+import type { HTMLAttributes } from "react";
 import { cx } from "../../lib/cx";
 import { Button } from "../Button";
 import { Popover } from "../Popover";
@@ -76,7 +77,8 @@ const resolveChoice = (status: DstStatus | null, choice: DstChoice): Date | null
  * the daylight-saving change the same reservation holds as for the
  * DateTimePicker, separately per end of the range.
  */
-export interface DateTimeRangePickerProps {
+export interface DateTimeRangePickerProps
+  extends Omit<HTMLAttributes<HTMLSpanElement>, "onChange" | "defaultValue"> {
   /** The time span with times at both ends; `null` means none. */
   value: DateRange | null;
   /** Runs only on "Apply" and on clearing (`null`), never between the two
@@ -121,17 +123,22 @@ export interface DateTimeRangePickerProps {
  * - Missing and doubled hours of the daylight-saving change are recognised per
  *   end and treated honestly, as in the DateTimePicker.
  */
-export function DateTimeRangePicker({
-  value,
-  onChange,
-  withSeconds = false,
-  placeholder,
-  disabled = false,
-  invalid,
-  size = "md",
-  clearable = false,
-  presets,
-}: DateTimeRangePickerProps) {
+export const DateTimeRangePicker = forwardRef<HTMLSpanElement, DateTimeRangePickerProps>(function DateTimeRangePicker(
+  {
+    value,
+    onChange,
+    withSeconds = false,
+    placeholder,
+    disabled = false,
+    invalid,
+    size = "md",
+    clearable = false,
+    presets,
+    className,
+    ...rest
+  },
+  ref,
+) {
   const field = useFormField();
   const wording = useWording();
   const formats = useFormats();
@@ -375,6 +382,9 @@ export function DateTimeRangePicker({
   return (
     <>
       <RangeTrigger
+        rootRef={ref}
+        root={rest}
+        className={className}
         wrapRef={wrapRef}
         triggerRef={triggerRef}
         panel={{ id: panelId, open, onToggle: () => (open ? setOpen(false) : openPanel()) }}
@@ -501,4 +511,4 @@ export function DateTimeRangePicker({
       </Popover>
     </>
   );
-}
+});

@@ -1,4 +1,5 @@
-import { useId, useRef, useState } from "react";
+import { forwardRef, useId, useRef, useState } from "react";
+import type { HTMLAttributes } from "react";
 import { Button } from "../Button";
 import { Popover } from "../Popover";
 import { useFormField } from "../FormField";
@@ -15,7 +16,8 @@ import { CalendarGlyph } from "../../lib/glyphs";
  * midnight (resolution "day"). There is no path that delivers a time of day
  * along with it.
  */
-export interface DatePickerProps {
+export interface DatePickerProps
+  extends Omit<HTMLAttributes<HTMLSpanElement>, "onChange" | "defaultValue"> {
   /** The day, as a `Date` on local midnight; `null` means none. */
   value: Date | null;
   /** Runs as soon as a day is settled - on a click in the grid, on "Today", on
@@ -37,15 +39,20 @@ export interface DatePickerProps {
 }
 
 /** A date selection with a calendar panel; weeks begin on Monday. */
-export function DatePicker({
-  value,
-  onChange,
-  placeholder,
-  disabled = false,
-  invalid,
-  size = "md",
-  clearable = false,
-}: DatePickerProps) {
+export const DatePicker = forwardRef<HTMLSpanElement, DatePickerProps>(function DatePicker(
+  {
+    value,
+    onChange,
+    placeholder,
+    disabled = false,
+    invalid,
+    size = "md",
+    clearable = false,
+    className,
+    ...rest
+  },
+  ref,
+) {
   const field = useFormField();
   const wording = useWording();
   const formats = useFormats();
@@ -80,6 +87,9 @@ export function DatePicker({
   return (
     <>
       <RangeTrigger
+        rootRef={ref}
+        root={rest}
+        className={className}
         wrapRef={wrapRef}
         triggerRef={triggerRef}
         panel={{ id: panelId, open, onToggle: () => (open ? setOpen(false) : openPanel()) }}
@@ -133,4 +143,4 @@ export function DatePicker({
       </Popover>
     </>
   );
-}
+});
