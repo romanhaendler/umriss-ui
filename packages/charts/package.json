@@ -24,6 +24,7 @@
   "type": "module",
   "files": [
     "dist",
+    "docs/llms-full.md",
     "CHANGELOG.md"
   ],
   "publishConfig": {
@@ -47,6 +48,7 @@
   },
   "scripts": {
     "props": "node --disable-warning=ExperimentalWarning --experimental-strip-types demo/props.ts",
+    "prepack": "pnpm run props",
     "predev": "pnpm run props",
     "dev": "vite --config vite.demo.config.ts",
     "build": "vite build",
