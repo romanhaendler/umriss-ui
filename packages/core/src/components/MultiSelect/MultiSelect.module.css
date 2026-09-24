@@ -163,7 +163,7 @@
     color: var(--u-color-accent-text);
     font-family: var(--u-font-mono);
     font-size: var(--u-text-xs);
-    letter-spacing: -0.01em;
+    letter-spacing: var(--u-tracking-figures);
     cursor: pointer;
     transition: background-color var(--u-transition);
   }
@@ -290,7 +290,7 @@
     flex: none;
     font-family: var(--u-font-mono);
     font-size: var(--u-text-xs);
-    letter-spacing: -0.01em;
+    letter-spacing: var(--u-tracking-figures);
     color: var(--u-color-text-secondary);
   }
 

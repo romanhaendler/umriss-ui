@@ -29,6 +29,17 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.9.0 – A token for figures (Sep. 2026)
+
+### Added
+
+- **`--u-tracking-figures`** (`-0.01em`), the tracking of figures set in Geist
+  Mono. It carries exactly the value that stood written out in the number
+  field, the input's numeric mode, the date picker's field, the multi-select's
+  count and chip, and the data-viz figures; nothing moves.
+
+---
+
 ## Target environment: applications that render in the browser
 
 The library is aimed at client-side rendered applications. The markers a

@@ -459,7 +459,13 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
   if (loading) {
     body = (
       <tbody>
-        <LoadingRows columns={columnCount} />
+        <LoadingRows
+          columns={columnCount}
+          rightAligned={[
+            ...Array.from({ length: controlColumns + (spanEntry ? 1 : 0) }, () => false),
+            ...dataColumns.map((e) => isRightAligned(registry.kindOf(e, hook.rows), e.spec.rightAligned)),
+          ]}
+        />
       </tbody>
     );
   } else if (projection.filtered.length === 0) {
@@ -912,6 +918,7 @@ function Row({
         data-row={virtual ? absolute : undefined}
         data-line={line ? "row" : undefined}
         data-motion={key}
+        data-selected={selectable && snapshot.selection.isSelected(key) ? "" : undefined}
         data-group-first={line?.first ? "" : undefined}
         data-group={group?.path}
         aria-level={line ? line.parents.length + 1 : undefined}
@@ -1120,14 +1127,14 @@ function RowActionsCell({
 /* Loading                                                                  */
 /* ====================================================================== */
 
-function LoadingRows({ columns, rows = 4 }: { columns: number; rows?: number }) {
+function LoadingRows({ columns, rightAligned = [], rows = 4 }: { columns: number; rightAligned?: readonly boolean[]; rows?: number }) {
   const widths = [72, 48, 60, 40, 56, 64];
   return (
     <>
       {Array.from({ length: rows }, (_, z) => (
         <tr key={z} aria-hidden="true">
           {Array.from({ length: columns }, (_, s) => (
-            <td key={s} className={styles.td}>
+            <td key={s} className={cx(styles.td, rightAligned[s] && styles.numeric)}>
               <span className={styles.skeleton} style={{ width: `${widths[(z + s) % widths.length]}%` }} />
             </td>
           ))}

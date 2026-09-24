@@ -125,6 +125,7 @@
     --u-tracking-caps: 0.07em;
     --u-tracking-display: -0.022em; /* large titles: slightly compressed */
     --u-tracking-tight: -0.011em;   /* medium titles (cards, dialogs) */
+    --u-tracking-figures: -0.01em;  /* figures set in the mono face */
 
     /* ---- Spacing and shape ---- */
     --u-space-1: 4px;

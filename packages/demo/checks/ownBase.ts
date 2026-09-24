@@ -41,9 +41,10 @@ interface Probe {
   /** A short, stable name for an element: its tag, its first class without the
       module hash, and the start of its text. */
   describe(el: Element): string;
-  /** The focus indication of an element, of its ancestors inside the stage and
-      of its next sibling - a visually hidden input rings the box drawn beside
-      it (`.input:focus-visible + .box`). The browser's own ring
+  /** The focus indication of an element, of its ancestors inside the stage, of
+      its next sibling - a visually hidden input rings the box drawn beside it
+      (`.input:focus-visible + .box`) - and of its children: a table row rings
+      its cells, since sticky cells paint over a ring of the row's own. The browser's own ring
       (`outline-style: auto`) does not count: it is what an element shows when
       the component brought nothing, and it is not the library's ring. */
   indication(el: Element): string;
@@ -68,7 +69,8 @@ function installProbe(): void {
     },
     indication(el) {
       const stage = el.closest(".exampleStage");
-      const around: Element[] = el.nextElementSibling ? [el.nextElementSibling] : [];
+      const around: Element[] = [...el.children];
+      if (el.nextElementSibling) around.push(el.nextElementSibling);
       for (let node: Element | null = el; node && node !== stage; node = node.parentElement) around.push(node);
       return around
         .map((node) => {

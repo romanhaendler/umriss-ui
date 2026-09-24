@@ -18,6 +18,22 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Sep. 2026 — Depth work: the table
+
+- **visuelle-wertigkeit 05, first surface.** Eighteen states of the table,
+  captured before and after in both themes, went to the user as a review page;
+  every change was decided there. Fixed: a numeric head's label stood 1.13 px
+  high, a focused virtual row lost its ring under the sticky cells, loading
+  placeholders stood left in numeric columns, the compact head kept the
+  comfortable padding. Changed after review: selected rows carry the subtle
+  accent, and every head reads label, arrow, funnel - the mirrored numeric
+  head, first kept, put its funnel beside the neighbour's.
+- **`--u-tracking-figures`** replaces the raw `-0.01em` in core and table.
+- **The own-base focus check** reads a focused element's children too: a table
+  row rings its cells.
+- **Every moved baseline looked at**, not rebuilt blind.
+- **Versions**: core 0.9.0, table 0.3.3, schedule 0.1.8, calculation 0.2.4.
+
 ## Sep. 2026 — Visual quality: vocabulary, motion, one stroke, one canon
 
 - **visuelle-wertigkeit 01-04, in parallel worktrees.** A check reads every

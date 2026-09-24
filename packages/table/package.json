@@ -1,6 +1,6 @@
 {
   "name": "@umriss-ui/table",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "The umriss table - declared the way it reads: columns as JSX, typed against their rows.",
   "license": "MIT",
   "author": "Roman Händler",
