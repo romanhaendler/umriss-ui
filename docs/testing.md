@@ -40,7 +40,7 @@ not photographed.
 
 | Layer | Tool | Place | Status |
 |---|---|---|---|
-| Unit tests of the charts (ticks, scale, layout, hit, materialisation, scene, bar geometry, **limit, state, cells, control chart, Pareto, operating time, limits and bands in the scene, downsampling, the time axis, the draw calls, the limit's default axis**) and their jsdom tests (legend toggle, empty state, tone, tooltip format, control chart violations, the scene across frames: hover, highlight, cursor sync, double click, **the keyboard's walk, the readout and summary, zoom by key, the wording, the data table**) and **the walk as a pure module (positions, bands, cells)** | vitest | packages/charts/tests-unit/ | green |
+| Unit tests of the charts (ticks, scale, layout, hit, materialisation, scene, bar geometry, **limit, state, cells, control chart, Pareto, operating time, limits and bands in the scene, downsampling, the time axis, the draw calls, the limit's default axis, the data table's rows, the marks**) and their jsdom tests (legend toggle, empty state, tone, tooltip format, control chart violations, the scene across frames: hover, highlight, cursor sync, double click, **the keyboard's walk, the readout and summary, zoom by key, the wording, the data table, the legend under encoding by marks**) and **the walk as a pure module (positions, bands, cells)** | vitest | packages/charts/tests-unit/ | green |
 | jsdom smoke test of the charts demo (every page, every example, the package by name in the source) + SSR test | vitest | packages/charts/tests-unit/ | green |
 | jsdom smoke test of the core demo | vitest | packages/core/tests-unit/ | green |
 | jsdom smoke test of the table demo: every page with its tables, every example with a title, the package by name in the source | vitest | packages/table/tests-unit/demo-smoke.test.tsx | green |
@@ -127,6 +127,7 @@ bodies. Placement follows ownership: with the module it belongs to, and in
 | `charts/pareto.ts` | sort, accumulate, collect the remainder, cutoff |
 | `charts/operatingTime.ts` | wall clock ↔ operating time, breaks, ticks, clamped position |
 | `charts/downsample.ts` | first, min, max and last per pixel column, gaps kept, the window of a zoomed course |
+| `charts/marks.ts` | a palette place → its dash, marker and hatch; a hatch's lines on a grid of the plane; a marker as one closed sub-path |
 | `charts/table.ts` | the data table's rows: the visible domain, series merged on x, above 500 rows the downsampled course and the count it stands for |
 | `charts/time.ts` | the time step, ticks on local boundaries across the clock change, labels by level |
 | `charts/hit.ts` (`nearestIndex`, `nearestPoint`, `lowerBound`) | the nearest x, the nearest point in pixel space, the first index not below a value |

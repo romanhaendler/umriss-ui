@@ -34,6 +34,7 @@ Screenshot pages carry their name in brackets.
 | A summary the plot is described by: series, visible stretch, each series' range there, the keys | charts-a11y R10 | Unit (jsdom readout) |
 | `+`/`−`, Shift+←/→ and `0` zoom, pan and show everything - only with `onDomainChange` | charts-a11y Q6 | Unit (jsdom zoom keys) |
 | The charts' own wording, English by default, German from `@umriss-ui/charts/wording/de`; `empty` wins over it | ADR-0031 | Unit (jsdom wording) |
+| `encoding="marks"`: each series a dash and a marker shape (line, area outline, scatter) or a hatch (bar, area fill) by its palette place - the first plain -, a caller's `dash` winning; a state and a matrix step hatched by index, a limit band hatched in its colour; the legend's chips show the same; default off | charts-alternatives C3 | Unit (marks, draw, jsdom encoding), Screenshot (`told-apart-without-colour`, `marks-on-every-kind`, `bands-limits-and-cells`) |
 | DEV warning without `ariaLabel` | R-7.6 | Manual |
 | Series kinds can be mixed in one chart | ADR-0002 | Screenshot (`mixed`), Interaction |
 | Every series kind can be bound to every axis | R-4.12 | Unit (scene) |
