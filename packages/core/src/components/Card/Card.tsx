@@ -23,19 +23,40 @@ export interface CardProps extends HTMLAttributes<HTMLElement> {
   /** Initial state of the collapse mechanism; afterwards it belongs to the
       card. Only effective together with `collapsible`. */
   defaultCollapsed?: boolean;
+  /** Controlled: whether the body is folded away - for a card folded from
+      outside, or one whose state is kept in an address. Only effective
+      together with `collapsible`. */
+  collapsed?: boolean;
+  /** Reports the wish of the header's button. Controlled, the card folds only
+      once `collapsed` follows; uncontrolled it is merely a message. */
+  onCollapsedChange?: (collapsed: boolean) => void;
 }
 
 export const Card = forwardRef<HTMLElement, CardProps>(function Card(
-  { collapsible = false, defaultCollapsed = false, className, children, ...rest },
+  {
+    collapsible = false,
+    defaultCollapsed = false,
+    collapsed: collapsedProp,
+    onCollapsedChange,
+    className,
+    children,
+    ...rest
+  },
   ref,
 ) {
-  const [collapsed, setCollapsed] = useState(defaultCollapsed);
+  const [ownCollapsed, setOwnCollapsed] = useState(defaultCollapsed);
+  const controlled = collapsedProp !== undefined;
+  const collapsed = controlled ? collapsedProp : ownCollapsed;
+  const toggle = () => {
+    if (!controlled) setOwnCollapsed(!collapsed);
+    onCollapsedChange?.(!collapsed);
+  };
   const bodyId = useId();
 
   return (
     <section ref={ref} className={cx(styles.card, className)} {...rest}>
       <CardContext.Provider
-        value={{ collapsible, collapsed, toggle: () => setCollapsed((value) => !value), bodyId }}
+        value={{ collapsible, collapsed, toggle, bodyId }}
       >
         {children}
       </CardContext.Provider>

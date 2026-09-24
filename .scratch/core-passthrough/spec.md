@@ -1,6 +1,6 @@
 # Every component takes a ref, a class and the rest
 
-Status: ready-for-agent
+Status: done
 Date:   2026-09-24
 Origin: the library comparison of 24 Sep 2026 (notes in `docs/research/library-comparison-2026-09/`); order in `.scratch/comparison-roadmap/spec.md`.
 
@@ -48,3 +48,17 @@ keyboard and screenshot suites must stay green - nothing visible moves.
 ## Out of scope
 
 Renaming props; changing any component's DOM structure.
+
+## Comments
+
+Delivered in five tickets. The guard (`packages/core/tests-unit/passthrough.test.tsx`)
+reads the exports and asks for ref, class, style, rest and `forwardRef`; it was
+red for 31 - the 21 and ten exported parts (`CardHeader`, `CardBody`, the
+three Modal parts, `TabList`, `Tab`, `TabPanel`, `MenuItem`,
+`MenuSeparator`), all fixed. Deviations: the spec's "the element that carries
+the ring" holds for `MultiSelect` only - for the combobox and the pickers the
+ring is on the control inside, and the ref goes to the wrapper around it,
+which is what P1 means; `Checkbox`, `NumberInput`, `Select` and `SplitButton`
+keep their earlier split (class on the wrapper, ref and rest on the control)
+and stand in the guard with their reason. No DOM structure changed, and core's
+screenshot and own-base suites are green without a moved baseline.
