@@ -50,7 +50,7 @@ module on the caller's side that carries `"use client"` and imports from there.
 
 ---
 
-## Unreleased
+## 0.8.0 – Motion, one stroke, one canon of states (Sep. 2026)
 
 ### Added
 

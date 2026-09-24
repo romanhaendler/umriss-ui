@@ -18,6 +18,24 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Sep. 2026 — Visual quality: vocabulary, motion, one stroke, one canon
+
+- **visuelle-wertigkeit 01-04, in parallel worktrees.** A check reads every
+  package's stylesheets for raw values where a token belongs (spacing
+  deliberately not); a motion vocabulary names entry, exit, press, path and
+  continuous process, and `--u-transition` runs on the library's own curve;
+  overlays grow from the corner facing their trigger and leave without
+  retracing; every glyph draws 1.4 per 10 units, held by a check; and one canon
+  of states - hover changes the surface, a press changes it more, focus is the
+  ring alone, disabled dims and reacts to nothing - held by a check as well.
+- **Found on the way:** the schedule's fold chevron named a curve token that
+  never existed; three disabled elements still reacted to the pointer; a hover
+  took the focus ring away in several places; a leaving panel stayed a dialog
+  for assistive technology; the page-head pictures still read the old scope.
+- **Every baseline drawn anew once**, after the four merged.
+- **Versions**: core 0.8.0, charts 0.5.0, table 0.3.2, schedule 0.1.7,
+  calculation 0.2.3. Left for the user: visuelle-wertigkeit 05 and charts-a11y.
+
 ## Sep. 2026 — Housekeeping after the grouping
 
 - **The tracker told the truth again.** A triage against history, changelogs
