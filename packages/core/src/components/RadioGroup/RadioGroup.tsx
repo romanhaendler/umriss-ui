@@ -18,6 +18,7 @@ import { forwardRef, useId, useRef } from "react";
 import { idPart } from "../../lib/idPart";
 import type { HTMLAttributes, KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
 import { cx } from "../../lib/cx";
+import { mergeRefs } from "../../lib/mergeRefs";
 import { useFormField } from "../FormField";
 import styles from "./RadioGroup.module.css";
 
@@ -144,11 +145,7 @@ export const RadioGroup = forwardRef(function RadioGroup<T extends string>(
 
   return (
     <div
-      ref={(node) => {
-        groupRef.current = node;
-        if (typeof ref === "function") ref(node);
-        else if (ref) ref.current = node;
-      }}
+      ref={mergeRefs(groupRef, ref)}
       /* The surrounding field's id is carried by the group itself, so that
          `label htmlFor` does not point into the void. Putting it on one of
          the options would be worse: a click on the field's label would then

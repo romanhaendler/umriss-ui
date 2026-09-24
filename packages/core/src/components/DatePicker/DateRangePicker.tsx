@@ -1,4 +1,5 @@
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { forwardRef, useEffect, useId, useMemo, useRef, useState } from "react";
+import type { HTMLAttributes } from "react";
 import { cx } from "../../lib/cx";
 import { Button } from "../Button";
 import { Popover } from "../Popover";
@@ -23,7 +24,8 @@ export type { DateRange, RangePreset } from "./range";
  * never lies after `to` - a range dragged backwards is silently turned around.
  * Both ends count inclusively. There is no error state.
  */
-export interface DateRangePickerProps {
+export interface DateRangePickerProps
+  extends Omit<HTMLAttributes<HTMLSpanElement>, "onChange" | "defaultValue"> {
   /** The time span, both ends on local midnight and both inclusive; `null`
       means none. */
   value: DateRange | null;
@@ -66,16 +68,21 @@ export interface DateRangePickerProps {
  * - Two chained months: paging on the outside, no day appears twice.
  * - The same day clicked twice = a one-day time span.
  */
-export function DateRangePicker({
-  value,
-  onChange,
-  placeholder,
-  disabled = false,
-  invalid,
-  size = "md",
-  clearable = false,
-  presets,
-}: DateRangePickerProps) {
+export const DateRangePicker = forwardRef<HTMLSpanElement, DateRangePickerProps>(function DateRangePicker(
+  {
+    value,
+    onChange,
+    placeholder,
+    disabled = false,
+    invalid,
+    size = "md",
+    clearable = false,
+    presets,
+    className,
+    ...rest
+  },
+  ref,
+) {
   const field = useFormField();
   const wording = useWording();
   const formats = useFormats();
@@ -163,6 +170,9 @@ export function DateRangePicker({
   return (
     <>
       <RangeTrigger
+        rootRef={ref}
+        root={rest}
+        className={className}
         wrapRef={wrapRef}
         triggerRef={triggerRef}
         panel={{ id: panelId, open, onToggle: () => (open ? setOpen(false) : openPanel()) }}
@@ -236,4 +246,4 @@ export function DateRangePicker({
       </Popover>
     </>
   );
-}
+});

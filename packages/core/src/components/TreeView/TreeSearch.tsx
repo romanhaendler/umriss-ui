@@ -4,7 +4,8 @@
    somewhere else - in a toolbar, in a panel header - should be able to, just
    as the table keeps its toolbar separate. */
 
-import type { ChangeEvent } from "react";
+import { forwardRef } from "react";
+import type { ChangeEvent, ForwardedRef, ReactNode } from "react";
 import { Input } from "../Input";
 import type { InputProps } from "../Input";
 import { useWording } from "../../lib/language";
@@ -18,14 +19,14 @@ export interface TreeSearchProps<K, S extends Key = string>
   tree: Tree<K, S>;
 }
 
-export function TreeSearch<K, S extends Key = string>({
-  tree,
-  placeholder,
-  ...rest
-}: TreeSearchProps<K, S>) {
+export const TreeSearch = forwardRef(function TreeSearch<K, S extends Key = string>(
+  { tree, placeholder, ...rest }: TreeSearchProps<K, S>,
+  ref: ForwardedRef<HTMLInputElement>,
+) {
   const wording = useWording();
   return (
     <Input
+      ref={ref}
       type="search"
       value={tree.search}
       placeholder={placeholder ?? wording.treeSearchPlaceholder}
@@ -33,4 +34,6 @@ export function TreeSearch<K, S extends Key = string>({
       {...rest}
     />
   );
-}
+}) as <K, S extends Key = string>(
+  props: TreeSearchProps<K, S> & { ref?: ForwardedRef<HTMLInputElement> },
+) => ReactNode;
