@@ -116,7 +116,7 @@ export const CardHeader = forwardRef<HTMLDivElement, CardHeaderProps>(function C
 });
 
 /* ------------------------------------------------------------------ */
-/* CardBody                                                          */
+/* CardBody                                                           */
 /* ------------------------------------------------------------------ */
 
 export interface CardBodyProps extends HTMLAttributes<HTMLDivElement> {

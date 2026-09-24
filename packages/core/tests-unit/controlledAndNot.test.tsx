@@ -31,6 +31,14 @@ describe("Tabs – uncontrolled", () => {
     expect(screen.getByRole("tab", { name: "Second" }).getAttribute("aria-selected")).toBe("true");
   });
 
+  it("without defaultValue keep every tab reachable until one is chosen", () => {
+    render(<TabsCase />);
+    const tabs = screen.getAllByRole("tab");
+    expect(tabs.map((tab) => tab.tabIndex)).toEqual([0, 0]);
+    fireEvent.click(tabs[1]!);
+    expect(tabs.map((tab) => tab.tabIndex)).toEqual([-1, 0]);
+  });
+
   it("report the switch as a message", () => {
     const changed = vi.fn();
     render(<TabsCase defaultValue="a" onChange={changed} />);

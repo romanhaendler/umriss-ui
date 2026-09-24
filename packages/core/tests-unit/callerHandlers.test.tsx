@@ -24,6 +24,7 @@ import { TreeView, useTree, type NodeReader } from "../src/components/TreeView";
 import { Modal } from "../src/components/Modal";
 import { CommandPalette } from "../src/components/CommandPalette";
 import { MultiSelect } from "../src/components/MultiSelect";
+import { Combobox } from "../src/components/Combobox";
 
 describe("Menu – the focus", () => {
   it("moves the focus to the first entry", () => {
@@ -246,6 +247,59 @@ describe("A caller's handler runs first and can prevent the component's own", ()
     fireEvent.keyDown(main, { key: "Backspace" });
     expect(pressed).toHaveBeenCalledTimes(1);
     expect(changed).toHaveBeenCalledWith(["a"]);
+  });
+
+  it("Combobox: an onKeyDown that prevents keeps the panel shut", () => {
+    const pressed = vi.fn((event: { preventDefault: () => void }) => event.preventDefault());
+    render(<Combobox aria-label="Line" options={[{ value: "a", label: "A" }]} value={null} onChange={vi.fn()} onKeyDown={pressed} />);
+    fireEvent.keyDown(screen.getByRole("combobox"), { key: "ArrowDown" });
+    expect(pressed).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("combobox").getAttribute("aria-expanded")).toBe("false");
+  });
+
+  it("Combobox: onKeyDown, and the arrow key still opens", () => {
+    const pressed = vi.fn();
+    render(<Combobox options={[{ value: "a", label: "A" }]} value={null} onChange={vi.fn()} onKeyDown={pressed} />);
+    fireEvent.keyDown(screen.getByRole("combobox"), { key: "ArrowDown" });
+    expect(pressed).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("combobox").getAttribute("aria-expanded")).toBe("true");
+  });
+
+  it("CommandPalette: an onKeyDown that prevents keeps Enter from choosing", () => {
+    const chosen = vi.fn();
+    render(
+      <CommandPalette
+        open
+        onClose={vi.fn()}
+        items={[{ id: "a", label: "Alpha" }]}
+        restingItems={[{ id: "a", label: "Alpha" }]}
+        onChoose={chosen}
+        onKeyDown={(event) => event.preventDefault()}
+      />,
+    );
+    fireEvent.keyDown(screen.getByRole("combobox"), { key: "Enter" });
+    expect(chosen).not.toHaveBeenCalled();
+  });
+
+  it("Tab and MenuItem: an onClick that prevents keeps their own work from running", () => {
+    const changed = vi.fn();
+    render(
+      <Tabs value="a" onChange={changed}>
+        <TabList aria-label="Views">
+          <Tab value="a">First</Tab>
+          <Tab value="b" onClick={(event) => event.preventDefault()}>
+            Second
+          </Tab>
+        </TabList>
+      </Tabs>,
+    );
+    fireEvent.click(screen.getByRole("tab", { name: "Second" }));
+    expect(changed).not.toHaveBeenCalled();
+
+    const selected = vi.fn();
+    render(<MenuItem onSelect={selected} onClick={(event) => event.preventDefault()}>Export</MenuItem>);
+    fireEvent.click(screen.getByRole("menuitem", { name: "Export" }));
+    expect(selected).not.toHaveBeenCalled();
   });
 
   it("MultiSelect: an onKeyDown that prevents keeps the selection", () => {

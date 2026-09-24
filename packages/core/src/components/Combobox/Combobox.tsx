@@ -54,6 +54,8 @@ export const Combobox = forwardRef(function Combobox<T extends string = string>(
     emptyText,
     clearable = false,
     className,
+    onKeyDown,
+    onKeyDownCapture,
     ...rest
   }: ComboboxProps<T>,
   ref: ForwardedRef<HTMLDivElement>,
@@ -102,7 +104,7 @@ export const Combobox = forwardRef(function Combobox<T extends string = string>(
 
   const handleKeyDown = (event: ReactKeyboardEvent<HTMLInputElement>) => {
     // An input method's own keys (Enter ends the composition) are not ours.
-    if (event.nativeEvent.isComposing) return;
+    if (event.nativeEvent.isComposing || event.defaultPrevented) return;
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {
       event.preventDefault();
       if (!open) {
@@ -132,8 +134,19 @@ export const Combobox = forwardRef(function Combobox<T extends string = string>(
     <>
       {/* The caller's ref, class and rest go to the wrapper, the field's
           outermost element (P1 of core-passthrough); the field id from
-          `FormField` stays on the input. */}
-      <div ref={ref} className={cx(styles.wrapper, className)} {...rest}>
+          `FormField` stays on the input. The caller's `onKeyDown` listens in
+          the capture phase: the keys land on the input inside, and a handler
+          on the wrapper would otherwise run after the field's own and could
+          not prevent it (P3). */}
+      <div
+        ref={ref}
+        className={cx(styles.wrapper, className)}
+        {...rest}
+        onKeyDownCapture={(event) => {
+          onKeyDownCapture?.(event);
+          onKeyDown?.(event);
+        }}
+      >
         <input
           ref={inputRef}
           type="text"
@@ -227,7 +240,8 @@ export const Combobox = forwardRef(function Combobox<T extends string = string>(
               )}
           </div>
       </Popover>
-    </>  );
+    </>
+  );
 }) as <T extends string = string>(
   props: ComboboxProps<T> & { ref?: ForwardedRef<HTMLDivElement> },
 ) => ReactElement;

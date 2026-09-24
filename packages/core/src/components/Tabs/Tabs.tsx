@@ -22,13 +22,13 @@ function useTabs(component: string): TabsContextValue {
 }
 
 /* ------------------------------------------------------------------ */
-/* Tabs – controlled through value + onChange, or on their own from    */
+/* Tabs – controlled through value + onChange, or on their own from   */
 /* defaultValue (rule 2 of the README).                               */
 /* ------------------------------------------------------------------ */
 
 export interface TabsProps extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
-  /** The value of the visible tab. Controlled: `Tabs` remembers nothing,
-      so that the tab can come out of an address. */
+  /** The value of the visible tab. Controlled, `Tabs` remember nothing, so
+      that the tab can come out of an address. */
   value?: string;
   /** Uncontrolled: the tab that stands first. Afterwards the choice belongs
       to the tabs - for a switch no address and no handler needs to know. */
@@ -122,7 +122,13 @@ export const TabList = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>
   };
 
   return (
-    <div ref={mergeRefs(listRef, ref)} role="tablist" className={cx(styles.list, className)} {...rest} onKeyDown={handleKeyDown}>
+    <div
+      ref={mergeRefs(listRef, ref)}
+      className={cx(styles.list, className)}
+      {...rest}
+      role="tablist"
+      onKeyDown={handleKeyDown}
+    >
       {children}
       {indicator && (
         <span
@@ -150,26 +156,31 @@ export const Tab = forwardRef<HTMLButtonElement, TabProps>(function Tab(
 ) {
   const tabs = useTabs("Tab");
   const selected = tabs.value === value;
+  /* Uncontrolled without `defaultValue` no tab is chosen yet; then every tab
+     is a tab stop, or the list could not be reached from the keyboard. */
+  const noneChosen = tabs.value === "";
 
   return (
     <button
       ref={ref}
       type="button"
+      className={cx(styles.tab, className)}
+      {...rest}
+      /* After `rest` (P3 of core-passthrough): the role, the ids that tie tab
+         and panel together and the roving tab stop are the tab's own. The
+         value goes into the id masked: `aria-controls` and `aria-labelledby`
+         split at whitespace, and a tab "first page" would otherwise point at
+         two ids that do not exist. */
       role="tab"
-      /* The value goes into the id masked: `aria-controls` and
-         `aria-labelledby` split at whitespace, and a tab "first page" would
-         otherwise point at two ids that do not exist. */
       id={`${tabs.idBase}-tab-${idPart(value)}`}
       aria-selected={selected}
       aria-controls={`${tabs.idBase}-panel-${idPart(value)}`}
-      tabIndex={selected ? 0 : -1}
-      className={cx(styles.tab, className)}
-      {...rest}
+      tabIndex={selected || noneChosen ? 0 : -1}
       /* Composed, not overridden by `rest`: a caller's `onClick` used to take
-         the switching away from the tab. */
+         the switching away from the tab. It runs first and can prevent it. */
       onClick={(event) => {
         onClick?.(event);
-        tabs.onChange(value);
+        if (!event.defaultPrevented) tabs.onChange(value);
       }}
     >
       {children}
@@ -198,12 +209,12 @@ export const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(function TabPa
   return (
     <div
       ref={ref}
-      role="tabpanel"
-      id={`${tabs.idBase}-panel-${idPart(value)}`}
-      aria-labelledby={`${tabs.idBase}-tab-${idPart(value)}`}
       tabIndex={0}
       className={cx(styles.panel, className)}
       {...rest}
+      role="tabpanel"
+      id={`${tabs.idBase}-panel-${idPart(value)}`}
+      aria-labelledby={`${tabs.idBase}-tab-${idPart(value)}`}
     >
       {children}
     </div>
