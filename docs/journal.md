@@ -18,6 +18,28 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Sep. 2026 — Grouping the table
+
+- **Grilled, prototyped, then built.** `.scratch/table-grouping/` holds the
+  spec (Q1-Q28), nine tickets and the throwaway prototype on the real tokens
+  that settled the look. ADR-0029 records why a group's form follows its level.
+- **Decided on the rendered table, not on sketches**, and several times
+  reversed there: one level was all span, then carried one aggregate at the
+  span's foot, and became a group header over plain rows; a closing line, a sum
+  on the boundary between groups, all aggregates at the foot and sub-totals in
+  the last row were each built, seen and dropped. A group of one row lost its
+  special case the same way, and the share bar went from every sum to the first.
+- **A pure pipeline, test-first**: `table/src/model/grouping.ts` - groups,
+  aggregates from rows only, the order of groups by value, aggregate or
+  content, date periods, lines of a page and of a virtual window.
+- **The matrix** - light and dark, both densities, one to three levels, hover,
+  focus, sticky, page two, the phone - found five faults that the unit tests
+  could not: an unbounded span, a sticky value reading through another, a fold
+  on the tree guide, motion measured against the viewport, and a tag whose
+  focus showed no step. `grouping.spec.ts` keeps those states.
+- **Versions**: `table` 0.3.0 and `core` 0.6.0 (the grouping's wording);
+  `schedule` 0.1.5 and `calculation` 0.2.1 only move their peer range.
+
 ## Sep. 2026 — Publishing from `main`
 
 - **A raised version is a release.** `.github/workflows/publish.yml` runs on

@@ -50,6 +50,20 @@ module on the caller's side that carries `"use client"` and imports from there.
 
 ---
 
+## 0.6.0 – The wording of the grouping (Sep. 2026)
+
+### Added
+
+- **The wording of the table's grouping and aggregates**, English and German:
+  the footer's minimum, maximum, range, count, distinct values and an aggregate
+  of one's own; the grouping section and its entry per column, "Grouped by",
+  removing the grouping or a level, fold all and unfold all, "No value",
+  "continued", the fold's and the group box's names, and the calendar week. A
+  caller who builds a complete `Wording` of their own has nineteen entries to
+  add.
+
+---
+
 ## 0.5.0 – The wording of the calculation (Sep. 2026)
 
 ### Added

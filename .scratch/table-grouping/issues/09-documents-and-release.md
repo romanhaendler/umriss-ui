@@ -1,6 +1,6 @@
 # 09 — Documents and the release
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Blocked by: 07, 08

@@ -72,7 +72,12 @@ stylesheets by hand.
 ## What it can do
 
 * **Columns by composition** (ADR-0017): a value from a field or computed, its
-  presentation, defaults per value type, absent values, a footer, a row header.
+  presentation, defaults per value type, absent values, aggregates, a row header.
+* **Grouping** (ADR-0029): by a column or by a value that is none, up to three
+  levels, switched on with one option or chosen by the user in the column menu.
+  The outer level is a group header carrying every aggregate under its column;
+  the innermost of several is a span beside its rows. Groups fold into a
+  summary, select as a whole, page and virtualise.
 * **Restricting a column**: the values that occur, two bounds, or a filter the
   application writes itself — plus conditions set from outside and read back.
 * **Around the table**: toolbar, search, column menu, export, paging — each

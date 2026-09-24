@@ -15,6 +15,16 @@ moves from here under the rule above.
 
 ---
 
+## 0.1.5 – Core 0.6.0 (Sep. 2026)
+
+### Changed
+
+- **The schedule takes `@umriss-ui/core` 0.6.** Nothing in the schedule
+  changed; the peer range moves to `^0.6.0`, so that it installs beside
+  `@umriss-ui/table` 0.3, which needs core's new wording.
+
+---
+
 ## 0.1.4 – Core 0.5.0 (Sep. 2026)
 
 ### Changed
