@@ -11,11 +11,13 @@
    looks"): a band is exactly one row high, every level has one fold slot of
    20 px, and a line is only as strong as the boundary it draws. */
 
-import type { CSSProperties, ReactNode } from "react";
+import { useLayoutEffect, useRef } from "react";
+import type { CSSProperties, KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
+import { Checkbox } from "@umriss-ui/core";
 import type { Formats, Wording } from "@umriss-ui/core";
 import { cx } from "./cx";
 import { AggregateValue, aggregateIsNumeric } from "./aggregateValue";
-import type { ColumnEntry, HookSnapshot } from "./registry";
+import type { ColumnEntry, HookSnapshot, Registry } from "./registry";
 import { aggregate } from "./model/grouping";
 import type { Line, RowGroup } from "./model/grouping";
 import { asText } from "./values";
@@ -58,37 +60,89 @@ function GroupValue({ entry, group, formats, wording }: { entry: ColumnEntry | u
 }
 
 /** The fold of a group - or, for a group of one row, the empty slot that keeps
-    every level's text on one vertical. */
+    every level's text on one vertical. The arrows fold as in a tree: left
+    folds, or goes to the group around it; right unfolds. */
 function Fold({
   group,
+  parent,
   entry,
   open,
+  registry,
   hook,
   formats,
   wording,
 }: {
   group: RowGroup<unknown>;
+  /** The group around it, for the left arrow. */
+  parent: RowGroup<unknown> | undefined;
   entry: ColumnEntry | undefined;
   open: boolean;
+  registry: Registry;
   hook: HookSnapshot;
   formats: Formats;
   wording: Wording;
 }) {
+  const button = useRef<HTMLButtonElement>(null);
+  useLayoutEffect(() => {
+    if (button.current && registry.takeFoldFocus(group.path)) button.current.focus();
+  });
   if (group.rows.length < 2) return <span className={styles.foldSlot} aria-hidden="true" />;
   const name = groupText(entry, group.value, formats, wording);
   const count = formats.count(group.rows.length);
+  const toggle = () => {
+    registry.requestFoldFocus(group.path);
+    hook.publicSnapshot.toggleFold(group.path);
+  };
+  const handleKeyDown = (event: ReactKeyboardEvent<HTMLButtonElement>) => {
+    if (event.key === "ArrowRight" && !open) {
+      event.preventDefault();
+      toggle();
+    } else if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      if (open) toggle();
+      else if (parent) {
+        const table = event.currentTarget.closest("table");
+        const target = Array.from(table?.querySelectorAll<HTMLButtonElement>("[data-fold-path]") ?? []).find(
+          (b) => b.dataset.foldPath === parent.path,
+        );
+        target?.focus();
+      }
+    }
+  };
   return (
     <button
+      ref={button}
       type="button"
       className={cx(styles.fold, !open && styles.foldClosed)}
+      data-fold-path={group.path}
       aria-expanded={open}
       aria-label={open ? wording.foldGroup(name, count) : wording.unfoldGroup(name, count)}
-      onClick={(event) => (event.altKey ? foldSiblings(group, open, hook) : hook.publicSnapshot.toggleFold(group.path))}
+      onKeyDown={handleKeyDown}
+      onClick={(event) => (event.altKey ? foldSiblings(group, open, hook) : toggle())}
     >
       <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
         <path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     </button>
+  );
+}
+
+/** The box that selects every row of a group - checked when all are,
+    indeterminate when some are. */
+function GroupCheckbox({ group, entry, hook, formats, wording }: { group: RowGroup<unknown>; entry: ColumnEntry | undefined; hook: HookSnapshot; formats: Formats; wording: Wording }) {
+  const { selection } = hook.publicSnapshot;
+  const keys = group.rows.map(hook.rowKey);
+  const chosen = keys.filter((k) => selection.isSelected(k)).length;
+  const all = chosen === keys.length;
+  return (
+    <Checkbox
+      aria-label={wording.selectGroup(groupText(entry, group.value, formats, wording))}
+      checked={all}
+      indeterminate={chosen > 0 && !all}
+      onChange={() => {
+        for (const key of keys) if (selection.isSelected(key) === all) selection.toggle(key);
+      }}
+    />
   );
 }
 
@@ -113,12 +167,16 @@ function foldSiblings(group: RowGroup<unknown>, open: boolean, hook: HookSnapsho
 export function SpanCell({
   line,
   entry,
+  selectable,
+  registry,
   hook,
   formats,
   wording,
 }: {
   line: Extract<Line<unknown>, { kind: "row" }>;
   entry: ColumnEntry | undefined;
+  selectable: boolean;
+  registry: Registry;
   hook: HookSnapshot;
   formats: Formats;
   wording: Wording;
@@ -128,7 +186,12 @@ export function SpanCell({
     <td className={cx(styles.td, styles.spanCell)}>
       {line.first && (
         <span className={styles.spanValue}>
-          <Fold group={group} entry={entry} open hook={hook} formats={formats} wording={wording} />
+          {selectable && group.rows.length > 1 && (
+            <span className={styles.spanSelect}>
+              <GroupCheckbox group={group} entry={entry} hook={hook} formats={formats} wording={wording} />
+            </span>
+          )}
+          <Fold group={group} parent={line.parents.at(-1)} entry={entry} open registry={registry} hook={hook} formats={formats} wording={wording} />
           <span className={styles.spanText}>
             <GroupValue entry={entry} group={group} formats={formats} wording={wording} />
             {line.continued && <span className={styles.continued}>{wording.groupContinued}</span>}
@@ -149,13 +212,24 @@ export function GroupLine({
   levelEntry,
   columns,
   controlColumns,
+  selectable,
   hasActions,
   total,
+  siblings,
+  depth,
+  registry,
   hook,
   formats,
   wording,
 }: {
   line: Extract<Line<unknown>, { kind: "header" | "folded" }>;
+  /** Whether the first control column is the selection's. */
+  selectable: boolean;
+  /** The groups beside it, itself included - for its position. */
+  siblings: readonly RowGroup<unknown>[];
+  /** How many levels the grouping has. */
+  depth: number;
+  registry: Registry;
   index: number;
   absolute: number | undefined;
   spanEntry: ColumnEntry | undefined;
@@ -183,7 +257,7 @@ export function GroupLine({
 
   const label = (
     <span className={styles.groupLabel}>
-      <Fold group={group} entry={levelEntry} open={open} hook={hook} formats={formats} wording={wording} />
+      <Fold group={group} parent={line.parents.at(-1)} entry={levelEntry} open={open} registry={registry} hook={hook} formats={formats} wording={wording} />
       <span className={styles.groupValue}>
         <GroupValue entry={levelEntry} group={group} formats={formats} wording={wording} />
       </span>
@@ -203,9 +277,17 @@ export function GroupLine({
       aria-rowindex={virtual ? absolute + 2 : undefined}
       data-index={index}
       style={header ? ({ "--u-band-level": group.level } as CSSProperties) : undefined}
+      aria-level={header ? group.level + 1 : depth}
+      aria-expanded={single ? undefined : open}
+      aria-posinset={siblings.indexOf(group) + 1 || undefined}
+      aria-setsize={siblings.length || undefined}
     >
       {Array.from({ length: controlColumns }, (_, i) => (
-        <td key={`c${i}`} className={cx(styles.td, styles.control)} />
+        <td key={`c${i}`} className={cx(styles.td, styles.control)}>
+          {i === 0 && selectable && header && !single && (
+            <GroupCheckbox group={group} entry={levelEntry} hook={hook} formats={formats} wording={wording} />
+          )}
+        </td>
       ))}
       {header ? (
         <td className={styles.td} colSpan={1 + lead} style={{ paddingLeft: `calc(var(--u-space-3) + ${group.level * 20}px)` }}>
@@ -215,7 +297,12 @@ export function GroupLine({
         <>
           <td className={cx(styles.td, styles.spanCell)}>
             <span className={styles.spanValue}>
-              <Fold group={group} entry={spanEntry} open={false} hook={hook} formats={formats} wording={wording} />
+              {selectable && (
+                <span className={styles.spanSelect}>
+                  <GroupCheckbox group={group} entry={spanEntry} hook={hook} formats={formats} wording={wording} />
+                </span>
+              )}
+              <Fold group={group} parent={line.parents.at(-1)} entry={spanEntry} open={false} registry={registry} hook={hook} formats={formats} wording={wording} />
               <span className={styles.spanText}>
                 <GroupValue entry={spanEntry} group={group} formats={formats} wording={wording} />
               </span>
