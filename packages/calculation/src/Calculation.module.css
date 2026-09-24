@@ -206,6 +206,11 @@
     color: var(--u-color-text);
   }
 
+  button.disclosure:active,
+  .line[data-foldable]:active button.disclosure {
+    background: var(--u-color-surface-pressed);
+  }
+
   .item[data-open] > .line button.disclosure {
     color: var(--u-color-accent);
   }

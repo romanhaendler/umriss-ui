@@ -40,8 +40,8 @@
   }
 
   .fieldDisabled {
-    background: var(--u-color-surface-sunken);
     cursor: not-allowed;
+    opacity: 0.5;
   }
 
   .placeholder {
@@ -50,12 +50,18 @@
     color: var(--u-color-text-muted);
   }
 
+  /* The row clips what does not fit, and would clip a focused chip's ring
+     with it: the full height of the field and two pixels at each side give the
+     ring its room, the negative margin keeps the chips where they stood. */
   .summary {
     flex: 1;
+    align-self: stretch;
     display: flex;
     align-items: center;
     gap: var(--u-space-2);
     min-width: 0;
+    margin-inline: -2px;
+    padding-inline: 2px;
     overflow: hidden;
   }
 
@@ -78,6 +84,7 @@
   /* Chip = remove button: the × appears on hovering over it (on devices
      without hover permanently), and the width stays constant while it does. */
   .chip {
+    composes: ring from "#own-styles";
     flex: 0 1 auto;
     min-width: 0;
     display: inline-flex;
@@ -98,12 +105,20 @@
       color var(--u-transition);
   }
 
-  .chip:hover:not(:disabled),
-  .chip:focus-visible {
+  /* The focused chip carries the ring; the danger surface is the pointer's
+     alone. It stood on the focus as well, and focus and hover could not be told
+     apart (visuelle-wertigkeit 04). */
+  .chip:hover:not(:disabled) {
     background: var(--u-color-danger-subtle);
     color: var(--u-color-danger-text);
   }
 
+  .chip:active:not(:disabled) {
+    background: var(--u-color-danger-subtle-pressed);
+  }
+
+  /* No opacity of its own: a chip is disabled only with its field, which
+     carries it. */
   .chip:disabled {
     cursor: not-allowed;
   }
@@ -122,7 +137,8 @@
     transition: opacity var(--u-transition);
   }
 
-  .chip:hover .chipX,
+  /* Focus reveals the × as hover does: it says what Enter will do. */
+  .chip:hover:not(:disabled) .chipX,
   .chip:focus-visible .chipX {
     opacity: 1;
   }
@@ -156,6 +172,12 @@
     background: color-mix(in srgb, var(--u-color-accent) 18%, var(--u-color-surface));
   }
 
+  /* 24 % and no further: the accent type holds 4.64:1 on it in the light
+     theme (6.0:1 dark); at 26 % it slipped under 4.5:1. */
+  .counter:active:not(:disabled) {
+    background: color-mix(in srgb, var(--u-color-accent) 24%, var(--u-color-surface));
+  }
+
   /* Main button: carries focus, ARIA and the chevron; when empty it fills the
      field. */
   .main {
@@ -175,7 +197,6 @@
 
   .main:disabled {
     cursor: not-allowed;
-    color: var(--u-color-text-muted);
   }
 
   .main:focus-visible {
@@ -236,6 +257,8 @@
       box-shadow var(--u-transition);
   }
 
+  /* A segment of a switch, like a tab: no surface of its own until chosen, so
+     hover darkens the type and the press chooses (visuelle-wertigkeit 04). */
   .scope:hover {
     color: var(--u-color-text);
   }
@@ -292,6 +315,10 @@
 
   .option:hover {
     background: var(--u-color-surface-sunken);
+  }
+
+  .option:active {
+    background: var(--u-color-surface-pressed);
   }
 
   .empty {

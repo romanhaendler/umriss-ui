@@ -37,9 +37,8 @@
   }
 
   .textarea:disabled {
-    background: var(--u-color-surface-sunken);
-    color: var(--u-color-text-muted);
     cursor: not-allowed;
+    opacity: 0.5;
   }
 
   .sm {

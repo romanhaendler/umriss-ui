@@ -143,6 +143,10 @@
     touch-action: none;
   }
 
+  /* A handle, not a key: nothing is pressed here, something is taken hold
+     of. Its states are the ink and the grab cursor, and a surface under the
+     pointer would draw a key where the strip has a seam (visuelle-wertigkeit
+     04). */
   .grip:hover {
     color: var(--u-color-text-secondary);
   }
@@ -176,9 +180,13 @@
     color: var(--u-color-text);
   }
 
+  .tool:active:not(:disabled) {
+    background: var(--u-color-surface-pressed);
+  }
+
   .tool:disabled {
-    color: var(--u-color-text-muted);
-    cursor: default;
+    cursor: not-allowed;
+    opacity: 0.5;
   }
 
   /* The mode - the one accent that does exactly its job: marking an interaction
@@ -188,6 +196,10 @@
   .inMode:hover:not(:disabled) {
     background: var(--u-color-accent-subtle);
     color: var(--u-color-accent);
+  }
+
+  .inMode:active:not(:disabled) {
+    background: var(--u-color-accent-subtle-pressed);
   }
 
   /* ---------------- The refusal ---------------- */
