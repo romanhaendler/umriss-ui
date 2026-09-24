@@ -29,16 +29,16 @@ recorded here so they can be challenged.
 | Q5 | Data table | Not now. A summary in the plot's description instead. A table on demand is a later ticket if asked for. |
 | Q6 | Zoom by key | Only with `onDomainChange`: `+`/`−` zoom around the Active point, Shift+←/→ pan, `0` asks for the data extent. The walk never pans by itself at the edge; after a domain change the Active point moves to the nearest visible position. |
 | Q7 | Words | A typed `ChartsWording` with English defaults, prop `wording` on `Chart`, German behind `@umriss-ui/charts/wording/de`. Existing string props win. |
-| R1 | Where the walk starts | On focus with no Active point: the last position in the visible domain (a time series' newest value). One set by the pointer stays. |
-| R2 | Leaving | Escape clears the Active point, the focus stays. Tab leaves. |
+| R1 | Where the walk starts | On keyboard focus with no Active point: the last position in the visible domain (a time series' newest value). One set by the pointer stays; a focus by click does not start the walk. |
+| R2 | Leaving | Escape clears the Active point, the focus stays. Tab leaves, and a point the keyboard set goes with the focus. |
 | R3 | Pointer and keyboard | `pointerleave` clears the Active point only when the pointer set it. |
 | R4 | Hidden series | Neither emphasised by ↑/↓ nor contributing positions. |
 | R5 | Positions | The union of x over the visible series within the visible domain; for bars, the categories. |
 | R6 | Scatter under `"nearest"` | ←/→ step through the emphasised series' points in x order; ↑/↓ switch series. |
 | R7 | Other kinds | Matrix: four arrows cell to cell, Home/End to the row's ends. StateBand: ←/→ from state change to state change, ↑/↓ lane to lane. ControlChart: as a line. Limit lines and bands are no walk targets. |
-| R8 | How focus looks | The plot area shows the charts' `--uc-focus-ring` on `:focus-visible` (inset, so it survives the clip); the Active point draws as the pointer's hit. |
+| R8 | How focus looks | The plot area shows the charts' `--uc-focus-ring` on `:focus-visible` - the legend entry's ring, outside the plot; an inset variant was refused by the state canon's check (the ring is one token). The Active point draws as the pointer's hit. |
 | R9 | API | No public Active point (no `onActiveChange`): nobody has asked, and sync already carries it between charts. |
-| R10 | Summary | A visually hidden element tied by `aria-describedby`, not live: the kind, the series by name, the visible x range, each series' minimum and maximum there, and the key help. Rebuilt on data, domain or visibility change. |
+| R10 | Summary | A visually hidden element tied by `aria-describedby`, not live: the series by name (the kind is the role description, "chart"), the visible x range, each series' minimum and maximum there - a band has none -, and the key help. Rebuilt on data, domain or visibility change. |
 | R11 | Pace of speech | The readout is written 150 ms after the last keystroke, so a held key speaks where it stops, not every step. The tooltip follows every step at once. |
 | R12 | Release | A minor: `@umriss-ui/charts` 0.6.0 with the new subpath. |
 
@@ -72,8 +72,8 @@ A data table; touch; announcing pointer moves; a public Active point API.
 ## Comments
 
 **Delivered** in `@umriss-ui/charts` 0.6.0, tickets 01-05. The walk is a pure
-module (`walk.ts`, 16 unit tests); the scene reuses the hit test for every
-keyboard position. Tests: jsdom for keyboard (10), readout and summary (4),
+module (`walk.ts`, 21 unit tests); the scene reuses the hit test for every
+keyboard position. Tests: jsdom for keyboard (11), readout and summary (4),
 zoom keys (4), wording (4); two Playwright interaction tests (Tab and keys;
 pointer handover and sync); a focused-chart screenshot per theme; axe clean on
 every sample page with no new tolerated pair.

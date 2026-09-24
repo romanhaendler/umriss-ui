@@ -38,3 +38,23 @@ export async function renderChart(element: ReactNode): Promise<{ host: HTMLEleme
     },
   };
 }
+
+/** The plot area - the chart's one tab stop. */
+export const plotOf = (host: HTMLElement) => host.querySelector(".uc-plot") as HTMLElement;
+
+export const tooltipOf = (host: HTMLElement) => host.querySelector(".uc-tooltip")?.textContent ?? "";
+
+/** A key on the plot, then a frame; true where the chart took it. */
+export async function press(host: HTMLElement, key: string, init: KeyboardEventInit = {}): Promise<boolean> {
+  const event = new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true, ...init });
+  await act(async () => {
+    plotOf(host).dispatchEvent(event);
+  });
+  await frame();
+  return event.defaultPrevented;
+}
+
+export async function focusPlot(host: HTMLElement): Promise<void> {
+  await act(async () => plotOf(host).focus());
+  await frame();
+}

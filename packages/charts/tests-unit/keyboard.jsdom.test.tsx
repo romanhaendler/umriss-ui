@@ -7,7 +7,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act } from "react";
 import { Chart, Line, Tooltip, XAxis, YAxis } from "../src";
-import { frame, renderChart, sizePlot } from "./renderChart";
+import { focusPlot as focus, frame, plotOf as plot, press, renderChart, sizePlot, tooltipOf as tooltip } from "./renderChart";
 
 interface Row {
   t: number;
@@ -44,21 +44,6 @@ async function chart(options: { tooltip?: "x" | "nearest" | null } = {}): Promis
   );
   unmount = r.unmount;
   return r.host;
-}
-
-const plot = (host: HTMLElement) => host.querySelector(".uc-plot") as HTMLElement;
-const tooltip = (host: HTMLElement) => host.querySelector(".uc-tooltip")?.textContent ?? "";
-
-async function press(host: HTMLElement, key: string, extra: KeyboardEventInit = {}): Promise<void> {
-  await act(async () => {
-    plot(host).dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true, ...extra }));
-  });
-  await frame();
-}
-
-async function focus(host: HTMLElement): Promise<void> {
-  await act(async () => plot(host).focus());
-  await frame();
 }
 
 describe("The chart as a tab stop", () => {
@@ -187,5 +172,43 @@ describe("The walk over a matrix", () => {
     await press(host, "End");
     await press(host, "ArrowUp");
     expect(tooltip(host)).toContain("62 %");
+  });
+});
+
+describe("A matrix among other series", () => {
+  interface Mixed {
+    hour: number;
+    machine: number;
+    oee: number;
+  }
+  const cells: Mixed[] = [
+    { hour: 0, machine: 0, oee: 50 },
+    { hour: 0, machine: 1, oee: 60 },
+    { hour: 1, machine: 0, oee: 51 },
+    { hour: 1, machine: 1, oee: 61 },
+  ];
+
+  it("hands ↑/↓ on at the edge of its column, and takes them back at a cell", async () => {
+    const { Matrix, Scatter } = await import("../src");
+    const r = await renderChart(
+      <Chart data={cells} ariaLabel="Mixed">
+        <XAxis accessor={(d: Mixed) => d.hour} tickFormat={(v) => `h${v}`} />
+        <YAxis accessor={(d: Mixed) => d.machine} />
+        <Matrix accessor={(d: Mixed) => d.machine} value={(d: Mixed) => d.oee} name="OEE" format={(v) => `${v} %`} />
+        <Scatter accessor={(d: Mixed) => d.machine + 0.5} name="Probe" />
+        <Tooltip mode="nearest" />
+      </Chart>,
+    );
+    unmount = r.unmount;
+    const host = r.host;
+    await focus(host);
+    expect(tooltip(host)).toContain("OEE");
+    await press(host, "ArrowUp"); // machine 1
+    await press(host, "ArrowUp"); // the top of the column: on to the next series
+    expect(tooltip(host)).toContain("Probe");
+    await press(host, "ArrowDown"); // back onto the matrix, at a cell of its column
+    expect(tooltip(host)).toContain("OEE");
+    await press(host, "ArrowLeft");
+    expect(tooltip(host)).toContain("h0");
   });
 });

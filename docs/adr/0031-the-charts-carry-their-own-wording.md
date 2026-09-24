@@ -5,8 +5,8 @@ Date:   2026-09
 
 The charts had words in three places only - "No data" and two hint strings, each
 an English default in a prop. Being walked by keyboard and read aloud makes
-them speak whole sentences: the chart's summary, the key help, "no value",
-"series 2 of 3". A prop per sentence does not scale, and core's register
+them speak whole sentences: the chart's summary, the key help, the readout of
+a position. A prop per sentence does not scale, and core's register
 cannot be borrowed: the charts depend on nothing (ADR-0016's reasoning, and
 CONTEXT.md's).
 

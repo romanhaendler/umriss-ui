@@ -8,7 +8,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act } from "react";
 import { Chart, Line, Tooltip, XAxis, YAxis } from "../src";
 import { ChartScene } from "../src/scene";
-import { frame, renderChart, sizePlot } from "./renderChart";
+import { focusPlot, frame, plotOf as plot, press, renderChart, sizePlot } from "./renderChart";
 
 interface Row {
   t: number;
@@ -40,26 +40,17 @@ function tree(domain?: [number, number], zoom = false) {
   );
 }
 
-const plot = (host: HTMLElement) => host.querySelector(".uc-plot") as HTMLElement;
 const readout = (host: HTMLElement) => host.querySelector("[aria-live='polite']")?.textContent ?? "";
 const summary = (host: HTMLElement) => {
   const id = plot(host).getAttribute("aria-describedby");
   return (id === null ? null : document.getElementById(id))?.textContent ?? "";
 };
 
-async function press(host: HTMLElement, key: string): Promise<void> {
-  await act(async () => {
-    plot(host).dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true }));
-  });
-  await frame();
-}
-
 describe("The readout", () => {
   it("reads x and every series once the keys rest, the emphasised one first", async () => {
     const r = await renderChart(tree());
     unmount = r.unmount;
-    await act(async () => plot(r.host).focus());
-    await frame();
+    await focusPlot(r.host);
     await press(r.host, "ArrowLeft");
     await press(r.host, "ArrowDown");
     expect(readout(r.host)).toBe("");
@@ -95,7 +86,7 @@ describe("The summary", () => {
     unmount = r.unmount;
     await rest(150);
     expect(summary(r.host)).toBe(
-      "2 series. From t0 to t4. A from 10 u to 14 u. B from 100 u to 104 u. " +
+      "2 series: A, B. From t0 to t4. A from 10 u to 14 u. B from 100 u to 104 u. " +
         "Left and right arrows move through the values, up and down change the series, Home and End go to the first and the last, Escape clears.",
     );
   });
