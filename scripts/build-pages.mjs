@@ -14,6 +14,11 @@
    The vite configs of the demos stay untouched: the screenshot suites build
    them with the default base, and nothing here should move a baseline.
 
+   Beside each demo stand its text for coding agents (.scratch/ai-readable-docs):
+   `llms.txt`, the index of its pages, and `llms-full.txt`, every page in full.
+   Both are written by the demo's props run, which `build:demo` does first;
+   `site/llms.txt` points at the five.
+
    Run: `pnpm build:pages`. */
 
 import { execFileSync } from "node:child_process";
@@ -36,6 +41,8 @@ for (const dir of PACKAGES) {
     stdio: "inherit",
   });
   cpSync(join(ROOT, "packages", dir, "dist-demo"), join(SITE, dir), { recursive: true });
+  cpSync(join(ROOT, "packages", dir, "demo", ".generated", "llms.txt"), join(SITE, dir, "llms.txt"));
+  cpSync(join(ROOT, "packages", dir, "docs", "llms-full.md"), join(SITE, dir, "llms-full.txt"));
   rows.push({ dir, name: manifest.name, version: manifest.version, description: manifest.description });
 }
 
@@ -74,11 +81,27 @@ ${rows
     (row) => `      <a class="card" href="./${row.dir}/"><code>${escape(row.name)}</code><span class="version">${escape(row.version)}</span><span class="text">${escape(row.description)}</span></a>`,
   )
   .join("\n")}
-      <footer><a href="https://github.com/romanhaendler/umriss-ui">Source on GitHub</a></footer>
+      <footer><a href="https://github.com/romanhaendler/umriss-ui">Source on GitHub</a> · <a href="./llms.txt">llms.txt</a>, for coding agents</footer>
     </main>
   </body>
 </html>
 `,
 );
 
-console.log(`\nsite/ is ready: ${rows.map((row) => `${row.dir}/`).join(", ")} and index.html`);
+/* The workspace's index for an agent: which package is which, and where each
+   one's own index and full text stand. Relative links, like the demos' base. */
+writeFileSync(
+  join(SITE, "llms.txt"),
+  `# umriss
+
+> React packages for the screens of a producing plant: components, canvas charts, a table, a schedule and calculations, in English and German. Each package's demo is its documentation; the text below points at the same material as plain text.
+
+Every package carries the full text of its installed version as \`node_modules/<package>/docs/llms-full.md\`.
+
+## Packages
+
+${rows.map((row) => `- [${row.name}](./${row.dir}/llms.txt): ${row.description} Full text: [llms-full.txt](./${row.dir}/llms-full.txt)`).join("\n")}
+`,
+);
+
+console.log(`\nsite/ is ready: ${rows.map((row) => `${row.dir}/`).join(", ")}, index.html and llms.txt`);

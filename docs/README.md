@@ -10,6 +10,7 @@ what a reader has — the filename is what they are looking for.
 | what changed for me as a caller | `packages/<package>/CHANGELOG.md` |
 | what a word in this workspace means | [`../CONTEXT.md`](../CONTEXT.md) |
 | why something was decided the way it was | [`adr/README.md`](adr/README.md) |
+| what umriss deliberately does not build, and what to do instead | [`adr/0032-what-umriss-is-not.md`](adr/0032-what-umriss-is-not.md) |
 | how the design language works | [`design-language.md`](design-language.md) |
 | how this repository is worked in | [`../CONTRIBUTING.md`](../CONTRIBUTING.md) |
 | how a version is published to npm | [`releasing.md`](releasing.md) |
@@ -17,6 +18,7 @@ what a reader has — the filename is what they are looking for.
 | what capability is proved, and by what | the capability record of the package: [`../packages/charts/docs/capabilities.md`](../packages/charts/docs/capabilities.md), [`../packages/core/docs/capabilities-tree.md`](../packages/core/docs/capabilities-tree.md) |
 | what was worked on here, and when | [`journal.md`](journal.md) |
 | how umriss compares with other libraries, and what follows from it | [`research/library-comparison-2026-09/`](research/library-comparison-2026-09/), [`../.scratch/comparison-roadmap/spec.md`](../.scratch/comparison-roadmap/spec.md) |
+| how a coding agent reads a package's documentation | `llms.txt` beside each demo online, or `docs/llms-full.md` inside the installed package — generated from the demo by `packages/demo/src/tooling/llms.ts` |
 | how an agent should read this repository | [`../CLAUDE.md`](../CLAUDE.md), [`agents/`](agents/) |
 | what a document used to be called | **What moved**, below |
 

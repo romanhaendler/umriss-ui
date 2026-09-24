@@ -356,6 +356,9 @@ Wanted, not yet built (charts-review Q12). Each waits for a caller who needs it.
 ## Out
 
 Not planned, because each contradicts a ground rule or buys little for its cost.
+The reasons across all five packages stand in
+[ADR-0032](../../../docs/adr/0032-what-umriss-is-not.md); the case for each one
+here.
 
 * **A category scale.** Bars sit on the numeric X axis (ADR-0002); categories are
   passed as numeric positions with a naming `tickFormat`.
