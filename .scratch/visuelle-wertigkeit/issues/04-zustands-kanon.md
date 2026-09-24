@@ -1,6 +1,6 @@
 # 04 — A canon of states
 
-Status: ready-for-agent
+Status: done
 
 Blocked by: 01
 
@@ -140,3 +140,58 @@ What the survey finds, in the canon's order:
   react: the disabled tab darkens, the disabled time stepper comes back to full
   presence under its group's hover, and the × of a disabled chip appears.
   Combobox moves its cursor onto a disabled option with the pointer.
+
+## Delivery
+
+Delivered on the branch `worktree-agent-a20e4ca0333803b02`, survey first
+(bacba05), then the canon.
+
+- **No new colour for hover, three for the press.** Hover already had its
+  surfaces; the press had no step below them. `--u-color-surface-pressed`,
+  `--u-color-accent-subtle-pressed` and `--u-color-danger-subtle-pressed` are
+  light-dark pairs in `tokens.css`, and `contrast.test.ts` holds the type on
+  each at 4.5:1 in both themes. Tone-relative grounds (the alert's close, the
+  tag's remove key, the table's fold and grouping option, the MultiSelect's
+  counter) press by a stronger mixture of the colour they hover with; the
+  counter stops at 24 % because 26 % measured 4.49:1.
+- **Every quiet key now sinks while pressed**, and the settlings are the two
+  the design language names: 0.98 on a button, 0.8 on a glyph - the
+  NumberInput's stepper had a third, 0.9 on the whole key.
+- **Focus by surface is gone**: the Menu item and the MultiSelect chip carry the
+  ring. The chip's ring needed room in the clipping summary row; the chips do
+  not move. The schedule's chevron no longer darkens its type on focus. Four
+  places where a hover edge outweighed the ring were found on the way - the
+  secondary button, Checkbox, RadioGroup, and the chosen, range-end and preview
+  days of the date pickers - and exclude the focused element now.
+- **Disabled dims and reacts to nothing**: the fields, Checkbox, tab, menu item,
+  combobox option, dock tool and the table's move key and grouping option dim
+  to 0.5 instead of being repainted. Fixed underneath: the disabled tab's
+  hover, the time stepper's comeback under its group's hover, the disabled
+  chip's ×, and Combobox's pointer moving the cursor onto a disabled option
+  (a unit test, `combobox.test.tsx`).
+- **Standing divergences, with their reason at the site**: type-only hover on
+  the tab, the link, the sort label, the scope segment and the dock's grip;
+  the list cursors of Combobox and CommandPalette (virtual focus - the ring
+  stays on the field); the virtual row's inset outline; the TreeView's disabled
+  row (focusable, so muted rather than faded); the steppers' 0.18 at a bound.
+- **The check** is part of `stylesheets.test.ts`: no hover or press rule reaches
+  an element with a disabled state without excluding it; a rule for the
+  element's own focus paints no surface or type and draws the ring or nothing;
+  no hover edge outweighs the ring; a disabled rule sets no colour or surface.
+  Four named exceptions, each with its reason, and a self-test that each check
+  fires. Its ceiling: a disabled state carried by a class other than
+  `.xDisabled` (RadioGroup's and Tag's `.disabled`) is not tied to its element.
+- **Baselines**: none moved. The full visual suite ran on its own ports and was
+  green, the accessibility and own-base checks included, but for one table
+  behaviour test (below). The dimmed fields and checkbox stay under the
+  comparison's per-pixel threshold - half-opacity ink on paper is, to the byte,
+  the muted type it replaces (#8b8b8b) - and the new pressed, hovered and
+  focused states are not photographed. Menu and chip focus were looked at in
+  the built demo.
+- **Seen, not caused here**: `features-table.spec.ts` "A click on a condition
+  opens the panel of its filter" fails deterministically - the filter panel
+  still leaving (ticket 02's 100 ms exit, `data-closing`, inert) and the newly
+  opened one both match the role query. Nothing of this ticket touches the
+  panel's lifecycle; it was not re-run on the base commit.
+- `CONTEXT.md` is unchanged: the canon's meaning stands as defined.
+  `docs/design-language.md` gained a **States.** paragraph.
