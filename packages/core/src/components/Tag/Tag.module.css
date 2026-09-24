@@ -105,7 +105,12 @@
     background: color-mix(in srgb, currentColor 14%, transparent);
   }
 
-  /* Press point only on the glyph, never on the surface. */
+  .remove:active {
+    background: color-mix(in srgb, currentColor 22%, transparent);
+  }
+
+  /* The settling only on the glyph: scaled, the small key would shift the
+     tag's edge. */
   .remove:active svg {
     transform: scale(0.8);
   }

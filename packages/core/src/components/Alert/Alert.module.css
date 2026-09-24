@@ -125,8 +125,13 @@
     opacity: 1;
   }
 
+  /* In the alert's own colour, because the alert has a tone of its own. */
   .close:hover {
     background: color-mix(in srgb, currentColor 12%, transparent);
+  }
+
+  .close:active {
+    background: color-mix(in srgb, currentColor 20%, transparent);
   }
 
   .close:focus-visible {

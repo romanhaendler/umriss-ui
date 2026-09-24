@@ -38,7 +38,7 @@
   }
 
   .disabled {
-    background: var(--u-color-surface-sunken);
+    opacity: 0.5;
   }
 
   .input {
@@ -62,7 +62,6 @@
   }
 
   .input:disabled {
-    color: var(--u-color-text-muted);
     cursor: not-allowed;
   }
 
@@ -104,8 +103,11 @@
     transition:
       opacity var(--u-transition),
       background-color var(--u-transition),
-      color var(--u-transition),
-      transform var(--u-transition-press);
+      color var(--u-transition);
+  }
+
+  .stepper button svg {
+    transition: transform var(--u-transition-press);
   }
 
   .sm .stepper button {
@@ -123,10 +125,21 @@
     color: var(--u-color-text);
   }
 
+  /* The press point on the glyph, as on the time stepper: 0.8, and the surface
+     sinks once more. The whole key used to give way to 0.9, a third value
+     beside the button's 0.98 and the glyph's 0.8 (visuelle-wertigkeit 04). */
   .stepper button:active:not(:disabled) {
-    transform: scale(0.9);
+    background: var(--u-color-surface-pressed);
   }
 
+  .stepper button:active:not(:disabled) svg {
+    transform: scale(0.8);
+  }
+
+  /* At its bound a stepper is out of reach rather than forbidden: it all but
+     disappears - below its resting 0.4, so the field's hover cannot bring it
+     back - and the cursor stays plain, because a held repeat that runs into the
+     bound should not flash a refusal under the finger. */
   .stepper button:disabled {
     cursor: default;
     opacity: 0.18;

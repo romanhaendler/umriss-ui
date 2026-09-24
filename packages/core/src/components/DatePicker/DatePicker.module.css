@@ -30,9 +30,8 @@
   }
 
   .trigger:disabled {
-    background: var(--u-color-surface-sunken);
-    color: var(--u-color-text-muted);
     cursor: not-allowed;
+    opacity: 0.5;
   }
 
   .sm {
@@ -119,6 +118,10 @@
     color: var(--u-color-text);
   }
 
+  .page:active {
+    background: var(--u-color-surface-pressed);
+  }
+
   .weekdays,
   .grid {
     display: grid;
@@ -162,6 +165,11 @@
     background: var(--u-color-surface-sunken);
   }
 
+  /* Before the chosen states: pressing a day already chosen keeps its ink. */
+  .day:active {
+    background: var(--u-color-surface-pressed);
+  }
+
   .otherMonth {
     color: var(--u-color-text-muted);
   }
@@ -176,6 +184,10 @@
   .selected:hover {
     background: var(--u-color-primary-bg);
     color: var(--u-color-primary-fg);
+  }
+
+  /* Today's edge gives way to the ink - the focus ring does not. */
+  .selected:not(:focus-visible) {
     box-shadow: none;
   }
 
@@ -295,17 +307,23 @@
     transition: transform var(--u-transition-press);
   }
 
-  .timeGroup:hover .timeStepper button,
-  .timeGroup:focus-within .timeStepper button {
+  /* A disabled stepper stays at rest: the group's hover lifted it back to full
+     presence and painted it (visuelle-wertigkeit 04). */
+  .timeGroup:hover .timeStepper button:not(:disabled),
+  .timeGroup:focus-within .timeStepper button:not(:disabled) {
     opacity: 1;
   }
 
-  .timeStepper button:hover {
+  .timeStepper button:hover:not(:disabled) {
     background: var(--u-color-surface-sunken);
     color: var(--u-color-text);
   }
 
-  .timeStepper button:active svg {
+  .timeStepper button:active:not(:disabled) {
+    background: var(--u-color-surface-pressed);
+  }
+
+  .timeStepper button:active:not(:disabled) svg {
     transform: scale(0.8);
   }
 
@@ -394,6 +412,10 @@
     color: var(--u-color-text);
   }
 
+  .triggerClear:active {
+    background: var(--u-color-surface-pressed);
+  }
+
 
   /* ------------------------------------------------------------------
      DateRangePicker: the two-month panel, the presets, the range band
@@ -449,6 +471,10 @@
 
   .preset:hover {
     background: var(--u-color-surface-sunken);
+  }
+
+  .preset:active {
+    background: var(--u-color-surface-pressed);
   }
 
   .presetActive,
@@ -529,6 +555,11 @@
   .rangeSingle:hover {
     background: var(--u-color-primary-bg);
     color: var(--u-color-primary-fg);
+  }
+
+  .rangeFrom:not(:focus-visible),
+  .rangeTo:not(:focus-visible),
+  .rangeSingle:not(:focus-visible) {
     box-shadow: none;
   }
 
@@ -552,6 +583,10 @@
   .previewEnd:hover {
     background: color-mix(in srgb, var(--u-color-accent) 9%, var(--u-color-surface));
     color: var(--u-color-accent-text);
+  }
+
+  /* The outline stands where the ring would; a focused end shows the ring. */
+  .previewEnd:not(:focus-visible) {
     box-shadow: inset 0 0 0 1px var(--u-color-accent);
   }
 
@@ -612,17 +647,14 @@
     margin-right: var(--u-space-2);
   }
 
+  /* The whole field dims, its steppers with it - at their resting presence,
+     which the group's hover no longer lifts. */
   .timeFieldDisabled {
-    background: var(--u-color-surface-sunken);
+    opacity: 0.5;
   }
 
-  .timeFieldDisabled .timeField {
-    color: var(--u-color-text-muted);
-    cursor: not-allowed;
-  }
-
+  .timeFieldDisabled .timeField,
   .timeStepper button:disabled {
-    cursor: default;
-    opacity: 0.18;
+    cursor: not-allowed;
   }
 }

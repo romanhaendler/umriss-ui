@@ -79,8 +79,14 @@
     transform: scale(1);
   }
 
-  .option:hover .input:not(:disabled):not(:checked) + .dot {
+  /* A focused dot keeps its ring under the pointer: the hover edge outweighed
+     it and replaced it (visuelle-wertigkeit 04). */
+  .option:hover .input:not(:disabled):not(:checked):not(:focus-visible) + .dot {
     box-shadow: 0 0 0 1px var(--u-color-edge-hover);
+  }
+
+  .option:active .input:not(:disabled):not(:checked) + .dot {
+    background: var(--u-color-surface-pressed);
   }
 
   .input:focus-visible + .dot {

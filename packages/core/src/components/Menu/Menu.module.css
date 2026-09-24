@@ -29,25 +29,41 @@
     transition: background-color var(--u-transition);
   }
 
-  .item:hover,
-  .item:focus-visible {
+  .item:hover:not(:disabled) {
     background: var(--u-color-surface-sunken);
-    box-shadow: none;
+  }
+
+  .item:active:not(:disabled) {
+    background: var(--u-color-surface-pressed);
+  }
+
+  /* The keyboard's item carries the ring, not the hover surface: with the
+     surface, the item under the resting pointer and the item the arrow keys
+     reached looked the same (visuelle-wertigkeit 04). Lifted, so that a
+     neighbour's surface does not cover the ring's edge; the panel's padding
+     leaves it room. */
+  .item:focus-visible {
+    position: relative;
+    z-index: 1;
+    outline: none;
+    box-shadow: var(--u-focus-ring);
   }
 
   .item:disabled {
-    color: var(--u-color-text-muted);
     cursor: not-allowed;
-    background: none;
+    opacity: 0.5;
   }
 
   .danger {
     color: var(--u-color-danger-text);
   }
 
-  .danger:hover,
-  .danger:focus-visible {
+  .danger:hover:not(:disabled) {
     background: var(--u-color-danger-subtle);
+  }
+
+  .danger:active:not(:disabled) {
+    background: var(--u-color-danger-subtle-pressed);
   }
 
   .separator {
