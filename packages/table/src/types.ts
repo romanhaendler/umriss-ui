@@ -226,10 +226,10 @@ export interface ColumnComponent<Z> {
     },
   ): ReactNode;
   <W extends number | Absent>(
-    props: Computed<Z, W> & { format: NumberFormat; children?: Presentation<W, Z> },
+    props: Computed<Z, W> & { format: NumberFormat; aggregate?: AggregateFunction<W, Z>; share?: boolean; children?: Presentation<W, Z> },
   ): ReactNode;
   <W extends Date | Absent>(
-    props: Computed<Z, W> & { format: DateFormat; group?: DateKey; children?: Presentation<W, Z> },
+    props: Computed<Z, W> & { format: DateFormat; group?: DateKey; aggregate?: AggregateFunction<W, Z>; children?: Presentation<W, Z> },
   ): ReactNode;
   <W>(
     props: Computed<Z, W> & {
