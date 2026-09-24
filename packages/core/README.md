@@ -14,6 +14,11 @@ pnpm add @umriss-ui/core
 ```
 
 The demo is the documentation: <https://romanhaendler.github.io/umriss-ui/core/>.
+For a coding agent the same material stands as one Markdown file inside the
+installed package, `docs/llms-full.md`, pinned to that version — every page
+with its examples' source, its props tables and why it is built as it is, and
+the declaration of every other export; online, for the latest version,
+<https://romanhaendler.github.io/umriss-ui/core/llms.txt>.
 In an application:
 
 ```tsx

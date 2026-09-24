@@ -116,6 +116,11 @@ them: it is wanted, and waits under "Later".
   shows running examples with their source and the props table generated from
   `src/`.
 * [`CHANGELOG.md`](CHANGELOG.md) — what changes for a caller.
+* **For a coding agent**: `docs/llms-full.md` inside the installed package —
+  the demo as one Markdown file, pinned to the installed version: every page
+  with its examples' source, its props tables and why it is built as it is,
+  and the declaration of every other export. Online, for the latest version:
+  <https://romanhaendler.github.io/umriss-ui/charts/llms.txt>.
 * [`docs/capabilities.md`](docs/capabilities.md) — every capability with the
   level at which it is proved.
 * [`../../docs/design-language.md`](../../docs/design-language.md) — the design
