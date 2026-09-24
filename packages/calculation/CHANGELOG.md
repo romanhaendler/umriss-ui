@@ -11,7 +11,9 @@ under a heading "Changed" of its own, no matter which digit rose.
 
 ---
 
-## Unreleased
+## 0.2.3 – Core 0.8.0: the canon of states (Sep. 2026)
+
+Needs `@umriss-ui/core` 0.8: it reads core's pressed surfaces and motion tokens; the peer range moves to `^0.8.0`.
 
 ### Changed
 

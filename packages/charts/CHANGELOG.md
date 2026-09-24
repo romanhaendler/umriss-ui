@@ -29,7 +29,7 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
-## Unreleased
+## 0.5.0 – Tokens for type and motion, a legend that answers (Sep. 2026)
 
 ### Added
 
