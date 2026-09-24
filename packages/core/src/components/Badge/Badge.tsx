@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import type { HTMLAttributes } from "react";
 import { cx } from "../../lib/cx";
 import styles from "./Badge.module.css";
@@ -14,10 +15,13 @@ export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 }
 
 /** Compact status label; as a `pill` for counters. */
-export function Badge({ tone = "neutral", pill = false, className, children, ...rest }: BadgeProps) {
+export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(function Badge(
+  { tone = "neutral", pill = false, className, children, ...rest },
+  ref,
+) {
   return (
-    <span className={cx(styles.badge, pill && styles.pill, styles[tone], className)} {...rest}>
+    <span ref={ref} className={cx(styles.badge, pill && styles.pill, styles[tone], className)} {...rest}>
       {children}
     </span>
   );
-}
+});

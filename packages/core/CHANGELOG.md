@@ -39,6 +39,24 @@ commit.
   built as it is, and the declaration of every other export. The same text
   stands online as <https://romanhaendler.github.io/umriss-ui/core/llms-full.txt>,
   with an index of the pages beside it (`llms.txt`).
+- **Every component takes a `ref`, a `className`, a `style` and the rest of
+  the DOM props** at the element a caller lays out - a tooltip on a `Stat`, a
+  measured `Card`, a `data-testid` anywhere. New for `Badge`, `Card`,
+  `CardHeader`, `CardBody`, `Combobox`, `CommandPalette`, `ConfirmDialog`,
+  `EmptyState`, `FormField`, `Meter`, `Modal`, `ModalHeader`, `ModalBody`,
+  `ModalFooter`, `MenuItem`, `MenuSeparator`, `MultiSelect`, `Skeleton`,
+  `Sparkline`, `Spinner`, `Stat`, `Tabs`, `TabList`, `Tab`, `TabPanel`,
+  `TreeView`, `TreeSearch` and the four pickers. The `<dialog>` takes it for
+  `Modal`, `ConfirmDialog` and `CommandPalette`; the field's wrapper for the
+  pickers, `Combobox` and `MultiSelect` (the id from `FormField` stays on the
+  control inside); the `role="tree"` list for `TreeView`. All of them are
+  `forwardRef` components, so the ref also arrives under React 18.
+- **`Tabs` work uncontrolled**: `defaultValue` names the first tab, and the
+  tabs switch on their own; `value` and `onChange` are both optional now.
+  Without either, every tab is a tab stop until one is chosen.
+- **`Card` can be controlled**: `collapsed` folds it from outside, and
+  `onCollapsedChange` reports the header's button - controlled, the card
+  folds once `collapsed` follows; beside `defaultCollapsed` it is a message.
 
 ### Changed
 
@@ -49,6 +67,18 @@ commit.
   `columnAvailability`. A partial wording passed to the provider is merged as
   before; an application that implements the whole `Wording` type itself no
   longer compiles until it adds these five.
+- **What `...rest` may not override.** `Stat` keeps its role and the name it
+  has read, `Meter` its role and `aria-value*`, `Spinner`, `TreeView`,
+  `TabList`, `TabPanel` and `MenuItem` their role, `Tab` its role, ids and
+  tab stop, even where a caller passes the same attribute. A caller's
+  `aria-label` still names a `Meter`, a `Spinner`, a `Modal` or the
+  `CommandPalette`.
+- **A caller's handler runs first and can prevent the component's own**:
+  `onCancel` and `onMouseDown` of `Modal` and `CommandPalette` (a
+  `preventDefault` keeps the window standing), `onKeyDown` of `Combobox` and
+  `CommandPalette` (heard in the capture phase, before the field inside),
+  `onClick` and `onKeyDown` of `MultiSelect`'s field, and `onClick` of `Tab`
+  and `MenuItem`, which ran first before but could not prevent.
 
 ---
 
