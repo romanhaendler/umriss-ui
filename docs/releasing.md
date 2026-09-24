@@ -27,7 +27,7 @@ mechanics.
   9.14.4 does not pass it on** — a dry run announced `latest` regardless. The very first version of a package gets `latest` as
   well, because a package without `latest` does not exist, and it stays there
   when the next candidate goes to `next` — so as long as no released version
-  exists, `latest` is moved to each new candidate by hand (step 4), or a plain
+  exists, `latest` is moved to each new candidate by hand (step 5), or a plain
   `pnpm add` keeps installing the first one.
 
 Every manifest has `publishConfig.access: "public"` — a scoped package is
@@ -60,11 +60,17 @@ do Trusted Publishing.
 1. The version in `packages/<package>/package.json` and a heading of that number
    in its `CHANGELOG.md`, in one commit. Several packages may move in the same
    commit.
-2. `pnpm test:visual` — green. It is the one check the workflow cannot run.
-3. Push to `main`. The run is under *Actions → Publish*; if one package fails,
+2. The package's `README.md` read against what it now claims. Every roadmap
+   line against the status of the spec it names under `.scratch/` — a spec that
+   went `done` leaves the roadmap; a figure only by a link to the record that
+   holds it (the charts' benchmark stands once, in `docs/capabilities.md`); a
+   "cannot" against ADR-0032. No test holds this: a README is prose, and a lint
+   over prose would check the wording, not the truth.
+3. `pnpm test:visual` — green. It is the one check the workflow cannot run.
+4. Push to `main`. The run is under *Actions → Publish*; if one package fails,
    the rest of that run stops, and the next push — or *Run workflow* on the
    same page — publishes what is still missing.
-4. For a release candidate of a package that has no released version yet, move
+5. For a release candidate of a package that has no released version yet, move
    `latest` along:
    ```bash
    npm dist-tag add @umriss-ui/charts@0.3.0-rc.1 latest

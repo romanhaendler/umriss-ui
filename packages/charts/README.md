@@ -97,13 +97,17 @@ loaded: Geist when the application has it, the system fonts otherwise.
   `zones`, `violations`, `pareto`, `operatingCalendar` and the rest. Whoever
   wants to draw something other than the composition offers should reach the
   arithmetic without rebuilding it.
-* **Performance, measured rather than claimed.** Three series of 100,000 points
-  each: 10.5 ms materialisation, 10.8 ms series draw, 60 FPS on hover; at three
-  million points, 49.8 ms and 49.6 ms. The measuring run, its conditions and the
-  mixed series set stand in [`docs/capabilities.md`](docs/capabilities.md).
+* **Performance, measured rather than claimed**, up to three series of a
+  million points, with the hover at 60 FPS throughout. The figures, the
+  measuring run and its conditions stand once, in
+  [`docs/capabilities.md`](docs/capabilities.md) under "Performance" — they are
+  not repeated here, so that a new measurement has one place to go.
 
-What it deliberately cannot do — animations, stacking, a category scale,
-horizontal bars — stands in the same record, with the reason.
+What it deliberately cannot do — animations, a log or category scale,
+horizontal bars, pie and radar — stands in the same record, with the reason,
+and across all five packages in
+[ADR-0032](../../docs/adr/0032-what-umriss-is-not.md). Stacking is not among
+them: it is wanted, and waits under "Later".
 
 ## More
 

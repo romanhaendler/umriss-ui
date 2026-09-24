@@ -1,6 +1,6 @@
 # Decisions
 
-Thirty-one decisions, each one written where it was made and kept afterwards. An
+Thirty-two decisions, each one written where it was made and kept afterwards. An
 ADR here is not an announcement: it states the question, the alternatives that
 were real at the time, and what the decision costs — which is what makes it
 worth reading a year later, when the code has changed and the reasoning has not.
@@ -45,5 +45,6 @@ half a later reader needs most. Exactly one is superseded today.
 | [0029](0029-a-row-groups-form-follows-its-level.md) | A row group's form follows its level | accepted | table |
 | [0030](0030-a-chart-is-one-tab-stop-that-walks-its-hits.md) | A chart is one tab stop that walks its hits | accepted | charts |
 | [0031](0031-the-charts-carry-their-own-wording.md) | The charts carry their own wording | accepted | charts, language |
+| [0032](0032-what-umriss-is-not.md) | What umriss is not | accepted | scope |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).
