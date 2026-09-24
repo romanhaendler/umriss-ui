@@ -79,6 +79,65 @@ describe("resolveTheme", () => {
   });
 });
 
+/* charts-alternatives 03 (C4): a canvas is not forced by the contrast mode,
+   so under `forced-colors: active` the theme resolves to the system colours
+   the page wears - played here by a stub, as the browser's part above. */
+describe("resolveTheme under forced colours", () => {
+  const SYSTEM: Record<string, string> = {
+    CanvasText: "rgb(1, 1, 1)",
+    Canvas: "rgb(2, 2, 2)",
+    GrayText: "rgb(3, 3, 3)",
+    Highlight: "rgb(4, 4, 4)",
+  };
+
+  function forcedBrowser() {
+    const real = window.getComputedStyle.bind(window);
+    vi.spyOn(window, "getComputedStyle").mockImplementation((el: Element) => {
+      const computed = real(el);
+      const inline = (el as HTMLElement).style?.color ?? "";
+      return new Proxy(computed, {
+        get(target, prop) {
+          if (prop === "getPropertyValue") return (name: string) => TOKENS[name] ?? "";
+          // jsdom writes a system colour's name in lower case.
+          if (prop === "color") return Object.entries(SYSTEM).find(([name]) => name.toLowerCase() === inline.toLowerCase())?.[1] ?? "";
+          return Reflect.get(target, prop);
+        },
+      });
+    });
+    vi.spyOn(window, "matchMedia").mockImplementation(
+      (query: string) => ({ matches: query === "(forced-colors: active)", addEventListener: () => undefined }) as unknown as MediaQueryList,
+    );
+  }
+
+  it("resolves text, ground, grid and severities to system colours", () => {
+    forcedBrowser();
+    const root = document.body.appendChild(document.createElement("div"));
+    const theme = resolveTheme(root);
+    expect(theme.forced).toBe(true);
+    expect(theme.colorText).toBe(SYSTEM.CanvasText);
+    expect(theme.colorAxis).toBe(SYSTEM.CanvasText);
+    expect(theme.colorBg).toBe(SYSTEM.Canvas);
+    expect(theme.colorGrid).toBe(SYSTEM.GrayText);
+    expect(theme.colorWarning).toBe(SYSTEM.Highlight);
+    expect(theme.colorAlarm).toBe(SYSTEM.Highlight);
+    expect(theme.colorOk).toBe(SYSTEM.CanvasText);
+  });
+
+  it("draws every series in the text colour - the marks tell them apart", () => {
+    forcedBrowser();
+    const root = document.body.appendChild(document.createElement("div"));
+    const theme = resolveTheme(root);
+    expect(theme.series).toHaveLength(6);
+    expect(new Set(theme.series)).toEqual(new Set([SYSTEM.CanvasText]));
+  });
+
+  it("is not forced otherwise", () => {
+    browserUnder("light");
+    const root = document.body.appendChild(document.createElement("div"));
+    expect(resolveTheme(root).forced).toBe(false);
+  });
+});
+
 describe("resolveColours - the resolution for a canvas that is not a chart", () => {
   it("resolves any CSS colour through the element it is given", () => {
     browserUnder("dark");

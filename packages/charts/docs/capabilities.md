@@ -297,6 +297,7 @@ Screenshot pages carry their name in brackets.
 | A MutationObserver on `documentElement` | R-1.7 | Interaction (theme switch) |
 | `invalidateTheme()` | R-1.7 | Manual |
 | Dark mode without code of its own | R-1.8 | Screenshot (dark) |
+| Under `forced-colors: active` the theme resolves to system colours - `CanvasText` for text, axes and every series, `Canvas` for the ground, `GrayText` for the grid, `Highlight` for warning and alarm; a caller's colour becomes `CanvasText` - and encoding by marks switches on by itself; entering or leaving the mode reads the theme anew | charts-alternatives C4 | Unit (jsdom theme, jsdom encoding), Interaction (forced colours: chip and canvas), Screenshot (forced colours × 4 examples) |
 
 ## Performance (R-5, reference run)
 

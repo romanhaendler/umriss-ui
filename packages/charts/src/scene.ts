@@ -913,9 +913,10 @@ export class ChartScene {
     this.markLayoutDirty();
   }
 
-  /** Is every series drawn with its marks as well as its colour? */
+  /** Is every series drawn with its marks as well as its colour? Under forced
+      colours always: every series is drawn in the one text colour then (C4). */
   private marked(): boolean {
-    return this.encoding === "marks";
+    return this.encoding === "marks" || this.theme?.forced === true;
   }
 
   /** A series' marks by its palette place - the same place its colour comes
@@ -1515,6 +1516,9 @@ export class ChartScene {
   private paint(color: string): string {
     const root = this.themeRoot;
     if (root === null) return color;
+    // Under forced colours a caller's colour is the page's text colour, as
+    // the browser would force it on an element (C4).
+    if (this.theme?.forced === true) return this.theme.colorText;
     let resolved = this.painted.get(color);
     if (resolved === undefined) {
       resolved = resolveColours(root, { color }).color;
