@@ -15,8 +15,8 @@
    itself, until now. */
 
 import { DEFAULT_FORMATS } from "@umriss-ui/core";
-import { groupRows, linesOf, pageLines } from "./grouping";
-import type { Aggregated, GroupLevel, Line, RowGroup } from "./grouping";
+import { groupRows, linesOf, pageLines, rowsOf } from "./grouping";
+import type { AggregateColumn, GroupLevel, Line, RowGroup } from "./grouping";
 /* Once stood in `Table.tsx` of @umriss-ui/core. */
 export type SortDirection = "asc" | "desc";
 
@@ -72,7 +72,7 @@ export interface TableInput<Z = unknown, K extends string = string> {
   /** Groups the sorted filtered set; a page then counts lines, not rows. */
   grouping?: {
     levels: readonly GroupLevel<Z>[];
-    aggregates?: readonly Aggregated<Z>[];
+    aggregates?: readonly AggregateColumn<Z>[];
     folded: ReadonlySet<string>;
     /** The collation of text keys; the provider's, where there is one. */
     compareText?: (a: string, b: string) => number;
@@ -221,7 +221,7 @@ export function tableModel<Z, K extends string = string>(
     return {
       columns: visibleColumns,
       filtered,
-      visible: paged.lines.flatMap((l) => (l.kind === "row" ? [l.row] : [])),
+      visible: rowsOf(paged.lines),
       groups,
       lines,
       visibleLines: paged.lines,

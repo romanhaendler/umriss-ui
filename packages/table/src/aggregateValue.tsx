@@ -1,11 +1,11 @@
 /* An aggregate as it is written, and an absent value as it is shown - shared
-   by the footer, the header bands and the folded spans. */
+   by the footer, the group headers and the folded spans. */
 
 import type { ReactNode } from "react";
 import { VisuallyHidden } from "@umriss-ui/core";
 import type { Formats, Wording } from "@umriss-ui/core";
 import { aggregate } from "./model/grouping";
-import type { Aggregated } from "./model/grouping";
+import type { AggregateColumn } from "./model/grouping";
 import type { ColumnEntry } from "./registry";
 import { asText, columnKind, isAbsent } from "./values";
 import styles from "./Table.module.css";
@@ -57,13 +57,13 @@ export function AggregateValue({
   const { aggregate: spec, format, presentation } = entry.spec;
   if (!spec) return null;
   const kind = typeof spec === "function" ? "own" : spec;
-  const value = aggregate({ id: entry.spec.id, read: entry.read, aggregate: spec as Aggregated<unknown>["aggregate"] }, rows);
+  const value = aggregate({ id: entry.spec.id, read: entry.read, aggregate: spec as AggregateColumn<unknown>["aggregate"] }, rows);
   const text = (v: unknown) => asText(v, format, formats, wording);
   let content: ReactNode;
   if (isAbsent(value)) content = <Absent wording={wording} />;
   else if (kind === "range" && format === "date" && sameYear(value as [unknown, unknown])) {
     /* The year once: "02/10–14/10" says as much as the long form within one
-       year, and a band has no room for the repetition. */
+       year, and a group header has no room for the repetition. */
     const [from, to] = value as [Date, Date];
     content = from.getTime() === to.getTime() ? formats.date(from) : wording.rangeFromTo(formats.dateShort(from), formats.dateShort(to));
   }

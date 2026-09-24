@@ -38,8 +38,8 @@ import type { TableSnapshot } from "./types";
 import { warnOnce } from "./dev";
 import { columnKind, sortValue } from "./values";
 import type { Format, ValueKind } from "./values";
-import type { Aggregated, AggregateKind, DateKey, GroupLevel } from "./model/grouping";
-import { dateKey } from "./model/grouping";
+import type { AggregateColumn, AggregateKind, DatePeriod, GroupLevel } from "./model/grouping";
+import { MOST_LEVELS, periodStart, rowsOf } from "./model/grouping";
 import { filterOf } from "./columnFilter";
 import type { FilterSpec } from "./columnFilter";
 
@@ -72,7 +72,7 @@ export interface ColumnSpec {
   /** What is grouped by, when not the value itself. */
   ownGroupValue?: (value: never) => unknown;
   /** Groups a point in time by its day, week, month or year. */
-  group?: DateKey;
+  group?: DatePeriod;
   groupable?: boolean;
 }
 
@@ -444,14 +444,14 @@ export class Registry {
       each once. */
   effectiveGrouping(ids: readonly string[], rows: readonly unknown[]): string[] {
     const known = new Set(this.groupingEntries(rows).map((e) => e.spec.id));
-    return [...new Set(ids)].filter((id) => known.has(id)).slice(0, 3);
+    return [...new Set(ids)].filter((id) => known.has(id)).slice(0, MOST_LEVELS);
   }
 
-  private groupingCache: { key: string; levels: GroupLevel<unknown>[]; aggregates: Aggregated<unknown>[] } | null = null;
+  private groupingCache: { key: string; levels: GroupLevel<unknown>[]; aggregates: AggregateColumn<unknown>[] } | null = null;
 
   /** The levels and aggregates for the model - the same identity as long as
       nothing changed that they read. */
-  groupingModel(ids: readonly string[], rows: readonly unknown[]): { levels: GroupLevel<unknown>[]; aggregates: Aggregated<unknown>[] } {
+  groupingModel(ids: readonly string[], rows: readonly unknown[]): { levels: GroupLevel<unknown>[]; aggregates: AggregateColumn<unknown>[] } {
     const key = [ids.join("|"), this.structure, this.values].join(":");
     if (this.groupingCache?.key === key) return this.groupingCache;
     const entries = this.groupingEntries(rows);
@@ -460,12 +460,12 @@ export class Registry {
       .filter((e): e is ColumnEntry => e !== undefined)
       .map((entry): GroupLevel<unknown> => ({
         id: entry.spec.id,
-        key: (row) => {
+        value: (row) => {
           const value = entry.read(row);
           if (value === null || value === undefined) return undefined;
           const { ownGroupValue, group } = entry.spec;
           if (ownGroupValue) return ownGroupValue(value as never);
-          if (group) return dateKey(group)(value);
+          if (group) return periodStart(group)(value);
           return value;
         },
         /* A value of one's own is a name; its groups stand by what they hold. */
@@ -474,7 +474,7 @@ export class Registry {
     const aggregates = this.orderedColumns()
       .filter((e) => e.spec.aggregate !== undefined)
       .map(
-        (entry): Aggregated<unknown> => ({
+        (entry): AggregateColumn<unknown> => ({
           id: entry.spec.id,
           read: entry.read,
           /* Read with the latest spec on every call: an aggregate of one's own
@@ -654,7 +654,7 @@ export class Registry {
   }
 
   /** Whether the table puts up a table toolbar of its own - also while it is
-      grouped: the chip that names and removes the grouping needs a place. */
+      grouped: the tag that names and removes the grouping needs a place. */
   needsOwnToolbar(): boolean {
     if (this.count("toolbar") > 0) return false;
     return (
@@ -726,7 +726,7 @@ export class Registry {
 export function windowed<Z>(projection: TableProjection<Z>, from: number, to: number): TableProjection<Z> {
   if (!projection.lines) return { ...projection, visible: projection.filtered.slice(from, to) };
   const visibleLines = projection.lines.slice(from, to);
-  return { ...projection, visibleLines, visible: visibleLines.flatMap((l) => (l.kind === "row" ? [l.row] : [])) };
+  return { ...projection, visibleLines, visible: rowsOf(visibleLines) };
 }
 
 /* Which registry belongs to a table: fastened to the hook's stable `Table`, so

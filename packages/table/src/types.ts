@@ -12,7 +12,7 @@ import type { SortLevel } from "./model/tableModel";
 import type { TableSelection } from "./model/useTableSelection";
 import type { ColumnFilter } from "./columnFilter";
 import type { DateFormat, NumberFormat } from "./values";
-import type { DateKey } from "./model/grouping";
+import type { DatePeriod } from "./model/grouping";
 
 /* --- Values --------------------------------------------------------------- */
 
@@ -47,13 +47,13 @@ export type AggregateFor<W, Z> =
 /** What a column's values come to - the props a column carries for it. */
 export interface AggregateOptions<W, Z> {
   /** What the column's values come to: in the footer over the filtered set,
-      in a group's band over its rows. `"sum"`, `"avg"` for numbers; `"min"`,
+      in a group's header over its rows. `"sum"`, `"avg"` for numbers; `"min"`,
       `"max"` for numbers and points in time; `"range"` for points in time;
       `"count"`, `"distinct"` for every value with a text form - or a function
       of one's own. Always from the values, never from other aggregates; absent
       values count towards nothing. */
   aggregate?: AggregateFor<W, Z>;
-  /** The share bar under a sum in a group's band – the group's share of the
+  /** The share bar under a sum in a group's header – the group's share of the
       filtered set's sum. On by default. */
   share?: boolean;
 }
@@ -71,7 +71,7 @@ type AggregateProps<W, Z> =
           grouped table the group's as well. The old name goes with the next
           minor version. */
       footer?: FooterFor<W>;
-      /** The share bar under a sum in a group's band. */
+      /** The share bar under a sum in a group's header. */
       share?: boolean;
     };
 
@@ -144,14 +144,14 @@ export interface ValuePaths<W> {
   sortValue?: (value: Present<W>) => string | number | Absent;
   /** What stands in the export, when not the value itself. */
   exportValue?: (value: Present<W>) => string | number | Absent;
-  /** What is grouped by, when not the value itself - a band of a number, say.
+  /** What is grouped by, when not the value itself - a group header of a number, say.
       Rows whose group value is absent form a group of their own. */
   groupValue?: (value: Present<W>) => string | number | boolean | Date | Absent;
 }
 
 /** `group` on a point in time: its rows are grouped by day, ISO week, month or
     year. */
-export type GroupFor<W> = [Present<W>] extends [Date] ? DateKey : never;
+export type GroupFor<W> = [Present<W>] extends [Date] ? DatePeriod : never;
 
 export type FieldColumn<Z, K extends Field<Z>> = ColumnBase &
   ValuePaths<Z[K]> & {
@@ -212,13 +212,13 @@ export interface ColumnComponent<Z> {
       aggregate: "min" | "max" | "range" | "count" | "distinct";
       footer?: never;
       format?: DateFormat;
-      group?: DateKey;
+      group?: DatePeriod;
       children?: Presentation<W, Z>;
     },
   ): ReactNode;
   <W extends Date | Absent>(
     props: Computed<Z, W> & {
-      group: DateKey;
+      group: DatePeriod;
       aggregate?: "min" | "max" | "range" | "count" | "distinct";
       footer?: never;
       format?: DateFormat;
@@ -229,7 +229,7 @@ export interface ColumnComponent<Z> {
     props: Computed<Z, W> & { format: NumberFormat; aggregate?: AggregateFunction<W, Z>; share?: boolean; children?: Presentation<W, Z> },
   ): ReactNode;
   <W extends Date | Absent>(
-    props: Computed<Z, W> & { format: DateFormat; group?: DateKey; aggregate?: AggregateFunction<W, Z>; children?: Presentation<W, Z> },
+    props: Computed<Z, W> & { format: DateFormat; group?: DatePeriod; aggregate?: AggregateFunction<W, Z>; children?: Presentation<W, Z> },
   ): ReactNode;
   <W>(
     props: Computed<Z, W> & {
@@ -248,7 +248,7 @@ export interface ColumnComponent<Z> {
 /* --- Group keys ----------------------------------------------------------- */
 
 interface GroupByBase {
-  /** Names the group key where a grouping is chosen, and in the chip of the table toolbar. */
+  /** Names the group key where a grouping is chosen, and in the grouping's tag in the table toolbar. */
   label: string;
 }
 
@@ -414,7 +414,7 @@ export interface TableOptions<Z> {
   /** The application's grouping: a column or group key, or up to three, the
       outermost first. It is the default that `view` leaves out; without it
       the table is ungrouped until the user groups it. */
-  defaultGrouping?: GroupingKey<Z> | readonly GroupingKey<Z>[];
+  defaultGrouping?: GroupingId<Z> | readonly GroupingId<Z>[];
   /** Which rows the table has at all – by permission, by plant, by anything the
       user is not meant to undo. It is invisible: never a condition, never
       reset, never part of the view, and "43 of 1,204" counts only the rows it
@@ -526,4 +526,4 @@ export interface Table<Z> extends TableSnapshot<Z> {
 /** A column or group key the table can be grouped by. The columns stand in the
     JSX, which the hook does not see: a field name is suggested, any id is
     taken, and one that nothing carries falls out. */
-export type GroupingKey<Z> = Field<Z> | (string & {});
+export type GroupingId<Z> = Field<Z> | (string & {});

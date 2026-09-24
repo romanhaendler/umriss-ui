@@ -1,4 +1,4 @@
-/* What a grouped table draws (table-grouping 04, ADR-0029): header bands for
+/* What a grouped table draws (table-grouping 04, ADR-0029): group headers for
    the outer levels, a span for the innermost, a group of one row as that row,
    folded groups as one line, and a page that begins inside a group. The case
    is the prototype's: 13 orders on three lines for eight customers. */
@@ -58,8 +58,8 @@ const kinds = (root: HTMLElement) => lines(root).map((tr) => tr.dataset.line);
 const heads = (root: HTMLElement) => Array.from(root.querySelectorAll("thead th")).map((th) => th.textContent);
 const cellsOf = (tr: HTMLTableRowElement) => Array.from(tr.cells).map((c) => c.textContent?.trim());
 
-describe("header bands and spans", () => {
-  it("draws 16 lines for 13 orders: a band per line, the customer beside its orders", () => {
+describe("group headers and spans", () => {
+  it("draws 16 lines for 13 orders: a group header per line, the customer beside its orders", () => {
     const { container } = render(<Orders />);
     expect(kinds(container)).toEqual([
       "header", "row", "row", "row", "row", "row", "row",
@@ -70,7 +70,7 @@ describe("header bands and spans", () => {
     expect(heads(container)).toEqual(["Customer", "Order", "Quantity", "Scrap"]);
   });
 
-  it("gives a band its value, its count and its aggregates in their columns", () => {
+  it("gives a group header its value, its count and its aggregates in their columns", () => {
     const { container } = render(<Orders />);
     const band = lines(container)[0]!;
     expect(band.cells[0]!.textContent).toContain("Line 1");
@@ -98,7 +98,7 @@ describe("folding", () => {
     expect(lines(container)).toHaveLength(14);
   });
 
-  it("folds a band to itself; everything folded is a summary of the lines", () => {
+  it("folds a group header to itself; everything folded is a summary of the lines", () => {
     const { container } = render(<Orders />);
     act(() => current!.foldAll());
     expect(kinds(container)).toEqual(["header", "header", "header"]);
@@ -108,7 +108,7 @@ describe("folding", () => {
 });
 
 describe("a page that begins inside a group", () => {
-  it("repeats the band, marked continued, and the span's value on its first row", () => {
+  it("repeats the group header, marked continued, and the span's value on its first row", () => {
     const { container } = render(<Orders paged />);
     act(() => current!.setPage(2));
     const [band, first] = lines(container);
@@ -121,7 +121,7 @@ describe("a page that begins inside a group", () => {
 });
 
 describe("selecting a group (table-grouping 05)", () => {
-  it("selects every row of a band – on other pages and in folded groups as well", () => {
+  it("selects every row of a group header – on other pages and in folded groups as well", () => {
     render(<Orders paged selectable />);
     fireEvent.click(screen.getByRole("button", { name: "Fold Otto & Söhne, 3" }));
     fireEvent.click(screen.getByRole("checkbox", { name: "Select Line 1" }));
@@ -176,5 +176,41 @@ describe("the treegrid (table-grouping 05)", () => {
     otto.focus();
     fireEvent.keyDown(otto, { key: "ArrowLeft" });
     expect(document.activeElement).toBe(screen.getByRole("button", { name: "Fold Line 1, 6" }));
+  });
+});
+
+describe("all siblings at once, and a virtual window (table-grouping 04, 05)", () => {
+  it("folds every group of the level with Alt and an arrow, and unfolds them again", () => {
+    render(<Orders />);
+    const brenner = screen.getByRole("button", { name: "Fold Brenner GmbH, 2" });
+    brenner.focus();
+    fireEvent.keyDown(brenner, { key: "ArrowLeft", altKey: true });
+    // Brenner and Otto on Line 1, Lindner on Line 2 - the groups of one order do not fold.
+    expect(current!.folded).toHaveLength(3);
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "Unfold Brenner GmbH, 2" }));
+    fireEvent.keyDown(document.activeElement!, { key: "ArrowRight", altKey: true });
+    expect(current!.folded).toHaveLength(0);
+  });
+
+  it("counts lines, not rows, for a virtual window", () => {
+    function Virtual() {
+      const { Table: Frame, Column } = useTable(ORDERS, {
+        rowKey: (o) => o.id,
+        defaultGrouping: ["line", "customer"],
+        virtual: { rowHeight: 36 },
+      });
+      return (
+        <Frame maxHeight="300px">
+          <Column value="id" label="Order" rowHeader />
+          <Column value="line" label="Line" />
+          <Column value="customer" label="Customer" />
+          <Column value="quantity" label="Quantity" aggregate="sum" />
+        </Frame>
+      );
+    }
+    const { container } = render(<Virtual />);
+    // 16 lines, the header row and the footer.
+    expect(screen.getByRole("treegrid").getAttribute("aria-rowcount")).toBe("18");
+    expect(kinds(container)[0]).toBe("header");
   });
 });

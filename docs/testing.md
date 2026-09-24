@@ -105,7 +105,9 @@ bodies. Placement follows ownership: with the module it belongs to, and in
 | `DatePicker/contract.ts` | the value contract: `day` or `instant` |
 | `DataViz/scale.ts` | projection and clamping of the marks |
 | `Popover/position.ts` | clamping and flipping, pure arithmetic |
-| `table/model/tableModel.ts` | filter → sort → page, column order and visibility |
+| `table/model/tableModel.ts` | filter → sort → group → page, column order and visibility |
+| `table/model/grouping.ts` | row groups, aggregates, the order of groups, date periods, the lines of a page and of a window |
+| `table/motion.ts` | `deltas`: how far each line that stays has moved |
 | `table/model/csv.ts` | the filtered set as delimiter-separated text |
 | `lib/virtual.ts` | a row's visible window and scroll target |
 | `Dock/place.ts` | the zone under the pointer, the strip's length, the space required, arrow → resting place |
@@ -113,7 +115,7 @@ bodies. Placement follows ownership: with the module it belongs to, and in
 | `lib/limit.ts` | limit, target value, assessment – four outcomes |
 | `lib/freshness.ts` | reading → fresh \| stale \| disconnected, and the cadence for it |
 | `table/alarms/alarmModel.ts` | lifecycle, order, frequency, flood, return band |
-| `table/values.ts` | absent, the kind of a value, text without children, sort and export value, footer |
+| `table/values.ts` | absent, the kind of a value, text without children, sort and export value |
 | `lib/language/wording.ts` | every text the library emits |
 | `Textarea/measure.ts` | the character counter and height clamping |
 | `styles/tokens.css` (checked, not executed) | contrast of the token pairs, both themes |

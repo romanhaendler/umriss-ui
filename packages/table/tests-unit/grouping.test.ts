@@ -4,8 +4,8 @@
    (.scratch/table-grouping/prototype). */
 
 import { describe, expect, it } from "vitest";
-import { aggregate, dateKey, groupRows, linesOf, livePaths, pageLines } from "../src/model/grouping";
-import type { Aggregated, GroupLevel } from "../src/model/grouping";
+import { aggregate, periodStart, groupRows, linesOf, livePaths, pageLines } from "../src/model/grouping";
+import type { AggregateColumn, GroupLevel } from "../src/model/grouping";
 import { column, tableModel } from "../src/model/tableModel";
 
 interface Order {
@@ -35,8 +35,8 @@ const ORDERS: Order[] = [
   { id: "A-1053", line: "Line 3", customer: "Weiss Antriebe", quantity: 1100, scrap: 27, due: day(8) },
 ];
 
-const byLine: GroupLevel<Order> = { id: "line", key: (o) => o.line };
-const byCustomer: GroupLevel<Order> = { id: "customer", key: (o) => o.customer };
+const byLine: GroupLevel<Order> = { id: "line", value: (o) => o.line };
+const byCustomer: GroupLevel<Order> = { id: "customer", value: (o) => o.customer };
 
 const ids = (rows: readonly Order[]) => rows.map((o) => o.id);
 
@@ -73,8 +73,8 @@ describe("groupRows – absent values and levels", () => {
 });
 
 describe("aggregates", () => {
-  const quantity = (kind: Aggregated<Order>["aggregate"]): Aggregated<Order> => ({ id: "quantity", read: (o) => o.quantity, aggregate: kind });
-  const scrap = (kind: Aggregated<Order>["aggregate"]): Aggregated<Order> => ({ id: "scrap", read: (o) => o.scrap, aggregate: kind });
+  const quantity = (kind: AggregateColumn<Order>["aggregate"]): AggregateColumn<Order> => ({ id: "quantity", read: (o) => o.quantity, aggregate: kind });
+  const scrap = (kind: AggregateColumn<Order>["aggregate"]): AggregateColumn<Order> => ({ id: "scrap", read: (o) => o.scrap, aggregate: kind });
   const line1 = ORDERS.slice(0, 6);
 
   it("sums and averages the values present, and has none without a value", () => {
@@ -87,20 +87,20 @@ describe("aggregates", () => {
   it("takes minimum, maximum and range of numbers and of points in time", () => {
     expect(aggregate(quantity("min"), line1)).toBe(300);
     expect(aggregate(quantity("max"), line1)).toBe(2400);
-    const due = (kind: Aggregated<Order>["aggregate"]): Aggregated<Order> => ({ id: "due", read: (o) => o.due, aggregate: kind });
+    const due = (kind: AggregateColumn<Order>["aggregate"]): AggregateColumn<Order> => ({ id: "due", read: (o) => o.due, aggregate: kind });
     expect(aggregate(due("min"), line1)).toEqual(day(2));
     expect(aggregate(due("range"), line1)).toEqual([day(2), day(14)]);
   });
 
   it("counts the values present and the different ones", () => {
     expect(aggregate(scrap("count"), line1)).toBe(5);
-    const customer: Aggregated<Order> = { id: "customer", read: (o) => o.customer, aggregate: "distinct" };
+    const customer: AggregateColumn<Order> = { id: "customer", read: (o) => o.customer, aggregate: "distinct" };
     expect(aggregate(customer, line1)).toBe(3);
   });
 
   it("hands a function of one's own the values present and the rows", () => {
     // The scrap rate: the sum of scrap over the sum of quantity - weighted.
-    const rate: Aggregated<Order> = {
+    const rate: AggregateColumn<Order> = {
       id: "scrap",
       read: (o) => o.scrap,
       aggregate: (values, rows) => (values as number[]).reduce((a, b) => a + b, 0) / rows.reduce((a, o) => a + o.quantity, 0),
@@ -118,7 +118,7 @@ describe("aggregates", () => {
 });
 
 describe("the order of the groups", () => {
-  const scrapSum: Aggregated<Order> = { id: "scrap", read: (o) => o.scrap, aggregate: "sum" };
+  const scrapSum: AggregateColumn<Order> = { id: "scrap", read: (o) => o.scrap, aggregate: "sum" };
 
   it("follows an aggregate when the sort is on its column – on every level", () => {
     const groups = groupRows(ORDERS, {
@@ -205,17 +205,17 @@ describe("lines – what a grouped table shows", () => {
 describe("date keys", () => {
   it("brings a point in time to the start of its day, ISO week, month or year", () => {
     const at = new Date(2026, 9, 14, 17, 30); // a Wednesday
-    expect(dateKey("day")(at)).toEqual(new Date(2026, 9, 14));
-    expect(dateKey("week")(at)).toEqual(new Date(2026, 9, 12));
-    expect(dateKey("month")(at)).toEqual(new Date(2026, 9, 1));
-    expect(dateKey("year")(at)).toEqual(new Date(2026, 0, 1));
+    expect(periodStart("day")(at)).toEqual(new Date(2026, 9, 14));
+    expect(periodStart("week")(at)).toEqual(new Date(2026, 9, 12));
+    expect(periodStart("month")(at)).toEqual(new Date(2026, 9, 1));
+    expect(periodStart("year")(at)).toEqual(new Date(2026, 0, 1));
     // A Sunday belongs to the week that began on the Monday before it.
-    expect(dateKey("week")(new Date(2026, 9, 18))).toEqual(new Date(2026, 9, 12));
-    expect(dateKey("month")(null)).toBeUndefined();
+    expect(periodStart("week")(new Date(2026, 9, 18))).toEqual(new Date(2026, 9, 12));
+    expect(periodStart("month")(null)).toBeUndefined();
   });
 
   it("groups deliveries by month", () => {
-    const due: GroupLevel<Order> = { id: "due", key: (o) => dateKey("month")(o.due) };
+    const due: GroupLevel<Order> = { id: "due", value: (o) => periodStart("month")(o.due) };
     const late = { ...ORDERS[0]!, id: "A-1100", due: new Date(2026, 10, 3) };
     expect(groupRows([...ORDERS, late], { levels: [due] }).map((g) => g.rows.length)).toEqual([13, 1]);
   });
@@ -274,7 +274,7 @@ describe("tableModel with a grouping", () => {
 describe("groups by a value of one's own", () => {
   it("stand in the order of what they hold, not of their names", () => {
     const band = (q: number) => (q < 1000 ? "Small" : q < 3000 ? "Medium" : "Large");
-    const size: GroupLevel<Order> = { id: "size", key: (o) => band(o.quantity), order: (o) => o.quantity };
+    const size: GroupLevel<Order> = { id: "size", value: (o) => band(o.quantity), order: (o) => o.quantity };
     expect(groupRows(ORDERS, { levels: [size] }).map((g) => g.value)).toEqual(["Small", "Medium", "Large"]);
     const down = groupRows(ORDERS, { levels: [size], sort: [{ column: "size", direction: "desc" }] });
     expect(down.map((g) => g.value)).toEqual(["Large", "Medium", "Small"]);

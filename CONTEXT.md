@@ -1121,12 +1121,15 @@ later reader does not "fix" the name back.
 | `charts/src/limit.ts` | the limit model, the same word as `core/src/lib/limit.ts` — ADR-0006 keeps the two in step. The component beside it therefore yields the bare word; see **Public names** |
 | `charts/src/bars.ts`, `cells.ts`, `controlLimits.ts` | plural or descriptive, because the singular collides with the component file beside it. On a case-insensitive file system an import of `./Bar` or `./ControlChart` resolves to `bar.ts` or `controlChart.ts`, and TypeScript then reports TS1149 ("differs only in casing") and resolves the wrong module. `cells.ts` recorded this first; the other two follow it |
 | `charts/src/state.ts` | the geometry of the state band. **State** is the charts' word (ADR-0007), and `StateBand.tsx` differs from it by more than case |
+| `table/src/groupingChoice.tsx` | the column menu's grouping section and the grouping's tag in the table toolbar; not `grouping.tsx`, which would sit beside `model/grouping.ts` and give one grep two answers |
+| `table/src/groupLines.tsx` | the lines of a grouped table - group headers, spans, folded spans; not `groups.tsx`, which reads as the model's **Row group** |
 | `demo/examples/Column/13-wrapper.tsx` | a column that brings its own presentation, taken as `of`; not `shell` — that is the demos' own shell (`@umriss-ui/demo`) |
 
 The rest are the plain word, recorded here so that no branch has to guess:
 `model/tableModel.ts`, `model/view.ts`, `parts.tsx`, `unbound.tsx` (the header's
 own word: these need no binding), `registry.ts`, `toolbar.tsx`, `export.ts`,
 `values.ts`, `column.ts`, `columnFilter.tsx`, `filter.tsx`, `types.ts`,
+`model/grouping.ts`, `aggregateValue.tsx`, `motion.ts`,
 `context.ts`, `useTable.tsx`, `alarms/alarmModel.ts`; in the shell `shell`,
 `outline`, `examples`, `checks`; in a demo of its own `App.tsx`, `outline.ts`,
 `examples.ts`, `examples/`, `why/`; in `lib` `wording.ts`, `formats.ts`,

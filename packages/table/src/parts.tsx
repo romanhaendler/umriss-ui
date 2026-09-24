@@ -359,17 +359,17 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
   const baseId = useId();
   const tableRef = useRef<HTMLTableElement>(null);
 
-  /* Sticky bands stand below the head and below one another; how high those
+  /* Sticky group headers stand below the head and below one another; how high those
      are only the layout knows. Measured after every render - a density or a
      font changes them. */
   useLayoutEffect(() => {
     const table = tableRef.current;
     if (!table || !stickyHeader) return;
     const head = table.tHead?.getBoundingClientRect().height ?? 0;
-    const band = table.querySelector("tr[data-line='header']")?.getBoundingClientRect().height ?? 0;
+    const headerHeight = table.querySelector("tr[data-line='header']")?.getBoundingClientRect().height ?? 0;
     table.style.setProperty("--u-table-head", `${head}px`);
-    table.style.setProperty("--u-table-band", `${band}px`);
-    /* A virtual window draws its bands anew as it scrolls: marked again after
+    table.style.setProperty("--u-table-group-header", `${headerHeight}px`);
+    /* A virtual window draws its group headers anew as it scrolls: marked again after
        every render, not only on the scroll. */
     if (table.parentElement) markStuck(table.parentElement);
   });
@@ -397,7 +397,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
 
   /* Grouped (ADR-0029): the innermost grouped column or group key stands first
      as the span; the outer grouped columns leave the body - their value stands
-     in the band. */
+     in the group header. */
   const grouping = snapshot.grouping;
   const lines = grouping.length > 0 ? projection.visibleLines : undefined;
   const groupingEntries = lines ? registry.groupingEntries(hook.rows) : [];
@@ -467,10 +467,10 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
       </tbody>
     );
   } else if (lines) {
-    /* A virtual window that begins inside a group repeats its bands above it,
-       where the upper filler would stand - so that the band can stick while
+    /* A virtual window that begins inside a group repeats its group headers above it,
+       where the upper filler would stand - so that the group header can stick while
        its group scrolls, and nothing below moves. */
-    /* Sticking, a band is simply still there - "continued" is a page's word. */
+    /* Sticking, a group header is simply still there - "continued" is a page's word. */
     const shown = virtual
       ? withContinuation(lines).map((l) => (l.kind === "folded" || !l.continued ? l : { ...l, continued: false }))
       : lines;
@@ -559,7 +559,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
         ref={tableRef}
         role={lines ? "treegrid" : undefined}
         data-depth={lines ? grouping.length : undefined}
-        style={lines ? ({ "--u-band-levels": grouping.length - 1 } as CSSProperties) : undefined}
+        style={lines ? ({ "--u-header-levels": grouping.length - 1 } as CSSProperties) : undefined}
         aria-label={ariaLabel}
         /* With virtualisation not every row stands in the document; plus one
            for the header row and one for the footer row, which count per ARIA. */
@@ -651,13 +651,13 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
   );
 }
 
-/* A band that sticks gets its shadow step: it sticks when it stands higher than
+/* A group header that sticks gets its shadow step: it sticks when it stands higher than
    its place in the flow would put it - measured against the row after it. */
 function markStuck(scroller: HTMLElement) {
-  for (const band of Array.from(scroller.querySelectorAll<HTMLTableRowElement>("tbody > tr[data-line='header']"))) {
-    const cell = band.cells[band.cells.length - 1];
-    const stuck = !!cell && cell.getBoundingClientRect().top > band.getBoundingClientRect().top + 0.5;
-    band.toggleAttribute("data-stuck", stuck);
+  for (const header of Array.from(scroller.querySelectorAll<HTMLTableRowElement>("tbody > tr[data-line='header']"))) {
+    const cell = header.cells[header.cells.length - 1];
+    const stuck = !!cell && cell.getBoundingClientRect().top > header.getBoundingClientRect().top + 0.5;
+    header.toggleAttribute("data-stuck", stuck);
   }
 }
 
