@@ -35,21 +35,37 @@ every component – no glow, and no browser outline beside it. On a field it lie
 where the field's edge lies, so the edge seems to grow; an invalid field keeps
 its danger colour (`--u-focus-ring-danger`). Unmistakable, never soft.
 
-**Motion.** Motion explains a change of state; it does not decorate. Micro
-transitions (hover, colour) run in 120 ms; choreographies use
-`--u-duration-fast` (140 ms) and `--u-duration-medium` (200 ms) with a decisive,
-softly landing curve (`--u-ease-out`). Overlays have an exit as well as an
-entrance: modals grow minimally out of the depth, popovers settle 6 px – and on
-closing everything runs backwards (including on Escape; the native `<dialog>` is
-choreographed for it instead of being closed hard). The tab underline glides to
-the active tab, cards collapse with an animated height (the content stays in the
-DOM and is made inert), the checkbox draws its tick (320 ms – slow enough to
-watch the line), skeletons shimmer instead of pulsing, buttons have a minimal
-pressure point (scale 0.98), and toasts arrive with presence (8 px plus scale),
-glide out to the right on leaving while the remaining ones move up gently over a
-grid collapse – and pause their countdown for as long as the mouse rests on
-them. `prefers-reduced-motion` switches every choreography off – the duration
-tokens then fall to 0 ms.
+**Motion.** Motion explains a change of state; it does not decorate, and
+every motion has a name in `tokens.css` - a motion that fits none of them wants
+a new token, not a number in its module. Three distinctions carry the names.
+*Micro or path*: a colour, an edge or an opacity changes in place in 120 ms
+(`--u-transition`); something that turns or slides takes
+`--u-transition-path` (140 ms), a longer way `--u-duration-medium` (240 ms); a
+press point is shorter than both (`--u-transition-press`, 80 ms, scale 0.98 on
+a button, 0.8 on a glyph). All of them run on one decisive, softly landing
+curve, `--u-ease-out`. *Entry or exit*: overlays unfold from their **motion
+origin** - the edge of the panel facing its trigger, computed from the same
+side and alignment that position it (`motionOrigin` in `position.ts`): a menu
+below its button grows from its top left, a flipped one from its bottom, a
+tooltip from the edge towards its trigger, a toast out of the corner it
+stands in, a modal - which hangs from no trigger - from its centre. Panels,
+tooltips and the modal enter by scale (0.96) and opacity, a toast rises 8 px
+as it grows; they leave faster (`--u-duration-exit-fast`
+100 ms for panels, `--u-duration-exit` 160 ms for a sheet) on `--u-ease-exit`,
+a curve that starts at once, and fade where they stand instead of retracing
+the way they came - a symmetrical exit makes a surface feel sluggish. The
+native `<dialog>` is choreographed for it instead of being closed hard,
+Escape included. *Continuous process*: the spinner turns
+(`--u-duration-spin`, `--u-ease-steady`), skeletons shimmer instead of pulsing
+(`--u-duration-shimmer`, `--u-ease-swell`). And the details: the tab
+underline glides to the active tab, cards collapse with an animated height
+(the content stays in the DOM and is made inert), the checkbox draws its tick
+(`--u-duration-draw`, 320 ms - slow enough to watch the line), and toasts
+glide out to the right on leaving while the remaining ones move up gently over
+a grid collapse - and pause their countdown for as long as the mouse rests on
+them. `prefers-reduced-motion` drops the path, never the state change: the
+duration tokens fall to 0 ms, a panel appears and goes at once - but it
+appears - and no focus style hangs on an animation.
 
 **Squircles.** Where the browser supports `corner-shape`, every rounding of the
 library's own elements is drawn as a superellipse ("squircle", as Apple does it)
