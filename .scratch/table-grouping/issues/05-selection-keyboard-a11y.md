@@ -1,6 +1,6 @@
 # 05 — Selecting a group, the keyboard and the treegrid
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Blocked by: 04

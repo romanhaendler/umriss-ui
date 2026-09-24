@@ -404,6 +404,21 @@ export class Registry {
     this.structure++;
   }
 
+  /** The group whose fold takes the focus after its line was drawn anew - a
+      folded span is a new row, and the focus would otherwise be lost. */
+  private pendingFoldFocus: string | null = null;
+
+  requestFoldFocus(path: string) {
+    this.pendingFoldFocus = path;
+  }
+
+  /** Whether this group's fold is to take the focus now - once. */
+  takeFoldFocus(path: string): boolean {
+    if (this.pendingFoldFocus !== path) return false;
+    this.pendingFoldFocus = null;
+    return true;
+  }
+
   /** Whether the table lets itself be grouped at all (`<Table groupable>`). */
   tableGroupable = true;
 
