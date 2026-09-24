@@ -154,9 +154,12 @@ export function unshelve(alarm: Alarm): Alarm {
   return { ...alarm, availability: "in-service", shelf: undefined };
 }
 
-/** Takes an alarm out of service - from any state, a shelf included. */
+/** Takes an alarm out of service - from service or from a shelf. An alarm
+    suppressed by design stays as it is: that field is the plant's logic's,
+    and `returnToService` would otherwise hand it back in service with the
+    suppression lost. */
 export function takeOutOfService(alarm: Alarm): Alarm {
-  if (alarm.availability === "out-of-service") return alarm;
+  if (alarm.availability === "out-of-service" || alarm.availability === "suppressed-by-design") return alarm;
   return { ...alarm, availability: "out-of-service", shelf: undefined };
 }
 

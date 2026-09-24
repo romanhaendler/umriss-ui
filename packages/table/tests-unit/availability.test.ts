@@ -73,14 +73,16 @@ describe("unshelve", () => {
 });
 
 describe("takeOutOfService", () => {
-  it("takes any alarm out of service, a shelf included", () => {
+  it("takes an alarm in service or on a shelf out of service, the shelf dropped", () => {
     expect(takeOutOfService(base)).toEqual({ ...base, availability: "out-of-service" });
     expect(takeOutOfService(shelved)).toEqual({ ...base, availability: "out-of-service" });
-    expect(takeOutOfService(suppressed)).toEqual({ ...base, availability: "out-of-service" });
   });
 
-  it("leaves what is already out of service as it is", () => {
+  it("leaves what is out of service or suppressed by design as it is", () => {
+    // Suppressed by design is the plant's logic's field; taken out of service
+    // and returned, it would come back in service with the suppression lost.
     expect(takeOutOfService(outOfService)).toBe(outOfService);
+    expect(takeOutOfService(suppressed)).toBe(suppressed);
   });
 });
 
