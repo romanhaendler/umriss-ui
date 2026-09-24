@@ -26,6 +26,7 @@ import type {
   ReactNode,
 } from "react";
 import {
+  AngleGlyph,
   Button,
   Checkbox,
   Menu,
@@ -789,13 +790,14 @@ function HeaderCell({
       )}
       <span className={cx(styles.sortIndicator, direction && styles.sortActive)} aria-hidden="true">
         {direction ? (
-          <svg viewBox="0 0 10 10" width="10" height="10" className={cx(styles.sortArrow, direction === "desc" && styles.sortArrowDesc)}>
-            <path d="M2.2 6.2 5 3.4l2.8 2.8" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+          <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true" className={cx(styles.sortArrow, direction === "desc" && styles.sortArrowDesc)}>
+            <path d="M2.2 6.2 5 3.4l2.8 2.8" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         ) : (
-          <svg viewBox="0 0 10 12" width="10" height="12">
-            <path d="M2.4 4.4 5 1.8l2.6 2.6" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M2.4 7.6 5 10.2l2.6-2.6" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          /* Drawn in the nominal box and set in the 12 pixels the indicator
+             has always taken, so that the head does not move. */
+          <svg viewBox="0 0 10 10" width="10" height="12" aria-hidden="true">
+            <path d="M2.8 3.7 5 1.5l2.2 2.2M2.8 6.3 5 8.5l2.2-2.2" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         )}
       </span>
@@ -944,9 +946,7 @@ function Row({
               className={cx(styles.expander, open && styles.expanderOpen)}
               onClick={() => snapshot.toggleRow(key)}
             >
-              <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">
-                <path d="M3.5 1.5 7 5l-3.5 3.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+              <AngleGlyph />
             </button>
           </td>
         )}

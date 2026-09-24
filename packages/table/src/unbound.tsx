@@ -211,7 +211,7 @@ export function ColumnMenu({ of }: ColumnMenuProps) {
                   onClick={() => move(index, -1)}
                 >
                   <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">
-                    <path d="M2 6.5 5 3.5l3 3" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M2 6.5 5 3.5l3 3" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </button>
                 <button
@@ -223,7 +223,7 @@ export function ColumnMenu({ of }: ColumnMenuProps) {
                   onClick={() => move(index, 1)}
                 >
                   <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">
-                    <path d="M2 3.5 5 6.5l3-3" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M2 3.5 5 6.5l3-3" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </button>
               </li>

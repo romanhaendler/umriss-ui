@@ -9,6 +9,7 @@ import * as Options from "../../lib/options";
 import { Popover } from "../Popover";
 import styles from "./MultiSelect.module.css";
 import { useWording } from "../../lib/language";
+import { CrossGlyph } from "../../lib/glyphs";
 
 export interface MultiSelectOption<T extends string = string> {
   /** What stands in `value` when this row is ticked. */
@@ -266,11 +267,7 @@ export function MultiSelect<T extends string = string>({
 
   const overflowCount = value.length - visibleChips;
 
-  const chipRemoveX = (
-    <svg viewBox="0 0 8 8" width="8" height="8" aria-hidden="true">
-      <path d="M1.2 1.2l5.6 5.6M6.8 1.2L1.2 6.8" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-    </svg>
-  );
+  const chipRemoveX = <CrossGlyph size={8} />;
 
   return (
     <>

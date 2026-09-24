@@ -40,7 +40,7 @@ import {
   type ReactNode,
 } from "react";
 import { DAY, HOUR, MINUTE, type CalendarInput } from "@umriss-ui/charts";
-import { useFormats, useWording } from "@umriss-ui/core";
+import { AngleGlyph, useFormats, useWording } from "@umriss-ui/core";
 import { ScheduleContext } from "./context";
 import { ScheduleScene, type PlacingItem, type ScheduleInteraction, type ScheduleTooltipTarget } from "./scene";
 import { DEFAULT_LANE_HEIGHT } from "./sceneView";
@@ -467,9 +467,7 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
                     aria-label={`${header.collapsed === true ? wording.scheduleUnfoldGroup : wording.scheduleFoldGroup}: ${typeof header.label === "string" ? header.label : header.group}`}
                     onClick={() => scene.toggleGroup(header.group!)}
                   >
-                    <svg viewBox="0 0 10 10" width="9" height="9" aria-hidden="true" data-open={header.collapsed === false ? "" : undefined}>
-                      <path d="M3.5 1.5 7 5l-3.5 3.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
+                    <AngleGlyph size={9} data-open={header.collapsed === false ? "" : undefined} />
                   </button>
                 )}
                 <span className={styles.headerLabel} data-schedule-overlay="header label">

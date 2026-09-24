@@ -4,6 +4,7 @@ import type { DialogHTMLAttributes, HTMLAttributes, MouseEvent, ReactNode } from
 import { cx } from "../../lib/cx";
 import styles from "./Modal.module.css";
 import { useWording } from "../../lib/language";
+import { CrossGlyph } from "../../lib/glyphs";
 
 interface ModalContextValue {
   onClose: () => void;
@@ -118,9 +119,7 @@ export function ModalHeader({ title, description, hideClose = false, className, 
           aria-label={wording.close}
           onClick={() => modal?.onClose()}
         >
-          <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
-            <path d="M2 2l8 8M10 2l-8 8" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-          </svg>
+          <CrossGlyph size={12} />
         </button>
       )}
     </div>
