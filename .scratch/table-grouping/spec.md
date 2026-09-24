@@ -340,6 +340,10 @@ Deviations from the text above, each decided while building:
   grouping stands in the table toolbar as a **tag** (the glossary avoids
   "chip").
 
+- **Q15 reversed (Q28, seen rendered): a group of one row is a group like any
+  other** - fold, count, aggregates, box. Its header without a figure read as a
+  fault in a column of figures.
+
 Open, for the user to decide:
 
 1. ~~**One level shows no group aggregates until it is folded.**~~ Decided

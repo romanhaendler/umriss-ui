@@ -31,10 +31,14 @@ export function durationOf(element: Element, token: string): number {
   return raw.endsWith("ms") ? value : value * 1000;
 }
 
+/* Measured against the table, not the viewport: when the page scrolls because
+   a fold shortened it, every row would otherwise seem to have moved, and all
+   of them travelled. */
 const positions = (table: HTMLTableElement): Map<string, number> => {
   const out = new Map<string, number>();
+  const origin = table.getBoundingClientRect().top;
   for (const row of Array.from(table.querySelectorAll<HTMLTableRowElement>("tbody > tr[data-motion]"))) {
-    out.set(row.dataset.motion!, row.getBoundingClientRect().top);
+    out.set(row.dataset.motion!, row.getBoundingClientRect().top - origin);
   }
   return out;
 };

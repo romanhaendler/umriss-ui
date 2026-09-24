@@ -83,8 +83,8 @@ describe("the grouping as state", () => {
     act(() => current!.unfoldAll());
     expect(current!.view.folded).toBeUndefined();
     act(() => current!.foldAll());
-    // Line 1 and Brenner GmbH on Line 1 - the groups of one order do not fold.
-    expect(current!.view.folded).toHaveLength(2);
+    // Line 1 and Line 2, Brenner and Kessler on Line 1, Brenner on Line 2.
+    expect(current!.view.folded).toHaveLength(5);
   });
 
   it("lets names fall out that no column and no group key carries, and keeps three levels at most", () => {
@@ -102,7 +102,8 @@ describe("the grouping as state", () => {
     render(<Orders defaultGrouping="line" />);
     const path = JSON.stringify(["value:Line 2"]);
     act(() => current!.toggleFold(path));
-    expect(current!.folded).toEqual([]); // Line 2 has one order: nothing to fold
+    expect(current!.folded).toEqual([path]); // Line 2 has one order, and folds all the same
+    act(() => current!.toggleFold(path));
     const line1 = JSON.stringify(["value:Line 1"]);
     act(() => current!.toggleFold(line1));
     expect(current!.folded).toEqual([line1]);
@@ -133,13 +134,13 @@ describe("the column menu", () => {
   });
 });
 
-describe("the chip in the table toolbar", () => {
+describe("the grouping's tag in the table toolbar", () => {
   it("names the levels in order and takes the grouping away", () => {
     render(<Orders defaultGrouping={["line", "shift"]} />);
-    const chip = screen.getByRole("group", { name: "Grouped by" });
-    expect(chip.textContent).toContain("Line›Shift");
-    fireEvent.click(within(chip).getByRole("button", { name: "Remove grouping" }));
+    const tag = screen.getByRole("list", { name: "Grouped by" });
+    expect(tag.textContent).toContain("Line›Shift");
+    fireEvent.click(within(tag).getByRole("button", { name: "Remove grouping" }));
     expect(current!.grouping).toEqual([]);
-    expect(screen.queryByRole("group", { name: "Grouped by" })).toBeNull();
+    expect(screen.queryByRole("list", { name: "Grouped by" })).toBeNull();
   });
 });
