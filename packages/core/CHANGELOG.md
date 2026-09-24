@@ -50,6 +50,17 @@ module on the caller's side that carries `"use client"` and imports from there.
 
 ---
 
+## Unreleased
+
+### Added
+
+- **`--u-text-mono`** (`0.75rem`), the size of figures set in Geist Mono inside
+  a control or a cell, and **`--u-leading-none`** (`1`), the line height of a
+  box as tall as its type. Both carry exactly the value that stood written out
+  in eight and six places before; nothing moves.
+
+---
+
 ## 0.7.0 – A text token for danger (Sep. 2026)
 
 ### Added

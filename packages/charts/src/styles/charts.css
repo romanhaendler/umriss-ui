@@ -50,7 +50,15 @@
     --uc-size-tick: 11.5px;
     --uc-size-title: 12px;
     --uc-size-legend: 12.5px;
+    /* The tooltip's text; its head is an x value and takes the tick's size. */
+    --uc-size-tooltip: 12px;
+    /* A label on an axis stands tight to its tick; running text - the legend,
+       the tooltip - gets a little more air. */
+    --uc-leading-label: 1.25;
+    --uc-leading-text: 1.35;
     --uc-radius: 6px;
+    /* The colour chips of legend and tooltip, and the legend entry's focus. */
+    --uc-radius-chip: 2px;
     --uc-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.08);
     --uc-focus-ring: var(--u-focus-ring, 0 0 0 2px #0e7d72);
 
@@ -168,7 +176,7 @@
     position: absolute;
     white-space: pre;
     font-size: var(--uc-size-tick);
-    line-height: 1.25;
+    line-height: var(--uc-leading-label);
     letter-spacing: 0.005em;
     color: var(--uc-color-text);
   }
@@ -189,7 +197,7 @@
     position: absolute;
     white-space: pre;
     font-size: var(--uc-size-title);
-    line-height: 1.25;
+    line-height: var(--uc-leading-label);
     letter-spacing: 0.01em;
     color: var(--uc-color-text);
   }
@@ -238,7 +246,7 @@
     flex-wrap: wrap;
     gap: 4px 14px;
     font-size: var(--uc-size-legend);
-    line-height: 1.35;
+    line-height: var(--uc-leading-text);
     color: var(--uc-color-text);
   }
 
@@ -263,14 +271,14 @@
     display: inline-block;
     width: 10px;
     height: 10px;
-    border-radius: 2px;
+    border-radius: var(--uc-radius-chip);
   }
 
   /* With onToggle an entry is a button, and looks like the entry it was. */
   button.uc-legend-item {
     padding: 0;
     border: 0;
-    border-radius: 2px;
+    border-radius: var(--uc-radius-chip);
     background: none;
     font: inherit;
     color: inherit;
@@ -308,14 +316,14 @@
     border-radius: var(--uc-radius);
     background: var(--uc-color-bg);
     box-shadow: var(--uc-shadow);
-    font-size: 12px;
-    line-height: 1.35;
+    font-size: var(--uc-size-tooltip);
+    line-height: var(--uc-leading-text);
     color: var(--uc-color-text);
   }
 
   .uc-tooltip-head {
     font-family: var(--uc-font-mono);
-    font-size: 11.5px;
+    font-size: var(--uc-size-tick);
     letter-spacing: 0.01em;
     padding-bottom: 5px;
     margin-bottom: 5px;
@@ -336,7 +344,7 @@
   .uc-tooltip-chip {
     width: 8px;
     height: 8px;
-    border-radius: 2px;
+    border-radius: var(--uc-radius-chip);
   }
 
   .uc-tooltip-name {
@@ -386,7 +394,7 @@
   .uc-limit-label {
     position: absolute;
     font-size: var(--uc-size-tick);
-    line-height: 1.25;
+    line-height: var(--uc-leading-label);
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
     /* A limit often lies exactly on a tick. Of the two statements the limit is the

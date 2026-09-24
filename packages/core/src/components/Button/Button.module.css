@@ -15,7 +15,7 @@
     font-family: var(--u-font-sans);
     font-size: var(--u-text-sm);
     font-weight: var(--u-weight-medium);
-    line-height: 1;
+    line-height: var(--u-leading-none);
     cursor: pointer;
     user-select: none;
     white-space: nowrap;

@@ -81,7 +81,7 @@
     font-family: var(--u-font-mono);
     font-size: var(--u-text-xs);
     font-variant-numeric: tabular-nums;
-    line-height: 1;
+    line-height: var(--u-leading-none);
     color: var(--u-color-text-muted);
     pointer-events: none;
     transition: color var(--u-transition);

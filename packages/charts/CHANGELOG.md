@@ -29,6 +29,19 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## Unreleased
+
+### Added
+
+- **Four `--uc-*` variables** an application may override like the others:
+  `--uc-size-tooltip` (12px), `--uc-leading-label` (1.25, axis labels),
+  `--uc-leading-text` (1.35, legend and tooltip) and `--uc-radius-chip` (2px,
+  the colour chips). They carry the values that stood written out before;
+  nothing moves. The tooltip's head now follows `--uc-size-tick`, which had the
+  same value.
+
+---
+
 ## 0.4.1 – The axis band after the web font (Sep. 2026)
 
 ### Fixed

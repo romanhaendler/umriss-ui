@@ -7,10 +7,16 @@
    stylesheet and once as a number in the code, and had drifted ten milliseconds
    apart.
 
-   The text is read the way contrast.test.ts reads `tokens.css`. The rules are
-   deliberately narrow: they check what this ticket repaired, so that it does not
-   come back. Checking the full vocabulary for motion, type and curves is what
-   `visuelle-wertigkeit` 01 wants; this is not that test. */
+   The text is read the way contrast.test.ts reads `tokens.css`.
+
+   The second half is the vocabulary check of `visuelle-wertigkeit` 01, and it
+   reads the stylesheets of every package that ships one - core, table,
+   schedule, calculation and the charts. It answers one question per site: is
+   there a raw value here where a token should stand? For colours, font sizes,
+   line heights, durations, timing curves, radii and shadows. It says nothing
+   about spacing, paddings, widths or heights, and it must not learn to: the
+   asymmetric `7px 5px` of the list fields is an optical correction, not a
+   debt (CONTEXT.md, **Vocabulary**). */
 
 import { describe, expect, it } from "vitest";
 import TOKENS from "../src/styles/tokens.css?raw";
@@ -45,18 +51,6 @@ function withoutReducedMotion(css: string): string {
   return rest;
 }
 
-/** Raw durations that may stay, as "file: value" - each with its reason. */
-const ALLOWED_DURATIONS: Readonly<Record<string, string>> = {
-  "Checkbox/Checkbox.module.css: 320ms":
-    "The tick is drawn, slowly enough to watch; under reduced motion the transition falls away.",
-  "Checkbox/Checkbox.module.css: 60ms": "The delay of that same tick.",
-  "Spinner/Spinner.module.css: 700ms":
-    "A steady process, not a motion between two states; the vocabulary for that is visuelle-wertigkeit 02.",
-  "Skeleton/Skeleton.module.css: 1.6s": "The same case as the spinner.",
-  "Button/Button.module.css: 80ms":
-    "The press point - shorter than any token. It has a block for reduced motion; it gets a name with visuelle-wertigkeit 02.",
-};
-
 describe("Stylesheets of the library (ADR-0021)", () => {
   it("begin with the layer order and keep every rule inside a layer of the library", () => {
     const offenders = [...entries(), ["tokens.css", TOKENS] as const, ["own.module.css", OWN] as const].flatMap(([file, text]) => [
@@ -70,30 +64,6 @@ describe("Stylesheets of the library (ADR-0021)", () => {
 describe("Stylesheets of the components", () => {
   it("find any stylesheets at all", () => {
     expect(entries().length).toBeGreaterThan(30);
-  });
-
-  it("write no colour value by hand", () => {
-    const finds = entries().flatMap(([file, css]) =>
-      [...withoutComments(css).matchAll(/#[0-9a-fA-F]{3,8}\b|\b(?:rgba?|hsla?)\(/g)].map((m) => `${file}: ${m[0]}`),
-    );
-    expect(finds).toEqual([]);
-  });
-
-  it("write no duration by hand, other than the named ones", () => {
-    const finds = entries().flatMap(([file, css]) =>
-      [...withoutReducedMotion(withoutComments(css)).matchAll(/(?<![\w.-])\d*\.?\d+m?s\b/g)]
-        .map((m) => `${file}: ${m[0]}`)
-        .filter((find) => !(find in ALLOWED_DURATIONS)),
-    );
-    expect(finds).toEqual([]);
-  });
-
-  it("still carries every allowed duration, and each one with a reason", () => {
-    for (const [find, reason] of Object.entries(ALLOWED_DURATIONS)) {
-      const [file, value] = find.split(": ") as [string, string];
-      expect(withoutComments(STYLES[`../src/components/${file}`] ?? ""), `${find} is out of date`).toContain(value);
-      expect(reason.length).toBeGreaterThan(20);
-    }
   });
 
   /* A variable only one module knows is called `--_…`, as in the modal. Under
@@ -116,5 +86,175 @@ describe("Stylesheets of the components", () => {
   it("show the textarea's focus ring only on visible focus, like every field beside it", () => {
     const css = withoutComments(STYLES["../src/components/Textarea/Textarea.module.css"] ?? "");
     expect(css).not.toMatch(/:focus(?![-\w])/);
+  });
+});
+
+/* ---------------- The vocabulary (visuelle-wertigkeit 01) ---------------- */
+
+const LIBRARY = import.meta.glob(
+  [
+    "../src/components/**/*.module.css",
+    "../../table/src/**/*.module.css",
+    "../../schedule/src/**/*.module.css",
+    "../../calculation/src/**/*.module.css",
+    "../../charts/src/styles/charts.css",
+  ],
+  { query: "?raw", import: "default", eager: true },
+) as Record<string, string>;
+
+/** "core/Button/Button.module.css", "table/Table.module.css", ... */
+const nameOf = (path: string) =>
+  path.replace("../src/components/", "core/").replace(/^\.\.\/\.\.\/(\w+)\/src\//, "$1/");
+
+/** The value with every `var(...)` taken out, fallbacks included: what is
+    left is what the site wrote by hand. */
+function withoutVars(value: string): string {
+  let rest = value;
+  for (let start = rest.indexOf("var("); start !== -1; start = rest.indexOf("var(")) {
+    let depth = 0;
+    let end = start + 3;
+    for (; end < rest.length; end++) {
+      if (rest[end] === "(") depth++;
+      if (rest[end] === ")" && --depth === 0) break;
+    }
+    rest = rest.slice(0, start) + " " + rest.slice(end + 1);
+  }
+  return rest;
+}
+
+const numbers = (value: string) => [...value.matchAll(/(?<![\w.#-])-?\d*\.?\d+/g)].map((m) => Number.parseFloat(m[0]));
+
+interface Rule {
+  /** The properties the rule reads. */
+  property: RegExp;
+  /** Whether the value, with its tokens taken out, still holds a raw one. */
+  raw: (bare: string, value: string) => boolean;
+}
+
+/* A shadow is a token when it has depth. An edge or a line - offset and spread
+   only, no blur - is drawn geometry in a token colour, like a width; the
+   colour rule already holds its colour. */
+const hasBlur = (bare: string) => bare.split(",").some((layer) => (numbers(layer)[2] ?? 0) !== 0);
+
+const RULES = {
+  colour: { property: /./, raw: (_bare, value) => /#[0-9a-fA-F]{3,8}\b|\b(?:rgba?|hsla?)\(/.test(value) },
+  "font size": { property: /^font(-size)?$/, raw: (bare) => numbers(bare).length > 0 },
+  "line height": { property: /^line-height$/, raw: (bare) => numbers(bare).length > 0 },
+  radius: { property: /radius$/, raw: (bare) => numbers(bare).some((n) => n !== 0) },
+  shadow: { property: /^(box|text)-shadow$/, raw: hasBlur },
+  duration: { property: /./, raw: (bare) => /(?<![\w.-])\d*\.?\d+m?s\b/.test(bare) },
+  curve: {
+    property: /^(transition|animation)(-timing-function)?$/,
+    raw: (bare) => /(?<![\w-])(?:ease(?:-in-out|-in|-out)?|linear|step-start|step-end|cubic-bezier|steps)(?![\w-])/.test(bare),
+  },
+} satisfies Record<string, Rule>;
+
+type Kind = keyof typeof RULES;
+
+/** Every declaration of a stylesheet as [property, value]. A block for
+    `prefers-reduced-motion` is left out: what stands there is switched off. */
+function declarations(css: string): Array<[string, string]> {
+  return [...withoutReducedMotion(withoutComments(css)).matchAll(/([\w-]+)\s*:\s*([^;{}]+?)\s*(?=[;}])/g)].map((m) => [
+    m[1] as string,
+    (m[2] as string).replace(/\s+/g, " "),
+  ]);
+}
+
+/** Each raw value of one kind as "file: property: value" - the work list. A
+    `--uc-*` declaration is not a site but the charts' own token layer: the
+    charts depend on nothing, so their values fall back onto a literal there
+    (R-1.6). */
+function finds(kind: Kind): string[] {
+  const rule: Rule = RULES[kind];
+  return Object.entries(LIBRARY).flatMap(([path, css]) =>
+    declarations(css)
+      .filter(([property]) => !property.startsWith("--uc-"))
+      .filter(([property, value]) => rule.property.test(property) && rule.raw(withoutVars(value), value))
+      .map(([property, value]) => `${nameOf(path)}: ${property}: ${value}`),
+  );
+}
+
+/** Raw values that may stay, each with its reason. Taking one on is allowed;
+    softening a rule to make one pass is not. */
+const EXCEPTIONS: Readonly<Record<string, string>> = {
+  "core/NumberInput/NumberInput.module.css: font-size: 0.71875rem":
+    "Mono figures in the small field, a step below --u-text-mono. Two sites in the library and no recurring role; pulled onto a neighbouring size they would move by half a pixel.",
+  "core/DataViz/DataViz.module.css: font-size: 0.71875rem": "The meter's figure - the second of the two sites above, with the same reason.",
+  "table/VerdictColumn.module.css: font-size: 0.7em":
+    "A proportion, not a size: the verdict glyph stands at 70 % of whatever size its cell has, and follows the cell when the table is set smaller.",
+  "table/VerdictColumn.module.css: font-size: 0.9em": "The excess beside the value, likewise a proportion of the cell's size.",
+  "core/Stat/Stat.module.css: line-height: 1.1":
+    "The stat's large figure is one number at --u-text-2xl, not a line of text; the one site that needs a leading this tight.",
+  "core/Button/Button.module.css: transition: background-color var(--u-transition), box-shadow var(--u-transition), color var(--u-transition), transform 80ms ease-out":
+    "The press point, shorter than any token. It gets a name with visuelle-wertigkeit 02.",
+  "core/Checkbox/Checkbox.module.css: transition: stroke-dashoffset 320ms var(--u-ease-out) 60ms":
+    "The tick is drawn, slowly enough to watch, after a short delay. It gets a name with visuelle-wertigkeit 02.",
+  "core/Spinner/Spinner.module.css: animation: rotate 700ms linear infinite":
+    "A continuous process, not a motion between two states; the vocabulary for it is visuelle-wertigkeit 02.",
+  "core/Skeleton/Skeleton.module.css: animation: shimmer 1.6s ease-in-out infinite": "A continuous process, as the spinner.",
+  "table/Table.module.css: animation: shimmer 1.6s ease-in-out infinite": "The loading rows shimmer like the skeleton of core.",
+  "charts/styles/charts.css: transition: opacity 80ms ease-out":
+    "The tooltip's fade. The charts depend on nothing, so it needs a --uc-* token of its own; it gets one with visuelle-wertigkeit 02.",
+};
+
+describe("The vocabulary of the stylesheets (visuelle-wertigkeit 01)", () => {
+  it("reads the stylesheets of every package that has them", () => {
+    const packages = new Set(Object.keys(LIBRARY).map((path) => nameOf(path).split("/")[0]));
+    expect([...packages].sort()).toEqual(["calculation", "charts", "core", "schedule", "table"]);
+  });
+
+  const check = (kind: Kind) => () => {
+    expect([...new Set(finds(kind))].filter((find) => !(find in EXCEPTIONS))).toEqual([]);
+  };
+
+  it("writes no colour by hand", check("colour"));
+  it("writes no font size by hand", check("font size"));
+  it("writes no line height by hand", check("line height"));
+  it("writes no radius by hand", check("radius"));
+  it("writes no shadow with depth by hand", check("shadow"));
+  it("writes no duration by hand", check("duration"));
+  /* Written, and switched on by visuelle-wertigkeit 02: the vocabulary has no
+     name yet for an exit or a continuous process, and six exceptions for a state
+     that is repaired one ticket later would be noise. */
+  it.skip("writes no timing curve by hand", check("curve"));
+
+  it("still meets every exception, and each one carries a reason", () => {
+    const all = new Set((Object.keys(RULES) as Kind[]).flatMap(finds));
+    for (const [find, reason] of Object.entries(EXCEPTIONS)) {
+      expect(all.has(find), `${find} is out of date`).toBe(true);
+      expect(reason.length).toBeGreaterThan(20);
+    }
+  });
+
+  it("references only tokens that exist", () => {
+    const declared = new Set([...TOKENS.matchAll(/(--u-[\w-]+)\s*:/g)].map((m) => m[1]));
+    const missing = Object.entries(LIBRARY).flatMap(([path, css]) =>
+      [...withoutComments(css).matchAll(/var\((--u-[\w-]+)\)/g)]
+        .filter((m) => !declared.has(m[1]))
+        .map((m) => `${nameOf(path)}: ${m[1]}`),
+    );
+    expect(missing).toEqual([]);
+  });
+
+  /* The check is only worth its name if it fires. */
+  it("recognises a raw value of each kind, and not a spacing", () => {
+    const raw = (kind: Kind, property: string, value: string) => RULES[kind].property.test(property) && RULES[kind].raw(withoutVars(value), value);
+    expect(raw("colour", "color", "#ffffff")).toBe(true);
+    expect(raw("font size", "font-size", "0.75rem")).toBe(true);
+    expect(raw("font size", "font-size", "var(--u-text-sm)")).toBe(false);
+    expect(raw("line height", "line-height", "1")).toBe(true);
+    expect(raw("radius", "border-radius", "var(--u-radius-sm) 0 0 var(--u-radius-sm)")).toBe(false);
+    expect(raw("radius", "border-radius", "1px")).toBe(true);
+    expect(raw("shadow", "box-shadow", "0 0 0 1px var(--u-color-accent)")).toBe(false);
+    expect(raw("shadow", "box-shadow", "0 4px 8px var(--u-edge-color)")).toBe(true);
+    expect(raw("duration", "transition", "opacity 80ms var(--u-ease-out)")).toBe(true);
+    expect(raw("curve", "animation", "modalOut var(--u-duration-exit) ease-in forwards")).toBe(true);
+    expect(raw("curve", "transition", "transform var(--u-duration-fast) var(--u-ease-out)")).toBe(false);
+    for (const kind of Object.keys(RULES) as Kind[]) {
+      for (const property of ["padding", "margin", "width", "height", "gap", "inset"]) {
+        if (kind === "colour" || kind === "duration") continue;
+        expect(raw(kind, property, "7px 5px"), `${kind} reads ${property}`).toBe(false);
+      }
+    }
   });
 });
