@@ -17,6 +17,11 @@ moves from here under the rule above.
 
 ## Unreleased
 
+### Changed
+
+- **The lane-group fold is core's `AngleGlyph`** – the same chevron, at the
+  one stroke width (1.4 instead of 1.5).
+
 ### Fixed
 
 - **The fold chevron of a lane group turns.** Its transition named a curve token

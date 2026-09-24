@@ -131,7 +131,7 @@ export function Calendar({
         ) : (
           <button type="button" className={styles.page} aria-label={wording.previousMonth} onClick={() => page(-1)}>
             <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">
-              <path d="M6.4 1.8 3.2 5l3.2 3.2" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M6.4 1.8 3.2 5l3.2 3.2" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
         )}
@@ -141,7 +141,7 @@ export function Calendar({
         ) : (
           <button type="button" className={styles.page} aria-label={wording.nextMonth} onClick={() => page(1)}>
             <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">
-              <path d="M3.6 1.8 6.8 5 3.6 8.2" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M3.6 1.8 6.8 5 3.6 8.2" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
         )}

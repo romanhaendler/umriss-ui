@@ -103,8 +103,8 @@ function Fold({
         foldSiblings(group, open, hook);
       }}
     >
-      <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
-        <path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <svg viewBox="0 0 10 10" width="12" height="12" aria-hidden="true">
+        <path d="M2.5 3.75 5 6.25 7.5 3.75" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     </button>
   );
