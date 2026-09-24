@@ -13,8 +13,9 @@ Spec: `.scratch/charts-a11y/spec.md` - Q7, ADR-0031.
   `exports`, a second build entry, types.
 - `Chart` takes `wording?: Partial<ChartsWording>`; missing entries fall back
   to English; the existing string props (`empty` and its kin) keep winning.
-- The entries 02 and 03 need: role description, summary sentences, key help,
-  "no value", series position, the empty readout.
+- The entries 02 and 03 need: role description, summary sentences, the
+  readout sentence, key help. (Delivered so; "no value" and a series position
+  were dropped - a gap is never a hit, and the readout names the series.)
 
 ## Acceptance
 
