@@ -51,6 +51,12 @@ interface was still expected to move before `0.3.0`.
   place in the state list, a matrix each step of its colouring, a limit band
   is hatched in its colour. The legend's chips draw the same marks. The
   default, `"color"`, changes nothing.
+- **Forced colours** (charts-alternatives 03): under `forced-colors: active`
+  (the Windows contrast mode), which forces every element but no canvas, the
+  chart forces itself - its theme resolves to the system colours (`CanvasText`,
+  `Canvas`, `GrayText`, `Highlight`), a caller's colour becomes `CanvasText`,
+  and encoding by marks switches on whatever `encoding` says. `ResolvedTheme`
+  gains `forced`.
 
 ### Changed
 

@@ -16,7 +16,15 @@
    root as `color: var(--uc-…)` and read back as the computed `color`, which
    the browser resolves in the scheme that applies there. Where no resolution
    comes back (a DOM without a style engine), the variable's text is used, as
-   before. */
+   before.
+
+   Under `forced-colors: active` - the Windows contrast mode - the browser
+   forces the colours of every element, and of nothing drawn on a canvas. So
+   the chart forces itself (charts-alternatives C4): the theme resolves to the
+   system colours the page around it now wears - text and marks in
+   `CanvasText`, the ground in `Canvas`, the grid in `GrayText`, the two
+   severities in `Highlight` - and every series, told apart no longer by
+   colour, is told apart by its marks (marks.ts). */
 
 export interface ResolvedTheme {
   colorAxis: string;
@@ -34,6 +42,9 @@ export interface ResolvedTheme {
   font: string;
   fontMono: string;
   series: readonly string[];
+  /** The page is in forced colours: every colour above is a system colour, and
+      the chart encodes by marks whatever its `encoding`. */
+  forced: boolean;
 }
 
 export const FALLBACK_THEME: ResolvedTheme = {
@@ -47,7 +58,14 @@ export const FALLBACK_THEME: ResolvedTheme = {
   font: "system-ui, sans-serif",
   fontMono: "ui-monospace, monospace",
   series: ["#2563eb", "#db2777", "#059669", "#d97706", "#7c3aed", "#0891b2"],
+  forced: false,
 };
+
+const FORCED_QUERY = "(forced-colors: active)";
+
+function forcedColors(): boolean {
+  return typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia(FORCED_QUERY).matches;
+}
 
 /* Cache with a generation number: invalidateTheme() raises the generation, so
    that every entry is read anew on its next access.
@@ -66,12 +84,17 @@ function readVar(style: CSSStyleDeclaration, name: string, fallback: string): st
 
 /** Runs `read` with a hidden probe inside `root` that resolves a CSS colour to
     its computed value - or gives the value back as it stands where no
-    resolution comes back - and removes the probe afterwards. */
-function withProbe<R>(root: Element, read: (resolve: (value: string) => string) => R): R {
+    resolution comes back - and removes the probe afterwards.
+
+    `system`: the probe reads system colours as they are. Forced colours
+    repaint an element's text at computed-value time, so without it "Canvas"
+    would read back as the forced text colour. */
+function withProbe<R>(root: Element, read: (resolve: (value: string) => string) => R, system = false): R {
   const probe = root.ownerDocument.createElement("span");
   probe.setAttribute("aria-hidden", "true");
   probe.style.position = "absolute";
   probe.style.visibility = "hidden";
+  if (system) probe.style.setProperty("forced-color-adjust", "none");
   root.appendChild(probe);
   try {
     return read((value) => {
@@ -85,8 +108,35 @@ function withProbe<R>(root: Element, read: (resolve: (value: string) => string) 
   }
 }
 
+/** The theme under forced colours: the system colours, every series in the
+    text colour - its marks tell it apart. */
+function forcedTheme(root: Element, style: CSSStyleDeclaration): ResolvedTheme {
+  return withProbe(
+    root,
+    (resolve) => {
+      const text = resolve("CanvasText");
+      const highlight = resolve("Highlight");
+      return {
+        colorAxis: text,
+        colorGrid: resolve("GrayText"),
+        colorText: text,
+        colorBg: resolve("Canvas"),
+        colorWarning: highlight,
+        colorAlarm: highlight,
+        colorOk: text,
+        font: readVar(style, "--uc-font", FALLBACK_THEME.font),
+        fontMono: readVar(style, "--uc-font-mono", FALLBACK_THEME.fontMono),
+        series: FALLBACK_THEME.series.map(() => text),
+        forced: true,
+      };
+    },
+    true,
+  );
+}
+
 function readTheme(root: Element): ResolvedTheme {
   const style = getComputedStyle(root);
+  if (forcedColors()) return forcedTheme(root, style);
   return withProbe(root, (resolve) => {
     const readColour = (name: string, fallback: string): string => {
       const text = readVar(style, name, fallback);
@@ -110,6 +160,7 @@ function readTheme(root: Element): ResolvedTheme {
       font: readVar(style, "--uc-font", FALLBACK_THEME.font),
       fontMono: readVar(style, "--uc-font-mono", FALLBACK_THEME.fontMono),
       series,
+      forced: false,
     };
   });
 }
@@ -121,6 +172,8 @@ function ensureObserver(): void {
   observer.observe(document.documentElement, { attributes: true });
   if (typeof window !== "undefined" && typeof window.matchMedia === "function") {
     window.matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", () => invalidateTheme());
+    // Entering or leaving the contrast mode is a change of theme as well.
+    window.matchMedia(FORCED_QUERY).addEventListener?.("change", () => invalidateTheme());
   }
 }
 
