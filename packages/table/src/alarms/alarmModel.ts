@@ -82,6 +82,94 @@ export function nextLifecycleState(state: LifecycleState, transition: Transition
   }
 }
 
+/* --- Availability ------------------------------------------------------- */
+
+/** Whether an alarm is in front of the operator - the second field beside the
+    lifecycle (ISA-18.2's special states).
+
+    A second field and never a fifth value of the lifecycle, by the same rule
+    that made the lifecycle one field: one state, one field. The two answer
+    different questions - what happened to the condition, and whether anyone
+    is meant to see it now - and a shelved alarm keeps its lifecycle
+    underneath: when the shelf ends it comes back standing and unacknowledged
+    if that is what it is.
+
+    `suppressed-by-design` has no transition here. It is the plant's logic that
+    suppresses (a pump that is off raises no low-flow alarm), and the
+    application writes the field from that logic. */
+export type Availability = "in-service" | "shelved" | "suppressed-by-design" | "out-of-service";
+
+/** In service first, then by how near each is to coming back: shelved (the
+    operator's own decision, with an end), suppressed by design, out of
+    service. The order of the default sort. */
+export const AVAILABILITIES: readonly Availability[] = [
+  "in-service",
+  "shelved",
+  "suppressed-by-design",
+  "out-of-service",
+];
+
+/** A shelf: the operator's own, time-limited decision to take an alarm out of
+    the way. */
+export interface Shelf {
+  /** When it ends, in milliseconds. Reaching it is enough. */
+  until: number;
+  /** Who shelved it - a shelf is tracked, not anonymous. */
+  by: string;
+}
+
+/** Everything but in service: still in the list, drawn neutrally and counted,
+    never removed. "Not absent, only deliberately hidden." */
+export const isHiddenFromOperation = (availability: Availability): boolean =>
+  availability !== "in-service";
+
+/**
+ * The availability at the as-of time. A shelf that has reached its end is in
+ * service again - by the model's clock, not by a timer: nothing here reads a
+ * clock, and a timer in a user-interface library would bring a shelved alarm
+ * back only while a browser tab happens to be open.
+ */
+export function availabilityAt(alarm: Alarm, asOf: number): Availability {
+  if (alarm.availability === "shelved") return asOf >= alarm.shelf.until ? "in-service" : "shelved";
+  return alarm.availability ?? "in-service";
+}
+
+/* The four transitions. Pure, one alarm in and one out; the application
+   performs them, the model never does - as with acknowledging. A transition
+   that does not apply returns the same object, so that a caller can see that
+   nothing happened. */
+
+/** Shelves an alarm in service, or shelves anew what is shelved. An alarm out
+    of service or suppressed by design stays as it is: the stronger removal is
+    not overwritten by the weaker one, or the end of the shelf would put a pump
+    under maintenance back in service. */
+export function shelve(alarm: Alarm, until: number, by: string): Alarm {
+  if (alarm.availability === "out-of-service" || alarm.availability === "suppressed-by-design") return alarm;
+  return { ...alarm, availability: "shelved", shelf: { until, by } };
+}
+
+/** Takes a shelved alarm off the shelf before its end. */
+export function unshelve(alarm: Alarm): Alarm {
+  if (alarm.availability !== "shelved") return alarm;
+  return { ...alarm, availability: "in-service", shelf: undefined };
+}
+
+/** Takes an alarm out of service - from service or from a shelf. An alarm
+    suppressed by design stays as it is: that field is the plant's logic's,
+    and `returnToService` would otherwise hand it back in service with the
+    suppression lost. */
+export function takeOutOfService(alarm: Alarm): Alarm {
+  if (alarm.availability === "out-of-service" || alarm.availability === "suppressed-by-design") return alarm;
+  return { ...alarm, availability: "out-of-service", shelf: undefined };
+}
+
+/** Returns an alarm out of service to service. Only that one: a shelf ends by
+    `unshelve` or its time, a suppression by the plant's logic. */
+export function returnToService(alarm: Alarm): Alarm {
+  if (alarm.availability !== "out-of-service") return alarm;
+  return { ...alarm, availability: "in-service" };
+}
+
 /* --- Return band (hysteresis, dead band) -------------------------------- */
 
 /** The triggering bound and the return band of an alarm type.
@@ -134,8 +222,15 @@ export interface AlarmType {
 
     `lifecycle` is the truth about the position; the two points in time are
     trimmings for the display. The other way round it would be a pair of
-    booleans in disguise. */
-export interface Alarm {
+    booleans in disguise.
+
+    `availability` is the second field, and its union with the shelf is why
+    this is a type and not an interface: a shelved alarm without an end cannot
+    be written down. A shelf without an end is the shelf ISA-18.2 warns
+    against - an alarm switched off that nobody will remember switching off. */
+export type Alarm = AlarmBase & AlarmAvailability;
+
+interface AlarmBase {
   id: string;
   /** Id of the alarm type. */
   type: string;
@@ -147,6 +242,18 @@ export interface Alarm {
   /** The moment of the acknowledgement, as long as unacknowledged: none. */
   acknowledgedAt?: number;
 }
+
+type AlarmAvailability =
+  | {
+      /** Without a statement: in service. */
+      availability?: Exclude<Availability, "shelved">;
+      shelf?: undefined;
+    }
+  | {
+      availability: "shelved";
+      /** Until when, and by whom. */
+      shelf: Shelf;
+    };
 
 /* --- Window, frequency, flood ------------------------------------------- */
 
@@ -292,6 +399,8 @@ export interface AlarmRow {
   alarm: Alarm;
   type: AlarmType;
   lifecycle: LifecycleState;
+  /** At the as-of time: an expired shelf is already back in service here. */
+  availability: Availability;
   priority: Priority;
   /** 0 is the most urgent. For the sort. */
   rank: number;
@@ -313,6 +422,7 @@ export interface AlarmRow {
 export type AlarmColumn =
   | "type"
   | "lifecycle"
+  | "availability"
   | "priority"
   | "acknowledgement"
   | "raised"
@@ -337,6 +447,9 @@ export const alarmColumns = (wording: Wording): readonly Column<AlarmRow, AlarmC
     hideable: false,
   },
   { id: "lifecycle", label: wording.columnLifecycleState, value: (row) => row.lifecycle, searchable: true },
+  /* The rank, like the priority: the column exists for the first level of the
+     order. */
+  { id: "availability", label: wording.columnAvailability, value: (row) => AVAILABILITIES.indexOf(row.availability) },
   { id: "priority", label: wording.columnPriority, value: (row) => row.rank },
   /* A column of its own instead of a glance at the lifecycle state: the second
      level of the order asks only about the acknowledgement and expressly not
@@ -351,10 +464,16 @@ export const alarmColumns = (wording: Wording): readonly Column<AlarmRow, AlarmC
 /** The columns with the default labels - for callers without a wording. */
 export const ALARM_COLUMNS: readonly Column<AlarmRow, AlarmColumn>[] = alarmColumns(DEFAULT_WORDING);
 
-/** Priority, then acknowledgement, then time - the worst first, not the newest.
-    As levels of the existing multi-level sort, so that a caller replaces one
-    value instead of fighting against a hard-wired comparison. */
+/** In service before hidden, then priority, then acknowledgement, then time -
+    the worst first, not the newest. As levels of the existing multi-level
+    sort, so that a caller replaces one value instead of fighting against a
+    hard-wired comparison.
+
+    Availability stands first because a shelved alarm of high priority is a
+    decision already taken; above a standing one of medium priority it would
+    take the first glance from the alarm nobody has decided about. */
 export const DEFAULT_ORDER: readonly SortLevel<AlarmColumn>[] = [
+  { column: "availability", direction: "asc" },
   { column: "priority", direction: "asc" },
   { column: "acknowledgement", direction: "asc" },
   { column: "raised", direction: "desc" },
@@ -390,8 +509,13 @@ export interface AlarmProjection extends TableProjection<AlarmRow, AlarmColumn> 
   flood: Flood | null;
   /** Standing and unacknowledged within the filtered set - the number for the
       polite screen reader. From the filtered set, not from the visible page,
-      like every figure in this house. */
+      like every figure in this house. Only alarms in service count: the
+      number calls somebody over, and a hidden alarm is one it must not call
+      to. */
   standingUnacknowledged: number;
+  /** Hidden from operation within the filtered set: shelved, suppressed by
+      design, out of service. They are in the list; this is how many. */
+  hiddenFromOperation: number;
 }
 
 /** For an alarm without an entry in the catalogue. Classified high: an alarm
@@ -439,6 +563,7 @@ export function alarmModel(
         alarm,
         type,
         lifecycle: alarm.lifecycle,
+        availability: availabilityAt(alarm, asOf),
         priority: type.priority,
         rank: priorityRank(type.priority),
         age: asOf - alarm.raised,
@@ -458,7 +583,12 @@ export function alarmModel(
     ...projection,
     flood: detectedFlood,
     standingUnacknowledged: projection.filtered.reduce(
-      (total, row) => total + (row.lifecycle === "standing-unacknowledged" ? 1 : 0),
+      (total, row) =>
+        total + (row.lifecycle === "standing-unacknowledged" && !isHiddenFromOperation(row.availability) ? 1 : 0),
+      0,
+    ),
+    hiddenFromOperation: projection.filtered.reduce(
+      (total, row) => total + (isHiddenFromOperation(row.availability) ? 1 : 0),
       0,
     ),
   };

@@ -40,6 +40,18 @@ commit.
   stands online as <https://romanhaendler.github.io/umriss-ui/core/llms-full.txt>,
   with an index of the pages beside it (`llms.txt`).
 
+### Changed
+
+- **Five new keys in `Wording`: the wording of an alarm's availability** (for
+  `@umriss-ui/table`'s alarm model and list), in English and German:
+  `availabilityShelved(until, by)`, `availabilitySuppressedByDesign`,
+  `availabilityOutOfService`, `hiddenFromOperation(count)` and
+  `columnAvailability`. A partial wording passed to the provider is merged as
+  before; an application that implements the whole `Wording` type itself no
+  longer compiles until it adds these five.
+
+---
+
 ## 0.9.2 – Today's dot, one chevron (Sep. 2026)
 
 ### Changed

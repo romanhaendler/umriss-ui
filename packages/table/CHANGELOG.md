@@ -24,6 +24,9 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ## Unreleased
 
+Needs the `@umriss-ui/core` that carries the availability wording (its own
+"Unreleased" section).
+
 ### Added
 
 - **`docs/llms-full.md`**, the package's documentation as one Markdown file for
@@ -32,6 +35,49 @@ is one of the internal numbers from before core's first publication as `0.1.0`
   built as it is, and the declaration of every other export. The same text
   stands online as <https://romanhaendler.github.io/umriss-ui/table/llms-full.txt>,
   with an index of the pages beside it (`llms.txt`).
+- **Availability, the second field beside the lifecycle** (ISA-18.2's special
+  states): `availability?: "in-service" | "shelved" | "suppressed-by-design" |
+  "out-of-service"` on `Alarm`, never merged into the four lifecycle values.
+  Without a statement an alarm is in service, so existing alarms read as
+  before. A shelved alarm carries `shelf: { until, by }` - and cannot be
+  written without it.
+- **Four pure transitions**, one alarm in and one out, performed by the
+  application: `shelve(alarm, until, by)`, `unshelve`, `takeOutOfService`,
+  `returnToService`. One that does not apply returns the same object. A shelf
+  never overwrites out of service or suppressed by design, and taking out of
+  service never overwrites suppressed by design - the plant's logic owns it.
+- **`availabilityAt(alarm, asOf)`**: a shelf that has reached its end is in
+  service again at the as-of time - by the model's clock, not by a timer.
+  `AlarmRow.availability` carries that value.
+- **`isHiddenFromOperation`, `AVAILABILITIES`, the types `Availability` and
+  `Shelf`**, and on the projection **`hiddenFromOperation`**: how many of the
+  filtered set are hidden. The model still removes nothing.
+- **An `availability` column** in `alarmColumns` / `ALARM_COLUMNS` (its label
+  from `wording.columnAvailability`), valued by rank like the priority.
+- **`<AlarmList>` shows what is hidden from operation**: the row stays,
+  drawn neutrally - no edge, the priority a word without its colour, the type
+  muted - with its availability as a word before its lifecycle ("Shelved until
+  11:10 by M. Keller"). The bar counts them ("Hidden from operation: 3").
+- **`hiddenOnly` and `onHiddenOnlyChange` on `<AlarmList>`**: with the
+  handler the count becomes a switch for the view; the application filters
+  with the table's own `filter` and `isHiddenFromOperation`. The switch stays
+  while the view is on, even at zero.
+
+### Changed
+
+- **`DEFAULT_ORDER` begins with availability**: in service above hidden, then
+  priority, acknowledgement and time as before. Only alarms with an
+  availability of their own move.
+- **`standingUnacknowledged` counts only alarms in service.** The live figure
+  calls somebody over; it must not call them to a shelved alarm.
+- **A done alarm's row (`keepDone`) is muted as it always claimed to be.**
+  Its colour stood on the row, and the table's cells set their own; it now
+  stands on the cells.
+- **`Alarm` is a type, no longer an interface** - the union with the shelf
+  needs it. `Partial<Alarm>` spread into an `Alarm` no longer compiles; name
+  the fields you mean (`Pick<Alarm, "cleared" | "acknowledgedAt">`).
+
+---
 
 ## 0.3.3 – Depth work on the table (Sep. 2026)
 

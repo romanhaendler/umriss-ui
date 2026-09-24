@@ -17,6 +17,14 @@ export {
   ALARM_COLUMNS,
   alarmColumns,
   DEFAULT_ORDER,
+  /* alarm-standards 01 - new exports stand at the end (CONTRIBUTING.md). */
+  availabilityAt,
+  isHiddenFromOperation,
+  shelve,
+  unshelve,
+  takeOutOfService,
+  returnToService,
+  AVAILABILITIES,
 } from "./alarmModel";
 export type {
   Alarm,
@@ -33,4 +41,6 @@ export type {
   FloodRule,
   Flood,
   Acknowledgement,
+  Availability,
+  Shelf,
 } from "./alarmModel";
