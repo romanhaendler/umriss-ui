@@ -185,16 +185,6 @@ const EXCEPTIONS: Readonly<Record<string, string>> = {
   "table/VerdictColumn.module.css: font-size: 0.9em": "The excess beside the value, likewise a proportion of the cell's size.",
   "core/Stat/Stat.module.css: line-height: 1.1":
     "The stat's large figure is one number at --u-text-2xl, not a line of text; the one site that needs a leading this tight.",
-  "core/Button/Button.module.css: transition: background-color var(--u-transition), box-shadow var(--u-transition), color var(--u-transition), transform 80ms ease-out":
-    "The press point, shorter than any token. It gets a name with visuelle-wertigkeit 02.",
-  "core/Checkbox/Checkbox.module.css: transition: stroke-dashoffset 320ms var(--u-ease-out) 60ms":
-    "The tick is drawn, slowly enough to watch, after a short delay. It gets a name with visuelle-wertigkeit 02.",
-  "core/Spinner/Spinner.module.css: animation: rotate 700ms linear infinite":
-    "A continuous process, not a motion between two states; the vocabulary for it is visuelle-wertigkeit 02.",
-  "core/Skeleton/Skeleton.module.css: animation: shimmer 1.6s ease-in-out infinite": "A continuous process, as the spinner.",
-  "table/Table.module.css: animation: shimmer 1.6s ease-in-out infinite": "The loading rows shimmer like the skeleton of core.",
-  "charts/styles/charts.css: transition: opacity 80ms ease-out":
-    "The tooltip's fade. The charts depend on nothing, so it needs a --uc-* token of its own; it gets one with visuelle-wertigkeit 02.",
 };
 
 describe("The vocabulary of the stylesheets (visuelle-wertigkeit 01)", () => {
@@ -213,10 +203,7 @@ describe("The vocabulary of the stylesheets (visuelle-wertigkeit 01)", () => {
   it("writes no radius by hand", check("radius"));
   it("writes no shadow with depth by hand", check("shadow"));
   it("writes no duration by hand", check("duration"));
-  /* Written, and switched on by visuelle-wertigkeit 02: the vocabulary has no
-     name yet for an exit or a continuous process, and six exceptions for a state
-     that is repaired one ticket later would be noise. */
-  it.skip("writes no timing curve by hand", check("curve"));
+  it("writes no timing curve by hand", check("curve"));
 
   it("still meets every exception, and each one carries a reason", () => {
     const all = new Set((Object.keys(RULES) as Kind[]).flatMap(finds));

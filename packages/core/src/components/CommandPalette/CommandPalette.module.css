@@ -126,7 +126,7 @@
     flex: 0 1 auto;
     min-height: 0;
     overflow: hidden;
-    transition: height var(--u-duration-fast) var(--u-ease-out);
+    transition: height var(--u-transition-path);
   }
 
   .body {

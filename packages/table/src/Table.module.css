@@ -196,7 +196,7 @@
   }
 
   .sortArrow {
-    transition: transform var(--u-transition);
+    transition: transform var(--u-transition-path);
   }
 
   .sortArrowDesc {
@@ -284,7 +284,7 @@
       color-mix(in srgb, var(--u-color-text) 8%, transparent) 100%
     );
     background-size: 200% 100%;
-    animation: shimmer 1.6s ease-in-out infinite;
+    animation: shimmer var(--u-duration-shimmer) var(--u-ease-swell) infinite;
   }
 
   @keyframes shimmer {
@@ -882,7 +882,7 @@
   }
 
   .fold svg {
-    transition: transform var(--u-duration-fast) var(--u-ease-out);
+    transition: transform var(--u-transition-path);
   }
 
   .foldClosed svg {
@@ -950,7 +950,7 @@
   }
 
   .expander svg {
-    transition: transform var(--u-duration-fast) var(--u-ease-out);
+    transition: transform var(--u-transition-path);
   }
 
   .expanderOpen svg {

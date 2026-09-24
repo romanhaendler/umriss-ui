@@ -23,7 +23,7 @@
       background-color var(--u-transition),
       box-shadow var(--u-transition),
       color var(--u-transition),
-      transform 80ms ease-out;
+      transform var(--u-transition-press);
   }
 
   /* The press point: the surface gives way minimally - no relief. */

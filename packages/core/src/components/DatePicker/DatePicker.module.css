@@ -292,7 +292,7 @@
      the chevron contracts briefly - the same quiet gesture as on the minus/plus
      buttons. */
   .timeStepper button svg {
-    transition: transform var(--u-transition);
+    transition: transform var(--u-transition-press);
   }
 
   .timeGroup:hover .timeStepper button,

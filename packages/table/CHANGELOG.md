@@ -22,6 +22,17 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## Unreleased
+
+### Changed
+
+- **The sort arrow turns as a path.** Its half turn ran on the 120 ms of a
+  hover; it now reads core's `--u-transition-path` (140 ms), like the fold
+  chevrons beside it. Hover and colour changes run on core's own curve since
+  `--u-transition` carries it.
+
+---
+
 ## 0.3.1 – The focus survives a fold (Sep. 2026)
 
 ### Fixed
