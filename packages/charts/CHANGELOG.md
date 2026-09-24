@@ -29,6 +29,18 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## Unreleased
+
+### Fixed
+
+- **An axis band no longer keeps the width of the fallback font.** A chart
+  laid out before its web font had arrived remembered the wider band under the
+  hysteresis (R-3.4) and kept it - the plot stood up to seven pixels too far in,
+  or not, depending on which came first. The band is now measured anew once the
+  font is there, and on a change of theme.
+
+---
+
 ## 0.4.0 – The charts examined (Sep. 2026)
 
 The result of a review of the whole package (`.scratch/charts-review/spec.md`),
