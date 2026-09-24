@@ -56,7 +56,7 @@ describe("aggregate in the footer", () => {
     expect(footer(container, "distinct")).toBe("Distinct values 2");
     expect(footer(container, "sum")).toBe("ΣSum 2,600");
     expect(footer(container, "max")).toBe("maxMaximum 14");
-    expect(footer(container, "range")).toBe("Range 02/10/2026–09/10/2026");
+    expect(footer(container, "range")).toBe("Range 02/10–09/10");
   });
 
   it("runs an aggregate of one's own through the column's presentation", () => {

@@ -266,8 +266,17 @@ export function pageLines<Z>(
   const pageCount = Math.max(1, Math.ceil(lines.length / per));
   const current = Math.min(Math.max(1, page), pageCount);
   const slice = lines.slice((current - 1) * per, current * per);
+  return { lines: withContinuation(slice), page: current, pageCount };
+}
+
+/**
+ * A run of lines cut out of the middle - a page, a virtual window - with what
+ * it begins inside of: the bands of its first line, uncounted and marked
+ * continued, and the span's value again on its first row.
+ */
+export function withContinuation<Z>(slice: readonly Line<Z>[]): Line<Z>[] {
   const head = slice[0];
-  if (!head) return { lines: slice, page: current, pageCount };
+  if (!head) return [...slice];
   const repeated: Line<Z>[] = head.parents.map((group, i) => ({
     kind: "header",
     group,
@@ -275,5 +284,5 @@ export function pageLines<Z>(
     continued: true,
   }));
   const first: Line<Z> = head.kind === "row" && !head.first ? { ...head, first: true, continued: true } : head;
-  return { lines: [...repeated, first, ...slice.slice(1)], page: current, pageCount };
+  return [...repeated, first, ...slice.slice(1)];
 }
