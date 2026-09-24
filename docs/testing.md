@@ -265,53 +265,38 @@ jsdom has no `PointerEvent` at all, and no pointer capture either.
 
 ## Known open
 
-* **The charts' example pictures do not reproduce, and that is new.** Two to
-  four of the twenty-seven differed from run to run – a different set each time, by
-  371 to 2338 pixels, which is a ratio of 0.001 to 0.006 against the workspace
-  bound of 0.001. The differences sit on the numeric tick labels and along the
-  marks. Since the charts-review packages (2026-09-23) the demo has more
-  examples and it is worse: 13 to 30 of the example pictures fail per full run,
-  again a different set each time, a whole plot shifted by a fraction of a pixel
-  (up to a ratio of 0.01); a picture that fails passes on a repeat.
+* ~~The charts' example pictures do not reproduce.~~ **Done (Sep. 2026).** 13 to
+  30 of the example pictures failed per full run of the two charts projects, a
+  different set each time, and a failing one passed on a repeat. It was never
+  the rasterisation. Measured at the moment of the picture, the y band of a
+  failing chart was **one or two whole pixels wider** than in the run before –
+  `47.13` against `49.13` for the first tick label – and so the plot, its line
+  and every label moved with it. The band width was path-dependent: the layout
+  keeps band widths under hysteresis (R-3.4, a band grows at once and shrinks
+  only by `HYSTERESIS` = 8 pixels), and a layout that ran before Geist had
+  arrived remembered the width of the fallback font. `loadingdone` cleared the
+  measurement cache but not that memory, so whether a band stayed a pixel too
+  wide depended on which came first under load, the font or the first frame.
+  `ChartScene` now clears the hysteresis together with the cache, on a font
+  load and on a change of theme; with that, every plot's geometry and canvas
+  signature were identical across repeats under full parallel load, 28 of the
+  92 baselines were taken anew once (they had been recorded with a band left
+  too wide), and the suite has passed two full runs and a `--repeat-each=3`
+  since.
 
-  **The same drift reaches the schedule when an example MOVES.** Cutting the
-  demo by feature (`schedule-lane-groups` 05) put every example at a different
-  scroll position on a shorter page, and five of them re-rendered with their
-  text on a different subpixel. Measured on `selection`, 988 × 404: 6392 of
-  399152 bytes differ, **none of them inside the plot** – 1147 in the lane
-  headers and 2338 in the time labels, both of them text. The drawing is
-  byte-identical. So a schedule picture that changes only in its text after an
-  example has been renamed is this, and not a change to the component; a
-  picture that changes inside the plot is not.
+  Not the cause, and measured rather than assumed: the unrounded plot rectangle
+  (`getBoundingClientRect`), the per-frame `getImageData` in
+  `packages/charts/tests-visual/navigation.ts`, and the missing GPU flags with
+  `fullyParallel` – under all three unchanged the canvas signature came out
+  identical once the band width was. Whoever sees this again: probe the label
+  positions at the moment of the picture before suspecting the pixels.
 
-  It is not a settling race, and that was established rather than assumed. Three
-  waits were tried in `packages/charts/tests-visual/navigation.ts`: two frames,
-  then the plot rectangles holding still (rounded, then at full precision), then
-  two consecutive frames that are pixel-identical on every canvas. None of them
-  changed the outcome. The decisive measurement was `--repeat-each=3`: **inside
-  one run** the same picture passes one repeat and fails the next, so the
-  variance is in the rasterisation and not in when the picture is taken.
-
-  What changed to bring it on: until ADR-0020 the charts demo drew in a fixed
-  1080-pixel column in `system-ui`, and its 26 baselines were stable at the same
-  bound. In the shared shell the column is laid out against a sidebar and the
-  labels are set in Geist, so the marks and the DOM labels no longer land on the
-  same pixel grid.
-
-  **The schedule is evidence for the first way.** Its canvas draws on the same
-  kind of plot, in the same shell and font, and every position goes through
-  `Math.round` before it reaches the canvas (`packages/schedule/src/geometry.ts`);
-  its fifty pictures passed three consecutive runs without a difference.
-
-  Three ways out, none of them taken yet, because each is a decision and not a
-  repair: **round the scene's measurements and the canvas backing to whole device
-  pixels** in `packages/charts/src` – the root fix, its own ticket, and it
-  rebaselines charts once more; **a named exception** raising the bound for the
-  two charts projects with the measurement written at it – which `CONTEXT.md`
-  argues against, since taking on an exception is allowed and softening the bound
-  is not; or **photograph the charts pages at the page head only** and let
-  `features-interaction.spec.ts` carry the marks, which it already does through
-  the canvas pixels rather than through a picture.
+  **The schedule note stands apart and is still true.** When a schedule example
+  MOVES (`schedule-lane-groups` 05 put every example at a different scroll
+  position), five pictures re-rendered with their text on a different subpixel
+  – 6392 of 399152 bytes on `selection`, none of them inside the plot. That is
+  deterministic, not a flake: a schedule picture that changes only in its text
+  after an example has been renamed is this, and not a change to the component.
 
 * ~~Two interaction tests fail on the hidden checkbox `input`.~~ **Done
   (table-surface, Aug. 2026).** The finding was not a defect of the checkbox but
