@@ -38,8 +38,10 @@ export type Side = "top" | "bottom";
 export interface PopoverPosition {
   top: number;
   left: number;
-  /** The panel stands above the anchor, because there was no room below. */
+  /** The panel stands on the other side than asked, because there was no room. */
   flipped: boolean;
+  /** The side of the anchor the panel stands on, after flipping. */
+  side: Side;
 }
 
 export interface PositionOptions {
@@ -91,7 +93,22 @@ export function computePosition(
   // the viewport, the left edge wins.
   const left = Math.max(vLeft + margin, Math.min(raw, vLeft + viewport.width - panel.width - margin));
 
-  return { top, left, flipped };
+  return { top, left, flipped, side: above ? "top" : "bottom" };
+}
+
+/**
+ * The motion origin: the point a panel grows out of, as a `transform-origin`
+ * for its stylesheet. It lies on the panel's edge that faces the anchor - a
+ * panel below grows from its top - at the end the alignment holds on to.
+ *
+ * `side` is the side the panel really stands on (`PopoverPosition.side`), not
+ * the one asked for: a flipped panel grows from the other edge.
+ */
+// ponytail: a panel clamped at the window's edge still grows from its aligned
+// corner, not from under the anchor; an x in pixels from the anchor if it shows.
+export function motionOrigin(side: Side, align: Align): string {
+  const x = align === "start" ? "left" : align === "end" ? "right" : "center";
+  return `${x} ${side === "bottom" ? "top" : "bottom"}`;
 }
 
 /** The visible part of the window, read from the browser. `innerWidth` and

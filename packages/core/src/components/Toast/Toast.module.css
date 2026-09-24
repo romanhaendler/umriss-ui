@@ -51,6 +51,7 @@
     background: var(--u-color-surface);
     border-radius: var(--u-radius-lg);
     box-shadow: var(--u-shadow-overlay);
+    transform-origin: var(--_origin);
     animation: toastIn var(--u-duration-medium) var(--u-ease-out);
     /* Leaving through a transition – does not collide with the entrance animation. */
     transition:
