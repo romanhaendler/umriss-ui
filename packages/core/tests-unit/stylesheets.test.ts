@@ -223,6 +223,18 @@ describe("The vocabulary of the stylesheets (visuelle-wertigkeit 01)", () => {
     expect(missing).toEqual([]);
   });
 
+  /* Reduced motion drops the path, never the state (visuelle-wertigkeit 02). A
+     focus style that arrived by an animation would vanish with it: where a
+     rule answers to focus, it shows the focus by itself. */
+  it("lets no focus style hang on an animation", () => {
+    const hanging = Object.entries(LIBRARY).flatMap(([path, css]) =>
+      [...withoutComments(css).matchAll(/([^{}]+)\{([^{}]*)\}/g)]
+        .filter((m) => /:focus/.test(m[1] as string) && /(?:^|[;\s])animation(?:-name)?\s*:(?!\s*none)/.test(m[2] as string))
+        .map((m) => `${nameOf(path)}: ${(m[1] as string).trim()}`),
+    );
+    expect(hanging).toEqual([]);
+  });
+
   /* The check is only worth its name if it fires. */
   it("recognises a raw value of each kind, and not a spacing", () => {
     const raw = (kind: Kind, property: string, value: string) => RULES[kind].property.test(property) && RULES[kind].raw(withoutVars(value), value);

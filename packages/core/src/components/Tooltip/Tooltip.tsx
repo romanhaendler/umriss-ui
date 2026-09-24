@@ -1,10 +1,10 @@
 import { cloneElement, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties, ReactElement, ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { cx } from "../../lib/cx";
 import { usePortalTarget } from "../../lib/provider";
 import { portalTargetFor } from "../../lib/portalTarget";
-import { computePosition, visibleViewport } from "../Popover/position";
+import { computePosition, motionOrigin, visibleViewport } from "../Popover/position";
+import { usePresence } from "../../lib/motion";
 import styles from "./Tooltip.module.css";
 
 export interface TooltipProps {
@@ -20,7 +20,6 @@ export interface TooltipProps {
 export function Tooltip({ content, children, delay = 300 }: TooltipProps) {
   const [open, setOpen] = useState(false);
   const [position, setPosition] = useState<CSSProperties | null>(null);
-  const [below, setBelow] = useState(false);
   /* Portal target determined in the effect, as with the popover: the rule
      reads the DOM of the trigger, and rendering may not do that. */
   const [target, setTarget] = useState<Element | null>(null);
@@ -29,6 +28,8 @@ export function Tooltip({ content, children, delay = 300 }: TooltipProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const id = useId();
+  /* Closed, it stays for its exit; the description goes with `open` at once. */
+  const present = usePresence(open, panelRef, "--u-duration-exit-fast");
 
   const show = () => {
     if (timer.current) clearTimeout(timer.current);
@@ -62,8 +63,9 @@ export function Tooltip({ content, children, delay = 300 }: TooltipProps) {
       visibleViewport(),
       { align: "center", side: "top", offset: 8 },
     );
-    setBelow(pos.flipped);
-    setPosition({ top: pos.top, left: pos.left });
+    /* The motion origin travels with the position: above its trigger it
+       grows from its bottom edge, flipped below from its top. */
+    setPosition({ top: pos.top, left: pos.left, "--_origin": motionOrigin(pos.side, "center") } as CSSProperties);
   }, [open, target, content]);
 
   useEffect(() => {
@@ -112,14 +114,15 @@ export function Tooltip({ content, children, delay = 300 }: TooltipProps) {
           hide();
         },
       })}
-      {open &&
+      {present &&
         target &&
         createPortal(
           <div
             ref={panelRef}
             id={id}
             role="tooltip"
-            className={cx(styles.tooltip, below ? styles.below : styles.above)}
+            className={styles.tooltip}
+            data-closing={!open || undefined}
             // Do not show before the first measurement, or it flashes in the top left.
             style={{ ...position, visibility: position ? undefined : "hidden" }}
           >

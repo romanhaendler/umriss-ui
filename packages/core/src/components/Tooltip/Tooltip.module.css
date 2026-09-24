@@ -15,18 +15,31 @@
     font-weight: var(--u-weight-medium);
     line-height: var(--u-leading-normal);
     pointer-events: none;
+    /* Entry from its motion origin - the edge facing its trigger, computed
+       with the position (motionOrigin in position.ts). */
+    transform-origin: var(--_origin);
     animation: tooltipIn var(--u-duration-fast) var(--u-ease-out);
   }
 
-  /* .above/.below no longer carry a shift - the position comes computed from
-     computePosition. The classes remain as hooks for the entrance. */
+  /* Exit: faster, fading where it stands. */
+  .tooltip[data-closing] {
+    animation: tooltipOut var(--u-duration-exit-fast) var(--u-ease-exit) forwards;
+  }
+
   @keyframes tooltipIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+  }
+
+  @keyframes tooltipOut {
+    to { opacity: 0; }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .tooltip {
+    .tooltip,
+    .tooltip[data-closing] {
       animation: none;
     }
   }

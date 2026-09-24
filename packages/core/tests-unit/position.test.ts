@@ -3,7 +3,8 @@
    tested here - and only for that reason can be tested at all. */
 
 import { describe, expect, it } from "vitest";
-import { computePosition } from "../src/components/Popover/position";
+import { computePosition, motionOrigin } from "../src/components/Popover/position";
+import type { Align, Side } from "../src/components/Popover/position";
 
 const VIEWPORT = { width: 1000, height: 800 };
 const anchor = (left: number, top: number, width = 120, height = 32) => ({
@@ -145,5 +146,45 @@ describe("computePosition – visible part of the window", () => {
   it("pulls a panel that fits nowhere into the visible part", () => {
     const pos = computePosition(anchor(60, 450), { width: 300, height: 300 }, VISIBLE);
     expect(pos.top).toBe(300 + 400 - 300 - 8);
+  });
+});
+
+/* The motion origin (visuelle-wertigkeit 02): the point a panel grows out of,
+   as the stylesheet's `transform-origin`. Checked are properties of the
+   mapping, not its formula. */
+describe("motionOrigin", () => {
+  const SIDES: Side[] = ["top", "bottom"];
+  const ALIGNS: Align[] = ["start", "center", "end"];
+  const combinations = SIDES.flatMap((side) => ALIGNS.map((align) => [side, align] as const));
+
+  it("lies on the edge opposite the panel: a panel below its anchor grows from its top", () => {
+    for (const align of ALIGNS) {
+      expect(motionOrigin("bottom", align).split(" ")[1]).toBe("top");
+      expect(motionOrigin("top", align).split(" ")[1]).toBe("bottom");
+    }
+  });
+
+  it("follows the alignment across", () => {
+    for (const side of SIDES) {
+      expect(motionOrigin(side, "start").split(" ")[0]).toBe("left");
+      expect(motionOrigin(side, "center").split(" ")[0]).toBe("center");
+      expect(motionOrigin(side, "end").split(" ")[0]).toBe("right");
+    }
+  });
+
+  it("yields a valid transform-origin for every combination, and a different one each", () => {
+    for (const [side, align] of combinations) {
+      expect(motionOrigin(side, align)).toMatch(/^(left|center|right) (top|bottom)$/);
+    }
+    expect(new Set(combinations.map(([side, align]) => motionOrigin(side, align))).size).toBe(combinations.length);
+  });
+
+  it("reads the side the position took, so a flipped panel grows from its bottom", () => {
+    const up = computePosition(anchor(200, 700), { width: 300, height: 200 }, VIEWPORT);
+    expect(up.side).toBe("top");
+    expect(motionOrigin(up.side, "start")).toBe("left bottom");
+    const down = computePosition(anchor(200, 100), { width: 300, height: 200 }, VIEWPORT, { side: "top" });
+    expect(down.side).toBe("bottom");
+    expect(motionOrigin(down.side, "end")).toBe("right top");
   });
 });
