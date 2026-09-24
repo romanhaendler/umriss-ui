@@ -259,8 +259,10 @@ export type Line<Z> =
       kind: "row";
       row: Z;
       parents: readonly RowGroup<Z>[];
-      /** The span the row stands in - the innermost group. */
-      span: RowGroup<Z>;
+      /** The span the row stands in - the innermost group, when there are
+          several levels; a single level has no span, its rows stand under
+          their group header. */
+      span: RowGroup<Z> | undefined;
       /** The span shows its value on this line: the group's first row, or the
           first of a page that begins inside it. */
       first: boolean;
@@ -270,15 +272,22 @@ export type Line<Z> =
 
 /**
  * The lines of the groups for a set of folded paths. The form of a group
- * follows its level (ADR-0029): the innermost is a span, every level outside it
- * a header. A group of one row is that row - it does not fold.
+ * follows its level (ADR-0029): the outermost is always a header, carrying
+ * every aggregate; below it, the innermost of several levels is a span, every
+ * other a header. A group of one row does not fold.
  */
 export function linesOf<Z>(groups: readonly RowGroup<Z>[], folded: ReadonlySet<string>): Line<Z>[] {
   const lines: Line<Z>[] = [];
   const walk = (groups: readonly RowGroup<Z>[], parents: readonly RowGroup<Z>[]) => {
     for (const group of groups) {
       const shut = folded.has(group.path) && group.rows.length > 1;
-      if (group.groups.length > 0) {
+      if (group.groups.length === 0 && group.level === 0) {
+        /* A single level: the header, and its rows plain beneath it. */
+        lines.push({ kind: "header", group, parents, continued: false });
+        if (!shut) {
+          for (const row of group.rows) lines.push({ kind: "row", row, parents: [group], span: undefined, first: false, continued: false });
+        }
+      } else if (group.groups.length > 0) {
         lines.push({ kind: "header", group, parents, continued: false });
         if (!shut) walk(group.groups, [...parents, group]);
       } else if (shut) {
@@ -327,6 +336,6 @@ export function withContinuation<Z>(slice: readonly Line<Z>[]): Line<Z>[] {
     parents: head.parents.slice(0, i),
     continued: true,
   }));
-  const first: Line<Z> = head.kind === "row" && !head.first ? { ...head, first: true, continued: true } : head;
+  const first: Line<Z> = head.kind === "row" && head.span && !head.first ? { ...head, first: true, continued: true } : head;
   return [...repeated, first, ...slice.slice(1)];
 }

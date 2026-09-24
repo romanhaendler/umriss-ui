@@ -2,8 +2,9 @@ import { Pagination, Toolbar, useTable } from "../../../src";
 
 export const title = "A whole group selected";
 
-/* Release every order of one customer at once. The box in a band selects all
-   of its group's rows, the box beside a span all of the span's - on other
+/* Release every order of one customer at once. The box in a group header
+   selects all of its group's rows - with several levels, the box beside a
+   span all of the span's -, on other
    pages and in folded groups as well; half a group shows as a dash. The bulk
    action in the table toolbar receives the list, as it always does. */
 

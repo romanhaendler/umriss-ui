@@ -3,9 +3,10 @@ import { useTable } from "../../../src";
 export const title = "One line: orders by line";
 
 /* `defaultGrouping` on the hook is all it takes. The table groups by the
-   column of that id, draws the line as a span beside its orders, and the
-   sum of each line appears as soon as it is folded. The line column moves to
-   the front; the table toolbar names the grouping and takes it away. */
+   column of that id and gives every line a group header: its name, its count
+   and its sum under the Quantity column, with a bar for its share. The line
+   column leaves the body - its value stands in the header; the table toolbar
+   names the grouping and takes it away. */
 
 interface Order {
   id: string;

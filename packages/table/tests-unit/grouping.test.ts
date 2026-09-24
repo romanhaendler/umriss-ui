@@ -186,10 +186,11 @@ describe("lines – what a grouped table shows", () => {
     expect(shape(linesOf(groups, new Set([kessler])))[3]).toBe("S Kessler AG · A-1052");
   });
 
-  it("makes one level all span", () => {
+  it("makes one level a group header over its rows - the outer level is always one", () => {
     const lines = linesOf(groupRows(ORDERS, { levels: [byLine] }), new Set());
-    expect(lines).toHaveLength(13);
-    expect(lines.every((l) => l.kind === "row" && l.parents.length === 0)).toBe(true);
+    expect(lines).toHaveLength(16);
+    expect(shape(lines).slice(0, 3)).toEqual(["H Line 1", "A-1041", "A-1044"]);
+    expect(lines.filter((l) => l.kind === "row").every((l) => l.kind === "row" && l.span === undefined)).toBe(true);
   });
 
   it("pages over lines, repeating at the top of a page what it begins inside of", () => {
