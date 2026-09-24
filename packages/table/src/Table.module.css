@@ -184,6 +184,9 @@
     flex-direction: row-reverse;
   }
 
+  /* The header's label, not a key: it has no surface to change, so hover
+     darkens the type and shows the arrow, and the press sorts, which the arrow
+     answers (visuelle-wertigkeit 04). */
   .sortButton:hover {
     color: var(--u-color-text);
   }
@@ -402,6 +405,10 @@
     color: var(--u-color-text);
   }
 
+  .filterButton:active {
+    background: var(--u-color-surface-pressed);
+  }
+
   .filterActive,
   .filterActive:hover {
     color: var(--u-color-accent);
@@ -569,14 +576,17 @@
     color: var(--u-color-text);
   }
 
+  .move:active:not(:disabled) {
+    background: var(--u-color-surface-pressed);
+  }
+
   .move:focus-visible {
     outline: none;
     box-shadow: var(--u-focus-ring);
   }
 
   .move:disabled {
-    color: var(--u-color-text-muted);
-    cursor: default;
+    cursor: not-allowed;
     opacity: 0.5;
   }
 
@@ -626,14 +636,18 @@
     background: color-mix(in srgb, var(--u-color-text) 10%, var(--u-color-surface-sunken));
   }
 
+  .groupingOption:active:not(:disabled) {
+    background: color-mix(in srgb, var(--u-color-text) 16%, var(--u-color-surface-sunken));
+  }
+
   .groupingOption[aria-pressed="true"] {
     background: var(--u-color-accent-subtle);
     color: var(--u-color-accent-text);
   }
 
   .groupingOption:disabled {
-    color: var(--u-color-text-muted);
-    cursor: default;
+    cursor: not-allowed;
+    opacity: 0.5;
   }
 
   .groupingLevel {
@@ -876,6 +890,10 @@
     background: color-mix(in srgb, var(--u-color-text) 8%, transparent);
   }
 
+  .fold:active {
+    background: color-mix(in srgb, var(--u-color-text) 14%, transparent);
+  }
+
   .fold:focus-visible {
     outline: none;
     box-shadow: var(--u-focus-ring);
@@ -942,6 +960,10 @@
   .expander:hover {
     background: var(--u-color-surface-sunken);
     color: var(--u-color-text);
+  }
+
+  .expander:active {
+    background: var(--u-color-surface-pressed);
   }
 
   .expander:focus-visible {
@@ -1042,6 +1064,10 @@
     background: color-mix(in srgb, var(--u-color-surface-sunken) 55%, var(--u-color-surface));
   }
 
+  /* The ring's colour and width, drawn inside as an outline - against the
+     canon's token, for a reason: the row fills its scroll area, which cuts an
+     outer ring away left and right, and a <tr> does not paint a box-shadow in
+     every engine (visuelle-wertigkeit 04). */
   .virtualRow:focus-visible {
     outline: 2px solid var(--u-color-accent);
     outline-offset: -2px;

@@ -26,6 +26,12 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ### Changed
 
+- **Pressed and disabled follow core's canon of interaction states.** The
+  filter key, the fold and the row expander, the column menu's move keys and
+  the grouping options sink while pressed. A disabled move key or grouping
+  option dims to half opacity with the not-allowed cursor; the move key was
+  dimmed twice (opacity and muted type), the grouping option only repainted.
+
 - **The sort arrow turns as a path.** Its half turn ran on the 120 ms of a
   hover; it now reads core's `--u-transition-path` (140 ms), like the fold
   chevrons beside it. Hover and colour changes run on core's own curve since

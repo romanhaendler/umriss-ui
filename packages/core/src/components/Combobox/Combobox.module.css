@@ -37,9 +37,8 @@
   }
 
   .input:disabled {
-    background: var(--u-color-surface-sunken);
-    color: var(--u-color-text-muted);
     cursor: not-allowed;
+    opacity: 0.5;
   }
 
   .invalid,
@@ -90,6 +89,9 @@
     cursor: pointer;
   }
 
+  /* The list's cursor, not its focus: DOM focus stays in the field, which
+     carries the ring, and the cursor is what the arrow keys and the pointer
+     both move - so it is the hover surface (the interaction-state canon). */
   .active {
     background: var(--u-color-surface-sunken);
   }
@@ -99,9 +101,13 @@
     font-weight: var(--u-weight-medium);
   }
 
+  .option:active:not(.optionDisabled) {
+    background: var(--u-color-surface-pressed);
+  }
+
   .optionDisabled {
-    color: var(--u-color-text-muted);
     cursor: not-allowed;
+    opacity: 0.5;
   }
 
   .optionLabel {
@@ -146,6 +152,10 @@
   .clear:hover {
     background: var(--u-color-surface-sunken);
     color: var(--u-color-text);
+  }
+
+  .clear:active {
+    background: var(--u-color-surface-pressed);
   }
 
   @keyframes clearIn {

@@ -11,6 +11,15 @@ under a heading "Changed" of its own, no matter which digit rose.
 
 ---
 
+## Unreleased
+
+### Changed
+
+- **The disclosure sinks while pressed** - on the key and on a foldable row -
+  with core's `--u-color-surface-pressed`, like every quiet key of the library.
+
+---
+
 ## 0.2.2 – Core 0.7.0 (Sep. 2026)
 
 ### Changed

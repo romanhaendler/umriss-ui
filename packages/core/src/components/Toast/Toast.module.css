@@ -156,6 +156,10 @@
     color: var(--u-color-text);
   }
 
+  .close:active {
+    background: var(--u-color-surface-pressed);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .toast {
       animation: none;

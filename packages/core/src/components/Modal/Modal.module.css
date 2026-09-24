@@ -155,6 +155,10 @@
     color: var(--u-color-text);
   }
 
+  .close:active {
+    background: var(--u-color-surface-pressed);
+  }
+
   /* Body & footer */
   .header,
   .footer {
