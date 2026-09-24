@@ -1050,10 +1050,14 @@ export class ChartScene {
       this.theme = null;
       this.painted.clear();
       this.measurer?.clear();
+      this.hysteresis.clear();
       this.markLayoutDirty();
     });
     // A web font that arrives after the first layout makes every measured label
-    // wider than its band: measure anew once it is there.
+    // wider than its band: measure anew once it is there. The hysteresis goes
+    // with the cache - it remembers band widths measured in the fallback font,
+    // and would keep a band up to HYSTERESIS - 1 pixels too wide, depending on
+    // whether the first layout ran before or after the font arrived.
     const fonts = typeof document === "undefined" ? undefined : document.fonts;
     fonts?.addEventListener?.("loadingdone", this.onFontsLoaded);
     this.theme = null;
@@ -1063,6 +1067,7 @@ export class ChartScene {
 
   private readonly onFontsLoaded = (): void => {
     this.measurer?.clear();
+    this.hysteresis.clear();
     this.markLayoutDirty();
   };
 

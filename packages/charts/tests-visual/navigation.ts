@@ -12,20 +12,11 @@
    pixel-identical on every canvas and every plot rectangle stands still. That is
    the thing the picture is of, and it cannot be outrun by a resize or a theme.
 
-   IT DOES NOT MAKE THE PICTURES REPRODUCIBLE, and the next reader should know
-   that before spending an afternoon on a fourth wait. Three were tried: two
-   frames, the plot rectangles holding still (rounded, then at full precision),
-   and the pixel comparison that stands here. Under each of them, two to four of
-   the twenty-seven example pictures differed from run to run - a different set
-   each time. `--repeat-each=3` then showed the same picture passing one repeat
-   and failing the next INSIDE one run, which puts the variance in the
-   rasterisation and not in the moment of capture.
-
-   This wait is kept because it is nevertheless the right one - it removed a real
-   layout race, in which the axis labels were measured at two different heights -
-   and because a weaker wait would add a second cause to a defect that already
-   has one. The finding, its measurements and the three ways out stand in
-   `docs/testing.md` under Known open. */
+   It removed a real layout race, in which the axis labels were measured at two
+   different heights. The pictures that still wandered by a whole pixel after it
+   were not a waiting problem and not the rasterisation either: the scene kept a
+   y band as wide as the fallback font had measured it, when a layout ran before
+   Geist arrived (fixed in `ChartScene`, see `docs/testing.md`, Known open). */
 
 import type { Page } from "@playwright/test";
 import { navigation } from "@umriss-ui/demo/checks/navigation";
