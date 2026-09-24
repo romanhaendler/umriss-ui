@@ -37,10 +37,12 @@ export function tableRows(series: readonly Course[], from: number, to: number, l
   // Counted before anything is built: the count decides whether it is.
   const readings = merge(windows, false).count;
   if (readings <= limit || !(to > from)) return { ...merge(windows, true), courses: windows, readings, thinned: false };
-  // Four rows per stretch and series at most - first, min, max, last -, so the
-  // stretches are counted to keep every series together under the limit. The
-  // last x of the domain falls into the last stretch, not one past it.
-  const stretches = Math.max(1, Math.floor(limit / 4 / Math.max(1, series.length)));
+  // Six rows per stretch and series at most - first, min, max, last, and the
+  // first gap and the gap after the last reading, which keep a hole a hole -,
+  // so the stretches are counted to keep every series together under the
+  // limit. The last x of the domain falls into the last stretch, not one past
+  // it.
+  const stretches = Math.max(1, Math.floor(limit / 6 / Math.max(1, series.length)));
   const m = (stretches - 1) / (to - from);
   const thin = windows.map((w) => downsample(w, from, to, m, -from * m, stretches));
   return { ...merge(thin, true), courses: thin, readings, thinned: true };

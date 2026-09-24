@@ -1635,7 +1635,6 @@ export class ChartScene {
     }
     const marks = this.marksOf(entry);
     if (marks === null) return null;
-    const color = this.colorFor(entry);
     switch (config.kind) {
       case "line":
         return { dash: config.dash ?? marks.dash, marker: marks.marker, swatches: null, ground: theme.colorBg };
@@ -1644,7 +1643,7 @@ export class ChartScene {
       case "scatter":
         return { dash: null, marker: marks.marker, swatches: null, ground: theme.colorBg };
       default:
-        return { dash: null, marker: null, swatches: [{ color, hatch: marks.hatch }], ground: theme.colorBg };
+        return { dash: null, marker: null, swatches: [{ color: this.colorFor(entry), hatch: marks.hatch }], ground: theme.colorBg };
     }
   }
 
@@ -2498,7 +2497,7 @@ export class ChartScene {
       const x = mat.x[i] as number;
       const value = mat.w[i] as number;
       if (x < from || x > to || !Number.isFinite(value)) continue;
-      rows.push([xAxis.format(x), yAxis.format(mat.y[i] as number), this.formatY(entry, value)]);
+      rows.push([this.xLabel(xAxis.id, x), yAxis.format(mat.y[i] as number), this.formatY(entry, value)]);
     }
     const w = this.wording;
     return {
