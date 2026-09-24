@@ -246,7 +246,7 @@ export function DateTimePicker({
 
             <div className={styles.foot}>
               <div className={styles.footLeft}>
-                <Button size="sm" variant="ghost" onClick={now}>
+                <Button size="sm" variant="ghost" className={styles.hangStart} onClick={now}>
                   {wording.now}
                 </Button>
                 {value && (

@@ -29,6 +29,21 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.9.1 – Depth work on the pickers and the select family (Sep. 2026)
+
+### Fixed
+
+- **A compact date field's placeholder is compact.** `size="sm"` shrank the
+  value but left the placeholder at the comfortable size; it now matches an
+  `Input` of size `sm`. Applies to all four pickers.
+- **A `Select` showing its placeholder option (`value=""`) reads muted**, like
+  the `Combobox`'s placeholder and the pickers'. It stood in full ink.
+- **The pickers' ghost keys at the panel's edge align with the calendar**:
+  "Today", "Now" and "Clear" stood a key's inset in from the grid, the
+  hairline and the TIME label above them.
+
+---
+
 ## 0.9.0 – A token for figures (Sep. 2026)
 
 ### Added

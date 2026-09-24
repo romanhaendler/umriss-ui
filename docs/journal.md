@@ -18,6 +18,19 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Sep. 2026 — Depth work: date picking and the select family
+
+- **visuelle-wertigkeit 05, surfaces two and three.** Twelve states of the
+  pickers and ten of Select, Combobox and MultiSelect, in both themes. Fixed
+  without a decision: the compact picker's placeholder, the Select's
+  placeholder in full ink, the panel feet's ghost keys a key's inset off the
+  grid. Every optical correction met on the way carries its reason now: the
+  turned-square chevrons' lift, the MultiSelect's narrow left inset, the time
+  steppers' 3 px.
+- **Left for the user**: today's mark reads like the keyboard focus; the three
+  field chevrons are CSS angles outside the one-stroke canon.
+- **Version**: core 0.9.1.
+
 ## Sep. 2026 — Depth work: the table
 
 - **visuelle-wertigkeit 05, first surface.** Eighteen states of the table,

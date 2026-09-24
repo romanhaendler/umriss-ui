@@ -66,6 +66,12 @@
     color: var(--u-color-text-muted);
   }
 
+  /* The compact field's placeholder is compact too, as in an Input of size
+     "sm": the rule above held it at the comfortable size. */
+  .sm .placeholder {
+    font-size: var(--u-text-xs);
+  }
+
   .icon {
     flex: none;
     color: var(--u-color-text-muted);
@@ -200,6 +206,21 @@
     border-top: 1px solid var(--u-hairline);
   }
 
+  /* Optical: a ghost key at the panel's edge has no surface at rest, so its
+     word is what the eye aligns - with the grid, the hairline and the TIME
+     label above. It hangs out by its inset on that side, and the inset there
+     shrinks to --u-space-2, so its hover surface keeps a sliver of the
+     panel's padding instead of touching the panel's edge. */
+  .foot .hangStart {
+    margin-left: calc(-1 * var(--u-space-2));
+    padding-left: var(--u-space-2);
+  }
+
+  .foot .hangEnd {
+    margin-right: calc(-1 * var(--u-space-2));
+    padding-right: var(--u-space-2);
+  }
+
   /* ------------------------------------------------------------------
      DateTimePicker: the time row and the daylight-saving hints
      ------------------------------------------------------------------ */
@@ -276,6 +297,7 @@
     flex-direction: column;
     justify-content: center;
     gap: 1px;
+    /* Off the wrapper's rounded edge: flush, the chevrons read as clipped. */
     padding-right: 3px;
   }
 
