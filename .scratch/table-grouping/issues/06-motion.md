@@ -1,6 +1,6 @@
 # 06 — Motion that explains the grouping
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Blocked by: 04

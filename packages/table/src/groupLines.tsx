@@ -17,6 +17,7 @@ import { Checkbox } from "@umriss-ui/core";
 import type { Formats, Wording } from "@umriss-ui/core";
 import { cx } from "./cx";
 import { AggregateValue, aggregateIsNumeric } from "./aggregateValue";
+import { useCountTo } from "./motion";
 import type { ColumnEntry, HookSnapshot, Registry } from "./registry";
 import { aggregate } from "./model/grouping";
 import type { Line, RowGroup } from "./model/grouping";
@@ -124,6 +125,17 @@ function Fold({
         <path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     </button>
+  );
+}
+
+/** A band's count, counting to its new value while the user filters. */
+function Count({ value, formats }: { value: number; formats: Formats }) {
+  const node = useRef<HTMLSpanElement>(null);
+  useCountTo(node, value, formats.count);
+  return (
+    <span ref={node} className={styles.groupCount}>
+      {formats.count(value)}
+    </span>
   );
 }
 
@@ -261,7 +273,7 @@ export function GroupLine({
       <span className={styles.groupValue}>
         <GroupValue entry={levelEntry} group={group} formats={formats} wording={wording} />
       </span>
-      {!single && <span className={styles.groupCount}>{formats.count(group.rows.length)}</span>}
+      {!single && <Count value={group.rows.length} formats={formats} />}
       {header && line.continued && <span className={styles.continued}>{wording.groupContinued}</span>}
     </span>
   );
@@ -271,6 +283,7 @@ export function GroupLine({
       className={cx(header ? styles.groupHeader : styles.groupFolded, virtual && styles.virtualRow)}
       data-line={line.kind}
       data-level={group.level}
+      data-motion={absolute !== undefined || !(header && line.continued) ? `${line.kind}:${group.path}` : undefined}
       data-continued={header && line.continued ? "" : undefined}
       data-group-first={header ? undefined : ""}
       data-row={virtual ? absolute : undefined}
