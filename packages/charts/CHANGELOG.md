@@ -29,7 +29,7 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
-## Unreleased
+## 0.4.1 – The axis band after the web font (Sep. 2026)
 
 ### Fixed
 
