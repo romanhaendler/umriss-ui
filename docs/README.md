@@ -11,6 +11,7 @@ what a reader has — the filename is what they are looking for.
 | what a word in this workspace means | [`../CONTEXT.md`](../CONTEXT.md) |
 | why something was decided the way it was | [`adr/README.md`](adr/README.md) |
 | how the design language works | [`design-language.md`](design-language.md) |
+| which industrial standards umriss follows (ISA-18.2, ISA-101), and where it does not | [`standards.md`](standards.md) |
 | how this repository is worked in | [`../CONTRIBUTING.md`](../CONTRIBUTING.md) |
 | how a version is published to npm | [`releasing.md`](releasing.md) |
 | what is tested, and how | [`testing.md`](testing.md) |
