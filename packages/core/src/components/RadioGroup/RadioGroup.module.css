@@ -67,7 +67,7 @@
     border-radius: var(--u-radius-full);
     background: var(--u-color-primary-fg);
     transform: scale(0);
-    transition: transform var(--u-duration-fast) var(--u-ease-out);
+    transition: transform var(--u-transition-path);
   }
 
   .input:checked + .dot {

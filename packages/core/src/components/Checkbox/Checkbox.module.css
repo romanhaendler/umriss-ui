@@ -46,7 +46,7 @@
   .check path {
     stroke-dasharray: 1;
     stroke-dashoffset: 1;
-    transition: stroke-dashoffset 320ms var(--u-ease-out) 60ms;
+    transition: stroke-dashoffset var(--u-duration-draw) var(--u-ease-out) var(--u-delay-draw);
   }
 
   @media (prefers-reduced-motion: reduce) {

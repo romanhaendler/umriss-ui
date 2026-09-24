@@ -111,6 +111,6 @@
   }
 
   .remove svg {
-    transition: transform var(--u-transition);
+    transition: transform var(--u-transition-press);
   }
 }

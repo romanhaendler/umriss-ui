@@ -40,6 +40,12 @@ interface was still expected to move before `0.3.0`.
   nothing moves. The tooltip's head now follows `--uc-size-tick`, which had the
   same value.
 
+### Changed
+
+- **The tooltip fades on `--uc-transition`**, a new variable: its own 80 ms,
+  on core's `--u-ease-out` where core is loaded and on the same curve written
+  out where it is not. It ran on the CSS keyword `ease-out` before.
+
 ---
 
 ## 0.4.1 – The axis band after the web font (Sep. 2026)
