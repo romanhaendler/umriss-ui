@@ -778,6 +778,25 @@
     color: var(--u-color-text-secondary);
   }
 
+  /* The span's aggregate stands at its foot, right-aligned like the count
+     above it: the two frame the group. Absolute, so that the last row keeps
+     its height; the sign reads as in the footer. */
+  .spanCell {
+    position: relative;
+  }
+
+  .spanAggregate {
+    position: absolute;
+    right: var(--u-space-2);
+    bottom: var(--u-space-2);
+    font-family: var(--u-font-mono);
+    font-size: var(--u-text-xs);
+    font-weight: var(--u-weight-medium);
+    font-variant-numeric: tabular-nums;
+    color: var(--u-color-text);
+    white-space: nowrap;
+  }
+
   /* In the span the count stands right, apart from the value. */
   .spanValue > .groupCount {
     margin-left: auto;
