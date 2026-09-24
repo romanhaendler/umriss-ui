@@ -82,8 +82,7 @@ describe("group headers and spans", () => {
     const { container } = render(<Orders />);
     const [, first, second, kessler] = lines(container);
     expect(first!.cells[0]!.textContent).toBe("Brenner GmbH2");
-    // The second row of Brenner is its last: the span's aggregate stands there.
-    expect(second!.cells[0]!.textContent).toBe("ΣSum 2,000");
+    expect(second!.cells[0]!.textContent).toBe("");
     // A group of one row is that row: no fold, no count.
     expect(kessler!.cells[0]!.textContent).toBe("Kessler AG");
     expect(within(kessler!.cells[0]!).queryByRole("button")).toBeNull();
@@ -216,46 +215,24 @@ describe("all siblings at once, and a virtual window (table-grouping 04, 05)", (
   });
 });
 
-describe("the aggregate at the foot of a span (table-grouping Q24)", () => {
-  it("stands on the span's last row: the first column's aggregate, with its sign and its word", () => {
-    const { container } = render(<Orders />);
-    const sums = Array.from(container.querySelectorAll("[data-span-aggregate]")).map((e) => e.textContent);
-    // Brenner and Otto on Line 1, Lindner on Line 2 - quantity is the first column with one.
-    expect(sums).toEqual(["ΣSum 2,000", "ΣSum 1,200", "ΣSum 2,400"]);
-    const [, , second] = lines(container);
-    expect(second!.cells[0]!.textContent).toBe("ΣSum 2,000");
-  });
-
-  it("is not there for a group of one row, nor in a table without aggregates", () => {
-    function Plain() {
+describe("one level (ADR-0029, Q27)", () => {
+  it("is a group header over plain rows: every aggregate under its column, no span", () => {
+    function OneLevel() {
       const { Table: Frame, Column } = useTable(ORDERS, { rowKey: (o) => o.id, defaultGrouping: "line" });
       return (
         <Frame>
           <Column value="id" label="Order" rowHeader />
           <Column value="line" label="Line" />
-          <Column value="quantity" label="Quantity" />
-        </Frame>
-      );
-    }
-    const { container } = render(<Plain />);
-    expect(container.querySelectorAll("[data-span-aggregate]")).toHaveLength(0);
-  });
-});
-
-describe("which aggregate the span carries", () => {
-  it("takes the first that has a sign - a count without its column's name would say nothing", () => {
-    function Counted() {
-      const { Table: Frame, Column } = useTable(ORDERS, { rowKey: (o) => o.id, defaultGrouping: "line" });
-      return (
-        <Frame>
-          <Column value="id" label="Order" rowHeader aggregate="count" />
-          <Column value="line" label="Line" />
-          <Column value="scrap" label="Scrap" aggregate="max" />
           <Column value="quantity" label="Quantity" aggregate="sum" />
+          <Column value="scrap" label="Scrap" aggregate="sum" />
         </Frame>
       );
     }
-    const { container } = render(<Counted />);
-    expect(container.querySelector("[data-span-aggregate]")?.textContent).toBe("maxMaximum 31");
+    const { container } = render(<OneLevel />);
+    expect(heads(container)).toEqual(["Order", "Quantity", "Scrap"]);
+    expect(kinds(container).slice(0, 8)).toEqual(["header", "row", "row", "row", "row", "row", "row", "header"]);
+    const band = lines(container)[0]!;
+    expect(cellsOf(band)).toEqual(["Line 16", "5,600", "50"]);
+    expect(lines(container)[1]!.cells[0]!.textContent).toBe("A-1041");
   });
 });

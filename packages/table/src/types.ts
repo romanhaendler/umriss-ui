@@ -53,8 +53,9 @@ export interface AggregateOptions<W, Z> {
       of one's own. Always from the values, never from other aggregates; absent
       values count towards nothing. */
   aggregate?: AggregateFor<W, Z>;
-  /** The share bar under a sum in a group's header – the group's share of the
-      filtered set's sum. On by default. */
+  /** The share bar in a group's header – the group's share of the filtered
+      set's sum. It stands under the first column with a sum, one per header;
+      `false` passes it on to the next. */
   share?: boolean;
 }
 

@@ -748,22 +748,23 @@ _Avoid_: grouping column, hidden column, dimension
 **Row group**:
 The rows of the filtered set that share one grouping value on one level of the
 grouping. Rows whose value is absent form a group of their own, which stands last.
-Its form follows its level and nothing else: the innermost level is a **Group
-span**, every level outside it a **Group header** (ADR-0029). A group of one row
-is that row — nothing to fold, nothing to count, no aggregate.
+Its form follows its level and nothing else: the outermost level is always a
+**Group header**, the innermost of several levels a **Group span** (ADR-0029).
+A group of one row does not fold and has no count and no aggregate.
 _Avoid_: group on its own, bucket, category, Kategorie
 
 **Group header**:
-The line heading a **Row group** of an outer level of the grouping: the grouping
-value, how many rows the group has, and in each column the group's **Aggregate**.
+The line heading a **Row group** - on the outermost level always, below it on
+every level but the innermost of several: the grouping value, how many rows the
+group has, and in each column the group's **Aggregate**.
 It is not a row — it has no row key and is never exported as one.
 _Avoid_: group row, subtotal row, Gruppenzeile, summary row
 
 **Group span**:
-The form of a **Row group** on the innermost level: its grouping column stands
-first and shows the value once, beside the group's rows, with no line of its own.
-Open, it carries one aggregate at its foot - the first that says what it is by
-its sign; folded, it is one line carrying all of the group's aggregates in the
+The form of a **Row group** on the innermost of several levels: its grouping
+column stands first and shows the value once, beside the group's rows, with no
+line of its own. Open it carries no aggregate - its sums stand in the header
+above it -; folded, it is one line carrying the group's aggregates in the
 columns.
 _Avoid_: gutter, Randspalte, merged cell, rowspan (which it is not built from)
 
