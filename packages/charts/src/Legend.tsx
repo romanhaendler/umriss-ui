@@ -9,7 +9,7 @@
 import { useSyncExternalStore, type ReactNode } from "react";
 import { useChartScene, useLegend } from "./context";
 import { DataKey } from "./DataTable";
-import { hatchLines, markerPath, type MarkerShape } from "./marks";
+import { hatchLines, markerPath, type Hatch, type MarkerShape } from "./marks";
 import type { ChartScene, LegendMark } from "./scene";
 import type { Rect } from "./types";
 
@@ -126,7 +126,7 @@ function MarkChip({ color, mark }: { color: string; mark: LegendMark }): ReactNo
   );
 }
 
-function linesD(box: Rect, hatch: Parameters<typeof hatchLines>[1]): string {
+function linesD(box: Rect, hatch: Hatch): string {
   const flat = hatchLines(box, hatch, CHIP_HATCH);
   let d = "";
   for (let i = 0; i < flat.length; i += 4) d += `M${flat[i]} ${flat[i + 1]}L${flat[i + 2]} ${flat[i + 3]}`;
