@@ -1,6 +1,6 @@
 # 04 - Zoom and pan by key
 
-Status: ready-for-agent
+Status: done
 Type: task
 Blocked by: 02
 

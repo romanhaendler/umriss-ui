@@ -1,6 +1,6 @@
 # 01 - The charts' wording
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Spec: `.scratch/charts-a11y/spec.md` - Q7, ADR-0031.

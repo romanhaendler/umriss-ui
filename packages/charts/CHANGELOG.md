@@ -29,6 +29,37 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## 0.6.0 – By keyboard and screen reader (Sep. 2026)
+
+### Added
+
+- **A chart with a `<Tooltip>` is one tab stop** (ADR-0030). Its plot area
+  takes the focus as `role="application"` with a role description, and the
+  keys walk its **Active point**: ←/→ from position to position, Home/End to
+  the ends of the visible domain, PageUp/PageDown by a tenth of it, ↑/↓ to
+  the next series, which is emphasised and read first. A matrix walks cell by
+  cell. Escape clears the point, leaving the chart clears it too.
+- **The Active point is one for pointer and keyboard**: the last input wins,
+  the tooltip, markers and `syncId` crosshair are the pointer's own.
+- **A polite readout** speaks what the tooltip shows once the keys rest - never
+  after a pointer move - and **a summary** describes the plot: its series, the
+  visible stretch, each series' range in it and the keys.
+- **Zoom and pan by key** where the x axis has `onDomainChange`: `+`/`−` zoom
+  around the Active point, Shift+←/→ pan by a tenth, `0` asks for the data.
+- **`wording` on `Chart`** with the new `ChartsWording` register and
+  `DEFAULT_CHARTS_WORDING` (ADR-0031); German as `GERMAN_CHARTS_WORDING` from
+  the subpath **`@umriss-ui/charts/wording/de`**. `empty` keeps winning over it.
+
+### Changed
+
+- **A chart with a tooltip no longer reports `role="img"`**: it is an
+  application a screen reader enters. Without a tooltip nothing changed.
+- A chart renders two visually hidden elements beside its plot area - the
+  readout and the summary - and the plot's `aria-describedby` points at the
+  summary.
+
+---
+
 ## 0.5.0 – Tokens for type and motion, a legend that answers (Sep. 2026)
 
 ### Added

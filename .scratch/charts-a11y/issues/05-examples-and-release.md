@@ -1,6 +1,6 @@
 # 05 - Examples, capabilities, release
 
-Status: ready-for-agent
+Status: done
 Type: task
 Blocked by: 01, 02, 03, 04
 

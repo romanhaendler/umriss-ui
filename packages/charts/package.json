@@ -1,6 +1,6 @@
 {
   "name": "@umriss-ui/charts",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Canvas-based chart library - few chart kinds, uncompromisingly clean, high performance.",
   "license": "MIT",
   "author": "Roman Händler",
@@ -38,6 +38,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/charts.js"
+    },
+    "./wording/de": {
+      "types": "./dist/de.d.ts",
+      "import": "./dist/wording/de.js"
     },
     "./styles.css": "./dist/charts.css"
   },

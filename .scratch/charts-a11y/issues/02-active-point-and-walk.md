@@ -1,6 +1,6 @@
 # 02 - The Active point and the walk
 
-Status: ready-for-agent
+Status: done
 Type: task
 Blocked by: 01
 
