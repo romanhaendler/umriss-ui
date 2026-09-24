@@ -22,26 +22,39 @@ function useTabs(component: string): TabsContextValue {
 }
 
 /* ------------------------------------------------------------------ */
-/* Tabs – controlled: value + onChange come from the application.      */
+/* Tabs – controlled through value + onChange, or on their own from    */
+/* defaultValue (rule 2 of the README).                               */
 /* ------------------------------------------------------------------ */
 
-export interface TabsProps extends Omit<HTMLAttributes<HTMLDivElement>, "onChange"> {
+export interface TabsProps extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
   /** The value of the visible tab. Controlled: `Tabs` remembers nothing,
       so that the tab can come out of an address. */
-  value: string;
-  /** Receives the value of the chosen tab. */
-  onChange: (value: string) => void;
+  value?: string;
+  /** Uncontrolled: the tab that stands first. Afterwards the choice belongs
+      to the tabs - for a switch no address and no handler needs to know. */
+  defaultValue?: string;
+  /** Receives the value of the chosen tab. Controlled, the tab switches only
+      once `value` follows; uncontrolled it is merely a message. */
+  onChange?: (value: string) => void;
 }
 
 export const Tabs = forwardRef<HTMLDivElement, TabsProps>(function Tabs(
-  { value, onChange, className, children, ...rest },
+  { value, defaultValue, onChange, className, children, ...rest },
   ref,
 ) {
   const idBase = useId();
+  const [ownValue, setOwnValue] = useState(defaultValue ?? "");
+  const controlled = value !== undefined;
+  const change = (next: string) => {
+    if (!controlled) setOwnValue(next);
+    onChange?.(next);
+  };
 
   return (
     <div ref={ref} className={className} {...rest}>
-      <TabsContext.Provider value={{ value, onChange, idBase }}>{children}</TabsContext.Provider>
+      <TabsContext.Provider value={{ value: controlled ? value : ownValue, onChange: change, idBase }}>
+        {children}
+      </TabsContext.Provider>
     </div>
   );
 });
