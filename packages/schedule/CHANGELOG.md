@@ -22,6 +22,11 @@ moves from here under the rule above.
 - **The lane-group fold is core's `AngleGlyph`** – the same chevron, at the
   one stroke width (1.4 instead of 1.5).
 
+- **The fold chevron of a lane group has a surface.** Under the pointer it now
+  takes the sunken surface of core's quiet keys, and a stronger one while
+  pressed, like the table's expander; it only darkened its type before. Its
+  focus is the ring alone - the ring no longer darkens the type as well.
+
 ### Fixed
 
 - **The fold chevron of a lane group turns.** Its transition named a curve token

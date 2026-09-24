@@ -88,7 +88,13 @@
   }
   .secondary:hover:not(:disabled) {
     background: var(--u-color-surface-sunken);
+  }
+  /* The hover edge outweighs the ring - on a focused button it stays away. */
+  .secondary:hover:not(:disabled):not(:focus-visible) {
     box-shadow: 0 0 0 1px var(--u-color-edge-hover);
+  }
+  .secondary:active:not(:disabled) {
+    background: var(--u-color-surface-pressed);
   }
 
   .ghost {
@@ -97,6 +103,9 @@
   }
   .ghost:hover:not(:disabled) {
     background: var(--u-color-accent-subtle);
+  }
+  .ghost:active:not(:disabled) {
+    background: var(--u-color-accent-subtle-pressed);
   }
 
   .label {

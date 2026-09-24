@@ -257,3 +257,181 @@ describe("The vocabulary of the stylesheets (visuelle-wertigkeit 01)", () => {
     }
   });
 });
+
+/* ---------------- The interaction-state canon (visuelle-wertigkeit 04) ----------------
+
+   The canon settles by what MEANS a state comes about, not how strongly
+   (CONTEXT.md, **Interaction-state canon**): hover changes the surface, active
+   changes it more strongly, focus is the ring and only the ring, disabled
+   reduces opacity and removes every reaction. "How strongly" is not checkable
+   and is not checked. Three means are, and they are what a component loses
+   first while it is being built:
+
+   - a disabled element reacts to nothing: a hover or press rule that reaches an
+     element with a disabled state excludes it;
+   - focus is the ring: a rule that answers to the element's own focus paints
+     neither its surface nor its type, and what it draws is the ring or nothing;
+   - and the ring is never taken away: a hover rule that draws an edge
+     excludes the focused element - it outweighs the ring, and a keyboard user
+     whose pointer rests on the control would lose the focus from sight;
+   - disabled dims, it does not repaint: a rule for the disabled state sets no
+     colour and no surface.
+
+   Where a site breaks away for a reason, it stands in the list below with that
+   reason, as the vocabulary's exceptions do. */
+
+/** Splits at `separator` where no parenthesis is open. */
+function splitTop(text: string, separator: (char: string) => boolean): string[] {
+  const parts: string[] = [];
+  let depth = 0;
+  let current = "";
+  for (const char of text) {
+    if (char === "(") depth++;
+    if (char === ")") depth--;
+    if (depth === 0 && separator(char)) {
+      if (current.trim()) parts.push(current.trim());
+      current = "";
+    } else current += char;
+  }
+  if (current.trim()) parts.push(current.trim());
+  return parts;
+}
+
+type Declarations = Array<[string, string]>;
+
+/** Every rule of a stylesheet as [selector, declarations], one entry per
+    selector of a list. */
+function stateRules(css: string): Array<[string, Declarations]> {
+  return [...withoutComments(css).matchAll(/([^{};]+)\{([^{}]*)\}/g)].flatMap((m) => {
+    const body = [...(m[2] as string).matchAll(/([\w-]+)\s*:\s*([^;]+)/g)].map(
+      (d) => [d[1] as string, (d[2] as string).trim()] as [string, string],
+    );
+    return splitTop(m[1] as string, (c) => c === ",").map((selector) => [selector.replace(/\s+/g, " "), body] as [string, Declarations]);
+  });
+}
+
+/** The compounds of a selector, from the outermost to the subject. */
+const compounds = (selector: string) => splitTop(selector, (c) => /[\s>+~]/.test(c));
+
+/** A compound without its pseudo-classes: the element it names. */
+const baseOf = (compound: string) => compound.replace(/::?[\w-]+(?:\((?:[^()]|\([^()]*\))*\))?/g, "");
+
+/** A compound without what stands inside `:not(...)`. */
+const withoutNot = (compound: string) => compound.replace(/:not\((?:[^()]|\([^()]*\))*\)/g, "");
+
+const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/** Whether the stylesheet gives the element a disabled state of its own:
+    `.x:disabled`, `.x[aria-disabled...]`, or a class `.xDisabled`. */
+const hasDisabledState = (css: string, base: string) =>
+  base !== "" && new RegExp(`(?<![\\w-])${escapeRegExp(base)}(?::disabled|\\[aria-disabled|Disabled\\b)`).test(withoutComments(css));
+
+const DISABLED_MARKER = /:disabled|\[aria-disabled|Disabled\b|\.disabled\b/;
+
+/** The compounds of a hover or press rule that reach an element with a
+    disabled state and do not exclude it. The hovered compound is checked, and
+    so is the subject: `.group:hover .key` lights a disabled key as surely as
+    `.key:hover` does. */
+function unguarded(css: string, selector: string): string[] {
+  const parts = compounds(selector);
+  const reacting = parts.filter((part) => /:hover|:active/.test(withoutNot(part)));
+  if (reacting.length === 0) return [];
+  const subject = parts[parts.length - 1] as string;
+  return [...new Set([...reacting, subject])].filter(
+    (part) => hasDisabledState(css, baseOf(part)) && !/:not\([^()]*(?:disabled|Disabled)/.test(part),
+  );
+}
+
+const RING = /^(?:none|var\(--u-focus-ring(?:-danger)?\)|var\(--uc-focus-ring\))$/;
+
+/** A rule for the element's own focus that paints more than the ring. */
+function focusPaints(selector: string, body: Declarations): boolean {
+  const subject = compounds(selector).at(-1) ?? "";
+  if (!/:focus/.test(subject.replace(/:(?:not|has)\((?:[^()]|\([^()]*\))*\)/g, ""))) return false;
+  return body.some(
+    ([property, value]) =>
+      /^(?:background(?:-color)?|color)$/.test(property) || (/^(?:box-shadow|outline)$/.test(property) && !RING.test(value)),
+  );
+}
+
+/** A hover rule that draws an edge over the ring of a focused element. */
+function hoverTakesRing(selector: string, body: Declarations): boolean {
+  if (!compounds(selector).some((part) => /:hover/.test(withoutNot(part)))) return false;
+  if (/:not\(:focus-(?:visible|within)\)/.test(selector)) return false;
+  return body.some(([property]) => /^(?:box-shadow|outline)$/.test(property));
+}
+
+/** A rule for the disabled state that repaints instead of dimming. */
+function disabledRepaints(selector: string, body: Declarations): boolean {
+  if (!compounds(selector).some((part) => DISABLED_MARKER.test(withoutNot(part)))) return false;
+  return body.some(([property]) => /^(?:background(?:-color)?|color|border-color)$/.test(property));
+}
+
+type CanonCheck = "guard" | "focus" | "ring" | "disabled";
+
+/** Sites that break away from the canon, each with its reason. */
+const CANON_EXCEPTIONS: Readonly<Record<string, string>> = {
+  "core/VisuallyHidden/VisuallyHidden.module.css: .focusable:focus":
+    "The skip link: invisible until focused, and focus is what makes it appear as a whole - surface, type and shadow. The ring alone would ring nothing.",
+  "core/VisuallyHidden/VisuallyHidden.module.css: .focusable:focus-within": "The same skip link, reached through a focusable child.",
+  "table/Table.module.css: .virtualRow:focus-visible":
+    "The ring's colour and width as an inset outline: a row's outer shadow is cut away left and right by the scroll area it fills, and a <tr> does not paint a box-shadow in every engine.",
+  "core/TreeView/TreeView.module.css: .disabled":
+    "The row is not disabled, only its checkbox is: the row stays focusable and navigable, and opacity would fade its focus ring with it. The type is muted instead; the checkbox dims by its own disabled state.",
+};
+
+function canonFinds(check: CanonCheck): string[] {
+  const breaks = (css: string, selector: string, body: Declarations) =>
+    ({
+      guard: () => unguarded(css, selector).length > 0,
+      focus: () => focusPaints(selector, body),
+      ring: () => hoverTakesRing(selector, body),
+      disabled: () => disabledRepaints(selector, body),
+    })[check]();
+  return Object.entries(LIBRARY).flatMap(([path, css]) =>
+    stateRules(css)
+      .filter(([selector, body]) => breaks(css, selector, body))
+      .map(([selector]) => `${nameOf(path)}: ${selector}`),
+  );
+}
+
+describe("The interaction-state canon (visuelle-wertigkeit 04)", () => {
+  const check = (kind: CanonCheck) => () => {
+    expect([...new Set(canonFinds(kind))].filter((find) => !(find in CANON_EXCEPTIONS))).toEqual([]);
+  };
+
+  it("lets no disabled element react to hover or press", check("guard"));
+  it("shows focus by the ring and by nothing else", check("focus"));
+  it("never lets a hover take the ring away", check("ring"));
+  it("dims a disabled element instead of repainting it", check("disabled"));
+
+  it("still meets every exception, and each one carries a reason", () => {
+    const all = new Set((["guard", "focus", "ring", "disabled"] as const).flatMap(canonFinds));
+    for (const [find, reason] of Object.entries(CANON_EXCEPTIONS)) {
+      expect(all.has(find), `${find} is out of date`).toBe(true);
+      expect(reason.length).toBeGreaterThan(20);
+    }
+  });
+
+  /* The check is only worth its name if it fires. */
+  it("recognises each breach, and lets the canon pass", () => {
+    const css = ".key:disabled { opacity: 0.5; } .fieldDisabled { opacity: 0.5; }";
+    expect(unguarded(css, ".key:hover")).toEqual([".key:hover"]);
+    expect(unguarded(css, ".group:hover .key")).toEqual([".key"]);
+    expect(unguarded(css, ".key:active:not(:disabled)")).toEqual([]);
+    expect(unguarded(css, ".field:hover:not(.fieldDisabled)")).toEqual([]);
+    expect(unguarded(css, ".field:hover")).toEqual([".field:hover"]);
+    expect(unguarded(css, ".other:hover")).toEqual([]);
+    expect(focusPaints(".item:focus-visible", [["background", "var(--u-color-surface-sunken)"]])).toBe(true);
+    expect(focusPaints(".item:focus-visible", [["box-shadow", "var(--u-focus-ring)"]])).toBe(false);
+    expect(focusPaints(".row:focus-visible", [["outline", "2px solid var(--u-color-accent)"]])).toBe(true);
+    expect(focusPaints(".group:focus-within .key", [["opacity", "1"]])).toBe(false);
+    expect(hoverTakesRing(".secondary:hover:not(:disabled)", [["box-shadow", "0 0 0 1px var(--u-color-edge-hover)"]])).toBe(true);
+    expect(hoverTakesRing(".input:hover:not(:disabled):not(:focus-visible)", [["box-shadow", "none"]])).toBe(false);
+    expect(hoverTakesRing(".key:hover", [["background", "var(--u-color-surface-sunken)"]])).toBe(false);
+    expect(disabledRepaints(".tab:disabled", [["color", "var(--u-color-text-muted)"]])).toBe(true);
+    expect(disabledRepaints(".input:disabled ~ .label", [["color", "var(--u-color-text-muted)"]])).toBe(true);
+    expect(disabledRepaints(".tab:disabled", [["opacity", "0.5"]])).toBe(false);
+    expect(disabledRepaints(".tab:hover:not(:disabled)", [["color", "var(--u-color-text)"]])).toBe(false);
+  });
+});

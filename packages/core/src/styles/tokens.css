@@ -22,6 +22,11 @@
     --u-color-bg: light-dark(#fafafa, #0f0f10);
     --u-color-surface: light-dark(#ffffff, #161618);
     --u-color-surface-sunken: light-dark(#f4f4f5, #1e1e21);
+    /* The pressed step of a quiet key: what sinks to the sunken surface under
+       the pointer sinks once more while it is pressed (the interaction-state
+       canon, visuelle-wertigkeit 04). The three `-pressed` surfaces exist
+       because the vocabulary had a hover for each ground and nothing stronger. */
+    --u-color-surface-pressed: light-dark(#e9e9eb, #28282c);
     --u-color-text: light-dark(#171717, #ededed);
     --u-color-text-secondary: light-dark(#565656, #a5a5ab);
     --u-color-text-muted: light-dark(#8b8b8b, #77777e);
@@ -48,6 +53,7 @@
     --u-color-accent-hover: light-dark(#0a685f, #1cb5a3);
     --u-color-accent-active: light-dark(#085a52, #128d7f);
     --u-color-accent-subtle: light-dark(#e9f4f2, #142e2b);
+    --u-color-accent-subtle-pressed: light-dark(#d5e9e6, #1b3d39);
     --u-color-accent-text: light-dark(#0b6a61, #4cc4b5);
     --u-color-on-accent: light-dark(#ffffff, #072522);
     /* Type on the danger surface - it stood as #ffffff inside the button, and so
@@ -73,6 +79,7 @@
       color-mix(in srgb,
       var(--u-color-danger) 85%, light-dark(#000000, #ffffff));
     --u-color-danger-subtle: light-dark(#f8eaea, #2f1b1d);
+    --u-color-danger-subtle-pressed: light-dark(#f3dcdc, #351e21);
     /* Danger as type, beside the surface - the split the accent has with
        --u-color-accent-text. Dark: the surface value reached only 4.40:1 on the
        subtle danger surface; this one is lighter and holds 4.5:1 there and on

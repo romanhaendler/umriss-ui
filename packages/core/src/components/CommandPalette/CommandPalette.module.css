@@ -173,8 +173,15 @@
     cursor: pointer;
   }
 
+  /* The list's cursor, not its focus: DOM focus stays in the field, and the
+     cursor is what the arrow keys and the pointer both move - which is why it
+     is a surface and not the ring (the interaction-state canon). */
   .rowActive {
     background: var(--u-color-accent-subtle);
+  }
+
+  .row:active {
+    background: var(--u-color-accent-subtle-pressed);
   }
 
   .icon {

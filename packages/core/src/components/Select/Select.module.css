@@ -35,9 +35,12 @@
   }
 
   .select:disabled {
-    background-color: var(--u-color-surface-sunken);
-    color: var(--u-color-text-muted);
     cursor: not-allowed;
+  }
+
+  /* On the wrapper, so that the chevron beside the field dims with it. */
+  .wrapper:has(.select:disabled) {
+    opacity: 0.5;
   }
 
   .sm {
@@ -65,10 +68,6 @@
     border-bottom: 1.5px solid var(--u-color-text-secondary);
     transform: translateY(-70%) rotate(45deg);
     pointer-events: none;
-  }
-
-  .select:disabled ~ .chevron {
-    border-color: var(--u-color-text-muted);
   }
 
   /* Reserves room for the clearing × to the left of the chevron. */
@@ -118,5 +117,9 @@
   .clear:hover {
     background: var(--u-color-surface-sunken);
     color: var(--u-color-text);
+  }
+
+  .clear:active {
+    background: var(--u-color-surface-pressed);
   }
 }
