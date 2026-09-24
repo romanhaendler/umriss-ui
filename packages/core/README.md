@@ -153,14 +153,14 @@ The table and the alarm list are not part of this package. They live in
    every component that renders a root element. Excepted are the wrappers that
    have none: `Popover` renders into a portal, `Tooltip` around the caller's
    child, `Menu` and `ToastProvider` are composed of other parts. **Not yet met**
-   (library-audit, ticket 09): `Badge`, `Card`, `Combobox`, `CommandPalette`,
+   (`.scratch/core-passthrough/`): `Badge`, `Card`, `Combobox`, `CommandPalette`,
    `EmptyState`, `FormField`, `Modal`, `MultiSelect`, `Skeleton`, `Spinner`,
    `Stat`, `Tabs`, `TreeView`, `TreeSearch`, `ConfirmDialog`, `Sparkline`,
    `Meter` and the four pickers.
 2. Support controlled **and** uncontrolled use (`value`/`defaultValue`).
    Deliberately controlled only: `Combobox` and `MultiSelect` – the field keeps
    no second state beside the caller's – as well as `Modal` and `CommandPalette`,
-   because opening is the caller's decision. **Not yet met** (ticket 09): `Tabs`
+   because opening is the caller's decision. **Not yet met** (`core-passthrough`): `Tabs`
    is controlled only and is to get `defaultValue`, `Card` is uncontrolled only
    and is to get `collapsed`/`onCollapsedChange`.
 3. Keyboard operation and `aria` attributes are part of the definition of done.
@@ -176,9 +176,19 @@ The table and the alarm list are not part of this package. They live in
 
 ## Roadmap
 
-The core scope is complete, and so are the command palette and `Dock`. What is
-open: a text tone of its own for danger and warning
-(`.scratch/tone-contrast/spec.md`), the `forwardRef`/`className`/`rest` and
-controlled/uncontrolled renames of `library-audit` ticket 09, and — if it ever
-earns it — collapsing the dock onto its grip, which is out of scope today
-because it doubles the state space.
+The core scope is complete, and so are the command palette, `Dock` and the
+danger text tone (`--u-color-danger-text`, 0.7.0). What is open, each with a
+spec under `.scratch/`:
+
+* `core-passthrough` — `ref`, `className` and the rest on every component, and
+  the controlled/uncontrolled gaps of rules 1 and 2 above.
+* `core-foundations` — `Switch`, `Slider`, `Drawer`, `ProgressBar`,
+  `Accordion`, `Breadcrumb`.
+* `forced-colors` and `listbox-announcements` — Windows high contrast, and
+  what a listbox says to VoiceOver.
+* `alarm-standards` — `Stat` and the limit model against ISA-18.2 and ISA-101.
+* `core-layout-extras` — `Splitter` and the layout tier after the basics.
+
+Collapsing the dock onto its grip stays out of scope, because it doubles the
+state space. What core will not build at all stands in
+[ADR-0032](../../docs/adr/0032-what-umriss-is-not.md).
