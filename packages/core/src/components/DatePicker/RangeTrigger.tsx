@@ -7,8 +7,9 @@
    trigger by hand - exactly the drift the popover seam had described
    (library-audit 02). */
 
-import type { ReactNode, RefObject } from "react";
+import type { ForwardedRef, HTMLAttributes, ReactNode, RefObject } from "react";
 import { cx } from "../../lib/cx";
+import { mergeRefs } from "../../lib/mergeRefs";
 import styles from "./DatePicker.module.css";
 import { CrossGlyph } from "../../lib/glyphs";
 
@@ -40,6 +41,12 @@ export interface RangeTriggerProps {
      ref access, and the rest of the package names them the same way (anchorRef,
      focusRef). */
   wrapRef: RefObject<HTMLSpanElement | null>;
+  /** The picker's caller's ref, class and rest: they go to the wrapper around
+      button and cross, the field's outermost element (P1 of
+      core-passthrough). The field id from `FormField` stays on the button. */
+  rootRef?: ForwardedRef<HTMLSpanElement>;
+  root?: HTMLAttributes<HTMLSpanElement>;
+  className?: string;
   triggerRef: RefObject<HTMLButtonElement | null>;
   panel: TriggerPanel;
   field?: TriggerField | null;
@@ -57,6 +64,9 @@ export interface RangeTriggerProps {
 
 export function RangeTrigger({
   wrapRef,
+  rootRef,
+  root,
+  className,
   triggerRef,
   panel,
   field,
@@ -70,7 +80,7 @@ export function RangeTrigger({
 }: RangeTriggerProps) {
   const { disabled, invalid, clearable, size } = state;
   return (
-    <span ref={wrapRef} className={styles.triggerWrap}>
+    <span ref={mergeRefs(wrapRef, rootRef)} className={cx(styles.triggerWrap, className)} {...root}>
       <button
         ref={triggerRef}
         type="button"

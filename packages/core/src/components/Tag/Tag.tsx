@@ -14,6 +14,7 @@
 import { createContext, forwardRef, useCallback, useContext, useEffect, useRef } from "react";
 import type { HTMLAttributes, KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
 import { cx } from "../../lib/cx";
+import { mergeRefs } from "../../lib/mergeRefs";
 import styles from "./Tag.module.css";
 import { useWording } from "../../lib/language";
 import { CrossGlyph } from "../../lib/glyphs";
@@ -108,11 +109,7 @@ export const TagGroup = forwardRef<HTMLDivElement, TagGroupProps>(function TagGr
 
   return (
     <div
-      ref={(element) => {
-        groupRef.current = element;
-        if (typeof ref === "function") ref(element);
-        else if (ref) ref.current = element;
-      }}
+      ref={mergeRefs(groupRef, ref)}
       role="list"
       className={cx(styles.group, className)}
       onKeyDown={handleKeyDown}

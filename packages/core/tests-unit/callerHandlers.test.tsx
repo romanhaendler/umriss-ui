@@ -21,6 +21,9 @@ import { Tag } from "../src/components/Tag";
 import { NumberInput } from "../src/components/NumberInput";
 import { RadioGroup } from "../src/components/RadioGroup";
 import { TreeView, useTree, type NodeReader } from "../src/components/TreeView";
+import { Modal } from "../src/components/Modal";
+import { CommandPalette } from "../src/components/CommandPalette";
+import { MultiSelect } from "../src/components/MultiSelect";
 
 describe("Menu – the focus", () => {
   it("moves the focus to the first entry", () => {
@@ -174,5 +177,89 @@ describe("A caller's handler runs beside the component's own", () => {
     expect(focused).toHaveBeenCalled();
     expect(document.activeElement).toBe(screen.getByRole("treeitem", { name: "two" }));
     vi.unstubAllGlobals();
+  });
+});
+
+/* core-passthrough P3: the components that took no `...rest` before take it
+   now, and a caller's handler runs first and may `preventDefault` - the
+   component's own work follows unless it did. */
+describe("A caller's handler runs first and can prevent the component's own", () => {
+  const dialog = () => document.querySelector("dialog")!;
+
+  it("Modal: onMouseDown on the backdrop, and the window still closes", () => {
+    const pressed = vi.fn();
+    const closed = vi.fn();
+    render(<Modal open onClose={closed} onMouseDown={pressed} />);
+    fireEvent.mouseDown(dialog());
+    expect(pressed).toHaveBeenCalledTimes(1);
+    expect(closed).toHaveBeenCalledTimes(1);
+  });
+
+  it("Modal: an onCancel that prevents keeps the window standing", () => {
+    const closed = vi.fn();
+    render(<Modal open onClose={closed} onCancel={(event) => event.preventDefault()} />);
+    fireEvent(dialog(), new Event("cancel", { cancelable: true }));
+    expect(closed).not.toHaveBeenCalled();
+    expect(dialog().hasAttribute("open")).toBe(true);
+  });
+
+  it("CommandPalette: onMouseDown on the backdrop, and the palette still closes", () => {
+    const pressed = vi.fn();
+    const closed = vi.fn();
+    render(<CommandPalette open onClose={closed} items={[]} onChoose={vi.fn()} onMouseDown={pressed} />);
+    fireEvent.mouseDown(dialog());
+    expect(pressed).toHaveBeenCalledTimes(1);
+    expect(closed).toHaveBeenCalledTimes(1);
+  });
+
+  it("CommandPalette: an onMouseDown that prevents keeps it open", () => {
+    const closed = vi.fn();
+    render(
+      <CommandPalette
+        open
+        onClose={closed}
+        items={[]}
+        onChoose={vi.fn()}
+        onMouseDown={(event) => event.preventDefault()}
+      />,
+    );
+    fireEvent.mouseDown(dialog());
+    expect(closed).not.toHaveBeenCalled();
+  });
+
+  it("MultiSelect: onKeyDown on the field, and Backspace still removes", () => {
+    const pressed = vi.fn();
+    const changed = vi.fn();
+    render(
+      <MultiSelect
+        aria-label="Lines"
+        options={[
+          { value: "a", label: "A" },
+          { value: "b", label: "B" },
+        ]}
+        value={["a", "b"]}
+        onChange={changed}
+        onKeyDown={pressed}
+      />,
+    );
+    const main = document.querySelector<HTMLButtonElement>('button[aria-haspopup="dialog"]')!;
+    fireEvent.keyDown(main, { key: "Backspace" });
+    expect(pressed).toHaveBeenCalledTimes(1);
+    expect(changed).toHaveBeenCalledWith(["a"]);
+  });
+
+  it("MultiSelect: an onKeyDown that prevents keeps the selection", () => {
+    const changed = vi.fn();
+    render(
+      <MultiSelect
+        options={[{ value: "a", label: "A" }]}
+        value={["a"]}
+        onChange={changed}
+        onKeyDown={(event) => event.preventDefault()}
+      />,
+    );
+    const main = document.querySelector<HTMLButtonElement>('button[aria-haspopup="dialog"]')!;
+    fireEvent.keyDown(main, { key: "Backspace" });
+    expect(changed).not.toHaveBeenCalled();
   });
 });

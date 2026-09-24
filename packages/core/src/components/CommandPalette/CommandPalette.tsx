@@ -22,9 +22,10 @@
    carry two anatomies. What is shared instead is exactly the mechanics both
    need: `useDialogChoreography`. */
 
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
-import type { KeyboardEvent, ReactNode } from "react";
+import { forwardRef, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import type { DialogHTMLAttributes, KeyboardEvent, ReactNode } from "react";
 import { cx } from "../../lib/cx";
+import { mergeRefs } from "../../lib/mergeRefs";
 import { useDialogChoreography } from "../../lib/dialogChoreography";
 import { idPart } from "../../lib/idPart";
 import { nextIndex } from "../../lib/options";
@@ -52,7 +53,8 @@ export interface CommandPaletteItem {
   weight?: number;
 }
 
-export interface CommandPaletteProps {
+export interface CommandPaletteProps
+  extends Omit<DialogHTMLAttributes<HTMLDialogElement>, "open" | "onClose" | "children"> {
   /** Controlled like the modal: opening is the caller's decision. */
   open: boolean;
   /** Reports every wish to close - Escape, an outside click, a choice. */
@@ -118,13 +120,10 @@ interface FindGroup {
   finds: Find<PaletteCandidate>[];
 }
 
-export function CommandPalette({
-  open,
-  onClose,
-  items,
-  onChoose,
-  restingItems,
-}: CommandPaletteProps) {
+export const CommandPalette = forwardRef<HTMLDialogElement, CommandPaletteProps>(function CommandPalette(
+  { open, onClose, items, onChoose, restingItems, className, onCancel, onMouseDown, ...rest },
+  ref,
+) {
   const wording = useWording();
   const baseId = useId();
   const listId = `${baseId}-list`;
@@ -349,9 +348,12 @@ export function CommandPalette({
 
   return (
     <dialog
-      ref={dialogRef}
-      className={styles.dialog}
+      ref={mergeRefs(dialogRef, ref)}
+      className={cx(styles.dialog, className)}
       aria-label={wording.palettePanel}
+      {...rest}
+      /* After `rest` and composed with the caller's, as in `Modal` (P3 of
+         core-passthrough). */
       onClose={() => {
         /* Reports only a close the browser triggered - every gesture of its own
            has already called `onClose`. */
@@ -367,8 +369,13 @@ export function CommandPalette({
            <dialog>, and it is the only part of this jsdom can observe. */
         (previouslyFocused.current as HTMLElement | null)?.focus?.();
       }}
-      onCancel={beimAbbrechen}
+      onCancel={(event) => {
+        onCancel?.(event);
+        if (!event.defaultPrevented) beimAbbrechen(event);
+      }}
       onMouseDown={(event) => {
+        onMouseDown?.(event);
+        if (event.defaultPrevented) return;
         // The dialog is an invisible full-screen container; everything outside
         // the pane counts as the backdrop.
         if (!(event.target as HTMLElement).closest(`.${styles.pane}`)) onClose();
@@ -476,7 +483,7 @@ export function CommandPalette({
       </div>
     </dialog>
   );
-}
+});
 
 /* ------------------------------------------------------------------ */
 /* One row                                                             */
