@@ -46,7 +46,7 @@
   .numeric {
     text-align: right;
     font-family: var(--u-font-mono);
-    font-size: 0.75rem;
+    font-size: var(--u-text-mono);
     letter-spacing: -0.01em;
     font-variant-numeric: tabular-nums;
   }

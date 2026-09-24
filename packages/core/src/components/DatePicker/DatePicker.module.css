@@ -56,7 +56,7 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     font-family: var(--u-font-mono);
-    font-size: 0.75rem;
+    font-size: var(--u-text-mono);
     letter-spacing: -0.01em;
     font-variant-numeric: tabular-nums;
   }
@@ -149,7 +149,7 @@
     background: none;
     border-radius: var(--u-radius-sm);
     font-family: var(--u-font-mono);
-    font-size: 0.75rem;
+    font-size: var(--u-text-mono);
     font-variant-numeric: tabular-nums;
     color: var(--u-color-text);
     cursor: pointer;
@@ -244,7 +244,7 @@
     padding: 0;
     text-align: center;
     font-family: var(--u-font-mono);
-    font-size: 0.75rem;
+    font-size: var(--u-text-mono);
     font-variant-numeric: tabular-nums;
     color: var(--u-color-text);
   }
@@ -311,7 +311,7 @@
 
   .timeSeparator {
     font-family: var(--u-font-mono);
-    font-size: 0.75rem;
+    font-size: var(--u-text-mono);
     color: var(--u-color-text-muted);
   }
 
@@ -601,7 +601,7 @@
 
   .timeDate {
     font-family: var(--u-font-mono);
-    font-size: 0.75rem;
+    font-size: var(--u-text-mono);
     font-variant-numeric: tabular-nums;
     color: var(--u-color-text);
   }

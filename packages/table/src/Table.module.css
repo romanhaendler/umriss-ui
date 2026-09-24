@@ -117,7 +117,7 @@
 
   .td.numeric {
     font-family: var(--u-font-mono);
-    font-size: 0.75rem;
+    font-size: var(--u-text-mono);
     letter-spacing: -0.01em;
     font-variant-numeric: tabular-nums;
   }
@@ -217,7 +217,7 @@
     font-family: var(--u-font-mono);
     font-size: var(--u-text-xs);
     font-variant-numeric: tabular-nums;
-    line-height: 1;
+    line-height: var(--u-leading-none);
     color: var(--u-color-accent);
   }
 
@@ -915,7 +915,7 @@
     right: 0;
     bottom: -5px;
     height: 2px;
-    border-radius: 1px;
+    border-radius: var(--u-radius-full);
     background: var(--u-color-text);
     opacity: 0.35;
   }
