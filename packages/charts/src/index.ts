@@ -111,3 +111,7 @@ export { toOperatingTimeClamped } from "./operatingTime";
 /* The shift of a tick grid onto local time, moved here from the schedule
    (charts-fixes 09): the calendar axis stands its days on it as well. */
 export { localOffset } from "./operatingTime";
+
+/* The charts' own wording (ADR-0031); German stands behind the subpath
+   `@umriss-ui/charts/wording/de`. */
+export { DEFAULT_CHARTS_WORDING, type ChartsWording } from "./wording";

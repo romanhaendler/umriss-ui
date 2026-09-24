@@ -55,6 +55,17 @@ JSX decides what lies over what, and at the same time the palette colour.
 On a touch screen a tap shows the tooltip, and a tap on empty plot or outside
 the chart takes it away; a finger swiping over the chart scrolls the page.
 
+**By keyboard and screen reader**, a chart with a `<Tooltip>` is one tab stop:
+the arrows walk its values, ↑/↓ choose the series read first, and a screen
+reader hears each value once the keys rest and a summary of the whole. The
+words are English; German comes from its own subpath:
+
+```tsx
+import { GERMAN_CHARTS_WORDING } from "@umriss-ui/charts/wording/de";
+
+<Chart data={DATA} ariaLabel="Verlauf" wording={GERMAN_CHARTS_WORDING}>…</Chart>
+```
+
 ## Styles
 
 Nothing to import. `dist/charts.js` loads its own stylesheet; the axes, ticks,
@@ -91,8 +102,8 @@ loaded: Geist when the application has it, the system fonts otherwise.
   million points, 49.8 ms and 49.6 ms. The measuring run, its conditions and the
   mixed series set stand in [`docs/capabilities.md`](docs/capabilities.md).
 
-What it deliberately cannot do — zoom and pan, animations, stacking, a category
-scale, horizontal bars — stands in the same record, with the reason.
+What it deliberately cannot do — animations, stacking, a category scale,
+horizontal bars — stands in the same record, with the reason.
 
 ## More
 

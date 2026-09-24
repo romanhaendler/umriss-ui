@@ -18,6 +18,22 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Sep. 2026 — The charts for keyboard and screen reader
+
+- **charts-a11y, grilled and built in one sitting.** Q1-Q7 put to the user and
+  taken as recommended, R1-R12 decided on the same footing and recorded in the
+  spec; ADR-0030 (one tab stop, one Active point) and ADR-0031 (the charts'
+  own wording), the Active point in the glossary.
+- **The walk is a pure module** (`walk.ts`) over the materialised series; the
+  scene turns a position into a hit by asking the hit test at its pixel, so the
+  tooltip, markers and sync are the pointer's own and needed no second path.
+- **Checks that caught something**: the own-base focus check and the state
+  canon both refused the first focus ring (an inset shadow and a radius); the
+  plot now carries the legend entry's ring token.
+- **Found on the way**: the charts README still listed zoom and pan among what
+  the package cannot do, two releases after both shipped.
+- **Version**: charts 0.6.0.
+
 ## Sep. 2026 — Depth work: date picking and the select family
 
 - **visuelle-wertigkeit 05, surfaces two and three.** Twelve states of the

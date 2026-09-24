@@ -38,3 +38,20 @@ for (const { pageId, exampleId, name } of EXAMPLE_ADDRESSES) {
     await expect(target).toHaveScreenshot(`example-${name}-${testInfo.project.name}.png`);
   });
 }
+
+/* charts-a11y: the plot as a tab stop - its ring, and the Active point the
+   keys set (ADR-0030). One state picture, both themes. */
+test("A focused chart with an Active point", async ({ page }, testInfo) => {
+  await openExample(page, "chart", "keyboard-and-screen-reader");
+  const target = page.locator('[data-example="keyboard-and-screen-reader"]');
+  await target.scrollIntoViewIfNeeded();
+  await drawn(page);
+  const plot = target.locator(".uc-plot").first();
+  await plot.focus();
+  await page.keyboard.press("Shift+Tab");
+  await page.keyboard.press("Tab");
+  await page.keyboard.press("PageUp");
+  await page.keyboard.press("ArrowDown");
+  await drawn(page);
+  await expect(target).toHaveScreenshot(`focused-active-point-${testInfo.project.name}.png`);
+});
