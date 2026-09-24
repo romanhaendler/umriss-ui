@@ -1,6 +1,6 @@
 # A plan one can read, and rules one cannot break
 
-Status: ready-for-agent
+Status: done
 Date:   2026-09-17
 Origin: Roman's findings after `schedule-refinement` was delivered - what a bar
 says, how a transport is drawn, which lane a subtask may go to, and the locale
@@ -267,3 +267,9 @@ Recorded here because a delivered spec is read backwards (`CONTRIBUTING.md`):
 - `Refusal` is the dock's word (`CONTEXT.md`), and the schedule takes it as it
   took **Grip**. If the glossary entry needs widening the way **Grip**'s did,
   that belongs to the ticket that uses it.
+
+## Comments
+
+### Status corrected (2026-09-24)
+
+Delivered in commits `schedule-legibility 01`-`06` and the review follow-up. The Status line had not been moved when the work landed.

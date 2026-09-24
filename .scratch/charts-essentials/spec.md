@@ -1,6 +1,6 @@
 # What a plant screen expects of a chart
 
-Status: ready-for-agent
+Status: done
 Date:   2026-09-23
 Origin: `.scratch/charts-review/spec.md`, decisions Q11, Q13, Q15-Q18, Q22.
 Blocked by: `.scratch/charts-fixes/` (09 provides the local offset, 04 the
@@ -31,3 +31,9 @@ chart without data draws an empty frame on [0,1] and says nothing. `tone` and
 Each issue: unit tests first (ticks, materialisation, scene, jsdom as fits),
 one screenshot example on the page it belongs to - `Axis` for 01, `Tooltip &
 Legend` for 02 and 04, `Line` for 03, `Chart` for 05.
+
+## Comments
+
+### Status corrected (2026-09-24)
+
+Delivered in commits `charts-essentials 01`-`07`; the capability record carries its "Later" and "Out" rows; released with `@umriss-ui/charts` 0.4.0. The Status line had not been moved when the work landed.

@@ -1,6 +1,6 @@
 # 09 — The renames
 
-Status: ready-for-agent
+Status: wontfix
 
 Spec: `.scratch/library-audit/spec.md`
 Decided in: `issues/06-one-grammar-for-the-surface.md`,
@@ -110,3 +110,9 @@ When C is done, the README loses its "Noch nicht erfüllt" lists.
 - `packages/ui/CHANGELOG.md` and `packages/charts/CHANGELOG.md` each carry a
   `Geändert` entry listing old → new.
 - No screenshot baseline moves.
+
+## Comments
+
+### Status corrected (2026-09-24)
+
+Superseded by `english-and-umriss-ui` and ADR-0018, which rules out deprecated aliases; the renames themselves are in (`laneFrom`, `tone`, `Stat.asOf`). The Status line had not been moved when the work landed.

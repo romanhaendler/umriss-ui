@@ -1,6 +1,6 @@
 # The schedule in daily use
 
-Status: ready-for-agent
+Status: done
 Date:   2026-09-17
 Origin: conversation after the delivery of `.scratch/schedule/` - the list of
 improvements (all but keyboard and screen-reader access, which stays a spec of
@@ -362,3 +362,9 @@ Recorded here because the spec is read backwards as a delivery record
   else), then wheel and auto-pan, tooltip and now line, snap offset and task
   shift, domain report and handle, selection with subtask, place intent and the
   drag from outside, the context menu position test, documents.
+
+## Comments
+
+### Status corrected (2026-09-24)
+
+Delivered in commits `schedule-refinement 01`-`09` and the review follow-up; the parked ideas were done by 06 and 07. The Status line had not been moved when the work landed.

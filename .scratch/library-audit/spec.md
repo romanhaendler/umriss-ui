@@ -1,6 +1,6 @@
 # Spec: Where the library contradicts itself
 
-Status: ready-for-agent
+Status: done
 
 Origin: a full read of both packages on 11 Sep 2026 — every source module of
 `@umriss/ui` and `@umriss/charts`, every stylesheet, the demo tooling and the
@@ -417,3 +417,6 @@ and its deviations recorded in the ticket. Ticket 06's decisions are recorded in
 ADR-0015. The spec stays open for `issues/09-the-renames.md`, the mechanical
 work those decisions left, which is `ready-for-agent`.
 
+### Status corrected (2026-09-24)
+
+Delivered: core's internal 0.9.0 "Where the library contradicted itself" and charts 0.3.0-rc.0; eight of nine issues done, the ninth superseded. The Status line had not been moved when the work landed.
