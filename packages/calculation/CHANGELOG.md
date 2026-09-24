@@ -11,6 +11,16 @@ under a heading "Changed" of its own, no matter which digit rose.
 
 ---
 
+## 0.2.2 – Core 0.7.0 (Sep. 2026)
+
+### Changed
+
+- **The worst-verdict glyph and the lost freshness read core's
+  `--u-color-danger-text`** - lighter in the dark theme, 4.5:1 on every surface.
+  The peer range moves to `@umriss-ui/core` `^0.7.0`.
+
+---
+
 ## 0.2.1 – Core 0.6.0 (Sep. 2026)
 
 ### Changed

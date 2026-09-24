@@ -50,7 +50,7 @@ module on the caller's side that carries `"use client"` and imports from there.
 
 ---
 
-## Unreleased
+## 0.7.0 – A text token for danger (Sep. 2026)
 
 ### Added
 

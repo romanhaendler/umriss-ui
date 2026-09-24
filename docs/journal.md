@@ -18,6 +18,20 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Sep. 2026 — Housekeeping after the grouping
+
+- **The tracker told the truth again.** A triage against history, changelogs
+  and journal found fourteen specs and tickets delivered long ago; their Status
+  lines now say so, each with the commits and the version.
+- **Three fixes, in parallel worktrees**, merged and checked together:
+  danger as type got a token of its own (`--u-color-danger-text`, 4.93:1 where
+  it was 4.40:1) and the accessibility check's last open exception is gone; the
+  charts screenshot drift turned out to be a library bug - an axis band kept the
+  fallback font's width when the first layout beat the web font - and the suite
+  is deterministic again; the table's focus survives any fold.
+- **Versions**: core 0.7.0, charts 0.4.1, table 0.3.1, schedule 0.1.6,
+  calculation 0.2.2.
+
 ## Sep. 2026 — Grouping the table
 
 - **Grilled, prototyped, then built.** `.scratch/table-grouping/` holds the
