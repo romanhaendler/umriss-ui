@@ -1,8 +1,50 @@
 # 03 — One stroke width
 
-Status: ready-for-agent
+Status: done
 
 Blocked by: 01
+
+## Delivery
+
+- **Stock before** (recounted across core, table, schedule, calculation, the
+  charts' DOM and the demo shell): 35 inline `<svg>` drawings (7 of them the set), **7 stroke
+  widths** (1.1 · 1.3 · 1.4 · 1.5 · 1.6 · 1.8 · 2) in **8 viewBoxes**
+  (`0 0 10 10`, `14 14`, `12 12`, `10 6`, `10 8`, `8 8`, `16 16`, `10 12`,
+  plus the Sparkline's data box). Charts draw on canvas and have none;
+  calculation already took `AngleGlyph` from core.
+- **Stock after**: every glyph at **1.4** in a box whose longer side is 10
+  (`10 10`, `10 8`, `10 6`). Outside it only the four named non-glyphs.
+- **The check** – written first and red with 32 offences in core alone:
+  `scripts/glyphs.ts` (the rules, once) and a `tests-unit/glyphs.test.ts` in
+  core, table, schedule and calculation, each globbing its own `src/**/*.tsx`
+  through `?raw` as the table's `styleGuard.test.ts` does. It checks the
+  viewBox, every `strokeWidth`, `fill`, `stroke` and `aria-hidden`. Named
+  exceptions with reasons: Spinner, Sparkline, Checkbox tick (core), filter
+  funnel (table). Not in `stylesheets.test.ts` as the ticket said: that file
+  was being changed in parallel, and a file of its own per package follows
+  the guard pattern.
+- **The value stays 1.4**, relative (point 1 sharpened: a glyph crops the box
+  rather than shrinking the unit). It reads right on the 8–10 pixel marks that
+  are nearly all glyphs. Where it did not – the date pickers' leaf and clock at
+  13 pixels read heavier than the field's text at 1.82 pixels – the display
+  size went to 12 rather than the width down: 11 read too small, 12 sits with
+  the Modal's cross and the Toast's tone symbol.
+- **Merged**: all crosses into `CrossGlyph` (Alert, Modal, Toast, Tag,
+  MultiSelect); `CalendarGlyph` (`range`) and `ClockGlyph` new in the set,
+  exported from core's public entry (it already exported the set) and noted
+  in the CHANGELOG; the table's expander and the schedule's fold use core's
+  `AngleGlyph` through the public entry. Single-place glyphs stay inline and
+  pass the check. The demo shell's code chevron is left out: never published,
+  and in every example picture of all five demos.
+- `packages/core/docs/glyphs.md`: specification kept, divergence table empty,
+  one sentence on where compliance is checked.
+- **Screenshots**: at the suite's own tolerance nothing fails against the
+  checked-in baselines. At zero tolerance against a reference rendered from the
+  sources before this ticket, 90 pictures move, all glyph pixels: the date
+  pickers' fields (core, 16), the Tag's crosses, the Alert's dismiss, the
+  table's group folds, expanders, sort arrows and a date picker in a table
+  (table, 66 including the 14 of the grouping matrix), the schedule's lane-group fold
+  (4) - plus one dark dock picture whose `GridGlyph` did not change, noise.
 
 Spec: `.scratch/visuelle-wertigkeit/spec.md`
 

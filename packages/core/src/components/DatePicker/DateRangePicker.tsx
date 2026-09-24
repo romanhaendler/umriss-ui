@@ -11,6 +11,7 @@ import type { DateRange, RangePreset } from "./range";
 import { rangeFromDays } from "./contract";
 import styles from "./DatePicker.module.css";
 import { useFormats, useWording } from "../../lib/language";
+import { CalendarGlyph } from "../../lib/glyphs";
 
 /* The range parts lie in ./range, the formats in ./format. Passed on here so
    that existing import paths still resolve. */
@@ -178,11 +179,7 @@ export function DateRangePicker({
           )
         }
         icon={
-          <svg viewBox="0 0 14 14" width="13" height="13" aria-hidden="true" className={styles.icon}>
-            <rect x="1.5" y="2.5" width="11" height="10" rx="1.5" fill="none" stroke="currentColor" strokeWidth="1.3" />
-            <path d="M1.5 5.5h11M4.5 1v3M9.5 1v3" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-            <path d="M4 9h6M8.2 7.4 10 9l-1.8 1.6" fill="none" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          <CalendarGlyph range className={styles.icon} />
         }
         placeholder={placeholderText}
         onClear={() => {
