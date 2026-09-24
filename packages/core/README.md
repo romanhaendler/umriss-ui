@@ -184,27 +184,17 @@ The table and the alarm list are not part of this package. They live in
 
 ## Roadmap
 
-<<<<<<< HEAD
 The core scope is complete, and so are the command palette, `Dock` and the
-danger text tone (`--u-color-danger-text`, 0.7.0). What is open, each with a
+danger text tone (`--u-color-danger-text`, 0.7.0) and the pass-through of
+rules 1 and 2 above. What is open, each with a
 spec under `.scratch/`:
 
-* `core-passthrough` — `ref`, `className` and the rest on every component, and
-  the controlled/uncontrolled gaps of rules 1 and 2 above.
 * `core-foundations` — `Switch`, `Slider`, `Drawer`, `ProgressBar`,
   `Accordion`, `Breadcrumb`.
 * `forced-colors` and `listbox-announcements` — Windows high contrast, and
   what a listbox says to VoiceOver.
-* `alarm-standards` — `Stat` and the limit model against ISA-18.2 and ISA-101.
 * `core-layout-extras` — `Splitter` and the layout tier after the basics.
 
 Collapsing the dock onto its grip stays out of scope, because it doubles the
 state space. What core will not build at all stands in
 [ADR-0032](../../docs/adr/0032-what-umriss-is-not.md).
-=======
-The core scope is complete, and so are the command palette and `Dock`. What is
-open: a text tone of its own for danger and warning
-(`.scratch/tone-contrast/spec.md`) and — if it ever earns it — collapsing the
-dock onto its grip, which is out of scope today because it doubles the state
-space.
->>>>>>> worktree-agent-a40dfcac4e41b351e
