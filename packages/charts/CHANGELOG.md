@@ -42,6 +42,13 @@ interface was still expected to move before `0.3.0`.
 
 ### Changed
 
+- **A toggling legend entry answers the pointer.** With `onToggle` an entry is a
+  button; it now takes a quiet surface under the pointer and a stronger one
+  while pressed (`--uc-color-hover`, `--uc-color-pressed`, new variables on
+  core's `--u-color-surface-sunken` and `--u-color-surface-pressed`), and fades
+  them on `--uc-transition-state` (core's `--u-transition`). Before, only its
+  cursor changed. A plain legend is unchanged.
+
 - **The tooltip fades on `--uc-transition`**, a new variable: its own 80 ms,
   on core's `--u-ease-out` where core is loaded and on the same curve written
   out where it is not. It ran on the CSS keyword `ease-out` before.

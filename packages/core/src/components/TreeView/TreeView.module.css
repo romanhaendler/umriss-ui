@@ -36,6 +36,10 @@
     background: var(--u-color-surface-sunken);
   }
 
+  .row:active {
+    background: var(--u-color-surface-pressed);
+  }
+
   /* The active node and a checked one are two different states and therefore
      look different (ADR-0003): the active one carries the surface, a checked
      one its tick. */
@@ -135,7 +139,9 @@
 
   /* Disabled: visible, navigable, but the box does not react. Dimmed like a
      signpost, but for a different reason - hence its own class and not a
-     shared one. */
+     shared one. By colour and not by opacity, against the canon: the row itself
+     stays focusable, and opacity would fade its focus ring with it; the
+     checkbox inside dims by its own disabled state (visuelle-wertigkeit 04). */
   .disabled {
     color: var(--u-color-text-muted);
   }

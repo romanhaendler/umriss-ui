@@ -122,18 +122,28 @@
     background: transparent;
     color: var(--u-color-text-secondary);
     cursor: pointer;
+    transition:
+      background-color var(--u-transition),
+      color var(--u-transition);
   }
 
+  /* A square key like the table's expander and the calculation's disclosure,
+     and with their surface: it darkened only its type (visuelle-wertigkeit
+     04). */
   .chevron:hover {
+    background: var(--u-color-surface-sunken);
     color: var(--u-color-text);
+  }
+
+  .chevron:active {
+    background: var(--u-color-surface-pressed);
   }
 
   /* The first thing this component puts into the tab order, so it is also the
-     first that has to show the focus itself (ADR-0021). */
+     first that has to show the focus itself (ADR-0021) - by the ring alone. */
   .chevron:focus-visible {
     outline: none;
     box-shadow: var(--u-focus-ring);
-    color: var(--u-color-text);
   }
 
   .chevron svg {

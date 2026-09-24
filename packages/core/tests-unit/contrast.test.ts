@@ -160,6 +160,21 @@ const PAIRS: readonly Pair[] = [
     minimum: { light: BODY_TEXT, dark: BODY_TEXT },
   })),
 
+  /* The pressed surfaces of the interaction-state canon (visuelle-wertigkeit
+     04), each under the type that stands on it while it is pressed. An optical
+     upgrade must not cost legibility: the full bound, in both themes. */
+  ...([
+    ["--u-color-text", "--u-color-surface-pressed"],
+    ["--u-color-text-secondary", "--u-color-surface-pressed"],
+    ["--u-color-accent-text", "--u-color-accent-subtle-pressed"],
+    ["--u-color-danger-text", "--u-color-danger-subtle-pressed"],
+  ] as const).map(([fg, bg]) => ({
+    name: `${fg} as text on ${bg}`,
+    fg,
+    bg,
+    minimum: { light: BODY_TEXT, dark: BODY_TEXT },
+  })),
+
   /* Exception, light: 4.45:1 measured - five hundredths under the bound. The
      case is defused, because on the subtle accent surface the components set
      not --u-color-accent but the --u-color-accent-text provided for it (badge,
