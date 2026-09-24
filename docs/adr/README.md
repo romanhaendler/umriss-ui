@@ -1,6 +1,6 @@
 # Decisions
 
-Twenty-seven decisions, each one written where it was made and kept afterwards. An
+Thirty-one decisions, each one written where it was made and kept afterwards. An
 ADR here is not an announcement: it states the question, the alternatives that
 were real at the time, and what the decision costs — which is what makes it
 worth reading a year later, when the code has changed and the reasoning has not.
@@ -43,5 +43,7 @@ half a later reader needs most. Exactly one is superseded today.
 | [0027](0027-a-calculation-is-written-as-it-is-shown.md) | A calculation is written as it is shown | accepted | calculation |
 | [0028](0028-a-calculation-is-a-tree-or-a-chain.md) | A calculation is a tree or a chain | accepted | calculation |
 | [0029](0029-a-row-groups-form-follows-its-level.md) | A row group's form follows its level | accepted | table |
+| [0030](0030-a-chart-is-one-tab-stop-that-walks-its-hits.md) | A chart is one tab stop that walks its hits | accepted | charts |
+| [0031](0031-the-charts-carry-their-own-wording.md) | The charts carry their own wording | accepted | charts, language |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).
