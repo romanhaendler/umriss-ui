@@ -762,7 +762,9 @@ _Avoid_: group row, subtotal row, Gruppenzeile, summary row
 **Group span**:
 The form of a **Row group** on the innermost level: its grouping column stands
 first and shows the value once, beside the group's rows, with no line of its own.
-Folded, a span is one line carrying the group's aggregates in the columns.
+Open, it carries one aggregate at its foot - the first that says what it is by
+its sign; folded, it is one line carrying all of the group's aggregates in the
+columns.
 _Avoid_: gutter, Randspalte, merged cell, rowspan (which it is not built from)
 
 ### The demo

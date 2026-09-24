@@ -26,6 +26,10 @@ export function Absent({ wording }: { wording: Wording }) {
    or an aggregate of one's own speaks only through its word. */
 const AGGREGATE_SIGN: Partial<Record<string, string>> = { sum: "Σ", avg: "⌀", min: "min", max: "max" };
 
+/** The aggregates that say what they are by their sign - the only ones that
+    read without their column's name, at the foot of a span. */
+export const SIGNED_AGGREGATES: ReadonlySet<string> = new Set(Object.keys(AGGREGATE_SIGN));
+
 const aggregateWord = (kind: string, wording: Wording): string =>
   ({
     sum: wording.footerSum,

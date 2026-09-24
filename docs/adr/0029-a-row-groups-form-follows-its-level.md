@@ -27,6 +27,15 @@ everything turns a grouped table into a summary of its groups.
 A group of one row is that row: no fold, no count, no aggregate that would only
 repeat its value.
 
+**An open span carries its aggregate at its foot.** A span has no line of its
+own, so its aggregates had nowhere to stand while it was open: the sum a reader
+groups for appeared only once the group was folded - once its rows were gone.
+The span's value stands top left, its count top right; its aggregate now stands
+bottom right, on its last row, and the three frame the group without a line of
+their own. One aggregate only: the first column's that says what it is by its
+sign - Σ, ⌀, min, max -, because no column name stands beside it. Every other
+aggregate stands in the group header, in the folded line and in the footer.
+
 ## Considered Options
 
 **One form, the header, on every level** — the market's default. Rejected: it is
@@ -40,6 +49,13 @@ rearranges itself under a search is harder to read than either form.
 **The form chosen by the caller**, a prop per level. Rejected: it is a decision
 every caller would have to make, and the rule by level is already the one they
 would make; a knob that is always set the same way is not a feature.
+
+**A closing line under each open span** carried every aggregate under its own
+column. Rejected when seen: it made the table taller by a line per group - the
+very cost the span exists to avoid. **The aggregate sitting on the boundary
+between two groups** cost no height, but was squeezed between two numbers and
+read as a fault. **Every aggregate at the foot of the span** overflowed the span
+as soon as a group had fewer rows than aggregates.
 
 ## Consequences
 
