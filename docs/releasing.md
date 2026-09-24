@@ -21,12 +21,12 @@ mechanics.
   version goes there.
 * **`next`** carries release candidates (`0.3.0-rc.1`); at the moment it
   carries nothing, because every package is released. A candidate is published
-  with `--tag next` written out (step 4): `publishConfig.tag` in a manifest does
+  with `--tag next` written out (the workflow does so for every version with a hyphen): `publishConfig.tag` in a manifest does
   not help, because **pnpm 9.14.4 does not pass it on** — a dry run announced
   `latest` regardless. The very first version of a package gets `latest` as
   well, because a package without `latest` does not exist, and it stays there
   when the next candidate goes to `next` — so as long as no released version
-  exists, `latest` is moved to each new candidate by hand (step 5), or a plain
+  exists, `latest` is moved to each new candidate by hand (step 4), or a plain
   `pnpm add` keeps installing the first one.
 
 Every manifest has `publishConfig.access: "public"` — a scoped package is
@@ -34,43 +34,41 @@ otherwise published as private, and the org would refuse it.
 
 ## Publishing a version
 
-Always with **pnpm**, never with `npm publish`: the manifests carry
-`workspace:` ranges (`@umriss-ui/table` takes `@umriss-ui/core` as
-`workspace:^`), and only `pnpm publish` rewrites them into real ranges.
-`prepublishOnly` runs typecheck, build and `check:dist` before anything is
-uploaded — the last holds the built package to ADR-0021: the JavaScript imports
-its stylesheet, the stylesheet begins with the layer order and selects only the
-library's own elements.
+A pushed tag publishes: `.github/workflows/publish.yml` runs on every tag
+`<dir>-v<version>`, checks that the version in `packages/<dir>/package.json`
+matches, runs lint, types, unit tests, build and `check:dist`, and uploads the
+package. A version with a hyphen (`0.3.0-rc.1`) goes to `next`, every other to
+`latest`. No token is involved: each package on npm trusts that workflow
+through Trusted Publishing (package settings → *Trusted Publisher*: owner
+`romanhaendler`, repository `umriss-ui`, workflow `publish.yml`, environment
+`npm`), and npm attaches the provenance itself.
+
+The workflow packs with pnpm — only pnpm rewrites the `workspace:` ranges
+(`@umriss-ui/table` takes `@umriss-ui/core` as `workspace:^`) — and uploads the
+tarball with npm, because pnpm 9.14.4 cannot do Trusted Publishing.
 
 1. The version in `packages/<package>/package.json` and a heading of that number
-   in its `CHANGELOG.md`, in one commit on `main`, pushed. `pnpm publish` refuses
-   a tree that is dirty, not on `main` or behind the remote. Publish `core` before
-   `table` when both move: the table's peer range is rewritten to core's version
-   in the workspace.
-2. `pnpm lint && pnpm typecheck && pnpm test:unit && pnpm test:visual` — green.
-3. Look at what would be uploaded - the dry run runs `prepublishOnly` and the
-   git checks as well, and names the tag it would use:
+   in its `CHANGELOG.md`, in one commit on `main`, pushed.
+2. `pnpm test:visual` — green. It is the one check the workflow cannot run.
+3. Tag the commit and push the tag, one push per tag — GitHub starts no
+   workflow for tags when more than three arrive in one push. Push `core` before
+   `table` when both move: the table's peer range names core's new version.
    ```bash
-   pnpm --filter @umriss-ui/core publish --dry-run
-   pnpm --filter @umriss-ui/charts publish --dry-run --tag next
+   git tag core-v0.5.0 && git push origin core-v0.5.0
    ```
-4. Publish (npm asks for the one-time password of the account). A release
-   candidate always with `--tag next`:
-   ```bash
-   pnpm --filter @umriss-ui/core publish
-   pnpm --filter @umriss-ui/charts publish --tag next
-   ```
-5. For a release candidate of a package that has no released version yet, move
+   One tag per package, because the packages count independently.
+4. For a release candidate of a package that has no released version yet, move
    `latest` along:
    ```bash
    npm dist-tag add @umriss-ui/charts@0.3.0-rc.1 latest
    ```
-6. Tag the commit and push the tag:
-   ```bash
-   git tag core-v0.2.0 && git push origin core-v0.2.0
-   ```
-   One tag per package, `<dir>-v<version>`, because the packages count
-   independently.
+
+A package that does not stand on npm yet cannot be given a Trusted Publisher,
+so its first version is published by hand, then the publisher is set up:
+
+```bash
+pnpm --filter @umriss-ui/<package> publish
+```
 
 Promoting a release candidate that already stands on the registry to `latest`
 without publishing again:
