@@ -18,6 +18,19 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Sep. 2026 — Publishing from `main`
+
+- **A raised version is a release.** `.github/workflows/publish.yml` runs on
+  every push to `main`, publishes every package whose version is not on npm
+  yet and sets its tag afterwards. It first ran on pushed tags; GitHub starts
+  no workflow for tags when more than three arrive in one push, and a tag
+  pushed a second time failed against the version already on npm. Asking npm
+  instead has neither hole.
+- **No token.** npm trusts the workflow through Trusted Publishing and attaches
+  the provenance; `core` 0.5.0, `table` 0.2.4 and `schedule` 0.1.4 were the
+  first to go out that way. `calculation` 0.2.0 was published by hand, because
+  a package has to exist before it can be given a Trusted Publisher.
+
 ## Sep. 2026 — calculation 0.2.0: a chain stands open
 
 - **The steps of a chain are what it is for.** Asked where the interim result

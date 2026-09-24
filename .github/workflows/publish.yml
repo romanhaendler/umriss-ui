@@ -1,20 +1,55 @@
-# Publishes one package to npm when its tag is pushed: `<dir>-v<version>`,
-# e.g. core-v0.5.0 (docs/releasing.md). No token: npm trusts this workflow
-# through OIDC (Trusted Publishing) and attaches the provenance itself.
+# Publishes every package whose version is not on npm yet, on each push to
+# main (docs/releasing.md). A version is released by raising it in its
+# package.json; the tag <dir>-v<version> is set here afterwards and triggers
+# nothing. No token: npm trusts this workflow through OIDC (Trusted
+# Publishing) and attaches the provenance itself.
 name: Publish
 
 on:
   push:
-    tags: ['*-v*']
+    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
-  id-token: write
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
 
 jobs:
+  # Outside the environment, so a push that releases nothing waits for no one.
+  find:
+    runs-on: ubuntu-latest
+    outputs:
+      dirs: ${{ steps.find.outputs.dirs }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: find
+        # In dependency order: core and charts before what depends on them.
+        # A new package is added here.
+        run: |
+          dirs=""
+          for dir in core charts table schedule calculation; do
+            name="$(node -p "require('./packages/$dir/package.json').name")"
+            version="$(node -p "require('./packages/$dir/package.json').version")"
+            if npm view "$name@$version" version > /dev/null 2>&1; then
+              echo "$name@$version is on npm"
+            else
+              echo "$name@$version is not - publishing"
+              dirs="$dirs $dir"
+            fi
+          done
+          echo "dirs=${dirs# }" >> "$GITHUB_OUTPUT"
+
   publish:
+    needs: find
+    if: needs.find.outputs.dirs != ''
     runs-on: ubuntu-latest
     environment: npm
+    permissions:
+      contents: write
+      id-token: write
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -24,33 +59,28 @@ jobs:
           node-version: 24
           cache: pnpm
           registry-url: https://registry.npmjs.org
-
-      - name: Read the tag
-        id: tag
-        run: |
-          dir="${GITHUB_REF_NAME%-v*}"
-          version="${GITHUB_REF_NAME##*-v}"
-          manifest="packages/$dir/package.json"
-          test -f "$manifest" || { echo "::error::No package at packages/$dir"; exit 1; }
-          actual="$(node -p "require('./$manifest').version")"
-          test "$actual" = "$version" || { echo "::error::Tag says $version, $manifest says $actual"; exit 1; }
-          case "$version" in *-*) dist_tag=next ;; *) dist_tag=latest ;; esac
-          echo "dir=$dir" >> "$GITHUB_OUTPUT"
-          echo "dist_tag=$dist_tag" >> "$GITHUB_OUTPUT"
-
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test:unit
       - run: pnpm build
-      - run: pnpm run check:dist
-        working-directory: packages/${{ steps.tag.outputs.dir }}
 
       # pnpm packs (it rewrites the workspace: ranges), npm uploads (pnpm 9
       # cannot do Trusted Publishing). npm runs no lifecycle scripts on a
-      # tarball, so prepublishOnly's work is the steps above.
-      - name: Publish
-        working-directory: packages/${{ steps.tag.outputs.dir }}
+      # tarball, so prepublishOnly's work is the steps above and check:dist.
+      # One package failing stops the rest; the next push picks them up.
+      - name: Publish and tag
+        env:
+          DIRS: ${{ needs.find.outputs.dirs }}
         run: |
-          pnpm pack
-          npm publish ./*.tgz --tag ${{ steps.tag.outputs.dist_tag }}
+          for dir in $DIRS; do
+            cd "$GITHUB_WORKSPACE/packages/$dir"
+            version="$(node -p "require('./package.json').version")"
+            case "$version" in *-*) dist_tag=next ;; *) dist_tag=latest ;; esac
+            pnpm run check:dist
+            pnpm pack
+            npm publish ./*.tgz --tag "$dist_tag"
+            tag="$dir-v$version"
+            git tag "$tag"
+            git ls-remote --exit-code --tags origin "$tag" > /dev/null || git push origin "$tag"
+          done
