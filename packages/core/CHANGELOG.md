@@ -59,6 +59,16 @@ module on the caller's side that carries `"use client"` and imports from there.
   box as tall as its type. Both carry exactly the value that stood written out
   in eight and six places before; nothing moves.
 
+### Changed
+
+- **`--u-transition` runs on `--u-ease-out`.** The collective token for hover
+  and colour carried the CSS keyword `ease-out`; it now carries the library's
+  own curve (`cubic-bezier(0.22, 1, 0.36, 1)`), which until now reached only
+  the few transitions that named it. Every hover, focus-edge and colour change
+  in core, table, schedule and calculation starts more decisively and lands
+  more softly; its duration (120 ms) is unchanged. An application that
+  overrides `--u-transition` is not affected.
+
 ---
 
 ## 0.7.0 – A text token for danger (Sep. 2026)
