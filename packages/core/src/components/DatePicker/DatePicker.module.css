@@ -180,9 +180,25 @@
     color: var(--u-color-text-muted);
   }
 
+  /* Today: the accent figure and a dot beneath it. An outline read as the
+     keyboard focus beside it - the focus is the only ring (the canon of
+     states). The dot takes the day's type colour, so on a chosen day it
+     stands in the ink's. */
   .today {
-    box-shadow: inset 0 0 0 1px var(--u-color-accent);
+    position: relative;
     color: var(--u-color-accent-text);
+  }
+
+  .today::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 4px;
+    width: 4px;
+    height: 4px;
+    margin-left: -2px;
+    border-radius: var(--u-radius-full);
+    background: currentColor;
   }
 
   /* The chosen day: ink. */
@@ -192,10 +208,6 @@
     color: var(--u-color-primary-fg);
   }
 
-  /* Today's edge gives way to the ink - the focus ring does not. */
-  .selected:not(:focus-visible) {
-    box-shadow: none;
-  }
 
   .foot {
     display: flex;

@@ -9,7 +9,7 @@ import * as Options from "../../lib/options";
 import { Popover } from "../Popover";
 import styles from "./MultiSelect.module.css";
 import { useWording } from "../../lib/language";
-import { CrossGlyph } from "../../lib/glyphs";
+import { AngleGlyph, CrossGlyph } from "../../lib/glyphs";
 
 export interface MultiSelectOption<T extends string = string> {
   /** What stands in `value` when this row is ticked. */
@@ -355,7 +355,7 @@ export function MultiSelect<T extends string = string>({
           }}
         >
           {value.length === 0 && <span className={styles.placeholder}>{placeholderText}</span>}
-          <span className={styles.chevron} aria-hidden="true" />
+          <AngleGlyph className={styles.chevron} />
         </button>
       </div>
       <Popover

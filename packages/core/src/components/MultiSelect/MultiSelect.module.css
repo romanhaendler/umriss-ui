@@ -213,14 +213,9 @@
 
   .chevron {
     flex: none;
-    width: 7px;
-    height: 7px;
-    border-right: 1.5px solid var(--u-color-text-secondary);
-    border-bottom: 1.5px solid var(--u-color-text-secondary);
-    /* Optical: the turned square's ink sits in its lower half; 2 px up puts
-       the angle's own middle on the field's (the -70 % of Select and Combobox,
-       for a box centred by flex rather than by top: 50 %). */
-    transform: translateY(-2px) rotate(45deg);
+    /* Core's AngleGlyph turned down, as in Select and Combobox. */
+    color: var(--u-color-text-secondary);
+    transform: rotate(90deg);
   }
 
   /* ---------------- Panel ---------------- */
