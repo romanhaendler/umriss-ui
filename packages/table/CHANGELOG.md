@@ -22,6 +22,46 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.3.0 – Grouping (Sep. 2026)
+
+### Added
+
+- **Grouping.** `defaultGrouping` on `useTable` groups by up to three columns or
+  group keys, the outermost first; without it, the user groups from the column
+  menu's new "Grouping" section. The outermost level is a group header with the
+  value, the count and every aggregate under its column; the innermost of several
+  levels is a span - the grouping column first, its value once beside its rows
+  (ADR-0029). Groups fold (one by one, all siblings with Alt, everything from the
+  grouping's tag in the table toolbar), select as a whole across pages, page as
+  lines with their headers repeated as "continued", virtualise with sticky
+  headers, and make the table a `treegrid` for assistive technology.
+- **`<GroupBy>`**, a group key: a value to group by that is no column - no cell,
+  no export, no entry among the columns.
+- **`groupValue`** beside `sortValue` and `exportValue`, **`group="day" | "week" |
+  "month" | "year"`** for points in time, **`groupable`** on a column and on the
+  table.
+- **`aggregate`** on a column: `sum`, `avg`, `min`, `max`, `range`, `count`,
+  `distinct`, or a function of one's own whose result runs through the column's
+  presentation - in the footer over the filtered set, in a group's header over
+  its rows, always from the rows and never from other aggregates.
+  `aggregate="worst"` on `VerdictColumn`. `share` switches off the share bar
+  under the first sum of a group header.
+- **The view** carries `grouping` and `folded`; the snapshot carries `grouping`,
+  `setGrouping`, `folded`, `toggleFold`, `foldAll` and `unfoldAll`.
+
+### Changed
+
+- **Every table can be grouped by its users** where a `ColumnMenu` stands: the
+  menu gains the "Grouping" section. `groupable={false}` on the table takes it
+  away.
+- **`footer` is called `aggregate` now.** The old name keeps working for this
+  minor version and says so once in development; it goes with the next one.
+- **A point-in-time aggregate follows its column's alignment**, and a range
+  within one year names the year once.
+- Needs `@umriss-ui/core` 0.6 for the grouping's wording.
+
+---
+
 ## 0.2.4 – Core 0.5.0 (Sep. 2026)
 
 ### Changed

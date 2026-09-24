@@ -1,6 +1,6 @@
 # Grouping a table so that it still reads at a glance
 
-Status: ready-for-agent
+Status: done
 Date:   2026-09-24
 Origin: grilling session on grouping for `@umriss-ui/table`. Vocabulary in
 `CONTEXT.md`, "Tables" — **Aggregate**, **Grouping**, **Group key**, **Row
@@ -344,7 +344,7 @@ Deviations from the text above, each decided while building:
   other** - fold, count, aggregates, box. Its header without a figure read as a
   fault in a column of figures.
 
-Open, for the user to decide:
+Decided with "set everything that is open" (2026-09-24), as recommended:
 
 1. ~~**One level shows no group aggregates until it is folded.**~~ Decided
    2026-09-24 (Q24-Q27, each from rendered variants): the outermost level is
@@ -353,7 +353,11 @@ Open, for the user to decide:
    open. The share bar stands once per header, under the first sum. ADR-0029
    records the six variants rejected on sight.
 2. **The user groups through `<ColumnMenu>`.** A table without a column menu
-   can be grouped by the application only.
+   is grouped by the application only - the README and the demo's "Nothing
+   declared" say so; a menu at the column header would be a feature of its own.
 3. **Groups follow an aggregate on any sort level**, not only the first:
    the first sort level that speaks about a grouping level or an aggregate
-   decides.
+   decides. Kept.
+
+Delivered 2026-09-24 on branch `table-grouping`: tickets 01-09; `table` 0.3.0,
+`core` 0.6.0, `schedule` 0.1.5, `calculation` 0.2.1.

@@ -11,6 +11,16 @@ under a heading "Changed" of its own, no matter which digit rose.
 
 ---
 
+## 0.2.1 – Core 0.6.0 (Sep. 2026)
+
+### Changed
+
+- **The calculation takes `@umriss-ui/core` 0.6.** Nothing in the calculation
+  changed; the peer range moves to `^0.6.0`, so that it installs beside
+  `@umriss-ui/table` 0.3, which needs core's new wording.
+
+---
+
 ## 0.2.0 – A chain stands open (Sep. 2026)
 
 0.1.0 was committed in the repository but never published; this is the first

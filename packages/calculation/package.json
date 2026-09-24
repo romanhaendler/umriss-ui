@@ -1,6 +1,6 @@
 {
   "name": "@umriss-ui/calculation",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "The umriss calculation - a derivation written as it is shown, evaluated by the library, folded and read line by line.",
   "license": "MIT",
   "author": "Roman Händler",
