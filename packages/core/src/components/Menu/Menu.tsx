@@ -147,14 +147,15 @@ export const MenuItem = forwardRef<HTMLButtonElement, MenuItemProps>(function Me
     <button
       ref={ref}
       type="button"
-      role="menuitem"
       tabIndex={-1}
       className={cx(styles.item, tone === "danger" && styles.danger, className)}
       {...rest}
+      role="menuitem"
       /* Composed, not overridden by `rest`: a caller's `onClick` used to take
-         the closing away from the entry. */
+         the closing away from the entry. It runs first and can prevent it. */
       onClick={(event) => {
         onClick?.(event);
+        if (event.defaultPrevented) return;
         onSelect?.();
         menu?.close();
       }}

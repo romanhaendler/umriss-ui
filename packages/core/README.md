@@ -181,5 +181,6 @@ The table and the alarm list are not part of this package. They live in
 
 The core scope is complete, and so are the command palette and `Dock`. What is
 open: a text tone of its own for danger and warning
-(`.scratch/tone-contrast/spec.md`) and — if it ever earns it — collapsing the dock onto its grip, which is out of scope today
-because it doubles the state space.
+(`.scratch/tone-contrast/spec.md`) and — if it ever earns it — collapsing the
+dock onto its grip, which is out of scope today because it doubles the state
+space.
