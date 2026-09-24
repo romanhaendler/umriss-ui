@@ -123,6 +123,8 @@ export function Tooltip({ content, children, delay = 300 }: TooltipProps) {
             role="tooltip"
             className={styles.tooltip}
             data-closing={!open || undefined}
+            // Leaving, it is gone for assistive technology at once; the fade is for the eye.
+            aria-hidden={!open || undefined}
             // Do not show before the first measurement, or it flashes in the top left.
             style={{ ...position, visibility: position ? undefined : "hidden" }}
           >

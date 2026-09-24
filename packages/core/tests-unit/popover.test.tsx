@@ -206,6 +206,17 @@ describe("Popover – motion", () => {
     expect(document.querySelector("[data-closing]")).toBeNull();
   });
 
+  it("is gone for assistive technology the moment it starts to leave", () => {
+    vi.useFakeTimers();
+    exitToken(100);
+    render(<Setup />);
+    fireEvent.keyDown(document, { key: "Escape" });
+    // Still drawn for its fade, but no longer a dialog anybody can reach or read.
+    expect(document.querySelector("[data-closing]")?.getAttribute("aria-hidden")).toBe("true");
+    expect(screen.queryByRole("dialog")).toBeNull();
+    act(() => vi.advanceTimersByTime(100));
+  });
+
   it("comes back whole when it is opened again during its exit", () => {
     vi.useFakeTimers();
     exitToken(100);
@@ -215,6 +226,7 @@ describe("Popover – motion", () => {
     const surface = screen.getByRole("dialog");
     expect(surface.hasAttribute("data-closing")).toBe(false);
     expect(surface.hasAttribute("inert")).toBe(false);
+    expect(surface.hasAttribute("aria-hidden")).toBe(false);
     act(() => vi.advanceTimersByTime(200));
     expect(screen.queryByRole("dialog")).not.toBeNull();
   });
