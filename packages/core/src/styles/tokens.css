@@ -230,8 +230,11 @@
     --u-color-scrim: light-dark(rgba(23, 23, 23, 0.30), rgba(0, 0, 0, 0.60));
 
     /* ---- Motion: explains a change of state, does not decorate ---- */
-    --u-transition: 120ms ease-out;          /* micro: hover, colour */
     --u-ease-out: cubic-bezier(0.22, 1, 0.36, 1); /* decisive, landing softly */
+    /* micro: hover, colour. It carried the CSS keyword `ease-out` and so kept
+       the curve above from three quarters of the library's transitions
+       (visuelle-wertigkeit 02). */
+    --u-transition: 120ms var(--u-ease-out);
     --u-duration-fast: 140ms;                /* popovers, short distances */
     --u-duration-medium: 240ms;              /* overlays, layout changes */
     /* Exits. They stood twice - as a number in the code waiting for the end, and
