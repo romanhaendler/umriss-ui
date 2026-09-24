@@ -1,6 +1,6 @@
 # Spec: A text tone of its own for danger and warning
 
-Status: ready-for-agent
+Status: done
 
 Origin: follow-up from `consumable-package/issues/04-accessibility-check.md`,
 Aug 2026. The findings stand by name in
@@ -93,3 +93,35 @@ The checks already exist; they only have to be allowed to tell the truth.
   Whoever touches it makes a ticket of its own out of it.
 - Every other colour of the palette. This ticket clears up a contradiction, it
   does not retune the palette.
+
+## Comments
+
+### Delivery report (2026-09-24)
+
+The text half is delivered. Paths in the spec above predate the renames:
+`packages/ui` is `packages/core`, `kontrast.test.ts` is `contrast.test.ts`,
+and the `OFFEN` list is `OPEN` in `packages/demo/checks/accessibility.ts`.
+
+- **`--u-color-danger-text: light-dark(#b13636, #d86f66)`** in `tokens.css`.
+  `--u-color-danger` was not darkened as proposed: the surface half was already
+  solved by `--u-color-on-danger` flipping polarity, so the surface keeps its
+  value. Measured (text on subtle / surface / page ground): light 5.20 / 6.09 /
+  5.83, dark 4.93 / 5.49 / 5.83.
+- **Every `color:` that drew danger as type** now reads the text token, in core
+  (Alert title, Badge, Tag, FormField error and required mark, Textarea count,
+  Menu, MultiSelect chip, Stat verdict and freshness), table (verdict column,
+  alarm list freshness), schedule (tooltip finding), calculation (worst
+  verdict, freshness) and the demo shell (required mark in the API table).
+  Borders, focus rings, the danger button surface, DataViz fills, the Toast
+  icon and the schedule's canvas stay on `--u-color-danger`.
+- **Warning and success** pass as they are and got no text token: light
+  warning 5.07 / 5.81 / 5.57, dark 6.56 / 7.71 / 8.17; light success
+  4.64 / 5.32 / 5.09, dark 5.89 / 6.61 / 7.00. Their pairs are now held at
+  4.5:1 in both themes; the light warning exception (3:1) is struck, its value
+  had been fixed before.
+- `contrast.test.ts` checks all nine tone-as-text pairs at 4.5:1; `OPEN` is
+  empty.
+- **Baselines:** the core suite (light and dark) passes at the repo's
+  tolerance without an update - the dark danger text moves ~150 px per image,
+  under 0.1 %. None were rewritten. The dark baselines of table, schedule and
+  calculation were not run here.

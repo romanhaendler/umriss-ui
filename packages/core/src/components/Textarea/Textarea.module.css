@@ -89,6 +89,6 @@
 
   /* Exceeded: the number carries the message, not a second element. */
   .countOver {
-    color: var(--u-color-danger);
+    color: var(--u-color-danger-text);
   }
 }

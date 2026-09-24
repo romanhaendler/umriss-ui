@@ -235,7 +235,7 @@
   }
 
   .tooltip .finding {
-    color: var(--u-color-danger);
+    color: var(--u-color-danger-text);
   }
 
   /* The present, in the time band: where the line on the plot meets the axis. */
