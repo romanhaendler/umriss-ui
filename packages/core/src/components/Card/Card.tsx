@@ -1,4 +1,4 @@
-import { createContext, useContext, useId, useState } from "react";
+import { createContext, forwardRef, useContext, useId, useState } from "react";
 import type { HTMLAttributes, ReactNode } from "react";
 import { cx } from "../../lib/cx";
 import styles from "./Card.module.css";
@@ -25,18 +25,15 @@ export interface CardProps extends HTMLAttributes<HTMLElement> {
   defaultCollapsed?: boolean;
 }
 
-export function Card({
-  collapsible = false,
-  defaultCollapsed = false,
-  className,
-  children,
-  ...rest
-}: CardProps) {
+export const Card = forwardRef<HTMLElement, CardProps>(function Card(
+  { collapsible = false, defaultCollapsed = false, className, children, ...rest },
+  ref,
+) {
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const bodyId = useId();
 
   return (
-    <section className={cx(styles.card, className)} {...rest}>
+    <section ref={ref} className={cx(styles.card, className)} {...rest}>
       <CardContext.Provider
         value={{ collapsible, collapsed, toggle: () => setCollapsed((value) => !value), bodyId }}
       >
@@ -44,7 +41,7 @@ export function Card({
       </CardContext.Provider>
     </section>
   );
-}
+});
 
 /* ------------------------------------------------------------------ */
 /* CardHeader                                                          */
@@ -66,12 +63,15 @@ export interface CardHeaderProps extends Omit<HTMLAttributes<HTMLDivElement>, "t
   divider?: boolean;
 }
 
-export function CardHeader({ title, eyebrow, actions, divider = false, className, ...rest }: CardHeaderProps) {
+export const CardHeader = forwardRef<HTMLDivElement, CardHeaderProps>(function CardHeader(
+  { title, eyebrow, actions, divider = false, className, ...rest },
+  ref,
+) {
   const card = useContext(CardContext);
   const wording = useWording();
 
   return (
-    <div className={cx(styles.header, divider && styles.divider, className)} {...rest}>
+    <div ref={ref} className={cx(styles.header, divider && styles.divider, className)} {...rest}>
       <div className={styles.headerText}>
         {eyebrow && <span className={styles.eyebrow}>{eyebrow}</span>}
         <h2 className={styles.title}>{title}</h2>
@@ -92,10 +92,10 @@ export function CardHeader({ title, eyebrow, actions, divider = false, className
       </div>
     </div>
   );
-}
+});
 
 /* ------------------------------------------------------------------ */
-/* CardBody                                                            */
+/* CardBody                                                          */
 /* ------------------------------------------------------------------ */
 
 export interface CardBodyProps extends HTMLAttributes<HTMLDivElement> {
@@ -103,11 +103,17 @@ export interface CardBodyProps extends HTMLAttributes<HTMLDivElement> {
   flush?: boolean;
 }
 
-export function CardBody({ flush = false, className, children, ...rest }: CardBodyProps) {
+/* Collapsible, the body stands inside the two wrappers of the fold; the ref
+   goes with the class to the body itself, the element a caller dresses. */
+export const CardBody = forwardRef<HTMLDivElement, CardBodyProps>(function CardBody(
+  { flush = false, className, children, ...rest },
+  ref,
+) {
   const card = useContext(CardContext);
 
   const body = (
     <div
+      ref={ref}
       id={card?.bodyId}
       className={cx(styles.body, flush && styles.flush, className)}
       {...rest}
@@ -129,4 +135,4 @@ export function CardBody({ flush = false, className, children, ...rest }: CardBo
       </div>
     </div>
   );
-}
+});
