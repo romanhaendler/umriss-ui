@@ -274,13 +274,13 @@ export type Line<Z> =
  * The lines of the groups for a set of folded paths. The form of a group
  * follows its level (ADR-0029): the outermost is always a header, carrying
  * every aggregate; below it, the innermost of several levels is a span, every
- * other a header. A group of one row does not fold.
+ * other a header. A group of one row is a group like any other.
  */
 export function linesOf<Z>(groups: readonly RowGroup<Z>[], folded: ReadonlySet<string>): Line<Z>[] {
   const lines: Line<Z>[] = [];
   const walk = (groups: readonly RowGroup<Z>[], parents: readonly RowGroup<Z>[]) => {
     for (const group of groups) {
-      const shut = folded.has(group.path) && group.rows.length > 1;
+      const shut = folded.has(group.path);
       if (group.groups.length === 0 && group.level === 0) {
         /* A single level: the header, and its rows plain beneath it. */
         lines.push({ kind: "header", group, parents, continued: false });

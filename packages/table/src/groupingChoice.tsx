@@ -6,9 +6,10 @@
    by Line › Customer" -, not a tag per level: the order of the levels is what
    a reader must see, and two tags that look alike say nothing about it. */
 
-import { Menu, MenuItem, MenuSeparator, Tag, useWording } from "@umriss-ui/core";
+import { Menu, MenuItem, MenuSeparator, Tag, TagGroup, useWording } from "@umriss-ui/core";
 import type { HookSnapshot, Registry } from "./registry";
 import { MOST_LEVELS } from "./model/grouping";
+import { cx } from "./cx";
 import styles from "./Table.module.css";
 
 const labelOf = (registry: Registry, hook: HookSnapshot, id: string): string =>
@@ -60,11 +61,13 @@ export function GroupingTag({ registry, hook }: { registry: Registry; hook: Hook
   if (grouping.length === 0) return null;
   const labels = grouping.map((id) => labelOf(registry, hook, id));
   return (
-    <div role="group" aria-label={wording.groupedBy} className={styles.groupingTag}>
+    /* In a tag group, as the conditions stand: the tag is one stop, its button
+       the thing one tabs to, and the ring stands on the tag. */
+    <TagGroup aria-label={wording.groupedBy} className={styles.groupingTag}>
       <Tag onRemove={() => snapshot.setGrouping([])} removeLabel={wording.removeGrouping}>
         <Menu
           trigger={
-            <button type="button" className={styles.conditionButton}>
+            <button type="button" className={cx(styles.conditionButton, styles.groupingTrigger)}>
               <span className={styles.groupingPrefix}>{wording.groupedBy}</span>
               {labels.map((label, i) => (
                 <span key={grouping[i]} className={styles.groupingPath}>
@@ -89,6 +92,6 @@ export function GroupingTag({ registry, hook }: { registry: Registry; hook: Hook
           <MenuItem onSelect={snapshot.foldAll}>{wording.foldAll}</MenuItem>
         </Menu>
       </Tag>
-    </div>
+    </TagGroup>
   );
 }

@@ -15,11 +15,11 @@ export default function WhyGrouping() {
         itself while the user filters would be harder to read than either form. See <code>docs/adr/0029-a-row-groups-form-follows-its-level.md</code>.
       </p>
 
-      <h3>A group of one row is that row</h3>
+      <h3>A group of one row is a group like any other</h3>
       <p>
-        It has nothing to fold, and a count of one and aggregates that repeat its own values would
-        be noise. It keeps the fold's empty slot, so that the text of every level still starts on
-        one vertical.
+        It has its fold, its count and its aggregates. A first version left them out – a count of
+        one seemed noise – and in the rendered table its header was the one without a figure in a
+        column of figures. A rule without exceptions reads faster than one that is sometimes right.
       </p>
 
       <h3>Grouped from the column menu, not from a bar to drag onto</h3>

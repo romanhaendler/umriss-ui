@@ -44,9 +44,9 @@ function GroupValue({ entry, group, formats, wording }: { entry: ColumnEntry | u
   return <>{groupText(entry, group.value, formats, wording)}</>;
 }
 
-/** The fold of a group - or, for a group of one row, the empty slot that keeps
-    every level's text on one vertical. The arrows fold as in a tree: left
-    folds, or goes to the group around it; right unfolds. */
+/** The fold of a group - of every group, one of a single row as well. The
+    arrows fold as in a tree: left folds, or goes to the group around it;
+    right unfolds. */
 function Fold({
   group,
   parent,
@@ -71,7 +71,6 @@ function Fold({
   useLayoutEffect(() => {
     if (button.current && registry.takeFoldFocus(group.path)) button.current.focus();
   });
-  if (group.rows.length < 2) return <span className={styles.foldSlot} aria-hidden="true" />;
   const name = groupText(entry, group.value, formats, wording);
   const count = formats.count(group.rows.length);
   const toggle = () => {
@@ -159,7 +158,7 @@ function foldSiblings(group: RowGroup<unknown>, open: boolean, hook: HookSnapsho
   const siblings: RowGroup<unknown>[] = [];
   const walk = (groups: readonly RowGroup<unknown>[]) => {
     for (const g of groups) {
-      if (g.level === group.level && g.rows.length > 1) siblings.push(g);
+      if (g.level === group.level) siblings.push(g);
       else walk(g.groups);
     }
   };
@@ -193,17 +192,17 @@ export function SpanCell({
     <td className={cx(styles.td, styles.spanCell)}>
       {line.first && (
         <span className={styles.spanValue}>
-          {selectable && group.rows.length > 1 && (
+          {selectable && (
             <span className={styles.spanSelect}>
               <GroupCheckbox group={group} entry={entry} hook={hook} formats={formats} wording={wording} />
             </span>
           )}
           <Fold group={group} parent={line.parents.at(-1)} entry={entry} open registry={registry} hook={hook} formats={formats} wording={wording} />
-          <span className={styles.spanText}>
+          <span className={styles.spanText} title={groupText(entry, group.value, formats, wording)}>
             <GroupValue entry={entry} group={group} formats={formats} wording={wording} />
             {line.continued && <span className={styles.continued}>{wording.groupContinued}</span>}
           </span>
-          {group.rows.length > 1 && <span className={styles.groupCount}>{formats.count(group.rows.length)}</span>}
+          <span className={styles.groupCount}>{formats.count(group.rows.length)}</span>
         </span>
       )}
     </td>
@@ -254,7 +253,6 @@ export function GroupLine({
   const { group } = line;
   const header = line.kind === "header";
   const open = header && !hook.publicSnapshot.folded.includes(group.path);
-  const single = group.rows.length < 2;
   /* The leading columns without an aggregate: a group header's label stretches over
      them, a folded span's "3 entries" stands in them. */
   const leading = columns.findIndex((e) => e.spec.aggregate !== undefined);
@@ -271,7 +269,7 @@ export function GroupLine({
       <span className={styles.groupValue}>
         <GroupValue entry={levelEntry} group={group} formats={formats} wording={wording} />
       </span>
-      {!single && <Count value={group.rows.length} formats={formats} />}
+      <Count value={group.rows.length} formats={formats} />
       {header && line.continued && <span className={styles.continued}>{wording.groupContinued}</span>}
     </span>
   );
@@ -289,13 +287,13 @@ export function GroupLine({
       data-index={index}
       style={header ? ({ "--u-header-level": group.level } as CSSProperties) : undefined}
       aria-level={header ? group.level + 1 : depth}
-      aria-expanded={single ? undefined : open}
+      aria-expanded={open}
       aria-posinset={siblings.indexOf(group) + 1 || undefined}
       aria-setsize={siblings.length || undefined}
     >
       {Array.from({ length: controlColumns }, (_, i) => (
         <td key={`c${i}`} className={cx(styles.td, styles.control)}>
-          {i === 0 && selectable && header && !single && (
+          {i === 0 && selectable && header && (
             <GroupCheckbox group={group} entry={levelEntry} hook={hook} formats={formats} wording={wording} />
           )}
         </td>
@@ -332,11 +330,10 @@ export function GroupLine({
           key={entry.key}
           entry={entry}
           group={group}
-          share={header && !single && entry === shareColumn}
+          share={header && entry === shareColumn}
           total={total}
           formats={formats}
           wording={wording}
-          shown={!single}
         />
       ))}
       {hasActions && <td className={styles.td} />}
@@ -351,7 +348,6 @@ function AggregateCell({
   total,
   formats,
   wording,
-  shown,
 }: {
   entry: ColumnEntry;
   group: RowGroup<unknown>;
@@ -359,10 +355,9 @@ function AggregateCell({
   total: readonly unknown[];
   formats: Formats;
   wording: Wording;
-  shown: boolean;
 }) {
   const { spec } = entry;
-  if (!spec.aggregate || !shown) return <td className={styles.td} />;
+  if (!spec.aggregate) return <td className={styles.td} />;
   let bar: ReactNode = null;
   if (share && spec.aggregate === "sum" && spec.share !== false) {
     const whole = aggregate({ id: spec.id, read: entry.read, aggregate: "sum" }, total);
