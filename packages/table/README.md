@@ -5,9 +5,9 @@ against the rows they came from. The hook binds the row kind once and hands back
 the `Table` and the `Column` that belong to it, so a column can only name a
 field the row actually has.
 
-Filtering, sorting, paging, selection, row detail, row actions, column widths
-and virtualisation are in the model, not in the markup — and the model is a pure
-module with tests of its own.
+Filtering, sorting, grouping, aggregates, paging, selection, row detail, row
+actions, column widths and virtualisation are in the model, not in the markup —
+and the model is a pure module with tests of its own.
 
 ## Install
 
@@ -56,6 +56,29 @@ column.
 
 A table wider than its place scrolls in its own frame, never the page; on a
 phone the toolbar and the paging bar wrap instead of running out of it.
+
+## Grouped, in one option
+
+```tsx
+const { Table, Column } = useTable(orders, {
+  rowKey: (o) => o.number,
+  defaultGrouping: ["line", "customer"],
+});
+
+<Table ariaLabel="Orders by line and customer">
+  <Column value="customer" label="Customer" />
+  <Column value="number" label="Order" rowHeader />
+  <Column value="line" label="Line" />
+  <Column value="quantity" label="Quantity" aggregate="sum" />
+</Table>;
+```
+
+Each line gets a group header with its count and its sum under the Quantity
+column; the customers stand beside their orders as a span (ADR-0029). Without
+`defaultGrouping` the user groups from the column menu. `aggregate` takes `sum`,
+`avg`, `min`, `max`, `range`, `count`, `distinct` or a function of one's own, and
+is the footer over the filtered set as well — it used to be called `footer`,
+and the old name still works for this version.
 
 ## Styles
 
