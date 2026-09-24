@@ -47,6 +47,14 @@ Needs the `@umriss-ui/core` that carries the availability wording (its own
   filtered set are hidden. The model still removes nothing.
 - **An `availability` column** in `alarmColumns` / `ALARM_COLUMNS` (its label
   from `wording.columnAvailability`), valued by rank like the priority.
+- **`<AlarmList>` shows what is hidden from operation**: the row stays,
+  drawn neutrally - no edge, the priority a word without its colour, the type
+  muted - with its availability as a word before its lifecycle ("Shelved until
+  11:10 by M. Keller"). The bar counts them ("Hidden from operation: 3").
+- **`hiddenOnly` and `onHiddenOnlyChange` on `<AlarmList>`**: with the
+  handler the count becomes a switch for the view; the application filters
+  with the table's own `filter` and `isHiddenFromOperation`. The switch stays
+  while the view is on, even at zero.
 
 ### Changed
 
@@ -55,6 +63,9 @@ Needs the `@umriss-ui/core` that carries the availability wording (its own
   availability of their own move.
 - **`standingUnacknowledged` counts only alarms in service.** The live figure
   calls somebody over; it must not call them to a shelved alarm.
+- **A done alarm's row (`keepDone`) is muted as it always claimed to be.**
+  Its colour stood on the row, and the table's cells set their own; it now
+  stands on the cells.
 - **`Alarm` is a type, no longer an interface** - the union with the shelf
   needs it. `Partial<Alarm>` spread into an `Alarm` no longer compiles; name
   the fields you mean (`Pick<Alarm, "cleared" | "acknowledgedAt">`).

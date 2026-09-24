@@ -20,16 +20,23 @@
    gets switched off, and then it reports nothing at all any more.
 
    The table neither sorts nor pages here: the order - the worst first - the
-   alarm model has already established, and no column is sortable. */
+   alarm model has already established, and no column is sortable.
+
+   An alarm hidden from operation - shelved, suppressed by design, out of
+   service (alarm-standards 02) - stays in the list too. It is drawn neutrally:
+   no edge, its priority a word without its colour, its type muted, and its
+   state stands there as a word. Colour is for what needs somebody now, and a
+   hidden alarm is a decision already taken; that it exists is not. "Not
+   absent, only deliberately hidden." */
 
 import { useMemo } from "react";
 import type { HTMLAttributes } from "react";
-import { Badge, Button, useFreshness, useDensityFor, useFormats, useWording } from "@umriss-ui/core";
-import type { FreshnessAges, FreshnessReading, Wording } from "@umriss-ui/core";
+import { Badge, Button, Checkbox, useFreshness, useDensityFor, useFormats, useWording } from "@umriss-ui/core";
+import type { Formats, FreshnessAges, FreshnessReading, Wording } from "@umriss-ui/core";
 import { useTable } from "../index";
 import type { TableSelection } from "../index";
-import { countAcknowledgeable } from "./alarmModel";
-import type { AlarmProjection, LifecycleState, Priority } from "./alarmModel";
+import { countAcknowledgeable, isHiddenFromOperation } from "./alarmModel";
+import type { AlarmProjection, AlarmRow, LifecycleState, Priority } from "./alarmModel";
 import styles from "./AlarmList.module.css";
 
 /* The props carry the names from library-audit 09. With ADR-0018 the
@@ -56,6 +63,13 @@ export interface AlarmListProps extends Omit<HTMLAttributes<HTMLDivElement>, "ch
       statement the density of the `UmrissProvider`, without a setting
       "compact". */
   density?: "regular" | "compact";
+  /** The view "hidden from operation" is on. The list does not filter - the
+      projection does, with the table's own `filter` and
+      `isHiddenFromOperation`; this only says what the switch shows. */
+  hiddenOnly?: boolean;
+  /** Offers the view as a switch beside its count. Without it the count
+      stands as text. */
+  onHiddenOnlyChange?: (hiddenOnly: boolean) => void;
 }
 
 function lifecycleWord(state: LifecycleState, wording: Wording): string {
@@ -68,6 +82,25 @@ function lifecycleWord(state: LifecycleState, wording: Wording): string {
       return wording.lifecycleClearedUnacknowledged;
     default:
       return wording.lifecycleClearedAcknowledged;
+  }
+}
+
+/** The availability as a word - none while in service, which is the normal
+    case and says nothing. */
+function availabilityWord(row: AlarmRow, wording: Wording, formats: Formats): string | null {
+  switch (row.availability) {
+    case "shelved": {
+      const shelf = row.alarm.shelf;
+      // ponytail: the end as a time of day - a shelf spans a shift, not days;
+      // a date beside it when shelves grow longer.
+      return shelf ? wording.availabilityShelved(formats.time(new Date(shelf.until), false), shelf.by) : null;
+    }
+    case "suppressed-by-design":
+      return wording.availabilitySuppressedByDesign;
+    case "out-of-service":
+      return wording.availabilityOutOfService;
+    default:
+      return null;
   }
 }
 
@@ -122,6 +155,8 @@ function Body({
   density: ownDensity,
   className,
   freshness,
+  hiddenOnly = false,
+  onHiddenOnlyChange,
   ...rest
 }: BodyProps & { freshness: FreshnessReading | null }) {
   const wording = useWording();
@@ -167,6 +202,20 @@ function Body({
             {freshness.age !== null && ` · ${formats.relative(freshness.age)}`}
           </span>
         )}
+        {/* The switch stays while the view is on, even at zero - or the way
+            back would vanish with the last hidden alarm. */}
+        {onHiddenOnlyChange !== undefined && (projection.hiddenFromOperation > 0 || hiddenOnly) ? (
+          <Checkbox
+            className={styles.hidden}
+            checked={hiddenOnly}
+            onChange={(event) => onHiddenOnlyChange(event.currentTarget.checked)}
+            label={wording.hiddenFromOperation(projection.hiddenFromOperation)}
+          />
+        ) : (
+          projection.hiddenFromOperation > 0 && (
+            <span className={styles.hidden}>{wording.hiddenFromOperation(projection.hiddenFromOperation)}</span>
+          )
+        )}
         <span className={styles.filler} />
         {selection !== undefined && onAcknowledge !== undefined && (
           <Button variant="primary" size="sm" disabled={acknowledgeable === 0} onClick={() => onAcknowledge(affected)}>
@@ -187,7 +236,12 @@ function Body({
         selectable={selection !== undefined}
         density={density}
         stickyHeader
-        rowProps={(row) => ({ className: styles.row, "data-lifecycle": row.lifecycle, "data-priority": row.priority })}
+        rowProps={(row) => ({
+          className: styles.row,
+          "data-lifecycle": row.lifecycle,
+          "data-priority": row.priority,
+          "data-availability": row.availability,
+        })}
         /* Empty on a standing line means quiet. Empty on a dead line means
            nothing at all – and that is something else. */
         empty={<span className={styles.empty}>{disconnected ? wording.noAlarmsDisconnected : wording.noAlarms}</span>}
@@ -206,11 +260,26 @@ function Body({
           )}
         </Column>
         <Column value="lifecycle" label={wording.columnLifecycleState} sortable={false}>
-          {/* The state stands there as a word. Colour alone carries nothing. */}
-          {(state) => <span className={styles.lifecycle}>{lifecycleWord(state, wording)}</span>}
+          {/* The state stands there as a word. Colour alone carries nothing.
+              A hidden alarm names its availability first and keeps its
+              lifecycle beside it: shelving changes neither the condition nor
+              whether anybody acknowledged it. */}
+          {(state, row) => {
+            const availability = availabilityWord(row, wording, formats);
+            return (
+              <>
+                {availability !== null && <span className={styles.availability}>{availability}</span>}
+                <span className={styles.lifecycle}>{lifecycleWord(state, wording)}</span>
+              </>
+            );
+          }}
         </Column>
         <Column value="priority" label={wording.columnPriority} sortable={false}>
-          {(p) => <Badge tone={priorityTone(p)}>{priorityWord(p, wording)}</Badge>}
+          {(p, row) => (
+            <Badge tone={isHiddenFromOperation(row.availability) ? "neutral" : priorityTone(p)}>
+              {priorityWord(p, wording)}
+            </Badge>
+          )}
         </Column>
         <Column
           id="raised"
