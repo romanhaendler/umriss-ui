@@ -95,6 +95,46 @@ Every value lives as a CSS custom property (`--u-*`) in `src/styles/tokens.css`,
 the cascade layer `umriss.tokens`; an application overrides it outside a layer.
 Components reach for tokens only – never for raw values.
 
+## Colour for the abnormal (ISA-101)
+
+ISA-101, the standard for high-performance operator screens, asks for what
+"Ink & Paper" already does: a grey base, and colour reserved for the abnormal,
+so that the one red thing on a screen is found in the corner of an eye. umriss
+names the rule here so that it stays deliberate (the norm text is paywalled;
+what umriss takes from it, and from which secondary sources, stands in
+[`standards.md`](standards.md)).
+
+**Grey is the normal state.** Ink on paper, the accent only for what can be
+operated. A value inside its limits, an alarm in service and acknowledged, a
+fresh reading - none of them needs a colour, and none gets one beyond the
+muted "ok" of a verdict word.
+
+**Colour is for the abnormal.** Danger, warning and success come from the
+verdict, the lifecycle or the freshness - never from a component's wish to look
+lively. A hidden alarm (shelved, suppressed, out of service) is a decision
+already taken and is drawn without its colour: neutral, but there, with its
+state as a word.
+
+**Never colour alone.** Every verdict colour stands beside a word or a glyph
+that says the same thing - the lifecycle written out beside its edge, the
+verdict glyph with a shape per verdict, the toast's tick and cross. A reader
+who cannot tell red from green, a grey-scale print and a screen reader lose
+nothing.
+
+**Where umriss departs, and why.** The danger button and a menu's destructive
+item are red for a *consequence*, not for an abnormal state; their label names
+the action. The "ok" verdict is tinted green on its word, where a strict
+ISA-101 screen would leave normal grey - it is a verdict the caller asked for,
+not the resting state of the screen.
+
+**The check.** `packages/core/tests-unit/verdictColour.test.ts` keeps a
+register of every stylesheet of the library that reaches for a verdict colour,
+each with what carries its meaning without the colour; a new one fails until
+that is written down. It is per stylesheet, not per rule, and it cannot see
+the caller's content: a badge of tone "danger" with no children is colour
+alone, and only the caller can prevent it. The alarm list and the verdict
+column hold their promise beyond the register, in their component tests.
+
 ## Dark theme
 
 The dark theme is the standard `color-scheme`, not an attribute of the library.

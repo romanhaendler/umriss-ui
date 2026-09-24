@@ -526,6 +526,33 @@ A run of alarms exceeding a rate over a window. It is **marked**, never
 suppressed: deciding a human should not see an alarm is a safety decision.
 _Avoid_: burst, storm, Schwall
 
+**Availability**:
+Whether an alarm is in front of the operator: one field with four values —
+in service, **Shelved**, **Suppressed by design**, **Out of service** (the
+special states of ISA-18.2). A second field beside the **Lifecycle state** and
+never merged into it, because the two answer different questions and a hidden
+alarm keeps its lifecycle underneath. Everything but in service is *hidden from
+operation*: still in the list, drawn neutrally with its state as a word, and
+counted — never removed.
+_Avoid_: enabled, active, muted, inhibited, Sperre
+
+**Shelved**:
+Taken out of the way by an operator, for a time and under a name: a shelf has
+an end (`until`) and a person (`by`), and an alarm shelved without either
+cannot be written down. It returns to service when the as-of time reaches the
+end — by the model's clock, not by a timer.
+_Avoid_: snoozed, silenced, parked
+
+**Suppressed by design**:
+Hidden by the plant's own logic — a pump that is off raises no low-flow alarm.
+The application writes it from that logic; the model has no transition for it.
+_Avoid_: filtered, masked, Unterdrückung (alone)
+
+**Out of service**:
+Taken out of operation for maintenance or repair, until returned to service.
+The strongest of the three: a shelf does not overwrite it.
+_Avoid_: disabled, offline, deactivated
+
 ### Operating time
 
 **Operating time**:
