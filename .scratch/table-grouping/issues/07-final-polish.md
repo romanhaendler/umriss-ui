@@ -1,6 +1,6 @@
 # 07 — The final round on the look: to the last spark
 
-Status: ready-for-human
+Status: done
 Type: task
 
 Blocked by: 04, 05, 06

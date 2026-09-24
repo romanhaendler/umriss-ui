@@ -750,7 +750,7 @@ The rows of the filtered set that share one grouping value on one level of the
 grouping. Rows whose value is absent form a group of their own, which stands last.
 Its form follows its level and nothing else: the outermost level is always a
 **Group header**, the innermost of several levels a **Group span** (ADR-0029).
-A group of one row does not fold and has no count and no aggregate.
+A group of one row is a group like any other.
 _Avoid_: group on its own, bucket, category, Kategorie
 
 **Group header**:

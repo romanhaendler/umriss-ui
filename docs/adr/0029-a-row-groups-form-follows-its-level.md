@@ -26,8 +26,10 @@ a folded header hides its rows, a folded span becomes one line carrying its
 aggregates in the columns, so folding everything turns a grouped table into a
 summary of its groups.
 
-A group of one row does not fold, and has no count and no aggregate that would
-only repeat its value; as a span it is simply that row.
+A group of one row is a group like any other: it folds, it counts its one row,
+and its header carries its aggregates. It once was "that row" - no fold, no
+count, no sum -, and seen rendered, its header was the one without a figure in
+a column of figures: a special case that read as a fault.
 
 **Aggregates stand in lines, always under their columns.** A group's sums are
 in its group header, in its folded line and - for the whole - in the footer. An

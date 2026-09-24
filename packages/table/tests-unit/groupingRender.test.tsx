@@ -83,9 +83,9 @@ describe("group headers and spans", () => {
     const [, first, second, kessler] = lines(container);
     expect(first!.cells[0]!.textContent).toBe("Brenner GmbH2");
     expect(second!.cells[0]!.textContent).toBe("");
-    // A group of one row is that row: no fold, no count.
-    expect(kessler!.cells[0]!.textContent).toBe("Kessler AG");
-    expect(within(kessler!.cells[0]!).queryByRole("button")).toBeNull();
+    // A group of one row is a group like any other: its fold and its count.
+    expect(kessler!.cells[0]!.textContent).toBe("Kessler AG1");
+    expect(within(kessler!.cells[0]!).getByRole("button", { name: "Fold Kessler AG, 1" })).toBeTruthy();
   });
 });
 
@@ -102,8 +102,9 @@ describe("folding", () => {
     const { container } = render(<Orders />);
     act(() => current!.foldAll());
     expect(kinds(container)).toEqual(["header", "header", "header"]);
+    // Folded all the way, the customers inside Line 3 stay folded when it opens.
     fireEvent.click(screen.getByRole("button", { name: "Unfold Line 3, 3" }));
-    expect(kinds(container)).toEqual(["header", "header", "header", "row", "row", "row"]);
+    expect(kinds(container)).toEqual(["header", "header", "header", "folded", "folded", "folded"]);
   });
 });
 
@@ -139,8 +140,8 @@ describe("selecting a group (table-grouping 05)", () => {
     expect((screen.getByRole("checkbox", { name: "Select Line 1" }) as HTMLInputElement).indeterminate).toBe(true);
     fireEvent.click(otto);
     expect(current!.selection.count).toBe(3);
-    // A group of one row is selected by its row's own box.
-    expect(screen.queryByRole("checkbox", { name: "Select Kessler AG" })).toBeNull();
+    // A group of one row has its box like every other.
+    expect(screen.getAllByRole("checkbox", { name: "Select Kessler AG" })).toHaveLength(2);
   });
 });
 
@@ -185,8 +186,8 @@ describe("all siblings at once, and a virtual window (table-grouping 04, 05)", (
     const brenner = screen.getByRole("button", { name: "Fold Brenner GmbH, 2" });
     brenner.focus();
     fireEvent.keyDown(brenner, { key: "ArrowLeft", altKey: true });
-    // Brenner and Otto on Line 1, Lindner on Line 2 - the groups of one order do not fold.
-    expect(current!.folded).toHaveLength(3);
+    // Every customer group on every line - three, three and three.
+    expect(current!.folded).toHaveLength(9);
     expect(document.activeElement).toBe(screen.getByRole("button", { name: "Unfold Brenner GmbH, 2" }));
     fireEvent.keyDown(document.activeElement!, { key: "ArrowRight", altKey: true });
     expect(current!.folded).toHaveLength(0);

@@ -181,9 +181,9 @@ describe("lines – what a grouped table shows", () => {
     expect(shape(linesOf(groups, new Set(groups.map((g) => g.path))))).toEqual(["H Line 1", "H Line 2", "H Line 3"]);
   });
 
-  it("does not fold a group of one row – it is that row", () => {
+  it("folds a group of one row like any other - no special case", () => {
     const kessler = groups[0]!.groups[1]!.path;
-    expect(shape(linesOf(groups, new Set([kessler])))[3]).toBe("S Kessler AG · A-1052");
+    expect(shape(linesOf(groups, new Set([kessler])))[3]).toBe("F Kessler AG");
   });
 
   it("makes one level a group header over its rows - the outer level is always one", () => {

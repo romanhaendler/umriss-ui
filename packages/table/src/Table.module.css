@@ -645,6 +645,14 @@
     display: contents;
   }
 
+  /* The trigger rings itself: the tag around it is a stop of its own (it
+     removes the grouping with Delete), and a ring that stayed on the tag while
+     the focus moved in would show no step at all. */
+  .groupingTrigger:focus-visible {
+    border-radius: var(--u-radius-xs);
+    box-shadow: var(--u-focus-ring);
+  }
+
   .groupingPrefix {
     margin-right: 0.4em;
     color: var(--u-color-text-secondary);
@@ -713,6 +721,9 @@
   /* The span's value stays in view while its group scrolls, and the next
      group's first row lays itself over it. */
   .sticky tbody tr[data-group-first] > .spanCell {
+    /* A surface of its own: the next group's value slides over this one, and
+       without it the two read through each other. */
+    background: var(--u-color-surface);
     position: sticky;
     top: calc(var(--u-table-head, 0px) + var(--u-header-levels, 0) * var(--u-table-group-header, 0px));
   }
@@ -769,6 +780,12 @@
     min-width: 0;
   }
 
+  /* A long value is cut, not allowed to widen the span until every other
+     column wraps; its full text stands in the title. */
+  .spanValue {
+    max-width: min(18rem, 45vw);
+  }
+
   .spanText,
   .groupValue {
     min-width: 0;
@@ -811,6 +828,12 @@
     background-position: calc(var(--u-space-3) + 7px) 0;
   }
 
+  /* The span of the third level steps in with the second, so that its fold
+     does not sit on the guide. */
+  .table[data-depth="3"] tbody tr:not(.groupHeader) > .spanCell {
+    padding-left: calc(var(--u-space-3) + 20px);
+  }
+
   .table[data-depth="3"] tbody tr.groupHeader[data-level="1"] > .td:not(.control) ~ .td {
     background-image: none;
   }
@@ -829,21 +852,12 @@
     color: var(--u-color-text-muted);
   }
 
-  /* One fold slot of 20 px on every level: the button, or the empty slot of a
-     group of one row. */
-  .fold,
-  .foldSlot {
+  /* One fold slot of 20 px on every level. */
+  .fold {
     flex: none;
     width: 16px;
     height: 16px;
     margin-right: 4px;
-  }
-
-  .foldSlot {
-    display: inline-block;
-  }
-
-  .fold {
     display: inline-grid;
     place-items: center;
     padding: 0;

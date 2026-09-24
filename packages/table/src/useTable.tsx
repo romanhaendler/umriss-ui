@@ -131,12 +131,12 @@ const listOf = (grouping: string | readonly string[] | undefined): string[] =>
 
 const sameList = (a: readonly string[], b: readonly string[]): boolean => a.length === b.length && a.every((id, i) => id === b[i]);
 
-/** The paths of every group that can fold - one of a single row cannot. */
+/** The paths of every group - each one folds, one of a single row as well. */
 function foldablePaths(groups: readonly RowGroup<unknown>[] | undefined): string[] {
   const out: string[] = [];
   const walk = (groups: readonly RowGroup<unknown>[]) => {
     for (const group of groups) {
-      if (group.rows.length > 1) out.push(group.path);
+      out.push(group.path);
       walk(group.groups);
     }
   };

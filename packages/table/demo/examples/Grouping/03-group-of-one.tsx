@@ -1,13 +1,12 @@
 import { useTable } from "../../../src";
 
-export const title = "A group of one is its row";
+export const title = "A group of one row";
 
-/* Lines, and within them customers, most of whom have a single order. A
-   header above each customer would double the table; a fold that folds one
-   row away would fold nothing. So the customers are the span - the innermost
-   of two levels -, and a group of one row is that row: its value stands in
-   the span, without a fold and without a count. Only Brenner GmbH, with three
-   orders, can fold. */
+/* Lines, and within them customers, most of whom have a single order. The
+   customers are the span - the innermost of two levels -, so a customer with
+   one order costs no line of its own. And a group of one row is a group like
+   any other: it has its fold, its count and its box. A special case that left
+   them out read as a fault among the groups beside it. */
 
 interface Order {
   id: string;
