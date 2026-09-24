@@ -52,6 +52,7 @@ import { withContinuation } from "./model/grouping";
 import type { Line } from "./model/grouping";
 import { GroupLine, SpanCell } from "./groupLines";
 import { Absent, AggregateValue, aggregateIsNumeric } from "./aggregateValue";
+import { useLineMotion } from "./motion";
 import styles from "./Table.module.css";
 
 /* The props as they arrive at runtime. The types at the call site (types.ts) are
@@ -368,7 +369,15 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
     const band = table.querySelector("tr[data-line='header']")?.getBoundingClientRect().height ?? 0;
     table.style.setProperty("--u-table-head", `${head}px`);
     table.style.setProperty("--u-table-band", `${band}px`);
+    /* A virtual window draws its bands anew as it scrolls: marked again after
+       every render, not only on the scroll. */
+    if (table.parentElement) markStuck(table.parentElement);
   });
+
+  /* Regrouping and folding move the lines that stay; a virtual window does
+     not - its rows come and go with the scroll. */
+  const moving = registry.hook && !registry.hook.companion.virtual ? registry.hook.publicSnapshot : null;
+  useLineMotion(tableRef, moving ? `${moving.grouping.join("|")}#${moving.folded.join("|")}` : "");
 
   const hook = registry.hook;
   if (!hook) return null;
@@ -539,13 +548,17 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
   return (
     <div
       ref={virtual?.scrollRef}
-      onScroll={virtual?.onScroll}
+      onScroll={(event) => {
+        virtual?.onScroll();
+        if (lines && stickyHeader) markStuck(event.currentTarget);
+      }}
       className={styles.scroll}
       style={maxHeight ? { maxHeight } : undefined}
     >
       <table
         ref={tableRef}
         role={lines ? "treegrid" : undefined}
+        data-depth={lines ? grouping.length : undefined}
         style={lines ? ({ "--u-band-levels": grouping.length - 1 } as CSSProperties) : undefined}
         aria-label={ariaLabel}
         /* With virtualisation not every row stands in the document; plus one
@@ -636,6 +649,16 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
       </table>
     </div>
   );
+}
+
+/* A band that sticks gets its shadow step: it sticks when it stands higher than
+   its place in the flow would put it - measured against the row after it. */
+function markStuck(scroller: HTMLElement) {
+  for (const band of Array.from(scroller.querySelectorAll<HTMLTableRowElement>("tbody > tr[data-line='header']"))) {
+    const cell = band.cells[band.cells.length - 1];
+    const stuck = !!cell && cell.getBoundingClientRect().top > band.getBoundingClientRect().top + 0.5;
+    band.toggleAttribute("data-stuck", stuck);
+  }
 }
 
 /* ====================================================================== */
@@ -871,6 +894,7 @@ function Row({
         className={cx(rowClass, virtual && styles.virtualRow)}
         data-row={virtual ? absolute : undefined}
         data-line={line ? "row" : undefined}
+        data-motion={key}
         data-group-first={line?.first ? "" : undefined}
         aria-level={line ? line.parents.length + 1 : undefined}
         aria-posinset={line ? line.span.rows.indexOf(row) + 1 : undefined}
