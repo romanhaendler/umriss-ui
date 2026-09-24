@@ -115,7 +115,7 @@ bodies. Placement follows ownership: with the module it belongs to, and in
 | `lib/language/formats.ts` | date, time, number, percentage, collation, relative duration |
 | `lib/limit.ts` | limit, target value, assessment – four outcomes |
 | `lib/freshness.ts` | reading → fresh \| stale \| disconnected, and the cadence for it |
-| `table/alarms/alarmModel.ts` | lifecycle, order, frequency, flood, return band |
+| `table/alarms/alarmModel.ts` | lifecycle, availability and its four transitions, order, frequency, flood, return band |
 | `table/values.ts` | absent, the kind of a value, text without children, sort and export value |
 | `lib/language/wording.ts` | every text the library emits |
 | `Textarea/measure.ts` | the character counter and height clamping |

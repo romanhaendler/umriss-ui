@@ -368,6 +368,18 @@ export interface Wording {
       land in the column menu and the CSV header (`alarmColumns`). */
   columnAcknowledgement: string;
   columnAge: string;
+  /** The availability of an alarm (ISA-18.2's special states), written out.
+      The shelf names its end and who shelved it - a shelf is tracked, not
+      anonymous; the time comes from the formats. */
+  availabilityShelved: (until: string, by: string) => string;
+  availabilitySuppressedByDesign: string;
+  availabilityOutOfService: string;
+  /** "Hidden from operation: 3" - the count of the view, and its name where the
+      list offers the view as a switch. */
+  hiddenFromOperation: (count: number) => string;
+  /** The availability column of the alarm model: the column menu and the CSV
+      header, like the two above. */
+  columnAvailability: string;
 
   /* -------- Overlays and states ----------------------------------- */
   close: string;
@@ -676,6 +688,11 @@ export const DEFAULT_WORDING: Wording = {
   columnFrequency: "Frequency",
   columnAcknowledgement: "Acknowledgement",
   columnAge: "Age",
+  availabilityShelved: (until, by) => `Shelved until ${until} by ${by}`,
+  availabilitySuppressedByDesign: "Suppressed by design",
+  availabilityOutOfService: "Out of service",
+  hiddenFromOperation: (count) => `Hidden from operation: ${count}`,
+  columnAvailability: "Availability",
 
   close: "Close",
   closeToast: "Close message",

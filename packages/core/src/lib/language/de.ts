@@ -258,6 +258,11 @@ export const GERMAN_WORDING: Wording = {
   columnFrequency: "Häufigkeit",
   columnAcknowledgement: "Quittierung",
   columnAge: "Alter",
+  availabilityShelved: (until, by) => `Zurückgestellt bis ${until} von ${by}`,
+  availabilitySuppressedByDesign: "Planmäßig unterdrückt",
+  availabilityOutOfService: "Außer Betrieb",
+  hiddenFromOperation: (count) => `Aus der Bedienung genommen: ${count}`,
+  columnAvailability: "Verfügbarkeit",
 
   close: "Schließen",
   closeToast: "Meldung schließen",
