@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Grouping prototype</title>
+<link rel="stylesheet" href="../../../packages/core/src/styles/tokens.css">
+<style>
+@font-face { font-family: "Geist Sans"; font-weight: 400; src: url(fonts/sans-400.woff2); }
+@font-face { font-family: "Geist Sans"; font-weight: 500; src: url(fonts/sans-500.woff2); }
+@font-face { font-family: "Geist Mono"; font-weight: 400; src: url(fonts/mono-400.woff2); }
+body { margin: 0; padding: 32px; background: var(--u-color-bg); font-family: var(--u-font-sans); color: var(--u-color-text); }
+h2 { font-size: 15px; font-weight: 500; margin: 0 0 4px; }
+p.note { font-size: 12px; color: var(--u-color-text-secondary); margin: 0 0 12px; max-width: 760px; }
+section { margin-bottom: 40px; width: 900px; }
+.frame { background: var(--u-color-surface); border-radius: 8px; box-shadow: var(--u-edge); overflow: hidden; }
+.bar { display: flex; gap: 8px; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--u-hairline); font-size: 12px; color: var(--u-color-text-secondary); }
+.chip { display: inline-flex; gap: 6px; align-items: center; padding: 2px 8px; border-radius: 6px; background: var(--u-color-surface-sunken); color: var(--u-color-text); font-size: 12px; }
+.chip i { font-style: normal; color: var(--u-color-text-muted); }
+.bar .count { margin-left: auto; font-family: var(--u-font-mono); font-size: 11px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; font-size: 11px; font-weight: 500; letter-spacing: .07em; text-transform: uppercase; color: var(--u-color-text-secondary); padding: 8px; border-bottom: 1px solid var(--u-hairline-strong); }
+td { padding: 7px 8px; border-bottom: 1px solid var(--u-hairline); }
+th:first-child, td:first-child { padding-left: 12px; }
+th:last-child, td:last-child { padding-right: 12px; }
+.num { text-align: right; font-family: var(--u-font-mono); font-size: 12px; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+th.num { font-family: var(--u-font-sans); font-size: 11px; }
+.muted { color: var(--u-color-text-muted); }
+.danger { color: var(--u-color-danger); }
+/* A: group header */
+tr.gh td { background: var(--u-color-surface); border-bottom: 1px solid var(--u-hairline-strong); padding-top: 10px; padding-bottom: 6px; }
+tr.gh .label { font-weight: 500; display: flex; align-items: center; gap: 8px; }
+.chev { width: 14px; color: var(--u-color-text-muted); display: inline-block; font-size: 10px; }
+.cnt { font-family: var(--u-font-mono); font-size: 11px; color: var(--u-color-text-muted); }
+.key { font-size: 10px; letter-spacing: .07em; text-transform: uppercase; color: var(--u-color-text-muted); }
+tr.gh .num { color: var(--u-color-text); font-weight: 500; }
+.share { display: block; height: 2px; margin-top: 3px; margin-left: auto; background: var(--u-color-text); opacity: .55; border-radius: 1px; }
+tr.row td:first-child { padding-left: 34px; }
+tr.row.l2 td:first-child { padding-left: 34px; }
+/* B: gutter */
+td.gut { vertical-align: top; width: 150px; border-right: 1px solid var(--u-hairline); font-weight: 500; }
+td.gut .cnt { float: right; font-weight: 400; }
+td.gut .chev { margin-right: 4px; }
+tr.first td { border-top: 1px solid var(--u-hairline-strong); }
+tr.lastInGroup td { border-bottom: none; }
+/* C: header level 1, gutter level 2 */
+tr.gh.l1 td { padding-top: 14px; }
+.summary td { color: var(--u-color-text-secondary); }
+tfoot td { border-top: 1px solid var(--u-hairline-strong); border-bottom: none; font-weight: 500; }
+tr.gh.f td { background: var(--u-color-surface-sunken); border-bottom: 1px solid var(--u-hairline-strong); }
+tr.gh.g td { padding-top: 16px; }
+tr.gh.g .eyebrow { display: block; font-size: 10px; font-weight: 500; letter-spacing: .07em; text-transform: uppercase; color: var(--u-color-text-muted); margin: 0 0 2px 22px; }
+.ind td.gut { padding-left: 34px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const orders = [
+  ["A-1041","Line 1","Brenner GmbH","Housing 40",1200,14,"Oct 02"],
+  ["A-1044","Line 1","Brenner GmbH","Housing 60",800,3,"Oct 04"],
+  ["A-1052","Line 1","Kessler AG","Cover plate",2400,31,"Oct 03"],
+  ["A-1058","Line 1","Otto & Söhne","Housing 40",600,0,"Oct 09"],
+  ["A-1060","Line 1","Otto & Söhne","Flange",300,2,"Oct 11"],
+  ["A-1061","Line 1","Otto & Söhne","Flange",300,null,"Oct 14"],
+  ["A-1043","Line 2","Brenner GmbH","Shaft 12",5000,62,"Oct 02"],
+  ["A-1049","Line 2","Hartmann KG","Shaft 16",3200,18,"Oct 06"],
+  ["A-1055","Line 2","Lindner Tech","Shaft 12",1500,4,"Oct 08"],
+  ["A-1057","Line 2","Lindner Tech","Bushing",900,1,"Oct 10"],
+  ["A-1046","Line 3","Kessler AG","Bracket",700,9,"Oct 05"],
+  ["A-1050","Line 3","Vogt Maschinen","Bracket L",450,0,"Oct 07"],
+  ["A-1053","Line 3","Weiss Antriebe","Bracket",1100,27,"Oct 08"],
+];
+const fmt = n => n == null ? '<span class="muted">—</span>' : n.toLocaleString("en-US");
+const sum = (rs, i) => rs.reduce((a, r) => a + (r[i] ?? 0), 0);
+const by = (rs, i) => { const m = new Map(); rs.forEach(r => m.set(r[i], [...(m.get(r[i]) || []), r])); return [...m]; };
+const total = sum(orders, 4);
+const scrap = (v, q) => v == null ? fmt(v) : `<span class="${v / q > 0.02 ? "danger" : ""}">${fmt(v)}</span>`;
+const cols = `<th>Order</th><th>Article</th><th class="num">Quantity</th><th class="num">Scrap</th><th>Due</th>`;
+const cells = r => `<td class="num" style="text-align:left;padding-left:8px">${r[0]}</td><td>${r[3]}</td><td class="num">${fmt(r[4])}</td><td class="num">${scrap(r[5], r[4])}</td><td class="muted">${r[6]}</td>`;
+const header = (key, v, rs, cls = "", open = true, share = true) => `<tr class="gh ${cls}"><td colspan="2"><span class="label"><span class="chev">${open ? "▾" : "▸"}</span>${v}<span class="cnt">${rs.length}</span></span></td>
+  <td class="num">${fmt(sum(rs, 4))}${share ? `<span class="share" style="width:${Math.round(sum(rs, 4) / total * 100)}%"></span>` : ""}</td><td class="num">${fmt(sum(rs, 5))}</td><td class="muted" style="font-size:12px">${rs.map(r => r[6]).sort()[0]} –</td></tr>`;
+const foot = n => `<tfoot><tr><td colspan="${n}">All</td><td class="num">${fmt(total)}</td><td class="num">${fmt(sum(orders, 5))}</td><td></td></tr></tfoot>`;
+const bar = (chips, n) => `<div class="bar">${chips.map(c => `<span class="chip"><i>Grouped by</i> ${c} ×</span>`).join("")}<span class="count">${n}</span></div>`;
+
+// A: headers only, two levels
+let a = "";
+for (const [line, rs] of by(orders, 1)) {
+  a += header("Line", line, rs, "l1");
+  for (const [cust, cs] of by(rs, 2)) {
+    a += header("Customer", cust, cs, "l2", true, false).replace('class="label"', 'class="label" style="padding-left:18px"');
+    cs.forEach(r => a += `<tr class="row l2"><td style="padding-left:52px" class="num">${r[0]}</td>${cells(r).split("</td>").slice(1).join("</td>")}</tr>`);
+  }
+}
+// B: gutter only, one level (customer)
+let b = "";
+for (const [cust, cs] of by([...orders].sort((x, y) => x[2].localeCompare(y[2])), 2))
+  cs.forEach((r, i) => b += `<tr class="${i === 0 ? "first" : ""}">${i === 0 ? `<td class="gut" rowspan="${cs.length}"><span class="chev">▾</span>${cust}<span class="cnt">${cs.length > 1 ? cs.length : ""}</span></td>` : ""}${cells(r)}</tr>`);
+
+let e = "";
+for (const [cust, cs] of by([...orders].sort((x, y) => x[2].localeCompare(y[2])), 2)) {
+  if (cs.length > 1 && cust !== "Lindner Tech") { e += `<tr class="first"><td class="gut"><span class="chev">▸</span>${cust}<span class="cnt">${cs.length}</span></td><td class="muted" colspan="2">${cs.length} orders</td><td class="num" style="font-weight:500">${fmt(sum(cs, 4))}<span class="share" style="width:${Math.round(sum(cs, 4) / total * 100)}%"></span></td><td class="num" style="font-weight:500">${fmt(sum(cs, 5))}</td><td class="muted">${cs.map(r => r[6]).sort()[0]} –</td></tr>`; continue; }
+  cs.forEach((r, i) => e += `<tr class="${i === 0 ? "first" : ""}">${i === 0 ? `<td class="gut" rowspan="${cs.length}"><span class="chev">${cs.length > 1 ? "▾" : ""}</span>${cust}<span class="cnt">${cs.length > 1 ? cs.length : ""}</span></td>` : ""}${cells(r)}</tr>`);
+}
+
+const styled = st => {
+  let c = "";
+  for (const [line, rs] of by(orders, 1)) {
+    let h = header("Line", line, rs, "l1 " + st).replace('colspan="2"', 'colspan="3"');
+    if (st === "g") h = h.replace('<span class="label">', '<span class="eyebrow">Line</span><span class="label">');
+    c += h;
+    for (const [cust, cs] of by(rs, 2))
+      cs.forEach((r, i) => c += `<tr class="${i === 0 ? "first" : ""}">${i === 0 ? `<td class="gut" rowspan="${cs.length}">${cust}<span class="cnt">${cs.length > 1 ? cs.length : ""}</span></td>` : ""}${cells(r)}</tr>`);
+  }
+  return c;
+};
+// C: header for line, gutter for customer
+const hybrid = open => {
+  let c = "";
+  for (const [line, rs] of by(orders, 1)) {
+    c += header("Line", line, rs, "l1", open).replace('colspan="2"', 'colspan="3"');
+    if (!open) continue;
+    for (const [cust, cs] of by(rs, 2))
+      cs.forEach((r, i) => c += `<tr class="${i === 0 ? "first" : ""}">${i === 0 ? `<td class="gut" rowspan="${cs.length}"><span class="chev">▾</span>${cust}<span class="cnt">${cs.length > 1 ? cs.length : ""}</span></td>` : ""}${cells(r)}</tr>`);
+  }
+  return c;
+};
+const sec = (id, title, note, head, body, chips) => `<section id="${id}"><h2>${title}</h2><p class="note">${note}</p><div class="frame">${bar(chips, "13 orders")}<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody>${foot(head.startsWith("<th>Customer") ? 3 : 2)}</table></div></section>`;
+document.getElementById("root").innerHTML =
+  sec("a", "A · Group headers on every level", "What Q5 decided, applied to both levels. Customers mostly have 1–2 orders, so nearly every second line is a header.", cols, a, ["Line", "Customer"]) +
+  sec("b", "B · Gutter: the group value spans its rows", "No header lines. The value stands once, at the top of its rows, with count and sum beneath it. A hairline separates groups.", `<th>Customer</th>` + cols, b, ["Customer"]) +
+  sec("c", "C · Mixed: header for the big level, gutter for the small one", "Line gets a header with aggregates and share bar; the customer inside a line is a gutter.", `<th>Customer</th>` + cols, hybrid(true), ["Line", "Customer"]) +
+  sec("d", "D · C collapsed: the overview", "Every line collapsed: the grouped table reads as a summary table of its groups.", `<th>Customer</th>` + cols, hybrid(false), ["Line", "Customer"]) +
+  sec("e", "E · One level as a span, three groups collapsed", "A collapsed span is one line with its aggregates in the columns — the header and the rows are the same line.", `<th>Customer</th>` + cols, e, ["Customer"]) +
+  sec("f", "F · Header on a sunken tone, span indented", "The outer header takes the sunken surface across the full width; the span steps in by the chevron's width.", `<th>Customer</th>` + cols, styled("f"), ["Line", "Customer"]).replace('<table>', '<table class="ind">') +
+  sec("g", "G · Header with an eyebrow, span indented", "The outer header names its column in letter-spaced capitals above the value, on the paper.", `<th>Customer</th>` + cols, styled("g"), ["Line", "Customer"]).replace('<table>', '<table class="ind">');
+</script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Grouping F2</title>
+<link rel="stylesheet" href="../../../packages/core/src/styles/tokens.css">
+<style>
+@font-face { font-family: "Geist Sans"; font-weight: 400; src: url(fonts/sans-400.woff2); }
+@font-face { font-family: "Geist Sans"; font-weight: 500; src: url(fonts/sans-500.woff2); }
+@font-face { font-family: "Geist Mono"; font-weight: 400; src: url(fonts/mono-400.woff2); }
+:root { color-scheme: light; }
+:root.dark { color-scheme: dark; }
+body { margin: 0; padding: 32px; background: var(--u-color-bg); font-family: var(--u-font-sans); color: var(--u-color-text); -webkit-font-smoothing: antialiased; }
+section { width: 900px; margin-bottom: 32px; }
+
+/* Frame and toolbar, as Table.module.css / toolbar */
+.frame { background: var(--u-color-surface); border-radius: var(--u-radius-md); box-shadow: var(--u-edge); overflow: hidden; }
+.bar { display: flex; gap: var(--u-space-2); align-items: center; padding: var(--u-space-2) var(--u-space-3); border-bottom: 1px solid var(--u-hairline); font-size: var(--u-text-sm); }
+.chip { display: inline-flex; gap: 6px; align-items: center; height: 24px; padding: 0 4px 0 8px; border-radius: 6px; background: var(--u-color-surface-sunken); font-size: 12px; }
+.chip .k { color: var(--u-color-text-secondary); }
+.chip .sep { color: var(--u-color-text-muted); }
+.chip .x { width: 18px; height: 18px; display: grid; place-items: center; color: var(--u-color-text-muted); border-radius: 4px; }
+.bar .count { margin-left: auto; font-family: var(--u-font-mono); font-size: 11px; color: var(--u-color-text-secondary); }
+
+table { width: 100%; border-collapse: collapse; font-size: var(--u-text-sm); }
+th, td { padding: var(--u-space-2); text-align: left; }
+th:first-child, td:first-child { padding-left: var(--u-space-3); }
+th:last-child, td:last-child { padding-right: var(--u-space-3); }
+thead th { font-size: var(--u-text-xs); font-weight: 500; letter-spacing: var(--u-tracking-caps); text-transform: uppercase; color: var(--u-color-text-secondary); border-bottom: 1px solid var(--u-hairline-strong); white-space: nowrap; }
+td { border-bottom: 1px solid var(--u-hairline); }
+.num { text-align: right; font-family: var(--u-font-mono); font-size: .75rem; letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
+th.num { font-family: var(--u-font-sans); font-size: var(--u-text-xs); letter-spacing: var(--u-tracking-caps); }
+.id { font-family: var(--u-font-mono); font-size: .75rem; letter-spacing: -.01em; }
+.muted { color: var(--u-color-text-muted); }
+.danger { color: var(--u-color-danger); }
+tbody tr.row:hover td:not(.span) { background: var(--u-color-surface-sunken); }
+
+/* The fold slot: 20 px, the same on every level, so that the text of every
+   level starts on one vertical - the header's label and the span's value. */
+.fold { display: inline-grid; place-items: center; width: 16px; height: 16px; margin-right: 4px; vertical-align: -3px; color: var(--u-color-text-secondary); border-radius: 4px; }
+.fold svg { transition: transform var(--u-duration-fast) var(--u-ease-out); }
+.closed .fold svg { transform: rotate(-90deg); }
+.slot { display: inline-block; width: 20px; }
+
+/* Group header: a band on the sunken tone. Its only line is the one above it;
+   the band itself is the boundary below. Same padding as a row, so a header
+   is exactly one row high. */
+tr.gh td { background: var(--u-color-surface-sunken); border-top: 1px solid var(--u-hairline-strong); border-bottom: none; font-weight: 500; }
+tbody tr.gh:first-child td { border-top: none; }
+tr.gh .cnt { margin-left: 6px; font-family: var(--u-font-mono); font-size: 11px; font-weight: 400; color: var(--u-color-text-muted); }
+tr.gh td.num { position: relative; }
+/* The share bar hangs from the cell's bottom edge and takes no height. */
+.share { position: absolute; right: var(--u-space-2); bottom: 3px; height: 2px; border-radius: 1px; background: var(--u-color-text); opacity: .35; }
+tr.gh .range { font-weight: 400; color: var(--u-color-text-secondary); }
+
+/* Group span: the grouping column, first, its value once. A span group is
+   bounded by a hairline across the whole width; the rows inside it by the
+   ordinary one, which starts right of the span. */
+td.span { vertical-align: top; width: 176px; font-weight: 500; border-bottom: none; border-right: 1px solid var(--u-hairline); }
+td.span .v { display: flex; align-items: center; }
+td.id { padding-left: var(--u-space-2) !important; }
+td.span .n { margin-left: auto; font-family: var(--u-font-mono); font-size: 11px; font-weight: 400; color: var(--u-color-text-muted); }
+tr.first > td { border-top: 1px solid var(--u-hairline-strong); }
+tr.gh + tr.first > td { border-top: none; }
+tr.first.closed td.num { font-weight: 500; }
+tr.first.closed td.sum { position: relative; }
+
+tfoot td { border-top: 1px solid var(--u-hairline-strong); border-bottom: none; font-weight: 600; }
+tfoot .kind { margin-right: 4px; font-weight: 400; color: var(--u-color-text-muted); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const orders = [
+  ["A-1041","Line 1","Brenner GmbH","Housing 40",1200,14,2],["A-1044","Line 1","Brenner GmbH","Housing 60",800,3,4],
+  ["A-1052","Line 1","Kessler AG","Cover plate",2400,31,3],["A-1058","Line 1","Otto & Söhne","Housing 40",600,0,9],
+  ["A-1060","Line 1","Otto & Söhne","Flange",300,2,11],["A-1061","Line 1","Otto & Söhne","Flange",300,null,14],
+  ["A-1043","Line 2","Brenner GmbH","Shaft 12",5000,62,2],["A-1049","Line 2","Hartmann KG","Shaft 16",3200,18,6],
+  ["A-1055","Line 2","Lindner Tech","Shaft 12",1500,4,8],["A-1057","Line 2","Lindner Tech","Bushing",900,1,10],
+  ["A-1046","Line 3","Kessler AG","Bracket",700,9,5],["A-1050","Line 3","Vogt Maschinen","Bracket L",450,0,7],
+  ["A-1053","Line 3","Weiss Antriebe","Bracket",1100,27,8],
+];
+const chev = `<span class="fold"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4.5 6 7.5 9 4.5"/></svg></span>`;
+const fmt = n => n == null ? '<span class="muted">—</span>' : n.toLocaleString("en-US");
+const sum = (rs, i) => rs.reduce((a, r) => a + (r[i] ?? 0), 0);
+const by = (rs, i) => { const m = new Map(); rs.forEach(r => m.set(r[i], [...(m.get(r[i]) || []), r])); return [...m]; };
+const total = sum(orders, 4);
+const day = d => `Oct ${String(d).padStart(2, "0")}`;
+const range = rs => { const d = rs.map(r => r[6]); const a = Math.min(...d), b = Math.max(...d); return a === b ? day(a) : `${day(a)} – ${String(b).padStart(2, "0")}`; };
+const scrap = (v, q) => v == null ? fmt(v) : `<span class="${v / q > 0.02 ? "danger" : ""}">${fmt(v)}</span>`;
+const share = rs => `<span class="share" style="width:${Math.max(2, Math.round(sum(rs, 4) / total * 64))}px"></span>`;
+const cells = r => `<td class="id">${r[0]}</td><td>${r[3]}</td><td class="num">${fmt(r[4])}</td><td class="num">${scrap(r[5], r[4])}</td><td class="muted">${day(r[6])}</td>`;
+
+function body({ closedLines = [], closedCust = [] }) {
+  let h = "";
+  for (const [line, rs] of by(orders, 1)) {
+    const closed = closedLines.includes(line);
+    h += `<tr class="gh ${closed ? "closed" : ""}"><td colspan="3">${chev}${line}<span class="cnt">${rs.length}</span></td><td class="num">${fmt(sum(rs, 4))}${share(rs)}</td><td class="num">${fmt(sum(rs, 5))}</td><td class="range">${range(rs)}</td></tr>`;
+    if (closed) continue;
+    for (const [cust, cs] of by(rs, 2)) {
+      const many = cs.length > 1, key = line + cust;
+      if (many && closedCust.includes(key)) {
+        h += `<tr class="row first closed"><td class="span"><span class="v">${chev}${cust}<span class="n">${cs.length}</span></span></td><td class="muted" colspan="2">${cs.length} orders</td><td class="num sum">${fmt(sum(cs, 4))}</td><td class="num">${fmt(sum(cs, 5))}</td><td class="muted">${range(cs)}</td></tr>`;
+        continue;
+      }
+      cs.forEach((r, i) => h += `<tr class="row ${i === 0 ? "first" : ""}">${i === 0 ? `<td class="span" rowspan="${cs.length}"><span class="v">${many ? chev : '<span class="slot"></span>'}${cust}<span class="n">${many ? cs.length : ""}</span></span></td>` : ""}${cells(r)}</tr>`);
+    }
+  }
+  return h;
+}
+const table = (id, state) => `<section id="${id}"><div class="frame">
+  <div class="bar"><span class="chip"><span class="k">Grouped by</span> Line <span class="sep">›</span> Customer <span class="x">×</span></span><span class="count">13 orders</span></div>
+  <table><thead><tr><th>Customer</th><th>Order</th><th>Article</th><th class="num">Quantity</th><th class="num">Scrap</th><th>Due</th></tr></thead>
+  <tbody>${body(state)}</tbody>
+  <tfoot><tr><td colspan="3">All</td><td class="num"><span class="kind">Σ</span>${fmt(total)}</td><td class="num"><span class="kind">Σ</span>${fmt(sum(orders, 5))}</td><td></td></tr></tfoot></table></div></section>`;
+document.getElementById("root").innerHTML = table("open", {}) + table("mixed", { closedLines: ["Line 3"], closedCust: ["Line 1Otto & Söhne"] }) + table("closed", { closedLines: ["Line 1", "Line 2", "Line 3"] });
+if (location.hash === "#dark") document.documentElement.classList.add("dark");
+</script>
+</body>
+</html>
