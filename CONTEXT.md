@@ -107,8 +107,12 @@ spinner, the filter funnel and the sparkline fall outside it.
 _Avoid_: icon, symbol
 
 **Motion origin**:
-The point an overlay grows out of, derived from its position relative to the
-anchor. A panel below the anchor grows from the top.
+The point an overlay grows out of, derived from the side and alignment it
+really stands at relative to its anchor - after flipping. A panel below the
+anchor grows from its top edge, at the end its alignment holds; a flipped one
+from its bottom. An overlay without an anchor, the modal, grows from its
+centre. Computed by `motionOrigin` in `position.ts`; the stylesheet draws it as
+`transform-origin`.
 _Avoid_: transform-origin, anchor point
 
 **Interaction-state canon**:
