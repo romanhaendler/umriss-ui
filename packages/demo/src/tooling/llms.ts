@@ -306,7 +306,7 @@ export function exportedDeclarations(packageDir: string): ExportedDeclaration[] 
   const program = ts.createProgram([entry], options);
   const checker = program.getTypeChecker();
   const module = checker.getSymbolAtLocation(program.getSourceFile(entry)!);
-  if (module === undefined) return [];
+  if (module === undefined) throw new Error(`\`${entry}\` is not a module the compiler can read.`);
 
   const emitted = new Map<string, ts.SourceFile>();
   const declarationsOf = (file: ts.SourceFile): ts.SourceFile => {
@@ -329,8 +329,14 @@ export function exportedDeclarations(packageDir: string): ExportedDeclaration[] 
     /* A symbol may have several statements (an overloaded function, an
        interface merged with a const); all of them belong to its signature. */
     const statements = emittedFile.statements.filter((statement) => declares(statement, target.name));
+    /* The keywords come off the statement, never off its comment - a JSDoc
+       line may well begin with "export" or say "declare". */
     const text = statements
-      .map((statement) => statement.getFullText().trim().replace(/^export /m, "").replace(/\bdeclare /, ""))
+      .map((statement) => {
+        const comment = statement.getFullText().slice(0, statement.getStart() - statement.getFullStart()).trim();
+        const body = statement.getText().replace(/^export /, "").replace(/^declare /, "");
+        return comment === "" ? body : `${comment}\n${body}`;
+      })
       .join("\n");
     return { name: exported.name, text: target.name === exported.name ? text : `${text}\n// exported as ${exported.name}` };
   });
@@ -344,10 +350,15 @@ function declares(statement: ts.Statement, name: string): boolean {
   return named.name !== undefined && ts.isIdentifier(named.name) && named.name.text === name;
 }
 
-/** The names a text never mentions as a word of its own - the completeness
-    guard's question, and the appendix's. */
+/** The names a text never mentions as code - the completeness guard's
+    question, and the appendix's.
+
+    Only code counts: fenced blocks and inline spans, where a page's import
+    line, its tables, its examples and a why page's `<code>` stand. An export
+    called `format` is not named by the English word in a sentence. */
 export function missingFrom(text: string, names: readonly string[]): string[] {
-  return names.filter((name) => !new RegExp(`(^|[^\\w$])${name.replace(/\$/g, "\\$")}($|[^\\w$])`).test(text));
+  const codeOnly = (text.match(/^(`{3,})[^\n]*\n[\s\S]*?^\1$|`[^`\n]+`|``[^\n]+?``/gm) ?? []).join("\n");
+  return names.filter((name) => !new RegExp(`(^|[^\\w$])${name.replace(/\$/g, "\\$")}($|[^\\w$])`).test(codeOnly));
 }
 
 /* ------------------------------------------------------------------ */
@@ -389,7 +400,8 @@ export function renderLlms({ packageDir, outline, tables }: LlmsJob): { index: s
     .map((file) => readExample(demoDir, file, manifest.name))
     .sort(byRank);
   const whyDir = join(demoDir, "why");
-  const whyFiles = new Set(readdirSync(whyDir).filter((name) => name.endsWith(".tsx")));
+  /* A demo without a single why page has no directory for them either. */
+  const whyFiles = new Set(existsSync(whyDir) ? readdirSync(whyDir).filter((name) => name.endsWith(".tsx")) : []);
 
   const pages = outline.flatMap((rubric) => rubric.pages);
   for (const example of examples) {
@@ -436,6 +448,9 @@ export function renderLlms({ packageDir, outline, tables }: LlmsJob): { index: s
 
       const own = examples
         .filter((example) => example.pageId === page.id)
+        /* `examplesOf`'s order, the demonstration last. Not imported: the
+           shell's `examples.ts` imports without extensions for Vite, which
+           Node's type stripping cannot follow. */
         .sort((a, b) => Number(a.demonstration) - Number(b.demonstration));
       parts.push("", "#### Examples");
       if (own.length === 0) parts.push("", "There is no example for this page yet. The tables below are complete all the same - they come from the source.");
