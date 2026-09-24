@@ -60,6 +60,13 @@ export interface ChartProps<T> {
       fall back to English. German: `GERMAN_CHARTS_WORDING` from
       `@umriss-ui/charts/wording/de`. */
   wording?: Partial<ChartsWording>;
+  /** How series are told apart. `"color"` (the default): by their colour.
+      `"marks"`: by a dash and a marker shape as well - a line, an area and a
+      scatter -, and by a hatch - a bar, a state, a matrix cell, a limit band -,
+      chosen by the same palette place as the colour, so that a reader who does
+      not see the colours still tells them apart; the legend's chips show the
+      same. A caller's own `dash` wins over the place's. */
+  encoding?: "color" | "marks";
   /** Charts with the same id share the pointer's x position, in domain units:
       each draws its crosshair there, the tooltip stays with the chart under
       the pointer. Zoom is not shared - give every chart the same controlled
@@ -86,6 +93,7 @@ export function Chart<T>(props: ChartProps<T>): ReactNode {
     syncId,
     empty: emptyProp,
     wording: wordingProp,
+    encoding = "color",
     children,
   } = props;
 
@@ -184,6 +192,10 @@ export function Chart<T>(props: ChartProps<T>): ReactNode {
   useEffect(() => {
     scene.setWording(wording);
   }, [scene, wording]);
+
+  useEffect(() => {
+    scene.setEncoding(encoding);
+  }, [scene, encoding]);
 
   useEffect(() => {
     scene.setOnPerf(onPerf ?? null);

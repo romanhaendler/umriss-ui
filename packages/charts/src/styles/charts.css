@@ -303,6 +303,16 @@
     border-radius: var(--uc-radius-chip);
   }
 
+  /* Under encoding by marks the chip draws the series' dash, marker or hatch
+     (charts-alternatives C3). Its colours are the canvas' own, already chosen
+     for the contrast mode where it applies: the browser is not to force them
+     away as it forces a background. */
+  .uc-legend-mark {
+    display: block;
+    flex: none;
+    forced-color-adjust: none;
+  }
+
   /* With onToggle an entry is a button, and looks like the entry it was. */
   button.uc-legend-item {
     padding: 0;
