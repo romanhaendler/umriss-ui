@@ -15,6 +15,16 @@ moves from here under the rule above.
 
 ---
 
+## 0.1.6 – Core 0.7.0 (Sep. 2026)
+
+### Changed
+
+- **A finding in the tooltip reads core's `--u-color-danger-text`** - lighter in
+  the dark theme, 4.5:1 on its surface. The peer range moves to
+  `@umriss-ui/core` `^0.7.0`.
+
+---
+
 ## 0.1.5 – Core 0.6.0 (Sep. 2026)
 
 ### Changed

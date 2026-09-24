@@ -22,7 +22,7 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
-## Unreleased
+## 0.3.1 – The focus survives a fold (Sep. 2026)
 
 ### Fixed
 
@@ -33,6 +33,14 @@ is one of the internal numbers from before core's first publication as `0.1.0`
   the fold that was pressed. This holds for `toggleFold`, `foldAll`, the tag
   menu's "Fold all" and Alt-click or Alt+arrow on a sibling's fold; a focus
   outside the folded group stays where it is.
+
+### Changed
+
+- **Danger as type reads core's `--u-color-danger-text`**: the verdict glyph
+  and excess of `VerdictColumn` and the lost freshness of `AlarmList` - lighter
+  in the dark theme, 4.5:1 on every surface. Needs `@umriss-ui/core` 0.7.
+
+---
 
 ## 0.3.0 – Grouping (Sep. 2026)
 
