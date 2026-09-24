@@ -111,3 +111,9 @@ in a tree - there it folds, and opens whole.
 The demo is the documentation: `pnpm dev:calculation` in the repository, port
 4177. The vocabulary — calculation, quantity, result, given, operator, operand,
 derivation, reference — stands in `CONTEXT.md` under "Calculations".
+
+For a coding agent the demo stands as one Markdown file inside the installed
+package, `docs/llms-full.md`, pinned to that version: every page with its
+examples' source, its props tables and why it is built as it is, and the
+declaration of every other export. Online, for the latest version:
+<https://romanhaendler.github.io/umriss-ui/calculation/llms.txt>.

@@ -18,6 +18,7 @@ what a reader has — the filename is what they are looking for.
 | what capability is proved, and by what | the capability record of the package: [`../packages/charts/docs/capabilities.md`](../packages/charts/docs/capabilities.md), [`../packages/core/docs/capabilities-tree.md`](../packages/core/docs/capabilities-tree.md) |
 | what was worked on here, and when | [`journal.md`](journal.md) |
 | how umriss compares with other libraries, and what follows from it | [`research/library-comparison-2026-09/`](research/library-comparison-2026-09/), [`../.scratch/comparison-roadmap/spec.md`](../.scratch/comparison-roadmap/spec.md) |
+| how a coding agent reads a package's documentation | `llms.txt` beside each demo online, or `docs/llms-full.md` inside the installed package — generated from the demo by `packages/demo/src/tooling/llms.ts` |
 | how an agent should read this repository | [`../CLAUDE.md`](../CLAUDE.md), [`agents/`](agents/) |
 | what a document used to be called | **What moved**, below |
 

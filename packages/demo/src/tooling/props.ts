@@ -47,7 +47,9 @@ export interface PropsJob {
   outline: readonly Rubric[];
 }
 
-export function generateProps({ packageName, outline }: PropsJob): void {
+/** Writes the tables and hands them back, for the text that is generated
+    from them next (`llms.ts`). */
+export function generateProps({ packageName, outline }: PropsJob): Record<string, TypeEntry> {
   const target = join(packageName, "demo", ".generated", "props.json");
   const { types: types, gaps: gaps } = readProps(
     sourceFiles(join(packageName, "src")),
@@ -73,4 +75,5 @@ export function generateProps({ packageName, outline }: PropsJob): void {
   const output: Record<string, TypeEntry> = types;
   writeFileSync(target, `${JSON.stringify(output, null, 2)}\n`, "utf8");
   process.stdout.write(`props.json: ${Object.keys(output).length} types.\n`);
+  return output;
 }

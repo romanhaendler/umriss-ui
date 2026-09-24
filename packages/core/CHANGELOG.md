@@ -29,6 +29,17 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## Unreleased
+
+### Added
+
+- **`docs/llms-full.md`**, the package's documentation as one Markdown file for
+  a coding agent, in the npm package and pinned to its version: every demo page
+  with its import line, its examples' source, its props tables and why it is
+  built as it is, and the declaration of every other export. The same text
+  stands online as <https://romanhaendler.github.io/umriss-ui/core/llms-full.txt>,
+  with an index of the pages beside it (`llms.txt`).
+
 ## 0.9.2 – Today's dot, one chevron (Sep. 2026)
 
 ### Changed

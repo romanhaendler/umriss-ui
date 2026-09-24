@@ -1,0 +1,6 @@
+{
+  "name": "@umriss-ui/fixture",
+  "version": "1.2.3",
+  "description": "A fixture package for the llms.txt generator.",
+  "homepage": "https://example.test/fixture/"
+}
