@@ -1,6 +1,6 @@
 # Spec: Perceived quality — strictness over the vocabulary, freedom in the values
 
-Status: ready-for-agent
+Status: done
 
 Origin: grilling session of 24 Aug 2026 on the question of how the design should
 be "strictly controlled". The session turned the question around: the goal is not
@@ -395,3 +395,11 @@ marks, **Maß** the height calculation of the multiline field. A design "Raster"
 or a typographic "Skala" would give three words a second meaning each. The terms
 used in this spec — vocabulary, motion origin, canon of states — are deliberately
 chosen to be free. They now stand in `CONTEXT.md`.
+
+## Comments
+
+**Delivered.** All five tickets are done: 01-04 in core 0.8.0 (with charts
+0.5.0, table 0.3.2, schedule 0.1.7, calculation 0.2.3); 05 as depth work on
+the table (table 0.3.3, core 0.9.0), the pickers and the select family (core
+0.9.1, 0.9.2), every visible change decided by the user on a before/after
+page, every moved baseline looked at.
