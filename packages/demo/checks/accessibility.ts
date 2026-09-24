@@ -62,28 +62,14 @@ export const EXCEPTIONS: readonly Exception[] = [
  *
  * For exactly this case the ticket says: better to land the check for one part
  * and open the rest as a follow-up than to have a check with blanket
- * suppression. The pairs here need a design decision, not a line of code:
- * `--u-color-danger` carries two roles at once in the dark theme (surface under
- * white text, and text on a pale surface), and the two pull in opposite
- * directions. Solving it cleanly needs a text token of its own, as
- * `--u-color-accent-text` already demonstrates.
+ * suppression.
  *
- * The surface half is done (library-audit 07): the text on the danger surface
- * is now `--u-color-on-danger` and flips polarity in the dark theme like the
- * accent. Its entry - white on #d0655c, 3.68:1 - is struck. What stays open is
- * the text half, and that belongs to `tone-contrast`.
+ * Empty since tone-contrast: the danger tone's two roles are split into a
+ * surface (`--u-color-danger`, with `--u-color-on-danger` on it) and a text
+ * token (`--u-color-danger-text`), as the accent has them. Empty is the
+ * intended state; a new entry names its follow-up under `.scratch/`.
  */
-export const OPEN: readonly Exception[] = [
-  {
-    foreground: "#d0655c",
-    background: "#2f1b1d",
-    upTo: 4.4,
-    reason:
-      "Danger text on a pale danger surface, dark theme (4.39:1). Opposed to the " +
-      "pair above - the same token, two roles. Follow-up: " +
-      ".scratch/tone-contrast/spec.md",
-  },
-];
+export const OPEN: readonly Exception[] = [];
 
 export const TOLERATED = [...EXCEPTIONS, ...OPEN];
 

@@ -53,6 +53,6 @@
 
   .danger {
     background: var(--u-color-danger-subtle);
-    color: var(--u-color-danger);
+    color: var(--u-color-danger-text);
   }
 }

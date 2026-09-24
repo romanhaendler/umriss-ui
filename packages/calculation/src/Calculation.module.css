@@ -315,7 +315,7 @@
   }
 
   .worst[data-verdict="alarm"]::before {
-    color: var(--u-color-danger);
+    color: var(--u-color-danger-text);
   }
 
   /* An inner derivation recedes: its numbers in the secondary colour. */
@@ -406,7 +406,7 @@
   }
 
   .freshness[data-freshness="lost"] {
-    color: var(--u-color-danger);
+    color: var(--u-color-danger-text);
     font-weight: var(--u-weight-medium);
   }
 
