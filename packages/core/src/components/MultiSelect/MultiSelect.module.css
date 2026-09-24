@@ -101,7 +101,7 @@
   .chip:hover:not(:disabled),
   .chip:focus-visible {
     background: var(--u-color-danger-subtle);
-    color: var(--u-color-danger);
+    color: var(--u-color-danger-text);
   }
 
   .chip:disabled {

@@ -71,7 +71,7 @@
 
   .danger {
     background: var(--u-color-danger-subtle);
-    color: var(--u-color-danger);
+    color: var(--u-color-danger-text);
   }
 
   /* ---- Removing: quiet at rest, clear on hover and focus ---- */

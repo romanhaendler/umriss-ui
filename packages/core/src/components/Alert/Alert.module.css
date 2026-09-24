@@ -95,7 +95,7 @@
     border-left: 2px solid var(--u-color-danger);
   }
   .danger .title {
-    color: var(--u-color-danger);
+    color: var(--u-color-danger-text);
   }
 
   /* ---- Closing: quiet at rest ---- */

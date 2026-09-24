@@ -138,35 +138,27 @@ const PAIRS: readonly Pair[] = [
     minimum: { light: LARGE_TEXT, dark: LARGE_TEXT },
   },
 
-  {
-    name: "Success on the subtle success surface",
-    fg: "--u-color-success",
-    bg: "--u-color-success-subtle",
+  /* The tones as type (tone-contrast): each on its own pale surface and on both
+     grounds it lands on, in both themes, at the full bound - including where it
+     passes today, because a tone that only gets through by accident is not a
+     system. Danger reads a text token of its own, as the accent does: the
+     surface value measured only 4.40:1 on the dark subtle danger surface. */
+  ...([
+    ["--u-color-success", "--u-color-success-subtle"],
+    ["--u-color-success", "--u-color-surface"],
+    ["--u-color-success", "--u-color-bg"],
+    ["--u-color-warning", "--u-color-warning-subtle"],
+    ["--u-color-warning", "--u-color-surface"],
+    ["--u-color-warning", "--u-color-bg"],
+    ["--u-color-danger-text", "--u-color-danger-subtle"],
+    ["--u-color-danger-text", "--u-color-surface"],
+    ["--u-color-danger-text", "--u-color-bg"],
+  ] as const).map(([fg, bg]) => ({
+    name: `${fg} as text on ${bg}`,
+    fg,
+    bg,
     minimum: { light: BODY_TEXT, dark: BODY_TEXT },
-  },
-
-  /* Exception, light: 4.25:1 measured. The pair carries the label of badge, tag
-     and alert in the warning role - short, mostly semibold words, but below the
-     bound for "large type". Recorded as a known shortcoming of the warning token
-     in the light theme; the fix would be a darker --u-color-warning, not a lower
-     bound for all. In the dark theme the same pair reaches 6.56:1 and therefore
-     stays at 4.5:1. */
-  {
-    name: "Warning on the subtle warning surface",
-    fg: "--u-color-warning",
-    bg: "--u-color-warning-subtle",
-    minimum: { light: LARGE_TEXT, dark: BODY_TEXT },
-  },
-
-  /* Exception, dark: 4.40:1 measured, just under the bound. Light has the same
-     pair at 5.20:1 and it is checked in full there. The fix would be a lighter
-     --u-color-danger in the dark theme. */
-  {
-    name: "Danger on the subtle danger surface",
-    fg: "--u-color-danger",
-    bg: "--u-color-danger-subtle",
-    minimum: { light: BODY_TEXT, dark: LARGE_TEXT },
-  },
+  })),
 
   /* Exception, light: 4.45:1 measured - five hundredths under the bound. The
      case is defused, because on the subtle accent surface the components set
