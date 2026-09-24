@@ -15,6 +15,16 @@ moves from here under the rule above.
 
 ---
 
+## Unreleased
+
+### Fixed
+
+- **The fold chevron of a lane group turns.** Its transition named a curve token
+  that does not exist (`--u-ease-standard`), which made the whole declaration
+  invalid, so the chevron has always jumped. It now reads `--u-ease-out`.
+
+---
+
 ## 0.1.6 – Core 0.7.0 (Sep. 2026)
 
 ### Changed
