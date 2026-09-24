@@ -94,6 +94,10 @@
     background: var(--u-color-accent-subtle);
   }
 
+  .collapseButton:active {
+    background: var(--u-color-accent-subtle-pressed);
+  }
+
   .body {
     padding: var(--u-space-4);
   }

@@ -200,7 +200,10 @@ export function Combobox<T extends string = string>({
                       option.value === value && styles.selected,
                       option.disabled && styles.optionDisabled,
                     )}
-                    onMouseEnter={() => setActiveIndex(index)}
+                    // The pointer does not move the cursor onto a disabled option: a
+                    // disabled element reacts to nothing. The arrow keys still reach
+                    // it, so that the list reads through in order.
+                    onMouseEnter={() => !option.disabled && setActiveIndex(index)}
                     onMouseDown={(event) => event.preventDefault()}
                     onClick={() => choose(option)}
                   >

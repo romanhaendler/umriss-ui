@@ -68,6 +68,11 @@ module on the caller's side that carries `"use client"` and imports from there.
   `--u-duration-shimmer`, `--u-ease-steady` and `--u-ease-swell`. Every
   motion in the library's stylesheets now reads one of them.
 
+- **Three pressed surfaces**: `--u-color-surface-pressed`,
+  `--u-color-accent-subtle-pressed` and `--u-color-danger-subtle-pressed`, the
+  step below the sunken, subtle-accent and subtle-danger hovers. Each holds
+  4.5:1 under the type that stands on it, in both themes.
+
 ### Changed
 
 - **`--u-transition` runs on `--u-ease-out`.** The collective token for hover
@@ -96,6 +101,43 @@ module on the caller's side that carries `"use client"` and imports from there.
   follows the same pattern from the edge facing its trigger, and each `Toast`
   grows out of the bottom right corner it stands in. Under reduced motion all
   of them appear and go at once. `Select` keeps the browser's own list.
+
+- **One canon of interaction states.** Hover changes the surface, a press
+  changes it more strongly, focus is `--u-focus-ring` and nothing else, and
+  disabled dims to half and reacts to nothing. What that changes:
+  - *Pressed*: every quiet key now sinks while it is pressed - `Button`
+    `secondary` and `ghost`, the close keys of `Modal`, `Toast` and `Alert`, the
+    remove key of `Tag`, the clear keys of the fields, the steppers, the date
+    picker's pages, days and presets, the items of `Menu`, the options of
+    `Combobox` and `MultiSelect`, the rows of `TreeView` and `CommandPalette`,
+    the tools of `Dock`, the chips and the counter of `MultiSelect`, the
+    collapse key of `Card`, and the empty boxes of `Checkbox` and `RadioGroup`.
+    Before, only the primary and danger buttons darkened.
+  - *Focus*: a `Menu` item reached by the keyboard carries the ring instead of
+    the hover surface, and so does a `MultiSelect` chip, which showed its focus
+    in the danger surface.
+  - *Disabled*: the fields (`Input`, `Textarea`, `Select`, `Combobox`,
+    `NumberInput`, `MultiSelect`, the date pickers' trigger and time fields),
+    `Checkbox`, a `Tabs` tab, a `Menu` item, a `Combobox` option and a `Dock`
+    tool dim to half opacity, as `Button` and `RadioGroup` always did, instead
+    of being repainted in a sunken ground and muted type. A disabled `Dock`
+    tool shows the not-allowed cursor.
+  - `Checkbox` has a hover edge on its empty box, as `RadioGroup` has.
+  - `NumberInput`'s steppers settle on the glyph (0.8) like the date picker's,
+    instead of scaling the whole key to 0.9.
+
+### Fixed
+
+- **Disabled elements reacted underneath.** A disabled `Tabs` tab darkened
+  under the pointer; a disabled time stepper of the date pickers came back to
+  full presence and its hover surface when the pointer entered its group; the
+  × of a disabled `MultiSelect` chip appeared under the pointer; and the
+  pointer moved `Combobox`'s cursor onto a disabled option (the arrow keys
+  still reach it).
+- **A hover took the focus ring away.** On a focused `Button` `secondary`,
+  `Checkbox` or `RadioGroup` the hover edge replaced the ring while the pointer
+  rested on it; on the date pickers the chosen day, the ends of a range and the
+  preview's end dropped the ring the same way.
 
 ---
 
