@@ -43,7 +43,7 @@ import {
 } from "./draw";
 import { lowerBound, nearestIndex, nearestPoint } from "./hit";
 import { DEFAULT_CHARTS_WORDING, type ChartsWording } from "./wording";
-import { nearestPosition, stepCell, stepPosition, type Cell, type Move, type WalkSeries } from "./walk";
+import { hasCell, nearestPosition, rowEnd, stepCell, stepPosition, type Cell, type Move, type WalkSeries } from "./walk";
 import { downsample } from "./downsample";
 import { lastSegmentEnd, medianStep, segmentEnd, segmentIndex } from "./state";
 import { cellSize, cellIndex, measureSpacing } from "./cells";
@@ -513,6 +513,24 @@ function domainEqual(
 const READOUT_REST = 150;
 /** The summary waits for layouts - a zoom - to rest this long. */
 const SUMMARY_REST = 100;
+
+/** The keys that walk a course, a band, bars or points (charts-a11y Q2). */
+const MOVES: Readonly<Record<string, Move>> = {
+  ArrowRight: "next",
+  ArrowLeft: "previous",
+  Home: "first",
+  End: "last",
+  PageDown: "pageNext",
+  PageUp: "pagePrevious",
+};
+
+/** The keys that walk a matrix (R7). */
+const CELL_STEPS: Readonly<Record<string, "left" | "right" | "up" | "down">> = {
+  ArrowLeft: "left",
+  ArrowRight: "right",
+  ArrowUp: "up",
+  ArrowDown: "down",
+};
 
 /** One zoom key widens the domain by this much; its opposite narrows it back. */
 const KEY_ZOOM = 1.25;
@@ -2015,7 +2033,7 @@ export class ChartScene {
     const alone = this.tooltip?.mode === "nearest";
     return this.walkable()
       .filter((e) => (alone ? e === emph : e.config.xAxisId === emph.config.xAxisId))
-      .map((e) => e.materialized as MaterializedSeries);
+      .map((e) => ({ ...(e.materialized as MaterializedSeries), changesOnly: e.config.kind === "state" }));
   }
 
   /** The focus came in: the walk starts at the newest position, unless the
@@ -2043,15 +2061,7 @@ export class ChartScene {
     const emph = this.emphasised();
     if (emph === null) return false;
     if (emph.config.kind === "matrix") return this.cellKey(event.key, emph);
-    const moves: Record<string, Move> = {
-      ArrowRight: "next",
-      ArrowLeft: "previous",
-      Home: "first",
-      End: "last",
-      PageDown: "pageNext",
-      PageUp: "pagePrevious",
-    };
-    const move = event.shiftKey ? undefined : moves[event.key];
+    const move = event.shiftKey ? undefined : MOVES[event.key];
     if (move !== undefined) {
       this.walk(move);
       return true;
@@ -2095,7 +2105,7 @@ export class ChartScene {
     if (emph === null || xAxis === null) return;
     const from = this.activeBy === null ? null : this.walkFrom();
     const to = stepPosition(this.walked(emph), from, move, xAxis.scale.domain);
-    if (to !== null) this.showKey(emph, to);
+    if (to !== null) this.showPosition(emph, to);
   }
 
   private changeSeries(step: 1 | -1): void {
@@ -2111,28 +2121,30 @@ export class ChartScene {
     const xAxis = this.findAxis("x", next.config.xAxisId);
     if (xAxis === null) return;
     const to = x === null ? stepPosition(this.walked(next), null, "last", xAxis.scale.domain) : nearestPosition(this.walked(next), x, xAxis.scale.domain);
-    if (to !== null) this.showKey(next, to);
+    if (to === null) return;
+    this.keyCell = null;
+    if (next.config.kind === "matrix") {
+      const cell = this.columnStart(next, to);
+      if (cell !== null) this.showCell(next, cell);
+    } else this.showPosition(next, to);
   }
 
-  /** A matrix walks cell by cell in two dimensions (R7). */
+  /** A matrix walks cell by cell in two dimensions (R7). At the top or
+      bottom of its column ↑/↓ go on to the chart's other series, so a matrix
+      among them does not keep the keys. */
   private cellKey(key: string, emph: SeriesEntry): boolean {
     const mat = emph.materialized as MaterializedSeries;
-    const directions: Record<string, "left" | "right" | "up" | "down"> = {
-      ArrowLeft: "left",
-      ArrowRight: "right",
-      ArrowUp: "up",
-      ArrowDown: "down",
-    };
     const at = this.keyCell ?? this.lastCell(emph);
     if (at === null) return false;
-    const direction = directions[key];
+    const direction = CELL_STEPS[key];
     let next: Cell;
     if (direction !== undefined) next = stepCell(mat, at, direction);
-    else if (key === "Home" || key === "End") {
-      // To the row's end: step until the row has no further cell.
-      next = at;
-      for (let step = stepCell(mat, at, key === "Home" ? "left" : "right"); step !== next; step = stepCell(mat, next, key === "Home" ? "left" : "right")) next = step;
-    } else return false;
+    else if (key === "Home" || key === "End") next = rowEnd(mat, at, key === "Home" ? "start" : "end");
+    else return false;
+    if (next === at && (direction === "up" || direction === "down") && this.walkable().length > 1) {
+      this.changeSeries(direction === "down" ? 1 : -1);
+      return true;
+    }
     this.showCell(emph, next);
     return true;
   }
@@ -2142,9 +2154,13 @@ export class ChartScene {
     const mat = emph.materialized as MaterializedSeries;
     const xAxis = this.findAxis("x", emph.config.xAxisId);
     const x = xAxis === null ? null : stepPosition([mat], null, "last", xAxis.scale.domain);
-    if (x === null) return null;
+    return x === null ? null : this.columnStart(emph, x);
+  }
+
+  /** The lowest cell with a value in a matrix' column. */
+  private columnStart(emph: SeriesEntry, x: number): Cell | null {
     const below = { x, y: Number.NEGATIVE_INFINITY };
-    const cell = stepCell(mat, below, "up");
+    const cell = stepCell(emph.materialized as MaterializedSeries, below, "up");
     return cell === below ? null : cell;
   }
 
@@ -2158,7 +2174,7 @@ export class ChartScene {
 
   /** The Active point at a position of the emphasised series. The pixel's y
       is that series' own, so that "nearest" picks it and a lane is hit. */
-  private showKey(emph: SeriesEntry, x: number, speak = true): void {
+  private showPosition(emph: SeriesEntry, x: number, speak = true): void {
     const xAxis = this.findAxis("x", emph.config.xAxisId);
     const yAxis = this.findAxis("y", emph.config.yAxisId);
     const mat = emph.materialized;
@@ -2200,12 +2216,11 @@ export class ChartScene {
     if (hover === null) return "";
     const rows = hover.hit.points.map((point, k) => {
       const row = this.hoverRows[k];
-      const x = row !== undefined && row.x !== "" ? ` (${row.x})` : "";
-      return { order: this.hoverOrders[k], text: `${point.seriesName} ${row?.value ?? ""}${x}.` };
+      return { order: this.hoverOrders[k], name: point.seriesName, value: row?.value ?? "", x: row?.x ?? "" };
     });
-    const emph = this.emphasis;
+    const emph = this.emphasised()?.order;
     rows.sort((a, b) => Number(b.order === emph) - Number(a.order === emph));
-    return [`${this.hoverXLabel}.`, ...rows.map((r) => r.text)].join(" ");
+    return this.wording.readout(this.hoverXLabel, rows);
   }
 
   /** The summary is rebuilt after a layout, but not on every one: a zoom lays
@@ -2225,14 +2240,14 @@ export class ChartScene {
     const w = this.wording;
     const series = this.walkable();
     const parts: string[] = [];
-    if (series.length > 0) parts.push(w.seriesCount(series.length));
+    const all = this.seriesInOrder();
+    if (series.length > 0) parts.push(w.seriesList(series.map((e) => this.nameFor(e, all.indexOf(e)))));
     const first = series[0];
     const xAxis = first === undefined ? null : this.findAxis("x", first.config.xAxisId);
     if (first !== undefined && xAxis !== null) {
       const [from, to] = xAxis.scale.domain;
       parts.push(w.visibleRange(this.xLabel(first.config.xAxisId, from), this.xLabel(first.config.xAxisId, to)));
     }
-    const all = this.seriesInOrder();
     for (const entry of series) {
       if (entry.config.kind === "state") continue;
       const range = this.visibleRange(entry);
@@ -2288,8 +2303,15 @@ export class ChartScene {
       this.clearActive();
       return;
     }
-    if (this.keyCell !== null && emph.config.kind === "matrix") this.showCell(emph, this.keyCell, false);
-    else this.showKey(emph, x, false);
+    if (emph.config.kind !== "matrix") this.showPosition(emph, x, false);
+    else {
+      // The cell stays where it still stands; a column zoomed away gives way
+      // to the nearest one still shown, in the same row where it has a value.
+      const kept = this.keyCell;
+      const mat = emph.materialized as MaterializedSeries;
+      const cell = kept !== null && hasCell(mat, { x, y: kept.y }) ? { x, y: kept.y } : this.columnStart(emph, x);
+      if (cell !== null) this.showCell(emph, cell, false);
+    }
   }
 
   /** The keyboard lets go: its emphasis leaves the series layer. */

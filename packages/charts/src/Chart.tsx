@@ -202,7 +202,7 @@ export function Chart<T>(props: ChartProps<T>): ReactNode {
 
   /* A chart with a tooltip has hits to walk: it is one tab stop whose keys
      move its Active point (ADR-0030). Without one it stays an image. */
-  const walkable = useSyncExternalStore(
+  const hasHits = useSyncExternalStore(
     scene.subscribeHover,
     () => scene.getHoverSnapshot().tooltip !== null,
     () => false,
@@ -238,11 +238,11 @@ export function Chart<T>(props: ChartProps<T>): ReactNode {
         <div
           ref={plotRef}
           className="uc-plot"
-          role={walkable ? "application" : "img"}
-          aria-roledescription={walkable ? wording.roleDescription : undefined}
+          role={hasHits ? "application" : "img"}
+          aria-roledescription={hasHits ? wording.roleDescription : undefined}
           aria-label={ariaLabel}
           aria-describedby={summaryId}
-          tabIndex={walkable ? 0 : undefined}
+          tabIndex={hasHits ? 0 : undefined}
           onKeyDown={(e) => {
             if (scene.key(e.nativeEvent)) e.preventDefault();
           }}

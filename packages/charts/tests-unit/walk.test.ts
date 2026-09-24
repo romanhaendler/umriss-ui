@@ -3,7 +3,7 @@
    inside the visible domain. */
 
 import { describe, expect, it } from "vitest";
-import { nearestPosition, stepCell, stepPosition, type WalkSeries } from "../src/walk";
+import { hasCell, nearestPosition, rowEnd, stepCell, stepPosition, type WalkSeries } from "../src/walk";
 
 const s = (x: number[], y: number[], w: number[] | null = null): WalkSeries => ({
   x: Float64Array.from(x),
@@ -101,5 +101,31 @@ describe("stepCell", () => {
   it("stays where its row has no further value", () => {
     // Row 1 has a value only at x 0; right from there stays.
     expect(stepCell(m, { x: 0, y: 1 }, "right")).toEqual({ x: 0, y: 1 });
+  });
+});
+
+describe("A band's walk", () => {
+  // Reports every minute; the state changes at 2 and at 5, and 3 is a hole.
+  const band: WalkSeries = { ...s([0, 1, 2, 3, 4, 5], [0, 0, 1, Number.NaN, 1, 2]), changesOnly: true };
+
+  it("goes from state change to state change", () => {
+    expect(stepPosition([band], 0, "next", all)).toBe(2);
+    expect(stepPosition([band], 2, "next", all)).toBe(4);
+    expect(stepPosition([band], 4, "next", all)).toBe(5);
+  });
+});
+
+describe("rowEnd", () => {
+  const m = s([0, 0, 1, 1, 2, 2], [0, 1, 0, 1, 0, 1], [5, Number.NaN, 8, 9, 7, 3]);
+
+  it("knows a cell only where it has a value", () => {
+    expect(hasCell(m, { x: 1, y: 1 })).toBe(true);
+    expect(hasCell(m, { x: 0, y: 1 })).toBe(false);
+  });
+
+  it("finds the first and last cell of a row with a value", () => {
+    expect(rowEnd(m, { x: 1, y: 0 }, "start")).toEqual({ x: 0, y: 0 });
+    expect(rowEnd(m, { x: 1, y: 1 }, "start")).toEqual({ x: 1, y: 1 });
+    expect(rowEnd(m, { x: 1, y: 1 }, "end")).toEqual({ x: 2, y: 1 });
   });
 });

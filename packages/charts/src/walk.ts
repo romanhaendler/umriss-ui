@@ -15,12 +15,17 @@ export interface WalkSeries {
   /** A cell's value; null for every kind but the matrix. */
   readonly w: Float64Array | null;
   readonly length: number;
+  /** A band: only where the state changes is a position (R7) - a report of
+      the state it already has is none. */
+  readonly changesOnly?: boolean;
 }
 
 export type Move = "next" | "previous" | "first" | "last" | "pageNext" | "pagePrevious";
 
 const valid = (s: WalkSeries, i: number): boolean =>
-  !Number.isNaN(s.y[i] as number) && (s.w === null || Number.isFinite(s.w[i] as number));
+  !Number.isNaN(s.y[i] as number) &&
+  (s.w === null || Number.isFinite(s.w[i] as number)) &&
+  (s.changesOnly !== true || i === 0 || s.y[i] !== s.y[i - 1]);
 
 /** The smallest position at or above `v` (`strict`: above) - Infinity where none. */
 function firstFrom(series: readonly WalkSeries[], v: number, strict: boolean): number {
@@ -144,4 +149,25 @@ export function stepCell(m: WalkSeries, at: Cell, direction: "left" | "right" | 
     if (ok && closer) best = { x, y };
   }
   return best ?? at;
+}
+
+/** The first or last cell of a matrix row that has a value - Home and End.
+    One pass, where stepping to the end cell by cell would read the matrix
+    once per cell. */
+export function rowEnd(m: WalkSeries, at: Cell, end: "start" | "end"): Cell {
+  let best = at;
+  for (let i = 0; i < m.length; i++) {
+    if ((m.y[i] as number) !== at.y || !valid(m, i)) continue;
+    const x = m.x[i] as number;
+    if (end === "start" ? x < best.x : x > best.x) best = { x, y: at.y };
+  }
+  return best;
+}
+
+/** Does the matrix have a cell with a value here? */
+export function hasCell(m: WalkSeries, at: Cell): boolean {
+  for (let i = 0; i < m.length; i++) {
+    if ((m.x[i] as number) === at.x && (m.y[i] as number) === at.y && valid(m, i)) return true;
+  }
+  return false;
 }
