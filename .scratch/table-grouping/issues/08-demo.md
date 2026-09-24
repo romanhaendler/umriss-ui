@@ -1,6 +1,6 @@
 # 08 — The demo: Grouping and Aggregate, as a ladder of examples
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Blocked by: 05, 06

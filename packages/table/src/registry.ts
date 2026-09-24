@@ -468,6 +468,8 @@ export class Registry {
           if (group) return dateKey(group)(value);
           return value;
         },
+        /* A value of one's own is a name; its groups stand by what they hold. */
+        order: entry.spec.ownGroupValue ? (row) => sortValue(entry.read(row), entry.spec.ownSortValue) : undefined,
       }));
     const aggregates = this.orderedColumns()
       .filter((e) => e.spec.aggregate !== undefined)
