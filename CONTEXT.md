@@ -638,8 +638,8 @@ _Avoid_: column definition, Spaltendefinition, field (which is one way to read a
 value), Zelle
 
 **Value**:
-What a column is for one row: the thing that is sorted, searched, exported and
-summed. It is read from the row by a field name or computed from it, and never
+What a column is for one row: the thing that is sorted, searched, exported,
+grouped and aggregated. It is read from the row by a field name or computed from it, and never
 read back from what the cell shows.
 _Avoid_: data, accessor, raw value, Rohwert
 
@@ -651,7 +651,7 @@ presentation by name)
 
 **Absent value**:
 A value that is null, undefined or not a number. It is shown as absent, sorts last
-in either direction and counts towards no footer. It is not zero and not an empty
+in either direction and counts towards no aggregate. It is not zero and not an empty
 string. It is the table's counterpart of a chart's **Gap** and shares neither its
 word nor its encoding.
 _Avoid_: Lücke (which is the chart's), empty, leer, null value
@@ -723,6 +723,47 @@ condition appears — there is no second strip for them — and a table with col
 filters or a search has one even where none is placed. It does not float and does not move;
 that is a **Dock**.
 _Avoid_: Dock, action bar, Werkzeugleiste, Filterleiste, Leiste on its own
+
+**Aggregate**:
+What a column's values come to over a set of rows — a sum, an average, a
+minimum, a count, or the caller's own. Over the filtered set it is the footer;
+over a **Row group** it stands in the **Group header**. It is always computed from
+the values themselves, never from other aggregates, and absent values do not count
+towards it.
+_Avoid_: subtotal, Zwischensumme (a maximum is no sum), total, rollup, summary
+
+**Grouping**:
+The ordered list of — at most three — columns the filtered set is divided by, the
+first one outermost. It is part of the **View**, like the sort levels.
+_Avoid_: group by, Gruppe on its own (a lane group and a chart legend group too),
+pivot
+
+**Group key**:
+A value a table can be grouped by without being a **Column**: it has no cell, is
+never exported and does not stand in the column menu — only where a grouping is
+chosen. A column can be grouped by as well, hidden or not; a group key is for
+the value that should never be one.
+_Avoid_: grouping column, hidden column, dimension
+
+**Row group**:
+The rows of the filtered set that share one grouping value on one level of the
+grouping. Rows whose value is absent form a group of their own, which stands last.
+Its form follows its level and nothing else: the innermost level is a **Group
+span**, every level outside it a **Group header** (ADR-0029). A group of one row
+is that row — nothing to fold, nothing to count, no aggregate.
+_Avoid_: group on its own, bucket, category, Kategorie
+
+**Group header**:
+The line heading a **Row group** of an outer level of the grouping: the grouping
+value, how many rows the group has, and in each column the group's **Aggregate**.
+It is not a row — it has no row key and is never exported as one.
+_Avoid_: group row, subtotal row, Gruppenzeile, summary row
+
+**Group span**:
+The form of a **Row group** on the innermost level: its grouping column stands
+first and shows the value once, beside the group's rows, with no line of its own.
+Folded, a span is one line carrying the group's aggregates in the columns.
+_Avoid_: gutter, Randspalte, merged cell, rowspan (which it is not built from)
 
 ### The demo
 
