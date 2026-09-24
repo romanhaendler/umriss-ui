@@ -41,7 +41,9 @@ import {
   type LimitDrawItem,
   type SeriesDrawItem,
 } from "./draw";
-import { nearestIndex, nearestPoint } from "./hit";
+import { lowerBound, nearestIndex, nearestPoint } from "./hit";
+import { DEFAULT_CHARTS_WORDING, type ChartsWording } from "./wording";
+import { nearestPosition, stepCell, stepPosition, type Cell, type Move, type WalkSeries } from "./walk";
 import { downsample } from "./downsample";
 import { lastSegmentEnd, medianStep, segmentEnd, segmentIndex } from "./state";
 import { cellSize, cellIndex, measureSpacing } from "./cells";
@@ -507,6 +509,14 @@ function domainEqual(
   return false;
 }
 
+/** The readout waits for the keys to rest this long (charts-a11y R11). */
+const READOUT_REST = 150;
+/** The summary waits for layouts - a zoom - to rest this long. */
+const SUMMARY_REST = 100;
+
+/** One zoom key widens the domain by this much; its opposite narrows it back. */
+const KEY_ZOOM = 1.25;
+
 export class ChartScene {
   /* ---------- Registration ---------- */
   private series = new Map<number, SeriesEntry>();
@@ -526,6 +536,13 @@ export class ChartScene {
   private seriesCtx: CanvasRenderingContext2D | null = null;
   private overlayCtx: CanvasRenderingContext2D | null = null;
   private tooltipEl: HTMLElement | null = null;
+  /** The readout (polite live region) and the summary the plot is described
+      by (charts-a11y 03). */
+  private readoutEl: HTMLElement | null = null;
+  private summaryEl: HTMLElement | null = null;
+  private readoutTimer: ReturnType<typeof setTimeout> | null = null;
+  private summaryTimer: ReturnType<typeof setTimeout> | null = null;
+  private wording: ChartsWording = DEFAULT_CHARTS_WORDING;
   private measurer: TextMeasurer | null = null;
 
   /* ---------- Size and DPR ---------- */
@@ -564,7 +581,20 @@ export class ChartScene {
   private hoverKey = "";
   private hoverXLabel = "";
   private hoverRows: readonly TooltipRow[] = [];
+  /** The orders of the series in the current hit, beside its rows. */
+  private hoverOrders: readonly number[] = [];
   private highlight: readonly number[] | null = null;
+  /** Who set the Active point (ADR-0030): the pointer and the keyboard move
+      the same one, the last input winning. */
+  private activeBy: "pointer" | "keyboard" | null = null;
+  /** Where the keyboard stands, in x of the emphasised series' axis; a
+      matrix' cell. */
+  private keyX: number | null = null;
+  private keyCell: Cell | null = null;
+  /** The series ↑/↓ chose (its order), read first; null: the first walked. */
+  private emphasis: number | null = null;
+  /** The highlight is the keyboard's, and goes with its Active point. */
+  private keyHighlight = false;
 
   /* ---------- Snapshots for the HTML layer ---------- */
   private layoutSnapshot: LayoutSnapshot = EMPTY_LAYOUT_SNAPSHOT;
@@ -1075,6 +1105,18 @@ export class ChartScene {
     this.tooltipEl = el;
   }
 
+  bindA11y(readout: HTMLElement | null, summary: HTMLElement | null): void {
+    this.readoutEl = readout;
+    this.summaryEl = summary;
+    this.scheduleSummary();
+  }
+
+  setWording(wording: ChartsWording): void {
+    if (wording === this.wording) return;
+    this.wording = wording;
+    this.scheduleSummary();
+  }
+
   private themeRoot: HTMLElement | null = null;
 
   unbind(): void {
@@ -1098,6 +1140,12 @@ export class ChartScene {
     this.seriesCtx = null;
     this.overlayCtx = null;
     this.tooltipEl = null;
+    this.readoutEl = null;
+    this.summaryEl = null;
+    if (this.readoutTimer !== null) clearTimeout(this.readoutTimer);
+    if (this.summaryTimer !== null) clearTimeout(this.summaryTimer);
+    this.readoutTimer = null;
+    this.summaryTimer = null;
   }
 
   /** Detect a change of DPR (a change of monitor): rebind matchMedia (R-2.9). */
@@ -1190,7 +1238,10 @@ export class ChartScene {
       this.pushLayoutSnapshot();
       // New data or a new layout under a resting pointer: the hit it had names
       // old values at old pixels. Ask again at the same place.
-      if (this.hover !== null) {
+      if (this.activeBy === "keyboard") {
+        this.hoverKey = "";
+        this.reapplyKey();
+      } else if (this.hover !== null) {
         const { mouseX, mouseY } = this.hover;
         this.hoverKey = "";
         this.pointerMove(mouseX, mouseY);
@@ -1773,11 +1824,19 @@ export class ChartScene {
       if (axis !== undefined) this.share({ axisId: axis.id, value: axis.scale.fromPx(x) });
       return;
     }
-    const hit = this.hitTest(x, y);
-    if (hit === null) {
+    if (!this.showAt(x, y)) {
       this.pointerLeave();
       return;
     }
+    if (this.activeBy === "keyboard") this.releaseKey();
+    this.activeBy = "pointer";
+  }
+
+  /** The Active point at a pixel - the pointer's, or the one a key resolved
+      to. False where nothing is hit there. */
+  private showAt(x: number, y: number): boolean {
+    const hit = this.hitTest(x, y);
+    if (hit === null) return false;
     const key = hit.key;
     this.hover = hit.state;
     this.hover.mouseX = x;
@@ -1791,11 +1850,22 @@ export class ChartScene {
       this.hoverKey = key;
       this.hoverXLabel = this.xLabel(xAxisId, hit.primary.xValue, subMinute(hit.primary));
       this.hoverRows = hit.chosen.map((k) => this.tooltipRow(k, xAxisId));
+      this.hoverOrders = hit.chosen.map((k) => k.entry.order);
       this.pushHoverSnapshot();
     }
+    return true;
   }
 
+  /** The pointer went away. A point the keyboard set stays (charts-a11y R3). */
   pointerLeave(): void {
+    if (this.activeBy === "keyboard") return;
+    this.clearActive();
+  }
+
+  /** No Active point, by whoever set it. */
+  private clearActive(): void {
+    this.releaseKey();
+    this.activeBy = null;
     this.share(null);
     if (this.hover === null && this.hoverKey === "") return;
     this.hover = null;
@@ -1918,6 +1988,318 @@ export class ChartScene {
     };
     const key = chosen.map((k) => `${k.entry.order}:${k.index}`).join("|");
     return { key, state, primary, chosen };
+  }
+
+  /* ---------- The keyboard's walk (charts-a11y, ADR-0030) ----------
+
+     The plot area is one tab stop; the keys move the Active point over the
+     positions the pointer would hit (walk.ts), and a position becomes a hit by
+     asking the hit test at its pixel - so the tooltip, the markers and the
+     sync are the pointer's own. */
+
+  /** The visible series with points, in registration order. */
+  private walkable(): SeriesEntry[] {
+    return this.seriesInOrder().filter(
+      (e) => e.config.hidden !== true && e.materialized !== null && e.materialized.length > 0,
+    );
+  }
+
+  private emphasised(): SeriesEntry | null {
+    const all = this.walkable();
+    return all.find((e) => e.order === this.emphasis) ?? all[0] ?? null;
+  }
+
+  /** What ←/→ walk over: under "nearest" the emphasised series alone, under
+      "x" every series on its x axis. */
+  private walked(emph: SeriesEntry): WalkSeries[] {
+    const alone = this.tooltip?.mode === "nearest";
+    return this.walkable()
+      .filter((e) => (alone ? e === emph : e.config.xAxisId === emph.config.xAxisId))
+      .map((e) => e.materialized as MaterializedSeries);
+  }
+
+  /** The focus came in: the walk starts at the newest position, unless the
+      pointer already stands somewhere (R1). A pointer's focus - a click - does
+      not start it. */
+  focus(byKeyboard: boolean): void {
+    if (this.tooltip === null || !byKeyboard || this.hover !== null) return;
+    this.walk("last");
+  }
+
+  /** The focus left: a point the keyboard set goes with it. */
+  blur(): void {
+    if (this.activeBy === "keyboard") this.clearActive();
+  }
+
+  /** A key on the plot area; true where the chart took it. */
+  key(event: KeyboardEvent): boolean {
+    if (this.tooltip === null || event.altKey || event.ctrlKey || event.metaKey) return false;
+    if (event.key === "Escape") {
+      if (this.hover === null) return false;
+      this.clearActive();
+      return true;
+    }
+    if (this.zoomKey(event)) return true;
+    const emph = this.emphasised();
+    if (emph === null) return false;
+    if (emph.config.kind === "matrix") return this.cellKey(event.key, emph);
+    const moves: Record<string, Move> = {
+      ArrowRight: "next",
+      ArrowLeft: "previous",
+      Home: "first",
+      End: "last",
+      PageDown: "pageNext",
+      PageUp: "pagePrevious",
+    };
+    const move = event.shiftKey ? undefined : moves[event.key];
+    if (move !== undefined) {
+      this.walk(move);
+      return true;
+    }
+    if (!event.shiftKey && (event.key === "ArrowDown" || event.key === "ArrowUp")) {
+      this.changeSeries(event.key === "ArrowDown" ? 1 : -1);
+      return true;
+    }
+    return false;
+  }
+
+  /** Zoom and pan by key (Q6), only where the caller controls the domain:
+      each key proposes what its gesture would. */
+  private zoomKey(event: KeyboardEvent): boolean {
+    if (!this.hasZoom()) return false;
+    const plot = this.layout.plot;
+    const at = this.hover?.hit.xPx ?? plot.x + plot.width / 2;
+    if (event.key === "+" || event.key === "=") this.zoomAt(at, 1 / KEY_ZOOM);
+    else if (event.key === "-" || event.key === "_") this.zoomAt(at, KEY_ZOOM);
+    else if (event.key === "0") this.doubleClick();
+    else if (event.shiftKey && (event.key === "ArrowLeft" || event.key === "ArrowRight"))
+      this.panBy(((event.key === "ArrowLeft" ? 1 : -1) * plot.width) / 10);
+    else return false;
+    return true;
+  }
+
+  /** Where the walk starts from: the keyboard's own place, or the pointer's. */
+  private walkFrom(): number | null {
+    if (this.activeBy === "keyboard") return this.keyX;
+    return this.hover?.hit.xValue ?? null;
+  }
+
+  private walk(move: Move): void {
+    const emph = this.emphasised();
+    if (emph?.config.kind === "matrix") {
+      const cell = this.lastCell(emph);
+      if (cell !== null) this.showCell(emph, cell);
+      return;
+    }
+    const xAxis = emph === null ? null : this.findAxis("x", emph.config.xAxisId);
+    if (emph === null || xAxis === null) return;
+    const from = this.activeBy === null ? null : this.walkFrom();
+    const to = stepPosition(this.walked(emph), from, move, xAxis.scale.domain);
+    if (to !== null) this.showKey(emph, to);
+  }
+
+  private changeSeries(step: 1 | -1): void {
+    const all = this.walkable();
+    const current = this.emphasised();
+    if (current === null || all.length < 2) return;
+    const next = all[(all.indexOf(current) + step + all.length) % all.length] as SeriesEntry;
+    this.emphasis = next.order;
+    // The legend's hover emphasis shows which series is read first.
+    this.setHighlight([next.order]);
+    this.keyHighlight = true;
+    const x = this.walkFrom();
+    const xAxis = this.findAxis("x", next.config.xAxisId);
+    if (xAxis === null) return;
+    const to = x === null ? stepPosition(this.walked(next), null, "last", xAxis.scale.domain) : nearestPosition(this.walked(next), x, xAxis.scale.domain);
+    if (to !== null) this.showKey(next, to);
+  }
+
+  /** A matrix walks cell by cell in two dimensions (R7). */
+  private cellKey(key: string, emph: SeriesEntry): boolean {
+    const mat = emph.materialized as MaterializedSeries;
+    const directions: Record<string, "left" | "right" | "up" | "down"> = {
+      ArrowLeft: "left",
+      ArrowRight: "right",
+      ArrowUp: "up",
+      ArrowDown: "down",
+    };
+    const at = this.keyCell ?? this.lastCell(emph);
+    if (at === null) return false;
+    const direction = directions[key];
+    let next: Cell;
+    if (direction !== undefined) next = stepCell(mat, at, direction);
+    else if (key === "Home" || key === "End") {
+      // To the row's end: step until the row has no further cell.
+      next = at;
+      for (let step = stepCell(mat, at, key === "Home" ? "left" : "right"); step !== next; step = stepCell(mat, next, key === "Home" ? "left" : "right")) next = step;
+    } else return false;
+    this.showCell(emph, next);
+    return true;
+  }
+
+  /** Where a matrix' walk starts: the newest column, its lowest row. */
+  private lastCell(emph: SeriesEntry): Cell | null {
+    const mat = emph.materialized as MaterializedSeries;
+    const xAxis = this.findAxis("x", emph.config.xAxisId);
+    const x = xAxis === null ? null : stepPosition([mat], null, "last", xAxis.scale.domain);
+    if (x === null) return null;
+    const below = { x, y: Number.NEGATIVE_INFINITY };
+    const cell = stepCell(mat, below, "up");
+    return cell === below ? null : cell;
+  }
+
+  private showCell(emph: SeriesEntry, cell: Cell, speak = true): void {
+    const xAxis = this.findAxis("x", emph.config.xAxisId);
+    const yAxis = this.findAxis("y", emph.config.yAxisId);
+    if (xAxis === null || yAxis === null) return;
+    this.keyCell = cell;
+    this.moveKey(cell.x, xAxis.scale.toPx(cell.x), yAxis.scale.toPx(cell.y), speak);
+  }
+
+  /** The Active point at a position of the emphasised series. The pixel's y
+      is that series' own, so that "nearest" picks it and a lane is hit. */
+  private showKey(emph: SeriesEntry, x: number, speak = true): void {
+    const xAxis = this.findAxis("x", emph.config.xAxisId);
+    const yAxis = this.findAxis("y", emph.config.yAxisId);
+    const mat = emph.materialized;
+    if (xAxis === null || yAxis === null || mat === null) return;
+    let py: number;
+    if (emph.config.kind === "state") {
+      const lane = this.lanePx(emph.config, yAxis);
+      py = (lane.top + lane.bottom) / 2;
+    } else {
+      const v = mat.y[nearestIndex(mat.x, mat.length, x)] as number;
+      py = Number.isNaN(v) ? this.layout.plot.y + this.layout.plot.height / 2 : yAxis.scale.toPx(v);
+    }
+    this.moveKey(x, xAxis.scale.toPx(x), py, speak);
+  }
+
+  private moveKey(x: number, px: number, py: number, speak = true): void {
+    if (!this.showAt(px, py)) return;
+    this.activeBy = "keyboard";
+    this.keyX = x;
+    if (speak) this.scheduleReadout();
+  }
+
+  /* ---------- What is spoken (charts-a11y 03) ---------- */
+
+  /** The readout, written once the keys rest (R11): a held key speaks where
+      it stops. It reads what the tooltip shows, the emphasised series first. */
+  private scheduleReadout(): void {
+    if (this.readoutEl === null) return;
+    if (this.readoutTimer !== null) clearTimeout(this.readoutTimer);
+    this.readoutTimer = setTimeout(() => {
+      this.readoutTimer = null;
+      const el = this.readoutEl;
+      if (el !== null && this.activeBy === "keyboard") el.textContent = this.readoutText();
+    }, READOUT_REST);
+  }
+
+  private readoutText(): string {
+    const hover = this.hover;
+    if (hover === null) return "";
+    const rows = hover.hit.points.map((point, k) => {
+      const row = this.hoverRows[k];
+      const x = row !== undefined && row.x !== "" ? ` (${row.x})` : "";
+      return { order: this.hoverOrders[k], text: `${point.seriesName} ${row?.value ?? ""}${x}.` };
+    });
+    const emph = this.emphasis;
+    rows.sort((a, b) => Number(b.order === emph) - Number(a.order === emph));
+    return [`${this.hoverXLabel}.`, ...rows.map((r) => r.text)].join(" ");
+  }
+
+  /** The summary is rebuilt after a layout, but not on every one: a zoom lays
+      out every frame, and the summary reads every visible point. */
+  private scheduleSummary(): void {
+    if (this.summaryEl === null) return;
+    if (this.summaryTimer !== null) clearTimeout(this.summaryTimer);
+    this.summaryTimer = setTimeout(() => {
+      this.summaryTimer = null;
+      if (this.summaryEl !== null) this.summaryEl.textContent = this.summaryText();
+    }, SUMMARY_REST);
+  }
+
+  /** Kind of content, series by name, the visible stretch, each series' range
+      in it and the keys (R10). A band has no range - its values are states. */
+  private summaryText(): string {
+    const w = this.wording;
+    const series = this.walkable();
+    const parts: string[] = [];
+    if (series.length > 0) parts.push(w.seriesCount(series.length));
+    const first = series[0];
+    const xAxis = first === undefined ? null : this.findAxis("x", first.config.xAxisId);
+    if (first !== undefined && xAxis !== null) {
+      const [from, to] = xAxis.scale.domain;
+      parts.push(w.visibleRange(this.xLabel(first.config.xAxisId, from), this.xLabel(first.config.xAxisId, to)));
+    }
+    const all = this.seriesInOrder();
+    for (const entry of series) {
+      if (entry.config.kind === "state") continue;
+      const range = this.visibleRange(entry);
+      if (range === null) continue;
+      const name = this.nameFor(entry, all.indexOf(entry));
+      parts.push(w.seriesExtent(name, this.formatY(entry, range[0]), this.formatY(entry, range[1])));
+    }
+    if (this.tooltip !== null) {
+      parts.push(w.walkHelp);
+      if (this.hasZoom()) parts.push(w.zoomHelp);
+    }
+    return parts.join(" ");
+  }
+
+  /** The lowest and highest value of a series inside its x axis' domain; a
+      cell's value, every other kind's y. */
+  private visibleRange(entry: SeriesEntry): [number, number] | null {
+    const mat = entry.materialized;
+    const xAxis = this.findAxis("x", entry.config.xAxisId);
+    if (mat === null || xAxis === null) return null;
+    const [from, to] = xAxis.scale.domain;
+    const values = mat.w ?? mat.y;
+    let min = Number.POSITIVE_INFINITY;
+    let max = Number.NEGATIVE_INFINITY;
+    // ponytail: reads every visible point once per summary; debounced above,
+    // so a zoom pays it once when it rests, not per frame.
+    for (let i = lowerBound(mat.x, mat.length, from); i < mat.length && (mat.x[i] as number) <= to; i++) {
+      const v = values[i] as number;
+      if (!Number.isFinite(v) || Number.isNaN(mat.y[i] as number)) continue;
+      if (v < min) min = v;
+      if (v > max) max = v;
+    }
+    return min <= max ? [min, max] : null;
+  }
+
+  /** A value as the tooltip writes it: the series' format, else its y axis'
+      (a cell's value has no y axis format). */
+  private formatY(entry: SeriesEntry, v: number): string {
+    const config = entry.config;
+    if (config.format !== undefined) return config.format(v);
+    if (config.kind === "matrix") return formatValue(v);
+    const own = this.findAxisConfig("y", config.yAxisId)?.tickFormat;
+    return own === undefined ? formatValue(v) : own(v);
+  }
+
+  /** After a layout - new data, a new domain -, the keyboard's point goes to
+      the nearest position still visible (Q6), or goes away. */
+  private reapplyKey(): void {
+    const emph = this.emphasised();
+    const xAxis = emph === null ? null : this.findAxis("x", emph.config.xAxisId);
+    const x = emph === null || xAxis === null || this.keyX === null ? null : nearestPosition(this.walked(emph), this.keyX, xAxis.scale.domain);
+    if (emph === null || x === null) {
+      this.clearActive();
+      return;
+    }
+    if (this.keyCell !== null && emph.config.kind === "matrix") this.showCell(emph, this.keyCell, false);
+    else this.showKey(emph, x, false);
+  }
+
+  /** The keyboard lets go: its emphasis leaves the series layer. */
+  private releaseKey(): void {
+    this.keyX = null;
+    this.keyCell = null;
+    if (this.keyHighlight) {
+      this.keyHighlight = false;
+      this.setHighlight(null);
+    }
   }
 
   /* ---------- Cursor sync (charts-long-series 04) ----------
@@ -2269,6 +2651,7 @@ export class ChartScene {
   }
 
   private pushLayoutSnapshot(): void {
+    this.scheduleSummary();
     this.layoutSnapshot = {
       version: this.layoutSnapshot.version + 1,
       layout: this.layout,

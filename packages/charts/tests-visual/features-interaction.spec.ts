@@ -573,3 +573,48 @@ test("cursor sync: one controlled domain zooms all three", async ({ page }) => {
   expect(after).not.toEqual(before);
   expect(after.some((l) => HOURS.test(l))).toBe(true);
 });
+
+/* charts-a11y: the chart as one tab stop (ADR-0030). */
+
+test("Tab reaches the plot, and the keys walk its Active point", async ({ page }) => {
+  await openExample(page, "chart", "keyboard-and-screen-reader");
+  const example = page.locator('[data-example="keyboard-and-screen-reader"]');
+  const plot = example.locator(".uc-plot").first();
+  await plot.focus();
+  await page.keyboard.press("Shift+Tab");
+  await page.keyboard.press("Tab");
+  await expect(plot).toBeFocused();
+  await expect(plot).toHaveAttribute("role", "application");
+  const tooltip = example.locator(".uc-tooltip").first();
+  await expect(tooltip).toHaveCSS("opacity", "1");
+  const newest = await tooltip.innerText();
+  await page.keyboard.press("Home");
+  await page.waitForTimeout(100);
+  expect(await tooltip.innerText()).not.toBe(newest);
+  await page.keyboard.press("End");
+  await page.waitForTimeout(100);
+  expect(await tooltip.innerText()).toBe(newest);
+  await page.keyboard.press("Escape");
+  await expect(tooltip).toHaveCSS("opacity", "0");
+  await expect(plot).toBeFocused();
+});
+
+test("the pointer takes the Active point over, and a synced chart follows the keys", async ({ page }) => {
+  await openExample(page, "chart", "cursor-sync");
+  const example = page.locator('[data-example="cursor-sync"]');
+  await example.scrollIntoViewIfNeeded();
+  const first = example.locator(".uc-plot").nth(0);
+  await first.focus();
+  await page.keyboard.press("Shift+Tab");
+  await page.keyboard.press("Tab");
+  await page.keyboard.press("Home");
+  await page.waitForTimeout(150);
+  // The second chart draws the crosshair the keys asked for.
+  expect(await occupiedPixels(example.locator(".uc-root").nth(1), "uc-layer-overlay")).toBeGreaterThan(0);
+  const keyed = await example.locator(".uc-tooltip").first().innerText();
+  const box = await first.boundingBox();
+  if (box === null) throw new Error("plot area not found");
+  await page.mouse.move(box.x + box.width * 0.9, box.y + box.height / 2);
+  await page.waitForTimeout(150);
+  expect(await example.locator(".uc-tooltip").first().innerText()).not.toBe(keyed);
+});

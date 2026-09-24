@@ -27,6 +27,13 @@ Screenshot pages carry their name in brackets.
 | Hover draws the overlay layer only | R-2.11 | Manual (benchmark FPS: 60 at 3 million points) |
 | `padding` as a number and as an object | 4.1 | Unit (layout), Screenshot (`configuration`) |
 | `role="img"` + `aria-label` on the plot area, the legend beside it rather than inside it; canvas `aria-hidden` | R-7.6 | Unit (jsdom) |
+| With a tooltip the plot area is one tab stop: `role="application"`, `aria-roledescription`, its ring on `:focus-visible` | ADR-0030 | Unit (jsdom keyboard), Interaction, Screenshot (`focused-active-point`) |
+| ←/→, Home/End, PageUp/PageDown walk the Active point over the visible positions, gaps skipped; ↑/↓ change the emphasised series; a matrix walks cell by cell; Escape clears, blur clears | charts-a11y Q2, R1-R7 | Unit (walk), Unit (jsdom keyboard), Interaction |
+| One Active point for pointer and keyboard, the last input winning; a pointer's leave keeps the keyboard's; it travels over `syncId` | ADR-0030 | Unit (jsdom keyboard), Interaction |
+| A polite readout after a key, never after the pointer, once the keys rest 150 ms; the emphasised series first | charts-a11y Q4, R11 | Unit (jsdom readout) |
+| A summary the plot is described by: series, visible stretch, each series' range there, the keys | charts-a11y R10 | Unit (jsdom readout) |
+| `+`/`−`, Shift+←/→ and `0` zoom, pan and show everything - only with `onDomainChange` | charts-a11y Q6 | Unit (jsdom zoom keys) |
+| The charts' own wording, English by default, German from `@umriss-ui/charts/wording/de`; `empty` wins over it | ADR-0031 | Unit (jsdom wording) |
 | DEV warning without `ariaLabel` | R-7.6 | Manual |
 | Series kinds can be mixed in one chart | ADR-0002 | Screenshot (`mixed`), Interaction |
 | Every series kind can be bound to every axis | R-4.12 | Unit (scene) |
@@ -334,9 +341,8 @@ constant over 5 s – the hysteresis from R-3.4 works (R-5.3).
 
 Wanted, not yet built (charts-review Q12). Each waits for a caller who needs it.
 
-* **Keyboard and screen reader.** A focus model over the points, a data table as
-  an alternative, a live region; a package of its own (`.scratch/charts-a11y/`),
-  to be settled once zoom has fixed the hit model.
+* **A data table.** The chart's values as a table, on demand, for a reader who
+  wants them all at once rather than walked (charts-a11y Q5).
 * **`onSelect`.** A click that reports the hit; the hit model is there, the
   question of what a selection is (ADR-0003 in core) is not.
 * **Stacking** (stacked bars and areas). It needs more than two Y channels and a

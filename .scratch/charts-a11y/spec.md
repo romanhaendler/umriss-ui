@@ -1,6 +1,6 @@
 # The charts for keyboard and screen reader
 
-Status: ready-for-agent
+Status: done
 Date:   2026-09-24
 Origin: `.scratch/charts-review/spec.md`, rows Q11 and Q26.
 Decisions: ADR-0030 (one tab stop, one Active point), ADR-0031 (the charts'
@@ -68,3 +68,12 @@ recorded here so they can be challenged.
 ## Out of scope
 
 A data table; touch; announcing pointer moves; a public Active point API.
+
+## Comments
+
+**Delivered** in `@umriss-ui/charts` 0.6.0, tickets 01-05. The walk is a pure
+module (`walk.ts`, 16 unit tests); the scene reuses the hit test for every
+keyboard position. Tests: jsdom for keyboard (10), readout and summary (4),
+zoom keys (4), wording (4); two Playwright interaction tests (Tab and keys;
+pointer handover and sync); a focused-chart screenshot per theme; axe clean on
+every sample page with no new tolerated pair.

@@ -87,6 +87,27 @@
     min-width: 0;
   }
 
+  /* Read, not seen: the readout and the summary (charts-a11y 03). */
+  .uc-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* The plot as a tab stop (ADR-0030): the focus is the ring alone, the
+     legend entry's. */
+  .uc-plot:focus {
+    outline: none;
+  }
+
+  .uc-plot:focus-visible {
+    box-shadow: var(--uc-focus-ring);
+  }
+
   .uc-plot > canvas {
     position: absolute;
     inset: 0;
