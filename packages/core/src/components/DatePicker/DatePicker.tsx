@@ -120,11 +120,11 @@ export function DatePicker({
               onPick={choose}
             />
             <div className={styles.foot}>
-              <Button size="sm" variant="ghost" onClick={() => choose(new Date())}>
+              <Button size="sm" variant="ghost" className={styles.hangStart} onClick={() => choose(new Date())}>
                 {wording.today}
               </Button>
               {value && (
-                <Button size="sm" variant="ghost" onClick={() => { onChange(null); closePanel(); }}>
+                <Button size="sm" variant="ghost" className={styles.hangEnd} onClick={() => { onChange(null); closePanel(); }}>
                   {wording.clear}
                 </Button>
               )}

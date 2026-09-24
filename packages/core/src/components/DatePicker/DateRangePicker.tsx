@@ -227,7 +227,7 @@ export function DateRangePicker({
                 {footText}
               </span>
               {value && !draftFrom && (
-                <Button size="sm" variant="ghost" onClick={() => { onChange(null); closePanel(); }}>
+                <Button size="sm" variant="ghost" className={styles.hangEnd} onClick={() => { onChange(null); closePanel(); }}>
                   {wording.clear}
                 </Button>
               )}
