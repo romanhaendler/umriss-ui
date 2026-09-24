@@ -107,6 +107,20 @@ describe("The legend under encoding by marks", () => {
     expect(hatches[1]).not.toBe("");
   });
 
+  /* charts-alternatives 03 (C4): the contrast mode leaves the canvas alone,
+     so the chart forces itself - and encodes by marks whatever it was told. */
+  it("switches the marks on by itself under forced colours", async () => {
+    const real = window.matchMedia;
+    vi.spyOn(window, "matchMedia").mockImplementation((query: string) =>
+      query === "(forced-colors: active)"
+        ? ({ matches: true, addEventListener: () => undefined } as unknown as MediaQueryList)
+        : real(query),
+    );
+    const [, b] = await legendOf(undefined, lines);
+    expect(b?.querySelector(".uc-legend-chip")).toBeNull();
+    expect(b?.querySelector("line")?.getAttribute("stroke-dasharray")).toBe("7 4");
+  });
+
   it("shows a matrix' steps side by side, each with its hatch", async () => {
     const [matrix] = await legendOf(
       "marks",
