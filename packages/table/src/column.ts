@@ -1,6 +1,6 @@
 /* A column that fits many tables: bound to one property, not to a row type.
 
-     const amount = column<{ amount: number }>({ value: "amount", label: "Amount", footer: "sum" });
+     const amount = column<{ amount: number }>({ value: "amount", label: "Amount", aggregate: "sum" });
      <Column {...amount} />
 
    The compiler accepts it for every row with a numeric `amount` and rejects it

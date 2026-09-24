@@ -38,7 +38,7 @@ export default function RangeFilter() {
     <Table ariaLabel="Orders">
       <Column value="number" label="Order" rowHeader />
       <Column value="customer" label="Customer" />
-      <Column value="quantity" label="Quantity" filter="range" footer="sum" />
+      <Column value="quantity" label="Quantity" filter="range" aggregate="sum" />
       <Column value="due" label="Due date" filter="range" format="date" />
     </Table>
   );

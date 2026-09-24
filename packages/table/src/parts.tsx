@@ -46,7 +46,9 @@ import type { HookSnapshot, Registry, ColumnSpec, ColumnEntry } from "./registry
 import { link } from "./registry";
 import { resetSearchAndFilters, visibleColumns } from "./export";
 import type { TableProps } from "./types";
-import { asText, footerValue, isAbsent, isRightAligned } from "./values";
+import { asText, isAbsent, isRightAligned } from "./values";
+import { aggregate } from "./model/grouping";
+import type { Aggregated } from "./model/grouping";
 import styles from "./Table.module.css";
 
 /* The props as they arrive at runtime. The types at the call site (types.ts) are
@@ -57,7 +59,10 @@ interface RuntimeColumnProps {
   label: string;
   children?: unknown;
   format?: ColumnSpec["format"];
-  footer?: ColumnSpec["footer"];
+  aggregate?: ColumnSpec["aggregate"];
+  /** The old name of `aggregate`. */
+  footer?: "sum" | "avg";
+  share?: boolean;
   rowHeader?: boolean;
   numeric?: boolean;
   width?: number;
@@ -91,6 +96,9 @@ function specFrom(props: RuntimeColumnProps): ColumnSpec {
     warnOnce(`without-id:${props.label}`, `The column "${props.label}" has a computed value but no id. Its label serves as the id.`);
     id = props.label;
   }
+  if (props.footer !== undefined) {
+    warnOnce(`footer:${id}`, `The column "${id}" uses \`footer\`, which is called \`aggregate\` now. The old name goes with the next minor version.`);
+  }
   if (props.children !== undefined && typeof props.children !== "function") {
     warnOnce(`children:${id}`, `The children of the column "${id}" are not a function and are passed over.`);
   }
@@ -100,7 +108,8 @@ function specFrom(props: RuntimeColumnProps): ColumnSpec {
     value: props.value,
     presentation: typeof props.children === "function" ? (props.children as ColumnSpec["presentation"]) : undefined,
     format: props.format,
-    footer: props.footer,
+    aggregate: props.aggregate ?? props.footer,
+    share: props.share,
     rowHeader: props.rowHeader === true,
     rightAligned: props.numeric,
     width: props.width,
@@ -330,7 +339,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
   const sticks = (e: ColumnEntry) => stickyRowHeader && e === header;
 
   const rows = projection.visible;
-  const footerShown = !loading && columns.some((e) => e.spec.footer);
+  const footerShown = !loading && columns.some((e) => e.spec.aggregate);
   const restricted = snapshot.search !== "" || Object.keys(snapshot.filter).length > 0;
 
   const renderRow = (row: unknown, index: number, absolute: number) => (
@@ -833,19 +842,72 @@ function FooterCell({
   sticky: boolean;
   left: number;
 }) {
-  const { footer, format } = entry.spec;
-  const classes = cx(styles.td, styles.numeric, sticky && styles.stickyCell);
   const style = sticky ? { left } : undefined;
-  if (!footer) return <td className={cx(styles.td, sticky && styles.stickyCell)} style={style} />;
-  const value = footerValue(rows, entry.read, footer);
+  if (!entry.spec.aggregate) return <td className={cx(styles.td, sticky && styles.stickyCell)} style={style} />;
+  const kind = typeof entry.spec.aggregate === "function" ? "own" : entry.spec.aggregate;
   return (
-    <td className={classes} style={style} data-footer={footer}>
-      <span aria-hidden="true" className={styles.footerKind}>
-        {footer === "sum" ? "Σ" : "⌀"}
-      </span>
-      <VisuallyHidden>{footer === "sum" ? wording.footerSum : wording.footerAverage} </VisuallyHidden>
-      {value === undefined ? <Absent wording={wording} /> : asText(value, format, formats, wording)}
+    <td className={cx(styles.td, styles.numeric, sticky && styles.stickyCell)} style={style} data-footer={kind}>
+      <AggregateValue entry={entry} rows={rows} formats={formats} wording={wording} signed />
     </td>
+  );
+}
+
+/* The sign before a footer aggregate, where the kind has one. A count, a range
+   or an aggregate of one's own speaks only through its word. */
+const AGGREGATE_SIGN: Partial<Record<string, string>> = { sum: "Σ", avg: "⌀", min: "min", max: "max" };
+
+const aggregateWord = (kind: string, wording: Wording): string =>
+  ({
+    sum: wording.footerSum,
+    avg: wording.footerAverage,
+    min: wording.footerMinimum,
+    max: wording.footerMaximum,
+    range: wording.footerRange,
+    count: wording.footerCount,
+    distinct: wording.footerDistinct,
+  })[kind] ?? wording.footerAggregate;
+
+/** What a column's aggregate comes to over rows, written: counts as counts, a
+    range from its two ends, the rest in the column's format - and an aggregate
+    of one's own through the column's presentation. */
+export function AggregateValue({
+  entry,
+  rows,
+  formats,
+  wording,
+  signed = false,
+}: {
+  entry: ColumnEntry;
+  rows: readonly unknown[];
+  formats: Formats;
+  wording: Wording;
+  /** With the sign and the word for the screen reader - the footer. */
+  signed?: boolean;
+}) {
+  const { aggregate: spec, format, presentation } = entry.spec;
+  if (!spec) return null;
+  const kind = typeof spec === "function" ? "own" : spec;
+  const value = aggregate({ id: entry.spec.id, read: entry.read, aggregate: spec as Aggregated<unknown>["aggregate"] }, rows);
+  const text = (v: unknown) => asText(v, format, formats, wording);
+  let content: ReactNode;
+  if (isAbsent(value)) content = <Absent wording={wording} />;
+  else if (kind === "count" || kind === "distinct") content = formats.count(value as number);
+  else if (kind === "range") {
+    const [from, to] = value as [unknown, unknown];
+    content = text(from) === text(to) ? text(from) : wording.rangeFromTo(text(from) ?? "", text(to) ?? "");
+  } else if (kind === "own" && presentation) content = (presentation as (w: unknown, z: unknown) => ReactNode)(value, rows[0]);
+  else content = text(value);
+  const sign = AGGREGATE_SIGN[kind];
+  return (
+    <>
+      {signed && sign && (
+        <span aria-hidden="true" className={styles.footerKind}>
+          {sign}
+        </span>
+      )}
+      {signed && <VisuallyHidden>{aggregateWord(kind, wording)} </VisuallyHidden>}
+      {content}
+    </>
   );
 }
 

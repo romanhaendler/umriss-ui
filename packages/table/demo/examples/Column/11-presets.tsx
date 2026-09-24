@@ -17,7 +17,7 @@ export const title = "Presets: column<P>() and spread";
    TypeScript stops inferring a type argument as soon as another one is
    named. */
 
-const quantity = column<{ quantity: number }>({ value: "quantity", label: "Quantity", format: "count", footer: "sum" });
+const quantity = column<{ quantity: number }>({ value: "quantity", label: "Quantity", format: "count", aggregate: "sum" });
 
 interface Order {
   number: string;

@@ -32,7 +32,7 @@ export default function AbsentValues() {
   return (
     <Table ariaLabel="Measurements">
       <Column value="sample" label="Sample" rowHeader />
-      <Column value="diameter" label="Diameter" footer="avg">
+      <Column value="diameter" label="Diameter" aggregate="avg">
         {(mm) => `${formats.number(mm, 2)} mm`}
       </Column>
     </Table>

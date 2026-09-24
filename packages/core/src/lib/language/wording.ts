@@ -249,6 +249,33 @@ export interface Wording {
   /** The kind of a footer number, read out before the number. */
   footerSum: string;
   footerAverage: string;
+  footerMinimum: string;
+  footerMaximum: string;
+  footerRange: string;
+  footerCount: string;
+  footerDistinct: string;
+  /** An aggregate the application computes itself. */
+  footerAggregate: string;
+  /** The grouping section of the column menu, and the menu entry per column. */
+  grouping: string;
+  groupBy: (label: string) => string;
+  /** The chip in the table toolbar: "Grouped by" Line › Customer. */
+  groupedBy: string;
+  removeGrouping: string;
+  removeGroupingLevel: (label: string) => string;
+  foldAll: string;
+  unfoldAll: string;
+  /** The group of rows without a value. */
+  groupNoValue: string;
+  /** Beside a group repeated at the top of a page that begins inside it. */
+  groupContinued: string;
+  /** The fold of a group, with its value and its count. */
+  foldGroup: (name: string, count: string) => string;
+  unfoldGroup: (name: string, count: string) => string;
+  /** The box that selects every row of a group. */
+  selectGroup: (name: string) => string;
+  /** A group of the week key: "Week 42, 2026". */
+  calendarWeek: (week: number, year: number) => string;
   /** "128 entries" in the pagination bar; the plural belongs to the language. */
   entries: (count: number, formatted: string) => string;
   /** "3 selected" in the pagination bar and the table toolbar. */
@@ -568,6 +595,25 @@ export const DEFAULT_WORDING: Wording = {
   booleanNo: "No",
   footerSum: "Sum",
   footerAverage: "Average",
+  footerMinimum: "Minimum",
+  footerMaximum: "Maximum",
+  footerRange: "Range",
+  footerCount: "Count",
+  footerDistinct: "Distinct values",
+  footerAggregate: "Aggregate",
+  grouping: "Grouping",
+  groupBy: (label) => `Group by ${label}`,
+  groupedBy: "Grouped by",
+  removeGrouping: "Remove grouping",
+  removeGroupingLevel: (label) => `Stop grouping by ${label}`,
+  foldAll: "Fold all",
+  unfoldAll: "Unfold all",
+  groupNoValue: "No value",
+  groupContinued: "continued",
+  foldGroup: (name, count) => `Fold ${name}, ${count}`,
+  unfoldGroup: (name, count) => `Unfold ${name}, ${count}`,
+  selectGroup: (name) => `Select ${name}`,
+  calendarWeek: (week, year) => `Week ${week}, ${year}`,
   entries: (count, formatted) => (count === 1 ? "1 entry" : `${formatted} entries`),
   selectedCount: (_count, formatted) => `${formatted} selected`,
   noEntries: "No entries",

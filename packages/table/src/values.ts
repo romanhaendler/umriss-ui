@@ -2,7 +2,7 @@
 
    The rules of the spec (A column, the table of defaults) as pure calculation:
    is a value absent, what kind is it, what text stands in the cell, what is
-   sorted by, what goes into the export, what into the footer. No React -
+   sorted by, what goes into the export. No React -
    formats and wording arrive as parameters, because only a component can read
    the provider.
 
@@ -18,7 +18,6 @@ export type NumberFormat = "percent" | "count" | { decimals: number };
 /** The names of the standard presentations of a point in time. */
 export type DateFormat = "date" | "time" | "dateTime";
 export type Format = NumberFormat | DateFormat;
-export type Footer = "sum" | "avg";
 
 /** The kinds the table tells apart. `other` needs a presentation from the
     caller; `empty` means: not a single value present. */
@@ -133,26 +132,6 @@ export function exportValue(
     default:
       return undefined;
   }
-}
-
-/** A sum or an average over the filtered set; absent values do not count
-    towards it. Without a single value there is neither of the two - null would
-    be a claim. */
-export function footerValue<Z>(
-  rows: readonly Z[],
-  read: (row: Z) => unknown,
-  footer: Footer,
-): number | undefined {
-  let total = 0;
-  let count = 0;
-  for (const row of rows) {
-    const value = read(row);
-    if (typeof value !== "number" || Number.isNaN(value)) continue;
-    total += value;
-    count += 1;
-  }
-  if (count === 0) return undefined;
-  return footer === "sum" ? total : total / count;
 }
 
 /** The key of a value in a list filter. Values that are present carry a

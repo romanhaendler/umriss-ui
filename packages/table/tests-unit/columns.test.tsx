@@ -31,7 +31,7 @@ const t = () => current!;
 
 function AmountColumn({ of }: { of: Table<Order> }) {
   const { Column } = of;
-  return <Column value="amount" label="Quantity" footer="sum" />;
+  return <Column value="amount" label="Quantity" aggregate="sum" />;
 }
 
 function Orders({
@@ -53,7 +53,7 @@ function Orders({
       {wrapper ? (
         <AmountColumn of={table} />
       ) : (
-        <Column value="amount" label="Quantity" footer="sum">
+        <Column value="amount" label="Quantity" aggregate="sum">
           {presentation}
         </Column>
       )}
