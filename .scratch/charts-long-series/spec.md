@@ -1,6 +1,6 @@
 # Long courses on a plant screen
 
-Status: ready-for-agent
+Status: done
 Date:   2026-09-23
 Origin: `.scratch/charts-review/spec.md`, decisions Q12, Q19-Q21, Q24.
 Blocked by: `.scratch/charts-essentials/` (the time axis).
@@ -28,3 +28,9 @@ of one line do not share a crosshair.
 Unit tests first for 02, 03, 05 (pure: extent, downsample, align); interaction
 tests for 01 and 04; one example each on `Axis` (01, 02, 05), `Benchmark` (03)
 and `Chart` (04).
+
+## Comments
+
+### Status corrected (2026-09-24)
+
+Delivered in commits `charts-long-series 01`-`05`; the capability rows for onDomainChange, domain="visible", downsampling, syncId and alignTicks stand; released with `@umriss-ui/charts` 0.4.0, bundled rather than as a minor of its own. The Status line had not been moved when the work landed.
