@@ -1,6 +1,6 @@
 # 05 — Depth work on three surfaces
 
-Status: ready-for-agent
+Status: ready-for-human
 
 Blocked by: 02, 03, 04
 

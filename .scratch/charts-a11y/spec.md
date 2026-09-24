@@ -1,6 +1,6 @@
 # The charts for keyboard and screen reader
 
-Status: needs-triage
+Status: ready-for-human
 Date:   2026-09-23
 Origin: `.scratch/charts-review/spec.md`, decision Q11 (f) and Q26.
 Blocked by: `.scratch/charts-long-series/` - the hit model after zoom decides
