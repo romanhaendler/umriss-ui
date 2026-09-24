@@ -27,9 +27,12 @@ as it stood.
   grid. Every optical correction met on the way carries its reason now: the
   turned-square chevrons' lift, the MultiSelect's narrow left inset, the time
   steppers' 3 px.
-- **Left for the user**: today's mark reads like the keyboard focus; the three
-  field chevrons are CSS angles outside the one-stroke canon.
-- **Version**: core 0.9.1.
+- **Decided by the user, then done**: today is a dot beneath its figure
+  instead of an outline that read as the focus; the three field chevrons are
+  `AngleGlyph`, inside the one-stroke check. Baselines refreshed where they
+  moved: the three components, the table's rows-per-page select, the demo
+  shell's version in the palette pictures.
+- **Versions**: core 0.9.1, then 0.9.2.
 
 ## Sep. 2026 — Depth work: the table
 

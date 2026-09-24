@@ -6,7 +6,7 @@ import { filterOptions, nextIndex, startIndex } from "../../lib/options";
 import { Popover } from "../Popover";
 import styles from "./Combobox.module.css";
 import { useWording } from "../../lib/language";
-import { CrossGlyph } from "../../lib/glyphs";
+import { AngleGlyph, CrossGlyph } from "../../lib/glyphs";
 
 export interface ComboboxOption<T extends string = string> {
   /** What comes back when this row is chosen. */
@@ -171,7 +171,7 @@ export function Combobox<T extends string = string>({
             <CrossGlyph />
           </button>
         )}
-        <span className={styles.chevron} aria-hidden="true" />
+        <AngleGlyph className={styles.chevron} />
       </div>
       <Popover
         open={open}

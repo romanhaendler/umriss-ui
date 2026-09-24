@@ -54,14 +54,10 @@
     position: absolute;
     right: var(--u-space-3);
     top: 50%;
-    width: 7px;
-    height: 7px;
-    border-right: 1.5px solid var(--u-color-text-secondary);
-    border-bottom: 1.5px solid var(--u-color-text-secondary);
-    /* Optical: a square turned 45 degrees with two borders is an angle whose
-       ink sits in its lower half; lifted by 70 % instead of 50 %, the angle's
-       own middle - not its box's - meets the field's middle. */
-    transform: translateY(-70%) rotate(45deg);
+    /* Core's AngleGlyph turned down: the field's chevron keeps the one
+       stroke width of every glyph (visuelle-wertigkeit 03). */
+    color: var(--u-color-text-secondary);
+    transform: translateY(-50%) rotate(90deg);
     pointer-events: none;
   }
 

@@ -1,6 +1,6 @@
 # 05 — Depth work on three surfaces
 
-Status: ready-for-human
+Status: done
 
 Blocked by: 02, 03, 04
 
@@ -88,10 +88,11 @@ ticket and no reason to widen this one.
   funnel after the label; the rest sub-pixel shifts below the lower head.
 - **Date picking — done except one decision (core 0.9.1).** Fixed: compact
   placeholder, feet's ghost keys aligned to the grid, the time steppers' 3 px
-  explained. Open: today's mark vs. the focus ring.
+  explained. Decided (core 0.9.2): today is a dot, the focus
+  the only ring.
 - **Combobox / Select / MultiSelect — done except one decision (core 0.9.1).**
   Fixed: Select placeholder muted; the chevrons' lift and the MultiSelect's
-  narrow inset explained at their sites. Open: the CSS chevrons vs. the
-  one-stroke canon.
+  narrow inset explained at their sites. Decided (core 0.9.2): the chevrons
+  are `AngleGlyph`.
 - Moved baselines: the compact pickers (three examples) and the select; each
   looked at.
