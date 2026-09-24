@@ -35,6 +35,18 @@ every component – no glow, and no browser outline beside it. On a field it lie
 where the field's edge lies, so the edge seems to grow; an invalid field keeps
 its danger colour (`--u-focus-ring-danger`). Unmistakable, never soft.
 
+**States.** One logic by means, not by values (the **interaction-state
+canon**): hover changes the surface - a quiet key sinks to
+`--u-color-surface-sunken`, a field's edge darkens; a press changes it more
+strongly (`--u-color-surface-pressed`, or the `-pressed` step of a tinted
+ground) and a button or a glyph may settle besides; focus is the ring and only
+the ring, never a surface, and no hover edge outweighs it; disabled dims to
+half and reacts to nothing - no hover, no press, the not-allowed cursor. What
+has no surface of its own - a tab, a link, a header's sort label, a segment -
+darkens its type instead, and says so where it does. The stylesheet check
+holds the three means that can be read off a rule; the exceptions stand there
+with their reasons.
+
 **Motion.** Motion explains a change of state; it does not decorate, and
 every motion has a name in `tokens.css` - a motion that fits none of them wants
 a new token, not a number in its module. Three distinctions carry the names.
