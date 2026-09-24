@@ -1,6 +1,6 @@
 # 01 — Closing the vocabulary, and the check that holds it
 
-Status: ready-for-agent
+Status: done
 
 Spec: `.scratch/visuelle-wertigkeit/spec.md`
 
@@ -74,3 +74,38 @@ establishing it. Its real value lies with the ten font sizes, where the set is
 genuinely open today, and in the fact that in future a motion without a matching
 token forces a token rather than a raw value — the way it did not happen with
 `modalOut` and `rotate`.
+
+## Comments
+
+**Delivered** (b304ba2, 4b1e07d).
+
+- The check lives in `packages/core/tests-unit/stylesheets.test.ts` and reads
+  the stylesheets of core, table, schedule, calculation and the charts
+  (`charts.css`; its `--uc-*` declarations are the charts' own token layer and
+  not sites). It reads declarations with a regex over `?raw` text - no parser -
+  and reports `file: property: value` per find. It checks colours, font sizes,
+  line heights, durations, curves, radii and shadows with depth (a shadow
+  without blur is an edge or a line in a token colour: geometry, like a
+  width). A test of its own holds that it reads no padding, margin, width,
+  height, gap or inset. The copies of the colour and duration rules in the
+  table, schedule and calculation guards are gone.
+- Written first; red with 29 distinct finds. The ticket's numbers had moved:
+  the two hex values in `Button.module.css` were already gone
+  (library-audit 07), `line-height: 1` stood six times, and the wider reading
+  added the charts and a find the ticket did not know - the schedule's chevron
+  referenced `--u-ease-standard`, which does not exist, so its transition was
+  invalid. The check now also asks that every referenced `--u-*` token
+  exists.
+- Resolved: `0.75rem` x8 -> new `--u-text-mono` (one role: mono figures beside
+  Sans text); `line-height: 1` x6 -> new `--u-leading-none`; Stat's `1.3` ->
+  `--u-leading-tight`; the table's `1px` share-bar radius -> `--u-radius-full`
+  (renders identically on a 2px bar); the charts get `--uc-size-tooltip`,
+  `--uc-leading-label`, `--uc-leading-text`, `--uc-radius-chip`, and the
+  tooltip head takes `--uc-size-tick`.
+- Named exceptions in the test: `0.71875rem` x2 (NumberInput small, DataViz
+  meter - no role, as the ticket expected), the verdict column's `0.7em` and
+  `0.9em` (proportions of the cell), Stat's `1.1` (one large figure). The six
+  motion values stood as exceptions pointing at 02, and the curve check was
+  written and skipped.
+- No core screenshot moved (ui-light/ui-dark, 384 passed). The other suites
+  were not run; every replacement there carries the value it replaced.

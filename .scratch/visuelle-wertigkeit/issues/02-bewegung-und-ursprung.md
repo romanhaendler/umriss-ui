@@ -1,6 +1,6 @@
 # 02 — A motion vocabulary and the origin of the overlays
 
-Status: ready-for-agent
+Status: done
 
 Blocked by: 01
 
@@ -102,3 +102,44 @@ today.
 
 No runtime library for motion, no springs. The library animates in CSS; changing
 that would be a different and larger decision.
+
+## Comments
+
+**Delivered** (75fb01c, 7793108, 9945ec9; docs in the commit that marks this
+ticket done).
+
+- `--u-transition` got `--u-ease-out` as its own commit (75fb01c). It was
+  referenced 86 times across the stylesheets; the good curve 23 times.
+- The vocabulary (7793108): `--u-ease-exit` (starts at once),
+  `--u-duration-press`/`--u-transition-press`, `--u-transition-path`,
+  `--u-duration-draw`/`--u-delay-draw`, `--u-duration-exit-fast`, and for
+  continuous processes `--u-duration-spin`, `--u-duration-shimmer`,
+  `--u-ease-steady`, `--u-ease-swell` (not zeroed under reduced motion). The
+  charts' tooltip got `--uc-transition`. Every site is on a token; the curve
+  check is on; the exception list holds only the five type values from 01.
+  Beyond the ticket's six raw values, the checkbox tick (`320ms ... 60ms`) and
+  the button's `80ms` press were named too. Glyph presses moved from 120 to
+  80 ms, the table's sort arrow from 120 to 140 ms (a path).
+- The origin (9945ec9): `computePosition` reports the side it took;
+  `motionOrigin(side, align)` in `position.ts` maps it to a
+  `transform-origin`; `position.test.ts` checks the properties the ticket
+  names. Popover (and so Menu, ContextMenu, Combobox, MultiSelect, the four date
+  pickers' panels) and Tooltip enter by scale 0.96 + opacity from it; Toast
+  grows out of its corner (`motionOrigin("top", "end")`). Modal has no anchor
+  and keeps its centre; its exit no longer retraces (fade only, on
+  `--u-ease-exit`). `Select` is native - its list is the browser's, nothing to
+  do.
+- Popover and Tooltip had no exit: they unmounted at once. `usePresence` in
+  `lib/motion.ts` keeps a closed surface, inert and `data-closing`, for
+  `--u-duration-exit-fast` read off the element; under reduced motion or
+  without the token it goes in the same pass. `popover.test.tsx` holds the
+  origin, the exit's length, reopening during the exit and reduced motion
+  (the panel appears, visible, and goes at once). `stylesheets.test.ts` holds
+  that no focus style hangs on an animation.
+- Screenshots: the core suite (ui-light/ui-dark) passed unchanged, 384 of
+  384, the accessibility check included - no baseline moved, as the ticket
+  expected of still images. The table, charts, schedule and calculation
+  suites were not run here.
+- Open: a panel clamped at the window's edge still grows from its aligned
+  corner rather than from under its anchor (a `ponytail:` note in
+  `position.ts`).
