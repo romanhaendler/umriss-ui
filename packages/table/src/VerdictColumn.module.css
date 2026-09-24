@@ -31,7 +31,7 @@
 
   .verdict[data-verdict="alarm"] .glyph,
   .verdict[data-verdict="alarm"] .excess {
-    color: var(--u-color-danger);
+    color: var(--u-color-danger-text);
   }
 
   .excess {

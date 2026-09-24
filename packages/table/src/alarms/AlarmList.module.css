@@ -36,7 +36,7 @@
   }
 
   .asOf[data-freshness="lost"] {
-    color: var(--u-color-danger);
+    color: var(--u-color-danger-text);
     font-weight: var(--u-weight-medium);
   }
 
