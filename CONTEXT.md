@@ -237,6 +237,14 @@ The data point a pointer position resolves to within one series. Hits feed both
 the tooltip and the overlay markers.
 _Avoid_: selection, match, hover point
 
+**Active point**:
+Where a chart stands: one position or none, set by the pointer and by the
+keyboard alike, the last input winning. It is drawn as the hits at that
+position - crosshair, markers, tooltip - and one series among them is the
+emphasised one, read first. It is never a selection and carries no choice (the
+chart's counterpart to core's active node, ADR-0003). See ADR-0030.
+_Avoid_: selected point, focus point, keyboard hit
+
 ### Control charts and Pareto
 
 **Control limit**:
