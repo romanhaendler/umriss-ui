@@ -12,6 +12,7 @@ import type { SortLevel } from "./model/tableModel";
 import type { TableSelection } from "./model/useTableSelection";
 import type { ColumnFilter } from "./columnFilter";
 import type { DateFormat, NumberFormat } from "./values";
+import type { DateKey } from "./model/grouping";
 
 /* --- Values --------------------------------------------------------------- */
 
@@ -120,6 +121,10 @@ export interface ColumnBase {
   sortable?: boolean;
   /** Takes part in the search. Without a statement: yes for text, no otherwise. */
   searchable?: boolean;
+  /** Can the table be grouped by this column? Without a statement: yes, when
+      its value is text, a number, a point in time or a boolean, or it has a
+      `groupValue`. */
+  groupable?: boolean;
 }
 
 /** How a value that does not sort or export itself does so after all. */
@@ -128,7 +133,14 @@ export interface ValuePaths<W> {
   sortValue?: (value: Present<W>) => string | number | Absent;
   /** What stands in the export, when not the value itself. */
   exportValue?: (value: Present<W>) => string | number | Absent;
+  /** What is grouped by, when not the value itself - a band of a number, say.
+      Rows whose group value is absent form a group of their own. */
+  groupValue?: (value: Present<W>) => string | number | boolean | Date | Absent;
 }
+
+/** `group` on a point in time: its rows are grouped by day, ISO week, month or
+    year. */
+export type GroupFor<W> = [Present<W>] extends [Date] ? DateKey : never;
 
 export type FieldColumn<Z, K extends Field<Z>> = ColumnBase &
   ValuePaths<Z[K]> & {
@@ -145,6 +157,8 @@ export type FieldColumn<Z, K extends Field<Z>> = ColumnBase &
         `columnFilter` asks whatever it asks itself. Its condition stands in the
         table toolbar. */
     filter?: FilterFor<Z[K]>;
+    /** Groups points in time by `"day"`, `"week"`, `"month"` or `"year"`. */
+    group?: GroupFor<Z[K]>;
   } & AggregateProps<Z[K], Z> &
   ChildrenFor<Z[K], Z>;
 
@@ -187,6 +201,16 @@ export interface ColumnComponent<Z> {
       aggregate: "min" | "max" | "range" | "count" | "distinct";
       footer?: never;
       format?: DateFormat;
+      group?: DateKey;
+      children?: Presentation<W, Z>;
+    },
+  ): ReactNode;
+  <W extends Date | Absent>(
+    props: Computed<Z, W> & {
+      group: DateKey;
+      aggregate?: "min" | "max" | "range" | "count" | "distinct";
+      footer?: never;
+      format?: DateFormat;
       children?: Presentation<W, Z>;
     },
   ): ReactNode;
@@ -194,7 +218,7 @@ export interface ColumnComponent<Z> {
     props: Computed<Z, W> & { format: NumberFormat; children?: Presentation<W, Z> },
   ): ReactNode;
   <W extends Date | Absent>(
-    props: Computed<Z, W> & { format: DateFormat; children?: Presentation<W, Z> },
+    props: Computed<Z, W> & { format: DateFormat; group?: DateKey; children?: Presentation<W, Z> },
   ): ReactNode;
   <W>(
     props: Computed<Z, W> & {
@@ -208,6 +232,36 @@ export interface ColumnComponent<Z> {
     props: Computed<Z, W> & { footer?: never; format?: never; aggregate?: "count" | "distinct" | AggregateFunction<W, Z>; children?: never },
   ): ReactNode;
   <K extends Field<Z>>(props: FieldColumn<Z, K>): ReactNode;
+}
+
+/* --- Group keys ----------------------------------------------------------- */
+
+interface GroupByBase {
+  /** Names the group key where a grouping is chosen, and in the chip of the table toolbar. */
+  label: string;
+}
+
+/** A value the table can be grouped by without being a column: no cell, no
+    export, no entry among the columns - only where a grouping is chosen. */
+export interface GroupByComponent<Z> {
+  <W extends string | number | boolean | Date | Absent>(
+    props: GroupByBase & {
+      /** The id is required where the value is a function. */
+      id: string;
+      value: (row: Z) => W;
+      groupValue?: (value: Present<W>) => string | number | boolean | Date | Absent;
+      group?: GroupFor<W>;
+    },
+  ): ReactNode;
+  <K extends Field<Z>>(
+    props: GroupByBase & {
+      /** A field of the row; supplies the id at the same time. */
+      value: K;
+      id?: string;
+      groupValue?: (value: Present<Z[K]>) => string | number | boolean | Date | Absent;
+      group?: GroupFor<Z[K]>;
+    },
+  ): ReactNode;
 }
 
 /** The properties of a column, as `column()` supplies them. */
@@ -303,6 +357,9 @@ export interface TableProps<Z> {
   ariaLabel?: string;
   /** Classes on the outer frame of the table. */
   className?: string;
+  /** `false`: the user cannot group this table - the column menu offers no
+      grouping, and a grouping handed in is passed over. */
+  groupable?: boolean;
   /** Columns, `RowDetail`, `RowActions` and the unbound parts. */
   children?: ReactNode;
 }
@@ -343,6 +400,10 @@ export interface TableOptions<Z> {
   pageSize?: number;
   /** The application's sort; it is the default that `view` leaves out. */
   defaultSort?: SortLevel | readonly SortLevel[] | null;
+  /** The application's grouping: a column or group key, or up to three, the
+      outermost first. It is the default that `view` leaves out; without it
+      the table is ungrouped until the user groups it. */
+  defaultGrouping?: GroupingKey<Z> | readonly GroupingKey<Z>[];
   /** Which rows the table has at all – by permission, by plant, by anything the
       user is not meant to undo. It is invisible: never a condition, never
       reset, never part of the view, and "43 of 1,204" counts only the rows it
@@ -413,6 +474,17 @@ export interface TableSnapshot<Z> {
   setFilter: SetFilter<Z>;
   /** The selection – its own or the one handed in through `selection`. */
   selection: TableSelection<string>;
+  /** The ids the table is grouped by, the outermost first – only those a
+      groupable column or a group key carries, at most three. */
+  grouping: readonly string[];
+  /** Groups by these columns or group keys; `[]` ungroups. Back to page one. */
+  setGrouping: (grouping: readonly string[]) => void;
+  /** The paths of the folded groups that still occur. */
+  folded: readonly string[];
+  /** Folds a group or unfolds it. A group of one row does not fold. */
+  toggleFold: (path: string) => void;
+  foldAll: () => void;
+  unfoldAll: () => void;
   /** The part of the state an application can keep; whatever is at its default is absent. */
   view: TableView;
   /** The filtered set in the visible columns as text for a spreadsheet. */
@@ -435,4 +507,10 @@ export interface Table<Z> extends TableSnapshot<Z> {
   RowDetail: (props: RowDetailProps<Z>) => ReactNode;
   RowActions: (props: RowActionsProps) => ReactNode;
   Action: (props: ActionProps<Z>) => ReactNode;
+  GroupBy: GroupByComponent<Z>;
 }
+
+/** A column or group key the table can be grouped by. The columns stand in the
+    JSX, which the hook does not see: a field name is suggested, any id is
+    taken, and one that nothing carries falls out. */
+export type GroupingKey<Z> = Field<Z> | (string & {});

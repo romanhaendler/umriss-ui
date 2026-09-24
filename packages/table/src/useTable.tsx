@@ -20,6 +20,8 @@
 import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import { useFormats } from "@umriss-ui/core";
 import { useCompanion } from "./model/companion";
+import { livePaths } from "./model/grouping";
+import type { RowGroup } from "./model/grouping";
 import type { TableView } from "./model/view";
 import type { Column } from "./model/tableModel";
 import { Registry } from "./registry";
@@ -124,6 +126,24 @@ function onlyKnown(view: TableView, known: ReadonlySet<string>): TableView {
   };
 }
 
+const listOf = (grouping: string | readonly string[] | undefined): string[] =>
+  grouping === undefined ? [] : typeof grouping === "string" ? [grouping] : [...grouping];
+
+const sameList = (a: readonly string[], b: readonly string[]): boolean => a.length === b.length && a.every((id, i) => id === b[i]);
+
+/** The paths of every group that can fold - one of a single row cannot. */
+function foldablePaths(groups: readonly RowGroup<unknown>[] | undefined): string[] {
+  const out: string[] = [];
+  const walk = (groups: readonly RowGroup<unknown>[]) => {
+    for (const group of groups) {
+      if (group.rows.length > 1) out.push(group.path);
+      walk(group.groups);
+    }
+  };
+  walk(groups ?? []);
+  return out;
+}
+
 const sameSet = (a: ReadonlySet<string>, b: ReadonlySet<string>): boolean =>
   a.size === b.size && [...a].every((id) => b.has(id));
 
@@ -164,6 +184,24 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
   const preFilter = (options.preFilter ?? options.filter) as ((row: unknown) => boolean) | undefined;
   const admitted = useAdmitted(rowsUnknown, preFilter);
 
+  /* The grouping is held here, not in the companion: which ids it may carry
+     only the registry knows. An id nothing groupable carries falls out on
+     reading - as long as nothing has registered, the grouping stays as it is. */
+  const [groupingState, setGroupingState] = useState<readonly string[]>(() =>
+    start?.grouping ? [...start.grouping] : listOf(options.defaultGrouping),
+  );
+  const [foldedState, setFoldedState] = useState<readonly string[]>(() => start?.folded ?? []);
+  const registered = registry.orderedColumns().length + registry.groupKeys.entries.size > 0;
+  const groupingNow = registered ? registry.effectiveGrouping(groupingState, rowsUnknown) : groupingState.slice(0, 3);
+  const groupingKey = groupingNow.join("|");
+  const foldedSet = useMemo(() => new Set(foldedState), [foldedState]);
+  const model = groupingNow.length ? registry.groupingModel(groupingNow, rowsUnknown) : null;
+  const grouping = useMemo(
+    () => (model && model.levels.length ? { ...model, folded: foldedSet, compareText: formats.compareText } : undefined),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the model's identity carries the ids and the columns
+    [model, foldedSet, formats.compareText, groupingKey],
+  );
+
   const rowKey = options.rowKey as (row: unknown) => string;
   const b = useCompanion(admitted, modelColumns, {
     rowKey,
@@ -172,6 +210,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     filter,
     initialView: start,
     virtual: options.virtual,
+    grouping,
   });
 
   /* Changing a condition resets to page one, like another search. Only what
@@ -239,6 +278,26 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     effective.length > 0 ? { ...withoutConditions, conditions: Object.fromEntries(effective) } : withoutConditions;
   const sort = known.size === 0 ? b.sort : b.sort.filter((s) => known.has(s.column));
 
+  /* The grouping's default is the application's; the view carries a deviation
+     only, and of the folds only those whose group still occurs. */
+  const defaultGrouping = registered
+    ? registry.effectiveGrouping(listOf(options.defaultGrouping), rowsUnknown)
+    : listOf(options.defaultGrouping);
+  const folded = b.groups ? livePaths(b.groups, foldedState) : registered ? [] : [...foldedState];
+  const groupedView: TableView = {
+    ...view,
+    ...(!sameList(groupingNow, defaultGrouping) ? { grouping: groupingNow } : {}),
+    ...(folded.length ? { folded } : {}),
+  };
+  const setGrouping = (ids: readonly string[]) => {
+    setGroupingState([...ids]);
+    setPage(1);
+  };
+  const toggleFold = (path: string) => {
+    if (!foldablePaths(b.groups).includes(path)) return;
+    setFoldedState((old) => (old.includes(path) ? old.filter((p) => p !== path) : [...old, path]));
+  };
+
   /* Without a pagination bar there are no pages (registry.ts). */
   const paginates = registry.paginates() || options.virtual !== undefined;
 
@@ -266,7 +325,13 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     filter: Object.fromEntries(effective),
     setFilter: setFilter as SetFilter<Z>,
     selection: options.selection ?? b.selection,
-    view,
+    view: groupedView,
+    grouping: groupingNow,
+    setGrouping,
+    folded,
+    toggleFold,
+    foldAll: () => setFoldedState(foldablePaths(b.groups)),
+    unfoldAll: () => setFoldedState([]),
     asCsv: () => csvOf(registry),
     virtual: options.virtual !== undefined,
   };
@@ -278,6 +343,8 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     modelColumns,
     companion: b,
     filter,
+    grouping,
+    folded: foldedSet,
     publicSnapshot: snapshot as unknown as TableSnapshot<unknown>,
     rowKey,
     formats,
