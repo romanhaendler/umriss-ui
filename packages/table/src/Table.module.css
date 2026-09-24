@@ -580,6 +580,85 @@
     opacity: 0.5;
   }
 
+  /* ---- Grouping: the column menu's section and the toolbar's chip ------- */
+
+  .groupingChoice {
+    margin-top: var(--u-space-2);
+    padding: var(--u-space-2) var(--u-space-1) var(--u-space-1);
+    border-top: 1px solid var(--u-hairline);
+  }
+
+  .groupingHeading {
+    margin: 0 0 var(--u-space-2);
+    font-size: var(--u-text-xs);
+    font-weight: var(--u-weight-medium);
+    letter-spacing: var(--u-tracking-caps);
+    text-transform: uppercase;
+    color: var(--u-color-text-secondary);
+  }
+
+  .groupingOptions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--u-space-1);
+  }
+
+  .groupingOption {
+    composes: ring from "#own-styles";
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 24px;
+    padding: 0 var(--u-space-2);
+    border: none;
+    border-radius: var(--u-radius-sm);
+    background: var(--u-color-surface-sunken);
+    font: inherit;
+    font-size: var(--u-text-xs);
+    color: var(--u-color-text);
+    cursor: pointer;
+    transition:
+      background-color var(--u-transition),
+      color var(--u-transition);
+  }
+
+  .groupingOption:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--u-color-text) 10%, var(--u-color-surface-sunken));
+  }
+
+  .groupingOption[aria-pressed="true"] {
+    background: var(--u-color-accent-subtle);
+    color: var(--u-color-accent-text);
+  }
+
+  .groupingOption:disabled {
+    color: var(--u-color-text-muted);
+    cursor: default;
+  }
+
+  .groupingLevel {
+    font-family: var(--u-font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .groupingChip {
+    display: contents;
+  }
+
+  .groupingKey {
+    margin-right: 0.4em;
+    color: var(--u-color-text-secondary);
+  }
+
+  .groupingPath {
+    color: var(--u-color-text);
+  }
+
+  .groupingSeparator {
+    margin: 0 0.35em;
+    color: var(--u-color-text-muted);
+  }
+
   /* ---- Row detail ------------------------------------------------------ */
 
   .expander {

@@ -23,4 +23,8 @@ export interface TableView<K extends string = string> {
   order?: readonly K[];
   /** Column widths the user has dragged, in pixels. */
   widths?: Readonly<Record<string, number>>;
+  /** The columns and group keys the table is grouped by, the outermost first. */
+  grouping?: readonly K[];
+  /** The paths of the folded groups. A path that no longer occurs falls out. */
+  folded?: readonly string[];
 }

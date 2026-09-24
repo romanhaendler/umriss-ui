@@ -15,7 +15,7 @@ import { useCallback, useMemo, useState } from "react";
 import { useTableSelection } from "./useTableSelection";
 import type { TableSelection } from "./useTableSelection";
 import { orderColumns, tableModel } from "./tableModel";
-import type { Column, SortLevel, TableProjection } from "./tableModel";
+import type { Column, SortLevel, TableInput, TableProjection } from "./tableModel";
 import type { SortDirection } from "./tableModel";
 import type { TableView } from "./view";
 import { useVirtual } from "@umriss-ui/core";
@@ -52,6 +52,9 @@ export interface CompanionOptions<Z, K extends string> {
    * long as this is set.
    */
   virtual?: VirtualOptions;
+  /** Groups the filtered set; a page and the virtual window then count lines.
+      Its identity should stay while nothing in it changes. */
+  grouping?: TableInput<Z, K>["grouping"];
 }
 
 export interface Companion<Z, K extends string> extends TableProjection<Z, K> {
@@ -118,7 +121,7 @@ export function useCompanion<Z, K extends string = string>(
   columns: readonly Column<Z, K>[],
   options: CompanionOptions<Z, K>,
 ): Companion<Z, K> {
-  const { rowKey, filter, defaultSort = null, initialView, virtual } = options;
+  const { rowKey, filter, defaultSort = null, initialView, virtual, grouping } = options;
 
   const [search, setSearchRaw] = useState(initialView?.search ?? "");
   const [sort, setSort] = useState<readonly Sort<K>[]>(() => {
@@ -161,14 +164,15 @@ export function useCompanion<Z, K extends string = string>(
         pageSize: modelPageSize,
         hidden,
         order,
+        grouping,
       }),
-    [rows, columns, search, filter, sort, page, modelPageSize, hidden, order],
+    [rows, columns, search, filter, sort, page, modelPageSize, hidden, order, grouping],
   );
 
   /* The hook always runs - the number of hooks must not hang on whether it
      virtualises. Without virtualisation it calculates over zero rows and the
      result is not handed out. */
-  const rowWindow = useVirtual(virtual ? projection.filtered.length : 0, {
+  const rowWindow = useVirtual(virtual ? (projection.lines ?? projection.filtered).length : 0, {
     rowHeight: virtual?.rowHeight ?? 0,
     overscan: virtual?.overscan,
   });
@@ -176,9 +180,18 @@ export function useCompanion<Z, K extends string = string>(
   /* `visible` is always "what is to be rendered now": with paging the page,
      with virtualisation the window. That way the loop in the caller stays the
      same. */
+  const windowLines = useMemo(
+    () => (virtual && projection.lines ? projection.lines.slice(rowWindow.from, rowWindow.to) : projection.visibleLines),
+    [virtual, projection.lines, projection.visibleLines, rowWindow.from, rowWindow.to],
+  );
   const visible = useMemo(
-    () => (virtual ? projection.filtered.slice(rowWindow.from, rowWindow.to) : projection.visible),
-    [virtual, projection.filtered, projection.visible, rowWindow.from, rowWindow.to],
+    () =>
+      !virtual
+        ? projection.visible
+        : windowLines
+          ? windowLines.flatMap((l) => (l.kind === "row" ? [l.row] : []))
+          : projection.filtered.slice(rowWindow.from, rowWindow.to),
+    [virtual, windowLines, projection.filtered, projection.visible, rowWindow.from, rowWindow.to],
   );
 
   // The keys of the filtered set – that is why "select all" reaches across
@@ -361,6 +374,7 @@ export function useCompanion<Z, K extends string = string>(
   return {
     ...projection,
     visible,
+    visibleLines: windowLines,
     virtual: virtual ? rowWindow : undefined,
     view,
     search,

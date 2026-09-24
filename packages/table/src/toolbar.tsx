@@ -18,6 +18,7 @@ import { Button, useFormats, useWording } from "@umriss-ui/core";
 import { resetSearchAndFilters } from "./export";
 import { cx } from "./cx";
 import { Conditions } from "./filter";
+import { GroupingChip } from "./grouping";
 import type { Registry } from "./registry";
 import styles from "./Table.module.css";
 
@@ -54,7 +55,12 @@ export function TableToolbar({
       : snapshot.filtered.filter((row) => snapshot.selection.isSelected(hook.rowKey(row)));
     const bulkActions = registry.hasRowActions() ? registry.actions.ordered().filter((a) => a.spec.bulk) : [];
 
-    conditions = <Conditions registry={registry} hook={hook} />;
+    conditions = (
+      <>
+        <GroupingChip registry={registry} hook={hook} />
+        <Conditions registry={registry} hook={hook} />
+      </>
+    );
     right = (
       <div className={styles.toolbarGroup}>
         <span role="status" className={styles.filteredCount}>

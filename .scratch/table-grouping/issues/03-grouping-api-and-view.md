@@ -1,6 +1,6 @@
 # 03 — Grouping in the interface: option, view, `GroupBy`, menu and chip
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Blocked by: 01
