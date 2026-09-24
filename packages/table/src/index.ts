@@ -32,6 +32,10 @@ export type {
   TableProps,
   VerdictColumnComponent,
   RowAttributes,
+  AggregateOptions,
+  AggregateFunction,
+  GroupByComponent,
+  GroupingKey,
 } from "./types";
 export type { DateFormat, NumberFormat } from "./values";
 

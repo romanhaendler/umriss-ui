@@ -19,6 +19,7 @@ import {
   useSyncExternalStore,
 } from "react";
 import type {
+  CSSProperties,
   KeyboardEvent as ReactKeyboardEvent,
   MouseEvent as ReactMouseEvent,
   PointerEvent as ReactPointerEvent,
@@ -47,8 +48,10 @@ import { link } from "./registry";
 import { resetSearchAndFilters, visibleColumns } from "./export";
 import type { TableProps } from "./types";
 import { asText, isAbsent, isRightAligned } from "./values";
-import { aggregate } from "./model/grouping";
-import type { Aggregated } from "./model/grouping";
+import { withContinuation } from "./model/grouping";
+import type { Line } from "./model/grouping";
+import { GroupLine, SpanCell } from "./groupLines";
+import { Absent, AggregateValue, aggregateIsNumeric } from "./aggregateValue";
 import styles from "./Table.module.css";
 
 /* The props as they arrive at runtime. The types at the call site (types.ts) are
@@ -135,18 +138,6 @@ function specFrom(props: RuntimeColumnProps): ColumnSpec {
     group: props.group,
     groupable: props.groupable,
   };
-}
-
-/* An absent value: visibly a muted dash, read out a word. */
-function Absent({ wording }: { wording: Wording }) {
-  return (
-    <>
-      <span aria-hidden="true" className={styles.absent}>
-        —
-      </span>
-      <VisuallyHidden>{wording.cellAbsentValue}</VisuallyHidden>
-    </>
-  );
 }
 
 /** The name of a row: the text of its row header. Without a row header its key
@@ -365,6 +356,19 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
   const formats = useFormats();
   const resolvedDensity = useDensityFor(density, "regular");
   const baseId = useId();
+  const tableRef = useRef<HTMLTableElement>(null);
+
+  /* Sticky bands stand below the head and below one another; how high those
+     are only the layout knows. Measured after every render - a density or a
+     font changes them. */
+  useLayoutEffect(() => {
+    const table = tableRef.current;
+    if (!table || !stickyHeader) return;
+    const head = table.tHead?.getBoundingClientRect().height ?? 0;
+    const band = table.querySelector("tr[data-line='header']")?.getBoundingClientRect().height ?? 0;
+    table.style.setProperty("--u-table-head", `${head}px`);
+    table.style.setProperty("--u-table-band", `${band}px`);
+  });
 
   const hook = registry.hook;
   if (!hook) return null;
@@ -382,16 +386,26 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
   const actions = registry.hasRowActions() ? registry.actions.ordered() : [];
   const virtual = hook.companion.virtual;
 
+  /* Grouped (ADR-0029): the innermost grouped column or group key stands first
+     as the span; the outer grouped columns leave the body - their value stands
+     in the band. */
+  const grouping = snapshot.grouping;
+  const lines = grouping.length > 0 ? projection.visibleLines : undefined;
+  const groupingEntries = lines ? registry.groupingEntries(hook.rows) : [];
+  const entryOf = (id: string | undefined) => groupingEntries.find((e) => e.spec.id === id);
+  const spanEntry = lines ? entryOf(grouping.at(-1)) : undefined;
+  const dataColumns = lines ? columns.filter((e) => !grouping.includes(e.spec.id)) : columns;
+
   const controlColumns = (selectable ? 1 : 0) + (detail ? 1 : 0);
-  const columnCount = controlColumns + columns.length + (actions.length > 0 ? 1 : 0);
+  const columnCount = controlColumns + (lines ? 1 : 0) + dataColumns.length + (actions.length > 0 ? 1 : 0);
   const rowHeaderLeft = controlColumns * CONTROL_CELL_WIDTH;
   const sticks = (e: ColumnEntry) => stickyRowHeader && e === header;
 
   const rows = projection.visible;
-  const footerShown = !loading && columns.some((e) => e.spec.aggregate);
+  const footerShown = !loading && dataColumns.some((e) => e.spec.aggregate);
   const restricted = snapshot.search !== "" || Object.keys(snapshot.filter).length > 0;
 
-  const renderRow = (row: unknown, index: number, absolute: number) => (
+  const renderRow = (row: unknown, index: number, absolute: number, line?: Extract<Line<unknown>, { kind: "row" }>) => (
     <Row
       key={hook.rowKey(row)}
       row={row}
@@ -399,7 +413,9 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
       absolute={virtual ? absolute : undefined}
       registry={registry}
       hook={hook}
-      columns={columns}
+      columns={dataColumns}
+      line={line}
+      spanEntry={spanEntry}
       header={header}
       selectable={selectable}
       actions={actions}
@@ -441,6 +457,67 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
         </tr>
       </tbody>
     );
+  } else if (lines) {
+    /* A virtual window that begins inside a group repeats its bands above it,
+       where the upper filler would stand - so that the band can stick while
+       its group scrolls, and nothing below moves. */
+    /* Sticking, a band is simply still there - "continued" is a page's word. */
+    const shown = virtual
+      ? withContinuation(lines).map((l) => (l.kind === "folded" || !l.continued ? l : { ...l, continued: false }))
+      : lines;
+    const repeated = shown.length - lines.length;
+    const perLine = virtual && virtual.from > 0 ? virtual.fillerBefore / virtual.from : 0;
+    const renderLine = (line: Line<unknown>, at: number) => {
+      const i = at - repeated;
+      const absolute = virtual ? virtual.from + i : i;
+      if (i < 0) {
+        return line.kind === "row" ? null : (
+          <GroupLine
+            key={`${line.kind}:${line.group.path}:repeated`}
+            line={line}
+            index={at}
+            absolute={undefined}
+            spanEntry={spanEntry}
+            levelEntry={entryOf(grouping[line.group.level])}
+            columns={dataColumns}
+            controlColumns={controlColumns}
+            hasActions={actions.length > 0}
+            total={projection.filtered}
+            hook={hook}
+            formats={formats}
+            wording={wording}
+          />
+        );
+      }
+      if (line.kind === "row") return renderRow(line.row, i, absolute, line);
+      return (
+        <GroupLine
+          key={`${line.kind}:${line.group.path}${line.kind === "header" && line.continued ? ":continued" : ""}`}
+          line={line}
+          index={i}
+          absolute={virtual ? absolute : undefined}
+          spanEntry={spanEntry}
+          levelEntry={entryOf(grouping[line.group.level])}
+          columns={dataColumns}
+          controlColumns={controlColumns}
+          hasActions={actions.length > 0}
+          total={projection.filtered}
+          hook={hook}
+          formats={formats}
+          wording={wording}
+        />
+      );
+    };
+    body = virtual ? (
+      <VirtualBody
+        virtual={{ ...virtual, fillerBefore: Math.max(0, virtual.fillerBefore - repeated * perLine) }}
+        colSpan={columnCount}
+      >
+        {shown.map(renderLine)}
+      </VirtualBody>
+    ) : (
+      <tbody>{lines.map(renderLine)}</tbody>
+    );
   } else if (virtual) {
     body = (
       <VirtualBody virtual={virtual} colSpan={columnCount}>
@@ -459,10 +536,12 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
       style={maxHeight ? { maxHeight } : undefined}
     >
       <table
+        ref={tableRef}
+        style={lines ? ({ "--u-band-levels": grouping.length - 1 } as CSSProperties) : undefined}
         aria-label={ariaLabel}
         /* With virtualisation not every row stands in the document; plus one
            for the header row and one for the footer row, which count per ARIA. */
-        aria-rowcount={virtual ? projection.filtered.length + 1 + (footerShown ? 1 : 0) : undefined}
+        aria-rowcount={virtual ? (projection.lines ?? projection.filtered).length + 1 + (footerShown ? 1 : 0) : undefined}
         aria-busy={loading || undefined}
         className={cx(
           styles.table,
@@ -493,7 +572,15 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
                 style={stickyRowHeader ? { left: (selectable ? 1 : 0) * CONTROL_CELL_WIDTH } : undefined}
               />
             )}
-            {columns.map((e) => (
+            {spanEntry &&
+              (registry.columnById(spanEntry.spec.id) === spanEntry ? (
+                <HeaderCell entry={spanEntry} registry={registry} hook={hook} sticky={false} left={rowHeaderLeft} />
+              ) : (
+                <th scope="col" className={styles.th}>
+                  {spanEntry.spec.label}
+                </th>
+              ))}
+            {dataColumns.map((e) => (
               <HeaderCell
                 key={e.key}
                 entry={e}
@@ -513,7 +600,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
         {body}
         {footerShown && (
           <tfoot>
-            <tr aria-rowindex={virtual ? projection.filtered.length + 2 : undefined}>
+            <tr aria-rowindex={virtual ? (projection.lines ?? projection.filtered).length + 2 : undefined}>
               {Array.from({ length: controlColumns }, (_, i) => (
                 <td
                   key={i}
@@ -521,7 +608,8 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
                   style={stickyRowHeader ? { left: i * CONTROL_CELL_WIDTH } : undefined}
                 />
               ))}
-              {columns.map((e) => (
+              {spanEntry && <td className={styles.td} />}
+              {dataColumns.map((e) => (
                 <FooterCell
                   key={e.key}
                   entry={e}
@@ -733,6 +821,8 @@ function Row({
   baseId,
   formats,
   wording,
+  line,
+  spanEntry,
 }: {
   row: unknown;
   index: number;
@@ -740,6 +830,9 @@ function Row({
   registry: Registry;
   hook: HookSnapshot;
   columns: readonly ColumnEntry[];
+  /** In a grouped table: the row's line, whose span stands first. */
+  line?: Extract<Line<unknown>, { kind: "row" }>;
+  spanEntry?: ColumnEntry;
   header: ColumnEntry | undefined;
   selectable: boolean;
   actions: ReturnType<Registry["actions"]["ordered"]>;
@@ -768,6 +861,8 @@ function Row({
         {...data}
         className={cx(rowClass, virtual && styles.virtualRow)}
         data-row={virtual ? absolute : undefined}
+        data-line={line ? "row" : undefined}
+        data-group-first={line?.first ? "" : undefined}
         tabIndex={virtual ? (absolute === tabStop ? 0 : -1) : undefined}
         data-even={virtual && absolute % 2 === 1 ? "" : undefined}
         aria-rowindex={virtual ? absolute + 2 : undefined}
@@ -803,6 +898,7 @@ function Row({
             </button>
           </td>
         )}
+        {line && <SpanCell line={line} entry={spanEntry} hook={hook} formats={formats} wording={wording} />}
         {columns.map((e) => (
           <Cell
             key={e.key}
@@ -895,68 +991,9 @@ function FooterCell({
   if (!entry.spec.aggregate) return <td className={cx(styles.td, sticky && styles.stickyCell)} style={style} />;
   const kind = typeof entry.spec.aggregate === "function" ? "own" : entry.spec.aggregate;
   return (
-    <td className={cx(styles.td, styles.numeric, sticky && styles.stickyCell)} style={style} data-footer={kind}>
+    <td className={cx(styles.td, aggregateIsNumeric(entry, rows) && styles.numeric, sticky && styles.stickyCell)} style={style} data-footer={kind}>
       <AggregateValue entry={entry} rows={rows} formats={formats} wording={wording} signed />
     </td>
-  );
-}
-
-/* The sign before a footer aggregate, where the kind has one. A count, a range
-   or an aggregate of one's own speaks only through its word. */
-const AGGREGATE_SIGN: Partial<Record<string, string>> = { sum: "Σ", avg: "⌀", min: "min", max: "max" };
-
-const aggregateWord = (kind: string, wording: Wording): string =>
-  ({
-    sum: wording.footerSum,
-    avg: wording.footerAverage,
-    min: wording.footerMinimum,
-    max: wording.footerMaximum,
-    range: wording.footerRange,
-    count: wording.footerCount,
-    distinct: wording.footerDistinct,
-  })[kind] ?? wording.footerAggregate;
-
-/** What a column's aggregate comes to over rows, written: counts as counts, a
-    range from its two ends, the rest in the column's format - and an aggregate
-    of one's own through the column's presentation. */
-export function AggregateValue({
-  entry,
-  rows,
-  formats,
-  wording,
-  signed = false,
-}: {
-  entry: ColumnEntry;
-  rows: readonly unknown[];
-  formats: Formats;
-  wording: Wording;
-  /** With the sign and the word for the screen reader - the footer. */
-  signed?: boolean;
-}) {
-  const { aggregate: spec, format, presentation } = entry.spec;
-  if (!spec) return null;
-  const kind = typeof spec === "function" ? "own" : spec;
-  const value = aggregate({ id: entry.spec.id, read: entry.read, aggregate: spec as Aggregated<unknown>["aggregate"] }, rows);
-  const text = (v: unknown) => asText(v, format, formats, wording);
-  let content: ReactNode;
-  if (isAbsent(value)) content = <Absent wording={wording} />;
-  else if (kind === "count" || kind === "distinct") content = formats.count(value as number);
-  else if (kind === "range") {
-    const [from, to] = value as [unknown, unknown];
-    content = text(from) === text(to) ? text(from) : wording.rangeFromTo(text(from) ?? "", text(to) ?? "");
-  } else if (kind === "own" && presentation) content = (presentation as (w: unknown, z: unknown) => ReactNode)(value, rows[0]);
-  else content = text(value);
-  const sign = AGGREGATE_SIGN[kind];
-  return (
-    <>
-      {signed && sign && (
-        <span aria-hidden="true" className={styles.footerKind}>
-          {sign}
-        </span>
-      )}
-      {signed && <VisuallyHidden>{aggregateWord(kind, wording)} </VisuallyHidden>}
-      {content}
-    </>
   );
 }
 
