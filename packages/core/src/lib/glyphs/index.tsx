@@ -4,8 +4,9 @@
 
    A glyph of this library is:
 
-   1. **Nominal size 10 x 10.** The `viewBox` is `0 0 10 10`, so that paths can
-      be compared and carried between glyphs.
+   1. **Nominal size 10.** The `viewBox` is `0 0 10 10`, so that paths can
+      be compared and carried between glyphs. A glyph flatter or narrower than
+      a square crops one side (`0 0 10 6`); the longer side stays 10.
    2. **Stroke width 1.4** at nominal size. Not 1.5, not 1.6: the width chosen
       is the one that occurs most often in the existing set.
    3. **`currentColor`.** A glyph takes the text colour of its place and never
@@ -23,21 +24,13 @@
    happened to do. The same cross shape stood in the code six times at width
    1.4, once at 1.5 and once at 1.6.
 
-   **Only what meets the specification stands here.** That is the decisive rule
-   and it costs something: the close cross of Modal and Toast is the same in
-   both places, and so is the clock symbol of the two time pickers - and still
-   they remain where they are, because they are drawn at nominal size 12 and 14
-   respectively. A set that collects its own exceptions is no longer a standard
-   but a drawer; a new glyph could then appeal to any exception at all.
-
-   The deviating glyphs have therefore stayed where they were, and stand in
-   full in `packages/core/docs/glyphs.md`. That list is the ticket's actual result: it is the
-   input for the later decision whether to align them - not the decision
-   itself.
-
-   What was taken over, moreover, is only what could be taken over pixel for
-   pixel. A move that silently altered twenty glyphs would be exactly the kind
-   of change the screenshot baselines exist to prevent. */
+   The specification is held by a check, not by this comment: the glyph test
+   of each package (`tests-unit/glyphs.test.ts`, rules in `scripts/glyphs.ts`)
+   reads every component source and holds every inline `<svg>` to it. The
+   width is relative to the nominal size - 1.4 per 10 units - so a glyph shown
+   at 13 pixels has the weight of one shown at 9. A glyph that needs less room
+   in one direction crops the box (`0 0 10 6`) rather than shrinking the unit.
+   What more than one component draws stands here, once. */
 
 import type { SVGProps } from "react";
 import { forwardRef } from "react";
@@ -50,7 +43,8 @@ export interface GlyphProps extends Omit<SVGProps<SVGSVGElement>, "viewBox" | "c
   size?: number;
 }
 
-/** The cross that clears a field. Six times in the set, identical. */
+/** The cross that clears a field, removes a tag or a chip, and closes a
+    dialog, a toast or an alert - one drawing at the size of its place. */
 export const CrossGlyph = forwardRef<SVGSVGElement, GlyphProps>(function CrossGlyph(
   { size = 9, ...rest },
   ref,
@@ -97,9 +91,8 @@ export const MinusGlyph = forwardRef<SVGSVGElement, GlyphProps>(function MinusGl
    but set rotated: the component tips it by 90 degrees when the branch is
    open, so that the motion has the same spring as everywhere else.
 
-   The path is the same as that of the expand arrow in TableRow, but the stroke
-   width is the specification's (1.4 instead of 1.5). The deviation there has
-   thereby shrunk to a single number - see packages/core/docs/glyphs.md. */
+   The table's row expander, the schedule's and the calculation's fold
+   controls draw the same chevron, and take it from here. */
 
 export const AngleGlyph = forwardRef<SVGSVGElement, GlyphProps>(function AngleGlyph(
   { size = 10, ...rest },
@@ -179,6 +172,50 @@ export const MeasureGlyph = forwardRef<SVGSVGElement, GlyphProps>(function Measu
     <svg ref={ref} viewBox="0 0 10 10" width={size} height={size} aria-hidden="true" {...rest}>
       <path
         d="M2 8L8 2M1 6.5v2.5h2.5M9 3.5V1H6.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+});
+
+/* The date pickers' two characters. Each stood twice, once per picker, at
+   nominal size 14 and width 1.3; they are drawn at 10 now, and set at 12
+   pixels - at 13 the relative stroke read heavier than the field's text. */
+
+/** A calendar leaf: a sheet with its header and two rings. With `range`, a
+    bar across the sheet stands for the span a range picker chooses. */
+export const CalendarGlyph = forwardRef<SVGSVGElement, GlyphProps & { range?: boolean }>(function CalendarGlyph(
+  { size = 12, range = false, ...rest },
+  ref,
+) {
+  return (
+    <svg ref={ref} viewBox="0 0 10 10" width={size} height={size} aria-hidden="true" {...rest}>
+      <rect x="1" y="1.6" width="8" height="7.7" rx="1.2" fill="none" stroke="currentColor" strokeWidth="1.4" />
+      <path
+        d={range ? "M1 4.4h8M3.2.7v1.9M6.8.7v1.9M3.8 6.9h2.4" : "M1 4.4h8M3.2.7v1.9M6.8.7v1.9"}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+});
+
+/** A clock face at a quarter past - the time pickers' character. */
+export const ClockGlyph = forwardRef<SVGSVGElement, GlyphProps>(function ClockGlyph(
+  { size = 12, ...rest },
+  ref,
+) {
+  return (
+    <svg ref={ref} viewBox="0 0 10 10" width={size} height={size} aria-hidden="true" {...rest}>
+      <circle cx="5" cy="5" r="4.1" fill="none" stroke="currentColor" strokeWidth="1.4" />
+      <path
+        d="M5 2.9v2.3l1.6 1"
         fill="none"
         stroke="currentColor"
         strokeWidth="1.4"

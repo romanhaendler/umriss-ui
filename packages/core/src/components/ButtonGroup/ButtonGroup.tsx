@@ -89,7 +89,7 @@ export const SplitButton = forwardRef<HTMLButtonElement, SplitButtonProps>(funct
                 d="M1 1.2 5 4.8 9 1.2"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="1.5"
+                strokeWidth="1.4"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />

@@ -15,6 +15,15 @@ moves from here under the rule above.
 
 ---
 
+## Unreleased
+
+### Changed
+
+- **The lane-group fold is core's `AngleGlyph`** – the same chevron, at the
+  one stroke width (1.4 instead of 1.5).
+
+---
+
 ## 0.1.6 – Core 0.7.0 (Sep. 2026)
 
 ### Changed

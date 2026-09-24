@@ -50,6 +50,28 @@ module on the caller's side that carries `"use client"` and imports from there.
 
 ---
 
+## Unreleased
+
+### Added
+
+- **`CalendarGlyph`** (with `range`) and **`ClockGlyph`**, the date and time
+  pickers' characters, in the shared set beside `CrossGlyph` and the others.
+
+### Changed
+
+- **Every glyph draws one stroke width at one nominal size** – 1.4 per 10
+  units, so the rendered stroke follows the size a glyph is set at. The
+  `Alert`, `Modal` and `Toast` close crosses, the `Tag` and `MultiSelect`
+  remove crosses are now `CrossGlyph`: the Modal's cross is slightly heavier,
+  the Tag's and the chip's slightly lighter. The calendar's paging arrows, the
+  `ButtonGroup` arrow and the `Combobox` tick go from 1.5 and 1.8 to 1.4.
+  The date pickers' calendar leaf and clock are drawn anew at nominal size 10
+  and set at 12 pixels instead of 13; the range picker's leaf shows a bar
+  instead of an arrow. The `Toast` tone symbols keep their look, drawn in the
+  nominal box, their dots as strokes. Held by a check (`docs/glyphs.md`).
+
+---
+
 ## 0.7.0 – A text token for danger (Sep. 2026)
 
 ### Added

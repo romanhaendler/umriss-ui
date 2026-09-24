@@ -6,6 +6,7 @@ import { durationFrom, prefersReducedMotion } from "../../lib/motion";
 import { roleFromTone } from "../../lib/roleFromTone";
 import styles from "./Toast.module.css";
 import { useWording } from "../../lib/language";
+import { CrossGlyph } from "../../lib/glyphs";
 import { usePortalTarget, useToastConfig } from "../../lib/provider";
 
 export type ToastTone = "neutral" | "success" | "warning" | "danger";
@@ -53,24 +54,20 @@ export function useToast(): ToastContextValue {
 function ToneIcon({ tone }: { tone: ToastTone }) {
   return (
     <span className={cx(styles.icon, styles[tone])} aria-hidden="true">
-      <svg viewBox="0 0 12 12" width="12" height="12">
+      {/* The dots of ! and i are strokes of no length: a round cap alone is a
+          dot as wide as the stem, and the glyph stays drawn with the stroke. */}
+      <svg viewBox="0 0 10 10" width="12" height="12" aria-hidden="true">
         {tone === "success" && (
-          <path d="M2.6 6.4 5 8.8l4.4-5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M2.2 5.3 4.2 7.3l3.6-4.1" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
         )}
         {tone === "danger" && (
-          <path d="M3.6 3.6l4.8 4.8M8.4 3.6l-4.8 4.8" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+          <path d="M3 3l4 4M7 3 3 7" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
         )}
         {tone === "warning" && (
-          <>
-            <path d="M6 2.8v3.9" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-            <circle cx="6" cy="9.2" r="0.95" fill="currentColor" />
-          </>
+          <path d="M5 2.3v3.3M5 7.7v0" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
         )}
         {tone === "neutral" && (
-          <>
-            <circle cx="6" cy="2.9" r="0.95" fill="currentColor" />
-            <path d="M6 5.3v3.9" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-          </>
+          <path d="M5 2.4v0M5 4.4v3.3" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
         )}
       </svg>
     </span>
@@ -201,9 +198,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               aria-label={wording.closeToast}
               onClick={() => beginLeave(item.id)}
             >
-              <svg viewBox="0 0 12 12" width="10" height="10" aria-hidden="true">
-                <path d="M2 2l8 8M10 2l-8 8" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-              </svg>
+              <CrossGlyph size={10} />
             </button>
           </div>
         </div>
