@@ -72,6 +72,16 @@ describe("The rows of the data table", () => {
     expect(rows.x.length).toBeLessThanOrEqual(500);
   });
 
+  it("stays under the limit where every stretch keeps its gaps as well", () => {
+    const xs = Array.from({ length: 50_000 }, (_, i) => i);
+    // A gap every seventh reading: each stretch keeps its first gap and the
+    // one after its last reading besides first, min, max and last.
+    const ys = xs.map((i) => (i % 7 === 3 ? Number.NaN : Math.sin(i)));
+    const rows = tableRows([course(xs, ys)], 0, 49_999);
+    expect(rows.thinned).toBe(true);
+    expect(rows.x.length).toBeLessThanOrEqual(500);
+  });
+
   it("counts readings only inside the visible domain", () => {
     const xs = Array.from({ length: 10_000 }, (_, i) => i);
     const rows = tableRows([course(xs, xs)], 100, 399);

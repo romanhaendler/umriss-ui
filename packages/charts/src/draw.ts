@@ -356,11 +356,10 @@ function drawArea(ctx: CanvasRenderingContext2D, item: AreaDrawItem, plot: Rect)
   ctx.globalAlpha = item.alpha * item.fillOpacity;
   ctx.fillStyle = item.color;
   ctx.fill(fill);
+
   ctx.globalAlpha = item.alpha;
   // Across a faint fill the hatch takes the series' colour, not the ground's.
   drawHatch(ctx, fill, plot, item.hatch ?? "none", item.color);
-
-  ctx.globalAlpha = item.alpha;
   ctx.strokeStyle = item.color;
   if (item.strokeWidth > 0) {
     ctx.setLineDash((item.dash ?? []) as number[]);
@@ -549,8 +548,9 @@ function drawLimits(
         ctx.restore();
         continue;
       }
-      // Hatched, the band says "zone" without its tint: at half the strength
-      // of a mark, it stays ground under the data.
+      // Hatched, the band says "zone" where its tint cannot be told apart: the
+      // hatch lies over the tint at half the strength of a mark, and stays
+      // ground under the data.
       const area = new Path2D();
       if (g.orientation === "y") area.rect(plot.x, a, plot.width, b - a);
       else area.rect(a, plot.y, b - a, plot.height);

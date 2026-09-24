@@ -37,13 +37,18 @@ export interface SeriesMarks {
 
 /** The marks of a palette place, cycling as the palette's six colours do. */
 export function marksFor(slot: number): SeriesMarks {
-  const k = ((slot % 6) + 6) % 6;
+  const k = place(slot, DASHES.length);
   return { dash: DASHES[k] as number[], marker: MARKERS[k] as MarkerShape, hatch: HATCHES[k] as Hatch };
 }
 
 /** The hatch of a state or a matrix bucket by its index - the first plain. */
 export function hatchFor(index: number): Hatch {
-  return HATCHES[((index % 6) + 6) % 6] as Hatch;
+  return HATCHES[place(index, HATCHES.length)] as Hatch;
+}
+
+/** An index into a list of `n`, cycling, never negative. */
+function place(index: number, n: number): number {
+  return ((index % n) + n) % n;
 }
 
 /** The line segments of a hatch across `box`, `spacing` pixels apart, as
