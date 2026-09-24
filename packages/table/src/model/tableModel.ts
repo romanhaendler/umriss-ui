@@ -15,6 +15,8 @@
    itself, until now. */
 
 import { DEFAULT_FORMATS } from "@umriss-ui/core";
+import { groupRows, linesOf, pageLines } from "./grouping";
+import type { Aggregated, GroupLevel, Line, RowGroup } from "./grouping";
 /* Once stood in `Table.tsx` of @umriss-ui/core. */
 export type SortDirection = "asc" | "desc";
 
@@ -67,6 +69,14 @@ export interface TableInput<Z = unknown, K extends string = string> {
   /** The wanted column order. Columns not named follow in their natural
       order; unknown ids are passed over. */
   order?: readonly K[];
+  /** Groups the sorted filtered set; a page then counts lines, not rows. */
+  grouping?: {
+    levels: readonly GroupLevel<Z>[];
+    aggregates?: readonly Aggregated<Z>[];
+    folded: ReadonlySet<string>;
+    /** The collation of text keys; the provider's, where there is one. */
+    compareText?: (a: string, b: string) => number;
+  };
 }
 
 export interface TableProjection<Z, K extends string = string> {
@@ -75,8 +85,14 @@ export interface TableProjection<Z, K extends string = string> {
   columns: readonly Column<Z, K>[];
   /** Everything the filter leaves – the basis for figures and the selection. */
   filtered: Z[];
-  /** Only the current page. */
+  /** Only the current page - with a grouping, the rows among its lines. */
   visible: Z[];
+  /** With a grouping: the groups, outermost first. */
+  groups?: RowGroup<Z>[];
+  /** With a grouping: every line of the filtered set. */
+  lines?: Line<Z>[];
+  /** With a grouping: the lines of the current page, with what it repeats. */
+  visibleLines?: Line<Z>[];
   /** The clamped page actually shown. */
   page: number;
   pageCount: number;
@@ -195,7 +211,27 @@ export function tableModel<Z, K extends string = string>(
     });
   }
 
-  // 3. Page - the page count is never zero, so that display and controls
+  /* 3. Group - after the sort, so that the rows within a group keep its
+        order. A page then counts lines (table-grouping, Q9). */
+  if (input.grouping?.levels.length) {
+    const { folded, ...grouping } = input.grouping;
+    const groups = groupRows(filtered, { ...grouping, sort: levels });
+    const lines = linesOf(groups, folded);
+    const paged = pageLines(lines, page, pageSize ?? 0);
+    return {
+      columns: visibleColumns,
+      filtered,
+      visible: paged.lines.flatMap((l) => (l.kind === "row" ? [l.row] : [])),
+      groups,
+      lines,
+      visibleLines: paged.lines,
+      page: paged.page,
+      pageCount: paged.pageCount,
+      columnCount: visibleColumns.length,
+    };
+  }
+
+  // 4. Page - the page count is never zero, so that display and controls
   //    cannot contradict each other.
   const size = pageSize && pageSize > 0 ? pageSize : filtered.length || 1;
   const pageCount = Math.max(1, Math.ceil(filtered.length / size));
