@@ -1,6 +1,6 @@
 # 01 — The grouping pipeline: a pure module, test-first
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Blocked by: none
