@@ -13,4 +13,11 @@ export const GERMAN_CHARTS_WORDING: ChartsWording = {
   walkHelp:
     "Pfeil links und rechts gehen durch die Werte, Pfeil hoch und runter wechseln die Serie, Pos1 und Ende springen zum ersten und letzten Wert, Escape hebt die Markierung auf.",
   zoomHelp: "Plus und Minus zoomen, Umschalt mit Pfeil links oder rechts verschiebt, 0 zeigt alles.",
+  showData: "Daten zeigen",
+  hideData: "Daten verbergen",
+  positionColumn: "Position",
+  rowColumn: "Zeile",
+  tableCaption: (from, to) => `Werte von ${from} bis ${to}.`,
+  downsampled: (readings) =>
+    `Ausgedünnt aus ${readings.toLocaleString("de-DE")} Messwerten: erster, kleinster, größter und letzter Wert je Abschnitt.`,
 };

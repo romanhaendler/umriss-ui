@@ -29,6 +29,28 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## Unreleased
+
+### Added
+
+- **`<DataTable />`** (charts-alternatives 01): the chart's values as a table,
+  on demand. It puts a disclosure key - "Show data", "Hide data" - at the end
+  of the legend, or on a line of its own without one, and the key lays a plain
+  `<table>` over the plot area: the visible domain, the x in the first column,
+  then one column per visible series, each value in the format the tooltip
+  writes it in; a state band names its states, a matrix gets a table of its
+  own. Above 500 rows it lists the downsampled course - the first, lowest,
+  highest and last value of each stretch - and its caption says how many
+  readings the rows stand for. The plot keeps its size beneath and is hidden
+  while the table is open.
+
+### Changed
+
+- **`ChartsWording`** gains `showData`, `hideData`, `positionColumn`,
+  `rowColumn`, `tableCaption` and `downsampled`, German beside them. A
+  `Partial<ChartsWording>` passed to `wording` keeps working; a register of
+  one's own typed as the whole `ChartsWording` has to add them.
+
 ## 0.6.0 – By keyboard and screen reader (Sep. 2026)
 
 ### Added
