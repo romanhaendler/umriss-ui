@@ -51,7 +51,7 @@ import { asText, isAbsent, isRightAligned } from "./values";
 import { withContinuation } from "./model/grouping";
 import type { Line } from "./model/grouping";
 import { GroupLine, SpanCell } from "./groupLines";
-import { Absent, AggregateValue, aggregateIsNumeric } from "./aggregateValue";
+import { Absent, AggregateValue, SIGNED_AGGREGATES, aggregateIsNumeric } from "./aggregateValue";
 import { useLineMotion } from "./motion";
 import styles from "./Table.module.css";
 
@@ -935,7 +935,7 @@ function Row({
           </td>
         )}
         {line && (
-          <SpanCell line={line} entry={spanEntry} selectable={selectable} registry={registry} hook={hook} formats={formats} wording={wording} />
+          <SpanCell line={line} entry={spanEntry} sumColumn={columns.find((e) => SIGNED_AGGREGATES.has(e.spec.aggregate as string))} selectable={selectable} registry={registry} hook={hook} formats={formats} wording={wording} />
         )}
         {columns.map((e) => (
           <Cell

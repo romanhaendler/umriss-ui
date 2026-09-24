@@ -174,6 +174,7 @@ function foldSiblings(group: RowGroup<unknown>, open: boolean, hook: HookSnapsho
 export function SpanCell({
   line,
   entry,
+  sumColumn,
   selectable,
   registry,
   hook,
@@ -182,6 +183,8 @@ export function SpanCell({
 }: {
   line: Extract<Line<unknown>, { kind: "row" }>;
   entry: ColumnEntry | undefined;
+  /** The first column with a signed aggregate: it closes the span. */
+  sumColumn: ColumnEntry | undefined;
   selectable: boolean;
   registry: Registry;
   hook: HookSnapshot;
@@ -189,8 +192,20 @@ export function SpanCell({
   wording: Wording;
 }) {
   const group = line.span;
+  /* The group's own aggregate at the foot of the span, on its last row: the
+     count stands top right beside the value, the aggregate bottom right, and
+     the two frame the group without a line of their own. One aggregate only -
+     the first that says what it is by its sign (Σ, ⌀, min, max), since no
+     column name stands beside it; the others stand in the group header, in
+     the folded line and in the footer. A group of one row has none. */
+  const closing = sumColumn && group.rows.length > 1 && group.rows.at(-1) === line.row;
   return (
     <td className={cx(styles.td, styles.spanCell)}>
+      {closing && (
+        <span className={styles.spanAggregate} data-span-aggregate="">
+          <AggregateValue entry={sumColumn} rows={group.rows} formats={formats} wording={wording} signed />
+        </span>
+      )}
       {line.first && (
         <span className={styles.spanValue}>
           {selectable && group.rows.length > 1 && (
