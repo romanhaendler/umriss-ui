@@ -29,3 +29,10 @@ failing case.
 The second half of A4 - every example compiles as it stands there - has no
 test of its own: the text carries the example through `displaySource`, the
 same function the demo uses, and each package's typecheck compiles the file.
+
+After review: a name counts only where it stands as code (a fence or an inline
+span), so an export called like an English word is not named by a sentence;
+and since the appendix makes the first check hold by construction for the main
+entry, a second one keeps the guard honest - every component (an export with a
+`<Name>Props` beside it) must be named by the pages themselves, not the
+appendix.

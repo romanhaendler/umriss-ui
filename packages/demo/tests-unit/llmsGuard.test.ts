@@ -9,7 +9,14 @@
    compiles that file (`demo/` is in every package's tsconfig).
 
    The entries are the ones each package's `vite.config.ts` builds, subpaths
-   included: a German wording is an export a reader imports too. */
+   included: a German wording is an export a reader imports too.
+
+   Every export of the main entry that no page names gets its declaration in
+   "The rest of the API" - so for those the first check holds by construction,
+   and a second one keeps the guard honest: a COMPONENT (an export with a
+   `<Name>Props` beside it) must be named by the pages themselves. A new
+   component without a page, or dropped from its page, fails here instead of
+   sliding quietly into the appendix. */
 
 import { describe, expect, it } from "vitest";
 import { fileURLToPath } from "node:url";
@@ -43,8 +50,12 @@ function exportedNames(files: readonly string[]): string[] {
 
 describe("missingFrom", () => {
   it("fails for an export the text does not name, and not for a longer name that contains it", () => {
-    expect(missingFrom("A `Gauge` and its GaugeProps.", ["Gauge", "GaugeProps", "GAUGE_RANGE"])).toEqual(["GAUGE_RANGE"]);
-    expect(missingFrom("GaugeProps only.", ["Gauge"])).toEqual(["Gauge"]);
+    expect(missingFrom("A `Gauge` and its `GaugeProps`.", ["Gauge", "GaugeProps", "GAUGE_RANGE"])).toEqual(["GAUGE_RANGE"]);
+    expect(missingFrom("`GaugeProps` only.", ["Gauge"])).toEqual(["Gauge"]);
+  });
+
+  it("counts only code, not a word in a sentence", () => {
+    expect(missingFrom("Read the format first.\n\n```ts\nformatValue(1);\n```\n", ["format", "formatValue"])).toEqual(["format"]);
   });
 });
 
@@ -58,5 +69,10 @@ describe.each(Object.keys(ENTRIES))("the llms-full.txt of %s", (dir) => {
     const names = exportedNames(ENTRIES[dir]!.map((entry) => join(packageDir, entry)));
     expect(names.length).toBeGreaterThan(0);
     expect(missingFrom(full, names)).toEqual([]);
+
+    const pages = full.split("\n## The rest of the API\n")[0]!;
+    const components = names.filter((name) => names.includes(`${name}Props`));
+    expect(components.length).toBeGreaterThan(0);
+    expect(missingFrom(pages, components)).toEqual([]);
   }, 60_000);
 });

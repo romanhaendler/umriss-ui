@@ -56,10 +56,13 @@ is only "not yet" stands in each package's record and in the open specs under
 - **Pie, donut, radar, candlestick.** The set of kinds is closed - there is no
   renderer interface for third parties - and none of the four answers a question
   a plant screen asks: a share is read better from sorted bars (`pareto()`), a
-  profile from a line, and candles are for markets.
+  profile from a line, and candles are for markets. *Instead:* `pareto()` with
+  `Bar` and `Line` for a share, a `Line` per axis for a profile.
 - **A log scale and a category scale.** Every scale is affine, and the drawing
   loop and the operating-time axis rely on it (ADR-0001); categories are numeric
-  positions with a naming `tickFormat` (ADR-0002).
+  positions with a naming `tickFormat` (ADR-0002). *Instead:* for values over
+  decades, a second y axis with its own extent, or the logarithm computed in
+  the accessor and named in the `tickFormat`; for categories, their index on x.
 - **WebGL.** Downsampling keeps a week of seconds under 25 ms on Canvas 2D
   (`packages/charts/docs/capabilities.md`); a second renderer would double
   every kind for figures no plant screen needs. *Instead:* a WebGL specialist
@@ -67,7 +70,9 @@ is only "not yet" stands in each package's record and in the open specs under
 - **Smoothing, animation, export, horizontal bars.** A smoothed curve invents
   values the plant never measured, an animated one is harder to read, a canvas
   already exports itself (`toDataURL`), and bars grow along the y axis. Each is
-  argued in the capability record's "Out".
+  argued in the capability record's "Out". *Instead:* `Line step` for what was
+  held, `canvas.toDataURL()` for a picture, a `Matrix` or bars on x for a
+  ranking.
 
 ## The schedule
 
