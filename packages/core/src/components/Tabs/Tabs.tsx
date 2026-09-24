@@ -1,7 +1,8 @@
-import { createContext, useCallback, useContext, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
+import { createContext, forwardRef, useCallback, useContext, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import type { ButtonHTMLAttributes, HTMLAttributes, KeyboardEvent as ReactKeyboardEvent } from "react";
 import { cx } from "../../lib/cx";
 import { idPart } from "../../lib/idPart";
+import { mergeRefs } from "../../lib/mergeRefs";
 import styles from "./Tabs.module.css";
 
 interface TabsContextValue {
@@ -32,21 +33,27 @@ export interface TabsProps extends Omit<HTMLAttributes<HTMLDivElement>, "onChang
   onChange: (value: string) => void;
 }
 
-export function Tabs({ value, onChange, className, children, ...rest }: TabsProps) {
+export const Tabs = forwardRef<HTMLDivElement, TabsProps>(function Tabs(
+  { value, onChange, className, children, ...rest },
+  ref,
+) {
   const idBase = useId();
 
   return (
-    <div className={className} {...rest}>
+    <div ref={ref} className={className} {...rest}>
       <TabsContext.Provider value={{ value, onChange, idBase }}>{children}</TabsContext.Provider>
     </div>
   );
-}
+});
 
 /* ------------------------------------------------------------------ */
 /* TabList – the arrow keys switch and activate                        */
 /* ------------------------------------------------------------------ */
 
-export function TabList({ className, children, onKeyDown, ...rest }: HTMLAttributes<HTMLDivElement>) {
+export const TabList = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(function TabList(
+  { className, children, onKeyDown, ...rest },
+  ref,
+) {
   const tabs = useTabs("TabList");
   const listRef = useRef<HTMLDivElement>(null);
   const [indicator, setIndicator] = useState<{ left: number; width: number } | null>(null);
@@ -102,7 +109,7 @@ export function TabList({ className, children, onKeyDown, ...rest }: HTMLAttribu
   };
 
   return (
-    <div ref={listRef} role="tablist" className={cx(styles.list, className)} {...rest} onKeyDown={handleKeyDown}>
+    <div ref={mergeRefs(listRef, ref)} role="tablist" className={cx(styles.list, className)} {...rest} onKeyDown={handleKeyDown}>
       {children}
       {indicator && (
         <span
@@ -113,7 +120,7 @@ export function TabList({ className, children, onKeyDown, ...rest }: HTMLAttribu
       )}
     </div>
   );
-}
+});
 
 /* ------------------------------------------------------------------ */
 /* Tab                                                                 */
@@ -124,12 +131,16 @@ export interface TabProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   value: string;
 }
 
-export function Tab({ value, className, children, onClick, ...rest }: TabProps) {
+export const Tab = forwardRef<HTMLButtonElement, TabProps>(function Tab(
+  { value, className, children, onClick, ...rest },
+  ref,
+) {
   const tabs = useTabs("Tab");
   const selected = tabs.value === value;
 
   return (
     <button
+      ref={ref}
       type="button"
       role="tab"
       /* The value goes into the id masked: `aria-controls` and
@@ -151,7 +162,7 @@ export function Tab({ value, className, children, onClick, ...rest }: TabProps) 
       {children}
     </button>
   );
-}
+});
 
 /* ------------------------------------------------------------------ */
 /* TabPanel                                                            */
@@ -164,12 +175,16 @@ export interface TabPanelProps extends HTMLAttributes<HTMLDivElement> {
   value: string;
 }
 
-export function TabPanel({ value, className, children, ...rest }: TabPanelProps) {
+export const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(function TabPanel(
+  { value, className, children, ...rest },
+  ref,
+) {
   const tabs = useTabs("TabPanel");
   if (tabs.value !== value) return null;
 
   return (
     <div
+      ref={ref}
       role="tabpanel"
       id={`${tabs.idBase}-panel-${idPart(value)}`}
       aria-labelledby={`${tabs.idBase}-tab-${idPart(value)}`}
@@ -180,4 +195,4 @@ export function TabPanel({ value, className, children, ...rest }: TabPanelProps)
       {children}
     </div>
   );
-}
+});

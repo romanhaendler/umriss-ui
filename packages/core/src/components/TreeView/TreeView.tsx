@@ -17,9 +17,10 @@
    doing so and hidden from the screen reader, so that nothing is announced
    twice. */
 
-import { useEffect, useId, useRef } from "react";
-import type { HTMLAttributes, KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
+import { forwardRef, useEffect, useId, useRef } from "react";
+import type { ForwardedRef, HTMLAttributes, KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
 import { cx } from "../../lib/cx";
+import { mergeRefs } from "../../lib/mergeRefs";
 import { AngleGlyph } from "../../lib/glyphs";
 import { Checkbox } from "../Checkbox";
 import { Spinner } from "../Spinner";
@@ -46,18 +47,21 @@ export interface TreeViewProps<K, S extends Key = string>
   children: (entry: FlatteningEntry<K, S>) => ReactNode;
 }
 
-export function TreeView<K, S extends Key = string>({
-  tree,
-  ariaLabel,
-  checkable = false,
-  children,
-  className,
-  onKeyDown,
-  onFocus,
-  onBlur,
-  onScroll,
-  ...rest
-}: TreeViewProps<K, S>): ReactNode {
+export const TreeView = forwardRef(function TreeView<K, S extends Key = string>(
+  {
+    tree,
+    ariaLabel,
+    checkable = false,
+    children,
+    className,
+    onKeyDown,
+    onFocus,
+    onBlur,
+    onScroll,
+    ...rest
+  }: TreeViewProps<K, S>,
+  ref: ForwardedRef<HTMLDivElement>,
+) {
   const wording = useWording();
   /* Namespace of the box ids: two trees with the same keys would otherwise
      hand out the same id, and a click on the label of the second one would
@@ -66,7 +70,8 @@ export function TreeView<K, S extends Key = string>({
   const rowWindow = tree.virtual;
   /* Virtualised, the root is at the same time the scroll area, and then its
      ref carries the window arithmetic - the table keeps it this way too.
-     Otherwise its own. One ref, no assigning inside a ref callback. */
+     Otherwise its own. The caller's ref is handed the same element beside
+     it (core-passthrough). */
   const ownRef = useRef<HTMLDivElement | null>(null);
   const rootRef = rowWindow?.scrollRef ?? ownRef;
   /* The focus follows the active node only where it already lies inside the
@@ -198,15 +203,15 @@ export function TreeView<K, S extends Key = string>({
 
   return (
     <div
-      ref={rootRef}
-      role="tree"
+      ref={mergeRefs(rootRef, ref)}
       aria-label={ariaLabel}
       className={cx(styles.tree, rowWindow !== undefined && styles.scrolls, className)}
       {...rest}
       /* After `rest` and composed with the caller's, as `onKeyDown` already
          was: a caller's `onFocus` or `onBlur` used to replace the tracking the
          focus-follows-the-active-node rule hangs on, and an `onScroll` the
-         row window. */
+         row window. The role stands here too - it is what the element is. */
+      role="tree"
       onKeyDown={onKey}
       onScroll={(e) => {
         onScroll?.(e);
@@ -309,4 +314,6 @@ export function TreeView<K, S extends Key = string>({
       ) : null}
     </div>
   );
-}
+}) as <K, S extends Key = string>(
+  props: TreeViewProps<K, S> & { ref?: ForwardedRef<HTMLDivElement> },
+) => ReactNode;

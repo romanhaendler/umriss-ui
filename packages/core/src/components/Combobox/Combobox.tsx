@@ -1,5 +1,5 @@
-import { useEffect, useId, useMemo, useRef, useState } from "react";
-import type { KeyboardEvent as ReactKeyboardEvent } from "react";
+import { forwardRef, useEffect, useId, useMemo, useRef, useState } from "react";
+import type { ForwardedRef, HTMLAttributes, KeyboardEvent as ReactKeyboardEvent, ReactElement } from "react";
 import { cx } from "../../lib/cx";
 import { useFormField } from "../FormField";
 import { filterOptions, nextIndex, startIndex } from "../../lib/options";
@@ -18,7 +18,8 @@ export interface ComboboxOption<T extends string = string> {
   disabled?: boolean;
 }
 
-export interface ComboboxProps<T extends string = string> {
+export interface ComboboxProps<T extends string = string>
+  extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
   /** The possibilities, in their natural order. Filtered while typing; never
       reordered. */
   options: readonly ComboboxOption<T>[];
@@ -42,16 +43,21 @@ export interface ComboboxProps<T extends string = string> {
 }
 
 /** A searchable select field (the combobox pattern with a listbox panel). */
-export function Combobox<T extends string = string>({
-  options,
-  value,
-  onChange,
-  placeholder,
-  disabled = false,
-  invalid,
-  emptyText,
-  clearable = false,
-}: ComboboxProps<T>) {
+export const Combobox = forwardRef(function Combobox<T extends string = string>(
+  {
+    options,
+    value,
+    onChange,
+    placeholder,
+    disabled = false,
+    invalid,
+    emptyText,
+    clearable = false,
+    className,
+    ...rest
+  }: ComboboxProps<T>,
+  ref: ForwardedRef<HTMLDivElement>,
+) {
   const field = useFormField();
   const wording = useWording();
   const placeholderText = placeholder ?? wording.comboboxPlaceholder;
@@ -124,7 +130,10 @@ export function Combobox<T extends string = string>({
 
   return (
     <>
-      <div className={styles.wrapper}>
+      {/* The caller's ref, class and rest go to the wrapper, the field's
+          outermost element (P1 of core-passthrough); the field id from
+          `FormField` stays on the input. */}
+      <div ref={ref} className={cx(styles.wrapper, className)} {...rest}>
         <input
           ref={inputRef}
           type="text"
@@ -218,6 +227,7 @@ export function Combobox<T extends string = string>({
               )}
           </div>
       </Popover>
-    </>
-  );
-}
+    </>  );
+}) as <T extends string = string>(
+  props: ComboboxProps<T> & { ref?: ForwardedRef<HTMLDivElement> },
+) => ReactElement;
