@@ -86,4 +86,12 @@ ticket and no reason to widen this one.
   each group looked at: the head 1-3 px lower (sort key top-aligned), the
   compact head, the selected-row surface, the right-aligned placeholders, the
   funnel after the label; the rest sub-pixel shifts below the lower head.
-- Next: the date picker, then the combobox family.
+- **Date picking — done except one decision (core 0.9.1).** Fixed: compact
+  placeholder, feet's ghost keys aligned to the grid, the time steppers' 3 px
+  explained. Open: today's mark vs. the focus ring.
+- **Combobox / Select / MultiSelect — done except one decision (core 0.9.1).**
+  Fixed: Select placeholder muted; the chevrons' lift and the MultiSelect's
+  narrow inset explained at their sites. Open: the CSS chevrons vs. the
+  one-stroke canon.
+- Moved baselines: the compact pickers (three examples) and the select; each
+  looked at.

@@ -186,6 +186,7 @@
     display: flex;
     align-items: center;
     gap: var(--u-space-2);
+    /* Narrow on the left: the chips before it already keep their gap. */
     padding: 0 var(--u-space-3) 0 var(--u-space-1);
     border: none;
     background: none;
@@ -216,6 +217,9 @@
     height: 7px;
     border-right: 1.5px solid var(--u-color-text-secondary);
     border-bottom: 1.5px solid var(--u-color-text-secondary);
+    /* Optical: the turned square's ink sits in its lower half; 2 px up puts
+       the angle's own middle on the field's (the -70 % of Select and Combobox,
+       for a box centred by flex rather than by top: 50 %). */
     transform: translateY(-2px) rotate(45deg);
   }
 

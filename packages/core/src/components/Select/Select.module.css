@@ -38,6 +38,17 @@
     cursor: not-allowed;
   }
 
+  /* The placeholder option (value "") reads as a placeholder, muted like the
+     Combobox's and the pickers'; it stood in full ink. The options in the
+     open list keep the text colour. */
+  .select:has(option[value=""]:checked) {
+    color: var(--u-color-text-muted);
+  }
+
+  .select option {
+    color: var(--u-color-text);
+  }
+
   /* On the wrapper, so that the chevron beside the field dims with it. */
   .wrapper:has(.select:disabled) {
     opacity: 0.5;
@@ -66,6 +77,9 @@
     height: 7px;
     border-right: 1.5px solid var(--u-color-text-secondary);
     border-bottom: 1.5px solid var(--u-color-text-secondary);
+    /* Optical: a square turned 45 degrees with two borders is an angle whose
+       ink sits in its lower half; lifted by 70 % instead of 50 %, the angle's
+       own middle - not its box's - meets the field's middle. */
     transform: translateY(-70%) rotate(45deg);
     pointer-events: none;
   }
