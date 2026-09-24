@@ -13,6 +13,11 @@ site/
 # away from its source, and the whole mechanism is built against exactly that.
 packages/*/demo/.generated/
 
+# The text for coding agents, generated beside the props tables (same run, same
+# reason). It travels in the npm package - `prepack` writes it - and on the
+# pages, never in the repository.
+packages/*/docs/llms-full.md
+
 # Test artefacts. The screenshot baselines under
 # packages/*/tests-visual/**-snapshots/ are deliberately NOT ignored -
 # they are checked in, as docs/testing.md says.

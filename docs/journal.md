@@ -18,6 +18,25 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Sep. 2026 — What umriss is not, and docs an agent can read
+
+- **non-goals-and-honest-docs.** ADR-0032 names what umriss deliberately does
+  not build, with the reason and what a caller does instead; the charts'
+  capability "Out" points to it. The charts README repeated a benchmark run
+  older than `capabilities.md`'s and counted stacking among what it cannot
+  do - both fixed; core's roadmap still named the danger text tone, shipped in
+  0.7.0. `docs/releasing.md` gained a README check instead of a lint.
+- **ai-readable-docs.** `llms.txt` and `llms-full.txt` per package, generated
+  from the demo by `packages/demo/src/tooling/llms.ts` in the props run; the
+  full text ships as `docs/llms-full.md` (`prepack`), the pages serve both and
+  a workspace index.
+- **The guard caught something at once**: it was red over all five packages,
+  because the pages name what a reader looks up and not the pure modules or
+  helper types. The text now carries every such export's `.d.ts` declaration.
+- **Found on the way**: the props table in the shell still heads its columns
+  in German ("Typ", "Standard", "Beschreibung"); the generated text does not
+  repeat that, the shell is untouched here.
+
 ## Sep. 2026 — The charts for keyboard and screen reader
 
 - **charts-a11y, grilled and built in one sitting.** Q1-Q7 put to the user and

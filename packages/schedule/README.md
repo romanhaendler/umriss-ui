@@ -136,6 +136,11 @@ point into a time and a lane and back.
   `pnpm dev:schedule` (port 4176). It is the documentation — every page shows
   running examples with their source and the props table generated from `src/`.
 * [`CHANGELOG.md`](CHANGELOG.md) — what changes for a caller.
+* **For a coding agent**: `docs/llms-full.md` inside the installed package —
+  the demo as one Markdown file, pinned to the installed version: every page
+  with its examples' source, its props tables and why it is built as it is,
+  and the declaration of every other export. Online, for the latest version:
+  <https://romanhaendler.github.io/umriss-ui/schedule/llms.txt>.
 * The vocabulary — **Task**, **Subtask**, **Setup**, **Teardown**,
   **Transport**, **Late transport**, **Lane header**, **Lane group**,
   **Miniature**, **Intent**, **Ghost** — stands in the workspace's

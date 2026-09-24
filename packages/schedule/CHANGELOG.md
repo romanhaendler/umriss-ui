@@ -15,6 +15,17 @@ moves from here under the rule above.
 
 ---
 
+## Unreleased
+
+### Added
+
+- **`docs/llms-full.md`**, the package's documentation as one Markdown file for
+  a coding agent, in the npm package and pinned to its version: every demo page
+  with its import line, its examples' source, its props tables and why it is
+  built as it is, and the declaration of every other export. The same text
+  stands online as <https://romanhaendler.github.io/umriss-ui/schedule/llms-full.txt>,
+  with an index of the pages beside it (`llms.txt`).
+
 ## 0.1.8 – Core 0.9.0 (Sep. 2026)
 
 Admits `@umriss-ui/core` 0.9, which only adds a token; the peer range moves to `^0.9.0`. Nothing else changes.
