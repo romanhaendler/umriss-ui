@@ -1,6 +1,6 @@
 # The charts, examined
 
-Status: ready-for-agent
+Status: done
 Date:   2026-09-23
 Origin: grilling session on the state of `@umriss-ui/charts` (0.3.2) - two
 tasks: complete the demo, and examine every chart critically. This file is the
@@ -173,3 +173,9 @@ own is not planned.
 
 Everything under "Later" and "Out" in Q12. They move into `docs/capabilities.md`
 with their reason, replacing "Deliberately open" (`charts-essentials` 07).
+
+## Comments
+
+### Status corrected (2026-09-24)
+
+Delivered (`0c1e1ae`, `d9a9c72`, `ea7dadf`, `e0b8dd2`; journal "The charts examined"). Its last child, accessibility, is tracked as `.scratch/charts-a11y/`. The Status line had not been moved when the work landed.

@@ -1,6 +1,6 @@
 # Every charts page shows its component
 
-Status: ready-for-agent
+Status: done
 Date:   2026-09-23
 Origin: `.scratch/charts-review/spec.md`, task 1; decisions Q1-Q4, Q7, Q8.
 
@@ -38,3 +38,9 @@ Examples do not show `Span`: it is removed in `charts-fixes` 01.
 ## Issues
 
 01 Area · 02 Bar · 03 Scatter · 04 StateBand · 05 Tooltip & Legend · 06 Why texts
+
+## Comments
+
+### Status corrected (2026-09-24)
+
+Delivered in commits `charts-demo-examples 01`-`06`; released with `@umriss-ui/charts` 0.4.0. The Status line had not been moved when the work landed.

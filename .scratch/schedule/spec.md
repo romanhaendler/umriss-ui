@@ -1,6 +1,6 @@
 # The schedule
 
-Status: ready-for-agent
+Status: done
 Date:   2026-09-17
 Origin: grilling session 2026-09-17; vocabulary in `CONTEXT.md` ("The
 schedule"), decisions in ADR-0022 and ADR-0023.
@@ -172,3 +172,9 @@ gives applications the menu to open there, and the demo shows the wiring.
 - Visible strings, if any, follow ADR-0018/0019: English default; if the
   schedule needs wording entries, it follows the same mechanism the table
   uses.
+
+## Comments
+
+### Status corrected (2026-09-24)
+
+Delivered in commits `schedule 01`-`08` and the review follow-up; released as `@umriss-ui/schedule` 0.1.x. The Status line had not been moved when the work landed.

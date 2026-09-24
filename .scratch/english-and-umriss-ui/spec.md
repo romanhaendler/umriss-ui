@@ -1,6 +1,6 @@
 # Spec: One language, one org — the library becomes English and moves to `@umriss-ui`
 
-Status: ready-for-agent
+Status: done
 
 Origin: `/grill-with-docs` session, 12 Sep 2026. It began with two statements — "I have secured the org `umriss-ui` on npm, so I want to rebuild everything as `umriss-ui/core`, `/table`, `/charts`" and "I do think all texts and names should be English" — and ended in a rename table, a second shipped wording, and a ticket order built around the one seam that cannot be parallelised.
 
@@ -222,3 +222,9 @@ Four in order, each one confidently wrong before it was replaced:
 
 The rule that survived all four: a grep finds files worth reading. Only reading
 finds defects.
+
+## Comments
+
+### Status corrected (2026-09-24)
+
+Delivered: all seventeen issues done (journal "one language, one scope"); the remaining German identifiers are gone, and the `de-DE` formats follow-up became ADR-0024. The Status line had not been moved when the work landed.
