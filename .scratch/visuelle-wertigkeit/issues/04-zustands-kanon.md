@@ -64,3 +64,79 @@ The most likely finding of the survey is that focus is additionally shown by a
 change of surface in several places, because that was the obvious thing to do
 while building the respective component. That is the case that makes the canon
 most necessary: focus and hover thereby become indistinguishable.
+
+## Survey
+
+Taken on `visual-quality` at 375ca94, before any change: every element a pointer
+or a key can operate in core, table, schedule, calculation and the charts' DOM,
+read out of the stylesheets (`:hover`, `:active`, `:focus*`, the disabled
+markers) and, where the stylesheet does not tell, out of the component. "Ring"
+means `--u-focus-ring` - by `composes: ring`, or written out. "—" means the
+state does not occur (not focusable, cannot be disabled). **Bold** marks a
+divergence from the canon.
+
+| Component · element | Hover | Active | Focus | Disabled |
+|---|---|---|---|---|
+| Button primary / danger | darker surface (`-hover`) | stronger surface (`-active`) + scale 0.98 | ring | opacity 0.5, not-allowed, hover/active guarded; busy is not greyed (reason in place) |
+| Button secondary | sunken surface + hover edge | **scale only, no surface** | ring | as above |
+| Button ghost | accent-subtle surface | **scale only, no surface** | ring | as above |
+| ButtonGroup | the Button's; z-index lift | settling removed (reason in place) | ring, clip lifted | the Button's |
+| Checkbox | **none** | **none** | ring on the box | **repaint: sunken box, muted label; no opacity** |
+| RadioGroup | hover edge on the dot (guarded) | **none** | ring on the dot | opacity 0.5, not-allowed |
+| Tabs · tab | type darkens (a tab has no surface) | **none** | ring | **muted colour, no opacity; hover not guarded - a disabled tab darkens under the pointer** |
+| Card · collapse button | accent-subtle surface | **none** | ring | — |
+| Alert · close | currentColor 12 % surface, opacity 1 | glyph 0.8, **no surface** | ring (+ opacity 1) | — |
+| Tag · remove key | currentColor 14 % surface | glyph 0.8, **no surface** | the tag's ring | tag opacity 0.5; the key is not rendered |
+| Toast · close, Modal · close | sunken surface + type | **none** | ring | — |
+| Fields: Input, Textarea, Select, Combobox, DatePicker trigger, TimeField, NumberInput, MultiSelect | hover edge (guarded) | — (a field has no press) | ring on the edge (`:focus-visible` / `:focus-within`) | **repaint: sunken ground + muted type, no opacity** |
+| Field clear keys (Input, Select, Combobox, DatePicker) | sunken surface + type | **none** | — (not in the tab order) | not rendered |
+| NumberInput · stepper | sunken surface + type (guarded) | **whole key scale 0.9 - neither 0.98 nor the glyph's 0.8; no surface** | — | opacity 0.18, default cursor (at a bound) |
+| DatePicker · time stepper | sunken surface + type, **not guarded** | glyph 0.8, **no surface** | — | opacity 0.18; **the group's hover lifts a disabled stepper back to opacity 1 and paints it** |
+| DatePicker · page, day, preset | sunken surface | **none** | ring | — |
+| Menu · item | sunken surface | **none** | **surface (sunken), ring suppressed** | **muted colour, no opacity; hover not guarded (a counter-rule resets it)** |
+| Menu · danger item | danger-subtle surface | **none** | **surface (danger-subtle)** | as the item |
+| Combobox · option | the list cursor (sunken), moved by pointer and keys | **none** | the focus stays in the field, ring there | **muted colour, no opacity; the pointer still moves the cursor onto a disabled option** |
+| CommandPalette · row | the list cursor (accent-subtle) | **none** | field without ring (reason in place) | — |
+| MultiSelect · chip | danger-subtle surface + × | **none** | **surface (danger-subtle), no ring** | not-allowed; **the × still appears under the pointer** |
+| MultiSelect · counter | accent 18 % surface (guarded) | **none** | ring | — |
+| MultiSelect · scope | type darkens (a segment, like a tab) | **none** | ring | — |
+| MultiSelect · option | sunken surface | **none** | the checkbox's ring | — |
+| TreeView · row | sunken surface | **none** | ring | row muted and navigable, checkbox disabled; no opacity |
+| Dock · tool | sunken surface + type (guarded) | **none** | ring | **muted colour, default cursor, no opacity** |
+| Dock · grip | type darkens | grabbing cursor + ink while dragged | ring | — |
+| Typography · link | accent-hover + underline (a link has no surface) | **none** | ring | — |
+| Table · sort button | type darkens + indicator (a header label) | **none** | ring | — |
+| Table · filter button | sunken surface + type | **none** | ring | — |
+| Table · condition tag button | **none** | **none** | ring on the tag (reason in place) | — |
+| Table · column move key | sunken surface + type (guarded) | **none** | ring | opacity 0.5 **+ muted colour** (dimmed twice), default cursor |
+| Table · grouping option | text 10 % into sunken (guarded) | **none** | ring | **muted colour, default cursor, no opacity** |
+| Table · fold | text 8 % surface + type | **none** | ring | — |
+| Table · expander | sunken surface + type | **none** | ring | — |
+| Table · row actions | accent type on row hover or focus-within (reason in place) | — | the buttons' ring | — |
+| Table · virtual row | the row band | — | **2 px accent outline inset, not the token; no reason at the site** | — |
+| Schedule · fold chevron | **type darkens, no surface** | **none** | ring **+ type darkens** | — |
+| Calculation · disclosure | sunken surface + type (also on row hover) | **none** | ring | — |
+| Charts · legend entry (button) | **none** | **none** | ring (`--uc-focus-ring`) | — |
+
+What the survey finds, in the canon's order:
+
+- **Hover** changes the surface almost everywhere. Five controls change only
+  their type, and four of them have no surface to change: the tab, the link, the
+  table's sort label and the MultiSelect's scope segment (a segment of a tab
+  strip). They stay, with the reason at the site. The schedule's fold chevron is
+  a square key like the table's expander and the calculation's disclosure, and
+  it gets their surface; the charts' legend entry gets one for the first time.
+- **Active** is the widest gap: only the primary and danger buttons darken their
+  surface. The rest has either nothing or a settling alone. Neutral surfaces
+  have no stronger step in the vocabulary - the pressed surface is a new token.
+- **Focus** is shown by surface in exactly the two places the ticket expected:
+  the menu item and the MultiSelect chip. The table's virtual row draws the ring
+  as an outline for a reason nobody wrote down; the schedule's chevron adds a
+  colour to the ring. The list cursors of Combobox and CommandPalette look like
+  focus by surface but are not: DOM focus stays in the field, which carries the
+  ring, and the cursor is what the pointer moves too.
+- **Disabled** is opacity in four places (Button, RadioGroup, Tag, the steppers)
+  and a repaint in muted colours in the rest. Three disabled elements still
+  react: the disabled tab darkens, the disabled time stepper comes back to full
+  presence under its group's hover, and the × of a disabled chip appears.
+  Combobox moves its cursor onto a disabled option with the pointer.
