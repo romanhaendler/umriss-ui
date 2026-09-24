@@ -756,10 +756,25 @@
     color: var(--u-color-text-muted);
   }
 
+  /* On the band's sunken tone the muted type would not hold 4.5:1 (3.09:1
+     light, 3.74:1 dark - the same finding as the filter's label); there the
+     count and "continued" take the secondary type. */
+  .groupHeader .groupCount,
+  .groupHeader .continued {
+    color: var(--u-color-text-secondary);
+  }
+
   /* In the span the count stands right, apart from the value. */
   .spanValue > .groupCount {
     margin-left: auto;
     padding-left: var(--u-space-2);
+  }
+
+  /* The box of a span group stands before its fold. */
+  .spanSelect {
+    display: inline-flex;
+    flex: none;
+    margin-right: var(--u-space-2);
   }
 
   .continued {

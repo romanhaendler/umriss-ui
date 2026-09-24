@@ -481,8 +481,12 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
             levelEntry={entryOf(grouping[line.group.level])}
             columns={dataColumns}
             controlColumns={controlColumns}
+            selectable={selectable}
             hasActions={actions.length > 0}
             total={projection.filtered}
+            siblings={line.parents.at(-1)?.groups ?? projection.groups ?? []}
+            depth={grouping.length}
+            registry={registry}
             hook={hook}
             formats={formats}
             wording={wording}
@@ -500,8 +504,12 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
           levelEntry={entryOf(grouping[line.group.level])}
           columns={dataColumns}
           controlColumns={controlColumns}
+          selectable={selectable}
           hasActions={actions.length > 0}
           total={projection.filtered}
+          siblings={line.parents.at(-1)?.groups ?? projection.groups ?? []}
+          depth={grouping.length}
+          registry={registry}
           hook={hook}
           formats={formats}
           wording={wording}
@@ -537,6 +545,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
     >
       <table
         ref={tableRef}
+        role={lines ? "treegrid" : undefined}
         style={lines ? ({ "--u-band-levels": grouping.length - 1 } as CSSProperties) : undefined}
         aria-label={ariaLabel}
         /* With virtualisation not every row stands in the document; plus one
@@ -863,6 +872,9 @@ function Row({
         data-row={virtual ? absolute : undefined}
         data-line={line ? "row" : undefined}
         data-group-first={line?.first ? "" : undefined}
+        aria-level={line ? line.parents.length + 1 : undefined}
+        aria-posinset={line ? line.span.rows.indexOf(row) + 1 : undefined}
+        aria-setsize={line ? line.span.rows.length : undefined}
         tabIndex={virtual ? (absolute === tabStop ? 0 : -1) : undefined}
         data-even={virtual && absolute % 2 === 1 ? "" : undefined}
         aria-rowindex={virtual ? absolute + 2 : undefined}
@@ -898,7 +910,9 @@ function Row({
             </button>
           </td>
         )}
-        {line && <SpanCell line={line} entry={spanEntry} hook={hook} formats={formats} wording={wording} />}
+        {line && (
+          <SpanCell line={line} entry={spanEntry} selectable={selectable} registry={registry} hook={hook} formats={formats} wording={wording} />
+        )}
         {columns.map((e) => (
           <Cell
             key={e.key}

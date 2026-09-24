@@ -37,12 +37,12 @@ const capture = (t: Table<Order>) => {
   current = t;
 };
 
-function Orders({ paged = false }: { paged?: boolean }) {
+function Orders({ paged = false, selectable = false }: { paged?: boolean; selectable?: boolean }) {
   const t = useTable(ORDERS, { rowKey: (o) => o.id, defaultGrouping: ["line", "customer"], pageSize: 5 });
   capture(t);
   const { Table: Frame, Column } = t;
   return (
-    <Frame>
+    <Frame selectable={selectable}>
       {paged && <Pagination />}
       <Column value="id" label="Order" rowHeader />
       <Column value="line" label="Line" />
@@ -117,5 +117,64 @@ describe("a page that begins inside a group", () => {
     expect(band!.cells[0]!.textContent).toContain("continued");
     expect(first!.cells[0]!.textContent).toContain("Otto & Söhne");
     expect(first!.cells[1]!.textContent).toBe("A-1060");
+  });
+});
+
+describe("selecting a group (table-grouping 05)", () => {
+  it("selects every row of a band – on other pages and in folded groups as well", () => {
+    render(<Orders paged selectable />);
+    fireEvent.click(screen.getByRole("button", { name: "Fold Otto & Söhne, 3" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "Select Line 1" }));
+    expect(current!.selection.count).toBe(6);
+    expect((screen.getByRole("checkbox", { name: "Select Line 1" }) as HTMLInputElement).checked).toBe(true);
+    fireEvent.click(screen.getByRole("checkbox", { name: "Select Line 1" }));
+    expect(current!.selection.count).toBe(0);
+  });
+
+  it("gives a span of several rows a box of its own that shows a partial selection", () => {
+    render(<Orders selectable />);
+    fireEvent.click(screen.getByRole("checkbox", { name: "Select A-1058" }));
+    const otto = screen.getByRole("checkbox", { name: "Select Otto & Söhne" }) as HTMLInputElement;
+    expect(otto.indeterminate).toBe(true);
+    expect((screen.getByRole("checkbox", { name: "Select Line 1" }) as HTMLInputElement).indeterminate).toBe(true);
+    fireEvent.click(otto);
+    expect(current!.selection.count).toBe(3);
+    // A group of one row is selected by its row's own box.
+    expect(screen.queryByRole("checkbox", { name: "Select Kessler AG" })).toBeNull();
+  });
+});
+
+describe("the treegrid (table-grouping 05)", () => {
+  it("is a treegrid while grouped, with levels, folds and positions", () => {
+    const { container } = render(<Orders />);
+    expect(screen.getByRole("treegrid")).toBeTruthy();
+    const [band, first] = lines(container);
+    expect(band!.getAttribute("aria-level")).toBe("1");
+    expect(band!.getAttribute("aria-expanded")).toBe("true");
+    expect(band!.getAttribute("aria-posinset")).toBe("1");
+    expect(band!.getAttribute("aria-setsize")).toBe("3");
+    expect(first!.getAttribute("aria-level")).toBe("2");
+    act(() => current!.setGrouping([]));
+    expect(screen.queryByRole("treegrid")).toBeNull();
+  });
+
+  it("folds with the left arrow and unfolds with the right one, and the focus stays on the fold", () => {
+    render(<Orders />);
+    const fold = screen.getByRole("button", { name: "Fold Otto & Söhne, 3" });
+    fold.focus();
+    fireEvent.keyDown(fold, { key: "ArrowLeft" });
+    const unfold = screen.getByRole("button", { name: "Unfold Otto & Söhne, 3" });
+    expect(document.activeElement).toBe(unfold);
+    fireEvent.keyDown(unfold, { key: "ArrowRight" });
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "Fold Otto & Söhne, 3" }));
+  });
+
+  it("goes from an open fold to the fold of the group around it with the left arrow", () => {
+    render(<Orders />);
+    act(() => current!.toggleFold(JSON.stringify(["value:Line 1", "value:Otto & Söhne"])));
+    const otto = screen.getByRole("button", { name: "Unfold Otto & Söhne, 3" });
+    otto.focus();
+    fireEvent.keyDown(otto, { key: "ArrowLeft" });
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "Fold Line 1, 6" }));
   });
 });
