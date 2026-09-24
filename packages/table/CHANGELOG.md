@@ -22,6 +22,18 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## Unreleased
+
+### Fixed
+
+- **The focus survives a fold.** When a fold hides the element that holds the
+  focus - a row's checkbox, a cell, a row action, the fold of an inner group -
+  the focus goes to the fold of the nearest group that still stands for it: its
+  folded line or its header. Before, it fell to the page whenever it was not on
+  the fold that was pressed. This holds for `toggleFold`, `foldAll`, the tag
+  menu's "Fold all" and Alt-click or Alt+arrow on a sibling's fold; a focus
+  outside the folded group stays where it is.
+
 ## 0.3.0 – Grouping (Sep. 2026)
 
 ### Added

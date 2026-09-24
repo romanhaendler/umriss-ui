@@ -374,6 +374,22 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
     if (table.parentElement) markStuck(table.parentElement);
   });
 
+  /* A fold that took away the focused element hands the focus to the fold of
+     the innermost group around it that still stands: its folded line or its
+     header. A focus the fold left standing stays where it is. */
+  useLayoutEffect(() => {
+    const noted = registry.takeFocusBeforeFold();
+    const table = tableRef.current;
+    if (!noted || !table || noted.table !== table || noted.element.isConnected) return;
+    const folds = Array.from(table.querySelectorAll<HTMLButtonElement>("[data-fold-path]"));
+    const keys = JSON.parse(noted.group) as unknown[];
+    for (let n = keys.length; n > 0; n--) {
+      const path = JSON.stringify(keys.slice(0, n));
+      const fold = folds.find((b) => b.dataset.foldPath === path);
+      if (fold) return fold.focus();
+    }
+  });
+
   /* Regrouping and folding move the lines that stay; a virtual window does
      not - its rows come and go with the scroll. */
   const moving = registry.hook && !registry.hook.companion.virtual ? registry.hook.publicSnapshot : null;
@@ -495,7 +511,6 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
             total={projection.filtered}
             siblings={line.parents.at(-1)?.groups ?? projection.groups ?? []}
             depth={grouping.length}
-            registry={registry}
             hook={hook}
             formats={formats}
             wording={wording}
@@ -518,7 +533,6 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
           total={projection.filtered}
           siblings={line.parents.at(-1)?.groups ?? projection.groups ?? []}
           depth={grouping.length}
-          registry={registry}
           hook={hook}
           formats={formats}
           wording={wording}
@@ -886,6 +900,7 @@ function Row({
   const { className: rowClass, ...data } = rowProps?.(row) ?? {};
 
   const virtual = absolute !== undefined;
+  const group = line ? (line.span ?? line.parents.at(-1))! : undefined;
 
   return (
     <>
@@ -896,9 +911,10 @@ function Row({
         data-line={line ? "row" : undefined}
         data-motion={key}
         data-group-first={line?.first ? "" : undefined}
+        data-group={group?.path}
         aria-level={line ? line.parents.length + 1 : undefined}
-        aria-posinset={line ? (line.span ?? line.parents.at(-1))!.rows.indexOf(row) + 1 : undefined}
-        aria-setsize={line ? (line.span ?? line.parents.at(-1))!.rows.length : undefined}
+        aria-posinset={group ? group.rows.indexOf(row) + 1 : undefined}
+        aria-setsize={group?.rows.length}
         tabIndex={virtual ? (absolute === tabStop ? 0 : -1) : undefined}
         data-even={virtual && absolute % 2 === 1 ? "" : undefined}
         aria-rowindex={virtual ? absolute + 2 : undefined}
@@ -935,7 +951,7 @@ function Row({
           </td>
         )}
         {line && line.span && (
-          <SpanCell line={{ ...line, span: line.span }} entry={spanEntry} selectable={selectable} registry={registry} hook={hook} formats={formats} wording={wording} />
+          <SpanCell line={{ ...line, span: line.span }} entry={spanEntry} selectable={selectable} hook={hook} formats={formats} wording={wording} />
         )}
         {columns.map((e) => (
           <Cell
@@ -956,7 +972,7 @@ function Row({
         )}
       </tr>
       {open && detail && (
-        <tr id={detailId} className={styles.detailRow}>
+        <tr id={detailId} className={styles.detailRow} data-group={group?.path}>
           <td colSpan={columnCount} className={styles.detailCell}>
             {detail.presentation(row as never)}
           </td>

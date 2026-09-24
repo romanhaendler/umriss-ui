@@ -11,14 +11,14 @@
    looks"): a group header is exactly one row high, every level has one fold slot of
    20 px, and a line is only as strong as the boundary it draws. */
 
-import { useLayoutEffect, useRef } from "react";
+import { useRef } from "react";
 import type { CSSProperties, KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
 import { Checkbox } from "@umriss-ui/core";
 import type { Formats, Wording } from "@umriss-ui/core";
 import { cx } from "./cx";
 import { AggregateValue, aggregateIsNumeric } from "./aggregateValue";
 import { useCountTo } from "./motion";
-import type { ColumnEntry, HookSnapshot, Registry } from "./registry";
+import type { ColumnEntry, HookSnapshot } from "./registry";
 import { aggregate, periodText } from "./model/grouping";
 import type { Line, RowGroup } from "./model/grouping";
 import { asText } from "./values";
@@ -52,7 +52,6 @@ function Fold({
   parent,
   entry,
   open,
-  registry,
   hook,
   formats,
   wording,
@@ -62,26 +61,17 @@ function Fold({
   parent: RowGroup<unknown> | undefined;
   entry: ColumnEntry | undefined;
   open: boolean;
-  registry: Registry;
   hook: HookSnapshot;
   formats: Formats;
   wording: Wording;
 }) {
-  const button = useRef<HTMLButtonElement>(null);
-  useLayoutEffect(() => {
-    if (button.current && registry.takeFoldFocus(group.path)) button.current.focus();
-  });
   const name = groupText(entry, group.value, formats, wording);
   const count = formats.count(group.rows.length);
-  const toggle = () => {
-    registry.requestFoldFocus(group.path);
-    hook.publicSnapshot.toggleFold(group.path);
-  };
+  const toggle = () => hook.publicSnapshot.toggleFold(group.path);
   const handleKeyDown = (event: ReactKeyboardEvent<HTMLButtonElement>) => {
     /* With Alt the arrows fold or unfold every group of the level, as Alt-click does. */
     if (event.altKey && (event.key === "ArrowLeft" || event.key === "ArrowRight")) {
       event.preventDefault();
-      registry.requestFoldFocus(group.path);
       foldSiblings(group, event.key === "ArrowLeft", hook);
       return;
     }
@@ -102,7 +92,6 @@ function Fold({
   };
   return (
     <button
-      ref={button}
       type="button"
       className={cx(styles.fold, !open && styles.foldClosed)}
       data-fold-path={group.path}
@@ -111,7 +100,6 @@ function Fold({
       onKeyDown={handleKeyDown}
       onClick={(event) => {
         if (!event.altKey) return toggle();
-        registry.requestFoldFocus(group.path);
         foldSiblings(group, open, hook);
       }}
     >
@@ -174,7 +162,6 @@ export function SpanCell({
   line,
   entry,
   selectable,
-  registry,
   hook,
   formats,
   wording,
@@ -182,7 +169,6 @@ export function SpanCell({
   line: Extract<Line<unknown>, { kind: "row" }> & { span: RowGroup<unknown> };
   entry: ColumnEntry | undefined;
   selectable: boolean;
-  registry: Registry;
   hook: HookSnapshot;
   formats: Formats;
   wording: Wording;
@@ -197,7 +183,7 @@ export function SpanCell({
               <GroupCheckbox group={group} entry={entry} hook={hook} formats={formats} wording={wording} />
             </span>
           )}
-          <Fold group={group} parent={line.parents.at(-1)} entry={entry} open registry={registry} hook={hook} formats={formats} wording={wording} />
+          <Fold group={group} parent={line.parents.at(-1)} entry={entry} open hook={hook} formats={formats} wording={wording} />
           <span className={styles.spanText} title={groupText(entry, group.value, formats, wording)}>
             <GroupValue entry={entry} group={group} formats={formats} wording={wording} />
             {line.continued && <span className={styles.continued}>{wording.groupContinued}</span>}
@@ -223,7 +209,6 @@ export function GroupLine({
   total,
   siblings,
   depth,
-  registry,
   hook,
   formats,
   wording,
@@ -235,7 +220,6 @@ export function GroupLine({
   siblings: readonly RowGroup<unknown>[];
   /** How many levels the grouping has. */
   depth: number;
-  registry: Registry;
   index: number;
   absolute: number | undefined;
   spanEntry: ColumnEntry | undefined;
@@ -265,7 +249,7 @@ export function GroupLine({
 
   const label = (
     <span className={styles.groupLabel}>
-      <Fold group={group} parent={line.parents.at(-1)} entry={levelEntry} open={open} registry={registry} hook={hook} formats={formats} wording={wording} />
+      <Fold group={group} parent={line.parents.at(-1)} entry={levelEntry} open={open} hook={hook} formats={formats} wording={wording} />
       <span className={styles.groupValue}>
         <GroupValue entry={levelEntry} group={group} formats={formats} wording={wording} />
       </span>
@@ -282,6 +266,7 @@ export function GroupLine({
       data-motion={absolute !== undefined || !(header && line.continued) ? `${line.kind}:${group.path}` : undefined}
       data-continued={header && line.continued ? "" : undefined}
       data-group-first={header ? undefined : ""}
+      data-group={group.path}
       data-row={virtual ? absolute : undefined}
       aria-rowindex={virtual ? absolute + 2 : undefined}
       data-index={index}
@@ -311,7 +296,7 @@ export function GroupLine({
                   <GroupCheckbox group={group} entry={spanEntry} hook={hook} formats={formats} wording={wording} />
                 </span>
               )}
-              <Fold group={group} parent={line.parents.at(-1)} entry={spanEntry} open={false} registry={registry} hook={hook} formats={formats} wording={wording} />
+              <Fold group={group} parent={line.parents.at(-1)} entry={spanEntry} open={false} hook={hook} formats={formats} wording={wording} />
               <span className={styles.spanText}>
                 <GroupValue entry={spanEntry} group={group} formats={formats} wording={wording} />
               </span>
