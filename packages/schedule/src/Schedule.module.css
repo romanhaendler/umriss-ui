@@ -137,7 +137,7 @@
   }
 
   .chevron svg {
-    transition: transform var(--u-duration-fast) var(--u-ease-out);
+    transition: transform var(--u-transition-path);
   }
 
   .chevron svg[data-open] {

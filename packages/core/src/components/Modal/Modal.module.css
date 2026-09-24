@@ -59,34 +59,36 @@
     background: var(--u-color-scrim);
   }
 
-  /* Entrance: grows minimally out of the depth. Exit: backwards. */
+  /* Entrance: grows minimally out of the depth, from its centre - a sheet
+     hangs from no trigger, so its motion origin is the default one, its
+     middle. Exit: faster, and it fades where it stands instead of retracing
+     the way it came. */
   .dialog[open] .sheet {
     animation: modalIn var(--u-duration-medium) var(--u-ease-out);
   }
 
   .dialog[data-closing] .sheet {
-    animation: modalOut var(--u-duration-exit) ease-in forwards;
+    animation: modalOut var(--u-duration-exit) var(--u-ease-exit) forwards;
   }
 
   .dialog[open]::backdrop {
-    animation: backdropIn var(--u-duration-medium) ease-out;
+    animation: backdropIn var(--u-duration-medium) var(--u-ease-out);
   }
 
   .dialog[data-closing]::backdrop {
-    animation: backdropOut var(--u-duration-exit) ease-in forwards;
+    animation: backdropOut var(--u-duration-exit) var(--u-ease-exit) forwards;
   }
 
   @keyframes modalIn {
     from {
       opacity: 0;
-      transform: translateY(8px) scale(0.97);
+      transform: scale(0.96);
     }
   }
 
   @keyframes modalOut {
     to {
       opacity: 0;
-      transform: translateY(4px) scale(0.98);
     }
   }
 

@@ -2,7 +2,7 @@
 
 @layer umriss.components {
   .spinner {
-    animation: rotate 700ms linear infinite;
+    animation: rotate var(--u-duration-spin) var(--u-ease-steady) infinite;
   }
 
   @keyframes rotate {

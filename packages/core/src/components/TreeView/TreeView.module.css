@@ -64,7 +64,7 @@
     height: 16px;
     color: var(--u-color-text-secondary);
     border-radius: var(--u-radius-xs);
-    transition: transform var(--u-duration-fast) var(--u-ease-out);
+    transition: transform var(--u-transition-path);
   }
 
   .chevronOpen {

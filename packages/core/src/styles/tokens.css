@@ -229,21 +229,52 @@
     --u-material-blur: 24px;
     --u-color-scrim: light-dark(rgba(23, 23, 23, 0.30), rgba(0, 0, 0, 0.60));
 
-    /* ---- Motion: explains a change of state, does not decorate ---- */
-    --u-ease-out: cubic-bezier(0.22, 1, 0.36, 1); /* decisive, landing softly */
+    /* ---- Motion: explains a change of state, does not decorate ----
+
+       The names follow the distinctions the library makes (visuelle-wertigkeit
+       02); a motion that fits none of them wants a new name here, not a number
+       in its module.
+
+       Micro or path. A colour, an edge or an opacity changes in place: that is
+       `--u-transition`. Something moves, turns or unfolds: that is
+       `--u-transition-path`, or `--u-duration-medium` with `--u-ease-out` for
+       a long way. A press is shorter than either.
+
+       Entry or exit. A surface enters on `--u-ease-out` from its motion
+       origin; it leaves faster, on a curve that starts at once, and does not
+       retrace the way it came - a symmetrical exit makes a surface feel
+       sluggish.
+
+       Continuous process. A spinner or a shimmer has no start and no end;
+       it runs steadily and long. */
+    --u-ease-out: cubic-bezier(0.22, 1, 0.36, 1); /* decisive, landing softly: entries and paths */
+    --u-ease-exit: cubic-bezier(0.2, 0.6, 0.4, 1); /* leaves at once, no wind-up */
+
     /* micro: hover, colour. It carried the CSS keyword `ease-out` and so kept
-       the curve above from three quarters of the library's transitions
-       (visuelle-wertigkeit 02). */
+       the curve above from three quarters of the library's transitions. */
     --u-transition: 120ms var(--u-ease-out);
-    --u-duration-fast: 140ms;                /* popovers, short distances */
-    --u-duration-medium: 240ms;              /* overlays, layout changes */
+    --u-duration-press: 80ms;                /* the press point of a button or glyph */
+    --u-transition-press: var(--u-duration-press) var(--u-ease-out);
+    --u-duration-fast: 140ms;                /* entry of a panel; a short path */
+    --u-transition-path: var(--u-duration-fast) var(--u-ease-out); /* a chevron turns, a thumb slides */
+    --u-duration-medium: 240ms;              /* entry of a sheet; a layout change */
+    --u-duration-draw: 320ms;                /* a stroke drawn slowly enough to watch: the tick */
+    --u-delay-draw: 60ms;                    /* the box fills first, then the tick is drawn */
+
     /* Exits. They stood twice - as a number in the code waiting for the end, and
        in the stylesheet drawing the movement - and for the toast the two had
-       drifted ten milliseconds apart. The code reads this token now (library-audit
-       07). The vocabulary for entrance and exit is `visuelle-wertigkeit` 02; until
-       then, two names for two numbers. */
+       drifted ten milliseconds apart. The code reads these tokens (library-audit
+       07). */
+    --u-duration-exit-fast: 100ms;           /* a panel or a tooltip goes */
     --u-duration-exit: 160ms;                /* a sheet takes its leave: modal */
     --u-duration-exit-collapse: 200ms;       /* a message goes and its place closes */
+
+    /* Continuous processes. They do NOT fall to zero under reduced motion - a
+       spinner at 0ms says nothing; each module slows or stops its own. */
+    --u-duration-spin: 700ms;
+    --u-duration-shimmer: 1.6s;
+    --u-ease-steady: linear;                 /* a turn with no start and no end */
+    --u-ease-swell: ease-in-out;             /* a shimmer that comes and goes */
   }
 
   /* ============================================================
@@ -265,8 +296,12 @@
   @media (prefers-reduced-motion: reduce) {
     :root {
       --u-transition: 0ms;
+      --u-duration-press: 0ms;
       --u-duration-fast: 0ms;
       --u-duration-medium: 0ms;
+      --u-duration-draw: 0ms;
+      --u-delay-draw: 0ms;
+      --u-duration-exit-fast: 0ms;
       --u-duration-exit: 0ms;
       --u-duration-exit-collapse: 0ms;
     }

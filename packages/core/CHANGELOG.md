@@ -59,6 +59,15 @@ module on the caller's side that carries `"use client"` and imports from there.
   box as tall as its type. Both carry exactly the value that stood written out
   in eight and six places before; nothing moves.
 
+- **A motion vocabulary** in `tokens.css`, naming the distinctions the
+  library makes: `--u-ease-exit` (an exit that starts at once),
+  `--u-duration-press` with `--u-transition-press` (the press point),
+  `--u-transition-path` (something turns or slides), `--u-duration-draw` and
+  `--u-delay-draw` (the checkbox's tick), `--u-duration-exit-fast` (a panel or
+  tooltip leaves), and for continuous processes `--u-duration-spin`,
+  `--u-duration-shimmer`, `--u-ease-steady` and `--u-ease-swell`. Every
+  motion in the library's stylesheets now reads one of them.
+
 ### Changed
 
 - **`--u-transition` runs on `--u-ease-out`.** The collective token for hover
@@ -68,6 +77,14 @@ module on the caller's side that carries `"use client"` and imports from there.
   in core, table, schedule and calculation starts more decisively and lands
   more softly; its duration (120 ms) is unchanged. An application that
   overrides `--u-transition` is not affected.
+
+- **Exits leave instead of retracing.** `Modal` enters by scale and opacity
+  from its centre (the 8 px rise is gone) and leaves by fading where it
+  stands, on `--u-ease-exit` instead of `ease-in`; its backdrop follows the
+  same curves. The leaving `Toast` glides out on `--u-ease-exit` as well.
+- **Press points take 80 ms.** The pressed glyphs of `Alert`, `Tag`,
+  `NumberInput` and the date picker's time stepper ran on the 120 ms of a
+  hover; they now take the button's press duration.
 
 ---
 

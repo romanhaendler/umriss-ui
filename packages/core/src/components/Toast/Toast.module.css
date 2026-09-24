@@ -54,8 +54,8 @@
     animation: toastIn var(--u-duration-medium) var(--u-ease-out);
     /* Leaving through a transition – does not collide with the entrance animation. */
     transition:
-      opacity var(--u-duration-exit-collapse) ease-in,
-      transform var(--u-duration-exit-collapse) ease-in;
+      opacity var(--u-duration-exit-collapse) var(--u-ease-exit),
+      transform var(--u-duration-exit-collapse) var(--u-ease-exit);
   }
 
   .itemWrapLeaving .toast {
