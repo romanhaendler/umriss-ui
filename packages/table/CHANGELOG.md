@@ -22,6 +22,35 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.3.3 – Depth work on the table (Sep. 2026)
+
+Needs `@umriss-ui/core` 0.9: it reads `--u-tracking-figures`; the peer range moves to `^0.9.0`.
+
+### Changed
+
+- **Every head reads the same way: label, arrow, funnel.** A numeric head
+  mirrored that order, so its arrow and funnel stood before the label - and
+  its funnel beside the funnel of the column before. The group now keeps the
+  order in every column and stands flush right in a numeric one, ending where
+  the figures end.
+- **A selected row carries core's `--u-color-accent-subtle`**, a step deeper
+  under the pointer. Before, only the checkbox said a row was selected.
+- **The head follows `density="compact"`.** Its padding shrank with the rows'
+  and it stood half again as tall as a row below it.
+- **The head is 1 to 3 px lower in every table**: the sort key sits at the top
+  of its cell instead of on the baseline of its label.
+
+### Fixed
+
+- **A numeric head's label stands on the line of its neighbours'**; it stood
+  1.13 px higher.
+- **A focused virtual row shows its ring all round.** The sticky selection and
+  row-header cells painted over it; the cells now draw it themselves.
+- **A loading placeholder stands where its value will**: right in a numeric
+  column.
+
+---
+
 ## 0.3.2 – Core 0.8.0: the canon of states (Sep. 2026)
 
 Needs `@umriss-ui/core` 0.8: it reads core's pressed surfaces and motion tokens; the peer range moves to `^0.8.0`.

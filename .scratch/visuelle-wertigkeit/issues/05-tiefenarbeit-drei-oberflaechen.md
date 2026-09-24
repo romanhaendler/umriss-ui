@@ -78,3 +78,12 @@ The selection of the three surfaces is a bet on visual weight, not a
 measurement. If going through them shows that a fourth surface carries more —
 modal and toast are the next candidates — that is a finding for a follow-up
 ticket and no reason to widen this one.
+
+## Progress
+
+- **Table — done (table 0.3.3, core 0.9.0).** Reviewed by the user on a
+  before/after page, every decision taken there; 144 table baselines moved,
+  each group looked at: the head 1-3 px lower (sort key top-aligned), the
+  compact head, the selected-row surface, the right-aligned placeholders, the
+  funnel after the label; the rest sub-pixel shifts below the lower head.
+- Next: the date picker, then the combobox family.

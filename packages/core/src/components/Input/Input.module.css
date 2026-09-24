@@ -48,7 +48,7 @@
     text-align: right;
     font-family: var(--u-font-mono);
     font-size: var(--u-text-mono);
-    letter-spacing: -0.01em;
+    letter-spacing: var(--u-tracking-figures);
     font-variant-numeric: tabular-nums;
   }
 
