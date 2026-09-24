@@ -3,8 +3,8 @@
    person observes: is the surface there, where does the focus sit, what does
    the role report. */
 
-import { describe, expect, it, vi } from "vitest";
-import { useRef, useState } from "react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { act, useRef, useState } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { Popover } from "../src/components/Popover/Popover";
 import { FormField, useFormField } from "../src/components/FormField";
@@ -165,5 +165,68 @@ describe("Popover – portal target", () => {
     render(<Setup />);
     const surface = screen.getByRole("dialog", { name: "Example surface" });
     expect(surface.parentElement).toBe(document.body);
+  });
+});
+
+/* visuelle-wertigkeit 02: the panel unfolds from its trigger and leaves
+   faster than it came. Under reduced motion the path is dropped, never the
+   state change - the panel then appears and goes at once, but it appears. The
+   exit token is set on every element, as in toast.test.tsx: jsdom loads no
+   tokens.css. */
+describe("Popover – motion", () => {
+  let style: HTMLStyleElement | null = null;
+  const exitToken = (ms: number) => {
+    style = document.createElement("style");
+    style.textContent = `* { --u-duration-exit-fast: ${ms}ms; }`;
+    document.head.append(style);
+  };
+  afterEach(() => {
+    style?.remove();
+    style = null;
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it("carries its motion origin: below its trigger, aligned to the start, it grows from the top left", () => {
+    render(<Setup />);
+    expect(screen.getByRole("dialog").style.getPropertyValue("--_origin")).toBe("left top");
+  });
+
+  it("stays for its exit, inert, exactly as long as the token says", () => {
+    vi.useFakeTimers();
+    exitToken(100);
+    render(<Setup />);
+    fireEvent.keyDown(document, { key: "Escape" });
+    const leaving = document.querySelector("[data-closing]");
+    expect(leaving).not.toBeNull();
+    expect(leaving?.hasAttribute("inert")).toBe(true);
+    act(() => vi.advanceTimersByTime(99));
+    expect(document.querySelector("[data-closing]")).not.toBeNull();
+    act(() => vi.advanceTimersByTime(1));
+    expect(document.querySelector("[data-closing]")).toBeNull();
+  });
+
+  it("comes back whole when it is opened again during its exit", () => {
+    vi.useFakeTimers();
+    exitToken(100);
+    render(<Setup />);
+    fireEvent.keyDown(document, { key: "Escape" });
+    fireEvent.click(screen.getByText("Trigger"));
+    const surface = screen.getByRole("dialog");
+    expect(surface.hasAttribute("data-closing")).toBe(false);
+    expect(surface.hasAttribute("inert")).toBe(false);
+    act(() => vi.advanceTimersByTime(200));
+    expect(screen.queryByRole("dialog")).not.toBeNull();
+  });
+
+  it("under reduced motion appears at once, visible, and goes at once", () => {
+    vi.spyOn(window, "matchMedia").mockImplementation(
+      (query: string) => ({ matches: query.includes("reduce"), media: query }) as MediaQueryList,
+    );
+    exitToken(100);
+    render(<Setup />);
+    expect(screen.getByRole("dialog").style.opacity).toBe("");
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(screen.queryByRole("dialog")).toBeNull();
   });
 });

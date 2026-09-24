@@ -86,6 +86,17 @@ module on the caller's side that carries `"use client"` and imports from there.
   `NumberInput` and the date picker's time stepper ran on the 120 ms of a
   hover; they now take the button's press duration.
 
+- **Overlays unfold from their trigger.** Every panel on `Popover` - `Menu`,
+  `ContextMenu`, the lists of `Combobox` and `MultiSelect`, the panels of the
+  four date pickers - enters by scale and opacity from its motion origin, the
+  corner facing its trigger (a panel below a start-aligned trigger grows from
+  its top left; a flipped one from its bottom). It used to slide 6 px. On
+  closing it stays for `--u-duration-exit-fast` (100 ms), inert, and fades
+  where it stands; it no longer disappears in the same frame. `Tooltip`
+  follows the same pattern from the edge facing its trigger, and each `Toast`
+  grows out of the bottom right corner it stands in. Under reduced motion all
+  of them appear and go at once. `Select` keeps the browser's own list.
+
 ---
 
 ## 0.7.0 – A text token for danger (Sep. 2026)

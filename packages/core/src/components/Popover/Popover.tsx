@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import type { ReactNode, RefObject } from "react";
+import type { CSSProperties, ReactNode, RefObject } from "react";
 import { createPortal } from "react-dom";
 import { cx } from "../../lib/cx";
 import { FormFieldBoundary } from "../FormField";
-import { computePosition, visibleViewport } from "./position";
+import { computePosition, motionOrigin, visibleViewport } from "./position";
 import type { Align, PopoverPosition } from "./position";
 import styles from "./Popover.module.css";
 import { usePortalTarget } from "../../lib/provider";
 import { portalTargetFor } from "../../lib/portalTarget";
+import { usePresence } from "../../lib/motion";
 
 export interface PopoverProps {
   /** Whether the surface stands. Controlled: the popover never opens itself. */
@@ -54,7 +55,8 @@ export interface PopoverProps {
 /**
  * The one closable, anchored surface. It owns: the portal, the position
  * including clamping and flipping, the outside click, Escape with focus
- * return, travelling along on scroll, stacking order and entrance.
+ * return, travelling along on scroll, stacking order, entrance from its motion
+ * origin and exit.
  *
  * Two things it takes off the callers' hands that each of them had to carry
  * itself before:
@@ -95,6 +97,9 @@ export function Popover({
      and is therefore not visible. */
   const [target, setTarget] = useState<Element | null>(null);
   const portalTarget = usePortalTarget();
+  /* Closed, it stays for its exit - inert, and no longer listening. */
+  const present = usePresence(open, panelRef, "--u-duration-exit-fast");
+  const closing = present && !open;
 
   const close = useCallback(
     (returnFocus: boolean) => {
@@ -209,7 +214,7 @@ export function Popover({
     // so that a fresh array per render does not rebind the listeners.
   }, [open, anchorRef, close, measure, hideOnScroll]);
 
-  if (!open || !target) return null;
+  if (!present || !target) return null;
 
   return createPortal(
     <div
@@ -217,17 +222,21 @@ export function Popover({
       id={id}
       role={role}
       aria-label={ariaLabel}
-      className={cx(styles.panel, position?.flipped && styles.above, className)}
+      className={cx(styles.panel, className)}
+      data-closing={closing || undefined}
+      inert={closing || undefined}
       style={{
         top: position?.top ?? 0,
         left: position?.left ?? 0,
+        /* The motion origin, computed here and drawn by the stylesheet. */
+        "--_origin": position ? motionOrigin(position.side, align) : undefined,
         /* Not shown before the first measurement, or it flashes in the top
            left. Transparent and not `visibility: hidden`: a hidden panel takes
            no focus, and the first opening of a menu lost its move to the first
            entry exactly then. The measurement runs before painting, so the
            transparent pass is never seen. */
         opacity: position ? undefined : 0,
-      }}
+      } as CSSProperties}
     >
       <FormFieldBoundary>{children}</FormFieldBoundary>
     </div>,

@@ -1,12 +1,18 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { cx } from "../../lib/cx";
 import { durationFrom, prefersReducedMotion } from "../../lib/motion";
 import { roleFromTone } from "../../lib/roleFromTone";
+import { motionOrigin } from "../Popover/position";
 import styles from "./Toast.module.css";
 import { useWording } from "../../lib/language";
 import { usePortalTarget, useToastConfig } from "../../lib/provider";
+
+/* The region stands in the window's bottom right corner and the messages
+   above it: each grows out of that corner - the motion origin of a panel
+   above its anchor, aligned to the end. */
+const REGION_STYLE = { "--_origin": motionOrigin("top", "end") } as CSSProperties;
 
 export type ToastTone = "neutral" | "success" | "warning" | "danger";
 
@@ -222,7 +228,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
            (library-audit 03 and its review). Both regions are
            `display: contents`, and `order` keeps on screen the order in which
            the messages arrived - whatever their tone. */
-        <div ref={regionRef} className={styles.region}>
+        <div ref={regionRef} className={styles.region} style={REGION_STYLE}>
           <div role="status" aria-live="polite" className={styles.live}>
             {items.filter((item) => roleFromTone[item.tone ?? "neutral"].role === "status").map(message)}
           </div>

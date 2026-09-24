@@ -1,4 +1,4 @@
-/* The one panel shell. Position, stacking order and entrance live here;
+/* The one panel shell. Position, stacking order, entrance and exit live here;
    appearance and inner workings stay in the components' stylesheets.
    Before this, @keyframes panelIn was defined five times. */
 
@@ -14,25 +14,28 @@
     max-width: calc(100vw - 16px);
     max-height: calc(100dvh - 16px);
     overflow: auto;
+    /* Entry: it unfolds from its motion origin - the corner facing its
+       trigger, computed from the position (motionOrigin in position.ts). */
+    transform-origin: var(--_origin);
     animation: panelIn var(--u-duration-fast) var(--u-ease-out);
   }
 
-  /* Flipped upwards: the entrance mirrors with it. */
-  .above {
-    animation-name: panelInAbove;
+  /* Exit: faster, and it fades where it stands rather than folding back. */
+  .panel[data-closing] {
+    animation: panelOut var(--u-duration-exit-fast) var(--u-ease-exit) forwards;
+    pointer-events: none;
   }
 
   @keyframes panelIn {
     from {
       opacity: 0;
-      transform: translateY(-6px);
+      transform: scale(0.96);
     }
   }
 
-  @keyframes panelInAbove {
-    from {
+  @keyframes panelOut {
+    to {
       opacity: 0;
-      transform: translateY(6px);
     }
   }
 }
