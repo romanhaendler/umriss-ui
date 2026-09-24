@@ -48,6 +48,7 @@ export interface VerdictColumnProps {
   sortBy?: "verdict" | "value";
   width?: number;
   resizable?: boolean;
+  aggregate?: "worst";
 }
 
 const write = (number: number, format: NumberFormat | undefined, formats: Formats): string =>
@@ -97,6 +98,13 @@ function VerdictCell({ reading, format }: { reading: Reading; format: NumberForm
 /** Builds the verdict column on top of a hook's `Column`. */
 const onlyTheValue = (reading: Reading) => reading.measured;
 
+/* The worst verdict among the readings; with equal weight the first. */
+const worst = (readings: readonly Reading[]): Reading | undefined =>
+  readings.reduce<Reading | undefined>(
+    (found, r) => (!found || verdictWeight(r.assessment.verdict) > verdictWeight(found.assessment.verdict) ? r : found),
+    undefined,
+  );
+
 export function buildVerdictColumn(
   Column: (props: {
     /* If the id is missing on a computed value, `Column` reports that in
@@ -110,9 +118,10 @@ export function buildVerdictColumn(
     sortValue: (reading: Reading) => number | null;
     exportValue: (reading: Reading) => number | null;
     children: (reading: Reading) => ReactNode;
+    aggregate?: (readings: readonly Reading[]) => Reading | undefined;
   }) => ReactNode,
 ) {
-  return function VerdictColumn({ id, value, label, limits, format, sortBy = "verdict", width, resizable }: VerdictColumnProps) {
+  return function VerdictColumn({ id, value, label, limits, format, sortBy = "verdict", width, resizable, aggregate }: VerdictColumnProps) {
     /* The functions stay stable as long as field, limits and sort kind are:
        a new value function on every render would make the table recalculate
        its model every time. The limits are compared as text, because a set
@@ -145,6 +154,7 @@ export function buildVerdictColumn(
         value={read}
         sortValue={sortValueOf}
         exportValue={onlyTheValue}
+        aggregate={aggregate === "worst" ? worst : undefined}
       >
         {(reading) => <VerdictCell reading={reading} format={format} />}
       </Column>

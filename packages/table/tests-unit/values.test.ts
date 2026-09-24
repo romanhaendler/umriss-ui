@@ -12,11 +12,11 @@ import {
   exportValue,
   filterKey,
   ABSENT_KEY,
-  footerValue,
   isAbsent,
   isRightAligned,
   sortValue,
 } from "../src/values";
+import { aggregate } from "../src/model/grouping";
 
 /* Formats that differ from the German ones: that way it is visible that the
    calculation uses them and not its own. */
@@ -130,17 +130,19 @@ describe("The export value", () => {
   });
 });
 
-describe("The footer row", () => {
-  const rows = [{ w: 2 }, { w: null }, { w: 4 }, { w: Number.NaN }];
+describe("The footer row – an aggregate over the filtered set", () => {
+  type W = { w: number | null };
+  const rows: W[] = [{ w: 2 }, { w: null }, { w: 4 }, { w: Number.NaN }];
+  const of = (kind: "sum" | "avg") => ({ id: "w", read: (z: W) => z.w, aggregate: kind });
 
   it("sums and averages without the absent values", () => {
-    expect(footerValue(rows, (z) => z.w, "sum")).toBe(6);
-    expect(footerValue(rows, (z) => z.w, "avg")).toBe(3);
+    expect(aggregate(of("sum"), rows)).toBe(6);
+    expect(aggregate(of("avg"), rows)).toBe(3);
   });
 
   it("has no number without a single value", () => {
-    expect(footerValue([{ w: null }], (z) => z.w, "avg")).toBeUndefined();
-    expect(footerValue([], (z: { w: number }) => z.w, "sum")).toBeUndefined();
+    expect(aggregate(of("avg"), [{ w: null }])).toBeUndefined();
+    expect(aggregate(of("sum"), [])).toBeUndefined();
   });
 });
 

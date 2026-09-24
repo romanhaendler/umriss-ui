@@ -36,7 +36,7 @@ export default function ShowHideAndOrder() {
       <Column value="number" label="Order" rowHeader />
       <Column value="customer" label="Customer" />
       <Column value="line" label="Line" />
-      <Column value="quantity" label="Quantity" footer="sum" />
+      <Column value="quantity" label="Quantity" aggregate="sum" />
       <Column value="due" label="Due" format="date" />
     </Table>
   );

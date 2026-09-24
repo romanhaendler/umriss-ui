@@ -36,9 +36,9 @@ export function Columns() {
   const { Table: Frame, Column } = t;
   const m = useTable(readings, { rowKey: (z) => z.id });
 
-  const amount = column<{ amount: number }>({ value: "amount", label: "Quantity", footer: "sum" });
+  const amount = column<{ amount: number }>({ value: "amount", label: "Quantity", aggregate: "sum" });
   const textAmount = column<{ amount: string }>({ value: "amount", label: "Quantity" });
-  const twoFields = column<{ amount: number; number: string }, "amount">({ value: "amount", label: "Quantity", footer: "sum" });
+  const twoFields = column<{ amount: number; number: string }, "amount">({ value: "amount", label: "Quantity", aggregate: "sum" });
 
   return (
     <Frame>
@@ -110,6 +110,34 @@ export function Columns() {
       {/* @ts-expect-error a sum on computed text */}
       <Column id="name" value={(a) => a.customer.name} label="Name" footer="sum" />
 
+      {/* aggregate (table-grouping 02): typed by the value. */}
+      <Column value="amount" label="Quantity" aggregate="sum" />
+      <Column value="price" label="Preis" aggregate="avg" share={false} />
+      <Column value="due" label="Due date" aggregate="range" />
+      <Column value="due" label="Due date" aggregate="max" format="date" />
+      <Column value="number" label="Number" aggregate="distinct" />
+      <Column value="status" label="Status" aggregate="count" />
+      <Column value="amount" label="Quantity" aggregate={(values, rows) => values.reduce((a, b) => a + b, 0) / rows.length} />
+      <Column id="netto3" value={(a) => a.amount * 0.81} label="Netto" aggregate="sum" format={{ decimals: 2 }} />
+      <Column id="netto4" value={(a) => a.amount * 0.81} label="Netto" aggregate="max" />
+      <Column id="faellig" value={(a) => a.due} label="Due" aggregate="range" format="date" />
+      <Column id="kunde2" value={(a) => a.customer.name} label="Customer" aggregate="distinct" />
+      <Column id="kunde3" value={(a) => a.customer} label="Customer" aggregate={(values) => values[0]}>
+        {(k) => k.name}
+      </Column>
+      {/* @ts-expect-error a sum on text */}
+      <Column value="number" label="Number" aggregate="sum" />
+      {/* @ts-expect-error a range on numbers */}
+      <Column value="amount" label="Quantity" aggregate="range" />
+      {/* @ts-expect-error an average of dates */}
+      <Column value="due" label="Due date" aggregate="avg" />
+      {/* @ts-expect-error a sum on computed text */}
+      <Column id="kunde4" value={(a) => a.customer.name} label="Customer" aggregate="sum" />
+      {/* @ts-expect-error an aggregate of one's own that returns another type than the value */}
+      <Column value="amount" label="Quantity" aggregate={(values) => values.join(", ")} />
+      {/* @ts-expect-error aggregate and footer together */}
+      <Column value="amount" label="Quantity" aggregate="sum" footer="sum" />
+
       {/* @ts-expect-error without a label */}
       <Column value="number" />
 
@@ -172,6 +200,9 @@ export function Verdicts() {
     <>
       <VerdictColumn value="price" label="Preis" limits={{}} />
       <VerdictColumn id="doppelt" value={(a) => a.amount * 2} label="Doppelt" limits={{}} format={{ decimals: 1 }} />
+      <VerdictColumn value="price" label="Preis" limits={{}} aggregate="worst" />
+      {/* @ts-expect-error a verdict column knows only its worst verdict */}
+      <VerdictColumn value="price" label="Preis" limits={{}} aggregate="sum" />
       {/* @ts-expect-error a verdict over text */}
       <VerdictColumn value="number" label="Number" limits={{}} />
     </>
