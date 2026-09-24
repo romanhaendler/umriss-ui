@@ -2,12 +2,14 @@ import { Search, Toolbar, useTable } from "../../../src";
 
 export const title = "Footer: sum and average";
 
-/* `footer="sum"` and `footer="avg"` compute over the filtered set - not over
-   the page and not over every row. Whoever searches for "Line 2" sees the sum
-   of line 2.
+/* `aggregate="sum"` and `aggregate="avg"` compute over the filtered set - not
+   over the page and not over every row. Whoever searches for "Line 2" sees the
+   sum of line 2.
 
-   `footer` is offered for numbers only: on text it does not compile. The footer
-   takes the column's format. */
+   A sum and an average are offered for numbers only: on text they do not
+   compile. The footer takes the column's format. The prop was called `footer`
+   until the table could group; the old name still works and says so in
+   development. */
 
 interface Lot {
   lot: string;
@@ -33,8 +35,8 @@ export default function Footer() {
       </Toolbar>
       <Column value="lot" label="Lot" rowHeader />
       <Column value="line" label="Line" />
-      <Column value="pieces" label="Pieces" format="count" footer="sum" />
-      <Column value="scrap" label="Scrap" format="percent" footer="avg" />
+      <Column value="pieces" label="Pieces" format="count" aggregate="sum" />
+      <Column value="scrap" label="Scrap" format="percent" aggregate="avg" />
     </Table>
   );
 }

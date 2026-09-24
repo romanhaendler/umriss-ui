@@ -37,7 +37,8 @@ import type { Companion } from "./model/companion";
 import type { TableSnapshot } from "./types";
 import { warnOnce } from "./dev";
 import { columnKind, sortValue } from "./values";
-import type { Format, Footer, ValueKind } from "./values";
+import type { Format, ValueKind } from "./values";
+import type { AggregateKind } from "./model/grouping";
 import { filterOf } from "./columnFilter";
 import type { FilterSpec } from "./columnFilter";
 
@@ -54,7 +55,10 @@ export interface ColumnSpec {
   value: string | ((row: never) => unknown);
   presentation?: (value: never, row: never) => ReactNode;
   format?: Format;
-  footer?: Footer;
+  /** What the values come to - in the footer and in a group's header. */
+  aggregate?: AggregateKind | ((values: readonly never[], rows: readonly never[]) => unknown);
+  /** The share bar under a sum in a group header; on unless `false`. */
+  share?: boolean;
   rowHeader: boolean;
   rightAligned?: boolean;
   width?: number;
@@ -153,7 +157,8 @@ const signatureOf = (a: ColumnSpec): string =>
     a.label,
     typeof a.value === "string" ? a.value : "ƒ",
     a.format,
-    a.footer,
+    typeof a.aggregate === "function" ? "ƒ" : a.aggregate,
+    a.share,
     a.rowHeader,
     a.rightAligned,
     a.width,
@@ -267,7 +272,11 @@ export class Registry {
       const old = existing.spec;
       if (this.signatures.get(key) !== signature) this.structure++;
       if (old.value !== spec.value || old.ownSortValue !== spec.ownSortValue) this.values++;
-      if (old.presentation !== spec.presentation || old.ownExportValue !== spec.ownExportValue) {
+      if (
+        old.presentation !== spec.presentation ||
+        old.ownExportValue !== spec.ownExportValue ||
+        old.aggregate !== spec.aggregate
+      ) {
         this.presentation++;
       }
       existing.spec = spec;

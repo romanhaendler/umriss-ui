@@ -29,6 +29,40 @@ export type FormatFor<W> = [Present<W>] extends [number]
 
 export type FooterFor<W> = [Present<W>] extends [number] ? "sum" | "avg" : never;
 
+/** An aggregate of one's own: the values present and the rows of the group -
+    or of the filtered set, in the footer. Its result runs through the column's
+    presentation; `undefined` means there is none. */
+export type AggregateFunction<W, Z> = (values: readonly Present<NoInfer<W>>[], rows: readonly Z[]) => Present<NoInfer<W>> | undefined;
+
+/** What a column accepts as `aggregate`: sums and averages for numbers, the
+    extremes for numbers and points in time, the range for points in time,
+    counts for every value with a text form - or a function of one's own. */
+export type AggregateFor<W, Z> =
+  | ([Present<W>] extends [number] ? "sum" | "avg" | "min" | "max" : never)
+  | ([Present<W>] extends [Date] ? "min" | "max" | "range" : never)
+  | (IsDisplayable<W> extends true ? "count" | "distinct" : never)
+  | AggregateFunction<W, Z>;
+
+/** `aggregate`, or its old name `footer` - never both. */
+type AggregateProps<W, Z> =
+  | {
+      /** What the column's values come to: in the footer over the filtered
+          set, in a group's header over its rows. Always from the values, never
+          from other aggregates; absent values count towards nothing. */
+      aggregate?: AggregateFor<W, Z>;
+      footer?: never;
+      /** The share bar under a sum in a group header; on by default. */
+      share?: boolean;
+    }
+  | {
+      aggregate?: never;
+      /** @deprecated Is called `aggregate` now – the same values, and in a
+          grouped table the group's as well. The old name goes with the next
+          minor version. */
+      footer?: FooterFor<W>;
+      share?: boolean;
+    };
+
 /** What a column accepts as `filter`: `"list"` for every value with a text
     form, `"range"` for numbers and points in time, a filter from `columnFilter`
     only where its value type fits. */
@@ -106,15 +140,13 @@ export type FieldColumn<Z, K extends Field<Z>> = ColumnBase &
         `{ decimals }` for numbers, `"date"`, `"time"` or `"dateTime"` for
         points in time. Alignment, sorting, export and footer stay with the value. */
     format?: FormatFor<Z[K]>;
-    /** A sum or an average over the filtered set. Numbers only; absent values
-        do not count towards it. */
-    footer?: FooterFor<Z[K]>;
     /** A filter in the column header: `"list"` offers the values that occur,
         `"range"` two bounds (numbers or points in time), a filter from
         `columnFilter` asks whatever it asks itself. Its condition stands in the
         table toolbar. */
     filter?: FilterFor<Z[K]>;
-  } & ChildrenFor<Z[K], Z>;
+  } & AggregateProps<Z[K], Z> &
+  ChildrenFor<Z[K], Z>;
 
 type Computed<Z, W> = ColumnBase &
   ValuePaths<W> & {
@@ -139,7 +171,24 @@ type Computed<Z, W> = ColumnBase &
    mistyped field name is the most frequent error. */
 export interface ColumnComponent<Z> {
   <W extends number | Absent>(
-    props: Computed<Z, W> & { footer: "sum" | "avg"; format?: NumberFormat; children?: Presentation<W, Z> },
+    props: Computed<Z, W> & { footer: "sum" | "avg"; aggregate?: never; format?: NumberFormat; children?: Presentation<W, Z>; share?: boolean },
+  ): ReactNode;
+  <W extends number | Absent>(
+    props: Computed<Z, W> & {
+      aggregate: "sum" | "avg" | "min" | "max" | "count" | "distinct";
+      footer?: never;
+      share?: boolean;
+      format?: NumberFormat;
+      children?: Presentation<W, Z>;
+    },
+  ): ReactNode;
+  <W extends Date | Absent>(
+    props: Computed<Z, W> & {
+      aggregate: "min" | "max" | "range" | "count" | "distinct";
+      footer?: never;
+      format?: DateFormat;
+      children?: Presentation<W, Z>;
+    },
   ): ReactNode;
   <W extends number | Absent>(
     props: Computed<Z, W> & { format: NumberFormat; children?: Presentation<W, Z> },
@@ -147,9 +196,16 @@ export interface ColumnComponent<Z> {
   <W extends Date | Absent>(
     props: Computed<Z, W> & { format: DateFormat; children?: Presentation<W, Z> },
   ): ReactNode;
-  <W>(props: Computed<Z, W> & { footer?: never; format?: never; children: Presentation<W, Z> }): ReactNode;
+  <W>(
+    props: Computed<Z, W> & {
+      footer?: never;
+      format?: never;
+      aggregate?: AggregateFunction<W, Z>;
+      children: Presentation<W, Z>;
+    },
+  ): ReactNode;
   <W extends Displayable | Absent>(
-    props: Computed<Z, W> & { footer?: never; format?: never; children?: never },
+    props: Computed<Z, W> & { footer?: never; format?: never; aggregate?: "count" | "distinct" | AggregateFunction<W, Z>; children?: never },
   ): ReactNode;
   <K extends Field<Z>>(props: FieldColumn<Z, K>): ReactNode;
 }
@@ -175,6 +231,9 @@ interface VerdictBase {
   resizable?: boolean;
   /** A verdict column has no list filter: four verdicts are filtered through the sort. */
   filter?: never;
+  /** `"worst"`: the worst verdict among the rows – in the footer and in a
+      group's header. */
+  aggregate?: "worst";
 }
 
 export interface VerdictColumnComponent<Z> {

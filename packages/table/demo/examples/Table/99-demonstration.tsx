@@ -117,7 +117,7 @@ export default function Demonstration() {
         <Column value="number" label="Order" rowHeader />
         <Column value="customer" label="Customer" />
         <Column value="line" label="Line" filter="list" />
-        <Column value="quantity" label="Quantity" filter="range" footer="sum" />
+        <Column value="quantity" label="Quantity" filter="range" aggregate="sum" />
         <VerdictColumn value="reading" label="Reading" limits={LIMITS} format={{ decimals: 2 }} />
         <Column value="status" label="Status" filter="list">
           {(status) => <Badge tone={TONE[status]}>{status}</Badge>}
@@ -127,7 +127,7 @@ export default function Demonstration() {
           label="Deviation"
           value={(o) => (o.reading === null ? null : o.reading - o.target)}
           format={{ decimals: 2 }}
-          footer="avg"
+          aggregate="avg"
         />
         <Column id="trend" label="Trend" value={(o) => o.history}>
           {(history) => <Sparkline data={history} width={72} />}

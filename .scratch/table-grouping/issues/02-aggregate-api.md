@@ -1,6 +1,6 @@
 # 02 — `aggregate` on a column, and `footer` as its old name
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Blocked by: 01

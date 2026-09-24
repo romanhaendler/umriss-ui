@@ -53,8 +53,8 @@ function Log({ rows = READINGS }: { rows?: Reading[] }) {
   return (
     <Frame>
       <Column value="name" label="Name" rowHeader />
-      <Column value="amount" label="Menge" footer="sum" />
-      <Column value="share" label="Anteil" format="percent" footer="avg" />
+      <Column value="amount" label="Menge" aggregate="sum" />
+      <Column value="share" label="Anteil" format="percent" aggregate="avg" />
       <Column value="measuredAt" label="Gemessen" />
       <Column value="checked" label="Geprüft" />
       <Column value="code" label="Kennung" numeric />
