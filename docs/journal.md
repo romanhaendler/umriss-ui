@@ -18,6 +18,23 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Sep. 2026 — Data-dense applications, not plant screens
+
+- **ADR-0035 and the demo rework in one day**: 29 tickets, run as parallel
+  agents in worktrees in four waves and merged on main between them - the
+  shell's page skeleton and scenarios page, five invented worlds, the hard
+  renames (alarms, lead-in/lead-out and dependencies, working time), blocked
+  time on a schedule lane, a plant-word check in CI, 22 scenarios and every
+  component page rewritten into the worlds.
+- **Found by the browser suites after the merge**: `useVirtual` ignored a row
+  half a pixel off its expected height (a scrollbar 10,000 px short over
+  20,000 rows), a disabled `FileInput` did not say so, a sideways-scrolling code
+  block was out of the keyboard's reach.
+- **The baselines were rebuilt in bulk** and, by the rule in CONTEXT.md, held on
+  a branch until the user had looked at the rendered demos; merged after that
+  review. A regeneration from empty folders found 392 orphans - and eleven
+  false ones, which only a second full run exposed.
+
 ## Sep. 2026 — From the library comparison to a release
 
 - **Fifteen specs in four waves over one night**, each strand in its own

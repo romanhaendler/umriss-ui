@@ -22,10 +22,9 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
-## Unreleased
+## 0.5.0 – Alarms without a plant (Sep. 2026)
 
-Needs the `@umriss-ui/core` release with the renamed alarm wording keys (see
-its changelog).
+Needs `@umriss-ui/core` 0.11: it reads the renamed alarm wording keys; the peer range moves to `^0.11.0`.
 
 ### Changed
 

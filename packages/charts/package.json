@@ -1,6 +1,6 @@
 {
   "name": "@umriss-ui/charts",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Canvas charts for data-dense applications - few chart kinds, drawn well, fast.",
   "license": "MIT",
   "author": "Roman Händler",
