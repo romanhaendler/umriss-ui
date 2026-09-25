@@ -13,7 +13,6 @@
    Internal, like `portalTargetFor`. */
 
 import { portalTargetFor } from "./portalTarget";
-import hidden from "../components/VisuallyHidden/VisuallyHidden.module.css";
 
 /** Announcements wait for the keys to rest this long - the charts' readout
     pause (charts-a11y R11): a held arrow key speaks where it stops, and a
@@ -21,6 +20,8 @@ import hidden from "../components/VisuallyHidden/VisuallyHidden.module.css";
 export const ANNOUNCE_REST = 150;
 
 const regions = new WeakMap<Element, HTMLElement>();
+/* One timer across all places: the library has one voice, and a later
+   announcement replaces a waiting one wherever either was to be spoken. */
 let timer: ReturnType<typeof setTimeout> | null = null;
 
 /** The region of a place, built once and built anew when the page removed it. */
@@ -31,7 +32,10 @@ function regionIn(host: Element): HTMLElement {
   region.setAttribute("role", "status");
   region.setAttribute("aria-live", "polite");
   region.setAttribute("data-umriss-announcer", "");
-  region.className = hidden.hidden ?? "";
+  /* `VisuallyHidden`'s rule, written here rather than imported: a module in
+     lib does not reach up into a component's stylesheet. No token in it. */
+  region.style.cssText =
+    "position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0";
   host.append(region);
   regions.set(host, region);
   return region;
@@ -60,4 +64,11 @@ export function announce(text: string, at?: Element | null): void {
     words.textContent = text;
     region.replaceChildren(words);
   }, ANNOUNCE_REST);
+}
+
+/** Drops an announcement still waiting - a list that closed has nothing
+    more to count. */
+export function silence(): void {
+  if (timer !== null) clearTimeout(timer);
+  timer = null;
 }

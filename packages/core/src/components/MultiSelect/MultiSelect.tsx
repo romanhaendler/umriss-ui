@@ -191,6 +191,7 @@ export const MultiSelect = forwardRef(function MultiSelect<T extends string = st
       const first = filtered.find((option) => !option.disabled);
       if (!first) return;
       toggle(first.value);
+      // `value` is still the one before the toggle: it comes back as a prop.
       announce(
         (value.includes(first.value) ? wording.optionRemoved : wording.optionAdded)(first.label),
         fieldRef.current,

@@ -63,17 +63,20 @@ export interface Wording {
      VoiceOver does not read an `aria-activedescendant` option's count or
      state, so the lists say them. The command palette's moving reads the
      option too, with its group as the state. */
-  /** How many options stand, when a list opens or its filter changes. */
+  /** How many options stand, when a list opens or its filter changes; never
+      zero - an empty list says its own empty text. Named, like the three
+      below, after the moment it is spoken in: an announcement labels no
+      element. */
   optionCount: (count: number) => string;
   /** The option the keys moved onto, with what VoiceOver leaves out. */
   optionActive: (
-    beschriftung: string,
+    label: string,
     state: { selected?: boolean; disabled?: boolean; group?: string },
   ) => string;
   /** A value the multi-select took or gave away where no checkbox had the
       focus to say it - Enter in the search, a chip, Backspace. */
-  optionAdded: (beschriftung: string) => string;
-  optionRemoved: (beschriftung: string) => string;
+  optionAdded: (label: string) => string;
+  optionRemoved: (label: string) => string;
 
   /* -------- Command palette --------------------------------------- */
   /* Entries of its own, not the combobox's. `noMatches` belongs there: the
@@ -533,11 +536,11 @@ export const DEFAULT_WORDING: Wording = {
   removeSelectedValue: (beschriftung) => `Remove ${beschriftung}`,
   manageMoreSelected: (count) => `Manage all ${count} selected`,
   multiSelectSummary: (gewaehlt, total) => `${gewaehlt} / ${total}`,
-  optionCount: (count) => (count === 0 ? "No options" : count === 1 ? "1 option" : `${count} options`),
-  optionActive: (beschriftung, { selected, disabled, group }) =>
-    [beschriftung, group, selected && "selected", disabled && "unavailable"].filter(Boolean).join(", "),
-  optionAdded: (beschriftung) => `${beschriftung} added`,
-  optionRemoved: (beschriftung) => `${beschriftung} removed`,
+  optionCount: (count) => (count === 1 ? "1 option" : `${count} options`),
+  optionActive: (label, { selected, disabled, group }) =>
+    [label, group, selected && "selected", disabled && "unavailable"].filter(Boolean).join(", "),
+  optionAdded: (label) => `${label} added`,
+  optionRemoved: (label) => `${label} removed`,
 
   palettePlaceholder: "Search …",
   paletteField: "Search",

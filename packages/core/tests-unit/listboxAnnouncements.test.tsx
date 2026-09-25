@@ -70,6 +70,13 @@ describe("Combobox - what it says", () => {
     expect(heard()).toBe("Gamma, selected");
   });
 
+  it("counts nothing after a choice made before the rest", () => {
+    const input = setup();
+    fireEvent.change(input, { target: { value: "gam" } });
+    fireEvent.keyDown(input, { key: "Enter" });
+    expect(heard()).toBe("");
+  });
+
   it("opening by the arrow key counts too", () => {
     const input = setup();
     fireEvent.keyDown(input, { key: "ArrowDown" });

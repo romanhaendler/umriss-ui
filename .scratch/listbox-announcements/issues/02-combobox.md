@@ -45,7 +45,7 @@ Deviations from B2, each on purpose:
 - A disabled option says "unavailable": B2 did not name it, and a silent Enter
   on an option that sounds choosable is the same gap.
 
-Tests: `packages/core/tests-unit/listboxAnnouncements.test.tsx` (13), in
+Tests: `packages/core/tests-unit/listboxAnnouncements.test.tsx` (14), in
 English and German; the palette's old status test in
 `commandPalette.test.tsx` points there. Browser: core's screenshots, shell,
 basics and accessibility suites on a temporary config (port 4311): 380
@@ -68,3 +68,22 @@ reader. What a human should check, Safari and Chrome on macOS:
    say find and group, and all of it is heard while the modal dialog is open
    (the region lives in the dialog - if silent there, that rule is wrong).
 4. A combobox inside a `Modal`: the count is heard (the dialog's region).
+5. The FIRST announcement on a fresh page and the first inside a freshly
+   opened dialog: the region is built at that call and written 150 ms later.
+   If VoiceOver drops that first one, the region must stand from mount.
+
+Review (code-review against `main`, standards and spec) - fixed: the new
+keys' parameters were German (`beschriftung`), now `label`; `optionCount`'s
+dead zero branch removed (every list says its own empty text); the announcer
+no longer imports `VisuallyHidden`'s stylesheet from `lib` (the same rule,
+inline); a count still waiting is dropped when the combobox or the palette
+closes (`silence()`, with a test - Enter before the rest used to be followed
+by the count); the palette's count no longer re-runs on a caller's inline
+wording, which would have spoken over the find the arrows named; a comment
+that said "only for the keys" where the opening's count is the pointer's too.
+Left as they are: the bulk actions (all / none / invert) say nothing - B2
+names choosing, and those are buttons whose summary stands beside them; the
+region built lazily 150 ms before its text (check 5 above); a region appended
+into a React-owned `<dialog>` - React leaves a foreign last child alone.
+Core suite after the review: 61 files, 1280 tests green; typecheck and lint
+green.
