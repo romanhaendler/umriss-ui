@@ -12,6 +12,7 @@
      sceneView.ts      what is in view, the layout and the hit
      sceneDraw.ts      the two canvases
      sceneGestures.ts  pointer, wheel and pinch; the ghost and the intents
+     sceneKeys.ts      the keyboard's walk, selection and edits; the readout
    What stays here is what joins them: the selection, the snapshot, the binding
    to the DOM and the frame the drawing runs in.
 
@@ -26,11 +27,13 @@ import type { Subtask } from "./model";
 import { barFace, drawData, drawOverlay, prepareCanvas, resolveSceneColours, type Colours } from "./sceneDraw";
 import { barLabelBox, inView } from "./geometry";
 import { SceneGestures, type GhostSummary, type PlacingItem, type SceneHandlers } from "./sceneGestures";
+import { SceneKeys, type Spoken } from "./sceneKeys";
 import { DEFAULT_LANE_HEIGHT, SceneView, type SceneOptions } from "./sceneView";
 
 export type { GroupConfig, LaneConfig, LayerConfig, ScheduleTooltipTarget } from "./sceneData";
 export type { SceneOptions, ScheduleHit } from "./sceneView";
 export type { SceneHandlers, ScheduleInteraction, PlacingItem } from "./sceneGestures";
+export type { Spoken } from "./sceneKeys";
 
 /** One row's header, as the DOM renders it. */
 export interface ScheduleHeader {
@@ -90,6 +93,18 @@ export interface ScheduleSnapshot {
     /** Whether the bar's colour is dark, so its label needs light text. */
     readonly dark: boolean;
   }[];
+  /** What the live region reads, set once the keys rest (schedule-a11y S4). */
+  readonly spoken: Spoken | null;
+  /** What the plot is described by (S6): the plan's lanes and findings, the
+      subtasks in view and the visible span in wall-clock time. */
+  readonly summary: {
+    readonly lanes: number;
+    readonly subtasks: number;
+    readonly from: number;
+    readonly to: number;
+    readonly overlaps: number;
+    readonly late: number;
+  };
 }
 
 const EMPTY_SNAPSHOT: ScheduleSnapshot = {
@@ -107,12 +122,15 @@ const EMPTY_SNAPSHOT: ScheduleSnapshot = {
   tooltip: null,
   now: null,
   bars: [],
+  spoken: null,
+  summary: { lanes: 0, subtasks: 0, from: 0, to: 0, overlaps: 0, late: 0 },
 };
 
 export class ScheduleScene {
   readonly data = new SceneData(() => this.viewChanged());
   readonly view = new SceneView(this.data);
   readonly gestures: SceneGestures;
+  readonly keys: SceneKeys;
 
   private handlersNow: SceneHandlers = {};
   private placing: PlacingItem | null = null;
@@ -150,6 +168,19 @@ export class ScheduleScene {
         if (time) this.reportDomain();
       },
       interactionChanged: () => this.interactionChanged(),
+    });
+    this.keys = new SceneKeys({
+      data: this.data,
+      view: this.view,
+      gestures: this.gestures,
+      handlers: () => this.handlersNow,
+      visibleDomain: () => this.visibleDomain(),
+      select: (task, subtask) => this.select(task, subtask),
+      viewMoved: (time) => {
+        this.viewChanged();
+        if (time) this.reportDomain();
+      },
+      spokenChanged: () => this.publish(),
     });
   }
 
@@ -251,6 +282,7 @@ export class ScheduleScene {
     /* A drag cut short by an unmount: its auto-pan frames and the timer of a
        fold it rests over would otherwise run on without a plot. */
     this.gestures.cancelEdit();
+    this.keys.stop();
     this.unsubscribeTheme?.();
     this.unsubscribeTheme = null;
     if (this.frame !== 0) cancelAnimationFrame(this.frame);
@@ -291,6 +323,7 @@ export class ScheduleScene {
     }
     this.view.layout();
     this.gestures.refreshHover();
+    this.keys.refresh();
     this.interactionChanged();
   }
 
@@ -323,6 +356,8 @@ export class ScheduleScene {
       tooltip: this.tooltip(),
       now: view.nowX(),
       bars: this.bars(),
+      spoken: this.keys.spoken,
+      summary: this.summary(),
     };
     for (const listener of this.listeners) listener();
   }
@@ -371,6 +406,21 @@ export class ScheduleScene {
           : barFace(resolveAppearance(box.subtask.appearance), colour, colours).onDark;
       return [{ subtask: box.subtask, ...place, dark }];
     });
+  }
+
+  /** The findings count the whole plan - an overlap out of view is still one
+      to know of -, the subtasks only what is in view. */
+  private summary(): ScheduleSnapshot["summary"] {
+    const view = this.view;
+    const [from, to] = this.visibleDomain();
+    return {
+      lanes: this.data.lanes.length,
+      subtasks: view.boxes.filter((box) => inView(box, view.width, view.height)).length,
+      from,
+      to,
+      overlaps: this.data.overlaps.length,
+      late: this.data.lateById.size,
+    };
   }
 
   private tooltip(): ScheduleSnapshot["tooltip"] {
@@ -481,4 +531,7 @@ export class ScheduleScene {
   drop = (event: DragEvent): void => this.gestures.drop(event);
   dragLeave = (): void => this.gestures.clearPlacing();
   cancelEdit = (): boolean => this.gestures.cancelEdit();
+  key = (event: KeyboardEvent): boolean => this.keys.key(event);
+  focus = (byKeyboard: boolean): void => this.keys.focus(byKeyboard);
+  blur = (): void => this.keys.blur();
 }
