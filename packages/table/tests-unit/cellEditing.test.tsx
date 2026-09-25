@@ -164,6 +164,37 @@ describe("Editing a cell", () => {
     expect(onCellEdit).toHaveBeenCalledWith(expect.objectContaining({ value: 90 }));
     expect(screen.queryByLabelText("Edit Setpoint: TIC-101")).toBeNull();
   });
+
+  it("keeps a draft that does not validate when the focus leaves for another cell, and takes the focus back to it", () => {
+    const onCellEdit = vi.fn();
+    render(<Loops onCellEdit={onCellEdit} />);
+    focusCell("80");
+    press("Enter");
+    fireEvent.change(active(), { target: { value: "150" } });
+    focusCell("TIC-102");
+    expect(onCellEdit).not.toHaveBeenCalled();
+    expect(document.activeElement).toBe(screen.getByLabelText("Edit Setpoint: TIC-101"));
+    expect(screen.getByText("At most 120 °C")).toBeTruthy();
+  });
+
+  it("lets Tab leave the grid past the last cell that edits, once the draft is reported", () => {
+    const onCellEdit = vi.fn();
+    render(<Loops onCellEdit={onCellEdit} />);
+    focusCell("Valve sticks");
+    press("Enter");
+    fireEvent.change(active(), { target: { value: "Valve replaced" } });
+    const tab = fireEvent.keyDown(active(), { key: "Tab" });
+    /* Not prevented: the browser moves the focus on, out of the table. */
+    expect(tab).toBe(true);
+    expect(onCellEdit).toHaveBeenCalledWith(expect.objectContaining({ value: "Valve replaced" }));
+  });
+
+  it("opens a select by typing, on the value as it stands", () => {
+    render(<Loops onCellEdit={() => undefined} />);
+    focusCell("Manual");
+    press("m");
+    expect((screen.getByLabelText("Edit Mode: TIC-102") as HTMLSelectElement).value).toBe("1");
+  });
 });
 
 describe("An editor of one's own", () => {

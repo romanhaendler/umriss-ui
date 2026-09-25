@@ -59,7 +59,7 @@ import { useLineMotion } from "./motion";
 import { NOT_PINNED, pinnedCell } from "./pinned";
 import type { PinnedCell } from "./pinned";
 import type { PinBlocks } from "./model/pinning";
-import { gridLines } from "./model/gridWalk";
+import { gridLines, rowLine } from "./model/gridWalk";
 import { CellEditor, GridContext, GridFocus, gridHandlers, useCellEditor, useGridState } from "./grid";
 import styles from "./Table.module.css";
 
@@ -578,7 +578,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
             total={projection.filtered}
             siblings={line.parents.at(-1)?.groups ?? projection.groups ?? []}
             depth={grouping.length}
-          grid={gridMode}
+            grid={gridMode}
             hook={hook}
             formats={formats}
             wording={wording}
@@ -630,7 +630,6 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
   }
 
   return (
-    <GridContext.Provider value={gridEvents ? { ...gridEvents.context, hook, wording } : null}>
     <div
       ref={virtual?.scrollRef}
       onScroll={(event) => {
@@ -704,7 +703,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
             )}
           </tr>
         </thead>
-        {body}
+        <GridContext.Provider value={gridEvents ? { ...gridEvents.context, hook, wording } : null}>{body}</GridContext.Provider>
         {footerShown && (
           <tfoot>
             <tr aria-rowindex={virtual ? (projection.lines ?? projection.filtered).length + 2 : undefined} data-grid-line={lineKey("foot")}>
@@ -736,7 +735,6 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
       />
       {gridMode && <GridFocus table={tableRef} grid={grid} lines={gridLinesNow} ids={gridIds} />}
     </div>
-    </GridContext.Provider>
   );
 }
 
@@ -1051,7 +1049,7 @@ function Row({
         aria-posinset={group ? group.rows.indexOf(row) + 1 : undefined}
         aria-setsize={group?.rows.length}
         tabIndex={virtual && !grid ? (absolute === tabStop ? 0 : -1) : undefined}
-        data-grid-line={grid ? `row:${key}` : undefined}
+        data-grid-line={grid ? rowLine(key) : undefined}
         data-even={virtual && absolute % 2 === 1 ? "" : undefined}
         aria-rowindex={virtual ? absolute + 2 : undefined}
       >
