@@ -98,9 +98,9 @@ test("a schedule without intents starts no drag: pressing a subtask pans", async
   const noon = example.locator("[data-schedule-ticks] span span", { hasText: "12:00" });
   const before = (await noon.boundingBox())!.x;
 
-  await page.mouse.move(plot.x(13, 45), plot.y("mill"));
+  await page.mouse.move(plot.x(13, 45), plot.y("van-1"));
   await page.mouse.down();
-  await page.mouse.move(plot.x(13, 45) - 100, plot.y("mill"), { steps: 5 });
+  await page.mouse.move(plot.x(13, 45) - 100, plot.y("van-1"), { steps: 5 });
   await expect(example.locator("[data-ghost]")).toHaveCount(0);
   await page.mouse.up();
   expect((await noon.boundingBox())!.x).toBeCloseTo(before - 100, -1);
@@ -259,8 +259,8 @@ test("a drag into a removed night stops at the seam where time counts again", as
   const plot = example.locator("[data-schedule-plot]");
   const box = (await plot.boundingBox())!;
 
-  /* The pouring runs 18:00 to 21:30 on the foundry, the first lane; the plant
-     stops at 22:00 and starts again at 06:00. Dragged to the right it can only
+  /* The line haul runs 18:00 to 21:30 on the truck, the first lane; the depot
+     closes at 22:00 and starts again at 06:00. Dragged to the right it can only
      land on the seam - 06:00 of the next morning. */
   await page.mouse.move(box.x + box.width * 0.28, box.y + 22);
   await page.mouse.down();
@@ -268,7 +268,7 @@ test("a drag into a removed night stops at the seam where time counts again", as
   await expect(example.locator("[data-ghost]")).toContainText("06:00–09:30");
   await page.mouse.up();
 
-  /* And the plan took it: the pouring now starts in the morning. */
+  /* And the plan took it: the line haul now starts in the morning. */
   await page.mouse.move(box.x + box.width * 0.37, box.y + 22);
   await expect(example.locator("[data-schedule-tooltip]")).toContainText("06:00–09:30");
 });
@@ -557,56 +557,56 @@ test("resting a drag over a folded group opens it, and the drop lands on a real 
   await openExample(page, "lane-groups", "the-miniature");
   const example = page.locator('[data-example="the-miniature"]');
   const plot = await plotOf(page, example, [at(6), at(16)]);
-  const row = await foldedRow(example, "hall");
+  const row = await foldedRow(example, "north");
   const lanes = () => example.locator("[data-schedule-headers] [data-lane]");
 
-  /* Folded, the hall has no lanes of its own. */
+  /* Folded, the depot has no lanes of its own. */
   await expect(lanes()).toHaveCount(2);
 
-  /* A drag from the paint shop, held over the hall. A miniature is no drop
+  /* A drag from the van below, held over the depot. A miniature is no drop
      target, so nothing lands until it opens - and it opens because the pointer
      rested, not because it crossed. */
-  await page.mouse.move(plot.x(14), plot.y("paint"));
+  await page.mouse.move(plot.x(14), plot.y("van-3"));
   await page.mouse.down();
   await page.mouse.move(plot.x(14), plot.box.y + row.top + row.height / 2, { steps: 6 });
   await expect.poll(async () => await lanes().count(), { timeout: 4000 }).toBe(4);
-  await expect(example.locator('[data-schedule-headers] [data-lane="mill"]')).toHaveCount(1);
+  await expect(example.locator('[data-schedule-headers] [data-lane="van-2"]')).toHaveCount(1);
 });
 
 test("what a gesture opened, it closes again - and the application is never told", async ({ page }) => {
   await openExample(page, "lane-groups", "the-miniature");
   const example = page.locator('[data-example="the-miniature"]');
   const plot = await plotOf(page, example, [at(6), at(16)]);
-  const row = await foldedRow(example, "hall");
+  const row = await foldedRow(example, "north");
   const lanes = () => example.locator("[data-schedule-headers] [data-lane]");
 
-  await page.mouse.move(plot.x(14), plot.y("paint"));
+  await page.mouse.move(plot.x(14), plot.y("van-3"));
   await page.mouse.down();
   await page.mouse.move(plot.x(14), plot.box.y + row.top + row.height / 2, { steps: 6 });
   await expect.poll(async () => await lanes().count(), { timeout: 4000 }).toBe(4);
 
-  /* Dropped on the lathe, which is the first lane of the hall. The intent
+  /* Dropped on van FP 214 K, the first lane of the depot. The intent
      names the REAL lane - a group is never a lane (ADR-0025). */
   const after = await plotOf(page, example, [at(6), at(16)]);
-  await page.mouse.move(plot.x(14), after.y("lathe"), { steps: 4 });
+  await page.mouse.move(plot.x(14), after.y("van-1"), { steps: 4 });
   await page.mouse.up();
 
-  /* And the hall folds again by itself: the application did not fold anything,
+  /* And the depot folds again by itself: the application did not fold anything,
      so its own list is untouched and it hears nothing. The example passes
      `onCollapsedGroupsChange` straight into its state, so the group coming
      back is the proof. */
   await expect.poll(async () => await lanes().count(), { timeout: 4000 }).toBe(2);
-  await expect(example.getByRole("button", { name: /Unfold group: Hall A/ })).toHaveCount(1);
+  await expect(example.getByRole("button", { name: /Unfold group: North depot/ })).toHaveCount(1);
 });
 
 test("Escape closes what the gesture opened", async ({ page }) => {
   await openExample(page, "lane-groups", "the-miniature");
   const example = page.locator('[data-example="the-miniature"]');
   const plot = await plotOf(page, example, [at(6), at(16)]);
-  const row = await foldedRow(example, "hall");
+  const row = await foldedRow(example, "north");
   const lanes = () => example.locator("[data-schedule-headers] [data-lane]");
 
-  await page.mouse.move(plot.x(14), plot.y("paint"));
+  await page.mouse.move(plot.x(14), plot.y("van-3"));
   await page.mouse.down();
   await page.mouse.move(plot.x(14), plot.box.y + row.top + row.height / 2, { steps: 6 });
   await expect.poll(async () => await lanes().count(), { timeout: 4000 }).toBe(4);
@@ -622,11 +622,11 @@ test("crossing a folded group does not open it", async ({ page }) => {
   const plot = await plotOf(page, example, [at(6), at(16)]);
   const lanes = () => example.locator("[data-schedule-headers] [data-lane]");
 
-  /* From the saw at the top straight past the hall to the paint shop: the
+  /* From the truck at the top straight past the depot to the van below: the
      pointer never rests, so the drawer stays shut. */
-  await page.mouse.move(plot.x(7), plot.y("saw"));
+  await page.mouse.move(plot.x(7), plot.y("truck"));
   await page.mouse.down();
-  await page.mouse.move(plot.x(7), plot.y("paint"), { steps: 10 });
+  await page.mouse.move(plot.x(7), plot.y("van-3"), { steps: 10 });
   await expect(lanes()).toHaveCount(2);
   await page.mouse.up();
 });

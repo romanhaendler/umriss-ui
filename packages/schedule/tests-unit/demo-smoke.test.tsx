@@ -27,6 +27,7 @@ const EXAMPLES = DEMO.examples;
 const A_CHAPTER = "A feature of `<Schedule>`; its props stand once, in `ScheduleProps` on *First schedule*.";
 
 const WITHOUT_TABLE: Readonly<Record<string, string>> = {
+  installation: "The setup page: the props and the data types stand on the pages of the parts.",
   ripple: "A function with positional parameters of types documented on their own pages - it has no props.",
   "time-axis": A_CHAPTER,
   "pan-and-zoom": A_CHAPTER,

@@ -13,8 +13,8 @@ checkShell({
     { name: "Subtasks", pageId: "subtasks" },
   ],
   deepLink: { pageId: "findings", absent: "schedule" },
-  example: { pageId: "dependencies", id: "violated-dependency", title: "A dependency whose lag does not fit", pageName: "Dependencies" },
+  example: { pageId: "dependencies", id: "violated-dependency", title: "Show a lag that does not fit", pageName: "Dependencies" },
   palettePage: { query: "ripple", name: "Ripple", pageId: "ripple", rubricName: "Editing" },
   abbreviation: { query: "sbt", find: "Subtasks", glyphs: ["S", "bt"] },
-  pointer: { wide: "s", narrow: "lag does" },
+  pointer: { wide: "s", narrow: "lag that does" },
 });
