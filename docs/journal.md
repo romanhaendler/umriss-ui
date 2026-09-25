@@ -18,6 +18,27 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Sep. 2026 — From the library comparison to a release
+
+- **Fifteen specs in four waves over one night**, each strand in its own
+  worktree on its own test ports, each through the implement loop and a
+  two-axis code review, merged and verified on main between the waves: the
+  pass-through, ADR-0032, agent-readable docs, the six basics and the layout
+  extras, the charts' data table, marks and stacks, the schedule and the table
+  by keyboard (ADR-0033, ADR-0034), the table's server mode and pinning,
+  forced colours across every package, the listbox announcements, the alarm
+  standards and a control room.
+- **Found by the user in the morning**: the drawer from the right shot in
+  too far and jumped back (a modal dialog's `overflow: auto` scrolled towards
+  the focus while the sheet stood off-screen), and a sticky head broke the
+  table frame's rounded corner. Both fixed with a test or a picture.
+- **The final polish** as thirty cards on one review page, all taken as
+  recommended.
+- **Parallel Playwright runs** collide on the fixed ports and reuse each
+  other's servers; the strands ran temporary configs on ports of their own.
+- **Versions**: core 0.10.0, charts 0.7.0, table 0.4.0, schedule 0.2.0,
+  calculation 0.3.0.
+
 ## Sep. 2026 — A control room: every package on one page
 
 - **control-room-demo 01-02.** A ninth rubric in the core demo, "Control

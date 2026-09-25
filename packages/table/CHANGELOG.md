@@ -22,11 +22,9 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
-## Unreleased
+## 0.4.0 – Grid, server, pinning, availability (Sep. 2026)
 
-Needs the `@umriss-ui/core` that carries the availability wording, the
-column menu's pin keys, `editCell`, `selectAllOnPage` and `exportPageLabel`
-(its own "Unreleased" section).
+Needs `@umriss-ui/core` 0.10: it reads the new wording keys and `--u-shadow-sticky`; the peer range moves to `^0.10.0`.
 
 ### Added
 

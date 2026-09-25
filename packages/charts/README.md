@@ -107,7 +107,7 @@ What it deliberately cannot do — animations, a log or category scale,
 horizontal bars, pie and radar — stands in the same record, with the reason,
 and across all five packages in
 [ADR-0032](../../docs/adr/0032-what-umriss-is-not.md). Stacking is not among
-them: it is wanted, and waits under "Later".
+them: bars and areas stack (`stack`, `normalize`).
 
 ## More
 

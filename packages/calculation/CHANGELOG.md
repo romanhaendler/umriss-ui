@@ -11,7 +11,9 @@ under a heading "Changed" of its own, no matter which digit rose.
 
 ---
 
-## Unreleased
+## 0.3.0 – Forced colours and agent-readable docs (Sep. 2026)
+
+Needs `@umriss-ui/core` 0.10; the peer range moves to `^0.10.0`.
 
 ### Added
 

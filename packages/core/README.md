@@ -194,17 +194,12 @@ The table and the alarm list are not part of this package. They live in
 
 ## Roadmap
 
-The core scope is complete, and so are the command palette, `Dock` and the
-danger text tone (`--u-color-danger-text`, 0.7.0) and the pass-through of
-rules 1 and 2 above. What is open, each with a
-spec under `.scratch/`:
-
-* `core-foundations` — `Switch`, `Slider`, `Drawer`, `ProgressBar`,
-  `Accordion` and `Breadcrumb` stand; their final polish round is open.
-* `forced-colors` and `listbox-announcements` — Windows high contrast, and
-  what a listbox says to VoiceOver.
-* `core-layout-extras` — `Splitter`, `Stepper` and `FileInput` stand; their
-  final polish round is open.
+The core scope is complete, and so are the command palette, `Dock`, the
+danger text tone, the pass-through of rules 1 and 2 above, the six basic
+components and the layout extras, forced colours and the listbox
+announcements. What is still open is one check a person makes: the listbox
+announcements heard through VoiceOver (`.scratch/listbox-announcements/`,
+ticket 02).
 
 Collapsing the dock onto its grip stays out of scope, because it doubles the
 state space. What core will not build at all stands in
