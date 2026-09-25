@@ -995,6 +995,16 @@ is the schedule's counterpart of the table's **Row header** and shares neither
 word — a lane is not a row.
 _Avoid_: row header, Zeilenkopf, sidebar, y axis label
 
+**Active subtask**:
+Where the schedule's keyboard stands: one subtask, or a **Transport** reached
+from one, or nothing - set by the keys and by the pointer's hover alike, the
+last input winning, and drawn as the hover is. It is the schedule's counterpart
+to core's active node and the charts' **Active point** (ADR-0003, ADR-0030):
+never a selection - Space or Enter selects its task, as a click does. The keys
+walk the rows as the plot lays them out, so a folded **Lane group** is one row
+of work. See `.scratch/schedule-a11y/spec.md`.
+_Avoid_: focused subtask, cursor, current subtask, selected subtask
+
 **Intent**:
 What the schedule reports when an interaction asks for a change: move this
 subtask, stretch its main time, change its setup, put it on another lane. The

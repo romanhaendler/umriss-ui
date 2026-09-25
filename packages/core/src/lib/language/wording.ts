@@ -425,6 +425,22 @@ export interface Wording {
   scheduleUnfoldGroup: string;
   /** How many lanes a group holds, beside its name in the header. */
   scheduleLaneCount: (count: number) => string;
+  /** What a screen reader calls the plot that takes the keys
+      (`aria-roledescription`, schedule-a11y S1). */
+  scheduleRoleDescription: string;
+  /** The plot's description (S6): the lanes, the subtasks in view, the
+      visible span with both ends formatted, and the findings of the plan by
+      kind. */
+  scheduleSummary: (summary: {
+    lanes: number;
+    subtasks: number;
+    from: string;
+    to: string;
+    overlaps: number;
+    late: number;
+  }) => string;
+  /** The keys that walk the plot, select and edit - read after the summary. */
+  scheduleKeyHelp: string;
 
   /* -------- @umriss-ui/calculation --------------------------------- */
   /* The calculation's entries stand here for the table's reason: one provider
@@ -718,6 +734,12 @@ export const DEFAULT_WORDING: Wording = {
   scheduleFoldGroup: "Fold group",
   scheduleUnfoldGroup: "Unfold group",
   scheduleLaneCount: (count) => (count === 1 ? "1 lane" : `${count} lanes`),
+  scheduleRoleDescription: "schedule",
+  scheduleSummary: ({ lanes, subtasks, from, to, overlaps, late }) =>
+    `${lanes === 1 ? "1 lane" : `${lanes} lanes`}, ${subtasks === 1 ? "1 subtask" : `${subtasks} subtasks`} in view from ${from} to ${to}. ` +
+    `${overlaps === 1 ? "1 overlap" : `${overlaps} overlaps`}, ${late === 1 ? "1 late transport" : `${late} late transports`}.`,
+  scheduleKeyHelp:
+    "Left and right arrows move along the lane, up and down change the lane, Home and End go to its first and last, Page Up and Page Down jump a tenth of the view. Right bracket follows a transport out, left bracket goes back. Space or Enter selects. Alt with left or right proposes a move, Alt and Shift a new end. Escape clears.",
   calculationSumSymbol: "+",
   calculationDifferenceSymbol: "−",
   calculationProductSymbol: "×",

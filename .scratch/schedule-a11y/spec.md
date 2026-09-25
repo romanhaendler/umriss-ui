@@ -48,3 +48,23 @@ schedule with an active subtask.
 
 Touch editing; a list view of the schedule as an alternative table (a later
 spec, like the charts' data table).
+
+## Comments
+
+**Ticket 03, the transport keys (2026-09-25, agent, the user asleep).** The
+prototype was built on the demo's first schedule and judged against the
+default rather than shown: **`]`/`[` stay.** `]` goes from a subtask onto the
+transport that leaves it and on to the stop it reaches, `[` back - a task's
+route is walked stop, line, stop. The alternative weighed was `t`/`Shift+T`
+(mnemonic in both languages, no AltGr). The brackets won as a pair that says
+its direction; their weakness on a German layout (AltGr+8/9, arriving with
+Ctrl and Alt) is closed by matching the character whatever those modifiers.
+Pictures for the morning: `review/before-schedule-*`,
+`review/after-active-subtask-*`, `review/after-active-transport-*`, light and
+dark - to be taken or overturned in ticket 06.
+
+**S2, the visible window (ticket 01).** The walk covers the whole row, and the
+view pans to the active subtask; ADR-0030 kept the charts inside the visible
+domain because they pan only where the caller owns the domain. The schedule
+always pans by gesture, so the keys do too. S1 and S5 follow ADR-0030, so no
+new ADR (S7).
