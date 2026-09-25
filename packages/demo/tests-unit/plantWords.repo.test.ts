@@ -123,8 +123,6 @@ const PENDING: readonly string[] = [
   "packages/table/demo/examples/Aggregate/08-never-an-average-of-averages.tsx",
   "packages/table/demo/examples/Aggregate/09-own-aggregate.tsx",
   "packages/table/demo/examples/Aggregate/10-worst-verdict.tsx",
-  "packages/table/demo/examples/AlarmList/01-lifecycle.tsx",
-  "packages/table/demo/examples/AlarmList/03-hidden-from-operation.tsx",
   "packages/table/demo/examples/Column/03-presentation.tsx",
   "packages/table/demo/examples/Column/06-format.tsx",
   "packages/table/demo/examples/Column/07-footer.tsx",
@@ -149,7 +147,6 @@ const PENDING: readonly string[] = [
   "packages/table/demo/examples/Table/12-comments-column.tsx",
   "packages/table/demo/examples/Table/13-setpoint-list.tsx",
   "packages/table/demo/examples/Table/14-the-whole-grid.tsx",
-  "packages/table/demo/examples/VerdictColumn/02-sorting.tsx",
 ];
 const PENDING_QUARTER: readonly string[] = [
   "charts examples",
