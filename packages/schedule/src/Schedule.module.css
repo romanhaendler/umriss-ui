@@ -173,6 +173,23 @@
     touch-action: none;
   }
 
+  /* The plot as a tab stop (ADR-0030): the focus is the ring alone, drawn by
+     the span inside it (`.focusRing`) so that no edge of it is clipped. */
+  .plot:focus {
+    outline: none;
+  }
+
+  .focusRing {
+    position: absolute;
+    inset: 2px;
+    border-radius: var(--u-radius-sm);
+    pointer-events: none;
+  }
+
+  .plot:focus-visible > .focusRing {
+    box-shadow: var(--u-focus-ring);
+  }
+
   .layer {
     position: absolute;
     inset: 0;
