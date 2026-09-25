@@ -94,11 +94,11 @@ export function stepSubtask(
 /** What the keyboard stands on: a subtask, or a transport reached from one. */
 export type Active = { readonly kind: "subtask"; readonly id: string } | { readonly kind: "transport"; readonly id: string };
 
-/** Along a transport (`]` out, `[` back): from a subtask out along the transport
-    that leaves it, or back along the one that arrives at it; from a transport
-    on to the subtask it reaches, or back to the one it left. A task's route is
-    walked stop by stop this way, the line between two stops included. Where
-    there is none to follow, it stays.
+/** Along a transport (`]` or `t` out, `[` or Shift+T back): from a subtask
+    out along the transport that leaves it, or back along the one that arrives
+    at it; from a transport on to the subtask it reaches, or back to the one
+    it left. A task's route is walked stop by stop this way, the line between
+    two stops included. Where there is none to follow, it stays.
 
     Of several transports leaving one subtask, the first the caller listed is
     taken. ponytail: a split to two successors is walked one way only; a key to

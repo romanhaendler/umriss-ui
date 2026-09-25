@@ -822,7 +822,7 @@ export const DEFAULT_WORDING: Wording = {
     `${lanes === 1 ? "1 lane" : `${lanes} lanes`}, ${subtasks === 1 ? "1 subtask" : `${subtasks} subtasks`} in view from ${from} to ${to}. ` +
     `${overlaps === 1 ? "1 overlap" : `${overlaps} overlaps`}, ${late === 1 ? "1 late transport" : `${late} late transports`}.`,
   scheduleKeyHelp:
-    "Left and right arrows move along the lane, up and down change the lane, Home and End go to its first and last, Page Up and Page Down jump a tenth of the view. Right bracket follows a transport out, left bracket goes back. Space or Enter selects. Alt with left or right proposes a move, Alt and Shift a new end. Escape clears.",
+    "Left and right arrows move along the lane, up and down change the lane, Home and End go to its first and last, Page Up and Page Down jump a tenth of the view. Right bracket or T follows a transport out, left bracket or Shift and T goes back. Space or Enter selects. Alt with left or right proposes a move, Alt and Shift a new end. Escape clears.",
   calculationSumSymbol: "+",
   calculationDifferenceSymbol: "−",
   calculationProductSymbol: "×",

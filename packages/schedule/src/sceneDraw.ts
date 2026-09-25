@@ -33,7 +33,10 @@ const TOKENS = {
   muted: "var(--u-color-text-muted)",
   alarm: "var(--u-color-danger)",
   surface: "var(--u-color-surface)",
-  accent: "var(--u-color-accent)",
+  /* The active subtask's mark - drawn in a colour of its own only under
+     forced colours; outside them it is the hover's wash (`drawHover`). */
+  active: "var(--u-color-accent)",
+  now: "var(--u-color-accent)",
   /* What text and marks take ON a filled bar - the same token the bar labels
      use in CSS, so a cap and the label beside it are one colour. */
   onAccent: "var(--u-color-on-accent)",
@@ -49,20 +52,26 @@ export type Colours = Record<keyof typeof TOKENS, string> & {
    page around the plot and none of its pixels, so the plot paints itself in
    the system colours the page now wears (forced-colors 03), as the charts do
    (charts-alternatives C4): the work in the text colour whatever its task's
-   colour - lane and label tell the tasks apart - lines in GrayText, and what
-   the accent and the danger tone marked in the selection colour. A system
-   colour an author names is kept under forced colours, so the probe reads
-   these back as they are. */
+   colour - lane and label tell the tasks apart - and lines in GrayText. The
+   selection colour is the active subtask's alone (forced-colors 04): the
+   findings take the text colour and say what they are by a dash, and the
+   present steps back to GrayText. A system colour an author names is kept
+   under forced colours, so the probe reads these back as they are. */
 const FORCED: Record<keyof typeof TOKENS, string> = {
   line: "GrayText",
   lineStrong: "CanvasText",
   text: "CanvasText",
   muted: "GrayText",
-  alarm: "Highlight",
+  alarm: "CanvasText",
   surface: "Canvas",
-  accent: "Highlight",
+  active: "Highlight",
+  now: "GrayText",
   onAccent: "Canvas",
 };
+
+/** The colours the canvas names, before they are resolved: the tokens, or
+    the system colours under forced colours. */
+export const canvasTokens = (forced: boolean): Readonly<Record<keyof typeof TOKENS, string>> => (forced ? FORCED : TOKENS);
 
 const forcedColours = () =>
   typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia("(forced-colors: active)").matches;
@@ -72,7 +81,7 @@ export function resolveSceneColours(root: Element, data: SceneData): Colours {
   const forced = forcedColours();
   const taskColours: Record<string, string> = {};
   for (const task of data.tasks.values()) taskColours[`task:${task.id}`] = forced ? FORCED.text : task.color;
-  const resolved: Record<string, string> = resolveColours<string>(root, { ...(forced ? FORCED : TOKENS), ...taskColours });
+  const resolved: Record<string, string> = resolveColours<string>(root, { ...canvasTokens(forced), ...taskColours });
   const tasks = new Map<string, string>();
   for (const task of data.tasks.values()) tasks.set(task.id, resolved[`task:${task.id}`] ?? task.color);
   return {
@@ -82,7 +91,8 @@ export function resolveSceneColours(root: Element, data: SceneData): Colours {
     muted: resolved.muted!,
     alarm: resolved.alarm!,
     surface: resolved.surface!,
-    accent: resolved.accent!,
+    active: resolved.active!,
+    now: resolved.now!,
     onAccent: resolved.onAccent!,
     tasks,
     forced,
@@ -335,7 +345,7 @@ function drawGrid(ctx: CanvasRenderingContext2D, input: DrawInput, viewport: Vie
 function drawNow(ctx: CanvasRenderingContext2D, input: DrawInput): void {
   const x = input.view.nowX();
   if (x === null) return;
-  ctx.fillStyle = input.colours.accent;
+  ctx.fillStyle = input.colours.now;
   ctx.fillRect(x, 0, 2, input.view.height);
 }
 
@@ -675,7 +685,6 @@ function drawTransport(ctx: CanvasRenderingContext2D, input: DrawInput, path: Tr
 function drawLateInFolds(ctx: CanvasRenderingContext2D, input: DrawInput, viewport: Viewport): void {
   const { data } = input;
   if (data.lateById.size === 0) return;
-  ctx.fillStyle = input.colours.alarm;
   for (const late of data.lateById.values()) {
     const transport = data.transports.find((t) => t.id === late.transport);
     const to = transport === undefined ? undefined : data.subtaskById.get(transport.to);
@@ -688,8 +697,27 @@ function drawLateInFolds(ctx: CanvasRenderingContext2D, input: DrawInput, viewpo
        can. */
     const x0 = xOf(viewport, late.arrival);
     const x1 = Math.max(x0 + 2, xOf(viewport, late.arrival + late.shortBy));
-    ctx.fillRect(x0, row.top - viewport.scrollY + 1, x1 - x0, 3);
+    findingBand(ctx, input, x0, x1, row.top - viewport.scrollY + 1, 3);
   }
+}
+
+/** The band a finding lays over the time it concerns. Under forced colours it
+    is in the text colour like the work beneath it, so it is dashed - the
+    mark says "finding" by its pattern, as a late transport's line does. */
+function findingBand(ctx: CanvasRenderingContext2D, input: DrawInput, x0: number, x1: number, y: number, height: number): void {
+  if (!input.colours.forced) {
+    ctx.fillStyle = input.colours.alarm;
+    ctx.fillRect(x0, y, x1 - x0, height);
+    return;
+  }
+  ctx.strokeStyle = input.colours.alarm;
+  ctx.lineWidth = height;
+  ctx.setLineDash([4, 3]);
+  ctx.beginPath();
+  ctx.moveTo(x0, y + height / 2);
+  ctx.lineTo(x1, y + height / 2);
+  ctx.stroke();
+  ctx.setLineDash([]);
 }
 
 function drawOverlap(ctx: CanvasRenderingContext2D, input: DrawInput, viewport: Viewport, overlap: Overlap): void {
@@ -701,14 +729,14 @@ function drawOverlap(ctx: CanvasRenderingContext2D, input: DrawInput, viewport: 
   ctx.globalAlpha = 0.14;
   ctx.fillRect(x0, slot.top + 1, x1 - x0, Math.max(1, slot.height - 2));
   ctx.globalAlpha = 1;
-  ctx.fillRect(x0, slot.top + 1, x1 - x0, Math.min(3, Math.max(1, slot.height - 1)));
+  findingBand(ctx, input, x0, x1, slot.top + 1, Math.min(3, Math.max(1, slot.height - 1)));
   /* Inside a folded group the mark goes on the ROW as well. Folding is a
      planner tidying the view; it must never be a planner hiding a finding
      (ADR-0025), and a three-pixel strip is not where an alarm can live
      alone. */
   if (slot.miniature) {
     const row = rowAt(viewport.rows, slot.top + viewport.scrollY);
-    if (row !== null) ctx.fillRect(x0, row.top - viewport.scrollY + 1, x1 - x0, 3);
+    if (row !== null) findingBand(ctx, input, x0, x1, row.top - viewport.scrollY + 1, 3);
   }
 }
 
@@ -729,7 +757,7 @@ function drawHover(ctx: CanvasRenderingContext2D, input: DrawInput, box: Subtask
      ground over it reads as a slightly lighter black: the active subtask takes
      an outline in the selection colour instead, around the bar. */
   if (colours.forced) {
-    ctx.strokeStyle = colours.accent;
+    ctx.strokeStyle = colours.active;
     ctx.lineWidth = 2;
     ctx.strokeRect(box.outerFrom - 2, box.y - 2, Math.max(1, box.outerTo - box.outerFrom) + 4, box.height + 4);
     return;
