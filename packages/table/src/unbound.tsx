@@ -284,7 +284,8 @@ export interface ExportProps {
 }
 
 /** Writes the filtered set in the visible columns and their order – with the
-    values, not with their presentation. */
+    values, not with their presentation. In manual mode the table holds one
+    page of the server's, so it writes that page, and its button says so. */
 export function Export({ filename, onExport, of }: ExportProps) {
   const connection = useConnection(of);
   const wording = useWording();
@@ -309,7 +310,7 @@ export function Export({ filename, onExport, of }: ExportProps) {
 
   return (
     <Button size="sm" onClick={exportCsv}>
-      {wording.exportLabel}
+      {snapshot.manual ? wording.exportPageLabel : wording.exportLabel}
     </Button>
   );
 }
@@ -340,7 +341,7 @@ export function Pagination({ pageSizes = [10, 25, 50], className, of }: Paginati
 
   if (!connection || connection.snapshot.virtual) return null;
   const { snapshot } = connection;
-  const count = snapshot.filtered.length;
+  const count = snapshot.rowCount;
   const sizes = pageSizes.includes(snapshot.pageSize)
     ? pageSizes
     : [...pageSizes, snapshot.pageSize].sort((a, b) => a - b);

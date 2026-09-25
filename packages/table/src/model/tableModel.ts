@@ -77,6 +77,10 @@ export interface TableInput<Z = unknown, K extends string = string> {
     /** The collation of text keys; the provider's, where there is one. */
     compareText?: (a: string, b: string) => number;
   };
+  /** Manual mode: the rows are the page a server answered, and `rowCount` is
+      its filtered set. The model then searches, filters, sorts, groups and
+      pages nothing - it would do it over one page and call that the whole. */
+  manual?: { rowCount: number };
 }
 
 export interface TableProjection<Z, K extends string = string> {
@@ -156,6 +160,25 @@ export function tableModel<Z, K extends string = string>(
   const visibleColumns = hidden?.length
     ? ordered.filter((s) => s.hideable === false || !hidden.includes(s.id))
     : ordered;
+
+  /* Manual mode: the rows stand as the server sent them. Only the page count
+     is the table's, from the server's total; the page is clamped only against
+     a total that is known - with none yet (the first request is still out),
+     the page of a view handed in would otherwise fall back to one. */
+  if (input.manual) {
+    const { rowCount } = input.manual;
+    const size = pageSize && pageSize > 0 ? pageSize : Math.max(rowCount, 1);
+    const pageCount = Math.max(1, Math.ceil(rowCount / size));
+    const currentPage = rowCount > 0 ? Math.min(Math.max(1, page), pageCount) : Math.max(1, page);
+    return {
+      columns: visibleColumns,
+      filtered: [...rows],
+      visible: [...rows],
+      page: currentPage,
+      pageCount,
+      columnCount: visibleColumns.length,
+    };
+  }
 
   // 1. Filter - free text and the additional filter together.
   const term = search.trim().toLowerCase();

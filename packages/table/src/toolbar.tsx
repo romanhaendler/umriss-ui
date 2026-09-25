@@ -52,7 +52,7 @@ export function TableToolbar({
        the worst kind of button. */
     const selected = own
       ? []
-      : snapshot.filtered.filter((row) => snapshot.selection.isSelected(hook.rowKey(row)));
+      : (hook.selectedRows ?? snapshot.filtered.filter((row) => snapshot.selection.isSelected(hook.rowKey(row))));
     const bulkActions = registry.hasRowActions() ? registry.actions.ordered().filter((a) => a.spec.bulk) : [];
 
     conditions = (
@@ -64,9 +64,12 @@ export function TableToolbar({
     right = (
       <div className={styles.toolbarGroup}>
         <span role="status" className={styles.filteredCount}>
-          {restricted
-            ? wording.filteredOfTotal(formats.count(snapshot.filtered.length), formats.count(hook.admitted.length))
-            : ""}
+          {!restricted
+            ? ""
+            : snapshot.manual
+              ? /* The server counts the matches only; a total beside them would be a second request. */
+                wording.entries(snapshot.rowCount, formats.count(snapshot.rowCount))
+              : wording.filteredOfTotal(formats.count(snapshot.filtered.length), formats.count(hook.admitted.length))}
         </span>
         {restricted && (
           <Button size="sm" variant="ghost" onClick={() => resetSearchAndFilters(snapshot)}>
@@ -81,7 +84,7 @@ export function TableToolbar({
                 key={key}
                 size="sm"
                 variant={spec.tone === "danger" ? "danger" : "secondary"}
-                onClick={() => (spec.onSelect as (rows: unknown[]) => void)(selected)}
+                onClick={() => (spec.onSelect as (rows: readonly unknown[]) => void)(selected)}
               >
                 {spec.label}
               </Button>

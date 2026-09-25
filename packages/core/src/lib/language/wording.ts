@@ -216,7 +216,8 @@ export interface Wording {
   pagination: string;
   rows: string;
   rowsPerPage: string;
-  /** "Page 2 of 7" */
+  /** "Page 2 of 7" - the numbers grouped as the language writes them, since a
+      table over a server has "Page 1 of 100,000". */
   pageOfPages: (page: number, total: number) => string;
   previousPage: string;
   nextPage: string;
@@ -242,6 +243,8 @@ export interface Wording {
   unpinColumn: (column: string) => string;
   /** The export button. */
   exportLabel: string;
+  /** The export button of a table in manual mode, which holds and writes one page. */
+  exportPageLabel: string;
   /** The export's file name, where the application names none. */
   exportFileName: string;
   /** Placeholder and accessible name of the search field. */
@@ -253,6 +256,8 @@ export interface Wording {
   selectRow: (row: string) => string;
   /** The selection of every row in the filtered set. */
   selectAllRows: string;
+  /** The same checkbox in manual mode, where the table holds one page of a server's. */
+  selectAllOnPage: string;
   /** The expand button, named after the row header. */
   expandRowNamed: (row: string) => string;
   collapseRowNamed: (row: string) => string;
@@ -632,7 +637,7 @@ export const DEFAULT_WORDING: Wording = {
   pagination: "Pagination",
   rows: "Rows",
   rowsPerPage: "Rows per page",
-  pageOfPages: (page, total) => `Page ${page} of ${total}`,
+  pageOfPages: (page, total) => `Page ${page.toLocaleString("en")} of ${total.toLocaleString("en")}`,
   previousPage: "Back",
   nextPage: "Next",
   filterReset: "Reset",
@@ -646,12 +651,14 @@ export const DEFAULT_WORDING: Wording = {
   pinColumnToEnd: (column) => `Pin ${column} to end`,
   unpinColumn: (column) => `Unpin ${column}`,
   exportLabel: "Export",
+  exportPageLabel: "Export page",
   exportFileName: "table.csv",
   tableSearchPlaceholder: "Search …",
   tableSearchLabel: "Search table",
   filterColumn: (column) => `Filter ${column}`,
   selectRow: (row) => `Select ${row}`,
   selectAllRows: "Select all",
+  selectAllOnPage: "Select all on this page",
   expandRowNamed: (row) => `Expand ${row}`,
   collapseRowNamed: (row) => `Collapse ${row}`,
   rowActions: "Actions",
