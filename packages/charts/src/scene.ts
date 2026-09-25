@@ -371,7 +371,7 @@ function stackOf(config: SeriesConfig): string | undefined {
 }
 
 function normalizes(config: SeriesConfig): boolean {
-  return stackOf(config) !== undefined && (config as BarSeriesConfig | AreaSeriesConfig).normalize === true;
+  return (config.kind === "bar" || config.kind === "area") && config.stack !== undefined && config.normalize === true;
 }
 
 /** The value channel, where the kind has one (ADR-0011). */
@@ -1215,7 +1215,10 @@ export class ChartScene {
       else members.push(entry);
     }
     for (const members of stacks.values()) {
-      const normalize = members.some((e) => normalizes(e.config));
+      // Any member normalises the stack, a hidden one too: the axis reads in
+      // percent by the same rule (yTickFormat), and the two must not part.
+      const key = stackOf((members[0] as SeriesEntry).config);
+      const normalize = [...this.series.values()].some((e) => stackOf(e.config) === key && normalizes(e.config));
       const sums = stackSeries(
         members.map((e) => ({ ...(e.materialized as MaterializedSeries), y: e.own as Float64Array })),
         normalize,
@@ -2139,7 +2142,10 @@ export class ChartScene {
         const dx = k.px - mouseX;
         const dy = k.py - mouseY;
         const d = dx * dx + dy * dy; // Euclidean comparison in pixel space
-        if (d < best) {
+        // Two stacked segments meet where one's top is the other's foot; a
+        // tie there goes to the upper one, which a segment of zero height is -
+        // otherwise the walk could never land on it.
+        if (d < best || (d === best && k.covers)) {
           best = d;
           primary = k;
         }
@@ -2509,7 +2515,12 @@ export class ChartScene {
     // series' `format` writes readings - the stack's total among them.
     if (config.format !== undefined && entry.stacked?.normalize !== true) return config.format(v);
     if (config.kind === "matrix") return formatValue(v);
-    const own = this.yTickFormat(config.yAxisId);
+    // Only a share takes the percent an axis gives a normalised stack: a line
+    // on the same axis still reads its own values.
+    const own =
+      entry.stacked?.normalize === true
+        ? this.yTickFormat(config.yAxisId)
+        : this.findAxisConfig("y", config.yAxisId)?.tickFormat;
     return own === undefined ? formatValue(v) : own(v);
   }
 

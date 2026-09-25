@@ -7,7 +7,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, type ReactNode } from "react";
-import { Area, Bar, Chart, DataTable, Tooltip, XAxis, YAxis } from "../src";
+import { Area, Bar, Chart, DataTable, Line, Tooltip, XAxis, YAxis } from "../src";
 import { ChartScene } from "../src/scene";
 import { GERMAN_CHARTS_WORDING } from "../src/wording/de";
 import type { BarSeriesConfig } from "../src/types";
@@ -107,6 +107,24 @@ describe("A normalised stack", () => {
     expect(ticks(host)).toContain("100%");
   });
 
+  it("leaves a line on its axis reading its own values, not percent", async () => {
+    const host = await mount(
+      <Chart data={data} ariaLabel="A stack and a line">
+        <XAxis accessor={(d: Row) => d.t} tickFormat={(v) => `t${v}`} />
+        <YAxis accessor={(d: Row) => d.b} />
+        <Bar accessor={(d: Row) => d.a} name="A" stack="s" normalize />
+        <Bar accessor={(d: Row) => d.b} name="B" stack="s" />
+        <Line accessor={(d: Row) => d.b} name="Target" />
+        <Tooltip />
+      </Chart>,
+    );
+    await focusPlot(host);
+    await press(host, "ArrowLeft");
+    const rows = [...host.querySelectorAll(".uc-tooltip-row")].map((r) => r.textContent);
+    // A member's normalize holds for the whole stack.
+    expect(rows).toEqual(["A33.333%", "B66.667%", "Total6", "Target4"]);
+  });
+
   it("writes the percent sign as its wording does", async () => {
     const host = await mount(stack("bar", { normalize: true, wording: GERMAN_CHARTS_WORDING }));
     expect(ticks(host)).toContain("100 %");
@@ -163,6 +181,32 @@ describe("A stack in the scene", () => {
     expect(s.getHoverSnapshot().hover?.hit.points.map((p) => [p.seriesName, p.yValue])).toEqual([["A", 2]]);
     s.pointerMove(x?.toPx(1) ?? 0, y?.toPx(2.5) ?? 0);
     expect(s.getHoverSnapshot().hover?.hit.points.map((p) => [p.seriesName, p.yValue])).toEqual([["B", 4]]);
+    s.unbind();
+    host.remove();
+  });
+
+  it("normalises by a hidden member's normalize, as its axis does", () => {
+    const { scene: s, lower } = scene();
+    s.updateSeries(lower, bar({ name: "A", accessor: (d) => (d as Row).a, hidden: true, normalize: true }));
+    expect(s.axisExtent("y", "y")).toEqual([0, 100]);
+  });
+
+  it("lets the keys land on a segment of zero height under \"nearest\"", async () => {
+    const s = new ChartScene();
+    s.setData([{ t: 0, a: 2, b: 0 }]);
+    s.registerAxis({ id: "x", orientation: "x", position: "bottom", accessor: (d) => (d as Row).t, domain: "data" });
+    s.registerAxis({ id: "y", orientation: "y", position: "left", accessor: (d) => (d as Row).b, domain: "data" });
+    s.registerSeries(bar({ name: "A", accessor: (d) => (d as Row).a }));
+    s.registerSeries(bar({ name: "B" }));
+    const host = document.createElement("div");
+    document.body.appendChild(host);
+    s.bind(host, document.createElement("canvas"), document.createElement("canvas"), host);
+    s.registerTooltip({ mode: "nearest" });
+    s.requestResize(400, 300);
+    await frame();
+    s.key(new KeyboardEvent("keydown", { key: "End" }));
+    s.key(new KeyboardEvent("keydown", { key: "ArrowDown" }));
+    expect(s.getHoverSnapshot().hover?.hit.points.map((p) => p.seriesName)).toEqual(["B"]);
     s.unbind();
     host.remove();
   });

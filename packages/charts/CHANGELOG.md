@@ -70,7 +70,8 @@ interface was still expected to move before `0.3.0`.
   tooltip and the readout name each series' own value and add the stack's
   total as the last row; the data table lists the own values. An area's
   `baseline` is not read in a stack. `TooltipPoint.yValue` of a stacked point
-  is its own value, not its top.
+  is its own value, not its top; a tooltip `render` gets no total and sums the
+  points itself.
 - **`normalize`** (charts-stacking 03): on any member of a stack, every x sums
   to 100 % - each value its share -, and the y axis reads in percent unless it
   has a `tickFormat`. The total stays the readings' sum, in the series'
