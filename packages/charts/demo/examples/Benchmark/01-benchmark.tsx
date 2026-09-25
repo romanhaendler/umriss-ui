@@ -1,23 +1,47 @@
-/* Benchmark example (R-5.1 to R-5.3).
-
-   Three series; lines and the area downsample on their own above two points
-   per pixel column (charts-long-series 03). A hover draws the overlay layer
-   exclusively - the FPS display proves it. Switchable between three lines and a
-   mixed set of a bar, an area and a line.
-
-   Excluded from the screenshot comparisons (R-5.1) - it measures the moment it
-   exists, so a picture of it would compare two different runs.
-   Shows: the time of materialisation, the time of the last series draw and an FPS
-   counter that runs while the mouse moves over the plot area.
-   Live mode appends 10 points/s and shifts the data window along - the axis width
-   has to stay calm through the hysteresis (R-5.3). */
+/* Lines and the area downsample on their own above two points per pixel
+   column; a hover draws the overlay layer only, which the FPS counter shows.
+   Live appends 10 points a second in a moving window, and the axis width stays
+   calm through its hysteresis (R-5.3). Not photographed: it measures the
+   moment it runs (R-5.1). */
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Area, Bar, Chart, Legend, Line, Tooltip, XAxis, YAxis } from "../../../src";
 import type { ChartPerf } from "../../../src";
-import { load, random, type LoadPoint } from "@umriss-ui/demo/worlds/plant";
 
-export const title = "Benchmark";
+export const title = "Measure a million points";
+export const lead = "Load up to a million points per series and hover: the times and the frame rate say what drawing and a hover cost here.";
+
+/* A small LCG - the same numbers on every run. */
+function random(seed: number): () => number {
+  let s = seed >>> 0;
+  return () => {
+    s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+    return s / 4294967296;
+  };
+}
+
+interface LoadPoint {
+  t: number;
+  s1: number;
+  s2: number;
+  s3: number;
+}
+
+/** Three random walks of any length. */
+function load(seed: number, n: number): LoadPoint[] {
+  const r = random(seed);
+  const points = new Array<LoadPoint>(n);
+  let s1 = 100;
+  let s2 = 60;
+  let s3 = 140;
+  for (let i = 0; i < n; i++) {
+    s1 += r() - 0.5;
+    s2 += (r() - 0.5) * 0.8;
+    s3 += (r() - 0.5) * 1.2;
+    points[i] = { t: i, s1, s2, s3 };
+  }
+  return points;
+}
 
 const SIZES = [1_000, 100_000, 1_000_000] as const;
 const WINDOW = 400;

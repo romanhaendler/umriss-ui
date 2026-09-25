@@ -1,25 +1,17 @@
-/* The output of three lines over a day, stacked: the upper edge is the plant's
-   output, each band a line's part of it. Every Area with the same `stack`
-   stands on the ones registered before it.
-
-   Line 3 stands at night and reports 0 - its band closes to a line, and the
-   plant's edge drops with it. A stacked band carries a quantity, so the fill
-   is stronger than a lone area's and the outline thin: the edges are the
-   boundaries between parts, not courses of their own. */
-
 import { Area, Chart, Legend, Tooltip, XAxis, YAxis } from "../../../src";
-import { lineOutputData, type LineOutput } from "@umriss-ui/demo/worlds/plant";
+import { PARCELS_PER_HOUR, type DepotHour } from "@umriss-ui/demo/worlds/logistics";
 
-export const title = "Stacked areas";
+export const title = "Stack areas";
+export const lead = "Areas with the same `stack` stand on the ones before them: the top edge is the whole, each band one depot's part.";
 
 export default function StackedAreas() {
   return (
-    <Chart data={lineOutputData} height={280} ariaLabel="Output of three lines over a day, stacked">
-      <XAxis accessor={(d: LineOutput) => d.t} time domain="data" />
-      <YAxis accessor={(d: LineOutput) => d.line1} label="Pieces per hour" />
-      <Area accessor={(d: LineOutput) => d.line1} name="Line 1" stack="plant" fillOpacity={0.5} strokeWidth={1} />
-      <Area accessor={(d: LineOutput) => d.line2} name="Line 2" stack="plant" fillOpacity={0.5} strokeWidth={1} />
-      <Area accessor={(d: LineOutput) => d.line3} name="Line 3" stack="plant" fillOpacity={0.5} strokeWidth={1} />
+    <Chart data={PARCELS_PER_HOUR} height={280} ariaLabel="Parcels loaded per hour at three depots, stacked">
+      <XAxis accessor={(d: DepotHour) => d.t} time domain="data" />
+      <YAxis accessor={(d: DepotHour) => d.north} label="Parcels per hour" />
+      <Area accessor={(d: DepotHour) => d.north} name="North" stack="depots" fillOpacity={0.5} strokeWidth={1} />
+      <Area accessor={(d: DepotHour) => d.river} name="Riverside" stack="depots" fillOpacity={0.5} strokeWidth={1} />
+      <Area accessor={(d: DepotHour) => d.east} name="East Gate" stack="depots" fillOpacity={0.5} strokeWidth={1} />
       <Legend placement="top" />
       <Tooltip mode="x" />
     </Chart>

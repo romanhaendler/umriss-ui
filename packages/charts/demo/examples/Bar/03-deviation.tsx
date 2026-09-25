@@ -1,27 +1,28 @@
-/* The deviation from plan, per working day: above plan upwards, below plan
-   downwards, the foot at 0 in the middle of the axis.
-
-   The foot of a bar is 0 and not the bottom of the axis - which is what lets one
-   series carry both signs. The deviation is computed in the accessor, not
-   stored: it is the difference of two numbers the data already has. */
-
 import { Bar, Chart, Tooltip, XAxis, YAxis } from "../../../src";
-import { outputData, type DayOutput } from "@umriss-ui/demo/worlds/plant";
+import { COST_CENTRES, LEDGER } from "@umriss-ui/demo/worlds/controlling";
 
-export const title = "Above and below plan";
+export const title = "Show bars above and below zero";
+export const lead = "A bar's foot is 0, not the bottom of the axis, so one series carries both signs - here the year's forecast against budget.";
 
-const signed = (v: number) => (v > 0 ? `+${v.toFixed(0)}` : v.toFixed(0));
+interface Deviation {
+  place: number;
+  euros: number;
+}
+
+const DEVIATION: Deviation[] = COST_CENTRES.map((centre, place) => {
+  const rows = LEDGER.filter((row) => row.costCentre === centre.id);
+  const sum = (pick: (row: (typeof rows)[number]) => number) => rows.reduce((total, row) => total + pick(row), 0);
+  return { place, euros: sum((row) => row.forecast) - sum((row) => row.budget) };
+});
+
+const signed = (v: number) => (v > 0 ? `+${(v / 1000).toFixed(0)}k` : `${(v / 1000).toFixed(0)}k`);
 
 export default function Deviation() {
   return (
-    <Chart data={outputData} height={280} ariaLabel="Deviation from plan per working day">
-      <XAxis
-        accessor={(d: DayOutput) => d.day}
-        ticks={outputData.map((d) => d.day)}
-        tickFormat={(v) => outputData[v]?.name ?? ""}
-      />
-      <YAxis accessor={(d: DayOutput) => d.actual - d.planned} tickFormat={signed} label="Pieces" />
-      <Bar accessor={(d: DayOutput) => d.actual - d.planned} name="Deviation from plan" />
+    <Chart data={DEVIATION} height={280} ariaLabel="Forecast against budget for the year, per cost centre">
+      <XAxis accessor={(d: Deviation) => d.place} ticks={COST_CENTRES.map((_, i) => i)} tickFormat={(v) => COST_CENTRES[v]?.name ?? ""} />
+      <YAxis accessor={(d: Deviation) => d.euros} tickFormat={signed} label="€" />
+      <Bar accessor={(d: Deviation) => d.euros} name="Over budget" />
       <Tooltip mode="x" />
     </Chart>
   );

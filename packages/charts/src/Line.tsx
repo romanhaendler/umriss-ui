@@ -39,7 +39,7 @@ export interface LineProps<T> {
       to be seen by - `always`, or `never`, not even that one. */
   markers?: "auto" | "always" | "never";
   /** Sample-and-hold: each value holds as a horizontal until the next sample
-      and jumps there - a set point, a digital signal. A gap ends the hold at
+      and jumps there - a target, a digital signal. A gap ends the hold at
       its x. The tooltip reports the sample the hold began with. */
   step?: boolean;
 }

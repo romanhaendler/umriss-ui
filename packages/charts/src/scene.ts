@@ -1174,7 +1174,7 @@ export class ChartScene {
       } else if (config.kind === "state") {
         // A lane says where something is drawn, not what the data span. A state
         // band therefore contributes no y extent: otherwise the state code 3
-        // would pull the axis onto three machines.
+        // would pull the axis onto three lanes.
         // Its x extent reaches one step past its last point: there its last
         // state ends where the band reports last (lastSegmentEnd), and a
         // `domain="data"` would cut it to nothing.
@@ -1672,7 +1672,7 @@ export class ChartScene {
 
   legendItems(): LegendItem[] {
     const out: LegendItem[] = [];
-    // Three machines share one state list. The legend explains colours, not
+    // Three lanes share one state list. The legend explains colours, not
     // series - so it explains every colour once. Twelve entries for four states
     // would not be a legend but a list.
     // A band that shares an entry is highlighted with it.
@@ -1992,7 +1992,7 @@ export class ChartScene {
 
   /** Lane of a state series in pixels. Without a value the whole domain of its y
       axis: a single series fills its band, a stack gets a domain with one unit per
-      machine from the caller. */
+      lane from the caller. */
   private lanePx(
     config: StateSeriesConfig,
     yAxis: AxisLayout,

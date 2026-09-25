@@ -1,33 +1,22 @@
-/* Three y axes with clearly different extents: one on the left, two stacked on
-   the right (the second lies outside, separated by the gap). The series "large"
-   is bound to a second x axis on top and counts in relative steps - the tooltip
-   still compares the series correctly in pixel space.
-
-   Only the first registered axis per orientation draws a grid. Two grids over
-   one plot area are two rulers over one drawing. */
-
 import { Chart, Legend, Line, Tooltip, XAxis, YAxis } from "../../../src";
-import { axesData, type DualPoint } from "@umriss-ui/demo/worlds/plant";
+import { LOAD_TEST, LOAD_TEST_START, type LoadTestPoint } from "@umriss-ui/demo/worlds/operations";
 
-export const title = "Multiple axes";
+export const title = "Add axes for other magnitudes";
+export const lead = "Several y axes stack outwards on their side, and a series picks its axes by `yAxisId` and `xAxisId`; only the first axis draws a grid.";
+
+const clock = (v: number) => new Date(v).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 
 export default function Axes() {
   return (
-    <Chart data={axesData} height={340} ariaLabel="Three extents on three y axes">
-      <XAxis accessor={(d: DualPoint) => d.t} label="Step" />
-      <XAxis id="top" position="top" accessor={(d: DualPoint) => d.t - 2000} label="Step (relative)" />
-      <YAxis id="small" position="left" label="small" accessor={(d: DualPoint) => d.small} />
-      <YAxis id="large" position="right" label="large" accessor={(d: DualPoint) => d.large} />
-      <YAxis id="medium" position="right" label="medium" accessor={(d: DualPoint) => d.medium} />
-      <Line accessor={(d: DualPoint) => d.small} yAxisId="small" name="small" />
-      <Line
-        accessor={(d: DualPoint) => d.large}
-        xAxisId="top"
-        yAxisId="large"
-        name="large"
-        dash={[4, 4]}
-      />
-      <Line accessor={(d: DualPoint) => d.medium} yAxisId="medium" name="medium" />
+    <Chart data={LOAD_TEST} height={340} ariaLabel="A load test: CPU, throughput and latency on three y axes">
+      <XAxis accessor={(d: LoadTestPoint) => d.minute} label="Minute of the test" />
+      <XAxis id="clock" position="top" accessor={(d: LoadTestPoint) => LOAD_TEST_START + d.minute * 60_000} tickFormat={clock} label="Time of day" />
+      <YAxis id="cpu" position="left" label="CPU %" accessor={(d: LoadTestPoint) => d.cpu} />
+      <YAxis id="requests" position="right" label="Requests/h" accessor={(d: LoadTestPoint) => d.requestsPerHour} />
+      <YAxis id="latency" position="right" label="p95 ms" accessor={(d: LoadTestPoint) => d.p95} />
+      <Line accessor={(d: LoadTestPoint) => d.cpu} yAxisId="cpu" name="CPU" />
+      <Line accessor={(d: LoadTestPoint) => d.requestsPerHour} xAxisId="clock" yAxisId="requests" name="Throughput" dash={[4, 4]} />
+      <Line accessor={(d: LoadTestPoint) => d.p95} yAxisId="latency" name="p95" />
       <Legend placement="top" />
       <Tooltip mode="x" />
     </Chart>
