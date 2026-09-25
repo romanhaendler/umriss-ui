@@ -9,7 +9,7 @@
    verdict. This module knows no verdict, takes none and returns none - it
    knows nothing of `unknown`. That is the one reason the file exists:
    whoever merges the axes while drawing greys away the last picture the
-   operator had, at exactly the moment he needs it most.
+   reader had, at exactly the moment they need it most.
 
    The reference time is a parameter. No clock is read here; the cadence
    belongs to `useFreshness`. */
@@ -51,8 +51,8 @@ const CADENCE_DIVISOR = 10;
 /**
  * The age of an as-of time at the reference time, in milliseconds.
  *
- * Never negative: an as-of time in the future is real - the clocks of machine
- * and panel drift apart - and does not mean that a value is about to become
+ * Never negative: an as-of time in the future is real - the clocks of source
+ * and screen drift apart - and does not mean that a value is about to become
  * true, but that it is true right now. It counts as zero old.
  *
  * `null` where there is no computable age: without an as-of time there is

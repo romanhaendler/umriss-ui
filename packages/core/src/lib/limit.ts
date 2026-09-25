@@ -1,6 +1,6 @@
 /* The limit model (ADR-0006).
 
-   The rule that says what a number is. On a control room screen no number
+   The rule that says what a number is. On a data-dense screen no number
    stands for itself - 82 % is above target or below it - and today the
    application decides that in a question-mark-colon in the middle of the JSX,
    again three components further on and there with a different bound. The
@@ -36,7 +36,7 @@ export type Severity = "warning" | "alarm";
 
     The fourth outcome is not a `null`. A `null` would invite `?? "ok"` at the
     call site, and that expression is exactly the defect this module exists
-    against: a dead sensor would look like a healthy machine. */
+    against: a dead data source would look like a healthy service. */
 export type Verdict = "ok" | "unknown" | "warning" | "alarm";
 
 /** A bound: a value, a side, a severity.

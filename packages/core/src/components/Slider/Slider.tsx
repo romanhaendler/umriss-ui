@@ -75,7 +75,7 @@ function keyed(key: string, value: number, min: number, max: number, step: numbe
 /* One value on the native range input: the pointer, the focus, a form's
    `name` and the role come from the platform, and the drawing comes from the
    tokens. The keys are the component's own - PageUp and PageDown step
-   differently from engine to engine, and a plant screen should not.
+   differently from engine to engine, and a data-dense screen should not.
 
    The construction of the other native fields: the class on the wrapper,
    ref and rest on the input. */
