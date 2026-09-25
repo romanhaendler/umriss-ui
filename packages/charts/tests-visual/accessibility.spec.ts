@@ -34,3 +34,16 @@ test("a page with every code block open is accessible", async ({ page }, testInf
   const result = await new AxeBuilder({ page }).include('[data-block="axis"]').withTags(STANDARDS).analyze();
   expect(findings(result), `Code open (${testInfo.project.name})`).toEqual([]);
 });
+
+/* charts-alternatives 01: the data table open - its key, caption, headings and
+   cells, over a plot that is hidden meanwhile. */
+test("an open data table is accessible", async ({ page }, testInfo) => {
+  await open(page, "tooltip");
+  const example = '[data-example="data-table"]';
+  await page.locator(`${example} .uc-data-key`).click();
+  // The key at rest: its hover surface is a passing state, not what is read.
+  await page.mouse.move(0, 0);
+  await expect(page.locator(`${example} .uc-data-panel`)).toBeVisible();
+  const result = await new AxeBuilder({ page }).include(example).withTags(STANDARDS).analyze();
+  expect(findings(result), `Open data table (${testInfo.project.name})`).toEqual([]);
+});

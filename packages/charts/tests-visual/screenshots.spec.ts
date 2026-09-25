@@ -55,3 +55,20 @@ test("A focused chart with an Active point", async ({ page }, testInfo) => {
   await drawn(page);
   await expect(target).toHaveScreenshot(`focused-active-point-${testInfo.project.name}.png`);
 });
+
+/* charts-alternatives 01: the data table open over the plot - every reading
+   of a shift, and a week downsampled with its caption saying so. The loop
+   above photographs both closed, with their key. */
+for (const exampleId of ["data-table", "a-week-as-a-table"]) {
+  test(`An open data table (${exampleId})`, async ({ page }, testInfo) => {
+    await openExample(page, "tooltip", exampleId);
+    const target = page.locator(`[data-example="${exampleId}"]`);
+    await target.scrollIntoViewIfNeeded();
+    await drawn(page);
+    await target.locator(".uc-data-key").click();
+    // The pointer leaves the key, so that the picture shows it at rest.
+    await page.mouse.move(0, 0);
+    await expect(target.locator(".uc-data-panel")).toBeVisible();
+    await expect(target).toHaveScreenshot(`open-${exampleId}-${testInfo.project.name}.png`);
+  });
+}
