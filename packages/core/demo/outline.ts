@@ -422,6 +422,24 @@ export const OUTLINE: readonly Rubric[] = [
       },
     ],
   },
+  {
+    /* The one rubric that is not about a component of this package: every
+       package on one page, as a consumer combines them (control-room-demo,
+       R1). Here and not a sixth demo, because the core demo is the one a
+       reader opens first. It stands last: it is the summary, not the way in. */
+    id: "control-room",
+    name: "Control room",
+    sentence: "Every package on one page, fed by one plant - the shared vocabulary at a glance.",
+    pages: [
+      {
+        id: "control-room",
+        name: "Control room",
+        sentence: "A kiln line over a shift: the limit crossed in the trend is the alarm in the list, the verdict on the tile and the scrap in the OEE.",
+        types: [],
+        exports: ["Stat", "Drawer", "ProgressBar"],
+      },
+    ],
+  },
 ];
 
 /* The addresses follow from the outline; their format is known to the shell

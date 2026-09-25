@@ -903,9 +903,11 @@ section
 The rubrics of the `@umriss-ui/core` demo are `setup` ("Setup"), `layout`
 ("Layout and text"), `actions` ("Actions"), `forms`, `status`
 ("Status and waiting"), `overlays` ("Overlays"), `navigation`
-("Navigation and structure") and `monitoring` — eight since `demo-rubrics`
-02, which broke up a `foundation` that had become the box for everything left
-over and took the overlays apart from what merely orders content;
+("Navigation and structure"), `monitoring` and `control-room` ("Control room") —
+eight since `demo-rubrics` 02, which broke up a `foundation` that had become the
+box for everything left over and took the overlays apart from what merely orders
+content, and a ninth since `control-room-demo`: the one page of any demo that
+imports every package, as a consumer combines them;
 `@umriss-ui/table` has
 `tables`, `rows`, `unbound` ("Unbound parts") and `monitoring`; `@umriss-ui/charts`
 has `chart`, `series`, `monitoring` and `around` ("Around the chart"). **Monitoring** and not

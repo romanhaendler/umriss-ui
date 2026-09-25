@@ -57,4 +57,6 @@ export const SAMPLE = [
   "progressbar",
   "accordion",
   "breadcrumb",
+  /* Every package on one page (control-room-demo). */
+  "control-room",
 ] as const;

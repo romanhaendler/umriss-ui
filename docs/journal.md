@@ -18,6 +18,29 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Sep. 2026 — A control room: every package on one page
+
+- **control-room-demo 01-02.** A ninth rubric in the core demo, "Control
+  room", with one page: a kiln line over an early shift, fed by one seeded
+  plant (`packages/core/demo/plant.ts`). The kiln's excursion is the line
+  above the limit in the trend, the alarm in the list, the verdict on the
+  tile, the points the control chart marks and the scrap in the OEE, because
+  each reads the same minute. Two examples: one minute in three places, and
+  the demonstration - Stat with freshness, trend with limit band and data
+  table, AlarmList with hidden alarms, ControlChart, Schedule with the now
+  line and a Drawer per batch, the OEE Calculation.
+- **The core demo imports every package** by alias to their sources, not by a
+  devDependency (that would close a cycle with the table's peer dependency on
+  core); the lint allows it in `packages/core/demo/**` only.
+- **The clock** runs a plant minute per second counted from `Date.now()`, so
+  the frozen clock of the suites is a still page; it starts paused under
+  reduced motion and has a Pause. Tested by moving the frozen clock by hand.
+- **Pictures**: six new baselines (the page head, two examples, both themes);
+  the overview's two moved, as they had to - 48 pages in 9 rubrics, 98
+  examples, and the ninth card. No palette picture moved.
+- **Left for the polish round (03)**: the region "Alarms" repeats the list's
+  own heading, and the batches carry no names on their bars.
+
 ## Sep. 2026 — What umriss is not, and docs an agent can read
 
 - **non-goals-and-honest-docs.** ADR-0032 names what umriss deliberately does
