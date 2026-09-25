@@ -64,6 +64,4 @@ export const SAMPLE = [
   "splitter",
   "stepper",
   "fileinput",
-  /* Every package on one page (control-room-demo). */
-  "control-room",
 ] as const;
