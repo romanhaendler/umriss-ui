@@ -833,6 +833,19 @@ above it -; folded, it is one line carrying the group's aggregates in the
 columns.
 _Avoid_: gutter, Randspalte, merged cell, rowspan (which it is not built from)
 
+**Active cell**:
+Where a table in grid mode stands: one cell of a line — the head, a row, a
+**Group header**, a folded **Group span**, a detail, the footer — set by the
+arrow keys and by a click alike, and the grid's one tab stop. It holds on to
+its row and its column, not to what is rendered, so it follows a sorted row,
+stands where a filtered one stood and outlives a virtual window. It is the
+table's counterpart to core's active node, the charts' **Active point** and
+the schedule's **Active subtask** (ADR-0003, ADR-0034): never a selection —
+walking chooses nothing, and Enter reaches the cell's controls or edits it.
+The cell is a table's, where a column meets a line; a chart matrix's **Cell**
+is another thing, and the table's word stands only in this compound.
+_Avoid_: focused cell, selected cell, current cell, cursor
+
 ### The demo
 
 The demos of all three packages are documentation, not decoration,

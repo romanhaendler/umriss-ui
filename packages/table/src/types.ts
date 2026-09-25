@@ -115,6 +115,58 @@ export type NumberField<Z> = {
   [K in Field<Z>]: Z[K] extends number | Absent ? K : never;
 }[Field<Z>];
 
+/* --- Editing (grid mode) --------------------------------------------------- */
+
+/** What a column accepts as `edit`: the core field for its value - `"text"`
+    for text, `"number"` for numbers, `"date"` for points in time, `"select"`
+    for text and numbers - or an editor of one's own. */
+export type EditFor<W, Z> =
+  | ([Present<W>] extends [string] ? "text" | "select" : never)
+  | ([Present<W>] extends [number] ? "number" | "select" : never)
+  | ([Present<W>] extends [Date] ? "date" : never)
+  | ((editor: CellEditorProps<W, Z>) => ReactNode);
+
+/** What an editor of one's own receives. The table holds the draft; Enter,
+    Escape and Tab stay the table's, bubbling up from the field. */
+export interface CellEditorProps<W, Z> {
+  /** The draft - the cell's value until the field changes it. */
+  value: W | null;
+  /** Changes the draft. */
+  onChange: (value: W | null) => void;
+  /** Commits - the draft, or the value given. A picker commits on its pick. */
+  commit: (value?: W | null) => void;
+  row: Z;
+  /** The draft did not validate: the field shows it; the message stands beneath. */
+  invalid: boolean;
+  /** The field's name: what is edited, for which row. The `FormField` around
+      the editor already names a core field by it. */
+  label: string;
+}
+
+/** The props a column carries for editing in grid mode (`<Table grid>`). */
+export interface EditOptions<W, Z> {
+  /** Edits the column's cells in place in grid mode: Enter, F2 or typing
+      starts it, Enter or Tab commits, Escape cancels. The table applies
+      nothing - the edit is reported through the table's `onCellEdit`. */
+  edit?: EditFor<W, Z>;
+  /** What `edit="select"` offers; without it, the values that occur. */
+  editOptions?: readonly Present<W>[];
+  /** Checks a draft before it is reported: a message keeps the editor open
+      and stands beneath the field, as in a `FormField`; nothing lets it
+      through. */
+  validate?: (value: W | null, row: Z) => string | null | undefined;
+}
+
+/** An edit the user committed - reported, not applied. */
+export interface CellEdit<Z> {
+  rowKey: string;
+  columnId: string;
+  /** The editor's value: text for `"text"`, a number or null for
+      `"number"`, a day or null for `"date"`, an option for `"select"`. */
+  value: unknown;
+  row: Z;
+}
+
 /* --- Columns -------------------------------------------------------------- */
 
 export interface ColumnBase {
@@ -177,6 +229,7 @@ export type FieldColumn<Z, K extends Field<Z>> = ColumnBase &
     /** Groups points in time by `"day"`, `"week"`, `"month"` or `"year"`. */
     group?: GroupFor<Z[K]>;
   } & AggregateProps<Z[K], Z> &
+  EditOptions<Z[K], Z> &
   ChildrenFor<Z[K], Z>;
 
 type Computed<Z, W> = ColumnBase &
@@ -194,6 +247,12 @@ type Computed<Z, W> = ColumnBase &
         filter from `columnFilter` asks whatever it asks itself. */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- the condition belongs to the filter
     filter?: "list" | "range" | ColumnFilter<Present<W>, any>;
+    /** Edits the column's cells in place in grid mode - see a field column's `edit`. */
+    edit?: "text" | "number" | "select" | "date" | ((editor: CellEditorProps<W, Z>) => ReactNode);
+    /** What `edit="select"` offers; without it, the values that occur. */
+    editOptions?: readonly Present<W>[];
+    /** Checks a draft before it is reported; a message keeps the editor open. */
+    validate?: (value: W | null, row: Z) => string | null | undefined;
   };
 
 /* Ticket 01: the overloads differ by REQUIRED properties, so that an unfitting
@@ -380,6 +439,15 @@ export interface TableProps<Z> {
   /** `false`: the user cannot group this table - the column menu offers no
       grouping, and a grouping handed in is passed over. */
   groupable?: boolean;
+  /** Grid mode: the table is one tab stop, and the arrows walk its cells -
+      Home and End in the row, Ctrl+Home and Ctrl+End to the table's ends,
+      PageUp and PageDown by the rows in view. A cell's own controls are
+      reached with Enter or F2 and left with Escape; a column with `edit` is
+      edited in place. Without it the table stays a native table. */
+  grid?: boolean;
+  /** Grid mode: an edit the user committed. The table applies nothing; the
+      cell shows the new value when the rows passed in carry it. */
+  onCellEdit?: (edit: CellEdit<Z>) => void;
   /** Columns, `RowDetail`, `RowActions` and the unbound parts. */
   children?: ReactNode;
 }

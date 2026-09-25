@@ -323,3 +323,26 @@ export function RangeFilters() {
     </Frame>
   );
 }
+
+/* Editing in grid mode (table-grid-mode 03): the core field fits the value. */
+export function Editing() {
+  const { Table: Frame, Column } = useTable(orders, { rowKey: (a) => a.id });
+  return (
+    <Frame grid onCellEdit={(edit) => edit.row.number}>
+      <Column value="number" label="Order" edit="text" validate={(value) => (value?.startsWith("A") ? undefined : "An order starts with A")} />
+      <Column value="amount" label="Quantity" edit="number" validate={(value, row) => (value !== null && value > row.amount * 2 ? "Too many" : null)} />
+      <Column value="price" label="Preis" edit="number" />
+      <Column value="due" label="Due date" edit="date" />
+      <Column value="status" label="Status" edit="select" editOptions={["Aktiv", "Pausiert"]} />
+      <Column value="customer" label="Customer" edit={({ value, onChange }) => <input value={value?.name ?? ""} onChange={(e) => onChange({ name: e.target.value })} />}>
+        {(c) => c.name}
+      </Column>
+      {/* @ts-expect-error a number field for text */}
+      <Column value="number" label="Order" edit="number" />
+      {/* @ts-expect-error a text field for a point in time */}
+      <Column value="due" label="Due date" edit="text" />
+      {/* @ts-expect-error an option that is no status */}
+      <Column value="status" label="Status" edit="select" editOptions={["Aktiv", "Stopped"]} />
+    </Frame>
+  );
+}

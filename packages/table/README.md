@@ -114,6 +114,11 @@ stylesheets by hand.
 * **Twenty thousand rows** where it has to be: virtualisation, sticky parts,
   columns pinned to either side and column widths that survive a view being
   restored.
+* **A grid, on request** (ADR-0034): `<Table grid>` is one tab stop whose
+  Active cell the arrows walk, and a column with `edit` is edited in place -
+  with the core field for its value, a `validate` that keeps a wrong draft
+  open, and `onCellEdit` reporting what the application applies. Without
+  `grid` the table stays a native table.
 
 ## More
 
