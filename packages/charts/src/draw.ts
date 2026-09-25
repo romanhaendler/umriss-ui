@@ -52,7 +52,10 @@ export interface AreaDrawItem extends DrawBase {
 
 export interface BarDrawItem extends DrawBase {
   kind: "bar";
-  /** Fixed lower edge in domain space. */
+  /** Foot per bar - a stacked bar stands on the stack below (charts-stacking);
+      null = the fixed baseline at `baseline`. */
+  y0: Float64Array | null;
+  /** Fixed lower edge in domain space; only effective where y0 is null. */
   baseline: number;
   /** Left edge relative to the x value, in domain units (ADR-0002). */
   offset: number;
@@ -386,6 +389,7 @@ function drawBars(ctx: CanvasRenderingContext2D, item: BarDrawItem, plot: Rect, 
   const yb = item.yScale.b;
   const xs = item.x;
   const ys = item.y;
+  const us = item.y0;
   const baselinePx = item.baseline * ym + yb;
   const edgePx = item.offset * xm;
   const widthPx = item.width * xm;
@@ -396,7 +400,8 @@ function drawBars(ctx: CanvasRenderingContext2D, item: BarDrawItem, plot: Rect, 
     if (Number.isNaN(value)) continue; // a gap leaves its bar out (R-2.5)
     const px = (xs[i] as number) * xm + xb + edgePx;
     const py = value * ym + yb;
-    path.rect(px, py, widthPx, baselinePx - py);
+    const footPx = us === null ? baselinePx : (us[i] as number) * ym + yb;
+    path.rect(px, py, widthPx, footPx - py);
   }
   ctx.fillStyle = item.color;
   ctx.fill(path);

@@ -36,6 +36,16 @@ export interface BarProps<T> {
   /** A role instead of a colour value; the theme resolves it. `color` beats
       it. */
   tone?: "ok" | "warning" | "alarm";
+  /** The stack this series stands in: every Bar and Area with the same id on
+      the same x and y axis stands on the ones registered before it. A gap
+      stacks as zero; negative values stack downward from zero. The tooltip
+      names each series' own value and the stack's total. */
+  stack?: string;
+  /** On any member of a stack, every x of the stack sums to 100 %: each value
+      becomes its share, and the y axis reads in percent unless it has a
+      `tickFormat`. The total stays the readings' own sum, written in the
+      series' `format`. */
+  normalize?: boolean;
   /** Width as a fraction of the step; just under 1, so that neighbours do not
       touch. Several bar series share this fraction. */
   barWidth?: number;
@@ -52,6 +62,8 @@ export function Bar<T>(props: BarProps<T>): null {
     format,
     color,
     tone,
+    stack,
+    normalize,
     barWidth = 0.8,
   } = props;
 
@@ -68,9 +80,11 @@ export function Bar<T>(props: BarProps<T>): null {
         format,
         color,
         tone,
+        stack,
+        normalize,
         barWidth,
       }) as BarSeriesConfig,
-    [accessor, xAxisId, yAxisId, data, name, hidden, format, color, tone, barWidth],
+    [accessor, xAxisId, yAxisId, data, name, hidden, format, color, tone, stack, normalize, barWidth],
   );
 
   useSeries("Bar", config);
