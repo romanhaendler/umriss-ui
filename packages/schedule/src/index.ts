@@ -43,3 +43,11 @@ export type { ResolvedAppearance, SubtaskAppearance } from "./appearance";
    the workspace's rule for new exports. */
 export { LaneGroup } from "./parts";
 export type { LaneGroupProps } from "./parts";
+
+/* What `demo-rework` 08 added: blocked time per lane, at the end by the
+   workspace's rule for new exports. */
+export { BlockedTimes } from "./parts";
+export type { BlockedTimesProps } from "./parts";
+export type { BlockedTime } from "./model";
+export { inBlockedTime } from "./findings";
+export type { InBlockedTime } from "./findings";

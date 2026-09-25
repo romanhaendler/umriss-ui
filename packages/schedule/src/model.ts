@@ -48,6 +48,28 @@ export interface Subtask {
   readonly progress?: number;
 }
 
+/** Time a lane is not available: leave, maintenance, a holiday. Work does
+    not belong in it - a subtask that covers some of it is a finding
+    (`inBlockedTime`), and a drag does not put one there.
+
+    A list of its own, keyed by lane like a subtask, and not a prop of `Lane`:
+    a lane is structure (ADR-0025) and blocked time is data (ADR-0023) - it
+    comes from the caller's leave table or maintenance plan as one array, and
+    the pure `findings` reads exactly the array `<BlockedTimes>` draws. */
+export interface BlockedTime {
+  /** The caller's identity of the interval - what a finding names. */
+  readonly id: string;
+  /** The id of the lane it blocks. */
+  readonly lane: string;
+  /** Where it begins. */
+  readonly from: number;
+  /** Where it ends. */
+  readonly to: number;
+  /** Why the lane is blocked - "Leave", "Maintenance" -, where the schedule
+      names it. */
+  readonly label?: string;
+}
+
 /** Two subtasks of one task in order: the later one may not begin before the
     earlier one ends plus a lag. Always from an end to a start. */
 export interface Dependency {
