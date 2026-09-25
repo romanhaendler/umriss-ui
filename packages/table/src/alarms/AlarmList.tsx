@@ -31,7 +31,7 @@
 
 import { useMemo } from "react";
 import type { HTMLAttributes } from "react";
-import { Badge, Button, Checkbox, useFreshness, useDensityFor, useFormats, useWording } from "@umriss-ui/core";
+import { Badge, Button, Checkbox, Tooltip, VisuallyHidden, useFreshness, useDensityFor, useFormats, useWording } from "@umriss-ui/core";
 import type { Formats, FreshnessAges, FreshnessReading, Wording } from "@umriss-ui/core";
 import { useTable } from "../index";
 import type { TableSelection } from "../index";
@@ -85,20 +85,25 @@ function lifecycleWord(state: LifecycleState, wording: Wording): string {
   }
 }
 
-/** The availability as a word - none while in service, which is the normal
-    case and says nothing. */
-function availabilityWord(row: AlarmRow, wording: Wording, formats: Formats): string | null {
+/** The availability as the badge's word and as the sentence spoken and shown
+    in its tooltip - none while in service, which is the normal case and says
+    nothing. A shelf's end is a time of day on the as-of day, a date and a time
+    beyond it. */
+function availabilityWords(row: AlarmRow, wording: Wording, formats: Formats): { short: string; full: string } | null {
   switch (row.availability) {
     case "shelved": {
       const shelf = row.alarm.shelf;
-      // ponytail: the end as a time of day - a shelf spans a shift, not days;
-      // a date beside it when shelves grow longer.
-      return shelf ? wording.availabilityShelved(formats.time(new Date(shelf.until), false), shelf.by) : null;
+      if (!shelf) return null;
+      const until = new Date(shelf.until);
+      const asOf = new Date(row.alarm.raised + row.age);
+      const sameDay = until.toDateString() === asOf.toDateString();
+      const end = sameDay ? formats.time(until, false) : formats.dateTime(until, false);
+      return { short: wording.availabilityShelvedShort, full: wording.availabilityShelved(end, shelf.by) };
     }
     case "suppressed-by-design":
-      return wording.availabilitySuppressedByDesign;
+      return { short: wording.availabilitySuppressedByDesign, full: wording.availabilitySuppressedByDesign };
     case "out-of-service":
-      return wording.availabilityOutOfService;
+      return { short: wording.availabilityOutOfService, full: wording.availabilityOutOfService };
     default:
       return null;
   }
@@ -211,7 +216,7 @@ function Body({
             className={styles.hidden}
             checked={hiddenOnly}
             onChange={(event) => onHiddenOnlyChange(event.currentTarget.checked)}
-            label={hiddenCount}
+            label={<span className={styles.hiddenLabel}>{hiddenCount}</span>}
           />
         ) : (
           projection.hiddenFromOperation > 0 && (
@@ -263,16 +268,29 @@ function Body({
         </Column>
         <Column value="lifecycle" label={wording.columnLifecycleState} sortable={false}>
           {/* The state stands there as a word. Colour alone carries nothing.
-              A hidden alarm names its availability first and keeps its
-              lifecycle beside it: shelving changes neither the condition nor
-              whether anybody acknowledged it. */}
+              A hidden alarm names its availability first, as a small neutral
+              badge, and keeps its lifecycle beside it: shelving changes
+              neither the condition nor whether anybody acknowledged it. The
+              badge says one word, so that the column holds one line; until
+              when and by whom stand in its tooltip, and are spoken with it. */}
           {(state, row) => {
-            const availability = availabilityWord(row, wording, formats);
+            const availability = availabilityWords(row, wording, formats);
+            const badge =
+              availability === null ? null : availability.short === availability.full ? (
+                <Badge className={styles.availability}>{availability.short}</Badge>
+              ) : (
+                <Tooltip content={availability.full}>
+                  <Badge className={styles.availability}>
+                    <span aria-hidden="true">{availability.short}</span>
+                    <VisuallyHidden>{availability.full}</VisuallyHidden>
+                  </Badge>
+                </Tooltip>
+              );
             return (
-              <>
-                {availability !== null && <span className={styles.availability}>{availability}</span>}
+              <span className={styles.state}>
+                {badge}
                 <span className={styles.lifecycle}>{lifecycleWord(state, wording)}</span>
-              </>
+              </span>
             );
           }}
         </Column>

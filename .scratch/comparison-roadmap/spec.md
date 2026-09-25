@@ -1,6 +1,6 @@
 # From the library comparison to work
 
-Status: ready-for-agent
+Status: done
 Date:   2026-09-24
 Origin: the library comparison of 24 Sep 2026; its notes in
 `docs/research/library-comparison-2026-09/`.
@@ -39,3 +39,9 @@ and print, Avatar, Timeline. Each waits for a caller who needs it.
 ## Deliberately not
 
 Recorded by `non-goals-and-honest-docs` as ADR-0032.
+
+## Comments
+
+**Delivered (2026-09-25).** All fifteen specs are implemented and merged, each
+with its final polish round taken on a review page. Still with the user: the
+VoiceOver pass of `listbox-announcements` 02, and the release.

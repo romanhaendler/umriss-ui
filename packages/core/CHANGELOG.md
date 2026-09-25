@@ -33,6 +33,10 @@ commit.
 
 ### Added
 
+- **`--u-shadow-sticky`**: the colour a sticking part's shadow starts from -
+  `@umriss-ui/table`'s pinned blocks and its stuck group header. Light as
+  before; dark is black at 50 % instead of the text colour at 9 %, which read
+  as a glow on the dark ground.
 - **The Windows contrast mode** (`forced-colors: active`, forced-colors 01,
   02). Forced colours drop every box-shadow and repaint every ground, and the
   library draws its rings, edges and depth as box-shadows: a focused control
@@ -144,6 +148,14 @@ commit.
   colours the primary `Button` has an edge of two pixels (the second
   inside, so it stands as large as its neighbours) and a `Badge` keeps its
   dot in the text colour.
+
+- **A new key in `Wording`: a shelf as one word** (for `@umriss-ui/table`'s
+  alarm list, whose availability is now a badge), in English and German:
+  `availabilityShelvedShort` ("Shelved", "Zurückgestellt"). The sentence
+  `availabilityShelved` stays - in the badge's tooltip and in what is
+  spoken. An application that implements the whole `Wording` type itself no
+  longer compiles until it adds it.
+
 - **Two new keys in `Wording`: a table over a server** (for
   `@umriss-ui/table`'s manual mode), in English and German:
   `selectAllOnPage` ("Select all on this page") and `exportPageLabel`
