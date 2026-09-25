@@ -288,6 +288,12 @@ export const GERMAN_WORDING: Wording = {
   scheduleFoldGroup: "Gruppe einklappen",
   scheduleUnfoldGroup: "Gruppe ausklappen",
   scheduleLaneCount: (count) => (count === 1 ? "1 Bahn" : `${count} Bahnen`),
+  scheduleRoleDescription: "Belegungsplan",
+  scheduleSummary: ({ lanes, subtasks, from, to, overlaps, late }) =>
+    `${lanes === 1 ? "1 Bahn" : `${lanes} Bahnen`}, ${subtasks === 1 ? "1 Arbeitsgang" : `${subtasks} Arbeitsgänge`} im Blick von ${from} bis ${to}. ` +
+    `${overlaps === 1 ? "1 Überschneidung" : `${overlaps} Überschneidungen`}, ${late === 1 ? "1 verspäteter Transport" : `${late} verspätete Transporte`}.`,
+  scheduleKeyHelp:
+    "Pfeil links und rechts gehen die Bahn entlang, Pfeil hoch und runter wechseln die Bahn, Pos1 und Ende springen zum ersten und letzten Arbeitsgang, Bild auf und Bild ab springen ein Zehntel der Ansicht. Schließende eckige Klammer folgt einem Transport hinaus, öffnende geht zurück. Leertaste oder Eingabe wählt aus. Alt mit Pfeil links oder rechts schlägt eine Verschiebung vor, Alt und Umschalt ein neues Ende. Escape hebt die Markierung auf.",
   calculationSumSymbol: "+",
   calculationDifferenceSymbol: "−",
   calculationProductSymbol: "×",

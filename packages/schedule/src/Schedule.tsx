@@ -5,7 +5,8 @@
        .corner        above the lane headers
        .dayBand       the coarse band: local days          (holds still)
        .headers       one header per ROW, real text        (scrolls with the lanes only)
-       .plot          catches the pointer
+       .plot          catches the pointer, and is the one tab stop whose keys
+                      walk the subtasks (schedule-a11y, ADR-0030)
          canvas       data: grid, transports, subtasks, findings, selection
          canvas       overlay: hover and the ghost
          .ghostLabel  the ghost's times and findings, while a drag is in flight
@@ -24,7 +25,8 @@
 
    Canvas access happens only inside effects. The canvas is hidden from
    assistive technology; the root names the schedule and the headers are
-   text. */
+   text. What the canvas shows is spoken instead: the plot is described by a
+   summary and reads the **Active subtask** into a live region beside it. */
 
 import {
   forwardRef,
@@ -40,11 +42,11 @@ import {
   type ReactNode,
 } from "react";
 import { DAY, HOUR, MINUTE, type CalendarInput } from "@umriss-ui/charts";
-import { AngleGlyph, useFormats, useWording } from "@umriss-ui/core";
+import { AngleGlyph, VisuallyHidden, useFormats, useWording } from "@umriss-ui/core";
 import { ScheduleContext } from "./context";
 import { ScheduleScene, type PlacingItem, type ScheduleInteraction, type ScheduleTooltipTarget } from "./scene";
 import { DEFAULT_LANE_HEIGHT } from "./sceneView";
-import { ScheduleTooltipContent } from "./ScheduleTooltip";
+import { ScheduleReadout, ScheduleTooltipContent } from "./ScheduleTooltip";
 import type { Intent, IntentKind, Subtask, TransportAttachment, TransportEnds, TransportRoute } from "./model";
 import type { ZoomLimits } from "./timeAxis";
 import type { SnapRaster } from "./snap";
@@ -220,6 +222,7 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
   /* One id per schedule, so that two on a page do not both claim
      `#…-group-presses` for their chevron's `aria-controls`. */
   const plotId = useId();
+  const summaryId = `${plotId}-summary`;
   const rootRef = useRef<HTMLDivElement | null>(null);
   const plotRef = useRef<HTMLDivElement | null>(null);
   const dataRef = useRef<HTMLCanvasElement | null>(null);
@@ -336,6 +339,9 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
   };
 
   const ghost = snapshot.ghost;
+  const spoken = snapshot.spoken;
+  const summary = snapshot.summary;
+  const instant = (at: number) => `${formats.dateShort(new Date(at))} ${formats.time(new Date(at), false)}`;
   /* What a group's chevron controls: every row that lies inside it - its heads
      and lanes while it is open, its one miniature row while it is folded. The
      ids therefore point at elements that exist either way, which is what a
@@ -488,6 +494,19 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
           data-schedule-plot=""
           data-schedule-clip="plot"
           style={{ cursor: snapshot.cursor }}
+          /* One tab stop for the whole plot, with the application role: in
+             browse mode a screen reader keeps the arrow keys for itself
+             (ADR-0030's reasoning holds here unchanged). */
+          tabIndex={0}
+          role="application"
+          aria-roledescription={wording.scheduleRoleDescription}
+          aria-label={ariaLabel}
+          aria-describedby={summaryId}
+          onKeyDown={(event) => {
+            if (scene.key(event.nativeEvent)) event.preventDefault();
+          }}
+          onFocus={(event) => scene.focus(focusVisible(event.currentTarget))}
+          onBlur={() => scene.blur()}
           onPointerDown={(event) => scene.pointerDown(event.nativeEvent)}
           onPointerMove={(event) => scene.pointerMove(event.nativeEvent)}
           onPointerUp={(event) => scene.pointerUp(event.nativeEvent)}
@@ -568,6 +587,10 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
               {ghost.late && <span className={styles.finding}>{wording.scheduleLateTransport}</span>}
             </span>
           )}
+          {/* The ring is drawn inside the plot, not around it: the plot meets
+              the root's clipped edge on the right, where an outer ring would be
+              cut away. */}
+          <span className={styles.focusRing} aria-hidden="true" />
         </div>
         <div className={styles.corner} />
         <div className={styles.tickBand} aria-hidden="true" data-schedule-ticks="" data-schedule-clip="time band">
@@ -584,8 +607,30 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
             </span>
           ))}
         </div>
+        {/* Beside the plot and out of the grid's flow (absolutely placed). */}
+        <VisuallyHidden aria-live="polite">
+          {spoken !== null && (
+            <ScheduleReadout
+              target={spoken.target}
+              lane={spoken.lane === null ? null : (scene.data.lanes.find((lane) => lane.id === spoken.lane)?.label ?? spoken.lane)}
+            />
+          )}
+        </VisuallyHidden>
+        <VisuallyHidden id={summaryId}>
+          {`${wording.scheduleSummary({ ...summary, from: instant(summary.from), to: instant(summary.to) })} ${wording.scheduleKeyHelp}`}
+        </VisuallyHidden>
       </div>
       {children}
     </ScheduleContext.Provider>
   );
 });
+
+/** Did the focus come by keyboard? A click focuses the plot too, and must not
+    start the walk. Where the selector is unknown, it is taken as yes. */
+function focusVisible(el: HTMLElement): boolean {
+  try {
+    return el.matches(":focus-visible");
+  } catch {
+    return true;
+  }
+}
