@@ -67,12 +67,30 @@ describe("computePosition – vertical", () => {
     expect(pos.flipped).toBe(false);
   });
 
-  it("is pulled into the window when it fits on neither side", () => {
-    // 500 high: 262 below the anchor, 294 above it - neither is enough.
+  it("takes the larger side, cut to its room, when it fits on neither", () => {
+    // 500 high: 454 below the anchor, 286 above it - neither is enough.
     const pos = computePosition(anchor(200, 300), { width: 300, height: 500 }, VIEWPORT);
-    expect(pos.top).toBe(800 - 500 - 8);
-    // Taller than the window: the top edge stays in it.
-    expect(computePosition(anchor(200, 300), { width: 300, height: 900 }, VIEWPORT).top).toBe(8);
+    expect(pos.top).toBe(300 + 32 + 6);
+    expect(pos.maxHeight).toBe(800 - 332 - 6 - 8);
+    // Above is larger: it stands above, its bottom edge at the anchor.
+    const high = computePosition(anchor(200, 500), { width: 300, height: 600 }, VIEWPORT);
+    expect(high.flipped).toBe(true);
+    expect(high.maxHeight).toBe(500 - 6 - 8);
+    expect(high.top).toBe(8);
+  });
+
+  it("is pulled into the window, over the anchor, where neither side has room to scroll", () => {
+    // A 480 high window: 213 below, 185 above - both under 240.
+    const small = { width: 1000, height: 480 };
+    const pos = computePosition(anchor(200, 199), { width: 300, height: 400 }, small);
+    expect(pos.maxHeight).toBeUndefined();
+    expect(pos.top).toBe(480 - 400 - 8);
+  });
+
+  it("keeps the window's margin when it fits to the pixel", () => {
+    // 800 - 632 - 6 = 162 below; a 160 high panel would end 2px from the edge.
+    const pos = computePosition(anchor(200, 600), { width: 300, height: 160 }, VIEWPORT);
+    expect(pos.flipped).toBe(true);
   });
 
   it("takes the measured panel height seriously", () => {
@@ -80,6 +98,34 @@ describe("computePosition – vertical", () => {
     const tall = computePosition(anchor(200, 600), { width: 300, height: 400 }, VIEWPORT);
     expect(tight.flipped).toBe(false);
     expect(tall.flipped).toBe(true);
+  });
+});
+
+describe("computePosition – flipping across", () => {
+  it("lines up with the right edge when the left one would stick out", () => {
+    const pos = computePosition(anchor(800, 100), { width: 300, height: 200 }, VIEWPORT);
+    expect(pos.align).toBe("end");
+    expect(pos.left).toBe(920 - 300);
+  });
+
+  it("lines up with the left edge when the right one would stick out", () => {
+    const pos = computePosition(anchor(50, 100), { width: 300, height: 200 }, VIEWPORT, { align: "end" });
+    expect(pos.align).toBe("start");
+    expect(pos.left).toBe(50);
+  });
+
+  it("centres under the anchor where neither edge fits but the middle does", () => {
+    // 390 wide: from 170 it sticks out right, back from 196 out left; centred it fits.
+    const phone = { width: 390, height: 844 };
+    const pos = computePosition(anchor(170, 100, 26), { width: 262, height: 100 }, phone);
+    expect(pos.align).toBe("center");
+    expect(pos.left).toBe(183 - 131);
+  });
+
+  it("keeps the edge asked for, and clamps, where nothing fits", () => {
+    const pos = computePosition(anchor(300, 100), { width: 900, height: 200 }, VIEWPORT, { align: "end" });
+    expect(pos.align).toBe("end");
+    expect(pos.left).toBe(8);
   });
 });
 
@@ -111,9 +157,10 @@ describe("computePosition – preferred side", () => {
     expect(pos.top).toBe(10 + 32 + 6);
   });
 
-  it("stays above when it fits neither above nor below", () => {
+  it("goes below, cut to its room, when it fits neither above nor below", () => {
     const pos = computePosition(anchor(200, 10), { width: 100, height: 900 }, VIEWPORT, { side: "top" });
-    expect(pos.flipped).toBe(false);
+    expect(pos.flipped).toBe(true);
+    expect(pos.maxHeight).toBe(800 - 42 - 6 - 8);
   });
 });
 
@@ -140,7 +187,7 @@ describe("computePosition – visible part of the window", () => {
 
   it("clamps to the visible edges, not to the window's", () => {
     expect(computePosition(anchor(20, 350), { width: 300, height: 200 }, VISIBLE).left).toBe(40 + 8);
-    expect(computePosition(anchor(300, 350), { width: 300, height: 200 }, VISIBLE).left).toBe(40 + 390 - 300 - 8);
+    expect(computePosition(anchor(380, 350), { width: 300, height: 200 }, VISIBLE).left).toBe(40 + 390 - 300 - 8);
   });
 
   it("pulls a panel that fits nowhere into the visible part", () => {

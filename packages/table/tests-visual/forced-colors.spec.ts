@@ -26,15 +26,19 @@ const scrolled = async (target: Locator) => {
   await expect(area).toHaveAttribute("data-under-start", "");
 };
 
-const STATES: Array<{ pageId: string; exampleId: string; act?: (target: Locator) => Promise<void> }> = [
-  { pageId: "column", exampleId: "pinned-both-sides", act: scrolled },
+/* `state` names a picture the shared suite takes too - the first example of a
+   page, at rest: `selection` is its page's first example and is photographed
+   here ticked. */
+const STATES: Array<{ pageId: string; exampleId: string; state?: string; act?: (target: Locator) => Promise<void> }> = [
+  { pageId: "width-and-pinning", exampleId: "pinned-both-sides", act: scrolled },
   { pageId: "grouping", exampleId: "in-bands" },
   { pageId: "grouping", exampleId: "a-whole-group-selected", act: tick([0]) },
-  { pageId: "table", exampleId: "selection", act: tick([1, 2]) },
+  { pageId: "selection", exampleId: "selection", state: "ticked", act: tick([1, 2]) },
 ];
 
-for (const { pageId, exampleId, act } of STATES) {
-  test(`Under forced colours: ${pageId}--${exampleId}`, async ({ page }, testInfo) => {
+for (const { pageId, exampleId, state, act } of STATES) {
+  const name = `${pageId}--${exampleId}${state ? `--${state}` : ""}`;
+  test(`Under forced colours: ${name}`, async ({ page }, testInfo) => {
     await openExample(page, pageId, exampleId);
     const target = page.locator(`[data-example="${exampleId}"]`);
     await target.scrollIntoViewIfNeeded();
@@ -42,12 +46,12 @@ for (const { pageId, exampleId, act } of STATES) {
     /* Out of the way: the pointer resting on the last ticked row would
        photograph its hover. */
     await page.mouse.move(0, 0);
-    await expect(target).toHaveScreenshot(`forced-${pageId}--${exampleId}-${testInfo.project.name}.png`);
+    await expect(target).toHaveScreenshot(`forced-${name}-${testInfo.project.name}.png`);
   });
 }
 
 test("A focused virtual row under forced colours", async ({ page }, testInfo) => {
-  await openExample(page, "table", "virtualisation");
+  await openExample(page, "virtualisation", "virtualisation");
   const target = page.locator('[data-example="virtualisation"]');
   await target.scrollIntoViewIfNeeded();
   await target.locator("tbody tr[tabindex='0']").focus();

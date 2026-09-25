@@ -24,6 +24,29 @@ export type { ExampleAddress };
 export const EXAMPLE_ADDRESSES: readonly ExampleAddress[] = exampleAddresses(EXAMPLES_DIR);
 
 /** A sample for the accessibility check (table-demo, Testing Decisions): the
-    scenarios page, the two long pages, the filters with their panels, the row actions
-    with their menu, the column menu with its dialog and the alarm list. */
-export const SAMPLE = ["scenarios", "table", "column", "filter", "rowactions", "columnmenu", "alarmlist"] as const;
+    scenarios page, every page that was once part of the two long pages `Table`
+    and `Column` (the demo's features, table-demo-features), the filters with
+    their panels, the row actions with their menu, the column menu with its
+    dialog and the alarm list. */
+export const SAMPLE = [
+  "scenarios",
+  "table",
+  "provider",
+  "column",
+  "formats",
+  "width-and-pinning",
+  "presets",
+  "sorting",
+  "pre-filter",
+  "selection",
+  "row-appearance",
+  "view",
+  "virtualisation",
+  "manual-mode",
+  "grid-mode",
+  "edits",
+  "filter",
+  "rowactions",
+  "columnmenu",
+  "alarmlist",
+] as const;

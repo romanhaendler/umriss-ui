@@ -32,6 +32,8 @@ A demo in `packages/table/demo`, built exactly like ui's: one page per building 
 
 The shell it runs in is shared with ui's demo rather than copied a second time (decision A). Its pages are the package's building blocks, with `Table` and `Column` carrying most of the examples (decision B).
 
+> **Reversed (Sep. 2026):** decision B is undone. The table demo is cut by feature, as the schedule's is - `Table` had grown to nineteen examples. The glossary's **Page** and the head of `demo/outline.ts` hold the rule now.
+
 ## User Stories
 
 1. As a developer new to the package, I want one page that shows the smallest working table and the call that produced it, so that I can start by copying.

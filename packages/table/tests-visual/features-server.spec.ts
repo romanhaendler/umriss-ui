@@ -12,7 +12,7 @@ test.skip(({ colorScheme }) => colorScheme === "dark", "Behaviour tests only onc
 const ID = "a-million-rows-on-a-server";
 
 test("the next page: busy over the previous page's height, then the server's rows", async ({ page }) => {
-  await openExample(page, "table", ID);
+  await openExample(page, "manual-mode", ID);
   const example = page.locator(`[data-example="${ID}"]`);
   const table = example.locator("table");
   const before = await table.boundingBox();
@@ -26,7 +26,7 @@ test("the next page: busy over the previous page's height, then the server's row
 });
 
 test("a list filter offers what the server names, and a condition reaches it", async ({ page }) => {
-  await openExample(page, "table", ID);
+  await openExample(page, "manual-mode", ID);
   const example = page.locator(`[data-example="${ID}"]`);
   await example.getByRole("button", { name: "Filter Service" }).click();
   const panel = page.getByRole("dialog", { name: "Filter Service" });
@@ -40,7 +40,7 @@ test("a list filter offers what the server names, and a condition reaches it", a
 });
 
 test("'select all' selects the page and says so; a key from another page stays", async ({ page }) => {
-  await openExample(page, "table", ID);
+  await openExample(page, "manual-mode", ID);
   const example = page.locator(`[data-example="${ID}"]`);
   await example.getByRole("checkbox", { name: "Select REQ-0000001" }).check({ force: true });
   await example.getByRole("button", { name: "Next" }).click();

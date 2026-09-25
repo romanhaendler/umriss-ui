@@ -28,21 +28,21 @@ async function scrollTo(page: Page, where: "middle" | "end") {
 }
 
 test("scrolled into the middle: both blocks stay, both shadows show", async ({ page }, info) => {
-  await openExample(page, "column", ID);
+  await openExample(page, "width-and-pinning", ID);
   const area = await scrollTo(page, "middle");
   await expect(area).toHaveAttribute("data-under-end", "");
   await expect(page.locator(`[data-example="${ID}"]`)).toHaveScreenshot(shot("middle", info.project.name));
 });
 
 test("scrolled to the end: nothing lies under the end block, its shadow is gone", async ({ page }, info) => {
-  await openExample(page, "column", ID);
+  await openExample(page, "width-and-pinning", ID);
   const area = await scrollTo(page, "end");
   await expect(area).not.toHaveAttribute("data-under-end", "");
   await expect(page.locator(`[data-example="${ID}"]`)).toHaveScreenshot(shot("end", info.project.name));
 });
 
 test("the column menu with a column pinned to each side (table-column-pinning 02)", async ({ page }, info) => {
-  await openExample(page, "column", ID);
+  await openExample(page, "width-and-pinning", ID);
   await page.locator(`[data-example="${ID}"]`).getByRole("button", { name: "Columns" }).click();
   const menu = page.getByRole("dialog", { name: "Show, hide and arrange columns" });
   await expect(menu.getByRole("button", { name: "Unpin Machine" })).toBeVisible();
@@ -51,7 +51,7 @@ test("the column menu with a column pinned to each side (table-column-pinning 02
 });
 
 test("grouped and scrolled: a group header's label and aggregates stick in their blocks", async ({ page }, info) => {
-  await openExample(page, "column", ID);
+  await openExample(page, "width-and-pinning", ID);
   const table = page.locator(`[data-example="${ID}"]`);
   await table.getByRole("button", { name: "Columns" }).click();
   await page.getByRole("button", { name: "Group by Area" }).click();
