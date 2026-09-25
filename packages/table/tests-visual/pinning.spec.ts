@@ -41,6 +41,15 @@ test("scrolled to the end: nothing lies under the end block, its shadow is gone"
   await expect(page.locator(`[data-example="${ID}"]`)).toHaveScreenshot(shot("end", info.project.name));
 });
 
+test("the column menu with a column pinned to each side (table-column-pinning 02)", async ({ page }, info) => {
+  await openExample(page, "column", ID);
+  await page.locator(`[data-example="${ID}"]`).getByRole("button", { name: "Columns" }).click();
+  const menu = page.getByRole("dialog", { name: "Show, hide and arrange columns" });
+  await expect(menu.getByRole("button", { name: "Unpin Machine" })).toBeVisible();
+  await page.mouse.move(0, 0);
+  await expect(menu).toHaveScreenshot(shot("menu", info.project.name));
+});
+
 test("grouped and scrolled: a group header's label and aggregates stick in their blocks", async ({ page }, info) => {
   await openExample(page, "column", ID);
   const table = page.locator(`[data-example="${ID}"]`);

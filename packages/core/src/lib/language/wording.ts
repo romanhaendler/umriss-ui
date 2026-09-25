@@ -218,6 +218,10 @@ export interface Wording {
   /** The two buttons that move a column in the column menu. */
   columnForward: (column: string) => string;
   columnBackward: (column: string) => string;
+  /** The column menu's pin keys: to a side, and back when it is pinned there. */
+  pinColumnToStart: (column: string) => string;
+  pinColumnToEnd: (column: string) => string;
+  unpinColumn: (column: string) => string;
   /** The export button. */
   exportLabel: string;
   /** The export's file name, where the application names none. */
@@ -590,6 +594,9 @@ export const DEFAULT_WORDING: Wording = {
   arrangeColumns: "Show, hide and arrange columns",
   columnForward: (column) => `Move ${column} forward`,
   columnBackward: (column) => `Move ${column} backward`,
+  pinColumnToStart: (column) => `Pin ${column} to start`,
+  pinColumnToEnd: (column) => `Pin ${column} to end`,
+  unpinColumn: (column) => `Unpin ${column}`,
   exportLabel: "Export",
   exportFileName: "table.csv",
   tableSearchPlaceholder: "Search …",
