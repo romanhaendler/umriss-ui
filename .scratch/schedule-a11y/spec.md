@@ -1,6 +1,6 @@
 # The schedule for keyboard and screen reader
 
-Status: ready-for-agent
+Status: done
 Date:   2026-09-24
 Origin: the library comparison of 24 Sep 2026 (notes in `docs/research/library-comparison-2026-09/`); order in `.scratch/comparison-roadmap/spec.md`.
 
@@ -62,6 +62,10 @@ Ctrl and Alt) is closed by matching the character whatever those modifiers.
 Pictures for the morning: `review/before-schedule-*`,
 `review/after-active-subtask-*`, `review/after-active-transport-*`, light and
 dark - to be taken or overturned in ticket 06.
+
+**Ticket 06, the user's answer (2026-09-25).** Both: `]`/`[` stay, and `t` /
+Shift+T are accepted as their equals, named in the key help and so in the
+summary. The focus ring takes the plan's radius (`--u-radius-md`).
 
 **S2, the visible window (ticket 01).** The walk covers the whole row, and the
 view pans to the active subtask; ADR-0030 kept the charts inside the visible

@@ -160,6 +160,19 @@ describe("along a transport", () => {
     expect(active(scene)).toBe("t1");
   });
 
+  it("takes t out and Shift+T back as the brackets' equals, and leaves Ctrl and Alt with t alone", () => {
+    const { scene } = sceneWith();
+    scene.focus(true);
+    expect(scene.key(key("t"))).toBe(true);
+    expect(active(scene)).toBe("t1");
+    scene.key(key("t"));
+    expect(active(scene)).toBe("w1");
+    expect(scene.key(key("T", { shiftKey: true }))).toBe(true);
+    expect(active(scene)).toBe("t1");
+    expect(scene.key(key("t", { ctrlKey: true }))).toBe(false);
+    expect(scene.key(key("t", { altKey: true }))).toBe(false);
+  });
+
   it("walks on from a transport's first stop", () => {
     const { scene } = sceneWith();
     scene.focus(true);
