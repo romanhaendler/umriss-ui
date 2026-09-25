@@ -24,6 +24,17 @@ export default defineConfig({
         replacement: fileURLToPath(new URL("./src/lib/language/de.ts", import.meta.url)),
       },
       { find: /^@umriss-ui\/core$/, replacement: fileURLToPath(new URL("./src/index.ts", import.meta.url)) },
+      /* The control room (control-room-demo, R1) is the one page of any demo
+         that imports every package, as a consumer would. Their sources and not
+         their `dist/`, for the reason the other demos give about core; and by
+         alias rather than by a devDependency, because a devDependency of core
+         on the table would close a cycle with the table's peer dependency on
+         core. The lint lets `demo/` do it and keeps it out of `src/`
+         (eslint.config.js). */
+      { find: /^@umriss-ui\/charts$/, replacement: fileURLToPath(new URL("../charts/src/index.ts", import.meta.url)) },
+      { find: /^@umriss-ui\/table$/, replacement: fileURLToPath(new URL("../table/src/index.ts", import.meta.url)) },
+      { find: /^@umriss-ui\/schedule$/, replacement: fileURLToPath(new URL("../schedule/src/index.ts", import.meta.url)) },
+      { find: /^@umriss-ui\/calculation$/, replacement: fileURLToPath(new URL("../calculation/src/index.ts", import.meta.url)) },
     ],
     dedupe: ["react", "react-dom"],
   },
