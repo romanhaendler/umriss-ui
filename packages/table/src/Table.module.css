@@ -1254,9 +1254,20 @@
       border-inline-end-width: 2px;
     }
 
-    /* The group's share is a ground too: it takes the system's text colour. */
+    /* The group's share is a ground too: it takes the system's text colour,
+       as it took the ink before. */
     .shareBar {
       background: CanvasText;
+    }
+
+    /* A pinned block's inner edge is a gradient, which forced colours drop:
+       while content lies under the block it becomes a line in the text
+       colour. */
+    .pinStartEdge::before,
+    .pinEndEdge::before {
+      width: 0;
+      background: none;
+      border-left: 1px solid CanvasText;
     }
   }
 }
