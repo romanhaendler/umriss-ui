@@ -50,8 +50,6 @@ const PENDING: readonly string[] = [
   "packages/core/demo/examples/Stepper/04-a-changeover.tsx",
   "packages/core/demo/examples/Switch/03-hand-or-automatic.tsx",
   "packages/core/demo/examples/Switch/04-functions-of-a-line.tsx",
-  "packages/core/demo/examples/UmrissProvider/01-the-second-language.tsx",
-  "packages/core/demo/examples/UmrissProvider/02-entry-by-entry.tsx",
   "packages/core/demo/outline.ts",
   "packages/demo/src/worlds/controlling.ts",
   "packages/demo/src/worlds/logistics.ts",
