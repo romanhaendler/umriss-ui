@@ -58,6 +58,16 @@
     background: var(--u-color-accent);
   }
 
+  /* Invalid, the track takes the fields' danger edge; the thumb stays as it
+     is (core-foundations 07). */
+  .range[aria-invalid="true"]::-webkit-slider-runnable-track {
+    box-shadow: 0 0 0 1px var(--u-color-danger);
+  }
+
+  .range[aria-invalid="true"]::-moz-range-track {
+    box-shadow: 0 0 0 1px var(--u-color-danger);
+  }
+
   .range::-webkit-slider-thumb {
     width: var(--_thumb);
     height: var(--_thumb);

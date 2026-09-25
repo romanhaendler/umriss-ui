@@ -1,6 +1,7 @@
 import { forwardRef, useId, useRef, useState } from "react";
 import type { CSSProperties, HTMLAttributes, KeyboardEvent, PointerEvent, ReactNode } from "react";
 import { cx } from "../../lib/cx";
+import { GripGlyph } from "../../lib/glyphs";
 import { useWording } from "../../lib/language";
 import { mergeRefs } from "../../lib/mergeRefs";
 import styles from "./Splitter.module.css";
@@ -164,7 +165,9 @@ export const Splitter = forwardRef<HTMLDivElement, SplitterProps>(function Split
         onPointerCancel={() => {
           dragging.current = null;
         }}
-      />
+      >
+        <GripGlyph className={styles.grip} />
+      </div>
       <div className={styles.pane} inert={value >= 100 || undefined}>
         {children[1]}
       </div>
