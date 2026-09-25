@@ -46,6 +46,16 @@ export function hatchFor(index: number): Hatch {
   return HATCHES[place(index, HATCHES.length)] as Hatch;
 }
 
+/** The hatch of each state by its name (charts-alternatives 04): the place
+    its name first takes across the chart's bands, in their order. Two bands
+    listing one state at different places hatch it alike, and the legend,
+    which shows it once, agrees with both. A single band keeps its index. */
+export function stateHatches(bands: readonly (readonly { label: string }[])[]): Map<string, Hatch> {
+  const out = new Map<string, Hatch>();
+  for (const states of bands) for (const { label } of states) if (!out.has(label)) out.set(label, hatchFor(out.size));
+  return out;
+}
+
 /** An index into a list of `n`, cycling, never negative. */
 function place(index: number, n: number): number {
   return ((index % n) + n) % n;

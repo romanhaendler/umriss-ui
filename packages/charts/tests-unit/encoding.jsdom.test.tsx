@@ -6,8 +6,8 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ReactNode } from "react";
-import { Bar, Chart, Legend, Line, Matrix, Scatter, StateBand, XAxis, YAxis } from "../src";
-import { renderChart, sizePlot } from "./renderChart";
+import { Area, Bar, Chart, Legend, Line, Matrix, Scatter, StateBand, Tooltip, XAxis, YAxis } from "../src";
+import { focusPlot, press, renderChart, sizePlot } from "./renderChart";
 
 interface Row {
   t: number;
@@ -96,6 +96,39 @@ describe("The legend under encoding by marks", () => {
     expect(hatch).not.toBe("");
   });
 
+  /* charts-alternatives 04: an area shows its dash and its fill's hatch, as
+     the plot draws it. */
+  it("gives an area its dash and its hatched fill", async () => {
+    const [, area] = await legendOf(
+      "marks",
+      <>
+        <Line accessor={(d: Row) => d.a} name="A" />
+        <Area accessor={(d: Row) => d.b} name="B" />
+      </>,
+    );
+    expect(area?.querySelector("line")?.getAttribute("stroke-dasharray")).toBe("7 4");
+    expect(area?.querySelector("rect + path")?.getAttribute("d") ?? "").not.toBe("");
+  });
+
+  it("hatches a state by its name, alike in every band that lists it", async () => {
+    const items = await legendOf(
+      "marks",
+      <>
+        <StateBand accessor={(d: Row) => d.s} states={[{ label: "Running", color: "green" }, { label: "Fault", color: "red" }]} name="One" />
+        <StateBand accessor={(d: Row) => d.s} states={[{ label: "Setup", color: "blue" }, { label: "Fault", color: "red" }]} name="Two" />
+      </>,
+    );
+    const hatchOf = (name: string) =>
+      items.find((i) => i.textContent === name)?.querySelector("rect + path")?.getAttribute("d") ?? "";
+    // Fault is second in both lists and takes the second hatch; Setup, first
+    // in its band but third by name, the third - not the plain first.
+    expect(items).toHaveLength(3);
+    expect(hatchOf("Running")).toBe("");
+    expect(hatchOf("Fault")).not.toBe("");
+    expect(hatchOf("Setup")).not.toBe("");
+    expect(hatchOf("Setup")).not.toBe(hatchOf("Fault"));
+  });
+
   it("hatches each state by its index, the first plain", async () => {
     const states = [
       { label: "Running", color: "green" },
@@ -119,6 +152,47 @@ describe("The legend under encoding by marks", () => {
     const [, b] = await legendOf(undefined, lines);
     expect(b?.querySelector(".uc-legend-chip")).toBeNull();
     expect(b?.querySelector("line")?.getAttribute("stroke-dasharray")).toBe("7 4");
+  });
+
+  /* charts-alternatives 04: the contrast mode takes a chip's background, so
+     the tooltip's chips draw the legend's marks instead. */
+  it("gives the tooltip the legend's marks under forced colours", async () => {
+    const real = window.matchMedia;
+    vi.spyOn(window, "matchMedia").mockImplementation((query: string) =>
+      query === "(forced-colors: active)"
+        ? ({ matches: true, addEventListener: () => undefined } as unknown as MediaQueryList)
+        : real(query),
+    );
+    const r = await renderChart(
+      <Chart data={data} ariaLabel="Marks">
+        <XAxis accessor={(d: Row) => d.t} />
+        <YAxis accessor={(d: Row) => d.b} />
+        {lines}
+        <Tooltip />
+      </Chart>,
+    );
+    unmount = r.unmount;
+    await focusPlot(r.host);
+    await press(r.host, "ArrowLeft");
+    const rows = [...r.host.querySelectorAll(".uc-tooltip-row")];
+    expect(rows).toHaveLength(2);
+    expect(rows.some((row) => row.querySelector(".uc-tooltip-chip") !== null)).toBe(false);
+    expect(rows[1]?.querySelector("svg line")?.getAttribute("stroke-dasharray")).toBe("7 4");
+  });
+
+  it("keeps the tooltip's colour chips otherwise", async () => {
+    const r = await renderChart(
+      <Chart data={data} ariaLabel="Marks" encoding="marks">
+        <XAxis accessor={(d: Row) => d.t} />
+        <YAxis accessor={(d: Row) => d.b} />
+        {lines}
+        <Tooltip />
+      </Chart>,
+    );
+    unmount = r.unmount;
+    await focusPlot(r.host);
+    await press(r.host, "ArrowLeft");
+    expect(r.host.querySelectorAll(".uc-tooltip-row .uc-tooltip-chip")).toHaveLength(2);
   });
 
   it("shows a matrix' steps side by side, each with its hatch", async () => {

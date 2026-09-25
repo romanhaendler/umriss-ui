@@ -34,7 +34,7 @@ Screenshot pages carry their name in brackets.
 | A summary the plot is described by: series, visible stretch, each series' range there, the keys | charts-a11y R10 | Unit (jsdom readout) |
 | `+`/`−`, Shift+←/→ and `0` zoom, pan and show everything - only with `onDomainChange` | charts-a11y Q6 | Unit (jsdom zoom keys) |
 | The charts' own wording, English by default, German from `@umriss-ui/charts/wording/de`; `empty` wins over it | ADR-0031 | Unit (jsdom wording) |
-| `encoding="marks"`: each series a dash and a marker shape (line, area outline, scatter) or a hatch (bar, area fill) by its palette place - the first plain -, a caller's `dash` winning; a state and a matrix step hatched by index, a limit band hatched in its colour; the legend's chips show the same; default off | charts-alternatives C3 | Unit (marks, draw, jsdom encoding), Screenshot (`told-apart-without-colour`, `marks-on-every-kind`, `bands-limits-and-cells`) |
+| `encoding="marks"`: each series a dash and a marker shape (line, area outline, scatter) or a hatch (bar, area fill) by its palette place - the first plain -, a caller's `dash` winning; a state hatched by its name, alike in every band that lists it, a matrix step by index, a limit band hatched in its colour; the legend's chips show the same, an area's its dash over its hatched fill; default off | charts-alternatives C3, 04 | Unit (marks, draw, jsdom encoding), Screenshot (`told-apart-without-colour`, `marks-on-every-kind`, `bands-limits-and-cells`) |
 | DEV warning without `ariaLabel` | R-7.6 | Manual |
 | Series kinds can be mixed in one chart | ADR-0002 | Screenshot (`mixed`), Interaction |
 | Every series kind can be bound to every axis | R-4.12 | Unit (scene) |
@@ -137,6 +137,7 @@ Screenshot pages carry their name in brackets.
 | `tone`: a role the theme resolves | Q11 | Unit (jsdom tone) |
 | Downsampling as the line's, the baseline channel taken at the same points | Q20 | Unit (downsample) |
 | `stack`: areas of one id stand on the ones registered before, the stack below as their baseline channel; a gap stacks as zero; downsampled after stacking, each member keeping its own extremes per pixel column | charts-stacking K1-K3 | Unit (stack, jsdom stacking), Screenshot (`stacked`) |
+| Below a stacked area's outline a 1px line in the ground's colour parts its fill from the member above, in both encodings | charts-stacking 04 | Unit (draw), Screenshot (`stacked`) |
 
 ## `Bar`
 
@@ -162,6 +163,7 @@ Screenshot pages carry their name in brackets.
 | A stack's extent from its foot to its highest top; a hidden member gives up its place | charts-stacking K2 | Unit (jsdom stacking) |
 | `normalize` on any member, a hidden one too: every x of the stack sums to 100 %, the y axis reads in percent without a `tickFormat` (the sign from the wording); a line on that axis keeps its own values | charts-stacking K5 | Unit (stack, jsdom stacking), Screenshot (`percent`) |
 | A Bar and an Area with the same id stack on each other - the key is the id and the two axes, not the kind | charts-stacking K1 | Unit (stack) |
+| Between two stacked bars a 1px line in the ground's colour - `Canvas` under forced colours -, in both encodings; none on the baseline | charts-stacking 04 | Unit (draw), Screenshot (`stacked`, `percent`) |
 | Under forced colours and `encoding="marks"` a stack's members are told apart by their hatches | C3, C4 | Manual (both stacked examples, forced colours emulated) |
 
 ## `Scatter`
@@ -294,7 +296,7 @@ Screenshot pages carry their name in brackets.
 | Each value in the tooltip's format - the series' `format`, else its y axis' `tickFormat`; a gap and a missing reading leave the cell empty; a state by its name; a corridor by both edges | C1 | Unit (jsdom data table) |
 | A stacked series lists its own value, not its top; no total column | charts-stacking K4 | Unit (jsdom stacking) |
 | The series of one x axis merged on their x; a matrix in a table of its own, by column and row | C1 | Unit (table) |
-| Above 500 rows the downsampled course - first, lowest, highest and last per stretch -, and the caption says from how many readings | C2 | Unit (table, jsdom data table), Screenshot (`open-a-week-as-a-table`) |
+| Above 500 rows the downsampled course - first, lowest, highest and last per stretch; a state band its changes of state, as the keys walk it -, and the caption says from how many readings | C2, charts-alternatives 04 | Unit (table, jsdom data table), Screenshot (`open-a-week-as-a-table`) |
 | Column and row headings (`scope`), a caption, the scrolling panel a tab stop of its own; axe clean | C1 | Unit (jsdom data table), Accessibility |
 | Its words from the chart's wording, German beside them | C5 | Unit (table, jsdom data table) |
 
@@ -307,7 +309,7 @@ Screenshot pages carry their name in brackets.
 | A MutationObserver on `documentElement` | R-1.7 | Interaction (theme switch) |
 | `invalidateTheme()` | R-1.7 | Manual |
 | Dark mode without code of its own | R-1.8 | Screenshot (dark) |
-| Under `forced-colors: active` the theme resolves to system colours - `CanvasText` for text, axes and every series, `Canvas` for the ground, `GrayText` for the grid, `Highlight` for warning and alarm; a caller's colour becomes `CanvasText` - and encoding by marks switches on by itself; entering or leaving the mode reads the theme anew | charts-alternatives C4 | Unit (jsdom theme, jsdom encoding), Interaction (forced colours: chip and canvas), Screenshot (forced colours × 4 examples) |
+| Under `forced-colors: active` the theme resolves to system colours - `CanvasText` for text, axes and every series, `Canvas` for the ground, `GrayText` for the grid, `Highlight` for warning and alarm; a caller's colour becomes `CanvasText` - and encoding by marks switches on by itself, the tooltip's chips drawing the legend's marks; entering or leaving the mode reads the theme anew | charts-alternatives C4, 04 | Unit (jsdom theme, jsdom encoding), Interaction (forced colours: chip and canvas), Screenshot (forced colours × 4 examples) |
 
 ## Performance (R-5, reference run)
 
