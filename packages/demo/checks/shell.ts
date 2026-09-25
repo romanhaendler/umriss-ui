@@ -141,10 +141,10 @@ test("the palette filters and jumps", async ({ page }) => {
   /* CHANGED (see the head, point 1): every entry used to stand here. The
      empty query is now not one that matches everything but one that matches
      nothing. */
-  await expect(page.getByRole("option")).toHaveCount(0);
+  await expect(page.getByRole("dialog").getByRole("option")).toHaveCount(0);
 
   await field.fill(p.palettePage.query);
-  const finds = page.getByRole("option");
+  const finds = page.getByRole("dialog").getByRole("option");
   await expect(finds.first()).toContainText(p.palettePage.name);
   // The find names its rubric - otherwise one does not know, after the jump,
   // where one has landed.
@@ -160,7 +160,7 @@ test("the palette finds an example too, under its component", async ({ page }) =
   await page.keyboard.press("ControlOrMeta+k");
   const field = page.getByRole("combobox", { name: "Search a page or example" });
   await field.fill(p.example.title);
-  const finds = page.getByRole("option");
+  const finds = page.getByRole("dialog").getByRole("option");
   await expect(finds.first()).toContainText(p.example.title);
   await expect(finds.first()).toContainText(p.example.pageName);
   await field.press("Enter");
@@ -175,7 +175,7 @@ test("the palette finds abbreviations and is operable with the arrows", async ({
      as a substring. `dtp` is the case the module was built for - as a
      substring it found nothing. */
   await field.fill(p.abbreviation.query);
-  const finds = page.getByRole("option");
+  const finds = page.getByRole("dialog").getByRole("option");
   await expect(finds.first()).toContainText(p.abbreviation.find);
 
   /* And the characters that explain the find stand there marked - the right
@@ -199,7 +199,7 @@ test("before the first character the palette is only the field, and then grows",
   expect(restingHeight).toBeLessThan(70);
 
   await field.fill(p.pointer.wide);
-  await expect(page.getByRole("option").first()).toBeVisible();
+  await expect(page.getByRole("dialog").getByRole("option").first()).toBeVisible();
   await expect
     .poll(async () => (await pane.boundingBox())!.height)
     .toBeGreaterThan(restingHeight + 100);
@@ -217,7 +217,7 @@ test("the resting pointer does not take the tick away from the keyboard", async 
      it stands here. */
   await page.keyboard.press("ControlOrMeta+k");
   const field = page.getByRole("combobox", { name: "Search a page or example" });
-  const finds = page.getByRole("option");
+  const finds = page.getByRole("dialog").getByRole("option");
 
   await field.fill(p.pointer.wide);
   const earlier = await finds.count();
@@ -294,7 +294,9 @@ test("Escape closes the palette and gives focus back", async ({ page }) => {
 
 
 test("the shell is accessible - header, sidebar, scenarios page", async ({ page }) => {
-  const result = await new AxeBuilder({ page }).withTags(STANDARDS).analyze();
+  /* The screens themselves are the demo's, checked with its pages
+     (accessibility.spec.ts, "scenarios"); here the frame around them. */
+  const result = await new AxeBuilder({ page }).exclude(".scenarioStage").withTags(STANDARDS).analyze();
   expect(result.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target).join(" ")}`)).toEqual([]);
 });
 

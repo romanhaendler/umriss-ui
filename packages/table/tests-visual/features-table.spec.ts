@@ -34,7 +34,9 @@ test("The head of the table stays put while one searches, filters and resets", {
   await openScenario(page, "work-through-orders");
   const table = page.locator('[data-scenario="work-through-orders"]');
   const rows = table.locator("tbody tr");
-  const top = async () => (await table.locator("thead").boundingBox())!.y;
+  /* Measured against the scenario, not the window: the scenario stands last on
+     its page, and a page that grows shorter moves the scroll position. */
+  const top = async () => (await table.locator("thead").boundingBox())!.y - (await table.boundingBox())!.y;
   const start = await top();
 
   await table.getByPlaceholder("Order or customer").pressSequentially("North");
