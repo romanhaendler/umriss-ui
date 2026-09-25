@@ -38,6 +38,16 @@ as it stood.
 - **Pictures**: six new baselines (the page head, two examples, both themes);
   the overview's two moved, as they had to - 48 pages in 9 rubrics, 98
   examples, and the ninth card. No palette picture moved.
+- **The review** (standards and spec, since `main`) found: the region a skip
+  link lands on showed no focus (now the library's ring); the kiln's numbers
+  written out in five places (now one `KILN`); tiles fired while no batch was
+  in the kiln, so the OEE and the plan counted different tiles (now only a
+  batch fires, and a test holds the sum); the demonstration opened after the
+  crossing, when only a cleared alarm was left of it (now a few minutes after,
+  with the alarm standing); the lint exemption covering the whole core demo
+  (now the page and its plant). Recorded, not changed: the tiles age on the
+  wall while the plant is paused, which is what a plant whose data stopped
+  looks like; and reduced motion is read once, when the page opens.
 - **Left for the polish round (03)**: the region "Alarms" repeats the list's
   own heading, and the batches carry no names on their bars.
 

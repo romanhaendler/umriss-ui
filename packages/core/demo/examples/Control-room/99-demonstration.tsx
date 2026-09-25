@@ -25,6 +25,7 @@ import { Calculation, Difference, Given, Product, Quotient, Ref } from "@umriss-
 import {
   ALARM_TYPES,
   IDEAL_CYCLE_MINUTES,
+  KILN,
   KILN_LIMITS,
   SHIFT_MINUTES,
   alarmsAt,
@@ -46,30 +47,33 @@ export const shows = ["../../plant.ts"];
    OEE and the points the control chart marks - because each reads the same
    minute, and none is told about the others.
 
-   The shift runs: one plant minute per second, from 11:00. It stands still
-   under `prefers-reduced-motion`, and Pause stops it for everybody else - a
-   page that updates on its own for minutes owes its reader a way to stop it.
+   The shift runs: one plant minute per second, from a few minutes after the
+   kiln crossed its alarm limit, while the alarm stands. It stands still under
+   `prefers-reduced-motion`, and Pause stops it for everybody else - a page
+   that updates on its own for minutes owes its reader a way to stop it.
    The clock advances by what the wall clock says has passed, so a page whose
-   clock is frozen (the screenshot suite freezes it) stands still at 11:00 and
+   clock is frozen (the screenshot suite freezes it) stands still there and
    is the same picture on every run.
 
    Every part keeps its own keyboard model; the page adds a landmark per
    region and a row of skip links to reach each one. */
 
 const SHIFT = plant(17);
-const FROM = 300;
+const CROSSING = SHIFT.readings.find((one) => one.kiln > KILN.alarm)!.minute;
 const LAST = SHIFT_MINUTES - 1;
 const SECOND = 1000;
 const MIN = 60_000;
 /* The shift begins at 06:00 today; everything below counts from there. */
-const START = new Date(new Date(Date.now()).setHours(6, 0, 0, 0)).getTime();
+const START = new Date(new Date().setHours(6, 0, 0, 0)).getTime();
 const at = (minute: number) => START + minute * MIN;
 
 const AGES: FreshnessAges = { stale: 5 * MIN, lost: 30 * MIN };
 
-/* The OEE is read against its own rule: a target, and two bounds below it. */
+const OEE_TARGET = 0.85;
+
+/* The OEE is read against its own rule: a target, and two limits below it. */
 const OEE_LIMITS = {
-  target: 85,
+  target: OEE_TARGET * 100,
   limits: [
     { value: 75, side: "lower", severity: "warning" },
     { value: 65, side: "lower", severity: "alarm" },
@@ -105,7 +109,7 @@ const STEPS: readonly Subtask[] = SHIFT.batches.flatMap((batch) =>
   })),
 );
 
-const PLAN_DOMAIN: readonly [number, number] = [at(-30), at(SHIFT_MINUTES + 90)];
+const PLAN_DOMAIN: readonly [number, number] = [at(-75), at(SHIFT_MINUTES + 30)];
 
 type Point = { t: number; kiln: number };
 type Measured = Sample & { t: number };
@@ -113,11 +117,17 @@ type Measured = Sample & { t: number };
 const inKiln = (minute: number): Batch | undefined =>
   SHIFT.batches.find((batch) => batch.kiln[0] <= minute && minute < batch.kiln[1]);
 
+/* The room opens six minutes or so after the crossing, at the first minute a
+   batch is in the kiln: the alarm stands, and there is a batch to look at. */
+const FROM = SHIFT.readings.find((one) => one.minute >= CROSSING + 6 && inKiln(one.minute) !== undefined)!.minute;
+
 /** The plant's clock: a minute per second while it runs, never past the end
     of the shift, and never on its own when the wall clock stands still. */
 function usePlantMinute(): { minute: number; wall: number; running: boolean; setRunning: (running: boolean) => void } {
   /* The minute and the wall-clock instant it was reached at, together: a
-     reading taken now is as old as the wall says, not as the plant does. */
+     reading taken now is as old as the wall says, not as the plant does.
+     Paused, no reading comes in, and the tiles age on the wall as they would
+     at a plant whose data stopped. */
   const [{ minute, wall }, setClock] = useState(() => ({ minute: FROM, wall: Date.now() }));
   const [running, setRunning] = useState(
     () => !window.matchMedia("(prefers-reduced-motion: reduce)").matches,
@@ -142,8 +152,18 @@ function usePlantMinute(): { minute: number; wall: number; running: boolean; set
 /** A region of the room: a landmark with its name, and the place a skip link
     lands. */
 function Region({ id, title, actions, children }: { id: string; title: string; actions?: ReactNode; children: ReactNode }) {
+  /* Where a skip link landed shows the library's ring, over the card's own
+     shadow - a card has no focus style of its own, being no control. */
+  const [landed, setLanded] = useState(false);
   return (
-    <Card id={id} aria-labelledby={`${id}-title`} tabIndex={-1} style={{ outline: "none" }}>
+    <Card
+      id={id}
+      aria-labelledby={`${id}-title`}
+      tabIndex={-1}
+      onFocus={(event) => setLanded(event.target === event.currentTarget)}
+      onBlur={() => setLanded(false)}
+      style={{ outline: "none", boxShadow: landed ? "var(--u-focus-ring), var(--u-shadow-card)" : undefined }}
+    >
       <CardHeader title={<span id={`${id}-title`}>{title}</span>} actions={actions} />
       <CardBody>{children}</CardBody>
     </Card>
@@ -199,6 +219,7 @@ export default function ControlRoom() {
   const count = countAt(SHIFT, minute);
   const oee = (IDEAL_CYCLE_MINUTES * count.good) / count.planned;
   const current = inKiln(minute);
+  const inTheKiln = current === undefined ? "No batch in the kiln" : `${current.name} through the kiln`;
   const chosen = SHIFT.batches.find((one) => one.id === batch);
 
   /* The tile's freshness is told the plant's age of the reading, as the
@@ -250,10 +271,10 @@ export default function ControlRoom() {
           <Stat label="OEE so far" value={oee * 100} unit="%" decimals={1} limits={OEE_LIMITS} />
           <Stack gap={2}>
             <Text size="sm" tone="muted">
-              {current === undefined ? "No batch in the kiln" : `${current.name} through the kiln`}
+              {inTheKiln}
             </Text>
             <ProgressBar
-              label={current === undefined ? "No batch in the kiln" : `${current.name} through the kiln`}
+              label={inTheKiln}
               value={current === undefined ? 0 : (minute - current.kiln[0]) / (current.kiln[1] - current.kiln[0])}
               showLabel
             />
@@ -269,8 +290,8 @@ export default function ControlRoom() {
         <Chart data={trend} height={240} ariaLabel="Kiln K1, zone 3, over the shift">
           <XAxis accessor={(d: Point) => d.t} domain={[at(0), at(LAST)]} time />
           <YAxis accessor={(d: Point) => d.kiln} domain={[1170, 1250]} label="°C" />
-          <LimitBand from={1185} to={1215} severity="warning" label="Tolerance" />
-          <LimitLine value={1230} severity="alarm" label="Alarm limit" />
+          <LimitBand from={KILN.tolerance[0]} to={KILN.tolerance[1]} severity="warning" label="Tolerance" />
+          <LimitLine value={KILN.alarm} severity="alarm" label="Alarm limit" />
           <Line accessor={(d: Point) => d.kiln} name="Zone 3" format={(v) => `${v.toFixed(1)} °C`} />
           <Tooltip mode="x" />
           <DataTable />
@@ -336,7 +357,7 @@ export default function ControlRoom() {
 
       <Region id="room-oee" title="OEE so far">
         <Calculation aria-label="OEE of the shift so far">
-          <Product label="OEE" format="percent" target={0.85}>
+          <Product label="OEE" format="percent" target={OEE_TARGET}>
             <Quotient label="Availability" format="percent">
               <Difference id="runtime" label="Run time" unit="min">
                 <Given id="planned" label="Planned production time" value={count.planned} unit="min" />

@@ -13,26 +13,29 @@
    the shift began.
 
    The plant generates alarms, which is exactly what the library does not do
-   (ADR-0009): it decides that a reading above the bound is an alarm, and when
+   (ADR-0009): it decides that a reading above the limit is an alarm, and when
    it has come back far enough to clear. The table's model takes it from
    there. */
 
 import { acknowledge, hasReturned } from "@umriss-ui/table";
-import type { Alarm, AlarmType } from "@umriss-ui/table";
+import type { Alarm, AlarmType, ReturnBand } from "@umriss-ui/table";
 import type { LimitSet } from "../src";
 
 /** The early shift, 06:00 to 14:00. */
 export const SHIFT_MINUTES = 480;
 
-/** The kiln's zone 3 is read against this - by the tile, the trend and the
-    alarm alike. Between the two warnings lies the tolerance: a tile fired
-    outside it is scrap. */
+/** The kiln's zone 3, in °C: the numbers every part reads it against, once.
+    Between the two warnings lies the tolerance - a tile fired outside it is
+    scrap; `returnTo` is the alarm's dead band. */
+export const KILN = { target: 1200, tolerance: [1185, 1215], alarm: 1230, returnTo: 1222 } as const;
+
+/** The same numbers as the limit set the tile and the verdict read. */
 export const KILN_LIMITS: LimitSet = {
-  target: 1200,
+  target: KILN.target,
   limits: [
-    { value: 1215, side: "upper", severity: "warning" },
-    { value: 1230, side: "upper", severity: "alarm" },
-    { value: 1185, side: "lower", severity: "warning" },
+    { value: KILN.tolerance[1], side: "upper", severity: "warning" },
+    { value: KILN.alarm, side: "upper", severity: "alarm" },
+    { value: KILN.tolerance[0], side: "lower", severity: "warning" },
   ],
 };
 
@@ -40,15 +43,18 @@ export const KILN_LIMITS: LimitSet = {
     the ideal cycle time of the OEE's performance. */
 export const IDEAL_CYCLE_MINUTES = 0.25;
 
+/** The kiln alarm's condition and its dead band, as the table's model reads them. */
+const KILN_RETURN: ReturnBand = { direction: "obere", limit: KILN.alarm, returnTo: KILN.returnTo };
+
 /** What the four measuring points of the line can report. */
 export const ALARM_TYPES: readonly AlarmType[] = [
   {
     id: "kiln-high",
     label: "Kiln K1 · zone 3 above alarm limit",
     priority: "high",
-    /* The dead band: back below 1222 °C, not merely below the bound, or a
-       reading riding on 1230 would raise an alarm a minute. */
-    returnBand: { direction: "obere", limit: 1230, returnTo: 1222 },
+    /* The dead band: back below `returnTo`, not merely below the limit, or a
+       reading riding on the limit would raise an alarm a minute. */
+    returnBand: KILN_RETURN,
   },
   { id: "exit-silent", label: "Kiln K1 · exit pyrometer sends nothing", priority: "medium" },
   { id: "belt-empty", label: "Kiln K1 · belt empty", priority: "medium" },
@@ -106,8 +112,8 @@ function random(seed: number): () => number {
 }
 
 /* When the exit pyrometer goes silent, and for how long. Fixed rather than
-   seeded, so that the control room opens on a stale reading that turns lost
-   while one watches, and comes back. */
+   seeded, so that a running control room shows its reading turn stale, then
+   lost, and come back. */
 const SILENT_FROM = 288;
 const SILENT_FOR = 50;
 
@@ -129,6 +135,25 @@ export function plant(seed: number): Plant {
   const stopFrom = surgeFrom + 22;
   const stopFor = 18;
 
+  /* The plan: batches through the kiln one after another, each pressed an
+     hour and dried half an hour before - the first ones during the night
+     shift. Tiles come out of the kiln only while a batch is in it, so the
+     OEE's count and the batches' counts are the same tiles. The plan is a
+     plan: a stop of the belt does not move it. */
+  const batches: Batch[] = [];
+  for (let at = 0, i = 0; at < SHIFT_MINUTES; i++) {
+    const length = 70 + Math.floor(r() * 25);
+    batches.push({
+      id: `b-${4121 + i}`,
+      name: `B-${4121 + i}`,
+      tiles: Math.round(length / IDEAL_CYCLE_MINUTES / 10) * 10,
+      press: [at - 60, at - 60 + length],
+      dryer: [at - 30, at - 30 + length],
+      kiln: [at, at + length],
+    });
+    at += length + 5;
+  }
+
   const readings: Reading[] = [];
   const samples: Sample[] = [];
   let drift = 0;
@@ -136,11 +161,13 @@ export function plant(seed: number): Plant {
     drift = 0.9 * drift + (r() - 0.5) * 3;
     const into = minute - surgeFrom;
     const surge = into >= 0 && into <= surgeFor ? 42 * Math.sin((Math.PI * into) / surgeFor) : 0;
-    const kiln = Math.round((1200 + drift + surge) * 10) / 10;
+    const kiln = Math.round((KILN.target + drift + surge) * 10) / 10;
 
     const running = !(minute >= stopFrom && minute < stopFrom + stopFor);
-    const fired = running ? (r() < 0.12 ? 3 : 4) : 0;
-    const inTolerance = kiln >= 1185 && kiln <= 1215;
+    const loaded = batches.some((batch) => batch.kiln[0] <= minute && minute < batch.kiln[1]);
+    const jam = r() < 0.12;
+    const fired = running && loaded ? (jam ? 3 : 4) : 0;
+    const inTolerance = kiln >= KILN.tolerance[0] && kiln <= KILN.tolerance[1];
     const silent = minute >= SILENT_FROM && minute < SILENT_FROM + SILENT_FOR;
     const exit = silent ? null : Math.round((kiln - 380 + (r() - 0.5) * 4) * 10) / 10;
 
@@ -149,24 +176,9 @@ export function plant(seed: number): Plant {
     if (running && minute % 10 === 0) {
       /* Hotter shrinks more: the length follows the kiln, so the control
          chart sees the excursion the trend sees. */
-      const length = 600 + (1200 - kiln) * 0.05 + (r() - 0.5) * 0.6;
+      const length = 600 + (KILN.target - kiln) * 0.05 + (r() - 0.5) * 0.6;
       samples.push({ minute, length: Math.round(length * 100) / 100 });
     }
-  }
-
-  const batches: Batch[] = [];
-  let at = 0;
-  for (let i = 0; at < SHIFT_MINUTES; i++) {
-    const length = 70 + Math.floor(r() * 25);
-    batches.push({
-      id: `b-${4121 + i}`,
-      name: `B-${4121 + i}`,
-      tiles: Math.round(length / IDEAL_CYCLE_MINUTES / 10) * 10,
-      press: [at, at + length],
-      dryer: [at + 30, at + 30 + length],
-      kiln: [at + 60, at + 60 + length],
-    });
-    at += length + 5;
   }
 
   return { readings, samples, batches };
@@ -223,7 +235,6 @@ export function alarmsAt(
   acknowledged: ReadonlyMap<string, number> = new Map(),
 ): Alarm[] {
   const instant = (m: number) => start + m * 60_000;
-  const kiln = ALARM_TYPES[0]!.returnBand!;
   const alarms: Alarm[] = [];
 
   const add = (
@@ -241,7 +252,7 @@ export function alarmsAt(
     });
   };
 
-  for (const span of spans(p.readings, minute, (one) => one.kiln > kiln.limit, (one) => hasReturned(kiln, one.kiln))) {
+  for (const span of spans(p.readings, minute, (one) => one.kiln > KILN_RETURN.limit, (one) => hasReturned(KILN_RETURN, one.kiln))) {
     add("kiln-high", span);
   }
   for (const span of spans(p.readings, minute, (one) => one.exit === null, (one) => one.exit !== null)) {
