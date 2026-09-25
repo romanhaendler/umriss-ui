@@ -1,25 +1,15 @@
 import { useState } from "react";
-import { DateTimePicker, FormField, Grid } from "../../../src";
+import { DateTimePicker, FormField } from "../../../src";
 
-export const title = "With seconds, and the states";
+export const title = "With seconds";
+export const lead = "Set `withSeconds` where the second is part of the value, such as the moment an alert fired.";
 
-/* `withSeconds` adds a third time field. It is not a display question: a
-   measurement instant without seconds is a different value from one with. */
 export default function WithSeconds() {
-  const [measuredAt, setMeasuredAt] = useState<Date | null>(null);
-  const [compact, setCompact] = useState<Date | null>(null);
+  const [fired, setFired] = useState<Date | null>(new Date(2026, 2, 17, 9, 41, 27));
 
   return (
-    <Grid minItemWidth="240px" gap={4}>
-      <FormField label="Measurement instant" hint="With seconds.">
-        <DateTimePicker value={measuredAt} onChange={setMeasuredAt} withSeconds />
-      </FormField>
-      <FormField label="Compact" hint="Compact size (sm).">
-        <DateTimePicker size="sm" value={compact} onChange={setCompact} clearable />
-      </FormField>
-      <FormField label="Disabled" hint="Deactivated.">
-        <DateTimePicker value={null} onChange={() => {}} disabled />
-      </FormField>
-    </Grid>
+    <FormField label="Alert fired" style={{ maxWidth: 320 }}>
+      <DateTimePicker value={fired} onChange={setFired} withSeconds />
+    </FormField>
   );
 }
