@@ -8,7 +8,7 @@
 
 import { useId, useMemo, useRef, useState } from "react";
 import type { RefObject } from "react";
-import { Button, Popover, Tag, TagGroup, useFormats, useWording } from "@umriss-ui/core";
+import { Button, Popover, Tag, TagGroup, Tooltip, useFormats, useWording } from "@umriss-ui/core";
 import { cx } from "./cx";
 import { warnOnce } from "./dev";
 import type { HookSnapshot, Registry, ColumnEntry } from "./registry";
@@ -22,6 +22,7 @@ export function FilterPanel({
   registry,
   hook,
   anchor,
+  align,
   focus,
   open,
   setOpen,
@@ -31,6 +32,10 @@ export function FilterPanel({
   registry: Registry;
   hook: HookSnapshot;
   anchor: RefObject<HTMLElement | null>;
+  /** The anchor's edge the panel lines up with: `end` under the funnel at
+      the end of a header cell, `start` under a condition, which stands at
+      the start of the toolbar. */
+  align: "start" | "end";
   /** Where the focus goes after "done"; without a statement to the anchor. */
   focus?: RefObject<HTMLElement | null>;
   open: boolean;
@@ -77,7 +82,7 @@ export function FilterPanel({
       open={open}
       onOpenChange={setOpen}
       anchorRef={anchor}
-      align="end"
+      align={align}
       role="dialog"
       ariaLabel={wording.filterColumn(label)}
       id={panelId}
@@ -121,32 +126,39 @@ export function ColumnFilterButton({
 
   return (
     <>
-      <button
-        ref={button}
-        type="button"
-        className={cx(styles.filterButton, active && styles.filterActive)}
-        aria-label={wording.filterColumn(label)}
-        aria-haspopup="dialog"
-        aria-expanded={open}
-        aria-controls={open ? panelId : undefined}
-        onClick={() => setOpen(!open)}
-      >
-        <svg viewBox="0 0 14 14" width="13" height="13" aria-hidden="true">
-          <path
-            d="M1.8 2.6h10.4L8.3 7.5v3.4l-2.6 1.1V7.5L1.8 2.6z"
-            fill={active ? "currentColor" : "none"}
-            stroke="currentColor"
-            strokeWidth="1.4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </button>
+      <Tooltip content={wording.filterHint}>
+        {/* No `ref` here: the tooltip takes the button's. The button is taken
+            from the click instead - the only way the panel opens. */}
+        <button
+          type="button"
+          className={cx(styles.filterButton, active && styles.filterActive)}
+          aria-label={wording.filterColumn(label)}
+          aria-haspopup="dialog"
+          aria-expanded={open}
+          aria-controls={open ? panelId : undefined}
+          onClick={(event) => {
+            button.current = event.currentTarget;
+            setOpen(!open);
+          }}
+        >
+          <svg viewBox="0 0 14 14" width="13" height="13" aria-hidden="true">
+            <path
+              d="M1.8 2.6h10.4L8.3 7.5v3.4l-2.6 1.1V7.5L1.8 2.6z"
+              fill={active ? "currentColor" : "none"}
+              stroke="currentColor"
+              strokeWidth="1.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+      </Tooltip>
       <FilterPanel
         entry={entry}
         registry={registry}
         hook={hook}
         anchor={button}
+        align="end"
         open={open}
         setOpen={setOpen}
         panelId={panelId}
@@ -225,6 +237,7 @@ function Condition({
         registry={registry}
         hook={hook}
         anchor={tag}
+        align="start"
         focus={button}
         open={open}
         setOpen={setOpen}

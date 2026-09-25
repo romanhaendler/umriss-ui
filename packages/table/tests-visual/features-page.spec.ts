@@ -8,8 +8,8 @@ import { open, openExample } from "./navigation";
 checkPage({
   open,
   openExample,
-  pageId: "table",
-  examples: ["first-table", "sort-by-several-columns", "search"],
+  pageId: "manual-mode",
+  examples: ["only-pages", "sort-and-search", "filter-options"],
   other: { name: "Column", pageId: "column" },
   packageName: "@umriss-ui/table",
   importLine: 'import { useTable } from "@umriss-ui/table";',

@@ -10,7 +10,9 @@ import styles from "./Tooltip.module.css";
 export interface TooltipProps {
   /** Short help text; no interaction, no long content. */
   content: ReactNode;
-  /** Exactly one element that triggers the tooltip (must accept refs). */
+  /** Exactly one element that triggers the tooltip (must accept refs). Its
+      own ref is replaced by the tooltip's: a trigger that needs its element
+      takes it from its events. */
   children: ReactElement<Record<string, unknown>>;
   /** Delay in ms before the tooltip appears. */
   delay?: number;
@@ -18,7 +20,11 @@ export interface TooltipProps {
 
 /** Appears on hover and keyboard focus; purely descriptive (role="tooltip"). */
 export function Tooltip({ content, children, delay = 300 }: TooltipProps) {
-  const [open, setOpen] = useState(false);
+  const [wanted, setWanted] = useState(false);
+  /* A trigger whose own panel is open says so with `aria-expanded`: the tip
+     would stand over that panel, so it gives way for as long as it is open. */
+  const expanded = children.props["aria-expanded"] === true;
+  const open = wanted && !expanded;
   const [position, setPosition] = useState<CSSProperties | null>(null);
   /* Portal target determined in the effect, as with the popover: the rule
      reads the DOM of the trigger, and rendering may not do that. */
@@ -33,12 +39,12 @@ export function Tooltip({ content, children, delay = 300 }: TooltipProps) {
 
   const show = () => {
     if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(() => setOpen(true), delay);
+    timer.current = setTimeout(() => setWanted(true), delay);
   };
 
   const hide = () => {
     if (timer.current) clearTimeout(timer.current);
-    setOpen(false);
+    setWanted(false);
   };
 
   useLayoutEffect(() => {
@@ -100,6 +106,11 @@ export function Tooltip({ content, children, delay = 300 }: TooltipProps) {
         onPointerEnter: (event: PointerEvent) => {
           (childProps.onPointerEnter as ((e: PointerEvent) => void) | undefined)?.(event);
           show();
+        },
+        /* A press acts; the tip has said what it would do. */
+        onPointerDown: (event: PointerEvent) => {
+          (childProps.onPointerDown as ((e: PointerEvent) => void) | undefined)?.(event);
+          hide();
         },
         onPointerLeave: (event: PointerEvent) => {
           (childProps.onPointerLeave as ((e: PointerEvent) => void) | undefined)?.(event);

@@ -15,7 +15,7 @@ test.skip(({ colorScheme }) => colorScheme === "dark", "Behaviour tests only onc
 
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(new Date("2026-03-17T10:30:00"));
-  await openExample(page, "table", "virtualisation");
+  await openExample(page, "virtualisation", "virtualisation");
   await example(page).scrollIntoViewIfNeeded();
 });
 

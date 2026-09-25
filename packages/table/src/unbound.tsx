@@ -18,7 +18,7 @@
 import { useLayoutEffect, useRef, useState, useId } from "react";
 import type { ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { Button, Checkbox, Input, Popover, Select, useFormats, useWording } from "@umriss-ui/core";
+import { Button, Checkbox, Input, Popover, Select, Tooltip, useFormats, useWording } from "@umriss-ui/core";
 import { cx } from "./cx";
 import { useConnection } from "./context";
 import { TableToolbar } from "./toolbar";
@@ -178,27 +178,29 @@ export function ColumnMenu({ of }: ColumnMenuProps) {
   const pinKey = (id: string, label: string, side: Pin) => {
     const on = pins[id] === side;
     return (
-      <button
-        type="button"
-        className={cx(styles.move, on && styles.pinOn)}
-        data-pin={side}
-        aria-label={on ? wording.unpinColumn(label) : side === "start" ? wording.pinColumnToStart(label) : wording.pinColumnToEnd(label)}
-        onClick={() => {
-          snapshot.setPin(id, on ? null : side);
-          setFocusAfter({ id, key: `[data-pin="${side}"]` });
-        }}
-      >
-        <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">
-          <path
-            d={side === "start" ? "M2 1.5v7M8.5 5H4.5M6 3.5 4.5 5 6 6.5" : "M8 1.5v7M1.5 5h4M4 3.5 5.5 5 4 6.5"}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </button>
+      <Tooltip content={on ? wording.unpinHint : side === "start" ? wording.pinToStartHint : wording.pinToEndHint}>
+        <button
+          type="button"
+          className={cx(styles.move, on && styles.pinOn)}
+          data-pin={side}
+          aria-label={on ? wording.unpinColumn(label) : side === "start" ? wording.pinColumnToStart(label) : wording.pinColumnToEnd(label)}
+          onClick={() => {
+            snapshot.setPin(id, on ? null : side);
+            setFocusAfter({ id, key: `[data-pin="${side}"]` });
+          }}
+        >
+          <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">
+            <path
+              d={side === "start" ? "M2 1.5v7M8.5 5H4.5M6 3.5 4.5 5 6 6.5" : "M8 1.5v7M1.5 5h4M4 3.5 5.5 5 4 6.5"}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+      </Tooltip>
     );
   };
 
@@ -218,7 +220,9 @@ export function ColumnMenu({ of }: ColumnMenuProps) {
         open={open}
         onOpenChange={setOpen}
         anchorRef={button}
-        align="end"
+        /* The toolbar puts its parts at its start: the panel lines up with the
+           button's start edge, and flips where there is no room. */
+        align="start"
         role="dialog"
         ariaLabel={wording.arrangeColumns}
         id={panelId}
@@ -236,30 +240,34 @@ export function ColumnMenu({ of }: ColumnMenuProps) {
                   disabled={column.hideable === false}
                   onChange={() => snapshot.toggleColumn(column.id)}
                 />
-                <button
-                  type="button"
-                  className={styles.move}
-                  data-direction="forward"
-                  aria-label={wording.columnForward(label)}
-                  disabled={!movable(index, -1)}
-                  onClick={() => move(index, -1)}
-                >
-                  <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">
-                    <path d="M2 6.5 5 3.5l3 3" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </button>
-                <button
-                  type="button"
-                  className={styles.move}
-                  data-direction="backward"
-                  aria-label={wording.columnBackward(label)}
-                  disabled={!movable(index, 1)}
-                  onClick={() => move(index, 1)}
-                >
-                  <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">
-                    <path d="M2 3.5 5 6.5l3-3" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </button>
+                <Tooltip content={wording.columnForwardHint}>
+                  <button
+                    type="button"
+                    className={styles.move}
+                    data-direction="forward"
+                    aria-label={wording.columnForward(label)}
+                    disabled={!movable(index, -1)}
+                    onClick={() => move(index, -1)}
+                  >
+                    <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">
+                      <path d="M2 6.5 5 3.5l3 3" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </button>
+                </Tooltip>
+                <Tooltip content={wording.columnBackwardHint}>
+                  <button
+                    type="button"
+                    className={styles.move}
+                    data-direction="backward"
+                    aria-label={wording.columnBackward(label)}
+                    disabled={!movable(index, 1)}
+                    onClick={() => move(index, 1)}
+                  >
+                    <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">
+                      <path d="M2 3.5 5 6.5l3-3" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </button>
+                </Tooltip>
                 {pinKey(column.id, label, "start")}
                 {pinKey(column.id, label, "end")}
               </li>
