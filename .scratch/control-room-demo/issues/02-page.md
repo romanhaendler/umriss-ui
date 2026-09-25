@@ -33,3 +33,10 @@ and prevent the navigation, because a fragment would leave the demo's address.
 `features-control-room.spec.ts` holds both. Screenshots (page head and both
 examples, light and dark), axe (`control-room` in the sample) and own base
 pass; the overview's two pictures moved for the new rubric, nothing else did.
+
+After the review since `main`: the region a skip link lands on shows the
+library's ring; the kiln's numbers stand once (`KILN` in `plant.ts`); only a
+batch in the kiln fires tiles, so the OEE and the batches count the same ones;
+the demonstration opens a few minutes after the crossing, with the alarm
+standing, the tile in alarm and the control chart marking it; the lint's
+exemption is narrowed to the page and its plant.

@@ -213,7 +213,9 @@ transitions (29.03.2026 forward, 25.10.2026 back).
 * Demo data is seed-based and deterministic (R-6.2); the interaction tests check
   concrete values at known positions.
 * Unit tests build their own fixtures, never the demo data – otherwise the suite
-  breaks on a changed demo line.
+  breaks on a changed demo line. The one exception is the control room's plant
+  (`plant.test.ts`), because there the demo data is the subject: what it holds
+  is a property over forty seeds, not a line of the demo.
 * Expected values come from an independent source: weekdays from the system
   calendar, clock changes from the real transitions, notation from the rule –
   never from the implementation's own arithmetic.
