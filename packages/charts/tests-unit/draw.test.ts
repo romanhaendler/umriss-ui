@@ -33,21 +33,26 @@ class RecordingPath {
 function recordingContext() {
   const filled: RecordingPath[] = [];
   const stroked: RecordingPath[] = [];
+  /** Each stroke with the colour and width it was drawn in. */
+  const strokes: { path: RecordingPath; style: unknown; width: unknown }[] = [];
+  const target: Record<string, unknown> = {
+    fill: (path?: RecordingPath) => {
+      if (path !== undefined) filled.push(path);
+    },
+    stroke: (path?: RecordingPath) => {
+      if (path === undefined) return;
+      stroked.push(path);
+      strokes.push({ path, style: target.strokeStyle, width: target.lineWidth });
+    },
+  };
   const ctx = new Proxy(
-    {
-      fill: (path?: RecordingPath) => {
-        if (path !== undefined) filled.push(path);
-      },
-      stroke: (path?: RecordingPath) => {
-        if (path !== undefined) stroked.push(path);
-      },
-    } as Record<string, unknown>,
+    target,
     {
       // Every other method is a no-op, every property takes what it is given.
       get: (target, key) => (key in target ? target[key as string] : () => undefined),
     },
   );
-  return { ctx: ctx as unknown as CanvasRenderingContext2D, filled, stroked };
+  return { ctx: ctx as unknown as CanvasRenderingContext2D, filled, stroked, strokes };
 }
 
 const original = (globalThis as { Path2D?: unknown }).Path2D;
@@ -312,5 +317,73 @@ describe("Stacked bars", () => {
     // Top at 60 → y 40, foot at 20 → y 80: 40 pixels high.
     expect(rects[0]?.[2]).toBeCloseTo(40);
     expect(rects[0]?.[4]).toBeCloseTo(40);
+  });
+});
+
+/* charts-stacking 04: between two stacked segments a 1px line in the ground's
+   colour, so that neighbouring segments stay apart where their colours are
+   alike - or, under forced colours, the same. */
+describe("The edge between stacked segments", () => {
+  const ground = FALLBACK_THEME.colorBg;
+  const bars = (edges: boolean) =>
+    draw({
+      x: new Float64Array([100, 200]),
+      y: new Float64Array([60, 50]),
+      y0: new Float64Array([20, 0]),
+      kind: "bar",
+      length: 2,
+      xScale,
+      yScale,
+      color: "#000",
+      alpha: 1,
+      baseline: 0,
+      offset: -10,
+      width: 20,
+      edges,
+    } as SeriesDrawItem);
+
+  it("runs along a stacked bar's foot, 1px in the ground's colour, and not on the baseline", () => {
+    const { strokes } = bars(true);
+    expect(strokes).toHaveLength(1);
+    expect(strokes[0]?.style).toBe(ground);
+    expect(strokes[0]?.width).toBe(1);
+    // Only the bar standing on another: its foot at 20 is y 80, from its left
+    // edge to its right.
+    expect(strokes[0]?.path.ops).toEqual([
+      ["moveTo", 90, 80],
+      ["lineTo", 110, 80],
+    ]);
+  });
+
+  it("is not drawn for bars that are not stacked", () => {
+    expect(bars(false).strokes).toHaveLength(0);
+  });
+
+  it("parts a stacked area from the one below, beneath its outline", () => {
+    const area = (edges: boolean) =>
+      draw({
+        x: new Float64Array([0, 10]),
+        y: new Float64Array([50, 60]),
+        y0: new Float64Array([20, 30]),
+        kind: "area",
+        length: 2,
+        xScale,
+        yScale,
+        color: "#000",
+        alpha: 1,
+        baseline: 0,
+        fillOpacity: 0.18,
+        strokeWidth: 1.5,
+        edges,
+      } as SeriesDrawItem);
+    const plain = area(false).strokes;
+    const { strokes } = area(true);
+    expect(strokes).toHaveLength(plain.length + 1);
+    // The ground first, a pixel wider than the outline on each side; the
+    // outline over it, on the same path.
+    expect(strokes[0]?.style).toBe(ground);
+    expect(strokes[0]?.width).toBe(3.5);
+    expect(strokes[1]?.style).toBe("#000");
+    expect(strokes[1]?.path).toBe(strokes[0]?.path);
   });
 });

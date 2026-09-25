@@ -1,7 +1,8 @@
 /* What a plant screen says in colour alone - a state, a tolerance, a verdict
-   per cell - told by marks as well. Each state is hatched by its place in the
-   state list (the first plain), the tolerance band is hatched in its own
-   colour, and a matrix hatches each step of its colouring. A reader who
+   per cell - told by marks as well. Each state is hatched by its name, in the
+   order the names first come (the first plain), the tolerance band is
+   hatched in its own colour, and a matrix hatches each step of its
+   colouring. A reader who
    cannot tell the fault's red from the setup's amber still tells the hatches
    apart, and the legend shows which is which. */
 
