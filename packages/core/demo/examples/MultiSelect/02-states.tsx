@@ -1,27 +1,31 @@
 import { FormField, Grid, MultiSelect } from "../../../src";
 
-export const title = "Empty, invalid, disabled";
+export const title = "States";
+export const lead = "Errors come from the `FormField`; `disabled` locks the field but keeps what is chosen visible, even on a `disabled` row.";
 
-/* Disabled means "do not change", not "gone": a value already chosen stays
-   visible even when its row is disabled. */
-
-const OPTIONS = [
-  { value: "a", label: "Alpha" },
-  { value: "b", label: "Beta" },
-  { value: "c", label: "Gamma", disabled: true },
+const SKILLS = [
+  { value: "react", label: "React" },
+  { value: "ios", label: "iOS" },
+  { value: "android", label: "Android" },
+  { value: "design", label: "Interaction design" },
+  { value: "a11y", label: "Accessibility audits" },
+  { value: "qa", label: "Test automation", disabled: true },
 ];
 
 export default function States() {
   return (
     <Grid minItemWidth="240px" gap={4}>
-      <FormField label="Empty">
-        <MultiSelect value={[]} onChange={() => {}} options={OPTIONS} placeholder="Nothing chosen" />
+      <FormField label="Skills" hint="Nothing chosen yet.">
+        <MultiSelect value={[]} onChange={() => {}} options={SKILLS} placeholder="Choose skills" />
       </FormField>
-      <FormField label="Invalid" error="Choose at least one area.">
-        <MultiSelect value={[]} onChange={() => {}} options={OPTIONS} placeholder="Choose areas" />
+      <FormField label="Skills" error="Choose at least one skill for the sprint.">
+        <MultiSelect value={[]} onChange={() => {}} options={SKILLS} placeholder="Choose skills" />
       </FormField>
-      <FormField label="Disabled" hint="What is chosen stays visible.">
-        <MultiSelect value={["a", "c"]} onChange={() => {}} options={OPTIONS} disabled />
+      <FormField label="Skills" hint="Set by the team lead.">
+        <MultiSelect value={["react", "qa"]} onChange={() => {}} options={SKILLS} disabled />
+      </FormField>
+      <FormField label="Skills" hint="More than fits: the rest as +N.">
+        <MultiSelect value={["react", "ios", "android", "design", "a11y"]} onChange={() => {}} options={SKILLS} />
       </FormField>
     </Grid>
   );
