@@ -2,56 +2,39 @@ import { useState } from "react";
 import { DateRangePicker, FormField, Grid } from "../../../src";
 import type { DateRange } from "../../../src";
 
-export const title = "Your own presets - and none";
+export const title = "Presets";
+export const lead = "Pass `presets` for the spans your users pick most; an empty list hides the column, and none gives the defaults.";
 
-/* Without anything given, the default presets stand on the left. `presets`
-   replaces them; an empty array hides the column. Both are intended: which
-   periods are usual in a plant only the caller knows.
+const fromToday = (days: number): DateRange => {
+  const today = new Date();
+  const from = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  return { from, to: new Date(from.getFullYear(), from.getMonth(), from.getDate() + days - 1) };
+};
 
-   A preset carries a `range` - the field a caller writes its own presets
-   against, which is exactly why it no longer carries a German name. */
 export default function Presets() {
   const [sprint, setSprint] = useState<DateRange | null>(null);
-  const [leave, setLeave] = useState<DateRange | null>(null);
+  const [workshop, setWorkshop] = useState<DateRange | null>(null);
+  const [report, setReport] = useState<DateRange | null>(null);
 
   return (
-    <Grid minItemWidth="260px" gap={4}>
-      <FormField label="Sprint" hint="Your own presets through `presets`.">
+    <Grid minItemWidth="240px" gap={4}>
+      <FormField label="Sprint" hint="Presets of your own.">
         <DateRangePicker
           value={sprint}
           onChange={setSprint}
           clearable
           placeholder="Choose a sprint"
           presets={[
-            {
-              label: "Next 2 weeks",
-              range: () => {
-                const today = new Date();
-                const from = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-                return {
-                  from,
-                  to: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 13),
-                };
-              },
-            },
-            {
-              label: "Rest of the month",
-              range: () => {
-                const today = new Date();
-                return {
-                  from: new Date(today.getFullYear(), today.getMonth(), today.getDate()),
-                  to: new Date(today.getFullYear(), today.getMonth() + 1, 0),
-                };
-              },
-            },
+            { label: "Next 2 weeks", range: () => fromToday(14) },
+            { label: "Next 3 weeks", range: () => fromToday(21) },
           ]}
         />
       </FormField>
-      <FormField label="Leave" hint="Without presets (presets empty), compact size.">
-        <DateRangePicker size="sm" value={leave} onChange={setLeave} presets={[]} />
+      <FormField label="Workshop" hint="No presets.">
+        <DateRangePicker value={workshop} onChange={setWorkshop} presets={[]} />
       </FormField>
-      <FormField label="Billing period" hint="Deactivated.">
-        <DateRangePicker value={null} onChange={() => {}} disabled />
+      <FormField label="Report" hint="The default presets.">
+        <DateRangePicker value={report} onChange={setReport} />
       </FormField>
     </Grid>
   );

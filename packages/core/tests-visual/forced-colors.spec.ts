@@ -51,8 +51,8 @@ test("A focused button under forced colours", async ({ page }, testInfo) => {
    whole viewport, because the panel lies in the top layer and not in the
    example; after it has come to rest, since it enters by scale. */
 test("A combobox's cursor under forced colours", async ({ page }, testInfo) => {
-  await openExample(page, "combobox", "typing-filters");
-  await page.locator('[data-example="typing-filters"] .exampleStage input').first().focus();
+  await openExample(page, "combobox", "pick-a-driver");
+  await page.locator('[data-example="pick-a-driver"] .exampleStage input').first().focus();
   await page.keyboard.press("ArrowDown");
   await page.keyboard.press("ArrowDown");
   await expect(page.getByRole("option").nth(1)).toBeVisible();
