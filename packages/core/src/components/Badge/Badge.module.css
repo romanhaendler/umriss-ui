@@ -63,5 +63,12 @@
     .badge {
       outline: 1px solid CanvasText;
     }
+
+    /* The dot says "this badge has a tone", the word says which: it keeps
+       the text colour instead of vanishing into the ground (forced-colors
+       04). */
+    .badge::before {
+      background: CanvasText;
+    }
   }
 }

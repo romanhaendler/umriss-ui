@@ -127,6 +127,18 @@ commit.
 
 ### Changed
 
+- **The final polish of the new components and of forced colours**
+  (core-foundations 07, core-layout-extras 04, forced-colors 04). The
+  indeterminate `ProgressBar` rests with its segment in the middle of the
+  track, its ends fading, and sweeps from there - with animations off it no
+  longer reads as a share done. The key of a `Breadcrumb`'s folded levels is
+  as tall and as wide as a small key and underlines its dots; the trail
+  grows to that height when it folds. An invalid `Slider` draws its track
+  with the fields' danger edge. The `Splitter`'s line carries the grip glyph
+  in its middle, quiet at rest and darker under the pointer. Under forced
+  colours the primary `Button` has an edge of two pixels (the second
+  inside, so it stands as large as its neighbours) and a `Badge` keeps its
+  dot in the text colour.
 - **Two new keys in `Wording`: a table over a server** (for
   `@umriss-ui/table`'s manual mode), in English and German:
   `selectAllOnPage` ("Select all on this page") and `exportPageLabel`
