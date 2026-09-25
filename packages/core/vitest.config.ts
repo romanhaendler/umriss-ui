@@ -21,6 +21,11 @@ export default defineConfig({
         replacement: fileURLToPath(new URL("./src/lib/language/de.ts", import.meta.url)),
       },
       { find: /^@umriss-ui\/core$/, replacement: fileURLToPath(new URL("./src/index.ts", import.meta.url)) },
+      /* The control room's neighbours, as vite.demo.config.ts has them and says why. */
+      { find: /^@umriss-ui\/charts$/, replacement: fileURLToPath(new URL("../charts/src/index.ts", import.meta.url)) },
+      { find: /^@umriss-ui\/table$/, replacement: fileURLToPath(new URL("../table/src/index.ts", import.meta.url)) },
+      { find: /^@umriss-ui\/schedule$/, replacement: fileURLToPath(new URL("../schedule/src/index.ts", import.meta.url)) },
+      { find: /^@umriss-ui\/calculation$/, replacement: fileURLToPath(new URL("../calculation/src/index.ts", import.meta.url)) },
     ],
     dedupe: ["react", "react-dom"],
   },
