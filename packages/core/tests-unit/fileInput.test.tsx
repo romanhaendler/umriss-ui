@@ -136,6 +136,16 @@ describe("FileInput", () => {
     expect(screen.getByRole("button", { name: "Remove recipe-0412.csv" })).toHaveProperty("disabled", true);
   });
 
+  /* Not preventing the drop would let the browser open the file in place of
+     the page - a disabled zone still catches it, and keeps nothing. */
+  it("catches a drop while disabled, so the browser does not open the file", () => {
+    const { container } = render(<FileInput disabled />);
+    const carried = { dataTransfer: { files: [PNG], types: ["Files"] } };
+    expect(fireEvent.dragOver(zone(container), carried)).toBe(false);
+    expect(fireEvent.drop(zone(container), carried)).toBe(false);
+    expect(zone(container).hasAttribute("data-dragging")).toBe(false);
+  });
+
   /* Space and Enter open the platform's dialog on a focused file input. jsdom
      has no dialog, so what is asserted is that nothing of ours stands between
      the key and the native control; the dialog itself opens in the browser

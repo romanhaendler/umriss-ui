@@ -172,8 +172,8 @@ The table and the alarm list are not part of this package. They live in
    `ConfirmDialog` and `CommandPalette`, the field's wrapper of the pickers
    and the combobox family, the `role="tree"` list of `TreeView`. The native
    fields that wear a wrapper (`Checkbox`, `Switch`, `Slider`, `NumberInput`,
-   `Select`, a clearable `Input`) put the class on the wrapper and ref and rest
-   on the control. The component's own
+   `Select`, `FileInput`, a clearable `Input`) put the class on the wrapper and
+   ref and rest on the control. The component's own
    `role`, the `aria-*` it computes and its handlers are not replaced by
    `rest`: a caller's handler runs first and can `preventDefault`. Held by
    `tests-unit/passthrough.test.tsx`, which renders every export.
