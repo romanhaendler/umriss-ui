@@ -15,10 +15,9 @@ moves from here under the rule above.
 
 ---
 
-## Unreleased
+## 0.3.0 – Dependencies and blocked time (Sep. 2026)
 
-Needs the next `@umriss-ui/core`: it reads the renamed wording keys and the
-new ones for blocked time.
+Needs `@umriss-ui/core` 0.11 and `@umriss-ui/charts` 0.8: it reads the renamed wording keys, the new ones for blocked time, and the charts' working-time functions; the peer ranges move to `^0.11.0` and `^0.8.0`.
 
 ### Added
 
