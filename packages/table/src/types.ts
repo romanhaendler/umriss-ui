@@ -512,7 +512,7 @@ interface TableOptionsCommon<Z> {
 
 /** The table holds every row and does the work itself. */
 interface AutomaticMode {
-  /** Manual mode: the rows are one page a server answered. */
+  /** Without it the table holds every row and does the work itself. */
   manual?: false;
   rowCount?: never;
   onViewChange?: never;

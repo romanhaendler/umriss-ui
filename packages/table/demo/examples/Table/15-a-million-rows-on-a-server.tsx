@@ -104,7 +104,9 @@ export default function AMillionRowsOnAServer() {
     rowCount: answer.rowCount,
     onViewChange: (view) => {
       latest.current = view;
-      if (same(view, answer.view)) return;
+      /* Back to the view on screen before its successor was answered: the
+         pending answer is dropped, so nothing is loading any more. */
+      if (same(view, answer.view)) return setLoading(false);
       setLoading(true);
       setTimeout(() => {
         if (latest.current !== view) return;
