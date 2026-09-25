@@ -120,3 +120,27 @@ for (const [key, place] of [
     await expect(host).toHaveScreenshot(`dock-${place}-${testInfo.project.name}.png`);
   });
 }
+
+/* The drawer standing open, at both edges (core-foundations 03). The example
+   loop photographs its examples closed - a button - and the sheet at the edge
+   is the one thing about it that is appearance. The whole viewport, because
+   the drawer is its edge and the scrim over the page behind; after the
+   entrance has come to rest, for the reason the dock's pictures give. */
+for (const [example, button] of [
+  ["beside-a-process-picture", "Labeller L1"],
+  ["left-and-wider", "Filter the alarms"],
+] as const) {
+  test(`The drawer open: ${example}`, async ({ page }, testInfo) => {
+    await openExample(page, "drawer", example);
+    await page.getByRole("button", { name: button, exact: true }).click();
+    const drawer = page.getByRole("dialog");
+    await expect(drawer).toBeVisible();
+    /* Settled rather than finished: under load the page's own jump highlight
+       is cancelled while the drawer comes in, and `standstill` rejects on a
+       cancelled animation (it aborted three of these runs). */
+    await drawer.evaluate((el) =>
+      Promise.allSettled(el.ownerDocument.getAnimations().map((a) => a.finished)).then(() => undefined),
+    );
+    await expect(page).toHaveScreenshot(`drawer-${example}-${testInfo.project.name}.png`);
+  });
+}

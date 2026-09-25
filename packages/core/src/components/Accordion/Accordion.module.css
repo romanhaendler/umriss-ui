@@ -1,0 +1,92 @@
+@layer umriss.tokens, umriss.base, umriss.components;
+
+/* Sections as rows divided by hairlines, not as cards: the accordion stands
+   on a surface - a card, a drawer - and adds no depth of its own. The chevron
+   turns on the path transition, the height unfolds on the sheet's duration
+   (visuelle-wertigkeit 02). */
+
+@layer umriss.components {
+  .accordion {
+    composes: text from "#own-styles";
+    display: flex;
+    flex-direction: column;
+  }
+
+  .item + .item {
+    box-shadow: 0 -1px 0 var(--u-hairline);
+  }
+
+  .heading {
+    margin: 0;
+    font-size: var(--u-text-md);
+    font-weight: var(--u-weight-medium);
+    line-height: var(--u-leading-tight);
+  }
+
+  .header {
+    composes: ring from "#own-styles";
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--u-space-3);
+    width: 100%;
+    padding: var(--u-space-3);
+    border: none;
+    border-radius: var(--u-radius-sm);
+    background: none;
+    font: inherit;
+    color: var(--u-color-text);
+    text-align: left;
+    cursor: pointer;
+    transition: background-color var(--u-transition);
+  }
+
+  .header:hover:not(:disabled) {
+    background: var(--u-color-surface-sunken);
+  }
+
+  .header:active:not(:disabled) {
+    background: var(--u-color-surface-pressed);
+  }
+
+  .header:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .title {
+    min-width: 0;
+  }
+
+  .chevron {
+    flex: none;
+    color: var(--u-color-text-muted);
+    transition: transform var(--u-transition-path);
+  }
+
+  .chevronOpen {
+    transform: rotate(90deg);
+  }
+
+  .collapse {
+    display: grid;
+    grid-template-rows: 1fr;
+    transition: grid-template-rows var(--u-duration-medium) var(--u-ease-out);
+  }
+
+  .collapsed {
+    grid-template-rows: 0fr;
+  }
+
+  .collapseInner {
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .panel {
+    padding: 0 var(--u-space-3) var(--u-space-4);
+    font-size: var(--u-text-sm);
+    line-height: var(--u-leading-normal);
+    color: var(--u-color-text-secondary);
+  }
+}

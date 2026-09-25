@@ -151,6 +151,12 @@ The table and the alarm list are not part of this package. They live in
 | `CrossGlyph` / `PlusGlyph` / `MinusGlyph` / `AngleGlyph` / `CalendarGlyph` / `ClockGlyph` / `GripGlyph` / `GridGlyph` / `MeasureGlyph` | the shared character set, one stroke width at one nominal size; specification in `docs/glyphs.md` |
 | `Sparkline` | a miniature history line with an area gradient and an accent end point – for trends in cells |
 | `Spinner` | a functional loading indicator |
+| `Switch` | on or off, taking effect at once: a native checkbox under `role="switch"`, the label beside it, two sizes, invalid through `FormField`; the thumb travels on the path transition |
+| `Slider` | one value between two bounds on the native range input, drawn with tokens: `min`/`max`/`step`, marks with optional words, `format` for the mono readout and `aria-valuetext`; arrows, PageUp/PageDown by a tenth, Home/End - the same on every engine |
+| `Drawer` | the `Modal`'s dialog entering from an edge (`side="right" \| "left"`): focus trap, Escape and focus return from the browser, `ModalHeader`/`ModalBody`/`ModalFooter` inside, its width the token `--u-drawer-width`; modal only |
+| `ProgressBar` | how far a task has come (`role="progressbar"`), determinate from 0 to 1 or indeterminate without a value; `valueText` for a count; no tone, because progress is no verdict - that is the `Meter` |
+| `Accordion` / `AccordionItem` | sections behind headers that are buttons with `aria-expanded`: `type="single" \| "multiple"`, controlled or uncontrolled, arrow keys between the headers; the height animates as the card's collapse does |
+| `Breadcrumb` | where a page stands: `<nav>` with an ordered list, the last item `aria-current="page"`, items as links or buttons (routing is the caller's); when narrow the middle levels fold into a `Menu`, measured rather than guessed |
 
 ## Principles for new components
 
@@ -159,18 +165,19 @@ The table and the alarm list are not part of this package. They live in
    have none: `Popover` renders into a portal, `Tooltip` around the caller's
    child, `Menu`, `ContextMenu` and `ToastProvider` are composed of other
    parts, and the providers render no element at all. The ref goes
-   to the element a caller lays out: the `<dialog>` of `Modal`, `ConfirmDialog`
-   and `CommandPalette`, the field's wrapper of the pickers and the combobox
-   family, the `role="tree"` list of `TreeView`. The native fields that wear a
-   wrapper (`Checkbox`, `NumberInput`, `Select`, a clearable `Input`) put the
-   class on the wrapper and ref and rest on the control. The component's own
+   to the element a caller lays out: the `<dialog>` of `Modal`, `Drawer`,
+   `ConfirmDialog` and `CommandPalette`, the field's wrapper of the pickers
+   and the combobox family, the `role="tree"` list of `TreeView`. The native
+   fields that wear a wrapper (`Checkbox`, `Switch`, `Slider`, `NumberInput`,
+   `Select`, a clearable `Input`) put the class on the wrapper and ref and rest
+   on the control. The component's own
    `role`, the `aria-*` it computes and its handlers are not replaced by
    `rest`: a caller's handler runs first and can `preventDefault`. Held by
    `tests-unit/passthrough.test.tsx`, which renders every export.
 2. Support controlled **and** uncontrolled use (`value`/`defaultValue`).
    Deliberately controlled only: `Combobox` and `MultiSelect` – the field keeps
-   no second state beside the caller's – as well as `Modal` and `CommandPalette`,
-   because opening is the caller's decision.
+   no second state beside the caller's – as well as `Modal`, `Drawer` and
+   `CommandPalette`, because opening is the caller's decision.
 3. Keyboard operation and `aria` attributes are part of the definition of done.
 4. No business logic: a mapping such as "status X is green" is the application's
    to make.
@@ -190,7 +197,7 @@ rules 1 and 2 above. What is open, each with a
 spec under `.scratch/`:
 
 * `core-foundations` — `Switch`, `Slider`, `Drawer`, `ProgressBar`,
-  `Accordion`, `Breadcrumb`.
+  `Accordion` and `Breadcrumb` stand; their final polish round is open.
 * `forced-colors` and `listbox-announcements` — Windows high contrast, and
   what a listbox says to VoiceOver.
 * `core-layout-extras` — `Splitter` and the layout tier after the basics.
