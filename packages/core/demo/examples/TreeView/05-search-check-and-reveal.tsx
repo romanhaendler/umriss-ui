@@ -1,18 +1,9 @@
-/* Flattening, keyboard movement and virtualisation are ONE behaviour: the
-   movement runs on the flat list, and the virtualisation shows only a window of
-   it. Four separate miniatures would have documented four features and kept
-   quiet about the component.
+/* Four trees over one filing, because the component's parts are one
+   behaviour: the keys run on the flat list, and virtualisation shows only a
+   window of it. The active node and the checks are two states (ADR-0003); the
+   tree with checks and the one with an active node only show both.
 
-   Deliberately a filing structure and not "node A / node B": the indeterminate
-   state only makes sense when what stands above it is something a person would
-   want to check.
-
-   Both states are shown side by side because they are different (ADR-0003): on
-   the left the tree with checks and a search, on the right the same data with an
-   active node only - and beside it, what is checked.
-
-   The `data-role` attribute is a selector the interaction suite reads; it moved
-   with that suite in english-and-umriss-ui 16, emitter and reader together. */
+   `data-role` is a selector the interaction suite reads. */
 
 import { useMemo, useState } from "react";
 import { Button, Grid, Stack, Text, TreeSearch, TreeView, useTree } from "../../../src";
@@ -21,7 +12,7 @@ import type { NodeReader } from "../../../src";
 export const title = "Search, check and reveal in a large tree";
 
 export const lead =
-  "Checks cascade through their branches, a search keeps the path to each find, and a virtualised tree of 240 nodes reveals any node.";
+  "In a company's filing, checks cascade, a search keeps the path, locked years stay unchecked, and `revealNode` finds any of 240 nodes.";
 
 interface TreeNode {
   id: string;
@@ -42,9 +33,9 @@ const FILING: TreeNode[] = [
         id: "framework",
         name: "Framework contracts",
         children: [
-          { id: "fc-north", name: "Nordwerk GmbH" },
-          { id: "fc-south", name: "Suedbahn AG" },
-          { id: "fc-east", name: "Ostmarkt eG" },
+          { id: "fc-brandlow", name: "Brandlow Office Supply" },
+          { id: "fc-nimbrel", name: "Nimbrel Software" },
+          { id: "fc-corrin", name: "Corrin Travel" },
         ],
       },
       {
@@ -75,7 +66,7 @@ const FILING: TreeNode[] = [
       { id: "2024", name: "2024 (closed)", locked: true },
     ],
   },
-  { id: "statutes", name: "Statutes.pdf" },
+  { id: "statutes", name: "Articles of association.pdf" },
   { id: "inbox", name: "Inbox", unloaded: true },
 ];
 
@@ -113,9 +104,9 @@ export default function SearchCheckAndReveal() {
                 ...n,
                 unloaded: false,
                 children: [
-                  { id: "in-1", name: "Letter of 12 March" },
-                  { id: "in-2", name: "Query from Nordwerk" },
-                  { id: "in-3", name: "Invoice 2026-114" },
+                  { id: "in-1", name: "Invoice INV-26-0318" },
+                  { id: "in-2", name: "Query from Brandlow Office Supply" },
+                  { id: "in-3", name: "Reminder from Fenwright Legal" },
                 ],
               }
             : n,
@@ -125,7 +116,7 @@ export default function SearchCheckAndReveal() {
   };
 
   const [checked, setChecked] = useState<ReadonlySet<string>>(
-    () => new Set(["fc-north", "fc-south", "fc-east", "framework"]),
+    () => new Set(["fc-brandlow", "fc-nimbrel", "fc-corrin", "framework"]),
   );
 
   const withChecks = useTree(filing, {
@@ -134,7 +125,7 @@ export default function SearchCheckAndReveal() {
     onChecked: setChecked,
     onLoadChildren: load,
     defaultExpanded: ["contracts", "framework", "documents"],
-    defaultActive: "fc-south",
+    defaultActive: "fc-nimbrel",
   });
 
   const activeOnly = useTree(filing, {
@@ -159,11 +150,6 @@ export default function SearchCheckAndReveal() {
 
   return (
     <Stack gap={4}>
-      <Text size="sm" tone="secondary">
-        Expandable and collapsible, cascading checks with an indeterminate state, a search with
-        the path, a keyboard following the pattern for lists and grids - and a large body of which
-        only a window stands in the document.
-      </Text>
       <Grid minItemWidth="260px" gap={4}>
           <Stack gap={2}>
             <Text size="xs" tone="muted">

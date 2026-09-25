@@ -1,20 +1,17 @@
 import { useState } from "react";
 import { Accordion, AccordionItem, Button, Stack, Text } from "../../../src";
 
-export const title = "Controlled: open all, fold all";
-
-/* Controlled, the open sections are the caller's list: `value` shows it,
-   `onChange` reports the header's wish. That is what lets a toolbar open
-   every section at once, or an address keep which ones stand open. */
+export const title = "Open and fold all";
+export const lead = "Control `value` with `onChange` when a toolbar opens every section at once, or an address keeps which stand open.";
 
 const SECTIONS = [
-  { value: "raw", title: "Raw materials", text: "Sugar 1,850 kg, citric acid 36 kg, lemon concentrate 960 l." },
-  { value: "water", title: "Water treatment", text: "Conductivity 42 µS/cm, below the recipe's 50." },
-  { value: "co2", title: "Carbonation", text: "5.8 g/l at 4 °C, inside the tolerance of 5.5 to 6.2." },
+  { value: "vehicle", title: "Vehicle", text: "FP 377 K, an e-van with 900 kg payload, charged to 92 %." },
+  { value: "driver", title: "Driver", text: "Nadia Petrova, on the road since 07:30, break due at 11:45." },
+  { value: "stops", title: "Stops", text: "10 stops, 6 delivered, 1 failed attempt, 3 to go." },
 ];
 
-export default function Controlled() {
-  const [open, setOpen] = useState<string[]>(["water"]);
+export default function OpenAndFoldAll() {
+  const [open, setOpen] = useState<string[]>(["stops"]);
 
   return (
     <Stack gap={3} style={{ maxWidth: 520 }}>
