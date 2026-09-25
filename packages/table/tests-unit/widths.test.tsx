@@ -122,10 +122,13 @@ describe("Sticky parts and density", () => {
     const { container } = render(<List sticky />);
     const header = container.querySelector<HTMLElement>("thead th[data-column]")!;
     expect(header.getAttribute("data-column")).toBe("number");
-    expect(header.className).toContain("stickyCell");
-    expect(header.style.left).toBe("34px");
+    /* The offsets are measured in the browser (features-browser.spec.ts);
+       here stands which place each cell sticks at. */
+    expect(header.className).toContain("pinned");
+    expect(header.style.left).toBe("var(--u-table-pin-start-1, 0px)");
     const rowHeader = container.querySelector<HTMLElement>('tbody th[scope="row"]')!;
-    expect(rowHeader.style.left).toBe("34px");
+    expect(rowHeader.style.left).toBe("var(--u-table-pin-start-1, 0px)");
+    expect(container.querySelector<HTMLElement>("tbody td")!.style.left).toBe("var(--u-table-pin-start-0, 0px)");
     expect(container.querySelector("table")!.className).toContain("sticky");
   });
 

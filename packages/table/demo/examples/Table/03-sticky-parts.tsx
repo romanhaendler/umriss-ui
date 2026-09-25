@@ -7,8 +7,9 @@ export const title = "Sticky header, sticky row header";
    `stickyRowHeader` the column that names the row during a sideways one -
    behind the selection and the expander, which stick along with it.
 
-   The sticky row header stands in front even though it stands second in the JSX:
-   a sticky column in the middle would travel over its neighbours while
+   `stickyRowHeader` is `pin="start"` on the row header (Column, "Pinned to both
+   sides"): it stands in front even though it stands second in the JSX - a
+   sticky column in the middle would travel over its neighbours while
    scrolling. Column menu and export show the same order.
 
    The hour columns come into being with `map` - columns are elements, and a

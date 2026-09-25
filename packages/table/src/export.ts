@@ -8,16 +8,16 @@ import type { Registry, ColumnEntry } from "./registry";
 import type { TableSnapshot } from "./types";
 import { exportValue } from "./values";
 
-/** The visible columns in the order the user sees - with the sticky row header
-    first when it sticks. Screen and export both read here, so that they cannot
-    drift apart. */
+/** The visible columns in the order the user sees - with the pinned blocks at
+    either end. Screen and export both read here, so that they cannot drift
+    apart. */
 export function visibleColumns(registry: Registry): ColumnEntry[] {
   const byId = new Map(registry.orderedColumns().map((e) => [e.spec.id, e]));
   const inModelOrder = registry
     .projection()
     .columns.map((s) => byId.get(s.id))
     .filter((e): e is ColumnEntry => e !== undefined);
-  return registry.withStickyHeaderFirst(inModelOrder.map((e) => ({ id: e.spec.id, e }))).map(({ e }) => e);
+  return registry.inPinOrder(inModelOrder.map((e) => ({ id: e.spec.id, e }))).map(({ e }) => e);
 }
 
 /** Clears the search and lifts every condition - and nothing else: the

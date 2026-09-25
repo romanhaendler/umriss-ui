@@ -151,13 +151,13 @@
 
   /* ---- Control cells: selection and expander --------------------------- */
 
-  /* Exactly 34 px, because the sticky offsets are calculated from it
-     (CONTROL_CELL_WIDTH in parts.tsx). A pixel width would not hold that: if
+  /* Exactly 34 px. The sticky offsets were once calculated from it; they are
+     measured now (parts.tsx, `PinPlacement`), but a control cell grown wider
+     would still be a wide empty column. A pixel width would not hold that: if
      every column has a `width` and the table is wider than their sum, the
      automatic table layout distributes the surplus over every column with a
      pixel width, the control cells included – `max-width` does not apply to a
-     cell – and the sticky row header would slide over the expander when
-     scrolling sideways. A percentage width gets no surplus as long as other
+     cell – and the control cells took a share of every surplus. A percentage width gets no surplus as long as other
      columns exist; `min-width` holds it at 34 px (table-demo,
      features-browser.spec.ts). */
   .control {
@@ -167,16 +167,51 @@
     padding-right: 0;
   }
 
-  /* ---- Sticky row header column ---------------------------------------- */
+  /* ---- Pinned columns (table-column-pinning) --------------------------- */
 
-  .stickyCell {
+  /* A pinned cell sticks at the offset the table measured for its place
+     (parts.tsx, `PinPlacement`) and needs a surface of its own: the cells that
+     scroll under it would read through it otherwise. */
+  .pinned {
     position: sticky;
     z-index: 2;
     background: var(--u-color-surface);
   }
 
-  .sticky .th.stickyCell {
+  .sticky .th.pinned {
     z-index: 3;
+  }
+
+  /* The shadow on a block's inner edge - the group header's stuck shadow,
+     turned on its side. It stands only while content lies under the block,
+     which the table marks on its scroll area. A box-shadow on a cell of a
+     collapsed table is not painted in Chromium; a gradient beside the cell
+     is. `::before`, because a group header's cell already carries its own
+     shadow as `::after`. */
+  .pinStartEdge::before,
+  .pinEndEdge::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    pointer-events: none;
+    visibility: hidden;
+  }
+
+  .pinStartEdge::before {
+    left: 100%;
+    background: linear-gradient(to right, color-mix(in srgb, var(--u-color-text) 9%, transparent), transparent);
+  }
+
+  .pinEndEdge::before {
+    right: 100%;
+    background: linear-gradient(to left, color-mix(in srgb, var(--u-color-text) 9%, transparent), transparent);
+  }
+
+  .scroll[data-under-start] .pinStartEdge::before,
+  .scroll[data-under-end] .pinEndEdge::before {
+    visibility: visible;
   }
 
   /* ---- Sorting --------------------------------------------------------- */
@@ -780,6 +815,32 @@
 
   .sticky tbody tr.groupHeader:hover > .td {
     background: var(--u-color-surface-sunken);
+  }
+
+  /* A pinned cell of a group header carries the header's tone itself - it
+     needs a surface of its own, like a sticking one - and stands above the
+     header's cells that scroll under it. */
+  .table tbody tr.groupHeader > .pinned,
+  .table tbody tr.groupHeader:hover > .pinned {
+    background: var(--u-color-surface-sunken);
+  }
+
+  .sticky tbody tr.groupHeader > .pinned {
+    z-index: 2;
+  }
+
+  /* With pinned cells Chromium left the collapsed top border of a group header
+     out over the pinned selection and actions cells - the strong line above
+     the header broke off at both ends (measured, table-column-pinning 01).
+     Drawn inside every cell it holds; the border stays for the height,
+     transparent. */
+  .pinnedTable tbody tr.groupHeader > .td {
+    border-top-color: transparent;
+    box-shadow: inset 0 1px 0 var(--u-hairline-strong);
+  }
+
+  .pinnedTable tbody tr.groupHeader:first-child > .td {
+    box-shadow: none;
   }
 
   /* A span group begins with the strong hairline across the full width -
