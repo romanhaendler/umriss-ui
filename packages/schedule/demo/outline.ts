@@ -77,6 +77,13 @@ export const OUTLINE: readonly Rubric[] = [
         exports: ["Schedule"],
       },
       {
+        id: "blocked-time",
+        name: "Blocked time",
+        sentence: "Leave, maintenance and other time a lane is not available: hatched behind the work, a finding where work covers it, and closed to a drag.",
+        types: ["BlockedTimesProps", "BlockedTime"],
+        exports: ["BlockedTimes", "findings"],
+      },
+      {
         id: "subtasks",
         name: "Subtasks",
         sentence: "The drawn intervals: a main time with its lead-in and lead-out, in the colour of the task they belong to.",
@@ -219,9 +226,9 @@ export const OUTLINE: readonly Rubric[] = [
       {
         id: "findings",
         name: "Findings as data",
-        sentence: "Overlaps on a lane and violated dependencies, computed from the data - to list, count and act on.",
-        types: ["Overlap", "ViolatedDependency"],
-        exports: ["findings", "overlaps", "violatedDependencies"],
+        sentence: "Overlaps on a lane, violated dependencies and work in blocked time, computed from the data - to list, count and act on.",
+        types: ["Overlap", "ViolatedDependency", "InBlockedTime"],
+        exports: ["findings", "overlaps", "violatedDependencies", "inBlockedTime"],
       },
     ],
   },

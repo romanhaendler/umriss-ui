@@ -130,6 +130,26 @@ phone the plot keeps the larger part;
 `onDomainChange` reports the visible span, and a ref handle turns a client
 point into a time and a lane and back.
 
+## Blocked time
+
+`<BlockedTimes data={…} />` takes the time a lane is not available — leave,
+maintenance — as plain data, `{ id, lane, from, to, label? }`. It is drawn
+hatched behind the work; a subtask that covers some of it is a finding
+(`inBlockedTime`, and the third argument of `findings`), and a drag does not
+put work into it.
+
+## Not yet
+
+What the schedule does not do today, and waits for a caller who needs it (what
+it never does stands in ADR-0032):
+
+* **Milestones** — a point in time on a lane, drawn as a mark rather than a bar.
+* **Stacked overlap** — overlapping subtasks packed into sub-lanes on request;
+  today an overlap is always drawn offset, as the finding it is.
+* **Dependencies across tasks** — a dependency joins two subtasks of one task.
+
+Done from this list: **blocked time** per lane.
+
 ## Where to read on
 
 * The demo: <https://romanhaendler.github.io/umriss-ui/schedule/>, or locally
@@ -142,7 +162,7 @@ point into a time and a lane and back.
   and the declaration of every other export. Online, for the latest version:
   <https://romanhaendler.github.io/umriss-ui/schedule/llms.txt>.
 * The vocabulary — **Task**, **Subtask**, **Lead-in**, **Lead-out**,
-  **Dependency**, **Violated dependency**, **Lane header**, **Lane group**,
+  **Dependency**, **Violated dependency**, **Blocked time**, **Lane header**, **Lane group**,
   **Miniature**, **Intent**, **Ghost** — stands in the workspace's
   `CONTEXT.md`, section "The schedule".
 * [`../../docs/design-language.md`](../../docs/design-language.md) — the design
