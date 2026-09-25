@@ -901,14 +901,15 @@ reader saw; the file *is* the example, and there is no list of examples to keep
 in step with it. Every example has an anchor and is linkable on its own.
 _Avoid_: Demo, snippet, Schnipsel, Ausschnitt, sample, usage
 
-**Demonstration**:
-A single, larger example that shows a component's parts working together —
-filter, selection, view and export in one table rather than in four separate
-examples. It is the answer to a component that has a model rather than a
-handful of props, and it earns its place only where the isolated examples would
-misrepresent the component by leaving out how the parts meet. A page has at most
-one.
-_Avoid_: Showcase, Playground, Spielwiese, full example, kitchen sink
+**Scenario**:
+One realistic screen, composed from several components, on the scenarios page
+that opens every demo. Each plays in one world a reader recognises — operations,
+controlling, planning and the like — and a scenarios page holds up to five, each
+in a different world. It answers "what can this library do?" before the pages
+answer "what is this component, and how do I use it?". It may use the
+neighbouring packages' components; a component page has none.
+_Avoid_: Demonstration (its retired, rarer predecessor), Showcase, Playground,
+Spielwiese, full example, kitchen sink, hero
 
 **Rubric**:
 A named run of pages in the sidebar. It sorts, and it does nothing else: it has
