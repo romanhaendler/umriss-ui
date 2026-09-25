@@ -66,15 +66,20 @@
     color: var(--u-color-text);
   }
 
-  /* The key of the folded levels: a quiet key, its surface sinking under the
-     pointer as every quiet key's does. */
+  /* The key of the folded levels: a quiet key, no surface at rest and its
+     surface sinking under the pointer as every quiet key's does. It has a
+     small key's size and a dotted underline under its dots, so that it reads
+     as something to click and not as a cut-off word (core-foundations 07). */
   .more {
     composes: ring from "#own-styles";
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 24px;
-    padding: 2px var(--u-space-1);
+    min-width: var(--u-control-height-sm);
+    height: var(--u-control-height-sm);
+    padding: 0 var(--u-space-1);
+    text-decoration: underline dotted;
+    text-underline-offset: 3px;
     border: none;
     border-radius: var(--u-radius-xs);
     background: none;

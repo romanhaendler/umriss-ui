@@ -114,7 +114,12 @@ appears - and no focus style hangs on an animation.
 library's own elements is drawn as a superellipse ("squircle", as Apple does it)
 rather than as a circular arc – a progressive refinement with no risk for older
 browsers. The build adds it after every radius (`scripts/styles/ownBox.ts`); an
-application's own rounded elements stay as the application drew them.
+application's own rounded elements stay as the application drew them. One
+exception, by rule: **a mark that shows a state is round, a key is not.** The
+stepper's markers are circles (`corner-shape: round`): they say where a
+procedure stands and are pressed by nobody, and a squircle that small is a
+rounded square - ticked, it would read as a checkbox to press. Whatever can be
+pressed keeps the squircle (core-layout-extras 04).
 
 **Details for the connoisseur.** The text cursor in the library's input fields is
 petrol (`caret-color`); the scrollbars of its scroll containers are slim and
