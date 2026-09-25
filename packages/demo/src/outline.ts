@@ -10,6 +10,13 @@
    break every link (CONTEXT.md, "Rubric"). Component names are unique within a
    package, so one segment is enough.
 
+   The texts of a page - lede, about, alternatives, keys, limits - are plain
+   strings with two marks: `code` in backticks and a [link](#/page). The demo
+   renders them, the llms text carries them as they are.
+
+   The scenarios page opens every demo. It is no page of the outline: it
+   stands at `#/`, a scenario on it at `#/scenarios/<anchor>`.
+
    This file runs without a bundler too: the props generator loads a demo's
    outline in Node. That is why it imports nothing. */
 
@@ -18,8 +25,19 @@ export interface Page {
   id: string;
   /** The name the component is looked up under. */
   name: string;
-  /** One sentence: what the component is for - not what it is made of. */
+  /** The lede: what it does for the user of the screen and when to reach
+      for it, synonyms once - up to ~60 words, no praise, no prop names. */
   sentence: string;
+  /** What a user must know to use it right, at most three short
+      paragraphs. Small components have none. */
+  about?: readonly string[];
+  /** "When to use something else": the situation, and what to use then -
+      a page id of this demo becomes a link. */
+  alternatives?: readonly { when: string; use: string }[];
+  /** The keyboard table: a key or chord, and what it does. */
+  keys?: readonly { key: string; action: string }[];
+  /** What it deliberately does not do (ADR-0032). */
+  limits?: readonly string[];
   /** The props types whose tables stand on this page, in the order they
       appear there. */
   types: readonly string[];
@@ -56,10 +74,14 @@ export interface Addresses {
   addressOf: (pageId: string, exampleId?: string) => string;
   /** The page for an address, and the example named in it.
 
-      An unknown address yields no page - the shell then shows the overview and
-      not an empty surface. */
+      An unknown address yields no page - the shell then shows the scenarios
+      page and not an empty surface. So does `scenarios/<anchor>`, with the
+      scenario as the example. */
   fromAddress: (hash: string) => { page?: PageWithRubric; example?: string };
 }
+
+/** The address of the scenarios page, as `placeOf`'s page id. */
+export const SCENARIOS = "scenarios";
 
 /** The addresses of an outline. */
 export function addresses(outline: readonly Rubric[]): Addresses {
@@ -68,6 +90,7 @@ export function addresses(outline: readonly Rubric[]): Addresses {
   );
 
   const placeOf = (pageId: string, exampleId?: string): string => {
+    if (pageId === SCENARIOS) return exampleId === undefined ? "" : `/${SCENARIOS}/${exampleId}`;
     const page = ALL_PAGES.find((s) => s.id === pageId);
     if (page === undefined) return "";
     return exampleId === undefined ? `/${page.id}` : `/${page.id}/${exampleId}`;
@@ -82,6 +105,7 @@ export function addresses(outline: readonly Rubric[]): Addresses {
     const raw = hash.replace(/^#/, "").replace(/^\//, "");
     if (raw === "") return {};
     const [pageId, exampleId] = raw.split("/");
+    if (pageId === SCENARIOS) return exampleId === undefined || exampleId === "" ? {} : { example: exampleId };
     const page = ALL_PAGES.find((s) => s.id === pageId);
     if (page === undefined) return {};
     return exampleId === undefined || exampleId === "" ? { page } : { page, example: exampleId };

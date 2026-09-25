@@ -1,4 +1,4 @@
-/* The shell of a demo: header bar, sidebar, overview, jump palette.
+/* The shell of a demo: header bar, sidebar, scenarios page, jump palette.
 
    It is the same one for all three demos (table-demo decision A, extended to
    charts by ADR-0020); what makes a demo a particular one arrives as `demo`.
@@ -35,13 +35,18 @@
 
    The palette finds pages AND examples, examples grouped under their component
    - around a hundred and eighty candidates, which is nothing for a filtered
-   list. Its worth grows with what it can find. */
+   list. Its worth grows with what it can find.
+
+   The front door is the scenarios page (`Scenarios.tsx`): composed screens
+   first, the components after them. It stands at the head of the sidebar,
+   above the rubrics. */
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { CommandPalette, LanguageProvider, useCommandPaletteShortcut } from "@umriss-ui/core";
 import type { Demo } from "./demo";
-import type { Rubric, Page as PageData } from "./outline";
+import { SCENARIOS } from "./outline";
 import { Page } from "./Page";
+import { Scenarios } from "./Scenarios";
 
 /* The palette's candidates: the flat view of the outline and the run of
    example files, translated into the palette's language (CONTEXT.md,
@@ -51,9 +56,15 @@ import { Page } from "./Page";
    The id IS the place, so that choosing has nothing to look up - and it comes
    from `placeOf()` and not from a template here. One spot knows the format;
    whoever rebuilds it holds a second truth about it. */
-function paletteCandidates({ addresses, examples }: Demo) {
+function paletteCandidates({ addresses, examples, scenarios }: Demo) {
   const { ALL_PAGES, placeOf } = addresses;
   return [
+    { id: "/", label: "Scenarios", group: "Scenarios" },
+    ...scenarios.map((scenario) => ({
+      id: placeOf(SCENARIOS, scenario.id),
+      label: scenario.title,
+      group: "Scenarios",
+    })),
     ...ALL_PAGES.map((page) => ({
       id: placeOf(page.id),
       label: page.name,
@@ -72,8 +83,8 @@ function paletteCandidates({ addresses, examples }: Demo) {
 
 function readPlace(fromAddress: Demo["addresses"]["fromAddress"]): { pageId: string; example?: string } {
   const { page, example } = fromAddress(window.location.hash);
-  /* An unknown address lands on the overview and not on an empty surface: a
-     typo is no reason for a white picture. */
+  /* An unknown address lands on the scenarios page and not on an empty
+     surface: a typo is no reason for a white picture. */
   return { pageId: page?.id ?? "", ...(example === undefined ? {} : { example }) };
 }
 
@@ -82,13 +93,13 @@ export interface ShellProps {
   demo: Demo;
   brand: string;
   version: string;
-  title: string;
+  /** What the demo is - under "Scenarios" on the front page. */
   sentence: string;
   /** On the right of the header, e.g. the theme switch. */
   actions?: ReactNode;
 }
 
-export function Shell({ demo, brand, version, title, sentence, actions }: ShellProps) {
+export function Shell({ demo, brand, version, sentence, actions }: ShellProps) {
   const { OUTLINE, ALL_PAGES, fromAddress, placeOf } = demo.addresses;
   const candidates = useMemo(() => paletteCandidates(demo), [demo]);
   const [place, setPlace] = useState(() => readPlace(fromAddress));
@@ -119,7 +130,10 @@ export function Shell({ demo, brand, version, title, sentence, actions }: ShellP
      one lands at the head of a page and starts searching again. */
   useEffect(() => {
     const target = place.example;
-    const el = target === undefined ? null : document.querySelector(`[data-example="${target}"]`);
+    const el =
+      target === undefined
+        ? null
+        : document.querySelector(`[data-example="${target}"], [data-scenario="${target}"]`);
     if (el === null) {
       /* A page change with no named target starts at the top. Otherwise one
          would stay at the height one was at on the previous page. scrollTop
@@ -176,6 +190,18 @@ export function Shell({ demo, brand, version, title, sentence, actions }: ShellP
 
       <div className="shellBody">
         <nav className="rail" aria-label="Components">
+          <button
+            type="button"
+            className="railEntry railScenarios"
+            data-active={page === undefined ? "" : undefined}
+            aria-current={page === undefined ? "page" : undefined}
+            onClick={() => {
+              window.location.hash = "";
+              setPlace({ pageId: "" });
+            }}
+          >
+            Scenarios
+          </button>
           {OUTLINE.map((rubric) => (
             <div className="railRubric" key={rubric.id}>
               <h2 className="railHead">
@@ -203,15 +229,7 @@ export function Shell({ demo, brand, version, title, sentence, actions }: ShellP
 
         <main className="shellContent">
           {page === undefined ? (
-            <Overview
-              outline={OUTLINE}
-              pageCount={ALL_PAGES.length}
-              exampleCount={demo.examples.length}
-              brand={brand}
-              title={title}
-              sentence={sentence}
-              goTo={goTo}
-            />
+            <Scenarios demo={demo} brand={brand} sentence={sentence} />
           ) : (
             <Page key={page.id} demo={demo} page={page} />
           )}
@@ -238,75 +256,10 @@ export function Shell({ demo, brand, version, title, sentence, actions }: ShellP
             /* Split with the same function that splits the address bar - not
                with a `split` beside it. */
             const { page: target, example } = fromAddress(id);
-            if (target !== undefined) goTo(target.id, example);
+            goTo(target?.id ?? SCENARIOS, example);
           }}
         />
       </LanguageProvider>
     </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* The overview - the front door.                                      */
-/*                                                                     */
-/* It answers the question a sidebar does not: what is actually in     */
-/* here. The rubrics with their chips do that, with a few sentences,   */
-/* better than a grid of thumbnails. It is itself a page for           */
-/* photographing, so that the shell is not the only unchecked part of  */
-/* the demo.                                                           */
-/* ------------------------------------------------------------------ */
-
-function Overview({
-  outline,
-  pageCount,
-  exampleCount,
-  brand,
-  title,
-  sentence,
-  goTo,
-}: {
-  outline: readonly (Rubric & { pages: readonly PageData[] })[];
-  pageCount: number;
-  exampleCount: number;
-  brand: string;
-  title: string;
-  sentence: string;
-  goTo: (page: string, example?: string) => void;
-}) {
-  return (
-    <section className="overview" data-block="overview" aria-labelledby="overview-title">
-      <p className="overviewEyebrow">{brand}</p>
-      <h1 className="overviewTitle" id="overview-title">
-        {title}
-      </h1>
-      <p className="overviewSentence">{sentence}</p>
-      <p className="overviewCount">
-        <strong>{pageCount}</strong> pages in {outline.length} rubrics,{" "}
-        <strong>{exampleCount}</strong> examples
-      </p>
-      <ul className="overviewGrid">
-        {outline.map((rubric, i) => (
-          <li key={rubric.id}>
-            <div className="rubricCard">
-              <span className="rubricCardRank">{String(i + 1).padStart(2, "0")}</span>
-              <span className="rubricCardName">{rubric.name}</span>
-              <span className="rubricCardSentence">{rubric.sentence}</span>
-              <span className="rubricCardChips">
-                {rubric.pages.map((s) => (
-                  <button
-                    type="button"
-                    className="rubricCardChip"
-                    key={s.id}
-                    onClick={() => goTo(s.id)}
-                  >
-                    {s.name}
-                  </button>
-                ))}
-              </span>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </section>
   );
 }

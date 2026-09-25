@@ -64,7 +64,7 @@ async function drawing(page: Page): Promise<string> {
 
     Two readings in a row that agree - with a bound on the attempts, so that a
     genuinely oscillating page fails as a timeout instead of hanging. A page
-    with no chart on it (the overview) agrees with itself at once. */
+    with no chart on it (the scenarios page) agrees with itself at once. */
 export async function drawn(page: Page): Promise<void> {
   /* The fonts first, and again here: the shell awaits them before the page is
      visible, and the labels this demo measures are laid out after that. */
@@ -82,6 +82,11 @@ export async function drawn(page: Page): Promise<void> {
 
 export async function open(page: Page, pageId: string): Promise<void> {
   await shell.open(page, pageId);
+  await drawn(page);
+}
+
+export async function openScenario(page: Page, scenarioId: string): Promise<void> {
+  await shell.openScenario(page, scenarioId);
   await drawn(page);
 }
 

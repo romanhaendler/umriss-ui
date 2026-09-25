@@ -16,11 +16,12 @@
    Anything relative that is not the package is a fixture, and a fixture is
    what this check exists to catch.
 
-   The one exception is named by the example itself. `export const shows = [...]`
-   puts a file beside the example as a further tab of the code view, so a reader
-   sees it and can copy it too. It exists for the case that cannot be otherwise -
-   a demonstration built on a whole plant - and it is an exception precisely
-   because it is declared, at the example, in the file that depends on it.
+   Two exceptions, both visible in the code view. `export const shows = [...]`
+   puts a file beside the example as a further tab, so a reader sees it and
+   can copy it too - declared at the example, in the file that depends on it.
+   And an import of `@umriss-ui/demo/worlds/<world>`, the demos' shared data,
+   brings the world's file as a tab by itself; being a bare specifier, it
+   passes the npm rule.
 
    It stands once and runs against every demo, as the shell's and the page's
    checks do: their `own-data.spec.ts` calls `checkOwnData` with their

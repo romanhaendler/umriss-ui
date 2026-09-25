@@ -9,5 +9,5 @@ import { PAGES } from "./pages";
 
 checkOverlays({
   open,
-  pages: PAGES.filter((pageId) => pageId !== "overview"),
+  pages: PAGES.filter((pageId) => pageId !== "scenarios"),
 });

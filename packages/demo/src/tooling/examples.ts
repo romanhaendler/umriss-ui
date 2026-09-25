@@ -17,12 +17,16 @@
    source. So the code shown is the code that ran.
 
    An example may also SHOW a file beside itself - `export const shows = [...]`,
-   paths relative to the example, one further tab of the code view each. It is
-   the one exception to "an example is one file", and it exists for the one
-   case that cannot be otherwise: a demonstration built on a plant of its own,
-   whose ninety lines of data a reader would never see and could never copy.
-   Every other example carries its own few lines in the file, and a check makes
-   sure of it (`@umriss-ui/demo/checks/ownData`).
+   paths relative to the example, one further tab of the code view each. The
+   demos' shared data needs no such line: an import of
+   `@umriss-ui/demo/worlds/<world>` brings the world's file as a tab by itself,
+   and the code view imports it from `./<world>`. Every other example carries
+   its own few lines in the file, and a check makes sure of it
+   (`@umriss-ui/demo/checks/ownData`).
+
+   A scenario is read the same way from `demo/scenarios/NN-<anchor>.tsx`: a
+   composed screen with its job as `title`, who uses it as `lead`, the
+   numbered `callouts` and the pages it is `builtFrom`.
 
    Both are `eager`, so every example lands in the demo's bundle. That is the
    price of the file being the list, and it is fine for a demo. Should the
@@ -31,8 +35,8 @@
 
 import type { ComponentType } from "react";
 import type { Page } from "../outline";
-import { byRank, parseFileName } from "./fileName";
-import { asPackage, displaySource } from "./source";
+import { byRank, parseFileName, parseScenarioName } from "./fileName";
+import { asPackage, displaySource, worldsOf } from "./source";
 
 /** One tab of an example's code view. The first is the example itself. */
 export interface ExampleFile {
@@ -49,6 +53,9 @@ export interface Example {
   id: string;
   /** What it is called - from the file's `title` export. */
   title: string;
+  /** The one visible sentence above it: the situation and the prop - from
+      the file's `lead` export, where it has one. */
+  lead?: string;
   /** The number in the file name; it orders the run and nothing else. */
   rank: number;
   /** What is rendered. */
@@ -59,15 +66,45 @@ export interface Example {
   /** The code view's tabs: this example first, then whatever it shows beside
       itself. One entry means no tabs are drawn at all. */
   files: readonly ExampleFile[];
-  /** A demonstration stands last and is labelled as such. */
-  demonstration: boolean;
 }
 
 export interface ExampleModule {
   default?: unknown;
   title?: unknown;
+  lead?: unknown;
   /** Files beside this one to show, as paths relative to the example. */
   shows?: unknown;
+}
+
+/** A page this demo does not have: a component of a neighbouring package,
+    linked into that package's demo. */
+export interface ForeignPage {
+  name: string;
+  /** `"@umriss-ui/charts#trend"` - the package and the page's address. */
+  page: string;
+}
+
+/** A composed screen on the scenarios page. */
+export interface Scenario {
+  /** The anchor: the name part after the number. */
+  id: string;
+  rank: number;
+  /** The user's job, as its heading. */
+  title: string;
+  /** Who uses the screen, and for what. */
+  lead: string;
+  /** What the numbered marks on the screen point at, in their order. The
+      screen marks a spot with `data-callout="1"`, and so on. */
+  callouts: readonly string[];
+  /** The pages it is made of: an id of this demo, or a neighbour's page. */
+  builtFrom: readonly (string | ForeignPage)[];
+  Component: ComponentType;
+  files: readonly ExampleFile[];
+}
+
+export interface ScenarioModule extends ExampleModule {
+  callouts?: unknown;
+  builtFrom?: unknown;
 }
 
 /** A path relative to an example, resolved against the glob's keys - which are
@@ -88,54 +125,72 @@ function tabName(path: string): string {
   return path.split("/").pop() ?? path;
 }
 
+interface ReadOptions {
+  packageName: string;
+  /** The raw glob over what `shows` may name. */
+  beside?: Record<string, string>;
+  /** The raw glob over `packages/demo/src/worlds/*.ts`. */
+  worlds?: Record<string, string>;
+}
+
+/** What an example and a scenario have in common: a title, maybe a lead, a
+    component, and the tabs of the code view. */
+function readModule(
+  path: string,
+  mod: ExampleModule,
+  sources: Record<string, string>,
+  { packageName, beside: shown = {}, worlds = {} }: ReadOptions,
+): { title: string; lead?: string; Component: ComponentType; files: ExampleFile[] } {
+  const title = mod.title;
+  if (typeof title !== "string" || title === "") {
+    throw new Error(`\`${path}\` exports no \`title\` – without one it has no name.`);
+  }
+  const lead = mod.lead;
+  if (lead !== undefined && (typeof lead !== "string" || lead === "")) {
+    throw new Error(`\`${path}\` exports a \`lead\` that is not a sentence.`);
+  }
+  const Component = mod.default;
+  if (typeof Component !== "function") {
+    throw new Error(`\`${path}\` has no default export that could be rendered.`);
+  }
+  const raw = sources[path];
+  if (typeof raw !== "string") {
+    throw new Error(`\`${path}\` has no source text.`);
+  }
+
+  const files: ExampleFile[] = [{ name: tabName(path), source: displaySource(raw, packageName) }];
+  for (const relative of readShows(path, mod.shows)) {
+    const key = beside(path, relative);
+    const text = shown[key];
+    if (typeof text !== "string") {
+      throw new Error(`\`${path}\` shows \`${relative}\`, which is not among the files the demo reads.`);
+    }
+    files.push({ name: tabName(key), source: asPackage(text, packageName) });
+  }
+  for (const world of worldsOf(raw)) {
+    const key = Object.keys(worlds).find((one) => tabName(one) === `${world}.ts`);
+    if (key === undefined) {
+      throw new Error(`\`${path}\` imports the world \`${world}\`, which the demo does not read.`);
+    }
+    files.push({ name: `${world}.ts`, source: worlds[key]! });
+  }
+  return { title, ...(typeof lead === "string" ? { lead } : {}), Component: Component as ComponentType, files };
+}
+
 export function readExamples(
   module: Record<string, ExampleModule>,
   sources: Record<string, string>,
-  { pages, packageName, beside: shown = {} }: { pages: readonly Page[]; packageName: string; beside?: Record<string, string> },
+  { pages, ...options }: ReadOptions & { pages: readonly Page[] },
 ): readonly Example[] {
   const found: Example[] = [];
 
   for (const [path, mod] of Object.entries(module)) {
-    const { pageId, rank, id, demonstration } = parseFileName(path);
+    const { pageId, rank, id } = parseFileName(path);
     if (!pages.some((s) => s.id === pageId)) {
       throw new Error(`\`${path}\` is in a folder for which there is no page \`${pageId}\`.`);
     }
-
-    const title = mod.title;
-    if (typeof title !== "string" || title === "") {
-      throw new Error(`\`${path}\` exports no \`title\` – without one the example has no name.`);
-    }
-    const Component = mod.default;
-    if (typeof Component !== "function") {
-      throw new Error(`\`${path}\` has no default export that could be rendered.`);
-    }
-
-    const raw = sources[path];
-    if (typeof raw !== "string") {
-      throw new Error(`\`${path}\` has no source text.`);
-    }
-
-    const source = displaySource(raw, packageName);
-    const files: ExampleFile[] = [{ name: tabName(path), source }];
-    for (const relative of readShows(path, mod.shows)) {
-      const key = beside(path, relative);
-      const text = shown[key];
-      if (typeof text !== "string") {
-        throw new Error(`\`${path}\` shows \`${relative}\`, which is not among the files the demo reads.`);
-      }
-      files.push({ name: tabName(key), source: asPackage(text, packageName) });
-    }
-
-    found.push({
-      pageId,
-      id,
-      title,
-      rank,
-      Component: Component as ComponentType,
-      source,
-      files,
-      demonstration,
-    });
+    const { title, lead, Component, files } = readModule(path, mod, sources, options);
+    found.push({ pageId, id, title, ...(lead === undefined ? {} : { lead }), rank, Component, source: files[0]!.source, files });
   }
 
   return found.sort(byRank);
@@ -151,12 +206,44 @@ function readShows(path: string, shows: unknown): readonly string[] {
   return shows as readonly string[];
 }
 
-/** A page's examples, in their order - the demonstration last.
-
-    It stands at the end because it is the summary and not the way in: whoever
-    saw it first would read six hundred lines before having seen thirty. */
+/** A page's examples, in their order. */
 export function examplesOf(examples: readonly Example[], pageId: string): readonly Example[] {
-  return examples
-    .filter((b) => b.pageId === pageId)
-    .sort((a, b) => Number(a.demonstration) - Number(b.demonstration));
+  return examples.filter((b) => b.pageId === pageId);
+}
+
+/** The scenarios, in their order - checked at load time: a callout list that
+    is not strings, or a page that does not exist, would otherwise be a dead
+    mark or a dead link. */
+export function readScenarios(
+  module: Record<string, ScenarioModule>,
+  sources: Record<string, string>,
+  { pages, ...options }: ReadOptions & { pages: readonly Page[] },
+): readonly Scenario[] {
+  const found: Scenario[] = [];
+  for (const [path, mod] of Object.entries(module)) {
+    const { rank, id } = parseScenarioName(path);
+    const { title, lead, Component, files } = readModule(path, mod, sources, options);
+    if (lead === undefined) throw new Error(`\`${path}\` exports no \`lead\` – a scenario says who uses the screen.`);
+    const callouts = mod.callouts ?? [];
+    if (!Array.isArray(callouts) || callouts.some((one) => typeof one !== "string")) {
+      throw new Error(`\`${path}\` exports \`callouts\`, which must be an array of sentences.`);
+    }
+    const builtFrom = mod.builtFrom;
+    if (!Array.isArray(builtFrom) || builtFrom.length === 0) {
+      throw new Error(`\`${path}\` exports no \`builtFrom\` – a scenario names the pages it is made of.`);
+    }
+    for (const one of builtFrom as unknown[]) {
+      if (typeof one === "string" ? !pages.some((page) => page.id === one) : !isForeign(one)) {
+        throw new Error(`\`${path}\` is built from \`${JSON.stringify(one)}\`, which is no page of this demo and no \`{ name, page }\`.`);
+      }
+    }
+    found.push({ id, rank, title, lead, callouts: callouts as string[], builtFrom: builtFrom as (string | ForeignPage)[], Component, files });
+  }
+  return found.sort(byRank);
+}
+
+function isForeign(value: unknown): value is ForeignPage {
+  if (typeof value !== "object" || value === null) return false;
+  const { name, page } = value as Record<string, unknown>;
+  return typeof name === "string" && typeof page === "string" && /^@[\w-]+\/[\w-]+#[\w-]+$/.test(page);
 }

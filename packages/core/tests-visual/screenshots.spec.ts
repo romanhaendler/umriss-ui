@@ -34,8 +34,8 @@ for (const pageId of PAGES) {
     /* From the head to the first example: the first example itself already has
        a picture of its own, and so does everything below it. */
     const target =
-      pageId === "overview"
-        ? page.locator('[data-block="overview"]')
+      pageId === "scenarios"
+        ? page.locator('[data-block="scenarios"]')
         : page.locator(`[data-block="${pageId}"] .pageHead`);
     await target.scrollIntoViewIfNeeded();
     await expect(target).toHaveScreenshot(`page-${pageId}-${testInfo.project.name}.png`);

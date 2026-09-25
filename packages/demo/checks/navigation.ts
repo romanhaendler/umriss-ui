@@ -10,7 +10,7 @@ export function navigation(addressOf: (pageId: string, exampleId?: string) => st
   return {
     /** Opens a page and waits until it stands. */
     async open(page: Page, pageId: string): Promise<void> {
-      await page.goto(pageId === "overview" ? "/" : addressOf(pageId));
+      await page.goto(pageId === "scenarios" ? "/" : addressOf(pageId));
       await page.evaluate(() => document.fonts.ready);
       await page.locator(`[data-block="${pageId}"]`).waitFor({ state: "visible" });
       await settle(page);
@@ -21,6 +21,14 @@ export function navigation(addressOf: (pageId: string, exampleId?: string) => st
       await page.goto(addressOf(pageId, exampleId));
       await page.evaluate(() => document.fonts.ready);
       await page.locator(`[data-example="${exampleId}"]`).waitFor({ state: "visible" });
+      await settle(page);
+    },
+
+    /** Opens the scenarios page and brings a scenario into view. */
+    async openScenario(page: Page, scenarioId: string): Promise<void> {
+      await page.goto(addressOf("scenarios", scenarioId));
+      await page.evaluate(() => document.fonts.ready);
+      await page.locator(`[data-scenario="${scenarioId}"]`).waitFor({ state: "visible" });
       await settle(page);
     },
   };

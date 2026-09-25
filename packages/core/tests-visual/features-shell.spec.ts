@@ -6,7 +6,7 @@ import { checkShell } from "@umriss-ui/demo/checks/shell";
 
 checkShell({
   notOnTheFrontDoor: ["tabs", "button"],
-  chip: { name: "Tabs", pageId: "tabs", absent: ["button", "dock"] },
+  scenario: "watch-a-kiln-line",
   rail: { name: "Meter", pageId: "meter", rubricId: "monitoring" },
   neighbours: [
     { name: "Tabs", pageId: "tabs" },

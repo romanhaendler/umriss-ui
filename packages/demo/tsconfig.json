@@ -12,5 +12,8 @@
       "@umriss-ui/core": ["../core/src/index.ts"]
     }
   },
-  "include": ["src", "pruefung", "tests-unit"]
+  "include": ["src", "checks", "tests-unit"],
+  /* The fixture scenario imports a world by the package's name, as a demo
+     does; the fixture's world is handed to the generator, not resolved. */
+  "exclude": ["tests-unit/fixtures/llms/demo/scenarios"]
 }

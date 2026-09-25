@@ -32,7 +32,6 @@ export function App() {
       demo={DEMO}
       brand="Umriss Calculation"
       version={manifest.version}
-      title="How a figure came about"
       sentence="The parts of @umriss-ui/calculation with the code that produces them: a derivation written as it is shown, evaluated by the library, folded and read line by line - so that what stands on the screen cannot disagree with the number. Every page shows running examples together with their source, and the props tables generated from it."
       actions={
         <Button size="sm" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>

@@ -40,7 +40,6 @@ export function App() {
       demo={DEMO}
       brand="Umriss Charts"
       version={manifest.version}
-      title="Charts that draw few things, and those properly"
       sentence="The parts of @umriss-ui/charts with the code that produces them: series as elements on shared axes, canvas for the marks and DOM for everything a reader has to read. Every page shows running examples together with their source, and the props tables generated from it. All data are seed-based and identical across runs."
       actions={
         <Button size="sm" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>

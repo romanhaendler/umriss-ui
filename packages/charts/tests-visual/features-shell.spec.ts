@@ -11,7 +11,6 @@ import { checkShell } from "@umriss-ui/demo/checks/shell";
 
 checkShell({
   notOnTheFrontDoor: ["line", "benchmark"],
-  chip: { name: "Line", pageId: "line", absent: ["matrix", "benchmark"] },
   rail: { name: "Pareto", pageId: "pareto", rubricId: "monitoring" },
   neighbours: [
     { name: "Line", pageId: "line" },

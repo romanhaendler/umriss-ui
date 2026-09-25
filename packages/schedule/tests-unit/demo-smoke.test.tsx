@@ -43,7 +43,6 @@ const WITHOUT_TABLE: Readonly<Record<string, string>> = {
   snapping: A_CHAPTER,
   placing: A_CHAPTER,
   "where-it-may-go": A_CHAPTER,
-  demonstration: A_CHAPTER,
 };
 
 /** Renders, and gives back the node together with its teardown – the teardown
@@ -119,13 +118,9 @@ describe("The examples as a set", () => {
     }
   });
 
-  it("carry at most one demonstration per page, and it stands last", () => {
-    for (const pageData of ALL_PAGES) {
-      const own = EXAMPLES.filter((b) => b.pageId === pageData.id);
-      const demonstrations = own.filter((b) => b.demonstration);
-      expect(demonstrations.length, pageData.id).toBeLessThanOrEqual(1);
-      if (demonstrations.length === 1) expect(own[own.length - 1]!.demonstration, pageData.id).toBe(true);
-    }
+  it.each(DEMO.scenarios.map((s) => [s.id, s] as const))("renders the scenario %s", async (_name, scenario) => {
+    const { unmount } = await mount(<scenario.Component />);
+    await unmount();
   });
 
   it("leave no page without an example", () => {

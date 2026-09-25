@@ -3,8 +3,8 @@
 
    Nothing here is written twice. The pages come from the outline, the tables
    from the same `props.json` the demo renders, the examples from the same files
-   through the same two string functions (`displaySource`, `asPackage`), and the
-   "Why it is like this" pages from the same TSX. So the text an agent reads is
+   through the same string functions (`displaySource`, `asPackage`), the
+   scenarios from theirs. So the text an agent reads is
    the demo a person reads, one medium over - and it cannot drift from it
    without the demo drifting too.
 
@@ -19,15 +19,21 @@
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, posix } from "node:path";
+import { fileURLToPath } from "node:url";
 import ts from "typescript";
 import type { Rubric, Page } from "../outline.ts";
-import { byRank, parseFileName } from "./fileName.ts";
-import { asPackage, displaySource } from "./source.ts";
+import { byRank, parseFileName, parseScenarioName } from "./fileName.ts";
+import { asPackage, displaySource, worldsOf } from "./source.ts";
+
+/** The demos' shared data, beside this file. */
+const WORLDS_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "worlds");
 import type { TypeEntry } from "./propsReader.ts";
 
 export interface LlmsJob {
   /** The package's directory: `package.json` and `demo/` are read there. */
   packageDir: string;
+  /** Where the worlds are read from - the shell's own by default. */
+  worldsDir?: string;
   outline: readonly Rubric[];
   /** The generated props tables - what `generateProps` just wrote. */
   tables: Readonly<Record<string, TypeEntry>>;
@@ -44,11 +50,25 @@ interface ExampleText {
   pageId: string;
   id: string;
   rank: number;
-  demonstration: boolean;
   title: string;
+  lead?: string;
   source: string;
   /** The demo's own files it shows beside itself, as `./data.ts`. */
   shows: readonly string[];
+  /** The worlds it imports, as `operations`. */
+  worlds: readonly string[];
+}
+
+interface ScenarioText {
+  id: string;
+  rank: number;
+  title: string;
+  lead: string;
+  callouts: readonly string[];
+  /** Page ids of this demo, or `{ name, page }` of a neighbour. */
+  builtFrom: readonly (string | { name: string; page: string })[];
+  source: string;
+  worlds: readonly string[];
 }
 
 /* ------------------------------------------------------------------ */
@@ -74,187 +94,94 @@ function cell(text: string): string {
 }
 
 /* ------------------------------------------------------------------ */
-/* "Why it is like this": TSX to Markdown                              */
+/* Reading the demo from disk                                          */
 /* ------------------------------------------------------------------ */
 
-/* The entities the why pages use, and the few a writer reaches for next. An
-   unknown one throws: a literal "&foo;" in the text would be a quiet lie. */
-const ENTITIES: Readonly<Record<string, string>> = {
-  amp: "&",
-  lt: "<",
-  gt: ">",
-  quot: '"',
-  apos: "'",
-  nbsp: " ",
-  bdquo: "„",
-  ldquo: "“",
-  rdquo: "”",
-  lsquo: "‘",
-  rsquo: "’",
-  hellip: "…",
-  ndash: "–",
-  mdash: "—",
-};
+/* What `readExamples` takes from the running module, read from the text
+   instead: every title, lead and `shows` is one line in the workspace, and a
+   form this does not read throws rather than being guessed at. The scenarios'
+   lists are read by the compiler. */
+const TITLE = /^export const title = ("(?:[^"\\]|\\.)*");$/m;
+const LEAD = /^export const lead =\s*("(?:[^"\\]|\\.)*");$/m;
+const SHOWS = /^export const shows = (\[[^\]]*\]);$/m;
 
-function decode(text: string): string {
-  return text.replace(/&(#x?[0-9a-fA-F]+|[a-zA-Z]+);/g, (whole, name: string) => {
-    if (name.startsWith("#x")) return String.fromCodePoint(parseInt(name.slice(2), 16));
-    if (name.startsWith("#")) return String.fromCodePoint(Number(name.slice(1)));
-    const found = ENTITIES[name];
-    if (found === undefined) throw new Error(`A why page uses the entity \`${whole}\`, which the llms.txt generator does not know.`);
-    return found;
-  });
+function titleOf(path: string, raw: string): string {
+  const title = TITLE.exec(raw);
+  if (title === null) throw new Error(`\`${path}\` has no \`export const title = "…";\` on one line.`);
+  return JSON.parse(title[1]!) as string;
 }
 
-/* React's rule for JSX text: a line break and the indentation around it
-   vanish, and the lines that remain are joined by one space. */
-function jsxText(raw: string): string {
-  const lines = raw.split(/\r?\n/);
-  if (lines.length === 1) return raw;
-  return lines
-    .map((line, i) => {
-      let out = line;
-      if (i > 0) out = out.trimStart();
-      if (i < lines.length - 1) out = out.trimEnd();
-      return out;
-    })
-    .filter((line) => line !== "")
-    .join(" ");
+function leadOf(raw: string): string | undefined {
+  const lead = LEAD.exec(raw);
+  return lead === null ? undefined : (JSON.parse(lead[1]!) as string);
 }
 
-type JsxChild = ts.JsxChild;
-
-function tagName(node: ts.JsxElement | ts.JsxSelfClosingElement): string {
-  const tag = ts.isJsxElement(node) ? node.openingElement.tagName : node.tagName;
-  return tag.getText();
-}
-
-function attribute(node: ts.JsxElement, name: string): string | undefined {
-  for (const property of node.openingElement.attributes.properties) {
-    if (ts.isJsxAttribute(property) && property.name.getText() === name && property.initializer !== undefined) {
-      if (ts.isStringLiteral(property.initializer)) return property.initializer.text;
+/** An exported literal - strings, arrays, objects - read by the compiler
+    rather than by a pattern: a callout may well hold a comma and a colon. */
+function literalOf(path: string, name: string, raw: string): unknown {
+  const file = ts.createSourceFile(path, raw, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const value = (node: ts.Expression): unknown => {
+    if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) return node.text;
+    if (ts.isAsExpression(node) || ts.isSatisfiesExpression(node) || ts.isParenthesizedExpression(node)) return value(node.expression);
+    if (ts.isArrayLiteralExpression(node)) return node.elements.map(value);
+    if (ts.isObjectLiteralExpression(node)) {
+      return Object.fromEntries(
+        node.properties.map((property) => {
+          if (!ts.isPropertyAssignment(property)) throw new Error(`\`${path}\`'s \`${name}\` holds \`${property.getText()}\`, which is no literal.`);
+          return [property.name.getText().replace(/^["']|["']$/g, ""), value(property.initializer)];
+        }),
+      );
+    }
+    throw new Error(`\`${path}\`'s \`${name}\` holds \`${node.getText()}\`, which is no literal.`);
+  };
+  for (const statement of file.statements) {
+    if (!ts.isVariableStatement(statement)) continue;
+    for (const one of statement.declarationList.declarations) {
+      if (ts.isIdentifier(one.name) && one.name.text === name && one.initializer !== undefined) return value(one.initializer);
     }
   }
   return undefined;
 }
 
-interface WhyOptions {
-  /** What an `<h3>` becomes: the level below the section it stands in. */
-  heading: string;
-  /** The demo's address, for a link to another page (`#/meter`). */
-  base: string;
-}
-
-/** A why page's TSX as Markdown. Only the handful of elements the why pages
-    use is known; anything else throws, so a new one is noticed at build time
-    instead of vanishing from the text. */
-export function whyMarkdown(tsx: string, { heading, base }: WhyOptions): string {
-  const file = ts.createSourceFile("why.tsx", tsx, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
-
-  const inline = (children: readonly JsxChild[]): string => children.map(inlineOne).join("");
-
-  function inlineOne(node: JsxChild): string {
-    if (ts.isJsxText(node)) return decode(jsxText(node.text));
-    if (ts.isJsxExpression(node)) {
-      if (node.expression === undefined) return "";
-      if (ts.isStringLiteral(node.expression)) return node.expression.text;
-      throw new Error(`A why page computes \`{${node.expression.getText()}}\`; the text generator takes only literal text.`);
-    }
-    if (ts.isJsxElement(node)) {
-      const name = tagName(node);
-      const inner = inline(node.children);
-      switch (name) {
-        case "code":
-          return code(inner);
-        case "strong":
-          return `**${inner}**`;
-        case "em":
-          return `*${inner}*`;
-        case "a": {
-          const href = attribute(node, "href") ?? "";
-          return `[${inner}](${href.startsWith("#") ? `${base}${href}` : href})`;
-        }
-      }
-      throw new Error(`A why page uses \`<${name}>\` inline, which the text generator does not know.`);
-    }
-    throw new Error(`A why page holds \`${node.getText()}\`, which the text generator does not know.`);
-  }
-
-  const blocks: string[] = [];
-  function block(node: JsxChild): void {
-    if (ts.isJsxText(node)) {
-      if (node.text.trim() !== "") throw new Error(`A why page has loose text: "${node.text.trim()}".`);
-      return;
-    }
-    if (ts.isJsxExpression(node) && node.expression === undefined) return;
-    if (ts.isJsxFragment(node)) {
-      node.children.forEach(block);
-      return;
-    }
-    if (ts.isJsxElement(node) || ts.isJsxSelfClosingElement(node)) {
-      const name = tagName(node);
-      const children = ts.isJsxElement(node) ? node.children : ts.factory.createNodeArray<JsxChild>();
-      if (name === "h3") blocks.push(`${heading} ${inline(children).trim()}`);
-      else if (name === "p") blocks.push(inline(children).trim());
-      else if (name === "ul") {
-        blocks.push(
-          children
-            .filter((child) => ts.isJsxElement(child) || ts.isJsxSelfClosingElement(child) || (ts.isJsxText(child) && child.text.trim() !== ""))
-            .map((child) => {
-              if (!ts.isJsxElement(child) || tagName(child) !== "li") throw new Error("A why page's `<ul>` holds something other than `<li>`.");
-              return `- ${inline(child.children).trim()}`;
-            })
-            .join("\n"),
-        );
-      } else throw new Error(`A why page uses \`<${name}>\` as a block, which the text generator does not know.`);
-      return;
-    }
-    throw new Error(`A why page holds \`${node.getText()}\`, which the text generator does not know.`);
-  }
-
-  /* The first JSX in the file is what the default export returns - a why page
-     is one component with one return, and nothing else. */
-  let root: ts.Node | undefined;
-  const find = (node: ts.Node): void => {
-    if (root !== undefined) return;
-    if (ts.isJsxElement(node) || ts.isJsxFragment(node) || ts.isJsxSelfClosingElement(node)) root = node;
-    else ts.forEachChild(node, find);
-  };
-  find(file);
-  if (root === undefined) throw new Error("A why page renders no JSX.");
-  block(root as JsxChild);
-
-  return `${blocks.join("\n\n")}\n`;
-}
-
-/* ------------------------------------------------------------------ */
-/* Reading the demo from disk                                          */
-/* ------------------------------------------------------------------ */
-
-/* What `readExamples` takes from the running module, read from the text
-   instead: every title and every `shows` is one line in the workspace, and a
-   form this does not read throws rather than being guessed at. */
-const TITLE = /^export const title = ("(?:[^"\\]|\\.)*");$/m;
-const SHOWS = /^export const shows = (\[[^\]]*\]);$/m;
-
 function readExample(demoDir: string, file: string, packageName: string): ExampleText {
   const path = `./examples/${file}`;
   const raw = readFileSync(join(demoDir, "examples", file), "utf8");
-  const title = TITLE.exec(raw);
-  if (title === null) throw new Error(`\`${path}\` has no \`export const title = "…";\` on one line.`);
   const shows = SHOWS.exec(raw);
-  const { pageId, id, rank, demonstration } = parseFileName(path);
+  const { pageId, id, rank } = parseFileName(path);
+  const lead = leadOf(raw);
   return {
     pageId,
     id,
     rank,
-    demonstration,
-    title: JSON.parse(title[1]!) as string,
+    title: titleOf(path, raw),
+    ...(lead === undefined ? {} : { lead }),
     source: displaySource(raw, packageName),
     /* Relative to the example, resolved against the demo directory - the key
        the demo's own `beside` glob uses. */
     shows: shows === null ? [] : (JSON.parse(shows[1]!) as string[]).map((one) => `./${posix.join(posix.dirname(path), one)}`),
+    worlds: worldsOf(raw),
   };
+}
+
+function readScenario(demoDir: string, file: string, packageName: string): ScenarioText {
+  const path = `./scenarios/${file}`;
+  const raw = readFileSync(join(demoDir, "scenarios", file), "utf8");
+  const { id, rank } = parseScenarioName(path);
+  return {
+    id,
+    rank,
+    title: titleOf(path, raw),
+    lead: leadOf(raw) ?? "",
+    callouts: (literalOf(path, "callouts", raw) ?? []) as string[],
+    builtFrom: (literalOf(path, "builtFrom", raw) ?? []) as ScenarioText["builtFrom"],
+    source: displaySource(raw, packageName),
+    worlds: worldsOf(raw),
+  };
+}
+
+function listScenarios(demoDir: string): string[] {
+  const root = join(demoDir, "scenarios");
+  return existsSync(root) ? readdirSync(root).filter((name) => name.endsWith(".tsx")) : [];
 }
 
 function listExamples(demoDir: string): string[] {
@@ -354,7 +281,7 @@ function declares(statement: ts.Statement, name: string): boolean {
     question, and the appendix's.
 
     Only code counts: fenced blocks and inline spans, where a page's import
-    line, its tables, its examples and a why page's `<code>` stand. An export
+    line, its tables, its examples and its texts' backticks stand. An export
     called `format` is not named by the English word in a sentence. */
 export function missingFrom(text: string, names: readonly string[]): string[] {
   const codeOnly = (text.match(/^(`{3,})[^\n]*\n[\s\S]*?^\1$|`[^`\n]+`|``[^\n]+?``/gm) ?? []).join("\n");
@@ -393,15 +320,15 @@ function tableMarkdown(entry: TypeEntry): string {
 }
 
 /** Both texts of one package, from its directory. Pure apart from reading. */
-export function renderLlms({ packageDir, outline, tables }: LlmsJob): { index: string; full: string } {
+export function renderLlms({ packageDir, outline, tables, worldsDir = WORLDS_DIR }: LlmsJob): { index: string; full: string } {
   const manifest = JSON.parse(readFileSync(join(packageDir, "package.json"), "utf8")) as Manifest;
   const demoDir = join(packageDir, "demo");
   const examples = listExamples(demoDir)
     .map((file) => readExample(demoDir, file, manifest.name))
     .sort(byRank);
-  const whyDir = join(demoDir, "why");
-  /* A demo without a single why page has no directory for them either. */
-  const whyFiles = new Set(existsSync(whyDir) ? readdirSync(whyDir).filter((name) => name.endsWith(".tsx")) : []);
+  const scenarios = listScenarios(demoDir)
+    .map((file) => readScenario(demoDir, file, manifest.name))
+    .sort(byRank);
 
   const pages = outline.flatMap((rubric) => rubric.pages);
   for (const example of examples) {
@@ -419,8 +346,18 @@ export function renderLlms({ packageDir, outline, tables }: LlmsJob): { index: s
     "",
     `> ${manifest.description}`,
     "",
-    `Version ${manifest.version}. Install with \`${install}\`. Every page below in full - its examples' source, its props tables generated from the code, and why it is built the way it is - stands in one file: [llms-full.txt](${fullUrl}). The npm package carries the same text for the installed version as \`docs/llms-full.md\`; prefer that one when the package is installed.`,
+    `Version ${manifest.version}. Install with \`${install}\`. Every page below in full - its examples' source, its props tables generated from the code, and what it deliberately does not do - stands in one file: [llms-full.txt](${fullUrl}). The npm package carries the same text for the installed version as \`docs/llms-full.md\`; prefer that one when the package is installed.`,
     "",
+    ...(scenarios.length === 0
+      ? []
+      : [
+          "## Scenarios",
+          "",
+          "Composed, realistic screens built from the package.",
+          "",
+          ...scenarios.map((scenario) => `- [${scenario.title}](${manifest.homepage}#/scenarios/${scenario.id}): ${scenario.lead}`),
+          "",
+        ]),
     ...outline.flatMap((rubric) => [
       `## ${rubric.name}`,
       "",
@@ -438,29 +375,54 @@ export function renderLlms({ packageDir, outline, tables }: LlmsJob): { index: s
     "",
     `> ${manifest.description}`,
     "",
-    `Install with \`${install}\`. This text is generated from the package's demo (${manifest.homepage}): every page with its import line, its examples - the source exactly as it runs, with the package name where the demo imports its own source - its props tables generated from the code, and why it is built the way it is. The pages index stands in ${manifest.homepage}llms.txt.`,
+    `Install with \`${install}\`. This text is generated from the package's demo (${manifest.homepage}): every page with its import line, its examples - the source exactly as it runs, with the package name where the demo imports its own source - its props tables generated from the code, and what it deliberately does not do. The pages index stands in ${manifest.homepage}llms.txt.`,
   ];
+  const beside = (worlds: readonly string[]) => {
+    if (worlds.length === 0) return;
+    const names = worlds.map((world) => code(`${world}.ts`));
+    parts.push("", `It imports ${names.join(", ")} from beside itself; the file stands once, under "Files the examples show" at the end.`);
+    worlds.forEach((world) => shown.add(`world:${world}`));
+  };
+  if (scenarios.length > 0) {
+    parts.push("", "## Scenarios", "", "Composed, realistic screens built from the package. A numbered mark on the screen is an element with `data-callout`.");
+    for (const scenario of scenarios) {
+      parts.push("", `### ${scenario.title}`, "", scenario.lead);
+      if (scenario.callouts.length > 0) parts.push("", scenario.callouts.map((text, i) => `${i + 1}. ${text}`).join("\n"));
+      const built = scenario.builtFrom.map((entry) => {
+        if (typeof entry !== "string") return entry.name;
+        return pages.find((page) => page.id === entry)?.name ?? entry;
+      });
+      parts.push("", `Built from: ${built.join(", ")}.`, "", fenced("tsx", scenario.source));
+      beside(scenario.worlds);
+    }
+  }
   for (const rubric of outline) {
     parts.push("", `## ${rubric.name}`, "", rubric.sentence);
     for (const page of rubric.pages) {
       parts.push("", `### ${page.name}`, "", page.sentence, "", fenced("ts", `import { ${page.exports.join(", ")} } from "${manifest.name}";`));
       parts.push("", `Demo page: ${pageUrl(manifest, page)}`);
+      if (page.about !== undefined) parts.push("", page.about.join("\n\n"));
 
-      const own = examples
-        .filter((example) => example.pageId === page.id)
-        /* `examplesOf`'s order, the demonstration last. Not imported: the
-           shell's `examples.ts` imports without extensions for Vite, which
-           Node's type stripping cannot follow. */
-        .sort((a, b) => Number(a.demonstration) - Number(b.demonstration));
+      const own = examples.filter((example) => example.pageId === page.id);
       parts.push("", "#### Examples");
       if (own.length === 0) parts.push("", "There is no example for this page yet. The tables below are complete all the same - they come from the source.");
       for (const example of own) {
-        parts.push("", `##### ${example.title}`, "", fenced("tsx", example.source));
+        parts.push("", `##### ${example.title}`);
+        if (example.lead !== undefined) parts.push("", example.lead);
+        parts.push("", fenced("tsx", example.source));
+        beside(example.worlds);
         if (example.shows.length > 0) {
           const names = example.shows.map((key) => code(posix.basename(key)));
           parts.push("", `It imports ${names.join(", ")} from beside itself; the file stands once, under "Files the examples show" at the end.`);
           example.shows.forEach((key) => shown.add(key));
         }
+      }
+
+      if (page.alternatives !== undefined) {
+        parts.push("", "#### When to use something else", "", page.alternatives.map(({ when, use }) => `- ${when} → ${pages.find((one) => one.id === use)?.name ?? use}`).join("\n"));
+      }
+      if (page.keys !== undefined) {
+        parts.push("", "#### Keyboard", "", "| Key | Action |", "|---|---|", ...page.keys.map(({ key, action }) => `| ${cell(code(key))} | ${cell(action)} |`));
       }
 
       if (page.types.length > 0) {
@@ -472,9 +434,8 @@ export function renderLlms({ packageDir, outline, tables }: LlmsJob): { index: s
         }
       }
 
-      if (whyFiles.has(`${page.id}.tsx`)) {
-        const tsx = readFileSync(join(whyDir, `${page.id}.tsx`), "utf8");
-        parts.push("", "#### Why it is like this", "", whyMarkdown(tsx, { heading: "#####", base: manifest.homepage }).trimEnd());
+      if (page.limits !== undefined) {
+        parts.push("", "#### Known limits", "", page.limits.map((text) => `- ${text}`).join("\n"));
       }
     }
   }
@@ -499,8 +460,11 @@ export function renderLlms({ packageDir, outline, tables }: LlmsJob): { index: s
   if (shown.size > 0) {
     parts.push("", "## Files the examples show", "", "The demo's own data, which some examples import from beside themselves. Copied with the example, it runs.");
     for (const key of [...shown].sort()) {
-      const text = asPackage(readFileSync(join(demoDir, key), "utf8"), manifest.name);
-      parts.push("", `### ${code(posix.basename(key))}`, "", fenced(key.endsWith(".tsx") ? "tsx" : "ts", text));
+      const world = key.startsWith("world:") ? key.slice("world:".length) : undefined;
+      const path = world === undefined ? join(demoDir, key) : join(worldsDir, `${world}.ts`);
+      const name = world === undefined ? posix.basename(key) : `${world}.ts`;
+      const text = asPackage(readFileSync(path, "utf8"), manifest.name);
+      parts.push("", `### ${code(name)}`, "", fenced(name.endsWith(".tsx") ? "tsx" : "ts", text));
     }
   }
 

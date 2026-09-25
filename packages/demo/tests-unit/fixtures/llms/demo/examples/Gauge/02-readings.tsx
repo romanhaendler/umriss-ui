@@ -1,10 +1,10 @@
 import { Gauge } from "../../../src";
 import { READINGS } from "../../data";
 
-export const title = "The whole plant";
+export const title = "Show several readings";
 
 export const shows = ["../../data.ts"];
 
-export default function Plant() {
+export default function Readings() {
   return <>{READINGS.map((value) => <Gauge key={value} value={value} />)}</>;
 }

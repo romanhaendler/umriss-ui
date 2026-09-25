@@ -34,7 +34,6 @@ export function App() {
       demo={DEMO}
       brand="Umriss Table"
       version={manifest.version}
-      title="A table, declared the way it reads"
       sentence="The parts of @umriss-ui/table with the code that produces them: columns as elements, typed against their rows, and a table that renders its rows itself. Every page shows running examples together with their source, and the props tables generated from it."
       actions={
         <Button size="sm" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
