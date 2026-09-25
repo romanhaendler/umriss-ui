@@ -8,7 +8,7 @@ export {
   frequencyByType,
   detectFlood,
   nextLifecycleState,
-  isStanding,
+  isActive,
   isAcknowledged,
   isDone,
   hasReturned,
@@ -19,11 +19,11 @@ export {
   DEFAULT_ORDER,
   /* alarm-standards 01 - new exports stand at the end (CONTRIBUTING.md). */
   availabilityAt,
-  isHiddenFromOperation,
-  shelve,
-  unshelve,
-  takeOutOfService,
-  returnToService,
+  isHidden,
+  snooze,
+  unsnooze,
+  disable,
+  enable,
   AVAILABILITIES,
 } from "./alarmModel";
 export type {
@@ -42,5 +42,5 @@ export type {
   Flood,
   Acknowledgement,
   Availability,
-  Shelf,
+  Snooze,
 } from "./alarmModel";

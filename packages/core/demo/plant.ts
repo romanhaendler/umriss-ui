@@ -44,7 +44,7 @@ export const KILN_LIMITS: LimitSet = {
 export const IDEAL_CYCLE_MINUTES = 0.25;
 
 /** The kiln alarm's condition and its dead band, as the table's model reads them. */
-const KILN_RETURN: ReturnBand = { direction: "obere", limit: KILN.alarm, returnTo: KILN.returnTo };
+const KILN_RETURN: ReturnBand = { direction: "upper", limit: KILN.alarm, returnTo: KILN.returnTo };
 
 /** What the four measuring points of the line can report. */
 export const ALARM_TYPES: readonly AlarmType[] = [
@@ -117,8 +117,8 @@ function random(seed: number): () => number {
 const SILENT_FROM = 288;
 const SILENT_FOR = 50;
 
-/* The dryer's vibration sensor is under maintenance all shift: its alarm stands
-   and is out of service. */
+/* The dryer's vibration sensor is under maintenance all shift: its alarm is
+   active and disabled. */
 const DRYER_FAN_RAISED = 20;
 
 /** The shift, from a seed. */
@@ -222,7 +222,7 @@ function spans(
 }
 
 /**
- * The alarms of the shift as they stand at the minute: raised, cleared - and
+ * The alarms of the shift as they stand at the minute: raised, resolved - and
  * acknowledged where the operator did, at the instant he did.
  *
  * `start` is the instant the shift began; the alarms carry instants because the
@@ -240,14 +240,14 @@ export function alarmsAt(
   const add = (
     type: string,
     span: { from: number; to?: number },
-    extra: { availability?: "suppressed-by-design" | "out-of-service" } = {},
+    extra: { availability?: "suppressed" | "disabled" } = {},
   ) => {
     alarms.push({
       id: `${type}-${span.from}`,
       type,
-      lifecycle: span.to === undefined ? "standing-unacknowledged" : "cleared-unacknowledged",
+      lifecycle: span.to === undefined ? "active-unacknowledged" : "resolved-unacknowledged",
       raised: instant(span.from),
-      ...(span.to === undefined ? {} : { cleared: instant(span.to) }),
+      ...(span.to === undefined ? {} : { resolved: instant(span.to) }),
       ...extra,
     });
   };
@@ -259,12 +259,12 @@ export function alarmsAt(
     add("exit-silent", span);
   }
   /* The belt runs empty because the operator stopped the feed: the plant's
-     logic knows it, so the alarm is suppressed by design - there, and neutral. */
+     logic knows it, so the alarm is suppressed - there, and neutral. */
   for (const span of spans(p.readings, minute, (one) => !one.running, (one) => one.running)) {
-    add("belt-empty", span, { availability: "suppressed-by-design" });
+    add("belt-empty", span, { availability: "suppressed" });
   }
   if (minute >= DRYER_FAN_RAISED) {
-    add("dryer-fan", { from: DRYER_FAN_RAISED }, { availability: "out-of-service" });
+    add("dryer-fan", { from: DRYER_FAN_RAISED }, { availability: "disabled" });
   }
 
   return alarms.map((alarm) => {

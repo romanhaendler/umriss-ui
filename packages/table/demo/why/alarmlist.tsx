@@ -4,7 +4,7 @@ export default function WhyAlarmList() {
       <h3>A lifecycle, not a generation</h3>
       <p>
         The library receives alarms. It generates none. Turning a measured value into an alarm means
-        knowing what a limit means in this plant, which delay applies and when a condition counts as
+        knowing what a limit means in this application, which delay applies and when a condition counts as
         true – and a user-interface library does not know that. It owns what happens afterwards:
         acknowledging, sorting, counting, marking. See{" "}
         <code>docs/adr/0009-the-library-owns-a-lifecycle-not-a-generation.md</code>.
@@ -12,8 +12,8 @@ export default function WhyAlarmList() {
 
       <h3>One field with four values, not a pair of booleans</h3>
       <p>
-        Standing/cleared and acknowledged/unacknowledged would be two flags. Two flags invite{" "}
-        <code>if (standing)</code>, and that filter loses the third case: it came, it went, and
+        Active/resolved and acknowledged/unacknowledged would be two flags. Two flags invite{" "}
+        <code>if (active)</code>, and that filter loses the third case: it came, it went, and
         nobody saw it. That is precisely the one worth investigating.
       </p>
 
@@ -26,7 +26,7 @@ export default function WhyAlarmList() {
 
       <h3>The live region reports a number</h3>
       <p>
-        It is polite and says how many standing unacknowledged there are. Not every arrival – a list
+        It is polite and says how many active unacknowledged there are. Not every arrival – a list
         that reads out forty arrivals during a flood gets switched off, and then it reports nothing
         at all.
       </p>
