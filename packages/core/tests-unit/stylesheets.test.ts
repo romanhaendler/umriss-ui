@@ -344,14 +344,30 @@ function unguarded(css: string, selector: string): string[] {
 
 const RING = /^(?:none|var\(--u-focus-ring(?:-danger)?\)|var\(--uc-focus-ring\))$/;
 
+/* The ring's outline (forced-colors 01): transparent, so it paints nothing
+   beside the ring - until forced colours drop the ring's box-shadow and paint
+   the outline in the system's text colour. Two pixels at no offset, where the
+   ring lies. */
+const RING_OUTLINE = /^2px solid transparent$/;
+
 /** A rule for the element's own focus that paints more than the ring. */
 function focusPaints(selector: string, body: Declarations): boolean {
   const subject = compounds(selector).at(-1) ?? "";
   if (!/:focus/.test(subject.replace(/:(?:not|has)\((?:[^()]|\([^()]*\))*\)/g, ""))) return false;
   return body.some(
     ([property, value]) =>
-      /^(?:background(?:-color)?|color)$/.test(property) || (/^(?:box-shadow|outline)$/.test(property) && !RING.test(value)),
+      /^(?:background(?:-color)?|color)$/.test(property) ||
+      (property === "box-shadow" && !RING.test(value)) ||
+      (property === "outline" && value !== "none" && !RING_OUTLINE.test(value)),
   );
+}
+
+/** A focus rule that draws the ring and leaves forced colours nothing: the
+    box-shadow goes there, the outline beside it is what stays. */
+function ringWithoutOutline(selector: string, body: Declarations): boolean {
+  if (!/:focus/.test(selector)) return false;
+  const ring = body.some(([property, value]) => property === "box-shadow" && value !== "none" && RING.test(value));
+  return ring && !body.some(([property, value]) => property === "outline" && RING_OUTLINE.test(value));
 }
 
 /** A hover rule that draws an edge over the ring of a focused element. */
@@ -361,13 +377,30 @@ function hoverTakesRing(selector: string, body: Declarations): boolean {
   return body.some(([property]) => /^(?:box-shadow|outline)$/.test(property));
 }
 
+/* The edge's outline (forced-colors 02): the library draws every edge and
+   every card's and overlay's depth as a box-shadow, and forced colours drop
+   them all - a button became a word, a field a line of text, a menu text
+   floating over the page. One transparent pixel of outline where the edge
+   lies stays, in the system's text colour. */
+const EDGE = /var\(--u-(?:edge(?:-strong)?|shadow-[\w-]+)\)/;
+const EDGE_OUTLINE = /^1px solid transparent$/;
+
+/** A resting rule that draws an edge or a depth and leaves forced colours
+    nothing. What changes an edge on hover or press is left out: the resting
+    rule's outline is still standing there. */
+function edgeWithoutOutline(selector: string, body: Declarations): boolean {
+  if (/:(?:hover|active|focus)/.test(selector.replace(/:not\((?:[^()]|\([^()]*\))*\)/g, ""))) return false;
+  const edge = body.some(([property, value]) => property === "box-shadow" && EDGE.test(value));
+  return edge && !body.some(([property, value]) => property === "outline" && EDGE_OUTLINE.test(value));
+}
+
 /** A rule for the disabled state that repaints instead of dimming. */
 function disabledRepaints(selector: string, body: Declarations): boolean {
   if (!compounds(selector).some((part) => DISABLED_MARKER.test(withoutNot(part)))) return false;
   return body.some(([property]) => /^(?:background(?:-color)?|color|border-color)$/.test(property));
 }
 
-type CanonCheck = "guard" | "focus" | "ring" | "disabled";
+type CanonCheck = "guard" | "focus" | "ring" | "outline" | "edge" | "disabled";
 
 /** Sites that break away from the canon, each with its reason. */
 const CANON_EXCEPTIONS: Readonly<Record<string, string>> = {
@@ -384,9 +417,12 @@ function canonFinds(check: CanonCheck): string[] {
       guard: () => unguarded(css, selector).length > 0,
       focus: () => focusPaints(selector, body),
       ring: () => hoverTakesRing(selector, body),
+      outline: () => ringWithoutOutline(selector, body),
+      edge: () => edgeWithoutOutline(selector, body),
       disabled: () => disabledRepaints(selector, body),
     })[check]();
-  return Object.entries(LIBRARY).flatMap(([path, css]) =>
+  /* The shared ring every `composes: ring` takes is held like a component's. */
+  return Object.entries({ ...LIBRARY, "own-styles/own.module.css": OWN }).flatMap(([path, css]) =>
     stateRules(css)
       .filter(([selector, body]) => breaks(css, selector, body))
       .map(([selector]) => `${nameOf(path)}: ${selector}`),
@@ -401,10 +437,12 @@ describe("The interaction-state canon (visuelle-wertigkeit 04)", () => {
   it("lets no disabled element react to hover or press", check("guard"));
   it("shows focus by the ring and by nothing else", check("focus"));
   it("never lets a hover take the ring away", check("ring"));
+  it("gives every ring the outline forced colours keep", check("outline"));
+  it("gives every edge the outline forced colours keep", check("edge"));
   it("dims a disabled element instead of repainting it", check("disabled"));
 
   it("still meets every exception, and each one carries a reason", () => {
-    const all = new Set((["guard", "focus", "ring", "disabled"] as const).flatMap(canonFinds));
+    const all = new Set((["guard", "focus", "ring", "outline", "edge", "disabled"] as const).flatMap(canonFinds));
     for (const [find, reason] of Object.entries(CANON_EXCEPTIONS)) {
       expect(all.has(find), `${find} is out of date`).toBe(true);
       expect(reason.length).toBeGreaterThan(20);
@@ -424,6 +462,15 @@ describe("The interaction-state canon (visuelle-wertigkeit 04)", () => {
     expect(focusPaints(".item:focus-visible", [["box-shadow", "var(--u-focus-ring)"]])).toBe(false);
     expect(focusPaints(".row:focus-visible", [["outline", "2px solid var(--u-color-accent)"]])).toBe(true);
     expect(focusPaints(".group:focus-within .key", [["opacity", "1"]])).toBe(false);
+    expect(focusPaints(".item:focus-visible", [["outline", "2px solid transparent"], ["box-shadow", "var(--u-focus-ring)"]])).toBe(false);
+    expect(ringWithoutOutline(".item:focus-visible", [["outline", "none"], ["box-shadow", "var(--u-focus-ring)"]])).toBe(true);
+    expect(ringWithoutOutline(".input:focus-visible + .box", [["box-shadow", "var(--u-focus-ring-danger)"]])).toBe(true);
+    expect(ringWithoutOutline(".item:focus-visible", [["outline", "2px solid transparent"], ["box-shadow", "var(--u-focus-ring)"]])).toBe(false);
+    expect(ringWithoutOutline(".inner:focus-visible", [["outline", "none"], ["box-shadow", "none"]])).toBe(false);
+    expect(edgeWithoutOutline(".secondary", [["box-shadow", "var(--u-edge-strong)"]])).toBe(true);
+    expect(edgeWithoutOutline(".panel", [["box-shadow", "var(--u-shadow-overlay)"], ["outline", "1px solid transparent"]])).toBe(false);
+    expect(edgeWithoutOutline(".secondary:hover:not(:disabled)", [["box-shadow", "var(--u-edge-strong)"]])).toBe(false);
+    expect(edgeWithoutOutline(".row:not(:focus-visible) > .td", [["box-shadow", "var(--u-edge)"]])).toBe(true);
     expect(hoverTakesRing(".secondary:hover:not(:disabled)", [["box-shadow", "0 0 0 1px var(--u-color-edge-hover)"]])).toBe(true);
     expect(hoverTakesRing(".input:hover:not(:disabled):not(:focus-visible)", [["box-shadow", "none"]])).toBe(false);
     expect(hoverTakesRing(".key:hover", [["background", "var(--u-color-surface-sunken)"]])).toBe(false);

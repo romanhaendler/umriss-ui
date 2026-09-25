@@ -60,10 +60,14 @@
 }
 
 /* The ring lies with the components and wins through its pseudo-class: a
-   component's own `box-shadow` (an edge, a hover) must not hide the focus. */
+   component's own `box-shadow` (an edge, a hover) must not hide the focus.
+   The outline beside it is transparent and paints nothing - until forced
+   colours (the Windows contrast mode) drop every box-shadow and paint the
+   outline in the system's text colour, two pixels where the ring stood. Every
+   site that draws its own ring carries the same outline (forced-colors 01). */
 @layer umriss.components {
   .ring:focus-visible {
-    outline: none;
+    outline: 2px solid transparent;
     box-shadow: var(--u-focus-ring);
   }
 

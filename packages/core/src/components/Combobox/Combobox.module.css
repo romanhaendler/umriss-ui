@@ -15,6 +15,7 @@
     border: none;
     border-radius: var(--u-radius-md);
     background: var(--u-color-surface);
+    outline: 1px solid transparent;
     box-shadow: var(--u-edge-strong);
     font-family: var(--u-font-sans);
     font-size: var(--u-text-sm);
@@ -32,7 +33,7 @@
   }
 
   .input:focus-visible {
-    outline: none;
+    outline: 2px solid transparent;
     box-shadow: var(--u-focus-ring);
   }
 
@@ -47,6 +48,7 @@
   }
 
   .invalid:focus-visible {
+    outline: 2px solid transparent;
     box-shadow: var(--u-focus-ring-danger);
   }
 
@@ -64,6 +66,7 @@
   .panel {
     background: var(--u-color-surface);
     border-radius: var(--u-radius-md);
+    outline: 1px solid transparent;
     box-shadow: var(--u-shadow-overlay);
     padding: var(--u-space-1);
   }
@@ -167,6 +170,16 @@
   @media (prefers-reduced-motion: reduce) {
     .clear {
       animation: none;
+    }
+  }
+
+  /* The list's cursor is a surface, and forced colours repaint it with the
+     page's (forced-colors 02): it takes an outline in the system's selection
+     colour, inside the option. */
+  @media (forced-colors: active) {
+    .active {
+      outline: 2px solid Highlight;
+      outline-offset: -2px;
     }
   }
 }

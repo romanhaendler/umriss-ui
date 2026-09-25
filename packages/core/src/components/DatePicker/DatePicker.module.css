@@ -12,6 +12,7 @@
     border: none;
     border-radius: var(--u-radius-md);
     background: var(--u-color-surface);
+    outline: 1px solid transparent;
     box-shadow: var(--u-edge-strong);
     font-family: var(--u-font-sans);
     font-size: var(--u-text-sm);
@@ -25,7 +26,7 @@
   }
 
   .trigger:focus-visible {
-    outline: none;
+    outline: 2px solid transparent;
     box-shadow: var(--u-focus-ring);
   }
 
@@ -46,6 +47,7 @@
   }
 
   .invalid:focus-visible {
+    outline: 2px solid transparent;
     box-shadow: var(--u-focus-ring-danger);
   }
 
@@ -88,6 +90,7 @@
     padding: var(--u-space-3);
     background: var(--u-color-surface);
     border-radius: var(--u-radius-md);
+    outline: 1px solid transparent;
     box-shadow: var(--u-shadow-overlay);
   }
 
@@ -271,12 +274,14 @@
     height: var(--u-control-height-sm);
     border-radius: var(--u-radius-sm);
     background: var(--u-color-surface);
+    outline: 1px solid transparent;
     box-shadow: var(--u-edge-strong);
     overflow: hidden;
     transition: box-shadow var(--u-transition);
   }
 
   .timeFieldWrap:focus-within {
+    outline: 2px solid transparent;
     box-shadow: var(--u-focus-ring);
   }
 
@@ -690,5 +695,30 @@
   .timeFieldDisabled .timeField,
   .timeStepper button:disabled {
     cursor: not-allowed;
+  }
+
+  /* Forced colours repaint every ground with the page's (forced-colors 02):
+     the chosen day, the range's ends and band, the chosen preset and today's
+     dot would all be gone. The chosen ones take outlines in the system's
+     selection colour - the ends two pixels, the band one - and the dot the
+     system's text colour. */
+  @media (forced-colors: active) {
+    .selected,
+    .rangeFrom,
+    .rangeTo,
+    .rangeSingle,
+    .presetActive {
+      outline: 2px solid Highlight;
+      outline-offset: -2px;
+    }
+
+    .inRange {
+      outline: 1px solid Highlight;
+      outline-offset: -1px;
+    }
+
+    .today::after {
+      background: CanvasText;
+    }
   }
 }

@@ -15,6 +15,7 @@
     min-width: 0;
     border-radius: var(--u-radius-md);
     background: var(--u-color-surface);
+    outline: 1px solid transparent;
     box-shadow: var(--u-edge);
   }
 
@@ -482,6 +483,7 @@
     max-width: 280px;
     background: var(--u-color-surface);
     border-radius: var(--u-radius-md);
+    outline: 1px solid transparent;
     box-shadow: var(--u-shadow-overlay);
     padding: var(--u-space-3);
     text-transform: none;
@@ -583,6 +585,7 @@
   }
 
   .condition:has(.conditionButton:focus-visible) {
+    outline: 2px solid transparent;
     box-shadow: var(--u-focus-ring);
   }
 
@@ -592,6 +595,7 @@
     min-width: 240px;
     background: var(--u-color-surface);
     border-radius: var(--u-radius-md);
+    outline: 1px solid transparent;
     box-shadow: var(--u-shadow-overlay);
     padding: var(--u-space-2);
   }
@@ -644,7 +648,7 @@
   }
 
   .move:focus-visible {
-    outline: none;
+    outline: 2px solid transparent;
     box-shadow: var(--u-focus-ring);
   }
 
@@ -734,6 +738,7 @@
      the focus moved in would show no step at all. */
   .groupingTrigger:focus-visible {
     border-radius: var(--u-radius-xs);
+    outline: 2px solid transparent;
     box-shadow: var(--u-focus-ring);
   }
 
@@ -996,7 +1001,7 @@
   }
 
   .fold:focus-visible {
-    outline: none;
+    outline: 2px solid transparent;
     box-shadow: var(--u-focus-ring);
   }
 
@@ -1068,7 +1073,7 @@
   }
 
   .expander:focus-visible {
-    outline: none;
+    outline: 2px solid transparent;
     box-shadow: var(--u-focus-ring);
   }
 
@@ -1204,5 +1209,54 @@
   .fillerRow td {
     padding: 0;
     border: 0;
+  }
+
+  /* ---- Forced colours (forced-colors 03) ------------------------------- */
+
+  /* Forced colours repaint every ground with the page's and drop every
+     box-shadow. A selected row loses its accent ground - the tick in its
+     checkbox stays, but the row itself would no longer say it - and a focused
+     virtual row its ring, which its cells draw as inset shadows. Both draw
+     lines inside their cells instead, on a pseudo-element: a border would grow
+     the row, and an outline on the row is painted over by the sticky cells.
+     The selection in the system's selection colour, the focus in its text
+     colour, as a ring is. The unpositioned cells are positioned for it; a
+     pinned or a span cell already sticks, and stays so. */
+  @media (forced-colors: active) {
+    .table tbody tr[data-selected] > .td:not(.pinned, .spanCell),
+    .table tbody tr.virtualRow:focus-visible > .td:not(.pinned, .spanCell) {
+      position: relative;
+    }
+
+    .table tbody tr[data-selected] > .td::after,
+    .table tbody tr.virtualRow:focus-visible > .td::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      height: auto;
+      border: 0 solid Highlight;
+      border-block-width: 2px;
+      background: none;
+      pointer-events: none;
+    }
+
+    .table tbody tr.virtualRow:focus-visible > .td::after {
+      border-color: CanvasText;
+    }
+
+    .table tbody tr[data-selected] > .td:first-child::after,
+    .table tbody tr.virtualRow:focus-visible > .td:first-child::after {
+      border-inline-start-width: 2px;
+    }
+
+    .table tbody tr[data-selected] > .td:last-child::after,
+    .table tbody tr.virtualRow:focus-visible > .td:last-child::after {
+      border-inline-end-width: 2px;
+    }
+
+    /* The group's share is a ground too: it takes the system's text colour. */
+    .shareBar {
+      background: CanvasText;
+    }
   }
 }

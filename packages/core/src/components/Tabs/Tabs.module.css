@@ -57,4 +57,13 @@
     composes: ring from "#own-styles";
     padding-top: var(--u-space-4);
   }
+
+  /* The underline is a ground, and forced colours repaint it with the page's
+     (forced-colors 02): the chosen tab would be told by nothing. It takes the
+     system's selection colour. */
+  @media (forced-colors: active) {
+    .indicator {
+      background: Highlight;
+    }
+  }
 }

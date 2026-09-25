@@ -16,6 +16,7 @@
     border: none;
     border-radius: var(--u-radius-md);
     background-color: var(--u-color-surface);
+    outline: 1px solid transparent;
     box-shadow: var(--u-edge-strong);
     font-family: var(--u-font-sans);
     font-size: var(--u-text-sm);
@@ -30,7 +31,7 @@
   }
 
   .select:focus-visible {
-    outline: none;
+    outline: 2px solid transparent;
     box-shadow: var(--u-focus-ring);
   }
 
@@ -66,6 +67,7 @@
   }
 
   .invalid:focus-visible {
+    outline: 2px solid transparent;
     box-shadow: var(--u-focus-ring-danger);
   }
 
