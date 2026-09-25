@@ -55,9 +55,9 @@ test("A partly checked branch reports itself as mixed", async ({ page }) => {
 test("Unchecking a child takes the branch out with it", async ({ page }) => {
   const frame = row(page, /Framework contracts/);
   await expect(frame).toHaveAttribute("aria-checked", "true");
-  await row(page, /Nordwerk/).locator("label").click();
+  await row(page, /Brandlow/).locator("label").click();
   await expect(frame).toHaveAttribute("aria-checked", "mixed");
-  expect(await checkedLine(page)).not.toContain("fc-north");
+  expect(await checkedLine(page)).not.toContain("fc-brandlow");
 });
 
 test("The chevron folds open without activating", async ({ page }) => {
@@ -158,16 +158,16 @@ test("Type-ahead: after a pause the buffer starts again from the front", async (
    bring five new ticks and not ten toggles. */
 
 test("Shift with a chevron checks while it travels", async ({ page }) => {
-  await row(page, /Nordwerk/).click();
+  await row(page, /Brandlow/).click();
   const before = (await checkedLine(page)).split(",").length;
   await page.keyboard.press("Shift+ArrowDown");
-  await expect(row(page, /Suedbahn/)).toBeFocused();
+  await expect(row(page, /Nimbrel/)).toBeFocused();
   await page.keyboard.press("Shift+ArrowDown");
-  await expect(row(page, /Ostmarkt/)).toBeFocused();
-  // Two gestures, two changes - the three were checked, now Suedbahn and
-  // Ostmarkt are off.
+  await expect(row(page, /Corrin/)).toBeFocused();
+  // Two gestures, two changes - the three were checked, now Nimbrel and
+  // Corrin are off.
   const after = (await checkedLine(page)).split(",").length;
-  expect(before - after).toBe(3); // Suedbahn, Ostmarkt and the whole branch
+  expect(before - after).toBe(3); // Nimbrel, Corrin and the whole branch
 });
 
 /** Counts the checked keys in the page's footer line. */
@@ -178,28 +178,28 @@ async function countChecked(page: Page): Promise<number> {
 
 test("Shift with space covers the span from the anchor to here", async ({ page }) => {
   // First empty everything, so that the count is unambiguous.
-  await row(page, /Nordwerk/).click();
+  await row(page, /Brandlow/).click();
   await page.keyboard.press("Control+a");
   await page.keyboard.press("Control+a");
   expect(await checkedLine(page)).toContain("nothing");
 
   // Set the anchor, span two rows lower.
-  await row(page, /Nordwerk/).locator("label").click();
+  await row(page, /Brandlow/).locator("label").click();
   const afterAnchor = await countChecked(page);
-  await row(page, /Ostmarkt/).click();
+  await row(page, /Corrin/).click();
   await page.keyboard.press("Shift+ ");
 
-  for (const name of ["fc-north", "fc-south", "fc-east"]) {
+  for (const name of ["fc-brandlow", "fc-nimbrel", "fc-corrin"]) {
     expect(await checkedLine(page)).toContain(name);
   }
   /* Counted rather than compared: the span brings exactly two further ticks
-     (Suedbahn and Ostmarkt) plus the branch that becomes full through them. A
+     (Nimbrel and Corrin) plus the branch that becomes full through them. A
      gesture that acted twice brought a different number. */
   expect((await countChecked(page)) - afterAnchor).toBe(3);
 });
 
 test("Ctrl with A fills and empties", async ({ page }) => {
-  await row(page, /Nordwerk/).click();
+  await row(page, /Brandlow/).click();
   await page.keyboard.press("Control+a");
   const full = await checkedLine(page);
   expect(full).toContain("statutes");
@@ -267,7 +267,7 @@ test("An unloaded branch shows on opening that it is loading", async ({ page }) 
   // First the spinner ...
   await expect(tree(page, "Filing with a selection").getByRole("status")).toHaveCount(1);
   // ... then the children, as soon as the caller has supplied the data.
-  await expect(row(page, /Query from Nordwerk/)).toHaveCount(1);
+  await expect(row(page, /Query from Brandlow/)).toHaveCount(1);
   await expect(tree(page, "Filing with a selection").getByRole("status")).toHaveCount(0);
 });
 

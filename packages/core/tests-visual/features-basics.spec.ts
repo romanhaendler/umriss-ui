@@ -37,11 +37,12 @@ test("Toast appears with a title and a description", async ({ page }) => {
 });
 
 test("Tabs change the content", async ({ page }) => {
-  await openExample(page, "tabs", "tabs");
-  await page.getByRole("tab", { name: "Empty" }).click();
-  await expect(page.getByText("Nothing to show.")).toBeVisible();
-  await page.getByRole("tab", { name: "Details" }).click();
-  await expect(page.getByText("Nothing to show.")).toBeHidden();
+  await openExample(page, "tabs", "loading-and-empty-panels");
+  const example = page.locator('[data-example="loading-and-empty-panels"]');
+  await example.getByRole("tab", { name: "Leave" }).click();
+  await expect(example.getByText("No leave planned")).toBeVisible();
+  await example.getByRole("tab", { name: "Profile" }).click();
+  await expect(example.getByText("No leave planned")).toBeHidden();
 });
 
 test("Menu opens and triggers an action", async ({ page }) => {
@@ -197,26 +198,26 @@ test("Drawer appears and goes at once under reduced motion", async ({ page }) =>
 test("Accordion walks its headers by the arrows and opens on Enter", async ({ page }) => {
   await openExample(page, "accordion", "one-section-at-a-time");
   const example = page.locator('[data-example="one-section-at-a-time"]');
-  const shift = example.getByRole("button", { name: "Shift handover" });
-  await shift.focus();
+  const goal = example.getByRole("button", { name: "Sprint goal" });
+  await goal.focus();
   await page.keyboard.press("ArrowDown");
-  const quality = example.getByRole("button", { name: "Quality" });
-  await expect(quality).toBeFocused();
+  const finished = example.getByRole("button", { name: "Finished work" });
+  await expect(finished).toBeFocused();
   await page.keyboard.press("Enter");
-  await expect(quality).toHaveAttribute("aria-expanded", "true");
-  await expect(shift).toHaveAttribute("aria-expanded", "false");
-  await expect(example.getByRole("region", { name: "Quality" })).toBeVisible();
+  await expect(finished).toHaveAttribute("aria-expanded", "true");
+  await expect(goal).toHaveAttribute("aria-expanded", "false");
+  await expect(example.getByRole("region", { name: "Finished work" })).toBeVisible();
 });
 
 test("Breadcrumb folds at a narrow width and is walked through its menu", async ({ page }) => {
-  await openExample(page, "breadcrumb", "folded-when-narrow");
-  const example = page.locator('[data-example="folded-when-narrow"]');
+  await openExample(page, "breadcrumb", "fold-when-narrow");
+  const example = page.locator('[data-example="fold-when-narrow"]');
   const narrow = example.getByRole("navigation").first();
   const wide = example.getByRole("navigation").nth(1);
   // Both keep the ends; the narrow one folds more than the wide one.
   for (const nav of [narrow, wide]) {
-    await expect(nav.getByRole("link", { name: "Plant Nord" })).toBeVisible();
-    await expect(nav.locator('[aria-current="page"]')).toHaveText("Valve 12");
+    await expect(nav.getByRole("link", { name: "Quillmere" })).toBeVisible();
+    await expect(nav.locator('[aria-current="page"]')).toHaveText("Timeline");
   }
   const shown = (nav: typeof narrow) => nav.locator("ol:not([aria-hidden]) > li").count();
   expect(await shown(narrow)).toBeLessThan(await shown(wide));
@@ -229,7 +230,7 @@ test("Breadcrumb folds at a narrow width and is walked through its menu", async 
   const menu = page.getByRole("menu");
   await expect(menu).toBeVisible();
   const first = menu.getByRole("menuitem").first();
-  await expect(first).toHaveText("Production");
+  await expect(first).toHaveText("Services");
   await expect(first).toBeFocused();
   await page.keyboard.press("ArrowDown");
   await expect(menu.getByRole("menuitem").nth(1)).toBeFocused();
