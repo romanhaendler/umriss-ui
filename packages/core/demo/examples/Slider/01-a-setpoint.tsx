@@ -12,7 +12,7 @@ export const title = "A setpoint, roughly set";
 export default function ASetpoint() {
   return (
     <FormField label="Hall temperature" hint="Between 14 and 26 °C." style={{ maxWidth: 360 }}>
-      <Slider min={14} max={26} step={0.5} defaultValue={19.5} showValue />
+      <Slider min={14} max={26} step={0.5} defaultValue={19.5} />
     </FormField>
   );
 }

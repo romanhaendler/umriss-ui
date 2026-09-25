@@ -60,6 +60,37 @@ describe("Slider", () => {
     expect(slider()).toHaveProperty("value", "10");
   });
 
+  /* Review finding: End went to a `max` off the step grid, and the browser
+     then showed the thumb on the grid while the value said otherwise. */
+  it("stays on the step grid where max does not lie on it", () => {
+    render(<Slider aria-label="Batches" min={0} max={10} step={3} defaultValue={3} />);
+    press("End");
+    expect(slider()).toHaveProperty("value", "9");
+    press("Home");
+    press("PageUp");
+    press("PageUp");
+    press("PageUp");
+    press("PageUp");
+    expect(slider()).toHaveProperty("value", "9");
+  });
+
+  it("says a form field's error and requirement to a screen reader", () => {
+    render(
+      <FormField label="Setpoint" error="Outside the permitted band" required>
+        <Slider />
+      </FormField>,
+    );
+    expect(slider().getAttribute("aria-invalid")).toBe("true");
+    expect(slider().getAttribute("aria-required")).toBe("true");
+  });
+
+  it("shows its value by default, and not when asked not to", () => {
+    const { rerender } = render(<Slider aria-label="Speed" defaultValue={42} />);
+    expect(screen.getByText("42")).toBeTruthy();
+    rerender(<Slider aria-label="Speed" defaultValue={42} showValue={false} />);
+    expect(screen.queryByText("42")).toBeNull();
+  });
+
   it("controlled: reports and waits until value follows", () => {
     const changed = vi.fn();
     const { rerender } = render(<Slider aria-label="Speed" value={30} onChange={changed} />);

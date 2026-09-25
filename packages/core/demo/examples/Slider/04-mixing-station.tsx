@@ -43,7 +43,6 @@ export default function MixingStation() {
                 value={shares[c.id] ?? 0}
                 onChange={(v) => setShares((previous) => ({ ...previous, [c.id]: v }))}
                 format={(v) => `${v.toFixed(1)} %`}
-                showValue
                 marks={[0, 25, 50, 75, 100, { value: c.rated, label: "Recipe" }]}
               />
             </FormField>
