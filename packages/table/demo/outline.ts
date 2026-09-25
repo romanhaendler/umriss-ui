@@ -227,7 +227,7 @@ export const OUTLINE: readonly Rubric[] = [
   {
     id: "unbound",
     name: "Unbound parts",
-    sentence: "The parts that touch no row: placed in the table they read it, outside they take `of`.",
+    sentence: "The parts that touch no row: placed in the table they read it, and they work outside it too.",
     pages: [
       {
         id: "toolbar",

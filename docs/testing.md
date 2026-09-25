@@ -23,7 +23,7 @@ preview server on its port.
 **A picture can move because the page grew.** A screenshot of one example is
 taken where that example happens to lie, and a new example above it moves the
 one below to another scroll offset - where a canvas lands on other half pixels
-and rasterises minutely differently. It cost the schedule's demonstration
+and rasterises minutely differently. It cost the schedule's former demonstration
 picture a renewal in `schedule-refinement` 07, and it was measured rather than
 assumed: the same 6171 pixels on three repeats, green again with the new
 example removed. Whoever adds an example above a canvas picture should expect
@@ -74,7 +74,7 @@ not photographed.
 | Every example runs as it is copied: it imports the package's `src` and bare npm specifiers, and whatever else it needs it SHOWS beside itself | Playwright (file system) | `packages/demo/checks/ownData.ts`, called by `packages/*/tests-visual/own-data.spec.ts` | green in all five demos; run before the repair it named all 25 offenders, in the two demos that had them |
 | Behaviour of the schedule: its name and lane headers as text, the day band and the fine band's step under zoom, pan in both directions with headers and bands holding still, hover, click and right-click with their target, task-wide selection with its subtask, **the wheel scrolling the lanes and releasing the page, Ctrl-wheel and a pinch zooming, the tooltip's content and an application's own, the now line, two schedules kept in step and the point-to-time handle** | Playwright | packages/schedule/tests-visual/features-schedule.spec.ts | green; the pinch is driven through the protocol - Playwright has no multi-touch API, and Chromium turns the touches into pointer events |
 | The schedule by keyboard: Tab into the plot and its ring, the arrows, the brackets and `t`, the readout, the pointer taking the active subtask over, Space selecting; one picture per theme of a focused schedule with an active subtask | Playwright | packages/schedule/tests-visual/features-keyboard.spec.ts | green |
-| Editing through the seam (ADR-0023): the ghost's times and findings before the drop, the reported move and lane intents after it, Escape, a read-only schedule that pans instead, lead-in grips on selection, stretch, the demonstration's context menu changing the plan through an intent, **auto-pan at the edge of a drag, the shift raster, the whole-order shift, a drag into a removed night stopping at the seam, and work dragged in from a list with its place intent** | Playwright | packages/schedule/tests-visual/features-editing.spec.ts | green; asserts what is reported and what the DOM says, never pixels. The drag from outside is the platform's own, driven by the mouse, and the ghost is observable while it is in flight |
+| Editing through the seam (ADR-0023): the ghost's times and findings before the drop, the reported move and lane intents after it, Escape, a read-only schedule that pans instead, lead-in grips on selection, stretch, the scenario's context menu changing the plan through an intent, **auto-pan at the edge of a drag, the shift raster, the whole-order shift, a drag into a removed night stopping at the seam, and work dragged in from a list with its place intent** | Playwright | packages/schedule/tests-visual/features-editing.spec.ts | green; asserts what is reported and what the DOM says, never pixels. The drag from outside is the platform's own, driven by the mouse, and the ghost is observable while it is in flight |
 | Operating the demo shell (outline, jumps, palette, addresses) | Playwright | packages/*/tests-visual/features-shell.spec.ts | green; **one** suite at the shell (`packages/demo/checks/shell.ts`), which calls each of the four demos with its own pages and terms – with axe and the palette's rules that jsdom cannot express (a resting pointer, the resting state, the material). Charts had a shell and a suite of its own until ADR-0020; beside the shared call there stands the one promise that is charts' own – the benchmark does not run on the front door |
 | Own base (ADR-0021): every example's text in a type of its own, every element with a library class in `border-box`, every element that takes the keyboard focus showing the library's ring (the browser's own ring does not count) | Playwright | `packages/demo/checks/ownBase.ts`, called by `packages/*/tests-visual/own-base.spec.ts` with every page; light only | green; the tolerated offenders stand in the spec files with their reason |
 | Interaction tests of core, the context menu's position and its flip included, **and what jsdom cannot show of the foundations: Space on the switch, the slider's keys and its ring on the thumb, the drawer's focus trap, focus return and reduced motion, a breadcrumb folding at a real width**, **and of the layout tier: a splitter's panes at real sizes under the keys and the pointer, the file input's dialog on Space and Enter and a drop written back into the input** | Playwright | packages/core/tests-visual/features-basics.spec.ts | green |
@@ -219,9 +219,10 @@ transitions (29.03.2026 forward, 25.10.2026 back).
 * Demo data is seed-based and deterministic (R-6.2); the interaction tests check
   concrete values at known positions.
 * Unit tests build their own fixtures, never the demo data – otherwise the suite
-  breaks on a changed demo line. The one exception is the plant world
-  (`plant.test.ts`), because there the demo data is the subject: what it holds
-  is a property over forty seeds, not a line of the demo.
+  breaks on a changed demo line. The two exceptions are the worlds themselves,
+  where the demo data is the subject: `plant.test.ts` (what the kiln line holds
+  is a property over forty seeds, not a line of the demo) and `worlds.test.ts`
+  in `packages/demo` (every world deterministic, import-free, its ids unique).
 * Expected values come from an independent source: weekdays from the system
   calendar, clock changes from the real transitions, notation from the rule –
   never from the implementation's own arithmetic.

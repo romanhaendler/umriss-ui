@@ -21,6 +21,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
+import { ADR_0032 } from "../outline.ts";
 import type { Rubric, Page } from "../outline.ts";
 import { byRank, parseFileName, parseScenarioName } from "./fileName.ts";
 import { displaySource, worldsOf } from "./source.ts";
@@ -424,7 +425,7 @@ export function renderLlms({ packageDir, outline, tables, worldsDir = WORLDS_DIR
       }
 
       if (page.limits !== undefined) {
-        parts.push("", "#### Known limits", "", page.limits.map((text) => `- ${text}`).join("\n"));
+        parts.push("", "#### Known limits", "", page.limits.map((text) => `- ${text}`).join("\n"), "", `What umriss deliberately does not build, and why: [ADR-0032](${ADR_0032}).`);
       }
     }
   }
