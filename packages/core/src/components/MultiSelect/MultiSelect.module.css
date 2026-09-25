@@ -16,6 +16,7 @@
     padding-left: var(--u-space-3);
     border-radius: var(--u-radius-md);
     background: var(--u-color-surface);
+    outline: 1px solid transparent;
     box-shadow: var(--u-edge-strong);
     cursor: pointer;
     transition: box-shadow var(--u-transition);
@@ -27,6 +28,7 @@
   }
 
   .field:focus-within {
+    outline: 2px solid transparent;
     box-shadow: var(--u-focus-ring);
   }
 
@@ -36,6 +38,7 @@
   }
 
   .invalid:focus-within {
+    outline: 2px solid transparent;
     box-shadow: var(--u-focus-ring-danger);
   }
 
@@ -223,6 +226,7 @@
   .panel {
     background: var(--u-color-surface);
     border-radius: var(--u-radius-md);
+    outline: 1px solid transparent;
     box-shadow: var(--u-shadow-overlay);
     padding: var(--u-space-3);
   }
@@ -264,6 +268,7 @@
 
   .scopeActive {
     background: var(--u-color-surface);
+    outline: 1px solid transparent;
     box-shadow: var(--u-edge);
     color: var(--u-color-text);
   }
@@ -325,5 +330,15 @@
     font-size: var(--u-text-sm);
     color: var(--u-color-text-muted);
     text-align: center;
+  }
+
+  /* Chips and the counter are grounds, and forced colours repaint them with
+     the page's (forced-colors 02): three words would stand loose in the
+     field. An edge keeps each one a chip. */
+  @media (forced-colors: active) {
+    .chip,
+    .counter {
+      outline: 1px solid CanvasText;
+    }
   }
 }

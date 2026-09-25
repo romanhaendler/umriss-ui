@@ -46,6 +46,7 @@
     background: var(--u-color-surface);
     color: var(--u-color-text);
     border-radius: var(--u-radius-lg);
+    outline: 1px solid transparent;
     box-shadow: var(--u-shadow-overlay);
   }
 
@@ -207,6 +208,7 @@
     height: 100%;
     background: var(--u-color-surface);
     color: var(--u-color-text);
+    outline: 1px solid transparent;
     box-shadow: var(--u-shadow-overlay);
   }
 

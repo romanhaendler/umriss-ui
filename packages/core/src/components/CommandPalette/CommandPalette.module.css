@@ -47,6 +47,7 @@
     width: min(680px, 100%);
     max-height: 72vh;
     border-radius: var(--u-radius-xl);
+    outline: 1px solid transparent;
     box-shadow: var(--u-shadow-overlay);
     overflow: hidden;
     /* The opaque substitute colour stands first and stays wherever
@@ -252,5 +253,15 @@
     font-family: var(--u-font-sans);
     font-size: var(--u-text-xs);
     color: var(--u-color-text-secondary);
+  }
+
+  /* The list's cursor is a surface, and forced colours repaint it with the
+     page's (forced-colors 02): it takes an outline in the system's selection
+     colour, inside the row. */
+  @media (forced-colors: active) {
+    .rowActive {
+      outline: 2px solid Highlight;
+      outline-offset: -2px;
+    }
   }
 }
