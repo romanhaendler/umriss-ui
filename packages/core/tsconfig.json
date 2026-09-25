@@ -26,6 +26,18 @@
       ],
       "@umriss-ui/core/wording/de": [
         "./src/lib/language/de.ts"
+      ],
+      "@umriss-ui/charts": [
+        "../charts/src/index.ts"
+      ],
+      "@umriss-ui/table": [
+        "../table/src/index.ts"
+      ],
+      "@umriss-ui/schedule": [
+        "../schedule/src/index.ts"
+      ],
+      "@umriss-ui/calculation": [
+        "../calculation/src/index.ts"
       ]
     }
   },
