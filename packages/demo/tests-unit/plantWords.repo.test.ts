@@ -150,7 +150,6 @@ const PENDING: readonly string[] = [
   "packages/table/demo/examples/Table/13-setpoint-list.tsx",
   "packages/table/demo/examples/Table/14-the-whole-grid.tsx",
   "packages/table/demo/examples/VerdictColumn/02-sorting.tsx",
-  "packages/table/demo/scenarios/01-work-through-orders.tsx",
 ];
 const PENDING_QUARTER: readonly string[] = [
   "charts examples",
