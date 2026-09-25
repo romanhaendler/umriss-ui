@@ -39,8 +39,6 @@ const PENDING: readonly string[] = [
   "packages/core/demo/examples/Drawer/03-beside-a-process-picture.tsx",
   "packages/core/demo/examples/FileInput/02-several-files.tsx",
   "packages/core/demo/examples/FileInput/03-controlled-in-a-form.tsx",
-  "packages/core/demo/examples/ProgressBar/01-how-far.tsx",
-  "packages/core/demo/examples/ProgressBar/03-a-batch-in-steps.tsx",
   "packages/core/demo/examples/Slider/01-a-setpoint.tsx",
   "packages/core/demo/examples/Slider/02-format-and-marks.tsx",
   "packages/core/demo/examples/Splitter/02-trend-above-alarms.tsx",
