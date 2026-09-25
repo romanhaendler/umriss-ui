@@ -33,6 +33,20 @@ commit.
 
 ### Added
 
+- **The Windows contrast mode** (`forced-colors: active`, forced-colors 01,
+  02). Forced colours drop every box-shadow and repaint every ground, and the
+  library draws its rings, edges and depth as box-shadows: a focused control
+  lost its ring, a button became a word, a field a line of text, a menu text
+  floating over the page. Every ring now carries `outline: 2px solid
+  transparent` and every edge or depth `outline: 1px solid transparent` - both
+  invisible until forced colours paint them in a system colour - and the states
+  that were a ground alone take a system colour: the tab's underline, the
+  switch that is on, the progress bar's and the meter's fill, the checkbox's
+  mixed dash, the radio's dot and the divider's line; the list cursor of
+  `Combobox` and `CommandPalette`, the active `TreeView` node and the chosen
+  days, range and preset of the date pickers an outline in the selection
+  colour. Buttons, badges, tags and `MultiSelect`'s chips keep an edge. Nothing
+  changes outside forced colours.
 - **`docs/llms-full.md`**, the package's documentation as one Markdown file for
   a coding agent, in the npm package and pinned to its version: every demo page
   with its import line, its examples' source, its props tables and why it is

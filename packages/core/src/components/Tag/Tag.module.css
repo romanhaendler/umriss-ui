@@ -34,7 +34,7 @@
   }
 
   .removable:focus-visible {
-    outline: none;
+    outline: 2px solid transparent;
     box-shadow: var(--u-focus-ring);
   }
 
@@ -117,5 +117,14 @@
 
   .remove svg {
     transition: transform var(--u-transition-press);
+  }
+
+  /* A tag is a ground with a word on it, and forced colours repaint the
+     ground with the page's (forced-colors 02): the word would stand loose in
+     the sentence. An edge keeps it a tag. */
+  @media (forced-colors: active) {
+    .tag {
+      outline: 1px solid CanvasText;
+    }
   }
 }

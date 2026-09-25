@@ -37,6 +37,7 @@
     height: var(--_track-height);
     border-radius: var(--u-radius-full);
     background: var(--u-color-surface-sunken);
+    outline: 1px solid transparent;
     box-shadow: var(--u-edge-strong);
     transition:
       background-color var(--u-transition),
@@ -51,6 +52,7 @@
     height: var(--_thumb);
     border-radius: var(--u-radius-full);
     background: var(--u-color-surface);
+    outline: 1px solid transparent;
     box-shadow: var(--u-edge-strong);
     transition:
       transform var(--u-transition-path),
@@ -80,6 +82,7 @@
   }
 
   .input:focus-visible + .track {
+    outline: 2px solid transparent;
     box-shadow: var(--u-focus-ring);
   }
 
@@ -91,6 +94,7 @@
   }
 
   .invalid:focus-visible + .track {
+    outline: 2px solid transparent;
     box-shadow: var(--u-focus-ring-danger);
   }
 
@@ -107,5 +111,14 @@
 
   .sm .label {
     font-size: var(--u-text-xs);
+  }
+
+  /* On is the accent's ground, which forced colours repaint with the page's
+     (forced-colors 02): the thumb's side alone would carry it. The track takes
+     the system's selection colour instead. */
+  @media (forced-colors: active) {
+    .input:checked + .track {
+      background: Highlight;
+    }
   }
 }

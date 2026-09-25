@@ -32,3 +32,13 @@ export function exampleAddresses(folder: string): ExampleAddress[] {
     .sort((a, b) => a.pageId.localeCompare(b.pageId) || byRank(a, b))
     .map((b) => ({ pageId: b.pageId, exampleId: b.id, name: `${b.pageId}--${b.id}` }));
 }
+
+/** The first example of every page - the simplest, the component at rest.
+    What each demo photographs a second time under forced colours
+    (forced-colors 02, 03): every example twice over would double the suite
+    for pictures that differ only where a forced-colours rule stands, and
+    those states get pictures of their own. */
+export function firstExamples(addresses: readonly ExampleAddress[]): ExampleAddress[] {
+  const seen = new Set<string>();
+  return addresses.filter((address) => !seen.has(address.pageId) && seen.add(address.pageId));
+}

@@ -33,6 +33,9 @@ interface was still expected to move before `0.3.0`.
 
 ### Added
 
+- **The focus rings under forced colours** (forced-colors 01): the plot's,
+  the legend entry's and the data panel's ring carry `outline: 2px solid
+  transparent` beside the box-shadow, which forced colours drop.
 - **`docs/llms-full.md`**, the package's documentation as one Markdown file for
   a coding agent, in the npm package and pinned to its version: every demo page
   with its import line, its examples' source, its props tables and why it is

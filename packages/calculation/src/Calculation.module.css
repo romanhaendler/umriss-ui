@@ -23,6 +23,7 @@
     font-size: var(--u-text-sm);
     border-radius: var(--u-radius-md);
     background: var(--u-color-surface);
+    outline: 1px solid transparent;
     box-shadow: var(--u-edge);
     overflow: hidden;
     /* The disclosure's square: the falling line starts at its middle, and
@@ -216,7 +217,7 @@
   }
 
   button.disclosure:focus-visible {
-    outline: none;
+    outline: 2px solid transparent;
     box-shadow: var(--u-focus-ring);
   }
 
@@ -453,6 +454,28 @@
 
     .derivation:not([hidden]) {
       animation: none;
+    }
+  }
+
+  /* Forced colours repaint every ground with the page's (forced-colors 03):
+     the hover coupling is a band of the accent's surface, and the open
+     derivation's spine a ground as well. The band takes an outline in the
+     system's selection colour - the quantity itself two pixels, its operands
+     one - and the spine the system's text colour. The verdicts need nothing:
+     each one's word stands beside its glyph. */
+  @media (forced-colors: active) {
+    .line[data-mark] {
+      outline: 1px solid Highlight;
+      outline-offset: -1px;
+    }
+
+    .line[data-mark="use"] {
+      outline-width: 2px;
+      outline-offset: -2px;
+    }
+
+    .derivation::before {
+      background: CanvasText;
     }
   }
 }
