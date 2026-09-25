@@ -27,8 +27,8 @@ export interface FreshnessReading {
  * state.
  *
  * The caller gives the ages; there is deliberately no default, because "stale"
- * at a furnace controller means something other than "stale" on a shift
- * overview.
+ * on a live latency panel means something other than "stale" on a monthly
+ * budget overview.
  */
 export function useFreshness(
   asOf: Date | number | null | undefined,

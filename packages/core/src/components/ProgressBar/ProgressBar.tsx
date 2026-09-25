@@ -10,12 +10,12 @@ export interface ProgressBarProps extends HTMLAttributes<HTMLDivElement> {
       indeterminate: the task runs, and nobody knows how far it is. */
   value?: number;
   /**
-   * What is progressing, e.g. "Import of the batch records". A progress bar
+   * What is progressing, e.g. "Import of the invoice records". A progress bar
    * needs a name from the author; without one the general term stands here.
    */
   label?: string;
   /** What a screen reader says instead of the percentage, where a count says
-      it better - "3 of 12 pallets". */
+      it better - "3 of 12 files". */
   valueText?: string;
   /** The percentage beside the bar (Geist Mono). Never for an indeterminate
       bar - it has no figure to show. */
@@ -25,7 +25,7 @@ export interface ProgressBarProps extends HTMLAttributes<HTMLDivElement> {
 /* How far a task has come - and nothing more. It is not a `Meter`: a meter
    reads a measured value against limits and takes its colour from that
    verdict, a progress bar only counts towards an end and has no tone at all.
-   A batch that is 90 per cent done is not a warning. (CONTEXT.md, Progress.) */
+   An upload that is 90 per cent done is not a warning. (CONTEXT.md, Progress.) */
 export const ProgressBar = forwardRef<HTMLDivElement, ProgressBarProps>(function ProgressBar(
   { value, label, valueText, showLabel = false, className, ...rest },
   ref,

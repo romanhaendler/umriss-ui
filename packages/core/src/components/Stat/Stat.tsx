@@ -36,7 +36,7 @@ export interface StatProps extends Omit<HTMLAttributes<HTMLDivElement>, "childre
   /** The measured value. Absent or non-finite gives the verdict `unknown` –
       and the tile says so, instead of showing a zero or an empty bar. */
   value: number | null | undefined;
-  /** The unit as it stands behind the value – „°C", „%", „Stk". */
+  /** The unit as it stands behind the value – „ms", „%", „GB". */
   unit?: string;
   /** Fixed number of decimal places. Without it the notation decides; a metric
       whose number of digits jumps reads as a jump in the value. */
