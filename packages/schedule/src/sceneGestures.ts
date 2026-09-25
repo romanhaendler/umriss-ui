@@ -6,7 +6,7 @@
    and reported when its target changes. Nothing here writes data or draws:
    the host lays out, publishes and draws when told that something changed. */
 
-import { MINUTE, calendarFrom, toOperatingTimeClamped, toWallClock } from "@umriss-ui/charts";
+import { MINUTE, calendarFrom, toWorkingTimeClamped, toWallClock } from "@umriss-ui/charts";
 import { autoPanSpeed } from "./autoPan";
 import { lateTransports, overlaps, type LateTransport, type Overlap } from "./findings";
 import { edgeAt, partAt } from "./geometry";
@@ -96,7 +96,7 @@ type Gesture =
   | { kind: "place"; ghost: Subtask; item: PlacingItem; refused: ReadonlySet<string> }
   | { kind: "pending"; pointerId: number; x0: number; y0: number; mode: EditMode | "pan"; subtask: Subtask | null }
   | { kind: "pan"; pointerId: number; lastX: number; lastY: number }
-  /* `t0` is the operating time the drag took hold at - not a pixel, because
+  /* `t0` is the working time the drag took hold at - not a pixel, because
      auto-pan moves the scale under a drag in flight. */
   | { kind: "edit"; pointerId: number; mode: EditMode; subtask: Subtask; t0: number; ghost: Subtask; refused: ReadonlySet<string> }
   | { kind: "pinch"; distance: number };
@@ -814,12 +814,12 @@ export class SceneGestures {
     }
   }
 
-  /** A time moved by an amount of OPERATING time and snapped: a drag moves
+  /** A time moved by an amount of WORKING time and snapped: a drag moves
       a start this way, and a key by one step of the raster - one arithmetic,
       so a key proposes exactly what a drag of that length would. */
   shifted(time: number, delta: number, step: SnapRaster): number {
     const calendar = calendarFrom(this.host.view.options.calendar);
-    const moved = toOperatingTimeClamped(time, calendar) + delta;
+    const moved = toWorkingTimeClamped(time, calendar) + delta;
     const wall = calendar.intervals.length === 0 ? moved : toWallClock(Math.max(0, Math.min(calendar.total, moved)), calendar);
     return this.snapInside(wall, step);
   }
@@ -831,7 +831,7 @@ export class SceneGestures {
     const snapped = snapTime(time, step);
     const calendar = calendarFrom(this.host.view.options.calendar);
     if (calendar.intervals.length === 0) return snapped;
-    return toWallClock(toOperatingTimeClamped(snapped, calendar), calendar);
+    return toWallClock(toWorkingTimeClamped(snapped, calendar), calendar);
   }
 
   private intentsOf(original: Subtask, ghost: Subtask, mode: EditMode): Intent[] {

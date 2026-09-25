@@ -3,7 +3,7 @@
 Canvas-based charts for data-dense applications: few chart kinds, each one drawn
 properly. Lines, areas, bars, scatters, state bands and matrices compose into
 one chart on shared axes — together with the instruments a plant screen is
-made of: limit lines and bands, a control chart, a Pareto and an operating-time
+made of: limit lines and bands, a control chart, a Pareto and a working-time
 axis.
 
 The package depends on **nothing but React**, and it will keep doing so (R-1.2).
@@ -91,10 +91,10 @@ loaded: Geist when the application has it, the system fonts otherwise.
 * **Several axes per orientation**, each with its own extent; only the first
   registered axis per orientation draws a grid.
 * **The instruments**: `LimitLine` and `LimitBand`, `ControlChart` with its four
-  rule violations, `pareto()` with a collected remainder, and an operating-time
+  rule violations, `pareto()` with a collected remainder, and a working-time
   axis that takes the empty hours out and marks every removed span.
 * **The pure modules are exported**, not hidden: `assess`, `controlLimits`,
-  `zones`, `violations`, `pareto`, `operatingCalendar` and the rest. Whoever
+  `zones`, `violations`, `pareto`, `workingCalendar` and the rest. Whoever
   wants to draw something other than the composition offers should reach the
   arithmetic without rebuilding it.
 * **Performance, measured rather than claimed**, up to three series of a

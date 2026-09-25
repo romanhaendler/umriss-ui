@@ -54,19 +54,19 @@ describe("fineTicks", () => {
     ]);
   });
 
-  it("drops ticks in removed time and places the rest in operating time", () => {
+  it("drops ticks in removed time and places the rest in working time", () => {
     const calendar = [
       { from: t("2026-03-17T06:00:00+01:00"), to: t("2026-03-17T08:00:00+01:00") },
       { from: t("2026-03-17T10:00:00+01:00"), to: t("2026-03-17T12:00:00+01:00") },
     ];
-    // The domain is in operating time: 0 is 06:00, four hours is 12:00.
+    // The domain is in working time: 0 is 06:00, four hours is 12:00.
     const ticks = fineTicks([0, 4 * HOUR], HOUR, calendar);
     expect(ticks).toEqual([
-      { wallClock: t("2026-03-17T06:00:00+01:00"), operatingTime: 0 },
-      { wallClock: t("2026-03-17T07:00:00+01:00"), operatingTime: HOUR },
-      { wallClock: t("2026-03-17T08:00:00+01:00"), operatingTime: 2 * HOUR },
-      { wallClock: t("2026-03-17T11:00:00+01:00"), operatingTime: 3 * HOUR },
-      { wallClock: t("2026-03-17T12:00:00+01:00"), operatingTime: 4 * HOUR },
+      { wallClock: t("2026-03-17T06:00:00+01:00"), workingTime: 0 },
+      { wallClock: t("2026-03-17T07:00:00+01:00"), workingTime: HOUR },
+      { wallClock: t("2026-03-17T08:00:00+01:00"), workingTime: 2 * HOUR },
+      { wallClock: t("2026-03-17T11:00:00+01:00"), workingTime: 3 * HOUR },
+      { wallClock: t("2026-03-17T12:00:00+01:00"), workingTime: 4 * HOUR },
     ]);
   });
 });
@@ -83,7 +83,7 @@ describe("days", () => {
     expect(found[1]!.end - found[1]!.start).toBe(23 * HOUR);
   });
 
-  it("places a day in operating time, collapsed where the calendar removes it", () => {
+  it("places a day in working time, collapsed where the calendar removes it", () => {
     const calendar = [
       { from: t("2026-03-17T06:00:00+01:00"), to: t("2026-03-17T22:00:00+01:00") },
       { from: t("2026-03-18T06:00:00+01:00"), to: t("2026-03-18T22:00:00+01:00") },

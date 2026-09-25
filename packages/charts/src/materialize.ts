@@ -38,9 +38,9 @@ export type Baseline<T> = Accessor<T> | number;
 export interface ExtraChannels<T> {
   /** Value channel of the matrix: the third value per point. */
   value?: Accessor<T>;
-  /** Pre-mapping of the x values, before anything calculates. The operating
+  /** Pre-mapping of the x values, before anything calculates. The working
       calendar comes in here: the scale stays affine, because the channel already
-      stands in operating time (ADR-0001).
+      stands in working time (ADR-0001).
 
       It must be MONOTONIC and must not yield NaN. Binary search - for a hit as
       for a segment boundary - assumes ascending x values, and every comparison

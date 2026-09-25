@@ -6,7 +6,7 @@
 import { describe, expect, it } from "vitest";
 import { timeLabels, timeStepFor, timeText, timeTicks } from "../src/time";
 import { CLASS_TICK, computeLayout, type AxisInput, type AxisLayout } from "../src/layout";
-import { DAY, HOUR, MINUTE, toWallClock } from "../src/operatingTime";
+import { DAY, HOUR, MINUTE, toWallClock } from "../src/workingTime";
 
 const at = (month: number, day: number, hour = 0, minute = 0) =>
   new Date(2026, month - 1, day, hour, minute).getTime();

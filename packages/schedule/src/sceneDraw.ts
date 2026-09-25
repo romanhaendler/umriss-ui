@@ -322,7 +322,7 @@ function drawGrid(ctx: CanvasRenderingContext2D, input: DrawInput, viewport: Vie
     ctx.lineTo(day.x + 0.5, height);
   }
   ctx.stroke();
-  /* A seam of the operating calendar: time was taken out here, and the plot
+  /* A seam of the working calendar: time was taken out here, and the plot
      says so as the axis does. */
   const seams = removedIntervals(view.options.calendar);
   if (seams.length > 0) {
@@ -330,7 +330,7 @@ function drawGrid(ctx: CanvasRenderingContext2D, input: DrawInput, viewport: Vie
     ctx.setLineDash([2, 3]);
     ctx.beginPath();
     for (const seam of seams) {
-      const x = Math.round(viewport.scale.toPx(seam.operatingTime)) + 0.5;
+      const x = Math.round(viewport.scale.toPx(seam.workingTime)) + 0.5;
       if (x < 0 || x > width) continue;
       ctx.moveTo(x, 0);
       ctx.lineTo(x, height);

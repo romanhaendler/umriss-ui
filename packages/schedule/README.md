@@ -17,7 +17,7 @@ pnpm add @umriss-ui/schedule @umriss-ui/core @umriss-ui/charts
 Both `@umriss-ui/core` and `@umriss-ui/charts` are **peer dependencies**
 (ADR-0022): the schedule takes its styling regime, provider, formats and
 wording from core, and its time arithmetic — the affine scale, the time steps,
-the operating calendar, the canvas colour resolution — from charts. React 18 or
+the working calendar, the canvas colour resolution — from charts. React 18 or
 19 as a peer as well.
 
 ## The smallest schedule that runs

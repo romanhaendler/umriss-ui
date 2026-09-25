@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import type { Assessment, Limit, LimitSet, Side, Severity, Verdict } from "./limit";
-import type { OperatingInterval } from "./operatingTime";
+import type { WorkingInterval } from "./workingTime";
 
 /** Value access of a series. Compared by its source text, not its identity - an
     inline accessor is new on every render. Known limit: one that reads a
@@ -136,7 +136,7 @@ export type SeriesConfig<T = unknown> =
 export type SeriesKind = SeriesConfig["kind"];
 
 export type { Assessment, Limit, LimitSet, Side, Severity, Verdict };
-export type { OperatingInterval, OperatingCalendar } from "./operatingTime";
+export type { WorkingInterval, WorkingCalendar } from "./workingTime";
 
 export type AxisOrientation = "x" | "y";
 export type AxisPosition = "bottom" | "top" | "left" | "right";
@@ -162,10 +162,10 @@ export interface AxisConfig<T = unknown> {
   /** The values are instants in milliseconds: ticks on local boundaries,
       labels by level. A calendar implies it. */
   time?: boolean;
-  /** Operating calendar: the intervals in which time counts. With it,
-      materialisation maps wall clock time onto operating time before the scale
+  /** Working calendar: the intervals in which time counts. With it,
+      materialisation maps wall clock time onto working time before the scale
       calculates - the scale stays affine (ADR-0001). */
-  calendar?: readonly OperatingInterval[];
+  calendar?: readonly WorkingInterval[];
   /** y axes only: this axis' ticks on the first y axis' grid. */
   alignTicks?: boolean;
   /** x axes only: where wheel, drag, pinch and double click propose a
