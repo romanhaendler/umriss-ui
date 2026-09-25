@@ -262,6 +262,9 @@ export interface Wording {
   rowAction: (aktion: string, row: string) => string;
   /** The menu holding a row's actions. */
   rowActionsMenu: (row: string) => string;
+  /** The editor of a cell in a table's grid mode, named after its column and
+      its row: "Edit Setpoint: Pump 1". */
+  editCell: (column: string, row: string) => string;
   /** What the screen reader hears for an absent value. Visibly a muted dash
       stands there. */
   cellAbsentValue: string;
@@ -654,6 +657,7 @@ export const DEFAULT_WORDING: Wording = {
   rowActions: "Actions",
   rowAction: (aktion, row) => `${aktion}: ${row}`,
   rowActionsMenu: (row) => `Actions: ${row}`,
+  editCell: (column, row) => `Edit ${column}: ${row}`,
   cellAbsentValue: "No value",
   booleanYes: "Yes",
   booleanNo: "No",

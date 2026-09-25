@@ -180,6 +180,7 @@ export const GERMAN_WORDING: Wording = {
   rowActions: "Aktionen",
   rowAction: (aktion, row) => `${aktion}: ${row}`,
   rowActionsMenu: (row) => `Aktionen: ${row}`,
+  editCell: (column, row) => `${column} bearbeiten: ${row}`,
   cellAbsentValue: "Kein Wert",
   booleanYes: "Ja",
   booleanNo: "Nein",

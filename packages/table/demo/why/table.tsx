@@ -57,6 +57,15 @@ export default function WhyTable() {
         where a <code>Pagination</code> stands. Without one it shows the whole filtered set: a table
         that stops quietly at the tenth row because nobody put a paging bar there is a trap.
       </p>
+
+      <h3>A grid only on request</h3>
+      <p>
+        A native table hands a screen reader its own table keys, and every control in it is one Tab
+        away. A grid takes the arrows for itself and puts the controls behind Enter - worth it where
+        the reader works in the cells, a loss where they only read. So <code>grid</code> is a prop,
+        and a report stays a table. An edit in the grid is reported, never applied: the application
+        owns the rows, and a setpoint it refuses is one the table never wrote.
+      </p>
     </>
   );
 }

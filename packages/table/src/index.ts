@@ -51,3 +51,6 @@ export * from "./alarms";
 
 /* Grouping and aggregates (table-grouping). */
 export type { AggregateOptions, AggregateFunction, GroupByComponent, GroupingId } from "./types";
+
+/* Grid mode and editing in place (table-grid-mode, ADR-0034). */
+export type { CellEdit, CellEditorProps, EditFor, EditOptions } from "./types";
