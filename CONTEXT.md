@@ -527,11 +527,13 @@ expressed without it.
 _Avoid_: category, Kategorie, kind
 
 **Lifecycle state**:
-One field with four values: standing/unacknowledged, standing/acknowledged,
-cleared/unacknowledged, cleared/acknowledged. One field and not two booleans,
-because a boolean pair invites `if (standing)` and that filter loses the third —
-the fleeting alarm, which came and went unseen.
-_Avoid_: two flags, open/closed, active
+One field with four values: active/unacknowledged, active/acknowledged,
+resolved/unacknowledged, resolved/acknowledged. One field and not two booleans,
+because a boolean pair invites `if (active)` and that filter loses the third —
+the fleeting alarm, which came and went unseen. **Active** is ISA-18.2's
+"standing" or "in alarm", **Resolved** its "cleared" or "returned to normal"
+(ADR-0035; the mapping stands in `docs/standards.md`).
+_Avoid_: two flags, open/closed, standing, cleared
 
 **Priority**:
 How urgent an alarm is. Three levels. A different scale from a limit's
@@ -544,31 +546,33 @@ suppressed: deciding a human should not see an alarm is a safety decision.
 _Avoid_: burst, storm, Schwall
 
 **Availability**:
-Whether an alarm is in front of the operator: one field with four values —
-in service, **Shelved**, **Suppressed by design**, **Out of service** (the
-special states of ISA-18.2). A second field beside the **Lifecycle state** and
+Whether an alarm is in front of the people watching it: one field with four
+values — in service, **Snoozed**, **Suppressed**, **Disabled** (the special
+states of ISA-18.2: shelved, suppressed by design, out of service). A second field beside the **Lifecycle state** and
 never merged into it, because the two answer different questions and a hidden
-alarm keeps its lifecycle underneath. Everything but in service is *hidden from
-operation*: still in the list, drawn neutrally with its state as a word, and
+alarm keeps its lifecycle underneath. Everything but in service is *hidden*: still
+in the list, drawn neutrally with its state as a word, and
 counted — never removed.
-_Avoid_: enabled, active, muted, inhibited, Sperre
+_Avoid_: enabled, active, muted, inhibited, hidden from operation, Sperre
 
-**Shelved**:
-Taken out of the way by an operator, for a time and under a name: a shelf has
-an end (`until`) and a person (`by`), and an alarm shelved without either
+**Snoozed**:
+Taken out of the way by a person, for a time and under a name: a snooze has
+an end (`until`) and a person (`by`), and an alarm snoozed without either
 cannot be written down. It returns to service when the as-of time reaches the
-end — by the model's clock, not by a timer.
-_Avoid_: snoozed, silenced, parked
+end — by the model's clock, not by a timer. ISA-18.2 says *shelved*.
+_Avoid_: shelved, silenced, parked
 
-**Suppressed by design**:
-Hidden by the plant's own logic — a pump that is off raises no low-flow alarm.
-The application writes it from that logic; the model has no transition for it.
-_Avoid_: filtered, masked, Unterdrückung (alone)
+**Suppressed**:
+Hidden by the application's own logic — a service that is switched off raises
+no error-rate alarm. The application writes it from that logic; the model has
+no transition for it. ISA-18.2 says *suppressed by design*.
+_Avoid_: suppressed by design, filtered, masked
 
-**Out of service**:
-Taken out of operation for maintenance or repair, until returned to service.
-The strongest of the three: a shelf does not overwrite it.
-_Avoid_: disabled, offline, deactivated
+**Disabled**:
+Taken out of service for maintenance or repair, until enabled again. The
+strongest of the three: a snooze does not overwrite it. ISA-18.2 says *out of
+service*.
+_Avoid_: out of service, offline, deactivated
 
 ### Operating time
 
@@ -1303,7 +1307,7 @@ model's computed output — visible columns, the filtered set, the page — and 
 deliberately not a **View**: a view is the part an application keeps, and the two
 are different objects. **Return band** avoids "threshold", which is an avoided
 word for a **Limit**; it is the dead band an alarm's reading must come back past
-before the alarm clears.
+before the alarm resolves.
 
 ## Words already taken
 

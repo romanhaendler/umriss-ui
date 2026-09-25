@@ -378,17 +378,17 @@ export interface Wording {
   priorityMedium: string;
   priorityLow: string;
   /** The four lifecycle states, written out. */
-  lifecycleStandingUnacknowledged: string;
-  lifecycleStandingAcknowledged: string;
-  lifecycleClearedUnacknowledged: string;
-  lifecycleClearedAcknowledged: string;
+  lifecycleActiveUnacknowledged: string;
+  lifecycleActiveAcknowledged: string;
+  lifecycleResolvedUnacknowledged: string;
+  lifecycleResolvedAcknowledged: string;
   /** "Alarm flood: 12 in quick succession" - a flood is marked, never
       suppressed. */
   floodHint: (count: number) => string;
   /** "40×" on a chattering alarm type. */
   chatterHint: (count: number) => string;
-  /** The text of the live region: the number of standing unacknowledged alarms. */
-  standingUnacknowledged: (count: number) => string;
+  /** The text of the live region: the number of active unacknowledged alarms. */
+  activeUnacknowledged: (count: number) => string;
   columnAlarm: string;
   columnLifecycleState: string;
   columnPriority: string;
@@ -400,17 +400,17 @@ export interface Wording {
   columnAcknowledgement: string;
   columnAge: string;
   /** The availability of an alarm (ISA-18.2's special states), written out.
-      The shelf names its end and who shelved it - a shelf is tracked, not
+      A snooze names its end and who snoozed it - a snooze is tracked, not
       anonymous; the time comes from the formats. */
-  availabilityShelved: (until: string, by: string) => string;
-  /** A shelf as one word - the alarm list's badge; the sentence above stands
+  availabilitySnoozed: (until: string, by: string) => string;
+  /** A snooze as one word - the alarm list's badge; the sentence above stands
       in its tooltip and in what is spoken. */
-  availabilityShelvedShort: string;
-  availabilitySuppressedByDesign: string;
-  availabilityOutOfService: string;
-  /** "Hidden from operation: 3" - the count of the view, and its name where the
-      list offers the view as a switch. */
-  hiddenFromOperation: (count: number) => string;
+  availabilitySnoozedShort: string;
+  availabilitySuppressed: string;
+  availabilityDisabled: string;
+  /** "Hidden: 3" - the count of the view of snoozed, suppressed and disabled
+      alarms, and its name where the list offers the view as a switch. */
+  hiddenAlarms: (count: number) => string;
   /** The availability column of the alarm model: the column menu and the CSV
       header, like the two above. */
   columnAvailability: string;
@@ -759,16 +759,16 @@ export const DEFAULT_WORDING: Wording = {
   priorityHigh: "High",
   priorityMedium: "Medium",
   priorityLow: "Low",
-  lifecycleStandingUnacknowledged: "Standing, unacknowledged",
-  lifecycleStandingAcknowledged: "Standing, acknowledged",
-  lifecycleClearedUnacknowledged: "Cleared, unacknowledged",
-  lifecycleClearedAcknowledged: "Cleared, acknowledged",
+  lifecycleActiveUnacknowledged: "Active, unacknowledged",
+  lifecycleActiveAcknowledged: "Active, acknowledged",
+  lifecycleResolvedUnacknowledged: "Resolved, unacknowledged",
+  lifecycleResolvedAcknowledged: "Resolved, acknowledged",
   floodHint: (count) => `Alarm flood: ${count} in quick succession`,
   chatterHint: (count) => `${count}×`,
-  standingUnacknowledged: (count) =>
+  activeUnacknowledged: (count) =>
     count === 1
-      ? "1 standing alarm, unacknowledged"
-      : `${count} standing alarms, unacknowledged`,
+      ? "1 active alarm, unacknowledged"
+      : `${count} active alarms, unacknowledged`,
   columnAlarm: "Alarm",
   columnLifecycleState: "State",
   columnPriority: "Priority",
@@ -777,11 +777,11 @@ export const DEFAULT_WORDING: Wording = {
   columnFrequency: "Frequency",
   columnAcknowledgement: "Acknowledgement",
   columnAge: "Age",
-  availabilityShelved: (until, by) => `Shelved until ${until} by ${by}`,
-  availabilityShelvedShort: "Shelved",
-  availabilitySuppressedByDesign: "Suppressed by design",
-  availabilityOutOfService: "Out of service",
-  hiddenFromOperation: (count) => `Hidden from operation: ${count}`,
+  availabilitySnoozed: (until, by) => `Snoozed until ${until} by ${by}`,
+  availabilitySnoozedShort: "Snoozed",
+  availabilitySuppressed: "Suppressed",
+  availabilityDisabled: "Disabled",
+  hiddenAlarms: (count) => `Hidden: ${count}`,
   columnAvailability: "Availability",
 
   close: "Close",

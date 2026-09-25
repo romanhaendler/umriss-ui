@@ -22,6 +22,44 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## Unreleased
+
+Needs the `@umriss-ui/core` release with the renamed alarm wording keys (see
+its changelog).
+
+### Changed
+
+- **The alarm names no longer assume a plant** (ADR-0035). One hard cut before
+  1.0, with no deprecated aliases: rename as below and the compiler finds the
+  rest. The concepts are ISA-18.2's as before; `docs/standards.md` maps each
+  ISA term to the name here. The string values change with the names, and so
+  do `data-lifecycle` and `data-availability` in the DOM.
+
+  | Before | Now |
+  |---|---|
+  | `"standing-unacknowledged"`, `"standing-acknowledged"` | `"active-unacknowledged"`, `"active-acknowledged"` |
+  | `"cleared-unacknowledged"`, `"cleared-acknowledged"` | `"resolved-unacknowledged"`, `"resolved-acknowledged"` |
+  | `Transition` `"cleared"` | `"resolved"` |
+  | `Alarm.cleared` (the moment) | `Alarm.resolved` |
+  | `isStanding` | `isActive` |
+  | `AlarmProjection.standingUnacknowledged` | `AlarmProjection.activeUnacknowledged` |
+  | `Availability` `"shelved"` | `"snoozed"` |
+  | `Availability` `"suppressed-by-design"` | `"suppressed"` |
+  | `Availability` `"out-of-service"` | `"disabled"` |
+  | `shelve(alarm, until, by)`, `unshelve(alarm)` | `snooze(alarm, until, by)`, `unsnooze(alarm)` |
+  | `takeOutOfService(alarm)`, `returnToService(alarm)` | `disable(alarm)`, `enable(alarm)` |
+  | the type `Shelf`, the field `Alarm.shelf` | the type `Snooze`, the field `Alarm.snooze` |
+  | `isHiddenFromOperation` | `isHidden` |
+  | `AlarmProjection.hiddenFromOperation` | `AlarmProjection.hiddenAlarms` |
+  | `ReturnBand.direction` `"obere"`, `"untere"` | `"upper"`, `"lower"` |
+
+  `"in-service"` and `acknowledge` keep their names. `<AlarmList>` reads the
+  renamed wording keys, so its words change with them: "Active" and
+  "Resolved" for the lifecycle, "Snoozed", "Suppressed" and "Disabled" for
+  the availability, "Hidden: 3" for the count.
+
+---
+
 ## 0.4.0 – Grid, server, pinning, availability (Sep. 2026)
 
 Needs `@umriss-ui/core` 0.10: it reads the new wording keys and `--u-shadow-sticky`; the peer range moves to `^0.10.0`.
@@ -79,21 +117,21 @@ Needs `@umriss-ui/core` 0.10: it reads the new wording keys and `--u-shadow-stic
   stands online as <https://romanhaendler.github.io/umriss-ui/table/llms-full.txt>,
   with an index of the pages beside it (`llms.txt`).
 - **Availability, the second field beside the lifecycle** (ISA-18.2's special
-  states): `availability?: "in-service" | "shelved" | "suppressed-by-design" |
-  "out-of-service"` on `Alarm`, never merged into the four lifecycle values.
+  states): `availability?: "in-service" | "snoozed" | "suppressed" |
+  "disabled"` on `Alarm`, never merged into the four lifecycle values.
   Without a statement an alarm is in service, so existing alarms read as
-  before. A shelved alarm carries `shelf: { until, by }` - and cannot be
+  before. A shelved alarm carries `snooze: { until, by }` - and cannot be
   written without it.
 - **Four pure transitions**, one alarm in and one out, performed by the
-  application: `shelve(alarm, until, by)`, `unshelve`, `takeOutOfService`,
-  `returnToService`. One that does not apply returns the same object. A shelf
+  application: `snooze(alarm, until, by)`, `unsnooze`, `disable`,
+  `enable`. One that does not apply returns the same object. A shelf
   never overwrites out of service or suppressed by design, and taking out of
   service never overwrites suppressed by design - the plant's logic owns it.
 - **`availabilityAt(alarm, asOf)`**: a shelf that has reached its end is in
   service again at the as-of time - by the model's clock, not by a timer.
   `AlarmRow.availability` carries that value.
-- **`isHiddenFromOperation`, `AVAILABILITIES`, the types `Availability` and
-  `Shelf`**, and on the projection **`hiddenFromOperation`**: how many of the
+- **`isHidden`, `AVAILABILITIES`, the types `Availability` and
+  `Snooze`**, and on the projection **`hiddenAlarms`**: how many of the
   filtered set are hidden. The model still removes nothing.
 - **An `availability` column** in `alarmColumns` / `ALARM_COLUMNS` (its label
   from `wording.columnAvailability`), valued by rank like the priority.
@@ -103,7 +141,7 @@ Needs `@umriss-ui/core` 0.10: it reads the new wording keys and `--u-shadow-stic
   11:10 by M. Keller"). The bar counts them ("Hidden from operation: 3").
 - **`hiddenOnly` and `onHiddenOnlyChange` on `<AlarmList>`**: with the
   handler the count becomes a switch for the view; the application filters
-  with the table's own `filter` and `isHiddenFromOperation`. The switch stays
+  with the table's own `filter` and `isHidden`. The switch stays
   while the view is on, even at zero.
 - **Any column can be pinned**: `pin="start"` or `pin="end"` on a `Column` or
   a `VerdictColumn` keeps it in view while the table scrolls sideways, in a
@@ -135,7 +173,7 @@ Needs `@umriss-ui/core` 0.10: it reads the new wording keys and `--u-shadow-stic
 - **`DEFAULT_ORDER` begins with availability**: in service above hidden, then
   priority, acknowledgement and time as before. Only alarms with an
   availability of their own move.
-- **`standingUnacknowledged` counts only alarms in service.** The live figure
+- **`activeUnacknowledged` counts only alarms in service.** The live figure
   calls somebody over; it must not call them to a shelved alarm.
 - **A done alarm's row (`keepDone`) is muted as it always claimed to be.**
   Its colour stood on the row, and the table's cells set their own; it now
@@ -165,7 +203,7 @@ Needs `@umriss-ui/core` 0.10: it reads the new wording keys and `--u-shadow-stic
     operation" switch's label is in the live figure's size.
 - **`Alarm` is a type, no longer an interface** - the union with the shelf
   needs it. `Partial<Alarm>` spread into an `Alarm` no longer compiles; name
-  the fields you mean (`Pick<Alarm, "cleared" | "acknowledgedAt">`).
+  the fields you mean (`Pick<Alarm, "resolved" | "acknowledgedAt">`).
 
 ### Fixed
 
@@ -422,10 +460,10 @@ Delivery report for `.scratch/english-and-umriss-ui/spec.md`, the table's share.
 
 ### Changed — the values, not only the names
 
-- **The alarm lifecycle.** `LifecycleState` is `"standing-unacknowledged"`,
-  `"standing-acknowledged"`, `"cleared-unacknowledged"`,
-  `"cleared-acknowledged"`; `Transition` is `"raised"`, `"acknowledged"`,
-  `"cleared"`; `Priority` is `"high"`, `"medium"`, `"low"`. In the DOM,
+- **The alarm lifecycle.** `LifecycleState` is `"active-unacknowledged"`,
+  `"active-acknowledged"`, `"resolved-unacknowledged"`,
+  `"resolved-acknowledged"`; `Transition` is `"raised"`, `"acknowledged"`,
+  `"resolved"`; `Priority` is `"high"`, `"medium"`, `"low"`. In the DOM,
   `data-zustand` is `data-lifecycle` and `data-prioritaet` is `data-priority`.
 - **The limit model's wire format** follows `@umriss-ui/core` and
   `@umriss-ui/charts`: `data-urteil` is `data-verdict`, and `VerdictColumn`

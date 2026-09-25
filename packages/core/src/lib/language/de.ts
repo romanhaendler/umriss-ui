@@ -251,16 +251,16 @@ export const GERMAN_WORDING: Wording = {
   priorityHigh: "Hoch",
   priorityMedium: "Mittel",
   priorityLow: "Niedrig",
-  lifecycleStandingUnacknowledged: "Anstehend, unquittiert",
-  lifecycleStandingAcknowledged: "Anstehend, quittiert",
-  lifecycleClearedUnacknowledged: "Gegangen, unquittiert",
-  lifecycleClearedAcknowledged: "Gegangen, quittiert",
+  lifecycleActiveUnacknowledged: "Aktiv, unquittiert",
+  lifecycleActiveAcknowledged: "Aktiv, quittiert",
+  lifecycleResolvedUnacknowledged: "Behoben, unquittiert",
+  lifecycleResolvedAcknowledged: "Behoben, quittiert",
   floodHint: (count) => `Meldungsflut: ${count} in kurzer Folge`,
   chatterHint: (count) => `${count}×`,
-  standingUnacknowledged: (count) =>
+  activeUnacknowledged: (count) =>
     count === 1
-      ? "1 anstehende Meldung, unquittiert"
-      : `${count} anstehende Meldungen, unquittiert`,
+      ? "1 aktive Meldung, unquittiert"
+      : `${count} aktive Meldungen, unquittiert`,
   columnAlarm: "Meldung",
   columnLifecycleState: "Zustand",
   columnPriority: "Priorität",
@@ -269,11 +269,11 @@ export const GERMAN_WORDING: Wording = {
   columnFrequency: "Häufigkeit",
   columnAcknowledgement: "Quittierung",
   columnAge: "Alter",
-  availabilityShelved: (until, by) => `Zurückgestellt bis ${until} von ${by}`,
-  availabilityShelvedShort: "Zurückgestellt",
-  availabilitySuppressedByDesign: "Planmäßig unterdrückt",
-  availabilityOutOfService: "Außer Betrieb",
-  hiddenFromOperation: (count) => `Aus der Bedienung genommen: ${count}`,
+  availabilitySnoozed: (until, by) => `Zurückgestellt bis ${until} von ${by}`,
+  availabilitySnoozedShort: "Zurückgestellt",
+  availabilitySuppressed: "Unterdrückt",
+  availabilityDisabled: "Deaktiviert",
+  hiddenAlarms: (count) => `Ausgeblendet: ${count}`,
   columnAvailability: "Verfügbarkeit",
 
   close: "Schließen",
