@@ -104,9 +104,37 @@ commit.
   search, a chip or Backspace added or removed. It speaks once the keys rest
   for 150 ms, the charts' readout pause, and inside a `<dialog>` from the
   dialog's own region.
+- **`Splitter`**: two panes and the line between them, the APG window
+  splitter - `orientation="horizontal"` side by side or `"vertical"` stacked,
+  `value`/`defaultValue` as the first pane's share in per cent with
+  `onChange(value)`, `min`, `max` and `step`. The line is a focusable
+  `role="separator"` (`separatorLabel` names it after the first pane): the
+  pointer drags it, the arrows of its axis move it, Home and End take it to
+  the bounds, Enter collapses the first pane to `min` and restores it.
+- **`Stepper`**: where a procedure stands - `steps` (`label`, `description`,
+  `failed`) and the index `current`, as an ordered list in a row or a column
+  (`orientation`). The current step is `aria-current="step"`; every other
+  step's state - done, upcoming, failed - is a word beside its label for a
+  screen reader and a tick, number or cross in its marker. It has no keys:
+  moving on is the caller's.
+- **`FileInput`**: the native file input behind a key, inside a zone that
+  takes a drop. `accept` and `multiple` hold for a drop as they hold in the
+  dialog (a refused file is named beneath the list), the chosen files stand
+  listed with their size and a cross each, `value` with `onChange(files)` or
+  uncontrolled, `invalid` from `FormField`. What a drop or a removal leaves
+  is written back into the input, so a form sends what the list shows. The
+  class goes to the zone, ref and rest to the input. Nothing is uploaded.
 
 ### Changed
 
+- **Eleven new keys in `Wording`, for `Splitter`, `Stepper` and
+  `FileInput`**, in English and German: `splitter` (the separator's name
+  where the caller gives none), `stepDone`, `stepUpcoming` and `stepFailed`
+  (a step's state beside its label), `chooseFile` and `chooseFiles` (the
+  key), `dropFile` and `dropFiles` (the words beside it), `removeFile(name)`
+  and `fileNotAccepted(name)`. A partial wording passed to the provider is
+  merged as before; an application that implements the whole `Wording` type
+  itself no longer compiles until it adds these eleven.
 - **Four new keys in `Wording`: what the lists announce**, in English and
   German: `optionCount(count)`, `optionActive(label, { selected, disabled,
   group })`, `optionAdded(label)` and `optionRemoved(label)`. A partial

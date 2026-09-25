@@ -57,6 +57,10 @@ export const SAMPLE = [
   "progressbar",
   "accordion",
   "breadcrumb",
+  /* The layout tier after them, each with its page (core-layout-extras). */
+  "splitter",
+  "stepper",
+  "fileinput",
   /* Every package on one page (control-room-demo). */
   "control-room",
 ] as const;
