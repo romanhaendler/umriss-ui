@@ -65,7 +65,7 @@ describe("the readout", () => {
     fireEvent.keyDown(plotOf(container), { key: "]" });
     await rest();
     /* Cutting ends at 10:00, painting starts at 11:00: ninety minutes do not fit. */
-    expect(readout(container)).toBe("Order 1, Transport 1 hrs 30 min, Cutting → Painting, Late transport, 30 min short");
+    expect(readout(container)).toBe("Order 1, Transport 1 hr 30 min, Cutting → Painting, Late transport, 30 min short");
   });
 
   it("stays silent for the pointer", async () => {

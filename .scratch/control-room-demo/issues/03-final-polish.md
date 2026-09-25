@@ -1,6 +1,6 @@
 # 03 - Final polish round
 
-Status: ready-for-agent
+Status: ready-for-human
 Type: task
 
 Spec: `.scratch/control-room-demo/spec.md`

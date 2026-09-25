@@ -191,10 +191,15 @@
      it travels the long way on the sheet's duration. It leaves as the modal
      does, faster and fading where it stands, rather than retracing its way
      (visuelle-wertigkeit 02). */
+  /* Clipped, not scrollable: the browser gives a modal dialog `overflow:
+     auto`, and the focus landing in the sheet while it still stood off-screen
+     scrolled the dialog towards it - the sheet shot in too far and jumped
+     back when the entrance ended and the overflow went. */
   .drawer {
     padding: 0;
     flex-direction: row;
     align-items: stretch;
+    overflow: clip;
   }
 
   .drawer[data-side="right"] {
@@ -216,7 +221,9 @@
     animation: drawerInRight var(--u-duration-medium) var(--u-ease-out);
   }
 
-  .drawer[data-side="left"][open] .drawerSheet {
+  /* Not while it leaves: this rule outweighs the exit's, and would put the
+     entrance back in its place - the left drawer vanished without a fade. */
+  .drawer[data-side="left"][open]:not([data-closing]) .drawerSheet {
     animation-name: drawerInLeft;
   }
 
