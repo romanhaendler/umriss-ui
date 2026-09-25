@@ -77,6 +77,29 @@ describe("the readout", () => {
     expect(readout(container)).toBe("");
   });
 
+  it("speaks the same words again when a key keeps them - at the end of a lane", async () => {
+    const { container } = render(plan);
+    /* The first key enters on Cutting, the second goes to the lane's end. */
+    fireEvent.keyDown(plotOf(container), { key: "End" });
+    fireEvent.keyDown(plotOf(container), { key: "End" });
+    await rest();
+    const live = container.querySelector("[aria-live='polite']")!;
+    const [words, first] = [live.textContent, live.firstChild];
+    fireEvent.keyDown(plotOf(container), { key: "End" });
+    await rest();
+    /* The same words, written anew: a node React left alone is not read again. */
+    expect(live.textContent).toBe(words);
+    expect(live.firstChild).not.toBe(first);
+  });
+
+  it("speaks after an Alt key on the pointer's subtask", async () => {
+    const { container } = render(plan);
+    fireEvent.pointerMove(plotOf(container), { clientX: 250, clientY: 20, pointerId: 1 });
+    fireEvent.keyDown(plotOf(container), { key: "ArrowRight", altKey: true });
+    await rest();
+    expect(readout(container)).toMatch(/^Press, Order 1, Cutting/);
+  });
+
   it("speaks German under the German wording and formats", async () => {
     const { container } = render(
       <LanguageProvider wording={GERMAN_WORDING} formats={GERMAN_FORMATS}>
@@ -105,7 +128,7 @@ describe("the summary", () => {
       </LanguageProvider>,
     );
     expect(summary(container)).toMatch(
-      /^2 Bahnen, 3 Arbeitsgänge im Blick von 17\.03\. 06:00 bis 17\.03\. 14:00\. 1 Überschneidung, 1 verspäteter Transport\. Pfeil links/,
+      /^2 Bahnen, 3 Teilaufgaben im Blick von 17\.03\. 06:00 bis 17\.03\. 14:00\. 1 Überschneidung, 1 verspäteter Transport\. Pfeil links/,
     );
   });
 });
