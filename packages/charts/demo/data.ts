@@ -421,6 +421,55 @@ export function planAndActual(seed: number): DayOutput[] {
   return points;
 }
 
+export interface DayDowntime {
+  /** The position on the x axis: the working day's index. */
+  day: number;
+  name: string;
+  /** Minutes stopped, per reason; null where the reason was not logged. */
+  setup: number;
+  material: number | null;
+  breakdown: number;
+}
+
+/** Two working weeks of downtime by reason. On one Wednesday the material log
+    was not kept - a gap, not a zero - and on the second Thursday a breakdown
+    takes the day. */
+export function downtimePerDay(seed: number): DayDowntime[] {
+  const r = random(seed);
+  const names = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+  return Array.from({ length: 10 }, (_, day) => ({
+    day,
+    name: `${names[day % 5]} ${new Date(WEEK_START + (day + 2 * Math.floor(day / 5)) * DAY_MS).getDate()}`,
+    setup: Math.round(40 + r() * 30),
+    material: day === 2 ? null : Math.round(10 + r() * 45),
+    breakdown: Math.round((day === 8 ? 150 : 5) + r() * 25),
+  }));
+}
+
+export interface LineOutput {
+  t: number;
+  /** Pieces per hour of each of three lines. */
+  line1: number;
+  line2: number;
+  line3: number;
+}
+
+/** A day of three lines, hour by hour from six to six. Line 3 runs the early
+    and late shift only - at night it stands, and says 0, not nothing. */
+export function outputPerLine(seed: number): LineOutput[] {
+  const r = random(seed);
+  return Array.from({ length: 25 }, (_, i) => {
+    const hour = (6 + i) % 24;
+    const night = hour >= 22 || hour < 6;
+    return {
+      t: WEEK_START + (6 + i) * HOUR_MS,
+      line1: Math.round(120 + r() * 30),
+      line2: Math.round((night ? 60 : 90) + r() * 25),
+      line3: night ? 0 : Math.round(70 + r() * 30),
+    };
+  });
+}
+
 export interface SetPoint {
   t: number;
   /** The set point in °C; null while no recipe is loaded. */
@@ -612,3 +661,5 @@ export const weightData = fillWeights(4040, 97, 9);
 export const furnaceData = furnaces(2718);
 export const hallData = hallTemperature(1603);
 export const kilnData = kiln(2024, 60_000);
+export const downtimeData = downtimePerDay(1204);
+export const lineOutputData = outputPerLine(906);

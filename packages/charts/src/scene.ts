@@ -46,6 +46,7 @@ import { DEFAULT_CHARTS_WORDING, type ChartsWording } from "./wording";
 import { hasCell, nearestPosition, rowEnd, stepCell, stepPosition, type Cell, type Move, type WalkSeries } from "./walk";
 import { downsample, type Course } from "./downsample";
 import { tableRows } from "./table";
+import { stackSeries, type Stacked } from "./stack";
 import { hatchFor, marksFor, type Hatch, type MarkerShape, type SeriesMarks } from "./marks";
 import { lastSegmentEnd, medianStep, segmentEnd, segmentIndex } from "./state";
 import { cellSize, cellIndex, measureSpacing } from "./cells";
@@ -113,6 +114,13 @@ interface SeriesEntry {
   /** Matrix only: the palette index per cell, once per materialisation and
       colouring - not per redraw, which a legend hover causes as well. */
   buckets: Int32Array | null;
+  /** Stacked only: the series' own values, as its accessor gave them. Its
+      materialised y holds its top and y0 the stack below (charts-stacking K2);
+      these are what the stack is summed from again when a member changes. */
+  own: Float64Array | null;
+  /** Stacked only: what each point shows as its value - its own, or its share
+      in a normalised stack - and the stack's total there (K4). */
+  stacked: { value: Float64Array; total: Float64Array; normalize: boolean } | null;
 }
 
 /** A series' hit, before the hits are grouped into one tooltip. */
@@ -132,6 +140,9 @@ interface Candidate {
       cell lie under the pointer where they cover it - their px is the
       beginning of the section and not the place being pointed at. */
   areal: boolean;
+  /** A stacked segment reaching over the pointer's y: under "nearest" it wins
+      over a nearer top, which may be the segment above's. */
+  covers: boolean;
   value?: number;
   segment?: { from: number; to: number; label: string };
 }
@@ -220,6 +231,14 @@ export interface TooltipRow {
   x: string;
 }
 
+/** A stack's total in the built-in tooltip (charts-stacking K4). */
+export interface StackTotal {
+  /** The index of the row it follows - its stack's last member in the hit. */
+  after: number;
+  name: string;
+  value: string;
+}
+
 export interface HoverSnapshot {
   version: number;
   hover: HoverState | null;
@@ -229,6 +248,8 @@ export interface HoverSnapshot {
   xLabel: string;
   /** Parallel to the hit's points. */
   rows: readonly TooltipRow[];
+  /** One per stack in the hit. */
+  totals: readonly StackTotal[];
 }
 
 const EMPTY_LAYOUT_SNAPSHOT: LayoutSnapshot = {
@@ -248,6 +269,7 @@ const EMPTY_HOVER_SNAPSHOT: HoverSnapshot = {
   tooltip: null,
   xLabel: "",
   rows: [],
+  totals: [],
 };
 
 /** Tolerance within which hits of different series are grouped (R-4.7). */
@@ -332,11 +354,24 @@ function listEqual(a: readonly number[] | undefined, b: readonly number[] | unde
 function materialEqual(previous: SeriesConfig, next: SeriesConfig): boolean {
   return (
     previous.kind === next.kind &&
+    stackOf(previous) === stackOf(next) &&
+    normalizes(previous) === normalizes(next) &&
     fnEqual(previous.accessor, next.accessor) &&
     previous.data === next.data &&
     fnEqual(baselineOf(previous), baselineOf(next)) &&
     fnEqual(valueChannelOf(previous), valueChannelOf(next))
   );
+}
+
+/** The stack a series stands in, as a key: the same id on the same x and y
+    axis (charts-stacking K1); undefined where it stands alone. */
+function stackOf(config: SeriesConfig): string | undefined {
+  if ((config.kind !== "bar" && config.kind !== "area") || config.stack === undefined) return undefined;
+  return `${config.xAxisId}\n${config.yAxisId}\n${config.stack}`;
+}
+
+function normalizes(config: SeriesConfig): boolean {
+  return stackOf(config) !== undefined && (config as BarSeriesConfig | AreaSeriesConfig).normalize === true;
 }
 
 /** The value channel, where the kind has one (ADR-0011). */
@@ -352,7 +387,8 @@ function baselineOf(config: SeriesConfig): Baseline<unknown> | undefined {
     case "scatter":
       return undefined;
     case "area":
-      return config.baseline ?? 0;
+      // In a stack the stack below is the foot, not a baseline of its own.
+      return config.stack === undefined ? (config.baseline ?? 0) : 0;
     case "bar":
       return 0;
     case "state":
@@ -632,6 +668,7 @@ export class ChartScene {
   private hoverKey = "";
   private hoverXLabel = "";
   private hoverRows: readonly TooltipRow[] = [];
+  private hoverTotals: readonly StackTotal[] = [];
   /** The orders of the series in the current hit, beside its rows. */
   private hoverOrders: readonly number[] = [];
   private highlight: readonly number[] | null = null;
@@ -704,6 +741,8 @@ export class ChartScene {
       step: null,
       cellHeight: null,
       buckets: null,
+      own: null,
+      stacked: null,
     });
     this.materialsDirty = true;
     this.markLayoutDirty();
@@ -737,6 +776,8 @@ export class ChartScene {
     entry.config = config;
     if (equal) return; // R-2.2: no dirty flag without a change of substance
     entry.buckets = null; // the colouring may have changed
+    // A hidden member leaves its place in the stack: the others sum anew.
+    if (previous.hidden !== config.hidden && stackOf(config) !== undefined) this.materialsDirty = true;
     if (!dataEqual) {
       entry.materialized = null;
       entry.extent = null;
@@ -1082,6 +1123,8 @@ export class ChartScene {
         },
       );
       entry.materialized = material.series;
+      entry.own = stackOf(config) === undefined ? null : material.series.y;
+      entry.stacked = null;
       points += material.series.length;
       if (config.kind === "bar") {
         const step = measureStep(material.series.x, material.series.length);
@@ -1149,10 +1192,44 @@ export class ChartScene {
         }
       }
     }
+    this.stackAll();
     this.materialsDirty = false;
     this.perf.materializeMs =
       (typeof performance === "undefined" ? 0 : performance.now()) - start;
     this.perf.points = points;
+  }
+
+  /** Sums every stack anew from its members' own values (charts-stacking K2),
+      once per materialisation: a member that changes moves every one above
+      it. The stack is summed before anything is drawn, so an area's
+      downsampling thins the stacked edges - each member keeps its own
+      extremes per pixel column, and inside one column the edge of a member
+      and the foot of the one above may part by a stroke's width. */
+  private stackAll(): void {
+    const stacks = new Map<string, SeriesEntry[]>();
+    for (const entry of this.seriesInOrder()) {
+      const key = stackOf(entry.config);
+      if (key === undefined || entry.config.hidden === true || entry.materialized === null || entry.own === null) continue;
+      const members = stacks.get(key);
+      if (members === undefined) stacks.set(key, [entry]);
+      else members.push(entry);
+    }
+    for (const members of stacks.values()) {
+      const normalize = members.some((e) => normalizes(e.config));
+      const sums = stackSeries(
+        members.map((e) => ({ ...(e.materialized as MaterializedSeries), y: e.own as Float64Array })),
+        normalize,
+      );
+      members.forEach((entry, k) => {
+        const sum = sums[k] as Stacked;
+        const stacked = { ...(entry.materialized as MaterializedSeries), y: sum.top, y0: sum.bottom };
+        entry.materialized = stacked;
+        entry.stacked = { value: sum.value, total: sum.total, normalize };
+        // The y extent is the stack's now, from its foot to its top.
+        const [yMin, yMax] = visibleExtent(stacked, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY);
+        if (entry.extent !== null) entry.extent = { ...entry.extent, yMin, yMax };
+      });
+    }
   }
 
   /* ================= DOM binding, DPR, resize ================= */
@@ -1210,9 +1287,9 @@ export class ChartScene {
   setWording(wording: ChartsWording): void {
     if (wording === this.wording) return;
     this.wording = wording;
-    this.scheduleSummary();
-    // The data table's key and caption are written from it.
-    if (this.dataTable !== null) this.pushLayoutSnapshot();
+    // The data table's key and caption are written from it, and a percent
+    // axis' labels (K5); a layout pushes both and the summary.
+    this.markLayoutDirty();
   }
 
   private themeRoot: HTMLElement | null = null;
@@ -1478,7 +1555,7 @@ export class ChartScene {
         extent: this.extentFor(c),
         domainMode: c.domain,
         tickCount: c.tickCount,
-        tickFormat: c.tickFormat,
+        tickFormat: c.orientation === "y" ? this.yTickFormat(c.id) : c.tickFormat,
         tickValues: c.ticks,
         time: c.time,
         calendar: c.calendar,
@@ -1750,6 +1827,7 @@ export class ChartScene {
         xAxisId: e.config.xAxisId,
         step: e.step ?? 0,
         fraction: e.config.kind === "bar" ? e.config.barWidth : 0,
+        stack: stackOf(e.config),
       })),
     );
     series.forEach((entry) => {
@@ -1824,6 +1902,7 @@ export class ChartScene {
           items.push({
             ...base,
             kind: "bar",
+            y0: mat.y0,
             baseline: 0,
             offset: placement.offset,
             width: placement.width,
@@ -1985,6 +2064,7 @@ export class ChartScene {
       this.hoverXLabel = this.xLabel(xAxisId, hit.primary.xValue, subMinute(hit.primary));
       this.hoverRows = hit.chosen.map((k) => this.tooltipRow(k, xAxisId));
       this.hoverOrders = hit.chosen.map((k) => k.entry.order);
+      this.hoverTotals = this.totalsOf(hit.chosen);
       this.pushHoverSnapshot();
     }
     return true;
@@ -2037,6 +2117,7 @@ export class ChartScene {
         yValue: hit.yValue,
         marked: hit.marked,
         areal: hit.areal,
+        covers: hit.covers === true,
         value: hit.value,
         segment: hit.segment,
       });
@@ -2053,7 +2134,8 @@ export class ChartScene {
     let primary = comparable[0] as Candidate;
     if (mode === "nearest") {
       let best = Number.POSITIVE_INFINITY;
-      for (const k of pointLike) {
+      const covering = pointLike.filter((k) => k.covers);
+      for (const k of covering.length > 0 ? covering : pointLike) {
         const dx = k.px - mouseX;
         const dy = k.py - mouseY;
         const d = dx * dx + dy * dy; // Euclidean comparison in pixel space
@@ -2065,7 +2147,7 @@ export class ChartScene {
       // An area covers the pointer wherever it is hit, so its distance is always
       // zero - it would beat every point. It answers only where no point is
       // within reach.
-      if (best > SNAP_DISTANCE * SNAP_DISTANCE) {
+      if (covering.length === 0 && best > SNAP_DISTANCE * SNAP_DISTANCE) {
         for (const k of candidates) {
           if (k.areal) {
             primary = k;
@@ -2336,7 +2418,26 @@ export class ChartScene {
     });
     const emph = this.emphasised()?.order;
     rows.sort((a, b) => Number(b.order === emph) - Number(a.order === emph));
-    return this.wording.readout(this.hoverXLabel, rows);
+    // The totals after every series, as the tooltip's last rows.
+    const totals = this.hoverTotals.map((t) => ({ name: t.name, value: t.value, x: "" }));
+    return this.wording.readout(this.hoverXLabel, [...rows, ...totals]);
+  }
+
+  /** The totals of the stacks in a hit (K4), each after its stack's last
+      member. A normalised stack's total is no share: it is written in the
+      series' own `format`, as its readings would be. */
+  private totalsOf(chosen: readonly Candidate[]): StackTotal[] {
+    const out: StackTotal[] = [];
+    chosen.forEach((k, i) => {
+      const key = stackOf(k.entry.config);
+      const stacked = k.entry.stacked;
+      if (key === undefined || stacked === null) return;
+      if (chosen.some((later, j) => j > i && stackOf(later.entry.config) === key)) return;
+      const total = stacked.total[k.index] as number;
+      const value = stacked.normalize ? (k.entry.config.format ?? formatValue)(total) : this.formatY(k.entry, total);
+      out.push({ after: i, name: this.wording.stackTotal, value });
+    });
+    return out;
   }
 
   /** The summary is rebuilt after a layout, but not on every one: a zoom lays
@@ -2385,7 +2486,8 @@ export class ChartScene {
     const xAxis = this.findAxis("x", entry.config.xAxisId);
     if (mat === null || xAxis === null) return null;
     const [from, to] = xAxis.scale.domain;
-    const values = mat.w ?? mat.y;
+    // A stacked series' range is its own values', not its tops'.
+    const values = mat.w ?? entry.stacked?.value ?? mat.y;
     let min = Number.POSITIVE_INFINITY;
     let max = Number.NEGATIVE_INFINITY;
     // ponytail: reads every visible point once per summary; debounced above,
@@ -2403,11 +2505,26 @@ export class ChartScene {
       (a cell's value has no y axis format). */
   private formatY(entry: SeriesEntry, v: number): string {
     const config = entry.config;
-    if (config.format !== undefined) return config.format(v);
+    // A share is no reading: it reads as its axis does, in percent. The
+    // series' `format` writes readings - the stack's total among them.
+    if (config.format !== undefined && entry.stacked?.normalize !== true) return config.format(v);
     if (config.kind === "matrix") return formatValue(v);
-    const own = this.findAxisConfig("y", config.yAxisId)?.tickFormat;
+    const own = this.yTickFormat(config.yAxisId);
     return own === undefined ? formatValue(v) : own(v);
   }
+
+  /** A y axis' `tickFormat`; without one, an axis that carries a normalised
+      stack reads in percent (K5). */
+  private yTickFormat(axisId: string): ((v: number) => string) | undefined {
+    const own = this.findAxisConfig("y", axisId)?.tickFormat;
+    if (own !== undefined) return own;
+    for (const e of this.series.values()) {
+      if (e.config.yAxisId === axisId && normalizes(e.config)) return this.percent;
+    }
+    return undefined;
+  }
+
+  private readonly percent = (v: number): string => this.wording.percent(formatValue(v));
 
   /* ---------- The data table (charts-alternatives 01) ---------- */
 
@@ -2444,7 +2561,15 @@ export class ChartScene {
     const xAxis = this.findAxis("x", axisId);
     if (xAxis === null) return null;
     const [from, to] = xAxis.scale.domain;
-    const rows = tableRows(entries.map((e) => e.materialized as MaterializedSeries), from, to);
+    // A stacked series lists its own values, not its tops.
+    const rows = tableRows(
+      entries.map((e) => {
+        const mat = e.materialized as MaterializedSeries;
+        return e.stacked === null ? mat : { ...mat, y: e.stacked.value, y0: null };
+      }),
+      from,
+      to,
+    );
     // Readings less than a minute apart carry their seconds, as the tooltip's
     // header does - otherwise rows would share one heading.
     let seconds = false;
@@ -2727,13 +2852,7 @@ export class ChartScene {
   private tooltipRow(k: Candidate, headerXAxisId: string): TooltipRow {
     const config = k.entry.config;
     const label = k.segment?.label;
-    let value: string;
-    if (label !== undefined && label !== "") value = label;
-    else if (k.value !== undefined) value = (config.format ?? formatValue)(k.value);
-    else {
-      const own = config.format ?? this.findAxisConfig("y", config.yAxisId)?.tickFormat;
-      value = own === undefined ? formatValue(k.yValue) : own(k.yValue);
-    }
+    const value = label !== undefined && label !== "" ? label : this.formatY(k.entry, k.value ?? k.yValue);
     const x = config.xAxisId === headerXAxisId ? "" : this.xLabel(config.xAxisId, k.xValue);
     return { value, x };
   }
@@ -2761,6 +2880,7 @@ export class ChartScene {
     yValue: number;
     marked: boolean;
     areal: boolean;
+    covers?: boolean;
     color?: string;
     value?: number;
     segment?: { from: number; to: number; label: string };
@@ -2840,17 +2960,20 @@ export class ChartScene {
           ? segmentIndex(mat.x, n, targetX)
           : nearestIndex(mat.x, n, targetX);
     if (index < 0) return null;
-    const yValue = mat.y[index] as number;
-    if (Number.isNaN(yValue)) return null; // gaps are no hits (R-4.6)
+    const top = mat.y[index] as number;
+    if (Number.isNaN(top)) return null; // gaps are no hits (R-4.6)
     const xValue = mat.x[index] as number;
+    // A stacked point is marked at its top and named by its own value.
+    const foot = entry.stacked === null || mat.y0 === null ? Number.NaN : (mat.y0[index] as number);
     return {
       index,
       px: xAxis.scale.toPx(xValue),
-      py: yAxis.scale.toPx(yValue),
+      py: yAxis.scale.toPx(top),
       xValue,
-      yValue,
+      yValue: entry.stacked === null ? top : (entry.stacked.value[index] as number),
       marked: true,
       areal: false,
+      covers: targetY >= Math.min(foot, top) && targetY <= Math.max(foot, top),
     };
   }
 
@@ -2912,6 +3035,7 @@ export class ChartScene {
       tooltip: this.tooltip,
       xLabel: this.hoverXLabel,
       rows: this.hoverRows,
+      totals: this.hoverTotals,
     };
     for (const notify of this.hoverSubscribers) notify();
   }

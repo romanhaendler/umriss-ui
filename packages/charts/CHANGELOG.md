@@ -63,11 +63,24 @@ interface was still expected to move before `0.3.0`.
   `Canvas`, `GrayText`, `Highlight`), a caller's colour becomes `CanvasText`,
   and encoding by marks switches on whatever `encoding` says. `ResolvedTheme`
   gains `forced`.
+- **`stack` on `Bar` and `Area`** (charts-stacking 01, 02): series with the
+  same id on the same axes stand on the ones registered before them. Stacked
+  bars take one place in their group; a gap stacks as zero and stays a gap;
+  negative values stack downward from zero, apart from the positive. The
+  tooltip and the readout name each series' own value and add the stack's
+  total as the last row; the data table lists the own values. An area's
+  `baseline` is not read in a stack. `TooltipPoint.yValue` of a stacked point
+  is its own value, not its top.
+- **`normalize`** (charts-stacking 03): on any member of a stack, every x sums
+  to 100 % - each value its share -, and the y axis reads in percent unless it
+  has a `tickFormat`. The total stays the readings' sum, in the series'
+  `format`.
 
 ### Changed
 
 - **`ChartsWording`** gains `showData`, `hideData`, `positionColumn`,
-  `rowColumn`, `tableCaption` and `downsampled`, German beside them. A
+  `rowColumn`, `tableCaption`, `downsampled`, `stackTotal` and `percent`,
+  German beside them. A
   `Partial<ChartsWording>` passed to `wording` keeps working; a register of
   one's own typed as the whole `ChartsWording` has to add them.
 

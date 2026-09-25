@@ -275,6 +275,7 @@ describe("Marks on the canvas", () => {
         yScale,
         color: "#000",
         alpha: 1,
+        y0: null,
         baseline: 0,
         offset: -10,
         width: 20,
@@ -285,5 +286,31 @@ describe("Marks on the canvas", () => {
     expect(hatched.filled).toHaveLength(1);
     expect(hatched.stroked).toHaveLength(1);
     expect(hatched.stroked[0]?.ops.length).toBeGreaterThan(0);
+  });
+});
+
+/* charts-stacking 02: a stacked bar stands on the stack below it - its foot
+   channel -, not on the baseline. */
+describe("Stacked bars", () => {
+  it("draw each bar from its own foot to its top, and leave a gap out", () => {
+    const { filled } = draw({
+      x: new Float64Array([0, 1]),
+      y: new Float64Array([60, Number.NaN]),
+      y0: new Float64Array([20, Number.NaN]),
+      kind: "bar",
+      length: 2,
+      xScale,
+      yScale,
+      color: "#000",
+      alpha: 1,
+      baseline: 0,
+      offset: 0,
+      width: 1,
+    });
+    const rects = filled[0]?.ops.filter(([name]) => name === "rect") ?? [];
+    expect(rects).toHaveLength(1);
+    // Top at 60 → y 40, foot at 20 → y 80: 40 pixels high.
+    expect(rects[0]?.[2]).toBeCloseTo(40);
+    expect(rects[0]?.[4]).toBeCloseTo(40);
   });
 });

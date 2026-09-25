@@ -10,6 +10,8 @@ export const GERMAN_CHARTS_WORDING: ChartsWording = {
   visibleRange: (from, to) => `Von ${from} bis ${to}.`,
   seriesExtent: (name, min, max) => `${name} von ${min} bis ${max}.`,
   readout: (x, rows) => [`${x}.`, ...rows.map((r) => `${r.name} ${r.value}${r.x === "" ? "" : ` bei ${r.x}`}.`)].join(" "),
+  stackTotal: "Summe",
+  percent: (value) => `${value} %`,
   walkHelp:
     "Pfeil links und rechts gehen durch die Werte, Pfeil hoch und runter wechseln die Serie, Pos1 und Ende springen zum ersten und letzten Wert, Escape hebt die Markierung auf.",
   zoomHelp: "Plus und Minus zoomen, Umschalt mit Pfeil links oder rechts verschiebt, 0 zeigt alles.",
