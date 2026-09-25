@@ -1,14 +1,10 @@
 import { useState } from "react";
 import { Button, Card, Splitter, Stack, Text } from "../../../src";
 
-export const title = "Controlled, and remembered";
+export const title = "Keep the share";
+export const lead = "Control `value` with `onChange` to keep the share in the user's settings, or to set it from a button.";
 
-/* The share belongs to the caller here: `value` and `onChange`, and the
-   caller may keep it - in the user's settings, so that the layout is the one
-   they left. `onChange` reports a share already inside the bounds, by pointer
-   and by key alike. The keys beside it set the share from outside; the line
-   follows, as any controlled field does. */
-export default function Controlled() {
+export default function KeepTheShare() {
   const [share, setShare] = useState(50);
 
   return (
@@ -21,16 +17,16 @@ export default function Controlled() {
           Half and half
         </Button>
         <Text size="xs" tone="muted" style={{ fontVariantNumeric: "tabular-nums" }}>
-          List: {share.toFixed(1)} %
+          People: {share.toFixed(1)} %
         </Text>
       </Stack>
       <Card style={{ height: 180 }}>
-        <Splitter value={share} onChange={setShare} min={20} max={80} separatorLabel="Order list" style={{ height: "100%" }}>
+        <Splitter value={share} onChange={setShare} min={20} max={80} separatorLabel="People" style={{ height: "100%" }}>
           <div style={{ padding: 16 }}>
-            <Text size="sm">Order list</Text>
+            <Text size="sm">People of the Web team</Text>
           </div>
           <div style={{ padding: 16 }}>
-            <Text size="sm">Order 4711-03</Text>
+            <Text size="sm">Chloe Durand · 40 h a week · 34 h planned in sprint 14</Text>
           </div>
         </Splitter>
       </Card>
