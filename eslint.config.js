@@ -93,7 +93,11 @@ export default [
     },
   },
   {
+    /* The core demo's control room imports every package, as a consumer
+       would (control-room-demo, R1): the rule binds what is published and
+       what tests it, not that one page. */
     files: ["packages/core/**/*.{ts,tsx}"],
+    ignores: ["packages/core/demo/**"],
     rules: {
       "no-restricted-imports": ["error", { patterns: [NO_TABLE, NO_SCHEDULE, NO_CALCULATION] }],
     },
