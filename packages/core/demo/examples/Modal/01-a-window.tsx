@@ -1,25 +1,9 @@
 import { useState } from "react";
-import {
-  Button,
-  FormField,
-  Grid,
-  Input,
-  Modal,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-  Select,
-} from "../../../src";
+import { Button, FormField, Grid, Input, Modal, ModalBody, ModalFooter, ModalHeader, Select } from "../../../src";
 
 export const title = "A window that holds focus";
+export const lead = "You hold `open`; `onClose` reports Escape, the cross and a click on the backdrop. The header's title names the dialog.";
 
-/* Controlled: opening is the caller's decision, and only he knows whether
-   something may be open right now. `onClose` reports every wish to close -
-   Escape, the cross, a click on the backdrop - and the caller decides whether
-   he follows it.
-
-   The title in the head names the window for the screen reader at the same
-   time. Without it, it says only "dialog". */
 export default function AWindow() {
   const [open, setOpen] = useState(false);
 
@@ -27,22 +11,22 @@ export default function AWindow() {
     <>
       <Button onClick={() => setOpen(true)}>Open the modal</Button>
       <Modal open={open} onClose={() => setOpen(false)}>
-        <ModalHeader
-          title="Create a project"
-          description="The name and the people responsible can be changed later at any time."
-        />
+        <ModalHeader title="Create a project" description="The name, client and lead can be changed later." />
         <ModalBody>
           <Grid minItemWidth="200px" gap={4}>
             <FormField label="Project name" required>
-              <Input placeholder="e.g. Juno" />
+              <Input placeholder="e.g. Member portal" />
             </FormField>
-            <FormField label="Responsible">
+            <FormField label="Client">
+              <Input placeholder="e.g. Rowan Credit Union" />
+            </FormField>
+            <FormField label="Lead">
               <Select defaultValue="">
                 <option value="" disabled>
                   Choose a person
                 </option>
-                <option value="mw">M. Weber</option>
-                <option value="jf">J. Fontaine</option>
+                <option value="maya">Maya Lindgren</option>
+                <option value="luis">Luis Moreno</option>
               </Select>
             </FormField>
           </Grid>
