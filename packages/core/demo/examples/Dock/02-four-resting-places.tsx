@@ -2,16 +2,8 @@ import { useState } from "react";
 import { Dock, GridGlyph, MeasureGlyph, PlusGlyph, Stack, Text } from "../../../src";
 import type { DockPlace, DockTool } from "../../../src";
 
-export const title = "The four resting places";
-
-/* What makes it a dock rather than a toolbar: it moves, and it moves between
-   four named places. Dragging the grip snaps into the edge whose zone the
-   pointer reaches, and the four arrow keys on the grip ARE the four places -
-   absolute, not relative. Nothing floats in between (ADR-0013).
-
-   The resting place is controlled here because the example displays it.
-   Uncontrolled works just as well; the library then carries it and still does
-   not remember it beyond the life of the component. */
+export const title = "Four resting places";
+export const lead = "Drag the handle or press an arrow on it to move the dock; control `place` with `onPlaceChange` to keep it in the user's settings.";
 
 const TOOLS: readonly DockTool[] = [
   { id: "zoom-in", label: "Zoom in", icon: <PlusGlyph /> },
@@ -19,7 +11,7 @@ const TOOLS: readonly DockTool[] = [
   { id: "measure", label: "Measure", icon: <MeasureGlyph /> },
 ];
 
-export default function TheFourPlaces() {
+export default function FourRestingPlaces() {
   const [place, setPlace] = useState<DockPlace>("top");
 
   return (
