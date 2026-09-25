@@ -78,6 +78,13 @@ export const OUTLINE: readonly Rubric[] = [
         exports: ["Divider"],
       },
       {
+        id: "splitter",
+        name: "Splitter",
+        sentence: "Two panes and the line between them, moved by the pointer or the keys - a trend above its alarms, a list beside its detail.",
+        types: ["SplitterProps"],
+        exports: ["Splitter"],
+      },
+      {
         id: "typography",
         name: "Typography",
         sentence: "Text, Heading and Link - the three pieces every surface draws its type from.",
@@ -167,6 +174,13 @@ export const OUTLINE: readonly Rubric[] = [
         sentence: "A value set roughly between two bounds - the native range underneath, the keys of the slider pattern on every engine alike.",
         types: ["SliderProps"],
         exports: ["Slider"],
+      },
+      {
+        id: "fileinput",
+        name: "FileInput",
+        sentence: "The platform's file input behind a key and a zone that takes a drop - the chosen files listed, sending them left to the application.",
+        types: ["FileInputProps"],
+        exports: ["FileInput"],
       },
       {
         id: "radiogroup",
@@ -363,6 +377,13 @@ export const OUTLINE: readonly Rubric[] = [
         sentence: "Where a page stands, from the plant down - and the way back up, folded into a menu where the place runs short.",
         types: ["BreadcrumbProps", "BreadcrumbEntry"],
         exports: ["Breadcrumb"],
+      },
+      {
+        id: "stepper",
+        name: "Stepper",
+        sentence: "Where a procedure stands - done, current, upcoming or failed, each said as a word; moving on stays the caller's.",
+        types: ["StepperProps", "StepperStep"],
+        exports: ["Stepper"],
       },
       {
         id: "tabs",

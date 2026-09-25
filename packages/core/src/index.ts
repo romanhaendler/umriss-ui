@@ -82,3 +82,9 @@ export * from "./components/Slider";
 export * from "./components/ProgressBar";
 export * from "./components/Accordion";
 export * from "./components/Breadcrumb";
+
+/* The layout tier after the basics (core-layout-extras) stands at the end for
+   the same rule. */
+export * from "./components/Splitter";
+export * from "./components/Stepper";
+export * from "./components/FileInput";
