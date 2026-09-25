@@ -1,0 +1,66 @@
+@layer umriss.tokens, umriss.base, umriss.components;
+
+/* The meter's narrow bar, in the accent only: progress has no tone, because
+   it carries no verdict. The indeterminate bar is a continuous process - a
+   segment crossing the track steadily, with no start and no end - and under
+   reduced motion it slows down instead of stopping, since a bar that stands
+   still would say the task has stopped (visuelle-wertigkeit 02). */
+
+@layer umriss.components {
+  .progress {
+    composes: text from "#own-styles";
+    display: flex;
+    align-items: center;
+    gap: var(--u-space-2);
+    width: 100%;
+    min-width: 90px;
+  }
+
+  .track {
+    position: relative;
+    flex: 1;
+    height: 6px;
+    border-radius: var(--u-radius-full);
+    background: var(--u-color-surface-sunken);
+    overflow: hidden; /* the fill has no shadow - clipping is harmless here */
+  }
+
+  .fill {
+    display: block;
+    height: 100%;
+    border-radius: var(--u-radius-full);
+    background: var(--u-color-accent);
+    transition: width var(--u-duration-medium) var(--u-ease-out);
+  }
+
+  .sweep {
+    width: 30%;
+    animation: sweep var(--u-duration-sweep) var(--u-ease-swell) infinite;
+  }
+
+  @keyframes sweep {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(334%);
+    }
+  }
+
+  .label {
+    flex: none;
+    min-width: 4ch;
+    text-align: right;
+    font-family: var(--u-font-mono);
+    font-size: var(--u-text-mono);
+    letter-spacing: var(--u-tracking-figures);
+    font-variant-numeric: tabular-nums;
+    color: var(--u-color-text-secondary);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sweep {
+      animation-duration: calc(var(--u-duration-sweep) * 3);
+    }
+  }
+}

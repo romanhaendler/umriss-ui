@@ -1,4 +1,4 @@
-export { Modal, ModalHeader, ModalBody, ModalFooter } from "./Modal";
-export type { ModalProps, ModalHeaderProps, ModalSize } from "./Modal";
+export { Modal, ModalHeader, ModalBody, ModalFooter, Drawer } from "./Modal";
+export type { ModalProps, ModalHeaderProps, ModalSize, DrawerProps } from "./Modal";
 export { ConfirmDialog } from "./ConfirmDialog";
 export type { ConfirmDialogProps } from "./ConfirmDialog";

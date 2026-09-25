@@ -393,6 +393,12 @@ export interface Wording {
   loading: string;
   /** Generic name of a fill-level bar, where the caller names none. */
   fillLevel: string;
+  /** Generic name of a progress bar, where the caller names none. */
+  progress: string;
+  /** The accessible name of a breadcrumb's navigation landmark. */
+  breadcrumb: string;
+  /** The key that opens a breadcrumb's folded middle levels as a menu. */
+  breadcrumbFolded: string;
   show: string;
   hide: string;
   moreActions: string;
@@ -723,6 +729,9 @@ export const DEFAULT_WORDING: Wording = {
   cancel: "Cancel",
   loading: "Loading",
   fillLevel: "Fill level",
+  progress: "Progress",
+  breadcrumb: "Breadcrumb",
+  breadcrumbFolded: "Show the levels in between",
   show: "Show",
   hide: "Hide",
   moreActions: "More actions",

@@ -170,12 +170,24 @@ const CASES: Record<string, Case> = {
   ClockGlyph: (probe) => <core.ClockGlyph {...p(probe)} />,
   Stat: (probe) => <core.Stat label="Temperature" value={21} {...p(probe)} />,
   Dock: (probe) => <core.Dock tools={[]} {...p(probe)} />,
+  Switch: (probe) => <core.Switch label="Automatic" {...p(probe)} />,
+  Slider: (probe) => <core.Slider aria-label="Setpoint" {...p(probe)} />,
+  Drawer: (probe) => <core.Drawer open={false} onClose={noop} {...p(probe)} />,
+  ProgressBar: (probe) => <core.ProgressBar value={0.5} {...p(probe)} />,
+  Breadcrumb: (probe) => <core.Breadcrumb items={[{ label: "Plant", href: "#/" }, { label: "Line 3" }]} {...p(probe)} />,
+  Accordion: (probe) => <core.Accordion {...p(probe)} />,
+  AccordionItem: (probe) => (
+    <core.Accordion>
+      <core.AccordionItem value="a" title="General" {...p(probe)} />
+    </core.Accordion>
+  ),
 };
 
 /* Where P1 names a particular element, the element the ref reaches has to be
    that one - not merely some element that carries the four. */
 const ROOT: Record<string, (element: Element) => boolean> = {
   Modal: (e) => e.tagName === "DIALOG",
+  Drawer: (e) => e.tagName === "DIALOG",
   ConfirmDialog: (e) => e.tagName === "DIALOG",
   CommandPalette: (e) => e.tagName === "DIALOG",
   TreeView: (e) => e.getAttribute("role") === "tree",
@@ -196,6 +208,8 @@ const CLASS_ON_WRAPPER: Record<string, string> = {
   NumberInput: "the class on the field with its stepper, the rest on the <input>",
   Select: "the class on the wrapper with the chevron, the rest on the <select>",
   SplitButton: "the class on the group, the rest on the main action",
+  Slider: "the class on the wrapper with marks and readout, the rest on the range <input>",
+  Switch: "the checkbox's construction: the class on the label that holds track and text, the rest on the <input>",
 };
 
 const FORWARD_REF =Symbol.for("react.forward_ref");
