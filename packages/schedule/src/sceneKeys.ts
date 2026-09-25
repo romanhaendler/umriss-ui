@@ -84,13 +84,17 @@ export class SceneKeys {
   key(event: KeyboardEvent): boolean {
     const gestures = this.host.gestures;
     if (event.metaKey || !gestures.idle) return false;
-    /* Matched by the character, whatever the modifiers: on a German keyboard
-       the brackets are AltGr+8 and AltGr+9, which arrive with Ctrl and Alt. */
-    if (event.key === "]" || event.key === "[") {
+    /* The brackets are matched by the character, whatever the modifiers: on a
+       German keyboard they are AltGr+8 and AltGr+9, which arrive with Ctrl and
+       Alt. `t` and Shift+T are their equals without AltGr (schedule-a11y 06),
+       and only bare: Ctrl+T and Alt+T belong to the browser and the system. */
+    const letter = event.key.toLowerCase() === "t" && !event.ctrlKey && !event.altKey;
+    if (event.key === "]" || event.key === "[" || letter) {
       const at = this.active();
       if (at === null) return false;
       const data = this.host.data;
-      this.show(alongTransport(data.transports, data.subtaskById, at, event.key === "]" ? "out" : "back"));
+      const out = letter ? !event.shiftKey : event.key === "]";
+      this.show(alongTransport(data.transports, data.subtaskById, at, out ? "out" : "back"));
       return true;
     }
     if (event.ctrlKey) return false;
