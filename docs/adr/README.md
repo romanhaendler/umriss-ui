@@ -46,5 +46,6 @@ half a later reader needs most. Exactly one is superseded today.
 | [0030](0030-a-chart-is-one-tab-stop-that-walks-its-hits.md) | A chart is one tab stop that walks its hits | accepted | charts |
 | [0031](0031-the-charts-carry-their-own-wording.md) | The charts carry their own wording | accepted | charts, language |
 | [0032](0032-what-umriss-is-not.md) | What umriss is not | accepted | scope |
+| [0033](0033-the-schedules-keys-walk-past-the-view.md) | The schedule's keys walk past the view | accepted | schedule |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).

@@ -48,6 +48,9 @@ export interface Spoken {
   readonly target: ScheduleTooltipTarget;
   /** The lane's id, for its header's label; null for a transport. */
   readonly lane: string | null;
+  /** Counts the readouts: the same words twice - a key at the end of a lane -
+      are written anew, so that the live region speaks them again. */
+  readonly count: number;
 }
 
 export class SceneKeys {
@@ -109,7 +112,17 @@ export class SceneKeys {
     const at = this.active();
     /* From a transport the walk goes on from the stop it left. */
     const from = at === null ? null : at.kind === "subtask" ? at.id : (data.transports.find((t) => t.id === at.id)?.from ?? null);
-    const to = stepSubtask(walkRows(view.rows, data.subtasks), from, move, this.host.visibleDomain());
+    let rows = walkRows(view.rows, data.subtasks);
+    /* Coming in, the lanes scrolled into view are where to start: entering
+       on a row scrolled away would scroll the plan back under the reader. */
+    if (from === null) {
+      const shown = rows.filter((row) => {
+        const box = view.boxById.get(row[0]!.id);
+        return box !== undefined && box.y + box.height > 0 && box.y < view.height;
+      });
+      if (shown.length > 0) rows = shown;
+    }
+    const to = stepSubtask(rows, from, move, this.host.visibleDomain());
     if (to !== null) this.show({ kind: "subtask", id: to.id });
   }
 
@@ -128,7 +141,11 @@ export class SceneKeys {
   private edit(event: KeyboardEvent): boolean {
     const hover = this.host.gestures.hover;
     const direction = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
-    if (direction === 0 || hover.kind !== "subtask") return false;
+    if (direction === 0) return false;
+    /* From here on the key is the plot's even where it proposes nothing:
+       Alt+Left/Right is the browser's Back and Forward, and a planner at the
+       end of a lane must not be taken off the page. */
+    if (hover.kind !== "subtask") return true;
     const s = hover.subtask;
     const gestures = this.host.gestures;
     const intents = this.host.view.options.intents;
@@ -144,8 +161,9 @@ export class SceneKeys {
       const to = Math.max(gestures.shifted(s.to, direction * step.step, step), s.from + Math.max(step.step, MINUTE));
       if (to !== s.to) intent = { kind: "stretch", subtask: s.id, from: s.from, to };
     }
-    if (intent === null) return false;
-    this.host.handlers().onIntent?.(intent);
+    /* An edit is the keys' act, on a subtask the pointer showed them too. */
+    gestures.byKeyboard = true;
+    if (intent !== null) this.host.handlers().onIntent?.(intent);
     /* The caller applies it, or not; either way the readout says what stands. */
     this.scheduleReadout();
     return true;
@@ -232,7 +250,7 @@ export class SceneKeys {
       if (!this.host.gestures.byKeyboard) return;
       const target = this.host.data.tooltipTargetFor(hover);
       if (target === null) return;
-      this.spoken = { target, lane: hover.kind === "subtask" ? hover.subtask.lane : null };
+      this.spoken = { target, lane: hover.kind === "subtask" ? hover.subtask.lane : null, count: (this.spoken?.count ?? 0) + 1 };
       this.host.spokenChanged();
     }, READOUT_REST);
   }
