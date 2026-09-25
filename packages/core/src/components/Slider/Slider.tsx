@@ -29,17 +29,22 @@ export interface SliderProps
       (`aria-valuetext`). Default: the number in the formats' notation, with
       as many decimals as the step has. */
   format?: (value: number) => string;
-  /** The value in mono beside the track. */
+  /** The value in mono beside the track. Default: true */
   showValue?: boolean;
 }
 
 /** Decimals of a step, so that 0.1 + 0.2 stays 0.3 on the track. */
 const decimalsOf = (step: number) => (String(step).split(".")[1] ?? "").length;
 
+/** The last value on the step grid - `max` itself only where it lies on the
+    grid; the browser would otherwise show the thumb a step below the value. */
+const topOf = (min: number, max: number, step: number) =>
+  Number((min + Math.floor((max - min) / step + 1e-9) * step).toFixed(decimalsOf(step)));
+
 /** A value moved onto the step grid from `min`, and inside the bounds. */
 function snap(value: number, min: number, max: number, step: number): number {
-  const onGrid = min + Math.round((value - min) / step) * step;
-  return Math.min(max, Math.max(min, Number(onGrid.toFixed(decimalsOf(step)))));
+  const onGrid = Number((min + Math.round((value - min) / step) * step).toFixed(decimalsOf(step)));
+  return Math.min(topOf(min, max, step), Math.max(min, onGrid));
 }
 
 /** Where a key takes the value, per the APG slider pattern; `undefined` for
@@ -61,7 +66,7 @@ function keyed(key: string, value: number, min: number, max: number, step: numbe
     case "Home":
       return min;
     case "End":
-      return max;
+      return topOf(min, max, step);
     default:
       return undefined;
   }
@@ -84,7 +89,7 @@ export const Slider = forwardRef<HTMLInputElement, SliderProps>(function Slider(
     step = 1,
     marks,
     format,
-    showValue = false,
+    showValue = true,
     className,
     style,
     id,
@@ -125,6 +130,8 @@ export const Slider = forwardRef<HTMLInputElement, SliderProps>(function Slider(
           type="range"
           id={id ?? field?.id}
           aria-describedby={rest["aria-describedby"] ?? field?.describedBy}
+          aria-invalid={field?.invalid || undefined}
+          aria-required={field?.required || undefined}
           aria-valuetext={text}
           disabled={disabled}
           className={styles.range}

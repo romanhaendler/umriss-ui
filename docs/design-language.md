@@ -60,7 +60,9 @@ origin** - the edge of the panel facing its trigger, computed from the same
 side and alignment that position it (`motionOrigin` in `position.ts`): a menu
 below its button grows from its top left, a flipped one from its bottom, a
 tooltip from the edge towards its trigger, a toast out of the corner it
-stands in, a modal - which hangs from no trigger - from its centre. Panels,
+stands in, a modal - which hangs from no trigger - from its centre, a drawer
+from the edge it stands at, sliding the whole way in on
+`--u-duration-medium`. Panels,
 tooltips and the modal enter by scale (0.96) and opacity, a toast rises 8 px
 as it grows; they leave faster (`--u-duration-exit-fast`
 100 ms for panels, `--u-duration-exit` 160 ms for a sheet) on `--u-ease-exit`,
@@ -69,7 +71,9 @@ the way they came - a symmetrical exit makes a surface feel sluggish. The
 native `<dialog>` is choreographed for it instead of being closed hard,
 Escape included. *Continuous process*: the spinner turns
 (`--u-duration-spin`, `--u-ease-steady`), skeletons shimmer instead of pulsing
-(`--u-duration-shimmer`, `--u-ease-swell`). And the details: the tab
+(`--u-duration-shimmer`, `--u-ease-swell`), and an indeterminate progress bar
+sweeps its track (`--u-duration-sweep`) - under reduced motion slower, never
+still, since a bar at rest would say the task has stopped. And the details: the tab
 underline glides to the active tab, cards collapse with an animated height
 (the content stays in the DOM and is made inert), the checkbox draws its tick
 (`--u-duration-draw`, 320 ms - slow enough to watch the line), and toasts

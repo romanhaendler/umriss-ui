@@ -67,7 +67,6 @@ export default function APlantBrowser() {
           value={width}
           onChange={setWidth}
           format={(v) => `${v} px`}
-          showValue
         />
       </FormField>
       <Card>

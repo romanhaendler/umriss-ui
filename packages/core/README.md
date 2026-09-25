@@ -165,18 +165,19 @@ The table and the alarm list are not part of this package. They live in
    have none: `Popover` renders into a portal, `Tooltip` around the caller's
    child, `Menu`, `ContextMenu` and `ToastProvider` are composed of other
    parts, and the providers render no element at all. The ref goes
-   to the element a caller lays out: the `<dialog>` of `Modal`, `ConfirmDialog`
-   and `CommandPalette`, the field's wrapper of the pickers and the combobox
-   family, the `role="tree"` list of `TreeView`. The native fields that wear a
-   wrapper (`Checkbox`, `NumberInput`, `Select`, a clearable `Input`) put the
-   class on the wrapper and ref and rest on the control. The component's own
+   to the element a caller lays out: the `<dialog>` of `Modal`, `Drawer`,
+   `ConfirmDialog` and `CommandPalette`, the field's wrapper of the pickers
+   and the combobox family, the `role="tree"` list of `TreeView`. The native
+   fields that wear a wrapper (`Checkbox`, `Switch`, `Slider`, `NumberInput`,
+   `Select`, a clearable `Input`) put the class on the wrapper and ref and rest
+   on the control. The component's own
    `role`, the `aria-*` it computes and its handlers are not replaced by
    `rest`: a caller's handler runs first and can `preventDefault`. Held by
    `tests-unit/passthrough.test.tsx`, which renders every export.
 2. Support controlled **and** uncontrolled use (`value`/`defaultValue`).
    Deliberately controlled only: `Combobox` and `MultiSelect` – the field keeps
-   no second state beside the caller's – as well as `Modal` and `CommandPalette`,
-   because opening is the caller's decision.
+   no second state beside the caller's – as well as `Modal`, `Drawer` and
+   `CommandPalette`, because opening is the caller's decision.
 3. Keyboard operation and `aria` attributes are part of the definition of done.
 4. No business logic: a mapping such as "status X is green" is the application's
    to make.

@@ -16,7 +16,10 @@ export interface BreadcrumbEntry {
   href?: string;
   /** Routing is the caller's: given, it runs instead of the browser's
       navigation - on the link and in the menu of folded levels. A level with
-      `onSelect` and no `href` is a button. */
+      `onSelect` and no `href` is a button. In the menu a level is a menu
+      entry, not a link: an `href` alone is followed there by
+      `location.assign`, without a new tab or a middle click - whoever needs
+      those routes through `onSelect`. */
   onSelect?: () => void;
 }
 
@@ -118,7 +121,7 @@ export const Breadcrumb = forwardRef<HTMLElement, BreadcrumbProps>(function Brea
                   }
                 >
                   {hidden.map((entry, i) => (
-                    <MenuItem key={i} onSelect={() => follow(entry)}>
+                    <MenuItem key={i} disabled={!entry.href && !entry.onSelect} onSelect={() => follow(entry)}>
                       {entry.label}
                     </MenuItem>
                   ))}

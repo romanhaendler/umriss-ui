@@ -60,7 +60,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     .sweep {
-      animation-duration: 4s;
+      animation-duration: calc(var(--u-duration-sweep) * 3);
     }
   }
 }
