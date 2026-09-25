@@ -1,28 +1,25 @@
 import { Accordion, AccordionItem, Card, CardBody, CardHeader } from "../../../src";
 
 export const title = "Several open, one locked";
+export const lead = "Set `type` to `multiple` for a reader who compares, `disabled` on a section that cannot open now, and `headingLevel` to fit the page.";
 
-/* `type="multiple"` lets sections stand open side by side - for a reader who
-   compares. A `disabled` section keeps its header in the list and does not
-   open; the arrows pass it by. `headingLevel` fits the headers into the page's
-   outline: under a card's title they are one level down. */
 export default function SeveralOpen() {
   return (
     <Card style={{ maxWidth: 560 }}>
-      <CardHeader title="Line 3 - documents" />
+      <CardHeader title="Checkout · runbook" />
       <CardBody>
-        <Accordion type="multiple" defaultValue={["sop", "hazards"]} headingLevel={4}>
-          <AccordionItem value="sop" title="Standard operating procedure">
-            Start the line from the operator panel, never from the filler's local panel.
+        <Accordion type="multiple" defaultValue={["symptoms", "first-steps"]} headingLevel={4}>
+          <AccordionItem value="symptoms" title="Symptoms">
+            p95 latency above 300 ms, card payments failing with a timeout at the provider.
           </AccordionItem>
-          <AccordionItem value="hazards" title="Hazards">
-            Hot surfaces at the pasteuriser up to 85 °C. Hearing protection at the capper.
+          <AccordionItem value="first-steps" title="First steps">
+            Cap payment retries at one, then check the provider's status page.
           </AccordionItem>
           <AccordionItem value="audit" title="Audit trail" disabled>
-            Only for the quality department.
+            Only for the Payments team's leads.
           </AccordionItem>
-          <AccordionItem value="contacts" title="Contacts">
-            Shift lead: extension 2310. Maintenance on call: extension 2399.
+          <AccordionItem value="escalation" title="Escalation">
+            After 30 minutes page the secondary; after an hour, the head of engineering.
           </AccordionItem>
         </Accordion>
       </CardBody>
