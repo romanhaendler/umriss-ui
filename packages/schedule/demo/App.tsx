@@ -32,7 +32,7 @@ export function App() {
       demo={DEMO}
       brand="Umriss Schedule"
       version={manifest.version}
-      sentence="The parts of @umriss-ui/schedule with the code that produces them: subtasks on lanes over time, dependencies between them, findings that are drawn and never resolved, and editing that reports intents instead of changing data. Every page shows running examples together with their source, and the props tables generated from it."
+      sentence="Work on lanes over time, for the screens where people plan who does what and when: rotas, tours, sprints. Each scenario below is a screen as an application would ship it, with its dependencies, blocked time and findings, and the code that builds it."
       actions={
         <Button size="sm" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
           {theme === "dark" ? "Light theme" : "Dark theme"}
