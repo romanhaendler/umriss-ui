@@ -142,14 +142,34 @@ export const OUTLINE: readonly Rubric[] = [
       {
         id: "typography",
         name: "Typography",
-        sentence: "Text, Heading and Link - the three pieces every surface draws its type from.",
+        sentence: "Sets paragraphs, headings and links on the library's type scale, so a screen of your own reads like the components around it. Reach for it wherever you would otherwise style text by hand.",
+        about: [
+          "A heading's outline level and its size are independent: choose the level for the page's structure, the size for the eye.",
+          "`Text` renders a `p`; inside a line, render it `as` a `span`.",
+        ],
+        alternatives: [
+          { when: "Text only a screen reader should hear", use: "visuallyhidden" },
+          { when: "A figure read against its limits, with unit and verdict", use: "stat" },
+          { when: "A short status word in colour", use: "badge" },
+        ],
+        limits: [
+          "No truncation and no line length: both depend on the column, which only the application knows.",
+          "No prose styles for lists, quotes or rich text (ADR-0032).",
+          "`Link` renders a plain `a` and knows no router; pass it the address your router resolves.",
+        ],
         types: ["TextProps", "HeadingProps", "LinkProps"],
         exports: ["Text", "Heading", "Link"],
       },
       {
         id: "visuallyhidden",
         name: "VisuallyHidden",
-        sentence: "Text only the screen reader hears - and which becomes visible as soon as it takes focus.",
+        sentence: "Text a screen reader announces but the eye does not see (also called screen-reader-only or sr-only). Reach for it when a visible label is clear from its surroundings but not on its own, and for a skip link.",
+        alternatives: [
+          { when: "A hint every user should be able to see", use: "tooltip" },
+          { when: "A button that shows only an icon", use: "an `aria-label` on the button" },
+        ],
+        keys: [{ key: "Tab", action: "Reaches a `focusable` one and shows it while it has focus." }],
+        limits: ["It hides from the eye only; to hide something from everyone, do not render it."],
         types: ["VisuallyHiddenProps"],
         exports: ["VisuallyHidden"],
       },
