@@ -12,7 +12,7 @@ export interface LineText {
   /** The unit as shown - "%" for a percentage - where there is one and a
       number to stand beside. */
   unit?: string;
-  /** "= Run time ÷ Planned production time", or "15 operands" where there
+  /** "= Error requests ÷ Total requests", or "15 operands" where there
       are more than can be written out; absent on a given or reference. */
   names?: string;
   /** "below target 85 %", where a target is set and the number known. */

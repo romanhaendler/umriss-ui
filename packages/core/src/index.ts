@@ -46,7 +46,7 @@ export * from "./lib/language";
 export * from "./lib/provider";
 export * from "./lib/glyphs";
 
-/* The building blocks of the plant view stand at the end on purpose and not
+/* The building blocks of the monitoring view stand at the end on purpose and not
    alphabetically in between: the order of the exports decides in which order
    the module styles land in the bundle, and two rules of equal specificity are
    decided by it. Filed in here, they moved the table by two pixels – made

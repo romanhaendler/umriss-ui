@@ -13,7 +13,7 @@ export interface ConfirmDialogProps
   /** Agreeing. The dialog does not close itself from that – whoever wants to
       show a confirmation in progress still needs it. */
   onConfirm: () => void;
-  /** The question, as a statement: "Delete batch 2041?". */
+  /** The question, as a statement: "Delete invoice 2041?". */
   title: ReactNode;
   /** What about it cannot be taken back. The most important line of the
       dialog. */

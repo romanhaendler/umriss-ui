@@ -21,7 +21,7 @@
    and deserves its own" - and ADR-0024 is that decision.
 
    The clock stays 24-hour. `en-GB` is chosen over `en-US` for exactly that:
-   a plant screen that writes 3 pm where 15:00 was meant is read wrongly once
+   a screen that writes 3 pm where 15:00 was meant is read wrongly once
    and distrusted afterwards.
 
    Formatters are expensive. Each set builds them once when it is created, not
@@ -140,7 +140,7 @@ export function formatsFor(locale: string): Formats {
     compareText: (a, b) => collator.compare(a, b),
     relative: (ms) => {
       // The coarsest unit that still yields at least one: "2 hours ago" reads
-      // better than "137 minutes ago", and in a control room the impression of
+      // better than "137 minutes ago", and on a monitoring screen the impression of
       // magnitude counts for more than the exact number.
       const seconds = Math.max(0, Math.round(ms / 1000));
       for (const [unit, size] of RELATIVE_STEPS) {

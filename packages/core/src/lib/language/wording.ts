@@ -251,7 +251,7 @@ export interface Wording {
   /** Placeholder and accessible name of the search field. */
   tableSearchPlaceholder: string;
   tableSearchLabel: string;
-  /** The filter button of a column: "Filter Line". */
+  /** The filter button of a column: "Filter Region". */
   filterColumn: (column: string) => string;
   /** The selection of one row, named after its row header. */
   selectRow: (row: string) => string;
@@ -269,7 +269,7 @@ export interface Wording {
   /** The menu holding a row's actions. */
   rowActionsMenu: (row: string) => string;
   /** The editor of a cell in a table's grid mode, named after its column and
-      its row: "Edit Setpoint: Pump 1". */
+      its row: "Edit Budget: Marketing". */
   editCell: (column: string, row: string) => string;
   /** What the screen reader hears for an absent value. Visibly a muted dash
       stands there. */
@@ -290,7 +290,7 @@ export interface Wording {
   /** The grouping section of the column menu, and the menu entry per column. */
   grouping: string;
   groupBy: (label: string) => string;
-  /** The grouping's tag in the table toolbar: "Grouped by" Line › Customer. */
+  /** The grouping's tag in the table toolbar: "Grouped by" Region › Customer. */
   groupedBy: string;
   removeGrouping: string;
   removeGroupingLevel: (label: string) => string;
@@ -321,9 +321,9 @@ export interface Wording {
   treeNoMatches: string;
   /** Group name of the conditions in the table toolbar. */
   conditions: string;
-  /** The button that removes a condition: "Remove Line: Line 1, Line 2". */
+  /** The button that removes a condition: "Remove Region: EU, US". */
   removeConditionNamed: (label: string, value: string) => string;
-  /** The condition itself, which opens its filter: "Edit Line: Line 1, Line 2". */
+  /** The condition itself, which opens its filter: "Edit Region: EU, US". */
   editConditionNamed: (label: string, value: string) => string;
   /** The remainder of a long list in a condition: "+1". */
   moreValues: (count: number, formatted: string) => string;
