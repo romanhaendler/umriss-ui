@@ -406,13 +406,7 @@ describe("Command palette - the announcement and the build-up", () => {
     expect(group.querySelectorAll('[role="option"]').length).toBe(2);
   });
 
-  it("announces the number of finds when it changes", () => {
-    render(<Harness />);
-    type("table");
-    expect(screen.getByRole("status").textContent).toBe("2 finds");
-    type("tablef");
-    expect(screen.getByRole("status").textContent).toBe("1 find");
-  });
+  // What it announces stands with the other lists in listboxAnnouncements.test.tsx.
 
   it("marks the matched characters", () => {
     // A find that no substring explains must let one see why it is one.
