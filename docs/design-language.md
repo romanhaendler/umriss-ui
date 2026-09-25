@@ -33,7 +33,13 @@ paper on a table. Interactive elements stay flat.
 **Focus.** A crisp accent edge of two pixels (`--u-focus-ring`), the same on
 every component – no glow, and no browser outline beside it. On a field it lies
 where the field's edge lies, so the edge seems to grow; an invalid field keeps
-its danger colour (`--u-focus-ring-danger`). Unmistakable, never soft.
+its danger colour (`--u-focus-ring-danger`). Unmistakable, never soft. Beside
+every ring stands one outline, `2px solid transparent`: it paints nothing, but
+forced colours (the Windows contrast mode) drop every box-shadow and paint the
+outline in a system colour, so the ring stays where it was. That outline is the
+one thing a focus rule may draw besides the ring token, and every rule that
+draws the ring has to draw it - the stylesheet check holds both
+(forced-colors 01).
 
 **States.** One logic by means, not by values (the **interaction-state
 canon**): hover changes the surface - a quiet key sinks to
@@ -46,6 +52,25 @@ has no surface of its own - a tab, a link, a header's sort label, a segment -
 darkens its type instead, and says so where it does. The stylesheet check
 holds the three means that can be read off a rule; the exceptions stand there
 with their reasons.
+
+**Forced colours.** The Windows contrast mode repaints every colour with a
+system colour and drops every box-shadow - and edges, depth and rings are all
+box-shadows here. So every edge and every card's or overlay's depth carries
+`outline: 1px solid transparent` where the edge lies (the stylesheet check
+holds it), and a state that was a ground alone takes a system colour inside
+`@media (forced-colors: active)`: a chosen or active item an outline in
+`Highlight` (inside it, two pixels; a band one), a fill that is the value -
+progress, a meter, a slider's track, a switch that is on, a tab's underline -
+`Highlight`, a mark that was ink - a checkbox's dash, a radio's dot, a divider,
+a group's share bar, a pinned block's edge - `CanvasText`. A system colour an
+author names survives forced colours; nothing else does, and a gradient not at
+all - the slider's track takes `forced-color-adjust: none` to keep its
+gradient, in system colours. A verdict keeps its word and its glyph. A tone
+told by colour alone - the meter's - is not kept: FC3 keeps a colour only
+where a word stands beside it, and no such chip needed it yet.
+The canvases paint themselves in the system colours (the charts' theme, the
+schedule's `FORCED`). The finer settling is the polish round's
+(forced-colors 04).
 
 **Motion.** Motion explains a change of state; it does not decorate, and
 every motion has a name in `tokens.css` - a motion that fits none of them wants

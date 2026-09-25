@@ -83,6 +83,7 @@
 
   .secondary {
     background: var(--u-color-surface);
+    outline: 1px solid transparent;
     box-shadow: var(--u-edge-strong);
     color: var(--u-color-text);
   }
@@ -127,5 +128,13 @@
     .button:active:not(:disabled) {
       transform: none;
     }
+  }
+
+  /* Forced colours drop the filled variants' ground with every other colour
+     (forced-colors 02): the outline where the edge would lie is what still
+     says "button", on every variant. `.secondary` repeats it beside its edge
+     only because the stylesheet check reads a rule at a time. */
+  .button {
+    outline: 1px solid transparent;
   }
 }

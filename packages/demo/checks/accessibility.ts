@@ -14,6 +14,14 @@ import type AxeBuilder from "@axe-core/playwright";
    opinions as errors gets switched off rather than read. */
 export const STANDARDS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"];
 
+/* The one rule switched off, and only under forced colours (forced-colors
+   02): there every pair is the system's, chosen by whoever chose the contrast
+   theme, so a finding could only be the theme's. And axe reads a text's
+   colour from `-webkit-text-fill-color`, which Chromium resolves against the
+   UNFORCED colour - the dark theme's primary button, white on black on the
+   screen, came back as #171717 on black. The unforced runs check contrast. */
+export const FORCED_BY_THE_SYSTEM = ["color-contrast"];
+
 /**
  * Individually justified exceptions - **never** blanket ones.
  *

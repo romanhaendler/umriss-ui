@@ -8,6 +8,7 @@
     width: 100%;
     font-size: var(--u-text-sm);
     background: var(--u-color-surface);
+    outline: 1px solid transparent;
     box-shadow: var(--u-edge);
     border-radius: var(--u-radius-md);
     overflow: hidden;
@@ -142,7 +143,7 @@
   /* The first thing this component puts into the tab order, so it is also the
      first that has to show the focus itself (ADR-0021) - by the ring alone. */
   .chevron:focus-visible {
-    outline: none;
+    outline: 2px solid transparent;
     box-shadow: var(--u-focus-ring);
   }
 
@@ -187,6 +188,7 @@
   }
 
   .plot:focus-visible > .focusRing {
+    outline: 2px solid transparent;
     box-shadow: var(--u-focus-ring);
   }
 
@@ -244,6 +246,7 @@
     padding: var(--u-space-2) var(--u-space-3);
     border-radius: var(--u-radius-sm);
     background: var(--u-color-surface);
+    outline: 1px solid transparent;
     box-shadow: var(--u-shadow-overlay);
     color: var(--u-color-text-secondary);
     font-size: var(--u-text-xs);
@@ -306,5 +309,21 @@
 
   .barLabel[data-on="light"] {
     color: var(--u-color-text);
+  }
+
+  /* Forced colours repaint every ground with the page's and drop every
+     box-shadow (forced-colors 03): a grip's edge is an inset shadow and the
+     ghost's label an inked ground, and both would be gone from a plot that
+     paints itself in the system colours. They take outlines in the text
+     colour. */
+  @media (forced-colors: active) {
+    .grip {
+      outline: 2px solid CanvasText;
+      outline-offset: -2px;
+    }
+
+    .ghostLabel {
+      outline: 1px solid CanvasText;
+    }
   }
 }

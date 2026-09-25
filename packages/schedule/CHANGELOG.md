@@ -19,6 +19,13 @@ moves from here under the rule above.
 
 ### Added
 
+- **The Windows contrast mode** (`forced-colors: active`, forced-colors 03).
+  The browser forces the page around the plot and none of its pixels, so the
+  plot paints itself in the system colours, as the charts do: the work in the
+  text colour, lines in `GrayText`, overlaps, late transports and the present
+  in the selection colour, and the **Active subtask** as an outline in the
+  selection colour around its bar. The frame, the tooltip, the grips and the
+  ghost's label keep an edge. Nothing changes outside forced colours.
 - **`docs/llms-full.md`**, the package's documentation as one Markdown file for
   a coding agent, in the npm package and pinned to its version: every demo page
   with its import line, its examples' source, its props tables and why it is

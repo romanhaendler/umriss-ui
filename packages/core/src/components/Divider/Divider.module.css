@@ -75,4 +75,12 @@
   .vertical .label {
     writing-mode: vertical-rl;
   }
+
+  /* The line is a ground, and forced colours repaint it with the page's
+     (forced-colors 02): it takes the system's text colour. */
+  @media (forced-colors: active) {
+    .divider {
+      --_color: CanvasText;
+    }
+  }
 }

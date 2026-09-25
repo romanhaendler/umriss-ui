@@ -58,4 +58,18 @@
   .sparklineDot {
     fill: var(--u-color-accent);
   }
+
+  /* The meter's track and fill are grounds, and forced colours repaint both
+     with the page's (forced-colors 02). The track takes an edge, the fill the
+     system's selection colour whatever its tone: the tone is a verdict told by
+     colour alone, and the fraction stands beside it as the figure. */
+  @media (forced-colors: active) {
+    .track {
+      outline: 1px solid CanvasText;
+    }
+
+    .fill {
+      background: Highlight;
+    }
+  }
 }
