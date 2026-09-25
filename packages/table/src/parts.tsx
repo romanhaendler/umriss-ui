@@ -11,6 +11,7 @@
 import {
   createContext,
   useContext,
+  useEffect,
   useId,
   useLayoutEffect,
   useMemo,
@@ -24,6 +25,7 @@ import type {
   MouseEvent as ReactMouseEvent,
   PointerEvent as ReactPointerEvent,
   ReactNode,
+  RefObject,
 } from "react";
 import {
   AngleGlyph,
@@ -54,6 +56,9 @@ import type { Line } from "./model/grouping";
 import { GroupLine, SpanCell } from "./groupLines";
 import { Absent, AggregateValue, aggregateIsNumeric } from "./aggregateValue";
 import { useLineMotion } from "./motion";
+import { NOT_PINNED, pinnedCell } from "./pinned";
+import type { PinnedCell } from "./pinned";
+import type { PinBlocks } from "./model/pinning";
 import styles from "./Table.module.css";
 
 /* The props as they arrive at runtime. The types at the call site (types.ts) are
@@ -71,6 +76,7 @@ interface RuntimeColumnProps {
   rowHeader?: boolean;
   numeric?: boolean;
   width?: number;
+  pin?: ColumnSpec["pin"];
   resizable?: boolean;
   sortable?: boolean;
   searchable?: boolean;
@@ -130,6 +136,7 @@ function specFrom(props: RuntimeColumnProps): ColumnSpec {
     rowHeader: props.rowHeader === true,
     rightAligned: props.numeric,
     width: props.width,
+    pin: props.pin === "start" || props.pin === "end" ? props.pin : undefined,
     resizable: props.resizable === true,
     sortable: props.sortable,
     searchable: props.searchable,
@@ -156,8 +163,6 @@ function rowName(
   if (isAbsent(value)) return wording.cellAbsentValue;
   return asText(value, header.spec.format, formats, wording) ?? hook.rowKey(row);
 }
-
-const CONTROL_CELL_WIDTH = 34;
 
 export function buildParts(registry: Registry): Parts {
   /* ---------------------------------------------------------------- Column */
@@ -343,7 +348,6 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
   const {
     selectable = false,
     stickyHeader = false,
-    stickyRowHeader = false,
     striped = false,
     density,
     maxHeight,
@@ -402,10 +406,10 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
   const snapshot = hook.publicSnapshot;
   const projection = registry.projection();
   const header = registry.rowHeader();
-  /* If the row header sticks it stands first - a sticky column in the middle
-     would stick at a place from which it wanders over its neighbours while
-     scrolling. That is decided in the registry, so that column menu and export
-     show the same order. */
+  /* Pinned columns stand in blocks at either end - a sticky column in the
+     middle would stick at a place from which it wanders over its neighbours
+     while scrolling. That is decided in the registry, so that column menu and
+     export show the same order. */
   const columns = visibleColumns(registry);
 
   const detail = registry.detail;
@@ -423,9 +427,23 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
   const dataColumns = lines ? columns.filter((e) => !grouping.includes(e.spec.id)) : columns;
 
   const controlColumns = (selectable ? 1 : 0) + (detail ? 1 : 0);
-  const columnCount = controlColumns + (spanEntry ? 1 : 0) + dataColumns.length + (actions.length > 0 ? 1 : 0);
-  const rowHeaderLeft = controlColumns * CONTROL_CELL_WIDTH;
-  const sticks = (e: ColumnEntry) => stickyRowHeader && e === header;
+  const leading = controlColumns + (spanEntry ? 1 : 0);
+  const columnCount = leading + dataColumns.length + (actions.length > 0 ? 1 : 0);
+
+  /* The pinned blocks, in cells of the head row. Whatever stands before a
+     pinned column sticks with it - the selection, the expander and the span;
+     otherwise the pinned column would stick over the gap they leave - and the
+     row actions stick behind the end block. */
+  const pins = registry.pins();
+  const startPinned = dataColumns.filter((e) => pins[e.spec.id] === "start").length;
+  const endPinned = dataColumns.filter((e) => pins[e.spec.id] === "end").length;
+  const spanPinned = spanEntry !== undefined && pins[spanEntry.spec.id] === "start";
+  const blocks: PinBlocks = {
+    start: startPinned > 0 || spanPinned ? leading + startPinned : 0,
+    end: endPinned > 0 ? endPinned + (actions.length > 0 ? 1 : 0) : 0,
+    count: columnCount,
+  };
+  const pinAt = (first: number, last = first) => pinnedCell(blocks, first, last);
 
   const rows = projection.visible;
   const footerShown = !loading && dataColumns.some((e) => e.spec.aggregate);
@@ -445,8 +463,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
       header={header}
       selectable={selectable}
       actions={actions}
-      stickyRowHeader={stickyRowHeader}
-      rowHeaderLeft={rowHeaderLeft}
+      blocks={blocks}
       columnCount={columnCount}
       rowProps={rowProps}
       baseId={baseId}
@@ -513,6 +530,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
             levelEntry={entryOf(grouping[line.group.level])}
             columns={dataColumns}
             controlColumns={controlColumns}
+            blocks={blocks}
             selectable={selectable}
             hasActions={actions.length > 0}
             total={projection.filtered}
@@ -535,6 +553,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
           levelEntry={entryOf(grouping[line.group.level])}
           columns={dataColumns}
           controlColumns={controlColumns}
+          blocks={blocks}
           selectable={selectable}
           hasActions={actions.length > 0}
           total={projection.filtered}
@@ -572,6 +591,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
       onScroll={(event) => {
         virtual?.onScroll();
         if (lines && stickyHeader) markStuck(event.currentTarget);
+        if (blocks.start || blocks.end) markUnder(event.currentTarget);
       }}
       className={styles.scroll}
       style={maxHeight ? { maxHeight } : undefined}
@@ -590,17 +610,14 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
           styles.table,
           resolvedDensity === "compact" && styles.compact,
           stickyHeader && styles.sticky,
+          (blocks.start > 0 || blocks.end > 0) && styles.pinnedTable,
           striped && styles.striped,
         )}
       >
         <thead>
           <tr aria-rowindex={virtual ? 1 : undefined}>
             {selectable && (
-              <th
-                scope="col"
-                className={cx(styles.th, styles.control, stickyRowHeader && styles.stickyCell)}
-                style={stickyRowHeader ? { left: 0 } : undefined}
-              >
+              <th scope="col" className={cx(styles.th, styles.control, pinAt(0).className)} style={pinAt(0).style}>
                 <Checkbox
                   aria-label={wording.selectAllRows}
                   checked={snapshot.selection.allSelected}
@@ -611,30 +628,27 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
             )}
             {detail && (
               <td
-                className={cx(styles.th, styles.control, stickyRowHeader && styles.stickyCell)}
-                style={stickyRowHeader ? { left: (selectable ? 1 : 0) * CONTROL_CELL_WIDTH } : undefined}
+                className={cx(styles.th, styles.control, pinAt(controlColumns - 1).className)}
+                style={pinAt(controlColumns - 1).style}
               />
             )}
             {spanEntry &&
               (registry.columnById(spanEntry.spec.id) === spanEntry ? (
-                <HeaderCell entry={spanEntry} registry={registry} hook={hook} sticky={false} left={rowHeaderLeft} />
+                <HeaderCell entry={spanEntry} registry={registry} hook={hook} pin={pinAt(controlColumns)} />
               ) : (
-                <th scope="col" className={styles.th}>
+                <th scope="col" className={cx(styles.th, pinAt(controlColumns).className)} style={pinAt(controlColumns).style}>
                   {spanEntry.spec.label}
                 </th>
               ))}
-            {dataColumns.map((e) => (
-              <HeaderCell
-                key={e.key}
-                entry={e}
-                registry={registry}
-                hook={hook}
-                sticky={sticks(e)}
-                left={rowHeaderLeft}
-              />
+            {dataColumns.map((e, i) => (
+              <HeaderCell key={e.key} entry={e} registry={registry} hook={hook} pin={pinAt(leading + i)} />
             ))}
             {actions.length > 0 && (
-              <th scope="col" className={cx(styles.th, styles.actionsCell)}>
+              <th
+                scope="col"
+                className={cx(styles.th, styles.actionsCell, pinAt(columnCount - 1).className)}
+                style={pinAt(columnCount - 1).style}
+              >
                 <VisuallyHidden>{wording.rowActions}</VisuallyHidden>
               </th>
             )}
@@ -645,31 +659,76 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
           <tfoot>
             <tr aria-rowindex={virtual ? (projection.lines ?? projection.filtered).length + 2 : undefined}>
               {Array.from({ length: controlColumns }, (_, i) => (
-                <td
-                  key={i}
-                  className={cx(styles.td, styles.control, stickyRowHeader && styles.stickyCell)}
-                  style={stickyRowHeader ? { left: i * CONTROL_CELL_WIDTH } : undefined}
-                />
+                <td key={i} className={cx(styles.td, styles.control, pinAt(i).className)} style={pinAt(i).style} />
               ))}
-              {spanEntry && <td className={styles.td} />}
-              {dataColumns.map((e) => (
+              {spanEntry && <td className={cx(styles.td, pinAt(controlColumns).className)} style={pinAt(controlColumns).style} />}
+              {dataColumns.map((e, i) => (
                 <FooterCell
                   key={e.key}
                   entry={e}
                   rows={projection.filtered}
                   formats={formats}
                   wording={wording}
-                  sticky={sticks(e)}
-                  left={rowHeaderLeft}
+                  pin={pinAt(leading + i)}
                 />
               ))}
-              {actions.length > 0 && <td className={styles.td} />}
+              {actions.length > 0 && (
+                <td className={cx(styles.td, pinAt(columnCount - 1).className)} style={pinAt(columnCount - 1).style} />
+              )}
             </tr>
           </tfoot>
         )}
       </table>
+      <PinPlacement table={tableRef} blocks={blocks} />
     </div>
   );
+}
+
+/* Where the pinned cells stick: each at the sum of the widths before it in
+   its block, read off the head row - after every render and whenever a cell
+   of a block changes its width (a font arriving, a column dragged), which
+   happens without one. A component and not a hook of the frame's: the blocks
+   are known only after the frame's early return. */
+function PinPlacement({ table: tableRef, blocks }: { table: RefObject<HTMLTableElement | null>; blocks: PinBlocks }) {
+  const { start, end } = blocks;
+  const place = () => {
+    const table = tableRef.current;
+    if (!table || (!start && !end)) return;
+    const cells = Array.from(table.tHead?.rows[0]?.cells ?? []);
+    let offset = 0;
+    for (let i = 0; i < start; i++) {
+      table.style.setProperty(`--u-table-pin-start-${i}`, `${offset}px`);
+      offset += cells[i]?.getBoundingClientRect().width ?? 0;
+    }
+    offset = 0;
+    for (let i = 0; i < end; i++) {
+      table.style.setProperty(`--u-table-pin-end-${i}`, `${offset}px`);
+      offset += cells[cells.length - 1 - i]?.getBoundingClientRect().width ?? 0;
+    }
+    if (table.parentElement) markUnder(table.parentElement);
+  };
+  useLayoutEffect(place);
+  useEffect(() => {
+    const table = tableRef.current;
+    if (!table || (!start && !end) || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(place);
+    const cells = Array.from(table.tHead?.rows[0]?.cells ?? []);
+    for (const cell of [...cells.slice(0, start), ...cells.slice(cells.length - end)]) observer.observe(cell);
+    /* The scroll area too: whether content lies under a block changes with its width. */
+    if (table.parentElement) observer.observe(table.parentElement);
+    return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `place` reads the table afresh; the cells change with the blocks
+  }, [tableRef, start, end, blocks.count]);
+  return null;
+}
+
+/* Whether content lies under a pinned block - the block's shadow shows only
+   then: under the start block once scrolled away from the start, under the end
+   block until scrolled to the end. */
+function markUnder(scroller: HTMLElement) {
+  const room = scroller.scrollWidth - scroller.clientWidth;
+  scroller.toggleAttribute("data-under-start", scroller.scrollLeft > 0.5);
+  scroller.toggleAttribute("data-under-end", scroller.scrollLeft < room - 0.5);
 }
 
 /* A group header that sticks gets its shadow step: it sticks when it stands higher than
@@ -690,14 +749,12 @@ function HeaderCell({
   entry,
   registry,
   hook,
-  sticky,
-  left,
+  pin,
 }: {
   entry: ColumnEntry;
   registry: Registry;
   hook: HookSnapshot;
-  sticky: boolean;
-  left: number;
+  pin: PinnedCell;
 }) {
   const { spec } = entry;
   const snapshot = hook.publicSnapshot;
@@ -824,10 +881,10 @@ function HeaderCell({
       aria-sort={sortable ? ariaSort : undefined}
       tabIndex={spec.resizable && !sortable ? 0 : undefined}
       onKeyDown={handleKeyDown}
-      className={cx(styles.th, rightAligned && styles.numeric, sticky && styles.stickyCell)}
+      className={cx(styles.th, rightAligned && styles.numeric, pin.className)}
       style={{
         ...(width !== undefined ? { width } : {}),
-        ...(sticky ? { left } : {}),
+        ...pin.style,
       }}
     >
       {withFilter ? (
@@ -868,8 +925,7 @@ function Row({
   header,
   selectable,
   actions,
-  stickyRowHeader,
-  rowHeaderLeft,
+  blocks,
   columnCount,
   rowProps,
   baseId,
@@ -890,8 +946,7 @@ function Row({
   header: ColumnEntry | undefined;
   selectable: boolean;
   actions: ReturnType<Registry["actions"]["ordered"]>;
-  stickyRowHeader: boolean;
-  rowHeaderLeft: number;
+  blocks: PinBlocks;
   columnCount: number;
   rowProps: TableProps<unknown>["rowProps"];
   baseId: string;
@@ -909,6 +964,9 @@ function Row({
 
   const virtual = absolute !== undefined;
   const group = line ? (line.span ?? line.parents.at(-1))! : undefined;
+  const controls = (selectable ? 1 : 0) + (detail ? 1 : 0);
+  const leading = controls + (spanEntry ? 1 : 0);
+  const pinAt = (at: number) => pinnedCell(blocks, at);
 
   return (
     <>
@@ -929,10 +987,7 @@ function Row({
         aria-rowindex={virtual ? absolute + 2 : undefined}
       >
         {selectable && (
-          <td
-            className={cx(styles.td, styles.control, stickyRowHeader && styles.stickyCell)}
-            style={stickyRowHeader ? { left: 0 } : undefined}
-          >
+          <td className={cx(styles.td, styles.control, pinAt(0).className)} style={pinAt(0).style}>
             <Checkbox
               aria-label={wording.selectRow(name)}
               checked={snapshot.selection.isSelected(key)}
@@ -941,10 +996,7 @@ function Row({
           </td>
         )}
         {detail && (
-          <td
-            className={cx(styles.td, styles.control, stickyRowHeader && styles.stickyCell)}
-            style={stickyRowHeader ? { left: (selectable ? 1 : 0) * CONTROL_CELL_WIDTH } : undefined}
-          >
+          <td className={cx(styles.td, styles.control, pinAt(controls - 1).className)} style={pinAt(controls - 1).style}>
             <button
               type="button"
               aria-expanded={open}
@@ -958,22 +1010,29 @@ function Row({
           </td>
         )}
         {line && line.span && (
-          <SpanCell line={{ ...line, span: line.span }} entry={spanEntry} selectable={selectable} hook={hook} formats={formats} wording={wording} />
+          <SpanCell
+            line={{ ...line, span: line.span }}
+            entry={spanEntry}
+            selectable={selectable}
+            pin={pinAt(controls)}
+            hook={hook}
+            formats={formats}
+            wording={wording}
+          />
         )}
-        {columns.map((e) => (
+        {columns.map((e, i) => (
           <Cell
             key={e.key}
             entry={e}
             row={row}
             kind={registry.kindOf(e, hook.rows)}
-            sticky={stickyRowHeader && e === header}
-            left={rowHeaderLeft}
+            pin={pinAt(leading + i)}
             formats={formats}
             wording={wording}
           />
         ))}
         {actions.length > 0 && (
-          <td className={cx(styles.td, styles.actionsCell)}>
+          <td className={cx(styles.td, styles.actionsCell, pinAt(columnCount - 1).className)} style={pinAt(columnCount - 1).style}>
             <RowActionsCell actions={actions} row={row} name={name} wording={wording} />
           </td>
         )}
@@ -993,16 +1052,14 @@ function Cell({
   entry,
   row,
   kind,
-  sticky,
-  left,
+  pin,
   formats,
   wording,
 }: {
   entry: ColumnEntry;
   row: unknown;
   kind: ReturnType<Registry["kindOf"]>;
-  sticky: boolean;
-  left: number;
+  pin: PinnedCell;
   formats: Formats;
   wording: Wording;
 }) {
@@ -1025,8 +1082,8 @@ function Cell({
   return (
     <Tag
       scope={spec.rowHeader ? "row" : undefined}
-      className={cx(styles.td, rightAligned && styles.numeric, spec.rowHeader && styles.rowHeader, sticky && styles.stickyCell)}
-      style={sticky ? { left } : undefined}
+      className={cx(styles.td, rightAligned && styles.numeric, spec.rowHeader && styles.rowHeader, pin.className)}
+      style={pin.style}
     >
       {content}
     </Tag>
@@ -1038,21 +1095,18 @@ function FooterCell({
   rows,
   formats,
   wording,
-  sticky,
-  left,
+  pin = NOT_PINNED,
 }: {
   entry: ColumnEntry;
   rows: readonly unknown[];
   formats: Formats;
   wording: Wording;
-  sticky: boolean;
-  left: number;
+  pin?: PinnedCell;
 }) {
-  const style = sticky ? { left } : undefined;
-  if (!entry.spec.aggregate) return <td className={cx(styles.td, sticky && styles.stickyCell)} style={style} />;
+  if (!entry.spec.aggregate) return <td className={cx(styles.td, pin.className)} style={pin.style} />;
   const kind = typeof entry.spec.aggregate === "function" ? "own" : entry.spec.aggregate;
   return (
-    <td className={cx(styles.td, aggregateIsNumeric(entry, rows) && styles.numeric, sticky && styles.stickyCell)} style={style} data-footer={kind}>
+    <td className={cx(styles.td, aggregateIsNumeric(entry, rows) && styles.numeric, pin.className)} style={pin.style} data-footer={kind}>
       <AggregateValue entry={entry} rows={rows} formats={formats} wording={wording} signed />
     </td>
   );

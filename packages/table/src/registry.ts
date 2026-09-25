@@ -41,6 +41,8 @@ import type { Format, ValueKind } from "./values";
 import type { AggregateColumn, AggregateKind, DatePeriod, GroupLevel } from "./model/grouping";
 import { MOST_LEVELS, periodStart, rowsOf } from "./model/grouping";
 import { filterOf } from "./columnFilter";
+import { declaredPins, inPinOrder } from "./model/pinning";
+import type { Pin, Pins } from "./model/pinning";
 import type { FilterSpec } from "./columnFilter";
 
 /* --- Specs ------------------------------------------------------------------- */
@@ -63,6 +65,7 @@ export interface ColumnSpec {
   rowHeader: boolean;
   rightAligned?: boolean;
   width?: number;
+  pin?: Pin;
   resizable: boolean;
   sortable?: boolean;
   searchable?: boolean;
@@ -119,6 +122,8 @@ export interface HookSnapshot {
   rowKey: (row: unknown) => string;
   /** The provider's formats - the text comparison of the sort comes from there. */
   formats: Formats;
+  /** The pins the user chose - absent while the declared ones hold. */
+  pins: Pins | null;
 }
 
 /* --- An ordered list of entries ----------------------------------------------- */
@@ -172,6 +177,7 @@ const signatureOf = (a: ColumnSpec): string =>
     a.rowHeader,
     a.rightAligned,
     a.width,
+    a.pin,
     a.resizable,
     a.sortable,
     a.searchable,
@@ -201,8 +207,7 @@ export class Registry {
   /** How many `RowActions` stand right now. */
   private actionGroups = new Set<string>();
 
-  /** Whether the row header column sticks - it then stands first, on screen, in
-      the column menu and in the export alike. */
+  /** Whether the row header column sticks - `pin: "start"` on it. */
   stickyRowHeader = false;
 
   /* Without a pagination bar the table does not page: one that stops quietly at
@@ -340,13 +345,23 @@ export class Registry {
     this.structure++;
   }
 
-  /** Puts the row header first when it sticks - the one place where that is
-      decided, for screen, column menu and export. */
-  withStickyHeaderFirst<T extends { id: string }>(columns: readonly T[]): T[] {
-    const header = this.rowHeader();
-    if (!this.stickyRowHeader || !header) return [...columns];
-    const first = columns.find((s) => s.id === header.spec.id);
-    return first ? [first, ...columns.filter((s) => s !== first)] : [...columns];
+  /** What the columns of this pass declare. */
+  declaredPins(): Pins {
+    return declaredPins(
+      this.orderedColumns().map((e) => ({ id: e.spec.id, pin: e.spec.pin })),
+      this.stickyRowHeader ? this.rowHeader()?.spec.id : undefined,
+    );
+  }
+
+  /** The pins that hold: the user's choice, otherwise the declaration. */
+  pins(): Pins {
+    return this.hook?.pins ?? this.declaredPins();
+  }
+
+  /** The columns with the pinned blocks at either end - the one place where
+      that is decided, for screen, column menu and export. */
+  inPinOrder<T extends { id: string }>(columns: readonly T[]): T[] {
+    return inPinOrder(columns, this.pins());
   }
 
   /** The columns in JSX order, the first one per id. */

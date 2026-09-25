@@ -153,16 +153,19 @@ export function ColumnMenu({ of }: ColumnMenuProps) {
   if (!connection) return null;
   const { registry, snapshot } = connection;
   const hook = registry.hook!;
-  const ordered = registry.withStickyHeaderFirst(
-    orderColumns(registry.modelColumns(hook.rows, hook.formats), snapshot.order),
-  );
-  /* A sticky row header stands first and stays there; nothing goes before it. */
-  const pinned = registry.stickyRowHeader ? ordered[0]?.hideable === false : false;
+  const ordered = registry.inPinOrder(orderColumns(registry.modelColumns(hook.rows, hook.formats), snapshot.order));
+  const pins = registry.pins();
+  /* A column moves inside its block: past the edge of a block it would only
+     be put back where its pin keeps it. */
+  const movable = (index: number, step: -1 | 1) => {
+    const target = ordered[index + step];
+    return target !== undefined && pins[target.id] === pins[ordered[index]!.id];
+  };
 
   const move = (index: number, step: -1 | 1) => {
     const ids = ordered.map((s) => s.id);
     const target = index + step;
-    if (target < 0 || target >= ids.length) return;
+    if (!movable(index, step)) return;
     [ids[index], ids[target]] = [ids[target]!, ids[index]!];
     snapshot.setOrder(ids);
     setFocusAfter({ id: ordered[index]!.id, direction: step < 0 ? "forward" : "backward" });
@@ -207,7 +210,7 @@ export function ColumnMenu({ of }: ColumnMenuProps) {
                   className={styles.move}
                   data-direction="forward"
                   aria-label={wording.columnForward(label)}
-                  disabled={index === 0 || (pinned && index <= 1)}
+                  disabled={!movable(index, -1)}
                   onClick={() => move(index, -1)}
                 >
                   <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">
@@ -219,7 +222,7 @@ export function ColumnMenu({ of }: ColumnMenuProps) {
                   className={styles.move}
                   data-direction="backward"
                   aria-label={wording.columnBackward(label)}
-                  disabled={index === ordered.length - 1 || (pinned && index === 0)}
+                  disabled={!movable(index, 1)}
                   onClick={() => move(index, 1)}
                 >
                   <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">
