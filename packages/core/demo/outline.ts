@@ -183,14 +183,45 @@ export const OUTLINE: readonly Rubric[] = [
       {
         id: "button",
         name: "Button",
-        sentence: "The button for one action - in four variants, two sizes, and with a loading state that disables itself.",
+        sentence: "Starts one action when pressed: save, send, deploy, delete. Its variant says how much weight the action carries beside its neighbours, and while the action runs it shows that it is busy and cannot be pressed twice.",
+        about: [
+          "Use the primary variant once per surface, and danger only for what cannot be undone.",
+          "A loading button locks itself and tells assistive technology it is busy; it needs no `disabled` beside it. A button is `type=\"button\"` unless you set another type, so it never sends a form by accident.",
+        ],
+        alternatives: [
+          { when: "Several buttons that act on the same thing", use: "buttongroup" },
+          { when: "One main action with rarer variants", use: "buttongroup" },
+          { when: "Going to another page rather than doing something", use: "typography" },
+          { when: "A setting that is on or off", use: "switch" },
+        ],
+        limits: [
+          "The label stays on one line; keep it short rather than let it wrap.",
+          "No icon slot and no icon-only variant: an SVG goes among the children, and an icon-only button needs an `aria-label`.",
+        ],
         types: ["ButtonProps"],
         exports: ["Button"],
       },
       {
         id: "buttongroup",
         name: "ButtonGroup",
-        sentence: "Several buttons as one unit, and the SplitButton: a main action with a menu beside it.",
+        sentence: "Joins buttons that act on the same thing into one control. Its companion SplitButton runs one main action and keeps the rarer variants in a menu beside it (also called a dropdown or menu button).",
+        about: [
+          "Name every group with an `aria-label`; a screen reader otherwise announces only \"group\". Each button in it stays its own Tab stop.",
+          "A group holds no selection: it does not remember which button was pressed.",
+        ],
+        alternatives: [
+          { when: "One option out of a few that stays chosen", use: "radiogroup" },
+          { when: "Several views of one place", use: "tabs" },
+          { when: "Many actions and none of them the main one", use: "menu" },
+        ],
+        keys: [
+          { key: "Tab", action: "Moves to the next button; on a split button, from the main action to the menu trigger." },
+          { key: "Enter / Space", action: "Presses the focused button; on the trigger, opens the menu and focuses its first entry." },
+          { key: "↓ / ↑", action: "Moves through the open menu's entries." },
+          { key: "Home / End", action: "Jumps to the first or last entry." },
+          { key: "Escape", action: "Closes the menu and returns focus to the trigger." },
+        ],
+        limits: ["No toggle or segmented state; a choice that stays is a radio group."],
         types: ["ButtonGroupProps", "SplitButtonProps"],
         exports: ["ButtonGroup", "SplitButton"],
       },
