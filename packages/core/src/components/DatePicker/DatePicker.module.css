@@ -541,10 +541,13 @@
       flex-direction: column;
     }
 
+    /* Zero width and the full width of the months below: the row wraps
+       within the months instead of widening the panel to the window. */
     .presetColumn {
       flex-direction: row;
       flex-wrap: wrap;
-      width: auto;
+      width: 0;
+      min-width: 100%;
       padding: 0 0 var(--u-space-2);
       border-right: none;
       border-bottom: 1px solid var(--u-hairline);
@@ -656,6 +659,16 @@
     margin-top: var(--u-space-2);
     padding-top: var(--u-space-2);
     border-top: 1px solid var(--u-hairline);
+  }
+
+  /* One month wide (the phone's panel), the two halves do not fit side by
+     side: they stand one below the other, like the months above them. After
+     the rule above, or it would win. */
+  @media (max-width: 600px) {
+    .timeRangeRow {
+      grid-template-columns: 1fr;
+      gap: var(--u-space-2);
+    }
   }
 
   .timeHalf {

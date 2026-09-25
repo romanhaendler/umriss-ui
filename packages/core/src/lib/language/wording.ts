@@ -242,6 +242,14 @@ export interface Wording {
   pinColumnToStart: (column: string) => string;
   pinColumnToEnd: (column: string) => string;
   unpinColumn: (column: string) => string;
+  /** The tooltips over those four keys: short, without the column, which
+      stands in the same line. The keys' names above keep it for a screen
+      reader. */
+  columnForwardHint: string;
+  columnBackwardHint: string;
+  pinToStartHint: string;
+  pinToEndHint: string;
+  unpinHint: string;
   /** The export button. */
   exportLabel: string;
   /** The export button of a table in manual mode, which holds and writes one page. */
@@ -253,6 +261,8 @@ export interface Wording {
   tableSearchLabel: string;
   /** The filter button of a column: "Filter Region". */
   filterColumn: (column: string) => string;
+  /** The tooltip over that button. */
+  filterHint: string;
   /** The selection of one row, named after its row header. */
   selectRow: (row: string) => string;
   /** The selection of every row in the filtered set. */
@@ -683,12 +693,18 @@ export const DEFAULT_WORDING: Wording = {
   pinColumnToStart: (column) => `Pin ${column} to start`,
   pinColumnToEnd: (column) => `Pin ${column} to end`,
   unpinColumn: (column) => `Unpin ${column}`,
+  columnForwardHint: "Move forward",
+  columnBackwardHint: "Move backward",
+  pinToStartHint: "Pin to start",
+  pinToEndHint: "Pin to end",
+  unpinHint: "Unpin",
   exportLabel: "Export",
   exportPageLabel: "Export page",
   exportFileName: "table.csv",
   tableSearchPlaceholder: "Search …",
   tableSearchLabel: "Search table",
   filterColumn: (column) => `Filter ${column}`,
+  filterHint: "Filter",
   selectRow: (row) => `Select ${row}`,
   selectAllRows: "Select all",
   selectAllOnPage: "Select all on this page",

@@ -23,7 +23,7 @@ const x = async (where: Locator) => (await where.boundingBox())!.x;
 /* ---------------- The sticky row header sticks (umriss-table 10) ---------------- */
 
 test("the row header sticks while scrolling sideways, behind selection and expander, and nothing covers it", async ({ page }) => {
-  await openExample(page, "table", "sticky-parts");
+  await openExample(page, "width-and-pinning", "sticky-parts");
   const table = example(page, "sticky-parts");
   const area = table.locator("table").locator("..");
   const first = table.locator("tbody tr").first();
@@ -60,7 +60,7 @@ test("the row header sticks while scrolling sideways, behind selection and expan
 /* ---------------- Pinned to both sides (table-column-pinning 01) ---------------- */
 
 test("both blocks stay while the hours scroll, each against its edge, and the shadow shows only over content", async ({ page }) => {
-  await openExample(page, "column", "pinned-both-sides");
+  await openExample(page, "width-and-pinning", "pinned-both-sides");
   const table = example(page, "pinned-both-sides");
   const area = table.locator("table").locator("..");
   const first = table.locator("tbody tr").first();
@@ -108,7 +108,7 @@ test("both blocks stay while the hours scroll, each against its edge, and the sh
 /* ---------------- Pinning in the column menu (table-column-pinning 02) ---------------- */
 
 test("the column menu pins a column to the end: it sticks there, and the focus stays on its key", async ({ page }) => {
-  await openExample(page, "column", "pinned-both-sides");
+  await openExample(page, "width-and-pinning", "pinned-both-sides");
   const table = example(page, "pinned-both-sides");
   await table.getByRole("button", { name: "Columns" }).click();
   const menu = page.getByRole("dialog", { name: "Show, hide and arrange columns" });

@@ -126,17 +126,28 @@ export function Popover({
       panel.style.width = `${width}px`;
     }
 
+    /* The cut from the last measurement off first, or a panel cut to its
+       room measures as if it fitted and loses the cut on the next scroll. Set
+       by hand like the width, and for the same reason: it has to hold before
+       the height is read. */
+    panel.style.maxHeight = "";
+
     // The exact size, not offsetWidth/-Height: those round, and half a pixel
     // decided whether a panel at the window's edge fitted or stuck out.
     const size = panel.getBoundingClientRect();
-    setPosition(
-      computePosition(
-        anchorRect,
-        { width: size.width, height: size.height },
-        visibleViewport(),
-        { align, offset },
-      ),
+    /* The entry animation scales the panel from 0.96, and the rectangle is
+       taken while it runs: without dividing the scale out, a tall panel was
+       placed as if it were smaller and stuck out of the window at the bottom. */
+    const transform = getComputedStyle(panel).transform;
+    const scale = transform && transform !== "none" ? new DOMMatrixReadOnly(transform).a : 1;
+    const next = computePosition(
+      anchorRect,
+      { width: size.width / scale, height: size.height / scale },
+      visibleViewport(),
+      { align, offset },
     );
+    if (next.maxHeight !== undefined) panel.style.maxHeight = `${next.maxHeight}px`;
+    setPosition(next);
   }, [anchorRef, align, offset, width, minWidth]);
 
   useLayoutEffect(() => {
@@ -186,7 +197,11 @@ export function Popover({
         measure();
       });
     };
-    const handleScroll = () => {
+    const handleScroll = (event: Event) => {
+      /* A scroll inside the panel moves nothing the position depends on. It
+         was taken for a page scroll: the panel was measured anew, lost its
+         cut for the measurement, and jumped back to its top. */
+      if (event.target instanceof Node && panelRef.current?.contains(event.target)) return;
       if (hideOnScroll) close(false);
       else reposition();
     };
@@ -233,7 +248,7 @@ export function Popover({
         top: position?.top ?? 0,
         left: position?.left ?? 0,
         /* The motion origin, computed here and drawn by the stylesheet. */
-        "--_origin": position ? motionOrigin(position.side, align) : undefined,
+        "--_origin": position ? motionOrigin(position.side, position.align) : undefined,
         /* Not shown before the first measurement, or it flashes in the top
            left. Transparent and not `visibility: hidden`: a hidden panel takes
            no focus, and the first opening of a menu lost its move to the first

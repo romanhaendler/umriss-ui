@@ -670,7 +670,12 @@
 
   /* ---- Grouping: the column menu's section and the toolbar's tag ------- */
 
+  /* The column list sets the panel's width, not the chips: without the zero
+     width the chips of a wide table stand in one line and stretch the panel
+     across the window. With it they wrap within the list's width. */
   .groupingChoice {
+    width: 0;
+    min-width: 100%;
     margin-top: var(--u-space-2);
     padding: var(--u-space-2) var(--u-space-1) var(--u-space-1);
     border-top: 1px solid var(--u-hairline);

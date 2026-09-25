@@ -127,9 +127,9 @@ stylesheets by hand.
 ## More
 
 * The demo: <https://romanhaendler.github.io/umriss-ui/table/>, or locally
-  `pnpm dev:table` (port 4175). It is the documentation — every page
-  shows running examples with their source and the props table generated from
-  `src/`.
+  `pnpm dev:table` (port 4175). It is the documentation — one page per
+  feature, each with running examples and their source, and the props tables
+  generated from `src/` where a page documents a type.
 * [`CHANGELOG.md`](CHANGELOG.md) — what changes for a caller.
 * **For a coding agent**: `docs/llms-full.md` inside the installed package —
   the demo as one Markdown file, pinned to the installed version: every page

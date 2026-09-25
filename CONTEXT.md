@@ -887,7 +887,13 @@ seven of its subjects would have shared one — a reader who came for the now
 line would have read past pan, zoom, the tooltip and the selection to reach it.
 So *Now line*, *Bar labels*, *Snapping* and the rest are pages, and the outline
 is the table of contents of the component
-(`.scratch/schedule-lane-groups/spec.md`, "The demo").
+(`.scratch/schedule-lane-groups/spec.md`, "The demo"). The table is the same
+case and was cut the same way after it had first been a shelf: its `Table`
+page carried nineteen examples - sorting, density, a server, grid mode - and a
+reader who came for one read past the rest. So *Sorting*, *Manual mode*,
+*Grid mode* and the rest are pages, and `Table` is the first table. A feature
+that is a part imported by name - `Search`, `Export`, `RowActions` - keeps
+that name as its page's name.
 
 Either way a page names ONE thing and one only; a page covering three unrelated
 subjects would be a page nobody could link to.
@@ -932,7 +938,8 @@ Every demo opens with its scenarios page, which is no rubric, and then
 "Getting started" (demo rework, `.scratch/demo-rework/spec.md`). The rubrics of
 the `@umriss-ui/core` demo are Getting started, Layout, Typography, Actions,
 Forms, Feedback, Overlays, Navigation and Data display; `@umriss-ui/table` has
-Tables, Grouping, Rows, Unbound parts and Limits and alarms; `@umriss-ui/charts`
+Columns, Finding rows, Grouping, Rows, Around the table, Many rows, Editing
+and Limits and alarms; `@umriss-ui/charts`
 has Chart, Series, Limits and alarms and Around the chart; `@umriss-ui/schedule`
 has Plan, Time, Reading, Editing and Findings; `@umriss-ui/calculation` has
 Writing a calculation and In practice. **Limits and alarms** and not

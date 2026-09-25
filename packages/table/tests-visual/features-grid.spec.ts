@@ -7,6 +7,7 @@
 import { test, expect } from "@playwright/test";
 import type { Page } from "@playwright/test";
 import { openExample } from "./navigation";
+import { EXAMPLE_ADDRESSES } from "./pages";
 
 test.skip(({ colorScheme }) => colorScheme === "dark", "Behaviour tests only once (light)");
 
@@ -15,10 +16,12 @@ test.beforeEach(async ({ page }) => {
 });
 
 const example = (page: Page, id: string) => page.locator(`[data-example="${id}"]`);
+/** The page an example stands on: grid mode and edits are two pages. */
+const pageOf = (id: string) => EXAMPLE_ADDRESSES.find((a) => a.exampleId === id)!.pageId;
 
 /** Tab from the example's code toggle into its table: the table's one stop. */
 async function tabIn(page: Page, id: string) {
-  await openExample(page, "table", id);
+  await openExample(page, pageOf(id), id);
   await example(page, id).scrollIntoViewIfNeeded();
   await example(page, id).locator(".exampleToggle").first().focus();
   await page.keyboard.press("Tab");
@@ -122,7 +125,7 @@ test("a day picked in the date editor commits at once", async ({ page }) => {
 test("in a virtual window the keys walk to rows never rendered, and the grid scrolls them in", async ({ page }) => {
   /* Grouped, the table puts up a toolbar for the grouping's tag: that is the
      stop before the grid's. */
-  await openExample(page, "table", "the-whole-grid");
+  await openExample(page, "grid-mode", "the-whole-grid");
   await example(page, "the-whole-grid").locator("td[tabindex='0']").focus();
   expect(await lineOf(page)).toBe('header:["value:East Gate depot"]');
   await page.keyboard.press("Control+End");
@@ -139,7 +142,7 @@ test("the keys keep the Active cell clear of the sticky head and the pinned bloc
      widths: the browser's own scroll into view stops short of them
      (table-grid-mode 05). Narrow, so that it scrolls both ways. */
   await page.setViewportSize({ width: 420, height: 900 });
-  await openExample(page, "table", "the-whole-grid");
+  await openExample(page, "grid-mode", "the-whole-grid");
   const scroller = example(page, "the-whole-grid").locator("table").locator("xpath=..");
   await example(page, "the-whole-grid").locator("td[tabindex='0']").focus();
   const clear = async () => {

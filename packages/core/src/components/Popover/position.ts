@@ -42,6 +42,12 @@ export interface PopoverPosition {
   flipped: boolean;
   /** The side of the anchor the panel stands on, after flipping. */
   side: Side;
+  /** The edge of the anchor the panel lines up with, after flipping: `start`
+      asked for and no room to the right becomes `end`. */
+  align: Align;
+  /** Set where the panel fits on neither side and is cut to the room on the
+      larger one, to scroll in itself: the height it may take. */
+  maxHeight?: number;
 }
 
 export interface PositionOptions {
@@ -55,6 +61,9 @@ export interface PositionOptions {
 
 export const OFFSET = 6;
 export const MARGIN = 8;
+/** The least room a panel is cut to. Below it, a calendar scrolling in a
+    strip is worse than a panel over its own trigger. */
+export const MIN_SCROLL_HEIGHT = 240;
 
 export function computePosition(
   anchor: AnchorRect,
@@ -65,35 +74,60 @@ export function computePosition(
   const { align = "start", side = "bottom", offset = OFFSET, margin = MARGIN } = options;
 
   const { top: vTop = 0, left: vLeft = 0 } = viewport;
-  const spaceBelow = vTop + viewport.height - anchor.bottom - offset;
-  const spaceAbove = anchor.top - vTop - offset;
+  /* The room on each side, the window's margin already taken off: without it
+     a panel that fitted to the pixel stood flush against the window's edge. */
+  const spaceBelow = vTop + viewport.height - anchor.bottom - offset - margin;
+  const spaceAbove = anchor.top - vTop - offset - margin;
   const spacePreferred = side === "top" ? spaceAbove : spaceBelow;
   const spaceOther = side === "top" ? spaceBelow : spaceAbove;
-
-  /* Only switch when the other side really is better. Where it fits nowhere,
-     it stays on the preferred one - being cut off over there would be no
-     better. */
-  const flipped = spacePreferred < panel.height && spaceOther >= panel.height;
-  const above = (side === "top") !== flipped;
-  const hanging = above ? anchor.top - offset - panel.height : anchor.bottom + offset;
-  /* Where it fits on neither side (a tall panel on a phone), it is pulled into
-     the window instead of hanging out of it - over the anchor if need be. A
-     panel taller than the window keeps its top edge; the panel's own
-     max-height lets it scroll. */
   const fits = spacePreferred >= panel.height || spaceOther >= panel.height;
-  const top = fits ? hanging : Math.max(vTop + margin, Math.min(hanging, vTop + viewport.height - panel.height - margin));
+  const roomy = Math.max(spacePreferred, spaceOther) >= MIN_SCROLL_HEIGHT;
 
-  const raw =
-    align === "end"
+  let flipped: boolean;
+  let top: number;
+  let maxHeight: number | undefined;
+  if (fits) {
+    /* Only switch when the other side really is better. */
+    flipped = spacePreferred < panel.height;
+    const above = (side === "top") !== flipped;
+    top = above ? anchor.top - offset - panel.height : anchor.bottom + offset;
+  } else if (roomy) {
+    /* It fits on neither side: it takes the larger one, cut to its room, and
+       scrolls in itself - the trigger stays in view. */
+    flipped = spaceOther > spacePreferred;
+    maxHeight = Math.max(spacePreferred, spaceOther);
+    const above = (side === "top") !== flipped;
+    top = above ? anchor.top - offset - maxHeight : anchor.bottom + offset;
+  } else {
+    /* Too little room on either side to scroll in (a tall panel on a phone):
+       it is pulled into the window, over the anchor if need be. A panel
+       taller than the window keeps its top edge; its own max-height lets it
+       scroll. */
+    flipped = false;
+    const hanging = side === "top" ? anchor.top - offset - panel.height : anchor.bottom + offset;
+    top = Math.max(vTop + margin, Math.min(hanging, vTop + viewport.height - panel.height - margin));
+  }
+  const above = (side === "top") !== flipped;
+
+  const leftFor = (edge: Align) =>
+    edge === "end"
       ? anchor.right - panel.width
-      : align === "center"
+      : edge === "center"
         ? anchor.left + anchor.width / 2 - panel.width / 2
         : anchor.left;
+  const fitsAcross = (x: number) => x >= vLeft + margin && x + panel.width <= vLeft + viewport.width - margin;
+  /* Across as along: where the edge asked for pushes the panel out of the
+     window and the other one does not, it lines up with the other one - flush
+     with the trigger rather than shoved against the window's edge. Where
+     neither edge fits (a phone), centred under the trigger still points at
+     it; only then is it shoved. */
+  const other: Align = align === "start" ? "end" : align === "end" ? "start" : "center";
+  const used = ([align, other, "center"] as const).find((edge) => fitsAcross(leftFor(edge))) ?? align;
   // Clamp at the right edge first, then at the left: if the panel is wider than
   // the viewport, the left edge wins.
-  const left = Math.max(vLeft + margin, Math.min(raw, vLeft + viewport.width - panel.width - margin));
+  const left = Math.max(vLeft + margin, Math.min(leftFor(used), vLeft + viewport.width - panel.width - margin));
 
-  return { top, left, flipped, side: above ? "top" : "bottom" };
+  return { top, left, flipped, side: above ? "top" : "bottom", align: used, ...(maxHeight === undefined ? {} : { maxHeight }) };
 }
 
 /**
@@ -101,11 +135,12 @@ export function computePosition(
  * for its stylesheet. It lies on the panel's edge that faces the anchor - a
  * panel below grows from its top - at the end the alignment holds on to.
  *
- * `side` is the side the panel really stands on (`PopoverPosition.side`), not
- * the one asked for: a flipped panel grows from the other edge.
+ * `side` and `align` are where the panel really stands (`PopoverPosition`),
+ * not what was asked for: a flipped panel grows from the other edge.
  */
-// ponytail: a panel clamped at the window's edge still grows from its aligned
-// corner, not from under the anchor; an x in pixels from the anchor if it shows.
+// ponytail: a panel clamped at the window's edge (a phone, where neither edge
+// fits) still grows from its aligned corner, not from under the anchor; an x in
+// pixels from the anchor if it shows.
 export function motionOrigin(side: Side, align: Align): string {
   const x = align === "start" ? "left" : align === "end" ? "right" : "center";
   return `${x} ${side === "bottom" ? "top" : "bottom"}`;

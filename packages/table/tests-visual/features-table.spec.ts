@@ -259,7 +259,7 @@ async function drag(page: Page, header: ReturnType<Page["locator"]>, by: number)
 
 test.describe("Column › width", () => {
   test.beforeEach(async ({ page }) => {
-    await openExample(page, "column", "width");
+    await openExample(page, "width-and-pinning", "width");
   });
 
   test("Dragging the grip changes the width and does not sort", async ({ page }) => {
@@ -298,7 +298,7 @@ test.describe("Column › width", () => {
 });
 
 test("The dragged width stands in the view", async ({ page }) => {
-  await openExample(page, "table", "initial-view");
+  await openExample(page, "view", "initial-view");
   const table = example(page, "initial-view");
   await drag(page, table.getByRole("columnheader", { name: "Supplier" }), 60);
   await expect(table.locator("[data-role='view']")).toContainText('"widths":{"supplier":');
