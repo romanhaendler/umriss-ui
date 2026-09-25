@@ -157,6 +157,9 @@ The table and the alarm list are not part of this package. They live in
 | `ProgressBar` | how far a task has come (`role="progressbar"`), determinate from 0 to 1 or indeterminate without a value; `valueText` for a count; no tone, because progress is no verdict - that is the `Meter` |
 | `Accordion` / `AccordionItem` | sections behind headers that are buttons with `aria-expanded`: `type="single" \| "multiple"`, controlled or uncontrolled, arrow keys between the headers; the height animates as the card's collapse does |
 | `Breadcrumb` | where a page stands: `<nav>` with an ordered list, the last item `aria-current="page"`, items as links or buttons (routing is the caller's); when narrow the middle levels fold into a `Menu`, measured rather than guessed |
+| `Splitter` | two panes and the line between them (the APG window splitter): side by side or stacked, the first pane's share in per cent, controlled or uncontrolled, `min`/`max`; drag, the arrows of its axis, Home/End, Enter collapses and restores |
+| `Stepper` | where a procedure stands: an ordered list of steps, done, current (`aria-current="step"`), upcoming or failed - each said as a word beside its label and drawn as a number, tick or cross; in a row or a column; moving on is the caller's |
+| `FileInput` | the native file input behind a key, inside a zone that takes a drop: `accept` and `multiple` hold for the drop as for the dialog, the chosen files listed with their size and a cross each, controlled or uncontrolled, invalid through `FormField`; no upload |
 
 ## Principles for new components
 
@@ -169,8 +172,8 @@ The table and the alarm list are not part of this package. They live in
    `ConfirmDialog` and `CommandPalette`, the field's wrapper of the pickers
    and the combobox family, the `role="tree"` list of `TreeView`. The native
    fields that wear a wrapper (`Checkbox`, `Switch`, `Slider`, `NumberInput`,
-   `Select`, a clearable `Input`) put the class on the wrapper and ref and rest
-   on the control. The component's own
+   `Select`, `FileInput`, a clearable `Input`) put the class on the wrapper and
+   ref and rest on the control. The component's own
    `role`, the `aria-*` it computes and its handlers are not replaced by
    `rest`: a caller's handler runs first and can `preventDefault`. Held by
    `tests-unit/passthrough.test.tsx`, which renders every export.
@@ -200,7 +203,8 @@ spec under `.scratch/`:
   `Accordion` and `Breadcrumb` stand; their final polish round is open.
 * `forced-colors` and `listbox-announcements` — Windows high contrast, and
   what a listbox says to VoiceOver.
-* `core-layout-extras` — `Splitter` and the layout tier after the basics.
+* `core-layout-extras` — `Splitter`, `Stepper` and `FileInput` stand; their
+  final polish round is open.
 
 Collapsing the dock onto its grip stays out of scope, because it doubles the
 state space. What core will not build at all stands in

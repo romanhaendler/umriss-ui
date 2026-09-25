@@ -1,0 +1,153 @@
+@layer umriss.tokens, umriss.base, umriss.components;
+
+/* A row of markers joined by lines, or a column of them. A marker says its
+   step's state three ways: a number while it is ahead, a tick once it is
+   done, a cross when it failed - and its ground and edge say it again. The
+   current step is the accent's, the one interactive-looking thing about a
+   list that is not interactive: it is where the attention belongs. The line
+   after a done step is ink, so the way already walked reads as one stroke. */
+
+@layer umriss.components {
+  .stepper {
+    composes: text from "#own-styles";
+    --_marker: 20px;
+    display: flex;
+    gap: var(--u-space-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .step {
+    display: flex;
+    flex: 1;
+    align-items: flex-start;
+    gap: var(--u-space-2);
+    min-width: 0;
+  }
+
+  .step:last-child {
+    flex: none;
+  }
+
+  /* The line to the next step fills the room the row leaves. */
+  .step:not(:last-child)::after {
+    content: "";
+    flex: 1;
+    min-width: var(--u-space-4);
+    height: 1px;
+    margin-top: calc(var(--_marker) / 2);
+    background: var(--u-hairline-strong);
+  }
+
+  .done:not(:last-child)::after {
+    background: var(--u-color-text-secondary);
+  }
+
+  .marker {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: var(--_marker);
+    height: var(--_marker);
+    border-radius: var(--u-radius-full);
+    /* A circle and not the library's squircle: a squircle this small is a
+       rounded square, and a ticked one would read as a checkbox to press. */
+    corner-shape: round;
+    background: var(--u-color-surface);
+    outline: 1px solid transparent;
+    box-shadow: var(--u-edge-strong);
+    font-family: var(--u-font-mono);
+    font-size: var(--u-text-xs);
+    line-height: var(--u-leading-none);
+    font-variant-numeric: tabular-nums;
+    color: var(--u-color-text-muted);
+  }
+
+  .done .marker {
+    background: var(--u-color-text);
+    box-shadow: none;
+    color: var(--u-color-surface);
+  }
+
+  .current .marker {
+    box-shadow: 0 0 0 1px var(--u-color-accent);
+    color: var(--u-color-accent-text);
+  }
+
+  .failed .marker {
+    background: var(--u-color-danger-subtle);
+    box-shadow: 0 0 0 1px var(--u-color-danger);
+    color: var(--u-color-danger-text);
+  }
+
+  .text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    padding-top: 2px;
+  }
+
+  .label {
+    font-size: var(--u-text-sm);
+    line-height: var(--u-leading-tight);
+    color: var(--u-color-text);
+  }
+
+  .current .label {
+    font-weight: var(--u-weight-medium);
+  }
+
+  .upcoming .label {
+    color: var(--u-color-text-secondary);
+  }
+
+  .description {
+    font-size: var(--u-text-xs);
+    line-height: var(--u-leading-tight);
+    color: var(--u-color-text-muted);
+  }
+
+  /* In a column the line runs down from the marker to the next one, and the
+     step's text takes the room beside it. */
+  .vertical {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .vertical .step {
+    position: relative;
+    padding-bottom: var(--u-space-5);
+  }
+
+  .vertical .step:last-child {
+    padding-bottom: 0;
+  }
+
+  .vertical .step:not(:last-child)::after {
+    position: absolute;
+    top: calc(var(--_marker) + var(--u-space-1));
+    bottom: var(--u-space-1);
+    left: calc(var(--_marker) / 2);
+    width: 1px;
+    height: auto;
+    min-width: 0;
+    margin: 0;
+  }
+
+  /* Grounds and edges are what forced colours take away (forced-colors 02):
+     the markers keep their outline, the lines take the system's text colour,
+     and the current step - which was the accent's edge alone - takes the
+     selection colour as an active item does. */
+  @media (forced-colors: active) {
+    .step:not(:last-child)::after {
+      background: CanvasText;
+    }
+
+    .current .marker {
+      outline: 2px solid Highlight;
+    }
+  }
+}

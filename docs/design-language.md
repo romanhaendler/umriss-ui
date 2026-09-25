@@ -28,7 +28,9 @@ meaning.
 **Edges and depth.** Borders are 1 px shadows without offset ("edge") rather than
 borders; cards are borderless and carry a multi-step shadow stack in which every
 step has a job (edge · contact with the ground · soft depth). Cards lie like
-paper on a table. Interactive elements stay flat.
+paper on a table. Interactive elements stay flat. The one edge drawn as a
+border is the file input's drop zone: dashed, because a dash is what says
+"put it here" on every desktop, and a shadow cannot be dashed.
 
 **Focus.** A crisp accent edge of two pixels (`--u-focus-ring`), the same on
 every component – no glow, and no browser outline beside it. On a field it lies
