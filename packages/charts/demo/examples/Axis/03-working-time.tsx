@@ -10,7 +10,7 @@
 import { Chart, Line, Tooltip, XAxis, YAxis } from "../../../src";
 import { WEEK_CALENDAR, weekData, type WeekPoint } from "../../data";
 
-export const title = "Operating time axis";
+export const title = "Working time axis";
 
 /* The plant this is drawn from stands in the second tab, so that the
    example can be copied whole. */
@@ -19,15 +19,15 @@ export const shows = ["../../data.ts"];
 const weekdayAndTime = (v: number) =>
   new Date(v).toLocaleString("en-GB", { weekday: "short", hour: "2-digit", minute: "2-digit" });
 
-export default function OperatingTime() {
+export default function WorkingTime() {
   return (
-    <Chart data={weekData} height={280} ariaLabel="Output across the operating time of one week">
+    <Chart data={weekData} height={280} ariaLabel="Output across the working time of one week">
       <XAxis
         accessor={(d: WeekPoint) => d.t}
         calendar={WEEK_CALENDAR}
         tickFormat={weekdayAndTime}
         tickCount={8}
-        label="Operating time"
+        label="Working time"
       />
       <YAxis accessor={(d: WeekPoint) => d.output} label="Pieces/h" />
       <Line accessor={(d: WeekPoint) => d.output} name="Output" />

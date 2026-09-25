@@ -1,7 +1,7 @@
 /* Where things lie on the plot: subtask boxes, transport paths, and what a
    pointer at a point hits.
 
-   Every horizontal position goes through the scale (ADR-0001) from OPERATING
+   Every horizontal position goes through the scale (ADR-0001) from WORKING
    time: a wall-clock instant is mapped through the calendar first, and one in
    removed time lands on the seam it collapses onto. Positions are rounded to
    whole pixels, so a fill and the hairline beside it meet on the same pixel
@@ -10,7 +10,7 @@
 
    Free of the DOM and of the canvas. */
 
-import { toOperatingTimeClamped, type CalendarInput, type Scale } from "@umriss-ui/charts";
+import { toWorkingTimeClamped, type CalendarInput, type Scale } from "@umriss-ui/charts";
 import { resolveAppearance } from "./appearance";
 import { laneAtY, slotOf, type Rows, type Slot } from "./rows";
 import {
@@ -26,7 +26,7 @@ import {
 
 /** What the geometry needs to know about the view. */
 export interface Viewport {
-  /** Operating time → pixel, across the plot's width. */
+  /** Working time → pixel, across the plot's width. */
   readonly scale: Scale;
   readonly calendar: CalendarInput;
   /** Height of one lane in pixels. */
@@ -73,7 +73,7 @@ export interface SubtaskBox {
 
 /** The pixel of a wall-clock instant. */
 export function xOf(view: Viewport, instant: number): number {
-  return Math.round(view.scale.toPx(toOperatingTimeClamped(instant, view.calendar)));
+  return Math.round(view.scale.toPx(toWorkingTimeClamped(instant, view.calendar)));
 }
 
 /** Where a lane is drawn on the plot, scroll included - its own row, or its

@@ -6,7 +6,7 @@
 import { useMemo } from "react";
 import { useAxis } from "./context";
 import type { AxisConfig } from "./types";
-import type { OperatingInterval } from "./operatingTime";
+import type { WorkingInterval } from "./workingTime";
 
 interface CommonProps<T> {
   /** Axis id, through which series bind themselves (R-4.12). */
@@ -46,11 +46,11 @@ export interface XAxisProps<T> extends CommonProps<T> {
       readings lie less than a minute apart. Another language is a `tickFormat`,
       which is handed the instant. `calendar` implies it. */
   time?: boolean;
-  /** Operating calendar: the intervals in which time counts. With it the axis
-      stands in operating time - weekends and night shifts are out, and every
+  /** Working calendar: the intervals in which time counts. With it the axis
+      stands in working time - nights and weekends are out, and every
       removed span gets a break mark. The scale stays affine; the mapping happens
       in materialisation (ADR-0001). */
-  calendar?: readonly OperatingInterval[];
+  calendar?: readonly WorkingInterval[];
   /** Zoom and pan, controlled: Ctrl or ⌘ with the wheel - and a pinch - zoom
       around the pointer, a drag, a horizontal wheel or Shift with the wheel pan,
       a double click proposes the whole data range. Each proposes a domain in

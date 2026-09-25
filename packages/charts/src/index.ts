@@ -49,28 +49,28 @@ export type {
   ParetoResult,
 } from "./pareto";
 export {
-  operatingCalendar,
+  workingCalendar,
   calendarFrom,
-  toOperatingTime,
+  toWorkingTime,
   toWallClock,
   mapSeries,
   removedIntervals,
   breaks,
-  operatingTicks,
-  operatingTimeTicks,
+  workingTicks,
+  workingTimeTicks,
   timeStep,
   SECOND,
   MINUTE,
   HOUR,
   DAY,
-} from "./operatingTime";
+} from "./workingTime";
 export type {
   CalendarInput,
-  OperatingCalendar,
-  OperatingInterval,
-  OperatingTimeTick,
+  WorkingCalendar,
+  WorkingInterval,
+  WorkingTimeTick,
   RemovedSpan,
-} from "./operatingTime";
+} from "./workingTime";
 export type {
   Accessor,
   AreaSeriesConfig,
@@ -104,13 +104,13 @@ export type {
 
 /* What @umriss-ui/schedule takes from here (ADR-0022): the canvas colour
    resolution for colours that are not the chart palette, and the clamped
-   mapping into operating time. At the end, by the workspace's rule for new
+   mapping into working time. At the end, by the workspace's rule for new
    exports - neither brings a stylesheet, so no picture could move. */
 export { resolveColours, subscribeTheme } from "./theme";
-export { toOperatingTimeClamped } from "./operatingTime";
+export { toWorkingTimeClamped } from "./workingTime";
 /* The shift of a tick grid onto local time, moved here from the schedule
    (charts-fixes 09): the calendar axis stands its days on it as well. */
-export { localOffset } from "./operatingTime";
+export { localOffset } from "./workingTime";
 
 /* The charts' own wording (ADR-0031); German stands behind the subpath
    `@umriss-ui/charts/wording/de`. */
