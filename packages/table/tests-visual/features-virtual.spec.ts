@@ -59,7 +59,7 @@ test("scrolling brings out rows that were never rendered", async ({ page }) => {
     el.scrollTop = el.scrollHeight;
   });
   await expect(row(page, 19_999)).toBeVisible();
-  await expect(example(page)).toContainText("MW-20000");
+  await expect(example(page)).toContainText("REQ-20000");
   await expect(row(page, 0)).toHaveCount(0);
 });
 
@@ -72,13 +72,13 @@ test("the way back leads to the beginning again", async ({ page }) => {
     el.scrollTop = 0;
   });
   await expect(row(page, 0)).toBeVisible();
-  await expect(example(page)).toContainText("MW-00001");
+  await expect(example(page)).toContainText("REQ-00001");
 });
 
 /* ---------------- Header and row header stick ---------------- */
 
 test("the header stays put while scrolling", async ({ page }) => {
-  const headerCell = example(page).getByRole("columnheader", { name: "Tag" });
+  const headerCell = example(page).getByRole("columnheader", { name: "Request" });
   const area = scrollArea(page);
   const areaBefore = (await area.boundingBox())!;
   const headerBefore = (await headerCell.boundingBox())!;
@@ -112,7 +112,7 @@ test("the row header sticks while scrolling sideways", async ({ page }) => {
   const after = (await header.boundingBox())!;
 
   expect(Math.abs(after.x - before.x)).toBeLessThan(4);
-  await expect(example(page).getByRole("columnheader", { name: "Tag" })).toBeVisible();
+  await expect(example(page).getByRole("columnheader", { name: "Request" })).toBeVisible();
 });
 
 /* ---------------- The keyboard reaches what was not rendered ---------------- */
@@ -127,7 +127,7 @@ test("the arrow keys wander from row to row", async ({ page }) => {
 });
 
 test("the keyboard alone reaches into the grid", async ({ page }) => {
-  await example(page).getByPlaceholder("Tag or station").focus();
+  await example(page).getByPlaceholder("Request or service").focus();
   for (let i = 0; i < 40; i++) {
     await page.keyboard.press("Tab");
     if (await row(page, 0).evaluate((el) => el === document.activeElement).catch(() => false)) break;
@@ -172,7 +172,7 @@ test("the focus does not land behind the sticky header", async ({ page }) => {
 
 test("a selection survives its row leaving the window", async ({ page }) => {
   const area = scrollArea(page);
-  await box(page, "Select MW-00003").click();
+  await box(page, "Select REQ-00003").click();
   await expect(example(page)).toContainText("1 selected");
 
   await area.evaluate((el) => {
@@ -184,7 +184,7 @@ test("a selection survives its row leaving the window", async ({ page }) => {
   await area.evaluate((el) => {
     el.scrollTop = 0;
   });
-  await expect(example(page).getByLabel("Select MW-00003")).toBeChecked();
+  await expect(example(page).getByLabel("Select REQ-00003")).toBeChecked();
 });
 
 test("select all reaches over the whole set, not over the window", async ({ page }) => {
@@ -195,17 +195,17 @@ test("select all reaches over the whole set, not over the window", async ({ page
 /* ---------------- Sorting and searching act on the whole set ---------------- */
 
 test("sorting orders every row, not only the rendered ones", async ({ page }) => {
-  await sortButton(page, "Tag").click();
+  await sortButton(page, "Request").click();
   // Descending: the highest id now stands on top.
-  await expect(row(page, 0)).toContainText("MW-20000");
+  await expect(row(page, 0)).toContainText("REQ-20000");
 });
 
 test("searching shrinks the set and the scrollbar", async ({ page }) => {
   const area = scrollArea(page);
   const before = await area.evaluate((el) => el.scrollHeight);
-  await example(page).getByPlaceholder("Tag or station").fill("MW-00001");
+  await example(page).getByPlaceholder("Request or service").fill("REQ-00001");
   await expect.poll(() => area.evaluate((el) => el.scrollHeight)).toBeLessThan(before);
-  await expect(example(page)).toContainText("MW-00001");
+  await expect(example(page)).toContainText("REQ-00001");
 });
 
 test("there is no paging beside virtualisation", async ({ page }) => {
