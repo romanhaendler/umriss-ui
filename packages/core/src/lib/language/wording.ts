@@ -464,20 +464,20 @@ export interface Wording {
      switches every package with one value (schedule 06). */
   /** The two findings, named on the ghost of a drag. */
   scheduleOverlap: string;
-  scheduleLateTransport: string;
+  scheduleViolatedDependency: string;
   /** The new times on the ghost: "08:15–10:00" - the times come from the
       formats. */
   scheduleGhostTimes: (from: string, to: string) => string;
-  /** The parts of a subtask and a transport, named in the tooltip. */
-  scheduleSetup: string;
-  scheduleTeardown: string;
-  scheduleTransport: string;
-  /** "A-2041-1 → A-2041-2": where a transport goes. */
+  /** The parts of a subtask and a dependency, named in the tooltip. */
+  scheduleLeadIn: string;
+  scheduleLeadOut: string;
+  scheduleDependency: string;
+  /** "A-2041-1 → A-2041-2": the two subtasks a dependency joins. */
   scheduleRoute: (from: string, to: string) => string;
   /** "Overlap with A-2043-2" - the other subtask on the lane. */
   scheduleOverlapWith: (other: string) => string;
-  /** "Late transport, 15 min short" - the amount from `minutesShort`. */
-  scheduleLateBy: (amount: string) => string;
+  /** "Violated dependency, 15 min short" - the amount from `minutesShort`. */
+  scheduleViolatedBy: (amount: string) => string;
   /** On the ghost of a drag over a lane the subtask may not go to. */
   scheduleLaneRefused: string;
   /** The chevron of a lane group's header, which folds it into one row and
@@ -499,7 +499,7 @@ export interface Wording {
     from: string;
     to: string;
     overlaps: number;
-    late: number;
+    violated: number;
   }) => string;
   /** The keys that walk the plot, select and edit - read after the summary. */
   scheduleKeyHelp: string;
@@ -809,24 +809,24 @@ export const DEFAULT_WORDING: Wording = {
   remove: "Remove",
   removeTag: (beschriftung) => `Remove ${beschriftung}`,
   scheduleOverlap: "Overlap",
-  scheduleLateTransport: "Late transport",
+  scheduleViolatedDependency: "Violated dependency",
   scheduleGhostTimes: (from, to) => `${from}–${to}`,
-  scheduleSetup: "Setup",
-  scheduleTeardown: "Teardown",
-  scheduleTransport: "Transport",
+  scheduleLeadIn: "Lead-in",
+  scheduleLeadOut: "Lead-out",
+  scheduleDependency: "Dependency",
   scheduleRoute: (from, to) => `${from} → ${to}`,
   scheduleOverlapWith: (other) => `Overlap with ${other}`,
-  scheduleLateBy: (amount) => `Late transport, ${amount} short`,
+  scheduleViolatedBy: (amount) => `Violated dependency, ${amount} short`,
   scheduleLaneRefused: "Not this lane",
   scheduleFoldGroup: "Fold group",
   scheduleUnfoldGroup: "Unfold group",
   scheduleLaneCount: (count) => (count === 1 ? "1 lane" : `${count} lanes`),
   scheduleRoleDescription: "schedule",
-  scheduleSummary: ({ lanes, subtasks, from, to, overlaps, late }) =>
+  scheduleSummary: ({ lanes, subtasks, from, to, overlaps, violated }) =>
     `${lanes === 1 ? "1 lane" : `${lanes} lanes`}, ${subtasks === 1 ? "1 subtask" : `${subtasks} subtasks`} in view from ${from} to ${to}. ` +
-    `${overlaps === 1 ? "1 overlap" : `${overlaps} overlaps`}, ${late === 1 ? "1 late transport" : `${late} late transports`}.`,
+    `${overlaps === 1 ? "1 overlap" : `${overlaps} overlaps`}, ${violated === 1 ? "1 violated dependency" : `${violated} violated dependencies`}.`,
   scheduleKeyHelp:
-    "Left and right arrows move along the lane, up and down change the lane, Home and End go to its first and last, Page Up and Page Down jump a tenth of the view. Right bracket or T follows a transport out, left bracket or Shift and T goes back. Space or Enter selects. Alt with left or right proposes a move, Alt and Shift a new end. Escape clears.",
+    "Left and right arrows move along the lane, up and down change the lane, Home and End go to its first and last, Page Up and Page Down jump a tenth of the view. Right bracket or T follows a dependency out, left bracket or Shift and T goes back. Space or Enter selects. Alt with left or right proposes a move, Alt and Shift a new end. Escape clears.",
   calculationSumSymbol: "+",
   calculationDifferenceSymbol: "−",
   calculationProductSymbol: "×",

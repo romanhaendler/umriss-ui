@@ -9,7 +9,7 @@ const MIN = 60_000;
 const at = (minutes: number) => Date.UTC(2026, 2, 17, 6, 0) + minutes * MIN;
 
 const DATA: Subtask[] = [
-  { id: "a-1", task: "a", lane: "saw", from: at(0), to: at(60), setup: 15 * MIN },
+  { id: "a-1", task: "a", lane: "saw", from: at(0), to: at(60), leadIn: 15 * MIN },
   { id: "b-1", task: "b", lane: "saw", from: at(60), to: at(90) },
   { id: "a-2", task: "a", lane: "mill", from: at(100), to: at(160) },
 ];

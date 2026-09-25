@@ -7,10 +7,10 @@
        .headers       one header per ROW, real text        (scrolls with the lanes only)
        .plot          catches the pointer, and is the one tab stop whose keys
                       walk the subtasks (schedule-a11y, ADR-0030)
-         canvas       data: grid, transports, subtasks, findings, selection
+         canvas       data: grid, dependencies, subtasks, findings, selection
          canvas       overlay: hover and the ghost
          .ghostLabel  the ghost's times and findings, while a drag is in flight
-         .grip        setup and teardown grips of the selected subtask
+         .grip        lead-in and lead-out grips of the selected subtask
        .corner
        .tickBand      the fine band: adaptive time ticks   (holds still)
 
@@ -47,7 +47,7 @@ import { ScheduleContext } from "./context";
 import { ScheduleScene, type PlacingItem, type ScheduleInteraction, type ScheduleTooltipTarget } from "./scene";
 import { DEFAULT_LANE_HEIGHT } from "./sceneView";
 import { ScheduleReadout, ScheduleTooltipContent } from "./ScheduleTooltip";
-import type { Intent, IntentKind, Subtask, TransportAttachment, TransportEnds, TransportRoute } from "./model";
+import type { Intent, IntentKind, Subtask, DependencyAttachment, DependencyEnds, DependencyRoute } from "./model";
 import type { ZoomLimits } from "./timeAxis";
 import type { SnapRaster } from "./snap";
 import styles from "./Schedule.module.css";
@@ -102,7 +102,7 @@ export interface ScheduleProps {
       selection itself. */
   selectedTask?: string | null;
   /** Called when a click selects a task or clears the selection, with the
-      subtask that was clicked - null where the click was on a transport or on
+      subtask that was clicked - null where the click was on a dependency or on
       nothing. It is called again when another subtask of the same task is
       clicked. */
   onSelectedTaskChange?: (task: string | null, subtask: string | null) => void;
@@ -125,34 +125,34 @@ export interface ScheduleProps {
       span handed in through `initialDomain` is not reported back. */
   onDomainChange?: (domain: readonly [number, number]) => void;
   /** What the application is dragging in from outside while it drags it - its
-      key, task, the length of its main time, its setup and teardown. The
+      key, task, the length of its main time, its lead-in and lead-out. The
       browser hands the dragged data over only on the drop, so the ghost before
       it can only come from here: set it on your own `dragstart`, clear it on
       `dragend`. Without `"place"` in `intents` no drop is accepted. */
   placing?: PlacingItem | null;
-  /** How the transports are drawn: a `"curve"` that leaves and arrives
-      forwards, a `"straight"` line, or `"orthogonal"` segments. A transport may
+  /** How the dependencies are drawn: a `"curve"` that leaves and arrives
+      forwards, a `"straight"` line, or `"orthogonal"` segments. A dependency may
       say otherwise for itself. */
-  route?: TransportRoute;
-  /** Where a transport's ends sit on their bars: the `"centre"` of both, or the
+  route?: DependencyRoute;
+  /** Where a dependency's ends sit on their bars: the `"centre"` of both, or the
       `"nearest"` edge - which is the shortest line between two stops. Within
-      one lane both mean the middle. A transport may say otherwise for itself.
+      one lane both mean the middle. A dependency may say otherwise for itself.
 
-      It changes the picture and never a finding: whether a transport is late
+      It changes the picture and never a finding: whether a dependency is violated
       follows from its `leaves` and `arrives` alone. */
-  attach?: TransportAttachment;
-  /** Whether a transport's two ends carry a dot (`"dot"`, the default) or the
+  attach?: DependencyAttachment;
+  /** Whether a dependency's two ends carry a dot (`"dot"`, the default) or the
       line stands alone (`"none"`). The dot says where the line is anchored - a
       help while a plan is being read, and noise in a plan full of short moves.
-      A transport may say otherwise for itself. */
-  ends?: TransportEnds;
+      A dependency may say otherwise for itself. */
+  ends?: DependencyEnds;
   /** What stands written in a bar: a function from a subtask to a line of
       text, or nothing for bars without text. The text is cut off with an
       ellipsis where the bar is too narrow for it and left out where even that
       would say nothing; a bar that began before the view keeps its text at the
       view's edge. */
   label?: (subtask: Subtask) => string;
-  /** The tooltip on a hovered subtask or transport: its order, its times, its
+  /** The tooltip on a hovered subtask or dependency: its order, its times, its
       parts and its findings. `false` switches it off; a function receives
       what the pointer rests on and returns content of the application's own. */
   tooltip?: false | ((target: ScheduleTooltipTarget) => ReactNode);
@@ -163,7 +163,7 @@ export interface ScheduleProps {
   className?: string;
   /** Goes to the root element. */
   style?: CSSProperties;
-  /** `Lane`, `Transports` and `Subtasks`, in the order they are to stand and
+  /** `Lane`, `Dependencies` and `Subtasks`, in the order they are to stand and
       be drawn. */
   children?: ReactNode;
 }
@@ -372,7 +372,7 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
      reason. */
   const ghostRef = useRef<HTMLSpanElement | null>(null);
   const [ghostAt, setGhostAt] = useState({ x: 0, y: 0, at: "" });
-  const ghostKey = ghost === null ? "" : `${ghost.x}:${ghost.y}:${ghost.from}:${ghost.to}:${ghost.overlap}:${ghost.late}`;
+  const ghostKey = ghost === null ? "" : `${ghost.x}:${ghost.y}:${ghost.from}:${ghost.to}:${ghost.overlap}:${ghost.violated}`;
   useLayoutEffect(() => {
     const element = ghostRef.current;
     if (ghost === null || element === null) return;
@@ -573,7 +573,7 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
               className={styles.ghostLabel}
               data-ghost=""
               data-schedule-overlay="ghost label"
-              data-findings={[ghost.overlap ? "overlap" : "", ghost.late ? "late-transport" : ""].filter(Boolean).join(" ")}
+              data-findings={[ghost.overlap ? "overlap" : "", ghost.violated ? "violated-dependency" : ""].filter(Boolean).join(" ")}
               data-refused={ghost.refused ? "" : undefined}
               style={{
                 left: `${ghostAt.x}px`,
@@ -584,7 +584,7 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
               {wording.scheduleGhostTimes(formats.time(new Date(ghost.from), false), formats.time(new Date(ghost.to), false))}
               {ghost.refused && <span className={styles.refusal}>{wording.scheduleLaneRefused}</span>}
               {ghost.overlap && <span className={styles.finding}>{wording.scheduleOverlap}</span>}
-              {ghost.late && <span className={styles.finding}>{wording.scheduleLateTransport}</span>}
+              {ghost.violated && <span className={styles.finding}>{wording.scheduleViolatedDependency}</span>}
             </span>
           )}
           {/* The ring is drawn inside the plot, not around it: the plot meets

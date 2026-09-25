@@ -1,4 +1,4 @@
-/* Where things lie on the plot: subtask boxes, transport paths, and what a
+/* Where things lie on the plot: subtask boxes, dependency paths, and what a
    pointer at a point hits.
 
    Every horizontal position goes through the scale (ADR-0001) from WORKING
@@ -18,10 +18,10 @@ import {
   departure,
   occupied,
   type Subtask,
-  type Transport,
-  type TransportAttachment,
-  type TransportEnds,
-  type TransportRoute,
+  type Dependency,
+  type DependencyAttachment,
+  type DependencyEnds,
+  type DependencyRoute,
 } from "./model";
 
 /** What the geometry needs to know about the view. */
@@ -64,7 +64,7 @@ export interface SubtaskBox {
   readonly depth: number;
   readonly y: number;
   readonly height: number;
-  /** Start of the setup, start and end of the main time, end of the teardown. */
+  /** Start of the lead-in, start and end of the main time, end of the lead-out. */
   readonly outerFrom: number;
   readonly mainFrom: number;
   readonly mainTo: number;
@@ -114,12 +114,12 @@ export function subtaskBox(view: Viewport, subtask: Subtask, lane: string, slot:
 
 /** The part of a subtask a point hits, or null. A bar narrower than a few
     pixels is widened for the pointer, or a short subtask could not be hit. */
-export function partAt(box: SubtaskBox, x: number, y: number): "setup" | "main" | "teardown" | null {
+export function partAt(box: SubtaskBox, x: number, y: number): "leadIn" | "main" | "leadOut" | null {
   if (y < box.y || y > box.y + box.height) return null;
   const slack = Math.max(0, (6 - (box.outerTo - box.outerFrom)) / 2);
   if (x < box.outerFrom - slack || x > box.outerTo + slack) return null;
-  if (x < box.mainFrom) return "setup";
-  if (x > box.mainTo) return "teardown";
+  if (x < box.mainFrom) return "leadIn";
+  if (x > box.mainTo) return "leadOut";
   return "main";
 }
 
@@ -149,7 +149,7 @@ export const MIN_LABEL_WIDTH = 64;
 
 /** Where a bar's label lies, or null where there is no room for one.
 
-    The label belongs to the main time - the setup is not the work - and to the
+    The label belongs to the main time - the lead-in is not the work - and to the
     VISIBLE part of it: a bar that began before the view keeps its label at the
     view's edge, the way the day band keeps its date. */
 export function barLabelBox(
@@ -174,21 +174,21 @@ export function barLabelBox(
   return { x, width, y: box.y, height: box.height };
 }
 
-/** How the transports of a schedule are drawn, where a transport does not say
+/** How the dependencies of a schedule are drawn, where a dependency does not say
     otherwise. */
-export interface TransportStyle {
-  readonly route: TransportRoute;
-  readonly attach: TransportAttachment;
-  readonly ends: TransportEnds;
+export interface DependencyStyle {
+  readonly route: DependencyRoute;
+  readonly attach: DependencyAttachment;
+  readonly ends: DependencyEnds;
 }
 
-/** A transport as drawn: its two ends, the shape between them, and the polyline
+/** A dependency as drawn: its two ends, the shape between them, and the polyline
     it is hit along - the same line that is drawn. */
-export interface TransportPath {
-  readonly transport: Transport;
-  readonly kind: TransportRoute;
+export interface DependencyPath {
+  readonly dependency: Dependency;
+  readonly kind: DependencyRoute;
   /** Whether its ends carry a dot. */
-  readonly ends: TransportEnds;
+  readonly ends: DependencyEnds;
   readonly x1: number;
   readonly y1: number;
   readonly x2: number;
@@ -214,7 +214,7 @@ const STUB = 10;
     from `y` over `height` fills the rows `y … y + height - 1`, and a line
     centred on `y + height` lies entirely below the last of them - which reads
     as a hairline gap between the line and the bar it leaves. */
-function attachY(attach: TransportAttachment, box: SubtaskBox, other: SubtaskBox): number {
+function attachY(attach: DependencyAttachment, box: SubtaskBox, other: SubtaskBox): number {
   const middle = Math.round(box.y + box.height / 2);
   /* Slots' tops rather than lane indices: a bar inside a folded group and one
      on a lane below it are still "the other lies below me", and a lane index
@@ -223,37 +223,37 @@ function attachY(attach: TransportAttachment, box: SubtaskBox, other: SubtaskBox
   return Math.round(other.y > box.y ? box.y + box.height - 1 : box.y + 1);
 }
 
-export function transportPath(
+export function dependencyPath(
   view: Viewport,
-  transport: Transport,
+  dependency: Dependency,
   from: SubtaskBox,
   to: SubtaskBox,
-  style: TransportStyle,
-): TransportPath {
-  const route = transport.route ?? style.route;
-  const attach = transport.attach ?? style.attach;
-  const ends = transport.ends ?? style.ends;
-  const x1 = xOf(view, departure(transport, from.subtask));
-  const x2 = xOf(view, arrival(transport, to.subtask));
+  style: DependencyStyle,
+): DependencyPath {
+  const route = dependency.route ?? style.route;
+  const attach = dependency.attach ?? style.attach;
+  const ends = dependency.ends ?? style.ends;
+  const x1 = xOf(view, departure(dependency, from.subtask));
+  const x2 = xOf(view, arrival(dependency, to.subtask));
   const y1 = attachY(attach, from, to);
   const y2 = attachY(attach, to, from);
 
   if (route === "straight") {
-    return { transport, kind: route, ends, x1, y1, x2, y2, c1x: x1, c2x: x2, points: [x1, y1, x2, y2] };
+    return { dependency, kind: route, ends, x1, y1, x2, y2, c1x: x1, c2x: x2, points: [x1, y1, x2, y2] };
   }
 
   if (route === "orthogonal") {
     /* Out of the bar, across, and in again. The turn lies halfway between the
-       stub and the arrival, so two transports of neighbouring stops do not
+       stub and the arrival, so two dependencies of neighbouring stops do not
        share a vertical. */
     const out = x1 + STUB;
     const turn = y1 === y2 ? out : Math.round((out + x2) / 2);
     const points = y1 === y2 ? [x1, y1, x2, y2] : [x1, y1, turn, y1, turn, y2, x2, y2];
-    return { transport, kind: route, ends, x1, y1, x2, y2, c1x: x1, c2x: x2, points };
+    return { dependency, kind: route, ends, x1, y1, x2, y2, c1x: x1, c2x: x2, points };
   }
 
   /* A curve that leaves forwards and arrives forwards, even where the arrival
-     lies before the departure - a late transport then loops back, which is the
+     lies before the departure - a violated dependency then loops back, which is the
      picture of what it is. */
   const bend = Math.max(14, Math.abs(x2 - x1) / 2);
   const c1x = x1 + bend;
@@ -267,11 +267,11 @@ export function transportPath(
       u * u * u * y1 + 3 * u * u * t * y1 + 3 * u * t * t * y2 + t * t * t * y2,
     );
   }
-  return { transport, kind: "curve", ends, x1, y1, x2, y2, c1x, c2x, points };
+  return { dependency, kind: "curve", ends, x1, y1, x2, y2, c1x, c2x, points };
 }
 
-/** Distance from a point to a transport's curve, in pixels. */
-export function distanceTo(path: TransportPath, x: number, y: number): number {
+/** Distance from a point to a dependency's curve, in pixels. */
+export function distanceTo(path: DependencyPath, x: number, y: number): number {
   let best = Infinity;
   const p = path.points;
   for (let i = 0; i + 3 < p.length; i += 2) {

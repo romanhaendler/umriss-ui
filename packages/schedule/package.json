@@ -1,7 +1,7 @@
 {
   "name": "@umriss-ui/schedule",
   "version": "0.2.0",
-  "description": "The umriss schedule - subtasks on lanes over time, with transports, findings and controlled editing.",
+  "description": "The umriss schedule - subtasks on lanes over time, with dependencies, findings and controlled editing.",
   "license": "MIT",
   "author": "Roman Händler",
   "homepage": "https://romanhaendler.github.io/umriss-ui/schedule/",

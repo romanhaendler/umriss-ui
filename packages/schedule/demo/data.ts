@@ -3,9 +3,9 @@
 
    Deterministic and written out, not generated from a seed: a planner reads
    these as a day's plan, and a finding is placed where it is on purpose - the
-   overlap on the mill, the late transport into the paint shop. */
+   overlap on the mill, the violated dependency into the paint shop. */
 
-import type { Subtask, Task, Transport } from "../src";
+import type { Subtask, Task, Dependency } from "../src";
 
 const at = (hours: number, minutes = 0) => new Date(2026, 2, 17, hours, minutes).getTime();
 const min = (n: number) => n * 60_000;
@@ -33,44 +33,44 @@ export const ORDERS: readonly Task[] = [
 ];
 
 export const STEPS: readonly Subtask[] = [
-  { id: "a-2041-1", task: "a-2041", lane: "saw", from: at(6), to: at(7), setup: min(15), teardown: min(10) },
-  { id: "a-2041-2", task: "a-2041", lane: "mill", from: at(8), to: at(10, 30), setup: min(30), teardown: min(15) },
+  { id: "a-2041-1", task: "a-2041", lane: "saw", from: at(6), to: at(7), leadIn: min(15), leadOut: min(10) },
+  { id: "a-2041-2", task: "a-2041", lane: "mill", from: at(8), to: at(10, 30), leadIn: min(30), leadOut: min(15) },
   { id: "a-2041-3", task: "a-2041", lane: "qa", from: at(11, 30), to: at(12, 15) },
 
-  { id: "a-2042-1", task: "a-2042", lane: "saw", from: at(7, 30), to: at(8, 15), setup: min(10) },
-  { id: "a-2042-2", task: "a-2042", lane: "lathe-1", from: at(9), to: at(11), setup: min(20), teardown: min(15) },
+  { id: "a-2042-1", task: "a-2042", lane: "saw", from: at(7, 30), to: at(8, 15), leadIn: min(10) },
+  { id: "a-2042-2", task: "a-2042", lane: "lathe-1", from: at(9), to: at(11), leadIn: min(20), leadOut: min(15) },
   { id: "a-2042-3", task: "a-2042", lane: "qa", from: at(13), to: at(13, 30) },
 
-  { id: "a-2043-1", task: "a-2043", lane: "press", from: at(6, 30), to: at(8), setup: min(30), teardown: min(15) },
-  { id: "a-2043-2", task: "a-2043", lane: "mill", from: at(10), to: at(11, 30), setup: min(15) },
-  { id: "a-2043-3", task: "a-2043", lane: "paint", from: at(12), to: at(14), setup: min(20), teardown: min(20) },
+  { id: "a-2043-1", task: "a-2043", lane: "press", from: at(6, 30), to: at(8), leadIn: min(30), leadOut: min(15) },
+  { id: "a-2043-2", task: "a-2043", lane: "mill", from: at(10), to: at(11, 30), leadIn: min(15) },
+  { id: "a-2043-3", task: "a-2043", lane: "paint", from: at(12), to: at(14), leadIn: min(20), leadOut: min(20) },
 
-  { id: "a-2044-1", task: "a-2044", lane: "lathe-2", from: at(6), to: at(8, 30), setup: min(20), teardown: min(10) },
-  { id: "a-2044-2", task: "a-2044", lane: "press", from: at(9, 30), to: at(10, 45), setup: min(25) },
-  { id: "a-2044-3", task: "a-2044", lane: "paint", from: at(14, 45), to: at(16), setup: min(15), teardown: min(15) },
+  { id: "a-2044-1", task: "a-2044", lane: "lathe-2", from: at(6), to: at(8, 30), leadIn: min(20), leadOut: min(10) },
+  { id: "a-2044-2", task: "a-2044", lane: "press", from: at(9, 30), to: at(10, 45), leadIn: min(25) },
+  { id: "a-2044-3", task: "a-2044", lane: "paint", from: at(14, 45), to: at(16), leadIn: min(15), leadOut: min(15) },
 
-  { id: "a-2045-1", task: "a-2045", lane: "lathe-1", from: at(12), to: at(13, 30), setup: min(15), teardown: min(10) },
-  { id: "a-2045-2", task: "a-2045", lane: "press", from: at(14, 15), to: at(15), setup: min(20) },
+  { id: "a-2045-1", task: "a-2045", lane: "lathe-1", from: at(12), to: at(13, 30), leadIn: min(15), leadOut: min(10) },
+  { id: "a-2045-2", task: "a-2045", lane: "press", from: at(14, 15), to: at(15), leadIn: min(20) },
   { id: "a-2045-3", task: "a-2045", lane: "qa", from: at(15, 45), to: at(16, 30) },
 
-  { id: "a-2046-1", task: "a-2046", lane: "lathe-2", from: at(10), to: at(12), setup: min(20), teardown: min(15) },
-  { id: "a-2046-2", task: "a-2046", lane: "mill", from: at(13), to: at(14, 30), setup: min(20), teardown: min(10) },
+  { id: "a-2046-1", task: "a-2046", lane: "lathe-2", from: at(10), to: at(12), leadIn: min(20), leadOut: min(15) },
+  { id: "a-2046-2", task: "a-2046", lane: "mill", from: at(13), to: at(14, 30), leadIn: min(20), leadOut: min(10) },
   { id: "a-2046-3", task: "a-2046", lane: "qa", from: at(15), to: at(15, 30) },
 ];
 
-export const MOVES: readonly Transport[] = [
-  { id: "t-2041-1", from: "a-2041-1", to: "a-2041-2", duration: min(10) },
-  { id: "t-2041-2", from: "a-2041-2", to: "a-2041-3", duration: min(20) },
-  { id: "t-2042-1", from: "a-2042-1", to: "a-2042-2", duration: min(15) },
-  { id: "t-2042-2", from: "a-2042-2", to: "a-2042-3", duration: min(30), leaves: "main" },
-  { id: "t-2043-1", from: "a-2043-1", to: "a-2043-2", duration: min(45) },
+export const MOVES: readonly Dependency[] = [
+  { id: "t-2041-1", from: "a-2041-1", to: "a-2041-2", lag: min(10) },
+  { id: "t-2041-2", from: "a-2041-2", to: "a-2041-3", lag: min(20) },
+  { id: "t-2042-1", from: "a-2042-1", to: "a-2042-2", lag: min(15) },
+  { id: "t-2042-2", from: "a-2042-2", to: "a-2042-3", lag: min(30), leaves: "main" },
+  { id: "t-2043-1", from: "a-2043-1", to: "a-2043-2", lag: min(45) },
   /* Leaves the mill at 11:30 and has 10 minutes to reach the paint shop's
-     setup at 11:40 - it takes 25: a late transport, on purpose. */
-  { id: "t-2043-2", from: "a-2043-2", to: "a-2043-3", duration: min(25) },
-  { id: "t-2044-1", from: "a-2044-1", to: "a-2044-2", duration: min(20) },
-  { id: "t-2044-2", from: "a-2044-2", to: "a-2044-3", duration: min(60), arrives: "main" },
-  { id: "t-2045-1", from: "a-2045-1", to: "a-2045-2", duration: min(15) },
-  { id: "t-2045-2", from: "a-2045-2", to: "a-2045-3", duration: min(15) },
-  { id: "t-2046-1", from: "a-2046-1", to: "a-2046-2", duration: min(20) },
-  { id: "t-2046-2", from: "a-2046-2", to: "a-2046-3", duration: min(10), leaves: "main" },
+     lead-in at 11:40 - it takes 25: a violated dependency, on purpose. */
+  { id: "t-2043-2", from: "a-2043-2", to: "a-2043-3", lag: min(25) },
+  { id: "t-2044-1", from: "a-2044-1", to: "a-2044-2", lag: min(20) },
+  { id: "t-2044-2", from: "a-2044-2", to: "a-2044-3", lag: min(60), arrives: "main" },
+  { id: "t-2045-1", from: "a-2045-1", to: "a-2045-2", lag: min(15) },
+  { id: "t-2045-2", from: "a-2045-2", to: "a-2045-3", lag: min(15) },
+  { id: "t-2046-1", from: "a-2046-1", to: "a-2046-2", lag: min(20) },
+  { id: "t-2046-2", from: "a-2046-2", to: "a-2046-3", lag: min(10), leaves: "main" },
 ];

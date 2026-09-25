@@ -1,6 +1,6 @@
 /* The schedule's context and the registration hooks.
 
-   `Lane`, `Subtasks` and `Transports` register their configuration on mount and
+   `Lane`, `Subtasks` and `Dependencies` register their configuration on mount and
    deregister on unmount; a change of props only updates the entry. The order in
    the JSX is the registration order - the order of the lanes from top to
    bottom, and the drawing order of the layers. Outside a `Schedule` they

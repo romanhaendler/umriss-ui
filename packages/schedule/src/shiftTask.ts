@@ -1,6 +1,6 @@
 /* Shifting a whole task: the arithmetic for moving an order with all its stops
    at once. One move intent per subtask of the task, each by the same amount, so
-   lengths and the distances between the stops - and with them every transport
+   lengths and the distances between the stops - and with them every dependency
    that fitted - stay as they were. The schedule never runs it; an application
    applies the moves like any other intent, or runs `ripple` over them first. */
 
