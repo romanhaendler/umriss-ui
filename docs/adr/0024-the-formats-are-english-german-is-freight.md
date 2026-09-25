@@ -21,7 +21,7 @@ defect of either register but of the pair, and the pair is what a reader sees.
 
 ## Why `en-GB` and not `en-US`
 
-**The clock.** A plant screen that writes 3 pm where 15:00 was meant is read
+**The clock.** A screen that writes 3 pm where 15:00 was meant is read
 wrongly once and distrusted afterwards; `en-US` writes it that way by default.
 The 24-hour clock is set explicitly all the same (`hourCycle: "h23"`), because
 the clock is this product's decision and not the locale's — the German set

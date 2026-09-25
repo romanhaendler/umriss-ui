@@ -18,6 +18,7 @@ import { Prose } from "./Prose";
 import type { Demo } from "./demo";
 import { examplesOf } from "./tooling/examples";
 import { tablesOf } from "./tooling/tables";
+import { ADR_0032 } from "./outline";
 import type { Rubric, Page as PageData } from "./outline";
 
 function ImportLine({ exports, packageName }: { exports: readonly string[]; packageName: string }) {
@@ -164,6 +165,9 @@ export function Page({ demo, page }: PageProps) {
               </li>
             ))}
           </ul>
+          <p className="pageAbout">
+            <Prose text={`What umriss deliberately does not build, and why: [ADR-0032](${ADR_0032}).`} />
+          </p>
         </Section>
       )}
     </article>

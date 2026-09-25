@@ -128,7 +128,7 @@ test.describe("Scenarios › find a late shipment", () => {
 
   /* The counterparts of the table tests from
      `packages/core/tests-visual/features-basics.spec.ts`, which ran there
-     against the old demonstration, now a scenario (umriss-table 14). */
+     against the order list that is now a scenario (umriss-table 14). */
 
   test("A click on the header sorts ascending and descending", async ({ page }) => {
     const first = dataRows(page).first();

@@ -737,7 +737,7 @@ _Avoid_: result, Ergebnis, visible rows, page
 
 **Pre-filter**:
 The application's restriction of which rows a table has at all — by permission,
-by plant, by anything the user is not meant to undo. It is invisible: it is never
+by tenant, by anything the user is not meant to undo. It is invisible: it is never
 shown as a condition, never reset, and the total a user sees beside the
 filtered set counts only the rows it admits. A table the pre-filter leaves empty
 has no entries; nothing has been filtered away. A restriction the user should see
