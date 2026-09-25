@@ -109,6 +109,10 @@ const STEPS: readonly Subtask[] = SHIFT.batches.flatMap((batch) =>
   })),
 );
 
+/* The batch number written into every bar, as the schedule's "Bar labels"
+   example writes the order. */
+const BATCH_NAMES = new Map(SHIFT.batches.map((batch) => [batch.id, batch.name]));
+
 const PLAN_DOMAIN: readonly [number, number] = [at(-75), at(SHIFT_MINUTES + 30)];
 
 type Point = { t: number; kiln: number };
@@ -150,21 +154,35 @@ function usePlantMinute(): { minute: number; wall: number; running: boolean; set
 }
 
 /** A region of the room: a landmark with its name, and the place a skip link
-    lands. */
-function Region({ id, title, actions, children }: { id: string; title: string; actions?: ReactNode; children: ReactNode }) {
+    lands. `quiet` keeps the name for the landmark and leaves the header out,
+    where the content shows a heading of its own. */
+function Region({
+  id,
+  title,
+  quiet = false,
+  actions,
+  children,
+}: {
+  id: string;
+  title: string;
+  quiet?: boolean;
+  actions?: ReactNode;
+  children: ReactNode;
+}) {
   /* Where a skip link landed shows the library's ring, over the card's own
      shadow - a card has no focus style of its own, being no control. */
   const [landed, setLanded] = useState(false);
   return (
     <Card
       id={id}
-      aria-labelledby={`${id}-title`}
+      aria-labelledby={quiet ? undefined : `${id}-title`}
+      aria-label={quiet ? title : undefined}
       tabIndex={-1}
       onFocus={(event) => setLanded(event.target === event.currentTarget)}
       onBlur={() => setLanded(false)}
       style={{ outline: "none", boxShadow: landed ? "var(--u-focus-ring), var(--u-shadow-card)" : undefined }}
     >
-      <CardHeader title={<span id={`${id}-title`}>{title}</span>} actions={actions} />
+      {!quiet && <CardHeader title={<span id={`${id}-title`}>{title}</span>} actions={actions} />}
       <CardBody>{children}</CardBody>
     </Card>
   );
@@ -298,7 +316,7 @@ export default function ControlRoom() {
         </Chart>
       </Region>
 
-      <Region id="room-alarms" title="Alarms">
+      <Region id="room-alarms" title="Alarms" quiet>
         <AlarmList
           view={alarms}
           selection={selection}
@@ -347,6 +365,7 @@ export default function ControlRoom() {
           now={now}
           selectedTask={batch}
           onSelectedTaskChange={(task) => setBatch(task)}
+          label={(subtask) => BATCH_NAMES.get(subtask.task) ?? subtask.task}
         >
           {LANES.map((lane) => (
             <Lane key={lane.id} id={lane.id} label={lane.label} />
