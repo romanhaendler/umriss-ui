@@ -842,16 +842,17 @@
      Drawn inside every cell it holds; the border stays for the height,
      transparent. */
   /* Not while focused: the focus ring of a virtual line is an inset shadow as
-     well, and this rule would take it off every cell between the ends. */
+     well, and this rule would take it off every cell between the ends - nor
+     off a cell that is the Active one of a grid. */
   .pinnedTable tbody tr.groupHeader > .td {
     border-top-color: transparent;
   }
 
-  .pinnedTable tbody tr.groupHeader:not(:focus-visible) > .td {
+  .pinnedTable tbody tr.groupHeader:not(:focus-visible) > .td:not(:focus-visible) {
     box-shadow: inset 0 1px 0 var(--u-hairline-strong);
   }
 
-  .pinnedTable tbody tr.groupHeader:first-child > .td {
+  .pinnedTable tbody tr.groupHeader:first-child > .td:not(:focus-visible) {
     box-shadow: none;
   }
 
@@ -1199,6 +1200,19 @@
 
   .fillerRow {
     pointer-events: none;
+  }
+
+  /* ---- Grid mode (table-grid-mode, ADR-0034) --------------------------- */
+
+  /* The Active cell rings itself with the shared ring, drawn inside its
+     edges: an outer ring is cut away by the scroll area at the table's sides
+     and painted over by the neighbouring cells' surfaces - a pinned cell's,
+     a hovered row's. Every cell of the grid can be the Active one: the
+     detail's and the empty body's too, which carry no `.td`. */
+  .grid td:focus-visible,
+  .grid th:focus-visible {
+    outline: none;
+    box-shadow: inset var(--u-focus-ring);
   }
 
   .fillerRow td {
