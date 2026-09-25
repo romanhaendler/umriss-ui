@@ -57,6 +57,86 @@ test("the row header sticks while scrolling sideways, behind selection and expan
   expect(onTop).toBe("row");
 });
 
+/* ---------------- Pinned to both sides (table-column-pinning 01) ---------------- */
+
+test("both blocks stay while the hours scroll, each against its edge, and the shadow shows only over content", async ({ page }) => {
+  await openExample(page, "column", "pinned-both-sides");
+  const table = example(page, "pinned-both-sides");
+  const area = table.locator("table").locator("..");
+  const first = table.locator("tbody tr").first();
+  const cells = {
+    selection: first.locator("td").first(),
+    machine: first.locator("th[scope='row']"),
+    verdict: first.locator("td").nth(-2),
+    actions: first.locator("td").last(),
+  };
+  const xs = async () =>
+    Object.fromEntries(await Promise.all(Object.entries(cells).map(async ([k, c]) => [k, await x(c)] as const)));
+  const shadow = (cell: Locator) => cell.evaluate((el) => getComputedStyle(el, "::before").visibility);
+
+  const before = await xs();
+  expect(await shadow(cells.machine)).toBe("hidden");
+  expect(await shadow(cells.verdict)).toBe("visible");
+
+  await area.evaluate((el) => {
+    el.scrollLeft = 200;
+  });
+  const after = await xs();
+  for (const key of Object.keys(before)) expect(Math.abs(after[key]! - before[key]!)).toBeLessThan(1);
+  await expect.poll(() => shadow(cells.machine)).toBe("visible");
+
+  // The machine stands right behind the selection; the verdict right before the actions.
+  const selection = (await cells.selection.boundingBox())!;
+  expect(Math.abs(after.machine! - (selection.x + selection.width))).toBeLessThan(1);
+  const verdict = (await cells.verdict.boundingBox())!;
+  expect(Math.abs(after.actions! - (verdict.x + verdict.width))).toBeLessThan(1);
+
+  // An hour that scrolled under the machine lies under it.
+  const machine = (await cells.machine.boundingBox())!;
+  const onTop = await page.evaluate(
+    ({ px, py }) => document.elementFromPoint(px, py)?.closest("th, td")?.getAttribute("scope") ?? null,
+    { px: machine.x + machine.width / 2, py: machine.y + machine.height / 2 },
+  );
+  expect(onTop).toBe("row");
+
+  await area.evaluate((el) => {
+    el.scrollLeft = el.scrollWidth;
+  });
+  await expect.poll(() => shadow(cells.verdict)).toBe("hidden");
+});
+
+/* ---------------- Pinning in the column menu (table-column-pinning 02) ---------------- */
+
+test("the column menu pins a column to the end: it sticks there, and the focus stays on its key", async ({ page }) => {
+  await openExample(page, "column", "pinned-both-sides");
+  const table = example(page, "pinned-both-sides");
+  await table.getByRole("button", { name: "Columns" }).click();
+  const menu = page.getByRole("dialog", { name: "Show, hide and arrange columns" });
+
+  /* The entry wanders to the end block in the list, and an element that has
+     been moved loses the focus in the browser. */
+  await menu.getByRole("button", { name: "Pin Area to end" }).click();
+  await expect(menu.getByRole("button", { name: "Unpin Area" })).toBeFocused();
+  const heads = table.locator("thead th");
+  await expect(heads.nth(-3)).toHaveText("Area");
+  await expect(heads.nth(-2)).toHaveText("Temperature (°C)");
+
+  await page.keyboard.press("Escape");
+  const area = table.locator("table").locator("..");
+  const head = heads.nth(-3);
+  const before = await x(head);
+  await area.evaluate((el) => {
+    el.scrollLeft = 200;
+  });
+  expect(Math.abs((await x(head)) - before)).toBeLessThan(1);
+
+  // And back: unpinned, it scrolls with the hours again.
+  await table.getByRole("button", { name: "Columns" }).click();
+  await menu.getByRole("button", { name: "Unpin Area" }).click();
+  await expect(menu.getByRole("button", { name: "Pin Area to end" })).toBeFocused();
+  await expect(table.locator("thead th").nth(2)).toHaveText("Area");
+});
+
 /* ---------------- The quiet gesture (umriss-table 09) ---------------- */
 
 test("a row action rests in the secondary type and stands in the accent when its row is meant", async ({ page }) => {

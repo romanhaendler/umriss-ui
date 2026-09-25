@@ -13,6 +13,7 @@ import type { TableSelection } from "./model/useTableSelection";
 import type { ColumnFilter } from "./columnFilter";
 import type { DateFormat, NumberFormat } from "./values";
 import type { DatePeriod } from "./model/grouping";
+import type { Pin } from "./model/pinning";
 
 /* --- Values --------------------------------------------------------------- */
 
@@ -119,8 +120,8 @@ export type NumberField<Z> = {
 export interface ColumnBase {
   /** Names the column in its header, in the column menu and in the header row of the export. */
   label: string;
-  /** This column names the row: row header cells, never hideable, the sticky
-      first column, and the name by which the row's selection, expander and
+  /** This column names the row: row header cells, never hideable, the column
+      `stickyRowHeader` pins, and the name by which the row's selection, expander and
       actions are read out. At most one per table. */
   rowHeader?: boolean;
   /** Right-aligned with tabular figures. Without it the first value present decides. */
@@ -129,6 +130,10 @@ export interface ColumnBase {
   width?: number;
   /** Shows the drag grip on the header cell. */
   resizable?: boolean;
+  /** Keeps the column in view while the table scrolls sideways: in a block
+      before every other column, or after them. The user can change it in the
+      column menu; the view carries the change. */
+  pin?: Pin;
   /** Sortable unless stated otherwise, when the value is text, a number, a point in time or a boolean. */
   sortable?: boolean;
   /** Takes part in the search. Without a statement: yes for text, no otherwise. */
@@ -295,6 +300,8 @@ interface VerdictBase {
   width?: number;
   /** Shows the drag grip on the header cell. */
   resizable?: boolean;
+  /** Keeps the column in view while the table scrolls sideways, before or after every other column. */
+  pin?: Pin;
   /** A verdict column has no list filter: four verdicts are filtered through the sort. */
   filter?: never;
   /** `"worst"`: the worst verdict among the rows – in the footer and in a
@@ -350,7 +357,8 @@ export interface TableProps<Z> {
   selectable?: boolean;
   /** Keeps the header row visible while scrolling. */
   stickyHeader?: boolean;
-  /** Keeps the row header column visible while scrolling sideways; it then stands first. */
+  /** Keeps the row header column visible while scrolling sideways - the same as
+      `pin="start"` on the row header. */
   stickyRowHeader?: boolean;
   /** Discreet zebra stripes. */
   striped?: boolean;
@@ -468,6 +476,10 @@ export interface TableSnapshot<Z> {
   order: readonly string[];
   /** Reorders the columns – on header, body and footer at once. */
   setOrder: (order: readonly string[]) => void;
+  /** The pinned columns by id - the declared ones until the user chooses. */
+  pinned: Readonly<Record<string, Pin>>;
+  /** Pins a column to the start or the end, or unpins it with `null`. */
+  setPin: (column: string, pin: Pin | null) => void;
   /** The widths in pixels: those of the columns, and over them the dragged ones. */
   widths: Readonly<Record<string, number>>;
   /** Sets the width of a column; `undefined` takes it back. */

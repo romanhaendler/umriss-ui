@@ -24,8 +24,8 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ## Unreleased
 
-Needs the `@umriss-ui/core` that carries the availability wording (its own
-"Unreleased" section).
+Needs the `@umriss-ui/core` that carries the availability wording and the
+column menu's pin keys (its own "Unreleased" section).
 
 ### Added
 
@@ -62,8 +62,32 @@ Needs the `@umriss-ui/core` that carries the availability wording (its own
   handler the count becomes a switch for the view; the application filters
   with the table's own `filter` and `isHiddenFromOperation`. The switch stays
   while the view is on, even at zero.
+- **Any column can be pinned**: `pin="start"` or `pin="end"` on a `Column` or
+  a `VerdictColumn` keeps it in view while the table scrolls sideways, in a
+  block before or after every other column. The selection and the expander
+  stick with the start block (and a group span with them), the row actions
+  with the end block; a group header's label and aggregates stick in their
+  blocks, and virtual rows pin like any other. A shadow on a block's inner
+  edge shows only while content lies under it.
+- **`t.pinned` and `t.setPin(column, "start" | "end" | null)`**, and
+  **`pinned` in the view**: the user's choice, whole, once it deviates from
+  what the columns declare (`{}` when every declared pin was undone). A view
+  handed in as `initialView` restores it.
+- **The column menu pins**: two keys per column, "Pin to start" and "Pin to
+  end"; the key of the side a column is pinned to stands in the accent and
+  reads "Unpin". The focus stays on the key that was pressed while the entry
+  moves to its block.
 
 ### Changed
+
+- **`stickyRowHeader` is `pin="start"` on the row header.** It looks as
+  before; the difference is that the row header can now be unpinned (with
+  `setPin`) and share its block with other pinned columns. The sticky offsets
+  are measured from the head row instead of assumed from the 34 px of a
+  control cell, so a control cell that grows no longer slides under the row
+  header.
+- **In the column menu a column moves only inside its block** (start, the
+  unpinned ones, end). Before, only the sticky row header was held in place.
 
 - **`DEFAULT_ORDER` begins with availability**: in service above hidden, then
   priority, acknowledgement and time as before. Only alarms with an
@@ -76,6 +100,14 @@ Needs the `@umriss-ui/core` that carries the availability wording (its own
 - **`Alarm` is a type, no longer an interface** - the union with the shelf
   needs it. `Partial<Alarm>` spread into an `Alarm` no longer compiles; name
   the fields you mean (`Pick<Alarm, "cleared" | "acknowledgedAt">`).
+
+### Fixed
+
+- **A group header whose first column carries an aggregate keeps its
+  aggregates under their columns.** Grouped by one level, its label stood in a
+  cell over no column, which a browser counts as one, and every aggregate
+  stood a column too far right. The label now takes the first column's place
+  in the header; its sum stays in the footer.
 
 ---
 

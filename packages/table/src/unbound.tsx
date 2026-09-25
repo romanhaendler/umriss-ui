@@ -26,6 +26,7 @@ import { GroupingChoice } from "./groupingChoice";
 import type { PartKind, Registry } from "./registry";
 import { orderColumns } from "./model/tableModel";
 import type { TableRef } from "./types";
+import type { Pin } from "./model/pinning";
 import styles from "./Table.module.css";
 
 /** Registers a part at its table for as long as it stands: first during the
@@ -131,10 +132,11 @@ export function ColumnMenu({ of }: ColumnMenuProps) {
   const button = useRef<HTMLButtonElement>(null);
   const list = useRef<HTMLUListElement>(null);
   const panelId = useId();
-  /* Which button gets the focus back after the move. The element wanders to its
-     new place in the DOM, and an element that has been moved loses the focus in
+  /* Which button gets the focus back after a move or a pin: the key itself,
+     or where it is disabled now its neighbour. The element wanders to its new
+     place in the DOM, and an element that has been moved loses the focus in
      the browser. */
-  const [focusAfter, setFocusAfter] = useState<{ id: string; direction: "forward" | "backward" } | null>(null);
+  const [focusAfter, setFocusAfter] = useState<{ id: string; key: string; otherwise?: string } | null>(null);
 
   useLayoutEffect(() => {
     if (!focusAfter || !list.current) return;
@@ -143,29 +145,61 @@ export function ColumnMenu({ of }: ColumnMenuProps) {
     const entry = Array.from(list.current.children).find(
       (child) => (child as HTMLElement).dataset.column === focusAfter.id,
     );
-    const wanted = entry?.querySelector<HTMLButtonElement>(`[data-direction="${focusAfter.direction}"]`);
-    const other = entry?.querySelector<HTMLButtonElement>(
-      `[data-direction="${focusAfter.direction === "forward" ? "backward" : "forward"}"]`,
-    );
+    const wanted = entry?.querySelector<HTMLButtonElement>(focusAfter.key);
+    const other = focusAfter.otherwise ? entry?.querySelector<HTMLButtonElement>(focusAfter.otherwise) : undefined;
     (wanted && !wanted.disabled ? wanted : other)?.focus();
   }, [focusAfter]);
 
   if (!connection) return null;
   const { registry, snapshot } = connection;
   const hook = registry.hook!;
-  const ordered = registry.withStickyHeaderFirst(
-    orderColumns(registry.modelColumns(hook.rows, hook.formats), snapshot.order),
-  );
-  /* A sticky row header stands first and stays there; nothing goes before it. */
-  const pinned = registry.stickyRowHeader ? ordered[0]?.hideable === false : false;
+  const ordered = registry.inPinOrder(orderColumns(registry.modelColumns(hook.rows, hook.formats), snapshot.order));
+  const pins = registry.pins();
+  /* A column moves inside its block: past the edge of a block it would only
+     be put back where its pin keeps it. */
+  const movable = (index: number, step: -1 | 1) => {
+    const target = ordered[index + step];
+    return target !== undefined && pins[target.id] === pins[ordered[index]!.id];
+  };
 
   const move = (index: number, step: -1 | 1) => {
     const ids = ordered.map((s) => s.id);
     const target = index + step;
-    if (target < 0 || target >= ids.length) return;
+    if (!movable(index, step)) return;
     [ids[index], ids[target]] = [ids[target]!, ids[index]!];
     snapshot.setOrder(ids);
-    setFocusAfter({ id: ordered[index]!.id, direction: step < 0 ? "forward" : "backward" });
+    const [key, otherwise] = step < 0 ? ["forward", "backward"] : ["backward", "forward"];
+    setFocusAfter({ id: ordered[index]!.id, key: `[data-direction="${key}"]`, otherwise: `[data-direction="${otherwise}"]` });
+  };
+
+  /* A pin key pins to its side, or unpins where the column is pinned there
+     already - two keys for three wishes, and the one that is on says so in the
+     accent. */
+  const pinKey = (id: string, label: string, side: Pin) => {
+    const on = pins[id] === side;
+    return (
+      <button
+        type="button"
+        className={cx(styles.move, on && styles.pinOn)}
+        data-pin={side}
+        aria-label={on ? wording.unpinColumn(label) : side === "start" ? wording.pinColumnToStart(label) : wording.pinColumnToEnd(label)}
+        onClick={() => {
+          snapshot.setPin(id, on ? null : side);
+          setFocusAfter({ id, key: `[data-pin="${side}"]` });
+        }}
+      >
+        <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">
+          <path
+            d={side === "start" ? "M2 1.5v7M8.5 5H4.5M6 3.5 4.5 5 6 6.5" : "M8 1.5v7M1.5 5h4M4 3.5 5.5 5 4 6.5"}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+    );
   };
 
   return (
@@ -207,7 +241,7 @@ export function ColumnMenu({ of }: ColumnMenuProps) {
                   className={styles.move}
                   data-direction="forward"
                   aria-label={wording.columnForward(label)}
-                  disabled={index === 0 || (pinned && index <= 1)}
+                  disabled={!movable(index, -1)}
                   onClick={() => move(index, -1)}
                 >
                   <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">
@@ -219,13 +253,15 @@ export function ColumnMenu({ of }: ColumnMenuProps) {
                   className={styles.move}
                   data-direction="backward"
                   aria-label={wording.columnBackward(label)}
-                  disabled={index === ordered.length - 1 || (pinned && index === 0)}
+                  disabled={!movable(index, 1)}
                   onClick={() => move(index, 1)}
                 >
                   <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">
                     <path d="M2 3.5 5 6.5l3-3" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </button>
+                {pinKey(column.id, label, "start")}
+                {pinKey(column.id, label, "end")}
               </li>
             );
           })}
