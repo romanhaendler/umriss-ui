@@ -157,6 +157,32 @@ test("Drawer holds the focus, closes on Escape and gives the focus back", async 
   await expect(opener).toBeFocused();
 });
 
+/* The browser gives a modal dialog `overflow: auto`; the focus landing in
+   the sheet while it still stood off-screen scrolled the dialog towards it,
+   and the sheet shot in too far and jumped back at the end (reported by the
+   user). The entrance is a path: the sheet's left edge only ever moves left,
+   and the dialog never scrolls. */
+test("Drawer enters along its path, without the dialog scrolling", async ({ page }) => {
+  await openExample(page, "drawer", "a-detail-from-the-edge");
+  await page.getByRole("button", { name: "Show the order" }).click();
+  const samples: { x: number; scroll: number }[] = [];
+  for (let i = 0; i < 12; i++) {
+    samples.push(
+      await page.evaluate(() => {
+        const dialog = document.querySelector("dialog[open]") as HTMLDialogElement;
+        const sheet = dialog.querySelector(":scope > div") as HTMLElement;
+        return { x: sheet.getBoundingClientRect().x, scroll: dialog.scrollLeft };
+      }),
+    );
+    await page.waitForTimeout(25);
+  }
+  expect(samples.every((s) => s.scroll === 0)).toBe(true);
+  for (let i = 1; i < samples.length; i++) {
+    expect(samples[i]!.x).toBeLessThanOrEqual(samples[i - 1]!.x + 0.5);
+  }
+  expect(samples[0]!.x).toBeGreaterThan(samples.at(-1)!.x);
+});
+
 test("Drawer appears and goes at once under reduced motion", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await openExample(page, "drawer", "a-detail-from-the-edge");

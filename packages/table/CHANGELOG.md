@@ -148,6 +148,8 @@ column menu's pin keys, `editCell`, `selectAllOnPage` and `exportPageLabel`
 
 ### Fixed
 
+- **A table's rounded corner stays whole** under a sticky head or pinned
+  cells: the scroll area carries the frame's radius and clips to it.
 - **A group header whose first column carries an aggregate keeps its
   aggregates under their columns.** Grouped by one level, its label stood in a
   cell over no column, which a browser counts as one, and every aggregate

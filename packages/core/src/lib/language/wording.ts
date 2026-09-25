@@ -634,7 +634,7 @@ export const DEFAULT_WORDING: Wording = {
     `${from} – ${to} · ${count} ${count === 1 ? "day" : "days"}`,
   daysAllDay: (count) => `${count} ${count === 1 ? "day" : "days"} (all day)`,
   duration: (teile) => `Duration: ${teile.join(" ")}`,
-  hoursShort: (count) => `${count} hrs`,
+  hoursShort: (count) => `${count} ${count === 1 ? "hr" : "hrs"}`,
   minutesShort: (count) => `${count} min`,
   timeMissingHint: (timeOfDay) =>
     `This time does not exist on this day (start of daylight saving time). ${timeOfDay} is used instead.`,

@@ -194,6 +194,16 @@ commit.
   `onClick` and `onKeyDown` of `MultiSelect`'s field, and `onClick` of `Tab`
   and `MenuItem`, which ran first before but could not prevent.
 
+### Fixed
+
+- **A drawer from the right no longer shoots in too far and jumps back.**
+  The browser gives a modal dialog `overflow: auto`; the focus landing in the
+  sheet while it still stood off-screen scrolled the dialog towards it. The
+  drawer's dialog is clipped now.
+- **A drawer from the left fades as it leaves**; its entrance rule outweighed
+  the exit and it vanished at once.
+- **"1 hr"**, not "1 hrs", in the English `hoursShort`.
+
 ---
 
 ## 0.9.2 – Today's dot, one chevron (Sep. 2026)
