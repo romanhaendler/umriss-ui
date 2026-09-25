@@ -57,6 +57,54 @@ test("the row header sticks while scrolling sideways, behind selection and expan
   expect(onTop).toBe("row");
 });
 
+/* ---------------- Pinned to both sides (table-column-pinning 01) ---------------- */
+
+test("both blocks stay while the hours scroll, each against its edge, and the shadow shows only over content", async ({ page }) => {
+  await openExample(page, "column", "pinned-both-sides");
+  const table = example(page, "pinned-both-sides");
+  const area = table.locator("table").locator("..");
+  const first = table.locator("tbody tr").first();
+  const cells = {
+    selection: first.locator("td").first(),
+    machine: first.locator("th[scope='row']"),
+    verdict: first.locator("td").nth(-2),
+    actions: first.locator("td").last(),
+  };
+  const xs = async () =>
+    Object.fromEntries(await Promise.all(Object.entries(cells).map(async ([k, c]) => [k, await x(c)] as const)));
+  const shadow = (cell: Locator) => cell.evaluate((el) => getComputedStyle(el, "::before").visibility);
+
+  const before = await xs();
+  expect(await shadow(cells.machine)).toBe("hidden");
+  expect(await shadow(cells.verdict)).toBe("visible");
+
+  await area.evaluate((el) => {
+    el.scrollLeft = 200;
+  });
+  const after = await xs();
+  for (const key of Object.keys(before)) expect(Math.abs(after[key]! - before[key]!)).toBeLessThan(1);
+  await expect.poll(() => shadow(cells.machine)).toBe("visible");
+
+  // The machine stands right behind the selection; the verdict right before the actions.
+  const selection = (await cells.selection.boundingBox())!;
+  expect(Math.abs(after.machine! - (selection.x + selection.width))).toBeLessThan(1);
+  const verdict = (await cells.verdict.boundingBox())!;
+  expect(Math.abs(after.actions! - (verdict.x + verdict.width))).toBeLessThan(1);
+
+  // An hour that scrolled under the machine lies under it.
+  const machine = (await cells.machine.boundingBox())!;
+  const onTop = await page.evaluate(
+    ({ px, py }) => document.elementFromPoint(px, py)?.closest("th, td")?.getAttribute("scope") ?? null,
+    { px: machine.x + machine.width / 2, py: machine.y + machine.height / 2 },
+  );
+  expect(onTop).toBe("row");
+
+  await area.evaluate((el) => {
+    el.scrollLeft = el.scrollWidth;
+  });
+  await expect.poll(() => shadow(cells.verdict)).toBe("hidden");
+});
+
 /* ---------------- The quiet gesture (umriss-table 09) ---------------- */
 
 test("a row action rests in the secondary type and stands in the accent when its row is meant", async ({ page }) => {

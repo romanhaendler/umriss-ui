@@ -8,9 +8,10 @@
 
 import type { SortLevel } from "./tableModel";
 
-/** Search, conditions, sort levels, page, page size, hidden columns, order and
-    dragged widths. Whatever is at its default is absent. The pre-filter never
-    belongs to it: it is a function of the application. */
+/** Search, conditions, sort levels, page, page size, hidden columns, order,
+    dragged widths, the grouping and the pinned columns. Whatever is at its
+    default is absent. The pre-filter never belongs to it: it is a function of
+    the application. */
 export interface TableView<K extends string = string> {
   search?: string;
   /** The conditions of the column filters, per column. A condition for a column
@@ -27,4 +28,8 @@ export interface TableView<K extends string = string> {
   grouping?: readonly K[];
   /** The paths of the folded groups. A path that no longer occurs falls out. */
   folded?: readonly string[];
+  /** The pinned columns, whole, once the user's choice deviates from what the
+      columns declare - `{}` when every declared pin was undone. A column that
+      does not exist falls out. */
+  pinned?: Readonly<Record<string, "start" | "end">>;
 }
