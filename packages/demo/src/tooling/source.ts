@@ -7,11 +7,10 @@
    any further transformation: no reformatting, no re-indenting, no stripping
    of comments.
 
-   1. The demo's own bookkeeping falls away: `title` and `lead`, `shows` where
-      an example names a file to show beside itself, and a scenario's
-      `callouts` and `builtFrom`. None is any business of the reader's, and a
-      pasted file carrying them would carry exports that mean nothing outside
-      this demo. One rule with several members, not several rules - what falls
+   1. The demo's own bookkeeping falls away: `title` and `lead`, and a
+      scenario's `callouts` and `builtFrom`. None is any business of the
+      reader's, and a pasted file carrying them would carry exports that mean
+      nothing outside this demo. One rule with several members, not several rules - what falls
       away is exactly what the demo put there.
 
    2. The library path `"../../../src"` becomes the demo's package name -
@@ -53,7 +52,7 @@ export function asPackage(source: string, packageName: string): string {
 /* One spelling. Both demos export `title` (english-and-umriss-ui 10 and 12);
    the alternation that bridged them is gone. */
 const TITLE_START = /^export const title\b/;
-const BOOKKEEPING = ["lead", "shows", "callouts", "builtFrom"].map((name) => new RegExp(`^export const ${name}\\b`));
+const BOOKKEEPING = ["lead", "callouts", "builtFrom"].map((name) => new RegExp(`^export const ${name}\\b`));
 
 /** Removes one `export const …` and the blank line that separated it, even
     where it runs over several lines. Says whether it found one. */
@@ -77,7 +76,7 @@ function withoutExport(lines: string[], start: RegExp): string[] | null {
 }
 
 /** Removes the demo's own bookkeeping: the `title` export, and `lead`,
-    `shows`, `callouts` and `builtFrom` where they stand.
+    `callouts` and `builtFrom` where they stand.
 
     Throws when there is no title. An example file without one would be
     "undefined" in the sidebar and in the palette, and a silent placeholder

@@ -16,13 +16,11 @@
    Two globs over the same files: one fetches the running component, one the
    source. So the code shown is the code that ran.
 
-   An example may also SHOW a file beside itself - `export const shows = [...]`,
-   paths relative to the example, one further tab of the code view each. The
-   demos' shared data needs no such line: an import of
-   `@umriss-ui/demo/worlds/<world>` brings the world's file as a tab by itself,
-   and the code view imports it from `./<world>`. Every other example carries
-   its own few lines in the file, and a check makes sure of it
-   (`@umriss-ui/demo/checks/ownData`).
+   The demos' shared data lives in the worlds: an import of
+   `@umriss-ui/demo/worlds/<world>` brings the world's file as a further tab
+   of the code view, and the code view imports it from `./<world>`. Every
+   other example carries its own few lines in the file, and a check makes sure
+   of it (`@umriss-ui/demo/checks/ownData`).
 
    A scenario is read the same way from `demo/scenarios/NN-<anchor>.tsx`: a
    composed screen with its job as `title`, who uses it as `lead`, the
@@ -36,7 +34,7 @@
 import type { ComponentType } from "react";
 import type { Page } from "../outline";
 import { byRank, parseFileName, parseScenarioName } from "./fileName";
-import { asPackage, displaySource, worldsOf } from "./source";
+import { displaySource, worldsOf } from "./source";
 
 /** One tab of an example's code view. The first is the example itself. */
 export interface ExampleFile {
@@ -63,8 +61,8 @@ export interface Example {
   /** What stands in the code block: the file, without its title, with the
       package name. */
   source: string;
-  /** The code view's tabs: this example first, then whatever it shows beside
-      itself. One entry means no tabs are drawn at all. */
+  /** The code view's tabs: this example first, then the worlds it imports.
+      One entry means no tabs are drawn at all. */
   files: readonly ExampleFile[];
 }
 
@@ -72,8 +70,6 @@ export interface ExampleModule {
   default?: unknown;
   title?: unknown;
   lead?: unknown;
-  /** Files beside this one to show, as paths relative to the example. */
-  shows?: unknown;
 }
 
 /** A page this demo does not have: a component of a neighbouring package,
@@ -107,28 +103,13 @@ export interface ScenarioModule extends ExampleModule {
   builtFrom?: unknown;
 }
 
-/** A path relative to an example, resolved against the glob's keys - which are
-    relative to the demo's own directory and start with `./`. */
-function beside(examplePath: string, relative: string): string {
-  const parts = examplePath.split("/").slice(0, -1).concat(relative.split("/"));
-  const out: string[] = [];
-  for (const part of parts) {
-    if (part === "." || part === "") continue;
-    if (part === ".." && out.length > 0 && out[out.length - 1] !== "..") out.pop();
-    else out.push(part);
-  }
-  return `./${out.join("/")}`;
-}
-
-/** The name a shown file's tab carries: the file's own name. */
+/** The name a file's tab carries: the file's own name. */
 function tabName(path: string): string {
   return path.split("/").pop() ?? path;
 }
 
 interface ReadOptions {
   packageName: string;
-  /** The raw glob over what `shows` may name. */
-  beside?: Record<string, string>;
   /** The raw glob over `packages/demo/src/worlds/*.ts`. */
   worlds?: Record<string, string>;
 }
@@ -139,7 +120,7 @@ function readModule(
   path: string,
   mod: ExampleModule,
   sources: Record<string, string>,
-  { packageName, beside: shown = {}, worlds = {} }: ReadOptions,
+  { packageName, worlds = {} }: ReadOptions,
 ): { title: string; lead?: string; Component: ComponentType; files: ExampleFile[] } {
   const title = mod.title;
   if (typeof title !== "string" || title === "") {
@@ -159,14 +140,6 @@ function readModule(
   }
 
   const files: ExampleFile[] = [{ name: tabName(path), source: displaySource(raw, packageName) }];
-  for (const relative of readShows(path, mod.shows)) {
-    const key = beside(path, relative);
-    const text = shown[key];
-    if (typeof text !== "string") {
-      throw new Error(`\`${path}\` shows \`${relative}\`, which is not among the files the demo reads.`);
-    }
-    files.push({ name: tabName(key), source: asPackage(text, packageName) });
-  }
   for (const world of worldsOf(raw)) {
     const key = Object.keys(worlds).find((one) => tabName(one) === `${world}.ts`);
     if (key === undefined) {
@@ -194,16 +167,6 @@ export function readExamples(
   }
 
   return found.sort(byRank);
-}
-
-/** What an example says it shows beside itself, checked at load time: a typo
-    here would otherwise be a tab that quietly never appears. */
-function readShows(path: string, shows: unknown): readonly string[] {
-  if (shows === undefined) return [];
-  if (!Array.isArray(shows) || shows.some((one) => typeof one !== "string")) {
-    throw new Error(`\`${path}\` exports \`shows\`, which must be an array of paths relative to the example.`);
-  }
-  return shows as readonly string[];
 }
 
 /** A page's examples, in their order. */

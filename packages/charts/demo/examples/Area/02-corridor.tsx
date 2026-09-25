@@ -6,13 +6,9 @@
    furnace was measured the whole time. */
 
 import { Area, Chart, Legend, Line, Tooltip, XAxis, YAxis } from "../../../src";
-import { corridorData, type CorridorPoint } from "../../data";
+import { corridorData, type CorridorPoint } from "@umriss-ui/demo/worlds/plant";
 
 export const title = "A corridor with a gap";
-
-/* The plant this is drawn from stands in the second tab, so that the
-   example can be copied whole. */
-export const shows = ["../../data.ts"];
 
 const timeOfDay = (v: number) =>
   new Date(v).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });

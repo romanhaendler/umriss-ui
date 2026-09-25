@@ -5,13 +5,9 @@
    points. */
 
 import { Chart, Legend, Line, Tooltip, XAxis, YAxis } from "../../../src";
-import { multiData, type Point } from "../../data";
+import { multiData, type Point } from "@umriss-ui/demo/worlds/plant";
 
 export const title = "Several series and gaps";
-
-/* The plant this is drawn from stands in the second tab, so that the
-   example can be copied whole. */
-export const shows = ["../../data.ts"];
 
 export default function MultiSeries() {
   return (

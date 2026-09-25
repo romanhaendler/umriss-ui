@@ -6,13 +6,9 @@
    than the default, because each point here is a person's walk to the line. */
 
 import { Chart, Scatter, Tooltip, XAxis, YAxis } from "../../../src";
-import { thicknessData, type ThicknessSample } from "../../data";
+import { thicknessData, type ThicknessSample } from "@umriss-ui/demo/worlds/plant";
 
 export const title = "Individual measurements";
-
-/* The plant this is drawn from stands in the second tab, so that the
-   example can be copied whole. */
-export const shows = ["../../data.ts"];
 
 const timeOfDay = (v: number) =>
   new Date(v).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
