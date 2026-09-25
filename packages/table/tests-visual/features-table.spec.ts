@@ -175,70 +175,71 @@ test.describe("Scenarios › find a late shipment", () => {
   });
 });
 
-/* ---------------- Row detail: RowDetail › detail-row ---------------- */
+/* ---------------- Row detail: RowDetail › open-a-detail, keep-rows-open-while-searching ---------------- */
 
-test.describe("RowDetail › detail-row", () => {
+test.describe("RowDetail › open-a-detail", () => {
   test.beforeEach(async ({ page }) => {
-    await openExample(page, "rowdetail", "detail-row");
+    await openExample(page, "rowdetail", "open-a-detail");
   });
 
   test("A row expands and collapses with the keyboard", async ({ page }) => {
-    const table = example(page, "detail-row");
-    const expand = table.getByRole("button", { name: "Expand A-2041" });
+    const table = example(page, "open-a-detail");
+    const expand = table.getByRole("button", { name: "Expand FP-1004210" });
     await expand.focus();
     await expect(expand).toHaveAttribute("aria-expanded", "false");
 
     await page.keyboard.press("Enter");
-    const collapse = table.getByRole("button", { name: "Collapse A-2041" });
+    const collapse = table.getByRole("button", { name: "Collapse FP-1004210" });
     await expect(collapse).toHaveAttribute("aria-expanded", "true");
-    // The name of the person responsible stands only in the detail row.
-    await expect(table.getByText("M. Weber")).toBeVisible();
+    // The address stands only in the detail row.
+    await expect(table.getByText("12 Orchard Lane, Ashcombe")).toBeVisible();
 
     await page.keyboard.press("Enter");
-    await expect(table.getByRole("button", { name: "Expand A-2041" })).toHaveAttribute("aria-expanded", "false");
-    await expect(table.getByText("M. Weber")).toHaveCount(0);
+    await expect(table.getByRole("button", { name: "Expand FP-1004210" })).toHaveAttribute("aria-expanded", "false");
+    await expect(table.getByText("12 Orchard Lane, Ashcombe")).toHaveCount(0);
   });
 
   test("Several rows stay open at once", async ({ page }) => {
-    const table = example(page, "detail-row");
-    await table.getByRole("button", { name: "Expand A-2041" }).click();
-    await table.getByRole("button", { name: "Expand A-2042" }).click();
+    const table = example(page, "open-a-detail");
+    await table.getByRole("button", { name: "Expand FP-1004210" }).click();
+    await table.getByRole("button", { name: "Expand FP-1004223" }).click();
     await expect(table.getByRole("button", { name: /Collapse/ })).toHaveCount(2);
   });
+});
 
-  test("An open row stays open when a search hides it for a moment", async ({ page }) => {
-    const table = example(page, "detail-row");
-    await table.getByRole("button", { name: "Expand A-2041" }).click();
-    await table.getByPlaceholder("Search customer").fill("Keller");
-    await expect(table.getByRole("button", { name: /A-2041/ })).toHaveCount(0);
-    await table.getByPlaceholder("Search customer").fill("");
-    await expect(table.getByRole("button", { name: "Collapse A-2041" })).toBeVisible();
-  });
+test("RowDetail › an open row stays open when a search hides it for a moment", async ({ page }) => {
+  await openExample(page, "rowdetail", "keep-rows-open-while-searching");
+  const table = example(page, "keep-rows-open-while-searching");
+  await table.getByRole("button", { name: "Expand FP-1004210" }).click();
+  await table.getByPlaceholder("Search customer").fill("Brixley");
+  await expect(table.getByRole("button", { name: /FP-1004210/ })).toHaveCount(0);
+  await table.getByPlaceholder("Search customer").fill("");
+  await expect(table.getByRole("button", { name: "Collapse FP-1004210" })).toBeVisible();
 });
 
 /* ---------------- Row actions: RowActions ---------------- */
 
 test("Row actions are reachable with the keyboard", async ({ page }) => {
-  await openExample(page, "rowactions", "row-actions");
-  const table = example(page, "row-actions");
-  const open = table.getByRole("button", { name: "Open: A-2041" });
+  await openExample(page, "rowactions", "two-actions");
+  const table = example(page, "two-actions");
+  const open = table.getByRole("button", { name: "Open: INV-26-0318" });
   await open.focus();
   await expect(open).toBeVisible();
   await page.keyboard.press("Enter");
-  await expect(table.getByText("A-2041 opened")).toBeVisible();
+  await expect(table.getByText("INV-26-0318 opened")).toBeVisible();
 });
 
 test("The row's overflow menu opens and runs an action", async ({ page }) => {
-  await openExample(page, "rowactions", "overflow");
-  const table = example(page, "overflow");
-  await table.getByRole("button", { name: "Actions: A-2041" }).click();
-  await page.getByRole("menuitem", { name: "Archive" }).click();
-  await expect(table.getByText("A-2041 archived")).toBeVisible();
+  await openExample(page, "rowactions", "more-than-two");
+  const table = example(page, "more-than-two");
+  await table.getByRole("button", { name: "Actions: INV-26-0318" }).click();
+  await page.getByRole("menuitem", { name: "Reject" }).click();
+  await expect(table.getByText("INV-26-0318 rejected")).toBeVisible();
 });
 
 test("The overflow menu gives the focus back to its trigger", async ({ page }) => {
-  await openExample(page, "rowactions", "overflow");
-  const trigger = example(page, "overflow").getByRole("button", { name: "Actions: A-2041" });
+  await openExample(page, "rowactions", "more-than-two");
+  const trigger = example(page, "more-than-two").getByRole("button", { name: "Actions: INV-26-0318" });
   await trigger.click();
   await expect(page.getByRole("menu")).toBeVisible();
   await page.keyboard.press("Escape");
