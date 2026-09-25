@@ -175,41 +175,41 @@ test("dragging up brings the lower lanes into view, headers with them", async ({
 });
 
 test("hover, click and right-click report their target", async ({ page }) => {
-  await openExample(page, "interactions", "interactions");
-  const example = page.locator('[data-example="interactions"]');
+  await openExample(page, "interactions", "report-the-pointer");
+  const example = page.locator('[data-example="report-the-pointer"]');
   const status = example.locator("[data-last-interaction]");
   const plot = await plotOf(page, example, DAY_OF_PLAN);
 
-  /* A-2041 on the saw, 06:00 to 07:00. */
-  await page.mouse.move(plot.x(6, 30), plot.y("saw"));
-  await expect(status).toHaveText("hover: subtask a-2041-1 (main) at 06:30");
-  await page.mouse.move(plot.x(5, 50), plot.y("saw"));
-  await expect(status).toHaveText(/^hover: subtask a-2041-1 \(leadIn\)/);
+  /* C-2041 on the truck, 06:00 to 07:00. */
+  await page.mouse.move(plot.x(6, 30), plot.y("truck-118"));
+  await expect(status).toHaveText("hover: subtask c-2041-1 (main) at 06:30");
+  await page.mouse.move(plot.x(5, 50), plot.y("truck-118"));
+  await expect(status).toHaveText(/^hover: subtask c-2041-1 \(leadIn\)/);
 
-  await page.mouse.click(plot.x(15), plot.y("saw"), { button: "right" });
+  await page.mouse.click(plot.x(15), plot.y("truck-118"), { button: "right" });
   /* A pixel is about a minute here; where the pointer lands on it decides. */
-  await expect(status).toHaveText(/^contextmenu: lane saw at (14:59|15:00|15:01)$/);
+  await expect(status).toHaveText(/^contextmenu: lane truck-118 at (14:59|15:00|15:01)$/);
 
-  await page.mouse.click(plot.x(6, 30), plot.y("saw"));
-  await expect(status).toHaveText("click: subtask a-2041-1 (main) at 06:30");
+  await page.mouse.click(plot.x(6, 30), plot.y("truck-118"));
+  await expect(status).toHaveText("click: subtask c-2041-1 (main) at 06:30");
 });
 
 test("a click selects the whole task with the stop it hit, and a click on nothing clears it", async ({ page }) => {
-  await openExample(page, "selection", "selection");
-  const example = page.locator('[data-example="selection"]');
-  const selected = example.locator("[data-selected-order]");
-  await expect(selected).toHaveText("Selected: A-2043 Bracket");
+  await openExample(page, "selection", "control-the-selection");
+  const example = page.locator('[data-example="control-the-selection"]');
+  const selected = example.locator("[data-selected-task]");
+  await expect(selected).toHaveText("Selected: C-2043 Oakridge Pharmacy");
   const plot = await plotOf(page, example, DAY_OF_PLAN);
 
-  /* The shaft's second subtask, on lathe 1 at 10:00. */
-  await page.mouse.click(plot.x(10), plot.y("lathe-1"));
-  await expect(selected).toHaveText("Selected: A-2042 Shaft, at a-2042-2");
+  /* C-2042's second leg, on van FP 214 K at 10:00. */
+  await page.mouse.click(plot.x(10), plot.y("van-214"));
+  await expect(selected).toHaveText("Selected: C-2042 Marlow & Finch Books, at c-2042-2");
 
-  /* Another stop of the same order: the task does not change, the stop does. */
-  await page.mouse.click(plot.x(8), plot.y("saw"));
-  await expect(selected).toHaveText("Selected: A-2042 Shaft, at a-2042-1");
+  /* Another leg of the same consignment: the task does not change, the stop does. */
+  await page.mouse.click(plot.x(8), plot.y("truck-118"));
+  await expect(selected).toHaveText("Selected: C-2042 Marlow & Finch Books, at c-2042-1");
 
-  await page.mouse.click(plot.x(17), plot.y("saw"));
+  await page.mouse.click(plot.x(17), plot.y("truck-118"));
   await expect(selected).toHaveText("Selected: nothing");
 });
 
@@ -256,9 +256,9 @@ test("an application's own tooltip content replaces the default", async ({ page 
   await openExample(page, "tooltip", "own-tooltip");
   const example = page.locator('[data-example="own-tooltip"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
-  await page.mouse.move(plot.x(13), plot.y("paint"));
+  await page.mouse.move(plot.x(13), plot.y("van-455"));
   const tooltip = example.locator("[data-schedule-tooltip]");
-  await expect(tooltip).toContainText("Northworks");
+  await expect(tooltip).toContainText("420 kg");
   await expect(tooltip).toContainText("1 finding");
   await expect(tooltip).not.toContainText("12:00–14:00");
 });
@@ -311,8 +311,8 @@ test("two schedules move together, and the span is reported", async ({ page }) =
 });
 
 test("the handle places the application's own mark at a time", async ({ page }) => {
-  await openExample(page, "handle", "handle");
-  const example = page.locator('[data-example="handle"]');
+  await openExample(page, "handle", "place-a-mark");
+  const example = page.locator('[data-example="place-a-mark"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
   const pin = example.locator("[data-pin]");
   const box = (await pin.boundingBox())!;
@@ -644,17 +644,17 @@ test("three statements on one bar stay three statements", async ({ page }) => {
 /* ------------------------------------------------------------------ */
 
 test("hovering a selected bar still shows something, because the two are different kinds of mark", async ({ page }) => {
-  await openExample(page, "selection", "selection");
-  const example = page.locator('[data-example="selection"]');
+  await openExample(page, "selection", "control-the-selection");
+  const example = page.locator('[data-example="control-the-selection"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
 
-  /* A-2043 is selected from the start: its stop on the press, 06:30 to 08:00.
+  /* C-2043 is selected from the start: its leg on truck FP 520 E, 06:30 to 08:00.
      Selection outlines it; hover washes it. Both at once has to be visible,
      which two outlines of the same colour never were. */
-  const onBar = { x: Math.round(plot.x(7) - plot.box.x), y: LANE_HEIGHT * plot.index("press") + LANE_HEIGHT / 2 };
+  const onBar = { x: Math.round(plot.x(7) - plot.box.x), y: LANE_HEIGHT * plot.index("truck-520") + LANE_HEIGHT / 2 };
   const before = await rgba(example, "overlay", onBar);
 
-  await page.mouse.move(plot.x(7), plot.y("press"));
+  await page.mouse.move(plot.x(7), plot.y("truck-520"));
   await expect(example.locator("[data-schedule-tooltip]")).toBeVisible();
   /* Polled: the overlay is redrawn in a frame of its own, and under load that
      frame can arrive after the tooltip's element does. */
@@ -666,21 +666,21 @@ test("hovering a selected bar still shows something, because the two are differe
 });
 
 test("the subtask that was clicked is told from its task's other bars", async ({ page }) => {
-  await openExample(page, "selection", "selection");
-  const example = page.locator('[data-example="selection"]');
+  await openExample(page, "selection", "control-the-selection");
+  const example = page.locator('[data-example="control-the-selection"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
 
-  /* A-2043 has three stops, and selection takes all of them. The one that was
+  /* C-2043 has three legs, and selection takes all of them. The one that was
      CLICKED carries the heavier outline, because the grips belong to it and a
      task with three stops would otherwise offer no way to tell which.
 
-     Measured on one and the same bar - the stop on the press - in both roles:
+     Measured on one and the same bar - the leg on the truck - in both roles:
      first clicked, then a sibling after another stop of the same task was
      clicked. Everything else about that column is then identical, so what is
      left of the difference is the outline's weight. */
   const column = {
     x: Math.round(plot.x(7) - plot.box.x),
-    y: LANE_HEIGHT * plot.index("press"),
+    y: LANE_HEIGHT * plot.index("truck-520"),
     width: 3,
     height: LANE_HEIGHT,
   };
@@ -689,15 +689,15 @@ test("the subtask that was clicked is told from its task's other bars", async ({
     await expect(example.locator("[data-schedule-tooltip]")).toHaveCount(0);
   };
 
-  await page.mouse.click(plot.x(7), plot.y("press"));
-  await expect(example.locator("[data-selected-order]")).toContainText("a-2043-1");
+  await page.mouse.click(plot.x(7), plot.y("truck-520"));
+  await expect(example.locator("[data-selected-task]")).toContainText("c-2043-1");
   await idle();
   const asClicked = await painted(example, "data", column);
 
-  /* The stop on the paint shop, 12:00 to 14:00 - the same task, so the press
+  /* The leg on e-van FP 455 R, 12:00 to 14:00 - the same task, so the truck
      bar stays selected and becomes a sibling. */
-  await page.mouse.click(plot.x(13), plot.y("paint"));
-  await expect(example.locator("[data-selected-order]")).toContainText("a-2043-3");
+  await page.mouse.click(plot.x(13), plot.y("van-455"));
+  await expect(example.locator("[data-selected-task]")).toContainText("c-2043-3");
   await idle();
   const asSibling = await painted(example, "data", column);
 

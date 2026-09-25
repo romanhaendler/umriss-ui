@@ -84,14 +84,14 @@ test("the pointer takes the active subtask over, and the keys walk on from it", 
 
 test("Space selects the active subtask's task, as a click does", async ({ page }) => {
   behaviour();
-  await openExample(page, "selection", "selection");
-  const example = page.locator('[data-example="selection"]');
+  await openExample(page, "selection", "control-the-selection");
+  const example = page.locator('[data-example="control-the-selection"]');
   await tabIn(page, example);
-  /* Onto an order other than the one selected at the start (A-2043). */
+  /* Onto an order other than the one selected at the start (C-2043). */
   await page.keyboard.press("ArrowRight");
   const order = (await tooltip(example).locator("span").first().textContent()) ?? "";
   await page.keyboard.press("Space");
-  await expect(example.locator("[data-selected-order]")).toHaveText(`Selected: ${order}, at a-2042-1`);
+  await expect(example.locator("[data-selected-task]")).toHaveText(`Selected: ${order}, at c-2042-1`);
 });
 
 test("A focused schedule with an active subtask", async ({ page }, testInfo) => {
