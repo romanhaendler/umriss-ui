@@ -1214,9 +1214,12 @@
      and painted over by the neighbouring cells' surfaces - a pinned cell's,
      a hovered row's. Every cell of the grid can be the Active one: the
      detail's and the empty body's too, which carry no `.td`. */
+  /* The outline paints nothing until forced colours drop the ring; drawn
+     inside like the ring, so the scroll area does not clip it either. */
   .grid td:focus-visible,
   .grid th:focus-visible {
-    outline: none;
+    outline: 2px solid transparent;
+    outline-offset: -2px;
     box-shadow: inset var(--u-focus-ring);
   }
 
