@@ -474,7 +474,13 @@ export class Registry {
 
   /** Everything a table can be grouped by: its columns, then its group keys. */
   groupingEntries(rows: readonly unknown[]): ColumnEntry[] {
-    if (!this.tableGroupable || this.manual) return [];
+    if (!this.tableGroupable) return [];
+    if (this.manual) {
+      if (this.orderedColumns().some((e) => e.spec.groupable === true)) {
+        warnOnce("manual-groupable-column", "`groupable` on a column is passed over in manual mode: the groups would be the page's, not the server's.");
+      }
+      return [];
+    }
     const seen = new Set<string>();
     return [...this.orderedColumns(), ...this.groupKeys.ordered()].filter((e) => {
       if (seen.has(e.spec.id)) return false;

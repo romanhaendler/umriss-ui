@@ -4,6 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 import { column, tableModel } from "../src/model/tableModel";
+import { manualViewKey } from "../src/model/view";
 
 interface Row {
   id: string;
@@ -71,5 +72,24 @@ describe("tableModel – manual mode", () => {
   it("still orders and hides columns - they are the table's, not the server's", () => {
     const projection = tableModel(PAGE, COLUMNS, { manual: { rowCount: 3 }, order: ["budget"], hidden: ["project"] });
     expect(projection.columns.map((c) => c.id)).toEqual(["budget"]);
+  });
+});
+
+describe("manualViewKey - what is reported once", () => {
+  const view = { search: "", conditions: {}, sort: [], page: 1, pageSize: 10 };
+
+  it("is the same for the same rows-deciding view, whatever else the view carries", () => {
+    expect(manualViewKey({ ...view, widths: { project: 200 }, hidden: ["budget"] })).toBe(manualViewKey(view));
+  });
+
+  it("changes with each of the five parts that decide the rows", () => {
+    const changed = [
+      { ...view, search: "aur" },
+      { ...view, conditions: { line: ["L2"] } },
+      { ...view, sort: [{ column: "budget", direction: "asc" as const }] },
+      { ...view, page: 2 },
+      { ...view, pageSize: 25 },
+    ].map(manualViewKey);
+    expect(new Set([manualViewKey(view), ...changed]).size).toBe(6);
   });
 });

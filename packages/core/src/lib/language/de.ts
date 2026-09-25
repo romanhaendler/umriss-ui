@@ -155,7 +155,7 @@ export const GERMAN_WORDING: Wording = {
   pagination: "Seitennavigation",
   rows: "Zeilen",
   rowsPerPage: "Zeilen pro Seite",
-  pageOfPages: (page, total) => `Seite ${page.toLocaleString("de")} von ${total.toLocaleString("de")}`,
+  pageOfPages: (page, total, formatted) => `Seite ${formatted?.page ?? page} von ${formatted?.total ?? total}`,
   previousPage: "Zurück",
   nextPage: "Weiter",
   filterReset: "Zurücksetzen",

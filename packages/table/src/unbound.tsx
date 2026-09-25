@@ -365,7 +365,10 @@ export function Pagination({ pageSizes = [10, 25, 50], className, of }: Paginati
             ))}
           </Select>
         </label>
-        <span className={styles.paginationStatus}>{wording.pageOfPages(snapshot.page, snapshot.pageCount)}</span>
+        <span className={styles.paginationStatus}>{wording.pageOfPages(snapshot.page, snapshot.pageCount, {
+            page: formats.count(snapshot.page),
+            total: formats.count(snapshot.pageCount),
+          })}</span>
         <Button size="sm" disabled={snapshot.page <= 1} onClick={() => snapshot.setPage(snapshot.page - 1)}>
           {wording.previousPage}
         </Button>

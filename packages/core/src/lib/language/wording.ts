@@ -216,9 +216,10 @@ export interface Wording {
   pagination: string;
   rows: string;
   rowsPerPage: string;
-  /** "Page 2 of 7" - the numbers grouped as the language writes them, since a
-      table over a server has "Page 1 of 100,000". */
-  pageOfPages: (page: number, total: number) => string;
+  /** "Page 2 of 7". `formatted` carries both numbers in the provider's
+      formats, where the caller has them - a table over a server has "Page 1 of
+      100,000". */
+  pageOfPages: (page: number, total: number, formatted?: { page: string; total: string }) => string;
   previousPage: string;
   nextPage: string;
   /** The two buttons in the column filter's footer. */
@@ -637,7 +638,7 @@ export const DEFAULT_WORDING: Wording = {
   pagination: "Pagination",
   rows: "Rows",
   rowsPerPage: "Rows per page",
-  pageOfPages: (page, total) => `Page ${page.toLocaleString("en")} of ${total.toLocaleString("en")}`,
+  pageOfPages: (page, total, formatted) => `Page ${formatted?.page ?? page} of ${formatted?.total ?? total}`,
   previousPage: "Back",
   nextPage: "Next",
   filterReset: "Reset",
