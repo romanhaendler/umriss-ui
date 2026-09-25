@@ -1,6 +1,6 @@
 /* Ripple: the cascade, as arithmetic and never as behaviour (ADR-0023).
 
-   Whether a successor may move is a plant decision - a fixed shift, a booked
+   Whether a successor may move is the application's decision - a fixed slot, a booked
    crew, a frozen order - that a drawing package cannot know. What it can know
    is the arithmetic: which successors no longer fit behind a change, and where
    they would have to go. The schedule never runs this; a caller runs it over its

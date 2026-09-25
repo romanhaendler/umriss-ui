@@ -62,9 +62,9 @@ async function watchWheel(page: Page): Promise<() => Promise<boolean | undefined
 
 test("the schedule carries its name, and the lane headers are text", async ({ page }) => {
   await openExample(page, "schedule", "first-schedule");
-  const figure = page.locator('[data-example="first-schedule"]').getByRole("figure", { name: "Plan of Tuesday, 17 March" });
+  const figure = page.locator('[data-example="first-schedule"]').getByRole("figure", { name: "Tours of Tuesday, 17 March" });
   await expect(figure).toBeVisible();
-  await expect(figure.locator("[data-schedule-headers]")).toHaveText(/Saw 1.*Mill.*Press 2.*Paint shop/);
+  await expect(figure.locator("[data-schedule-headers]")).toHaveText(/Truck FP 118 R.*Van FP 214 K.*Van FP 402 R.*E-van FP 377 K/);
   await expect(figure.locator("canvas").first()).toHaveAttribute("aria-hidden", "true");
 });
 
@@ -79,7 +79,7 @@ test("zooming in with Ctrl and the wheel steps the fine band down to the quarter
   await openExample(page, "pan-and-zoom", "pan-and-zoom");
   const example = page.locator('[data-example="pan-and-zoom"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
-  await wheel(page, plot.x(10), plot.y("press"), -120, 25, "Control");
+  await wheel(page, plot.x(10), plot.y("ada"), -120, 25, "Control");
   await expect.poll(async () => (await tickLabels(example)).some((label) => label.endsWith(":15"))).toBe(true);
   /* The instant under the pointer kept its place: 10:00 is still in view. */
   expect(await tickLabels(example)).toContain("10:00");
@@ -89,7 +89,7 @@ test("zooming out with Ctrl and the wheel steps the fine band up past the hour",
   await openExample(page, "pan-and-zoom", "pan-and-zoom");
   const example = page.locator('[data-example="pan-and-zoom"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
-  await wheel(page, plot.x(12), plot.y("press"), 120, 12, "Control");
+  await wheel(page, plot.x(12), plot.y("ada"), 120, 12, "Control");
   await expect.poll(async () => (await tickLabels(example)).includes("07:00")).toBe(false);
 });
 
@@ -102,7 +102,7 @@ test("the plain wheel does not zoom, and is released to the page where the lanes
 
   /* Three lanes in this plot: there is nothing to scroll, so the schedule has
      no business with the wheel and says so. */
-  await wheel(page, plot.x(10), plot.y("press"), 120, 3);
+  await wheel(page, plot.x(10), plot.y("ada"), 120, 3);
   expect(await tickLabels(example)).toEqual(labels);
   expect(await prevented()).toBe(false);
 });
@@ -111,7 +111,7 @@ test("the wheel scrolls the lanes, and lets the page scroll on at their end", as
   await openExample(page, "lane", "many-lanes");
   const example = page.locator('[data-example="many-lanes"]');
   const headers = example.locator("[data-schedule-headers]");
-  const last = headers.getByText("Cell 20");
+  const last = headers.getByText("Van 20");
   const plot = example.locator("[data-schedule-plot]");
   const box = (await plot.boundingBox())!;
   const frame = (await headers.boundingBox())!;
@@ -141,10 +141,10 @@ test("panning moves the time, and the headers and bands hold still", async ({ pa
   const bandBefore = await example.locator("[data-schedule-ticks]").boundingBox();
   const before = await tickPositions(example);
 
-  /* On the empty inspection lane at 08:00: nothing to drag there, so it pans. */
-  await page.mouse.move(plot.x(8), plot.y("press"));
+  /* On Ada's lane at 08:00: nothing to drag there, so it pans. */
+  await page.mouse.move(plot.x(8), plot.y("ada"));
   await page.mouse.down();
-  await page.mouse.move(plot.x(8) - 150, plot.y("press"), { steps: 6 });
+  await page.mouse.move(plot.x(8) - 150, plot.y("ada"), { steps: 6 });
   await page.mouse.up();
 
   const after = await tickPositions(example);
@@ -157,13 +157,13 @@ test("dragging up brings the lower lanes into view, headers with them", async ({
   await openExample(page, "lane", "many-lanes");
   const example = page.locator('[data-example="many-lanes"]');
   const headers = example.locator("[data-schedule-headers]");
-  const last = headers.getByText("Cell 20");
+  const last = headers.getByText("Van 20");
   const frame = (await headers.boundingBox())!;
   expect((await last.boundingBox())!.y).toBeGreaterThan(frame.y + frame.height);
 
   const plot = example.locator("[data-schedule-plot]");
   const box = (await plot.boundingBox())!;
-  /* Late in the day, where no cell has work: the drag pans. */
+  /* Late in the day, where no van has work: the drag pans. */
   await page.mouse.move(box.x + box.width - 10, box.y + box.height - 10);
   await page.mouse.down();
   await page.mouse.move(box.x + box.width - 10, box.y - 400, { steps: 10 });
@@ -220,22 +220,22 @@ test("resting on a subtask shows its order, times, parts and findings", async ({
   const tooltip = example.locator("[data-schedule-tooltip]");
   await expect(tooltip).toHaveCount(0);
 
-  /* The bracket in the paint shop, noon to 14:00: its dependency from the mill
+  /* The Old Town tour on the e-van, noon to 14:00: its handover from the van
      is fifteen minutes short. */
-  await page.mouse.move(plot.x(13), plot.y("paint"));
+  await page.mouse.move(plot.x(13), plot.y("e-van"));
   await expect(tooltip).toBeVisible();
-  await expect(tooltip).toContainText("A-2043 Bracket");
+  await expect(tooltip).toContainText("T-03 Old Town");
   await expect(tooltip).toContainText("12:00–14:00");
   await expect(tooltip).toContainText("Lead-in 20 min");
   await expect(tooltip).toContainText("Lead-out 20 min");
   await expect(tooltip).toContainText("Violated dependency, 15 min short");
 
-  /* The housing on the mill shares its time with the bracket's milling. */
-  await page.mouse.move(plot.x(9), plot.y("mill"));
-  await expect(tooltip).toContainText("A-2041 Housing");
-  await expect(tooltip).toContainText("Overlap with a-2043-2");
+  /* The Harbour tour on van FP 214 K shares its time with the Old Town's. */
+  await page.mouse.move(plot.x(9), plot.y("van-1"));
+  await expect(tooltip).toContainText("T-01 Harbour");
+  await expect(tooltip).toContainText("Overlap with t-03-2");
 
-  await page.mouse.move(plot.x(17), plot.y("saw"));
+  await page.mouse.move(plot.x(17), plot.y("truck"));
   await expect(tooltip).toHaveCount(0);
 });
 
@@ -243,11 +243,11 @@ test("resting on a dependency names its route, its lag and that it is violated",
   await openExample(page, "schedule", "first-schedule");
   const example = page.locator('[data-example="first-schedule"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
-  /* The bracket's move from the mill (11:30) to the paint shop's lead-in (11:40):
+  /* The Old Town's handover from the van (11:30) to the e-van's lead-in (11:40):
      a symmetric curve passes through the middle of its two ends. */
-  await page.mouse.move((plot.x(11, 30) + plot.x(11, 40)) / 2, plot.y("press"));
+  await page.mouse.move((plot.x(11, 30) + plot.x(11, 40)) / 2, plot.y("van-2"));
   const tooltip = example.locator("[data-schedule-tooltip]");
-  await expect(tooltip).toContainText("a-2043-2 → a-2043-3");
+  await expect(tooltip).toContainText("t-03-2 → t-03-3");
   await expect(tooltip).toContainText("Dependency 25 min");
   await expect(tooltip).toContainText("Violated dependency, 15 min short");
 });
@@ -334,7 +334,7 @@ test.describe("touch", () => {
        no multi-touch API in Playwright, so the events come through the
        protocol. */
     const cdp = await context.newCDPSession(page);
-    const middle = plot.y("press");
+    const middle = plot.y("ada");
     const touch = (type: "touchStart" | "touchMove" | "touchEnd", points: readonly number[]) =>
       cdp.send("Input.dispatchTouchEvent", {
         type,
@@ -378,27 +378,27 @@ test("a bar says what the caller writes into it, cut off where it must be", asyn
   const example = page.locator('[data-example="bar-labels"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
 
-  /* The housing's milling runs 08:00 to 10:30 - room for the whole name. */
-  const wide = example.locator('[data-bar-label="a-2041-2"]');
-  await expect(wide).toHaveText("A-2041 Housing");
+  /* The profile page runs 08:00 to 10:30 - room for the whole name. */
+  const wide = example.locator('[data-bar-label="w-102"]');
+  await expect(wide).toHaveText("Profile page");
   const fits = await wide.evaluate((el) => {
     const text = el.firstElementChild as HTMLElement;
     return text.scrollWidth <= text.clientWidth;
   });
   expect(fits).toBe(true);
 
-  /* The flange on the press runs an hour and a quarter: room for a label, not
+  /* The basket item runs an hour and a quarter: room for a label, not
      for the whole name, so it is cut. */
-  const narrow = example.locator('[data-bar-label="a-2044-2"]');
+  const narrow = example.locator('[data-bar-label="w-104"]');
   const cut = await narrow.evaluate((el) => {
     const text = el.firstElementChild as HTMLElement;
     return text.scrollWidth > text.clientWidth;
   });
   expect(cut).toBe(true);
 
-  /* The housing's inspection is forty-five minutes: too narrow for a label
+  /* The test plan review is forty-five minutes: too narrow for a label
      that would say anything, so it stays silent and the tooltip answers. */
-  await expect(example.locator('[data-bar-label="a-2041-3"]')).toHaveCount(0);
+  await expect(example.locator('[data-bar-label="w-108"]')).toHaveCount(0);
 
   /* The label lies within its bar: the box is the bar's visible main time. */
   const box = (await wide.boundingBox())!;
@@ -406,29 +406,29 @@ test("a bar says what the caller writes into it, cut off where it must be", asyn
   expect(box.x + box.width).toBeCloseTo(plot.x(10, 30), -1);
 
   /* Zoomed out, the short subtasks lose their text rather than wear a row of
-     dots: half an hour of inspection is then a few pixels wide. */
+     dots: half an hour of a device check is then a few pixels wide. */
   const before = await example.locator("[data-bar-label]").count();
-  await wheel(page, plot.x(12), plot.y("qa"), 120, 8, "Control");
+  await wheel(page, plot.x(12), plot.y("eva"), 120, 8, "Control");
   await expect.poll(async () => example.locator("[data-bar-label]").count()).toBeLessThan(before);
-  await expect(example.locator('[data-bar-label="a-2046-3"]')).toHaveCount(0);
+  await expect(example.locator('[data-bar-label="w-116"]')).toHaveCount(0);
 });
 
 test("a bar that began before the view keeps its label at the edge", async ({ page }) => {
   await openExample(page, "bar-labels", "bar-labels");
   const example = page.locator('[data-example="bar-labels"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
-  const label = example.locator('[data-bar-label="a-2041-2"]');
+  const label = example.locator('[data-bar-label="w-102"]');
 
-  /* Panned until the milling starts left of the view: its label follows to
+  /* Panned until the profile page starts left of the view: its label follows to
      the edge instead of leaving with it. */
-  await page.mouse.move(plot.x(8), plot.y("qa"));
+  await page.mouse.move(plot.x(8), plot.y("eva"));
   await page.mouse.down();
-  await page.mouse.move(plot.x(8) - 200, plot.y("qa"), { steps: 8 });
+  await page.mouse.move(plot.x(8) - 200, plot.y("eva"), { steps: 8 });
   await page.mouse.up();
 
   const box = (await label.boundingBox())!;
   expect(box.x).toBeCloseTo(plot.box.x, 0);
-  await expect(label).toHaveText("A-2041 Housing");
+  await expect(label).toHaveText("Profile page");
   expect(await overlayOffenders(page)).toEqual([]);
 });
 
@@ -717,17 +717,17 @@ test("a group is structure over lanes: a head above them, and its lanes in the o
 
   await expect(headers).toHaveCount(5);
   await expect(headers.nth(0)).toHaveAttribute("data-row", "groupHead");
-  await expect(headers.nth(0)).toContainText("Press shop");
+  await expect(headers.nth(0)).toContainText("Developers");
   await expect(headers.nth(0)).toContainText("2 lanes");
   /* The lanes, in the order the example declared them - group or no group. */
   const lanes = await example.locator("[data-schedule-headers] [data-lane]").evaluateAll((n) => n.map((e) => e.getAttribute("data-lane")));
-  expect(lanes).toEqual(["press-1", "press-2", "weld", "paint"]);
+  expect(lanes).toEqual(["arjun", "chloe", "noah", "eva"]);
 });
 
 test("the fold control is a real button, and says whether its group is open", async ({ page }) => {
   await openExample(page, "lane-groups", "a-group");
   const example = page.locator('[data-example="a-group"]');
-  const chevron = example.getByRole("button", { name: /Fold group: Press shop/ });
+  const chevron = example.getByRole("button", { name: /Fold group: Developers/ });
 
   await expect(chevron).toHaveAttribute("aria-expanded", "true");
   /* What it controls exists: the rows that lie inside the group. */
@@ -738,11 +738,11 @@ test("the fold control is a real button, and says whether its group is open", as
   for (const id of controls) await expect(page.locator(`[id="${id}"]`)).toHaveCount(1);
 
   await chevron.click();
-  const folded = example.getByRole("button", { name: /Unfold group: Press shop/ });
+  const folded = example.getByRole("button", { name: /Unfold group: Developers/ });
   await expect(folded).toHaveAttribute("aria-expanded", "false");
   /* One row for the whole group, and its lanes have none of their own. */
   await expect(example.locator("[data-schedule-headers] [data-row]")).toHaveCount(3);
-  await expect(example.locator('[data-schedule-headers] [data-lane="press-1"]')).toHaveCount(0);
+  await expect(example.locator('[data-schedule-headers] [data-lane="arjun"]')).toHaveCount(0);
   /* And it still controls something that exists - the miniature's row. */
   for (const id of (await folded.getAttribute("aria-controls"))!.split(" ")) {
     await expect(page.locator(`[id="${id}"]`)).toHaveCount(1);
@@ -752,14 +752,14 @@ test("the fold control is a real button, and says whether its group is open", as
 test("a group folds by keyboard, because the control is a button", async ({ page }) => {
   await openExample(page, "lane-groups", "a-group");
   const example = page.locator('[data-example="a-group"]');
-  const chevron = example.getByRole("button", { name: /group: Press shop/ });
+  const chevron = example.getByRole("button", { name: /group: Developers/ });
 
   await chevron.focus();
   await expect(chevron).toBeFocused();
   await page.keyboard.press("Enter");
-  await expect(example.getByRole("button", { name: /Unfold group: Press shop/ })).toHaveAttribute("aria-expanded", "false");
+  await expect(example.getByRole("button", { name: /Unfold group: Developers/ })).toHaveAttribute("aria-expanded", "false");
   await page.keyboard.press("Space");
-  await expect(example.getByRole("button", { name: /Fold group: Press shop/ })).toHaveAttribute("aria-expanded", "true");
+  await expect(example.getByRole("button", { name: /Fold group: Developers/ })).toHaveAttribute("aria-expanded", "true");
 });
 
 test("groups fold from outside, and the state is the application's", async ({ page }) => {
@@ -767,9 +767,9 @@ test("groups fold from outside, and the state is the application's", async ({ pa
   const example = page.locator('[data-example="controlled"]');
   const readout = example.locator("[data-folded]");
 
-  await expect(readout).toHaveText("welding");
+  await expect(readout).toHaveText("discovery");
   await example.locator("[data-fold-all]").click();
-  await expect(readout).toHaveText("presses, welding");
+  await expect(readout).toHaveText("payments, discovery");
   await expect(example.locator("[data-schedule-headers] [data-lane]")).toHaveCount(0);
 
   await example.locator("[data-unfold-all]").click();
@@ -777,8 +777,8 @@ test("groups fold from outside, and the state is the application's", async ({ pa
   await expect(example.locator("[data-schedule-headers] [data-lane]")).toHaveCount(4);
 
   /* And the chevron reports to the application rather than deciding for it. */
-  await example.getByRole("button", { name: /Fold group: Press shop/ }).click();
-  await expect(readout).toHaveText("presses");
+  await example.getByRole("button", { name: /Fold group: Payments/ }).click();
+  await expect(readout).toHaveText("payments");
 });
 
 test("an inner group keeps its state while the outer one is folded", async ({ page }) => {
@@ -786,21 +786,21 @@ test("an inner group keeps its state while the outer one is folded", async ({ pa
   const example = page.locator('[data-example="nesting"]');
   const rows = () => example.locator("[data-schedule-headers] [data-row]");
 
-  /* Hall A holds a turning line of three and a press: two heads and four
-     lanes, plus the paint shop outside. */
+  /* The North depot holds three vans and a truck: two heads and four
+     lanes, plus a van from Riverside outside. */
   await expect(rows()).toHaveCount(7);
   /* Folded, the line is one row: the hall's head, that row, the press and the
      paint shop. */
-  await example.getByRole("button", { name: /Fold group: Turning line/ }).click();
+  await example.getByRole("button", { name: /Fold group: Vans/ }).click();
   await expect(rows()).toHaveCount(4);
 
   /* Fold the hall around it, then open the hall again: the line is still
      folded, because folding the hall never touched the line's own state. */
-  await example.getByRole("button", { name: /Fold group: Hall A/ }).click();
+  await example.getByRole("button", { name: /Fold group: North depot/ }).click();
   await expect(rows()).toHaveCount(2);
-  await example.getByRole("button", { name: /Unfold group: Hall A/ }).click();
+  await example.getByRole("button", { name: /Unfold group: North depot/ }).click();
   await expect(rows()).toHaveCount(4);
-  await expect(example.getByRole("button", { name: /Unfold group: Turning line/ })).toHaveCount(1);
+  await expect(example.getByRole("button", { name: /Unfold group: Vans/ })).toHaveCount(1);
 });
 
 test("a subtask on a folded lane is drawn on no other row", async ({ page }) => {
@@ -808,30 +808,30 @@ test("a subtask on a folded lane is drawn on no other row", async ({ page }) => 
   const example = page.locator('[data-example="a-group"]');
   const plot = await plotOf(page, example, [at(6), at(15)]);
 
-  /* The welding bay's bar, 10:00 to 12:00, before and after the press shop
-     folds. Its row moves up by what the two press lanes gave back, and
-     nothing of the presses' work is drawn on it. */
+  /* Noah's bar, 10:00 to 12:00, before and after the developers
+     fold. Its row moves up by what the two developer lanes gave back, and
+     nothing of the developers' work is drawn on it. */
   const at11 = Math.round(plot.x(11) - plot.box.x);
   expect(
-    await paintedShare(example, "data", { x: at11, y: middleOf(plot, "weld") - 4, width: 20, height: 8 }),
+    await paintedShare(example, "data", { x: at11, y: middleOf(plot, "noah") - 4, width: 20, height: 8 }),
   ).toBeGreaterThan(0.9);
 
-  await example.getByRole("button", { name: /Fold group: Press shop/ }).click();
+  await example.getByRole("button", { name: /Fold group: Developers/ }).click();
   const after = await plotOf(page, example, [at(6), at(15)]);
-  /* The welding bay moved up: the two press lanes gave their rows back. */
-  expect(after.index("weld")).toBe(0);
-  expect(middleOf(after, "weld")).toBeLessThan(middleOf(plot, "weld"));
+  /* Noah's lane moved up: the two developer lanes gave their rows back. */
+  expect(after.index("noah")).toBe(0);
+  expect(middleOf(after, "noah")).toBeLessThan(middleOf(plot, "noah"));
   /* Its own bar came with it. */
   expect(
-    await paintedShare(example, "data", { x: at11, y: middleOf(after, "weld") - 4, width: 20, height: 8 }),
+    await paintedShare(example, "data", { x: at11, y: middleOf(after, "noah") - 4, width: 20, height: 8 }),
   ).toBeGreaterThan(0.9);
-  /* And at 07:30 the presses are busy while the welding bay is not: its row
-     has to be empty there. The press shop's work stayed in the press shop's
+  /* And at 07:30 the developers are busy while Noah is not: its row
+     has to be empty there. The developers' work stayed in their group's
      row. */
   expect(
     await paintedShare(example, "data", {
       x: Math.round(after.x(7, 30) - after.box.x),
-      y: middleOf(after, "weld") - 4,
+      y: middleOf(after, "noah") - 4,
       width: 20,
       height: 8,
     }),
@@ -860,15 +860,15 @@ test("a folded group draws the work of every lane in it", async ({ page }) => {
   await openExample(page, "lane-groups", "the-miniature");
   const example = page.locator('[data-example="the-miniature"]');
   const plot = await plotOf(page, example, [at(6), at(16)]);
-  const row = await miniatureOf(example, "hall");
+  const row = await miniatureOf(example, "north");
 
-  /* The lathe runs 07:00 to 09:00 and the mill 09:00 to 11:30 - two lanes, two
+  /* Van FP 214 K runs 07:00 to 09:00 and the e-van 09:00 to 11:30 - two lanes, two
      strips, one above the other inside the one row. */
   const upper = { x: Math.round(plot.x(8) - plot.box.x), y: row.top + row.height * 0.3, width: 12, height: 3 };
   const lower = { x: Math.round(plot.x(10) - plot.box.x), y: row.top + row.height * 0.7, width: 12, height: 3 };
   expect(await paintedShare(example, "data", upper)).toBe(1);
   expect(await paintedShare(example, "data", lower)).toBe(1);
-  /* And each keeps its own hours: at 10:00 the lathe is done, so its strip is
+  /* And each keeps its own hours: at 10:00 the van is done, so its strip is
      empty there but for the grid's time ticks, which run the height of the
      plot behind everything. */
   expect(await paintedShare(example, "data", { ...upper, x: lower.x })).toBeLessThan(0.2);
@@ -878,10 +878,10 @@ test("a dependency into a folded group arrives at the strip of its lane", async 
   await openExample(page, "lane-groups", "the-miniature");
   const example = page.locator('[data-example="the-miniature"]');
   const plot = await plotOf(page, example, [at(6), at(16)]);
-  const row = await miniatureOf(example, "hall");
+  const row = await miniatureOf(example, "north");
 
-  /* The housing leaves the saw at 08:15 and reaches the mill's lead-in at 08:30.
-     The mill is the LOWER of the two strips, so the line has to come down past
+  /* The Harbour tour leaves the truck at 08:15 and reaches the e-van at 08:30.
+     The e-van is the LOWER of the two strips, so the line has to come down past
      the middle of the row - not stop at its top edge, which is where a lane
      index would have put it. */
   const between = {
@@ -897,9 +897,9 @@ test("a finding inside a folded group is marked on its row", async ({ page }) =>
   await openExample(page, "lane-groups", "the-miniature");
   const example = page.locator('[data-example="the-miniature"]');
   const plot = await plotOf(page, example, [at(6), at(16)]);
-  const row = await miniatureOf(example, "hall");
+  const row = await miniatureOf(example, "north");
 
-  /* The two orders claim the mill from 10:45 to 11:30. A three-pixel strip is
+  /* The two tours claim the e-van from 10:45 to 11:30. A three-pixel strip is
      not where an alarm can live alone, so the mark goes on the ROW as well -
      folding is a planner tidying the view, never a planner hiding a finding. */
   const onRow = { x: Math.round(plot.x(11) - plot.box.x), y: row.top + 1, width: 10, height: 3 };
@@ -917,26 +917,26 @@ test("a strip can be hovered and selected, and carries neither label nor grips",
   await openExample(page, "lane-groups", "the-miniature");
   const example = page.locator('[data-example="the-miniature"]');
   const plot = await plotOf(page, example, [at(6), at(16)]);
-  const row = await miniatureOf(example, "hall");
-  const onMill = { x: plot.box.x + plot.x(10) - plot.box.x, y: plot.box.y + row.top + row.height * 0.7 };
+  const row = await miniatureOf(example, "north");
+  const onEVan = { x: plot.box.x + plot.x(10) - plot.box.x, y: plot.box.y + row.top + row.height * 0.7 };
 
   /* Folding costs detail, never access: the tooltip names the stop. */
-  await page.mouse.move(onMill.x, onMill.y);
-  await expect(example.locator("[data-schedule-tooltip]")).toContainText("A-2041 Housing");
+  await page.mouse.move(onEVan.x, onEVan.y);
+  await expect(example.locator("[data-schedule-tooltip]")).toContainText("T-01 Harbour");
 
-  /* And a click takes its whole task, here across a folded group and the saw
-     outside it: the saw's bar gains an outline it did not have. */
-  const edgeOfSaw = {
+  /* And a click takes its whole task, here across a folded group and the truck
+     outside it: the truck's bar gains an outline it did not have. */
+  const edgeOfTruck = {
     x: Math.round(plot.x(7) - plot.box.x),
-    y: plot.row("saw").top + 6,
+    y: plot.row("truck").top + 6,
     width: 10,
     height: 6,
   };
   await page.mouse.move(plot.box.x + 4, plot.box.y + 4);
-  const before = await painted(example, "data", edgeOfSaw);
-  await page.mouse.click(onMill.x, onMill.y);
+  const before = await painted(example, "data", edgeOfTruck);
+  await page.mouse.click(onEVan.x, onEVan.y);
   await page.mouse.move(plot.box.x + 4, plot.box.y + 4);
-  await expect.poll(async () => await painted(example, "data", edgeOfSaw)).toBeGreaterThan(before);
+  await expect.poll(async () => await painted(example, "data", edgeOfTruck)).toBeGreaterThan(before);
 
   /* No grips on a strip - a bar three pixels high is not something to stretch
      by three pixels - and no label on one either. */
@@ -948,9 +948,9 @@ test("a violated dependency into a folded group is marked on its row", async ({ 
   await openExample(page, "lane-groups", "the-miniature");
   const example = page.locator('[data-example="the-miniature"]');
   const plot = await plotOf(page, example, [at(6), at(16)]);
-  const row = await miniatureOf(example, "hall");
+  const row = await miniatureOf(example, "north");
 
-  /* The housing leaves the saw at 08:15 and takes twenty minutes; the mill's
+  /* The Harbour tour leaves the truck at 08:15 and takes twenty minutes; the e-van's
      lead-in had to begin at 08:30. Five minutes short, and those five minutes
      are what the row marks. A line between two strips is a few pixels of a few
      pixels, so the row says it instead. */

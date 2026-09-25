@@ -14,7 +14,7 @@ export const ScheduleContext = createContext<ScheduleScene | null>(null);
 /** The **Lane group** a child is declared inside, or null at the top level.
 
     A lane never names its group: the group gives its id downwards, so that a
-    group reads in JSX as it reads in the plant and moving a lane between
+    group reads in JSX as it reads in the organisation and moving a lane between
     groups is moving a line of JSX (ADR-0025). */
 export const LaneGroupContext = createContext<string | null>(null);
 

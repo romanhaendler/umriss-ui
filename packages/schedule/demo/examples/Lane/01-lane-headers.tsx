@@ -4,47 +4,44 @@ import type { Subtask, Task } from "../../../src";
 
 export const title = "What a lane header says";
 
-/* A lane is declared by its id - the one subtasks name - and a label. The label
-   is content, not a string: a name with its resource number, a status beside
-   it. It is real text, read by a screen reader, and it stays at the left edge
-   while the plot pans.
-
-   The lanes stand in the order they are declared. A subtask on a lane that is
-   not declared is not drawn. */
+export const lead = "A `label` is content, not a string: here the vehicle with its plate, and a badge for the van that is off the road.";
 
 const at = (hours: number) => new Date(2026, 2, 17, hours).getTime();
 
-const TASKS: Task[] = [{ id: "order", color: "light-dark(#7c3aed, #a98bfa)" }];
+const TOURS: Task[] = [{ id: "t-02", name: "T-02 Northfold", color: "light-dark(#0d9488, #3cc7b8)" }];
 
-const WORK: Subtask[] = [
-  { id: "one", task: "order", lane: "m-104", from: at(7), to: at(9) },
-  { id: "two", task: "order", lane: "m-231", from: at(9), to: at(11) },
+const LEGS: Subtask[] = [
+  { id: "t-02-1", task: "t-02", lane: "v1", from: at(7), to: at(9) },
+  { id: "t-02-2", task: "t-02", lane: "v2", from: at(9), to: at(11) },
 ];
 
 export default function LaneHeaders() {
   return (
-    <Schedule ariaLabel="Two presses" initialDomain={[at(6), at(12)]} height={150} headerWidth={200}>
+    <Schedule ariaLabel="Two vans of the North depot" initialDomain={[at(6), at(12)]} height={150} headerWidth={210}>
       <Lane
-        id="m-104"
+        id="v1"
         label={
           <Stack direction="row" gap={2} align="center">
-            <Text size="sm">Press 1</Text>
+            <Text size="sm">Van</Text>
             <Text size="xs" tone="muted" mono>
-              M-104
+              FP 214 K
             </Text>
           </Stack>
         }
       />
       <Lane
-        id="m-231"
+        id="v2"
         label={
           <Stack direction="row" gap={2} align="center">
-            <Text size="sm">Press 2</Text>
-            <Badge tone="warning">Service</Badge>
+            <Text size="sm">E-van</Text>
+            <Text size="xs" tone="muted" mono>
+              FP 377 K
+            </Text>
+            <Badge tone="warning">Workshop</Badge>
           </Stack>
         }
       />
-      <Subtasks data={WORK} tasks={TASKS} />
+      <Subtasks data={LEGS} tasks={TOURS} />
     </Schedule>
   );
 }

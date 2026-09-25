@@ -1,8 +1,8 @@
 /* Snapping: a wall-clock time onto a raster (ADR-0023).
 
    The raster lies on LOCAL time, counted from local midnight plus an offset: a
-   raster of two hours means 06:00, 08:00, 10:00 on the plant's clock, and a
-   raster of eight hours offset by six means the shift changes at 06:00, 14:00
+   raster of two hours means 06:00, 08:00, 10:00 on the wall clock, and a
+   raster of eight hours offset by six means handovers at 06:00, 14:00
    and 22:00 - never UTC's hours. The offset of the time zone is the one at the
    instant itself, so a raster keeps its hours across a clock change. Snapping
    shapes the ghost and therefore the intent - never the stored data. */
@@ -14,7 +14,7 @@ export interface SnapRaster {
   /** The distance between two lines of the raster, in milliseconds. */
   readonly step: number;
   /** Where the raster starts after local midnight, in milliseconds: six
-      hours for shifts that change at 06:00. */
+      hours for handovers at 06:00, 14:00 and 22:00. */
   readonly offset: number;
 }
 
