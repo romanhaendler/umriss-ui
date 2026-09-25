@@ -15,6 +15,12 @@ moves from here under the rule above.
 
 ---
 
+## 0.3.1 – Core 0.12.0 (Sep. 2026)
+
+Needs `@umriss-ui/core` 0.12; the peer range moves to `^0.12.0`. Nothing else changes for a caller.
+
+---
+
 ## 0.3.0 – Dependencies and blocked time (Sep. 2026)
 
 Needs `@umriss-ui/core` 0.11 and `@umriss-ui/charts` 0.8: it reads the renamed wording keys, the new ones for blocked time, and the charts' working-time functions; the peer ranges move to `^0.11.0` and `^0.8.0`.

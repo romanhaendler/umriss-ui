@@ -22,6 +22,33 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.6.0 – Tooltips and a column menu that opens by its button (Sep. 2026)
+
+Needs `@umriss-ui/core` 0.12: it reads the new tooltip wording keys; the peer range moves to `^0.12.0`.
+
+### Added
+
+- **Tooltips on the icon keys.** The column menu's move and pin keys and a
+  column's filter key show what they do on hover and focus: "Move forward",
+  "Pin to start", "Unpin", "Filter". The keys' accessible names are
+  unchanged.
+
+### Changed
+
+- **The column menu opens at its button's start edge.** The toolbar puts its
+  parts at its start, and the panel grew away from them over the page. It
+  still flips to the end edge where there is no room. A condition in the
+  toolbar opens its filter the same way; the filter key in a header keeps the
+  end edge, where it stands.
+
+### Fixed
+
+- **The column menu of a wide table no longer stretches across the window.**
+  The grouping choices stood in one line and set the panel's width; they now
+  wrap within the column list.
+
+---
+
 ## 0.5.0 – Alarms without a plant (Sep. 2026)
 
 Needs `@umriss-ui/core` 0.11: it reads the renamed alarm wording keys; the peer range moves to `^0.11.0`.
