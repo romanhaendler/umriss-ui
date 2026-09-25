@@ -9,26 +9,26 @@
    with the mouse is therefore checked here. */
 
 import { test, expect } from "@playwright/test";
-import { openScenario } from "./navigation";
+import { openExample } from "./navigation";
 import type { Page } from "@playwright/test";
 
 test.skip(({ colorScheme }) => colorScheme === "dark", "Behaviour tests only once (light)");
 
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(new Date("2026-03-17T10:30:00"));
-  await openScenario(page, "browse-a-hierarchy");
-  await page.locator('[data-scenario="browse-a-hierarchy"]').scrollIntoViewIfNeeded();
+  await openExample(page, "treeview", "search-check-and-reveal");
+  await page.locator('[data-example="search-check-and-reveal"]').scrollIntoViewIfNeeded();
 });
 
-const scenario = (page: Page) => page.locator('[data-scenario="browse-a-hierarchy"]');
+const example = (page: Page) => page.locator('[data-example="search-check-and-reveal"]');
 /* The page shows three trees side by side; every selector therefore names the
    one it means. Without that a name would hit several. */
 const tree = (page: Page, label: string) =>
-  scenario(page).getByRole("tree", { name: label });
+  example(page).getByRole("tree", { name: label });
 const row = (page: Page, name: RegExp) =>
   tree(page, "Filing with a selection").getByRole("treeitem", { name });
 const checkedLine = async (page: Page) =>
-  ((await scenario(page).innerText()).split("\n").find((l) => l.startsWith("Checked")) ?? "").trim();
+  ((await example(page).innerText()).split("\n").find((l) => l.startsWith("Checked")) ?? "").trim();
 
 test("A click on the checkbox toggles exactly once", async ({ page }) => {
   const target = row(page, /Single orders/);
@@ -82,7 +82,7 @@ test("The keyboard travels, opens and checks", async ({ page }) => {
 
 test("The search shows the find with its path", async ({ page }) => {
   const searched = tree(page, "Filing, searched");
-  const field = scenario(page).getByLabel("Search the filing").nth(1);
+  const field = example(page).getByLabel("Search the filing").nth(1);
   await field.fill("termination");
   await expect(searched.getByRole("treeitem", { name: /Terminations/ })).toHaveCount(1);
   // "Contracts" stands there only as a signpost – but it stands there.
@@ -102,22 +102,22 @@ test("Showing a node brings it into the window and focuses it", async ({ page })
   expect(await large.getByRole("treeitem").count()).toBeLessThan(60);
   await expect(large.getByRole("treeitem", { name: "Sheet 33.2" })).toHaveCount(0);
 
-  await scenario(page).locator('[data-role="reveal-deep"]').click();
+  await example(page).locator('[data-role="reveal-deep"]').click();
 
   // The path has been folded open, the row brought into the window – and the
   // focus sits on it. That is exactly what jsdom cannot prove.
   await expect(large.getByRole("treeitem", { name: "Sheet 33.2" })).toBeFocused();
-  expect(await scenario(page).innerText()).toContain("Last revealed: f33-2");
+  expect(await example(page).innerText()).toContain("Last revealed: f33-2");
 });
 
 test("Folding everything open and closed", async ({ page }) => {
   const large = tree(page, "Large body");
   const closed = await large.getByRole("treeitem").count();
-  await scenario(page).getByRole("button", { name: "Expand all" }).click();
+  await example(page).getByRole("button", { name: "Expand all" }).click();
   // Do more rows fit into the same window when folded open? No – the number of
   // rendered ones stays the same, but the leaves are below them now.
   await expect(large.getByRole("treeitem", { name: "Sheet 0.0" })).toHaveCount(1);
-  await scenario(page).getByRole("button", { name: "Collapse all" }).click();
+  await example(page).getByRole("button", { name: "Collapse all" }).click();
   await expect(large.getByRole("treeitem", { name: "Sheet 0.0" })).toHaveCount(0);
   expect(await large.getByRole("treeitem").count()).toBe(closed);
 });
@@ -273,7 +273,7 @@ test("An unloaded branch shows on opening that it is loading", async ({ page }) 
 
 test("An unloaded branch survives the search", async ({ page }) => {
   const searched = tree(page, "Filing, searched");
-  const field = scenario(page).getByLabel("Search the filing").nth(1);
+  const field = example(page).getByLabel("Search the filing").nth(1);
   await field.fill("quarter");
   // It cannot be searched, so it is never said of it that it contains nothing.
   await expect(searched.getByRole("treeitem", { name: /Inbox/ })).toHaveCount(1);
