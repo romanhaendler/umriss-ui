@@ -9,6 +9,7 @@
    - Series are clipped to the plot area.
    - 1-px lines lie on half pixels, so that they are crisp at DPR 1. */
 
+import { hatchLines, markerPath, type Hatch, type MarkerShape } from "./marks";
 import { segmentEnd } from "./state";
 import type { AxisLayout } from "./layout";
 import type { ResolvedTheme } from "./theme";
@@ -32,6 +33,8 @@ export interface LineDrawItem extends DrawBase {
   dash?: readonly number[];
   markers: "auto" | "always" | "never";
   step?: boolean;
+  /** The markers' shape (charts-alternatives C3); a circle without one. */
+  marker?: MarkerShape;
 }
 
 export interface AreaDrawItem extends DrawBase {
@@ -43,6 +46,8 @@ export interface AreaDrawItem extends DrawBase {
   fillOpacity: number;
   strokeWidth: number;
   dash?: readonly number[];
+  /** Lines across the fill, in the series' colour (C3). */
+  hatch?: Hatch;
 }
 
 export interface BarDrawItem extends DrawBase {
@@ -53,11 +58,15 @@ export interface BarDrawItem extends DrawBase {
   offset: number;
   /** Bar width in domain units. */
   width: number;
+  /** Lines across the bars, in the background's colour (C3). */
+  hatch?: Hatch;
 }
 
 export interface ScatterDrawItem extends DrawBase {
   kind: "scatter";
   radius: number;
+  /** The points' shape (C3); a circle without one. */
+  marker?: MarkerShape;
 }
 
 export interface StateDrawItem extends DrawBase {
@@ -70,6 +79,8 @@ export interface StateDrawItem extends DrawBase {
   laneBottom: number;
   /** Where the last segment ends (lastSegmentEnd). */
   lastEnd: number;
+  /** A hatch per state code, across its colour (C3); null draws colour alone. */
+  hatches?: readonly Hatch[] | null;
 }
 
 export interface MatrixDrawItem extends DrawBase {
@@ -81,6 +92,8 @@ export interface MatrixDrawItem extends DrawBase {
   /** Cell edges in domain units. */
   width: number;
   height: number;
+  /** A hatch per bucket, across its colour (C3); null draws colour alone. */
+  hatches?: readonly Hatch[] | null;
 }
 
 /** Mirrors the union of the series configuration (types.ts). */
@@ -103,6 +116,8 @@ export interface LimitDrawItem {
   /** Dash pattern; empty means solid. It carries the difference between a chosen
       and a calculated limit (ADR-0008). */
   dash: readonly number[];
+  /** A band hatched in its colour, not only tinted (C3). */
+  hatch?: boolean;
 }
 
 export interface SeriesLayerInput {
@@ -160,6 +175,31 @@ function drawGrid(ctx: CanvasRenderingContext2D, input: SeriesLayerInput): void 
       ctx.stroke();
     }
   }
+}
+
+/* ---------------- Hatches (charts-alternatives C3) ----------------
+
+   Lines across a fill, clipped to it: a pattern a reader can tell apart where
+   the colours cannot be. One path of lines per filled path, across the plot,
+   so a series of bars stays one stroke however many bars it has. */
+
+const HATCH_SPACING = 6;
+
+function drawHatch(ctx: CanvasRenderingContext2D, area: Path2D, box: Rect, hatch: Hatch, color: string): void {
+  if (hatch === "none") return;
+  const flat = hatchLines(box, hatch, HATCH_SPACING);
+  const lines = new Path2D();
+  for (let i = 0; i < flat.length; i += 4) {
+    lines.moveTo(flat[i] as number, flat[i + 1] as number);
+    lines.lineTo(flat[i + 2] as number, flat[i + 3] as number);
+  }
+  ctx.save();
+  ctx.clip(area);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1;
+  ctx.setLineDash([]);
+  ctx.stroke(lines);
+  ctx.restore();
 }
 
 /* ---------------- Line (R-2.12, R-4.4, R-4.5) ---------------- */
@@ -225,6 +265,7 @@ function drawLine(ctx: CanvasRenderingContext2D, item: LineDrawItem): void {
   if (item.markers !== "never") {
     const every = item.markers === "always" || n <= MARKER_LIMIT;
     const r = item.strokeWidth + 1.5;
+    const shape = item.marker ?? "circle";
     const points = new Path2D();
     for (let i = 0; i < n; i++) {
       const value = ys[i] as number;
@@ -232,8 +273,7 @@ function drawLine(ctx: CanvasRenderingContext2D, item: LineDrawItem): void {
       if (!every && !isolated(ys, n, i)) continue;
       const px = (xs[i] as number) * xm + xb;
       const py = value * ym + yb;
-      points.moveTo(px + r, py);
-      points.arc(px, py, r, 0, Math.PI * 2);
+      markerPath(points, shape, px, py, r);
     }
     ctx.fillStyle = item.color;
     ctx.fill(points); // batched marker pass
@@ -251,7 +291,7 @@ function drawLine(ctx: CanvasRenderingContext2D, item: LineDrawItem): void {
    A section of one point has no width to fill: it is a stroke from its foot to
    its value, or it would not be drawn at all (Q23). */
 
-function drawArea(ctx: CanvasRenderingContext2D, item: AreaDrawItem): void {
+function drawArea(ctx: CanvasRenderingContext2D, item: AreaDrawItem, plot: Rect): void {
   const n = item.length;
   const xm = item.xScale.m;
   const xb = item.xScale.b;
@@ -318,6 +358,8 @@ function drawArea(ctx: CanvasRenderingContext2D, item: AreaDrawItem): void {
   ctx.fill(fill);
 
   ctx.globalAlpha = item.alpha;
+  // Across a faint fill the hatch takes the series' colour, not the ground's.
+  drawHatch(ctx, fill, plot, item.hatch ?? "none", item.color);
   ctx.strokeStyle = item.color;
   if (item.strokeWidth > 0) {
     ctx.setLineDash((item.dash ?? []) as number[]);
@@ -336,7 +378,7 @@ function drawArea(ctx: CanvasRenderingContext2D, item: AreaDrawItem): void {
    slope of the x scale - a distance, not a place, hence without the intercept.
    One Path2D for the whole series, one fill(). */
 
-function drawBars(ctx: CanvasRenderingContext2D, item: BarDrawItem): void {
+function drawBars(ctx: CanvasRenderingContext2D, item: BarDrawItem, plot: Rect, ground: string): void {
   const n = item.length;
   const xm = item.xScale.m;
   const xb = item.xScale.b;
@@ -358,6 +400,7 @@ function drawBars(ctx: CanvasRenderingContext2D, item: BarDrawItem): void {
   }
   ctx.fillStyle = item.color;
   ctx.fill(path);
+  drawHatch(ctx, path, plot, item.hatch ?? "none", ground);
 }
 
 /* ---------------- Scatter ----------------
@@ -375,6 +418,7 @@ function drawScatter(ctx: CanvasRenderingContext2D, item: ScatterDrawItem): void
   const xs = item.x;
   const ys = item.y;
   const r = item.radius;
+  const shape = item.marker ?? "circle";
 
   const points = new Path2D();
   for (let i = 0; i < n; i++) {
@@ -382,8 +426,7 @@ function drawScatter(ctx: CanvasRenderingContext2D, item: ScatterDrawItem): void
     if (Number.isNaN(value)) continue; // a gap leaves its point out (R-2.5)
     const px = (xs[i] as number) * xm + xb;
     const py = value * ym + yb;
-    points.moveTo(px + r, py);
-    points.arc(px, py, r, 0, Math.PI * 2);
+    markerPath(points, shape, px, py, r);
   }
   ctx.fillStyle = item.color;
   ctx.fill(points);
@@ -400,7 +443,7 @@ function drawScatter(ctx: CanvasRenderingContext2D, item: ScatterDrawItem): void
    this costs as many fill() calls as there are states and not as many as there
    are changes. */
 
-function drawStateBand(ctx: CanvasRenderingContext2D, item: StateDrawItem): void {
+function drawStateBand(ctx: CanvasRenderingContext2D, item: StateDrawItem, plot: Rect, ground: string): void {
   const n = item.length;
   const xm = item.xScale.m;
   const xb = item.xScale.b;
@@ -434,6 +477,7 @@ function drawStateBand(ctx: CanvasRenderingContext2D, item: StateDrawItem): void
   for (let k = 0; k < count; k++) {
     ctx.fillStyle = item.colors[k] as string;
     ctx.fill(paths[k] as Path2D);
+    drawHatch(ctx, paths[k] as Path2D, plot, item.hatches?.[k] ?? "none", ground);
   }
 }
 
@@ -443,7 +487,7 @@ function drawStateBand(ctx: CanvasRenderingContext2D, item: StateDrawItem): void
    path per bucket: the same batched move as with the state band, and for the same
    reason - the number of colours is small, the number of cells is not. */
 
-function drawMatrix(ctx: CanvasRenderingContext2D, item: MatrixDrawItem): void {
+function drawMatrix(ctx: CanvasRenderingContext2D, item: MatrixDrawItem, plot: Rect, ground: string): void {
   const n = item.length;
   const xm = item.xScale.m;
   const xb = item.xScale.b;
@@ -478,6 +522,7 @@ function drawMatrix(ctx: CanvasRenderingContext2D, item: MatrixDrawItem): void {
   for (let k = 0; k < count; k++) {
     ctx.fillStyle = item.colors[k] as string;
     ctx.fill(paths[k] as Path2D);
+    drawHatch(ctx, paths[k] as Path2D, plot, item.hatches?.[k] ?? "none", ground);
   }
 }
 
@@ -497,11 +542,21 @@ function drawLimits(
       // A band is ground, not a mark: it carries only enough opacity to make the
       // zone readable, without colouring the data above it.
       ctx.globalAlpha = 0.12;
-      if (g.orientation === "y") {
-        ctx.fillRect(plot.x, a, plot.width, b - a);
-      } else {
-        ctx.fillRect(a, plot.y, b - a, plot.height);
+      if (g.hatch !== true) {
+        if (g.orientation === "y") ctx.fillRect(plot.x, a, plot.width, b - a);
+        else ctx.fillRect(a, plot.y, b - a, plot.height);
+        ctx.restore();
+        continue;
       }
+      // Hatched, the band says "zone" where its tint cannot be told apart: the
+      // hatch lies over the tint at half the strength of a mark, and stays
+      // ground under the data.
+      const area = new Path2D();
+      if (g.orientation === "y") area.rect(plot.x, a, plot.width, b - a);
+      else area.rect(a, plot.y, b - a, plot.height);
+      ctx.fill(area);
+      ctx.globalAlpha = 0.5;
+      drawHatch(ctx, area, plot, "rising", g.color);
       ctx.restore();
       continue;
     }
@@ -555,19 +610,19 @@ export function drawSeriesLayer(
         drawLine(ctx, item);
         break;
       case "area":
-        drawArea(ctx, item);
+        drawArea(ctx, item, plot);
         break;
       case "bar":
-        drawBars(ctx, item);
+        drawBars(ctx, item, plot, input.theme.colorBg);
         break;
       case "scatter":
         drawScatter(ctx, item);
         break;
       case "state":
-        drawStateBand(ctx, item);
+        drawStateBand(ctx, item, plot, input.theme.colorBg);
         break;
       case "matrix":
-        drawMatrix(ctx, item);
+        drawMatrix(ctx, item, plot, input.theme.colorBg);
         break;
     }
   }

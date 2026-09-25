@@ -303,6 +303,16 @@
     border-radius: var(--uc-radius-chip);
   }
 
+  /* Under encoding by marks the chip draws the series' dash, marker or hatch
+     (charts-alternatives C3). Its colours are the canvas' own, already chosen
+     for the contrast mode where it applies: the browser is not to force them
+     away as it forces a background. */
+  .uc-legend-mark {
+    display: block;
+    flex: none;
+    forced-color-adjust: none;
+  }
+
   /* With onToggle an entry is a button, and looks like the entry it was. */
   button.uc-legend-item {
     padding: 0;
@@ -350,6 +360,82 @@
 
   .uc-legend-item[data-hidden] > .uc-legend-chip {
     opacity: 0.3;
+  }
+
+  /* ---------------- Data table (charts-alternatives 01) ---------------- */
+
+  /* The key closes the legend's line, apart from the entries it does not
+     explain. */
+  .uc-data-key {
+    margin-left: auto;
+  }
+
+  /* The table lies over the plot area (its top and height measured inline) and
+     scrolls there; the plot beneath is hidden from the eye and from a screen
+     reader while it is open, and keeps its size, so closing shows it at once. */
+  .uc-data-panel {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    overflow: auto;
+    background: var(--uc-color-bg);
+    font-size: var(--uc-size-tooltip);
+    line-height: var(--uc-leading-text);
+    color: var(--uc-color-text);
+  }
+
+  /* It scrolls, so it takes the focus - with the chart's ring. */
+  .uc-data-panel:focus {
+    outline: none;
+  }
+
+  .uc-data-panel:focus-visible {
+    box-shadow: var(--uc-focus-ring);
+  }
+
+  .uc-root:has(> .uc-data-panel) > .uc-plot {
+    visibility: hidden;
+  }
+
+  .uc-data-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .uc-data-table + .uc-data-table {
+    margin-top: 12px;
+  }
+
+  .uc-data-table > caption {
+    padding-bottom: 6px;
+    text-align: left;
+  }
+
+  .uc-data-table th,
+  .uc-data-table td {
+    padding: 3px 8px;
+    border-bottom: 1px solid var(--uc-color-grid);
+    white-space: nowrap;
+    font-weight: normal;
+    text-align: right;
+  }
+
+  /* The heading row stays while the values scroll beneath it. */
+  .uc-data-table > thead th {
+    position: sticky;
+    top: 0;
+    background: var(--uc-color-bg);
+    border-bottom-color: var(--uc-color-axis);
+  }
+
+  .uc-data-table th:first-child {
+    text-align: left;
+  }
+
+  /* Numbers and positions in mono, as the tooltip writes them. */
+  .uc-data-table > tbody th,
+  .uc-data-table > tbody td {
+    font-family: var(--uc-font-mono);
   }
 
   /* ---------------- Tooltip (R-4.8, R-4.9) ---------------- */
