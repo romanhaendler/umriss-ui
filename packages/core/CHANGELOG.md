@@ -29,6 +29,54 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.12.0 – Popovers that stay by their trigger (Sep. 2026)
+
+### Added
+
+- **Wording for the table's icon keys' tooltips:** `columnForwardHint`,
+  `columnBackwardHint`, `pinToStartHint`, `pinToEndHint`, `unpinHint`
+  ("Move forward", "Move backward", "Pin to start", "Pin to end", "Unpin";
+  German "Nach vorn", "Nach hinten", "Am Anfang fixieren", "Am Ende fixieren",
+  "Fixierung lösen") and `filterHint` ("Filter", German "Filtern"). Short,
+  without the column: the keys' accessible names keep it. An application that
+  implements the whole `Wording` type adds the six keys.
+
+### Changed
+
+- **A popover flips across as it flips along.** Where the edge its caller asks
+  for (`align`) would push the panel out of the window and the other edge
+  would not, it lines up with the other one; where neither fits, it is centred
+  under its trigger if that fits; only then is it pushed against the window's
+  edge. It grows out of the corner it really stands at. Before, a panel that
+  did not fit was pushed against the edge and lined up with nothing. `Menu`,
+  the date pickers, `Combobox`, `MultiSelect`, `ContextMenu` and every other
+  panel on `Popover` follow.
+- **A popover that fits on neither side keeps its trigger in view.** It takes
+  the side with more room, is cut to it and scrolls in itself - where that
+  side has at least 240 px. Below that it is pulled into the window as before,
+  over its trigger if need be. Before, every such panel was pulled over its
+  trigger: a column menu at a laptop's height hid the button that opened it.
+- **A popover keeps the window's 8 px margin when it only just fits.** A
+  panel that fitted to the pixel stood flush against the window's edge.
+- **A tooltip gives way to its trigger's own panel.** While the trigger says
+  `aria-expanded="true"`, the tooltip does not show, and a press hides it. A
+  tooltip over a filter key stood over the filter's panel.
+
+### Fixed
+
+- **A tall popover no longer sticks out of the window at the bottom.** It was
+  measured while its entrance animation still scaled it down, and placed as if
+  it were four per cent smaller.
+- **A scroll inside a popover no longer throws it back to its top.** It was
+  taken for a page scroll and the panel measured anew.
+- **`DateRangePicker` and `DateTimeRangePicker` on a narrow window.** The
+  presets widened the panel to the window while the months below stood one
+  month wide, and the time row of `DateTimeRangePicker` pressed "From" and
+  "To" into each other; the presets now wrap within the months, and below
+  600 px the two times stand one under the other.
+
+---
+
 ## 0.11.0 – Data-dense applications (Sep. 2026)
 
 ### Added
