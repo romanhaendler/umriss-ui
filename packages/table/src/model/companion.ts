@@ -56,6 +56,8 @@ export interface CompanionOptions<Z, K extends string> {
   /** Groups the filtered set; a page and the virtual window then count lines.
       Its identity should stay while nothing in it changes. */
   grouping?: TableInput<Z, K>["grouping"];
+  /** Manual mode: the rows are a server's page, `rowCount` its total. */
+  manual?: TableInput<Z, K>["manual"];
 }
 
 export interface Companion<Z, K extends string> extends TableProjection<Z, K> {
@@ -115,6 +117,8 @@ export interface Companion<Z, K extends string> extends TableProjection<Z, K> {
    * touch its loop.
    */
   virtual?: VirtualRows;
+  /** Manual mode, as it was handed in. */
+  manual?: TableInput<Z, K>["manual"];
 }
 
 export function useCompanion<Z, K extends string = string>(
@@ -122,7 +126,7 @@ export function useCompanion<Z, K extends string = string>(
   columns: readonly Column<Z, K>[],
   options: CompanionOptions<Z, K>,
 ): Companion<Z, K> {
-  const { rowKey, filter, defaultSort = null, initialView, virtual, grouping } = options;
+  const { rowKey, filter, defaultSort = null, initialView, virtual, grouping, manual } = options;
 
   const [search, setSearchRaw] = useState(initialView?.search ?? "");
   const [sort, setSort] = useState<readonly Sort<K>[]>(() => {
@@ -166,8 +170,9 @@ export function useCompanion<Z, K extends string = string>(
         hidden,
         order,
         grouping,
+        manual,
       }),
-    [rows, columns, search, filter, sort, page, modelPageSize, hidden, order, grouping],
+    [rows, columns, search, filter, sort, page, modelPageSize, hidden, order, grouping, manual],
   );
 
   /* The hook always runs - the number of hooks must not hang on whether it
@@ -377,6 +382,7 @@ export function useCompanion<Z, K extends string = string>(
     visible,
     visibleLines: windowLines,
     virtual: virtual ? rowWindow : undefined,
+    manual,
     view,
     search,
     setSearch,

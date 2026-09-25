@@ -34,3 +34,10 @@ export interface TableView<K extends string = string> {
       does not exist falls out. */
   pinned?: Readonly<Record<string, Pin>>;
 }
+
+/** The view as manual mode reports it to `onViewChange`: the parts that decide
+    the rows - search, conditions, sort, page and page size - are always there,
+    at their default as well. A server has no default of the table's to fall
+    back on, and a view it has to complete is one it completes wrongly. */
+export type ManualView<K extends string = string> = TableView<K> &
+  Required<Pick<TableView<K>, "search" | "conditions" | "sort" | "page" | "pageSize">>;

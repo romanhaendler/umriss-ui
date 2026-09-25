@@ -771,6 +771,15 @@ storage; where a view is remembered, if anywhere, is the application's business.
 Whatever is at its default is not part of it, and the pre-filter never is.
 _Avoid_: view state, settings, Einstellungen, preset, saved view, Ansichtslink
 
+**Manual mode**:
+A table over rows a server holds: the rows passed in are one page, the
+server's count stands beside them, and the **View** goes out whenever what
+decides the rows changes — complete, defaults included, since a server has no
+default of the table's. The **Filtered set** is then the server's; what would
+act on it here — select all, the export — acts on the page and says so, and
+what would misstate it — a footer, a grouping — is not there.
+_Avoid_: server mode, server-side model, data source, remote table
+
 **Pinned column**:
 A column that stays in view while the table scrolls sideways, in a block at the
 start or at the end of the row; the rest scrolls under the blocks. Pinning moves

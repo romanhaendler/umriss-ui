@@ -7,7 +7,7 @@
 
 import type { ReactNode } from "react";
 import type { LimitSet } from "@umriss-ui/core";
-import type { TableView } from "./model/view";
+import type { ManualView, TableView } from "./model/view";
 import type { SortLevel } from "./model/tableModel";
 import type { TableSelection } from "./model/useTableSelection";
 import type { ColumnFilter } from "./columnFilter";
@@ -481,7 +481,7 @@ export interface SetFilter<Z> {
 
 /* --- The hook ------------------------------------------------------------- */
 
-export interface TableOptions<Z> {
+interface TableOptionsCommon<Z> {
   /** A stable key per row – the basis of selection and expansion. */
   rowKey: (row: Z) => string;
   /** Default 10. */
@@ -509,6 +509,38 @@ export interface TableOptions<Z> {
   /** A selection from outside instead of its own – when the application holds it. */
   selection?: TableSelection<string>;
 }
+
+/** The table holds every row and does the work itself. */
+interface AutomaticMode {
+  /** Manual mode: the rows are one page a server answered. */
+  manual?: false;
+  rowCount?: never;
+  onViewChange?: never;
+  filterOptions?: never;
+}
+
+/** Manual mode: the rows are the page a server answered for the view the table
+    reported. The table searches, filters, sorts, groups and pages nothing of
+    its own; select all, the export and the footer would act on one page and
+    call it the whole, so "select all" says it selects the page, the export
+    writes the page and says so, and there is no footer and no grouping. */
+interface ManualMode {
+  /** Manual mode: the rows are one page a server answered. */
+  manual: true;
+  /** How many rows the server's filtered set has - the pages and the counts
+      read it. */
+  rowCount: number;
+  /** The view changed where it decides the rows: search, conditions, sort,
+      page or page size. Called once when the table first stands and once per
+      change, with every one of the five present. */
+  onViewChange: (view: ManualView) => void;
+  /** The values a list filter offers for a column, `null` for an absent one -
+      the table cannot count what it does not hold. */
+  filterOptions?: (column: string) => readonly unknown[];
+}
+
+/** The options of `useTable`: automatic, or manual over a server. */
+export type TableOptions<Z> = TableOptionsCommon<Z> & (AutomaticMode | ManualMode);
 
 /** The state of a table, as everything outside the columns reads it. */
 export interface TableSnapshot<Z> {
@@ -581,10 +613,15 @@ export interface TableSnapshot<Z> {
   unfoldAll: () => void;
   /** The part of the state an application can keep; whatever is at its default is absent. */
   view: TableView;
-  /** The filtered set in the visible columns as text for a spreadsheet. */
+  /** The filtered set in the visible columns as text for a spreadsheet - in
+      manual mode the page. */
   asCsv: () => string;
   /** Whether it virtualises. */
   virtual: boolean;
+  /** How many rows the filtered set has - in manual mode the server's count. */
+  rowCount: number;
+  /** Whether it is in manual mode: the rows are one page of a server's. */
+  manual: boolean;
 }
 
 /** What a part without a row type needs from a table – for `of`. */
