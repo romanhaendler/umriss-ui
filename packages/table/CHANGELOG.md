@@ -24,8 +24,8 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ## Unreleased
 
-Needs the `@umriss-ui/core` that carries the availability wording (its own
-"Unreleased" section).
+Needs the `@umriss-ui/core` that carries the availability wording and the
+column menu's pin keys (its own "Unreleased" section).
 
 ### Added
 
@@ -73,6 +73,10 @@ Needs the `@umriss-ui/core` that carries the availability wording (its own
   **`pinned` in the view**: the user's choice, whole, once it deviates from
   what the columns declare (`{}` when every declared pin was undone). A view
   handed in as `initialView` restores it.
+- **The column menu pins**: two keys per column, "Pin to start" and "Pin to
+  end"; the key of the side a column is pinned to stands in the accent and
+  reads "Unpin". The focus stays on the key that was pressed while the entry
+  moves to its block.
 
 ### Changed
 

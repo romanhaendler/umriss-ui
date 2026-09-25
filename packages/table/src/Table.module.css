@@ -653,6 +653,13 @@
     opacity: 0.5;
   }
 
+  /* A pin key that is on stands in the accent: the column is pinned to that
+     side, and the key now unpins it. */
+  .pinOn,
+  .pinOn:hover:not(:disabled) {
+    color: var(--u-color-accent-text);
+  }
+
   /* ---- Grouping: the column menu's section and the toolbar's tag ------- */
 
   .groupingChoice {
