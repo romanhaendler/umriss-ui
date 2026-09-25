@@ -1,6 +1,6 @@
 # 26 - Component pages: schedule, Plan and Time
 
-Status: ready-for-agent
+Status: done
 Type: task
 Blocked by: 01, 02, 04, 08
 
@@ -14,3 +14,7 @@ Every page in schedule, Plan and Time rewritten to the page skeleton, rubrics re
 
 - The spec's page checklist, per page.
 - Plant examples within the quarter.
+
+## Comments
+
+2026-09-25, delivered on `main`. Pages rewritten to the skeleton, examples in the worlds with visible leads; plant within the quarter (see the merge commits of this ticket). Visual baselines wait on the branch `demo-rework-baselines` for ticket 30's review (CONTEXT.md, Baseline).
