@@ -1,7 +1,7 @@
 /* The application around the shell: the theme and nothing else.
 
    It was once called `Showcase`. That word stands on the avoid list of
-   CONTEXT.md under "Demonstration", and it no longer fitted either:
+   CONTEXT.md under "Scenario", and it no longer fitted either:
    everything that used to stand here - twenty-one surfaces, their state and
    their layers - now stands in `demo/examples/`, one file per example. The
    file IS the example: what runs is exactly what the reader sees. */

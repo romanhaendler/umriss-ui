@@ -1,11 +1,12 @@
 # @umriss-ui/schedule
 
-The schedule of a plant: **subtasks** on **lanes** over time. One task runs
-across several machines in a fixed order, each stop has a main time with a
-lead-in before it and a lead-out after it, and between the stops lie
-**dependencies** with lags of their own. The schedule draws all of it, marks
-what cannot work — two subtasks on one machine at once, a dependency whose lag
-does not fit — and lets a planner move things by hand without ever changing
+Work planned over time: **subtasks** on **lanes** — people, vehicles, rooms or
+machines. One task runs across several lanes in a fixed order, each stop has a
+main time with a lead-in before it and a lead-out after it, between the stops
+lie **dependencies** with lags of their own, and a lane can be **blocked** for
+leave or maintenance. The schedule draws all of it, marks what cannot work —
+two subtasks on one lane at once, a dependency whose lag does not fit, work in
+blocked time — and lets a planner move things by hand without ever changing
 the plan underneath them.
 
 ## Install
@@ -65,11 +66,11 @@ drag shows a **ghost** with the findings the drop would create, and ends in an
 read-only. `canMoveTo(subtask, lane)` narrows it: a drag across a lane the
 subtask may not go to leaves the ghost where it was allowed and shows a
 refusal, and a refused drop reports nothing. A drag near the edge of the plot pans the plot along, and `snap`
-takes the tick raster, a step, or a step with an offset - shifts at 06:00,
+takes the tick raster, a step, or a step with an offset - handovers at 06:00,
 14:00 and 22:00 are eight hours offset by six.
 
 Dependent subtasks never move by themselves: `ripple` computes the cascade for
-the application to apply, or not, and `shiftTask` the moves of a whole order.
+the application to apply, or not, and `shiftTask` the moves of a whole task.
 `findings`, `overlaps` and `violatedDependencies` return what the schedule draws as
 data.
 
@@ -97,7 +98,7 @@ lead-out and to nothing else.
 
 ## Lanes that fold
 
-`<LaneGroup>` puts halls, lines and machine groups over the lanes, to any
+`<LaneGroup>` puts teams, depots or regions over the lanes, to any
 depth. A group is structure and never a lane: nothing sits on it, no finding is
 reported for it, and no intent names it (ADR-0025).
 

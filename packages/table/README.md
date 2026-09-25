@@ -108,7 +108,7 @@ stylesheets by hand.
 * **On a row**: a detail row that stays open across a change of filter, row
   actions that stay quiet until the row is meant, and a bulk action that always
   receives a list.
-* **For producing plants**: `VerdictColumn` reads a measured value against a
+* **For monitoring**: `VerdictColumn` reads a measured value against a
   limit set, and `AlarmList` shows alarms with a lifecycle — active or
   resolved, acknowledged or not. The library generates no alarms (ADR-0009).
 * **A million rows on a server**: in manual mode the rows are one page a server
