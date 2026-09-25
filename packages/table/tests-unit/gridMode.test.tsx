@@ -182,6 +182,46 @@ describe("Grid mode", () => {
   });
 });
 
+describe("Grid mode through a spanning cell", () => {
+  interface Part {
+    id: string;
+    kind: string;
+    name: string;
+    maker: string;
+    stock: number;
+  }
+  const PARTS: Part[] = [
+    { id: "a", kind: "Valve", name: "V-1", maker: "Keller", stock: 4 },
+    { id: "b", kind: "Valve", name: "V-2", maker: "Brandt", stock: 2 },
+  ];
+
+  function Parts() {
+    const { Table: Frame, Column } = useTable(PARTS, { rowKey: (p) => p.id, defaultGrouping: "kind" });
+    return (
+      <Frame grid>
+        <Column value="kind" label="Kind" />
+        <Column value="name" label="Part" rowHeader />
+        <Column value="maker" label="Maker" />
+        <Column value="stock" label="Stock" aggregate="sum" />
+      </Frame>
+    );
+  }
+
+  it("keeps its column through a group header whose label spans it", () => {
+    render(<Parts />);
+    act(() => screen.getByText("Keller").focus());
+    fireEvent.focus(active());
+    /* The header's label spans Part and Maker; up and up again lands on Maker's head. */
+    press("ArrowUp");
+    expect(at()[1]).toBe('header:["value:Valve"]');
+    press("ArrowUp");
+    expect(active().textContent).toBe("Maker");
+    press("ArrowDown");
+    press("ArrowDown");
+    expect(at()).toEqual(["Keller", "row:a"]);
+  });
+});
+
 describe("Grid mode in a virtual window", () => {
   interface Reading {
     id: string;

@@ -24,7 +24,7 @@ import type { VirtualRows, Wording } from "@umriss-ui/core";
 import type { ColumnEntry } from "./registry";
 import { occurringValues } from "./columnFilter";
 import { isAbsent } from "./values";
-import { cellAt, nextCell, placeOf, stepGrid } from "./model/gridWalk";
+import { nextCell, placeOf, rowLine, stepGrid } from "./model/gridWalk";
 import type { GridLine, GridMove, GridPosition } from "./model/gridWalk";
 import type { CellEdit } from "./types";
 
@@ -99,7 +99,7 @@ export const GridContext = createContext<GridContextValue | null>(null);
 export function useCellEditor(rowKey: string, columnId: string): GridContextValue | null {
   const grid = useContext(GridContext);
   const editing = grid?.editing;
-  return editing && editing.line === `row:${rowKey}` && editing.column === columnId ? grid : null;
+  return editing && editing.line === rowLine(rowKey) && editing.column === columnId ? grid : null;
 }
 
 /* --- The DOM: which cell is the tab stop ------------------------------------------ */
@@ -135,13 +135,14 @@ function cellsOf(row: HTMLTableRowElement): { cell: HTMLTableCellElement; start:
 /** The cell a key or a focus happened in, and its place: its line's key and
     the column it begins at. Null outside this grid - a popover's panel is in
     a portal, and a key there is the panel's. */
-function placeOfCell(table: HTMLTableElement, target: EventTarget | null): { cell: HTMLTableCellElement; line: string; column: number } | null {
+function placeOfCell(table: HTMLTableElement, target: EventTarget | null): { cell: HTMLTableCellElement; line: string; column: number; end: number } | null {
   if (!(target instanceof Element)) return null;
   const cell = target.closest<HTMLTableCellElement>("td, th");
   const row = cell?.parentElement as HTMLTableRowElement | undefined;
   const line = row?.dataset.gridLine;
   if (!cell || !row || line === undefined || row.closest("table") !== table) return null;
-  return { cell, line, column: cellsOf(row).find((c) => c.cell === cell)!.start };
+  const { start, end } = cellsOf(row).find((c) => c.cell === cell)!;
+  return { cell, line, column: start, end };
 }
 
 /** Writes the tab stop onto the Active cell and takes every cell's own
@@ -157,6 +158,9 @@ export function GridFocus({ table: tableRef, grid, lines, ids }: { table: RefObj
     const key = lines[at.line]?.key;
     let stop: HTMLTableCellElement | null = null;
     let fallback: HTMLTableCellElement | null = null;
+    /* ponytail: every cell and every control in them, after every render -
+       a few hundred in a virtual window, all of them in a long table without
+       one; a pass over the changed lines only is the upgrade if it shows. */
     for (const row of Array.from(table.querySelectorAll<HTMLTableRowElement>("tr[data-grid-line]"))) {
       const line = row.dataset.gridLine!;
       const cells = cellsOf(row);
@@ -244,7 +248,15 @@ export function gridHandlers(input: GridInput) {
   const lineRow = (key: string) => lines.find((l) => l.key === key)?.row;
   const editable = (p: GridPosition) => {
     const line = lines[p.line];
-    return line !== undefined && line.key.startsWith("row:") && edits(columnById(ids[p.column] ?? ""));
+    return line?.row !== undefined && line.key === rowLine(rowKey(line.row)) && edits(columnById(ids[p.column] ?? ""));
+  };
+
+  /** The column a key starts from in this cell: the walk's goal where the
+      Active cell stands here and the cell spans it, else the cell's first. */
+  const goalIn = (place: { line: string; column: number; end: number }, active = grid.state.active) => {
+    return active && active.line === place.line && active.columnIndex >= place.column && active.columnIndex < place.end
+      ? active.columnIndex
+      : place.column;
   };
 
   /** The Active cell moves here: focused where it stands, otherwise brought
@@ -252,8 +264,10 @@ export function gridHandlers(input: GridInput) {
   const moveTo = (table: HTMLTableElement, p: GridPosition) => {
     const line = lines[p.line];
     if (!line) return;
-    const column = cellAt(line.cells, p.column).start;
-    setState((s) => ({ ...s, widget: false, active: { line: line.key, column: ids[column] ?? "", lineIndex: p.line, columnIndex: column } }));
+    /* The column stays the walk's goal, not the start of the cell that covers
+       it: down through a spanning label, on down again, the walk is back in
+       the column it came from. */
+    setState((s) => ({ ...s, widget: false, active: { line: line.key, column: ids[p.column] ?? "", lineIndex: p.line, columnIndex: p.column } }));
     const row = Array.from(table.querySelectorAll<HTMLTableRowElement>("tr[data-grid-line]")).find((r) => r.dataset.gridLine === line.key);
     const cell = row ? cellsOf(row).find((c) => p.column >= c.start && p.column < c.end)?.cell : undefined;
     if (cell) cell.focus();
@@ -317,7 +331,7 @@ export function gridHandlers(input: GridInput) {
     if (event.defaultPrevented) return;
     const place = placeOfCell(table, event.target);
     if (!place) return;
-    const here: GridPosition = { line: keys.indexOf(place.line), column: place.column };
+    const here: GridPosition = { line: keys.indexOf(place.line), column: goalIn(place) };
     if (here.line < 0) return;
     const editing = grid.state.editing;
 
@@ -332,10 +346,14 @@ export function gridHandlers(input: GridInput) {
         event.preventDefault();
         commit(editing.draft);
       } else if (event.key === "Tab") {
-        event.preventDefault();
-        if (!commit(editing.draft)) return;
         const next = nextCell(lines, here, event.shiftKey, editable);
+        /* Past the last cell that edits, Tab leaves the grid as it would
+           anywhere else - once the draft is reported. */
+        const done = commit(editing.draft);
+        if (next || !done) event.preventDefault();
+        if (!done) return;
         if (next) startEdit(next);
+        else grid.focus.want(null);
       }
       return;
     }
@@ -372,39 +390,43 @@ export function gridHandlers(input: GridInput) {
       }
       return;
     }
-    /* Typing starts an edit of a text or a number with what was typed, as a
-       spreadsheet does. A digit is a number; any other key leaves the number
-       as it stands. */
+    /* Typing starts an edit, as in a spreadsheet: a text with what was typed,
+       a number with a digit typed. Any other editor opens on the value as it
+       stands - a select or a day has no first letter to take. Space is no
+       typing there: it would open an editor on the way down the page. */
     if (event.key.length === 1 && editable(here)) {
       const kind = columnById(ids[place.column] ?? "")?.spec.edit;
-      if (kind === "text") {
-        event.preventDefault();
-        startEdit(here, event.key);
-      } else if (kind === "number") {
-        event.preventDefault();
-        startEdit(here, /\d/.test(event.key) ? Number(event.key) : undefined);
-      }
+      if (kind !== "text" && event.key === " ") return;
+      event.preventDefault();
+      startEdit(here, kind === "text" ? event.key : kind === "number" && /\d/.test(event.key) ? Number(event.key) : undefined);
     }
   };
 
   /* A focus in the grid - by key, by click, by Tab - makes its cell the
      Active one; a focus inside a cell is among its controls. An edit the
-     focus left for another cell ends: reported where it validates, dropped
-     where not. */
+     focus left for another cell ends where it validates and is reported; one
+     that does not keeps the editor, and the focus goes back to it with its
+     message - a draft is never dropped without a word. */
   const onFocus = (event: ReactFocusEvent<HTMLTableElement>) => {
     const place = placeOfCell(event.currentTarget, event.target);
     if (!place) return;
     const line = keys.indexOf(place.line);
     const editing = grid.state.editing;
     if (editing && (editing.line !== place.line || editing.column !== ids[place.column]) && !commit(editing.draft)) {
-      setState((s) => ({ ...s, editing: null }));
+      grid.focus.want("editor");
+      return;
     }
     grid.focus.want(null);
-    setState((s) => ({
-      ...s,
-      widget: (event.target as Element) !== place.cell,
-      active: { line: place.line, column: ids[place.column] ?? "", lineIndex: Math.max(0, line), columnIndex: place.column },
-    }));
+    /* From the state as the key just left it: a key moves the Active cell
+       and focuses it in one event, and the focus must not undo the goal. */
+    setState((s) => {
+      const column = goalIn(place, s.active);
+      return {
+        ...s,
+        widget: (event.target as Element) !== place.cell,
+        active: { line: place.line, column: ids[column] ?? "", lineIndex: Math.max(0, line), columnIndex: column },
+      };
+    });
   };
 
   /* Leaving the grid leaves the cell's controls as well: tabbing back in

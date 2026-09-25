@@ -88,6 +88,10 @@ export function lineCells(shape: LineShape, layout: GridLayout): number[] {
 
 /* --- The lines ------------------------------------------------------------------ */
 
+/** The key of a row's line - the one the table, the walk and the editor
+    name it by. */
+export const rowLine = (rowKey: string): string => `row:${rowKey}`;
+
 /** One line of the grid. */
 export interface GridLine<Z = unknown> {
   /** Identifies the line across renders - what the Active cell holds on to
@@ -125,7 +129,7 @@ export function gridLines<Z>({ layout, body, rowKey, expanded, foot }: GridInput
   const out: GridLine<Z>[] = [{ key: "head", cells, at: -1 }];
   const row = (r: Z, at: number) => {
     const key = rowKey(r);
-    out.push({ key: `row:${key}`, cells, at, row: r });
+    out.push({ key: rowLine(key), cells, at, row: r });
     if (expanded.has(key)) out.push({ key: `detail:${key}`, cells: whole, at, row: r });
   };
   if ("rows" in body) body.rows.forEach(row);

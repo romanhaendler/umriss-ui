@@ -48,7 +48,6 @@ column menu's pin keys and `editCell` (its own "Unreleased" section).
   `onCellEdit({ rowKey, columnId, value, row })` on `<Table>` reports, and the
   cell shows the value once the rows carry it. New types `CellEdit`,
   `CellEditorProps`, `EditFor`, `EditOptions`.
-
 - **`docs/llms-full.md`**, the package's documentation as one Markdown file for
   a coding agent, in the npm package and pinned to its version: every demo page
   with its import line, its examples' source, its props tables and why it is

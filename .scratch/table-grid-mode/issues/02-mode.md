@@ -30,8 +30,9 @@ focuses the cell once it stands. ADR-0034, glossary **Active cell**.
   away. Core's canon check now accepts `inset var(--u-focus-ring)` (with a test
   line each way). Two pinned-group-header rules gained `.td:not(:focus-visible)`
   so they do not take the ring off (the own-base check found it).
-- Tests: `gridMode.test.tsx` (12: every key, one stop, widget mode, a detail,
-  a sort, a hidden column, treegrid, a virtual window) and
+- Tests: `gridMode.test.tsx` (13: every key, one stop, widget mode, a detail,
+  a sort, a hidden column, treegrid, the goal column through a spanning label
+  - a review find -, a virtual window) and
   `tests-visual/features-grid.spec.ts` (6, in the browser). axe on the Table
   page with the grid examples is clean; own-base green.
 - Without `grid`: no role, no `data-grid-line`, no tabindex on cells (tested);
