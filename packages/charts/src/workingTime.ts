@@ -1,8 +1,8 @@
-/* Operating time: the mapping of wall clock time into operating time and back.
+/* Working time: the mapping of wall clock time into working time and back.
 
-   A week of production data on a wall clock axis is, for a good forty per cent,
-   a flat line over an empty hall. An operating calendar - a list of intervals in
-   which time counts - takes that time out.
+   A working week of data on a wall clock axis is, for a good forty per cent, a
+   flat line over hours in which nothing happens. A working calendar - a list of
+   intervals in which time counts - takes that time out.
 
    The axis stays affine (ADR-0001): it is not the scale that calculates, it is
    materialisation that maps the x channel beforehand. ADR-0001 itself names
@@ -15,10 +15,10 @@
 
    Deliberately free of the DOM and of the scene, like bars.ts.
 
-   Explicitly not here: deriving the intervals from a shift model. Turning a
-   shift plan with its exceptions, holidays and handovers into a list of
-   intervals is a plant data problem and belongs above this library. The time
-   zone is the machine's: `localOffset` shifts a tick grid onto its local
+   Explicitly not here: deriving the intervals from a roster or opening hours.
+   Turning a plan with its exceptions, holidays and handovers into a list of
+   intervals is a problem of the caller's data and belongs above this library.
+   The time zone is the data's: `localOffset` shifts a tick grid onto its local
    boundaries, as it does the schedule's. */
 
 import { tickStep } from "./ticks";
@@ -29,43 +29,43 @@ export const HOUR = 60 * MINUTE;
 export const DAY = 24 * HOUR;
 
 /** An interval in which time counts; thought of as half-open, but mappable from
-    both sides at its edges: both `from` and `to` have an operating time. */
-export interface OperatingInterval {
+    both sides at its edges: both `from` and `to` have a working time. */
+export interface WorkingInterval {
   readonly from: number;
   readonly to: number;
 }
 
-/** An operating calendar: sorted, merged intervals with the operating time
+/** A working calendar: sorted, merged intervals with the working time
     accumulated before each one begins. An empty calendar is no calendar: it maps
     unchanged.
 
     Build once, then pass around: the mapping runs once per point, and were it to
     sort and accumulate every time, the calendar would be the most expensive
     thing about the frame. */
-export interface OperatingCalendar {
-  readonly intervals: readonly OperatingInterval[];
-  /** Operating time accumulated before the respective interval begins. */
+export interface WorkingCalendar {
+  readonly intervals: readonly WorkingInterval[];
+  /** Working time accumulated before the respective interval begins. */
   readonly offsets: readonly number[];
-  /** The whole operating time - the axis' extent is [0, total]. */
+  /** The whole working time - the axis' extent is [0, total]. */
   readonly total: number;
 }
 
 /** Every function of this module takes either: the raw list as it stands on the
     axis, or the calendar built from it. */
-export type CalendarInput = OperatingCalendar | readonly OperatingInterval[];
+export type CalendarInput = WorkingCalendar | readonly WorkingInterval[];
 
 /** Builds a calendar: sorts, merges overlapping and abutting intervals and
     throws away empty, reversed and non-finite ones. Merging is not a courtesy
     but a precondition: only over separated intervals is the reverse mapping
     unambiguous. */
-export function operatingCalendar(
-  intervals: readonly OperatingInterval[],
-): OperatingCalendar {
+export function workingCalendar(
+  intervals: readonly WorkingInterval[],
+): WorkingCalendar {
   const usable = intervals
     .filter((i) => Number.isFinite(i.from) && Number.isFinite(i.to) && i.to > i.from)
     .sort((a, b) => a.from - b.from);
 
-  const merged: OperatingInterval[] = [];
+  const merged: WorkingInterval[] = [];
   for (const i of usable) {
     const last = merged[merged.length - 1];
     if (last !== undefined && i.from <= last.to) {
@@ -88,30 +88,30 @@ export function operatingCalendar(
    point - with a million points; were it to sort and accumulate every time, the
    calendar would be the most expensive thing about the frame. The key is the
    list itself, which is exactly what the axis holds. */
-const built = new WeakMap<object, OperatingCalendar>();
+const built = new WeakMap<object, WorkingCalendar>();
 
 /** Calendar from an input - a built calendar is passed straight through, a raw
     list is built once and remembered. */
-export function calendarFrom(input: CalendarInput): OperatingCalendar {
-  if (!Array.isArray(input)) return input as OperatingCalendar;
-  const list = input as readonly OperatingInterval[];
+export function calendarFrom(input: CalendarInput): WorkingCalendar {
+  if (!Array.isArray(input)) return input as WorkingCalendar;
+  const list = input as readonly WorkingInterval[];
   const known = built.get(list);
   if (known !== undefined) return known;
-  const fresh = operatingCalendar(list);
+  const fresh = workingCalendar(list);
   built.set(list, fresh);
   return fresh;
 }
 
 /** Index of the interval that contains the wall clock time (edges included);
     -1 when it lies in removed time. Binary search over the beginnings. */
-function findInterval(calendar: OperatingCalendar, wallClock: number): number {
+function findInterval(calendar: WorkingCalendar, wallClock: number): number {
   const intervals = calendar.intervals;
   let lo = 0;
   let hi = intervals.length - 1;
   let hit = -1;
   while (lo <= hi) {
     const mid = (lo + hi) >> 1;
-    if ((intervals[mid] as OperatingInterval).from <= wallClock) {
+    if ((intervals[mid] as WorkingInterval).from <= wallClock) {
       hit = mid;
       lo = mid + 1;
     } else {
@@ -119,10 +119,10 @@ function findInterval(calendar: OperatingCalendar, wallClock: number): number {
     }
   }
   if (hit < 0) return -1;
-  return wallClock <= (intervals[hit] as OperatingInterval).to ? hit : -1;
+  return wallClock <= (intervals[hit] as WorkingInterval).to ? hit : -1;
 }
 
-/** Wall clock time → operating time.
+/** Wall clock time → working time.
 
     A point in a removed interval is a gap and becomes `NaN` - the encoding every
     gap of this library already uses, and the drawing loop breaks the mark at it
@@ -132,40 +132,40 @@ function findInterval(calendar: OperatingCalendar, wallClock: number): number {
     before the first and after the last interval.
 
     The end of one interval and the beginning of the next fall on the same value:
-    in operating time they are neighbours, and the line between two points on
+    in working time they are neighbours, and the line between two points on
     either side is drawn. That is not a lie but the whole purpose of the axis; the
     mark in the axis band tells the reader that time was taken out there. */
-export function toOperatingTime(wallClock: number, input: CalendarInput): number {
+export function toWorkingTime(wallClock: number, input: CalendarInput): number {
   const calendar = calendarFrom(input);
   if (calendar.intervals.length === 0) return wallClock;
   const index = findInterval(calendar, wallClock);
   if (index < 0) return Number.NaN;
   return (
     (calendar.offsets[index] as number) +
-    (wallClock - (calendar.intervals[index] as OperatingInterval).from)
+    (wallClock - (calendar.intervals[index] as WorkingInterval).from)
   );
 }
 
-/** Operating time → wall clock time; outside [0, total] there is none.
+/** Working time → wall clock time; outside [0, total] there is none.
 
     At a seam - the end of an interval which is at the same time the beginning of
     the next - the beginning of the next comes out: from there time counts again,
-    and a pointer aiming there aims at the coming shift. Only the end of the last
+    and a pointer aiming there aims at the coming interval. Only the end of the last
     interval has no next and comes back as itself. */
-export function toWallClock(operatingTime: number, input: CalendarInput): number {
+export function toWallClock(workingTime: number, input: CalendarInput): number {
   const calendar = calendarFrom(input);
   const intervals = calendar.intervals;
-  if (intervals.length === 0) return operatingTime;
-  if (!(operatingTime >= 0) || operatingTime > calendar.total) return Number.NaN;
-  if (operatingTime === calendar.total) {
-    return (intervals[intervals.length - 1] as OperatingInterval).to;
+  if (intervals.length === 0) return workingTime;
+  if (!(workingTime >= 0) || workingTime > calendar.total) return Number.NaN;
+  if (workingTime === calendar.total) {
+    return (intervals[intervals.length - 1] as WorkingInterval).to;
   }
   let lo = 0;
   let hi = intervals.length - 1;
   let hit = 0;
   while (lo <= hi) {
     const mid = (lo + hi) >> 1;
-    if ((calendar.offsets[mid] as number) <= operatingTime) {
+    if ((calendar.offsets[mid] as number) <= workingTime) {
       hit = mid;
       lo = mid + 1;
     } else {
@@ -173,8 +173,8 @@ export function toWallClock(operatingTime: number, input: CalendarInput): number
     }
   }
   return (
-    (intervals[hit] as OperatingInterval).from +
-    (operatingTime - (calendar.offsets[hit] as number))
+    (intervals[hit] as WorkingInterval).from +
+    (workingTime - (calendar.offsets[hit] as number))
   );
 }
 
@@ -188,51 +188,51 @@ export function mapSeries(
 ): void {
   const calendar = calendarFrom(input);
   for (let i = 0; i < n; i++) {
-    target[i] = toOperatingTime(source[i] as number, calendar);
+    target[i] = toWorkingTime(source[i] as number, calendar);
   }
 }
 
-/** Wall clock time → operating time, but without NaN: whatever lies in removed
+/** Wall clock time → working time, but without NaN: whatever lies in removed
     time falls onto the seam that this span collapses onto anyway; whatever lies
     before the first or after the last interval onto 0 or onto the whole
-    operating time respectively.
+    working time respectively.
 
     Why this exists: the materialised x values must stay ascending. Binary search
     - for a hit as for a segment boundary - assumes that, and every comparison
     with NaN is false, so that a search over a block of NaN silently lands on the
     wrong point. The clamped value is a POSITION, not a statement: the point
     itself is carried as a gap and is never drawn and never hit. */
-export function toOperatingTimeClamped(wallClock: number, input: CalendarInput): number {
+export function toWorkingTimeClamped(wallClock: number, input: CalendarInput): number {
   const calendar = calendarFrom(input);
   if (calendar.intervals.length === 0) return wallClock;
-  const inside = toOperatingTime(wallClock, calendar);
+  const inside = toWorkingTime(wallClock, calendar);
   if (!Number.isNaN(inside)) return inside;
   if (!Number.isFinite(wallClock)) return Number.NaN;
   // The seam of the first span that begins after the value.
   for (let i = 0; i < calendar.intervals.length; i++) {
-    const interval = calendar.intervals[i] as OperatingInterval;
+    const interval = calendar.intervals[i] as WorkingInterval;
     if (wallClock < interval.from) return calendar.offsets[i] as number;
   }
   return calendar.total;
 }
 
 /** Does this point in time lie in removed time? The question
-    `toOperatingTimeClamped` deliberately no longer answers. */
+    `toWorkingTimeClamped` deliberately no longer answers. */
 export function inRemovedTime(wallClock: number, input: CalendarInput): boolean {
   const calendar = calendarFrom(input);
   if (calendar.intervals.length === 0) return false;
-  return Number.isNaN(toOperatingTime(wallClock, calendar));
+  return Number.isNaN(toWorkingTime(wallClock, calendar));
 }
 
 /** A removed span and the place it collapses onto. */
 export interface RemovedSpan {
   readonly from: number;
   readonly to: number;
-  /** Operating time on which the whole span lies - a point, not a stretch. */
-  readonly operatingTime: number;
+  /** Working time on which the whole span lies - a point, not a stretch. */
+  readonly workingTime: number;
 }
 
-/** The removed spans between the operating intervals, for the mark in the axis
+/** The removed spans between the working intervals, for the mark in the axis
     band. A chart that takes a weekend out and does not say so claims a
     continuity it does not have. Before the first and after the last interval
     there is nothing to mark: that lies outside the axis' extent. */
@@ -241,19 +241,19 @@ export function removedIntervals(input: CalendarInput): RemovedSpan[] {
   const spans: RemovedSpan[] = [];
   for (let i = 1; i < calendar.intervals.length; i++) {
     spans.push({
-      from: (calendar.intervals[i - 1] as OperatingInterval).to,
-      to: (calendar.intervals[i] as OperatingInterval).from,
-      operatingTime: calendar.offsets[i] as number,
+      from: (calendar.intervals[i - 1] as WorkingInterval).to,
+      to: (calendar.intervals[i] as WorkingInterval).from,
+      workingTime: calendar.offsets[i] as number,
     });
   }
   return spans;
 }
 
-/** The breaks in operating time that lie within the extent [from, to] - what the
+/** The breaks in working time that lie within the extent [from, to] - what the
     axis must mark, in domain units. */
 export function breaks(input: CalendarInput, from: number, to: number): number[] {
   return removedIntervals(input)
-    .map((s) => s.operatingTime)
+    .map((s) => s.workingTime)
     .filter((b) => b >= from && b <= to);
 }
 
@@ -286,37 +286,37 @@ export function localOffset(instant: number): number {
 }
 
 /** A tick: where it stands on the clock and where it lies on the axis. */
-export interface OperatingTimeTick {
+export interface WorkingTimeTick {
   readonly wallClock: number;
-  readonly operatingTime: number;
+  readonly workingTime: number;
 }
 
-/** Ticks for an operating time axis, from an extent in WALL CLOCK TIME.
+/** Ticks for a working time axis, from an extent in WALL CLOCK TIME.
 
     The candidates arise in wall clock time on multiples of the step - hours,
-    shift changes, days - whatever lies in removed time falls away, the rest is
-    mapped. Never the other way round: ticks generated in operating time land in
-    the middle of a shift and yield an axis labelled 14.5 and 29.0 which nobody
+    interval changes, days - whatever lies in removed time falls away, the rest is
+    mapped. Never the other way round: ticks generated in working time land in
+    the middle of an interval and yield an axis labelled 14.5 and 29.0 which nobody
     can read.
 
     The offset shifts the grid; with it a local time hits its own midnight without
     this module having to know about time zones.
 
-    If two candidates fall on the same operating time - the end of one shift and
+    If two candidates fall on the same working time - the end of one interval and
     the beginning of the next - the earlier one stays: two labels on the same
     pixel would be one too many.
 
-    Both times come back, because the axis needs both: the operating time to
+    Both times come back, because the axis needs both: the working time to
     place the tick, the wall clock time to label it. */
-export function operatingTimeTicks(
+export function workingTimeTicks(
   input: CalendarInput,
   from: number,
   to: number,
   step: number,
   offset = 0,
-): OperatingTimeTick[] {
+): WorkingTimeTick[] {
   const calendar = calendarFrom(input);
-  const ticks: OperatingTimeTick[] = [];
+  const ticks: WorkingTimeTick[] = [];
   if (!Number.isFinite(from) || !Number.isFinite(to) || !(step > 0)) return ticks;
   const first = Math.ceil((from - offset) / step);
   const last = Math.floor((to - offset) / step);
@@ -324,24 +324,24 @@ export function operatingTimeTicks(
   let previous = Number.NaN;
   for (let k = first; k <= last; k++) {
     const wallClock = offset + k * step;
-    const operatingTime = toOperatingTime(wallClock, calendar);
-    if (Number.isNaN(operatingTime) || operatingTime === previous) continue;
-    ticks.push({ wallClock, operatingTime });
-    previous = operatingTime;
+    const workingTime = toWorkingTime(wallClock, calendar);
+    if (Number.isNaN(workingTime) || workingTime === previous) continue;
+    ticks.push({ wallClock, workingTime });
+    previous = workingTime;
   }
   return ticks;
 }
 
-/** Tick values for an axis extent that already stands in OPERATING TIME - the
+/** Tick values for an axis extent that already stands in WORKING TIME - the
     route the axis layout takes.
 
-    The extent is trimmed to the operating time that exists (an extent widened to
+    The extent is trimmed to the working time that exists (an extent widened to
     nice boundaries reaches beyond it), calculated back into wall clock time, and
-    the candidates arise there. The step comes from the span in operating time and
+    the candidates arise there. The step comes from the span in working time and
     not from the one in wall clock time: roughly one candidate per step of
-    operating time survives, and calculated from the wall clock span, four out of
+    working time survives, and calculated from the wall clock span, four out of
     ten wanted ticks would be left. */
-export function operatingTicks(
+export function workingTicks(
   input: CalendarInput,
   from: number,
   to: number,
@@ -353,12 +353,12 @@ export function operatingTicks(
   const insideFrom = Math.max(0, Math.min(calendar.total, from));
   const insideTo = Math.max(0, Math.min(calendar.total, to));
   const step = timeStep(to - from, count);
-  const ticks = operatingTimeTicks(
+  const ticks = workingTimeTicks(
     calendar,
     toWallClock(insideFrom, calendar),
     toWallClock(insideTo, calendar),
     step,
     offset,
   );
-  return ticks.map((t) => t.operatingTime).filter((b) => b >= from && b <= to);
+  return ticks.map((t) => t.workingTime).filter((b) => b >= from && b <= to);
 }

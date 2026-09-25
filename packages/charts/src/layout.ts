@@ -24,11 +24,11 @@ import {
   breaks as calendarBreaks,
   calendarFrom,
   MINUTE,
-  toOperatingTime,
+  toWorkingTime,
   toWallClock,
-} from "./operatingTime";
+} from "./workingTime";
 import { timeDomain, timeLabels, timeStepFor, timeText, timeTicks } from "./time";
-import type { OperatingInterval } from "./operatingTime";
+import type { WorkingInterval } from "./workingTime";
 import type { AxisOrientation, AxisPosition, Rect } from "./types";
 import type { TextSize } from "./measure";
 
@@ -61,10 +61,10 @@ export interface AxisInput {
   tickValues?: readonly number[];
   /** The values are instants: ticks on local boundaries, labels by level. */
   time?: boolean;
-  /** Operating calendar; the axis then stands in operating time, and carries
+  /** Working calendar; the axis then stands in working time, and carries
       time. The module behind it builds a calendar out of the list once and
       keeps it. */
-  calendar?: readonly OperatingInterval[];
+  calendar?: readonly WorkingInterval[];
   /** A further y axis: its ticks on the first y axis' grid. */
   alignTicks?: boolean;
   /** Labels of the limits on a y axis: they stand in its band beside the
@@ -154,7 +154,7 @@ function stabilize(key: string, needed: number, hysteresis: Map<string, number>)
 }
 
 /** The calendar of an axis; an empty list is none. */
-function calendarOf(axis: AxisInput): readonly OperatingInterval[] | undefined {
+function calendarOf(axis: AxisInput): readonly WorkingInterval[] | undefined {
   return axis.calendar !== undefined && axis.calendar.length > 0 ? axis.calendar : undefined;
 }
 
@@ -180,7 +180,7 @@ function domainOf(
     return fixed;
   }
   const [min, max] = axis.extent;
-  // An operating time axis gets no "nice" domain. Operating time is
+  // A working time axis gets no "nice" domain. Working time is
   // milliseconds, and a rounded-up end would lie outside [0, total] - there is no
   // wall clock time back there, and the tick generation needs it. The data span
   // the extent, not the round number.
@@ -197,8 +197,8 @@ function domainOf(
 /** The tick values of an axis: named explicitly, on local time, or 1-2-5.
 
     With a calendar: candidates in WALL CLOCK TIME on local boundaries, throw
-    away those in removed intervals, map the rest. Ticks generated in operating
-    time land in the middle of a shift at 14.5 - an axis nobody can use. */
+    away those in removed intervals, map the rest. Ticks generated in working
+    time land in the middle of a working interval at 14.5 - an axis nobody can use. */
 function tickValuesFor(
   axis: AxisInput,
   domain: readonly [number, number],
@@ -208,7 +208,7 @@ function tickValuesFor(
   if (axis.tickValues !== undefined) {
     // Named on the clock, like the data; one in removed time has no place.
     const values =
-      calendar !== undefined ? axis.tickValues.map((v) => toOperatingTime(v, calendar)) : axis.tickValues;
+      calendar !== undefined ? axis.tickValues.map((v) => toWorkingTime(v, calendar)) : axis.tickValues;
     return values.filter((v) => v >= domain[0] && v <= domain[1]);
   }
   if (calendar !== undefined) {
@@ -216,7 +216,7 @@ function tickValuesFor(
     const inside = (v: number) => toWallClock(Math.min(Math.max(v, 0), built.total), built);
     const values: number[] = [];
     for (const wall of timeTicks(inside(domain[0]), inside(domain[1]), stepOf(domain, tickCount))) {
-      const v = toOperatingTime(wall, built);
+      const v = toWorkingTime(wall, built);
       // Removed time, or the seam an earlier candidate already stands on: two
       // labels on one pixel are one too many.
       if (Number.isNaN(v) || v === values[values.length - 1]) continue;
@@ -232,7 +232,7 @@ function formatterFor(axis: AxisInput, domain: readonly [number, number], tickCo
   const own = axis.tickFormat;
   const calendar = calendarOf(axis);
   if (calendar !== undefined) {
-    // An operating time axis carries operating time but labels the clock. The
+    // A working time axis carries working time but labels the clock. The
     // caller's formatter therefore gets the point in time it expects - and the
     // same route labels the tooltip later.
     return own !== undefined

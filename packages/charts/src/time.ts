@@ -7,12 +7,12 @@
    the whole grid could not do that.
 
    The labels are en-GB with a 24-hour clock, by level: `15:00`, `17 Mar`,
-   `Mar 2026`, `2026`. Fixed, not the machine's locale: the same axis must look the same
+   `Mar 2026`, `2026`. Fixed, not the browser's locale: the same axis must look the same
    on two computers (library-audit 03). Another language is a `tickFormat`.
 
-   Deliberately free of the DOM and of the scene, like operatingTime.ts. */
+   Deliberately free of the DOM and of the scene, like workingTime.ts. */
 
-import { DAY, HOUR, MINUTE } from "./operatingTime";
+import { DAY, HOUR, MINUTE } from "./workingTime";
 import { tickStep } from "./ticks";
 
 /** A readable step: `n` of a calendar unit. `ms` is its nominal length - a

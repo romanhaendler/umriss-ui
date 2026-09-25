@@ -355,9 +355,9 @@ test.describe("touch", () => {
   });
 });
 
-test("the operating calendar holds through pan and zoom: no removed hour gets a tick", async ({ page }) => {
-  await openExample(page, "time-axis", "operating-calendar");
-  const example = page.locator('[data-example="operating-calendar"]');
+test("the working calendar holds through pan and zoom: no removed hour gets a tick", async ({ page }) => {
+  await openExample(page, "time-axis", "working-calendar");
+  const example = page.locator('[data-example="working-calendar"]');
   const removed = (labels: readonly string[]) => labels.filter((l) => /^(00|01|02|03|04|05|23):/.test(l));
   expect(removed(await tickLabels(example))).toEqual([]);
 

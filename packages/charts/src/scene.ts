@@ -52,7 +52,7 @@ import { lastSegmentEnd, medianStep, segmentEnd, segmentIndex } from "./state";
 import { cellSize, cellIndex, measureSpacing } from "./cells";
 import { assess } from "./limit";
 import { formatValue } from "./format";
-import { MINUTE, inRemovedTime, toOperatingTimeClamped } from "./operatingTime";
+import { MINUTE, inRemovedTime, toWorkingTimeClamped } from "./workingTime";
 import {
   axisExtent,
   firstUnsortedIndex,
@@ -1518,7 +1518,7 @@ export class ChartScene {
     return out;
   }
 
-  /** A limit's value in the units of its axis. An x limit on an operating-time
+  /** A limit's value in the units of its axis. An x limit on a working-time
       axis is named on the wall clock, like the data, and mapped as they are. */
   private limitAt(config: LimitConfig, value: number): number {
     if (config.orientation !== "x") return value;
@@ -1527,7 +1527,7 @@ export class ChartScene {
     return map === undefined ? value : map(value);
   }
 
-  /** Pre-mapping of the x values of an axis with an operating calendar. The scale
+  /** Pre-mapping of the x values of an axis with a working calendar. The scale
       stays affine; the mapping happens beforehand, once per point, in
       materialisation - exactly the route ADR-0001 prescribes for a non-affine
       axis. */
@@ -1535,10 +1535,10 @@ export class ChartScene {
     const calendar = axis.calendar;
     if (calendar === undefined || calendar.length === 0) return undefined;
     // Clamped, not NaN: the channel has to stay ascending, otherwise every binary
-    // search over it runs into nothing. The operating time module builds a
+    // search over it runs into nothing. The working time module builds a
     // calendar out of the list once and keeps it; there is therefore no second
     // cache here.
-    return (v: number) => toOperatingTimeClamped(v, calendar);
+    return (v: number) => toWorkingTimeClamped(v, calendar);
   }
 
   private gapFor(axis: AxisConfig): ((v: number) => boolean) | undefined {

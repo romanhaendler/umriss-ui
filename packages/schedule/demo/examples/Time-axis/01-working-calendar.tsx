@@ -4,7 +4,7 @@ import type { Subtask, Task, Transport } from "../../../src";
 
 export const title = "Nights cut out of the axis";
 
-/* The plant runs two shifts, 06:00 to 22:00. An operating calendar lists the
+/* The plant runs two shifts, 06:00 to 22:00. A working calendar lists the
    intervals in which time counts, and the axis leaves the rest out: three days
    in the width of two, and no empty night between the evening's work and the
    morning's. A dotted line marks each seam, because an axis that takes time
@@ -35,7 +35,7 @@ const MOVES: Transport[] = [
   { id: "carry", from: "fettle", to: "machine", duration: 45 * 60_000 },
 ];
 
-export default function OperatingCalendar() {
+export default function WorkingCalendar() {
   const [steps, setSteps] = useState<readonly Subtask[]>(STEPS);
   return (
     <Schedule
