@@ -31,7 +31,7 @@ export const TICK_SPACING = 56;
 
 /** The fine step at a zoom: the smallest readable step whose labels stand at
     least `spacing` pixels apart - never finer than the quarter hour, which is
-    the finest a plant plans in, and never coarser than the day, which is the
+    the finest a planner plans in, and never coarser than the day, which is the
     coarse band's. */
 export function fineStep(msPerPx: number, spacing = TICK_SPACING): number {
   if (!(msPerPx > 0)) return 15 * MINUTE;

@@ -4,7 +4,7 @@
    and the first is the one a planner notices: a refusal that is known before
    the pointer arrives can be DRAWN - the lanes are marked the moment a drag
    begins, so nobody has to try a lane to learn it is closed. The second is
-   arithmetic: `canMoveTo` reads a plant's master data, and a rule asked anew on
+   arithmetic: `canMoveTo` reads the application's master data, and a rule asked anew on
    every pointer movement would be asked hundreds of times for one drag.
 
    Holding the answer means a rule that changes mid-drag is not noticed while

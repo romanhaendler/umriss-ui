@@ -20,7 +20,7 @@ test("A focused schedule with an active subtask under forced colours", async ({ 
   for (let i = 0; i < 8 && !(await plot.evaluate((el) => el === document.activeElement)); i++) await page.keyboard.press("Tab");
   await page.keyboard.press("ArrowDown");
   await page.keyboard.press("ArrowRight");
-  await expect(example.locator("[data-schedule-tooltip]")).toContainText("a-2043-2");
+  await expect(example.locator("[data-schedule-tooltip]")).toContainText("t-03-2");
   await drawn(page);
   await expect(example).toHaveScreenshot(`forced-focus-active-${testInfo.project.name}.png`);
 });

@@ -1,31 +1,21 @@
 import { Lane, Schedule, Subtasks } from "../../../src";
 import type { Subtask, Task } from "../../../src";
 
-export const title = "Open: work that goes on past the view";
+export const title = "Open";
 
-/* `"open"` owns the FADE: where the bar passes the edge of the view it fades
-   into the surface instead of ending in an edge a reader would take for its
-   end.
+export const lead = "An incident still being worked runs past the view: `\"open\"` fades the bar at whichever edge it passes, and only there.";
 
-   At WHICHEVER edge it passes, left as well as right. An edge of the screen is
-   an edge of the screen on both sides, and a bar that began before the view
-   used to say nothing at all about it - the bottom lane is that case.
-
-   The middle lane passes neither edge, and carries no fade at all. That is not
-   an omission: the fade says "the edge of the screen is not the end of this
-   work", and a bar whose ends are both in view has no such edge to speak
-   about. Zoom out until it does and the fade appears. */
+/* The middle bar is wholly in view and carries no fade; zoom out until it
+   passes an edge and the fade appears. */
 
 const at = (hours: number, minutes = 0) => new Date(2026, 2, 17, hours, minutes).getTime();
 
-const TASKS: Task[] = [{ id: "order", color: "light-dark(#2563eb, #6b9bff)" }];
+const TASKS: Task[] = [{ id: "inc-1048", name: "INC-1048", color: "light-dark(#2563eb, #6b9bff)" }];
 
 const WORK: Subtask[] = [
-  { id: "runs-on", task: "order", lane: "runs-on", from: at(7), to: at(13), appearance: ["open"] },
-  /* Wholly in view: both its ends are there to be seen, so there is no edge
-     of the screen to say anything about. */
-  { id: "whole", task: "order", lane: "whole", from: at(7), to: at(10), appearance: ["open"] },
-  { id: "began", task: "order", lane: "began", from: at(4), to: at(10), appearance: ["open"] },
+  { id: "runs-on", task: "inc-1048", lane: "runs-on", from: at(7), to: at(13), appearance: ["open"] },
+  { id: "whole", task: "inc-1048", lane: "whole", from: at(7), to: at(10), appearance: ["open"] },
+  { id: "began", task: "inc-1048", lane: "began", from: at(4), to: at(10), appearance: ["open"] },
 ];
 
 export default function Open() {

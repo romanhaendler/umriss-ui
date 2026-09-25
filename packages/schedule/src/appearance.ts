@@ -1,7 +1,7 @@
 /* What a bar says besides its colour (schedule-legibility 05).
 
    A closed list, and a short one: released work against work still being
-   planned, work that may move against work that may not, another shift's plan,
+   planned, work that may move against work that may not, another team's plan,
    and a bar that continues past the view. Each is a pattern or an outline and
    not only a colour, so the statement arrives without relying on colour
    vision.
@@ -30,7 +30,7 @@ export interface ResolvedAppearance {
       kept only so that this type did not change with the picture. */
   readonly hatched: boolean;
   /** `muted`: the SATURATION - the task colour mixed half into the surface,
-      opaque and at full height. Another shift's, another crew's. */
+      opaque and at full height. Another team's, another crew's. */
   readonly muted: boolean;
   /** `open`: the FADE, where the bar passes the edge of the view. It goes on
       past what is drawn. */

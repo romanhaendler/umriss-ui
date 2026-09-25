@@ -10,12 +10,12 @@ import type { BlockedTime, Subtask, Task, Dependency } from "./model";
 export interface LaneProps {
   /** The identity subtasks name in their `lane`. */
   id: string;
-  /** What the lane header says - the machine or station. Real text, read by a
+  /** What the lane header says - the person, vehicle or room. Real text, read by a
       screen reader; without one the header shows the id. */
   label?: ReactNode;
 }
 
-/** One lane: a machine or station. The lanes run top to bottom in the order
+/** One lane: a person, a vehicle, a room. The lanes run top to bottom in the order
     they are declared - whichever group they are declared in. */
 export function Lane({ id, label }: LaneProps): null {
   const parent = useLaneGroup();
@@ -29,7 +29,7 @@ export interface LaneGroupProps {
       no subtask sits on it, no finding is reported for it, and no intent names
       it (ADR-0025). */
   id: string;
-  /** What the group's header says - the hall, the line, the machine group.
+  /** What the group's header says - the team, the depot, the region.
       Real text, read by a screen reader; without one the header shows the id. */
   label?: ReactNode;
   /** `Lane`s and further `LaneGroup`s, to any depth. */
@@ -39,7 +39,7 @@ export interface LaneGroupProps {
 /** A group of lanes: structure over them, and never a lane itself.
 
     It gives its id to its children through context, so a lane never names its
-    group and a group reads in JSX as it reads in the plant. Folded, it becomes
+    group and a group reads in JSX as it reads in the organisation. Folded, it becomes
     one row showing a **Miniature** of everything in it; open, it shows a slim
     head above its lanes. Which groups are folded is `collapsedGroups` on
     `Schedule` - a view state, never an **Intent**. */
