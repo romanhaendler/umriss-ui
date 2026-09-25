@@ -29,7 +29,6 @@ const PENDING: readonly string[] = [
   "packages/core/demo/examples/Stat/01-value-against-limits.tsx",
   "packages/core/demo/examples/Stat/02-the-fourth-outcome.tsx",
   "packages/core/demo/examples/Stat/04-freshness.tsx",
-  "packages/core/demo/outline.ts",
   "packages/demo/src/worlds/controlling.ts",
   "packages/demo/src/worlds/logistics.ts",
   "packages/demo/src/worlds/operations.ts",
