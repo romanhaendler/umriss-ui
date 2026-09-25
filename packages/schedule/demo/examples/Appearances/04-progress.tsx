@@ -8,8 +8,8 @@ export const title = "Progress: how far the work has got";
    a mark ON the bar and not the bar's own edge.
 
    Inside the main time, and stopping where it stops: progress measures the
-   WORK, and a rail running on under the teardown would be measuring the
-   clearing away as well. The bar below carries a teardown, so that can be
+   WORK, and a rail running on under the lead-out would be measuring the
+   clearing away as well. The bar below carries a lead-out, so that can be
    seen.
 
    A rail rather than a paler remainder, for the reason every appearance here
@@ -26,7 +26,7 @@ const TASKS: Task[] = [{ id: "order", color: "light-dark(#2563eb, #6b9bff)" }];
 
 const WORK: Subtask[] = [
   { id: "unclaimed", task: "order", lane: "unclaimed", from: at(7), to: at(10) },
-  { id: "started", task: "order", lane: "started", from: at(7), to: at(10), progress: 0.65, teardown: min(30) },
+  { id: "started", task: "order", lane: "started", from: at(7), to: at(10), progress: 0.65, leadOut: min(30) },
 ];
 
 export default function Progress() {

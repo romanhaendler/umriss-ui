@@ -14,7 +14,7 @@
 
    Every real lane resolves to a SLOT: its own row where it has one, or its
    strip inside a miniature where its group is folded. Everything that needs a
-   y - a bar, a transport's end, an overlap's band, a grip, the handle's
+   y - a bar, a dependency's end, an overlap's band, a grip, the handle's
    answers - asks for a slot and never multiplies an index by a height again.
 
    Free of the DOM, the canvas and the view: ids, a height, and arithmetic.

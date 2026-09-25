@@ -1,15 +1,15 @@
-import { Lane, Schedule, Subtasks, Transports } from "../../../src";
-import type { Subtask, Task, Transport } from "../../../src";
+import { Lane, Schedule, Subtasks, Dependencies } from "../../../src";
+import type { Subtask, Task, Dependency } from "../../../src";
 
 export const title = "What the tooltip says";
 
 /* Resting the pointer on a subtask names the order, the stop, its main time
-   and - where it has them - its setup and teardown, and then every finding on
-   it: with whom it overlaps, and by how much a transport of it is late. Try
+   and - where it has them - its lead-in and lead-out, and then every finding on
+   it: with whom it overlaps, and by how much a dependency of it is violated. Try
    the bracket in the paint shop at noon, or the housing on the mill at nine.
 
-   On a transport it names where the move goes from and to, how long it takes,
-   and whether it can arrive in time.
+   On a dependency it names the two subtasks it joins, its lag, and whether
+   it is violated.
 
    Every word comes from the wording of @umriss-ui/core and every number from
    its formats, so a provider switches the tooltip with everything else. It
@@ -35,17 +35,17 @@ const ORDERS: readonly Task[] = [
 ];
 
 const STEPS: readonly Subtask[] = [
-  { id: "a-2041-2", task: "a-2041", lane: "mill", from: at(8), to: at(10, 30), setup: min(30), teardown: min(15) },
-  { id: "a-2043-1", task: "a-2043", lane: "press", from: at(6, 30), to: at(8), setup: min(30), teardown: min(15) },
-  { id: "a-2043-2", task: "a-2043", lane: "mill", from: at(10), to: at(11, 30), setup: min(15) },
-  { id: "a-2043-3", task: "a-2043", lane: "paint", from: at(12), to: at(14), setup: min(20), teardown: min(20) },
+  { id: "a-2041-2", task: "a-2041", lane: "mill", from: at(8), to: at(10, 30), leadIn: min(30), leadOut: min(15) },
+  { id: "a-2043-1", task: "a-2043", lane: "press", from: at(6, 30), to: at(8), leadIn: min(30), leadOut: min(15) },
+  { id: "a-2043-2", task: "a-2043", lane: "mill", from: at(10), to: at(11, 30), leadIn: min(15) },
+  { id: "a-2043-3", task: "a-2043", lane: "paint", from: at(12), to: at(14), leadIn: min(20), leadOut: min(20) },
 ];
 
-const MOVES: readonly Transport[] = [
-  { id: "t-2043-1", from: "a-2043-1", to: "a-2043-2", duration: min(45) },
+const MOVES: readonly Dependency[] = [
+  { id: "t-2043-1", from: "a-2043-1", to: "a-2043-2", lag: min(45) },
   /* Leaves the mill at 11:30 and has ten minutes to reach the paint shop's
-     setup at 11:40 - it takes twenty-five. A late transport, on purpose. */
-  { id: "t-2043-2", from: "a-2043-2", to: "a-2043-3", duration: min(25) },
+     lead-in at 11:40 - it takes twenty-five. A violated dependency, on purpose. */
+  { id: "t-2043-2", from: "a-2043-2", to: "a-2043-3", lag: min(25) },
 ];
 
 export default function Tooltip() {
@@ -54,7 +54,7 @@ export default function Tooltip() {
       {STATIONS.map((station) => (
         <Lane key={station.id} id={station.id} label={station.label} />
       ))}
-      <Transports data={MOVES} />
+      <Dependencies data={MOVES} />
       <Subtasks data={STEPS} tasks={ORDERS} />
     </Schedule>
   );

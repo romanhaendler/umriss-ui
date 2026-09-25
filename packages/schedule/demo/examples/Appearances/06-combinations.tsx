@@ -44,7 +44,7 @@ const WORK: Subtask[] = [
     from: at(7),
     to: at(13),
     appearance: ["fixed", "muted", "open"],
-    setup: 30 * 60_000,
+    leadIn: 30 * 60_000,
   },
   /* Provisional work that has got somewhere: the rail lies on the surface the
      hollow bar leaves, in the colour text takes there. */

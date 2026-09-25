@@ -8,7 +8,7 @@
 
 import { MINUTE, calendarFrom, toOperatingTimeClamped, toWallClock } from "@umriss-ui/charts";
 import { autoPanSpeed } from "./autoPan";
-import { lateTransports, overlaps, type LateTransport, type Overlap } from "./findings";
+import { violatedDependencies, overlaps, type ViolatedDependency, type Overlap } from "./findings";
 import { edgeAt, partAt } from "./geometry";
 import { occupied, type Intent, type PlaceIntent, type Subtask } from "./model";
 import { refusedLanes } from "./refusal";
@@ -66,7 +66,7 @@ export interface GestureHost {
   interactionChanged(): void;
 }
 
-type EditMode = "move" | "stretch-from" | "stretch-to" | "setup" | "teardown";
+type EditMode = "move" | "stretch-from" | "stretch-to" | "leadIn" | "leadOut";
 
 /** What the application says it is dragging in, while it drags it
     (schedule-refinement 07): the browser hands over the dragged data only on
@@ -78,10 +78,10 @@ export interface PlacingItem {
   readonly task: string;
   /** How long its main time is. */
   readonly duration: number;
-  /** The setup it brings. */
-  readonly setup?: number;
-  /** The teardown it brings. */
-  readonly teardown?: number;
+  /** The lead-in it brings. */
+  readonly leadIn?: number;
+  /** The lead-out it brings. */
+  readonly leadOut?: number;
 }
 
 /** The id the ghost of a drag from outside carries while it is in flight. It
@@ -111,8 +111,8 @@ function keyOf(hit: ScheduleHit): string {
   switch (hit.kind) {
     case "subtask":
       return `subtask:${hit.subtask.id}:${hit.part}`;
-    case "transport":
-      return `transport:${hit.transport.id}`;
+    case "dependency":
+      return `dependency:${hit.dependency.id}`;
     case "lane":
       return `lane:${hit.lane}`;
     default:
@@ -148,7 +148,7 @@ export interface GhostSummary {
   readonly from: number;
   readonly to: number;
   readonly overlap: boolean;
-  readonly late: boolean;
+  readonly violated: boolean;
 }
 
 export class SceneGestures {
@@ -201,7 +201,7 @@ export class SceneGestures {
     return {
       ghost: gesture.ghost,
       overlaps: found.overlaps,
-      late: found.late,
+      violated: found.violated,
       refusedLanes: gesture.refused,
       /* The tether is drawn only while the pointer really stands on a refused
          lane: the marked lanes say where the work may not go, the tether says
@@ -216,7 +216,7 @@ export class SceneGestures {
     const box = ghostBox(this.host.view.viewport(), gesture.ghost);
     if (box === null) return null;
     const found = this.ghostFindings(gesture.ghost, this.ghostHome(gesture));
-    const outer = gesture.kind === "edit" && (gesture.mode === "setup" || gesture.mode === "teardown");
+    const outer = gesture.kind === "edit" && (gesture.mode === "leadIn" || gesture.mode === "leadOut");
     const shown = outer ? occupied(gesture.ghost) : gesture.ghost;
     return {
       refused: this.refused,
@@ -227,7 +227,7 @@ export class SceneGestures {
       from: shown.from,
       to: shown.to,
       overlap: found.overlaps.length > 0,
-      late: found.late.length > 0,
+      violated: found.violated.length > 0,
     };
   }
 
@@ -266,7 +266,7 @@ export class SceneGestures {
       /* Touch pans and pinches; editing by touch is not part of this version
          (spec, Out of Scope), so a finger on a subtask pans as well. */
       this.gesture = { kind: "pending", pointerId: event.pointerId, x0: x, y0: y, mode: "pan", subtask: null };
-    } else if ((grip === "setup" || grip === "teardown") && selected !== null) {
+    } else if ((grip === "leadIn" || grip === "leadOut") && selected !== null) {
       this.gesture = { kind: "pending", pointerId: event.pointerId, x0: x, y0: y, mode: grip, subtask: selected };
     } else {
       this.gesture = { kind: "pending", pointerId: event.pointerId, x0: x, y0: y, ...this.modeAt(x, y) };
@@ -577,7 +577,7 @@ export class SceneGestures {
   private click(clientX: number, clientY: number, x: number, y: number): void {
     const hit = this.host.view.hitAt(x, y);
     const task =
-      hit.kind === "subtask" ? hit.subtask.task : hit.kind === "transport" ? this.host.data.taskOfTransport(hit.transport) : null;
+      hit.kind === "subtask" ? hit.subtask.task : hit.kind === "dependency" ? this.host.data.taskOfDependency(hit.dependency) : null;
     this.host.select(task, hit.kind === "subtask" ? hit.subtask.id : null);
     this.report("click", hit, clientX, clientY, x, y);
   }
@@ -590,7 +590,7 @@ export class SceneGestures {
     this.hoverPoint = { x, y };
     if (key === this.hoverKey) {
       /* The tooltip follows the pointer along its target. */
-      if (hit.kind === "subtask" || hit.kind === "transport") this.host.interactionChanged();
+      if (hit.kind === "subtask" || hit.kind === "dependency") this.host.interactionChanged();
       return;
     }
     this.setHover(hit, key);
@@ -714,8 +714,8 @@ export class SceneGestures {
       lane,
       from,
       to: from + placing.duration,
-      ...(placing.setup === undefined ? {} : { setup: placing.setup }),
-      ...(placing.teardown === undefined ? {} : { teardown: placing.teardown }),
+      ...(placing.leadIn === undefined ? {} : { leadIn: placing.leadIn }),
+      ...(placing.leadOut === undefined ? {} : { leadOut: placing.leadOut }),
     };
   }
 
@@ -744,8 +744,8 @@ export class SceneGestures {
       lane: ghost.lane,
       from: ghost.from,
       to: ghost.to,
-      ...(ghost.setup === undefined ? {} : { setup: ghost.setup }),
-      ...(ghost.teardown === undefined ? {} : { teardown: ghost.teardown }),
+      ...(ghost.leadIn === undefined ? {} : { leadIn: ghost.leadIn }),
+      ...(ghost.leadOut === undefined ? {} : { leadOut: ghost.leadOut }),
     };
     this.host.handlers().onIntent?.(intent);
   }
@@ -807,10 +807,10 @@ export class SceneGestures {
         return { ...s, from: Math.min(at, s.to - Math.max(step.step, MINUTE)) };
       case "stretch-to":
         return { ...s, to: Math.max(at, s.from + Math.max(step.step, MINUTE)) };
-      case "setup":
-        return { ...s, setup: Math.max(0, s.from - at) };
-      case "teardown":
-        return { ...s, teardown: Math.max(0, at - s.to) };
+      case "leadIn":
+        return { ...s, leadIn: Math.max(0, s.from - at) };
+      case "leadOut":
+        return { ...s, leadOut: Math.max(0, at - s.to) };
     }
   }
 
@@ -843,10 +843,10 @@ export class SceneGestures {
       if (ghost.lane !== original.lane && allowed.includes("lane")) intents.push({ kind: "lane", subtask: id, lane: ghost.lane });
     } else if (mode === "stretch-from" || mode === "stretch-to") {
       if (ghost.from !== original.from || ghost.to !== original.to) intents.push({ kind: "stretch", subtask: id, from: ghost.from, to: ghost.to });
-    } else if (mode === "setup") {
-      if ((ghost.setup ?? 0) !== (original.setup ?? 0)) intents.push({ kind: "setup", subtask: id, setup: ghost.setup ?? 0 });
-    } else if ((ghost.teardown ?? 0) !== (original.teardown ?? 0)) {
-      intents.push({ kind: "teardown", subtask: id, teardown: ghost.teardown ?? 0 });
+    } else if (mode === "leadIn") {
+      if ((ghost.leadIn ?? 0) !== (original.leadIn ?? 0)) intents.push({ kind: "leadIn", subtask: id, leadIn: ghost.leadIn ?? 0 });
+    } else if ((ghost.leadOut ?? 0) !== (original.leadOut ?? 0)) {
+      intents.push({ kind: "leadOut", subtask: id, leadOut: ghost.leadOut ?? 0 });
     }
     return intents;
   }
@@ -865,15 +865,15 @@ export class SceneGestures {
       every other lane's overlaps are the ones already assessed. That is what
       keeps a plan of hundreds of tasks fluid while a drag runs, since this is
       computed on every pointer movement. */
-  private ghostFindings(ghost: Subtask, home: string): { overlaps: Overlap[]; late: LateTransport[] } {
+  private ghostFindings(ghost: Subtask, home: string): { overlaps: Overlap[]; violated: ViolatedDependency[] } {
     const data = this.host.data;
     const onLane = (s: Subtask) => s.lane === ghost.lane || s.lane === home;
     const others = data.subtasks.filter((s) => s.id !== ghost.id && onLane(s));
     const assessed = [...others, ghost];
     const own = (o: Overlap) => o.first === ghost.id || o.second === ghost.id;
-    /* A transport is judged against both its ends, wherever they lie. */
-    const touching = data.transports.filter((t) => t.from === ghost.id || t.to === ghost.id);
+    /* A dependency is judged against both its ends, wherever they lie. */
+    const touching = data.dependencies.filter((t) => t.from === ghost.id || t.to === ghost.id);
     const ends = ghost.id === PLACING ? data.subtasks : data.subtasks.map((s) => (s.id === ghost.id ? ghost : s));
-    return { overlaps: overlaps(assessed).filter(own), late: lateTransports(ends, touching) };
+    return { overlaps: overlaps(assessed).filter(own), violated: violatedDependencies(ends, touching) };
   }
 }

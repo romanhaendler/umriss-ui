@@ -1,8 +1,8 @@
 /* Findings: what the schedule draws and reports and never resolves.
 
-   An overlap is two subtasks covering the same time on one lane, setup and
-   teardown included - an overlap that only touches a setup is still one. A late
-   transport is one whose duration does not fit between its anchors. Both are
+   An overlap is two subtasks covering the same time on one lane, lead-in and
+   lead-out included - an overlap that only touches a lead-in is still one. A violated
+   dependency is one whose lag does not fit between its anchors. Both are
    the point of opening a schedule; packing overlaps into sub-lanes or pushing a
    successor would hide exactly what a planner is looking for (ADR-0023).
 
@@ -10,13 +10,13 @@
    holds subtasks, not a measurement series, and this runs when the data
    changes, not per frame. */
 
-import { arrival, departure, occupied, type Subtask, type Transport } from "./model";
+import { arrival, departure, occupied, type Subtask, type Dependency } from "./model";
 
 /** Two subtasks covering the same time on one lane. */
 export interface Overlap {
   /** The lane both sit on. */
   readonly lane: string;
-  /** The subtask that starts earlier (setup included); on a tie, the one that
+  /** The subtask that starts earlier (lead-in included); on a tie, the one that
       stands first in the data. */
   readonly first: string;
   /** The other one. */
@@ -27,22 +27,22 @@ export interface Overlap {
   readonly to: number;
 }
 
-/** A transport whose duration does not fit between its anchors. */
-export interface LateTransport {
-  /** The id of the transport. */
-  readonly transport: string;
+/** A dependency whose lag does not fit between its anchors. */
+export interface ViolatedDependency {
+  /** The id of the dependency. */
+  readonly dependency: string;
   /** When it leaves, by its anchor. */
   readonly departure: number;
   /** When it has to have arrived, by its anchor. */
   readonly arrival: number;
-  /** How much time is missing: departure plus duration, minus arrival. */
+  /** How much time is missing: departure plus lag, minus arrival. */
   readonly shortBy: number;
 }
 
 /** Both kinds of finding over the same data. */
 export interface Findings {
   readonly overlaps: readonly Overlap[];
-  readonly lateTransports: readonly LateTransport[];
+  readonly violatedDependencies: readonly ViolatedDependency[];
 }
 
 /** Every pair of subtasks that cover each other on a lane. Touching at a
@@ -92,25 +92,25 @@ export function overlapDepth(subtasks: readonly Subtask[]): Map<string, number> 
   return depth;
 }
 
-/** Every transport whose successor is to be reached before the predecessor's
-    departure plus the transport's duration. A transport naming a subtask that
+/** Every dependency whose successor is to be reached before the predecessor's
+    departure plus the dependency's lag. A dependency naming a subtask that
     is not in the data is passed over: there is nothing to judge. */
-export function lateTransports(subtasks: readonly Subtask[], transports: readonly Transport[]): LateTransport[] {
+export function violatedDependencies(subtasks: readonly Subtask[], dependencies: readonly Dependency[]): ViolatedDependency[] {
   const byId = new Map(subtasks.map((s) => [s.id, s] as const));
-  const found: LateTransport[] = [];
-  for (const transport of transports) {
-    const from = byId.get(transport.from);
-    const to = byId.get(transport.to);
+  const found: ViolatedDependency[] = [];
+  for (const dependency of dependencies) {
+    const from = byId.get(dependency.from);
+    const to = byId.get(dependency.to);
     if (from === undefined || to === undefined) continue;
-    const leaves = departure(transport, from);
-    const arrives = arrival(transport, to);
-    const shortBy = leaves + transport.duration - arrives;
-    if (shortBy > 0) found.push({ transport: transport.id, departure: leaves, arrival: arrives, shortBy });
+    const leaves = departure(dependency, from);
+    const arrives = arrival(dependency, to);
+    const shortBy = leaves + dependency.lag - arrives;
+    if (shortBy > 0) found.push({ dependency: dependency.id, departure: leaves, arrival: arrives, shortBy });
   }
   return found;
 }
 
-/** Overlaps and late transports at once. */
-export function findings(subtasks: readonly Subtask[], transports: readonly Transport[]): Findings {
-  return { overlaps: overlaps(subtasks), lateTransports: lateTransports(subtasks, transports) };
+/** Overlaps and violated dependencies at once. */
+export function findings(subtasks: readonly Subtask[], dependencies: readonly Dependency[]): Findings {
+  return { overlaps: overlaps(subtasks), violatedDependencies: violatedDependencies(subtasks, dependencies) };
 }
