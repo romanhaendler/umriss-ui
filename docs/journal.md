@@ -18,6 +18,24 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Sep. 2026 — The table demo by feature, popovers by their trigger
+
+- **The table demo is cut by feature**, as the schedule's already was:
+  `Table` had carried nineteen examples and `Column` twelve; now 28 pages in
+  nine rubrics, each naming one thing, and `Table` is the first table. It
+  reverses decision B of `.scratch/table-demo/spec.md`; the glossary's
+  **Page** says so. Manual mode became a ladder of five examples instead of
+  one that showed everything at once.
+- **Every popover in the demos measured** at four window widths - a script
+  opening each trigger and checking the panel against the window, its trigger
+  and its edges. It found a margin the flip ignored, panels laid over their
+  own triggers, alignments that never flipped across, a measurement taken
+  while the entrance animation still scaled the panel, and the range pickers'
+  narrow layout; all fixed in `Popover`, `computePosition` and the pickers'
+  stylesheet, and the script found nothing more afterwards.
+- **Tooltips on the table's icon keys**, and a `Tooltip` that gives way to its
+  trigger's own panel.
+
 ## Sep. 2026 — Data-dense applications, not plant screens
 
 - **ADR-0035 and the demo rework in one day**: 29 tickets, run as parallel
