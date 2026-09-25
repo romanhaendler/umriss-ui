@@ -24,11 +24,30 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ## Unreleased
 
-Needs the `@umriss-ui/core` that carries the availability wording and the
-column menu's pin keys (its own "Unreleased" section).
+Needs the `@umriss-ui/core` that carries the availability wording, the
+column menu's pin keys and `editCell` (its own "Unreleased" section).
 
 ### Added
 
+- **Grid mode, on request** (ADR-0034): `<Table grid>` makes the table
+  `role="grid"` (`treegrid` when grouped) and one tab stop with an **Active
+  cell** - the arrows walk the cells of the head, the rows, group headers,
+  folded spans, details and the footer; Home and End go to the row's ends,
+  Ctrl+Home and Ctrl+End to the table's, PageUp and PageDown by the rows in
+  view. A cell's own controls leave the tab order and are reached with Enter
+  or F2 and left with Escape. The Active cell holds on to its row and its
+  column: it follows a sort, stands where a filtered row stood, and walks to
+  rows a virtual window has not rendered. Without `grid` nothing changes.
+- **Editing in place**: `edit` on a column - `"text"`, `"number"`,
+  `"select"` (over `editOptions`, or the values that occur), `"date"`, or an
+  editor of one's own receiving `CellEditorProps` - gives it the core field
+  for its value. Enter, F2 or typing starts an edit, Enter commits, Escape
+  cancels, Tab commits and moves on to the next cell that edits; a picked day
+  commits at once. `validate(value, row)` keeps a draft that does not pass
+  open, its message beneath the field. The table applies nothing:
+  `onCellEdit({ rowKey, columnId, value, row })` on `<Table>` reports, and the
+  cell shows the value once the rows carry it. New types `CellEdit`,
+  `CellEditorProps`, `EditFor`, `EditOptions`.
 - **`docs/llms-full.md`**, the package's documentation as one Markdown file for
   a coding agent, in the npm package and pinned to its version: every demo page
   with its import line, its examples' source, its props tables and why it is
