@@ -1,9 +1,16 @@
 import { useState } from "react";
 import { Badge, Button, ConfirmDialog, Grid, Sparkline, Stack, Text, useFormats } from "@umriss-ui/core";
 import type { LimitSet } from "@umriss-ui/core";
-import { ColumnMenu, Export, Pagination, Search, Toolbar, useTable } from "../../../src";
+import { ColumnMenu, Export, Pagination, Search, Toolbar, useTable } from "../../src";
 
-export const title = "Demonstration: the order list";
+export const title = "Work through the open orders";
+
+export const lead =
+  "A clerk searches, sorts and exports the day's orders and cancels the ones that are wrong.";
+
+export const callouts = [];
+
+export const builtFrom = ["table", { name: "Badge", page: "@umriss-ui/core#badge" }, { name: "ConfirmDialog", page: "@umriss-ui/core#confirmdialog" }];
 
 /* The order list this interface was built for - the sketch from the spec of
    @umriss-ui/table, running.

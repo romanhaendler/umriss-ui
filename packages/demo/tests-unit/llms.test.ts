@@ -1,13 +1,13 @@
-/* The llms.txt generator against a fixture package: one page, three examples
-   (one a demonstration that shows a file beside itself), one props table and
-   one "Why it is like this". What is checked is what an agent reading the text
-   relies on - every page is there with its link, every example's source stands
-   as the demo shows it, the table is complete, and the why page reads as prose. */
+/* The llms.txt generator against a fixture package: one scenario, one page
+   with three examples (one with a lead, one showing a file beside itself), one
+   props table and the page's texts. What is checked is what an agent reading
+   the text relies on - every page is there with its link, every example's
+   source stands as the demo shows it, the table is complete. */
 
 import { describe, expect, it } from "vitest";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
-import { renderLlms, whyMarkdown } from "../src/tooling/llms";
+import { renderLlms } from "../src/tooling/llms";
 import type { Rubric } from "../src/outline";
 import type { TypeEntry } from "../src/tooling/tables";
 
@@ -23,6 +23,10 @@ const OUTLINE: readonly Rubric[] = [
         id: "gauge",
         name: "Gauge",
         sentence: "One value as a needle.",
+        about: ["Read it at a glance.", "One `value`, one limit set."],
+        alternatives: [{ when: "A value over time", use: "meter" }],
+        keys: [{ key: "Tab", action: "Moves focus to the gauge." }],
+        limits: ["No second needle."],
         types: ["GaugeProps"],
         exports: ["Gauge"],
       },
@@ -50,13 +54,19 @@ const TABLES: Record<string, TypeEntry> = {
   },
 };
 
-const { index, full } = renderLlms({ packageDir: PACKAGE_DIR, outline: OUTLINE, tables: TABLES });
+const { index, full } = renderLlms({ packageDir: PACKAGE_DIR, outline: OUTLINE, tables: TABLES, worldsDir: join(PACKAGE_DIR, "worlds") });
 
 describe("llms.txt", () => {
   it("names the package, its summary and where the full text is", () => {
     expect(index.startsWith("# @umriss-ui/fixture\n\n> A fixture package for the llms.txt generator.\n")).toBe(true);
     expect(index).toContain("https://example.test/fixture/llms-full.txt");
     expect(index).toContain("`docs/llms-full.md`");
+  });
+
+  it("lists the scenarios first, with their lead and a link", () => {
+    expect(index).toContain("## Scenarios\n");
+    expect(index).toContain("- [Watch a service's latency](https://example.test/fixture/#/scenarios/watch-latency): An on-call engineer keeps it open beside the incident channel.\n");
+    expect(index.indexOf("## Scenarios")).toBeLessThan(index.indexOf("## Instruments"));
   });
 
   it("lists every page under its rubric, with one line and a link", () => {
@@ -78,10 +88,40 @@ describe("llms-full.txt", () => {
     expect(full).not.toContain("export const title");
   });
 
-  it("runs the examples in the demo's order, the demonstration last", () => {
+  it("runs the examples in the demo's order", () => {
     const at = (title: string) => full.indexOf(`##### ${title}\n`);
-    expect(at("A basic gauge")).toBeLessThan(at("Compact"));
-    expect(at("Compact")).toBeLessThan(at("The whole plant"));
+    expect(at("A basic gauge")).toBeLessThan(at("Show several readings"));
+    expect(at("Show several readings")).toBeLessThan(at("Compact"));
+  });
+
+  it("puts an example's lead between its title and its source, and not in the source", () => {
+    expect(full).toContain("##### A basic gauge\n\nPass the `value`; the needle points at it.\n\n```tsx\n");
+    expect(full).not.toContain("export const lead");
+  });
+
+  it("carries the page's about, alternatives, keyboard and known limits", () => {
+    const gauge = full.slice(full.indexOf("### Gauge"), full.indexOf("### Meter"));
+    expect(gauge).toContain("Read it at a glance.\n\nOne `value`, one limit set.");
+    expect(gauge).toContain("#### When to use something else\n\n- A value over time → Meter");
+    expect(gauge).toContain("#### Keyboard\n\n| Key | Action |\n|---|---|\n| `Tab` | Moves focus to the gauge. |");
+    expect(gauge).toContain("#### Known limits\n\n- No second needle.");
+    expect(gauge.indexOf("#### API")).toBeLessThan(gauge.indexOf("#### Known limits"));
+  });
+
+  it("carries each scenario with its callouts, what it is built from, and its source", () => {
+    const scenarios = full.slice(full.indexOf("## Scenarios"), full.indexOf("## Instruments"));
+    expect(scenarios).toContain("### Watch a service's latency\n\nAn on-call engineer keeps it open beside the incident channel.");
+    expect(scenarios).toContain("1. The needle: latency, in ms.\n2. Red above the limit, as the SLA says: 300 ms.");
+    expect(scenarios).toContain("Built from: Gauge, Trend.");
+    expect(scenarios).toContain('import { SERVICES } from "./operations";');
+    expect(scenarios).not.toContain("export const callouts");
+    expect(scenarios).not.toContain("export const builtFrom");
+  });
+
+  it("prints a world a scenario imports once, among the files shown", () => {
+    const files = full.slice(full.indexOf("## Files the examples show"));
+    expect(files).toContain("### `operations.ts`");
+    expect(full.split("export const SERVICES").length - 1).toBe(1);
   });
 
   it("names a file shown beside an example and prints it once, at the end", () => {
@@ -112,47 +152,5 @@ describe("llms-full.txt", () => {
     /* On a page already, so not again - and the demo's data is not the package's. */
     expect(rest).not.toContain("### `Gauge`");
     expect(full.indexOf("## The rest of the API")).toBeLessThan(full.indexOf("## Files the examples show"));
-  });
-
-  it("carries the why page as prose", () => {
-    expect(full).toContain("#### Why it is like this\n\n##### A needle, not a number\n");
-  });
-});
-
-describe("whyMarkdown", () => {
-  const md = whyMarkdown(
-    `export default function W() {
-  return (
-    <>
-      <h3>A needle, not a number</h3>
-      <p>
-        A <code>Gauge</code> is read at a glance &ndash; the needle&apos;s angle
-        says <strong>more</strong> than the digits, see{" "}
-        <a href="#/meter">Meter</a> and <em>the ADR</em>.
-      </p>
-      <ul>
-        <li>One value.</li>
-        <li>One limit set.</li>
-      </ul>
-    </>
-  );
-}`,
-    { heading: "#####", base: "https://example.test/fixture/" },
-  );
-
-  it("joins the lines of a paragraph the way JSX does, and decodes entities", () => {
-    expect(md).toContain(
-      "A `Gauge` is read at a glance – the needle's angle says **more** than the digits, see [Meter](https://example.test/fixture/#/meter) and *the ADR*.",
-    );
-  });
-
-  it("turns headings and lists into Markdown", () => {
-    expect(md.startsWith("##### A needle, not a number\n\n")).toBe(true);
-    expect(md).toContain("- One value.\n- One limit set.");
-  });
-
-  it("refuses what it cannot write rather than dropping it", () => {
-    expect(() => whyMarkdown("export default () => <p>{value}</p>;", { heading: "#####", base: "" })).toThrow(/value/);
-    expect(() => whyMarkdown("export default () => <table />;", { heading: "#####", base: "" })).toThrow(/<table>/);
   });
 });

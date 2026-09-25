@@ -18,8 +18,8 @@ for (const pageId of PAGES) {
   test(`Seitenkopf ${pageId}`, async ({ page }, testInfo) => {
     await open(page, pageId);
     const target =
-      pageId === "overview"
-        ? page.locator('[data-block="overview"]')
+      pageId === "scenarios"
+        ? page.locator('[data-block="scenarios"]')
         : page.locator(`[data-block="${pageId}"] .pageHead`);
     await target.scrollIntoViewIfNeeded();
     await expect(target).toHaveScreenshot(`page-${pageId}-${testInfo.project.name}.png`);

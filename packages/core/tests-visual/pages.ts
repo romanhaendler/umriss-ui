@@ -11,7 +11,7 @@
    ways to the same files – but only ONE opinion about what they are called:
    that stands in `fileName.ts`, and both fetch it from there.
 
-   The overview stands first: it is itself a page, so that the shell is not the
+   The scenarios page stands first: it is itself a page, so that the shell is not the
    only unchecked part of the demo. */
 
 import { dirname, join } from "node:path";
@@ -22,8 +22,8 @@ import { ALL_PAGES } from "../demo/outline";
 
 const EXAMPLES_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "demo", "examples");
 
-/** The addresses of all pages, the overview first. */
-export const PAGES = ["overview", ...ALL_PAGES.map((p) => p.id)] as const;
+/** The addresses of all pages, the scenarios page first. */
+export const PAGES = ["scenarios", ...ALL_PAGES.map((p) => p.id)] as const;
 
 export type { ExampleAddress };
 
@@ -34,9 +34,9 @@ export const EXAMPLE_ADDRESSES: readonly ExampleAddress[] = exampleAddresses(EXA
     Every page in both themes would mean two axe runs per page; that is minutes
     for an answer that rarely differs between two pages of the same sort. What
     is taken is therefore, per rubric, the one that carries the most
-    interaction, plus the overview. */
+    interaction, plus the scenarios page. */
 export const SAMPLE = [
-  "overview",
+  "scenarios",
   "button",
   "alert",
   "card",

@@ -15,10 +15,9 @@
    and it must not grow a second reason to be lenient. */
 export const EXAMPLE_PATTERN = /\/examples\/([^/]+)\/(\d+)-([^/]+)\.tsx$/;
 
-/* The name part a demonstration carries. It is not a folder of its own and
-   not an entry in a list: it is an example with a different appearance, and its
-   file says so itself. */
-export const DEMONSTRATION = "demonstration";
+/* A scenario: `demo/scenarios/NN-<anchor>.tsx`. No folder - the scenarios all
+   stand on the one page that opens a demo. */
+export const SCENARIO_PATTERN = /\/scenarios\/(\d+)-([^/]+)\.tsx$/;
 
 export interface FileName {
   /** The page's address: the folder name, lower-cased. */
@@ -27,7 +26,6 @@ export interface FileName {
   rank: number;
   /** The anchor. */
   id: string;
-  demonstration: boolean;
 }
 
 /** Splits a path, or throws - an example that is not named like one should
@@ -44,8 +42,16 @@ export function parseFileName(path: string): FileName {
     pageId: folder.toLowerCase(),
     rank: Number(rankText),
     id,
-    demonstration: id === DEMONSTRATION,
   };
+}
+
+/** A scenario's number and anchor, or throws. */
+export function parseScenarioName(path: string): { rank: number; id: string } {
+  const match = SCENARIO_PATTERN.exec(path);
+  if (match === null) {
+    throw new Error(`\`${path}\` is not named like a scenario. Expected: scenarios/NN-<anchor>.tsx`);
+  }
+  return { rank: Number(match[1]), id: match[2]! };
 }
 
 /** The order of a run: by number, and by anchor on a tie.

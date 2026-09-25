@@ -101,15 +101,9 @@ describe("The examples as a set", () => {
     }
   });
 
-  it("carry at most one demonstration per page, and it stands last", () => {
-    for (const page of ALL_PAGES) {
-      const own = EXAMPLES.filter((e) => e.pageId === page.id);
-      const demonstrations = own.filter((e) => e.demonstration);
-      expect(demonstrations.length, page.id).toBeLessThanOrEqual(1);
-      if (demonstrations.length === 1) {
-        expect(own[own.length - 1]!.demonstration, page.id).toBe(true);
-      }
-    }
+  it.each(DEMO.scenarios.map((s) => [s.id, s] as const))("renders the scenario %s", async (_name, scenario) => {
+    const { teardown } = await mount(<scenario.Component />);
+    await teardown();
   });
 
   it("leave no page without an example", () => {

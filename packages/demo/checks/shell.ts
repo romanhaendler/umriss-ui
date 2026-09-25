@@ -2,7 +2,7 @@
 
    The other test files go straight to a page through `open()` and see of the
    shell only what it passes through. This one is the only place where sidebar,
-   header, overview and palette themselves run in a browser.
+   header, scenarios page and palette themselves run in a browser.
 
    It stands once, with the shell, and runs against every demo that uses it:
    `packages/<package>/tests-visual/features-shell.spec.ts` calls
@@ -27,7 +27,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { STANDARDS } from "./accessibility";
 
 interface NamedPage {
-  /** The name in sidebar, chip and palette. */
+  /** The name in sidebar and palette. */
   name: string;
   /** The address of the page. */
   pageId: string;
@@ -36,8 +36,6 @@ interface NamedPage {
 export interface ShellProbes {
   /** Two pages, neither of which the front door may show. */
   notOnTheFrontDoor: readonly [string, string];
-  /** A chip on the overview - and two pages it does not bring along. */
-  chip: NamedPage & { absent: readonly [string, string] };
   /** An entry in the sidebar and the id of its rubric. */
   rail: NamedPage & { rubricId: string };
   /** Two pages of the same rubric. */
@@ -52,6 +50,8 @@ export interface ShellProbes {
   abbreviation: { query: string; find: string; glyphs: readonly string[] };
   /** A query with more than five finds, and a longer one with fewer. */
   pointer: { wide: string; narrow: string };
+  /** A scenario's anchor, where the demo has one. */
+  scenario?: string;
 }
 
 export function checkShell(p: ShellProbes): void {
@@ -63,21 +63,19 @@ test.beforeEach(async ({ page }) => {
   await page.evaluate(() => document.fonts.ready);
 });
 
-test("the front door shows the rubrics and no page yet", async ({ page }) => {
-  // That is exactly the purpose: the overview first, then the depth.
-  await expect(page.locator('[data-block="overview"]')).toBeVisible();
+test("the front door is the scenarios page, and no component page", async ({ page }) => {
+  await expect(page.locator('[data-block="scenarios"]')).toBeVisible();
   await expect(page.locator(`[data-block="${p.notOnTheFrontDoor[0]}"]`)).toHaveCount(0);
   await expect(page.locator(`[data-block="${p.notOnTheFrontDoor[1]}"]`)).toHaveCount(0);
 });
 
-test("a chip on the overview opens its page - and only it", async ({ page }) => {
-  await page.getByRole("button", { name: p.chip.name, exact: true }).first().click();
-  await expect(page.locator(`[data-block="${p.chip.pageId}"]`)).toBeVisible();
-  // What does not belong to the page is not in the document either - that is
-  // the difference between "hidden" and "not there", and only the second
-  // really shortens the scrolling.
-  await expect(page.locator(`[data-block="${p.chip.absent[0]}"]`)).toHaveCount(0);
-  await expect(page.locator(`[data-block="${p.chip.absent[1]}"]`)).toHaveCount(0);
+test("the sidebar's first entry leads back to the scenarios page", async ({ page }) => {
+  const rail = page.getByRole("navigation", { name: "Components" });
+  await rail.getByText(p.rail.name, { exact: true }).click();
+  await expect(page.locator(`[data-block="${p.rail.pageId}"]`)).toBeVisible();
+  await rail.getByRole("button", { name: "Scenarios", exact: true }).click();
+  await expect(page.locator('[data-block="scenarios"]')).toBeVisible();
+  await expect(page.locator(`[data-block="${p.rail.pageId}"]`)).toHaveCount(0);
 });
 
 test("an entry in the sidebar opens its page", async ({ page }) => {
@@ -124,9 +122,15 @@ test("the address of an example brings it into view", async ({ page }) => {
   await expect(target).toBeInViewport();
 });
 
-test("an unknown address lands on the overview, not on nothing", async ({ page }) => {
+test("an unknown address lands on the scenarios page, not on nothing", async ({ page }) => {
   await page.goto("/#/gibtesnicht");
-  await expect(page.locator('[data-block="overview"]')).toBeVisible();
+  await expect(page.locator('[data-block="scenarios"]')).toBeVisible();
+});
+
+test("the address of a scenario brings it into view", async ({ page }) => {
+  test.skip(p.scenario === undefined, "this demo has no scenario yet");
+  await page.goto(`/#/scenarios/${p.scenario}`);
+  await expect(page.locator(`[data-scenario="${p.scenario}"]`)).toBeInViewport();
 });
 
 test("the palette filters and jumps", async ({ page }) => {
@@ -277,8 +281,7 @@ test("the pane rests on the translucent material", async ({ page }) => {
 
 test("Escape closes the palette and gives focus back", async ({ page }) => {
   /* The shell's own search button, named exactly: core and table both have a page
-     called "Search", so a loose /Search/ matches the rail entry and the
-     overview chip as well. */
+     called "Search", so a loose /Search/ matches the rail entry as well. */
   const trigger = page.getByRole("button", { name: "Search … ⌘K" });
   await trigger.click();
   await expect(page.getByRole("dialog")).toBeVisible();
@@ -290,7 +293,7 @@ test("Escape closes the palette and gives focus back", async ({ page }) => {
 });
 
 
-test("the shell is accessible - header, sidebar, overview", async ({ page }) => {
+test("the shell is accessible - header, sidebar, scenarios page", async ({ page }) => {
   const result = await new AxeBuilder({ page }).withTags(STANDARDS).analyze();
   expect(result.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target).join(" ")}`)).toEqual([]);
 });

@@ -12,7 +12,7 @@
 
 import { test, expect } from "@playwright/test";
 import type { Page } from "@playwright/test";
-import { openExample } from "./navigation";
+import { openExample, openScenario } from "./navigation";
 
 test.beforeEach(({ colorScheme }, testInfo) => {
   testInfo.skip(colorScheme === "dark" && !testInfo.tags.includes("@both-themes"), "Behaviour tests only once (light)");
@@ -24,15 +24,15 @@ test.beforeEach(async ({ page }) => {
 
 const example = (page: Page, id: string) => page.locator(`[data-example="${id}"]`);
 
-/* ---------------- The position guard: Table › demonstration (table-filters D1) ---------------- */
+/* ---------------- The position guard: Scenarios › work through the open orders (table-filters D1) ---------------- */
 
 test("The head of the table stays put while one searches, filters and resets", { tag: "@both-themes" }, async ({ page }) => {
   /* The conditions used to stand as a row of their own between the table
      toolbar and the header and appeared with the first keystroke – the table
      slid downwards, and upwards again when it was cleared. The measurement is
      taken after every step, as soon as the rows show it. */
-  await openExample(page, "table", "demonstration");
-  const table = example(page, "demonstration");
+  await openScenario(page, "work-through-orders");
+  const table = page.locator('[data-scenario="work-through-orders"]');
   const rows = table.locator("tbody tr");
   const top = async () => (await table.locator("thead").boundingBox())!.y;
   const start = await top();
@@ -52,14 +52,14 @@ test("The head of the table stays put while one searches, filters and resets", {
   expect(await top()).toBe(start);
 });
 
-/* ---------------- Table toolbar and sorting: Table › demonstration ---------------- */
+/* ---------------- Table toolbar and sorting: Scenarios › work through the open orders ---------------- */
 
-test.describe("Table › demonstration", () => {
+test.describe("Scenarios › work through the open orders", () => {
   test.beforeEach(async ({ page }) => {
-    await openExample(page, "table", "demonstration");
+    await openScenario(page, "work-through-orders");
   });
 
-  const table = (page: Page) => example(page, "demonstration");
+  const table = (page: Page) => page.locator('[data-scenario="work-through-orders"]');
   const searchField = (page: Page) => table(page).getByPlaceholder("Order or customer");
   const conditions = (page: Page) => table(page).getByRole("list", { name: "Active filters" });
   const dataRows = (page: Page) => table(page).locator("tbody tr");
@@ -126,7 +126,7 @@ test.describe("Table › demonstration", () => {
 
   /* The counterparts of the table tests from
      `packages/core/tests-visual/features-basics.spec.ts`, which ran there
-     against the old demonstration (umriss-table 14). */
+     against the old demonstration, now a scenario (umriss-table 14). */
 
   test("A click on the header sorts ascending and descending", async ({ page }) => {
     const first = dataRows(page).first();

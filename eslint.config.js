@@ -97,7 +97,7 @@ export default [
        would (control-room-demo, R1): the rule binds what is published and
        what tests it, not that one page and its plant. */
     files: ["packages/core/**/*.{ts,tsx}"],
-    ignores: ["packages/core/demo/examples/Control-room/**", "packages/core/demo/plant.ts"],
+    ignores: ["packages/core/demo/examples/Control-room/**", "packages/core/demo/plant.ts", "packages/core/demo/scenarios/**"],
     rules: {
       "no-restricted-imports": ["error", { patterns: [NO_TABLE, NO_SCHEDULE, NO_CALCULATION] }],
     },
@@ -242,5 +242,12 @@ export default [
         },
       ],
     },
+  },
+  {
+    /* A scenario is a composed screen and may use the neighbouring packages,
+       as a consumer's application would (.scratch/demo-rework/spec.md): the
+       directions bind what is published, not the demos' front pages. */
+    files: ["packages/*/demo/scenarios/**/*.{ts,tsx}"],
+    rules: { "no-restricted-imports": "off" },
   },
 ];

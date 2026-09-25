@@ -15,8 +15,8 @@ import {
   Stack,
   Stat,
   Text,
-} from "../../../src";
-import type { FreshnessAges } from "../../../src";
+} from "../../src";
+import type { FreshnessAges } from "../../src";
 import { Chart, ControlChart, DataTable, LimitBand, LimitLine, Line, Tooltip, XAxis, YAxis } from "@umriss-ui/charts";
 import { AlarmList, alarmModel, isHiddenFromOperation, useTableSelection } from "@umriss-ui/table";
 import { Lane, Schedule, Subtasks } from "@umriss-ui/schedule";
@@ -33,14 +33,21 @@ import {
   exitSilence,
   plant,
   upTo,
-} from "../../plant";
-import type { Batch, Sample } from "../../plant";
+} from "../plant";
+import type { Batch, Sample } from "../plant";
 
-export const title = "Demonstration: the control room of a kiln line";
+export const title = "Watch a kiln line over a shift";
+
+export const lead =
+  "A line lead keeps this screen open through the shift: the trend, the alarms, the plan and the OEE read the same minute.";
+
+export const callouts = [];
+
+export const builtFrom = ["stat", "drawer", "progressbar", { name: "Line", page: "@umriss-ui/charts#line" }, { name: "ControlChart", page: "@umriss-ui/charts#controlchart" }, { name: "AlarmList", page: "@umriss-ui/table#alarmlist" }, { name: "Schedule", page: "@umriss-ui/schedule#schedule" }, { name: "Calculation", page: "@umriss-ui/calculation#calculation" }];
 
 /* The plant stands in the second tab: one shift, and every part below reads
    from it. */
-export const shows = ["../../plant.ts"];
+export const shows = ["../plant.ts"];
 
 /* Every package on one page, fed by one plant. The kiln's excursion is the
    line above the limit in the trend, the alarm in the list, the scrap in the

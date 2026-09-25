@@ -19,7 +19,7 @@ test.beforeEach(async ({ page }) => {
 /* The five table tests of this file went with the table (umriss-table 14).
    Their counterparts stand in
    `packages/table/tests-visual/features-table.spec.ts` and run against the
-   demonstration of the demo of @umriss-ui/table. */
+   scenario of the demo of @umriss-ui/table. */
 
 test("Modal opens and closes on Escape", async ({ page }) => {
   await openExample(page, "modal", "a-window");

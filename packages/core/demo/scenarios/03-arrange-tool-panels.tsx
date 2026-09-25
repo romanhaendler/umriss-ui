@@ -37,10 +37,17 @@ import {
   GridGlyph,
   Stack,
   Text,
-} from "../../../src";
-import type { DockPlace, DockTool } from "../../../src";
+} from "../../src";
+import type { DockPlace, DockTool } from "../../src";
 
-export const title = "Demonstration: four resting places, the handle and the refusal";
+export const title = "Arrange tool panels around a workspace";
+
+export const lead =
+  "Someone who works in one view all day docks the panels they need where they want them.";
+
+export const callouts = [];
+
+export const builtFrom = ["dock"];
 
 const TOOLS: readonly DockTool[] = [
   { id: "zoom-in", label: "Zoom in", icon: <PlusGlyph /> },
