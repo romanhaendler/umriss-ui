@@ -6,7 +6,7 @@ import { checkShell } from "@umriss-ui/demo/checks/shell";
 
 checkShell({
   notOnTheFrontDoor: ["schedule", "move-and-lane"],
-  scenario: "replan-the-day",
+  scenario: "replan-the-day-on-the-line",
   rail: { name: "Dependencies", pageId: "dependencies", rubricId: "plan" },
   neighbours: [
     { name: "Lanes", pageId: "lane" },

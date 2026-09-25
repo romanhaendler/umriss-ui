@@ -4,14 +4,28 @@ import { Lane, Schedule, Subtasks, Dependencies, applyIntent, findings, ripple, 
 import type { Intent, ScheduleInteraction, Subtask } from "../../src";
 import { DAY_OF_PLAN, MOVES, ORDERS, STATIONS, STEPS } from "@umriss-ui/demo/worlds/plant";
 
-export const title = "Replan the day";
+export const title = "Replan the day on the line";
 
 export const lead =
-  "A planner moves work between lanes, lets the cascade follow and reads the findings before committing.";
+  "A production planner at the tile works moves orders between machines during the day, lets the cascade follow and reads the findings before committing.";
 
-export const callouts = [];
+export const callouts = [
+  "Whether moving a step pushes the steps after it along, when their dependency no longer fits.",
+  "The machines as lanes, each order in its colour: drag a step in time or onto another machine, stretch its lead-in or lead-out, or right-click it for the context menu.",
+  "What is wrong with the plan now - overlaps and violated dependencies, counted from the same data after every change.",
+  "The intents the schedule reported, newest first: it changes nothing itself.",
+];
 
-export const builtFrom = ["schedule"];
+export const builtFrom = [
+  "schedule",
+  "dependencies",
+  "move-and-lane",
+  "stretch",
+  "ripple",
+  "findings",
+  "interactions",
+  { name: "ContextMenu", page: "@umriss-ui/core#contextmenu" },
+];
 
 /* The whole recipe, as an application writes it.
 
@@ -44,7 +58,7 @@ function applied(plan: Plan, intent: Intent, cascade: boolean): Plan {
   return { steps, log: [line, ...plan.log].slice(0, 4) };
 }
 
-export default function Demonstration() {
+export default function ReplanTheDay() {
   const [plan, setPlan] = useState<Plan>(START);
   const [cascade, setCascade] = useState(true);
   const [menu, setMenu] = useState<Menu | null>(null);
@@ -62,21 +76,25 @@ export default function Demonstration() {
 
   return (
     <Stack gap={3}>
-      <Checkbox label="Push successors when a dependency no longer fits" checked={cascade} onChange={(e) => setCascade(e.target.checked)} />
-      <Schedule
-        ariaLabel="Plan of Tuesday, 17 March, in the planner's hands"
-        initialDomain={DAY_OF_PLAN}
-        height={380}
-        intents={["move", "lane", "stretch", "leadIn", "leadOut"]}
-        onIntent={apply}
-        onInteraction={onInteraction}
-      >
-        {STATIONS.map((station) => (
-          <Lane key={station.id} id={station.id} label={station.label} />
-        ))}
-        <Dependencies data={MOVES} />
-        <Subtasks data={plan.steps} tasks={ORDERS} />
-      </Schedule>
+      <div data-callout="1">
+        <Checkbox label="Push successors when a dependency no longer fits" checked={cascade} onChange={(e) => setCascade(e.target.checked)} />
+      </div>
+      <div data-callout="2">
+        <Schedule
+          ariaLabel="Plan of Tuesday, 17 March, in the planner's hands"
+          initialDomain={DAY_OF_PLAN}
+          height={380}
+          intents={["move", "lane", "stretch", "leadIn", "leadOut"]}
+          onIntent={apply}
+          onInteraction={onInteraction}
+        >
+          {STATIONS.map((station) => (
+            <Lane key={station.id} id={station.id} label={station.label} />
+          ))}
+          <Dependencies data={MOVES} />
+          <Subtasks data={plan.steps} tasks={ORDERS} />
+        </Schedule>
+      </div>
       <ContextMenu
         open={menu !== null}
         position={{ x: menu?.interaction.clientX ?? 0, y: menu?.interaction.clientY ?? 0 }}
@@ -105,11 +123,11 @@ export default function Demonstration() {
           <MenuItem onSelect={() => setPlan(START)}>Reset the plan</MenuItem>
         )}
       </ContextMenu>
-      <Text size="sm" tone="secondary" data-findings-summary>
+      <Text size="sm" tone="secondary" data-findings-summary data-callout="3">
         {found.overlaps.length} {found.overlaps.length === 1 ? "overlap" : "overlaps"}, {found.violatedDependencies.length}{" "}
         {found.violatedDependencies.length === 1 ? "violated dependency" : "violated dependencies"}
       </Text>
-      <Text size="xs" mono tone="muted" data-intent-log>
+      <Text size="xs" mono tone="muted" data-intent-log data-callout="4">
         {plan.log.length === 0 ? "Drag a subtask, or right-click one" : plan.log.join(" · ")}
       </Text>
     </Stack>
