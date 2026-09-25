@@ -26,21 +26,21 @@ describe("the plant", () => {
     expect(alarmsAt(p, crossing - 1, START).filter((a) => a.type === "kiln-high")).toEqual([]);
     expect(assess(p.readings[crossing - 1]!.kiln, KILN_LIMITS).verdict).not.toBe("alarm");
 
-    /* At the crossing: the verdict and a standing alarm raised at that minute. */
+    /* At the crossing: the verdict and an active alarm raised at that minute. */
     expect(assess(p.readings[crossing]!.kiln, KILN_LIMITS).verdict).toBe("alarm");
-    const standing = alarmsAt(p, crossing, START).filter((a) => a.type === "kiln-high");
-    expect(standing).toEqual([
-      { id: `kiln-high-${crossing}`, type: "kiln-high", lifecycle: "standing-unacknowledged", raised: START + crossing * 60_000 },
+    const active = alarmsAt(p, crossing, START).filter((a) => a.type === "kiln-high");
+    expect(active).toEqual([
+      { id: `kiln-high-${crossing}`, type: "kiln-high", lifecycle: "active-unacknowledged", raised: START + crossing * 60_000 },
     ]);
 
-    /* At the end of the shift: exactly one, cleared once the kiln came back
+    /* At the end of the shift: exactly one, resolved once the kiln came back
        below the dead band - the fleeting alarm nobody acknowledged. */
     const kiln = alarmsAt(p, SHIFT_MINUTES - 1, START).filter((a) => a.type === "kiln-high");
     expect(kiln).toHaveLength(1);
-    expect(kiln[0]!.lifecycle).toBe("cleared-unacknowledged");
-    const cleared = (kiln[0]!.cleared! - START) / 60_000;
-    expect(p.readings[cleared]!.kiln).toBeLessThanOrEqual(KILN.returnTo);
-    expect(p.readings.slice(crossing, cleared).every((one) => one.kiln > KILN.returnTo)).toBe(true);
+    expect(kiln[0]!.lifecycle).toBe("resolved-unacknowledged");
+    const resolved = (kiln[0]!.resolved! - START) / 60_000;
+    expect(p.readings[resolved]!.kiln).toBeLessThanOrEqual(KILN.returnTo);
+    expect(p.readings.slice(crossing, resolved).every((one) => one.kiln > KILN.returnTo)).toBe(true);
   });
 
   it.each(SEEDS)("seed %i: a tile fired outside the tolerance is scrap in the OEE", (seed) => {
@@ -66,15 +66,15 @@ describe("the plant", () => {
     const id = `kiln-high-${crossing}`;
     const at = START + (crossing + 2) * 60_000;
     const [alarm] = alarmsAt(p, crossing + 2, START, new Map([[id, at]])).filter((a) => a.id === id);
-    expect(alarm).toMatchObject({ lifecycle: "standing-acknowledged", acknowledgedAt: at });
+    expect(alarm).toMatchObject({ lifecycle: "active-acknowledged", acknowledgedAt: at });
   });
 
   it("keeps the hidden alarms in the list, with their availability", () => {
     const p = plant(7);
     const stop = p.readings.find((one) => !one.running)!.minute;
     const types = alarmsAt(p, stop, START).map((a) => [a.type, a.availability]);
-    expect(types).toContainEqual(["belt-empty", "suppressed-by-design"]);
-    expect(types).toContainEqual(["dryer-fan", "out-of-service"]);
+    expect(types).toContainEqual(["belt-empty", "suppressed"]);
+    expect(types).toContainEqual(["dryer-fan", "disabled"]);
   });
 
   it("says how long the exit pyrometer has been silent", () => {

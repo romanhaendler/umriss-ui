@@ -18,7 +18,7 @@ import {
 } from "../../../src";
 import type { FreshnessAges } from "../../../src";
 import { Chart, ControlChart, DataTable, LimitBand, LimitLine, Line, Tooltip, XAxis, YAxis } from "@umriss-ui/charts";
-import { AlarmList, alarmModel, isHiddenFromOperation, useTableSelection } from "@umriss-ui/table";
+import { AlarmList, alarmModel, isHidden, useTableSelection } from "@umriss-ui/table";
 import { Lane, Schedule, Subtasks } from "@umriss-ui/schedule";
 import type { Subtask, Task } from "@umriss-ui/schedule";
 import { Calculation, Difference, Given, Product, Quotient, Ref } from "@umriss-ui/calculation";
@@ -228,7 +228,7 @@ export default function ControlRoom() {
     () =>
       alarmModel(
         { alarms: alarmsAt(SHIFT, minute, START, acknowledged), types: ALARM_TYPES, asOf: now },
-        hiddenOnly ? { filter: (row) => isHiddenFromOperation(row.availability) } : {},
+        hiddenOnly ? { filter: (row) => isHidden(row.availability) } : {},
       ),
     [minute, now, acknowledged, hiddenOnly],
   );

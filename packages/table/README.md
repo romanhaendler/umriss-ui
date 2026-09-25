@@ -109,8 +109,8 @@ stylesheets by hand.
   actions that stay quiet until the row is meant, and a bulk action that always
   receives a list.
 * **For producing plants**: `VerdictColumn` reads a measured value against a
-  limit set, and `AlarmList` shows alarms with a lifecycle — standing or
-  cleared, acknowledged or not. The library generates no alarms (ADR-0009).
+  limit set, and `AlarmList` shows alarms with a lifecycle — active or
+  resolved, acknowledged or not. The library generates no alarms (ADR-0009).
 * **A million rows on a server**: in manual mode the rows are one page a server
   answered; the table reports the view - search, conditions, sort, page -
   once per change and shows placeholders over the previous page while the

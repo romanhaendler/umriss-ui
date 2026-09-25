@@ -3,18 +3,19 @@
 
    The library RECEIVES alarms; it GENERATES none. Whoever turns a measured
    value into an alarm decides about bounds, sampling rates, suppression and a
-   clock - all of them plant decisions with plant consequences. The tree draws
-   the same line when it reports that a branch was opened instead of fetching
-   its children (ADR-0009).
+   clock - all of them the application's decisions, with the application's
+   consequences. The tree draws the same line when it reports that a branch
+   was opened instead of fetching its children (ADR-0009).
 
    The lifecycle state is ONE field with FOUR values, not two booleans. A pair
-   of booleans invites `if (standing)`, and precisely that filter is the error:
+   of booleans invites `if (active)`, and precisely that filter is the error:
    it loses the fleeting alarm - it came, it went, nobody saw it - and that is
    the alarm most worth investigating.
 
-   The model suppresses nothing. It marks floods and chatter; which alarm a human
-   sees the plant decides, not a user-interface library. The only removal it
-   performs is the fourth position: cleared and acknowledged is done.
+   The model suppresses nothing. It marks floods and chatter; which alarm a
+   human sees the application decides, not a user-interface library. The only
+   removal it performs is the fourth position: resolved and acknowledged is
+   done.
 
    Nothing here reads a clock. The as-of time is a parameter. */
 
@@ -31,7 +32,7 @@ import type { Column, SortLevel, TableProjection, TableInput } from "../model/ta
 
     This is a DIFFERENT scale from the severity of a limit (which has two), on a
     different object. The mapping between the two is the caller's, in his code,
-    where the plant's convention stands. */
+    where the application's convention stands. */
 export type Priority = "high" | "medium" | "low";
 
 /** From the most urgent to the last - the order of the scale. */
@@ -43,94 +44,94 @@ export const priorityRank = (priority: Priority): number =>
 
 /* --- Lifecycle state ---------------------------------------------------- */
 
-/** One field, four values. `cleared-unacknowledged` is the fleeting alarm and the
+/** One field, four values. `resolved-unacknowledged` is the fleeting alarm and the
     reason why no pair of booleans stands here. */
 export type LifecycleState =
-  | "standing-unacknowledged"
-  | "standing-acknowledged"
-  | "cleared-unacknowledged"
-  | "cleared-acknowledged";
+  | "active-unacknowledged"
+  | "active-acknowledged"
+  | "resolved-unacknowledged"
+  | "resolved-acknowledged";
 
-export const isStanding = (state: LifecycleState): boolean =>
-  state === "standing-unacknowledged" || state === "standing-acknowledged";
+export const isActive = (state: LifecycleState): boolean =>
+  state === "active-unacknowledged" || state === "active-acknowledged";
 
 export const isAcknowledged = (state: LifecycleState): boolean =>
-  state === "standing-acknowledged" || state === "cleared-acknowledged";
+  state === "active-acknowledged" || state === "resolved-acknowledged";
 
-/** Cleared and acknowledged: the only position that leaves the list. */
-export const isDone = (state: LifecycleState): boolean => state === "cleared-acknowledged";
+/** Resolved and acknowledged: the only position that leaves the list. */
+export const isDone = (state: LifecycleState): boolean => state === "resolved-acknowledged";
 
 /** What can happen to an alarm. The caller reports the event; what it means the
     model knows. */
-export type Transition = "raised" | "acknowledged" | "cleared";
+export type Transition = "raised" | "acknowledged" | "resolved";
 
 /**
  * The transition as pure calculation.
  *
- * `raised` always leads to `standing-unacknowledged`, even out of an
+ * `raised` always leads to `active-unacknowledged`, even out of an
  * acknowledged position: a renewed occurrence of the condition is a new
  * event and demands that somebody see it again.
  */
 export function nextLifecycleState(state: LifecycleState, transition: Transition): LifecycleState {
   switch (transition) {
     case "raised":
-      return "standing-unacknowledged";
+      return "active-unacknowledged";
     case "acknowledged":
-      return isStanding(state) ? "standing-acknowledged" : "cleared-acknowledged";
-    case "cleared":
-      return isAcknowledged(state) ? "cleared-acknowledged" : "cleared-unacknowledged";
+      return isActive(state) ? "active-acknowledged" : "resolved-acknowledged";
+    case "resolved":
+      return isAcknowledged(state) ? "resolved-acknowledged" : "resolved-unacknowledged";
   }
 }
 
 /* --- Availability ------------------------------------------------------- */
 
-/** Whether an alarm is in front of the operator - the second field beside the
-    lifecycle (ISA-18.2's special states).
+/** Whether an alarm is in front of the people watching the list - the second
+    field beside the lifecycle (ISA-18.2's special states).
 
     A second field and never a fifth value of the lifecycle, by the same rule
     that made the lifecycle one field: one state, one field. The two answer
     different questions - what happened to the condition, and whether anyone
-    is meant to see it now - and a shelved alarm keeps its lifecycle
-    underneath: when the shelf ends it comes back standing and unacknowledged
+    is meant to see it now - and a snoozed alarm keeps its lifecycle
+    underneath: when the snooze ends it comes back active and unacknowledged
     if that is what it is.
 
-    `suppressed-by-design` has no transition here. It is the plant's logic that
-    suppresses (a pump that is off raises no low-flow alarm), and the
-    application writes the field from that logic. */
-export type Availability = "in-service" | "shelved" | "suppressed-by-design" | "out-of-service";
+    `suppressed` has no transition here. It is the application's logic that
+    suppresses (a service that is switched off raises no error-rate alarm),
+    and the application writes the field from that logic. */
+export type Availability = "in-service" | "snoozed" | "suppressed" | "disabled";
 
-/** In service first, then by how near each is to coming back: shelved (the
-    operator's own decision, with an end), suppressed by design, out of
-    service. The order of the default sort. */
+/** In service first, then by how near each is to coming back: snoozed (a
+    person's own decision, with an end), suppressed, disabled. The order of
+    the default sort. */
 export const AVAILABILITIES: readonly Availability[] = [
   "in-service",
-  "shelved",
-  "suppressed-by-design",
-  "out-of-service",
+  "snoozed",
+  "suppressed",
+  "disabled",
 ];
 
-/** A shelf: the operator's own, time-limited decision to take an alarm out of
+/** A snooze: a person's own, time-limited decision to take an alarm out of
     the way. */
-export interface Shelf {
+export interface Snooze {
   /** When it ends, in milliseconds. Reaching it is enough. */
   until: number;
-  /** Who shelved it - a shelf is tracked, not anonymous. */
+  /** Who snoozed it - a snooze is tracked, not anonymous. */
   by: string;
 }
 
 /** Everything but in service: still in the list, drawn neutrally and counted,
     never removed. "Not absent, only deliberately hidden." */
-export const isHiddenFromOperation = (availability: Availability): boolean =>
+export const isHidden = (availability: Availability): boolean =>
   availability !== "in-service";
 
 /**
- * The availability at the as-of time. A shelf that has reached its end is in
+ * The availability at the as-of time. A snooze that has reached its end is in
  * service again - by the model's clock, not by a timer: nothing here reads a
- * clock, and a timer in a user-interface library would bring a shelved alarm
+ * clock, and a timer in a user-interface library would bring a snoozed alarm
  * back only while a browser tab happens to be open.
  */
 export function availabilityAt(alarm: Alarm, asOf: number): Availability {
-  if (alarm.availability === "shelved") return asOf >= alarm.shelf.until ? "in-service" : "shelved";
+  if (alarm.availability === "snoozed") return asOf >= alarm.snooze.until ? "in-service" : "snoozed";
   return alarm.availability ?? "in-service";
 }
 
@@ -139,34 +140,33 @@ export function availabilityAt(alarm: Alarm, asOf: number): Availability {
    that does not apply returns the same object, so that a caller can see that
    nothing happened. */
 
-/** Shelves an alarm in service, or shelves anew what is shelved. An alarm out
-    of service or suppressed by design stays as it is: the stronger removal is
-    not overwritten by the weaker one, or the end of the shelf would put a pump
-    under maintenance back in service. */
-export function shelve(alarm: Alarm, until: number, by: string): Alarm {
-  if (alarm.availability === "out-of-service" || alarm.availability === "suppressed-by-design") return alarm;
-  return { ...alarm, availability: "shelved", shelf: { until, by } };
+/** Snoozes an alarm in service, or snoozes anew what is snoozed. A disabled
+    or suppressed alarm stays as it is: the stronger removal is not
+    overwritten by the weaker one, or the end of the snooze would put an alarm
+    disabled for maintenance back in service. */
+export function snooze(alarm: Alarm, until: number, by: string): Alarm {
+  if (alarm.availability === "disabled" || alarm.availability === "suppressed") return alarm;
+  return { ...alarm, availability: "snoozed", snooze: { until, by } };
 }
 
-/** Takes a shelved alarm off the shelf before its end. */
-export function unshelve(alarm: Alarm): Alarm {
-  if (alarm.availability !== "shelved") return alarm;
-  return { ...alarm, availability: "in-service", shelf: undefined };
+/** Ends a snooze before its time. */
+export function unsnooze(alarm: Alarm): Alarm {
+  if (alarm.availability !== "snoozed") return alarm;
+  return { ...alarm, availability: "in-service", snooze: undefined };
 }
 
-/** Takes an alarm out of service - from service or from a shelf. An alarm
-    suppressed by design stays as it is: that field is the plant's logic's,
-    and `returnToService` would otherwise hand it back in service with the
-    suppression lost. */
-export function takeOutOfService(alarm: Alarm): Alarm {
-  if (alarm.availability === "out-of-service" || alarm.availability === "suppressed-by-design") return alarm;
-  return { ...alarm, availability: "out-of-service", shelf: undefined };
+/** Disables an alarm - from service or from a snooze. A suppressed alarm
+    stays as it is: that field is the application's logic's, and `enable`
+    would otherwise hand it back in service with the suppression lost. */
+export function disable(alarm: Alarm): Alarm {
+  if (alarm.availability === "disabled" || alarm.availability === "suppressed") return alarm;
+  return { ...alarm, availability: "disabled", snooze: undefined };
 }
 
-/** Returns an alarm out of service to service. Only that one: a shelf ends by
-    `unshelve` or its time, a suppression by the plant's logic. */
-export function returnToService(alarm: Alarm): Alarm {
-  if (alarm.availability !== "out-of-service") return alarm;
+/** Returns a disabled alarm to service. Only that one: a snooze ends by
+    `unsnooze` or its time, a suppression by the application's logic. */
+export function enable(alarm: Alarm): Alarm {
+  if (alarm.availability !== "disabled") return alarm;
   return { ...alarm, availability: "in-service" };
 }
 
@@ -178,31 +178,31 @@ export function returnToService(alarm: Alarm): Alarm {
     it. That is the dead band: it keeps the value sitting on the bound from
     producing a hundred alarms. */
 export interface ReturnBand {
-  /** `obere`: the alarm comes when the value rises above the bound.
-      `untere`: it comes when the value falls below it. */
-  direction: "obere" | "untere";
+  /** `upper`: the alarm comes when the value rises above the bound.
+      `lower`: it comes when the value falls below it. */
+  direction: "upper" | "lower";
   /** The bound that triggered the alarm. Stands here so that the condition is
-      described completely in one place - for the decision about clearing it is
+      described completely in one place - for the decision about resolving it is
       expressly not read. */
   limit: number;
-  /** The value the reading must come back past before the alarm clears. */
+  /** The value the reading must come back past before the alarm resolves. */
   returnTo: number;
 }
 
 /**
- * Has the value come back far enough for a standing alarm to clear? The value
+ * Has the value come back far enough for an active alarm to resolve? The value
  * must come back past the return value, not merely past the bound that
  * triggered the alarm - which is why `limit` does not appear in this
  * calculation.
  *
- * The condition of clearing, not that of raising: that a measured value raises
+ * The condition of resolving, not that of raising: that a measured value raises
  * an alarm the caller's process layer decides. It lives here because only this
  * module knows what the alarm just was.
  *
  * The return value itself belongs to the return: reaching it is enough.
  */
 export const hasReturned = (band: ReturnBand, value: number): boolean =>
-  band.direction === "obere" ? value <= band.returnTo : value >= band.returnTo;
+  band.direction === "upper" ? value <= band.returnTo : value >= band.returnTo;
 
 /* --- Alarm type and alarm ----------------------------------------------- */
 
@@ -224,9 +224,9 @@ export interface AlarmType {
     trimmings for the display. The other way round it would be a pair of
     booleans in disguise.
 
-    `availability` is the second field, and its union with the shelf is why
-    this is a type and not an interface: a shelved alarm without an end cannot
-    be written down. A shelf without an end is the shelf ISA-18.2 warns
+    `availability` is the second field, and its union with the snooze is why
+    this is a type and not an interface: a snoozed alarm without an end cannot
+    be written down. A snooze without an end is the snooze ISA-18.2 warns
     against - an alarm switched off that nobody will remember switching off. */
 export type Alarm = AlarmBase & AlarmAvailability;
 
@@ -237,8 +237,8 @@ interface AlarmBase {
   lifecycle: LifecycleState;
   /** The moment of coming, in milliseconds. */
   raised: number;
-  /** The moment of clearing, as long as it stands: none. */
-  cleared?: number;
+  /** The moment of resolving; while the alarm is active: none. */
+  resolved?: number;
   /** The moment of the acknowledgement, as long as unacknowledged: none. */
   acknowledgedAt?: number;
 }
@@ -246,13 +246,13 @@ interface AlarmBase {
 type AlarmAvailability =
   | {
       /** Without a statement: in service. */
-      availability?: Exclude<Availability, "shelved">;
-      shelf?: undefined;
+      availability?: Exclude<Availability, "snoozed">;
+      snooze?: undefined;
     }
   | {
-      availability: "shelved";
+      availability: "snoozed";
       /** Until when, and by whom. */
-      shelf: Shelf;
+      snooze: Snooze;
     };
 
 /* --- Window, frequency, flood ------------------------------------------- */
@@ -272,7 +272,7 @@ export const countInWindow = (
 ): number => times.reduce((total, time) => total + (inWindow(time, windowMs, asOf) ? 1 : 0), 0);
 
 /** Frequency per alarm type within the window. Grouped by TYPE, not by
-    occurrence - a chattering measuring point is one problem, not forty. */
+    occurrence - a chattering source is one problem, not forty. */
 export function frequencyByType(
   alarms: readonly Alarm[],
   windowMs: number,
@@ -298,7 +298,7 @@ export interface ChatterRule {
 export interface FloodRule {
   windowMs: number;
   /** From how many alarms within the window - across all types, because one
-      fault drags nine interlocks with it. Reaching it is enough. */
+      fault drags nine others with it. Reaching it is enough. */
   atLeast: number;
 }
 
@@ -399,14 +399,14 @@ export interface AlarmRow {
   alarm: Alarm;
   type: AlarmType;
   lifecycle: LifecycleState;
-  /** At the as-of time: an expired shelf is already back in service here. */
+  /** At the as-of time: an expired snooze is already back in service here. */
   availability: Availability;
   priority: Priority;
   /** 0 is the most urgent. For the sort. */
   rank: number;
   /** Since the coming, from the as-of time passed in. */
   age: number;
-  /** How long the condition was true - until the clearing, otherwise until the
+  /** How long the condition was true - until the resolving, otherwise until the
       as-of time. Not the same thing as the age. */
   duration: number;
   /** Occurrences of this TYPE within the window; without a chatter rule: all of
@@ -453,7 +453,7 @@ export const alarmColumns = (wording: Wording): readonly Column<AlarmRow, AlarmC
   { id: "priority", label: wording.columnPriority, value: (row) => row.rank },
   /* A column of its own instead of a glance at the lifecycle state: the second
      level of the order asks only about the acknowledgement and expressly not
-     about whether the alarm is still standing. Otherwise the fleeting alarm
+     about whether the alarm is still active. Otherwise the fleeting alarm
      falls back down again. */
   { id: "acknowledgement", label: wording.columnAcknowledgement, value: (row) => (isAcknowledged(row.lifecycle) ? 1 : 0) },
   { id: "raised", label: wording.columnRaised, value: (row) => row.alarm.raised },
@@ -469,8 +469,8 @@ export const ALARM_COLUMNS: readonly Column<AlarmRow, AlarmColumn>[] = alarmColu
     sort, so that a caller replaces one value instead of fighting against a
     hard-wired comparison.
 
-    Availability stands first because a shelved alarm of high priority is a
-    decision already taken; above a standing one of medium priority it would
+    Availability stands first because a snoozed alarm of high priority is a
+    decision already taken; above an active one of medium priority it would
     take the first glance from the alarm nobody has decided about. */
 export const DEFAULT_ORDER: readonly SortLevel<AlarmColumn>[] = [
   { column: "availability", direction: "asc" },
@@ -494,7 +494,7 @@ export interface AlarmInput {
   chatter?: ChatterRule;
   /** Without it no flood is detected and nothing is marked. */
   flood?: FloodRule;
-  /** Show the alarms that are done as well (cleared and acknowledged).
+  /** Show the alarms that are done as well (resolved and acknowledged).
       Default: no - that is the only removal the model performs. */
   keepDone?: boolean;
   /** The columns of the projection; without a statement `ALARM_COLUMNS`.
@@ -507,15 +507,15 @@ export interface AlarmProjection extends TableProjection<AlarmRow, AlarmColumn> 
   /** The flood that was detected, when a rule was given and it applies. A
       marking beside the complete list, not a replacement for it. */
   flood: Flood | null;
-  /** Standing and unacknowledged within the filtered set - the number for the
+  /** Active and unacknowledged within the filtered set - the number for the
       polite screen reader. From the filtered set, not from the visible page,
       like every figure in this house. Only alarms in service count: the
       number calls somebody over, and a hidden alarm is one it must not call
       to. */
-  standingUnacknowledged: number;
-  /** Hidden from operation within the filtered set: shelved, suppressed by
-      design, out of service. They are in the list; this is how many. */
-  hiddenFromOperation: number;
+  activeUnacknowledged: number;
+  /** Hidden within the filtered set: snoozed, suppressed, disabled. They are
+      in the list; this is how many. */
+  hiddenAlarms: number;
 }
 
 /** For an alarm without an entry in the catalogue. Classified high: an alarm
@@ -567,7 +567,7 @@ export function alarmModel(
         priority: type.priority,
         rank: priorityRank(type.priority),
         age: asOf - alarm.raised,
-        duration: (alarm.cleared ?? asOf) - alarm.raised,
+        duration: (alarm.resolved ?? asOf) - alarm.raised,
         frequency: count,
         chatters: chatter !== undefined && count >= chatter.atLeast,
         inFlood: inFlood.has(alarm.id),
@@ -582,13 +582,13 @@ export function alarmModel(
   return {
     ...projection,
     flood: detectedFlood,
-    standingUnacknowledged: projection.filtered.reduce(
+    activeUnacknowledged: projection.filtered.reduce(
       (total, row) =>
-        total + (row.lifecycle === "standing-unacknowledged" && !isHiddenFromOperation(row.availability) ? 1 : 0),
+        total + (row.lifecycle === "active-unacknowledged" && !isHidden(row.availability) ? 1 : 0),
       0,
     ),
-    hiddenFromOperation: projection.filtered.reduce(
-      (total, row) => total + (isHiddenFromOperation(row.availability) ? 1 : 0),
+    hiddenAlarms: projection.filtered.reduce(
+      (total, row) => total + (isHidden(row.availability) ? 1 : 0),
       0,
     ),
   };

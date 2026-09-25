@@ -1,25 +1,25 @@
 import { useMemo, useState } from "react";
 import { Button, Stack, Text } from "@umriss-ui/core";
-import { AlarmList, acknowledge, alarmModel, isHiddenFromOperation, shelve, useTableSelection } from "../../../src";
+import { AlarmList, acknowledge, alarmModel, isHidden, snooze, useTableSelection } from "../../../src";
 import type { Alarm, AlarmType } from "../../../src";
 
-export const title = "Hidden from operation, never absent";
+export const title = "Hidden, never absent";
 
-/* ISA-18.2 knows three special states beside the lifecycle: shelved by an
-   operator, suppressed by the plant's design, out of service for maintenance.
+/* ISA-18.2 knows three special states beside the lifecycle: snoozed by a
+   person, suppressed by the application's logic, disabled for maintenance.
    They are a second field, `availability`, and never a fifth lifecycle value:
-   a shelved alarm keeps its lifecycle, and comes back with it.
+   a snoozed alarm keeps its lifecycle, and comes back with it.
 
    None of them removes a row. A hidden alarm is drawn neutrally - no edge, its
    priority a word without its colour - with its state as a word, and the bar
    counts them. The count is a switch here because the application takes it:
    the view is the table's own `filter`, the list only shows the switch.
 
-   A shelf has an end and a name. It returns by the model's clock: at the
+   A snooze has an end and a name. It returns by the model's clock: at the
    as-of time that reaches its end the row is in service again, with no timer.
 
-   The application performs the transitions - `shelve`, `unshelve`,
-   `takeOutOfService`, `returnToService` - one alarm in, one out. */
+   The application performs the transitions - `snooze`, `unsnooze`,
+   `disable`, `enable` - one alarm in, one out. */
 
 /* The reference is taken once at load time, so that the times are right for a
    human. The screenshot suite freezes the page's clock; `Date.now()` then
@@ -35,36 +35,36 @@ const TYPES: AlarmType[] = [
 ];
 
 const START: readonly Alarm[] = [
-  { id: "a1", type: "furnace-temp", lifecycle: "standing-unacknowledged", raised: NOW - 3 * MIN },
+  { id: "a1", type: "furnace-temp", lifecycle: "active-unacknowledged", raised: NOW - 3 * MIN },
   {
     id: "a2",
     type: "vibration",
-    lifecycle: "standing-acknowledged",
+    lifecycle: "active-acknowledged",
     raised: NOW - 52 * MIN,
     acknowledgedAt: NOW - 50 * MIN,
-    availability: "shelved",
-    shelf: { until: NOW + 40 * MIN, by: "M. Keller" },
+    availability: "snoozed",
+    snooze: { until: NOW + 40 * MIN, by: "M. Keller" },
   },
   /* The pump is off; its low flow is expected. The plant's logic writes this
      one, and the model has no transition for it. */
   {
     id: "a3",
     type: "low-flow",
-    lifecycle: "standing-unacknowledged",
+    lifecycle: "active-unacknowledged",
     raised: NOW - 18 * MIN,
-    availability: "suppressed-by-design",
+    availability: "suppressed",
   },
   {
     id: "a4",
     type: "level",
-    lifecycle: "standing-acknowledged",
+    lifecycle: "active-acknowledged",
     raised: NOW - 300 * MIN,
     acknowledgedAt: NOW - 290 * MIN,
-    availability: "out-of-service",
+    availability: "disabled",
   },
 ];
 
-export default function HiddenFromOperation() {
+export default function HiddenAlarms() {
   const [alarms, setAlarms] = useState<readonly Alarm[]>(START);
   const [hiddenOnly, setHiddenOnly] = useState(false);
 
@@ -72,7 +72,7 @@ export default function HiddenFromOperation() {
     () =>
       alarmModel(
         { alarms, types: TYPES, asOf: NOW },
-        hiddenOnly ? { filter: (row) => isHiddenFromOperation(row.availability) } : {},
+        hiddenOnly ? { filter: (row) => isHidden(row.availability) } : {},
       ),
     [alarms, hiddenOnly],
   );
@@ -96,15 +96,15 @@ export default function HiddenFromOperation() {
           disabled={selection.selected.size === 0}
           onClick={() => {
             setAlarms((current) =>
-              current.map((alarm) => (selection.selected.has(alarm.id) ? shelve(alarm, NOW + 30 * MIN, "J. Weber") : alarm)),
+              current.map((alarm) => (selection.selected.has(alarm.id) ? snooze(alarm, NOW + 30 * MIN, "J. Weber") : alarm)),
             );
             selection.clear();
           }}
         >
-          Shelve for 30 minutes
+          Snooze for 30 minutes
         </Button>
         <Text size="xs" tone="muted">
-          Shelved, the row stays - neutral, with its end and its name.
+          Snoozed, the row stays - neutral, with its end and its name.
         </Text>
       </Stack>
     </Stack>

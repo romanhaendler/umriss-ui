@@ -7,7 +7,7 @@ import { describe, expect, it } from "vitest";
 import {
   detectFlood,
   frequencyByType,
-  isStanding,
+  isActive,
   hasReturned,
   ALARM_COLUMNS,
   alarmModel,
@@ -74,13 +74,13 @@ const TYPES: AlarmType[] = [
     id: "boiler-pressure",
     label: "Boiler pressure too high",
     priority: "high",
-    returnBand: { direction: "obere", limit: 80, returnTo: 75 },
+    returnBand: { direction: "upper", limit: 80, returnTo: 75 },
   },
   {
     id: "flow-temp",
     label: "Flow temperature too low",
     priority: "medium",
-    returnBand: { direction: "untere", limit: 20, returnTo: 25 },
+    returnBand: { direction: "lower", limit: 20, returnTo: 25 },
   },
   { id: "filter-change", label: "Change filter", priority: "low" },
 ];
@@ -90,18 +90,18 @@ const alarm = (
   type: string,
   lifecycle: LifecycleState,
   raised: number,
-  rest: Pick<Alarm, "cleared" | "acknowledgedAt"> = {},
+  rest: Pick<Alarm, "resolved" | "acknowledgedAt"> = {},
 ): Alarm => ({ id, type, lifecycle, raised, ...rest });
 
 const ids = (rows: readonly AlarmRow[]) => rows.map((row) => row.id);
 
 /* All four states of one type, with times lying apart. */
 const FOUR: Alarm[] = [
-  alarm("m-au", "boiler-pressure", "standing-unacknowledged", T0 - 400_000),
-  alarm("m-aq", "boiler-pressure", "standing-acknowledged", T0 - 300_000, { acknowledgedAt: T0 - 250_000 }),
-  alarm("m-gu", "boiler-pressure", "cleared-unacknowledged", T0 - 200_000, { cleared: T0 - 150_000 }),
-  alarm("m-gq", "boiler-pressure", "cleared-acknowledged", T0 - 100_000, {
-    cleared: T0 - 50_000,
+  alarm("m-au", "boiler-pressure", "active-unacknowledged", T0 - 400_000),
+  alarm("m-aq", "boiler-pressure", "active-acknowledged", T0 - 300_000, { acknowledgedAt: T0 - 250_000 }),
+  alarm("m-gu", "boiler-pressure", "resolved-unacknowledged", T0 - 200_000, { resolved: T0 - 150_000 }),
+  alarm("m-gq", "boiler-pressure", "resolved-acknowledged", T0 - 100_000, {
+    resolved: T0 - 50_000,
     acknowledgedAt: T0 - 40_000,
   }),
 ];
@@ -112,14 +112,14 @@ describe("alarmModel – the fleeting alarm", () => {
   /* It came, it went, nobody saw it. That is the state the ordinary
      implementation loses, and that is why it stands first. */
 
-  it("stays in the model – only cleared and acknowledged leaves the list", () => {
+  it("stays in the model – only resolved and acknowledged leaves the list", () => {
     const projection = alarmModel({ alarms: FOUR, types: TYPES, asOf: T0 });
     expect(projection.filtered).toHaveLength(3);
     expect(ids(projection.filtered)).toContain("m-gu");
     expect(ids(projection.filtered)).not.toContain("m-gq");
   });
 
-  it("stands in the default order before the acknowledged one that is still standing", () => {
+  it("stands in the default order before the acknowledged one that is still active", () => {
     const projection = alarmModel({ alarms: FOUR, types: TYPES, asOf: T0 });
     // Equal priority: unacknowledged first (newest first), then acknowledged.
     expect(ids(projection.filtered)).toEqual(["m-gu", "m-au", "m-aq"]);
@@ -134,10 +134,10 @@ describe("alarmModel – the fleeting alarm", () => {
     expect(ids(projection.visible)).toEqual(["m-gu", "m-au"]);
   });
 
-  it("disappears only through a filter that expressly wants standing ones only", () => {
+  it("disappears only through a filter that expressly wants active ones only", () => {
     const projection = alarmModel(
       { alarms: FOUR, types: TYPES, asOf: T0 },
-      { filter: (row) => isStanding(row.lifecycle) },
+      { filter: (row) => isActive(row.lifecycle) },
     );
     // The caller may do that - but it is his decision, not the model's, and
     // that is exactly why the state is one field with four values.
@@ -157,32 +157,32 @@ describe("alarmModel – the fleeting alarm", () => {
 
 describe("alarmModel – the four transitions", () => {
   it("comes: a new alarm stands and is unacknowledged", () => {
-    expect(nextLifecycleState("cleared-acknowledged", "raised")).toBe("standing-unacknowledged");
+    expect(nextLifecycleState("resolved-acknowledged", "raised")).toBe("active-unacknowledged");
   });
 
-  it("acknowledged: the standing one stays standing", () => {
-    expect(nextLifecycleState("standing-unacknowledged", "acknowledged")).toBe("standing-acknowledged");
+  it("acknowledged: the active one stays active", () => {
+    expect(nextLifecycleState("active-unacknowledged", "acknowledged")).toBe("active-acknowledged");
   });
 
-  it("clears before acknowledged: the fleeting alarm comes into being", () => {
-    const cleared = nextLifecycleState("standing-unacknowledged", "cleared");
-    expect(cleared).toBe("cleared-unacknowledged");
-    expect(nextLifecycleState(cleared, "acknowledged")).toBe("cleared-acknowledged");
+  it("resolves before acknowledged: the fleeting alarm comes into being", () => {
+    const resolved = nextLifecycleState("active-unacknowledged", "resolved");
+    expect(resolved).toBe("resolved-unacknowledged");
+    expect(nextLifecycleState(resolved, "acknowledged")).toBe("resolved-acknowledged");
   });
 
-  it("acknowledged before clears: the same final position, another way there", () => {
-    const acknowledged = nextLifecycleState("standing-unacknowledged", "acknowledged");
-    expect(acknowledged).toBe("standing-acknowledged");
-    expect(nextLifecycleState(acknowledged, "cleared")).toBe("cleared-acknowledged");
+  it("acknowledged before resolves: the same final position, another way there", () => {
+    const acknowledged = nextLifecycleState("active-unacknowledged", "acknowledged");
+    expect(acknowledged).toBe("active-acknowledged");
+    expect(nextLifecycleState(acknowledged, "resolved")).toBe("resolved-acknowledged");
   });
 
   it("a renewed coming demands a new acknowledgement", () => {
-    expect(nextLifecycleState("standing-acknowledged", "raised")).toBe("standing-unacknowledged");
+    expect(nextLifecycleState("active-acknowledged", "raised")).toBe("active-unacknowledged");
   });
 
   it("repeats without consequence", () => {
-    expect(nextLifecycleState("cleared-acknowledged", "cleared")).toBe("cleared-acknowledged");
-    expect(nextLifecycleState("standing-acknowledged", "acknowledged")).toBe("standing-acknowledged");
+    expect(nextLifecycleState("resolved-acknowledged", "resolved")).toBe("resolved-acknowledged");
+    expect(nextLifecycleState("active-acknowledged", "acknowledged")).toBe("active-acknowledged");
   });
 });
 
@@ -197,10 +197,10 @@ describe("alarmModel – the default order", () => {
   };
   const OFFSET: Record<string, number> = { au: 100_000, gu: 200_000, aq: 300_000, gq: 400_000 };
   const LIFECYCLE: Record<string, LifecycleState> = {
-    au: "standing-unacknowledged",
-    gu: "cleared-unacknowledged",
-    aq: "standing-acknowledged",
-    gq: "cleared-acknowledged",
+    au: "active-unacknowledged",
+    gu: "resolved-unacknowledged",
+    aq: "active-acknowledged",
+    gq: "resolved-acknowledged",
   };
 
   // Built the wrong way round, so that the sort has something to do.
@@ -244,37 +244,37 @@ describe("alarmModel – the default order", () => {
     expect(ids(projection.filtered).at(-1)).toBe("high-au");
   });
 
-  it("counts the standing and unacknowledged ones for the screen reader", () => {
+  it("counts the active and unacknowledged ones for the screen reader", () => {
     const projection = alarmModel({ alarms: TWELVE, types: TYPES, asOf: T0 });
-    expect(projection.standingUnacknowledged).toBe(3);
+    expect(projection.activeUnacknowledged).toBe(3);
   });
 });
 
 describe("alarmModel – the return band", () => {
-  const upper = { direction: "obere", limit: 80, returnTo: 75 } as const;
-  const lower = { direction: "untere", limit: 20, returnTo: 25 } as const;
+  const upper = { direction: "upper", limit: 80, returnTo: 75 } as const;
+  const lower = { direction: "lower", limit: 20, returnTo: 25 } as const;
 
-  it("upper bound: below the bound but not back – the alarm goes on standing", () => {
+  it("upper bound: below the bound but not back – the alarm stays active", () => {
     expect(hasReturned(upper, 79)).toBe(false);
     expect(hasReturned(upper, 75.5)).toBe(false);
   });
 
-  it("upper bound: on and below the return value it clears", () => {
+  it("upper bound: on and below the return value it resolves", () => {
     expect(hasReturned(upper, 75)).toBe(true);
     expect(hasReturned(upper, 74)).toBe(true);
   });
 
-  it("lower bound: above the bound but not back – the alarm goes on standing", () => {
+  it("lower bound: above the bound but not back – the alarm stays active", () => {
     expect(hasReturned(lower, 21)).toBe(false);
     expect(hasReturned(lower, 24.5)).toBe(false);
   });
 
-  it("lower bound: on and above the return value it clears", () => {
+  it("lower bound: on and above the return value it resolves", () => {
     expect(hasReturned(lower, 25)).toBe(true);
     expect(hasReturned(lower, 26)).toBe(true);
   });
 
-  it("a value beyond the bound leaves it standing all the more", () => {
+  it("a value beyond the bound leaves it active all the more", () => {
     expect(hasReturned(upper, 81)).toBe(false);
     expect(hasReturned(lower, 19)).toBe(false);
   });
@@ -283,11 +283,11 @@ describe("alarmModel – the return band", () => {
 describe("alarmModel – frequency and chatter", () => {
   const WINDOW = 60_000;
   const FREQUENT: Alarm[] = [
-    alarm("f0", "boiler-pressure", "cleared-unacknowledged", T0 - WINDOW),
-    alarm("f1", "boiler-pressure", "cleared-unacknowledged", T0 - WINDOW + 1),
-    alarm("f2", "boiler-pressure", "standing-unacknowledged", T0),
-    alarm("f3", "boiler-pressure", "standing-unacknowledged", T0 + 1),
-    alarm("g1", "flow-temp", "standing-unacknowledged", T0 - 1),
+    alarm("f0", "boiler-pressure", "resolved-unacknowledged", T0 - WINDOW),
+    alarm("f1", "boiler-pressure", "resolved-unacknowledged", T0 - WINDOW + 1),
+    alarm("f2", "boiler-pressure", "active-unacknowledged", T0),
+    alarm("f3", "boiler-pressure", "active-unacknowledged", T0 + 1),
+    alarm("g1", "flow-temp", "active-unacknowledged", T0 - 1),
   ];
 
   it("counts per type, not per occurrence", () => {
@@ -329,7 +329,7 @@ describe("alarmModel – the flood", () => {
   const WINDOW = 90_000;
   const series = (count: number): Alarm[] =>
     Array.from({ length: count }, (_, i) =>
-      alarm(`i${i}`, "boiler-pressure", "standing-unacknowledged", T0 - 1_000 * (i + 1)),
+      alarm(`i${i}`, "boiler-pressure", "active-unacknowledged", T0 - 1_000 * (i + 1)),
     );
 
   it("detects no flood one alarm below the threshold", () => {
@@ -351,8 +351,8 @@ describe("alarmModel – the flood", () => {
   it("counts only what lies within the window", () => {
     const spread = [
       ...series(3),
-      alarm("old", "boiler-pressure", "standing-unacknowledged", T0 - WINDOW),
-      alarm("barely", "boiler-pressure", "standing-unacknowledged", T0 - WINDOW + 1),
+      alarm("old", "boiler-pressure", "active-unacknowledged", T0 - WINDOW),
+      alarm("barely", "boiler-pressure", "active-unacknowledged", T0 - WINDOW + 1),
     ];
     expect(detectFlood(spread, { windowMs: WINDOW, atLeast: 4 }, T0)?.count).toBe(4);
     expect(detectFlood(spread, { windowMs: WINDOW, atLeast: 5 }, T0)).toBeNull();
@@ -389,16 +389,16 @@ describe("alarmModel – age and duration", () => {
     expect(later.filtered.find((row) => row.id === "m-au")?.age).toBe(460_000);
   });
 
-  it("measures the standing time of a cleared alarm up to its clearing", () => {
+  it("measures the active time of a resolved alarm up to its resolving", () => {
     const projection = alarmModel({
       alarms: FOUR,
       types: TYPES,
       asOf: T0 + 60_000,
       keepDone: true,
     });
-    // m-gu: raised T0-200_000, cleared T0-150_000.
+    // m-gu: raised T0-200_000, resolved T0-150_000.
     expect(projection.filtered.find((row) => row.id === "m-gu")?.duration).toBe(50_000);
-    // The standing one measures up to the as-of time.
+    // The active one measures up to the as-of time.
     expect(projection.filtered.find((row) => row.id === "m-au")?.duration).toBe(460_000);
   });
 });
@@ -417,7 +417,7 @@ describe("alarmModel – acknowledging", () => {
 
   it("leads the fleeting alarm into the final position and out of the list", () => {
     const after = acknowledge(FOUR, ["m-gu"], T0).alarms;
-    expect(after.find((m) => m.id === "m-gu")?.lifecycle).toBe("cleared-acknowledged");
+    expect(after.find((m) => m.id === "m-gu")?.lifecycle).toBe("resolved-acknowledged");
     const projection = alarmModel({ alarms: after, types: TYPES, asOf: T0 });
     expect(ids(projection.filtered)).toEqual(["m-au", "m-aq"]);
   });
@@ -425,7 +425,7 @@ describe("alarmModel – acknowledging", () => {
   it("records the moment of the acknowledgement and leaves the uninvolved untouched", () => {
     const after = acknowledge(FOUR, ["m-au"], T0).alarms;
     expect(after.find((m) => m.id === "m-au")?.acknowledgedAt).toBe(T0);
-    expect(after.find((m) => m.id === "m-gu")?.lifecycle).toBe("cleared-unacknowledged");
+    expect(after.find((m) => m.id === "m-gu")?.lifecycle).toBe("resolved-unacknowledged");
   });
 
   it("passes over unknown ids instead of choking on them", () => {
@@ -435,7 +435,7 @@ describe("alarmModel – acknowledging", () => {
 
 describe("alarmModel – what must not disappear", () => {
   it("keeps an alarm whose type is unknown and classifies it high", () => {
-    const foreign = [alarm("x1", "not-in-catalogue", "standing-unacknowledged", T0 - 1_000)];
+    const foreign = [alarm("x1", "not-in-catalogue", "active-unacknowledged", T0 - 1_000)];
     const projection = alarmModel({ alarms: [...FOUR, ...foreign], types: TYPES, asOf: T0 });
     const row = projection.filtered.find((row) => row.id === "x1");
     expect(row).toBeDefined();
@@ -452,7 +452,7 @@ describe("alarmModel – what must not disappear", () => {
     expect(projection.filtered).toHaveLength(3);
     expect(projection.visible).toHaveLength(1);
     expect(projection.pageCount).toBe(3);
-    expect(projection.standingUnacknowledged).toBe(1);
+    expect(projection.activeUnacknowledged).toBe(1);
   });
 });
 
@@ -465,7 +465,7 @@ describe("A flood with very many alarms", () => {
     const alarms = Array.from({ length: 200_000 }, (_, i) => ({
       id: `m${i}`,
       type: "a",
-      lifecycle: "standing-unacknowledged" as const,
+      lifecycle: "active-unacknowledged" as const,
       raised: asOf - i,
     }));
     const flood = detectFlood(alarms, { windowMs: 600_000, atLeast: 10 }, asOf);
