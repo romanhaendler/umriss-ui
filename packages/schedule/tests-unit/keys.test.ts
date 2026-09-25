@@ -203,14 +203,16 @@ describe("editing by key proposes what the drag would", () => {
     expect(keyed.intents).toEqual(dragged.intents);
     expect(keyed.intents).toEqual([{ kind: "stretch", subtask: "p2", from: 4 * HOUR, to: 6 * HOUR }]);
     /* One hour long, a step of one hour: shorter it cannot get. */
-    expect(keyed.scene.key(key("ArrowLeft", { altKey: true, shiftKey: true }))).toBe(false);
+    keyed.scene.key(key("ArrowLeft", { altKey: true, shiftKey: true }));
+    expect(keyed.intents).toHaveLength(1);
   });
 
   it("proposes nothing the caller does not handle", () => {
     const { scene, intents } = sceneWith({ intents: [] });
     onP2(scene);
-    expect(scene.key(key("ArrowRight", { altKey: true }))).toBe(false);
-    expect(scene.key(key("ArrowRight", { altKey: true, shiftKey: true }))).toBe(false);
+    /* Taken all the same: Alt+←/→ is the browser's Back and Forward. */
+    expect(scene.key(key("ArrowRight", { altKey: true }))).toBe(true);
+    expect(scene.key(key("ArrowRight", { altKey: true, shiftKey: true }))).toBe(true);
     expect(intents).toEqual([]);
   });
 

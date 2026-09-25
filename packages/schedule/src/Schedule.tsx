@@ -611,6 +611,7 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
         <VisuallyHidden aria-live="polite">
           {spoken !== null && (
             <ScheduleReadout
+              key={spoken.count}
               target={spoken.target}
               lane={spoken.lane === null ? null : (scene.data.lanes.find((lane) => lane.id === spoken.lane)?.label ?? spoken.lane)}
             />

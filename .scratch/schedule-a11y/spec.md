@@ -66,5 +66,6 @@ dark - to be taken or overturned in ticket 06.
 **S2, the visible window (ticket 01).** The walk covers the whole row, and the
 view pans to the active subtask; ADR-0030 kept the charts inside the visible
 domain because they pan only where the caller owns the domain. The schedule
-always pans by gesture, so the keys do too. S1 and S5 follow ADR-0030, so no
-new ADR (S7).
+always pans by gesture, so the keys do too. S7 asked for an ADR only where S1
+or S5 diverge, and they do not; the review found the departure from ADR-0030's
+consequences worth recording all the same: ADR-0033.

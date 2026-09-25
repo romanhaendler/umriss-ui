@@ -26,7 +26,7 @@ moves from here under the rule above.
   stands online as <https://romanhaendler.github.io/umriss-ui/schedule/llms-full.txt>,
   with an index of the pages beside it (`llms.txt`).
 - **The schedule by keyboard and screen reader** (schedule-a11y, ADR-0030's
-  pattern). The plot is one tab stop (`role="application"`, role description
+  pattern; ADR-0033 where it departs from it). The plot is one tab stop (`role="application"`, role description
   "schedule", the schedule's `ariaLabel`) with an **Active subtask**: ←/→ walk
   a lane in time order, ↑/↓ go to the nearest subtask on the lane above or
   below (a folded group is one row), Home/End to the lane's first and last,
