@@ -346,7 +346,7 @@ what is left of the 8 ms at a million. The mixed set keeps its bar, which is
 never thinned - a rectangle per point - and that is most of its 57 ms.
 Materialisation does not change: every accessor still runs once per point.
 
-The second example on the benchmark page, a week of a kiln at one reading a
+The second example on the benchmark page, a week of a service at one reading a
 second (2 × 604,800 points, zoomable), drew the whole week in 8 to 23 ms and
 a zoomed three quarters of an hour in 0.6 ms.
 
