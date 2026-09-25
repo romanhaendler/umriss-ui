@@ -102,7 +102,7 @@ export type Active = { readonly kind: "subtask"; readonly id: string } | { reado
 
     Of several dependencies leaving one subtask, the first the caller listed is
     taken. ponytail: a split to two successors is walked one way only; a key to
-    cycle between them is the upgrade if a plant ever splits a part. */
+    cycle between them is the upgrade if an application ever splits a step. */
 export function alongDependency(
   dependencies: readonly Dependency[],
   subtasks: ReadonlyMap<string, Subtask>,

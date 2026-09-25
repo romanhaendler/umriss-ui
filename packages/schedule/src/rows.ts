@@ -1,7 +1,7 @@
 /* The rows of a plot: a tree of lane groups and a set of folded ones, turned
    into what is actually laid out from top to bottom (ADR-0025).
 
-   ROW is this module's word. A **Lane** is a machine; a row is what the plot
+   ROW is this module's word. A **Lane** is a resource; a row is what the plot
    lays out - a lane's row, an open group's slim head, or the one row a folded
    group becomes. The distinction is the whole reason the word exists here: "a
    lane is not a row" is a standing sentence of this component, and a layout

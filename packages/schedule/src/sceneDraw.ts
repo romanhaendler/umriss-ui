@@ -307,8 +307,8 @@ function drawGrid(ctx: CanvasRenderingContext2D, input: DrawInput, viewport: Vie
     ctx.lineTo(width, y);
   }
   /* Inside a folded group, a hairline where one inner group ends and the next
-     begins: a miniature is the plant at a smaller scale, and the structure is
-     part of the plant. */
+     begins: a miniature is the plan at a smaller scale, and the structure is
+     part of the plan. */
   const strips = [...viewport.rows.slots.values()].filter((slot) => slot.miniature).sort((a, b) => a.top - b.top);
   strips.forEach((slot, i) => {
     const next = strips[i + 1];
@@ -387,8 +387,8 @@ function drawStrip(ctx: CanvasRenderingContext2D, input: DrawInput, box: Subtask
 
     Muted work is the task colour mixed half into the surface, OPAQUE. Opaque,
     because transparency is the lead-in's channel; and it carries no outline,
-    because an outline is the lead-in's edge. Another shift's work and one
-    shift's preparation can then not be confused in either direction - the
+    because an outline is the lead-in's edge. Another team's work and one
+    team's preparation can then not be confused in either direction - the
     distinction Roman objected to once, settled in the material. */
 export function barFace(
   look: ResolvedAppearance,

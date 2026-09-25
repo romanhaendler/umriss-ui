@@ -853,7 +853,7 @@ export class SceneGestures {
 
   /** Snapped - and, where the raster lands in time the calendar removes, moved
       on to the seam, where time counts again. An intent never asks for a time
-      the plant does not run. */
+      nobody works. */
   private snapInside(time: number, step: SnapRaster): number {
     const snapped = snapTime(time, step);
     const calendar = calendarFrom(this.host.view.options.calendar);

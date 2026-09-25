@@ -1,49 +1,38 @@
 import { Lane, LaneGroup, Schedule, Subtasks } from "../../../src";
 import type { Subtask, Task } from "../../../src";
 
-export const title = "A group of lanes";
+export const title = "Group lanes under a head";
 
-/* `<LaneGroup>` puts structure over the lanes. It is not a lane itself:
-   nothing sits on it, no finding is reported for it, no intent names it. A
-   subtask still names a machine, and `canMoveTo` is still asked about a
-   machine - a group only says which machines belong together.
+export const lead = "Wrap lanes in a `LaneGroup`: a slim head names the team and counts its lanes, and its chevron folds it.";
 
-   Declared by composition, so a group reads in JSX as it reads in the plant:
-   the lanes inside the tags are the lanes in the hall. A lane never names its
-   group; the group gives its id downwards, which is why moving a machine
-   between groups is moving a line of JSX.
-
-   An open group shows a slim head above its lanes, with its name and how many
-   lanes it holds. The chevron folds it - that is the next example.
-
-   The lanes keep the order they were DECLARED in, whatever group they are in.
-   That is the order a reader wrote and the only one they can predict. */
+/* Declared by composition: a lane never names its group, so moving a person
+   to another team is moving a line of JSX. */
 
 const at = (hours: number, minutes = 0) => new Date(2026, 2, 17, hours, minutes).getTime();
 const min = (n: number) => n * 60_000;
 
-const TASKS: Task[] = [
-  { id: "a-2041", name: "A-2041 Housing", color: "light-dark(#2563eb, #6b9bff)" },
-  { id: "a-2043", name: "A-2043 Bracket", color: "light-dark(#c2410c, #f08a52)" },
+const PROJECTS: Task[] = [
+  { id: "portal", name: "Member portal", color: "light-dark(#7c3aed, #a98bfa)" },
+  { id: "shop", name: "Online shop relaunch", color: "light-dark(#2563eb, #6b9bff)" },
 ];
 
-const STEPS: Subtask[] = [
-  { id: "a-2041-1", task: "a-2041", lane: "press-1", from: at(7), to: at(9), leadIn: min(30) },
-  { id: "a-2043-1", task: "a-2043", lane: "press-2", from: at(8), to: at(10, 30), leadOut: min(15) },
-  { id: "a-2041-2", task: "a-2041", lane: "weld", from: at(10), to: at(12) },
-  { id: "a-2043-2", task: "a-2043", lane: "paint", from: at(11, 30), to: at(14) },
+const WORK: Subtask[] = [
+  { id: "w-102", task: "portal", lane: "arjun", from: at(7), to: at(9), leadIn: min(30) },
+  { id: "w-104", task: "shop", lane: "chloe", from: at(8), to: at(10, 30), leadOut: min(15) },
+  { id: "w-106", task: "portal", lane: "noah", from: at(10), to: at(12) },
+  { id: "w-108", task: "shop", lane: "eva", from: at(11, 30), to: at(14) },
 ];
 
 export default function AGroup() {
   return (
-    <Schedule ariaLabel="Two presses in a hall, and two stations outside it" initialDomain={[at(6), at(15)]} height={240}>
-      <LaneGroup id="presses" label="Press shop">
-        <Lane id="press-1" label="Press 1" />
-        <Lane id="press-2" label="Press 2" />
+    <Schedule ariaLabel="Two developers in a team, a designer and a tester outside it" initialDomain={[at(6), at(15)]} height={240}>
+      <LaneGroup id="developers" label="Developers">
+        <Lane id="arjun" label="Arjun Mehta" />
+        <Lane id="chloe" label="Chloe Durand" />
       </LaneGroup>
-      <Lane id="weld" label="Welding bay" />
-      <Lane id="paint" label="Paint shop" />
-      <Subtasks data={STEPS} tasks={TASKS} />
+      <Lane id="noah" label="Noah Fischer" />
+      <Lane id="eva" label="Eva Novak" />
+      <Subtasks data={WORK} tasks={PROJECTS} />
     </Schedule>
   );
 }
