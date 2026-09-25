@@ -1,29 +1,17 @@
 import { useState } from "react";
 import { Button, CommandPalette, Stack, Text } from "../../../src";
 
-export const title = "Commands instead of places";
-
-/* The same component jumps to pages in the shell of this demo (Cmd-K) and runs
-   something here. That is exactly what keeps "places" and "commands" under one
-   term: what happens on choosing is the caller's decision.
-
-   It searches by subsequence instead of by substring: `cf` finds "Charge
-   freigeben". The matched characters stand in the accent, so that an unexpected
-   find looks justified.
-
-   `restingItems` fills the resting state - here all seven, because seven
-   commands without a term would otherwise stand there as an empty window. The
-   shell does it the other way round: all pages in the resting state would be
-   exactly the full list this component abolished. */
+export const title = "Run a command";
+export const lead = "Typing finds candidates by subsequence – “ack” finds “Acknowledge the alert”; `onChoose` reports the id and you decide what happens.";
 
 const COMMANDS = [
-  { id: "create-batch", label: "Create a batch", group: "Commands" },
-  { id: "release-batch", label: "Release a batch", group: "Commands" },
-  { id: "close-shift", label: "Close the shift", group: "Commands" },
-  { id: "line-1", label: "Line 1 - filling", group: "Plant" },
-  { id: "line-3", label: "Line 3 - labelling", group: "Plant" },
-  { id: "daily-report", label: "Open the daily report", group: "Reports" },
-  { id: "batch-log", label: "Export the batch log", group: "Reports" },
+  { id: "ack", label: "Acknowledge the alert", group: "Incident INC-1048" },
+  { id: "page", label: "Page the secondary on call", group: "Incident INC-1048" },
+  { id: "status", label: "Post a status update", group: "Incident INC-1048" },
+  { id: "resolve", label: "Resolve the incident", group: "Incident INC-1048" },
+  { id: "checkout", label: "Open Checkout", group: "Services" },
+  { id: "billing", label: "Open Billing", group: "Services" },
+  { id: "rota", label: "Show this week's on-call rota", group: "People" },
 ];
 
 export default function Commands() {

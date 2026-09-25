@@ -134,8 +134,8 @@ for (const [key, place] of [
    the drawer is its edge and the scrim over the page behind; after the
    entrance has come to rest, for the reason the dock's pictures give. */
 for (const [example, button] of [
-  ["beside-a-process-picture", "Labeller L1"],
-  ["left-and-wider", "Filter the alarms"],
+  ["beside-a-service-list", "Checkout"],
+  ["left-and-wider", "Filter the alerts"],
 ] as const) {
   test(`The drawer open: ${example}`, async ({ page }, testInfo) => {
     await openExample(page, "drawer", example);

@@ -22,13 +22,6 @@ import { checkPlantWords } from "../checks/plantWords";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 
 const PENDING: readonly string[] = [
-  "packages/core/demo/examples/CommandPalette/01-commands.tsx",
-  "packages/core/demo/examples/Drawer/03-beside-a-process-picture.tsx",
-  "packages/core/demo/examples/ProgressBar/01-how-far.tsx",
-  "packages/core/demo/examples/ProgressBar/03-a-batch-in-steps.tsx",
-  "packages/core/demo/examples/Stat/01-value-against-limits.tsx",
-  "packages/core/demo/examples/Stat/02-the-fourth-outcome.tsx",
-  "packages/core/demo/examples/Stat/04-freshness.tsx",
 ];
 const PENDING_QUARTER: readonly string[] = [
 ];
