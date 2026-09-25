@@ -17,14 +17,15 @@
    the column filters the hook holds itself, in the order in which they were
    set. */
 
-import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useFormats } from "@umriss-ui/core";
 import { useCompanion } from "./model/companion";
 import { MOST_LEVELS, livePaths } from "./model/grouping";
 import type { RowGroup } from "./model/grouping";
 import { pinsForView, withPin } from "./model/pinning";
 import type { Pin, Pins } from "./model/pinning";
-import type { TableView } from "./model/view";
+import { manualViewKey } from "./model/view";
+import type { ManualView, TableView } from "./model/view";
 import type { Column } from "./model/tableModel";
 import { Registry } from "./registry";
 import type { ColumnEntry } from "./registry";
@@ -175,6 +176,26 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
 
   const [start] = useState<TableView | undefined>(() => options.initialView);
 
+  /* Manual mode (table-server-mode, M1): the rows are one page of a server's.
+     What the table would otherwise do over all rows - the pre-filter, the
+     grouping, virtualisation - it would do over one page and call that the
+     whole, so it is passed over, and said so once in development. */
+  const manual = options.manual === true;
+  const rowCount = options.manual ? options.rowCount : 0;
+  const manualInput = useMemo(() => (manual ? { rowCount } : undefined), [manual, rowCount]);
+  registry.setManual(manual);
+  if (manual) {
+    if (options.preFilter ?? options.filter) {
+      warnOnce("manual-prefilter", "`preFilter` is passed over in manual mode: the server decides which rows the table has.");
+    }
+    if (options.virtual) {
+      warnOnce("manual-virtual", "`virtual` is passed over in manual mode: the table pages instead.");
+    }
+    if (options.defaultGrouping !== undefined || start?.grouping?.length) {
+      warnOnce("manual-grouping", "A grouping is passed over in manual mode: the groups would be the page's, not the server's.");
+    }
+  }
+
   /* The conditions of the view hold already in the first render: the table
      never appears unfiltered only to jump afterwards. */
   const [conditions, setConditions] = useState<ConditionList>(() => Object.entries(start?.conditions ?? {}));
@@ -184,7 +205,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
      it reacts to. It runs before search and conditions, and everything further
      calculates with what it admits. */
   const preFilter = (options.preFilter ?? options.filter) as ((row: unknown) => boolean) | undefined;
-  const admitted = useAdmitted(rowsUnknown, preFilter);
+  const admitted = useAdmitted(rowsUnknown, manual ? undefined : preFilter);
 
   /* The grouping is held here, not in the companion: which ids it may carry
      only the registry knows. An id nothing groupable carries falls out on
@@ -198,7 +219,11 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
      declared only the registry knows. */
   const [pinsChosen, setPinsChosen] = useState<Pins | null>(() => (start?.pinned ? { ...start.pinned } : null));
   const registered = registry.orderedColumns().length + registry.groupKeys.entries.size > 0;
-  const groupingNow = registered ? registry.effectiveGrouping(groupingState, rowsUnknown) : groupingState.slice(0, MOST_LEVELS);
+  const groupingNow = manual
+    ? []
+    : registered
+      ? registry.effectiveGrouping(groupingState, rowsUnknown)
+      : groupingState.slice(0, MOST_LEVELS);
   const groupingPrefix = groupingNow.join("|");
   const foldedSet = useMemo(() => new Set(foldedState), [foldedState]);
   const model = groupingNow.length ? registry.groupingModel(groupingNow, rowsUnknown) : null;
@@ -215,8 +240,9 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     defaultSort: options.defaultSort,
     filter,
     initialView: start,
-    virtual: options.virtual,
+    virtual: manual ? undefined : options.virtual,
     grouping,
+    manual: manualInput,
   });
 
   /* Changing a condition resets to page one, like another search. Only what
@@ -286,7 +312,9 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
 
   /* The grouping's default is the application's; the view carries a deviation
      only, and of the folds only those whose group still occurs. */
-  const defaultGrouping = registered
+  const defaultGrouping = manual
+    ? []
+    : registered
     ? registry.effectiveGrouping(listOf(options.defaultGrouping), rowsUnknown)
     : listOf(options.defaultGrouping);
   const folded = b.groups ? livePaths(b.groups, foldedState) : registered ? [] : [...foldedState];
@@ -312,7 +340,50 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
   };
 
   /* Without a pagination bar there are no pages (registry.ts). */
-  const paginates = registry.paginates() || options.virtual !== undefined;
+  const virtual = !manual && options.virtual !== undefined;
+  const paginates = registry.paginates() || virtual;
+  const selection = options.selection ?? b.selection;
+
+  /* The server's answer to the view (M1): reported after the commit, once when
+     the table first stands and once per change of what decides the rows - a
+     new width or a hidden column fetches nothing. The key is compared, not the
+     object: a second render with the same view (Strict Mode, a column
+     registering) must not fetch twice. */
+  const manualView: ManualView = {
+    ...groupedView,
+    search: b.search,
+    conditions: Object.fromEntries(effective),
+    sort,
+    page: b.page,
+    pageSize: b.pageSize,
+  };
+  const reportKey = manual ? manualViewKey(manualView) : "";
+  const reported = useRef<string | null>(null);
+  useEffect(() => {
+    if (!manual || reported.current === reportKey) return;
+    reported.current = reportKey;
+    options.onViewChange?.(manualView);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per change of what decides the rows, with that render's view and handler
+  }, [reportKey]);
+
+  /* A bulk action receives rows, and in manual mode a selected row may stand
+     on a page the table no longer holds (M5). It keeps the rows it has seen
+     for as long as they are selected, as they were when last seen - never
+     more than the selection and the page. */
+  const [seenRows] = useState(() => new Map<string, unknown>());
+  let selectedRows: readonly unknown[] | undefined;
+  if (manual) {
+    const onPage = new Set<string>();
+    for (const row of rowsUnknown) {
+      const key = rowKey(row);
+      onPage.add(key);
+      seenRows.set(key, row);
+    }
+    for (const key of [...seenRows.keys()]) {
+      if (!onPage.has(key) && !selection.isSelected(key)) seenRows.delete(key);
+    }
+    selectedRows = [...selection.selected].filter((key) => seenRows.has(key)).map((key) => seenRows.get(key));
+  }
 
   const snapshot: TableSnapshot<Z> = {
     rows,
@@ -339,7 +410,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     toggleRow: b.toggleRow,
     filter: Object.fromEntries(effective),
     setFilter: setFilter as SetFilter<Z>,
-    selection: options.selection ?? b.selection,
+    selection,
     view: groupedView,
     grouping: groupingNow,
     setGrouping,
@@ -354,7 +425,9 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
       setFoldedState([]);
     },
     asCsv: () => csvOf(registry),
-    virtual: options.virtual !== undefined,
+    virtual,
+    rowCount: manual ? rowCount : b.filtered.length,
+    manual,
   };
 
   // Idempotent for the same snapshot (registry.ts, guarantee 1).
@@ -370,6 +443,8 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     rowKey,
     formats,
     pins: pinsChosen,
+    filterOptions: manual ? options.filterOptions : undefined,
+    selectedRows,
   });
 
   return { ...snapshot, ...parts } as unknown as Table<Z>;

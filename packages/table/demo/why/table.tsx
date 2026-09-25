@@ -50,6 +50,18 @@ export default function WhyTable() {
         action from the table toolbar acts only on what lies inside.
       </p>
 
+      <h3>Over a server, the table does less and says so</h3>
+      <p>
+        In manual mode the table holds one page, and everything it would otherwise do over the
+        filtered set it would do over that page and call it the whole. So it sorts, filters and
+        pages nothing; it reports the view - with the sort, page and page size it would otherwise
+        leave out as defaults, because a server has none of the table's - and shows what comes
+        back. What acts on the filtered set acts on the page and names it: “Select all on this
+        page”, “Export page”. What would misstate it is not there: a footer summing ten rows under
+        a million, groups made of one page. A list filter cannot count values it does not hold, so
+        the application names them.
+      </p>
+
       <h3>Page or virtualise, never both</h3>
       <p>
         A page number beside a scrollbar would be a control that contradicts itself. Virtualisation

@@ -10,6 +10,7 @@ import { useId, useMemo, useRef, useState } from "react";
 import type { RefObject } from "react";
 import { Button, Popover, Tag, TagGroup, useFormats, useWording } from "@umriss-ui/core";
 import { cx } from "./cx";
+import { warnOnce } from "./dev";
 import type { HookSnapshot, Registry, ColumnEntry } from "./registry";
 import { description, filterOf, isBuiltIn, occurringValues } from "./columnFilter";
 import styles from "./Table.module.css";
@@ -42,8 +43,22 @@ export function FilterPanel({
   /* The values of the admitted rows - not of the filtered ones, otherwise a
      choice would vanish the moment one makes it, and not of all of them,
      otherwise the filter would betray what the pre-filter hides (D5). */
-  const { values, absent } = useMemo(() => occurringValues(hook.admitted, entry.read, formats), [hook.admitted, entry, formats]);
+  const { filterOptions } = hook;
+  const offered = filterOptions?.(id);
+  const { values, absent } = useMemo(
+    () => (offered ? occurringValues(offered, (value) => value, formats) : occurringValues(hook.admitted, entry.read, formats)),
+    [offered, hook.admitted, entry, formats],
+  );
   const filter = filterOf(entry.spec.filter);
+  /* In manual mode the table holds one page: the values it could offer are
+     the page's, and a value that occurs only on page nine would not be offered
+     (M4). */
+  if (hook.publicSnapshot.manual && !offered && entry.spec.filter === "list") {
+    warnOnce(
+      `manual-filter-options:${id}`,
+      `The list filter of "${id}" offers only the values of the page in manual mode; \`filterOptions\` gives it the server's.`,
+    );
+  }
   if (!filter) return null;
 
   const snapshot = hook.publicSnapshot;

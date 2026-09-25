@@ -111,6 +111,10 @@ stylesheets by hand.
 * **For producing plants**: `VerdictColumn` reads a measured value against a
   limit set, and `AlarmList` shows alarms with a lifecycle — standing or
   cleared, acknowledged or not. The library generates no alarms (ADR-0009).
+* **A million rows on a server**: in manual mode the rows are one page a server
+  answered; the table reports the view - search, conditions, sort, page -
+  once per change and shows placeholders over the previous page while the
+  next is on its way.
 * **Twenty thousand rows** where it has to be: virtualisation, sticky parts,
   columns pinned to either side and column widths that survive a view being
   restored.

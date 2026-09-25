@@ -25,10 +25,29 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 ## Unreleased
 
 Needs the `@umriss-ui/core` that carries the availability wording, the
-column menu's pin keys and `editCell` (its own "Unreleased" section).
+column menu's pin keys, `editCell`, `selectAllOnPage` and `exportPageLabel`
+(its own "Unreleased" section).
 
 ### Added
 
+- **Manual mode, for data the browser does not hold**: `useTable(page, {
+  manual: true, rowCount, onViewChange })`. The rows are the page a server
+  answered and `rowCount` its filtered set; the table searches, filters,
+  sorts and pages nothing of its own. `onViewChange(view)` receives a
+  `ManualView` - search, conditions, sort, page and page size, always
+  present - once when the table first stands and once per change of those
+  five (a width or a hidden column fetches nothing). `loading` then lays as
+  many placeholders as the page had rows over it, in its rows' height and its
+  columns' widths, with `aria-busy`. A list filter offers what
+  `filterOptions(column)` names (with a warning in development where it
+  names nothing). Keys selected on another page stay selected, and a bulk
+  action receives every selected row the table has seen; "select all" selects
+  the page and says so ("Select all on this page"). The export writes the
+  page, and its button says so ("Export page"). There is no grouping, no
+  footer, no pre-filter and no virtualisation in manual mode - each would be
+  the page's and not the server's; a grouping asked for is passed over with
+  a warning in development. `TableSnapshot` gains `rowCount` and `manual`.
+  Without `manual` nothing changes.
 - **Grid mode, on request** (ADR-0034): `<Table grid>` makes the table
   `role="grid"` (`treegrid` when grouped) and one tab stop with an **Active
   cell** - the arrows walk the cells of the head, the rows, group headers,
