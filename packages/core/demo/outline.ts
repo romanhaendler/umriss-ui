@@ -41,11 +41,54 @@ export const OUTLINE: readonly Rubric[] = [
     sentence: "What an application sets up once, before the first component.",
     pages: [
       {
+        id: "installation",
+        name: "Installation",
+        sentence: "What an application does once before its first component: install the package, choose the fonts and let light and dark follow the page. The styles load themselves, and no provider is needed.",
+        about: [
+          "Install with `pnpm add @umriss-ui/core` (React 18 or newer). Importing a component brings its stylesheet along; `@umriss-ui/core/styles.css` stays exported for setups that link stylesheets by hand. The styles touch nothing outside the components: no rule on `html`, `body` or `*` (ADR-0021).",
+          "Every token is a `--u-…` custom property in the cascade layer `umriss.tokens`, so CSS written outside a layer overrides it. The fonts are the application's: the tokens name Geist first and fall back to the system fonts, and nothing is loaded. For Geist, install `@fontsource/geist-sans` (400, 500, 600) and `@fontsource/geist-mono` (400).",
+          "Light and dark follow the application's `color-scheme`, since every two-valued token is written `light-dark(…)`. Nothing set means light; one part of a page can be dark on its own.",
+        ],
+        limits: [
+          "No theme object and no theme switch: the mode is the page's `color-scheme` (ADR-0021).",
+          "No font is loaded or bundled.",
+          "Chrome 123, Firefox 120 and Safari 17.5 or newer; an older browser discards the tokens and shows the components unstyled.",
+        ],
+        types: [],
+        exports: [],
+      },
+      {
         id: "umrissprovider",
         name: "UmrissProvider",
-        sentence: "One place for density, portal target, toasts and language - and it stays optional, because every component already works without it.",
-        types: ["UmrissProviderProps", "LanguageOptions"],
-        exports: ["UmrissProvider", "LanguageProvider", "useWording", "useFormats"],
+        sentence: "Sets once, at the root, what an application shares: the density of its tables, where overlays open, how long toasts stay and the language. It is optional; every component works the same without it.",
+        about: [
+          "It holds these four settings and nothing else: no theme (see [Installation](#/installation)) and no defaults for a component's own props. It writes nothing onto the document.",
+          "Keep the objects you pass outside the component or memoised: a new object on every render is a new setting on every render.",
+        ],
+        alternatives: [
+          { when: "Only the wording or the formats of one section differ", use: "language" },
+        ],
+        limits: ["No theme and no default variants for components: a component is configured by its own props."],
+        types: ["UmrissProviderProps"],
+        exports: ["UmrissProvider"],
+      },
+      {
+        id: "language",
+        name: "Language",
+        sentence: "The words and the number and date notation the components write themselves: English by default, German in one import, and any single entry your own. Wording is a directory of named entries, not a translation call (also called i18n or localisation).",
+        about: [
+          "English needs nothing (ADR-0018). German ships as the subpath `@umriss-ui/core/wording/de` with `GERMAN_WORDING` and `GERMAN_FORMATS`, the two halves of a language; take both in one import (ADR-0019, ADR-0024).",
+          "Pass them to the `language` of [UmrissProvider](#/umrissprovider) for the application, or to `LanguageProvider` for one section. Both merge entry by entry: what you leave out keeps its default. Every wording is typed `Wording`, so a whole language of your own misses no entry without a compile error.",
+        ],
+        alternatives: [
+          { when: "The application also sets a density, a portal target or toasts", use: "umrissprovider" },
+        ],
+        limits: [
+          "Two languages ship; a third is a `Wording` object of your own. No right-to-left (ADR-0032).",
+          "It holds only what the components say themselves; your labels, titles and data are yours to translate.",
+        ],
+        types: ["LanguageOptions"],
+        exports: ["LanguageProvider", "useWording", "useFormats"],
       },
     ],
   },
