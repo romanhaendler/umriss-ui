@@ -127,6 +127,10 @@ commit.
 
 ### Changed
 
+- **`scheduleKeyHelp` names T beside the brackets**, in English and German:
+  `@umriss-ui/schedule` takes `t` and Shift+T as equals of `]` and `[`, since
+  a German keyboard reaches the brackets only with AltGr. A wording of one's
+  own keeps its text until it says so too.
 - **Two new keys in `Wording`: a table over a server** (for
   `@umriss-ui/table`'s manual mode), in English and German:
   `selectAllOnPage` ("Select all on this page") and `exportPageLabel`
