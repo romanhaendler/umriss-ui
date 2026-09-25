@@ -30,9 +30,9 @@ export type { Rubric, Page } from "@umriss-ui/demo/outline";
 
 export const OUTLINE: readonly Rubric[] = [
   {
-    id: "drawing",
-    name: "Drawing",
-    sentence: "What the schedule shows: lanes over time, the work on them, and everything a bar says besides its colour.",
+    id: "plan",
+    name: "Plan",
+    sentence: "What the schedule shows: work on lanes, and everything a bar says besides its colour.",
     pages: [
       {
         id: "schedule",
@@ -54,34 +54,6 @@ export const OUTLINE: readonly Rubric[] = [
         sentence: "Halls, lines and machine groups over the lanes - to any depth, and folded into one row when a planner wants the part they work on.",
         types: ["LaneGroupProps"],
         exports: ["LaneGroup", "Lane"],
-      },
-      {
-        id: "time-axis",
-        name: "Time axis and calendar",
-        sentence: "The two bands, and the working calendar that cuts the hours the plant does not run out of the axis.",
-        types: [],
-        exports: ["Schedule"],
-      },
-      {
-        id: "pan-and-zoom",
-        name: "Pan and zoom",
-        sentence: "Dragging the background, the wheel, Ctrl and a pinch: what moves the view, and what the view never changes.",
-        types: [],
-        exports: ["Schedule"],
-      },
-      {
-        id: "now-line",
-        name: "Now line",
-        sentence: "A line across the lanes at the present moment, following the clock or fixed where a replay needs it.",
-        types: [],
-        exports: ["Schedule"],
-      },
-      {
-        id: "blocked-time",
-        name: "Blocked time",
-        sentence: "Leave, maintenance and other time a lane is not available: hatched behind the work, a finding where work covers it, and closed to a drag.",
-        types: ["BlockedTimesProps", "BlockedTime"],
-        exports: ["BlockedTimes", "findings"],
       },
       {
         id: "subtasks",
@@ -124,6 +96,41 @@ export const OUTLINE: readonly Rubric[] = [
         sentence: "How a dependency is drawn between its two ends: a curve that leaves forwards, a straight line, or orthogonal segments.",
         types: [],
         exports: ["Dependencies"],
+      },
+    ],
+  },
+  {
+    id: "time",
+    name: "Time",
+    sentence: "The axis the work stands on: the calendar, blocked time, the now line, and moving through it.",
+    pages: [
+      {
+        id: "time-axis",
+        name: "Time axis and calendar",
+        sentence: "The two bands, and the working calendar that cuts the hours the plant does not run out of the axis.",
+        types: [],
+        exports: ["Schedule"],
+      },
+      {
+        id: "blocked-time",
+        name: "Blocked time",
+        sentence: "Leave, maintenance and other time a lane is not available: hatched behind the work, a finding where work covers it, and closed to a drag.",
+        types: ["BlockedTimesProps", "BlockedTime"],
+        exports: ["BlockedTimes", "findings"],
+      },
+      {
+        id: "now-line",
+        name: "Now line",
+        sentence: "A line across the lanes at the present moment, following the clock or fixed where a replay needs it.",
+        types: [],
+        exports: ["Schedule"],
+      },
+      {
+        id: "pan-and-zoom",
+        name: "Pan and zoom",
+        sentence: "Dragging the background, the wheel, Ctrl and a pinch: what moves the view, and what the view never changes.",
+        types: [],
+        exports: ["Schedule"],
       },
     ],
   },
