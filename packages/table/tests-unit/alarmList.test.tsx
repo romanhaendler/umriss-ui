@@ -4,14 +4,14 @@
    nothing else.
 
    The case that stands first is the reason for the whole component: the
-   fleeting alarm – came, cleared, nobody saw it – must be visible. An ordinary
+   fleeting alarm – came, resolved, nobody saw it – must be visible. An ordinary
    table loses it. */
 
 import { describe, expect, it, vi } from "vitest";
 import { useState } from "react";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { AlarmList } from "../src";
-import { alarmModel, alarmColumns, isHiddenFromOperation } from "../src/alarms/alarmModel";
+import { alarmModel, alarmColumns, isHidden } from "../src/alarms/alarmModel";
 import { GERMAN_FORMATS, GERMAN_WORDING } from "@umriss-ui/core/wording/de";
 import type { Alarm, AlarmType } from "../src/alarms/alarmModel";
 import { useTableSelection } from "../src";
@@ -28,20 +28,20 @@ const TYPES: AlarmType[] = [
 
 /** Three of the four lifecycle states, one per row. */
 const ALARMS: Alarm[] = [
-  { id: "m1", type: "temp", lifecycle: "standing-unacknowledged", raised: NOW - 4 * MIN },
+  { id: "m1", type: "temp", lifecycle: "active-unacknowledged", raised: NOW - 4 * MIN },
   {
     id: "m2",
     type: "pressure",
-    lifecycle: "standing-acknowledged",
+    lifecycle: "active-acknowledged",
     raised: NOW - 40 * MIN,
     acknowledgedAt: NOW - 30 * MIN,
   },
   {
     id: "m3",
     type: "filter",
-    lifecycle: "cleared-unacknowledged",
+    lifecycle: "resolved-unacknowledged",
     raised: NOW - 90 * MIN,
-    cleared: NOW - 88 * MIN,
+    resolved: NOW - 88 * MIN,
   },
 ];
 
@@ -57,10 +57,10 @@ function WithSelection({ onAcknowledge }: { onAcknowledge: (ids: readonly string
 }
 
 describe("The fleeting alarm stays visible", () => {
-  it("shows the alarm that came and cleared again, unacknowledged", () => {
+  it("shows the alarm that came and resolved again, unacknowledged", () => {
     render(<AlarmList view={projectionOf()} />);
     expect(screen.getByText("Filter fouled")).toBeTruthy();
-    expect(screen.getByText(DEFAULT_WORDING.lifecycleClearedUnacknowledged)).toBeTruthy();
+    expect(screen.getByText(DEFAULT_WORDING.lifecycleResolvedUnacknowledged)).toBeTruthy();
   });
 
   it("leaves the alarm that is done out – the model's only removal", () => {
@@ -69,21 +69,21 @@ describe("The fleeting alarm stays visible", () => {
       {
         id: "m4",
         type: "pressure",
-        lifecycle: "cleared-acknowledged",
+        lifecycle: "resolved-acknowledged",
         raised: NOW - 200 * MIN,
-        cleared: NOW - 190 * MIN,
+        resolved: NOW - 190 * MIN,
         acknowledgedAt: NOW - 189 * MIN,
       },
     ];
     render(<AlarmList view={projectionOf(done)} />);
-    expect(screen.queryByText(DEFAULT_WORDING.lifecycleClearedAcknowledged)).toBeNull();
+    expect(screen.queryByText(DEFAULT_WORDING.lifecycleResolvedAcknowledged)).toBeNull();
   });
 
   it("shows all three remaining states at once", () => {
     render(<AlarmList view={projectionOf()} />);
-    expect(screen.getByText(DEFAULT_WORDING.lifecycleStandingUnacknowledged)).toBeTruthy();
-    expect(screen.getByText(DEFAULT_WORDING.lifecycleStandingAcknowledged)).toBeTruthy();
-    expect(screen.getByText(DEFAULT_WORDING.lifecycleClearedUnacknowledged)).toBeTruthy();
+    expect(screen.getByText(DEFAULT_WORDING.lifecycleActiveUnacknowledged)).toBeTruthy();
+    expect(screen.getByText(DEFAULT_WORDING.lifecycleActiveAcknowledged)).toBeTruthy();
+    expect(screen.getByText(DEFAULT_WORDING.lifecycleResolvedUnacknowledged)).toBeTruthy();
   });
 });
 
@@ -97,34 +97,34 @@ describe("Priority stands there as a word, not only as a colour", () => {
 });
 
 describe("The live region", () => {
-  it("is polite and reports the number of standing unacknowledged ones", () => {
+  it("is polite and reports the number of active unacknowledged ones", () => {
     const { container } = render(<AlarmList view={projectionOf()} />);
     const region = container.querySelector("[aria-live]");
     expect(region?.getAttribute("aria-live")).toBe("polite");
-    expect(region?.textContent).toBe(DEFAULT_WORDING.standingUnacknowledged(1));
+    expect(region?.textContent).toBe(DEFAULT_WORDING.activeUnacknowledged(1));
   });
 
-  it("counts only standing AND unacknowledged – not everything unacknowledged", () => {
-    // The fleeting alarm is unacknowledged and still not standing. If it
+  it("counts only active AND unacknowledged – not everything unacknowledged", () => {
+    // The fleeting alarm is unacknowledged and still not active. If it
     // counted, the region would call somebody to a fault that is over.
     const { container } = render(<AlarmList view={projectionOf()} />);
     expect(container.querySelector("[aria-live]")?.textContent).toBe(
-      DEFAULT_WORDING.standingUnacknowledged(1),
+      DEFAULT_WORDING.activeUnacknowledged(1),
     );
   });
 
   it("follows the number when the set changes", () => {
     const two: Alarm[] = [
       ...ALARMS,
-      { id: "m5", type: "pressure", lifecycle: "standing-unacknowledged", raised: NOW - MIN },
+      { id: "m5", type: "pressure", lifecycle: "active-unacknowledged", raised: NOW - MIN },
     ];
     const { container, rerender } = render(<AlarmList view={projectionOf()} />);
     expect(container.querySelector("[aria-live]")?.textContent).toBe(
-      DEFAULT_WORDING.standingUnacknowledged(1),
+      DEFAULT_WORDING.activeUnacknowledged(1),
     );
     rerender(<AlarmList view={projectionOf(two)} />);
     expect(container.querySelector("[aria-live]")?.textContent).toBe(
-      DEFAULT_WORDING.standingUnacknowledged(2),
+      DEFAULT_WORDING.activeUnacknowledged(2),
     );
   });
 });
@@ -212,13 +212,13 @@ describe("Acknowledging", () => {
 });
 
 describe("Empty is not the same as empty", () => {
-  it("reports quiet when nothing is standing", () => {
+  it("reports quiet when nothing is active", () => {
     render(<AlarmList view={projectionOf([])} />);
     expect(screen.getByText(DEFAULT_WORDING.noAlarms)).toBeTruthy();
   });
 
   it("says on a dead line that the emptiness means nothing", () => {
-    // An empty list on a standing connection means "the plant is quiet". On a
+    // An empty list on a live connection means "all is quiet". On a
     // disconnected one it means nothing at all – and that is something else.
     render(
       <AlarmList
@@ -237,7 +237,7 @@ describe("A flood is marked, not suppressed", () => {
     const flood: Alarm[] = Array.from({ length: 12 }, (_, i) => ({
       id: `f${i}`,
       type: "temp",
-      lifecycle: "standing-unacknowledged" as const,
+      lifecycle: "active-unacknowledged" as const,
       raised: NOW - i * 1000,
     }));
     render(
@@ -324,29 +324,29 @@ describe("Density of the alarm list", () => {
   });
 });
 
-/* alarm-standards 02: hidden from operation, never absent. A shelved or
+/* alarm-standards 02: hidden, never absent. A snoozed or
    out-of-service alarm stays in the list, drawn neutrally with its state as a
    word, and the list counts them. The German wording is asserted as the
-   subject, not as a leftover. The pinned time zone is Europe/Berlin: the shelf
+   subject, not as a leftover. The pinned time zone is Europe/Berlin: the snooze
    ends 11:00 UTC, which is 12:00 there. */
-describe("Hidden from operation", () => {
+describe("Hidden", () => {
   const HIDDEN: Alarm[] = [
     {
       id: "h1",
       type: "temp",
-      lifecycle: "standing-unacknowledged",
+      lifecycle: "active-unacknowledged",
       raised: NOW - 6 * MIN,
-      availability: "shelved",
-      shelf: { until: NOW + 30 * MIN, by: "M. Keller" },
+      availability: "snoozed",
+      snooze: { until: NOW + 30 * MIN, by: "M. Keller" },
     },
-    { id: "h2", type: "pressure", lifecycle: "standing-unacknowledged", raised: NOW - 8 * MIN, availability: "out-of-service" },
+    { id: "h2", type: "pressure", lifecycle: "active-unacknowledged", raised: NOW - 8 * MIN, availability: "disabled" },
     {
       id: "h3",
       type: "filter",
-      lifecycle: "cleared-unacknowledged",
+      lifecycle: "resolved-unacknowledged",
       raised: NOW - 9 * MIN,
-      cleared: NOW - 7 * MIN,
-      availability: "suppressed-by-design",
+      resolved: NOW - 7 * MIN,
+      availability: "suppressed",
     },
   ];
   const withHidden = () => alarmModel({ alarms: [...ALARMS, ...HIDDEN], types: TYPES, asOf: NOW });
@@ -355,35 +355,35 @@ describe("Hidden from operation", () => {
 
   it("keeps each hidden alarm in the list with its state as a word", () => {
     render(<AlarmList view={withHidden()} />);
-    expect(screen.getByText("Shelved until 12:00 by M. Keller")).toBeTruthy();
-    expect(screen.getByText("Out of service")).toBeTruthy();
-    expect(screen.getByText("Suppressed by design")).toBeTruthy();
-    // The lifecycle still stands beside it: shelving does not change it.
-    expect(screen.getAllByText(DEFAULT_WORDING.lifecycleStandingUnacknowledged)).toHaveLength(3);
+    expect(screen.getByText("Snoozed until 12:00 by M. Keller")).toBeTruthy();
+    expect(screen.getByText("Disabled")).toBeTruthy();
+    expect(screen.getByText("Suppressed")).toBeTruthy();
+    // The lifecycle still stands beside it: snoozing does not change it.
+    expect(screen.getAllByText(DEFAULT_WORDING.lifecycleActiveUnacknowledged)).toHaveLength(3);
   });
 
   it("draws a hidden row neutrally: its priority is a word without its colour", () => {
     render(<AlarmList view={withHidden()} />);
-    const shelved = rowWith("Shelved until 12:00 by M. Keller");
-    const standing = screen.getAllByText(DEFAULT_WORDING.lifecycleStandingUnacknowledged)[0]!.closest("tr");
-    expect(shelved?.getAttribute("data-availability")).toBe("shelved");
-    expect(standing?.getAttribute("data-availability")).toBe("in-service");
+    const snoozed = rowWith("Snoozed until 12:00 by M. Keller");
+    const active = screen.getAllByText(DEFAULT_WORDING.lifecycleActiveUnacknowledged)[0]!.closest("tr");
+    expect(snoozed?.getAttribute("data-availability")).toBe("snoozed");
+    expect(active?.getAttribute("data-availability")).toBe("in-service");
     const badge = (row: Element | null | undefined) =>
       [...(row?.querySelectorAll("span") ?? [])].find((span) => span.textContent === DEFAULT_WORDING.priorityHigh);
-    expect(badge(shelved)?.className).toMatch(/neutral/);
-    expect(badge(standing)?.className).toMatch(/danger/);
+    expect(badge(snoozed)?.className).toMatch(/neutral/);
+    expect(badge(active)?.className).toMatch(/danger/);
   });
 
   it("counts them, and says nothing where there are none", () => {
     const { rerender } = render(<AlarmList view={withHidden()} />);
-    expect(screen.getByText(DEFAULT_WORDING.hiddenFromOperation(3))).toBeTruthy();
+    expect(screen.getByText(DEFAULT_WORDING.hiddenAlarms(3))).toBeTruthy();
     rerender(<AlarmList view={projectionOf()} />);
-    expect(screen.queryByText(DEFAULT_WORDING.hiddenFromOperation(0))).toBeNull();
+    expect(screen.queryByText(DEFAULT_WORDING.hiddenAlarms(0))).toBeNull();
   });
 
   it("calls nobody to a hidden alarm", () => {
     const { container } = render(<AlarmList view={withHidden()} />);
-    expect(container.querySelector("[aria-live]")?.textContent).toBe(DEFAULT_WORDING.standingUnacknowledged(1));
+    expect(container.querySelector("[aria-live]")?.textContent).toBe(DEFAULT_WORDING.activeUnacknowledged(1));
   });
 
   it("offers the view as a switch when the application takes it", () => {
@@ -391,12 +391,12 @@ describe("Hidden from operation", () => {
       const [hiddenOnly, setHiddenOnly] = useState(false);
       const view = alarmModel(
         { alarms: [...ALARMS, ...HIDDEN], types: TYPES, asOf: NOW },
-        hiddenOnly ? { filter: (row) => isHiddenFromOperation(row.availability) } : {},
+        hiddenOnly ? { filter: (row) => isHidden(row.availability) } : {},
       );
       return <AlarmList view={view} hiddenOnly={hiddenOnly} onHiddenOnlyChange={setHiddenOnly} />;
     }
     render(<View />);
-    const toggle = screen.getByRole("checkbox", { name: DEFAULT_WORDING.hiddenFromOperation(3) });
+    const toggle = screen.getByRole("checkbox", { name: DEFAULT_WORDING.hiddenAlarms(3) });
     expect((toggle as HTMLInputElement).checked).toBe(false);
     // The header row and six alarms.
     expect(screen.getAllByRole("row")).toHaveLength(7);
@@ -404,13 +404,13 @@ describe("Hidden from operation", () => {
     expect((toggle as HTMLInputElement).checked).toBe(true);
     // The header row and the three hidden ones.
     expect(screen.getAllByRole("row")).toHaveLength(4);
-    expect(screen.getByText("Out of service")).toBeTruthy();
+    expect(screen.getByText("Disabled")).toBeTruthy();
   });
 
   it("keeps the switch while the view is on, even when nothing is hidden any more", () => {
     // Otherwise the way back would vanish with the last hidden alarm.
     render(<AlarmList view={projectionOf()} hiddenOnly onHiddenOnlyChange={() => {}} />);
-    expect(screen.getByRole("checkbox", { name: DEFAULT_WORDING.hiddenFromOperation(0) })).toBeTruthy();
+    expect(screen.getByRole("checkbox", { name: DEFAULT_WORDING.hiddenAlarms(0) })).toBeTruthy();
   });
 
   it("speaks German from the German wording", () => {
@@ -420,38 +420,38 @@ describe("Hidden from operation", () => {
       </LanguageProvider>,
     );
     expect(screen.getByText("Zurückgestellt bis 12:00 von M. Keller")).toBeTruthy();
-    expect(screen.getByText("Außer Betrieb")).toBeTruthy();
-    expect(screen.getByText("Planmäßig unterdrückt")).toBeTruthy();
-    expect(screen.getByText("Aus der Bedienung genommen: 3")).toBeTruthy();
+    expect(screen.getByText("Deaktiviert")).toBeTruthy();
+    expect(screen.getByText("Unterdrückt")).toBeTruthy();
+    expect(screen.getByText("Ausgeblendet: 3")).toBeTruthy();
   });
 
   /* alarm-standards 05: the availability is a small badge before the
      lifecycle - the word alone, so the state column holds one line; until
      when and by whom stand in its tooltip and in what is spoken. */
-  it("shows a shelf as a short badge, the rest in its tooltip and in what is spoken", async () => {
+  it("shows a snooze as a short badge, the rest in its tooltip and in what is spoken", async () => {
     vi.useFakeTimers();
     try {
       render(<AlarmList view={withHidden()} />);
-      const word = screen.getByText(DEFAULT_WORDING.availabilityShelvedShort);
+      const word = screen.getByText(DEFAULT_WORDING.availabilitySnoozedShort);
       expect(word.getAttribute("aria-hidden")).toBe("true");
       const badge = word.closest("[class*='badge']")!;
       expect(badge.className).toMatch(/neutral/);
       // Spoken: the whole sentence, in the same badge.
-      expect(badge.textContent).toContain("Shelved until 12:00 by M. Keller");
+      expect(badge.textContent).toContain("Snoozed until 12:00 by M. Keller");
       fireEvent.pointerEnter(badge);
       await act(() => vi.advanceTimersByTimeAsync(400));
-      expect(screen.getByRole("tooltip").textContent).toBe("Shelved until 12:00 by M. Keller");
+      expect(screen.getByRole("tooltip").textContent).toBe("Snoozed until 12:00 by M. Keller");
     } finally {
       vi.useRealTimers();
     }
   });
 
-  it("names the day of a shelf that ends on another day", () => {
-    const shelf = { until: NOW + 26 * 60 * MIN, by: "M. Keller" };
-    const alarm: Alarm = { id: "h1", type: "temp", lifecycle: "standing-unacknowledged", raised: NOW - 6 * MIN, availability: "shelved", shelf };
+  it("names the day of a snooze that ends on another day", () => {
+    const snooze = { until: NOW + 26 * 60 * MIN, by: "M. Keller" };
+    const alarm: Alarm = { id: "h1", type: "temp", lifecycle: "active-unacknowledged", raised: NOW - 6 * MIN, availability: "snoozed", snooze };
     const view = alarmModel({ alarms: [alarm], types: TYPES, asOf: NOW });
     render(<AlarmList view={view} />);
     // 18 March, 13:30 in Berlin - the day after the as-of time (11:30 there).
-    expect(screen.getByText("Shelved until 18/03/2026, 13:30 by M. Keller")).toBeTruthy();
+    expect(screen.getByText("Snoozed until 18/03/2026, 13:30 by M. Keller")).toBeTruthy();
   });
 });

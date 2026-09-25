@@ -40,8 +40,8 @@
     font-weight: var(--u-weight-medium);
   }
 
-  /* The live region is visible: the number of standing unacknowledged alarms is
-     the one figure everyone in a control room looks for anyway. Hiding it would
+  /* The live region is visible: the number of active unacknowledged alarms is
+     the one figure everyone watching the list looks for anyway. Hiding it would
      mean giving it only to those who use a screen reader. */
   .live {
     font-size: var(--u-text-xs);
@@ -66,7 +66,7 @@
     font-size: var(--u-text-xs);
   }
 
-  /* The count of what is hidden from operation, as quiet as the live figure:
+  /* The count of hidden alarms, as quiet as the live figure:
      it is there to be found, not to call. */
   .hidden {
     font-size: var(--u-text-xs);
@@ -89,24 +89,24 @@
     color: var(--u-color-text-secondary);
   }
 
-  /* A standing unacknowledged alarm carries a strong edge – it is the one
+  /* An active unacknowledged alarm carries a strong edge – it is the one
      somebody has to walk over to. The edge is an addition to the word in the
      lifecycle column, not a replacement for it. Only in service: a hidden
      alarm calls nobody over, whatever its lifecycle. */
-  .row[data-availability="in-service"][data-lifecycle="standing-unacknowledged"] td:first-child {
+  .row[data-availability="in-service"][data-lifecycle="active-unacknowledged"] td:first-child {
     box-shadow: inset 3px 0 0 var(--u-color-danger);
   }
 
   /* Came and went again without anybody seeing it: the state an ordinary list
      loses. Here it is marked, not hidden. */
-  .row[data-availability="in-service"][data-lifecycle="cleared-unacknowledged"] td:first-child {
+  .row[data-availability="in-service"][data-lifecycle="resolved-unacknowledged"] td:first-child {
     box-shadow: inset 3px 0 0 var(--u-color-warning);
   }
 
   /* A done alarm and a hidden one are muted. The colour stands on the cells,
      the row header among them, because the table's cells set their own text
      colour and one on the row would not reach them. */
-  .row[data-lifecycle="cleared-acknowledged"] :is(td, th),
+  .row[data-lifecycle="resolved-acknowledged"] :is(td, th),
   .row:not([data-availability="in-service"]) :is(td, th) {
     color: var(--u-color-text-secondary);
   }
