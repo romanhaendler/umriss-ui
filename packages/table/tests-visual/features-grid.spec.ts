@@ -30,7 +30,7 @@ const lineOf = (page: Page) => focused(page).evaluate((el) => el.parentElement!.
 test("the grid is one tab stop, and its Active cell shows the shared ring inside its edges", async ({ page }) => {
   await tabIn(page, "grid-mode");
   await expect(focused(page)).toHaveAttribute("tabindex", "0");
-  expect(await lineOf(page)).toBe("row:P-101");
+  expect(await lineOf(page)).toBe("row:checkout");
   const ring = await focused(page).evaluate((el) => getComputedStyle(el).boxShadow);
   expect(ring).toContain("inset");
   /* The next Tab leaves the table: nothing inside it is a stop of its own. */
@@ -41,9 +41,9 @@ test("the grid is one tab stop, and its Active cell shows the shared ring inside
 test("the arrows, Home, End and Ctrl walk the cells; Enter reaches a checkbox and Escape leaves it", async ({ page }) => {
   await tabIn(page, "grid-mode");
   await page.keyboard.press("ArrowRight");
-  await expect(focused(page)).toHaveText("P-101");
+  await expect(focused(page)).toHaveText("Checkout");
   await page.keyboard.press("ArrowDown");
-  await expect(focused(page)).toHaveText("P-102");
+  await expect(focused(page)).toHaveText("Billing");
   await page.keyboard.press("End");
   expect(await focused(page).locator("button").count()).toBe(1);
   await page.keyboard.press("Control+End");
@@ -62,34 +62,34 @@ test("the arrows, Home, End and Ctrl walk the cells; Enter reaches a checkbox an
 test("typing starts an edit, Enter commits, and the cell shows what the application applied", async ({ page }) => {
   await tabIn(page, "comments-column");
   await page.keyboard.press("End");
-  await page.keyboard.type("Belt slips");
-  await expect(focused(page)).toHaveValue("Belt slips");
+  await page.keyboard.type("Van loaded late");
+  await expect(focused(page)).toHaveValue("Van loaded late");
   await page.keyboard.press("Enter");
-  await expect(focused(page)).toHaveText("Belt slips");
+  await expect(focused(page)).toHaveText("Van loaded late");
   expect(await focused(page).evaluate((el) => el.tagName)).toBe("TD");
   /* Escape drops a draft. */
   await page.keyboard.press("ArrowDown");
   await page.keyboard.press("F2");
   await page.keyboard.type(" - no");
   await page.keyboard.press("Escape");
-  await expect(focused(page)).toHaveText("Tool change at 10:40");
+  await expect(focused(page)).toHaveText("Van swapped at 10:40");
 });
 
-test("a setpoint outside its range keeps the editor open with the message; Tab commits and moves on", async ({ page }) => {
-  await tabIn(page, "setpoint-list");
-  const table = example(page, "setpoint-list").locator("table");
+test("a capacity outside its range keeps the editor open with the message; Tab commits and moves on", async ({ page }) => {
+  await tabIn(page, "validated-edits");
+  const table = example(page, "validated-edits").locator("table");
   const before = await table.boundingBox();
   await page.keyboard.press("ArrowRight");
   await page.keyboard.press("ArrowRight");
   const cell = await focused(page).boundingBox();
   await page.keyboard.type("120");
   await page.keyboard.press("Enter");
-  const field = example(page, "setpoint-list").getByLabel("Edit Setpoint: TIC-101");
+  const field = example(page, "validated-edits").getByLabel("Edit Capacity: Maya Lindgren");
   await expect(field).toBeFocused();
   await expect(field).toHaveAttribute("aria-invalid", "true");
   /* The message hangs beneath the cell in a popover, and nothing in the table
      shifts - the editor lies over the cell at its size (table-grid-mode 05). */
-  const message = page.getByText("Between 60 and 95 °C", { exact: true }).and(page.locator("[aria-hidden='true']"));
+  const message = page.getByText("Between 4 and 40 hours a week", { exact: true }).and(page.locator("[aria-hidden='true']"));
   await expect(message).toBeVisible();
   expect((await message.boundingBox())!.y).toBeGreaterThanOrEqual(cell!.y + cell!.height);
   expect(await table.boundingBox()).toEqual(before);
@@ -97,17 +97,17 @@ test("a setpoint outside its range keeps the editor open with the message; Tab c
   expect(editor!.y).toBeGreaterThanOrEqual(cell!.y);
   expect(editor!.y + editor!.height).toBeLessThanOrEqual(cell!.y + cell!.height);
   await page.keyboard.press("ControlOrMeta+A");
-  await page.keyboard.type("85");
+  await page.keyboard.type("36");
   await expect(message).toHaveCount(0);
   await page.keyboard.press("Tab");
-  await expect(example(page, "setpoint-list").getByLabel("Edit Mode: TIC-101")).toBeFocused();
+  await expect(example(page, "validated-edits").getByLabel("Edit Role: Maya Lindgren")).toBeFocused();
   await page.keyboard.press("Escape");
-  await expect(example(page, "setpoint-list")).toContainText("Last edit: TIC-101, setpoint");
-  await expect(example(page, "setpoint-list").locator("tr[data-grid-line='row:TIC-101']")).toContainText("85.0");
+  await expect(example(page, "validated-edits")).toContainText("Last edit: Maya Lindgren, capacity");
+  await expect(example(page, "validated-edits").locator("tr[data-grid-line='row:maya']")).toContainText("36");
 });
 
 test("a day picked in the date editor commits at once", async ({ page }) => {
-  await tabIn(page, "setpoint-list");
+  await tabIn(page, "validated-edits");
   await page.keyboard.press("End");
   await page.keyboard.press("Enter");
   /* The picker's trigger keeps its Enter: it opens the calendar. */
@@ -115,8 +115,8 @@ test("a day picked in the date editor commits at once", async ({ page }) => {
   const panel = page.getByRole("dialog");
   await expect(panel).toBeVisible();
   await panel.getByRole("button", { name: "Today" }).click();
-  await expect(example(page, "setpoint-list")).toContainText("Last edit: TIC-101, reviewed");
-  await expect(example(page, "setpoint-list").locator("tr[data-grid-line='row:TIC-101']")).toContainText("17/03/2026");
+  await expect(example(page, "validated-edits")).toContainText("Last edit: Maya Lindgren, availableFrom");
+  await expect(example(page, "validated-edits").locator("tr[data-grid-line='row:maya']")).toContainText("17/03/2026");
 });
 
 test("in a virtual window the keys walk to rows never rendered, and the grid scrolls them in", async ({ page }) => {
@@ -124,7 +124,7 @@ test("in a virtual window the keys walk to rows never rendered, and the grid scr
      stop before the grid's. */
   await openExample(page, "table", "the-whole-grid");
   await example(page, "the-whole-grid").locator("td[tabindex='0']").focus();
-  expect(await lineOf(page)).toBe('header:["value:Distribution"]');
+  expect(await lineOf(page)).toBe('header:["value:East Gate depot"]');
   await page.keyboard.press("Control+End");
   expect(await lineOf(page)).toBe("foot");
   await page.keyboard.press("ArrowUp");
@@ -156,7 +156,7 @@ test("the keys keep the Active cell clear of the sticky head and the pinned bloc
   expect(await scroller.evaluate((el) => el.scrollTop)).toBeGreaterThan(0);
   expect(await scroller.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
   /* Back to the first column after the block: Home, then right past the
-     selection and the pinned point. */
+     selection and the pinned parcel. */
   await page.keyboard.press("Home");
   await page.keyboard.press("ArrowRight");
   await page.keyboard.press("ArrowRight");
