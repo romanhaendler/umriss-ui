@@ -56,6 +56,12 @@
     margin-left: var(--u-space-2);
   }
 
+  /* The state holds one line - the badge and the lifecycle beside it; the
+     column takes the width it needs from the ones that wrap. */
+  .state {
+    white-space: nowrap;
+  }
+
   .lifecycle {
     font-size: var(--u-text-xs);
   }
@@ -67,11 +73,15 @@
     color: var(--u-color-text-secondary);
   }
 
-  /* A hidden alarm's availability, before its lifecycle. The weight tells the
-     two words apart where no colour may. */
-  .availability {
+  /* The switch's label in the live figure's size, not the checkbox's own:
+     beside the other figures of the bar it keeps the bar on one line. */
+  .hiddenLabel {
     font-size: var(--u-text-xs);
-    font-weight: var(--u-weight-medium);
+  }
+
+  /* A hidden alarm's availability, before its lifecycle: a neutral badge, so
+     that the two words stand apart where no colour may. */
+  .availability {
     margin-right: var(--u-space-2);
   }
 

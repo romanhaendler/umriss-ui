@@ -382,11 +382,15 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
      font changes them. */
   useLayoutEffect(() => {
     const table = tableRef.current;
+    if (table?.parentElement && !stickyHeader) table.parentElement.style.removeProperty("scroll-padding-top");
     if (!table || !stickyHeader) return;
     const head = table.tHead?.getBoundingClientRect().height ?? 0;
     const headerHeight = table.querySelector("tr[data-line='header']")?.getBoundingClientRect().height ?? 0;
     table.style.setProperty("--u-table-head", `${head}px`);
     table.style.setProperty("--u-table-group-header", `${headerHeight}px`);
+    /* The browser's own scroll into view - a focused cell, a walked one -
+       keeps what it brings in clear of the head (table-grid-mode 05). */
+    table.parentElement?.style.setProperty("scroll-padding-top", `${head}px`);
     /* A virtual window draws its group headers anew as it scrolls: marked again after
        every render, not only on the scroll. */
     if (table.parentElement) markStuck(table.parentElement);
@@ -519,6 +523,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
         rowKey: hook.rowKey,
         virtual,
         onCellEdit: props.onCellEdit,
+        select: selectable ? (row) => snapshot.selection.toggle(hook.rowKey(row)) : undefined,
       })
     : undefined;
   const lineKey = (key: string) => (gridMode ? key : undefined);
@@ -694,7 +699,6 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
           styles.table,
           resolvedDensity === "compact" && styles.compact,
           stickyHeader && styles.sticky,
-          (blocks.start > 0 || blocks.end > 0) && styles.pinnedTable,
           striped && styles.striped,
           gridMode && styles.grid,
         )}
@@ -769,7 +773,15 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
         blocks={blocks}
         pinnedKeys={dataColumns.filter((e) => pins[e.spec.id]).map((e) => e.key).join("|")}
       />
-      {gridMode && <GridFocus table={tableRef} grid={grid} lines={gridLinesNow} ids={gridIds} />}
+      {gridMode && (
+        <GridFocus
+          table={tableRef}
+          grid={grid}
+          lines={gridLinesNow}
+          ids={gridIds}
+          editable={dataColumns.some((e) => e.spec.edit !== undefined) ? gridEvents?.editable : undefined}
+        />
+      )}
     </div>
   );
 }
@@ -792,19 +804,30 @@ function PinPlacement({
   const { start, end } = blocks;
   const place = () => {
     const table = tableRef.current;
-    if (!table || (!start && !end)) return;
+    const scroller = table?.parentElement;
+    if (!table || !scroller) return;
+    /* The browser's own scroll into view keeps a cell it brings in clear of
+       the blocks (table-grid-mode 05); a pinned cell, which lies in that
+       padding, shifts its target out of it by the same width (pinned.ts). */
+    scroller.style.removeProperty("scroll-padding-left");
+    scroller.style.removeProperty("scroll-padding-right");
+    if (!start && !end) return;
     const cells = Array.from(table.tHead?.rows[0]?.cells ?? []);
-    let offset = 0;
+    let startWidth = 0;
     for (let i = 0; i < start; i++) {
-      table.style.setProperty(`--u-table-pin-start-${i}`, `${offset}px`);
-      offset += cells[i]?.getBoundingClientRect().width ?? 0;
+      table.style.setProperty(`--u-table-pin-start-${i}`, `${startWidth}px`);
+      startWidth += cells[i]?.getBoundingClientRect().width ?? 0;
     }
-    offset = 0;
+    let endWidth = 0;
     for (let i = 0; i < end; i++) {
-      table.style.setProperty(`--u-table-pin-end-${i}`, `${offset}px`);
-      offset += cells[cells.length - 1 - i]?.getBoundingClientRect().width ?? 0;
+      table.style.setProperty(`--u-table-pin-end-${i}`, `${endWidth}px`);
+      endWidth += cells[cells.length - 1 - i]?.getBoundingClientRect().width ?? 0;
     }
-    if (table.parentElement) markUnder(table.parentElement);
+    table.style.setProperty("--u-table-pin-start", `${startWidth}px`);
+    table.style.setProperty("--u-table-pin-end", `${endWidth}px`);
+    if (startWidth) scroller.style.setProperty("scroll-padding-left", `${startWidth}px`);
+    if (endWidth) scroller.style.setProperty("scroll-padding-right", `${endWidth}px`);
+    markUnder(scroller);
   };
   useLayoutEffect(place);
   useEffect(() => {
@@ -1179,9 +1202,7 @@ function Cell({
   const editor = useCellEditor(rowKey, spec.id);
 
   let content: ReactNode;
-  if (editor) {
-    content = <CellEditor entry={entry} row={row} rowName={rowName} grid={editor} />;
-  } else if (isAbsent(value)) {
+  if (isAbsent(value)) {
     /* children is not called for an absent value - that is what its parameter
        is typed without null for. */
     content = <Absent wording={wording} />;
@@ -1195,10 +1216,20 @@ function Cell({
   return (
     <Tag
       scope={spec.rowHeader ? "row" : undefined}
-      className={cx(styles.td, rightAligned && styles.numeric, spec.rowHeader && styles.rowHeader, pin.className)}
+      className={cx(styles.td, rightAligned && styles.numeric, spec.rowHeader && styles.rowHeader, pin.className, editor && styles.editing)}
       style={pin.style}
     >
-      {content}
+      {editor ? (
+        <>
+          <CellEditor entry={entry} row={row} rowName={rowName} grid={editor} />
+          {/* The value holds the cell's size while the editor lies over it. */}
+          <span className={styles.editingValue} aria-hidden="true">
+            {content}
+          </span>
+        </>
+      ) : (
+        content
+      )}
     </Tag>
   );
 }

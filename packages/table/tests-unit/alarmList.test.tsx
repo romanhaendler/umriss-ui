@@ -9,7 +9,7 @@
 
 import { describe, expect, it, vi } from "vitest";
 import { useState } from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { AlarmList } from "../src";
 import { alarmModel, alarmColumns, isHiddenFromOperation } from "../src/alarms/alarmModel";
 import { GERMAN_FORMATS, GERMAN_WORDING } from "@umriss-ui/core/wording/de";
@@ -423,5 +423,35 @@ describe("Hidden from operation", () => {
     expect(screen.getByText("Außer Betrieb")).toBeTruthy();
     expect(screen.getByText("Planmäßig unterdrückt")).toBeTruthy();
     expect(screen.getByText("Aus der Bedienung genommen: 3")).toBeTruthy();
+  });
+
+  /* alarm-standards 05: the availability is a small badge before the
+     lifecycle - the word alone, so the state column holds one line; until
+     when and by whom stand in its tooltip and in what is spoken. */
+  it("shows a shelf as a short badge, the rest in its tooltip and in what is spoken", async () => {
+    vi.useFakeTimers();
+    try {
+      render(<AlarmList view={withHidden()} />);
+      const word = screen.getByText(DEFAULT_WORDING.availabilityShelvedShort);
+      expect(word.getAttribute("aria-hidden")).toBe("true");
+      const badge = word.closest("[class*='badge']")!;
+      expect(badge.className).toMatch(/neutral/);
+      // Spoken: the whole sentence, in the same badge.
+      expect(badge.textContent).toContain("Shelved until 12:00 by M. Keller");
+      fireEvent.pointerEnter(badge);
+      await act(() => vi.advanceTimersByTimeAsync(400));
+      expect(screen.getByRole("tooltip").textContent).toBe("Shelved until 12:00 by M. Keller");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("names the day of a shelf that ends on another day", () => {
+    const shelf = { until: NOW + 26 * 60 * MIN, by: "M. Keller" };
+    const alarm: Alarm = { id: "h1", type: "temp", lifecycle: "standing-unacknowledged", raised: NOW - 6 * MIN, availability: "shelved", shelf };
+    const view = alarmModel({ alarms: [alarm], types: TYPES, asOf: NOW });
+    render(<AlarmList view={view} />);
+    // 18 March, 13:30 in Berlin - the day after the as-of time (11:30 there).
+    expect(screen.getByText("Shelved until 18/03/2026, 13:30 by M. Keller")).toBeTruthy();
   });
 });
