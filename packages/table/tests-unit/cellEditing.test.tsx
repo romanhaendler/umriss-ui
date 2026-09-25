@@ -57,6 +57,24 @@ describe("Editing a cell", () => {
     expect(field.value).toBe("80");
   });
 
+  /* table-grid-mode 05: in a grid that edits, a cell that does not says so. */
+  it("marks every cell that does not edit read-only, and none that does", () => {
+    render(<Loops onCellEdit={() => undefined} />);
+    const cell = (text: string) => screen.getByText(text).closest("td, th")!;
+    expect(cell("TIC-101").getAttribute("aria-readonly")).toBe("true");
+    expect(cell("80").getAttribute("aria-readonly")).toBeNull();
+    expect(cell("Valve sticks").getAttribute("aria-readonly")).toBeNull();
+    // The head names the columns; it is not a cell that could edit.
+    expect(screen.getByRole("columnheader", { name: /Setpoint/ }).getAttribute("aria-readonly")).toBeNull();
+  });
+
+  it("does not start an edit with Space", () => {
+    render(<Loops onCellEdit={() => undefined} />);
+    focusCell("Valve sticks");
+    press(" ");
+    expect(screen.queryByLabelText("Edit Comment: TIC-102")).toBeNull();
+  });
+
   it("reports the draft on Enter, applies nothing, and gives the focus back to the cell", () => {
     const onCellEdit = vi.fn();
     render(<Loops onCellEdit={onCellEdit} />);
@@ -111,7 +129,11 @@ describe("Editing a cell", () => {
     expect(onCellEdit).not.toHaveBeenCalled();
     const field = screen.getByLabelText("Edit Setpoint: TIC-101");
     expect(field.getAttribute("aria-invalid")).toBe("true");
-    expect(screen.getByText("At most 120 °C").id).toBe(field.getAttribute("aria-describedby"));
+    expect(document.getElementById(field.getAttribute("aria-describedby")!)?.textContent).toBe("At most 120 °C");
+    /* Seen beneath the cell in a popover, not inside the table: nothing in
+       it shifts (table-grid-mode 05). */
+    const shown = screen.getAllByText("At most 120 °C").filter((m) => !m.closest("table"));
+    expect(shown).toHaveLength(1);
     /* Corrected, the message goes as the draft becomes right. */
     fireEvent.change(field, { target: { value: "110" } });
     expect(screen.queryByText("At most 120 °C")).toBeNull();
@@ -174,7 +196,7 @@ describe("Editing a cell", () => {
     focusCell("TIC-102");
     expect(onCellEdit).not.toHaveBeenCalled();
     expect(document.activeElement).toBe(screen.getByLabelText("Edit Setpoint: TIC-101"));
-    expect(screen.getByText("At most 120 °C")).toBeTruthy();
+    expect(screen.getAllByText("At most 120 °C").length).toBeGreaterThan(0);
   });
 
   it("lets Tab leave the grid past the last cell that edits, once the draft is reported", () => {

@@ -201,6 +201,12 @@
       0 4px 8px light-dark(rgba(23, 23, 23, 0.06), rgba(0, 0, 0, 0.4)),
       0 24px 48px -16px light-dark(rgba(23, 23, 23, 0.24), rgba(0, 0, 0, 0.7));
 
+    /* The shadow a sticking part casts on what scrolls under it - a pinned
+       column block, a stuck group header - as the colour its gradient starts
+       from. Dark is black at a higher opacity: the text colour at 9 % read as
+       a glow on the dark ground (table-column-pinning 03). */
+    --u-shadow-sticky: light-dark(rgba(23, 23, 23, 0.09), rgba(0, 0, 0, 0.5));
+
     /* ---- Translucent material and scrim (ADR-0012) ----
 
        An overlay meant to be a window ABOVE the application and not a card

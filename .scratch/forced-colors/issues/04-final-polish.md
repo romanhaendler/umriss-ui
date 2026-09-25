@@ -16,3 +16,8 @@ are settled by the agent; new tokens or visibly new colours go as a card first.
 
 - The user has taken every card on the review page.
 - Every moved screenshot baseline looked at individually, never rebuilt in bulk.
+
+## Comments
+
+**Table part (2026-09-25).** fc-bands, no card, for context: the group bands
+keep their lines and lose their tone under forced colours - left as is.

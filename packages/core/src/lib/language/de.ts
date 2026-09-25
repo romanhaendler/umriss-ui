@@ -270,6 +270,7 @@ export const GERMAN_WORDING: Wording = {
   columnAcknowledgement: "Quittierung",
   columnAge: "Alter",
   availabilityShelved: (until, by) => `Zurückgestellt bis ${until} von ${by}`,
+  availabilityShelvedShort: "Zurückgestellt",
   availabilitySuppressedByDesign: "Planmäßig unterdrückt",
   availabilityOutOfService: "Außer Betrieb",
   hiddenFromOperation: (count) => `Aus der Bedienung genommen: ${count}`,
