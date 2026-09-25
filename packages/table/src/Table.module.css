@@ -27,11 +27,15 @@
 
   /* Positioned so that absolute descendants (a VisuallyHidden in a cell) are
      clipped by it - otherwise they escape to the page and widen it. */
+  /* The frame's radius carries on here: a scroll area clips to its own
+     corners, so a sticky head or pinned cell - square, with a background -
+     no longer paints over the frame's rounded edge. */
   .scroll {
     composes: scroll from "#own-styles";
     position: relative;
     overflow: auto;
     min-width: 0;
+    border-radius: inherit;
   }
 
   .footerTarget {

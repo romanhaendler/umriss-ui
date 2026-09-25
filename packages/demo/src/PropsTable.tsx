@@ -75,9 +75,9 @@ export function PropsTable({ entry }: { entry: TypeEntry }) {
             <thead>
               <tr>
                 <th scope="col">Name</th>
-                <th scope="col">Typ</th>
-                <th scope="col">Standard</th>
-                <th scope="col">Beschreibung</th>
+                <th scope="col">Type</th>
+                <th scope="col">Default</th>
+                <th scope="col">Description</th>
               </tr>
             </thead>
             <tbody>

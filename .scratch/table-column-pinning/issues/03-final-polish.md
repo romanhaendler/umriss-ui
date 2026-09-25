@@ -1,6 +1,6 @@
 # 03 - Final polish round
 
-Status: ready-for-agent
+Status: ready-for-human
 Type: task
 
 Spec: `.scratch/table-column-pinning/spec.md`

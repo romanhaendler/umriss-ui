@@ -1,6 +1,6 @@
 # 06 - Final polish round
 
-Status: ready-for-agent
+Status: ready-for-human
 Type: task
 
 Spec: `.scratch/schedule-a11y/spec.md`
