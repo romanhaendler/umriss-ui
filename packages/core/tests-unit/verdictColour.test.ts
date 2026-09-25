@@ -61,6 +61,8 @@ const REGISTER: Readonly<Record<string, string>> = {
     "The meter's fill in its tone. The caller's: its optional figure is the percentage, not the verdict, so the word for the tone is the application's.",
   "core/DatePicker/DatePicker.module.css":
     "The invalid field's edge (with the form field's message), and the clock-change hint, which is a sentence in its own colour.",
+  "core/FileInput/FileInput.module.css":
+    "The invalid zone's edge and the key's danger ring; the form field's error message is the word, and aria-invalid says it to a screen reader.",
   "core/FormField/FormField.module.css":
     "The error message is the word itself; the required mark is an asterisk, a glyph, and the input carries aria-required.",
   "core/Input/Input.module.css":
@@ -75,6 +77,8 @@ const REGISTER: Readonly<Record<string, string>> = {
     "The invalid field's edge; the form field's error message is the word, and aria-invalid says it to a screen reader.",
   "core/Stat/Stat.module.css":
     "The verdict is written out beside the value, and the freshness beside the as-of time: the colour tints words that stand there anyway.",
+  "core/Stepper/Stepper.module.css":
+    "The failed step's marker carries the cross glyph in place of its number, and a screen reader hears 'Failed' beside its label.",
   "core/Switch/Switch.module.css":
     "The invalid switch's edge; the form field's error message is the word, and aria-invalid says it to a screen reader.",
   "core/Tag/Tag.module.css": "The tag's text is the word; the tone is the caller's choice for a word the caller writes.",
