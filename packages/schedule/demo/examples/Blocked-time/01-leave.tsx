@@ -2,7 +2,7 @@ import { Stack, Text } from "@umriss-ui/core";
 import { BlockedTimes, Lane, Schedule, Subtasks, findings } from "../../../src";
 import type { BlockedTime, Subtask, Task } from "../../../src";
 
-export const title = "Leave and maintenance on the lanes";
+export const title = "Block out leave and maintenance";
 
 export const lead = "A person on leave, a server in maintenance: `BlockedTimes` hatches that time on the lane, and work planned into it is a finding.";
 

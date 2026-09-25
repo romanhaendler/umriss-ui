@@ -226,7 +226,7 @@ export class SceneView {
 
   /** The lane a DROP at this y would land on.
 
-      A **Miniature** is no drop target. A strip is three pixels of a machine's
+      A **Miniature** is no drop target. A strip is three pixels of a lane's
       whole day, and a drop aimed at one would be a guess; resting over the
       group opens it for the gesture instead, and then there is a real lane to
       aim at. Hover, the tooltip and selection do read a strip - they cost
