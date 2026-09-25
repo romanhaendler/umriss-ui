@@ -3,7 +3,7 @@
 
    It is built with NOTHING a caller of @umriss-ui/table would not have as well:
    a `Column` from the hook, `assess`, `verdictWeight`, the formats and the
-   wording. Therein lies its second purpose - it proves that the plant layer
+   wording. Therein lies its second purpose - it proves that the limits layer
    needs nothing private. That is why this file imports only @umriss-ui/core and
    React.
 

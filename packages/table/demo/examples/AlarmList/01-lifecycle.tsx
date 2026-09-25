@@ -6,7 +6,7 @@ import type { Alarm, AlarmType } from "../../../src";
 export const title = "Four lifecycle states, none of them disappears";
 
 /* The lifecycle state is ONE field with four values and not a pair of booleans.
-   A pair invites `if (standing)`, and that filter loses the third case: it
+   A pair invites `if (active)`, and that filter loses the third case: it
    came, it went, and nobody saw it. That is precisely the one worth
    investigating (the row "Cell 4 · guard door open").
 
@@ -36,21 +36,21 @@ const TYPES: AlarmType[] = [
 ];
 
 const START: readonly Alarm[] = [
-  { id: "a1", type: "furnace-temp", lifecycle: "standing-unacknowledged", raised: NOW - 3 * MIN },
-  { id: "a2", type: "coolant", lifecycle: "standing-unacknowledged", raised: NOW - 21 * MIN },
+  { id: "a1", type: "furnace-temp", lifecycle: "active-unacknowledged", raised: NOW - 3 * MIN },
+  { id: "a2", type: "coolant", lifecycle: "active-unacknowledged", raised: NOW - 21 * MIN },
   {
     id: "a3",
     type: "press-pressure",
-    lifecycle: "standing-acknowledged",
+    lifecycle: "active-acknowledged",
     raised: NOW - 96 * MIN,
     acknowledgedAt: NOW - 74 * MIN,
   },
   {
     id: "a4",
     type: "door",
-    lifecycle: "cleared-unacknowledged",
+    lifecycle: "resolved-unacknowledged",
     raised: NOW - 142 * MIN,
-    cleared: NOW - 141 * MIN,
+    resolved: NOW - 141 * MIN,
   },
 ];
 

@@ -160,7 +160,7 @@ export const OUTLINE: readonly Rubric[] = [
       {
         id: "alarmlist",
         name: "AlarmList",
-        sentence: "Alarms with a lifecycle, as a table of the same interface: standing or cleared, acknowledged or not - the library generates none.",
+        sentence: "Alarms with a lifecycle, as a table of the same interface: active or resolved, acknowledged or not - the library generates none.",
         types: ["AlarmListProps"],
         exports: ["AlarmList", "alarmModel"],
       },

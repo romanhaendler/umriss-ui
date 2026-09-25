@@ -7,23 +7,23 @@
    from the package but its public entry.
 
    The list shows all four lifecycle states, and it shows all of them. The one
-   an ordinary table loses is the third: came, cleared, and nobody saw it. It
+   an ordinary table loses is the third: came, resolved, and nobody saw it. It
    does not fall out, because the state is ONE field with four values and not a
-   pair of booleans that invites `if (standing)`.
+   pair of booleans that invites `if (active)`.
 
    A flood is MARKED, never suppressed. All forty rows are there; the marking
    says that they came together. To decide that a human should not see an alarm
    is a safety decision and does not belong in a user-interface library.
 
-   The live region is polite and reports ONE number: the standing unacknowledged
+   The live region is polite and reports ONE number: the active unacknowledged
    ones. Not every arrival – a list that reads out forty arrivals during a flood
    gets switched off, and then it reports nothing at all any more.
 
    The table neither sorts nor pages here: the order - the worst first - the
    alarm model has already established, and no column is sortable.
 
-   An alarm hidden from operation - shelved, suppressed by design, out of
-   service (alarm-standards 02) - stays in the list too. It is drawn neutrally:
+   A hidden alarm - snoozed, suppressed, disabled (alarm-standards 02) -
+   stays in the list too. It is drawn neutrally:
    no edge, its priority a word without its colour, its type muted, and its
    state stands there as a word. Colour is for what needs somebody now, and a
    hidden alarm is a decision already taken; that it exists is not. "Not
@@ -35,7 +35,7 @@ import { Badge, Button, Checkbox, Tooltip, VisuallyHidden, useFreshness, useDens
 import type { Formats, FreshnessAges, FreshnessReading, Wording } from "@umriss-ui/core";
 import { useTable } from "../index";
 import type { TableSelection } from "../index";
-import { countAcknowledgeable, isHiddenFromOperation } from "./alarmModel";
+import { countAcknowledgeable, isHidden } from "./alarmModel";
 import type { AlarmProjection, AlarmRow, LifecycleState, Priority } from "./alarmModel";
 import styles from "./AlarmList.module.css";
 
@@ -63,9 +63,9 @@ export interface AlarmListProps extends Omit<HTMLAttributes<HTMLDivElement>, "ch
       statement the density of the `UmrissProvider`, without a setting
       "compact". */
   density?: "regular" | "compact";
-  /** The view "hidden from operation" is on. The list does not filter - the
-      projection does, with the table's own `filter` and
-      `isHiddenFromOperation`; this only says what the switch shows. */
+  /** The view of hidden alarms is on. The list does not filter - the
+      projection does, with the table's own `filter` and `isHidden`; this
+      only says what the switch shows. */
   hiddenOnly?: boolean;
   /** Offers the view as a switch beside its count. Without it the count
       stands as text. */
@@ -74,36 +74,36 @@ export interface AlarmListProps extends Omit<HTMLAttributes<HTMLDivElement>, "ch
 
 function lifecycleWord(state: LifecycleState, wording: Wording): string {
   switch (state) {
-    case "standing-unacknowledged":
-      return wording.lifecycleStandingUnacknowledged;
-    case "standing-acknowledged":
-      return wording.lifecycleStandingAcknowledged;
-    case "cleared-unacknowledged":
-      return wording.lifecycleClearedUnacknowledged;
+    case "active-unacknowledged":
+      return wording.lifecycleActiveUnacknowledged;
+    case "active-acknowledged":
+      return wording.lifecycleActiveAcknowledged;
+    case "resolved-unacknowledged":
+      return wording.lifecycleResolvedUnacknowledged;
     default:
-      return wording.lifecycleClearedAcknowledged;
+      return wording.lifecycleResolvedAcknowledged;
   }
 }
 
 /** The availability as the badge's word and as the sentence spoken and shown
     in its tooltip - none while in service, which is the normal case and says
-    nothing. A shelf's end is a time of day on the as-of day, a date and a time
+    nothing. A snooze's end is a time of day on the as-of day, a date and a time
     beyond it. */
 function availabilityWords(row: AlarmRow, wording: Wording, formats: Formats): { short: string; full: string } | null {
   switch (row.availability) {
-    case "shelved": {
-      const shelf = row.alarm.shelf;
-      if (!shelf) return null;
-      const until = new Date(shelf.until);
+    case "snoozed": {
+      const snooze = row.alarm.snooze;
+      if (!snooze) return null;
+      const until = new Date(snooze.until);
       const asOf = new Date(row.alarm.raised + row.age);
       const sameDay = until.toDateString() === asOf.toDateString();
       const end = sameDay ? formats.time(until, false) : formats.dateTime(until, false);
-      return { short: wording.availabilityShelvedShort, full: wording.availabilityShelved(end, shelf.by) };
+      return { short: wording.availabilitySnoozedShort, full: wording.availabilitySnoozed(end, snooze.by) };
     }
-    case "suppressed-by-design":
-      return { short: wording.availabilitySuppressedByDesign, full: wording.availabilitySuppressedByDesign };
-    case "out-of-service":
-      return { short: wording.availabilityOutOfService, full: wording.availabilityOutOfService };
+    case "suppressed":
+      return { short: wording.availabilitySuppressed, full: wording.availabilitySuppressed };
+    case "disabled":
+      return { short: wording.availabilityDisabled, full: wording.availabilityDisabled };
     default:
       return null;
   }
@@ -180,7 +180,7 @@ function Body({
      once and both are fed from it.
 
      Whether a confirmation comes of it the application decides – a confirmation
-     the operator cannot switch off is itself a danger during a flood. */
+     the user cannot switch off is itself a danger during a flood. */
   const affected = useMemo(() => {
     if (selection === undefined) return [] as string[];
     return projection.filtered.map((row) => row.id).filter((id) => selection.selected.has(id));
@@ -192,7 +192,7 @@ function Body({
      (library-audit 07). */
   const density = useDensityFor(ownDensity, "compact");
 
-  const hiddenCount = wording.hiddenFromOperation(projection.hiddenFromOperation);
+  const hiddenCount = wording.hiddenAlarms(projection.hiddenAlarms);
 
   return (
     <div className={[styles.list, className].filter(Boolean).join(" ")} {...rest}>
@@ -211,7 +211,7 @@ function Body({
         )}
         {/* The switch stays while the view is on, even at zero - or the way
             back would vanish with the last hidden alarm. */}
-        {onHiddenOnlyChange !== undefined && (projection.hiddenFromOperation > 0 || hiddenOnly) ? (
+        {onHiddenOnlyChange !== undefined && (projection.hiddenAlarms > 0 || hiddenOnly) ? (
           <Checkbox
             className={styles.hidden}
             checked={hiddenOnly}
@@ -219,7 +219,7 @@ function Body({
             label={<span className={styles.hiddenLabel}>{hiddenCount}</span>}
           />
         ) : (
-          projection.hiddenFromOperation > 0 && (
+          projection.hiddenAlarms > 0 && (
             <span className={styles.hidden}>{hiddenCount}</span>
           )
         )}
@@ -235,7 +235,7 @@ function Body({
 
       {/* Polite, and exactly one number. */}
       <div aria-live="polite" aria-atomic="true" className={styles.live}>
-        {wording.standingUnacknowledged(projection.standingUnacknowledged)}
+        {wording.activeUnacknowledged(projection.activeUnacknowledged)}
       </div>
 
       <Table
@@ -249,7 +249,7 @@ function Body({
           "data-priority": row.priority,
           "data-availability": row.availability,
         })}
-        /* Empty on a standing line means quiet. Empty on a dead line means
+        /* Empty on a live connection means quiet. Empty on a dead one means
            nothing at all – and that is something else. */
         empty={<span className={styles.empty}>{disconnected ? wording.noAlarmsDisconnected : wording.noAlarms}</span>}
       >
@@ -269,7 +269,7 @@ function Body({
         <Column value="lifecycle" label={wording.columnLifecycleState} sortable={false}>
           {/* The state stands there as a word. Colour alone carries nothing.
               A hidden alarm names its availability first, as a small neutral
-              badge, and keeps its lifecycle beside it: shelving changes
+              badge, and keeps its lifecycle beside it: snoozing changes
               neither the condition nor whether anybody acknowledged it. The
               badge says one word, so that the column holds one line; until
               when and by whom stand in its tooltip, and are spoken with it. */}
@@ -296,7 +296,7 @@ function Body({
         </Column>
         <Column value="priority" label={wording.columnPriority} sortable={false}>
           {(p, row) => (
-            <Badge tone={isHiddenFromOperation(row.availability) ? "neutral" : priorityTone(p)}>
+            <Badge tone={isHidden(row.availability) ? "neutral" : priorityTone(p)}>
               {priorityWord(p, wording)}
             </Badge>
           )}

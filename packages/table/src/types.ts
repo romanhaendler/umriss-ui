@@ -492,7 +492,7 @@ interface TableOptionsCommon<Z> {
       outermost first. It is the default that `view` leaves out; without it
       the table is ungrouped until the user groups it. */
   defaultGrouping?: GroupingId<Z> | readonly GroupingId<Z>[];
-  /** Which rows the table has at all – by permission, by plant, by anything the
+  /** Which rows the table has at all – by permission, by tenant, by anything the
       user is not meant to undo. It is invisible: never a condition, never
       reset, never part of the view, and "43 of 1,204" counts only the rows it
       admits. It may stand in the call; a change leaves the page standing, and

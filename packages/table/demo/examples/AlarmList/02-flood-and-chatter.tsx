@@ -31,15 +31,15 @@ const ALARMS: readonly Alarm[] = [
   ...Array.from({ length: 9 }, (_, i) => ({
     id: `f${i}`,
     type: "labeller",
-    lifecycle: "standing-unacknowledged" as const,
+    lifecycle: "active-unacknowledged" as const,
     raised: NOW - (4 + i) * MIN,
   })),
   {
     id: "a5",
     type: "filter",
-    lifecycle: "cleared-unacknowledged",
+    lifecycle: "resolved-unacknowledged",
     raised: NOW - 320 * MIN,
-    cleared: NOW - 300 * MIN,
+    resolved: NOW - 300 * MIN,
   },
 ];
 

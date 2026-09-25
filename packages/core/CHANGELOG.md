@@ -29,6 +29,34 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## Unreleased
+
+### Changed
+
+- **The alarm wording keys follow `@umriss-ui/table`'s new names** (ADR-0035),
+  with no deprecated aliases. A partial wording passed to the provider names
+  the new keys; an application that implements the whole `Wording` type
+  renames them.
+
+  | Before | Now |
+  |---|---|
+  | `lifecycleStandingUnacknowledged`, `lifecycleStandingAcknowledged` | `lifecycleActiveUnacknowledged`, `lifecycleActiveAcknowledged` |
+  | `lifecycleClearedUnacknowledged`, `lifecycleClearedAcknowledged` | `lifecycleResolvedUnacknowledged`, `lifecycleResolvedAcknowledged` |
+  | `standingUnacknowledged(count)` | `activeUnacknowledged(count)` |
+  | `availabilityShelved(until, by)`, `availabilityShelvedShort` | `availabilitySnoozed(until, by)`, `availabilitySnoozedShort` |
+  | `availabilitySuppressedByDesign` | `availabilitySuppressed` |
+  | `availabilityOutOfService` | `availabilityDisabled` |
+  | `hiddenFromOperation(count)` | `hiddenAlarms(count)` |
+
+  The default texts change with them. English: "Active, unacknowledged",
+  "Resolved, acknowledged", "3 active alarms, unacknowledged", "Snoozed until
+  12:00 by M. Keller", "Suppressed", "Disabled", "Hidden: 3". German
+  (`@umriss-ui/core/wording/de`): "Aktiv, unquittiert", "Behoben, quittiert",
+  "3 aktive Meldungen, unquittiert", "Unterdrückt", "Deaktiviert",
+  "Ausgeblendet: 3"; "Zurückgestellt" stays.
+
+---
+
 ## 0.10.0 – Everything the comparison asked for (Sep. 2026)
 
 ### Added
@@ -151,8 +179,8 @@ commit.
 
 - **A new key in `Wording`: a shelf as one word** (for `@umriss-ui/table`'s
   alarm list, whose availability is now a badge), in English and German:
-  `availabilityShelvedShort` ("Shelved", "Zurückgestellt"). The sentence
-  `availabilityShelved` stays - in the badge's tooltip and in what is
+  `availabilitySnoozedShort` ("Shelved", "Zurückgestellt"). The sentence
+  `availabilitySnoozed` stays - in the badge's tooltip and in what is
   spoken. An application that implements the whole `Wording` type itself no
   longer compiles until it adds it.
 
@@ -200,8 +228,8 @@ commit.
   longer compiles until it adds these three.
 - **Five new keys in `Wording`: the wording of an alarm's availability** (for
   `@umriss-ui/table`'s alarm model and list), in English and German:
-  `availabilityShelved(until, by)`, `availabilitySuppressedByDesign`,
-  `availabilityOutOfService`, `hiddenFromOperation(count)` and
+  `availabilitySnoozed(until, by)`, `availabilitySuppressed`,
+  `availabilityDisabled`, `hiddenAlarms(count)` and
   `columnAvailability`. A partial wording passed to the provider is merged as
   before; an application that implements the whole `Wording` type itself no
   longer compiles until it adds these five.
@@ -914,7 +942,7 @@ unpublished until now.
   are unchanged. The export is `t.asCsv()` and the part `Export`.
 - **`AlarmList` and `alarmModel`** with `acknowledge`, `countAcknowledgeable`,
   `countInWindow`, `frequencyByType`, `detectFlood`, `nextLifecycleState`,
-  `isStanding`, `isAcknowledged`, `isDone`, `hasReturned`, `priorityRank`,
+  `isActive`, `isAcknowledged`, `isDone`, `hasReturned`, `priorityRank`,
   `PRIORITIES`, `ALARM_COLUMNS`, `alarmColumns`, `DEFAULT_ORDER` and their types.
   **Instead** the same names out of `@umriss-ui/table`; the props of the alarm
   list are called `view`, `selection`, `onAcknowledge`, `asOf` and `freshness`
