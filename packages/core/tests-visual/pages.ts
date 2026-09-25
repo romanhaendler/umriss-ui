@@ -16,11 +16,14 @@
 
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { exampleAddresses } from "@umriss-ui/demo/checks/pages";
+import { exampleAddresses, scenarioIds } from "@umriss-ui/demo/checks/pages";
 import type { ExampleAddress } from "@umriss-ui/demo/checks/pages";
 import { ALL_PAGES } from "../demo/outline";
 
 const EXAMPLES_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "demo", "examples");
+
+/** The scenarios on the front page, in their order. */
+export const SCENARIO_IDS: readonly string[] = scenarioIds(join(dirname(fileURLToPath(import.meta.url)), "..", "demo", "scenarios"));
 
 /** The addresses of all pages, the scenarios page first. */
 export const PAGES = ["scenarios", ...ALL_PAGES.map((p) => p.id)] as const;

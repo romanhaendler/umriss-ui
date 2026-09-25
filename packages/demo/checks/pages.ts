@@ -11,7 +11,8 @@
 
 import { readdirSync } from "node:fs";
 import { join } from "node:path";
-import { byRank, parseFileName } from "../src/tooling/fileName.ts";
+import { existsSync } from "node:fs";
+import { byRank, parseFileName, parseScenarioName } from "../src/tooling/fileName.ts";
 
 export interface ExampleAddress {
   pageId: string;
@@ -41,4 +42,15 @@ export function exampleAddresses(folder: string): ExampleAddress[] {
 export function firstExamples(addresses: readonly ExampleAddress[]): ExampleAddress[] {
   const seen = new Set<string>();
   return addresses.filter((address) => !seen.has(address.pageId) && seen.add(address.pageId));
+}
+
+/** The scenarios' anchors, in their order - from `demo/scenarios/`, which a
+    demo without scenarios does not have yet. */
+export function scenarioIds(folder: string): string[] {
+  if (!existsSync(folder)) return [];
+  return readdirSync(folder)
+    .filter((file) => file.endsWith(".tsx"))
+    .map((file) => parseScenarioName(`/scenarios/${file}`))
+    .sort(byRank)
+    .map((one) => one.id);
 }
