@@ -1,6 +1,6 @@
 /* The keyboard through the scene (schedule-a11y 02, 03, 05): the active subtask
    is the hover the pointer would make, pointer and keys hand it over, the view
-   follows it, the brackets follow a transport, and Alt proposes exactly the
+   follows it, the brackets follow a dependency, and Alt proposes exactly the
    intents a drag of one step would. jsdom's plot lies at the origin, so a
    client point is a plot point. */
 
@@ -8,7 +8,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { HOUR } from "@umriss-ui/charts";
 import { ScheduleScene } from "../src/scene";
 import type { SceneOptions } from "../src/sceneView";
-import type { Intent, Subtask, Transport } from "../src/model";
+import type { Intent, Subtask, Dependency } from "../src/model";
 
 const OPTIONS: SceneOptions = {
   laneHeight: 44,
@@ -29,7 +29,7 @@ const WORK: Subtask[] = [
   { id: "p3", task: "b", lane: "press", from: 20 * HOUR, to: 21 * HOUR },
   { id: "w1", task: "a", lane: "weld", from: 3 * HOUR, to: 4 * HOUR },
 ];
-const TRANSPORTS: Transport[] = [{ id: "t1", from: "p1", to: "w1", duration: HOUR / 2 }];
+const DEPENDENCIES: Dependency[] = [{ id: "t1", from: "p1", to: "w1", lag: HOUR / 2 }];
 
 function sceneWith(options: Partial<SceneOptions> = {}) {
   const scene = new ScheduleScene();
@@ -38,7 +38,7 @@ function sceneWith(options: Partial<SceneOptions> = {}) {
   scene.registerLane({ id: "press", label: "Press" });
   scene.registerLane({ id: "weld", label: "Weld" });
   scene.registerLayer({ kind: "subtasks", data: WORK, tasks: [{ id: "a", color: "red" }, { id: "b", color: "blue" }] });
-  scene.registerLayer({ kind: "transports", data: TRANSPORTS });
+  scene.registerLayer({ kind: "dependencies", data: DEPENDENCIES });
   scene.setOptions({ ...OPTIONS, ...options }, [0, 8 * HOUR]);
   scene.setHandlers({ onIntent: (i) => intents.push(i), onSelectedTaskChange: (t, s) => selected.push([t, s]) });
   scene.bind(document.createElement("div"), document.createElement("div"), document.createElement("canvas"), document.createElement("canvas"));
@@ -49,7 +49,7 @@ function sceneWith(options: Partial<SceneOptions> = {}) {
 const key = (k: string, init: KeyboardEventInit = {}) => new KeyboardEvent("keydown", { key: k, ...init });
 const active = (scene: ScheduleScene) => {
   const hover = scene.gestures.hover;
-  return hover.kind === "subtask" ? hover.subtask.id : hover.kind === "transport" ? hover.transport.id : null;
+  return hover.kind === "subtask" ? hover.subtask.id : hover.kind === "dependency" ? hover.dependency.id : null;
 };
 const pointer = (type: string, x: number, y: number) => new PointerEvent(type, { pointerId: 1, pointerType: "mouse", clientX: x, clientY: y, button: 0 });
 
@@ -139,13 +139,13 @@ describe("the tab stop and the active subtask", () => {
   });
 });
 
-describe("along a transport", () => {
-  it("goes out with ] onto the transport and on to its stop, and back with [", () => {
+describe("along a dependency", () => {
+  it("goes out with ] onto the dependency and on to its stop, and back with [", () => {
     const { scene } = sceneWith();
     scene.focus(true);
     scene.key(key("]"));
     expect(active(scene)).toBe("t1");
-    expect(scene.getSnapshot().tooltip?.target.kind).toBe("transport");
+    expect(scene.getSnapshot().tooltip?.target.kind).toBe("dependency");
     scene.key(key("]"));
     expect(active(scene)).toBe("w1");
     scene.key(key("["));
@@ -173,7 +173,7 @@ describe("along a transport", () => {
     expect(scene.key(key("t", { altKey: true }))).toBe(false);
   });
 
-  it("walks on from a transport's first stop", () => {
+  it("walks on from a dependency's first stop", () => {
     const { scene } = sceneWith();
     scene.focus(true);
     scene.key(key("]"));

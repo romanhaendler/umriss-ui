@@ -46,7 +46,7 @@ const WITHOUT_TABLE: Readonly<Record<string, string>> = {
   demonstration: A_CHAPTER,
 };
 
-/** Renders, and gives back the node together with its teardown – the teardown
+/** Renders, and gives back the node together with its lead-out – the lead-out
     belongs to the test: an example that throws only while being cleaned up is
     just as broken. */
 async function mount(content: ReactNode): Promise<{ host: HTMLDivElement; unmount: () => Promise<void> }> {

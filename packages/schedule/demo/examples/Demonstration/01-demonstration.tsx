@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Checkbox, ContextMenu, MenuItem, MenuSeparator, Stack, Text } from "@umriss-ui/core";
-import { Lane, Schedule, Subtasks, Transports, applyIntent, findings, ripple, shiftTask } from "../../../src";
+import { Lane, Schedule, Subtasks, Dependencies, applyIntent, findings, ripple, shiftTask } from "../../../src";
 import type { Intent, ScheduleInteraction, Subtask } from "../../../src";
 import { DAY_OF_PLAN, MOVES, ORDERS, STATIONS, STEPS } from "../../data";
 
@@ -63,19 +63,19 @@ export default function Demonstration() {
 
   return (
     <Stack gap={3}>
-      <Checkbox label="Push successors when a transport no longer fits" checked={cascade} onChange={(e) => setCascade(e.target.checked)} />
+      <Checkbox label="Push successors when a dependency no longer fits" checked={cascade} onChange={(e) => setCascade(e.target.checked)} />
       <Schedule
         ariaLabel="Plan of Tuesday, 17 March, in the planner's hands"
         initialDomain={DAY_OF_PLAN}
         height={380}
-        intents={["move", "lane", "stretch", "setup", "teardown"]}
+        intents={["move", "lane", "stretch", "leadIn", "leadOut"]}
         onIntent={apply}
         onInteraction={onInteraction}
       >
         {STATIONS.map((station) => (
           <Lane key={station.id} id={station.id} label={station.label} />
         ))}
-        <Transports data={MOVES} />
+        <Dependencies data={MOVES} />
         <Subtasks data={plan.steps} tasks={ORDERS} />
       </Schedule>
       <ContextMenu
@@ -98,8 +98,8 @@ export default function Demonstration() {
               The whole order later by a quarter hour
             </MenuItem>
             <MenuSeparator />
-            <MenuItem onSelect={() => apply({ kind: "setup", subtask: target.id, setup: 0 })} disabled={(target.setup ?? 0) === 0}>
-              Remove the setup
+            <MenuItem onSelect={() => apply({ kind: "leadIn", subtask: target.id, leadIn: 0 })} disabled={(target.leadIn ?? 0) === 0}>
+              Remove the lead-in
             </MenuItem>
           </>
         ) : (
@@ -107,8 +107,8 @@ export default function Demonstration() {
         )}
       </ContextMenu>
       <Text size="sm" tone="secondary" data-findings-summary>
-        {found.overlaps.length} {found.overlaps.length === 1 ? "overlap" : "overlaps"}, {found.lateTransports.length}{" "}
-        {found.lateTransports.length === 1 ? "late transport" : "late transports"}
+        {found.overlaps.length} {found.overlaps.length === 1 ? "overlap" : "overlaps"}, {found.violatedDependencies.length}{" "}
+        {found.violatedDependencies.length === 1 ? "violated dependency" : "violated dependencies"}
       </Text>
       <Text size="xs" mono tone="muted" data-intent-log>
         {plan.log.length === 0 ? "Drag a subtask, or right-click one" : plan.log.join(" · ")}

@@ -649,7 +649,7 @@ would be ambiguous between taking a tool and moving the dock, and that
 ambiguity could only be settled by a drag threshold; it is also the single
 keyboard stop from which the dock is moved, four arrow keys for four resting
 places. The **Schedule** has two per selected **Subtask**, at the outer edges
-of its **Setup** and **Teardown**, and they appear on selection only — a plan
+of its **Lead-in** and **Lead-out**, and they appear on selection only — a plan
 where every bar bristles with grips is a plan nobody can read. One word,
 because it is one gesture: press the small thing to move the big one.
 _Avoid_: Anfasser, handle, Ziehfläche, Titelleiste — for the drawn thing. The
@@ -967,22 +967,22 @@ editing (ADR-0026).
 **Schedule**:
 The component that shows subtasks on lanes over time: lane headers at the left,
 a coarse axis band above the plot area and a fine one below it, the subtasks
-and transports painted on canvas. It is not a **Chart** — that word owns a plot
+and dependencies painted on canvas. It is not a **Chart** — that word owns a plot
 area with series — though it is built in its image and on its arithmetic.
 _Avoid_: Gantt, timeline, Plantafel, planning board, Diagramm
 
 **Task**:
 One whole undertaking: subtasks in a fixed order across several lanes, joined
-by transports. It is never drawn as a thing of its own — it shows as the colour
+by dependencies. It is never drawn as a thing of its own — it shows as the colour
 its subtasks share, which the caller assigns, and in selection, which always
-takes the whole task: every subtask and every transport of it.
+takes the whole task: every subtask and every dependency of it.
 _Avoid_: Auftrag, job, order, Vorgang
 
 **Lane group**:
 Structure over the **Lane**s and never a lane itself: `<LaneGroup>` around
 lanes and other groups, to any depth, so that the plan follows the plant —
 hall, line, machine. Nothing sits on a group. A **Subtask** names a lane, a
-**Transport** connects two subtasks, a finding belongs to a lane, `canMoveTo`
+**Dependency** joins two subtasks, a finding belongs to a lane, `canMoveTo`
 is asked about a lane and every **Intent** names one; none of them can name a
 group, and none of them changes when a group is folded. Folding changes the
 view and not the plan, which is why it is not an intent (ADR-0025).
@@ -991,7 +991,7 @@ _Avoid_: parent lane, super-lane, Gruppenbahn, category, swimlane group
 **Miniature**:
 What a folded **Lane group** shows: every lane in it as a thin strip, at a
 smaller scale, with its work in the tasks' own colours. It is the real work,
-smaller — not a summary, not a packing, not a utilisation band. Transports
+smaller — not a summary, not a packing, not a utilisation band. Dependencies
 arrive at a strip, findings show on the row, and a strip can be hovered and
 selected: folding costs a planner detail and never access. Both standing
 sentences hold inside one — a lane is still a machine, and an **Overlap** is
@@ -999,8 +999,8 @@ still not packed, because a change of SCALE moves nothing.
 _Avoid_: summary, collapsed lane, aggregate, Übersichtszeile, roll-up
 
 **Subtask**:
-The drawn interval: a main time on one lane, with an optional **Setup** before
-it and a **Teardown** after it. It is what the pointer hits, a drag moves and
+The drawn interval: a main time on one lane, with an optional **Lead-in** before
+it and a **Lead-out** after it. It is what the pointer hits, a drag moves and
 an overlap stands between. It is not the removed charts `Span`: a span had
 an extent and nothing else, a subtask has three parts and a task it belongs to.
 Where the German wording has to name it, it says *Teilaufgabe*.
@@ -1017,28 +1017,30 @@ lane and never packed into sub-lanes: packing turns the conflict into a layout,
 and the conflict is the finding.
 _Avoid_: collision, Konflikt as the drawn thing
 
-**Setup** / **Teardown**:
-The preparation before a subtask's main time and the clearing after it
-(Rüsten, Abrüsten). Both occupy the lane — an overlap that only touches a
-setup is still an overlap — and each is changed on its own, never only as a
-consequence of the main time moving.
-_Avoid_: Vorlaufzeit/Nachlaufzeit as identifiers, lead/lag, run-in/run-out
+**Lead-in** / **Lead-out**:
+The time a subtask needs on its lane before its main time and after it — the
+preparation and the clearing up, whatever they are in the caller's domain
+(German *Vorlauf*, *Nachlauf*). Both occupy the lane — an overlap that only
+touches a lead-in is still an overlap — and each is changed on its own, never
+only as a consequence of the main time moving.
+_Avoid_: setup/teardown, Rüsten/Abrüsten, buffer, run-in/run-out
 
-**Transport**:
-A task's move between two of its subtasks: from one, to the next, with a
-duration of its own. It is drawn as the line between the two, and where each
-end anchors — at the main time, or beyond the setup or teardown — is declared
-per transport. A transport always runs from an end to a start; there is no
-other kind of connection.
-_Avoid_: dependency, link, connection, arrow, edge, Verbindung
+**Dependency**:
+The order between two subtasks of one task: the later may not begin before the
+earlier ends plus a **lag** of the dependency's own. It is drawn as the line
+between the two, and where each end anchors — at the main time, or beyond the
+lead-in or lead-out — is declared per dependency. A dependency always runs from
+an end to a start, and only within one task; there is no other kind of
+connection.
+_Avoid_: transport, link, connection, arrow, edge, Verbindung
 
-**Late transport**:
-A transport whose duration does not fit between its subtasks: the successor
-starts before the predecessor's end plus the transport's duration. Like an
-**Overlap** it is drawn and reported and never resolved by the schedule — the
-finding is the point. It is not a **Violation**: that word judges a control
-chart's sequence.
-_Avoid_: conflict, Konflikt, violation, error
+**Violated dependency**:
+A dependency whose lag does not fit between its subtasks: the successor starts
+before the predecessor's end plus the lag. Like an **Overlap** it is drawn and
+reported and never resolved by the schedule — the finding is the point. The
+two words stand together; alone, a **Violation** is a control chart's rule and
+the indices it flags.
+_Avoid_: late transport, conflict, Konflikt, violation alone, error
 
 **Lane header**:
 The label at the left edge naming what a lane is. The run of lane headers
@@ -1048,7 +1050,7 @@ word — a lane is not a row.
 _Avoid_: row header, Zeilenkopf, sidebar, y axis label
 
 **Active subtask**:
-Where the schedule's keyboard stands: one subtask, or a **Transport** reached
+Where the schedule's keyboard stands: one subtask, or a **Dependency** reached
 from one, or nothing — set by the keys and by the pointer's hover alike, the
 last input winning, and drawn as the hover is. It is the schedule's counterpart
 to core's active node and the charts' **Active point** (ADR-0003, ADR-0030):
@@ -1059,14 +1061,14 @@ _Avoid_: focused subtask, cursor, current subtask, selected subtask
 
 **Intent**:
 What the schedule reports when an interaction asks for a change: move this
-subtask, stretch its main time, change its setup, put it on another lane. The
+subtask, stretch its main time, change its lead-in, put it on another lane. The
 schedule draws what it is given and changes nothing itself; whether an intent
 becomes data is the caller's decision (ADR-0023).
 _Avoid_: change event, mutation, edit, command
 
 **Ghost**:
 The picture of an intent while its drag is in flight, drawn beside the
-unchanged data and assessed like data — an overlap or late transport the drop
+unchanged data and assessed like data — an overlap or violated dependency the drop
 would create shows before the drop. When the drag ends the ghost goes and the
 intent is reported. A drag from outside the schedule has one too: there the
 ghost is the work that is not on the plan yet.
@@ -1082,7 +1084,7 @@ _Avoid_: create, add, new, insert, Anlegen
 
 **Bar label**:
 The line of text a caller writes into a **Subtask**'s bar. It lies on the main
-time, because the setup is not the work; it is cut off where the bar is too
+time, because the lead-in is not the work; it is cut off where the bar is too
 narrow and left out where nothing readable would fit — a letter and an ellipsis
 say less than nothing. It is real text in the DOM, as every other thing a reader
 has to read in this library is.
@@ -1100,8 +1102,8 @@ Each owns exactly ONE property of the drawing, and no property says two things.
 saturation and is the task colour mixed half into the surface, at full height,
 opaque and unoutlined; `open` owns the fade, at whichever edge of the view the
 bar passes. A **Progress** share owns a rail, inside the main time and above
-the bar's lower edge. The faint, outlined fill belongs to a **Setup** and a
-**Teardown** and to nothing else — which is why provisional work is empty
+the bar's lower edge. The faint, outlined fill belongs to a **Lead-in** and a
+**Lead-out** and to nothing else — which is why provisional work is empty
 rather than pale, and another shift's is a paler colour rather than a
 transparent one. A hatch says none of these: it says a **Lane** is not
 available, and only during a **Refusal**.
@@ -1110,10 +1112,10 @@ Adding a statement means finding a channel, not inventing a mark.
 _Avoid_: style, variant, state, Zustand, status
 
 **Route**:
-How a **Transport** is drawn between its two ends — a curve, a straight line or
+How a **Dependency** is drawn between its two ends — a curve, a straight line or
 orthogonal segments — together with where its line attaches to the bars and
 whether its ends carry a dot. It is the picture and nothing else: what a
-transport connects, and therefore whether it is a **Late transport**, is said by
+dependency connects, and therefore whether it is a **Violated dependency**, is said by
 its two anchors alone.
 _Avoid_: path as the API word, shape, style, Linienführung
 

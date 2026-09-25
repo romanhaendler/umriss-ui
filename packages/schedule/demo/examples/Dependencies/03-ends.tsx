@@ -1,13 +1,13 @@
 import { Stack, Text } from "@umriss-ui/core";
-import { Lane, Schedule, Subtasks, Transports } from "../../../src";
-import type { Subtask, Task, Transport, TransportEnds } from "../../../src";
+import { Lane, Schedule, Subtasks, Dependencies } from "../../../src";
+import type { Subtask, Task, Dependency, DependencyEnds } from "../../../src";
 
 export const title = "Whether the ends carry a dot";
 
-/* `ends` decides whether a transport's two ends are marked with a dot. The dot
+/* `ends` decides whether a dependency's two ends are marked with a dot. The dot
    says where the line is anchored - a help while a plan is being read, and
    noise in a plan full of short moves. So it is the caller's choice, and a
-   single transport may say otherwise for itself.
+   single dependency may say otherwise for itself.
 
    Picture only, like `route` and `attach`: no finding follows from it. */
 
@@ -22,12 +22,12 @@ const STEPS: Subtask[] = [
   { id: "press", task: "frame", lane: "press", from: at(10), to: at(11) },
 ];
 
-const MOVES: Transport[] = [
-  { id: "to-mill", from: "saw", to: "mill", duration: min(15) },
-  { id: "to-press", from: "mill", to: "press", duration: min(15) },
+const MOVES: Dependency[] = [
+  { id: "to-mill", from: "saw", to: "mill", lag: min(15) },
+  { id: "to-press", from: "mill", to: "press", lag: min(15) },
 ];
 
-function Variant({ ends }: { ends: TransportEnds }) {
+function Variant({ ends }: { ends: DependencyEnds }) {
   return (
     <Stack gap={1}>
       <Text size="xs" tone="muted" mono>
@@ -37,7 +37,7 @@ function Variant({ ends }: { ends: TransportEnds }) {
         <Lane id="saw" label="Saw" />
         <Lane id="mill" label="Mill" />
         <Lane id="press" label="Press" />
-        <Transports data={MOVES} />
+        <Dependencies data={MOVES} />
         <Subtasks data={STEPS} tasks={TASKS} />
       </Schedule>
     </Stack>

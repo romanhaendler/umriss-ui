@@ -8,7 +8,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render } from "@testing-library/react";
 import { LanguageProvider } from "@umriss-ui/core";
 import { GERMAN_FORMATS, GERMAN_WORDING } from "@umriss-ui/core/wording/de";
-import { Lane, Schedule, Subtasks, Transports } from "../src";
+import { Lane, Schedule, Subtasks, Dependencies } from "../src";
 import type { Subtask } from "../src";
 
 const at = (hour: number) => new Date(2026, 2, 17, hour).getTime();
@@ -29,7 +29,7 @@ const plan = (
   <Schedule ariaLabel="Plan of week 12" initialDomain={[at(6), at(14)]}>
     <Lane id="press" label="Press" />
     <Lane id="paint" label="Paint shop" />
-    <Transports data={[{ id: "t", from: "c", to: "p", duration: 5_400_000 }]} />
+    <Dependencies data={[{ id: "t", from: "c", to: "p", lag: 5_400_000 }]} />
     <Subtasks data={WORK} tasks={[{ id: "o1", color: "red", name: "Order 1" }, { id: "o2", color: "blue", name: "Order 2" }]} />
   </Schedule>
 );
@@ -59,13 +59,13 @@ describe("the readout", () => {
     expect(readout(container)).toBe("Press, Order 2, Welding, 17/03 09:00–11:00, Overlap with Cutting");
   });
 
-  it("reads a transport reached by key, and a late one as late", async () => {
+  it("reads a dependency reached by key, and a violated one as violated", async () => {
     const { container } = render(plan);
     fireEvent.keyDown(plotOf(container), { key: "ArrowRight" });
     fireEvent.keyDown(plotOf(container), { key: "]" });
     await rest();
     /* Cutting ends at 10:00, painting starts at 11:00: ninety minutes do not fit. */
-    expect(readout(container)).toBe("Order 1, Transport 1 hr 30 min, Cutting → Painting, Late transport, 30 min short");
+    expect(readout(container)).toBe("Order 1, Dependency 1 hr 30 min, Cutting → Painting, Violated dependency, 30 min short");
   });
 
   it("stays silent for the pointer", async () => {
@@ -109,7 +109,7 @@ describe("the readout", () => {
     expect(plotOf(container).getAttribute("aria-roledescription")).toBe("Belegungsplan");
     fireEvent.keyDown(plotOf(container), { key: "ArrowRight" });
     await rest();
-    expect(readout(container)).toBe("Press, Order 1, Cutting, 17.03. 08:00–10:00, Überschneidung mit Welding, Transport verspätet, 30 Min zu knapp");
+    expect(readout(container)).toBe("Press, Order 1, Cutting, 17.03. 08:00–10:00, Überschneidung mit Welding, Abhängigkeit verletzt, 30 Min zu knapp");
   });
 });
 
@@ -117,7 +117,7 @@ describe("the summary", () => {
   it("describes the lanes, the subtasks in view, the span and the findings, then the keys", () => {
     const { container } = render(plan);
     const text = summary(container);
-    expect(text).toMatch(/^2 lanes, 3 subtasks in view from 17\/03 06:00 to 17\/03 14:00\. 1 overlap, 1 late transport\. /);
+    expect(text).toMatch(/^2 lanes, 3 subtasks in view from 17\/03 06:00 to 17\/03 14:00\. 1 overlap, 1 violated dependency\. /);
     expect(text).toContain("Left and right arrows move along the lane");
   });
 
@@ -128,7 +128,7 @@ describe("the summary", () => {
       </LanguageProvider>,
     );
     expect(summary(container)).toMatch(
-      /^2 Bahnen, 3 Teilaufgaben im Blick von 17\.03\. 06:00 bis 17\.03\. 14:00\. 1 Überschneidung, 1 verspäteter Transport\. Pfeil links/,
+      /^2 Bahnen, 3 Teilaufgaben im Blick von 17\.03\. 06:00 bis 17\.03\. 14:00\. 1 Überschneidung, 1 verletzte Abhängigkeit\. Pfeil links/,
     );
   });
 });

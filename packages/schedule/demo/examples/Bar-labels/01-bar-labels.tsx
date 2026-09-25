@@ -5,7 +5,7 @@ export const title = "What a bar says";
 
 /* `label` writes a line into every bar: the order, the article, the quantity -
    whatever a planner reads first. The text lies on the main time, because the
-   setup is not the work.
+   lead-in is not the work.
 
    It is cut off with an ellipsis where the bar is too narrow, and left out
    where even a word and an ellipsis would say nothing - the inspections at the
@@ -37,8 +37,8 @@ const ORDERS: readonly Task[] = [
 ];
 
 const STEPS: readonly Subtask[] = [
-  { id: "a-2041-2", task: "a-2041", lane: "mill", from: at(8), to: at(10, 30), setup: min(30), teardown: min(15) },
-  { id: "a-2044-2", task: "a-2044", lane: "press", from: at(9, 30), to: at(10, 45), setup: min(25) },
+  { id: "a-2041-2", task: "a-2041", lane: "mill", from: at(8), to: at(10, 30), leadIn: min(30), leadOut: min(15) },
+  { id: "a-2044-2", task: "a-2044", lane: "press", from: at(9, 30), to: at(10, 45), leadIn: min(25) },
   { id: "a-2041-3", task: "a-2041", lane: "qa", from: at(11, 30), to: at(12, 15) },
   { id: "a-2046-3", task: "a-2046", lane: "qa", from: at(15), to: at(15, 30) },
 ];

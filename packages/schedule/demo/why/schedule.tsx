@@ -5,7 +5,7 @@ export default function WhySchedule() {
       <p>
         Drag a bar and the plan does not move. The schedule draws a ghost, assesses it as if it
         were data, and when the drag ends it <strong>reports what was asked for</strong> - a
-        move, a lane, a stretch, a setup, a teardown, a place. The subtasks it was given are the
+        move, a lane, a stretch, a lead-in, a lead-out, a place. The subtasks it was given are the
         subtasks it still has. See <code>docs/adr/0023-intents-not-mutations.md</code>.
       </p>
       <p>
