@@ -1,23 +1,19 @@
-/* Two quantities, two y axes, one grid: the kiln's temperature on the left and
-   the gas it burns on the right. Only the first axis draws grid lines; with
-   `alignTicks` the gas axis takes its tick count and widens its own domain
-   until each of its ticks stands on one of those lines - in steps of 1, 2 or
-   5, never 17.3. Without it the right labels would float between the lines,
-   and a reader would take a line for a value it is not. */
-
 import { Chart, Legend, Line, Tooltip, XAxis, YAxis } from "../../../src";
-import { kilnData, type KilnPoint } from "@umriss-ui/demo/worlds/plant";
+import { week, type MetricPoint } from "@umriss-ui/demo/worlds/operations";
 
-export const title = "Aligned ticks";
+export const title = "Align a second axis to the grid";
+export const lead = "With `alignTicks` a further y axis widens its domain until its ticks, in 1-2-5 steps, fall on the first axis' grid lines.";
+
+const LAST_WEEK = week("search", 5 * 60_000);
 
 export default function AlignedTicks() {
   return (
-    <Chart data={kilnData} height={260} ariaLabel="Kiln temperature and gas flow across a week on one grid">
-      <XAxis accessor={(d: KilnPoint) => d.t} time />
-      <YAxis accessor={(d: KilnPoint) => d.temperature} label="°C" />
-      <YAxis id="gas" position="right" accessor={(d: KilnPoint) => d.gas} label="m³/h" alignTicks />
-      <Line accessor={(d: KilnPoint) => d.temperature} name="Temperature" />
-      <Line accessor={(d: KilnPoint) => d.gas} yAxisId="gas" name="Gas" />
+    <Chart data={LAST_WEEK} height={260} ariaLabel="Search requests and latency over last week on one grid">
+      <XAxis accessor={(d: MetricPoint) => d.t} time />
+      <YAxis accessor={(d: MetricPoint) => d.requests} label="Requests/min" />
+      <YAxis id="latency" position="right" accessor={(d: MetricPoint) => d.p95} label="ms" alignTicks />
+      <Line accessor={(d: MetricPoint) => d.requests} name="Requests" />
+      <Line accessor={(d: MetricPoint) => d.p95} yAxisId="latency" name="p95" />
       <Legend placement="top" />
       <Tooltip mode="x" />
     </Chart>

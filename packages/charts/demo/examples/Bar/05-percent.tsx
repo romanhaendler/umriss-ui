@@ -1,30 +1,19 @@
-/* The same downtime as shares: `normalize` on a stack makes every day sum to
-   100 %, so the question moves from "how long" to "of what". The breakdown on
-   the second Thursday is no longer the tallest bar - it is the widest part.
-
-   The y axis reads in percent by itself, and so does the tooltip's row per
-   reason. The total stays in minutes: it is the one number the shares hide,
-   and `format` writes it, as it would write any reading. */
-
 import { Bar, Chart, Legend, Tooltip, XAxis, YAxis } from "../../../src";
-import { downtimeData, type DayDowntime } from "@umriss-ui/demo/worlds/plant";
+import { DELAYS, type DayDelays } from "@umriss-ui/demo/worlds/logistics";
 
-export const title = "Shares of a whole";
+export const title = "Show shares of a whole";
+export const lead = "`normalize` makes each stack sum to 100 %, so the question moves from how long to of what; `format` still writes minutes.";
 
 const minutes = (v: number) => `${v} min`;
 
 export default function Percent() {
   return (
-    <Chart data={downtimeData} height={280} ariaLabel="Share of each reason in the downtime per working day">
-      <XAxis
-        accessor={(d: DayDowntime) => d.day}
-        ticks={downtimeData.map((d) => d.day)}
-        tickFormat={(v) => downtimeData[v]?.name ?? ""}
-      />
-      <YAxis accessor={(d: DayDowntime) => d.setup} />
-      <Bar accessor={(d: DayDowntime) => d.setup} name="Setup" stack="downtime" normalize format={minutes} />
-      <Bar accessor={(d: DayDowntime) => d.material} name="Material" stack="downtime" normalize format={minutes} />
-      <Bar accessor={(d: DayDowntime) => d.breakdown} name="Breakdown" stack="downtime" normalize format={minutes} />
+    <Chart data={DELAYS} height={280} ariaLabel="Share of each cause in the minutes late per working day">
+      <XAxis accessor={(d: DayDelays) => d.day} ticks={DELAYS.map((d) => d.day)} tickFormat={(v) => DELAYS[v]?.name ?? ""} />
+      <YAxis accessor={(d: DayDelays) => d.traffic} />
+      <Bar accessor={(d: DayDelays) => d.traffic} name="Traffic" stack="delay" normalize format={minutes} />
+      <Bar accessor={(d: DayDelays) => d.loading} name="Loading" stack="delay" normalize format={minutes} />
+      <Bar accessor={(d: DayDelays) => d.access} name="No access" stack="delay" normalize format={minutes} />
       <Legend placement="top" />
       <Tooltip mode="x" />
     </Chart>

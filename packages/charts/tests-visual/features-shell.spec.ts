@@ -20,7 +20,7 @@ checkShell({
   example: {
     pageId: "limitline",
     id: "limits-and-state",
-    title: "Limits and state band",
+    title: "Read limits above the states",
     pageName: "LimitLine",
   },
   palettePage: { query: "controlchart", name: "ControlChart", pageId: "controlchart", rubricName: "Limits and alarms" },

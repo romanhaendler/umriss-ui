@@ -54,12 +54,12 @@ test("a hover shows the crosshair and a tooltip with every series", async ({ pag
   const tooltip = example.locator(".uc-tooltip");
   await expect(tooltip).toHaveCSS("opacity", "1");
   const text = await tooltip.innerText();
-  for (const name of ["Series A", "Series B", "Series C", "Series D (with a gap)"]) {
+  for (const name of ["Checkout", "Billing", "Sign-in", "Image service"]) {
     expect(text).toContain(name);
   }
-  // Values at the last data point (a deterministic series, R-6.2).
-  expect(text).toContain("26.933");
-  expect(text).toContain("64.265");
+  // Values at the last data point, 10:30 (a deterministic world, R-6.2).
+  expect(text).toContain("175");
+  expect(text).toContain("312");
   // The crosshair and the markers lie on the overlay layer.
   expect(await occupiedPixels(example, "uc-layer-overlay")).toBeGreaterThan(0);
 });
@@ -70,10 +70,10 @@ test("the gap series is missing at the place of the gap", async ({ page }) => {
   await example.scrollIntoViewIfNeeded();
   await pointAt(page, example, 0.45, 0.5);
   const text = await example.locator(".uc-tooltip").innerText();
-  expect(text).toContain("Series A");
-  expect(text).toContain("Series B");
-  expect(text).toContain("Series C");
-  expect(text).not.toContain("Series D");
+  expect(text).toContain("Checkout");
+  expect(text).toContain("Billing");
+  expect(text).toContain("Sign-in");
+  expect(text).not.toContain("Image service");
 });
 
 test("the tooltip flips to the left at the right edge", async ({ page }) => {
@@ -134,14 +134,14 @@ test("multiple axes: values per axis space, right labels right of the marks", as
   expect(medium).toBeLessThan(1_000);
 
   // R-4.16: the tick labels of a right y axis stand to the right of their marks.
-  const right = example.locator('.uc-axis-right[data-axis="large"] .uc-tick').first();
+  const right = example.locator('.uc-axis-right[data-axis="requests"] .uc-tick').first();
   const mark = await right.locator(".uc-tick-mark").boundingBox();
   const label = await right.locator(".uc-tick-label").boundingBox();
   if (mark === null || label === null) throw new Error("tick not found");
   expect(label.x).toBeGreaterThan(mark.x + mark.width - 1);
 
   // … and to the left of them on the left axis.
-  const leftAxis = example.locator('.uc-axis-left[data-axis="small"] .uc-tick').first();
+  const leftAxis = example.locator('.uc-axis-left[data-axis="cpu"] .uc-tick').first();
   const markL = await leftAxis.locator(".uc-tick-mark").boundingBox();
   const labelL = await leftAxis.locator(".uc-tick-label").boundingBox();
   if (markL === null || labelL === null) throw new Error("tick not found");
@@ -149,14 +149,14 @@ test("multiple axes: values per axis space, right labels right of the marks", as
 });
 
 test("container resize: collapsing and expanding without an error", async ({ page }) => {
-  await openExample(page, "chart", "sizes");
+  await openExample(page, "getting-started", "in-its-container");
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(String(e)));
   page.on("console", (msg) => {
     if (msg.type() === "error") errors.push(msg.text());
   });
 
-  const example = page.locator('[data-example="sizes"]');
+  const example = page.locator('[data-example="in-its-container"]');
   await example.scrollIntoViewIfNeeded();
   const before = await example.locator(".uc-plot").first().boundingBox();
 
@@ -174,8 +174,8 @@ test("container resize: collapsing and expanding without an error", async ({ pag
 });
 
 test("switching the theme changes the axis and series colours without a reload", async ({ page }) => {
-  await openExample(page, "line", "basic");
-  const example = page.locator('[data-example="basic"]');
+  await openExample(page, "line", "one-series");
+  const example = page.locator('[data-example="one-series"]');
   await example.scrollIntoViewIfNeeded();
 
   const labelColor = () =>
@@ -256,7 +256,7 @@ test("the mixed example: the tooltip carries every series kind", async ({ page }
   await pointAt(page, example, 0.8, 0.5);
   const text = await example.locator(".uc-tooltip").innerText();
   // Bars, a band area, a line and a scatter at one position, in one chart.
-  for (const name of ["Inflow", "Outflow", "Corridor", "Stock", "Samples"]) {
+  for (const name of ["Arrived", "Dispatched", "Target range", "On hand", "Counted"]) {
     expect(text).toContain(name);
   }
 });
@@ -268,14 +268,14 @@ test("the mixed example: the bar marker follows the value, not the foot", async 
   const example = page.locator('[data-example="mixed"]');
   await example.scrollIntoViewIfNeeded();
 
-  // Two periods with clearly different inflow. If the marker sat at the foot of
+  // Two days with clearly different arrivals. If the marker sat at the foot of
   // the bar - the baseline 0 - it would lie in the same place both times.
   await pointAt(page, example, 0.22, 0.5);
-  const smallValue = valueOf(await example.locator(".uc-tooltip").innerText(), "Inflow");
+  const smallValue = valueOf(await example.locator(".uc-tooltip").innerText(), "Arrived");
   const smallPosition = await markerPosition(example, 37, 99, 235);
 
   await pointAt(page, example, 0.78, 0.5);
-  const largeValue = valueOf(await example.locator(".uc-tooltip").innerText(), "Inflow");
+  const largeValue = valueOf(await example.locator(".uc-tooltip").innerText(), "Arrived");
   const largePosition = await markerPosition(example, 37, 99, 235);
 
   expect(smallPosition).toBeGreaterThan(0);
@@ -286,15 +286,15 @@ test("the mixed example: the bar marker follows the value, not the foot", async 
 });
 
 /* ------------------------------------------------------------------------
-   The operation instruments.
+   The state band and the matrix.
 
    The exact position of the lanes is NOT nailed down here - a test that guesses
    fractions of the plot area checks the layout calculation and not the statement.
    Instead the pointer is moved across the area and what comes out is checked.
    ------------------------------------------------------------------------ */
 
-const STATES = ["Production", "Setup", "Fault", "Maintenance"];
-const MACHINES = ["Furnace 1", "Press 2", "Mill 3"];
+const STATES = ["Driving", "Loading", "Idle", "Break"];
+const VEHICLES = ["FP 214 K", "FP 377 K", "FP 118 R"];
 
 /** What the tooltip says at a place; empty when it says nothing. */
 async function tooltipText(page: Page, example: Locator, fx: number, fy: number): Promise<string> {
@@ -343,27 +343,27 @@ test("state band: every lane answers for itself", async ({ page }) => {
   for (let k = 0; k <= 20; k++) {
     const fy = 0.55 + k * 0.022;
     const text = await tooltipText(page, example, 0.35, fy);
-    const machine = MACHINES.find((m) => text.includes(m));
-    if (machine === undefined) continue;
-    // Exactly one machine per place: two would be two lanes at one point.
-    expect(MACHINES.filter((m) => text.includes(m))).toHaveLength(1);
-    if (order[order.length - 1] !== machine) order.push(machine);
+    const vehicle = VEHICLES.find((m) => text.includes(m));
+    if (vehicle === undefined) continue;
+    // Exactly one vehicle per place: two would be two lanes at one point.
+    expect(VEHICLES.filter((m) => text.includes(m))).toHaveLength(1);
+    if (order[order.length - 1] !== vehicle) order.push(vehicle);
   }
 
   // All three occur, and from top to bottom in this order - the same one the axis
   // writes to its ticks.
-  expect(order).toEqual(MACHINES);
+  expect(order).toEqual(VEHICLES);
 });
 
 test("matrix: the tooltip carries the value, not the row number", async ({ page }) => {
-  await openExample(page, "matrix", "matrix");
+  await openExample(page, "matrix", "by-limits");
   // Colour alone can transport no number. The cell has to give up its value as
   // text, otherwise the matrix is empty for part of its readers.
-  const example = page.locator('[data-example="matrix"]');
+  const example = page.locator('[data-example="by-limits"]');
   await example.scrollIntoViewIfNeeded();
   const text = await tooltipText(page, example, 0.5, 0.5);
-  expect(text).toContain("OEE");
-  // OEE lies between 18 and 94; a row number 0-7 does not.
+  expect(text).toContain("Success rate");
+  // The success rate lies above 96; a row number 0-7 does not.
   const numbers = [...text.matchAll(/(\d+)[.,]\d+/g)].map((m) => Number(m[1]));
   expect(numbers.some((z) => z > 10)).toBe(true);
 });
@@ -380,8 +380,8 @@ test("scatter under \"nearest\": the hit follows the pointer up and down", async
   // Hit by x alone, a pointer moving straight up and down names the same
   // sample the whole way. In the plane it names the one above near the top and
   // the one below near the bottom - somewhere along the course the two differ.
-  await openExample(page, "scatter", "measurements");
-  const example = page.locator('[data-example="measurements"]');
+  await openExample(page, "scatter", "arrivals");
+  const example = page.locator('[data-example="arrivals"]');
   await example.scrollIntoViewIfNeeded();
   let changed = 0;
   for (let fx = 0.1; fx < 0.9; fx += 0.04) {
@@ -506,7 +506,7 @@ test("zoom: two fingers spread apart zoom in", async ({ page, context }) => {
 });
 
 /* ------------------------------------------------------------------------
-   Cursor sync (charts-long-series 04): three charts of one kiln share
+   Cursor sync (charts-long-series 04): three charts of one service share
    `syncId`. The crosshair is found on each overlay as the mean column of its
    pixels - the hover marker sits on the crosshair, so it does not move it.
    ------------------------------------------------------------------------ */

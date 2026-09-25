@@ -214,3 +214,169 @@ export const DOWNTIME_MINUTES: Readonly<Record<string, number>> = {
   webhooks: 210,
   reports: 95,
 };
+
+/* ---------------------------------------------------------------------------
+   For @umriss-ui/charts: last week at any resolution, a load test, single
+   traced requests, the autoscaler's log, the expected range and yesterday's
+   success rates.
+   --------------------------------------------------------------------------- */
+
+const HOUR = 60 * MINUTE;
+const DAY = 24 * HOUR;
+
+/** Monday, 9 March 2026, 00:00 - the start of last week. */
+export const LAST_WEEK = at(9, 0);
+
+/** Search returned nothing for some regions (INC-1043): Saturday, 18:30 to 19:55. */
+const SEARCH_OUTAGE = [at(14, 18, 30) - LAST_WEEK, at(14, 19, 55) - LAST_WEEK] as const;
+
+/** A service's last week, Monday to Monday, one point every `step`
+    milliseconds: busy by day, quieter at the weekend. During INC-1043 Search's
+    95th percentile more than doubles and its errors climb. The hour is counted,
+    not asked of a Date - a week of seconds is 604,800 points. */
+export function week(serviceId: string, step: number): MetricPoint[] {
+  const index = SERVICES.findIndex((one) => one.id === serviceId);
+  const service = SERVICES[index];
+  if (service === undefined) throw new Error(`No service "${serviceId}".`);
+  const r = random(2000 + index * 37);
+  const n = Math.floor((7 * DAY) / step);
+  const points = new Array<MetricPoint>(n);
+  /* The drift wanders at the same pace whatever the step. */
+  const keep = Math.pow(0.8, step / (5 * MINUTE));
+  const kick = 0.08 * Math.sqrt(1 - keep * keep) / 0.6;
+  let drift = 0;
+  for (let i = 0; i < n; i++) {
+    const offset = i * step;
+    const day = Math.floor(offset / DAY);
+    const hour = (offset % DAY) / HOUR;
+    const load = (day >= 5 ? 0.85 : 1) * (0.35 + 0.65 * Math.max(0, Math.sin((Math.PI * (hour - 5)) / 16)));
+    drift = keep * drift + (r() - 0.5) * kick;
+    const outage = serviceId === "search" && offset >= SEARCH_OUTAGE[0] && offset < SEARCH_OUTAGE[1];
+    const p95 = Math.round(service.latencySlo * (0.45 + 0.2 * load + drift) * (outage ? 2.3 : 1) * (1 + r() * 0.08));
+    points[i] = {
+      t: LAST_WEEK + offset,
+      p50: Math.round(p95 * (0.42 + r() * 0.06)),
+      p95,
+      errorRate: Math.round((0.05 + r() * 0.12 + (outage ? 3 : 0)) * 100) / 100,
+      requests: Math.round(VOLUME[service.tier] * load * (1 + (r() - 0.5) * 0.1)),
+    };
+  }
+  return points;
+}
+
+/** When this morning's load test of Search began. */
+export const LOAD_TEST_START = at(17, 6);
+
+export interface LoadTestPoint {
+  /** Minutes since the test began. */
+  minute: number;
+  /** CPU load of the busiest node, in per cent. */
+  cpu: number;
+  requestsPerHour: number;
+  /** 95th percentile latency, in ms. */
+  p95: number;
+}
+
+/** An hour of load test, minute by minute: three magnitudes far apart. */
+export const LOAD_TEST: readonly LoadTestPoint[] = (() => {
+  const r = random(99);
+  let cpu = 21;
+  let requestsPerHour = 128_000;
+  let p95 = 640;
+  return Array.from({ length: 60 }, (_, minute) => {
+    cpu += (r() - 0.5) * 0.9;
+    requestsPerHour += (r() - 0.5) * 9000;
+    p95 += (r() - 0.5) * 40;
+    return { minute, cpu, requestsPerHour, p95 };
+  });
+})();
+
+export interface Trace {
+  t: number;
+  /** How long the request took, end to end, in ms. */
+  ms: number;
+}
+
+/** Single Checkout requests traced end to end this morning, one every few
+    minutes from 06:00 - individual measurements, nothing in between. Slow
+    during the bad half hour, and now and then on their own. */
+export const TRACES: readonly Trace[] = (() => {
+  const r = random(4040);
+  const traces: Trace[] = [];
+  for (let t = at(17, 6, 2); t <= NOW; t += Math.round(1 + r() * 4) * MINUTE) {
+    const bad = t >= at(17, 9, 40) && t < at(17, 10, 10);
+    const ms = 150 + r() * 90 + (bad ? 110 + r() * 120 : r() < 0.05 ? 150 : 0);
+    traces.push({ t, ms: Math.round(ms) });
+  }
+  return traces;
+})();
+
+export interface ReplicaChange {
+  t: number;
+  /** Checkout's instances from here on; `null` while the autoscaler was paused. */
+  replicas: number | null;
+}
+
+/** Checkout's instances today, logged only when the autoscaler changes them.
+    It was paused for a database upgrade from 03:00 to 04:00; the last entry,
+    at now, closes the hold. */
+export const REPLICAS: readonly ReplicaChange[] = [
+  { t: at(17, 0), replicas: 4 },
+  { t: at(17, 3), replicas: null },
+  { t: at(17, 4), replicas: 3 },
+  { t: at(17, 6, 30), replicas: 5 },
+  { t: at(17, 8), replicas: 8 },
+  { t: at(17, 9, 45), replicas: 12 },
+  { t: at(17, 10, 15), replicas: 9 },
+  { t: NOW, replicas: 9 },
+];
+
+export interface ExpectedPoint {
+  t: number;
+  /** The range the requests per minute are expected in; `null` where the
+      job that computes it did not run. */
+  low: number | null;
+  high: number | null;
+}
+
+/** The range a service's requests per minute are expected in today, every
+    five minutes - the day's usual curve, give or take 15 %. The job that
+    computes it skipped 03:00 to 04:00. */
+export function expected(serviceId: string): ExpectedPoint[] {
+  const service = SERVICES.find((one) => one.id === serviceId);
+  if (service === undefined) throw new Error(`No service "${serviceId}".`);
+  const points: ExpectedPoint[] = [];
+  for (let t = at(17, 0); t <= NOW; t += 5 * MINUTE) {
+    const hour = (t - at(17, 0)) / HOUR;
+    const usual = VOLUME[service.tier] * (0.35 + 0.65 * Math.max(0, Math.sin((Math.PI * (hour - 5)) / 16)));
+    const skipped = hour >= 3 && hour < 4;
+    points.push({ t, low: skipped ? null : Math.round(usual * 0.85), high: skipped ? null : Math.round(usual * 1.15) });
+  }
+  return points;
+}
+
+export interface SuccessCell {
+  hour: number;
+  /** The row: the service's place in `SERVICES`. */
+  service: number;
+  /** Requests that succeeded, in per cent; `null` where there were none. */
+  success: number | null;
+}
+
+/** Yesterday, per service and hour: the share of requests that succeeded.
+    Webhooks has a bad late morning, 03:00 is bad everywhere (a DNS change),
+    and Reporting takes no requests before 06:00 - no requests, no share. */
+export const SUCCESS_BY_HOUR: readonly SuccessCell[] = (() => {
+  const r = random(23);
+  const cells: SuccessCell[] = [];
+  SERVICES.forEach((one, service) => {
+    for (let hour = 0; hour < 24; hour++) {
+      let success: number | null = 99.2 + r() * 0.8;
+      if (one.id === "webhooks" && hour >= 9 && hour < 14) success = 96 + r() * 1.5;
+      if (hour === 3) success = 97.4 + r() * 1;
+      if (one.id === "reports" && hour < 6) success = null;
+      cells.push({ hour, service, success: success === null ? null : Math.round(success * 100) / 100 });
+    }
+  });
+  return cells;
+})();
