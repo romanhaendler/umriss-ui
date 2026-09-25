@@ -140,8 +140,8 @@ test("the column menu pins a column to the end: it sticks there, and the focus s
 /* ---------------- The quiet gesture (umriss-table 09) ---------------- */
 
 test("a row action rests in the secondary type and stands in the accent when its row is meant", async ({ page }) => {
-  await openExample(page, "rowactions", "row-actions");
-  const table = example(page, "row-actions");
+  await openExample(page, "rowactions", "two-actions");
+  const table = example(page, "two-actions");
 
   /* The colours of the tokens, resolved by the browser – not copied out. */
   const colorOf = (token: string) =>
@@ -158,8 +158,8 @@ test("a row action rests in the secondary type and stands in the accent when its
   expect(resting).not.toBe(accent);
 
   const colorOfLocator = (where: Locator) => where.evaluate((el) => getComputedStyle(el).color);
-  const open = table.getByRole("button", { name: "Open: A-2041" });
-  const other = table.getByRole("button", { name: "Open: A-2043" });
+  const open = table.getByRole("button", { name: "Open: INV-26-0318" });
+  const other = table.getByRole("button", { name: "Open: INV-26-0309" });
 
   await page.mouse.move(0, 0);
   await expect.poll(() => colorOfLocator(open)).toBe(resting);
@@ -169,7 +169,7 @@ test("a row action rests in the secondary type and stands in the accent when its
   await expect.poll(() => colorOfLocator(other)).toBe(resting);
 
   await page.mouse.move(0, 0);
-  await table.getByRole("button", { name: "Duplicate: A-2043" }).focus();
+  await table.getByRole("button", { name: "Forward: INV-26-0309" }).focus();
   await expect.poll(() => colorOfLocator(other)).toBe(accent);
   await expect.poll(() => colorOfLocator(open)).toBe(resting);
 });
@@ -177,58 +177,58 @@ test("a row action rests in the secondary type and stands in the accent when its
 /* ---------------- The focus in the column menu (umriss-table 08) ---------------- */
 
 test("after “move forward” the focus stands on the button of the column that moved, at the end of the list on its neighbour", async ({ page }) => {
-  await openExample(page, "columnmenu", "show-hide-and-order");
-  await example(page, "show-hide-and-order").getByRole("button", { name: "Columns" }).click();
+  await openExample(page, "columnmenu", "show-hide-and-arrange");
+  await example(page, "show-hide-and-arrange").getByRole("button", { name: "Columns" }).click();
   const menu = page.getByRole("dialog", { name: "Show, hide and arrange columns" });
 
   /* The element wanders to its new place in the DOM, and an element that has
      been moved loses the focus in the browser – exactly what jsdom cannot do. */
-  await menu.getByRole("button", { name: "Move Quantity forward" }).click();
-  await expect(menu.getByRole("button", { name: "Move Quantity forward" })).toBeFocused();
+  await menu.getByRole("button", { name: "Move Actual (k€) forward" }).click();
+  await expect(menu.getByRole("button", { name: "Move Actual (k€) forward" })).toBeFocused();
 
-  /* Once more: Quantity now stands directly behind the sticky row header, "move
+  /* Once more: Actual now stands directly behind the sticky row header, "move
      forward" is disabled, and the focus goes to "move backward". */
   await page.keyboard.press("Enter");
-  await expect(menu.getByRole("button", { name: "Move Quantity forward" })).toBeDisabled();
-  await expect(menu.getByRole("button", { name: "Move Quantity backward" })).toBeFocused();
+  await expect(menu.getByRole("button", { name: "Move Actual (k€) forward" })).toBeDisabled();
+  await expect(menu.getByRole("button", { name: "Move Actual (k€) backward" })).toBeFocused();
 });
 
 /* ---------------- The download (umriss-table 08) ---------------- */
 
-test("Export downloads orders.csv, and in it stands the filtered set in the visible order", async ({ page }) => {
-  await openExample(page, "export", "download");
-  const table = example(page, "download");
+test("Export downloads shipments.csv, and in it stands the filtered set in the visible order", async ({ page }) => {
+  await openExample(page, "export", "download-a-file");
+  const table = example(page, "download-a-file");
   await table.getByPlaceholder("Search customer").fill("North");
-  await table.getByRole("columnheader", { name: "Quantity" }).getByRole("button", { name: "Quantity", exact: true }).click();
+  await table.getByRole("columnheader", { name: "Parcels" }).getByRole("button", { name: "Parcels", exact: true }).click();
 
   const [download] = await Promise.all([
     page.waitForEvent("download"),
     table.getByRole("button", { name: "Export" }).click(),
   ]);
-  expect(download.suggestedFilename()).toBe("orders.csv");
+  expect(download.suggestedFilename()).toBe("shipments.csv");
 
   const text = (await readFile((await download.path())!, "utf8")).replace(/^﻿/, "");
   expect(text.trim().split(/\r?\n/)).toEqual([
-    "Order;Customer;Quantity;Price",
-    "A-2044;Northplate;310;2215,8",
-    "A-2043;Northworks;1250;9870,25",
+    "Shipment;Customer;Parcels;Weight (kg)",
+    "FP-1004249;Northbay Books;2;18,4",
+    "FP-1004223;Northgate Florists;6;41,25",
   ]);
 });
 
 /* ---------------- The error this package exists for ---------------- */
 
 test("reordering in the column menu moves head, body and foot on the screen", async ({ page }) => {
-  await openExample(page, "columnmenu", "show-hide-and-order");
-  const table = example(page, "show-hide-and-order");
-  const amountHeader = table.getByRole("columnheader", { name: "Quantity" });
-  const lineHeader = table.getByRole("columnheader", { name: "Line" });
-  const amountCell = table.locator("tbody tr").first().getByRole("cell", { name: "120", exact: true });
+  await openExample(page, "columnmenu", "show-hide-and-arrange");
+  const table = example(page, "show-hide-and-arrange");
+  const amountHeader = table.getByRole("columnheader", { name: "Actual (k€)" });
+  const lineHeader = table.getByRole("columnheader", { name: "Budget (k€)" });
+  const amountCell = table.locator("tbody tr").first().getByRole("cell", { name: "138", exact: true });
   const sum = table.locator("tfoot [data-footer='sum']");
 
   expect(await x(amountHeader)).toBeGreaterThan(await x(lineHeader));
 
   await table.getByRole("button", { name: "Columns" }).click();
-  await page.getByRole("button", { name: "Move Quantity forward" }).click();
+  await page.getByRole("button", { name: "Move Actual (k€) forward" }).click();
   await page.keyboard.press("Escape");
 
   /* Not only in the model: on the screen, in all three parts. */

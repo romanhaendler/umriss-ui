@@ -97,9 +97,6 @@ const PENDING: readonly string[] = [
   "packages/schedule/src/snap.ts",
   "packages/schedule/src/timeAxis.ts",
   "packages/schedule/src/walk.ts",
-  "packages/table/demo/examples/AlarmList/01-lifecycle.tsx",
-  "packages/table/demo/examples/AlarmList/03-hidden-from-operation.tsx",
-  "packages/table/demo/examples/VerdictColumn/02-sorting.tsx",
 ];
 const PENDING_QUARTER: readonly string[] = [
 ];
