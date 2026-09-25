@@ -33,8 +33,8 @@ test("a page with every code block open is accessible", async ({ page }, testInf
 /* The context menu of the scenario is portalled to the body, outside
    every page block - it is checked where it lands. */
 test("the scenario's context menu is accessible", async ({ page }, testInfo) => {
-  await openScenario(page, "replan-the-day");
-  const plot = page.locator('[data-scenario="replan-the-day"] [data-schedule-plot]');
+  await openScenario(page, "replan-the-day-on-the-line");
+  const plot = page.locator('[data-scenario="replan-the-day-on-the-line"] [data-schedule-plot]');
   await plot.scrollIntoViewIfNeeded();
   const box = (await plot.boundingBox())!;
   await page.mouse.click(box.x + box.width * 0.02, box.y + 6 * 44 + 22, { button: "right" });
