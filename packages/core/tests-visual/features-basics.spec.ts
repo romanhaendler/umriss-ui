@@ -132,9 +132,9 @@ test("Slider follows the keys of the slider pattern", async ({ page }) => {
 
 test("Drawer holds the focus, closes on Escape and gives the focus back", async ({ page }) => {
   await openExample(page, "drawer", "a-detail-from-the-edge");
-  const opener = page.getByRole("button", { name: "Show the order" });
+  const opener = page.getByRole("button", { name: "Show the shipment" });
   await opener.click();
-  const drawer = page.getByRole("dialog", { name: "Order 4711-03" });
+  const drawer = page.getByRole("dialog", { name: "Shipment SH-1042" });
   await expect(drawer).toBeVisible();
   // It stands at the right edge of the window, once it has come in.
   const sheet = drawer.locator("> div");
@@ -164,7 +164,7 @@ test("Drawer holds the focus, closes on Escape and gives the focus back", async 
    and the dialog never scrolls. */
 test("Drawer enters along its path, without the dialog scrolling", async ({ page }) => {
   await openExample(page, "drawer", "a-detail-from-the-edge");
-  await page.getByRole("button", { name: "Show the order" }).click();
+  await page.getByRole("button", { name: "Show the shipment" }).click();
   const samples: { x: number; scroll: number }[] = [];
   for (let i = 0; i < 12; i++) {
     samples.push(
@@ -186,8 +186,8 @@ test("Drawer enters along its path, without the dialog scrolling", async ({ page
 test("Drawer appears and goes at once under reduced motion", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await openExample(page, "drawer", "a-detail-from-the-edge");
-  await page.getByRole("button", { name: "Show the order" }).click();
-  const drawer = page.getByRole("dialog", { name: "Order 4711-03" });
+  await page.getByRole("button", { name: "Show the shipment" }).click();
+  const drawer = page.getByRole("dialog", { name: "Shipment SH-1042" });
   await expect(drawer).toBeVisible();
   expect(await drawer.locator("> div").evaluate((el) => el.getAnimations().length)).toBe(0);
   await page.keyboard.press("Escape");
