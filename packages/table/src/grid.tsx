@@ -17,9 +17,9 @@
    editor holds a draft, Enter or Tab reports it through `onCellEdit`, and the
    table applies nothing - the value changes when the caller's rows do. */
 
-import { createContext, useContext, useLayoutEffect, useState } from "react";
+import { createContext, useContext, useLayoutEffect, useRef, useState } from "react";
 import type { FocusEvent as ReactFocusEvent, KeyboardEvent as ReactKeyboardEvent, ReactNode, RefObject } from "react";
-import { DatePicker, FormField, Input, NumberInput, Select, VisuallyHidden, useFormats } from "@umriss-ui/core";
+import { DatePicker, FormField, Input, NumberInput, Popover, Select, VisuallyHidden, useFormats } from "@umriss-ui/core";
 import type { VirtualRows, Wording } from "@umriss-ui/core";
 import type { ColumnEntry } from "./registry";
 import { occurringValues } from "./columnFilter";
@@ -27,6 +27,7 @@ import { isAbsent } from "./values";
 import { nextCell, placeOf, rowLine, stepGrid } from "./model/gridWalk";
 import type { GridLine, GridMove, GridPosition } from "./model/gridWalk";
 import type { CellEdit } from "./types";
+import styles from "./Table.module.css";
 
 /* --- State ------------------------------------------------------------------------ */
 
@@ -149,13 +150,28 @@ function placeOfCell(table: HTMLTableElement, target: EventTarget | null): { cel
     controls out of the tab order - after every render, since a virtual window
     renders new rows as it scrolls. A component and not a hook of the frame's:
     what it needs is known only after the frame's early return. */
-export function GridFocus({ table: tableRef, grid, lines, ids }: { table: RefObject<HTMLTableElement | null>; grid: GridHandle; lines: readonly GridLine[]; ids: readonly string[] }) {
+export function GridFocus({
+  table: tableRef,
+  grid,
+  lines,
+  ids,
+  editable,
+}: {
+  table: RefObject<HTMLTableElement | null>;
+  grid: GridHandle;
+  lines: readonly GridLine[];
+  ids: readonly string[];
+  /** In a grid that edits: whether the cell at a position does. Every other
+      cell of its body and foot is `aria-readonly` (table-grid-mode 05). */
+  editable?: (p: GridPosition) => boolean;
+}) {
   useLayoutEffect(() => {
     const table = tableRef.current;
     if (!table) return;
     const { active, widget, editing } = grid.state;
     const at = resolve(active, lines, ids);
     const key = lines[at.line]?.key;
+    const indexOf = new Map(lines.map((l, i) => [l.key, i]));
     let stop: HTMLTableCellElement | null = null;
     let fallback: HTMLTableCellElement | null = null;
     /* ponytail: every cell and every control in them, after every render -
@@ -169,6 +185,8 @@ export function GridFocus({ table: tableRef, grid, lines, ids }: { table: RefObj
         if (covers && line === key) stop = cell;
         if (covers && fallback === null && line !== "head") fallback = cell;
         cell.tabIndex = -1;
+        if (editable && line !== "head" && !editable({ line: indexOf.get(line) ?? -1, column: start })) cell.setAttribute("aria-readonly", "true");
+        else cell.removeAttribute("aria-readonly");
         const open = cell === stop && (widget || (editing !== null && editing.line === line));
         for (const element of Array.from(cell.querySelectorAll<HTMLElement>(FOCUSABLE))) quiet(element, !open);
       }
@@ -226,6 +244,9 @@ export interface GridInput {
   rowKey: (row: unknown) => string;
   virtual: VirtualRows | undefined;
   onCellEdit: ((edit: CellEdit<unknown>) => void) | undefined;
+  /** Selects or deselects a row - in a table with selection; Space asks for
+      it from any cell of the row. */
+  select: ((row: unknown) => void) | undefined;
 }
 
 /** Does this column edit? */
@@ -241,15 +262,17 @@ function same(a: unknown, b: unknown): boolean {
 /** The frame's handlers for a table in grid mode. Not a hook: they close over
     this render's lines, and the frame calls them after its early return. */
 export function gridHandlers(input: GridInput) {
-  const { grid, lines, ids, columnById, rowKey, virtual, onCellEdit } = input;
+  const { grid, lines, ids, columnById, rowKey, virtual, onCellEdit, select } = input;
   const { setState } = grid;
   const keys = lines.map((l) => l.key);
 
   const lineRow = (key: string) => lines.find((l) => l.key === key)?.row;
-  const editable = (p: GridPosition) => {
+  /** The row of a row line - not of its detail, nor of a group line. */
+  const rowAt = (p: GridPosition) => {
     const line = lines[p.line];
-    return line?.row !== undefined && line.key === rowLine(rowKey(line.row)) && edits(columnById(ids[p.column] ?? ""));
+    return line?.row !== undefined && line.key === rowLine(rowKey(line.row)) ? { row: line.row } : null;
   };
+  const editable = (p: GridPosition) => rowAt(p) !== null && edits(columnById(ids[p.column] ?? ""));
 
   /** The column a key starts from in this cell: the walk's goal where the
       Active cell stands here and the cell spans it, else the cell's first. */
@@ -270,7 +293,9 @@ export function gridHandlers(input: GridInput) {
     setState((s) => ({ ...s, widget: false, active: { line: line.key, column: ids[p.column] ?? "", lineIndex: p.line, columnIndex: p.column } }));
     const row = Array.from(table.querySelectorAll<HTMLTableRowElement>("tr[data-grid-line]")).find((r) => r.dataset.gridLine === line.key);
     const cell = row ? cellsOf(row).find((c) => p.column >= c.start && p.column < c.end)?.cell : undefined;
-    if (cell) cell.focus();
+    /* The head sticks, always in view: scrolled into view it sat in the
+       scroll padding kept for it, and the body jumped up beneath it. */
+    if (cell) cell.focus({ preventScroll: line.key === "head" });
     else {
       grid.focus.want("cell");
       if (virtual && line.at >= 0) virtual.showRow(line.at);
@@ -376,6 +401,18 @@ export function gridHandlers(input: GridInput) {
       return;
     }
     if (event.ctrlKey) return;
+    /* Space selects the row, as in AG Grid and MUI - the key its checkbox
+       answers to, from any of its cells. Without a selection it does
+       nothing, and never starts an edit: it would open editors on the way
+       down the page. */
+    if (event.key === " ") {
+      const at = rowAt(here);
+      if (select && at) {
+        event.preventDefault();
+        select(at.row);
+      }
+      return;
+    }
     if (event.key === "Enter" || event.key === "F2") {
       if (editable(here)) {
         event.preventDefault();
@@ -392,11 +429,9 @@ export function gridHandlers(input: GridInput) {
     }
     /* Typing starts an edit, as in a spreadsheet: a text with what was typed,
        a number with a digit typed. Any other editor opens on the value as it
-       stands - a select or a day has no first letter to take. Space is no
-       typing there: it would open an editor on the way down the page. */
+       stands - a select or a day has no first letter to take. */
     if (event.key.length === 1 && editable(here)) {
       const kind = columnById(ids[place.column] ?? "")?.spec.edit;
-      if (kind !== "text" && event.key === " ") return;
       event.preventDefault();
       startEdit(here, kind === "text" ? event.key : kind === "number" && /\d/.test(event.key) ? Number(event.key) : undefined);
     }
@@ -437,7 +472,7 @@ export function gridHandlers(input: GridInput) {
   };
 
   const context: Omit<GridContextValue, "hook" | "wording"> = { editing: grid.state.editing, setDraft, commit };
-  return { onKeyDown, onFocus, onBlur, context };
+  return { onKeyDown, onFocus, onBlur, context, editable };
 }
 
 /** How many lines PageUp and PageDown jump: as many as the scroll area shows
@@ -453,9 +488,15 @@ function pageOf(cell: HTMLElement, table: HTMLTableElement): number {
 
 /** The editor in a cell: the core field for its kind, or the column's own,
     inside a `FormField` whose error is the message of a draft that did not
-    validate (G4, G5). Its name says what is edited, for which row. */
+    validate (G4, G5). Its name says what is edited, for which row.
+
+    It lies over the cell at the cell's size, and the message hangs beneath
+    it in a popover: nothing in the table shifts while a cell is edited
+    (table-grid-mode 05). The field's description stays the `FormField`'s
+    message, out of sight; the popover is its picture. */
 export function CellEditor({ entry, row, rowName, grid }: { entry: ColumnEntry; row: unknown; rowName: string; grid: GridContextValue }) {
   const formats = useFormats();
+  const anchor = useRef<HTMLDivElement>(null);
   const { spec } = entry;
   const editing = grid.editing!;
   const draft = editing.draft;
@@ -492,8 +533,15 @@ export function CellEditor({ entry, row, rowName, grid }: { entry: ColumnEntry; 
     field = <Input size="sm" value={isAbsent(draft) ? "" : String(draft)} onChange={(event) => grid.setDraft(event.target.value)} />;
   }
   return (
-    <FormField label={<VisuallyHidden>{label}</VisuallyHidden>} error={editing.error ?? undefined}>
-      {field}
-    </FormField>
+    <div ref={anchor} className={styles.editor}>
+      <FormField className={styles.editorField} label={<VisuallyHidden>{label}</VisuallyHidden>} error={editing.error ?? undefined}>
+        {field}
+      </FormField>
+      {/* Held open while the draft does not validate: an outside click or
+          Escape does not take the message away - Escape cancels the edit. */}
+      <Popover open={editing.error !== null} onOpenChange={() => undefined} anchorRef={anchor} restoreFocus={false} offset={4} className={styles.editorMessage}>
+        <span aria-hidden="true">{editing.error}</span>
+      </Popover>
+    </div>
   );
 }

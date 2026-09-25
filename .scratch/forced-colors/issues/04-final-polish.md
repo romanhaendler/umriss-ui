@@ -1,6 +1,6 @@
 # 04 - Final polish round
 
-Status: ready-for-human
+Status: done
 Type: task
 
 Spec: `.scratch/forced-colors/spec.md`
@@ -45,3 +45,9 @@ are settled by the agent; new tokens or visibly new colours go as a card first.
 - **fc-badge-dot**: under forced colours the badge's dot is drawn in `CanvasText`.
 
 Baselines moved: `forced-button--variants` and `forced-buttongroup--buttons-that-belong-together`, light and dark (the primary group's frame and dividers are now 2px). Each looked at. The badge's forced picture stays within the tolerance (a few dots) and was looked at in the browser.
+
+**Table part (2026-09-25).** fc-bands, no card, for context: the group bands
+keep their lines and lose their tone under forced colours - left as is.
+
+**Closed (2026-09-25).** The core, table and schedule parts above are all
+merged; every card of the review page was taken as recommended.

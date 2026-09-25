@@ -26,6 +26,20 @@ export function pinnedCell(blocks: PinBlocks, first: number, last = first): Pinn
   const start = pin.side === "start";
   return {
     className: cx(styles.pinned, pin.edge && (start ? styles.pinStartEdge : styles.pinEndEdge)),
-    style: start ? { left: `var(--u-table-pin-start-${pin.at}, 0px)` } : { right: `var(--u-table-pin-end-${pin.at}, 0px)` },
+    /* The scroll area keeps a padding as wide as the block for the browser's
+       scroll into view; a pinned cell lies inside it and would scroll the
+       table back to its start when focused. Its target is shifted out of the
+       padding by the block's width - it is in view wherever it sticks. */
+    style: start
+      ? {
+          left: `var(--u-table-pin-start-${pin.at}, 0px)`,
+          scrollMarginLeft: "calc(-1 * var(--u-table-pin-start, 0px))",
+          scrollMarginRight: "var(--u-table-pin-start, 0px)",
+        }
+      : {
+          right: `var(--u-table-pin-end-${pin.at}, 0px)`,
+          scrollMarginRight: "calc(-1 * var(--u-table-pin-end, 0px))",
+          scrollMarginLeft: "var(--u-table-pin-end, 0px)",
+        },
   };
 }
