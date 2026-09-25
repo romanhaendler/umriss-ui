@@ -13,7 +13,7 @@ checkShell({
     { name: "Search", pageId: "search" },
   ],
   deepLink: { pageId: "columnmenu", absent: "table" },
-  example: { pageId: "table", id: "empty-and-loading", title: "Loading, empty, nothing matches", pageName: "Table" },
+  example: { pageId: "table", id: "states", title: "Show loading, empty, failed and no match", pageName: "Table" },
   palettePage: { query: "verdictcolumn", name: "VerdictColumn", pageId: "verdictcolumn", rubricName: "Limits and alarms" },
   abbreviation: { query: "vc", find: "VerdictColumn", glyphs: ["V", "C"] },
   /* Twenty-seven finds become eleven, and the find under the pointer is no
