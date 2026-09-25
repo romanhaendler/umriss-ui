@@ -15,7 +15,9 @@ moves from here under the rule above.
 
 ---
 
-## Unreleased
+## 0.2.0 – By keyboard and screen reader (Sep. 2026)
+
+Needs `@umriss-ui/core` 0.10 and `@umriss-ui/charts` 0.7: it reads the schedule's wording keys; the peer ranges move to `^0.10.0` and `^0.7.0`.
 
 ### Added
 
