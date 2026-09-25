@@ -23,12 +23,12 @@ import { test, expect } from "@playwright/test";
 test("the scenario shows its plan in a second tab, and Copy takes the tab in front", async ({ page, context }) => {
   test.skip(test.info().project.name.endsWith("dark"), "a behaviour test runs once (light)");
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
-  await openScenario(page, "replan-the-day");
+  await openScenario(page, "replan-the-day-on-the-line");
 
-  const example = page.locator('[data-scenario="replan-the-day"]');
+  const example = page.locator('[data-scenario="replan-the-day-on-the-line"]');
   await example.getByRole("button", { name: "Code" }).click();
   const tabs = example.getByRole("group", { name: "Files of this example" }).getByRole("button");
-  await expect(tabs).toHaveText(["01-replan-the-day.tsx", "plant.ts"]);
+  await expect(tabs).toHaveText(["04-replan-the-day-on-the-line.tsx", "plant.ts"]);
 
   /* The example itself is in front, and Copy takes it. */
   const copy = async () => {
