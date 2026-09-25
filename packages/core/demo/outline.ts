@@ -610,35 +610,100 @@ export const OUTLINE: readonly Rubric[] = [
       {
         id: "stat",
         name: "Stat",
-        sentence: "A figure with an assessment, a history, a deviation from target, and a freshness independent of all of it.",
+        sentence: "A single figure with its verdict: read against limits, with the history before it, the deviation from its target and how fresh it is (also called a KPI tile or metric card). Reach for it for the few numbers a screen is watched for.",
+        about: [
+          "The tile gets a rule, not a colour: `limits` are values with a side and a severity, and the colour and the verdict word follow from them. The same limit model drives the charts' limit lines (ADR-0006).",
+          "Four verdicts, in order: in order, unknown, warning, alarm. A missing or non-finite value is unknown, never in order. A `target` is missed by an amount and shown as a signed deviation; it is never a limit.",
+          "Freshness is a separate axis: with `asOf` and `ages` the tile says when its value is stale or lost and keeps its verdict, since the last value is the best one there is (ADR-0010). `useFreshness` gives the same reading for your own parts.",
+        ],
+        alternatives: [
+          { when: "A share of a whole, drawn as a bar", use: "meter" },
+          { when: "Only the shape of a history, in a row or a cell", use: "sparkline" },
+          { when: "A value over time with axes and limit lines", use: "`Line` and `LimitLine` from @umriss-ui/charts" },
+        ],
+        limits: [
+          "No trend arrow: a direction from two noisy points is read as information it does not carry; the history line shows the shape.",
+          "It fetches and polls nothing: freshness is judged from the `asOf` you give it.",
+        ],
         types: ["StatProps"],
         exports: ["Stat", "useFreshness"],
       },
       {
         id: "meter",
         name: "Meter",
-        sentence: "A bar for a fraction that draws its colour from an assessment and not from taste.",
+        sentence: "A bar that shows a measured share, such as capacity booked or budget used, coloured by your verdict on it (also called a gauge bar or level indicator). Reach for it in lists and tables where a percentage alone is hard to compare.",
+        about: [
+          "`value` runs from 0 to 1 and is clamped outside; say the true figure beside the bar where it can pass 100 %.",
+          "The `tone` is your assessment, since only you know whether 90 % is good or bad; the bar never colours itself by height. Keep the number or a word beside it so the colour is never alone.",
+          "The role `meter` needs a name from you: `label` says what is measured, and neither the percentage nor a column heading counts as one.",
+        ],
+        alternatives: [
+          { when: "How far a job has come towards its end", use: "progressbar" },
+          { when: "One figure read against limits, with its history", use: "stat" },
+        ],
+        limits: [
+          "No limit marks, target tick or scale on the bar; for a value against limits use a [Stat](#/stat).",
+        ],
         types: ["MeterProps"],
         exports: ["Meter"],
       },
       {
         id: "sparkline",
         name: "Sparkline",
-        sentence: "A history at line height, without axes and without labels - the shape, not the value.",
+        sentence: "A small line of a history, at the height of a line of text, without axes or labels (also called a micro chart). Reach for it beside a value or in a table cell, where the shape of the last hours tells more than the figure alone.",
+        about: [
+          "It needs at least two values; with fewer it draws nothing. The line is ink, not meaning: the `accent` tone is for picking out one line among several, never for a verdict.",
+        ],
+        alternatives: [
+          { when: "A figure with its verdict and a history beneath", use: "stat" },
+          { when: "Axes, values, limits or several series", use: "`Line` from @umriss-ui/charts" },
+        ],
+        limits: [
+          "No axes, labels, tooltip or points to hover: the value stands beside it.",
+        ],
         types: ["SparklineProps"],
         exports: ["Sparkline"],
       },
       {
         id: "badge",
         name: "Badge",
-        sentence: "A number or a word at the edge of another element - small, quiet, and never telling on its own.",
+        sentence: "A small word or number at the edge of something else: a status, a count (also called a label or chip). Reach for it to mark the state of a row, or how many items wait behind a button.",
+        about: [
+          "It is never the only place a state is said: the word inside carries the meaning, and the tone repeats it for the eye.",
+        ],
+        alternatives: [
+          { when: "The user can remove it, or it stands for a chosen filter", use: "tag" },
+          { when: "A figure read against limits", use: "stat" },
+        ],
+        limits: [
+          "It cannot be clicked or removed; a label the user acts on is a [Tag](#/tag).",
+          "It counts nothing itself: capping at “99+” is yours.",
+        ],
         types: ["BadgeProps"],
         exports: ["Badge"],
       },
       {
         id: "tag",
         name: "Tag",
-        sentence: "A short label on content - readable in every tone, removable where the caller allows it.",
+        sentence: "A short label on content that the user can remove where you allow it (also called a chip). Reach for it for active filters, chosen values and assignments.",
+        about: [
+          "`onRemove` turns the label into a control. In a `TagGroup` the whole group is one tab stop, and focus moves to the neighbour after a removal instead of falling to the top of the page.",
+          "A `disabled` tag keeps its place and loses its remove button: disabled speaks about the button, not the label. Every tone keeps its contrast in both themes, and the word carries the meaning.",
+        ],
+        alternatives: [
+          { when: "A status that cannot be acted on", use: "badge" },
+          { when: "The user picks several values from a list", use: "multiselect" },
+        ],
+        keys: [
+          { key: "Tab", action: "Enters the group on one tag and leaves it on the next Tab." },
+          { key: "← / → or ↑ / ↓", action: "Moves to the previous or next tag in the group." },
+          { key: "Home / End", action: "Moves to the first or last tag." },
+          { key: "Delete or Backspace", action: "Removes the focused tag and moves focus to its neighbour." },
+        ],
+        limits: [
+          "No field for typing new tags: a tag input is a [MultiSelect](#/multiselect).",
+          "Tags are not toggles: a set of choices to switch on and off is a group of [Checkbox](#/checkbox) or a [ButtonGroup](#/buttongroup).",
+        ],
         types: ["TagProps", "TagGroupProps"],
         exports: ["Tag", "TagGroup"],
       },
