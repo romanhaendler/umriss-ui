@@ -3,32 +3,32 @@ import type { CSSProperties } from "react";
 import { Button, Checkbox, Drawer, ModalBody, ModalFooter, ModalHeader, Stack, Text } from "../../../src";
 
 export const title = "From the left, and wider";
+export const lead = "`side` set to `left` puts it at the other edge; one drawer that needs more room sets `--u-drawer-width` in its own `style`.";
 
-/* `side="left"` puts the drawer at the other edge, and it enters from there.
-   The width is a token, `--u-drawer-width`: an application sets it once for
-   all its drawers, and one drawer that needs more room sets it in its own
-   `style` - here 480 pixels for a list of filters with long names. */
+const TEAMS = ["Payments", "Identity", "Discovery", "Messaging", "Integrations", "Insights"];
+
 export default function LeftAndWider() {
   const [open, setOpen] = useState(false);
 
   return (
     <>
-      <Button onClick={() => setOpen(true)}>Filter the alarms</Button>
-      <Drawer
-        open={open}
-        onClose={() => setOpen(false)}
-        side="left"
-        style={{ "--u-drawer-width": "480px" } as CSSProperties}
-      >
-        <ModalHeader title="Filter" description="Which alarms the list shows." />
+      <Button onClick={() => setOpen(true)}>Filter the alerts</Button>
+      <Drawer open={open} onClose={() => setOpen(false)} side="left" style={{ "--u-drawer-width": "480px" } as CSSProperties}>
+        <ModalHeader title="Filter" description="Which alerts the list shows." />
         <ModalBody>
           <Stack gap={3}>
             <Text size="sm" weight="medium">
-              Area
+              Owning team
             </Text>
-            <Checkbox label="Syrup room and mixing stations 1 to 3" defaultChecked />
-            <Checkbox label="Filling lines 1 to 4 with capper and labeller" defaultChecked />
-            <Checkbox label="Palletiser and stretch wrapper in the dispatch hall" />
+            {TEAMS.map((team) => (
+              <Checkbox key={team} label={team} defaultChecked={team === "Payments" || team === "Identity"} />
+            ))}
+            <Text size="sm" weight="medium">
+              Priority
+            </Text>
+            <Checkbox label="High – pages the on-call engineer at any hour" defaultChecked />
+            <Checkbox label="Medium – pages during working hours, otherwise waits" defaultChecked />
+            <Checkbox label="Low – collected into the morning's summary" />
           </Stack>
         </ModalBody>
         <ModalFooter>

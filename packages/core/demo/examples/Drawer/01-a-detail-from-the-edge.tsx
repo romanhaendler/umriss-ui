@@ -2,22 +2,18 @@ import { useState } from "react";
 import { Button, Drawer, ModalBody, ModalFooter, ModalHeader, Text } from "../../../src";
 
 export const title = "A detail from the edge";
+export const lead = "A `Drawer` is a `Modal` at the right edge, with the same header, body and footer and the same hold on focus.";
 
-/* The first step: a Modal that enters from the right. Everything a modal
-   promises holds - the focus stays inside until it is answered, Escape and a
-   click beside the sheet close it, and the focus returns to the button that
-   opened it - because it is the same native dialog. Head, body and foot are
-   the modal's too. */
 export default function ADetailFromTheEdge() {
   const [open, setOpen] = useState(false);
 
   return (
     <>
-      <Button onClick={() => setOpen(true)}>Show the order</Button>
+      <Button onClick={() => setOpen(true)}>Show the shipment</Button>
       <Drawer open={open} onClose={() => setOpen(false)}>
-        <ModalHeader title="Order 4711-03" description="Customer order, released yesterday at 14:20." />
+        <ModalHeader title="Shipment SH-1042" description="Harlow Bakery · out for delivery on tour T-01" />
         <ModalBody>
-          <Text>12,000 bottles of lemonade, 0.5 l, for delivery on Friday.</Text>
+          <Text>Two parcels, 14 kg in all, to be delivered between 09:00 and 11:00.</Text>
         </ModalBody>
         <ModalFooter>
           <Button onClick={() => setOpen(false)}>Close</Button>
