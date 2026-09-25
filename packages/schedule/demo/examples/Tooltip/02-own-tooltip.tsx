@@ -1,71 +1,55 @@
 import { Badge, Stack, Text } from "@umriss-ui/core";
-import { Lane, Schedule, Subtasks, Dependencies } from "../../../src";
-import type { ScheduleTooltipTarget, Subtask, Task, Dependency } from "../../../src";
+import { Dependencies, Lane, Schedule, Subtasks } from "../../../src";
+import type { Dependency, ScheduleTooltipTarget, Subtask, Task } from "../../../src";
 
-export const title = "A tooltip of the application's own";
+export const title = "Write your own tooltip content";
 
-/* Resting the pointer on a subtask or a dependency shows a tooltip: by default
-   the order, the stop, its times, lead-in and lead-out, and every finding on it -
-   try the bracket in the paint shop at noon. Its words come from the provider's
-   wording, so a German application reads it in German.
-
-   `tooltip` takes a function instead, which receives what the pointer rests on
-   together with its findings and returns the application's own content - here
-   a customer that only the application knows. `tooltip={false}` switches it
-   off, for an application with a detail panel of its own. */
+export const lead = "Pass `tooltip` a function to show what only your application knows - here the load - with the findings the schedule found.";
 
 const at = (hours: number, minutes = 0) => new Date(2026, 2, 17, hours, minutes).getTime();
 const min = (n: number) => n * 60_000;
 
-const DAY_OF_PLAN: readonly [number, number] = [at(5, 30), at(18)];
-
-
-const STATIONS = [
-  { id: "mill", label: "Mill" },
-  { id: "press", label: "Press 2" },
-  { id: "paint", label: "Paint shop" },
+const VEHICLES = [
+  { id: "van-402", label: "Van FP 402 R" },
+  { id: "truck-520", label: "Truck FP 520 E" },
+  { id: "van-455", label: "E-van FP 455 R" },
 ];
 
-const ORDERS: readonly Task[] = [
-  { id: "a-2041", name: "A-2041 Housing", color: "light-dark(#2563eb, #6b9bff)" },
-  { id: "a-2043", name: "A-2043 Bracket", color: "light-dark(#c2410c, #f08a52)" },
+const CONSIGNMENTS: readonly Task[] = [
+  { id: "c-2041", name: "C-2041 Holloway Garden Supplies", color: "light-dark(#2563eb, #6b9bff)" },
+  { id: "c-2043", name: "C-2043 Oakridge Pharmacy", color: "light-dark(#c2410c, #f08a52)" },
 ];
 
-const STEPS: readonly Subtask[] = [
-  { id: "a-2041-2", task: "a-2041", lane: "mill", from: at(8), to: at(10, 30), leadIn: min(30), leadOut: min(15) },
-  { id: "a-2043-1", task: "a-2043", lane: "press", from: at(6, 30), to: at(8), leadIn: min(30), leadOut: min(15) },
-  { id: "a-2043-2", task: "a-2043", lane: "mill", from: at(10), to: at(11, 30), leadIn: min(15) },
-  { id: "a-2043-3", task: "a-2043", lane: "paint", from: at(12), to: at(14), leadIn: min(20), leadOut: min(20) },
+const LEGS: readonly Subtask[] = [
+  { id: "c-2041-2", task: "c-2041", lane: "van-402", from: at(8), to: at(10, 30), leadIn: min(30), leadOut: min(15) },
+  { id: "c-2043-1", task: "c-2043", lane: "truck-520", from: at(6, 30), to: at(8), leadIn: min(30), leadOut: min(15) },
+  { id: "c-2043-2", task: "c-2043", lane: "van-402", from: at(10), to: at(11, 30), leadIn: min(15) },
+  { id: "c-2043-3", task: "c-2043", lane: "van-455", from: at(12), to: at(14), leadIn: min(20), leadOut: min(20) },
 ];
 
-const MOVES: readonly Dependency[] = [
-  { id: "t-2043-1", from: "a-2043-1", to: "a-2043-2", lag: min(45) },
-  /* Leaves the mill at 11:30 and has ten minutes to reach the paint shop's
-     lead-in at 11:40 - it takes twenty-five. A violated dependency, on purpose. */
-  { id: "t-2043-2", from: "a-2043-2", to: "a-2043-3", lag: min(25) },
+const TRANSFERS: readonly Dependency[] = [
+  { id: "t-2043-1", from: "c-2043-1", to: "c-2043-2", lag: min(45) },
+  { id: "t-2043-2", from: "c-2043-2", to: "c-2043-3", lag: min(25) },
 ];
 
-const CUSTOMERS: Record<string, string> = {
-  "a-2041": "Brandt Metalworks",
-  "a-2042": "Keller & Sons",
-  "a-2043": "Northworks",
-  "a-2044": "Brandt Metalworks",
-  "a-2045": "Weiss Hydraulics",
-  "a-2046": "Northworks",
+/* What the application knows and the schedule does not. */
+const LOADS: Record<string, string> = {
+  "c-2041": "6 pallets · 1,140 kg",
+  "c-2043": "2 pallets · 420 kg, chilled",
 };
 
-function OrderTooltip({ target }: { target: ScheduleTooltipTarget }) {
+function LoadTooltip({ target }: { target: ScheduleTooltipTarget }) {
   const task = target.task;
-  const findings = target.kind === "subtask" ? target.overlapping.length + target.violatedDependencies.length : target.violated ? 1 : 0;
+  const found = target.kind === "subtask" ? target.overlapping.length + target.violatedDependencies.length : target.violated ? 1 : 0;
   return (
     <Stack gap={1}>
       <Text size="sm" weight="semibold">
-        {task?.name ?? "Unknown order"}
+        {task?.name ?? "Unknown consignment"}
       </Text>
       <Text size="xs" tone="secondary">
-        {task ? CUSTOMERS[task.id] : ""}
+        {task ? LOADS[task.id] : ""}
       </Text>
-      {findings > 0 && <Badge tone="danger">{findings === 1 ? "1 finding" : `${findings} findings`}</Badge>}
+      {found > 0 && <Badge tone="danger">{found === 1 ? "1 finding" : `${found} findings`}</Badge>}
     </Stack>
   );
 }
@@ -73,16 +57,16 @@ function OrderTooltip({ target }: { target: ScheduleTooltipTarget }) {
 export default function OwnTooltip() {
   return (
     <Schedule
-      ariaLabel="Plan of Tuesday, 17 March, with customers"
-      initialDomain={DAY_OF_PLAN}
+      ariaLabel="Three vehicles with the load in the tooltip"
+      initialDomain={[at(5, 30), at(18)]}
       height={196}
-      tooltip={(target) => <OrderTooltip target={target} />}
+      tooltip={(target) => <LoadTooltip target={target} />}
     >
-      {STATIONS.map((station) => (
-        <Lane key={station.id} id={station.id} label={station.label} />
+      {VEHICLES.map((vehicle) => (
+        <Lane key={vehicle.id} id={vehicle.id} label={vehicle.label} />
       ))}
-      <Dependencies data={MOVES} />
-      <Subtasks data={STEPS} tasks={ORDERS} />
+      <Dependencies data={TRANSFERS} />
+      <Subtasks data={LEGS} tasks={CONSIGNMENTS} />
     </Schedule>
   );
 }

@@ -14,16 +14,16 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("a drag shows the ghost with its findings before the drop, and reports the intent after it", async ({ page }) => {
-  await openExample(page, "move-and-lane", "move-and-lane");
-  const example = page.locator('[data-example="move-and-lane"]');
+  await openExample(page, "move-and-lane", "move-to-another-lane");
+  const example = page.locator('[data-example="move-to-another-lane"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
 
-  /* A-2046 on the mill, 13:00 to 14:30 - dragged three hours earlier, onto the
-     time A-2043 holds the mill. */
-  await page.mouse.move(plot.x(13, 45), plot.y("mill"));
+  /* C-2046 on van FP 402 R, 13:00 to 14:30 - dragged three hours earlier,
+     onto the time C-2043 holds the van. */
+  await page.mouse.move(plot.x(13, 45), plot.y("van-402"));
   await page.mouse.down();
-  await page.mouse.move(plot.x(12), plot.y("mill"), { steps: 5 });
-  await page.mouse.move(plot.x(10, 45), plot.y("mill"), { steps: 5 });
+  await page.mouse.move(plot.x(12), plot.y("van-402"), { steps: 5 });
+  await page.mouse.move(plot.x(10, 45), plot.y("van-402"), { steps: 5 });
 
   const ghost = example.locator("[data-ghost]");
   await expect(ghost).toBeVisible();
@@ -38,32 +38,32 @@ test("a drag shows the ghost with its findings before the drop, and reports the 
   await page.mouse.up();
   await expect(ghost).toHaveCount(0);
   await expect(example.locator("[data-last-intent]")).toHaveText(
-    JSON.stringify({ kind: "move", subtask: "a-2046-2", from: at(10), to: at(11, 30) }),
+    JSON.stringify({ kind: "move", subtask: "c-2046-2", from: at(10), to: at(11, 30) }),
   );
 });
 
 test("a drop on another lane reports a lane intent", async ({ page }) => {
-  await openExample(page, "move-and-lane", "move-and-lane");
-  const example = page.locator('[data-example="move-and-lane"]');
+  await openExample(page, "move-and-lane", "move-to-another-lane");
+  const example = page.locator('[data-example="move-to-another-lane"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
 
-  await page.mouse.move(plot.x(13, 45), plot.y("mill"));
+  await page.mouse.move(plot.x(13, 45), plot.y("van-402"));
   await page.mouse.down();
-  await page.mouse.move(plot.x(13, 45), plot.y("press"), { steps: 5 });
-  await page.mouse.move(plot.x(13, 45), plot.y("paint"), { steps: 5 });
+  await page.mouse.move(plot.x(13, 45), plot.y("truck-520"), { steps: 5 });
+  await page.mouse.move(plot.x(13, 45), plot.y("van-455"), { steps: 5 });
   await page.mouse.up();
 
-  await expect(example.locator("[data-last-intent]")).toHaveText(JSON.stringify({ kind: "lane", subtask: "a-2046-2", lane: "paint" }));
+  await expect(example.locator("[data-last-intent]")).toHaveText(JSON.stringify({ kind: "lane", subtask: "c-2046-2", lane: "van-455" }));
 });
 
 test("a drag held at the edge pans the plot along, and the drop lands beyond what was in view", async ({ page }) => {
-  await openExample(page, "move-and-lane", "move-and-lane");
-  const example = page.locator('[data-example="move-and-lane"]');
+  await openExample(page, "move-and-lane", "move-to-another-lane");
+  const example = page.locator('[data-example="move-to-another-lane"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
 
-  await page.mouse.move(plot.x(13, 45), plot.y("mill"));
+  await page.mouse.move(plot.x(13, 45), plot.y("van-402"));
   await page.mouse.down();
-  await page.mouse.move(plot.box.x + plot.box.width - 4, plot.y("mill"), { steps: 8 });
+  await page.mouse.move(plot.box.x + plot.box.width - 4, plot.y("van-402"), { steps: 8 });
   /* Held still at the right edge: the plot pans until the ghost starts after
      the 18:00 the view ended at. */
   await expect
@@ -77,13 +77,13 @@ test("a drag held at the edge pans the plot along, and the drop lands beyond wha
 });
 
 test("Escape cancels a drag: the ghost goes, and nothing is reported", async ({ page }) => {
-  await openExample(page, "move-and-lane", "move-and-lane");
-  const example = page.locator('[data-example="move-and-lane"]');
+  await openExample(page, "move-and-lane", "move-to-another-lane");
+  const example = page.locator('[data-example="move-to-another-lane"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
 
-  await page.mouse.move(plot.x(13, 45), plot.y("mill"));
+  await page.mouse.move(plot.x(13, 45), plot.y("van-402"));
   await page.mouse.down();
-  await page.mouse.move(plot.x(11), plot.y("mill"), { steps: 5 });
+  await page.mouse.move(plot.x(11), plot.y("van-402"), { steps: 5 });
   await expect(example.locator("[data-ghost]")).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(example.locator("[data-ghost]")).toHaveCount(0);
@@ -107,14 +107,14 @@ test("a schedule without intents starts no drag: pressing a subtask pans", async
 });
 
 test("lead-in grips appear on the selected subtask, and dragging one changes the lead-in", async ({ page }) => {
-  await openExample(page, "stretch", "stretch-lead-in-lead-out");
-  const example = page.locator('[data-example="stretch-lead-in-lead-out"]');
+  await openExample(page, "stretch", "change-lead-in-and-lead-out");
+  const example = page.locator('[data-example="change-lead-in-and-lead-out"]');
   const plot = await plotOf(page, example, [at(6), at(13, 30)]);
   const grips = example.locator("[data-grip]");
   await expect(grips).toHaveCount(0);
 
-  /* The turning, 08:00 to 10:00 with half an hour of lead-in. */
-  await page.mouse.click(plot.x(9), plot.y("lathe"));
+  /* Tour T-01, 08:00 to 10:00 with half an hour of loading. */
+  await page.mouse.click(plot.x(9), plot.y("van-214"));
   await expect(grips).toHaveCount(2);
   const leadIn = example.locator('[data-grip="leadIn"]');
   const before = (await leadIn.boundingBox())!;
@@ -134,20 +134,20 @@ test("lead-in grips appear on the selected subtask, and dragging one changes the
 });
 
 test("stretching the main time at its edge reports a stretch", async ({ page }) => {
-  await openExample(page, "stretch", "stretch-lead-in-lead-out");
-  const example = page.locator('[data-example="stretch-lead-in-lead-out"]');
+  await openExample(page, "stretch", "change-lead-in-and-lead-out");
+  const example = page.locator('[data-example="change-lead-in-and-lead-out"]');
   const plot = await plotOf(page, example, [at(6), at(13, 30)]);
   const grips = example.locator("[data-grip]");
 
-  /* The grinding ends at 12:30; drag its end to 13:00, then select it to read
+  /* Tour T-02 ends at 12:30; drag its end to 13:00, then select it to read
      where its lead-out grip - at the end, with no lead-out - now stands. */
-  await page.mouse.move(plot.x(12, 30), plot.y("grinder"));
+  await page.mouse.move(plot.x(12, 30), plot.y("van-377"));
   await page.mouse.down();
-  await page.mouse.move(plot.x(13), plot.y("grinder"), { steps: 6 });
+  await page.mouse.move(plot.x(13), plot.y("van-377"), { steps: 6 });
   await expect(example.locator("[data-ghost]")).toContainText("11:00–13:00");
   await page.mouse.up();
 
-  await page.mouse.click(plot.x(11, 30), plot.y("grinder"));
+  await page.mouse.click(plot.x(11, 30), plot.y("van-377"));
   await expect(grips).toHaveCount(2);
   const leadOut = (await example.locator('[data-grip="leadOut"]').boundingBox())!;
   expect(leadOut.x + leadOut.width / 2).toBeCloseTo(plot.x(13), -1);
@@ -175,21 +175,21 @@ test("the scenario: a right-click opens the context menu, and an entry changes t
   await expect(summary).toHaveText("2 overlaps, 0 violated dependencies");
 });
 
-test("a drag on the shift raster lands on a shift change", async ({ page }) => {
-  await openExample(page, "snapping", "snapping");
-  const example = page.locator('[data-example="snapping"]');
-  /* The curing runs 06:00 to 14:00; the upper schedule shows 04:00 to
-     midnight and snaps to 06:00, 14:00, 22:00. */
+test("a drag on the handover raster lands on a handover", async ({ page }) => {
+  await openExample(page, "snapping", "snap-to-handovers");
+  const example = page.locator('[data-example="snap-to-handovers"]');
+  /* The watch runs 06:00 to 14:00; the schedule shows 04:00 to midnight
+     and snaps to 06:00, 14:00, 22:00. */
   const plot = await plotOf(page, example, [at(4), at(24)], 110 - 56);
 
-  await page.mouse.move(plot.x(10), plot.y("oven"));
+  await page.mouse.move(plot.x(10), plot.y("primary"));
   await page.mouse.down();
-  await page.mouse.move(plot.x(16), plot.y("oven"), { steps: 8 });
+  await page.mouse.move(plot.x(16), plot.y("primary"), { steps: 8 });
   /* Six hours of pointer become eight: the raster decides, not the pointer. */
   await expect(example.locator("[data-ghost]").first()).toContainText("14:00–22:00");
   await page.mouse.up();
 
-  await page.mouse.move(plot.x(18), plot.y("oven"));
+  await page.mouse.move(plot.x(18), plot.y("primary"));
   await expect(example.locator("[data-schedule-tooltip]").first()).toContainText("14:00–22:00");
 });
 
@@ -213,44 +213,44 @@ test("the scenario shifts a whole order through one intent per stop", async ({ p
 });
 
 test("work dragged in from a list shows its ghost and is reported as a place intent", async ({ page }) => {
-  await openExample(page, "placing", "drag-in");
-  const example = page.locator('[data-example="drag-in"]');
+  await openExample(page, "placing", "drag-from-the-backlog");
+  const example = page.locator('[data-example="drag-from-the-backlog"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
   const ghost = example.locator("[data-ghost]");
   const last = example.locator("[data-last-place]");
-  await expect(last).toHaveText("Drag an order onto a lane");
+  await expect(last).toHaveText("Drag an item onto a person");
 
-  /* The plate takes four hours; dropped on the press at 09:00 it collides with
-     the flange that holds the press from 09:05. */
-  await example.locator('[data-waiting="a-2049"]').hover();
+  /* The audit takes four hours; dropped on Chloe at 09:00 it collides with
+     the basket work she holds from 09:30. */
+  await example.locator('[data-waiting="w-123"]').hover();
   await page.mouse.down();
-  await page.mouse.move(plot.x(8), plot.y("press"), { steps: 6 });
-  await page.mouse.move(plot.x(9), plot.y("press"), { steps: 6 });
+  await page.mouse.move(plot.x(8), plot.y("chloe"), { steps: 6 });
+  await page.mouse.move(plot.x(9), plot.y("chloe"), { steps: 6 });
   await expect(ghost).toContainText("09:00–13:00");
   await expect(ghost).toContainText("Overlap");
   await expect(ghost).toHaveAttribute("data-findings", /overlap/);
   /* Nothing is on the plan while the drag is in flight. */
-  await expect(last).toHaveText("Drag an order onto a lane");
+  await expect(last).toHaveText("Drag an item onto a person");
 
   await page.mouse.up();
   await expect(ghost).toHaveCount(0);
-  await expect(last).toHaveText("place a-2049 on press as a-2049-1");
+  await expect(last).toHaveText("place w-123 on chloe as w-123-1");
 });
 
 test("a drag from a list that leaves the lanes places nothing", async ({ page }) => {
-  await openExample(page, "placing", "drag-in");
-  const example = page.locator('[data-example="drag-in"]');
+  await openExample(page, "placing", "drag-from-the-backlog");
+  const example = page.locator('[data-example="drag-from-the-backlog"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
 
-  await example.locator('[data-waiting="a-2048"]').hover();
+  await example.locator('[data-waiting="w-122"]').hover();
   await page.mouse.down();
-  await page.mouse.move(plot.x(10), plot.y("saw"), { steps: 6 });
+  await page.mouse.move(plot.x(10), plot.y("arjun"), { steps: 6 });
   await expect(example.locator("[data-ghost]")).toBeVisible();
   /* Below the last lane there is no lane to place it on. */
   await page.mouse.move(plot.x(10), plot.box.y + plot.box.height - 2, { steps: 6 });
   await expect(example.locator("[data-ghost]")).toHaveCount(0);
   await page.mouse.up();
-  await expect(example.locator("[data-last-place]")).toHaveText("Drag an order onto a lane");
+  await expect(example.locator("[data-last-place]")).toHaveText("Drag an item onto a person");
 });
 
 test("a drag into a removed night stops at the seam where time counts again", async ({ page }) => {
@@ -274,13 +274,13 @@ test("a drag into a removed night stops at the seam where time counts again", as
 });
 
 test("Escape during a drag from outside places nothing", async ({ page }) => {
-  await openExample(page, "placing", "drag-in");
-  const example = page.locator('[data-example="drag-in"]');
+  await openExample(page, "placing", "drag-from-the-backlog");
+  const example = page.locator('[data-example="drag-from-the-backlog"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
 
-  await example.locator('[data-waiting="a-2047"]').hover();
+  await example.locator('[data-waiting="w-121"]').hover();
   await page.mouse.down();
-  await page.mouse.move(plot.x(12), plot.y("qa"), { steps: 6 });
+  await page.mouse.move(plot.x(12), plot.y("eva"), { steps: 6 });
   await expect(example.locator("[data-ghost]")).toBeVisible();
 
   /* The browser delivers no key events while it runs a drag of its own: Escape
@@ -289,37 +289,37 @@ test("Escape during a drag from outside places nothing", async ({ page }) => {
   await page.keyboard.press("Escape");
   await expect(example.locator("[data-ghost]")).toHaveCount(0);
   await page.mouse.up();
-  await expect(example.locator("[data-last-place]")).toHaveText("Drag an order onto a lane");
+  await expect(example.locator("[data-last-place]")).toHaveText("Drag an item onto a person");
 });
 
 test("a drag from outside held at the edge pans the plot along", async ({ page }) => {
-  await openExample(page, "placing", "drag-in");
-  const example = page.locator('[data-example="drag-in"]');
+  await openExample(page, "placing", "drag-from-the-backlog");
+  const example = page.locator('[data-example="drag-from-the-backlog"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
 
-  await example.locator('[data-waiting="a-2048"]').hover();
+  await example.locator('[data-waiting="w-122"]').hover();
   await page.mouse.down();
-  await page.mouse.move(plot.x(12), plot.y("qa"), { steps: 4 });
-  await page.mouse.move(plot.box.x + plot.box.width - 4, plot.y("qa"), { steps: 6 });
+  await page.mouse.move(plot.x(12), plot.y("eva"), { steps: 4 });
+  await page.mouse.move(plot.box.x + plot.box.width - 4, plot.y("eva"), { steps: 6 });
   /* Held still at the right edge: the plot pans until the ghost starts after
      the 18:00 the view ended at. */
   await expect
     .poll(async () => (await example.locator("[data-ghost]").textContent()) ?? "", { timeout: 5000 })
     .toMatch(/^(19|2\d):\d\d–/);
   await page.mouse.up();
-  await expect(example.locator("[data-last-place]")).toContainText("place a-2048 on qa");
+  await expect(example.locator("[data-last-place]")).toContainText("place w-122 on eva");
 });
 
 test("the ghost's label stays inside the plot, even on the topmost lane", async ({ page }) => {
-  await openExample(page, "move-and-lane", "move-and-lane");
-  const example = page.locator('[data-example="move-and-lane"]');
+  await openExample(page, "move-and-lane", "move-to-another-lane");
+  const example = page.locator('[data-example="move-to-another-lane"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
 
-  /* The housing on the saw, the first lane: above its bar there is no room for
+  /* C-2041 on the truck, the first lane: above its bar there is no room for
      a label, so it belongs under it - and inside the plot either way. */
-  await page.mouse.move(plot.x(6, 30), plot.y("saw"));
+  await page.mouse.move(plot.x(6, 30), plot.y("truck-118"));
   await page.mouse.down();
-  await page.mouse.move(plot.x(8), plot.y("saw"), { steps: 6 });
+  await page.mouse.move(plot.x(8), plot.y("truck-118"), { steps: 6 });
   const label = example.locator("[data-ghost]");
   await expect(label).toBeVisible();
   /* The same invariant the check of schedule-legibility 02 walks the pages
@@ -328,88 +328,88 @@ test("the ghost's label stays inside the plot, even on the topmost lane", async 
   expect(await overlayOffenders(page)).toEqual([]);
   const box = (await label.boundingBox())!;
   /* Under the bar, not over the lane above it. */
-  expect(box.y).toBeGreaterThan(plot.y("saw"));
+  expect(box.y).toBeGreaterThan(plot.y("truck-118"));
   await page.mouse.up();
 });
 
 test("the ghost's label stays inside the plot at the right edge of the plan", async ({ page }) => {
-  await openExample(page, "move-and-lane", "move-and-lane");
-  const example = page.locator('[data-example="move-and-lane"]');
+  await openExample(page, "move-and-lane", "move-to-another-lane");
+  const example = page.locator('[data-example="move-to-another-lane"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
 
-  /* The inspection of A-2045 ends the day at 16:30; dragged to the right edge
+  /* C-2045 on van FP 290 E ends the day at 16:30; dragged to the right edge
      its label would hang out of the plot. */
-  await page.mouse.move(plot.x(16), plot.y("qa"));
+  await page.mouse.move(plot.x(16), plot.y("van-290"));
   await page.mouse.down();
-  await page.mouse.move(plot.box.x + plot.box.width - 20, plot.y("qa"), { steps: 6 });
+  await page.mouse.move(plot.box.x + plot.box.width - 20, plot.y("van-290"), { steps: 6 });
   const box = (await example.locator("[data-ghost]").boundingBox())!;
   expect(box.x + box.width).toBeLessThanOrEqual(plot.box.x + plot.box.width);
   await page.mouse.up();
 });
 
 test("a lane a subtask may not go to refuses the drop, and the ghost stays where it may", async ({ page }) => {
-  await openExample(page, "where-it-may-go", "within");
-  const example = page.locator('[data-example="within"]');
+  await openExample(page, "where-it-may-go", "lanes-that-fit");
+  const example = page.locator('[data-example="lanes-that-fit"]');
   const plot = await plotOf(page, example, [at(6, 30), at(15)]);
   const ghost = example.locator("[data-ghost]");
   const last = example.locator("[data-last-move]");
 
-  /* The moulded part fits the two presses only; the welding bay is the third
-     lane. Dragged onto it, the ghost stays on press 2 and says why. */
-  await page.mouse.move(plot.x(10, 30), plot.y("press-2"));
+  /* The vaccines fit the two cooled vans only; the dry van is the third
+     lane. Dragged onto it, the ghost stays on cooled van 2 and says why. */
+  await page.mouse.move(plot.x(10, 30), plot.y("cool-2"));
   await page.mouse.down();
-  await page.mouse.move(plot.x(10, 30), plot.y("weld"), { steps: 8 });
+  await page.mouse.move(plot.x(10, 30), plot.y("dry"), { steps: 8 });
   await expect(ghost).toBeVisible();
   await expect(ghost).toHaveAttribute("data-refused", "");
   await expect(ghost).toContainText("Not this lane");
-  /* Still on press 2 - the lane it was allowed to be on. */
+  /* Still on cooled van 2 - the lane it was allowed to be on. */
   const box = (await ghost.boundingBox())!;
-  expect(box.y).toBeLessThan(plot.y("weld") - 10);
+  expect(box.y).toBeLessThan(plot.y("dry") - 10);
 
   await page.mouse.up();
-  await expect(last).toHaveText("Drag the moulded part onto the welding bay");
+  await expect(last).toHaveText("Drag the vaccines onto the dry van");
 });
 
 test("the same subtask may still be moved in time, and onto the lane it fits", async ({ page }) => {
-  await openExample(page, "where-it-may-go", "within");
-  const example = page.locator('[data-example="within"]');
+  await openExample(page, "where-it-may-go", "lanes-that-fit");
+  const example = page.locator('[data-example="lanes-that-fit"]');
   const plot = await plotOf(page, example, [at(6, 30), at(15)]);
 
-  /* Press 2 to press 1: allowed, and reported. */
-  await page.mouse.move(plot.x(10, 30), plot.y("press-2"));
+  /* Cooled van 2 to cooled van 1: allowed, and reported. */
+  await page.mouse.move(plot.x(10, 30), plot.y("cool-2"));
   await page.mouse.down();
-  await page.mouse.move(plot.x(10, 30), plot.y("press-1"), { steps: 8 });
+  await page.mouse.move(plot.x(10, 30), plot.y("cool-1"), { steps: 8 });
   await expect(example.locator("[data-ghost]")).not.toHaveAttribute("data-refused", "");
   await page.mouse.up();
-  await expect(example.locator("[data-last-move]")).toHaveText("moulded: lane");
+  await expect(example.locator("[data-last-move]")).toHaveText("vaccines: lane");
 });
 
 test("a drag from a list holds its ghost on the last lane that allowed it", async ({ page }) => {
-  await openExample(page, "where-it-may-go", "from-outside");
-  const example = page.locator('[data-example="from-outside"]');
+  await openExample(page, "where-it-may-go", "dragged-in");
+  const example = page.locator('[data-example="dragged-in"]');
   const plot = await plotOf(page, example, [at(6, 30), at(15)]);
   const ghost = example.locator("[data-ghost]");
 
-  /* First over press 1, which the mould fits: the ghost stands there. */
-  await example.locator('[data-waiting="mould"]').hover();
+  /* First over cooled van 1, which the chilled delivery fits: the ghost stands there. */
+  await example.locator('[data-waiting="insulin"]').hover();
   await page.mouse.down();
-  await page.mouse.move(plot.x(12), plot.y("press-1"), { steps: 6 });
+  await page.mouse.move(plot.x(12), plot.y("cool-1"), { steps: 6 });
   await expect(ghost).toBeVisible();
   await expect(ghost).not.toHaveAttribute("data-refused", "");
 
-  /* Then over the welding bay, which it does not fit. On the way the pointer
-     crosses press 2, which the mould DOES fit, so that is where the ghost was
+  /* Then over the dry van, which it does not fit. On the way the pointer
+     crosses cooled van 2, which it DOES fit, so that is where the ghost was
      last allowed - and that is where it stays. */
-  await page.mouse.move(plot.x(12), plot.y("weld"), { steps: 6 });
+  await page.mouse.move(plot.x(12), plot.y("dry"), { steps: 6 });
   await expect(ghost).toHaveAttribute("data-refused", "");
   await expect(ghost).toContainText("Not this lane");
   const box = (await ghost.boundingBox())!;
-  expect(box.y).toBeLessThan(plot.y("weld") - LANE_HEIGHT / 2);
+  expect(box.y).toBeLessThan(plot.y("dry") - LANE_HEIGHT / 2);
 
   /* And the drop lands where the ghost stood, because the ghost is the promise
      of where a drop lands - here as in a drag inside the plot. */
   await page.mouse.up();
-  await expect(example.locator("[data-last-place]")).toHaveText("mould: place on press-2");
+  await expect(example.locator("[data-last-place]")).toHaveText("insulin: place on cool-2");
 });
 
 /* ------------------------------------------------------------------ */
@@ -417,24 +417,24 @@ test("a drag from a list holds its ghost on the last lane that allowed it", asyn
 /* ------------------------------------------------------------------ */
 
 test("the lanes a subtask may not go to are marked the moment the drag begins", async ({ page }) => {
-  await openExample(page, "where-it-may-go", "within");
-  const example = page.locator('[data-example="within"]');
+  await openExample(page, "where-it-may-go", "lanes-that-fit");
+  const example = page.locator('[data-example="lanes-that-fit"]');
   const plot = await plotOf(page, example, [at(6, 30), at(15)]);
-  const weld = example.locator('[data-lane="weld"]');
+  const weld = example.locator('[data-lane="dry"]');
 
   await expect(weld).not.toHaveAttribute("data-refused", "");
 
-  /* The drag takes hold on press 2 and has not left it. The welding bay is
+  /* The drag takes hold on cooled van 2 and has not left it. The dry van is
      already marked: nobody has to try a lane to learn it is closed. */
-  await page.mouse.move(plot.x(10, 30), plot.y("press-2"));
+  await page.mouse.move(plot.x(10, 30), plot.y("cool-2"));
   await page.mouse.down();
-  await page.mouse.move(plot.x(10, 45), plot.y("press-2"), { steps: 6 });
+  await page.mouse.move(plot.x(10, 45), plot.y("cool-2"), { steps: 6 });
   await expect(example.locator("[data-ghost]")).toBeVisible();
   await expect(weld).toHaveAttribute("data-refused", "");
-  await expect(example.locator('[data-lane="press-1"]')).not.toHaveAttribute("data-refused", "");
+  await expect(example.locator('[data-lane="cool-1"]')).not.toHaveAttribute("data-refused", "");
 
-  /* And the lane itself is drawn back and hatched, while press 1 - which the
-     mould fits - is left alone. */
+  /* And the lane itself is drawn back and hatched, while cooled van 1 - which
+     the vaccines fit - is left alone. */
   const lane = (top: number) => ({ x: 4, y: top + 6, width: 60, height: LANE_HEIGHT - 12 });
   expect(await painted(example, "overlay", lane(2 * LANE_HEIGHT))).toBeGreaterThan(0);
   expect(await painted(example, "overlay", lane(0))).toBe(0);
@@ -444,66 +444,66 @@ test("the lanes a subtask may not go to are marked the moment the drag begins", 
 });
 
 test("over a refused lane the cursor says so, and says otherwise again on leaving it", async ({ page }) => {
-  await openExample(page, "where-it-may-go", "within");
-  const example = page.locator('[data-example="within"]');
+  await openExample(page, "where-it-may-go", "lanes-that-fit");
+  const example = page.locator('[data-example="lanes-that-fit"]');
   const plot = await plotOf(page, example, [at(6, 30), at(15)]);
   const surface = example.locator("[data-schedule-plot]");
 
-  await page.mouse.move(plot.x(10, 30), plot.y("press-2"));
+  await page.mouse.move(plot.x(10, 30), plot.y("cool-2"));
   await page.mouse.down();
-  await page.mouse.move(plot.x(10, 30), plot.y("weld"), { steps: 8 });
+  await page.mouse.move(plot.x(10, 30), plot.y("dry"), { steps: 8 });
   await expect(surface).toHaveCSS("cursor", "not-allowed");
 
-  await page.mouse.move(plot.x(10, 30), plot.y("press-1"), { steps: 8 });
+  await page.mouse.move(plot.x(10, 30), plot.y("cool-1"), { steps: 8 });
   await expect(surface).toHaveCSS("cursor", "grabbing");
   await page.mouse.up();
 });
 
 test("a line ties the held ghost to the pointer it is not following", async ({ page }) => {
-  await openExample(page, "where-it-may-go", "within");
-  const example = page.locator('[data-example="within"]');
+  await openExample(page, "where-it-may-go", "lanes-that-fit");
+  const example = page.locator('[data-example="lanes-that-fit"]');
   const plot = await plotOf(page, example, [at(6, 30), at(15)]);
   const ghost = example.locator("[data-ghost]");
 
-  /* Measured on press 2, in the gap between the ghost's bar and the boundary
-     of the welding bay: that strip lies on a lane which is NOT refused, so
+  /* Measured on cooled van 2, in the gap between the ghost's bar and the
+     boundary of the dry van: that strip lies on a lane which is NOT refused, so
      nothing but the tether can paint it. */
   const x = plot.x(10, 30) - plot.box.x;
   const strip = { x: x - 2, y: 2 * LANE_HEIGHT - 5, width: 5, height: 4 };
 
-  await page.mouse.move(plot.x(10, 30), plot.y("press-2"));
+  await page.mouse.move(plot.x(10, 30), plot.y("cool-2"));
   await page.mouse.down();
-  await page.mouse.move(plot.x(10, 30), plot.y("press-1"), { steps: 8 });
+  await page.mouse.move(plot.x(10, 30), plot.y("cool-1"), { steps: 8 });
   await expect(ghost).not.toHaveAttribute("data-refused", "");
   expect(await painted(example, "overlay", strip)).toBe(0);
 
-  await page.mouse.move(plot.x(10, 30), plot.y("weld"), { steps: 8 });
+  await page.mouse.move(plot.x(10, 30), plot.y("dry"), { steps: 8 });
   await expect(ghost).toHaveAttribute("data-refused", "");
   expect(await painted(example, "overlay", strip)).toBeGreaterThan(0);
   await page.mouse.up();
 });
 
 test("a refused lane costs the lane and not the move in time", async ({ page }) => {
-  await openExample(page, "where-it-may-go", "within");
-  const example = page.locator('[data-example="within"]');
+  await openExample(page, "where-it-may-go", "lanes-that-fit");
+  const example = page.locator('[data-example="lanes-that-fit"]');
   const plot = await plotOf(page, example, [at(6, 30), at(15)]);
 
-  /* Down onto the welding bay AND an hour earlier: the lane is refused, the
+  /* Down onto the dry van AND an hour earlier: the lane is refused, the
      hour is not. One refusal must not cost the other half of the gesture. */
-  await page.mouse.move(plot.x(10, 30), plot.y("press-2"));
+  await page.mouse.move(plot.x(10, 30), plot.y("cool-2"));
   await page.mouse.down();
-  await page.mouse.move(plot.x(9, 30), plot.y("weld"), { steps: 10 });
+  await page.mouse.move(plot.x(9, 30), plot.y("dry"), { steps: 10 });
   await expect(example.locator("[data-ghost]")).toHaveAttribute("data-refused", "");
   await page.mouse.up();
 
-  await expect(example.locator("[data-last-move]")).toHaveText("moulded: move");
+  await expect(example.locator("[data-last-move]")).toHaveText("vaccines: move");
 });
 
 test("a drag from outside is marked and refused in the same language", async ({ page }) => {
-  await openExample(page, "where-it-may-go", "from-outside");
-  const example = page.locator('[data-example="from-outside"]');
+  await openExample(page, "where-it-may-go", "dragged-in");
+  const example = page.locator('[data-example="dragged-in"]');
   const plot = await plotOf(page, example, [at(6, 30), at(15)]);
-  const weld = example.locator('[data-lane="weld"]');
+  const weld = example.locator('[data-lane="dry"]');
 
   /* The browser's own answer to a drag, read after the schedule gave it:
      React listens on the root container, so a listener on the document runs
@@ -516,19 +516,19 @@ test("a drag from outside is marked and refused in the same language", async ({ 
   });
   const dropEffect = () => page.evaluate(() => (window as unknown as { lastDropEffect?: string }).lastDropEffect);
 
-  /* The welding bay is marked as soon as the drag reaches the plot, exactly as
+  /* The dry van is marked as soon as the drag reaches the plot, exactly as
      it is for a drag inside it. */
-  await example.locator('[data-waiting="mould"]').hover();
+  await example.locator('[data-waiting="insulin"]').hover();
   await page.mouse.down();
-  await page.mouse.move(plot.x(12), plot.y("press-1"), { steps: 6 });
+  await page.mouse.move(plot.x(12), plot.y("cool-1"), { steps: 6 });
   await expect(weld).toHaveAttribute("data-refused", "");
   await expect(example.locator("[data-ghost]")).toBeVisible();
   expect(await dropEffect()).toBe("copy");
 
-  /* And back over the welding bay it stays "copy": the ghost still stands on
-     press 1, and a ghost is the promise of where a drop lands. The refusal is
+  /* And back over the dry van it stays "copy": the ghost still stands on
+     cooled van 1, and a ghost is the promise of where a drop lands. The refusal is
      said in the marks, not by taking the gesture away. */
-  await page.mouse.move(plot.x(12), plot.y("weld"), { steps: 6 });
+  await page.mouse.move(plot.x(12), plot.y("dry"), { steps: 6 });
   await expect(example.locator("[data-ghost]")).toHaveAttribute("data-refused", "");
   expect(await dropEffect()).toBe("copy");
 
