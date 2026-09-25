@@ -1,23 +1,21 @@
-import { Calculation, Given, Quotient, Sum } from "../../../src";
+import { Calculation, Given, Product, Quotient, Sum } from "../../../src";
 
 export const title = "A division by zero";
+export const lead = "A tour that delivered nothing has no cost per parcel – not zero, not infinity; the quotient is absent with its own reason.";
 
-/* A machine that did not run has no output per hour - not zero, and not
-   infinity. The quotient is absent with its own reason, and so is everything
-   that depends on it. */
 export default function DivisionByZero() {
   return (
-    <Calculation aria-label="Output per hour, cell 7">
-      <Sum label="Output per hour, cell 7" unit="pcs/h">
-        <Quotient label="Robot A" unit="pcs/h">
-          <Given label="Parts, robot A" value={412} unit="pcs" />
-          <Given label="Hours run, robot A" value={7.5} unit="h" />
+    <Calculation aria-label="Planned cost of tomorrow's parcels, tour T-07">
+      <Product label="Cost of tomorrow's 80 parcels" unit="€" decimals={2}>
+        <Quotient label="Cost per parcel, tour T-07" unit="€/parcel" decimals={2}>
+          <Sum label="Cost of tour T-07" unit="€" decimals={2}>
+            <Given label="Driver, standby" value={69} unit="€" decimals={2} />
+            <Given label="E-van, one day" value={72} unit="€" decimals={2} />
+          </Sum>
+          <Given label="Parcels delivered" value={0} unit="parcels" />
         </Quotient>
-        <Quotient label="Robot B" unit="pcs/h">
-          <Given label="Parts, robot B" value={0} unit="pcs" />
-          <Given label="Hours run, robot B" value={0} unit="h" />
-        </Quotient>
-      </Sum>
+        <Given label="Parcels planned for tomorrow" value={80} unit="parcels" />
+      </Product>
     </Calculation>
   );
 }

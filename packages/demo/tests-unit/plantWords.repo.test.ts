@@ -22,22 +22,6 @@ import { checkPlantWords } from "../checks/plantWords";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 
 const PENDING: readonly string[] = [
-  "packages/calculation/demo/examples/Calculation/01-first-sum.tsx",
-  "packages/calculation/demo/examples/Calculation/02-oee.tsx",
-  "packages/calculation/demo/examples/Chain/03-shift-cost.tsx",
-  "packages/calculation/demo/examples/Chain/06-chain-in-a-tree.tsx",
-  "packages/calculation/demo/examples/Given/01-where-it-came-from.tsx",
-  "packages/calculation/demo/examples/Given/02-as-of.tsx",
-  "packages/calculation/demo/examples/Tree/02-difference-of-three.tsx",
-  "packages/calculation/demo/examples/Tree/03-product-with-units.tsx",
-  "packages/calculation/demo/examples/Tree/04-used-twice.tsx",
-  "packages/calculation/demo/examples/What-can-go-wrong/01-missing.tsx",
-  "packages/calculation/demo/examples/What-can-go-wrong/02-division-by-zero.tsx",
-  "packages/calculation/demo/examples/What-can-go-wrong/03-rounding.tsx",
-  "packages/calculation/demo/examples/What-can-go-wrong/04-limit-inside.tsx",
-  "packages/calculation/demo/examples/Worked-examples/01-cost-per-piece.tsx",
-  "packages/calculation/demo/examples/Worked-examples/02-hall-oee.tsx",
-  "packages/calculation/demo/outline.ts",
   "packages/charts/demo/examples/Chart/03-empty.tsx",
   "packages/charts/demo/outline.ts",
   "packages/charts/src/Line.tsx",

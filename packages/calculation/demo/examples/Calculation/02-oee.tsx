@@ -1,36 +1,31 @@
+import { countAt, IDEAL_CYCLE_MINUTES, plant, SHIFT_MINUTES } from "@umriss-ui/demo/worlds/plant";
 import { Calculation, Difference, Given, Product, Quotient, Ref } from "../../../src";
 
-export const title = "OEE of an early shift";
+export const title = "Write a tree";
+export const lead = "Nest operators for a figure made of factors: each folds with its formula under its name, and `Ref` stands for a quantity used twice.";
 
-/* A tree: overall equipment effectiveness as availability × performance ×
-   quality, each derived from the shift's numbers. The three factors stand
-   above the result, each folded, with the formula it hides beneath its name;
-   click a name to open it.
+const COUNT = countAt(plant(17), SHIFT_MINUTES);
 
-   Planned production time, run time and total count are each used twice. They
-   are defined once, where they belong, and stand elsewhere as a `<Ref>` - a
-   reference shows the quantity's name and number, never its derivation again.
-   Hover a line and its operands and every place it is used light up. */
 export default function Oee() {
   return (
-    <Calculation aria-label="OEE, early shift">
+    <Calculation aria-label="OEE of the kiln line, early shift">
       <Product label="OEE" format="percent" target={0.85}>
         <Quotient label="Availability" format="percent">
           <Difference id="runtime" label="Run time" unit="min">
-            <Given id="planned" label="Planned production time" value={450} unit="min" />
-            <Given label="Downtime" value={38} unit="min" />
+            <Given id="planned" label="Planned production time" value={COUNT.planned} unit="min" />
+            <Given label="Downtime" value={COUNT.downtime} unit="min" />
           </Difference>
           <Ref to="planned" />
         </Quotient>
         <Quotient label="Performance" format="percent">
           <Product label="Ideal run time" unit="min">
-            <Given label="Ideal cycle time" value={0.8} unit="min/pc" />
-            <Given id="total" label="Total count" value={480} unit="pcs" />
+            <Given label="Ideal cycle time" value={IDEAL_CYCLE_MINUTES} unit="min/tile" />
+            <Given id="total" label="Tiles fired" value={COUNT.total} unit="tiles" />
           </Product>
           <Ref to="runtime" />
         </Quotient>
         <Quotient label="Quality" format="percent">
-          <Given label="Good count" value={461} unit="pcs" />
+          <Given label="Good tiles" value={COUNT.good} unit="tiles" />
           <Ref to="total" />
         </Quotient>
       </Product>
