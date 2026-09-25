@@ -8,7 +8,7 @@
    cosmetic reasons.
 
    The lane stands in domain units of the y axis, not in pixels and not in
-   fractions of the plot height. Four machines are one axis with a domain of four
+   fractions of the plot height. Four resources are one axis with a domain of four
    units and four series of one each - labelled through the tickFormat the axis
    has anyway. No new lane concept, no new layout, no pixel arithmetic on the
    caller's side. */

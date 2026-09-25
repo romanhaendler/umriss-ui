@@ -5,7 +5,7 @@
 
 import { describe, expect, it, vi } from "vitest";
 import CHARTS_CSS from "../src/styles/charts.css?raw";
-import { toOperatingTime, toWallClock } from "../src/operatingTime";
+import { toWorkingTime, toWallClock } from "../src/workingTime";
 import {
   BAND_GAP,
   CLASS_TICK,
@@ -45,13 +45,13 @@ function find(axes: readonly AxisLayout[], key: string): AxisLayout {
   return hit;
 }
 
-/* library-audit 03: the default labelling of an operating time axis ran through
+/* library-audit 03: the default labelling of a working time axis ran through
    `toLocaleString(undefined, …)` and thereby depended on the machine - in a
    workspace whose other package nails the notation down. A screenshot from a
    colleague would not have matched one's own. Since charts-essentials 01 the
    notation is en-GB by level, the same as a time axis without a calendar
    (timeAxis.test.ts) - fixed, never the machine's. */
-describe("computeLayout - operating time without a formatter of its own", () => {
+describe("computeLayout - working time without a formatter of its own", () => {
   it("labels the clock in en-GB and asks for no locale", () => {
     const spy = vi.spyOn(Date.prototype, "toLocaleString");
     const start = new Date(2026, 2, 16, 6, 0).getTime();
@@ -421,11 +421,11 @@ describe("computeLayout - the label of an x limit", () => {
   });
 });
 
-/* charts-fixes 09: an operating-time axis stood its day and half-day ticks on
+/* charts-fixes 09: a working-time axis stood its day and half-day ticks on
    UTC's midnight and labelled them in local time - "01:00" under a day change
-   in CET - and took explicit ticks as operating time. The tests run under
+   in CET - and took explicit ticks as working time. The tests run under
    Europe/Berlin (vitest.config.ts). */
-describe("computeLayout - ticks of an operating-time axis", () => {
+describe("computeLayout - ticks of a working-time axis", () => {
   const HOUR = 3_600_000;
   const start = new Date(2026, 2, 16, 0, 0).getTime();
 
@@ -471,7 +471,7 @@ describe("computeLayout - ticks of an operating-time axis", () => {
     const wall = [start + 8 * HOUR, start + 20 * HOUR, start + 32 * HOUR];
     const layout = xAxisOf(calendar, { tickValues: wall });
     const values = find(layout.axes, "x:x").ticks.map((t) => t.value);
-    expect(values).toEqual([toOperatingTime(wall[0] as number, calendar), toOperatingTime(wall[2] as number, calendar)]);
+    expect(values).toEqual([toWorkingTime(wall[0] as number, calendar), toWorkingTime(wall[2] as number, calendar)]);
     expect(values).toEqual([2 * HOUR, 10 * HOUR]);
   });
 });

@@ -29,7 +29,7 @@ interface CommonProps {
       is nearly always a value and not a moment. */
   orientation?: "x" | "y";
   /** Two severities, not five: five urgencies are five colours, and five colours
-      on a plant screen are noise. */
+      on a dense screen are noise. */
   severity?: Severity;
   /** What the value means. A line at 90 does not say what 90 is. */
   label?: string;
