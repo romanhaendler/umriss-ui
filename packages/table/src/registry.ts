@@ -130,6 +130,11 @@ export interface HookSnapshot {
   formats: Formats;
   /** The pins the user chose - absent while the declared ones hold. */
   pins: Pins | null;
+  /** Manual mode: the values a list filter offers, from the application. */
+  filterOptions?: (column: string) => readonly unknown[];
+  /** Manual mode: the selected rows the table has seen, on this page or an
+      earlier one - what a bulk action receives. */
+  selectedRows?: readonly unknown[];
 }
 
 /* --- An ordered list of entries ----------------------------------------------- */
@@ -451,6 +456,16 @@ export class Registry {
   /** Whether the table lets itself be grouped at all (`<Table groupable>`). */
   tableGroupable = true;
 
+  /** Manual mode: the rows are a server's page, and nothing groups them. */
+  manual = false;
+
+  /** The hook says during its render, before the table's, whether it is in
+      manual mode. Idempotent, and no version rises: the hook renders before
+      everything that reads it. */
+  setManual(manual: boolean) {
+    this.manual = manual;
+  }
+
   setTableGroupable(groupable: boolean) {
     if (this.tableGroupable === groupable) return;
     this.tableGroupable = groupable;
@@ -460,6 +475,12 @@ export class Registry {
   /** Everything a table can be grouped by: its columns, then its group keys. */
   groupingEntries(rows: readonly unknown[]): ColumnEntry[] {
     if (!this.tableGroupable) return [];
+    if (this.manual) {
+      if (this.orderedColumns().some((e) => e.spec.groupable === true)) {
+        warnOnce("manual-groupable-column", "`groupable` on a column is passed over in manual mode: the groups would be the page's, not the server's.");
+      }
+      return [];
+    }
     const seen = new Set<string>();
     return [...this.orderedColumns(), ...this.groupKeys.ordered()].filter((e) => {
       if (seen.has(e.spec.id)) return false;
@@ -635,6 +656,7 @@ export class Registry {
       hidden: b.hidden,
       order: b.order,
       grouping: this.groupingFor(hook),
+      manual: b.manual,
     };
     const fresh = tableModel(hook.admitted, columns, input);
     const projection = b.virtual ? windowed(fresh, b.virtual.from, b.virtual.to) : fresh;

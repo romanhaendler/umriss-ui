@@ -37,7 +37,7 @@ export type { DateFormat, NumberFormat } from "./values";
 
 /* The view as an object: `initialView` in, `t.view` out. Where it is kept the
    application decides. */
-export type { TableView } from "./model/view";
+export type { ManualView, TableView } from "./model/view";
 export type { SortDirection, SortLevel } from "./model/tableModel";
 
 /* The selection as a hook of its own - for a selection the application holds

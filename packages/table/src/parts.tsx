@@ -306,6 +306,9 @@ export function buildParts(registry: Registry): Parts {
     registry.beginPass();
     registry.setStickyRowHeader(props.stickyRowHeader === true);
     registry.setTableGroupable(props.groupable !== false);
+    if (registry.manual && props.groupable === true) {
+      warnOnce("manual-groupable", "`groupable` is passed over in manual mode: the groups would be the page's, not the server's.");
+    }
     const childrenRef = useRef<HTMLDivElement>(null);
     const [footerTarget, setFooterTarget] = useState<HTMLDivElement | null>(null);
 
@@ -405,6 +408,34 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
     }
   });
 
+  /* Manual mode (M2): the placeholders stand where the previous page stood,
+     at the height its rows had and in the widths its columns had - a
+     placeholder is lower than a row with a checkbox in it, and the columns of
+     an automatic layout would shift to the placeholders' widths while the
+     answer is out. Measured from the rendered rows, since only the layout
+     knows them. */
+  const previousPage = useRef<{ height: number; widths: number[] } | null>(null);
+  useLayoutEffect(() => {
+    const body = tableRef.current?.tBodies[0];
+    if (!body || !registry.manual) return;
+    if (!loading) {
+      const rendered = Array.from(body.querySelectorAll<HTMLTableRowElement>(":scope > tr[data-motion]"));
+      if (rendered.length === 0) return;
+      previousPage.current = {
+        height: rendered.reduce((sum, tr) => sum + tr.getBoundingClientRect().height, 0) / rendered.length,
+        widths: Array.from(rendered[0]!.cells, (cell) => cell.getBoundingClientRect().width),
+      };
+      return;
+    }
+    const previous = previousPage.current;
+    if (!previous) return;
+    for (const tr of Array.from(body.rows)) tr.style.height = `${previous.height}px`;
+    const first = body.rows[0];
+    if (first?.cells.length === previous.widths.length) {
+      Array.from(first.cells).forEach((cell, i) => (cell.style.width = `${previous.widths[i]}px`));
+    }
+  });
+
   /* Regrouping and folding move the lines that stay; a virtual window does
      not - its rows come and go with the scroll. */
   const moving = registry.hook && !registry.hook.companion.virtual ? registry.hook.publicSnapshot : null;
@@ -456,7 +487,9 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
   const pinAt = (first: number, last = first) => pinnedCell(blocks, first, last);
 
   const rows = projection.visible;
-  const footerShown = !loading && dataColumns.some((e) => e.spec.aggregate);
+  /* In manual mode the aggregates would be the page's, standing where the
+     filtered set's belong - no footer rather than a wrong one. */
+  const footerShown = !loading && !snapshot.manual && dataColumns.some((e) => e.spec.aggregate);
   const restricted = snapshot.search !== "" || Object.keys(snapshot.filter).length > 0;
 
   /* Grid mode (ADR-0034): every line the arrows walk - all of them, the ones a
@@ -520,6 +553,9 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
       <tbody>
         <LoadingRows
           columns={columnCount}
+          /* Over a server's page: as many placeholders as the page had rows,
+             so that nothing below jumps while the next one is on its way. */
+          rows={snapshot.manual ? rows.length || snapshot.pageSize : undefined}
           rightAligned={[
             ...Array.from({ length: controlColumns + (spanEntry ? 1 : 0) }, () => false),
             ...dataColumns.map((e) => isRightAligned(registry.kindOf(e, hook.rows), e.spec.rightAligned)),
@@ -533,7 +569,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
         <tr data-grid-line={lineKey("empty")}>
           <td colSpan={columnCount} className={styles.emptyCell}>
             <div className={styles.empty}>
-              {hook.admitted.length > 0 && restricted ? (
+              {(snapshot.manual || hook.admitted.length > 0) && restricted ? (
                 <>
                   <p className={styles.emptyTitle}>{wording.nothingMatchesFilters}</p>
                   <Button size="sm" variant="ghost" onClick={() => resetSearchAndFilters(snapshot)}>
@@ -668,7 +704,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
             {selectable && (
               <th scope="col" className={cx(styles.th, styles.control, pinAt(0).className)} style={pinAt(0).style}>
                 <Checkbox
-                  aria-label={wording.selectAllRows}
+                  aria-label={snapshot.manual ? wording.selectAllOnPage : wording.selectAllRows}
                   checked={snapshot.selection.allSelected}
                   indeterminate={snapshot.selection.someSelected}
                   onChange={snapshot.selection.toggleAll}
