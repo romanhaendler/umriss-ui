@@ -1,22 +1,18 @@
-import { Calculation, Given, Product, Quotient, Sum } from "../../../src";
+import { Calculation, Given, Quotient, Sum } from "../../../src";
 
-export const title = "When the rounded figures do not add up";
+export const title = "Rounded figures that do not add up";
+export const lead = "Operations use full values and only the screen rounds; where the rounded operands miss the rounded result, the line says so with ≈.";
 
-/* Every operation uses the full value; rounding happens only on the screen.
-   Three shares of 33.3 % each add up to 100 % - not to the 99.9 % a reader
-   gets from the rounded figures. The line says so with "≈" and a note,
-   instead of leaving the reader to find it. */
+const PEOPLE = ["Arjun Mehta", "Chloe Durand", "Eva Novak"];
+
 export default function Rounding() {
   return (
-    <Calculation aria-label="Shares of the shift">
-      <Sum label="All three lines" format="percent">
-        {["Line 1", "Line 2", "Line 3"].map((line) => (
-          <Quotient key={line} label={`Share of ${line}`} format="percent">
-            <Product label={`Hours on ${line}`} unit="h">
-              <Given label="Machines" value={2} />
-              <Given label="Hours each" value={4} unit="h" />
-            </Product>
-            <Given label="Hours in the shift" value={24} unit="h" />
+    <Calculation aria-label="Shares of the booking app release">
+      <Sum label="All three" format="percent">
+        {PEOPLE.map((person) => (
+          <Quotient key={person} label={`Share, ${person}`} format="percent">
+            <Given label={`Hours, ${person}`} value={12} unit="h" />
+            <Given label="Hours on the release" value={36} unit="h" />
           </Quotient>
         ))}
       </Sum>

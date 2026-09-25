@@ -1,27 +1,28 @@
 import { Calculation, Chain, Given, Interim, Plus, Product } from "../../../src";
 
 export const title = "A limit violated deep inside";
+export const lead = "A folded line holding a worse verdict says so quietly – without taking the colour itself, since its own number is not the one in alarm.";
 
-/* The scrap rate on line 2 is beyond its alarm limit, inside a folded line.
-   The folded line says so quietly - "Inside: Alarm limit exceeded" - without
-   taking on the alarm's colour itself: its own number is not the one in
-   alarm. Open it to find the line that is. */
+const ERROR_LIMITS = [
+  { value: 0.01, side: "upper" as const, severity: "warning" as const },
+  { value: 0.02, side: "upper" as const, severity: "alarm" as const },
+];
+
 export default function LimitInside() {
-  const scrapLimits = [{ value: 0.03, side: "upper" as const, severity: "alarm" as const }];
   return (
-    <Calculation aria-label="Scrap cost, hall 1">
+    <Calculation aria-label="Payments at risk, this morning">
       <Chain>
-        <Product label="Scrap cost, line 1" unit="€" decimals={2}>
-          <Given label="Scrap rate, line 1" value={0.018} format="percent" limits={scrapLimits} />
-          <Given label="Material, line 1" value={24800} unit="€" decimals={2} />
+        <Product label="At risk, Billing" unit="€" decimals={2}>
+          <Given label="Error rate, Billing" value={0.004} format="percent" limits={ERROR_LIMITS} />
+          <Given label="Payments, Billing" value={24800} unit="€" decimals={2} />
         </Product>
         <Plus>
-          <Product label="Scrap cost, line 2" unit="€" decimals={2}>
-            <Given label="Scrap rate, line 2" value={0.041} format="percent" limits={scrapLimits} />
-            <Given label="Material, line 2" value={19650} unit="€" decimals={2} />
+          <Product label="At risk, Checkout" unit="€" decimals={2}>
+            <Given label="Error rate, Checkout" value={0.026} format="percent" limits={ERROR_LIMITS} />
+            <Given label="Payments, Checkout" value={19650} unit="€" decimals={2} />
           </Product>
         </Plus>
-        <Interim label="Scrap cost, hall 1" unit="€" decimals={2} />
+        <Interim label="Payments at risk" unit="€" decimals={2} />
       </Chain>
     </Calculation>
   );

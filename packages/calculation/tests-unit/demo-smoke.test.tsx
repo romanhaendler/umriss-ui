@@ -18,6 +18,7 @@ const EXAMPLES = DEMO.examples;
 
 /** Named exceptions: pages without a props table, each with its reason. */
 const WITHOUT_TABLE: Readonly<Record<string, string>> = {
+  installation: "Setting up the package; the elements' props stand on the pages after it.",
   "what-can-go-wrong": "Behaviour of the elements documented on the pages before; it has no props of its own.",
   "worked-examples": "Worked examples of the elements documented on the pages before; they have no props of their own.",
 };
