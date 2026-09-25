@@ -244,13 +244,6 @@ export default [
     },
   },
   {
-    /* A scenario is a composed screen and may use the neighbouring packages,
-       as a consumer's application would (.scratch/demo-rework/spec.md): the
-       directions bind what is published, not the demos' front pages. */
-    files: ["packages/*/demo/scenarios/**/*.{ts,tsx}"],
-    rules: { "no-restricted-imports": "off" },
-  },
-  {
     /* A world is copied beside an example and must compile there: plain
        data, no import of anything. */
     files: ["packages/demo/src/worlds/*.ts"],

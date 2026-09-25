@@ -80,6 +80,9 @@ export interface Addresses {
   fromAddress: (hash: string) => { page?: PageWithRubric; example?: string };
 }
 
+/** The record of what umriss is not - every page's known limits point there. */
+export const ADR_0032 = "https://github.com/romanhaendler/umriss-ui/blob/main/docs/adr/0032-what-umriss-is-not.md";
+
 /** The address of the scenarios page, as `placeOf`'s page id. */
 export const SCENARIOS = "scenarios";
 
