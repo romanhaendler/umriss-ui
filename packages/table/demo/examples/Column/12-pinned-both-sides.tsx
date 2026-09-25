@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Stack, Text } from "@umriss-ui/core";
 import type { LimitSet } from "@umriss-ui/core";
-import { MACHINES } from "@umriss-ui/demo/worlds/plant";
+import { STATIONS } from "@umriss-ui/demo/worlds/plant";
 import { ColumnMenu, Toolbar, useTable } from "../../../src";
 
 export const title = "Pin columns to both sides";
@@ -32,9 +32,9 @@ const TEMPERATURE: LimitSet = {
   ],
 };
 
-const AREAS = ["Pressing", "Milling", "Hardening", "Assembly"];
+const AREAS = ["Cutting", "Turning", "Forming", "Finishing"];
 
-const ROWS: Machine[] = MACHINES.map((name, i) => ({
+const ROWS: Machine[] = STATIONS.map(({ label: name }, i) => ({
   name,
   area: AREAS[Math.floor(i / 2)]!,
   output: HOURS.map((_, h) => 30 + ((i * 11 + h * 7) % 29)),
