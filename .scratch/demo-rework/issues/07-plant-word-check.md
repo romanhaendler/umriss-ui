@@ -1,6 +1,6 @@
 # 07 - The plant-word check
 
-Status: ready-for-agent
+Status: done
 Type: task
 Blocked by: 03, 04, 05, 06
 
@@ -14,3 +14,7 @@ A check (beside the existing demo checks) that flags plant words (plant, machine
 
 - Runs in CI with the other checks; fails with file and word.
 - Its own unit test with a good and a bad fixture.
+
+## Comments
+
+2026-09-25, delivered on `main`. `packages/demo/checks/plantWords.ts` with its fixture test; the repo run is a unit test (`plantWords.repo.test.ts`), so CI holds it; counts the plant quarter and plant scenarios. "operator" is left out on purpose (the calculation's arithmetic operator), recorded in the check's head. Visual baselines wait on the branch `demo-rework-baselines` for ticket 30's review (CONTEXT.md, Baseline).

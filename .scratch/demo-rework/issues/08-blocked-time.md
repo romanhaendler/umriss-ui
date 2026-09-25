@@ -1,6 +1,6 @@
 # 08 - Schedule: blocked time per lane
 
-Status: ready-for-agent
+Status: done
 Type: task
 Blocked by: 04
 
@@ -14,3 +14,7 @@ A lane carries blocked intervals (leave, maintenance, unavailability), drawn beh
 
 - Model as plain data (ADR-0023); unit tests for the finding.
 - Visual test; keyboard and screen-reader wording in English and German.
+
+## Comments
+
+2026-09-25, delivered on `main`. `BlockedTime` / `<BlockedTimes>`, finding `inBlockedTime`, refusal in where-it-may-go, drawing incl. forced colours, EN/DE wording; "Not yet" in the schedule README. Visual baselines wait on the branch `demo-rework-baselines` for ticket 30's review (CONTEXT.md, Baseline).

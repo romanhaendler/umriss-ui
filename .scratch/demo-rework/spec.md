@@ -1,6 +1,6 @@
 # Demo rework: scenarios first, generic worlds, pages that explain
 
-Status: ready-for-agent (grilled 2026-09-25; tickets in `issues/`). Positioning and renames: ADR-0035.
+Status: done for tickets 01–29 (2026-09-25); ticket 30, the final polish, is ready-for-human. The visual baselines wait on `demo-rework-baselines` for that review. Positioning and renames: ADR-0035.
 Page research: `research-component-pages.md`.
 
 ## Settled
