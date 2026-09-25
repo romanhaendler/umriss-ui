@@ -160,7 +160,9 @@ Screenshot pages carry their name in brackets.
 | The hover marker sits at the head, not at the foot | R-4.7 | Interaction (`mixed`) |
 | `stack`: bars of one id stand on each other in registration order, one place in the group; a gap stacks as zero and is no hit; negative values stack downward from zero apart from the positive | charts-stacking K1-K3 | Unit (stack, bars, draw, jsdom stacking), Screenshot (`stacked`) |
 | A stack's extent from its foot to its highest top; a hidden member gives up its place | charts-stacking K2 | Unit (jsdom stacking) |
-| `normalize`: every x of the stack sums to 100 %, the y axis reads in percent without a `tickFormat` (the sign from the wording) | charts-stacking K5 | Unit (stack, jsdom stacking), Screenshot (`percent`) |
+| `normalize` on any member, a hidden one too: every x of the stack sums to 100 %, the y axis reads in percent without a `tickFormat` (the sign from the wording); a line on that axis keeps its own values | charts-stacking K5 | Unit (stack, jsdom stacking), Screenshot (`percent`) |
+| A Bar and an Area with the same id stack on each other - the key is the id and the two axes, not the kind | charts-stacking K1 | Unit (stack) |
+| Under forced colours and `encoding="marks"` a stack's members are told apart by their hatches | C3, C4 | Manual (both stacked examples, forced colours emulated) |
 
 ## `Scatter`
 
@@ -265,7 +267,8 @@ Screenshot pages carry their name in brackets.
 | A value in its y axis' `tickFormat`, the default without one; with several x axes each point's own x value in its own axis' format | R-4.8 | Unit (jsdom tooltip) |
 | A series' own `format` before its y axis' `tickFormat`, a matrix' value included; `ControlChart` passes it to its line and its violations | Q16 | Unit (jsdom tooltip, jsdom control chart), Screenshot (`value-format`) |
 | A stack: each series' own value (a normalised one's share), and the stack's total as its last row - in the series' `format` where the stack is normalised; the readout the same, the totals last | charts-stacking K4 | Unit (jsdom stacking) |
-| `"nearest"` over a stack: the segment under the pointer, not the nearest top | charts-stacking K4 | Unit (jsdom stacking) |
+| `"nearest"` over a stack: the segment under the pointer, not the nearest top; at a shared edge the upper one, so the keys reach a segment of zero height | charts-stacking K4 | Unit (jsdom stacking) |
+| A render prop gets each stacked point's own value in `yValue` and no total - it sums the points itself | charts-stacking K4 | Unit (jsdom stacking) |
 | A render prop for one's own content | 4.4 | Screenshot (`configuration`), Manual |
 | 12 px beside the crosshair, flipping at the edge, clamped vertically | R-4.9 | Interaction |
 | Leaving the plot area and a window `blur` end the hover | R-4.10 | Interaction |
