@@ -4,13 +4,9 @@
    would take over, in any language. */
 
 import { Chart, Line, Tooltip, XAxis, YAxis } from "../../../src";
-import { hallData, type HallPoint } from "../../data";
+import { hallData, type HallPoint } from "@umriss-ui/demo/worlds/plant";
 
 export const title = "Time axis";
-
-/* The plant this is drawn from stands in the second tab, so that the
-   example can be copied whole. */
-export const shows = ["../../data.ts"];
 
 export default function TimeAxis() {
   return (

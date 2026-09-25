@@ -12,13 +12,9 @@
 import { useCallback, useState } from "react";
 import { Chart, Legend, Line, Tooltip, XAxis, YAxis } from "../../../src";
 import type { ChartPerf } from "../../../src";
-import { kiln, type KilnPoint } from "../../data";
+import { kiln, type KilnPoint } from "@umriss-ui/demo/worlds/plant";
 
 export const title = "A week of seconds";
-
-/* The plant this is drawn from stands in the second tab, so that the
-   example can be copied whole. */
-export const shows = ["../../data.ts"];
 
 export default function WeekOfSeconds() {
   // Made on first render, not on import: 604,800 readings are no page's

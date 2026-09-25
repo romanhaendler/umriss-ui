@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 import { assess } from "../src";
-import { KILN, KILN_LIMITS, SHIFT_MINUTES, alarmsAt, countAt, exitSilence, plant } from "../demo/plant";
+import { KILN, KILN_LIMITS, SHIFT_MINUTES, alarmsAt, countAt, exitSilence, plant } from "@umriss-ui/demo/worlds/plant";
 
 const START = Date.UTC(2026, 2, 17, 5);
 const SEEDS = Array.from({ length: 40 }, (_, i) => i + 1);

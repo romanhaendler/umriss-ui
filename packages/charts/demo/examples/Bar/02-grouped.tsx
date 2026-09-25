@@ -8,13 +8,9 @@
    canvas resolves it like the palette. */
 
 import { Bar, Chart, Legend, Tooltip, XAxis, YAxis } from "../../../src";
-import { outputData, type DayOutput } from "../../data";
+import { outputData, type DayOutput } from "@umriss-ui/demo/worlds/plant";
 
 export const title = "Grouped bars";
-
-/* The plant this is drawn from stands in the second tab, so that the
-   example can be copied whole. */
-export const shows = ["../../data.ts"];
 
 export default function Grouped() {
   return (

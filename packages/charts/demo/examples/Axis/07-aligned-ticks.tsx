@@ -6,13 +6,9 @@
    and a reader would take a line for a value it is not. */
 
 import { Chart, Legend, Line, Tooltip, XAxis, YAxis } from "../../../src";
-import { kilnData, type KilnPoint } from "../../data";
+import { kilnData, type KilnPoint } from "@umriss-ui/demo/worlds/plant";
 
 export const title = "Aligned ticks";
-
-/* The plant this is drawn from stands in the second tab, so that the
-   example can be copied whole. */
-export const shows = ["../../data.ts"];
 
 export default function AlignedTicks() {
   return (

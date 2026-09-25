@@ -7,13 +7,9 @@
    between two. Hover to see the difference - a picture of the page cannot. */
 
 import { Chart, Line, Tooltip, XAxis, YAxis } from "../../../src";
-import { furnaceData, type FurnacePoint } from "../../data";
+import { furnaceData, type FurnacePoint } from "@umriss-ui/demo/worlds/plant";
 
 export const title = "Mode x or nearest";
-
-/* The plant this is drawn from stands in the second tab, so that the
-   example can be copied whole. */
-export const shows = ["../../data.ts"];
 
 const timeOfDay = (v: number) =>
   new Date(v).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });

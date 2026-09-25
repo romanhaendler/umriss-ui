@@ -3,7 +3,7 @@
 
    Nothing here is written twice. The pages come from the outline, the tables
    from the same `props.json` the demo renders, the examples from the same files
-   through the same string functions (`displaySource`, `asPackage`), the
+   through the same string function (`displaySource`), the
    scenarios from theirs. So the text an agent reads is
    the demo a person reads, one medium over - and it cannot drift from it
    without the demo drifting too.
@@ -18,12 +18,12 @@
    imports carry their extensions and nothing here touches Vite or React. */
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join, posix } from "node:path";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
 import type { Rubric, Page } from "../outline.ts";
 import { byRank, parseFileName, parseScenarioName } from "./fileName.ts";
-import { asPackage, displaySource, worldsOf } from "./source.ts";
+import { displaySource, worldsOf } from "./source.ts";
 
 /** The demos' shared data, beside this file. */
 const WORLDS_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "worlds");
@@ -53,8 +53,6 @@ interface ExampleText {
   title: string;
   lead?: string;
   source: string;
-  /** The demo's own files it shows beside itself, as `./data.ts`. */
-  shows: readonly string[];
   /** The worlds it imports, as `operations`. */
   worlds: readonly string[];
 }
@@ -98,12 +96,11 @@ function cell(text: string): string {
 /* ------------------------------------------------------------------ */
 
 /* What `readExamples` takes from the running module, read from the text
-   instead: every title, lead and `shows` is one line in the workspace, and a
+   instead: every title and lead is one line in the workspace, and a
    form this does not read throws rather than being guessed at. The scenarios'
    lists are read by the compiler. */
 const TITLE = /^export const title = ("(?:[^"\\]|\\.)*");$/m;
 const LEAD = /^export const lead =\s*("(?:[^"\\]|\\.)*");$/m;
-const SHOWS = /^export const shows = (\[[^\]]*\]);$/m;
 
 function titleOf(path: string, raw: string): string {
   const title = TITLE.exec(raw);
@@ -146,7 +143,6 @@ function literalOf(path: string, name: string, raw: string): unknown {
 function readExample(demoDir: string, file: string, packageName: string): ExampleText {
   const path = `./examples/${file}`;
   const raw = readFileSync(join(demoDir, "examples", file), "utf8");
-  const shows = SHOWS.exec(raw);
   const { pageId, id, rank } = parseFileName(path);
   const lead = leadOf(raw);
   return {
@@ -156,9 +152,6 @@ function readExample(demoDir: string, file: string, packageName: string): Exampl
     title: titleOf(path, raw),
     ...(lead === undefined ? {} : { lead }),
     source: displaySource(raw, packageName),
-    /* Relative to the example, resolved against the demo directory - the key
-       the demo's own `beside` glob uses. */
-    shows: shows === null ? [] : (JSON.parse(shows[1]!) as string[]).map((one) => `./${posix.join(posix.dirname(path), one)}`),
     worlds: worldsOf(raw),
   };
 }
@@ -381,7 +374,7 @@ export function renderLlms({ packageDir, outline, tables, worldsDir = WORLDS_DIR
     if (worlds.length === 0) return;
     const names = worlds.map((world) => code(`${world}.ts`));
     parts.push("", `It imports ${names.join(", ")} from beside itself; the file stands once, under "Files the examples show" at the end.`);
-    worlds.forEach((world) => shown.add(`world:${world}`));
+    worlds.forEach((world) => shown.add(world));
   };
   if (scenarios.length > 0) {
     parts.push("", "## Scenarios", "", "Composed, realistic screens built from the package. A numbered mark on the screen is an element with `data-callout`.");
@@ -412,11 +405,6 @@ export function renderLlms({ packageDir, outline, tables, worldsDir = WORLDS_DIR
         if (example.lead !== undefined) parts.push("", example.lead);
         parts.push("", fenced("tsx", example.source));
         beside(example.worlds);
-        if (example.shows.length > 0) {
-          const names = example.shows.map((key) => code(posix.basename(key)));
-          parts.push("", `It imports ${names.join(", ")} from beside itself; the file stands once, under "Files the examples show" at the end.`);
-          example.shows.forEach((key) => shown.add(key));
-        }
       }
 
       if (page.alternatives !== undefined) {
@@ -459,13 +447,9 @@ export function renderLlms({ packageDir, outline, tables, worldsDir = WORLDS_DIR
   }
 
   if (shown.size > 0) {
-    parts.push("", "## Files the examples show", "", "The demo's own data, which some examples import from beside themselves. Copied with the example, it runs.");
-    for (const key of [...shown].sort()) {
-      const world = key.startsWith("world:") ? key.slice("world:".length) : undefined;
-      const path = world === undefined ? join(demoDir, key) : join(worldsDir, `${world}.ts`);
-      const name = world === undefined ? posix.basename(key) : `${world}.ts`;
-      const text = asPackage(readFileSync(path, "utf8"), manifest.name);
-      parts.push("", `### ${code(name)}`, "", fenced(name.endsWith(".tsx") ? "tsx" : "ts", text));
+    parts.push("", "## Files the examples show", "", "The demos' shared data, which some examples import from beside themselves. Copied with the example, it runs.");
+    for (const world of [...shown].sort()) {
+      parts.push("", `### ${code(`${world}.ts`)}`, "", fenced("ts", readFileSync(join(worldsDir, `${world}.ts`), "utf8")));
     }
   }
 

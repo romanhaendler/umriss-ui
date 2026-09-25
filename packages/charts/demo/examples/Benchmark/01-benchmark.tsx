@@ -15,13 +15,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Area, Bar, Chart, Legend, Line, Tooltip, XAxis, YAxis } from "../../../src";
 import type { ChartPerf } from "../../../src";
-import { load, random, type LoadPoint } from "../../data";
+import { load, random, type LoadPoint } from "@umriss-ui/demo/worlds/plant";
 
 export const title = "Benchmark";
-
-/* The plant this is drawn from stands in the second tab, so that the
-   example can be copied whole. */
-export const shows = ["../../data.ts"];
 
 const SIZES = [1_000, 100_000, 1_000_000] as const;
 const WINDOW = 400;

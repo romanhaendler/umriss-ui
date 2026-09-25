@@ -8,13 +8,9 @@
    long before a point leaves the specification. */
 
 import { Chart, ControlChart, LimitLine, Tooltip, XAxis, YAxis } from "../../../src";
-import { measurementData, type Measurement } from "../../data";
+import { measurementData, type Measurement } from "@umriss-ui/demo/worlds/plant";
 
 export const title = "Control chart";
-
-/* The plant this is drawn from stands in the second tab, so that the
-   example can be copied whole. */
-export const shows = ["../../data.ts"];
 
 /* The control limits come out of the first 60 per cent of the series - the
    period in which the process demonstrably ran in control. */

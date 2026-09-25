@@ -7,13 +7,9 @@
    cause lies exactly under its effect. */
 
 import { Chart, Legend, Line, StateBand, Tooltip, XAxis, YAxis } from "../../../src";
-import { PLANT_STATES, shiftData, type StatePoint } from "../../data";
+import { PLANT_STATES, shiftData, type StatePoint } from "@umriss-ui/demo/worlds/plant";
 
 export const title = "A state under a course";
-
-/* The plant this is drawn from stands in the second tab, so that the
-   example can be copied whole. */
-export const shows = ["../../data.ts"];
 
 const timeOfDay = (v: number) =>
   new Date(v).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
