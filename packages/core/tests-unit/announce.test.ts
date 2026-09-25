@@ -5,7 +5,7 @@
    time, because a region only speaks what was added to it. */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { announce } from "../src/lib/announce";
+import { announce, silence } from "../src/lib/announce";
 
 const regions = () => Array.from(document.querySelectorAll<HTMLElement>("[data-umriss-announcer]"));
 const spoken = (host: Element = document.body) =>
@@ -61,6 +61,13 @@ describe("announce", () => {
     vi.advanceTimersByTime(150);
     expect(regions()).toHaveLength(1);
     expect(spoken()).toBe("two");
+  });
+
+  it("drops what is still waiting when told to be silent", () => {
+    announce("one");
+    silence();
+    vi.advanceTimersByTime(150);
+    expect(spoken()).toBe("");
   });
 
   it("builds a region anew when the page threw its own away", () => {

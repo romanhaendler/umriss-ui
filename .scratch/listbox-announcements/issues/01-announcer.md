@@ -27,6 +27,7 @@ pending one; every text goes in as a new node, so the same words twice are
 spoken twice. A region the page removed is built anew. Hidden with
 `VisuallyHidden`'s class, no style of its own.
 
-Tests: `packages/core/tests-unit/announce.test.ts` (6) - the rest, the last
+Tests: `packages/core/tests-unit/announce.test.ts` (7) - the rest, the last
 call winning, the region standing before its text, a repeat as a new node,
-the dialog's own region, one region for several callers, rebuilt after removal.
+the dialog's own region, one region for several callers, rebuilt after removal,
+and `silence()` dropping what waits (a list that closed counts nothing more).

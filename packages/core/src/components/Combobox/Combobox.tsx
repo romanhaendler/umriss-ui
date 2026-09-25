@@ -7,7 +7,7 @@ import { Popover } from "../Popover";
 import styles from "./Combobox.module.css";
 import { useWording } from "../../lib/language";
 import { AngleGlyph, CrossGlyph } from "../../lib/glyphs";
-import { announce } from "../../lib/announce";
+import { announce, silence } from "../../lib/announce";
 
 export interface ComboboxOption<T extends string = string> {
   /** What comes back when this row is chosen. */
@@ -80,7 +80,8 @@ export const Combobox = forwardRef(function Combobox<T extends string = string>(
 
   /* What VoiceOver does not read of an active descendant - how many options
      stand, and an option's state - the field says itself
-     (listbox-announcements). Only for the keys: the pointer sees. */
+     (listbox-announcements). The count on every opening, the pointer's too;
+     the option moved onto only for the keys - the pointer sees it. */
   const sayCount = (count: number) =>
     announce(count === 0 ? emptyLabel : wording.optionCount(count), inputRef.current);
 
@@ -91,6 +92,8 @@ export const Combobox = forwardRef(function Combobox<T extends string = string>(
   };
 
   const closePanel = () => {
+    // A count still waiting would be spoken after the choice or the Escape.
+    silence();
     setOpen(false);
     setQuery(null);
   };
