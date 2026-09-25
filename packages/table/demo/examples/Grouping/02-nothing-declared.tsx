@@ -1,43 +1,38 @@
 import { ColumnMenu, Toolbar, useTable } from "../../../src";
 
-export const title = "Nothing declared: the user groups";
+export const title = "Let people choose the grouping";
+export const lead = "With a `ColumnMenu` people group without any code: under Grouping, the first choice is the outer level, up to three.";
 
-/* No grouping in the code - and still a groupable table. Open "Columns" and
-   choose under GROUPING: every column whose value is text, a number, a point
-   in time or a boolean is offered, the first choice is the outer level, up to
-   three. The table toolbar names the grouping in one chip; its menu takes one
-   level away or folds everything. */
-
-interface Stoppage {
+interface Incident {
   id: string;
-  machine: string;
-  cause: string;
-  shift: "Early" | "Late" | "Night";
+  service: string;
+  severity: "SEV1" | "SEV2" | "SEV3";
+  assignee: string;
   minutes: number;
 }
 
-const STOPPAGES: Stoppage[] = [
-  { id: "S-301", machine: "Press 1", cause: "Tool change", shift: "Early", minutes: 24 },
-  { id: "S-302", machine: "Press 1", cause: "Material missing", shift: "Late", minutes: 41 },
-  { id: "S-303", machine: "Press 2", cause: "Tool change", shift: "Early", minutes: 18 },
-  { id: "S-304", machine: "Lathe 4", cause: "Sensor fault", shift: "Night", minutes: 63 },
-  { id: "S-305", machine: "Lathe 4", cause: "Tool change", shift: "Late", minutes: 22 },
-  { id: "S-306", machine: "Press 2", cause: "Material missing", shift: "Night", minutes: 35 },
-  { id: "S-307", machine: "Mill 6", cause: "Sensor fault", shift: "Early", minutes: 12 },
+const INCIDENTS: Incident[] = [
+  { id: "INC-1048", service: "Checkout", severity: "SEV1", assignee: "Jonas Keller", minutes: 48 },
+  { id: "INC-1047", service: "Webhooks", severity: "SEV3", assignee: "Ines Duarte", minutes: 195 },
+  { id: "INC-1046", service: "Image service", severity: "SEV2", assignee: "Tomasz Nowak", minutes: 155 },
+  { id: "INC-1045", service: "Sign-in", severity: "SEV2", assignee: "Ada Mwangi", minutes: 45 },
+  { id: "INC-1043", service: "Search", severity: "SEV1", assignee: "Leila Haddad", minutes: 85 },
+  { id: "INC-1042", service: "Notifications", severity: "SEV3", assignee: "Sam Okafor", minutes: 255 },
+  { id: "INC-1041", service: "Billing", severity: "SEV2", assignee: "Priya Raman", minutes: 150 },
 ];
 
 export default function NothingDeclared() {
-  const { Table, Column } = useTable(STOPPAGES, { rowKey: (s) => s.id });
+  const { Table, Column } = useTable(INCIDENTS, { rowKey: (i) => i.id });
   return (
-    <Table ariaLabel="Stoppages">
+    <Table ariaLabel="Incidents">
       <Toolbar>
         <ColumnMenu />
       </Toolbar>
-      <Column value="id" label="Stoppage" rowHeader />
-      <Column value="machine" label="Machine" />
-      <Column value="cause" label="Cause" />
-      <Column value="shift" label="Shift" />
-      <Column value="minutes" label="Minutes" aggregate="sum" />
+      <Column value="id" label="Incident" rowHeader />
+      <Column value="service" label="Service" />
+      <Column value="severity" label="Severity" />
+      <Column value="assignee" label="Assignee" />
+      <Column value="minutes" label="Minutes to resolve" aggregate="sum" />
     </Table>
   );
 }

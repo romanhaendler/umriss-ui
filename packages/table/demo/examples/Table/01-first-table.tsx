@@ -1,39 +1,32 @@
 import { useTable } from "../../../src";
 
-export const title = "The first table";
+export const title = "Show a list of services";
+export const lead = "Pass the rows to `useTable` and declare a `Column` per field; `rowHeader` names the row, and numbers align right and sort by value.";
 
-/* Three columns and the rows, nothing else.
-
-   `useTable` binds the row kind: from `ORDERS` the compiler knows that a row has
-   `number`, `customer` and `quantity`, and `value` offers exactly those three.
-   `Table` and `Column` come out of the same call - the typing hangs on that, and
-   that is why there is no freely imported `Column`.
-
-   What the columns do not say is decided by the value: text on the left, the
-   quantity right-aligned in the provider's notation and sortable. `rowHeader`
-   makes the order the name of the row. */
-
-interface Order {
-  number: string;
-  customer: string;
-  quantity: number;
+interface Service {
+  id: string;
+  name: string;
+  team: string;
+  tier: number;
+  latencySlo: number;
 }
 
-const ORDERS: Order[] = [
-  { number: "A-2041", customer: "Brandt Metalworks", quantity: 120 },
-  { number: "A-2042", customer: "Keller & Sons", quantity: 48 },
-  { number: "A-2043", customer: "Northworks", quantity: 1250 },
-  { number: "A-2044", customer: "Hofmann Drives", quantity: 310 },
+const SERVICES: Service[] = [
+  { id: "checkout", name: "Checkout", team: "Payments", tier: 1, latencySlo: 300 },
+  { id: "sign-in", name: "Sign-in", team: "Identity", tier: 1, latencySlo: 200 },
+  { id: "search", name: "Search", team: "Discovery", tier: 1, latencySlo: 250 },
+  { id: "notifications", name: "Notifications", team: "Messaging", tier: 2, latencySlo: 800 },
 ];
 
 export default function FirstTable() {
-  const { Table, Column } = useTable(ORDERS, { rowKey: (o) => o.number });
+  const { Table, Column } = useTable(SERVICES, { rowKey: (s) => s.id });
 
   return (
-    <Table ariaLabel="Orders">
-      <Column value="number" label="Order" rowHeader />
-      <Column value="customer" label="Customer" />
-      <Column value="quantity" label="Quantity" />
+    <Table ariaLabel="Services">
+      <Column value="name" label="Service" rowHeader />
+      <Column value="team" label="Team" />
+      <Column value="tier" label="Tier" />
+      <Column value="latencySlo" label="Latency objective (ms)" />
     </Table>
   );
 }

@@ -1,40 +1,29 @@
 import { useTable } from "../../../src";
 
-export const title = "A computed value needs an id";
+export const title = "Compute a value from the row";
+export const lead = "When `value` is a function the column needs an `id`; the computed value sorts, formats and exports like any other.";
 
-/* A value that stands in no field is computed from the row: `value` is then a
-   function. A function has no name under which a link or the export could know
-   the column - which is why the compiler demands an `id` here.
-
-   The computed value is a value like any other: it sorts, it has a format, it
-   stands in the export. */
-
-interface Part {
-  number: string;
-  stock: number;
+interface Line {
+  description: string;
+  quantity: number;
   unitPrice: number;
 }
 
-const STORES: Part[] = [
-  { number: "T-1180", stock: 240, unitPrice: 12.4 },
-  { number: "T-1204", stock: 18, unitPrice: 86.9 },
-  { number: "T-1311", stock: 1065, unitPrice: 3.15 },
+const LINES: Line[] = [
+  { description: "Desk lamps, LED", quantity: 24, unitPrice: 48.9 },
+  { description: "Printer paper, box of 5 reams", quantity: 40, unitPrice: 21.5 },
+  { description: "Delivery", quantity: 1, unitPrice: 35 },
 ];
 
 export default function ComputedValue() {
-  const { Table, Column } = useTable(STORES, { rowKey: (p) => p.number });
+  const { Table, Column } = useTable(LINES, { rowKey: (l) => l.description });
 
   return (
-    <Table ariaLabel="Stock value">
-      <Column value="number" label="Part" rowHeader />
-      <Column value="stock" label="Stock" />
-      <Column value="unitPrice" label="Unit price" format={{ decimals: 2 }} />
-      <Column
-        id="stockValue"
-        label="Stock value"
-        value={(p) => p.stock * p.unitPrice}
-        format={{ decimals: 2 }}
-      />
+    <Table ariaLabel="Invoice lines">
+      <Column value="description" label="Description" rowHeader />
+      <Column value="quantity" label="Quantity" />
+      <Column value="unitPrice" label="Unit price (€)" format={{ decimals: 2 }} />
+      <Column id="net" label="Net (€)" value={(l) => l.quantity * l.unitPrice} format={{ decimals: 2 }} />
     </Table>
   );
 }
