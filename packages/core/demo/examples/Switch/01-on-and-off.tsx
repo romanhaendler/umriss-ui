@@ -1,11 +1,8 @@
 import { Switch } from "../../../src";
 
 export const title = "On and off";
+export const lead = "Use a switch for a setting that takes effect the moment it flips; Space and a click on the label toggle it.";
 
-/* The first step: one function, one switch, and the state belongs to the
-   switch. Space toggles it, and so does a click on the label - both come from
-   the native checkbox underneath; `role="switch"` makes a screen reader say
-   "on" and "off" instead of "ticked". */
 export default function OnAndOff() {
-  return <Switch label="Night setback" defaultChecked />;
+  return <Switch label="Page me at night" defaultChecked />;
 }
