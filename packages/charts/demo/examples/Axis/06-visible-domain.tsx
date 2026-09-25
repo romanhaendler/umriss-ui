@@ -6,13 +6,9 @@
 
 import { useState } from "react";
 import { Chart, Line, Tooltip, XAxis, YAxis } from "../../../src";
-import { DAY_MS, HOUR_MS, WEEK_START, kilnData, type KilnPoint } from "../../data";
+import { DAY_MS, HOUR_MS, WEEK_START, kilnData, type KilnPoint } from "@umriss-ui/demo/worlds/plant";
 
 export const title = "The visible domain";
-
-/* The plant this is drawn from stands in the second tab, so that the
-   example can be copied whole. */
-export const shows = ["../../data.ts"];
 
 const WEDNESDAY = WEEK_START + 2 * DAY_MS;
 

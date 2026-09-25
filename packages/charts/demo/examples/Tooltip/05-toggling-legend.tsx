@@ -6,13 +6,9 @@
 
 import { useState } from "react";
 import { Chart, Legend, Line, Tooltip, XAxis, YAxis } from "../../../src";
-import { furnaceData, type FurnacePoint } from "../../data";
+import { furnaceData, type FurnacePoint } from "@umriss-ui/demo/worlds/plant";
 
 export const title = "Legend that hides a series";
-
-/* The plant this is drawn from stands in the second tab, so that the
-   example can be copied whole. */
-export const shows = ["../../data.ts"];
 
 export default function TogglingLegend() {
   const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set(["Set point"]));

@@ -7,13 +7,9 @@
    carry a value, so no sample is drawn twice. */
 
 import { Chart, Legend, Line, Scatter, Tooltip, XAxis, YAxis } from "../../../src";
-import { weightData, type WeightSample } from "../../data";
+import { weightData, type WeightSample } from "@umriss-ui/demo/worlds/plant";
 
 export const title = "Samples against a set point";
-
-/* The plant this is drawn from stands in the second tab, so that the
-   example can be copied whole. */
-export const shows = ["../../data.ts"];
 
 const timeOfDay = (v: number) =>
   new Date(v).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });

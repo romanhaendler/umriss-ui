@@ -6,13 +6,9 @@
    stored: it is the difference of two numbers the data already has. */
 
 import { Bar, Chart, Tooltip, XAxis, YAxis } from "../../../src";
-import { outputData, type DayOutput } from "../../data";
+import { outputData, type DayOutput } from "@umriss-ui/demo/worlds/plant";
 
 export const title = "Above and below plan";
-
-/* The plant this is drawn from stands in the second tab, so that the
-   example can be copied whole. */
-export const shows = ["../../data.ts"];
 
 const signed = (v: number) => (v > 0 ? `+${v.toFixed(0)}` : v.toFixed(0));
 

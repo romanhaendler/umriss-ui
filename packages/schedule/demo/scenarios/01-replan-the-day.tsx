@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Checkbox, ContextMenu, MenuItem, MenuSeparator, Stack, Text } from "@umriss-ui/core";
 import { Lane, Schedule, Subtasks, Dependencies, applyIntent, findings, ripple, shiftTask } from "../../src";
 import type { Intent, ScheduleInteraction, Subtask } from "../../src";
-import { DAY_OF_PLAN, MOVES, ORDERS, STATIONS, STEPS } from "../data";
+import { DAY_OF_PLAN, MOVES, ORDERS, STATIONS, STEPS } from "@umriss-ui/demo/worlds/plant";
 
 export const title = "Replan the day";
 
@@ -12,14 +12,6 @@ export const lead =
 export const callouts = [];
 
 export const builtFrom = ["schedule"];
-
-/* The one example that does not carry its own data. A demonstration is a whole
-   plant - seven stations, six orders and their moves through a Tuesday - and
-   ninety lines of it in this file would bury the thing it demonstrates. It is
-   shown instead: `data.ts` stands in the second tab of the code view, so a
-   reader sees it and can copy both. That is the named exception the check
-   allows, and the only one in this demo. */
-export const shows = ["../data.ts"];
 
 /* The whole recipe, as an application writes it.
 

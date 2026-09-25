@@ -5,13 +5,9 @@
    chart of an application. */
 
 import { Area, Bar, Chart, Legend, Line, Scatter, Tooltip, XAxis, YAxis } from "../../../src";
-import { mixedData, type MixedPoint } from "../../data";
+import { mixedData, type MixedPoint } from "@umriss-ui/demo/worlds/plant";
 
 export const title = "Marks on every kind";
-
-/* The plant this is drawn from stands in the second tab, so that the
-   example can be copied whole. */
-export const shows = ["../../data.ts"];
 
 export default function MarksOnEveryKind() {
   return (

@@ -97,7 +97,7 @@ export default [
        would (control-room-demo, R1): the rule binds what is published and
        what tests it, not that one page and its plant. */
     files: ["packages/core/**/*.{ts,tsx}"],
-    ignores: ["packages/core/demo/examples/Control-room/**", "packages/core/demo/plant.ts", "packages/core/demo/scenarios/**"],
+    ignores: ["packages/core/demo/examples/Control-room/**", "packages/core/demo/scenarios/**"],
     rules: {
       "no-restricted-imports": ["error", { patterns: [NO_TABLE, NO_SCHEDULE, NO_CALCULATION] }],
     },
@@ -249,5 +249,13 @@ export default [
        directions bind what is published, not the demos' front pages. */
     files: ["packages/*/demo/scenarios/**/*.{ts,tsx}"],
     rules: { "no-restricted-imports": "off" },
+  },
+  {
+    /* A world is copied beside an example and must compile there: plain
+       data, no import of anything. */
+    files: ["packages/demo/src/worlds/*.ts"],
+    rules: {
+      "no-restricted-syntax": ["error", { selector: "ImportDeclaration", message: "A world imports nothing - declare the shapes it needs locally." }],
+    },
   },
 ];

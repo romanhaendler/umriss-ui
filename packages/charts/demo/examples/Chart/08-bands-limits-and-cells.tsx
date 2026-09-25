@@ -7,13 +7,9 @@
    apart, and the legend shows which is which. */
 
 import { Chart, Legend, LimitBand, LimitLine, Line, Matrix, StateBand, Tooltip, XAxis, YAxis } from "../../../src";
-import { MACHINES, PLANT_STATES, matrixData, shiftData, type CellPoint, type StatePoint } from "../../data";
+import { MACHINES, PLANT_STATES, matrixData, shiftData, type CellPoint, type StatePoint } from "@umriss-ui/demo/worlds/plant";
 
 export const title = "Bands, limits and cells";
-
-/* The plant this is drawn from stands in the second tab, so that the
-   example can be copied whole. */
-export const shows = ["../../data.ts"];
 
 const timeOfDay = (v: number) =>
   new Date(v).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
