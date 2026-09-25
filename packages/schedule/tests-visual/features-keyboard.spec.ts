@@ -41,7 +41,7 @@ test("Tab reaches the plot, which rings and stands on the first subtask in view"
   expect(ring).not.toBe("none");
 });
 
-test("the arrows walk the lanes, the brackets follow a transport, and the readout speaks once the keys rest", async ({ page }) => {
+test("the arrows walk the lanes, the brackets and t follow a transport, and the readout speaks once the keys rest", async ({ page }) => {
   behaviour();
   const example = await firstSchedule(page);
   await tabIn(page, example);
@@ -57,6 +57,11 @@ test("the arrows walk the lanes, the brackets follow a transport, and the readou
   await expect(tooltip(example)).toContainText("a-2043-3");
   await page.keyboard.press("[");
   await page.keyboard.press("[");
+  await expect(tooltip(example)).toContainText("a-2043-2");
+  /* The same way by t and Shift+T, the keys without AltGr. */
+  await page.keyboard.press("t");
+  await expect(tooltip(example)).toContainText("a-2043-2 → a-2043-3");
+  await page.keyboard.press("Shift+T");
   await expect(tooltip(example)).toContainText("a-2043-2");
   await expect(example.locator("[aria-live='polite']")).toHaveText(
     /^Mill, A-2043 Bracket, a-2043-2, 17\/03 10:00–11:30, Overlap with a-2041-2, Late transport, 15 min short$/,

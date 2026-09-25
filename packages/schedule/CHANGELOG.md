@@ -22,10 +22,11 @@ moves from here under the rule above.
 - **The Windows contrast mode** (`forced-colors: active`, forced-colors 03).
   The browser forces the page around the plot and none of its pixels, so the
   plot paints itself in the system colours, as the charts do: the work in the
-  text colour, lines in `GrayText`, overlaps, late transports and the present
-  in the selection colour, and the **Active subtask** as an outline in the
-  selection colour around its bar. The frame, the tooltip, the grips and the
-  ghost's label keep an edge. Nothing changes outside forced colours.
+  text colour, lines in `GrayText`, and the selection colour kept for the
+  **Active subtask** alone, as an outline around its bar. Overlaps and late
+  transports are drawn in the text colour and dashed, the present in
+  `GrayText`. The frame, the tooltip, the grips and the ghost's label keep an
+  edge. Nothing changes outside forced colours.
 - **`docs/llms-full.md`**, the package's documentation as one Markdown file for
   a coding agent, in the npm package and pinned to its version: every demo page
   with its import line, its examples' source, its props tables and why it is
@@ -37,9 +38,10 @@ moves from here under the rule above.
   "schedule", the schedule's `ariaLabel`) with an **Active subtask**: ←/→ walk
   a lane in time order, ↑/↓ go to the nearest subtask on the lane above or
   below (a folded group is one row), Home/End to the lane's first and last,
-  PageUp/PageDown by a tenth of the view. `]` follows a transport out from its
-  subtask and on to the next stop, `[` goes back. The view pans and scrolls to
-  bring the active subtask into it. The active subtask is drawn and tooltipped
+  PageUp/PageDown by a tenth of the view. `]` or `t` follows a transport out
+  from its subtask and on to the next stop, `[` or Shift+T goes back - `t`
+  because a German keyboard reaches the brackets only with AltGr. The view
+  pans and scrolls to bring the active subtask into it. The active subtask is drawn and tooltipped
   as the hover is; the pointer takes it over by moving, and keys walk on from
   the pointer's.
 - **Space and Enter select** the active subtask's task, reported through
