@@ -7,14 +7,14 @@ import { checkShell } from "@umriss-ui/demo/checks/shell";
 checkShell({
   notOnTheFrontDoor: ["tabs", "button"],
   scenario: "watch-a-kiln-line",
-  rail: { name: "Meter", pageId: "meter", rubricId: "monitoring" },
+  rail: { name: "Meter", pageId: "meter", rubricId: "data-display" },
   neighbours: [
     { name: "Tabs", pageId: "tabs" },
     { name: "TreeView", pageId: "treeview" },
   ],
   deepLink: { pageId: "datepicker", absent: "button" },
   example: { pageId: "button", id: "loading-and-disabled", title: "Loading and disabled", pageName: "Button" },
-  palettePage: { query: "treeview", name: "TreeView", pageId: "treeview", rubricName: "Navigation and structure" },
+  palettePage: { query: "treeview", name: "TreeView", pageId: "treeview", rubricName: "Navigation" },
   /* Not the first `t` in "Date" but the `T` of "Time": the matcher computes
      exhaustively and not greedily. */
   abbreviation: { query: "dtp", find: "DateTimePicker", glyphs: ["D", "T", "P"] },

@@ -72,7 +72,7 @@ export function Page({ demo, page }: PageProps) {
         <p className="pageSentence">
           <Prose text={page.sentence} />
         </p>
-        <ImportLine exports={page.exports} packageName={demo.packageName} />
+        {page.exports.length > 0 && <ImportLine exports={page.exports} packageName={demo.packageName} />}
         {page.about !== undefined && (
           <div className="pageAbout">
             {page.about.map((text) => (
@@ -86,8 +86,7 @@ export function Page({ demo, page }: PageProps) {
 
       {first === undefined ? (
         <p className="pageEmpty">
-          There is no example for this page yet. The table below is complete all the same – it
-          comes from the source.
+          There is no example for this page yet.
         </p>
       ) : (
         <Example example={first} allOpen={allOpen} hero />
@@ -148,11 +147,13 @@ export function Page({ demo, page }: PageProps) {
         </Section>
       )}
 
-      <Section id={`api-${page.id}`} title="API">
-        {tables.map((entry) => (
-          <PropsTable key={entry.name} entry={entry} eventsApart={demo.eventsApart} />
-        ))}
-      </Section>
+      {tables.length > 0 && (
+        <Section id={`api-${page.id}`} title="API">
+          {tables.map((entry) => (
+            <PropsTable key={entry.name} entry={entry} eventsApart={demo.eventsApart} />
+          ))}
+        </Section>
+      )}
 
       {page.limits !== undefined && (
         <Section id={`limits-${page.id}`} title="Known limits">

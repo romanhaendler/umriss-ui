@@ -7,14 +7,14 @@ import { checkShell } from "@umriss-ui/demo/checks/shell";
 checkShell({
   notOnTheFrontDoor: ["table", "toolbar"],
   scenario: "work-through-orders",
-  rail: { name: "AlarmList", pageId: "alarmlist", rubricId: "monitoring" },
+  rail: { name: "AlarmList", pageId: "alarmlist", rubricId: "limits-and-alarms" },
   neighbours: [
     { name: "Toolbar", pageId: "toolbar" },
     { name: "Search", pageId: "search" },
   ],
   deepLink: { pageId: "columnmenu", absent: "table" },
   example: { pageId: "table", id: "empty-and-loading", title: "Loading, empty, nothing matches", pageName: "Table" },
-  palettePage: { query: "verdictcolumn", name: "VerdictColumn", pageId: "verdictcolumn", rubricName: "Monitoring" },
+  palettePage: { query: "verdictcolumn", name: "VerdictColumn", pageId: "verdictcolumn", rubricName: "Limits and alarms" },
   abbreviation: { query: "vc", find: "VerdictColumn", glyphs: ["V", "C"] },
   /* Twenty-seven finds become eleven, and the find under the pointer is no
      longer among them. With "tabelle" it would still be - the palette would

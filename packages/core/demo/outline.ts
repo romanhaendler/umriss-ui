@@ -1,6 +1,6 @@
 /* The outline of the demo - in one place.
 
-   It is data, not markup: the sidebar, the overview, the jump palette, the
+   It is data, not markup: the sidebar, the jump palette, the
    page head, the props tables and the screenshot suite all read from it. Two
    lists that mean the same thing drift apart.
 
@@ -19,14 +19,12 @@
    `demo/examples/` and from nothing else - a list beside them would be exactly
    the second truth this head argues against.
 
-   On the cut. Eight rubrics, each of which is one subject. Three names still
-   carry an "and" - `Layout and text`, `Status and waiting` and `Navigation and
-   structure` - and in each the "and" joins two halves of one subject instead
-   of hiding a seam, which is the difference from the `Foundation` and
-   `Structure and overlays` this cut retired. All three are argued name by name
-   in `.scratch/demo-rubrics/issues/01`. Within a rubric the pages run from the
-   simple to the composed and not alphabetically: an alphabet is an index, and
-   the palette is already one (CONTEXT.md, "Rubric").
+   On the cut. The rubrics of the demo rework (.scratch/demo-rework/spec.md):
+   Getting started, Layout, Typography, Actions, Forms, Feedback, Overlays,
+   Navigation and Data display, after the Scenarios page that opens the demo.
+   Within a rubric the pages run from the simple to the composed and not
+   alphabetically: an alphabet is an index, and the palette is already one
+   (CONTEXT.md, "Rubric").
 
    The order follows the page, not taste: a sidebar sorted differently from
    what it jumps to confuses precisely when one trusts it. */
@@ -38,9 +36,9 @@ export type { Rubric, Page } from "@umriss-ui/demo/outline";
 
 export const OUTLINE: readonly Rubric[] = [
   {
-    id: "setup",
-    name: "Setup",
-    sentence: "The one component an application meets before every other - and the only page here that is not a component.",
+    id: "getting-started",
+    name: "Getting started",
+    sentence: "What an application sets up once, before the first component.",
     pages: [
       {
         id: "umrissprovider",
@@ -53,8 +51,8 @@ export const OUTLINE: readonly Rubric[] = [
   },
   {
     id: "layout",
-    name: "Layout and text",
-    sentence: "The surface a page stands on, and the type it is set in.",
+    name: "Layout",
+    sentence: "The surfaces a screen is arranged on.",
     pages: [
       {
         id: "stack-and-grid",
@@ -84,6 +82,20 @@ export const OUTLINE: readonly Rubric[] = [
         types: ["SplitterProps"],
         exports: ["Splitter"],
       },
+      {
+        id: "dock",
+        name: "Dock",
+        sentence: "A strip of tools that floats above its surface and rests at one of its four edges.",
+        types: ["DockProps", "DockTool"],
+        exports: ["Dock"],
+      },
+    ],
+  },
+  {
+    id: "typography",
+    name: "Typography",
+    sentence: "The type a screen is set in.",
+    pages: [
       {
         id: "typography",
         name: "Typography",
@@ -124,7 +136,7 @@ export const OUTLINE: readonly Rubric[] = [
   {
     id: "forms",
     name: "Forms",
-    sentence: "Everything that takes a value - with its notation and its states.",
+    sentence: "Where a user enters and picks values.",
     pages: [
       {
         id: "input",
@@ -241,9 +253,9 @@ export const OUTLINE: readonly Rubric[] = [
     ],
   },
   {
-    id: "status",
-    name: "Status and waiting",
-    sentence: "What a surface says about itself: a message, a mark - and the three shapes of something not yet there.",
+    id: "feedback",
+    name: "Feedback",
+    sentence: "What tells a user how things stand and that something is under way.",
     pages: [
       {
         id: "alert",
@@ -251,20 +263,6 @@ export const OUTLINE: readonly Rubric[] = [
         sentence: "A standing message in the flow of the page: tone, title, text and at most one action.",
         types: ["AlertProps"],
         exports: ["Alert"],
-      },
-      {
-        id: "badge",
-        name: "Badge",
-        sentence: "A number or a word at the edge of another element - small, quiet, and never telling on its own.",
-        types: ["BadgeProps"],
-        exports: ["Badge"],
-      },
-      {
-        id: "tag",
-        name: "Tag",
-        sentence: "A short label on content - readable in every tone, removable where the caller allows it.",
-        types: ["TagProps", "TagGroupProps"],
-        exports: ["Tag", "TagGroup"],
       },
       {
         id: "toast",
@@ -306,7 +304,7 @@ export const OUTLINE: readonly Rubric[] = [
   {
     id: "overlays",
     name: "Overlays",
-    sentence: "What opens above the surface and gives it back when it is answered.",
+    sentence: "What opens above the screen and closes again.",
     pages: [
       {
         id: "tooltip",
@@ -368,8 +366,8 @@ export const OUTLINE: readonly Rubric[] = [
   },
   {
     id: "navigation",
-    name: "Navigation and structure",
-    sentence: "How one gets from one place to the next - and how many places are held in one.",
+    name: "Navigation",
+    sentence: "How a user finds their way through a screen and between screens.",
     pages: [
       {
         id: "breadcrumb",
@@ -406,19 +404,12 @@ export const OUTLINE: readonly Rubric[] = [
         types: ["TreeViewProps", "TreeSearchProps"],
         exports: ["TreeView", "TreeSearch", "useTree"],
       },
-      {
-        id: "dock",
-        name: "Dock",
-        sentence: "A strip of tools that floats above its surface and rests at one of its four edges.",
-        types: ["DockProps", "DockTool"],
-        exports: ["Dock"],
-      },
     ],
   },
   {
-    id: "monitoring",
-    name: "Monitoring",
-    sentence: "A value read against its limits - and its shape over time.",
+    id: "data-display",
+    name: "Data display",
+    sentence: "Single values and labels, read at a glance.",
     pages: [
       {
         id: "stat",
@@ -428,6 +419,13 @@ export const OUTLINE: readonly Rubric[] = [
         exports: ["Stat", "useFreshness"],
       },
       {
+        id: "meter",
+        name: "Meter",
+        sentence: "A bar for a fraction that draws its colour from an assessment and not from taste.",
+        types: ["MeterProps"],
+        exports: ["Meter"],
+      },
+      {
         id: "sparkline",
         name: "Sparkline",
         sentence: "A history at line height, without axes and without labels - the shape, not the value.",
@@ -435,11 +433,18 @@ export const OUTLINE: readonly Rubric[] = [
         exports: ["Sparkline"],
       },
       {
-        id: "meter",
-        name: "Meter",
-        sentence: "A bar for a fraction that draws its colour from an assessment and not from taste.",
-        types: ["MeterProps"],
-        exports: ["Meter"],
+        id: "badge",
+        name: "Badge",
+        sentence: "A number or a word at the edge of another element - small, quiet, and never telling on its own.",
+        types: ["BadgeProps"],
+        exports: ["Badge"],
+      },
+      {
+        id: "tag",
+        name: "Tag",
+        sentence: "A short label on content - readable in every tone, removable where the caller allows it.",
+        types: ["TagProps", "TagGroupProps"],
+        exports: ["Tag", "TagGroup"],
       },
     ],
   },
