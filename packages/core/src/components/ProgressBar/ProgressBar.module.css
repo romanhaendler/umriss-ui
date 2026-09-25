@@ -63,4 +63,17 @@
       animation-duration: calc(var(--u-duration-sweep) * 3);
     }
   }
+
+  /* Track and fill are grounds, and forced colours repaint both with the
+     page's (forced-colors 02): how far a task has come would be the figure
+     alone. The track takes an edge, the fill the system's selection colour. */
+  @media (forced-colors: active) {
+    .track {
+      outline: 1px solid CanvasText;
+    }
+
+    .fill {
+      background: Highlight;
+    }
+  }
 }

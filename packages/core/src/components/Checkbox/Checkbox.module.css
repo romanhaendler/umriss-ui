@@ -28,6 +28,7 @@
     border: none;
     border-radius: var(--u-radius-xs);
     background: var(--u-color-surface);
+    outline: 1px solid transparent;
     box-shadow: var(--u-edge-strong);
     color: var(--u-color-on-accent);
     transition:
@@ -102,6 +103,7 @@
   }
 
   .input:focus-visible + .box {
+    outline: 2px solid transparent;
     box-shadow: var(--u-focus-ring);
   }
 
@@ -116,5 +118,14 @@
   .label {
     font-size: var(--u-text-sm);
     line-height: var(--u-leading-tight);
+  }
+
+  /* Forced colours repaint every ground with the page's (forced-colors 02):
+     the tick is a stroke and stays, the mixed state's dash is a ground and
+     would go - so it takes the system's text colour, the tick's. */
+  @media (forced-colors: active) {
+    .dash {
+      background: CanvasText;
+    }
   }
 }

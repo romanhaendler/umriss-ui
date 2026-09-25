@@ -39,13 +39,40 @@ const TOKENS = {
   onAccent: "var(--u-color-on-accent)",
 } as const;
 
-export type Colours = Record<keyof typeof TOKENS, string> & { readonly tasks: ReadonlyMap<string, string> };
+export type Colours = Record<keyof typeof TOKENS, string> & {
+  readonly tasks: ReadonlyMap<string, string>;
+  /** The page is in forced colours: every colour above is a system colour. */
+  readonly forced: boolean;
+};
+
+/* Under forced colours - the Windows contrast mode - the browser repaints the
+   page around the plot and none of its pixels, so the plot paints itself in
+   the system colours the page now wears (forced-colors 03), as the charts do
+   (charts-alternatives C4): the work in the text colour whatever its task's
+   colour - lane and label tell the tasks apart - lines in GrayText, and what
+   the accent and the danger tone marked in the selection colour. A system
+   colour an author names is kept under forced colours, so the probe reads
+   these back as they are. */
+const FORCED: Record<keyof typeof TOKENS, string> = {
+  line: "GrayText",
+  lineStrong: "CanvasText",
+  text: "CanvasText",
+  muted: "GrayText",
+  alarm: "Highlight",
+  surface: "Canvas",
+  accent: "Highlight",
+  onAccent: "Canvas",
+};
+
+const forcedColours = () =>
+  typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia("(forced-colors: active)").matches;
 
 /** The tokens and the task colours, resolved to values a canvas can draw. */
 export function resolveSceneColours(root: Element, data: SceneData): Colours {
+  const forced = forcedColours();
   const taskColours: Record<string, string> = {};
-  for (const task of data.tasks.values()) taskColours[`task:${task.id}`] = task.color;
-  const resolved: Record<string, string> = resolveColours<string>(root, { ...TOKENS, ...taskColours });
+  for (const task of data.tasks.values()) taskColours[`task:${task.id}`] = forced ? FORCED.text : task.color;
+  const resolved: Record<string, string> = resolveColours<string>(root, { ...(forced ? FORCED : TOKENS), ...taskColours });
   const tasks = new Map<string, string>();
   for (const task of data.tasks.values()) tasks.set(task.id, resolved[`task:${task.id}`] ?? task.color);
   return {
@@ -58,6 +85,7 @@ export function resolveSceneColours(root: Element, data: SceneData): Colours {
     accent: resolved.accent!,
     onAccent: resolved.onAccent!,
     tasks,
+    forced,
   };
 }
 
@@ -697,6 +725,15 @@ function drawHover(ctx: CanvasRenderingContext2D, input: DrawInput, box: Subtask
   const { colours } = input;
   const look = resolveAppearance(box.subtask.appearance);
   const face = barFace(look, colours.tasks.get(box.subtask.task) ?? colours.muted, colours);
+  /* Under forced colours every bar is the text colour, and a wash of the
+     ground over it reads as a slightly lighter black: the active subtask takes
+     an outline in the selection colour instead, around the bar. */
+  if (colours.forced) {
+    ctx.strokeStyle = colours.accent;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(box.outerFrom - 2, box.y - 2, Math.max(1, box.outerTo - box.outerFrom) + 4, box.height + 4);
+    return;
+  }
   ctx.globalAlpha = HOVER_WASH;
   ctx.fillStyle = face.onDark ? colours.onAccent : colours.text;
   ctx.fillRect(box.outerFrom, box.y, Math.max(1, box.outerTo - box.outerFrom), box.height);

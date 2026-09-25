@@ -6,6 +6,7 @@
     background: var(--u-color-surface);
     border: none;
     border-radius: var(--u-radius-lg);
+    outline: 1px solid transparent;
     box-shadow: var(--u-shadow-card);
     overflow: hidden;
   }

@@ -48,6 +48,13 @@ column menu's pin keys and `editCell` (its own "Unreleased" section).
   `onCellEdit({ rowKey, columnId, value, row })` on `<Table>` reports, and the
   cell shows the value once the rows carry it. New types `CellEdit`,
   `CellEditorProps`, `EditFor`, `EditOptions`.
+- **The Windows contrast mode** (`forced-colors: active`, forced-colors 03).
+  A selected row keeps its selection as lines in the system's selection colour
+  and a focused virtual row its ring as lines in the text colour, both drawn
+  inside the cells, where the sticky cells cannot paint over them; the frame,
+  the panels and every focus ring keep an outline where the box-shadow stood,
+  and a group's share bar a system colour. Nothing changes outside forced
+  colours.
 - **`docs/llms-full.md`**, the package's documentation as one Markdown file for
   a coding agent, in the npm package and pinned to its version: every demo page
   with its import line, its examples' source, its props tables and why it is

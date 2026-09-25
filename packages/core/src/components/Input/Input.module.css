@@ -8,6 +8,7 @@
     border: none;
     border-radius: var(--u-radius-md);
     background: var(--u-color-surface);
+    outline: 1px solid transparent;
     box-shadow: var(--u-edge-strong);
     font-family: var(--u-font-sans);
     font-size: var(--u-text-sm);
@@ -27,7 +28,7 @@
   /* The focus is the edge, grown to two pixels in the accent. No halo around
      it, and no outline: Safari drew its own blue ring outside the edge. */
   .input:focus-visible {
-    outline: none;
+    outline: 2px solid transparent;
     box-shadow: var(--u-focus-ring);
   }
 
@@ -58,6 +59,7 @@
   }
 
   .invalid:focus-visible {
+    outline: 2px solid transparent;
     box-shadow: var(--u-focus-ring-danger);
   }
 
@@ -76,6 +78,7 @@
     padding: 0 var(--u-space-2) 0 var(--u-space-3);
     border-radius: var(--u-radius-md);
     background: var(--u-color-surface);
+    outline: 1px solid transparent;
     box-shadow: var(--u-edge-strong);
     font-size: var(--u-text-sm);
     transition: box-shadow var(--u-transition);
@@ -86,6 +89,7 @@
   }
 
   .wrapper:focus-within {
+    outline: 2px solid transparent;
     box-shadow: var(--u-focus-ring);
   }
 
@@ -101,6 +105,7 @@
   }
 
   .wrapperInvalid:focus-within {
+    outline: 2px solid transparent;
     box-shadow: var(--u-focus-ring-danger);
   }
 

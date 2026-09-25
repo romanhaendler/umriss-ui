@@ -49,6 +49,7 @@
     margin-top: 1px;
     border-radius: var(--u-radius-full);
     background: var(--u-color-surface);
+    outline: 1px solid transparent;
     box-shadow: var(--u-edge-strong);
     transition:
       box-shadow var(--u-transition),
@@ -90,10 +91,12 @@
   }
 
   .input:focus-visible + .dot {
+    outline: 2px solid transparent;
     box-shadow: var(--u-focus-ring);
   }
 
   .input:checked:focus-visible + .dot {
+    outline: 2px solid transparent;
     box-shadow: var(--u-focus-ring);
   }
 
@@ -142,5 +145,14 @@
 
   .sm .label {
     font-size: var(--u-text-xs);
+  }
+
+  /* The chosen dot is a ground inside a ground, and forced colours repaint
+     both with the page's (forced-colors 02): it takes the system's text
+     colour, as a checkbox's tick does. */
+  @media (forced-colors: active) {
+    .dot::after {
+      background: CanvasText;
+    }
   }
 }

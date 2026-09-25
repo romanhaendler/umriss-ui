@@ -47,6 +47,7 @@
     width: max-content;
     height: max-content;
     border-radius: var(--u-radius-xl);
+    outline: 1px solid transparent;
     box-shadow: var(--u-shadow-overlay);
     color: var(--u-color-text);
     /* The opaque substitute colour stands first and unconditionally (ADR-0012).
@@ -212,6 +213,7 @@
     position: absolute;
     pointer-events: none;
     border-radius: var(--u-radius-xl);
+    outline: 1px solid transparent;
     box-shadow: var(--u-edge-strong);
     background: var(--u-dock-refusal-surface);
   }
