@@ -137,4 +137,21 @@
   .button {
     outline: 1px solid transparent;
   }
+
+  /* Without its ink the primary button would be one secondary among others:
+     under forced colours its outline is twice as wide, the second pixel
+     inside, so that it stands as large as its neighbours (forced-colors 04).
+     Focused, the ring's outline moves out to where every ring lies - and the
+     move is needed: where rest and focus drew the same geometry, Chromium
+     kept painting the resting colour over the selection colour. */
+  @media (forced-colors: active) {
+    .primary {
+      outline-width: 2px;
+      outline-offset: -1px;
+    }
+
+    .primary:focus-visible {
+      outline-offset: 0;
+    }
+  }
 }
