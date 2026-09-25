@@ -32,7 +32,7 @@ import { nextIndex } from "../../lib/options";
 import { useWording } from "../../lib/language";
 import { find } from "../../lib/search";
 import type { Find, MatchSpan } from "../../lib/search";
-import { announce } from "../../lib/announce";
+import { announce, silence } from "../../lib/announce";
 import styles from "./CommandPalette.module.css";
 
 /** A candidate the palette can find - the outside of the term CONTEXT.md lists
@@ -270,9 +270,18 @@ export const CommandPalette = forwardRef<HTMLDialogElement, CommandPaletteProps>
      regions are silent (listbox-announcements). */
   const count = order.length;
   useEffect(() => {
-    if (!open || (!searching && count === 0)) return;
+    if (!open) {
+      silence();
+      return;
+    }
+    if (!searching && count === 0) return;
     announce(count === 0 ? wording.paletteNoFinds : wording.paletteFindCount(count), fieldRef.current);
-  }, [open, query, searching, count, wording]);
+    /* Without `wording`: a caller's inline wording is a new object on every
+       render of its parent, and each would count again over the find the
+       arrow keys just named. A wording that changes while the palette
+       stands is heard with the next letter. */
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, query, searching, count]);
 
   /* The mark stays in view. `nearest` as in the combobox: that is the only
      value which does not shift half the list on every step. */
@@ -507,7 +516,6 @@ export const CommandPalette = forwardRef<HTMLDialogElement, CommandPaletteProps>
             )}
           </div>
         </div>
-
       </div>
     </dialog>
   );
