@@ -9,6 +9,7 @@
 
 import { MINUTE } from "@umriss-ui/charts";
 import type { Intent } from "./model";
+import { entersBlockedTime } from "./refusal";
 import type { SceneData, ScheduleTooltipTarget } from "./sceneData";
 import type { SceneGestures, SceneHandlers } from "./sceneGestures";
 import type { ScheduleHit, SceneView } from "./sceneView";
@@ -156,14 +157,26 @@ export class SceneKeys {
     /* Without a raster a key still needs a step: the fine band's. */
     const raster = gestures.snapStep();
     const step = raster.step > 0 ? raster : { step: this.host.view.step(), offset: 0 };
+    const blocked = this.host.data.blocked;
     let intent: Intent | null = null;
     if (!event.shiftKey && intents.includes("move")) {
-      const from = gestures.shifted(s.from, direction * step.step, step);
-      if (from !== s.from) intent = { kind: "move", subtask: s.id, from, to: from + (s.to - s.from) };
+      /* Blocked time is stepped OVER, not into: a key that stopped in front
+         of it would lock a keyboard user behind a colleague's leave, where a
+         drag simply jumps past. */
+      // ponytail: at most 1000 steps over one blocked stretch; raise it if a raster that fine ever meets a block that long.
+      const moved = (from: number) => ({ ...s, from, to: from + (s.to - s.from) });
+      let from = s.from;
+      for (let i = 0; i < 1000; i++) {
+        const next = gestures.shifted(from, direction * step.step, step);
+        if (next === from) break;
+        from = next;
+        if (!entersBlockedTime(moved(from), s, blocked)) break;
+      }
+      if (from !== s.from && !entersBlockedTime(moved(from), s, blocked)) intent = { kind: "move", subtask: s.id, from, to: moved(from).to };
     } else if (event.shiftKey && intents.includes("stretch")) {
       /* The drag's floor: a main time never shorter than a step or a minute. */
       const to = Math.max(gestures.shifted(s.to, direction * step.step, step), s.from + Math.max(step.step, MINUTE));
-      if (to !== s.to) intent = { kind: "stretch", subtask: s.id, from: s.from, to };
+      if (to !== s.to && !entersBlockedTime({ ...s, to }, s, blocked)) intent = { kind: "stretch", subtask: s.id, from: s.from, to };
     }
     /* An edit is the keys' act, on a subtask the pointer showed them too. */
     gestures.byKeyboard = true;

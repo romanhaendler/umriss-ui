@@ -7,8 +7,8 @@
    view and nothing of the pointer. */
 
 import type { ReactNode } from "react";
-import { violatedDependencies, overlapDepth, overlaps, type ViolatedDependency, type Overlap } from "./findings";
-import type { Subtask, Task, Dependency } from "./model";
+import { inBlockedTime, violatedDependencies, overlapDepth, overlaps, type InBlockedTime, type ViolatedDependency, type Overlap } from "./findings";
+import type { BlockedTime, Subtask, Task, Dependency } from "./model";
 import type { ScheduleHit } from "./sceneView";
 
 export interface LaneConfig {
@@ -31,7 +31,8 @@ export interface GroupConfig {
 
 export type LayerConfig =
   | { readonly kind: "subtasks"; readonly data: readonly Subtask[]; readonly tasks: readonly Task[] }
-  | { readonly kind: "dependencies"; readonly data: readonly Dependency[] };
+  | { readonly kind: "dependencies"; readonly data: readonly Dependency[] }
+  | { readonly kind: "blocked"; readonly data: readonly BlockedTime[] };
 
 export class SceneData {
   private nextId = 1;
@@ -49,10 +50,13 @@ export class SceneData {
   subtasks: Subtask[] = [];
   subtaskById = new Map<string, Subtask>();
   dependencies: Dependency[] = [];
+  /** Every blocked time, whichever layer declared it. */
+  blocked: BlockedTime[] = [];
   tasks = new Map<string, Task>();
   overlaps: Overlap[] = [];
   violatedById = new Map<string, ViolatedDependency>();
   depth = new Map<string, number>();
+  inBlocked: InBlockedTime[] = [];
 
   /** `changed` is called after every registration change. */
   constructor(private readonly changed: () => void) {}
@@ -128,19 +132,23 @@ export class SceneData {
     this.layers = inOrder(this.layerEntries);
     this.subtasks = [];
     this.dependencies = [];
+    this.blocked = [];
     this.tasks = new Map();
     for (const layer of this.layers) {
       if (layer.kind === "subtasks") {
         this.subtasks.push(...layer.data);
         for (const task of layer.tasks) this.tasks.set(task.id, task);
-      } else {
+      } else if (layer.kind === "dependencies") {
         this.dependencies.push(...layer.data);
+      } else {
+        this.blocked.push(...layer.data);
       }
     }
     this.subtaskById = new Map(this.subtasks.map((s) => [s.id, s] as const));
     this.overlaps = overlaps(this.subtasks);
     this.violatedById = new Map(violatedDependencies(this.subtasks, this.dependencies).map((l) => [l.dependency, l] as const));
     this.depth = overlapDepth(this.subtasks);
+    this.inBlocked = inBlockedTime(this.subtasks, this.blocked);
     return true;
   }
 
@@ -162,7 +170,11 @@ export class SceneData {
         .filter((t) => t.from === id || t.to === id)
         .map((t) => this.violatedById.get(t.id))
         .filter((l): l is ViolatedDependency => l !== undefined);
-      return { kind: "subtask", subtask: hit.subtask, task: this.tasks.get(hit.subtask.task), overlapping, violatedDependencies };
+      const blocked = this.inBlocked
+        .filter((b) => b.subtask === id)
+        .map((b) => this.blocked.find((own) => own.id === b.blocked))
+        .filter((b): b is BlockedTime => b !== undefined);
+      return { kind: "subtask", subtask: hit.subtask, task: this.tasks.get(hit.subtask.task), overlapping, violatedDependencies, blocked };
     }
     if (hit.kind !== "dependency") return null;
     const dependency = hit.dependency;
@@ -192,6 +204,8 @@ export type ScheduleTooltipTarget =
       readonly overlapping: readonly Subtask[];
       /** The violated dependencies leaving or reaching it. */
       readonly violatedDependencies: readonly ViolatedDependency[];
+      /** The blocked time it covers on its lane. */
+      readonly blocked: readonly BlockedTime[];
     }
   | {
       /** A dependency is hovered. */

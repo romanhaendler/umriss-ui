@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import type { ReactNode } from "react";
 import { LaneGroupContext, useLane, useLaneGroup, useLaneGroupRegistration, useLayer } from "./context";
 import type { LayerConfig } from "./scene";
-import type { Subtask, Task, Dependency } from "./model";
+import type { BlockedTime, Subtask, Task, Dependency } from "./model";
 
 export interface LaneProps {
   /** The identity subtasks name in their `lane`. */
@@ -75,5 +75,19 @@ export interface DependenciesProps {
 export function Dependencies({ data }: DependenciesProps): null {
   const config = useMemo<LayerConfig>(() => ({ kind: "dependencies", data }), [data]);
   useLayer("Dependencies", config);
+  return null;
+}
+
+export interface BlockedTimesProps {
+  /** The blocked time of the lanes - leave, maintenance, unavailability -, as
+      the caller holds it: one list, each interval naming its lane. */
+  data: readonly BlockedTime[];
+}
+
+/** A layer of blocked time. Wherever it is declared, it is drawn behind every
+    subtask and dependency: it is a property of the lane, not something on it. */
+export function BlockedTimes({ data }: BlockedTimesProps): null {
+  const config = useMemo<LayerConfig>(() => ({ kind: "blocked", data }), [data]);
+  useLayer("BlockedTimes", config);
   return null;
 }
