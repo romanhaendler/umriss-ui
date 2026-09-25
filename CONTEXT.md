@@ -928,21 +928,16 @@ a list of arrivals.
 _Avoid_: Gruppe, group (a chart legend groups series), category, Kategorie,
 section
 
-The rubrics of the `@umriss-ui/core` demo are `setup` ("Setup"), `layout`
-("Layout and text"), `actions` ("Actions"), `forms`, `status`
-("Status and waiting"), `overlays` ("Overlays"), `navigation`
-("Navigation and structure"), `monitoring` and `control-room` ("Control room") —
-eight since `demo-rubrics` 02, which broke up a `foundation` that had become the
-box for everything left over and took the overlays apart from what merely orders
-content, and a ninth since `control-room-demo`: the one page of any demo that
-imports every package, as a consumer combines them;
-`@umriss-ui/table` has
-`tables`, `rows`, `unbound` ("Unbound parts") and `monitoring`; `@umriss-ui/charts`
-has `chart`, `series`, `monitoring` and `around` ("Around the chart"). **Monitoring** and not
-"Operations": a figure, a trend and a fraction are not tied to a producing
-plant, and the word is taken twice over already - `lib/options.ts` performs set
-operations, and several component heads use *operation* for how a control is
-worked. The specificity stands in the rubric's sentence, where it costs nothing.
+Every demo opens with its scenarios page, which is no rubric, and then
+"Getting started" (demo rework, `.scratch/demo-rework/spec.md`). The rubrics of
+the `@umriss-ui/core` demo are Getting started, Layout, Typography, Actions,
+Forms, Feedback, Overlays, Navigation and Data display; `@umriss-ui/table` has
+Tables, Grouping, Rows, Unbound parts and Limits and alarms; `@umriss-ui/charts`
+has Chart, Series, Limits and alarms and Around the chart; `@umriss-ui/schedule`
+has Plan, Time, Reading, Editing and Findings; `@umriss-ui/calculation` has
+Writing a calculation and In practice. **Limits and alarms** and not
+"Monitoring": the pages hold what reads a value against a limit and what reports
+it, in any world.
 **Overlays** and not "Layers" on purpose: **Ebene** is one of the
 five words the design-language tail below leaves undecided, and "Layer" beside
 a tree node's **Level** is the collision that section warns about. "Overlay" is

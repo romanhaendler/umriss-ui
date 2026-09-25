@@ -87,8 +87,8 @@ not photographed.
 | What jsdom cannot prove about the table: a sticky row header behind selection and expanders, a silent gesture as a computed colour, focus in the column menu, the download and its content, reordering moves head, body and foot, **both pinned blocks staying put while the rest scrolls, their shadow only over content, a column pinned from the column menu with the focus kept on its key** | Playwright | packages/table/tests-visual/features-browser.spec.ts | green; on its first run the first test found control cells growing wider than their sticky offsets |
 | Interaction tests of the tree | Playwright | packages/core/tests-visual/features-tree.spec.ts | green |
 | Interaction tests of the dock | Playwright | packages/core/tests-visual/features-dock.spec.ts | green; drag, refusal, change and reduced motion – none of it observable in jsdom |
-| The control room's plant: a seed is a shift, and over forty seeds the one limit crossing is the alarm raised at that minute, the alarm verdict of `assess`, one alarm resolved after the dead band, and the scrap in the OEE's count | vitest | packages/core/tests-unit/plant.test.ts | green |
-| The control room's clock and regions: still under a frozen clock, a minute per second once it moves, stopped by Pause and under reduced motion; a landmark per region, and a skip link that moves the focus and leaves the address | Playwright | packages/core/tests-visual/features-control-room.spec.ts | green |
+| The plant world's kiln line: a seed is a shift, and over forty seeds the one limit crossing is the alarm raised at that minute, the alarm verdict of `assess`, one alarm resolved after the dead band, and the scrap in the OEE's count | vitest | packages/core/tests-unit/plant.test.ts | green |
+| The kiln line scenario's clock and regions: still under a frozen clock, a minute per second once it moves, stopped by Pause and under reduced motion; a landmark per region, and a skip link that moves the focus and leaves the address | Playwright | packages/core/tests-visual/features-control-room.spec.ts | green |
 | Accessibility check of a sample of pages (axe, WCAG 2.1 AA) | Playwright | packages/{core,charts,table,schedule,calculation}/tests-visual/accessibility.spec.ts | green; three individually justified colour pairs tolerated – the list stands once, at the shell (`packages/demo/checks/accessibility.ts`), and holds for all five demos, none added for the charts or the schedule – plus one run each with every code block open |
 
 ## Pure modules (the checkable seam)
@@ -200,15 +200,15 @@ transitions (29.03.2026 forward, 25.10.2026 back).
   `packages/core/src/styles/`. The lint forbids exactly this route for `.ts` and
   `.tsx` and cannot see it in CSS; the reason stands in both files and in the
   alias that puts them there (`vite.demo.config.ts`).
-* **The core demo's control room imports every package.** It reaches charts,
+* **The core demo's scenarios import every package.** They reach charts,
   table, schedule and calculation by alias to their sources, in the demo build,
   the unit tests and the typecheck alike, and not by a devDependency - that would
   close a cycle with the table's peer dependency on core. The lint allows it in
   `packages/core/demo/**` and nowhere else in core.
 * A demo with a clock of its own advances by what `Date.now()` says has passed,
   never by counting timer ticks: the suites freeze `Date` and leave the timers
-  running, so only the first holds still for a picture. The control room is the
-  one such demo, and its suite moves the frozen clock by hand to see it run
+  running, so only the first holds still for a picture. The kiln line scenario is
+  the one such screen, and its suite moves the frozen clock by hand to see it run
   (`features-control-room.spec.ts`).
 * The demo data of the operations instruments carries domain reference – a state
   band without states and a Pareto without fault reasons show nothing. The other
@@ -219,7 +219,7 @@ transitions (29.03.2026 forward, 25.10.2026 back).
 * Demo data is seed-based and deterministic (R-6.2); the interaction tests check
   concrete values at known positions.
 * Unit tests build their own fixtures, never the demo data – otherwise the suite
-  breaks on a changed demo line. The one exception is the control room's plant
+  breaks on a changed demo line. The one exception is the plant world
   (`plant.test.ts`), because there the demo data is the subject: what it holds
   is a property over forty seeds, not a line of the demo.
 * Expected values come from an independent source: weekdays from the system
