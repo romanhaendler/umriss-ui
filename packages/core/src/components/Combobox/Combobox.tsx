@@ -7,6 +7,7 @@ import { Popover } from "../Popover";
 import styles from "./Combobox.module.css";
 import { useWording } from "../../lib/language";
 import { AngleGlyph, CrossGlyph } from "../../lib/glyphs";
+import { announce, silence } from "../../lib/announce";
 
 export interface ComboboxOption<T extends string = string> {
   /** What comes back when this row is chosen. */
@@ -77,12 +78,22 @@ export const Combobox = forwardRef(function Combobox<T extends string = string>(
 
   const filtered = useMemo(() => filterOptions(options, query ?? ""), [options, query]);
 
+  /* What VoiceOver does not read of an active descendant - how many options
+     stand, and an option's state - the field says itself
+     (listbox-announcements). The count on every opening, the pointer's too;
+     the option moved onto only for the keys - the pointer sees it. */
+  const sayCount = (count: number) =>
+    announce(count === 0 ? emptyLabel : wording.optionCount(count), inputRef.current);
+
   const openPanel = () => {
     setActiveIndex(startIndex(filtered, value));
     setOpen(true);
+    sayCount(filtered.length);
   };
 
   const closePanel = () => {
+    // A count still waiting would be spoken after the choice or the Escape.
+    silence();
     setOpen(false);
     setQuery(null);
   };
@@ -111,8 +122,14 @@ export const Combobox = forwardRef(function Combobox<T extends string = string>(
         openPanel();
         return;
       }
-      if (filtered.length === 0) return;
-      setActiveIndex((index) => nextIndex(index, filtered.length, event.key === "ArrowDown" ? 1 : -1));
+      const index = nextIndex(activeIndex, filtered.length, event.key === "ArrowDown" ? 1 : -1);
+      const next = filtered[index];
+      if (next === undefined) return;
+      setActiveIndex(index);
+      announce(
+        wording.optionActive(next.label, { selected: next.value === value, disabled: next.disabled }),
+        inputRef.current,
+      );
       return;
     }
     if (event.key === "Enter") {
@@ -167,6 +184,8 @@ export const Combobox = forwardRef(function Combobox<T extends string = string>(
             setQuery(event.target.value);
             setActiveIndex(0);
             if (!open) openPanel();
+            // After the opening's count, which is the old query's: the later wins.
+            sayCount(filterOptions(options, event.target.value).length);
           }}
           onClick={() => {
             if (!open) openPanel();
