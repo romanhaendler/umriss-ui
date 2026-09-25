@@ -136,6 +136,7 @@ Screenshot pages carry their name in brackets.
 | `dash` on the outline only; the fill and a lone point's stroke stay solid | Q11 | Unit (draw) |
 | `tone`: a role the theme resolves | Q11 | Unit (jsdom tone) |
 | Downsampling as the line's, the baseline channel taken at the same points | Q20 | Unit (downsample) |
+| `stack`: areas of one id stand on the ones registered before, the stack below as their baseline channel; a gap stacks as zero; downsampled after stacking, each member keeping its own extremes per pixel column | charts-stacking K1-K3 | Unit (stack, jsdom stacking), Screenshot (`stacked`) |
 
 ## `Bar`
 
@@ -157,6 +158,9 @@ Screenshot pages carry their name in brackets.
 | A gap leaves its bar out | R-2.5 | Screenshot (`mixed`) |
 | `tone`: a role the theme resolves | Q11 | Unit (jsdom tone) |
 | The hover marker sits at the head, not at the foot | R-4.7 | Interaction (`mixed`) |
+| `stack`: bars of one id stand on each other in registration order, one place in the group; a gap stacks as zero and is no hit; negative values stack downward from zero apart from the positive | charts-stacking K1-K3 | Unit (stack, bars, draw, jsdom stacking), Screenshot (`stacked`) |
+| A stack's extent from its foot to its highest top; a hidden member gives up its place | charts-stacking K2 | Unit (jsdom stacking) |
+| `normalize`: every x of the stack sums to 100 %, the y axis reads in percent without a `tickFormat` (the sign from the wording) | charts-stacking K5 | Unit (stack, jsdom stacking), Screenshot (`percent`) |
 
 ## `Scatter`
 
@@ -260,6 +264,8 @@ Screenshot pages carry their name in brackets.
 | The built-in tooltip, numbers in mono with tabular figures | R-4.8 | Interaction, Manual |
 | A value in its y axis' `tickFormat`, the default without one; with several x axes each point's own x value in its own axis' format | R-4.8 | Unit (jsdom tooltip) |
 | A series' own `format` before its y axis' `tickFormat`, a matrix' value included; `ControlChart` passes it to its line and its violations | Q16 | Unit (jsdom tooltip, jsdom control chart), Screenshot (`value-format`) |
+| A stack: each series' own value (a normalised one's share), and the stack's total as its last row - in the series' `format` where the stack is normalised; the readout the same, the totals last | charts-stacking K4 | Unit (jsdom stacking) |
+| `"nearest"` over a stack: the segment under the pointer, not the nearest top | charts-stacking K4 | Unit (jsdom stacking) |
 | A render prop for one's own content | 4.4 | Screenshot (`configuration`), Manual |
 | 12 px beside the crosshair, flipping at the edge, clamped vertically | R-4.9 | Interaction |
 | Leaving the plot area and a window `blur` end the hover | R-4.10 | Interaction |
@@ -283,6 +289,7 @@ Screenshot pages carry their name in brackets.
 | The table lies over the plot area; the plot keeps its size and is hidden meanwhile | C1 | Screenshot (`open-data-table`, `open-a-week-as-a-table`) |
 | The visible domain only; the x in the first column (the axis `label`, else "Position"), then one column per visible series | C1 | Unit (table, jsdom data table) |
 | Each value in the tooltip's format - the series' `format`, else its y axis' `tickFormat`; a gap and a missing reading leave the cell empty; a state by its name; a corridor by both edges | C1 | Unit (jsdom data table) |
+| A stacked series lists its own value, not its top; no total column | charts-stacking K4 | Unit (jsdom stacking) |
 | The series of one x axis merged on their x; a matrix in a table of its own, by column and row | C1 | Unit (table) |
 | Above 500 rows the downsampled course - first, lowest, highest and last per stretch -, and the caption says from how many readings | C2 | Unit (table, jsdom data table), Screenshot (`open-a-week-as-a-table`) |
 | Column and row headings (`scope`), a caption, the scrolling panel a tab stop of its own; axe clean | C1 | Unit (jsdom data table), Accessibility |
@@ -358,9 +365,9 @@ Wanted, not yet built (charts-review Q12). Each waits for a caller who needs it.
 
 * **`onSelect`.** A click that reports the hit; the hit model is there, the
   question of what a selection is (ADR-0003 in core) is not.
-* **Stacking** (stacked bars and areas). It needs more than two Y channels and a
-  cross-series summing step; that is a data question and not a drawing one, and it
-  deserves a work package of its own.
+* **A stack's total in the data table.** The tooltip and the readout carry it
+  (charts-stacking K4); the table lists the members' own values only, and waits
+  for a reader who misses the column.
 * **Box plot.** A kind of its own with five channels; nobody has asked for it
   on a plant screen yet.
 * **Line colour by limit.** A line that turns alarm-coloured above a limit; today
@@ -385,6 +392,8 @@ here.
   `toDataURL`.
 * **WebGL.** Downsampling keeps a week of seconds under 25 ms in 2D; a second
   renderer would double every kind.
+* **Stacked lines, streamgraphs.** A line is a course, not a share: `stack`
+  is on the two kinds that fill a whole of parts (charts-stacking).
 * **Horizontal bars.** Bars grow along the Y axis from a baseline on the X axis.
 * **Pie, radar, candle.** The set of kinds is closed (no renderer interface for
   third parties); none of the three answers a question of a plant screen.

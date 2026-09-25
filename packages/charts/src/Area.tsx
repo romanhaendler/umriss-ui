@@ -12,7 +12,8 @@ import type { Accessor, AreaSeriesConfig } from "./types";
 export interface AreaProps<T> {
   /** Upper edge; null/undefined/NaN/±Infinity means a gap (R-2.5). */
   accessor: Accessor<T>;
-  /** Lower edge; without a value the fixed baseline 0. */
+  /** Lower edge; without a value the fixed baseline 0. In a `stack` the stack
+      below is the lower edge, and this is not read. */
   baseline?: Accessor<T>;
   /** Binding to an x axis (R-4.12). */
   xAxisId?: string;
@@ -36,6 +37,16 @@ export interface AreaProps<T> {
   /** A role instead of a colour value; the theme resolves it. `color` beats
       it. */
   tone?: "ok" | "warning" | "alarm";
+  /** The stack this series stands in: every Bar and Area with the same id on
+      the same x and y axis stands on the ones registered before it. A gap
+      stacks as zero; negative values stack downward from zero. The tooltip
+      names each series' own value and the stack's total. */
+  stack?: string;
+  /** On any member of a stack, every x of the stack sums to 100 %: each value
+      becomes its share, and the y axis reads in percent unless it has a
+      `tickFormat`. The total stays the readings' own sum, written in the
+      series' `format`. */
+  normalize?: boolean;
   /** Opacity of the fill, from 0 to 1; the outline stays fully opaque. */
   fillOpacity?: number;
   /** Width of the outline along the upper edge in CSS pixels; 0 leaves it
@@ -58,6 +69,8 @@ export function Area<T>(props: AreaProps<T>): null {
     format,
     color,
     tone,
+    stack,
+    normalize,
     fillOpacity = 0.18,
     strokeWidth = 1.5,
     dash,
@@ -77,11 +90,13 @@ export function Area<T>(props: AreaProps<T>): null {
         format,
         color,
         tone,
+        stack,
+        normalize,
         fillOpacity,
         strokeWidth,
         dash,
       }) as AreaSeriesConfig,
-    [accessor, baseline, xAxisId, yAxisId, data, name, hidden, format, color, tone, fillOpacity, strokeWidth, dash],
+    [accessor, baseline, xAxisId, yAxisId, data, name, hidden, format, color, tone, stack, normalize, fillOpacity, strokeWidth, dash],
   );
 
   useSeries("Area", config);

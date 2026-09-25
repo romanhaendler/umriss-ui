@@ -19,6 +19,11 @@ export interface ChartsWording {
       (and its own x where it stands on another x axis), the emphasised one
       first. */
   readout: (x: string, rows: readonly { name: string; value: string; x: string }[]) => string;
+  /** The last row of a stack in the tooltip and the readout: the sum of its
+      members at the point (charts-stacking K4). */
+  stackTotal: string;
+  /** A share in a normalised stack, its number already formatted (K5). */
+  percent: (value: string) => string;
   /** The keys that walk the chart. */
   walkHelp: string;
   /** The keys that zoom and pan it - only where the chart can be zoomed. */
@@ -45,6 +50,8 @@ export const DEFAULT_CHARTS_WORDING: ChartsWording = {
   visibleRange: (from, to) => `From ${from} to ${to}.`,
   seriesExtent: (name, min, max) => `${name} from ${min} to ${max}.`,
   readout: (x, rows) => [`${x}.`, ...rows.map((r) => `${r.name} ${r.value}${r.x === "" ? "" : ` at ${r.x}`}.`)].join(" "),
+  stackTotal: "Total",
+  percent: (value) => `${value}%`,
   walkHelp:
     "Left and right arrows move through the values, up and down change the series, Home and End go to the first and the last, Escape clears.",
   zoomHelp: "Plus and minus zoom, Shift with left or right pans, 0 shows everything.",

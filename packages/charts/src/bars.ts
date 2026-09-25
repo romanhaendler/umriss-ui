@@ -65,6 +65,8 @@ export interface BarCandidate {
   step: number;
   /** Width fraction of this series. */
   fraction: number;
+  /** The stack it stands in; its members share one place in the group. */
+  stack?: string;
 }
 
 export interface BarGroup {
@@ -87,7 +89,10 @@ export interface BarGroup {
     another. Members may carry series-own data of differing density - which is
     why the smallest measurable step applies, because only it guarantees that
     neighbouring x positions do not touch. A step of 0 means "not measurable"
-    and not "tiny"; it does not count. */
+    and not "tiny"; it does not count.
+
+    The members of one stack stand on top of each other, not beside: they take
+    one place, where the first of them stands (charts-stacking K1). */
 export function barGroups(
   series: readonly BarCandidate[],
 ): Map<number, BarGroup> {
@@ -106,14 +111,19 @@ export function barGroups(
     }
     const shared = Number.isFinite(smallest) ? smallest : 0;
     const fraction = (list[0] as BarCandidate).fraction;
-    list.forEach((m, index) => {
+    const places = new Map<string | number, number>();
+    for (const m of list) {
+      const key = m.stack ?? m.order;
+      if (!places.has(key)) places.set(key, places.size);
+    }
+    for (const m of list) {
       result.set(m.order, {
-        index,
-        size: list.length,
+        index: places.get(m.stack ?? m.order) as number,
+        size: places.size,
         step: shared,
         fraction,
       });
-    });
+    }
   }
   return result;
 }
