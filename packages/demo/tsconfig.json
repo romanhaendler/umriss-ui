@@ -14,6 +14,7 @@
   },
   "include": ["src", "checks", "tests-unit"],
   /* The fixture scenario imports a world by the package's name, as a demo
-     does; the fixture's world is handed to the generator, not resolved. */
-  "exclude": ["tests-unit/fixtures/llms/demo/scenarios"]
+     does; the fixture's world is handed to the generator, not resolved. The
+     plant-word fixtures are small repositories, read as text. */
+  "exclude": ["tests-unit/fixtures/llms/demo/scenarios", "tests-unit/fixtures/plantWords"]
 }
