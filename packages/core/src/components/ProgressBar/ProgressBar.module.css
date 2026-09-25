@@ -33,17 +33,30 @@
     transition: width var(--u-duration-medium) var(--u-ease-out);
   }
 
+  /* The segment rests in the middle of the track with ends that fade out,
+     and sweeps from there: before the motion starts, or where animations are
+     off, a segment anchored at the left edge would read as a share done
+     (core-foundations 07). Centred, the sweep runs 65% of the track either
+     way - 217% of its own width. */
   .sweep {
     width: 30%;
+    margin-inline: auto;
+    background: linear-gradient(
+      to right,
+      transparent,
+      var(--u-color-accent) 35%,
+      var(--u-color-accent) 65%,
+      transparent
+    );
     animation: sweep var(--u-duration-sweep) var(--u-ease-swell) infinite;
   }
 
   @keyframes sweep {
     from {
-      transform: translateX(-100%);
+      transform: translateX(-217%);
     }
     to {
-      transform: translateX(334%);
+      transform: translateX(217%);
     }
   }
 

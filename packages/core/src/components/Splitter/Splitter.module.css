@@ -63,6 +63,27 @@
     background: var(--u-color-text-secondary);
   }
 
+  /* The grip on the line's middle says the line can be taken hold of: quiet
+     at rest, clear under the pointer and while held (core-layout-extras 04).
+     The dock's grip, standing across a stacked splitter's line. */
+  .grip {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--u-color-text-muted);
+    transition: color var(--u-transition);
+  }
+
+  .vertical > .separator > .grip {
+    transform: translate(-50%, -50%) rotate(90deg);
+  }
+
+  .separator:hover > .grip,
+  .separator:active > .grip {
+    color: var(--u-color-text-secondary);
+  }
+
   .separator:focus-visible {
     outline: 2px solid transparent;
     box-shadow: var(--u-focus-ring);
