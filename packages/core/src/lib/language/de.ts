@@ -317,7 +317,7 @@ export const GERMAN_WORDING: Wording = {
     `${lanes === 1 ? "1 Bahn" : `${lanes} Bahnen`}, ${subtasks === 1 ? "1 Teilaufgabe" : `${subtasks} Teilaufgaben`} im Blick von ${from} bis ${to}. ` +
     `${overlaps === 1 ? "1 Überschneidung" : `${overlaps} Überschneidungen`}, ${late === 1 ? "1 verspäteter Transport" : `${late} verspätete Transporte`}.`,
   scheduleKeyHelp:
-    "Pfeil links und rechts gehen die Bahn entlang, Pfeil hoch und runter wechseln die Bahn, Pos1 und Ende springen zur ersten und letzten Teilaufgabe, Bild auf und Bild ab springen ein Zehntel der Ansicht. Schließende eckige Klammer folgt einem Transport hinaus, öffnende geht zurück. Leertaste oder Eingabe wählt aus. Alt mit Pfeil links oder rechts schlägt eine Verschiebung vor, Alt und Umschalt ein neues Ende. Escape lässt die aktive Teilaufgabe los.",
+    "Pfeil links und rechts gehen die Bahn entlang, Pfeil hoch und runter wechseln die Bahn, Pos1 und Ende springen zur ersten und letzten Teilaufgabe, Bild auf und Bild ab springen ein Zehntel der Ansicht. Schließende eckige Klammer oder T folgt einem Transport hinaus, öffnende eckige Klammer oder Umschalt und T geht zurück. Leertaste oder Eingabe wählt aus. Alt mit Pfeil links oder rechts schlägt eine Verschiebung vor, Alt und Umschalt ein neues Ende. Escape lässt die aktive Teilaufgabe los.",
   calculationSumSymbol: "+",
   calculationDifferenceSymbol: "−",
   calculationProductSymbol: "×",

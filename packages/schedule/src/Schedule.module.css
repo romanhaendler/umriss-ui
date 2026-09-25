@@ -175,7 +175,8 @@
   }
 
   /* The plot as a tab stop (ADR-0030): the focus is the ring alone, drawn by
-     the span inside it (`.focusRing`) so that no edge of it is clipped. */
+     the span inside it (`.focusRing`) so that no edge of it is clipped. Its
+     corners are the plan's own (schedule-a11y 06). */
   .plot:focus {
     outline: none;
   }
@@ -183,7 +184,7 @@
   .focusRing {
     position: absolute;
     inset: 2px;
-    border-radius: var(--u-radius-sm);
+    border-radius: var(--u-radius-md);
     pointer-events: none;
   }
 
