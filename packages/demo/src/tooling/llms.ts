@@ -399,7 +399,8 @@ export function renderLlms({ packageDir, outline, tables, worldsDir = WORLDS_DIR
   for (const rubric of outline) {
     parts.push("", `## ${rubric.name}`, "", rubric.sentence);
     for (const page of rubric.pages) {
-      parts.push("", `### ${page.name}`, "", page.sentence, "", fenced("ts", `import { ${page.exports.join(", ")} } from "${manifest.name}";`));
+      parts.push("", `### ${page.name}`, "", page.sentence);
+      if (page.exports.length > 0) parts.push("", fenced("ts", `import { ${page.exports.join(", ")} } from "${manifest.name}";`));
       parts.push("", `Demo page: ${pageUrl(manifest, page)}`);
       if (page.about !== undefined) parts.push("", page.about.join("\n\n"));
 

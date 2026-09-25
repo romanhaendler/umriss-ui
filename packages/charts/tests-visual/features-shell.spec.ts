@@ -11,7 +11,7 @@ import { checkShell } from "@umriss-ui/demo/checks/shell";
 
 checkShell({
   notOnTheFrontDoor: ["line", "benchmark"],
-  rail: { name: "Pareto", pageId: "pareto", rubricId: "monitoring" },
+  rail: { name: "Pareto", pageId: "pareto", rubricId: "limits-and-alarms" },
   neighbours: [
     { name: "Line", pageId: "line" },
     { name: "Area", pageId: "area" },
@@ -23,7 +23,7 @@ checkShell({
     title: "Limits and state band",
     pageName: "LimitLine",
   },
-  palettePage: { query: "controlchart", name: "ControlChart", pageId: "controlchart", rubricName: "Monitoring" },
+  palettePage: { query: "controlchart", name: "ControlChart", pageId: "controlchart", rubricName: "Limits and alarms" },
   abbreviation: { query: "sb", find: "StateBand", glyphs: ["S", "B"] },
   pointer: { wide: "a", narrow: "matrix" },
 });
