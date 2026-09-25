@@ -32,7 +32,7 @@ import { nextIndex } from "../../lib/options";
 import { useWording } from "../../lib/language";
 import { find } from "../../lib/search";
 import type { Find, MatchSpan } from "../../lib/search";
-import { VisuallyHidden } from "../VisuallyHidden";
+import { announce } from "../../lib/announce";
 import styles from "./CommandPalette.module.css";
 
 /** A candidate the palette can find - the outside of the term CONTEXT.md lists
@@ -263,6 +263,17 @@ export const CommandPalette = forwardRef<HTMLDialogElement, CommandPaletteProps>
     fieldRef.current?.focus();
   }, [open]);
 
+  /* So that the screen reader learns what the typing left, without having to
+     arrow through it - on every query, even one that changed nothing, and on
+     opening where a resting list stands. Through the shared announcer, whose
+     region is this dialog's own: the page behind a modal is inert and its
+     regions are silent (listbox-announcements). */
+  const count = order.length;
+  useEffect(() => {
+    if (!open || (!searching && count === 0)) return;
+    announce(count === 0 ? wording.paletteNoFinds : wording.paletteFindCount(count), fieldRef.current);
+  }, [open, query, searching, count, wording]);
+
   /* The mark stays in view. `nearest` as in the combobox: that is the only
      value which does not shift half the list on every step. */
   useEffect(() => {
@@ -317,8 +328,12 @@ export const CommandPalette = forwardRef<HTMLDialogElement, CommandPaletteProps>
     keyboardTakesOver();
     if (order.length === 0) return;
     const current = order.findIndex((f) => f.kandidat.id === activeId);
-    const next = nextIndex(current === -1 ? 0 : current, order.length, direction);
-    setHeld(order[next]!.kandidat.id);
+    const next = order[nextIndex(current === -1 ? 0 : current, order.length, direction)]!.kandidat;
+    setHeld(next.id);
+    /* VoiceOver reads neither the active descendant's group nor, often, the
+       row itself (listbox-announcements); a row here is never "selected" - its
+       `aria-selected` is the mark. */
+    announce(wording.optionActive(next.name, { group: next.gruppe }), fieldRef.current);
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
@@ -493,11 +508,6 @@ export const CommandPalette = forwardRef<HTMLDialogElement, CommandPaletteProps>
           </div>
         </div>
 
-        {/* So that the screen reader learns that the typing has shortened the
-            list, without having to arrow through it. */}
-        <VisuallyHidden role="status" aria-live="polite">
-          {searching ? wording.paletteFindCount(order.length) : ""}
-        </VisuallyHidden>
       </div>
     </dialog>
   );

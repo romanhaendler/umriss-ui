@@ -11,6 +11,7 @@ import { Popover } from "../Popover";
 import styles from "./MultiSelect.module.css";
 import { useWording } from "../../lib/language";
 import { AngleGlyph, CrossGlyph } from "../../lib/glyphs";
+import { announce } from "../../lib/announce";
 
 export interface MultiSelectOption<T extends string = string> {
   /** What stands in `value` when this row is ticked. */
@@ -95,11 +96,38 @@ export const MultiSelect = forwardRef(function MultiSelect<T extends string = st
   const listRef = useRef<HTMLDivElement>(null);
   const panelId = useId();
 
+  /* What the list says through the shared announcer (listbox-announcements):
+     how many options the search and the scope leave - typing in the search
+     otherwise gives no word of it - and what a gesture away from the
+     checkboxes added or removed. A ticked checkbox with the focus says
+     "checked" itself and is left to do so. */
+  const labelOf = (optionValue: T) => options.find((option) => option.value === optionValue)?.label ?? optionValue;
+
+  /** `inScope` is the list before the search: the snapshot of the chosen
+      while the scope holds, the chosen now when it is entered. */
+  const sayCount = (targetScope: Scope, term: string, inScope: readonly MultiSelectOption<T>[]) => {
+    const count = Options.filterOptions(inScope, term).length;
+    announce(
+      count > 0
+        ? wording.optionCount(count)
+        : targetScope === "selected" && inScope.length === 0
+          ? wording.nothingSelected
+          : emptyMessage,
+      fieldRef.current,
+    );
+  };
+
+  const chosenNow = (targetScope: Scope) =>
+    targetScope === "selected" ? options.filter((option) => value.includes(option.value)) : options;
+
+  const sayRemoved = (optionValue: T) => announce(wording.optionRemoved(labelOf(optionValue)), fieldRef.current);
+
   const openPanel = (targetScope: Scope = "all") => {
     setScope(targetScope);
     setSelectedSnapshot(new Set(value));
     setSearch("");
     setOpen(true);
+    sayCount(targetScope, "", chosenNow(targetScope));
   };
 
   const switchScope = (target: Scope) => {
@@ -108,6 +136,7 @@ export const MultiSelect = forwardRef(function MultiSelect<T extends string = st
       setSelectedSnapshot(new Set(value));
     }
     searchRef.current?.focus();
+    sayCount(target, search, chosenNow(target));
   };
 
   /* Into the search as soon as the panel stands. An effect on `open` ran
@@ -136,6 +165,7 @@ export const MultiSelect = forwardRef(function MultiSelect<T extends string = st
 
   const remove = (optionValue: T) => {
     onChange(value.filter((v) => v !== optionValue));
+    sayRemoved(optionValue);
   };
 
   const filteredValues = useMemo(() => Options.selectableValues(filtered), [filtered]);
@@ -159,7 +189,12 @@ export const MultiSelect = forwardRef(function MultiSelect<T extends string = st
     if (event.key === "Enter") {
       event.preventDefault();
       const first = filtered.find((option) => !option.disabled);
-      if (first) toggle(first.value);
+      if (!first) return;
+      toggle(first.value);
+      announce(
+        (value.includes(first.value) ? wording.optionRemoved : wording.optionAdded)(first.label),
+        fieldRef.current,
+      );
     }
   };
 
@@ -200,6 +235,7 @@ export const MultiSelect = forwardRef(function MultiSelect<T extends string = st
       } else if (event.key === "Backspace" && value.length > 0) {
         event.preventDefault();
         onChange(value.slice(0, -1));
+        sayRemoved(value[value.length - 1]!);
       }
       return;
     }
@@ -399,7 +435,10 @@ export const MultiSelect = forwardRef(function MultiSelect<T extends string = st
                   setSearch("");
                   searchRef.current?.focus();
                 }}
-                onChange={(event) => setSearch(event.target.value)}
+                onChange={(event) => {
+                  setSearch(event.target.value);
+                  sayCount(scope, event.target.value, base);
+                }}
                 onKeyDown={handleSearchKeyDown}
               />
               <div className={styles.scopes} role="group" aria-label={wording.optionScope}>
