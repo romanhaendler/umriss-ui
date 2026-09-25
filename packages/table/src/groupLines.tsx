@@ -22,6 +22,9 @@ import type { ColumnEntry, HookSnapshot } from "./registry";
 import { aggregate, periodText } from "./model/grouping";
 import type { Line, RowGroup } from "./model/grouping";
 import { asText } from "./values";
+import { pinnedCell } from "./pinned";
+import type { PinnedCell } from "./pinned";
+import type { PinBlocks } from "./model/pinning";
 import styles from "./Table.module.css";
 
 /** A group's value as text - for the fold's name and wherever no presentation
@@ -162,6 +165,7 @@ export function SpanCell({
   line,
   entry,
   selectable,
+  pin,
   hook,
   formats,
   wording,
@@ -169,13 +173,14 @@ export function SpanCell({
   line: Extract<Line<unknown>, { kind: "row" }> & { span: RowGroup<unknown> };
   entry: ColumnEntry | undefined;
   selectable: boolean;
+  pin: PinnedCell;
   hook: HookSnapshot;
   formats: Formats;
   wording: Wording;
 }) {
   const group = line.span;
   return (
-    <td className={cx(styles.td, styles.spanCell)}>
+    <td className={cx(styles.td, styles.spanCell, pin.className)} style={pin.style}>
       {line.first && (
         <span className={styles.spanValue}>
           {selectable && (
@@ -204,6 +209,7 @@ export function GroupLine({
   levelEntry,
   columns,
   controlColumns,
+  blocks,
   selectable,
   hasActions,
   total,
@@ -227,6 +233,8 @@ export function GroupLine({
   levelEntry: ColumnEntry | undefined;
   columns: readonly ColumnEntry[];
   controlColumns: number;
+  /** The pinned blocks of the table, in cells of its head row. */
+  blocks: PinBlocks;
   hasActions: boolean;
   /** The filtered set - what a share is a share of. */
   total: readonly unknown[];
@@ -239,9 +247,31 @@ export function GroupLine({
   const open = header && !hook.publicSnapshot.folded.includes(group.path);
   /* The leading columns without an aggregate: a group header's label stretches over
      them, a folded span's "3 entries" stands in them. */
-  const leading = columns.findIndex((e) => e.spec.aggregate !== undefined);
-  const lead = leading === -1 ? columns.length : leading;
+  const firstAggregate = columns.findIndex((e) => e.spec.aggregate !== undefined);
+  /* The leading run stops before the end block: a cell over it would stick
+     nowhere. */
+  const endColumns = blocks.end > 0 ? blocks.end - (hasActions ? 1 : 0) : 0;
+  /* Without a span the label needs one column at least: over none it was a
+     cell of `colSpan` 0, which counts as one, and every aggregate after it
+     stood a column too far right. Where the first column carries an
+     aggregate - easily reached by pinning it to the start - the label takes
+     its place in the header, and the sum stands in the footer. */
+  const lead = Math.max(
+    spanEntry || columns.length === 0 ? 0 : 1,
+    Math.min(firstAggregate === -1 ? columns.length : firstAggregate, columns.length - endColumns),
+  );
   const rest = columns.slice(lead);
+  /* With a start block the label or the count covers only the pinned columns
+     of the run, so that it sticks with them; a cell without a text fills the
+     rest. Where the run has no pinned column, the label keeps to the span and
+     the count to the whole run. */
+  const before = controlColumns + (spanEntry ? 1 : 0);
+  const startColumns = blocks.start > 0 ? blocks.start - before : 0;
+  const labelColumns = blocks.start > 0 ? Math.min(lead, startColumns) : lead;
+  const countColumns = startColumns > 0 ? Math.min(lead, startColumns) : lead;
+  const pinAt = (first: number, last = first) => pinnedCell(blocks, first, last);
+  const filler = (columnsCovered: number) =>
+    lead - columnsCovered > 0 && <td className={styles.td} colSpan={lead - columnsCovered} />;
   /* One share bar per group header, under the first sum: the figure groups are
      compared by. A bar under every sum would be decoration, not a statement. */
   const shareColumn = columns.find((e) => e.spec.aggregate === "sum" && e.spec.share !== false);
@@ -277,19 +307,29 @@ export function GroupLine({
       aria-setsize={siblings.length || undefined}
     >
       {Array.from({ length: controlColumns }, (_, i) => (
-        <td key={`c${i}`} className={cx(styles.td, styles.control)}>
+        <td key={`c${i}`} className={cx(styles.td, styles.control, pinAt(i).className)} style={pinAt(i).style}>
           {i === 0 && selectable && header && (
             <GroupCheckbox group={group} entry={levelEntry} hook={hook} formats={formats} wording={wording} />
           )}
         </td>
       ))}
       {header ? (
-        <td className={styles.td} colSpan={(spanEntry ? 1 : 0) + lead} style={{ paddingLeft: `calc(var(--u-space-3) + ${group.level * 20}px)` }}>
-          {label}
-        </td>
+        <>
+          <td
+            className={cx(styles.td, pinAt(controlColumns, before + labelColumns - 1).className)}
+            colSpan={(spanEntry ? 1 : 0) + labelColumns}
+            style={{
+              ...pinAt(controlColumns, before + labelColumns - 1).style,
+              paddingLeft: `calc(var(--u-space-3) + ${group.level * 20}px)`,
+            }}
+          >
+            {label}
+          </td>
+          {filler(labelColumns)}
+        </>
       ) : (
         <>
-          <td className={cx(styles.td, styles.spanCell)}>
+          <td className={cx(styles.td, styles.spanCell, pinAt(controlColumns).className)} style={pinAt(controlColumns).style}>
             <span className={styles.spanValue}>
               {selectable && (
                 <span className={styles.spanSelect}>
@@ -303,16 +343,22 @@ export function GroupLine({
               <span className={styles.groupCount}>{formats.count(group.rows.length)}</span>
             </span>
           </td>
-          {lead > 0 && (
-            <td className={cx(styles.td, styles.foldedCount)} colSpan={lead}>
+          {countColumns > 0 && (
+            <td
+              className={cx(styles.td, styles.foldedCount, pinAt(before, before + countColumns - 1).className)}
+              style={pinAt(before, before + countColumns - 1).style}
+              colSpan={countColumns}
+            >
               {wording.entries(group.rows.length, formats.count(group.rows.length))}
             </td>
           )}
+          {filler(countColumns)}
         </>
       )}
-      {rest.map((entry) => (
+      {rest.map((entry, i) => (
         <AggregateCell
           key={entry.key}
+          pin={pinAt(before + lead + i)}
           entry={entry}
           group={group}
           share={header && entry === shareColumn}
@@ -321,19 +367,23 @@ export function GroupLine({
           wording={wording}
         />
       ))}
-      {hasActions && <td className={styles.td} />}
+      {hasActions && (
+        <td className={cx(styles.td, pinAt(blocks.count - 1).className)} style={pinAt(blocks.count - 1).style} />
+      )}
     </tr>
   );
 }
 
 function AggregateCell({
   entry,
+  pin,
   group,
   share,
   total,
   formats,
   wording,
 }: {
+  pin: PinnedCell;
   entry: ColumnEntry;
   group: RowGroup<unknown>;
   share: boolean;
@@ -342,7 +392,7 @@ function AggregateCell({
   wording: Wording;
 }) {
   const { spec } = entry;
-  if (!spec.aggregate) return <td className={styles.td} />;
+  if (!spec.aggregate) return <td className={cx(styles.td, pin.className)} style={pin.style} />;
   let bar: ReactNode = null;
   if (share && spec.aggregate === "sum" && spec.share !== false) {
     const whole = aggregate({ id: spec.id, read: entry.read, aggregate: "sum" }, total);
@@ -355,7 +405,7 @@ function AggregateCell({
     }
   }
   return (
-    <td className={cx(styles.td, aggregateIsNumeric(entry, group.rows) && styles.numeric, styles.aggregateCell)} data-aggregate={typeof spec.aggregate === "function" ? "own" : spec.aggregate}>
+    <td className={cx(styles.td, aggregateIsNumeric(entry, group.rows) && styles.numeric, styles.aggregateCell, pin.className)} style={pin.style} data-aggregate={typeof spec.aggregate === "function" ? "own" : spec.aggregate}>
       {bar ? (
         <span className={styles.shareHost}>
           <AggregateValue entry={entry} rows={group.rows} formats={formats} wording={wording} />
