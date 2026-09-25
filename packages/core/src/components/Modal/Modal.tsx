@@ -35,8 +35,76 @@ export interface ModalProps extends Omit<DialogHTMLAttributes<HTMLDialogElement>
   closeOnBackdrop?: boolean;
 }
 
+/* The Modal and the Drawer are one dialog in two placements: the frame below
+   holds the choreography, the backdrop and the name, and each of the two says
+   only where its sheet stands. */
 export const Modal = forwardRef<HTMLDialogElement, ModalProps>(function Modal(
-  { open, onClose, size = "md", closeOnBackdrop = true, className, children, onCancel, onMouseDown, ...rest },
+  { size = "md", closeOnBackdrop = true, ...rest },
+  ref,
+) {
+  return (
+    <DialogFrame
+      ref={ref}
+      sheetClassName={cx(styles.sheet, styles[size])}
+      spacers
+      closeOnBackdrop={closeOnBackdrop}
+      {...rest}
+    />
+  );
+});
+
+/* ------------------------------------------------------------------ */
+/* Drawer – the same dialog, entering from an edge.                    */
+/* ------------------------------------------------------------------ */
+
+export interface DrawerProps extends Omit<ModalProps, "size"> {
+  /** The edge the drawer stands at and enters from. Default: `right` */
+  side?: "right" | "left";
+}
+
+/* A drawer is a Modal that stands at an edge instead of in the middle: the
+   same <dialog>, so the focus trap, Escape, the scroll lock and the return of
+   the focus are the browser's, and the same head, body and foot inside it.
+   It is modal on purpose - a panel beside the page that leaves the page
+   operable is layout, not an overlay. Its width is the token
+   `--u-drawer-width`, which an application or one drawer's `style`
+   overrides. */
+export const Drawer = forwardRef<HTMLDialogElement, DrawerProps>(function Drawer(
+  { side = "right", className, ...rest },
+  ref,
+) {
+  return (
+    <DialogFrame
+      ref={ref}
+      className={cx(styles.drawer, className)}
+      sheetClassName={styles.drawerSheet}
+      side={side}
+      {...rest}
+    />
+  );
+});
+
+interface DialogFrameProps extends Omit<ModalProps, "size"> {
+  sheetClassName?: string;
+  /** The golden-ratio spacers of the centred sheet; a drawer has none. */
+  spacers?: boolean;
+  side?: "right" | "left";
+}
+
+const DialogFrame = forwardRef<HTMLDialogElement, DialogFrameProps>(function DialogFrame(
+  {
+    open,
+    onClose,
+    closeOnBackdrop = true,
+    sheetClassName,
+    spacers = false,
+    side,
+    className,
+    children,
+    onCancel,
+    onMouseDown,
+    ...rest
+  },
   ref,
 ) {
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -70,6 +138,7 @@ export const Modal = forwardRef<HTMLDialogElement, ModalProps>(function Modal(
       /* After `rest` and composed with the caller's: a caller's `onCancel` or
          `onMouseDown` would otherwise take Escape's exit or the backdrop's
          closing away from the window (P3 of core-passthrough). */
+      data-side={side}
       data-closing={closing || undefined}
       onClose={handleDialogClose}
       onCancel={(event) => {
@@ -81,11 +150,11 @@ export const Modal = forwardRef<HTMLDialogElement, ModalProps>(function Modal(
       {/* Free space distributes itself in the golden ratio (38 : 62) above and
           below the surface: small modals sit in the upper third, long ones use
           the full height – above as well as below. */}
-      <div className={styles.spacerTop} aria-hidden="true" />
-      <div ref={sheetRef} className={cx(styles.sheet, styles[size])}>
+      {spacers && <div className={styles.spacerTop} aria-hidden="true" />}
+      <div ref={sheetRef} className={sheetClassName}>
         <ModalContext.Provider value={{ onClose, titleId }}>{children}</ModalContext.Provider>
       </div>
-      <div className={styles.spacerBottom} aria-hidden="true" />
+      {spacers && <div className={styles.spacerBottom} aria-hidden="true" />}
     </dialog>
   );
 });

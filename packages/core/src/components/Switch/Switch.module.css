@@ -1,0 +1,111 @@
+@layer umriss.tokens, umriss.base, umriss.components;
+
+/* The track is the checkbox's box stretched to two places, the thumb the one
+   thing that moves: it travels on the path transition while the track changes
+   its colour in place (visuelle-wertigkeit 02). */
+
+@layer umriss.components {
+  .wrapper {
+    composes: text from "#own-styles";
+    --_track-width: 28px;
+    --_track-height: 16px;
+    --_thumb: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--u-space-2);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .sm {
+    --_track-width: 22px;
+    --_track-height: 12px;
+    --_thumb: 8px;
+  }
+
+  .input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+  }
+
+  .track {
+    position: relative;
+    flex: none;
+    width: var(--_track-width);
+    height: var(--_track-height);
+    border-radius: var(--u-radius-full);
+    background: var(--u-color-surface-sunken);
+    box-shadow: var(--u-edge-strong);
+    transition:
+      background-color var(--u-transition),
+      box-shadow var(--u-transition);
+  }
+
+  .thumb {
+    position: absolute;
+    top: calc((var(--_track-height) - var(--_thumb)) / 2);
+    left: calc((var(--_track-height) - var(--_thumb)) / 2);
+    width: var(--_thumb);
+    height: var(--_thumb);
+    border-radius: var(--u-radius-full);
+    background: var(--u-color-surface);
+    box-shadow: var(--u-edge-strong);
+    transition:
+      transform var(--u-transition-path),
+      background-color var(--u-transition);
+  }
+
+  .input:checked + .track {
+    background: var(--u-color-accent);
+    box-shadow: 0 0 0 1px var(--u-color-accent);
+  }
+
+  .input:checked + .track .thumb {
+    transform: translateX(calc(var(--_track-width) - var(--_track-height)));
+    background: var(--u-color-on-accent);
+    box-shadow: none;
+  }
+
+  /* Hover and press work on the track's edge and ground, as on the empty
+     checkbox; a switch that is on is already accent and takes neither, and a
+     focused one keeps its ring under the pointer. */
+  .wrapper:hover .input:not(:disabled):not(:checked):not(:focus-visible) + .track {
+    box-shadow: 0 0 0 1px var(--u-color-edge-hover);
+  }
+
+  .wrapper:active .input:not(:disabled):not(:checked) + .track {
+    background: var(--u-color-surface-pressed);
+  }
+
+  .input:focus-visible + .track {
+    box-shadow: var(--u-focus-ring);
+  }
+
+  /* Invalid keeps its colour as a field does, under the pointer and under the
+     focus. The word is the form field's error message. */
+  .invalid + .track,
+  .wrapper:hover .invalid:not(:disabled):not(:checked):not(:focus-visible) + .track {
+    box-shadow: 0 0 0 1px var(--u-color-danger);
+  }
+
+  .invalid:focus-visible + .track {
+    box-shadow: var(--u-focus-ring-danger);
+  }
+
+  /* Disabled dims the whole control, track and label, as the checkbox does. */
+  .wrapper:has(.input:disabled) {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .label {
+    font-size: var(--u-text-sm);
+    line-height: var(--u-leading-tight);
+  }
+
+  .sm .label {
+    font-size: var(--u-text-xs);
+  }
+}

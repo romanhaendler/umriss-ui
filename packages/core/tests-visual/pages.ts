@@ -50,4 +50,11 @@ export const SAMPLE = [
   "treeview",
   "dock",
   "stat",
+  /* The six foundations, each with its page (core-foundations). */
+  "switch",
+  "slider",
+  "drawer",
+  "progressbar",
+  "accordion",
+  "breadcrumb",
 ] as const;
