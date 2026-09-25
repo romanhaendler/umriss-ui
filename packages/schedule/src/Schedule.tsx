@@ -16,10 +16,10 @@
 
    `data-row` on a header is the one place the layout's private word reaches
    the DOM, and it is here because an application styling beside the schedule
-   has to be able to tell the three apart: `lane` is a machine's own row,
+   has to be able to tell the three apart: `lane` is a resource's own row,
    `groupHead` the slim line of an open **Lane group**, `miniature` the one row
    a folded group becomes. The word ROW is `rows.ts`'s and says what the plot
-   lays out; a **Lane** is still a machine (ADR-0025). A lane's header also
+   lays out; a **Lane** is still a resource (ADR-0025). A lane's header also
    carries `data-lane`, a group's `data-group`, and a lane a drag may not go to
    carries `data-refused` for as long as that drag runs.
 

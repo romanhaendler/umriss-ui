@@ -3,68 +3,50 @@ import { Lane, LaneGroup, Schedule, Subtasks, Dependencies, applyIntent, finding
 import { Stack, Text } from "@umriss-ui/core";
 import type { Subtask, Task, Dependency } from "../../../src";
 
-export const title = "What a folded group shows";
+export const title = "Read a folded group";
 
-/* A folded group is not a closed box. It shows a **miniature**: every lane in
-   it as a thin strip, at a smaller scale, with its work in the tasks' own
-   colours. The real work, smaller - not a summary, not a packing, not a
-   utilisation band.
+export const lead = "Folded, the depot shows each van as a thin strip: handovers still arrive, the double booking stays marked, and a held drag opens it.";
 
-   Fold the hall and watch what survives. The dependency from the saw still
-   arrives, at the strip of the machine it arrives at. The overlap on the mill
-   is still marked, on the strip AND on the row, because folding is a planner
-   tidying the view and must never be a planner hiding a finding. Hover a strip
-   and the tooltip names the stop; click it and its whole task is outlined
-   across the plan.
-
-   What a strip does NOT show is everything that needs room to be read: no
-   appearance, no label, no progress rail, and no grips - a bar three pixels
-   high is not something to stretch by three pixels. That is what unfolding is
-   for.
-
-   A drag held over the folded hall opens it for the gesture, so work can be
-   moved into a group without preparing the view first. It shuts again when the
-   drag ends - the application did not fold anything, so its own list is never
-   written to and it hears nothing.
-
-   `findings()` is the proof that nothing moved: the list below is computed
-   from the data and does not change by one entry when the hall folds. */
+/* A drag held over the folded depot opens it for the gesture and shuts it
+   again when the drag ends; the application's own list is never written to.
+   `findings()` is computed from the data, so the count below is the same
+   folded or not. */
 
 const at = (hours: number, minutes = 0) => new Date(2026, 2, 17, hours, minutes).getTime();
 const min = (n: number) => n * 60_000;
 
-const TASKS: Task[] = [
-  { id: "a-2041", name: "A-2041 Housing", color: "light-dark(#2563eb, #6b9bff)" },
-  { id: "a-2043", name: "A-2043 Bracket", color: "light-dark(#c2410c, #f08a52)" },
+const TOURS: Task[] = [
+  { id: "t-01", name: "T-01 Harbour", color: "light-dark(#2563eb, #6b9bff)" },
+  { id: "t-03", name: "T-03 Old Town", color: "light-dark(#c2410c, #f08a52)" },
 ];
 
-const STEPS: Subtask[] = [
-  { id: "a-2041-1", task: "a-2041", lane: "saw", from: at(6, 30), to: at(8), leadOut: min(15) },
-  { id: "a-2041-2", task: "a-2041", lane: "mill", from: at(9), to: at(11, 30), leadIn: min(30) },
-  { id: "a-2043-1", task: "a-2043", lane: "lathe", from: at(7), to: at(9) },
-  /* Claims the mill while the housing still has it: an overlap, on purpose. */
-  { id: "a-2043-2", task: "a-2043", lane: "mill", from: at(11), to: at(13), leadIn: min(15) },
-  { id: "a-2043-3", task: "a-2043", lane: "paint", from: at(13, 30), to: at(15) },
+const LEGS: Subtask[] = [
+  { id: "t-01-1", task: "t-01", lane: "truck", from: at(6, 30), to: at(8), leadOut: min(15) },
+  { id: "t-01-2", task: "t-01", lane: "van-2", from: at(9), to: at(11, 30), leadIn: min(30) },
+  { id: "t-03-1", task: "t-03", lane: "van-1", from: at(7), to: at(9) },
+  /* Claims the e-van while the Harbour tour still has it: an overlap. */
+  { id: "t-03-2", task: "t-03", lane: "van-2", from: at(11), to: at(13), leadIn: min(15) },
+  { id: "t-03-3", task: "t-03", lane: "van-3", from: at(13, 30), to: at(15) },
 ];
 
-const MOVES: Dependency[] = [
-  /* Out of the saw, which stands outside the hall, into a machine inside it. */
-  { id: "t-1", from: "a-2041-1", to: "a-2041-2", lag: min(20) },
-  { id: "t-2", from: "a-2043-1", to: "a-2043-2", lag: min(30) },
-  { id: "t-3", from: "a-2043-2", to: "a-2043-3", lag: min(20) },
+const HANDOVERS: Dependency[] = [
+  /* Out of the truck, outside the depot group, into a van inside it. */
+  { id: "h-1", from: "t-01-1", to: "t-01-2", lag: min(20) },
+  { id: "h-2", from: "t-03-1", to: "t-03-2", lag: min(30) },
+  { id: "h-3", from: "t-03-2", to: "t-03-3", lag: min(20) },
 ];
 
-const FOUND = findings(STEPS, MOVES);
+const FOUND = findings(LEGS, HANDOVERS);
 
 export default function TheMiniature() {
-  const [folded, setFolded] = useState<readonly string[]>(["hall"]);
-  const [work, setWork] = useState<readonly Subtask[]>(STEPS);
-  const [last, setLast] = useState("Hold a bar over the folded hall");
+  const [folded, setFolded] = useState<readonly string[]>(["north"]);
+  const [legs, setLegs] = useState<readonly Subtask[]>(LEGS);
+  const [last, setLast] = useState("Hold a bar over the folded depot");
 
   return (
     <Stack gap={3}>
       <Schedule
-        ariaLabel="A hall that folds into one row"
+        ariaLabel="A depot that folds into one row"
         initialDomain={[at(6), at(16)]}
         height={240}
         collapsedGroups={folded}
@@ -72,18 +54,18 @@ export default function TheMiniature() {
         intents={["move", "lane"]}
         onIntent={(intent) => {
           if (intent.kind === "place") return;
-          setWork((current) => current.map((step) => applyIntent(step, intent)));
+          setLegs((current) => current.map((leg) => applyIntent(leg, intent)));
           setLast(`${intent.subtask}: ${intent.kind}`);
         }}
       >
-        <Lane id="saw" label="Saw 1" />
-        <LaneGroup id="hall" label="Hall A">
-          <Lane id="lathe" label="Lathe 1" />
-          <Lane id="mill" label="Mill" />
+        <Lane id="truck" label="Truck FP 118 R" />
+        <LaneGroup id="north" label="North depot">
+          <Lane id="van-1" label="Van FP 214 K" />
+          <Lane id="van-2" label="E-van FP 377 K" />
         </LaneGroup>
-        <Lane id="paint" label="Paint shop" />
-        <Dependencies data={MOVES} />
-        <Subtasks data={work} tasks={TASKS} />
+        <Lane id="van-3" label="Van FP 402 R" />
+        <Dependencies data={HANDOVERS} />
+        <Subtasks data={legs} tasks={TOURS} />
       </Schedule>
       <Text size="sm" mono tone="secondary" data-last-move>
         {last}

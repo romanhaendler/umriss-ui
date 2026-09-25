@@ -36,7 +36,7 @@ test("Tab reaches the plot, which rings and stands on the first subtask in view"
   const example = await firstSchedule(page);
   const plot = await tabIn(page, example);
   await expect(plot).toHaveAttribute("aria-roledescription", "schedule");
-  await expect(tooltip(example)).toContainText("a-2041-1");
+  await expect(tooltip(example)).toContainText("t-01-1");
   const ring = await plot.locator("span[aria-hidden]").last().evaluate((el) => getComputedStyle(el).boxShadow);
   expect(ring).not.toBe("none");
 });
@@ -45,26 +45,26 @@ test("the arrows walk the lanes, the brackets and t follow a dependency, and the
   behaviour();
   const example = await firstSchedule(page);
   await tabIn(page, example);
-  /* Saw 1's first subtask (06:00-07:00) down to the mill's nearest, 08:00. */
+  /* The truck's first leg (06:00-07:00) down to the van's nearest, 08:00. */
   await page.keyboard.press("ArrowDown");
-  await expect(tooltip(example)).toContainText("a-2041-2");
+  await expect(tooltip(example)).toContainText("t-01-2");
   await page.keyboard.press("ArrowRight");
-  await expect(tooltip(example)).toContainText("a-2043-2");
-  /* Out along the violated dependency to the paint shop, and back. */
+  await expect(tooltip(example)).toContainText("t-03-2");
+  /* Out along the violated handover to the e-van, and back. */
   await page.keyboard.press("]");
-  await expect(tooltip(example)).toContainText("a-2043-2 → a-2043-3");
+  await expect(tooltip(example)).toContainText("t-03-2 → t-03-3");
   await page.keyboard.press("]");
-  await expect(tooltip(example)).toContainText("a-2043-3");
+  await expect(tooltip(example)).toContainText("t-03-3");
   await page.keyboard.press("[");
   await page.keyboard.press("[");
-  await expect(tooltip(example)).toContainText("a-2043-2");
+  await expect(tooltip(example)).toContainText("t-03-2");
   /* The same way by t and Shift+T, the keys without AltGr. */
   await page.keyboard.press("t");
-  await expect(tooltip(example)).toContainText("a-2043-2 → a-2043-3");
+  await expect(tooltip(example)).toContainText("t-03-2 → t-03-3");
   await page.keyboard.press("Shift+T");
-  await expect(tooltip(example)).toContainText("a-2043-2");
+  await expect(tooltip(example)).toContainText("t-03-2");
   await expect(example.locator("[aria-live='polite']")).toHaveText(
-    /^Mill, A-2043 Bracket, a-2043-2, 17\/03 10:00–11:30, Overlap with a-2041-2, Violated dependency, 15 min short$/,
+    /^Van FP 214 K, T-03 Old Town, t-03-2, 17\/03 10:00–11:30, Overlap with t-01-2, Violated dependency, 15 min short$/,
   );
 });
 
@@ -73,13 +73,13 @@ test("the pointer takes the active subtask over, and the keys walk on from it", 
   const example = await firstSchedule(page);
   await tabIn(page, example);
   const plot = await plotOf(page, example, DAY_OF_PLAN);
-  await page.mouse.move(plot.x(15, 15), plot.y("paint"));
-  await expect(tooltip(example)).toContainText("a-2044-3");
+  await page.mouse.move(plot.x(15, 15), plot.y("e-van"));
+  await expect(tooltip(example)).toContainText("t-04-3");
   await page.keyboard.press("ArrowLeft");
-  await expect(tooltip(example)).toContainText("a-2043-3");
+  await expect(tooltip(example)).toContainText("t-03-3");
   /* The pointer leaving lets the keys' subtask stand. */
   await page.mouse.move(0, 0);
-  await expect(tooltip(example)).toContainText("a-2043-3");
+  await expect(tooltip(example)).toContainText("t-03-3");
 });
 
 test("Space selects the active subtask's task, as a click does", async ({ page }) => {
@@ -99,6 +99,6 @@ test("A focused schedule with an active subtask", async ({ page }, testInfo) => 
   await tabIn(page, example);
   await page.keyboard.press("ArrowDown");
   await page.keyboard.press("ArrowRight");
-  await expect(tooltip(example)).toContainText("a-2043-2");
+  await expect(tooltip(example)).toContainText("t-03-2");
   await expect(example).toHaveScreenshot(`keyboard-active-${testInfo.project.name}.png`);
 });

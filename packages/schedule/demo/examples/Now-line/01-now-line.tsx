@@ -1,63 +1,36 @@
-import { Lane, Schedule, Subtasks, Dependencies } from "../../../src";
-import type { Subtask, Task, Dependency } from "../../../src";
+import { Lane, Schedule, Subtasks } from "../../../src";
+import type { Subtask, Task } from "../../../src";
+import { NOW, TOURS, VEHICLES } from "@umriss-ui/demo/worlds/logistics";
 
-export const title = "Where the present stands";
+export const title = "Mark the present";
 
-/* `now` draws a line across the lanes at the present moment, and a mark where
-   it meets the time band. Everything to its left should have happened; what
-   still stands there in full colour is late, and a planner sees it at once.
+export const lead = "Pass an instant to `now` and a line crosses the lanes there: a dispatcher at 10:30 sees which tours are under way.";
 
-   In an application you write `now` and nothing else: it reads the clock and
-   moves on by the minute, so a schedule left open on a wall screen stays true.
-   This plan is a fixed Tuesday in March, and the real clock would put the line
-   outside it - where it would be as useless as the plan is old. An instant
-   instead of `true` fixes the line where it belongs, which is also what a
-   replay of a past shift needs, and what makes a picture of it hold still. */
+/* A fixed instant suits a replay and a picture that must hold still; in a
+   live application `now` alone follows the clock - the next example. */
 
 const at = (hours: number, minutes = 0) => new Date(2026, 2, 17, hours, minutes).getTime();
-const min = (n: number) => n * 60_000;
 
-const DAY_OF_PLAN: readonly [number, number] = [at(5, 30), at(18)];
+const COLORS = ["light-dark(#2563eb, #6b9bff)", "light-dark(#0d9488, #3cc7b8)", "light-dark(#c2410c, #f08a52)", "light-dark(#7c3aed, #a98bfa)"];
 
+const TASKS: Task[] = TOURS.map((tour, i) => ({ id: tour.id, name: tour.id, color: COLORS[i % COLORS.length]! }));
 
-const STATIONS = [
-  { id: "saw", label: "Saw 1" },
-  { id: "mill", label: "Mill" },
-  { id: "press", label: "Press 2" },
-];
-
-const ORDERS: readonly Task[] = [
-  { id: "a-2041", name: "A-2041 Housing", color: "light-dark(#2563eb, #6b9bff)" },
-  { id: "a-2043", name: "A-2043 Bracket", color: "light-dark(#c2410c, #f08a52)" },
-];
-
-const STEPS: readonly Subtask[] = [
-  { id: "a-2041-1", task: "a-2041", lane: "saw", from: at(6), to: at(7), leadIn: min(15), leadOut: min(10) },
-  { id: "a-2041-2", task: "a-2041", lane: "mill", from: at(8), to: at(10, 30), leadIn: min(30), leadOut: min(15) },
-  { id: "a-2043-1", task: "a-2043", lane: "press", from: at(6, 30), to: at(8), leadIn: min(30), leadOut: min(15) },
-  { id: "a-2043-2", task: "a-2043", lane: "mill", from: at(10), to: at(11, 30), leadIn: min(15) },
-];
-
-const MOVES: readonly Dependency[] = [
-  { id: "t-2041-1", from: "a-2041-1", to: "a-2041-2", lag: min(10) },
-  { id: "t-2043-1", from: "a-2043-1", to: "a-2043-2", lag: min(45) },
-];
-
-const HALF_PAST_TEN = new Date(2026, 2, 17, 10, 30).getTime();
+const ROUNDS: Subtask[] = TOURS.map((tour) => ({
+  id: tour.id,
+  task: tour.id,
+  lane: tour.vehicle,
+  from: tour.from,
+  to: tour.to,
+  leadIn: tour.loading * 60_000,
+}));
 
 export default function NowLine() {
   return (
-    <Schedule
-      ariaLabel="Plan of Tuesday, 17 March, with the present"
-      initialDomain={DAY_OF_PLAN}
-      height={196}
-      now={HALF_PAST_TEN}
-    >
-      {STATIONS.map((station) => (
-        <Lane key={station.id} id={station.id} label={station.label} />
+    <Schedule ariaLabel="Today's tours, with the present" initialDomain={[at(5, 30), at(18)]} height={420} now={NOW}>
+      {VEHICLES.map((vehicle) => (
+        <Lane key={vehicle.id} id={vehicle.id} label={vehicle.plate} />
       ))}
-      <Dependencies data={MOVES} />
-      <Subtasks data={STEPS} tasks={ORDERS} />
+      <Subtasks data={ROUNDS} tasks={TASKS} />
     </Schedule>
   );
 }
