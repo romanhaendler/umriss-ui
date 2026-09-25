@@ -1,7 +1,8 @@
 # @umriss-ui/calculation
 
-A calculation a reader can follow and redo. A plant screen shows a figure — an
-OEE of 82 %, a cost per piece — and this package shows how it came about, as a
+A calculation a reader can follow and redo. A screen shows a figure — an
+availability of 99.9 %, a cost per tour, an invoice total — and this package
+shows how it came about, as a
 statement of account: the operator before each number, the final result above a
 double rule, and every figure opening beneath itself into the calculation it
 came from, down to the numbers at its root. The package **performs every operation it
@@ -24,29 +25,25 @@ their children are their operands in order, givens are the leaves (ADR-0027). A
 quantity used twice is defined once and stands elsewhere as a `<Ref>`:
 
 ```tsx
-import { Calculation, Difference, Given, Product, Quotient, Ref } from "@umriss-ui/calculation";
+import { Calculation, Difference, Given, Product, Ref, Sum } from "@umriss-ui/calculation";
 
-<Calculation aria-label="OEE, early shift">
-  <Product label="OEE" format="percent" target={0.85}>
-    <Quotient label="Availability" format="percent">
-      <Difference id="runtime" label="Run time" unit="min">
-        <Given id="planned" label="Planned production time" value={450} unit="min" />
-        <Given label="Downtime" value={38} unit="min" />
-      </Difference>
-      <Ref to="planned" />
-    </Quotient>
-    <Quotient label="Performance" format="percent">
-      <Product label="Ideal run time" unit="min">
-        <Given label="Ideal cycle time" value={0.8} unit="min/pc" />
-        <Given id="total" label="Total count" value={480} unit="pcs" />
+<Calculation aria-label="Invoice 2041">
+  <Sum label="Invoice total" unit="€" decimals={2}>
+    <Difference id="net" label="Net amount" unit="€">
+      <Product id="lines" label="Line amount" unit="€">
+        <Given label="Quantity" value={12} unit="pcs" />
+        <Given label="Unit price" value={389} unit="€" />
       </Product>
-      <Ref to="runtime" />
-    </Quotient>
-    <Quotient label="Quality" format="percent">
-      <Given label="Good count" value={461} unit="pcs" />
-      <Ref to="total" />
-    </Quotient>
-  </Product>
+      <Product label="Discount" unit="€">
+        <Ref to="lines" />
+        <Given label="Discount rate" value={0.05} format="percent" />
+      </Product>
+    </Difference>
+    <Product label="VAT" unit="€">
+      <Ref to="net" />
+      <Given label="VAT rate" value={0.19} format="percent" />
+    </Product>
+  </Sum>
 </Calculation>
 ```
 
@@ -97,9 +94,9 @@ in a tree - there it folds, and opens whole.
   with "= label"; folded, the row shows the formula it hides in names — or how
   many operands there are, above four. The Result is the last row, its number
   underlined twice.
-- **Every line is read as one sentence** — "Availability equals Run time
-  divided by Planned production time, equals 412 min divided by 450 min,
-  equals 91.6 percent" — and every derivation is a disclosure.
+- **Every line is read as one sentence** — "Net amount equals Line amount
+  minus Discount, equals 4,668 € minus 233.40 €, equals 4,434.60 €" — and
+  every derivation is a disclosure.
 - **A declaration the calculation cannot evaluate fails on the first render**
   with a message saying which and where: a `Ref` to nothing (listing the ids
   that exist), a circle through references, a wrong operand count, a

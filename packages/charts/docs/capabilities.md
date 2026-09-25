@@ -374,7 +374,7 @@ Wanted, not yet built (charts-review Q12). Each waits for a caller who needs it.
   (charts-stacking K4); the table lists the members' own values only, and waits
   for a reader who misses the column.
 * **Box plot.** A kind of its own with five channels; nobody has asked for it
-  on a plant screen yet.
+  on a monitoring screen yet.
 * **Line colour by limit.** A line that turns alarm-coloured above a limit; today
   a `LimitBand` and the ControlChart's violations say the same.
 
@@ -401,7 +401,7 @@ here.
   is on the two kinds that fill a whole of parts (charts-stacking).
 * **Horizontal bars.** Bars grow along the Y axis from a baseline on the X axis.
 * **Pie, radar, candle.** The set of kinds is closed (no renderer interface for
-  third parties); none of the three answers a question of a plant screen.
+  third parties); none of the three answers a question of a data-dense screen.
 
 ## Known limits
 

@@ -65,7 +65,7 @@ describe("The default notation: dates", () => {
 
 describe("The default notation: times", () => {
   /* The clock is the product's decision and not the locale's: 24 hours, here
-     as in the German set. A plant screen that writes 3 pm where 15:00 was
+     as in the German set. A screen that writes 3 pm where 15:00 was
      meant is read wrongly once and distrusted afterwards. */
   it("writes hour and minute two-digit on a 24-hour clock", () => {
     expect(timeFormat(false).format(SAMPLE)).toBe("09:05");

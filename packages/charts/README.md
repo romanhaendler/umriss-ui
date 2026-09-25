@@ -2,7 +2,7 @@
 
 Canvas-based charts for data-dense applications: few chart kinds, each one drawn
 properly. Lines, areas, bars, scatters, state bands and matrices compose into
-one chart on shared axes — together with the instruments a plant screen is
+one chart on shared axes — together with the instruments a monitoring screen is
 made of: limit lines and bands, a control chart, a Pareto and a working-time
 axis.
 
@@ -86,7 +86,7 @@ loaded: Geist when the application has it, the system fonts otherwise.
 ## What it can do
 
 * **Six series kinds** in one chart on shared axes: `Line`, `Area`, `Bar`,
-  `Scatter`, `StateBand`, `Matrix`. Occupancy — jobs on machines, idle time,
+  `Scatter`, `StateBand`, `Matrix`. Occupancy — work on people or vehicles, idle time,
   double bookings — is `@umriss-ui/schedule`'s (ADR-0026).
 * **Several axes per orientation**, each with its own extent; only the first
   registered axis per orientation draws a grid.
