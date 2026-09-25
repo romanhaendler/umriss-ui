@@ -209,13 +209,6 @@ export const OUTLINE: readonly Rubric[] = [
         types: [],
         exports: ["ripple", "shiftTask", "applyIntent"],
       },
-      {
-        id: "demonstration",
-        name: "Demonstration",
-        sentence: "A whole plant in a planner's hands: a context menu, the cascade, the findings, and every intent the schedule reports.",
-        types: [],
-        exports: ["Schedule", "findings", "ripple", "shiftTask"],
-      },
     ],
   },
   {

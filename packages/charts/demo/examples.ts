@@ -14,12 +14,13 @@ import { ADDRESSES } from "./outline";
 export const DEMO = buildDemo({
   packageName: "@umriss-ui/charts",
   addresses: ADDRESSES,
-  examples: import.meta.glob<{ default?: unknown; title?: unknown; shows?: unknown }>("./examples/*/*.tsx", { eager: true }),
-  sources: import.meta.glob<string>("./examples/*/*.tsx", { eager: true, query: "?raw", import: "default" }),
+  scenarios: import.meta.glob<Record<string, unknown>>("./scenarios/*.tsx", { eager: true }),
+  examples: import.meta.glob<Record<string, unknown>>("./examples/*/*.tsx", { eager: true }),
+  sources: import.meta.glob<string>(["./examples/*/*.tsx", "./scenarios/*.tsx"], { eager: true, query: "?raw", import: "default" }),
+  worlds: import.meta.glob<string>("../../demo/src/worlds/*.ts", { eager: true, query: "?raw", import: "default" }),
   /* What an example may name in `shows`: the demo's own files beside the
      examples. Every example here draws one course out of `data.ts`, and shows
      it as a second tab so that what stands there can be copied and run. */
   beside: import.meta.glob<string>("./*.ts", { eager: true, query: "?raw", import: "default" }),
-  why: import.meta.glob<{ default?: unknown }>("./why/*.tsx", { eager: true }),
   props,
 });

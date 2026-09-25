@@ -4,7 +4,7 @@
 
 import { test, expect, type Locator } from "@playwright/test";
 import { overlayOffenders } from "@umriss-ui/demo/checks/overlays";
-import { openExample } from "./navigation";
+import { openExample, openScenario } from "./navigation";
 import { painted } from "./pixels";
 import { DAY_OF_PLAN, LANE_HEIGHT, at, plotOf } from "./plot";
 
@@ -153,9 +153,9 @@ test("stretching the main time at its edge reports a stretch", async ({ page }) 
   expect(teardown.x + teardown.width / 2).toBeCloseTo(plot.x(13), -1);
 });
 
-test("the demonstration: a right-click opens the context menu, and an entry changes the plan through an intent", async ({ page }) => {
-  await openExample(page, "demonstration", "demonstration");
-  const example = page.locator('[data-example="demonstration"]');
+test("the scenario: a right-click opens the context menu, and an entry changes the plan through an intent", async ({ page }) => {
+  await openScenario(page, "replan-the-day");
+  const example = page.locator('[data-scenario="replan-the-day"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
   const summary = example.locator("[data-findings-summary]");
   await expect(summary).toHaveText("1 overlap, 1 late transport");
@@ -193,9 +193,9 @@ test("a drag on the shift raster lands on a shift change", async ({ page }) => {
   await expect(example.locator("[data-schedule-tooltip]").first()).toContainText("14:00–22:00");
 });
 
-test("the demonstration shifts a whole order through one intent per stop", async ({ page }) => {
-  await openExample(page, "demonstration", "demonstration");
-  const example = page.locator('[data-example="demonstration"]');
+test("the scenario shifts a whole order through one intent per stop", async ({ page }) => {
+  await openScenario(page, "replan-the-day");
+  const example = page.locator('[data-scenario="replan-the-day"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
   const summary = example.locator("[data-findings-summary]");
   await expect(summary).toHaveText("1 overlap, 1 late transport");

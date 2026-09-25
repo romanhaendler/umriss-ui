@@ -61,6 +61,11 @@ export async function open(page: Page, pageId: string): Promise<void> {
   await drawn(page);
 }
 
+export async function openScenario(page: Page, scenarioId: string): Promise<void> {
+  await shell.openScenario(page, scenarioId);
+  await drawn(page);
+}
+
 export async function openExample(page: Page, pageId: string, exampleId: string): Promise<void> {
   await shell.openExample(page, pageId, exampleId);
   await drawn(page);

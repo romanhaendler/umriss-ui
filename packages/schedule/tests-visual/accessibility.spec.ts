@@ -7,7 +7,7 @@ import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { STANDARDS, findings } from "@umriss-ui/demo/checks/accessibility";
 import { SAMPLE } from "./pages";
-import { allWithCode, open } from "./navigation";
+import { allWithCode, open, openScenario } from "./navigation";
 
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(new Date("2026-03-17T10:30:00"));
@@ -30,11 +30,11 @@ test("a page with every code block open is accessible", async ({ page }, testInf
   expect(findings(result), `Code open (${testInfo.project.name})`).toEqual([]);
 });
 
-/* The context menu of the demonstration is portalled to the body, outside
+/* The context menu of the scenario is portalled to the body, outside
    every page block - it is checked where it lands. */
-test("the demonstration's context menu is accessible", async ({ page }, testInfo) => {
-  await open(page, "demonstration");
-  const plot = page.locator('[data-example="demonstration"] [data-schedule-plot]');
+test("the scenario's context menu is accessible", async ({ page }, testInfo) => {
+  await openScenario(page, "replan-the-day");
+  const plot = page.locator('[data-scenario="replan-the-day"] [data-schedule-plot]');
   await plot.scrollIntoViewIfNeeded();
   const box = (await plot.boundingBox())!;
   await page.mouse.click(box.x + box.width * 0.02, box.y + 6 * 44 + 22, { button: "right" });

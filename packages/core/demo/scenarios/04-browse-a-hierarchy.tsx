@@ -17,10 +17,17 @@
    with that suite in english-and-umriss-ui 16, emitter and reader together. */
 
 import { useMemo, useState } from "react";
-import { Button, Grid, Stack, Text, TreeSearch, TreeView, useTree } from "../../../src";
-import type { NodeReader } from "../../../src";
+import { Button, Grid, Stack, Text, TreeSearch, TreeView, useTree } from "../../src";
+import type { NodeReader } from "../../src";
 
-export const title = "Demonstration: the tree in one piece";
+export const title = "Browse a large hierarchy";
+
+export const lead =
+  "Someone looking for one item among thousands searches, expands and selects in one tree.";
+
+export const callouts = [];
+
+export const builtFrom = ["treeview"];
 
 interface TreeNode {
   id: string;

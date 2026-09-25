@@ -6,7 +6,7 @@
    the plant that many minutes on. Light only; nothing here is appearance. */
 
 import { test, expect } from "@playwright/test";
-import { openExample } from "./navigation";
+import { openScenario } from "./navigation";
 
 test.skip(({ colorScheme }) => colorScheme === "dark", "Behaviour tests only once (light)");
 
@@ -24,10 +24,10 @@ const plus = (time: string, minutes: number) => {
   return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
 };
 
-const room = (page: import("@playwright/test").Page) => page.locator('[data-example="demonstration"]');
+const room = (page: import("@playwright/test").Page) => page.locator('[data-scenario="watch-a-kiln-line"]');
 
 test("stands still while the wall clock does, and runs a minute per second", async ({ page }) => {
-  await openExample(page, "control-room", "demonstration");
+  await openScenario(page, "watch-a-kiln-line");
   const clock = room(page).getByText(/^\d\d:\d\d$/).first();
   const opened = (await clock.textContent())!;
   await page.waitForTimeout(600);
@@ -38,7 +38,7 @@ test("stands still while the wall clock does, and runs a minute per second", asy
 });
 
 test("pause stops the plant", async ({ page }) => {
-  await openExample(page, "control-room", "demonstration");
+  await openScenario(page, "watch-a-kiln-line");
   const clock = room(page).getByText(/^\d\d:\d\d$/).first();
   const opened = (await clock.textContent())!;
   await room(page).getByRole("button", { name: "Pause the shift" }).click();
@@ -50,7 +50,7 @@ test("pause stops the plant", async ({ page }) => {
 
 test("stands still under reduced motion until asked to run", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await openExample(page, "control-room", "demonstration");
+  await openScenario(page, "watch-a-kiln-line");
   const clock = room(page).getByText(/^\d\d:\d\d$/).first();
   const opened = (await clock.textContent())!;
   await page.clock.setFixedTime(later(5));
@@ -63,7 +63,7 @@ test("stands still under reduced motion until asked to run", async ({ page }) =>
 });
 
 test("every region is a landmark, and its skip link moves the focus, not the address", async ({ page }) => {
-  await openExample(page, "control-room", "demonstration");
+  await openScenario(page, "watch-a-kiln-line");
   const address = page.url();
   for (const name of ["Line status", "Kiln trend", "Alarms", "Tile length", "Plan", "OEE so far"]) {
     await expect(room(page).getByRole("region", { name, exact: true })).toBeVisible();

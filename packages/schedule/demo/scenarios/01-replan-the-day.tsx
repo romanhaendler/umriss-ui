@@ -1,10 +1,17 @@
 import { useState } from "react";
 import { Checkbox, ContextMenu, MenuItem, MenuSeparator, Stack, Text } from "@umriss-ui/core";
-import { Lane, Schedule, Subtasks, Transports, applyIntent, findings, ripple, shiftTask } from "../../../src";
-import type { Intent, ScheduleInteraction, Subtask } from "../../../src";
-import { DAY_OF_PLAN, MOVES, ORDERS, STATIONS, STEPS } from "../../data";
+import { Lane, Schedule, Subtasks, Transports, applyIntent, findings, ripple, shiftTask } from "../../src";
+import type { Intent, ScheduleInteraction, Subtask } from "../../src";
+import { DAY_OF_PLAN, MOVES, ORDERS, STATIONS, STEPS } from "../data";
 
-export const title = "Demonstration: the plan in the planner's hands";
+export const title = "Replan the day";
+
+export const lead =
+  "A planner moves work between lanes, lets the cascade follow and reads the findings before committing.";
+
+export const callouts = [];
+
+export const builtFrom = ["schedule"];
 
 /* The one example that does not carry its own data. A demonstration is a whole
    plant - seven stations, six orders and their moves through a Tuesday - and
@@ -12,7 +19,7 @@ export const title = "Demonstration: the plan in the planner's hands";
    shown instead: `data.ts` stands in the second tab of the code view, so a
    reader sees it and can copy both. That is the named exception the check
    allows, and the only one in this demo. */
-export const shows = ["../../data.ts"];
+export const shows = ["../data.ts"];
 
 /* The whole recipe, as an application writes it.
 

@@ -2,7 +2,7 @@
 
    The pages from the outline, the examples from the files under
    `demo/examples/`: the same two sources the demo is made of. A new example is
-   a new picture, without anything being added here. The overview stands first:
+   a new picture, without anything being added here. The scenarios page stands first:
    the shell is not the unchecked part. */
 
 import { dirname, join } from "node:path";
@@ -13,8 +13,8 @@ import { ALL_PAGES } from "../demo/outline";
 
 const EXAMPLES_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "demo", "examples");
 
-/** The addresses of every page, the overview first. */
-export const PAGES = ["overview", ...ALL_PAGES.map((s) => s.id)] as const;
+/** The addresses of every page, the scenarios page first. */
+export const PAGES = ["scenarios", ...ALL_PAGES.map((s) => s.id)] as const;
 
 export type { ExampleAddress };
 
@@ -35,7 +35,7 @@ export const EXAMPLE_ADDRESSES: readonly ExampleAddress[] = exampleAddresses(EXA
   (e) => NOT_PHOTOGRAPHED[e.exampleId] === undefined,
 );
 
-/** A sample for the accessibility check: the overview, the page with the
+/** A sample for the accessibility check: the scenarios page, the page with the
     densest chart, the one with two charts beside each other, the instrument
     with the most text and the page whose examples carry a custom tooltip. */
-export const SAMPLE = ["overview", "limitline", "matrix", "controlchart", "axis"] as const;
+export const SAMPLE = ["scenarios", "limitline", "matrix", "controlchart", "axis"] as const;

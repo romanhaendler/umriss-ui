@@ -7,5 +7,5 @@ import { PAGES } from "./pages";
 
 checkOwnBase({
   open,
-  pages: PAGES.filter((pageId) => pageId !== "overview"),
+  pages: PAGES.filter((pageId) => pageId !== "scenarios"),
 });

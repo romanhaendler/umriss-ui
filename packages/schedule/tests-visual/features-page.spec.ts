@@ -2,7 +2,7 @@
    The tests stand with the shell (`@umriss-ui/demo/checks/page.ts`). */
 
 import { checkPage } from "@umriss-ui/demo/checks/page";
-import { open, openExample } from "./navigation";
+import { open, openExample, openScenario } from "./navigation";
 
 checkPage({
   open,
@@ -20,15 +20,15 @@ checkPage({
 
 import { test, expect } from "@playwright/test";
 
-test("the demonstration shows its plant in a second tab, and Copy takes the tab in front", async ({ page, context }) => {
+test("the scenario shows its plan in a second tab, and Copy takes the tab in front", async ({ page, context }) => {
   test.skip(test.info().project.name.endsWith("dark"), "a behaviour test runs once (light)");
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
-  await openExample(page, "demonstration", "demonstration");
+  await openScenario(page, "replan-the-day");
 
-  const example = page.locator('[data-example="demonstration"]');
+  const example = page.locator('[data-scenario="replan-the-day"]');
   await example.getByRole("button", { name: "Code" }).click();
   const tabs = example.getByRole("group", { name: "Files of this example" }).getByRole("button");
-  await expect(tabs).toHaveText(["01-demonstration.tsx", "data.ts"]);
+  await expect(tabs).toHaveText(["01-replan-the-day.tsx", "data.ts"]);
 
   /* The example itself is in front, and Copy takes it. */
   const copy = async () => {

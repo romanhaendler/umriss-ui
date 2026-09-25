@@ -12,15 +12,15 @@ import { ALL_PAGES } from "../demo/outline";
 
 const EXAMPLES_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "demo", "examples");
 
-/** The addresses of every page, the overview first. */
-export const PAGES = ["overview", ...ALL_PAGES.map((s) => s.id)] as const;
+/** The addresses of every page, the scenarios page first. */
+export const PAGES = ["scenarios", ...ALL_PAGES.map((s) => s.id)] as const;
 
 export type { ExampleAddress };
 
 export const EXAMPLE_ADDRESSES: readonly ExampleAddress[] = exampleAddresses(EXAMPLES_DIR);
 
-/** A sample for the accessibility check: the overview, the first schedule, the
-    lanes with their headers in markup, the lane groups with the only buttons
-    the schedule puts into the tab order, the demonstration with its context
-    menu, and the findings listed as text. */
-export const SAMPLE = ["overview", "schedule", "lane", "lane-groups", "demonstration", "findings"] as const;
+/** A sample for the accessibility check: the scenarios page with its
+    context menu, the first schedule, the lanes with their headers in markup,
+    the lane groups with the only buttons the schedule puts into the tab
+    order, and the findings listed as text. */
+export const SAMPLE = ["scenarios", "schedule", "lane", "lane-groups", "findings"] as const;

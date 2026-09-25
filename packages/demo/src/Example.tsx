@@ -1,8 +1,9 @@
 /* An example: the running thing and its source, at an address.
 
-   The demonstration is the same component with a different appearance - wider,
-   last, and labelled as such. Two implementations of the same thing would be
-   two places where the copy button can break.
+   Its lead - one sentence, the situation and the prop - stands visible above
+   it: the skimmer is the reader who needs it, and a code comment inside a
+   collapsed block never reaches them. The first example of a page stands
+   without a heading, right under the page head: the component at rest.
 
    Two controls, and they mean different things. Whoever skims wants the
    examples as a gallery; whoever has found the right one wants every block
@@ -31,6 +32,7 @@
 import { useMemo, useState } from "react";
 import { highlight } from "sugar-high";
 import { CopyButton } from "./CopyButton";
+import { Prose } from "./Prose";
 import type { Example as ExampleData, ExampleFile } from "./tooling/examples";
 
 function Chevron({ open }: { open: boolean }) {
@@ -48,7 +50,7 @@ function Chevron({ open }: { open: boolean }) {
   );
 }
 
-function CodeBlock({ files }: { files: readonly ExampleFile[] }) {
+export function CodeBlock({ files }: { files: readonly ExampleFile[] }) {
   const [shown, setShown] = useState(0);
   const front = files[Math.min(shown, files.length - 1)]!;
   const highlighted = useMemo(() => highlight(front.source), [front.source]);
@@ -87,9 +89,11 @@ export interface ExampleProps {
   example: ExampleData;
   /** The state of the page toggle - the default, not the last word. */
   allOpen: boolean;
+  /** The first example: no heading, its title only as the section's name. */
+  hero?: boolean;
 }
 
-export function Example({ example, allOpen }: ExampleProps) {
+export function Example({ example, allOpen, hero = false }: ExampleProps) {
   const [exception, setException] = useState<boolean | null>(null);
   /* A new state of the toggle clears the exceptions: it is the statement for
      the whole page and not a suggestion per block.
@@ -111,15 +115,19 @@ export function Example({ example, allOpen }: ExampleProps) {
     <section
       className="example"
       data-example={example.id}
-      data-demonstration={example.demonstration ? "" : undefined}
+      data-hero={hero ? "" : undefined}
       id={`${example.pageId}/${example.id}`}
-      aria-labelledby={headId}
+      aria-labelledby={hero ? undefined : headId}
+      aria-label={hero ? example.title : undefined}
     >
       <header className="exampleHead">
-        <h3 className="exampleTitle" id={headId}>
-          {example.title}
-        </h3>
-        {example.demonstration && <span className="exampleMark">Demonstration</span>}
+        {hero ? (
+          <span className="exampleTitle" />
+        ) : (
+          <h3 className="exampleTitle" id={headId}>
+            {example.title}
+          </h3>
+        )}
         <button
           type="button"
           className="exampleToggle"
@@ -131,6 +139,12 @@ export function Example({ example, allOpen }: ExampleProps) {
           Code
         </button>
       </header>
+
+      {example.lead !== undefined && (
+        <p className="exampleLead">
+          <Prose text={example.lead} />
+        </p>
+      )}
 
       <div className="exampleStage">
         <example.Component />
