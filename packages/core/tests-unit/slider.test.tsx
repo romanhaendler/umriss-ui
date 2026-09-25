@@ -2,7 +2,7 @@
    native range input, the keys of the APG slider pattern, marks, the readout
    and its `format`. The keys are the component's own and not left to the
    browser - PageUp and PageDown differ between engines, and a step that
-   depends on the browser is one a plant screen cannot promise. */
+   depends on the browser is one a data-dense screen cannot promise. */
 
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
