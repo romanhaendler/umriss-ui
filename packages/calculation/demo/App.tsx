@@ -32,7 +32,7 @@ export function App() {
       demo={DEMO}
       brand="Umriss Calculation"
       version={manifest.version}
-      sentence="The parts of @umriss-ui/calculation with the code that produces them: a derivation written as it is shown, evaluated by the library, folded and read line by line - so that what stands on the screen cannot disagree with the number. Every page shows running examples together with their source, and the props tables generated from it."
+      sentence="A calculation shows how a figure on a data-dense screen came about - an availability, a price, an invoice total - evaluated by the library and read line by line down to the numbers it started from, so the working cannot disagree with the result. Below, screens in which a reader checks a number before acting on it."
       actions={
         <Button size="sm" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
           {theme === "dark" ? "Light theme" : "Dark theme"}
