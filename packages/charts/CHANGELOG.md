@@ -29,7 +29,7 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
-## Unreleased
+## 0.7.0 – Data table, marks and stacks (Sep. 2026)
 
 ### Added
 
