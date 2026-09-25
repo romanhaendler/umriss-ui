@@ -756,10 +756,19 @@ _Avoid_: batch action, mass action, Massenaktion
 **View**:
 The part of a table's state an application can hand in at the start and read
 back: search, conditions, sort levels, page, page size, hidden columns, column
-order and widths. The table keeps it nowhere — not in the address, not in
+order, widths, the grouping and the pinned columns. The table keeps it nowhere — not in the address, not in
 storage; where a view is remembered, if anywhere, is the application's business.
 Whatever is at its default is not part of it, and the pre-filter never is.
 _Avoid_: view state, settings, Einstellungen, preset, saved view, Ansichtslink
+
+**Pinned column**:
+A column that stays in view while the table scrolls sideways, in a block at the
+start or at the end of the row; the rest scrolls under the blocks. Pinning moves
+a column into its block without changing the column order, so an unpinned column
+is back where it was. The row header of a `stickyRowHeader` table is a pinned
+column like any other.
+_Avoid_: frozen column, fixed column, sticky column (sticky is the CSS that does
+it), fixiert on its own
 
 **Table toolbar**:
 The strip in the flow above a table carrying its search, column menu and export,

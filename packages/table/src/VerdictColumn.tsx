@@ -48,6 +48,7 @@ export interface VerdictColumnProps {
   sortBy?: "verdict" | "value";
   width?: number;
   resizable?: boolean;
+  pin?: "start" | "end";
   aggregate?: "worst";
 }
 
@@ -115,13 +116,14 @@ export function buildVerdictColumn(
     numeric: boolean;
     width?: number;
     resizable?: boolean;
+    pin?: "start" | "end";
     sortValue: (reading: Reading) => number | null;
     exportValue: (reading: Reading) => number | null;
     children: (reading: Reading) => ReactNode;
     aggregate?: (readings: readonly Reading[]) => Reading | undefined;
   }) => ReactNode,
 ) {
-  return function VerdictColumn({ id, value, label, limits, format, sortBy = "verdict", width, resizable, aggregate }: VerdictColumnProps) {
+  return function VerdictColumn({ id, value, label, limits, format, sortBy = "verdict", width, resizable, pin, aggregate }: VerdictColumnProps) {
     /* The functions stay stable as long as field, limits and sort kind are:
        a new value function on every render would make the table recalculate
        its model every time. The limits are compared as text, because a set
@@ -151,6 +153,7 @@ export function buildVerdictColumn(
         numeric
         width={width}
         resizable={resizable}
+        pin={pin}
         value={read}
         sortValue={sortValueOf}
         exportValue={onlyTheValue}

@@ -22,6 +22,8 @@ import { useFormats } from "@umriss-ui/core";
 import { useCompanion } from "./model/companion";
 import { MOST_LEVELS, livePaths } from "./model/grouping";
 import type { RowGroup } from "./model/grouping";
+import { pinsForView, withPin } from "./model/pinning";
+import type { Pin, Pins } from "./model/pinning";
 import type { TableView } from "./model/view";
 import type { Column } from "./model/tableModel";
 import { Registry } from "./registry";
@@ -191,6 +193,10 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     start?.grouping ? [...start.grouping] : listOf(options.defaultGrouping),
   );
   const [foldedState, setFoldedState] = useState<readonly string[]>(() => start?.folded ?? []);
+  /* The pins the user chose, whole; `null` while the declared ones hold. They
+     are held here and not in the companion for the grouping's reason: what is
+     declared only the registry knows. */
+  const [pinsChosen, setPinsChosen] = useState<Pins | null>(() => (start?.pinned ? { ...start.pinned } : null));
   const registered = registry.orderedColumns().length + registry.groupKeys.entries.size > 0;
   const groupingNow = registered ? registry.effectiveGrouping(groupingState, rowsUnknown) : groupingState.slice(0, MOST_LEVELS);
   const groupingPrefix = groupingNow.join("|");
@@ -284,11 +290,17 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     ? registry.effectiveGrouping(listOf(options.defaultGrouping), rowsUnknown)
     : listOf(options.defaultGrouping);
   const folded = b.groups ? livePaths(b.groups, foldedState) : registered ? [] : [...foldedState];
+  const declared = registry.declaredPins();
+  const pinnedView = pinsForView(pinsChosen, declared, known);
   const groupedView: TableView = {
     ...view,
     ...(!sameList(groupingNow, defaultGrouping) ? { grouping: groupingNow } : {}),
     ...(folded.length ? { folded } : {}),
+    ...(pinnedView ? { pinned: pinnedView } : {}),
   };
+  /* Read on the call, not on the render: a column may have registered since. */
+  const setPin = (column: string, pin: Pin | null) =>
+    setPinsChosen((old) => withPin(old ?? registry.declaredPins(), column, pin));
   const setGrouping = (ids: readonly string[]) => {
     setGroupingState([...ids]);
     setPage(1);
@@ -319,6 +331,8 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     toggleColumn: b.toggleColumn,
     order: b.order,
     setOrder: b.setOrder,
+    pinned: pinsChosen ?? declared,
+    setPin,
     widths: effectiveWidths(modelColumns, b.widths),
     setWidth: b.setWidth,
     expanded: b.expanded,
@@ -355,6 +369,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     publicSnapshot: snapshot as unknown as TableSnapshot<unknown>,
     rowKey,
     formats,
+    pins: pinsChosen,
   });
 
   return { ...snapshot, ...parts } as unknown as Table<Z>;

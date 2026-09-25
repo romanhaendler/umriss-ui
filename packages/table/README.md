@@ -111,8 +111,9 @@ stylesheets by hand.
 * **For producing plants**: `VerdictColumn` reads a measured value against a
   limit set, and `AlarmList` shows alarms with a lifecycle — standing or
   cleared, acknowledged or not. The library generates no alarms (ADR-0009).
-* **Twenty thousand rows** where it has to be: virtualisation, sticky parts and
-  column widths that survive a view being restored.
+* **Twenty thousand rows** where it has to be: virtualisation, sticky parts,
+  columns pinned to either side and column widths that survive a view being
+  restored.
 
 ## More
 
