@@ -54,7 +54,6 @@ const PENDING: readonly string[] = [
   "packages/demo/src/worlds/controlling.ts",
   "packages/demo/src/worlds/logistics.ts",
   "packages/demo/src/worlds/operations.ts",
-  "packages/schedule/demo/outline.ts",
 ];
 const PENDING_QUARTER: readonly string[] = [
 ];
