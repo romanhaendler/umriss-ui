@@ -5,9 +5,8 @@
 
    The schedule put nothing into the tab order until lane groups arrived
    (schedule-lane-groups 08): its grips are for the pointer and hidden from
-   assistive technology. The chevron that folds a group is a real button - that
-   is the whole point of it - and is therefore the first element this guard
-   really guards. */
+   assistive technology. The chevron that folds a group is a real button, and
+   the plot has been a tab stop since schedule-a11y. */
 
 import { describe, expect, it } from "vitest";
 import { focusableElements, hasFocusStyle } from "../../../scripts/styles/focus.ts";
@@ -25,12 +24,12 @@ describe("Focus styles of @umriss-ui/schedule (ADR-0021)", () => {
     focusableElements(path.replace("../src/", ""), source),
   );
 
-  it("puts only the fold controls into the tab order", () => {
-    /* The plot itself is still not reachable by keyboard - that is its own
-       spec. What is here is the chevron of a lane group's header, and it is
-       here because a fold a screen reader cannot reach is a view a screen
-       reader cannot leave. */
-    expect(elements.map((element) => element.key)).toEqual(["Schedule.tsx button .chevron"]);
+  it("puts the fold controls and the plot into the tab order", () => {
+    /* The chevron of a lane group's header is here because a fold a screen
+       reader cannot reach is a view a screen reader cannot leave; the plot,
+       since schedule-a11y, as the one tab stop whose keys walk the subtasks
+       (ADR-0030). The grips stay the pointer's. */
+    expect(elements.map((element) => element.key)).toEqual(["Schedule.tsx button .chevron", "Schedule.tsx div .plot"]);
   });
 
   it("give every element in the tab order a focus style of its own", () => {
