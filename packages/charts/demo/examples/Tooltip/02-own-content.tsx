@@ -1,30 +1,26 @@
-/* A tooltip in the plant's language: "Furnace 1 - 812 °C, 4 °C above set
-   point" instead of a name and a number.
-
-   The render prop receives the hit - the x value and one entry per series, each
-   with its datum - and returns what stands in the box. The set point is not a
-   series here but a field of the datum, which is exactly what the render prop
-   can read and the built-in tooltip cannot know. */
-
 import { Chart, Legend, Line, Tooltip, XAxis, YAxis } from "../../../src";
 import type { TooltipHit } from "../../../src";
-import { furnaceData, type FurnacePoint } from "@umriss-ui/demo/worlds/plant";
+import { SERVICES, metrics, type MetricPoint } from "@umriss-ui/demo/worlds/operations";
 
-export const title = "Content of one's own";
+export const title = "Write the tooltip yourself";
+export const lead = "`render` receives the hit - the x value and each series' point with its row - and returns the box's content, in your screen's language.";
+
+const CHECKOUT = metrics("checkout");
+const BILLING = metrics("billing");
+const OBJECTIVE: Record<string, number> = Object.fromEntries(SERVICES.map((one) => [one.name, one.latencySlo]));
 
 const timeOfDay = (v: number) =>
   new Date(v).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 
-function PlantTooltip({ hit }: { hit: TooltipHit<FurnacePoint> }) {
+function AgainstObjective({ hit }: { hit: TooltipHit<MetricPoint> }) {
   return (
     <div className="custom-tooltip">
       <strong>{timeOfDay(hit.xValue)}</strong>
       {hit.points.map((point) => {
-        const off = point.yValue - point.datum.setPoint;
+        const off = point.datum.p95 - (OBJECTIVE[point.seriesName] ?? 0);
         return (
           <span key={point.seriesName}>
-            {point.seriesName} - {point.yValue.toFixed(0)} °C, {Math.abs(off).toFixed(0)} °C{" "}
-            {off >= 0 ? "above" : "below"} set point
+            {point.seriesName} - {point.datum.p95} ms, {Math.abs(off)} ms {off > 0 ? "over" : "under"} objective
           </span>
         );
       })}
@@ -34,13 +30,13 @@ function PlantTooltip({ hit }: { hit: TooltipHit<FurnacePoint> }) {
 
 export default function OwnContent() {
   return (
-    <Chart data={furnaceData} height={280} ariaLabel="Two furnace temperatures with a tooltip in plant language">
-      <XAxis accessor={(d: FurnacePoint) => d.t} tickFormat={timeOfDay} label="Time" />
-      <YAxis accessor={(d: FurnacePoint) => d.f1} label="°C" />
-      <Line accessor={(d: FurnacePoint) => d.f1} name="Furnace 1" />
-      <Line accessor={(d: FurnacePoint) => d.f2} name="Furnace 2" />
+    <Chart data={CHECKOUT} height={280} ariaLabel="Checkout and billing latency, the tooltip against their objectives">
+      <XAxis accessor={(d: MetricPoint) => d.t} time />
+      <YAxis accessor={(d: MetricPoint) => d.p95} label="ms" />
+      <Line accessor={(d: MetricPoint) => d.p95} name="Checkout" />
+      <Line data={BILLING} accessor={(d: MetricPoint) => d.p95} name="Billing" />
       <Legend placement="top" />
-      <Tooltip<FurnacePoint> mode="x" render={(hit) => <PlantTooltip hit={hit} />} />
+      <Tooltip<MetricPoint> mode="x" render={(hit) => <AgainstObjective hit={hit} />} />
     </Chart>
   );
 }

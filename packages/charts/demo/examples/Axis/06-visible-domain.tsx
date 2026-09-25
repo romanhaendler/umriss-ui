@@ -1,27 +1,21 @@
-/* The same week, opened on Wednesday afternoon, when the burner tripped. With
-   `domain="visible"` the y axis fits what the x domain shows: the twenty
-   minutes the kiln fell and the hour it took to climb back, not the week's
-   600 to 850 °C that would press them flat. Zoom out - Ctrl or ⌘ with the
-   wheel, or a double click - and the axis follows. */
-
 import { useState } from "react";
 import { Chart, Line, Tooltip, XAxis, YAxis } from "../../../src";
-import { DAY_MS, HOUR_MS, WEEK_START, kilnData, type KilnPoint } from "@umriss-ui/demo/worlds/plant";
+import { week, type MetricPoint } from "@umriss-ui/demo/worlds/operations";
 
-export const title = "The visible domain";
+export const title = "Fit the y axis to what is visible";
+export const lead = "With `domain=\"visible\"` the y axis fits the zoomed stretch - here Saturday evening's outage - and follows when you zoom out.";
 
-const WEDNESDAY = WEEK_START + 2 * DAY_MS;
+const LAST_WEEK = week("search", 60_000);
+const SATURDAY = new Date(2026, 2, 14).getTime();
+const HOUR = 3_600_000;
 
 export default function VisibleDomain() {
-  const [domain, setDomain] = useState<readonly [number, number]>([
-    WEDNESDAY + 12 * HOUR_MS,
-    WEDNESDAY + 17 * HOUR_MS,
-  ]);
+  const [domain, setDomain] = useState<readonly [number, number]>([SATURDAY + 16 * HOUR, SATURDAY + 22 * HOUR]);
   return (
-    <Chart data={kilnData} height={260} ariaLabel="Kiln temperature on Wednesday afternoon, the y axis fitted to it">
-      <XAxis accessor={(d: KilnPoint) => d.t} time domain={domain} onDomainChange={setDomain} />
-      <YAxis accessor={(d: KilnPoint) => d.temperature} label="°C" domain="visible" />
-      <Line accessor={(d: KilnPoint) => d.temperature} name="Kiln" />
+    <Chart data={LAST_WEEK} height={260} ariaLabel="Search latency on Saturday evening, the y axis fitted to it">
+      <XAxis accessor={(d: MetricPoint) => d.t} time domain={domain} onDomainChange={setDomain} />
+      <YAxis accessor={(d: MetricPoint) => d.p95} label="ms" domain="visible" />
+      <Line accessor={(d: MetricPoint) => d.p95} name="p95" />
       <Tooltip mode="x" />
     </Chart>
   );

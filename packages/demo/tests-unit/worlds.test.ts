@@ -37,7 +37,8 @@ describe("the worlds", () => {
     expect(operations.metrics("checkout")).toEqual(operations.metrics("checkout"));
     expect(logistics.vehicleDay("v1")).toEqual(logistics.vehicleDay("v1"));
     expect(plant.plant(7)).toEqual(plant.plant(7));
-    expect(plant.kiln(2024, 600_000)).toEqual(plant.kiln(2024, 600_000));
+    expect(operations.week("search", 600_000)).toEqual(operations.week("search", 600_000));
+    expect(logistics.batteryDay("v2")).toEqual(logistics.batteryDay("v2"));
   });
 });
 
@@ -119,9 +120,8 @@ describe("planning", () => {
 });
 
 describe("plant", () => {
-  it("has the kiln line, the machine plan and the charts' series", () => {
+  it("has the kiln line and the machine plan", () => {
     expect(plant.plant(7).readings).toHaveLength(plant.SHIFT_MINUTES);
     expect(unique(plant.STEPS.map((one) => one.id))).toBe(true);
-    expect(plant.basicData).toHaveLength(120);
   });
 });

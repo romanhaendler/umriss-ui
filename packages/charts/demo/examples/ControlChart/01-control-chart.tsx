@@ -1,36 +1,32 @@
-/* Two kinds of limit, and they look different because they mean different
-   things.
-
-   The SPECIFICATION limits (dashed, coloured) are chosen: what the customer
-   assumes. The CONTROL limits (solid, neutral) are calculated: what this process
-   normally does - and out of a named reference window, never out of what happens
-   to be visible (ADR-0008). From value 62 the process drifts; the run rule fires
-   long before a point leaves the specification. */
-
 import { Chart, ControlChart, LimitLine, Tooltip, XAxis, YAxis } from "../../../src";
-import { measurementData, type Measurement } from "@umriss-ui/demo/worlds/plant";
+import { plant, type Sample } from "@umriss-ui/demo/worlds/plant";
 
-export const title = "Control chart";
+export const title = "Chart a process against its control limits";
+export const lead = "In the plant: `origin` names the reference window the limits come from; the burner's overshoot breaks them while every tile stays in specification.";
 
-/* The control limits come out of the first 60 per cent of the series - the
-   period in which the process demonstrably ran in control. */
-const REFERENCE_WINDOW = { kind: "referenceWindow", from: 0, to: 54 } as const;
+/* A tile measured off the belt every ten minutes of the early shift. */
+const SAMPLES = plant(7).samples;
+
+/* The first fifteen samples, 06:00 to 08:20: the kiln demonstrably ran in
+   control. Never the samples that happen to be visible (ADR-0008). */
+const REFERENCE_WINDOW = { kind: "referenceWindow", from: 0, to: 15 } as const;
 
 export default function ControlChartExample() {
   return (
-    <Chart data={measurementData} height={300} ariaLabel="Control chart of a feature inspection">
-      <XAxis accessor={(d: Measurement) => d.n} label="Inspection" />
-      <YAxis accessor={(d: Measurement) => d.value} label="mm" />
-      <LimitLine value={13.2} severity="alarm" label="USL" />
-      <LimitLine value={11.8} severity="alarm" label="LSL" />
+    <Chart data={SAMPLES} height={300} ariaLabel="Control chart of the tile length after firing">
+      <XAxis accessor={(d: Sample) => d.minute} label="Minute of the shift" />
+      <YAxis accessor={(d: Sample) => d.length} label="mm" />
+      {/* Specification limits are chosen, control limits are computed. */}
+      <LimitLine value={602.5} severity="alarm" label="USL" />
+      <LimitLine value={597.5} severity="alarm" label="LSL" />
       <ControlChart
-        accessor={(d: Measurement) => d.value}
-        data={measurementData}
+        accessor={(d: Sample) => d.length}
+        data={SAMPLES}
         origin={REFERENCE_WINDOW}
-        name="Feature Ø"
+        name="Tile length"
         labelUpper="UCL"
         labelLower="LCL"
-        violationName="Feature Ø - rule violation"
+        violationName="Tile length - rule violation"
       />
       <Tooltip mode="x" />
     </Chart>
