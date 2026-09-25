@@ -452,6 +452,16 @@ The signed distance from the **Target**. Absent when there is no target. It is a
 different number from the **Excess** and never populated from it.
 _Avoid_: Überschreitung, offset, error
 
+**Progress**:
+How far a task has come towards its end — a share from 0 to 1, or unknown
+while the task runs without saying how far. It is not a measured value and has
+no **Verdict**: a batch at 90 per cent is not a warning. That is the line
+between the two bars of core: a `Meter` reads a value against limits and takes
+its colour from that judgement, a `ProgressBar` counts towards an end and has no
+tone at all.
+_Avoid_: Fortschritt as an English word, completion, status, fill level (which
+is the meter's)
+
 ### States and lanes
 
 **State**:

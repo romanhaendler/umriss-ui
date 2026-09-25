@@ -1,0 +1,114 @@
+@layer umriss.tokens, umriss.base, umriss.components;
+
+/* A trail on one line, quiet: the levels one can go back to in secondary
+   type, darkening under the pointer (they have no surface of their own), the
+   current page in the text colour. `.text` and `.link` share their box, so
+   that the hidden copy measures what the trail shows. */
+
+@layer umriss.components {
+  .breadcrumb {
+    composes: text from "#own-styles";
+    position: relative;
+    min-width: 0;
+  }
+
+  .list {
+    display: flex;
+    align-items: center;
+    column-gap: var(--u-space-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    white-space: nowrap;
+    font-size: var(--u-text-sm);
+    line-height: var(--u-leading-tight);
+  }
+
+  .item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--u-space-1);
+    flex: none;
+  }
+
+  /* The current page gives way when even the folded trail does not fit. */
+  .lastItem {
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+
+  .link,
+  .text {
+    padding: 2px var(--u-space-1);
+    border-radius: var(--u-radius-xs);
+    font: inherit;
+    color: var(--u-color-text-secondary);
+  }
+
+  .link {
+    composes: ring from "#own-styles";
+    border: none;
+    background: none;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color var(--u-transition);
+  }
+
+  .link:hover {
+    color: var(--u-color-text);
+  }
+
+  .current {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: var(--u-weight-medium);
+    color: var(--u-color-text);
+  }
+
+  /* The key of the folded levels: a quiet key, its surface sinking under the
+     pointer as every quiet key's does. */
+  .more {
+    composes: ring from "#own-styles";
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    padding: 2px var(--u-space-1);
+    border: none;
+    border-radius: var(--u-radius-xs);
+    background: none;
+    font: inherit;
+    color: var(--u-color-text-secondary);
+    cursor: pointer;
+    transition: background-color var(--u-transition);
+  }
+
+  .more:hover {
+    background: var(--u-color-surface-sunken);
+    color: var(--u-color-text);
+  }
+
+  .more:active {
+    background: var(--u-color-surface-pressed);
+  }
+
+  .separator {
+    flex: none;
+    color: var(--u-color-text-muted);
+  }
+
+  /* The hidden copy takes no room and adds no overflow: a box of nothing,
+     clipping levels that keep their own widths (`flex: none`) for the
+     measurement. */
+  .measure {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    visibility: hidden;
+    pointer-events: none;
+  }
+}

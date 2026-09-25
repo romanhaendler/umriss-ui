@@ -73,3 +73,12 @@ export * from "./components/Dock";
    brings no stylesheet of its own - it wears the menu's - so no baseline can
    move by its place; the rule is kept anyway, so that nobody has to check. */
 export * from "./components/ContextMenu";
+
+/* The six foundations (core-foundations) stand at the end for the same rule:
+   filed in alphabetically, their stylesheets would land between older ones
+   and could decide a tie the older ones decide today. */
+export * from "./components/Switch";
+export * from "./components/Slider";
+export * from "./components/ProgressBar";
+export * from "./components/Accordion";
+export * from "./components/Breadcrumb";
