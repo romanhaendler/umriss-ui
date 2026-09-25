@@ -15,6 +15,48 @@ moves from here under the rule above.
 
 ---
 
+## Unreleased
+
+Needs the next `@umriss-ui/core`: it reads the renamed wording keys.
+
+### Changed
+
+- **Neutral names for the schedule's terms** (ADR-0035). The schedule is for
+  any plan of work on lanes, and its names said "plant": a transport is now a
+  **dependency** with a **lag**, setup and teardown are **lead-in** and
+  **lead-out**, and a late transport is a **violated dependency** — with every
+  name built on them. One hard cut, no deprecated aliases. What the terms do is
+  unchanged: a dependency still joins two subtasks of one task, from an end to
+  a start, and its anchors decide whether it is violated. `]`/`[` and `t`/Shift+T
+  still walk along it. The tooltip, the ghost, the readout and the summary say
+  "Lead-in", "Lead-out", "Dependency" and "Violated dependency" (German
+  "Vorlauf", "Nachlauf", "Abhängigkeit", "Abhängigkeit verletzt").
+
+  | Before | Now |
+  |---|---|
+  | `Subtask.setup` | `Subtask.leadIn` |
+  | `Subtask.teardown` | `Subtask.leadOut` |
+  | `PlaceIntent.setup`, `.teardown` | `PlaceIntent.leadIn`, `.leadOut` |
+  | `PlacingItem.setup`, `.teardown` | `PlacingItem.leadIn`, `.leadOut` |
+  | `SetupIntent` (`kind: "setup"`, field `setup`) | `LeadInIntent` (`kind: "leadIn"`, field `leadIn`) |
+  | `TeardownIntent` (`kind: "teardown"`, field `teardown`) | `LeadOutIntent` (`kind: "leadOut"`, field `leadOut`) |
+  | `"setup"`, `"teardown"` in `intents` | `"leadIn"`, `"leadOut"` |
+  | `Transport` | `Dependency` |
+  | `Transport.duration` | `Dependency.lag` |
+  | `leaves: "teardown"` (the default) | `leaves: "leadOut"` |
+  | `arrives: "setup"` (the default) | `arrives: "leadIn"` |
+  | `TransportRoute`, `TransportAttachment`, `TransportEnds` | `DependencyRoute`, `DependencyAttachment`, `DependencyEnds` |
+  | `<Transports>`, `TransportsProps` | `<Dependencies>`, `DependenciesProps` |
+  | `LateTransport` (field `transport`) | `ViolatedDependency` (field `dependency`) |
+  | `lateTransports()` | `violatedDependencies()` |
+  | `Findings.lateTransports` | `Findings.violatedDependencies` |
+  | `ScheduleTooltipTarget`: `kind: "transport"`, `transport`, `late`; `lateTransports` | `kind: "dependency"`, `dependency`, `violated`; `violatedDependencies` |
+  | `ScheduleHit`: `kind: "transport"`, `transport`; `part: "setup" \| "teardown"` | `kind: "dependency"`, `dependency`; `part: "leadIn" \| "leadOut"` |
+  | ghost `data-findings` value `late-transport` | `violated-dependency` |
+  | grip `data-grip` values `setup`, `teardown` | `leadIn`, `leadOut` |
+
+---
+
 ## 0.2.0 – By keyboard and screen reader (Sep. 2026)
 
 Needs `@umriss-ui/core` 0.10 and `@umriss-ui/charts` 0.7: it reads the schedule's wording keys; the peer ranges move to `^0.10.0` and `^0.7.0`.

@@ -184,7 +184,7 @@ test("hover, click and right-click report their target", async ({ page }) => {
   await page.mouse.move(plot.x(6, 30), plot.y("saw"));
   await expect(status).toHaveText("hover: subtask a-2041-1 (main) at 06:30");
   await page.mouse.move(plot.x(5, 50), plot.y("saw"));
-  await expect(status).toHaveText(/^hover: subtask a-2041-1 \(setup\)/);
+  await expect(status).toHaveText(/^hover: subtask a-2041-1 \(leadIn\)/);
 
   await page.mouse.click(plot.x(15), plot.y("saw"), { button: "right" });
   /* A pixel is about a minute here; where the pointer lands on it decides. */
@@ -220,15 +220,15 @@ test("resting on a subtask shows its order, times, parts and findings", async ({
   const tooltip = example.locator("[data-schedule-tooltip]");
   await expect(tooltip).toHaveCount(0);
 
-  /* The bracket in the paint shop, noon to 14:00: its transport from the mill
+  /* The bracket in the paint shop, noon to 14:00: its dependency from the mill
      is fifteen minutes short. */
   await page.mouse.move(plot.x(13), plot.y("paint"));
   await expect(tooltip).toBeVisible();
   await expect(tooltip).toContainText("A-2043 Bracket");
   await expect(tooltip).toContainText("12:00–14:00");
-  await expect(tooltip).toContainText("Setup 20 min");
-  await expect(tooltip).toContainText("Teardown 20 min");
-  await expect(tooltip).toContainText("Late transport, 15 min short");
+  await expect(tooltip).toContainText("Lead-in 20 min");
+  await expect(tooltip).toContainText("Lead-out 20 min");
+  await expect(tooltip).toContainText("Violated dependency, 15 min short");
 
   /* The housing on the mill shares its time with the bracket's milling. */
   await page.mouse.move(plot.x(9), plot.y("mill"));
@@ -239,17 +239,17 @@ test("resting on a subtask shows its order, times, parts and findings", async ({
   await expect(tooltip).toHaveCount(0);
 });
 
-test("resting on a transport names its route, its duration and that it is late", async ({ page }) => {
+test("resting on a dependency names its route, its lag and that it is violated", async ({ page }) => {
   await openExample(page, "schedule", "first-schedule");
   const example = page.locator('[data-example="first-schedule"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
-  /* The bracket's move from the mill (11:30) to the paint shop's setup (11:40):
+  /* The bracket's move from the mill (11:30) to the paint shop's lead-in (11:40):
      a symmetric curve passes through the middle of its two ends. */
   await page.mouse.move((plot.x(11, 30) + plot.x(11, 40)) / 2, plot.y("press"));
   const tooltip = example.locator("[data-schedule-tooltip]");
   await expect(tooltip).toContainText("a-2043-2 → a-2043-3");
-  await expect(tooltip).toContainText("Transport 25 min");
-  await expect(tooltip).toContainText("Late transport, 15 min short");
+  await expect(tooltip).toContainText("Dependency 25 min");
+  await expect(tooltip).toContainText("Violated dependency, 15 min short");
 });
 
 test("an application's own tooltip content replaces the default", async ({ page }) => {
@@ -510,16 +510,16 @@ test("a fixed bar is marked at its ends and keeps its face clear", async ({ page
   expect(await colour(example, "data", { ...at7Movable, x: at7Movable.x + 3 })).toBe(movable);
 });
 
-test("muted work is a paler colour at full height, and cannot be read as a setup", async ({ page }) => {
+test("muted work is a paler colour at full height, and cannot be read as a lead-in", async ({ page }) => {
   await openExample(page, "appearances", "muted");
   const example = page.locator('[data-example="muted"]');
   const plot = await plotOf(page, example, APPEARANCE_DOMAIN);
 
   /* The lower lane carries another shift's work from 07:00 with half an hour
-     of setup before it: the two lie side by side in one picture, which is the
+     of lead-in before it: the two lie side by side in one picture, which is the
      only way to prove they cannot be confused. */
   const onBar = spotOn(plot, "theirs", 8);
-  const inSetup = spotOn(plot, "theirs", 6, 45);
+  const inLeadIn = spotOn(plot, "theirs", 6, 45);
 
   /* Full height: the bar's top rows are painted. A half-height bar - which is
      what muted used to be - would leave them empty. */
@@ -527,10 +527,10 @@ test("muted work is a paler colour at full height, and cannot be read as a setup
     await paintedShare(example, "data", { x: onBar.x, y: plot.row("theirs").top + 12, width: 20, height: 3 }),
   ).toBe(1);
 
-  /* And a different colour from the setup beside it, by a margin and not by a
+  /* And a different colour from the lead-in beside it, by a margin and not by a
      rounding: user story 4 asks for "without doubt", so the test asks for a
      distance and not merely for inequality. */
-  expect(await distanceFrom(example, "data", onBar, await rgba(example, "data", inSetup))).toBeGreaterThan(50);
+  expect(await distanceFrom(example, "data", onBar, await rgba(example, "data", inLeadIn))).toBeGreaterThan(50);
 
   /* Nor is it simply the task colour - that is the whole point of the
      channel. */
@@ -542,7 +542,7 @@ test("the progress rail lies within the main time and stops at its end", async (
   const example = page.locator('[data-example="progress"]');
   const plot = await plotOf(page, example, APPEARANCE_DOMAIN);
 
-  /* 07:00 to 10:00 at 65 per cent, with half an hour of teardown after it. The
+  /* 07:00 to 10:00 at 65 per cent, with half an hour of lead-out after it. The
      rail is a mark ON the bar, so it lies above the bar's own bottom edge -
      and it measures the WORK, so it must stop where the main time does. */
   const bottom = middleOf(plot, "started") + 11 - 4;
@@ -551,12 +551,12 @@ test("the progress rail lies within the main time and stops at its end", async (
 
   const onWork = await colour(example, "data", spot(plot.x(8)));
   const stillToDo = await colour(example, "data", spot(done + 20));
-  const underTeardown = await colour(example, "data", spot(plot.x(10, 15)));
-  /* Done, still to do, and the teardown: three different things at that
+  const underLeadOut = await colour(example, "data", spot(plot.x(10, 15)));
+  /* Done, still to do, and the lead-out: three different things at that
      height. If the rail ran on, the last two would be one. */
   expect(onWork).not.toBe(stillToDo);
-  expect(underTeardown).not.toBe(onWork);
-  expect(underTeardown).not.toBe(stillToDo);
+  expect(underLeadOut).not.toBe(onWork);
+  expect(underLeadOut).not.toBe(stillToDo);
 
   /* And it is inset: the bar's lowest row is the bar, not the rail. */
   const lowest = { x: Math.round(plot.x(8) - plot.box.x), y: middleOf(plot, "started") + 10 };
@@ -874,13 +874,13 @@ test("a folded group draws the work of every lane in it", async ({ page }) => {
   expect(await paintedShare(example, "data", { ...upper, x: lower.x })).toBeLessThan(0.2);
 });
 
-test("a transport into a folded group arrives at the strip of its lane", async ({ page }) => {
+test("a dependency into a folded group arrives at the strip of its lane", async ({ page }) => {
   await openExample(page, "lane-groups", "the-miniature");
   const example = page.locator('[data-example="the-miniature"]');
   const plot = await plotOf(page, example, [at(6), at(16)]);
   const row = await miniatureOf(example, "hall");
 
-  /* The housing leaves the saw at 08:15 and reaches the mill's setup at 08:30.
+  /* The housing leaves the saw at 08:15 and reaches the mill's lead-in at 08:30.
      The mill is the LOWER of the two strips, so the line has to come down past
      the middle of the row - not stop at its top edge, which is where a lane
      index would have put it. */
@@ -944,14 +944,14 @@ test("a strip can be hovered and selected, and carries neither label nor grips",
   await expect(example.locator("[data-bar-label]")).toHaveCount(0);
 });
 
-test("a late transport into a folded group is marked on its row", async ({ page }) => {
+test("a violated dependency into a folded group is marked on its row", async ({ page }) => {
   await openExample(page, "lane-groups", "the-miniature");
   const example = page.locator('[data-example="the-miniature"]');
   const plot = await plotOf(page, example, [at(6), at(16)]);
   const row = await miniatureOf(example, "hall");
 
   /* The housing leaves the saw at 08:15 and takes twenty minutes; the mill's
-     setup had to begin at 08:30. Five minutes short, and those five minutes
+     lead-in had to begin at 08:30. Five minutes short, and those five minutes
      are what the row marks. A line between two strips is a few pixels of a few
      pixels, so the row says it instead. */
   const onRow = { x: Math.round(plot.x(8, 31) - plot.box.x), y: row.top + 1, width: 4, height: 3 };

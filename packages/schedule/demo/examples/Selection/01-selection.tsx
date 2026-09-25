@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Stack, Text } from "@umriss-ui/core";
-import { Lane, Schedule, Subtasks, Transports } from "../../../src";
-import type { Subtask, Task, Transport } from "../../../src";
+import { Lane, Schedule, Subtasks, Dependencies } from "../../../src";
+import type { Subtask, Task, Dependency } from "../../../src";
 
 export const title = "Selecting a task";
 
 /* A click on a subtask selects its whole task: every subtask and every
-   transport of it is outlined, across all lanes. A click on a transport selects
+   dependency of it is outlined, across all lanes. A click on a dependency selects
    the task it belongs to, a click on the empty plot clears the selection.
 
    Here the selection is controlled - `selectedTask` and
@@ -37,19 +37,19 @@ const ORDERS: readonly Task[] = [
 ];
 
 const STEPS: readonly Subtask[] = [
-  { id: "a-2042-1", task: "a-2042", lane: "saw", from: at(7, 30), to: at(8, 15), setup: min(10) },
-  { id: "a-2042-2", task: "a-2042", lane: "lathe-1", from: at(9), to: at(11), setup: min(20), teardown: min(15) },
-  { id: "a-2043-1", task: "a-2043", lane: "press", from: at(6, 30), to: at(8), setup: min(30), teardown: min(15) },
-  { id: "a-2043-2", task: "a-2043", lane: "mill", from: at(10), to: at(11, 30), setup: min(15) },
-  { id: "a-2043-3", task: "a-2043", lane: "paint", from: at(12), to: at(14), setup: min(20), teardown: min(20) },
+  { id: "a-2042-1", task: "a-2042", lane: "saw", from: at(7, 30), to: at(8, 15), leadIn: min(10) },
+  { id: "a-2042-2", task: "a-2042", lane: "lathe-1", from: at(9), to: at(11), leadIn: min(20), leadOut: min(15) },
+  { id: "a-2043-1", task: "a-2043", lane: "press", from: at(6, 30), to: at(8), leadIn: min(30), leadOut: min(15) },
+  { id: "a-2043-2", task: "a-2043", lane: "mill", from: at(10), to: at(11, 30), leadIn: min(15) },
+  { id: "a-2043-3", task: "a-2043", lane: "paint", from: at(12), to: at(14), leadIn: min(20), leadOut: min(20) },
 ];
 
-const MOVES: readonly Transport[] = [
-  { id: "t-2042-1", from: "a-2042-1", to: "a-2042-2", duration: min(15) },
-  { id: "t-2043-1", from: "a-2043-1", to: "a-2043-2", duration: min(45) },
+const MOVES: readonly Dependency[] = [
+  { id: "t-2042-1", from: "a-2042-1", to: "a-2042-2", lag: min(15) },
+  { id: "t-2043-1", from: "a-2043-1", to: "a-2043-2", lag: min(45) },
   /* Leaves the mill at 11:30 and has ten minutes to reach the paint shop's
-     setup at 11:40 - it takes twenty-five. A late transport, on purpose. */
-  { id: "t-2043-2", from: "a-2043-2", to: "a-2043-3", duration: min(25) },
+     lead-in at 11:40 - it takes twenty-five. A violated dependency, on purpose. */
+  { id: "t-2043-2", from: "a-2043-2", to: "a-2043-3", lag: min(25) },
 ];
 
 export default function Selection() {
@@ -72,7 +72,7 @@ export default function Selection() {
         {STATIONS.map((station) => (
           <Lane key={station.id} id={station.id} label={station.label} />
         ))}
-        <Transports data={MOVES} />
+        <Dependencies data={MOVES} />
         <Subtasks data={STEPS} tasks={ORDERS} />
       </Schedule>
       <Text size="sm" tone="secondary" data-selected-order>

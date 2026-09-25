@@ -9,7 +9,7 @@ export default function WhyLaneGroups() {
         with its work in the tasks&apos; own colours. The real work, smaller.
       </p>
       <p>
-        Everything that was true of a bar stays true of its strip. A transport arrives at the
+        Everything that was true of a bar stays true of its strip. A dependency arrives at the
         strip of the machine it arrives at, not at the top of the group. An overlap is marked on
         the strip <em>and</em> on the row, because a three-pixel strip is not where an alarm can
         live alone. Hover names the stop; a click takes its whole task across the plan. And{" "}

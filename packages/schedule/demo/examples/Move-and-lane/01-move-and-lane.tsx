@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Stack, Text } from "@umriss-ui/core";
-import { Lane, Schedule, Subtasks, Transports, applyIntent } from "../../../src";
-import type { Intent, Subtask, Task, Transport } from "../../../src";
+import { Lane, Schedule, Subtasks, Dependencies, applyIntent } from "../../../src";
+import type { Intent, Subtask, Task, Dependency } from "../../../src";
 
 export const title = "Moving, and putting on another lane";
 
@@ -36,19 +36,19 @@ const ORDERS: readonly Task[] = [
 ];
 
 const STEPS: readonly Subtask[] = [
-  { id: "a-2041-1", task: "a-2041", lane: "saw", from: at(6), to: at(7), setup: min(15), teardown: min(10) },
-  { id: "a-2043-1", task: "a-2043", lane: "press", from: at(6, 30), to: at(8), setup: min(30), teardown: min(15) },
-  { id: "a-2043-2", task: "a-2043", lane: "mill", from: at(10), to: at(11, 30), setup: min(15) },
-  { id: "a-2046-2", task: "a-2046", lane: "mill", from: at(13), to: at(14, 30), setup: min(20), teardown: min(10) },
-  { id: "a-2043-3", task: "a-2043", lane: "paint", from: at(12), to: at(14), setup: min(20), teardown: min(20) },
+  { id: "a-2041-1", task: "a-2041", lane: "saw", from: at(6), to: at(7), leadIn: min(15), leadOut: min(10) },
+  { id: "a-2043-1", task: "a-2043", lane: "press", from: at(6, 30), to: at(8), leadIn: min(30), leadOut: min(15) },
+  { id: "a-2043-2", task: "a-2043", lane: "mill", from: at(10), to: at(11, 30), leadIn: min(15) },
+  { id: "a-2046-2", task: "a-2046", lane: "mill", from: at(13), to: at(14, 30), leadIn: min(20), leadOut: min(10) },
+  { id: "a-2043-3", task: "a-2043", lane: "paint", from: at(12), to: at(14), leadIn: min(20), leadOut: min(20) },
   { id: "a-2045-3", task: "a-2045", lane: "qa", from: at(15, 45), to: at(16, 30) },
 ];
 
-const MOVES: readonly Transport[] = [
-  { id: "t-2043-1", from: "a-2043-1", to: "a-2043-2", duration: min(45) },
+const MOVES: readonly Dependency[] = [
+  { id: "t-2043-1", from: "a-2043-1", to: "a-2043-2", lag: min(45) },
   /* Leaves the mill at 11:30 and has ten minutes to reach the paint shop's
-     setup at 11:40 - it takes twenty-five. A late transport, on purpose. */
-  { id: "t-2043-2", from: "a-2043-2", to: "a-2043-3", duration: min(25) },
+     lead-in at 11:40 - it takes twenty-five. A violated dependency, on purpose. */
+  { id: "t-2043-2", from: "a-2043-2", to: "a-2043-3", lag: min(25) },
 ];
 
 export default function MoveAndLane() {
@@ -70,7 +70,7 @@ export default function MoveAndLane() {
         {STATIONS.map((station) => (
           <Lane key={station.id} id={station.id} label={station.label} />
         ))}
-        <Transports data={MOVES} />
+        <Dependencies data={MOVES} />
         <Subtasks data={steps} tasks={ORDERS} />
       </Schedule>
       <Text size="sm" mono tone="secondary" data-last-intent>

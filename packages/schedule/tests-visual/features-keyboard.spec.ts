@@ -1,5 +1,5 @@
 /* The schedule by keyboard (schedule-a11y 02-05): Tab into the plot, the keys
-   walking its subtasks and following a transport, the pointer taking the
+   walking its subtasks and following a dependency, the pointer taking the
    active subtask over, the readout, and a proposed move. Observed through the
    DOM - the tooltip, the live region, what the example writes down. Behaviour
    in light only; the one picture of a focused schedule with an active subtask
@@ -41,7 +41,7 @@ test("Tab reaches the plot, which rings and stands on the first subtask in view"
   expect(ring).not.toBe("none");
 });
 
-test("the arrows walk the lanes, the brackets and t follow a transport, and the readout speaks once the keys rest", async ({ page }) => {
+test("the arrows walk the lanes, the brackets and t follow a dependency, and the readout speaks once the keys rest", async ({ page }) => {
   behaviour();
   const example = await firstSchedule(page);
   await tabIn(page, example);
@@ -50,7 +50,7 @@ test("the arrows walk the lanes, the brackets and t follow a transport, and the 
   await expect(tooltip(example)).toContainText("a-2041-2");
   await page.keyboard.press("ArrowRight");
   await expect(tooltip(example)).toContainText("a-2043-2");
-  /* Out along the late transport to the paint shop, and back. */
+  /* Out along the violated dependency to the paint shop, and back. */
   await page.keyboard.press("]");
   await expect(tooltip(example)).toContainText("a-2043-2 → a-2043-3");
   await page.keyboard.press("]");
@@ -64,7 +64,7 @@ test("the arrows walk the lanes, the brackets and t follow a transport, and the 
   await page.keyboard.press("Shift+T");
   await expect(tooltip(example)).toContainText("a-2043-2");
   await expect(example.locator("[aria-live='polite']")).toHaveText(
-    /^Mill, A-2043 Bracket, a-2043-2, 17\/03 10:00–11:30, Overlap with a-2041-2, Late transport, 15 min short$/,
+    /^Mill, A-2043 Bracket, a-2043-2, 17\/03 10:00–11:30, Overlap with a-2041-2, Violated dependency, 15 min short$/,
   );
 });
 

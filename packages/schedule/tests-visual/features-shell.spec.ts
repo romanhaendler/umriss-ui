@@ -7,14 +7,14 @@ import { checkShell } from "@umriss-ui/demo/checks/shell";
 checkShell({
   notOnTheFrontDoor: ["schedule", "move-and-lane"],
   chip: { name: "Subtasks", pageId: "subtasks", absent: ["schedule", "ripple"] },
-  rail: { name: "Transports", pageId: "transports", rubricId: "drawing" },
+  rail: { name: "Dependencies", pageId: "dependencies", rubricId: "drawing" },
   neighbours: [
     { name: "Lanes", pageId: "lane" },
     { name: "Subtasks", pageId: "subtasks" },
   ],
   deepLink: { pageId: "findings", absent: "schedule" },
-  example: { pageId: "transports", id: "late-transport", title: "A transport that cannot arrive in time", pageName: "Transports" },
+  example: { pageId: "dependencies", id: "violated-dependency", title: "A dependency whose lag does not fit", pageName: "Dependencies" },
   palettePage: { query: "ripple", name: "Ripple", pageId: "ripple", rubricName: "Editing" },
   abbreviation: { query: "sbt", find: "Subtasks", glyphs: ["S", "bt"] },
-  pointer: { wide: "s", narrow: "late" },
+  pointer: { wide: "s", narrow: "lag does" },
 });

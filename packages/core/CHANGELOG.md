@@ -29,6 +29,30 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## Unreleased
+
+### Changed
+
+- **The schedule's wording keys follow its renamed terms** (ADR-0035): a
+  transport is a dependency, setup and teardown are lead-in and lead-out, and a
+  late transport is a violated dependency. The keys are renamed in one cut, with
+  no alias; an application that hands in a whole `Wording` object of its own
+  renames its entries. The English texts read "Lead-in", "Lead-out",
+  "Dependency" and "Violated dependency", the German ones "Vorlauf", "Nachlauf",
+  "Abhängigkeit" and "Abhängigkeit verletzt"; the key help follows a dependency
+  instead of a transport.
+
+  | Before | Now |
+  |---|---|
+  | `scheduleSetup` | `scheduleLeadIn` |
+  | `scheduleTeardown` | `scheduleLeadOut` |
+  | `scheduleTransport` | `scheduleDependency` |
+  | `scheduleLateTransport` | `scheduleViolatedDependency` |
+  | `scheduleLateBy` | `scheduleViolatedBy` |
+  | `scheduleSummary`'s field `late` | `violated` |
+
+---
+
 ## 0.10.0 – Everything the comparison asked for (Sep. 2026)
 
 ### Added
@@ -633,10 +657,10 @@ From `.scratch/schedule/spec.md`, ticket 01, and
   `onOpenChange`, `position` in client coordinates, `ariaLabel`), built on
   `Popover`, with `MenuItem`, `MenuSeparator` and the menu's keyboard. The focus
   returns to where it stood when the menu opened.
-- **Wording:** `scheduleLaneRefused`, `scheduleOverlap`, `scheduleLateTransport`,
-  `scheduleGhostTimes`, `scheduleSetup`, `scheduleTeardown`,
-  `scheduleTransport`, `scheduleRoute`, `scheduleOverlapWith` and
-  `scheduleLateBy`, for `@umriss-ui/schedule`, in both shipped wordings. An
+- **Wording:** `scheduleLaneRefused`, `scheduleOverlap`, `scheduleViolatedDependency`,
+  `scheduleGhostTimes`, `scheduleLeadIn`, `scheduleLeadOut`,
+  `scheduleDependency`, `scheduleRoute`, `scheduleOverlapWith` and
+  `scheduleViolatedBy`, for `@umriss-ui/schedule`, in both shipped wordings. An
   application that hands in a whole `Wording` object of its own adds the nine.
 
 ---

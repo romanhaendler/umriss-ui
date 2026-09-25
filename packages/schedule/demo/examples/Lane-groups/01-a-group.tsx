@@ -28,8 +28,8 @@ const TASKS: Task[] = [
 ];
 
 const STEPS: Subtask[] = [
-  { id: "a-2041-1", task: "a-2041", lane: "press-1", from: at(7), to: at(9), setup: min(30) },
-  { id: "a-2043-1", task: "a-2043", lane: "press-2", from: at(8), to: at(10, 30), teardown: min(15) },
+  { id: "a-2041-1", task: "a-2041", lane: "press-1", from: at(7), to: at(9), leadIn: min(30) },
+  { id: "a-2043-1", task: "a-2043", lane: "press-2", from: at(8), to: at(10, 30), leadOut: min(15) },
   { id: "a-2041-2", task: "a-2041", lane: "weld", from: at(10), to: at(12) },
   { id: "a-2043-2", task: "a-2043", lane: "paint", from: at(11, 30), to: at(14) },
 ];
