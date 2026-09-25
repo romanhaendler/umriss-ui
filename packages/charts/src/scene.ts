@@ -47,7 +47,7 @@ import { hasCell, nearestPosition, rowEnd, stepCell, stepPosition, type Cell, ty
 import { downsample, type Course } from "./downsample";
 import { tableRows } from "./table";
 import { stackSeries, type Stacked } from "./stack";
-import { hatchFor, marksFor, type Hatch, type MarkerShape, type SeriesMarks } from "./marks";
+import { hatchFor, marksFor, stateHatches, type Hatch, type MarkerShape, type SeriesMarks } from "./marks";
 import { lastSegmentEnd, medianStep, segmentEnd, segmentIndex } from "./state";
 import { cellSize, cellIndex, measureSpacing } from "./cells";
 import { assess } from "./limit";
@@ -74,6 +74,7 @@ import type {
   LimitConfig,
   MatrixColoring,
   MatrixSeriesConfig,
+  StateEntry,
   StateSeriesConfig,
   AxisOrientation,
   BarSeriesConfig,
@@ -177,12 +178,13 @@ export interface LegendItem {
 
 /** A legend chip's marks: a line with its dash and marker (a scatter: the
     marker alone), or swatches with their hatch - one for a bar or a state, one
-    per step for a matrix. `ground` is the colour a hatch is drawn in across a
-    swatch. */
+    per step for a matrix. An area has both, its dash over one swatch with its
+    fill's `opacity`, hatched in its own colour as the plot does it. `ground`
+    is the colour a hatch is drawn in across any other swatch. */
 export interface LegendMark {
   dash: readonly number[] | null;
   marker: MarkerShape | null;
-  swatches: readonly { color: string; hatch: Hatch }[] | null;
+  swatches: readonly { color: string; hatch: Hatch; opacity?: number }[] | null;
   ground: string;
 }
 
@@ -229,6 +231,10 @@ export interface TooltipRow {
   /** The point's x value in the format of its own x axis - empty where that
       is the x axis of the header. */
   x: string;
+  /** Under forced colours the chip's background is forced away, so the chip
+      draws the legend's marks instead (charts-alternatives 04); null draws
+      the point's colour. */
+  chip: { color: string; mark: LegendMark } | null;
 }
 
 /** A stack's total in the built-in tooltip (charts-stacking K4). */
@@ -967,6 +973,14 @@ export class ChartScene {
     return this.marked() && takesPalette(entry.config) ? marksFor(this.paletteSlot(entry)) : null;
   }
 
+  /** Each state's hatch by its name, across every band of the chart - so the
+      legend and each band agree (charts-alternatives 04). */
+  private stateHatches(): Map<string, Hatch> {
+    const bands: (readonly StateEntry[])[] = [];
+    for (const { config } of this.seriesInOrder()) if (config.kind === "state") bands.push(config.states);
+    return stateHatches(bands);
+  }
+
   /** The words the HTML layer writes - the data table's key among them. */
   getWording(): ChartsWording {
     return this.wording;
@@ -1664,6 +1678,7 @@ export class ChartScene {
     // A band that shares an entry is highlighted with it.
     const seen = new Map<string, LegendItem>();
     const theme = this.theme ?? FALLBACK_THEME;
+    const hatches = this.marked() ? this.stateHatches() : null;
     this.seriesInOrder().forEach((entry, i) => {
       const config = entry.config;
       if (config.kind === "state") {
@@ -1683,7 +1698,7 @@ export class ChartScene {
             hidden: config.hidden === true,
             color: z.color,
             seriesIds: [entry.order],
-            mark: this.marked() ? { dash: null, marker: null, swatches: [{ color: this.paint(z.color), hatch: hatchFor(k) }], ground: theme.colorBg } : null,
+            mark: hatches === null ? null : { dash: null, marker: null, swatches: [{ color: this.paint(z.color), hatch: hatches.get(z.label) ?? "none" }], ground: theme.colorBg },
           };
           seen.set(key, item);
           out.push(item);
@@ -1719,7 +1734,12 @@ export class ChartScene {
       case "line":
         return { dash: config.dash ?? marks.dash, marker: marks.marker, swatches: null, ground: theme.colorBg };
       case "area":
-        return { dash: config.dash ?? marks.dash, marker: null, swatches: null, ground: theme.colorBg };
+        return {
+          dash: config.dash ?? marks.dash,
+          marker: null,
+          swatches: [{ color: this.colorFor(entry), hatch: marks.hatch, opacity: config.fillOpacity }],
+          ground: theme.colorBg,
+        };
       case "scatter":
         return { dash: null, marker: marks.marker, swatches: null, ground: theme.colorBg };
       default:
@@ -1816,6 +1836,7 @@ export class ChartScene {
 
   private drawItems(): SeriesDrawItem[] {
     const items: SeriesDrawItem[] = [];
+    let hatches: Map<string, Hatch> | undefined;
     // A hidden bar leaves no empty place in its group.
     const series = this.seriesInOrder().filter((e) => e.config.hidden !== true);
     // A highlight of nothing drawn - a hidden series' legend entry - dims nothing.
@@ -1883,6 +1904,7 @@ export class ChartScene {
             strokeWidth: config.strokeWidth,
             dash: config.dash ?? marks?.dash,
             hatch: marks?.hatch,
+            edges: entry.stacked !== null,
           });
           break;
         case "bar": {
@@ -1910,6 +1932,7 @@ export class ChartScene {
             offset: placement.offset,
             width: placement.width,
             hatch: marks?.hatch,
+            edges: entry.stacked !== null,
           });
           break;
         }
@@ -1925,7 +1948,7 @@ export class ChartScene {
             laneTop: lane.top,
             laneBottom: lane.bottom,
             lastEnd: this.lastEnd(entry, mat, xAxis),
-            hatches: this.marked() ? config.states.map((_, k) => hatchFor(k)) : null,
+            hatches: this.marked() ? config.states.map((z) => (hatches ??= this.stateHatches()).get(z.label) ?? "none") : null,
           });
           break;
         }
@@ -2576,7 +2599,8 @@ export class ChartScene {
     const rows = tableRows(
       entries.map((e) => {
         const mat = e.materialized as MaterializedSeries;
-        return e.stacked === null ? mat : { ...mat, y: e.stacked.value, y0: null };
+        if (e.stacked !== null) return { ...mat, y: e.stacked.value, y0: null };
+        return e.config.kind === "state" ? { ...mat, changesOnly: true } : mat;
       }),
       from,
       to,
@@ -2865,7 +2889,21 @@ export class ChartScene {
     const label = k.segment?.label;
     const value = label !== undefined && label !== "" ? label : this.formatY(k.entry, k.value ?? k.yValue);
     const x = config.xAxisId === headerXAxisId ? "" : this.xLabel(config.xAxisId, k.xValue);
-    return { value, x };
+    return { value, x, chip: this.theme?.forced === true ? this.tooltipChip(k, this.theme) : null };
+  }
+
+  /** A hit's chip drawn as its legend entry is: a band's state and a cell's
+      step by their hatch, every other series by its marks. */
+  private tooltipChip(k: Candidate, theme: ResolvedTheme): { color: string; mark: LegendMark } | null {
+    const config = k.entry.config;
+    const swatch = (hatch: Hatch) => ({
+      color: theme.colorText,
+      mark: { dash: null, marker: null, swatches: [{ color: theme.colorText, hatch }], ground: theme.colorBg },
+    });
+    if (config.kind === "state") return swatch(this.stateHatches().get(k.segment?.label ?? "") ?? "none");
+    if (config.kind === "matrix") return swatch(hatchFor(k.entry.buckets?.[k.index] ?? 0));
+    const mark = this.legendMark(k.entry, theme);
+    return mark === null ? null : { color: this.colorFor(k.entry), mark };
   }
 
   /** The hit of one series - one different question per kind.

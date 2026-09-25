@@ -91,7 +91,28 @@ function LegendInner({
 
 const CHIP_HATCH = 3;
 
-function MarkChip({ color, mark }: { color: string; mark: LegendMark }): ReactNode {
+export function MarkChip({ color, mark }: { color: string; mark: LegendMark }): ReactNode {
+  const area = mark.dash !== null ? mark.swatches?.[0] : undefined;
+  if (area !== undefined) {
+    // An area: its faint fill hatched in its own colour, its dashed outline
+    // along the top - as the plot draws it.
+    return (
+      <svg className="uc-legend-mark" width={18} height={10} viewBox="0 0 18 10" aria-hidden="true">
+        <rect y={3} width={18} height={7} fill={area.color} fillOpacity={area.opacity} />
+        <path d={linesD({ x: 0, y: 3, width: 18, height: 7 }, area.hatch)} stroke={area.color} strokeWidth={1} />
+        <line
+          x1={1}
+          y1={3}
+          x2={17}
+          y2={3}
+          stroke={color}
+          strokeWidth={1.5}
+          strokeLinecap="round"
+          strokeDasharray={mark.dash !== null && mark.dash.length > 0 ? mark.dash.join(" ") : undefined}
+        />
+      </svg>
+    );
+  }
   if (mark.swatches !== null) {
     const w = mark.swatches.length === 1 ? 10 : 8;
     const width = w * mark.swatches.length;

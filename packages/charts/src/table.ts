@@ -8,8 +8,11 @@
    A week of seconds is 600,000 rows, and a table of 600,000 rows is no answer
    to anybody. Above the limit every series is thinned the way its line is
    drawn (downsample.ts) - first, lowest, highest and last per stretch of the
-   domain -, and the table says how many readings the rows stand for. Pure and
-   free of the DOM, so that it can be tested. */
+   domain -, and the table says how many readings the rows stand for. A state
+   band's code is a name, not a height: its lowest and highest code say
+   nothing, so a band is thinned to where its state changes, as the keyboard
+   walks it (charts-alternatives 04). Pure and free of the DOM, so that it can
+   be tested. */
 
 import { downsample, type Course } from "./downsample";
 import { lowerBound } from "./hit";
@@ -32,7 +35,7 @@ export interface TableRows {
 }
 
 /** The rows of the series over [from, to], both ends included. */
-export function tableRows(series: readonly Course[], from: number, to: number, limit = TABLE_LIMIT): TableRows {
+export function tableRows(series: readonly (Course & { changesOnly?: boolean })[], from: number, to: number, limit = TABLE_LIMIT): TableRows {
   const windows = series.map((s) => windowOf(s, from, to));
   // Counted before anything is built: the count decides whether it is.
   const readings = merge(windows, false).count;
@@ -44,8 +47,25 @@ export function tableRows(series: readonly Course[], from: number, to: number, l
   // it.
   const stretches = Math.max(1, Math.floor(limit / 6 / Math.max(1, series.length)));
   const m = (stretches - 1) / (to - from);
-  const thin = windows.map((w) => downsample(w, from, to, m, -from * m, stretches));
+  const thin = windows.map((w, s) =>
+    series[s]?.changesOnly === true ? changes(w) : downsample(w, from, to, m, -from * m, stretches),
+  );
   return { ...merge(thin, true), courses: thin, readings, thinned: true };
+}
+
+/** Where a band's state changes - its first reading, and each that differs
+    from the one before; a gap is a state of its own.
+    ponytail: a band that changes more often than the limit lists every change;
+    thin the changes by stretch should one ever. */
+function changes(c: Course): Course {
+  const keep: number[] = [];
+  for (let i = 0; i < c.length; i++) if (i === 0 || !Object.is(c.y[i], c.y[i - 1])) keep.push(i);
+  return {
+    x: Float64Array.from(keep, (i) => c.x[i] as number),
+    y: Float64Array.from(keep, (i) => c.y[i] as number),
+    y0: null,
+    length: keep.length,
+  };
 }
 
 function windowOf(c: Course, from: number, to: number): Course {
