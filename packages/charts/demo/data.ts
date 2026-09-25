@@ -299,7 +299,7 @@ export function week(seed: number): WeekPoint[] {
   return points;
 }
 
-/** The operating calendar to go with it: Monday to Friday, 6 to 22 o'clock. */
+/** The working calendar to go with it: Monday to Friday, 6 to 22 o'clock. */
 export const WEEK_CALENDAR = Array.from({ length: 5 }, (_, day) => ({
   from: WEEK_START + day * DAY_MS + 6 * HOUR_MS,
   to: WEEK_START + day * DAY_MS + 22 * HOUR_MS,

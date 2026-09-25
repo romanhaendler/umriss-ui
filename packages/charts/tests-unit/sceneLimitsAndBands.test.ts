@@ -384,8 +384,8 @@ describe("Degenerate cases that look like an empty chart", () => {
   });
 });
 
-describe("Operating time axis: the x channel stays ascending", () => {
-  /* The point at which it almost went wrong. `toOperatingTime` yields NaN for time
+describe("Working time axis: the x channel stays ascending", () => {
+  /* The point at which it almost went wrong. `toWorkingTime` yields NaN for time
      that, according to the calendar, does not exist - and a NaN in the x channel
      breaks every binary search silently: every comparison with NaN is false, the
      search carries on to the left and lands on a point from an earlier shift.
@@ -464,7 +464,7 @@ describe("Operating time axis: the x channel stays ascending", () => {
     expect(y[4]).toBe(14);
   });
 
-  it("maps an x limit into operating time for the extent", () => {
+  it("maps an x limit into working time for the extent", () => {
     // 26 o'clock on the wall is the second shift's second hour: 8 h + 2 h.
     const s = sceneWithCalendar();
     s.registerLimit({

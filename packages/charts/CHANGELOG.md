@@ -29,6 +29,30 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## Unreleased
+
+### Changed
+
+- **Operating time is working time** (ADR-0035). The calendar axis and its
+  pure modules speak of working time, not of a plant's operating time. A hard
+  cut, without deprecated aliases — rename on upgrade:
+
+  | Before | After |
+  |---|---|
+  | `operatingCalendar()` | `workingCalendar()` |
+  | `toOperatingTime()` | `toWorkingTime()` |
+  | `toOperatingTimeClamped()` | `toWorkingTimeClamped()` |
+  | `operatingTicks()` | `workingTicks()` |
+  | `operatingTimeTicks()` | `workingTimeTicks()` |
+  | `OperatingCalendar` | `WorkingCalendar` |
+  | `OperatingInterval` | `WorkingInterval` |
+  | `OperatingTimeTick` | `WorkingTimeTick` |
+  | `OperatingTimeTick.operatingTime` | `WorkingTimeTick.workingTime` |
+  | `RemovedSpan.operatingTime` | `RemovedSpan.workingTime` |
+
+  `calendar` on `XAxis`/`YAxis`, `CalendarInput`, `calendarFrom`,
+  `toWallClock`, `breaks` and `removedIntervals` keep their names.
+
 ## 0.7.0 – Data table, marks and stacks (Sep. 2026)
 
 ### Added
@@ -201,7 +225,7 @@ gone** - occupancy is drawn by `@umriss-ui/schedule` (ADR-0026).
   band came out in the palette's second colour, after three bands in its
   fourth. It now gets the first. A series without a `name` counts its position
   among the series that take a colour.
-- **The operating-time axis labels in en-GB by level.** Without a
+- **The working-time axis labels in en-GB by level.** Without a
   `tickFormat` it wrote every tick as `dd.MM. HH:mm`; it now labels as the
   time axis does - `15:00`, and the date on the first tick of a new day,
   `17 Mar 06:00` - and the tooltip's x value as `17 Mar 15:23`. Its ticks
@@ -331,12 +355,12 @@ gone** - occupancy is drawn by `@umriss-ui/schedule` (ADR-0026).
   found none and drew nothing, silently. Without an `axisId` a limit now binds
   to the first axis of its orientation - an `<XAxis id="time">` too - and an
   unknown `axisId` is a DEV error, as it is for a series.
-- **The operating-time axis stands on the local clock.** Its day and half-day
+- **The working-time axis stands on the local clock.** Its day and half-day
   ticks fell on UTC's midnight and were labelled in local time - "01:00"
   where a day begins, in CET. They now fall on local midnight and noon. Explicit
   `ticks` and the value of an x limit are named on the wall clock, like the
-  data, and mapped into operating time as the data are; before, both were taken
-  as operating time and landed far off, or pulled the axis out of shape.
+  data, and mapped into working time as the data are; before, both were taken
+  as working time and landed far off, or pulled the axis out of shape.
 - **Hit testing where areas and points meet.** Under `mode="nearest"` a state
   band or a matrix cell under the pointer counted as distance zero and beat
   every point; a point within 12 px of the pointer now wins, and the area
@@ -431,7 +455,7 @@ time arithmetic from here, so what it uses is public now.
   `light-dark()` included, resolved to values a canvas can draw in the scheme
   that applies at `root`. **`subscribeTheme(notify)`** tells a canvas when to
   resolve again.
-- **`toOperatingTimeClamped`** — wall clock to operating time without `NaN`: a
+- **`toWorkingTimeClamped`** — wall clock to working time without `NaN`: a
   time in removed time lands on its seam.
 
 ### No longer a release candidate
@@ -529,7 +553,7 @@ German defaults stood there regardless:
   `"Sonstige"`). Whoever names `collectRank` names `remainderName` with it — in
   the type (`ParetoSettings`) and in DEV as an error. `paretoDefaults` no longer
   contains `remainderName`.
-- The labelling of an operating-time axis without a `tickFormat` of its own is
+- The labelling of a working-time axis without a `tickFormat` of its own is
   `dd.MM. HH:mm`, set by hand. Previously it came out of
   `toLocaleString(undefined, …)` and looked different on every machine.
 - `"Series n"` remains the last resort for a series without a `name`, but warns
@@ -569,8 +593,8 @@ ADR-0006 to ADR-0011.
 - **`ControlChart`:** the control chart as a composition out of `Line`,
   `LimitLine` and `Scatter` (ADR-0008), and with it the pure modules
   `controlLimits`, `zones`, the four rules and `violations`.
-- **The operating-time axis:** `calendar` on `XAxis`/`YAxis` and the pure modules
-  out of `operatingTime.ts` — wall clock ↔ operating time, ticks, breaks.
+- **The working-time axis:** `calendar` on `XAxis`/`YAxis` and the pure modules
+  out of `workingTime.ts` — wall clock ↔ working time, ticks, breaks.
 - **`pareto`** as a pure module.
 - **The limit as a rule:** `assess` and `verdictWeight` with their types — the
   same rule as in `@umriss-ui/core`, deliberately there twice (ADR-0006).

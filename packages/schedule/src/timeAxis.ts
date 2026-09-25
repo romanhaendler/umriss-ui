@@ -1,7 +1,7 @@
 /* The time axis of the schedule: what the two bands show, and how pan and zoom
    exchange the domain.
 
-   The scale stays affine (ADR-0001). The domain is in OPERATING time - with no
+   The scale stays affine (ADR-0001). The domain is in WORKING time - with no
    calendar that is the wall clock itself - and pan and zoom exchange the domain
    and nothing else. The stepping, the calendar mapping and the tick placement
    are @umriss-ui/charts' (ADR-0022); what is the schedule's own is the choice
@@ -15,12 +15,12 @@ import {
   DAY,
   localOffset,
   MINUTE,
-  operatingTimeTicks,
+  workingTimeTicks,
   timeStep,
-  toOperatingTimeClamped,
+  toWorkingTimeClamped,
   toWallClock,
   type CalendarInput,
-  type OperatingTimeTick,
+  type WorkingTimeTick,
 } from "@umriss-ui/charts";
 
 /** Nothing removed: the wall clock is the axis. */
@@ -45,10 +45,10 @@ export function fineTicks(
   domain: readonly [number, number],
   step: number,
   calendar: CalendarInput = WALL_CLOCK,
-): OperatingTimeTick[] {
+): WorkingTimeTick[] {
   const [from, to] = wallExtentWithin(domain, calendar);
-  return operatingTimeTicks(calendar, from, to, step, localOffset(from)).filter(
-    (tick) => tick.operatingTime >= domain[0] && tick.operatingTime <= domain[1],
+  return workingTimeTicks(calendar, from, to, step, localOffset(from)).filter(
+    (tick) => tick.workingTime >= domain[0] && tick.workingTime <= domain[1],
   );
 }
 
@@ -58,7 +58,7 @@ export interface Day {
   readonly start: number;
   /** Local midnight at its end - 23 or 25 hours later on a clock change. */
   readonly end: number;
-  /** Where it begins on the axis, in operating time. */
+  /** Where it begins on the axis, in working time. */
   readonly from: number;
   /** Where it ends on the axis; equal to `from` where the calendar removes it. */
   readonly to: number;
@@ -77,8 +77,8 @@ export function days(domain: readonly [number, number], calendar: CalendarInput 
     found.push({
       start,
       end,
-      from: toOperatingTimeClamped(start, calendar),
-      to: toOperatingTimeClamped(end, calendar),
+      from: toWorkingTimeClamped(start, calendar),
+      to: toWorkingTimeClamped(end, calendar),
     });
   }
   return found;

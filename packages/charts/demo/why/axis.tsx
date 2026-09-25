@@ -1,12 +1,12 @@
 export default function WhyAxis() {
   return (
     <>
-      <h3>Operating time is a mapping, not a scale</h3>
+      <h3>Working time is a mapping, not a scale</h3>
       <p>
-        An operating calendar takes out the hours in which nobody was there - nights, weekends.
+        A working calendar takes out the hours in which nobody was there - nights, weekends.
         The obvious implementation is a scale that skips them. This one does not: every scale in
         the library stays affine, a slope and an offset the draw loop multiplies with. Instead the
-        x values are mapped into operating time once, during materialisation, and the scale never
+        x values are mapped into working time once, during materialisation, and the scale never
         learns that a weekend existed. The drawing loop pays nothing for the calendar. See{" "}
         <code>docs/adr/0001-affine-scale-contract.md</code>.
       </p>

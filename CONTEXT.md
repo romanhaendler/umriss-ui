@@ -570,19 +570,19 @@ Taken out of operation for maintenance or repair, until returned to service.
 The strongest of the three: a shelf does not overwrite it.
 _Avoid_: disabled, offline, deactivated
 
-### Operating time
+### Working time
 
-**Operating time**:
+**Working time**:
 Elapsed time counted only inside the intervals the calendar names. An axis in
-operating time stays affine, because the mapping happens in materialisation —
+working time stays affine, because the mapping happens in materialisation —
 the route ADR-0001 prescribed for a non-affine axis.
-_Avoid_: Laufzeit, uptime, elapsed
+_Avoid_: operating time, Laufzeit, uptime, elapsed
 
-**Operating calendar**:
+**Working calendar**:
 The list of intervals in which time counts, sorted and merged. Deriving it from a
-shift pattern, with its exceptions and holidays, is a plant data problem and
-belongs above this library.
-_Avoid_: Schichtplan, schedule, roster
+roster or opening hours, with their exceptions and holidays, is a problem of the
+caller's data and belongs above this library.
+_Avoid_: operating calendar, Schichtplan, schedule, roster
 
 **Break**:
 The mark in the axis band where the calendar removed time. Without it the chart

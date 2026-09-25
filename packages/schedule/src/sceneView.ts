@@ -1,6 +1,6 @@
 /* What is in view, and where things lie in it.
 
-   The domain in operating time, the vertical scroll, the plot's size, and the
+   The domain in working time, the vertical scroll, the plot's size, and the
    layout that follows from them over the data: a box per subtask, a path per
    transport. Pan and zoom exchange the domain and the scroll and nothing else
    (ADR-0001). The hit and the mapping from a plot point to a time and a lane
@@ -11,7 +11,7 @@ import {
   HOUR,
   LinearScale,
   calendarFrom,
-  toOperatingTimeClamped,
+  toWorkingTimeClamped,
   toWallClock,
   type CalendarInput,
 } from "@umriss-ui/charts";
@@ -95,7 +95,7 @@ export class SceneView {
     const previous = this.options.calendar;
     this.options = options;
     if (initialDomain !== null) {
-      this.domain = [toOperatingTimeClamped(initialDomain[0], options.calendar), toOperatingTimeClamped(initialDomain[1], options.calendar)];
+      this.domain = [toWorkingTimeClamped(initialDomain[0], options.calendar), toWorkingTimeClamped(initialDomain[1], options.calendar)];
     } else if (calendarChanged) {
       /* A view panned past the old calendar's ends has no wall clock there; the
          distance beyond the end is carried over as it is, or the domain would
@@ -103,7 +103,7 @@ export class SceneView {
       const old = calendarFrom(previous);
       const carry = (v: number) => {
         const inside = old.intervals.length === 0 ? v : Math.max(0, Math.min(old.total, v));
-        return toOperatingTimeClamped(toWallClock(inside, old), options.calendar) + (v - inside);
+        return toWorkingTimeClamped(toWallClock(inside, old), options.calendar) + (v - inside);
       };
       this.domain = [carry(this.domain[0]), carry(this.domain[1])];
     }
@@ -173,7 +173,7 @@ export class SceneView {
         const x = Math.round(scale.toPx(day.from));
         return { start: day.start, x, width: Math.round(scale.toPx(day.to)) - x };
       }),
-      ticks: fineTicks(this.domain, step, calendar).map((tick) => ({ wallClock: tick.wallClock, x: Math.round(scale.toPx(tick.operatingTime)) })),
+      ticks: fineTicks(this.domain, step, calendar).map((tick) => ({ wallClock: tick.wallClock, x: Math.round(scale.toPx(tick.workingTime)) })),
       step,
     };
   }
@@ -182,7 +182,7 @@ export class SceneView {
   nowX(): number | null {
     const now = this.options.now;
     if (now === null || this.width <= 0) return null;
-    const x = Math.round(this.viewport().scale.toPx(toOperatingTimeClamped(now, this.options.calendar)));
+    const x = Math.round(this.viewport().scale.toPx(toWorkingTimeClamped(now, this.options.calendar)));
     return x >= 0 && x <= this.width ? x : null;
   }
 
@@ -208,10 +208,10 @@ export class SceneView {
 
   /** The wall-clock time at a plot x; within the calendar's extent. */
   timeAt(x: number): number {
-    const operating = this.viewport().scale.fromPx(x);
+    const working = this.viewport().scale.fromPx(x);
     const calendar = calendarFrom(this.options.calendar);
-    if (calendar.intervals.length === 0) return operating;
-    return toWallClock(Math.max(0, Math.min(calendar.total, operating)), calendar);
+    if (calendar.intervals.length === 0) return working;
+    return toWallClock(Math.max(0, Math.min(calendar.total, working)), calendar);
   }
 
   /** The lane at a y, strips included: what the pointer is ON.
