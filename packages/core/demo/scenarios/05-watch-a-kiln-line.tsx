@@ -39,11 +39,18 @@ import type { Batch, Sample } from "@umriss-ui/demo/worlds/plant";
 export const title = "Watch a kiln line over a shift";
 
 export const lead =
-  "A line lead keeps this screen open through the shift: the trend, the alarms, the plan and the OEE read the same minute.";
+  "A line lead at Brenholt Tile Works keeps this control room open through the shift to see the kiln, its alarms, the plan and the OEE at once.";
 
-export const callouts = [];
+export const callouts = [
+  "The shift runs a minute per second; Pause stops it, and under reduced motion it starts stopped. The skip links reach each region by keyboard.",
+  "The tile reads zone 3 against its limits and says the verdict in a word. The minute the kiln crosses its alarm limit is the same minute in the trend and in the alarm list.",
+  "The trend draws the limits the tile reads, and its table view holds every reading for a screen reader.",
+  "The alarm the kiln raised stands in the list; acknowledging it records who knew when and changes nothing else on the screen.",
+  "Choosing a batch in the plan and opening its details shows what the kiln has fired of it so far, in a drawer.",
+  "The OEE shows its working, down to the counts it is made of, so the scrap from the excursion can be traced back.",
+];
 
-export const builtFrom = ["stat", "drawer", "progressbar", { name: "Line", page: "@umriss-ui/charts#line" }, { name: "ControlChart", page: "@umriss-ui/charts#controlchart" }, { name: "AlarmList", page: "@umriss-ui/table#alarmlist" }, { name: "Schedule", page: "@umriss-ui/schedule#schedule" }, { name: "Calculation", page: "@umriss-ui/calculation#calculation" }];
+export const builtFrom = ["stat", "card", "progressbar", "drawer", { name: "Line", page: "@umriss-ui/charts#line" }, { name: "ControlChart", page: "@umriss-ui/charts#controlchart" }, { name: "AlarmList", page: "@umriss-ui/table#alarmlist" }, { name: "Schedule", page: "@umriss-ui/schedule#schedule" }, { name: "Calculation", page: "@umriss-ui/calculation#calculation" }];
 
 /* Every package on one page, fed by one plant. The kiln's excursion is the
    line above the limit in the trend, the alarm in the list, the scrap in the
@@ -164,11 +171,14 @@ function Region({
   title,
   quiet = false,
   actions,
+  callout,
   children,
 }: {
   id: string;
   title: string;
   quiet?: boolean;
+  /** The numbered mark the scenarios page lays over the region. */
+  callout?: string;
   actions?: ReactNode;
   children: ReactNode;
 }) {
@@ -178,6 +188,7 @@ function Region({
   return (
     <Card
       id={id}
+      data-callout={callout}
       aria-labelledby={quiet ? undefined : `${id}-title`}
       aria-label={quiet ? title : undefined}
       tabIndex={-1}
@@ -255,7 +266,7 @@ export default function ControlRoom() {
         <Text mono>
           {new Date(now).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
         </Text>
-        <Button size="sm" disabled={minute === LAST} onClick={() => setRunning(!running)}>
+        <Button size="sm" data-callout="1" disabled={minute === LAST} onClick={() => setRunning(!running)}>
           {running ? "Pause the shift" : "Run the shift"}
         </Button>
         <Text as="nav" size="sm" aria-label="Regions of the control room">
@@ -272,6 +283,7 @@ export default function ControlRoom() {
       <Region id="room-status" title="Line status">
         <Grid minItemWidth="200px" gap={4}>
           <Stat
+            data-callout="2"
             label="Kiln K1 · zone 3"
             value={reading.kiln}
             unit="°C"
@@ -307,7 +319,7 @@ export default function ControlRoom() {
         </Grid>
       </Region>
 
-      <Region id="room-trend" title="Kiln trend">
+      <Region id="room-trend" title="Kiln trend" callout="3">
         <Chart data={trend} height={240} ariaLabel="Kiln K1, zone 3, over the shift">
           <XAxis accessor={(d: Point) => d.t} domain={[at(0), at(LAST)]} time />
           <YAxis accessor={(d: Point) => d.kiln} domain={[1170, 1250]} label="°C" />
@@ -319,7 +331,7 @@ export default function ControlRoom() {
         </Chart>
       </Region>
 
-      <Region id="room-alarms" title="Alarms" quiet>
+      <Region id="room-alarms" title="Alarms" quiet callout="4">
         <AlarmList
           view={alarms}
           selection={selection}
@@ -355,6 +367,7 @@ export default function ControlRoom() {
       <Region
         id="room-plan"
         title="Plan"
+        callout="5"
         actions={
           <Button size="sm" disabled={chosen === undefined} onClick={() => setDetails(true)}>
             {chosen === undefined ? "Choose a batch" : `Details of ${chosen.name}`}
@@ -377,7 +390,7 @@ export default function ControlRoom() {
         </Schedule>
       </Region>
 
-      <Region id="room-oee" title="OEE so far">
+      <Region id="room-oee" title="OEE so far" callout="6">
         <Calculation aria-label="OEE of the shift so far">
           <Product label="OEE" format="percent" target={OEE_TARGET}>
             <Quotient label="Availability" format="percent">

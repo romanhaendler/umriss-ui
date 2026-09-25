@@ -1,10 +1,4 @@
-/* The dock - a demonstration and not a run of examples.
-
-   Four resting places, the turn between them and the handle are ONE behaviour.
-   A still picture would show none of it: what one has to see is that the dock
-   does not float between the places.
-
-   Two surfaces, because the component has two things to show.
+/* Two surfaces, because the component has two things to show.
 
    Above, a roomy stand-in surface: there all four resting places are
    reachable, with the handle and with the arrow keys. It carries a grid so that
@@ -37,17 +31,13 @@ import {
   GridGlyph,
   Stack,
   Text,
-} from "../../src";
-import type { DockPlace, DockTool } from "../../src";
+} from "../../../src";
+import type { DockPlace, DockTool } from "../../../src";
 
-export const title = "Arrange tool panels around a workspace";
+export const title = "Move the dock, and where it does not fit";
 
 export const lead =
-  "Someone who works in one view all day docks the panels they need where they want them.";
-
-export const callouts = [];
-
-export const builtFrom = ["dock"];
+  "Drag the handle or press an arrow key on it; on a flat surface the two side edges refuse and show why.";
 
 const TOOLS: readonly DockTool[] = [
   { id: "zoom-in", label: "Zoom in", icon: <PlusGlyph /> },
@@ -100,7 +90,7 @@ function Surface({ height, children }: { height: number; children: React.ReactNo
   );
 }
 
-export default function Demonstration() {
+export default function RoomAndNoRoom() {
   const [place, setPlace] = useState<DockPlace>("bottom");
   const [mode, setMode] = useState("grid");
   const [last, setLast] = useState<string | null>(null);
@@ -113,7 +103,7 @@ export default function Demonstration() {
               tools={TOOLS}
               place={place}
               onPlaceChange={setPlace}
-              /* The resting place is controlled here because the demonstration
+              /* The resting place is controlled here because the example
                  displays it. Uncontrolled would work just as well - then the
                  dock carries it itself, and the library still does not remember
                  it beyond the life of the component. */

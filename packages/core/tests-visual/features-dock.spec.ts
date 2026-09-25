@@ -9,13 +9,13 @@
 
 import { test, expect } from "@playwright/test";
 import type { Locator, Page } from "@playwright/test";
-import { openScenario, standstill } from "./navigation";
+import { openExample, standstill } from "./navigation";
 
 test.skip(({ colorScheme }) => colorScheme === "dark", "Behaviour tests only once (light)");
 
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(new Date("2026-03-17T10:30:00"));
-  await openScenario(page, "arrange-tool-panels");
+  await openExample(page, "dock", "room-and-no-room");
 });
 
 /* The page shows TWO docks - a spacious one and a flat one. Every selector
@@ -273,7 +273,7 @@ test("Under reduced motion the transition falls away, and the position is right 
   const withMotion = await box(strip(where));
 
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await openScenario(page, "arrange-tool-panels");
+  await openExample(page, "dock", "room-and-no-room");
   const where2 = spacious(page);
   await grip(where2).focus();
   await page.keyboard.press("ArrowRight");
