@@ -426,6 +426,28 @@ export interface Wording {
   breadcrumb: string;
   /** The key that opens a breadcrumb's folded middle levels as a menu. */
   breadcrumbFolded: string;
+  /** The separator between a splitter's panes, where the caller names none -
+      a caller who can should name the first pane instead (APG). */
+  splitter: string;
+  /** A stepper's step that is behind it, said beside its label to a screen
+      reader; the current step is `aria-current` and needs no word. */
+  stepDone: string;
+  /** A step still ahead. */
+  stepUpcoming: string;
+  /** A step that failed - behind the current one or the current one itself. */
+  stepFailed: string;
+  /** The key of a file input that takes one file - and its name where no
+      field names it. */
+  chooseFile: string;
+  /** The same key where it takes several. */
+  chooseFiles: string;
+  /** The words beside the key that say the zone takes a drop. */
+  dropFile: string;
+  dropFiles: string;
+  /** The cross beside a chosen file. */
+  removeFile: (name: string) => string;
+  /** A dropped file the input's `accept` does not take. */
+  fileNotAccepted: (name: string) => string;
   show: string;
   hide: string;
   moreActions: string;
@@ -767,6 +789,16 @@ export const DEFAULT_WORDING: Wording = {
   progress: "Progress",
   breadcrumb: "Breadcrumb",
   breadcrumbFolded: "Show the levels in between",
+  splitter: "Resize the panes",
+  stepDone: "Done",
+  stepUpcoming: "Upcoming",
+  stepFailed: "Failed",
+  chooseFile: "Choose a file",
+  chooseFiles: "Choose files",
+  dropFile: "or drop it here",
+  dropFiles: "or drop them here",
+  removeFile: (name) => `Remove ${name}`,
+  fileNotAccepted: (name) => `${name} is not an accepted type`,
   show: "Show",
   hide: "Hide",
   moreActions: "More actions",

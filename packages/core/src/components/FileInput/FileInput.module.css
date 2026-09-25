@@ -1,0 +1,188 @@
+@layer umriss.tokens, umriss.base, umriss.components;
+
+/* A zone with a dashed edge - the one edge in the library drawn as a border
+   and not as a shadow: a dash is what says "put it here" on every desktop,
+   and a shadow cannot be dashed. Inside it the key, drawn as a secondary
+   button over the transparent native input, the words that say it takes a
+   drop, and beneath them the chosen files, one per line. While files are
+   dragged over it the zone takes the accent - the one moment it is the
+   thing to aim at. */
+
+@layer umriss.components {
+  .zone {
+    composes: text from "#own-styles";
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--u-space-2) var(--u-space-3);
+    padding: var(--u-space-4);
+    border: 1px dashed var(--u-edge-color-strong);
+    border-radius: var(--u-radius-md);
+    background: var(--u-color-surface);
+    transition:
+      background-color var(--u-transition),
+      border-color var(--u-transition);
+  }
+
+  .dragging {
+    border-color: var(--u-color-accent);
+    background: var(--u-color-accent-subtle);
+  }
+
+  /* Invalid keeps its colour as a field's edge does; the word is the form
+     field's error message. */
+  .invalidZone {
+    border-color: var(--u-color-danger);
+  }
+
+  .key {
+    position: relative;
+    display: inline-flex;
+  }
+
+  .input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .face {
+    display: inline-flex;
+    align-items: center;
+    height: var(--u-control-height-sm);
+    padding: 0 var(--u-space-3);
+    border-radius: var(--u-radius-sm);
+    background: var(--u-color-surface);
+    outline: 1px solid transparent;
+    box-shadow: var(--u-edge-strong);
+    font-size: var(--u-text-sm);
+    font-weight: var(--u-weight-medium);
+    line-height: var(--u-leading-none);
+    color: var(--u-color-text);
+    white-space: nowrap;
+    transition:
+      background-color var(--u-transition),
+      box-shadow var(--u-transition);
+  }
+
+  /* The key answers as a secondary button does: hover sinks its ground, a
+     press sinks it further, focus is the ring - on the face beside the
+     input, which is what the eye sees. */
+  .input:hover:not(:disabled) + .face {
+    background: var(--u-color-surface-sunken);
+  }
+
+  .input:active:not(:disabled) + .face {
+    background: var(--u-color-surface-pressed);
+  }
+
+  .input:focus-visible + .face {
+    outline: 2px solid transparent;
+    box-shadow: var(--u-focus-ring);
+  }
+
+  .invalid:focus-visible + .face {
+    outline: 2px solid transparent;
+    box-shadow: var(--u-focus-ring-danger);
+  }
+
+  .input:disabled {
+    cursor: not-allowed;
+  }
+
+  /* Disabled dims the whole zone, key, words and list, and takes no drop. */
+  .zone:has(.input:disabled) {
+    opacity: 0.5;
+  }
+
+  .hint {
+    font-size: var(--u-text-sm);
+    line-height: var(--u-leading-tight);
+    color: var(--u-color-text-secondary);
+  }
+
+  .list {
+    display: flex;
+    flex-basis: 100%;
+    flex-direction: column;
+    gap: var(--u-space-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .file {
+    display: flex;
+    align-items: center;
+    gap: var(--u-space-2);
+    min-width: 0;
+    font-size: var(--u-text-sm);
+    line-height: var(--u-leading-tight);
+  }
+
+  .name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .size {
+    flex: none;
+    font-family: var(--u-font-mono);
+    font-size: var(--u-text-mono);
+    letter-spacing: var(--u-tracking-figures);
+    font-variant-numeric: tabular-nums;
+    color: var(--u-color-text-muted);
+  }
+
+  .remove {
+    composes: ring from "#own-styles";
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: none;
+    border-radius: var(--u-radius-xs);
+    background: none;
+    color: var(--u-color-text-secondary);
+    cursor: pointer;
+    transition: background-color var(--u-transition);
+  }
+
+  .remove:hover:not(:disabled) {
+    background: var(--u-color-surface-sunken);
+  }
+
+  .remove:active:not(:disabled) {
+    background: var(--u-color-surface-pressed);
+  }
+
+  .remove:disabled {
+    cursor: not-allowed;
+  }
+
+  .rejected {
+    flex-basis: 100%;
+    margin: 0;
+    font-size: var(--u-text-xs);
+    line-height: var(--u-leading-tight);
+    color: var(--u-color-text-secondary);
+  }
+
+  /* The key's ground and the dragged zone's ground are what forced colours
+     repaint (forced-colors 02). The key keeps its outline from the edge rule;
+     the zone under a drag takes the selection colour on its dashes. */
+  @media (forced-colors: active) {
+    .dragging {
+      border-color: Highlight;
+    }
+  }
+}
