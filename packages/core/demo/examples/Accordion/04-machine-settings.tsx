@@ -58,7 +58,6 @@ export default function MachineSettings() {
                   value={speed}
                   onChange={setSpeed}
                   format={(v) => `${v.toLocaleString("en")} bottles/h`}
-                  showValue
                   marks={[{ value: 18000, label: "Rated" }]}
                 />
               </FormField>

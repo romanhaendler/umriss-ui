@@ -133,8 +133,14 @@ for (const [example, button] of [
   test(`The drawer open: ${example}`, async ({ page }, testInfo) => {
     await openExample(page, "drawer", example);
     await page.getByRole("button", { name: button, exact: true }).click();
-    await expect(page.getByRole("dialog")).toBeVisible();
-    await standstill(page);
+    const drawer = page.getByRole("dialog");
+    await expect(drawer).toBeVisible();
+    /* Settled rather than finished: under load the page's own jump highlight
+       is cancelled while the drawer comes in, and `standstill` rejects on a
+       cancelled animation (it aborted three of these runs). */
+    await drawer.evaluate((el) =>
+      Promise.allSettled(el.ownerDocument.getAnimations().map((a) => a.finished)).then(() => undefined),
+    );
     await expect(page).toHaveScreenshot(`drawer-${example}-${testInfo.project.name}.png`);
   });
 }
