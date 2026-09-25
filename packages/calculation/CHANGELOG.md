@@ -15,6 +15,11 @@ under a heading "Changed" of its own, no matter which digit rose.
 
 ### Added
 
+- **The Windows contrast mode** (`forced-colors: active`, forced-colors 03).
+  The hover coupling keeps its band as an outline in the system's selection
+  colour, the open derivation its spine, the frame and the disclosure's ring an
+  outline where the box-shadow stood; the verdicts keep their words. Nothing
+  changes outside forced colours.
 - **`docs/llms-full.md`**, the package's documentation as one Markdown file for
   a coding agent, in the npm package and pinned to its version: every demo page
   with its import line, its examples' source, its props tables and why it is

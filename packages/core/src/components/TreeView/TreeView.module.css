@@ -49,7 +49,7 @@
   }
 
   .row:focus-visible {
-    outline: none;
+    outline: 2px solid transparent;
     box-shadow: var(--u-focus-ring);
   }
 
@@ -152,5 +152,15 @@
     /* Secondary, not muted: the track is drawn at a quarter of this colour, and
        a quarter of muted all but vanished on the dark surface. */
     color: var(--u-color-text-secondary);
+  }
+
+  /* The active node is a surface, and forced colours repaint it with the
+     page's (forced-colors 02): it takes an outline in the system's selection
+     colour, inside the row. */
+  @media (forced-colors: active) {
+    .active {
+      outline: 2px solid Highlight;
+      outline-offset: -2px;
+    }
   }
 }

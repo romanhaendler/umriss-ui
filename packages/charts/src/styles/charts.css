@@ -105,6 +105,7 @@
   }
 
   .uc-plot:focus-visible {
+    outline: 2px solid transparent;
     box-shadow: var(--uc-focus-ring);
   }
 
@@ -348,7 +349,7 @@
   }
 
   button.uc-legend-item:focus-visible {
-    outline: none;
+    outline: 2px solid transparent;
     box-shadow: var(--uc-focus-ring);
   }
 
@@ -390,6 +391,7 @@
   }
 
   .uc-data-panel:focus-visible {
+    outline: 2px solid transparent;
     box-shadow: var(--uc-focus-ring);
   }
 

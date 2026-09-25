@@ -20,6 +20,7 @@
        it. */
     border-top-left-radius: var(--u-radius-xs);
     border-bottom-left-radius: var(--u-radius-xs);
+    outline: 1px solid transparent;
     box-shadow: var(--u-edge);
   }
 
@@ -135,7 +136,7 @@
   }
 
   .close:focus-visible {
-    outline: none;
+    outline: 2px solid transparent;
     box-shadow: var(--u-focus-ring);
   }
 

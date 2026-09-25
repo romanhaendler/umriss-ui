@@ -40,6 +40,7 @@
       var(--u-color-accent) var(--_fill),
       var(--u-color-surface-sunken) var(--_fill)
     );
+    outline: 1px solid transparent;
     box-shadow: var(--u-edge);
   }
 
@@ -47,6 +48,7 @@
     height: var(--_track);
     border-radius: var(--u-radius-full);
     background: var(--u-color-surface-sunken);
+    outline: 1px solid transparent;
     box-shadow: var(--u-edge);
   }
 
@@ -63,6 +65,7 @@
     border: none;
     border-radius: var(--u-radius-full);
     background: var(--u-color-surface);
+    outline: 1px solid transparent;
     box-shadow: var(--u-edge-strong);
     appearance: none;
     transition:
@@ -76,6 +79,7 @@
     border: none;
     border-radius: var(--u-radius-full);
     background: var(--u-color-surface);
+    outline: 1px solid transparent;
     box-shadow: var(--u-edge-strong);
     transition:
       background-color var(--u-transition),
@@ -105,10 +109,12 @@
   }
 
   .range:focus-visible::-webkit-slider-thumb {
+    outline: 2px solid transparent;
     box-shadow: var(--u-focus-ring);
   }
 
   .range:focus-visible::-moz-range-thumb {
+    outline: 2px solid transparent;
     box-shadow: var(--u-focus-ring);
   }
 
