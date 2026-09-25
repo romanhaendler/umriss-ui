@@ -146,8 +146,8 @@ export const OUTLINE: readonly Rubric[] = [
     ],
   },
   {
-    id: "monitoring",
-    name: "Monitoring",
+    id: "limits-and-alarms",
+    name: "Limits and alarms",
     sentence: "A reading, read against its limits - and alarms with a lifecycle.",
     pages: [
       {
