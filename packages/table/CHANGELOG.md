@@ -101,6 +101,14 @@ column menu's pin keys (its own "Unreleased" section).
   needs it. `Partial<Alarm>` spread into an `Alarm` no longer compiles; name
   the fields you mean (`Pick<Alarm, "cleared" | "acknowledgedAt">`).
 
+### Fixed
+
+- **A group header whose first column carries an aggregate keeps its
+  aggregates under their columns.** Grouped by one level, its label stood in a
+  cell over no column, which a browser counts as one, and every aggregate
+  stood a column too far right. The label now takes the first column's place
+  in the header; its sum stays in the footer.
+
 ---
 
 ## 0.3.3 – Depth work on the table (Sep. 2026)

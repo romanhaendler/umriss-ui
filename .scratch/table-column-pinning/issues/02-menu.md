@@ -35,3 +35,7 @@ the open menu photographed in both themes (`pinning-menu`).
 
 For 03: the two 10 px glyphs (a bar with an arrow towards it) and whether the
 entry wants its keys grouped.
+
+**Review (2026-09-25).** The German "X lösen" read ambiguously; it is
+"Fixierung von X lösen" now. The two keys instead of three entries are the
+deviation above - for the user to confirm in 03.

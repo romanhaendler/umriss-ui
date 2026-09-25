@@ -162,7 +162,7 @@ export const GERMAN_WORDING: Wording = {
   columnBackward: (column) => `${column} nach hinten`,
   pinColumnToStart: (column) => `${column} am Anfang fixieren`,
   pinColumnToEnd: (column) => `${column} am Ende fixieren`,
-  unpinColumn: (column) => `${column} lösen`,
+  unpinColumn: (column) => `Fixierung von ${column} lösen`,
   exportLabel: "Exportieren",
   exportFileName: "tabelle.csv",
   tableSearchPlaceholder: "Suchen …",
