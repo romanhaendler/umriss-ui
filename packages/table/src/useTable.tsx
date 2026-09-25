@@ -24,6 +24,7 @@ import { MOST_LEVELS, livePaths } from "./model/grouping";
 import type { RowGroup } from "./model/grouping";
 import { pinsForView, withPin } from "./model/pinning";
 import type { Pin, Pins } from "./model/pinning";
+import { manualViewKey } from "./model/view";
 import type { ManualView, TableView } from "./model/view";
 import type { Column } from "./model/tableModel";
 import { Registry } from "./registry";
@@ -356,7 +357,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     page: b.page,
     pageSize: b.pageSize,
   };
-  const reportKey = manual ? JSON.stringify([b.search, effective, sort, b.page, b.pageSize]) : "";
+  const reportKey = manual ? manualViewKey(manualView) : "";
   const reported = useRef<string | null>(null);
   useEffect(() => {
     if (!manual || reported.current === reportKey) return;

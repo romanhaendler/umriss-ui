@@ -41,3 +41,9 @@ export interface TableView<K extends string = string> {
     back on, and a view it has to complete is one it completes wrongly. */
 export type ManualView<K extends string = string> = TableView<K> &
   Required<Pick<TableView<K>, "search" | "conditions" | "sort" | "page" | "pageSize">>;
+
+/** What manual mode compares to report a view once: the five parts that decide
+    the rows, and nothing else - a new width fetches nothing. Conditions are
+    compared as JSON, which is what a server receives of them. */
+export const manualViewKey = (view: ManualView): string =>
+  JSON.stringify([view.search, view.conditions, view.sort, view.page, view.pageSize]);
