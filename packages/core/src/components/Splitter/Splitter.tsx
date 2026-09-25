@@ -50,6 +50,7 @@ export const Splitter = forwardRef<HTMLDivElement, SplitterProps>(function Split
     separatorLabel,
     className,
     style,
+    onKeyDown,
     children,
     ...rest
   },
@@ -58,6 +59,7 @@ export const Splitter = forwardRef<HTMLDivElement, SplitterProps>(function Split
   const wording = useWording();
   const firstId = useId();
   const root = useRef<HTMLDivElement>(null);
+  const line = useRef<HTMLDivElement>(null);
   const clamp = (share: number) => Math.min(max, Math.max(min, share));
   const [own, setOwn] = useState(() => clamp(defaultValue));
   const controlled = valueProp !== undefined;
@@ -65,7 +67,9 @@ export const Splitter = forwardRef<HTMLDivElement, SplitterProps>(function Split
   /* Where Enter brings a collapsed pane back to. Unset for a pane that
      started collapsed: that one opens to the middle. */
   const restoreTo = useRef<number | null>(null);
-  const dragging = useRef<number | null>(null);
+  /* The pointer held, and how far from the line's middle it took hold: the
+     line keeps that point under the pointer instead of jumping to it. */
+  const dragging = useRef<{ pointer: number; offset: number } | null>(null);
   const across = orientation === "horizontal";
 
   const commit = (next: number) => {
@@ -75,7 +79,12 @@ export const Splitter = forwardRef<HTMLDivElement, SplitterProps>(function Split
     onChange?.(share);
   };
 
+  /* On the root, so that a caller's handler runs first and can keep a key;
+     only the separator's own keys count - not a nested splitter's, not a
+     field's inside a pane. */
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    onKeyDown?.(event);
+    if (event.defaultPrevented || event.target !== line.current) return;
     const keys: Record<string, () => number> = {
       [across ? "ArrowRight" : "ArrowDown"]: () => value + step,
       [across ? "ArrowLeft" : "ArrowUp"]: () => value - step,
@@ -95,12 +104,22 @@ export const Splitter = forwardRef<HTMLDivElement, SplitterProps>(function Split
     commit(next());
   };
 
+  /** A coordinate along the axis, and the middle of an element on it. */
+  const along = (event: PointerEvent) => (across ? event.clientX : event.clientY);
+  const middleOf = (element: Element) => {
+    const box = element.getBoundingClientRect();
+    return across ? box.left + box.width / 2 : box.top + box.height / 2;
+  };
+
   /* The share under the pointer, on a tenth of a per cent: a whole per cent
-     is a dozen pixels on a wide screen, and a drag should not jump. */
-  const follow = (event: PointerEvent<HTMLDivElement>) => {
+     is a dozen pixels on a wide screen, and a drag should not jump. The
+     panes share the box less the separator's strip, and so does this. */
+  const follow = (event: PointerEvent<HTMLDivElement>, offset: number) => {
     const box = root.current?.getBoundingClientRect();
-    if (!box) return;
-    const share = across ? (event.clientX - box.left) / box.width : (event.clientY - box.top) / box.height;
+    const strip = line.current?.getBoundingClientRect();
+    if (!box || !strip) return;
+    const [start, size, own] = across ? [box.left, box.width, strip.width] : [box.top, box.height, strip.height];
+    const share = (along(event) - offset - start - own / 2) / (size - own);
     if (Number.isFinite(share)) commit(Math.round(share * 1000) / 10);
   };
 
@@ -109,12 +128,16 @@ export const Splitter = forwardRef<HTMLDivElement, SplitterProps>(function Split
       ref={mergeRefs(ref, root)}
       className={cx(styles.splitter, !across && styles.vertical, className)}
       {...rest}
+      onKeyDown={handleKeyDown}
       style={{ ...style, "--_first": `${value}fr`, "--_second": `${100 - value}fr` } as CSSProperties}
     >
-      <div id={firstId} className={styles.pane}>
+      {/* A pane folded to nothing is out of the tab order as well as out of
+          sight: the keys would otherwise walk into content nobody sees. */}
+      <div id={firstId} className={styles.pane} inert={value <= 0 || undefined}>
         {children[0]}
       </div>
       <div
+        ref={line}
         role="separator"
         tabIndex={0}
         aria-label={separatorLabel ?? wording.splitter}
@@ -124,16 +147,15 @@ export const Splitter = forwardRef<HTMLDivElement, SplitterProps>(function Split
         aria-valuemin={min}
         aria-valuemax={max}
         className={styles.separator}
-        onKeyDown={handleKeyDown}
         onPointerDown={(event) => {
           if (event.button !== 0) return;
           event.preventDefault(); // no text selection while dragging
           event.currentTarget.focus();
           event.currentTarget.setPointerCapture(event.pointerId);
-          dragging.current = event.pointerId;
+          dragging.current = { pointer: event.pointerId, offset: along(event) - middleOf(event.currentTarget) };
         }}
         onPointerMove={(event) => {
-          if (dragging.current === event.pointerId) follow(event);
+          if (dragging.current?.pointer === event.pointerId) follow(event, dragging.current.offset);
         }}
         onPointerUp={(event) => {
           dragging.current = null;
@@ -143,7 +165,9 @@ export const Splitter = forwardRef<HTMLDivElement, SplitterProps>(function Split
           dragging.current = null;
         }}
       />
-      <div className={styles.pane}>{children[1]}</div>
+      <div className={styles.pane} inert={value >= 100 || undefined}>
+        {children[1]}
+      </div>
     </div>
   );
 });

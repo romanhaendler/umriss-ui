@@ -55,8 +55,8 @@ export const Stepper = forwardRef<HTMLOListElement, StepperProps>(function Stepp
     <ol
       ref={ref}
       className={cx(styles.stepper, orientation === "vertical" && styles.vertical, className)}
-      data-orientation={orientation}
       {...rest}
+      data-orientation={orientation}
     >
       {steps.map((step, index) => {
         const state = stateOf(step, index, current);
