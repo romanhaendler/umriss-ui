@@ -1,8 +1,8 @@
 /* The limit model (ADR-0006).
 
-   What a value is, once you read it against something. On a control room screen
-   no number stands for itself: 47 °C is inside the tolerance or above it, and
-   the answer has to be on the tile and not in the operator's head.
+   What a value is, once you read it against something. On a monitoring
+   screen no number stands for itself: 480 ms is inside the target or above it,
+   and the answer has to be on the tile and not in the reader's head.
 
    The same rule stands a second time in @umriss-ui/core. That is deliberate and
    not an oversight: charts may import nothing from ui (R-1.2), and making ui
@@ -27,7 +27,7 @@ export type Side = "upper" | "lower";
 
 /** How seriously a violation weighs. Exactly two: one severity that advises and
     one that calls for action. Five severities would be five colours, and five
-    colours on a control room screen are noise. Whoever needs a third
+    colours on a dense screen are noise. Whoever needs a third
     distinction sets a second limit. */
 export type Severity = "warning" | "alarm";
 

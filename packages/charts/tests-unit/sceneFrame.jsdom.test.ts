@@ -134,7 +134,7 @@ describe("ChartScene across frames", () => {
     scene.unbind();
   });
 
-  it("places an x limit on an operating-time axis in operating time", async () => {
+  it("places an x limit on a working-time axis in working time", async () => {
     const HOUR = 3_600_000;
     const root = document.createElement("div");
     document.body.appendChild(root);

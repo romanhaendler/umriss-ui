@@ -65,7 +65,7 @@ export interface ScheduleProps {
   /** Width of the lane headers in pixels - at most 40 % of the schedule, so
       that on a phone the plot keeps the larger part. */
   headerWidth?: number;
-  /** An operating calendar: the intervals in which time counts. Nights and
+  /** A working calendar: the intervals in which time counts. Nights and
       weekends outside them are cut out of the axis. Default: the wall clock. */
   calendar?: CalendarInput;
   /** The narrowest and widest time span zoom may reach, in milliseconds.

@@ -58,7 +58,7 @@ export const OUTLINE: readonly Rubric[] = [
       {
         id: "time-axis",
         name: "Time axis and calendar",
-        sentence: "The two bands, and the operating calendar that cuts the hours the plant does not run out of the axis.",
+        sentence: "The two bands, and the working calendar that cuts the hours the plant does not run out of the axis.",
         types: [],
         exports: ["Schedule"],
       },

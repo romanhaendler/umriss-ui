@@ -232,15 +232,15 @@ Screenshot pages carry their name in brackets.
 | The violations as data through `onViolations`, once per change of their content; inline accessor and origin recompute nothing | — | Unit (jsdom, control chart violations) |
 | `tone` colours the line; the violations stay "alarm" | Q11 | Unit (jsdom tone) |
 
-## The operating-time axis (`calendar`)
+## The working-time axis (`calendar`)
 
 | Capability | Rule | Proved at |
 |---|---|---|
-| The calendar sorted and merged; empty, reversed and infinite intervals fall away | — | Unit (operating time) |
-| Wall clock ↔ operating time, monotonic; removed time becomes a gap | ADR-0001 | Unit (operating time, limits and bands in the scene) |
-| Ticks in wall-clock time on the time axis' local boundaries, mapped afterwards | — | Unit (time axis, layout under Europe/Berlin), Screenshot (`operating-time`) |
+| The calendar sorted and merged; empty, reversed and infinite intervals fall away | — | Unit (working time) |
+| Wall clock ↔ working time, monotonic; removed time becomes a gap | ADR-0001 | Unit (working time, limits and bands in the scene) |
+| Ticks in wall-clock time on the time axis' local boundaries, mapped afterwards | — | Unit (time axis, layout under Europe/Berlin), Screenshot (`working-time`) |
 | Explicit `ticks` and x limits named on the wall clock and mapped like the data | — | Unit (layout, limits and bands in the scene, jsdom scene) |
-| One break mark per removed span | — | Unit (operating time), Screenshot (`operating-time`) |
+| One break mark per removed span | — | Unit (working time), Screenshot (`working-time`) |
 | The time axis' labels, independent of the locale; `tickFormat` gets the wall clock | Q15 | Unit (layout, time axis) |
 
 ## `pareto`
@@ -388,7 +388,7 @@ here.
 * **A category scale.** Bars sit on the numeric X axis (ADR-0002); categories are
   passed as numeric positions with a naming `tickFormat`.
 * **Log scale.** Plant values are read linearly; a log axis breaks the affine
-  scale that the operating-time axis relies on (ADR-0001).
+  scale that the working-time axis relies on (ADR-0001).
 * **Smoothing.** A curve between samples invents values the plant never
   measured; `Line step` draws what was held.
 * **Animation.** A chart that moves on every update is harder to read, and the

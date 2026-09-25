@@ -34,9 +34,9 @@ export const OUTLINE: readonly Rubric[] = [
       {
         id: "axis",
         name: "Axis",
-        sentence: "What a value is measured against: extent, ticks and labelling, several per orientation - and an operating time axis that leaves the empty hours out and says so.",
+        sentence: "What a value is measured against: extent, ticks and labelling, several per orientation - and a working time axis that leaves the empty hours out and says so.",
         types: ["XAxisProps", "YAxisProps"],
-        exports: ["XAxis", "YAxis", "operatingCalendar"],
+        exports: ["XAxis", "YAxis", "workingCalendar"],
       },
     ],
   },
