@@ -17,7 +17,7 @@
  * functions, no imports: copy the file beside an example and it runs.
  */
 
-/** A small LCG - the same numbers on every machine. */
+/** A small LCG - the same numbers on every computer. */
 function random(seed: number): () => number {
   let s = seed >>> 0;
   return () => {
