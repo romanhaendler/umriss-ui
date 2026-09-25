@@ -154,8 +154,8 @@ test("stretching the main time at its edge reports a stretch", async ({ page }) 
 });
 
 test("the scenario: a right-click opens the context menu, and an entry changes the plan through an intent", async ({ page }) => {
-  await openScenario(page, "replan-the-day");
-  const example = page.locator('[data-scenario="replan-the-day"]');
+  await openScenario(page, "replan-the-day-on-the-line");
+  const example = page.locator('[data-scenario="replan-the-day-on-the-line"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
   const summary = example.locator("[data-findings-summary]");
   await expect(summary).toHaveText("1 overlap, 1 violated dependency");
@@ -194,8 +194,8 @@ test("a drag on the shift raster lands on a shift change", async ({ page }) => {
 });
 
 test("the scenario shifts a whole order through one intent per stop", async ({ page }) => {
-  await openScenario(page, "replan-the-day");
-  const example = page.locator('[data-scenario="replan-the-day"]');
+  await openScenario(page, "replan-the-day-on-the-line");
+  const example = page.locator('[data-scenario="replan-the-day-on-the-line"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
   const summary = example.locator("[data-findings-summary]");
   await expect(summary).toHaveText("1 overlap, 1 violated dependency");
