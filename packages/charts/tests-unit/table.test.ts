@@ -82,6 +82,22 @@ describe("The rows of the data table", () => {
     expect(rows.x.length).toBeLessThanOrEqual(500);
   });
 
+  /* charts-alternatives 04: a band's code is a name, not a height - its lowest
+     and highest code say nothing. Thinned, it keeps where its state changes,
+     as the keyboard walks it. */
+  it("thins a band to its changes of state, not to its lowest and highest code", () => {
+    const n = 600_000;
+    const xs = Array.from({ length: n }, (_, i) => i);
+    // 0 up to 100k, a gap to 100,010, 2 to 400k, then 1.
+    const ys = xs.map((i) => (i < 100_000 ? 0 : i < 100_010 ? Number.NaN : i < 400_000 ? 2 : 1));
+    const rows = tableRows([{ ...course(xs, ys), changesOnly: true }], 0, n - 1);
+    expect(rows.thinned).toBe(true);
+    expect(rows.readings).toBe(n);
+    const kept = rows.courses[0] as Course;
+    expect(Array.from(kept.x.subarray(0, kept.length))).toEqual([0, 100_000, 100_010, 400_000]);
+    expect(Array.from(kept.y.subarray(0, kept.length))).toEqual([0, Number.NaN, 2, 1]);
+  });
+
   it("counts readings only inside the visible domain", () => {
     const xs = Array.from({ length: 10_000 }, (_, i) => i);
     const rows = tableRows([course(xs, xs)], 100, 399);
