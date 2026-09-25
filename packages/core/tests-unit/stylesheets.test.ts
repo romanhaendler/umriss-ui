@@ -342,7 +342,10 @@ function unguarded(css: string, selector: string): string[] {
   );
 }
 
-const RING = /^(?:none|var\(--u-focus-ring(?:-danger)?\)|var\(--uc-focus-ring\))$/;
+/* The ring, or the same ring drawn inside the element: a table cell in grid
+   mode (table-grid-mode) rings itself inset, since the scroll area cuts an
+   outer ring away and its neighbours paint over it - the token, not a copy. */
+const RING = /^(?:none|(?:inset )?var\(--u-focus-ring(?:-danger)?\)|var\(--uc-focus-ring\))$/;
 
 /** A rule for the element's own focus that paints more than the ring. */
 function focusPaints(selector: string, body: Declarations): boolean {
@@ -422,6 +425,8 @@ describe("The interaction-state canon (visuelle-wertigkeit 04)", () => {
     expect(unguarded(css, ".other:hover")).toEqual([]);
     expect(focusPaints(".item:focus-visible", [["background", "var(--u-color-surface-sunken)"]])).toBe(true);
     expect(focusPaints(".item:focus-visible", [["box-shadow", "var(--u-focus-ring)"]])).toBe(false);
+    expect(focusPaints(".grid td:focus-visible", [["box-shadow", "inset var(--u-focus-ring)"]])).toBe(false);
+    expect(focusPaints(".grid td:focus-visible", [["box-shadow", "inset 0 0 0 2px var(--u-color-accent)"]])).toBe(true);
     expect(focusPaints(".row:focus-visible", [["outline", "2px solid var(--u-color-accent)"]])).toBe(true);
     expect(focusPaints(".group:focus-within .key", [["opacity", "1"]])).toBe(false);
     expect(hoverTakesRing(".secondary:hover:not(:disabled)", [["box-shadow", "0 0 0 1px var(--u-color-edge-hover)"]])).toBe(true);

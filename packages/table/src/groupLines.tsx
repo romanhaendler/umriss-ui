@@ -25,6 +25,7 @@ import { asText } from "./values";
 import { pinnedCell } from "./pinned";
 import type { PinnedCell } from "./pinned";
 import type { PinBlocks } from "./model/pinning";
+import { groupLineLayout } from "./model/gridWalk";
 import styles from "./Table.module.css";
 
 /** A group's value as text - for the fold's name and wherever no presentation
@@ -218,8 +219,11 @@ export function GroupLine({
   hook,
   formats,
   wording,
+  grid,
 }: {
   line: Extract<Line<unknown>, { kind: "header" | "folded" }>;
+  /** Grid mode: the line names itself for the walk. */
+  grid: boolean;
   /** Whether the first control column is the selection's. */
   selectable: boolean;
   /** The groups beside it, itself included - for its position. */
@@ -245,30 +249,17 @@ export function GroupLine({
   const { group } = line;
   const header = line.kind === "header";
   const open = header && !hook.publicSnapshot.folded.includes(group.path);
-  /* The leading columns without an aggregate: a group header's label stretches over
-     them, a folded span's "3 entries" stands in them. */
-  const firstAggregate = columns.findIndex((e) => e.spec.aggregate !== undefined);
-  /* The leading run stops before the end block: a cell over it would stick
-     nowhere. */
-  const endColumns = blocks.end > 0 ? blocks.end - (hasActions ? 1 : 0) : 0;
-  /* Without a span the label needs one column at least: over none it was a
-     cell of `colSpan` 0, which counts as one, and every aggregate after it
-     stood a column too far right. Where the first column carries an
-     aggregate - easily reached by pinning it to the start - the label takes
-     its place in the header, and the sum stands in the footer. */
-  const lead = Math.max(
-    spanEntry || columns.length === 0 ? 0 : 1,
-    Math.min(firstAggregate === -1 ? columns.length : firstAggregate, columns.length - endColumns),
-  );
+  /* The leading run without an aggregate carries the label or the count; the
+     arithmetic is the walk's too (`groupLineLayout`). */
+  const { lead, labelColumns, countColumns } = groupLineLayout({
+    controls: controlColumns,
+    span: spanEntry !== undefined,
+    aggregates: columns.map((e) => e.spec.aggregate !== undefined),
+    actions: hasActions,
+    blocks,
+  });
   const rest = columns.slice(lead);
-  /* With a start block the label or the count covers only the pinned columns
-     of the run, so that it sticks with them; a cell without a text fills the
-     rest. Where the run has no pinned column, the label keeps to the span and
-     the count to the whole run. */
   const before = controlColumns + (spanEntry ? 1 : 0);
-  const startColumns = blocks.start > 0 ? blocks.start - before : 0;
-  const labelColumns = blocks.start > 0 ? Math.min(lead, startColumns) : lead;
-  const countColumns = startColumns > 0 ? Math.min(lead, startColumns) : lead;
   const pinAt = (first: number, last = first) => pinnedCell(blocks, first, last);
   const filler = (columnsCovered: number) =>
     lead - columnsCovered > 0 && <td className={styles.td} colSpan={lead - columnsCovered} />;
@@ -297,6 +288,7 @@ export function GroupLine({
       data-continued={header && line.continued ? "" : undefined}
       data-group-first={header ? undefined : ""}
       data-group={group.path}
+      data-grid-line={grid ? `${line.kind}:${group.path}` : undefined}
       data-row={virtual ? absolute : undefined}
       aria-rowindex={virtual ? absolute + 2 : undefined}
       data-index={index}
