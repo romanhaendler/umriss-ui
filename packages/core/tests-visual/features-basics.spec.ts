@@ -99,18 +99,18 @@ test("ContextMenu flips and stays inside the window at its edge", async ({ page 
 
 test("Switch toggles on Space and on its label", async ({ page }) => {
   await openExample(page, "switch", "on-and-off");
-  const control = page.getByRole("switch", { name: "Night setback", exact: true });
+  const control = page.getByRole("switch", { name: "Page me at night", exact: true });
   await expect(control).toBeChecked();
   await control.focus();
   await page.keyboard.press("Space");
   await expect(control).not.toBeChecked();
-  await page.locator('[data-example="on-and-off"]').getByText("Night setback").click();
+  await page.locator('[data-example="on-and-off"]').getByText("Page me at night").click();
   await expect(control).toBeChecked();
 });
 
 test("Slider follows the keys of the slider pattern", async ({ page }) => {
-  await openExample(page, "slider", "a-setpoint");
-  const slider = page.getByRole("slider", { name: "Hall temperature" });
+  await openExample(page, "slider", "canary-traffic");
+  const slider = page.getByRole("slider", { name: "Canary traffic, %" });
   /* The ring stands on the thumb, a pseudo-element neither the own-base probe
      nor getComputedStyle reads - so it is looked at: the focused slider has
      to look different from the resting one. */
@@ -120,14 +120,14 @@ test("Slider follows the keys of the slider pattern", async ({ page }) => {
   const focused = await slider.screenshot({ animations: "disabled" });
   expect(focused.equals(resting)).toBe(false);
   await page.keyboard.press("ArrowRight");
-  await expect(slider).toHaveValue("20");
+  await expect(slider).toHaveValue("15");
   await page.keyboard.press("PageUp");
-  await expect(slider).toHaveValue("21");
+  await expect(slider).toHaveValue("25");
   await page.keyboard.press("End");
-  await expect(slider).toHaveValue("26");
+  await expect(slider).toHaveValue("100");
   await page.keyboard.press("Home");
-  await expect(slider).toHaveValue("14");
-  await expect(slider).toHaveAttribute("aria-valuetext", "14.0");
+  await expect(slider).toHaveValue("0");
+  await expect(slider).toHaveAttribute("aria-valuetext", "0");
 });
 
 test("Drawer holds the focus, closes on Escape and gives the focus back", async ({ page }) => {
@@ -276,14 +276,14 @@ test("Splitter follows its keys and the pointer, and the panes follow it", async
 test("FileInput opens the platform's dialog on its keys and takes a drop", async ({ page }) => {
   await openExample(page, "fileinput", "one-file");
   const example = page.locator('[data-example="one-file"]');
-  const input = example.getByLabel("Recipe file");
+  const input = example.getByLabel("Bank statement");
 
   for (const key of ["Space", "Enter"]) {
     await input.focus();
     const [chooser] = await Promise.all([page.waitForEvent("filechooser"), page.keyboard.press(key)]);
     expect(chooser.isMultiple()).toBe(false);
-    await chooser.setFiles({ name: `recipes-${key}.csv`, mimeType: "text/csv", buffer: Buffer.from("name;speed\nLemonade;42\n") });
-    await expect(example.getByRole("listitem")).toHaveText(new RegExp(`recipes-${key}\\.csv`));
+    await chooser.setFiles({ name: `statement-${key}.csv`, mimeType: "text/csv", buffer: Buffer.from("date;amount\n2026-03-16;-4860.00\n") });
+    await expect(example.getByRole("listitem")).toHaveText(new RegExp(`statement-${key}\\.csv`));
   }
 
   /* A drop is built in the page, as the platform hands it over: a data
@@ -292,7 +292,7 @@ test("FileInput opens the platform's dialog on its keys and takes a drop", async
   const zone = example.locator(".exampleStage input[type=file]").locator("xpath=../..");
   await zone.evaluate((element) => {
     const transfer = new DataTransfer();
-    transfer.items.add(new File(["name;speed\n"], "dropped.csv", { type: "text/csv" }));
+    transfer.items.add(new File(["date;amount\n"], "dropped.csv", { type: "text/csv" }));
     transfer.items.add(new File(["%PDF"], "manual.pdf", { type: "application/pdf" }));
     for (const type of ["dragenter", "dragover", "drop"]) {
       element.dispatchEvent(new DragEvent(type, { dataTransfer: transfer, bubbles: true, cancelable: true }));
