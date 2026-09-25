@@ -48,7 +48,8 @@ test("the scenario shows its plan in a second tab, and Copy takes the tab in fro
   await tabs.nth(1).click();
   const second = await copy();
   expect(second).toContain("export const STEPS");
-  expect(second).toContain('from "@umriss-ui/schedule"');
+  /* A world imports nothing: copied beside the scenario, it runs as it is. */
+  expect(second).not.toMatch(/^import /m);
   expect(second).not.toBe(first);
 });
 

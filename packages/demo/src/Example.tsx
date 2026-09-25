@@ -77,8 +77,9 @@ export function CodeBlock({ files }: { files: readonly ExampleFile[] }) {
         <CopyButton text={front.source} />
       </div>
       {/* The source comes from our own directory and from a highlighter that
-          only puts marks around it - no input from outside. */}
-      <pre className="code">
+          only puts marks around it - no input from outside. A long line scrolls
+          the block sideways, so the keyboard has to reach it too. */}
+      <pre className="code" tabIndex={0} aria-label={`Source of ${front.name}`}>
         <code dangerouslySetInnerHTML={{ __html: highlighted }} />
       </pre>
     </div>
