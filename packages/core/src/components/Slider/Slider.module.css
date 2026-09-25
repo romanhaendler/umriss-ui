@@ -1,0 +1,167 @@
+@layer umriss.tokens, umriss.base, umriss.components;
+
+/* The native range input, drawn with tokens: the track is a sunken groove, the
+   part up to the value is the accent, the thumb is a flat disc with an edge.
+   The marks stand in a strip inset by half a thumb on each side, so that a
+   mark at 50 lies where the thumb's centre lies at 50. */
+
+@layer umriss.components {
+  .slider {
+    composes: text from "#own-styles";
+    --_thumb: 14px;
+    --_track: 4px;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--u-space-3);
+    width: 100%;
+  }
+
+  .control {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .range {
+    display: block;
+    width: 100%;
+    height: 20px;
+    margin: 0;
+    background: transparent;
+    appearance: none;
+    cursor: pointer;
+  }
+
+  .range::-webkit-slider-runnable-track {
+    height: var(--_track);
+    border-radius: var(--u-radius-full);
+    background: linear-gradient(
+      to right,
+      var(--u-color-accent) var(--_fill),
+      var(--u-color-surface-sunken) var(--_fill)
+    );
+    box-shadow: var(--u-edge);
+  }
+
+  .range::-moz-range-track {
+    height: var(--_track);
+    border-radius: var(--u-radius-full);
+    background: var(--u-color-surface-sunken);
+    box-shadow: var(--u-edge);
+  }
+
+  .range::-moz-range-progress {
+    height: var(--_track);
+    border-radius: var(--u-radius-full);
+    background: var(--u-color-accent);
+  }
+
+  .range::-webkit-slider-thumb {
+    width: var(--_thumb);
+    height: var(--_thumb);
+    margin-top: calc((var(--_track) - var(--_thumb)) / 2);
+    border: none;
+    border-radius: var(--u-radius-full);
+    background: var(--u-color-surface);
+    box-shadow: var(--u-edge-strong);
+    appearance: none;
+    transition:
+      background-color var(--u-transition),
+      box-shadow var(--u-transition);
+  }
+
+  .range::-moz-range-thumb {
+    width: var(--_thumb);
+    height: var(--_thumb);
+    border: none;
+    border-radius: var(--u-radius-full);
+    background: var(--u-color-surface);
+    box-shadow: var(--u-edge-strong);
+    transition:
+      background-color var(--u-transition),
+      box-shadow var(--u-transition);
+  }
+
+  /* Hover darkens the thumb's edge, a press sinks its ground; a focused thumb
+     keeps its ring under the pointer (the interaction-state canon). */
+  .range:hover:not(:disabled):not(:focus-visible)::-webkit-slider-thumb {
+    box-shadow: 0 0 0 1px var(--u-color-edge-hover);
+  }
+
+  .range:hover:not(:disabled):not(:focus-visible)::-moz-range-thumb {
+    box-shadow: 0 0 0 1px var(--u-color-edge-hover);
+  }
+
+  .range:active:not(:disabled)::-webkit-slider-thumb {
+    background: var(--u-color-surface-pressed);
+  }
+
+  .range:active:not(:disabled)::-moz-range-thumb {
+    background: var(--u-color-surface-pressed);
+  }
+
+  .range:focus-visible {
+    outline: none;
+  }
+
+  .range:focus-visible::-webkit-slider-thumb {
+    box-shadow: var(--u-focus-ring);
+  }
+
+  .range:focus-visible::-moz-range-thumb {
+    box-shadow: var(--u-focus-ring);
+  }
+
+  .slider:has(.range:disabled) {
+    opacity: 0.5;
+  }
+
+  .range:disabled {
+    cursor: not-allowed;
+  }
+
+  .marks {
+    position: relative;
+    height: var(--u-space-2);
+    margin: 0 calc(var(--_thumb) / 2);
+  }
+
+  .mark {
+    position: absolute;
+    top: 0;
+    width: 1px;
+    height: 4px;
+    background: var(--u-color-text-muted);
+    transform: translateX(-50%);
+  }
+
+  .markLabel {
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    font-size: var(--u-text-xs);
+    line-height: var(--u-leading-none);
+    color: var(--u-color-text-secondary);
+  }
+
+  .marks:has(.markLabel) {
+    height: var(--u-space-6);
+  }
+
+  /* The value in mono, tabular and right-aligned, so that the track keeps its
+     length while the figure changes. */
+  .readout {
+    flex: none;
+    min-width: 6ch;
+    padding-top: 2px;
+    text-align: right;
+    font-family: var(--u-font-mono);
+    font-size: var(--u-text-mono);
+    line-height: var(--u-leading-tight);
+    letter-spacing: var(--u-tracking-figures);
+    font-variant-numeric: tabular-nums;
+    color: var(--u-color-text);
+  }
+}

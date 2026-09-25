@@ -151,6 +151,12 @@ The table and the alarm list are not part of this package. They live in
 | `CrossGlyph` / `PlusGlyph` / `MinusGlyph` / `AngleGlyph` / `CalendarGlyph` / `ClockGlyph` / `GripGlyph` / `GridGlyph` / `MeasureGlyph` | the shared character set, one stroke width at one nominal size; specification in `docs/glyphs.md` |
 | `Sparkline` | a miniature history line with an area gradient and an accent end point – for trends in cells |
 | `Spinner` | a functional loading indicator |
+| `Switch` | on or off, taking effect at once: a native checkbox under `role="switch"`, the label beside it, two sizes, invalid through `FormField`; the thumb travels on the path transition |
+| `Slider` | one value between two bounds on the native range input, drawn with tokens: `min`/`max`/`step`, marks with optional words, `format` for the mono readout and `aria-valuetext`; arrows, PageUp/PageDown by a tenth, Home/End - the same on every engine |
+| `Drawer` | the `Modal`'s dialog entering from an edge (`side="right" \| "left"`): focus trap, Escape and focus return from the browser, `ModalHeader`/`ModalBody`/`ModalFooter` inside, its width the token `--u-drawer-width`; modal only |
+| `ProgressBar` | how far a task has come (`role="progressbar"`), determinate from 0 to 1 or indeterminate without a value; `valueText` for a count; no tone, because progress is no verdict - that is the `Meter` |
+| `Accordion` / `AccordionItem` | sections behind headers that are buttons with `aria-expanded`: `type="single" \| "multiple"`, controlled or uncontrolled, arrow keys between the headers; the height animates as the card's collapse does |
+| `Breadcrumb` | where a page stands: `<nav>` with an ordered list, the last item `aria-current="page"`, items as links or buttons (routing is the caller's); when narrow the middle levels fold into a `Menu`, measured rather than guessed |
 
 ## Principles for new components
 
@@ -190,7 +196,7 @@ rules 1 and 2 above. What is open, each with a
 spec under `.scratch/`:
 
 * `core-foundations` — `Switch`, `Slider`, `Drawer`, `ProgressBar`,
-  `Accordion`, `Breadcrumb`.
+  `Accordion` and `Breadcrumb` stand; their final polish round is open.
 * `forced-colors` and `listbox-announcements` — Windows high contrast, and
   what a listbox says to VoiceOver.
 * `core-layout-extras` — `Splitter` and the layout tier after the basics.

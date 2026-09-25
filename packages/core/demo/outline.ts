@@ -155,6 +155,20 @@ export const OUTLINE: readonly Rubric[] = [
         exports: ["Checkbox"],
       },
       {
+        id: "switch",
+        name: "Switch",
+        sentence: "On or off, taking effect at once - the checkbox's construction under the role a screen reader says as a switch.",
+        types: ["SwitchProps"],
+        exports: ["Switch"],
+      },
+      {
+        id: "slider",
+        name: "Slider",
+        sentence: "A value set roughly between two bounds - the native range underneath, the keys of the slider pattern on every engine alike.",
+        types: ["SliderProps"],
+        exports: ["Slider"],
+      },
+      {
         id: "radiogroup",
         name: "RadioGroup",
         sentence: "A choice among few visible possibilities, with the keyboard model of a radio group.",
@@ -253,6 +267,13 @@ export const OUTLINE: readonly Rubric[] = [
         exports: ["Spinner"],
       },
       {
+        id: "progressbar",
+        name: "ProgressBar",
+        sentence: "How far a task has come - or, without a value, that it runs; never a verdict, so never a tone.",
+        types: ["ProgressBarProps"],
+        exports: ["ProgressBar"],
+      },
+      {
         id: "skeleton",
         name: "Skeleton",
         sentence: "The placeholder for content still to come: it holds the height the content will have.",
@@ -309,6 +330,13 @@ export const OUTLINE: readonly Rubric[] = [
         exports: ["Modal", "ModalHeader", "ModalBody", "ModalFooter"],
       },
       {
+        id: "drawer",
+        name: "Drawer",
+        sentence: "The same window, entering from an edge - a detail beside the page it came from.",
+        types: ["DrawerProps"],
+        exports: ["Drawer", "ModalHeader", "ModalBody", "ModalFooter"],
+      },
+      {
         id: "confirmdialog",
         name: "ConfirmDialog",
         sentence: "The one question before an action that cannot be taken back.",
@@ -330,11 +358,25 @@ export const OUTLINE: readonly Rubric[] = [
     sentence: "How one gets from one place to the next - and how many places are held in one.",
     pages: [
       {
+        id: "breadcrumb",
+        name: "Breadcrumb",
+        sentence: "Where a page stands, from the plant down - and the way back up, folded into a menu where the place runs short.",
+        types: ["BreadcrumbProps", "BreadcrumbEntry"],
+        exports: ["Breadcrumb"],
+      },
+      {
         id: "tabs",
         name: "Tabs",
         sentence: "Several views in one place, of which exactly one is visible.",
         types: ["TabsProps", "TabProps", "TabPanelProps"],
         exports: ["Tabs", "TabList", "Tab", "TabPanel"],
+      },
+      {
+        id: "accordion",
+        name: "Accordion",
+        sentence: "Long content in sections behind headers - one open at a time, or several side by side.",
+        types: ["AccordionProps", "AccordionItemProps"],
+        exports: ["Accordion", "AccordionItem"],
       },
       {
         id: "treeview",

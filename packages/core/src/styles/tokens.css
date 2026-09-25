@@ -184,6 +184,11 @@
     --u-dock-refusal-surface: color-mix(in srgb, var(--u-color-material-fallback) 55%, transparent);
     --u-dock-refusal-duration: 1400ms;
 
+    /* The width of a drawer (core-foundations 03). A token rather than a size
+       prop: a detail beside a process picture wants one width across an
+       application, and one drawer that needs another sets it in its `style`. */
+    --u-drawer-width: 400px;
+
     /* ---- Shadow stacks: every step has one job ----
        Card:    edge - contact with the ground - soft depth
        Overlay: edge - near shadow - depth                    */
@@ -281,6 +286,7 @@
        spinner at 0ms says nothing; each module slows or stops its own. */
     --u-duration-spin: 700ms;
     --u-duration-shimmer: 1.6s;
+    --u-duration-sweep: 1.4s;                /* an indeterminate progress bar crosses its track */
     --u-ease-steady: linear;                 /* a turn with no start and no end */
     --u-ease-swell: ease-in-out;             /* a shimmer that comes and goes */
   }
