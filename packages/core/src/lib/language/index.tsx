@@ -27,8 +27,8 @@ export type { Wording } from "./wording";
 /** What an application can pass in for formatting and wording. */
 export interface LanguageOptions {
   /** How numbers, dates and durations are written. Overridden entry by entry;
-      what is left out keeps writing as `DEFAULT_FORMATS` does - in `de-DE`,
-      whatever the wording says (ADR-0019). */
+      what is left out keeps writing as `DEFAULT_FORMATS` does - in English
+      notation, whatever the wording says (ADR-0024). */
   formats?: Partial<Formats>;
   /** The presets are a register of their own and are likewise overridden entry
       by entry. */

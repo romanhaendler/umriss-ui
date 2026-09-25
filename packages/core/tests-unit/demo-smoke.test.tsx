@@ -61,8 +61,8 @@ describe("Demo smoke test", () => {
     await teardown();
   });
 
-  it("has a props table with at least one row for every page", async () => {
-    const { host, teardown } = await mount(<Page demo={DEMO} page={ALL_PAGES[0]!} />);
+  it("has a props table with at least one row for the first page with types", async () => {
+    const { host, teardown } = await mount(<Page demo={DEMO} page={ALL_PAGES.find((p) => p.types.length > 0)!} />);
     expect(host.querySelectorAll(".apiTable tbody tr").length).toBeGreaterThan(0);
     await teardown();
   });
