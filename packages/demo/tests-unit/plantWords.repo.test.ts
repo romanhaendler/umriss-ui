@@ -38,10 +38,6 @@ const PENDING: readonly string[] = [
   "packages/calculation/demo/examples/Worked-examples/01-cost-per-piece.tsx",
   "packages/calculation/demo/examples/Worked-examples/02-hall-oee.tsx",
   "packages/calculation/demo/outline.ts",
-  "packages/charts/demo/examples/Chart/03-empty.tsx",
-  "packages/charts/demo/outline.ts",
-  "packages/charts/src/Line.tsx",
-  "packages/charts/src/scene.ts",
   "packages/core/demo/examples/Accordion/01-one-section-at-a-time.tsx",
   "packages/core/demo/examples/Accordion/02-several-open.tsx",
   "packages/core/demo/examples/Accordion/04-machine-settings.tsx",
@@ -153,7 +149,6 @@ const PENDING: readonly string[] = [
   "packages/table/demo/scenarios/01-work-through-orders.tsx",
 ];
 const PENDING_QUARTER: readonly string[] = [
-  "charts examples",
 ];
 
 it("finds no plant word outside the plant world and no package over the quarter, but what is pending", () => {

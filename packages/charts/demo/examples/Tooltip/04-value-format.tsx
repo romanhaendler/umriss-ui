@@ -1,24 +1,22 @@
-/* A furnace and the line it heats, on two y axes: each series writes its value
-   in its own unit, through `format`. Without it the tooltip would take the y
-   axis' `tickFormat`, and without that the default - a bare number beside
-   another bare number. No render prop is needed for "°C". Hover to read it. */
-
 import { Chart, Legend, Line, Tooltip, XAxis, YAxis } from "../../../src";
-import { corridorData, powerData, type CorridorPoint, type PowerPoint } from "@umriss-ui/demo/worlds/plant";
+import { metrics, type MetricPoint } from "@umriss-ui/demo/worlds/operations";
 
-export const title = "Value format per series";
+export const title = "Write each value in its unit";
+export const lead = "`format` on a series writes its value in the tooltip; without it the y axis' `tickFormat` does, and without that a bare number.";
 
-const celsius = (v: number) => `${v.toFixed(1)} °C`;
-const kilowatts = (v: number) => `${v.toFixed(0)} kW`;
+const CHECKOUT = metrics("checkout");
+
+const milliseconds = (v: number) => `${v.toFixed(0)} ms`;
+const percent = (v: number) => `${v.toFixed(2)} %`;
 
 export default function ValueFormat() {
   return (
-    <Chart data={corridorData} height={260} ariaLabel="Furnace temperature and power draw with their units">
-      <XAxis accessor={(d: { t: number }) => d.t} time />
-      <YAxis accessor={(d: CorridorPoint) => d.temperature} label="°C" />
-      <YAxis id="power" position="right" accessor={(d: PowerPoint) => d.kw} label="kW" />
-      <Line accessor={(d: CorridorPoint) => d.temperature} name="Furnace" format={celsius} />
-      <Line data={powerData} accessor={(d: PowerPoint) => d.kw} yAxisId="power" name="Power draw" format={kilowatts} />
+    <Chart data={CHECKOUT} height={260} ariaLabel="Checkout's latency and error rate with their units">
+      <XAxis accessor={(d: MetricPoint) => d.t} time />
+      <YAxis accessor={(d: MetricPoint) => d.p95} label="ms" />
+      <YAxis id="errors" position="right" accessor={(d: MetricPoint) => d.errorRate} label="Errors %" />
+      <Line accessor={(d: MetricPoint) => d.p95} name="p95" format={milliseconds} />
+      <Line accessor={(d: MetricPoint) => d.errorRate} yAxisId="errors" name="Error rate" format={percent} />
       <Legend />
       <Tooltip mode="x" />
     </Chart>

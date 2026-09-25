@@ -1,28 +1,20 @@
-/* Planned and made, side by side: two bar series on the same x axis share the
-   step and stand next to each other, centred on the day as a group.
-
-   `barWidth` is the fraction of the step the whole group takes - so both series
-   carry the same value, and a different one would be a DEV warning. The plan
-   gets a quiet `color` of its own: it is the reference, and the palette colour
-   goes to what was made. A token, so that it follows the colour scheme - the
-   canvas resolves it like the palette. */
-
 import { Bar, Chart, Legend, Tooltip, XAxis, YAxis } from "../../../src";
-import { outputData, type DayOutput } from "@umriss-ui/demo/worlds/plant";
+import { COST_CENTRES, LEDGER, type LedgerRow } from "@umriss-ui/demo/worlds/controlling";
 
-export const title = "Grouped bars";
+export const title = "Group bars side by side";
+export const lead = "Bar series on one x axis stand beside each other; give each the same `barWidth`, and the reference a quiet `color`.";
+
+const FEBRUARY = LEDGER.filter((row) => row.month === "2026-02");
+const place = (row: LedgerRow) => COST_CENTRES.findIndex((c) => c.id === row.costCentre);
 
 export default function Grouped() {
   return (
-    <Chart data={outputData} height={280} ariaLabel="Planned and made output per working day">
-      <XAxis
-        accessor={(d: DayOutput) => d.day}
-        ticks={outputData.map((d) => d.day)}
-        tickFormat={(v) => outputData[v]?.name ?? ""}
-      />
-      <YAxis accessor={(d: DayOutput) => d.actual} label="Pieces" />
-      <Bar accessor={(d: DayOutput) => d.planned} name="Planned" color="var(--uc-color-text)" barWidth={0.7} />
-      <Bar accessor={(d: DayOutput) => d.actual} name="Made" barWidth={0.7} />
+    <Chart data={FEBRUARY} height={280} ariaLabel="Budget and actual per cost centre in February">
+      <XAxis accessor={place} ticks={COST_CENTRES.map((_, i) => i)} tickFormat={(v) => COST_CENTRES[v]?.name ?? ""} />
+      <YAxis accessor={(d: LedgerRow) => d.budget} label="€" />
+      {/* A token, so that it follows the colour scheme. */}
+      <Bar accessor={(d: LedgerRow) => d.budget} name="Budget" color="var(--uc-color-text)" barWidth={0.7} />
+      <Bar accessor={(d: LedgerRow) => d.actual} name="Actual" barWidth={0.7} />
       <Legend placement="top" />
       <Tooltip mode="x" />
     </Chart>
