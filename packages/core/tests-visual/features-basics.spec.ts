@@ -30,7 +30,7 @@ test("Modal opens and closes on Escape", async ({ page }) => {
 });
 
 test("Toast appears with a title and a description", async ({ page }) => {
-  await openExample(page, "toast", "feedback");
+  await openExample(page, "toast", "show-a-toast");
   await page.getByRole("button", { name: "Show a toast" }).click();
   await expect(page.getByText("Export finished")).toBeVisible();
   await expect(page.getByText("The project list is ready as a CSV.")).toBeVisible();
