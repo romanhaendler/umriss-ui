@@ -1,37 +1,33 @@
 import { useTable } from "../../../src";
 
-export const title = "By month: group=\"month\"";
+export const title = "Group dates by month";
+export const lead = "`group=\"month\"` brings each date to the start of its month; \"day\", \"week\" and \"year\" work the same, and the cells keep the full date.";
 
-/* A delivery date grouped as it is would give every day a group of its own.
-   `group="month"` brings each date to the start of its month - one word,
-   no function. "day", "week" (ISO, Monday first) and "year" work the same
-   way. The cells keep their full date; the group header names the month. */
-
-interface Delivery {
+interface Invoice {
   id: string;
-  customer: string;
-  due: Date;
-  pallets: number;
+  supplier: string;
+  received: Date;
+  amount: number;
 }
 
-const DELIVERIES: Delivery[] = [
-  { id: "D-8810", customer: "Brenner GmbH", due: new Date(2026, 8, 28), pallets: 6 },
-  { id: "D-8811", customer: "Kessler AG", due: new Date(2026, 8, 30), pallets: 2 },
-  { id: "D-8812", customer: "Hartmann KG", due: new Date(2026, 9, 2), pallets: 9 },
-  { id: "D-8813", customer: "Brenner GmbH", due: new Date(2026, 9, 14), pallets: 4 },
-  { id: "D-8814", customer: "Weiss Antriebe", due: new Date(2026, 9, 21), pallets: 3 },
-  { id: "D-8815", customer: "Vogt Maschinen", due: new Date(2026, 10, 4), pallets: 7 },
-  { id: "D-8816", customer: "Kessler AG", due: new Date(2026, 10, 18), pallets: 5 },
+const INVOICES: Invoice[] = [
+  { id: "INV-26-0102", supplier: "Pennock Energy", received: new Date(2026, 0, 9), amount: 3420 },
+  { id: "INV-26-0131", supplier: "Castrel Hosting", received: new Date(2026, 0, 28), amount: 2890 },
+  { id: "INV-26-0204", supplier: "Brandlow Office Supply", received: new Date(2026, 1, 4), amount: 860 },
+  { id: "INV-26-0221", supplier: "Stellbrook Consulting", received: new Date(2026, 1, 21), amount: 8700 },
+  { id: "INV-26-0226", supplier: "Corrin Travel", received: new Date(2026, 1, 26), amount: 8117.2 },
+  { id: "INV-26-0309", supplier: "Nimbrel Software", received: new Date(2026, 2, 9), amount: 7288 },
+  { id: "INV-26-0318", supplier: "Brandlow Office Supply", received: new Date(2026, 2, 16), amount: 1951.24 },
 ];
 
 export default function ByMonth() {
-  const { Table, Column } = useTable(DELIVERIES, { rowKey: (d) => d.id, defaultGrouping: "due" });
+  const { Table, Column } = useTable(INVOICES, { rowKey: (i) => i.id, defaultGrouping: "received" });
   return (
-    <Table ariaLabel="Deliveries by month">
-      <Column value="due" label="Due" format="date" group="month" />
-      <Column value="id" label="Delivery" rowHeader />
-      <Column value="customer" label="Customer" />
-      <Column value="pallets" label="Pallets" aggregate="sum" />
+    <Table ariaLabel="Invoices by month received">
+      <Column value="received" label="Received" format="date" group="month" />
+      <Column value="id" label="Invoice" rowHeader />
+      <Column value="supplier" label="Supplier" />
+      <Column value="amount" label="Amount (€)" format={{ decimals: 2 }} aggregate="sum" />
     </Table>
   );
 }

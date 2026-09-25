@@ -1,64 +1,48 @@
 import { RadioGroup } from "@umriss-ui/core";
 import { columnFilter, useTable } from "../../../src";
 
-export const title = "A filter of one's own with columnFilter";
+export const title = "Offer conditions of your own";
+export const lead = "A filter from `columnFilter<number, …>` fits every number column of every table; an absent value matches none of its conditions.";
 
-/* What a filter asks is not always the table's decision. `columnFilter` takes
-   three things: `matches` checks a value against the condition, `Input` stands
-   in the panel, and `describe` names the condition in the table toolbar. The
-   panel with "Reset" and "Done", the counting, the way back and the view belong
-   to the table - for this filter as for the list filter, which goes through the
-   same door.
+type Load = "part-time" | "full-time";
 
-   The filter is bound to a value type, not to a table:
-   `columnFilter<number, …>` is accepted by the compiler at every number column
-   and not at a text column. An absent value satisfies no condition of one's own,
-   and `matches` never gets to see it. */
-
-type Level = "low" | "empty";
-
-const LEVELS = [
-  { value: "low", label: "Low – under 20" },
-  { value: "empty", label: "Empty" },
+const LOADS = [
+  { value: "part-time", label: "Part-time – under 32 h" },
+  { value: "full-time", label: "Full-time – 32 h and more" },
 ] as const;
 
-const stockLevel = columnFilter<number, Level>({
-  matches: (value, level) => (level === "empty" ? value === 0 : value < 20),
+const workload = columnFilter<number, Load>({
+  matches: (hours, load) => (load === "part-time" ? hours < 32 : hours >= 32),
   Input: ({ condition, setCondition, column }) => (
-    <RadioGroup
-      aria-label={column.label}
-      size="sm"
-      options={LEVELS}
-      value={condition}
-      onChange={(level) => setCondition(level)}
-    />
+    <RadioGroup aria-label={column.label} size="sm" options={LOADS} value={condition} onChange={(load) => setCondition(load)} />
   ),
-  describe: (level) => (level === "empty" ? "empty" : "low"),
+  describe: (load) => load,
 });
 
-interface Part {
-  number: string;
-  description: string;
-  stock: number | null;
+interface Person {
+  id: string;
+  name: string;
+  role: string;
+  capacity: number | null;
 }
 
-const PARTS: Part[] = [
-  { number: "T-1180", description: "Flange DN 50", stock: 240 },
-  { number: "T-1204", description: "Shaft Ø 32 × 410", stock: 12 },
-  { number: "T-1311", description: "Bearing cap", stock: 0 },
-  { number: "T-1320", description: "Flange DN 80", stock: null },
-  { number: "T-1402", description: "Sealing ring 40 × 3", stock: 1065 },
-  { number: "T-1415", description: "Key 8 × 7", stock: 7 },
+const PEOPLE: Person[] = [
+  { id: "maya", name: "Maya Lindgren", role: "Product manager", capacity: 32 },
+  { id: "arjun", name: "Arjun Mehta", role: "Developer", capacity: 40 },
+  { id: "noah", name: "Noah Fischer", role: "Designer", capacity: 24 },
+  { id: "kofi", name: "Kofi Mensah", role: "Developer", capacity: 32 },
+  { id: "david", name: "David Kowalski", role: "QA engineer", capacity: 20 },
+  { id: "new", name: "Starts in April", role: "Developer", capacity: null },
 ];
 
 export default function OwnFilter() {
-  const { Table, Column } = useTable(PARTS, { rowKey: (p) => p.number });
+  const { Table, Column } = useTable(PEOPLE, { rowKey: (p) => p.id });
 
   return (
-    <Table ariaLabel="Stores">
-      <Column value="number" label="Part" rowHeader />
-      <Column value="description" label="Description" />
-      <Column value="stock" label="Stock" filter={stockLevel} />
+    <Table ariaLabel="Team">
+      <Column value="name" label="Person" rowHeader />
+      <Column value="role" label="Role" />
+      <Column value="capacity" label="Hours a week" filter={workload} />
     </Table>
   );
 }

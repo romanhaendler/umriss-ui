@@ -1,39 +1,34 @@
 import { useTable } from "../../../src";
 
-export const title = "In bands: groupValue";
+export const title = "Group numbers in bands";
+export const lead = "`groupValue` says what to group by instead of the value, here an amount band; bands stand small before large, and cells keep the amount.";
 
-/* A number grouped as it is would give every quantity its own group.
-   `groupValue` - beside `sortValue` and `exportValue` - says what is grouped
-   by instead: here a lot size band. The bands stand by what they hold, small
-   before large, not by the alphabet of their names. The cells keep the
-   quantity; sorting and the export do too. */
-
-interface Lot {
+interface Invoice {
   id: string;
-  article: string;
-  pieces: number;
+  supplier: string;
+  amount: number;
 }
 
-const LOTS: Lot[] = [
-  { id: "L-5510", article: "Housing 40", pieces: 1200 },
-  { id: "L-5511", article: "Flange", pieces: 240 },
-  { id: "L-5512", article: "Shaft 12", pieces: 4800 },
-  { id: "L-5513", article: "Bushing", pieces: 90 },
-  { id: "L-5514", article: "Cover plate", pieces: 760 },
-  { id: "L-5515", article: "Bracket", pieces: 2100 },
-  { id: "L-5516", article: "Housing 60", pieces: 380 },
+const INVOICES: Invoice[] = [
+  { id: "INV-26-0318", supplier: "Brandlow Office Supply", amount: 1951.24 },
+  { id: "INV-26-0317", supplier: "Kettering & Shaw Events", amount: 15_110 },
+  { id: "INV-26-0309", supplier: "Nimbrel Software", amount: 7288 },
+  { id: "INV-26-0302", supplier: "Fenwright Legal", amount: 3770 },
+  { id: "INV-26-0296", supplier: "Lumen Print", amount: 640 },
+  { id: "INV-26-0290", supplier: "Pennock Energy", amount: 3180 },
+  { id: "INV-26-0284", supplier: "Orla Ads", amount: 480 },
 ];
 
-const band = (pieces: number) => (pieces < 500 ? "Small (under 500)" : pieces < 2000 ? "Medium (500–1,999)" : "Large (2,000 and more)");
+const band = (amount: number) => (amount < 1000 ? "Small (under €1,000)" : amount < 10_000 ? "Medium (€1,000–9,999)" : "Large (€10,000 and more)");
 
 export default function InBands() {
-  const { Table, Column } = useTable(LOTS, { rowKey: (l) => l.id, defaultGrouping: "size" });
+  const { Table, Column } = useTable(INVOICES, { rowKey: (i) => i.id, defaultGrouping: "size" });
   return (
-    <Table ariaLabel="Lots by size">
-      <Column id="size" value={(l) => l.pieces} label="Lot size" groupValue={band} format="count" />
-      <Column value="id" label="Lot" rowHeader />
-      <Column value="article" label="Article" />
-      <Column value="pieces" label="Pieces" format="count" aggregate="sum" />
+    <Table ariaLabel="Invoices by size">
+      <Column id="size" value={(i) => i.amount} label="Size" groupValue={band} format={{ decimals: 2 }} />
+      <Column value="id" label="Invoice" rowHeader />
+      <Column value="supplier" label="Supplier" />
+      <Column value="amount" label="Amount (€)" format={{ decimals: 2 }} aggregate="sum" />
     </Table>
   );
 }

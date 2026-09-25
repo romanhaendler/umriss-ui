@@ -271,7 +271,7 @@ test.describe("Column › width", () => {
 
     expect((await header.boundingBox())!.width).toBeGreaterThan(before + 40);
     await expect(header).toHaveAttribute("aria-sort", "none");
-    await expect(table.locator("tbody tr").first()).toContainText("A-2041");
+    await expect(table.locator("tbody tr").first()).toContainText("FP-1004210");
   });
 
   test("A double click on the grip measures the content", async ({ page }) => {
@@ -298,6 +298,6 @@ test.describe("Column › width", () => {
 test("The dragged width stands in the view", async ({ page }) => {
   await openExample(page, "table", "initial-view");
   const table = example(page, "initial-view");
-  await drag(page, table.getByRole("columnheader", { name: "Customer" }), 60);
-  await expect(table.locator("[data-role='view']")).toContainText('"widths":{"customer":');
+  await drag(page, table.getByRole("columnheader", { name: "Supplier" }), 60);
+  await expect(table.locator("[data-role='view']")).toContainText('"widths":{"supplier":');
 });

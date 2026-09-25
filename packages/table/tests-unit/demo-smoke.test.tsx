@@ -52,7 +52,10 @@ describe("Demo smoke test", () => {
   it.each(ALL_PAGES.map((s) => [s.name, s] as const))("renders the page %s with its tables", async (_name, pageData) => {
     const { host, unmount } = await mount(<Page demo={DEMO} page={pageData} />);
     expect(host.querySelector(`[data-block="${pageData.id}"]`)).not.toBeNull();
-    expect(host.querySelectorAll(".apiTable tbody tr").length).toBeGreaterThan(0);
+    /* Installation documents no type: it has no API table. */
+    if (pageData.types.length > 0) {
+      expect(host.querySelectorAll(".apiTable tbody tr").length).toBeGreaterThan(0);
+    }
     await unmount();
   });
 

@@ -31,11 +31,11 @@ test("hover on a group header, a row and a span", async ({ page }, info) => {
 test("a folded span and a folded header, the focus on the fold", async ({ page }, info) => {
   await openExample(page, "grouping", "two-levels");
   const table = example(page, "two-levels");
-  await table.getByRole("button", { name: "Fold Otto & Söhne, 3" }).click();
-  const header = table.getByRole("button", { name: "Fold Line 3, 3" });
+  await table.getByRole("button", { name: "Fold Brandlow Office Supply, 3" }).click();
+  const header = table.getByRole("button", { name: "Fold IT, 3" });
   await header.focus();
   await page.keyboard.press("ArrowLeft");
-  await expect(table.getByRole("button", { name: "Unfold Line 3, 3" })).toBeFocused();
+  await expect(table.getByRole("button", { name: "Unfold IT, 3" })).toBeFocused();
   await expect(table).toHaveScreenshot(shot("folded-focus", info.project.name));
 });
 
@@ -51,15 +51,15 @@ test("three levels, compact, selected in part", async ({ page }, info) => {
   const table = example(page, "compact-and-long-values");
   /* The box's input is visually hidden under the drawn box; it is reached as a
      keyboard user reaches it. */
-  await table.getByRole("checkbox", { name: "Select M-4417" }).focus();
+  await table.getByRole("checkbox", { name: "Select W-112" }).focus();
   await page.keyboard.press("Space");
-  await expect(table.getByRole("checkbox", { name: "Select M-4417" })).toBeChecked();
+  await expect(table.getByRole("checkbox", { name: "Select W-112" })).toBeChecked();
   await expect(table).toHaveScreenshot(shot("compact-partial", info.project.name));
 });
 
 test("a sticky group header while its group scrolls", async ({ page }, info) => {
-  await openExample(page, "grouping", "the-shift-report");
-  const table = example(page, "the-shift-report");
+  await openExample(page, "grouping", "the-dispatch-report");
+  const table = example(page, "the-dispatch-report");
   await table.locator("table").evaluate((el) => {
     el.parentElement!.scrollTop = 150;
   });
