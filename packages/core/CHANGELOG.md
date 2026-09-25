@@ -57,6 +57,30 @@ commit.
 - **`Card` can be controlled**: `collapsed` folds it from outside, and
   `onCollapsedChange` reports the header's button - controlled, the card
   folds once `collapsed` follows; beside `defaultCollapsed` it is a message.
+- **`Switch`**: on or off, taking effect at once - a native checkbox under
+  `role="switch"` with its label beside it, `checked`/`defaultChecked`, sizes
+  `sm` and `md`, `invalid` (set by `FormField` with an error). The class goes
+  to the label, ref and rest to the input, as for `Checkbox`.
+- **`Slider`**: one value on the native range input, drawn with tokens -
+  `value`/`defaultValue` with `onChange(value)`, `min`, `max`, `step`, `marks`
+  (a number, or `{ value, label }`), `format` for the mono readout
+  (`showValue`) and `aria-valuetext`. Arrows by a step, PageUp/PageDown by a
+  tenth of the range, Home/End to the bounds, the same on every engine.
+- **`Drawer`**: the `Modal`'s dialog entering from an edge, `side="right" |
+  "left"`, with `ModalHeader`, `ModalBody` and `ModalFooter` inside; its width
+  is the new token `--u-drawer-width` (400px).
+- **`ProgressBar`**: how far a task has come, `role="progressbar"` -
+  determinate with `value` from 0 to 1, indeterminate without; `valueText`
+  for a count, `showLabel` for the percentage. No tone: progress is no
+  verdict. New token `--u-duration-sweep` for the indeterminate bar.
+- **`Accordion` / `AccordionItem`**: sections behind headers that are buttons
+  with `aria-expanded` inside a heading (`headingLevel`), `type="single" |
+  "multiple"`, `value`/`defaultValue` as a list with `onChange`, arrow keys,
+  Home and End between the headers, `disabled` items.
+- **`Breadcrumb`**: `items` from the root to the current page, the last
+  `aria-current="page"`, each a link (`href`), a button (`onSelect`) or both -
+  with `onSelect` the caller routes. Where the trail does not fit, its middle
+  levels fold into a menu, measured from the trail's own widths.
 
 ### Changed
 
@@ -73,6 +97,11 @@ commit.
   `columnAvailability`. A partial wording passed to the provider is merged as
   before; an application that implements the whole `Wording` type itself no
   longer compiles until it adds these five.
+- **Three more keys in `Wording`, for the new components**, in English and
+  German: `progress` (a `ProgressBar`'s name where the caller gives none),
+  `breadcrumb` (the landmark's name) and `breadcrumbFolded` (the key of the
+  folded levels). The same holds as above: a partial wording merges, a whole
+  `Wording` of an application's own needs the three.
 - **What `...rest` may not override.** `Stat` keeps its role and the name it
   has read, `Meter` its role and `aria-value*`, `Spinner`, `TreeView`,
   `TabList`, `TabPanel` and `MenuItem` their role, `Tab` its role, ids and
