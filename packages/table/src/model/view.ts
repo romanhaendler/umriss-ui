@@ -7,6 +7,7 @@
    That is why the view is an object and not a string. */
 
 import type { SortLevel } from "./tableModel";
+import type { Pin } from "./pinning";
 
 /** Search, conditions, sort levels, page, page size, hidden columns, order,
     dragged widths, the grouping and the pinned columns. Whatever is at its
@@ -31,5 +32,5 @@ export interface TableView<K extends string = string> {
   /** The pinned columns, whole, once the user's choice deviates from what the
       columns declare - `{}` when every declared pin was undone. A column that
       does not exist falls out. */
-  pinned?: Readonly<Record<string, "start" | "end">>;
+  pinned?: Readonly<Record<string, Pin>>;
 }

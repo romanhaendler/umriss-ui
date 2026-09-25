@@ -679,7 +679,11 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
           </tfoot>
         )}
       </table>
-      <PinPlacement table={tableRef} blocks={blocks} />
+      <PinPlacement
+        table={tableRef}
+        blocks={blocks}
+        pinnedKeys={dataColumns.filter((e) => pins[e.spec.id]).map((e) => e.key).join("|")}
+      />
     </div>
   );
 }
@@ -689,7 +693,16 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
    of a block changes its width (a font arriving, a column dragged), which
    happens without one. A component and not a hook of the frame's: the blocks
    are known only after the frame's early return. */
-function PinPlacement({ table: tableRef, blocks }: { table: RefObject<HTMLTableElement | null>; blocks: PinBlocks }) {
+function PinPlacement({
+  table: tableRef,
+  blocks,
+  pinnedKeys,
+}: {
+  table: RefObject<HTMLTableElement | null>;
+  blocks: PinBlocks;
+  /** Which columns are pinned: another column in a block is another cell to watch. */
+  pinnedKeys: string;
+}) {
   const { start, end } = blocks;
   const place = () => {
     const table = tableRef.current;
@@ -718,7 +731,7 @@ function PinPlacement({ table: tableRef, blocks }: { table: RefObject<HTMLTableE
     if (table.parentElement) observer.observe(table.parentElement);
     return () => observer.disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- `place` reads the table afresh; the cells change with the blocks
-  }, [tableRef, start, end, blocks.count]);
+  }, [tableRef, start, end, blocks.count, pinnedKeys]);
   return null;
 }
 

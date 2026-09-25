@@ -174,6 +174,16 @@ describe("the lines of a grouped table", () => {
   });
 });
 
+describe("a group header over a pinned column with an aggregate", () => {
+  it("keeps one cell per column: the label takes the first column's place", () => {
+    const { container } = render(<Plant grouping={["line"]} initialView={{ pinned: { output: "start" } }} />);
+    const header = container.querySelector("tbody tr[data-line='header']") as HTMLTableRowElement;
+    const span = (row: HTMLTableRowElement) => Array.from(row.cells).reduce((n, c) => n + c.colSpan, 0);
+    expect(span(header)).toBe(headRow(container).cells.length);
+    expect(places(header).slice(0, 3)).toEqual(["start 0", "start 1", "start 2"]);
+  });
+});
+
 describe("a virtualised table", () => {
   interface Reading {
     id: string;
@@ -259,6 +269,6 @@ describe("pinning in the column menu (table-column-pinning 02)", () => {
     const menu = screen.getByRole("dialog");
     within(menu).getByRole("button", { name: "Line am Anfang fixieren" });
     within(menu).getByRole("button", { name: "Line am Ende fixieren" });
-    within(menu).getByRole("button", { name: "Tag lösen" });
+    within(menu).getByRole("button", { name: "Fixierung von Tag lösen" });
   });
 });

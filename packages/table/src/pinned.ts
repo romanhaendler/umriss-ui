@@ -1,7 +1,7 @@
 /* A cell of a pinned block: its class and its offset (table-column-pinning).
 
    The offset is a variable the table sets from the widths of its head row
-   (parts.tsx, `placePins`) - the cells only name it. That way a measurement
+   (parts.tsx, `PinPlacement`) - the cells only name it. That way a measurement
    writes one value per place instead of one per cell, and a virtual row that
    appears later finds its offset already standing. */
 
