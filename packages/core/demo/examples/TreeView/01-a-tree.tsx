@@ -2,46 +2,46 @@ import { TreeView, useTree } from "../../../src";
 import type { NodeReader } from "../../../src";
 
 export const title = "A tree";
+export const lead = "Hand your data and a `reader` to `useTree`; the reader says how to get a node's key, label and children.";
 
-/* The smallest tree there is: a handful of nodes, one of them active, and the
-   arrow keys. No ticking, no search, no virtualisation - those are the examples
-   below this one.
-
-   `useTree` takes the caller's data and a reader that says how to get a key, a
-   label and the children out of it. The library never owns the data; it owns
-   the view state over it. */
-
-interface Folder {
+interface Unit {
   id: string;
   name: string;
-  children?: Folder[];
+  children?: Unit[];
 }
 
-const FILING: Folder[] = [
+const COMPANY: Unit[] = [
   {
-    id: "contracts",
-    name: "Contracts",
+    id: "commercial",
+    name: "Commercial",
     children: [
-      { id: "framework", name: "Framework contracts" },
-      { id: "single", name: "Single orders" },
+      { id: "CC-1100", name: "Sales, CC-1100" },
+      { id: "CC-1200", name: "Marketing, CC-1200" },
     ],
   },
-  { id: "documents", name: "Documents", children: [{ id: "2026", name: "2026" }] },
-  { id: "statutes", name: "Statutes.pdf" },
+  {
+    id: "product",
+    name: "Product",
+    children: [
+      { id: "CC-2100", name: "Engineering, CC-2100" },
+      { id: "CC-2200", name: "Design, CC-2200" },
+    ],
+  },
+  { id: "CC-3100", name: "Customer service, CC-3100" },
 ];
 
-const READER: NodeReader<Folder> = {
-  key: (e) => e.id,
-  children: (e) => e.children,
-  label: (e) => e.name,
+const READER: NodeReader<Unit> = {
+  key: (unit) => unit.id,
+  children: (unit) => unit.children,
+  label: (unit) => unit.name,
 };
 
 export default function ATree() {
-  const tree = useTree(FILING, { reader: READER, defaultExpanded: ["contracts"], defaultActive: "framework" });
+  const tree = useTree(COMPANY, { reader: READER, defaultExpanded: ["commercial"], defaultActive: "CC-1200" });
 
   return (
-    <TreeView tree={tree} ariaLabel="Filing">
-      {(e) => e.node.name}
+    <TreeView tree={tree} ariaLabel="Cost centres">
+      {(entry) => entry.node.name}
     </TreeView>
   );
 }

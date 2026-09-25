@@ -1,22 +1,19 @@
 import { Accordion, AccordionItem } from "../../../src";
 
 export const title = "One section at a time";
+export const lead = "By default opening one section folds the other; `defaultValue` names the sections open at the start.";
 
-/* The first step: `type="single"` is the default - opening one section folds
-   the other, and a second click folds the open one. Each header is a button
-   inside a heading; the arrow keys move between the headers, Enter and Space
-   open. The state belongs to the accordion. */
 export default function OneSectionAtATime() {
   return (
-    <Accordion defaultValue={["shift"]} style={{ maxWidth: 520 }}>
-      <AccordionItem value="shift" title="Shift handover">
-        Line 2 ran 7 h 40 min; one stop of 12 min at the capper, cleared by the night shift.
+    <Accordion defaultValue={["goal"]} style={{ maxWidth: 520 }}>
+      <AccordionItem value="goal" title="Sprint goal">
+        Member portal sign-in and profile, ready for Rowan Credit Union's review on Friday.
       </AccordionItem>
-      <AccordionItem value="quality" title="Quality">
-        Three samples taken, all inside the limits. The lab releases batch 0317-B at 11:00.
+      <AccordionItem value="finished" title="Finished work">
+        Sign-in form, password reset and the profile page's layout: 46 of 120 hours.
       </AccordionItem>
-      <AccordionItem value="maintenance" title="Maintenance">
-        The filler's valve seals are due in 180 operating hours.
+      <AccordionItem value="carried" title="Carried over">
+        Two-factor codes by text message, waiting for the provider's contract.
       </AccordionItem>
     </Accordion>
   );
