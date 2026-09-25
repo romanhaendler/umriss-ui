@@ -120,18 +120,44 @@ describe("Splitter", () => {
     expect(now()).toBe("30");
   });
 
-  it("follows the pointer across the whole box, inside its bounds", () => {
+  /* The line keeps the point it was grabbed at, and the panes share the box
+     less the separator's strip: box 100-500, the strip 8 wide. */
+  it("follows the pointer from where it was grabbed, inside its bounds", () => {
     const { container } = render(<Panes defaultValue={50} min={10} max={90} />);
     const root = container.firstElementChild as HTMLElement;
-    root.getBoundingClientRect = () => ({ left: 100, top: 0, width: 400, height: 300, right: 500, bottom: 300, x: 100, y: 0, toJSON: () => ({}) });
-    fireEvent.pointerDown(separator(), { pointerId: 1, button: 0, clientX: 300, clientY: 10 });
+    const rect = (left: number, width: number) => () =>
+      ({ left, top: 0, width, height: 300, right: left + width, bottom: 300, x: left, y: 0, toJSON: () => ({}) });
+    root.getBoundingClientRect = rect(100, 400);
+    separator().getBoundingClientRect = rect(298, 8);
+    // Grabbed six pixels left of the line's middle (302): at 200 the middle
+    // stands at 206, and (206 - 100 - 4) / (400 - 8) is 26 per cent.
+    fireEvent.pointerDown(separator(), { pointerId: 1, button: 0, clientX: 296, clientY: 10 });
     fireEvent.pointerMove(separator(), { pointerId: 1, clientX: 200, clientY: 10 });
-    expect(now()).toBe("25");
+    expect(now()).toBe("26");
     fireEvent.pointerMove(separator(), { pointerId: 1, clientX: 60, clientY: 10 });
     expect(now()).toBe("10");
     fireEvent.pointerUp(separator(), { pointerId: 1, clientX: 60, clientY: 10 });
     // Released: a move no longer drags.
     fireEvent.pointerMove(separator(), { pointerId: 1, clientX: 400, clientY: 10 });
     expect(now()).toBe("10");
+  });
+
+  it("lets a caller's key handler run first and keep the key", () => {
+    render(<Panes defaultValue={50} onKeyDown={(event) => event.key === "Enter" && event.preventDefault()} />);
+    press("Enter");
+    expect(now()).toBe("50");
+    press("ArrowRight");
+    expect(now()).toBe("55");
+  });
+
+  it("takes a pane folded to nothing out of the tab order", () => {
+    render(<Panes defaultValue={30} />);
+    const first = document.getElementById(separator().getAttribute("aria-controls")!)!;
+    expect(first.hasAttribute("inert")).toBe(false);
+    press("Enter");
+    expect(first.hasAttribute("inert")).toBe(true);
+    press("End");
+    expect(first.hasAttribute("inert")).toBe(false);
+    expect(separator().nextElementSibling?.hasAttribute("inert")).toBe(true);
   });
 });

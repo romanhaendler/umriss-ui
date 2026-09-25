@@ -1,5 +1,6 @@
 import { forwardRef, useEffect, useRef, useState } from "react";
 import type { DragEvent, InputHTMLAttributes } from "react";
+import { announce } from "../../lib/announce";
 import { cx } from "../../lib/cx";
 import { CrossGlyph } from "../../lib/glyphs";
 import { useFormats, useWording } from "../../lib/language";
@@ -56,7 +57,9 @@ export const FileInput = forwardRef<HTMLInputElement, FileInputProps>(function F
 
   /* The input holds what the list shows. `DataTransfer` is how a script
      builds a file list; where it is missing, an emptied list at least empties
-     the input. */
+     the input. After every render and not only when the list changes: a
+     controlled caller who refuses a choice keeps the same list, while the
+     browser has already put the refused files into the input. */
   useEffect(() => {
     const element = input.current;
     if (!element) return;
@@ -65,7 +68,7 @@ export const FileInput = forwardRef<HTMLInputElement, FileInputProps>(function F
       for (const file of files) transfer.items.add(file);
       element.files = transfer.files;
     } else if (files.length === 0) element.value = "";
-  }, [files]);
+  });
 
   const commit = (next: File[]) => {
     if (!controlled) setOwn(next);
@@ -74,11 +77,18 @@ export const FileInput = forwardRef<HTMLInputElement, FileInputProps>(function F
 
   const take = (offered: File[]) => {
     const taken = offered.filter((file) => accepts(file, accept));
-    setRejected(offered.filter((file) => !taken.includes(file)).map((file) => file.name));
+    const refused = offered.filter((file) => !taken.includes(file)).map((file) => file.name);
+    setRejected(refused);
+    /* Said as well as shown: the dialog's "all files" lets a keyboard user
+       choose a file `accept` refuses, and the line beneath the list is out
+       of their way. */
+    if (refused.length > 0) announce(refused.map((name) => wording.fileNotAccepted(name)).join(". "), input.current);
     commit(multiple ? taken : taken.slice(0, 1));
   };
 
-  const carriesFiles = (event: DragEvent) => !disabled && Array.from(event.dataTransfer?.types ?? []).includes("Files");
+  /* A drag that carries files is caught even by a disabled zone: not taking
+     it would let the browser open the file in place of the page. */
+  const carriesFiles = (event: DragEvent) => Array.from(event.dataTransfer?.types ?? []).includes("Files");
 
   const keyText = multiple ? wording.chooseFiles : wording.chooseFile;
 
@@ -89,12 +99,12 @@ export const FileInput = forwardRef<HTMLInputElement, FileInputProps>(function F
       onDragEnter={(event) => {
         if (!carriesFiles(event)) return;
         event.preventDefault();
-        setDragging(true);
+        if (!disabled) setDragging(true);
       }}
       onDragOver={(event) => {
         if (!carriesFiles(event)) return;
         event.preventDefault(); // this is what makes the zone a drop target
-        event.dataTransfer.dropEffect = "copy";
+        event.dataTransfer.dropEffect = disabled ? "none" : "copy";
       }}
       onDragLeave={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setDragging(false);
@@ -148,8 +158,8 @@ export const FileInput = forwardRef<HTMLInputElement, FileInputProps>(function F
           ))}
         </ul>
       )}
-      {rejected.map((name) => (
-        <p key={name} className={styles.rejected}>
+      {rejected.map((name, index) => (
+        <p key={index} className={styles.rejected}>
           {wording.fileNotAccepted(name)}
         </p>
       ))}
