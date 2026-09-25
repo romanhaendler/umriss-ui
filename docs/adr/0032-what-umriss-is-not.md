@@ -13,10 +13,11 @@ reader will ask - "not yet, or never?" Until now the answers stood in scattered
 answer reads as "not yet", and a library whose argument is honesty cannot leave
 a reader to guess.
 
-**umriss is a React library for the screens of a producing plant - values read
-against their limits, a machine's day, a shift's schedule, a calculation a
-planner can check - in English and German. What does not serve such a screen is
-not built, however common it is elsewhere.** The list below is the "never"; what
+**umriss is a set of React components for data-dense applications -
+dashboards, monitoring, planning, and the tools in which people read a lot of
+data and act on it (ADR-0035, which replaced this ADR's earlier plant-only
+sentence). What does not serve such an application is not built, however common
+it is elsewhere.** The list below is the "never"; what
 is only "not yet" stands in each package's record and in the open specs under
 `.scratch/`, and waits for a caller who needs it.
 
