@@ -15,7 +15,7 @@ checkOwnBase({
        input the probe does not read; features-basics.spec.ts reads it there.
        One entry per example that has a slider. */
     ...Object.fromEntries(
-      ["canary-traffic", "units-and-marks", "set-roughly-then-exactly", "split-a-budget", "machine-settings", "a-plant-browser"].map(
+      ["canary-traffic", "units-and-marks", "set-roughly-then-exactly", "split-a-budget", "browse-down-and-back-up", "long-settings-in-sections"].map(
         (example) => [
           `${example} › input.range`,
           "The slider's ring stands on its thumb (::-webkit-slider-thumb), which the probe cannot read; features-basics.spec.ts checks it there.",

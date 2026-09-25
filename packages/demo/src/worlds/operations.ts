@@ -265,8 +265,6 @@ export function week(serviceId: string, step: number): MetricPoint[] {
 }
 
 /** When this morning's load test of Search began. */
-export const LOAD_TEST_START = at(17, 6);
-
 export interface LoadTestPoint {
   /** Minutes since the test began. */
   minute: number;

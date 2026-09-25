@@ -9,6 +9,7 @@
 
 import { describe, expect, it } from "vitest";
 import { scrollForRow, visibleWindow } from "../src/lib/virtual";
+import { useVirtual } from "../src/lib/useVirtual";
 
 const BASE = { count: 1000, rowHeight: 40, viewportHeight: 400, overscan: 0 };
 
@@ -112,5 +113,26 @@ describe("scrollForRow – bringing a row into view", () => {
 
   it("brings the last row to the lower end", () => {
     expect(scrollForRow(999, { ...PLACEMENT, scrollTop: 0 })).toBe(40000 - 400);
+  });
+});
+
+/* The hook measures a real row and adopts its height. A row half a pixel off
+   the expected height is still off: over twenty thousand rows it is a
+   scrollbar ten thousand pixels short. */
+describe("useVirtual – the measured row height", () => {
+  it("adopts a row that is half a pixel taller than expected", async () => {
+    const { renderHook, act } = await import("@testing-library/react");
+    const frame = document.createElement("div");
+    const row = document.createElement("tr");
+    row.setAttribute("data-row", "0");
+    frame.appendChild(row);
+    row.getBoundingClientRect = () => ({ height: 37.5 }) as DOMRect;
+    const { result, rerender } = renderHook(({ count }) => {
+      const rows = useVirtual(count, { rowHeight: 37 });
+      rows.scrollRef.current = frame as HTMLDivElement;
+      return rows;
+    }, { initialProps: { count: 0 } });
+    await act(async () => rerender({ count: 20_000 }));
+    expect(result.current.fillerBefore + result.current.fillerAfter + (result.current.to - result.current.from) * 37.5).toBe(20_000 * 37.5);
   });
 });
