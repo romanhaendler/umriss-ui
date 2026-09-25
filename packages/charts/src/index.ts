@@ -115,3 +115,8 @@ export { localOffset } from "./operatingTime";
 /* The charts' own wording (ADR-0031); German stands behind the subpath
    `@umriss-ui/charts/wording/de`. */
 export { DEFAULT_CHARTS_WORDING, type ChartsWording } from "./wording";
+
+/* The data table (charts-alternatives 01). At the end, by the workspace's rule
+   for new exports. */
+export { DataTable } from "./DataTable";
+export type { DataTableGroup } from "./scene";

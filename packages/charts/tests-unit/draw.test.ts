@@ -252,3 +252,38 @@ describe("The hover marker", () => {
     expect(markers(345)).toEqual([]);
   });
 });
+
+/* charts-alternatives 02 (C3): under encoding by marks a line's markers take
+   their shape, and a bar is hatched across its fill - one stroke of lines,
+   clipped to the bars, after their one fill. */
+describe("Marks on the canvas", () => {
+  it("draws a line's markers in their shape, still one fill", () => {
+    const { filled } = draw({ ...line("always"), marker: "square" } as SeriesDrawItem);
+    expect(filled).toHaveLength(1);
+    expect(arcs(filled)).toBe(0);
+    expect(filled[0]?.ops.filter(([name]) => name === "closePath")).toHaveLength(1);
+  });
+
+  it("hatches bars with one stroke after their fill, and not without a hatch", () => {
+    const bars = (hatch?: "rising") =>
+      draw({
+        x: new Float64Array([100, 200]),
+        y: new Float64Array([50, 80]),
+        kind: "bar",
+        length: 2,
+        xScale,
+        yScale,
+        color: "#000",
+        alpha: 1,
+        baseline: 0,
+        offset: -10,
+        width: 20,
+        hatch,
+      });
+    expect(bars().stroked).toHaveLength(0);
+    const hatched = bars("rising");
+    expect(hatched.filled).toHaveLength(1);
+    expect(hatched.stroked).toHaveLength(1);
+    expect(hatched.stroked[0]?.ops.length).toBeGreaterThan(0);
+  });
+});

@@ -23,6 +23,19 @@ export interface ChartsWording {
   walkHelp: string;
   /** The keys that zoom and pan it - only where the chart can be zoomed. */
   zoomHelp: string;
+  /** The data table's disclosure key, closed and open (charts-alternatives
+      C1). */
+  showData: string;
+  hideData: string;
+  /** The heading of the table's x column where its axis has no `label`, and
+      of a matrix' row column where its y axis has none. */
+  positionColumn: string;
+  rowColumn: string;
+  /** The table's caption: the visible stretch it lists, both ends formatted. */
+  tableCaption: (from: string, to: string) => string;
+  /** Added to the caption where the table shows the downsampled course (C2):
+      how many readings its rows stand for. */
+  downsampled: (readings: number) => string;
 }
 
 export const DEFAULT_CHARTS_WORDING: ChartsWording = {
@@ -35,4 +48,11 @@ export const DEFAULT_CHARTS_WORDING: ChartsWording = {
   walkHelp:
     "Left and right arrows move through the values, up and down change the series, Home and End go to the first and the last, Escape clears.",
   zoomHelp: "Plus and minus zoom, Shift with left or right pans, 0 shows everything.",
+  showData: "Show data",
+  hideData: "Hide data",
+  positionColumn: "Position",
+  rowColumn: "Row",
+  tableCaption: (from, to) => `Values from ${from} to ${to}.`,
+  downsampled: (readings) =>
+    `Downsampled from ${readings.toLocaleString("en-GB")} readings: the first, lowest, highest and last value of each stretch.`,
 };

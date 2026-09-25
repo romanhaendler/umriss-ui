@@ -127,7 +127,7 @@ export const OUTLINE: readonly Rubric[] = [
         name: "Tooltip & Legend",
         sentence: "What a hover reports and what the colours mean: the hit as a whole x position or as the nearest point, the legend above or below the plot.",
         types: ["TooltipProps", "LegendProps"],
-        exports: ["Tooltip", "Legend"],
+        exports: ["Tooltip", "Legend", "DataTable"],
       },
       {
         id: "benchmark",

@@ -44,7 +44,9 @@ import {
 import { lowerBound, nearestIndex, nearestPoint } from "./hit";
 import { DEFAULT_CHARTS_WORDING, type ChartsWording } from "./wording";
 import { hasCell, nearestPosition, rowEnd, stepCell, stepPosition, type Cell, type Move, type WalkSeries } from "./walk";
-import { downsample } from "./downsample";
+import { downsample, type Course } from "./downsample";
+import { tableRows } from "./table";
+import { hatchFor, marksFor, type Hatch, type MarkerShape, type SeriesMarks } from "./marks";
 import { lastSegmentEnd, medianStep, segmentEnd, segmentIndex } from "./state";
 import { cellSize, cellIndex, measureSpacing } from "./cells";
 import { assess } from "./limit";
@@ -157,6 +159,20 @@ export interface LegendItem {
   /** The series highlighted on hover - several where state bands share a
       state. */
   seriesIds: number[];
+  /** Under encoding by marks (charts-alternatives C3), what the chip shows
+      besides the colour; null where the colour stands alone. */
+  mark: LegendMark | null;
+}
+
+/** A legend chip's marks: a line with its dash and marker (a scatter: the
+    marker alone), or swatches with their hatch - one for a bar or a state, one
+    per step for a matrix. `ground` is the colour a hatch is drawn in across a
+    swatch. */
+export interface LegendMark {
+  dash: readonly number[] | null;
+  marker: MarkerShape | null;
+  swatches: readonly { color: string; hatch: Hatch }[] | null;
+  ground: string;
 }
 
 /** A labelled limit, ready for the axis band. */
@@ -180,6 +196,19 @@ export interface LayoutSnapshot {
   limits: readonly LimitLabel[];
   /** No visible series has a point to show. */
   empty: boolean;
+  /** The registered data table - the id its panel carries, and whether it is
+      open -, or null without one. The legend shows its key. */
+  dataTable: { id: string; open: boolean } | null;
+}
+
+/** One table of the data table: the series of one x axis, or one matrix. Every
+    cell is text already, in the format the tooltip writes. */
+export interface DataTableGroup {
+  key: string;
+  caption: string;
+  columns: readonly string[];
+  /** The first cell of each row is its x - the row's heading. */
+  rows: readonly (readonly string[])[];
 }
 
 /** One row of the built-in tooltip, written out once per hit. */
@@ -210,6 +239,7 @@ const EMPTY_LAYOUT_SNAPSHOT: LayoutSnapshot = {
   limits: [],
   // Unknown before the first frame: saying "No data" there would flash.
   empty: false,
+  dataTable: null,
 };
 
 const EMPTY_HOVER_SNAPSHOT: HoverSnapshot = {
@@ -541,6 +571,9 @@ export class ChartScene {
   private axes = new Map<number, AxisEntry>();
   private legend: LegendConfig | null = null;
   private tooltip: TooltipConfig | null = null;
+  private dataTable: { id: string; open: boolean } | null = null;
+  /** `Chart encoding` (charts-alternatives C3). */
+  private encoding: "color" | "marks" = "color";
   private limits = new Map<number, LimitEntry>();
 
   /* ---------- Data and layout inputs ---------- */
@@ -853,6 +886,51 @@ export class ChartScene {
     this.pushHoverSnapshot();
   }
 
+  /* The data table (charts-alternatives 01) registers like the legend: one per
+     chart. Whether it is open is the scene's, because two elements show it -
+     the key in the legend and the panel. Opening it changes no pixel of the
+     plot, so it only pushes the snapshot. */
+
+  registerDataTable(id: string): void {
+    this.dataTable = { id, open: false };
+    this.pushLayoutSnapshot();
+  }
+
+  unregisterDataTable(): void {
+    this.dataTable = null;
+    this.pushLayoutSnapshot();
+  }
+
+  toggleDataTable(): void {
+    if (this.dataTable === null) return;
+    this.dataTable = { ...this.dataTable, open: !this.dataTable.open };
+    this.pushLayoutSnapshot();
+  }
+
+  setEncoding(encoding: "color" | "marks"): void {
+    if (encoding === this.encoding) return;
+    this.encoding = encoding;
+    this.markLayoutDirty();
+  }
+
+  /** Is every series drawn with its marks as well as its colour? Under forced
+      colours always: every series is drawn in the one text colour then (C4). */
+  private marked(): boolean {
+    return this.encoding === "marks" || this.theme?.forced === true;
+  }
+
+  /** A series' marks by its palette place - the same place its colour comes
+      from; null without encoding by marks, and for the kinds that take no
+      place (a band and a cell are hatched by state and by step instead). */
+  private marksOf(entry: SeriesEntry): SeriesMarks | null {
+    return this.marked() && takesPalette(entry.config) ? marksFor(this.paletteSlot(entry)) : null;
+  }
+
+  /** The words the HTML layer writes - the data table's key among them. */
+  getWording(): ChartsWording {
+    return this.wording;
+  }
+
   /** Series in registration order - the drawing order. The palette follows it
       only on the first mount; after that it follows the name. */
   seriesInOrder(): readonly SeriesEntry[] {
@@ -1133,6 +1211,8 @@ export class ChartScene {
     if (wording === this.wording) return;
     this.wording = wording;
     this.scheduleSummary();
+    // The data table's key and caption are written from it.
+    if (this.dataTable !== null) this.pushLayoutSnapshot();
   }
 
   private themeRoot: HTMLElement | null = null;
@@ -1436,6 +1516,9 @@ export class ChartScene {
   private paint(color: string): string {
     const root = this.themeRoot;
     if (root === null) return color;
+    // Under forced colours a caller's colour is the page's text colour, as
+    // the browser would force it on an element (C4).
+    if (this.theme?.forced === true) return this.theme.colorText;
     let resolved = this.painted.get(color);
     if (resolved === undefined) {
       resolved = resolveColours(root, { color }).color;
@@ -1500,6 +1583,7 @@ export class ChartScene {
     // would not be a legend but a list.
     // A band that shares an entry is highlighted with it.
     const seen = new Map<string, LegendItem>();
+    const theme = this.theme ?? FALLBACK_THEME;
     this.seriesInOrder().forEach((entry, i) => {
       const config = entry.config;
       if (config.kind === "state") {
@@ -1519,6 +1603,7 @@ export class ChartScene {
             hidden: config.hidden === true,
             color: z.color,
             seriesIds: [entry.order],
+            mark: this.marked() ? { dash: null, marker: null, swatches: [{ color: this.paint(z.color), hatch: hatchFor(k) }], ground: theme.colorBg } : null,
           };
           seen.set(key, item);
           out.push(item);
@@ -1531,12 +1616,35 @@ export class ChartScene {
         hidden: config.hidden === true,
         color:
           config.kind === "matrix"
-            ? chipOf(matrixColors(config.coloring, this.theme ?? FALLBACK_THEME))
+            ? chipOf(matrixColors(config.coloring, theme))
             : this.colorFor(entry),
         seriesIds: [entry.order],
+        mark: this.legendMark(entry, theme),
       });
     });
     return out;
+  }
+
+  /** What a series' chip shows under encoding by marks. */
+  private legendMark(entry: SeriesEntry, theme: ResolvedTheme): LegendMark | null {
+    if (!this.marked()) return null;
+    const config = entry.config;
+    if (config.kind === "matrix") {
+      const swatches = matrixColors(config.coloring, theme).map((c, k) => ({ color: this.paint(c), hatch: hatchFor(k) }));
+      return { dash: null, marker: null, swatches, ground: theme.colorBg };
+    }
+    const marks = this.marksOf(entry);
+    if (marks === null) return null;
+    switch (config.kind) {
+      case "line":
+        return { dash: config.dash ?? marks.dash, marker: marks.marker, swatches: null, ground: theme.colorBg };
+      case "area":
+        return { dash: config.dash ?? marks.dash, marker: null, swatches: null, ground: theme.colorBg };
+      case "scatter":
+        return { dash: null, marker: marks.marker, swatches: null, ground: theme.colorBg };
+      default:
+        return { dash: null, marker: null, swatches: [{ color: this.colorFor(entry), hatch: marks.hatch }], ground: theme.colorBg };
+    }
   }
 
   /* ---------- Limits, ready in pixels ---------- */
@@ -1580,6 +1688,7 @@ export class ChartScene {
           color,
           band: true,
           dash,
+          hatch: this.marked(),
         });
       } else {
         const px = axis.scale.toPx(this.limitAt(config, config.value));
@@ -1650,6 +1759,7 @@ export class ChartScene {
       const yAxis = this.findAxis("y", entry.config.yAxisId);
       if (xAxis === null || yAxis === null) return;
       const dimmed = highlight !== null && !highlight.includes(entry.order);
+      const marks = this.marksOf(entry);
       const base: DrawBase = {
         x: mat.x,
         y: mat.y,
@@ -1675,9 +1785,11 @@ export class ChartScene {
             ...base,
             kind: "line",
             strokeWidth: config.strokeWidth,
-            dash: config.dash,
+            // A dash of the caller's own wins over the one its place gives.
+            dash: config.dash ?? marks?.dash,
             markers: config.markers,
             step: config.step,
+            marker: marks?.marker,
           });
           break;
         case "area":
@@ -1688,7 +1800,8 @@ export class ChartScene {
             baseline: 0,
             fillOpacity: config.fillOpacity,
             strokeWidth: config.strokeWidth,
-            dash: config.dash,
+            dash: config.dash ?? marks?.dash,
+            hatch: marks?.hatch,
           });
           break;
         case "bar": {
@@ -1714,11 +1827,12 @@ export class ChartScene {
             baseline: 0,
             offset: placement.offset,
             width: placement.width,
+            hatch: marks?.hatch,
           });
           break;
         }
         case "scatter":
-          items.push({ ...base, kind: "scatter", radius: config.radius });
+          items.push({ ...base, kind: "scatter", radius: config.radius, marker: marks?.marker });
           break;
         case "state": {
           const lane = this.lanePx(config, yAxis);
@@ -1729,6 +1843,7 @@ export class ChartScene {
             laneTop: lane.top,
             laneBottom: lane.bottom,
             lastEnd: this.lastEnd(entry, mat, xAxis),
+            hatches: this.marked() ? config.states.map((_, k) => hatchFor(k)) : null,
           });
           break;
         }
@@ -1739,6 +1854,7 @@ export class ChartScene {
             kind: "matrix",
             buckets: (entry.buckets ??= matrixBuckets(mat, config.coloring, colors.length)),
             colors: colors,
+            hatches: this.marked() ? colors.map((_, k) => hatchFor(k)) : null,
             width: cellSize(
               entry.step ?? 0,
               xAxis.scale.domain[1] - xAxis.scale.domain[0],
@@ -2293,6 +2409,109 @@ export class ChartScene {
     return own === undefined ? formatValue(v) : own(v);
   }
 
+  /* ---------- The data table (charts-alternatives 01) ---------- */
+
+  /** What the data table lists: one table per x axis for the series on it, one
+      per matrix - a matrix has two positions per value, and shares no rows.
+      Only the visible domain, and above the limit its downsampled course
+      (table.ts). Called by the open table, once per layout. */
+  dataTableGroups(): DataTableGroup[] {
+    const all = this.seriesInOrder();
+    // In the order their first series came: a matrix alone, the others by
+    // their x axis.
+    const parts: SeriesEntry[][] = [];
+    const byAxis = new Map<string, SeriesEntry[]>();
+    for (const entry of this.walkable()) {
+      const shared = entry.config.kind === "matrix" ? undefined : byAxis.get(entry.config.xAxisId);
+      if (shared !== undefined) shared.push(entry);
+      else {
+        const part = [entry];
+        parts.push(part);
+        if (entry.config.kind !== "matrix") byAxis.set(entry.config.xAxisId, part);
+      }
+    }
+    return parts.flatMap((entries) => {
+      const first = entries[0] as SeriesEntry;
+      if (first.config.kind === "matrix") return this.matrixTable(first, all) ?? [];
+      return this.courseTable(entries, all) ?? [];
+    });
+  }
+
+  /** The series of one x axis, merged on their x. */
+  private courseTable(entries: readonly SeriesEntry[], all: readonly SeriesEntry[]): DataTableGroup | null {
+    const w = this.wording;
+    const axisId = (entries[0] as SeriesEntry).config.xAxisId;
+    const xAxis = this.findAxis("x", axisId);
+    if (xAxis === null) return null;
+    const [from, to] = xAxis.scale.domain;
+    const rows = tableRows(entries.map((e) => e.materialized as MaterializedSeries), from, to);
+    // Readings less than a minute apart carry their seconds, as the tooltip's
+    // header does - otherwise rows would share one heading.
+    let seconds = false;
+    for (let r = 1; r < rows.x.length && !seconds; r++) {
+      const d = (rows.x[r] as number) - (rows.x[r - 1] as number);
+      seconds = d > 0 && d < MINUTE;
+    }
+    const caption = w.tableCaption(this.xLabel(axisId, from), this.xLabel(axisId, to));
+    return {
+      key: `x:${axisId}`,
+      caption: rows.thinned ? `${caption} ${w.downsampled(rows.readings)}` : caption,
+      columns: [
+        this.findAxisConfig("x", axisId)?.label ?? w.positionColumn,
+        ...entries.map((e) => this.nameFor(e, all.indexOf(e))),
+      ],
+      rows: rows.x.map((x, r) => [
+        this.xLabel(axisId, x, seconds),
+        ...entries.map((e, s) => this.cellText(e, rows.courses[s] as Course, rows.at[r]?.[s] ?? -1)),
+      ]),
+    };
+  }
+
+  /** One cell: empty where the series has no reading there or a gap; a
+      state's name; a corridor's two edges; every other value as the tooltip
+      writes it. */
+  private cellText(entry: SeriesEntry, course: Course, i: number): string {
+    if (i < 0) return "";
+    const v = course.y[i] as number;
+    if (Number.isNaN(v)) return "";
+    const config = entry.config;
+    if (config.kind === "state") return config.states[v | 0]?.label ?? "";
+    const lower = course.y0?.[i];
+    if (lower !== undefined && !Number.isNaN(lower)) return `${this.formatY(entry, lower)} – ${this.formatY(entry, v)}`;
+    return this.formatY(entry, v);
+  }
+
+  /** A matrix' table: its cells inside the visible x domain, by column and
+      row, with their value. */
+  private matrixTable(entry: SeriesEntry, all: readonly SeriesEntry[]): DataTableGroup | null {
+    const mat = entry.materialized;
+    const xAxis = this.findAxis("x", entry.config.xAxisId);
+    const yAxis = this.findAxis("y", entry.config.yAxisId);
+    if (mat === null || mat.w === null || xAxis === null || yAxis === null) return null;
+    const [from, to] = xAxis.scale.domain;
+    const rows: string[][] = [];
+    // ponytail: a matrix is listed whole inside the domain, never thinned - a
+    // grid of cells stays small enough to be drawn one rectangle each; a
+    // matrix of hundreds of thousands of cells would want a limit here too.
+    for (let i = 0; i < mat.length; i++) {
+      const x = mat.x[i] as number;
+      const value = mat.w[i] as number;
+      if (x < from || x > to || !Number.isFinite(value)) continue;
+      rows.push([this.xLabel(xAxis.id, x), yAxis.format(mat.y[i] as number), this.formatY(entry, value)]);
+    }
+    const w = this.wording;
+    return {
+      key: `m:${entry.order}`,
+      caption: w.tableCaption(xAxis.format(from), xAxis.format(to)),
+      columns: [
+        this.findAxisConfig("x", entry.config.xAxisId)?.label ?? w.positionColumn,
+        this.findAxisConfig("y", entry.config.yAxisId)?.label ?? w.rowColumn,
+        this.nameFor(entry, all.indexOf(entry)),
+      ],
+      rows,
+    };
+  }
+
   /** After a layout - new data, a new domain -, the keyboard's point goes to
       the nearest position still visible (Q6), or goes away. */
   private reapplyKey(): void {
@@ -2681,6 +2900,7 @@ export class ChartScene {
       series: this.legendItems(),
       limits: this.limitLabels(),
       empty: !this.showsAPoint(),
+      dataTable: this.dataTable,
     };
     for (const notify of this.layoutSubscribers) notify();
   }
