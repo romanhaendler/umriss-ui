@@ -1,6 +1,6 @@
 # What VoiceOver does not say in a combobox
 
-Status: ready-for-agent
+Status: done
 Date:   2026-09-24
 Origin: the library comparison of 24 Sep 2026 (notes in `docs/research/library-comparison-2026-09/`); order in `.scratch/comparison-roadmap/spec.md`.
 
