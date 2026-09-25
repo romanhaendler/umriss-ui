@@ -81,14 +81,15 @@ export function useVirtual(count: number, options: VirtualOptions): VirtualRows 
      The dependencies are the occasion to re-measure: the first row appears
      (count), the layout changed (viewportHeight), or the previous measurement was
      off (rowHeight). The comparison lets the chain come to rest after one
-     pass. */
+     pass - and it tolerates only rounding noise: a row half a pixel off is
+     off, and over twenty thousand rows a scrollbar ten thousand pixels short. */
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
     const row = el.querySelector<HTMLElement>("[data-row]");
     if (!row) return;
     const measured = row.getBoundingClientRect().height;
-    if (measured > 0 && Math.abs(measured - rowHeight) > 0.5) setRowHeight(measured);
+    if (measured > 0 && Math.abs(measured - rowHeight) > 0.01) setRowHeight(measured);
   }, [count, viewportHeight, rowHeight]);
 
   const rowWindow: RowWindow = visibleWindow({ count, rowHeight, scrollTop, viewportHeight, overscan });

@@ -469,6 +469,11 @@
   color: var(--u-color-danger-text);
 }
 
+.code:focus-visible {
+  outline: none;
+  box-shadow: var(--u-focus-ring);
+}
+
 /* ---------------- About, lists, keyboard ---------------- */
 
 .pageAbout,

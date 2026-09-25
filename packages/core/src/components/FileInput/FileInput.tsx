@@ -96,6 +96,9 @@ export const FileInput = forwardRef<HTMLInputElement, FileInputProps>(function F
     <div
       className={cx(styles.zone, dragging && styles.dragging, isInvalid && styles.invalidZone, className)}
       data-dragging={dragging ? "" : undefined}
+      /* The zone's texts belong to the inactive control; said so, a screen
+         reader and a contrast check read them as such (WCAG 1.4.3). */
+      aria-disabled={disabled || undefined}
       onDragEnter={(event) => {
         if (!carriesFiles(event)) return;
         event.preventDefault();

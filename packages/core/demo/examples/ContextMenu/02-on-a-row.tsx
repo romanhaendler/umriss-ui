@@ -11,6 +11,14 @@ const SHIPMENTS = [
   { id: "SH-1044", customer: "Moreau Optics", window: "11:30–13:30" },
 ];
 
+/* A focusable row owes a visible focus: the library's ring, from its token. */
+const STYLE = `
+.shipment-row:focus-visible {
+  outline: none;
+  box-shadow: var(--u-focus-ring);
+}
+`;
+
 export default function OnARow() {
   const [menu, setMenu] = useState<{ id: string; x: number; y: number } | null>(null);
   const [last, setLast] = useState("-");
@@ -31,12 +39,14 @@ export default function OnARow() {
 
   return (
     <Stack gap={3} style={{ maxWidth: 480 }}>
+      <style>{STYLE}</style>
       <div role="list" aria-label="Shipments">
         {SHIPMENTS.map((shipment) => (
           <div
             key={shipment.id}
             role="listitem"
             tabIndex={0}
+            className="shipment-row"
             onContextMenu={byPointer(shipment.id)}
             onKeyDown={byKey(shipment.id)}
             style={{

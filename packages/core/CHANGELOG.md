@@ -85,6 +85,15 @@ commit.
 
 ---
 
+### Fixed
+
+- **`useVirtual` adopts a row height half a pixel off the expected one.** It
+  ignored anything up to 0.5 px, so rows of 37.5 px under a `rowHeight` of 37
+  left the scrollbar of twenty thousand rows ten thousand pixels short.
+- **A disabled `FileInput`'s zone says it is disabled** (`aria-disabled`): its
+  hint and key text belong to the inactive control, and a screen reader and a
+  contrast check now read them as such.
+
 ## 0.10.0 – Everything the comparison asked for (Sep. 2026)
 
 ### Added
