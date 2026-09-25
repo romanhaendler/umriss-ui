@@ -9,13 +9,9 @@
 
 import { useState } from "react";
 import { Chart, DataTable, Legend, Line, Tooltip, XAxis, YAxis } from "../../../src";
-import { furnaceData, type FurnacePoint } from "../../data";
+import { furnaceData, type FurnacePoint } from "@umriss-ui/demo/worlds/plant";
 
 export const title = "The values as a table";
-
-/* The plant this is drawn from stands in the second tab, so that the
-   example can be copied whole. */
-export const shows = ["../../data.ts"];
 
 const timeOfDay = (v: number) =>
   new Date(v).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });

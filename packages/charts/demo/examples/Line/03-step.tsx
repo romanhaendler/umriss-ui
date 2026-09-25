@@ -5,13 +5,9 @@
    reports the entry the hold began with, not the nearer one after it. */
 
 import { Chart, Legend, Line, Tooltip, XAxis, YAxis } from "../../../src";
-import { corridorData, setPoints, type CorridorPoint, type SetPoint } from "../../data";
+import { corridorData, setPoints, type CorridorPoint, type SetPoint } from "@umriss-ui/demo/worlds/plant";
 
 export const title = "Step line";
-
-/* The plant this is drawn from stands in the second tab, so that the
-   example can be copied whole. */
-export const shows = ["../../data.ts"];
 
 export default function StepLine() {
   return (

@@ -33,8 +33,8 @@ import {
   exitSilence,
   plant,
   upTo,
-} from "../plant";
-import type { Batch, Sample } from "../plant";
+} from "@umriss-ui/demo/worlds/plant";
+import type { Batch, Sample } from "@umriss-ui/demo/worlds/plant";
 
 export const title = "Watch a kiln line over a shift";
 
@@ -44,10 +44,6 @@ export const lead =
 export const callouts = [];
 
 export const builtFrom = ["stat", "drawer", "progressbar", { name: "Line", page: "@umriss-ui/charts#line" }, { name: "ControlChart", page: "@umriss-ui/charts#controlchart" }, { name: "AlarmList", page: "@umriss-ui/table#alarmlist" }, { name: "Schedule", page: "@umriss-ui/schedule#schedule" }, { name: "Calculation", page: "@umriss-ui/calculation#calculation" }];
-
-/* The plant stands in the second tab: one shift, and every part below reads
-   from it. */
-export const shows = ["../plant.ts"];
 
 /* Every package on one page, fed by one plant. The kiln's excursion is the
    line above the limit in the trend, the alarm in the list, the scrap in the

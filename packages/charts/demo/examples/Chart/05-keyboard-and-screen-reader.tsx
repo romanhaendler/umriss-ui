@@ -11,13 +11,9 @@
 import { useState } from "react";
 import { Chart, Line, Tooltip, XAxis, YAxis } from "../../../src";
 import { GERMAN_CHARTS_WORDING } from "../../../src/wording/de";
-import { kilnData, type KilnPoint } from "../../data";
+import { kilnData, type KilnPoint } from "@umriss-ui/demo/worlds/plant";
 
 export const title = "By keyboard and screen reader";
-
-/* The plant this is drawn from stands in the second tab, so that the
-   example can be copied whole. */
-export const shows = ["../../data.ts"];
 
 export default function KeyboardAndScreenReader() {
   const [domain, setDomain] = useState<"data" | readonly [number, number]>("data");

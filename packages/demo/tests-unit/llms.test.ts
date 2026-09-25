@@ -1,5 +1,5 @@
 /* The llms.txt generator against a fixture package: one scenario, one page
-   with three examples (one with a lead, one showing a file beside itself), one
+   with three examples (one with a lead, one importing a world), one
    props table and the page's texts. What is checked is what an agent reading
    the text relies on - every page is there with its link, every example's
    source stands as the demo shows it, the table is complete. */
@@ -118,17 +118,12 @@ describe("llms-full.txt", () => {
     expect(scenarios).not.toContain("export const builtFrom");
   });
 
-  it("prints a world a scenario imports once, among the files shown", () => {
+  it("prints a world a scenario and an example import once, among the files shown", () => {
     const files = full.slice(full.indexOf("## Files the examples show"));
     expect(files).toContain("### `operations.ts`");
     expect(full.split("export const SERVICES").length - 1).toBe(1);
-  });
-
-  it("names a file shown beside an example and prints it once, at the end", () => {
-    expect(full).not.toContain("export const shows");
-    expect(full).toContain("`data.ts`");
     expect(full.split("export const READINGS").length - 1).toBe(1);
-    expect(full.indexOf("export const READINGS")).toBeGreaterThan(full.indexOf("## Files the examples show"));
+    expect(full).toContain('import { READINGS } from "./operations";');
   });
 
   it("writes the props table with every row, escaped for Markdown", () => {
