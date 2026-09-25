@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 import { assess } from "../src";
-import { KILN_LIMITS, SHIFT_MINUTES, alarmsAt, countAt, exitSilence, plant } from "../demo/plant";
+import { KILN, KILN_LIMITS, SHIFT_MINUTES, alarmsAt, countAt, exitSilence, plant } from "../demo/plant";
 
 const START = Date.UTC(2026, 2, 17, 5);
 const SEEDS = Array.from({ length: 40 }, (_, i) => i + 1);
@@ -18,7 +18,7 @@ describe("the plant", () => {
 
   it.each(SEEDS)("seed %i: the one crossing is the alarm and the verdict", (seed) => {
     const p = plant(seed);
-    const above = p.readings.filter((one) => one.kiln > 1230);
+    const above = p.readings.filter((one) => one.kiln > KILN.alarm);
     expect(above.length).toBeGreaterThan(0);
     const crossing = above[0]!.minute;
 
@@ -39,8 +39,8 @@ describe("the plant", () => {
     expect(kiln).toHaveLength(1);
     expect(kiln[0]!.lifecycle).toBe("cleared-unacknowledged");
     const cleared = (kiln[0]!.cleared! - START) / 60_000;
-    expect(p.readings[cleared]!.kiln).toBeLessThanOrEqual(1222);
-    expect(p.readings.slice(crossing, cleared).every((one) => one.kiln > 1222)).toBe(true);
+    expect(p.readings[cleared]!.kiln).toBeLessThanOrEqual(KILN.returnTo);
+    expect(p.readings.slice(crossing, cleared).every((one) => one.kiln > KILN.returnTo)).toBe(true);
   });
 
   it.each(SEEDS)("seed %i: a tile fired outside the tolerance is scrap in the OEE", (seed) => {
@@ -51,9 +51,18 @@ describe("the plant", () => {
     expect(count.total - count.good).toBeGreaterThan(0);
   });
 
+  it("fires only what a batch brought into the kiln, so the OEE and the plan count the same tiles", () => {
+    const p = plant(7);
+    const inBatches = p.batches.reduce(
+      (sum, batch) => sum + p.readings.filter((one) => batch.kiln[0] <= one.minute && one.minute < batch.kiln[1]).reduce((s, one) => s + one.fired, 0),
+      0,
+    );
+    expect(inBatches).toBe(countAt(p, SHIFT_MINUTES - 1).total);
+  });
+
   it("acknowledges an alarm at the instant the operator did", () => {
     const p = plant(7);
-    const crossing = p.readings.find((one) => one.kiln > 1230)!.minute;
+    const crossing = p.readings.find((one) => one.kiln > KILN.alarm)!.minute;
     const id = `kiln-high-${crossing}`;
     const at = START + (crossing + 2) * 60_000;
     const [alarm] = alarmsAt(p, crossing + 2, START, new Map([[id, at]])).filter((a) => a.id === id);

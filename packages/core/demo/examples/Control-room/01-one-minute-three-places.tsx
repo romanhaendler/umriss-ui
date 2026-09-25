@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { Grid, Stack, Stat } from "../../../src";
 import { Chart, LimitBand, LimitLine, Line, Tooltip, XAxis, YAxis } from "@umriss-ui/charts";
 import { AlarmList, alarmModel } from "@umriss-ui/table";
-import { ALARM_TYPES, KILN_LIMITS, alarmsAt, plant, upTo } from "../../plant";
+import { ALARM_TYPES, KILN, KILN_LIMITS, alarmsAt, plant, upTo } from "../../plant";
 
 export const title = "One minute, three places";
 
@@ -17,10 +17,10 @@ export const shows = ["../../plant.ts"];
    reading against the same limits, which is why they agree. */
 
 const SHIFT = plant(17);
-const CROSSING = SHIFT.readings.find((one) => one.kiln > 1230)!.minute;
+const CROSSING = SHIFT.readings.find((one) => one.kiln > KILN.alarm)!.minute;
 /* The shift begins at 06:00 today. The screenshot suite freezes the page's
    clock, and "today" is then the same day on every run. */
-const START = new Date(new Date(Date.now()).setHours(6, 0, 0, 0)).getTime();
+const START = new Date(new Date().setHours(6, 0, 0, 0)).getTime();
 const at = (minute: number) => START + minute * 60_000;
 
 type Point = { t: number; kiln: number };
@@ -50,8 +50,8 @@ export default function OneMinuteThreePlaces() {
         <Chart data={trend} height={160} ariaLabel="Kiln zone 3 up to the crossing">
           <XAxis accessor={(d: Point) => d.t} time />
           <YAxis accessor={(d: Point) => d.kiln} domain={[1170, 1250]} label="°C" />
-          <LimitBand from={1185} to={1215} severity="warning" label="Tolerance" />
-          <LimitLine value={1230} severity="alarm" label="Alarm limit" />
+          <LimitBand from={KILN.tolerance[0]} to={KILN.tolerance[1]} severity="warning" label="Tolerance" />
+          <LimitLine value={KILN.alarm} severity="alarm" label="Alarm limit" />
           <Line accessor={(d: Point) => d.kiln} name="Zone 3" />
           <Tooltip mode="x" />
         </Chart>
