@@ -2,7 +2,8 @@
 
    An overlap is two subtasks covering the same time on one lane, lead-in and
    lead-out included - an overlap that only touches a lead-in is still one. A violated
-   dependency is one whose lag does not fit between its anchors. Both are
+   dependency is one whose lag does not fit between its anchors. A subtask in
+   blocked time covers time its lane is not available. All three are
    the point of opening a schedule; packing overlaps into sub-lanes or pushing a
    successor would hide exactly what a planner is looking for (ADR-0023).
 
@@ -10,7 +11,7 @@
    holds subtasks, not a measurement series, and this runs when the data
    changes, not per frame. */
 
-import { arrival, departure, occupied, type Subtask, type Dependency } from "./model";
+import { arrival, departure, occupied, type BlockedTime, type Subtask, type Dependency } from "./model";
 
 /** Two subtasks covering the same time on one lane. */
 export interface Overlap {
@@ -39,10 +40,25 @@ export interface ViolatedDependency {
   readonly shortBy: number;
 }
 
-/** Both kinds of finding over the same data. */
+/** A subtask covering time its lane is blocked. */
+export interface InBlockedTime {
+  /** The id of the subtask. */
+  readonly subtask: string;
+  /** The id of the blocked time it covers. */
+  readonly blocked: string;
+  /** The lane both are on. */
+  readonly lane: string;
+  /** Where the covering begins. */
+  readonly from: number;
+  /** Where it ends. */
+  readonly to: number;
+}
+
+/** Every kind of finding over the same data. */
 export interface Findings {
   readonly overlaps: readonly Overlap[];
   readonly violatedDependencies: readonly ViolatedDependency[];
+  readonly inBlockedTime: readonly InBlockedTime[];
 }
 
 /** Every pair of subtasks that cover each other on a lane. Touching at a
@@ -110,7 +126,30 @@ export function violatedDependencies(subtasks: readonly Subtask[], dependencies:
   return found;
 }
 
-/** Overlaps and violated dependencies at once. */
-export function findings(subtasks: readonly Subtask[], dependencies: readonly Dependency[]): Findings {
-  return { overlaps: overlaps(subtasks), violatedDependencies: violatedDependencies(subtasks, dependencies) };
+/** Every subtask that covers blocked time on its lane, lead-in and lead-out
+    included - once per blocked interval it covers, in the order of the
+    subtasks. Touching at a shared edge is not covering. */
+export function inBlockedTime(subtasks: readonly Subtask[], blocked: readonly BlockedTime[]): InBlockedTime[] {
+  const found: InBlockedTime[] = [];
+  for (const subtask of subtasks) {
+    const own = occupied(subtask);
+    for (const b of blocked) {
+      if (b.lane !== subtask.lane || !(own.from < b.to && b.from < own.to)) continue;
+      found.push({ subtask: subtask.id, blocked: b.id, lane: b.lane, from: Math.max(own.from, b.from), to: Math.min(own.to, b.to) });
+    }
+  }
+  return found;
+}
+
+/** Every finding at once. Without blocked time there is none in it. */
+export function findings(
+  subtasks: readonly Subtask[],
+  dependencies: readonly Dependency[],
+  blocked: readonly BlockedTime[] = [],
+): Findings {
+  return {
+    overlaps: overlaps(subtasks),
+    violatedDependencies: violatedDependencies(subtasks, dependencies),
+    inBlockedTime: inBlockedTime(subtasks, blocked),
+  };
 }

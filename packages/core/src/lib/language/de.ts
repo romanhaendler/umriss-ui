@@ -310,13 +310,16 @@ export const GERMAN_WORDING: Wording = {
   scheduleOverlapWith: (other) => `Überschneidung mit ${other}`,
   scheduleViolatedBy: (amount) => `Abhängigkeit verletzt, ${amount} zu knapp`,
   scheduleLaneRefused: "Nicht hierher",
+  scheduleBlockedTime: "Sperrzeit",
+  scheduleInBlockedTime: (label) => (label === undefined ? "In der Sperrzeit" : `In der Sperrzeit (${label})`),
   scheduleFoldGroup: "Gruppe einklappen",
   scheduleUnfoldGroup: "Gruppe ausklappen",
   scheduleLaneCount: (count) => (count === 1 ? "1 Bahn" : `${count} Bahnen`),
   scheduleRoleDescription: "Belegungsplan",
-  scheduleSummary: ({ lanes, subtasks, from, to, overlaps, violated }) =>
+  scheduleSummary: ({ lanes, subtasks, from, to, overlaps, violated, blocked }) =>
     `${lanes === 1 ? "1 Bahn" : `${lanes} Bahnen`}, ${subtasks === 1 ? "1 Teilaufgabe" : `${subtasks} Teilaufgaben`} im Blick von ${from} bis ${to}. ` +
-    `${overlaps === 1 ? "1 Überschneidung" : `${overlaps} Überschneidungen`}, ${violated === 1 ? "1 verletzte Abhängigkeit" : `${violated} verletzte Abhängigkeiten`}.`,
+    `${overlaps === 1 ? "1 Überschneidung" : `${overlaps} Überschneidungen`}, ${violated === 1 ? "1 verletzte Abhängigkeit" : `${violated} verletzte Abhängigkeiten`}` +
+    (blocked === 0 ? "." : `, ${blocked === 1 ? "1 Teilaufgabe in einer Sperrzeit" : `${blocked} Teilaufgaben in Sperrzeiten`}.`),
   scheduleKeyHelp:
     "Pfeil links und rechts gehen die Bahn entlang, Pfeil hoch und runter wechseln die Bahn, Pos1 und Ende springen zur ersten und letzten Teilaufgabe, Bild auf und Bild ab springen ein Zehntel der Ansicht. Schließende eckige Klammer oder T folgt einer Abhängigkeit hinaus, öffnende eckige Klammer oder Umschalt und T geht zurück. Leertaste oder Eingabe wählt aus. Alt mit Pfeil links oder rechts schlägt eine Verschiebung vor, Alt und Umschalt ein neues Ende. Escape lässt die aktive Teilaufgabe los.",
   calculationSumSymbol: "+",

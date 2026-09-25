@@ -17,7 +17,33 @@ moves from here under the rule above.
 
 ## Unreleased
 
-Needs the next `@umriss-ui/core`: it reads the renamed wording keys.
+Needs the next `@umriss-ui/core`: it reads the renamed wording keys and the
+new ones for blocked time.
+
+### Added
+
+- **Blocked time per lane.** `<BlockedTimes data={…} />` takes a list of
+  `BlockedTime` — `{ id, lane, from, to, label? }`, plain data keyed by lane
+  like a subtask — for leave, maintenance and any other time a lane is not
+  available. It is drawn hatched behind all the work on the lane, in forced
+  colours too, wherever the layer is declared.
+- **A finding: a subtask in blocked time.** `inBlockedTime(subtasks, blocked)`
+  returns every subtask that covers blocked time on its lane (lead-in and
+  lead-out included) as `InBlockedTime` — `{ subtask, blocked, lane, from, to }`.
+  `findings()` takes the blocked time as an optional third argument, and
+  `Findings` has the field `inBlockedTime`. The schedule marks the covered time
+  like an overlap; the tooltip and the keys' readout name it ("In blocked time
+  (Leave)"), and the plot's description counts it where there is any.
+  `ScheduleTooltipTarget` of kind `"subtask"` carries `blocked`, the blocked
+  times the subtask covers.
+- **Blocked time is part of where a subtask may go.** A drag — inside the plot
+  or from outside — does not put work into blocked time it did not already
+  cover: the ghost stays where it was allowed, the cursor says no, a line ties
+  the ghost to the pointer, and its label says "Blocked time" (`data-blocked`
+  on the ghost label). Alt with an arrow key steps over blocked time instead of
+  into it; Alt+Shift does not stretch into it. Work the data already put there
+  is never locked in.
+- A demo page, *Blocked time*.
 
 ### Changed
 

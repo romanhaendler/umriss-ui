@@ -22,7 +22,7 @@ import {
 } from "./geometry";
 import { resolveAppearance, type ResolvedAppearance } from "./appearance";
 import { rowAt, slotOf } from "./rows";
-import type { Subtask } from "./model";
+import type { BlockedTime, Subtask } from "./model";
 import type { SceneData } from "./sceneData";
 import type { ScheduleHit, SceneView } from "./sceneView";
 
@@ -172,8 +172,10 @@ export function drawData(ctx: CanvasRenderingContext2D, input: DrawInput): void 
   const { data, view } = input;
   const viewport = view.viewport();
   drawGrid(ctx, input, viewport);
+  for (const blocked of data.blocked) drawBlocked(ctx, input, viewport, blocked);
   drawNow(ctx, input);
   for (const layer of data.layers) {
+    if (layer.kind === "blocked") continue;
     const own = new Set<unknown>(layer.data);
     if (layer.kind === "dependencies") {
       for (const path of view.paths) if (own.has(path.dependency)) drawDependency(ctx, input, path, false);
@@ -182,6 +184,7 @@ export function drawData(ctx: CanvasRenderingContext2D, input: DrawInput): void 
     }
   }
   for (const overlap of data.overlaps) drawOverlap(ctx, input, viewport, overlap);
+  for (const found of data.inBlocked) drawOverlap(ctx, input, viewport, found);
   drawViolatedInFolds(ctx, input, viewport);
   drawSelection(ctx, input);
 }
@@ -229,7 +232,8 @@ export function drawOverlay(ctx: CanvasRenderingContext2D, input: DrawInput): vo
 /** The lanes a drag in flight may not put its work on: drawn back under a wash
     of the surface, and hatched.
 
-    The hatch is here and nowhere else on the plot. "Not available" is what a
+    The hatch is here and on blocked time (`drawBlocked`), and nowhere else on
+    the plot. "Not available" is what a
     hatch says on a plan - which is a statement about a PLACE, not about a bar,
     and the bars gave it up for that reason (schedule-lane-groups 02). No
     warning colour: a mould that fits one press is nobody's mistake
@@ -720,7 +724,32 @@ function findingBand(ctx: CanvasRenderingContext2D, input: DrawInput, x0: number
   ctx.setLineDash([]);
 }
 
-function drawOverlap(ctx: CanvasRenderingContext2D, input: DrawInput, viewport: Viewport, overlap: Overlap): void {
+/** A lane's blocked time: a band of the muted ink under the hatch, across the
+    lane for its interval, behind all the work. The hatch says "not available"
+    of a place, as it does on a refused lane - here of a place in time. Under
+    forced colours both are GrayText on Canvas, and the hatch alone carries it. */
+function drawBlocked(ctx: CanvasRenderingContext2D, input: DrawInput, viewport: Viewport, blocked: BlockedTime): void {
+  const slot = slotAt(viewport, blocked.lane);
+  if (slot === null || slot.top + slot.height < 0 || slot.top > input.view.height) return;
+  const x0 = Math.max(0, xOf(viewport, blocked.from));
+  const x1 = Math.min(input.view.width, xOf(viewport, blocked.to));
+  if (x1 <= x0) return;
+  ctx.globalAlpha = 0.1;
+  ctx.fillStyle = input.colours.muted;
+  ctx.fillRect(x0, slot.top, x1 - x0, slot.height);
+  ctx.globalAlpha = 1;
+  hatch(ctx, x0, slot.top, x1 - x0, slot.height, input.colours.muted, 0.7, REFUSED_HATCH_STEP, 1);
+}
+
+/** The mark of a finding on a lane - two subtasks overlapping, or a subtask in
+    blocked time: a wash of the danger tone over the time it concerns, and a
+    band at the top. */
+function drawOverlap(
+  ctx: CanvasRenderingContext2D,
+  input: DrawInput,
+  viewport: Viewport,
+  overlap: { readonly lane: string; readonly from: number; readonly to: number },
+): void {
   const slot = slotAt(viewport, overlap.lane);
   if (slot === null) return;
   const x0 = xOf(viewport, overlap.from);
