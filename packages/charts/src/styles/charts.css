@@ -489,6 +489,11 @@
     white-space: nowrap;
   }
 
+  /* A stack's total has no chip: its name takes the chip's column as well. */
+  .uc-tooltip-total {
+    grid-column: 1 / 3;
+  }
+
   /* A point's own x value, where it lies on another x axis than the head's. */
   .uc-tooltip-x {
     margin-left: 6px;
