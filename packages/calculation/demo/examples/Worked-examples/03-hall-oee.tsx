@@ -1,13 +1,8 @@
+import { SHIFT_MINUTES } from "@umriss-ui/demo/worlds/plant";
 import { Calculation, Difference, Given, Product, Quotient, Ref, Sum } from "../../../src";
 
 export const title = "OEE of a hall, weighted by planned time";
-
-/* Three lines, each with its own OEE derived from its own counts, weighted by
-   how long each was planned to run. A tree three levels deep, built from
-   data, each line's quantities named once and referred to by id - and line
-   C's downtime has not been booked. Its OEE is missing, so is
-   the hall's, and every line on the way says why; lines A and B stand as
-   they are. Nothing is averaged over a gap as if it were zero. */
+export const lead = "Three lines from data, three levels deep; line C's downtime is `null`, so its OEE and the hall's are missing while A and B stand.";
 
 interface Line {
   name: string;
@@ -18,10 +13,12 @@ interface Line {
   good: number;
 }
 
+const BREAKS = 30;
+
 const LINES: Line[] = [
-  { name: "A", planned: 450, downtime: 38, idealCycle: 0.8, total: 480, good: 461 },
-  { name: "B", planned: 450, downtime: 62, idealCycle: 1.2, total: 300, good: 291 },
-  { name: "C", planned: 240, downtime: null, idealCycle: 0.5, total: 402, good: 395 },
+  { name: "A", planned: SHIFT_MINUTES - BREAKS, downtime: 38, idealCycle: 0.8, total: 480, good: 461 },
+  { name: "B", planned: SHIFT_MINUTES - BREAKS, downtime: 62, idealCycle: 1.2, total: 300, good: 291 },
+  { name: "C", planned: SHIFT_MINUTES / 2, downtime: null, idealCycle: 0.5, total: 402, good: 395 },
 ];
 
 function lineOee(line: Line) {

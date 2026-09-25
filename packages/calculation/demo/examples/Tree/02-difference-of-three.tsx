@@ -1,16 +1,16 @@
 import { Calculation, Difference, Given } from "../../../src";
 
-export const title = "A difference of three";
+export const title = "Take several amounts away";
+export const lead = "`Difference` takes every operand after the first away from it, each with its minus in the operator column.";
 
-/* `<Difference>` takes the first operand and subtracts every other: a − b − c.
-   Each operand after the first carries its minus in the operator column. */
 export default function DifferenceOfThree() {
   return (
-    <Calculation aria-label="Planned production time, early shift">
-      <Difference label="Planned production time" unit="min">
-        <Given label="Shift length" value={480} unit="min" />
-        <Given label="Breaks" value={30} unit="min" />
-        <Given label="Planned maintenance" value={20} unit="min" />
+    <Calculation aria-label="Plannable hours, Chloe Durand, week 12">
+      <Difference label="Plannable hours, Chloe" unit="h">
+        <Given label="Capacity" value={40} unit="h" />
+        <Given label="Leave" value={8} unit="h" />
+        <Given label="Meetings" value={5} unit="h" />
+        <Given label="Support rota" value={4} unit="h" />
       </Difference>
     </Calculation>
   );

@@ -7,19 +7,19 @@ import { openExample } from "./navigation";
 test.skip(({ colorScheme }) => colorScheme === "dark", "behaviour tests once only (light)");
 
 test("a derivation opens beneath the line that was clicked, and the line does not move", async ({ page }) => {
-  await openExample(page, "calculation", "costing-sheet");
-  const target = page.locator('[data-example="costing-sheet"]');
-  const button = target.getByRole("button", { name: "Show how Production overhead is derived" });
+  await openExample(page, "calculation", "invoice");
+  const target = page.locator('[data-example="invoice"]');
+  const button = target.getByRole("button", { name: "Show how Discount is derived" });
   const before = await button.boundingBox();
   await button.click();
   /* Its name says what a click does next, so it is found anew. */
-  const opened = target.getByRole("button", { name: "Hide how Production overhead is derived" });
+  const opened = target.getByRole("button", { name: "Hide how Discount is derived" });
   const after = await opened.boundingBox();
   expect(after!.y).toBe(before!.y);
   const list = target.locator(`[id="${await opened.getAttribute("aria-controls")}"]`);
   await expect(list).toBeVisible();
   expect((await list.boundingBox())!.y).toBeGreaterThan(after!.y);
-  await expect(list).toContainText("= Production overhead");
+  await expect(list).toContainText("= Discount");
 });
 
 test("a chain in view stands open: every line and interim, nothing to fold but the trees in its lines", async ({ page }) => {

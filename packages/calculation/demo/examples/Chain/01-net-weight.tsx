@@ -1,13 +1,11 @@
 import { Calculation, Chain, Given, Interim, Minus } from "../../../src";
 
-export const title = "Net weight";
+export const title = "Take amounts away from a first quantity";
+export const lead = "A chain starts with a quantity without operator; `Minus` and `Plus` take a label and a value directly, and an `Interim` ends it.";
 
-/* The simplest chain: a first quantity with no operator, lines that take
-   something away, and an `<Interim>` that names the value. `<Minus>` and
-   `<Plus>` take a label and a value directly - a given written in place. */
 export default function NetWeight() {
   return (
-    <Calculation aria-label="Net weight, delivery 4471">
+    <Calculation aria-label="Net weight, shipment FP-1004223">
       <Chain>
         <Given label="Gross weight" value={1250} unit="kg" decimals={1} />
         <Minus label="Pallet" value={25} unit="kg" decimals={1} />
