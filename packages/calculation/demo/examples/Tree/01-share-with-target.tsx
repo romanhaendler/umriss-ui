@@ -1,16 +1,14 @@
 import { Calculation, Given, Quotient } from "../../../src";
 
-export const title = "A share with a target";
+export const title = "Show a share against a target";
+export const lead = "`format=\"percent\"` shows a ratio as per cent while it stays a ratio in every operation; a `target` is missed, never violated.";
 
-/* `format="percent"` presents a plain ratio as per cent - the quotient stays
-   0.9604 in every operation. The target is assessed through core's
-   `assess()` and stands beneath the number: missed, never violated. */
 export default function ShareWithTarget() {
   return (
-    <Calculation aria-label="First-pass yield, press 3">
-      <Quotient label="First-pass yield" format="percent" target={0.95}>
-        <Given label="Good parts" value={461} unit="pcs" />
-        <Given label="Parts made" value={480} unit="pcs" />
+    <Calculation aria-label="Utilisation of the Web team, week 12">
+      <Quotient label="Utilisation, Web team" format="percent" target={0.85}>
+        <Given label="Hours booked on projects" value={141} unit="h" />
+        <Given label="Hours the team can be planned for" value={176} unit="h" />
       </Quotient>
     </Calculation>
   );

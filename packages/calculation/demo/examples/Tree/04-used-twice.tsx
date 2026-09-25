@@ -1,23 +1,17 @@
-import { Calculation, Given, Product, Quotient, Ref } from "../../../src";
+import { Calculation, Difference, Given, Quotient, Ref } from "../../../src";
 
-export const title = "A quantity used twice";
+export const title = "Use a quantity twice";
+export const lead = "Give a quantity an `id` where it first belongs and write `Ref` wherever it is used again; hover either place and both light up.";
 
-/* The material per part enters both products. It is defined once, where it
-   first belongs, and stands as a `<Ref>` in the second place: a reference
-   shows the quantity's name and number, in italics, never its derivation
-   again. Open both products and hover either place - both light up. */
 export default function UsedTwice() {
   return (
-    <Calculation aria-label="Material lost to scrap, week 12">
-      <Quotient label="Material lost to scrap" format="percent" decimals={2}>
-        <Product label="Scrap cost" unit="€" decimals={2}>
-          <Given label="Scrapped parts" value={38} unit="pcs" />
-          <Given id="material" label="Material per part" value={2.8} unit="€" decimals={2} />
-        </Product>
-        <Product label="Material cost" unit="€" decimals={2}>
-          <Given label="Parts made" value={1278} unit="pcs" />
-          <Ref to="material" />
-        </Product>
+    <Calculation aria-label="Overspend of Marketing, February">
+      <Quotient label="Overspend, share of budget" format="percent">
+        <Difference label="Overspend" unit="€">
+          <Given label="Actual, February" value={77420} unit="€" />
+          <Given id="budget" label="Budget, February" value={68000} unit="€" />
+        </Difference>
+        <Ref to="budget" />
       </Quotient>
     </Calculation>
   );

@@ -1,34 +1,27 @@
-import { Calculation, Difference, Given, Product, Quotient, Ref } from "../../../src";
+import { Calculation, Given, Quotient, Sum } from "../../../src";
 
-export const title = "A missing number";
+export const title = "A number that is not there yet";
+export const lead = "A given with `value={null}` shows as missing, and so does every figure that depends on it – never carried on as zero.";
 
-/* The downtime has not been booked yet. It shows as missing - and so does
-   every figure that depends on it, each with the reason, up to the result.
-   Nothing is carried on as zero: an OEE computed with no downtime would be a
-   number, and a wrong one. */
+const BOOKED = [
+  { name: "Luis Moreno", hours: 34 },
+  { name: "Hana Sato", hours: 38 },
+  { name: "Kofi Mensah", hours: null },
+  { name: "Freya Olsen", hours: 36 },
+  { name: "David Kowalski", hours: 17 },
+];
+
 export default function Missing() {
   return (
-    <Calculation aria-label="OEE, late shift">
-      <Product label="OEE" format="percent" target={0.85}>
-        <Quotient label="Availability" format="percent">
-          <Difference id="runtime" label="Run time" unit="min">
-            <Given id="planned" label="Planned production time" value={450} unit="min" />
-            <Given label="Downtime" value={null} unit="min" />
-          </Difference>
-          <Ref to="planned" />
-        </Quotient>
-        <Quotient label="Performance" format="percent">
-          <Product label="Ideal run time" unit="min">
-            <Given label="Ideal cycle time" value={0.8} unit="min/pc" />
-            <Given id="total" label="Total count" value={455} unit="pcs" />
-          </Product>
-          <Ref to="runtime" />
-        </Quotient>
-        <Quotient label="Quality" format="percent">
-          <Given label="Good count" value={441} unit="pcs" />
-          <Ref to="total" />
-        </Quotient>
-      </Product>
+    <Calculation aria-label="Utilisation of the Apps team, week 11">
+      <Quotient label="Utilisation, Apps team" format="percent" target={0.85}>
+        <Sum label="Hours booked" unit="h">
+          {BOOKED.map((person) => (
+            <Given key={person.name} label={person.name} value={person.hours} unit="h" source="Timesheets" />
+          ))}
+        </Sum>
+        <Given label="Capacity, Apps team" value={172} unit="h" />
+      </Quotient>
     </Calculation>
   );
 }

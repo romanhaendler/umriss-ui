@@ -39,13 +39,13 @@ test("a page with every code block open is accessible", async ({ page }, testInf
    time) - every tree starts folded and nothing is hovered, so the loop never sees
    it. */
 test("a calculation with derivations open is accessible", async ({ page }, testInfo) => {
-  await openExample(page, "worked-examples", "cost-per-piece");
-  const target = page.locator('[data-example="cost-per-piece"]');
-  for (const label of ["Direct material", "Machine time", "Scrap surcharge"]) {
+  await openExample(page, "worked-examples", "cost-per-tour");
+  const target = page.locator('[data-example="cost-per-tour"]');
+  for (const label of ["Drivers", "Diesel", "Electricity"]) {
     await target.getByRole("button", { name: `Show how ${label} is derived` }).click();
   }
-  /* The scrap surcharge marks its operands - among them the stale scrap rate. */
-  await target.getByText("Scrap surcharge", { exact: true }).hover();
-  const result = await new AxeBuilder({ page }).include('[data-example="cost-per-piece"]').withTags(STANDARDS).analyze();
+  /* The diesel line marks its operands - among them the stale diesel price. */
+  await target.getByText("Diesel", { exact: true }).hover();
+  const result = await new AxeBuilder({ page }).include('[data-example="cost-per-tour"]').withTags(STANDARDS).analyze();
   expect(findings(result), `Derivations open (${testInfo.project.name})`).toEqual([]);
 });
