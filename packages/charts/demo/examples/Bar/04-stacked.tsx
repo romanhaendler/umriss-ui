@@ -8,13 +8,9 @@
    and their total. */
 
 import { Bar, Chart, Legend, Tooltip, XAxis, YAxis } from "../../../src";
-import { downtimeData, type DayDowntime } from "../../data";
+import { downtimeData, type DayDowntime } from "@umriss-ui/demo/worlds/plant";
 
 export const title = "Stacked bars";
-
-/* The plant this is drawn from stands in the second tab, so that the
-   example can be copied whole. */
-export const shows = ["../../data.ts"];
 
 export default function Stacked() {
   return (

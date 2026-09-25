@@ -8,13 +8,9 @@
 
 import { Chart, Legend, Line, Tooltip, XAxis, YAxis } from "../../../src";
 import type { TooltipHit } from "../../../src";
-import { furnaceData, type FurnacePoint } from "../../data";
+import { furnaceData, type FurnacePoint } from "@umriss-ui/demo/worlds/plant";
 
 export const title = "Content of one's own";
-
-/* The plant this is drawn from stands in the second tab, so that the
-   example can be copied whole. */
-export const shows = ["../../data.ts"];
 
 const timeOfDay = (v: number) =>
   new Date(v).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });

@@ -13,7 +13,8 @@
     }
   },
   "include": ["src", "checks", "tests-unit"],
-  /* The fixture scenario imports a world by the package's name, as a demo
-     does; the fixture's world is handed to the generator, not resolved. */
-  "exclude": ["tests-unit/fixtures/llms/demo/scenarios"]
+  /* The fixture's scenario and example import a world by the package's name,
+     as a demo does; the fixture's world is handed to the generator, not
+     resolved. */
+  "exclude": ["tests-unit/fixtures/llms/demo"]
 }

@@ -16,12 +16,10 @@
    Anything relative that is not the package is a fixture, and a fixture is
    what this check exists to catch.
 
-   Two exceptions, both visible in the code view. `export const shows = [...]`
-   puts a file beside the example as a further tab, so a reader sees it and
-   can copy it too - declared at the example, in the file that depends on it.
-   And an import of `@umriss-ui/demo/worlds/<world>`, the demos' shared data,
-   brings the world's file as a tab by itself; being a bare specifier, it
-   passes the npm rule.
+   The demos' shared data is no exception: an import of
+   `@umriss-ui/demo/worlds/<world>` brings the world's file as a further tab
+   of the code view, so a reader sees it and can copy it too; being a bare
+   specifier, it passes the npm rule.
 
    It stands once and runs against every demo, as the shell's and the page's
    checks do: their `own-data.spec.ts` calls `checkOwnData` with their
@@ -44,29 +42,16 @@ export interface OwnDataProbes {
     fixture is a dependency on the fixture. */
 const IMPORT = /(?:\bfrom|^[ \t]*import)\s*(["'])([^"']+)\1/gm;
 
-/** The `shows` export, as the file writes it - read from the text and not from
-    the module, because this check never runs the example. */
-const SHOWS = /^export const shows\s*=\s*\[([^\]]*)\]/m;
-const STRING = /(["'])([^"']+)\1/g;
-
 function specifiersOf(source: string): string[] {
   return [...source.matchAll(IMPORT)].map((match) => match[2]!);
 }
 
-function showsOf(source: string): string[] {
-  const block = SHOWS.exec(source);
-  return block === null ? [] : [...block[1]!.matchAll(STRING)].map((match) => match[2]!);
-}
-
 /** Whether a specifier is one an example may have. */
-function allowed(specifier: string, shows: readonly string[]): boolean {
+function allowed(specifier: string): boolean {
   /* npm: anything that is not a path at all. */
   if (!specifier.startsWith(".") && !specifier.startsWith("/")) return true;
   /* The package's own source, and its subpaths. */
-  if (specifier === LIBRARY_PATH || specifier.startsWith(`${LIBRARY_PATH}/`)) return true;
-  /* A file the example shows beside itself, with or without its extension -
-     an import writes `../../data`, the `shows` entry names `../../data.ts`. */
-  return shows.some((shown) => shown === specifier || shown.replace(/\.tsx?$/, "") === specifier);
+  return specifier === LIBRARY_PATH || specifier.startsWith(`${LIBRARY_PATH}/`);
 }
 
 /** Every example file of a demo, as `<folder>/<file>`. */
@@ -92,16 +77,15 @@ export function checkOwnData({ examplesDir }: OwnDataProbes): void {
     const offenders: string[] = [];
     for (const { name, path } of files) {
       const source = readFileSync(path, "utf8");
-      const shows = showsOf(source);
       for (const specifier of specifiersOf(source)) {
-        if (allowed(specifier, shows)) continue;
+        if (allowed(specifier)) continue;
         offenders.push(`${name} › ${specifier}`);
       }
     }
 
     /* Named, so that the file to repair can be found from the output - and
-       repaired by giving the example its own few lines of data, or by having it
-       SHOW the file it needs. */
+       repaired by giving the example its own few lines of data, or by moving
+       the data into a world. */
     expect(offenders).toEqual([]);
   });
 }

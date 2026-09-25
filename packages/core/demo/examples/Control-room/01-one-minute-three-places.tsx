@@ -2,13 +2,9 @@ import { useMemo } from "react";
 import { Grid, Stack, Stat } from "../../../src";
 import { Chart, LimitBand, LimitLine, Line, Tooltip, XAxis, YAxis } from "@umriss-ui/charts";
 import { AlarmList, alarmModel } from "@umriss-ui/table";
-import { ALARM_TYPES, KILN, KILN_LIMITS, alarmsAt, plant, upTo } from "../../plant";
+import { ALARM_TYPES, KILN, KILN_LIMITS, alarmsAt, plant, upTo } from "@umriss-ui/demo/worlds/plant";
 
 export const title = "One minute, three places";
-
-/* The plant this is drawn from stands in the second tab, so that the example
-   can be copied whole. */
-export const shows = ["../../plant.ts"];
 
 /* The first step: one minute of one shift - the minute the kiln crosses its
    alarm limit - read in three places. The trend draws it above the limit, the

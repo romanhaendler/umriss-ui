@@ -6,13 +6,9 @@
    algorithm would pick its own positions and name every second shift. */
 
 import { Bar, Chart, Tooltip, XAxis, YAxis } from "../../../src";
-import { scrapData, type ShiftScrap } from "../../data";
+import { scrapData, type ShiftScrap } from "@umriss-ui/demo/worlds/plant";
 
 export const title = "One bar per shift";
-
-/* The plant this is drawn from stands in the second tab, so that the
-   example can be copied whole. */
-export const shows = ["../../data.ts"];
 
 export default function PerShift() {
   return (

@@ -34,10 +34,6 @@ export interface DemoSources {
   examples: Record<string, ExampleModule>;
   /** Both globs again with `query: "?raw", import: "default"`. */
   sources: Record<string, string>;
-  /** The source of the files an example may show BESIDE itself - a raw glob
-      over whatever a demo allows to be named in `shows`. Left out where no
-      example shows anything. */
-  beside?: Record<string, string>;
   /** `import.meta.glob("../../demo/src/worlds/*.ts", { query: "?raw", … })`:
       the worlds an example or scenario imports, shown beside it. */
   worlds?: Record<string, string>;
@@ -52,7 +48,6 @@ export function buildDemo(sources: DemoSources): Demo {
   const options = {
     pages: sources.addresses.ALL_PAGES,
     packageName: sources.packageName,
-    beside: sources.beside,
     worlds: sources.worlds,
   };
   return {

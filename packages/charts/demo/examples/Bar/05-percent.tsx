@@ -7,13 +7,9 @@
    and `format` writes it, as it would write any reading. */
 
 import { Bar, Chart, Legend, Tooltip, XAxis, YAxis } from "../../../src";
-import { downtimeData, type DayDowntime } from "../../data";
+import { downtimeData, type DayDowntime } from "@umriss-ui/demo/worlds/plant";
 
 export const title = "Shares of a whole";
-
-/* The plant this is drawn from stands in the second tab, so that the
-   example can be copied whole. */
-export const shows = ["../../data.ts"];
 
 const minutes = (v: number) => `${v} min`;
 
