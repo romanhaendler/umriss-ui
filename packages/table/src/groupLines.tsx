@@ -251,7 +251,15 @@ export function GroupLine({
   /* The leading run stops before the end block: a cell over it would stick
      nowhere. */
   const endColumns = blocks.end > 0 ? blocks.end - (hasActions ? 1 : 0) : 0;
-  const lead = Math.min(firstAggregate === -1 ? columns.length : firstAggregate, columns.length - endColumns);
+  /* Without a span the label needs one column at least: over none it was a
+     cell of `colSpan` 0, which counts as one, and every aggregate after it
+     stood a column too far right. Where the first column carries an
+     aggregate - easily reached by pinning it to the start - the label takes
+     its place in the header, and the sum stands in the footer. */
+  const lead = Math.max(
+    spanEntry || columns.length === 0 ? 0 : 1,
+    Math.min(firstAggregate === -1 ? columns.length : firstAggregate, columns.length - endColumns),
+  );
   const rest = columns.slice(lead);
   /* With a start block the label or the count covers only the pinned columns
      of the run, so that it sticks with them; a cell without a text fills the

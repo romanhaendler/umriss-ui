@@ -13,6 +13,7 @@ import type { TableSelection } from "./model/useTableSelection";
 import type { ColumnFilter } from "./columnFilter";
 import type { DateFormat, NumberFormat } from "./values";
 import type { DatePeriod } from "./model/grouping";
+import type { Pin } from "./model/pinning";
 
 /* --- Values --------------------------------------------------------------- */
 
@@ -132,7 +133,7 @@ export interface ColumnBase {
   /** Keeps the column in view while the table scrolls sideways: in a block
       before every other column, or after them. The user can change it in the
       column menu; the view carries the change. */
-  pin?: "start" | "end";
+  pin?: Pin;
   /** Sortable unless stated otherwise, when the value is text, a number, a point in time or a boolean. */
   sortable?: boolean;
   /** Takes part in the search. Without a statement: yes for text, no otherwise. */
@@ -300,7 +301,7 @@ interface VerdictBase {
   /** Shows the drag grip on the header cell. */
   resizable?: boolean;
   /** Keeps the column in view while the table scrolls sideways, before or after every other column. */
-  pin?: "start" | "end";
+  pin?: Pin;
   /** A verdict column has no list filter: four verdicts are filtered through the sort. */
   filter?: never;
   /** `"worst"`: the worst verdict among the rows – in the footer and in a
@@ -476,9 +477,9 @@ export interface TableSnapshot<Z> {
   /** Reorders the columns – on header, body and footer at once. */
   setOrder: (order: readonly string[]) => void;
   /** The pinned columns by id - the declared ones until the user chooses. */
-  pinned: Readonly<Record<string, "start" | "end">>;
+  pinned: Readonly<Record<string, Pin>>;
   /** Pins a column to the start or the end, or unpins it with `null`. */
-  setPin: (column: string, pin: "start" | "end" | null) => void;
+  setPin: (column: string, pin: Pin | null) => void;
   /** The widths in pixels: those of the columns, and over them the dragged ones. */
   widths: Readonly<Record<string, number>>;
   /** Sets the width of a column; `undefined` takes it back. */

@@ -26,6 +26,7 @@ import { GroupingChoice } from "./groupingChoice";
 import type { PartKind, Registry } from "./registry";
 import { orderColumns } from "./model/tableModel";
 import type { TableRef } from "./types";
+import type { Pin } from "./model/pinning";
 import styles from "./Table.module.css";
 
 /** Registers a part at its table for as long as it stands: first during the
@@ -135,7 +136,7 @@ export function ColumnMenu({ of }: ColumnMenuProps) {
      or where it is disabled now its neighbour. The element wanders to its new
      place in the DOM, and an element that has been moved loses the focus in
      the browser. */
-  const [focusAfter, setFocusAfter] = useState<{ id: string; key: string; otherwise: string } | null>(null);
+  const [focusAfter, setFocusAfter] = useState<{ id: string; key: string; otherwise?: string } | null>(null);
 
   useLayoutEffect(() => {
     if (!focusAfter || !list.current) return;
@@ -145,7 +146,7 @@ export function ColumnMenu({ of }: ColumnMenuProps) {
       (child) => (child as HTMLElement).dataset.column === focusAfter.id,
     );
     const wanted = entry?.querySelector<HTMLButtonElement>(focusAfter.key);
-    const other = entry?.querySelector<HTMLButtonElement>(focusAfter.otherwise);
+    const other = focusAfter.otherwise ? entry?.querySelector<HTMLButtonElement>(focusAfter.otherwise) : undefined;
     (wanted && !wanted.disabled ? wanted : other)?.focus();
   }, [focusAfter]);
 
@@ -174,7 +175,7 @@ export function ColumnMenu({ of }: ColumnMenuProps) {
   /* A pin key pins to its side, or unpins where the column is pinned there
      already - two keys for three wishes, and the one that is on says so in the
      accent. */
-  const pinKey = (id: string, label: string, side: "start" | "end") => {
+  const pinKey = (id: string, label: string, side: Pin) => {
     const on = pins[id] === side;
     return (
       <button
@@ -184,7 +185,7 @@ export function ColumnMenu({ of }: ColumnMenuProps) {
         aria-label={on ? wording.unpinColumn(label) : side === "start" ? wording.pinColumnToStart(label) : wording.pinColumnToEnd(label)}
         onClick={() => {
           snapshot.setPin(id, on ? null : side);
-          setFocusAfter({ id, key: `[data-pin="${side}"]`, otherwise: `[data-pin="${side}"]` });
+          setFocusAfter({ id, key: `[data-pin="${side}"]` });
         }}
       >
         <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">

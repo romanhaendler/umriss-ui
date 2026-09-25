@@ -42,3 +42,18 @@ from the declaration). `stickyRowHeader` is `pin: "start"` on the row header.
 For 03: the shadow in dark (the stuck header's formula, reads as a light
 glow), the verdict column's width in the example, and the line above a group
 header in a pinned table.
+
+**Review (2026-09-25, standards and spec against `main`).** Fixed: a focused
+virtual group header in a pinned table lost its ring between its end cells (the
+inset line above the header overrode it - now only when not focused); the
+ResizeObserver kept watching the old cell when one pinned column was swapped for
+another; a group header without a span over a first column with an aggregate
+got a label of `colSpan` 0 (counted as one, every aggregate a column too far
+right) - the label now takes that column's place, the sum stays in the footer;
+a stale comment reference; `Pin` used instead of the literal where the module
+may import it. Decided, not changed: a detail row scrolls with its row - its
+content belongs to the row, not to a block; the compact density needs nothing
+of its own, since the offsets are measured, not derived from a row height. Left
+as judgement calls: the repeated `pinAt(x).className` / `.style` pair per cell,
+and the 6 px / 9 % shadow copied from the stuck group header (a token for both
+would be a card in 03).

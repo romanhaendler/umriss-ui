@@ -157,8 +157,8 @@
      every column has a `width` and the table is wider than their sum, the
      automatic table layout distributes the surplus over every column with a
      pixel width, the control cells included – `max-width` does not apply to a
-     cell – and the control cells took a share of every surplus. A percentage width gets no surplus as long as other
-     columns exist; `min-width` holds it at 34 px (table-demo,
+     cell – and the control cells took a share of every surplus. A
+     percentage width gets no surplus as long as other columns exist; `min-width` holds it at 34 px (table-demo,
      features-browser.spec.ts). */
   .control {
     width: 0.1%;
@@ -841,8 +841,13 @@
      the header broke off at both ends (measured, table-column-pinning 01).
      Drawn inside every cell it holds; the border stays for the height,
      transparent. */
+  /* Not while focused: the focus ring of a virtual line is an inset shadow as
+     well, and this rule would take it off every cell between the ends. */
   .pinnedTable tbody tr.groupHeader > .td {
     border-top-color: transparent;
+  }
+
+  .pinnedTable tbody tr.groupHeader:not(:focus-visible) > .td {
     box-shadow: inset 0 1px 0 var(--u-hairline-strong);
   }
 
