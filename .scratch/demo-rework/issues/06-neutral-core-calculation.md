@@ -1,6 +1,6 @@
 # 06 - Neutral JSDoc and wording: core and calculation
 
-Status: ready-for-agent
+Status: done
 Type: task
 Blocked by: —
 
@@ -13,3 +13,7 @@ JSDoc and wording examples in core (Stat, limit, freshness, Breadcrumb, Progress
 ## Acceptance
 
 - No API change; tests green.
+
+## Comments
+
+2026-09-25, delivered on `main`. Core and calculation JSDoc and wording examples neutral; no API change. Visual baselines wait on the branch `demo-rework-baselines` for ticket 30's review (CONTEXT.md, Baseline).

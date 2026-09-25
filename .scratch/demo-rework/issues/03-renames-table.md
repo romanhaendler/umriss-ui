@@ -1,6 +1,6 @@
 # 03 - Hard renames: table and its alarms
 
-Status: ready-for-agent
+Status: done
 Type: task
 Blocked by: —
 
@@ -14,3 +14,7 @@ ADR-0035's alarm renames (`snooze`, `disabled`, `suppressed`, `isHidden`, active
 
 - Changelog migration table, no aliases.
 - Unit and visual tests green; baselines updated only where names show.
+
+## Comments
+
+2026-09-25, delivered on `main`. Alarm names (snooze, disabled, suppressed, isHidden, active/resolved), `ReturnBand` upper/lower, ISA → umriss table in `docs/standards.md`; migration tables in table and core changelogs. Visual baselines wait on the branch `demo-rework-baselines` for ticket 30's review (CONTEXT.md, Baseline).

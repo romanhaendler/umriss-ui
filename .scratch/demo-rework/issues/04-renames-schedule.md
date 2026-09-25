@@ -1,6 +1,6 @@
 # 04 - Hard renames: schedule
 
-Status: ready-for-agent
+Status: done
 Type: task
 Blocked by: —
 
@@ -14,3 +14,7 @@ Spec: `.scratch/demo-rework/spec.md` · ADR-0035
 
 - Changelog migration table, no aliases.
 - Tests green.
+
+## Comments
+
+2026-09-25, delivered on `main`. leadIn/leadOut, Dependency with lag, violated dependency, `Dependencies` part, wording keys EN/DE; migration tables in schedule and core changelogs. Visual baselines wait on the branch `demo-rework-baselines` for ticket 30's review (CONTEXT.md, Baseline).

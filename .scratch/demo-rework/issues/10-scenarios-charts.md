@@ -1,6 +1,6 @@
 # 10 - Scenarios page: charts
 
-Status: ready-for-agent
+Status: done
 Type: task
 Blocked by: 01, 02, 03, 04, 05, 06
 
@@ -14,3 +14,7 @@ The charts demo's scenarios page after the spec's table (one screen per world li
 
 - Spec's scenarios-page rules met; visual test per scenario.
 - Plant at most one scenario.
+
+## Comments
+
+2026-09-25, delivered on `main`. Charts scenarios: latency against its objective, idle vans, budget vs forecast, sprint burn-down, tile length in control. Visual baselines wait on the branch `demo-rework-baselines` for ticket 30's review (CONTEXT.md, Baseline).
