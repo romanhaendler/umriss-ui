@@ -48,6 +48,9 @@ export interface AreaDrawItem extends DrawBase {
   dash?: readonly number[];
   /** Lines across the fill, in the series' colour (C3). */
   hatch?: Hatch;
+  /** A stacked member: a line in the ground's colour parts it from the
+      member above (charts-stacking 04). */
+  edges?: boolean;
 }
 
 export interface BarDrawItem extends DrawBase {
@@ -63,6 +66,9 @@ export interface BarDrawItem extends DrawBase {
   width: number;
   /** Lines across the bars, in the background's colour (C3). */
   hatch?: Hatch;
+  /** A stacked member: a line in the ground's colour along each foot parts
+      it from the bar below (charts-stacking 04). */
+  edges?: boolean;
 }
 
 export interface ScatterDrawItem extends DrawBase {
@@ -294,7 +300,7 @@ function drawLine(ctx: CanvasRenderingContext2D, item: LineDrawItem): void {
    A section of one point has no width to fill: it is a stroke from its foot to
    its value, or it would not be drawn at all (Q23). */
 
-function drawArea(ctx: CanvasRenderingContext2D, item: AreaDrawItem, plot: Rect): void {
+function drawArea(ctx: CanvasRenderingContext2D, item: AreaDrawItem, plot: Rect, ground: string): void {
   const n = item.length;
   const xm = item.xScale.m;
   const xb = item.xScale.b;
@@ -363,6 +369,15 @@ function drawArea(ctx: CanvasRenderingContext2D, item: AreaDrawItem, plot: Rect)
   ctx.globalAlpha = item.alpha;
   // Across a faint fill the hatch takes the series' colour, not the ground's.
   drawHatch(ctx, fill, plot, item.hatch ?? "none", item.color);
+  if (item.edges === true) {
+    // A stacked member: a pixel of ground on either side of its outline. The
+    // one below the outline parts its fill from the member above; the one
+    // above lies under that member's fill, drawn next, and does not show.
+    ctx.setLineDash([]);
+    ctx.strokeStyle = ground;
+    ctx.lineWidth = item.strokeWidth + 2;
+    ctx.stroke(outline);
+  }
   ctx.strokeStyle = item.color;
   if (item.strokeWidth > 0) {
     ctx.setLineDash((item.dash ?? []) as number[]);
@@ -395,6 +410,8 @@ function drawBars(ctx: CanvasRenderingContext2D, item: BarDrawItem, plot: Rect, 
   const widthPx = item.width * xm;
 
   const path = new Path2D();
+  // A stacked bar's foot where it stands on another bar - not on zero.
+  const feet = item.edges === true && us !== null ? new Path2D() : null;
   for (let i = 0; i < n; i++) {
     const value = ys[i] as number;
     if (Number.isNaN(value)) continue; // a gap leaves its bar out (R-2.5)
@@ -402,10 +419,20 @@ function drawBars(ctx: CanvasRenderingContext2D, item: BarDrawItem, plot: Rect, 
     const py = value * ym + yb;
     const footPx = us === null ? baselinePx : (us[i] as number) * ym + yb;
     path.rect(px, py, widthPx, footPx - py);
+    if (feet !== null && us?.[i] !== 0) {
+      feet.moveTo(px, footPx);
+      feet.lineTo(px + widthPx, footPx);
+    }
   }
   ctx.fillStyle = item.color;
   ctx.fill(path);
   drawHatch(ctx, path, plot, item.hatch ?? "none", ground);
+  if (feet !== null) {
+    ctx.strokeStyle = ground;
+    ctx.lineWidth = 1;
+    ctx.setLineDash([]);
+    ctx.stroke(feet);
+  }
 }
 
 /* ---------------- Scatter ----------------
@@ -615,7 +642,7 @@ export function drawSeriesLayer(
         drawLine(ctx, item);
         break;
       case "area":
-        drawArea(ctx, item, plot);
+        drawArea(ctx, item, plot, input.theme.colorBg);
         break;
       case "bar":
         drawBars(ctx, item, plot, input.theme.colorBg);

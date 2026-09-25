@@ -4,6 +4,7 @@
    change of hit triggers no React render. */
 
 import { Fragment, useCallback, useEffect, useSyncExternalStore, type ReactNode } from "react";
+import { MarkChip } from "./Legend";
 import type { ChartScene } from "./scene";
 
 /* What stands in the value column - a state's name, a cell's value, every
@@ -53,7 +54,11 @@ export function TooltipHtml({ scene }: { scene: ChartScene }): ReactNode {
                     return (
                       <Fragment key={`${point.seriesName}-${point.index}`}>
                         <div className="uc-tooltip-row">
-                          <span className="uc-tooltip-chip" style={{ background: point.color }} />
+                          {row?.chip != null ? (
+                            <MarkChip color={row.chip.color} mark={row.chip.mark} />
+                          ) : (
+                            <span className="uc-tooltip-chip" style={{ background: point.color }} />
+                          )}
                           <span className="uc-tooltip-name">
                             {point.seriesName}
                             {row !== undefined && row.x !== "" ? (
