@@ -25,6 +25,27 @@ moves from here under the rule above.
   built as it is, and the declaration of every other export. The same text
   stands online as <https://romanhaendler.github.io/umriss-ui/schedule/llms-full.txt>,
   with an index of the pages beside it (`llms.txt`).
+- **The schedule by keyboard and screen reader** (schedule-a11y, ADR-0030's
+  pattern). The plot is one tab stop (`role="application"`, role description
+  "schedule", the schedule's `ariaLabel`) with an **Active subtask**: ←/→ walk
+  a lane in time order, ↑/↓ go to the nearest subtask on the lane above or
+  below (a folded group is one row), Home/End to the lane's first and last,
+  PageUp/PageDown by a tenth of the view. `]` follows a transport out from its
+  subtask and on to the next stop, `[` goes back. The view pans and scrolls to
+  bring the active subtask into it. The active subtask is drawn and tooltipped
+  as the hover is; the pointer takes it over by moving, and keys walk on from
+  the pointer's.
+- **Space and Enter select** the active subtask's task, reported through
+  `onSelectedTaskChange` as a click is.
+- **Editing by key**: Alt+←/→ proposes a move by one step of the snap raster,
+  Alt+Shift+←/→ a new end - the same `move` and `stretch` intents a drag of that
+  length reports, and only where `intents` lists them.
+- **What a screen reader hears**: once the keys rest (150 ms), a polite readout
+  of the lane, the task, the subtask, its day and times and every finding by
+  name; never after the pointer. The plot is described by a summary - lanes,
+  subtasks in view, the visible span, the plan's overlaps and late transports -
+  and the key help. New wording entries in `@umriss-ui/core`, English and
+  German: `scheduleRoleDescription`, `scheduleSummary`, `scheduleKeyHelp`.
 
 ## 0.1.8 – Core 0.9.0 (Sep. 2026)
 

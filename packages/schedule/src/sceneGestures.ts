@@ -170,8 +170,13 @@ export class SceneGestures {
       open it for this gesture. */
   private resting: { group: string; timer: ReturnType<typeof setTimeout> } | null = null;
   hover: ScheduleHit = { kind: "nothing" };
-  /** Where the pointer rests on the plot while nothing is being dragged. */
+  /** Where the pointer rests on the plot while nothing is being dragged - or,
+      where the keyboard set the hover, the point its tooltip stands at. */
   hoverPoint = { x: 0, y: 0 };
+  /** Whether the keyboard set the hover (ADR-0030): pointer and keys share one
+      **Active subtask**, and the last input wins. The keys' hover stays when
+      the pointer leaves, and the pointer takes it over by moving. */
+  byKeyboard = false;
   cursor = "default";
 
   constructor(private readonly host: GestureHost) {}
@@ -404,7 +409,10 @@ export class SceneGestures {
       this.autoPan();
       return;
     }
-    if (current.kind === "none") this.hoverAt(event.clientX, event.clientY, x, y);
+    if (current.kind === "none") {
+      this.byKeyboard = false;
+      this.hoverAt(event.clientX, event.clientY, x, y);
+    }
   }
 
   pointerUp(event: PointerEvent): void {
@@ -501,7 +509,8 @@ export class SceneGestures {
       pointer without the pointer moving, and a tooltip still naming the old
       times would be a lie. Nothing is reported: no interaction happened. */
   refreshHover(): void {
-    if (!this.idle || this.hoverKey === "nothing") return;
+    /* The keys' hover is read anew by its id, by the keys (`sceneKeys.ts`). */
+    if (!this.idle || this.hoverKey === "nothing" || this.byKeyboard) return;
     const { x, y } = this.hoverPoint;
     const hit = this.host.view.hitAt(x, y);
     this.hover = hit;
@@ -509,7 +518,7 @@ export class SceneGestures {
   }
 
   pointerLeave(): void {
-    if (this.gesture.kind !== "none") return;
+    if (this.gesture.kind !== "none" || this.byKeyboard) return;
     this.setHover({ kind: "nothing" }, "nothing");
   }
 
@@ -586,6 +595,17 @@ export class SceneGestures {
     }
     this.setHover(hit, key);
     this.report("hover", hit, clientX, clientY, x, y);
+  }
+
+  /** The keyboard sets the hover: drawn, and its tooltip shown, as the
+      pointer's would be - and reported to nobody, since `onInteraction`
+      speaks of pointer positions. `nothing` hands the hover back. */
+  setKeyboardHover(hit: ScheduleHit, point: { x: number; y: number }): void {
+    this.byKeyboard = hit.kind !== "nothing";
+    this.hoverPoint = point;
+    this.hover = hit;
+    this.hoverKey = keyOf(hit);
+    this.host.interactionChanged();
   }
 
   private setHover(hit: ScheduleHit, key: string): void {
@@ -748,7 +768,7 @@ export class SceneGestures {
   /* Ghost and intents                                                 */
   /* ---------------------------------------------------------------- */
 
-  private snapStep(): SnapRaster {
+  snapStep(): SnapRaster {
     const snap = this.host.view.options.snap;
     if (snap === "ticks") return { step: this.host.view.step(), offset: 0 };
     if (snap === false) return { step: 0, offset: 0 };
@@ -768,12 +788,7 @@ export class SceneGestures {
            start that lies off the raster would report a move nobody made. */
         const scale = view.viewport().scale;
         const delta = scale.fromPx(x) - gesture.t0;
-        if (intents.includes("move") && Math.abs(delta * scale.m) >= CLICK_SLOP) {
-          const calendar = calendarFrom(view.options.calendar);
-          const start = toOperatingTimeClamped(s.from, calendar) + delta;
-          const wall = calendar.intervals.length === 0 ? start : toWallClock(Math.max(0, Math.min(calendar.total, start)), calendar);
-          from = this.snapInside(wall, step);
-        }
+        if (intents.includes("move") && Math.abs(delta * scale.m) >= CLICK_SLOP) from = this.shifted(s.from, delta, step);
         let lane = gesture.ghost.lane;
         if (intents.includes("lane")) {
           const wanted = this.onLane(y) ?? lane;
@@ -797,6 +812,16 @@ export class SceneGestures {
       case "teardown":
         return { ...s, teardown: Math.max(0, at - s.to) };
     }
+  }
+
+  /** A time moved by an amount of OPERATING time and snapped: a drag moves
+      a start this way, and a key by one step of the raster - one arithmetic,
+      so a key proposes exactly what a drag of that length would. */
+  shifted(time: number, delta: number, step: SnapRaster): number {
+    const calendar = calendarFrom(this.host.view.options.calendar);
+    const moved = toOperatingTimeClamped(time, calendar) + delta;
+    const wall = calendar.intervals.length === 0 ? moved : toWallClock(Math.max(0, Math.min(calendar.total, moved)), calendar);
+    return this.snapInside(wall, step);
   }
 
   /** Snapped - and, where the raster lands in time the calendar removes, moved
