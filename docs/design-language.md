@@ -147,7 +147,7 @@ muted "ok" of a verdict word.
 
 **Colour is for the abnormal.** Danger, warning and success come from the
 verdict, the lifecycle or the freshness - never from a component's wish to look
-lively. A hidden alarm (shelved, suppressed, out of service) is a decision
+lively. A hidden alarm (snoozed, suppressed, disabled) is a decision
 already taken and is drawn without its colour: neutral, but there, with its
 state as a word.
 
