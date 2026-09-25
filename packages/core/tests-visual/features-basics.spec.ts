@@ -211,3 +211,72 @@ test("Breadcrumb folds at a narrow width and is walked through its menu", async 
   await expect(menu).toBeHidden();
   await expect(more).toBeFocused();
 });
+
+/* ---------------- The layout tier (core-layout-extras) ----------------
+
+   What jsdom cannot show of it: a pane's real size under the keys and the
+   pointer, and the platform's file dialog behind the file input's key. */
+
+test("Splitter follows its keys and the pointer, and the panes follow it", async ({ page }) => {
+  await openExample(page, "splitter", "two-panes");
+  const line = page.locator('[data-example="two-panes"]').getByRole("separator", { name: "Resize the panes" });
+  const first = line.locator("xpath=preceding-sibling::div[1]");
+  const box = (await line.locator("xpath=..").boundingBox())!;
+  const share = async () => ((await first.boundingBox())!.width / box.width) * 100;
+
+  await page.keyboard.press("Tab"); // a keyboard focus, so :focus-visible holds
+  await line.focus();
+  await expect(line).toHaveAttribute("aria-valuenow", "35");
+  await page.keyboard.press("ArrowRight");
+  await expect(line).toHaveAttribute("aria-valuenow", "40");
+  // The pane's share of the whole box: the separator's strip is taken off
+  // before the rest is shared, so it lies a little under the value.
+  expect(Math.abs((await share()) - 40)).toBeLessThan(1.5);
+  await page.keyboard.press("Enter");
+  await expect(line).toHaveAttribute("aria-valuenow", "0");
+  expect((await first.boundingBox())!.width).toBe(0);
+  await page.keyboard.press("Enter");
+  await expect(line).toHaveAttribute("aria-valuenow", "40");
+
+  const handle = (await line.boundingBox())!;
+  await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width * 0.7, handle.y + 20, { steps: 4 });
+  await page.mouse.up();
+  await expect(line).toHaveAttribute("aria-valuenow", "70");
+  expect(Math.abs((await share()) - 70)).toBeLessThan(1.5);
+});
+
+test("FileInput opens the platform's dialog on its keys and takes a drop", async ({ page }) => {
+  await openExample(page, "fileinput", "one-file");
+  const example = page.locator('[data-example="one-file"]');
+  const input = example.getByLabel("Recipe file");
+
+  for (const key of ["Space", "Enter"]) {
+    await input.focus();
+    const [chooser] = await Promise.all([page.waitForEvent("filechooser"), page.keyboard.press(key)]);
+    expect(chooser.isMultiple()).toBe(false);
+    await chooser.setFiles({ name: `recipes-${key}.csv`, mimeType: "text/csv", buffer: Buffer.from("name;speed\nLemonade;42\n") });
+    await expect(example.getByRole("listitem")).toHaveText(new RegExp(`recipes-${key}\\.csv`));
+  }
+
+  /* A drop is built in the page, as the platform hands it over: a data
+     transfer with the files, on the zone. The PDF is refused by `accept`,
+     and the input holds what the list shows. */
+  const zone = example.locator(".exampleStage input[type=file]").locator("xpath=../..");
+  await zone.evaluate((element) => {
+    const transfer = new DataTransfer();
+    transfer.items.add(new File(["name;speed\n"], "dropped.csv", { type: "text/csv" }));
+    transfer.items.add(new File(["%PDF"], "manual.pdf", { type: "application/pdf" }));
+    for (const type of ["dragenter", "dragover", "drop"]) {
+      element.dispatchEvent(new DragEvent(type, { dataTransfer: transfer, bubbles: true, cancelable: true }));
+    }
+  });
+  await expect(example.getByRole("listitem")).toHaveText(/dropped\.csv/);
+  await expect(example.getByText("manual.pdf is not an accepted type")).toBeVisible();
+  expect(await input.evaluate((el: HTMLInputElement) => [...(el.files ?? [])].map((f) => f.name))).toEqual(["dropped.csv"]);
+
+  await example.getByRole("button", { name: "Remove dropped.csv" }).click();
+  await expect(example.getByRole("listitem")).toHaveCount(0);
+  expect(await input.evaluate((el: HTMLInputElement) => el.files?.length)).toBe(0);
+});

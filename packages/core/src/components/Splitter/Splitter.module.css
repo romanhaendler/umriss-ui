@@ -1,0 +1,79 @@
+@layer umriss.tokens, umriss.base, umriss.components;
+
+/* Two panes as grid tracks and a strip between them. The strip is wider than
+   the line it draws, so that a pointer finds it; the line is a hairline that
+   darkens under the pointer and while it is held. The box's height is the
+   caller's - a splitter divides a room, it does not decide how large the room
+   is. It takes no text of its own: the panes hold the caller's content. */
+
+@layer umriss.components {
+  .splitter {
+    display: grid;
+    grid-template-columns: minmax(0, var(--_first)) auto minmax(0, var(--_second));
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .vertical {
+    grid-template-columns: none;
+    grid-template-rows: minmax(0, var(--_first)) auto minmax(0, var(--_second));
+  }
+
+  .pane {
+    composes: scroll from "#own-styles";
+    min-width: 0;
+    min-height: 0;
+    overflow: auto;
+  }
+
+  .separator {
+    position: relative;
+    width: var(--u-space-2);
+    border-radius: var(--u-radius-sm);
+    cursor: col-resize;
+    touch-action: none;
+  }
+
+  .vertical > .separator {
+    width: auto;
+    height: var(--u-space-2);
+    cursor: row-resize;
+  }
+
+  .separator::before {
+    content: "";
+    position: absolute;
+    inset: 0 calc(50% - 0.5px);
+    background: var(--u-hairline-strong);
+    transition: background-color var(--u-transition);
+  }
+
+  .vertical > .separator::before {
+    inset: calc(50% - 0.5px) 0;
+  }
+
+  /* Hover darkens the line as it darkens a field's edge; held, the line takes
+     the ink, which is the press's stronger change (the interaction-state
+     canon). */
+  .separator:hover::before {
+    background: var(--u-color-edge-hover);
+  }
+
+  .separator:active::before {
+    background: var(--u-color-text-secondary);
+  }
+
+  .separator:focus-visible {
+    outline: 2px solid transparent;
+    box-shadow: var(--u-focus-ring);
+  }
+
+  /* The line is a ground, and forced colours repaint it with the page's
+     (forced-colors 02): the panes would meet with nothing between them. It
+     takes the system's text colour. */
+  @media (forced-colors: active) {
+    .separator::before {
+      background: CanvasText;
+    }
+  }
+}

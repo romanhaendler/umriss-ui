@@ -176,6 +176,14 @@ const CASES: Record<string, Case> = {
   ProgressBar: (probe) => <core.ProgressBar value={0.5} {...p(probe)} />,
   Breadcrumb: (probe) => <core.Breadcrumb items={[{ label: "Plant", href: "#/" }, { label: "Line 3" }]} {...p(probe)} />,
   Accordion: (probe) => <core.Accordion {...p(probe)} />,
+  Splitter: (probe) => (
+    <core.Splitter {...p(probe)}>
+      <div>Trend</div>
+      <div>Alarms</div>
+    </core.Splitter>
+  ),
+  Stepper: (probe) => <core.Stepper steps={[{ label: "Drain" }, { label: "Clean" }]} current={0} {...p(probe)} />,
+  FileInput: (probe) => <core.FileInput aria-label="Recipe file" {...p(probe)} />,
   AccordionItem: (probe) => (
     <core.Accordion>
       <core.AccordionItem value="a" title="General" {...p(probe)} />
@@ -204,6 +212,7 @@ const ROOT: Record<string, (element: Element) => boolean> = {
    there - and the class dresses the wrapper around it, which is what a
    caller lays out. A decision of principle 1 from before this guard, kept. */
 const CLASS_ON_WRAPPER: Record<string, string> = {
+  FileInput: "the class on the drop zone around key, words and list, the rest on the file <input>",
   Checkbox: "the class on the label that holds box and text, the rest on the <input>",
   NumberInput: "the class on the field with its stepper, the rest on the <input>",
   Select: "the class on the wrapper with the chevron, the rest on the <select>",
