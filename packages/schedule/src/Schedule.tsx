@@ -372,7 +372,7 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
      reason. */
   const ghostRef = useRef<HTMLSpanElement | null>(null);
   const [ghostAt, setGhostAt] = useState({ x: 0, y: 0, at: "" });
-  const ghostKey = ghost === null ? "" : `${ghost.x}:${ghost.y}:${ghost.from}:${ghost.to}:${ghost.overlap}:${ghost.violated}`;
+  const ghostKey = ghost === null ? "" : `${ghost.x}:${ghost.y}:${ghost.from}:${ghost.to}:${ghost.overlap}:${ghost.violated}:${ghost.refused}:${ghost.blocked}`;
   useLayoutEffect(() => {
     const element = ghostRef.current;
     if (ghost === null || element === null) return;
@@ -575,6 +575,7 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
               data-schedule-overlay="ghost label"
               data-findings={[ghost.overlap ? "overlap" : "", ghost.violated ? "violated-dependency" : ""].filter(Boolean).join(" ")}
               data-refused={ghost.refused ? "" : undefined}
+              data-blocked={ghost.blocked ? "" : undefined}
               style={{
                 left: `${ghostAt.x}px`,
                 top: `${ghostAt.y}px`,
@@ -583,6 +584,7 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
             >
               {wording.scheduleGhostTimes(formats.time(new Date(ghost.from), false), formats.time(new Date(ghost.to), false))}
               {ghost.refused && <span className={styles.refusal}>{wording.scheduleLaneRefused}</span>}
+              {ghost.blocked && <span className={styles.refusal}>{wording.scheduleBlockedTime}</span>}
               {ghost.overlap && <span className={styles.finding}>{wording.scheduleOverlap}</span>}
               {ghost.violated && <span className={styles.finding}>{wording.scheduleViolatedDependency}</span>}
             </span>
