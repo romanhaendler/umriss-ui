@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { Stack, Text } from "@umriss-ui/core";
-import { Lane, Schedule, Subtasks, Transports } from "../../../src";
-import type { ScheduleInteraction, Subtask, Task, Transport } from "../../../src";
+import { Lane, Schedule, Subtasks, Dependencies } from "../../../src";
+import type { ScheduleInteraction, Subtask, Task, Dependency } from "../../../src";
 
 export const title = "What the pointer reports";
 
 /* `onInteraction` hears a click, a context menu and a change of what is under
    the pointer - each with its target and its position: the subtask and the part
-   of it, the transport, the lane, or nothing; the client point, the time and
+   of it, the dependency, the lane, or nothing; the client point, the time and
    the lane under it. What the application does with it is its own: open a
    menu, show a detail, fill a status line like this one.
 
@@ -34,12 +34,12 @@ const ORDERS: readonly Task[] = [
 ];
 
 const STEPS: readonly Subtask[] = [
-  { id: "a-2041-1", task: "a-2041", lane: "saw", from: at(6), to: at(7), setup: min(15), teardown: min(10) },
-  { id: "a-2041-2", task: "a-2041", lane: "mill", from: at(8), to: at(10, 30), setup: min(30), teardown: min(15) },
+  { id: "a-2041-1", task: "a-2041", lane: "saw", from: at(6), to: at(7), leadIn: min(15), leadOut: min(10) },
+  { id: "a-2041-2", task: "a-2041", lane: "mill", from: at(8), to: at(10, 30), leadIn: min(30), leadOut: min(15) },
 ];
 
-const MOVES: readonly Transport[] = [
-  { id: "t-2041-1", from: "a-2041-1", to: "a-2041-2", duration: min(10) },
+const MOVES: readonly Dependency[] = [
+  { id: "t-2041-1", from: "a-2041-1", to: "a-2041-2", lag: min(10) },
 ];
 
 const describe = (interaction: ScheduleInteraction): string => {
@@ -49,8 +49,8 @@ const describe = (interaction: ScheduleInteraction): string => {
   const target =
     hit.kind === "subtask"
       ? `subtask ${hit.subtask.id} (${hit.part})`
-      : hit.kind === "transport"
-        ? `transport ${hit.transport.id}`
+      : hit.kind === "dependency"
+        ? `dependency ${hit.dependency.id}`
         : hit.kind === "lane"
           ? `lane ${hit.lane}`
           : "nothing";
@@ -73,7 +73,7 @@ export default function Interactions() {
         {STATIONS.map((station) => (
           <Lane key={station.id} id={station.id} label={station.label} />
         ))}
-        <Transports data={MOVES} />
+        <Dependencies data={MOVES} />
         <Subtasks data={STEPS} tasks={ORDERS} />
       </Schedule>
       <Text size="sm" mono tone="secondary" data-last-interaction>

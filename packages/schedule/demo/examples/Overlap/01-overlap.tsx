@@ -8,8 +8,8 @@ export const title = "An overlap is a finding";
    the lane. They are never packed into sub-lanes - packing would turn the
    double booking into layout and hide it.
 
-   Setup and teardown occupy the lane: the second pair below overlaps only
-   where one's teardown meets the other's setup, and that is an overlap too. */
+   Lead-in and lead-out occupy the lane: the second pair below overlaps only
+   where one's lead-out meets the other's lead-in, and that is an overlap too. */
 
 const at = (hours: number, minutes = 0) => new Date(2026, 2, 17, hours, minutes).getTime();
 const min = (n: number) => n * 60_000;
@@ -22,8 +22,8 @@ const TASKS: Task[] = [
 const WORK: Subtask[] = [
   { id: "a", task: "first", lane: "press-1", from: at(7), to: at(9, 30) },
   { id: "b", task: "second", lane: "press-1", from: at(8, 30), to: at(10, 30) },
-  { id: "c", task: "first", lane: "press-2", from: at(7), to: at(8, 30), teardown: min(30) },
-  { id: "d", task: "second", lane: "press-2", from: at(9, 15), to: at(10, 45), setup: min(30) },
+  { id: "c", task: "first", lane: "press-2", from: at(7), to: at(8, 30), leadOut: min(30) },
+  { id: "d", task: "second", lane: "press-2", from: at(9, 15), to: at(10, 45), leadIn: min(30) },
 ];
 
 export default function Overlap() {

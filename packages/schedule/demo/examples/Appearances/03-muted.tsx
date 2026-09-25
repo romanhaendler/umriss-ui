@@ -8,8 +8,8 @@ export const title = "Muted: another shift's work";
 
    Full height, because a bar drawn half as high reads as a different KIND of
    thing, and loses its label with its room. Opaque and unoutlined, because
-   transparency and an edge are what a setup is made of - and this example puts
-   a setup right beside it so the difference has to hold. Another crew's plan
+   transparency and an edge are what a lead-in is made of - and this example puts
+   a lead-in right beside it so the difference has to hold. Another crew's plan
    should step back; it should not turn into preparation on the way. */
 
 const at = (hours: number, minutes = 0) => new Date(2026, 2, 17, hours, minutes).getTime();
@@ -18,8 +18,8 @@ const min = (n: number) => n * 60_000;
 const TASKS: Task[] = [{ id: "order", color: "light-dark(#2563eb, #6b9bff)" }];
 
 const WORK: Subtask[] = [
-  { id: "ours", task: "order", lane: "ours", from: at(7), to: at(10), setup: min(30) },
-  { id: "theirs", task: "order", lane: "theirs", from: at(7), to: at(10), setup: min(30), appearance: ["muted"] },
+  { id: "ours", task: "order", lane: "ours", from: at(7), to: at(10), leadIn: min(30) },
+  { id: "theirs", task: "order", lane: "theirs", from: at(7), to: at(10), leadIn: min(30), appearance: ["muted"] },
 ];
 
 export default function Muted() {

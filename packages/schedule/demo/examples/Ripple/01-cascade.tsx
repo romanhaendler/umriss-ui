@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Button, Stack, Text } from "@umriss-ui/core";
-import { Lane, Schedule, Subtasks, Transports, applyIntent, ripple } from "../../../src";
-import type { MoveIntent, Subtask, Task, Transport } from "../../../src";
+import { Lane, Schedule, Subtasks, Dependencies, applyIntent, ripple } from "../../../src";
+import type { MoveIntent, Subtask, Task, Dependency } from "../../../src";
 
 export const title = "Pushing the successors";
 
-/* The saw runs an hour late. `ripple` takes the data, the transports and that
-   one intent, and returns the moves that push every successor whose transport
+/* The saw runs an hour late. `ripple` takes the data, the dependencies and that
+   one intent, and returns the moves that push every successor whose dependency
    no longer fits - by exactly what is missing, down the chain, never earlier.
    The schedule never runs it; whether a successor may move is the plant's
    decision, and this application decides with a button. */
@@ -22,9 +22,9 @@ const START: Subtask[] = [
   { id: "weld", task: "bracket", lane: "weld", from: at(9, 30), to: at(11) },
 ];
 
-const MOVES: Transport[] = [
-  { id: "to-press", from: "saw", to: "bend", duration: min(20) },
-  { id: "to-weld", from: "bend", to: "weld", duration: min(15) },
+const MOVES: Dependency[] = [
+  { id: "to-press", from: "saw", to: "bend", lag: min(20) },
+  { id: "to-weld", from: "bend", to: "weld", lag: min(15) },
 ];
 
 const LATE: MoveIntent = { kind: "move", subtask: "saw", from: at(7), to: at(8, 30) };
@@ -42,7 +42,7 @@ export default function Cascade() {
         <Lane id="saw" label="Saw" />
         <Lane id="press" label="Press" />
         <Lane id="weld" label="Welding" />
-        <Transports data={MOVES} />
+        <Dependencies data={MOVES} />
         <Subtasks data={work} tasks={TASKS} />
       </Schedule>
       <Stack direction="row" gap={2} align="center">
