@@ -365,56 +365,196 @@ export const OUTLINE: readonly Rubric[] = [
       {
         id: "tooltip",
         name: "Tooltip",
-        sentence: "One sentence of explanation, on pointer contact and on keyboard focus - never the only source of a piece of information.",
+        sentence: "A sentence of explanation that appears while the pointer rests on an element or the keyboard focus is on it (also called a hint). Reach for it to name an icon button or explain an abbreviation.",
+        about: [
+          "It wraps exactly one element that can take focus and a ref; on text, give a `span` a `tabIndex` of 0.",
+          "Anything that stands only in a tooltip is lost on a touch screen. Keep it to a sentence that repeats or explains what is already there.",
+        ],
+        alternatives: [
+          { when: "The content has a link, a button or more than a sentence", use: "popover" },
+          { when: "The reader must see it without hovering", use: "Plain text beside the element" },
+        ],
+        keys: [
+          { key: "Tab", action: "Focusing the element shows its tooltip; moving focus away hides it." },
+          { key: "Escape", action: "Hides the tooltip." },
+        ],
+        limits: [
+          "No interactive content and no rich layout inside: it is read, never used.",
+          "No placement option: it stands above its element and flips below where there is no room.",
+        ],
         types: ["TooltipProps"],
         exports: ["Tooltip"],
       },
       {
         id: "popover",
         name: "Popover",
-        sentence: "The seam under Menu, Tooltip, Select and the pickers: one placement, one dismissal, one focus model.",
+        sentence: "A surface that hangs from a trigger and closes on Escape, an outside click or scrolling (also called a flyout or dropdown panel). Reach for it for a small panel of your own: a filter, a detail, a short form.",
+        about: [
+          "It is controlled: you hold `open`, and `onOpenChange` reports each wish to close. Only you know whether it may close now, for instance with a half-filled form in it.",
+          "It places itself below its anchor, flips above where there is no room and stays inside the window. Inside a dialog it portals into that dialog, so it never lands behind it.",
+          "`Menu`, `Tooltip`, `Select`, `Combobox`, `MultiSelect` and the pickers stand on it, so they all place and dismiss the same way.",
+        ],
+        alternatives: [
+          { when: "A list of actions", use: "menu" },
+          { when: "A sentence of explanation", use: "tooltip" },
+          { when: "The user must answer before going on", use: "modal" },
+        ],
+        keys: [
+          { key: "Escape", action: "Asks to close; with `restoreFocus` the focus returns to the trigger." },
+        ],
+        limits: [
+          "No look of its own: background, radius and shadow are yours, so each surface built on it keeps its own.",
+          "It does not trap focus; a surface the user must answer is a [Modal](#/modal).",
+        ],
         types: ["PopoverProps"],
         exports: ["Popover"],
       },
       {
         id: "menu",
         name: "Menu",
-        sentence: "A list of actions under a trigger - not a select, but things that happen.",
+        sentence: "A list of actions that opens under a button (also called a dropdown menu). Reach for it when a place has more actions than room for buttons, or for the actions of each row in a list.",
+        about: [
+          "The entries are things that happen, not values that stay; choosing one runs it and closes the menu so the result is in view.",
+          "An icon-only trigger needs an `aria-label` that says what it acts on, such as “Actions for INC-1048”.",
+        ],
+        alternatives: [
+          { when: "The user chooses a value that stays", use: "select" },
+          { when: "The actions belong to a point or a row that is right-clicked", use: "contextmenu" },
+          { when: "Two or three actions that fit as buttons", use: "buttongroup" },
+          { when: "Many commands across the application, found by typing", use: "commandpalette" },
+        ],
+        keys: [
+          { key: "Enter or Space", action: "On the trigger, opens the menu and moves focus to the first entry; on an entry, runs it and closes the menu." },
+          { key: "↓ / ↑", action: "Moves to the next or previous entry, wrapping at the ends; disabled entries are skipped." },
+          { key: "Home / End", action: "Moves to the first or last entry." },
+          { key: "Escape", action: "Closes the menu and returns focus to the trigger." },
+          { key: "Tab", action: "Closes the menu and moves on from the trigger." },
+        ],
+        limits: [
+          "No submenus, no checkable entries and no type-ahead.",
+        ],
         types: ["MenuProps", "MenuItemProps"],
         exports: ["Menu", "MenuItem", "MenuSeparator"],
       },
       {
         id: "contextmenu",
         name: "ContextMenu",
-        sentence: "The same menu, opened at a point instead of under a trigger - for a right-click on something that is not a button.",
+        sentence: "A menu that opens at a point, for a right-click on something that is not a button: a row, a canvas, a bar in a schedule (also called a right-click menu). The entries and the keyboard are those of the menu.",
+        about: [
+          "It is controlled: on `contextmenu` you keep the point and open it there, and `onOpenChange` reports the wish to close. Focus goes to the first entry and back to where it was on closing.",
+          "A right-click is invisible to a keyboard. Open the same menu on Shift+F10 or the menu key at the focused element, and keep the actions reachable some other way too.",
+        ],
+        alternatives: [
+          { when: "The actions have a visible trigger", use: "menu" },
+        ],
+        keys: [
+          { key: "↓ / ↑", action: "Moves to the next or previous entry, wrapping at the ends; disabled entries are skipped." },
+          { key: "Home / End", action: "Moves to the first or last entry." },
+          { key: "Escape", action: "Closes the menu and returns focus to where it was." },
+          { key: "Enter or Space", action: "Runs the focused entry and closes the menu." },
+          { key: "Shift+F10 or the menu key", action: "Opens the menu where you listen for them, as the row example does." },
+        ],
+        limits: [
+          "It listens to no right-click itself: the element that is clicked is yours, and so is the point.",
+          "No submenus, no checkable entries and no type-ahead, as in the menu.",
+        ],
         types: ["ContextMenuProps"],
         exports: ["ContextMenu", "MenuItem", "MenuSeparator"],
       },
       {
         id: "modal",
         name: "Modal",
-        sentence: "A window above the page that holds focus until it is answered.",
+        sentence: "A window above the page that holds the focus until it is answered or closed (also called a dialog). Reach for it for a short task that interrupts the page: create an item, edit its settings, read a policy.",
+        about: [
+          "It is controlled: you hold `open`, and `onClose` reports Escape, the cross and a click on the backdrop. Whether it closes is yours, so a window with unsaved edits can ask first.",
+          "The title in `ModalHeader` names the dialog for a screen reader. The height follows the content; where it does not fit, only `ModalBody` scrolls.",
+          "It is the browser's modal dialog: focus stays inside, the page behind cannot be scrolled, and focus returns to the opener on closing.",
+        ],
+        alternatives: [
+          { when: "A detail beside the list the user came from", use: "drawer" },
+          { when: "One yes-or-no before something that cannot be undone", use: "confirmdialog" },
+          { when: "A small panel that should not block the page", use: "popover" },
+        ],
+        keys: [
+          { key: "Tab / Shift+Tab", action: "Moves between the controls inside; focus does not leave the window." },
+          { key: "Escape", action: "Asks to close: `onClose` is called, and the window goes when you close it." },
+        ],
+        limits: [
+          "No non-modal window and no dragging or resizing: a panel that leaves the page usable is layout – a [Splitter](#/splitter) or a [Dock](#/dock).",
+        ],
         types: ["ModalProps", "ModalHeaderProps"],
         exports: ["Modal", "ModalHeader", "ModalBody", "ModalFooter"],
       },
       {
         id: "drawer",
         name: "Drawer",
-        sentence: "The same window, entering from an edge - a detail beside the page it came from.",
+        sentence: "A modal window that slides in from the left or right edge of the screen (also called a side sheet). Reach for it for the detail of something picked from a list, while the list stays in sight behind it.",
+        about: [
+          "Everything the modal promises holds: the focus stays inside, Escape and a click beside it ask to close, and the focus returns to the button that opened it. Header, body and footer are the modal's parts.",
+          "Its width is the token `--u-drawer-width`: set it once for the application, or in one drawer's `style` where it needs more room.",
+        ],
+        alternatives: [
+          { when: "A task that has nothing to do with what lies behind it", use: "modal" },
+          { when: "A side panel that stays open while the page is used", use: "splitter" },
+        ],
+        keys: [
+          { key: "Tab / Shift+Tab", action: "Moves between the controls inside; focus does not leave the window." },
+          { key: "Escape", action: "Asks to close: `onClose` is called, and the window goes when you close it." },
+        ],
+        limits: [
+          "Modal on purpose, with no non-modal mode: a panel beside a page the user keeps working in is layout, not an overlay.",
+          "Only the left and right edges; nothing slides in from the top or bottom.",
+        ],
         types: ["DrawerProps"],
         exports: ["Drawer", "ModalHeader", "ModalBody", "ModalFooter"],
       },
       {
         id: "confirmdialog",
         name: "ConfirmDialog",
-        sentence: "The one question before an action that cannot be taken back.",
+        sentence: "A small modal window with one question and two buttons, for the moment before something that cannot be undone (also called a confirmation). Reach for it before deleting, rejecting or closing for good.",
+        about: [
+          "Use it only where the step cannot be taken back: a question before every action gets clicked away, and then it no longer protects the one that mattered.",
+          "It does not close itself on `onConfirm`, so you can show `loading` while the request runs. Cancelling, by Escape, the cross or the second button, calls `onClose`.",
+        ],
+        alternatives: [
+          { when: "The user fills in fields before confirming", use: "modal" },
+          { when: "The action can be undone afterwards", use: "Do it, and confirm it with a [Toast](#/toast)" },
+        ],
+        keys: [
+          { key: "Tab / Shift+Tab", action: "Moves between the controls inside; focus does not leave the window." },
+          { key: "Escape", action: "Asks to close: `onClose` is called, and the window goes when you close it." },
+          { key: "Enter or Space", action: "Presses the focused button." },
+        ],
+        limits: [
+          "A title, a description and two buttons, nothing more: fields belong in a [Modal](#/modal).",
+        ],
         types: ["ConfirmDialogProps"],
         exports: ["ConfirmDialog"],
       },
       {
         id: "commandpalette",
         name: "CommandPalette",
-        sentence: "Typing instead of searching: candidates by subsequence, with the matched characters in the accent.",
+        sentence: "A search field above the page that finds commands and places as you type (also called a command menu or quick switcher). Reach for it when an application has more actions and pages than any menu can show.",
+        about: [
+          "It matches by subsequence, not by substring: “ack” finds “Acknowledge the alert”, and the matched letters are marked so an unexpected find explains itself. A candidate's group is searched too.",
+          "A candidate is an id, a label and a group; what happens on choosing is yours, so pages and commands live in one list.",
+          "Without `restingItems` the empty palette is only the field. The library keeps no memory: pass recent choices as `restingItems` and rank them with `weight`.",
+        ],
+        alternatives: [
+          { when: "A value for a form field, chosen from a list", use: "combobox" },
+          { when: "A few actions under one button", use: "menu" },
+        ],
+        keys: [
+          { key: "Cmd+K / Ctrl+K", action: "Opens the palette, with `useCommandPaletteShortcut`." },
+          { key: "/", action: "Opens the palette too, except while typing in a text field." },
+          { key: "↓ / ↑", action: "Moves through the finds while the field keeps the focus." },
+          { key: "Enter", action: "Chooses the marked find." },
+          { key: "Escape", action: "Closes the palette." },
+        ],
+        limits: [
+          "No memory of past choices and no ranking of its own beyond the match: recency and frequency are weights you keep.",
+          "No nested steps or arguments: a command that needs input opens your own form after it is chosen.",
+        ],
         types: ["CommandPaletteProps", "CommandPaletteItem"],
         exports: ["CommandPalette", "useCommandPaletteShortcut"],
       },
