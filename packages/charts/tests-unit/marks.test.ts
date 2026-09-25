@@ -2,7 +2,7 @@
    pure mapping, and the geometry the canvas and the legend draw from it. */
 
 import { describe, expect, it } from "vitest";
-import { hatchFor, hatchLines, markerPath, marksFor, type PathSink } from "../src/marks";
+import { hatchFor, hatchLines, markerPath, marksFor, stateHatches, type PathSink } from "../src/marks";
 
 describe("The marks of a palette place", () => {
   it("leaves the first place plain: solid, a circle, no hatch", () => {
@@ -44,6 +44,27 @@ describe("The marks of a palette place", () => {
       "crossed",
       "none",
     ]);
+  });
+});
+
+/* charts-alternatives 04: a state is hatched by its name, so two bands that
+   list one state at different places hatch it alike - and the legend, which
+   shows it once, agrees with both. */
+describe("The hatch of a state", () => {
+  it("follows the name, in the order the names first come", () => {
+    const hatches = stateHatches([
+      [{ label: "Running" }, { label: "Fault" }],
+      [{ label: "Setup" }, { label: "Fault" }, { label: "Running" }],
+    ]);
+    expect(hatches.get("Running")).toBe("none");
+    expect(hatches.get("Fault")).toBe("rising");
+    expect(hatches.get("Setup")).toBe("falling");
+  });
+
+  it("is the index hatch for a single band", () => {
+    const states = ["A", "B", "C", "D", "E", "F", "G"].map((label) => ({ label }));
+    const hatches = stateHatches([states]);
+    expect(states.map((z) => hatches.get(z.label))).toEqual(states.map((_, k) => hatchFor(k)));
   });
 });
 

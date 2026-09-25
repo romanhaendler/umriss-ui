@@ -57,7 +57,7 @@ interface was still expected to move before `0.3.0`.
   line, an area's outline, a scatter's points - or a hatch across its fill - a
   bar, an area -, chosen by the same palette place as its colour, the first
   plain; a caller's own `dash` wins. A state band hatches each state by its
-  place in the state list, a matrix each step of its colouring, a limit band
+  name, a matrix each step of its colouring, a limit band
   is hatched in its colour. The legend's chips draw the same marks. The
   default, `"color"`, changes nothing.
 - **Forced colours** (charts-alternatives 03): under `forced-colors: active`
@@ -87,6 +87,28 @@ interface was still expected to move before `0.3.0`.
   German beside them. A
   `Partial<ChartsWording>` passed to `wording` keeps working; a register of
   one's own typed as the whole `ChartsWording` has to add them.
+- **A state's hatch follows its name** (charts-alternatives 04), no longer its
+  place in the state list: the first name to come across the chart's bands is
+  plain, the next rising, and so on. Two bands that list one state at
+  different places hatch it alike, and the legend, which shows it once, agrees
+  with both. A single band is hatched as before.
+- **An area's legend chip shows its hatched fill** under encoding by marks
+  (charts-alternatives 04): the faint fill with its hatch, the dashed outline
+  along its top - as the plot draws it.
+- **The data table thins a state band to its changes** (charts-alternatives
+  04): above 500 rows a band keeps its first reading and each where its state
+  changes - the positions the keyboard walks -, not its lowest and highest
+  state code, which say nothing about a band.
+- **Stacked segments are parted by a line** (charts-stacking 04): 1px in the
+  ground's colour - `Canvas` under forced colours - between two stacked bars
+  and below each stacked area's outline, in both encodings.
+
+### Fixed
+
+- **The tooltip's chips under forced colours** (charts-alternatives 04): the
+  contrast mode forced their background away and only the names stayed. They
+  now draw the legend's marks - a dash and marker, a hatch - in the system
+  colours.
 
 ---
 
