@@ -7,9 +7,11 @@
    shows only while content lies under it, only the browser can say
    (features-browser.spec.ts). */
 
-import { act, render } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { useTable } from "../src";
+import { LanguageProvider } from "@umriss-ui/core";
+import { GERMAN_WORDING } from "@umriss-ui/core/wording/de";
+import { ColumnMenu, useTable } from "../src";
 import type { Table, TableView } from "../src";
 
 interface Machine {
@@ -49,6 +51,7 @@ function Plant({
   const { Table: Frame, Column, RowActions, Action, RowDetail } = t;
   return (
     <Frame selectable stickyRowHeader={stickyRowHeader}>
+      <ColumnMenu />
       <Column value="line" label="Line" />
       <Column value="area" label="Area" />
       <Column value="output" label="Output" aggregate="sum" />
@@ -196,5 +199,66 @@ describe("a virtualised table", () => {
     expect(rows.length).toBeGreaterThan(0);
     for (const row of rows) expect(places(row)).toEqual(["start 0", "start 1", "-"]);
     vi.restoreAllMocks();
+  });
+});
+
+describe("pinning in the column menu (table-column-pinning 02)", () => {
+  const openMenu = () => {
+    fireEvent.click(screen.getByRole("button", { name: "Columns" }));
+    return screen.getByRole("dialog");
+  };
+  const entries = (menu: HTMLElement) =>
+    within(menu).getAllByRole("checkbox").map((k) => k.closest("label")!.textContent);
+
+  it("lists the columns in the order they stand, and offers each side or the way back", () => {
+    render(<Plant />);
+    const menu = openMenu();
+    expect(entries(menu)).toEqual(["Tag", "Line", "Area", "Output", "Scrap", "Verdict"]);
+    within(menu).getByRole("button", { name: "Unpin Tag" });
+    within(menu).getByRole("button", { name: "Pin Tag to end" });
+    within(menu).getByRole("button", { name: "Pin Line to start" });
+    within(menu).getByRole("button", { name: "Pin Line to end" });
+    within(menu).getByRole("button", { name: "Unpin Verdict" });
+  });
+
+  it("pins to the end: the column joins the end block on the screen and in the menu, and the view carries it", () => {
+    const { container } = render(<Plant />);
+    const menu = openMenu();
+    fireEvent.click(within(menu).getByRole("button", { name: "Pin Line to end" }));
+    expect(labels(container).slice(2, 8)).toEqual(["Tag", "Area", "Output", "Scrap", "Line", "Verdict"]);
+    expect(entries(menu)).toEqual(["Tag", "Area", "Output", "Scrap", "Line", "Verdict"]);
+    expect(current!.view.pinned).toEqual({ tag: "start", verdict: "end", line: "end" });
+    fireEvent.click(within(menu).getByRole("button", { name: "Unpin Line" }));
+    expect(labels(container).slice(2, 8)).toEqual(["Tag", "Line", "Area", "Output", "Scrap", "Verdict"]);
+  });
+
+  it("the other side's key moves a pinned column across", () => {
+    const { container } = render(<Plant />);
+    const menu = openMenu();
+    fireEvent.click(within(menu).getByRole("button", { name: "Pin Tag to end" }));
+    expect(labels(container).slice(2, 8)).toEqual(["Line", "Area", "Output", "Scrap", "Verdict", "Tag"]);
+  });
+
+  it("moves a column only inside its block", () => {
+    render(<Plant />);
+    const menu = openMenu();
+    const disabled = (name: string) => (within(menu).getByRole("button", { name }) as HTMLButtonElement).disabled;
+    expect(disabled("Move Line forward")).toBe(true);
+    expect(disabled("Move Scrap backward")).toBe(true);
+    expect(disabled("Move Area forward")).toBe(false);
+    expect(disabled("Move Tag backward")).toBe(true);
+  });
+
+  it("speaks German from the provider's wording", () => {
+    render(
+      <LanguageProvider wording={GERMAN_WORDING}>
+        <Plant />
+      </LanguageProvider>,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Spalten" }));
+    const menu = screen.getByRole("dialog");
+    within(menu).getByRole("button", { name: "Line am Anfang fixieren" });
+    within(menu).getByRole("button", { name: "Line am Ende fixieren" });
+    within(menu).getByRole("button", { name: "Tag lösen" });
   });
 });

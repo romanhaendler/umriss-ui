@@ -105,6 +105,38 @@ test("both blocks stay while the hours scroll, each against its edge, and the sh
   await expect.poll(() => shadow(cells.verdict)).toBe("hidden");
 });
 
+/* ---------------- Pinning in the column menu (table-column-pinning 02) ---------------- */
+
+test("the column menu pins a column to the end: it sticks there, and the focus stays on its key", async ({ page }) => {
+  await openExample(page, "column", "pinned-both-sides");
+  const table = example(page, "pinned-both-sides");
+  await table.getByRole("button", { name: "Columns" }).click();
+  const menu = page.getByRole("dialog", { name: "Show, hide and arrange columns" });
+
+  /* The entry wanders to the end block in the list, and an element that has
+     been moved loses the focus in the browser. */
+  await menu.getByRole("button", { name: "Pin Area to end" }).click();
+  await expect(menu.getByRole("button", { name: "Unpin Area" })).toBeFocused();
+  const heads = table.locator("thead th");
+  await expect(heads.nth(-3)).toHaveText("Area");
+  await expect(heads.nth(-2)).toHaveText("Temperature (°C)");
+
+  await page.keyboard.press("Escape");
+  const area = table.locator("table").locator("..");
+  const head = heads.nth(-3);
+  const before = await x(head);
+  await area.evaluate((el) => {
+    el.scrollLeft = 200;
+  });
+  expect(Math.abs((await x(head)) - before)).toBeLessThan(1);
+
+  // And back: unpinned, it scrolls with the hours again.
+  await table.getByRole("button", { name: "Columns" }).click();
+  await menu.getByRole("button", { name: "Unpin Area" }).click();
+  await expect(menu.getByRole("button", { name: "Pin Area to end" })).toBeFocused();
+  await expect(table.locator("thead th").nth(2)).toHaveText("Area");
+});
+
 /* ---------------- The quiet gesture (umriss-table 09) ---------------- */
 
 test("a row action rests in the secondary type and stands in the accent when its row is meant", async ({ page }) => {

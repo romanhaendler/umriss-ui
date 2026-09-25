@@ -60,6 +60,12 @@ commit.
 
 ### Changed
 
+- **Three new keys in `Wording`: the column menu's pin keys** (for
+  `@umriss-ui/table`'s pinned columns), in English and German:
+  `pinColumnToStart(column)`, `pinColumnToEnd(column)` and
+  `unpinColumn(column)`. A partial wording passed to the provider is merged as
+  before; an application that implements the whole `Wording` type itself no
+  longer compiles until it adds these three.
 - **Five new keys in `Wording`: the wording of an alarm's availability** (for
   `@umriss-ui/table`'s alarm model and list), in English and German:
   `availabilityShelved(until, by)`, `availabilitySuppressedByDesign`,
