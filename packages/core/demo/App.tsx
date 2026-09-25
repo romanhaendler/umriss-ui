@@ -39,7 +39,7 @@ export function App() {
       demo={DEMO}
       brand="Umriss UI"
       version={manifest.version}
-      sentence="Living documentation of every component: each page shows running examples together with their source, and the complete props table, generated from the source code. Every colour and every spacing comes from the design tokens - the demo allows itself nothing the library does not give it."
+      sentence="Whole screens of data-dense applications, built from these components as a product would ship them. Each is named after the job it serves, and its numbered marks point to the parts that do the work."
       actions={
         <Button size="sm" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
           {theme === "dark" ? "Light theme" : "Dark theme"}

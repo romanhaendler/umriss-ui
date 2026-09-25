@@ -1,6 +1,4 @@
-/* The tree - a demonstration and not a run of examples.
-
-   Flattening, keyboard movement and virtualisation are ONE behaviour: the
+/* Flattening, keyboard movement and virtualisation are ONE behaviour: the
    movement runs on the flat list, and the virtualisation shows only a window of
    it. Four separate miniatures would have documented four features and kept
    quiet about the component.
@@ -17,17 +15,13 @@
    with that suite in english-and-umriss-ui 16, emitter and reader together. */
 
 import { useMemo, useState } from "react";
-import { Button, Grid, Stack, Text, TreeSearch, TreeView, useTree } from "../../src";
-import type { NodeReader } from "../../src";
+import { Button, Grid, Stack, Text, TreeSearch, TreeView, useTree } from "../../../src";
+import type { NodeReader } from "../../../src";
 
-export const title = "Browse a large hierarchy";
+export const title = "Search, check and reveal in a large tree";
 
 export const lead =
-  "Someone looking for one item among thousands searches, expands and selects in one tree.";
-
-export const callouts = [];
-
-export const builtFrom = ["treeview"];
+  "Checks cascade through their branches, a search keeps the path to each find, and a virtualised tree of 240 nodes reveals any node.";
 
 interface TreeNode {
   id: string;
@@ -101,7 +95,7 @@ const READER: NodeReader<TreeNode> = {
   unloaded: (e) => e.unloaded === true,
 };
 
-export default function Demonstration() {
+export default function SearchCheckAndReveal() {
   /* All three framework contracts: the branch above them is thereby fully
      checked, the branch above that only partly. Both states at a glance. */
   /* Loading belongs to the caller: the tree reports only that an unloaded
