@@ -8,13 +8,9 @@
 import { useMemo } from "react";
 import { Chart, Legend, Line, Tooltip, XAxis, YAxis } from "../../../src";
 import type { TooltipHit } from "../../../src";
-import { configData, type Point } from "../../data";
+import { configData, type Point } from "@umriss-ui/demo/worlds/plant";
 
 export const title = "Domain, ticks and tooltip";
-
-/* The plant this is drawn from stands in the second tab, so that the
-   example can be copied whole. */
-export const shows = ["../../data.ts"];
 
 function CustomTooltip({ hit }: { hit: TooltipHit<Point> }) {
   const point = hit.points[0];

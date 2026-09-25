@@ -4,13 +4,9 @@
    another bare number. No render prop is needed for "°C". Hover to read it. */
 
 import { Chart, Legend, Line, Tooltip, XAxis, YAxis } from "../../../src";
-import { corridorData, powerData, type CorridorPoint, type PowerPoint } from "../../data";
+import { corridorData, powerData, type CorridorPoint, type PowerPoint } from "@umriss-ui/demo/worlds/plant";
 
 export const title = "Value format per series";
-
-/* The plant this is drawn from stands in the second tab, so that the
-   example can be copied whole. */
-export const shows = ["../../data.ts"];
 
 const celsius = (v: number) => `${v.toFixed(1)} °C`;
 const kilowatts = (v: number) => `${v.toFixed(0)} kW`;

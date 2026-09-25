@@ -8,13 +8,9 @@
 
 import { useState } from "react";
 import { Chart, DataTable, Line, Tooltip, XAxis, YAxis } from "../../../src";
-import { kilnData, type KilnPoint } from "../../data";
+import { kilnData, type KilnPoint } from "@umriss-ui/demo/worlds/plant";
 
 export const title = "A week as a table";
-
-/* The plant this is drawn from stands in the second tab, so that the
-   example can be copied whole. */
-export const shows = ["../../data.ts"];
 
 const celsius = (v: number) => `${v.toFixed(0)} °C`;
 

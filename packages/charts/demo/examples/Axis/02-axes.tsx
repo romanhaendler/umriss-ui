@@ -7,13 +7,9 @@
    one plot area are two rulers over one drawing. */
 
 import { Chart, Legend, Line, Tooltip, XAxis, YAxis } from "../../../src";
-import { axesData, type DualPoint } from "../../data";
+import { axesData, type DualPoint } from "@umriss-ui/demo/worlds/plant";
 
 export const title = "Multiple axes";
-
-/* The plant this is drawn from stands in the second tab, so that the
-   example can be copied whole. */
-export const shows = ["../../data.ts"];
 
 export default function Axes() {
   return (

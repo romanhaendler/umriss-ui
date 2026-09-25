@@ -28,7 +28,7 @@ test("the scenario shows its plan in a second tab, and Copy takes the tab in fro
   const example = page.locator('[data-scenario="replan-the-day"]');
   await example.getByRole("button", { name: "Code" }).click();
   const tabs = example.getByRole("group", { name: "Files of this example" }).getByRole("button");
-  await expect(tabs).toHaveText(["01-replan-the-day.tsx", "data.ts"]);
+  await expect(tabs).toHaveText(["01-replan-the-day.tsx", "plant.ts"]);
 
   /* The example itself is in front, and Copy takes it. */
   const copy = async () => {
