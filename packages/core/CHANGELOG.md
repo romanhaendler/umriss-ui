@@ -81,9 +81,29 @@ commit.
   `aria-current="page"`, each a link (`href`), a button (`onSelect`) or both -
   with `onSelect` the caller routes. Where the trail does not fit, its middle
   levels fold into a menu, measured from the trail's own widths.
+- **`Combobox`, `MultiSelect` and `CommandPalette` say what VoiceOver leaves
+  out of a list**, through one polite live region the library shares: the
+  number of options on opening and on every letter of the search ("4
+  options", the empty text where none is left), the option the arrow keys
+  moved onto with its state ("Gamma, selected", "Beta, unavailable"; the
+  palette's find with its group), and in the multi-select what Enter in the
+  search, a chip or Backspace added or removed. It speaks once the keys rest
+  for 150 ms, the charts' readout pause, and inside a `<dialog>` from the
+  dialog's own region.
 
 ### Changed
 
+- **Four new keys in `Wording`: what the lists announce**, in English and
+  German: `optionCount(count)`, `optionActive(label, { selected, disabled,
+  group })`, `optionAdded(label)` and `optionRemoved(label)`. A partial
+  wording passed to the provider is merged as before; an application that
+  implements the whole `Wording` type itself no longer compiles until it adds
+  these four.
+- **`CommandPalette` no longer renders a `role="status"` element of its own.**
+  The count of finds is spoken through the shared region, which the palette's
+  `<dialog>` now holds as its last child once something was said; it is also
+  said on opening when `restingItems` stand, and for a query that finds
+  nothing (`paletteNoFinds`).
 - **Three new keys in `Wording`: the column menu's pin keys** (for
   `@umriss-ui/table`'s pinned columns), in English and German:
   `pinColumnToStart(column)`, `pinColumnToEnd(column)` and

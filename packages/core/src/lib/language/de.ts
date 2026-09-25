@@ -62,6 +62,11 @@ export const GERMAN_WORDING: Wording = {
   removeSelectedValue: (beschriftung) => `${beschriftung} entfernen`,
   manageMoreSelected: (count) => `Alle ${count} Gewählten verwalten`,
   multiSelectSummary: (gewaehlt, total) => `${gewaehlt} / ${total}`,
+  optionCount: (count) => (count === 0 ? "Keine Optionen" : count === 1 ? "1 Option" : `${count} Optionen`),
+  optionActive: (beschriftung, { selected, disabled, group }) =>
+    [beschriftung, group, selected && "ausgewählt", disabled && "nicht verfügbar"].filter(Boolean).join(", "),
+  optionAdded: (beschriftung) => `${beschriftung} hinzugefügt`,
+  optionRemoved: (beschriftung) => `${beschriftung} entfernt`,
 
   palettePlaceholder: "Suchen …",
   paletteField: "Suchen",
