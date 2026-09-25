@@ -1,23 +1,30 @@
-/* Four series, the legend on top, one dashed series and one series with a gap -
-   the line is interrupted, not interpolated. A gap is a hole and never a value
-   the chart invents (CONTEXT.md, **Gap**). The one reading inside the gap has
-   no neighbour to be joined to; it keeps its marker, whatever the number of
-   points. */
-
 import { Chart, Legend, Line, Tooltip, XAxis, YAxis } from "../../../src";
-import { multiData, type Point } from "@umriss-ui/demo/worlds/plant";
+import { metrics, type MetricPoint } from "@umriss-ui/demo/worlds/operations";
 
-export const title = "Several series and gaps";
+export const title = "Several series and a gap";
+export const lead = "Each `Line` may bring its own `data`; a `null` reading breaks the line instead of being bridged, and a lone reading keeps its marker.";
+
+const CHECKOUT = metrics("checkout");
+const BILLING = metrics("billing");
+const SIGN_IN = metrics("sign-in");
+
+/* The image service's exporter restarted from 04:25 to 05:45 and sent a
+   single reading at 05:05 in between. */
+const IMAGES = metrics("images").map((d) => {
+  const minutes = new Date(d.t).getHours() * 60 + new Date(d.t).getMinutes();
+  const lost = minutes >= 4 * 60 + 25 && minutes <= 5 * 60 + 45 && minutes !== 5 * 60 + 5;
+  return lost ? { ...d, p95: null } : d;
+});
 
 export default function MultiSeries() {
   return (
-    <Chart data={multiData} height={300} ariaLabel="Four series with a legend">
-      <XAxis accessor={(d: Point) => d.t} label="Index" />
-      <YAxis accessor={(d: Point) => d.a} label="Value" />
-      <Line accessor={(d: Point) => d.a} name="Series A" />
-      <Line accessor={(d: Point) => d.b} name="Series B" />
-      <Line accessor={(d: Point) => d.c} name="Series C" dash={[4, 4]} />
-      <Line accessor={(d: Point) => d.d} name="Series D (with a gap)" />
+    <Chart data={CHECKOUT} height={300} ariaLabel="95th percentile latency of four services today">
+      <XAxis accessor={(d: MetricPoint) => d.t} time />
+      <YAxis accessor={(d: MetricPoint) => d.p95} label="ms" />
+      <Line accessor={(d: MetricPoint) => d.p95} name="Checkout" />
+      <Line data={BILLING} accessor={(d: MetricPoint) => d.p95} name="Billing" />
+      <Line data={SIGN_IN} accessor={(d: MetricPoint) => d.p95} name="Sign-in" dash={[4, 4]} />
+      <Line data={IMAGES} accessor={(d: { p95: number | null }) => d.p95} name="Image service" />
       <Legend placement="top" />
       <Tooltip mode="x" />
     </Chart>

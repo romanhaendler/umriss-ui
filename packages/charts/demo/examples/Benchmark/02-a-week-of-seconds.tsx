@@ -1,25 +1,18 @@
-/* A week of a kiln at one reading a second: 604,800 points per series, two
-   series. Lines and areas downsample on their own above two points per pixel
-   column: each column draws where the course entered it, its lowest and its
-   highest reading and where it left - a spike stays a spike -, so the week
-   costs a path of a few thousand points instead of 1.2 million. Zoom in with
-   Ctrl or ⌘ and the wheel: from about half an hour on, the chart draws every
-   reading again. The tooltip always reads the raw data.
-
-   It measures, like the benchmark above it - the time of the last series
-   draw -, and is therefore not photographed either (R-5.1). */
+/* Not photographed, like the benchmark above it: it measures the series draw
+   (R-5.1). */
 
 import { useCallback, useState } from "react";
 import { Chart, Legend, Line, Tooltip, XAxis, YAxis } from "../../../src";
 import type { ChartPerf } from "../../../src";
-import { kiln, type KilnPoint } from "@umriss-ui/demo/worlds/plant";
+import { week, type MetricPoint } from "@umriss-ui/demo/worlds/operations";
 
-export const title = "A week of seconds";
+export const title = "Draw a week of seconds";
+export const lead = "Two series of 604,800 readings each: every pixel column draws first, lowest, highest and last, so a spike stays; zoom in for every reading.";
 
 export default function WeekOfSeconds() {
   // Made on first render, not on import: 604,800 readings are no page's
   // business until this one is open.
-  const [data] = useState(() => kiln(2024, 1000));
+  const [data] = useState(() => week("search", 1000));
   const [domain, setDomain] = useState<"data" | readonly [number, number]>("data");
   const [drawMs, setDrawMs] = useState(0);
   const onPerf = useCallback((p: ChartPerf) => setDrawMs(p.seriesDrawMs), []);
@@ -35,12 +28,12 @@ export default function WeekOfSeconds() {
           <dd>{drawMs.toFixed(1)} ms</dd>
         </div>
       </dl>
-      <Chart data={data} height={300} ariaLabel="Kiln temperature and gas flow across a week, one reading a second" onPerf={onPerf}>
-        <XAxis accessor={(d: KilnPoint) => d.t} time domain={domain} onDomainChange={setDomain} />
-        <YAxis accessor={(d: KilnPoint) => d.temperature} label="°C" domain="visible" />
-        <YAxis id="gas" position="right" accessor={(d: KilnPoint) => d.gas} label="m³/h" domain="visible" />
-        <Line accessor={(d: KilnPoint) => d.temperature} name="Temperature" />
-        <Line accessor={(d: KilnPoint) => d.gas} yAxisId="gas" name="Gas" />
+      <Chart data={data} height={300} ariaLabel="Search latency and requests over last week, a reading a second" onPerf={onPerf}>
+        <XAxis accessor={(d: MetricPoint) => d.t} time domain={domain} onDomainChange={setDomain} />
+        <YAxis accessor={(d: MetricPoint) => d.p95} label="ms" domain="visible" />
+        <YAxis id="requests" position="right" accessor={(d: MetricPoint) => d.requests} label="Requests/min" domain="visible" />
+        <Line accessor={(d: MetricPoint) => d.p95} name="p95" />
+        <Line accessor={(d: MetricPoint) => d.requests} yAxisId="requests" name="Requests" />
         <Legend placement="top" />
         <Tooltip mode="x" />
       </Chart>

@@ -1,17 +1,19 @@
-/* The legend as a switch. `hidden` is the caller's state and `onToggle` hands
-   it the name of the entry clicked - the chart keeps nothing of its own. A
-   hidden series is not drawn and gives up its say in the extent, so the y axis
-   closes in on what is left; its entry stays, struck through, to be clicked
-   back. Without `onToggle` a legend is not clickable. */
-
 import { useState } from "react";
 import { Chart, Legend, Line, Tooltip, XAxis, YAxis } from "../../../src";
-import { furnaceData, type FurnacePoint } from "@umriss-ui/demo/worlds/plant";
+import { metrics, type MetricPoint } from "@umriss-ui/demo/worlds/operations";
 
-export const title = "Legend that hides a series";
+export const title = "Hide a series from the legend";
+export const lead = "`hidden` is your state and `onToggle` hands you the clicked entry; a hidden series leaves the y extent, its entry stays struck through.";
+
+const SERVICES = [
+  { name: "Checkout", data: metrics("checkout") },
+  { name: "Billing", data: metrics("billing") },
+  { name: "Reporting", data: metrics("reports") },
+];
 
 export default function TogglingLegend() {
-  const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set(["Set point"]));
+  /* Reporting's slow jobs would flatten the other two. */
+  const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set(["Reporting"]));
   const toggle = (name: string) =>
     setHidden((previous) => {
       const next = new Set(previous);
@@ -20,17 +22,12 @@ export default function TogglingLegend() {
     });
 
   return (
-    <Chart data={furnaceData} height={260} ariaLabel="Two furnaces and their set point, one series hidden">
-      <XAxis accessor={(d: FurnacePoint) => d.t} time />
-      <YAxis accessor={(d: FurnacePoint) => d.f1} label="°C" />
-      <Line accessor={(d: FurnacePoint) => d.f1} name="Furnace 1" hidden={hidden.has("Furnace 1")} />
-      <Line accessor={(d: FurnacePoint) => d.f2} name="Furnace 2" hidden={hidden.has("Furnace 2")} />
-      <Line
-        accessor={(d: FurnacePoint) => d.setPoint}
-        name="Set point"
-        dash={[4, 4]}
-        hidden={hidden.has("Set point")}
-      />
+    <Chart data={SERVICES[0]!.data} height={260} ariaLabel="Latency of three services, one hidden">
+      <XAxis accessor={(d: MetricPoint) => d.t} time />
+      <YAxis accessor={(d: MetricPoint) => d.p95} label="ms" />
+      {SERVICES.map((one) => (
+        <Line key={one.name} data={one.data} accessor={(d: MetricPoint) => d.p95} name={one.name} hidden={hidden.has(one.name)} />
+      ))}
       <Legend onToggle={toggle} />
       <Tooltip mode="x" />
     </Chart>
