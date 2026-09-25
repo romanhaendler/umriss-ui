@@ -45,7 +45,7 @@ describe("Demo smoke test", () => {
     await unmount();
   });
 
-  it("shows no chart on the front door", async () => {
+  it("runs no example on the front door", async () => {
     /* Not a matter of taste: the benchmark measures the moment it exists, and a
        front door is to measure nothing. */
     window.history.replaceState({}, "", "/");
@@ -65,6 +65,11 @@ describe("Demo smoke test", () => {
 
   it.each(EXAMPLES.map((b) => [`${b.pageId}/${b.id}`, b] as const))("renders the example %s", async (_name, example) => {
     const { unmount } = await mount(<example.Component />);
+    await unmount();
+  });
+
+  it.each(DEMO.scenarios.map((s) => [s.id, s] as const))("renders the scenario %s", async (_name, scenario) => {
+    const { unmount } = await mount(<scenario.Component />);
     await unmount();
   });
 });
