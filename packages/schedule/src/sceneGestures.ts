@@ -11,7 +11,7 @@ import { autoPanSpeed } from "./autoPan";
 import { violatedDependencies, overlaps, type ViolatedDependency, type Overlap } from "./findings";
 import { edgeAt, partAt } from "./geometry";
 import { occupied, type Intent, type PlaceIntent, type Subtask } from "./model";
-import { refusedLanes } from "./refusal";
+import { entersBlockedTime, refusedLanes } from "./refusal";
 import type { SceneData } from "./sceneData";
 import { ghostBox, type GhostDrawing } from "./sceneDraw";
 import type { ScheduleHit, SceneView } from "./sceneView";
@@ -140,6 +140,9 @@ export interface GhostSummary {
       the ids, so that an application can mark its own parts beside the plot
       the way the schedule marks the lanes. */
   readonly refusedLanes: readonly string[];
+  /** The pointer stands where the work would cover blocked time; the ghost
+      stayed where it was allowed. */
+  readonly blocked: boolean;
   readonly x: number;
   readonly y: number;
   /** The height of the bar the label belongs to, so the label can go under it
@@ -163,6 +166,9 @@ export class SceneGestures {
       to. It is a fact about the pointer and not about the ghost, which stayed
       where it was allowed. */
   private refused = false;
+  /** Whether the pointer last stood where the dragged work would cover blocked
+      time - as `refused`, a fact about the pointer and not about the ghost. */
+  private blocked = false;
   /** Where the pointer stands on the plot while a drag is in flight - what the
       tether is drawn to, since the ghost is not following it. */
   private dragPoint = { x: 0, y: 0 };
@@ -206,7 +212,7 @@ export class SceneGestures {
       /* The tether is drawn only while the pointer really stands on a refused
          lane: the marked lanes say where the work may not go, the tether says
          that the ghost is held on purpose right now. */
-      tether: this.refused ? this.dragPoint : null,
+      tether: this.refused || this.blocked ? this.dragPoint : null,
     };
   }
 
@@ -221,6 +227,7 @@ export class SceneGestures {
     return {
       refused: this.refused,
       refusedLanes: [...gesture.refused],
+      blocked: this.blocked,
       x: outer ? box.outerFrom : box.mainFrom,
       y: box.y,
       height: box.height,
@@ -401,10 +408,11 @@ export class SceneGestures {
       this.lastClient = { x: event.clientX, y: event.clientY };
       this.dragPoint = { x, y };
       this.restOver(y);
-      this.gesture = { ...current, ghost: this.ghostFor(current, x, y) };
-      /* The hand learns what the eye may have missed: over a refused lane the
-         cursor says no, and says it again as soon as the pointer leaves. */
-      this.setCursor(this.refused ? "not-allowed" : current.mode === "move" ? "grabbing" : "ew-resize");
+      this.gesture = { ...current, ghost: this.heldGhost(current, x, y) };
+      /* The hand learns what the eye may have missed: over a refused lane or
+         blocked time the cursor says no, and says it again as soon as the
+         pointer leaves. */
+      this.setCursor(this.refused || this.blocked ? "not-allowed" : current.mode === "move" ? "grabbing" : "ew-resize");
       this.host.interactionChanged();
       this.autoPan();
       return;
@@ -455,6 +463,7 @@ export class SceneGestures {
         (intent) => kept || intent.kind !== "lane",
       );
       this.refused = false;
+      this.blocked = false;
       this.cursor = "default";
       this.host.interactionChanged();
       for (const intent of intents) this.host.handlers().onIntent?.(intent);
@@ -479,10 +488,11 @@ export class SceneGestures {
       if (!panned.moved) return;
       this.dragPoint = { x, y };
       if (gesture.kind === "edit") {
-        this.gesture = { ...gesture, ghost: this.ghostFor(gesture, x, y) };
+        this.gesture = { ...gesture, ghost: this.heldGhost(gesture, x, y) };
       } else {
         const wanted = this.placeGhost(gesture.item, x, y, gesture.refused);
         this.refused = wanted.refused;
+        this.blocked = wanted.blocked;
         this.gesture = { ...gesture, ghost: wanted.ghost ?? gesture.ghost };
       }
       this.host.viewMoved(panned.time);
@@ -530,6 +540,7 @@ export class SceneGestures {
     this.closeGestureFolds();
     this.gesture = { kind: "none" };
     this.refused = false;
+    this.blocked = false;
     this.cursor = "default";
     this.host.interactionChanged();
     return true;
@@ -662,11 +673,12 @@ export class SceneGestures {
           this.askRefused(this.askedFor(placing, this.onLane(y) ?? "", x), null);
     const wanted = this.placeGhost(placing, x, y, refused);
     this.refused = wanted.refused;
-    this.setCursor(wanted.refused ? "not-allowed" : "default");
+    this.blocked = wanted.blocked;
+    this.setCursor(wanted.refused || wanted.blocked ? "not-allowed" : "default");
     /* Refused, and the drag already stands somewhere allowed: the ghost stays
        there and says why, exactly as a drag inside the plot does. */
     const standing = this.gesture.kind === "place" ? this.gesture.ghost : null;
-    const ghost = wanted.ghost ?? (wanted.refused ? standing : null);
+    const ghost = wanted.ghost ?? (wanted.refused || wanted.blocked ? standing : null);
     /* The drop effect follows the GHOST and not the pointer. A ghost is the
        promise of where a drop lands (schedule-refinement 07), and the browser
        would break that promise if it were told "none" here: it then delivers
@@ -688,19 +700,22 @@ export class SceneGestures {
   }
 
   /** The ghost of a drag from outside at a point on the plot: none off the
-      lanes, and none where the caller refuses that lane - which the answer
-      says apart, because the two mean different things to the drag. */
+      lanes, none where the caller refuses that lane and none where it would
+      cover blocked time - which the answer says apart, because they mean
+      different things to the drag. */
   private placeGhost(
     placing: PlacingItem,
     x: number,
     y: number,
     refused: ReadonlySet<string>,
-  ): { ghost: Subtask | null; refused: boolean } {
+  ): { ghost: Subtask | null; refused: boolean; blocked: boolean } {
     const lane = this.onLane(y);
-    if (lane === null) return { ghost: null, refused: false };
+    if (lane === null) return { ghost: null, refused: false, blocked: false };
     /* Work dragged in may not land where placed work may not go either. */
-    if (refused.has(lane)) return { ghost: null, refused: true };
-    return { ghost: { ...this.askedFor(placing, lane, x), id: PLACING }, refused: false };
+    if (refused.has(lane)) return { ghost: null, refused: true, blocked: false };
+    const ghost = { ...this.askedFor(placing, lane, x), id: PLACING };
+    if (entersBlockedTime(ghost, null, this.host.data.blocked)) return { ghost: null, refused: false, blocked: true };
+    return { ghost, refused: false, blocked: false };
   }
 
   /** The dragged item as a subtask, under the caller's key for it - not the
@@ -730,6 +745,7 @@ export class SceneGestures {
     this.closeGestureFolds();
     this.gesture = { kind: "none" };
     this.refused = false;
+    this.blocked = false;
     this.cursor = "default";
     this.host.interactionChanged();
     /* Asked again at the drop, as a drag within the plot asks: the held set
@@ -756,6 +772,7 @@ export class SceneGestures {
       runs. */
   clearPlacing(): void {
     this.refused = false;
+    this.blocked = false;
     this.cursor = "default";
     this.closeGestureFolds();
     if (this.gesture.kind !== "place") return;
@@ -773,6 +790,16 @@ export class SceneGestures {
     if (snap === "ticks") return { step: this.host.view.step(), offset: 0 };
     if (snap === false) return { step: 0, offset: 0 };
     return typeof snap === "number" ? { step: snap, offset: 0 } : snap;
+  }
+
+  /** The ghost of a drag inside the plot at a point - or, where that would
+      put the work into blocked time it did not already cover, the ghost where
+      it last stood. It is held, not clamped: a pointer carried on past the
+      blocked time takes the ghost along again. */
+  private heldGhost(gesture: Extract<Gesture, { kind: "edit" }>, x: number, y: number): Subtask {
+    const wanted = this.ghostFor(gesture, x, y);
+    this.blocked = entersBlockedTime(wanted, gesture.subtask, this.host.data.blocked);
+    return this.blocked ? gesture.ghost : wanted;
   }
 
   private ghostFor(gesture: Extract<Gesture, { kind: "edit" }>, x: number, y: number): Subtask {

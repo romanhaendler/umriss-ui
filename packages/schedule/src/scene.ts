@@ -104,6 +104,8 @@ export interface ScheduleSnapshot {
     readonly to: number;
     readonly overlaps: number;
     readonly violated: number;
+    /** Subtasks in blocked time, counted once per blocked interval covered. */
+    readonly blocked: number;
   };
 }
 
@@ -123,7 +125,7 @@ const EMPTY_SNAPSHOT: ScheduleSnapshot = {
   now: null,
   bars: [],
   spoken: null,
-  summary: { lanes: 0, subtasks: 0, from: 0, to: 0, overlaps: 0, violated: 0 },
+  summary: { lanes: 0, subtasks: 0, from: 0, to: 0, overlaps: 0, violated: 0, blocked: 0 },
 };
 
 export class ScheduleScene {
@@ -420,6 +422,7 @@ export class ScheduleScene {
       to,
       overlaps: this.data.overlaps.length,
       violated: this.data.violatedById.size,
+      blocked: this.data.inBlocked.length,
     };
   }
 

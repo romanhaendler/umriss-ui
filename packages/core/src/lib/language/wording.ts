@@ -480,6 +480,11 @@ export interface Wording {
   scheduleViolatedBy: (amount: string) => string;
   /** On the ghost of a drag over a lane the subtask may not go to. */
   scheduleLaneRefused: string;
+  /** On the ghost of a drag held back from a lane's blocked time. */
+  scheduleBlockedTime: string;
+  /** "In blocked time (Leave)" - a subtask covering its lane's blocked time,
+      with the blocked time's label where it has one. */
+  scheduleInBlockedTime: (label: string | undefined) => string;
   /** The chevron of a lane group's header, which folds it into one row and
       unfolds it again. The group's own label stands beside the button, so the
       name is what the ACTION is, not which group it acts on. */
@@ -500,6 +505,8 @@ export interface Wording {
     to: string;
     overlaps: number;
     violated: number;
+    /** Subtasks in blocked time; said only where there are any. */
+    blocked: number;
   }) => string;
   /** The keys that walk the plot, select and edit - read after the summary. */
   scheduleKeyHelp: string;
@@ -818,13 +825,16 @@ export const DEFAULT_WORDING: Wording = {
   scheduleOverlapWith: (other) => `Overlap with ${other}`,
   scheduleViolatedBy: (amount) => `Violated dependency, ${amount} short`,
   scheduleLaneRefused: "Not this lane",
+  scheduleBlockedTime: "Blocked time",
+  scheduleInBlockedTime: (label) => (label === undefined ? "In blocked time" : `In blocked time (${label})`),
   scheduleFoldGroup: "Fold group",
   scheduleUnfoldGroup: "Unfold group",
   scheduleLaneCount: (count) => (count === 1 ? "1 lane" : `${count} lanes`),
   scheduleRoleDescription: "schedule",
-  scheduleSummary: ({ lanes, subtasks, from, to, overlaps, violated }) =>
+  scheduleSummary: ({ lanes, subtasks, from, to, overlaps, violated, blocked }) =>
     `${lanes === 1 ? "1 lane" : `${lanes} lanes`}, ${subtasks === 1 ? "1 subtask" : `${subtasks} subtasks`} in view from ${from} to ${to}. ` +
-    `${overlaps === 1 ? "1 overlap" : `${overlaps} overlaps`}, ${violated === 1 ? "1 violated dependency" : `${violated} violated dependencies`}.`,
+    `${overlaps === 1 ? "1 overlap" : `${overlaps} overlaps`}, ${violated === 1 ? "1 violated dependency" : `${violated} violated dependencies`}` +
+    (blocked === 0 ? "." : `, ${blocked === 1 ? "1 subtask" : `${blocked} subtasks`} in blocked time.`),
   scheduleKeyHelp:
     "Left and right arrows move along the lane, up and down change the lane, Home and End go to its first and last, Page Up and Page Down jump a tenth of the view. Right bracket or T follows a dependency out, left bracket or Shift and T goes back. Space or Enter selects. Alt with left or right proposes a move, Alt and Shift a new end. Escape clears.",
   calculationSumSymbol: "+",

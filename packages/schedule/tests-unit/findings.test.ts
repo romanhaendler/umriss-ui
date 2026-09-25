@@ -4,8 +4,8 @@
    after a fixed morning - never by running the module's own arithmetic. */
 
 import { describe, expect, it } from "vitest";
-import { findings, violatedDependencies, overlapDepth, overlaps } from "../src/findings";
-import type { Subtask, Dependency } from "../src/model";
+import { findings, inBlockedTime, violatedDependencies, overlapDepth, overlaps } from "../src/findings";
+import type { BlockedTime, Subtask, Dependency } from "../src/model";
 
 const MIN = 60_000;
 const at = (minutes: number) => Date.UTC(2026, 2, 17, 6, 0) + minutes * MIN;
@@ -122,5 +122,42 @@ describe("findings", () => {
     );
     expect(result.overlaps).toHaveLength(1);
     expect(result.violatedDependencies).toEqual([{ dependency: "x", departure: at(60), arrival: at(30), shortBy: 30 * MIN }]);
+  });
+});
+
+describe("inBlockedTime", () => {
+  const leave: BlockedTime = { id: "leave", lane: "anna", from: at(60), to: at(180), label: "Leave" };
+
+  it("finds a subtask that covers blocked time on its lane, with the time it covers", () => {
+    expect(inBlockedTime([subtask("a", "anna", 0, 90)], [leave])).toEqual([
+      { subtask: "a", blocked: "leave", lane: "anna", from: at(60), to: at(90) },
+    ]);
+  });
+
+  it("does not count touching at a shared edge", () => {
+    expect(inBlockedTime([subtask("a", "anna", 0, 60), subtask("b", "anna", 180, 200)], [leave])).toEqual([]);
+  });
+
+  it("does not compare with blocked time on another lane", () => {
+    expect(inBlockedTime([subtask("a", "ben", 0, 90)], [leave])).toEqual([]);
+  });
+
+  it("counts a lead-in that reaches into blocked time", () => {
+    // b's main time starts at 190, its lead-in at 170.
+    expect(inBlockedTime([subtask("b", "anna", 190, 240, { leadIn: 20 * MIN })], [leave])).toEqual([
+      { subtask: "b", blocked: "leave", lane: "anna", from: at(170), to: at(180) },
+    ]);
+  });
+
+  it("reports a subtask once per blocked interval it covers", () => {
+    const service: BlockedTime = { id: "service", lane: "anna", from: at(200), to: at(220) };
+    const found = inBlockedTime([subtask("a", "anna", 100, 210)], [leave, service]);
+    expect(found.map((f) => f.blocked)).toEqual(["leave", "service"]);
+  });
+
+  it("is part of findings, and empty without blocked time", () => {
+    const work = [subtask("a", "anna", 0, 90)];
+    expect(findings(work, []).inBlockedTime).toEqual([]);
+    expect(findings(work, [], [leave]).inBlockedTime).toHaveLength(1);
   });
 });

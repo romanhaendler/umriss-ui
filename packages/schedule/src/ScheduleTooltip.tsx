@@ -38,6 +38,7 @@ export function ScheduleReadout({ target, lane }: { target: ScheduleTooltipTarge
       `${formats.dateShort(new Date(subtask.from))} ${wording.scheduleGhostTimes(time(subtask.from), time(subtask.to))}`,
       ...target.overlapping.map((other) => wording.scheduleOverlapWith(other.name ?? other.id)),
       ...target.violatedDependencies.map((violated) => wording.scheduleViolatedBy(duration(violated.shortBy))),
+      ...target.blocked.map((blocked) => wording.scheduleInBlockedTime(blocked.label)),
     ];
     return (
       <>
@@ -78,6 +79,11 @@ export function ScheduleTooltipContent({ target }: { target: ScheduleTooltipTarg
         {target.violatedDependencies.map((violated) => (
           <span key={violated.dependency} className={styles.finding}>
             {wording.scheduleViolatedBy(duration(violated.shortBy))}
+          </span>
+        ))}
+        {target.blocked.map((blocked) => (
+          <span key={blocked.id} className={styles.finding}>
+            {wording.scheduleInBlockedTime(blocked.label)}
           </span>
         ))}
       </>

@@ -31,6 +31,16 @@ commit.
 
 ## Unreleased
 
+### Added
+
+- **Wording for the schedule's blocked time:** `scheduleBlockedTime` ("Blocked
+  time", German "Sperrzeit") on the ghost of a drag held back from it, and
+  `scheduleInBlockedTime(label)` ("In blocked time (Leave)", German "In der
+  Sperrzeit (Urlaub)") in the tooltip and the readout. `scheduleSummary` gets
+  the field `blocked`, the subtasks in blocked time, and says it only where it
+  is not zero. An application that implements the whole `Wording` type adds
+  the two keys.
+
 ### Changed
 
 - **The alarm wording keys follow `@umriss-ui/table`'s new names** (ADR-0035),

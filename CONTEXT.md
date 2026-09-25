@@ -680,7 +680,8 @@ not go to, and says so before the pointer arrives: the lanes that are closed
 are drawn back and hatched from the first frame of the drag, their headers with
 them; over one of them the cursor says no, the **Ghost** stays on the last lane
 that was allowed, and a hairline ties it to the pointer it is not following, so
-that a held ghost is not read as a stuck one. Neither is an error — a wide, flat
+that a held ghost is not read as a stuck one. **Blocked time** refuses the
+same way, for a place in time rather than a whole lane. Neither is an error — a wide, flat
 host with no room for a standing dock is nobody's mistake, and a mould that fits
 one press is nobody's either — which is why a refusal is neither a warning nor
 an alarm, and why the place is never travelled to and then corrected. And a
@@ -1045,6 +1046,17 @@ reported and never resolved by the schedule — the finding is the point. The
 two words stand together; alone, a **Violation** is a control chart's rule and
 the indices it flags.
 _Avoid_: late transport, conflict, Konflikt, violation alone, error
+
+**Blocked time**:
+Time a lane is not available — leave, maintenance, a holiday (German
+*Sperrzeit*). Plain data beside the work, one interval per entry naming its
+lane, drawn hatched behind everything on the lane. A subtask that covers some
+of it (lead-in and lead-out included) is a finding, drawn, named and counted
+like an **Overlap** and never resolved. A drag does not put work into it: it
+is a **Refusal** of a place in time, where `canMoveTo` refuses a whole lane —
+except for the blocked time the work already covered, which never locks it in.
+_Avoid_: absence, downtime, Sperre (the alarms' word, see **Availability**),
+unavailability as a type name
 
 **Lane header**:
 The label at the left edge naming what a lane is. The run of lane headers
