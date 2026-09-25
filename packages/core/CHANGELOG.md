@@ -84,6 +84,11 @@ commit.
 
 ### Changed
 
+- **A new key in `Wording`: `editCell(column, row)`**, the name of a cell's
+  editor in `@umriss-ui/table`'s grid mode ("Edit Setpoint: TIC-101"), in
+  English and German. A partial wording passed to the provider is merged as
+  before; an application that implements the whole `Wording` type itself no
+  longer compiles until it adds it.
 - **Three new keys in `Wording`: the column menu's pin keys** (for
   `@umriss-ui/table`'s pinned columns), in English and German:
   `pinColumnToStart(column)`, `pinColumnToEnd(column)` and

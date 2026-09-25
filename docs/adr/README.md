@@ -47,5 +47,6 @@ half a later reader needs most. Exactly one is superseded today.
 | [0031](0031-the-charts-carry-their-own-wording.md) | The charts carry their own wording | accepted | charts, language |
 | [0032](0032-what-umriss-is-not.md) | What umriss is not | accepted | scope |
 | [0033](0033-the-schedules-keys-walk-past-the-view.md) | The schedule's keys walk past the view | accepted | schedule |
+| [0034](0034-the-table-becomes-a-grid-only-on-request.md) | The table becomes a grid only on request | accepted | table |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).

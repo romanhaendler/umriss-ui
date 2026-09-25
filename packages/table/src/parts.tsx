@@ -59,6 +59,8 @@ import { useLineMotion } from "./motion";
 import { NOT_PINNED, pinnedCell } from "./pinned";
 import type { PinnedCell } from "./pinned";
 import type { PinBlocks } from "./model/pinning";
+import { gridLines } from "./model/gridWalk";
+import { CellEditor, GridContext, GridFocus, gridHandlers, useCellEditor, useGridState } from "./grid";
 import styles from "./Table.module.css";
 
 /* The props as they arrive at runtime. The types at the call site (types.ts) are
@@ -86,6 +88,9 @@ interface RuntimeColumnProps {
   groupValue?: (value: never) => unknown;
   group?: ColumnSpec["group"];
   groupable?: boolean;
+  edit?: ColumnSpec["edit"];
+  editOptions?: readonly unknown[];
+  validate?: ColumnSpec["validate"];
 }
 
 interface RuntimeGroupByProps {
@@ -146,6 +151,9 @@ function specFrom(props: RuntimeColumnProps): ColumnSpec {
     ownGroupValue: props.groupValue,
     group: props.group,
     groupable: props.groupable,
+    edit: props.edit,
+    editOptions: props.editOptions,
+    validate: props.validate,
   };
 }
 
@@ -355,6 +363,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
     loading = false,
     rowProps,
     ariaLabel,
+    grid: gridMode = false,
   } = props;
 
   useSyncExternalStore(registry.subscribe, registry.bodyVersion, registry.bodyVersion);
@@ -363,6 +372,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
   const resolvedDensity = useDensityFor(density, "regular");
   const baseId = useId();
   const tableRef = useRef<HTMLTableElement>(null);
+  const grid = useGridState();
 
   /* Sticky group headers stand below the head and below one another; how high those
      are only the layout knows. Measured after every render - a density or a
@@ -449,6 +459,37 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
   const footerShown = !loading && dataColumns.some((e) => e.spec.aggregate);
   const restricted = snapshot.search !== "" || Object.keys(snapshot.filter).length > 0;
 
+  /* Grid mode (ADR-0034): every line the arrows walk - all of them, the ones a
+     virtual window leaves unrendered as well - and the head row's columns. */
+  const gridLinesNow = gridMode
+    ? gridLines({
+        layout: { controls: controlColumns, span: spanEntry !== undefined, aggregates: dataColumns.map((e) => e.spec.aggregate !== undefined), actions: actions.length > 0, blocks },
+        body: loading ? { rows: [] } : lines ? { lines: virtual ? projection.lines! : lines } : { rows: virtual ? projection.filtered : rows },
+        rowKey: hook.rowKey,
+        expanded: new Set(detail ? snapshot.expanded : []),
+        foot: footerShown,
+      })
+    : [];
+  const gridIds = [
+    ...(selectable ? ["#select"] : []),
+    ...(detail ? ["#detail"] : []),
+    ...(spanEntry ? ["#span"] : []),
+    ...dataColumns.map((e) => e.spec.id),
+    ...(actions.length > 0 ? ["#actions"] : []),
+  ];
+  const gridEvents = gridMode
+    ? gridHandlers({
+        grid,
+        lines: gridLinesNow,
+        ids: gridIds,
+        columnById: (id) => dataColumns.find((e) => e.spec.id === id),
+        rowKey: hook.rowKey,
+        virtual,
+        onCellEdit: props.onCellEdit,
+      })
+    : undefined;
+  const lineKey = (key: string) => (gridMode ? key : undefined);
+
   const renderRow = (row: unknown, index: number, absolute: number, line?: Extract<Line<unknown>, { kind: "row" }>) => (
     <Row
       key={hook.rowKey(row)}
@@ -469,6 +510,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
       baseId={baseId}
       formats={formats}
       wording={wording}
+      grid={gridMode}
     />
   );
 
@@ -488,7 +530,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
   } else if (projection.filtered.length === 0) {
     body = (
       <tbody>
-        <tr>
+        <tr data-grid-line={lineKey("empty")}>
           <td colSpan={columnCount} className={styles.emptyCell}>
             <div className={styles.empty}>
               {hook.admitted.length > 0 && restricted ? (
@@ -536,6 +578,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
             total={projection.filtered}
             siblings={line.parents.at(-1)?.groups ?? projection.groups ?? []}
             depth={grouping.length}
+          grid={gridMode}
             hook={hook}
             formats={formats}
             wording={wording}
@@ -559,6 +602,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
           total={projection.filtered}
           siblings={line.parents.at(-1)?.groups ?? projection.groups ?? []}
           depth={grouping.length}
+          grid={gridMode}
           hook={hook}
           formats={formats}
           wording={wording}
@@ -586,6 +630,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
   }
 
   return (
+    <GridContext.Provider value={gridEvents ? { ...gridEvents.context, hook, wording } : null}>
     <div
       ref={virtual?.scrollRef}
       onScroll={(event) => {
@@ -598,7 +643,11 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
     >
       <table
         ref={tableRef}
-        role={lines ? "treegrid" : undefined}
+        role={lines ? "treegrid" : gridMode ? "grid" : undefined}
+        aria-readonly={gridMode && !dataColumns.some((e) => e.spec.edit !== undefined) ? true : undefined}
+        onKeyDown={gridEvents?.onKeyDown}
+        onFocus={gridEvents?.onFocus}
+        onBlur={gridEvents?.onBlur}
         data-depth={lines ? grouping.length : undefined}
         style={lines ? ({ "--u-header-levels": grouping.length - 1 } as CSSProperties) : undefined}
         aria-label={ariaLabel}
@@ -612,10 +661,11 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
           stickyHeader && styles.sticky,
           (blocks.start > 0 || blocks.end > 0) && styles.pinnedTable,
           striped && styles.striped,
+          gridMode && styles.grid,
         )}
       >
         <thead>
-          <tr aria-rowindex={virtual ? 1 : undefined}>
+          <tr aria-rowindex={virtual ? 1 : undefined} data-grid-line={lineKey("head")}>
             {selectable && (
               <th scope="col" className={cx(styles.th, styles.control, pinAt(0).className)} style={pinAt(0).style}>
                 <Checkbox
@@ -657,7 +707,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
         {body}
         {footerShown && (
           <tfoot>
-            <tr aria-rowindex={virtual ? (projection.lines ?? projection.filtered).length + 2 : undefined}>
+            <tr aria-rowindex={virtual ? (projection.lines ?? projection.filtered).length + 2 : undefined} data-grid-line={lineKey("foot")}>
               {Array.from({ length: controlColumns }, (_, i) => (
                 <td key={i} className={cx(styles.td, styles.control, pinAt(i).className)} style={pinAt(i).style} />
               ))}
@@ -684,7 +734,9 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
         blocks={blocks}
         pinnedKeys={dataColumns.filter((e) => pins[e.spec.id]).map((e) => e.key).join("|")}
       />
+      {gridMode && <GridFocus table={tableRef} grid={grid} lines={gridLinesNow} ids={gridIds} />}
     </div>
+    </GridContext.Provider>
   );
 }
 
@@ -946,8 +998,11 @@ function Row({
   wording,
   line,
   spanEntry,
+  grid,
 }: {
   row: unknown;
+  /** Grid mode: the cells are the stops, not the row. */
+  grid: boolean;
   index: number;
   absolute: number | undefined;
   registry: Registry;
@@ -995,7 +1050,8 @@ function Row({
         aria-level={line ? line.parents.length + 1 : undefined}
         aria-posinset={group ? group.rows.indexOf(row) + 1 : undefined}
         aria-setsize={group?.rows.length}
-        tabIndex={virtual ? (absolute === tabStop ? 0 : -1) : undefined}
+        tabIndex={virtual && !grid ? (absolute === tabStop ? 0 : -1) : undefined}
+        data-grid-line={grid ? `row:${key}` : undefined}
         data-even={virtual && absolute % 2 === 1 ? "" : undefined}
         aria-rowindex={virtual ? absolute + 2 : undefined}
       >
@@ -1042,6 +1098,8 @@ function Row({
             pin={pinAt(leading + i)}
             formats={formats}
             wording={wording}
+            rowKey={key}
+            rowName={name}
           />
         ))}
         {actions.length > 0 && (
@@ -1051,7 +1109,7 @@ function Row({
         )}
       </tr>
       {open && detail && (
-        <tr id={detailId} className={styles.detailRow} data-group={group?.path}>
+        <tr id={detailId} className={styles.detailRow} data-group={group?.path} data-grid-line={grid ? `detail:${key}` : undefined}>
           <td colSpan={columnCount} className={styles.detailCell}>
             {detail.presentation(row as never)}
           </td>
@@ -1068,6 +1126,8 @@ function Cell({
   pin,
   formats,
   wording,
+  rowKey,
+  rowName,
 }: {
   entry: ColumnEntry;
   row: unknown;
@@ -1075,13 +1135,19 @@ function Cell({
   pin: PinnedCell;
   formats: Formats;
   wording: Wording;
+  rowKey: string;
+  /** The row's name, for its editor's. */
+  rowName: string;
 }) {
   const { spec } = entry;
   const value = entry.read(row);
   const rightAligned = isRightAligned(kind, spec.rightAligned);
+  const editor = useCellEditor(rowKey, spec.id);
 
   let content: ReactNode;
-  if (isAbsent(value)) {
+  if (editor) {
+    content = <CellEditor entry={entry} row={row} rowName={rowName} grid={editor} />;
+  } else if (isAbsent(value)) {
     /* children is not called for an absent value - that is what its parameter
        is typed without null for. */
     content = <Absent wording={wording} />;

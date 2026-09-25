@@ -77,6 +77,12 @@ export interface ColumnSpec {
   /** Groups a point in time by its day, week, month or year. */
   group?: DatePeriod;
   groupable?: boolean;
+  /** Edited in place in grid mode: by a core field of this kind, or by the column's own editor. */
+  edit?: "text" | "number" | "select" | "date" | ((editor: never) => ReactNode);
+  /** What `edit="select"` offers. */
+  editOptions?: readonly unknown[];
+  /** Checks a draft before it is reported. */
+  validate?: (value: never, row: never) => string | null | undefined;
 }
 
 export interface ColumnEntry {
@@ -190,6 +196,9 @@ const signatureOf = (a: ColumnSpec): string =>
     !!a.ownGroupValue,
     a.group,
     a.groupable,
+    /* Whether a column edits, and how - not its editor or its check, which
+       are new functions on every render and are read when an edit starts. */
+    typeof a.edit === "function" ? "ƒ" : a.edit,
   ]);
 
 const readField = (row: unknown, field: string): unknown =>
