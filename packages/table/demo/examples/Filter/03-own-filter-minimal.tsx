@@ -1,58 +1,43 @@
 import { Checkbox } from "@umriss-ui/core";
 import { columnFilter, useTable } from "../../../src";
 
-export const title = "The smallest filter of one's own";
+export const title = "Write the smallest filter of your own";
+export const lead = "`columnFilter` takes `matches`, `describe` and the `Input` for the panel; the header funnel, the panel and the condition come from the table.";
 
-/* A filter of one's own needs three things, and two of them are one line long
-   here: `matches` says whether a value satisfies the condition, `describe` names
-   it in the table toolbar, and `Input` is what stands in the panel - here a
-   single checkbox.
-
-   Everything else comes from the table, for this filter as for the built-in
-   ones: the funnel in the header, the panel with "Reset" and "Done", the
-   condition with its cross, the ratio of matches and the way back.
-
-   The condition here is `true` or none - `setCondition(null)` lifts it. An
-   absent value satisfies no condition of one's own, and `matches` never gets to
-   see it. The cutoff date is fixed so that the example looks the same every day;
-   in an application `new Date()` would stand there. */
-
-const CUTOFF = new Date(2026, 8, 20);
+/* Fixed so the example looks the same every day; an application would
+   write `new Date()`. `setCondition(null)` lifts the condition. */
+const TODAY = new Date(2026, 2, 17);
 
 const overdue = columnFilter<Date, true>({
-  matches: (due) => due.getTime() < CUTOFF.getTime(),
+  matches: (due) => due.getTime() < TODAY.getTime(),
   Input: ({ condition, setCondition }) => (
-    <Checkbox
-      label="Overdue only"
-      checked={condition === true}
-      onChange={(event) => setCondition(event.target.checked ? true : null)}
-    />
+    <Checkbox label="Overdue only" checked={condition === true} onChange={(event) => setCondition(event.target.checked ? true : null)} />
   ),
   describe: () => "overdue",
 });
 
-interface Order {
-  number: string;
-  customer: string;
+interface Invoice {
+  id: string;
+  supplier: string;
   due: Date;
 }
 
-const ORDERS: Order[] = [
-  { number: "A-2041", customer: "Brandt Metalworks", due: new Date(2026, 8, 3) },
-  { number: "A-2042", customer: "Keller & Sons", due: new Date(2026, 8, 12) },
-  { number: "A-2043", customer: "Northworks", due: new Date(2026, 8, 24) },
-  { number: "A-2044", customer: "Hofmann Drives", due: new Date(2026, 8, 18) },
-  { number: "A-2045", customer: "Lindner Hydraulics", due: new Date(2026, 9, 2) },
+const INVOICES: Invoice[] = [
+  { id: "INV-26-0318", supplier: "Brandlow Office Supply", due: new Date(2026, 3, 15) },
+  { id: "INV-26-0309", supplier: "Nimbrel Software", due: new Date(2026, 3, 8) },
+  { id: "INV-26-0226", supplier: "Corrin Travel", due: new Date(2026, 2, 12) },
+  { id: "INV-26-0302", supplier: "Fenwright Legal", due: new Date(2026, 2, 16) },
+  { id: "INV-26-0221", supplier: "Stellbrook Consulting", due: new Date(2026, 2, 23) },
 ];
 
 export default function OwnFilterMinimal() {
-  const { Table, Column } = useTable(ORDERS, { rowKey: (o) => o.number });
+  const { Table, Column } = useTable(INVOICES, { rowKey: (i) => i.id });
 
   return (
-    <Table ariaLabel="Orders">
-      <Column value="number" label="Order" rowHeader />
-      <Column value="customer" label="Customer" />
-      <Column value="due" label="Due date" format="date" filter={overdue} />
+    <Table ariaLabel="Invoices">
+      <Column value="id" label="Invoice" rowHeader />
+      <Column value="supplier" label="Supplier" />
+      <Column value="due" label="Due" format="date" filter={overdue} />
     </Table>
   );
 }

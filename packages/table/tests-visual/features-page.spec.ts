@@ -9,7 +9,7 @@ checkPage({
   open,
   openExample,
   pageId: "table",
-  examples: ["first-table", "selection", "sticky-parts"],
+  examples: ["first-table", "sort-by-several-columns", "search"],
   other: { name: "Column", pageId: "column" },
   packageName: "@umriss-ui/table",
   importLine: 'import { useTable } from "@umriss-ui/table";',
