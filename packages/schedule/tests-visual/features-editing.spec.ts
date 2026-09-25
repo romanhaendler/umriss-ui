@@ -106,18 +106,18 @@ test("a schedule without intents starts no drag: pressing a subtask pans", async
   expect((await noon.boundingBox())!.x).toBeCloseTo(before - 100, -1);
 });
 
-test("setup grips appear on the selected subtask, and dragging one changes the setup", async ({ page }) => {
-  await openExample(page, "stretch", "stretch-setup-teardown");
-  const example = page.locator('[data-example="stretch-setup-teardown"]');
+test("lead-in grips appear on the selected subtask, and dragging one changes the lead-in", async ({ page }) => {
+  await openExample(page, "stretch", "stretch-lead-in-lead-out");
+  const example = page.locator('[data-example="stretch-lead-in-lead-out"]');
   const plot = await plotOf(page, example, [at(6), at(13, 30)]);
   const grips = example.locator("[data-grip]");
   await expect(grips).toHaveCount(0);
 
-  /* The turning, 08:00 to 10:00 with half an hour of setup. */
+  /* The turning, 08:00 to 10:00 with half an hour of lead-in. */
   await page.mouse.click(plot.x(9), plot.y("lathe"));
   await expect(grips).toHaveCount(2);
-  const setup = example.locator('[data-grip="setup"]');
-  const before = (await setup.boundingBox())!;
+  const leadIn = example.locator('[data-grip="leadIn"]');
+  const before = (await leadIn.boundingBox())!;
   expect(before.x + before.width / 2).toBeCloseTo(plot.x(7, 30), -1);
 
   await page.mouse.move(before.x + before.width / 2, before.y + before.height / 2);
@@ -128,19 +128,19 @@ test("setup grips appear on the selected subtask, and dragging one changes the s
 
   /* The example applies the intent: the grip now stands an hour before 08:00. */
   await expect.poll(async () => {
-    const box = await setup.boundingBox();
+    const box = await leadIn.boundingBox();
     return box === null ? NaN : Math.round(box.x + box.width / 2);
   }).toBeCloseTo(plot.x(7), -1);
 });
 
 test("stretching the main time at its edge reports a stretch", async ({ page }) => {
-  await openExample(page, "stretch", "stretch-setup-teardown");
-  const example = page.locator('[data-example="stretch-setup-teardown"]');
+  await openExample(page, "stretch", "stretch-lead-in-lead-out");
+  const example = page.locator('[data-example="stretch-lead-in-lead-out"]');
   const plot = await plotOf(page, example, [at(6), at(13, 30)]);
   const grips = example.locator("[data-grip]");
 
   /* The grinding ends at 12:30; drag its end to 13:00, then select it to read
-     where its teardown grip - at the end, with no teardown - now stands. */
+     where its lead-out grip - at the end, with no lead-out - now stands. */
   await page.mouse.move(plot.x(12, 30), plot.y("grinder"));
   await page.mouse.down();
   await page.mouse.move(plot.x(13), plot.y("grinder"), { steps: 6 });
@@ -149,8 +149,8 @@ test("stretching the main time at its edge reports a stretch", async ({ page }) 
 
   await page.mouse.click(plot.x(11, 30), plot.y("grinder"));
   await expect(grips).toHaveCount(2);
-  const teardown = (await example.locator('[data-grip="teardown"]').boundingBox())!;
-  expect(teardown.x + teardown.width / 2).toBeCloseTo(plot.x(13), -1);
+  const leadOut = (await example.locator('[data-grip="leadOut"]').boundingBox())!;
+  expect(leadOut.x + leadOut.width / 2).toBeCloseTo(plot.x(13), -1);
 });
 
 test("the scenario: a right-click opens the context menu, and an entry changes the plan through an intent", async ({ page }) => {
@@ -158,9 +158,9 @@ test("the scenario: a right-click opens the context menu, and an entry changes t
   const example = page.locator('[data-scenario="replan-the-day"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
   const summary = example.locator("[data-findings-summary]");
-  await expect(summary).toHaveText("1 overlap, 1 late transport");
+  await expect(summary).toHaveText("1 overlap, 1 violated dependency");
 
-  /* The bracket in the paint shop, noon: its transport from the mill is late. */
+  /* The bracket in the paint shop, noon: its dependency from the mill is violated. */
   await page.mouse.click(plot.x(13), plot.y("paint"), { button: "right" });
   const menu = page.getByRole("menu", { name: "Actions for a-2043-3" });
   await expect(menu).toBeVisible();
@@ -170,9 +170,9 @@ test("the scenario: a right-click opens the context menu, and an entry changes t
   await menu.getByRole("menuitem", { name: "Later by a quarter hour", exact: true }).click();
   await expect(menu).toHaveCount(0);
   await expect(example.locator("[data-intent-log]")).toContainText("move a-2043-3");
-  /* Later by a quarter hour the transport fits - and the teardown now reaches
-     into the flange's setup: the fix of one finding is visible as the next. */
-  await expect(summary).toHaveText("2 overlaps, 0 late transports");
+  /* Later by a quarter hour the dependency fits - and the lead-out now reaches
+     into the flange's lead-in: the fix of one finding is visible as the next. */
+  await expect(summary).toHaveText("2 overlaps, 0 violated dependencies");
 });
 
 test("a drag on the shift raster lands on a shift change", async ({ page }) => {
@@ -198,7 +198,7 @@ test("the scenario shifts a whole order through one intent per stop", async ({ p
   const example = page.locator('[data-scenario="replan-the-day"]');
   const plot = await plotOf(page, example, DAY_OF_PLAN);
   const summary = example.locator("[data-findings-summary]");
-  await expect(summary).toHaveText("1 overlap, 1 late transport");
+  await expect(summary).toHaveText("1 overlap, 1 violated dependency");
 
   await page.mouse.click(plot.x(13), plot.y("paint"), { button: "right" });
   const menu = page.getByRole("menu", { name: "Actions for a-2043-3" });
@@ -206,10 +206,10 @@ test("the scenario shifts a whole order through one intent per stop", async ({ p
 
   const log = example.locator("[data-intent-log]");
   for (const stop of ["a-2043-1", "a-2043-2", "a-2043-3"]) await expect(log).toContainText(`move ${stop}`);
-  /* Every stop moved by the same amount, so the transports still fit as they
-     did - the late one is still late, and the teardown now reaches into the
-     flange's setup. */
-  await expect(summary).toHaveText("2 overlaps, 1 late transport");
+  /* Every stop moved by the same amount, so the dependencies still fit as they
+     did - the violated one is still violated, and the lead-out now reaches into the
+     flange's lead-in. */
+  await expect(summary).toHaveText("2 overlaps, 1 violated dependency");
 });
 
 test("work dragged in from a list shows its ghost and is reported as a place intent", async ({ page }) => {

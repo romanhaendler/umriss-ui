@@ -37,7 +37,7 @@ export function ScheduleReadout({ target, lane }: { target: ScheduleTooltipTarge
       subtask.name ?? subtask.id,
       `${formats.dateShort(new Date(subtask.from))} ${wording.scheduleGhostTimes(time(subtask.from), time(subtask.to))}`,
       ...target.overlapping.map((other) => wording.scheduleOverlapWith(other.name ?? other.id)),
-      ...target.lateTransports.map((late) => wording.scheduleLateBy(duration(late.shortBy))),
+      ...target.violatedDependencies.map((violated) => wording.scheduleViolatedBy(duration(violated.shortBy))),
     ];
     return (
       <>
@@ -46,12 +46,12 @@ export function ScheduleReadout({ target, lane }: { target: ScheduleTooltipTarge
       </>
     );
   }
-  const { transport, task, from, to, late } = target;
+  const { dependency, task, from, to, violated } = target;
   return [
-    task?.name ?? task?.id ?? transport.id,
-    `${wording.scheduleTransport} ${duration(transport.duration)}`,
-    wording.scheduleRoute(from?.name ?? transport.from, to?.name ?? transport.to),
-    ...(late === undefined ? [] : [wording.scheduleLateBy(duration(late.shortBy))]),
+    task?.name ?? task?.id ?? dependency.id,
+    `${wording.scheduleDependency} ${duration(dependency.lag)}`,
+    wording.scheduleRoute(from?.name ?? dependency.from, to?.name ?? dependency.to),
+    ...(violated === undefined ? [] : [wording.scheduleViolatedBy(duration(violated.shortBy))]),
   ].join(", ");
 }
 
@@ -68,29 +68,29 @@ export function ScheduleTooltipContent({ target }: { target: ScheduleTooltipTarg
         <span className={styles.tooltipHead}>{task?.name ?? subtask.task}</span>
         <span>{subtask.name ?? subtask.id}</span>
         <span className={styles.tooltipTimes}>{wording.scheduleGhostTimes(time(subtask.from), time(subtask.to))}</span>
-        {(subtask.setup ?? 0) > 0 && <span>{`${wording.scheduleSetup} ${duration(subtask.setup!)}`}</span>}
-        {(subtask.teardown ?? 0) > 0 && <span>{`${wording.scheduleTeardown} ${duration(subtask.teardown!)}`}</span>}
+        {(subtask.leadIn ?? 0) > 0 && <span>{`${wording.scheduleLeadIn} ${duration(subtask.leadIn!)}`}</span>}
+        {(subtask.leadOut ?? 0) > 0 && <span>{`${wording.scheduleLeadOut} ${duration(subtask.leadOut!)}`}</span>}
         {target.overlapping.map((other) => (
           <span key={other.id} className={styles.finding}>
             {wording.scheduleOverlapWith(other.name ?? other.id)}
           </span>
         ))}
-        {target.lateTransports.map((late) => (
-          <span key={late.transport} className={styles.finding}>
-            {wording.scheduleLateBy(duration(late.shortBy))}
+        {target.violatedDependencies.map((violated) => (
+          <span key={violated.dependency} className={styles.finding}>
+            {wording.scheduleViolatedBy(duration(violated.shortBy))}
           </span>
         ))}
       </>
     );
   }
 
-  const { transport, task, from, to, late } = target;
+  const { dependency, task, from, to, violated } = target;
   return (
     <>
-      <span className={styles.tooltipHead}>{task?.name ?? task?.id ?? transport.id}</span>
-      <span>{wording.scheduleRoute(from?.name ?? transport.from, to?.name ?? transport.to)}</span>
-      <span>{`${wording.scheduleTransport} ${duration(transport.duration)}`}</span>
-      {late !== undefined && <span className={styles.finding}>{wording.scheduleLateBy(duration(late.shortBy))}</span>}
+      <span className={styles.tooltipHead}>{task?.name ?? task?.id ?? dependency.id}</span>
+      <span>{wording.scheduleRoute(from?.name ?? dependency.from, to?.name ?? dependency.to)}</span>
+      <span>{`${wording.scheduleDependency} ${duration(dependency.lag)}`}</span>
+      {violated !== undefined && <span className={styles.finding}>{wording.scheduleViolatedBy(duration(violated.shortBy))}</span>}
     </>
   );
 }

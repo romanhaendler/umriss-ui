@@ -27,7 +27,7 @@ const WORK: Subtask[] = CELLS.map((cell, i) => ({
   lane: cell.id,
   from: at(7, 15 * i),
   to: at(9, 15 * i),
-  setup: 15 * 60_000,
+  leadIn: 15 * 60_000,
 }));
 
 export default function ManyLanes() {

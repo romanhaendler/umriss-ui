@@ -1,6 +1,6 @@
 /* Where a bar's label lies, and when there is none (schedule-legibility 03).
 
-   The label belongs to the main time - not to the setup, which is not the work
+   The label belongs to the main time - not to the lead-in, which is not the work
    - and it is the visible part of it: a bar that began before the view keeps
    its label at the view's edge, the way the day band keeps its date. */
 
@@ -49,7 +49,7 @@ describe("barLabelBox", () => {
     expect(fixed.x - 100).toBe(300 - (fixed.x + fixed.width));
   });
 
-  it("lies on the main time, not on the setup or the teardown", () => {
+  it("lies on the main time, not on the lead-in or the lead-out", () => {
     expect(barLabelBox(box(100, 300), 800)).toEqual({ x: 100, width: 200, y: 10, height: 23 });
   });
 

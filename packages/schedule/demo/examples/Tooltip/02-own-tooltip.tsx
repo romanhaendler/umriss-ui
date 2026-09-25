@@ -1,11 +1,11 @@
 import { Badge, Stack, Text } from "@umriss-ui/core";
-import { Lane, Schedule, Subtasks, Transports } from "../../../src";
-import type { ScheduleTooltipTarget, Subtask, Task, Transport } from "../../../src";
+import { Lane, Schedule, Subtasks, Dependencies } from "../../../src";
+import type { ScheduleTooltipTarget, Subtask, Task, Dependency } from "../../../src";
 
 export const title = "A tooltip of the application's own";
 
-/* Resting the pointer on a subtask or a transport shows a tooltip: by default
-   the order, the stop, its times, setup and teardown, and every finding on it -
+/* Resting the pointer on a subtask or a dependency shows a tooltip: by default
+   the order, the stop, its times, lead-in and lead-out, and every finding on it -
    try the bracket in the paint shop at noon. Its words come from the provider's
    wording, so a German application reads it in German.
 
@@ -32,17 +32,17 @@ const ORDERS: readonly Task[] = [
 ];
 
 const STEPS: readonly Subtask[] = [
-  { id: "a-2041-2", task: "a-2041", lane: "mill", from: at(8), to: at(10, 30), setup: min(30), teardown: min(15) },
-  { id: "a-2043-1", task: "a-2043", lane: "press", from: at(6, 30), to: at(8), setup: min(30), teardown: min(15) },
-  { id: "a-2043-2", task: "a-2043", lane: "mill", from: at(10), to: at(11, 30), setup: min(15) },
-  { id: "a-2043-3", task: "a-2043", lane: "paint", from: at(12), to: at(14), setup: min(20), teardown: min(20) },
+  { id: "a-2041-2", task: "a-2041", lane: "mill", from: at(8), to: at(10, 30), leadIn: min(30), leadOut: min(15) },
+  { id: "a-2043-1", task: "a-2043", lane: "press", from: at(6, 30), to: at(8), leadIn: min(30), leadOut: min(15) },
+  { id: "a-2043-2", task: "a-2043", lane: "mill", from: at(10), to: at(11, 30), leadIn: min(15) },
+  { id: "a-2043-3", task: "a-2043", lane: "paint", from: at(12), to: at(14), leadIn: min(20), leadOut: min(20) },
 ];
 
-const MOVES: readonly Transport[] = [
-  { id: "t-2043-1", from: "a-2043-1", to: "a-2043-2", duration: min(45) },
+const MOVES: readonly Dependency[] = [
+  { id: "t-2043-1", from: "a-2043-1", to: "a-2043-2", lag: min(45) },
   /* Leaves the mill at 11:30 and has ten minutes to reach the paint shop's
-     setup at 11:40 - it takes twenty-five. A late transport, on purpose. */
-  { id: "t-2043-2", from: "a-2043-2", to: "a-2043-3", duration: min(25) },
+     lead-in at 11:40 - it takes twenty-five. A violated dependency, on purpose. */
+  { id: "t-2043-2", from: "a-2043-2", to: "a-2043-3", lag: min(25) },
 ];
 
 const CUSTOMERS: Record<string, string> = {
@@ -56,7 +56,7 @@ const CUSTOMERS: Record<string, string> = {
 
 function OrderTooltip({ target }: { target: ScheduleTooltipTarget }) {
   const task = target.task;
-  const findings = target.kind === "subtask" ? target.overlapping.length + target.lateTransports.length : target.late ? 1 : 0;
+  const findings = target.kind === "subtask" ? target.overlapping.length + target.violatedDependencies.length : target.violated ? 1 : 0;
   return (
     <Stack gap={1}>
       <Text size="sm" weight="semibold">
@@ -81,7 +81,7 @@ export default function OwnTooltip() {
       {STATIONS.map((station) => (
         <Lane key={station.id} id={station.id} label={station.label} />
       ))}
-      <Transports data={MOVES} />
+      <Dependencies data={MOVES} />
       <Subtasks data={STEPS} tasks={ORDERS} />
     </Schedule>
   );

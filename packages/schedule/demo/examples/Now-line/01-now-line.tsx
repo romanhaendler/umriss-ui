@@ -1,5 +1,5 @@
-import { Lane, Schedule, Subtasks, Transports } from "../../../src";
-import type { Subtask, Task, Transport } from "../../../src";
+import { Lane, Schedule, Subtasks, Dependencies } from "../../../src";
+import type { Subtask, Task, Dependency } from "../../../src";
 
 export const title = "Where the present stands";
 
@@ -32,15 +32,15 @@ const ORDERS: readonly Task[] = [
 ];
 
 const STEPS: readonly Subtask[] = [
-  { id: "a-2041-1", task: "a-2041", lane: "saw", from: at(6), to: at(7), setup: min(15), teardown: min(10) },
-  { id: "a-2041-2", task: "a-2041", lane: "mill", from: at(8), to: at(10, 30), setup: min(30), teardown: min(15) },
-  { id: "a-2043-1", task: "a-2043", lane: "press", from: at(6, 30), to: at(8), setup: min(30), teardown: min(15) },
-  { id: "a-2043-2", task: "a-2043", lane: "mill", from: at(10), to: at(11, 30), setup: min(15) },
+  { id: "a-2041-1", task: "a-2041", lane: "saw", from: at(6), to: at(7), leadIn: min(15), leadOut: min(10) },
+  { id: "a-2041-2", task: "a-2041", lane: "mill", from: at(8), to: at(10, 30), leadIn: min(30), leadOut: min(15) },
+  { id: "a-2043-1", task: "a-2043", lane: "press", from: at(6, 30), to: at(8), leadIn: min(30), leadOut: min(15) },
+  { id: "a-2043-2", task: "a-2043", lane: "mill", from: at(10), to: at(11, 30), leadIn: min(15) },
 ];
 
-const MOVES: readonly Transport[] = [
-  { id: "t-2041-1", from: "a-2041-1", to: "a-2041-2", duration: min(10) },
-  { id: "t-2043-1", from: "a-2043-1", to: "a-2043-2", duration: min(45) },
+const MOVES: readonly Dependency[] = [
+  { id: "t-2041-1", from: "a-2041-1", to: "a-2041-2", lag: min(10) },
+  { id: "t-2043-1", from: "a-2043-1", to: "a-2043-2", lag: min(45) },
 ];
 
 const HALF_PAST_TEN = new Date(2026, 2, 17, 10, 30).getTime();
@@ -56,7 +56,7 @@ export default function NowLine() {
       {STATIONS.map((station) => (
         <Lane key={station.id} id={station.id} label={station.label} />
       ))}
-      <Transports data={MOVES} />
+      <Dependencies data={MOVES} />
       <Subtasks data={STEPS} tasks={ORDERS} />
     </Schedule>
   );

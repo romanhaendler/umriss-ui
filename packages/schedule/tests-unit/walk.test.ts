@@ -3,9 +3,9 @@
    is 3_600_000 ms, and the plan is small enough to read. */
 
 import { describe, expect, it } from "vitest";
-import type { Subtask, Transport } from "../src/model";
+import type { Subtask, Dependency } from "../src/model";
 import { layOutRows } from "../src/rows";
-import { alongTransport, stepSubtask, walkRows } from "../src/walk";
+import { alongDependency, stepSubtask, walkRows } from "../src/walk";
 
 const H = 3_600_000;
 const s = (id: string, lane: string, from: number, to: number): Subtask => ({ id, task: "t", lane, from: from * H, to: to * H });
@@ -114,29 +114,29 @@ describe("a step", () => {
   });
 });
 
-describe("along a transport", () => {
+describe("along a dependency", () => {
   const byId = new Map(WORK.map((x) => [x.id, x] as const));
-  const T: Transport[] = [
-    { id: "t1", from: "a2", to: "c1", duration: H },
-    { id: "t2", from: "c1", to: "a3", duration: H },
-    { id: "dangling", from: "c2", to: "nowhere", duration: H },
+  const T: Dependency[] = [
+    { id: "t1", from: "a2", to: "c1", lag: H },
+    { id: "t2", from: "c1", to: "a3", lag: H },
+    { id: "dangling", from: "c2", to: "nowhere", lag: H },
   ];
-  const at = (kind: "subtask" | "transport", id: string) => ({ kind, id });
+  const at = (kind: "subtask" | "dependency", id: string) => ({ kind, id });
 
-  it("goes out from a subtask onto the transport that leaves it, and on to the stop it reaches", () => {
-    expect(alongTransport(T, byId, at("subtask", "a2"), "out")).toEqual(at("transport", "t1"));
-    expect(alongTransport(T, byId, at("transport", "t1"), "out")).toEqual(at("subtask", "c1"));
-    expect(alongTransport(T, byId, at("subtask", "c1"), "out")).toEqual(at("transport", "t2"));
+  it("goes out from a subtask onto the dependency that leaves it, and on to the stop it reaches", () => {
+    expect(alongDependency(T, byId, at("subtask", "a2"), "out")).toEqual(at("dependency", "t1"));
+    expect(alongDependency(T, byId, at("dependency", "t1"), "out")).toEqual(at("subtask", "c1"));
+    expect(alongDependency(T, byId, at("subtask", "c1"), "out")).toEqual(at("dependency", "t2"));
   });
 
-  it("goes back onto the transport that arrives, and on to the stop it left", () => {
-    expect(alongTransport(T, byId, at("subtask", "c1"), "back")).toEqual(at("transport", "t1"));
-    expect(alongTransport(T, byId, at("transport", "t1"), "back")).toEqual(at("subtask", "a2"));
+  it("goes back onto the dependency that arrives, and on to the stop it left", () => {
+    expect(alongDependency(T, byId, at("subtask", "c1"), "back")).toEqual(at("dependency", "t1"));
+    expect(alongDependency(T, byId, at("dependency", "t1"), "back")).toEqual(at("subtask", "a2"));
   });
 
   it("stays where there is nothing to follow, or its other end is not in the plan", () => {
-    expect(alongTransport(T, byId, at("subtask", "a1"), "out")).toEqual(at("subtask", "a1"));
-    expect(alongTransport(T, byId, at("subtask", "a2"), "back")).toEqual(at("subtask", "a2"));
-    expect(alongTransport(T, byId, at("subtask", "c2"), "out")).toEqual(at("subtask", "c2"));
+    expect(alongDependency(T, byId, at("subtask", "a1"), "out")).toEqual(at("subtask", "a1"));
+    expect(alongDependency(T, byId, at("subtask", "a2"), "back")).toEqual(at("subtask", "a2"));
+    expect(alongDependency(T, byId, at("subtask", "c2"), "out")).toEqual(at("subtask", "c2"));
   });
 });

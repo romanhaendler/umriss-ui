@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Lane, Schedule, Subtasks, Transports, applyIntent } from "../../../src";
-import type { Subtask, Task, Transport } from "../../../src";
+import { Lane, Schedule, Subtasks, Dependencies, applyIntent } from "../../../src";
+import type { Subtask, Task, Dependency } from "../../../src";
 
 export const title = "Nights cut out of the axis";
 
@@ -25,14 +25,14 @@ const SHIFTS = [0, 1, 2].map((day) => ({ from: at(day, 6), to: at(day, 22) }));
 const TASKS: Task[] = [{ id: "casting", color: "light-dark(#c2410c, #f08a52)" }];
 
 const STEPS: Subtask[] = [
-  { id: "pour", task: "casting", lane: "foundry", from: at(0, 18), to: at(0, 21, 30), setup: 30 * 60_000 },
-  { id: "fettle", task: "casting", lane: "fettling", from: at(1, 6, 30), to: at(1, 11), setup: 15 * 60_000 },
-  { id: "machine", task: "casting", lane: "machining", from: at(1, 20), to: at(2, 9), teardown: 30 * 60_000 },
+  { id: "pour", task: "casting", lane: "foundry", from: at(0, 18), to: at(0, 21, 30), leadIn: 30 * 60_000 },
+  { id: "fettle", task: "casting", lane: "fettling", from: at(1, 6, 30), to: at(1, 11), leadIn: 15 * 60_000 },
+  { id: "machine", task: "casting", lane: "machining", from: at(1, 20), to: at(2, 9), leadOut: 30 * 60_000 },
 ];
 
-const MOVES: Transport[] = [
-  { id: "cool", from: "pour", to: "fettle", duration: 20 * 60_000 },
-  { id: "carry", from: "fettle", to: "machine", duration: 45 * 60_000 },
+const MOVES: Dependency[] = [
+  { id: "cool", from: "pour", to: "fettle", lag: 20 * 60_000 },
+  { id: "carry", from: "fettle", to: "machine", lag: 45 * 60_000 },
 ];
 
 export default function WorkingCalendar() {
@@ -49,7 +49,7 @@ export default function WorkingCalendar() {
       <Lane id="foundry" label="Foundry" />
       <Lane id="fettling" label="Fettling" />
       <Lane id="machining" label="Machining" />
-      <Transports data={MOVES} />
+      <Dependencies data={MOVES} />
       <Subtasks data={steps} tasks={TASKS} />
     </Schedule>
   );

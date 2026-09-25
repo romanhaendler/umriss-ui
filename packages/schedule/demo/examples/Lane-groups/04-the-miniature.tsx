@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Lane, LaneGroup, Schedule, Subtasks, Transports, applyIntent, findings } from "../../../src";
+import { Lane, LaneGroup, Schedule, Subtasks, Dependencies, applyIntent, findings } from "../../../src";
 import { Stack, Text } from "@umriss-ui/core";
-import type { Subtask, Task, Transport } from "../../../src";
+import type { Subtask, Task, Dependency } from "../../../src";
 
 export const title = "What a folded group shows";
 
@@ -10,7 +10,7 @@ export const title = "What a folded group shows";
    colours. The real work, smaller - not a summary, not a packing, not a
    utilisation band.
 
-   Fold the hall and watch what survives. The transport from the saw still
+   Fold the hall and watch what survives. The dependency from the saw still
    arrives, at the strip of the machine it arrives at. The overlap on the mill
    is still marked, on the strip AND on the row, because folding is a planner
    tidying the view and must never be a planner hiding a finding. Hover a strip
@@ -39,19 +39,19 @@ const TASKS: Task[] = [
 ];
 
 const STEPS: Subtask[] = [
-  { id: "a-2041-1", task: "a-2041", lane: "saw", from: at(6, 30), to: at(8), teardown: min(15) },
-  { id: "a-2041-2", task: "a-2041", lane: "mill", from: at(9), to: at(11, 30), setup: min(30) },
+  { id: "a-2041-1", task: "a-2041", lane: "saw", from: at(6, 30), to: at(8), leadOut: min(15) },
+  { id: "a-2041-2", task: "a-2041", lane: "mill", from: at(9), to: at(11, 30), leadIn: min(30) },
   { id: "a-2043-1", task: "a-2043", lane: "lathe", from: at(7), to: at(9) },
   /* Claims the mill while the housing still has it: an overlap, on purpose. */
-  { id: "a-2043-2", task: "a-2043", lane: "mill", from: at(11), to: at(13), setup: min(15) },
+  { id: "a-2043-2", task: "a-2043", lane: "mill", from: at(11), to: at(13), leadIn: min(15) },
   { id: "a-2043-3", task: "a-2043", lane: "paint", from: at(13, 30), to: at(15) },
 ];
 
-const MOVES: Transport[] = [
+const MOVES: Dependency[] = [
   /* Out of the saw, which stands outside the hall, into a machine inside it. */
-  { id: "t-1", from: "a-2041-1", to: "a-2041-2", duration: min(20) },
-  { id: "t-2", from: "a-2043-1", to: "a-2043-2", duration: min(30) },
-  { id: "t-3", from: "a-2043-2", to: "a-2043-3", duration: min(20) },
+  { id: "t-1", from: "a-2041-1", to: "a-2041-2", lag: min(20) },
+  { id: "t-2", from: "a-2043-1", to: "a-2043-2", lag: min(30) },
+  { id: "t-3", from: "a-2043-2", to: "a-2043-3", lag: min(20) },
 ];
 
 const FOUND = findings(STEPS, MOVES);
@@ -82,14 +82,14 @@ export default function TheMiniature() {
           <Lane id="mill" label="Mill" />
         </LaneGroup>
         <Lane id="paint" label="Paint shop" />
-        <Transports data={MOVES} />
+        <Dependencies data={MOVES} />
         <Subtasks data={work} tasks={TASKS} />
       </Schedule>
       <Text size="sm" mono tone="secondary" data-last-move>
         {last}
       </Text>
       <Text size="sm" mono tone="secondary" data-findings-count>
-        {FOUND.overlaps.length} overlap and {FOUND.lateTransports.length} late transport - folded or not
+        {FOUND.overlaps.length} overlap and {FOUND.violatedDependencies.length} violated dependency - folded or not
       </Text>
     </Stack>
   );

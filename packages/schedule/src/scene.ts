@@ -74,11 +74,11 @@ export interface ScheduleSnapshot {
   readonly step: number;
   /** The ghost's label while a drag is in flight. */
   readonly ghost: GhostSummary | null;
-  /** The setup and teardown grips of the selected subtask. */
-  readonly grips: readonly { readonly kind: "setup" | "teardown"; readonly x: number; readonly y: number; readonly height: number }[];
+  /** The lead-in and lead-out grips of the selected subtask. */
+  readonly grips: readonly { readonly kind: "leadIn" | "leadOut"; readonly x: number; readonly y: number; readonly height: number }[];
   readonly cursor: string;
   /** The tooltip's target and the point it stands at, while the pointer rests
-      on a subtask or transport and nothing is dragged. */
+      on a subtask or dependency and nothing is dragged. */
   readonly tooltip: { readonly target: ScheduleTooltipTarget; readonly x: number; readonly y: number } | null;
   /** The now line's x on the plot, or null. */
   readonly now: number | null;
@@ -103,7 +103,7 @@ export interface ScheduleSnapshot {
     readonly from: number;
     readonly to: number;
     readonly overlaps: number;
-    readonly late: number;
+    readonly violated: number;
   };
 }
 
@@ -123,7 +123,7 @@ const EMPTY_SNAPSHOT: ScheduleSnapshot = {
   now: null,
   bars: [],
   spoken: null,
-  summary: { lanes: 0, subtasks: 0, from: 0, to: 0, overlaps: 0, late: 0 },
+  summary: { lanes: 0, subtasks: 0, from: 0, to: 0, overlaps: 0, violated: 0 },
 };
 
 export class ScheduleScene {
@@ -335,13 +335,13 @@ export class ScheduleScene {
   private publish(): void {
     const view = this.view;
     const selected = this.selected !== null ? view.boxById.get(this.selected) : undefined;
-    const grips: { kind: "setup" | "teardown"; x: number; y: number; height: number }[] = [];
+    const grips: { kind: "leadIn" | "leadOut"; x: number; y: number; height: number }[] = [];
     /* No grips on a strip: a bar three pixels high is not something to stretch
        by three pixels, and the grips belong to a subtask a planner can see
        (ADR-0025). */
     if (selected !== undefined && !selected.miniature && !this.gestures.editing && selected.subtask.task === this.selectedTask) {
-      if (view.options.intents.includes("setup")) grips.push({ kind: "setup", x: selected.outerFrom, y: selected.y, height: selected.height });
-      if (view.options.intents.includes("teardown")) grips.push({ kind: "teardown", x: selected.outerTo, y: selected.y, height: selected.height });
+      if (view.options.intents.includes("leadIn")) grips.push({ kind: "leadIn", x: selected.outerFrom, y: selected.y, height: selected.height });
+      if (view.options.intents.includes("leadOut")) grips.push({ kind: "leadOut", x: selected.outerTo, y: selected.y, height: selected.height });
     }
     this.snapshot = {
       width: view.width,
@@ -419,7 +419,7 @@ export class ScheduleScene {
       from,
       to,
       overlaps: this.data.overlaps.length,
-      late: this.data.lateById.size,
+      violated: this.data.violatedById.size,
     };
   }
 

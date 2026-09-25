@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import type { ReactNode } from "react";
 import { LaneGroupContext, useLane, useLaneGroup, useLaneGroupRegistration, useLayer } from "./context";
 import type { LayerConfig } from "./scene";
-import type { Subtask, Task, Transport } from "./model";
+import type { Subtask, Task, Dependency } from "./model";
 
 export interface LaneProps {
   /** The identity subtasks name in their `lane`. */
@@ -65,15 +65,15 @@ export function Subtasks({ data, tasks }: SubtasksProps): null {
   return null;
 }
 
-export interface TransportsProps {
-  /** The transports, as the caller holds them. */
-  data: readonly Transport[];
+export interface DependenciesProps {
+  /** The dependencies, as the caller holds them. */
+  data: readonly Dependency[];
 }
 
-/** A layer of transports. Declared before `Subtasks`, the lines run beneath the
+/** A layer of dependencies. Declared before `Subtasks`, the lines run beneath the
     bars; after them, above. */
-export function Transports({ data }: TransportsProps): null {
-  const config = useMemo<LayerConfig>(() => ({ kind: "transports", data }), [data]);
-  useLayer("Transports", config);
+export function Dependencies({ data }: DependenciesProps): null {
+  const config = useMemo<LayerConfig>(() => ({ kind: "dependencies", data }), [data]);
+  useLayer("Dependencies", config);
   return null;
 }

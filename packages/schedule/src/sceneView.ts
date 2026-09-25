@@ -2,7 +2,7 @@
 
    The domain in working time, the vertical scroll, the plot's size, and the
    layout that follows from them over the data: a box per subtask, a path per
-   transport. Pan and zoom exchange the domain and the scroll and nothing else
+   dependency. Pan and zoom exchange the domain and the scroll and nothing else
    (ADR-0001). The hit and the mapping from a plot point to a time and a lane
    stand here too, because they read exactly this layout. */
 
@@ -20,21 +20,21 @@ import {
   laneAt,
   partAt,
   subtaskBox,
-  transportPath,
+  dependencyPath,
   type SubtaskBox,
-  type TransportPath,
+  type DependencyPath,
   type Viewport,
 } from "./geometry";
 import { effectiveCollapsed, layOutRows, rowAt, slotOf, type Rows } from "./rows";
-import type { IntentKind, Subtask, Transport, TransportAttachment, TransportEnds, TransportRoute } from "./model";
+import type { IntentKind, Subtask, Dependency, DependencyAttachment, DependencyEnds, DependencyRoute } from "./model";
 import type { SceneData } from "./sceneData";
 import type { SnapRaster } from "./snap";
 import { days, fineStep, fineTicks, panDomain, zoomDomain, type ZoomLimits } from "./timeAxis";
 
 /** What a pointer is on. */
 export type ScheduleHit =
-  | { readonly kind: "subtask"; readonly subtask: Subtask; readonly part: "setup" | "main" | "teardown" }
-  | { readonly kind: "transport"; readonly transport: Transport }
+  | { readonly kind: "subtask"; readonly subtask: Subtask; readonly part: "leadIn" | "main" | "leadOut" }
+  | { readonly kind: "dependency"; readonly dependency: Dependency }
   | { readonly kind: "lane"; readonly lane: string }
   | { readonly kind: "nothing" };
 
@@ -46,10 +46,10 @@ export interface SceneOptions {
   readonly intents: readonly IntentKind[];
   /** The present, as a wall-clock instant, or null for no now line. */
   readonly now: number | null;
-  /** How the transports are drawn, where one does not say otherwise. */
-  readonly route: TransportRoute;
-  readonly attach: TransportAttachment;
-  readonly ends: TransportEnds;
+  /** How the dependencies are drawn, where one does not say otherwise. */
+  readonly route: DependencyRoute;
+  readonly attach: DependencyAttachment;
+  readonly ends: DependencyEnds;
 }
 
 /** The height of a lane where a caller names none. It stands here because the
@@ -84,7 +84,7 @@ export class SceneView {
   openForGesture: ReadonlySet<string> = new Set();
   boxes: SubtaskBox[] = [];
   boxById = new Map<string, SubtaskBox>();
-  paths: TransportPath[] = [];
+  paths: DependencyPath[] = [];
 
   constructor(private readonly data: SceneData) {}
 
@@ -154,11 +154,11 @@ export class SceneView {
       this.boxById.set(subtask.id, box);
     }
     this.paths = [];
-    for (const transport of this.data.transports) {
-      const from = this.boxById.get(transport.from);
-      const to = this.boxById.get(transport.to);
+    for (const dependency of this.data.dependencies) {
+      const from = this.boxById.get(dependency.from);
+      const to = this.boxById.get(dependency.to);
       if (from === undefined || to === undefined) continue;
-      this.paths.push(transportPath(view, transport, from, to, this.options));
+      this.paths.push(dependencyPath(view, dependency, from, to, this.options));
     }
   }
 
@@ -192,7 +192,7 @@ export class SceneView {
       const part = partAt(box, x, y);
       if (part !== null) return { kind: "subtask", subtask: box.subtask, part };
     }
-    let nearest: TransportPath | null = null;
+    let nearest: DependencyPath | null = null;
     let distance = 4;
     for (const path of this.paths) {
       const d = distanceTo(path, x, y);
@@ -201,7 +201,7 @@ export class SceneView {
         nearest = path;
       }
     }
-    if (nearest !== null) return { kind: "transport", transport: nearest.transport };
+    if (nearest !== null) return { kind: "dependency", dependency: nearest.dependency };
     const lane = laneAt(this.viewport(), y);
     return lane !== null ? { kind: "lane", lane } : { kind: "nothing" };
   }

@@ -1,7 +1,7 @@
 /* @umriss-ui/schedule - subtasks on lanes over time (ADR-0022, ADR-0023). */
 
 export { Schedule, type ScheduleProps } from "./Schedule";
-export { Lane, Subtasks, Transports, type LaneProps, type SubtasksProps, type TransportsProps } from "./parts";
+export { Lane, Subtasks, Dependencies, type LaneProps, type SubtasksProps, type DependenciesProps } from "./parts";
 export type { ScheduleHit, ScheduleInteraction } from "./scene";
 
 /* The pure modules: the arithmetic a caller runs over its own data - the
@@ -12,15 +12,15 @@ export type {
   IntentKind,
   LaneIntent,
   MoveIntent,
-  SetupIntent,
+  LeadInIntent,
   StretchIntent,
   Subtask,
   Task,
-  TeardownIntent,
-  Transport,
+  LeadOutIntent,
+  Dependency,
 } from "./model";
-export { findings, lateTransports, overlaps } from "./findings";
-export type { Findings, LateTransport, Overlap } from "./findings";
+export { findings, violatedDependencies, overlaps } from "./findings";
+export type { Findings, ViolatedDependency, Overlap } from "./findings";
 export { ripple } from "./ripple";
 export { snapTime } from "./snap";
 export type { ZoomLimits } from "./timeAxis";
@@ -35,7 +35,7 @@ export { subtaskFromPlace } from "./model";
 export type { PlaceIntent } from "./model";
 export { shiftTask } from "./shiftTask";
 export type { SnapRaster } from "./snap";
-export type { TransportAttachment, TransportEnds, TransportRoute } from "./model";
+export type { DependencyAttachment, DependencyEnds, DependencyRoute } from "./model";
 export { resolveAppearance } from "./appearance";
 export type { ResolvedAppearance, SubtaskAppearance } from "./appearance";
 

@@ -14,7 +14,7 @@
    (ADR-0033). */
 
 import { rowAt, type Rows } from "./rows";
-import type { Subtask, Transport } from "./model";
+import type { Subtask, Dependency } from "./model";
 
 export type WalkMove = "next" | "previous" | "up" | "down" | "first" | "last" | "pageNext" | "pagePrevious";
 
@@ -91,31 +91,31 @@ export function stepSubtask(
   }
 }
 
-/** What the keyboard stands on: a subtask, or a transport reached from one. */
-export type Active = { readonly kind: "subtask"; readonly id: string } | { readonly kind: "transport"; readonly id: string };
+/** What the keyboard stands on: a subtask, or a dependency reached from one. */
+export type Active = { readonly kind: "subtask"; readonly id: string } | { readonly kind: "dependency"; readonly id: string };
 
-/** Along a transport (`]` or `t` out, `[` or Shift+T back): from a subtask
-    out along the transport that leaves it, or back along the one that arrives
-    at it; from a transport on to the subtask it reaches, or back to the one
+/** Along a dependency (`]` or `t` out, `[` or Shift+T back): from a subtask
+    out along the dependency that leaves it, or back along the one that arrives
+    at it; from a dependency on to the subtask it reaches, or back to the one
     it left. A task's route is walked stop by stop this way, the line between
     two stops included. Where there is none to follow, it stays.
 
-    Of several transports leaving one subtask, the first the caller listed is
+    Of several dependencies leaving one subtask, the first the caller listed is
     taken. ponytail: a split to two successors is walked one way only; a key to
     cycle between them is the upgrade if a plant ever splits a part. */
-export function alongTransport(
-  transports: readonly Transport[],
+export function alongDependency(
+  dependencies: readonly Dependency[],
   subtasks: ReadonlyMap<string, Subtask>,
   at: Active,
   direction: "out" | "back",
 ): Active {
-  if (at.kind === "transport") {
-    const transport = transports.find((t) => t.id === at.id);
-    const end = transport === undefined ? undefined : direction === "out" ? transport.to : transport.from;
+  if (at.kind === "dependency") {
+    const dependency = dependencies.find((t) => t.id === at.id);
+    const end = dependency === undefined ? undefined : direction === "out" ? dependency.to : dependency.from;
     return end !== undefined && subtasks.has(end) ? { kind: "subtask", id: end } : at;
   }
-  const transport = transports.find(
+  const dependency = dependencies.find(
     (t) => (direction === "out" ? t.from : t.to) === at.id && subtasks.has(direction === "out" ? t.to : t.from),
   );
-  return transport === undefined ? at : { kind: "transport", id: transport.id };
+  return dependency === undefined ? at : { kind: "dependency", id: dependency.id };
 }

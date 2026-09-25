@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card, Stack, Text } from "@umriss-ui/core";
-import { Lane, Schedule, Subtasks, Transports, applyIntent, subtaskFromPlace } from "../../../src";
-import type { Intent, PlacingItem, Subtask, Task, Transport } from "../../../src";
+import { Lane, Schedule, Subtasks, Dependencies, applyIntent, subtaskFromPlace } from "../../../src";
+import type { Intent, PlacingItem, Subtask, Task, Dependency } from "../../../src";
 
 export const title = "Dragging unplanned work onto the plan";
 
@@ -39,22 +39,22 @@ const ORDERS: readonly Task[] = [
 ];
 
 const STEPS: readonly Subtask[] = [
-  { id: "a-2041-1", task: "a-2041", lane: "saw", from: at(6), to: at(7), setup: min(15), teardown: min(10) },
-  { id: "a-2043-1", task: "a-2043", lane: "press", from: at(6, 30), to: at(8), setup: min(30), teardown: min(15) },
-  { id: "a-2044-2", task: "a-2044", lane: "press", from: at(9, 30), to: at(10, 45), setup: min(25) },
+  { id: "a-2041-1", task: "a-2041", lane: "saw", from: at(6), to: at(7), leadIn: min(15), leadOut: min(10) },
+  { id: "a-2043-1", task: "a-2043", lane: "press", from: at(6, 30), to: at(8), leadIn: min(30), leadOut: min(15) },
+  { id: "a-2044-2", task: "a-2044", lane: "press", from: at(9, 30), to: at(10, 45), leadIn: min(25) },
   { id: "a-2041-3", task: "a-2041", lane: "qa", from: at(11, 30), to: at(12, 15) },
 ];
 
-const MOVES: readonly Transport[] = [
-  { id: "t-2041-3", from: "a-2041-1", to: "a-2041-3", duration: min(20) },
+const MOVES: readonly Dependency[] = [
+  { id: "t-2041-3", from: "a-2041-1", to: "a-2041-3", lag: min(20) },
 ];
 
 const HOUR = 3_600_000;
 
 const WAITING: readonly (PlacingItem & { label: string })[] = [
-  { item: "a-2047", label: "A-2047 Cap · 2 h", task: "a-2041", duration: 2 * HOUR, setup: 15 * 60_000 },
+  { item: "a-2047", label: "A-2047 Cap · 2 h", task: "a-2041", duration: 2 * HOUR, leadIn: 15 * 60_000 },
   { item: "a-2048", label: "A-2048 Ring · 1 h", task: "a-2042", duration: HOUR },
-  { item: "a-2049", label: "A-2049 Plate · 4 h", task: "a-2043", duration: 4 * HOUR, teardown: 20 * 60_000 },
+  { item: "a-2049", label: "A-2049 Plate · 4 h", task: "a-2043", duration: 4 * HOUR, leadOut: 20 * 60_000 },
 ];
 
 export default function DragIn() {
@@ -113,7 +113,7 @@ export default function DragIn() {
         {STATIONS.map((station) => (
           <Lane key={station.id} id={station.id} label={station.label} />
         ))}
-        <Transports data={MOVES} />
+        <Dependencies data={MOVES} />
         <Subtasks data={plan.steps} tasks={ORDERS} />
       </Schedule>
       <Text size="sm" mono tone="secondary" data-last-place>

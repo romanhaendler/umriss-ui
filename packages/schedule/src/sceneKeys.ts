@@ -1,6 +1,6 @@
 /* The keyboard (schedule-a11y, ADR-0030): the plot is one tab stop, and the
    keys move the **Active subtask** over the rows (`walk.ts`), follow a
-   transport, select and propose edits.
+   dependency, select and propose edits.
 
    The active subtask IS the hover: the keys set the hover the pointer would
    have set, so it is drawn, tooltipped and selected by the same code - one
@@ -12,7 +12,7 @@ import type { Intent } from "./model";
 import type { SceneData, ScheduleTooltipTarget } from "./sceneData";
 import type { SceneGestures, SceneHandlers } from "./sceneGestures";
 import type { ScheduleHit, SceneView } from "./sceneView";
-import { alongTransport, stepSubtask, walkRows, type Active, type WalkMove } from "./walk";
+import { alongDependency, stepSubtask, walkRows, type Active, type WalkMove } from "./walk";
 
 /** The readout waits for the keys to rest this long - the charts' pause: a
     held key speaks where it stops, not at every step on the way. */
@@ -46,7 +46,7 @@ export interface KeyHost {
 /** What the live region reads: the target and the lane it stands on. */
 export interface Spoken {
   readonly target: ScheduleTooltipTarget;
-  /** The lane's id, for its header's label; null for a transport. */
+  /** The lane's id, for its header's label; null for a dependency. */
   readonly lane: string | null;
   /** Counts the readouts: the same words twice - a key at the end of a lane -
       are written anew, so that the live region speaks them again. */
@@ -63,7 +63,7 @@ export class SceneKeys {
   private active(): Active | null {
     const hover = this.host.gestures.hover;
     if (hover.kind === "subtask") return { kind: "subtask", id: hover.subtask.id };
-    if (hover.kind === "transport") return { kind: "transport", id: hover.transport.id };
+    if (hover.kind === "dependency") return { kind: "dependency", id: hover.dependency.id };
     return null;
   }
 
@@ -94,7 +94,7 @@ export class SceneKeys {
       if (at === null) return false;
       const data = this.host.data;
       const out = letter ? !event.shiftKey : event.key === "]";
-      this.show(alongTransport(data.transports, data.subtaskById, at, out ? "out" : "back"));
+      this.show(alongDependency(data.dependencies, data.subtaskById, at, out ? "out" : "back"));
       return true;
     }
     if (event.ctrlKey) return false;
@@ -114,8 +114,8 @@ export class SceneKeys {
   private walk(move: WalkMove): void {
     const { data, view } = this.host;
     const at = this.active();
-    /* From a transport the walk goes on from the stop it left. */
-    const from = at === null ? null : at.kind === "subtask" ? at.id : (data.transports.find((t) => t.id === at.id)?.from ?? null);
+    /* From a dependency the walk goes on from the stop it left. */
+    const from = at === null ? null : at.kind === "subtask" ? at.id : (data.dependencies.find((t) => t.id === at.id)?.from ?? null);
     let rows = walkRows(view.rows, data.subtasks);
     /* Coming in, the lanes scrolled into view are where to start: entering
        on a row scrolled away would scroll the plan back under the reader. */
@@ -134,7 +134,7 @@ export class SceneKeys {
   private select(): boolean {
     const hover = this.host.gestures.hover;
     if (hover.kind === "subtask") this.host.select(hover.subtask.task, hover.subtask.id);
-    else if (hover.kind === "transport") this.host.select(this.host.data.taskOfTransport(hover.transport), null);
+    else if (hover.kind === "dependency") this.host.select(this.host.data.taskOfDependency(hover.dependency), null);
     else return false;
     return true;
   }
@@ -195,12 +195,12 @@ export class SceneKeys {
       const subtask = data.subtaskById.get(at.id);
       return subtask === undefined ? null : { kind: "subtask", subtask, part: "main" };
     }
-    const transport = data.transports.find((t) => t.id === at.id);
-    return transport === undefined ? null : { kind: "transport", transport };
+    const dependency = data.dependencies.find((t) => t.id === at.id);
+    return dependency === undefined ? null : { kind: "dependency", dependency };
   }
 
   /** Where a target lies on the plot: a subtask's bar, or the span between
-      the two bars a transport joins. */
+      the two bars a dependency joins. */
   private bounds(at: Active): { x0: number; x1: number; y0: number; y1: number } | null {
     const view = this.host.view;
     const box = (id: string) => view.boxById.get(id);
@@ -208,9 +208,9 @@ export class SceneKeys {
       const b = box(at.id);
       return b === undefined ? null : { x0: b.outerFrom, x1: b.outerTo, y0: b.y, y1: b.y + b.height };
     }
-    const transport = this.host.data.transports.find((t) => t.id === at.id);
-    const from = transport === undefined ? undefined : box(transport.from);
-    const to = transport === undefined ? undefined : box(transport.to);
+    const dependency = this.host.data.dependencies.find((t) => t.id === at.id);
+    const from = dependency === undefined ? undefined : box(dependency.from);
+    const to = dependency === undefined ? undefined : box(dependency.to);
     if (from === undefined || to === undefined) return null;
     return {
       x0: Math.min(from.mainTo, to.mainFrom),

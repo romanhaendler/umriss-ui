@@ -7,17 +7,17 @@
    interaction state and from nothing else. */
 
 import { resolveColours, removedIntervals } from "@umriss-ui/charts";
-import type { LateTransport, Overlap } from "./findings";
+import type { ViolatedDependency, Overlap } from "./findings";
 import {
   CAP,
   CAP_INSET,
   inView,
   slotAt,
   subtaskBox,
-  transportPath,
+  dependencyPath,
   xOf,
   type SubtaskBox,
-  type TransportPath,
+  type DependencyPath,
   type Viewport,
 } from "./geometry";
 import { resolveAppearance, type ResolvedAppearance } from "./appearance";
@@ -147,7 +147,7 @@ export function prepareCanvas(canvas: HTMLCanvasElement | null, width: number, h
 export interface GhostDrawing {
   readonly ghost: Subtask;
   readonly overlaps: readonly Overlap[];
-  readonly late: readonly LateTransport[];
+  readonly violated: readonly ViolatedDependency[];
   /** The lanes this work may not go to, for the whole run of the gesture. */
   readonly refusedLanes: ReadonlySet<string>;
   /** The pointer, while it stands on a refused lane and the ghost therefore
@@ -175,14 +175,14 @@ export function drawData(ctx: CanvasRenderingContext2D, input: DrawInput): void 
   drawNow(ctx, input);
   for (const layer of data.layers) {
     const own = new Set<unknown>(layer.data);
-    if (layer.kind === "transports") {
-      for (const path of view.paths) if (own.has(path.transport)) drawTransport(ctx, input, path, false);
+    if (layer.kind === "dependencies") {
+      for (const path of view.paths) if (own.has(path.dependency)) drawDependency(ctx, input, path, false);
     } else {
       for (const box of view.boxes) if (own.has(box.subtask)) drawSubtask(ctx, input, box, 1);
     }
   }
   for (const overlap of data.overlaps) drawOverlap(ctx, input, viewport, overlap);
-  drawLateInFolds(ctx, input, viewport);
+  drawViolatedInFolds(ctx, input, viewport);
   drawSelection(ctx, input);
 }
 
@@ -193,29 +193,29 @@ export function drawOverlay(ctx: CanvasRenderingContext2D, input: DrawInput): vo
     if (hover.kind === "subtask") {
       const box = view.boxById.get(hover.subtask.id);
       if (box !== undefined) drawHover(ctx, input, box);
-    } else if (hover.kind === "transport") {
-      const path = view.paths.find((p) => p.transport === hover.transport);
-      if (path !== undefined) drawTransport(ctx, input, path, true);
+    } else if (hover.kind === "dependency") {
+      const path = view.paths.find((p) => p.dependency === hover.dependency);
+      if (path !== undefined) drawDependency(ctx, input, path, true);
     }
     return;
   }
-  const { ghost, overlaps, late } = input.ghost;
+  const { ghost, overlaps, violated } = input.ghost;
   /* Under everything the drag draws: the lanes this work may not go to are a
      property of the plot while the gesture runs, not of the ghost. */
   drawRefusedLanes(ctx, input, viewport, input.ghost.refusedLanes);
   const box = ghostBox(viewport, ghost);
   if (box === null) return;
   for (const overlap of overlaps) drawOverlap(ctx, input, viewport, overlap);
-  const lateIds = new Set(late.map((l) => l.transport));
-  for (const transport of input.data.transports) {
-    if (transport.from !== ghost.id && transport.to !== ghost.id) continue;
-    const other = view.boxById.get(transport.from === ghost.id ? transport.to : transport.from);
+  const violatedIds = new Set(violated.map((l) => l.dependency));
+  for (const dependency of input.data.dependencies) {
+    if (dependency.from !== ghost.id && dependency.to !== ghost.id) continue;
+    const other = view.boxById.get(dependency.from === ghost.id ? dependency.to : dependency.from);
     if (other === undefined) continue;
     const path =
-      transport.from === ghost.id
-        ? transportPath(viewport, transport, box, other, view.options)
-        : transportPath(viewport, transport, other, box, view.options);
-    drawTransport(ctx, input, path, true, lateIds.has(transport.id));
+      dependency.from === ghost.id
+        ? dependencyPath(viewport, dependency, box, other, view.options)
+        : dependencyPath(viewport, dependency, other, box, view.options);
+    drawDependency(ctx, input, path, true, violatedIds.has(dependency.id));
   }
   drawSubtask(ctx, input, box, 0.55);
   ctx.strokeStyle = input.colours.text;
@@ -350,7 +350,7 @@ function drawNow(ctx: CanvasRenderingContext2D, input: DrawInput): void {
 }
 
 /** A bar on a strip of a **Miniature**: the main time in the task's colour,
-    the setup and the teardown faint, and nothing else.
+    the lead-in and the lead-out faint, and nothing else.
 
     Nothing else on purpose. A folded group is a change of SCALE and not a
     second kind of picture, and at three or four pixels an appearance, a label
@@ -377,13 +377,13 @@ function drawStrip(ctx: CanvasRenderingContext2D, input: DrawInput, box: Subtask
     what colour text and marks lying ON it have to take.
 
     `fill` is null for a hollow bar: provisional work paints nothing at all over
-    the surface. That is precisely what tells it from a setup, which is a FAINT
+    the surface. That is precisely what tells it from a lead-in, which is a FAINT
     fill of the task colour - faint is not empty, and the two must never be
     read for one another.
 
     Muted work is the task colour mixed half into the surface, OPAQUE. Opaque,
-    because transparency is the setup's channel; and it carries no outline,
-    because an outline is the setup's edge. Another shift's work and one
+    because transparency is the lead-in's channel; and it carries no outline,
+    because an outline is the lead-in's edge. Another shift's work and one
     shift's preparation can then not be confused in either direction - the
     distinction Roman objected to once, settled in the material. */
 export function barFace(
@@ -405,7 +405,7 @@ export function barFace(
 }
 
 /** Two resolved colours mixed, opaquely - not an alpha over the surface, which
-    would be transparency, which is the setup's channel. */
+    would be transparency, which is the lead-in's channel. */
 function mix(a: string, b: string, t: number): string {
   const x = channels(a);
   const y = channels(b);
@@ -424,7 +424,7 @@ const RAIL_INSET = 2;
    Everything a bar has to say besides its colour owns exactly one property of
    the drawing, and no property says two things:
 
-     setup, teardown   a faint fill    28 per cent of the task colour, edged
+     lead-in, lead-out   a faint fill    28 per cent of the task colour, edged
      provisional       the fill        none - the surface shows through
      fixed             the ends        a cap at each end of the main time
      muted             the saturation  the task colour, half mixed into surface
@@ -466,7 +466,7 @@ function drawSubtask(ctx: CanvasRenderingContext2D, input: DrawInput, box: Subta
      the surface. */
   const on = face.onDark ? colours.onAccent : colours.text;
 
-  /* 1. Fill. Setup and teardown first: the task's colour, faint, with its
+  /* 1. Fill. Lead-in and lead-out first: the task's colour, faint, with its
         edge - preparation reads as belonging to the work, and as not being
         it. Then the face of the main time, or nothing where it is hollow. */
   ctx.lineWidth = 1;
@@ -489,7 +489,7 @@ function drawSubtask(ctx: CanvasRenderingContext2D, input: DrawInput, box: Subta
   }
 
   /* 2. Rail. Progress measures the WORK, so it lies within the main time and
-        stops at its end - a rail running on under the teardown would measure
+        stops at its end - a rail running on under the lead-out would measure
         the clearing away as well. It sits in from the bottom edge, so that it
         is a mark ON the bar and not the bar's own lower edge. */
   const share = box.subtask.progress;
@@ -641,16 +641,16 @@ function withAlpha(colour: string, alpha: number): string {
   return `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha})`;
 }
 
-function drawTransport(ctx: CanvasRenderingContext2D, input: DrawInput, path: TransportPath, emphasised: boolean, late?: boolean): void {
+function drawDependency(ctx: CanvasRenderingContext2D, input: DrawInput, path: DependencyPath, emphasised: boolean, violated?: boolean): void {
   const { data, colours } = input;
-  const task = data.taskOfTransport(path.transport);
-  const isLate = late ?? data.lateById.has(path.transport.id);
+  const task = data.taskOfDependency(path.dependency);
+  const isViolated = violated ?? data.violatedById.has(path.dependency.id);
   const selected = task !== null && task === input.selectedTask;
-  const colour = isLate ? colours.alarm : (task !== null ? colours.tasks.get(task) : undefined) ?? colours.muted;
+  const colour = isViolated ? colours.alarm : (task !== null ? colours.tasks.get(task) : undefined) ?? colours.muted;
   ctx.strokeStyle = colour;
   ctx.fillStyle = colour;
   ctx.lineWidth = emphasised || selected ? 2 : 1.25;
-  ctx.setLineDash(isLate ? [4, 3] : []);
+  ctx.setLineDash(isViolated ? [4, 3] : []);
   ctx.beginPath();
   ctx.moveTo(path.x1, path.y1);
   if (path.kind === "curve") {
@@ -668,13 +668,13 @@ function drawTransport(ctx: CanvasRenderingContext2D, input: DrawInput, path: Tr
       [path.x2, path.y2],
     ] as const) {
       ctx.beginPath();
-      ctx.arc(x, y, isLate ? 3 : 2.5, 0, Math.PI * 2);
+      ctx.arc(x, y, isViolated ? 3 : 2.5, 0, Math.PI * 2);
       ctx.fill();
     }
   }
 }
 
-/** A late transport whose arrival lies inside a folded group, marked on that
+/** A violated dependency whose arrival lies inside a folded group, marked on that
     group's row.
 
     A line between two strips is a few pixels of a few pixels, and the thing a
@@ -682,12 +682,12 @@ function drawTransport(ctx: CanvasRenderingContext2D, input: DrawInput, path: Tr
     Folding is a planner tidying the view and must never be a planner hiding a
     finding (ADR-0025), so the row says it the way a lane's own overlap says
     it: the danger tone, at the top, over the time that is short. */
-function drawLateInFolds(ctx: CanvasRenderingContext2D, input: DrawInput, viewport: Viewport): void {
+function drawViolatedInFolds(ctx: CanvasRenderingContext2D, input: DrawInput, viewport: Viewport): void {
   const { data } = input;
-  if (data.lateById.size === 0) return;
-  for (const late of data.lateById.values()) {
-    const transport = data.transports.find((t) => t.id === late.transport);
-    const to = transport === undefined ? undefined : data.subtaskById.get(transport.to);
+  if (data.violatedById.size === 0) return;
+  for (const violated of data.violatedById.values()) {
+    const dependency = data.dependencies.find((t) => t.id === violated.dependency);
+    const to = dependency === undefined ? undefined : data.subtaskById.get(dependency.to);
     if (to === undefined) continue;
     const slot = slotAt(viewport, to.lane);
     if (slot === null || !slot.miniature) continue;
@@ -695,15 +695,15 @@ function drawLateInFolds(ctx: CanvasRenderingContext2D, input: DrawInput, viewpo
     if (row === null) continue;
     /* The time that is missing: from when it had to have arrived to when it
        can. */
-    const x0 = xOf(viewport, late.arrival);
-    const x1 = Math.max(x0 + 2, xOf(viewport, late.arrival + late.shortBy));
+    const x0 = xOf(viewport, violated.arrival);
+    const x1 = Math.max(x0 + 2, xOf(viewport, violated.arrival + violated.shortBy));
     findingBand(ctx, input, x0, x1, row.top - viewport.scrollY + 1, 3);
   }
 }
 
 /** The band a finding lays over the time it concerns. Under forced colours it
     is in the text colour like the work beneath it, so it is dashed - the
-    mark says "finding" by its pattern, as a late transport's line does. */
+    mark says "finding" by its pattern, as a violated dependency's line does. */
 function findingBand(ctx: CanvasRenderingContext2D, input: DrawInput, x0: number, x1: number, y: number, height: number): void {
   if (!input.colours.forced) {
     ctx.fillStyle = input.colours.alarm;
