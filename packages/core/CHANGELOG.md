@@ -107,6 +107,18 @@ commit.
 
 ### Changed
 
+- **Two new keys in `Wording`: a table over a server** (for
+  `@umriss-ui/table`'s manual mode), in English and German:
+  `selectAllOnPage` ("Select all on this page") and `exportPageLabel`
+  ("Export page"). A partial wording passed to the provider is merged as
+  before; an application that implements the whole `Wording` type itself no
+  longer compiles until it adds these two.
+- **`pageOfPages` takes the numbers formatted as well**: a third, optional
+  argument `{ page, total }` carries them in the provider's formats, and the
+  English and German wording write those - "Page 1 of 100,000", "Seite 1 von
+  100.000", since a table over a server has that many pages. Below a thousand
+  pages nothing changes, and a wording of one's own that reads two arguments
+  still compiles.
 - **Four new keys in `Wording`: what the lists announce**, in English and
   German: `optionCount(count)`, `optionActive(label, { selected, disabled,
   group })`, `optionAdded(label)` and `optionRemoved(label)`. A partial
