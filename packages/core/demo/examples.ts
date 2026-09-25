@@ -13,6 +13,9 @@ export const DEMO = buildDemo({
   addresses: ADDRESSES,
   examples: import.meta.glob<{ default?: unknown; title?: unknown }>("./examples/*/*.tsx", { eager: true }),
   sources: import.meta.glob<string>("./examples/*/*.tsx", { eager: true, query: "?raw", import: "default" }),
+  /* What an example may name in `shows`: the control room's plant, the one
+     file here an example draws from and shows beside itself. */
+  beside: import.meta.glob<string>("./plant.ts", { eager: true, query: "?raw", import: "default" }),
   why: import.meta.glob<{ default?: unknown }>("./why/*.tsx", { eager: true }),
   props,
 });

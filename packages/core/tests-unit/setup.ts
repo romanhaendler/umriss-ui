@@ -79,6 +79,11 @@ if (typeof Element.prototype.setPointerCapture !== "function") {
   };
 }
 
+/* jsdom knows no canvas 2D context, and the control room's charts and
+   schedule draw on one. Their scenes cope with null; the stub only keeps
+   jsdom's "not implemented" out of the output, as in charts' own setup. */
+HTMLCanvasElement.prototype.getContext = (() => null) as HTMLCanvasElement["getContext"];
+
 if (typeof Element.prototype.scrollIntoView !== "function") {
   Element.prototype.scrollIntoView = () => undefined;
 }
