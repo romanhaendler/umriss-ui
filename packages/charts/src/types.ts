@@ -56,7 +56,16 @@ export interface ScatterSeriesConfig<T = unknown> extends SeriesBase<T> {
   radius: number;
 }
 
-export interface AreaSeriesConfig<T = unknown> extends SeriesBase<T> {
+/** What the two filled kinds share: a place in a stack (charts-stacking). */
+export interface Stackable {
+  /** The stack this series stands in: series with the same id, on the same x
+      and y axis, stack in registration order (K1). */
+  stack?: string;
+  /** On any member, the whole stack sums to 100 at every x (K5). */
+  normalize?: boolean;
+}
+
+export interface AreaSeriesConfig<T = unknown> extends SeriesBase<T>, Stackable {
   kind: "area";
   /** Lower edge; without a value the fixed baseline 0. */
   baseline?: Accessor<T>;
@@ -67,7 +76,7 @@ export interface AreaSeriesConfig<T = unknown> extends SeriesBase<T> {
   dash?: readonly number[];
 }
 
-export interface BarSeriesConfig<T = unknown> extends SeriesBase<T> {
+export interface BarSeriesConfig<T = unknown> extends SeriesBase<T>, Stackable {
   kind: "bar";
   /** Width as a fraction of the step; the group shares this fraction. */
   barWidth: number;
@@ -271,6 +280,8 @@ export interface TooltipPoint<T = unknown> {
   /** The point's x value on its own x axis - with several x axes it can
       differ from the hit's. */
   xValue: number;
+  /** The point's y value; in a stack its own value, not its top - in a
+      normalised stack its share in percent. */
   yValue: number;
   datum: T;
   index: number;

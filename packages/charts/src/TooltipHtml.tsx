@@ -3,7 +3,7 @@
    imperatively in the scene through transform, so that a mouse movement without a
    change of hit triggers no React render. */
 
-import { useCallback, useEffect, useSyncExternalStore, type ReactNode } from "react";
+import { Fragment, useCallback, useEffect, useSyncExternalStore, type ReactNode } from "react";
 import type { ChartScene } from "./scene";
 
 /* What stands in the value column - a state's name, a cell's value, every
@@ -51,16 +51,27 @@ export function TooltipHtml({ scene }: { scene: ChartScene }): ReactNode {
                   {hover.hit.points.map((point, k) => {
                     const row = snapshot.rows[k];
                     return (
-                      <div className="uc-tooltip-row" key={`${point.seriesName}-${point.index}`}>
-                        <span className="uc-tooltip-chip" style={{ background: point.color }} />
-                        <span className="uc-tooltip-name">
-                          {point.seriesName}
-                          {row !== undefined && row.x !== "" ? (
-                            <span className="uc-tooltip-x">{row.x}</span>
-                          ) : null}
-                        </span>
-                        <span className="uc-tooltip-value">{row?.value}</span>
-                      </div>
+                      <Fragment key={`${point.seriesName}-${point.index}`}>
+                        <div className="uc-tooltip-row">
+                          <span className="uc-tooltip-chip" style={{ background: point.color }} />
+                          <span className="uc-tooltip-name">
+                            {point.seriesName}
+                            {row !== undefined && row.x !== "" ? (
+                              <span className="uc-tooltip-x">{row.x}</span>
+                            ) : null}
+                          </span>
+                          <span className="uc-tooltip-value">{row?.value}</span>
+                        </div>
+                        {/* A stack's total follows its last member (charts-stacking K4). */}
+                        {snapshot.totals
+                          .filter((t) => t.after === k)
+                          .map((t) => (
+                            <div className="uc-tooltip-row" key="total">
+                              <span className="uc-tooltip-name uc-tooltip-total">{t.name}</span>
+                              <span className="uc-tooltip-value">{t.value}</span>
+                            </div>
+                          ))}
+                      </Fragment>
                     );
                   })}
                 </div>

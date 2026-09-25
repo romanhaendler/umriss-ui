@@ -107,6 +107,19 @@ describe("barGroups - who shares one step", () => {
     expect(groups.has(3)).toBe(false);
   });
 
+  it("gives the members of one stack one place, where the first stands", () => {
+    const groups = barGroups([
+      candidate(1, "bar", "x"),
+      { ...candidate(2, "bar", "x"), stack: "s" },
+      candidate(3, "bar", "x"),
+      { ...candidate(4, "bar", "x"), stack: "s" },
+    ]);
+    expect(groups.get(1)).toMatchObject({ index: 0, size: 3 });
+    expect(groups.get(2)).toMatchObject({ index: 1, size: 3 });
+    expect(groups.get(3)).toMatchObject({ index: 2, size: 3 });
+    expect(groups.get(4)).toMatchObject({ index: 1, size: 3 });
+  });
+
   it("assigns the indices in registration order", () => {
     const groups = barGroups([
       candidate(7, "bar", "x"),

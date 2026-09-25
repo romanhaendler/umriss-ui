@@ -212,6 +212,13 @@ accessor for an area. A baseline is part of the series' extent, so an axis that
 carries a filled mark always shows the baseline.
 _Avoid_: zero line, Nulllinie (which is the grid line at y = 0), floor
 
+**Stack**:
+Bars or areas sharing a `stack` id on the same axes: each stands on the sum of
+the ones registered before it, which becomes its baseline. A gap stacks as zero,
+negative values stack downward apart from the positive. A **normalised** stack
+sums to 100 at every x, each value then its share.
+_Avoid_: pile, cumulative series
+
 **Step**:
 The smallest distance between two consecutive x values of a series, in domain
 units. Bar widths are a fraction of it.
