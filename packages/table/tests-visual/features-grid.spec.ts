@@ -77,17 +77,28 @@ test("typing starts an edit, Enter commits, and the cell shows what the applicat
 
 test("a setpoint outside its range keeps the editor open with the message; Tab commits and moves on", async ({ page }) => {
   await tabIn(page, "setpoint-list");
+  const table = example(page, "setpoint-list").locator("table");
+  const before = await table.boundingBox();
   await page.keyboard.press("ArrowRight");
   await page.keyboard.press("ArrowRight");
+  const cell = await focused(page).boundingBox();
   await page.keyboard.type("120");
   await page.keyboard.press("Enter");
   const field = example(page, "setpoint-list").getByLabel("Edit Setpoint: TIC-101");
   await expect(field).toBeFocused();
   await expect(field).toHaveAttribute("aria-invalid", "true");
-  await expect(example(page, "setpoint-list")).toContainText("Between 60 and 95 °C");
+  /* The message hangs beneath the cell in a popover, and nothing in the table
+     shifts - the editor lies over the cell at its size (table-grid-mode 05). */
+  const message = page.getByText("Between 60 and 95 °C", { exact: true }).and(page.locator("[aria-hidden='true']"));
+  await expect(message).toBeVisible();
+  expect((await message.boundingBox())!.y).toBeGreaterThanOrEqual(cell!.y + cell!.height);
+  expect(await table.boundingBox()).toEqual(before);
+  const editor = await field.boundingBox();
+  expect(editor!.y).toBeGreaterThanOrEqual(cell!.y);
+  expect(editor!.y + editor!.height).toBeLessThanOrEqual(cell!.y + cell!.height);
   await page.keyboard.press("ControlOrMeta+A");
   await page.keyboard.type("85");
-  await expect(example(page, "setpoint-list")).not.toContainText("Between 60 and 95 °C");
+  await expect(message).toHaveCount(0);
   await page.keyboard.press("Tab");
   await expect(example(page, "setpoint-list").getByLabel("Edit Mode: TIC-101")).toBeFocused();
   await page.keyboard.press("Escape");
@@ -121,4 +132,35 @@ test("in a virtual window the keys walk to rows never rendered, and the grid scr
   await expect(focused(page)).toBeInViewport();
   await page.keyboard.press("Control+Home");
   expect(await lineOf(page)).toBe("head");
+});
+
+test("the keys keep the Active cell clear of the sticky head and the pinned block", async ({ page }) => {
+  /* The scroll area's scroll-padding is the head's height and the blocks'
+     widths: the browser's own scroll into view stops short of them
+     (table-grid-mode 05). Narrow, so that it scrolls both ways. */
+  await page.setViewportSize({ width: 420, height: 900 });
+  await openExample(page, "table", "the-whole-grid");
+  const scroller = example(page, "the-whole-grid").locator("table").locator("xpath=..");
+  await example(page, "the-whole-grid").locator("td[tabindex='0']").focus();
+  const clear = async () => {
+    const [cell, head, block] = await Promise.all([
+      focused(page).boundingBox(),
+      example(page, "the-whole-grid").locator("thead").boundingBox(),
+      example(page, "the-whole-grid").locator("thead th").nth(1).boundingBox(),
+    ]);
+    expect(cell!.y).toBeGreaterThanOrEqual(head!.y + head!.height - 1);
+    expect(cell!.x).toBeGreaterThanOrEqual(block!.x + block!.width - 1);
+  };
+  for (let i = 0; i < 12; i++) await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("End");
+  expect(await scroller.evaluate((el) => el.scrollTop)).toBeGreaterThan(0);
+  expect(await scroller.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
+  /* Back to the first column after the block: Home, then right past the
+     selection and the pinned point. */
+  await page.keyboard.press("Home");
+  await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("ArrowRight");
+  await clear();
+  for (let i = 0; i < 8; i++) await page.keyboard.press("ArrowUp");
+  await clear();
 });

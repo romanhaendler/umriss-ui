@@ -26,12 +26,12 @@ const capture = (t: Table<Pump>) => {
   current = t;
 };
 
-function Pumps({ grid = true, grouped = false, rows = PUMPS, detail = false }: { grid?: boolean; grouped?: boolean; rows?: Pump[]; detail?: boolean }) {
+function Pumps({ grid = true, grouped = false, rows = PUMPS, detail = false, selectable = true }: { grid?: boolean; grouped?: boolean; rows?: Pump[]; detail?: boolean; selectable?: boolean }) {
   const t = useTable(rows, { rowKey: (p) => p.id, defaultGrouping: grouped ? "area" : undefined });
   capture(t);
   const { Table: Frame, Column, RowDetail } = t;
   return (
-    <Frame grid={grid} selectable ariaLabel="Pumps">
+    <Frame grid={grid} selectable={selectable} ariaLabel="Pumps">
       <Column value="name" label="Pump" rowHeader />
       <Column value="area" label="Area" />
       <Column value="flow" label="Flow" aggregate="sum" />
@@ -130,6 +130,31 @@ describe("Grid mode", () => {
     press("Escape");
     expect(document.activeElement).toBe(cell);
     expect(box.getAttribute("tabindex")).toBe("-1");
+  });
+
+  /* table-grid-mode 05: as in AG Grid and MUI - the key a checkbox answers
+     to, from anywhere in its row. */
+  it("selects the Active cell's row with Space, and deselects it with the next", () => {
+    render(<Pumps />);
+    act(() => tabStops(table())[0]!.focus());
+    press("ArrowRight");
+    press("ArrowRight");
+    press(" ");
+    const box = screen.getByRole("checkbox", { name: "Select Pump 1" }) as HTMLInputElement;
+    expect(box.checked).toBe(true);
+    expect(at()).toEqual(["North", "row:p1"]);
+    press(" ");
+    expect(box.checked).toBe(false);
+  });
+
+  it("does nothing with Space where there is no selection, or no row", () => {
+    render(<Pumps selectable={false} />);
+    act(() => tabStops(table())[0]!.focus());
+    const before = at();
+    const event = new KeyboardEvent("keydown", { key: " ", bubbles: true, cancelable: true });
+    active().dispatchEvent(event);
+    expect(at()).toEqual(before);
+    expect(event.defaultPrevented).toBe(false);
   });
 
   it("reaches the controls in a detail with F2", () => {

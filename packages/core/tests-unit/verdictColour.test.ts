@@ -90,6 +90,8 @@ const REGISTER: Readonly<Record<string, string>> = {
     "The tone's glyph - a tick, a cross, an exclamation mark - stands beside the message, and the role follows the tone.",
   "table/alarms/AlarmList.module.css":
     "The lifecycle edge stands beside the lifecycle written out, the freshness colour on its word; a hidden alarm gets no colour at all.",
+  "table/Table.module.css":
+    "A cell editor's message beneath it is the word itself, as the form field's is; the field carries aria-invalid and is described by it.",
   "table/VerdictColumn.module.css":
     "The verdict glyph has a shape per verdict, and the excess beside the value is a figure; colour tints both.",
   "schedule/Schedule.module.css": "A finding is a sentence in the label and the tooltip; the colour tints the sentence.",

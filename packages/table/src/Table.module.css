@@ -206,12 +206,12 @@
 
   .pinStartEdge::before {
     left: 100%;
-    background: linear-gradient(to right, color-mix(in srgb, var(--u-color-text) 9%, transparent), transparent);
+    background: linear-gradient(to right, var(--u-shadow-sticky), transparent);
   }
 
   .pinEndEdge::before {
     right: 100%;
-    background: linear-gradient(to left, color-mix(in srgb, var(--u-color-text) 9%, transparent), transparent);
+    background: linear-gradient(to left, var(--u-shadow-sticky), transparent);
   }
 
   .scroll[data-under-start] .pinStartEdge::before,
@@ -778,7 +778,7 @@
 
   .groupHeader > .td {
     background: none;
-    border-top: 1px solid var(--u-hairline-strong);
+    border-top: 1px solid transparent;
     border-bottom: none;
     font-weight: var(--u-weight-medium);
   }
@@ -807,7 +807,7 @@
     right: 0;
     top: 100%;
     height: 6px;
-    background: linear-gradient(color-mix(in srgb, var(--u-color-text) 9%, transparent), transparent);
+    background: linear-gradient(var(--u-shadow-sticky), transparent);
     pointer-events: none;
   }
 
@@ -845,23 +845,20 @@
     z-index: 2;
   }
 
-  /* With pinned cells Chromium left the collapsed top border of a group header
-     out over the pinned selection and actions cells - the strong line above
-     the header broke off at both ends (measured, table-column-pinning 01).
-     Drawn inside every cell it holds; the border stays for the height,
-     transparent. */
+  /* The strong line above a group header is drawn inside every cell, not as
+     the collapsed top border: with pinned cells Chromium left that border out
+     over the pinned selection and actions cells - the line broke off at both
+     ends (measured, table-column-pinning 01) - and one drawing for every table
+     keeps them alike (table-column-pinning 03). The border stays for the
+     height, transparent, and forced colours draw it (the shadow they drop). */
   /* Not while focused: the focus ring of a virtual line is an inset shadow as
      well, and this rule would take it off every cell between the ends - nor
      off a cell that is the Active one of a grid. */
-  .pinnedTable tbody tr.groupHeader > .td {
-    border-top-color: transparent;
-  }
-
-  .pinnedTable tbody tr.groupHeader:not(:focus-visible) > .td:not(:focus-visible) {
+  .table tbody tr.groupHeader:not(:focus-visible) > .td:not(:focus-visible) {
     box-shadow: inset 0 1px 0 var(--u-hairline-strong);
   }
 
-  .pinnedTable tbody tr.groupHeader:first-child > .td:not(:focus-visible) {
+  .table tbody tr.groupHeader:first-child > .td:not(:focus-visible) {
     box-shadow: none;
   }
 
@@ -1230,6 +1227,59 @@
   .fillerRow td {
     padding: 0;
     border: 0;
+  }
+
+  /* The editor lies over its cell at the cell's size, and the value stays
+     beneath it, unseen, to hold that size: nothing in the table shifts while
+     a cell is edited (table-grid-mode 05). A pinned cell sticks, which places
+     the editor as well. */
+  .editing:not(.pinned) {
+    position: relative;
+  }
+
+  .editingValue {
+    visibility: hidden;
+  }
+
+  .editor {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    padding: 0 var(--u-space-1);
+  }
+
+  /* The field fills the editor's width; its label is out of sight, so no gap
+     stands above the field. */
+  .editor .editorField {
+    flex: 1 1 auto;
+    gap: 0;
+  }
+
+  /* The field's message stays its description, out of sight: the popover
+     beneath the editor shows it. */
+  .editorField > p {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* The message of a draft that does not validate, beneath the editor - a
+     surface of its own, as the field's message reads beneath a FormField. */
+  .editorMessage {
+    padding: var(--u-space-1) var(--u-space-2);
+    border-radius: var(--u-radius-sm);
+    background: var(--u-color-surface);
+    outline: 1px solid transparent;
+    box-shadow: var(--u-shadow-overlay);
+    font-size: var(--u-text-xs);
+    font-weight: var(--u-weight-medium);
+    line-height: var(--u-leading-tight);
+    color: var(--u-color-danger-text);
   }
 
   /* ---- Forced colours (forced-colors 03) ------------------------------- */

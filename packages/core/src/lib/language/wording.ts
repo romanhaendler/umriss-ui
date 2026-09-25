@@ -403,6 +403,9 @@ export interface Wording {
       The shelf names its end and who shelved it - a shelf is tracked, not
       anonymous; the time comes from the formats. */
   availabilityShelved: (until: string, by: string) => string;
+  /** A shelf as one word - the alarm list's badge; the sentence above stands
+      in its tooltip and in what is spoken. */
+  availabilityShelvedShort: string;
   availabilitySuppressedByDesign: string;
   availabilityOutOfService: string;
   /** "Hidden from operation: 3" - the count of the view, and its name where the
@@ -775,6 +778,7 @@ export const DEFAULT_WORDING: Wording = {
   columnAcknowledgement: "Acknowledgement",
   columnAge: "Age",
   availabilityShelved: (until, by) => `Shelved until ${until} by ${by}`,
+  availabilityShelvedShort: "Shelved",
   availabilitySuppressedByDesign: "Suppressed by design",
   availabilityOutOfService: "Out of service",
   hiddenFromOperation: (count) => `Hidden from operation: ${count}`,

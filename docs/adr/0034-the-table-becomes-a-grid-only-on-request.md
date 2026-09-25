@@ -56,8 +56,9 @@ application that refuses an edit - a setpoint outside what the plant allows -
 would have to undo what the table already did. So an edit ends in
 `onCellEdit({ rowKey, columnId, value, row })`, and the cell shows the new
 value when the rows passed in carry it. A `validate` per column keeps a draft
-that does not pass open, with its message beneath the field as a `FormField`
-shows it; the check the application makes after the report is its own.
+that does not pass open, with its message in a popover beneath the cell - the
+editor lies over the cell at its size, and nothing in the table shifts; the
+check the application makes after the report is its own.
 
 ## Consequences
 

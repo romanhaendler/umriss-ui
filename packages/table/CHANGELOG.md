@@ -142,6 +142,29 @@ column menu's pin keys, `editCell`, `selectAllOnPage` and `exportPageLabel`
 - **A done alarm's row (`keepDone`) is muted as it always claimed to be.**
   Its colour stood on the row, and the table's cells set their own; it now
   stands on the cells.
+- **Final polish of pinning, grid mode and the alarm list** (table-column-pinning
+  03, table-grid-mode 05, alarm-standards 05):
+  - The shadow of a pinned block and of a stuck group header comes from core's
+    `--u-shadow-sticky`: dark as a shadow in the dark theme, no longer a glow.
+  - A group header draws its top line inside its cells in every table, as a
+    table with pinned columns already did - one drawing, one look.
+  - In grid mode the open editor lies over its cell at the cell's size, and
+    the message of a draft that does not validate hangs beneath it in a
+    popover (core `Popover`); nothing in the table shifts while editing.
+  - The scroll area carries a `scroll-padding` of the sticky head's height and
+    the pinned blocks' widths, so a cell the keys walk to is scrolled clear of
+    them; a pinned cell's own scroll target is shifted out of that padding, so
+    focusing it does not scroll the table back.
+  - Space in a grid with selection selects or deselects the Active cell's row,
+    from any of its cells (as AG Grid and MUI do); without selection it does
+    nothing - it no longer starts a text edit either.
+  - In a grid with an editable column every cell that does not edit carries
+    `aria-readonly="true"`.
+  - `AlarmList` shows the availability as a small neutral badge before the
+    lifecycle state; until when and by whom stand in its tooltip and are
+    spoken with it. The state keeps to one line. A shelf that ends on another
+    day than the as-of time shows its date beside the time. The "Hidden from
+    operation" switch's label is in the live figure's size.
 - **`Alarm` is a type, no longer an interface** - the union with the shelf
   needs it. `Partial<Alarm>` spread into an `Alarm` no longer compiles; name
   the fields you mean (`Pick<Alarm, "cleared" | "acknowledgedAt">`).
