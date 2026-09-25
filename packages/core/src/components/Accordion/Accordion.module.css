@@ -89,4 +89,13 @@
     line-height: var(--u-leading-normal);
     color: var(--u-color-text-secondary);
   }
+
+  /* The line between two sections is a box-shadow, which forced colours drop
+     (forced-colors 02): it becomes a border there, a pixel of height the
+     contrast mode alone pays. */
+  @media (forced-colors: active) {
+    .item + .item {
+      border-top: 1px solid CanvasText;
+    }
+  }
 }

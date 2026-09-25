@@ -1,38 +1,40 @@
 /* The table under forced colours - the Windows contrast mode, emulated
-   (forced-colors 03). The browser repaints every colour with a system colour
-   and drops every box-shadow: the frame's edge, the focused virtual row's
-   ring, a group band's tone, a selected row's accent ground. What survives is
-   what the stylesheet gives it. Light and dark through the projects. */
+   (forced-colors 03). The suite stands with the shell
+   (`@umriss-ui/demo/checks/forcedColors.ts`); here stand the states no first
+   example shows: pinned blocks scrolled, bands, a whole group selected, selected rows -
+   the last two ticked here, since no example rests selected - and a focused
+   virtual row, whose ring its cells draw as inset shadows that forced colours
+   drop. */
 
 import { test, expect, type Locator } from "@playwright/test";
-import AxeBuilder from "@axe-core/playwright";
-import { FORCED_BY_THE_SYSTEM, STANDARDS, findings } from "@umriss-ui/demo/checks/accessibility";
-import { firstExamples } from "@umriss-ui/demo/checks/pages";
-import { EXAMPLE_ADDRESSES, SAMPLE, type ExampleAddress } from "./pages";
+import { checkForcedColours } from "@umriss-ui/demo/checks/forcedColors";
+import { EXAMPLE_ADDRESSES, SAMPLE } from "./pages";
 import { open, openExample } from "./navigation";
 
-test.beforeEach(async ({ page }) => {
-  await page.clock.setFixedTime(new Date("2026-03-17T10:30:00"));
-  await page.emulateMedia({ forcedColors: "active" });
-});
+checkForcedColours({ open, openExample, examples: EXAMPLE_ADDRESSES, sample: SAMPLE });
 
-/* Every page's first example, and the states no first example shows: pinned
-   blocks, bands, a whole group selected, selected rows - the last two ticked
-   here, since no example rests selected. */
 const tick = (rows: number[]) => async (target: Locator) => {
   // The native input lies invisibly under its drawn box: clicked as a keyboard would.
   for (const row of rows) await target.locator("tbody tr").nth(row).getByRole("checkbox").evaluate((box: HTMLElement) => box.click());
 };
 
-const STATES: Array<ExampleAddress & { act?: (target: Locator) => Promise<void> }> = [
-  { pageId: "column", exampleId: "pinned-both-sides", name: "column--pinned-both-sides" },
-  { pageId: "grouping", exampleId: "in-bands", name: "grouping--in-bands" },
-  { pageId: "grouping", exampleId: "a-whole-group-selected", name: "grouping--a-whole-group-selected", act: tick([0]) },
-  { pageId: "table", exampleId: "selection", name: "table--selection", act: tick([1, 2]) },
+/* Scrolled into the middle, so that content lies under both pinned blocks and
+   both inner edges show. */
+const scrolled = async (target: Locator) => {
+  const area = target.locator("table").locator("..");
+  await area.evaluate((el) => (el.scrollLeft = 240));
+  await expect(area).toHaveAttribute("data-under-start", "");
+};
+
+const STATES: Array<{ pageId: string; exampleId: string; act?: (target: Locator) => Promise<void> }> = [
+  { pageId: "column", exampleId: "pinned-both-sides", act: scrolled },
+  { pageId: "grouping", exampleId: "in-bands" },
+  { pageId: "grouping", exampleId: "a-whole-group-selected", act: tick([0]) },
+  { pageId: "table", exampleId: "selection", act: tick([1, 2]) },
 ];
 
-for (const { pageId, exampleId, name, act } of [...firstExamples(EXAMPLE_ADDRESSES), ...STATES] as typeof STATES) {
-  test(`Under forced colours: ${name}`, async ({ page }, testInfo) => {
+for (const { pageId, exampleId, act } of STATES) {
+  test(`Under forced colours: ${pageId}--${exampleId}`, async ({ page }, testInfo) => {
     await openExample(page, pageId, exampleId);
     const target = page.locator(`[data-example="${exampleId}"]`);
     await target.scrollIntoViewIfNeeded();
@@ -40,12 +42,10 @@ for (const { pageId, exampleId, name, act } of [...firstExamples(EXAMPLE_ADDRESS
     /* Out of the way: the pointer resting on the last ticked row would
        photograph its hover. */
     await page.mouse.move(0, 0);
-    await expect(target).toHaveScreenshot(`forced-${name}-${testInfo.project.name}.png`);
+    await expect(target).toHaveScreenshot(`forced-${pageId}--${exampleId}-${testInfo.project.name}.png`);
   });
 }
 
-/* A virtual row draws its ring on its cells as inset shadows, which forced
-   colours drop - the row keeps an outline of its own there. */
 test("A focused virtual row under forced colours", async ({ page }, testInfo) => {
   await openExample(page, "table", "virtualisation");
   const target = page.locator('[data-example="virtualisation"]');
@@ -55,15 +55,3 @@ test("A focused virtual row under forced colours", async ({ page }, testInfo) =>
   await expect(target.locator("tbody tr:focus-visible")).toHaveCount(1);
   await expect(target).toHaveScreenshot(`forced-focus-virtual-row-${testInfo.project.name}.png`);
 });
-
-for (const pageId of SAMPLE) {
-  test(`Page ${pageId} is accessible under forced colours`, async ({ page }, testInfo) => {
-    await open(page, pageId);
-    const result = await new AxeBuilder({ page })
-      .include(`[data-block="${pageId}"]`)
-      .withTags(STANDARDS)
-      .disableRules(FORCED_BY_THE_SYSTEM)
-      .analyze();
-    expect(findings(result), `${pageId} (${testInfo.project.name})`).toEqual([]);
-  });
-}

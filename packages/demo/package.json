@@ -22,7 +22,8 @@
     "./checks/accessibility": "./checks/accessibility.ts",
     "./checks/ownBase": "./checks/ownBase.ts",
     "./checks/ownData": "./checks/ownData.ts",
-    "./checks/overlays": "./checks/overlays.ts"
+    "./checks/overlays": "./checks/overlays.ts",
+    "./checks/forcedColors": "./checks/forcedColors.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

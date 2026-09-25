@@ -170,4 +170,32 @@
     font-variant-numeric: tabular-nums;
     color: var(--u-color-text);
   }
+
+  /* The fill is a gradient in the track, and forced colours drop a gradient
+     with every other colour (forced-colors 02): only the thumb's place would
+     say the value. The track keeps its gradient, drawn in system colours -
+     the selection colour up to the value - and so takes its colours out of
+     the forcing; the moz track draws its fill as a ground of its own. */
+  @media (forced-colors: active) {
+    .range::-webkit-slider-runnable-track {
+      forced-color-adjust: none;
+      background: linear-gradient(to right, Highlight var(--_fill), Canvas var(--_fill));
+      outline-color: CanvasText;
+    }
+
+    /* The thumb lies inside the track and inherits the track's adjust: it
+       names its system colours itself. The focused thumb's ring as well. */
+    .range::-webkit-slider-thumb {
+      background: Canvas;
+      outline-color: CanvasText;
+    }
+
+    .range:focus-visible::-webkit-slider-thumb {
+      outline-color: Highlight;
+    }
+
+    .range::-moz-range-progress {
+      background: Highlight;
+    }
+  }
 }

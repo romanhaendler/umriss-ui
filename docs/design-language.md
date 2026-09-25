@@ -60,10 +60,14 @@ box-shadows here. So every edge and every card's or overlay's depth carries
 holds it), and a state that was a ground alone takes a system colour inside
 `@media (forced-colors: active)`: a chosen or active item an outline in
 `Highlight` (inside it, two pixels; a band one), a fill that is the value -
-progress, a meter, a switch that is on, a tab's underline - `Highlight`, a
-mark - a checkbox's dash, a radio's dot, a divider - `CanvasText`. A system
-colour an author names survives forced colours; nothing else does. A verdict
-keeps its word and its glyph, and nothing takes `forced-color-adjust: none`.
+progress, a meter, a slider's track, a switch that is on, a tab's underline -
+`Highlight`, a mark that was ink - a checkbox's dash, a radio's dot, a divider,
+a group's share bar, a pinned block's edge - `CanvasText`. A system colour an
+author names survives forced colours; nothing else does, and a gradient not at
+all - the slider's track takes `forced-color-adjust: none` to keep its
+gradient, in system colours. A verdict keeps its word and its glyph. A tone
+told by colour alone - the meter's - is not kept: FC3 keeps a colour only
+where a word stands beside it, and no such chip needed it yet.
 The canvases paint themselves in the system colours (the charts' theme, the
 schedule's `FORCED`). The finer settling is the polish round's
 (forced-colors 04).

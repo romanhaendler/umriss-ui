@@ -1,22 +1,18 @@
 /* The library under forced colours - the Windows contrast mode, emulated
-   (forced-colors). The browser repaints every colour with a system colour and
-   drops every box-shadow: the ring, the edges, a state that was only a
-   surface. What survives is what the stylesheets give it - a transparent
-   outline beside every ring (01), a border or outline beside every state that
-   was only a surface (02). Light and dark through the projects, as
-   everywhere; Chromium's emulated contrast themes differ between the two. */
+   (forced-colors 01, 02). The browser repaints every colour with a system
+   colour and drops every box-shadow: the ring, the edges, a state that was
+   only a surface. What survives is what the stylesheets give it - a
+   transparent outline beside every ring and every edge, a system colour or an
+   outline for every state that was only a surface. The suite every demo runs
+   stands with the shell (`@umriss-ui/demo/checks/forcedColors.ts`); here
+   stand the ring and the states that live in an open panel. */
 
 import { test, expect, type Page } from "@playwright/test";
-import AxeBuilder from "@axe-core/playwright";
-import { FORCED_BY_THE_SYSTEM, STANDARDS, findings } from "@umriss-ui/demo/checks/accessibility";
-import { firstExamples } from "@umriss-ui/demo/checks/pages";
+import { checkForcedColours } from "@umriss-ui/demo/checks/forcedColors";
 import { EXAMPLE_ADDRESSES, SAMPLE } from "./pages";
 import { open, openExample, standstill } from "./navigation";
 
-test.beforeEach(async ({ page }) => {
-  await page.clock.setFixedTime(new Date("2026-03-17T10:30:00"));
-  await page.emulateMedia({ forcedColors: "active" });
-});
+checkForcedColours({ open, openExample, examples: EXAMPLE_ADDRESSES, sample: SAMPLE });
 
 /** The outline the element paints, as forced colours leave it. */
 function outlineOf(page: Page, selector: string) {
@@ -28,8 +24,8 @@ function outlineOf(page: Page, selector: string) {
 
 /* 01: the ring survives. Three ways a ring is drawn - the shared `ring` a
    button composes, a field's own, and the box beside a hidden input - and
-   under forced colours each leaves its two-pixel outline in the system's
-   text colour. */
+   under forced colours each leaves its two-pixel outline, which Chromium
+   paints in the selection colour on a focused element. */
 for (const [pageId, exampleId, control, painted] of [
   ["button", "variants", "button", ":focus-visible"],
   ["input", "states", "input", ":focus-visible"],
@@ -51,17 +47,9 @@ test("A focused button under forced colours", async ({ page }, testInfo) => {
   await expect(target).toHaveScreenshot(`forced-focus-button-${testInfo.project.name}.png`);
 });
 
-/* 02: every page's first example, the component at rest. */
-for (const { pageId, exampleId, name } of firstExamples(EXAMPLE_ADDRESSES)) {
-  test(`Under forced colours: ${name}`, async ({ page }, testInfo) => {
-    await openExample(page, pageId, exampleId);
-    const target = page.locator(`[data-example="${exampleId}"]`);
-    await target.scrollIntoViewIfNeeded();
-    await expect(target).toHaveScreenshot(`forced-${name}-${testInfo.project.name}.png`);
-  });
-}
-
-/* 02: the states that live in an open panel - no example rests in them. */
+/* 02: the states that live in an open panel - no example rests in them. The
+   whole viewport, because the panel lies in the top layer and not in the
+   example; after it has come to rest, since it enters by scale. */
 test("A combobox's cursor under forced colours", async ({ page }, testInfo) => {
   await openExample(page, "combobox", "typing-filters");
   await page.locator('[data-example="typing-filters"] .exampleStage input').first().focus();
@@ -82,15 +70,3 @@ test("A chosen range under forced colours", async ({ page }, testInfo) => {
   await standstill(page);
   await expect(page).toHaveScreenshot(`forced-range-${testInfo.project.name}.png`);
 });
-
-for (const pageId of SAMPLE) {
-  test(`Page ${pageId} is accessible under forced colours`, async ({ page }, testInfo) => {
-    await open(page, pageId);
-    const result = await new AxeBuilder({ page })
-      .include(`[data-block="${pageId}"]`)
-      .withTags(STANDARDS)
-      .disableRules(FORCED_BY_THE_SYSTEM)
-      .analyze();
-    expect(findings(result), `${pageId} (${testInfo.project.name})`).toEqual([]);
-  });
-}
