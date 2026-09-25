@@ -1,32 +1,24 @@
-/* The same week, only without the hours in which nobody was there: Monday to
-   Friday, 6 to 22 o'clock.
-
-   On a wall clock axis the chart would consist, for a good forty per cent, of
-   flat lines over an empty hall. Every removed span carries a break mark - a
-   chart that takes a weekend out and does not say so claims a continuity it does
-   not have. The scale stays affine; the mapping happens in materialisation
-   (ADR-0001). */
-
 import { Chart, Line, Tooltip, XAxis, YAxis } from "../../../src";
-import { WEEK_CALENDAR, weekData, type WeekPoint } from "@umriss-ui/demo/worlds/plant";
+import { SORTED, SORTING_HOURS, type SortedPoint } from "@umriss-ui/demo/worlds/logistics";
 
-export const title = "Working time axis";
+export const title = "Leave out the hours nobody works";
+export const lead = "Pass the working hours as `calendar` and the axis drops nights and the weekend, marking every seam where time was taken out.";
 
 const weekdayAndTime = (v: number) =>
   new Date(v).toLocaleString("en-GB", { weekday: "short", hour: "2-digit", minute: "2-digit" });
 
 export default function WorkingTime() {
   return (
-    <Chart data={weekData} height={280} ariaLabel="Output across the working time of one week">
+    <Chart data={SORTED} height={280} ariaLabel="Parcels sorted per hour across last week's sorting hours">
       <XAxis
-        accessor={(d: WeekPoint) => d.t}
-        calendar={WEEK_CALENDAR}
+        accessor={(d: SortedPoint) => d.t}
+        calendar={SORTING_HOURS}
         tickFormat={weekdayAndTime}
         tickCount={8}
-        label="Working time"
+        label="Sorting hours"
       />
-      <YAxis accessor={(d: WeekPoint) => d.output} label="Pieces/h" />
-      <Line accessor={(d: WeekPoint) => d.output} name="Output" />
+      <YAxis accessor={(d: SortedPoint) => d.parcels} label="Parcels/h" />
+      <Line accessor={(d: SortedPoint) => d.parcels} name="Sorted" />
       <Tooltip mode="x" />
     </Chart>
   );

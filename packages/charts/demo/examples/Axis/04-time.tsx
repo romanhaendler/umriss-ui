@@ -1,19 +1,17 @@
-/* A day of hall temperature on a time axis: `time` says the values are
-   instants, and the axis stands its ticks on the local clock and labels them by
-   level - the hours, and the date where the day changes. No `tickFormat`; one
-   would take over, in any language. */
-
 import { Chart, Line, Tooltip, XAxis, YAxis } from "../../../src";
-import { hallData, type HallPoint } from "@umriss-ui/demo/worlds/plant";
+import { metrics, type MetricPoint } from "@umriss-ui/demo/worlds/operations";
 
-export const title = "Time axis";
+export const title = "Plot instants on a time axis";
+export const lead = "With `time` the values are instants: ticks stand on the local clock, labelled by hour, with the date where a day begins.";
+
+const CHECKOUT = metrics("checkout");
 
 export default function TimeAxis() {
   return (
-    <Chart data={hallData} height={260} ariaLabel="Hall temperature across a day and a night">
-      <XAxis accessor={(d: HallPoint) => d.t} time />
-      <YAxis accessor={(d: HallPoint) => d.temperature} label="°C" />
-      <Line accessor={(d: HallPoint) => d.temperature} name="Hall" />
+    <Chart data={CHECKOUT} height={260} ariaLabel="Checkout's error rate today">
+      <XAxis accessor={(d: MetricPoint) => d.t} time />
+      <YAxis accessor={(d: MetricPoint) => d.errorRate} label="Errors %" />
+      <Line accessor={(d: MetricPoint) => d.errorRate} name="Error rate" />
       <Tooltip mode="x" />
     </Chart>
   );

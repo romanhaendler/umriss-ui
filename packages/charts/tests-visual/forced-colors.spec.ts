@@ -79,7 +79,7 @@ for (const [pageId, exampleId] of [
   ["chart", "told-apart-without-colour"],
   ["chart", "marks-on-every-kind"],
   ["chart", "bands-limits-and-cells"],
-  ["stateband", "shift"],
+  ["stateband", "one-vehicle"],
 ] as const) {
   test(`Under forced colours: ${exampleId}`, async ({ page }, testInfo) => {
     await openExample(page, pageId, exampleId);

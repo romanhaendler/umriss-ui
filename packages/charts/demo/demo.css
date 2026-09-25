@@ -36,6 +36,9 @@
 .pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--u-space-4); }
 .pair-caption { margin: 0 0 var(--u-space-2); font-family: var(--u-font-sans); font-size: var(--u-text-xs); color: var(--u-color-text-secondary); }
 
+/* A list beside a chart - the control chart's violations as text. */
+.side-note { flex: 1 1 200px; margin: 0; padding-left: 1.2em; font-family: var(--u-font-sans); font-size: var(--u-text-sm); color: var(--u-color-text); }
+
 /* The custom tooltips of the "configuration" and "own-content" examples
    (render prop). */
 .custom-tooltip { display: flex; flex-direction: column; gap: 2px; font-size: var(--u-text-xs); }

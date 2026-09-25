@@ -1,35 +1,25 @@
-/* The chart's values as a table, for a reader who wants them all at once
-   rather than walked. `<DataTable />` puts a key at the end of the legend;
-   "Show data" lays a plain table over the plot - the time in the first column,
-   then one column per visible series, every value in the format the tooltip
-   writes it in - and "Hide data" gives the picture back.
-
-   The table lists what the chart shows: hide a series in the legend, or zoom
-   the axis, and the table follows. */
-
 import { useState } from "react";
 import { Chart, DataTable, Legend, Line, Tooltip, XAxis, YAxis } from "../../../src";
-import { furnaceData, type FurnacePoint } from "@umriss-ui/demo/worlds/plant";
+import { BURNDOWN, type BurndownPoint } from "@umriss-ui/demo/worlds/planning";
 
-export const title = "The values as a table";
+export const title = "Show the values as a table";
+export const lead = "`DataTable` adds a key to the legend that lays a table of what the chart shows over the plot, and takes it back.";
 
-const timeOfDay = (v: number) =>
-  new Date(v).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
-
-const celsius = (v: number) => `${v.toFixed(1)} °C`;
+const day = (v: number) => new Date(v).toLocaleDateString("en-GB", { weekday: "short", day: "numeric" });
+const hours = (v: number) => `${v.toFixed(0)} h`;
 
 export default function ValuesAsTable() {
   const [hidden, setHidden] = useState<readonly string[]>([]);
-  const toggle = (name: string) =>
-    setHidden((h) => (h.includes(name) ? h.filter((n) => n !== name) : [...h, name]));
+  const toggle = (name: string) => setHidden((h) => (h.includes(name) ? h.filter((n) => n !== name) : [...h, name]));
   return (
-    <Chart data={furnaceData} height={260} ariaLabel="Two furnaces over the early shift">
-      <XAxis accessor={(d: FurnacePoint) => d.t} tickFormat={timeOfDay} label="Time" />
-      <YAxis accessor={(d: FurnacePoint) => d.f1} label="°C" />
-      <Line accessor={(d: FurnacePoint) => d.f1} name="Furnace 1" format={celsius} hidden={hidden.includes("Furnace 1")} />
-      <Line accessor={(d: FurnacePoint) => d.f2} name="Furnace 2" format={celsius} hidden={hidden.includes("Furnace 2")} />
+    <Chart data={BURNDOWN} height={260} ariaLabel="Sprint 14: hours left against the ideal">
+      <XAxis accessor={(d: BurndownPoint) => d.t} ticks={BURNDOWN.map((d) => d.t)} tickFormat={day} />
+      <YAxis accessor={(d: BurndownPoint) => d.ideal} label="Hours left" />
+      <Line accessor={(d: BurndownPoint) => d.ideal} name="Ideal" format={hours} hidden={hidden.includes("Ideal")} />
+      <Line accessor={(d: BurndownPoint) => d.remaining} name="Remaining" format={hours} hidden={hidden.includes("Remaining")} />
       <Legend onToggle={toggle} />
       <Tooltip mode="x" />
+      {/* The table lists what the chart shows: hide a series and it follows. */}
       <DataTable />
     </Chart>
   );
