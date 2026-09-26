@@ -860,6 +860,17 @@ The cell is a table's, where a column meets a line; a chart matrix's **Cell**
 is another thing, and the table's word stands only in this compound.
 _Avoid_: focused cell, selected cell, current cell, cursor
 
+**Row draft**:
+The values a person has typed into the one row being edited when a grid edits
+by rows: every editable cell of that row open at once, nothing reported until
+the person saves the row on purpose, and nothing kept when they discard it.
+There is at most one; a row with a draft is left only by saving or discarding
+it, never by walking away. Saved, it is reported with only the columns it
+changed; saved unchanged, it reports nothing. A new row is always a row draft,
+whichever way the grid edits: it stands above the body's rows, has no row key
+until the application gives it one, and is reported whole.
+_Avoid_: pending changes, dirty row, Zeilenentwurf, row edit
+
 ### The demo
 
 The demos of all three packages are documentation, not decoration,
