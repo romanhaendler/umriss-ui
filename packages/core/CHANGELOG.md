@@ -29,6 +29,19 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.14.0 – Words for a table's rows (Sep. 2026)
+
+### Added
+
+- **Seven wording keys for `@umriss-ui/table`'s row editing** (ADR-0036):
+  `newRow` ("New row" / "Neue Zeile"), `saveRow`, `discardRow`, `deleteRow`,
+  `deleteRowAsk` ("Delete?" / "Löschen?"), `keepRow` and `saveOrDiscardFirst`
+  ("Save or discard this row first" / "Erst diese Zeile speichern oder
+  verwerfen"). An application that implements the whole `Wording` type adds
+  them; a partial wording passed to the provider needs nothing.
+
+---
+
 ## 0.13.1 – A round end point in Safari (Sep. 2026)
 
 ### Fixed
