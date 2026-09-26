@@ -12,7 +12,7 @@ hard outlines or effects.
 
 | Package | Version | What it is |
 |---|---|---|
-| [`@umriss-ui/core`](packages/core/README.md) | 0.12.0 | The component library — forms, overlays, structure, the tree, the dock, the command palette. The package you install first |
+| [`@umriss-ui/core`](packages/core/README.md) | 0.12.1 | The component library — forms, overlays, structure, the tree, the dock, the command palette. The package you install first |
 | [`@umriss-ui/charts`](packages/charts/README.md) | 0.8.0 | Canvas charts — few kinds, drawn well. Depends on nothing but React |
 | [`@umriss-ui/table`](packages/table/README.md) | 0.6.0 | The table, declared the way it reads: columns as JSX, typed against their rows — filtering, grouping and aggregates in a pure model. Takes `@umriss-ui/core` as a peer |
 | [`@umriss-ui/schedule`](packages/schedule/README.md) | 0.3.1 | The schedule: subtasks on lanes over time, with dependencies, blocked time, findings and controlled editing. Takes `@umriss-ui/core` and `@umriss-ui/charts` as peers |
