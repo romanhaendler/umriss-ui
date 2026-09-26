@@ -433,6 +433,7 @@ export const OUTLINE: readonly Rubric[] = [
           { key: "Home / End", action: "The first or last cell of the row." },
           { key: "Ctrl + Home / Ctrl + End", action: "The first cell of the head, the last cell of the footer." },
           { key: "Page Up / Page Down", action: "Moves by the rows in view." },
+          { key: "Click", action: "Opens the editor of a cell that edits; a select shows its list, a day its calendar." },
           { key: "Enter / F2", action: "Starts an edit, or reaches the cell's own controls." },
           { key: "Escape", action: "Cancels an edit, or goes back from a control to its cell." },
           { key: "Space", action: "Selects the row of the active cell." },
@@ -446,9 +447,13 @@ export const OUTLINE: readonly Rubric[] = [
         sentence: "Let people change a value in its cell. The table reports each edit, and the application writes it into its rows.",
         about: [
           "An edit is reported, never applied: the application owns the rows. `validate` keeps the editor open with its message until the draft passes.",
+          "By default each cell is reported as it is left (`onCellEdit`). `editMode=\"row\"` opens a whole row as one draft and reports it only when it is saved (`onRowSave`); a row with a draft is left only by saving or discarding it (ADR-0036).",
+          "`onRowAdd` puts up \"New row\" - in the toolbar, or beneath the table without one - and `onRowDelete` a Delete that asks inside its row. Both work in either mode.",
         ],
         keys: [
-          { key: "Tab (while editing)", action: "Commits the edit and moves to the next cell that edits." },
+          { key: "Tab (while editing)", action: "Commits the edit and moves to the next cell that edits; in a row draft, walks its fields and buttons." },
+          { key: "Enter (row draft)", action: "Saves the row." },
+          { key: "Escape (row draft)", action: "Discards the row's changes." },
         ],
         limits: [
           "No cell range selection and no undo (ADR-0032).",

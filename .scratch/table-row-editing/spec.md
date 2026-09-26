@@ -51,3 +51,7 @@ pinned column; axe over row mode.
 ## Out of scope
 
 A row-wide `validateRow`; undo; several drafts; inline create in sort order.
+
+## Comments
+
+**01-04 done (2026-09-26)** on branch `worktree-table-row-editing`; 05 waits for the user on the rendered pages.

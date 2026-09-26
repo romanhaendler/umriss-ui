@@ -57,6 +57,8 @@ const click = (element: HTMLElement) => {
   fireEvent.click(element);
 };
 const field = (label: string) => screen.getByLabelText(label) as HTMLInputElement;
+/** The delete question in the body - its width stands reserved, unseen, in the head. */
+const asked = () => screen.queryAllByText("Delete?").filter((e) => !e.closest("thead"));
 
 describe("A click on a cell that edits", () => {
   it("opens its editor at once", () => {
@@ -253,7 +255,7 @@ describe("Deleting a row", () => {
     render(<Loops onRowDelete={onRowDelete} />);
     fireEvent.click(screen.getByRole("button", { name: "Delete: TIC-102" }));
     expect(onRowDelete).not.toHaveBeenCalled();
-    expect(screen.getByText("Delete?")).toBeTruthy();
+    expect(asked()).toHaveLength(1);
     expect(document.activeElement).toBe(screen.getByRole("button", { name: "Keep: TIC-102" }));
     fireEvent.click(screen.getByRole("button", { name: "Delete: TIC-102" }));
     expect(onRowDelete).toHaveBeenCalledWith({ rowKey: "l2", row: LOOPS[1] });
@@ -265,7 +267,7 @@ describe("Deleting a row", () => {
     fireEvent.click(screen.getByRole("button", { name: "Delete: TIC-101" }));
     fireEvent.click(screen.getByRole("button", { name: "Keep: TIC-101" }));
     expect(onRowDelete).not.toHaveBeenCalled();
-    expect(screen.queryByText("Delete?")).toBeNull();
+    expect(asked()).toHaveLength(0);
     expect(document.activeElement).toBe(screen.getByRole("button", { name: "Delete: TIC-101" }));
   });
 
@@ -274,6 +276,6 @@ describe("Deleting a row", () => {
     render(<Loops editMode="row" onRowSave={() => undefined} onRowDelete={onRowDelete} />);
     click(cellOf("80"));
     fireEvent.click(screen.getByRole("button", { name: "Delete: TIC-102" }));
-    expect(screen.queryByText("Delete?")).toBeNull();
+    expect(asked()).toHaveLength(0);
   });
 });
