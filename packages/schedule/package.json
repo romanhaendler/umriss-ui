@@ -1,6 +1,6 @@
 {
   "name": "@umriss-ui/schedule",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "The umriss schedule for data-dense applications - work on lanes over time, with dependencies, blocked time, findings and controlled editing.",
   "license": "MIT",
   "author": "Roman Händler",
