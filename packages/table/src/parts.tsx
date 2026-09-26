@@ -33,6 +33,7 @@ import {
   Checkbox,
   Menu,
   MenuItem,
+  Popover,
   VisuallyHidden,
   useDensityFor,
   useFormats,
@@ -42,7 +43,7 @@ import type { Formats, VirtualRows, Wording } from "@umriss-ui/core";
 import { cx } from "./cx";
 import { DEV, warnOnce } from "./dev";
 import { ColumnFilterButton } from "./filter";
-import { TableToolbar } from "./toolbar";
+import { NewRowButton, TableToolbar } from "./toolbar";
 import { filterOf } from "./columnFilter";
 import { TableContext } from "./context";
 import type { TableContextValue } from "./context";
@@ -60,7 +61,7 @@ import { NOT_PINNED, pinnedCell } from "./pinned";
 import type { PinnedCell } from "./pinned";
 import type { PinBlocks } from "./model/pinning";
 import { gridLines, rowLine } from "./model/gridWalk";
-import { CellEditor, GridContext, GridFocus, gridHandlers, useCellEditor, useGridState } from "./grid";
+import { CellEditor, GridContext, GridFocus, NEW_LINE, gridHandlers, useCellEditor, useGridState } from "./grid";
 import styles from "./Table.module.css";
 
 /* The props as they arrive at runtime. The types at the call site (types.ts) are
@@ -306,6 +307,7 @@ export function buildParts(registry: Registry): Parts {
     registry.beginPass();
     registry.setStickyRowHeader(props.stickyRowHeader === true);
     registry.setTableGroupable(props.groupable !== false);
+    registry.setRowAdding(props.grid === true && props.onRowAdd !== undefined);
     if (registry.manual && props.groupable === true) {
       warnOnce("manual-groupable", "`groupable` is passed over in manual mode: the groups would be the page's, not the server's.");
     }
@@ -376,6 +378,15 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
   const baseId = useId();
   const tableRef = useRef<HTMLTableElement>(null);
   const grid = useGridState();
+
+  /* A row gone from the rows takes its draft with it (ADR-0036) - nothing is
+     left to report it against. */
+  const draftLine = grid.state.editing?.line;
+  useLayoutEffect(() => {
+    const hook = registry.hook;
+    if (!hook || draftLine === undefined || draftLine === NEW_LINE) return;
+    if (!hook.rows.some((row) => rowLine(hook.rowKey(row)) === draftLine)) grid.setState((s) => ({ ...s, editing: null }));
+  });
 
   /* Sticky group headers stand below the head and below one another; how high those
      are only the layout knows. Measured after every render - a density or a
@@ -473,7 +484,13 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
 
   const controlColumns = (selectable ? 1 : 0) + (detail ? 1 : 0);
   const leading = controlColumns + (spanEntry ? 1 : 0);
-  const columnCount = leading + dataColumns.length + (actions.length > 0 ? 1 : 0);
+  /* A grid that saves rows, adds or deletes them carries their buttons in the
+     actions column, pinned at the end: a Save far off to the right, scrolled
+     out of view, would be a draft nobody can finish (ADR-0036). */
+  const rowMode = gridMode && props.editMode === "row";
+  const rowTools = gridMode && (rowMode || props.onRowAdd !== undefined || props.onRowDelete !== undefined);
+  const trailing = actions.length > 0 || rowTools;
+  const columnCount = leading + dataColumns.length + (trailing ? 1 : 0);
 
   /* The pinned blocks, in cells of the head row. Whatever stands before a
      pinned column sticks with it - the selection, the expander and the span;
@@ -485,7 +502,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
   const spanPinned = spanEntry !== undefined && pins[spanEntry.spec.id] === "start";
   const blocks: PinBlocks = {
     start: startPinned > 0 || spanPinned ? leading + startPinned : 0,
-    end: endPinned > 0 ? endPinned + (actions.length > 0 ? 1 : 0) : 0,
+    end: endPinned > 0 ? endPinned + (trailing ? 1 : 0) : rowTools ? 1 : 0,
     count: columnCount,
   };
   const pinAt = (first: number, last = first) => pinnedCell(blocks, first, last);
@@ -500,19 +517,23 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
      virtual window leaves unrendered as well - and the head row's columns. */
   const gridLinesNow = gridMode
     ? gridLines({
-        layout: { controls: controlColumns, span: spanEntry !== undefined, aggregates: dataColumns.map((e) => e.spec.aggregate !== undefined), actions: actions.length > 0, blocks },
+        layout: { controls: controlColumns, span: spanEntry !== undefined, aggregates: dataColumns.map((e) => e.spec.aggregate !== undefined), actions: trailing, blocks },
         body: loading ? { rows: [] } : lines ? { lines: virtual ? projection.lines! : lines } : { rows: virtual ? projection.filtered : rows },
         rowKey: hook.rowKey,
         expanded: new Set(detail ? snapshot.expanded : []),
         foot: footerShown,
       })
     : [];
+  /* A new row stands above the body's rows, whatever the sort, the filter or
+     the page - the walk finds it right beneath the head. */
+  const fresh = grid.state.editing?.line === NEW_LINE ? grid.state.editing : null;
+  if (fresh && gridLinesNow[0]) gridLinesNow.splice(1, 0, { key: NEW_LINE, cells: gridLinesNow[0].cells, at: -1, row: fresh.fresh });
   const gridIds = [
     ...(selectable ? ["#select"] : []),
     ...(detail ? ["#detail"] : []),
     ...(spanEntry ? ["#span"] : []),
     ...dataColumns.map((e) => e.spec.id),
-    ...(actions.length > 0 ? ["#actions"] : []),
+    ...(trailing ? ["#actions"] : []),
   ];
   const gridEvents = gridMode
     ? gridHandlers({
@@ -523,9 +544,17 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
         rowKey: hook.rowKey,
         virtual,
         onCellEdit: props.onCellEdit,
+        rowMode,
+        onRowSave: props.onRowSave,
+        onRowAdd: props.onRowAdd,
+        newRow: props.newRow,
+        onRowDelete: props.onRowDelete,
         select: selectable ? (row) => snapshot.selection.toggle(hook.rowKey(row)) : undefined,
       })
     : undefined;
+  /* The toolbar's "New row" reaches the grid through the registry: this
+     render's handler, over this render's lines. */
+  registry.setAddRow(gridEvents?.addRow ?? null);
   const lineKey = (key: string) => (gridMode ? key : undefined);
 
   const renderRow = (row: unknown, index: number, absolute: number, line?: Extract<Line<unknown>, { kind: "row" }>) => (
@@ -542,6 +571,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
       header={header}
       selectable={selectable}
       actions={actions}
+      trailing={trailing}
       blocks={blocks}
       columnCount={columnCount}
       rowProps={rowProps}
@@ -550,6 +580,32 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
       wording={wording}
       grid={gridMode}
     />
+  );
+  const newRowBody = fresh && (
+    <tbody>
+      <Row
+        key={NEW_LINE}
+        row={fresh.fresh}
+        fresh
+        index={-1}
+        absolute={undefined}
+        registry={registry}
+        hook={hook}
+        columns={dataColumns}
+        spanEntry={spanEntry}
+        header={header}
+        selectable={selectable}
+        actions={actions}
+        trailing={trailing}
+        blocks={blocks}
+        columnCount={columnCount}
+        rowProps={undefined}
+        baseId={baseId}
+        formats={formats}
+        wording={wording}
+        grid
+      />
+    </tbody>
   );
 
   let body: ReactNode;
@@ -615,7 +671,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
             controlColumns={controlColumns}
             blocks={blocks}
             selectable={selectable}
-            hasActions={actions.length > 0}
+            hasActions={trailing}
             total={projection.filtered}
             siblings={line.parents.at(-1)?.groups ?? projection.groups ?? []}
             depth={grouping.length}
@@ -639,7 +695,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
           controlColumns={controlColumns}
           blocks={blocks}
           selectable={selectable}
-          hasActions={actions.length > 0}
+          hasActions={trailing}
           total={projection.filtered}
           siblings={line.parents.at(-1)?.groups ?? projection.groups ?? []}
           depth={grouping.length}
@@ -671,118 +727,129 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
   }
 
   return (
-    <div
-      ref={virtual?.scrollRef}
-      onScroll={(event) => {
-        virtual?.onScroll();
-        if (lines && stickyHeader) markStuck(event.currentTarget);
-        if (blocks.start || blocks.end) markUnder(event.currentTarget);
-      }}
-      className={styles.scroll}
-      style={maxHeight ? { maxHeight } : undefined}
-    >
-      <table
-        ref={tableRef}
-        role={lines ? "treegrid" : gridMode ? "grid" : undefined}
-        aria-readonly={gridMode && !dataColumns.some((e) => e.spec.edit !== undefined) ? true : undefined}
-        onKeyDown={gridEvents?.onKeyDown}
-        onFocus={gridEvents?.onFocus}
-        onBlur={gridEvents?.onBlur}
-        data-depth={lines ? grouping.length : undefined}
-        style={lines ? ({ "--u-header-levels": grouping.length - 1 } as CSSProperties) : undefined}
-        aria-label={ariaLabel}
-        /* With virtualisation not every row stands in the document; plus one
-           for the header row and one for the footer row, which count per ARIA. */
-        aria-rowcount={virtual ? (projection.lines ?? projection.filtered).length + 1 + (footerShown ? 1 : 0) : undefined}
-        aria-busy={loading || undefined}
-        className={cx(
-          styles.table,
-          resolvedDensity === "compact" && styles.compact,
-          stickyHeader && styles.sticky,
-          striped && styles.striped,
-          gridMode && styles.grid,
-        )}
+    <>
+      <div
+        ref={virtual?.scrollRef}
+        onScroll={(event) => {
+          virtual?.onScroll();
+          if (lines && stickyHeader) markStuck(event.currentTarget);
+          if (blocks.start || blocks.end) markUnder(event.currentTarget);
+        }}
+        className={styles.scroll}
+        style={maxHeight ? { maxHeight } : undefined}
       >
-        <thead>
-          <tr aria-rowindex={virtual ? 1 : undefined} data-grid-line={lineKey("head")}>
-            {selectable && (
-              <th scope="col" className={cx(styles.th, styles.control, pinAt(0).className)} style={pinAt(0).style}>
-                <Checkbox
-                  aria-label={snapshot.manual ? wording.selectAllOnPage : wording.selectAllRows}
-                  checked={snapshot.selection.allSelected}
-                  indeterminate={snapshot.selection.someSelected}
-                  onChange={snapshot.selection.toggleAll}
-                />
-              </th>
-            )}
-            {detail && (
-              <td
-                className={cx(styles.th, styles.control, pinAt(controlColumns - 1).className)}
-                style={pinAt(controlColumns - 1).style}
-              />
-            )}
-            {spanEntry &&
-              (registry.columnById(spanEntry.spec.id) === spanEntry ? (
-                <HeaderCell entry={spanEntry} registry={registry} hook={hook} pin={pinAt(controlColumns)} />
-              ) : (
-                <th scope="col" className={cx(styles.th, pinAt(controlColumns).className)} style={pinAt(controlColumns).style}>
-                  {spanEntry.spec.label}
+        <table
+          ref={tableRef}
+          role={lines ? "treegrid" : gridMode ? "grid" : undefined}
+          aria-readonly={gridMode && !dataColumns.some((e) => e.spec.edit !== undefined) ? true : undefined}
+          onKeyDown={gridEvents?.onKeyDown}
+          onFocus={gridEvents?.onFocus}
+          onClick={gridEvents?.onClick}
+          onBlur={gridEvents?.onBlur}
+          data-depth={lines ? grouping.length : undefined}
+          style={lines ? ({ "--u-header-levels": grouping.length - 1 } as CSSProperties) : undefined}
+          aria-label={ariaLabel}
+          /* With virtualisation not every row stands in the document; plus one
+             for the header row and one for the footer row, which count per ARIA. */
+          aria-rowcount={virtual ? (projection.lines ?? projection.filtered).length + 1 + (footerShown ? 1 : 0) : undefined}
+          aria-busy={loading || undefined}
+          className={cx(
+            styles.table,
+            resolvedDensity === "compact" && styles.compact,
+            stickyHeader && styles.sticky,
+            striped && styles.striped,
+            gridMode && styles.grid,
+          )}
+        >
+          <thead>
+            <tr aria-rowindex={virtual ? 1 : undefined} data-grid-line={lineKey("head")}>
+              {selectable && (
+                <th scope="col" className={cx(styles.th, styles.control, pinAt(0).className)} style={pinAt(0).style}>
+                  <Checkbox
+                    aria-label={snapshot.manual ? wording.selectAllOnPage : wording.selectAllRows}
+                    checked={snapshot.selection.allSelected}
+                    indeterminate={snapshot.selection.someSelected}
+                    onChange={snapshot.selection.toggleAll}
+                  />
                 </th>
-              ))}
-            {dataColumns.map((e, i) => (
-              <HeaderCell key={e.key} entry={e} registry={registry} hook={hook} pin={pinAt(leading + i)} />
-            ))}
-            {actions.length > 0 && (
-              <th
-                scope="col"
-                className={cx(styles.th, styles.actionsCell, pinAt(columnCount - 1).className)}
-                style={pinAt(columnCount - 1).style}
-              >
-                <VisuallyHidden>{wording.rowActions}</VisuallyHidden>
-              </th>
-            )}
-          </tr>
-        </thead>
-        <GridContext.Provider value={gridEvents ? { ...gridEvents.context, hook, wording } : null}>{body}</GridContext.Provider>
-        {footerShown && (
-          <tfoot>
-            <tr aria-rowindex={virtual ? (projection.lines ?? projection.filtered).length + 2 : undefined} data-grid-line={lineKey("foot")}>
-              {Array.from({ length: controlColumns }, (_, i) => (
-                <td key={i} className={cx(styles.td, styles.control, pinAt(i).className)} style={pinAt(i).style} />
-              ))}
-              {spanEntry && <td className={cx(styles.td, pinAt(controlColumns).className)} style={pinAt(controlColumns).style} />}
-              {dataColumns.map((e, i) => (
-                <FooterCell
-                  key={e.key}
-                  entry={e}
-                  rows={projection.filtered}
-                  formats={formats}
-                  wording={wording}
-                  pin={pinAt(leading + i)}
+              )}
+              {detail && (
+                <td
+                  className={cx(styles.th, styles.control, pinAt(controlColumns - 1).className)}
+                  style={pinAt(controlColumns - 1).style}
                 />
+              )}
+              {spanEntry &&
+                (registry.columnById(spanEntry.spec.id) === spanEntry ? (
+                  <HeaderCell entry={spanEntry} registry={registry} hook={hook} pin={pinAt(controlColumns)} />
+                ) : (
+                  <th scope="col" className={cx(styles.th, pinAt(controlColumns).className)} style={pinAt(controlColumns).style}>
+                    {spanEntry.spec.label}
+                  </th>
+                ))}
+              {dataColumns.map((e, i) => (
+                <HeaderCell key={e.key} entry={e} registry={registry} hook={hook} pin={pinAt(leading + i)} />
               ))}
-              {actions.length > 0 && (
-                <td className={cx(styles.td, pinAt(columnCount - 1).className)} style={pinAt(columnCount - 1).style} />
+              {trailing && (
+                <th
+                  scope="col"
+                  className={cx(styles.th, styles.actionsCell, pinAt(columnCount - 1).className)}
+                  style={pinAt(columnCount - 1).style}
+                >
+                  <VisuallyHidden>{wording.rowActions}</VisuallyHidden>
+                </th>
               )}
             </tr>
-          </tfoot>
-        )}
-      </table>
-      <PinPlacement
-        table={tableRef}
-        blocks={blocks}
-        pinnedKeys={dataColumns.filter((e) => pins[e.spec.id]).map((e) => e.key).join("|")}
-      />
-      {gridMode && (
-        <GridFocus
+          </thead>
+          <GridContext.Provider value={gridEvents ? { ...gridEvents.context, hook, wording } : null}>
+            {newRowBody}
+            {body}
+          </GridContext.Provider>
+          {footerShown && (
+            <tfoot>
+              <tr aria-rowindex={virtual ? (projection.lines ?? projection.filtered).length + 2 : undefined} data-grid-line={lineKey("foot")}>
+                {Array.from({ length: controlColumns }, (_, i) => (
+                  <td key={i} className={cx(styles.td, styles.control, pinAt(i).className)} style={pinAt(i).style} />
+                ))}
+                {spanEntry && <td className={cx(styles.td, pinAt(controlColumns).className)} style={pinAt(controlColumns).style} />}
+                {dataColumns.map((e, i) => (
+                  <FooterCell
+                    key={e.key}
+                    entry={e}
+                    rows={projection.filtered}
+                    formats={formats}
+                    wording={wording}
+                    pin={pinAt(leading + i)}
+                  />
+                ))}
+                {trailing && (
+                  <td className={cx(styles.td, pinAt(columnCount - 1).className)} style={pinAt(columnCount - 1).style} />
+                )}
+              </tr>
+            </tfoot>
+          )}
+        </table>
+        <PinPlacement
           table={tableRef}
-          grid={grid}
-          lines={gridLinesNow}
-          ids={gridIds}
-          editable={dataColumns.some((e) => e.spec.edit !== undefined) ? gridEvents?.editable : undefined}
+          blocks={blocks}
+          pinnedKeys={dataColumns.filter((e) => pins[e.spec.id]).map((e) => e.key).join("|")}
         />
+        {gridMode && (
+          <GridFocus
+            table={tableRef}
+            grid={grid}
+            lines={gridLinesNow}
+            ids={gridIds}
+            editable={dataColumns.some((e) => e.spec.edit !== undefined) ? gridEvents?.editable : undefined}
+          />
+        )}
+      </div>
+      {registry.rowAdding && !registry.showsToolbar() && (
+        <div className={styles.newRowBar}>
+          <NewRowButton registry={registry} />
+        </div>
       )}
-    </div>
+    </>
   );
 }
 
@@ -1056,10 +1123,16 @@ function Row({
   line,
   spanEntry,
   grid,
+  trailing,
+  fresh = false,
 }: {
   row: unknown;
   /** Grid mode: the cells are the stops, not the row. */
   grid: boolean;
+  /** The actions column stands - the row actions, a Row draft's buttons, Delete. */
+  trailing: boolean;
+  /** A new row (ADR-0036): no key yet, nothing to select, expand or delete. */
+  fresh?: boolean;
   index: number;
   absolute: number | undefined;
   registry: Registry;
@@ -1080,10 +1153,13 @@ function Row({
 }) {
   const tabStop = useContext(TabStopContext);
   const snapshot = hook.publicSnapshot;
-  const key = hook.rowKey(row);
-  const name = rowName(row, header, hook, formats, wording);
+  const key = fresh ? NEW_LINE : hook.rowKey(row);
+  const name = fresh ? wording.newRow : rowName(row, header, hook, formats, wording);
+  const gridLine = fresh ? NEW_LINE : rowLine(key);
+  const editing = useContext(GridContext)?.editing;
+  const draft = editing?.row === true && editing.line === gridLine;
   const detail = registry.detail;
-  const open = detail !== null && snapshot.expanded.includes(key);
+  const open = !fresh && detail !== null && snapshot.expanded.includes(key);
   const detailId = `${baseId}-detail-${index}`;
   const { className: rowClass, ...data } = rowProps?.(row) ?? {};
 
@@ -1108,11 +1184,15 @@ function Row({
         aria-posinset={group ? group.rows.indexOf(row) + 1 : undefined}
         aria-setsize={group?.rows.length}
         tabIndex={virtual && !grid ? (absolute === tabStop ? 0 : -1) : undefined}
-        data-grid-line={grid ? rowLine(key) : undefined}
+        data-grid-line={grid ? gridLine : undefined}
+        data-draft={draft ? "" : undefined}
         data-even={virtual && absolute % 2 === 1 ? "" : undefined}
         aria-rowindex={virtual ? absolute + 2 : undefined}
       >
-        {selectable && (
+        {fresh && Array.from({ length: controls + (spanEntry ? 1 : 0) }, (_, i) => (
+          <td key={i} className={cx(styles.td, i < controls && styles.control, pinAt(i).className)} style={pinAt(i).style} />
+        ))}
+        {!fresh && selectable && (
           <td className={cx(styles.td, styles.control, pinAt(0).className)} style={pinAt(0).style}>
             <Checkbox
               aria-label={wording.selectRow(name)}
@@ -1121,7 +1201,7 @@ function Row({
             />
           </td>
         )}
-        {detail && (
+        {!fresh && detail && (
           <td className={cx(styles.td, styles.control, pinAt(controls - 1).className)} style={pinAt(controls - 1).style}>
             <button
               type="button"
@@ -1155,13 +1235,17 @@ function Row({
             pin={pinAt(leading + i)}
             formats={formats}
             wording={wording}
-            rowKey={key}
+            line={gridLine}
             rowName={name}
           />
         ))}
-        {actions.length > 0 && (
+        {trailing && (
           <td className={cx(styles.td, styles.actionsCell, pinAt(columnCount - 1).className)} style={pinAt(columnCount - 1).style}>
-            <RowActionsCell actions={actions} row={row} name={name} wording={wording} />
+            {draft ? (
+              <RowDraftButtons name={name} wording={wording} />
+            ) : (
+              <RowActionsCell actions={fresh ? [] : actions} row={row} name={name} wording={wording} line={gridLine} />
+            )}
           </td>
         )}
       </tr>
@@ -1183,7 +1267,7 @@ function Cell({
   pin,
   formats,
   wording,
-  rowKey,
+  line,
   rowName,
 }: {
   entry: ColumnEntry;
@@ -1192,14 +1276,19 @@ function Cell({
   pin: PinnedCell;
   formats: Formats;
   wording: Wording;
-  rowKey: string;
+  /** The line the cell stands in - what an edit names it by. */
+  line: string;
   /** The row's name, for its editor's. */
   rowName: string;
 }) {
   const { spec } = entry;
   const value = entry.read(row);
   const rightAligned = isRightAligned(kind, spec.rightAligned);
-  const editor = useCellEditor(rowKey, spec.id);
+  const editor = useCellEditor(line, spec.id);
+  /* A cell that edits says so under the pointer (ADR-0036): a text cursor over
+     what is typed, a pointer over what is picked. */
+  const gridMode = useContext(GridContext) !== null;
+  const editKind = !gridMode || spec.edit === undefined ? undefined : spec.edit === "text" || spec.edit === "number" ? "type" : "pick";
 
   let content: ReactNode;
   if (isAbsent(value)) {
@@ -1218,6 +1307,7 @@ function Cell({
       scope={spec.rowHeader ? "row" : undefined}
       className={cx(styles.td, rightAligned && styles.numeric, spec.rowHeader && styles.rowHeader, pin.className, editor && styles.editing)}
       style={pin.style}
+      data-edit={editKind}
     >
       {editor ? (
         <>
@@ -1271,23 +1361,62 @@ function RowActionsCell({
   row,
   name,
   wording,
+  line,
 }: {
   actions: ReturnType<Registry["actions"]["ordered"]>;
   row: unknown;
   name: string;
   wording: Wording;
+  /** The row's line in grid mode - to know whether a Row draft elsewhere holds the grid. */
+  line: string;
 }) {
+  const grid = useContext(GridContext);
+  /* A Row draft elsewhere holds the grid: a click here is refused as a
+     focus is, and triggers nothing (ADR-0036). */
+  const held = grid?.editing?.row === true && grid.editing.line !== line;
+  const remove = grid?.remove;
+  const [asking, setAsking] = useState(false);
+  const askedRef = useRef(false);
+  const deleteRef = useRef<HTMLButtonElement>(null);
+  const keepRef = useRef<HTMLButtonElement>(null);
+  /* The question takes the focus to its safe answer, and Keep brings it
+     back to Delete: the button pressed is gone from under it either way. */
+  useEffect(() => {
+    if (asking) keepRef.current?.focus();
+    else if (askedRef.current) deleteRef.current?.focus();
+    askedRef.current = asking;
+  }, [asking]);
+
   /* A bulk action always gets a list - at the row one made from it. That way
      "delete three" is one confirmation and not three. */
   const trigger = (spec: (typeof actions)[number]["spec"]) => {
+    if (held) return;
     const onSelect = spec.onSelect as (target: unknown) => void;
     onSelect(spec.bulk ? [row] : row);
   };
 
+  /* Delete asks inside its row before it is reported: a row lost to one
+     stray click is data lost. */
+  const deletion = remove && (asking ? (
+    <>
+      <span className={styles.deleteAsk}>{wording.deleteRowAsk}</span>
+      <Button size="sm" variant="danger" aria-label={wording.rowAction(wording.deleteRow, name)} onClick={() => { setAsking(false); remove(row); }}>
+        {wording.deleteRow}
+      </Button>
+      <Button ref={keepRef} size="sm" variant="ghost" aria-label={wording.rowAction(wording.keepRow, name)} onClick={() => setAsking(false)}>
+        {wording.keepRow}
+      </Button>
+    </>
+  ) : (
+    <Button ref={deleteRef} size="sm" variant="ghost" aria-label={wording.rowAction(wording.deleteRow, name)} onClick={() => !held && setAsking(true)}>
+      {wording.deleteRow}
+    </Button>
+  ));
+
   if (actions.length <= AT_MOST_IN_THE_ROW) {
     return (
       <div className={styles.actions}>
-        {actions.map(({ key, spec }) => (
+        {!asking && actions.map(({ key, spec }) => (
           <Button
             key={key}
             size="sm"
@@ -1298,25 +1427,57 @@ function RowActionsCell({
             {spec.label}
           </Button>
         ))}
+        {deletion}
       </div>
     );
   }
   return (
     <div className={styles.actions}>
-      <Menu
-        align="end"
-        trigger={
-          <Button size="sm" variant="ghost" aria-label={wording.rowActionsMenu(name)}>
-            ⋯
-          </Button>
-        }
+      {!asking && (
+        <Menu
+          align="end"
+          trigger={
+            <Button size="sm" variant="ghost" aria-label={wording.rowActionsMenu(name)}>
+              ⋯
+            </Button>
+          }
+        >
+          {actions.map(({ key, spec }) => (
+            <MenuItem key={key} tone={spec.tone} onSelect={() => trigger(spec)}>
+              {spec.label}
+            </MenuItem>
+          ))}
+        </Menu>
+      )}
+      {deletion}
+    </div>
+  );
+}
+
+/** A Row draft's buttons, where the row's actions stood (ADR-0036): Save and
+    Discard, and - once someone tried to leave the draft - the word that it
+    must be saved or discarded first. */
+function RowDraftButtons({ name, wording }: { name: string; wording: Wording }) {
+  const grid = useContext(GridContext)!;
+  const anchor = useRef<HTMLDivElement>(null);
+  return (
+    <div ref={anchor} className={styles.actions}>
+      <Button size="sm" variant="primary" aria-label={wording.rowAction(wording.saveRow, name)} onClick={grid.save}>
+        {wording.saveRow}
+      </Button>
+      <Button size="sm" variant="ghost" aria-label={wording.rowAction(wording.discardRow, name)} onClick={grid.discard}>
+        {wording.discardRow}
+      </Button>
+      <Popover
+        open={grid.editing?.refused === true}
+        onOpenChange={() => undefined}
+        anchorRef={anchor}
+        restoreFocus={false}
+        offset={4}
+        className={styles.draftMessage}
       >
-        {actions.map(({ key, spec }) => (
-          <MenuItem key={key} tone={spec.tone} onSelect={() => trigger(spec)}>
-            {spec.label}
-          </MenuItem>
-        ))}
-      </Menu>
+        <span role="status">{wording.saveOrDiscardFirst}</span>
+      </Popover>
     </div>
   );
 }

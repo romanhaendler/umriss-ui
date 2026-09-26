@@ -281,6 +281,18 @@ export interface Wording {
   /** The editor of a cell in a table's grid mode, named after its column and
       its row: "Edit Budget: Marketing". */
   editCell: (column: string, row: string) => string;
+  /** The button above a grid that opens an empty row to fill in, and the name
+      of that row while it has none (ADR-0036). */
+  newRow: string;
+  /** A row draft's buttons, named with the row through `rowAction`. */
+  saveRow: string;
+  discardRow: string;
+  /** A row's delete button, and its question once pressed: Delete? Delete / Keep. */
+  deleteRow: string;
+  deleteRowAsk: string;
+  keepRow: string;
+  /** Said where someone tries to leave a row draft unsaved. */
+  saveOrDiscardFirst: string;
   /** What the screen reader hears for an absent value. Visibly a muted dash
       stands there. */
   cellAbsentValue: string;
@@ -714,6 +726,13 @@ export const DEFAULT_WORDING: Wording = {
   rowAction: (aktion, row) => `${aktion}: ${row}`,
   rowActionsMenu: (row) => `Actions: ${row}`,
   editCell: (column, row) => `Edit ${column}: ${row}`,
+  newRow: "New row",
+  saveRow: "Save",
+  discardRow: "Discard",
+  deleteRow: "Delete",
+  deleteRowAsk: "Delete?",
+  keepRow: "Keep",
+  saveOrDiscardFirst: "Save or discard this row first",
   cellAbsentValue: "No value",
   booleanYes: "Yes",
   booleanNo: "No",

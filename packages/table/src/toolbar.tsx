@@ -22,6 +22,17 @@ import { GroupingTag } from "./groupingChoice";
 import type { Registry } from "./registry";
 import styles from "./Table.module.css";
 
+/** "New row" (ADR-0036): opens an empty Row draft above the rows of a grid
+    with `onRowAdd` - in the toolbar, or beneath the table without one. */
+export function NewRowButton({ registry }: { registry: Registry }) {
+  const wording = useWording();
+  return (
+    <Button size="sm" variant="secondary" onClick={() => registry.addRow?.()}>
+      {wording.newRow}
+    </Button>
+  );
+}
+
 export function TableToolbar({
   registry,
   className,
@@ -91,6 +102,7 @@ export function TableToolbar({
             ))}
           </>
         )}
+        {registry.rowAdding && <NewRowButton registry={registry} />}
       </div>
     );
   }
