@@ -1,6 +1,6 @@
 # The table becomes a grid only on request
 
-Status: accepted
+Status: accepted, amended by ADR-0036 (the first click edits)
 Date:   2026-09
 
 `@umriss-ui/table` renders a native `<table>`: every control in it is a stop
