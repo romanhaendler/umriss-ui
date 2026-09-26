@@ -151,3 +151,22 @@ for (const [example, button] of [
     await expect(page).toHaveScreenshot(`drawer-${example}-${testInfo.project.name}.png`);
   });
 }
+
+/* A popover standing open (popover surface). The example loop photographs
+   the trigger only, and a surface drawn inside the panel - clipped to square
+   corners and no shadow by the panel's scroll - went unseen until a user
+   looked. The panel with a margin around it, so that corners and shadow are
+   in the picture; after the entrance has come to rest. */
+test("The popover open: width-from-anchor", async ({ page }, testInfo) => {
+  await openExample(page, "popover", "width-from-anchor");
+  await page.getByRole("button", { name: /Riverside depot/ }).click();
+  const panel = page.getByRole("dialog", { name: "Vehicles at Riverside depot" });
+  await expect(panel).toBeVisible();
+  await panel.evaluate((el) =>
+    Promise.allSettled(el.getAnimations().map((a) => a.finished)).then(() => undefined),
+  );
+  const box = (await panel.boundingBox())!;
+  await expect(page).toHaveScreenshot(`popover-open-${testInfo.project.name}.png`, {
+    clip: { x: box.x - 24, y: box.y - 24, width: box.width + 48, height: box.height + 48 },
+  });
+});
