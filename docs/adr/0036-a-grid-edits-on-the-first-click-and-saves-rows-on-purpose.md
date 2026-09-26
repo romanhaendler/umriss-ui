@@ -33,6 +33,15 @@ the application puts it into the rows. A delete asks inside its row before it
 reports `onRowDelete({ rowKey, row })`: losing a row by one stray click is
 data loss, and a guard every application would rebuild belongs in the table.
 
+**A click outside the grid ends an edit of one cell, never a Row draft.** In
+cell mode it is what a click on another cell is: the draft reported where it
+validates, left open with its message where not - and the focus stays where
+the click put it; pulling it back out of a search field or a menu would be
+worse than the message standing. A click in a panel the editor opened (a
+day's calendar) is inside. A Row draft ignores a click elsewhere on the page:
+it waits for its Save or Discard, and only a click into another row is
+refused with a word.
+
 ## Considered options
 
 - *Second click, or a double click, opens the editor* (Excel, AG Grid). Kept

@@ -447,7 +447,7 @@ export const OUTLINE: readonly Rubric[] = [
         sentence: "Let people change a value in its cell. The table reports each edit, and the application writes it into its rows.",
         about: [
           "An edit is reported, never applied: the application owns the rows. `validate` keeps the editor open with its message until the draft passes.",
-          "By default each cell is reported as it is left (`onCellEdit`). `editMode=\"row\"` opens a whole row as one draft and reports it only when it is saved (`onRowSave`); a row with a draft is left only by saving or discarding it (ADR-0036).",
+          "By default each cell is reported as it is left (`onCellEdit`) - for another cell, or by a click outside the table. `editMode=\"row\"` opens a whole row as one draft and reports it only when it is saved (`onRowSave`); a row with a draft is left only by saving or discarding it (ADR-0036).",
           "`onRowAdd` puts up \"New row\" - in the toolbar, or beneath the table without one - and `onRowDelete` a Delete that asks inside its row. Both work in either mode.",
         ],
         keys: [

@@ -30,6 +30,7 @@ are written one by one, and a row can be neither added nor deleted.
 | R11 | New row | `onRowAdd` shows "New row" in the toolbar (footer without a toolbar); an empty **Row draft** above the body's rows, independent of sort, filter, page; `newRow?: () => Partial<T>` for defaults; Save validates all, reports `onRowAdd({ values })`; it appears once the application puts it into `rows`. A draft elsewhere refuses the button (R7). Both modes. |
 | R12 | Delete | `onRowDelete` puts 🗑 into the action column on every row without a draft; a click turns it into "Delete? ✓ ✕" in the row; ✓ reports `onRowDelete({ rowKey, row })`. Both modes. |
 | R13 | Keys | No Delete key, no shortcut for a new row. |
+| R14 | Click outside (added 2026-09-26) | Cell mode: a click outside the grid ends the edit as a click on another cell does - reported where valid, open with its message where not, the focus left where the click put it; a panel the editor opened counts as inside. Row mode: the draft stays open, without the hint. No close button in an editor. |
 
 ## Solution
 
