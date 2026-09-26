@@ -44,7 +44,8 @@ export interface StatProps extends Omit<HTMLAttributes<HTMLDivElement>, "childre
   /** The rule the value is read against. Without it the tile is neutral – the
       honest display of a number for which nobody has named a rule. */
   limits?: LimitSet;
-  /** Values in chronological order; yields the history line. */
+  /** Values in chronological order; yields the history line, across the
+      tile beneath the figures, or beside them in a tile of 380 px and more. */
   history?: readonly number[];
   /** When the value was true – not when it was fetched. */
   asOf?: Date | number | null;
@@ -147,25 +148,32 @@ export const Stat = forwardRef<HTMLDivElement, StatProps>(function Stat(
       aria-label={name}
       data-verdict={showsVerdict ? verdict : undefined}
     >
-      <span className={styles.label}>{label}</span>
-      <span className={styles.valueRow}>
-        <span className={styles.value}>{display}</span>
-        {known && unit !== undefined && <span className={styles.unit}>{unit}</span>}
-      </span>
-      {showsVerdict && (
-        <span className={styles.verdict} data-verdict={verdict}>
-          {word}
-        </span>
-      )}
-      {deviation !== null && known && (
-        <span className={styles.deviation}>{deviation}</span>
-      )}
-      {history !== undefined && history.length >= 2 && (
-        <Sparkline data={history} className={styles.history} aria-hidden="true" />
-      )}
-      {asOf !== undefined && ages !== undefined && (
-        <FreshnessLine asOf={asOf ?? null} ages={ages} />
-      )}
+      {/* Two parts, so that the tile can lay them out by its own width: the
+          figures, and the history beside them in a wide tile or beneath them
+          in a narrow one. */}
+      <div className={styles.body}>
+        <div className={styles.figures}>
+          <span className={styles.label}>{label}</span>
+          <span className={styles.valueRow}>
+            <span className={styles.value}>{display}</span>
+            {known && unit !== undefined && <span className={styles.unit}>{unit}</span>}
+          </span>
+          {showsVerdict && (
+            <span className={styles.verdict} data-verdict={verdict}>
+              {word}
+            </span>
+          )}
+          {deviation !== null && known && (
+            <span className={styles.deviation}>{deviation}</span>
+          )}
+          {asOf !== undefined && ages !== undefined && (
+            <FreshnessLine asOf={asOf ?? null} ages={ages} />
+          )}
+        </div>
+        {history !== undefined && history.length >= 2 && (
+          <Sparkline data={history} width="fill" className={styles.history} aria-hidden="true" />
+        )}
+      </div>
     </div>
   );
 });

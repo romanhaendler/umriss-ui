@@ -51,6 +51,19 @@
     color: var(--u-color-text-secondary);
   }
 
+  /* Filling, it is a block as wide as its container and as high as its
+     `height` or a stylesheet says; the drawing follows the box. */
+  .sparklineFill {
+    display: block;
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .sparklineCap {
+    stroke: var(--u-color-accent);
+  }
+
   .sparklineAccent {
     color: var(--u-color-accent);
   }
