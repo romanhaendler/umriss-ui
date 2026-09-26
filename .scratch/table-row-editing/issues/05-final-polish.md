@@ -19,3 +19,4 @@ Found while checking the rendered pages (2026-09-26), for this round:
 - Save as a black primary beside a ghost Discard - loud in a dense table?
 - Text buttons (Save, Discard, Delete) rather than glyphs: core exports no check/cross/bin glyph.
 - The reserved width makes the actions column wide at rest (Item wraps in Edits 05 at 1100 px).
+- Compact (checked 2026-09-26): nothing shifts - the fields (26 px) fill the 27 px row almost edge to edge, and their text is the regular size beside the compact type of the rows.

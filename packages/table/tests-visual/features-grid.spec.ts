@@ -5,7 +5,7 @@
    own in `screenshots.spec.ts`. */
 
 import { test, expect } from "@playwright/test";
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 import { openExample } from "./navigation";
 import { EXAMPLE_ADDRESSES } from "./pages";
 
@@ -214,4 +214,22 @@ test("a new row stands above the rows until it is saved; a delete asks first", a
   await expect(table.locator("tr[data-grid-line='row:i5']").getByText("Delete?")).toBeVisible();
   await table.getByRole("button", { name: "Delete: Kiln door seal" }).click();
   await expect(table).not.toContainText("Kiln door seal");
+});
+
+test("opening a row draft or a new row shifts nothing: the rows keep their height", async ({ page }) => {
+  const height = (row: Locator) => row.evaluate((el) => el.getBoundingClientRect().height);
+  await openExample(page, pageOf("save-a-row-on-purpose"), "save-a-row-on-purpose");
+  let table = example(page, "save-a-row-on-purpose");
+  const row = table.locator("tr[data-grid-line='row:S-1']");
+  const before = await height(row);
+  await row.locator("td[data-edit]").first().click();
+  await expect(table.getByRole("button", { name: "Save: Kiln 1" })).toBeVisible();
+  expect(await height(row)).toBe(before);
+
+  await openExample(page, pageOf("keep-a-list"), "keep-a-list");
+  table = example(page, "keep-a-list");
+  const other = await height(table.locator("tr[data-grid-line='row:i1']"));
+  await table.getByRole("button", { name: "New row" }).click();
+  expect(await height(table.locator("tr[data-grid-line='new']"))).toBe(other);
+  expect(await height(table.locator("tr[data-grid-line='row:i1']"))).toBe(other);
 });
