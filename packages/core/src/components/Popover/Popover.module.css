@@ -1,5 +1,6 @@
-/* The one panel shell. Position, stacking order, entrance and exit live here;
-   appearance and inner workings stay in the components' stylesheets.
+/* The one panel shell. Position, stacking order, entrance and exit live here,
+   and the overlay's surface - ground, corners, shadow; inner workings and
+   padding stay in the components' stylesheets, which may restate the surface.
    Before this, @keyframes panelIn was defined five times. */
 
 @layer umriss.tokens, umriss.base, umriss.components;
@@ -14,6 +15,15 @@
     max-width: calc(100vw - 16px);
     max-height: calc(100dvh - 16px);
     overflow: auto;
+    /* The surface on the panel itself, not left to what it holds: the
+       panel scrolls (`overflow: auto`), and a surface drawn by its content
+       lost its shadow and its round corners to that clip - a popover used
+       directly stood flat on the page. The transparent outline is the edge
+       forced colours draw. */
+    background: var(--u-color-surface);
+    border-radius: var(--u-radius-md);
+    outline: 1px solid transparent;
+    box-shadow: var(--u-shadow-overlay);
     /* Entry: it unfolds from its motion origin - the corner facing its
        trigger, computed from the position (motionOrigin in position.ts). */
     transform-origin: var(--_origin);
