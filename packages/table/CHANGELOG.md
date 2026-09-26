@@ -22,6 +22,12 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.6.1 – Core 0.13.0 (Sep. 2026)
+
+Needs `@umriss-ui/core` 0.13; the peer range moves to `^0.13.0`. Nothing else changes for a caller.
+
+---
+
 ## 0.6.0 – Tooltips and a column menu that opens by its button (Sep. 2026)
 
 Needs `@umriss-ui/core` 0.12: it reads the new tooltip wording keys; the peer range moves to `^0.12.0`.

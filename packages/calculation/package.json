@@ -1,6 +1,6 @@
 {
   "name": "@umriss-ui/calculation",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "The umriss calculation for data-dense applications - a derivation written as it is shown, evaluated by the library, folded and read line by line.",
   "license": "MIT",
   "author": "Roman Händler",
