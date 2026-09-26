@@ -1075,7 +1075,18 @@ to core's active node and the charts' **Active point** (ADR-0003, ADR-0030):
 never a selection — Space or Enter selects its task, as a click does. The keys
 walk the rows as the plot lays them out, so a folded **Lane group** is one row
 of work, and they walk past the view, which follows them (ADR-0033).
-_Avoid_: focused subtask, cursor, current subtask, selected subtask
+_Avoid_: focused subtask, cursor, current subtask, selected subtask (which is
+the clicked one, see **Selected subtask**)
+
+**Selected subtask**:
+The one **Subtask** of the selection that was clicked, or chosen by Space or
+Enter; the grips are its own. The selection still takes the whole **Task** —
+the selected subtask only says which of its bars the planner reached for. A
+task selected by its **Dependency** has none. It shows as the colour: the
+selected subtask in its task's full colour, its siblings halfway to grey, all
+other work grey, each at its own lightness. Findings keep their colours.
+_Avoid_: active subtask (which is where the keyboard stands), clicked subtask,
+focused subtask
 
 **Intent**:
 What the schedule reports when an interaction asks for a change: move this
@@ -1125,6 +1136,13 @@ the bar's lower edge. The faint, outlined fill belongs to a **Lead-in** and a
 rather than pale, and another shift's is a paler colour rather than a
 transparent one. A hatch says none of these: it says a **Lane** is not
 available, and only during a **Refusal**.
+
+One more line is drawn by the selection, and it runs between the two ways a
+colour can grow paler. `muted` mixes it into the surface, so it grows lighter;
+the selection takes it towards the grey of its OWN lightness, so it keeps its
+lightness and loses its hue — halfway for the siblings of the **Selected
+subtask**, all the way for all other work. Lighter is `muted`'s, greyer at the
+same lightness is the selection's, and neither says the other's.
 
 Adding a statement means finding a channel, not inventing a mark.
 _Avoid_: style, variant, state, Zustand, status
