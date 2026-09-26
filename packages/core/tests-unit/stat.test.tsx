@@ -117,6 +117,20 @@ describe("History", () => {
     );
     expect(container.querySelector("svg")).not.toBeNull();
   });
+
+  /* The tile's line fills the tile: stretched to its box, with a stroke that
+     does not stretch and an end point that stays round - a circle would be
+     pulled into an ellipse. */
+  it("fills the tile, stroke and end point unstretched", () => {
+    const { container } = render(
+      <Stat label="Piece count" value={412} history={[1, 2, 3, 4]} />,
+    );
+    const svg = container.querySelector("svg")!;
+    expect(svg.getAttribute("width")).toBe("100%");
+    expect(svg.getAttribute("preserveAspectRatio")).toBe("none");
+    expect(svg.querySelector("polyline")!.getAttribute("vector-effect")).toBe("non-scaling-stroke");
+    expect(svg.querySelector("circle")).toBeNull();
+  });
 });
 
 describe("Freshness is a different axis from the verdict (ADR-0010)", () => {
