@@ -797,6 +797,23 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
                   style={pinAt(columnCount - 1).style}
                 >
                   <VisuallyHidden>{wording.rowActions}</VisuallyHidden>
+                  {rowTools && (
+                    <span className={styles.reserve} aria-hidden="true">
+                      {(rowMode || props.onRowAdd) && (
+                        <span className={styles.actions}>
+                          <Button tabIndex={-1} size="sm">{wording.saveRow}</Button>
+                          <Button tabIndex={-1} size="sm">{wording.discardRow}</Button>
+                        </span>
+                      )}
+                      {props.onRowDelete && (
+                        <span className={styles.actions}>
+                          <span className={styles.deleteAsk}>{wording.deleteRowAsk}</span>
+                          <Button tabIndex={-1} size="sm">{wording.deleteRow}</Button>
+                          <Button tabIndex={-1} size="sm">{wording.keepRow}</Button>
+                        </span>
+                      )}
+                    </span>
+                  )}
                 </th>
               )}
             </tr>
@@ -1400,7 +1417,7 @@ function RowActionsCell({
   const deletion = remove && (asking ? (
     <>
       <span className={styles.deleteAsk}>{wording.deleteRowAsk}</span>
-      <Button size="sm" variant="danger" aria-label={wording.rowAction(wording.deleteRow, name)} onClick={() => { setAsking(false); remove(row); }}>
+      <Button className={styles.toned} size="sm" variant="danger" aria-label={wording.rowAction(wording.deleteRow, name)} onClick={() => { setAsking(false); remove(row); }}>
         {wording.deleteRow}
       </Button>
       <Button ref={keepRef} size="sm" variant="ghost" aria-label={wording.rowAction(wording.keepRow, name)} onClick={() => setAsking(false)}>
@@ -1462,7 +1479,7 @@ function RowDraftButtons({ name, wording }: { name: string; wording: Wording }) 
   const anchor = useRef<HTMLDivElement>(null);
   return (
     <div ref={anchor} className={styles.actions}>
-      <Button size="sm" variant="primary" aria-label={wording.rowAction(wording.saveRow, name)} onClick={grid.save}>
+      <Button className={styles.toned} size="sm" variant="primary" aria-label={wording.rowAction(wording.saveRow, name)} onClick={grid.save}>
         {wording.saveRow}
       </Button>
       <Button size="sm" variant="ghost" aria-label={wording.rowAction(wording.discardRow, name)} onClick={grid.discard}>

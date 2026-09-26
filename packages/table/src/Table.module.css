@@ -1116,14 +1116,27 @@
     gap: var(--u-space-1);
   }
 
-  .actions button {
+  /* A Row draft's Save and a confirmed Delete keep their own tone: they are
+     the decision, not the quiet gesture. */
+  .actions button:not(.toned) {
     color: var(--u-color-text-secondary);
     transition: color var(--u-transition);
   }
 
-  tbody tr:hover .actions button,
-  tbody tr:focus-within .actions button {
+  tbody tr:hover .actions button:not(.toned),
+  tbody tr:focus-within .actions button:not(.toned) {
     color: var(--u-color-accent-text);
+  }
+
+  /* The widest the actions column gets - a Row draft's buttons, a delete's
+     question - held in its head at no height: opening either shifts no
+     column (ADR-0036). */
+  .reserve {
+    display: flex;
+    flex-direction: column;
+    height: 0;
+    overflow: hidden;
+    visibility: hidden;
   }
 
   /* ---- Column widths --------------------------------------------------- */
