@@ -54,14 +54,28 @@
   /* Filling, it is a block as wide as its container and as high as its
      `height` or a stylesheet says; the drawing follows the box. */
   .sparklineFill {
+    position: relative;
     display: block;
     flex: 1 1 auto;
     width: 100%;
     min-width: 0;
   }
 
-  .sparklineCap {
-    stroke: var(--u-color-accent);
+  /* The end point of a filling line, as round as the circle of a fixed one.
+     Its ground is kept under forced colours, as the circle's fill is. */
+  .sparklineEnd {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    transform: translate(-50%, -50%);
+    border-radius: var(--u-radius-full);
+    /* A circle and not the library's squircle, which the build adds to every
+       radius: this small a squircle is a rounded square (as the Stepper's
+       marker says). */
+    corner-shape: round;
+    background: var(--u-color-accent);
+    forced-color-adjust: none;
+    pointer-events: none;
   }
 
   .sparklineAccent {
