@@ -61,6 +61,15 @@ export function AggregateValue({
   const text = (v: unknown) => asText(v, format, formats, wording);
   let content: ReactNode;
   if (isAbsent(value)) content = <Absent wording={wording} />;
+  else if ((kind === "sum" || kind === "avg") && format === undefined && typeof value === "number") {
+    /* Computed, so its trailing digits are arithmetic: a sum keeps the
+       decimals of its most precise value, an average one more - whole hours
+       average to tenths, not to 13.3333333333. A fixed count, so that the
+       totals of a column stand aligned on the point (table-aggregate-digits
+       01). */
+    const places = Math.max(0, ...rows.map((row) => entry.read(row)).filter(isFiniteNumber).map(decimalsOf));
+    content = formats.number(value, Math.min(10, kind === "avg" ? places + 1 : places));
+  }
   else if (kind === "range" && format === "date" && sameYear(value as [unknown, unknown])) {
     /* The year once: "02/10–14/10" says as much as the long form within one
        year, and a group header has no room for the repetition. */
@@ -87,6 +96,15 @@ export function AggregateValue({
   );
 }
 
+
+const isFiniteNumber = (value: unknown): value is number => typeof value === "number" && Number.isFinite(value);
+
+/** The decimals a number carries as written: 0.25 has two, 1234.5 one, 12
+    none - read from its exponent form, which also says it for 1e-7. */
+const decimalsOf = (n: number): number => {
+  const [mantissa = "", exponent = "0"] = n.toExponential().split("e");
+  return Math.max(0, (mantissa.split(".")[1]?.length ?? 0) - Number(exponent));
+};
 
 const sameYear = ([from, to]: [unknown, unknown]): boolean =>
   from instanceof Date && to instanceof Date && from.getFullYear() === to.getFullYear();
