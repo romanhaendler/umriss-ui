@@ -22,7 +22,7 @@
    when it is saved; a new row is always one. An edit of one cell is a draft
    of one column - the same state, the same save. */
 
-import { createContext, useContext, useLayoutEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { FocusEvent as ReactFocusEvent, KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent, ReactNode, RefObject } from "react";
 import { DatePicker, FormField, Input, NumberInput, Popover, Select, VisuallyHidden, useFormats } from "@umriss-ui/core";
 import type { VirtualRows, Wording } from "@umriss-ui/core";
@@ -182,6 +182,7 @@ export function GridFocus({
   lines,
   ids,
   editable,
+  outside,
 }: {
   table: RefObject<HTMLTableElement | null>;
   grid: GridHandle;
@@ -190,7 +191,29 @@ export function GridFocus({
   /** In a grid that edits: whether the cell at a position does. Every other
       cell of its body and foot is `aria-readonly` (table-grid-mode 05). */
   editable?: (p: GridPosition) => boolean;
+  /** While a cell's edit is open: what a click outside the grid does. */
+  outside?: () => void;
 }) {
+  /* A click outside the grid - not in it, and not in a panel one of its
+     controls opened (a day's calendar names its panel by `aria-controls`). */
+  const outsideRef = useRef(outside);
+  useLayoutEffect(() => {
+    outsideRef.current = outside;
+  });
+  const listening = outside !== undefined;
+  useEffect(() => {
+    const table = tableRef.current;
+    if (!listening || !table) return;
+    const onMouseDown = (event: MouseEvent) => {
+      for (let node = event.target instanceof Element ? event.target : null; node; node = node.parentElement) {
+        if (node === table || (node.id && table.querySelector(`[aria-controls="${CSS.escape(node.id)}"]`))) return;
+      }
+      outsideRef.current?.();
+    };
+    document.addEventListener("mousedown", onMouseDown);
+    return () => document.removeEventListener("mousedown", onMouseDown);
+  }, [listening, tableRef]);
+
   useLayoutEffect(() => {
     const table = tableRef.current;
     if (!table) return;
@@ -371,8 +394,8 @@ export function gridHandlers(input: GridInput) {
       edit through `onCellEdit`, a Row draft's changes through `onRowSave`, a
       new row whole through `onRowAdd`. Where a draft does not validate, the
       edit stays open with its messages and the focus in the first of them.
-      True when the edit is over. */
-  const save = (patch: Readonly<Record<string, unknown>> = {}): boolean => {
+      True when the edit is over. `focus` false leaves the focus where it is. */
+  const save = (patch: Readonly<Record<string, unknown>> = {}, focus = true): boolean => {
     if (!editing) return true;
     const drafts = { ...editing.drafts, ...patch };
     const row = lineRow(editing.line);
@@ -388,7 +411,7 @@ export function gridHandlers(input: GridInput) {
     const invalid = Object.keys(drafts).find((id) => errors[id] !== undefined);
     if (invalid !== undefined) {
       const column = editing.row ? invalid : editing.column;
-      grid.focus.want("editor");
+      if (focus) grid.focus.want("editor");
       setState((s) => ({
         ...s,
         active: { line: editing.line, column, lineIndex: Math.max(0, keys.indexOf(editing.line)), columnIndex: ids.indexOf(column) },
@@ -401,7 +424,7 @@ export function gridHandlers(input: GridInput) {
     else if (editing.row) {
       if (changed.length > 0) onRowSave?.({ rowKey: rowKey(row), changes: Object.fromEntries(changed.map((id) => [id, drafts[id]])), row });
     } else if (changed.length > 0) onCellEdit?.({ rowKey: rowKey(row), columnId: editing.column, value: drafts[editing.column], row });
-    grid.focus.want("cell");
+    if (focus) grid.focus.want("cell");
     setState((s) => ({ ...s, editing: null }));
     return true;
   };
@@ -617,7 +640,13 @@ export function gridHandlers(input: GridInput) {
     discard,
     remove: onRowDelete && ((row: unknown) => onRowDelete({ rowKey: rowKey(row), row })),
   };
-  return { onKeyDown, onClick, onFocus, onBlur, context, editable, addRow };
+  /* A click outside the grid ends an edit of one cell as a click on another
+     cell does - reported where it validates, left open with its message where
+     not; the focus stays where the click put it (ADR-0036). A Row draft stays
+     open: it is saved on purpose, not by a click elsewhere on the page. */
+  const outside = editing && !editing.row ? () => void save({}, false) : undefined;
+
+  return { onKeyDown, onClick, onFocus, onBlur, context, editable, addRow, outside };
 }
 
 /** How many lines PageUp and PageDown jump: as many as the scroll area shows

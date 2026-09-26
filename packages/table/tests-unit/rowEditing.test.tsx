@@ -101,6 +101,60 @@ describe("A click on a cell that edits", () => {
   });
 });
 
+describe("A click outside the grid", () => {
+  it("ends a cell's edit as a click on another cell does, and leaves the focus where it went", () => {
+    const onCellEdit = vi.fn();
+    render(
+      <>
+        <button>elsewhere</button>
+        <Loops onCellEdit={onCellEdit} />
+      </>,
+    );
+    click(cellOf("80"));
+    fireEvent.change(active(), { target: { value: "95" } });
+    const elsewhere = screen.getByText("elsewhere");
+    fireEvent.mouseDown(elsewhere);
+    act(() => elsewhere.focus());
+    expect(onCellEdit).toHaveBeenCalledWith(expect.objectContaining({ rowKey: "l1", columnId: "setpoint", value: 95 }));
+    expect(screen.queryByLabelText("Edit Setpoint: TIC-101")).toBeNull();
+    expect(document.activeElement).toBe(elsewhere);
+  });
+
+  it("keeps a draft that does not validate open with its message, without taking the focus back", () => {
+    const onCellEdit = vi.fn();
+    render(
+      <>
+        <button>elsewhere</button>
+        <Loops onCellEdit={onCellEdit} />
+      </>,
+    );
+    click(cellOf("80"));
+    fireEvent.change(active(), { target: { value: "150" } });
+    const elsewhere = screen.getByText("elsewhere");
+    fireEvent.mouseDown(elsewhere);
+    act(() => elsewhere.focus());
+    expect(onCellEdit).not.toHaveBeenCalled();
+    expect(field("Edit Setpoint: TIC-101").getAttribute("aria-invalid")).toBe("true");
+    expect(document.activeElement).toBe(elsewhere);
+  });
+
+  it("leaves a Row draft open, without a word", () => {
+    const onRowSave = vi.fn();
+    render(
+      <>
+        <button>elsewhere</button>
+        <Loops editMode="row" onRowSave={onRowSave} />
+      </>,
+    );
+    click(cellOf("80"));
+    fireEvent.change(active(), { target: { value: "95" } });
+    fireEvent.mouseDown(screen.getByText("elsewhere"));
+    expect(onRowSave).not.toHaveBeenCalled();
+    expect(field("Edit Setpoint: TIC-101").value).toBe("95");
+    expect(screen.queryByText("Save or discard this row first")).toBeNull();
+  });
+});
+
 describe("A Row draft (editMode=\"row\")", () => {
   it("opens every cell of the row that edits, the one clicked focused", () => {
     render(<Loops editMode="row" onRowSave={() => undefined} />);
