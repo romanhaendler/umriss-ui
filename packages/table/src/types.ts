@@ -167,6 +167,25 @@ export interface CellEdit<Z> {
   row: Z;
 }
 
+/** A Row draft the user saved (ADR-0036) - reported, not applied. */
+export interface RowSave<Z> {
+  rowKey: string;
+  /** The columns the draft changed, by column id, with their editors' values. */
+  changes: Readonly<Record<string, unknown>>;
+  row: Z;
+}
+
+/** A new row the user saved: every column that edits, by column id. */
+export interface RowAdd {
+  values: Readonly<Record<string, unknown>>;
+}
+
+/** A row the user asked to delete, and confirmed. */
+export interface RowDelete<Z> {
+  rowKey: string;
+  row: Z;
+}
+
 /* --- Columns -------------------------------------------------------------- */
 
 export interface ColumnBase {
@@ -448,6 +467,24 @@ export interface TableProps<Z> {
   /** Grid mode: an edit the user committed. The table applies nothing; the
       cell shows the new value when the rows passed in carry it. */
   onCellEdit?: (edit: CellEdit<Z>) => void;
+  /** Grid mode (ADR-0036): `"cell"` reports every cell as it is left
+      (`onCellEdit`); `"row"` opens every cell of a row that edits at once, as
+      one **Row draft**, and reports it only when the row is saved on purpose
+      (`onRowSave`) - by its Save button or Enter; Escape or Discard drops it.
+      A row with a draft is left only by saving or discarding it. */
+  editMode?: "cell" | "row";
+  /** `editMode="row"`: a saved Row draft, with the columns it changed. */
+  onRowSave?: (save: RowSave<Z>) => void;
+  /** Grid mode: puts up a "New row" button - in the table toolbar, or beneath
+      the table without one. It opens an empty Row draft above the rows; saved,
+      it is reported whole. The row appears when the rows passed in carry it. */
+  onRowAdd?: (add: RowAdd) => void;
+  /** What a new row starts with - the values the columns read before anything
+      is typed. Without it, nothing. */
+  newRow?: () => Partial<Z>;
+  /** Grid mode: a Delete button on every row, which asks inside its row before
+      the delete is reported. The table removes nothing. */
+  onRowDelete?: (remove: RowDelete<Z>) => void;
   /** Columns, `RowDetail`, `RowActions` and the unbound parts. */
   children?: ReactNode;
 }

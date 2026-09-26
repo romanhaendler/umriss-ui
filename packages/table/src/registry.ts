@@ -704,6 +704,25 @@ export class Registry {
     return this.count("pagination") > 0;
   }
 
+  /** A grid with `onRowAdd` (ADR-0036): the toolbar puts up "New row", or the
+      table beneath itself where no toolbar stands. The frame hands in what the
+      button does - its grid's handler of this render. */
+  rowAdding = false;
+  addRow: (() => void) | null = null;
+
+  setRowAdding(on: boolean) {
+    this.rowAdding = on;
+  }
+
+  setAddRow(add: (() => void) | null) {
+    this.addRow = add;
+  }
+
+  /** Whether a table toolbar stands - one put there, or the table's own. */
+  showsToolbar(): boolean {
+    return this.count("toolbar") > 0 || this.needsOwnToolbar();
+  }
+
   /** Whether the table puts up a table toolbar of its own - also while it is
       grouped: the tag that names and removes the grouping needs a place. */
   needsOwnToolbar(): boolean {
