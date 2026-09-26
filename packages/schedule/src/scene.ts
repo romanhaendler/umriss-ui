@@ -24,7 +24,7 @@ import { resolveAppearance } from "./appearance";
 import { slotAt, xOf } from "./geometry";
 import { SceneData, type GroupConfig, type LaneConfig, type LayerConfig, type ScheduleTooltipTarget } from "./sceneData";
 import type { Subtask } from "./model";
-import { barFace, drawData, drawOverlay, prepareCanvas, resolveSceneColours, type Colours } from "./sceneDraw";
+import { barFace, drawData, drawOverlay, prepareCanvas, resolveSceneColours, workColour, type Colours } from "./sceneDraw";
 import { barLabelBox, inView } from "./geometry";
 import { SceneGestures, type GhostSummary, type PlacingItem, type SceneHandlers } from "./sceneGestures";
 import { SceneKeys, type Spoken } from "./sceneKeys";
@@ -253,6 +253,14 @@ export class ScheduleScene {
     return this.controlledTask !== undefined ? this.controlledTask : this.ownTask;
   }
 
+  /** The **Selected subtask**, where it belongs to the selected task: a
+      controlled selection can move to another task while the last click
+      stays behind on the old one. */
+  private get selectedSubtask(): string | null {
+    const subtask = this.selected === null ? undefined : this.data.subtaskById.get(this.selected);
+    return subtask !== undefined && subtask.task === this.selectedTask ? subtask.id : null;
+  }
+
   private select(task: string | null, subtask: string | null): void {
     const changed = task !== this.selectedTask || subtask !== this.selected;
     this.selected = subtask;
@@ -401,11 +409,14 @@ export class ScheduleScene {
          the surface and takes the text colour, a muted one is the mix and not
          the task colour. One answer, so the label and the caps beside it can
          never disagree (`barFace`). */
-      const colour = colours === null ? undefined : colours.tasks.get(box.subtask.task);
       const dark =
-        colour === undefined || colours === null
+        colours === null
           ? true
-          : barFace(resolveAppearance(box.subtask.appearance), colour, colours).onDark;
+          : barFace(
+              resolveAppearance(box.subtask.appearance),
+              workColour(colours, { selectedTask: this.selectedTask, selectedSubtask: this.selectedSubtask }, box.subtask.task, box.subtask.id),
+              colours,
+            ).onDark;
       return [{ subtask: box.subtask, ...place, dark }];
     });
   }
@@ -511,7 +522,7 @@ export class ScheduleScene {
       colours: this.colours,
       bands: this.snapshot,
       selectedTask: this.selectedTask,
-      selectedSubtask: this.selected,
+      selectedSubtask: this.selectedSubtask,
       hover: this.gestures.hover,
       ghost: this.gestures.ghostDrawing(),
     };
