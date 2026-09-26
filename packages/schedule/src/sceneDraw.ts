@@ -111,11 +111,20 @@ function channels(colour: string): [number, number, number] | null {
 /** The sRGB relative luminance of a resolved colour, 0 to 1. */
 function luminance(colour: string): number {
   const rgb = channels(colour);
-  if (rgb === null) return 0;
-  const [r, g, b] = rgb.map((value) => {
+  return rgb === null ? 0 : luminanceOf(linear(rgb));
+}
+
+/** The channels of an sRGB colour in linear light, 0 to 1. */
+function linear(rgb: readonly [number, number, number]): [number, number, number] {
+  return rgb.map((value) => {
     const channel = value / 255;
     return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
   }) as [number, number, number];
+}
+
+/** The relative luminance of channels already in linear light - `luminance`
+    for a colour that has been taken apart. */
+function luminanceOf([r, g, b]: readonly [number, number, number]): number {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
@@ -155,15 +164,11 @@ export interface GhostDrawing {
   readonly tether: { readonly x: number; readonly y: number } | null;
 }
 
-export interface DrawInput {
+export interface DrawInput extends SelectionColouring {
   readonly data: SceneData;
   readonly view: SceneView;
   readonly colours: Colours;
   readonly bands: { readonly days: readonly { x: number }[]; readonly ticks: readonly { x: number }[] };
-  readonly selectedTask: string | null;
-  /** The subtask the last click was on, where it belongs to the selected task.
-      Selection takes a whole task; this says which of its bars was touched. */
-  readonly selectedSubtask: string | null;
   readonly hover: ScheduleHit;
   readonly ghost: GhostDrawing | null;
 }
@@ -202,10 +207,11 @@ export function drawOverlay(ctx: CanvasRenderingContext2D, input: DrawInput): vo
     }
     return;
   }
-  const { ghost, overlaps, violated } = input.ghost;
+  const drag = input.ghost;
+  const { ghost, overlaps, violated } = drag;
   /* Under everything the drag draws: the lanes this work may not go to are a
      property of the plot while the gesture runs, not of the ghost. */
-  drawRefusedLanes(ctx, input, viewport, input.ghost.refusedLanes);
+  drawRefusedLanes(ctx, input, viewport, drag.refusedLanes);
   const box = ghostBox(viewport, ghost);
   if (box === null) return;
   for (const overlap of overlaps) drawOverlap(ctx, input, viewport, overlap);
@@ -220,13 +226,16 @@ export function drawOverlay(ctx: CanvasRenderingContext2D, input: DrawInput): vo
         : dependencyPath(viewport, dependency, other, box, view.options);
     drawDependency(ctx, input, path, true, violatedIds.has(dependency.id));
   }
-  drawSubtask(ctx, input, box, 0.55);
+  /* What is being dragged is what the planner works with right now: the ghost
+     in full colour, whatever the selection greys - its dependencies stay as
+     the selection draws them. */
+  drawSubtask(ctx, { ...input, selectedTask: null }, box, 0.55);
   ctx.strokeStyle = input.colours.text;
   ctx.lineWidth = 1;
   ctx.setLineDash([3, 2]);
   ctx.strokeRect(box.outerFrom + 0.5, box.y + 0.5, Math.max(1, box.outerTo - box.outerFrom - 1), box.height - 1);
   ctx.setLineDash([]);
-  if (input.ghost.tether !== null) drawTether(ctx, input, box, input.ghost.tether);
+  if (drag.tether !== null) drawTether(ctx, input, box, drag.tether);
 }
 
 /** The lanes a drag in flight may not put its work on: drawn back under a wash
@@ -362,7 +371,7 @@ function drawNow(ctx: CanvasRenderingContext2D, input: DrawInput): void {
     misreads. What a strip promises is where the work is and whose it is; the
     rest is what unfolding is for (ADR-0025). */
 function drawStrip(ctx: CanvasRenderingContext2D, input: DrawInput, box: SubtaskBox, alpha: number): void {
-  const colour = input.colours.tasks.get(box.subtask.task) ?? input.colours.muted;
+  const colour = workColour(input.colours, input, box.subtask.task, box.subtask.id);
   ctx.fillStyle = colour;
   for (const [from, to] of [
     [box.outerFrom, box.mainFrom],
@@ -418,6 +427,44 @@ function mix(a: string, b: string, t: number): string {
   return `rgb(${at(0)}, ${at(1)}, ${at(2)})`;
 }
 
+/** A resolved colour taken the share `t` of the way to the grey of its own
+    lightness. Mixed in linear light, where the luminance is a weighted sum of
+    the channels: every step on the way keeps it, so a greyed bar keeps the
+    label colour it had - and it never goes towards the surface, which is
+    `muted`'s channel (CONTEXT.md, **Appearance**). */
+export function towardsGrey(colour: string, t: number): string {
+  const rgb = channels(colour);
+  if (rgb === null || t === 0) return colour;
+  const light = linear(rgb);
+  const grey = luminanceOf(light);
+  const [r, g, b] = light.map((channel) => {
+    const value = channel + (grey - channel) * t;
+    const encoded = value <= 0.0031308 ? value * 12.92 : 1.055 * value ** (1 / 2.4) - 0.055;
+    return Math.round(Math.min(1, Math.max(0, encoded)) * 255);
+  }) as [number, number, number];
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
+/** What the planner has selected, as the colours need it. */
+export interface SelectionColouring {
+  readonly selectedTask: string | null;
+  readonly selectedSubtask: string | null;
+}
+
+/** The colour a piece of work is drawn in - a subtask, or with `subtask` null a
+    dependency or a strip's owner - once the selection has had its say: the
+    **Selected subtask** in its task's full colour, its siblings halfway to
+    grey, all other work grey. A task selected by its dependency has no
+    selected subtask and stays whole. Under forced colours there are only two
+    steps: the selected task in the text colour, the rest in GrayText. */
+export function workColour(colours: Colours, selection: SelectionColouring, task: string | null, subtask: string | null): string {
+  const colour = (task === null ? undefined : colours.tasks.get(task)) ?? colours.muted;
+  if (selection.selectedTask === null) return colour;
+  if (task !== selection.selectedTask) return colours.forced ? colours.muted : towardsGrey(colour, 1);
+  if (colours.forced || selection.selectedSubtask === null || subtask === null || subtask === selection.selectedSubtask) return colour;
+  return towardsGrey(colour, 0.5);
+}
+
 /** How far the progress rail sits in from the bar's bottom edge, in pixels.
     The cap's width and inset stand in `geometry.ts`, because a bar's label has
     to keep clear of them. */
@@ -459,7 +506,7 @@ function drawSubtask(ctx: CanvasRenderingContext2D, input: DrawInput, box: Subta
     return;
   }
   const look = resolveAppearance(box.subtask.appearance);
-  const colour = colours.tasks.get(box.subtask.task) ?? colours.muted;
+  const colour = workColour(colours, input, box.subtask.task, box.subtask.id);
   const face = barFace(look, colour, colours);
   /* The whole box: no appearance changes what a bar measures any more. */
   const top = box.y;
@@ -650,7 +697,7 @@ function drawDependency(ctx: CanvasRenderingContext2D, input: DrawInput, path: D
   const task = data.taskOfDependency(path.dependency);
   const isViolated = violated ?? data.violatedById.has(path.dependency.id);
   const selected = task !== null && task === input.selectedTask;
-  const colour = isViolated ? colours.alarm : (task !== null ? colours.tasks.get(task) : undefined) ?? colours.muted;
+  const colour = isViolated ? colours.alarm : workColour(colours, input, task, null);
   ctx.strokeStyle = colour;
   ctx.fillStyle = colour;
   ctx.lineWidth = emphasised || selected ? 2 : 1.25;
@@ -781,7 +828,7 @@ function drawOverlap(
 function drawHover(ctx: CanvasRenderingContext2D, input: DrawInput, box: SubtaskBox): void {
   const { colours } = input;
   const look = resolveAppearance(box.subtask.appearance);
-  const face = barFace(look, colours.tasks.get(box.subtask.task) ?? colours.muted, colours);
+  const face = barFace(look, workColour(colours, input, box.subtask.task, box.subtask.id), colours);
   /* Under forced colours every bar is the text colour, and a wash of the
      ground over it reads as a slightly lighter black: the active subtask takes
      an outline in the selection colour instead, around the bar. */

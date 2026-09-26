@@ -238,6 +238,7 @@ export const OUTLINE: readonly Rubric[] = [
         about: [
           "The schedule keeps the selection itself unless you pass `selectedTask`; then your state holds it and every change is reported. The report also names the subtask that was clicked, the one the editing grips belong to.",
           "Selection and hover are two different marks: the selected task is outlined, the one under the pointer washed, and both show at once.",
+          "The selection also steps the rest back, so a planner sees at once what they are working with: the clicked subtask keeps its task's full colour, the other subtasks of its task go halfway to grey, and all other work goes grey. Findings keep their colours, and a task selected by its dependency stays whole.",
         ],
         keys: [
           { key: "Tab", action: "Focuses the plot; the first subtask in view becomes the active one." },
