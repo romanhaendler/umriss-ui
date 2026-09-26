@@ -858,6 +858,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
             lines={gridLinesNow}
             ids={gridIds}
             editable={dataColumns.some((e) => e.spec.edit !== undefined) ? gridEvents?.editable : undefined}
+            outside={gridEvents?.outside}
           />
         )}
       </div>

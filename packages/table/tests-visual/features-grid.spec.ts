@@ -185,6 +185,24 @@ test("a click on a day opens its calendar at once", async ({ page }) => {
   await expect(page.getByRole("dialog")).toBeVisible();
 });
 
+test("a click in the calendar is inside the edit; a click outside the grid ends it", async ({ page }) => {
+  await openExample(page, pageOf("validated-edits"), "validated-edits");
+  const table = example(page, "validated-edits");
+  await table.locator("tr[data-grid-line='row:maya'] td").last().click();
+  const panel = page.getByRole("dialog");
+  await panel.getByRole("button", { name: "Next month" }).click();
+  await expect(panel).toBeVisible();
+  await expect(table.getByLabel("Edit Available from: Maya Lindgren")).toBeVisible();
+  await page.keyboard.press("Escape");
+  /* A text: typed, then a click beside the table - reported and closed. */
+  await table.locator("tr[data-grid-line='row:maya'] td[data-edit]").first().click();
+  await page.keyboard.press("ControlOrMeta+a");
+  await page.keyboard.type("36");
+  await table.locator(".exampleLead, p").first().click();
+  await expect(table.getByLabel("Edit Capacity: Maya Lindgren")).toHaveCount(0);
+  await expect(table).toContainText("Last edit: Maya Lindgren, capacity");
+});
+
 test("a row draft opens whole, keeps its buttons in view, refuses to be left and is saved on purpose", async ({ page }) => {
   await openExample(page, pageOf("save-a-row-on-purpose"), "save-a-row-on-purpose");
   const table = example(page, "save-a-row-on-purpose");
