@@ -22,6 +22,51 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.7.0 – Rows edited on purpose (Sep. 2026)
+
+Needs `@umriss-ui/core` 0.14: it reads the new row wording keys; the peer
+range moves to `^0.14.0`. All of it applies to a table in grid mode
+(`<Table grid>`), as editing did (ADR-0036).
+
+### Added
+
+- **`editMode="row"`** opens every cell of a row that edits at once, as one
+  **Row draft**, and reports nothing until the row is saved on purpose - by
+  its Save button or Enter; Discard or Escape drops it. **`onRowSave`**
+  receives `{ rowKey, changes, row }` with only the columns that changed; a
+  row saved unchanged reports nothing. A row with a draft is left only by
+  saving or discarding it: a click into another row is refused with "Save or
+  discard this row first". On Save every open cell runs its `validate`, and
+  the row stays open until all pass. `editMode="cell"` stays the default.
+- **`onRowAdd`** puts up a "New row" button - in the table toolbar, or
+  beneath the table where none stands. It opens an empty Row draft above the
+  rows, whatever the sort, filter or page; **`newRow`** gives the values it
+  starts with. Saved, it is reported whole as `{ values }` by column id and
+  appears when the rows passed in carry it. Both edit modes.
+- **`onRowDelete`** puts a Delete button on every row; pressed, it asks
+  "Delete?" inside its row, and only the confirmation reports
+  `{ rowKey, row }`. Both edit modes.
+- The types **`RowSave`**, **`RowAdd`** and **`RowDelete`**.
+
+### Changed
+
+- **A click on a cell that edits opens its editor.** It only made the cell
+  active; Enter, F2 or typing opened it. A select opens with its list shown,
+  a day with its calendar. The arrow keys and Tab still walk without editing.
+- **A cell that edits says so under the pointer**: a text cursor over a text
+  or a number, a pointer over a select, a day or an editor of one's own, and
+  a field's edge on hover. Nothing marks it at rest.
+- **A click outside the table ends an edit of one cell** as a click on
+  another cell does: reported where it validates, left open with its message
+  where not; the focus stays where the click put it. A click in the panel the
+  editor opened - a day's calendar - is inside. A Row draft stays open.
+- **The actions column stands pinned at the end** in a grid with
+  `editMode="row"`, `onRowAdd` or `onRowDelete`, and holds the width of its
+  widest buttons from the start, so a draft or a delete's question shifts no
+  column. A row keeps its height while its draft is open.
+
+---
+
 ## 0.6.2 – Averages without float noise (Sep. 2026)
 
 ### Changed
