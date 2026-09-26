@@ -7,40 +7,40 @@ export const title = "Save a row on purpose";
 export const lead =
   "`editMode=\"row\"` opens every cell of a row that edits at once. Nothing is reported until Save or Enter; `onRowSave` hands over only the columns that changed.";
 
-interface Shift {
+interface Project {
   id: string;
-  line: string;
-  crew: string;
-  lead: string;
-  hours: number;
+  name: string;
+  phase: string;
+  owner: string;
+  days: number;
 }
 
-const SHIFTS: Shift[] = [
-  { id: "S-1", line: "Kiln 1", crew: "Early", lead: "Ines Duarte", hours: 8 },
-  { id: "S-2", line: "Kiln 2", crew: "Late", lead: "Tomasz Wrona", hours: 8 },
-  { id: "S-3", line: "Press", crew: "Night", lead: "Amira Haddad", hours: 10 },
+const PROJECTS: Project[] = [
+  { id: "P-1", name: "Checkout redesign", phase: "Build", owner: "Ines Duarte", days: 40 },
+  { id: "P-2", name: "Mobile app", phase: "Discovery", owner: "Tomasz Wrona", days: 15 },
+  { id: "P-3", name: "Data warehouse", phase: "Launch", owner: "Amira Haddad", days: 60 },
 ];
 
 export default function SaveARowOnPurpose() {
-  const [shifts, setShifts] = useState(SHIFTS);
-  const [last, setLast] = useState<RowSave<Shift> | null>(null);
-  const { Table, Column } = useTable(shifts, { rowKey: (s) => s.id });
+  const [projects, setProjects] = useState(PROJECTS);
+  const [last, setLast] = useState<RowSave<Project> | null>(null);
+  const { Table, Column } = useTable(projects, { rowKey: (p) => p.id });
 
-  const save = (saved: RowSave<Shift>) => {
-    setShifts((all) => all.map((s) => (s.id === saved.rowKey ? { ...s, ...saved.changes } : s)));
+  const save = (saved: RowSave<Project>) => {
+    setProjects((all) => all.map((p) => (p.id === saved.rowKey ? { ...p, ...saved.changes } : p)));
     setLast(saved);
   };
 
   return (
     <Stack gap={2}>
-      <Table grid editMode="row" ariaLabel="Shifts" onRowSave={save}>
-        <Column value="line" label="Line" rowHeader />
-        <Column value="crew" label="Crew" edit="select" editOptions={["Early", "Late", "Night"]} width={140} />
-        <Column value="lead" label="Shift lead" edit="text" />
-        <Column value="hours" label="Hours" edit="number" width={110} />
+      <Table grid editMode="row" ariaLabel="Projects" onRowSave={save}>
+        <Column value="name" label="Project" rowHeader />
+        <Column value="phase" label="Phase" edit="select" editOptions={["Discovery", "Build", "Launch"]} width={140} />
+        <Column value="owner" label="Owner" edit="text" />
+        <Column value="days" label="Budget (days)" edit="number" width={130} />
       </Table>
       <Text size="xs" tone="muted">
-        {last ? `Saved ${last.row.line}: ${Object.keys(last.changes).join(", ")}` : "Nothing saved yet."}
+        {last ? `Saved ${last.row.name}: ${Object.keys(last.changes).join(", ")}` : "Nothing saved yet."}
       </Text>
     </Stack>
   );
