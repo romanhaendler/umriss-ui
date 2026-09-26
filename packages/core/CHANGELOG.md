@@ -29,6 +29,27 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.13.0 – A tile's history across the tile (Sep. 2026)
+
+### Added
+
+- **`Sparkline` takes `width="fill"`**: it is as wide as its container and as
+  high as `height` or a stylesheet says, and the drawing follows its box. The
+  line keeps its 1.5 px stroke and the end point stays round, however far it
+  is stretched. The default stays 96 px - a row width, for cells.
+
+### Changed
+
+- **A `Stat`'s history fills the tile.** It ran at a fixed 96 × 28 px, and a
+  tile in a wide grid kept its line in the first third and the rest empty.
+  Now it runs across the tile beneath the figures, 32 px high; in a tile of
+  380 px and more it stands beside the figures and takes their height. The
+  tile decides by its own width (a container query), not by the window's.
+- **The freshness line stands with the figures**, above the history, not
+  beneath it: it speaks about the value.
+
+---
+
 ## 0.12.1 – A popover's own surface (Sep. 2026)
 
 ### Changed
