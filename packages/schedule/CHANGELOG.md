@@ -15,6 +15,24 @@ moves from here under the rule above.
 
 ---
 
+## 0.3.3 – What you are working with (Sep. 2026)
+
+### Changed
+
+- **A selection steps the rest of the plan back.** The subtask that was
+  clicked keeps its task's full colour, the other subtasks of its task go
+  halfway to grey, and all other work - bars, dependencies, the strips of a
+  folded group - goes grey. The grey is the colour's own lightness without
+  its hue, so a label keeps its colour and greyed work never reads as
+  `"muted"`, which grows lighter instead. Findings keep their colours. A task
+  selected by its dependency, or through `selectedTask` alone, stays whole in
+  its colour; the ghost of a drag is always in full colour. Under forced
+  colours the selected task stays in the text colour and the rest takes
+  `GrayText`. Nothing to change for a caller: the picture follows the
+  selection the schedule already has.
+
+---
+
 ## 0.3.2 – Core 0.13.0 (Sep. 2026)
 
 Needs `@umriss-ui/core` 0.13; the peer range moves to `^0.13.0`. Nothing else changes for a caller.

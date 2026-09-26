@@ -29,6 +29,18 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.13.1 – A round end point in Safari (Sep. 2026)
+
+### Fixed
+
+- **The end point of a `Sparkline` with `width="fill"` is round in every
+  browser.** It was a round cap inside the stretched drawing, which Chromium
+  drew round and Safari stretched with the line - a dot crossed by a flat
+  ellipse. It is now drawn on its own, 5 px, at the end of the line, and keeps
+  its ground under forced colours.
+
+---
+
 ## 0.13.0 – A tile's history across the tile (Sep. 2026)
 
 ### Added
