@@ -89,7 +89,9 @@
     font-weight: var(--u-weight-medium);
   }
 
-  .table tbody tr:last-child .td {
+  /* A new row stands in a body of its own above the rows: it is last there,
+     but its line to the rows beneath stays. */
+  .table tbody tr:last-child:not([data-grid-line="new"]) .td {
     border-bottom: none;
   }
 
@@ -1297,6 +1299,21 @@
      while it is open - its ground is the one a hovered row has, held. */
   .table tbody tr[data-draft] > .td {
     background: var(--u-color-surface-sunken);
+  }
+
+  /* A Row draft's buttons lie over their cell as its editors do: the row
+     keeps its height, and the column its width - held by the reserve in the
+     head. */
+  .draftButtons {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    justify-content: flex-end;
+    padding: 0 var(--u-space-2);
+  }
+
+  .held {
+    visibility: hidden;
   }
 
   .deleteAsk {

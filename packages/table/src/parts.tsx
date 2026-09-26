@@ -1257,9 +1257,15 @@ function Row({
           />
         ))}
         {trailing && (
-          <td className={cx(styles.td, styles.actionsCell, pinAt(columnCount - 1).className)} style={pinAt(columnCount - 1).style}>
+          <td className={cx(styles.td, styles.actionsCell, pinAt(columnCount - 1).className, draft && styles.editing)} style={pinAt(columnCount - 1).style}>
             {draft ? (
-              <RowDraftButtons name={name} wording={wording} />
+              <>
+                <RowDraftButtons name={name} wording={wording} />
+                {/* What the row carries at rest holds its height, unseen, under the draft's buttons. */}
+                <span className={styles.held} aria-hidden="true">
+                  <RowActionsCell actions={fresh ? [] : actions} row={row} name={name} wording={wording} line={gridLine} />
+                </span>
+              </>
             ) : (
               <RowActionsCell actions={fresh ? [] : actions} row={row} name={name} wording={wording} line={gridLine} />
             )}
@@ -1478,7 +1484,7 @@ function RowDraftButtons({ name, wording }: { name: string; wording: Wording }) 
   const grid = useContext(GridContext)!;
   const anchor = useRef<HTMLDivElement>(null);
   return (
-    <div ref={anchor} className={styles.actions}>
+    <div ref={anchor} className={cx(styles.actions, styles.draftButtons)}>
       <Button className={styles.toned} size="sm" variant="primary" aria-label={wording.rowAction(wording.saveRow, name)} onClick={grid.save}>
         {wording.saveRow}
       </Button>
