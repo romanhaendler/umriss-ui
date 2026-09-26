@@ -720,7 +720,7 @@ export const OUTLINE: readonly Rubric[] = [
           { key: "Escape", action: "Asks to close; with `restoreFocus` the focus returns to the trigger." },
         ],
         limits: [
-          "No look of its own: background, radius and shadow are yours, so each surface built on it keeps its own.",
+          "No padding and no inner layout: it brings the overlay's surface - ground, corners, shadow - and the rest is yours. A `className` restates the surface where one needs another.",
           "It does not trap focus; a surface the user must answer is a [Modal](#/modal).",
         ],
         types: ["PopoverProps"],
