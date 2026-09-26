@@ -6,16 +6,30 @@
 @layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.components {
+  /* The tile is the container its layout answers to: in a grid of tiles the
+     window's width says nothing about the tile's. */
   .stat {
     composes: text from "#own-styles";
-    display: grid;
-    grid-template-rows: auto auto auto;
-    gap: var(--u-space-1);
-    align-content: start;
+    container-type: inline-size;
     padding: var(--u-space-4);
     border: 1px solid var(--u-edge-color);
     border-radius: var(--u-radius-md);
     background: var(--u-color-surface);
+    min-width: 0;
+  }
+
+  /* Narrow: the figures, and the history beneath them across the tile. */
+  .body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--u-space-2);
+    min-width: 0;
+  }
+
+  .figures {
+    display: grid;
+    gap: var(--u-space-1);
+    align-content: start;
     min-width: 0;
   }
 
@@ -95,7 +109,28 @@
   }
 
   .history {
-    margin-top: var(--u-space-1);
+    height: 32px;
+  }
+
+  /* Wide: the history stands beside the figures and takes their height -
+     a tile three times as wide as its figures had kept its line at 96 px and
+     left the rest empty. */
+  @container (min-width: 380px) {
+    .body {
+      flex-direction: row;
+      align-items: stretch;
+      gap: var(--u-space-5);
+    }
+
+    .figures {
+      flex: none;
+    }
+
+    .history {
+      height: auto;
+      min-height: 48px;
+      align-self: stretch;
+    }
   }
 
   .asOf {

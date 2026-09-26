@@ -3,7 +3,7 @@ import type { LimitSet } from "../../../src";
 import { metrics } from "@umriss-ui/demo/worlds/operations";
 
 export const title = "Add a history";
-export const lead = "`history` draws the values before it as a line under the figure: the shape of the last hours, not a trend arrow.";
+export const lead = "`history` draws the values before it as a line across the tile - under the figure, or beside it where the tile is wide: the shape of the last hours, not a trend arrow.";
 
 const CHECKOUT_P95: LimitSet = {
   limits: [
