@@ -32,8 +32,9 @@ export const Sparkline = forwardRef<HTMLSpanElement, SparklineProps>(function Sp
   /* Filling, the drawing is stretched to its box in both directions: it is
      laid out on a field of 100 × 100 without padding, the stroke does not
      scale with it, and it may draw past its edge rather than be cut. The end
-     point is a round cap on a zero-length stroke, which stays round where a
-     circle would be pulled into an ellipse. */
+     point is no part of the stretched drawing: a circle there is pulled into
+     an ellipse, and a round cap on a zero-length stroke was drawn stretched
+     by Safari. It is an element of its own, set at the end in per cent. */
   const w = fill ? 100 : width;
   const h = fill ? 100 : height;
   const padding = fill ? 0 : 3;
@@ -74,18 +75,9 @@ export const Sparkline = forwardRef<HTMLSpanElement, SparklineProps>(function Sp
           strokeLinejoin="round"
           vectorEffect={fill ? "non-scaling-stroke" : undefined}
         />
-        {fill ? (
-          <path
-            d={`M${endX},${endY}h0`}
-            className={styles.sparklineCap}
-            strokeWidth="4.4"
-            strokeLinecap="round"
-            vectorEffect="non-scaling-stroke"
-          />
-        ) : (
-          <circle cx={endX} cy={endY} r="2.2" className={styles.sparklineDot} />
-        )}
+        {!fill && <circle cx={endX} cy={endY} r="2.2" className={styles.sparklineDot} />}
       </svg>
+      {fill && <span className={styles.sparklineEnd} style={{ left: `${endX}%`, top: `${endY}%` }} />}
     </span>
   );
 });
