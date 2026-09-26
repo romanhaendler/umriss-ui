@@ -3,7 +3,7 @@ import type { Dependency, Subtask, Task } from "../../../src";
 
 export const title = "Select a task";
 
-export const lead = "Click a leg and the whole consignment is outlined on every vehicle; click the empty plot to clear it.";
+export const lead = "Click a leg and the whole consignment is outlined on every vehicle: the leg you clicked in full colour, its other legs halfway to grey, all other work grey. Click the empty plot to clear it.";
 
 const at = (hours: number, minutes = 0) => new Date(2026, 2, 17, hours, minutes).getTime();
 
@@ -15,12 +15,14 @@ const CONSIGNMENTS: readonly Task[] = [
 const LEGS: readonly Subtask[] = [
   { id: "c-2041-1", task: "c-2041", lane: "truck-118", from: at(6), to: at(7, 30) },
   { id: "c-2041-2", task: "c-2041", lane: "van-214", from: at(8), to: at(10, 30) },
+  { id: "c-2041-3", task: "c-2041", lane: "truck-118", from: at(11), to: at(12) },
   { id: "c-2042-1", task: "c-2042", lane: "truck-118", from: at(8), to: at(9) },
   { id: "c-2042-2", task: "c-2042", lane: "van-214", from: at(11), to: at(12, 30) },
 ];
 
 const TRANSFERS: readonly Dependency[] = [
   { id: "t-2041", from: "c-2041-1", to: "c-2041-2", lag: 20 * 60_000 },
+  { id: "t-2041-b", from: "c-2041-2", to: "c-2041-3", lag: 20 * 60_000 },
   { id: "t-2042", from: "c-2042-1", to: "c-2042-2", lag: 20 * 60_000 },
 ];
 
