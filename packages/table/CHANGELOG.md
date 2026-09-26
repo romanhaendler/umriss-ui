@@ -22,6 +22,24 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.6.2 – Averages without float noise (Sep. 2026)
+
+### Changed
+
+- **A sum and an average in a column without a `format` are written to the
+  digits their values carry.** They were written to full precision, which
+  is right for a measurement and wrong for a computed value: three estimates
+  of 18, 12 and 10 hours averaged to `13.3333333333`. A sum now keeps the
+  decimals of its most precise value, an average one more - whole hours
+  average to tenths, `13.3`. The count is fixed, so that the totals of a
+  column stand aligned on the point (`12.0` beside `13.3`); a sum of `0.5`
+  and `0.5` reads `1.0` where it read `1`. In the footer and in every group
+  header alike. A column with a `format` writes its aggregates in that format
+  as before; `min`, `max` and `range` are values that went in and are written
+  as they are.
+
+---
+
 ## 0.6.1 – Core 0.13.0 (Sep. 2026)
 
 Needs `@umriss-ui/core` 0.13; the peer range moves to `^0.13.0`. Nothing else changes for a caller.
