@@ -129,7 +129,10 @@ describe("History", () => {
     expect(svg.getAttribute("width")).toBe("100%");
     expect(svg.getAttribute("preserveAspectRatio")).toBe("none");
     expect(svg.querySelector("polyline")!.getAttribute("vector-effect")).toBe("non-scaling-stroke");
+    /* The end point stands outside the stretched drawing, set in per cent. */
     expect(svg.querySelector("circle")).toBeNull();
+    const end = svg.parentElement!.querySelector(":scope > span") as HTMLElement;
+    expect(end.style.left).toBe("100%");
   });
 });
 
