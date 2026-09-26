@@ -167,3 +167,51 @@ test("the keys keep the Active cell clear of the sticky head and the pinned bloc
   for (let i = 0; i < 8; i++) await page.keyboard.press("ArrowUp");
   await clear();
 });
+
+/* ADR-0036: the first click edits, a row is saved on purpose, rows are added
+   and deleted by the table's own buttons. */
+
+test("a click opens a cell's editor, and the pointer says the cell edits", async ({ page }) => {
+  await openExample(page, pageOf("comments-column"), "comments-column");
+  const cell = example(page, "comments-column").locator("tr[data-grid-line='row:T-02'] td[data-edit]");
+  expect(await cell.evaluate((el) => getComputedStyle(el).cursor)).toBe("text");
+  await cell.click();
+  await expect(focused(page)).toHaveValue("Van swapped at 10:40");
+});
+
+test("a click on a day opens its calendar at once", async ({ page }) => {
+  await openExample(page, pageOf("validated-edits"), "validated-edits");
+  await example(page, "validated-edits").locator("tr[data-grid-line='row:maya'] td").last().click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+});
+
+test("a row draft opens whole, keeps its buttons in view, refuses to be left and is saved on purpose", async ({ page }) => {
+  await openExample(page, pageOf("save-a-row-on-purpose"), "save-a-row-on-purpose");
+  const table = example(page, "save-a-row-on-purpose");
+  await table.locator("tr[data-grid-line='row:S-1'] td[data-edit]").nth(1).click();
+  await expect(table.getByLabel("Edit Shift lead: Kiln 1")).toBeFocused();
+  await expect(table.getByLabel("Edit Hours: Kiln 1")).toBeVisible();
+  await page.keyboard.press("ControlOrMeta+a");
+  await page.keyboard.type("Rui Costa");
+  await table.locator("tr[data-grid-line='row:S-3'] td[data-edit]").first().click();
+  await expect(page.getByText("Save or discard this row first")).toBeVisible();
+  await expect(table.getByLabel("Edit Shift lead: Kiln 1")).toBeFocused();
+  await table.getByRole("button", { name: "Save: Kiln 1" }).click();
+  await expect(table).toContainText("Saved Kiln 1: lead");
+  await expect(table.locator("tr[data-grid-line='row:S-1']")).toContainText("Rui Costa");
+});
+
+test("a new row stands above the rows until it is saved; a delete asks first", async ({ page }) => {
+  await openExample(page, pageOf("keep-a-list"), "keep-a-list");
+  const table = example(page, "keep-a-list");
+  await table.getByRole("button", { name: "New row" }).click();
+  await expect(table.locator("tbody tr").first()).toHaveAttribute("data-grid-line", "new");
+  await expect(table.getByLabel("Edit Item: New row")).toBeFocused();
+  await page.keyboard.type("Kiln door seal");
+  await page.keyboard.press("Enter");
+  await expect(table.locator("tr[data-grid-line='row:i5']")).toContainText("Kiln door seal");
+  await table.getByRole("button", { name: "Delete: Kiln door seal" }).click();
+  await expect(table.locator("tr[data-grid-line='row:i5']").getByText("Delete?")).toBeVisible();
+  await table.getByRole("button", { name: "Delete: Kiln door seal" }).click();
+  await expect(table).not.toContainText("Kiln door seal");
+});
