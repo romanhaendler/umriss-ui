@@ -206,17 +206,17 @@ test("a click in the calendar is inside the edit; a click outside the grid ends 
 test("a row draft opens whole, keeps its buttons in view, refuses to be left and is saved on purpose", async ({ page }) => {
   await openExample(page, pageOf("save-a-row-on-purpose"), "save-a-row-on-purpose");
   const table = example(page, "save-a-row-on-purpose");
-  await table.locator("tr[data-grid-line='row:S-1'] td[data-edit]").nth(1).click();
-  await expect(table.getByLabel("Edit Shift lead: Kiln 1")).toBeFocused();
-  await expect(table.getByLabel("Edit Hours: Kiln 1")).toBeVisible();
+  await table.locator("tr[data-grid-line='row:P-1'] td[data-edit]").nth(1).click();
+  await expect(table.getByLabel("Edit Owner: Checkout redesign")).toBeFocused();
+  await expect(table.getByLabel("Edit Budget (days): Checkout redesign")).toBeVisible();
   await page.keyboard.press("ControlOrMeta+a");
   await page.keyboard.type("Rui Costa");
-  await table.locator("tr[data-grid-line='row:S-3'] td[data-edit]").first().click();
+  await table.locator("tr[data-grid-line='row:P-3'] td[data-edit]").first().click();
   await expect(page.getByText("Save or discard this row first")).toBeVisible();
-  await expect(table.getByLabel("Edit Shift lead: Kiln 1")).toBeFocused();
-  await table.getByRole("button", { name: "Save: Kiln 1" }).click();
-  await expect(table).toContainText("Saved Kiln 1: lead");
-  await expect(table.locator("tr[data-grid-line='row:S-1']")).toContainText("Rui Costa");
+  await expect(table.getByLabel("Edit Owner: Checkout redesign")).toBeFocused();
+  await table.getByRole("button", { name: "Save: Checkout redesign" }).click();
+  await expect(table).toContainText("Saved Checkout redesign: owner");
+  await expect(table.locator("tr[data-grid-line='row:P-1']")).toContainText("Rui Costa");
 });
 
 test("a new row stands above the rows until it is saved; a delete asks first", async ({ page }) => {
@@ -238,10 +238,10 @@ test("opening a row draft or a new row shifts nothing: the rows keep their heigh
   const height = (row: Locator) => row.evaluate((el) => el.getBoundingClientRect().height);
   await openExample(page, pageOf("save-a-row-on-purpose"), "save-a-row-on-purpose");
   let table = example(page, "save-a-row-on-purpose");
-  const row = table.locator("tr[data-grid-line='row:S-1']");
+  const row = table.locator("tr[data-grid-line='row:P-1']");
   const before = await height(row);
   await row.locator("td[data-edit]").first().click();
-  await expect(table.getByRole("button", { name: "Save: Kiln 1" })).toBeVisible();
+  await expect(table.getByRole("button", { name: "Save: Checkout redesign" })).toBeVisible();
   expect(await height(row)).toBe(before);
 
   await openExample(page, pageOf("keep-a-list"), "keep-a-list");
