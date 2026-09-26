@@ -29,6 +29,21 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.12.1 – A popover's own surface (Sep. 2026)
+
+### Changed
+
+- **`Popover` brings the overlay's surface**: the ground, the medium corners,
+  the overlay shadow and the edge forced colours draw, on the panel itself.
+  A popover used directly - with its content drawing the surface - lost its
+  shadow and its round corners to the panel's scroll clip and stood flat on
+  the page. Padding and inner layout stay the caller's; a `className`
+  restates the surface where one needs another, as `Menu`, the pickers and
+  the table's panels do. A caller that drew the surface in its content can
+  drop that.
+
+---
+
 ## 0.12.0 – Popovers that stay by their trigger (Sep. 2026)
 
 ### Added
