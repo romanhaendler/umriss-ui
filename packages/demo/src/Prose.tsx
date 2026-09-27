@@ -3,7 +3,7 @@
    llms text carries these strings as the Markdown they already are.
 
    `#/page` is written in the texts as the hash it once was; here it becomes
-   the page's path (ADR-0036). */
+   the page's path (ADR-0037). */
 
 import type { ReactNode } from "react";
 import { hrefOfText } from "./href";

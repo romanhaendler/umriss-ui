@@ -129,7 +129,7 @@ export function Shell({ demo, brand, version, sentence, actions }: ShellProps) {
   );
 
   useEffect(() => {
-    /* An old hash address - a bookmark, a link from before ADR-0036, a
+    /* An old hash address - a bookmark, a link from before ADR-0037, a
        `#/page` in a page's text - is replaced by its path, so the address bar
        only ever shows the one form. */
     const forward = () => {

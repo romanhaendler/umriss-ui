@@ -150,7 +150,7 @@ describe("llms-full.txt", () => {
   });
 });
 
-describe("the site's pages (ADR-0036)", () => {
+describe("the site's pages (ADR-0037)", () => {
   const byPath = new Map(pages.map((one) => [one.path, one]));
 
   it("has one per page of the outline, and the front page", () => {

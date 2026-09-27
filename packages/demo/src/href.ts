@@ -1,7 +1,7 @@
 /* The one spot that joins an address of the outline to the demo's base.
 
    The base is `/` in the dev server and `/umriss-ui/<package>/` on the site
-   (scripts/build-pages.mjs); every address stands below it (ADR-0036). This
+   (scripts/build-pages.mjs); every address stands below it (ADR-0037). This
    is a file of its own and not part of `outline.ts` because the outline runs
    in Node too, where Vite's `import.meta.env` does not exist. */
 

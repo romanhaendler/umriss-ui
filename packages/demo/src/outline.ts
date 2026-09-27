@@ -5,7 +5,7 @@
    have in common: their shape and the format of their addresses.
 
    About the address. It is a path of one segment: `/button/`, an example on
-   the page an anchor, `/button/#basic` (ADR-0036 - a search engine reads no
+   the page an anchor, `/button/#basic` (ADR-0037 - a search engine reads no
    hash, so the hash `#/button` it once was only forwards now). The rubric is
    deliberately NOT in it. A rubric sorts the sidebar and means nothing inside
    the library; were it in the address, every re-sorting of the sidebar would
@@ -88,7 +88,7 @@ export interface Addresses {
   fromPlace: (place: string) => { page?: PageWithRubric; example?: string };
 }
 
-/** The address of a place, below the demo's base (ADR-0036): the page a
+/** The address of a place, below the demo's base (ADR-0037): the page a
     directory, the example an anchor on it; a scenario an anchor on the front
     page. Needs no outline - the format is the same for every demo. */
 export function addressOfPlace(place: string): string {

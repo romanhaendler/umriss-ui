@@ -302,7 +302,7 @@ function pageUrl(manifest: Manifest, page: Page): string {
 /* ------------------------------------------------------------------ */
 
 /** One prerendered page of the site: what a search engine reads before the
-    demo starts (ADR-0036). */
+    demo starts (ADR-0037). */
 export interface SitePage {
   /** Below the package's directory on the site: `""` for the front page,
       `gauge/` for a page. */

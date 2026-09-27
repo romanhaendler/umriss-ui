@@ -3,7 +3,7 @@
 Status: done
 Type: task
 
-Spec: `.scratch/search-visibility/spec.md` (D4, D5, D7), ADR-0036
+Spec: `.scratch/search-visibility/spec.md` (D4, D5, D7), ADR-0037
 
 ## Scope
 
@@ -19,7 +19,7 @@ Spec: `.scratch/search-visibility/spec.md` (D4, D5, D7), ADR-0036
   default SPA fallback covers it).
 - The comments that justify the hash (`Shell.tsx`, `build-pages.mjs`) and
   "No documentation website" in `docs/README.md` are rewritten, pointing at
-  ADR-0036.
+  ADR-0037.
 
 ## Acceptance
 

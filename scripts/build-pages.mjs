@@ -9,7 +9,7 @@
 
    Every page of a demo is a path with an `index.html` of its own, carrying the
    page's text, its examples' source and its props tables - what a search
-   engine reads, since it reads no hash (ADR-0036). The demo replaces that text
+   engine reads, since it reads no hash (ADR-0037). The demo replaces that text
    when it starts. The text comes from the same run as `llms.txt`
    (`packages/demo/src/tooling/llms.ts`, written as `demo/.generated/pages.json`),
    so it cannot say anything the demo does not.
