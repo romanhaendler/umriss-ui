@@ -20,7 +20,7 @@ as it stood.
 
 ## Sep. 2026 — Found by search, on our own merits
 
-- **Every demo page is a path now, with its text prerendered** (ADR-0036,
+- **Every demo page is a path now, with its text prerendered** (ADR-0037,
   `.scratch/search-visibility/`). The demos had addressed their pages by the
   hash, which a search engine does not read: five indexable URLs, each an
   empty `#root`. Now `/umriss-ui/core/card/` is a file of its own with the

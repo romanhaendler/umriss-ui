@@ -885,7 +885,7 @@ Everything the demo says about one thing a reader looks up, at one address. A
 page is the unit of the demo: the sidebar lists pages, the palette finds pages,
 an address names a page. The address is a path, `/card/`, and an example on the
 page an anchor on it, `/card/#head-and-body` — a search engine reads no hash
-(ADR-0036).
+(ADR-0037).
 
 What that thing is depends on how many things the package has to say. Where a
 package is a shelf of components, a page is a component — with one exception: a

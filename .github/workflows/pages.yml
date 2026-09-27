@@ -1,4 +1,4 @@
-# The five demos on GitHub Pages, every page prerendered (ADR-0036): https://romanhaendler.github.io/umriss-ui/
+# The five demos on GitHub Pages, every page prerendered (ADR-0037): https://romanhaendler.github.io/umriss-ui/
 # Built by scripts/build-pages.mjs; deployed on every push to main, or by hand.
 name: Pages
 

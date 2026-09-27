@@ -52,7 +52,7 @@ above.
 **No documentation website beside the demos.** The demos are the documentation
 for the components, online at <https://romanhaendler.github.io/umriss-ui/>, built
 by `pnpm build:pages`. Every demo page is a path with its text prerendered, so
-that a search engine reads it (ADR-0036) — the demos, prerendered, are the
+that a search engine reads it (ADR-0037) — the demos, prerendered, are the
 website. A site that hosts this prose beside them is still a product decision
 with a spec of its own; this page is its table of contents when it comes.
 

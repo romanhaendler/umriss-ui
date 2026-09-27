@@ -116,7 +116,7 @@ test("the address is the place: a deep link lands on the page", async ({ page })
   await expect(page.locator(`[data-block="${p.deepLink.absent}"]`)).toHaveCount(0);
 });
 
-test("an old hash address is forwarded to its path (ADR-0036)", async ({ page }) => {
+test("an old hash address is forwarded to its path (ADR-0037)", async ({ page }) => {
   await page.goto(`/#/${p.example.pageId}/${p.example.id}`);
   await expect(page.locator(`[data-example="${p.example.id}"]`)).toBeInViewport();
   const url = new URL(page.url());

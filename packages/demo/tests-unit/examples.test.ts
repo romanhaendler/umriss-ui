@@ -120,7 +120,7 @@ describe("the scenarios page's addresses", () => {
   });
 });
 
-describe("a page's address is a path (ADR-0036)", () => {
+describe("a page's address is a path (ADR-0037)", () => {
   it("names the page as a directory, an example as an anchor on it", () => {
     expect(addressOf("gauge")).toBe("/gauge/");
     expect(addressOf("gauge", "basic")).toBe("/gauge/#basic");

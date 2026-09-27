@@ -2,7 +2,7 @@
 
 Status: ready-for-human
 Date:   2026-09-27
-Origin: grilling session with the user, 27 Sep 2026. Decision record: ADR-0036.
+Origin: grilling session with the user, 27 Sep 2026. Decision record: ADR-0037.
 
 ## Problem
 
@@ -26,7 +26,7 @@ metadata, npm's metadata, Google Search Console, Bing Webmaster Tools.
 | D1 | What is to rank? | The Pages site as the landing. GitHub and npm only carry description, keywords, topics and the homepage link. |
 | D2 | Which queries? | The long tail, one page per query: "react canvas charts", "react gantt / schedule component", "react data table columns as JSX", "react command palette", "react sparkline", "react tree view" … The head terms ("react components") stay a side goal: without backlinks, MUI, shadcn and Recharts hold them. |
 | D3 | Own domain? | No, not for now. The site stays at `https://romanhaendler.github.io/umriss-ui/`. No root `robots.txt` is possible there; the user site returns 404 for it, which allows everything. |
-| D4 | Addresses | By path, prerendered (ADR-0036). |
+| D4 | Addresses | By path, prerendered (ADR-0037). |
 | D5 | Granularity | One URL per page. Examples stay anchors within their page (`/core/card/#with-actions`) — a single example is too thin for a page of its own. **Deviation from the session:** scenarios were to get a URL each, but they are examples on the demo's front page (`placeOf(SCENARIOS, id)`), not pages; they stay anchors there, and the front page carries all their texts. Revisit if a scenario should rank on its own. |
 | D6 | Prerendering | Static HTML per page from the data of `packages/demo/src/tooling/llms.ts` — heading, lead, every example's source, the props tables — inside `#root`; the app replaces it with `createRoot` (not hydration). |
 | D7 | Old hash links | Forwarded at start: `/core/#/card/x` → `/core/card/#x`. `llms.txt`, READMEs and changelog links move to paths. |
