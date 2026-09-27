@@ -6,7 +6,7 @@
    the page's path (ADR-0036). */
 
 import type { ReactNode } from "react";
-import { hrefOf } from "./href";
+import { hrefOfText } from "./href";
 
 const MARK = /`([^`]+)`|\[([^\]]+)\]\(([^)\s]+)\)/g;
 
@@ -16,7 +16,7 @@ export function Prose({ text }: { text: string }) {
   for (const match of text.matchAll(MARK)) {
     if (match.index > at) out.push(text.slice(at, match.index));
     const [, code, label, href] = match;
-    out.push(code !== undefined ? <code key={match.index}>{code}</code> : <a key={match.index} href={href?.startsWith("#/") ? hrefOf(`${href.slice(1)}/`) : href}>{label}</a>);
+    out.push(code !== undefined ? <code key={match.index}>{code}</code> : <a key={match.index} href={href === undefined ? href : hrefOfText(href)}>{label}</a>);
     at = match.index + match[0].length;
   }
   if (at < text.length) out.push(text.slice(at));

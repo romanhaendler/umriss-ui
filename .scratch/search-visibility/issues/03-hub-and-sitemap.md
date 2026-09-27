@@ -32,3 +32,8 @@ one per demo front page), `sitemap.xml` from the same list the pages are
 written from (133 addresses), `llms.txt` with absolute links and without the
 plant sentence ADR-0035 had outlived. Not run through Google's Rich Results
 Test - that needs the site online; do it with ticket 05.
+
+After review: the guard over the built site stands in `build-pages.mjs` and
+fails the build - every sitemap address a file with title, description,
+self-canonical and h1, and no page file the sitemap misses. `404.html`
+(noindex) for addresses that are no page. `HOME` is read from the manifests.

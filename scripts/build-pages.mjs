@@ -34,9 +34,11 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SITE = join(ROOT, "site");
-const HOME = "https://romanhaendler.github.io/umriss-ui/";
 const REPOSITORY = "https://github.com/romanhaendler/umriss-ui";
 const PACKAGES = ["core", "charts", "table", "schedule", "calculation"];
+/* The site's address is the one above every package's homepage - read from
+   the manifests, which already carry it, rather than written a second time. */
+const HOME = new URL("../", JSON.parse(readFileSync(join(ROOT, "packages", PACKAGES[0], "package.json"), "utf8")).homepage).href;
 
 const escape = (text) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
@@ -72,9 +74,11 @@ function structuredData(row) {
 
 const jsonLd = (data) => `<script type="application/ld+json">${JSON.stringify(data).replace(/</g, "\\u003c")}</script>`;
 
-/* Read until the demo replaces it, and all a reader without JavaScript gets:
-   legible, not styled - the demo's look arrives with the demo. */
-const PRERENDERED_STYLE = `<style>.prerendered{max-width:48rem;margin:0 auto;padding:2rem 1rem;font:15px/1.55 system-ui,sans-serif}.prerendered pre{overflow:auto;padding:.75rem;background:rgba(127,127,127,.1)}.prerendered table{border-collapse:collapse;display:block;overflow:auto}.prerendered td,.prerendered th{border:1px solid rgba(127,127,127,.3);padding:.25rem .5rem;text-align:left;vertical-align:top}</style>`;
+/* All a reader without JavaScript gets: legible, not styled - the demo's look
+   arrives with the demo. With JavaScript the text stays in the document, for
+   the crawler, but unseen: otherwise it flashes up unstyled for the moment
+   before the demo replaces it. */
+const PRERENDERED_STYLE = `<script>document.documentElement.classList.add("js")</script><style>.js .prerendered{visibility:hidden}.prerendered{max-width:48rem;margin:0 auto;padding:2rem 1rem;font:15px/1.55 system-ui,sans-serif}.prerendered pre{overflow:auto;padding:.75rem;background:rgba(127,127,127,.1)}.prerendered table{border-collapse:collapse;display:block;overflow:auto}.prerendered td,.prerendered th{border:1px solid rgba(127,127,127,.3);padding:.25rem .5rem;text-align:left;vertical-align:top}</style>`;
 
 /** A page of a demo: the built `index.html`, told which page it is. */
 function pageDocument(template, page, extraHead = "") {
@@ -182,6 +186,59 @@ ${urls.map((url) => `  <url><loc>${escape(url)}</loc><lastmod>${today}</lastmod>
 </urlset>
 `,
 );
+
+/* An address that is no page. GitHub Pages serves this file for it; there is
+   no fallback to a demo's index.html as in the dev server. */
+writeFileSync(
+  join(SITE, "404.html"),
+  `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>Not found – umriss</title>
+    <style>:root{color-scheme:light dark}body{margin:0;font:15px/1.5 system-ui,sans-serif}main{max-width:44rem;margin:0 auto;padding:4rem 1rem}</style>
+  </head>
+  <body>
+    <main>
+      <h1>No page at this address</h1>
+      <p>The components are listed on <a href="${HOME}">the front page</a>${rows.map((row) => `, <a href="${HOME}${row.dir}/">${escape(row.name)}</a>`).join("")}.</p>
+    </main>
+  </body>
+</html>
+`,
+);
+
+/* The guard over what was written (search-visibility, Testing): every
+   address in the sitemap is a file with a title, a description, a canonical
+   pointing at itself and an h1, and there is no page file the sitemap misses.
+   A build that breaks it fails here, before it is deployed. */
+const written = [];
+const walk = (dir) => {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    if (entry.isDirectory() && entry.name !== "assets") walk(join(dir, entry.name));
+    else if (entry.name === "index.html") written.push(join(dir, entry.name));
+  }
+};
+walk(SITE);
+const expected = urls.map((url) => join(SITE, url.slice(HOME.length), "index.html"));
+const faults = [
+  ...written.filter((file) => !expected.includes(file)).map((file) => `${file}: in no sitemap entry`),
+  ...urls.flatMap((url, i) => {
+    const file = expected[i];
+    if (!existsSync(file)) return [`${url}: no file`];
+    const html = readFileSync(file, "utf8");
+    const missing = [
+      /<title>[^<]+<\/title>/.test(html) ? null : "title",
+      /<meta name="description" content="[^"]+"/.test(html) ? null : "description",
+      html.includes(`<link rel="canonical" href="${url}"`) ? null : "canonical",
+      /<h1[ >]/.test(html) ? null : "h1",
+    ].filter(Boolean);
+    return missing.length === 0 ? [] : [`${url}: no ${missing.join(", ")}`];
+  }),
+];
+if (faults.length > 0) throw new Error(`The built site fails its guard:\n${faults.join("\n")}`);
 
 /* The consoles' proof of ownership, where there is one yet. */
 const VERIFICATION = join(ROOT, "scripts", "site-verification");

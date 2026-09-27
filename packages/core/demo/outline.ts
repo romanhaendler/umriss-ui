@@ -1109,4 +1109,4 @@ export const OUTLINE: readonly Rubric[] = [
 /* The addresses follow from the outline; their format is known to the shell
    (`@umriss-ui/demo`, `outline.ts`) and to nobody else. */
 export const ADDRESSES = addresses(OUTLINE);
-export const { ALL_PAGES, placeOf, addressOf, fromAddress } = ADDRESSES;
+export const { ALL_PAGES, placeOf, addressOf, fromPlace } = ADDRESSES;

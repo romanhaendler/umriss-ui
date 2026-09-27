@@ -130,4 +130,4 @@ export const OUTLINE: readonly Rubric[] = [
 ];
 
 export const ADDRESSES = addresses(OUTLINE);
-export const { ALL_PAGES, placeOf, addressOf, fromAddress } = ADDRESSES;
+export const { ALL_PAGES, placeOf, addressOf, fromPlace } = ADDRESSES;
