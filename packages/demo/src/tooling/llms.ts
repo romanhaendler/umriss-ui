@@ -22,7 +22,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Marked, type Tokens } from "marked";
 import ts from "typescript";
-import { ADR_0032 } from "../outline.ts";
+import { ADR_0032, SCENARIOS, addressOfPlace } from "../outline.ts";
 import type { Rubric, Page } from "../outline.ts";
 import { byRank, parseFileName, parseScenarioName } from "./fileName.ts";
 import { displaySource, worldsOf } from "./source.ts";
@@ -287,11 +287,14 @@ export function missingFrom(text: string, names: readonly string[]): string[] {
 /* The two texts                                                       */
 /* ------------------------------------------------------------------ */
 
-/* A page's address is its path, an example or a scenario an anchor
-   (ADR-0036). The site's own format of it stands in `outline.ts`; here it is
-   the absolute form, under the package's homepage. */
+/** A place (`/gauge`, `#/gauge/basic`, `/scenarios/watch`) as the absolute
+    address under the package's homepage - the format is `outline.ts`'s. */
+function urlOf(homepage: string, place: string): string {
+  return homepage + addressOfPlace(place).slice(1);
+}
+
 function pageUrl(manifest: Manifest, page: Page): string {
-  return `${manifest.homepage}${page.id}/`;
+  return urlOf(manifest.homepage, `/${page.id}`);
 }
 
 /* ------------------------------------------------------------------ */
@@ -314,12 +317,13 @@ export interface SitePage {
   html: string;
 }
 
-/** What a search engine should read after the component's name, per package.
-    One word or two - the title's formula (search-visibility D8). */
+/** What a search engine should read after the page's name, per package -
+    the title's formula (search-visibility D8). */
 const NOUN: Readonly<Record<string, string>> = {
   "@umriss-ui/charts": "chart",
-  "@umriss-ui/table": "data table",
-  "@umriss-ui/schedule": "schedule component",
+  "@umriss-ui/table": "table",
+  "@umriss-ui/schedule": "schedule",
+  "@umriss-ui/calculation": "calculation",
 };
 
 function plain(text: string): string {
@@ -328,15 +332,23 @@ function plain(text: string): string {
 
 const escapeHtml = (text: string) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-/** The Markdown this file writes, as HTML. A page's heading `###` becomes the
-    document's `h1`; a `#/page` link becomes that page's address; markup written
-    in a text is shown, never passed through. */
-function markdownToHtml(markdown: string, homepage: string, lift: number): string {
+/** The Markdown this file writes, as HTML. Headings are lifted by `lift`
+    levels, so that a page's `###` becomes the document's `h1`; a heading
+    named in `anchors` carries that id, so that an example's or a scenario's
+    address points at it; a `#/page` link becomes that page's address; markup
+    written in a text is shown, never passed through. */
+function markdownToHtml(markdown: string, homepage: string, lift: number, anchors: ReadonlyMap<string, string> = new Map()): string {
   const marked = new Marked({
-    renderer: { html: ({ text }: Tokens.HTML | Tokens.Tag) => escapeHtml(text) },
+    renderer: {
+      html: ({ text }: Tokens.HTML | Tokens.Tag) => escapeHtml(text),
+      heading({ tokens, depth, text }: Tokens.Heading) {
+        const id = anchors.get(text);
+        return `<h${depth}${id === undefined ? "" : ` id="${id}"`}>${this.parser.parseInline(tokens)}</h${depth}>\n`;
+      },
+    },
     walkTokens(token) {
       if (token.type === "heading") token.depth = Math.max(1, token.depth - lift);
-      if (token.type === "link" && token.href.startsWith("#/")) token.href = `${homepage}${token.href.slice(2)}/`;
+      if (token.type === "link" && token.href.startsWith("#/")) token.href = urlOf(homepage, token.href);
     },
   });
   return (marked.parse(markdown, { async: false }) as string).trim();
@@ -401,7 +413,7 @@ export function renderLlms({ packageDir, outline, tables, worldsDir = WORLDS_DIR
           "",
           "Composed, realistic screens built from the package.",
           "",
-          ...scenarios.map((scenario) => `- [${scenario.title}](${manifest.homepage}#${scenario.id}): ${scenario.lead}`),
+          ...scenarios.map((scenario) => `- [${scenario.title}](${urlOf(manifest.homepage, `/${SCENARIOS}/${scenario.id}`)}): ${scenario.lead}`),
           "",
         ]),
     ...outline.flatMap((rubric) => [
@@ -551,6 +563,7 @@ export function renderLlms({ packageDir, outline, tables, worldsDir = WORLDS_DIR
         ].join("\n"),
         home,
         0,
+        new Map(scenarios.map((scenario) => [scenario.title, scenario.id])),
       ),
     },
     ...cuts.flatMap(({ page, from, to }) =>
@@ -558,14 +571,19 @@ export function renderLlms({ packageDir, outline, tables, worldsDir = WORLDS_DIR
         ? []
         : [
             {
-              path: `${page.id}/`,
+              path: addressOfPlace(`/${page.id}`).slice(1),
               url: pageUrl(manifest, page),
               name: page.name,
               title: `${page.name} – React ${noun} · ${manifest.name}`,
               description: plain(page.sentence),
               /* "Demo page: <this page>" is for the agent reading the full
                  text; on the page itself it would point at itself. */
-              html: markdownToHtml(`${parts.slice(from, to).filter((line) => !line.startsWith("Demo page: ")).join("\n")}\n\n${everyPage}`, home, 2),
+              html: markdownToHtml(
+                `${parts.slice(from, to).filter((line) => !line.startsWith("Demo page: ")).join("\n")}\n\n${everyPage}`,
+                home,
+                2,
+                new Map(examples.filter((example) => example.pageId === page.id).map((example) => [example.title, example.id])),
+              ),
             },
           ],
     ),

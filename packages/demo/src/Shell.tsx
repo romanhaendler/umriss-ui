@@ -82,13 +82,16 @@ function paletteCandidates({ addresses, examples, scenarios }: Demo) {
   ];
 }
 
-function placeHere(): string {
-  const path = window.location.pathname;
-  return placeOfLocation(path.startsWith(BASE) ? path.slice(BASE.length - 1) : "/", window.location.hash);
+function placeAt(path: string, hash: string): string {
+  return placeOfLocation(path.startsWith(BASE) ? path.slice(BASE.length - 1) : "/", hash);
 }
 
-function readPlace(fromAddress: Demo["addresses"]["fromAddress"]): { pageId: string; example?: string } {
-  const { page, example } = fromAddress(placeHere());
+function placeHere(): string {
+  return placeAt(window.location.pathname, window.location.hash);
+}
+
+function readPlace(fromPlace: Demo["addresses"]["fromPlace"]): { pageId: string; example?: string } {
+  const { page, example } = fromPlace(placeHere());
   /* An unknown address lands on the scenarios page and not on an empty
      surface: a typo is no reason for a white picture. */
   return { pageId: page?.id ?? "", ...(example === undefined ? {} : { example }) };
@@ -106,9 +109,9 @@ export interface ShellProps {
 }
 
 export function Shell({ demo, brand, version, sentence, actions }: ShellProps) {
-  const { OUTLINE, ALL_PAGES, fromAddress, addressOf } = demo.addresses;
+  const { OUTLINE, ALL_PAGES, fromPlace, addressOf } = demo.addresses;
   const candidates = useMemo(() => paletteCandidates(demo), [demo]);
-  const [place, setPlace] = useState(() => readPlace(fromAddress));
+  const [place, setPlace] = useState(() => readPlace(fromPlace));
   const [paletteOpen, setPaletteOpen] = useState(false);
   /* The jump needs a counter of its own. Two examples on the same page one
      after the other do not change the page - an effect hanging only on that
@@ -118,11 +121,11 @@ export function Shell({ demo, brand, version, sentence, actions }: ShellProps) {
   const goTo = useCallback(
     (pageId: string, exampleId?: string) => {
       window.history.pushState(null, "", hrefOf(addressOf(pageId, exampleId)));
-      setPlace(readPlace(fromAddress));
+      setPlace(readPlace(fromPlace));
       setJump((n) => n + 1);
       setPaletteOpen(false);
     },
-    [addressOf, fromAddress],
+    [addressOf, fromPlace],
   );
 
   useEffect(() => {
@@ -131,23 +134,26 @@ export function Shell({ demo, brand, version, sentence, actions }: ShellProps) {
        only ever shows the one form. */
     const forward = () => {
       if (!window.location.hash.startsWith("#/")) return;
-      const { page, example } = fromAddress(placeHere());
+      const { page, example } = fromPlace(placeHere());
       window.history.replaceState(null, "", hrefOf(addressOf(page?.id ?? SCENARIOS, example)));
     };
     const onMove = () => {
       forward();
-      setPlace(readPlace(fromAddress));
+      setPlace(readPlace(fromPlace));
       setJump((n) => n + 1);
     };
-    /* A link inside this demo moves without a reload, as a click in the
-       sidebar does. Another demo, a new tab or a modified click is the
-       browser's. */
+    /* A link to a page of this demo moves without a reload, as a click in
+       the sidebar does. Anything else - another demo, `llms.txt` beside this
+       one, a new tab, a modified click - is the browser's. */
     const onClick = (event: MouseEvent) => {
       const link = (event.target as Element | null)?.closest?.("a");
       if (link === null || link === undefined || link.target !== "" || link.hasAttribute("download")) return;
       if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       const url = new URL(link.href, window.location.href);
       if (url.origin !== window.location.origin || !url.pathname.startsWith(BASE)) return;
+      const place = placeAt(url.pathname, url.hash);
+      const { page, example } = fromPlace(place);
+      if (place !== "" && page === undefined && example === undefined) return;
       event.preventDefault();
       window.history.pushState(null, "", url.pathname + url.hash);
       onMove();
@@ -161,7 +167,7 @@ export function Shell({ demo, brand, version, sentence, actions }: ShellProps) {
       window.removeEventListener("hashchange", onMove);
       document.removeEventListener("click", onClick);
     };
-  }, [addressOf, fromAddress]);
+  }, [addressOf, fromPlace]);
 
   /* After the change, fetch the example meant and mark it briefly - otherwise
      one lands at the head of a page and starts searching again. */
@@ -288,7 +294,7 @@ export function Shell({ demo, brand, version, sentence, actions }: ShellProps) {
           onChoose={(id) => {
             /* Split with the same function that splits the address bar - not
                with a `split` beside it. */
-            const { page: target, example } = fromAddress(id);
+            const { page: target, example } = fromPlace(id);
             goTo(target?.id ?? SCENARIOS, example);
           }}
         />

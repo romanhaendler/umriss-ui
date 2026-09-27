@@ -41,3 +41,12 @@ every same-demo link click. `Prose`, `Page` and `Scenarios` write path hrefs.
 The sidebar entries stay buttons - turning them into links would move every
 baseline; the crawler gets the links from the prerendered page and the
 sitemap instead.
+
+After review: the address format has one owner again - `addressOfPlace` in
+`outline.ts` (with `placeOf` and its inverse `placeOfLocation`); `addressOf`,
+the texts' `#/page/example` (`href.ts` `hrefOfText`), the neighbour links and
+the llms/site URLs all go through it. `fromAddress` is `fromPlace`, since it
+takes a place. The click takeover only takes links that name a page of this
+demo, so `llms.txt` and a neighbour demo load as documents. An unknown path
+gets the site's `404.html` on GitHub Pages; the check that it lands on the
+scenarios page holds for the dev and preview servers only.

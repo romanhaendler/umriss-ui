@@ -19,7 +19,7 @@
 
    The scenarios page opens every demo. It is no page of the outline: it
    stands at `/`, a scenario on it at `/#<anchor>`. Its place - what the
-   palette and `fromAddress` speak - is `/scenarios/<anchor>` all the same.
+   palette and `fromPlace` speak - is `/scenarios/<anchor>` all the same.
 
    This file runs without a bundler too: the props generator loads a demo's
    outline in Node. That is why it imports nothing. */
@@ -68,22 +68,33 @@ export interface Addresses {
   OUTLINE: readonly Rubric[];
   /** Every page with its rubric - the flat view for palette and tests. */
   ALL_PAGES: readonly PageWithRubric[];
-  /** The place of a page, optionally with an example on it: `/button/basic`.
-      Not the address - `placeOfLocation` turns an address back into it.
+  /** The place of a page, optionally with an example on it: `/button/basic`
+      - what the palette and the texts' `#/button/basic` speak. Not the
+      address: `addressOfPlace` turns it into one, `placeOfLocation` back.
 
-      The only place that knows the format. Whoever bypasses it holds a second
-      truth about the same address; a `.replace()` on the result is one too. */
+      These three are the only spots that know the formats. Whoever bypasses
+      them holds a second truth about the same address; a `.replace()` on the
+      result is one too. */
   placeOf: (pageId: string, exampleId?: string) => string;
   /** The address, below the demo's base: `/button/`, `/button/#basic`, `/`,
       `/#<scenario>` - for `page.goto()` and for an `href`. */
   addressOf: (pageId: string, exampleId?: string) => string;
-  /** The page for a place, and the example named in it. An old hash
-      address (`#/button`) reads the same.
+  /** The page for a place, and the example named in it. A text's
+      `#/button` reads the same.
 
-      An unknown address yields no page - the shell then shows the scenarios
+      An unknown place yields no page - the shell then shows the scenarios
       page and not an empty surface. So does `scenarios/<anchor>`, with the
       scenario as the example. */
-  fromAddress: (place: string) => { page?: PageWithRubric; example?: string };
+  fromPlace: (place: string) => { page?: PageWithRubric; example?: string };
+}
+
+/** The address of a place, below the demo's base (ADR-0036): the page a
+    directory, the example an anchor on it; a scenario an anchor on the front
+    page. Needs no outline - the format is the same for every demo. */
+export function addressOfPlace(place: string): string {
+  const [page, anchor] = place.replace(/^#?\/?/, "").split("/");
+  const at = anchor === undefined || anchor === "" ? "" : `#${anchor}`;
+  return page === undefined || page === "" || page === SCENARIOS ? `/${at}` : `/${page}/${at}`;
 }
 
 /** The place an address names: the path below the demo's base and the hash
@@ -116,13 +127,9 @@ export function addresses(outline: readonly Rubric[]): Addresses {
     return exampleId === undefined ? `/${page.id}` : `/${page.id}/${exampleId}`;
   };
 
-  const addressOf = (pageId: string, exampleId?: string): string => {
-    const [, page, anchor] = placeOf(pageId, exampleId).split("/");
-    const at = anchor === undefined ? "" : `#${anchor}`;
-    return page === undefined || page === SCENARIOS ? `/${at}` : `/${page}/${at}`;
-  };
+  const addressOf = (pageId: string, exampleId?: string): string => addressOfPlace(placeOf(pageId, exampleId));
 
-  const fromAddress = (place: string): { page?: PageWithRubric; example?: string } => {
+  const fromPlace = (place: string): { page?: PageWithRubric; example?: string } => {
     const raw = place.replace(/^#/, "").replace(/^\//, "");
     if (raw === "") return {};
     const [pageId, exampleId] = raw.split("/");
@@ -132,5 +139,5 @@ export function addresses(outline: readonly Rubric[]): Addresses {
     return exampleId === undefined || exampleId === "" ? { page } : { page, example: exampleId };
   };
 
-  return { OUTLINE: outline, ALL_PAGES, placeOf, addressOf, fromAddress };
+  return { OUTLINE: outline, ALL_PAGES, placeOf, addressOf, fromPlace };
 }

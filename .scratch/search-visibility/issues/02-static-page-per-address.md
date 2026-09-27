@@ -41,3 +41,12 @@ list of every page of the package at the end. `generateLlms` writes it as
 `index.html` per path. Guarded in `tests-unit/llms.test.ts`. The static text
 stands in `#root` with a small legible style; `createRoot` replaces it. Seen
 in a browser with and without JavaScript.
+
+After review: example headings (h3 - the page's sections are h2) and the
+scenarios on the front page carry their id, so `/card/#head-and-body` points
+at them. The flash: with JavaScript the prerendered text is
+`visibility:hidden` (a class set by an inline script in the head), so it stays
+in the document but never shows unstyled; without JavaScript it shows. Title
+nouns now as D8 names them (chart, table, schedule, calculation, component).
+The demo's front page is titled `<package> – <description>`, as it has no
+page name for the formula.

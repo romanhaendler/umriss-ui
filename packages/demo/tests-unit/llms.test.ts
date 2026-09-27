@@ -22,7 +22,7 @@ const OUTLINE: readonly Rubric[] = [
       {
         id: "gauge",
         name: "Gauge",
-        sentence: "One value as a needle (also called a `dial`), beside the [Meter](#/meter).",
+        sentence: "One value as a needle (also called a `dial`), beside the [Meter](#/meter) and its [first example](#/meter/basic).",
         about: ["Read it at a glance.", "One `value`, one limit set."],
         alternatives: [{ when: "A value over time", use: "meter" }],
         keys: [{ key: "Tab", action: "Moves focus to the gauge." }],
@@ -71,14 +71,14 @@ describe("llms.txt", () => {
 
   it("lists every page under its rubric, with one line and a link", () => {
     expect(index).toContain("## Instruments\n\nWhat a value is read on.\n\n");
-    expect(index).toContain("- [Gauge](https://example.test/fixture/gauge/): One value as a needle (also called a `dial`), beside the [Meter](#/meter).\n");
+    expect(index).toContain("- [Gauge](https://example.test/fixture/gauge/): One value as a needle (also called a `dial`), beside the [Meter](#/meter) and its [first example](#/meter/basic).\n");
     expect(index).toContain("- [Meter](https://example.test/fixture/meter/): One value as a bar.\n");
   });
 });
 
 describe("llms-full.txt", () => {
   it("heads every page with its sentence and import line", () => {
-    expect(full).toContain("### Gauge\n\nOne value as a needle (also called a `dial`), beside the [Meter](#/meter).\n\n```ts\nimport { Gauge } from \"@umriss-ui/fixture\";\n```\n");
+    expect(full).toContain("### Gauge\n\nOne value as a needle (also called a `dial`), beside the [Meter](#/meter) and its [first example](#/meter/basic).\n\n```ts\nimport { Gauge } from \"@umriss-ui/fixture\";\n```\n");
   });
 
   it("carries every example's source as the demo shows it - title gone, package name in", () => {
@@ -160,7 +160,7 @@ describe("the site's pages (ADR-0036)", () => {
   it("titles a page by the formula and describes it by its sentence, as plain text", () => {
     const gauge = byPath.get("gauge/")!;
     expect(gauge.title).toBe("Gauge – React component · @umriss-ui/fixture");
-    expect(gauge.description).toBe("One value as a needle (also called a dial), beside the Meter.");
+    expect(gauge.description).toBe("One value as a needle (also called a dial), beside the Meter and its first example.");
     expect(gauge.url).toBe("https://example.test/fixture/gauge/");
   });
 
@@ -169,6 +169,7 @@ describe("the site's pages (ADR-0036)", () => {
     expect(html).toMatch(/^<h1>Gauge<\/h1>/);
     expect(html).toContain("<code>dial</code>");
     expect(html).toContain('<a href="https://example.test/fixture/meter/">Meter</a>');
+    expect(html).toContain('<a href="https://example.test/fixture/meter/#basic">first example</a>');
     expect(html).toContain("The value the needle points at.");
     expect(html).toContain("<pre><code");
     expect(html).not.toContain("#/");
@@ -179,6 +180,13 @@ describe("the site's pages (ADR-0036)", () => {
       expect(one.html).toContain('href="https://example.test/fixture/gauge/"');
       expect(one.html).toContain('href="https://example.test/fixture/meter/"');
     }
+  });
+
+  it("gives each example's heading its id, so that its address points at it", () => {
+    for (const one of pages.filter((page) => page.path === "gauge/")) {
+      expect(one.html).toMatch(/<h3 id="[a-z-]+">/);
+    }
+    expect(byPath.get("")!.html).toContain('<h3 id="watch-latency">');
   });
 
   it("puts the scenarios and the pages on the front page", () => {

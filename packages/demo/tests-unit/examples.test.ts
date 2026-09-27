@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 import { readExamples, readScenarios } from "../src/tooling/examples";
-import { addresses, placeOfLocation } from "../src/outline";
+import { addressOfPlace, addresses, placeOfLocation } from "../src/outline";
 import type { Rubric } from "../src/outline";
 
 const OUTLINE: readonly Rubric[] = [
@@ -15,7 +15,7 @@ const OUTLINE: readonly Rubric[] = [
     pages: [{ id: "gauge", name: "Gauge", sentence: "One value.", types: [], exports: ["Gauge"] }],
   },
 ];
-const { ALL_PAGES, placeOf, addressOf, fromAddress } = addresses(OUTLINE);
+const { ALL_PAGES, placeOf, addressOf, fromPlace } = addresses(OUTLINE);
 const Screen = () => null;
 const WORLDS = { "../../demo/src/worlds/operations.ts": "export const SERVICES = [];\n" };
 const options = { pages: ALL_PAGES, packageName: "@umriss-ui/fixture", worlds: WORLDS };
@@ -114,9 +114,9 @@ describe("the scenarios page's addresses", () => {
   });
 
   it("reads a scenario's address back as no page with the scenario as its example", () => {
-    expect(fromAddress("/scenarios/watch")).toEqual({ example: "watch" });
-    expect(fromAddress("/scenarios")).toEqual({});
-    expect(fromAddress("/gauge").page?.id).toBe("gauge");
+    expect(fromPlace("/scenarios/watch")).toEqual({ example: "watch" });
+    expect(fromPlace("/scenarios")).toEqual({});
+    expect(fromPlace("/gauge").page?.id).toBe("gauge");
   });
 });
 
@@ -132,6 +132,13 @@ describe("a page's address is a path (ADR-0036)", () => {
     expect(placeOfLocation("/gauge", "")).toBe("/gauge");
     expect(placeOfLocation("/", "")).toBe("");
     expect(placeOfLocation("/", "#watch")).toBe("/scenarios/watch");
+  });
+
+  it("turns a text's `#/page` and `#/page/example` into their addresses", () => {
+    expect(addressOfPlace("#/gauge")).toBe("/gauge/");
+    expect(addressOfPlace("#/gauge/basic")).toBe("/gauge/#basic");
+    expect(addressOfPlace("#/scenarios/watch")).toBe("/#watch");
+    expect(addressOfPlace("")).toBe("/");
   });
 
   it("still reads an old hash address, so old links land", () => {
