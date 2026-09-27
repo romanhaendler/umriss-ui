@@ -29,6 +29,18 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.14.1 – Found by search (Sep. 2026)
+
+### Fixed
+
+- **The package's description and keywords say what it is in the words a
+  search uses**, and the demo it links to addresses every page by a path
+  (`…/core/<page>/`) instead of a hash, with the page's text readable before
+  the demo starts. Old `#/<page>` links still land. Nothing in the package's
+  code changed.
+
+---
+
 ## 0.14.0 – Words for a table's rows (Sep. 2026)
 
 ### Added
