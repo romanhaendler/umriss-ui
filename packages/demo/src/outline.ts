@@ -4,7 +4,9 @@
    the props types and the import line. What stands here is what all outlines
    have in common: their shape and the format of their addresses.
 
-   About the address. It is single-segment: `#/button`. The rubric is
+   About the address. It is a path of one segment: `/button/`, an example on
+   the page an anchor, `/button/#basic` (ADR-0036 - a search engine reads no
+   hash, so the hash `#/button` it once was only forwards now). The rubric is
    deliberately NOT in it. A rubric sorts the sidebar and means nothing inside
    the library; were it in the address, every re-sorting of the sidebar would
    break every link (CONTEXT.md, "Rubric"). Component names are unique within a
@@ -12,10 +14,12 @@
 
    The texts of a page - lede, about, alternatives, keys, limits - are plain
    strings with two marks: `code` in backticks and a [link](#/page). The demo
-   renders them, the llms text carries them as they are.
+   renders them, turning `#/page` into the page's address; the llms text
+   carries them as they are.
 
    The scenarios page opens every demo. It is no page of the outline: it
-   stands at `#/`, a scenario on it at `#/scenarios/<anchor>`.
+   stands at `/`, a scenario on it at `/#<anchor>`. Its place - what the
+   palette and `fromAddress` speak - is `/scenarios/<anchor>` all the same.
 
    This file runs without a bundler too: the props generator loads a demo's
    outline in Node. That is why it imports nothing. */
@@ -64,20 +68,33 @@ export interface Addresses {
   OUTLINE: readonly Rubric[];
   /** Every page with its rubric - the flat view for palette and tests. */
   ALL_PAGES: readonly PageWithRubric[];
-  /** The place of a page, optionally with an example on it - as it stands
-      behind the `#`.
+  /** The place of a page, optionally with an example on it: `/button/basic`.
+      Not the address - `placeOfLocation` turns an address back into it.
 
       The only place that knows the format. Whoever bypasses it holds a second
       truth about the same address; a `.replace()` on the result is one too. */
   placeOf: (pageId: string, exampleId?: string) => string;
-  /** The same address as a whole - for `page.goto()` and for an `href`. */
+  /** The address, below the demo's base: `/button/`, `/button/#basic`, `/`,
+      `/#<scenario>` - for `page.goto()` and for an `href`. */
   addressOf: (pageId: string, exampleId?: string) => string;
-  /** The page for an address, and the example named in it.
+  /** The page for a place, and the example named in it. An old hash
+      address (`#/button`) reads the same.
 
       An unknown address yields no page - the shell then shows the scenarios
       page and not an empty surface. So does `scenarios/<anchor>`, with the
       scenario as the example. */
-  fromAddress: (hash: string) => { page?: PageWithRubric; example?: string };
+  fromAddress: (place: string) => { page?: PageWithRubric; example?: string };
+}
+
+/** The place an address names: the path below the demo's base and the hash
+    as the browser reports them. An old hash address (`#/button/basic`) wins
+    over the path - that is how old links still land. */
+export function placeOfLocation(path: string, hash: string): string {
+  if (hash.startsWith("#/")) return hash.slice(1);
+  const page = path.replace(/^\/+|\/+$/g, "");
+  const anchor = hash.replace(/^#/, "");
+  if (page === "") return anchor === "" ? "" : `/${SCENARIOS}/${anchor}`;
+  return anchor === "" ? `/${page}` : `/${page}/${anchor}`;
 }
 
 /** The record of what umriss is not - every page's known limits point there. */
@@ -100,12 +117,13 @@ export function addresses(outline: readonly Rubric[]): Addresses {
   };
 
   const addressOf = (pageId: string, exampleId?: string): string => {
-    const place = placeOf(pageId, exampleId);
-    return place === "" ? "/" : `/#${place}`;
+    const [, page, anchor] = placeOf(pageId, exampleId).split("/");
+    const at = anchor === undefined ? "" : `#${anchor}`;
+    return page === undefined || page === SCENARIOS ? `/${at}` : `/${page}/${at}`;
   };
 
-  const fromAddress = (hash: string): { page?: PageWithRubric; example?: string } => {
-    const raw = hash.replace(/^#/, "").replace(/^\//, "");
+  const fromAddress = (place: string): { page?: PageWithRubric; example?: string } => {
+    const raw = place.replace(/^#/, "").replace(/^\//, "");
     if (raw === "") return {};
     const [pageId, exampleId] = raw.split("/");
     if (pageId === SCENARIOS) return exampleId === undefined || exampleId === "" ? {} : { example: exampleId };

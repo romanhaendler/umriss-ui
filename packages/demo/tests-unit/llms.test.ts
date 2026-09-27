@@ -22,7 +22,7 @@ const OUTLINE: readonly Rubric[] = [
       {
         id: "gauge",
         name: "Gauge",
-        sentence: "One value as a needle.",
+        sentence: "One value as a needle (also called a `dial`), beside the [Meter](#/meter).",
         about: ["Read it at a glance.", "One `value`, one limit set."],
         alternatives: [{ when: "A value over time", use: "meter" }],
         keys: [{ key: "Tab", action: "Moves focus to the gauge." }],
@@ -54,7 +54,7 @@ const TABLES: Record<string, TypeEntry> = {
   },
 };
 
-const { index, full } = renderLlms({ packageDir: PACKAGE_DIR, outline: OUTLINE, tables: TABLES, worldsDir: join(PACKAGE_DIR, "worlds") });
+const { index, full, pages } = renderLlms({ packageDir: PACKAGE_DIR, outline: OUTLINE, tables: TABLES, worldsDir: join(PACKAGE_DIR, "worlds") });
 
 describe("llms.txt", () => {
   it("names the package, its summary and where the full text is", () => {
@@ -65,20 +65,20 @@ describe("llms.txt", () => {
 
   it("lists the scenarios first, with their lead and a link", () => {
     expect(index).toContain("## Scenarios\n");
-    expect(index).toContain("- [Watch a service's latency](https://example.test/fixture/#/scenarios/watch-latency): An on-call engineer keeps it open beside the incident channel.\n");
+    expect(index).toContain("- [Watch a service's latency](https://example.test/fixture/#watch-latency): An on-call engineer keeps it open beside the incident channel.\n");
     expect(index.indexOf("## Scenarios")).toBeLessThan(index.indexOf("## Instruments"));
   });
 
   it("lists every page under its rubric, with one line and a link", () => {
     expect(index).toContain("## Instruments\n\nWhat a value is read on.\n\n");
-    expect(index).toContain("- [Gauge](https://example.test/fixture/#/gauge): One value as a needle.\n");
-    expect(index).toContain("- [Meter](https://example.test/fixture/#/meter): One value as a bar.\n");
+    expect(index).toContain("- [Gauge](https://example.test/fixture/gauge/): One value as a needle (also called a `dial`), beside the [Meter](#/meter).\n");
+    expect(index).toContain("- [Meter](https://example.test/fixture/meter/): One value as a bar.\n");
   });
 });
 
 describe("llms-full.txt", () => {
   it("heads every page with its sentence and import line", () => {
-    expect(full).toContain("### Gauge\n\nOne value as a needle.\n\n```ts\nimport { Gauge } from \"@umriss-ui/fixture\";\n```\n");
+    expect(full).toContain("### Gauge\n\nOne value as a needle (also called a `dial`), beside the [Meter](#/meter).\n\n```ts\nimport { Gauge } from \"@umriss-ui/fixture\";\n```\n");
   });
 
   it("carries every example's source as the demo shows it - title gone, package name in", () => {
@@ -147,5 +147,48 @@ describe("llms-full.txt", () => {
     /* On a page already, so not again - and the demo's data is not the package's. */
     expect(rest).not.toContain("### `Gauge`");
     expect(full.indexOf("## The rest of the API")).toBeLessThan(full.indexOf("## Files the examples show"));
+  });
+});
+
+describe("the site's pages (ADR-0036)", () => {
+  const byPath = new Map(pages.map((one) => [one.path, one]));
+
+  it("has one per page of the outline, and the front page", () => {
+    expect([...byPath.keys()].sort()).toEqual(["", "gauge/", "meter/"]);
+  });
+
+  it("titles a page by the formula and describes it by its sentence, as plain text", () => {
+    const gauge = byPath.get("gauge/")!;
+    expect(gauge.title).toBe("Gauge – React component · @umriss-ui/fixture");
+    expect(gauge.description).toBe("One value as a needle (also called a dial), beside the Meter.");
+    expect(gauge.url).toBe("https://example.test/fixture/gauge/");
+  });
+
+  it("carries the page's text, its examples' source and its table as HTML", () => {
+    const html = byPath.get("gauge/")!.html;
+    expect(html).toMatch(/^<h1>Gauge<\/h1>/);
+    expect(html).toContain("<code>dial</code>");
+    expect(html).toContain('<a href="https://example.test/fixture/meter/">Meter</a>');
+    expect(html).toContain("The value the needle points at.");
+    expect(html).toContain("<pre><code");
+    expect(html).not.toContain("#/");
+  });
+
+  it("links every page from every page", () => {
+    for (const one of pages) {
+      expect(one.html).toContain('href="https://example.test/fixture/gauge/"');
+      expect(one.html).toContain('href="https://example.test/fixture/meter/"');
+    }
+  });
+
+  it("puts the scenarios and the pages on the front page", () => {
+    const front = byPath.get("")!;
+    expect(front.title).toBe("@umriss-ui/fixture – A fixture package for the llms.txt generator.");
+    expect(front.html).toContain("Watch a service&#39;s latency");
+    expect(front.url).toBe("https://example.test/fixture/");
+  });
+
+  it("escapes markup written in a text instead of passing it through", () => {
+    expect(pages.map((one) => one.html).join("")).not.toMatch(/<(div|script)[ >]/);
   });
 });

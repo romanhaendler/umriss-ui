@@ -1,6 +1,6 @@
 # @umriss-ui/calculation
 
-A calculation a reader can follow and redo. A screen shows a figure — an
+A React calculation view: a calculation a reader can follow and redo. A screen shows a figure — an
 availability of 99.9 %, a cost per tour, an invoice total — and this package
 shows how it came about, as a
 statement of account: the operator before each number, the final result above a

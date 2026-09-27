@@ -1,6 +1,6 @@
 # 04 - Searchable first lines
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Spec: `.scratch/search-visibility/spec.md` (D2, D10)
@@ -20,3 +20,10 @@ Spec: `.scratch/search-visibility/spec.md` (D2, D10)
 ## Acceptance
 
 - Read by the user once for voice. No claim that is not true of the package.
+
+## Comments
+
+Delivered: descriptions and keywords of all five manifests, the first
+sentence of the root README and of each package README. The page summaries
+already name their synonyms ("also called …") and were left alone. Waits for
+the user's read for voice.

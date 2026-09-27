@@ -49,11 +49,12 @@ above.
 
 ## What is deliberately not here
 
-**No documentation website.** The demos are the documentation for the
-components, and they are online as they are —
-<https://romanhaendler.github.io/umriss-ui/>, built by `pnpm build:pages`. A site
-that hosts this prose beside them is still a product decision with a spec of its
-own. This page is its table of contents when it comes.
+**No documentation website beside the demos.** The demos are the documentation
+for the components, online at <https://romanhaendler.github.io/umriss-ui/>, built
+by `pnpm build:pages`. Every demo page is a path with its text prerendered, so
+that a search engine reads it (ADR-0036) — the demos, prerendered, are the
+website. A site that hosts this prose beside them is still a product decision
+with a spec of its own; this page is its table of contents when it comes.
 
 **No prose copy of the demos.** A component is described where it runs, with the
 source that produced it and a props table generated from `src/` — a second

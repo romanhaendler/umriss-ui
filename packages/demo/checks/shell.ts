@@ -82,7 +82,7 @@ test("an entry in the sidebar opens its page", async ({ page }) => {
   await page.getByRole("navigation", { name: "Components" }).getByText(p.rail.name, { exact: true }).click();
   await expect(page.locator(`[data-block="${p.rail.pageId}"]`)).toBeVisible();
   // The rubric is NOT in the address (CONTEXT.md, "Rubric").
-  expect(page.url()).toContain(`#/${p.rail.pageId}`);
+  expect(new URL(page.url()).pathname).toBe(`/${p.rail.pageId}/`);
   expect(page.url()).not.toContain(p.rail.rubricId);
 });
 
@@ -93,7 +93,7 @@ test("two pages of the same rubric in turn", async ({ page }) => {
 
   await rail.getByText(p.neighbours[1].name, { exact: true }).click();
   await expect(page.locator(`[data-block="${p.neighbours[1].pageId}"]`)).toBeVisible();
-  expect(page.url()).toContain(`#/${p.neighbours[1].pageId}`);
+  expect(new URL(page.url()).pathname).toBe(`/${p.neighbours[1].pageId}/`);
 
   // And back again.
   await rail.getByText(p.neighbours[0].name, { exact: true }).click();
@@ -111,25 +111,32 @@ test("history carries: back and forward again", async ({ page }) => {
 });
 
 test("the address is the place: a deep link lands on the page", async ({ page }) => {
-  await page.goto(`/#/${p.deepLink.pageId}`);
+  await page.goto(`/${p.deepLink.pageId}/`);
   await expect(page.locator(`[data-block="${p.deepLink.pageId}"]`)).toBeVisible();
   await expect(page.locator(`[data-block="${p.deepLink.absent}"]`)).toHaveCount(0);
 });
 
-test("the address of an example brings it into view", async ({ page }) => {
+test("an old hash address is forwarded to its path (ADR-0036)", async ({ page }) => {
   await page.goto(`/#/${p.example.pageId}/${p.example.id}`);
+  await expect(page.locator(`[data-example="${p.example.id}"]`)).toBeInViewport();
+  const url = new URL(page.url());
+  expect(url.pathname + url.hash).toBe(`/${p.example.pageId}/#${p.example.id}`);
+});
+
+test("the address of an example brings it into view", async ({ page }) => {
+  await page.goto(`/${p.example.pageId}/#${p.example.id}`);
   const target = page.locator(`[data-example="${p.example.id}"]`);
   await expect(target).toBeInViewport();
 });
 
 test("an unknown address lands on the scenarios page, not on nothing", async ({ page }) => {
-  await page.goto("/#/gibtesnicht");
+  await page.goto("/gibtesnicht/");
   await expect(page.locator('[data-block="scenarios"]')).toBeVisible();
 });
 
 test("the address of a scenario brings it into view", async ({ page }) => {
   test.skip(p.scenario === undefined, "this demo has no scenario yet");
-  await page.goto(`/#/scenarios/${p.scenario}`);
+  await page.goto(`/#${p.scenario}`);
   await expect(page.locator(`[data-scenario="${p.scenario}"]`)).toBeInViewport();
 });
 

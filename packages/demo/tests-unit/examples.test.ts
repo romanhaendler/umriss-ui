@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 import { readExamples, readScenarios } from "../src/tooling/examples";
-import { addresses } from "../src/outline";
+import { addresses, placeOfLocation } from "../src/outline";
 import type { Rubric } from "../src/outline";
 
 const OUTLINE: readonly Rubric[] = [
@@ -107,14 +107,42 @@ describe("readScenarios", () => {
 });
 
 describe("the scenarios page's addresses", () => {
-  it("stands at the front, a scenario under /scenarios/", () => {
+  it("stands at the front, a scenario as an anchor on it", () => {
     expect(placeOf("scenarios")).toBe("");
-    expect(addressOf("scenarios", "watch")).toBe("/#/scenarios/watch");
+    expect(addressOf("scenarios")).toBe("/");
+    expect(addressOf("scenarios", "watch")).toBe("/#watch");
   });
 
   it("reads a scenario's address back as no page with the scenario as its example", () => {
-    expect(fromAddress("#/scenarios/watch")).toEqual({ example: "watch" });
-    expect(fromAddress("#/scenarios")).toEqual({});
-    expect(fromAddress("#/gauge").page?.id).toBe("gauge");
+    expect(fromAddress("/scenarios/watch")).toEqual({ example: "watch" });
+    expect(fromAddress("/scenarios")).toEqual({});
+    expect(fromAddress("/gauge").page?.id).toBe("gauge");
+  });
+});
+
+describe("a page's address is a path (ADR-0036)", () => {
+  it("names the page as a directory, an example as an anchor on it", () => {
+    expect(addressOf("gauge")).toBe("/gauge/");
+    expect(addressOf("gauge", "basic")).toBe("/gauge/#basic");
+  });
+
+  it("reads the location back into the place it came from", () => {
+    expect(placeOfLocation("/gauge/", "")).toBe("/gauge");
+    expect(placeOfLocation("/gauge/", "#basic")).toBe("/gauge/basic");
+    expect(placeOfLocation("/gauge", "")).toBe("/gauge");
+    expect(placeOfLocation("/", "")).toBe("");
+    expect(placeOfLocation("/", "#watch")).toBe("/scenarios/watch");
+  });
+
+  it("still reads an old hash address, so old links land", () => {
+    expect(placeOfLocation("/", "#/gauge/basic")).toBe("/gauge/basic");
+    expect(placeOfLocation("/", "#/scenarios/watch")).toBe("/scenarios/watch");
+  });
+
+  it("round-trips every address through the location", () => {
+    for (const [pageId, exampleId] of [["gauge"], ["gauge", "basic"], ["scenarios", "watch"]] as const) {
+      const url = new URL(addressOf(pageId, exampleId), "https://example.test");
+      expect(placeOfLocation(url.pathname, url.hash)).toBe(placeOf(pageId, exampleId));
+    }
   });
 });

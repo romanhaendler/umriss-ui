@@ -18,6 +18,20 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Sep. 2026 — Found by search, on our own merits
+
+- **Every demo page is a path now, with its text prerendered** (ADR-0036,
+  `.scratch/search-visibility/`). The demos had addressed their pages by the
+  hash, which a search engine does not read: five indexable URLs, each an
+  empty `#root`. Now `/umriss-ui/core/card/` is a file of its own with the
+  page's title, description, canonical, its examples' source and its props
+  tables - cut from the same run that writes `llms.txt` - and the demo
+  replaces that text when it starts. An old `#/card` link is forwarded. 128
+  pages, a sitemap, and a front page that links every one of them.
+- **Only our own channels.** No backlinks, by the user's choice: the site, the
+  repository's description and topics (set on 27 Sep, empty until then), and
+  npm's descriptions and keywords, which now begin with what a searcher types.
+
 ## Sep. 2026 — The table demo by feature, popovers by their trigger
 
 - **The table demo is cut by feature**, as the schedule's already was:

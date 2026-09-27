@@ -20,6 +20,7 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { Marked, type Tokens } from "marked";
 import ts from "typescript";
 import { ADR_0032 } from "../outline.ts";
 import type { Rubric, Page } from "../outline.ts";
@@ -286,8 +287,59 @@ export function missingFrom(text: string, names: readonly string[]): string[] {
 /* The two texts                                                       */
 /* ------------------------------------------------------------------ */
 
+/* A page's address is its path, an example or a scenario an anchor
+   (ADR-0036). The site's own format of it stands in `outline.ts`; here it is
+   the absolute form, under the package's homepage. */
 function pageUrl(manifest: Manifest, page: Page): string {
-  return `${manifest.homepage}#/${page.id}`;
+  return `${manifest.homepage}${page.id}/`;
+}
+
+/* ------------------------------------------------------------------ */
+/* The site's pages                                                    */
+/* ------------------------------------------------------------------ */
+
+/** One prerendered page of the site: what a search engine reads before the
+    demo starts (ADR-0036). */
+export interface SitePage {
+  /** Below the package's directory on the site: `""` for the front page,
+      `gauge/` for a page. */
+  path: string;
+  url: string;
+  /** The page's name, or the package's on the front page. */
+  name: string;
+  title: string;
+  /** Plain text - the page's sentence without its marks. */
+  description: string;
+  /** What stands in `#root` until the demo replaces it. */
+  html: string;
+}
+
+/** What a search engine should read after the component's name, per package.
+    One word or two - the title's formula (search-visibility D8). */
+const NOUN: Readonly<Record<string, string>> = {
+  "@umriss-ui/charts": "chart",
+  "@umriss-ui/table": "data table",
+  "@umriss-ui/schedule": "schedule component",
+};
+
+function plain(text: string): string {
+  return text.replace(/\[([^\]]+)\]\([^)\s]+\)/g, "$1").replace(/`+ ?([^`]+?) ?`+/g, "$1");
+}
+
+const escapeHtml = (text: string) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+/** The Markdown this file writes, as HTML. A page's heading `###` becomes the
+    document's `h1`; a `#/page` link becomes that page's address; markup written
+    in a text is shown, never passed through. */
+function markdownToHtml(markdown: string, homepage: string, lift: number): string {
+  const marked = new Marked({
+    renderer: { html: ({ text }: Tokens.HTML | Tokens.Tag) => escapeHtml(text) },
+    walkTokens(token) {
+      if (token.type === "heading") token.depth = Math.max(1, token.depth - lift);
+      if (token.type === "link" && token.href.startsWith("#/")) token.href = `${homepage}${token.href.slice(2)}/`;
+    },
+  });
+  return (marked.parse(markdown, { async: false }) as string).trim();
 }
 
 function tableMarkdown(entry: TypeEntry): string {
@@ -314,7 +366,7 @@ function tableMarkdown(entry: TypeEntry): string {
 }
 
 /** Both texts of one package, from its directory. Pure apart from reading. */
-export function renderLlms({ packageDir, outline, tables, worldsDir = WORLDS_DIR }: LlmsJob): { index: string; full: string } {
+export function renderLlms({ packageDir, outline, tables, worldsDir = WORLDS_DIR }: LlmsJob): { index: string; full: string; pages: SitePage[] } {
   const manifest = JSON.parse(readFileSync(join(packageDir, "package.json"), "utf8")) as Manifest;
   const demoDir = join(packageDir, "demo");
   const examples = listExamples(demoDir)
@@ -349,7 +401,7 @@ export function renderLlms({ packageDir, outline, tables, worldsDir = WORLDS_DIR
           "",
           "Composed, realistic screens built from the package.",
           "",
-          ...scenarios.map((scenario) => `- [${scenario.title}](${manifest.homepage}#/scenarios/${scenario.id}): ${scenario.lead}`),
+          ...scenarios.map((scenario) => `- [${scenario.title}](${manifest.homepage}#${scenario.id}): ${scenario.lead}`),
           "",
         ]),
     ...outline.flatMap((rubric) => [
@@ -377,7 +429,11 @@ export function renderLlms({ packageDir, outline, tables, worldsDir = WORLDS_DIR
     parts.push("", `It imports ${names.join(", ")} from beside itself; the file stands once, under "Files the examples show" at the end.`);
     worlds.forEach((world) => shown.add(world));
   };
+  /* Where each page's part of the full text begins and ends - the site's
+     pages are cut from it, so they cannot say anything else. */
+  const cuts: { page?: Page; from: number; to: number }[] = [];
   if (scenarios.length > 0) {
+    const from = parts.length;
     parts.push("", "## Scenarios", "", "Composed, realistic screens built from the package. A numbered mark on the screen is an element with `data-callout`.");
     for (const scenario of scenarios) {
       parts.push("", `### ${scenario.title}`, "", scenario.lead);
@@ -389,10 +445,12 @@ export function renderLlms({ packageDir, outline, tables, worldsDir = WORLDS_DIR
       parts.push("", `Built from: ${built.join(", ")}.`, "", fenced("tsx", scenario.source));
       beside(scenario.worlds);
     }
+    cuts.push({ from, to: parts.length });
   }
   for (const rubric of outline) {
     parts.push("", `## ${rubric.name}`, "", rubric.sentence);
     for (const page of rubric.pages) {
+      const from = parts.length;
       parts.push("", `### ${page.name}`, "", page.sentence);
       if (page.exports.length > 0) parts.push("", fenced("ts", `import { ${page.exports.join(", ")} } from "${manifest.name}";`));
       parts.push("", `Demo page: ${pageUrl(manifest, page)}`);
@@ -427,6 +485,7 @@ export function renderLlms({ packageDir, outline, tables, worldsDir = WORLDS_DIR
       if (page.limits !== undefined) {
         parts.push("", "#### Known limits", "", page.limits.map((text) => `- ${text}`).join("\n"), "", `What umriss deliberately does not build, and why: [ADR-0032](${ADR_0032}).`);
       }
+      cuts.push({ page, from, to: parts.length });
     }
   }
 
@@ -454,18 +513,79 @@ export function renderLlms({ packageDir, outline, tables, worldsDir = WORLDS_DIR
     }
   }
 
-  return { index, full: `${parts.join("\n")}\n` };
+  /* The site's pages. Every one links every other, under its rubric - with
+     no links from elsewhere (search-visibility, "only our own"), the links
+     between our own pages are what a crawler walks. */
+  const home = manifest.homepage;
+  /* Written at a page's heading levels: `###` is the page, so `####` is h2. */
+  const everyPage = [
+    `#### Every page of ${manifest.name}`,
+    "",
+    ...outline.flatMap((rubric) => [`##### ${rubric.name}`, "", ...rubric.pages.map((page) => `- [${page.name}](${pageUrl(manifest, page)})`), ""]),
+  ].join("\n");
+  const noun = NOUN[manifest.name] ?? "component";
+  const sitePages: SitePage[] = [
+    {
+      path: "",
+      url: home,
+      name: manifest.name,
+      title: `${manifest.name} – ${manifest.description}`,
+      description: manifest.description,
+      html: markdownToHtml(
+        [
+          `# ${manifest.name}`,
+          "",
+          manifest.description,
+          "",
+          `Install with \`${install}\`.`,
+          ...cuts.filter((cut) => cut.page === undefined).map((cut) => parts.slice(cut.from, cut.to).join("\n")),
+          "",
+          ...outline.flatMap((rubric) => [
+            `## ${rubric.name}`,
+            "",
+            rubric.sentence,
+            "",
+            ...rubric.pages.map((page) => `- [${page.name}](${pageUrl(manifest, page)}): ${page.sentence}`),
+            "",
+          ]),
+        ].join("\n"),
+        home,
+        0,
+      ),
+    },
+    ...cuts.flatMap(({ page, from, to }) =>
+      page === undefined
+        ? []
+        : [
+            {
+              path: `${page.id}/`,
+              url: pageUrl(manifest, page),
+              name: page.name,
+              title: `${page.name} – React ${noun} · ${manifest.name}`,
+              description: plain(page.sentence),
+              /* "Demo page: <this page>" is for the agent reading the full
+                 text; on the page itself it would point at itself. */
+              html: markdownToHtml(`${parts.slice(from, to).filter((line) => !line.startsWith("Demo page: ")).join("\n")}\n\n${everyPage}`, home, 2),
+            },
+          ],
+    ),
+  ];
+
+  return { index, full: `${parts.join("\n")}\n`, pages: sitePages };
 }
 
-/** Writes `demo/.generated/llms.txt` and `docs/llms-full.md`. Neither is
-    checked in: a generation drifts from its source (`.gitignore`). */
+/** Writes `demo/.generated/llms.txt`, `demo/.generated/pages.json` (the
+    site's pages, which `scripts/build-pages.mjs` writes out) and
+    `docs/llms-full.md`. None is checked in: a generation drifts from its
+    source (`.gitignore`). */
 export function generateLlms(job: LlmsJob): void {
-  const { index, full } = renderLlms(job);
+  const { index, full, pages } = renderLlms(job);
   const indexPath = join(job.packageDir, "demo", ".generated", "llms.txt");
   const fullPath = join(job.packageDir, "docs", "llms-full.md");
   mkdirSync(dirname(indexPath), { recursive: true });
   mkdirSync(dirname(fullPath), { recursive: true });
   writeFileSync(indexPath, index, "utf8");
+  writeFileSync(join(dirname(indexPath), "pages.json"), JSON.stringify(pages), "utf8");
   writeFileSync(fullPath, full, "utf8");
   process.stdout.write(`llms-full.md: ${Math.round(Buffer.byteLength(full) / 1024)} kB.\n`);
 }

@@ -1,6 +1,6 @@
 # @umriss-ui/charts
 
-Canvas-based charts for data-dense applications: few chart kinds, each one drawn
+React canvas charts for data-dense dashboards: few chart kinds, each one drawn
 properly. Lines, areas, bars, scatters, state bands and matrices compose into
 one chart on shared axes — together with the instruments a monitoring screen is
 made of: limit lines and bands, a control chart, a Pareto and a working-time

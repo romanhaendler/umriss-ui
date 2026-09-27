@@ -1,7 +1,7 @@
 {
   "name": "@umriss-ui/core",
   "version": "0.14.0",
-  "description": "A React component library for data-dense applications - precise, quiet, professional.",
+  "description": "React component library for data-dense dashboards and tools - forms, date pickers, overlays, a tree view and a command palette. Precise, quiet, professional.",
   "license": "MIT",
   "author": "Roman Händler",
   "homepage": "https://romanhaendler.github.io/umriss-ui/core/",
@@ -15,10 +15,17 @@
   },
   "keywords": [
     "react",
-    "components",
+    "react-components",
+    "component-library",
     "ui",
-    "umriss",
-    "design-system"
+    "ui-library",
+    "design-system",
+    "typescript",
+    "dashboard",
+    "date-picker",
+    "command-palette",
+    "tree-view",
+    "umriss"
   ],
   "type": "module",
   "files": [

@@ -883,7 +883,9 @@ examples and "Why it is like this" texts.
 **Page**:
 Everything the demo says about one thing a reader looks up, at one address. A
 page is the unit of the demo: the sidebar lists pages, the palette finds pages,
-an address names a page.
+an address names a page. The address is a path, `/card/`, and an example on the
+page an anchor on it, `/card/#head-and-body` — a search engine reads no hash
+(ADR-0036).
 
 What that thing is depends on how many things the package has to say. Where a
 package is a shelf of components, a page is a component — with one exception: a
@@ -965,8 +967,8 @@ nothing. **Status and waiting** and not "State": **State** is the charts' word
 
 An **Example**'s file exports its name as `title`. A page's address is its
 component name, lower-cased, and a rename of the outline never touches it - with
-one exception, taken once: the page `Stack and Grid` is `#/stack-and-grid`,
-because `#/stack-und-grid` carried a German word in an address that no
+one exception, taken once: the page `Stack and Grid` is `/stack-and-grid/`,
+because `/stack-und-grid/` carried a German word in an address that no
 component name put there.
 
 
