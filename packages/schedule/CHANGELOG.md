@@ -15,6 +15,18 @@ moves from here under the rule above.
 
 ---
 
+## 0.3.5 – Found by search (Sep. 2026)
+
+### Fixed
+
+- **The package's description and keywords say what it is in the words a
+  search uses**, and the demo it links to addresses every page by a path
+  (`…/schedule/<page>/`) instead of a hash, with the page's text readable before
+  the demo starts. Old `#/<page>` links still land. Nothing in the package's
+  code changed.
+
+---
+
 ## 0.3.4 – Core 0.14.0 (Sep. 2026)
 
 Needs `@umriss-ui/core` 0.14; the peer range moves to `^0.14.0`. Nothing else changes for a caller.
