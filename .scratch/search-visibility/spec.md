@@ -1,6 +1,6 @@
 # Found by search, on our own merits
 
-Status: ready-for-agent
+Status: ready-for-human
 Date:   2026-09-27
 Origin: grilling session with the user, 27 Sep 2026. Decision record: ADR-0036.
 

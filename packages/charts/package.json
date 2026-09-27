@@ -1,7 +1,7 @@
 {
   "name": "@umriss-ui/charts",
   "version": "0.8.0",
-  "description": "Canvas charts for data-dense applications - few chart kinds, drawn well, fast.",
+  "description": "React canvas chart library for data-dense dashboards - line, area, bar, scatter, control and Pareto charts. Few chart kinds, drawn well, fast.",
   "license": "MIT",
   "author": "Roman Händler",
   "homepage": "https://romanhaendler.github.io/umriss-ui/charts/",
@@ -15,11 +15,18 @@
   },
   "keywords": [
     "react",
-    "components",
-    "ui",
-    "umriss",
+    "react-charts",
     "charts",
-    "canvas"
+    "chart-library",
+    "canvas",
+    "line-chart",
+    "bar-chart",
+    "scatter-plot",
+    "control-chart",
+    "pareto",
+    "dashboard",
+    "typescript",
+    "umriss"
   ],
   "type": "module",
   "files": [

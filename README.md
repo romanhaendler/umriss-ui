@@ -1,8 +1,8 @@
 # umriss
 
-A pnpm workspace of React packages for data-dense applications — dashboards,
-monitoring, planning, and the tools in which people read a lot of data and act
-on it (ADR-0035). The demos show them in five invented worlds: a SaaS
+React components, canvas charts, a data table and a Gantt-style schedule for
+data-dense applications — dashboards, monitoring, planning, and the tools in
+which people read a lot of data and act on it (ADR-0035). One pnpm workspace. The demos show them in five invented worlds: a SaaS
 platform's operations, a parcel carrier, a company's controlling, a studio's
 planning, and a tile works. The design language is **precise and quiet, with
 palpable quality**: depth comes from soft shadows and fine light edges, not from

@@ -1,6 +1,6 @@
 # 02 - A static page per address
 
-Status: ready-for-agent
+Status: done
 Type: task
 Blocked by: 01
 
@@ -29,3 +29,15 @@ Spec: `.scratch/search-visibility/spec.md` (D6, D8)
   title, description, canonical and `<h1>`.
 - Output of three pages read by hand; one page checked with JavaScript off.
 - No screenshot baseline moves.
+
+## Comments
+
+Delivered. `renderLlms` now also returns `pages`: each page's part of the full
+text, cut where it is written, turned into HTML by `marked` (a dependency of
+the private `@umriss-ui/demo`, used only at build time) - headings lifted so
+the page is `h1`, `#/page` links made absolute, raw markup escaped - with a
+list of every page of the package at the end. `generateLlms` writes it as
+`demo/.generated/pages.json`; `build-pages.mjs` puts it into the built
+`index.html` per path. Guarded in `tests-unit/llms.test.ts`. The static text
+stands in `#root` with a small legible style; `createRoot` replaces it. Seen
+in a browser with and without JavaScript.

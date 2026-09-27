@@ -1,6 +1,7 @@
 # Umriss UI
 
-A React component library for data-dense applications.
+A React component library for data-dense dashboards, monitoring and tools:
+forms, date pickers, overlays, a tree view and a command palette.
 Guiding idea: **precise and quiet, with palpable quality** – depth comes from
 soft shadows and fine light edges, not from hard outlines or effects.
 

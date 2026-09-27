@@ -1,6 +1,6 @@
 # @umriss-ui/table
 
-The umriss table, declared the way it reads: columns are JSX elements, typed
+A React data table for data-dense applications, declared the way it reads: columns are JSX elements, typed
 against the rows they came from. The hook binds the row kind once and hands back
 the `Table` and the `Column` that belong to it, so a column can only name a
 field the row actually has.

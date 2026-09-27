@@ -87,7 +87,7 @@ test("the page toggle survives a jump within the page", async ({ page }) => {
   /* A jump to an example on the SAME page does not rebuild the page. If it
      did, the toggle would be off again afterwards, and opening every block
      would hold exactly until the first link. */
-  await page.goto(`/#/${p.pageId}/${third}`);
+  await page.goto(`/${p.pageId}/#${third}`);
   await expect(example(page, third)).toBeInViewport();
   await expect(page.getByLabel("all examples with code")).toBeChecked();
   await expect(codeBlock(page, first)).toBeVisible();

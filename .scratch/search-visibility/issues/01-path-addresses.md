@@ -1,6 +1,6 @@
 # 01 - Path addresses in the shell
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Spec: `.scratch/search-visibility/spec.md` (D4, D5, D7), ADR-0036
@@ -27,3 +27,17 @@ Spec: `.scratch/search-visibility/spec.md` (D4, D5, D7), ADR-0036
   suite pass; no baseline moves. `shell.ts:114` (`/#/…` deep link) is kept as
   the test of the forwarding.
 - Unit test of `addressOf`/`fromAddress` round trip, old hash included.
+
+## Comments
+
+Delivered. `addressOf` gives `/card/`, `/card/#example`, `/#scenario`;
+`placeOfLocation(path, hash)` in `outline.ts` reads a location back into the
+place, an old `#/card/x` first. The base is joined in one spot,
+`packages/demo/src/href.ts` (`import.meta.env.BASE_URL`), apart from the
+outline because the outline runs in Node. `Shell.tsx` moves by
+`pushState`/`popstate`, keeps `hashchange` for the `#/page` links written in
+the outlines' texts, forwards an old hash with `replaceState`, and takes over
+every same-demo link click. `Prose`, `Page` and `Scenarios` write path hrefs.
+The sidebar entries stay buttons - turning them into links would move every
+baseline; the crawler gets the links from the prerendered page and the
+sitemap instead.

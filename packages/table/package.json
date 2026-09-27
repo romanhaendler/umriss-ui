@@ -1,7 +1,7 @@
 {
   "name": "@umriss-ui/table",
   "version": "0.7.0",
-  "description": "The umriss table for data-dense applications - declared the way it reads: columns as JSX, typed against their rows.",
+  "description": "React data table for data-dense applications - sorting, filtering, grouping, aggregates, virtualisation. Declared the way it reads: columns as JSX, typed against their rows.",
   "license": "MIT",
   "author": "Roman Händler",
   "homepage": "https://romanhaendler.github.io/umriss-ui/table/",
@@ -15,11 +15,17 @@
   },
   "keywords": [
     "react",
-    "components",
-    "ui",
-    "umriss",
+    "react-table",
+    "data-table",
+    "data-grid",
+    "datagrid",
     "table",
-    "data-grid"
+    "sorting",
+    "filtering",
+    "grouping",
+    "virtualization",
+    "typescript",
+    "umriss"
   ],
   "type": "module",
   "files": [

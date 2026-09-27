@@ -9,7 +9,7 @@
    further down: two lists that mean the same thing drift apart.
 
    The folder is named like the page, only in the component's spelling:
-   `Button` -> `#/button`, `Stack-and-Grid` -> `#/stack-and-grid`. One rule -
+   `Button` -> `/button/`, `Stack-and-Grid` -> `/stack-and-grid/`. One rule -
    lower-cased, the folder name is the address - and a folder belonging to no
    page is noticed at load time instead of vanishing quietly.
 

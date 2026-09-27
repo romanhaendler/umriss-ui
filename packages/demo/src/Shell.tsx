@@ -44,7 +44,8 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { CommandPalette, LanguageProvider, useCommandPaletteShortcut } from "@umriss-ui/core";
 import type { Demo } from "./demo";
-import { SCENARIOS } from "./outline";
+import { BASE, hrefOf } from "./href";
+import { SCENARIOS, placeOfLocation } from "./outline";
 import { Page } from "./Page";
 import { Scenarios } from "./Scenarios";
 
@@ -81,8 +82,13 @@ function paletteCandidates({ addresses, examples, scenarios }: Demo) {
   ];
 }
 
+function placeHere(): string {
+  const path = window.location.pathname;
+  return placeOfLocation(path.startsWith(BASE) ? path.slice(BASE.length - 1) : "/", window.location.hash);
+}
+
 function readPlace(fromAddress: Demo["addresses"]["fromAddress"]): { pageId: string; example?: string } {
-  const { page, example } = fromAddress(window.location.hash);
+  const { page, example } = fromAddress(placeHere());
   /* An unknown address lands on the scenarios page and not on an empty
      surface: a typo is no reason for a white picture. */
   return { pageId: page?.id ?? "", ...(example === undefined ? {} : { example }) };
@@ -100,7 +106,7 @@ export interface ShellProps {
 }
 
 export function Shell({ demo, brand, version, sentence, actions }: ShellProps) {
-  const { OUTLINE, ALL_PAGES, fromAddress, placeOf } = demo.addresses;
+  const { OUTLINE, ALL_PAGES, fromAddress, addressOf } = demo.addresses;
   const candidates = useMemo(() => paletteCandidates(demo), [demo]);
   const [place, setPlace] = useState(() => readPlace(fromAddress));
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -109,22 +115,53 @@ export function Shell({ demo, brand, version, sentence, actions }: ShellProps) {
      would not run at all on the second click, and the jump would not happen. */
   const [jump, setJump] = useState(0);
 
+  const goTo = useCallback(
+    (pageId: string, exampleId?: string) => {
+      window.history.pushState(null, "", hrefOf(addressOf(pageId, exampleId)));
+      setPlace(readPlace(fromAddress));
+      setJump((n) => n + 1);
+      setPaletteOpen(false);
+    },
+    [addressOf, fromAddress],
+  );
+
   useEffect(() => {
-    const onHash = () => {
+    /* An old hash address - a bookmark, a link from before ADR-0036, a
+       `#/page` in a page's text - is replaced by its path, so the address bar
+       only ever shows the one form. */
+    const forward = () => {
+      if (!window.location.hash.startsWith("#/")) return;
+      const { page, example } = fromAddress(placeHere());
+      window.history.replaceState(null, "", hrefOf(addressOf(page?.id ?? SCENARIOS, example)));
+    };
+    const onMove = () => {
+      forward();
       setPlace(readPlace(fromAddress));
       setJump((n) => n + 1);
     };
-    window.addEventListener("hashchange", onHash);
-    return () => window.removeEventListener("hashchange", onHash);
-  }, [fromAddress]);
-
-  const goTo = useCallback(
-    (pageId: string, exampleId?: string) => {
-      window.location.hash = placeOf(pageId, exampleId);
-      setPaletteOpen(false);
-    },
-    [placeOf],
-  );
+    /* A link inside this demo moves without a reload, as a click in the
+       sidebar does. Another demo, a new tab or a modified click is the
+       browser's. */
+    const onClick = (event: MouseEvent) => {
+      const link = (event.target as Element | null)?.closest?.("a");
+      if (link === null || link === undefined || link.target !== "" || link.hasAttribute("download")) return;
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const url = new URL(link.href, window.location.href);
+      if (url.origin !== window.location.origin || !url.pathname.startsWith(BASE)) return;
+      event.preventDefault();
+      window.history.pushState(null, "", url.pathname + url.hash);
+      onMove();
+    };
+    forward();
+    window.addEventListener("popstate", onMove);
+    window.addEventListener("hashchange", onMove);
+    document.addEventListener("click", onClick);
+    return () => {
+      window.removeEventListener("popstate", onMove);
+      window.removeEventListener("hashchange", onMove);
+      document.removeEventListener("click", onClick);
+    };
+  }, [addressOf, fromAddress]);
 
   /* After the change, fetch the example meant and mark it briefly - otherwise
      one lands at the head of a page and starts searching again. */
@@ -166,11 +203,10 @@ export function Shell({ demo, brand, version, sentence, actions }: ShellProps) {
       <header className="shellHead">
         <a
           className="shellMark"
-          href="#"
+          href={BASE}
           onClick={(e) => {
             e.preventDefault();
-            window.location.hash = "";
-            setPlace({ pageId: "" });
+            goTo(SCENARIOS);
           }}
         >
           <span className="shellMarkName">{brand}</span>
@@ -195,10 +231,7 @@ export function Shell({ demo, brand, version, sentence, actions }: ShellProps) {
             className="railEntry railScenarios"
             data-active={page === undefined ? "" : undefined}
             aria-current={page === undefined ? "page" : undefined}
-            onClick={() => {
-              window.location.hash = "";
-              setPlace({ pageId: "" });
-            }}
+            onClick={() => goTo(SCENARIOS)}
           >
             Scenarios
           </button>

@@ -1,6 +1,6 @@
 # @umriss-ui/schedule
 
-Work planned over time: **subtasks** on **lanes** — people, vehicles, rooms or
+A React Gantt-style schedule for data-dense applications — work planned over time: **subtasks** on **lanes** — people, vehicles, rooms or
 machines. One task runs across several lanes in a fixed order, each stop has a
 main time with a lead-in before it and a lead-out after it, between the stops
 lie **dependencies** with lags of their own, and a lane can be **blocked** for

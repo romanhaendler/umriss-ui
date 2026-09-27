@@ -1,6 +1,6 @@
 # 03 - The front page as hub, sitemap, structured data
 
-Status: ready-for-agent
+Status: done
 Type: task
 Blocked by: 02
 
@@ -23,3 +23,12 @@ Spec: `.scratch/search-visibility/spec.md` (D9)
 
 - Sitemap validated against the guard from 02 (same set of URLs).
 - JSON-LD passes Google's Rich Results Test (or schema.org validator) once.
+
+## Comments
+
+Delivered in `scripts/build-pages.mjs`: hub title and description, every page
+linked under its package, JSON-LD `SoftwareSourceCode` (`@graph` on the hub,
+one per demo front page), `sitemap.xml` from the same list the pages are
+written from (133 addresses), `llms.txt` with absolute links and without the
+plant sentence ADR-0035 had outlived. Not run through Google's Rich Results
+Test - that needs the site online; do it with ticket 05.

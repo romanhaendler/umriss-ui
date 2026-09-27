@@ -13,6 +13,7 @@
 
 import { useLayoutEffect, useRef, useState } from "react";
 import { CodeBlock } from "./Example";
+import { hrefOf, hrefOfNeighbour } from "./href";
 import { Prose } from "./Prose";
 import type { Demo } from "./demo";
 import type { ForeignPage, Scenario } from "./tooling/examples";
@@ -61,12 +62,10 @@ function Stage({ scenario }: { scenario: Scenario }) {
 function linkOf(entry: string | ForeignPage, demo: Demo): { name: string; href: string } {
   if (typeof entry !== "string") {
     const [packageName, pageId] = entry.page.split("#") as [string, string];
-    /* The site keeps each demo in a directory named after its package
-       (scripts/build-pages.mjs). */
-    return { name: entry.name, href: `../${packageName.split("/")[1]}/#/${pageId}` };
+    return { name: entry.name, href: hrefOfNeighbour(packageName, pageId) };
   }
   const page = demo.addresses.ALL_PAGES.find((one) => one.id === entry);
-  return { name: page?.name ?? entry, href: `#/${entry}` };
+  return { name: page?.name ?? entry, href: hrefOf(demo.addresses.addressOf(entry)) };
 }
 
 function ScenarioBlock({ scenario, demo }: { scenario: Scenario; demo: Demo }) {

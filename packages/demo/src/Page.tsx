@@ -16,6 +16,7 @@ import { CopyButton } from "./CopyButton";
 import { PropsTable } from "./PropsTable";
 import { Prose } from "./Prose";
 import type { Demo } from "./demo";
+import { hrefOf } from "./href";
 import { examplesOf } from "./tooling/examples";
 import { tablesOf } from "./tooling/tables";
 import { ADR_0032 } from "./outline";
@@ -116,7 +117,7 @@ export function Page({ demo, page }: PageProps) {
             {page.alternatives.map(({ when, use }) => (
               <li key={when}>
                 <Prose text={when} /> →{" "}
-                {known.has(use) ? <a href={`#/${use}`}>{nameOf(use)}</a> : <Prose text={use} />}
+                {known.has(use) ? <a href={hrefOf(demo.addresses.addressOf(use))}>{nameOf(use)}</a> : <Prose text={use} />}
               </li>
             ))}
           </ul>

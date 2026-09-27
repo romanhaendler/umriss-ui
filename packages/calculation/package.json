@@ -1,7 +1,7 @@
 {
   "name": "@umriss-ui/calculation",
   "version": "0.3.4",
-  "description": "The umriss calculation for data-dense applications - a derivation written as it is shown, evaluated by the library, folded and read line by line.",
+  "description": "React calculation view for data-dense applications - a derivation written as it is shown, evaluated by the library, folded and read line by line.",
   "license": "MIT",
   "author": "Roman Händler",
   "homepage": "https://romanhaendler.github.io/umriss-ui/calculation/",
@@ -15,11 +15,13 @@
   },
   "keywords": [
     "react",
-    "components",
-    "ui",
-    "umriss",
+    "react-components",
     "calculation",
-    "derivation"
+    "derivation",
+    "formula",
+    "explainable",
+    "typescript",
+    "umriss"
   ],
   "type": "module",
   "files": [
