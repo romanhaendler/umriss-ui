@@ -21,7 +21,7 @@ export default function LaneHeaders() {
       <Lane
         id="v1"
         label={
-          <Stack direction="row" gap={2} align="center">
+          <Stack direction="row" gap={1} align="center">
             <Text size="sm">Van</Text>
             <Text size="xs" tone="muted" mono>
               FP 214 K
@@ -32,7 +32,7 @@ export default function LaneHeaders() {
       <Lane
         id="v2"
         label={
-          <Stack direction="row" gap={2} align="center">
+          <Stack direction="row" gap={1} align="center" wrap>
             <Text size="sm">E-van</Text>
             <Text size="xs" tone="muted" mono>
               FP 377 K

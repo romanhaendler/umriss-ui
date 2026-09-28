@@ -11,7 +11,11 @@ import {
   CLASS_TICK,
   TICK_GAP,
   TICK_LEN,
+  LIMIT_SHARE,
+  apart,
   computeLayout,
+  spread,
+  twoLines,
   type AxisInput,
   type AxisLayout,
 } from "../src/layout";
@@ -515,5 +519,183 @@ describe("computeLayout - alignTicks", () => {
   it("changes nothing without it", () => {
     const g = find(layout(false), "y:g");
     expect(g.ticks.map((t) => t.px)).not.toEqual(find(layout(false), "y:t").ticks.map((t) => t.px));
+  });
+});
+
+/* charts-narrow: on a phone the x labels ran into one smear - nine cost
+   centres, a week of days - and a week's axis asked for three ticks showed
+   one. The collision is measured: every label keeps LABEL_GAP to the next. */
+describe("computeLayout - labels that would collide", () => {
+  const DAY = 86_400_000;
+
+  function xOf(width: number, part: Partial<AxisInput>): AxisLayout {
+    const layout = computeLayout({
+      width,
+      height: 300,
+      padding: { top: 0, right: 0, bottom: 0, left: 0 },
+      axes: [axis({ id: "x", orientation: "x", position: "bottom", ...part })],
+      measure,
+      hysteresis: new Map(),
+    });
+    return find(layout.axes, "x:x");
+  }
+
+  it("keeps every k-th named tick, from the first, until the labels stand apart", () => {
+    const names = ["Sales", "Marketing", "Engineering", "Design", "Customer service", "Finance", "People", "IT", "Facilities"];
+    const x = xOf(300, {
+      extent: [-0.4, 8.4],
+      tickValues: names.map((_, i) => i),
+      tickFormat: (v) => names[v] ?? "",
+    });
+    expect(x.ticks.map((t) => t.label)).toEqual(["Sales", "Design", "People"]);
+    expect(apart(x.ticks)).toBe(true);
+    // Wide enough, every one stays.
+    expect(xOf(2000, { extent: [-0.4, 8.4], tickValues: names.map((_, i) => i), tickFormat: (v) => names[v] ?? "" }).ticks).toHaveLength(9);
+  });
+
+  it("widens a nice domain to named ticks, not to a 1-2-5 grid", () => {
+    const bars = xOf(300, { extent: [-0.4, 8.4], tickValues: [0, 1, 2, 3, 4, 5, 6, 7, 8] });
+    expect(bars.domain).toEqual([-0.4, 8.4]);
+    const beyond = xOf(300, { extent: [2, 5], tickValues: [0, 6] });
+    expect(beyond.domain).toEqual([0, 6]);
+  });
+
+  it("asks generated ticks for fewer, on a 1-2-5 step", () => {
+    const x = xOf(200, { extent: [0, 100], tickCount: 10, tickFormat: fixed("XXXXXX") });
+    expect(apart(x.ticks)).toBe(true);
+    expect(x.ticks.map((t) => t.value)).toEqual([0, 50, 100]);
+  });
+
+  it("gives a week at least two labels where three ticks would give one", () => {
+    const monday = new Date(2026, 2, 9).getTime();
+    const x = xOf(260, { time: true, extent: [monday, monday + 7 * DAY], domainMode: "data", tickCount: 3 });
+    expect(x.ticks.length).toBeGreaterThanOrEqual(2);
+    expect(apart(x.ticks)).toBe(true);
+  });
+});
+
+describe("apart", () => {
+  it("wants LABEL_GAP between two labels", () => {
+    expect(apart([{ labelLeft: 0, labelWidth: 10 }, { labelLeft: 18, labelWidth: 10 }])).toBe(true);
+    expect(apart([{ labelLeft: 0, labelWidth: 10 }, { labelLeft: 17, labelWidth: 10 }])).toBe(false);
+    expect(apart([])).toBe(true);
+  });
+});
+
+/* A limit band's label stood behind the label of the line at its edge. */
+describe("spread", () => {
+  it("leaves positions far enough apart where they are", () => {
+    expect(spread([10, 40, 100], 14)).toEqual([10, 40, 100]);
+  });
+
+  it("centres a crowded run on where its members want to stand, in order", () => {
+    expect(spread([100, 106], 14)).toEqual([96, 110]);
+    expect(spread([106, 100], 14)).toEqual([110, 96]);
+    expect(spread([90, 100, 110], 14)).toEqual([86, 100, 114]);
+  });
+
+  it("merges a run that grows into its neighbour", () => {
+    const out = spread([0, 20, 24], 14);
+    expect(out[1]! - out[0]!).toBeGreaterThanOrEqual(14);
+    expect(out[2]! - out[1]!).toBeCloseTo(14);
+  });
+});
+
+/* charts-narrow, second pass: thinning left most Pareto causes unnamed. A
+   category's name is the content - two lines come before any is dropped. */
+describe("computeLayout - category names on two lines", () => {
+  const names = ["Nobody home", "No access code", "Address incomplete", "Business closed"];
+
+  function xOf(width: number) {
+    const layout = computeLayout({
+      width,
+      height: 300,
+      padding: { top: 0, right: 0, bottom: 0, left: 0 },
+      axes: [
+        axis({ id: "x", orientation: "x", position: "bottom", extent: [-0.4, 3.4], tickValues: [0, 1, 2, 3], tickFormat: (v) => names[v] ?? "" }),
+      ],
+      measure: (text: string, className: string) => {
+        const lines = text.split("\n");
+        return className === CLASS_TICK
+          ? { width: Math.max(...lines.map((l) => l.length)) * 7, height: 14 * lines.length }
+          : { width: text.length * 8, height: 16 };
+      },
+      hysteresis: new Map(),
+    });
+    return { layout, x: find(layout.axes, "x:x") };
+  }
+
+  it("keeps every name and breaks it where one line would collide", () => {
+    const { x } = xOf(320);
+    expect(x.ticks.map((t) => t.label)).toEqual(["Nobody\nhome", "No access\ncode", "Address\nincomplete", "Business\nclosed"]);
+    // The band has the second line.
+    expect(x.size).toBe(X_BAND + 14);
+  });
+
+  it("stays on one line, in a one-line band, where it fits", () => {
+    const { x } = xOf(2000);
+    expect(x.ticks.map((t) => t.label)).toEqual(names);
+    expect(x.size).toBe(X_BAND);
+  });
+
+  it("breaks at the space that leaves the longer line shortest", () => {
+    const width = (t: string) => t.length;
+    expect(twoLines("No access code", width)).toBe("No access\ncode");
+    expect(twoLines("Other", width)).toBe("Other");
+  });
+});
+
+describe("computeLayout - a limit label wider than the band may be", () => {
+  function yOf(width: number) {
+    const layout = computeLayout({
+      width,
+      height: 300,
+      padding: { top: 0, right: 0, bottom: 0, left: 0 },
+      axes: [axis({ id: "y", orientation: "y", position: "left", limitLabels: ["Objective 300 ms"] })],
+      measure,
+      hysteresis: new Map(),
+    });
+    return find(layout.axes, "y:y");
+  }
+
+  it("stands inside the plot on a narrow chart and takes no band width", () => {
+    // 16 characters, 112 px + 4, plus tick and gap: more than a fifth of 300.
+    const y = yOf(300);
+    expect(y.limitsInside).toBe(true);
+    expect(y.size).toBe(TICK_LEN + TICK_GAP + 21);
+  });
+
+  it("widens the band where it costs less than LIMIT_SHARE", () => {
+    const y = yOf(1200);
+    expect(TICK_LEN + TICK_GAP + 116).toBeLessThan(1200 * LIMIT_SHARE);
+    expect(y.limitsInside).toBe(false);
+    expect(y.size).toBe(TICK_LEN + TICK_GAP + 116);
+  });
+});
+
+describe("computeLayout - a narrow axis", () => {
+  it("takes a denser step below four ticks while the labels stand apart", () => {
+    const start = new Date(2026, 2, 17).getTime();
+    const layout = computeLayout({
+      width: 260,
+      height: 300,
+      padding: { top: 0, right: 0, bottom: 0, left: 0 },
+      axes: [
+        axis({
+          id: "x",
+          orientation: "x",
+          position: "bottom",
+          time: true,
+          extent: [start, start + 10.5 * 3_600_000],
+          tickFormat: (v) => String(new Date(v).getHours()),
+        }),
+      ],
+      measure,
+      hysteresis: new Map(),
+    });
+    const x = find(layout.axes, "x:x");
+    // Asked for three, the six-hour step gave 0 and 6.
+    expect(x.ticks.map((t) => t.label)).toEqual(["0", "3", "6", "9"]);
+    expect(apart(x.ticks)).toBe(true);
   });
 });

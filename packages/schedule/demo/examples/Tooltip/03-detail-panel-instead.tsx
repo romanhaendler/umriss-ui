@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Badge, Card, Stack, Text } from "@umriss-ui/core";
+import { Badge, Card, CardBody, Stack, Text } from "@umriss-ui/core";
 import { Lane, Schedule, Subtasks } from "../../../src";
 import type { ScheduleInteraction } from "../../../src";
 import { PEOPLE, PROJECTS, WORK } from "@umriss-ui/demo/worlds/planning";
@@ -38,24 +38,26 @@ export default function DetailPanelInstead() {
         <Subtasks data={WEB_WORK} tasks={PROJECTS} />
       </Schedule>
       <Card data-detail-panel>
-        {item === null ? (
-          <Text size="sm" tone="secondary">
-            Rest the pointer on a work item to see its details.
-          </Text>
-        ) : (
-          <Stack gap={1}>
-            <Stack direction="row" gap={2} align="center">
-              <Text size="sm" weight="semibold">
-                {item.name}
-              </Text>
-              <Badge tone={item.status === "done" ? "success" : "neutral"}>{item.status}</Badge>
-            </Stack>
-            <Text size="xs" tone="secondary">
-              {PROJECTS.find((project) => project.id === item.task)?.name} · {PEOPLE.find((person) => person.id === item.lane)?.name} ·{" "}
-              {item.estimate} h estimated
+        <CardBody>
+          {item === null ? (
+            <Text size="sm" tone="secondary">
+              Rest the pointer on a work item to see its details.
             </Text>
-          </Stack>
-        )}
+          ) : (
+            <Stack gap={1}>
+              <Stack direction="row" gap={2} align="center">
+                <Text size="sm" weight="semibold">
+                  {item.name}
+                </Text>
+                <Badge tone={item.status === "done" ? "success" : "neutral"}>{item.status}</Badge>
+              </Stack>
+              <Text size="xs" tone="secondary">
+                {PROJECTS.find((project) => project.id === item.task)?.name} · {PEOPLE.find((person) => person.id === item.lane)?.name} ·{" "}
+                {item.estimate} h estimated
+              </Text>
+            </Stack>
+          )}
+        </CardBody>
       </Card>
     </Stack>
   );

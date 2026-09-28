@@ -307,3 +307,25 @@ test("FileInput opens the platform's dialog on its keys and takes a drop", async
   await expect(example.getByRole("listitem")).toHaveCount(0);
   expect(await input.evaluate((el: HTMLInputElement) => el.files?.length)).toBe(0);
 });
+
+/* A horizontal stepper measures its room (fit.ts): on a phone five steps take
+   a column, at the desktop's width the same list stands in a row - and in
+   neither does one label run into another's box. */
+test("Stepper takes a column on a phone and a row on the desktop, and no label overruns", async ({ page }) => {
+  const labelsApart = () =>
+    page.evaluate(() => {
+      const list = document.querySelector('[data-example="where-a-procedure-stands"] ol')!;
+      const boxes = [...list.querySelectorAll(":scope > li")].map((step) => step.getBoundingClientRect());
+      const texts = [...list.querySelectorAll(":scope > li > span:last-child")].map((text) => text.getBoundingClientRect());
+      return texts.every((text, i) => text.right <= boxes[i]!.right + 0.5 && text.width > 0);
+    });
+  const list = page.locator('[data-example="where-a-procedure-stands"] ol');
+
+  await openExample(page, "stepper", "where-a-procedure-stands");
+  await expect(list).toHaveAttribute("data-fit", "row");
+  expect(await labelsApart()).toBe(true);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(list).toHaveAttribute("data-fit", "column");
+  expect(await labelsApart()).toBe(true);
+});

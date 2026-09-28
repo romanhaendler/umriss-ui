@@ -13,6 +13,10 @@ export const lead = "Folded, the depot shows each van as a thin strip: handovers
    folded or not. */
 
 const at = (hours: number, minutes = 0) => new Date(2026, 2, 17, hours, minutes).getTime();
+
+/* A plate is one word: a lane header that takes two lines must not tear it
+   apart ("FP 214" / "K"). */
+const plate = (text: string) => text.replaceAll(" ", "\u00a0");
 const min = (n: number) => n * 60_000;
 
 const TOURS: Task[] = [
@@ -58,12 +62,12 @@ export default function TheMiniature() {
           setLast(`${intent.subtask}: ${intent.kind}`);
         }}
       >
-        <Lane id="truck" label="Truck FP 118 R" />
+        <Lane id="truck" label={`Truck ${plate("FP 118 R")}`} />
         <LaneGroup id="north" label="North depot">
-          <Lane id="van-1" label="Van FP 214 K" />
-          <Lane id="van-2" label="E-van FP 377 K" />
+          <Lane id="van-1" label={`Van ${plate("FP 214 K")}`} />
+          <Lane id="van-2" label={`E-van ${plate("FP 377 K")}`} />
         </LaneGroup>
-        <Lane id="van-3" label="Van FP 402 R" />
+        <Lane id="van-3" label={`Van ${plate("FP 402 R")}`} />
         <Dependencies data={HANDOVERS} />
         <Subtasks data={legs} tasks={TOURS} />
       </Schedule>

@@ -387,3 +387,15 @@ describe("The edge between stacked segments", () => {
     expect(strokes[1]?.path).toBe(strokes[0]?.path);
   });
 });
+
+/* charts-narrow, second pass: a marker on the plot's edge - a Pareto's 100 % -
+   was clipped to half. Markers are filled after the clip is lifted, and only
+   those whose centre lies in the plot. */
+describe("Markers on the plot's edge", () => {
+  it("are whole, and those beyond it are left out", () => {
+    const x = new Float64Array([-50, 0, 500, 999, 1200]);
+    const y = new Float64Array([50, 100, 50, 0, 50]);
+    const { filled } = draw({ x, y, kind: "line", length: 5, xScale, yScale, color: "#000", alpha: 1, strokeWidth: 1.5, markers: "always" });
+    expect(arcs(filled)).toBe(3);
+  });
+});

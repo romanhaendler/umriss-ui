@@ -90,7 +90,7 @@ export function usePortalTarget(): () => HTMLElement | null {
 export interface UmrissProviderProps {
   /**
    * The default for the `density` of every component that reads it with
-   * `useDensityFor` - in @umriss-ui/table `Table` and `AlarmList`
+   * `useDensityFor` - in `@umriss-ui/table` `Table` and `AlarmList`
    * ("comfortable" means "regular"). Without a value the provider touches no
    * component: one that is compact of its own accord stays compact.
    */

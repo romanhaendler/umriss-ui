@@ -3,7 +3,7 @@
    where a cell of a row sticks. */
 
 import { describe, expect, it } from "vitest";
-import { declaredPins, inPinOrder, pinOf, pinsForView, withPin } from "../src/model/pinning";
+import { blocksThatStick, declaredPins, inPinOrder, pinOf, pinsForView, withPin } from "../src/model/pinning";
 
 const ids = (columns: readonly { id: string }[]) => columns.map((c) => c.id);
 const COLUMNS = ["a", "b", "c", "d", "e"].map((id) => ({ id }));
@@ -99,5 +99,34 @@ describe("where a cell sticks", () => {
   it("nothing sticks without blocks", () => {
     expect(pinOf({ start: 0, end: 0, count: 4 }, 0)).toBeUndefined();
     expect(pinOf({ start: 0, end: 0, count: 4 }, 3)).toBeUndefined();
+  });
+});
+
+describe("which blocks stick in the room there is", () => {
+  it("keeps both while together they take at most half the scroll area", () => {
+    expect(blocksThatStick(130, 150, 600)).toEqual({ start: true, end: true });
+  });
+
+  it("on a wide table, keeps both while 256 px are left to scroll", () => {
+    expect(blocksThatStick(168, 341, 950)).toEqual({ start: true, end: true });
+    expect(blocksThatStick(168, 227, 680)).toEqual({ start: true, end: true });
+    expect(blocksThatStick(168, 300, 680)).toEqual({ start: true, end: false });
+  });
+
+  it("lets the end block scroll first, keeping the one that names the row", () => {
+    expect(blocksThatStick(130, 230, 300)).toEqual({ start: true, end: false });
+  });
+
+  it("lets a block wider than half scroll even when it is the only one", () => {
+    expect(blocksThatStick(0, 200, 300)).toEqual({ start: false, end: false });
+    expect(blocksThatStick(200, 0, 300)).toEqual({ start: false, end: false });
+  });
+
+  it("keeps the end block when only the start one is too wide", () => {
+    expect(blocksThatStick(200, 100, 300)).toEqual({ start: false, end: true });
+  });
+
+  it("keeps both while the scroll area is not measured", () => {
+    expect(blocksThatStick(200, 200, 0)).toEqual({ start: true, end: true });
   });
 });

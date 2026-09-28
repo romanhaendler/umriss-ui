@@ -59,6 +59,7 @@ import { Absent, AggregateValue, aggregateIsNumeric } from "./aggregateValue";
 import { useLineMotion } from "./motion";
 import { NOT_PINNED, pinnedCell } from "./pinned";
 import type { PinnedCell } from "./pinned";
+import { blocksThatStick } from "./model/pinning";
 import type { PinBlocks } from "./model/pinning";
 import { gridLines, rowLine } from "./model/gridWalk";
 import { CellEditor, GridContext, GridFocus, NEW_LINE, gridHandlers, useCellEditor, useGridState } from "./grid";
@@ -378,6 +379,9 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
   const baseId = useId();
   const tableRef = useRef<HTMLTableElement>(null);
   const grid = useGridState();
+  /* Which pinned blocks stick in the width the scroll area has - measured
+     (`PinPlacement`, `blocksThatStick`). */
+  const [sticking, setSticking] = useState({ start: true, end: true });
 
   /* A row gone from the rows takes its draft with it (ADR-0036) - nothing is
      left to report it against. */
@@ -500,9 +504,25 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
   const startPinned = dataColumns.filter((e) => pins[e.spec.id] === "start").length;
   const endPinned = dataColumns.filter((e) => pins[e.spec.id] === "end").length;
   const spanPinned = spanEntry !== undefined && pins[spanEntry.spec.id] === "start";
-  const blocks: PinBlocks = {
+  /* The actions column sticks at the end as a block of its own: a table a
+     little too wide for a phone cut its last button to "Forwa". An actions
+     column that holds nothing at rest - a Row draft's buttons,
+     no Delete, no action - sticks only while a draft is open: pinned blank,
+     it took half of a phone's table. Its width is reserved either way, so
+     sticking moves nothing. */
+  const drafting = grid.state.editing?.row === true;
+  const toolsShow = actions.length > 0 || props.onRowDelete !== undefined || drafting;
+  const pinned: PinBlocks = {
     start: startPinned > 0 || spanPinned ? leading + startPinned : 0,
-    end: endPinned > 0 ? endPinned + (trailing ? 1 : 0) : rowTools ? 1 : 0,
+    end: endPinned > 0 ? endPinned + (trailing ? 1 : 0) : trailing && toolsShow ? 1 : 0,
+    count: columnCount,
+  };
+  /* A block the narrow table has no room for scrolls with the rest; the pin
+     itself stays, and sticks again once the table is wide enough. An open
+     Row draft keeps its Save in view regardless (ADR-0036). */
+  const blocks: PinBlocks = {
+    start: sticking.start ? pinned.start : 0,
+    end: sticking.end || (drafting && rowTools) ? pinned.end : 0,
     count: columnCount,
   };
   const pinAt = (first: number, last = first) => pinnedCell(blocks, first, last);
@@ -609,6 +629,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
   );
 
   let body: ReactNode;
+  let emptyBody: ReactNode = null;
   if (loading) {
     body = (
       <tbody>
@@ -625,7 +646,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
       </tbody>
     );
   } else if (projection.filtered.length === 0) {
-    body = (
+    body = emptyBody = (
       <tbody>
         <tr data-grid-line={lineKey("empty")}>
           <td colSpan={columnCount} className={styles.emptyCell}>
@@ -734,6 +755,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
           virtual?.onScroll();
           if (lines && stickyHeader) markStuck(event.currentTarget);
           if (blocks.start || blocks.end) markUnder(event.currentTarget);
+          markBeyond(event.currentTarget, blocks);
         }}
         className={styles.scroll}
         style={maxHeight ? { maxHeight } : undefined}
@@ -846,9 +868,12 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
             </tfoot>
           )}
         </table>
+        {body === emptyBody && <ViewWidth table={tableRef} />}
+        <Beyond table={tableRef} blocks={blocks} />
         <PinPlacement
           table={tableRef}
-          blocks={blocks}
+          blocks={pinned}
+          onSticking={(next) => setSticking((now) => (now.start === next.start && now.end === next.end ? now : next))}
           pinnedKeys={dataColumns.filter((e) => pins[e.spec.id]).map((e) => e.key).join("|")}
         />
         {gridMode && (
@@ -879,14 +904,25 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
 function PinPlacement({
   table: tableRef,
   blocks,
+  onSticking,
   pinnedKeys,
 }: {
   table: RefObject<HTMLTableElement | null>;
+  /** The blocks as pinned - whether they stick is decided here. */
   blocks: PinBlocks;
+  onSticking: (sticking: { start: boolean; end: boolean }) => void;
   /** Which columns are pinned: another column in a block is another cell to watch. */
   pinnedKeys: string;
 }) {
   const { start, end } = blocks;
+  /* A block's width as it stood while it stuck - for the pinned columns, not
+     for the pin: a group header's label covers only the start block while
+     it sticks and widens it, and a block measured loose would have fitted
+     and stuck again, round and round. */
+  const known = useRef<{ key: string; sticking: { start: boolean; end: boolean }; start?: number; end?: number }>({
+    key: "",
+    sticking: { start: true, end: true },
+  });
   const place = () => {
     const table = tableRef.current;
     const scroller = table?.parentElement;
@@ -908,6 +944,17 @@ function PinPlacement({
       table.style.setProperty(`--u-table-pin-end-${i}`, `${endWidth}px`);
       endWidth += cells[cells.length - 1 - i]?.getBoundingClientRect().width ?? 0;
     }
+    /* Other columns in a block are other widths. */
+    const key = `${start}|${end}|${blocks.count}|${pinnedKeys}`;
+    if (known.current.key !== key) known.current = { key, sticking: known.current.sticking };
+    const now = known.current;
+    if (now.sticking.start) now.start = startWidth;
+    if (now.sticking.end) now.end = endWidth;
+    const sticking = blocksThatStick(now.start ?? startWidth, now.end ?? endWidth, scroller.clientWidth);
+    now.sticking = sticking;
+    onSticking(sticking);
+    if (!sticking.start) startWidth = 0;
+    if (!sticking.end) endWidth = 0;
     table.style.setProperty("--u-table-pin-start", `${startWidth}px`);
     table.style.setProperty("--u-table-pin-end", `${endWidth}px`);
     if (startWidth) scroller.style.setProperty("scroll-padding-left", `${startWidth}px`);
@@ -927,6 +974,53 @@ function PinPlacement({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- `place` reads the table afresh; the cells change with the blocks
   }, [tableRef, start, end, blocks.count, pinnedKeys]);
   return null;
+}
+
+/* The width the scroll area shows, for the empty body's message: it spans
+   every column, and centred across a table wider than the phone it stood
+   half out of view - "No alarms – the connection is dov". */
+function ViewWidth({ table: tableRef }: { table: RefObject<HTMLTableElement | null> }) {
+  useLayoutEffect(() => {
+    const scroller = tableRef.current?.parentElement;
+    if (!scroller) return;
+    const measure = () => scroller.style.setProperty("--u-table-view", `${scroller.clientWidth}px`);
+    measure();
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(scroller);
+    return () => observer.disconnect();
+  }, [tableRef]);
+  return null;
+}
+
+/* Whether columns lie beyond a side of the scroll area where no block
+   sticks: that side fades out. A table a few pixels too wide for a phone cut
+   "1,951.24" to "1,951.2" at the edge and read as cut, not as a table that
+   scrolls. Marked on the scroll, and whenever the area or the table changes
+   its width. */
+function Beyond({ table: tableRef, blocks }: { table: RefObject<HTMLTableElement | null>; blocks: PinBlocks }) {
+  const latest = useRef(blocks);
+  useLayoutEffect(() => {
+    latest.current = blocks;
+    const scroller = tableRef.current?.parentElement;
+    if (scroller) markBeyond(scroller, blocks);
+  });
+  useEffect(() => {
+    const table = tableRef.current;
+    const scroller = table?.parentElement;
+    if (!table || !scroller || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(() => markBeyond(scroller, latest.current));
+    observer.observe(scroller);
+    observer.observe(table);
+    return () => observer.disconnect();
+  }, [tableRef]);
+  return null;
+}
+
+function markBeyond(scroller: HTMLElement, blocks: PinBlocks) {
+  const room = scroller.scrollWidth - scroller.clientWidth;
+  scroller.toggleAttribute("data-beyond-start", !blocks.start && scroller.scrollLeft > 0.5);
+  scroller.toggleAttribute("data-beyond-end", !blocks.end && scroller.scrollLeft < room - 0.5);
 }
 
 /* Whether content lies under a pinned block - the block's shadow shows only
@@ -1284,6 +1378,10 @@ function Row({
   );
 }
 
+/* A longer text without a space - a URL - keeps the breaks it has rather
+   than widening its column past the table. */
+const TOKEN_LENGTH = 24;
+
 function Cell({
   entry,
   row,
@@ -1324,12 +1422,16 @@ function Cell({
   } else {
     content = asText(value, spec.format, formats, wording);
   }
+  /* A short text without a space is one token - an id, a date, a code, a
+     time window. WebKit broke "FP-1004223", "2026-03-16" and "06:00–08:00"
+     where the column was a hair too narrow, and their neighbours not. */
+  const token = typeof content === "string" && content.length <= TOKEN_LENGTH && !/\s/.test(content);
 
   const Tag = spec.rowHeader ? "th" : "td";
   return (
     <Tag
       scope={spec.rowHeader ? "row" : undefined}
-      className={cx(styles.td, rightAligned && styles.numeric, spec.rowHeader && styles.rowHeader, pin.className, editor && styles.editing)}
+      className={cx(styles.td, rightAligned && styles.numeric, spec.rowHeader && styles.rowHeader, token && styles.token, pin.className, editor && styles.editing)}
       style={pin.style}
       data-edit={editKind}
     >

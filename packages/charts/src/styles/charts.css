@@ -219,6 +219,10 @@
   .uc-axis-left > .uc-tick > .uc-tick-label {
     text-align: right;
   }
+  /* A category's name on two lines stands centred under its bar. */
+  .uc-axis-x > .uc-tick > .uc-tick-label {
+    text-align: center;
+  }
   .uc-axis-right > .uc-tick > .uc-tick-label {
     text-align: left;
   }

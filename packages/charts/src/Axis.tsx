@@ -32,8 +32,10 @@ interface CommonProps<T> {
 }
 
 export interface XAxisProps<T> extends CommonProps<T> {
-  /** `"nice"` widens the data's extent to ticks, `"data"` keeps it, a pair is
-      fixed - the one a zoom passes back. */
+  /** `"nice"` widens the data's extent to ticks - to named `ticks` where
+      there are any, on a time axis to whole units of a step of hours or
+      longer -, `"data"` keeps it, a pair is fixed - the one a zoom passes
+      back. */
   domain?: "nice" | "data" | readonly [number, number];
   /** Which edge the axis stands at. A second x axis on the opposite edge is how
       a series counts in a unit of its own. */

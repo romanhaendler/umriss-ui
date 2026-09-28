@@ -9,6 +9,10 @@ export const lead = "`canMoveTo` names the lanes a subtask may go to; the others
 
 const at = (hours: number, minutes = 0) => new Date(2026, 2, 17, hours, minutes).getTime();
 
+/* A plate is one word: a lane header that takes two lines must not tear it
+   apart ("FP 214" / "K"). */
+const plate = (text: string) => text.replaceAll(" ", "\u00a0");
+
 const GOODS: Task[] = [
   { id: "dry", name: "Dry goods", color: "light-dark(#2563eb, #6b9bff)" },
   { id: "chilled", name: "Chilled goods", color: "light-dark(#c2410c, #f08a52)" },
@@ -47,9 +51,9 @@ export default function LanesThatFit() {
         canMoveTo={mayGo}
         onIntent={onIntent}
       >
-        <Lane id="cool-1" label="Cooled van FP 377 K" />
-        <Lane id="cool-2" label="Cooled van FP 455 R" />
-        <Lane id="dry" label="Van FP 214 K" />
+        <Lane id="cool-1" label={`Cooled van ${plate("FP 377 K")}`} />
+        <Lane id="cool-2" label={`Cooled van ${plate("FP 455 R")}`} />
+        <Lane id="dry" label={`Van ${plate("FP 214 K")}`} />
         <Subtasks data={work} tasks={GOODS} />
       </Schedule>
       <Text size="sm" mono tone="secondary" data-last-move>

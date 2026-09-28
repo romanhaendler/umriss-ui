@@ -17,11 +17,11 @@ export default function FoldWhenNarrow() {
   return (
     <Stack gap={4}>
       {[300, 480].map((width) => (
-        <Card key={width} style={{ width }}>
+        <Card key={width} style={{ width: "100%", maxWidth: width }}>
           <CardBody>
             <Stack gap={2}>
               <Text size="xs" tone="muted">
-                {width} pixels
+                Up to {width} pixels
               </Text>
               <Breadcrumb items={TRAIL} />
             </Stack>

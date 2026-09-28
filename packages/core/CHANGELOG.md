@@ -29,6 +29,35 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## Unreleased
+
+### Changed
+
+- **A horizontal `Stepper` measures its room.** Too narrow for each label on
+  one line beside its marker, the labels stand beneath the markers; narrower
+  still - five steps on a phone - the steps take a column, as
+  `orientation="vertical"` does. The list says which as `data-fit` (`row`,
+  `stacked`, `column`). Before, the labels ran into each other and the lines
+  struck them through.
+- **`CardHeader`'s actions wrap beneath the title** once the title would get
+  less than 8rem beside them. Without actions and without folding, the
+  header renders no empty actions area.
+- **`Checkbox` and `Switch` stand at the label's first line**, not at the
+  middle of a label that wraps.
+
+### Fixed
+
+- **The pickers' clearing cross no longer covers the value.** On a touch
+  screen it stands for good, and in a field as narrow as its value it lay on
+  the last digits ("18.03.2026").
+- **`FileInput`'s file list stays inside the zone**: a long name ends in an
+  ellipsis, and its size and cross stay in sight.
+- **A clearable `Input` of `type="search"` shows one cross**, not the
+  browser's beside its own; a text wider than any `Input` ends in an ellipsis.
+- **`Textarea`'s count stands clear of the resize grip.**
+
+---
+
 ## 0.15.0 – A step for dense surfaces (Sep. 2026)
 
 ### Added

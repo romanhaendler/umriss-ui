@@ -59,7 +59,7 @@ export default function DragFromTheBacklog() {
 
   return (
     <Stack gap={3}>
-      <Stack direction="row" gap={2}>
+      <Stack direction="row" gap={2} wrap>
         {BACKLOG.map((entry) => (
           <Card key={entry.item}>
             <div
@@ -71,7 +71,7 @@ export default function DragFromTheBacklog() {
                 setPlacing(entry);
               }}
               onDragEnd={() => setPlacing(null)}
-              style={{ cursor: "grab" }}
+              style={{ cursor: "grab", padding: "var(--u-space-2) var(--u-space-3)" }}
             >
               <Text size="sm">{entry.label}</Text>
             </div>

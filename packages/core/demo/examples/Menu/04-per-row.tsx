@@ -30,7 +30,7 @@ export default function PerRow() {
         <Stack key={incident.id} direction="row" gap={3} align="center">
           <Badge tone={TONE[incident.severity]}>{incident.severity}</Badge>
           <Text size="sm" style={{ flex: 1 }}>
-            <Text as="span" size="sm" mono>
+            <Text as="span" size="sm" mono style={{ whiteSpace: "nowrap" }}>
               {incident.id}
             </Text>{" "}
             {incident.title}

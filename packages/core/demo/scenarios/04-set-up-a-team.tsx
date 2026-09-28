@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react";
+import { useState } from "react";
 import {
   Breadcrumb,
   Button,
@@ -115,45 +115,53 @@ export default function SetUpATeam() {
       <Card>
         <CardHeader title="Members" />
         <CardBody>
-          <div style={{ overflowX: "auto" }}>
-          <div style={{ display: "grid", minWidth: "30rem", gridTemplateColumns: "minmax(8rem, 1.2fr) minmax(9rem, 1fr) 8.5rem auto", gap: "var(--u-space-2) var(--u-space-3)", alignItems: "center" }}>
-            <Text size="xs" tone="muted">Name</Text>
-            <Text size="xs" tone="muted">Role</Text>
-            <Text size="xs" tone="muted">Hours a week</Text>
-            <span />
+          {/* One row a person, which wraps on a narrow screen: the name above,
+              role and then hours and Remove beneath it - a grid of four columns had
+              scrolled its last two out of sight on a phone. */}
+          <Text size="xs" tone="muted">
+            Role and hours a week, per person
+          </Text>
+          <Stack gap={2} style={{ marginTop: "var(--u-space-2)" }}>
             {draft.members.map((one, i) => (
-              <Fragment key={one.id}>
-                <Text size="sm">{one.name}</Text>
-                <Select
-                  selectSize="sm"
-                  aria-label={`Role of ${one.name}`}
-                  data-callout={i === 0 ? "2" : undefined}
-                  value={one.role}
-                  onChange={(event) => setMember(one.id, { role: event.target.value as Role })}
-                >
-                  {ROLES.map((role) => (
-                    <option key={role} value={role}>
-                      {role}
-                    </option>
-                  ))}
-                </Select>
-                <NumberInput
-                  size="sm"
-                  aria-label={`Hours a week of ${one.name}`}
-                  value={one.capacity}
-                  onChange={(value) => setMember(one.id, { capacity: value ?? 0 })}
-                  min={0}
-                  max={40}
-                  decimals={0}
-                  suffix="h"
-                />
-                <Button size="sm" variant="ghost" data-callout={i === 0 ? "3" : undefined} onClick={() => setRemoving(one)}>
-                  Remove
-                </Button>
-              </Fragment>
+              <Stack key={one.id} direction="row" gap={3} align="center" wrap>
+                <Text size="sm" style={{ flex: "1 1 8rem" }}>
+                  {one.name}
+                </Text>
+                <Stack direction="row" gap={3} align="center" wrap style={{ flex: "1 1 18rem" }}>
+                  <div style={{ flex: "1 1 10rem", minWidth: 0 }}>
+                    <Select
+                      selectSize="sm"
+                      aria-label={`Role of ${one.name}`}
+                      data-callout={i === 0 ? "2" : undefined}
+                      value={one.role}
+                      onChange={(event) => setMember(one.id, { role: event.target.value as Role })}
+                    >
+                      {ROLES.map((role) => (
+                        <option key={role} value={role}>
+                          {role}
+                        </option>
+                      ))}
+                    </Select>
+                  </div>
+                  <div style={{ flex: "none", width: "7.5rem" }}>
+                    <NumberInput
+                      size="sm"
+                      aria-label={`Hours a week of ${one.name}`}
+                      value={one.capacity}
+                      onChange={(value) => setMember(one.id, { capacity: value ?? 0 })}
+                      min={0}
+                      max={40}
+                      decimals={0}
+                      suffix="h"
+                    />
+                  </div>
+                  <Button size="sm" variant="ghost" data-callout={i === 0 ? "3" : undefined} onClick={() => setRemoving(one)}>
+                    Remove
+                  </Button>
+                </Stack>
+              </Stack>
             ))}
-          </div>
-          </div>
+          </Stack>
           <Stack direction="row" gap={3} align="flex-end" justify="space-between" wrap style={{ marginTop: "var(--u-space-4)" }}>
             <FormField label="Add someone" style={{ flex: "0 1 280px" }}>
               <Combobox

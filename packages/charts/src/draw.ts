@@ -6,7 +6,8 @@
    - Markers are a batched pass of their own.
    - The domain→pixel calculation is taken from the scale as a line equation
      (m, b) and computed inline in the loop: monomorphic, allocation-free.
-   - Series are clipped to the plot area.
+   - Series are clipped to the plot area; a marker by its centre, so that one
+     on the edge stays whole.
    - 1-px lines lie on half pixels, so that they are crisp at DPR 1. */
 
 import { hatchLines, markerPath, type Hatch, type MarkerShape } from "./marks";
@@ -227,7 +228,23 @@ function isolated(ys: Float64Array, n: number, i: number): boolean {
   );
 }
 
-function drawLine(ctx: CanvasRenderingContext2D, item: LineDrawItem): void {
+/** Markers, filled after the plot's clip is lifted: a point on the plot's
+    edge - the 100 % of a Pareto, the first day of a burn-down - is a whole
+    point, not half of one. Only points whose centre lies in the plot are in
+    them, so nothing beyond a zoomed edge shows (R-2.13). */
+interface Markers {
+  path: Path2D;
+  color: string;
+  alpha: number;
+}
+
+/** Is the centre inside the plot? Half a pixel of slack for float noise at
+    the domain's ends. */
+function inPlot(plot: Rect, px: number, py: number): boolean {
+  return px >= plot.x - 0.5 && px <= plot.x + plot.width + 0.5 && py >= plot.y - 0.5 && py <= plot.y + plot.height + 0.5;
+}
+
+function drawLine(ctx: CanvasRenderingContext2D, item: LineDrawItem, plot: Rect, late: Markers[]): void {
   const n = item.length;
   const xm = item.xScale.m;
   const xb = item.xScale.b;
@@ -282,10 +299,9 @@ function drawLine(ctx: CanvasRenderingContext2D, item: LineDrawItem): void {
       if (!every && !isolated(ys, n, i)) continue;
       const px = (xs[i] as number) * xm + xb;
       const py = value * ym + yb;
-      markerPath(points, shape, px, py, r);
+      if (inPlot(plot, px, py)) markerPath(points, shape, px, py, r);
     }
-    ctx.fillStyle = item.color;
-    ctx.fill(points); // batched marker pass
+    late.push({ path: points, color: item.color, alpha: item.alpha }); // batched marker pass
   }
 }
 
@@ -441,7 +457,7 @@ function drawBars(ctx: CanvasRenderingContext2D, item: BarDrawItem, plot: Rect, 
    for the whole series, one fill() - the same batched move as the marker pass of
    the line. */
 
-function drawScatter(ctx: CanvasRenderingContext2D, item: ScatterDrawItem): void {
+function drawScatter(item: ScatterDrawItem, plot: Rect, late: Markers[]): void {
   const n = item.length;
   const xm = item.xScale.m;
   const xb = item.xScale.b;
@@ -458,10 +474,9 @@ function drawScatter(ctx: CanvasRenderingContext2D, item: ScatterDrawItem): void
     if (Number.isNaN(value)) continue; // a gap leaves its point out (R-2.5)
     const px = (xs[i] as number) * xm + xb;
     const py = value * ym + yb;
-    markerPath(points, shape, px, py, r);
+    if (inPlot(plot, px, py)) markerPath(points, shape, px, py, r);
   }
-  ctx.fillStyle = item.color;
-  ctx.fill(points);
+  late.push({ path: points, color: item.color, alpha: item.alpha });
 }
 
 
@@ -627,6 +642,7 @@ export function drawSeriesLayer(
 
   ctx.lineJoin = "round";
   ctx.lineCap = "round";
+  const late: Markers[] = [];
 
   // Bands first: they are ground.
   ctx.globalAlpha = 1;
@@ -639,7 +655,7 @@ export function drawSeriesLayer(
     // the loop thereby stays monomorphic and allocation-free (R-5.2).
     switch (item.kind) {
       case "line":
-        drawLine(ctx, item);
+        drawLine(ctx, item, plot, late);
         break;
       case "area":
         drawArea(ctx, item, plot, input.theme.colorBg);
@@ -648,7 +664,7 @@ export function drawSeriesLayer(
         drawBars(ctx, item, plot, input.theme.colorBg);
         break;
       case "scatter":
-        drawScatter(ctx, item);
+        drawScatter(item, plot, late);
         break;
       case "state":
         drawStateBand(ctx, item, plot, input.theme.colorBg);
@@ -664,6 +680,13 @@ export function drawSeriesLayer(
   drawLimits(ctx, plot, input.limitLines);
 
   ctx.restore();
+
+  for (const markers of late) {
+    ctx.globalAlpha = markers.alpha;
+    ctx.fillStyle = markers.color;
+    ctx.fill(markers.path);
+  }
+  ctx.globalAlpha = 1;
 }
 
 export interface OverlayLayerInput {

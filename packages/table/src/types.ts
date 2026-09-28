@@ -203,7 +203,9 @@ export interface ColumnBase {
   resizable?: boolean;
   /** Keeps the column in view while the table scrolls sideways: in a block
       before every other column, or after them. The user can change it in the
-      column menu; the view carries the change. */
+      column menu; the view carries the change. Pinned blocks take at most
+      half of the width the table shows: on a narrower one the end block, then
+      the start block scrolls with the rest, and sticks again when there is room. */
   pin?: Pin;
   /** Sortable unless stated otherwise, when the value is text, a number, a point in time or a boolean. */
   sortable?: boolean;

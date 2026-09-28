@@ -6,6 +6,7 @@
    element being carried does not stand in it as two hundred and fifty rows but
    as one sentence underneath. */
 
+import { Prose } from "./Prose";
 import type { TypeEntry } from "./tooling/tables";
 
 function Head({ entry }: { entry: TypeEntry }) {
@@ -90,7 +91,7 @@ function Rows({ props, label }: { props: TypeEntry["props"]; label: string }) {
               </td>
               <td>{prop.defaultValue === undefined ? "—" : <code>{prop.defaultValue}</code>}</td>
               <td>
-                {prop.description}
+                <Prose text={prop.description} />
                 {prop.inheritedFrom !== undefined && (
                   <span className="apiOrigin">
                     {" "}

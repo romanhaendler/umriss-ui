@@ -1,10 +1,12 @@
 @layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.components {
+  /* The box stands at the label's first line, not at the middle of a label
+     that wraps. */
   .wrapper {
     composes: text from "#own-styles";
     display: inline-flex;
-    align-items: center;
+    align-items: flex-start;
     gap: var(--u-space-2);
     cursor: pointer;
     user-select: none;
@@ -118,6 +120,10 @@
   .label {
     font-size: var(--u-text-sm);
     line-height: var(--u-leading-tight);
+  }
+
+  .wrapper:has(.label) .box {
+    margin-top: calc((var(--u-text-sm) * var(--u-leading-tight) - 16px) / 2);
   }
 
   /* Forced colours repaint every ground with the page's (forced-colors 02):

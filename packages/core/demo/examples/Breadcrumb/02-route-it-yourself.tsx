@@ -12,7 +12,10 @@ export default function RouteItYourself() {
 
   return (
     <Stack gap={3} align="flex-start">
-      <Breadcrumb items={trail.map((label, i) => ({ label, onSelect: () => setDepth(i + 1) }))} />
+      <Breadcrumb
+        items={trail.map((label, i) => ({ label, onSelect: () => setDepth(i + 1) }))}
+        style={{ alignSelf: "stretch" }}
+      />
       <Text size="xs" tone="muted">
         Page: {trail[trail.length - 1]}
       </Text>

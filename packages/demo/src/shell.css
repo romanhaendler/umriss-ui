@@ -277,3 +277,36 @@ body {
     width: 160px;
   }
 }
+
+/* A phone: the bar keeps one line. The version and the key hint give way -
+   there is no keyboard to press ⌘K on - and the search takes what the name and
+   the actions leave, down to its own word. Before, the bar ran past the
+   screen's edge and cut the theme button in half. */
+@media (max-width: 560px) {
+  .shellHead {
+    gap: var(--u-space-3);
+    padding: 0 var(--u-space-4);
+  }
+  .shellMark {
+    flex: none;
+    white-space: nowrap;
+  }
+  .shellVersion,
+  .shellKbd {
+    display: none;
+  }
+  .shellSearch {
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
+    max-width: 260px;
+    white-space: nowrap;
+  }
+  .shellSearch > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .shellActions {
+    flex: none;
+  }
+}

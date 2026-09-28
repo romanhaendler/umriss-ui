@@ -161,10 +161,12 @@ describe("computeLayout - a time axis", () => {
     return x;
   }
 
-  it("widens a nice domain to the step's local boundaries and labels by level", () => {
+  it("widens a nice domain to whole units of the step, local, and labels by level", () => {
     const x = xOf({ time: true, extent: [at(3, 16, 7, 20), at(3, 16, 16, 40)], tickCount: 5 });
-    expect(x.domain).toEqual([at(3, 16, 6), at(3, 16, 18)]);
-    expect(x.ticks.map((t) => t.label)).toEqual(["16 Mar 06:00", "09:00", "12:00", "15:00", "18:00"]);
+    // Whole hours, not the three-hour step the extent asked for: 06:00 to
+    // 18:00 would leave a sixth of the plot blank.
+    expect(x.domain).toEqual([at(3, 16, 7), at(3, 16, 17)]);
+    expect(x.ticks.map((t) => t.label)).toEqual(["16 Mar 08:00", "10:00", "12:00", "14:00", "16:00"]);
   });
 
   it("keeps a data domain as it is", () => {

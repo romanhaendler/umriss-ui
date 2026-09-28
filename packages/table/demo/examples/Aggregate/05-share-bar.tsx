@@ -26,8 +26,10 @@ export default function ShareBar() {
     <Table ariaLabel="Invoices by cost centre and supplier">
       <Column value="supplier" label="Supplier" />
       <Column value="costCentre" label="Cost centre" />
-      <Column value="id" label="Invoice" rowHeader />
+      {/* The amount with its bar right beside the groups: after the invoice
+          it stood out of view on a phone. */}
       <Column value="amount" label="Amount (€)" format={{ decimals: 2 }} aggregate="sum" />
+      <Column value="id" label="Invoice" rowHeader />
       <Column value="lines" label="Lines" aggregate="sum" share={false} />
     </Table>
   );

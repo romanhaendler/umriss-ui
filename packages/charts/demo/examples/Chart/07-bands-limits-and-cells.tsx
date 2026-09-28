@@ -8,14 +8,11 @@ export const lead = "What is otherwise said in colour alone - a state, a limit b
 const BATTERY = batteryDay("v2");
 const STATES = vehicleDay("v2");
 
-const timeOfDay = (v: number) =>
-  new Date(v).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
-
 export default function BandsLimitsAndCells() {
   return (
     <div className="side-by-side">
       <Chart data={BATTERY} height={280} ariaLabel="An e-van's battery against its reserve, above its states" encoding="marks">
-        <XAxis accessor={(d: BatteryPoint) => d.t} tickFormat={timeOfDay} label="Time" tickCount={4} />
+        <XAxis accessor={(d: BatteryPoint) => d.t} time label="Time" tickCount={4} />
         <YAxis accessor={(d: BatteryPoint) => d.charge ?? 0} domain={[-40, 100]} ticks={[0, 20, 40, 60, 80, 100]} label="%" />
         <YAxis id="lane" position="right" accessor={() => 0} domain={[0, 5]} ticks={[0.45]} tickFormat={() => "FP 377 K"} />
         <LimitBand from={10} to={20} severity="warning" label="Reserve" />

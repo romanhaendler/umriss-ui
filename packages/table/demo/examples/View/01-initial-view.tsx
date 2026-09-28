@@ -45,7 +45,8 @@ function InvoiceList({ start, restart }: { start: TableView; restart: (view: Tab
         <Text as="span" size="sm" tone="secondary">
           What the application would keep
         </Text>
-        <Text as="code" size="sm" mono data-role="view">
+        {/* JSON has no space to break at: without this it ran past a phone's card. */}
+        <Text as="code" size="sm" mono data-role="view" style={{ overflowWrap: "anywhere" }}>
           {JSON.stringify(t.view)}
         </Text>
       </Stack>

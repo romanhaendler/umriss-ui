@@ -97,20 +97,22 @@ export const CardHeader = forwardRef<HTMLDivElement, CardHeaderProps>(function C
         {eyebrow && <span className={styles.eyebrow}>{eyebrow}</span>}
         <h2 className={styles.title}>{title}</h2>
       </div>
-      <div className={styles.headerRight}>
-        {actions}
-        {card?.collapsible && (
-          <button
-            type="button"
-            className={styles.collapseButton}
-            onClick={card.toggle}
-            aria-expanded={!card.collapsed}
-            aria-controls={card.bodyId}
-          >
-            {card.collapsed ? wording.show : wording.hide}
-          </button>
-        )}
-      </div>
+      {(actions || card?.collapsible) && (
+        <div className={styles.headerRight}>
+          {actions}
+          {card?.collapsible && (
+            <button
+              type="button"
+              className={styles.collapseButton}
+              onClick={card.toggle}
+              aria-expanded={!card.collapsed}
+              aria-controls={card.bodyId}
+            >
+              {card.collapsed ? wording.show : wording.hide}
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 });

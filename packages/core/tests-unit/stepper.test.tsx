@@ -8,6 +8,7 @@ import { describe, expect, it } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import { LanguageProvider, Stepper } from "../src";
 import { GERMAN_WORDING } from "../src/lib/language/de";
+import { rowWidth, stackedWidth, stepperFit } from "../src/components/Stepper/fit";
 
 const STEPS = [
   { label: "Drain" },
@@ -87,5 +88,57 @@ describe("Stepper", () => {
     expect(screen.getByRole("list").getAttribute("data-orientation")).toBe("horizontal");
     rerender(<Stepper steps={STEPS} current={0} orientation="vertical" />);
     expect(screen.getByRole("list").getAttribute("data-orientation")).toBe("vertical");
+  });
+});
+
+/* A horizontal stepper narrower than its steps need: the labels go beneath
+   the markers, and narrower still the row turns into a column (a phone, a
+   side panel). The widths are measured off a copy of the list; what follows
+   from them is arithmetic. */
+describe("stepperFit", () => {
+  it("keeps the labels beside their markers while the row fits", () => {
+    expect(stepperFit(640, 600, 400)).toBe("row");
+    expect(stepperFit(600, 600, 400)).toBe("row");
+  });
+
+  it("puts the labels beneath the markers when the row does not fit", () => {
+    expect(stepperFit(599, 600, 400)).toBe("stacked");
+    expect(stepperFit(400, 600, 400)).toBe("stacked");
+  });
+
+  it("turns into a column when not even the longest words fit beneath", () => {
+    expect(stepperFit(399, 600, 400)).toBe("column");
+    expect(stepperFit(270, 600, 270.5)).toBe("column");
+  });
+
+  it("does not decide on nothing: no width yet stays a row", () => {
+    expect(stepperFit(0, 600, 400)).toBe("row");
+  });
+});
+
+describe("rowWidth", () => {
+  it("gives every step but the last the widest one's share, and the gaps between", () => {
+    expect(rowWidth([100, 180, 120, 90], 12)).toBe(3 * 180 + 90 + 3 * 12);
+    expect(rowWidth([90], 12)).toBe(90);
+    expect(rowWidth([], 12)).toBe(0);
+  });
+});
+
+describe("stackedWidth", () => {
+  it("gives every step the widest step's share, and the gaps between", () => {
+    expect(stackedWidth([40, 90, 60], 12)).toBe(3 * 90 + 2 * 12);
+    expect(stackedWidth([], 12)).toBe(0);
+  });
+});
+
+describe("Stepper's fit", () => {
+  it("is a row where nothing can be measured", () => {
+    render(<Stepper steps={STEPS} current={1} />);
+    expect(screen.getByRole("list").getAttribute("data-fit")).toBe("row");
+  });
+
+  it("leaves a vertical stepper alone", () => {
+    render(<Stepper steps={STEPS} current={1} orientation="vertical" />);
+    expect(screen.getByRole("list").hasAttribute("data-fit")).toBe(false);
   });
 });

@@ -140,8 +140,10 @@ test("in a virtual window the keys walk to rows never rendered, and the grid scr
 test("the keys keep the Active cell clear of the sticky head and the pinned block", async ({ page }) => {
   /* The scroll area's scroll-padding is the head's height and the blocks'
      widths: the browser's own scroll into view stops short of them
-     (table-grid-mode 05). Narrow, so that it scrolls both ways. */
-  await page.setViewportSize({ width: 420, height: 900 });
+     (table-grid-mode 05). Narrow, so that it scrolls both ways - and no
+     narrower, or the start block takes more than the table leaves it and
+     scrolls with the rest (`blocksThatStick`). */
+  await page.setViewportSize({ width: 500, height: 900 });
   await openExample(page, "grid-mode", "the-whole-grid");
   const scroller = example(page, "the-whole-grid").locator("table").locator("xpath=..");
   await example(page, "the-whole-grid").locator("td[tabindex='0']").focus();

@@ -107,6 +107,9 @@ export interface AxisLayout {
   /** Places at which the calendar removed time, in pixels. An axis that takes a
       weekend out and says nothing claims a continuity that does not exist. */
   breaks: readonly number[];
+  /** A y axis' limit labels stand inside the plot, not beside the ticks: in
+      the band they would have taken more than LIMIT_SHARE of the width. */
+  limitsInside: boolean;
 }
 
 export interface LayoutResult {
@@ -186,10 +189,24 @@ function domainOf(
   // the extent, not the round number.
   if (calendarOf(axis) !== undefined) return dataDomain(min, max);
   if (mode === "data") return dataDomain(min, max);
+  // Named ticks are the axis' ticks: "nice" widens to them, not to a 1-2-5
+  // grid nobody sees. That grid left categories a step of blank on one side
+  // and half of one on the other, and on a narrow chart a third of the plot.
+  const named = axis.tickValues;
+  if (named !== undefined && named.length > 0) {
+    return dataDomain(Math.min(min, ...named), Math.max(max, ...named));
+  }
   if (axis.time === true) {
     // "Nice" on a time axis is the step's local boundary, not a round number of
     // milliseconds - where there is a step to speak of.
-    return readable([min, max]) ? timeDomain(min, max, stepOf([min, max], tickCount)) : dataDomain(min, max);
+    // Widened to whole units of the step, not to the step: six-hour ticks
+    // would stretch a day's 05:00 to 19:00 over all 24 hours, and a narrow
+    // chart would show its data in the middle half. Minutes are the
+    // exception - a whole minute is no margin, and a point on the edge would
+    // be cut in half.
+    if (!readable([min, max])) return dataDomain(min, max);
+    const step = stepOf([min, max], tickCount);
+    return timeDomain(min, max, step.unit === "minute" ? step : { ...step, n: 1, ms: step.ms / step.n });
   }
   return niceDomain(min, max, tickCount);
 }
@@ -266,9 +283,88 @@ export function insideContainer(left: number, labelWidth: number, width: number)
   return Math.min(Math.max(left, 0), Math.max(0, width - labelWidth));
 }
 
+/** A label broken at the space that leaves its longer line shortest; one
+    word stays as it is. */
+export function twoLines(label: string, width: (text: string) => number): string {
+  const words = label.split(" ");
+  let best = label;
+  let widest = Number.POSITIVE_INFINITY;
+  for (let i = 1; i < words.length; i++) {
+    const a = words.slice(0, i).join(" ");
+    const b = words.slice(i).join(" ");
+    const w = Math.max(width(a), width(b));
+    if (w < widest) {
+      widest = w;
+      best = `${a}\n${b}`;
+    }
+  }
+  return best;
+}
+
+/** The most of the chart's width a y band may take for its limit labels;
+    beyond it they stand inside the plot. */
+export const LIMIT_SHARE = 0.2;
+
+/** Room between two x labels; closer, and two read as one word. */
+export const LABEL_GAP = 8;
+
+/** Do the labels, in ascending order, stand clear of each other? */
+export function apart(ticks: readonly Pick<TickLayout, "labelLeft" | "labelWidth">[]): boolean {
+  for (let i = 1; i < ticks.length; i++) {
+    const before = ticks[i - 1] as TickLayout;
+    if (before.labelLeft + before.labelWidth + LABEL_GAP > (ticks[i] as TickLayout).labelLeft) return false;
+  }
+  return true;
+}
+
+/** Centres at least `size` apart, each as near its wish as the others allow:
+    crowded ones form a run, centred on where its members want to stand. The
+    labels of two limits a few pixels apart - a band and the line at its edge -
+    would otherwise cover each other. Order is kept. */
+export function spread(wanted: readonly number[], size: number): number[] {
+  const order = wanted.map((_, i) => i).sort((a, b) => (wanted[a] as number) - (wanted[b] as number));
+  const runs: { members: number[]; start: number }[] = [];
+  for (const i of order) {
+    runs.push({ members: [i], start: wanted[i] as number });
+    // Merge while the newest run reaches into the one before it.
+    for (;;) {
+      const last = runs[runs.length - 1] as (typeof runs)[number];
+      const before = runs[runs.length - 2];
+      if (before === undefined || before.start + before.members.length * size <= last.start) break;
+      runs.pop();
+      before.members.push(...last.members);
+      const mean = before.members.reduce((sum, m) => sum + (wanted[m] as number), 0) / before.members.length;
+      before.start = mean - ((before.members.length - 1) * size) / 2;
+    }
+  }
+  const out = wanted.slice();
+  for (const run of runs) run.members.forEach((m, k) => (out[m] = run.start + k * size));
+  return out;
+}
+
 /** Complete layout calculation; derivable and testable purely from the inputs. */
 export function computeLayout(input: LayoutInput): LayoutResult {
-  const { width, height, padding, axes, measure, hysteresis } = input;
+  // Named x ticks that only fit on two lines need a band two lines high, and
+  // whether they fit is known only once the plot width is. So a first pass,
+  // on a copy of the hysteresis, finds them, and a second grants the line.
+  const probe = new Map(input.hysteresis);
+  const first = layoutPass(input, probe, null);
+  if (first.wrapped.size === 0) {
+    for (const [key, size] of probe) input.hysteresis.set(key, size);
+    return first.layout;
+  }
+  return layoutPass(input, input.hysteresis, first.wrapped).layout;
+}
+
+/** One pass. `tall` null: every named x axis may wrap, as the probe;
+    otherwise only those it names, which have the band for it. */
+function layoutPass(
+  input: LayoutInput,
+  hysteresis: Map<string, number>,
+  tall: ReadonlySet<string> | null,
+): { layout: LayoutResult; wrapped: Set<string> } {
+  const { width, height, padding, axes, measure } = input;
+  const wrapped = new Set<string>();
 
   const left = axes.filter((a) => a.position === "left");
   const right = axes.filter((a) => a.position === "right");
@@ -284,7 +380,8 @@ export function computeLayout(input: LayoutInput): LayoutResult {
       axis.label === undefined || axis.label === ""
         ? 0
         : Math.ceil(measure(axis.label, CLASS_TITLE).height) + TITLE_GAP;
-    xHeight.set(axis.key, stabilize(axis.key, TICK_LEN + TICK_GAP + lineHeight + title, hysteresis));
+    const lines = tall?.has(axis.key) === true ? 2 : 1;
+    xHeight.set(axis.key, stabilize(axis.key, TICK_LEN + TICK_GAP + lines * lineHeight + title, hysteresis));
   }
 
   const sum = (list: readonly AxisInput[], sizes: Map<string, number>): number => {
@@ -310,6 +407,7 @@ export function computeLayout(input: LayoutInput): LayoutResult {
     labels: string[];
     widths: number[];
     format: (v: number) => string;
+    limitsInside: boolean;
   }
   const yInterim = new Map<string, Interim>();
   const yWidth = new Map<string, number>();
@@ -335,12 +433,17 @@ export function computeLayout(input: LayoutInput): LayoutResult {
     let maxWidth = 0;
     for (const b of widths) if (b > maxWidth) maxWidth = b;
     // A limit label carries 2px padding on either side (its background covers a tick).
-    for (const l of axis.limitLabels ?? []) maxWidth = Math.max(maxWidth, measure(l, CLASS_TICK).width + 4);
+    let limitWidth = 0;
+    for (const l of axis.limitLabels ?? []) limitWidth = Math.max(limitWidth, measure(l, CLASS_TICK).width + 4);
     const title =
       axis.label === undefined || axis.label === ""
         ? 0
         : Math.ceil(measure(axis.label, CLASS_TITLE).height) + TITLE_GAP;
-    yInterim.set(axis.key, { axis, domain, values, labels, widths, format });
+    // "Objective 300 ms" beside the ticks took a third of a phone's chart and
+    // left the course a strip; inside the plot it costs no width.
+    const limitsInside = limitWidth > maxWidth && TICK_LEN + TICK_GAP + limitWidth + title > width * LIMIT_SHARE;
+    if (!limitsInside) maxWidth = Math.max(maxWidth, limitWidth);
+    yInterim.set(axis.key, { axis, domain, values, labels, widths, format, limitsInside });
     yWidth.set(
       axis.key,
       stabilize(axis.key, TICK_LEN + TICK_GAP + maxWidth + title, hysteresis),
@@ -411,6 +514,7 @@ export function computeLayout(input: LayoutInput): LayoutResult {
             ? 0
             : Math.ceil(measure(axis.label, CLASS_TITLE).height),
         breaks: [],
+        limitsInside: z?.limitsInside ?? false,
       });
     });
   };
@@ -425,21 +529,75 @@ export function computeLayout(input: LayoutInput): LayoutResult {
       const size = xHeight.get(axis.key) ?? 0;
       const band = bandRect(axis, stack, offset, size);
       offset += size + BAND_GAP;
-      const tickCount = axis.tickCount ?? Math.max(2, Math.round(plotWidth / 80));
-      const domain = domainOf(axis, tickCount);
-      const values = tickValuesFor(axis, domain, tickCount);
-      const format = formatterFor(axis, domain, tickCount);
-      const labels = labelsFor(axis, domain, tickCount, values, format);
+      let count = axis.tickCount ?? Math.max(2, Math.round(plotWidth / 80));
+      // The domain comes from the count asked for; fewer labels below do not
+      // widen it to a coarser step.
+      const domain = domainOf(axis, count);
       const scale = new LinearScale(domain, [plotLeft, plotLeft + plotWidth]);
-      const ticks: TickLayout[] = values.map((value, i) => {
-        const label = labels[i] ?? "";
-        const labelWidth = measure(label, CLASS_TICK).width;
-        const px = scale.toPx(value);
-        // Collision with the edge (R-3.3.5): the first and last label stay inside
-        // the container.
-        const labelLeft = insideContainer(px - labelWidth / 2, labelWidth, width);
-        return { value, label, px, labelLeft, labelWidth };
-      });
+      // Every `keep`-th tick at `tickCount`, measured and placed; `wrap`
+      // breaks each label onto two lines.
+      const place = (tickCount: number, keep: number, wrap = false) => {
+        const all = tickValuesFor(axis, domain, tickCount);
+        const values = all.filter((_, i) => i % keep === 0);
+        const format = formatterFor(axis, domain, tickCount);
+        // Labelled after thinning: a time label's date moves to the first tick
+        // that is kept.
+        const plain = labelsFor(axis, domain, tickCount, values, format);
+        const labels = wrap ? plain.map((l) => twoLines(l, (t) => measure(t, CLASS_TICK).width)) : plain;
+        const ticks: TickLayout[] = values.map((value, i) => {
+          const label = labels[i] ?? "";
+          const labelWidth = measure(label, CLASS_TICK).width;
+          const px = scale.toPx(value);
+          // Collision with the edge (R-3.3.5): the first and last label stay inside
+          // the container.
+          const labelLeft = insideContainer(px - labelWidth / 2, labelWidth, width);
+          return { value, label, px, labelLeft, labelWidth };
+        });
+        return { format, ticks, total: all.length };
+      };
+      // Collision between the labels, measured and not guessed from a width
+      // per tick. Generated ticks first ask for fewer, so their step stays
+      // 1-2-5 or a calendar unit, as long as two remain; then - and named ticks,
+      // the categories, at once - every k-th is kept.
+      let placed = place(count, 1);
+      if (axis.tickValues === undefined) {
+        // One label cannot place a point: a week asked for three ticks gets a
+        // week's step and one tick. Ask for more until there are two; should
+        // they collide, keeping every other one below still leaves two.
+        for (const most = count + 8; placed.total < 2 && count < most; ) placed = place(++count, 1);
+        while (!apart(placed.ticks) && count > 1) {
+          const next = place(count - 1, 1);
+          if (next.total < 2) break;
+          count--;
+          placed = next;
+        }
+        // Below four ticks the steps jump far - six hours after three, a week
+        // after two days -, and ten hours on a phone got two labels. A narrow
+        // axis takes a denser step while its labels still stand apart.
+        if (axis.tickCount === undefined) {
+          for (let more = count + 1; placed.total < 4 && more <= count + 3; more++) {
+            const next = place(more, 1);
+            if (next.total <= placed.total) continue;
+            if (!apart(next.ticks)) break;
+            placed = next;
+          }
+        }
+        for (let keep = 2; !apart(placed.ticks) && placed.ticks.length > 1; keep++) placed = place(count, keep);
+      } else {
+        // Named ticks are categories, and their names are the content: two
+        // lines before any is left out, and at every thinning again.
+        const wrap = tall === null || tall.has(axis.key);
+        ladder: for (let keep = 1; ; keep++) {
+          for (const lines of wrap ? [false, true] : [false]) {
+            placed = place(count, keep, lines);
+            if (apart(placed.ticks) || placed.ticks.length <= 1) {
+              if (lines) wrapped.add(axis.key);
+              break ladder;
+            }
+          }
+        }
+      }
+      const { format, ticks } = placed;
       result.push({
         key: axis.key,
         id: axis.id,
@@ -462,6 +620,7 @@ export function computeLayout(input: LayoutInput): LayoutResult {
           axis.calendar === undefined || axis.calendar.length === 0
             ? []
             : calendarBreaks(axis.calendar, domain[0], domain[1]).map((v) => scale.toPx(v)),
+        limitsInside: false,
       });
     });
   };
@@ -469,5 +628,5 @@ export function computeLayout(input: LayoutInput): LayoutResult {
   buildX(top);
   buildX(bottom);
 
-  return { width, height, plot, axes: result };
+  return { layout: { width, height, plot, axes: result }, wrapped };
 }

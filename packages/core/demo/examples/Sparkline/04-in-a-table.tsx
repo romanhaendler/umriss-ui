@@ -15,42 +15,44 @@ const CELL = { padding: "var(--u-space-1) var(--u-space-3)", borderBottom: "1px 
 
 export default function InATable() {
   return (
-    <table style={{ borderCollapse: "collapse", maxWidth: 560, width: "100%" }}>
-      <thead>
-        <tr>
-          {["Service", "p95, last 2 h", "Now", "Objective"].map((head, i) => (
-            <th key={head} style={{ ...CELL, textAlign: i >= 2 ? "right" : "left" }}>
-              <Text as="span" size="xs" tone="muted">
-                {head}
-              </Text>
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {ROWS.map(({ service, p95, now }) => (
-          <tr key={service.id}>
-            <td style={CELL}>
-              <Text as="span" size="sm">
-                {service.name}
-              </Text>
-            </td>
-            <td style={CELL}>
-              <Sparkline data={p95} />
-            </td>
-            <td style={{ ...CELL, textAlign: "right" }}>
-              <Text as="span" size="sm" mono>
-                {now} ms
-              </Text>
-            </td>
-            <td style={{ ...CELL, textAlign: "right" }}>
-              <Text as="span" size="sm" mono tone="muted">
-                {service.latencySlo} ms
-              </Text>
-            </td>
+    <div style={{ overflowX: "auto" }}>
+      <table style={{ borderCollapse: "collapse", maxWidth: 560, width: "100%" }}>
+        <thead>
+          <tr>
+            {["Service", "p95, last 2 h", "Now", "Objective"].map((head, i) => (
+              <th key={head} style={{ ...CELL, textAlign: i >= 2 ? "right" : "left", whiteSpace: "nowrap" }}>
+                <Text as="span" size="xs" tone="muted">
+                  {head}
+                </Text>
+              </th>
+            ))}
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {ROWS.map(({ service, p95, now }) => (
+            <tr key={service.id}>
+              <td style={CELL}>
+                <Text as="span" size="sm">
+                  {service.name}
+                </Text>
+              </td>
+              <td style={CELL}>
+                <Sparkline data={p95} />
+              </td>
+              <td style={{ ...CELL, textAlign: "right", whiteSpace: "nowrap" }}>
+                <Text as="span" size="sm" mono>
+                  {now} ms
+                </Text>
+              </td>
+              <td style={{ ...CELL, textAlign: "right", whiteSpace: "nowrap" }}>
+                <Text as="span" size="sm" mono tone="muted">
+                  {service.latencySlo} ms
+                </Text>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }

@@ -26,7 +26,10 @@ function ImportLine({ exports, packageName }: { exports: readonly string[]; pack
   const text = `import { ${exports.join(", ")} } from "${packageName}";`;
   return (
     <div className="importLine">
-      <code>{text}</code>
+      <code>
+        {`import { ${exports.join(", ")} } from `}
+        <span>{`"${packageName}";`}</span>
+      </code>
       <CopyButton text={text} />
     </div>
   );

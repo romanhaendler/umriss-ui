@@ -149,4 +149,19 @@
     cursor: default;
     opacity: 0.18;
   }
+
+  /* Under a finger the steps are hit taller than they are drawn - 22 px is
+     too small a target. Only upwards and downwards: side by side, the two
+     would take each other's taps. */
+  @media (pointer: coarse) {
+    .stepper button {
+      position: relative;
+    }
+
+    .stepper button::after {
+      content: "";
+      position: absolute;
+      inset: -10px 0;
+    }
+  }
 }

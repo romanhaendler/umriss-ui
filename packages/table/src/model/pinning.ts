@@ -80,3 +80,21 @@ export function pinOf(
   if (blocks.end > 0 && first >= endBegins) return { side: "end", at: blocks.count - 1 - last, edge: first === endBegins };
   return undefined;
 }
+
+/** How much of a scroll area the columns that scroll keep at the least: half
+    of it, and on a wide table no more than this - enough to scroll through. */
+const SCROLL_ROOM = 256;
+
+/** Which blocks stick in a scroll area `room` pixels wide, given their
+    widths. They leave the columns that scroll half of it, or 256 px where
+    half is more: on a phone the end block of a Row draft's buttons alone
+    stood 200 px of 300, and both blocks of a wide table left nothing between
+    them to scroll. A block that would take more scrolls with the rest
+    instead - the start one, which names the row, is kept first. A room not
+    yet measured keeps both. */
+export function blocksThatStick(start: number, end: number, room: number): { start: boolean; end: boolean } {
+  const most = room - Math.min(room / 2, SCROLL_ROOM);
+  if (room <= 0 || start + end <= most) return { start: true, end: true };
+  if (start > 0 && start <= most) return { start: true, end: false };
+  return { start: false, end: end > 0 && end <= most };
+}

@@ -6,13 +6,10 @@ export const lead = "A y axis with one unit per vehicle and a band per lane: the
 
 const FLEET = VEHICLES.map((vehicle) => ({ vehicle, day: vehicleDay(vehicle.id) }));
 
-const timeOfDay = (v: number) =>
-  new Date(v).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
-
 export default function OneLaneEach() {
   return (
     <Chart data={FLEET[0]!.day} height={300} ariaLabel="The states of all eight vehicles through the day">
-      <XAxis accessor={(d: StatePoint) => d.t} tickFormat={timeOfDay} label="Time" />
+      <XAxis accessor={(d: StatePoint) => d.t} time label="Time" />
       {/* Lane 0 lies at the bottom, so the first vehicle takes the top lane. */}
       <YAxis
         accessor={() => 0}

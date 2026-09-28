@@ -182,8 +182,8 @@ export default function ApproveSpending() {
                       <td style={{ padding: "6px 8px 6px 0" }}>{line.description}</td>
                       <td style={{ padding: "6px 8px", textAlign: "right" }}>{line.quantity}</td>
                       <td style={{ padding: "6px 8px", textAlign: "right" }}>{euro.format(line.unitPrice)}</td>
-                      <td style={{ padding: "6px 8px", textAlign: "right" }}>{line.discount === 0 ? "-" : `${Math.round(line.discount * 100)} %`}</td>
-                      <td style={{ padding: "6px 8px", textAlign: "right" }}>{Math.round(line.vatRate * 100)} %</td>
+                      <td style={{ padding: "6px 8px", textAlign: "right" }}>{line.discount === 0 ? "-" : `${Math.round(line.discount * 100)}\u00a0%`}</td>
+                      <td style={{ padding: "6px 8px", textAlign: "right" }}>{`${Math.round(line.vatRate * 100)}\u00a0%`}</td>
                       <td style={{ padding: "6px 0 6px 8px", textAlign: "right" }}>
                         {euro.format(line.quantity * line.unitPrice * (1 - line.discount))}
                       </td>

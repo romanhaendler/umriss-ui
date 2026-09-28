@@ -39,25 +39,26 @@ export default function AFilterBar() {
   return (
     <Stack gap={3} style={{ maxWidth: 560 }}>
       <Stack direction="row" gap={3} align="center" wrap>
-        <Select
-          selectSize="sm"
-          aria-label="Add a filter"
-          value=""
-          onChange={(event) => {
-            const picked = OPTIONS[Number(event.target.value)];
-            if (picked && !filters.some((f) => f.value === picked.value)) setFilters([...filters, picked]);
-          }}
-          style={{ width: 200 }}
-        >
-          <option value="" disabled>
-            Add a filter …
-          </option>
-          {OPTIONS.map((option, i) => (
-            <option key={option.value} value={i}>
-              {option.key === "depot" ? "Depot" : "Status"}: {option.value}
+        <div style={{ width: 200 }}>
+          <Select
+            selectSize="sm"
+            aria-label="Add a filter"
+            value=""
+            onChange={(event) => {
+              const picked = OPTIONS[Number(event.target.value)];
+              if (picked && !filters.some((f) => f.value === picked.value)) setFilters([...filters, picked]);
+            }}
+          >
+            <option value="" disabled>
+              Add a filter …
             </option>
-          ))}
-        </Select>
+            {OPTIONS.map((option, i) => (
+              <option key={option.value} value={i}>
+                {option.key === "depot" ? "Depot" : "Status"}: {option.value}
+              </option>
+            ))}
+          </Select>
+        </div>
         <TagGroup aria-label="Active filters">
           {filters.map((filter) => (
             <Tag key={filter.value} tone="accent" onRemove={() => setFilters(filters.filter((f) => f !== filter))}>

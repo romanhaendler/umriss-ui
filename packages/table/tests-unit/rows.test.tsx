@@ -53,6 +53,11 @@ function List({
 }
 
 describe("Row actions", () => {
+  it("stick at the end, so that a table a little too wide cuts no button", () => {
+    const { container } = render(<List />);
+    expect(container.querySelector("thead th:last-child")!.className).toContain("pinned");
+  });
+
   it("a row action gets the row and is named after it", () => {
     const onOpen = vi.fn();
     render(<List onOpen={onOpen} />);

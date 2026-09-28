@@ -8,7 +8,7 @@
 
 import { describe, expect, it } from "vitest";
 import { DAY, HOUR, MINUTE } from "@umriss-ui/charts";
-import { days, fineStep, fineTicks, panDomain, zoomDomain } from "../src/timeAxis";
+import { dayRun, days, fineStep, fineTicks, opensRun, panDomain, zoomDomain } from "../src/timeAxis";
 
 const t = (iso: string) => Date.parse(iso);
 
@@ -93,6 +93,50 @@ describe("days", () => {
       [0, 16 * HOUR],
       [16 * HOUR, 32 * HOUR],
     ]);
+  });
+});
+
+describe("dayRun", () => {
+  it("writes every date where a day holds one", () => {
+    expect(dayRun(44, 44)).toBe(1);
+  });
+
+  it("writes every other date, then one a week, as the days narrow", () => {
+    // Ten days on a phone's plot: eighteen pixels each.
+    expect(dayRun(30, 44)).toBe(2);
+    expect(dayRun(18, 44)).toBe(7);
+    expect(dayRun(18, 56)).toBe(7);
+  });
+
+  it("stops at four weeks, and at a day with no width at all", () => {
+    expect(dayRun(1, 44)).toBe(28);
+    expect(dayRun(0, 44)).toBe(28);
+  });
+});
+
+describe("opensRun", () => {
+  it("opens every day in a run of one", () => {
+    expect(opensRun(t("2026-03-18T00:00:00+01:00"), 1)).toBe(true);
+  });
+
+  it("opens a week on its Monday", () => {
+    // 16.03.2026 is a Monday.
+    expect(opensRun(t("2026-03-16T00:00:00+01:00"), 7)).toBe(true);
+    expect(opensRun(t("2026-03-17T00:00:00+01:00"), 7)).toBe(false);
+    expect(opensRun(t("2026-03-23T00:00:00+01:00"), 7)).toBe(true);
+  });
+
+  it("keeps its Mondays across the clock change", () => {
+    // 29.03.2026 is the change; the next Monday has an offset of two hours.
+    expect(opensRun(t("2026-03-30T00:00:00+02:00"), 7)).toBe(true);
+    // A grid laid on the old offset lands an hour late, and still counts.
+    expect(opensRun(t("2026-03-30T01:00:00+02:00"), 7)).toBe(true);
+  });
+
+  it("alternates day by day in a run of two", () => {
+    expect(opensRun(t("2026-03-16T00:00:00+01:00"), 2)).toBe(true);
+    expect(opensRun(t("2026-03-17T00:00:00+01:00"), 2)).toBe(false);
+    expect(opensRun(t("2026-03-18T00:00:00+01:00"), 2)).toBe(true);
   });
 });
 
