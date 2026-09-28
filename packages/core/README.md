@@ -124,7 +124,7 @@ The table and the alarm list are not part of this package. They live in
 | `Input` / `Select` / `Checkbox` | form elements; `Input numeric` in Geist Mono, `Input clearable` with a softly fading-in × button (clears without losing focus); `Checkbox indeterminate` |
 | `Modal` / `ModalHeader` / `ModalBody` / `ModalFooter` | dialogs built on `<dialog>`; free space is distributed in the golden ratio (38 : 62) above and below the surface – small modals sit in the upper third, long ones use the full height, and only the body scrolls while head and foot stay put |
 | `ConfirmDialog` | a compact confirmation dialog, `tone="danger"` for destructive actions, loading state |
-| `ToastProvider` / `useToast` | stacked status messages at the bottom right, four tones, auto-dismiss, `aria-live` |
+| `ToastProvider` / `useToast` | passing messages as a deck at one of six places: four tones and `loading`, one action, `update` in place, a close reason, a limit, Alt+T, `aria-live` |
 | `Menu` / `MenuItem` / `MenuSeparator` | a dropdown menu with a portal panel, arrow-key navigation, `tone="danger"` |
 | `ContextMenu` | the same menu opened at a point in the viewport - for a right-click on a surface that is not a button; controlled, focus returns to where it was |
 | `Tooltip` | help text on hover and keyboard focus, inverted (ink surface), portal |

@@ -291,6 +291,8 @@ export const GERMAN_WORDING: Wording = {
 
   close: "Schließen",
   closeToast: "Meldung schließen",
+  toastDeckCount: (count) => `${count} Meldungen, alle zeigen`,
+  toastRegion: "Meldungen (Alt+T)",
   confirm: "Bestätigen",
   cancel: "Abbrechen",
   loading: "Wird geladen",

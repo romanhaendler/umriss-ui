@@ -1,69 +1,137 @@
 @layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.components {
+  /* The region stands at the edge and along it where the provider says; its
+     height is the deck's, set by the component, so that the pointer opens the
+     deck over it and nowhere else. The ring shows where Alt+T has put the
+     focus. */
   .region {
     composes: text from "#own-styles";
+    composes: ring from "#own-styles";
     position: fixed;
-    right: var(--u-space-5);
-    bottom: var(--u-space-5);
     z-index: var(--u-z-toast);
-    display: flex;
-    flex-direction: column;
-    max-width: min(92vw, 380px);
+    width: 360px;
+    border-radius: var(--u-radius-lg);
+    transition: height var(--u-duration-medium) var(--u-ease-out);
   }
 
-  /* The two live regions carry no layout of their own: their messages stand as
-     members of the region one below the other, ordered through `order`. */
+  .region[data-keys]:focus {
+    outline: 2px solid transparent;
+    box-shadow: var(--u-focus-ring);
+  }
+
+  .region[data-edge="bottom"] {
+    bottom: var(--u-space-5);
+  }
+
+  .region[data-edge="top"] {
+    top: var(--u-space-5);
+  }
+
+  .region[data-along="start"] {
+    inset-inline-start: var(--u-space-5);
+  }
+
+  .region[data-along="end"] {
+    inset-inline-end: var(--u-space-5);
+  }
+
+  .region[data-along="center"] {
+    inset-inline: 0;
+    margin-inline: auto;
+  }
+
+  /* On a phone the toast takes the window's width; only the edge counts. */
+  @media (max-width: 600px) {
+    .region.region {
+      width: auto;
+      inset-inline: var(--u-space-4);
+      margin-inline: 0;
+    }
+
+    .region[data-edge="bottom"] {
+      bottom: var(--u-space-4);
+    }
+
+    .region[data-edge="top"] {
+      top: var(--u-space-4);
+    }
+  }
+
+  /* The two live regions carry no layout of their own: their cards lie in
+     the region. */
   .live {
     display: contents;
   }
 
-  /* Every entry collapses on leaving (1fr → 0fr), so that the remaining
-     messages move up gently. Deliberately NO overflow:hidden – our edges are
-     shadows and would otherwise be cut off as grey rectangles behind the
-     rounded corners. The leaving message may overlap briefly; it fades out at
-     the same time, so that stays invisible. */
-  .itemWrap {
-    display: grid;
-    grid-template-rows: 1fr;
-    transition: grid-template-rows var(--u-duration-exit-collapse) var(--u-ease-out);
+  /* A card lies at the region's edge and is moved to its place in the deck
+     by a transform - one transition for opening, closing and closing up.
+     Behind the front card it shrinks towards the far edge, so that exactly
+     PEEK of it shows. */
+  .card {
+    position: absolute;
+    inset-inline: 0;
+    transform: translateY(var(--_y)) scale(var(--_scale));
+    transition:
+      transform var(--u-duration-medium) var(--u-ease-out),
+      opacity var(--u-duration-medium) var(--u-ease-out);
   }
 
-  .itemWrapLeaving {
-    grid-template-rows: 0fr;
+  .region[data-edge="bottom"] .card {
+    bottom: 0;
+    transform-origin: top center;
   }
 
-  .itemInner {
-    min-height: 0;
-    padding-top: var(--u-space-2);
-    transition: padding-top var(--u-duration-exit-collapse) var(--u-ease-out);
+  .region[data-edge="top"] .card {
+    top: 0;
+    transform-origin: bottom center;
   }
 
-  .itemWrapLeaving .itemInner {
-    padding-top: 0;
+  /* Further back than two in a closed deck (a limit above three). A focus
+     that tabs into it opens the deck, and it shows. */
+  .hidden {
+    opacity: 0;
+    pointer-events: none;
   }
 
   .toast {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--u-space-3);
-    padding: var(--u-space-3) var(--u-space-4);
+    --_tone: var(--u-edge-color-strong);
+    position: relative;
     background: var(--u-color-surface);
     border-radius: var(--u-radius-lg);
     outline: 1px solid transparent;
     box-shadow: var(--u-shadow-overlay);
+    /* Cuts the content of a card behind the front one, never its shadow. */
+    overflow: hidden;
     transform-origin: var(--_origin);
     animation: toastIn var(--u-duration-medium) var(--u-ease-out);
     /* Leaving through a transition – does not collide with the entrance animation. */
     transition:
+      height var(--u-duration-medium) var(--u-ease-out),
       opacity var(--u-duration-exit-collapse) var(--u-ease-exit),
       transform var(--u-duration-exit-collapse) var(--u-ease-exit);
   }
 
-  .itemWrapLeaving .toast {
+  .behind .toast {
+    height: var(--_front);
+  }
+
+  .leaving .toast {
     opacity: 0;
-    transform: translateX(16px);
+    transform: translateX(var(--_leave, 16px));
     pointer-events: none;
+  }
+
+  .region[data-along="start"] .toast {
+    --_leave: -16px;
+  }
+
+  .region[data-along="center"] .toast {
+    --_leave: 0;
+  }
+
+  .region[data-edge="top"] .toast {
+    animation-name: toastInFromTop;
   }
 
   @keyframes toastIn {
@@ -77,36 +145,44 @@
     }
   }
 
-  /* Tone icon: the splash of colour of the message. */
-  .icon {
-    flex: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
+  @keyframes toastInFromTop {
+    from {
+      opacity: 0;
+      transform: translateY(-8px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* The content, measured by the component. Title, description and action
+     share one left edge; the count and the close button stand on the
+     title's first line. The rail is drawn here too, so that a card behind
+     cuts it along with the rest. */
+  .content {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    column-gap: var(--u-space-2);
+    align-items: start;
+    padding: var(--u-space-3) var(--u-space-3) var(--u-space-3) 18px;
+    transition: opacity var(--u-duration-medium) var(--u-ease-out);
+  }
+
+  .content::before {
+    content: "";
+    position: absolute;
+    inset-block: var(--u-space-3);
+    inset-inline-start: var(--u-space-2);
+    width: 3px;
     border-radius: var(--u-radius-full);
-    margin-top: 1px;
+    background: var(--_tone);
   }
 
-  .neutral {
-    background: var(--u-color-surface-sunken);
-    color: var(--u-color-text-secondary);
-  }
-
-  .success {
-    background: var(--u-color-success-subtle);
-    color: var(--u-color-success);
-  }
-
-  .warning {
-    background: var(--u-color-warning-subtle);
-    color: var(--u-color-warning);
-  }
-
-  .danger {
-    background: var(--u-color-danger-subtle);
-    color: var(--u-color-danger);
+  /* Behind the front card only the edge shows, not half a line of text. */
+  .behind .content {
+    opacity: 0;
   }
 
   .text {
@@ -114,8 +190,6 @@
     flex-direction: column;
     gap: 2px;
     min-width: 0;
-    flex: 1;
-    padding-top: 3px;
   }
 
   .title {
@@ -123,52 +197,151 @@
     font-size: var(--u-text-sm);
     font-weight: var(--u-weight-semibold);
     line-height: var(--u-leading-tight);
+    letter-spacing: var(--u-tracking-tight);
     color: var(--u-color-text);
+    overflow-wrap: anywhere;
   }
 
-  .descriptionText {
+  /* The glyph is the title's first character, in a box as tall as its line:
+     a wrapped title returns to the left edge under it. A loading toast shows
+     its spinner in the same place (a spinner is not a glyph). The ring, the
+     triangle and the spinner fill their box to its edge; the tick keeps a
+     margin inside it and moves 2px towards the edge, flush with the
+     description. */
+  .glyph {
+    display: inline-flex;
+    align-items: center;
+    height: 1lh;
+    vertical-align: top;
+    margin-inline-end: var(--u-space-2);
+    color: var(--_glyph, var(--u-color-text-secondary));
+  }
+
+  .success .glyph {
+    margin-inline-start: -2px;
+  }
+
+  .description {
     margin: 0;
     font-size: var(--u-text-sm);
     line-height: var(--u-leading-normal);
     color: var(--u-color-text-secondary);
   }
 
+  .action {
+    composes: ring from "#own-styles";
+    align-self: flex-start;
+    margin-top: 6px;
+    padding: 0;
+    border: none;
+    background: none;
+    border-radius: var(--u-radius-xs);
+    font: inherit;
+    font-size: var(--u-text-sm);
+    font-weight: var(--u-weight-semibold);
+    line-height: var(--u-leading-tight);
+    color: var(--u-color-accent-text);
+    cursor: pointer;
+  }
+
+  .action:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* ---- Tones: the rail and the glyph. ---- */
+
+  .success {
+    --_tone: var(--u-color-success);
+    --_glyph: var(--u-color-success);
+  }
+
+  .warning {
+    --_tone: var(--u-color-warning);
+    --_glyph: var(--u-color-warning);
+  }
+
+  .danger {
+    --_tone: var(--u-color-danger);
+    --_glyph: var(--u-color-danger);
+  }
+
+  /* ---- The count and the close button, on the title's first line. ---- */
+
+  /* One column for both, so that the cross stands at the same place with a
+     count beside it and without. */
+  .tools {
+    display: flex;
+    gap: var(--u-space-2);
+  }
+
+  .count,
   .close {
     composes: ring from "#own-styles";
+    position: relative;
     flex: none;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 22px;
-    height: 22px;
-    margin: 1px -6px 0 0;
+    height: calc(var(--u-text-sm) * var(--u-leading-tight));
     border: none;
-    background: none;
-    border-radius: var(--u-radius-sm);
-    color: var(--u-color-text-muted);
     cursor: pointer;
     transition:
       background-color var(--u-transition),
       color var(--u-transition);
   }
 
+  .count {
+    padding: 0 7px;
+    border-radius: var(--u-radius-full);
+    background: var(--u-color-surface-sunken);
+    color: var(--u-color-text-secondary);
+    font: inherit;
+    font-size: var(--u-text-xs);
+    font-weight: var(--u-weight-medium);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .close {
+    width: 22px;
+    margin-inline-end: -4px;
+    background: none;
+    border-radius: var(--u-radius-sm);
+    color: var(--u-color-text-muted);
+  }
+
+  .count:hover,
   .close:hover {
     background: var(--u-color-surface-sunken);
     color: var(--u-color-text);
   }
 
-  .close:active {
+  .count:hover {
     background: var(--u-color-surface-pressed);
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .toast {
-      animation: none;
-      transition: none;
-    }
+  .close:active,
+  .count:active {
+    background: var(--u-color-surface-pressed);
+  }
 
-    .itemWrap,
-    .itemInner {
+  /* Under a finger both are hit in a larger square than they are drawn. */
+  @media (pointer: coarse) {
+    .count::after,
+    .close::after {
+      content: "";
+      position: absolute;
+      inset: -10px -6px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .region,
+    .card,
+    .toast,
+    .content {
+      animation: none;
       transition: none;
     }
   }

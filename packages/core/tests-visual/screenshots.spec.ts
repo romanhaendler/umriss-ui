@@ -170,3 +170,88 @@ test("The popover open: width-from-anchor", async ({ page }, testInfo) => {
     clip: { x: box.x - 24, y: box.y - 24, width: box.width + 48, height: box.height + 48 },
   });
 });
+
+/* The toast itself (toast-refinement 01). The example loop photographs the
+   buttons that call toasts; the toasts stand at the window's edge, outside
+   every example. Each is photographed at rest: toasts that stay until closed,
+   or held by the pointer resting on them - an open deck stops every clock.
+   The region with a margin, so that the shadow and the cards behind are in
+   the picture. */
+async function toastRegion(page: import("@playwright/test").Page, name: string, projectName: string) {
+  const region = page.locator("[data-edge]").filter({ has: page.locator("[data-toast]") }).last();
+  await expect(region).toBeVisible();
+  /* Every choreography at rest - but not the spinner's turn, which never ends
+     and would keep `standstill` waiting for good. */
+  await page.evaluate(() =>
+    Promise.all(
+      document
+        .getAnimations()
+        .filter((animation) => animation.effect?.getComputedTiming().iterations !== Infinity)
+        .map((animation) => animation.finished),
+    ).then(() => undefined),
+  );
+  const box = (await region.boundingBox())!;
+  await expect(page).toHaveScreenshot(`toast-${name}-${projectName}.png`, {
+    clip: { x: box.x - 24, y: box.y - 24, width: box.width + 48, height: box.height + 48 },
+  });
+}
+
+test("The toast deck closed", async ({ page }, testInfo) => {
+  await openExample(page, "toast", "until-closed");
+  for (let i = 0; i < 3; i++) await page.getByRole("button", { name: "Go offline" }).click();
+  await page.mouse.move(0, 0);
+  await toastRegion(page, "deck-closed", testInfo.project.name);
+});
+
+test("The toast deck open", async ({ page }, testInfo) => {
+  await openExample(page, "toast", "until-closed");
+  for (let i = 0; i < 3; i++) await page.getByRole("button", { name: "Go offline" }).click();
+  await page.locator("[data-toast]").last().hover();
+  await toastRegion(page, "deck-open", testInfo.project.name);
+});
+
+test("A toast with an action", async ({ page }, testInfo) => {
+  await openExample(page, "toast", "undo");
+  await page.getByRole("button", { name: "Cancel" }).first().click();
+  await page.locator("[data-toast]").last().hover();
+  await toastRegion(page, "action", testInfo.project.name);
+});
+
+test("A toast at the top", async ({ page }, testInfo) => {
+  await openExample(page, "toast", "where-they-stand");
+  await page.getByRole("button", { name: "Top center" }).click();
+  await page.locator("[data-toast]").last().hover();
+  await toastRegion(page, "top-center", testInfo.project.name);
+});
+
+/* A toast at work: the spinner in the glyph's place, no close button. The
+   example answers after 1.5 seconds; that one timeout is kept from firing, so
+   that the picture is of the wait and not of a race with it (a paused clock
+   would hold the animation frames Playwright waits on as well). The spinner
+   stands still, as every animation does in a picture. */
+test("A toast at work", async ({ page }, testInfo) => {
+  await page.addInitScript(() => {
+    const later = window.setTimeout;
+    window.setTimeout = ((handler: TimerHandler, delay?: number, ...rest: unknown[]) =>
+      delay === 1500 ? 0 : later(handler, delay, ...rest)) as typeof window.setTimeout;
+  });
+  await openExample(page, "toast", "save-with-loading");
+  await page.getByRole("button", { name: "Publish release notes" }).click();
+  await expect(page.getByText("Publishing release notes…")).toBeVisible();
+  await toastRegion(page, "loading", testInfo.project.name);
+});
+
+/* On a phone: the window's width less the gutter, and a title that wraps
+   beside the count and returns to the left edge under the glyph. Two
+   failures stand as a closed deck, well inside their five seconds. */
+test("The toast deck on a phone", async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 320, height: 640 });
+  await openExample(page, "toast", "save-with-loading");
+  await page.getByText("Let it fail").click();
+  const publish = page.getByRole("button", { name: "Publish release notes" });
+  await publish.click();
+  await publish.click();
+  await expect(page.getByText("Release notes not published")).toHaveCount(2);
+  await page.mouse.move(0, 0);
+  await toastRegion(page, "phone", testInfo.project.name);
+});

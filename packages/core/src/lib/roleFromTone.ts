@@ -10,13 +10,15 @@
 
    Internal. */
 
-/** The five tones of a message. `Toast` uses four of them. */
-type Ton = "neutral" | "accent" | "success" | "warning" | "danger";
+/** The tones of a message. `Toast` has no `accent` and a `loading` of its own:
+    a toast still at work, which reports politely. */
+type Tone = "neutral" | "accent" | "success" | "warning" | "danger" | "loading";
 
-export const roleFromTone: Readonly<Record<Ton, { role: "alert" | "status"; live?: "polite" }>> = {
+export const roleFromTone: Readonly<Record<Tone, { role: "alert" | "status"; live?: "polite" }>> = {
   neutral: { role: "status", live: "polite" },
   accent: { role: "status", live: "polite" },
   success: { role: "status", live: "polite" },
   warning: { role: "alert" },
   danger: { role: "alert" },
+  loading: { role: "status", live: "polite" },
 };

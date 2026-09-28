@@ -27,8 +27,10 @@ set at 12 pixels draws a stroke of 1.68 pixels, one set at 9 pixels one of
 1.26, and both have the same weight for their size. That is also why the date
 pickers' calendar leaf and clock are set at 12 pixels, not the 13 they had: at
 13 the relative stroke read heavier than the field's text beside them, and a
-pixel less keeps them at the weight of the Modal's close cross and the Toast's
-tone symbol, which stand at 12 as well.
+pixel less keeps them at the weight of the Modal's close cross, which stands
+at 12 as well. The Toast's tone glyphs stand at 16 since `toast-refinement`:
+they are the first character of a semibold title, and at 12 the ring and the
+triangle closed around their marks.
 
 Point 1 was sharpened by the same ticket. A chevron that needs six units of
 height draws in `0 0 10 6` rather than in its own box of six: the unit stays one
@@ -64,8 +66,9 @@ picker's leaf carries a bar across the sheet where it had a small arrow at width
 A glyph drawn in **one** place may stay inline in its component, as long as it
 keeps the specification – the check reads it there as well: the calendar's
 paging arrows, the TimeField's and the ButtonGroup's arrows, the Combobox's
-tick, the Toast's tone symbols (whose dots are strokes of no length: a round cap
-alone is a dot as wide as the stem), and in `@umriss-ui/table` the sort arrow,
+tick, the Toast's tone glyphs - a tick, and a ring, a triangle and a ring again
+around the marks of danger, warning and a note (whose dots are strokes of no
+length: a round cap alone is a dot as wide as the stem), and in `@umriss-ui/table` the sort arrow,
 the sortable indicator, the column reordering's arrows and the group fold. The
 bar of two places decides whether **moving** something into the set is worth
 it, not where a **new** character belongs.

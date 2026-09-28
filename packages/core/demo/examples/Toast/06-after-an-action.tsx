@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Badge, Button, Stack, Text, useToast } from "../../../src";
 
 export const title = "Confirm an action in a list";
-export const lead = "The row changes where the reader looks; the toast confirms it in passing, so a second approval never waits on the first.";
+export const lead = "The row changes where the reader looks; the toast confirms it in passing, so a second approval never waits on the first. Approve all three: the toasts stand as a deck with a count on the front one, and open under the pointer, on the count or with Alt+T.";
 
 const INVOICES = [
   { id: "INV-26-0318", supplier: "Brandlow Office Supply", amount: "€ 1,965.84" },

@@ -7,11 +7,12 @@
 
 import TOKENS from "../src/styles/tokens.css?raw";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { act } from "react";
+import { act, useEffect } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { ToastProvider, useToast } from "../src/components/Toast";
 import type { ToastTone } from "../src/components/Toast";
 import { DEFAULT_WORDING } from "../src/lib/language";
+import { UmrissProvider } from "../src/lib/provider";
 
 function Trigger({ tone }: { tone: ToastTone }) {
   const { toast } = useToast();
@@ -125,5 +126,261 @@ describe("Toast – role by tone", () => {
 
   it("reports a success as status", () => {
     expect(roleOfMessage("success")).toBe("status");
+  });
+});
+
+/* toast-refinement 02: the options. Each test drives the public hook and reads
+   what a user or a caller observes - a button, a text, a reason. */
+type Api = ReturnType<typeof useToast>;
+
+function mount(config?: Parameters<typeof UmrissProvider>[0]["toast"]) {
+  const apiRef: { current: Api | null } = { current: null };
+  function Grab() {
+    const api = useToast();
+    useEffect(() => {
+      apiRef.current = api;
+    });
+    return null;
+  }
+  render(
+    <UmrissProvider toast={config}>
+      <ToastProvider>
+        <Grab />
+      </ToastProvider>
+    </UmrissProvider>,
+  );
+  const call = <T,>(fn: (a: Api) => T): T => {
+    let out!: T;
+    act(() => {
+      out = fn(apiRef.current!);
+    });
+    return out;
+  };
+  return call;
+}
+
+describe("Toast – action and close reason", () => {
+  afterEach(() => vi.useRealTimers());
+
+  it("runs the action, then leaves with the reason action", () => {
+    const call = mount();
+    const onClick = vi.fn();
+    const onClose = vi.fn();
+    call((t) => t.toast({ title: "3 rows deleted", action: { label: "Undo", onClick }, onClose }));
+    fireEvent.click(screen.getByRole("button", { name: "Undo" }));
+    expect(onClick).toHaveBeenCalledTimes(1);
+    expect(onClose).toHaveBeenCalledWith("action");
+    expect(screen.queryByText("3 rows deleted")).toBeNull();
+  });
+
+  it("reports a closed toast as dismiss, once", () => {
+    const call = mount();
+    const onClose = vi.fn();
+    call((t) => t.toast({ title: "Saved", onClose }));
+    fireEvent.click(screen.getByRole("button", { name: DEFAULT_WORDING.closeToast }));
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(onClose).toHaveBeenCalledWith("dismiss");
+  });
+
+  it("reports a toast whose time ran out as timeout", () => {
+    vi.useFakeTimers();
+    const call = mount();
+    const onClose = vi.fn();
+    call((t) => t.toast({ title: "Saved", duration: 1000, onClose }));
+    act(() => vi.advanceTimersByTime(1000));
+    expect(onClose).toHaveBeenCalledWith("timeout");
+  });
+
+  it("reports dismiss() from the caller as dismiss", () => {
+    const call = mount();
+    const onClose = vi.fn();
+    const id = call((t) => t.toast({ title: "Saved", onClose }));
+    call((t) => t.dismiss(id));
+    expect(onClose).toHaveBeenCalledWith("dismiss");
+    expect(screen.queryByText("Saved")).toBeNull();
+  });
+});
+
+describe("Toast – loading and update", () => {
+  afterEach(() => vi.useRealTimers());
+
+  it("keeps a loading toast without a close button and without a timer", () => {
+    vi.useFakeTimers();
+    const call = mount({ duration: 1000 });
+    call((t) => t.toast({ title: "Saving report…", tone: "loading" }));
+    act(() => vi.advanceTimersByTime(60_000));
+    expect(screen.getByText("Saving report…")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: DEFAULT_WORDING.closeToast })).toBeNull();
+    expect(screen.getByText("Saving report…").closest("[role]")?.getAttribute("role")).toBe("status");
+  });
+
+  it("turns into its outcome in place, and its time starts then", () => {
+    vi.useFakeTimers();
+    const call = mount({ duration: 1000 });
+    const id = call((t) => t.toast({ title: "Saving report…", tone: "loading" }));
+    act(() => vi.advanceTimersByTime(5000));
+    call((t) => t.update(id, { title: "Report saved", tone: "success" }));
+    expect(screen.queryByText("Saving report…")).toBeNull();
+    expect(screen.getByText("Report saved")).toBeTruthy();
+    expect(screen.getByRole("button", { name: DEFAULT_WORDING.closeToast })).toBeTruthy();
+    act(() => vi.advanceTimersByTime(999));
+    expect(screen.queryByText("Report saved")).not.toBeNull();
+    act(() => vi.advanceTimersByTime(1));
+    expect(screen.queryByText("Report saved")).toBeNull();
+  });
+
+  it("starts its time afresh on a new duration", () => {
+    vi.useFakeTimers();
+    const call = mount({ duration: 1000 });
+    const id = call((t) => t.toast({ title: "Report saved" }));
+    act(() => vi.advanceTimersByTime(900));
+    call((t) => t.update(id, { duration: 0 }));
+    act(() => vi.advanceTimersByTime(60_000));
+    expect(screen.getByText("Report saved")).toBeTruthy();
+  });
+
+  it("moves a failed outcome into the alert region", () => {
+    const call = mount();
+    const id = call((t) => t.toast({ title: "Saving…", tone: "loading" }));
+    call((t) => t.update(id, { title: "Not saved", tone: "danger" }));
+    expect(screen.getByText("Not saved").closest("[role]")?.getAttribute("role")).toBe("alert");
+  });
+
+  it("does nothing for an id that no longer stands", () => {
+    const call = mount();
+    const id = call((t) => t.toast({ title: "Saved" }));
+    call((t) => t.dismiss(id));
+    call((t) => t.update(id, { title: "Back again" }));
+    expect(screen.queryByText("Back again")).toBeNull();
+  });
+});
+
+describe("Toast – limit", () => {
+  it("lets the oldest give way to the fourth, as dismissed", () => {
+    const call = mount();
+    const onClose = vi.fn();
+    call((t) => t.toast({ title: "First", onClose }));
+    call((t) => t.toast({ title: "Second" }));
+    call((t) => t.toast({ title: "Third" }));
+    call((t) => t.toast({ title: "Fourth" }));
+    expect(screen.queryByText("First")).toBeNull();
+    expect(onClose).toHaveBeenCalledWith("dismiss");
+    for (const title of ["Second", "Third", "Fourth"]) expect(screen.getByText(title)).toBeTruthy();
+  });
+
+  it("takes the limit from the provider", () => {
+    const call = mount({ limit: 1 });
+    call((t) => t.toast({ title: "First" }));
+    call((t) => t.toast({ title: "Second" }));
+    expect(screen.queryByText("First")).toBeNull();
+    expect(screen.getByText("Second")).toBeTruthy();
+  });
+});
+
+/* toast-refinement 01: the deck. What is observable without layout: the
+   count and its name, where the focus goes, and whether the time runs. */
+describe("Toast – the deck", () => {
+  afterEach(() => vi.useRealTimers());
+
+  it("names the count on the front toast while more than one stands", () => {
+    const call = mount();
+    call((t) => t.toast({ title: "First" }));
+    expect(screen.queryByRole("button", { name: DEFAULT_WORDING.toastDeckCount(1) })).toBeNull();
+    call((t) => t.toast({ title: "Second" }));
+    call((t) => t.toast({ title: "Third" }));
+    const count = screen.getByRole("button", { name: DEFAULT_WORDING.toastDeckCount(3) });
+    expect(count.textContent).toBe("1 / 3");
+    expect(count.closest("[role=status] > *")?.textContent).toContain("Third");
+  });
+
+  it("opens by the count: the count gives way and the focus stands in the region", () => {
+    const call = mount();
+    call((t) => t.toast({ title: "First" }));
+    call((t) => t.toast({ title: "Second" }));
+    fireEvent.click(screen.getByRole("button", { name: DEFAULT_WORDING.toastDeckCount(2) }));
+    expect(screen.queryByRole("button", { name: DEFAULT_WORDING.toastDeckCount(2) })).toBeNull();
+    expect(document.activeElement).toBe(screen.getByRole("region", { name: DEFAULT_WORDING.toastRegion }));
+  });
+
+  it("holds every countdown while the focus is inside, and runs on after", () => {
+    vi.useFakeTimers();
+    const call = mount();
+    call((t) => t.toast({ title: "First", duration: 1000 }));
+    call((t) => t.toast({ title: "Second", duration: 1000, action: { label: "Undo", onClick: () => {} } }));
+    act(() => vi.advanceTimersByTime(400));
+    act(() => screen.getByRole("button", { name: "Undo" }).focus());
+    act(() => vi.advanceTimersByTime(10_000));
+    expect(screen.getByText("First")).toBeTruthy();
+    expect(screen.getByText("Second")).toBeTruthy();
+    act(() => screen.getByRole("button", { name: "Undo" }).blur());
+    act(() => vi.advanceTimersByTime(599));
+    expect(screen.queryByText("First")).not.toBeNull();
+    act(() => vi.advanceTimersByTime(1));
+    expect(screen.queryByText("First")).toBeNull();
+  });
+
+  /* Found in the browser: a click leaves the focus on the close button, the
+     toast goes, and the focus goes with it without a blur - the deck stayed
+     open for good. */
+  it("closes again once the focused toast has gone", () => {
+    const call = mount();
+    call((t) => t.toast({ title: "First" }));
+    call((t) => t.toast({ title: "Second" }));
+    call((t) => t.toast({ title: "Third" }));
+    const close = screen.getAllByRole("button", { name: DEFAULT_WORDING.closeToast }).at(-1)!;
+    act(() => close.focus());
+    expect(screen.queryByRole("button", { name: DEFAULT_WORDING.toastDeckCount(3) })).toBeNull();
+    fireEvent.click(close);
+    expect(screen.queryByText("Third")).toBeNull();
+    act(() => (document.activeElement as HTMLElement).blur());
+    expect(screen.getByRole("button", { name: DEFAULT_WORDING.toastDeckCount(2) })).toBeTruthy();
+  });
+
+  it("holds a toast that arrives while the deck is open", () => {
+    vi.useFakeTimers();
+    const call = mount();
+    call((t) => t.toast({ title: "First", duration: 0, action: { label: "Undo", onClick: () => {} } }));
+    act(() => screen.getByRole("button", { name: "Undo" }).focus());
+    call((t) => t.toast({ title: "Second", duration: 1000 }));
+    act(() => vi.advanceTimersByTime(5000));
+    expect(screen.getByText("Second")).toBeTruthy();
+  });
+});
+
+describe("Toast – Alt+T", () => {
+  const before = document.createElement("button");
+  afterEach(() => before.remove());
+
+  it("moves the focus into the region, and Escape gives it back", () => {
+    const call = mount();
+    document.body.append(before);
+    before.focus();
+    call((t) => t.toast({ title: "Saved" }));
+    fireEvent.keyDown(document, { key: "†", code: "KeyT", altKey: true });
+    const region = screen.getByRole("region", { name: DEFAULT_WORDING.toastRegion });
+    expect(document.activeElement).toBe(region);
+    fireEvent.keyDown(region, { key: "Escape" });
+    expect(document.activeElement).toBe(before);
+  });
+
+  it("gives nothing back once the focus has left by other means", () => {
+    const call = mount();
+    const elsewhere = document.createElement("input");
+    document.body.append(before, elsewhere);
+    before.focus();
+    call((t) => t.toast({ title: "Saved", duration: 0, action: { label: "Show", onClick: () => {} } }));
+    fireEvent.keyDown(document, { key: "†", code: "KeyT", altKey: true });
+    act(() => elsewhere.focus());
+    act(() => screen.getByRole("button", { name: "Show" }).focus());
+    fireEvent.keyDown(screen.getByRole("button", { name: "Show" }), { key: "Escape" });
+    expect(document.activeElement).not.toBe(before);
+    elsewhere.remove();
+  });
+
+  it("does nothing while no toast stands", () => {
+    mount();
+    fireEvent.keyDown(document, { key: "†", code: "KeyT", altKey: true });
+    expect(screen.queryByRole("region")).toBeNull();
+    expect(document.activeElement).toBe(document.body);
   });
 });

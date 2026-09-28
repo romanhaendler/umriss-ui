@@ -39,9 +39,19 @@ export type Density = "comfortable" | "compact";
  */
 export type PortalTarget = HTMLElement | (() => HTMLElement | null) | null;
 
+/** Where the toasts stand: an edge of the window and a place along it. On a
+    phone they take the width of the window, and only the edge counts. */
+export type ToastPosition = "top-start" | "top-center" | "top-end" | "bottom-start" | "bottom-center" | "bottom-end";
+
 export interface ToastConfig {
   /** Display duration in ms, where the individual toast names none. */
   duration?: number;
+  /** Where the toasts stand. Default: `bottom-end`. There is no position per
+      toast - toasts that stand in different places are not read as one. */
+  position?: ToastPosition;
+  /** How many toasts stand at once; the oldest gives way to a new one, as if
+      it had been closed. Default: 3. */
+  limit?: number;
 }
 
 export interface UmrissConfig {
@@ -104,7 +114,7 @@ export interface UmrissProviderProps {
    */
   portalTarget?: PortalTarget;
   /** The setting for toasts: the display duration where the individual toast
-      names none. */
+      names none, where they stand, and how many stand at once. */
   toast?: ToastConfig;
   /** Formats and wording, entry by entry. See `lib/language`. */
   language?: LanguageOptions;
