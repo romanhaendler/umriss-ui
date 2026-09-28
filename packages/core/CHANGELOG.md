@@ -29,6 +29,22 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.15.0 – A step for dense surfaces (Sep. 2026)
+
+### Added
+
+- **`--u-control-height-xs`** (18px), the small control on a dense surface.
+  `@umriss-ui/table` gives it to the fields and buttons inside a table at
+  `density="compact"`, under a fine pointer. Like every token it can be
+  overridden at `:root`.
+
+### Fixed
+
+- **`NumberInput size="sm"`'s steppers are never taller than the field.**
+  At a field shorter than 21px they stood out above and below it.
+
+---
+
 ## 0.14.1 – Found by search (Sep. 2026)
 
 ### Fixed

@@ -22,6 +22,38 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.7.2 – Room in a dense row (Sep. 2026)
+
+Needs `@umriss-ui/core` 0.15: a compact table reads its new
+`--u-control-height-xs`; the peer range moves to `^0.15.0`.
+
+### Changed
+
+- **A compact table's controls are a step smaller**: at `density="compact"`
+  a Row draft's fields and buttons, its row actions and a cell's editor are
+  18px tall instead of 26px, which filled a compact row edge to edge. Under a
+  coarse pointer (touch) they keep 26px.
+- **A cell editor keeps its cell's side padding** instead of 4px, in both
+  densities: a field no longer stands against the frame or against its
+  neighbour's field.
+- **A row with actions stands as tall as a row of text.** The actions cell
+  and, in a compact table, the selection and expander cells trim their
+  vertical padding.
+- **The toolbar's search is 160px wide** in the toolbar, instead of taking a
+  line of its own on a phone.
+
+### Fixed
+
+- **A narrow table's toolbar wraps its parts** - by the table's width, not
+  by the window's: beside a sidebar the search, the buttons and the grouping
+  tag ran out of the frame and over one another. An empty ratio no longer
+  leaves an empty line beneath them.
+- **Save and Discard, and a delete's question, stand 8px apart**; at 4px
+  the filled button and the quiet one beside it read as one piece.
+- **A compact head's sort button** no longer reaches past the head.
+
+---
+
 ## 0.7.1 – Found by search (Sep. 2026)
 
 ### Fixed
