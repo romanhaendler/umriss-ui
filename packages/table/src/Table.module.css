@@ -416,6 +416,13 @@
      width decides, not the window's: beside a sidebar the parts ran out of
      the frame and over one another. The search holds a width of its own for
      that: at a field's 100 % it took a line of its own at every width. */
+  /* The right group holding nothing but the empty ratio - a status that
+     stays in the document for its announcements - takes no place: wrapped
+     beneath a narrow table's parts it stood there as an empty line. */
+  .toolbarGroup:has(> [role="status"]:only-child:empty) {
+    position: absolute;
+  }
+
   .toolbarGroup > .search {
     width: 160px;
     min-width: 120px;
