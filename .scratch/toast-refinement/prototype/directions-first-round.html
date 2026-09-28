@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Toast directions</title>
+<link rel="stylesheet" href="../../../packages/core/src/styles/tokens.css">
+<style>
+  :root { color-scheme: light; }
+  :root[data-scheme="dark"] { color-scheme: dark; }
+  body { margin: 0; padding: 32px; background: var(--u-color-bg); color: var(--u-color-text); font-family: var(--u-font-sans); font-size: 14px; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  h2 { font-size: 15px; margin: 0 0 4px; }
+  p.lead { color: var(--u-color-text-secondary); margin: 0 0 16px; max-width: 70ch; }
+  .bar { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+  .bar button { font: inherit; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--u-edge-color); background: var(--u-color-surface); color: var(--u-color-text); cursor: pointer; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 40px 32px; }
+  .col { display: flex; flex-direction: column; gap: 10px; }
+  .col > p { margin: 0 0 8px; color: var(--u-color-text-secondary); font-size: 13px; }
+
+  /* ---------- shared anatomy ---------- */
+  .t {
+    --tone: var(--u-color-text-secondary);
+    box-sizing: border-box;
+    width: 360px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    column-gap: 12px;
+    align-items: start;
+    padding: 14px 14px 14px 16px;
+    border-radius: var(--u-radius-lg);
+    background: var(--u-color-surface);
+    box-shadow: var(--u-shadow-overlay);
+    position: relative;
+  }
+  .t.success { --tone: var(--u-color-success); --tone-subtle: var(--u-color-success-subtle); }
+  .t.warning { --tone: var(--u-color-warning); --tone-subtle: var(--u-color-warning-subtle); }
+  .t.danger  { --tone: var(--u-color-danger);  --tone-subtle: var(--u-color-danger-subtle); }
+  .t.neutral { --tone: var(--u-color-text-secondary); --tone-subtle: var(--u-color-surface-sunken); }
+  .t.loading { --tone: var(--u-color-text-secondary); --tone-subtle: var(--u-color-surface-sunken); }
+  .ic { display: flex; align-items: center; justify-content: center; height: 1lh; line-height: var(--u-leading-tight); font-size: var(--u-text-sm); color: var(--tone); }
+  .ic svg { width: 16px; height: 16px; display: block; }
+  .tx { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .ti { margin: 0; font-size: var(--u-text-sm); font-weight: var(--u-weight-semibold); line-height: var(--u-leading-tight); letter-spacing: var(--u-tracking-tight); }
+  .de { margin: 0; font-size: var(--u-text-sm); line-height: var(--u-leading-normal); color: var(--u-color-text-secondary); }
+  .ac { display: flex; gap: 12px; margin-top: 8px; }
+  .ac button { font: inherit; font-size: var(--u-text-sm); font-weight: var(--u-weight-semibold); background: none; border: 0; padding: 0; color: var(--u-color-accent-text); cursor: pointer; }
+  .ac button.sec { color: var(--u-color-text-secondary); font-weight: var(--u-weight-medium); }
+  .x { width: 20px; height: 1lh; line-height: var(--u-leading-tight); font-size: var(--u-text-sm); display: flex; align-items: center; justify-content: center; border: 0; background: none; color: var(--u-color-text-muted); border-radius: 4px; cursor: pointer; padding: 0; margin-right: -2px; }
+  .x svg { width: 10px; height: 10px; }
+  .x:hover { color: var(--u-color-text); background: var(--u-color-surface-sunken); }
+  .spin { animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ---------- A: Quiet — bare glyph, nothing else ---------- */
+  .A .t { }
+
+  /* ---------- B: Rail — a tone rail inset on the left ---------- */
+  .B .t { padding-left: 20px; }
+  .B .t::before { content: ""; position: absolute; left: 7px; top: 10px; bottom: 10px; width: 3px; border-radius: 3px; background: var(--tone); }
+  .B .t.neutral::before, .B .t.loading::before { background: var(--u-edge-color-strong); }
+
+  /* ---------- C: Inverse — the dark pill of Linear / Vercel ---------- */
+  .C .t { background: var(--u-color-primary-bg); color: var(--u-color-primary-fg); box-shadow: 0 8px 24px -6px rgb(0 0 0 / .35), 0 2px 6px rgb(0 0 0 / .18); }
+  .C .t .de { color: color-mix(in oklab, var(--u-color-primary-fg) 68%, transparent); }
+  .C .t .x { color: color-mix(in oklab, var(--u-color-primary-fg) 55%, transparent); }
+  .C .t .x:hover { color: var(--u-color-primary-fg); background: color-mix(in oklab, var(--u-color-primary-fg) 12%, transparent); }
+  .C .t.success { --tone: light-dark(oklch(0.80 0.15 150), var(--u-color-success)); }
+  .C .t.danger  { --tone: light-dark(oklch(0.72 0.17 25), var(--u-color-danger)); }
+  .C .t.warning { --tone: light-dark(oklch(0.84 0.14 80), var(--u-color-warning)); }
+  .C .t.neutral, .C .t.loading { --tone: color-mix(in oklab, var(--u-color-primary-fg) 70%, transparent); }
+  .C .ac button { color: var(--u-color-primary-fg); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: color-mix(in oklab, var(--u-color-primary-fg) 40%, transparent); }
+  .C .ac button.sec { color: color-mix(in oklab, var(--u-color-primary-fg) 68%, transparent); text-decoration: none; }
+
+  /* ---------- D: Solid badge — small filled disc, glyph knocked out ---------- */
+  .D .ic span { width: 18px; height: 18px; border-radius: 50%; background: var(--tone); color: var(--u-color-surface); display: flex; align-items: center; justify-content: center; }
+  .D .ic svg { width: 12px; height: 12px; }
+  .D .t.neutral .ic span, .D .t.loading .ic span { background: none; color: var(--u-color-text-secondary); }
+  .D .t.loading .ic svg, .D .t.neutral .ic svg { width: 16px; height: 16px; }
+
+  /* ---------- E: Actions to the right, compact single row ---------- */
+  .E .t { grid-template-columns: auto 1fr auto auto; align-items: center; padding: 10px 10px 10px 16px; }
+  .E .t.hasDesc { align-items: start; padding-top: 14px; padding-bottom: 14px; }
+  .E .ac { margin: 0; }
+  .E .ac button { padding: 5px 10px; border-radius: 6px; background: var(--u-color-surface-sunken); color: var(--u-color-text); font-weight: var(--u-weight-medium); }
+  .E .ac button:hover { background: var(--u-color-surface-pressed); }
+  .E .t.hasDesc .ac button { margin-top: -5px; }
+
+  /* ---------- stacking ---------- */
+  .stage { position: fixed; right: 24px; bottom: 24px; width: 360px; z-index: 10; }
+  .stage .t { position: absolute; right: 0; bottom: 0; transition: transform .35s cubic-bezier(.2,.8,.2,1), opacity .35s; }
+  .modes { display: flex; gap: 6px; align-items: center; }
+  .modes label { display: flex; gap: 4px; align-items: center; }
+</style>
+</head>
+<body>
+<h1>Toast — five directions</h1>
+<p class="lead">All at the fixed width of 360px. Each column: one line · one line with action · with description · danger with two actions · loading. The glyph sits in a box as tall as the title's line (<code>1lh</code>), so it centres on the first line whatever the text does.</p>
+<div class="bar">
+  <button id="scheme">Toggle light / dark</button>
+  <span class="modes">Stacking demo with style
+    <select id="styleSel"><option>A</option><option>B</option><option selected>C</option><option>D</option><option>E</option></select>
+    <label><input type="radio" name="mode" value="list" > list</label>
+    <label><input type="radio" name="mode" value="deck" checked> deck (expand on hover)</label>
+  </span>
+  <button id="fire">Fire a toast</button>
+</div>
+
+<div class="grid" id="grid"></div>
+<div class="stage" id="stage"></div>
+
+<script>
+const G = {
+  success: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5l3 3 6-7"/></svg>',
+  danger:  '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6.2"/><path d="M8 4.8v3.6M8 11.1v0" stroke-linecap="round" stroke-width="1.8"/></svg>',
+  warning: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M8 2.2 14.3 13H1.7Z"/><path d="M8 6.4v3M8 11.3v0" stroke-linecap="round" stroke-width="1.8"/></svg>',
+  neutral: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6.2"/><path d="M8 7.3v3.6M8 4.9v0" stroke-linecap="round" stroke-width="1.8"/></svg>',
+  loading: '<svg class="spin" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 1.8a6.2 6.2 0 1 1-6.2 6.2" /></svg>',
+};
+// Solid-disc variant (D) uses knocked-out glyphs without the outer ring.
+const GD = {
+  success: '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6.2l2 2 4-4.6"/></svg>',
+  danger:  '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M6 3v3.4M6 8.9v0"/></svg>',
+  warning: '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M6 3v3.4M6 8.9v0"/></svg>',
+  neutral: G.neutral, loading: G.loading,
+};
+const X = '<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 2l6 6M8 2 2 8"/></svg>';
+
+const SAMPLES = [
+  { tone: 'success', title: 'Invoice INV-26-0318 approved' },
+  { tone: 'success', title: '3 rows deleted', actions: ['Undo'] },
+  { tone: 'neutral', title: 'Export started', desc: 'The file lands in your downloads once all 12,400 rows are written.' },
+  { tone: 'danger', title: 'Could not save the shift plan', desc: 'The connection to the server was lost.', actions: ['Try again', 'Details'] },
+  { tone: 'loading', title: 'Saving shift plan…' },
+  { tone: 'warning', title: 'Line 4 is running at 62 % capacity' },
+];
+
+function toast(style, s) {
+  const icon = style === 'D' ? `<span>${GD[s.tone]}</span>` : G[s.tone];
+  const acts = s.actions ? `<div class="ac">${s.actions.map((a, i) => `<button class="${i ? 'sec' : ''}">${a}</button>`).join('')}</div>` : '';
+  const inlineActs = style === 'E';
+  return `<div class="t ${s.tone} ${s.desc ? 'hasDesc' : ''}">
+    <div class="ic">${icon}</div>
+    <div class="tx"><p class="ti">${s.title}</p>${s.desc ? `<p class="de">${s.desc}</p>` : ''}${inlineActs ? '' : acts}</div>
+    ${inlineActs ? (acts || '<span></span>') : ''}
+    ${s.tone === 'loading' ? '<span></span>' : `<button class="x" aria-label="Close">${X}</button>`}
+  </div>`;
+}
+
+const DESC = {
+  A: 'Quiet — the bare glyph in tone colour, no disc. Actions as text below.',
+  B: 'Rail — a short tone rail inset on the left edge; echoes Alert\'s edge without a second border.',
+  C: 'Inverse — dark in light mode, light in dark mode. Stands off any page; tone lives only in the glyph.',
+  D: 'Solid disc — a small filled disc (18px) with the glyph knocked out. Loud, but compact.',
+  E: 'Row actions — single-line toasts become a compact row; actions sit as buttons on the right.',
+};
+document.getElementById('grid').innerHTML = Object.keys(DESC).map(k =>
+  `<div class="col ${k}"><h2>${k}</h2><p>${DESC[k]}</p>${SAMPLES.map(s => toast(k, s)).join('')}</div>`).join('');
+
+document.getElementById('scheme').onclick = () => {
+  const r = document.documentElement; r.dataset.scheme = r.dataset.scheme === 'dark' ? 'light' : 'dark';
+};
+
+// ---- stacking demo ----
+const stage = document.getElementById('stage');
+let items = [], n = 0, hovered = false;
+const mode = () => document.querySelector('input[name=mode]:checked').value;
+function layout() {
+  const els = [...stage.children];
+  let y = 0;
+  els.slice().reverse().forEach((el, i) => {
+    if (mode() === 'list' || hovered) {
+      el.style.transform = `translateY(${-y}px)`; el.style.opacity = i < 5 ? 1 : 0;
+      y += el.offsetHeight + 8;
+    } else {
+      el.style.transform = `translateY(${-i * 10}px) scale(${1 - i * 0.05})`;
+      el.style.opacity = i < 3 ? 1 : 0;
+    }
+    el.style.zIndex = 100 - i;
+  });
+}
+stage.onmouseenter = () => { hovered = true; layout(); };
+stage.onmouseleave = () => { hovered = false; layout(); };
+document.querySelectorAll('input[name=mode]').forEach(r => r.onchange = layout);
+document.getElementById('fire').onclick = () => {
+  const style = document.getElementById('styleSel').value;
+  stage.className = 'stage ' + style;
+  const s = SAMPLES[n++ % SAMPLES.length];
+  const wrap = document.createElement('div'); wrap.innerHTML = toast(style, s);
+  const el = wrap.firstElementChild; el.style.opacity = 0; el.style.transform = 'translateY(16px)';
+  el.querySelector('.x')?.addEventListener('click', () => { el.remove(); layout(); });
+  stage.appendChild(el);
+  requestAnimationFrame(() => requestAnimationFrame(layout));
+  setTimeout(() => { if (!hovered) { el.remove(); layout(); } }, 8000);
+};
+</script>
+</body>
+</html>
