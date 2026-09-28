@@ -15,7 +15,9 @@ moves from here under the rule above.
 
 ---
 
-## Unreleased
+## 0.3.7 – Room on a phone (Sep. 2026)
+
+Needs `@umriss-ui/core` 0.16 and `@umriss-ui/charts` 0.8.2; the peer ranges move to `^0.16.0` and `^0.8.2`.
 
 ### Changed
 
