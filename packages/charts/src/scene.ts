@@ -30,6 +30,7 @@ import {
   CLASS_TICK,
   EMPTY_LAYOUT,
   insideContainer,
+  spread,
   type AxisInput,
   type AxisLayout,
   type LayoutResult,
@@ -196,6 +197,12 @@ export interface LimitLabel {
   /** An x limit's label: its left edge in container coordinates, kept inside
       the container as a tick label is. */
   labelLeft: number;
+  /** The line a y limit's label takes; a tick label closer than that would
+      stand half covered and is left out. */
+  height: number;
+  /** A y label inside the plot, at its far edge and on its value as in the
+      band - where the band had no room for it (`AxisLayout.limitsInside`). */
+  inside: boolean;
   label: string;
   severity: string;
   role: string;
@@ -1816,18 +1823,30 @@ export class ChartScene {
         config.kind === "line"
           ? this.limitAt(config, config.value)
           : (this.limitAt(config, config.from) + this.limitAt(config, config.to)) / 2;
+      const size = this.measurer?.measure(config.label, CLASS_TICK);
+      const height = size?.height ?? 0;
       const px = axis.scale.toPx(value);
       // As wide as a tick label of its text, and its 2 px padding either side.
-      const width = (this.measurer?.measure(config.label, CLASS_TICK).width ?? 0) + 4;
+      const width = (size?.width ?? 0) + 4;
       out.push({
         id: order,
         axisKey: axis.key,
         px,
         labelLeft: insideContainer(px, width, this.cssWidth),
+        height,
+        inside: axis.limitsInside,
         label: config.label,
         severity: config.severity,
         role: config.role,
       });
+    }
+    // A y label stands centred on its limit; two limits closer than a line
+    // move apart, so each stays readable.
+    for (const key of new Set(out.map((l) => l.axisKey))) {
+      if (!key.startsWith("y:")) continue;
+      const labels = out.filter((l) => l.axisKey === key);
+      const height = Math.max(...labels.map((l) => l.height));
+      spread(labels.map((l) => l.px), height).forEach((px, i) => ((labels[i] as LimitLabel).px = px));
     }
     return out;
   }

@@ -99,10 +99,12 @@ describe("the pinned blocks", () => {
     expect(current!.asCsv().replace("﻿", "").split("\r\n")[0]).toBe("Tag;Line;Area;Output;Scrap;Verdict");
   });
 
-  it("leave a table without pins as it was - nothing sticks", () => {
+  it("leave a table without pins as it was - only its row actions stick, at the end", () => {
     const { container } = render(<Plant declared={false} />);
     expect(labels(container).slice(2, 8)).toEqual(["Line", "Area", "Output", "Verdict", "Tag", "Scrap"]);
-    expect(container.querySelector("[style*='--u-table-pin']")).toBeNull();
+    expect(container.querySelector("[style*='--u-table-pin-start-']")).toBeNull();
+    const head = container.querySelector("thead tr") as HTMLTableRowElement;
+    expect(Array.from(head.cells).map((c) => c.className.includes("pinned"))).toEqual([...Array(8).fill(false), true]);
   });
 
   it("stickyRowHeader is `pin=\"start\"` on the row header, and nothing the view carries", () => {

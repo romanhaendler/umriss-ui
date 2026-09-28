@@ -373,16 +373,20 @@ export function Pagination({ pageSizes = [10, 25, 50], className, of }: Paginati
             ))}
           </Select>
         </label>
-        <span className={styles.paginationStatus}>{wording.pageOfPages(snapshot.page, snapshot.pageCount, {
-            page: formats.count(snapshot.page),
-            total: formats.count(snapshot.pageCount),
-          })}</span>
-        <Button size="sm" disabled={snapshot.page <= 1} onClick={() => snapshot.setPage(snapshot.page - 1)}>
-          {wording.previousPage}
-        </Button>
-        <Button size="sm" disabled={snapshot.page >= snapshot.pageCount} onClick={() => snapshot.setPage(snapshot.page + 1)}>
-          {wording.nextPage}
-        </Button>
+        {/* The page and its two steps wrap as one: "Next" alone on a line
+            of its own, split from "Back", read as a control of its own. */}
+        <span className={styles.pageSteps}>
+          <span className={styles.paginationStatus}>{wording.pageOfPages(snapshot.page, snapshot.pageCount, {
+              page: formats.count(snapshot.page),
+              total: formats.count(snapshot.pageCount),
+            })}</span>
+          <Button size="sm" disabled={snapshot.page <= 1} onClick={() => snapshot.setPage(snapshot.page - 1)}>
+            {wording.previousPage}
+          </Button>
+          <Button size="sm" disabled={snapshot.page >= snapshot.pageCount} onClick={() => snapshot.setPage(snapshot.page + 1)}>
+            {wording.nextPage}
+          </Button>
+        </span>
       </div>
     </nav>
   );

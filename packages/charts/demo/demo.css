@@ -16,7 +16,7 @@
 .resizable {
   resize: horizontal;
   overflow: hidden;
-  min-width: 280px;
+  min-width: min(280px, 100%);
   max-width: 100%;
   margin-bottom: var(--u-space-3);
   padding-bottom: 4px;
@@ -33,7 +33,7 @@
 
 /* Two charts of the same data beside each other, each under a caption that says
    what differs - a picture cannot show a hover, so the caption has to. */
-.pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--u-space-4); }
+.pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); gap: var(--u-space-4); }
 .pair-caption { margin: 0 0 var(--u-space-2); font-family: var(--u-font-sans); font-size: var(--u-text-xs); color: var(--u-color-text-secondary); }
 
 /* A list beside a chart - the control chart's violations as text. */

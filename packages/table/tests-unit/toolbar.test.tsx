@@ -280,6 +280,15 @@ describe("Paging", () => {
     fireEvent.click(within(bar).getByRole("button", { name: "Next" }));
     expect(rowHeaders(container)).toEqual(["B-3", "B-4"]);
   });
+
+  it("keeps the page and its two steps together, so that a narrow bar wraps them as one", () => {
+    render(<List />);
+    const bar = screen.getByRole("navigation", { name: "Pagination" });
+    const back = within(bar).getByRole("button", { name: "Back" });
+    const next = within(bar).getByRole("button", { name: "Next" });
+    expect(back.parentElement).toBe(next.parentElement);
+    expect(next.parentElement!.textContent).toContain("Page 1 of 3");
+  });
 });
 
 describe("Without a pagination bar", () => {

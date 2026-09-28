@@ -1,9 +1,12 @@
-import { forwardRef } from "react";
+import { forwardRef, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { HTMLAttributes, ReactNode } from "react";
 import { cx } from "../../lib/cx";
 import { CrossGlyph } from "../../lib/glyphs";
 import { useWording } from "../../lib/language";
+import { mergeRefs } from "../../lib/mergeRefs";
 import { VisuallyHidden } from "../VisuallyHidden";
+import { rowWidth, stackedWidth, stepperFit } from "./fit";
+import type { StepperFit } from "./fit";
 import styles from "./Stepper.module.css";
 
 /** One step of a procedure. */
@@ -44,6 +47,68 @@ export const Stepper = forwardRef<HTMLOListElement, StepperProps>(function Stepp
   ref,
 ) {
   const wording = useWording();
+  const listRef = useRef<HTMLOListElement>(null);
+  const [fit, setFit] = useState<StepperFit>("row");
+
+  const measure = useCallback(() => {
+    const list = listRef.current;
+    if (!list || orientation === "vertical" || list.clientWidth <= 0) return;
+    /* A copy, hidden and out of the flow, every step at its natural width:
+       once as a row with each label on one line, once stacked with each step
+       at its longest word. The list itself is not touched, so the measuring
+       shows nowhere. */
+    const copy = list.cloneNode(true) as HTMLOListElement;
+    copy.classList.remove(styles.vertical!);
+    /* A label may carry ids; the copy must not double them, even for the
+       moment it stands. */
+    for (const withId of [copy, ...copy.querySelectorAll("[id]")]) withId.removeAttribute("id");
+    copy.removeAttribute("data-fit");
+    copy.setAttribute("aria-hidden", "true");
+    copy.style.cssText = "position:absolute;top:0;left:0;visibility:hidden;pointer-events:none;width:max-content;max-width:none";
+    list.after(copy);
+    const gap = Number.parseFloat(getComputedStyle(copy).columnGap) || 0;
+    const steps = Array.from(copy.children as HTMLCollectionOf<HTMLElement>);
+    /* In a row only the label keeps to one line; a description beneath it
+       wraps in the room the label leaves. */
+    const descriptions = Array.from(copy.querySelectorAll<HTMLElement>(`.${styles.description}`));
+    for (const description of descriptions) description.style.display = "none";
+    for (const step of steps) step.style.cssText = "flex:none;width:max-content";
+    const row = rowWidth(steps.map((step) => step.getBoundingClientRect().width), gap);
+    for (const description of descriptions) description.style.display = "";
+    copy.setAttribute("data-fit", "stacked");
+    for (const step of steps) step.style.width = "min-content";
+    const stacked = stackedWidth(
+      steps.map((step) => {
+        const text = step.querySelector<HTMLElement>(`.${styles.text}`);
+        if (text) text.style.width = "min-content";
+        return Math.max(step.getBoundingClientRect().width, text?.getBoundingClientRect().width ?? 0);
+      }),
+      gap,
+    );
+    copy.remove();
+    setFit(stepperFit(list.clientWidth, row, stacked));
+  }, [orientation]);
+
+  /* After every commit - other labels are other widths - and on every change
+     of the place; it sets the fit only when it changes. The list's width does
+     not depend on its fit, so the answer does not flip back and forth. */
+  useLayoutEffect(() => measure());
+
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list || orientation === "vertical") return;
+    const observer = new ResizeObserver(() => measure());
+    observer.observe(list);
+    /* A web font that arrives late changes the labels' widths and not the
+       list's, which the observer would not hear. */
+    let live = true;
+    void list.ownerDocument.fonts?.ready.then(() => live && measure());
+    return () => {
+      live = false;
+      observer.disconnect();
+    };
+  }, [measure, orientation]);
+
   const words: Record<StepState, string | null> = {
     done: wording.stepDone,
     current: null,
@@ -53,10 +118,11 @@ export const Stepper = forwardRef<HTMLOListElement, StepperProps>(function Stepp
 
   return (
     <ol
-      ref={ref}
-      className={cx(styles.stepper, orientation === "vertical" && styles.vertical, className)}
+      ref={mergeRefs(listRef, ref)}
+      className={cx(styles.stepper, (orientation === "vertical" || fit === "column") && styles.vertical, className)}
       {...rest}
       data-orientation={orientation}
+      data-fit={orientation === "vertical" ? undefined : fit}
     >
       {steps.map((step, index) => {
         const state = stateOf(step, index, current);

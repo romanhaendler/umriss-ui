@@ -10,12 +10,14 @@ export default function Gaps() {
     <Stack gap={4}>
       {([1, 3, 6] as const).map((gap) => (
         <Stack key={gap} direction="row" gap={gap} align="center">
-          <Text size="xs" tone="muted" style={{ width: 48 }}>
+          <Text size="xs" tone="muted" style={{ width: 48, flex: "none", whiteSpace: "nowrap" }}>
             gap {gap}
           </Text>
-          {TEAMS.map((team) => (
-            <Badge key={team}>{team}</Badge>
-          ))}
+          <Stack direction="row" gap={gap} align="center" wrap>
+            {TEAMS.map((team) => (
+              <Badge key={team}>{team}</Badge>
+            ))}
+          </Stack>
         </Stack>
       ))}
     </Stack>

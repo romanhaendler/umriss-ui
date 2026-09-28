@@ -1,6 +1,13 @@
 @layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.components {
+  /* A placeholder or value wider than the field ends in an ellipsis, not
+     mid-letter (a search at 160 px on a toolbar). */
+  .input,
+  .inner {
+    text-overflow: ellipsis;
+  }
+
   .input {
     composes: field from "#own-styles";
     height: var(--u-control-height);
@@ -132,6 +139,12 @@
     color: var(--u-color-text);
   }
 
+  /* A search field brings the browser's own cross; the clearable field has
+     one already, and two crosses side by side read as a fault. */
+  .inner::-webkit-search-cancel-button {
+    display: none;
+  }
+
   .inner::placeholder {
     color: var(--u-color-text-muted);
   }
@@ -178,6 +191,21 @@
   @media (prefers-reduced-motion: reduce) {
     .clear {
       animation: none;
+    }
+  }
+
+  /* Under a finger the cross is hit in a larger square than it is drawn:
+     18 px is too small a target, and a bigger glyph would crowd the value. */
+  @media (pointer: coarse) {
+    .clear {
+      position: relative;
+    }
+
+    .clear::after {
+      content: "";
+      position: absolute;
+      /* Not towards the value: a tap at its end places the caret. */
+      inset: -8px -8px -8px 0;
     }
   }
 }

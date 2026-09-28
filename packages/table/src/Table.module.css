@@ -38,6 +38,27 @@
     border-radius: inherit;
   }
 
+  /* Columns beyond an edge where no block sticks: the edge fades out, so a
+     value cut there reads as one that scrolls on (parts.tsx, `Beyond`). A
+     mask reads only the alpha; the text colour is simply an opaque one. */
+  .scroll[data-beyond-end] {
+    mask-image: linear-gradient(to left, transparent, var(--u-color-text) var(--u-space-6));
+  }
+
+  .scroll[data-beyond-start] {
+    mask-image: linear-gradient(to right, transparent, var(--u-color-text) var(--u-space-6));
+  }
+
+  .scroll[data-beyond-start][data-beyond-end] {
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      var(--u-color-text) var(--u-space-6),
+      var(--u-color-text) calc(100% - var(--u-space-6)),
+      transparent
+    );
+  }
+
   .footerTarget {
     display: contents;
   }
@@ -160,6 +181,11 @@
     font-size: var(--u-text-mono);
     letter-spacing: var(--u-tracking-figures);
     font-variant-numeric: tabular-nums;
+  }
+
+  /* A short value without a space stays one piece (parts.tsx, `Cell`). */
+  .token {
+    white-space: nowrap;
   }
 
   /* An absent value: a muted dash, not a zero and not an empty field. */
@@ -337,7 +363,13 @@
     border-bottom: none;
   }
 
+  /* The message stays in the part of the row one sees: it sticks at the
+     scroll area's start, as wide as the area (parts.tsx, `ViewWidth`). */
   .empty {
+    position: sticky;
+    left: 0;
+    box-sizing: border-box;
+    width: var(--u-table-view, auto);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -464,6 +496,12 @@
 
   .pageSize > * {
     width: 64px;
+  }
+
+  .pageSteps {
+    display: flex;
+    align-items: center;
+    gap: var(--u-space-2);
   }
 
   .paginationStatus {
@@ -933,9 +971,11 @@
   }
 
   /* A long value is cut, not allowed to widen the span until every other
-     column wraps; its full text stands in the title. */
+     column wraps; its full text stands in the title. On a phone a third of
+     the window: at 45 % the span took 60 % of the table, and the column the
+     groups were compared by stood out of view. */
   .spanValue {
-    max-width: min(18rem, 45vw);
+    max-width: min(18rem, 35vw);
   }
 
   .spanText,

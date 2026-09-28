@@ -84,6 +84,30 @@ export function days(domain: readonly [number, number], calendar: CalendarInput 
   return found;
 }
 
+/* How many days one date may speak for once a day is too narrow for its own:
+   every day, every other day, then whole weeks. */
+const DAY_RUNS: readonly number[] = [1, 2, 7, 14, 28];
+
+/** Every how many days a date is written, where a day is `dayWidth` pixels wide
+    and a date needs `room`: the shortest run of days that holds one. A phone
+    showing ten days gives each about eighteen pixels, and a date written on
+    every one of them ran into the next. */
+export function dayRun(dayWidth: number, room: number): number {
+  return DAY_RUNS.find((run) => run * dayWidth >= room) ?? (DAY_RUNS[DAY_RUNS.length - 1] as number);
+}
+
+/** Whether the local day that begins at `start` opens a run of `run` days.
+    Counted from a Monday, so that a week's date stands on its first day - and
+    counted on the calendar, not in the view, so that the dates hold still while
+    the plot pans instead of hopping from day to day. */
+export function opensRun(start: number, run: number): boolean {
+  /* The local day's number since 1 January 1970; the 5th, day 4, was a Monday.
+     Rounded, because a grid laid on one offset is an hour off after a clock
+     change (`localOffset`). */
+  const day = Math.round((start - localOffset(start)) / DAY);
+  return (((day - 4) % run) + run) % run === 0;
+}
+
 /** The narrowest and the widest span zoom may reach. */
 export interface ZoomLimits {
   readonly min: number;

@@ -51,7 +51,7 @@ export default function PlaceAMark() {
     <Stack gap={2}>
       <div ref={host} style={{ position: "relative", height: 12 }}>
         {pin !== null && (
-          <Text size="xs" tone="muted" style={{ position: "absolute", top: -4, left: pin, transform: "translateX(-50%)" }} data-pin>
+          <Text size="xs" tone="muted" style={{ position: "absolute", top: -4, left: pin, transform: "translateX(-50%)", whiteSpace: "nowrap" }} data-pin>
             Same-day cut-off
           </Text>
         )}

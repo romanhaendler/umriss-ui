@@ -75,9 +75,10 @@
     padding-bottom: var(--u-space-6);
   }
 
+  /* Clear of the resize grip in the corner, which it had touched. */
   .count {
     position: absolute;
-    right: var(--u-space-3);
+    right: var(--u-space-6);
     bottom: var(--u-space-2);
     font-family: var(--u-font-mono);
     font-size: var(--u-text-xs);

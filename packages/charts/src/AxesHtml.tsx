@@ -8,8 +8,9 @@
 import { useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import type { ChartScene, LimitLabel } from "./scene";
 import { TICK_GAP, TICK_LEN, type AxisLayout } from "./layout";
+import type { Rect } from "./types";
 
-function renderAxis(axis: AxisLayout, limits: readonly LimitLabel[]): ReactNode {
+function renderAxis(axis: AxisLayout, limits: readonly LimitLabel[], plot: Rect): ReactNode {
   const { band, position, orientation } = axis;
   const bandStyle: CSSProperties = {
     left: `${band.x}px`,
@@ -32,15 +33,20 @@ function renderAxis(axis: AxisLayout, limits: readonly LimitLabel[]): ReactNode 
         // the canvas, which is aligned to half pixels (R-3.5).
         if (orientation === "y") {
           const anchor = Math.round(tick.px - band.y);
+          // A limit's label is the weightier statement and covers the tick's;
+          // half a number showing beside it would be read as part of it.
+          const covered = limits.some((g) => !g.inside && Math.abs(g.px - tick.px) < g.height);
           return (
             <span key={tick.value} className="uc-tick" style={{ top: `${anchor}px` }}>
               <span className="uc-tick-mark" />
-              <span
-                className="uc-tick-label"
-                style={{ [position === "left" ? "right" : "left"]: `${offset}px` }}
-              >
-                {tick.label}
-              </span>
+              {!covered && (
+                <span
+                  className="uc-tick-label"
+                  style={{ [position === "left" ? "right" : "left"]: `${offset}px` }}
+                >
+                  {tick.label}
+                </span>
+              )}
             </span>
           );
         }
@@ -79,7 +85,15 @@ function renderAxis(axis: AxisLayout, limits: readonly LimitLabel[]): ReactNode 
             className="uc-limit-label"
             data-severity={g.severity}
             data-role={g.role}
-            style={{ top: `${Math.round(g.px - band.y)}px` }}
+            style={{
+              top: `${Math.round(g.px - band.y)}px`,
+              // Inside: against the plot's far edge, 4 px in.
+              ...(g.inside
+                ? position === "left"
+                  ? { right: `${band.x + band.width - (plot.x + plot.width) + 4}px` }
+                  : { left: `${plot.x - band.x + 4}px` }
+                : {}),
+            }}
           >
             {g.label}
           </span>
@@ -128,6 +142,7 @@ export function AxesHtml({ scene, empty }: { scene: ChartScene; empty: ReactNode
         renderAxis(
           axis,
           snapshot.limits.filter((g) => g.axisKey === axis.key),
+          plot,
         ),
       )}
     </div>

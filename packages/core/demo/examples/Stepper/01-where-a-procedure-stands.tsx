@@ -9,7 +9,7 @@ export default function WhereAProcedureStands() {
       aria-label="Incident INC-1048"
       steps={[{ label: "Detect" }, { label: "Acknowledge" }, { label: "Mitigate" }, { label: "Resolve" }, { label: "Review" }]}
       current={2}
-      style={{ maxWidth: 640 }}
+      style={{ maxWidth: 720 }}
     />
   );
 }

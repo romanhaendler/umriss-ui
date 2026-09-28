@@ -5,7 +5,7 @@ export const lead = "Set `orientation` to `vertical` between groups of buttons; 
 
 export default function UprightInABar() {
   return (
-    <Stack direction="row" gap={3} align="center">
+    <Stack direction="row" gap={3} align="center" wrap>
       <Button size="sm" variant="ghost">
         This sprint
       </Button>

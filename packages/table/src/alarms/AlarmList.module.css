@@ -48,6 +48,14 @@
     color: var(--u-color-text-secondary);
   }
 
+  /* The alarm keeps a width a name reads in: every other column holds one
+     line, and on a phone the table's surplus left it the width of its
+     longest word - "Checkout / · p95 / latency / above / 300 ms". */
+  .alarm {
+    display: block;
+    min-width: 10rem;
+  }
+
   .label {
     font-weight: var(--u-weight-medium);
   }
@@ -57,7 +65,8 @@
   }
 
   /* The state holds one line - the badge and the lifecycle beside it; the
-     column takes the width it needs from the ones that wrap. */
+     column takes the width it needs from the ones that wrap. A duration
+     too: "3 hrs 18" over "min" tore the unit from its number. */
   .state {
     white-space: nowrap;
   }

@@ -29,6 +29,35 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## Unreleased
+
+### Changed
+
+- **X labels never overlap.** Generated ticks ask for fewer steps first; named
+  ticks - categories - keep every k-th label. A time axis shows at least two
+  labels. The axis range does not change.
+- **A time axis widens only to whole hours or days of its step**, not to the
+  next round step: on a phone a day's work no longer stretched over 24 hours.
+- **Axes with named ticks widen to those ticks**, not to a hidden
+  round-number grid: bars and matrix cells fill their plot.
+
+- **Category names break onto a second line before any is left out**; only
+  then does the axis keep every k-th name, on one line and then on two.
+- **Limit labels stand inside the plot** at its far edge when beside it they
+  would take more than a fifth of the chart's width - on a phone they had
+  left the plot a third of the card.
+- **A time axis with fewer than four ticks tries a finer step** where its
+  labels still keep apart, unless the caller set `tickCount`.
+
+### Fixed
+
+- **Markers on the plot's edge are drawn whole**; lines, areas, bars, bands
+  and limits stay clipped to the plot.
+- **Limit labels on one axis keep apart**, in their order; a tick label a
+  limit label would half cover gives way, its tick mark stays.
+
+---
+
 ## 0.8.1 – Found by search (Sep. 2026)
 
 ### Fixed

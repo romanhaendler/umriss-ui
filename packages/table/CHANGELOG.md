@@ -22,6 +22,41 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## Unreleased
+
+### Changed
+
+- **Pinned blocks take at most half of the width a table shows.** On a
+  narrower table the end block, then the start block scrolls with the rest,
+  and sticks again once there is room: on a phone a Row draft's actions
+  column or both blocks of a wide table left nothing between them to scroll.
+  The pin itself, in the column menu and the view, stays.
+- **An actions column that holds nothing at rest** - a Row draft's buttons,
+  no Delete, no row action - sticks only while a draft is open.
+- **Row actions stick at the end** as a block of their own, as a grid's
+  Row draft buttons already did: a table a little too wide for a phone cut
+  the last button ("Forwa").
+- **A short value without a space stays on one line**: an id, a date or a
+  string a column's `children` returns, such as `FP-1004223`, `2026-03-16`
+  or `06:00–08:00`, no longer breaks at its hyphen or dash.
+- **A table that scrolls sideways fades out at the edge where more columns
+  lie** (and no pinned block stands), so a value cut there reads as one that
+  scrolls on.
+- **A span's value is cut at 35 % of the window** instead of 45 %, below
+  its 18rem: on a phone it took 60 % of the table.
+
+### Fixed
+
+- **The pagination bar wraps the page and its two steps as one**; on a phone
+  "Next" stood alone on a line beneath "Back".
+- **The empty body's message stays in view** in a table wider than its
+  scroll area, instead of being centred across the full width and cut.
+- **`AlarmList`'s alarm column keeps 10rem**: on a phone it was the width of
+  its longest word, and every name wrapped over five lines. Its duration
+  holds one line: "3 hrs 18" no longer stands over "min".
+
+---
+
 ## 0.7.2 – Room in a dense row (Sep. 2026)
 
 Needs `@umriss-ui/core` 0.15: a compact table reads its new

@@ -10,8 +10,11 @@
     --_track-width: 28px;
     --_track-height: 16px;
     --_thumb: 12px;
+    --_label: var(--u-text-sm);
     display: inline-flex;
-    align-items: center;
+    /* The track stands at the label's first line, not at the middle of a
+       label that wraps. */
+    align-items: flex-start;
     gap: var(--u-space-2);
     cursor: pointer;
     user-select: none;
@@ -21,6 +24,11 @@
     --_track-width: 22px;
     --_track-height: 12px;
     --_thumb: 8px;
+    --_label: var(--u-text-xs);
+  }
+
+  .wrapper:has(.label) .track {
+    margin-top: calc((var(--_label) * var(--u-leading-tight) - var(--_track-height)) / 2);
   }
 
   .input {
@@ -110,7 +118,7 @@
   }
 
   .sm .label {
-    font-size: var(--u-text-xs);
+    font-size: var(--_label);
   }
 
   /* On is the accent's ground, which forced colours repaint with the page's

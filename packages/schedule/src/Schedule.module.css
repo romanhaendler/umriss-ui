@@ -44,9 +44,15 @@
     overflow: hidden;
   }
 
+  /* Where one date speaks for a run of days, the lines between those days
+     run under it: it stands on the band's own ground, one step wider than its
+     text on either side, and above the days that follow. */
   .dayLabel {
     position: absolute;
-    left: var(--u-space-2);
+    z-index: 1;
+    left: var(--u-space-1);
+    padding: 0 var(--u-space-1);
+    background: var(--u-color-surface);
     top: 50%;
     transform: translateY(-50%);
     white-space: nowrap;
@@ -92,6 +98,30 @@
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  /* A lane's name takes a second line where its row holds two. On a phone the
+     column is a hundred pixels wide, and two vans cut to the same "Cooled van
+     FP…" were two lanes nobody could tell apart. A folded group's row is a
+     lane's height and does the same. A row too low for two lines - and an open
+     group's slim head - keeps the one line and its ellipsis. Text only:
+     the clamp cuts a label of elements down to its first line, and a label
+     of the application's own lays itself out. */
+  .header[data-row="lane"],
+  .header[data-row="miniature"] {
+    container: lane-header / size;
+  }
+
+  /* Two lines of the label's type and leading, and the row's hairline. */
+  @container lane-header (height >= 2.5rem) {
+    .headerLabel:not(:has(*)) {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      white-space: normal;
+      text-wrap: balance;
+    }
   }
 
   /* A group's head is a slim line and must not read as a lane: it carries the

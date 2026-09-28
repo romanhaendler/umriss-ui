@@ -24,7 +24,7 @@ export default function FilterIncidentsByService() {
         {shown.map((incident) => (
           <Stack key={incident.id} direction="row" gap={3} align="center">
             <Badge tone={incident.severity === "SEV1" ? "danger" : "warning"}>{incident.severity}</Badge>
-            <Text size="sm" mono>
+            <Text size="sm" mono style={{ flex: "none" }}>
               {incident.id}
             </Text>
             <Text size="sm">{incident.title}</Text>

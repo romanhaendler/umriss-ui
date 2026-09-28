@@ -16,7 +16,7 @@ export default function InvoiceToolbar() {
   return (
     <Stack gap={3}>
       <Stack direction="row" gap={3} align="center" justify="space-between" wrap>
-        <Stack direction="row" gap={3} align="center">
+        <Stack direction="row" gap={3} align="center" wrap>
           <ButtonGroup aria-label="Invoices awaiting approval">
             <Button size="sm" disabled={index === 0} onClick={() => setIndex(index - 1)}>
               Previous

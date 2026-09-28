@@ -7,13 +7,10 @@ export const lead = "Put the band on a second y axis with `laneFrom` and `laneTo
 const BATTERY = batteryDay("v2");
 const STATES = vehicleDay("v2");
 
-const timeOfDay = (v: number) =>
-  new Date(v).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
-
 export default function UnderACourse() {
   return (
     <Chart data={BATTERY} height={320} ariaLabel="An e-van's charge above what it was doing">
-      <XAxis accessor={(d: BatteryPoint) => d.t} tickFormat={timeOfDay} label="Time" />
+      <XAxis accessor={(d: BatteryPoint) => d.t} time label="Time" />
       <YAxis accessor={(d: BatteryPoint) => d.charge ?? 0} domain={[-40, 100]} ticks={[0, 25, 50, 75, 100]} label="Charge %" />
       {/* The lane: the bottom unit of five, the rest is room for the course. */}
       <YAxis id="lane" position="right" accessor={() => 0} domain={[0, 5]} ticks={[0.4]} tickFormat={() => "State"} />

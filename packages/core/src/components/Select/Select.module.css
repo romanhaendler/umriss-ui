@@ -134,4 +134,19 @@
   .clear:active {
     background: var(--u-color-surface-pressed);
   }
+
+  /* Under a finger the cross is hit in a larger square than it is drawn:
+     18 px is too small a target, and a bigger glyph would crowd the value. */
+  @media (pointer: coarse) {
+    .clear {
+      position: absolute;
+    }
+
+    .clear::after {
+      content: "";
+      position: absolute;
+      /* Not towards the value: a tap at its end places the caret. */
+      inset: -8px -8px -8px 0;
+    }
+  }
 }

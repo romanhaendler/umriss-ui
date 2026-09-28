@@ -19,7 +19,8 @@ export default function AtThePointer() {
       <div
         onContextMenu={openHere}
         style={{
-          width: 320,
+          width: "100%",
+          maxWidth: 320,
           height: 120,
           display: "grid",
           placeItems: "center",

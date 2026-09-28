@@ -203,6 +203,31 @@ describe("Value and presentation", () => {
   });
 });
 
+describe("A value that is one token", () => {
+  it("stays one piece: an id or a date does not break at its hyphen, a name still wraps", () => {
+    function Shipments() {
+      const rows = [{ id: "FP-1004223", customer: "Holloway Garden Supplies", url: "https://example.com/a/very/long/path/to/it" }];
+      const { Table: Frame, Column } = useTable(rows, { rowKey: (s) => s.id });
+      return (
+        <Frame>
+          <Column value="id" label="Shipment" rowHeader />
+          <Column value="customer" label="Customer" />
+          <Column value="url" label="Link" />
+          <Column id="window" label="Window" value={() => 6}>
+            {(hour) => `0${hour}:00–0${hour + 2}:00`}
+          </Column>
+        </Frame>
+      );
+    }
+    render(<Shipments />);
+    const cell = (text: string) => screen.getByText(text).closest("td, th")!.className;
+    expect(cell("FP-1004223")).toContain("token");
+    expect(cell("Holloway Garden Supplies")).not.toContain("token");
+    expect(cell("https://example.com/a/very/long/path/to/it")).not.toContain("token");
+    expect(cell("06:00–08:00")).toContain("token");
+  });
+});
+
 describe("Row header and selection", () => {
   it("renders row header cells and names the row's selection after them", () => {
     const { container } = render(<Orders />);

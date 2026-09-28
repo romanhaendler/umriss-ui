@@ -7,6 +7,10 @@ export const lead = "A depot holds a fleet of vans and a truck; an inner group k
 
 const at = (hours: number, minutes = 0) => new Date(2026, 2, 17, hours, minutes).getTime();
 
+/* A plate is one word: a lane header that takes two lines must not tear it
+   apart ("FP 214" / "K"). */
+const plate = (text: string) => text.replaceAll(" ", "\u00a0");
+
 const TOURS: Task[] = [
   { id: "t-01", name: "T-01 Harbour", color: "light-dark(#2563eb, #6b9bff)" },
   { id: "t-03", name: "T-03 Old Town", color: "light-dark(#c2410c, #f08a52)" },
@@ -25,13 +29,13 @@ export default function Nesting() {
     <Schedule ariaLabel="North depot with its vans and a truck, and a van from Riverside" initialDomain={[at(6), at(15)]} height={330} headerWidth={200}>
       <LaneGroup id="north" label="North depot">
         <LaneGroup id="vans" label="Vans">
-          <Lane id="fp-214" label="Van FP 214 K" />
-          <Lane id="fp-377" label="E-van FP 377 K" />
-          <Lane id="fp-290" label="Van FP 290 E" />
+          <Lane id="fp-214" label={`Van ${plate("FP 214 K")}`} />
+          <Lane id="fp-377" label={`E-van ${plate("FP 377 K")}`} />
+          <Lane id="fp-290" label={`Van ${plate("FP 290 E")}`} />
         </LaneGroup>
-        <Lane id="fp-118" label="Truck FP 118 R" />
+        <Lane id="fp-118" label={`Truck ${plate("FP 118 R")}`} />
       </LaneGroup>
-      <Lane id="fp-402" label="Van FP 402 R" />
+      <Lane id="fp-402" label={`Van ${plate("FP 402 R")}`} />
       <Subtasks data={LEGS} tasks={TOURS} />
     </Schedule>
   );

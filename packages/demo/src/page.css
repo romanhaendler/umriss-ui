@@ -36,9 +36,12 @@
   color: var(--u-color-accent-text);
 }
 
+/* On a phone the name shrinks with the screen: "DateTimeRangePicker" is one
+   word and would not fit a 320 px screen at 32 px. */
 .pageName {
   margin: 0;
-  font-size: 32px;
+  font-size: min(32px, 8vw);
+  overflow-wrap: anywhere;
   line-height: 1.15;
   font-weight: var(--u-weight-semibold);
   letter-spacing: var(--u-tracking-display);
@@ -72,14 +75,26 @@
   border-radius: var(--u-radius-md);
   background: var(--u-color-surface-sunken);
   box-shadow: var(--u-edge);
-  overflow-x: auto;
 }
 
+/* A line longer than the column wraps inside its box, and the copy key
+   stays in sight: scrolled, it had hidden the key on a phone. */
 .importLine code {
+  min-width: 0;
   font-family: var(--u-font-mono);
   font-size: var(--u-text-sm);
   color: var(--u-color-text);
+  overflow-wrap: anywhere;
+}
+
+/* The package's name is one word: it moves to the next line whole rather
+   than break at its hyphen. */
+.importLine code span {
   white-space: nowrap;
+}
+
+.importLine .codeCopy {
+  flex: none;
 }
 
 /* ---------------- Abschnitte ---------------- */
@@ -453,6 +468,12 @@
   max-width: 46ch;
 }
 
+/* The descriptions' `code`, as the page's prose sets it. */
+.apiTable td code:not(.apiType) {
+  font-family: var(--u-font-mono);
+  color: var(--u-color-text);
+}
+
 .apiTable tbody tr:last-child th,
 .apiTable tbody tr:last-child td {
   border-bottom: none;
@@ -461,7 +482,46 @@
 .apiType {
   font-family: var(--u-font-mono);
   color: var(--u-color-accent-text);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
+}
+
+/* A phone: one block a prop - name and type, the default, the
+   description beneath. As a table the description column lay outside the box
+   and every row stood a hand high and empty. */
+@media (max-width: 560px) {
+  .apiTable {
+    min-width: 0;
+  }
+  .apiTable thead {
+    display: none;
+  }
+  .apiTable,
+  .apiTable tbody,
+  .apiTable tr,
+  .apiTable th,
+  .apiTable td {
+    display: block;
+  }
+  .apiTable tr {
+    padding: var(--u-space-3);
+    border-bottom: 1px solid var(--u-hairline);
+  }
+  .apiTable tbody tr:last-child {
+    border-bottom: none;
+  }
+  .apiTable th,
+  .apiTable td {
+    max-width: none;
+    padding: 0;
+    border-bottom: none;
+  }
+  .apiTable td {
+    margin-top: var(--u-space-1);
+  }
+  .apiTable td:nth-child(3)::before {
+    content: "Default ";
+    color: var(--u-color-text-muted);
+  }
 }
 
 .apiRequired {
@@ -536,6 +596,39 @@
   white-space: nowrap;
 }
 
+/* A phone: key above action, one block a row. Side by side, a long key -
+   "Arrow Up / Right / Down / Left (on the handle)" - took the width, left the
+   action two letters a line and pushed the page sideways. */
+@media (max-width: 560px) {
+  .keyTable,
+  .keyTable tbody,
+  .keyTable tr,
+  .keyTable th,
+  .keyTable td {
+    display: block;
+  }
+  .keyTable thead {
+    display: none;
+  }
+  .keyTable tr {
+    padding: var(--u-space-2) 0;
+    border-bottom: 1px solid var(--u-edge-color);
+  }
+  .keyTable th,
+  .keyTable td {
+    padding: 0;
+    border-bottom: none;
+  }
+  .keyTable td {
+    margin-top: var(--u-space-1);
+  }
+  .keyTable kbd {
+    white-space: normal;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+}
+
 .apiEvents {
   margin: var(--u-space-3) 0 var(--u-space-2);
   font-size: var(--u-text-xs);
@@ -547,6 +640,7 @@
    own blue, and the demo allows itself nothing the library does not offer. */
 .pageHead a,
 .pageList a,
+.pageAbout a,
 .keyTable td a,
 .exampleLead a,
 .scenarioLead a,
@@ -623,7 +717,7 @@
   place-items: center;
   width: 20px;
   height: 20px;
-  margin: -10px 0 0 -10px;
+  margin: -18px 0 0 -18px;
   border-radius: var(--u-radius-full);
   background: var(--u-color-accent);
   box-shadow: 0 0 0 2px var(--u-color-surface);

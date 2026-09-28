@@ -255,7 +255,7 @@ function Body({
       >
         <Column id="type" label={wording.columnAlarm} value={(row) => row.type.label} rowHeader sortable={false}>
           {(label, row) => (
-            <>
+            <span className={styles.alarm}>
               <span className={styles.label}>{label}</span>
               {/* A chattering type occupies one row of attention, not forty. */}
               {row.chatters && (
@@ -263,7 +263,7 @@ function Body({
                   {wording.chatterHint(row.frequency)}
                 </Badge>
               )}
-            </>
+            </span>
           )}
         </Column>
         <Column value="lifecycle" label={wording.columnLifecycleState} sortable={false}>
@@ -309,7 +309,7 @@ function Body({
           sortable={false}
         />
         <Column value="duration" label={wording.columnDuration} sortable={false}>
-          {(ms) => durationWord(ms, wording)}
+          {(ms) => <span className={styles.state}>{durationWord(ms, wording)}</span>}
         </Column>
         <Column value="frequency" label={wording.columnFrequency} format="count" sortable={false} />
       </Table>

@@ -4,9 +4,9 @@ export const title = "Fixed columns";
 export const lead = "Use `columns` where the layout decides the count, such as three figures that always stand side by side.";
 
 const FIGURES = [
-  { label: "Marketing budget, March", value: "68,000 €" },
-  { label: "Forecast, March", value: "77,500 €" },
-  { label: "Over budget", value: "9,500 €" },
+  { label: "Marketing budget, March", value: "68,000\u00a0€" },
+  { label: "Forecast, March", value: "77,500\u00a0€" },
+  { label: "Over budget", value: "9,500\u00a0€" },
 ];
 
 export default function FixedColumns() {

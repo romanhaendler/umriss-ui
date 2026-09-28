@@ -89,7 +89,8 @@ Screenshot pages carry their name in brackets.
 | The Y title rotated outside, along the axis | R-4.16 | Unit (layout, band width), Screenshot |
 | `time`: ticks on local boundaries from the minute to the month, across a clock change | Q15 | Unit (time axis, under Europe/Berlin) |
 | `time`: labels by level in en-GB, 24 h (`15:00`, `17 Mar`, `Mar 2026`), the date on the first tick and on the first of a new day (the year on a day axis); `tickFormat` for any other language | Q15 | Unit (time axis), Screenshot (`time`) |
-| `time` with `domain="nice"`: widened to the step's local boundaries | Q15 | Unit (time axis) |
+| `time` with `domain="nice"`: widened to whole local units of the step (the hour under six-hour ticks), a minute step to itself | Q15 | Unit (time axis) |
+| `ticks` with `domain="nice"`: widened to the named ticks, not to a 1-2-5 grid | — | Unit (layout), Screenshot (`per-category`, `by-limits`) |
 | `time` over less than a minute (an axis without data): no ticks | Q18 | Unit (time axis) |
 | `onDomainChange`: Ctrl/⌘ + wheel and a pinch zoom around the pointer, a drag and a horizontal or Shift wheel pan, a double click proposes the data range; without it nothing zooms and the plain wheel stays the page's | Q19 | Interaction (zoom and pan) |
 
@@ -101,6 +102,10 @@ Screenshot pages carry their name in brackets.
 | Bands stack from the inside outwards, with a fixed joint | R-3.2 | Unit (layout), Screenshot (`axes`) |
 | A measuring pass over a single hidden measuring span | R-3.3 | Unit (layout, with a measuring stub) |
 | Edge collision of the X labels: shift rather than clip | R-3.3 | Unit (layout) |
+| Collision between X labels, measured: generated ticks ask for fewer while two remain, then every k-th is kept; a time axis gets at least two, a narrow one below four ticks a denser step while its labels stand apart | — | Unit (layout) |
+| Named X ticks (categories): a name on two lines, the band a line higher, before any is left out, and again at every thinning | — | Unit (layout), Screenshot (`pareto`) |
+| Y limit labels closer than a line move apart; a tick label they would half cover is left out | — | Unit (layout), Screenshot (`bands-limits-and-cells`, `limits-and-state`) |
+| Y limit labels that would widen the band past a fifth of the chart stand inside the plot, at its far edge | — | Unit (layout) |
 | Whole-number band sizes with hysteresis per band | R-3.4 | Unit (layout), Manual (live mode) |
 | Grid lines on half pixels | R-3.5 | Manual |
 
@@ -110,7 +115,7 @@ Screenshot pages carry their name in brackets.
 |---|---|---|
 | One `Path2D`, one `stroke()` per series | R-2.12 | Manual (benchmark) |
 | Gaps produce a `moveTo`, not separate strokes | R-2.12 | Interaction, Screenshot |
-| Clipping to the plot area | R-2.13 | Manual |
+| Clipping to the plot area; a marker by its centre, whole on the edge | R-2.13 | Unit (draw), Manual |
 | `lineJoin`/`lineCap` round | R-4.4 | Manual |
 | `strokeWidth`, `dash`, `color` | 4.3 | Screenshot |
 | Palette `--uc-series-N` by name, in order on first mounting | 4.3 | Unit (scene), Screenshot |

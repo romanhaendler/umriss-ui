@@ -15,6 +15,20 @@ moves from here under the rule above.
 
 ---
 
+## Unreleased
+
+### Changed
+
+- **On narrow days a date covers a run of days** - 1, 2, 7, 14 or 28, counted
+  from Mondays - in both bands: a ten-day plan on a phone wrote a date under
+  every midnight, and they ran into each other.
+- **A lane group's name wins over its count**: where a name in the header
+  column would be cut, every count in that column gives way.
+- **A text lane label may take a second line** where its row is tall enough
+  for two.
+
+---
+
 ## 0.3.6 – Core 0.15.0 (Sep. 2026)
 
 Needs `@umriss-ui/core` 0.15; the peer range moves to `^0.15.0`. Nothing else changes for a caller.

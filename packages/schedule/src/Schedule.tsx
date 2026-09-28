@@ -48,7 +48,7 @@ import { ScheduleScene, type PlacingItem, type ScheduleInteraction, type Schedul
 import { DEFAULT_LANE_HEIGHT } from "./sceneView";
 import { ScheduleReadout, ScheduleTooltipContent } from "./ScheduleTooltip";
 import type { Intent, IntentKind, Subtask, DependencyAttachment, DependencyEnds, DependencyRoute } from "./model";
-import type { ZoomLimits } from "./timeAxis";
+import { dayRun, opensRun, type ZoomLimits } from "./timeAxis";
 import type { SnapRaster } from "./snap";
 import styles from "./Schedule.module.css";
 
@@ -173,6 +173,8 @@ const DEFAULT_LIMITS = { min: HOUR, max: 28 * DAY };
 const WALL_CLOCK: CalendarInput = [];
 /** Half the width of a time label, and a little more. */
 const LABEL_MARGIN = 20;
+/** The room the shortest date of the day band needs. */
+const DATE_ROOM = 44;
 
 /** What a schedule offers a caller imperatively: the arithmetic between a
     point on the screen and a time on a lane. Everything else is props. */
@@ -334,9 +336,17 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
     const date = new Date(start);
     if (width >= 200) return formats.dateLong(date);
     if (width >= 84) return formats.date(date);
-    if (width >= 44) return formats.dateShort(date);
+    if (width >= DATE_ROOM) return formats.dateShort(date);
     return "";
   };
+
+  /* Where a day is too narrow for its date, one date speaks for a run of days,
+     and the same run in both bands: two runs of different length named
+     different days above and below the plot. The widest day is the measure:
+     a calendar collapses the days it removes to nothing. */
+  const widestDay = snapshot.days.reduce((widest, day) => Math.max(widest, day.width), 0);
+  const daysPerDate = dayRun(widestDay, DATE_ROOM);
+  const daysPerTick = snapshot.step >= DAY ? daysPerDate : 1;
 
   const ghost = snapshot.ghost;
   const spoken = snapshot.spoken;
@@ -364,6 +374,35 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
     return byGroup;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [snapshot.headers, plotId]);
+  /* A group's name wins over its count: where a name would be cut, or pushed
+     onto a second line in a folded group's row, the counts give way - all of
+     them, so that the heads of one column read alike. On a phone the column
+     is a hundred pixels, and "2 lanes" kept its width while the name shrank to
+     "De…". Measured, since only the rendered name knows its
+     width - anew whenever the column or the rows change, and once the fonts
+     are in. `hidden` is not React's here, so a render leaves it alone. */
+  const headersRef = useRef<HTMLDivElement | null>(null);
+  const fitKey = `${snapshot.width}|${snapshot.headers.map((header) => `${header.key}:${header.kind}:${typeof header.label === "string" ? header.label : ""}`).join("|")}`;
+  useLayoutEffect(() => {
+    let live = true;
+    const fit = () => {
+      if (!live) return;
+      const counts = [...(headersRef.current?.querySelectorAll<HTMLElement>("[data-lane-count]") ?? [])];
+      for (const count of counts) count.hidden = false;
+      const cut = counts.some((count) => {
+        const name = count.previousElementSibling;
+        if (!(name instanceof HTMLElement)) return false;
+        const line = parseFloat(getComputedStyle(name).lineHeight);
+        return name.scrollWidth > name.clientWidth || name.clientHeight > line * 1.5;
+      });
+      for (const count of counts) count.hidden = cut;
+    };
+    fit();
+    void document.fonts?.ready.then(fit);
+    return () => {
+      live = false;
+    };
+  }, [fitKey]);
   const refused = useMemo(() => new Set(ghost?.refusedLanes ?? []), [ghost?.refusedLanes]);
 
   /* The ghost's label stands above its bar, and under it in the topmost lane:
@@ -426,21 +465,31 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
       >
         <div className={styles.corner} />
         <div className={styles.dayBand} aria-hidden="true" data-schedule-days="" data-schedule-clip="day band">
-          {snapshot.days.map((day) => {
+          {snapshot.days.map((day, index) => {
+            /* A day that opens its run carries the date, and so does the first
+               day in view, whose run began before it. The run's width is the
+               label's room, up to the next date or the end of the view. */
+            const labelled = daysPerDate === 1 || index === 0 || opensRun(day.start, daysPerDate);
+            const end =
+              daysPerDate === 1
+                ? day.x + day.width
+                : (snapshot.days.slice(index + 1).find((next) => opensRun(next.start, daysPerDate))?.x ?? snapshot.width);
             /* The label stands at the visible start of its day: a day that began
                before the view still says which day it is. */
             const hidden = Math.max(0, -day.x);
-            const visible = Math.min(day.x + day.width, snapshot.width) - Math.max(day.x, 0);
+            const visible = Math.min(end, snapshot.width) - Math.max(day.x, 0);
             return (
-              <span key={day.start} className={styles.day} style={{ left: `${day.x}px`, width: `${day.width}px` }}>
+              <span key={day.start} className={styles.day} style={{ left: `${day.x}px`, width: `${labelled ? end - day.x : day.width}px` }}>
                 <span className={styles.dayLabel} data-schedule-overlay="day label" style={{ marginLeft: `${hidden}px` }}>
-                  {dayLabel(day.start, visible)}
+                  {/* A run's dates all in the short form: a long one where a run
+                      happens to be wider read as a different kind of mark. */}
+                  {labelled ? dayLabel(day.start, daysPerDate === 1 ? visible : Math.min(visible, DATE_ROOM)) : ""}
                 </span>
               </span>
             );
           })}
         </div>
-        <div className={styles.headers} data-schedule-headers="">
+        <div ref={headersRef} className={styles.headers} data-schedule-headers="">
           <div className={styles.headerRun} style={{ transform: `translateY(${-snapshot.scrollY}px)` }}>
             {snapshot.headers.map((header) => (
               <div
@@ -599,9 +648,11 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
           {snapshot.now !== null && <span className={styles.now} data-now="" data-schedule-overlay="now mark" style={{ left: `${snapshot.now}px` }} />}
           {snapshot.ticks.map((tick) => (
             <span key={tick.wallClock} className={styles.tick} style={{ left: `${tick.x}px` }}>
-              {/* A label that would be cut by the band's edge is left out; its
-                  line stays. */}
-              {tick.x >= LABEL_MARGIN && tick.x <= snapshot.width - LABEL_MARGIN && (
+              {/* A label that would be cut by the band's edge is left out, and
+                  so is a date inside another date's run; the line stays. */}
+              {tick.x >= LABEL_MARGIN &&
+                tick.x <= snapshot.width - LABEL_MARGIN &&
+                (daysPerTick === 1 || opensRun(tick.wallClock, daysPerTick)) && (
                 <span className={styles.tickLabel} data-schedule-overlay="time label">
                   {snapshot.step >= DAY ? formats.dateShort(new Date(tick.wallClock)) : formats.time(new Date(tick.wallClock), false)}
                 </span>

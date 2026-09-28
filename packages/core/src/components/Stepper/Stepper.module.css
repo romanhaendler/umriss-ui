@@ -90,6 +90,13 @@
     padding-top: 2px;
   }
 
+  /* The fit keeps every word inside its step; should one still be longer, it
+     breaks rather than run into the next step's label. */
+  .label,
+  .description {
+    overflow-wrap: break-word;
+  }
+
   .label {
     font-size: var(--u-text-sm);
     line-height: var(--u-leading-tight);
@@ -135,6 +142,30 @@
     height: auto;
     min-width: 0;
     margin: 0;
+  }
+
+  /* Stacked: a row too tight for a label beside its marker - a tablet, a
+     side panel - puts the labels beneath the markers, and the line runs from
+     marker to marker above them. Every step takes an equal share, the last
+     one too: its label needs the room now that it stands below. Narrower
+     still, the component gives the list the column's class. */
+  .stepper[data-fit="stacked"] > .step {
+    display: grid;
+    flex: 1;
+    grid-template-columns: var(--_marker) minmax(0, 1fr);
+    align-content: start;
+    column-gap: var(--u-space-2);
+    row-gap: var(--u-space-1);
+  }
+
+  .stepper[data-fit="stacked"] > .step > .text {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .stepper[data-fit="stacked"] > .step::after {
+    grid-column: 2;
+    grid-row: 1;
   }
 
   /* Grounds and edges are what forced colours take away (forced-colors 02):

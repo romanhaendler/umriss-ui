@@ -82,6 +82,9 @@ const WINDOW_CLOSES = new Map(
   TOURS.flatMap((tour) => tour.stops.map((stop) => [stop.id, stop.window[1] + DAY] as const)),
 );
 
+/* A plate is one word, and so is its tie to the type: a lane header that
+   takes two lines must not tear "FP 377" from its "K". */
+const plate = (text: string) => text.replaceAll(" ", "\u00a0");
 const plateOf = (vehicle: string) => VEHICLES.find((one) => one.id === vehicle)?.plate ?? vehicle;
 const driverOf = (driver: string) => DRIVERS.find((one) => one.id === driver)?.name ?? driver;
 
@@ -122,7 +125,7 @@ export default function TourPlan() {
           {DEPOTS.map((depot) => (
             <LaneGroup key={depot.id} id={depot.id} label={depot.name}>
               {VEHICLES.filter((one) => one.depot === depot.id).map((vehicle) => (
-                <Lane key={vehicle.id} id={vehicle.id} label={`${vehicle.plate} · ${vehicle.type}`} />
+                <Lane key={vehicle.id} id={vehicle.id} label={`${plate(vehicle.plate)}\u00a0· ${vehicle.type}`} />
               ))}
             </LaneGroup>
           ))}

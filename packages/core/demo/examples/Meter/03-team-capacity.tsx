@@ -48,7 +48,7 @@ export default function TeamCapacity() {
             <td style={CELL}>
               <Meter value={share} tone={toneOf(share)} showLabel label={`Capacity booked, ${name}`} />
             </td>
-            <td style={{ ...CELL, textAlign: "right" }}>
+            <td style={{ ...CELL, textAlign: "right", whiteSpace: "nowrap" }}>
               <Text as="span" size="sm" mono>
                 {booked} / {available}
               </Text>

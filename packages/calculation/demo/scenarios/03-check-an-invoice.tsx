@@ -31,7 +31,7 @@ export const builtFrom = [
 const WAITING = INVOICES.filter((one) => one.status === "awaiting approval");
 const DECISION_TONE = { approved: "success", rejected: "danger", pending: "neutral" } as const;
 const date = (at: number) => new Date(at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
-const percent = (rate: number) => `${Math.round(rate * 100)} %`;
+const percent = (rate: number) => `${Math.round(rate * 100)}\u00a0%`;
 
 /** One line's net amount: quantity × unit price, times the share paid after a
     discount. A function and not a component: the calculation reads its
@@ -149,7 +149,7 @@ export default function CheckAnInvoice() {
                 ))}
               </Stack>
               {decision === undefined ? (
-                <Stack direction="row" gap={2} data-callout="5">
+                <Stack direction="row" gap={2} wrap data-callout="5">
                   <Button variant="primary" onClick={() => setDecided({ ...decided, [invoice.id]: "approved" })}>
                     Approve as {next?.approver ?? "approver"}
                   </Button>

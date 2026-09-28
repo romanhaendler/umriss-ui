@@ -333,3 +333,19 @@ describe("Deleting a row", () => {
     expect(asked()).toHaveLength(0);
   });
 });
+
+describe("The actions column of a grid", () => {
+  const actionsHead = (container: HTMLElement) => container.querySelector("thead th:last-child")!;
+
+  it("does not stick while it holds nothing - a Row draft's buttons show only in a draft", () => {
+    const { container } = render(<Loops editMode="row" onRowSave={() => undefined} />);
+    expect(actionsHead(container).className).not.toContain("pinned");
+    click(cellOf("80"));
+    expect(actionsHead(container).className).toContain("pinned");
+  });
+
+  it("sticks at rest where it holds Delete", () => {
+    const { container } = render(<Loops editMode="row" onRowSave={() => undefined} onRowDelete={() => undefined} />);
+    expect(actionsHead(container).className).toContain("pinned");
+  });
+});

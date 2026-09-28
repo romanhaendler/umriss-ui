@@ -91,7 +91,12 @@ export function RangeTrigger({
         aria-controls={panel.open ? panel.id : undefined}
         aria-describedby={field?.describedBy}
         aria-invalid={invalid || undefined}
-        className={cx(styles.trigger, size === "sm" && styles.sm, invalid && styles.invalid)}
+        className={cx(
+          styles.trigger,
+          size === "sm" && styles.sm,
+          invalid && styles.invalid,
+          clearable && hasValue && !disabled && styles.clearable,
+        )}
         onClick={panel.onToggle}
       >
         <span className={cx(styles.value, !hasValue && styles.placeholder)}>

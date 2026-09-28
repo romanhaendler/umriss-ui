@@ -11,7 +11,7 @@ const month = (row: LedgerRow) => Number(row.month.slice(5)) - 1;
 function Marketing({ placement }: { placement?: "bottom" }) {
   return (
     <Chart data={MARKETING} height={220} ariaLabel={`Marketing's budget and forecast, legend ${placement ?? "above"}`}>
-      <XAxis accessor={month} tickFormat={(v) => MONTH_NAMES[v] ?? ""} tickCount={4} />
+      <XAxis accessor={month} ticks={MONTH_NAMES.map((_, i) => i)} tickFormat={(v) => MONTH_NAMES[v] ?? ""} />
       <YAxis accessor={(d: LedgerRow) => d.forecast} label="€" />
       <Line accessor={(d: LedgerRow) => d.budget} name="Budget" />
       <Line accessor={(d: LedgerRow) => d.forecast} name="Forecast" />

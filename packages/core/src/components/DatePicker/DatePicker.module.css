@@ -432,6 +432,13 @@
       color var(--u-transition);
   }
 
+  /* The value keeps clear of the cross: on a touch screen the cross stands
+     for good, and in a field as narrow as its value it lay on the last
+     digits. */
+  .clearable .value {
+    margin-right: calc(18px + var(--u-space-1));
+  }
+
   .triggerWrap:hover .triggerClear,
   .triggerWrap:focus-within .triggerClear {
     opacity: 1;
@@ -732,6 +739,21 @@
 
     .today::after {
       background: CanvasText;
+    }
+  }
+
+  /* Under a finger the cross is hit in a larger square than it is drawn:
+     18 px is too small a target, and a bigger glyph would crowd the value. */
+  @media (pointer: coarse) {
+    .triggerClear {
+      position: absolute;
+    }
+
+    .triggerClear::after {
+      content: "";
+      position: absolute;
+      /* Not towards the value: a tap at its end places the caret. */
+      inset: -8px -8px -8px 0;
     }
   }
 }
