@@ -1,7 +1,7 @@
 /* What every component used to take from the page and now carries itself
    (ADR-0021): the text context of its surface, the focus ring of what it makes
-   focusable, the caret, autofill look and touch size of its fields and the
-   scrollbars of its scroll containers. The values are the ones `html` and `body` carried in the
+   focusable, the caret, autofill look and touch size of its fields, the
+   scrollbars of its scroll containers and the dense step of a compact surface. The values are the ones `html` and `body` carried in the
    old base layer, so nothing a picture shows moves.
 
    Components take them with `composes: text from "#own-styles"` - or `ring`,
@@ -27,6 +27,18 @@
     color: var(--u-color-text);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+  }
+
+  /* A dense surface - the table at `density="compact"` - takes its small
+     controls a step smaller: at 26 px a field or button filled a compact row
+     edge to edge. Both heights are core's tokens; this is the one place that
+     trades the one for the other. */
+  /* Only under a fine pointer: under a finger a field's type is 16 px (below)
+     and a target wants its size. */
+  @media (pointer: fine) {
+    .dense {
+      --u-control-height-sm: var(--u-control-height-xs);
+    }
   }
 
   /* A text field's cursor carries the accent - colour for interactive things

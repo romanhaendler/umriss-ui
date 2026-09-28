@@ -800,13 +800,13 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
                   {rowTools && (
                     <span className={styles.reserve} aria-hidden="true">
                       {(rowMode || props.onRowAdd) && (
-                        <span className={styles.actions}>
+                        <span className={cx(styles.actions, styles.decision)}>
                           <Button tabIndex={-1} size="sm">{wording.saveRow}</Button>
                           <Button tabIndex={-1} size="sm">{wording.discardRow}</Button>
                         </span>
                       )}
                       {props.onRowDelete && (
-                        <span className={styles.actions}>
+                        <span className={cx(styles.actions, styles.decision)}>
                           <span className={styles.deleteAsk}>{wording.deleteRowAsk}</span>
                           <Button tabIndex={-1} size="sm">{wording.deleteRow}</Button>
                           <Button tabIndex={-1} size="sm">{wording.keepRow}</Button>
@@ -1439,7 +1439,7 @@ function RowActionsCell({
 
   if (actions.length <= AT_MOST_IN_THE_ROW) {
     return (
-      <div className={styles.actions}>
+      <div className={cx(styles.actions, asking && styles.decision)}>
         {!asking && actions.map(({ key, spec }) => (
           <Button
             key={key}
@@ -1456,7 +1456,7 @@ function RowActionsCell({
     );
   }
   return (
-    <div className={styles.actions}>
+    <div className={cx(styles.actions, asking && styles.decision)}>
       {!asking && (
         <Menu
           align="end"
@@ -1485,7 +1485,7 @@ function RowDraftButtons({ name, wording }: { name: string; wording: Wording }) 
   const grid = useContext(GridContext)!;
   const anchor = useRef<HTMLDivElement>(null);
   return (
-    <div ref={anchor} className={cx(styles.actions, styles.draftButtons)}>
+    <div ref={anchor} className={cx(styles.actions, styles.decision, styles.draftButtons)}>
       <Button className={styles.toned} size="sm" variant="primary" aria-label={wording.rowAction(wording.saveRow, name)} onClick={grid.save}>
         {wording.saveRow}
       </Button>

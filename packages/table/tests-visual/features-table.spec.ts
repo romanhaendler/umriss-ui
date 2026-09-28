@@ -303,3 +303,37 @@ test("The dragged width stands in the view", async ({ page }) => {
   await drag(page, table.getByRole("columnheader", { name: "Supplier" }), 60);
   await expect(table.locator("[data-role='view']")).toContainText('"widths":{"supplier":');
 });
+
+test("A narrow table wraps its toolbar: no part runs out of it or over another", async ({ page }) => {
+  /* The toolbar wrapped by the window's width only: beside a sidebar the
+     search, the buttons and the grouping's tag ran out of the frame. The
+     frame is the table's scroll area's parent, the toolbar its first part. */
+  await openExample(page, "grouping", "the-dispatch-report");
+  const table = example(page, "the-dispatch-report");
+  await table.getByRole("checkbox").nth(1).focus();
+  await page.keyboard.press("Space");
+  await expect(table.getByRole("button", { name: "Reschedule" }).first()).toBeVisible();
+  for (const width of [640, 480, 360]) {
+    const { edge, parts } = await table.locator("table").evaluate((el, w) => {
+      const frame = el.parentElement!.parentElement!;
+      frame.style.width = `${w}px`;
+      const toolbar = frame.firstElementChild!.firstElementChild!;
+      const rect = (e: Element) => {
+        const r = e.getBoundingClientRect();
+        return { left: r.left, right: r.right, top: r.top, bottom: r.bottom, width: r.width };
+      };
+      const leaves = [...toolbar.querySelectorAll("input, button, [role=status], [role=listitem]")].filter(
+        (e) => e.matches("[role=listitem]") || !e.closest("[role=listitem]"),
+      );
+      return { edge: rect(toolbar), parts: leaves.map(rect).filter((r) => r.width > 0) };
+    }, width);
+    expect(parts.length).toBeGreaterThan(3);
+    for (const [i, a] of parts.entries()) {
+      expect(a.right, `part ${i} at ${width}px`).toBeLessThanOrEqual(edge.right + 0.5);
+      for (const b of parts.slice(i + 1)) {
+        const apart = a.right <= b.left + 0.5 || b.right <= a.left + 0.5 || a.bottom <= b.top + 0.5 || b.bottom <= a.top + 0.5;
+        expect(apart, `parts overlap at ${width}px`).toBe(true);
+      }
+    }
+  }
+});

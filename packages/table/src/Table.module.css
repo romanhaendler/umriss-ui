@@ -103,14 +103,29 @@
     background: var(--u-color-surface-sunken);
   }
 
+  /* The controls in a compact row - its actions, a Row draft's editors and
+     buttons - take the dense step: a row with actions stood a third taller
+     than one without. */
+  .compact {
+    composes: dense from "#own-styles";
+  }
+
   .compact .td {
     padding: var(--u-space-1) var(--u-space-2);
     font-size: var(--u-text-xs);
   }
 
   /* The head follows the density: at the regular one it stood half again as
-     tall as a compact row beneath it. */
+     tall as a compact row beneath it. The sort button's surface follows the
+     head's padding, or it reaches past the head. */
   .compact .th {
+    padding-top: var(--u-space-1);
+    padding-bottom: var(--u-space-1);
+  }
+
+  .compact .sortButton {
+    margin-top: calc(-1 * var(--u-space-1));
+    margin-bottom: calc(-1 * var(--u-space-1));
     padding-top: var(--u-space-1);
     padding-bottom: var(--u-space-1);
   }
@@ -390,19 +405,20 @@
      keystroke (table-filters D1). */
   .toolbarGroup {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: var(--u-space-2);
     min-width: 0;
     min-height: var(--u-control-height-sm);
   }
 
-  /* On a phone the search and the buttons beside it are wider than the frame:
-     they wrap there instead of running out of it. Only there - with room, a
-     wrapping group would hand its buttons a line of their own. */
-  @media (max-width: 600px) {
-    .toolbarGroup {
-      flex-wrap: wrap;
-    }
+  /* A group wraps when the table is narrower than its parts - the table's
+     width decides, not the window's: beside a sidebar the parts ran out of
+     the frame and over one another. The search holds a width of its own for
+     that: at a field's 100 % it took a line of its own at every width. */
+  .toolbarGroup > .search {
+    width: 160px;
+    min-width: 120px;
   }
 
   .toolbarInfo {
@@ -1102,10 +1118,24 @@
 
   /* ---- Row actions: the quiet gesture ---------------------------------- */
 
+  /* Its buttons are taller than a line of text: with the cells' padding a
+     row with actions stood taller than a row without. */
   .actionsCell {
     width: 1%;
     white-space: nowrap;
     text-align: right;
+  }
+
+  .td.actionsCell {
+    padding-top: var(--u-space-1);
+    padding-bottom: var(--u-space-1);
+  }
+
+  /* In a compact row the expander, 20 px, too stood taller than the text. */
+  .compact .td.actionsCell,
+  .compact .td.control {
+    padding-top: 2px;
+    padding-bottom: 2px;
   }
 
   /* At rest the secondary type, on hover OR focus within the row the accent
@@ -1116,6 +1146,13 @@
     display: inline-flex;
     align-items: center;
     gap: var(--u-space-1);
+  }
+
+  /* A decision - a Row draft's Save and Discard, a delete's question - is
+     two buttons of different weight: at the gesture's 4 px the filled one
+     and the quiet one beside it read as one piece. */
+  .actions.decision {
+    gap: var(--u-space-2);
   }
 
   /* A Row draft's Save and a confirmed Delete keep their own tone: they are
@@ -1261,13 +1298,17 @@
     visibility: hidden;
   }
 
+  /* Its sides keep the cell's padding: at 4 px a field stood against the
+     frame in the first column and against its neighbour's field. */
   .editor {
     position: absolute;
     inset: 0;
     z-index: 1;
     display: flex;
     align-items: center;
-    padding: 0 var(--u-space-1);
+    padding: 0;
+    padding-left: inherit;
+    padding-right: inherit;
   }
 
   /* The field fills the editor's width; its label is out of sight, so no gap

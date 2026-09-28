@@ -150,6 +150,9 @@
 
     --u-control-height: 32px;
     --u-control-height-sm: 26px;
+    /* The small control on a dense surface - a compact table's row draft and
+       actions (`dense` in the shared own styles). */
+    --u-control-height-xs: 18px;
 
     /* ---- Dock (floating-dock) ----
 
