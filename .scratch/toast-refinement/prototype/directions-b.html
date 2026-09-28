@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Toast directions</title>
+<link rel="stylesheet" href="../../../packages/core/src/styles/tokens.css">
+<style>
+  :root { color-scheme: light; }
+  :root[data-scheme="dark"] { color-scheme: dark; }
+  body { margin: 0; padding: 32px; background: var(--u-color-bg); color: var(--u-color-text); font-family: var(--u-font-sans); font-size: 14px; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  h2 { font-size: 15px; margin: 0 0 4px; }
+  p.lead { color: var(--u-color-text-secondary); margin: 0 0 16px; max-width: 70ch; }
+  .bar { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+  .bar button { font: inherit; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--u-edge-color); background: var(--u-color-surface); color: var(--u-color-text); cursor: pointer; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 40px 32px; }
+  .col { display: flex; flex-direction: column; gap: 10px; }
+  .col > p { margin: 0 0 8px; color: var(--u-color-text-secondary); font-size: 13px; }
+
+  /* ---------- shared anatomy ---------- */
+  .t {
+    --tone: var(--u-color-text-secondary);
+    box-sizing: border-box;
+    width: 360px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    column-gap: 12px;
+    align-items: start;
+    padding: 14px 14px 14px 16px;
+    border-radius: var(--u-radius-lg);
+    background: var(--u-color-surface);
+    box-shadow: var(--u-shadow-overlay);
+    position: relative;
+  }
+  .t.success { --tone: var(--u-color-success); --tone-subtle: var(--u-color-success-subtle); }
+  .t.warning { --tone: var(--u-color-warning); --tone-subtle: var(--u-color-warning-subtle); }
+  .t.danger  { --tone: var(--u-color-danger);  --tone-subtle: var(--u-color-danger-subtle); }
+  .t.neutral { --tone: var(--u-color-text-secondary); --tone-subtle: var(--u-color-surface-sunken); }
+  .t.loading { --tone: var(--u-color-text-secondary); --tone-subtle: var(--u-color-surface-sunken); }
+  .ic { display: flex; align-items: center; justify-content: center; height: 1lh; line-height: var(--u-leading-tight); font-size: var(--u-text-sm); color: var(--tone); }
+  .ic svg { width: 16px; height: 16px; display: block; }
+  .tx { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .ti { margin: 0; font-size: var(--u-text-sm); font-weight: var(--u-weight-semibold); line-height: var(--u-leading-tight); letter-spacing: var(--u-tracking-tight); }
+  .de { margin: 0; font-size: var(--u-text-sm); line-height: var(--u-leading-normal); color: var(--u-color-text-secondary); }
+  .ac { display: flex; gap: 12px; margin-top: 8px; }
+  .ac button { font: inherit; font-size: var(--u-text-sm); font-weight: var(--u-weight-semibold); background: none; border: 0; padding: 0; color: var(--u-color-accent-text); cursor: pointer; }
+  .ac button.sec { color: var(--u-color-text-secondary); font-weight: var(--u-weight-medium); }
+  .x { width: 20px; height: 1lh; line-height: var(--u-leading-tight); font-size: var(--u-text-sm); display: flex; align-items: center; justify-content: center; border: 0; background: none; color: var(--u-color-text-muted); border-radius: 4px; cursor: pointer; padding: 0; margin-right: -2px; }
+  .x svg { width: 10px; height: 10px; }
+  .x:hover { color: var(--u-color-text); background: var(--u-color-surface-sunken); }
+  .spin { animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ---------- A: Quiet — bare glyph, nothing else ---------- */
+  .A .t { }
+
+  /* ---------- B: Rail — a tone rail inset on the left ---------- */
+  .B .t { padding-left: 20px; }
+  .B .t::before { content: ""; position: absolute; left: 7px; top: 10px; bottom: 10px; width: 3px; border-radius: 3px; background: var(--tone); }
+  .B .t.neutral::before, .B .t.loading::before { background: var(--u-edge-color-strong); }
+
+  /* ---------- C: Inverse — the dark pill of Linear / Vercel ---------- */
+  .C .t { background: var(--u-color-primary-bg); color: var(--u-color-primary-fg); box-shadow: 0 8px 24px -6px rgb(0 0 0 / .35), 0 2px 6px rgb(0 0 0 / .18); }
+  .C .t .de { color: color-mix(in oklab, var(--u-color-primary-fg) 68%, transparent); }
+  .C .t .x { color: color-mix(in oklab, var(--u-color-primary-fg) 55%, transparent); }
+  .C .t .x:hover { color: var(--u-color-primary-fg); background: color-mix(in oklab, var(--u-color-primary-fg) 12%, transparent); }
+  .C .t.success { --tone: light-dark(oklch(0.80 0.15 150), var(--u-color-success)); }
+  .C .t.danger  { --tone: light-dark(oklch(0.72 0.17 25), var(--u-color-danger)); }
+  .C .t.warning { --tone: light-dark(oklch(0.84 0.14 80), var(--u-color-warning)); }
+  .C .t.neutral, .C .t.loading { --tone: color-mix(in oklab, var(--u-color-primary-fg) 70%, transparent); }
+  .C .ac button { color: var(--u-color-primary-fg); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: color-mix(in oklab, var(--u-color-primary-fg) 40%, transparent); }
+  .C .ac button.sec { color: color-mix(in oklab, var(--u-color-primary-fg) 68%, transparent); text-decoration: none; }
+
+  /* ---------- D: Solid badge — small filled disc, glyph knocked out ---------- */
+  .D .ic span { width: 18px; height: 18px; border-radius: 50%; background: var(--tone); color: var(--u-color-surface); display: flex; align-items: center; justify-content: center; }
+  .D .ic svg { width: 12px; height: 12px; }
+  .D .t.neutral .ic span, .D .t.loading .ic span { background: none; color: var(--u-color-text-secondary); }
+  .D .t.loading .ic svg, .D .t.neutral .ic svg { width: 16px; height: 16px; }
+
+  /* ---------- E: Actions to the right, compact single row ---------- */
+  .E .t { grid-template-columns: auto 1fr auto auto; align-items: center; padding: 10px 10px 10px 16px; }
+  .E .t.hasDesc { align-items: start; padding-top: 14px; padding-bottom: 14px; }
+  .E .ac { margin: 0; }
+  .E .ac button { padding: 5px 10px; border-radius: 6px; background: var(--u-color-surface-sunken); color: var(--u-color-text); font-weight: var(--u-weight-medium); }
+  .E .ac button:hover { background: var(--u-color-surface-pressed); }
+  .E .t.hasDesc .ac button { margin-top: -5px; }
+
+  /* ---------- stacking ---------- */
+  .stage { position: fixed; right: 24px; bottom: 24px; width: 360px; z-index: 10; }
+  .stage .t { position: absolute; right: 0; bottom: 0; transition: transform .35s cubic-bezier(.2,.8,.2,1), opacity .35s; }
+  .modes { display: flex; gap: 6px; align-items: center; }
+  .modes label { display: flex; gap: 4px; align-items: center; }
+</style>
+</head>
+
+<style>
+  /* all B */
+  .v .t { padding-left: 20px; }
+  .v .t::before { content: ""; position: absolute; left: 7px; top: 10px; bottom: 10px; width: 3px; border-radius: 3px; background: var(--tone); }
+  .v .t.neutral::before, .v .t.loading::before { background: var(--u-edge-color-strong); }
+
+  /* B1: as before, glyph on the title line */
+  /* B2: glyph centred on the whole text block */
+  .B2 .t.hasDesc { align-items: center; }
+  .B2 .t.hasDesc .x { align-self: start; }
+  /* B3: glyph on the title line, description and action run under it (no empty column) */
+  .B3 .t { grid-template-columns: auto 1fr auto; grid-template-areas: "ic ti x" "de de de"; row-gap: 4px; }
+  .B3 .tx { display: contents; }
+  .B3 .ic { grid-area: ic; } .B3 .ti { grid-area: ti; align-self: center; } .B3 .x { grid-area: x; }
+  .B3 .de, .B3 .ac { grid-column: 1 / -1; }
+  /* B4: bigger glyph in a soft tile that spans title + first description line */
+  .B4 .ic { height: auto; }
+  .B4 .ic span { width: 32px; height: 32px; border-radius: 8px; background: var(--tone-subtle); display: flex; align-items: center; justify-content: center; }
+  .B4 .ic svg { width: 18px; height: 18px; }
+  .B4 .t:not(.hasDesc) { align-items: center; }
+  .B4 .t:not(.hasDesc) .ic span { width: 24px; height: 24px; border-radius: 6px; background: none; }
+  .B4 .t:not(.hasDesc) .ic svg { width: 16px; height: 16px; }
+  /* B5: no glyph once there is a description – rail + title carry the tone; glyph moves before the title inline */
+  .B5 .t.hasDesc { grid-template-columns: 1fr auto; }
+  .B5 .t.hasDesc .ic { display: none; }
+  .B5 .t.hasDesc .ti::before { content: ""; }
+</style>
+<style>
+  .chip { position: absolute; right: 8px;  z-index: 200; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--u-color-primary-bg); color: var(--u-color-primary-fg); box-shadow: var(--u-shadow-overlay); }
+  .stage { min-height: 1px; }
+  .chip { white-space: nowrap; cursor: pointer; }
+  .chip.edge { font-size: 11px; padding: 1px 7px; box-shadow: 0 0 0 2px var(--u-color-surface); }
+  .chip.inside { background: var(--u-color-surface-sunken); color: var(--u-color-text-secondary); box-shadow: none; font-variant-numeric: tabular-nums; font-weight: 500; }
+  .chip.side { background: var(--u-color-surface); color: var(--u-color-text-secondary); }
+</style>
+<style>
+  .v .t.hasN { grid-template-columns: auto 1fr auto auto; grid-template-areas: "ic ti n x" "de de de de"; }
+  .v .t.hasN .de, .v .t.hasN .ac { grid-column: 1 / -1; }
+  .n { grid-area: n; align-self: start; height: 1lh; line-height: var(--u-leading-tight); font: inherit; font-size: 12px; font-weight: 500; font-variant-numeric: tabular-nums;
+       display: flex; align-items: center; padding: 0 7px; margin-top: -1px; border: 0; border-radius: 999px; background: var(--u-color-surface-sunken); color: var(--u-color-text-secondary); cursor: pointer; white-space: nowrap; box-sizing: content-box; padding-block: 1px; }
+  .n:hover { background: var(--u-color-surface-pressed); color: var(--u-color-text); }
+  .t.clamp .ti { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .t.drop.hasN { grid-template-areas: "ic ti ti x" "de de n n"; }
+  .t.drop .n { align-self: end; }
+</style>
+<style>
+  /* B3 spacing pass */
+  .B3 .t { padding: 12px 12px 12px 18px; column-gap: 8px; row-gap: 2px; }
+  .B3 .t::before { left: 8px; top: 12px; bottom: 12px; }
+  .B3 .ic svg { margin-left: -2px; }          /* the glyph's own inner margin: optically flush with the description */
+  .B3 .ac { margin-top: 6px; }
+  .B3 .ti { align-self: start; }
+  .col { gap: 12px; }
+</style>
+<style>
+  .B3b .t { grid-template-columns: 1fr auto; padding: 12px 12px 12px 18px; column-gap: 8px; }
+  .B3b .t.hasN { grid-template-columns: 1fr auto auto; grid-template-areas: none; }
+  .B3b .t.hasN .de, .B3b .t.hasN .ac { grid-column: auto; }
+  .B3b .t::before { left: 8px; top: 12px; bottom: 12px; }
+  .B3b .ti .ic { display: inline-flex; vertical-align: top; height: 1lh; margin: 0 8px 0 -2px; }
+  .B3b .ac { margin-top: 6px; }
+  .B3b .n { grid-area: auto; }
+</style>
+<body>
+<h1>Toast B — glyph with a description</h1>
+<p class="lead">Only direction B, fixed 360px. Look at the second and third toast in each column: that is where the glyph used to feel lost.</p>
+<div class="bar">
+  <button id="scheme">Toggle light / dark</button>
+  <span class="modes">Deck with
+    <select id="styleSel"><option value="B1">B1</option><option value="B2">B2</option><option value="B3">B3</option><option value="B3b" selected>B3b</option><option value="B4">B4</option></select>
+    peek <select id="peek"><option value="6">6px</option><option value="10">10px</option><option value="14" selected>14px</option></select>
+    <label><input type="checkbox" id="count" checked> count chip</label>
+    long title <select id="chipPos">
+      <option value="wrap">L1 wraps, count stays on the first line</option>
+      <option value="clamp">L2 clamps to two lines</option>
+      <option value="drop">L3 count drops to the description line when the title wraps</option>
+    </select>
+    <label><input type="radio" name="mode" value="list"> list</label>
+    <label><input type="radio" name="mode" value="deck" checked> deck</label>
+  </span>
+  <button id="fire">Fire a toast</button>
+</div>
+<div class="grid" id="grid"></div>
+<div class="stage" id="stage"></div>
+<script>
+const G = {
+  success: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5l3 3 6-7"/></svg>',
+  danger:  '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6.2"/><path d="M8 4.8v3.6M8 11.1v0" stroke-linecap="round" stroke-width="1.8"/></svg>',
+  warning: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M8 2.2 14.3 13H1.7Z"/><path d="M8 6.4v3M8 11.3v0" stroke-linecap="round" stroke-width="1.8"/></svg>',
+  neutral: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="6.2"/><path d="M8 7.3v3.6M8 4.9v0" stroke-linecap="round" stroke-width="1.8"/></svg>',
+  loading: '<svg class="spin" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 1.8a6.2 6.2 0 1 1-6.2 6.2" /></svg>',
+};
+// Solid-disc variant (D) uses knocked-out glyphs without the outer ring.
+const GD = {
+  success: '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6.2l2 2 4-4.6"/></svg>',
+  danger:  '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M6 3v3.4M6 8.9v0"/></svg>',
+  warning: '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M6 3v3.4M6 8.9v0"/></svg>',
+  neutral: G.neutral, loading: G.loading,
+};
+const X = '<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 2l6 6M8 2 2 8"/></svg>';
+
+const SAMPLES = [
+  { tone: 'danger', title: 'Could not publish the shift plan for line 4, week 41 – two operators are double-booked', desc: 'Resolve the conflicts on Tuesday and Thursday, then publish again.', actions: ['Show conflicts'] },
+  { tone: 'success', title: 'Maintenance window for press P-12 moved to Saturday, 06:00 – 10:00' },
+  { tone: 'success', title: 'Invoice INV-26-0318 approved' },
+  { tone: 'success', title: '3 rows deleted', actions: ['Undo'] },
+  { tone: 'success', title: 'Order 4711 moved to line 2', desc: 'It starts at 14:30 instead of 16:00.', actions: ['Undo'] },
+  { tone: 'neutral', title: 'Export started', desc: 'The file lands in your downloads once all 12,400 rows are written.' },
+  { tone: 'danger', title: 'Could not save the shift plan', desc: 'The connection to the server was lost.', actions: ['Try again'] },
+  { tone: 'success', title: 'Shift plan published', desc: 'All 14 operators on line 4 were notified.' },
+  { tone: 'loading', title: 'Saving shift plan…' },
+  { tone: 'warning', title: 'Line 4 is running at 62 % capacity' },
+];
+
+function toast(style, s) {
+  const icon = `<span>${G[s.tone]}</span>`;
+  const inl = style === 'B3b';
+  const acts = s.actions ? `<div class="ac">${s.actions.map((a, i) => `<button class="${i ? 'sec' : ''}">${a}</button>`).join('')}</div>` : '';
+  const inlineActs = style === 'E';
+  return `<div class="t ${s.tone} ${s.desc ? 'hasDesc' : ''}">
+    ${inl ? '' : `<div class="ic">${icon}</div>`}
+    <div class="tx"><p class="ti">${inl ? `<span class="ic">${icon}</span>` : ''}${s.title}</p>${s.desc ? `<p class="de">${s.desc}</p>` : ''}${inlineActs ? '' : acts}</div>
+    ${inlineActs ? (acts || '<span></span>') : ''}
+    ${s.tone === 'loading' ? '<span></span>' : `<button class="x" aria-label="Close">${X}</button>`}
+  </div>`;
+}
+
+const DESC_OLD = {
+  A: 'Quiet — the bare glyph in tone colour, no disc. Actions as text below.',
+  B: 'Rail — a short tone rail inset on the left edge; echoes Alert\'s edge without a second border.',
+  C: 'Inverse — dark in light mode, light in dark mode. Stands off any page; tone lives only in the glyph.',
+  D: 'Solid disc — a small filled disc (18px) with the glyph knocked out. Loud, but compact.',
+  E: 'Row actions — single-line toasts become a compact row; actions sit as buttons on the right.',
+};
+const DESC = {
+  B1: 'Glyph on the title line (as in the first round).',
+  B2: 'Glyph centred on the whole text block.',
+  B3: 'Glyph and title share a line; description and action run under both – no empty column.',
+  B3b: 'The glyph is the first character of the title: a wrapped title returns to the left edge, so title, description and action share one edge.',
+  B4: 'A 32px soft tile with an 18px glyph once there is a description; bare glyph for one line.',
+  B5: 'No glyph at all once there is a description – the rail and the words carry it.',
+};
+document.getElementById('grid').innerHTML = Object.keys(DESC).map(k =>
+  `<div class="col v ${k}"><h2>${k}</h2><p>${DESC[k]}</p>${SAMPLES.map(s => toast(k, s)).join('')}</div>`).join('');
+
+document.getElementById('scheme').onclick = () => {
+  const r = document.documentElement; r.dataset.scheme = r.dataset.scheme === 'dark' ? 'light' : 'dark';
+};
+
+// ---- stacking demo ----
+const stage = document.getElementById('stage');
+let items = [], n = 0, hovered = false;
+const mode = () => document.querySelector('input[name=mode]:checked').value;
+function layout() {
+  const els = [...stage.querySelectorAll('.t')];
+  const deck = mode() === 'deck' && !hovered;
+  // 1. the count chip changes the front card's height – settle it before measuring
+  stage.querySelectorAll('.n').forEach(n => n.remove());
+  els.forEach(t => t.classList.remove('hasN', 'clamp', 'drop'));
+  if (deck && document.getElementById('count').checked && els.length > 1) {
+    const fr = els[els.length - 1];
+    const n = document.createElement('button'); n.className = 'n'; n.textContent = '1 / ' + els.length;
+    n.setAttribute('aria-label', els.length + ' messages, show all');
+    n.onclick = () => { hovered = true; layout(); };
+    fr.insertBefore(n, fr.querySelector('.x') || null);
+    fr.classList.add('hasN', document.getElementById('chipPos').value);
+  }
+  // 2. natural heights first, then place
+  els.forEach(el => { el.style.height = ''; el.style.overflow = ''; });
+  const front = els[els.length - 1];
+  const p = +document.getElementById('peek').value;
+  let y = 0;
+  els.slice().reverse().forEach((el, i) => {
+    el.style.zIndex = 100 - i;
+    if (!deck) {
+      el.style.transform = `translateY(${-y}px)`; el.style.opacity = 1;
+      y += el.offsetHeight + 8;
+    } else {
+      el.style.transform = `translateY(${-i * p}px) scale(${1 - i * 0.04})`;
+      el.style.opacity = i < 3 ? 1 : 0;
+      if (i > 0) { el.style.height = front.offsetHeight + 'px'; el.style.overflow = 'hidden'; }
+    }
+  });
+}
+stage.onmouseenter = () => { hovered = true; layout(); };
+stage.onmouseleave = () => { hovered = false; layout(); };
+document.querySelectorAll('input[name=mode], #peek, #count, #chipPos').forEach(r => r.onchange = layout);
+document.getElementById('fire').onclick = () => {
+  const style = document.getElementById('styleSel').value;
+  stage.className = 'stage v ' + style;
+  const s = SAMPLES[n++ % SAMPLES.length];
+  const wrap = document.createElement('div'); wrap.innerHTML = toast(style, s);
+  const el = wrap.firstElementChild; el.style.opacity = 0; el.style.transform = 'translateY(16px)';
+  el.querySelector('.x')?.addEventListener('click', () => { el.remove(); layout(); });
+  stage.appendChild(el);
+  requestAnimationFrame(() => requestAnimationFrame(layout));
+  setTimeout(() => { if (!hovered) { el.remove(); layout(); } }, 8000);
+};
+</script>
+</body>
+</html>

@@ -115,6 +115,13 @@ centre. Computed by `motionOrigin` in `position.ts`; the stylesheet draws it as
 `transform-origin`.
 _Avoid_: transform-origin, anchor point
 
+**Toast**:
+A passing message that something has happened, standing apart from the page
+and leaving by itself unless it is still at work. It carries at most one
+action, which is never the only way to do what it offers. Several open toasts
+stand as a deck; the oldest gives way once the limit is reached.
+_Avoid_: notification, snackbar; **Alert** for the message that stays in the page
+
 **Interaction-state canon**:
 The settlement of **what** produces hover, active, focus and disabled — not how
 strongly. It holds across every component.
