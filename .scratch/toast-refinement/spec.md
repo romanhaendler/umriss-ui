@@ -1,6 +1,6 @@
 # The toast, grown up
 
-Status: ready-for-agent
+Status: done
 Date:   2026-09-28
 Origin: grilling session of 2026-09-28 - "our toasts are too basic, options are
 missing, and with the glyph the design is not balanced: too much negative
@@ -182,11 +182,47 @@ callback's reason, which toasts stand - not class names or the timer map.
 - A custom or no glyph.
 - Swipe to dismiss.
 
+## Deviations, decided during delivery
+
+- **The deck measures each card, once, on its content.** The spec said the
+  layout is CSS and only the front card is measured. Opening and closing as
+  one transition needs every card's height; a card's content is never cut, so
+  measuring it (a `ResizeObserver`, border box - `offsetHeight` rounded 8px
+  of gap to 7.6) gives the natural height in both states. The prototype's
+  error - measuring a card while it was cut to the front one's height - cannot
+  happen there.
+- **The deck opens for the keyboard's focus only** (`:focus-visible`, or the
+  region itself). A click leaves the focus on the close button, the toast goes
+  and takes the focus with it without a blur: the deck stayed open for good.
+  After every change the focus is read again; a keyboard focus on a leaving
+  toast moves to the region while another stands.
+- **The count is out of the tab order** (`tabIndex={-1}`) and does not take
+  the focus on a press: a focus on it would open the deck and remove it under
+  the focus. The keyboard enters the deck, or uses Alt+T.
+- **Alt+T draws its ring by hand** (`data-keys`): Chrome shows no
+  `:focus-visible` for a scripted focus that follows a click.
+- **The tick moves 2px towards the edge, the other glyphs do not**: the ring,
+  the triangle and the spinner fill their box, the tick keeps a margin in it.
+- **`update` starts the time afresh on a new `duration` too**, not only on a
+  new tone: `update(id, { duration: 0 })` keeps a toast, as a caller would
+  expect. Found by the code review.
+- **Words from the plant world are out of the examples** (ADR-0035, checked
+  by `plantWords.repo.test.ts`): the prototype's shift plans became room
+  bookings, release notes and a report.
+- **Count and close button share one column**, so that the cross stands at the
+  same place with and without the count; an empty third column kept its gap
+  and moved the cross 8px.
+
 ## Further Notes
 
-- The prototype's deck measures heights in JavaScript and once got the gaps
-  wrong doing so; the implementation keeps that in CSS.
+- The prototype's deck measured heights while the cards were cut and got the
+  gaps wrong; the implementation measures each card's uncut content (see the
+  first deviation).
 - `Alert` keeps its tone edge and its look; the toast is deliberately not an
   `Alert` with a shadow.
 
 ## Comments
+
+**Delivered (2026-09-28)** in `@umriss-ui/core` 0.16.0 - tickets 01 to 03. The
+user asked for no acceptance of their own and for the strictest checks
+instead; what was checked stands in 03.

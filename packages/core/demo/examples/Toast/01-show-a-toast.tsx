@@ -1,7 +1,7 @@
 import { Button, useToast } from "../../../src";
 
 export const title = "Show a toast";
-export const lead = "Call `toast()` from `useToast` with what has happened; a `ToastProvider` at the root of the application holds the stack.";
+export const lead = "Call `toast()` from `useToast` with what has happened; a `ToastProvider` at the root of the application holds them.";
 
 export default function ShowAToast() {
   const { toast } = useToast();

@@ -91,7 +91,7 @@ stands in, a modal - which hangs from no trigger - from its centre, a drawer
 from the edge it stands at, sliding the whole way in on
 `--u-duration-medium`. Panels,
 tooltips and the modal enter by scale (0.96) and opacity, a toast rises 8 px
-as it grows; they leave faster (`--u-duration-exit-fast`
+from its edge as it grows; they leave faster (`--u-duration-exit-fast`
 100 ms for panels, `--u-duration-exit` 160 ms for a sheet) on `--u-ease-exit`,
 a curve that starts at once, and fade where they stand instead of retracing
 the way they came - a symmetrical exit makes a surface feel sluggish. The
@@ -104,9 +104,9 @@ still, since a bar at rest would say the task has stopped. And the details: the 
 underline glides to the active tab, cards collapse with an animated height
 (the content stays in the DOM and is made inert), the checkbox draws its tick
 (`--u-duration-draw`, 320 ms - slow enough to watch the line), and toasts
-glide out to the right on leaving while the remaining ones move up gently over
-a grid collapse - and pause their countdown for as long as the mouse rests on
-them. `prefers-reduced-motion` drops the path, never the state change: the
+glide out towards their side on leaving while the others close up over the
+place - a deck that fans out under the pointer or the focus, and holds every
+countdown while it is open. `prefers-reduced-motion` drops the path, never the state change: the
 duration tokens fall to 0 ms, a panel appears and goes at once - but it
 appears - and no focus style hangs on an animation.
 
@@ -153,7 +153,7 @@ state as a word.
 
 **Never colour alone.** Every verdict colour stands beside a word or a glyph
 that says the same thing - the lifecycle written out beside its edge, the
-verdict glyph with a shape per verdict, the toast's tick and cross. A reader
+verdict glyph with a shape per verdict, the toast's tick, ring and triangle. A reader
 who cannot tell red from green, a grey-scale print and a screen reader lose
 nothing.
 

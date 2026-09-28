@@ -1,2 +1,2 @@
 export { ToastProvider, useToast } from "./Toast";
-export type { ToastOptions, ToastTone } from "./Toast";
+export type { ToastAction, ToastCloseReason, ToastOptions, ToastTone } from "./Toast";

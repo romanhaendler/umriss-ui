@@ -60,7 +60,7 @@ export const OUTLINE: readonly Rubric[] = [
       {
         id: "umrissprovider",
         name: "UmrissProvider",
-        sentence: "Sets once, at the root, what an application shares: the density of its tables, where overlays open, how long toasts stay and the language. It is optional; every component works the same without it.",
+        sentence: "Sets once, at the root, what an application shares: the density of its tables, where overlays open, how long toasts stay and where they stand, and the language. It is optional; every component works the same without it.",
         about: [
           "It holds these four settings and nothing else: no theme (see [Installation](#/installation)) and no defaults for a component's own props. It writes nothing onto the document.",
           "Keep the objects you pass outside the component or memoised: a new object on every render is a new setting on every render.",
@@ -69,7 +69,7 @@ export const OUTLINE: readonly Rubric[] = [
           { when: "Only the wording or the formats of one section differ", use: "language" },
         ],
         limits: ["No theme and no default variants for components: a component is configured by its own props."],
-        types: ["UmrissProviderProps"],
+        types: ["UmrissProviderProps", "ToastConfig"],
         exports: ["UmrissProvider"],
       },
       {
@@ -600,18 +600,22 @@ export const OUTLINE: readonly Rubric[] = [
         sentence: "Short feedback in the corner of the window that interrupts nothing and goes away by itself (also called a snackbar or notification). Reach for it to confirm what has just happened: saved, exported, approved.",
         about: [
           "`useToast` needs a `ToastProvider` around the application, once, at the root.",
-          "A toast stays five seconds by default. Its clock stops while the pointer rests on it and runs on with the time that was left.",
+          "A toast stays five seconds by default. Its clock stops while the deck is open – under the pointer, with the focus inside it – and runs on with the time that was left.",
+          "The title says what has happened, in about one line: “Invoice not sent”. Why, and what to do next, go in the description.",
           "Nothing that must be read goes in a toast: whoever looked elsewhere has missed it. `duration: 0` keeps one until it is closed – for the rare message whose loss costs something, since a corner full of standing toasts stops being read.",
+          "Several toasts stand as a deck: the newest in front, a count on it, two edges behind it. It opens under the pointer, on the count, with the focus inside it, or with Alt+T; Escape gives the focus back.",
+          "At most three stand at once (`toast.limit` in the [UmrissProvider](#/umrissprovider)); the oldest gives way to a new one, as if closed.",
         ],
         alternatives: [
           { when: "The reader must see it, or it stays true until something is done", use: "alert" },
           { when: "The reader must decide before going on", use: "confirmdialog" },
         ],
         limits: [
-          "No buttons inside a toast: what needs a decision needs an [Alert](#/alert) or a [ConfirmDialog](#/confirmdialog).",
-          "No choice of position: the stack stands in the bottom right corner of the window.",
+          "One action at most, and never the only way to what it offers: the toast leaves by itself. What needs a decision needs an [Alert](#/alert) or a [ConfirmDialog](#/confirmdialog).",
+          "One position for the whole application, set in the [UmrissProvider](#/umrissprovider); none per toast.",
+          "No queue: a toast over the limit pushes the oldest out rather than waiting.",
         ],
-        types: ["ToastOptions"],
+        types: ["ToastOptions", "ToastAction"],
         exports: ["ToastProvider", "useToast"],
       },
       {

@@ -31,8 +31,41 @@ commit.
 
 ## Unreleased
 
+### Added
+
+- **A toast takes one `action`** (`{ label, onClick }`) - "Undo", "Show".
+  Pressing it runs `onClick` and closes the toast. More than one action is a
+  dialog.
+- **`onClose(reason)`** on a toast, called once when it goes: `"timeout"`,
+  `"dismiss"` (closed, `dismiss(id)`, or pushed out by a newer toast) or
+  `"action"`. New types `ToastAction` and `ToastCloseReason`.
+- **`update(id, options)`** from `useToast`, and the tone **`loading`**: a
+  spinner in the glyph's place, no close button, no timer. `update` turns it
+  into its outcome in place; a new tone or a new `duration` starts the time
+  afresh.
+- **`toast.position`** in the `UmrissProvider` (`ToastPosition`: `top-start`,
+  `top-center`, `top-end`, `bottom-start`, `bottom-center`, `bottom-end`;
+  default `bottom-end`) and **`toast.limit`** (default 3).
+- **Alt+T** moves the focus into the toasts, Escape gives it back. The
+  toasts' region carries the name of the new wording entry `toastRegion`
+  while a toast stands; the deck's count is named by `toastDeckCount`
+  (English and German).
+
 ### Changed
 
+- **The toast has a shape of its own.** A fixed width of 360px (on a phone the
+  window's width less 16px), a tone rail at its edge, and the glyph as the
+  first character of the title, 16px, with no disc behind it - a wrapped title
+  returns to the left edge. Danger, warning and neutral draw a ring, a
+  triangle and a ring around their marks.
+- **Several toasts stand as a deck**: the newest in front with a count
+  ("1 / 3"), two edges behind it. The deck opens under the pointer, with the
+  keyboard focus inside it, on its count, or with Alt+T; while it is open,
+  every countdown stands still - before, only the toast under the pointer
+  held, and the keyboard focus held none.
+- **At most three toasts stand at once.** The oldest gives way to a new one,
+  as if closed (`toast.limit` sets another number). Before, they stacked up
+  without an end.
 - **A horizontal `Stepper` measures its room.** Too narrow for each label on
   one line beside its marker, the labels stand beneath the markers; narrower
   still - five steps on a phone - the steps take a column, as

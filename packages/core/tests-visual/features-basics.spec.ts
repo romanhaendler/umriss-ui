@@ -36,6 +36,33 @@ test("Toast appears with a title and a description", async ({ page }) => {
   await expect(page.getByText("The project list is ready as a CSV.")).toBeVisible();
 });
 
+/* toast-refinement: what jsdom cannot show. A click leaves the focus on the
+   close button, and the toast goes with it without a blur - the deck once
+   stayed open for good. And the deck opens for the keyboard: Alt+T, Escape
+   back to where the focus was. */
+test("Toast deck closes again after a click on a close button", async ({ page }) => {
+  await openExample(page, "toast", "until-closed");
+  const trigger = page.getByRole("button", { name: "Go offline" });
+  for (let i = 0; i < 3; i++) await trigger.click();
+  await page.getByRole("button", { name: "Close message" }).last().click();
+  await page.mouse.move(0, 0);
+  await expect(page.getByRole("button", { name: "2 messages, show all" })).toBeVisible();
+});
+
+test("Toast deck opens with Alt+T and gives the focus back on Escape", async ({ page }) => {
+  await openExample(page, "toast", "until-closed");
+  const trigger = page.getByRole("button", { name: "Go offline" });
+  await trigger.click();
+  await trigger.click();
+  await trigger.focus();
+  await page.keyboard.press("Alt+KeyT");
+  await expect(page.getByRole("region", { name: "Messages (Alt+T)" })).toBeFocused();
+  await expect(page.getByRole("button", { name: "2 messages, show all" })).toBeHidden();
+  await page.keyboard.press("Escape");
+  await expect(trigger).toBeFocused();
+  await expect(page.getByRole("button", { name: "2 messages, show all" })).toBeVisible();
+});
+
 test("Tabs change the content", async ({ page }) => {
   await openExample(page, "tabs", "loading-and-empty-panels");
   const example = page.locator('[data-example="loading-and-empty-panels"]');
