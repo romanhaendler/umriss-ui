@@ -29,7 +29,7 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
-## Unreleased
+## 0.8.2 – Room on a phone (Sep. 2026)
 
 ### Changed
 

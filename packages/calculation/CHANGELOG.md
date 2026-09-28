@@ -11,6 +11,12 @@ under a heading "Changed" of its own, no matter which digit rose.
 
 ---
 
+## 0.3.7 – Core 0.16.0 (Sep. 2026)
+
+Needs `@umriss-ui/core` 0.16; the peer range moves to `^0.16.0`. Nothing else changes for a caller.
+
+---
+
 ## 0.3.6 – Core 0.15.0 (Sep. 2026)
 
 Needs `@umriss-ui/core` 0.15; the peer range moves to `^0.15.0`. Nothing else changes for a caller.
