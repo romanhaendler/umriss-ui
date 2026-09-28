@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Stack, Text } from "@umriss-ui/core";
-import { useTable } from "../../../src";
+import { Toolbar, useTable } from "../../../src";
 
 export const title = "Act on a selection";
 
-export const lead = "Mark an action `bulk` and it receives a list: one row at the row, the selection in the toolbar that appears while rows are ticked.";
+export const lead = "Mark an action `bulk` and it receives a list: one row at the row, the selection in the `Toolbar` while rows are ticked.";
 
 interface Invoice {
   id: string;
@@ -26,6 +26,7 @@ export default function ActOnASelection() {
   return (
     <Stack gap={3}>
       <Table selectable ariaLabel="Invoices awaiting approval">
+        <Toolbar />
         <Column value="id" label="Invoice" rowHeader />
         <Column value="supplier" label="Supplier" />
         <Column value="costCentre" label="Cost centre" />

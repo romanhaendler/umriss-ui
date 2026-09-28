@@ -251,3 +251,41 @@ test("opening a row draft or a new row shifts nothing: the rows keep their heigh
   expect(await height(table.locator("tr[data-grid-line='new']"))).toBe(other);
   expect(await height(table.locator("tr[data-grid-line='row:i1']"))).toBe(other);
 });
+
+test("a compact row draft fits its row, and its Save and Discard stand apart", async ({ page }) => {
+  const box = async (l: Locator) => (await l.boundingBox())!;
+  await openExample(page, pageOf("edit-a-dense-table"), "edit-a-dense-table");
+  const table = example(page, "edit-a-dense-table");
+  const row = table.locator("tr[data-grid-line='row:r1']");
+  /* A row with actions stands as tall as a dense row of text alone: one
+     line, the 4 px padding above and beneath it, the rule. */
+  const text = await box(row);
+  const lineOfText = await row.evaluate((el) =>
+    Math.max(...[...el.children].slice(0, -1).map((cell) => parseFloat(getComputedStyle(cell).lineHeight))),
+  );
+  expect(text.height).toBeLessThanOrEqual(lineOfText + 2 * 4 + 1 + 0.5);
+
+  await row.locator("td[data-edit]").first().click();
+  const save = await box(table.getByRole("button", { name: "Save: Harbour" }));
+  const discard = await box(table.getByRole("button", { name: "Discard: Harbour" }));
+  const line = await box(row);
+  expect(line.height).toBe(text.height);
+  /* The fields and buttons leave the row's lines free - at 26 px they
+     touched them. */
+  expect(save.height).toBeLessThanOrEqual(line.height - 7);
+  expect(discard.x - (save.x + save.width)).toBeGreaterThanOrEqual(8);
+  /* A field keeps its cell's padding: it stood 4 px from the frame and
+     from its neighbour. */
+  const fields = await row.evaluate((el) =>
+    [...el.querySelectorAll("input")].map((input) => {
+      const cell = input.closest("td, th")!.getBoundingClientRect();
+      const field = input.closest("td > div > *, th > div > *")!.getBoundingClientRect();
+      return { cellLeft: cell.left, left: field.left, right: field.right };
+    }),
+  );
+  const [room, seats, floor] = fields;
+  expect(fields).toHaveLength(3);
+  expect(room!.left - room!.cellLeft).toBeGreaterThanOrEqual(12);
+  expect(seats!.left - room!.right).toBeGreaterThanOrEqual(12);
+  expect(floor!.left - seats!.right).toBeGreaterThanOrEqual(12);
+});

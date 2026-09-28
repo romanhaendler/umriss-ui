@@ -104,7 +104,7 @@ export function Search({ placeholder, "aria-label": name, className, of }: Searc
     <Input
       size="sm"
       type="search"
-      className={className}
+      className={cx(styles.search, className)}
       value={snapshot.search}
       onChange={(event) => snapshot.setSearch(event.target.value)}
       clearable

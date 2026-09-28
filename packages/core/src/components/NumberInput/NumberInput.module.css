@@ -113,9 +113,11 @@
     transition: transform var(--u-transition-press);
   }
 
+  /* Never taller than the field: on a dense surface the small field is
+     18 px (own styles, `dense`). */
   .sm .stepper button {
     width: 18px;
-    height: 19px;
+    height: min(19px, calc(var(--u-control-height-sm) - 2px));
   }
 
   .wrapper:hover .stepper button:not(:disabled),
