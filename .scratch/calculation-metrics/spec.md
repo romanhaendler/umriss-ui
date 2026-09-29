@@ -4,9 +4,9 @@ Status: done
 Date:   2026-09-29
 Origin: grilling session on `@umriss-ui/calculation` 0.3.7. The term is in
 `CONTEXT.md`, "Calculations" (**Metric**), and the decision in ADR-0038.
-Rendered prototype: branch `prototype/calculation-metrics` (commit `d162387`),
-`packages/calculation/demo/prototype-metrics.tsx`, opened with `?variant=A`.
-The prototype is a primary source, not code to merge.
+Rendered prototype: three variants on a throwaway branch, variant A chosen;
+the branch was deleted after the release. What the variants were and why A
+won stands in ADR-0038.
 
 ## Problem Statement
 
@@ -176,4 +176,4 @@ rendered page. Released as `@umriss-ui/calculation` 0.4.0.
 - **Deviation:** the demo does not show thrown messages (ticket 03).
 - **Not asked for, and in the changelog:** a frame wider than its place
   scrolls instead of clipping.
-- The prototype stays on `prototype/calculation-metrics`, unmerged.
+- The prototype branch was never merged, and deleted after the release.

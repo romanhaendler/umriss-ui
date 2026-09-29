@@ -18,8 +18,8 @@ one does not fit", "Sentence"; user stories 1–5
   badges and notes placed for it.
 - The sentence with metrics, and any wording it needs in core, English and
   German.
-- Take the look from the prototype branch `prototype/calculation-metrics`,
-  variant A, and rewrite it properly. Do not merge it.
+- Take the look from the prototype's variant A (a throwaway branch, deleted
+  after the release), and rewrite it properly. Do not merge it.
 
 ## Acceptance
 
