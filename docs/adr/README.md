@@ -51,5 +51,6 @@ half a later reader needs most. Exactly one is superseded today.
 | [0035](0035-umriss-is-for-data-dense-applications.md) | umriss is for data-dense applications, not for plants alone | accepted | scope |
 | [0036](0036-a-grid-edits-on-the-first-click-and-saves-rows-on-purpose.md) | A grid edits on the first click, and saves rows on purpose | accepted | table |
 | [0037](0037-the-demos-are-addressed-by-path-and-prerendered.md) | The demos are addressed by path and prerendered, so that a search engine can read them | accepted | demo |
+| [0038](0038-a-calculation-can-carry-several-metrics.md) | A calculation can carry several metrics | accepted | calculation |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).
