@@ -1263,6 +1263,16 @@ is the whole calculation, its **Result**.
 _Avoid_: subtotal (after a times it is no sum), checkpoint, carry,
 Zwischensumme
 
+**Metric**:
+One of several numbers every quantity of a **Calculation** carries side by
+side — headcount and full-time equivalents of the same teams. The derivation is
+the same for every metric; each metric is worked on its own, top to bottom, and
+never with another. Unit and presentation belong to the metric, not to the
+quantity. A calculation with metrics only adds and subtracts, and an **Absent
+value** in one metric makes absent only what depends on it in that metric.
+_Avoid_: column (which is a table's), Spalte as an identifier, series (which is
+the charts'), measure, Kennzahl
+
 
 ## Module and directory names
 
