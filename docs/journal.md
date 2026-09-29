@@ -24,8 +24,8 @@ as it stood.
   `.scratch/calculation-metrics/`; `@umriss-ui/calculation` 0.4.0).
   Headcount and full-time equivalents of the same teams, one derivation, a
   column each. Grilled from "Stückzahlen und Kosten nebeneinander" down to a
-  staff report; decided on a rendered prototype of three variants (branch
-  `prototype/calculation-metrics`, kept unmerged): the unit in the head and
+  staff report; decided on a rendered prototype of three variants (a throwaway
+  branch, never merged, deleted after the release): the unit in the head and
   wherever a result closes, a short badge per absent metric.
 - **The reader stays as it was**: `perMetric` gives evaluation and
   presentation one view per metric, each with that metric's numbers, unit and

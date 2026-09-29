@@ -12,8 +12,8 @@ Spec: "Further Notes"
   `docs/llms-full.md`. Core's changelog if wording entries were added.
   `docs/testing.md`, `docs/journal.md`.
 - The spec's status to `done`, with a delivery report under `## Comments`.
-- A pointer in the report to the prototype branch
-  `prototype/calculation-metrics`, which stays unmerged.
+- A pointer in the report to the prototype branch, which stays unmerged
+  (deleted after the release).
 
 ## Comments
 

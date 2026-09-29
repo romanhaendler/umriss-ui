@@ -50,8 +50,8 @@ The rules:
 
 ## How it is shown
 
-Settled on a rendered prototype (branch `prototype/calculation-metrics`),
-variant A of three:
+Settled on a rendered prototype, variant A of three (a throwaway branch,
+deleted after the release; its variants and why they lost stand below):
 
 - **A head row** above the statement names each metric, with its unit beneath
   the name. The operand rows show numbers only, one column per metric, aligned
