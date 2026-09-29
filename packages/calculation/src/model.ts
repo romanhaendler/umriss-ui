@@ -17,7 +17,7 @@
 import { Children, Fragment, isValidElement } from "react";
 import type { ReactElement, ReactNode } from "react";
 import { Chain, Difference, DividedBy, Given, Interim, Minus, Plus, Product, Quotient, Ref, Sum, Times } from "./elements";
-import type { ChainOperandProps, GivenProps, OperatorProps, QuantityProps, RefProps } from "./elements";
+import type { ChainOperandProps, GivenProps, Metric, MetricValues, OperatorProps, QuantityProps, RefProps } from "./elements";
 
 export type Operator = "sum" | "difference" | "product" | "quotient";
 
@@ -50,6 +50,8 @@ export interface CalculationModel {
   result: string;
   /** Every quantity by key, in the order they stand. */
   quantities: ReadonlyMap<string, Quantity>;
+  /** The metrics every quantity carries a number for (ADR-0038). */
+  metrics?: readonly Metric[];
 }
 
 const OPERATORS = new Map<unknown, Operator>([
@@ -81,6 +83,12 @@ const LINES = new Map<unknown, LineKind>([
 
 const QUANTITIES = "<Given>, <Sum>, <Difference>, <Product>, <Quotient> or <Chain>";
 
+const ONLY_ADDS = "a calculation with metrics only adds and subtracts - <Sum>, <Difference>, <Plus>, <Minus>.";
+
+/** The props that belong to the metric, not to a quantity, once there are
+    metrics. */
+const METRIC_PROPS = ["unit", "format", "decimals"] as const;
+
 function fail(message: string): never {
   throw new Error(`@umriss-ui/calculation: ${message}`);
 }
@@ -111,11 +119,43 @@ const childKey = (key: string, child: ReactNode, index: number) =>
  * through references, an element that is none of the calculation's own, and a
  * chain written against its rules (ADR-0028).
  */
-export function readCalculation(children: ReactNode): CalculationModel {
+export function readCalculation(children: ReactNode, metrics?: readonly Metric[]): CalculationModel {
   const top = flatten(children);
   if (top.length !== 1) {
     fail(`<Calculation> takes exactly one child, the result; it was given ${top.length}.`);
   }
+
+  if (metrics !== undefined) {
+    if (metrics.length === 0) {
+      fail("<Calculation>: metrics is empty; leave it out for a calculation with one number per quantity.");
+    }
+    const seen = new Set<string>();
+    for (const { id } of metrics) {
+      if (seen.has(id)) fail(`<Calculation>: the metric id "${id}" is used twice.`);
+      seen.add(id);
+    }
+  }
+  /** The metric ids as a message names them: "heads", "fte". */
+  const namedIds = metrics?.map((m) => `"${m.id}"`).join(", ");
+
+  /** A given's value: a number without metrics, an object with exactly the
+      metrics' ids with them (ADR-0038). */
+  const checkValue = (value: GivenProps["value"], where: string) => {
+    const byMetric = typeof value === "object" && value !== null;
+    if (metrics === undefined) {
+      if (byMetric) fail(`${where}: value is an object by metric, but the calculation has no metrics.`);
+      return;
+    }
+    if (!byMetric) fail(`${where}: with metrics, value is an object with a number for each metric - ${namedIds}.`);
+    for (const { id } of metrics) {
+      if (!(id in value)) fail(`${where}: value has no number for the metric "${id}"; write null where it is absent. The metrics: ${namedIds}.`);
+    }
+    for (const key of Object.keys(value)) {
+      if (!metrics.some((m) => m.id === key)) {
+        fail(`${where}: value has a number for "${key}", which is no metric. The metrics: ${namedIds}.`);
+      }
+    }
+  };
 
   const quantities = new Map<string, Quantity>();
   const ids = new Map<string, string>();
@@ -123,6 +163,16 @@ export function readCalculation(children: ReactNode): CalculationModel {
 
   const define = (key: string, props: QuantityProps, where: string): Quantity => {
     const { id, ...rest } = props;
+    if (metrics !== undefined) {
+      for (const prop of METRIC_PROPS) {
+        if (props[prop] !== undefined) {
+          fail(`${where}: ${prop} belongs to the metric once the calculation has metrics, not to a quantity.`);
+        }
+      }
+      if (props.target !== undefined || props.limits !== undefined) {
+        fail(`${where}: target and limits are not assessed in a calculation with metrics.`);
+      }
+    }
     if (id !== undefined) {
       if (ids.has(id)) fail(`${where}: the id "${id}" is used twice.`);
       ids.set(id, key);
@@ -155,8 +205,12 @@ export function readCalculation(children: ReactNode): CalculationModel {
     }
     const { children: operandNodes, value, source, asOf, ages, ...rest } = node.props as GivenProps & OperatorProps;
     const here = `${where} › ${rest.label}`;
+    if (metrics !== undefined && (operator === "product" || operator === "quotient")) {
+      fail(`${here}: <${ELEMENT_NAMES[operator]}> - ${ONLY_ADDS}`);
+    }
     const quantity = define(key, rest, here);
     if (operator === undefined) {
+      checkValue(value, here);
       quantity.given = { value, source, asOf, ages };
       return key;
     }
@@ -206,6 +260,7 @@ export function readCalculation(children: ReactNode): CalculationModel {
       if (line === undefined) {
         fail(`${here}: ${nameOf(node)} needs an operator in a chain - <Plus>, <Minus>, <Times> or <DividedBy> - or is an <Interim>.`);
       }
+      if (metrics !== undefined && line.operator !== "sum") fail(`${here}: <${line.name}> - ${ONLY_ADDS}`);
       const alone = line.operator !== "sum";
       const blocking = pending.find((p) => p.line.operator !== "sum");
       if ((alone && pending.length > 0) || blocking) {
@@ -227,7 +282,9 @@ export function readCalculation(children: ReactNode): CalculationModel {
       }
       if (given.label === undefined) wrong();
       const { value, source, asOf, ages, ...quantityProps } = given;
-      const quantity = define(nodeKey, { ...quantityProps, label: given.label! }, `${here} › ${given.label}`);
+      const at = `${here} › ${given.label}`;
+      const quantity = define(nodeKey, { ...quantityProps, label: given.label! }, at);
+      checkValue(value, at);
       quantity.given = { value, source, asOf, ages };
       pending.push({ operand: { key: nodeKey, reference: false, negated: line.negated }, line });
     });
@@ -250,7 +307,26 @@ export function readCalculation(children: ReactNode): CalculationModel {
   }
 
   findCycle(quantities);
-  return { result, quantities };
+  return { result, quantities, metrics };
+}
+
+/**
+ * The calculation as seen by each metric: every given with that metric's
+ * number, every quantity with its unit and places. Evaluation and
+ * presentation then work on one number per quantity, as without metrics.
+ * Without metrics, the model itself.
+ */
+export function perMetric(model: CalculationModel): readonly CalculationModel[] {
+  if (!model.metrics) return [model];
+  return model.metrics.map((metric) => {
+    const quantities = new Map<string, Quantity>();
+    for (const [key, quantity] of model.quantities) {
+      /* An object by metric: `readCalculation` checked every given. */
+      const given = quantity.given && { ...quantity.given, value: (quantity.given.value as MetricValues)[metric.id] };
+      quantities.set(key, { ...quantity, unit: metric.unit, decimals: metric.decimals, given });
+    }
+    return { result: model.result, quantities };
+  });
 }
 
 /** A quantity that depends on itself through references cannot be evaluated. */

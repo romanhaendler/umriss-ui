@@ -4,6 +4,7 @@
 import type { Formats, Verdict, Wording } from "@umriss-ui/core";
 import type { Absence, Evaluation } from "./evaluate";
 import { shownOf } from "./evaluate";
+import type { Metric } from "./elements";
 import type { CalculationModel, Operator, Quantity } from "./model";
 
 export interface LineText {
@@ -21,6 +22,11 @@ export interface LineText {
   reason?: string;
   /** The line read as one sentence. */
   sentence: string;
+  /** The formula in names as spoken, where the quantity is derived. */
+  spokenNames?: string;
+  /** The number as spoken, with its unit and, where approximated, the word
+      for it. */
+  spokenNumber: string;
 }
 
 /** Above this many operands a line shows how many, not a formula of them
@@ -151,5 +157,25 @@ export function lineText(
 
   const unit = own.shown === null ? undefined : quantity.format === "percent" ? "%" : quantity.unit;
   const amount = own.shown === null ? wording.statAbsentValue : formats.number(own.shown, quantity.decimals);
-  return { amount, unit, names, target: target(false), reason, sentence };
+  return { amount, unit, names, target: target(false), reason, sentence, spokenNames: spoken.names, spokenNumber: result };
+}
+
+/** A line of a calculation with metrics, read as one sentence: its formula in
+    names once, then each metric's number, and the reason where one is
+    missing (ADR-0038). The formula in numbers is left out - the operand lines
+    read their own. */
+export function metricsSentence(
+  label: string,
+  texts: readonly LineText[],
+  metrics: readonly Metric[],
+  wording: Wording,
+  position?: Position,
+): string {
+  const prefix = position ? `${operatorText(position, true, wording)} ` : "";
+  const names = texts[0]!.spokenNames;
+  const head = prefix + label + (names === undefined ? "" : ` ${wording.calculationEquals} ${names}`);
+  const figures = metrics.map((metric, i) =>
+    [`${metric.label} ${texts[i]!.spokenNumber}`, texts[i]!.reason].filter(Boolean).join(", "),
+  );
+  return `${head}: ${figures.join("; ")}`;
 }

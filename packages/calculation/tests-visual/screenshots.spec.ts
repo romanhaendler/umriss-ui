@@ -77,3 +77,25 @@ test("Beispiel calculation--oee, narrow", async ({ page }, testInfo) => {
   await page.mouse.move(0, 0);
   await expect(target).toHaveScreenshot(`example-calculation--oee-narrow-${testInfo.project.name}.png`);
 });
+
+/* Metrics opened - the closing rows with their units, a derivation inside
+   another - and on a phone, where three metrics stand beneath their labels. */
+test("Beispiel metrics--whole-company, opened", async ({ page }, testInfo) => {
+  await openExample(page, "metrics", "whole-company");
+  const target = page.locator('[data-example="whole-company"]');
+  for (const label of ["Commercial", "Customer service"]) {
+    await target.getByRole("button", { name: `Show how ${label} is derived` }).click();
+  }
+  await page.mouse.move(0, 0);
+  await expect(target).toHaveScreenshot(`example-metrics--whole-company-opened-${testInfo.project.name}.png`);
+});
+
+test("Beispiel metrics--whole-company, narrow", async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 390, height: 900 });
+  await openExample(page, "metrics", "whole-company");
+  const target = page.locator('[data-example="whole-company"]');
+  await target.getByRole("button", { name: "Show how Commercial is derived" }).click();
+  await page.mouse.move(0, 0);
+  await expect(target).toHaveScreenshot(`example-metrics--whole-company-narrow-${testInfo.project.name}.png`);
+});
+

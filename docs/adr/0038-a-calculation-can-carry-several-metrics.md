@@ -64,11 +64,13 @@ variant A of three:
   unit in the existing wording. The sentence carries the full reason. A long
   badge pushed the numbers aside when wide and was cut off when narrow.
 - **Two lines only where one does not fit.** The component measures the width
-  its number columns take and, where they leave the label less than 10 rem,
-  sets each row's numbers on a line beneath its label, still in their columns
-  under the head. A breakpoint cannot know this, because it depends on the
-  number of metrics and the number of digits. Two metrics stay on one line in
-  300 px; three do not in 360 px.
+  its number columns take and the width its longest label needs. Where the
+  figures leave less than that, and less than 10 rem, it sets each row's
+  numbers on a line beneath its label, still in their columns under the head.
+  Above 10 rem a long label wraps instead. A breakpoint cannot know this,
+  because it depends on the labels, the number of metrics and the number of
+  digits. Two metrics with short labels stay on one line on a phone; three do
+  not.
 - **The sentence** names the formula once and then each metric's number:
   "Logistics equals Warehouse plus Dispatch plus Student staff: Headcount
   64 HC; Full-time equivalents unknown, Student staff is missing". The formula

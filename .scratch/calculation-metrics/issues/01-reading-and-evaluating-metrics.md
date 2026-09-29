@@ -1,6 +1,6 @@
 # 01 — Reading and evaluating metrics
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Blocked by: none
@@ -25,3 +25,7 @@ stories 3, 6–8
   metric only, and one test per error asserting its message.
 - The existing unit tests pass unchanged.
 - `pnpm lint`, `pnpm typecheck`, `pnpm test:unit` green.
+
+## Comments
+
+Delivered: `metrics`, `Metric`, `MetricValues`; every error of the spec with a test asserting its message; `perMetric` gives one view of the model per metric, so evaluation needed no change. The missing-key message lists the metric ids (from the review).

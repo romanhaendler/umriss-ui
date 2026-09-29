@@ -1,6 +1,6 @@
 # 03 — Demo: a page "Metrics"
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Blocked by: 02
@@ -28,3 +28,7 @@ Every one uses real staff numbers, never `a + b`:
   looked at. axe clean on the page.
 - The prerendered HTML and `llms.txt` carry the page (ADR-0037).
 - `pnpm lint`, `pnpm typecheck`, the package's tests and visual tests green.
+
+## Comments
+
+Delivered: the page and six examples in the order asked, on the planning world (Tidewell) and the controlling world, which gained `TEAMS` and `BUSINESS_LINES`. **Deviation:** the development errors are not shown as thrown messages. No demo has an error boundary, and a caught render error is logged to every visitor's console; the messages stand in the page's limits and, verbatim, in the unit tests.

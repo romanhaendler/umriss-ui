@@ -101,6 +101,28 @@ export const OUTLINE: readonly Rubric[] = [
         types: ["GivenProps"],
         exports: ["Given"],
       },
+      {
+        id: "metrics",
+        name: "Metrics",
+        sentence: "Several numbers on every line, side by side (columns, measures): headcount and full-time equivalents of the same teams, summed by the same derivation. Reach for it where one sheet has to answer in more than one unit.",
+        about: [
+          "`metrics` on the calculation names each metric once, with its unit and places; every `value` is then an object with a number for each metric id. Each metric is worked on its own - nothing ever takes numbers from two of them (ADR-0038).",
+          "The head names each metric above its column. The unit stands again only where a result closes: the Result, an interim, the line that closes an open derivation.",
+          "A number one metric does not have is `null`, and makes absent only what depends on it in that metric; the badge says which metric, the sentence the full reason.",
+          "Where the figures leave the labels less room than they need, and less than 10 rem, each line puts them on a line beneath its label, still in their columns. The component measures this: it depends on the labels, the number of metrics and their digits, not on a breakpoint.",
+        ],
+        alternatives: [
+          { when: "A ratio across two metrics, such as FTE per head", use: "a calculation of its own, a `Quotient` of two givens" },
+          { when: "Many figures per row, sorted and filtered", use: "`Table` from @umriss-ui/table" },
+        ],
+        limits: [
+          "A calculation with metrics only adds and subtracts: `Product`, `Quotient`, `Times` and `DividedBy` fail on the first render, since a factor would need a unit in every metric.",
+          "Unit, format and places belong to the metric; on a quantity they fail on the first render, and so does a missing or unknown metric key in a `value`.",
+          "No target or limits with metrics: an assessment per cell is not there yet.",
+        ],
+        types: ["Metric"],
+        exports: ["Calculation", "Given", "Sum", "Chain", "Plus", "Minus", "Interim"],
+      },
     ],
   },
   {

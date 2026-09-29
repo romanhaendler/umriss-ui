@@ -1,6 +1,6 @@
 # 02 — Showing metrics
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Blocked by: 01
@@ -30,3 +30,7 @@ one does not fit", "Sentence"; user stories 1–5
   on every frame. Hover band, falling line, focus ring and the Result's double
   rule looked at in both layouts.
 - `pnpm lint`, `pnpm typecheck`, `pnpm test:unit` green.
+
+## Comments
+
+Delivered as specified, with one sharpening from the browser: the two-line switch also measures the longest label (over all its line boxes, so the answer is the same on one line or two), after a phone went to two lines where "Web team" needed 70 px. Narrow figures stand closer by width, not by the flag - by the flag, it flipped on every measure. A frame that still does not fit scrolls rather than clips (in the changelog under Changed). Checked at 900, 360 and 300 px of frame width and every 10 px between, light and dark, hover, focus, forced colours.
