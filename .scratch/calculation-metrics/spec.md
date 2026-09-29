@@ -1,6 +1,6 @@
 # Several metrics side by side: headcount and FTE in one calculation
 
-Status: ready-for-agent
+Status: ready-for-human
 Date:   2026-09-29
 Origin: grilling session on `@umriss-ui/calculation` 0.3.7. The term is in
 `CONTEXT.md`, "Calculations" (**Metric**), and the decision in ADR-0038.
@@ -107,8 +107,8 @@ const STAFF = [
   past the frame.
 - **Two lines only where one does not fit.** A `ResizeObserver` on the frame
   compares the frame's width with the width of the number columns (from the
-  grid's resolved tracks). Where less than 10 rem is left for the label, the
-  frame gets a flag, and each row places its label across the full width and
+  grid's resolved tracks). Where what is left for the label is less than the
+  longest label needs, and less than 10 rem, the frame gets a flag, and each row places its label across the full width and
   its operator and numbers on a second line in their columns. Head, badges and
   notes follow. 10 rem is a constant, not a prop. Without the flag, the narrow
   layout of ADR-0028 applies unchanged with metrics: the names give way, the
@@ -146,3 +146,34 @@ const STAFF = [
 Term introduced: **Metric**. Avoided: *column* (the table's), *series* (the
 charts'), *measure*, *Kennzahl*. The prototype's variants B and C and the
 reasons they lost are in ADR-0038.
+
+## Comments
+
+### Delivery report (2026-09-29)
+
+Tickets 01, 02, 03 and 05 delivered; 04, the polish round, waits for the
+user's look at the rendered page - hence `ready-for-human`.
+
+- **Model.** The reader is unchanged but for the checks; `perMetric` gives
+  evaluation and presentation one view per metric, so the four operators,
+  absence and the approximation mark work per metric without a line of their
+  own.
+- **Found in the browser, fixed, and held by a test:** the fixed 10 rem went
+  to two lines where a short label had room - the rule now measures the
+  longest label as well; three metrics overflowed a 320 px phone - narrow
+  figures stand closer; setting them closer only on two lines made the flag
+  flip until React gave up - the spacing follows the width alone, and a test
+  walks 900 to 300 px in 10 px steps watching for page errors.
+- **From the review:** the missing-key message lists the metric ids; the
+  browser tests use the frame widths the spec names; per-metric readings are
+  one bundle instead of parallel arrays; the grid lines are computed in one
+  place beside the stylesheet's track order.
+- **Left, as judgement calls:** the page sentence keeps "(columns, measures)"
+  as search terms, as the other pages name theirs (search-visibility 04); the
+  two-line assessment block repeats the narrow one, since the flag also
+  applies outside the container query; `readCalculation` branches on
+  `metrics` in five places, each a rule of its own.
+- **Deviation:** the demo does not show thrown messages (ticket 03).
+- **Not asked for, and in the changelog:** a frame wider than its place
+  scrolls instead of clipping.
+- The prototype stays on `prototype/calculation-metrics`, unmerged.

@@ -18,6 +18,32 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Sep. 2026 — Metrics side by side in a calculation
+
+- **A calculation carries several metrics** (ADR-0038,
+  `.scratch/calculation-metrics/`; `@umriss-ui/calculation`, unreleased).
+  Headcount and full-time equivalents of the same teams, one derivation, a
+  column each. Grilled from "Stückzahlen und Kosten nebeneinander" down to a
+  staff report; decided on a rendered prototype of three variants (branch
+  `prototype/calculation-metrics`, kept unmerged): the unit in the head and
+  wherever a result closes, a short badge per absent metric.
+- **The reader stays as it was**: `perMetric` gives evaluation and
+  presentation one view per metric, each with that metric's numbers, unit and
+  places, so the four operators, absence and the approximation mark needed no
+  change. Every rule is a development error with a test asserting its message.
+- **Found in the browser**: the prototype's fixed 10 rem went to two lines on a
+  phone where "Web team" needed 70 px; the rule now measures the longest
+  label as well, over all its line boxes, so the answer is the same on one
+  line or two. Three metrics overflowed a 320 px phone by 15 px; narrow, the
+  figures now stand closer, and a frame that still does not fit scrolls rather
+  than clipping. The first try set them closer only on two lines - and the
+  flag flipped on every measure until React gave up and the example vanished.
+  The spacing now follows the width alone, and a browser test walks every
+  width from 900 to 300 px in 10 px steps, watching for page errors. Baselines: twenty new pictures (six examples, opened and narrow,
+  the page head, forced colours), each looked at; no existing one moved. A
+  changed word stays inside the tolerance - `--update-snapshots` alone keeps
+  the old picture, `--update-snapshots=all` writes it.
+
 ## Sep. 2026 — Found by search, on our own merits
 
 - **Every demo page is a path now, with its text prerendered** (ADR-0037,

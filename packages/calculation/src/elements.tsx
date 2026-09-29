@@ -39,11 +39,33 @@ export interface QuantityProps {
   aside?: ReactNode;
 }
 
+/** One of several numbers every quantity carries side by side (ADR-0038):
+    headcount and full-time equivalents of the same teams. Each metric is
+    worked on its own, with the same derivation. */
+export interface Metric {
+  /** The key of this metric's number in every `value` object. */
+  id: string;
+  /** The metric's name, in the head above its column and in each row's
+      sentence. */
+  label: string;
+  /** A label written after the number where a result closes, and beneath the
+      metric's name in the head. Never converted and never checked. */
+  unit?: string;
+  /** Fixed number of fraction digits as shown, for every quantity of this
+      metric. Without it: a given as given, at most two for a derived number. */
+  decimals?: number;
+}
+
+/** A given's numbers where the calculation has metrics: one per metric id,
+    `null` where the number is absent. */
+export type MetricValues = Readonly<Record<string, number | null>>;
+
 export interface GivenProps extends QuantityProps {
   /** The number the calculation starts from. Absent (`null`, `undefined`,
       not finite) makes every quantity that depends on it absent, with the
-      reason - never zero. */
-  value: number | null | undefined;
+      reason - never zero. Where the calculation has `metrics`, an object with
+      a number for each metric id instead; absence then stays in its metric. */
+  value: number | null | undefined | MetricValues;
   /** Where the number came from: a system, a report, a person. */
   source?: string;
   /** When the number was true - not when it was fetched. */
@@ -99,8 +121,9 @@ export interface ChainOperandProps extends Omit<GivenProps, "label" | "value"> {
   label?: string;
   /** The operand's number, where the line is a given written in place.
       Absent as for a `Given`: the line and every interim after it are
-      absent, with the reason. */
-  value?: number | null;
+      absent, with the reason. With `metrics`, an object by metric id, as on
+      a `Given`. */
+  value?: number | null | MetricValues;
   /** Instead of `label` and `value`: exactly one quantity - a tree, a
       `<Ref>` or a `<Chain>`. */
   children?: ReactNode;

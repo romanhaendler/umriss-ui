@@ -8,7 +8,10 @@
  *   where the month is closed (January and February), the forecast for every
  *   month; Marketing overspends, IT runs under;
  * - `INVOICES` - incoming invoices with their lines (quantity, unit price,
- *   discount, VAT rate), and `APPROVALS`, who signed which, or has yet to.
+ *   discount, VAT rate), and `APPROVALS`, who signed which, or has yet to;
+ * - `TEAMS` - the teams of each cost centre with their headcount, full-time
+ *   equivalents and monthly staff cost, and `BUSINESS_LINES`, which cost
+ *   centres each of the three business lines holds.
  *
  * Amounts in euros. "Now" is Tuesday, 17 March 2026. Plain data and small pure
  * functions, no imports: copy the file beside an example and it runs.
@@ -159,4 +162,56 @@ export const APPROVALS: readonly Approval[] = [
   { invoice: "INV-26-0226", step: "cost centre", approver: "Helen Marsh", decision: "approved", at: on(2, 27) },
   { invoice: "INV-26-0226", step: "finance", approver: "Martina Vogel", decision: "approved", at: on(3, 2) },
   { invoice: "INV-26-0221", step: "cost centre", approver: "Anika Sørensen", decision: "rejected", at: on(2, 24), comment: "Not ordered - the review was cancelled in January." },
+];
+
+export interface Team {
+  /** The cost centre the team books to. */
+  costCentre: string;
+  name: string;
+  /** People employed, whatever their hours. */
+  headcount: number;
+  /** Full-time equivalents: contracted hours over 40 a week. */
+  fte: number;
+  /** Staff cost of a month, in thousand euros. */
+  monthlyCost: number;
+}
+
+/** Every team, on 17 March: 102 people, 91.5 full-time equivalents. */
+export const TEAMS: readonly Team[] = [
+  { costCentre: "CC-1100", name: "Field sales North", headcount: 9, fte: 8.6, monthlyCost: 61.2 },
+  { costCentre: "CC-1100", name: "Field sales South", headcount: 8, fte: 7.5, monthlyCost: 53.9 },
+  { costCentre: "CC-1100", name: "Inside sales", headcount: 6, fte: 5.2, monthlyCost: 29.8 },
+  { costCentre: "CC-1100", name: "Key accounts", headcount: 4, fte: 4.0, monthlyCost: 33.6 },
+  { costCentre: "CC-1200", name: "Brand", headcount: 3, fte: 2.8, monthlyCost: 19.4 },
+  { costCentre: "CC-1200", name: "Online marketing", headcount: 4, fte: 3.5, monthlyCost: 24.1 },
+  { costCentre: "CC-1200", name: "Trade fairs", headcount: 2, fte: 1.5, monthlyCost: 10.2 },
+  { costCentre: "CC-3100", name: "Service desk", headcount: 7, fte: 5.9, monthlyCost: 31.3 },
+  { costCentre: "CC-3100", name: "Returns", headcount: 3, fte: 2.5, monthlyCost: 12.6 },
+  { costCentre: "CC-2100", name: "Seating", headcount: 6, fte: 5.8, monthlyCost: 43.5 },
+  { costCentre: "CC-2100", name: "Desks", headcount: 7, fte: 6.5, monthlyCost: 48.1 },
+  { costCentre: "CC-2100", name: "Storage", headcount: 5, fte: 4.6, monthlyCost: 33.9 },
+  { costCentre: "CC-2100", name: "Test lab", headcount: 3, fte: 2.5, monthlyCost: 16.8 },
+  { costCentre: "CC-2200", name: "Industrial design", headcount: 4, fte: 3.6, monthlyCost: 27.2 },
+  { costCentre: "CC-2200", name: "Colour and material", headcount: 2, fte: 1.8, monthlyCost: 12.9 },
+  { costCentre: "CC-4100", name: "Accounting", headcount: 5, fte: 4.4, monthlyCost: 27.5 },
+  { costCentre: "CC-4100", name: "Controlling", headcount: 3, fte: 3.0, monthlyCost: 21.3 },
+  { costCentre: "CC-4200", name: "Recruiting", headcount: 2, fte: 1.8, monthlyCost: 12.4 },
+  { costCentre: "CC-4200", name: "Payroll", headcount: 2, fte: 1.5, monthlyCost: 9.6 },
+  { costCentre: "CC-4300", name: "Workplace", headcount: 4, fte: 3.8, monthlyCost: 24.2 },
+  { costCentre: "CC-4300", name: "Applications", headcount: 5, fte: 4.5, monthlyCost: 34.8 },
+  { costCentre: "CC-4400", name: "Buildings", headcount: 3, fte: 3.0, monthlyCost: 16.9 },
+  { costCentre: "CC-4400", name: "Canteen", headcount: 5, fte: 3.2, monthlyCost: 14.7 },
+];
+
+export interface BusinessLine {
+  name: string;
+  /** Its cost centres, in the order a report lists them. */
+  costCentres: readonly string[];
+}
+
+/** How the company reports: three business lines over the nine cost centres. */
+export const BUSINESS_LINES: readonly BusinessLine[] = [
+  { name: "Commercial", costCentres: ["CC-1100", "CC-1200", "CC-3100"] },
+  { name: "Product", costCentres: ["CC-2100", "CC-2200"] },
+  { name: "Corporate services", costCentres: ["CC-4100", "CC-4200", "CC-4300", "CC-4400"] },
 ];

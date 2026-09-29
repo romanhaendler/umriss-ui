@@ -103,6 +103,31 @@ in a tree - there it folds, and opens whole.
   duplicate id, a component of your own wrapping `Given`. `.map` inside an
   operator works.
 
+## Several metrics side by side
+
+Where one sheet answers in more than one unit - headcount and full-time
+equivalents of the same teams - `metrics` puts a number per metric on every
+line, each in its own column under a head (ADR-0038):
+
+```tsx
+<Calculation
+  aria-label="Staff, 17 March"
+  metrics={[
+    { id: "heads", label: "Headcount", unit: "HC" },
+    { id: "fte", label: "Full-time equivalents", unit: "FTE", decimals: 1 },
+  ]}
+>
+  <Sum label="Customer service">
+    <Given label="Service desk" value={{ heads: 7, fte: 5.9 }} />
+    <Given label="Returns" value={{ heads: 3, fte: 2.5 }} />
+  </Sum>
+</Calculation>
+```
+
+Each metric is worked on its own, and a calculation with metrics only adds and
+subtracts. Unit and places belong to the metric; a missing number is `null`
+and makes absent only its own metric.
+
 ## Documentation
 
 The demo is the documentation: `pnpm dev:calculation` in the repository, port

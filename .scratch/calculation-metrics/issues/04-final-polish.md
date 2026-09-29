@@ -19,3 +19,11 @@ corrections; new tokens or visibly new colours go to the user as a card first.
 - The user has taken every card on the review page.
 - Every moved screenshot baseline has been looked at on its own, never rebuilt
   in bulk.
+
+## Comments
+
+Before the user's look, checked by the agent: every example at 1280, 390 and
+320 px of window and at 900, 360 and 300 px of frame, light and dark, opened,
+hovered, with keyboard focus, and under forced colours. Nothing clipped,
+nothing overflows, no page error. Waiting for the user's acceptance on the
+rendered page.

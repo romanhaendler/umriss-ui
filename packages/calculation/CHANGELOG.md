@@ -11,6 +11,46 @@ under a heading "Changed" of its own, no matter which digit rose.
 
 ---
 
+## Unreleased
+
+### Added
+
+- **Metrics: several numbers on every line, side by side** (ADR-0038).
+  `<Calculation metrics={[{ id, label, unit?, decimals? }, …]}>` names each
+  metric once; every `value` on a `Given` or a chain's line is then an object
+  with a number for each metric id - `value={{ heads: 31, fte: 27.5 }}`. The
+  derivation is the same for every metric, and each is worked on its own. The
+  type `Metric` (and `MetricValues`) is exported.
+  - A head above the figures names each metric with its unit; the unit stands
+    again only where a result closes - the Result, an interim, the line that
+    closes an open derivation.
+  - `null` for one metric makes absent only what depends on it in that metric;
+    the badge says which metric ("FTE is missing"), the sentence the full
+    reason.
+  - Where the figures leave the labels less room than they need, and less than
+    10 rem, each line puts them on a line beneath its label, still in their
+    columns. Measured, not a breakpoint.
+  - Every line reads as one sentence: its formula in names once, then each
+    metric's number - "Logistics equals Warehouse plus Dispatch: Headcount
+    58 HC; Full-time equivalents 45.7 FTE".
+  - Fails on the first render, with a message saying which and where: a
+    `value` that is not an object by metric, a metric's number left out or one
+    for no metric, `unit`, `format` or `decimals` on a quantity, `target` or
+    `limits`, `Product`, `Quotient`, `Times`, `DividedBy`, `metrics` empty or
+    with an id twice, and a `value` by metric where the calculation has none.
+- **A demo page "Metrics"**, six examples from two teams to a whole company.
+
+### Changed
+
+- **A calculation wider than its place scrolls instead of being cut off.** The
+  frame clipped what did not fit; it now scrolls sideways, still clipped to its
+  radius. A calculation that fits looks as before.
+- **Narrow, a verdict or a reason beneath the label no longer widens the
+  statement past its frame**: a long badge is cut at the frame's edge instead of
+  pushing the numbers out of view.
+
+---
+
 ## 0.3.7 – Core 0.16.0 (Sep. 2026)
 
 Needs `@umriss-ui/core` 0.16; the peer range moves to `^0.16.0`. Nothing else changes for a caller.

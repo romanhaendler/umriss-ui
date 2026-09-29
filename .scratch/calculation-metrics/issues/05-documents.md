@@ -1,6 +1,6 @@
 # 05 — The documents follow
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Blocked by: 04
@@ -14,3 +14,7 @@ Spec: "Further Notes"
 - The spec's status to `done`, with a delivery report under `## Comments`.
 - A pointer in the report to the prototype branch
   `prototype/calculation-metrics`, which stays unmerged.
+
+## Comments
+
+Delivered: README, changelog (unreleased), `docs/testing.md` (two rows, the page count, and the tolerance trap of `--update-snapshots`), `docs/journal.md`. `docs/llms-full.md` is generated at pack time.
