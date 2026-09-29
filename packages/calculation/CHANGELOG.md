@@ -11,7 +11,7 @@ under a heading "Changed" of its own, no matter which digit rose.
 
 ---
 
-## Unreleased
+## 0.4.0 – Metrics side by side (Sep. 2026)
 
 ### Added
 

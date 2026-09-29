@@ -1,6 +1,6 @@
 # 04 — Final polish round
 
-Status: ready-for-human
+Status: done
 Type: task
 
 Blocked by: 03
@@ -27,3 +27,5 @@ Before the user's look, checked by the agent: every example at 1280, 390 and
 hovered, with keyboard focus, and under forced colours. Nothing clipped,
 nothing overflows, no page error. Waiting for the user's acceptance on the
 rendered page.
+
+Accepted by the user on the rendered demo page (2026-09-29): "Demo sieht gut für mich aus." No corrections asked for.
