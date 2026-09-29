@@ -1,7 +1,7 @@
 import { Button, Stack } from "../../../src";
 
 export const title = "Variants";
-export const lead = "Use `primary` once per surface – two main actions side by side are no longer a main action; `danger` only for what cannot be undone.";
+export const lead = "Use `primary` once per surface – two main actions side by side are no longer a main action; `danger` only for what cannot be undone. `ghost` is quiet in the accent, `plain` quiet and neutral.";
 
 export default function Variants() {
   return (
@@ -9,6 +9,7 @@ export default function Variants() {
       <Button variant="primary">Approve invoice</Button>
       <Button>Send back</Button>
       <Button variant="ghost">Add a note</Button>
+      <Button variant="plain">Remind me later</Button>
       <Button variant="danger">Reject</Button>
     </Stack>
   );

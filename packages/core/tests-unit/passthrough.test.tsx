@@ -77,6 +77,11 @@ const CASES: Record<string, Case> = {
   Alert: (probe) => <core.Alert {...p(probe)}>Text</core.Alert>,
   Badge: (probe) => <core.Badge {...p(probe)}>New</core.Badge>,
   Button: (probe) => <core.Button {...p(probe)}>Save</core.Button>,
+  IconButton: (probe) => (
+    <core.IconButton aria-label="Close" {...p(probe)}>
+      ×
+    </core.IconButton>
+  ),
   ButtonGroup: (probe) => <core.ButtonGroup {...p(probe)} />,
   SplitButton: (probe) => (
     <core.SplitButton menu={<core.MenuItem>Other</core.MenuItem>} {...p(probe)}>

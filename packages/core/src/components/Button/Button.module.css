@@ -9,9 +9,12 @@
     justify-content: center;
     gap: var(--u-space-2);
     height: var(--u-control-height);
-    padding: 0 var(--u-space-4);
+    padding: 0 var(--u-space-3);
     border: none;
     border-radius: var(--u-radius-md);
+    /* The size of an icon in the button - the button decides it, not the icon
+       (CONTEXT.md, "Icon"): one beside a label and one alone are the same. */
+    --_icon: var(--u-icon-size);
     font-family: var(--u-font-sans);
     font-size: var(--u-text-sm);
     font-weight: var(--u-weight-medium);
@@ -44,10 +47,33 @@
   }
 
   .sm {
+    --_icon: var(--u-icon-size-sm);
     height: var(--u-control-height-sm);
-    padding: 0 var(--u-space-3);
+    padding: 0 var(--u-space-2);
     font-size: var(--u-text-xs);
     border-radius: var(--u-radius-sm);
+  }
+
+  /* IconButton: a square of the control height, the icon at its centre. It
+     does not give in a crowded row - a squeezed square is no longer one. An
+     icon font's glyph takes the icon size through the type size. */
+  .square {
+    flex: none;
+    width: var(--u-control-height);
+    padding: 0;
+  }
+
+  .square.sm {
+    width: var(--u-control-height-sm);
+  }
+
+  .square .label {
+    font-size: var(--_icon);
+  }
+
+  /* Loading, the spinner takes the icon's place rather than standing beside it. */
+  .square[aria-busy="true"] .label {
+    display: none;
   }
 
   /* ------------------------------------------------------------------
@@ -109,10 +135,33 @@
     background: var(--u-color-accent-subtle-pressed);
   }
 
+  /* Plain: ghost without the accent - the neutral button that closes, pages
+     and opens a row's menu. The text steps up to full colour under the hand. */
+  .plain {
+    background: transparent;
+    color: var(--u-color-text-secondary);
+  }
+  .plain:hover:not(:disabled) {
+    background: var(--u-color-surface-sunken);
+    color: var(--u-color-text);
+  }
+  .plain:active:not(:disabled) {
+    background: var(--u-color-surface-pressed);
+  }
+
   .label {
     display: inline-flex;
     align-items: center;
     gap: var(--u-space-2);
+  }
+
+  /* An icon among the children, and the spinner that stands in for it while
+     loading, take the one size the button gives them. */
+  .label > svg,
+  .spinner {
+    flex: none;
+    width: var(--_icon);
+    height: var(--_icon);
   }
 
   /* Under reduced motion the button does not give way. The colour still changes -

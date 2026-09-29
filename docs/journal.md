@@ -18,6 +18,32 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Sep. 2026 — Tighter buttons, and an icon button
+
+- **Buttons lose a third of their side room** and **`IconButton` joins
+  `Button`** (ADR-0039, `.scratch/icon-button/`; `@umriss-ui/core`, unreleased).
+  Grilled from "zu viel Platz nach links und rechts, und vielleicht fehlt ein
+  reiner IconButton": 12 px a side at `md`, 8 at `sm`; a square with a
+  required `aria-label` that is name and tooltip at once; the icon sized by the
+  button, beside a label as well as alone.
+- **"Icon" entered the glossary** as the wider term, a **Glyph** one kind of it:
+  an icon button carries Font Awesome's and lucide's drawings, which the glyph
+  entry had kept out by name.
+- **`plain`, a fifth variant**, came out of the inventory: every hand-drawn icon
+  button in the library - a dozen, at five sizes - was quiet and neutral, and
+  `ghost` is quiet in the accent. The Modal's close, the calendar's paging and
+  the table's row-actions trigger took `IconButton`; field parts, the Alert's
+  and Toast's closes, the Dock's tools and the SplitButton's trigger kept their
+  own geometry, each for a reason ADR-0039 names.
+- **The tooltip was fixed where every trigger passes through it**: it keeps its
+  child's ref, and so does the menu (the Dock had worked around losing it); it
+  no longer describes a trigger with the name it repeats (the Dock's tools were
+  announced twice); and it opens for keyboard focus only - after a click it came
+  back over what the click had started.
+- **The name is `aria-label`, not `label`**: the review found the first draft
+  against principle 6 of core's README, which ADR-0015 left standing. `Tag`
+  already requires its `aria-label` the same way.
+
 ## Sep. 2026 — Metrics side by side in a calculation
 
 - **A calculation carries several metrics** (ADR-0038,

@@ -5,14 +5,15 @@ import { usePortalTarget } from "../../lib/provider";
 import { portalTargetFor } from "../../lib/portalTarget";
 import { computePosition, motionOrigin, visibleViewport } from "../Popover/position";
 import { usePresence } from "../../lib/motion";
+import { mergeRefs } from "../../lib/mergeRefs";
+import { elementRef } from "../../lib/elementRef";
 import styles from "./Tooltip.module.css";
 
 export interface TooltipProps {
   /** Short help text; no interaction, no long content. */
   content: ReactNode;
   /** Exactly one element that triggers the tooltip (must accept refs). Its
-      own ref is replaced by the tooltip's: a trigger that needs its element
-      takes it from its events. */
+      own ref keeps its element: the tooltip holds the same one beside it. */
   children: ReactElement<Record<string, unknown>>;
   /** Delay in ms before the tooltip appears. */
   delay?: number;
@@ -92,15 +93,22 @@ export function Tooltip({ content, children, delay = 300 }: TooltipProps) {
   }, []);
 
   const childProps = children.props;
+  /* A tip that repeats the trigger's name is what the eye needs and the ear
+     has had: described by it, a screen reader said every icon button twice. */
+  const describes = open && content !== childProps["aria-label"];
 
   return (
     <>
+      {/* The child keeps its own ref beside the tooltip's. The rule takes a ref
+          handed on as one read during render; nothing here reads `.current`. */}
+      {/* eslint-disable-next-line react-hooks/refs */}
       {cloneElement(children, {
-        ref: targetRef,
+        // eslint-disable-next-line react-hooks/refs
+        ref: mergeRefs(targetRef, elementRef<HTMLElement>(children)),
         /* Added to the child's own description, not put in its place: a field's
            hint went silent for as long as the tooltip stood. */
         "aria-describedby":
-          [childProps["aria-describedby"] as string | undefined, open ? id : undefined]
+          [childProps["aria-describedby"] as string | undefined, describes ? id : undefined]
             .filter(Boolean)
             .join(" ") || undefined,
         onPointerEnter: (event: PointerEvent) => {
@@ -116,9 +124,11 @@ export function Tooltip({ content, children, delay = 300 }: TooltipProps) {
           (childProps.onPointerLeave as ((e: PointerEvent) => void) | undefined)?.(event);
           hide();
         },
+        /* Only a focus the keyboard gave: the one a click hands over follows
+           the press, and the press has just hidden the tip. */
         onFocus: (event: FocusEvent) => {
           (childProps.onFocus as ((e: FocusEvent) => void) | undefined)?.(event);
-          show();
+          if ((event.currentTarget as Element).matches(":focus-visible")) show();
         },
         onBlur: (event: FocusEvent) => {
           (childProps.onBlur as ((e: FocusEvent) => void) | undefined)?.(event);

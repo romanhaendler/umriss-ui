@@ -84,7 +84,7 @@ export const SplitButton = forwardRef<HTMLButtonElement, SplitButtonProps>(funct
             aria-label={menuLabel ?? wording.moreActions}
             className={styles.trigger}
           >
-            <svg viewBox="0 0 10 6" width="9" height="6" aria-hidden="true" className={styles.arrow}>
+            <svg viewBox="0 0 10 6" aria-hidden="true" className={styles.arrow}>
               <path
                 d="M1 1.2 5 4.8 9 1.2"
                 fill="none"

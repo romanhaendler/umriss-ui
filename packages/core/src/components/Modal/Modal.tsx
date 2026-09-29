@@ -6,6 +6,7 @@ import { mergeRefs } from "../../lib/mergeRefs";
 import styles from "./Modal.module.css";
 import { useWording } from "../../lib/language";
 import { CrossGlyph } from "../../lib/glyphs";
+import { IconButton } from "../Button";
 
 interface ModalContextValue {
   onClose: () => void;
@@ -189,14 +190,9 @@ export const ModalHeader = forwardRef<HTMLDivElement, ModalHeaderProps>(function
         {description && <p className={styles.description}>{description}</p>}
       </div>
       {!hideClose && (
-        <button
-          type="button"
-          className={styles.close}
-          aria-label={wording.close}
-          onClick={() => modal?.onClose()}
-        >
-          <CrossGlyph size={12} />
-        </button>
+        <IconButton size="sm" aria-label={wording.close} className={styles.close} onClick={() => modal?.onClose()}>
+          <CrossGlyph />
+        </IconButton>
       )}
     </div>
   );

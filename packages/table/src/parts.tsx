@@ -31,6 +31,7 @@ import {
   AngleGlyph,
   Button,
   Checkbox,
+  IconButton,
   Menu,
   MenuItem,
   Popover,
@@ -1563,9 +1564,9 @@ function RowActionsCell({
         <Menu
           align="end"
           trigger={
-            <Button size="sm" variant="ghost" aria-label={wording.rowActionsMenu(name)}>
+            <IconButton size="sm" variant="ghost" aria-label={wording.rowActionsMenu(name)}>
               ⋯
-            </Button>
+            </IconButton>
           }
         >
           {actions.map(({ key, spec }) => (

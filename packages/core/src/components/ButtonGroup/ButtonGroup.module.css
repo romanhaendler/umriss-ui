@@ -37,7 +37,7 @@
 
      It has to be the clip and not a different edge: the clip takes away the edge
      a button happens to have, without giving one to a button that has none -
-     `primary` and `ghost` carry no edge and must not gain one here. */
+     `primary`, `ghost` and `plain` carry no edge and must not gain one here. */
   .group > * {
     clip-path: inset(-1px 0);
   }
@@ -99,7 +99,11 @@
     padding-right: var(--u-space-2);
   }
 
-  .arrow {
+  /* The arrow keeps its own flat box: the button sets an icon square, and the
+     arrow is the trigger's mark rather than an icon. */
+  .split .arrow {
+    width: 9px;
+    height: 6px;
     transition: transform var(--u-transition-path);
   }
 

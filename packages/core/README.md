@@ -111,7 +111,8 @@ The table and the alarm list are not part of this package. They live in
 
 | Component | Purpose |
 | --- | --- |
-| `Button` | variants primary/secondary/ghost/danger, sizes, loading state |
+| `Button` | variants primary/secondary/ghost/plain/danger, sizes, loading state |
+| `IconButton` | a square button that shows only an icon; its required `aria-label` is the name and the tooltip |
 | `FormField` / `FormFieldBoundary` | label, help text, error; wires `id`/`aria-*` automatically through context. `FormFieldBoundary` resets the context inside panels so that their contents do not inherit the trigger's field id |
 | `Textarea` | multi-line input; grows with its content on request (`autoGrow`, `maxRows`), character counter (`showCount`) |
 | `RadioGroup` | one out of a few, each option with an optional explanatory line; one tab stop, arrow keys select |

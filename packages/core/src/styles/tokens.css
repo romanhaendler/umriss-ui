@@ -153,6 +153,10 @@
     /* The small control on a dense surface - a compact table's row draft and
        actions (`dense` in the shared own styles). */
     --u-control-height-xs: 18px;
+    /* The icon in a button, beside a label or alone (CONTEXT.md, "Icon"): the
+       button decides its size, one step per control height. */
+    --u-icon-size: 14px;
+    --u-icon-size-sm: 12px;
 
     /* ---- Dock (floating-dock) ----
 

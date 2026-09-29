@@ -52,5 +52,6 @@ half a later reader needs most. Exactly one is superseded today.
 | [0036](0036-a-grid-edits-on-the-first-click-and-saves-rows-on-purpose.md) | A grid edits on the first click, and saves rows on purpose | accepted | table |
 | [0037](0037-the-demos-are-addressed-by-path-and-prerendered.md) | The demos are addressed by path and prerendered, so that a search engine can read them | accepted | demo |
 | [0038](0038-a-calculation-can-carry-several-metrics.md) | A calculation can carry several metrics | accepted | calculation |
+| [0039](0039-an-icon-button-names-itself-once.md) | An icon button names itself once, and shows that name | accepted | components |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).

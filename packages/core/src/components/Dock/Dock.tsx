@@ -444,9 +444,9 @@ export const Dock = forwardRef<HTMLDivElement, DockProps>(function Dock(
   const [tabHolder, setTabHolder] = useState<string | null>(null);
   /* Searched through `data-tool` and a comparison, not through an assembled
      attribute selector: the `id` comes from the caller and may contain anything
-     a string may contain. And not through an own ref on the button: the
-     `Tooltip` clones its child and sets its ref in doing so - a second one
-     beside it would not survive that. */
+     a string may contain. And not through a ref per tool: the strip holds
+     the buttons already, and a ref per tool would be a map to keep in step
+     with the list. */
   const buttonFor = (id: string) =>
     Array.from(stripRef.current?.querySelectorAll<HTMLButtonElement>("[data-tool]") ?? [])
       .find((button) => button.dataset.tool === id);

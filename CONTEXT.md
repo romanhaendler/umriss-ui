@@ -103,8 +103,16 @@ while a colour role never means a verdict; that condition is the whole reason
 A character from the shared set: drawn with the stroke, without fill, in
 `currentColor`, hidden from assistive technology. Anything that depicts a state,
 is animated, or carries an accessible name is **not** a glyph — which is why the
-spinner, the filter funnel and the sparkline fall outside it.
-_Avoid_: icon, symbol
+spinner, the filter funnel and the sparkline fall outside it. A glyph is one
+kind of **Icon**; "icon" names the wider set, not a glyph in particular.
+_Avoid_: symbol
+
+**Icon**:
+A small picture a caller places in a control — from the shared set or from
+outside it (Font Awesome, lucide, their own). It carries no name of its own; the
+control it sits in does, and the control decides its size. Every glyph is an
+icon, not every icon a glyph.
+_Avoid_: symbol, pictogram, glyph (for one from outside the set)
 
 **Motion origin**:
 The point an overlay grows out of, derived from the side and alignment it

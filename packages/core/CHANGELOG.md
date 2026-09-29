@@ -29,6 +29,47 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## Unreleased
+
+### Added
+
+- **`IconButton`**, a button that shows only an icon: square at the control
+  heights (32px, 26px at `sm`), with a required `aria-label` that is its
+  accessible name and always shows as its tooltip. The icon is the children -
+  an SVG, a glyph of the set or an icon font's element - and the button sets
+  its size. Everything else is a `Button`'s: the sizes, `loading` (the spinner
+  takes the icon's place), `disabled`, and the variants, with `plain` as the
+  default. It anchors a `Menu` as its trigger. It takes no `aria-labelledby`
+  and no `title`, which would part the name from the tooltip. New type
+  `IconButtonProps`.
+- **`plain`**, a fifth variant of `Button` and `IconButton`: no ground, the
+  secondary text colour, the sunken surface and the full text colour under the
+  pointer. `ghost` stays quiet in the accent.
+- **`--u-icon-size`** (14px) and **`--u-icon-size-sm`** (12px), the size of
+  the icon in a button at `md` and `sm`.
+
+### Changed
+
+- **Buttons are tighter**: 12px of room a side at `md` (was 16px), 8px at `sm`
+  (was 12px). The heights stay.
+- **A `Button` sizes the SVG among its children**: a direct `svg` child of its
+  label stands at `--u-icon-size`, `--u-icon-size-sm` at `sm` - the size an
+  `IconButton` gives its icon. A `width` and `height` on that SVG no longer
+  apply. The loading spinner takes the same size.
+- **A `Tooltip` opens for keyboard focus only**, not for the focus a click
+  leaves behind: after a click the tip came back over what the click had
+  started, and a dialog opened by the pointer showed its close button's tip.
+- **A `Tooltip` no longer describes its trigger with the words that name it**:
+  a tip whose content equals the trigger's `aria-label` sets no
+  `aria-describedby`, so the dock's tools, among others, are announced once.
+- **`Tooltip` and `Menu` keep their trigger's ref** beside their own, instead
+  of replacing it.
+- **The Modal's close button and the calendar's month paging are
+  `IconButton`s**: 26px squares (they were 28px and 24px) with their name as a
+  tooltip.
+
+---
+
 ## 0.16.0 – A toast of its own, and room on a phone (Sep. 2026)
 
 ### Added

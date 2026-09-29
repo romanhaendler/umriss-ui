@@ -14,6 +14,7 @@ import {
   beforeDay,
 } from "./grid";
 import styles from "./DatePicker.module.css";
+import { IconButton } from "../Button";
 import { DEFAULT_WORDING, useFormats, useWording } from "../../lib/language";
 
 /* The weekday heads now stand in the wording. This constant remains as a
@@ -129,21 +130,21 @@ export function Calendar({
         {withoutPrevious ? (
           <span className={styles.pageSpacer} aria-hidden="true" />
         ) : (
-          <button type="button" className={styles.page} aria-label={wording.previousMonth} onClick={() => page(-1)}>
-            <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">
+          <IconButton size="sm" aria-label={wording.previousMonth} onClick={() => page(-1)}>
+            <svg viewBox="0 0 10 10" aria-hidden="true">
               <path d="M6.4 1.8 3.2 5l3.2 3.2" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-          </button>
+          </IconButton>
         )}
         <span className={styles.month}>{formats.month(view)}</span>
         {withoutNext ? (
           <span className={styles.pageSpacer} aria-hidden="true" />
         ) : (
-          <button type="button" className={styles.page} aria-label={wording.nextMonth} onClick={() => page(1)}>
-            <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true">
+          <IconButton size="sm" aria-label={wording.nextMonth} onClick={() => page(1)}>
+            <svg viewBox="0 0 10 10" aria-hidden="true">
               <path d="M3.6 1.8 6.8 5 3.6 8.2" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-          </button>
+          </IconButton>
         )}
       </div>
       <div className={styles.weekdays} aria-hidden="true">
