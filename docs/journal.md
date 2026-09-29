@@ -21,7 +21,7 @@ as it stood.
 ## Sep. 2026 — Metrics side by side in a calculation
 
 - **A calculation carries several metrics** (ADR-0038,
-  `.scratch/calculation-metrics/`; `@umriss-ui/calculation`, unreleased).
+  `.scratch/calculation-metrics/`; `@umriss-ui/calculation` 0.4.0).
   Headcount and full-time equivalents of the same teams, one derivation, a
   column each. Grilled from "Stückzahlen und Kosten nebeneinander" down to a
   staff report; decided on a rendered prototype of three variants (branch

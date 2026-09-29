@@ -1,6 +1,6 @@
 # Several metrics side by side: headcount and FTE in one calculation
 
-Status: ready-for-human
+Status: done
 Date:   2026-09-29
 Origin: grilling session on `@umriss-ui/calculation` 0.3.7. The term is in
 `CONTEXT.md`, "Calculations" (**Metric**), and the decision in ADR-0038.
@@ -151,8 +151,8 @@ reasons they lost are in ADR-0038.
 
 ### Delivery report (2026-09-29)
 
-Tickets 01, 02, 03 and 05 delivered; 04, the polish round, waits for the
-user's look at the rendered page - hence `ready-for-human`.
+All five tickets delivered; 04, the polish round, accepted by the user on the
+rendered page. Released as `@umriss-ui/calculation` 0.4.0.
 
 - **Model.** The reader is unchanged but for the checks; `perMetric` gives
   evaluation and presentation one view per metric, so the four operators,
