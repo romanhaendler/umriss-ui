@@ -4,7 +4,7 @@
    otherwise have remained unevidenced. */
 
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
-import { act } from "react";
+import { act, createRef } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { Tooltip } from "../src/components/Tooltip";
 import { UmrissProvider } from "../src/lib/provider";
@@ -46,7 +46,7 @@ describe("Tooltip", () => {
       </Tooltip>,
     );
     const target = screen.getByText("Target");
-    fireEvent.focus(target);
+    act(() => target.focus());
     show();
     const tooltip = screen.getByRole("tooltip");
     expect(target.getAttribute("aria-describedby")).toBe(tooltip.id);
@@ -62,12 +62,50 @@ describe("Tooltip", () => {
       </>,
     );
     const target = screen.getByText("Target");
-    fireEvent.focus(target);
+    act(() => target.focus());
     show();
     const tooltip = screen.getByRole("tooltip");
     expect(target.getAttribute("aria-describedby")).toBe(`own ${tooltip.id}`);
-    fireEvent.blur(target);
+    act(() => target.blur());
     expect(target.getAttribute("aria-describedby")).toBe("own");
+  });
+
+  /* A click focuses the button it lands on. The pointer has had the tip
+     already; the focus that follows the press opened it a second time, over
+     whatever the press had started - a dialog's close button under the hand
+     that opened the dialog. */
+  it("stays away from a focus the pointer handed over", () => {
+    render(
+      <Tooltip content="Hint">
+        <button>Target</button>
+      </Tooltip>,
+    );
+    fireEvent.focus(screen.getByText("Target"));
+    show();
+    expect(screen.queryByRole("tooltip")).toBeNull();
+  });
+
+  it("keeps its trigger's own ref", () => {
+    const ref = createRef<HTMLButtonElement>();
+    render(
+      <Tooltip content="Hint">
+        <button ref={ref}>Target</button>
+      </Tooltip>,
+    );
+    expect(ref.current).toBe(screen.getByText("Target"));
+  });
+
+  it("does not describe a trigger with the words that already name it", () => {
+    render(
+      <Tooltip content="Export">
+        <button aria-label="Export">⤓</button>
+      </Tooltip>,
+    );
+    const target = screen.getByRole("button", { name: "Export" });
+    act(() => target.focus());
+    show();
+    expect(screen.getByRole("tooltip").textContent).toBe("Export");
+    expect(target.getAttribute("aria-describedby")).toBeNull();
   });
 
   it("closes on Escape", () => {

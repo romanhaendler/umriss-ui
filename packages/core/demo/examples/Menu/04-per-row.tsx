@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Badge, Button, Menu, MenuItem, MenuSeparator, Stack, Text } from "../../../src";
+import { Badge, IconButton, Menu, MenuItem, MenuSeparator, Stack, Text } from "../../../src";
 
 export const title = "Act on a row";
 export const lead = "One menu per row keeps a list quiet; the trigger's name says which row it acts on, since every button reads the same.";
@@ -41,9 +41,9 @@ export default function PerRow() {
           <Menu
             align="end"
             trigger={
-              <Button size="sm" variant="ghost" aria-label={`Actions for ${incident.id}`}>
+              <IconButton size="sm" aria-label={`Actions for ${incident.id}`}>
                 ⋯
-              </Button>
+              </IconButton>
             }
           >
             <MenuItem disabled={incident.state !== "open"} onSelect={() => set(incident.id, "acknowledged")}>

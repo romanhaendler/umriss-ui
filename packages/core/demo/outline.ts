@@ -213,7 +213,7 @@ export const OUTLINE: readonly Rubric[] = [
         sentence: "Text a screen reader announces but the eye does not see (also called screen-reader-only or sr-only). Reach for it when a visible label is clear from its surroundings but not on its own, and for a skip link.",
         alternatives: [
           { when: "A hint every user should be able to see", use: "tooltip" },
-          { when: "A button that shows only an icon", use: "an `aria-label` on the button" },
+          { when: "A button that shows only an icon", use: "iconbutton" },
         ],
         keys: [{ key: "Tab", action: "Reaches a `focusable` one and shows it while it has focus." }],
         limits: ["It hides from the eye only; to hide something from everyone, do not render it."],
@@ -232,10 +232,11 @@ export const OUTLINE: readonly Rubric[] = [
         name: "Button",
         sentence: "Starts one action when pressed: save, send, deploy, delete. Its variant says how much weight the action carries beside its neighbours, and while the action runs it shows that it is busy and cannot be pressed twice.",
         about: [
-          "Use the primary variant once per surface, and danger only for what cannot be undone.",
+          "Use the primary variant once per surface, and danger only for what cannot be undone. `ghost` is quiet in the accent, `plain` quiet and neutral.",
           "A loading button locks itself and tells assistive technology it is busy; it needs no `disabled` beside it. A button is `type=\"button\"` unless you set another type, so it never sends a form by accident.",
         ],
         alternatives: [
+          { when: "A button that shows only an icon", use: "iconbutton" },
           { when: "Several buttons that act on the same thing", use: "buttongroup" },
           { when: "One main action with rarer variants", use: "buttongroup" },
           { when: "Going to another page rather than doing something", use: "typography" },
@@ -243,10 +244,36 @@ export const OUTLINE: readonly Rubric[] = [
         ],
         limits: [
           "The label stays on one line; keep it short rather than let it wrap.",
-          "No icon slot and no icon-only variant: an SVG goes among the children, and an icon-only button needs an `aria-label`.",
+          "No icon slot: an icon goes among the children, before the label, and the button sets its size.",
         ],
         types: ["ButtonProps"],
         exports: ["Button"],
+      },
+      {
+        id: "iconbutton",
+        name: "IconButton",
+        sentence: "A square button that shows only an icon (also called an icon-only button): refresh, export, close, the actions of a row. Reach for it where the icon is known well enough to stand alone; its name is required and shows as a tooltip.",
+        about: [
+          "Its `aria-label` is required, and it is the accessible name and the tooltip in one: a screen reader hears it once, and the eye reads it on hover or keyboard focus.",
+          "The icon is yours: an SVG, a glyph of the set, or an icon font's element. The button sets its size – 14 px, 12 px at `sm` – the size an SVG takes beside a label in a `Button` as well.",
+          "It is a `Button` underneath, with the same sizes, loading state and variants; the default is `plain`, quiet and neutral. As the trigger of a `Menu` it anchors the panel, and its tooltip gives way while the menu is open.",
+        ],
+        alternatives: [
+          { when: "The action is clearer said than drawn", use: "button" },
+          { when: "Icon buttons that act on the same thing", use: "buttongroup" },
+          { when: "A floating strip of tools over a canvas", use: "dock" },
+        ],
+        keys: [
+          { key: "Tab", action: "Reaches the button and shows its name." },
+          { key: "Enter / Space", action: "Presses it." },
+          { key: "Escape", action: "Hides the name." },
+        ],
+        limits: [
+          "The tooltip always shows the name; a hint that says more than the name is a `Tooltip` around a `Button`.",
+          "A touch screen shows no tooltip: choose icons whose meaning is common, or a `Button` with a label.",
+        ],
+        types: ["IconButtonProps"],
+        exports: ["IconButton"],
       },
       {
         id: "buttongroup",
@@ -686,10 +713,11 @@ export const OUTLINE: readonly Rubric[] = [
       {
         id: "tooltip",
         name: "Tooltip",
-        sentence: "A sentence of explanation that appears while the pointer rests on an element or the keyboard focus is on it (also called a hint). Reach for it to name an icon button or explain an abbreviation.",
+        sentence: "A sentence of explanation that appears while the pointer rests on an element or the keyboard focus is on it (also called a hint). Reach for it to explain an abbreviation or a control; an icon button names itself as an [IconButton](#/iconbutton).",
         about: [
           "It wraps exactly one element that can take focus and a ref; on text, give a `span` a `tabIndex` of 0.",
           "Anything that stands only in a tooltip is lost on a touch screen. Keep it to a sentence that repeats or explains what is already there.",
+          "It shows for keyboard focus, not for the focus a click leaves behind, and a tooltip that repeats its element's `aria-label` does not describe the element a second time.",
         ],
         alternatives: [
           { when: "The content has a link, a button or more than a sentence", use: "popover" },
@@ -736,7 +764,7 @@ export const OUTLINE: readonly Rubric[] = [
         sentence: "A list of actions that opens under a button (also called a dropdown menu). Reach for it when a place has more actions than room for buttons, or for the actions of each row in a list.",
         about: [
           "The entries are things that happen, not values that stay; choosing one runs it and closes the menu so the result is in view.",
-          "An icon-only trigger needs an `aria-label` that says what it acts on, such as “Actions for INC-1048”.",
+          "An [IconButton](#/iconbutton) makes the trigger for a row; its label says what it acts on, such as “Actions for INC-1048”.",
         ],
         alternatives: [
           { when: "The user chooses a value that stays", use: "select" },

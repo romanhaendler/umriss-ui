@@ -8,6 +8,8 @@ import type {
   ReactNode,
 } from "react";
 import { cx } from "../../lib/cx";
+import { elementRef } from "../../lib/elementRef";
+import { mergeRefs } from "../../lib/mergeRefs";
 import { Popover } from "../Popover";
 import styles from "./Menu.module.css";
 
@@ -63,7 +65,8 @@ export function handleMenuKeyDown(
 /* ------------------------------------------------------------------ */
 
 export interface MenuProps {
-  /** Trigger, e.g. a <Button>; must accept refs. */
+  /** Trigger, e.g. a <Button>; must accept refs. Its own ref keeps its
+      element: the menu holds the same one beside it. */
   trigger: ReactElement<Record<string, unknown>>;
   /** The entries – typically `MenuItem` and `MenuSeparator`. */
   children: ReactNode;
@@ -99,7 +102,10 @@ export function Menu({ trigger, children, align = "start" }: MenuProps) {
   return (
     <>
       {cloneElement(trigger, {
-        ref: triggerRef,
+        /* The trigger keeps its own ref beside the menu's. The rule takes a
+           ref handed on as one read during render; nothing reads `.current`. */
+        // eslint-disable-next-line react-hooks/refs
+        ref: mergeRefs(triggerRef, elementRef<HTMLElement>(trigger)),
         "aria-haspopup": "menu",
         "aria-expanded": open,
         "aria-controls": open ? panelId : undefined,

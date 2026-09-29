@@ -132,32 +132,11 @@
     color: var(--u-color-text-secondary);
   }
 
+  /* The close button is an IconButton; this only hangs it into the corner,
+     so that its cross stands on the title's first line, two pixels inside the
+     header's edge. */
   .close {
-    composes: ring from "#own-styles";
-    flex: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    margin: -4px -6px 0 0;
-    border: none;
-    background: none;
-    border-radius: var(--u-radius-sm);
-    color: var(--u-color-text-muted);
-    cursor: pointer;
-    transition:
-      background-color var(--u-transition),
-      color var(--u-transition);
-  }
-
-  .close:hover {
-    background: var(--u-color-surface-sunken);
-    color: var(--u-color-text);
-  }
-
-  .close:active {
-    background: var(--u-color-surface-pressed);
+    margin: -3px -5px 0 0;
   }
 
   /* Body & footer */

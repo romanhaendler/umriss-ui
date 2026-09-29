@@ -22,6 +22,15 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## Unreleased
+
+### Changed
+
+- **A row's actions menu opens from an `IconButton`**: a 26px square in place
+  of an oblong, with its name ("Actions for …") as a tooltip.
+
+---
+
 ## 0.7.3 – Room on a phone (Sep. 2026)
 
 Needs `@umriss-ui/core` 0.16; the peer range moves to `^0.16.0`.
