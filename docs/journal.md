@@ -21,7 +21,7 @@ as it stood.
 ## Sep. 2026 — Tighter buttons, and an icon button
 
 - **Buttons lose a third of their side room** and **`IconButton` joins
-  `Button`** (ADR-0039, `.scratch/icon-button/`; `@umriss-ui/core`, unreleased).
+  `Button`** (ADR-0039, `.scratch/icon-button/`; `@umriss-ui/core` 0.17.0).
   Grilled from "zu viel Platz nach links und rechts, und vielleicht fehlt ein
   reiner IconButton": 12 px a side at `md`, 8 at `sm`; a square with a
   required `aria-label` that is name and tooltip at once; the icon sized by the
