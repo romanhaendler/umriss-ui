@@ -29,6 +29,26 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## Unreleased
+
+### Added
+
+- **`--u-button-padding`** (10px) and **`--u-button-padding-sm`** (6px), the
+  room left and right of a button's label at `md` and `sm`.
+
+### Changed
+
+- **Buttons are tighter still**: 10px of room a side at `md` (12px in 0.17.0),
+  6px at `sm` (8px), chosen on a rendered comparison of three steps. The
+  heights, the type and the icon size stay; an `IconButton` stays square, and
+  a `SplitButton`'s menu trigger keeps 8px a side, so that it stays a 24px
+  target.
+- **The date pickers' "Today" and "Clear" and the MultiSelect's "All", "None"
+  and "Invert"** hang out by the new padding, so that their words still stand
+  on the edge they align with.
+
+---
+
 ## 0.17.0 – Tighter buttons, and a button for an icon (Sep. 2026)
 
 ### Added

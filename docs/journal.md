@@ -20,6 +20,19 @@ as it stood.
 
 ## Sep. 2026 — Tighter buttons, and an icon button
 
+- **Still too much room** was the user's verdict on 0.17.0's 12/8 px. A page
+  rendered from the published build set 12/8, 10/6 and 8/6 px under one
+  another in five scenes; 10/6 was chosen (`@umriss-ui/core`, unreleased). The
+  number became two tokens, because the date pickers' foot and the
+  MultiSelect's quick keys had repeated it as a hang - a change of the padding
+  would have left their words off their edge without a sound. The split
+  button's trigger keeps 8 px: at 6 it fell under a 24 px target.
+- **A dock test that measured the page instead of the dock**: "under reduced
+  motion … the position is right all the same" compared absolute page
+  coordinates of two separate visits, and failed in five of six runs on the
+  unchanged 0.17.0 as well - the second visit laid the page out a pixel apart
+  above the example. It now measures the dock against its area.
+
 - **Buttons lose a third of their side room** and **`IconButton` joins
   `Button`** (ADR-0039, `.scratch/icon-button/`; `@umriss-ui/core` 0.17.0).
   Grilled from "zu viel Platz nach links und rechts, und vielleicht fehlt ein

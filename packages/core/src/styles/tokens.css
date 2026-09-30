@@ -157,6 +157,12 @@
        button decides its size, one step per control height. */
     --u-icon-size: 14px;
     --u-icon-size-sm: 12px;
+    /* The room left and right of a button's label, one step per control
+       height. What stands beside a quiet button and has to align with its word
+       hangs out by exactly this much (the date pickers' foot, the MultiSelect's
+       quick keys) - so they read it here instead of repeating the number. */
+    --u-button-padding: 10px;
+    --u-button-padding-sm: 6px;
 
     /* ---- Dock (floating-dock) ----
 
