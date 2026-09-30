@@ -92,8 +92,9 @@
   /* SplitButton                                                         */
   /* ------------------------------------------------------------------ */
 
-  /* The trigger carries only the glyph and therefore needs no width for
-     text. */
+  /* The trigger carries only the glyph and needs no room for text - but it
+     keeps 8 px a side, more than a small button's own: at 6 px it would be
+     21 px wide, under the 24 px a pointer target needs (WCAG 2.5.8). */
   .split .trigger {
     padding-left: var(--u-space-2);
     padding-right: var(--u-space-2);

@@ -271,6 +271,7 @@ test("Under reduced motion the transition falls away, and the position is right 
   await page.keyboard.press("ArrowRight");
   await standstill(page);
   const withMotion = await box(strip(where));
+  const hostWithMotion = await box(where);
 
   await page.emulateMedia({ reducedMotion: "reduce" });
   await openExample(page, "dock", "room-and-no-room");
@@ -280,7 +281,16 @@ test("Under reduced motion the transition falls away, and the position is right 
   // Immediately afterwards: nothing is running, and the position is already the
   // final one.
   expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
-  expect(await box(strip(where2))).toEqual(withMotion);
+  /* Measured against its area, not the page: the second visit may lay the page
+     out a pixel apart above the example (a line of the lead set before or after
+     its font arrived), and that says nothing about where the dock rests. */
+  const host = await box(where2);
+  const dock = await box(strip(where2));
+  expect({ ...dock, x: dock.x - host.x, y: dock.y - host.y }).toEqual({
+    ...withMotion,
+    x: withMotion.x - hostWithMotion.x,
+    y: withMotion.y - hostWithMotion.y,
+  });
 });
 
 test("Nothing on the dock rotates", async ({ page }) => {

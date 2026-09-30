@@ -9,7 +9,7 @@
     justify-content: center;
     gap: var(--u-space-2);
     height: var(--u-control-height);
-    padding: 0 var(--u-space-3);
+    padding: 0 var(--u-button-padding);
     border: none;
     border-radius: var(--u-radius-md);
     /* The size of an icon in the button - the button decides it, not the icon
@@ -49,7 +49,7 @@
   .sm {
     --_icon: var(--u-icon-size-sm);
     height: var(--u-control-height-sm);
-    padding: 0 var(--u-space-2);
+    padding: 0 var(--u-button-padding-sm);
     font-size: var(--u-text-xs);
     border-radius: var(--u-radius-sm);
   }

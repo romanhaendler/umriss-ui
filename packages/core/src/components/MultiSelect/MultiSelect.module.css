@@ -283,11 +283,13 @@
     border-bottom: 1px solid var(--u-hairline);
   }
 
+  /* The quick keys are quiet buttons: they hang out by their inset, so that
+     "All" stands on the edge of the search field above it. */
   .qolButtons {
     display: flex;
     align-items: center;
     gap: 2px;
-    margin-left: calc(-1 * var(--u-space-2));
+    margin-left: calc(-1 * var(--u-button-padding-sm));
   }
 
   .count {

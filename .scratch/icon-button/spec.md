@@ -108,3 +108,9 @@ Delivered on 2026-09-29 (`@umriss-ui/core` 0.17.0, with table 0.7.4, schedule
 - Opening a tooltip for keyboard focus only (`:focus-visible`) was added during
   the work, not grilled: without it the Modal's close showed its tip whenever a
   pointer opened the dialog, and a menu's trigger whenever the menu closed.
+
+Follow-up on 2026-09-30: the user still found 12/8 px roomy. A rendered
+comparison of 12/8, 10/6 and 8/6 px (the published buttons, only the padding
+overridden) was put before them; they chose 10/6. It ships as the tokens
+`--u-button-padding` and `--u-button-padding-sm` in core 0.18.0, read by the
+two hangs that had repeated the number.

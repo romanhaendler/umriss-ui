@@ -199,15 +199,15 @@
 
   /* Optical: a ghost key at the panel's edge has no surface at rest, so its
      word is what the eye aligns - with the grid, the hairline and the TIME
-     label above. It hangs out by its inset on that side (--u-space-2 at `sm`),
-     and its hover surface keeps a sliver of the panel's padding instead of
-     touching the panel's edge. */
+     label above. It hangs out by its inset on that side, and its hover
+     surface keeps a sliver of the panel's padding instead of touching the
+     panel's edge. */
   .foot .hangStart {
-    margin-left: calc(-1 * var(--u-space-2));
+    margin-left: calc(-1 * var(--u-button-padding-sm));
   }
 
   .foot .hangEnd {
-    margin-right: calc(-1 * var(--u-space-2));
+    margin-right: calc(-1 * var(--u-button-padding-sm));
   }
 
   /* ------------------------------------------------------------------
