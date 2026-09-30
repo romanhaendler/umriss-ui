@@ -22,7 +22,7 @@ as it stood.
 
 - **Still too much room** was the user's verdict on 0.17.0's 12/8 px. A page
   rendered from the published build set 12/8, 10/6 and 8/6 px under one
-  another in five scenes; 10/6 was chosen (`@umriss-ui/core`, unreleased). The
+  another in five scenes; 10/6 was chosen (`@umriss-ui/core` 0.18.0). The
   number became two tokens, because the date pickers' foot and the
   MultiSelect's quick keys had repeated it as a hang - a change of the padding
   would have left their words off their edge without a sound. The split
