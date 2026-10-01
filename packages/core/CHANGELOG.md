@@ -29,6 +29,15 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.20.0 – A small multiselect and combobox (Oct. 2026)
+
+### Added
+
+- **`size` on `MultiSelect` and `Combobox`**, `"sm"` or `"md"` (the default) -
+  `Input`'s two sizes, so that a field of one's own stands level with the
+  search in a table toolbar. The chips keep their size. `Select` has the same
+  under `selectSize`, since `size` is the native element's own.
+
 ## 0.19.0 – A tree model that takes a match (Oct. 2026)
 
 ### Added

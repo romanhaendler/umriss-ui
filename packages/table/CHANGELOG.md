@@ -22,6 +22,51 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.9.0 – Row filters, and one size for the toolbar (Oct. 2026)
+
+Needs `@umriss-ui/core` 0.20, whose `MultiSelect` and `Combobox` take the
+toolbar's sizes; the peer range moves to `^0.20.0`.
+
+### Added
+
+- **Row filters: `rowFilter({ id, label, matches, describe? })`** - a condition
+  the application defines over the whole row, by a field no column shows or by
+  several at once ("overdue" = past its window and not delivered). Defined
+  once, outside the component, and named in **`rowFilters`** on `useTable`.
+  - **`t.setFilter(filter, condition)`** sets it from any control of the
+    application's own, **`t.conditionOf(filter)`** reads it back - both typed
+    by `matches`' second parameter; `null` lifts it.
+  - Its condition is a condition like a column's: "43 of 1,204" counts it,
+    "Reset" lifts it, a change goes back to page one, `t.view.conditions`
+    carries it under its id (and `initialView` restores it), manual mode
+    reports it to the server. Row filters and column filters combine with AND.
+  - With `describe` it stands in the toolbar as a chip "label: text" whose cross
+    lifts it; without, the application's control shows it. A table with row
+    filters puts up a toolbar of its own where none is placed.
+- **`Toolbar` takes `size`**, `"sm"` (the default) or `"md"`, and every part
+  the table puts into it follows: `Search`, `ColumnMenu`, `Export`, "Reset",
+  the bulk actions and "New row". `Search`, `ColumnMenu` and `Export` each take
+  their own **`size`** as well, which wins.
+- **Demo:** the page **Toolbar controls**, and on the Filter page a field no
+  column shows, rows from a request, and a question over several fields.
+
+### Changed
+
+- **In a table toolbar every part is as wide as its content**, unless it says
+  its own width. A `Select` or `Combobox` from `@umriss-ui/core` - 100 % wide
+  anywhere - took a line of its own there. The search keeps its width.
+
+### Fixed
+
+- **A pre-filter over rows written in the call no longer loops.** Rows that
+  are a new array on every render (`data ?? []`, `data.map(...)`) together with
+  `preFilter` ended in "Too many re-renders".
+- **The ratio and "Reset" no longer stand over the search in Safari.** The
+  right part of the toolbar left the flow while the ratio was empty through a
+  `:has(:empty)` rule Safari did not ask again when the ratio got its text.
+
+---
+
 ## 0.8.0 – Tree rows (Oct. 2026)
 
 Needs `@umriss-ui/core` 0.19: it filters through the tree model's new match

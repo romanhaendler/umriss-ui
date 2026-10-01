@@ -114,7 +114,8 @@ stylesheets by hand.
   application's own, and counts, resets and travels in the view like any
   other condition.
 * **Around the table**: toolbar, search, column menu, export, paging — each
-  usable inside the table toolbar or anywhere else on the page with `of`.
+  usable inside the table toolbar or anywhere else on the page with `of`, and
+  one `size` for the whole bar that a control of one's own can match.
 * **On a row**: a detail row that stays open across a change of filter, row
   actions that stay quiet until the row is meant, and a bulk action that always
   receives a list.
