@@ -29,6 +29,17 @@ export interface BoxPlotProps<T> {
       three IQR of the box's own quartiles as a ring -, read in its tooltip
       and table row, never hit on their own (ADR-0040). */
   outliers?: (d: T, index: number) => readonly number[] | null | undefined;
+  /** The mean, drawn as a small ×: beside the median it shows a skew. */
+  mean?: Accessor<T>;
+  /** The notch's lower bound - usually of a confidence interval of the
+      median. Both bounds or neither: one alone warns in DEV and is not
+      drawn. */
+  notchLower?: Accessor<T>;
+  /** The notch's upper bound; see `notchLower`. */
+  notchUpper?: Accessor<T>;
+  /** How many values stand behind the box; read in the tooltip and the
+      table, not drawn. */
+  count?: Accessor<T>;
   /** Binding to an x axis (R-4.12). */
   xAxisId?: string;
   /** Binding to a y axis (R-4.12). */
@@ -63,6 +74,10 @@ export function BoxPlot<T>(props: BoxPlotProps<T>): null {
     lowerWhisker,
     upperWhisker,
     outliers,
+    mean,
+    notchLower,
+    notchUpper,
+    count,
     xAxisId = "x",
     yAxisId = "y",
     data,
@@ -84,6 +99,10 @@ export function BoxPlot<T>(props: BoxPlotProps<T>): null {
         lowerWhisker,
         upperWhisker,
         outliers,
+        mean,
+        notchLower,
+        notchUpper,
+        count,
         xAxisId,
         yAxisId,
         data,
@@ -94,7 +113,7 @@ export function BoxPlot<T>(props: BoxPlotProps<T>): null {
         tone,
         boxWidth,
       }) as BoxSeriesConfig,
-    [median, lowerQuartile, upperQuartile, lowerWhisker, upperWhisker, outliers, xAxisId, yAxisId, data, name, hidden, format, color, tone, boxWidth],
+    [median, lowerQuartile, upperQuartile, lowerWhisker, upperWhisker, outliers, mean, notchLower, notchUpper, count, xAxisId, yAxisId, data, name, hidden, format, color, tone, boxWidth],
   );
 
   useSeries("BoxPlot", config);

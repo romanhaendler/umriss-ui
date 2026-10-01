@@ -475,6 +475,10 @@ function drawBars(ctx: CanvasRenderingContext2D, item: BarDrawItem, plot: Rect, 
 const BOX_FILL = 0.18;
 const BOX_MEDIAN = 2;
 const OUTLIER_RADIUS = 3;
+/** Half the mean's ×, in pixels. */
+const MEAN_SIZE = 3.5;
+/** How deep a notch cuts into each side, as a share of the box's width. */
+const NOTCH_DEPTH = 0.2;
 /** An outlier this many IQR of its own box beyond a quartile is far out: a
     ring, not a dot (ADR-0040). */
 const FAR_OUT = 3;
@@ -487,15 +491,17 @@ function drawBoxes(ctx: CanvasRenderingContext2D, item: BoxDrawItem, plot: Rect)
   const yb = item.yScale.b;
   const xs = item.x;
   const ys = item.y;
-  const { lowerQuartile, upperQuartile, lowerWhisker, upperWhisker, outliers, outlierOffsets } = item.box;
+  const { lowerQuartile, upperQuartile, lowerWhisker, upperWhisker, outliers, outlierOffsets, mean, notchLower, notchUpper } = item.box;
   const edgePx = item.offset * xm;
   const widthPx = item.width * xm;
   const capPx = widthPx / 4;
+  const notchPx = widthPx * NOTCH_DEPTH;
 
   const boxes = new Path2D();
   const medians = new Path2D();
   const whiskers = new Path2D();
   const dots = new Path2D();
+  const means = new Path2D();
   const rings = new Path2D();
   for (let i = 0; i < n; i++) {
     const median = ys[i] as number;
@@ -504,10 +510,38 @@ function drawBoxes(ctx: CanvasRenderingContext2D, item: BoxDrawItem, plot: Rect)
     const mid = left + widthPx / 2;
     const q1 = (lowerQuartile[i] as number) * ym + yb;
     const q3 = (upperQuartile[i] as number) * ym + yb;
-    if (!Number.isNaN(q1) && !Number.isNaN(q3)) boxes.rect(left, q3, widthPx, q1 - q3);
     const py = median * ym + yb;
-    medians.moveTo(left, py);
-    medians.lineTo(left + widthPx, py);
+    const nLo = notchLower === null ? Number.NaN : (notchLower[i] as number) * ym + yb;
+    const nHi = notchUpper === null ? Number.NaN : (notchUpper[i] as number) * ym + yb;
+    const notched = !Number.isNaN(nLo) && !Number.isNaN(nHi);
+    if (!Number.isNaN(q1) && !Number.isNaN(q3)) {
+      if (notched) {
+        // The waist: in from each side at the notch's bounds to the median,
+        // drawn as given even where a bound lies beyond its quartile.
+        const right = left + widthPx;
+        boxes.moveTo(left, q3);
+        boxes.lineTo(left, nHi);
+        boxes.lineTo(left + notchPx, py);
+        boxes.lineTo(left, nLo);
+        boxes.lineTo(left, q1);
+        boxes.lineTo(right, q1);
+        boxes.lineTo(right, nLo);
+        boxes.lineTo(right - notchPx, py);
+        boxes.lineTo(right, nHi);
+        boxes.lineTo(right, q3);
+        boxes.closePath();
+      } else boxes.rect(left, q3, widthPx, q1 - q3);
+    }
+    const inset = notched ? notchPx : 0;
+    medians.moveTo(left + inset, py);
+    medians.lineTo(left + widthPx - inset, py);
+    const m = mean === null ? Number.NaN : (mean[i] as number) * ym + yb;
+    if (!Number.isNaN(m)) {
+      means.moveTo(mid - MEAN_SIZE, m - MEAN_SIZE);
+      means.lineTo(mid + MEAN_SIZE, m + MEAN_SIZE);
+      means.moveTo(mid - MEAN_SIZE, m + MEAN_SIZE);
+      means.lineTo(mid + MEAN_SIZE, m - MEAN_SIZE);
+    }
     const lo = (lowerWhisker[i] as number) * ym + yb;
     const hi = (upperWhisker[i] as number) * ym + yb;
     // Each whisker from its quartile out, where both ends are given.
@@ -548,6 +582,9 @@ function drawBoxes(ctx: CanvasRenderingContext2D, item: BoxDrawItem, plot: Rect)
   ctx.stroke(boxes);
   ctx.stroke(whiskers);
   ctx.stroke(rings);
+  ctx.lineWidth = 1.5;
+  ctx.stroke(means);
+  ctx.lineWidth = 1;
   ctx.fillStyle = item.color;
   ctx.fill(dots);
   ctx.lineWidth = BOX_MEDIAN;

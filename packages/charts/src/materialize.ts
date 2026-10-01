@@ -6,7 +6,7 @@
    encoded as NaN (R-2.5). */
 
 import { lowerBound } from "./hit";
-import type { Accessor, BoxChannels, BoxNumbers, MaterializedSeries } from "./types";
+import type { Accessor, BoxChannels, BoxExtras, BoxNumbers, MaterializedSeries } from "./types";
 
 /** An accessor's value, or NaN for a gap. An infinity is a gap as well: it is no
     value a chart can place, and in the extent it would leave no finite range -
@@ -39,7 +39,8 @@ export interface ExtraChannels<T> {
   /** Value channel of the matrix: the third value per point. */
   value?: Accessor<T>;
   /** A box's further numbers (ADR-0011): one channel each. */
-  box?: BoxNumbers<Accessor<T>> & {
+  box?: BoxNumbers<Accessor<T>> &
+    Partial<BoxExtras<Accessor<T>>> & {
     /** Its outliers, a list per point (ADR-0040). */
     outliers?: (d: T, index: number) => readonly number[] | null | undefined;
   };
@@ -86,6 +87,10 @@ export function materializeSeries<T>(
           upperWhisker: new Float64Array(n),
           outliers: null,
           outlierOffsets: boxAccessors.outliers === undefined ? null : new Uint32Array(n + 1),
+          mean: boxAccessors.mean === undefined ? null : new Float64Array(n),
+          notchLower: boxAccessors.notchLower === undefined ? null : new Float64Array(n),
+          notchUpper: boxAccessors.notchUpper === undefined ? null : new Float64Array(n),
+          count: boxAccessors.count === undefined ? null : new Float64Array(n),
         };
   const outlierAccessor = boxAccessors?.outliers ?? null;
   const offsets = box?.outlierOffsets ?? null;
@@ -137,6 +142,17 @@ export function materializeSeries<T>(
         if (v < yMin) yMin = v;
         if (v > yMax) yMax = v;
       }
+      for (const key of BOX_EXTRA_KEYS) {
+        const accessor = boxAccessors[key];
+        const channel = (box as BoxChannels)[key];
+        if (accessor === undefined || channel === null) continue;
+        const v = Number.isNaN(yv) ? Number.NaN : valueOf(accessor(d, i));
+        channel[i] = v;
+        // A count is no place on the y axis.
+        if (key === "count") continue;
+        if (v < yMin) yMin = v;
+        if (v > yMax) yMax = v;
+      }
       if (outlierAccessor !== null) {
         const list = Number.isNaN(yv) ? null : outlierAccessor(d, i);
         for (const raw of list ?? []) {
@@ -163,6 +179,27 @@ export function materializeSeries<T>(
 /** A box's further numbers, top to bottom as drawn: the order of its tooltip
     rows, readout and table columns (box-plot B9). */
 export const BOX_KEYS = ["upperWhisker", "upperQuartile", "lowerQuartile", "lowerWhisker"] as const;
+
+/** A box's optional numbers, in the order its tooltip reads them. */
+export const BOX_EXTRA_KEYS = ["mean", "notchUpper", "notchLower", "count"] as const;
+
+/** Index of the first box whose numbers are not lower whisker ≤ lower
+    quartile ≤ median ≤ upper quartile ≤ upper whisker, otherwise -1 (DEV
+    check, box-plot 04). A gap is in order. */
+export function firstDisorderedBox(series: MaterializedSeries): number {
+  const box = series.box;
+  if (box === null) return -1;
+  for (let i = 0; i < series.length; i++) {
+    const median = series.y[i] as number;
+    if (Number.isNaN(median)) continue;
+    const lo = box.lowerWhisker[i] as number;
+    const q1 = box.lowerQuartile[i] as number;
+    const q3 = box.upperQuartile[i] as number;
+    const hi = box.upperWhisker[i] as number;
+    if (lo > q1 || q1 > median || median > q3 || q3 > hi) return i;
+  }
+  return -1;
+}
 
 /** Index of the first unsorted x value, otherwise -1 (DEV check, R-2.6). */
 export function firstUnsortedIndex(x: Float64Array, n: number): number {
@@ -195,6 +232,12 @@ export function visibleExtent(
     if (box !== null) {
       for (const key of BOX_KEYS) {
         const u = box[key][i] as number;
+        if (u < min) min = u;
+        if (u > max) max = u;
+      }
+      for (const channel of [box.mean, box.notchLower, box.notchUpper]) {
+        if (channel === null) continue;
+        const u = channel[i] as number;
         if (u < min) min = u;
         if (u > max) max = u;
       }

@@ -63,6 +63,8 @@ import {
   type Extent,
   type ExtraChannels,
   BOX_KEYS,
+  BOX_EXTRA_KEYS,
+  firstDisorderedBox,
 } from "./materialize";
 
 /** A box's rows top to bottom as drawn: its further numbers with the median
@@ -399,19 +401,36 @@ function materialEqual(previous: SeriesConfig, next: SeriesConfig): boolean {
 /** A box's further accessors (ADR-0011); undefined for every other kind. */
 function boxChannelsOf(config: SeriesConfig): ExtraChannels<unknown>["box"] {
   if (config.kind !== "box") return undefined;
-  const { lowerQuartile, upperQuartile, lowerWhisker, upperWhisker, outliers } = config;
-  return { lowerQuartile, upperQuartile, lowerWhisker, upperWhisker, outliers };
+  const { lowerQuartile, upperQuartile, lowerWhisker, upperWhisker, outliers, mean, count } = config;
+  // A notch takes both bounds or neither: half of one is not drawn wrong but
+  // not drawn, and validate() says so.
+  const notch = config.notchLower !== undefined && config.notchUpper !== undefined;
+  return {
+    lowerQuartile,
+    upperQuartile,
+    lowerWhisker,
+    upperWhisker,
+    outliers,
+    mean,
+    count,
+    notchLower: notch ? config.notchLower : undefined,
+    notchUpper: notch ? config.notchUpper : undefined,
+  };
 }
 
 function boxChannelsEqual(a: ExtraChannels<unknown>["box"], b: ExtraChannels<unknown>["box"]): boolean {
   if (a === undefined || b === undefined) return a === b;
-  return BOX_KEYS.every((key) => fnEqual(a[key], b[key])) && fnEqual(a.outliers, b.outliers);
+  return [...BOX_KEYS, ...BOX_EXTRA_KEYS, "outliers" as const].every((key) => fnEqual(a[key], b[key]));
 }
 
 /** A box's numbers at one point. */
 function boxAt(box: BoxChannels, i: number): NonNullable<TooltipPoint["box"]> {
   const out = {} as NonNullable<TooltipPoint["box"]>;
   for (const key of BOX_KEYS) out[key] = box[key][i] as number;
+  for (const key of BOX_EXTRA_KEYS) {
+    const channel = box[key];
+    if (channel !== null) out[key] = channel[i] as number;
+  }
   const { outliers, outlierOffsets } = box;
   if (outliers !== null && outlierOffsets !== null) {
     out.outliers = [...outliers.subarray(outlierOffsets[i], outlierOffsets[i + 1])];
@@ -1146,6 +1165,15 @@ export class ChartScene {
         );
       }
     }
+    // A notch needs both bounds; one alone is not drawn (box-plot 04).
+    for (const { config } of this.series.values()) {
+      if (config.kind !== "box" || (config.notchLower === undefined) === (config.notchUpper === undefined)) continue;
+      const name = config.name ?? "?";
+      warnOnce(
+        `box-notch-${name}`,
+        `BoxPlot "${name}" gives only one of notchLower and notchUpper. A notch needs both bounds; none is drawn.`,
+      );
+    }
     let gridAxes = 0;
     for (const axis of this.axesInOrder()) if (axis.config.grid === true) gridAxes++;
     if (gridAxes > 1) {
@@ -1257,6 +1285,16 @@ export class ChartScene {
       // Once per materialisation, which is once per change of data - for every
       // series whose hit is a binary search. A matrix runs row-major and hits
       // linearly: its x values are unsorted by right.
+      if (DEV && config.kind === "box") {
+        const index = firstDisorderedBox(material.series);
+        if (index >= 0) {
+          const name = config.name ?? "?";
+          warnOnce(
+            `box-order-${name}`,
+            `BoxPlot "${name}": the numbers at index ${index} are out of order - expected lowerWhisker ≤ lowerQuartile ≤ median ≤ upperQuartile ≤ upperWhisker. It is drawn as given.`,
+          );
+        }
+      }
       if (DEV && config.kind !== "matrix") {
         const index = firstUnsortedIndex(material.series.x, material.series.length);
         if (index >= 0) {
@@ -2730,10 +2768,7 @@ export class ChartScene {
         ...entries.flatMap((e) => {
           const name = this.nameFor(e, all.indexOf(e));
           if (e.config.kind !== "box") return [name];
-          const columns = BOX_ROWS.map((key) => `${name} – ${this.wording[key]}`);
-          // The outliers' column only where the series has them (B9).
-          if (e.materialized?.box?.outliers != null) columns.push(`${name} – ${this.wording.outliers}`);
-          return columns;
+          return this.boxParts(e, null).map((p) => `${name} – ${p.label}`);
         }),
       ],
       rows: rows.x.map((x, r) => [
@@ -2747,20 +2782,16 @@ export class ChartScene {
     };
   }
 
-  /** A box's five cells, top to bottom; empty where it has no box. The
+  /** A box's cells, top to bottom; empty where it has no box. The
       course may be thinned: its point is found in the channels by its x.
       ponytail: two boxes at one x read the first's numbers when thinned;
       carry the index through downsample() should that ever matter. */
   private boxCells(entry: SeriesEntry, course: Course, i: number): string[] {
     const mat = entry.materialized as MaterializedSeries;
     const median = i < 0 ? Number.NaN : (course.y[i] as number);
-    const columns = BOX_ROWS.length + (mat.box?.outliers != null ? 1 : 0);
-    if (Number.isNaN(median) || mat.box === null) return Array<string>(columns).fill("");
     const at = lowerBound(mat.x, mat.length, course.x[i] as number);
-    const box = boxAt(mat.box, at);
-    const cells = BOX_ROWS.map((key) => this.formatY(entry, key === "median" ? median : box[key]));
-    if (box.outliers !== undefined) cells.push(box.outliers.length > 0 ? this.outlierText(entry, box.outliers) : "");
-    return cells;
+    const v = Number.isNaN(median) || mat.box === null ? null : { ...boxAt(mat.box, at), median };
+    return this.boxParts(entry, v).map((p) => p.value);
   }
 
   /** One cell: empty where the series has no reading there or a gap; a
@@ -3025,17 +3056,37 @@ export class ChartScene {
     const label = k.segment?.label;
     const value = label !== undefined && label !== "" ? label : this.formatY(k.entry, k.value ?? k.yValue);
     const x = config.xAxisId === headerXAxisId ? "" : this.xLabel(config.xAxisId, k.xValue);
-    const box = k.box === undefined ? null : this.boxParts(k.entry, { ...k.box, median: k.yValue });
+    // A reading the box does not have is no row.
+    const box = k.box === undefined ? null : this.boxParts(k.entry, { ...k.box, median: k.yValue }).filter((p) => p.value !== "");
     return { value, x, chip: this.theme?.forced === true ? this.tooltipChip(k, this.theme) : null, box };
   }
 
-  /** A box's numbers top to bottom as drawn, named and formatted (B9). */
+  /** A box's readings top to bottom as drawn (B9): the five, then mean,
+      notch, n and outliers - each only where the series has it. One list for
+      the tooltip's rows and the table's columns; without numbers (a table
+      row with no box) every value is empty, and so is one not given. */
   private boxParts(
     entry: SeriesEntry,
-    v: NonNullable<TooltipPoint["box"]> & { median: number },
+    v: (NonNullable<TooltipPoint["box"]> & { median: number }) | null,
   ): { label: string; value: string }[] {
-    const parts = BOX_ROWS.map((key) => ({ label: this.wording[key], value: this.formatY(entry, v[key]) }));
-    if (v.outliers !== undefined && v.outliers.length > 0) parts.push({ label: this.wording.outliers, value: this.outlierText(entry, v.outliers) });
+    const w = this.wording;
+    const channels = entry.materialized?.box ?? null;
+    const y = (n: number | undefined) => (n === undefined || !Number.isFinite(n) ? "" : this.formatY(entry, n));
+    const parts = BOX_ROWS.map((key) => ({ label: w[key], value: y(v?.[key]) }));
+    if (channels?.mean != null) parts.push({ label: w.mean, value: y(v?.mean) });
+    if (channels?.notchLower != null) {
+      const lower = y(v?.notchLower);
+      const upper = y(v?.notchUpper);
+      parts.push({ label: w.notch, value: lower === "" || upper === "" ? "" : `${lower} – ${upper}` });
+    }
+    if (channels?.count != null) {
+      const n = v?.count;
+      parts.push({ label: w.count, value: n === undefined || !Number.isFinite(n) ? "" : formatValue(n) });
+    }
+    if (channels?.outliers != null) {
+      const list = v?.outliers ?? [];
+      parts.push({ label: w.outliers, value: list.length > 0 ? this.outlierText(entry, list) : "" });
+    }
     return parts;
   }
 

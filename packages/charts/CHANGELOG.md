@@ -50,7 +50,12 @@ interface was still expected to move before `0.3.0`.
   (ADR-0040): drawn with their box in its colour, one beyond three IQR as a
   ring, read in its tooltip and table row as a count and the first five
   values. They pull the y axis and hide with their box.
-- **`ChartsWording`** gains `outliers` and `outlierList`, and `upperWhisker`, `upperQuartile`, `median`,
+- **`BoxPlot mean`, `notchLower` + `notchUpper`, `count`** - a mean drawn as
+  a small ×, a notch as a waist in the box, and n; each read in the tooltip
+  and the table only where given. One notch bound alone, and numbers out of
+  order, warn once in DEV.
+- **`ChartsWording`** gains `mean`, `notch`, `count`, `outliers` and
+  `outlierList`, and `upperWhisker`, `upperQuartile`, `median`,
   `lowerQuartile` and `lowerWhisker`; German in `wording/de`.
 - **`MaterializedSeries.box`** holds a box's further numbers; null for every
   other kind. **`TooltipPoint.box`** carries them to a custom `render`.

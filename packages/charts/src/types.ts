@@ -93,6 +93,12 @@ export interface BoxSeriesConfig<T = unknown> extends SeriesBase<T> {
   upperWhisker: Accessor<T>;
   /** The values beyond the whiskers, per box (ADR-0040). */
   outliers?: (d: T, index: number) => readonly number[] | null | undefined;
+  mean?: Accessor<T>;
+  /** Both bounds or neither (CONTEXT.md: Notch). */
+  notchLower?: Accessor<T>;
+  notchUpper?: Accessor<T>;
+  /** How many values stand behind the box; no y value. */
+  count?: Accessor<T>;
   /** Width as a fraction of the step; boxes and bars on one x axis share it. */
   boxWidth: number;
 }
@@ -239,6 +245,19 @@ export interface BoxChannels extends BoxNumbers<Float64Array> {
       from outlierOffsets[i] to outlierOffsets[i + 1]. null without
       `outliers`. */
   outlierOffsets: Uint32Array | null;
+  /** The optional numbers, each null where not given. */
+  mean: Float64Array | null;
+  notchLower: Float64Array | null;
+  notchUpper: Float64Array | null;
+  count: Float64Array | null;
+}
+
+/** The optional numbers of a box (box-plot 04), by name. */
+export interface BoxExtras<V = number> {
+  mean: V;
+  notchLower: V;
+  notchUpper: V;
+  count: V;
 }
 
 /* The Scale interface is fixed (R-2.14); V0 implements only LinearScale. */
@@ -334,10 +353,11 @@ export interface TooltipPoint<T = unknown> {
   segment?: { from: number; to: number; label: string };
   /** Only for a box: its further numbers; yValue is its median. Fields of
       their own for the reason `value` has one (ADR-0011). */
-  box?: BoxNumbers & {
-    /** As the caller gave them; only where the series has `outliers`. */
-    outliers?: readonly number[];
-  };
+  box?: BoxNumbers &
+    Partial<BoxExtras> & {
+      /** As the caller gave them; only where the series has `outliers`. */
+      outliers?: readonly number[];
+    };
 }
 
 export interface TooltipHit<T = unknown> {

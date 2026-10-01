@@ -190,6 +190,9 @@ Screenshot pages carry their name in brackets.
 | `outliers`: a list per box in two named channels - values flat, offsets per box -, null without it and for every other kind | ADR-0040 | Unit (materialize) |
 | Outliers drawn in the box's colour on its centre line, filled; beyond three IQR of the box's own quartiles a ring; in the extent, hidden with their box, never a hit of their own | ADR-0040, B12 | Unit (materialize, jsdom boxPlot), Screenshot (`outliers`) |
 | Tooltip and table: a count and the values top to bottom, cut after five; a row and a column only where given | box-plot B9 | Unit (jsdom boxPlot) |
+| `mean` a small ×, `notchLower` + `notchUpper` a waist in the outline, `count` read and not drawn; mean and notch in the extent | box-plot B8, B12 | Unit (materialize), Screenshot (`mean-and-notches`) |
+| Mean, notch and n: a tooltip row and a table column each, only where given, in both wordings | box-plot B9 | Unit (jsdom boxPlot) |
+| One notch bound without the other: DEV warning once, no notch drawn; numbers out of order: DEV warning once, drawn as given | box-plot 04 | Unit (jsdom boxPlot) |
 | Colours from the theme, light and dark; under forced colours the text colour | Q11, C4 | Screenshot (`minimal`, `over-time`), Manual (forced colours emulated) |
 
 ## `Scatter`
