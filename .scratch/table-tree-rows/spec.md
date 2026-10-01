@@ -147,9 +147,14 @@ const t = useTable(units, {
 
 ### The fold and the row header
 
-- The **Row header** column carries the tree: indent per level, then the fold,
-  then the cell. Without a `rowHeader` column the first visible column carries
-  it, with a development warning.
+- The **first visible column** carries the tree: indent per level, then the
+  fold, then the cell - wherever the **Row header** stands. (First written as
+  "the row header carries it"; seen rendered with a code column before the
+  name, the indent began mid-row and nobody could tell what belonged where.
+  The structure reads down the left edge, as a grouping's span stands first.)
+- A row whose `RowDetail` comes to nothing (`null`, `undefined`, `false`) has
+  no expander and no detail line - a branch whose records hang only from its
+  leaves showed an empty grey line. This holds for flat tables as well.
 - The indent follows `TreeView`: a component-local `--tree-indent` of
   `var(--u-space-4)` times the level. No new public token - there is no
   `--u-table-*` token today, and the tree view's indent is not one either.

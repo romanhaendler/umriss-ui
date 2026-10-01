@@ -236,7 +236,7 @@ export const OUTLINE: readonly Rubric[] = [
         name: "Tree rows",
         sentence: "Rows that hold rows: a hierarchy of any number of levels whose every level carries the same figures (also called tree data). Reach for it to drill down an organisation, regions and places or cost centres - levels the application holds, uneven as they are.",
         about: [
-          "`childRows` names the children of a row; the rows passed in are the roots. Every row with children gets a fold in its row header, and the next level stands beneath it, indented.",
+          "`childRows` names the children of a row; the rows passed in are the roots. Every row with children gets a fold in the first column, and the next level stands beneath it, indented.",
           "The figures of a row are the application's: the table sums nothing for a branch. The footer sums the top level only, since a parent already holds its children.",
           "Every level sorts on its own, and a child never leaves its parent. A search or a filter shows a match with the rows above it, muted, and leaves the open branches as they were.",
           "The export writes every row of the filtered tree, open or not, with its level first.",
