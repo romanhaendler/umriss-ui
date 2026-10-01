@@ -15,6 +15,12 @@ moves from here under the rule above.
 
 ---
 
+## 0.3.12 – Core 0.20.0 (Oct. 2026)
+
+Needs `@umriss-ui/core` 0.20; the peer range moves to `^0.20.0`. Nothing else changes for a caller.
+
+---
+
 ## 0.3.11 – Charts 0.9.0 (Oct. 2026)
 
 Needs `@umriss-ui/charts` 0.9; the peer range moves to `^0.9.0`. Nothing else changes for a caller.

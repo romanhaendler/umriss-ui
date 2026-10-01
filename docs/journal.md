@@ -18,6 +18,27 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Oct. 2026 — Row filters, and one size for the toolbar
+
+- **Row filters** (`.scratch/table-filters/issues/08-row-filters.md`;
+  `@umriss-ui/table` 0.9.0). It began as a bug: a multiselect in the toolbar
+  driving `preFilter` looped, since rows written in the call reset the
+  pre-filter's memo on every render. The fix compares only what the
+  pre-filter admits. The question behind it was the real one - a filter the
+  user lifts had to be a column's. Two drafts fell on the user's word: a hidden
+  column ("only by hiding is not good enough") and a toolbar part per column
+  ("I want to define the filter freely"). What stood: `rowFilter`, defined
+  once, the object as the key, any condition, the application's own control.
+- **One size for the toolbar** (`09-toolbar-sizes.md`; `@umriss-ui/core`
+  0.20.0). A multiselect of one's own stood taller than the search beside it
+  on the rendered page; `Toolbar` now says `sm` or `md` once, and `MultiSelect`
+  and `Combobox` took `Input`'s two sizes. The page **Toolbar controls** was
+  the user's request.
+- **A `:has(:empty)` rule that only Safari kept stale** put the ratio and
+  "Reset" over the search. Playwright's WebKit did not reproduce it; the
+  user's Safari 26.6 did. The toolbar now says itself when its right part is
+  idle - the second `:has()` in the table that a browser did not redraw.
+
 ## Oct. 2026 — A box plot
 
 - **A box plot** (`.scratch/box-plot/`, ADR-0040; `@umriss-ui/charts`
