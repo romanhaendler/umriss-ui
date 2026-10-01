@@ -23,6 +23,8 @@ import { cx } from "./cx";
 import { useConnection } from "./context";
 import { warnOnce } from "./dev";
 import { TableToolbar } from "./toolbar";
+import { useToolbarSize } from "./toolbarSize";
+import type { ToolbarSize } from "./toolbarSize";
 import { GroupingChoice, TreeChoice } from "./groupingChoice";
 import type { PartKind, Registry } from "./registry";
 import { orderColumns } from "./model/tableModel";
@@ -55,6 +57,10 @@ export interface ToolbarProps {
   children?: ReactNode;
   /** Classes on the table toolbar. */
   className?: string;
+  /** The size of every control the table puts into it - search, column menu,
+      export, "reset", the bulk actions -: `sm` (the default) or `md`. A
+      control of one's own takes the same size by its own prop. */
+  size?: ToolbarSize;
   /** The table, when the table toolbar does not stand inside it. If it then
       stands behind the table in the tree, it registers only after the first
       frame – until then a table with a search or a column filter shows its own
@@ -67,14 +73,14 @@ export interface ToolbarProps {
     rows and "reset" as long as something restricts, and the count of the
     selection with the bulk actions. A table with a search or a column filter
     has one, even where none stands; where one stands, there is no second. */
-export function Toolbar({ children, className, of }: ToolbarProps) {
+export function Toolbar({ children, className, size = "sm", of }: ToolbarProps) {
   const connection = useConnection(of);
   // A toolbar that has been put there registers, so that the table puts up none of its own.
   useRegistration(connection?.registry, "toolbar");
   const registry = connection?.registry;
 
   return (
-    <TableToolbar registry={registry ?? null} className={className}>
+    <TableToolbar registry={registry ?? null} className={className} size={size}>
       {children}
     </TableToolbar>
   );
@@ -89,12 +95,15 @@ export interface SearchProps {
   "aria-label"?: string;
   /** Classes on the field. */
   className?: string;
+  /** `sm` or `md`; without it the size of the toolbar it stands in, `sm` outside one. */
+  size?: ToolbarSize;
   /** The table, when the part does not stand inside it: the return value of `useTable`. */
   of?: TableRef;
 }
 
-export function Search({ placeholder, "aria-label": name, className, of }: SearchProps) {
+export function Search({ placeholder, "aria-label": name, className, size: own, of }: SearchProps) {
   const connection = useConnection(of);
+  const size = useToolbarSize(own);
   const wording = useWording();
   /* With a search the table puts up a table toolbar when none stands - the
      ratio of the filtered set needs a place. */
@@ -103,7 +112,7 @@ export function Search({ placeholder, "aria-label": name, className, of }: Searc
   const { snapshot } = connection;
   return (
     <Input
-      size="sm"
+      size={size}
       type="search"
       className={cx(styles.search, className)}
       value={snapshot.search}
@@ -119,6 +128,8 @@ export function Search({ placeholder, "aria-label": name, className, of }: Searc
 /* ------------------------------------------------------------- ColumnMenu */
 
 export interface ColumnMenuProps {
+  /** `sm` or `md`; without it the size of the toolbar it stands in, `sm` outside one. */
+  size?: ToolbarSize;
   /** The table, when the part does not stand inside it: the return value of `useTable`. */
   of?: TableRef;
 }
@@ -126,8 +137,9 @@ export interface ColumnMenuProps {
 /** Show and hide columns and arrange them. Every control is a real control -
     a box or a button -, so it is reachable without a pointer; after a move the
     focus stays on the button that was pressed. */
-export function ColumnMenu({ of }: ColumnMenuProps) {
+export function ColumnMenu({ size: own, of }: ColumnMenuProps) {
   const connection = useConnection(of);
+  const size = useToolbarSize(own);
   const wording = useWording();
   const [open, setOpen] = useState(false);
   const button = useRef<HTMLButtonElement>(null);
@@ -209,7 +221,7 @@ export function ColumnMenu({ of }: ColumnMenuProps) {
     <>
       <Button
         ref={button}
-        size="sm"
+        size={size}
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-controls={open ? panelId : undefined}
@@ -289,6 +301,8 @@ export interface ExportProps {
   filename?: string;
   /** Gets the text instead of triggering a file. */
   onExport?: (text: string) => void;
+  /** `sm` or `md`; without it the size of the toolbar it stands in, `sm` outside one. */
+  size?: ToolbarSize;
   /** The table, when the part does not stand inside it: the return value of `useTable`. */
   of?: TableRef;
 }
@@ -296,8 +310,9 @@ export interface ExportProps {
 /** Writes the filtered set in the visible columns and their order – with the
     values, not with their presentation. In manual mode the table holds one
     page of the server's, so it writes that page, and its button says so. */
-export function Export({ filename, onExport, of }: ExportProps) {
+export function Export({ filename, onExport, size: own, of }: ExportProps) {
   const connection = useConnection(of);
+  const size = useToolbarSize(own);
   const wording = useWording();
   if (!connection) return null;
   const { snapshot } = connection;
@@ -319,7 +334,7 @@ export function Export({ filename, onExport, of }: ExportProps) {
   };
 
   return (
-    <Button size="sm" onClick={exportCsv}>
+    <Button size={size} onClick={exportCsv}>
       {snapshot.manual ? wording.exportPageLabel : wording.exportLabel}
     </Button>
   );

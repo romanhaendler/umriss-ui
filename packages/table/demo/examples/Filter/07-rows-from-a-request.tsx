@@ -59,6 +59,7 @@ export default function RowsFromARequest() {
           aria-label="Status"
           placeholder="Every status"
           options={STATUSES}
+          size="sm"
           style={{ width: 240 }}
           value={t.conditionOf(statuses) ?? []}
           onChange={(next) => t.setFilter(statuses, next.length > 0 ? next : null)}

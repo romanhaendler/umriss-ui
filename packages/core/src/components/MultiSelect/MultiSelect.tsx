@@ -39,6 +39,9 @@ export interface MultiSelectProps<T extends string = string>
   searchPlaceholder?: string;
   /** Text when the search finds nothing. */
   emptyText?: string;
+  /** `sm` for a table toolbar and dense forms, `md` otherwise - the heights of
+      `Input`'s two sizes. */
+  size?: "sm" | "md";
   /** Locks field and panel. */
   disabled?: boolean;
   /** Marks the field as invalid. `FormField` sets it itself as soon as it
@@ -69,6 +72,7 @@ export const MultiSelect = forwardRef(function MultiSelect<T extends string = st
     placeholder,
     searchPlaceholder,
     emptyText,
+    size = "md",
     disabled = false,
     invalid,
     className,
@@ -323,7 +327,7 @@ export const MultiSelect = forwardRef(function MultiSelect<T extends string = st
           the field's own and can prevent them (P3). */}
       <div
         ref={mergeRefs(fieldRef, ref)}
-        className={cx(styles.field, isInvalid && styles.invalid, disabled && styles.fieldDisabled, className)}
+        className={cx(styles.field, size === "sm" && styles.sm, isInvalid && styles.invalid, disabled && styles.fieldDisabled, className)}
         {...rest}
         onClick={(event) => {
           onClick?.(event);

@@ -19,6 +19,8 @@ import { resetSearchAndFilters } from "./export";
 import { cx } from "./cx";
 import { Conditions } from "./filter";
 import { GroupingTag } from "./groupingChoice";
+import { ToolbarSizeContext, useToolbarSize } from "./toolbarSize";
+import type { ToolbarSize } from "./toolbarSize";
 import type { Registry } from "./registry";
 import styles from "./Table.module.css";
 
@@ -26,8 +28,9 @@ import styles from "./Table.module.css";
     with `onRowAdd` - in the toolbar, or beneath the table without one. */
 export function NewRowButton({ registry }: { registry: Registry }) {
   const wording = useWording();
+  const size = useToolbarSize();
   return (
-    <Button size="sm" variant="secondary" onClick={() => registry.addRow?.()}>
+    <Button size={size} variant="secondary" onClick={() => registry.addRow?.()}>
       {wording.newRow}
     </Button>
   );
@@ -38,6 +41,7 @@ export function TableToolbar({
   className,
   children,
   own = false,
+  size = "sm",
 }: {
   registry: Registry | null;
   className?: string;
@@ -47,6 +51,8 @@ export function TableToolbar({
       toolbar somebody put there - otherwise a control nobody provided for
       would appear with the first tick. */
   own?: boolean;
+  /** The size of the controls in it (toolbarSize.ts). */
+  size?: ToolbarSize;
 }) {
   const wording = useWording();
   const formats = useFormats();
@@ -88,7 +94,7 @@ export function TableToolbar({
               : wording.filteredOfTotal(formats.count(snapshot.filtered.length), formats.count(hook.companion.total ?? hook.admitted.length))}
         </span>
         {restricted && (
-          <Button size="sm" variant="ghost" onClick={() => resetSearchAndFilters(snapshot)}>
+          <Button size={size} variant="ghost" onClick={() => resetSearchAndFilters(snapshot)}>
             {wording.resetAll}
           </Button>
         )}
@@ -98,7 +104,7 @@ export function TableToolbar({
             {bulkActions.map(({ key, spec }) => (
               <Button
                 key={key}
-                size="sm"
+                size={size}
                 variant={spec.tone === "danger" ? "danger" : "secondary"}
                 onClick={() => (spec.onSelect as (rows: readonly unknown[]) => void)(selected)}
               >
@@ -113,12 +119,14 @@ export function TableToolbar({
   }
 
   return (
-    <div className={cx(styles.toolbar, className)}>
-      <div className={styles.toolbarGroup}>
-        {children}
-        {conditions}
+    <ToolbarSizeContext.Provider value={size}>
+      <div className={cx(styles.toolbar, size === "md" && styles.toolbarMd, className)}>
+        <div className={styles.toolbarGroup}>
+          {children}
+          {conditions}
+        </div>
+        {right}
       </div>
-      {right}
-    </div>
+    </ToolbarSizeContext.Provider>
   );
 }

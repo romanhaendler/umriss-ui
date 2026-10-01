@@ -23,6 +23,18 @@
     overflow: hidden;
   }
 
+  /* The small size: `Input`'s, so that the two stand level in a toolbar. The
+     chips are 20px and keep their size; the texts take the small one. */
+  .sm {
+    height: var(--u-control-height-sm);
+    border-radius: var(--u-radius-sm);
+  }
+
+  .sm .placeholder,
+  .sm .main {
+    font-size: var(--u-text-xs);
+  }
+
   .field:hover:not(.fieldDisabled):not(:focus-within) {
     box-shadow: 0 0 0 1px var(--u-color-edge-hover);
   }
