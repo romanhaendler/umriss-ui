@@ -123,7 +123,7 @@ export const Slider = forwardRef<HTMLInputElement, SliderProps>(function Slider(
   };
 
   return (
-    <div className={cx(styles.slider, className)}>
+    <div className={cx(styles.slider, className)} style={style}>
       <div className={styles.control}>
         <input
           ref={ref}
@@ -138,7 +138,7 @@ export const Slider = forwardRef<HTMLInputElement, SliderProps>(function Slider(
           {...rest}
           /* The share of the track that is filled, read by the track's
              pseudo-elements - they inherit it from the input. */
-          style={{ ...style, "--_fill": `${share(value)}%` } as CSSProperties}
+          style={{ "--_fill": `${share(value)}%` } as CSSProperties}
           min={min}
           max={max}
           step={step}

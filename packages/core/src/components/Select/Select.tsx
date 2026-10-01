@@ -41,7 +41,7 @@ export interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement
  * theme tokens.
  */
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select(
-  { size: ownSize, chars, invalid, clearable = false, onClear, className, id, children, disabled, ...rest },
+  { size: ownSize, chars, invalid, clearable = false, onClear, className, style, id, children, disabled, ...rest },
   ref,
 ) {
   const size = useControlSize(ownSize);
@@ -58,7 +58,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
         clearable && styles.wrapperClearable,
         className,
       )}
-      style={extentStyle(chars)}
+      style={{ ...extentStyle(chars), ...style }}
     >
       <select
         ref={ref}

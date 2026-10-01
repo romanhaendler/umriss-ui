@@ -41,7 +41,7 @@ const sizeOf = (bytes: number, formats: Formats) =>
    The construction of the other native fields: the class on the zone, ref
    and rest on the input. */
 export const FileInput = forwardRef<HTMLInputElement, FileInputProps>(function FileInput(
-  { value, onChange, invalid, accept, multiple = false, disabled = false, className, id, ...rest },
+  { value, onChange, invalid, accept, multiple = false, disabled = false, className, style, id, ...rest },
   ref,
 ) {
   const wording = useWording();
@@ -95,6 +95,7 @@ export const FileInput = forwardRef<HTMLInputElement, FileInputProps>(function F
   return (
     <div
       className={cx(styles.zone, dragging && styles.dragging, isInvalid && styles.invalidZone, className)}
+      style={style}
       data-dragging={dragging ? "" : undefined}
       /* The zone's texts belong to the inactive control; said so, a screen
          reader and a contrast check read them as such (WCAG 1.4.3). */

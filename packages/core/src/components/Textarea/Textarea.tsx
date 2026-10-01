@@ -64,6 +64,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function 
     showCount = false,
     resize,
     className,
+    style,
     id,
     disabled,
     rows = 3,
@@ -126,7 +127,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function 
   return (
     <span
       className={cx(styles.wrapper, size === "sm" && styles.wrapperSm, countVisible && styles.counted, className)}
-      style={extentStyle(chars)}
+      style={{ ...extentStyle(chars), ...style }}
     >
       <textarea
         ref={innerRef}

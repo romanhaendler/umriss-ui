@@ -95,7 +95,10 @@ asks, it is its natural width, and it is never wider than its place; a field's
 root is a block (it was `inline-flex` for `Input`, `Select`, `Combobox`,
 `NumberInput`), so in a row it no longer takes the row's width; `selectSize`
 is now `size` (no alias); `Input` and `Textarea` always render their wrapper,
-so `className` lands on the wrapper; `Textarea` no longer takes `cols`; every
+so `className` lands on the wrapper; on every wrapped field (`Input`,
+`Textarea`, `Select`, `NumberInput`, `Checkbox`, `Switch`, `Slider`,
+`FileInput`) `style` lands where `className` does, on the wrapper - it went to
+the control inside; `Textarea` no longer takes `cols`; every
 control with `size` follows a `ControlSizeProvider` around it; a FormField's
 message wraps inside its field's width; the combobox's panel is at least 200 px.
 

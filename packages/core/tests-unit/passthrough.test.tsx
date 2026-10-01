@@ -230,6 +230,14 @@ const CLASS_ON_WRAPPER: Record<string, string> = {
   Switch: "the checkbox's construction: the class on the label that holds track and text, the rest on the <input>",
 };
 
+/* The fields among them take the style where they take the class (ADR-0041):
+   class and style are how a caller dresses and sizes what it lays out, and a
+   width in `style` that reached the input inside sized the wrong element - an
+   empty frame around a narrower field, or nothing at all where the input is
+   hidden behind a drawn box. The split button is no field and keeps its style
+   on the main action. */
+const STYLE_ON_WRAPPER = new Set(Object.keys(CLASS_ON_WRAPPER).filter((name) => name !== "SplitButton"));
+
 const FORWARD_REF =Symbol.for("react.forward_ref");
 
 /** What the package exports that React can render: a component is a function
@@ -276,9 +284,12 @@ describe("Every exported component passes ref, class, style and the rest through
         name in CLASS_ON_WRAPPER
           ? (element?.parentElement?.closest(".probe-class") ?? null) !== null
           : (element?.classList.contains("probe-class") ?? false),
-      style: element instanceof HTMLElement || element instanceof SVGElement
-        ? element.style.marginTop === "7px"
-        : false,
+      style: STYLE_ON_WRAPPER.has(name)
+        ? (element?.parentElement?.closest<HTMLElement>(".probe-class")?.style.marginTop ?? "") === "7px" &&
+          (element as HTMLElement).style.marginTop === ""
+        : element instanceof HTMLElement || element instanceof SVGElement
+          ? element.style.marginTop === "7px"
+          : false,
       rest: element?.getAttribute("data-probe") === name,
       root: element ? (ROOT[name]?.(element) ?? true) : false,
     }).toEqual({ forwardRef: true, ref: true, className: true, style: true, rest: true, root: true });

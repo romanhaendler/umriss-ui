@@ -73,10 +73,16 @@ and the provider for it is scoped to that place.
 ## Consequences
 
 `Input` and `Textarea` always render their wrapper: Firefox applies no size
-containment to a bare native field. The class lands on the wrapper, ref and
-rest on the control (principle 1) - a `className` that styled the input itself
-now styles the wrapper. The native `size` of `Select` and `cols` of `Textarea`
-are left out; neither had reached the screen.
+containment to a bare native field. The class and the style land on the
+wrapper, ref and rest on the control (principle 1) - and so for every wrapped
+field, `Select`, `NumberInput`, `Checkbox`, `Switch`, `Slider` and `FileInput`
+too. The style used to go with the rest: `<Input style={{ width: 120 }} />`,
+the first thing a developer writes, would have sized the input inside a frame
+that kept its own width, and on a checkbox or a file input it reached an
+element hidden behind the drawn one. Class and style are how a caller dresses
+and sizes what it lays out; they go to the same element. The native `size` of
+`Select` and `cols` of `Textarea` are left out; neither had reached the
+screen.
 
 A field does not grow to fill a row; the row's own layout gives it room
 (`flex: 1`, a grid). A place that sizes itself by its content and has no width
