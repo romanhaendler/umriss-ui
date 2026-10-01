@@ -362,3 +362,45 @@ describe("materializeSeries with a box", () => {
     expect(series.box).toBeNull();
   });
 });
+
+/* ADR-0040: a box carries its outliers - one flat channel of the values, one
+   of offsets, box i's standing from offsets[i] to offsets[i + 1]. */
+describe("materializeSeries with a box's outliers", () => {
+  interface Box {
+    t: number;
+    med: number | null;
+    out?: number[] | null;
+  }
+  const boxes: Box[] = [
+    { t: 0, med: 5, out: [20, 1] },
+    { t: 1, med: 6, out: [] },
+    { t: 2, med: null, out: [99] },
+    { t: 3, med: 7 },
+    { t: 4, med: 6, out: [Number.NaN, 30, Number.POSITIVE_INFINITY] },
+  ];
+  const box = {
+    lowerWhisker: () => 4,
+    lowerQuartile: () => 5,
+    upperQuartile: () => 6,
+    upperWhisker: () => 8,
+  };
+
+  it("holds the values flat and an offset per box; a gap, an empty and a missing list hold none", () => {
+    const { series } = materializeSeries(boxes, (d) => d.t, (d) => d.med, undefined, { box: { ...box, outliers: (d) => d.out } });
+    expect([...(series.box?.outliers ?? [])]).toEqual([20, 1, 30]);
+    expect([...(series.box?.outlierOffsets ?? [])]).toEqual([0, 2, 2, 2, 2, 3]);
+  });
+
+  it("pulls the extent to the outliers, not to a gap's", () => {
+    const { extent } = materializeSeries(boxes, (d) => d.t, (d) => d.med, undefined, { box: { ...box, outliers: (d) => d.out } });
+    expect([extent.yMin, extent.yMax]).toEqual([1, 30]);
+    const { series } = materializeSeries(boxes, (d) => d.t, (d) => d.med, undefined, { box: { ...box, outliers: (d) => d.out } });
+    expect(visibleExtent(series, 1, 4)).toEqual([4, 30]);
+  });
+
+  it("has no outlier channels without the accessor, nor for any other kind", () => {
+    const { series } = materializeSeries(boxes, (d) => d.t, (d) => d.med, undefined, { box });
+    expect(series.box?.outliers).toBeNull();
+    expect(series.box?.outlierOffsets).toBeNull();
+  });
+});

@@ -91,6 +91,8 @@ export interface BoxSeriesConfig<T = unknown> extends SeriesBase<T> {
   upperQuartile: Accessor<T>;
   lowerWhisker: Accessor<T>;
   upperWhisker: Accessor<T>;
+  /** The values beyond the whiskers, per box (ADR-0040). */
+  outliers?: (d: T, index: number) => readonly number[] | null | undefined;
   /** Width as a fraction of the step; boxes and bars on one x axis share it. */
   boxWidth: number;
 }
@@ -220,13 +222,23 @@ export interface MaterializedSeries {
   length: number;
 }
 
-/** The named channels of a box, one number per point; NaN where the median
-    is a gap. */
-export interface BoxChannels {
-  lowerQuartile: Float64Array;
-  upperQuartile: Float64Array;
-  lowerWhisker: Float64Array;
-  upperWhisker: Float64Array;
+/** A box's further numbers beside its median, by name. */
+export interface BoxNumbers<V = number> {
+  lowerQuartile: V;
+  upperQuartile: V;
+  lowerWhisker: V;
+  upperWhisker: V;
+}
+
+/** The named channels of a box: one number per point, NaN where the median
+    is a gap; and its outliers (ADR-0040). */
+export interface BoxChannels extends BoxNumbers<Float64Array> {
+  /** Every box's outliers, flat, box after box; null without `outliers`. */
+  outliers: Float64Array | null;
+  /** Where each box's outliers begin, and one past the last: box i's stand
+      from outlierOffsets[i] to outlierOffsets[i + 1]. null without
+      `outliers`. */
+  outlierOffsets: Uint32Array | null;
 }
 
 /* The Scale interface is fixed (R-2.14); V0 implements only LinearScale. */
@@ -322,7 +334,10 @@ export interface TooltipPoint<T = unknown> {
   segment?: { from: number; to: number; label: string };
   /** Only for a box: its further numbers; yValue is its median. Fields of
       their own for the reason `value` has one (ADR-0011). */
-  box?: { [K in keyof BoxChannels]: number };
+  box?: BoxNumbers & {
+    /** As the caller gave them; only where the series has `outliers`. */
+    outliers?: readonly number[];
+  };
 }
 
 export interface TooltipHit<T = unknown> {

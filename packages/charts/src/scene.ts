@@ -68,6 +68,9 @@ import {
 /** A box's rows top to bottom as drawn: its further numbers with the median
     between the quartiles (box-plot B9). */
 const BOX_ROWS = [...BOX_KEYS.slice(0, 2), "median", ...BOX_KEYS.slice(2)] as const;
+
+/** A box's tooltip and table write this many outliers, and count the rest. */
+const OUTLIERS_SHOWN = 5;
 import {
   barGroups,
   barPlacement,
@@ -396,19 +399,23 @@ function materialEqual(previous: SeriesConfig, next: SeriesConfig): boolean {
 /** A box's further accessors (ADR-0011); undefined for every other kind. */
 function boxChannelsOf(config: SeriesConfig): ExtraChannels<unknown>["box"] {
   if (config.kind !== "box") return undefined;
-  const { lowerQuartile, upperQuartile, lowerWhisker, upperWhisker } = config;
-  return { lowerQuartile, upperQuartile, lowerWhisker, upperWhisker };
+  const { lowerQuartile, upperQuartile, lowerWhisker, upperWhisker, outliers } = config;
+  return { lowerQuartile, upperQuartile, lowerWhisker, upperWhisker, outliers };
 }
 
 function boxChannelsEqual(a: ExtraChannels<unknown>["box"], b: ExtraChannels<unknown>["box"]): boolean {
   if (a === undefined || b === undefined) return a === b;
-  return BOX_KEYS.every((key) => fnEqual(a[key], b[key]));
+  return BOX_KEYS.every((key) => fnEqual(a[key], b[key])) && fnEqual(a.outliers, b.outliers);
 }
 
 /** A box's numbers at one point. */
 function boxAt(box: BoxChannels, i: number): NonNullable<TooltipPoint["box"]> {
   const out = {} as NonNullable<TooltipPoint["box"]>;
   for (const key of BOX_KEYS) out[key] = box[key][i] as number;
+  const { outliers, outlierOffsets } = box;
+  if (outliers !== null && outlierOffsets !== null) {
+    out.outliers = [...outliers.subarray(outlierOffsets[i], outlierOffsets[i + 1])];
+  }
   return out;
 }
 
@@ -2722,7 +2729,11 @@ export class ChartScene {
         this.findAxisConfig("x", axisId)?.label ?? w.positionColumn,
         ...entries.flatMap((e) => {
           const name = this.nameFor(e, all.indexOf(e));
-          return e.config.kind === "box" ? BOX_ROWS.map((key) => `${name} – ${this.wording[key]}`) : [name];
+          if (e.config.kind !== "box") return [name];
+          const columns = BOX_ROWS.map((key) => `${name} – ${this.wording[key]}`);
+          // The outliers' column only where the series has them (B9).
+          if (e.materialized?.box?.outliers != null) columns.push(`${name} – ${this.wording.outliers}`);
+          return columns;
         }),
       ],
       rows: rows.x.map((x, r) => [
@@ -2743,9 +2754,13 @@ export class ChartScene {
   private boxCells(entry: SeriesEntry, course: Course, i: number): string[] {
     const mat = entry.materialized as MaterializedSeries;
     const median = i < 0 ? Number.NaN : (course.y[i] as number);
-    if (Number.isNaN(median) || mat.box === null) return ["", "", "", "", ""];
+    const columns = BOX_ROWS.length + (mat.box?.outliers != null ? 1 : 0);
+    if (Number.isNaN(median) || mat.box === null) return Array<string>(columns).fill("");
     const at = lowerBound(mat.x, mat.length, course.x[i] as number);
-    return this.boxParts(entry, { ...boxAt(mat.box, at), median }).map((p) => p.value);
+    const box = boxAt(mat.box, at);
+    const cells = BOX_ROWS.map((key) => this.formatY(entry, key === "median" ? median : box[key]));
+    if (box.outliers !== undefined) cells.push(box.outliers.length > 0 ? this.outlierText(entry, box.outliers) : "");
+    return cells;
   }
 
   /** One cell: empty where the series has no reading there or a gap; a
@@ -3019,7 +3034,16 @@ export class ChartScene {
     entry: SeriesEntry,
     v: NonNullable<TooltipPoint["box"]> & { median: number },
   ): { label: string; value: string }[] {
-    return BOX_ROWS.map((key) => ({ label: this.wording[key], value: this.formatY(entry, v[key]) }));
+    const parts = BOX_ROWS.map((key) => ({ label: this.wording[key], value: this.formatY(entry, v[key]) }));
+    if (v.outliers !== undefined && v.outliers.length > 0) parts.push({ label: this.wording.outliers, value: this.outlierText(entry, v.outliers) });
+    return parts;
+  }
+
+  /** A box's outliers top to bottom as drawn, the first five written out
+      (B9). */
+  private outlierText(entry: SeriesEntry, outliers: readonly number[]): string {
+    const sorted = [...outliers].sort((a, b) => b - a);
+    return this.wording.outlierList(sorted.slice(0, OUTLIERS_SHOWN).map((v) => this.formatY(entry, v)), Math.max(0, sorted.length - OUTLIERS_SHOWN));
   }
 
   /** A hit's chip drawn as its legend entry is: a band's state and a cell's
