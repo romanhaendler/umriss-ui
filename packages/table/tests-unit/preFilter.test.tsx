@@ -118,6 +118,31 @@ describe("D4: a pre-filter may stand in the call", () => {
     fireEvent.change(select);
     expect(rowHeaders(container)).toEqual(["B-1", "B-2"]);
   });
+
+  it("new rows are read anew, even where they are the same objects changed in place", () => {
+    const live = [
+      { id: "1", number: "A-1", plant: "Plant A", amount: 1 },
+      { id: "2", number: "A-2", plant: "Plant A", amount: 2 },
+    ];
+    function Live({ rows }: { rows: typeof live }) {
+      const { Table: Frame, Column } = useTable(rows, {
+        rowKey: (a) => a.id,
+        preFilter: (a) => a.plant === "Plant A",
+        defaultSort: { column: "amount", direction: "asc" },
+      });
+      return (
+        <Frame>
+          <Column value="number" label="Order" rowHeader />
+          <Column value="amount" label="Amount" />
+        </Frame>
+      );
+    }
+    const { container, rerender } = render(<Live rows={live} />);
+    expect(rowHeaders(container)).toEqual(["A-1", "A-2"]);
+    live[0]!.amount = 3;
+    rerender(<Live rows={[...live]} />);
+    expect(rowHeaders(container)).toEqual(["A-2", "A-1"]);
+  });
 });
 
 describe("D3: the table's rows are the ones the pre-filter admits", () => {
