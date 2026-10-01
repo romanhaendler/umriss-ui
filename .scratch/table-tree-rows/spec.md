@@ -1,6 +1,6 @@
 # Tree rows: drilling down a hierarchy inside a table
 
-Status: ready-for-agent
+Status: done
 Date:   2026-10-01
 Origin: "Tree data" in `.scratch/comparison-roadmap/spec.md` ("Later"), and an
 outside draft (`~/cc/hr/umriss-table-tree-rows.md`) cut down in conversation to
@@ -228,7 +228,10 @@ for leaves that carry more than their branches:
   at its level - the row's fold opens what stands under it, its detail, then
   its children; a tree has no expander column. The detail is no box: it hangs
   from the fold on a rail, a level deeper, on the table's surface, and a table
-  inside it drops its frame. Precedents: SAP Fiori's tree table (the first
+  inside it drops its frame. A branch with a detail - a unit with staff of
+  its own and teams beneath - opens both with its one fold, the detail first;
+  its detail follows the branch's state (`branches`), so whatever opens the
+  branch opens its detail too: one fold, one state. Precedents: SAP Fiori's tree table (the first
   column is the tree column and carries the only expand control), AG Grid's
   tree data with master/detail (the detail opens from the group cell).
 
@@ -368,3 +371,17 @@ Each of these is a later, separate step:
 - The fold beside the RowDetail expander is the place to judge rendered in the
   final polish ticket: two chevrons on one row.
 - Changelog: table minor, core minor (the `matches` seam and the wording).
+
+## Comments
+
+### Delivery notes (2026-10-01), tickets 01–11
+
+Released as `@umriss-ui/table` 0.8.0 with `@umriss-ui/core` 0.19.0. Built test
+first at the agreed seams (core's tree model, the table model, the rendered
+table). Decided on the rendered page while building, each recorded above: the
+first column carries the tree; a detail of nothing has no expander; in a tree
+the row's fold opens its detail, on a rail without a box; a branch reads by
+weight, a root after the first by a stronger line. Left for later, as written
+under Out of Scope: unloaded branches, `revealRow`, cascading ticks, row
+activation, rollups, `parentKey`. The user accepted the rendered result.
+
