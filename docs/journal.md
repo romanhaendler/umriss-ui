@@ -18,6 +18,28 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Oct. 2026 — Sizes
+
+- **A field's width never follows what it shows** (`.scratch/control-sizes/`,
+  ADR-0041). It began as a question about how wide the core fields are, and a
+  probe of every control in the table toolbar at five widths answered it: in
+  a place that asks, a field was whatever it happened to show - a multiselect
+  83, 96 and 133 px for none, one and two values, a select its longest option.
+  The mechanism was measured in Chromium, Firefox and WebKit before it was
+  chosen: size containment on a block root with `width: auto` fills a block,
+  a stretched column and a grid's cell and is the contained size in a row, a
+  shrink-to-fit parent and an `auto` track - identically in all three. Two
+  findings shaped it. Firefox applies no size containment to a bare `<input>`
+  or `<textarea>`, so both fields now always wear their wrapper. And a `ch` is
+  a figure, wider than the average letter the browser counts for `size`: the
+  first default of 20 made a dispatcher's bar take three lines, sixteen make
+  the browser's own text field. The probe also found the edges the browser
+  suite now holds: a FormField's message widened its field in a row, a
+  FormField in a start-aligned column stood out of a phone, a combobox of six
+  characters would have cut its options. `selectSize` became `size`, and
+  `ControlSizeProvider` gives a place one size - the table's toolbar is one.
+  A new page, Sizes, shows it after FormField.
+
 ## Oct. 2026 — Row filters, and one size for the toolbar
 
 - **Row filters** (`.scratch/table-filters/issues/08-row-filters.md`;

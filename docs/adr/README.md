@@ -1,6 +1,6 @@
 # Decisions
 
-Thirty-four decisions, each one written where it was made and kept afterwards. An
+Forty-one decisions, each one written where it was made and kept afterwards. An
 ADR here is not an announcement: it states the question, the alternatives that
 were real at the time, and what the decision costs — which is what makes it
 worth reading a year later, when the code has changed and the reasoning has not.
@@ -54,5 +54,6 @@ half a later reader needs most. Exactly one is superseded today.
 | [0038](0038-a-calculation-can-carry-several-metrics.md) | A calculation can carry several metrics | accepted | calculation |
 | [0039](0039-an-icon-button-names-itself-once.md) | An icon button names itself once, and shows that name | accepted | components |
 | [0040](0040-a-box-carries-its-outliers.md) | A box carries its outliers | accepted | charts |
+| [0041](0041-a-fields-width-never-follows-what-it-shows.md) | A field's width never follows what it shows | accepted | components |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).
