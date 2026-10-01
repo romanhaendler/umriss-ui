@@ -296,7 +296,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
        rows or branches. Compare its admitted children, as useAdmitted does
        the roots, if a caller needs that live. */
     // eslint-disable-next-line react-hooks/exhaustive-deps -- the open keys by value; the rows the pre-filter admits stand for it
-    [isTree, openKey, admitted, rowsUnknown, reader],
+    [isTree, openKey, admitted, reader],
   );
   const b = useCompanion(admitted, modelColumns, {
     rowKey,
