@@ -22,3 +22,11 @@ Open questions for the user:
    characters of room for the value) - as before. Take it on now?
 4. **A field that fills a row** still needs the row's layout (`flex: 1`, a
    grid); there is no prop for it on purpose. Wanted?
+
+## Comments
+
+The acceptance page with the before/after measurements, the rules, the Sizes
+examples and the developer's review:
+https://claude.ai/artifact/LD2XjPSgtaMgd1rzFn1AMC (private to the user). The
+live pages: `pnpm dev:core` → `/sizes`, `pnpm dev:table` →
+`/toolbar-controls`, in the worktree `control-sizes`.
