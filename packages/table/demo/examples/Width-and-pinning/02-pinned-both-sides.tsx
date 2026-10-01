@@ -1,8 +1,18 @@
 import { useState } from "react";
 import { Stack, Text } from "@umriss-ui/core";
 import type { LimitSet } from "@umriss-ui/core";
-import { STATIONS } from "@umriss-ui/demo/worlds/plant";
 import { ColumnMenu, Toolbar, useTable } from "../../../src";
+
+/* Data from the plant world, written out here so the example runs on its own. */
+const STATIONS = [
+  { id: "saw", label: "Saw 1" },
+  { id: "lathe-1", label: "Lathe 1" },
+  { id: "lathe-2", label: "Lathe 2" },
+  { id: "mill", label: "Mill" },
+  { id: "press", label: "Press 2" },
+  { id: "paint", label: "Paint shop" },
+  { id: "qa", label: "Inspection" },
+] as const;
 
 export const title = "Pin columns to both sides";
 export const lead = "`pin=\"start\"` or `\"end\"` keeps a column at that edge while the rest scrolls; people pin and unpin in the column menu too.";

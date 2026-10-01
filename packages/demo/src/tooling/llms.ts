@@ -19,23 +19,17 @@
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 import { Marked, type Tokens } from "marked";
 import ts from "typescript";
 import { ADR_0032, SCENARIOS, addressOfPlace } from "../outline.ts";
 import type { Rubric, Page } from "../outline.ts";
 import { byRank, parseFileName, parseScenarioName } from "./fileName.ts";
-import { displaySource, worldsOf } from "./source.ts";
-
-/** The demos' shared data, beside this file. */
-const WORLDS_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "worlds");
+import { displaySource } from "./source.ts";
 import type { TypeEntry } from "./propsReader.ts";
 
 export interface LlmsJob {
   /** The package's directory: `package.json` and `demo/` are read there. */
   packageDir: string;
-  /** Where the worlds are read from - the shell's own by default. */
-  worldsDir?: string;
   outline: readonly Rubric[];
   /** The generated props tables - what `generateProps` just wrote. */
   tables: Readonly<Record<string, TypeEntry>>;
@@ -55,8 +49,6 @@ interface ExampleText {
   title: string;
   lead?: string;
   source: string;
-  /** The worlds it imports, as `operations`. */
-  worlds: readonly string[];
 }
 
 interface ScenarioText {
@@ -68,7 +60,6 @@ interface ScenarioText {
   /** Page ids of this demo, or `{ name, page }` of a neighbour. */
   builtFrom: readonly (string | { name: string; page: string })[];
   source: string;
-  worlds: readonly string[];
 }
 
 /* ------------------------------------------------------------------ */
@@ -154,7 +145,6 @@ function readExample(demoDir: string, file: string, packageName: string): Exampl
     title: titleOf(path, raw),
     ...(lead === undefined ? {} : { lead }),
     source: displaySource(raw, packageName),
-    worlds: worldsOf(raw),
   };
 }
 
@@ -170,7 +160,6 @@ function readScenario(demoDir: string, file: string, packageName: string): Scena
     callouts: (literalOf(path, "callouts", raw) ?? []) as string[],
     builtFrom: (literalOf(path, "builtFrom", raw) ?? []) as ScenarioText["builtFrom"],
     source: displaySource(raw, packageName),
-    worlds: worldsOf(raw),
   };
 }
 
@@ -378,7 +367,7 @@ function tableMarkdown(entry: TypeEntry): string {
 }
 
 /** Both texts of one package, from its directory. Pure apart from reading. */
-export function renderLlms({ packageDir, outline, tables, worldsDir = WORLDS_DIR }: LlmsJob): { index: string; full: string; pages: SitePage[] } {
+export function renderLlms({ packageDir, outline, tables }: LlmsJob): { index: string; full: string; pages: SitePage[] } {
   const manifest = JSON.parse(readFileSync(join(packageDir, "package.json"), "utf8")) as Manifest;
   const demoDir = join(packageDir, "demo");
   const examples = listExamples(demoDir)
@@ -427,7 +416,6 @@ export function renderLlms({ packageDir, outline, tables, worldsDir = WORLDS_DIR
   ].join("\n");
 
   /* The full text. */
-  const shown = new Set<string>();
   const parts: string[] = [
     `# ${manifest.name} ${manifest.version}`,
     "",
@@ -435,12 +423,6 @@ export function renderLlms({ packageDir, outline, tables, worldsDir = WORLDS_DIR
     "",
     `Install with \`${install}\`. This text is generated from the package's demo (${manifest.homepage}): every page with its import line, its examples - the source exactly as it runs, with the package name where the demo imports its own source - its props tables generated from the code, and what it deliberately does not do. The pages index stands in ${manifest.homepage}llms.txt.`,
   ];
-  const beside = (worlds: readonly string[]) => {
-    if (worlds.length === 0) return;
-    const names = worlds.map((world) => code(`${world}.ts`));
-    parts.push("", `It imports ${names.join(", ")} from beside itself; the file stands once, under "Files the examples show" at the end.`);
-    worlds.forEach((world) => shown.add(world));
-  };
   /* Where each page's part of the full text begins and ends - the site's
      pages are cut from it, so they cannot say anything else. */
   const cuts: { page?: Page; from: number; to: number }[] = [];
@@ -455,7 +437,6 @@ export function renderLlms({ packageDir, outline, tables, worldsDir = WORLDS_DIR
         return pages.find((page) => page.id === entry)?.name ?? entry;
       });
       parts.push("", `Built from: ${built.join(", ")}.`, "", fenced("tsx", scenario.source));
-      beside(scenario.worlds);
     }
     cuts.push({ from, to: parts.length });
   }
@@ -475,7 +456,6 @@ export function renderLlms({ packageDir, outline, tables, worldsDir = WORLDS_DIR
         parts.push("", `##### ${example.title}`);
         if (example.lead !== undefined) parts.push("", example.lead);
         parts.push("", fenced("tsx", example.source));
-        beside(example.worlds);
       }
 
       if (page.alternatives !== undefined) {
@@ -502,8 +482,7 @@ export function renderLlms({ packageDir, outline, tables, worldsDir = WORLDS_DIR
   }
 
   /* What no page names. After the pages, so that a page's mention counts
-     first, and before the data files, whose names are the demo's and not the
-     package's. */
+     first. */
   const pagesText = parts.join("\n");
   const rest = exportedDeclarations(packageDir).filter((one) => missingFrom(pagesText, [one.name]).length > 0);
   if (rest.length > 0) {
@@ -518,12 +497,6 @@ export function renderLlms({ packageDir, outline, tables, worldsDir = WORLDS_DIR
     }
   }
 
-  if (shown.size > 0) {
-    parts.push("", "## Files the examples show", "", "The demos' shared data, which some examples import from beside themselves. Copied with the example, it runs.");
-    for (const world of [...shown].sort()) {
-      parts.push("", `### ${code(`${world}.ts`)}`, "", fenced("ts", readFileSync(join(worldsDir, `${world}.ts`), "utf8")));
-    }
-  }
 
   /* The site's pages. Every one links every other, under its rubric - with
      no links from elsewhere (search-visibility, "only our own"), the links

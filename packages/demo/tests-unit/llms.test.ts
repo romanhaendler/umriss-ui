@@ -1,5 +1,5 @@
 /* The llms.txt generator against a fixture package: one scenario, one page
-   with three examples (one with a lead, one importing a world), one
+   with three examples (one with a lead, one with its own data), one
    props table and the page's texts. What is checked is what an agent reading
    the text relies on - every page is there with its link, every example's
    source stands as the demo shows it, the table is complete. */
@@ -54,7 +54,7 @@ const TABLES: Record<string, TypeEntry> = {
   },
 };
 
-const { index, full, pages } = renderLlms({ packageDir: PACKAGE_DIR, outline: OUTLINE, tables: TABLES, worldsDir: join(PACKAGE_DIR, "worlds") });
+const { index, full, pages } = renderLlms({ packageDir: PACKAGE_DIR, outline: OUTLINE, tables: TABLES });
 
 describe("llms.txt", () => {
   it("names the package, its summary and where the full text is", () => {
@@ -113,17 +113,9 @@ describe("llms-full.txt", () => {
     expect(scenarios).toContain("### Watch a service's latency\n\nAn on-call engineer keeps it open beside the incident channel.");
     expect(scenarios).toContain("1. The needle: latency, in ms.\n2. Red above the limit, as the SLA says: 300 ms.");
     expect(scenarios).toContain("Built from: Gauge, Trend.");
-    expect(scenarios).toContain('import { SERVICES } from "./operations";');
+    expect(scenarios).toContain('const SERVICES = [{ name: "checkout", latency: 120 }];');
     expect(scenarios).not.toContain("export const callouts");
     expect(scenarios).not.toContain("export const builtFrom");
-  });
-
-  it("prints a world a scenario and an example import once, among the files shown", () => {
-    const files = full.slice(full.indexOf("## Files the examples show"));
-    expect(files).toContain("### `operations.ts`");
-    expect(full.split("export const SERVICES").length - 1).toBe(1);
-    expect(full.split("export const READINGS").length - 1).toBe(1);
-    expect(full).toContain('import { READINGS } from "./operations";');
   });
 
   it("writes the props table with every row, escaped for Markdown", () => {
@@ -144,9 +136,8 @@ describe("llms-full.txt", () => {
     expect(rest).toContain("### `GAUGE_RANGE`");
     expect(rest).toContain("/** The range every gauge spans - exported, and named on no page. */\nconst GAUGE_RANGE: readonly [0, 100];");
     expect(rest).toContain("function fraction(value: number): number;");
-    /* On a page already, so not again - and the demo's data is not the package's. */
+    /* On a page already, so not again. */
     expect(rest).not.toContain("### `Gauge`");
-    expect(full.indexOf("## The rest of the API")).toBeLessThan(full.indexOf("## Files the examples show"));
   });
 });
 

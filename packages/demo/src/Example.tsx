@@ -17,23 +17,14 @@
    coloured. It lives in `CopyButton.tsx`, because the import line in the page
    head needs the same one.
 
-   An example that shows a file beside itself gets a row of buttons, and Copy
-   takes the file in front: two of them mean two things to copy, and a button
-   that always copied the first would be a lie on the second. An example
-   showing nothing - which is nearly all of them - has no such row at all.
-
-   They are buttons and not ARIA tabs. The tabs pattern owes a `tabpanel`, one
-   stop in the tab order with arrow keys inside it, and `aria-controls` on
-   every tab; what is here is a group of buttons that swap what one block
-   shows, every one of them reachable by Tab, and `aria-pressed` saying which
-   is in front. Claiming the role without the pattern would promise a screen
-   reader keys that do not work. */
+   It is one file, and copied alone it runs: the example's data stands in it
+   (`checks/ownData`). */
 
 import { useMemo, useState } from "react";
 import { highlight } from "sugar-high";
 import { CopyButton } from "./CopyButton";
 import { Prose } from "./Prose";
-import type { Example as ExampleData, ExampleFile } from "./tooling/examples";
+import type { Example as ExampleData } from "./tooling/examples";
 
 function Chevron({ open }: { open: boolean }) {
   return (
@@ -50,36 +41,18 @@ function Chevron({ open }: { open: boolean }) {
   );
 }
 
-export function CodeBlock({ files }: { files: readonly ExampleFile[] }) {
-  const [shown, setShown] = useState(0);
-  const front = files[Math.min(shown, files.length - 1)]!;
-  const highlighted = useMemo(() => highlight(front.source), [front.source]);
+export function CodeBlock({ name, source }: { name: string; source: string }) {
+  const highlighted = useMemo(() => highlight(source), [source]);
   return (
     <div className="codeBlock">
       <div className="codeBar">
-        {files.length > 1 ? (
-          <span className="codeTabs" role="group" aria-label="Files of this example">
-            {files.map((file, index) => (
-              <button
-                key={file.name}
-                type="button"
-                className="codeTab"
-                aria-pressed={file === front}
-                onClick={() => setShown(index)}
-              >
-                {file.name}
-              </button>
-            ))}
-          </span>
-        ) : (
-          <span className="codeLanguage">tsx</span>
-        )}
-        <CopyButton text={front.source} />
+        <span className="codeLanguage">tsx</span>
+        <CopyButton text={source} />
       </div>
       {/* The source comes from our own directory and from a highlighter that
           only puts marks around it - no input from outside. A long line scrolls
           the block sideways, so the keyboard has to reach it too. */}
-      <pre className="code" tabIndex={0} aria-label={`Source of ${front.name}`}>
+      <pre className="code" tabIndex={0} aria-label={`Source of ${name}`}>
         <code dangerouslySetInnerHTML={{ __html: highlighted }} />
       </pre>
     </div>
@@ -154,7 +127,7 @@ export function Example({ example, allOpen, hero = false }: ExampleProps) {
       <div className="exampleCode" id={codeId} hidden={!open}>
         {/* Render it only once it is visible: forty highlighted blocks on one
             page, none of them open, are forty trees for nothing. */}
-        {open && <CodeBlock files={example.files} />}
+        {open && <CodeBlock name={example.title} source={example.source} />}
       </div>
     </section>
   );

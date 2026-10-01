@@ -146,6 +146,26 @@ nothing onto the document; its settings reach its subtree through context
 (ADR-0021).
 _Avoid_: root, configuration
 
+**Natural width**:
+How wide a field is where its place asks it rather than giving it a width —
+a row, a toolbar, a column lined up at the start, a cell sized by its content.
+A count of characters of the field's own type, `ch`, plus its chrome: 16 for a
+text field, select, combobox and multiselect, 10 for a number, 40 for a
+textarea, the longest value of its formats for a date picker; `chars` names
+another count and fixes the field at it. Never what the field shows — its
+value, options, chips or files cannot move it. Where the place gives a width,
+the field fills it instead, and it is never wider than its place (ADR-0041).
+_Avoid_: intrinsic width, auto width, content width (the very thing it is not)
+
+**Control size**:
+One of a control's two heights, `sm` or `md`, said with `size` on every control
+that has them. A place says it once for every control in it with
+`ControlSizeProvider` — @umriss-ui/table's toolbar does; a control's own `size`
+wins, and a popover, dialog, tooltip or toast opened from the place starts
+without it (ADR-0041). Not the **Provider**'s density, which is how close a
+table sets its rows.
+_Avoid_: scale, variant, `selectSize` (retired)
+
 **Wording**:
 The directory of the library's visible and assistive-technology strings, named
 after what they label. A directory of entries, not a translation function.

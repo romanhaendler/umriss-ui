@@ -14,11 +14,10 @@
       away is exactly what the demo put there.
 
    2. The library path `"../../../src"` becomes the demo's package name -
-      `"@umriss-ui/core"` or `"@umriss-ui/table"`, and a world's
-      `"@umriss-ui/demo/worlds/<world>"` becomes `"./<world>"`, the file the
-      code view shows beside it. That is the one point where "what runs here"
-      and "what runs at your place" really diverge - a copied example has to
-      run. Imports of other packages stand as they are written.
+      `"@umriss-ui/core"` or `"@umriss-ui/table"`. That is the one point where
+      "what runs here" and "what runs at your place" really diverge - a copied
+      example has to run. Imports of other packages stand as they are written;
+      an example's data stands in the file itself (`checks/ownData`).
 
    Should a third rule ever become tempting, that is the moment to question
    `?raw` at all, and not the moment to add a third rule. */
@@ -32,14 +31,6 @@ export const LIBRARY_PATH = "../../../src";
    talks about paths, say - must not be hit by this. The path therefore has to
    be preceded by a `from` or by an `import` at the start of a line. */
 const IMPORT_LINE = /(\bfrom\s*|^[ \t]*import\s*)(["'])((?:\.\.\/)+src)((?:\/[^"']*)?)\2/gm;
-
-/* The demos' shared data (`packages/demo/src/worlds`), as an example imports it. */
-const WORLD_IMPORT = /(\bfrom\s*|^[ \t]*import\s*)(["'])@umriss-ui\/demo\/worlds\/([\w-]+)\2/gm;
-
-/** The worlds a source imports, in the order it names them, once each. */
-export function worldsOf(source: string): string[] {
-  return [...new Set([...source.matchAll(WORLD_IMPORT)].map((match) => match[3]!))];
-}
 
 /** Replaces the library path with the package name - only in imports. */
 export function asPackage(source: string, packageName: string): string {
@@ -92,13 +83,8 @@ export function withoutTitle(source: string): string {
   return `${lines.join("\n").replace(/\s+$/, "")}\n`;
 }
 
-/** A world's import as the reader copies it: from the file beside. */
-export function asBeside(source: string): string {
-  return source.replace(WORLD_IMPORT, (_match, lead: string, quote: string, world: string) => `${lead}${quote}./${world}${quote}`);
-}
-
 /** What stands in the code block: the file, without its bookkeeping, with the
-    package name and its worlds beside it. */
+    package name. */
 export function displaySource(source: string, packageName: string): string {
-  return asBeside(asPackage(withoutTitle(source), packageName));
+  return asPackage(withoutTitle(source), packageName);
 }
