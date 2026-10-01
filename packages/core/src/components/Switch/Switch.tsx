@@ -23,7 +23,7 @@ export interface SwitchProps extends Omit<InputHTMLAttributes<HTMLInputElement>,
    checkbox is the honest control. The construction is the checkbox's, and so
    is the pass-through: the class on the label, ref and rest on the input. */
 export const Switch = forwardRef<HTMLInputElement, SwitchProps>(function Switch(
-  { label, size: ownSize, invalid, className, id, ...rest },
+  { label, size: ownSize, invalid, className, style, id, ...rest },
   ref,
 ) {
   const size = useControlSize(ownSize);
@@ -32,7 +32,7 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(function Switch(
   const isInvalid = invalid ?? field?.invalid ?? false;
 
   return (
-    <label className={cx(styles.wrapper, size === "sm" && styles.sm, className)} htmlFor={inputId}>
+    <label className={cx(styles.wrapper, size === "sm" && styles.sm, className)} style={style} htmlFor={inputId}>
       <input
         ref={ref}
         type="checkbox"

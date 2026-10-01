@@ -34,11 +34,11 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
 
 /* The field always wears its wrapper (ADR-0041): the wrapper is what a place
    lays out and what carries the natural width - Firefox applies no size
-   containment to the native input element itself. The class goes to the
-   wrapper, ref and rest to the input, as with every wrapped field
+   containment to the native input element itself. The class and the style go
+   to the wrapper, ref and rest to the input, as with every wrapped field
    (principle 1). */
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
-  { size: ownSize, chars, invalid, numeric = false, clearable = false, onClear, className, id, disabled, ...rest },
+  { size: ownSize, chars, invalid, numeric = false, clearable = false, onClear, className, style, id, disabled, ...rest },
   ref,
 ) {
   const size = useControlSize(ownSize);
@@ -49,7 +49,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
 
   /* A hidden input is no field: it carries a value and nothing to see, and a
      wrapper around it would draw an empty frame. */
-  if (rest.type === "hidden") return <input ref={ref} id={id} className={className} {...rest} />;
+  if (rest.type === "hidden") return <input ref={ref} id={id} className={className} style={style} {...rest} />;
 
   return (
     <span
@@ -61,7 +61,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         disabled && styles.wrapperDisabled,
         className,
       )}
-      style={extentStyle(chars)}
+      style={{ ...extentStyle(chars), ...style }}
     >
       <input
         ref={ref}

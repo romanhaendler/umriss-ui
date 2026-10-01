@@ -87,6 +87,7 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
     invalid,
     disabled,
     className,
+    style,
     id,
     onFocus,
     onBlur,
@@ -211,7 +212,7 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
         disabled && styles.disabled,
         className,
       )}
-      style={extentStyle(chars, { extra: adornmentChars(prefix) + adornmentChars(suffix) })}
+      style={{ ...extentStyle(chars, { extra: adornmentChars(prefix) + adornmentChars(suffix) }), ...style }}
     >
       {prefix && <span className={styles.adornment}>{prefix}</span>}
       <input

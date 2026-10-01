@@ -7,8 +7,10 @@ import { describe, expect, it } from "vitest";
 import { createRef } from "react";
 import type { ReactElement } from "react";
 import { render } from "@testing-library/react";
+import { renderToString } from "react-dom/server";
 import {
   Combobox,
+  ControlSizeProvider,
   DatePicker,
   DateRangePicker,
   DateTimePicker,
@@ -55,8 +57,8 @@ describe("chars on every field", () => {
     });
   }
 
-  /* Where `style` reaches the root, the caller's own wins over the width. */
-  for (const name of ["Combobox", "MultiSelect", "DatePicker", "DateRangePicker"]) {
+  /* `style` reaches the root of every field, and the caller's own wins over the width. */
+  for (const name of Object.keys(FIELDS)) {
     it(`${name}: a caller's style wins over chars`, () => {
       const element = root(FIELDS[name]!({ chars: 7, style: { inlineSize: "120px", marginTop: "3px" } }));
       expect(element.style.inlineSize).toBe("120px");
@@ -92,6 +94,25 @@ describe("Input and Textarea always wear their wrapper", () => {
       expect(element.classList.contains("probe")).toBe(true);
       expect(element.querySelector("textarea")?.classList.contains("probe")).toBe(false);
     }
+  });
+});
+
+/* A server renders the width into the markup: an application rendered by
+   Next.js or Remix shows its fields at their width before any script runs,
+   and hydration finds the same style - nothing is measured on the client. */
+describe("rendered on a server", () => {
+  it("writes the count and the fixed width into the style attribute", () => {
+    const html = renderToString(
+      <ControlSizeProvider size="sm">
+        <Input aria-label="Postcode" chars={5} />
+        <DatePicker aria-label="Due" value={null} onChange={() => {}} />
+      </ControlSizeProvider>,
+    );
+    expect(html).toContain("--_chars:5");
+    expect(html).toContain("inline-size:fit-content");
+    // The picker's natural count from its format, and the provider's size.
+    expect(html).toMatch(/--_chars:\d+/);
+    expect(html).toMatch(/_wrapperSm_|_sm_/);
   });
 });
 

@@ -12,7 +12,7 @@ export interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement
 }
 
 export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(function Checkbox(
-  { label, indeterminate = false, className, id, ...rest },
+  { label, indeterminate = false, className, style, id, ...rest },
   ref,
 ) {
   const innerRef = useRef<HTMLInputElement>(null);
@@ -28,7 +28,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(function Che
   const inputId = id ?? field?.id;
 
   return (
-    <label className={cx(styles.wrapper, className)} htmlFor={inputId}>
+    <label className={cx(styles.wrapper, className)} style={style} htmlFor={inputId}>
       <input
         ref={innerRef}
         type="checkbox"
