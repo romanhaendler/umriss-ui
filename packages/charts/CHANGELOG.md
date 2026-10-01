@@ -29,6 +29,39 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## 0.9.0 – A box plot (Oct. 2026)
+
+### Changed
+
+- **`MaterializedSeries` has a required field `box`** - null for every kind
+  but the box. Code that builds a `MaterializedSeries` itself adds `box: null`.
+
+### Added
+
+- **`BoxPlot`** - a box per x from five numbers the caller brings: `median`,
+  `lowerQuartile`, `upperQuartile`, `lowerWhisker`, `upperWhisker`. It stands
+  on the numeric x axis as a bar does, `boxWidth` a fraction of the step;
+  boxes and bars on one x axis share the step side by side. A missing median
+  is a gap. The tooltip, the readout and the data table read the five numbers
+  top to bottom as drawn, in `format` or the y axis' `tickFormat`; the arrows
+  walk box to box, the marker on the median of its own box. The library
+  computes no statistics.
+- **`BoxPlot outliers`** - the values beyond the whiskers, an array per box
+  (ADR-0040): drawn with their box in its colour, one beyond three IQR as a
+  ring, read in its tooltip and table row as a count and the first five
+  values. They pull the y axis and hide with their box.
+- **`BoxPlot mean`, `notchLower` + `notchUpper`, `count`** - a mean drawn as
+  a small ×, a notch as a waist in the box, and n; each read in the tooltip
+  and the table only where given. One notch bound alone, and numbers out of
+  order, warn once in DEV.
+- **`ChartsWording`** gains `mean`, `notch`, `count`, `outliers` and
+  `outlierList`, and `upperWhisker`, `upperQuartile`, `median`,
+  `lowerQuartile` and `lowerWhisker`; German in `wording/de`.
+- **`MaterializedSeries.box`** holds a box's further numbers; null for every
+  other kind. **`TooltipPoint.box`** carries them to a custom `render`.
+
+---
+
 ## 0.8.2 – Room on a phone (Sep. 2026)
 
 ### Changed

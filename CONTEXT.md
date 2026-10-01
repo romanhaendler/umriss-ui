@@ -196,8 +196,9 @@ axis. A series has a kind; it is not itself a chart.
 _Avoid_: Datenreihe, dataset, trace
 
 **Series kind**:
-What a series is drawn as — line, area, bar or scatter. The kind belongs to the
-series, never to the chart, which is why kinds can be mixed in one chart.
+What a series is drawn as — line, area, bar, box, scatter, state band or
+matrix. The kind belongs to the series, never to the chart, which is why kinds
+can be mixed in one chart.
 _Avoid_: chart type, Diagrammtyp, Charttyp
 
 **Registration order**:
@@ -238,6 +239,32 @@ _Avoid_: pile, cumulative series
 The smallest distance between two consecutive x values of a series, in domain
 units. Bar widths are a fraction of it.
 _Avoid_: band width, Bandbreite (which is the width of an axis band), spacing
+
+**Box**:
+The mark of a box-plot series at one x: a box from the lower to the upper
+quartile with the median across it, a whisker out to each side, and the outliers
+beyond the whiskers as points. Its width is a fraction of the **Step**, as a
+bar's is; several box series on one x axis stand side by side. Always upright.
+The caller brings every number; the library draws them and computes none, so
+which quartile method or whisker rule stands behind them is the caller's to say.
+_Avoid_: box-and-whisker, candle, Kerze, Boxplot as the name of the mark
+
+**Whisker**:
+The line from a quartile out to the end the caller names. Not the minimum or the
+maximum: under the usual rule it stops at the last value within 1.5 IQR.
+_Avoid_: min, max, range, Antenne
+
+**Notch**:
+The waist cut into a box around its median, from two bounds the caller names —
+usually a confidence interval of the median. Both bounds or neither.
+_Avoid_: confidence band, Kerbe
+
+**Outlier** (of a box):
+A value the caller places beyond a whisker; it belongs to its box, is drawn with
+it and read in its tooltip, never hit on its own. One beyond three IQR is drawn
+as a ring. Not the control chart's `"outlier"`, which is a **Rule** a point
+violates, judged against a process.
+_Avoid_: Ausreißer as an identifier, extreme, flier
 
 **Axis band**:
 The strip outside the plot area on one of its four sides that carries one axis'

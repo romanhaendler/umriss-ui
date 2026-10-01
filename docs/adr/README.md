@@ -53,5 +53,6 @@ half a later reader needs most. Exactly one is superseded today.
 | [0037](0037-the-demos-are-addressed-by-path-and-prerendered.md) | The demos are addressed by path and prerendered, so that a search engine can read them | accepted | demo |
 | [0038](0038-a-calculation-can-carry-several-metrics.md) | A calculation can carry several metrics | accepted | calculation |
 | [0039](0039-an-icon-button-names-itself-once.md) | An icon button names itself once, and shows that name | accepted | components |
+| [0040](0040-a-box-carries-its-outliers.md) | A box carries its outliers | accepted | charts |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).

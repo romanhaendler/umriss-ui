@@ -6,7 +6,7 @@
    encoded as NaN (R-2.5). */
 
 import { lowerBound } from "./hit";
-import type { Accessor, MaterializedSeries } from "./types";
+import type { Accessor, BoxChannels, ListAccessor, BoxExtras, BoxNumbers, MaterializedSeries } from "./types";
 
 /** An accessor's value, or NaN for a gap. An infinity is a gap as well: it is no
     value a chart can place, and in the extent it would leave no finite range -
@@ -38,6 +38,12 @@ export type Baseline<T> = Accessor<T> | number;
 export interface ExtraChannels<T> {
   /** Value channel of the matrix: the third value per point. */
   value?: Accessor<T>;
+  /** A box's further numbers (ADR-0011): one channel each. */
+  box?: BoxNumbers<Accessor<T>> &
+    Partial<BoxExtras<Accessor<T>>> & {
+    /** Its outliers, a list per point (ADR-0040). */
+    outliers?: ListAccessor<T>;
+  };
   /** Pre-mapping of the x values, before anything calculates. The working
       calendar comes in here: the scale stays affine, because the channel already
       stands in working time (ADR-0001).
@@ -70,6 +76,25 @@ export function materializeSeries<T>(
   const y0 = baseAccessor === null ? null : new Float64Array(n);
   const valueAccessor = extra?.value ?? null;
   const w = valueAccessor === null ? null : new Float64Array(n);
+  const boxAccessors = extra?.box ?? null;
+  const box: BoxChannels | null =
+    boxAccessors === null
+      ? null
+      : {
+          lowerQuartile: new Float64Array(n),
+          upperQuartile: new Float64Array(n),
+          lowerWhisker: new Float64Array(n),
+          upperWhisker: new Float64Array(n),
+          outliers: null,
+          outlierOffsets: boxAccessors.outliers === undefined ? null : new Uint32Array(n + 1),
+          mean: boxAccessors.mean === undefined ? null : new Float64Array(n),
+          notchLower: boxAccessors.notchLower === undefined ? null : new Float64Array(n),
+          notchUpper: boxAccessors.notchUpper === undefined ? null : new Float64Array(n),
+          count: boxAccessors.count === undefined ? null : new Float64Array(n),
+        };
+  const outlierAccessor = boxAccessors?.outliers ?? null;
+  const offsets = box?.outlierOffsets ?? null;
+  const outliers: number[] = [];
   const map = extra?.xMap ?? null;
   const isGap = extra?.xGap ?? null;
   let xMin = Number.POSITIVE_INFINITY;
@@ -108,6 +133,37 @@ export function materializeSeries<T>(
       // A missing value is a hole in the matrix, not a zero.
       (w as Float64Array)[i] = unplaced ? Number.NaN : valueOf(valueAccessor(d, i));
     }
+    if (boxAccessors !== null) {
+      // A box without its median is a gap whole: nothing of it is drawn or
+      // counted.
+      for (const key of BOX_KEYS) {
+        const v = Number.isNaN(yv) ? Number.NaN : valueOf(boxAccessors[key](d, i));
+        (box as BoxChannels)[key][i] = v;
+        if (v < yMin) yMin = v;
+        if (v > yMax) yMax = v;
+      }
+      for (const key of BOX_EXTRA_KEYS) {
+        const accessor = boxAccessors[key];
+        const channel = (box as BoxChannels)[key];
+        if (accessor === undefined || channel === null) continue;
+        const v = Number.isNaN(yv) ? Number.NaN : valueOf(accessor(d, i));
+        channel[i] = v;
+        if (!BOX_EXTENT_EXTRAS.includes(key)) continue;
+        if (v < yMin) yMin = v;
+        if (v > yMax) yMax = v;
+      }
+      if (outlierAccessor !== null) {
+        const list = Number.isNaN(yv) ? null : outlierAccessor(d, i);
+        for (const raw of list ?? []) {
+          // A value that is no place is left out, as a gap is.
+          if (!Number.isFinite(raw)) continue;
+          outliers.push(raw);
+          if (raw < yMin) yMin = raw;
+          if (raw > yMax) yMax = raw;
+        }
+        if (offsets !== null) offsets[i + 1] = outliers.length;
+      }
+    }
     if (baseAccessor !== null) {
       const uv = unplaced ? Number.NaN : valueOf(baseAccessor(d, i));
       (y0 as Float64Array)[i] = uv;
@@ -115,7 +171,37 @@ export function materializeSeries<T>(
       if (uv > yMax) yMax = uv;
     }
   }
-  return { series: { x, y, y0, w, length: n }, extent: { xMin, xMax, yMin, yMax } };
+  if (box !== null && outlierAccessor !== null) box.outliers = Float64Array.from(outliers);
+  return { series: { x, y, y0, w, box, length: n }, extent: { xMin, xMax, yMin, yMax } };
+}
+
+/** A box's further numbers, top to bottom as drawn: the order of its tooltip
+    rows, readout and table columns (box-plot B9). */
+export const BOX_KEYS = ["upperWhisker", "upperQuartile", "lowerQuartile", "lowerWhisker"] as const;
+
+/** A box's optional numbers. */
+export const BOX_EXTRA_KEYS = ["mean", "notchUpper", "notchLower", "count"] as const;
+
+/** Those of them that are places on the y axis and pull its extent; a count
+    is none. */
+const BOX_EXTENT_EXTRAS: readonly (typeof BOX_EXTRA_KEYS)[number][] = ["mean", "notchUpper", "notchLower"];
+
+/** Index of the first box whose numbers are not lower whisker ≤ lower
+    quartile ≤ median ≤ upper quartile ≤ upper whisker, otherwise -1 (DEV
+    check, box-plot 04). A gap is in order. */
+export function firstDisorderedBox(series: MaterializedSeries): number {
+  const box = series.box;
+  if (box === null) return -1;
+  for (let i = 0; i < series.length; i++) {
+    const median = series.y[i] as number;
+    if (Number.isNaN(median)) continue;
+    const lo = box.lowerWhisker[i] as number;
+    const q1 = box.lowerQuartile[i] as number;
+    const q3 = box.upperQuartile[i] as number;
+    const hi = box.upperWhisker[i] as number;
+    if (lo > q1 || q1 > median || median > q3 || q3 > hi) return i;
+  }
+  return -1;
 }
 
 /** Index of the first unsorted x value, otherwise -1 (DEV check, R-2.6). */
@@ -134,7 +220,7 @@ export function visibleExtent(
   from: number,
   to: number,
 ): [number, number] {
-  const { x, y, y0, length } = series;
+  const { x, y, y0, box, length } = series;
   let min = Number.POSITIVE_INFINITY;
   let max = Number.NEGATIVE_INFINITY;
   for (let i = lowerBound(x, length, from); i < length && (x[i] as number) <= to; i++) {
@@ -145,6 +231,28 @@ export function visibleExtent(
       const u = y0[i] as number;
       if (u < min) min = u;
       if (u > max) max = u;
+    }
+    if (box !== null) {
+      for (const key of BOX_KEYS) {
+        const u = box[key][i] as number;
+        if (u < min) min = u;
+        if (u > max) max = u;
+      }
+      for (const key of BOX_EXTENT_EXTRAS) {
+        const channel = box[key];
+        if (channel === null) continue;
+        const u = channel[i] as number;
+        if (u < min) min = u;
+        if (u > max) max = u;
+      }
+      const { outliers, outlierOffsets } = box;
+      if (outliers !== null && outlierOffsets !== null) {
+        for (let k = outlierOffsets[i] as number; k < (outlierOffsets[i + 1] as number); k++) {
+          const u = outliers[k] as number;
+          if (u < min) min = u;
+          if (u > max) max = u;
+        }
+      }
     }
   }
   return [min, max];

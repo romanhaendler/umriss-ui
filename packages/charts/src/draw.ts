@@ -14,7 +14,7 @@ import { hatchLines, markerPath, type Hatch, type MarkerShape } from "./marks";
 import { segmentEnd } from "./state";
 import type { AxisLayout } from "./layout";
 import type { ResolvedTheme } from "./theme";
-import type { HoverState, Rect, Scale } from "./types";
+import type { BoxChannels, HoverState, Rect, Scale } from "./types";
 
 /** What every series kind needs in order to be drawn: the channels, both scales,
     the colour. */
@@ -72,6 +72,18 @@ export interface BarDrawItem extends DrawBase {
   edges?: boolean;
 }
 
+export interface BoxDrawItem extends DrawBase {
+  kind: "box";
+  /** The further numbers beside the median in y (ADR-0011). */
+  box: BoxChannels;
+  /** Left edge relative to the x value, in domain units (ADR-0002). */
+  offset: number;
+  /** Box width in domain units. */
+  width: number;
+  /** Lines across the box, in the series' colour (C3). */
+  hatch?: Hatch;
+}
+
 export interface ScatterDrawItem extends DrawBase {
   kind: "scatter";
   radius: number;
@@ -111,6 +123,7 @@ export type SeriesDrawItem =
   | LineDrawItem
   | AreaDrawItem
   | BarDrawItem
+  | BoxDrawItem
   | ScatterDrawItem
   | StateDrawItem
   | MatrixDrawItem;
@@ -451,6 +464,148 @@ function drawBars(ctx: CanvasRenderingContext2D, item: BarDrawItem, plot: Rect, 
   }
 }
 
+/* ---------------- Box (box-plot B12) ----------------
+
+   Placed as a bar is (ADR-0002). Four paths for the whole series, each
+   stroked or filled once: the boxes, filled faintly and outlined in full;
+   the medians, heavier; the whiskers with their caps, half a box wide. Two
+   more for the outliers on the box's centre line: dots, and rings for the far
+   out; and one for the means' crosses. A gap - a missing median - leaves its box out whole (R-2.5). */
+
+const BOX_FILL = 0.18;
+const BOX_MEDIAN = 2;
+const OUTLIER_RADIUS = 3;
+/** Half the mean's ×, in pixels. */
+const MEAN_SIZE = 3.5;
+const MEAN_STROKE = 1.5;
+/** How deep a notch cuts into each side, as a share of the box's width. */
+const NOTCH_DEPTH = 0.2;
+/** An outlier this many IQR of its own box beyond a quartile is far out: a
+    ring, not a dot (ADR-0040). */
+const FAR_OUT = 3;
+/** Pixels left open between two boxes side by side, so that one's outline
+    does not lie on the other's; dropped where a box is too narrow for it. */
+const BOX_GAP = 3;
+
+function drawBoxes(ctx: CanvasRenderingContext2D, item: BoxDrawItem, plot: Rect): void {
+  const n = item.length;
+  const xm = item.xScale.m;
+  const xb = item.xScale.b;
+  const ym = item.yScale.m;
+  const yb = item.yScale.b;
+  const xs = item.x;
+  const ys = item.y;
+  const { lowerQuartile, upperQuartile, lowerWhisker, upperWhisker, outliers, outlierOffsets, mean, notchLower, notchUpper } = item.box;
+  const edgePx = item.offset * xm;
+  const widthPx = item.width * xm;
+  const gap = widthPx > 4 * BOX_GAP ? BOX_GAP / 2 : 0;
+  // The centre's distance from the x value - exactly 0 for a box alone, so
+  // that its pixel is the grid line's to the bit.
+  const centrePx = (item.offset + item.width / 2) * xm;
+
+  const boxes = new Path2D();
+  const medians = new Path2D();
+  const whiskers = new Path2D();
+  const dots = new Path2D();
+  const means = new Path2D();
+  const rings = new Path2D();
+  for (let i = 0; i < n; i++) {
+    const median = ys[i] as number;
+    if (Number.isNaN(median)) continue;
+    // The 1px outline, whiskers and caps on half pixels and the 2px median on
+    // whole ones, so that each stays crisp (R-3.5); a notch's slants cannot.
+    const from = (xs[i] as number) * xm + xb + edgePx;
+    const left = crisp(from + gap);
+    const right = Math.round(from + widthPx - gap) - 0.5;
+    const width = right - left;
+    // Rounded as a grid line at the same x is, so that a whisker covers it
+    // rather than standing a pixel beside it.
+    const mid = crisp((xs[i] as number) * xm + xb + centrePx);
+    const capPx = width / 4;
+    const notchPx = width * NOTCH_DEPTH;
+    const q1 = crisp((lowerQuartile[i] as number) * ym + yb);
+    const q3 = crisp((upperQuartile[i] as number) * ym + yb);
+    const py = Math.round(median * ym + yb);
+    const nLo = notchLower === null ? Number.NaN : (notchLower[i] as number) * ym + yb;
+    const nHi = notchUpper === null ? Number.NaN : (notchUpper[i] as number) * ym + yb;
+    const notched = !Number.isNaN(nLo) && !Number.isNaN(nHi);
+    if (!Number.isNaN(q1) && !Number.isNaN(q3)) {
+      if (notched) {
+        // The waist: in from each side at the notch's bounds to the median,
+        // drawn as given even where a bound lies beyond its quartile.
+        boxes.moveTo(left, q3);
+        boxes.lineTo(left, nHi);
+        boxes.lineTo(left + notchPx, py);
+        boxes.lineTo(left, nLo);
+        boxes.lineTo(left, q1);
+        boxes.lineTo(right, q1);
+        boxes.lineTo(right, nLo);
+        boxes.lineTo(right - notchPx, py);
+        boxes.lineTo(right, nHi);
+        boxes.lineTo(right, q3);
+        boxes.closePath();
+      } else boxes.rect(left, q3, width, q1 - q3);
+    }
+    const inset = notched ? notchPx : 0;
+    medians.moveTo(left + inset, py);
+    medians.lineTo(right - inset, py);
+    const m = mean === null ? Number.NaN : (mean[i] as number) * ym + yb;
+    if (!Number.isNaN(m)) {
+      means.moveTo(mid - MEAN_SIZE, m - MEAN_SIZE);
+      means.lineTo(mid + MEAN_SIZE, m + MEAN_SIZE);
+      means.moveTo(mid - MEAN_SIZE, m + MEAN_SIZE);
+      means.lineTo(mid + MEAN_SIZE, m - MEAN_SIZE);
+    }
+    const lo = crisp((lowerWhisker[i] as number) * ym + yb);
+    const hi = crisp((upperWhisker[i] as number) * ym + yb);
+    // Each whisker from its quartile out, where both ends are given.
+    for (const [start, to] of [[q3, hi], [q1, lo]] as const) {
+      if (Number.isNaN(start) || Number.isNaN(to)) continue;
+      whiskers.moveTo(mid, start);
+      whiskers.lineTo(mid, to);
+      whiskers.moveTo(mid - capPx, to);
+      whiskers.lineTo(mid + capPx, to);
+    }
+    if (outliers !== null && outlierOffsets !== null) {
+      // Far out by the box's own quartiles, in domain units; a box without
+      // them has no far.
+      const lower = lowerQuartile[i] as number;
+      const upper = upperQuartile[i] as number;
+      const reach = FAR_OUT * (upper - lower);
+      for (let k = outlierOffsets[i] as number; k < (outlierOffsets[i + 1] as number); k++) {
+        const v = outliers[k] as number;
+        const path = v > upper + reach || v < lower - reach ? rings : dots;
+        const oy = v * ym + yb;
+        path.moveTo(mid + OUTLIER_RADIUS, oy);
+        path.arc(mid, oy, OUTLIER_RADIUS, 0, Math.PI * 2);
+      }
+    }
+  }
+  const alpha = ctx.globalAlpha;
+  const cap = ctx.lineCap;
+  ctx.globalAlpha = alpha * BOX_FILL;
+  ctx.fillStyle = item.color;
+  ctx.fill(boxes);
+  ctx.globalAlpha = alpha;
+  // Across a faint fill the hatch takes the series' colour, as an area's does.
+  drawHatch(ctx, boxes, plot, item.hatch ?? "none", item.color);
+  ctx.strokeStyle = item.color;
+  ctx.setLineDash([]);
+  ctx.lineCap = "butt";
+  ctx.lineWidth = 1;
+  ctx.stroke(boxes);
+  ctx.stroke(whiskers);
+  ctx.stroke(rings);
+  ctx.lineWidth = MEAN_STROKE;
+  ctx.stroke(means);
+  ctx.lineWidth = 1;
+  ctx.fillStyle = item.color;
+  ctx.fill(dots);
+  ctx.lineWidth = BOX_MEDIAN;
+  ctx.stroke(medians);
+  ctx.lineCap = cap;
+}
+
 /* ---------------- Scatter ----------------
 
    No connecting path: a scatter claims no order between its points. One Path2D
@@ -662,6 +817,9 @@ export function drawSeriesLayer(
         break;
       case "bar":
         drawBars(ctx, item, plot, input.theme.colorBg);
+        break;
+      case "box":
+        drawBoxes(ctx, item, plot);
         break;
       case "scatter":
         drawScatter(item, plot, late);
