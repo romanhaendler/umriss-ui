@@ -312,6 +312,7 @@ export const OUTLINE: readonly Rubric[] = [
         sentence: "A single line of text (text field, text box): names, references, addresses, search terms. Reach for it whenever the answer is short free text; for numbers take a [NumberInput](#/numberinput).",
         about: [
           "Put it in a [FormField](#/formfield): the field brings the label, the hint, the error and the wiring a screen reader needs. Every attribute of the native input passes through.",
+          "It fills its place, or takes the width of its value with `chars` - a postcode `chars={5}`; in a row it is sixteen characters wide whatever it holds. How wide and how tall every field is stands on [Sizes](#/sizes).",
         ],
         alternatives: [
           { when: "A figure that is calculated with, with a unit and a range", use: "numberinput" },
@@ -510,6 +511,7 @@ export const OUTLINE: readonly Rubric[] = [
         sentence: "Several values from a list (multi-select, tag picker): a project team, services to filter by. The chosen ones stand as chips in the field, with a view in the panel that shows only them.",
         about: [
           "The field stays one line tall: as many chips as fit, the rest as a “+N” button that opens the panel on the chosen values.",
+          "Choosing never moves it: it fills its place, or in a row stands at twenty characters, or at its `chars`, and the chips follow its width ([Sizes](#/sizes)).",
           "The panel has a search, select all, select none and invert for what the search found, and it never reorders the list.",
         ],
         alternatives: [
