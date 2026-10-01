@@ -758,7 +758,7 @@ by tenant, by anything the user is not meant to undo. It is invisible: it is nev
 shown as a condition, never reset, and the total a user sees beside the
 filtered set counts only the rows it admits. A table the pre-filter leaves empty
 has no entries; nothing has been filtered away. A restriction the user should see
-and undo is a **Column filter**, never a pre-filter.
+and undo is a **Column filter** or a **Row filter**, never a pre-filter.
 _Avoid_: app filter, Anwendungsfilter, base filter, Grundfilter
 
 **Column filter**:
@@ -768,10 +768,20 @@ while it holds a condition. It is never the pre-filter.
 _Avoid_: filter on its own where the pre-filter could be meant, Listenfilter as
 the general word (it is one kind), Anwendungsfilter
 
+**Row filter**:
+A question the application defines over the whole row, once and outside the
+component, and asks through a control of its own. Unlike the **Pre-filter** the
+user sees and undoes it; unlike a **Column filter** it belongs to no column and
+the table offers no control for it. Whatever it varies by is its condition, never
+state it reads on the side.
+_Avoid_: quick filter, custom filter, Schnellfilter, filter on its own
+
 **Condition**:
-What an active column filter currently requires — the chosen values, or the
-bounds of a range. Each condition is shown once, in the table toolbar, and is
-removed on its own. The search is not a condition.
+What an active column filter or row filter currently requires — the chosen
+values, the bounds of a range, or whatever a row filter asks for. Each condition
+counts toward the **Filtered set**, is lifted by "Reset" and is removed on its
+own; it is shown once, in the table toolbar — a row filter's only where it
+describes itself, otherwise its control shows it. The search is not a condition.
 _Avoid_: Filterwert, active filter, aktiver Filter, chip, Tag
 
 **Search**:
