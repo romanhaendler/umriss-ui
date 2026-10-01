@@ -456,6 +456,19 @@
     position: absolute;
   }
 
+  /* A field from @umriss-ui/core is as wide as its parent - in a toolbar a
+     select or a combobox took a line of its own. Here each part is as wide as
+     its content, unless it says its own width; the search keeps its own below. */
+  .toolbarGroup > * {
+    width: auto;
+  }
+
+  /* At `md` a group is as tall as a control of that size, for the reason
+     above. */
+  .toolbarMd .toolbarGroup {
+    min-height: var(--u-control-height);
+  }
+
   .toolbarGroup > .search {
     width: 160px;
     min-width: 120px;

@@ -32,6 +32,9 @@ export interface ComboboxProps<T extends string = string>
   onChange: (value: T | null) => void;
   /** What stands in the empty field. */
   placeholder?: string;
+  /** `sm` for a table toolbar and dense forms, `md` otherwise - the heights of
+      `Input`'s two sizes. */
+  size?: "sm" | "md";
   /** Locks field and panel. */
   disabled?: boolean;
   /** Marks the field as invalid. `FormField` sets it itself as soon as it
@@ -50,6 +53,7 @@ export const Combobox = forwardRef(function Combobox<T extends string = string>(
     value,
     onChange,
     placeholder,
+    size = "md",
     disabled = false,
     invalid,
     emptyText,
@@ -179,7 +183,7 @@ export const Combobox = forwardRef(function Combobox<T extends string = string>(
           aria-invalid={isInvalid || undefined}
           placeholder={placeholderText}
           value={display}
-          className={cx(styles.input, clearable && styles.inputClearable, isInvalid && styles.invalid)}
+          className={cx(styles.input, size === "sm" && styles.sm, clearable && styles.inputClearable, isInvalid && styles.invalid)}
           onChange={(event) => {
             setQuery(event.target.value);
             setActiveIndex(0);

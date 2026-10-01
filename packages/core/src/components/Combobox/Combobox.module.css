@@ -24,6 +24,13 @@
     width: 100%;
   }
 
+  /* The small size: `Input`'s, so that the two stand level in a toolbar. */
+  .sm {
+    height: var(--u-control-height-sm);
+    font-size: var(--u-text-xs);
+    border-radius: var(--u-radius-sm);
+  }
+
   .input::placeholder {
     color: var(--u-color-text-muted);
   }
