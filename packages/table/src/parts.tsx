@@ -496,16 +496,19 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
   if (entries) {
     const byKey = new Map<string, FlatteningEntry<unknown>>();
     const parentOf = new Map<string, string | undefined>();
+    const beforeRoot = new Set<string>();
     const path: string[] = [];
-    for (const entry of entries) {
+    entries.forEach((entry, i) => {
       byKey.set(entry.key, entry);
       path.length = entry.level;
       parentOf.set(entry.key, path.at(-1));
       path.push(entry.key);
-    }
+      if (entries[i + 1]?.level === 0) beforeRoot.add(entry.key);
+    });
     tree = {
       column: dataColumns[0],
       entry: (row) => byKey.get(hook.rowKey(row)),
+      beforeRoot: (key) => beforeRoot.has(key),
       parent: (key) => parentOf.get(key),
       /* Against the open branches, not against what is shown: a branch open
          only on the way to a match is not open, and folding it must not
@@ -1347,9 +1350,9 @@ function Row({
           virtual && styles.virtualRow,
           entry && styles.treeRow,
           opens && styles.branchRow,
-          entry?.level === 0 && styles.rootRow,
           entry?.pathOnly && styles.pathRow,
         )}
+        data-before-root={entry && !open && tree?.beforeRoot(key) ? "" : undefined}
         data-row={virtual ? absolute : undefined}
         data-line={line ? "row" : undefined}
         data-motion={key}
@@ -1441,7 +1444,13 @@ function Row({
         )}
       </tr>
       {open && (
-        <tr id={detailId} className={styles.detailRow} data-group={group?.path} data-grid-line={grid ? `detail:${key}` : undefined}>
+        <tr
+          id={detailId}
+          className={styles.detailRow}
+          data-group={group?.path}
+          data-grid-line={grid ? `detail:${key}` : undefined}
+          data-before-root={entry && tree?.beforeRoot(key) ? "" : undefined}
+        >
           <td
             colSpan={columnCount}
             className={cx(styles.detailCell, entry && styles.treeDetail)}
@@ -1535,6 +1544,8 @@ function Cell({
 interface TreeSetup {
   /** The column that carries the tree. */
   column: ColumnEntry | undefined;
+  /** Whether a root follows the row - its last line draws the root's line. */
+  beforeRoot: (key: string) => boolean;
   entry: (row: unknown) => FlatteningEntry<unknown> | undefined;
   parent: (key: string) => string | undefined;
   /** Opens or closes a branch - the open branches, never the search's path. */

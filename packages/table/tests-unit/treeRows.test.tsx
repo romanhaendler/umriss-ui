@@ -153,6 +153,16 @@ describe("tree rows - the column that carries the tree", () => {
   });
 });
 
+describe("tree rows - the line before a root", () => {
+  it("marks the last line before each root, and moves the mark when a branch opens", () => {
+    const { container } = render(<Units />);
+    const marked = () => Array.from(container.querySelectorAll("tbody tr[data-before-root]"), (tr) => tr.querySelector("th")?.textContent?.trim());
+    expect(marked()).toEqual(["Sales", "Staff"]);
+    fireEvent.click(screen.getByRole("button", { name: "Unfold rows under Sales" }));
+    expect(marked()).toEqual(["South", "Staff"]);
+  });
+});
+
 describe("tree rows - open branches and the view", () => {
   it("opens to a depth on the first render and leaves the default out of the view", () => {
     const { container } = render(<Units defaultBranches={2} />);
