@@ -3,8 +3,8 @@ import { BoxPlot, Chart, Tooltip, XAxis, YAxis } from "../../../src";
 export const title = "With outliers";
 export const lead = "`outliers` returns the values beyond the whiskers, a list per box. They are drawn with their box and read in its tooltip, the first five written out; one more than three IQR beyond its box is a ring.";
 
-interface CycleTime {
-  machine: string;
+interface ResponseTime {
+  service: string;
   low: number;
   q1: number;
   median: number;
@@ -13,28 +13,28 @@ interface CycleTime {
   outliers: number[];
 }
 
-/* Seconds per part over the last shift. The whiskers end at the last value
-   within 1.5 IQR; the database returned everything beyond as outliers. */
-const CYCLE_TIMES: CycleTime[] = [
-  { machine: "Press", low: 41.2, q1: 43.8, median: 44.9, q3: 46.1, high: 49.5, outliers: [52.4, 38.9] },
-  { machine: "Dryer", low: 38.5, q1: 42.1, median: 44.0, q3: 47.3, high: 53.8, outliers: [58.1, 75.0] },
-  { machine: "Kiln", low: 44.0, q1: 45.2, median: 45.8, q3: 46.5, high: 48.1, outliers: [49.2, 53.0, 40.1] },
-  { machine: "Sorter", low: 39.9, q1: 42.6, median: 43.7, q3: 45.0, high: 48.6, outliers: [49.3, 49.8, 50.4, 51.0, 52.2, 53.5, 55.9, 37.1] },
+/* Milliseconds per request over the last hour. The whiskers end at the last
+   value within 1.5 IQR; the database returned everything beyond as outliers. */
+const RESPONSE_TIMES: ResponseTime[] = [
+  { service: "Checkout", low: 112, q1: 138, median: 149, q3: 161, high: 195, outliers: [224, 98] },
+  { service: "Billing", low: 85, q1: 121, median: 140, q3: 173, high: 238, outliers: [281, 395] },
+  { service: "Search", low: 140, q1: 152, median: 158, q3: 165, high: 181, outliers: [189, 214, 104] },
+  { service: "Images", low: 99, q1: 126, median: 137, q3: 150, high: 186, outliers: [193, 198, 204, 210, 222, 235, 259, 71] },
 ];
 
 export default function WithOutliers() {
   return (
-    <Chart data={CYCLE_TIMES} height={300} ariaLabel="Cycle time per machine over the last shift, with outliers">
-      <XAxis accessor={(_: CycleTime, i) => i} ticks={[0, 1, 2, 3]} tickFormat={(v) => CYCLE_TIMES[v]?.machine ?? ""} />
-      <YAxis accessor={(d: CycleTime) => d.median} tickFormat={(v) => `${v} s`} />
+    <Chart data={RESPONSE_TIMES} height={300} ariaLabel="Response time per service over the last hour, with outliers">
+      <XAxis accessor={(_: ResponseTime, i) => i} ticks={[0, 1, 2, 3]} tickFormat={(v) => RESPONSE_TIMES[v]?.service ?? ""} />
+      <YAxis accessor={(d: ResponseTime) => d.median} tickFormat={(v) => `${v} ms`} />
       <BoxPlot
-        name="Cycle time"
-        median={(d: CycleTime) => d.median}
-        lowerQuartile={(d: CycleTime) => d.q1}
-        upperQuartile={(d: CycleTime) => d.q3}
-        lowerWhisker={(d: CycleTime) => d.low}
-        upperWhisker={(d: CycleTime) => d.high}
-        outliers={(d: CycleTime) => d.outliers}
+        name="Response time"
+        median={(d: ResponseTime) => d.median}
+        lowerQuartile={(d: ResponseTime) => d.q1}
+        upperQuartile={(d: ResponseTime) => d.q3}
+        lowerWhisker={(d: ResponseTime) => d.low}
+        upperWhisker={(d: ResponseTime) => d.high}
+        outliers={(d: ResponseTime) => d.outliers}
       />
       <Tooltip />
     </Chart>
