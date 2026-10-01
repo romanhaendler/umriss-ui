@@ -61,7 +61,13 @@ import {
   visibleExtent,
   type Baseline,
   type Extent,
+  type ExtraChannels,
+  BOX_KEYS,
 } from "./materialize";
+
+/** A box's rows top to bottom as drawn: its further numbers with the median
+    between the quartiles (box-plot B9). */
+const BOX_ROWS = [...BOX_KEYS.slice(0, 2), "median", ...BOX_KEYS.slice(2)] as const;
 import {
   barGroups,
   barPlacement,
@@ -79,6 +85,8 @@ import type {
   StateSeriesConfig,
   AxisOrientation,
   BarSeriesConfig,
+  BoxChannels,
+  BoxSeriesConfig,
   ChartPerf,
   HoverState,
   LegendConfig,
@@ -147,6 +155,7 @@ interface Candidate {
   covers: boolean;
   value?: number;
   segment?: { from: number; to: number; label: string };
+  box?: TooltipPoint["box"];
 }
 
 interface AxisEntry {
@@ -242,6 +251,9 @@ export interface TooltipRow {
       draws the legend's marks instead (charts-alternatives 04); null draws
       the point's colour. */
   chip: { color: string; mark: LegendMark } | null;
+  /** A box's numbers top to bottom as drawn, each named (box-plot B9); null
+      for every other kind, whose value stands alone. */
+  box: readonly { label: string; value: string }[] | null;
 }
 
 /** A stack's total in the built-in tooltip (charts-stacking K4). */
@@ -372,8 +384,34 @@ function materialEqual(previous: SeriesConfig, next: SeriesConfig): boolean {
     fnEqual(previous.accessor, next.accessor) &&
     previous.data === next.data &&
     fnEqual(baselineOf(previous), baselineOf(next)) &&
-    fnEqual(valueChannelOf(previous), valueChannelOf(next))
+    fnEqual(valueChannelOf(previous), valueChannelOf(next)) &&
+    boxChannelsEqual(boxChannelsOf(previous), boxChannelsOf(next))
   );
+}
+
+/** A box's further accessors (ADR-0011); undefined for every other kind. */
+function boxChannelsOf(config: SeriesConfig): ExtraChannels<unknown>["box"] {
+  if (config.kind !== "box") return undefined;
+  const { lowerQuartile, upperQuartile, lowerWhisker, upperWhisker } = config;
+  return { lowerQuartile, upperQuartile, lowerWhisker, upperWhisker };
+}
+
+function boxChannelsEqual(a: ExtraChannels<unknown>["box"], b: ExtraChannels<unknown>["box"]): boolean {
+  if (a === undefined || b === undefined) return a === b;
+  return BOX_KEYS.every((key) => fnEqual(a[key], b[key]));
+}
+
+/** A box's numbers at one point. */
+function boxAt(box: BoxChannels, i: number): NonNullable<TooltipPoint["box"]> {
+  const out = {} as NonNullable<TooltipPoint["box"]>;
+  for (const key of BOX_KEYS) out[key] = box[key][i] as number;
+  return out;
+}
+
+/** A bar's or a box's width fraction - the two share one group (ADR-0002);
+    0 for every other kind. */
+function widthOf(config: SeriesConfig): number {
+  return config.kind === "bar" ? config.barWidth : config.kind === "box" ? config.boxWidth : 0;
 }
 
 /** The stack a series stands in, as a key: the same id on the same x and y
@@ -398,6 +436,8 @@ function baselineOf(config: SeriesConfig): Baseline<unknown> | undefined {
   switch (config.kind) {
     case "line":
     case "scatter":
+    case "box":
+      // A box floats where its numbers are; it has no foot at 0.
       return undefined;
     case "area":
       // In a stack the stack below is the foot, not a baseline of its own.
@@ -437,6 +477,10 @@ function ownFieldsEqual(previous: SeriesConfig, next: SeriesConfig): boolean {
     case "bar": {
       const a = previous as BarSeriesConfig;
       return a.barWidth === next.barWidth;
+    }
+    case "box": {
+      const a = previous as BoxSeriesConfig;
+      return a.boxWidth === next.boxWidth;
     }
     case "scatter": {
       const a = previous as ScatterSeriesConfig;
@@ -1076,17 +1120,17 @@ export class ChartScene {
       }
     }
     // A bar group calculates with one width fraction - that of the first member.
-    // Tacitly, that would be an unwritten rule.
+    // Tacitly, that would be an unwritten rule. Boxes stand in the same group.
     const fractions = new Map<string, number>();
     for (const { config } of this.seriesInOrder()) {
-      if (config.kind !== "bar") continue;
+      if (config.kind !== "bar" && config.kind !== "box") continue;
       const first = fractions.get(config.xAxisId);
       if (first === undefined) {
-        fractions.set(config.xAxisId, config.barWidth);
-      } else if (first !== config.barWidth) {
+        fractions.set(config.xAxisId, widthOf(config));
+      } else if (first !== widthOf(config)) {
         warnOnce(
           `bar-width-${config.xAxisId}`,
-          `Bars on the x axis "${config.xAxisId}" give different barWidth. ` +
+          `Bars and boxes on the x axis "${config.xAxisId}" give different barWidth or boxWidth. ` +
             `A group shares one width fraction; that of the first (${first}) applies (ADR-0002).`,
         );
       }
@@ -1139,6 +1183,7 @@ export class ChartScene {
         baselineOf(config),
         {
           value: valueChannelOf(config),
+          box: boxChannelsOf(config),
           xMap: this.mapFor(xAxis),
           xGap: this.gapFor(xAxis),
         },
@@ -1147,7 +1192,7 @@ export class ChartScene {
       entry.own = stackOf(config) === undefined ? null : material.series.y;
       entry.stacked = null;
       points += material.series.length;
-      if (config.kind === "bar") {
+      if (config.kind === "bar" || config.kind === "box") {
         const step = measureStep(material.series.x, material.series.length);
         entry.step = step;
         // A bar is centred on its x value, so half the step belongs to the left
@@ -1869,7 +1914,7 @@ export class ChartScene {
         kind: e.config.kind,
         xAxisId: e.config.xAxisId,
         step: e.step ?? 0,
-        fraction: e.config.kind === "bar" ? e.config.barWidth : 0,
+        fraction: widthOf(e.config),
         stack: stackOf(e.config),
       })),
     );
@@ -1952,6 +1997,21 @@ export class ChartScene {
             width: placement.width,
             hatch: marks?.hatch,
             edges: entry.stacked !== null,
+          });
+          break;
+        }
+        case "box": {
+          // Placed as a bar is, in the same group (ADR-0002).
+          const group = groups.get(entry.order) ?? { index: 0, size: 1, step: entry.step ?? 0, fraction: config.boxWidth };
+          const domain = xAxis.scale.domain;
+          const placement = barPlacement(effectiveStep(group.step, domain[1] - domain[0]), group.fraction, group.index, group.size);
+          items.push({
+            ...base,
+            kind: "box",
+            box: mat.box as BoxChannels,
+            offset: placement.offset,
+            width: placement.width,
+            hatch: marks?.hatch,
           });
           break;
         }
@@ -2165,6 +2225,7 @@ export class ChartScene {
         covers: hit.covers === true,
         value: hit.value,
         segment: hit.segment,
+        box: hit.box,
       });
     });
     if (candidates.length === 0) return null;
@@ -2233,6 +2294,7 @@ export class ChartScene {
       index: k.index,
       value: k.value,
       segment: k.segment,
+      box: k.box,
     }));
     const hit: TooltipHit = {
       xValue: primary.xValue,
@@ -2462,7 +2524,10 @@ export class ChartScene {
     if (hover === null) return "";
     const rows = hover.hit.points.map((point, k) => {
       const row = this.hoverRows[k];
-      return { order: this.hoverOrders[k], name: point.seriesName, value: row?.value ?? "", x: row?.x ?? "" };
+      // A box is heard as its numbers in a list after its name.
+      const box = row?.box?.map((p) => `${p.label} ${p.value}`).join(", ");
+      const name = box === undefined ? point.seriesName : `${point.seriesName}:`;
+      return { order: this.hoverOrders[k], name, value: box ?? row?.value ?? "", x: row?.x ?? "" };
     });
     const emph = this.emphasised()?.order;
     rows.sort((a, b) => Number(b.order === emph) - Number(a.order === emph));
@@ -2637,13 +2702,32 @@ export class ChartScene {
       caption: rows.thinned ? `${caption} ${w.downsampled(rows.readings)}` : caption,
       columns: [
         this.findAxisConfig("x", axisId)?.label ?? w.positionColumn,
-        ...entries.map((e) => this.nameFor(e, all.indexOf(e))),
+        ...entries.flatMap((e) => {
+          const name = this.nameFor(e, all.indexOf(e));
+          return e.config.kind === "box" ? BOX_ROWS.map((key) => `${name} – ${this.wording[key]}`) : [name];
+        }),
       ],
       rows: rows.x.map((x, r) => [
         this.xLabel(axisId, x, seconds),
-        ...entries.map((e, s) => this.cellText(e, rows.courses[s] as Course, rows.at[r]?.[s] ?? -1)),
+        ...entries.flatMap((e, s) => {
+          const course = rows.courses[s] as Course;
+          const i = rows.at[r]?.[s] ?? -1;
+          return e.config.kind === "box" ? this.boxCells(e, course, i) : [this.cellText(e, course, i)];
+        }),
       ]),
     };
+  }
+
+  /** A box's five cells, top to bottom; empty where it has no box. The
+      course may be thinned: its point is found in the channels by its x.
+      ponytail: two boxes at one x read the first's numbers when thinned;
+      carry the index through downsample() should that ever matter. */
+  private boxCells(entry: SeriesEntry, course: Course, i: number): string[] {
+    const mat = entry.materialized as MaterializedSeries;
+    const median = i < 0 ? Number.NaN : (course.y[i] as number);
+    if (Number.isNaN(median) || mat.box === null) return ["", "", "", "", ""];
+    const at = lowerBound(mat.x, mat.length, course.x[i] as number);
+    return this.boxParts(entry, { ...boxAt(mat.box, at), median }).map((p) => p.value);
   }
 
   /** One cell: empty where the series has no reading there or a gap; a
@@ -2908,7 +2992,16 @@ export class ChartScene {
     const label = k.segment?.label;
     const value = label !== undefined && label !== "" ? label : this.formatY(k.entry, k.value ?? k.yValue);
     const x = config.xAxisId === headerXAxisId ? "" : this.xLabel(config.xAxisId, k.xValue);
-    return { value, x, chip: this.theme?.forced === true ? this.tooltipChip(k, this.theme) : null };
+    const box = k.box === undefined ? null : this.boxParts(k.entry, { ...k.box, median: k.yValue });
+    return { value, x, chip: this.theme?.forced === true ? this.tooltipChip(k, this.theme) : null, box };
+  }
+
+  /** A box's numbers top to bottom as drawn, named and formatted (B9). */
+  private boxParts(
+    entry: SeriesEntry,
+    v: NonNullable<TooltipPoint["box"]> & { median: number },
+  ): { label: string; value: string }[] {
+    return BOX_ROWS.map((key) => ({ label: this.wording[key], value: this.formatY(entry, v[key]) }));
   }
 
   /** A hit's chip drawn as its legend entry is: a band's state and a cell's
@@ -2952,6 +3045,7 @@ export class ChartScene {
     color?: string;
     value?: number;
     segment?: { from: number; to: number; label: string };
+    box?: TooltipPoint["box"];
   } | null {
     const config = entry.config;
     const n = mat.length;
@@ -3042,6 +3136,7 @@ export class ChartScene {
       marked: true,
       areal: false,
       covers: targetY >= Math.min(foot, top) && targetY <= Math.max(foot, top),
+      box: mat.box === null ? undefined : boxAt(mat.box, index),
     };
   }
 

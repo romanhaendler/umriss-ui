@@ -14,7 +14,7 @@ import { hatchLines, markerPath, type Hatch, type MarkerShape } from "./marks";
 import { segmentEnd } from "./state";
 import type { AxisLayout } from "./layout";
 import type { ResolvedTheme } from "./theme";
-import type { HoverState, Rect, Scale } from "./types";
+import type { BoxChannels, HoverState, Rect, Scale } from "./types";
 
 /** What every series kind needs in order to be drawn: the channels, both scales,
     the colour. */
@@ -72,6 +72,18 @@ export interface BarDrawItem extends DrawBase {
   edges?: boolean;
 }
 
+export interface BoxDrawItem extends DrawBase {
+  kind: "box";
+  /** The further numbers beside the median in y (ADR-0011). */
+  box: BoxChannels;
+  /** Left edge relative to the x value, in domain units (ADR-0002). */
+  offset: number;
+  /** Box width in domain units. */
+  width: number;
+  /** Lines across the box, in the series' colour (C3). */
+  hatch?: Hatch;
+}
+
 export interface ScatterDrawItem extends DrawBase {
   kind: "scatter";
   radius: number;
@@ -111,6 +123,7 @@ export type SeriesDrawItem =
   | LineDrawItem
   | AreaDrawItem
   | BarDrawItem
+  | BoxDrawItem
   | ScatterDrawItem
   | StateDrawItem
   | MatrixDrawItem;
@@ -451,6 +464,73 @@ function drawBars(ctx: CanvasRenderingContext2D, item: BarDrawItem, plot: Rect, 
   }
 }
 
+/* ---------------- Box (box-plot B12) ----------------
+
+   Placed as a bar is (ADR-0002). Four paths for the whole series, each
+   stroked or filled once: the boxes, filled faintly and outlined in full;
+   the medians, heavier; the whiskers with their caps, half a box wide. A gap
+   - a missing median - leaves its box out whole (R-2.5). */
+
+const BOX_FILL = 0.18;
+const BOX_MEDIAN = 2;
+
+function drawBoxes(ctx: CanvasRenderingContext2D, item: BoxDrawItem, plot: Rect): void {
+  const n = item.length;
+  const xm = item.xScale.m;
+  const xb = item.xScale.b;
+  const ym = item.yScale.m;
+  const yb = item.yScale.b;
+  const xs = item.x;
+  const ys = item.y;
+  const { lowerQuartile, upperQuartile, lowerWhisker, upperWhisker } = item.box;
+  const edgePx = item.offset * xm;
+  const widthPx = item.width * xm;
+  const capPx = widthPx / 4;
+
+  const boxes = new Path2D();
+  const medians = new Path2D();
+  const whiskers = new Path2D();
+  for (let i = 0; i < n; i++) {
+    const median = ys[i] as number;
+    if (Number.isNaN(median)) continue;
+    const left = (xs[i] as number) * xm + xb + edgePx;
+    const mid = left + widthPx / 2;
+    const q1 = (lowerQuartile[i] as number) * ym + yb;
+    const q3 = (upperQuartile[i] as number) * ym + yb;
+    if (!Number.isNaN(q1) && !Number.isNaN(q3)) boxes.rect(left, q3, widthPx, q1 - q3);
+    const py = median * ym + yb;
+    medians.moveTo(left, py);
+    medians.lineTo(left + widthPx, py);
+    const lo = (lowerWhisker[i] as number) * ym + yb;
+    const hi = (upperWhisker[i] as number) * ym + yb;
+    // Each whisker from its quartile out, where both ends are given.
+    for (const [from, to] of [[q3, hi], [q1, lo]] as const) {
+      if (Number.isNaN(from) || Number.isNaN(to)) continue;
+      whiskers.moveTo(mid, from);
+      whiskers.lineTo(mid, to);
+      whiskers.moveTo(mid - capPx, to);
+      whiskers.lineTo(mid + capPx, to);
+    }
+  }
+  const alpha = ctx.globalAlpha;
+  const cap = ctx.lineCap;
+  ctx.globalAlpha = alpha * BOX_FILL;
+  ctx.fillStyle = item.color;
+  ctx.fill(boxes);
+  ctx.globalAlpha = alpha;
+  // Across a faint fill the hatch takes the series' colour, as an area's does.
+  drawHatch(ctx, boxes, plot, item.hatch ?? "none", item.color);
+  ctx.strokeStyle = item.color;
+  ctx.setLineDash([]);
+  ctx.lineCap = "butt";
+  ctx.lineWidth = 1;
+  ctx.stroke(boxes);
+  ctx.stroke(whiskers);
+  ctx.lineWidth = BOX_MEDIAN;
+  ctx.stroke(medians);
+  ctx.lineCap = cap;
+}
+
 /* ---------------- Scatter ----------------
 
    No connecting path: a scatter claims no order between its points. One Path2D
@@ -662,6 +742,9 @@ export function drawSeriesLayer(
         break;
       case "bar":
         drawBars(ctx, item, plot, input.theme.colorBg);
+        break;
+      case "box":
+        drawBoxes(ctx, item, plot);
         break;
       case "scatter":
         drawScatter(item, plot, late);

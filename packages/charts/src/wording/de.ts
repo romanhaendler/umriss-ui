@@ -20,6 +20,11 @@ export const GERMAN_CHARTS_WORDING: ChartsWording = {
   positionColumn: "Position",
   rowColumn: "Zeile",
   tableCaption: (from, to) => `Werte von ${from} bis ${to}.`,
+  upperWhisker: "Oberer Whisker",
+  upperQuartile: "Oberes Quartil",
+  median: "Median",
+  lowerQuartile: "Unteres Quartil",
+  lowerWhisker: "Unterer Whisker",
   downsampled: (readings) =>
     `Ausgedünnt aus ${readings.toLocaleString("de-DE")} Messwerten: erster, kleinster, größter und letzter Wert je Abschnitt.`,
 };

@@ -120,3 +120,8 @@ export { DEFAULT_CHARTS_WORDING, type ChartsWording } from "./wording";
    for new exports. */
 export { DataTable } from "./DataTable";
 export type { DataTableGroup } from "./scene";
+
+/* The box plot (box-plot 01). At the end, by the workspace's rule for new
+   exports. */
+export { BoxPlot, type BoxPlotProps } from "./BoxPlot";
+export type { BoxSeriesConfig, BoxChannels } from "./types";

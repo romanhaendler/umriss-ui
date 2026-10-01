@@ -82,6 +82,18 @@ export interface BarSeriesConfig<T = unknown> extends SeriesBase<T>, Stackable {
   barWidth: number;
 }
 
+/** A box plot (CONTEXT.md: Box). The base accessor is the median; the four
+    further numbers are the caller's, computed by whatever method the caller
+    chose - the library draws them and computes none. */
+export interface BoxSeriesConfig<T = unknown> extends SeriesBase<T> {
+  kind: "box";
+  lowerQuartile: Accessor<T>;
+  upperQuartile: Accessor<T>;
+  lowerWhisker: Accessor<T>;
+  upperWhisker: Accessor<T>;
+  /** Width as a fraction of the step; boxes and bars on one x axis share it. */
+  boxWidth: number;
+}
 
 /** One state of the closed set a state series knows. */
 export interface StateEntry {
@@ -129,6 +141,7 @@ export type SeriesConfig<T = unknown> =
   | LineSeriesConfig<T>
   | AreaSeriesConfig<T>
   | BarSeriesConfig<T>
+  | BoxSeriesConfig<T>
   | ScatterSeriesConfig<T>
   | StateSeriesConfig<T>
   | MatrixSeriesConfig<T>;
@@ -201,7 +214,19 @@ export interface MaterializedSeries {
       carry does not belong in the shared type with a comment (ADR-0011). null
       for every kind that does not use it. */
   w: Float64Array | null;
+  /** A box's further numbers beside its median in y; null for every other
+      kind (ADR-0011). */
+  box: BoxChannels | null;
   length: number;
+}
+
+/** The named channels of a box, one number per point; NaN where the median
+    is a gap. */
+export interface BoxChannels {
+  lowerQuartile: Float64Array;
+  upperQuartile: Float64Array;
+  lowerWhisker: Float64Array;
+  upperWhisker: Float64Array;
 }
 
 /* The Scale interface is fixed (R-2.14); V0 implements only LinearScale. */
@@ -295,6 +320,9 @@ export interface TooltipPoint<T = unknown> {
       entry already carries, and formatting it would presuppose knowing what the
       x axis means. The caller knows that, not this library. */
   segment?: { from: number; to: number; label: string };
+  /** Only for a box: its further numbers; yValue is its median. Fields of
+      their own for the reason `value` has one (ADR-0011). */
+  box?: { [K in keyof BoxChannels]: number };
 }
 
 export interface TooltipHit<T = unknown> {

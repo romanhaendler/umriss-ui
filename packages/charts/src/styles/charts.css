@@ -500,6 +500,11 @@
     grid-column: 1 / 3;
   }
 
+  /* A box's numbers stand under its name, in the name's column. */
+  .uc-tooltip-part {
+    grid-column: 2;
+  }
+
   /* A point's own x value, where it lies on another x axis than the head's. */
   .uc-tooltip-x {
     margin-left: 6px;

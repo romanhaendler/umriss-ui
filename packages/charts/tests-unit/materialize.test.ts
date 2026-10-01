@@ -314,3 +314,51 @@ describe("visibleExtent", () => {
     expect(visibleExtent(corridor, 1, 2)).toEqual([-8, 50]);
   });
 });
+
+/* A box's further numbers stand in named channels of their own, null for every
+   other kind (ADR-0011): the median is y, the rest is never folded into y0 or
+   w. */
+describe("materializeSeries with a box", () => {
+  interface Box {
+    t: number;
+    lo: number;
+    q1: number;
+    med: number | null;
+    q3: number;
+    hi: number;
+  }
+  const boxes: Box[] = [
+    { t: 0, lo: 2, q1: 4, med: 5, q3: 6, hi: 9 },
+    { t: 1, lo: 1, q1: 3, med: null, q3: 7, hi: 30 },
+    { t: 2, lo: 3, q1: 5, med: 6, q3: 8, hi: 12 },
+  ];
+  const box = {
+    lowerWhisker: (d: Box) => d.lo,
+    lowerQuartile: (d: Box) => d.q1,
+    upperQuartile: (d: Box) => d.q3,
+    upperWhisker: (d: Box) => d.hi,
+  };
+
+  it("holds the four further numbers beside the median, a gap's as NaN", () => {
+    const { series } = materializeSeries(boxes, (d) => d.t, (d) => d.med, undefined, { box });
+    expect([...series.y].map(String)).toEqual(["5", "NaN", "6"]);
+    expect([...(series.box?.lowerWhisker ?? [])].map(String)).toEqual(["2", "NaN", "3"]);
+    expect([...(series.box?.lowerQuartile ?? [])].map(String)).toEqual(["4", "NaN", "5"]);
+    expect([...(series.box?.upperQuartile ?? [])].map(String)).toEqual(["6", "NaN", "8"]);
+    expect([...(series.box?.upperWhisker ?? [])].map(String)).toEqual(["9", "NaN", "12"]);
+    expect(series.y0).toBeNull();
+    expect(series.w).toBeNull();
+  });
+
+  it("spans the whisker ends in its extent; a gap contributes nothing", () => {
+    const { extent } = materializeSeries(boxes, (d) => d.t, (d) => d.med, undefined, { box });
+    expect(extent).toEqual({ xMin: 0, xMax: 2, yMin: 2, yMax: 12 });
+    const { series } = materializeSeries(boxes, (d) => d.t, (d) => d.med, undefined, { box });
+    expect(visibleExtent(series, 0, 2)).toEqual([2, 12]);
+  });
+
+  it("has no box channels for any other kind", () => {
+    const { series } = materializeSeries(data, (d) => d.t, (d) => d.a, (d) => d.b, { value: (d) => d.b });
+    expect(series.box).toBeNull();
+  });
+});

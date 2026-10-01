@@ -6,7 +6,7 @@
    encoded as NaN (R-2.5). */
 
 import { lowerBound } from "./hit";
-import type { Accessor, MaterializedSeries } from "./types";
+import type { Accessor, BoxChannels, MaterializedSeries } from "./types";
 
 /** An accessor's value, or NaN for a gap. An infinity is a gap as well: it is no
     value a chart can place, and in the extent it would leave no finite range -
@@ -38,6 +38,8 @@ export type Baseline<T> = Accessor<T> | number;
 export interface ExtraChannels<T> {
   /** Value channel of the matrix: the third value per point. */
   value?: Accessor<T>;
+  /** A box's further numbers (ADR-0011): one channel each. */
+  box?: { [K in keyof BoxChannels]: Accessor<T> };
   /** Pre-mapping of the x values, before anything calculates. The working
       calendar comes in here: the scale stays affine, because the channel already
       stands in working time (ADR-0001).
@@ -70,6 +72,16 @@ export function materializeSeries<T>(
   const y0 = baseAccessor === null ? null : new Float64Array(n);
   const valueAccessor = extra?.value ?? null;
   const w = valueAccessor === null ? null : new Float64Array(n);
+  const boxAccessors = extra?.box ?? null;
+  const box: BoxChannels | null =
+    boxAccessors === null
+      ? null
+      : {
+          lowerQuartile: new Float64Array(n),
+          upperQuartile: new Float64Array(n),
+          lowerWhisker: new Float64Array(n),
+          upperWhisker: new Float64Array(n),
+        };
   const map = extra?.xMap ?? null;
   const isGap = extra?.xGap ?? null;
   let xMin = Number.POSITIVE_INFINITY;
@@ -108,6 +120,16 @@ export function materializeSeries<T>(
       // A missing value is a hole in the matrix, not a zero.
       (w as Float64Array)[i] = unplaced ? Number.NaN : valueOf(valueAccessor(d, i));
     }
+    if (boxAccessors !== null) {
+      // A box without its median is a gap whole: nothing of it is drawn or
+      // counted.
+      for (const key of BOX_KEYS) {
+        const v = Number.isNaN(yv) ? Number.NaN : valueOf(boxAccessors[key](d, i));
+        (box as BoxChannels)[key][i] = v;
+        if (v < yMin) yMin = v;
+        if (v > yMax) yMax = v;
+      }
+    }
     if (baseAccessor !== null) {
       const uv = unplaced ? Number.NaN : valueOf(baseAccessor(d, i));
       (y0 as Float64Array)[i] = uv;
@@ -115,8 +137,12 @@ export function materializeSeries<T>(
       if (uv > yMax) yMax = uv;
     }
   }
-  return { series: { x, y, y0, w, length: n }, extent: { xMin, xMax, yMin, yMax } };
+  return { series: { x, y, y0, w, box, length: n }, extent: { xMin, xMax, yMin, yMax } };
 }
+
+/** A box's further numbers, top to bottom as drawn: the order of its tooltip
+    rows, readout and table columns (box-plot B9). */
+export const BOX_KEYS = ["upperWhisker", "upperQuartile", "lowerQuartile", "lowerWhisker"] as const;
 
 /** Index of the first unsorted x value, otherwise -1 (DEV check, R-2.6). */
 export function firstUnsortedIndex(x: Float64Array, n: number): number {
@@ -134,7 +160,7 @@ export function visibleExtent(
   from: number,
   to: number,
 ): [number, number] {
-  const { x, y, y0, length } = series;
+  const { x, y, y0, box, length } = series;
   let min = Number.POSITIVE_INFINITY;
   let max = Number.NEGATIVE_INFINITY;
   for (let i = lowerBound(x, length, from); i < length && (x[i] as number) <= to; i++) {
@@ -145,6 +171,13 @@ export function visibleExtent(
       const u = y0[i] as number;
       if (u < min) min = u;
       if (u > max) max = u;
+    }
+    if (box !== null) {
+      for (const key of BOX_KEYS) {
+        const u = box[key][i] as number;
+        if (u < min) min = u;
+        if (u > max) max = u;
+      }
     }
   }
   return [min, max];

@@ -29,6 +29,29 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## Unreleased
+
+### Changed
+
+- **`MaterializedSeries` has a required field `box`** - null for every kind
+  but the box. Code that builds a `MaterializedSeries` itself adds `box: null`.
+
+### Added
+
+- **`BoxPlot`** - a box per x from five numbers the caller brings: `median`,
+  `lowerQuartile`, `upperQuartile`, `lowerWhisker`, `upperWhisker`. It stands
+  on the numeric x axis as a bar does, `boxWidth` a fraction of the step;
+  boxes and bars on one x axis share the step side by side. A missing median
+  is a gap. The tooltip, the readout and the data table read the five numbers
+  top to bottom as drawn, in `format` or the y axis' `tickFormat`; the arrows
+  walk box to box. The library computes no statistics.
+- **`ChartsWording`** gains `upperWhisker`, `upperQuartile`, `median`,
+  `lowerQuartile` and `lowerWhisker`; German in `wording/de`.
+- **`MaterializedSeries.box`** holds a box's further numbers; null for every
+  other kind. **`TooltipPoint.box`** carries them to a custom `render`.
+
+---
+
 ## 0.8.2 – Room on a phone (Sep. 2026)
 
 ### Changed

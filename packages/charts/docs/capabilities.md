@@ -171,6 +171,20 @@ Screenshot pages carry their name in brackets.
 | Between two stacked bars a 1px line in the ground's colour - `Canvas` under forced colours -, in both encodings; none on the baseline | charts-stacking 04 | Unit (draw), Screenshot (`stacked`, `percent`) |
 | Under forced colours and `encoding="marks"` a stack's members are told apart by their hatches | C3, C4 | Manual (both stacked examples, forced colours emulated) |
 
+## `BoxPlot`
+
+| Capability | Rule | Proved at |
+|---|---|---|
+| Five numbers the caller brings, none computed; named for what they are | box-plot B2, B8 | Unit (materialize, jsdom boxPlot) |
+| The further numbers in named channels, null for every other kind | ADR-0011 | Unit (materialize) |
+| On the numeric x axis, `boxWidth` a fraction of the step; in one group with bars | ADR-0002 | Screenshot (`minimal`, `over-time`) |
+| The y extent spans the whisker ends; a missing median is a gap, drawn, hit and counted nowhere | R-2.5 | Unit (materialize, jsdom boxPlot) |
+| Tooltip, readout and data table top to bottom as drawn, in `format` or `tickFormat` | box-plot B9 | Unit (jsdom boxPlot) |
+| The arrows walk box to box; the marker on the median | box-plot B11 | Unit (jsdom boxPlot) |
+| English and German wording | ADR-0031 | Unit (jsdom boxPlot) |
+| Fill at 0.18 with a full outline, median 2px, whisker caps half the box wide | box-plot B12 | Screenshot (`minimal`, `over-time`) |
+| Colours from the theme, light and dark; under forced colours the text colour | Q11, C4 | Screenshot (`minimal`, `over-time`), Manual (forced colours emulated) |
+
 ## `Scatter`
 
 | Capability | Rule | Proved at |
@@ -378,8 +392,6 @@ Wanted, not yet built (charts-review Q12). Each waits for a caller who needs it.
 * **A stack's total in the data table.** The tooltip and the readout carry it
   (charts-stacking K4); the table lists the members' own values only, and waits
   for a reader who misses the column.
-* **Box plot.** A kind of its own with five channels; nobody has asked for it
-  on a monitoring screen yet.
 * **Line colour by limit.** A line that turns alarm-coloured above a limit; today
   a `LimitBand` and the ControlChart's violations say the same.
 
@@ -405,6 +417,11 @@ here.
 * **Stacked lines, streamgraphs.** A line is a course, not a share: `stack`
   is on the two kinds that fill a whole of parts (charts-stacking).
 * **Horizontal bars.** Bars grow along the Y axis from a baseline on the X axis.
+* **Violin plots.** A density estimate between the values is smoothing: it
+  draws values nobody measured.
+* **Jittered or beeswarm points.** A random jitter gives a picture that does
+  not repeat from one render to the next; a deterministic beeswarm would be a
+  kind of its own.
 * **Pie, radar, candle.** The set of kinds is closed (no renderer interface for
   third parties); none of the three answers a question of a data-dense screen.
 
