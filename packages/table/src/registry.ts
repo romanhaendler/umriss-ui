@@ -744,6 +744,7 @@ export class Registry {
     return (
       this.count("search") > 0 ||
       this.orderedColumns().some((e) => filterOf(e.spec.filter) !== undefined) ||
+      (this.hook?.rowFilters.size ?? 0) > 0 ||
       (this.hook?.publicSnapshot.grouping.length ?? 0) > 0
     );
   }

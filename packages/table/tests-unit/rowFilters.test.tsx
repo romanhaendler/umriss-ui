@@ -181,3 +181,60 @@ it("in manual mode it goes to the server and the table filters nothing itself", 
   expect(views.at(-1)?.conditions).toEqual({ tours: ["T-02"] });
   expect(ids(container)).toEqual(["S-1", "S-2", "S-3", "S-4"]);
 });
+
+describe("found in review", () => {
+  it("a table with only row filters puts up a toolbar of its own for the ratio and the chip", () => {
+    function Bare() {
+      const table = useTable(SHIPMENTS, { rowKey: (s) => s.id, rowFilters: [overdue] });
+      capture(table);
+      const { Table: Frame, Column } = table;
+      return (
+        <Frame>
+          <Column value="id" label="Shipment" rowHeader />
+        </Frame>
+      );
+    }
+    const { container } = render(<Bare />);
+    act(() => t!.setFilter(overdue, { before: 30, includeFailed: false }));
+    expect(screen.getByRole("status").textContent).toBe("1 of 4");
+    expect(within(container).getByRole("list", { name: "Active filters" }).textContent).toContain("Overdue");
+  });
+
+  it("a row filter made anew on every render is the same filter by its id", () => {
+    const make = () =>
+      rowFilter({ id: "tours", label: "Tours", matches: (s: Shipment, c: readonly string[]) => c.includes(s.tour) });
+    function Inline() {
+      const table = useTable(SHIPMENTS, { rowKey: (s) => s.id, rowFilters: [make()] });
+      capture(table);
+      const { Table: Frame, Column } = table;
+      return (
+        <Frame>
+          <Column value="id" label="Shipment" rowHeader />
+        </Frame>
+      );
+    }
+    const { container } = render(<Inline />);
+    act(() => t!.setFilter(make(), ["T-02"]));
+    expect(ids(container)).toEqual(["S-3"]);
+  });
+
+  it("a column of the same id that leaves does not take the row filter's condition along", () => {
+    const tour = rowFilter({ id: "tour", label: "Tour", matches: (s: Shipment, c: readonly string[]) => c.includes(s.tour) });
+    function Clash({ withColumn }: { withColumn: boolean }) {
+      const table = useTable(SHIPMENTS, { rowKey: (s) => s.id, rowFilters: [tour] });
+      capture(table);
+      const { Table: Frame, Column } = table;
+      return (
+        <Frame>
+          <Column value="id" label="Shipment" rowHeader />
+          {withColumn && <Column value="tour" label="Tour" />}
+        </Frame>
+      );
+    }
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const { container, rerender } = render(<Clash withColumn />);
+    act(() => t!.setFilter(tour, ["T-03"]));
+    rerender(<Clash withColumn={false} />);
+    expect(ids(container)).toEqual(["S-4"]);
+  });
+});

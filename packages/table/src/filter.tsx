@@ -178,10 +178,10 @@ export function Conditions({ registry, hook }: { registry: Registry; hook: HookS
   const formats = useFormats();
   /* A row filter's condition stands here only with a `describe`: without one
      the application's control is where it shows (table-filters 08). */
-  type Item = { id: string; text: string } & ({ own: RowFilter<unknown, unknown> } | { entry: ColumnEntry });
+  type Item = { id: string; text: string } & ({ rowFilter: RowFilter<unknown, unknown> } | { entry: ColumnEntry });
   const list = Object.entries(hook.publicSnapshot.filter).flatMap(([id, condition]): Item[] => {
-    const own = hook.rowFilters.get(id);
-    if (own) return own.describe ? [{ id, own, text: own.describe(condition) }] : [];
+    const rowFilter = hook.rowFilters.get(id);
+    if (rowFilter) return rowFilter.describe ? [{ id, rowFilter, text: rowFilter.describe(condition) }] : [];
     const entry = registry.columnById(id);
     const filter = entry ? filterOf(entry.spec.filter) : undefined;
     if (!entry || !filter) return [];
@@ -193,14 +193,14 @@ export function Conditions({ registry, hook }: { registry: Registry; hook: HookS
   return (
     <TagGroup aria-label={wording.conditions} className={styles.conditions}>
       {list.map((item) =>
-        "own" in item ? (
+        "rowFilter" in item ? (
           <Tag
             key={item.id}
             className={styles.condition}
             onRemove={() => hook.publicSnapshot.setFilter(item.id, null)}
-            removeLabel={wording.removeConditionNamed(item.own.label, item.text)}
+            removeLabel={wording.removeConditionNamed(item.rowFilter.label, item.text)}
           >
-            <span className={styles.filterLabel}>{item.own.label}</span>
+            <span className={styles.filterLabel}>{item.rowFilter.label}</span>
             <span className={styles.filterValue}>{item.text}</span>
           </Tag>
         ) : (
