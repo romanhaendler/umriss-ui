@@ -72,8 +72,13 @@ export function TableToolbar({
         <Conditions registry={registry} hook={hook} />
       </>
     );
+    /* Holding nothing but the empty ratio, the group leaves the flow. Said
+       here, not by `:has(:empty)` in the style: a browser that does not ask
+       that again when the ratio's text comes kept the group out of the flow,
+       and the ratio stood over the search. */
+    const idle = !restricted && selected.length === 0 && !registry.rowAdding;
     right = (
-      <div className={styles.toolbarGroup}>
+      <div className={cx(styles.toolbarGroup, idle && styles.toolbarGroupIdle)}>
         <span role="status" className={styles.filteredCount}>
           {!restricted
             ? ""
