@@ -22,6 +22,52 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.8.0 – Tree rows (Oct. 2026)
+
+Needs `@umriss-ui/core` 0.19: it filters through the tree model's new match
+and reads the tree rows' wording; the peer range moves to `^0.19.0`.
+
+### Added
+
+- **Tree rows: `childRows`** on `useTable` names the children of a row; the
+  rows passed in are the roots. Every row with children gets a fold in the
+  first column that opens the next level beneath it, indented - as uneven as
+  the application's hierarchy is. The figures of every level are the
+  application's; the table sums nothing for a branch.
+  - Every level **sorts** on its own; a child never leaves its parent.
+  - A **search or a condition** shows a match with the rows above it - **path
+    rows**, muted and said to be one - without writing the open branches.
+    "43 of 1,204" counts matches and rows on every level; `filtered` and
+    "select all" hold the matches on every level.
+  - The **footer** sums the roots only, since a parent holds its children, and
+    says so ("Top level only").
+  - The **export** writes every row of the filtered tree, open or not, with a
+    first column "Level", 1 for a root.
+  - **`defaultBranches`** - keys, or how many levels stand open; the open
+    branches stand in the view as **`branches`**. The snapshot has
+    `branches`, `toggleBranch`, `unfoldAllBranches` and `foldAllBranches`;
+    the `ColumnMenu` offers "Unfold all" and "Fold all".
+  - The fold has the group fold's keys: → opens, ← closes or goes to the
+    parent's fold, Alt with either acts on the siblings too. A tree is a
+    `treegrid` in both modes; in grid mode the arrows keep walking the cells.
+  - A **branch reads by weight** - medium across its row, a leaf regular - and
+    a root after the first carries a group header's stronger line above it.
+  - A row's **`RowDetail`** opens with the row's own fold - one chevron per
+    row; a tree has no expander column. The detail hangs from the fold on a
+    rail, without a box, and a table inside it drops its frame. A branch's
+    fold opens its detail and then its children, as one state: its detail is
+    open whenever the branch is - by default, by a view, by "Unfold all".
+  - Not with grouping or pagination (each passed over with a warning in
+    development), not in manual mode (a compile error).
+
+### Changed
+
+- **A `RowDetail` that comes to nothing** - `null`, `undefined` or `false` for
+  a row - **gives that row no expander and no detail line**. It had an
+  expander that opened an empty line.
+
+---
+
 ## 0.7.5 – Core 0.18.0 (Sep. 2026)
 
 Needs `@umriss-ui/core` 0.18; the peer range moves to `^0.18.0`. Nothing else changes for a caller.

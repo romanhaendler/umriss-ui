@@ -5,8 +5,8 @@ against the rows they came from. The hook binds the row kind once and hands back
 the `Table` and the `Column` that belong to it, so a column can only name a
 field the row actually has.
 
-Filtering, sorting, grouping, aggregates, paging, selection, row detail, row
-actions, column widths and virtualisation are in the model, not in the markup —
+Filtering, sorting, grouping, tree rows, aggregates, paging, selection, row
+detail, row actions, column widths and virtualisation are in the model, not in the markup —
 and the model is a pure module with tests of its own.
 
 ## Install
@@ -102,6 +102,11 @@ stylesheets by hand.
   The outer level is a group header carrying every aggregate under its column;
   the innermost of several is a span beside its rows. Groups fold into a
   summary, select as a whole, page and virtualise.
+* **Tree rows**: `childRows` turns the rows into the roots of a hierarchy of
+  any number of levels, uneven as the application holds it - an organisation,
+  regions and places, cost centres. Every level sorts on its own, a search
+  shows a match with the rows above it, the footer sums the top level, the
+  export writes the level, and a leaf's detail opens from its own fold.
 * **Restricting a column**: the values that occur, two bounds, or a filter the
   application writes itself — plus conditions set from outside and read back.
 * **Around the table**: toolbar, search, column menu, export, paging — each

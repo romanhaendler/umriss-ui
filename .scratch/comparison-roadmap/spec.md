@@ -33,7 +33,7 @@ Specs of one step are independent of each other and can run in parallel.
 
 ## Later ("can"), not specified yet
 
-Tree data, clipboard, XLSX export, saved views, the schedule's utilisation view
+Tree data (delivered: `.scratch/table-tree-rows/`, table 0.8.0), clipboard, XLSX export, saved views, the schedule's utilisation view
 and print, Avatar, Timeline. Each waits for a caller who needs it.
 
 ## Deliberately not

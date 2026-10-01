@@ -1,6 +1,6 @@
 # 11 — Final polish round
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Blocked by: 10
@@ -24,3 +24,8 @@ the master/detail example showed an expander and an empty grey detail line on
 a branch without employees - a detail that comes to nothing now has neither;
 and in "From a flat list" the tree hung from the name column in the middle,
 behind the codes - the first visible column carries the tree now.
+
+**2026-10-01 (user):** After the detail on a rail, the branch form by weight and
+the line before a root marked by the body: "Wenn du damit fertig bist, bin ich
+zufrieden." Accepted.
+

@@ -18,6 +18,22 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Oct. 2026 — Tree rows
+
+- **Tree rows** (`.scratch/table-tree-rows/`; `@umriss-ui/table` 0.8.0,
+  `@umriss-ui/core` 0.19.0). From an outside draft cut down in conversation to
+  what a drill-down through an uneven hierarchy needs - the calendar example
+  turned out to be grouping's, organisations and regions are not. Core's tree
+  model took a match predicate, so the table filters through the one
+  flattening rather than a second walk.
+- **Decided on the rendered page, not the sketch:** the tree in the first
+  column (behind a code column the indent began mid-row); one chevron per row,
+  the row's fold opening its detail on a rail (three variants rendered, after
+  SAP Fiori and AG Grid); a branch by weight, never a tone (researched against
+  Fiori, financial statements, Power BI, Carbon - a tone greys a deep tree and
+  forced colours drop it). A line drawn through `:has()` was redrawn only on
+  hover in a collapsed table; the body now marks it.
+
 ## Sep. 2026 — Tighter buttons, and an icon button
 
 - **Still too much room** was the user's verdict on 0.17.0's 12/8 px. A page

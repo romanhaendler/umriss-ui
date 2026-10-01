@@ -29,6 +29,24 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.19.0 – A tree model that takes a match (Oct. 2026)
+
+### Added
+
+- **`NodeReader.matches`** - an optional predicate for the tree model. Given,
+  a search runs and the predicate decides what matches; the search text is not
+  read. The path rule stays: a match shows with the nodes above it, and a
+  branch shown only for a descendant opens without its expanded state being
+  written. `@umriss-ui/table`'s tree rows filter by their columns and
+  conditions through it. Without it, nothing changes.
+- **Wording for `@umriss-ui/table`'s tree rows:** `foldBranch` and
+  `unfoldBranch` ("Fold rows under {row}" / "Zeilen unter {row} zuklappen" -
+  apart from the row detail's expander), `levelColumn` ("Level" / "Ebene"),
+  `pathRow` ("on the path to a match" / "auf dem Weg zu einem Treffer") and
+  `footerTopLevel` ("Top level only" / "Nur oberste Ebene"). An application
+  that implements the whole `Wording` type adds the five keys; a partial
+  wording passed to the provider needs nothing.
+
 ## 0.18.0 – Buttons a step tighter (Sep. 2026)
 
 ### Added
