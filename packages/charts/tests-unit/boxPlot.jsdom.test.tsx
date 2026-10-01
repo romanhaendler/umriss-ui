@@ -7,8 +7,10 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, type ReactNode } from "react";
-import { BoxPlot, Chart, DataTable, Tooltip, XAxis, YAxis, type ChartsWording } from "../src";
+import { BoxPlot, Chart, DataTable, Legend, Line, Tooltip, XAxis, YAxis, type ChartsWording } from "../src";
 import { GERMAN_CHARTS_WORDING } from "../src/wording/de";
+import { ChartScene } from "../src/scene";
+import type { BoxSeriesConfig } from "../src/types";
 import { focusPlot, frame, press, renderChart, sizePlot } from "./renderChart";
 
 interface Machine {
@@ -156,5 +158,109 @@ describe("A box in the data table", () => {
       "Kiln|||||",
       "Glaze|31 s|9 s|7 s|6 s|4 s",
     ]);
+  });
+});
+
+/* box-plot 02: several series - grouped beside each other, mixed with a line,
+   toggled from the legend. */
+describe("Several box series", () => {
+  const before = (d: Machine) => d.med;
+  function grouped(extra: { hidden?: boolean; encoding?: "marks" } = {}): ReactNode {
+    return (
+      <Chart data={data} ariaLabel="Before and after" encoding={extra.encoding}>
+        <XAxis accessor={(d: Machine) => d.at} ticks={[0, 1, 2, 3]} tickFormat={(v) => MACHINES[v] ?? ""} />
+        <YAxis accessor={(d: Machine) => d.q3} tickFormat={(v) => `${v} s`} />
+        <BoxPlot
+          name="Before"
+          median={before}
+          lowerQuartile={(d: Machine) => d.q1}
+          upperQuartile={(d: Machine) => d.q3}
+          lowerWhisker={(d: Machine) => d.lo}
+          upperWhisker={(d: Machine) => d.hi}
+        />
+        <BoxPlot
+          name="After"
+          hidden={extra.hidden}
+          median={(d: Machine) => (d.med === null ? null : d.med - 1)}
+          lowerQuartile={(d: Machine) => d.q1 - 1}
+          upperQuartile={(d: Machine) => d.q3 - 1}
+          lowerWhisker={(d: Machine) => d.lo - 1}
+          upperWhisker={(d: Machine) => d.hi + 60}
+        />
+        <Line accessor={before} name="Median trend" />
+        <Legend />
+        <Tooltip />
+      </Chart>
+    );
+  }
+
+  it("reads both boxes and the line at one x in one tooltip", async () => {
+    const host = await mount(grouped());
+    await focusPlot(host);
+    await press(host, "Home");
+    const all = rows(host);
+    expect(all.filter((r) => r === "Before" || r === "After")).toEqual(["Before", "After"]);
+    expect(all).toContain("Median trend5 s");
+    expect(all.filter((r) => r?.startsWith("Median"))).toEqual(["Median5 s", "Median4 s", "Median trend5 s"]);
+  });
+
+  it("takes a hidden box series out of the tooltip and the extent, its legend entry stays", async () => {
+    const shown = await mount(grouped());
+    expect(ticks(shown)).toContain("80 s");
+    unmount?.();
+    const host = await mount(grouped({ hidden: true }));
+    expect(ticks(host)).not.toContain("80 s");
+    expect([...host.querySelectorAll(".uc-legend-item")].map((i) => i.textContent)).toEqual(["Before", "After", "Median trend"]);
+    await focusPlot(host);
+    await press(host, "Home");
+    expect(rows(host)).not.toContain("After");
+  });
+
+  it("carries a bar's hatched swatch in the legend under encoding by marks", async () => {
+    const host = await mount(grouped({ encoding: "marks" }));
+    const after = [...host.querySelectorAll(".uc-legend-item")].find((i) => i.textContent === "After");
+    expect(after?.querySelector("rect + path")?.getAttribute("d") ?? "").not.toBe("");
+  });
+});
+
+/* B11: the active point's marker sits on the median of its own box - in a
+   group that is beside the x value, not on it. */
+describe("The hover marker of grouped boxes", () => {
+  it("sits on each box's centre, the crosshair on the x value", async () => {
+    const scene = new ChartScene();
+    const host = document.createElement("div");
+    document.body.appendChild(host);
+    scene.setData(data.filter((d) => d.med !== null));
+    scene.registerAxis({ id: "x", orientation: "x", position: "bottom", accessor: (d) => (d as Machine).at, domain: "data" });
+    scene.registerAxis({ id: "y", orientation: "y", position: "left", accessor: (d) => (d as Machine).hi, domain: "data" });
+    const box = (name: string): BoxSeriesConfig => ({
+      kind: "box",
+      name,
+      accessor: (d) => (d as Machine).med,
+      lowerQuartile: (d) => (d as Machine).q1,
+      upperQuartile: (d) => (d as Machine).q3,
+      lowerWhisker: (d) => (d as Machine).lo,
+      upperWhisker: (d) => (d as Machine).hi,
+      boxWidth: 0.8,
+      xAxisId: "x",
+      yAxisId: "y",
+    });
+    scene.registerSeries(box("Before"));
+    scene.registerSeries(box("After"));
+    scene.registerTooltip({ mode: "x" });
+    scene.bind(host, document.createElement("canvas"), document.createElement("canvas"), host);
+    scene.requestResize(400, 300);
+    await frame();
+    const layout = scene.getLayoutSnapshot().layout;
+    const xScale = layout.axes.find((a) => a.key === "x:x")?.scale;
+    const at = xScale?.toPx(1) ?? 0;
+    scene.pointerMove(at, layout.plot.y + layout.plot.height / 2);
+    const hover = scene.getHoverSnapshot().hover;
+    // Step 1, the group 0.8 wide: each box 0.4 wide, centred 0.2 either side.
+    const quarter = (xScale?.m ?? 0) * 0.2;
+    expect(hover?.hit.xPx).toBeCloseTo(at);
+    expect(hover?.marker.map((m) => m.x)).toEqual([expect.closeTo(at - quarter), expect.closeTo(at + quarter)]);
+    scene.unbind();
+    host.remove();
   });
 });

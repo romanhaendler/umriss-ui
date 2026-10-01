@@ -71,6 +71,7 @@ const BOX_ROWS = [...BOX_KEYS.slice(0, 2), "median", ...BOX_KEYS.slice(2)] as co
 import {
   barGroups,
   barPlacement,
+  type BarPlacement,
   measureStep,
   effectiveStep,
 } from "./bars";
@@ -156,6 +157,9 @@ interface Candidate {
   value?: number;
   segment?: { from: number; to: number; label: string };
   box?: TooltipPoint["box"];
+  /** Where its marker stands, where that is not px: a grouped box's centre
+      (B11). px stays the x value's, so that hits at one x group together. */
+  markX?: number;
 }
 
 interface AxisEntry {
@@ -1906,18 +1910,7 @@ export class ChartScene {
     // A highlight of nothing drawn - a hidden series' legend entry - dims nothing.
     const lit = this.highlight;
     const highlight = lit !== null && series.some((e) => lit.includes(e.order)) ? lit : null;
-    // Bars on the same x axis share one step (ADR-0002); one pass over the
-    // series, not over the points.
-    const groups = barGroups(
-      series.map((e) => ({
-        order: e.order,
-        kind: e.config.kind,
-        xAxisId: e.config.xAxisId,
-        step: e.step ?? 0,
-        fraction: widthOf(e.config),
-        stack: stackOf(e.config),
-      })),
-    );
+    const placements = this.placements();
     series.forEach((entry) => {
       const mat = entry.materialized;
       if (mat === null) return;
@@ -1972,22 +1965,7 @@ export class ChartScene {
           });
           break;
         case "bar": {
-          // Step and fraction come from the group, not from this series:
-          // otherwise members with data of differing density would compute their
-          // offsets from different group widths and lie on top of one another.
-          const group = groups.get(entry.order) ?? {
-            index: 0,
-            size: 1,
-            step: entry.step ?? 0,
-            fraction: config.barWidth,
-          };
-          const domain = xAxis.scale.domain;
-          const placement = barPlacement(
-            effectiveStep(group.step, domain[1] - domain[0]),
-            group.fraction,
-            group.index,
-            group.size,
-          );
+          const placement = placements.get(entry.order) as BarPlacement;
           items.push({
             ...base,
             kind: "bar",
@@ -2001,10 +1979,7 @@ export class ChartScene {
           break;
         }
         case "box": {
-          // Placed as a bar is, in the same group (ADR-0002).
-          const group = groups.get(entry.order) ?? { index: 0, size: 1, step: entry.step ?? 0, fraction: config.boxWidth };
-          const domain = xAxis.scale.domain;
-          const placement = barPlacement(effectiveStep(group.step, domain[1] - domain[0]), group.fraction, group.index, group.size);
+          const placement = placements.get(entry.order) as BarPlacement;
           items.push({
             ...base,
             kind: "box",
@@ -2053,6 +2028,36 @@ export class ChartScene {
       }
     });
     return items;
+  }
+
+  /** Where each visible bar and box stands relative to its x value, by its
+      place in the group of its x axis (ADR-0002). One pass over the series,
+      not over the points. Step and fraction come from the group, not from
+      the series: otherwise members with data of differing density would
+      compute their offsets from different group widths and lie on top of one
+      another. */
+  private placements(): Map<number, BarPlacement> {
+    const series = this.seriesInOrder().filter((e) => e.config.hidden !== true);
+    const groups = barGroups(
+      series.map((e) => ({
+        order: e.order,
+        kind: e.config.kind,
+        xAxisId: e.config.xAxisId,
+        step: e.step ?? 0,
+        fraction: widthOf(e.config),
+        stack: stackOf(e.config),
+      })),
+    );
+    const out = new Map<number, BarPlacement>();
+    for (const entry of series) {
+      const xAxis = this.findAxis("x", entry.config.xAxisId);
+      if (xAxis === null) continue;
+      const group = groups.get(entry.order);
+      if (group === undefined) continue;
+      const domain = xAxis.scale.domain;
+      out.set(entry.order, barPlacement(effectiveStep(group.step, domain[1] - domain[0]), group.fraction, group.index, group.size));
+    }
+    return out;
   }
 
   /** Where a band's last state ends: the latest x of the visible series on its
@@ -2199,6 +2204,7 @@ export class ChartScene {
   ): { key: string; state: HoverState; primary: Candidate; chosen: readonly Candidate[] } | null {
     const mode = this.tooltip?.mode ?? "x";
     const candidates: Candidate[] = [];
+    let placements: Map<number, BarPlacement> | undefined;
     this.seriesInOrder().forEach((entry, i) => {
       const mat = entry.materialized;
       if (mat === null || mat.length === 0 || entry.config.hidden === true) return;
@@ -2226,6 +2232,10 @@ export class ChartScene {
         value: hit.value,
         segment: hit.segment,
         box: hit.box,
+        markX:
+          config.kind === "box"
+            ? hit.px + this.centreOf((placements ??= this.placements()).get(entry.order), xAxis)
+            : undefined,
       });
     });
     if (candidates.length === 0) return null;
@@ -2242,7 +2252,8 @@ export class ChartScene {
       let best = Number.POSITIVE_INFINITY;
       const covering = pointLike.filter((k) => k.covers);
       for (const k of covering.length > 0 ? covering : pointLike) {
-        const dx = k.px - mouseX;
+        // A grouped box is near where it is drawn, not at its x value.
+        const dx = (k.markX ?? k.px) - mouseX;
         const dy = k.py - mouseY;
         const d = dx * dx + dy * dy; // Euclidean comparison in pixel space
         // Two stacked segments meet where one's top is the other's foot; a
@@ -2308,7 +2319,7 @@ export class ChartScene {
       hit,
       marker: chosen
         .filter((k) => k.marked)
-        .map((k) => ({ x: k.px, y: k.py, color: k.color })),
+        .map((k) => ({ x: k.markX ?? k.px, y: k.py, color: k.color })),
       mouseX,
       mouseY,
     };
@@ -2480,6 +2491,11 @@ export class ChartScene {
     this.moveKey(cell.x, xAxis.scale.toPx(cell.x), yAxis.scale.toPx(cell.y), speak);
   }
 
+  /** How far a bar's or a box's centre stands from its x value, in pixels. */
+  private centreOf(placement: BarPlacement | undefined, xAxis: AxisLayout): number {
+    return placement === undefined ? 0 : (placement.offset + placement.width / 2) * xAxis.scale.m;
+  }
+
   /** The Active point at a position of the emphasised series. The pixel's y
       is that series' own, so that "nearest" picks it and a lane is hit. */
   private showPosition(emph: SeriesEntry, x: number, speak = true): void {
@@ -2495,7 +2511,9 @@ export class ChartScene {
       const v = mat.y[nearestIndex(mat.x, mat.length, x)] as number;
       py = Number.isNaN(v) ? this.layout.plot.y + this.layout.plot.height / 2 : yAxis.scale.toPx(v);
     }
-    this.moveKey(x, xAxis.scale.toPx(x), py, speak);
+    // A grouped box is asked for at its own centre, so that "nearest" picks it.
+    const centre = emph.config.kind === "box" ? this.centreOf(this.placements().get(emph.order), xAxis) : 0;
+    this.moveKey(x, xAxis.scale.toPx(x) + centre, py, speak);
   }
 
   private moveKey(x: number, px: number, py: number, speak = true): void {

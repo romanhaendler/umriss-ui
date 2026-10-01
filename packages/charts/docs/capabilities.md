@@ -183,6 +183,10 @@ Screenshot pages carry their name in brackets.
 | The arrows walk box to box; the marker on the median | box-plot B11 | Unit (jsdom boxPlot) |
 | English and German wording | ADR-0031 | Unit (jsdom boxPlot) |
 | Fill at 0.18 with a full outline, median 2px, whisker caps half the box wide | box-plot B12 | Screenshot (`minimal`, `over-time`) |
+| Several box series side by side in the step; boxes and bars on one x axis share one group | ADR-0002 | Unit (jsdom boxPlot), Screenshot (`grouped`, `specification-limits`) |
+| The hover marker on the median of its own box; the crosshair on the x value | box-plot B11 | Unit (jsdom boxPlot) |
+| `hidden`: out of drawing, hit and extent, the legend entry stays; a bar's hatched swatch under encoding by marks | R-4.13, C3 | Unit (jsdom boxPlot) |
+| Mixed with `Line` and `LimitLine`; `tone` per series | Q11 | Screenshot (`specification-limits`, `detailed`) |
 | Colours from the theme, light and dark; under forced colours the text colour | Q11, C4 | Screenshot (`minimal`, `over-time`), Manual (forced colours emulated) |
 
 ## `Scatter`
