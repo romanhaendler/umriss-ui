@@ -86,20 +86,20 @@ function combineConditions(conditions: ConditionList, registry: Registry): ((row
     the same ones out of the same rows. A pre-filter written in the call is a new
     function on every render; without this reconciliation the model, the sort and
     everything that remembers something by the rows would recalculate on every
-    render - including on every scroll of a virtualised table. */
+    render - including on every scroll of a virtualised table. The admitted
+    rows are compared, not the rows they came from: rows written in the call
+    are new on every render too, and a comparison by their identity would set
+    the state on every render without end. */
 function useAdmitted(
   rows: readonly unknown[],
   preFilter: ((row: unknown) => boolean) | undefined,
 ): readonly unknown[] {
   const fresh = useMemo(() => (preFilter ? rows.filter((row) => preFilter(row)) : rows), [rows, preFilter]);
-  const [memo, setMemo] = useState(() => ({ source: rows, result: fresh }));
+  const [memo, setMemo] = useState(fresh);
   if (!preFilter) return rows;
-  const same =
-    memo.source === rows &&
-    (memo.result === fresh ||
-      (memo.result.length === fresh.length && memo.result.every((row, i) => row === fresh[i])));
-  if (!same) setMemo({ source: rows, result: fresh });
-  return same ? memo.result : fresh;
+  const same = memo === fresh || (memo.length === fresh.length && memo.every((row, i) => row === fresh[i]));
+  if (!same) setMemo(fresh);
+  return same ? memo : fresh;
 }
 
 /** The view without names that no registered column carries. As long as none

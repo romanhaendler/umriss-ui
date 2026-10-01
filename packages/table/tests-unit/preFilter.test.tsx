@@ -8,6 +8,7 @@
    D5 - the list filter offered values the application's filter excludes. */
 
 import { fireEvent, render, screen, within } from "@testing-library/react";
+import { useState } from "react";
 import { describe, expect, it } from "vitest";
 import { Pagination, Search, Toolbar, useTable } from "../src";
 import type { TableView } from "../src";
@@ -83,6 +84,39 @@ describe("D4: a pre-filter may stand in the call", () => {
     expect(rowHeaders(container)).toEqual(["A-2"]);
     rerender(<List plant="Plant B" pageSize={1} />);
     expect(rowHeaders(container)).toEqual(["B-2"]);
+  });
+
+  it("rows written in the call as well, under a multiselect in the toolbar", () => {
+    function Picked() {
+      const [plants, setPlants] = useState<string[]>(["Plant A"]);
+      const { Table: Frame, Column } = useTable(ORDERS.slice(), {
+        rowKey: (a) => a.id,
+        preFilter: (a) => plants.includes(a.plant),
+      });
+      return (
+        <Frame>
+          <Toolbar>
+            <select
+              multiple
+              aria-label="Plants"
+              value={plants}
+              onChange={(e) => setPlants(Array.from(e.target.selectedOptions, (o) => o.value))}
+            >
+              <option>Plant A</option>
+              <option>Plant B</option>
+            </select>
+          </Toolbar>
+          <Column value="number" label="Order" rowHeader />
+        </Frame>
+      );
+    }
+    const { container } = render(<Picked />);
+    expect(rowHeaders(container)).toEqual(["A-1", "A-2", "A-3"]);
+    const select = screen.getByLabelText<HTMLSelectElement>("Plants");
+    select.options[0]!.selected = false;
+    select.options[1]!.selected = true;
+    fireEvent.change(select);
+    expect(rowHeaders(container)).toEqual(["B-1", "B-2"]);
   });
 });
 
