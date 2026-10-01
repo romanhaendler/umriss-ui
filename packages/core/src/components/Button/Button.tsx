@@ -1,28 +1,33 @@
 import { forwardRef } from "react";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { cx } from "../../lib/cx";
+import { useControlSize } from "../../lib/controlSize";
+import type { ControlSize } from "../../lib/controlSize";
 import { Spinner } from "../Spinner";
 import { Tooltip } from "../Tooltip";
 import styles from "./Button.module.css";
 
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "plain" | "danger";
-export type ButtonSize = "sm" | "md";
+/** A button's two heights - the controls' (`ControlSize`). */
+export type ButtonSize = ControlSize;
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   /** How loud the button is. `primary` exactly once per surface - two main
       actions side by side are no longer a main action. `ghost` is quiet in the
       accent, `plain` quiet and neutral. */
   variant?: ButtonVariant;
-  /** `sm` for buttons in header bars and table rows, `md` otherwise. */
+  /** `sm` for buttons in header bars and table rows, `md` otherwise. Default:
+      the size of a `ControlSizeProvider` around it, else `md`. */
   size?: ButtonSize;
   /** Shows a loading indicator and locks the button. */
   loading?: boolean;
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant = "secondary", size = "md", loading = false, disabled, className, children, type, ...rest },
+  { variant = "secondary", size: ownSize, loading = false, disabled, className, children, type, ...rest },
   ref,
 ) {
+  const size = useControlSize(ownSize);
   return (
     <button
       ref={ref}

@@ -11,6 +11,7 @@
 import { forwardRef } from "react";
 import type { HTMLAttributes, ReactNode } from "react";
 import { cx } from "../../lib/cx";
+import { ControlSizeProvider, useControlSize } from "../../lib/controlSize";
 import { Button } from "../Button";
 import type { ButtonProps, ButtonSize, ButtonVariant } from "../Button";
 import { Menu } from "../Menu";
@@ -20,15 +21,18 @@ import { useWording } from "../../lib/language";
 export interface ButtonGroupProps extends HTMLAttributes<HTMLDivElement> {
   /** Label of the group for the screen reader. */
   "aria-label"?: string;
+  /** The size of the buttons in it that do not say their own - one group,
+      one height. Default: the size around it, else `md`. */
+  size?: ButtonSize;
 }
 
 export const ButtonGroup = forwardRef<HTMLDivElement, ButtonGroupProps>(function ButtonGroup(
-  { className, children, ...rest },
+  { size, className, children, ...rest },
   ref,
 ) {
   return (
     <div ref={ref} role="group" className={cx(styles.group, className)} {...rest}>
-      {children}
+      {size ? <ControlSizeProvider size={size}>{children}</ControlSizeProvider> : children}
     </div>
   );
 });
@@ -46,7 +50,8 @@ export interface SplitButtonProps extends Omit<ButtonProps, "children" | "size" 
   menu: ReactNode;
   /** How loud the main action is; the trigger beside it follows suit. */
   variant?: ButtonVariant;
-  /** `sm` for buttons in header bars and table rows, `md` otherwise. */
+  /** `sm` for buttons in header bars and table rows, `md` otherwise. Default:
+      the size around it, else `md`. */
   size?: ButtonSize;
   /** Label of the trigger; default "More actions". */
   menuLabel?: string;
@@ -59,7 +64,7 @@ export const SplitButton = forwardRef<HTMLButtonElement, SplitButtonProps>(funct
     children,
     menu,
     variant = "secondary",
-    size = "md",
+    size: ownSize,
     menuLabel,
     align = "end",
     disabled,
@@ -69,6 +74,7 @@ export const SplitButton = forwardRef<HTMLButtonElement, SplitButtonProps>(funct
   ref,
 ) {
   const wording = useWording();
+  const size = useControlSize(ownSize);
   return (
     <ButtonGroup className={cx(styles.split, className)}>
       <Button ref={ref} variant={variant} size={size} disabled={disabled} {...rest}>

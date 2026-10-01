@@ -9,6 +9,7 @@ import type { DstStatus, DstChoice } from "./time";
 import { RangeTrigger } from "./RangeTrigger";
 import { TimeField } from "./TimeField";
 import styles from "./DatePicker.module.css";
+import { useControlSize } from "../../lib/controlSize";
 import { useFormats, useWording } from "../../lib/language";
 import { ClockGlyph } from "../../lib/glyphs";
 
@@ -46,7 +47,8 @@ export interface DateTimePickerProps
   placeholder?: string;
   /** Locks the field and the panel. */
   disabled?: boolean;
-  /** `sm` for dense forms and table rows, `md` otherwise. */
+  /** `sm` for a toolbar and dense forms, `md` otherwise. Default: the size of a
+      `ControlSizeProvider` around it, else `md`. */
   size?: "sm" | "md";
   /** Marks the field as invalid. `FormField` sets it itself as soon as it
       carries an `error` - by hand only necessary without `FormField`. */
@@ -63,7 +65,7 @@ export const DateTimePicker = forwardRef<HTMLSpanElement, DateTimePickerProps>(f
     withSeconds = false,
     placeholder,
     disabled = false,
-    size = "md",
+    size: ownSize,
     invalid,
     clearable = false,
     className,
@@ -71,6 +73,7 @@ export const DateTimePicker = forwardRef<HTMLSpanElement, DateTimePickerProps>(f
   },
   ref,
 ) {
+  const size = useControlSize(ownSize);
   const field = useFormField();
   const wording = useWording();
   const formats = useFormats();

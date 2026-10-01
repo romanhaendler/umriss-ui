@@ -21,6 +21,7 @@ import { cx } from "../../lib/cx";
 import { mergeRefs } from "../../lib/mergeRefs";
 import { useFormField } from "../FormField";
 import styles from "./RadioGroup.module.css";
+import { useControlSize } from "../../lib/controlSize";
 
 export interface RadioOption<T extends string> {
   /** What comes back when this possibility is chosen. */
@@ -48,7 +49,8 @@ export interface RadioGroupProps<T extends string>
   onChange?: (value: T) => void;
   /** Arrangement; Default one below the other. */
   orientation?: "vertical" | "horizontal";
-  /** `sm` for dense forms, `md` otherwise. */
+  /** `sm` for a toolbar and dense forms, `md` otherwise. Default: the size of a
+      `ControlSizeProvider` around it, else `md`. */
   size?: "sm" | "md";
   /** Disables the whole group. `RadioOption` disables single
       possibilities. */
@@ -64,7 +66,7 @@ export const RadioGroup = forwardRef(function RadioGroup<T extends string>(
     defaultValue,
     onChange,
     orientation = "vertical",
-    size = "md",
+    size: ownSize,
     disabled = false,
     name,
     className,
@@ -73,6 +75,7 @@ export const RadioGroup = forwardRef(function RadioGroup<T extends string>(
   }: RadioGroupProps<T>,
   ref: React.ForwardedRef<HTMLDivElement>,
 ) {
+  const size = useControlSize(ownSize);
   const field = useFormField();
   const generatedName = useId();
   const groupName = name ?? field?.id ?? generatedName;

@@ -3,11 +3,13 @@ import type { InputHTMLAttributes } from "react";
 import { cx } from "../../lib/cx";
 import { useFormField } from "../FormField";
 import styles from "./Input.module.css";
+import { useControlSize } from "../../lib/controlSize";
 import { useWording } from "../../lib/language";
 import { CrossGlyph } from "../../lib/glyphs";
 
 export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "size"> {
-  /** `sm` for dense forms and table rows, `md` otherwise. */
+  /** `sm` for a toolbar and dense forms, `md` otherwise. Default: the size of a
+      `ControlSizeProvider` around it, else `md`. */
   size?: "sm" | "md";
   /** Marks the field as invalid. `FormField` sets it itself as soon as it
       carries an `error` - by hand only necessary without `FormField`. */
@@ -25,9 +27,10 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
-  { size = "md", invalid, numeric = false, clearable = false, onClear, className, id, disabled, ...rest },
+  { size: ownSize, invalid, numeric = false, clearable = false, onClear, className, id, disabled, ...rest },
   ref,
 ) {
+  const size = useControlSize(ownSize);
   const field = useFormField();
   const wording = useWording();
   const isInvalid = invalid ?? field?.invalid ?? false;

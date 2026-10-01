@@ -1,13 +1,13 @@
 import { FormField, Grid, Select } from "../../../src";
 
 export const title = "States";
-export const lead = "`selectSize=\"sm\"` suits dense forms; errors come from the `FormField`, and a long option is cut at the field's edge.";
+export const lead = "`size=\"sm\"` suits dense forms; errors come from the `FormField`, and a long option is cut at the field's edge.";
 
 export default function States() {
   return (
     <Grid minItemWidth="220px" gap={4}>
       <FormField label="Month" hint="Small size.">
-        <Select selectSize="sm" defaultValue="2026-03">
+        <Select size="sm" defaultValue="2026-03">
           <option value="2026-01">January 2026</option>
           <option value="2026-02">February 2026</option>
           <option value="2026-03">March 2026</option>

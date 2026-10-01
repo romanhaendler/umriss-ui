@@ -49,6 +49,7 @@ const EXCEPTIONS: Record<string, string> = {
   FormFieldBoundary: "a context reset, it renders no element",
   LanguageProvider: "a context, it renders no element",
   UmrissProvider: "a context, it renders no element",
+  ControlSizeProvider: "a context, it renders no element",
 };
 
 interface Leaf {

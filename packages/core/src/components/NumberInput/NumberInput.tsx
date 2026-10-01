@@ -11,6 +11,7 @@ import {
 } from "./number";
 import type { NumberConstraints } from "./number";
 import styles from "./NumberInput.module.css";
+import { useControlSize } from "../../lib/controlSize";
 import { useFormats, useWording } from "../../lib/language";
 import { separatorsOf } from "../../lib/language/formats";
 import { MinusGlyph, PlusGlyph } from "../../lib/glyphs";
@@ -40,7 +41,8 @@ export interface NumberInputProps
   prefix?: ReactNode;
   /** Adornment after the number, e.g. "€" or "%". */
   suffix?: ReactNode;
-  /** `sm` for dense forms and table rows, `md` otherwise. */
+  /** `sm` for a toolbar and dense forms, `md` otherwise. Default: the size of a
+      `ControlSizeProvider` around it, else `md`. */
   size?: "sm" | "md";
   /** Marks the field as invalid. `FormField` sets it itself as soon as it
       carries an `error` – by hand only needed without `FormField`. */
@@ -67,7 +69,7 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
     decimals,
     prefix,
     suffix,
-    size = "md",
+    size: ownSize,
     invalid,
     disabled,
     className,
@@ -79,6 +81,7 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
   },
   ref,
 ) {
+  const size = useControlSize(ownSize);
   const field = useFormField();
   const wording = useWording();
   /* Through the seam and not through `formatNumber`: otherwise the number

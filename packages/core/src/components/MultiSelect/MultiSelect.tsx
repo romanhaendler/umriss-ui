@@ -9,6 +9,7 @@ import { useFormField } from "../FormField";
 import * as Options from "../../lib/options";
 import { Popover } from "../Popover";
 import styles from "./MultiSelect.module.css";
+import { useControlSize } from "../../lib/controlSize";
 import { useWording } from "../../lib/language";
 import { AngleGlyph, CrossGlyph } from "../../lib/glyphs";
 import { announce } from "../../lib/announce";
@@ -39,8 +40,8 @@ export interface MultiSelectProps<T extends string = string>
   searchPlaceholder?: string;
   /** Text when the search finds nothing. */
   emptyText?: string;
-  /** `sm` for a table toolbar and dense forms, `md` otherwise - the heights of
-      `Input`'s two sizes. */
+  /** `sm` for a toolbar and dense forms, `md` otherwise. Default: the size of a
+      `ControlSizeProvider` around it, else `md`. */
   size?: "sm" | "md";
   /** Locks field and panel. */
   disabled?: boolean;
@@ -72,7 +73,7 @@ export const MultiSelect = forwardRef(function MultiSelect<T extends string = st
     placeholder,
     searchPlaceholder,
     emptyText,
-    size = "md",
+    size: ownSize,
     disabled = false,
     invalid,
     className,
@@ -82,6 +83,7 @@ export const MultiSelect = forwardRef(function MultiSelect<T extends string = st
   }: MultiSelectProps<T>,
   ref: ForwardedRef<HTMLDivElement>,
 ) {
+  const size = useControlSize(ownSize);
   const field = useFormField();
   const wording = useWording();
   const placeholderText = placeholder ?? wording.multiSelectPlaceholder;

@@ -11,6 +11,7 @@ import { RangeTrigger } from "./RangeTrigger";
 import type { DateRange, RangePreset } from "./range";
 import { rangeFromDays } from "./contract";
 import styles from "./DatePicker.module.css";
+import { useControlSize } from "../../lib/controlSize";
 import { useFormats, useWording } from "../../lib/language";
 import { CalendarGlyph } from "../../lib/glyphs";
 
@@ -40,7 +41,8 @@ export interface DateRangePickerProps
   /** Marks the field as invalid. `FormField` sets it itself as soon as it
       carries an `error` - by hand only necessary without `FormField`. */
   invalid?: boolean;
-  /** `sm` for dense forms and table rows, `md` otherwise. */
+  /** `sm` for a toolbar and dense forms, `md` otherwise. Default: the size of a
+      `ControlSizeProvider` around it, else `md`. */
   size?: "sm" | "md";
   /** Shows a cross where a value is set, which fades in on hover/focus and
       clears the value. */
@@ -75,7 +77,7 @@ export const DateRangePicker = forwardRef<HTMLSpanElement, DateRangePickerProps>
     placeholder,
     disabled = false,
     invalid,
-    size = "md",
+    size: ownSize,
     clearable = false,
     presets,
     className,
@@ -83,6 +85,7 @@ export const DateRangePicker = forwardRef<HTMLSpanElement, DateRangePickerProps>
   },
   ref,
 ) {
+  const size = useControlSize(ownSize);
   const field = useFormField();
   const wording = useWording();
   const formats = useFormats();
