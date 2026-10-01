@@ -171,6 +171,31 @@ Screenshot pages carry their name in brackets.
 | Between two stacked bars a 1px line in the ground's colour - `Canvas` under forced colours -, in both encodings; none on the baseline | charts-stacking 04 | Unit (draw), Screenshot (`stacked`, `percent`) |
 | Under forced colours and `encoding="marks"` a stack's members are told apart by their hatches | C3, C4 | Manual (both stacked examples, forced colours emulated) |
 
+## `BoxPlot`
+
+| Capability | Rule | Proved at |
+|---|---|---|
+| Five numbers the caller brings, none computed; named for what they are | box-plot B2, B8 | Unit (materialize, jsdom boxPlot) |
+| The further numbers in named channels, null for every other kind | ADR-0011 | Unit (materialize) |
+| On the numeric x axis, `boxWidth` a fraction of the step; in one group with bars | ADR-0002 | Screenshot (`minimal`, `over-time`) |
+| The y extent spans the whisker ends; a missing median is a gap, drawn, hit and counted nowhere | R-2.5 | Unit (materialize, jsdom boxPlot) |
+| Tooltip, readout and data table top to bottom as drawn, in `format` or `tickFormat` | box-plot B9 | Unit (jsdom boxPlot) |
+| The arrows walk box to box; the marker on the median | box-plot B11 | Unit (jsdom boxPlot) |
+| English and German wording | ADR-0031 | Unit (jsdom boxPlot) |
+| Fill at 0.18 (as `Area`) with a full outline, median 2px, whisker caps half the box wide, mean a 3.5px ×, outliers r 3 (as `Scatter`), notch depth 0.2 | box-plot B12, 05 | Screenshot (`minimal`, `over-time`) |
+| Several box series side by side in the step; boxes and bars on one x axis share one group | ADR-0002 | Unit (jsdom boxPlot), Screenshot (`grouped`, `objective`) |
+| The hover marker on the median of its own box; the crosshair on the x value | box-plot B11 | Unit (jsdom boxPlot) |
+| `hidden`: out of drawing, hit and extent, the legend entry stays; a bar's hatched swatch under encoding by marks | R-4.13, C3 | Unit (jsdom boxPlot) |
+| Mixed with `Line` and `LimitLine`; `tone` per series | Q11 | Screenshot (`objective`, `detailed`) |
+| `outliers`: a list per box in two named channels - values flat, offsets per box -, null without it and for every other kind | ADR-0040 | Unit (materialize) |
+| Outliers drawn in the box's colour on its centre line, filled; beyond three IQR of the box's own quartiles a ring; in the extent, hidden with their box, never a hit of their own | ADR-0040, B12 | Unit (materialize, jsdom boxPlot), Screenshot (`outliers`) |
+| Tooltip and table: a count and the values top to bottom, cut after five; a row and a column only where given | box-plot B9 | Unit (jsdom boxPlot) |
+| `mean` a small ×, `notchLower` + `notchUpper` a waist in the outline, `count` read and not drawn; mean and notch in the extent | box-plot B8, B12 | Unit (materialize), Screenshot (`mean-and-notches`) |
+| Mean, notch and n: a tooltip row and a table column each, only where given, in both wordings | box-plot B9 | Unit (jsdom boxPlot) |
+| One notch bound without the other: DEV warning once, no notch drawn; numbers out of order: DEV warning once, drawn as given | box-plot 04 | Unit (jsdom boxPlot) |
+| 1px outline, whiskers and caps on half pixels, the 2px median on whole ones; a whisker on the grid line of its x; boxes side by side 3px apart | R-3.5, box-plot 05 | Screenshot (every `boxplot` example) |
+| Colours from the theme, light and dark; under forced colours the text colour | Q11, C4 | Screenshot (`minimal`, `over-time`), Manual (forced colours emulated) |
+
 ## `Scatter`
 
 | Capability | Rule | Proved at |
@@ -378,8 +403,6 @@ Wanted, not yet built (charts-review Q12). Each waits for a caller who needs it.
 * **A stack's total in the data table.** The tooltip and the readout carry it
   (charts-stacking K4); the table lists the members' own values only, and waits
   for a reader who misses the column.
-* **Box plot.** A kind of its own with five channels; nobody has asked for it
-  on a monitoring screen yet.
 * **Line colour by limit.** A line that turns alarm-coloured above a limit; today
   a `LimitBand` and the ControlChart's violations say the same.
 
@@ -405,6 +428,11 @@ here.
 * **Stacked lines, streamgraphs.** A line is a course, not a share: `stack`
   is on the two kinds that fill a whole of parts (charts-stacking).
 * **Horizontal bars.** Bars grow along the Y axis from a baseline on the X axis.
+* **Violin plots.** A density estimate between the values is smoothing: it
+  draws values nobody measured.
+* **Jittered or beeswarm points.** A random jitter gives a picture that does
+  not repeat from one render to the next; a deterministic beeswarm would be a
+  kind of its own.
 * **Pie, radar, candle.** The set of kinds is closed (no renderer interface for
   third parties); none of the three answers a question of a data-dense screen.
 

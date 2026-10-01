@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Box plot polish</title>
+<link rel="stylesheet" href="../../../packages/core/src/styles/tokens.css">
+<style>
+:root { color-scheme: light; }
+body { margin: 0; padding: 32px; background: var(--u-color-bg, #fafafa); font-family: var(--u-font-sans, system-ui, sans-serif); color: var(--u-color-text, #171717); -webkit-font-smoothing: antialiased; }
+main { max-width: 1120px; margin: 0 auto; }
+h1 { font-size: 22px; font-weight: 600; margin: 0 0 6px; }
+h2 { font-size: 15px; font-weight: 600; margin: 40px 0 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--u-color-text-secondary, #555); }
+p.lead { margin: 0 0 8px; color: var(--u-color-text-secondary, #555); max-width: 760px; line-height: 1.5; }
+code { font-family: var(--u-font-mono, ui-monospace, monospace); font-size: .9em; }
+
+/* The examples as the screenshot suite took them. */
+.shots { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.shots figure { margin: 0; }
+.shots img { width: 100%; display: block; border-radius: 8px; box-shadow: 0 0 0 1px rgba(0,0,0,.08); }
+.shots figcaption { font-size: 12px; color: var(--u-color-text-muted, #888); margin: 4px 0 14px; font-family: var(--u-font-mono, monospace); }
+
+/* A card per open point: three variants, each in light and dark. */
+.card { background: var(--u-color-surface, #fff); border-radius: 10px; box-shadow: 0 0 0 1px rgba(0,0,0,.08); padding: 18px 20px 20px; margin-bottom: 16px; }
+.card h3 { margin: 0 0 4px; font-size: 15px; }
+.card .q { margin: 0 0 14px; color: var(--u-color-text-secondary, #555); font-size: 13px; line-height: 1.5; max-width: 820px; }
+.variants { display: grid; grid-template-columns: 1fr; gap: 16px; }
+.variant .label { font-size: 13px; margin-bottom: 6px; display: flex; gap: 8px; align-items: baseline; }
+.variant .label b { font-family: var(--u-font-mono, monospace); }
+.variant .now { font-size: 11px; padding: 1px 6px; border-radius: 4px; background: #e9f4f2; color: #0b6a61; }
+.pair { display: grid; grid-template-columns: 1fr 1fr; border-radius: 6px; overflow: hidden; box-shadow: 0 0 0 1px rgba(0,0,0,.08); }
+.pair canvas { width: 100%; height: 230px; display: block; }
+@media (max-width: 800px) { .variants, .shots { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<main>
+<h1>Box plot – letzte Politurrunde</h1>
+<p class="lead">Ticket 05. Oben die sieben Beispiele, wie die Screenshot-Suite sie aufgenommen hat. Darunter je eine Karte pro offenem Punkt aus B12. Jede Karte zeigt drei Varianten, links hell und rechts dunkel; <span class="now" style="font-size:11px;padding:1px 6px;border-radius:4px;background:#e9f4f2;color:#0b6a61">jetzt</span> markiert den heutigen Stand. Die Varianten zeichnet eine Kopie von <code>drawBoxes</code> mit denselben Farben. Antworte im Chat kurz mit z. B. „1B 2B 3A …“.</p>
+
+<h2>Die Beispiele, hell und dunkel</h2>
+<div class="shots" id="shots"></div>
+
+<h2>Karten</h2>
+<div id="cards"></div>
+</main>
+
+<script>
+const SNAP = "../../../packages/charts/tests-visual/screenshots.spec.ts-snapshots/";
+const EXAMPLES = ["minimal", "over-time", "outliers", "mean-and-notches", "grouped", "specification-limits", "detailed"];
+const shots = document.getElementById("shots");
+for (const id of EXAMPLES) {
+  for (const theme of ["light", "dark"]) {
+    const fig = document.createElement("figure");
+    fig.innerHTML = `<img alt="${id}, ${theme}" src="${SNAP}example-boxplot--${id}-charts-${theme}-charts-${theme}-darwin.png"><figcaption>${id} · ${theme}</figcaption>`;
+    shots.appendChild(fig);
+  }
+}
+
+/* The look as draw.ts has it today; each card varies one value. */
+const NOW = { fill: 0.18, median: 2, cap: 0.5, mean: "x", meanSize: 3.5, meanStroke: 1.5, dot: 3, ring: 3, ringFill: false, notch: 0.2, width: 0.8, clampNotch: false };
+const THEMES = {
+  light: { bg: "#ffffff", grid: "rgba(23,23,23,0.06)", series: "#2563eb" },
+  dark: { bg: "#161618", grid: "rgba(255,255,255,0.07)", series: "#2563eb" },
+};
+const BOXES = [
+  { lo: 1310, q1: 1395, med: 1430, q3: 1468, hi: 1540, mean: 1445, nl: 1420, nu: 1440, out: [1585, 1700, 1270] },
+  { lo: 1290, q1: 1380, med: 1418, q3: 1462, hi: 1555, mean: 1426, nl: 1402, nu: 1434, out: [1600] },
+  { lo: 1240, q1: 1322, med: 1352, q3: 1398, hi: 1490, mean: 1371, nl: 1340, nu: 1364, out: [1200] },
+];
+/* For card 8: a box of few values, whose notch reaches past its upper quartile. */
+const FEW = [
+  { lo: 1300, q1: 1380, med: 1420, q3: 1450, hi: 1530, mean: 1425, nl: 1370, nu: 1475, out: [] },
+  { lo: 1240, q1: 1322, med: 1352, q3: 1398, hi: 1490, mean: 1371, nl: 1340, nu: 1364, out: [] },
+];
+
+const CARDS = [
+  { title: "1 · Füllung", q: "Deckkraft der Box-Fläche; Kontur immer voll.", key: "fill", options: [["A", "0.12", 0.12], ["B", "0.18", 0.18], ["C", "0.28", 0.28]] },
+  { title: "2 · Median-Stärke", q: "Die Linie quer durch die Box; die Kontur hat 1px.", key: "median", options: [["A", "1.5px", 1.5], ["B", "2px", 2], ["C", "3px", 3]] },
+  { title: "3 · Kappenbreite", q: "Der Querstrich am Whisker-Ende, als Anteil der Boxbreite.", key: "cap", options: [["A", "0.3", 0.3], ["B", "0.5 (halb)", 0.5], ["C", "0.75", 0.75]] },
+  { title: "4 · Mittelwert-Marke", q: "Ein kleines × heute; Alternativen: kleiner, oder eine hohle Raute.", key: "meanVariant", options: [["A", "× 3.5px", { mean: "x", meanSize: 3.5 }], ["B", "× 2.5px", { mean: "x", meanSize: 2.5, meanStroke: 1.25 }], ["C", "◇ Raute", { mean: "diamond", meanSize: 3.5 }]] },
+  { title: "5 · Ausreißer und Far-out-Ring", q: "Punkt bis 3 IQR, Ring darüber hinaus (oben bei der ersten Box, 1700). C deckt die Linien unter dem Ring mit dem Hintergrund ab.", key: "outlierVariant", options: [["A", "Punkt r3, Ring r3", { dot: 3, ring: 3 }], ["B", "Punkt r2.5, Ring r3.5", { dot: 2.5, ring: 3.5 }], ["C", "Ring mit Grund", { dot: 3, ring: 3, ringFill: true }]] },
+  { title: "6 · Notch-Tiefe", q: "Wie weit die Taille je Seite einschneidet, als Anteil der Boxbreite.", key: "notch", options: [["A", "0.1", 0.1], ["B", "0.2", 0.2], ["C", "0.3", 0.3]] },
+  { title: "7 · Standardbreite boxWidth", q: "Ohne Angabe; Balken haben 0.8. Im Beispiel „minimal“ und „grouped“ gilt der Standard.", key: "width", options: [["A", "0.5", 0.5], ["B", "0.6", 0.6], ["C", "0.8 (wie Bar)", 0.8]] },
+  { title: "8 · Notch über das Quartil hinaus", q: "Bei wenigen Werten reicht der Notch über das Quartil (linke Box). Heute: wie gegeben gezeichnet, die Kontur faltet sich nach außen. B begrenzt ihn auf die Box.", key: "clampNotch", data: FEW, options: [["A", "wie gegeben", false], ["B", "auf das Quartil begrenzt", true], null] },
+];
+
+function draw(canvas, theme, p, data) {
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  canvas.width = w * dpr; canvas.height = h * dpr;
+  const ctx = canvas.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const t = THEMES[theme];
+  ctx.fillStyle = t.bg; ctx.fillRect(0, 0, w, h);
+  const y = (v) => h - 12 - ((v - 1180) / (1720 - 1180)) * (h - 24);
+  ctx.strokeStyle = t.grid; ctx.lineWidth = 1;
+  for (const v of [1200, 1300, 1400, 1500, 1600, 1700]) { ctx.beginPath(); ctx.moveTo(0, Math.round(y(v)) + .5); ctx.lineTo(w, Math.round(y(v)) + .5); ctx.stroke(); }
+  const step = w / data.length;
+  const widthPx = step * p.width;
+  const capPx = widthPx * p.cap / 2;
+  const notchPx = widthPx * p.notch;
+  const boxes = new Path2D(), medians = new Path2D(), whiskers = new Path2D(), dots = new Path2D(), rings = new Path2D(), means = new Path2D();
+  data.forEach((b, i) => {
+    const mid = step * (i + .5), left = mid - widthPx / 2, right = left + widthPx;
+    const q1 = y(b.q1), q3 = y(b.q3), py = y(b.med);
+    let nLo = y(b.nl), nHi = y(b.nu);
+    if (p.clampNotch) { nLo = Math.min(nLo, q1); nHi = Math.max(nHi, q3); }
+    boxes.moveTo(left, q3); boxes.lineTo(left, nHi); boxes.lineTo(left + notchPx, py); boxes.lineTo(left, nLo); boxes.lineTo(left, q1);
+    boxes.lineTo(right, q1); boxes.lineTo(right, nLo); boxes.lineTo(right - notchPx, py); boxes.lineTo(right, nHi); boxes.lineTo(right, q3); boxes.closePath();
+    medians.moveTo(left + notchPx, py); medians.lineTo(right - notchPx, py);
+    for (const [from, to] of [[q3, y(b.hi)], [q1, y(b.lo)]]) { whiskers.moveTo(mid, from); whiskers.lineTo(mid, to); whiskers.moveTo(mid - capPx, to); whiskers.lineTo(mid + capPx, to); }
+    const m = y(b.mean), s = p.meanSize;
+    if (p.mean === "x") { means.moveTo(mid - s, m - s); means.lineTo(mid + s, m + s); means.moveTo(mid - s, m + s); means.lineTo(mid + s, m - s); }
+    else { means.moveTo(mid, m - s - 1); means.lineTo(mid + s + 1, m); means.lineTo(mid, m + s + 1); means.lineTo(mid - s - 1, m); means.closePath(); }
+    const reach = 3 * (b.q3 - b.q1);
+    for (const v of b.out) {
+      const far = v > b.q3 + reach || v < b.q1 - reach;
+      const r = far ? p.ring : p.dot, path = far ? rings : dots, oy = y(v);
+      path.moveTo(mid + r, oy); path.arc(mid, oy, r, 0, Math.PI * 2);
+    }
+  });
+  ctx.lineJoin = "round";
+  ctx.globalAlpha = p.fill; ctx.fillStyle = t.series; ctx.fill(boxes); ctx.globalAlpha = 1;
+  ctx.strokeStyle = t.series; ctx.lineCap = "butt"; ctx.lineWidth = 1;
+  ctx.stroke(boxes); ctx.stroke(whiskers);
+  if (p.ringFill) { ctx.fillStyle = t.bg; ctx.fill(rings); }
+  ctx.stroke(rings);
+  ctx.lineWidth = p.meanStroke; ctx.stroke(means); ctx.lineWidth = 1;
+  ctx.fillStyle = t.series; ctx.fill(dots);
+  ctx.lineWidth = p.median; ctx.stroke(medians);
+}
+
+const cards = document.getElementById("cards");
+const jobs = [];
+for (const card of CARDS) {
+  const el = document.createElement("section");
+  el.className = "card";
+  el.innerHTML = `<h3>${card.title}</h3><p class="q">${card.q}</p><div class="variants"></div>`;
+  const row = el.querySelector(".variants");
+  for (const option of card.options) {
+    const v = document.createElement("div");
+    v.className = "variant";
+    if (option === null) continue;
+    const [letter, label, value] = option;
+    const params = { ...NOW, ...(typeof value === "object" && value !== null ? value : { [card.key]: value }) };
+    const current = card.key === "meanVariant" ? letter === "A" : card.key === "outlierVariant" ? letter === "A" : NOW[card.key] === value;
+    v.innerHTML = `<div class="label"><b>${letter}</b> ${label} ${current ? '<span class="now">jetzt</span>' : ""}</div><div class="pair"><canvas></canvas><canvas></canvas></div>`;
+    row.appendChild(v);
+    const [light, dark] = v.querySelectorAll("canvas");
+    jobs.push(() => { draw(light, "light", params, card.data ?? BOXES); draw(dark, "dark", params, card.data ?? BOXES); });
+  }
+  cards.appendChild(el);
+}
+const run = () => jobs.forEach((j) => j());
+run();
+addEventListener("resize", run);
+</script>
+</body>
+</html>

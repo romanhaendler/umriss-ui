@@ -65,8 +65,15 @@ export function TooltipHtml({ scene }: { scene: ChartScene }): ReactNode {
                               <span className="uc-tooltip-x">{row.x}</span>
                             ) : null}
                           </span>
-                          <span className="uc-tooltip-value">{row?.value}</span>
+                          {/* A box names its numbers in rows of their own below (B9). */}
+                          <span className="uc-tooltip-value">{row?.box == null ? row?.value : null}</span>
                         </div>
+                        {row?.box?.map((part) => (
+                          <div className="uc-tooltip-row" key={part.label}>
+                            <span className="uc-tooltip-name uc-tooltip-part">{part.label}</span>
+                            <span className="uc-tooltip-value">{part.value}</span>
+                          </div>
+                        ))}
                         {/* A stack's total follows its last member (charts-stacking K4). */}
                         {snapshot.totals
                           .filter((t) => t.after === k)

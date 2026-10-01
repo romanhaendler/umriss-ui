@@ -10,6 +10,10 @@ import type { WorkingInterval } from "./workingTime";
     data reference then. A native or bound function is compared by identity. */
 export type Accessor<T> = (d: T, index: number) => number | null | undefined;
 
+/** A list per datum - a box's outliers (ADR-0040). null/undefined or an
+    empty array is none; a value that is not finite is left out. */
+export type ListAccessor<T> = (d: T, index: number) => readonly number[] | null | undefined;
+
 /* ---------------- Series ----------------
 
    The series kind belongs to the series, never to the chart - which is exactly
@@ -82,6 +86,26 @@ export interface BarSeriesConfig<T = unknown> extends SeriesBase<T>, Stackable {
   barWidth: number;
 }
 
+/** A box plot (CONTEXT.md: Box). The base accessor is the median; the four
+    further numbers are the caller's, computed by whatever method the caller
+    chose - the library draws them and computes none. */
+export interface BoxSeriesConfig<T = unknown> extends SeriesBase<T> {
+  kind: "box";
+  lowerQuartile: Accessor<T>;
+  upperQuartile: Accessor<T>;
+  lowerWhisker: Accessor<T>;
+  upperWhisker: Accessor<T>;
+  /** The values beyond the whiskers, per box (ADR-0040). */
+  outliers?: ListAccessor<T>;
+  mean?: Accessor<T>;
+  /** Both bounds or neither (CONTEXT.md: Notch). */
+  notchLower?: Accessor<T>;
+  notchUpper?: Accessor<T>;
+  /** How many values stand behind the box; no y value. */
+  count?: Accessor<T>;
+  /** Width as a fraction of the step; boxes and bars on one x axis share it. */
+  boxWidth: number;
+}
 
 /** One state of the closed set a state series knows. */
 export interface StateEntry {
@@ -129,6 +153,7 @@ export type SeriesConfig<T = unknown> =
   | LineSeriesConfig<T>
   | AreaSeriesConfig<T>
   | BarSeriesConfig<T>
+  | BoxSeriesConfig<T>
   | ScatterSeriesConfig<T>
   | StateSeriesConfig<T>
   | MatrixSeriesConfig<T>;
@@ -201,7 +226,42 @@ export interface MaterializedSeries {
       carry does not belong in the shared type with a comment (ADR-0011). null
       for every kind that does not use it. */
   w: Float64Array | null;
+  /** A box's further numbers beside its median in y; null for every other
+      kind (ADR-0011). */
+  box: BoxChannels | null;
   length: number;
+}
+
+/** A box's further numbers beside its median, by name. */
+export interface BoxNumbers<V = number> {
+  lowerQuartile: V;
+  upperQuartile: V;
+  lowerWhisker: V;
+  upperWhisker: V;
+}
+
+/** The named channels of a box: one number per point, NaN where the median
+    is a gap; and its outliers (ADR-0040). */
+export interface BoxChannels extends BoxNumbers<Float64Array> {
+  /** Every box's outliers, flat, box after box; null without `outliers`. */
+  outliers: Float64Array | null;
+  /** Where each box's outliers begin, and one past the last: box i's stand
+      from outlierOffsets[i] to outlierOffsets[i + 1]. null without
+      `outliers`. */
+  outlierOffsets: Uint32Array | null;
+  /** The optional numbers, each null where not given. */
+  mean: Float64Array | null;
+  notchLower: Float64Array | null;
+  notchUpper: Float64Array | null;
+  count: Float64Array | null;
+}
+
+/** The optional numbers of a box (box-plot 04), by name. */
+export interface BoxExtras<V = number> {
+  mean: V;
+  notchLower: V;
+  notchUpper: V;
+  count: V;
 }
 
 /* The Scale interface is fixed (R-2.14); V0 implements only LinearScale. */
@@ -295,6 +355,13 @@ export interface TooltipPoint<T = unknown> {
       entry already carries, and formatting it would presuppose knowing what the
       x axis means. The caller knows that, not this library. */
   segment?: { from: number; to: number; label: string };
+  /** Only for a box: its further numbers; yValue is its median. Fields of
+      their own for the reason `value` has one (ADR-0011). */
+  box?: BoxNumbers &
+    Partial<BoxExtras> & {
+      /** As the caller gave them; only where the series has `outliers`. */
+      outliers?: readonly number[];
+    };
 }
 
 export interface TooltipHit<T = unknown> {

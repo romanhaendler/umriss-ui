@@ -314,3 +314,132 @@ describe("visibleExtent", () => {
     expect(visibleExtent(corridor, 1, 2)).toEqual([-8, 50]);
   });
 });
+
+/* A box's further numbers stand in named channels of their own, null for every
+   other kind (ADR-0011): the median is y, the rest is never folded into y0 or
+   w. */
+describe("materializeSeries with a box", () => {
+  interface Box {
+    t: number;
+    lo: number;
+    q1: number;
+    med: number | null;
+    q3: number;
+    hi: number;
+  }
+  const boxes: Box[] = [
+    { t: 0, lo: 2, q1: 4, med: 5, q3: 6, hi: 9 },
+    { t: 1, lo: 1, q1: 3, med: null, q3: 7, hi: 30 },
+    { t: 2, lo: 3, q1: 5, med: 6, q3: 8, hi: 12 },
+  ];
+  const box = {
+    lowerWhisker: (d: Box) => d.lo,
+    lowerQuartile: (d: Box) => d.q1,
+    upperQuartile: (d: Box) => d.q3,
+    upperWhisker: (d: Box) => d.hi,
+  };
+
+  it("holds the four further numbers beside the median, a gap's as NaN", () => {
+    const { series } = materializeSeries(boxes, (d) => d.t, (d) => d.med, undefined, { box });
+    expect([...series.y].map(String)).toEqual(["5", "NaN", "6"]);
+    expect([...(series.box?.lowerWhisker ?? [])].map(String)).toEqual(["2", "NaN", "3"]);
+    expect([...(series.box?.lowerQuartile ?? [])].map(String)).toEqual(["4", "NaN", "5"]);
+    expect([...(series.box?.upperQuartile ?? [])].map(String)).toEqual(["6", "NaN", "8"]);
+    expect([...(series.box?.upperWhisker ?? [])].map(String)).toEqual(["9", "NaN", "12"]);
+    expect(series.y0).toBeNull();
+    expect(series.w).toBeNull();
+  });
+
+  it("spans the whisker ends in its extent; a gap contributes nothing", () => {
+    const { extent } = materializeSeries(boxes, (d) => d.t, (d) => d.med, undefined, { box });
+    expect(extent).toEqual({ xMin: 0, xMax: 2, yMin: 2, yMax: 12 });
+    const { series } = materializeSeries(boxes, (d) => d.t, (d) => d.med, undefined, { box });
+    expect(visibleExtent(series, 0, 2)).toEqual([2, 12]);
+  });
+
+  it("has no box channels for any other kind", () => {
+    const { series } = materializeSeries(data, (d) => d.t, (d) => d.a, (d) => d.b, { value: (d) => d.b });
+    expect(series.box).toBeNull();
+  });
+});
+
+/* ADR-0040: a box carries its outliers - one flat channel of the values, one
+   of offsets, box i's standing from offsets[i] to offsets[i + 1]. */
+describe("materializeSeries with a box's outliers", () => {
+  interface Box {
+    t: number;
+    med: number | null;
+    out?: number[] | null;
+  }
+  const boxes: Box[] = [
+    { t: 0, med: 5, out: [20, 1] },
+    { t: 1, med: 6, out: [] },
+    { t: 2, med: null, out: [99] },
+    { t: 3, med: 7 },
+    { t: 4, med: 6, out: [Number.NaN, 30, Number.POSITIVE_INFINITY] },
+  ];
+  const box = {
+    lowerWhisker: () => 4,
+    lowerQuartile: () => 5,
+    upperQuartile: () => 6,
+    upperWhisker: () => 8,
+  };
+
+  it("holds the values flat and an offset per box; a gap, an empty and a missing list hold none", () => {
+    const { series } = materializeSeries(boxes, (d) => d.t, (d) => d.med, undefined, { box: { ...box, outliers: (d) => d.out } });
+    expect([...(series.box?.outliers ?? [])]).toEqual([20, 1, 30]);
+    expect([...(series.box?.outlierOffsets ?? [])]).toEqual([0, 2, 2, 2, 2, 3]);
+  });
+
+  it("pulls the extent to the outliers, not to a gap's", () => {
+    const { extent } = materializeSeries(boxes, (d) => d.t, (d) => d.med, undefined, { box: { ...box, outliers: (d) => d.out } });
+    expect([extent.yMin, extent.yMax]).toEqual([1, 30]);
+    const { series } = materializeSeries(boxes, (d) => d.t, (d) => d.med, undefined, { box: { ...box, outliers: (d) => d.out } });
+    expect(visibleExtent(series, 1, 4)).toEqual([4, 30]);
+  });
+
+  it("has no outlier channels without the accessor, nor for any other kind", () => {
+    const { series } = materializeSeries(boxes, (d) => d.t, (d) => d.med, undefined, { box });
+    expect(series.box?.outliers).toBeNull();
+    expect(series.box?.outlierOffsets).toBeNull();
+  });
+});
+
+/* box-plot 04: mean, notch bounds and count - named channels of their own,
+   null where not given; the y values in the extent, the count not. */
+describe("materializeSeries with a box's mean, notch and count", () => {
+  interface Box {
+    t: number;
+    med: number | null;
+  }
+  const boxes: Box[] = [
+    { t: 0, med: 5 },
+    { t: 1, med: null },
+  ];
+  const box = {
+    lowerWhisker: () => 4,
+    lowerQuartile: () => 4.5,
+    upperQuartile: () => 6,
+    upperWhisker: () => 7,
+  };
+
+  it("holds them where given, NaN for a gap, and takes mean and notch into the extent", () => {
+    const { series, extent } = materializeSeries(boxes, (d) => d.t, (d) => d.med, undefined, {
+      box: { ...box, mean: () => 9, notchLower: () => 1, notchUpper: () => 5.5, count: () => 250 },
+    });
+    expect([...(series.box?.mean ?? [])].map(String)).toEqual(["9", "NaN"]);
+    expect([...(series.box?.notchLower ?? [])].map(String)).toEqual(["1", "NaN"]);
+    expect([...(series.box?.notchUpper ?? [])].map(String)).toEqual(["5.5", "NaN"]);
+    expect([...(series.box?.count ?? [])].map(String)).toEqual(["250", "NaN"]);
+    expect([extent.yMin, extent.yMax]).toEqual([1, 9]);
+    expect(visibleExtent(series, 0, 1)).toEqual([1, 9]);
+  });
+
+  it("leaves them null where not given", () => {
+    const { series } = materializeSeries(boxes, (d) => d.t, (d) => d.med, undefined, { box });
+    expect(series.box?.mean).toBeNull();
+    expect(series.box?.notchLower).toBeNull();
+    expect(series.box?.notchUpper).toBeNull();
+    expect(series.box?.count).toBeNull();
+  });
+});

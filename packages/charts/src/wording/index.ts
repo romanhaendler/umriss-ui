@@ -38,6 +38,22 @@ export interface ChartsWording {
   rowColumn: string;
   /** The table's caption: the visible stretch it lists, both ends formatted. */
   tableCaption: (from: string, to: string) => string;
+  /** A box's numbers, top to bottom as drawn: the tooltip's rows, the
+      readout's parts and the data table's columns (box-plot B9). */
+  upperWhisker: string;
+  upperQuartile: string;
+  median: string;
+  lowerQuartile: string;
+  lowerWhisker: string;
+  /** A box's outliers: the row's name, and the row's value - their count and
+      the first few values, the rest counted (box-plot B9). */
+  outliers: string;
+  /** A box's optional readings: its mean, its notch's two bounds as one row,
+      and how many values stand behind it. */
+  mean: string;
+  notch: string;
+  count: string;
+  outlierList: (values: readonly string[], more: number) => string;
   /** Added to the caption where the table shows the downsampled course (C2):
       how many readings its rows stand for. */
   downsampled: (readings: number) => string;
@@ -60,6 +76,16 @@ export const DEFAULT_CHARTS_WORDING: ChartsWording = {
   positionColumn: "Position",
   rowColumn: "Row",
   tableCaption: (from, to) => `Values from ${from} to ${to}.`,
+  upperWhisker: "Upper whisker",
+  upperQuartile: "Upper quartile",
+  median: "Median",
+  lowerQuartile: "Lower quartile",
+  lowerWhisker: "Lower whisker",
+  outliers: "Outliers",
+  mean: "Mean",
+  notch: "Notch",
+  count: "n",
+  outlierList: (values, more) => `${values.length + more}: ${values.join(", ")}${more > 0 ? ` and ${more} more` : ""}`,
   downsampled: (readings) =>
     `Downsampled from ${readings.toLocaleString("en-GB")} readings: the first, lowest, highest and last value of each stretch.`,
 };

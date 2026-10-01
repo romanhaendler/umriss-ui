@@ -125,6 +125,18 @@ export const OUTLINE: readonly Rubric[] = [
         exports: ["Bar"],
       },
       {
+        id: "boxplot",
+        name: "BoxPlot",
+        sentence: "A distribution per position (a box plot, box-and-whisker): quartiles, median and whiskers, per service, per group or per hour. Reach for it to compare spreads, not single values.",
+        about: [
+          "Every number is the caller's: `median`, the two quartiles and where each whisker ends. The library computes none of them and names no quartile method or whisker rule, so a box aggregated in a database draws as well as one computed in the browser.",
+          "A box stands on the numeric x axis as a bar does: a group is a position a `tickFormat` names, and a time axis carries a box per hour (ADR-0002). A missing median is a gap - no box is drawn there.",
+        ],
+        limits: ["No horizontal boxes, no violin or jittered points, no box width by count: a density is smoothing, a jitter a picture that does not repeat."],
+        types: ["BoxPlotProps"],
+        exports: ["BoxPlot"],
+      },
+      {
         id: "scatter",
         name: "Scatter",
         sentence: "Single readings as points, joined by nothing (a scatter plot, dots). Reach for it for samples, checks and events - anything that is not a course.",

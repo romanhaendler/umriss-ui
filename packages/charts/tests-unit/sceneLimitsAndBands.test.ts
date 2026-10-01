@@ -12,6 +12,7 @@ import { cellSize } from "../src/cells";
 import { FALLBACK_THEME } from "../src/theme";
 import type {
   AxisConfig,
+  BoxSeriesConfig,
   LimitConfig,
   LineSeriesConfig,
   MatrixSeriesConfig,
@@ -319,6 +320,40 @@ describe("The value channel exists only where a kind needs it (ADR-0011)", () =>
     s.axisExtent("y", "y");
     const mat = access(s);
     expect([...(mat?.w ?? [])]).toEqual([5, 9, 1]);
+  });
+});
+
+describe("The box channels exist only for a box (ADR-0011)", () => {
+  const access = (s: ChartScene) => s.seriesInOrder()[0]?.materialized ?? null;
+
+  it("leaves them null for a line, a state series and a matrix", () => {
+    for (const config of [line(), stateSeries(), { kind: "matrix", accessor: (d: unknown) => (d as Row).a, value: (d: unknown) => (d as Row).w, coloring: { kind: "gradient", stops: ["#eee", "#333"] }, xAxisId: "x", yAxisId: "y" } as MatrixSeriesConfig]) {
+      const s = makeScene();
+      s.registerSeries(config);
+      s.axisExtent("y", "y");
+      expect(access(s)?.box).toBeNull();
+    }
+  });
+
+  it("fills them for a box, which leaves y0 and the value channel null", () => {
+    const s = makeScene();
+    const box: BoxSeriesConfig = {
+      kind: "box",
+      accessor: (d) => (d as Row).a,
+      lowerQuartile: (d) => (d as Row).a - 1,
+      upperQuartile: (d) => (d as Row).a + 1,
+      lowerWhisker: (d) => (d as Row).a - 2,
+      upperWhisker: (d) => (d as Row).a + 2,
+      boxWidth: 0.8,
+      xAxisId: "x",
+      yAxisId: "y",
+    };
+    s.registerSeries(box);
+    s.axisExtent("y", "y");
+    const mat = access(s);
+    expect(mat?.box).not.toBeNull();
+    expect(mat?.y0).toBeNull();
+    expect(mat?.w).toBeNull();
   });
 });
 
