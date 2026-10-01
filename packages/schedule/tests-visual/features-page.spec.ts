@@ -15,49 +15,29 @@ checkPage({
 });
 
 /* ------------------------------------------------------------------ */
-/* An example that shows a file beside itself (schedule-lane-groups 04) */
+/* A scenario copied alone runs: its data stands in the file            */
 /* ------------------------------------------------------------------ */
 
 import { test, expect } from "@playwright/test";
 
-test("the scenario shows its plan in a second tab, and Copy takes the tab in front", async ({ page, context }) => {
+test("Copy takes the scenario with its plan in it, and nothing of the demo", async ({ page, context }) => {
   test.skip(test.info().project.name.endsWith("dark"), "a behaviour test runs once (light)");
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   await openScenario(page, "replan-the-day-on-the-line");
 
   const example = page.locator('[data-scenario="replan-the-day-on-the-line"]');
   await example.getByRole("button", { name: "Code" }).click();
-  const tabs = example.getByRole("group", { name: "Files of this example" }).getByRole("button");
-  await expect(tabs).toHaveText(["04-replan-the-day-on-the-line.tsx", "plant.ts"]);
-
-  /* The example itself is in front, and Copy takes it. */
-  const copy = async () => {
-    await example.getByRole("button", { name: "Copy" }).click();
-    await expect(example.getByRole("button", { name: "Copied" })).toBeVisible();
-    return (await page.evaluate(() => navigator.clipboard.readText())).trim();
-  };
-  const first = await copy();
-  expect(first).toContain("export default function");
-  expect(first).toContain('from "@umriss-ui/schedule"');
-  /* Neither the demo's own bookkeeping: a pasted file must not carry it. */
-  expect(first).not.toContain("export const title");
-  expect(first).not.toContain("export const shows");
-
-  /* The plant, in the second tab - and Copy follows the tab, not the
-     example. */
-  await tabs.nth(1).click();
-  const second = await copy();
-  expect(second).toContain("export const STEPS");
-  /* A world imports nothing: copied beside the scenario, it runs as it is. */
-  expect(second).not.toMatch(/^import /m);
-  expect(second).not.toBe(first);
-});
-
-test("an example that shows nothing has no tabs at all", async ({ page }) => {
-  test.skip(test.info().project.name.endsWith("dark"), "a behaviour test runs once (light)");
-  await openExample(page, "schedule", "first-schedule");
-  const example = page.locator('[data-example="first-schedule"]');
-  await example.getByRole("button", { name: "Code" }).click();
-  await expect(example.getByRole("group", { name: "Files of this example" })).toHaveCount(0);
   await expect(example.locator(".codeLanguage")).toHaveText("tsx");
+  await example.getByRole("button", { name: "Copy" }).click();
+  await expect(example.getByRole("button", { name: "Copied" })).toBeVisible();
+  const copied = (await page.evaluate(() => navigator.clipboard.readText())).trim();
+
+  expect(copied).toContain("export default function");
+  expect(copied).toContain('from "@umriss-ui/schedule"');
+  /* The plan itself, not an import of it. */
+  expect(copied).toContain("const STEPS");
+  expect(copied).not.toContain("@umriss-ui/demo");
+  /* Neither the demo's own bookkeeping: a pasted file must not carry it. */
+  expect(copied).not.toContain("export const title");
+  expect(copied).not.toContain("export const shows");
 });

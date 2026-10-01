@@ -1,5 +1,9 @@
-import { SHIFT_MINUTES } from "@umriss-ui/demo/worlds/plant";
 import { Calculation, Difference, Given, Product, Quotient, Ref, Sum } from "../../../src";
+
+/* Data from the plant world, written out here so the example runs on its own. */
+
+/** The early shift, 06:00 to 14:00. */
+const SHIFT_MINUTES = 480;
 
 export const title = "OEE of a hall, weighted by planned time";
 export const lead = "Three lines from data, three levels deep; line C's downtime is `null`, so its OEE and the hall's are missing while A and B stand.";

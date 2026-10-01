@@ -1,6 +1,47 @@
 import { Lane, Schedule, Subtasks } from "../../../src";
 import type { Subtask, Task } from "../../../src";
-import { ENGINEERS, ONCALL } from "@umriss-ui/demo/worlds/operations";
+
+/* Data from the operations world, written out here so the example runs on its own. */
+
+const at = (day: number, hours: number, minutes = 0) => new Date(2026, 2, day, hours, minutes).getTime();
+
+interface Engineer {
+  id: string;
+  name: string;
+  team: string;
+}
+
+const ENGINEERS: readonly Engineer[] = [
+  { id: "priya", name: "Priya Raman", team: "Payments" },
+  { id: "jonas", name: "Jonas Keller", team: "Payments" },
+  { id: "ada", name: "Ada Mwangi", team: "Identity" },
+  { id: "tomasz", name: "Tomasz Nowak", team: "Discovery" },
+  { id: "leila", name: "Leila Haddad", team: "Discovery" },
+  { id: "sam", name: "Sam Okafor", team: "Messaging" },
+  { id: "ines", name: "Ines Duarte", team: "Integrations" },
+  { id: "felix", name: "Felix Brandt", team: "Insights" },
+];
+
+interface OnCall {
+  id: string;
+  engineer: string;
+  rotation: "primary" | "secondary";
+  from: number;
+  to: number;
+}
+
+/** Monday 16 to Monday 23 March, handed over every morning at 09:00: the
+    secondary of one day is the primary of the next. */
+const ONCALL: readonly OnCall[] = Array.from({ length: 7 }, (_, day) => [
+  { rotation: "primary" as const, engineer: ENGINEERS[day % ENGINEERS.length]!.id },
+  { rotation: "secondary" as const, engineer: ENGINEERS[(day + 1) % ENGINEERS.length]!.id },
+].map(({ rotation, engineer }) => ({
+  id: `${rotation}-${16 + day}`,
+  engineer,
+  rotation,
+  from: at(16 + day, 9),
+  to: at(17 + day, 9),
+}))).flat();
 
 export const title = "Show a week on one axis";
 

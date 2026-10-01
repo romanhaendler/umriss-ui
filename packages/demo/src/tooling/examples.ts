@@ -16,11 +16,8 @@
    Two globs over the same files: one fetches the running component, one the
    source. So the code shown is the code that ran.
 
-   The demos' shared data lives in the worlds: an import of
-   `@umriss-ui/demo/worlds/<world>` brings the world's file as a further tab
-   of the code view, and the code view imports it from `./<world>`. Every
-   other example carries its own few lines in the file, and a check makes sure
-   of it (`@umriss-ui/demo/checks/ownData`).
+   Every example carries its own data in the file, so that the file copied
+   alone runs, and a check makes sure of it (`@umriss-ui/demo/checks/ownData`).
 
    A scenario is read the same way from `demo/scenarios/NN-<anchor>.tsx`: a
    composed screen with its job as `title`, who uses it as `lead`, the
@@ -34,15 +31,7 @@
 import type { ComponentType } from "react";
 import type { Page } from "../outline";
 import { byRank, parseFileName, parseScenarioName } from "./fileName";
-import { displaySource, worldsOf } from "./source";
-
-/** One tab of an example's code view. The first is the example itself. */
-export interface ExampleFile {
-  /** What the tab is called: the file's name, as the example named it. */
-  name: string;
-  /** What stands in the block - and what Copy takes while it is in front. */
-  source: string;
-}
+import { displaySource } from "./source";
 
 export interface Example {
   /** The page it stands on - the id from the outline. */
@@ -61,9 +50,6 @@ export interface Example {
   /** What stands in the code block: the file, without its title, with the
       package name. */
   source: string;
-  /** The code view's tabs: this example first, then the worlds it imports.
-      One entry means no tabs are drawn at all. */
-  files: readonly ExampleFile[];
 }
 
 export interface ExampleModule {
@@ -95,7 +81,7 @@ export interface Scenario {
   /** The pages it is made of: an id of this demo, or a neighbour's page. */
   builtFrom: readonly (string | ForeignPage)[];
   Component: ComponentType;
-  files: readonly ExampleFile[];
+  source: string;
 }
 
 export interface ScenarioModule extends ExampleModule {
@@ -103,25 +89,18 @@ export interface ScenarioModule extends ExampleModule {
   builtFrom?: unknown;
 }
 
-/** The name a file's tab carries: the file's own name. */
-function tabName(path: string): string {
-  return path.split("/").pop() ?? path;
-}
-
 interface ReadOptions {
   packageName: string;
-  /** The raw glob over `packages/demo/src/worlds/*.ts`. */
-  worlds?: Record<string, string>;
 }
 
 /** What an example and a scenario have in common: a title, maybe a lead, a
-    component, and the tabs of the code view. */
+    component, and the source of the code view. */
 function readModule(
   path: string,
   mod: ExampleModule,
   sources: Record<string, string>,
-  { packageName, worlds = {} }: ReadOptions,
-): { title: string; lead?: string; Component: ComponentType; files: ExampleFile[] } {
+  { packageName }: ReadOptions,
+): { title: string; lead?: string; Component: ComponentType; source: string } {
   const title = mod.title;
   if (typeof title !== "string" || title === "") {
     throw new Error(`\`${path}\` exports no \`title\` – without one it has no name.`);
@@ -139,15 +118,7 @@ function readModule(
     throw new Error(`\`${path}\` has no source text.`);
   }
 
-  const files: ExampleFile[] = [{ name: tabName(path), source: displaySource(raw, packageName) }];
-  for (const world of worldsOf(raw)) {
-    const key = Object.keys(worlds).find((one) => tabName(one) === `${world}.ts`);
-    if (key === undefined) {
-      throw new Error(`\`${path}\` imports the world \`${world}\`, which the demo does not read.`);
-    }
-    files.push({ name: `${world}.ts`, source: worlds[key]! });
-  }
-  return { title, ...(typeof lead === "string" ? { lead } : {}), Component: Component as ComponentType, files };
+  return { title, ...(typeof lead === "string" ? { lead } : {}), Component: Component as ComponentType, source: displaySource(raw, packageName) };
 }
 
 export function readExamples(
@@ -162,8 +133,8 @@ export function readExamples(
     if (!pages.some((s) => s.id === pageId)) {
       throw new Error(`\`${path}\` is in a folder for which there is no page \`${pageId}\`.`);
     }
-    const { title, lead, Component, files } = readModule(path, mod, sources, options);
-    found.push({ pageId, id, title, ...(lead === undefined ? {} : { lead }), rank, Component, source: files[0]!.source, files });
+    const { title, lead, Component, source } = readModule(path, mod, sources, options);
+    found.push({ pageId, id, title, ...(lead === undefined ? {} : { lead }), rank, Component, source });
   }
 
   return found.sort(byRank);
@@ -185,7 +156,7 @@ export function readScenarios(
   const found: Scenario[] = [];
   for (const [path, mod] of Object.entries(module)) {
     const { rank, id } = parseScenarioName(path);
-    const { title, lead, Component, files } = readModule(path, mod, sources, options);
+    const { title, lead, Component, source } = readModule(path, mod, sources, options);
     if (lead === undefined) throw new Error(`\`${path}\` exports no \`lead\` – a scenario says who uses the screen.`);
     const callouts = mod.callouts ?? [];
     if (!Array.isArray(callouts) || callouts.some((one) => typeof one !== "string")) {
@@ -200,7 +171,7 @@ export function readScenarios(
         throw new Error(`\`${path}\` is built from \`${JSON.stringify(one)}\`, which is no page of this demo and no \`{ name, page }\`.`);
       }
     }
-    found.push({ id, rank, title, lead, callouts: callouts as string[], builtFrom: builtFrom as (string | ForeignPage)[], Component, files });
+    found.push({ id, rank, title, lead, callouts: callouts as string[], builtFrom: builtFrom as (string | ForeignPage)[], Component, source });
   }
   return found.sort(byRank);
 }
