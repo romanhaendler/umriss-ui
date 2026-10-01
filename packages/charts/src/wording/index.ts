@@ -38,6 +38,13 @@ export interface ChartsWording {
   rowColumn: string;
   /** The table's caption: the visible stretch it lists, both ends formatted. */
   tableCaption: (from: string, to: string) => string;
+  /** A box's numbers, top to bottom as drawn: the tooltip's rows, the
+      readout's parts and the data table's columns (box-plot B9). */
+  upperWhisker: string;
+  upperQuartile: string;
+  median: string;
+  lowerQuartile: string;
+  lowerWhisker: string;
   /** Added to the caption where the table shows the downsampled course (C2):
       how many readings its rows stand for. */
   downsampled: (readings: number) => string;
@@ -60,6 +67,11 @@ export const DEFAULT_CHARTS_WORDING: ChartsWording = {
   positionColumn: "Position",
   rowColumn: "Row",
   tableCaption: (from, to) => `Values from ${from} to ${to}.`,
+  upperWhisker: "Upper whisker",
+  upperQuartile: "Upper quartile",
+  median: "Median",
+  lowerQuartile: "Lower quartile",
+  lowerWhisker: "Lower whisker",
   downsampled: (readings) =>
     `Downsampled from ${readings.toLocaleString("en-GB")} readings: the first, lowest, highest and last value of each stretch.`,
 };

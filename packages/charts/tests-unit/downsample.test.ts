@@ -10,6 +10,7 @@ function course(ys: readonly number[], y0?: readonly number[]): MaterializedSeri
     y: Float64Array.from(ys),
     y0: y0 === undefined ? null : Float64Array.from(y0),
     w: null,
+    box: null,
     length: ys.length,
   };
 }
@@ -60,6 +61,7 @@ describe("downsample", () => {
       y: Float64Array.from([Number.NaN, 1, 2, 3, 4, 5, Number.NaN, 7, 8]),
       y0: null,
       w: null,
+      box: null,
       length: 9,
     };
     const out = downsample(series, 0, 100.5, 1, 0, 2);

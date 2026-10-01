@@ -80,8 +80,8 @@ export interface BarGroup {
 
 /** Bars on the same x axis share one step. Every bar series learns here how
     many of them there are and which one it is - in registration order, so that
-    the arrangement matches the order of the legend. Series that are not bars do
-    not appear in the map.
+    the arrangement matches the order of the legend. Boxes are members as bars
+    are; series that are neither do not appear in the map.
 
     Step and width fraction hold for the group as a whole, not per member:
     barPlacement() derives the offsets from the group width, and if every member
@@ -98,7 +98,8 @@ export function barGroups(
 ): Map<number, BarGroup> {
   const members = new Map<string, BarCandidate[]>();
   for (const entry of series) {
-    if (entry.kind !== "bar") continue;
+    // A box stands in the group as a bar does: one step, side by side.
+    if (entry.kind !== "bar" && entry.kind !== "box") continue;
     const list = members.get(entry.xAxisId);
     if (list === undefined) members.set(entry.xAxisId, [entry]);
     else list.push(entry);
