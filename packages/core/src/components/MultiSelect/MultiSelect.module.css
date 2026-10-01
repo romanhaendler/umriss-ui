@@ -11,9 +11,13 @@
      removing a value moves nothing around it. It used to be 83, 96 and then
      133 px for none, one and two chosen values in a toolbar, and it showed one
      chip there whatever room the toolbar had. The type size stands here so that
-     a character is the field's own; every text inside sets its own. */
+     a character is the field's own; every text inside sets its own. Twenty
+     characters, not a text field's sixteen: a chip costs more than its letters
+     - its padding and the room its cross keeps - and twenty hold two short
+     chips and the counter; at sixteen the second chip never came. */
   .field {
     composes: text extent from "#own-styles";
+    --_chars: 20;
     --_chrome: calc(var(--u-space-2) + var(--u-space-1) + 10px + var(--u-space-3));
     position: relative; /* frame of reference for the invisible measuring row */
     display: flex;

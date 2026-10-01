@@ -30,9 +30,11 @@ an ellipsis. One rule in `#own-styles` (`.extent`), composed by every field.
 value, with the field's own padding, glyph, cross and steppers added. Given,
 the field is `fit-content` at that count - the same arithmetic as its natural
 width, so `chars={16}` is the field without it, in a row. The default is 16 for
-a text field, select, combobox and multiselect: a `ch` is a figure, wider than
-the average letter the browser counts for `size`, and sixteen of them make the
-browser's own text field. A number takes 10, a textarea 40, and a date picker
+a text field, select and combobox: a `ch` is a figure, wider than the average
+letter the browser counts for `size`, and sixteen of them make the browser's
+own text field. A multiselect takes 20 - a chip costs more than its letters,
+and twenty hold two short chips and the counter - a number 10, a textarea 40,
+and a date picker
 the length of its longest value in the formats in use - so a date never
 truncates, in English or in German.
 

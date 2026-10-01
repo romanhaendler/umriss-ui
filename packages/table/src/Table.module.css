@@ -463,7 +463,7 @@
   }
 
   /* No width for the parts: a field from @umriss-ui/core is its natural width
-     in a row by itself (ADR-0041) - sixteen characters, or its `chars` - and
+     in a row by itself (ADR-0041) - a count of characters, or its `chars` - and
      never what it shows. Here stood `width: auto` for every part and 160 px
      for the search. */
 
