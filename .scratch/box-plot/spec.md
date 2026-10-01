@@ -1,6 +1,6 @@
 # Box plot
 
-Status: ready-for-agent
+Status: done
 Date:   2026-10-01
 Origin: grilling session of 1 Oct 2026; `packages/charts/docs/capabilities.md`
 listed the box plot under "Later" ("a kind of its own with five channels").

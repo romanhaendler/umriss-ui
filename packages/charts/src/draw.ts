@@ -483,6 +483,9 @@ const NOTCH_DEPTH = 0.2;
 /** An outlier this many IQR of its own box beyond a quartile is far out: a
     ring, not a dot (ADR-0040). */
 const FAR_OUT = 3;
+/** Pixels left open between two boxes side by side, so that one's outline
+    does not lie on the other's; dropped where a box is too narrow for it. */
+const BOX_GAP = 3;
 
 function drawBoxes(ctx: CanvasRenderingContext2D, item: BoxDrawItem, plot: Rect): void {
   const n = item.length;
@@ -495,8 +498,10 @@ function drawBoxes(ctx: CanvasRenderingContext2D, item: BoxDrawItem, plot: Rect)
   const { lowerQuartile, upperQuartile, lowerWhisker, upperWhisker, outliers, outlierOffsets, mean, notchLower, notchUpper } = item.box;
   const edgePx = item.offset * xm;
   const widthPx = item.width * xm;
-  const capPx = widthPx / 4;
-  const notchPx = widthPx * NOTCH_DEPTH;
+  const gap = widthPx > 4 * BOX_GAP ? BOX_GAP / 2 : 0;
+  // The centre's distance from the x value - exactly 0 for a box alone, so
+  // that its pixel is the grid line's to the bit.
+  const centrePx = (item.offset + item.width / 2) * xm;
 
   const boxes = new Path2D();
   const medians = new Path2D();
@@ -507,11 +512,20 @@ function drawBoxes(ctx: CanvasRenderingContext2D, item: BoxDrawItem, plot: Rect)
   for (let i = 0; i < n; i++) {
     const median = ys[i] as number;
     if (Number.isNaN(median)) continue;
-    const left = (xs[i] as number) * xm + xb + edgePx;
-    const mid = left + widthPx / 2;
-    const q1 = (lowerQuartile[i] as number) * ym + yb;
-    const q3 = (upperQuartile[i] as number) * ym + yb;
-    const py = median * ym + yb;
+    // The 1px outline, whiskers and caps on half pixels and the 2px median on
+    // whole ones, so that each stays crisp (R-3.5); a notch's slants cannot.
+    const from = (xs[i] as number) * xm + xb + edgePx;
+    const left = crisp(from + gap);
+    const right = Math.round(from + widthPx - gap) - 0.5;
+    const width = right - left;
+    // Rounded as a grid line at the same x is, so that a whisker covers it
+    // rather than standing a pixel beside it.
+    const mid = crisp((xs[i] as number) * xm + xb + centrePx);
+    const capPx = width / 4;
+    const notchPx = width * NOTCH_DEPTH;
+    const q1 = crisp((lowerQuartile[i] as number) * ym + yb);
+    const q3 = crisp((upperQuartile[i] as number) * ym + yb);
+    const py = Math.round(median * ym + yb);
     const nLo = notchLower === null ? Number.NaN : (notchLower[i] as number) * ym + yb;
     const nHi = notchUpper === null ? Number.NaN : (notchUpper[i] as number) * ym + yb;
     const notched = !Number.isNaN(nLo) && !Number.isNaN(nHi);
@@ -519,7 +533,6 @@ function drawBoxes(ctx: CanvasRenderingContext2D, item: BoxDrawItem, plot: Rect)
       if (notched) {
         // The waist: in from each side at the notch's bounds to the median,
         // drawn as given even where a bound lies beyond its quartile.
-        const right = left + widthPx;
         boxes.moveTo(left, q3);
         boxes.lineTo(left, nHi);
         boxes.lineTo(left + notchPx, py);
@@ -531,11 +544,11 @@ function drawBoxes(ctx: CanvasRenderingContext2D, item: BoxDrawItem, plot: Rect)
         boxes.lineTo(right, nHi);
         boxes.lineTo(right, q3);
         boxes.closePath();
-      } else boxes.rect(left, q3, widthPx, q1 - q3);
+      } else boxes.rect(left, q3, width, q1 - q3);
     }
     const inset = notched ? notchPx : 0;
     medians.moveTo(left + inset, py);
-    medians.lineTo(left + widthPx - inset, py);
+    medians.lineTo(right - inset, py);
     const m = mean === null ? Number.NaN : (mean[i] as number) * ym + yb;
     if (!Number.isNaN(m)) {
       means.moveTo(mid - MEAN_SIZE, m - MEAN_SIZE);
@@ -543,12 +556,12 @@ function drawBoxes(ctx: CanvasRenderingContext2D, item: BoxDrawItem, plot: Rect)
       means.moveTo(mid - MEAN_SIZE, m + MEAN_SIZE);
       means.lineTo(mid + MEAN_SIZE, m - MEAN_SIZE);
     }
-    const lo = (lowerWhisker[i] as number) * ym + yb;
-    const hi = (upperWhisker[i] as number) * ym + yb;
+    const lo = crisp((lowerWhisker[i] as number) * ym + yb);
+    const hi = crisp((upperWhisker[i] as number) * ym + yb);
     // Each whisker from its quartile out, where both ends are given.
-    for (const [from, to] of [[q3, hi], [q1, lo]] as const) {
-      if (Number.isNaN(from) || Number.isNaN(to)) continue;
-      whiskers.moveTo(mid, from);
+    for (const [start, to] of [[q3, hi], [q1, lo]] as const) {
+      if (Number.isNaN(start) || Number.isNaN(to)) continue;
+      whiskers.moveTo(mid, start);
       whiskers.lineTo(mid, to);
       whiskers.moveTo(mid - capPx, to);
       whiskers.lineTo(mid + capPx, to);
@@ -562,9 +575,9 @@ function drawBoxes(ctx: CanvasRenderingContext2D, item: BoxDrawItem, plot: Rect)
       for (let k = outlierOffsets[i] as number; k < (outlierOffsets[i + 1] as number); k++) {
         const v = outliers[k] as number;
         const path = v > upper + reach || v < lower - reach ? rings : dots;
-        const py = v * ym + yb;
-        path.moveTo(mid + OUTLIER_RADIUS, py);
-        path.arc(mid, py, OUTLIER_RADIUS, 0, Math.PI * 2);
+        const oy = v * ym + yb;
+        path.moveTo(mid + OUTLIER_RADIUS, oy);
+        path.arc(mid, oy, OUTLIER_RADIUS, 0, Math.PI * 2);
       }
     }
   }

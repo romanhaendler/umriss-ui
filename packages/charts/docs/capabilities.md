@@ -182,7 +182,7 @@ Screenshot pages carry their name in brackets.
 | Tooltip, readout and data table top to bottom as drawn, in `format` or `tickFormat` | box-plot B9 | Unit (jsdom boxPlot) |
 | The arrows walk box to box; the marker on the median | box-plot B11 | Unit (jsdom boxPlot) |
 | English and German wording | ADR-0031 | Unit (jsdom boxPlot) |
-| Fill at 0.18 with a full outline, median 2px, whisker caps half the box wide | box-plot B12 | Screenshot (`minimal`, `over-time`) |
+| Fill at 0.18 (as `Area`) with a full outline, median 2px, whisker caps half the box wide, mean a 3.5px ×, outliers r 3 (as `Scatter`), notch depth 0.2 | box-plot B12, 05 | Screenshot (`minimal`, `over-time`) |
 | Several box series side by side in the step; boxes and bars on one x axis share one group | ADR-0002 | Unit (jsdom boxPlot), Screenshot (`grouped`, `specification-limits`) |
 | The hover marker on the median of its own box; the crosshair on the x value | box-plot B11 | Unit (jsdom boxPlot) |
 | `hidden`: out of drawing, hit and extent, the legend entry stays; a bar's hatched swatch under encoding by marks | R-4.13, C3 | Unit (jsdom boxPlot) |
@@ -193,6 +193,7 @@ Screenshot pages carry their name in brackets.
 | `mean` a small ×, `notchLower` + `notchUpper` a waist in the outline, `count` read and not drawn; mean and notch in the extent | box-plot B8, B12 | Unit (materialize), Screenshot (`mean-and-notches`) |
 | Mean, notch and n: a tooltip row and a table column each, only where given, in both wordings | box-plot B9 | Unit (jsdom boxPlot) |
 | One notch bound without the other: DEV warning once, no notch drawn; numbers out of order: DEV warning once, drawn as given | box-plot 04 | Unit (jsdom boxPlot) |
+| 1px outline, whiskers and caps on half pixels, the 2px median on whole ones; a whisker on the grid line of its x; boxes side by side 3px apart | R-3.5, box-plot 05 | Screenshot (every `boxplot` example) |
 | Colours from the theme, light and dark; under forced colours the text colour | Q11, C4 | Screenshot (`minimal`, `over-time`), Manual (forced colours emulated) |
 
 ## `Scatter`
