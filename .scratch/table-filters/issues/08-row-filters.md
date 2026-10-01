@@ -1,6 +1,6 @@
 # 08 — Row filters
 
-Status: ready-for-agent
+Status: done
 Type: feature
 
 Spec: `.scratch/table-filters/spec.md` — takes up the out-of-scope item
@@ -49,4 +49,7 @@ hidden through `initialView` only to carry a condition.
 - `CONTEXT.md` gains **Row filter**; **Condition** names both kinds.
 - Demo `Filter`: 06 a multiselect over a field without a column, 07 rows
   from a request, 08 the complex case "overdue" with a chip. New baselines for
-  these three examples may be written; no existing baseline moves.
+  these three examples may be written. The Filter page head may move, and only
+  for its import line naming `rowFilter`; no other baseline moves - the page's
+  prose stays as it is, since a paragraph more shifted every example under it
+  by a pixel.

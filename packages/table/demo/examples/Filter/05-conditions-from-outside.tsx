@@ -25,6 +25,14 @@ const SHIPMENTS: Shipment[] = [
 
 const QUICK_FILTERS: readonly Status[] = ["out for delivery", "failed attempt"];
 
+/* The table holds the condition; the buttons only ask it to change. That is
+   why the column's funnel, the chip in the toolbar, "Reset" and `t.view` all
+   agree with them without a line of synchronisation. `setFilter` takes the
+   condition of the column's filter - for `filter="list"` the chosen values -
+   and passes over a column that has none, with a warning in development.
+   Something the user may lift belongs here; `preFilter` is for rows the user
+   may not see at all. A restriction by no column, or by several fields at
+   once, is a row filter (the examples below). */
 export default function ConditionsFromOutside() {
   const t = useTable(SHIPMENTS, { rowKey: (s) => s.id });
   const { Table, Column } = t;

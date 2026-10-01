@@ -165,8 +165,7 @@ export const OUTLINE: readonly Rubric[] = [
         sentence: "Narrow a column to some of its values: those that occur, a range between two bounds, or a condition the application defines. Reach for it when people look for records by a field rather than by free text.",
         about: [
           "Every condition stands in the table toolbar with the count of matches, a cross to lift it and “Reset” for all. A click on a condition opens its filter again.",
-          "An absent value matches no condition. The list filter offers only values the pre-filter admits, so it never gives away rows a user may not see.",
-        ],
+          "An absent value matches no condition. The list filter offers only values the pre-filter admits, so it never gives away rows a user may not see.",        ],
         alternatives: [
           { when: "Free text across the columns", use: "search" },
           { when: "Rows a user may not see at all, invisibly", use: "pre-filter" },
@@ -175,8 +174,8 @@ export const OUTLINE: readonly Rubric[] = [
           "No text filter per column: the search covers text.",
           "In [manual mode](#/manual-mode) a list filter offers what the application names; the table cannot count values it does not hold.",
         ],
-        types: ["ColumnFilter", "FilterInputProps"],
-        exports: ["columnFilter"],
+        types: ["ColumnFilter", "FilterInputProps", "RowFilter"],
+        exports: ["columnFilter", "rowFilter"],
       },
       {
         id: "pre-filter",
