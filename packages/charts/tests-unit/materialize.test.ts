@@ -404,3 +404,42 @@ describe("materializeSeries with a box's outliers", () => {
     expect(series.box?.outlierOffsets).toBeNull();
   });
 });
+
+/* box-plot 04: mean, notch bounds and count - named channels of their own,
+   null where not given; the y values in the extent, the count not. */
+describe("materializeSeries with a box's mean, notch and count", () => {
+  interface Box {
+    t: number;
+    med: number | null;
+  }
+  const boxes: Box[] = [
+    { t: 0, med: 5 },
+    { t: 1, med: null },
+  ];
+  const box = {
+    lowerWhisker: () => 4,
+    lowerQuartile: () => 4.5,
+    upperQuartile: () => 6,
+    upperWhisker: () => 7,
+  };
+
+  it("holds them where given, NaN for a gap, and takes mean and notch into the extent", () => {
+    const { series, extent } = materializeSeries(boxes, (d) => d.t, (d) => d.med, undefined, {
+      box: { ...box, mean: () => 9, notchLower: () => 1, notchUpper: () => 5.5, count: () => 250 },
+    });
+    expect([...(series.box?.mean ?? [])].map(String)).toEqual(["9", "NaN"]);
+    expect([...(series.box?.notchLower ?? [])].map(String)).toEqual(["1", "NaN"]);
+    expect([...(series.box?.notchUpper ?? [])].map(String)).toEqual(["5.5", "NaN"]);
+    expect([...(series.box?.count ?? [])].map(String)).toEqual(["250", "NaN"]);
+    expect([extent.yMin, extent.yMax]).toEqual([1, 9]);
+    expect(visibleExtent(series, 0, 1)).toEqual([1, 9]);
+  });
+
+  it("leaves them null where not given", () => {
+    const { series } = materializeSeries(boxes, (d) => d.t, (d) => d.med, undefined, { box });
+    expect(series.box?.mean).toBeNull();
+    expect(series.box?.notchLower).toBeNull();
+    expect(series.box?.notchUpper).toBeNull();
+    expect(series.box?.count).toBeNull();
+  });
+});

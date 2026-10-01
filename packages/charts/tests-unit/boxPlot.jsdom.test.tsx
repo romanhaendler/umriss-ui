@@ -346,3 +346,107 @@ describe("A box's outliers", () => {
     expect(ticks(hidden)).not.toContain("15 s");
   });
 });
+
+/* box-plot 04: mean, notch and count read where given; a half-given notch
+   and numbers out of order warn once in DEV and draw what is given. */
+describe("A box's mean, notch and count", () => {
+  interface Full {
+    at: number;
+    med: number;
+    lo: number;
+    hi: number;
+  }
+  const full: Full[] = [
+    { at: 0, med: 5, lo: 3, hi: 9 },
+    { at: 1, med: 6, lo: 4, hi: 10 },
+  ];
+  function chartFull(extra: { wording?: ChartsWording; given?: boolean; notchUpper?: boolean; name?: string } = {}): ReactNode {
+    const given = extra.given !== false;
+    return (
+      <Chart data={full} ariaLabel="Mean and notch" wording={extra.wording}>
+        <XAxis accessor={(d: Full) => d.at} ticks={[0, 1]} tickFormat={(v) => MACHINES[v] ?? ""} />
+        <YAxis accessor={(d: Full) => d.hi} tickFormat={(v) => `${v} s`} />
+        <BoxPlot
+          name={extra.name ?? "Cycle time"}
+          median={(d: Full) => d.med}
+          lowerQuartile={(d: Full) => d.med - 1}
+          upperQuartile={(d: Full) => d.med + 1}
+          lowerWhisker={(d: Full) => d.lo}
+          upperWhisker={(d: Full) => d.hi}
+          mean={given ? (d: Full) => d.med + 0.5 : undefined}
+          notchLower={given ? (d: Full) => d.med - 0.25 : undefined}
+          notchUpper={given && extra.notchUpper !== false ? (d: Full) => d.med + 0.25 : undefined}
+          count={given ? () => 120 : undefined}
+        />
+        <Tooltip />
+        <DataTable />
+      </Chart>
+    );
+  }
+
+  it("reads mean, notch and n after the five, in the tooltip", async () => {
+    const host = await mount(chartFull());
+    await focusPlot(host);
+    await press(host, "Home");
+    expect(rows(host).slice(6)).toEqual(["Mean5.5 s", "Notch4.75 s – 5.25 s", "n120"]);
+  });
+
+  it("reads them in German", async () => {
+    const host = await mount(chartFull({ wording: GERMAN_CHARTS_WORDING }));
+    await focusPlot(host);
+    await press(host, "Home");
+    expect(rows(host).slice(6)).toEqual(["Mittelwert5.5 s", "Notch4.75 s – 5.25 s", "n120"]);
+  });
+
+  it("has neither rows nor columns where they are not given", async () => {
+    const host = await mount(chartFull({ given: false }));
+    await focusPlot(host);
+    await press(host, "Home");
+    expect(rows(host)).toHaveLength(6);
+    await act(async () => (host.querySelector(".uc-data-key") as HTMLButtonElement).click());
+    await frame();
+    expect(tableOf(host)[0]).toBe(
+      "Position|Cycle time – Upper whisker|Cycle time – Upper quartile|Cycle time – Median|Cycle time – Lower quartile|Cycle time – Lower whisker",
+    );
+  });
+
+  it("gives the table a column for each where given", async () => {
+    const host = await mount(chartFull());
+    await act(async () => (host.querySelector(".uc-data-key") as HTMLButtonElement).click());
+    await frame();
+    const [head, first] = tableOf(host);
+    expect(head?.split("|").slice(6)).toEqual(["Cycle time – Mean", "Cycle time – Notch", "Cycle time – n"]);
+    expect(first?.split("|").slice(6)).toEqual(["5.5 s", "4.75 s – 5.25 s", "120"]);
+  });
+
+  it("warns once in DEV about a notch bound without the other", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const r = await renderChart(chartFull({ notchUpper: false, name: "Half notch" }));
+    await r.rerender(chartFull({ notchUpper: false, name: "Half notch" }));
+    r.unmount();
+    const notch = warn.mock.calls.filter(([m]) => String(m).includes("Half notch") && String(m).includes("notchUpper"));
+    expect(notch).toHaveLength(1);
+  });
+
+  it("warns once in DEV about numbers out of order, and still draws", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const r = await renderChart(
+      <Chart data={full} ariaLabel="Out of order">
+        <XAxis accessor={(d: Full) => d.at} />
+        <YAxis accessor={(d: Full) => d.hi} />
+        <BoxPlot
+          name="Disordered"
+          median={(d: Full) => d.med}
+          lowerQuartile={(d: Full) => d.med + 1}
+          upperQuartile={(d: Full) => d.med - 1}
+          lowerWhisker={(d: Full) => d.lo}
+          upperWhisker={(d: Full) => d.hi}
+        />
+      </Chart>,
+    );
+    unmount = r.unmount;
+    const order = warn.mock.calls.filter(([m]) => String(m).includes("Disordered") && String(m).includes("order"));
+    expect(order).toHaveLength(1);
+    expect(r.host.querySelector(".uc-empty")).toBeNull();
+  });
+});
