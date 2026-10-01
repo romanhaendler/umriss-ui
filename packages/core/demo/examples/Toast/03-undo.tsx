@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, Stack, Text, useToast } from "../../../src";
+import { Button, Stack, Text, ToastProvider, useToast } from "../../../src";
 import type { ToastCloseReason } from "../../../src";
 
 export const title = "Undo";
@@ -13,7 +13,7 @@ const OUTCOME: Record<ToastCloseReason, string> = {
   action: "Undone: the booking is back.",
 };
 
-export default function Undo() {
+function Content() {
   const { toast } = useToast();
   const [bookings, setBookings] = useState(BOOKINGS);
   const [outcome, setOutcome] = useState<string | null>(null);
@@ -47,5 +47,15 @@ export default function Undo() {
         {outcome ?? `${bookings.length} of ${BOOKINGS.length} rooms booked`}
       </Text>
     </Stack>
+  );
+}
+
+/* `useToast` needs a `ToastProvider` above it; at the root of an application
+   one provider serves every screen. */
+export default function Undo() {
+  return (
+    <ToastProvider>
+      <Content />
+    </ToastProvider>
   );
 }

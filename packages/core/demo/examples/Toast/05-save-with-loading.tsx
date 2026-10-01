@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { Button, Stack, Switch, useToast } from "../../../src";
+import { Button, Stack, Switch, ToastProvider, useToast } from "../../../src";
 
 export const title = "Save, and say how it went";
 export const lead = "A `loading` toast shows a spinner, has no close button and does not leave by itself; `update` turns it into its outcome in place, and only then does its time begin.";
 
-export default function SaveWithLoading() {
+function Content() {
   const { toast, update } = useToast();
   const [fail, setFail] = useState(false);
   /* Read when the answer comes, so that "Try again" follows the switch. */
@@ -38,5 +38,15 @@ export default function SaveWithLoading() {
       <Button onClick={publish}>Publish release notes</Button>
       <Switch label="Let it fail" checked={fail} onChange={(event) => setFail(event.target.checked)} />
     </Stack>
+  );
+}
+
+/* `useToast` needs a `ToastProvider` above it; at the root of an application
+   one provider serves every screen. */
+export default function SaveWithLoading() {
+  return (
+    <ToastProvider>
+      <Content />
+    </ToastProvider>
   );
 }

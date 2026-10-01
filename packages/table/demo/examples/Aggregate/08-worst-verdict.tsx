@@ -1,5 +1,21 @@
-import { KILN_LIMITS } from "@umriss-ui/demo/worlds/plant";
+import type { LimitSet } from "@umriss-ui/core";
 import { useTable } from "../../../src";
+
+/* Data from the plant world, written out here so the example runs on its own. */
+/** The kiln's zone 3, in °C: the numbers every part reads it against, once.
+    Between the two warnings lies the tolerance - a tile fired outside it is
+    scrap; `returnTo` is the alarm's dead band. */
+const KILN = { target: 1200, tolerance: [1185, 1215], alarm: 1230, returnTo: 1222 } as const;
+
+/** The same numbers as the limit set the tile and the verdict read. */
+const KILN_LIMITS: LimitSet = {
+  target: KILN.target,
+  limits: [
+    { value: KILN.tolerance[1], side: "upper", severity: "warning" },
+    { value: KILN.alarm, side: "upper", severity: "alarm" },
+    { value: KILN.tolerance[0], side: "lower", severity: "warning" },
+  ],
+};
 
 export const title = "Carry the worst verdict up";
 export const lead = "On a `VerdictColumn`, `aggregate=\"worst\"` shows the worst verdict among a group's rows; fold a zone and its line still shows the alarm.";

@@ -1,5 +1,45 @@
 import { Area, Chart, Legend, Tooltip, XAxis, YAxis } from "../../../src";
-import { PARCELS_PER_HOUR, type DepotHour } from "@umriss-ui/demo/worlds/logistics";
+
+/* Data from the logistics world, written out here so the example runs on its own. */
+
+/** A small LCG - the same numbers on every computer. */
+function random(seed: number): () => number {
+  let s = seed >>> 0;
+  return () => {
+    s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+    return s / 4294967296;
+  };
+}
+
+const MINUTE = 60_000;
+
+const on = (month: number, day: number, hours = 0) => new Date(2026, month - 1, day, hours).getTime();
+
+const HOUR = 60 * MINUTE;
+
+interface DepotHour {
+  t: number;
+  /** Parcels loaded per hour at each depot. */
+  north: number;
+  river: number;
+  east: number;
+}
+
+/** Monday 06:00 to Tuesday 06:00, hour by hour. East Gate closes at night and
+    loads nothing - 0, not nothing. */
+const PARCELS_PER_HOUR: readonly DepotHour[] = (() => {
+  const r = random(906);
+  return Array.from({ length: 25 }, (_, i) => {
+    const hour = (6 + i) % 24;
+    const night = hour >= 22 || hour < 6;
+    return {
+      t: on(3, 16, 6) + i * HOUR,
+      north: Math.round(120 + r() * 30),
+      river: Math.round((night ? 60 : 90) + r() * 25),
+      east: night ? 0 : Math.round(70 + r() * 30),
+    };
+  });
+})();
 
 export const title = "Stack areas";
 export const lead = "Areas with the same `stack` stand on the ones before them: the top edge is the whole, each band one depot's part.";

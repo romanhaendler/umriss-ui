@@ -1,5 +1,6 @@
 import { Gauge } from "../../../src";
-import { READINGS } from "@umriss-ui/demo/worlds/operations";
+
+const READINGS = [3, 1, 4];
 
 export const title = "Show several readings";
 

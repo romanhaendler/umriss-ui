@@ -6,31 +6,29 @@
    fixture from two directories up breaks that half silently: the reader copies
    thirty lines that cannot compile, and nothing in the demo says so.
 
-   So an example may import from exactly two places:
+   So an example - and a scenario, whose code is shown the same way - may
+   import from exactly two places:
 
-   1. **The package's own source** - `../../../src` and its subpaths, which the
-      code view rewrites to the package name a reader would install.
+   1. **The package's own source** - `../../../src` (`../../src` from a
+      scenario) and its subpaths, which the code view rewrites to the package
+      name a reader would install.
    2. **npm** - a bare specifier: `react`, `@umriss-ui/core`, and any subpath of
       one. A reader has those or can get them.
 
    Anything relative that is not the package is a fixture, and a fixture is
-   what this check exists to catch.
-
-   The demos' shared data is no exception: an import of
-   `@umriss-ui/demo/worlds/<world>` brings the world's file as a further tab
-   of the code view, so a reader sees it and can copy it too; being a bare
-   specifier, it passes the npm rule.
+   what this check exists to catch. `@umriss-ui/demo` is one too, bare as it
+   looks: it is never published, so its worlds cannot be imported - an example
+   playing in a world carries the part of it it uses, written out in the file.
 
    It stands once and runs against every demo, as the shell's and the page's
    checks do: their `own-data.spec.ts` calls `checkOwnData` with their
    directory. It needs no browser - it reads the files - but it lives with the
    other checks because it is the same kind of promise about the same files. */
 
-import { readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { test, expect } from "@playwright/test";
 import { EXAMPLE_PATTERN } from "../src/tooling/fileName";
-import { LIBRARY_PATH } from "../src/tooling/source";
 
 export interface OwnDataProbes {
   /** The demo's `examples/` directory. */
@@ -48,10 +46,12 @@ function specifiersOf(source: string): string[] {
 
 /** Whether a specifier is one an example may have. */
 function allowed(specifier: string): boolean {
+  /* The demo shell: private, so no reader can install it. */
+  if (specifier === "@umriss-ui/demo" || specifier.startsWith("@umriss-ui/demo/")) return false;
   /* npm: anything that is not a path at all. */
   if (!specifier.startsWith(".") && !specifier.startsWith("/")) return true;
   /* The package's own source, and its subpaths. */
-  return specifier === LIBRARY_PATH || specifier.startsWith(`${LIBRARY_PATH}/`);
+  return /^(\.\.\/)+src(\/|$)/.test(specifier);
 }
 
 /** Every example file of a demo, as `<folder>/<file>`. */
@@ -67,12 +67,23 @@ function exampleFiles(examplesDir: string): { name: string; path: string }[] {
   return found.sort((a, b) => a.name.localeCompare(b.name));
 }
 
+/** Every scenario of a demo, as `scenarios/<file>` - beside `examples/`. */
+function scenarioFiles(examplesDir: string): { name: string; path: string }[] {
+  const dir = join(examplesDir, "..", "scenarios");
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir)
+    .filter((file) => file.endsWith(".tsx"))
+    .sort()
+    .map((file) => ({ name: `scenarios/${file}`, path: join(dir, file) }));
+}
+
 export function checkOwnData({ examplesDir }: OwnDataProbes): void {
-  test("every example imports the package and npm, and nothing else", () => {
-    const files = exampleFiles(examplesDir);
+  test("every example and scenario imports the package and npm, and nothing else", () => {
+    const examples = exampleFiles(examplesDir);
     /* A directory that reads empty would let this check pass without having
        checked anything - the one failure a check must never have. */
-    expect(files.length).toBeGreaterThan(0);
+    expect(examples.length).toBeGreaterThan(0);
+    const files = [...examples, ...scenarioFiles(examplesDir)];
 
     const offenders: string[] = [];
     for (const { name, path } of files) {
@@ -84,8 +95,7 @@ export function checkOwnData({ examplesDir }: OwnDataProbes): void {
     }
 
     /* Named, so that the file to repair can be found from the output - and
-       repaired by giving the example its own few lines of data, or by moving
-       the data into a world. */
+       repaired by giving the example its own data, in the file. */
     expect(offenders).toEqual([]);
   });
 }

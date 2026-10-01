@@ -34,9 +34,6 @@ export interface DemoSources {
   examples: Record<string, ExampleModule>;
   /** Both globs again with `query: "?raw", import: "default"`. */
   sources: Record<string, string>;
-  /** `import.meta.glob("../../demo/src/worlds/*.ts", { query: "?raw", … })`:
-      the worlds an example or scenario imports, shown beside it. */
-  worlds?: Record<string, string>;
   /** The generated `props.json`. */
   props: unknown;
   /** The events in a table of their own - for the table and the schedule,
@@ -48,7 +45,6 @@ export function buildDemo(sources: DemoSources): Demo {
   const options = {
     pages: sources.addresses.ALL_PAGES,
     packageName: sources.packageName,
-    worlds: sources.worlds,
   };
   return {
     packageName: sources.packageName,
