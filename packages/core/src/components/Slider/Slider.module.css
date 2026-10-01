@@ -6,14 +6,17 @@
    mark at 50 lies where the thumb's centre lies at 50. */
 
 @layer umriss.components {
+  /* The width (ADR-0041): the place's, and where the place asks, twenty
+     characters - the text fields' natural width, so that a slider in a
+     toolbar stands as wide as a field beside it. Its value readout cannot
+     move it. */
   .slider {
-    composes: text from "#own-styles";
+    composes: text extent from "#own-styles";
     --_thumb: 14px;
     --_track: 4px;
     display: flex;
     align-items: flex-start;
     gap: var(--u-space-3);
-    width: 100%;
   }
 
   .control {

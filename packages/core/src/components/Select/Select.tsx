@@ -4,6 +4,7 @@ import { cx } from "../../lib/cx";
 import { useFormField } from "../FormField";
 import styles from "./Select.module.css";
 import { useControlSize } from "../../lib/controlSize";
+import { extentStyle } from "../../lib/extent";
 import { useWording } from "../../lib/language";
 import { AngleGlyph, CrossGlyph } from "../../lib/glyphs";
 
@@ -15,6 +16,12 @@ export interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement
   /** `sm` for a toolbar and dense forms, `md` otherwise. Default: the size of a
       `ControlSizeProvider` around it, else `md`. */
   size?: "sm" | "md";
+  /** The width in characters - room for the chosen option; the field adds
+      its own padding, chevron and cross. Given, the field is that wide
+      wherever it stands, and never wider than its place. Without it the field
+      fills its place, and is 20 characters wide where the place asks - never
+      as wide as its longest option. */
+  chars?: number;
   /** Marks the field as invalid. `FormField` sets it itself as soon as it
       carries an `error` – by hand only necessary without `FormField`. */
   invalid?: boolean;
@@ -34,7 +41,7 @@ export interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement
  * theme tokens.
  */
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select(
-  { size: ownSize, invalid, clearable = false, onClear, className, id, children, disabled, ...rest },
+  { size: ownSize, chars, invalid, clearable = false, onClear, className, id, children, disabled, ...rest },
   ref,
 ) {
   const size = useControlSize(ownSize);
@@ -44,7 +51,15 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
   const hasSelection = clearable && !rest.multiple && String(rest.value ?? "") !== "";
 
   return (
-    <span className={cx(styles.wrapper, className)}>
+    <span
+      className={cx(
+        styles.wrapper,
+        size === "sm" && styles.wrapperSm,
+        clearable && styles.wrapperClearable,
+        className,
+      )}
+      style={extentStyle(chars)}
+    >
       <select
         ref={ref}
         id={id ?? field?.id}

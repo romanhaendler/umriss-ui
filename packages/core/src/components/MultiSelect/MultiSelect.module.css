@@ -5,13 +5,21 @@
 @layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.components {
+  /* Its width never follows its chips (ADR-0041): the chips follow the width.
+     Where the place gives none, the field is its natural width - the room for
+     the chips plus the button with the chevron beside them - and choosing or
+     removing a value moves nothing around it. It used to be 83, 96 and then
+     133 px for none, one and two chosen values in a toolbar, and it showed one
+     chip there whatever room the toolbar had. The type size stands here so that
+     a character is the field's own; every text inside sets its own. */
   .field {
-    composes: text from "#own-styles";
+    composes: text extent from "#own-styles";
+    --_chrome: calc(var(--u-space-2) + var(--u-space-1) + 10px + var(--u-space-3));
     position: relative; /* frame of reference for the invisible measuring row */
     display: flex;
     align-items: center;
     gap: var(--u-space-2);
-    width: 100%;
+    font-size: var(--u-text-sm);
     height: var(--u-control-height);
     padding-left: var(--u-space-3);
     border-radius: var(--u-radius-md);
@@ -28,6 +36,7 @@
   .sm {
     height: var(--u-control-height-sm);
     border-radius: var(--u-radius-sm);
+    font-size: var(--u-text-xs);
   }
 
   .sm .placeholder,

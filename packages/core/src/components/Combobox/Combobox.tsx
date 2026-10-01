@@ -6,6 +6,7 @@ import { filterOptions, nextIndex, startIndex } from "../../lib/options";
 import { Popover } from "../Popover";
 import styles from "./Combobox.module.css";
 import { useControlSize } from "../../lib/controlSize";
+import { extentStyle } from "../../lib/extent";
 import { useWording } from "../../lib/language";
 import { AngleGlyph, CrossGlyph } from "../../lib/glyphs";
 import { announce, silence } from "../../lib/announce";
@@ -36,6 +37,13 @@ export interface ComboboxProps<T extends string = string>
   /** `sm` for a toolbar and dense forms, `md` otherwise. Default: the size of a
       `ControlSizeProvider` around it, else `md`. */
   size?: "sm" | "md";
+  /** The width in characters - room for the typed text and the chosen
+      option; the field adds its own padding, chevron and cross. Given, the
+      field is that wide wherever it stands, and never wider than its place.
+      Without it the field fills its place, and is 20 characters wide where the
+      place asks - in a toolbar or a row. The panel is never narrower than the
+      field. */
+  chars?: number;
   /** Locks field and panel. */
   disabled?: boolean;
   /** Marks the field as invalid. `FormField` sets it itself as soon as it
@@ -55,11 +63,13 @@ export const Combobox = forwardRef(function Combobox<T extends string = string>(
     onChange,
     placeholder,
     size: ownSize,
+    chars,
     disabled = false,
     invalid,
     emptyText,
     clearable = false,
     className,
+    style,
     onKeyDown,
     onKeyDownCapture,
     ...rest
@@ -163,8 +173,15 @@ export const Combobox = forwardRef(function Combobox<T extends string = string>(
           not prevent it (P3). */}
       <div
         ref={ref}
-        className={cx(styles.wrapper, className)}
+        className={cx(
+          styles.wrapper,
+          size === "sm" && styles.wrapperSm,
+          clearable && styles.wrapperClearable,
+          className,
+        )}
         {...rest}
+        /* The width in characters, and the caller's own style over it. */
+        style={{ ...extentStyle(chars), ...style }}
         onKeyDownCapture={(event) => {
           onKeyDownCapture?.(event);
           onKeyDown?.(event);
@@ -227,6 +244,11 @@ export const Combobox = forwardRef(function Combobox<T extends string = string>(
         }}
         anchorRef={inputRef}
         width="anchor"
+        /* As wide as the field, and never narrower than a list can be read:
+           a field of six characters (`chars`) - a country code - would
+           otherwise have cut every option to an ellipsis. The multiselect's
+           panel has the same floor for its own content. */
+        minWidth={200}
         className={styles.panel}
       >
           <div ref={panelRef} role="listbox" id={listboxId} className={styles.list} aria-label={placeholderText}>

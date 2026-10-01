@@ -41,6 +41,36 @@
     }
   }
 
+  /* A field's width (ADR-0041) - the width a block takes, on a root that is a
+     block: `auto`, not `100%`. In a form's column, a grid's cell, a dialog or
+     any block it fills its place. Where the place asks how wide it is
+     instead - a row, a toolbar, a cell sized by its content, anything that
+     shrinks to fit - it answers with its natural width: `--_chars` characters
+     of its own type, plus `--_extra` it shows beside its value, plus
+     `--_chrome`, the padding, chevron, cross or steppers inside it. Never with
+     what it shows: the containment takes its content out of the question, so
+     chosen values, the options of a select, a clearing cross that comes and
+     goes or a list of files cannot move it. It is never wider than its place
+     and may grow narrower than its natural width; what does not fit then ends
+     in an ellipsis. Measured alike in Chromium, Firefox and WebKit.
+
+     The component sets its chrome, and its own count where 20 - the
+     browser's own default for a text field - is not it; `chars` hands a count
+     in as an inline style (`lib/extent.ts`) and fixes the field at it. In this
+     layer, so that both win. */
+  .extent {
+    --_chars: 20;
+    --_extra: 0;
+    --_tracking: 0px;
+    --_chrome: 0px;
+    min-inline-size: 0;
+    max-inline-size: 100%;
+    contain: inline-size;
+    contain-intrinsic-inline-size: calc(
+      (var(--_chars) + var(--_extra)) * (1ch + var(--_tracking)) + var(--_chrome)
+    );
+  }
+
   /* A text field's cursor carries the accent - colour for interactive things
      only. */
   .field {
@@ -92,6 +122,13 @@
      class, whichever stylesheet comes last. */
   @media (pointer: coarse) {
     .field.field {
+      font-size: 16px;
+    }
+
+    /* The root around such a field writes at the field's size as well, so
+       that a character of its width (`.extent`, ADR-0041) is a character of
+       the text in it: twenty characters stay twenty under a finger. */
+    .fieldRoot.fieldRoot {
       font-size: 16px;
     }
   }

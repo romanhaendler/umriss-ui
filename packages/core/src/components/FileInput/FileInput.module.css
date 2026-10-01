@@ -9,8 +9,12 @@
    thing to aim at. */
 
 @layer umriss.components {
+  /* The width (ADR-0041): the place's, and where the place asks, room for the
+     button and its sentence ("Choose a file or drop it here") on one line. The
+     files chosen into it cannot move it - each name ends in an ellipsis. */
   .zone {
-    composes: text from "#own-styles";
+    composes: text extent from "#own-styles";
+    --_chars: 32;
     display: flex;
     flex-wrap: wrap;
     align-items: center;

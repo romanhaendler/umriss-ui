@@ -1,11 +1,24 @@
 @layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.components {
+  /* The width is the wrapper's (ADR-0041): never the longest option's, chosen
+     or not. The select's padding, the chevron in it, and the cross's room are
+     the chrome; the type size is here as well, so that a character is the
+     select's own. */
   .wrapper {
-    composes: text from "#own-styles";
+    composes: text extent fieldRoot from "#own-styles";
+    --_chrome: calc(var(--u-space-3) + var(--u-space-7));
     position: relative;
-    display: inline-flex;
-    width: 100%;
+    display: flex;
+    font-size: var(--u-text-sm);
+  }
+
+  .wrapperSm {
+    font-size: var(--u-text-xs);
+  }
+
+  .wrapperClearable {
+    --_chrome: calc(var(--u-space-3) + var(--u-space-7) + 20px);
   }
 
   .select {

@@ -1,12 +1,18 @@
 @layer umriss.tokens, umriss.base, umriss.components;
 
 @layer umriss.components {
+  /* The width (ADR-0041): ten characters of number by default, the steppers
+     and their gap as chrome; a prefix or suffix given as text adds its own
+     length (`--_extra`, NumberInput.tsx). The type size is the field's, so
+     that a character is about one figure. */
   .wrapper {
-    composes: text from "#own-styles";
-    display: inline-flex;
+    composes: text extent fieldRoot from "#own-styles";
+    --_chars: 10;
+    --_chrome: calc(var(--u-space-2) + 42px);
+    display: flex;
     align-items: center;
     gap: var(--u-space-2);
-    width: 100%;
+    font-size: var(--u-text-sm);
     height: var(--u-control-height);
     padding: 0 var(--u-space-1) 0 var(--u-space-3);
     border-radius: var(--u-radius-md);
@@ -26,8 +32,10 @@
   }
 
   .sm {
+    --_chrome: calc(var(--u-space-2) + 38px);
     height: var(--u-control-height-sm);
     border-radius: var(--u-radius-sm);
+    font-size: var(--u-text-xs);
   }
 
   .invalid,

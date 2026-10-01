@@ -26,11 +26,19 @@ import { useFormField } from "../FormField";
 import { clampedHeight, remainingChars } from "./measure";
 import styles from "./Textarea.module.css";
 import { useControlSize } from "../../lib/controlSize";
+import { extentStyle } from "../../lib/extent";
 
-export interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
+/* The native `cols` is left out: the field's width is `chars` - the native
+   attribute never reached the screen beside a width of 100 %. */
+export interface TextareaProps extends Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "cols"> {
   /** `sm` for a toolbar and dense forms, `md` otherwise. Default: the size of a
       `ControlSizeProvider` around it, else `md`. */
   size?: "sm" | "md";
+  /** The width in characters - the length of a line; the field adds its own
+      padding. Given, the field is that wide wherever it stands, and never
+      wider than its place. Without it the field fills its place, and is 40
+      characters wide where the place asks - in a row. */
+  chars?: number;
   /** Marks the field as invalid. `FormField` sets it itself as soon as it
       carries an `error` – by hand only needed without `FormField`. */
   invalid?: boolean;
@@ -49,6 +57,7 @@ export interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElemen
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function Textarea(
   {
     size: ownSize,
+    chars,
     invalid,
     autoGrow = false,
     maxRows,
@@ -110,48 +119,43 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function 
   const remaining = remainingChars(value, rest.maxLength);
   const countVisible = showCount && remaining !== undefined;
 
-  const element = (
-    <textarea
-      ref={innerRef}
-      id={id ?? field?.id}
-      rows={rows}
-      disabled={disabled}
-      aria-describedby={rest["aria-describedby"] ?? field?.describedBy}
-      aria-required={field?.required || undefined}
-      aria-invalid={isInvalid || undefined}
-      className={cx(
-        styles.textarea,
-        size === "sm" && styles.sm,
-        isInvalid && styles.invalid,
-        !countVisible && className,
-      )}
-      style={{ resize: resize ?? (autoGrow ? "none" : "vertical") }}
-      /* Composed, not overridden: the caller's onInput used to come along
-         behind with `...rest` and took the count and the growing away from
-         the field (library-audit 04). First the caller, then the
-         measuring. */
-      onInput={(event) => {
-        onInput?.(event);
-        if (!controlled) setOwnValue(event.currentTarget.value);
-        measure();
-      }}
-      {...rest}
-    />
-  );
-
-  if (!countVisible) return element;
-
+  /* The field always wears its wrapper (ADR-0041): the wrapper is what a place
+     lays out and what carries the width - Firefox applies no size containment
+     to a bare textarea element - and the class lands in one place, with a count
+     or without. */
   return (
-    <span className={cx(styles.wrapper, className)}>
-      {element}
-      {/* Announced politely: the count changes on every keystroke, and a
-          reading after every letter would be unusable. */}
-      <span
-        aria-live="polite"
-        className={cx(styles.count, remaining < 0 && styles.countOver)}
-      >
-        {remaining}
-      </span>
+    <span
+      className={cx(styles.wrapper, size === "sm" && styles.wrapperSm, countVisible && styles.counted, className)}
+      style={extentStyle(chars)}
+    >
+      <textarea
+        ref={innerRef}
+        id={id ?? field?.id}
+        rows={rows}
+        disabled={disabled}
+        aria-describedby={rest["aria-describedby"] ?? field?.describedBy}
+        aria-required={field?.required || undefined}
+        aria-invalid={isInvalid || undefined}
+        className={cx(styles.textarea, size === "sm" && styles.sm, isInvalid && styles.invalid)}
+        style={{ resize: resize ?? (autoGrow ? "none" : "vertical") }}
+        /* Composed, not overridden: the caller's onInput used to come along
+           behind with `...rest` and took the count and the growing away from
+           the field (library-audit 04). First the caller, then the
+           measuring. */
+        onInput={(event) => {
+          onInput?.(event);
+          if (!controlled) setOwnValue(event.currentTarget.value);
+          measure();
+        }}
+        {...rest}
+      />
+      {countVisible && (
+        /* Announced politely: the count changes on every keystroke, and a
+           reading after every letter would be unusable. */
+        <span aria-live="polite" className={cx(styles.count, remaining < 0 && styles.countOver)}>
+          {remaining}
+        </span>
+      )}
     </span>
   );
 });

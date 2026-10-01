@@ -10,6 +10,7 @@ import * as Options from "../../lib/options";
 import { Popover } from "../Popover";
 import styles from "./MultiSelect.module.css";
 import { useControlSize } from "../../lib/controlSize";
+import { extentStyle } from "../../lib/extent";
 import { useWording } from "../../lib/language";
 import { AngleGlyph, CrossGlyph } from "../../lib/glyphs";
 import { announce } from "../../lib/announce";
@@ -43,6 +44,13 @@ export interface MultiSelectProps<T extends string = string>
   /** `sm` for a toolbar and dense forms, `md` otherwise. Default: the size of a
       `ControlSizeProvider` around it, else `md`. */
   size?: "sm" | "md";
+  /** The width in characters - room for the chips; the field adds its own
+      padding and chevron. Given, the field is that wide wherever it stands,
+      and never wider than its place. Without it the field fills its place,
+      and is 20 characters wide where the place asks - in a toolbar or a row.
+      Either way, choosing and removing values never moves it: the chips that
+      do not fit stand as "+N". */
+  chars?: number;
   /** Locks field and panel. */
   disabled?: boolean;
   /** Marks the field as invalid. `FormField` sets it itself as soon as it
@@ -74,9 +82,11 @@ export const MultiSelect = forwardRef(function MultiSelect<T extends string = st
     searchPlaceholder,
     emptyText,
     size: ownSize,
+    chars,
     disabled = false,
     invalid,
     className,
+    style,
     onClick,
     onKeyDown,
     ...rest
@@ -331,6 +341,8 @@ export const MultiSelect = forwardRef(function MultiSelect<T extends string = st
         ref={mergeRefs(fieldRef, ref)}
         className={cx(styles.field, size === "sm" && styles.sm, isInvalid && styles.invalid, disabled && styles.fieldDisabled, className)}
         {...rest}
+        /* The width in characters, and the caller's own style over it. */
+        style={{ ...extentStyle(chars), ...style }}
         onClick={(event) => {
           onClick?.(event);
           if (event.defaultPrevented || disabled) return;

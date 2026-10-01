@@ -373,11 +373,24 @@
 
   /* A wrapper around the trigger, so that the clearing cross can sit as a sibling
      element (a button inside a button would be invalid). */
+  /* The field's root carries its width (ADR-0041). Its natural count is the
+     picker's longest value (RangeTrigger.tsx), and a character is one figure of
+     the value: the root sets the value's face, size and tracking, which none
+     of its children inherits - the trigger and the cross set their own. The
+     trigger's padding, the gap and the glyph are the chrome, and the cross's
+     room on a clearable picker. */
   .triggerWrap {
-    composes: text from "#own-styles";
+    composes: text extent from "#own-styles";
+    --_tracking: var(--u-tracking-figures);
+    --_chrome: calc(2 * var(--u-space-3) + var(--u-space-2) + 13px);
     position: relative;
     display: block;
-    width: 100%;
+    font-family: var(--u-font-mono);
+    font-size: var(--u-text-mono);
+  }
+
+  .triggerWrapClearable {
+    --_chrome: calc(2 * var(--u-space-3) + var(--u-space-2) + 13px + 18px + var(--u-space-1));
   }
 
   /* The clearing cross on the trigger: invisible at rest, it fades in on hover or

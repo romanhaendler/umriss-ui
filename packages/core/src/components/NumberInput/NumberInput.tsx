@@ -12,6 +12,7 @@ import {
 import type { NumberConstraints } from "./number";
 import styles from "./NumberInput.module.css";
 import { useControlSize } from "../../lib/controlSize";
+import { extentStyle } from "../../lib/extent";
 import { useFormats, useWording } from "../../lib/language";
 import { separatorsOf } from "../../lib/language/formats";
 import { MinusGlyph, PlusGlyph } from "../../lib/glyphs";
@@ -44,10 +45,22 @@ export interface NumberInputProps
   /** `sm` for a toolbar and dense forms, `md` otherwise. Default: the size of a
       `ControlSizeProvider` around it, else `md`. */
   size?: "sm" | "md";
+  /** The width in characters - room for the number; the field adds its own
+      padding and steppers, and the room for a `prefix` and `suffix` given as
+      text. Given, the field is that wide wherever it stands, and never wider
+      than its place. Without it the field fills its place, and is 10
+      characters wide where the place asks - in a toolbar or a row. */
+  chars?: number;
   /** Marks the field as invalid. `FormField` sets it itself as soon as it
       carries an `error` – by hand only needed without `FormField`. */
   invalid?: boolean;
 }
+
+/* What an adornment adds to the natural width, in characters: its text and
+   the gap beside it (8 px, about one character). An adornment that is not text
+   - an icon - is not counted; `chars` makes room for it. */
+const adornmentChars = (adornment: ReactNode) =>
+  typeof adornment === "string" || typeof adornment === "number" ? String(adornment).length + 1 : 0;
 
 /**
  * Number input in the notation of the formats (`useFormats`): its decimal and
@@ -70,6 +83,7 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
     prefix,
     suffix,
     size: ownSize,
+    chars,
     invalid,
     disabled,
     className,
@@ -197,6 +211,7 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
         disabled && styles.disabled,
         className,
       )}
+      style={extentStyle(chars, { extra: adornmentChars(prefix) + adornmentChars(suffix) })}
     >
       {prefix && <span className={styles.adornment}>{prefix}</span>}
       <input

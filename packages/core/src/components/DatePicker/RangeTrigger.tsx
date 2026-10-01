@@ -10,6 +10,7 @@
 import type { ForwardedRef, HTMLAttributes, ReactNode, RefObject } from "react";
 import { cx } from "../../lib/cx";
 import { mergeRefs } from "../../lib/mergeRefs";
+import { extentStyle } from "../../lib/extent";
 import styles from "./DatePicker.module.css";
 import { CrossGlyph } from "../../lib/glyphs";
 
@@ -60,6 +61,23 @@ export interface RangeTriggerProps {
   onClear: () => void;
   /** The label of the clearing cross. */
   ariaLabel: string;
+  /** The caller's width in characters (ADR-0041). */
+  chars?: number;
+  /** The picker's own natural width in characters: its longest value in the
+      formats in use, or its placeholder (`naturalChars`). */
+  natural: number;
+}
+
+/* A day late in a late month, at a late hour: every part that a format may
+   or may not pad has two digits here. Its length in the formats in use is the
+   longest a value of the picker gets - so a date never ends in an ellipsis
+   where the place asks the picker how wide it is, in German or in English. */
+const LONGEST = new Date(2026, 11, 28, 23, 58, 58);
+
+/** A picker's natural count of characters: its longest value, read through
+    the formats in use (`length`), or its placeholder if that is longer. */
+export function naturalChars(length: (sample: Date) => number, placeholder: string): number {
+  return Math.max(length(LONGEST), placeholder.length);
 }
 
 export function RangeTrigger({
@@ -77,10 +95,18 @@ export function RangeTrigger({
   placeholder,
   onClear,
   ariaLabel,
+  chars,
+  natural,
 }: RangeTriggerProps) {
   const { disabled, invalid, clearable, size } = state;
   return (
-    <span ref={mergeRefs(wrapRef, rootRef)} className={cx(styles.triggerWrap, className)} {...root}>
+    <span
+      ref={mergeRefs(wrapRef, rootRef)}
+      className={cx(styles.triggerWrap, clearable && styles.triggerWrapClearable, className)}
+      {...root}
+      /* The width in characters, and the caller's own style over it. */
+      style={{ ...extentStyle(chars, { natural }), ...root?.style }}
+    >
       <button
         ref={triggerRef}
         type="button"

@@ -59,19 +59,31 @@
   }
 
   /* ------------------------------------------------------------------ */
-  /* Character count                                                     */
+  /* The wrapper, and the character count                                 */
   /* ------------------------------------------------------------------ */
 
+  /* The wrapper is the field's root and carries its width (ADR-0041): forty
+     characters of a line where the place asks, the textarea's padding as
+     chrome. The type size stands here so that a character is the field's
+     own. */
   .wrapper {
-    composes: text from "#own-styles";
+    composes: text extent fieldRoot from "#own-styles";
+    --_chars: 40;
+    --_chrome: calc(2 * var(--u-space-3));
     display: block;
     position: relative;
+    font-size: var(--u-text-sm);
+  }
+
+  .wrapperSm {
+    --_chrome: calc(2 * var(--u-space-2));
+    font-size: var(--u-text-xs);
   }
 
   /* Sits in the lower right inner edge. The room for it comes from the
      field's inner spacing and not from a line of its own - otherwise the
      layout would jump as it appears and disappears. */
-  .wrapper .textarea {
+  .counted .textarea {
     padding-bottom: var(--u-space-6);
   }
 

@@ -21,7 +21,12 @@
     color: var(--u-color-danger-text);
   }
 
+  /* A hint or an error never widens the field it belongs to (ADR-0041): in a
+     row, a FormField is as wide as its label or its field, and a message that
+     appears with the first wrong value wraps inside that width rather than
+     pushing the row apart. In a block it fills the field's width as before. */
   .message {
+    contain: inline-size;
     margin: 0;
     font-size: var(--u-text-xs);
     line-height: var(--u-leading-tight);

@@ -220,6 +220,9 @@ const ROOT: Record<string, (element: Element) => boolean> = {
 const CLASS_ON_WRAPPER: Record<string, string> = {
   FileInput: "the class on the drop zone around key, words and list, the rest on the file <input>",
   Checkbox: "the class on the label that holds box and text, the rest on the <input>",
+  Input: "the class on the wrapper with the padding and the cross, the rest on the <input> (ADR-0041)",
+  Textarea: "the class on the wrapper with the count, the rest on the <textarea> (ADR-0041)",
+  TreeSearch: "an Input: the class on its wrapper, the rest on the <input>",
   NumberInput: "the class on the field with its stepper, the rest on the <input>",
   Select: "the class on the wrapper with the chevron, the rest on the <select>",
   SplitButton: "the class on the group, the rest on the main action",
