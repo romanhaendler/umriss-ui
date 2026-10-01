@@ -434,7 +434,10 @@
 
   /* Every group is at least as tall as a small button: a toolbar carrying only
      conditions and the ratio must not grow when "reset" appears with the first
-     keystroke (table-filters D1). */
+     keystroke (table-filters D1). Its parts are given no width: a field from
+     @umriss-ui/core is its natural width in a row by itself (ADR-0041) - a
+     count of characters, or its `chars` - and never what it shows. Here stood
+     `width: auto` for every part and 160 px for the search. */
   .toolbarGroup {
     display: flex;
     flex-wrap: wrap;
@@ -461,11 +464,6 @@
   .toolbarMd .toolbarGroup {
     min-height: var(--u-control-height);
   }
-
-  /* No width for the parts: a field from @umriss-ui/core is its natural width
-     in a row by itself (ADR-0041) - a count of characters, or its `chars` - and
-     never what it shows. Here stood `width: auto` for every part and 160 px
-     for the search. */
 
   .toolbarInfo {
     font-size: var(--u-text-xs);
@@ -500,7 +498,6 @@
     margin-right: var(--u-space-3);
     font-size: var(--u-text-xs);
   }
-
 
   .pageSteps {
     display: flex;

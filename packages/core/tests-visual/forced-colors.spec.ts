@@ -23,12 +23,13 @@ function outlineOf(page: Page, selector: string) {
 }
 
 /* 01: the ring survives. Three ways a ring is drawn - the shared `ring` a
-   button composes, a field's own, and the box beside a hidden input - and
-   under forced colours each leaves its two-pixel outline, which Chromium
-   paints in the selection colour on a focused element. */
+   button composes, a field's own on the wrapper around its input (ADR-0041),
+   and the box beside a hidden input - and under forced colours each leaves its
+   two-pixel outline, which Chromium paints in the selection colour on a
+   focused element. */
 for (const [pageId, exampleId, control, painted] of [
   ["button", "variants", "button", ":focus-visible"],
-  ["input", "states", "input", ":focus-visible"],
+  ["input", "states", "input", ":has(> input:focus-visible)"],
   ["checkbox", "states", "input", ":focus-visible + *"],
 ] as const) {
   test(`The ${pageId}'s ring survives forced colours`, async ({ page }) => {

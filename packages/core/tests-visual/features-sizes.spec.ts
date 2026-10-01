@@ -73,7 +73,7 @@ test("A select is as wide as its natural width, not as its longest option", asyn
   const before = await box(status);
   await status.selectOption("Held at customs until the papers of origin are checked");
   expect(await box(status)).toEqual(before);
-  // Twenty characters, not the fifty of the long option.
+  // Sixteen characters, not the fifty of the long option.
   expect(before.width).toBeLessThan(260);
   // A search field beside it writes, and its cross comes: nothing moves.
   const search = stage.getByLabel("Search shipments");
@@ -98,6 +98,62 @@ test("chars fixes a field at the width of its value", async ({ page }) => {
     const cut = await field.evaluate((element: HTMLInputElement) => element.scrollWidth > element.clientWidth);
     expect(cut).toBe(false);
   }
+});
+
+/* The field's own markup, cloned beside it with a count as `chars` would hand
+   it in (lib/extent.ts): the stylesheet's arithmetic measured on the real
+   classes, without a second example on the page. */
+const widthAt = (field: Locator, count: number) =>
+  field.evaluate((element, chars) => {
+    const clone = element.cloneNode(true) as HTMLElement;
+    clone.style.setProperty("--_chars", String(chars));
+    clone.style.inlineSize = "fit-content";
+    element.after(clone);
+    const width = clone.getBoundingClientRect().width;
+    clone.remove();
+    return width;
+  }, count);
+
+test("chars at the default count is the natural width, and every character counts", async ({ page }) => {
+  await openExample(page, "sizes", "a-row-that-holds-still");
+  const stage = example(page, "a-row-that-holds-still");
+  // A text field's sixteen, a select's sixteen, a multiselect's twenty.
+  for (const [field, natural] of [
+    [stage.getByLabel("Search shipments").locator(".."), 16],
+    [stage.getByLabel("Status").locator(".."), 16],
+    [stage.locator('[aria-label="Carriers"]'), 20],
+  ] as const) {
+    const width = (await box(field)).width;
+    expect(Math.abs((await widthAt(field, natural)) - width)).toBeLessThanOrEqual(0.5);
+  }
+
+  await openExample(page, "sizes", "sized-to-the-value");
+  const postcode = example(page, "sized-to-the-value").getByLabel("Postcode").locator("..");
+  const five = (await box(postcode)).width;
+  const ten = await widthAt(postcode, 10);
+  // Five characters more are five `ch` of the field's own type wider.
+  const ch = await postcode.evaluate((element) => {
+    const probe = document.createElement("span");
+    probe.style.cssText = "display:inline-block;inline-size:1ch";
+    element.append(probe);
+    const width = probe.getBoundingClientRect().width;
+    probe.remove();
+    return width;
+  });
+  expect(Math.abs(ten - five - 5 * ch)).toBeLessThanOrEqual(0.5);
+});
+
+test("A multiselect holds still in a column too", async ({ page }) => {
+  await openExample(page, "sizes", "narrow-places");
+  const field = example(page, "narrow-places").locator(".exampleStage [aria-haspopup]").last().locator("..");
+  const before = await box(field);
+  await field.locator("[aria-haspopup]").click();
+  const panel = page.getByRole("dialog");
+  for (const person of ["Ada Okafor", "Jun Park"]) await panel.getByText(person, { exact: true }).click();
+  await page.keyboard.press("Escape");
+  expect(await box(field)).toEqual(before);
+  for (let i = 0; i < 4; i++) await field.locator("[data-value]").first().click();
+  expect(await box(field)).toEqual(before);
 });
 
 test("A message under a field in a row wraps there and moves nothing", async ({ page }) => {

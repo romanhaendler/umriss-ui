@@ -5,10 +5,12 @@
    with `ControlSizeProvider`, and every control inside takes it unless it says
    its own. Without a provider a control is `md`, as it always was.
 
-   A surface of its own starts without it: a popover, a dialog, a tooltip, a
-   toast. React carries a context through a portal, and a dialog opened from a
-   small toolbar would otherwise have taken small buttons - the size belongs to
-   the place, not to whatever was opened from it. */
+   A surface of its own starts without it: a popover, a dialog (and so a
+   drawer), a tooltip. React carries a context through a portal, and a dialog
+   opened from a small toolbar would otherwise have taken small buttons - the
+   size belongs to the place, not to whatever was opened from it. A toast needs
+   no reset: its region stands where the `ToastProvider` stands, at the
+   application's root, and the command palette takes no children. */
 
 import { createContext, useContext } from "react";
 import type { ReactNode } from "react";
@@ -27,8 +29,8 @@ export interface ControlSizeProviderProps {
 }
 
 /** Sets the size of the controls inside it - every control with `size` takes
-    it unless it says its own. A popover, dialog, tooltip or toast opened from
-    inside starts without it. */
+    it unless it says its own. A popover, dialog or tooltip opened from inside
+    starts without it. */
 export function ControlSizeProvider({ size, children }: ControlSizeProviderProps) {
   return <ControlSizeContext.Provider value={size}>{children}</ControlSizeContext.Provider>;
 }

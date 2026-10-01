@@ -8,10 +8,10 @@
    The size is read from the class the control sets for it - `sm`, or
    `wrapperSm` and the like - the only trace jsdom has of a height. */
 
-import { describe, expect, it } from "vitest";
-import { useRef } from "react";
+import { describe, expect, it, vi } from "vitest";
+import { act, useRef } from "react";
 import type { ReactElement } from "react";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import {
   Button,
   ButtonGroup,
@@ -32,6 +32,7 @@ import {
   Select,
   Switch,
   Textarea,
+  Tooltip,
 } from "../src";
 import type { ControlSize } from "../src";
 
@@ -117,6 +118,24 @@ describe("a surface of its own starts without the provider", () => {
     }
     render(<Setup />);
     expect(isSmall(screen.getByRole("button", { name: "Inside" }))).toBe(false);
+  });
+
+  it("a tooltip's content", () => {
+    vi.useFakeTimers();
+    try {
+      render(
+        <ControlSizeProvider size="sm">
+          <Tooltip content={<Button>Inside</Button>}>
+            <span>Target</span>
+          </Tooltip>
+        </ControlSizeProvider>,
+      );
+      fireEvent.pointerEnter(screen.getByText("Target"));
+      act(() => vi.advanceTimersByTime(400));
+      expect(isSmall(screen.getByRole("button", { name: "Inside", hidden: true }))).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("a modal's content", () => {

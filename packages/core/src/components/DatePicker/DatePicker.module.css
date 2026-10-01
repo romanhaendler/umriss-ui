@@ -372,8 +372,8 @@
 
 
   /* A wrapper around the trigger, so that the clearing cross can sit as a sibling
-     element (a button inside a button would be invalid). */
-  /* The field's root carries its width (ADR-0041). Its natural count is the
+     element (a button inside a button would be invalid). As the field's root it
+     carries its width (ADR-0041). Its natural count is the
      picker's longest value (RangeTrigger.tsx), and a character is one figure of
      the value: the root sets the value's face, size and tracking, which none
      of its children inherits - the trigger and the cross set their own. The
