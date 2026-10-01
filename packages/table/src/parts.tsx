@@ -525,7 +525,11 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
     };
   }
 
-  const controlColumns = (selectable ? 1 : 0) + (detail ? 1 : 0);
+  /* A tree opens a row's detail with the row's own fold (table-tree-rows):
+     one chevron per row, in the first column at its level - no expander
+     column, whose chevron stood left of the tree's own. */
+  const expanderColumn = detail !== null && !entries;
+  const controlColumns = (selectable ? 1 : 0) + (expanderColumn ? 1 : 0);
   const leading = controlColumns + (spanEntry ? 1 : 0);
   /* A grid that saves rows, adds or deletes them carries their buttons in the
      actions column, pinned at the end: a Save far off to the right, scrolled
@@ -589,7 +593,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
   if (fresh && gridLinesNow[0]) gridLinesNow.splice(1, 0, { key: NEW_LINE, cells: gridLinesNow[0].cells, at: -1, row: fresh.fresh });
   const gridIds = [
     ...(selectable ? ["#select"] : []),
-    ...(detail ? ["#detail"] : []),
+    ...(expanderColumn ? ["#detail"] : []),
     ...(spanEntry ? ["#span"] : []),
     ...dataColumns.map((e) => e.spec.id),
     ...(trailing ? ["#actions"] : []),
@@ -835,7 +839,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
                   />
                 </th>
               )}
-              {detail && (
+              {expanderColumn && (
                 <td
                   className={cx(styles.th, styles.control, pinAt(controlColumns - 1).className)}
                   style={pinAt(controlColumns - 1).style}
@@ -1327,17 +1331,25 @@ function Row({
 
   const virtual = absolute !== undefined;
   const group = line ? (line.span ?? line.parents.at(-1))! : undefined;
-  const controls = (selectable ? 1 : 0) + (detail ? 1 : 0);
+  const entry = fresh ? undefined : tree?.entry(row);
+  const expanderColumn = detail !== null && !tree;
+  const controls = (selectable ? 1 : 0) + (expanderColumn ? 1 : 0);
   const leading = controls + (spanEntry ? 1 : 0);
   const pinAt = (at: number) => pinnedCell(blocks, at);
-  const entry = fresh ? undefined : tree?.entry(row);
   const opens = entry !== undefined && entry.branch && !entry.empty;
 
   return (
     <>
       <tr
         {...data}
-        className={cx(rowClass, virtual && styles.virtualRow, entry?.pathOnly && styles.pathRow)}
+        className={cx(
+          rowClass,
+          virtual && styles.virtualRow,
+          entry && styles.treeRow,
+          opens && styles.branchRow,
+          entry?.level === 0 && styles.rootRow,
+          entry?.pathOnly && styles.pathRow,
+        )}
         data-row={virtual ? absolute : undefined}
         data-line={line ? "row" : undefined}
         data-motion={key}
@@ -1367,7 +1379,7 @@ function Row({
             />
           </td>
         )}
-        {!fresh && detail && (
+        {!fresh && expanderColumn && (
           <td className={cx(styles.td, styles.control, pinAt(controls - 1).className)} style={pinAt(controls - 1).style}>
             {hasDetail && (
               <button
@@ -1405,7 +1417,11 @@ function Row({
             wording={wording}
             line={gridLine}
             rowName={name}
-            tree={entry && e === tree?.column ? { setup: tree, entry } : undefined}
+            tree={
+              entry && e === tree?.column
+                ? { setup: tree, entry, detail: hasDetail ? { open, toggle: () => snapshot.toggleRow(key) } : undefined }
+                : undefined
+            }
           />
         ))}
         {trailing && (
@@ -1426,8 +1442,12 @@ function Row({
       </tr>
       {open && (
         <tr id={detailId} className={styles.detailRow} data-group={group?.path} data-grid-line={grid ? `detail:${key}` : undefined}>
-          <td colSpan={columnCount} className={styles.detailCell}>
-            {detailContent}
+          <td
+            colSpan={columnCount}
+            className={cx(styles.detailCell, entry && styles.treeDetail)}
+            style={entry ? ({ "--tree-level": entry.level } as CSSProperties) : undefined}
+          >
+            {entry ? <div className={styles.treeDetailRail}>{detailContent}</div> : detailContent}
           </td>
         </tr>
       )}
@@ -1451,7 +1471,7 @@ function Cell({
   tree,
 }: {
   /** Tree rows: this cell carries the indent and the fold. */
-  tree?: { setup: TreeSetup; entry: FlatteningEntry<unknown> };
+  tree?: { setup: TreeSetup; entry: FlatteningEntry<unknown>; detail?: TreeDetail };
   entry: ColumnEntry;
   row: unknown;
   kind: ReturnType<Registry["kindOf"]>;
@@ -1526,28 +1546,42 @@ interface TreeSetup {
    labels of one level align - then the cell. The fold is the group header's,
    with its keys: Right opens, Left closes or goes to the parent's fold, Alt
    acts on the siblings as well. */
+/** A row's detail in a tree: its fold opens it. */
+interface TreeDetail {
+  open: boolean;
+  toggle: () => void;
+}
+
 function TreeCellContent({
   setup,
   entry,
+  detail,
   name,
   wording,
   children,
 }: {
   setup: TreeSetup;
   entry: FlatteningEntry<unknown>;
+  detail?: TreeDetail;
   name: string;
   wording: Wording;
   children: ReactNode;
 }) {
-  const opens = entry.branch && !entry.empty;
-  const open = entry.expanded;
+  const branch = entry.branch && !entry.empty;
+  const opens = branch || detail !== undefined;
+  /* The fold opens what stands under the row: its detail, then its children. */
+  const open = (branch && entry.expanded) || (detail?.open ?? false);
+  const set = (wanted: boolean) => {
+    if (branch) setup.set(entry.key, wanted);
+    if (detail && detail.open !== wanted) detail.toggle();
+  };
   const onKeyDown = (event: ReactKeyboardEvent<HTMLButtonElement>) => {
     if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
     event.preventDefault();
     if (event.altKey) return setup.siblings(entry.key, event.key === "ArrowRight");
     if (event.key === "ArrowRight") {
-      if (!open) setup.set(entry.key, true);
-    } else if (open) setup.set(entry.key, false);
+      if (!open) set(true);
+    } else if (open) set(false);
     else {
       const parent = setup.parent(entry.key);
       const table = event.currentTarget.closest("table");
@@ -1565,7 +1599,7 @@ function TreeCellContent({
           aria-expanded={open}
           aria-label={open ? wording.foldBranch(name) : wording.unfoldBranch(name)}
           onKeyDown={onKeyDown}
-          onClick={(event) => (event.altKey ? setup.siblings(entry.key, !open) : setup.set(entry.key, !open))}
+          onClick={(event) => (event.altKey ? setup.siblings(entry.key, !open) : set(!open))}
         >
           <FoldMark />
         </button>

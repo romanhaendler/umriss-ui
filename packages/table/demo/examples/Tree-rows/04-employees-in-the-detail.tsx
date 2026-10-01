@@ -1,7 +1,7 @@
 import { useTable } from "../../../src";
 
 export const title = "Employees in the detail";
-export const lead = "When the bottom of the hierarchy is records of another kind, the tree carries the summarising columns and a leaf's `RowDetail` holds a table of its own - with every column the employees have, and its own sort.";
+export const lead = "When the bottom of the hierarchy is records of another kind, the tree carries the summarising columns and a team's `RowDetail` holds its employees - a table of their own, with every field they have and their own sort. In a tree the team's fold opens them: they hang from it a level deeper, on the table's surface, without a box.";
 
 interface Employee {
   id: string;

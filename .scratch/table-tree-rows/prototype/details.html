@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Records under a tree</title>
+<link rel="stylesheet" href="../../../packages/core/src/styles/tokens.css" />
+<style>
+  :root { color-scheme: light dark; }
+  :root[data-theme="dark"] { color-scheme: dark; }
+  :root[data-theme="light"] { color-scheme: light; }
+  body {
+    margin: 0; padding: 32px 16px 64px; background: var(--u-color-bg); color: var(--u-color-text);
+    font-family: var(--u-font-sans); font-size: var(--u-text-md);
+  }
+  main { max-width: 1040px; margin: 0 auto; }
+  h1 { font-size: var(--u-text-xl); margin: 0 0 8px; }
+  h2 { font-size: var(--u-text-lg); margin: 48px 0 4px; }
+  p.lead { color: var(--u-color-text-secondary); margin: 0 0 16px; max-width: 72ch; line-height: 1.5; }
+  .card { background: var(--u-color-surface); border: 1px solid var(--u-hairline); border-radius: var(--u-radius-lg); overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  th, td { padding: var(--u-space-2) var(--u-space-3); border-bottom: 1px solid var(--u-hairline); text-align: left; vertical-align: middle; }
+  thead th { font-size: var(--u-text-xs); font-weight: var(--u-weight-medium); letter-spacing: var(--u-tracking-caps); text-transform: uppercase; color: var(--u-color-text-secondary); border-bottom-color: var(--u-hairline-strong); white-space: nowrap; }
+  tbody tr:last-child > * { border-bottom: none; }
+  .num { text-align: right; }
+  tbody th { font-weight: var(--u-weight-medium); }
+  .tree { display: flex; align-items: center; padding-left: calc(var(--level, 0) * var(--u-space-4)); }
+  .fold, .slot { flex: none; width: 16px; height: 16px; margin-right: 4px; }
+  .fold { display: inline-grid; place-items: center; padding: 0; border: 0; background: none; color: var(--u-color-text-secondary); border-radius: var(--u-radius-xs); cursor: pointer; }
+  .fold:hover { background: color-mix(in srgb, var(--u-color-text) 8%, transparent); color: var(--u-color-text); }
+  .fold svg { transition: transform 160ms; }
+  .fold[aria-expanded="false"] svg { transform: rotate(-90deg); }
+  .muted { color: var(--u-color-text-muted); }
+  .secondary { color: var(--u-color-text-secondary); }
+  .count { font-weight: var(--u-weight-regular); color: var(--u-color-text-muted); margin-left: 6px; font-size: var(--u-text-sm); }
+  [hidden] { display: none !important; }
+
+  /* A: records as a sub-list - no box, a rail from the team's fold down */
+  .a .rec > td { padding: 0; border-bottom: none; }
+  .a .recRow {
+    display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) 6rem 7.5rem; align-items: center;
+    margin-left: calc((var(--level) * var(--u-space-4)) + var(--u-space-3) + 7px);
+    padding: 6px var(--u-space-3) 6px calc(var(--u-space-4) + 4px);
+    border-left: 1px solid var(--u-hairline-strong);
+    font-size: var(--u-text-sm);
+  }
+  .a .recHead .recRow { font-size: var(--u-text-xs); font-weight: var(--u-weight-medium); letter-spacing: var(--u-tracking-caps); text-transform: uppercase; color: var(--u-color-text-muted); padding-top: 8px; }
+  .a .recLast .recRow { padding-bottom: 10px; }
+  .a .recLast > td { border-bottom: 1px solid var(--u-hairline); }
+  .a .recRow > :last-child { text-align: right; }
+  .a .recRow > .name { font-weight: var(--u-weight-medium); }
+
+  /* B: records as the last level, in the shared columns */
+  .b .person > th { font-weight: var(--u-weight-regular); }
+  .b .person .meta { color: var(--u-color-text-muted); font-size: var(--u-text-sm); margin-left: 8px; }
+  .b .avatar { flex: none; width: 18px; height: 18px; margin-right: 8px; border-radius: 50%; display: inline-grid; place-items: center; font-size: 9px; font-weight: var(--u-weight-medium); background: var(--u-color-surface-sunken); color: var(--u-color-text-secondary); }
+
+  /* C: split view - the tree chooses, the panel shows */
+  .c .split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); }
+  .c .split > .tree-side { border-right: 1px solid var(--u-hairline); }
+  .c tbody tr.leaf { cursor: pointer; }
+  .c tbody tr.leaf:hover > * { background: var(--u-color-surface-sunken); }
+  .c tbody tr[aria-selected="true"] > * { background: var(--u-color-accent-subtle); }
+  .c tbody tr[aria-selected="true"] > th { box-shadow: inset 2px 0 0 var(--u-color-accent); }
+  .c .panelHead { display: flex; align-items: baseline; gap: 8px; padding: 12px var(--u-space-3) 8px; border-bottom: 1px solid var(--u-hairline-strong); }
+  .c .panelHead strong { font-weight: var(--u-weight-semibold); }
+  .c .crumb { color: var(--u-color-text-muted); font-size: var(--u-text-sm); }
+  .c .panel table th, .c .panel table td { font-size: var(--u-text-sm); }
+  .c .empty { padding: 24px var(--u-space-3); color: var(--u-color-text-muted); }
+
+  .notes { margin: 10px 0 0; padding-left: 18px; color: var(--u-color-text-secondary); font-size: var(--u-text-sm); line-height: 1.6; }
+  .switch { position: fixed; top: 12px; right: 16px; font: inherit; font-size: var(--u-text-sm); padding: 4px 10px; border-radius: var(--u-radius-sm); border: 1px solid var(--u-hairline-strong); background: var(--u-color-surface); color: var(--u-color-text); cursor: pointer; }
+</style>
+</head>
+<body>
+<button class="switch" id="theme">Dark theme</button>
+<main>
+  <h1>Records under a tree - three ways</h1>
+  <p class="lead">An organisation with headcount and hours on every level; a team's employees are records of another kind with more fields. In all three: <strong>one chevron per row, always in the first column at its level</strong> - the row detail's own expander column is gone. Click the folds and, in C, a team.</p>
+
+  <h2>A · The records as a sub-list under their team</h2>
+  <p class="lead">Opening a team opens its employees right beneath it - no box, no own surface. A rail runs down from the team's fold, a quiet header names the fields, the records are a step smaller. The hours of a person stand under the team's hours.</p>
+  <div class="card a"><table id="tA"></table></div>
+  <ul class="notes">
+    <li>Like a bill of materials or the line items under an account in a financial statement.</li>
+    <li>Library: a leaf's fold opens its <code>RowDetail</code>; a new form of detail, "records", lays the detail rows on the table's grid instead of a free box.</li>
+  </ul>
+
+  <h2>B · The records are the last level of the tree</h2>
+  <p class="lead">Employees are rows like units, one level deeper, in the same columns: the name in the first column, the hours under "Hours a week". What has no column of its own - role, since - stands quietly beside the name.</p>
+  <div class="card b"><table id="tB"></table></div>
+  <ul class="notes">
+    <li>Like Jira's or Notion's sub-items, or a file tree where files sit under folders.</li>
+    <li>Library: nothing new - <code>childRows</code> returns the employees for a team, the row type is a union. Cheapest, but only as good as the fields that map onto the units' columns.</li>
+  </ul>
+
+  <h2>C · Tree and records side by side</h2>
+  <p class="lead">The tree chooses, the panel shows: click a team and its employees fill the right side with all their columns, sortable, while the tree keeps its place. Opening and choosing are two things - the chevron opens a branch, a click on a team chooses it.</p>
+  <div class="card c"><div class="split"><div class="tree-side"><table id="tC"></table></div><div class="panel" id="pC"></div></div></div>
+  <ul class="notes">
+    <li>Like a mail client, a file manager's column view, or SAP's master-detail layout.</li>
+    <li>Library: tree rows plus a chosen row (an active row, ADR-0003) the application reads; the panel is a second ordinary table.</li>
+  </ul>
+</main>
+
+<script>
+const ORG = [
+  { id: "it", name: "IT", headcount: 5, hours: 196, children: [
+    { id: "ops", name: "IT Operations", headcount: 3, hours: 118, people: [
+      ["Ada Brenner", "Lead", 2016, 40], ["Jonas Kessler", "Administrator", 2021, 40], ["Mira Otto", "Administrator", 2024, 38]] },
+    { id: "dev", name: "Development", headcount: 2, hours: 78, people: [
+      ["Lena Vogt", "Developer", 2019, 40], ["Tom Weiss", "Developer", 2023, 38]] },
+  ] },
+  { id: "fin", name: "Finance", headcount: 3, hours: 110, children: [
+    { id: "ctl", name: "Controlling", headcount: 2, hours: 72, people: [
+      ["Paula Hartmann", "Controller", 2018, 40], ["Ben Lindner", "Analyst", 2025, 32]] },
+    { id: "acc", name: "Accounting", headcount: 1, hours: 38, people: [["Clara Vogel", "Accountant", 2012, 38]] },
+  ] },
+  { id: "dp", name: "Data protection", headcount: 1, hours: 20, people: [["Sven Roth", "Officer", 2020, 20]] },
+];
+const ANGLE = '<svg viewBox="0 0 10 10" width="12" height="12" aria-hidden="true"><path d="M2.5 3.75 5 6.25 7.5 3.75" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const fmt = (n) => n.toLocaleString("en");
+const head = (first) => `<thead><tr><th>${first}</th><th class="num">Headcount</th><th class="num">Hours a week</th></tr></thead>`;
+const fold = (id, open, name) => `<button class="fold" data-id="${id}" aria-expanded="${open}" aria-label="${open ? "Fold" : "Unfold"} rows under ${name}">${ANGLE}</button>`;
+const initials = (n) => n.split(" ").map((p) => p[0]).join("");
+
+function render(kind, open, chosen) {
+  const rows = [];
+  const walk = (list, level) => {
+    for (const u of list) {
+      const opens = (u.children && u.children.length) || (kind !== "c" && u.people);
+      const isOpen = open.has(u.id);
+      const leafOfC = kind === "c" && !u.children;
+      rows.push(`<tr class="${leafOfC ? "leaf" : ""}" data-choose="${leafOfC ? u.id : ""}" aria-selected="${chosen === u.id}">
+        <th scope="row"><span class="tree" style="--level:${level}">${opens ? fold(u.id, isOpen, u.name) : '<span class="slot"></span>'}${u.name}${kind === "c" && u.people && !u.children ? `<span class="count">${u.people.length}</span>` : ""}</span></th>
+        <td class="num">${fmt(u.headcount)}</td><td class="num">${fmt(u.hours)}</td></tr>`);
+      if (!isOpen) continue;
+      if (u.children) walk(u.children, level + 1);
+      if (u.people && kind === "a") {
+        rows.push(`<tr class="rec recHead"><td colspan="3"><div class="recRow" style="--level:${level}"><span>Employee</span><span>Role</span><span>Since</span><span>Hours</span></div></td></tr>`);
+        u.people.forEach(([n, r, s, h], i) => rows.push(`<tr class="rec ${i === u.people.length - 1 ? "recLast" : ""}"><td colspan="3"><div class="recRow" style="--level:${level}"><span class="name">${n}</span><span class="secondary">${r}</span><span class="secondary">${s}</span><span>${h}</span></div></td></tr>`));
+      }
+      if (u.people && kind === "b") {
+        for (const [n, r, s, h] of u.people) rows.push(`<tr class="person"><th scope="row"><span class="tree" style="--level:${level + 1}"><span class="slot"></span><span class="avatar">${initials(n)}</span>${n}<span class="meta">${r} · since ${s}</span></span></th><td class="num"></td><td class="num">${h}</td></tr>`);
+      }
+    }
+  };
+  walk(ORG, 0);
+  return head(kind === "b" ? "Team / person" : "Team") + `<tbody>${rows.join("")}</tbody>`;
+}
+
+function panel(chosen) {
+  const find = (list, path) => { for (const u of list) { if (u.id === chosen) return [u, path]; if (u.children) { const f = find(u.children, [...path, u.name]); if (f) return f; } } };
+  const hit = chosen && find(ORG, []);
+  if (!hit) return '<div class="panelHead"><strong>Employees</strong></div><p class="empty">Choose a team on the left.</p>';
+  const [u, path] = hit;
+  return `<div class="panelHead"><strong>${u.name}</strong><span class="crumb">${[...path].join(" › ") || "Top level"} · ${u.people.length} employees</span></div>
+    <table><thead><tr><th>Employee</th><th>Role</th><th>Since</th><th class="num">Hours</th></tr></thead><tbody>
+    ${u.people.map(([n, r, s, h]) => `<tr><th scope="row">${n}</th><td>${r}</td><td>${s}</td><td class="num">${h}</td></tr>`).join("")}</tbody></table>`;
+}
+
+const state = { a: new Set(["it", "ops"]), b: new Set(["it", "ops"]), c: new Set(["it"]), chosen: "ops" };
+function draw() {
+  document.getElementById("tA").innerHTML = render("a", state.a);
+  document.getElementById("tB").innerHTML = render("b", state.b);
+  document.getElementById("tC").innerHTML = render("c", state.c, state.chosen);
+  document.getElementById("pC").innerHTML = panel(state.chosen);
+}
+for (const k of ["a", "b", "c"]) {
+  document.getElementById("t" + k.toUpperCase()).addEventListener("click", (e) => {
+    const f = e.target.closest(".fold");
+    if (f) { const s = state[k]; s.has(f.dataset.id) ? s.delete(f.dataset.id) : s.add(f.dataset.id); return draw(); }
+    const r = e.target.closest("tr[data-choose]");
+    if (k === "c" && r && r.dataset.choose) { state.chosen = r.dataset.choose; draw(); }
+  });
+}
+const themeButton = document.getElementById("theme");
+themeButton.addEventListener("click", () => {
+  const dark = document.documentElement.dataset.theme !== "dark";
+  document.documentElement.dataset.theme = dark ? "dark" : "light";
+  themeButton.textContent = dark ? "Light theme" : "Dark theme";
+});
+draw();
+</script>
+</body>
+</html>

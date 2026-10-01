@@ -1060,6 +1060,30 @@
     margin-right: 4px;
   }
 
+  /* How a branch reads (table-tree-rows 09, decided on research - Fiori's tree
+     table, financial statements, Power BI's stepped matrix): by weight, never
+     by a tone. A branch is medium across its row, a leaf regular - its row
+     header too; open or closed alike, the fold alone turns. A tone on every
+     open branch greyed most of a deep tree and fought hover and selection, and
+     forced colours drop it; weight and a line survive. */
+  .treeRow > .rowHeader {
+    font-weight: var(--u-weight-regular);
+  }
+
+  .branchRow > .td {
+    font-weight: var(--u-weight-medium);
+  }
+
+  /* A root after the first starts a new top-level part: the stronger line of a
+     group header above it, and the row before gives up its own. */
+  .table tbody tr.rootRow:not(:first-child) > .td {
+    border-top: 1px solid var(--u-hairline-strong);
+  }
+
+  .table tbody tr:has(+ tr.rootRow) > * {
+    border-bottom: none;
+  }
+
   /* Shown only for a match beneath it: muted, so that the matches stand out -
      as the tree view's path nodes. Its row header says so to a screen reader. */
   .pathRow > .td {
@@ -1183,6 +1207,27 @@
     padding: var(--u-space-4);
     background: var(--u-color-surface-sunken);
     box-shadow: inset 0 -1px 0 var(--u-hairline);
+  }
+
+  /* A detail in a tree (table-tree-rows) is no box: its records hang from the
+     row's fold on a rail, a level deeper, on the table's own surface. A table
+     inside it drops its frame - it reads as the rows under the row. */
+  .detailRow > .treeDetail {
+    padding: 0 0 var(--u-space-2);
+    background: none;
+  }
+
+  .treeDetailRail {
+    /* Under the fold's centre: the cell's padding, the indent, half the fold. */
+    margin-left: calc(var(--u-space-2) + var(--tree-level, 0) * var(--u-space-4) + 7.5px);
+    padding-left: calc(var(--u-space-4) + 4px);
+    border-left: 1px solid var(--u-hairline-strong);
+  }
+
+  .treeDetailRail .frame {
+    background: none;
+    box-shadow: none;
+    border-radius: 0;
   }
 
   /* ---- Row actions: the quiet gesture ---------------------------------- */

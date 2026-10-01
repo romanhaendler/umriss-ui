@@ -1,6 +1,6 @@
 # 01 — Prototype: how a branch looks, and leaves with more fields
 
-Status: needs-info
+Status: done
 Type: prototype
 
 Blocked by: none
@@ -36,3 +36,7 @@ today's look, light and dark, over the shipped table (injected CSS on the demo's
 "An uneven organisation"), and absent cells and master/detail. Waiting for the
 user's choice. Seen while rendering: the row detail's expander stands beside the
 fold - two chevrons on one row - and shows on a branch whose detail is empty.
+
+**2026-10-01 (user):** "Forsche selber noch einmal nach, was da wirklich die
+optimale Lösung wäre, und wende diese an." Researched (spec, "Decided"): weight
+only, a stronger line above each root after the first. Built in 09.

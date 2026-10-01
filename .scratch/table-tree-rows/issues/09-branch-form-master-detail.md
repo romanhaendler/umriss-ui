@@ -1,6 +1,6 @@
 # 09 — The branch form from the prototype, and master/detail
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Blocked by: 01, 03
@@ -19,3 +19,10 @@ own sort, search and export, and its keys stay apart from the tree's.
 - [ ] An ADR exists if the form departs from ADR-0029.
 - [ ] A table in a leaf's row detail sorts, searches and exports on its own (rendered test).
 - [ ] Visual baselines: five uneven levels, the branch form, a master/detail leaf, a pinned row header.
+
+## Comments
+
+**2026-10-01 (agent):** The branch form as decided (weight; a root's line),
+and the detail in a tree as the user chose from `prototype/details.html`: the
+row's own fold opens it, no expander column, a rail and no box. Visual
+baselines for the tree pages renewed.
