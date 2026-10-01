@@ -63,7 +63,6 @@ export default function ADispatchersBar() {
             aria-label="Tours"
             placeholder="All tours"
             options={TOURS}
-            style={{ width: 200 }}
             value={t.conditionOf(tours) ?? []}
             onChange={(next) => t.setFilter(tours, next.length > 0 ? next : null)}
           />
@@ -81,7 +80,6 @@ export default function ADispatchersBar() {
             aria-label="Customer"
             placeholder="Any customer"
             options={CUSTOMERS}
-            style={{ width: 220 }}
             value={t.conditionOf(customer)}
             onChange={(name) => t.setFilter(customer, name)}
           />

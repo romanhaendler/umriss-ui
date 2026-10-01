@@ -28,8 +28,6 @@ export default function FieldNoColumnShows() {
           aria-label="Tours"
           placeholder="All tours"
           options={TOURS}
-          size="sm"
-          style={{ width: 240 }}
           /* Typed as the filter's condition - no cast. */
           value={t.conditionOf(tours) ?? []}
           /* The whole new choice, every time; an empty one lifts the condition. */

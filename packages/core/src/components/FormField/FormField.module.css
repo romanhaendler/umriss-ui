@@ -7,6 +7,10 @@
     flex-direction: column;
     gap: var(--u-space-1);
     min-width: 0;
+    /* Never wider than its place, like the field in it (ADR-0041): in a
+       column that lines up at the start, a field of 27 characters stood out of
+       a phone's screen. */
+    max-inline-size: 100%;
   }
 
   .label {

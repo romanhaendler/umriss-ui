@@ -14,7 +14,7 @@
    region it already knows. */
 
 import type { ReactNode } from "react";
-import { Button, useFormats, useWording } from "@umriss-ui/core";
+import { Button, ControlSizeProvider, useFormats, useWording } from "@umriss-ui/core";
 import { resetSearchAndFilters } from "./export";
 import { cx } from "./cx";
 import { Conditions } from "./filter";
@@ -120,13 +120,18 @@ export function TableToolbar({
 
   return (
     <ToolbarSizeContext.Provider value={size}>
-      <div className={cx(styles.toolbar, size === "md" && styles.toolbarMd, className)}>
-        <div className={styles.toolbarGroup}>
-          {children}
-          {conditions}
+      {/* The controls a caller puts in take the toolbar's size as well - a
+          select or a multiselect of one's own stands level with the search
+          without a word (ADR-0041). */}
+      <ControlSizeProvider size={size}>
+        <div className={cx(styles.toolbar, size === "md" && styles.toolbarMd, className)}>
+          <div className={styles.toolbarGroup}>
+            {children}
+            {conditions}
+          </div>
+          {right}
         </div>
-        {right}
-      </div>
+      </ControlSizeProvider>
     </ToolbarSizeContext.Provider>
   );
 }

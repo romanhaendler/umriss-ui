@@ -1,0 +1,181 @@
+/* Sizes (control-sizes, ADR-0041): what jsdom cannot see - a field's width
+   in a real layout. Measured on the Sizes page, at the widths a person meets:
+   a phone at 320 px, the desktop at 1280.
+
+   The promises: a field fills the place that gives it a width; in a row it is
+   its natural width and holds still whatever it shows - chips, an option, a
+   message under it; `chars` fixes it; it is never wider than its place; one
+   size for a place reaches every control in it and stops at a dialog. */
+
+import { test, expect } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
+import { openExample } from "./navigation";
+
+test.skip(({ colorScheme }) => colorScheme === "dark", "Behaviour tests only once (light)");
+
+test.beforeEach(async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-03-17T10:30:00"));
+});
+
+const box = async (locator: Locator) => {
+  const rect = await locator.boundingBox();
+  if (!rect) throw new Error("not laid out");
+  return rect;
+};
+
+const example = (page: Page, id: string) => page.locator(`[data-example="${id}"]`);
+
+test("A field fills the place that gives it a width", async ({ page }) => {
+  await openExample(page, "sizes", "fill-the-place");
+  const stage = example(page, "fill-the-place");
+  const first = await box(stage.getByLabel("First name"));
+  const last = await box(stage.getByLabel("Last name"));
+  // The ref and the label reach the control; the field is its wrapper.
+  const service = await box(stage.getByLabel("Delivery service").locator(".."));
+  const note = await box(stage.getByLabel("Note for the driver").locator(".."));
+  // Two equal grid cells, and the full column below them.
+  expect(Math.abs(first.width - last.width)).toBeLessThanOrEqual(1);
+  expect(service.width).toBeGreaterThan(first.width * 2);
+  expect(Math.abs(note.width - service.width)).toBeLessThanOrEqual(1);
+});
+
+test("A multiselect holds still while values are chosen and removed", async ({ page }) => {
+  await openExample(page, "sizes", "a-row-that-holds-still");
+  const stage = example(page, "a-row-that-holds-still");
+  const field = stage.locator('[aria-label="Carriers"]');
+  const range = stage.getByRole("button", { name: /Select range/ });
+  const before = await box(field);
+  const rangeBefore = await box(range);
+
+  await field.locator("[aria-haspopup]").click();
+  const panel = page.getByRole("dialog");
+  for (const carrier of ["DPD", "Hermes", "FedEx", "TNT", "Dachser"]) {
+    await panel.getByText(carrier, { exact: true }).click();
+  }
+  await page.keyboard.press("Escape");
+  await expect(stage.getByText(/carriers: 8 chosen/)).toBeVisible();
+  expect(await box(field)).toEqual(before);
+  expect(await box(range)).toEqual(rangeBefore);
+  // What does not fit stands as "+N".
+  await expect(field.getByRole("button", { name: /Manage all 8 selected/ })).toBeVisible();
+
+  // Removed down to none: the placeholder stands in the same width.
+  for (let i = 0; i < 8; i++) await field.locator("[data-value]").first().click();
+  await expect(stage.getByText("Every carrier")).toBeVisible();
+  expect(await box(field)).toEqual(before);
+  expect(await box(range)).toEqual(rangeBefore);
+});
+
+test("A select is as wide as its natural width, not as its longest option", async ({ page }) => {
+  await openExample(page, "sizes", "a-row-that-holds-still");
+  const stage = example(page, "a-row-that-holds-still");
+  const status = stage.getByLabel("Status");
+  const before = await box(status);
+  await status.selectOption("Held at customs until the papers of origin are checked");
+  expect(await box(status)).toEqual(before);
+  // Twenty characters, not the fifty of the long option.
+  expect(before.width).toBeLessThan(260);
+  // A search field beside it writes, and its cross comes: nothing moves.
+  const search = stage.getByLabel("Search shipments");
+  const searchBefore = await box(search.locator(".."));
+  await search.fill("Hamburg");
+  await expect(stage.getByRole("button", { name: "Clear input" })).toBeVisible();
+  expect(await box(search.locator(".."))).toEqual(searchBefore);
+  expect(await box(status)).toEqual(before);
+});
+
+test("chars fixes a field at the width of its value", async ({ page }) => {
+  await openExample(page, "sizes", "sized-to-the-value");
+  const stage = example(page, "sized-to-the-value");
+  const postcode = stage.getByLabel("Postcode");
+  const city = stage.getByLabel("City");
+  const iban = stage.getByLabel("IBAN");
+  const postcodeWidth = (await box(postcode.locator(".."))).width;
+  // Five characters and the padding: narrower than the twenty of the city.
+  expect(postcodeWidth).toBeLessThan((await box(city.locator(".."))).width / 2);
+  // The values fit whole: no field cuts its own value.
+  for (const field of [postcode, iban]) {
+    const cut = await field.evaluate((element: HTMLInputElement) => element.scrollWidth > element.clientWidth);
+    expect(cut).toBe(false);
+  }
+});
+
+test("A message under a field in a row wraps there and moves nothing", async ({ page }) => {
+  await openExample(page, "sizes", "sized-to-the-value");
+  const stage = example(page, "sized-to-the-value");
+  const postcode = stage.getByLabel("Postcode");
+  const city = stage.getByLabel("City");
+  const field = await box(postcode.locator(".."));
+  const cityBefore = await box(city.locator(".."));
+  await postcode.fill("204");
+  await expect(stage.getByText("Five digits.")).toBeVisible();
+  expect(await box(postcode.locator(".."))).toEqual(field);
+  expect(await box(city.locator(".."))).toEqual(cityBefore);
+});
+
+test("A date picker without chars shows its whole date", async ({ page }) => {
+  await openExample(page, "sizes", "sized-to-the-value");
+  // The trigger is named by its FormField's label; its first child is the value.
+  const value = example(page, "sized-to-the-value").getByRole("button", { name: "Due" });
+  const cut = await value.evaluate((trigger) => {
+    const text = trigger.firstElementChild as HTMLElement;
+    return text.scrollWidth > text.clientWidth;
+  });
+  expect(cut).toBe(false);
+});
+
+test.describe("on a phone", () => {
+  test.use({ viewport: { width: 320, height: 800 } });
+
+  test("no field is wider than its place, and the page does not scroll sideways", async ({ page }) => {
+    for (const id of ["narrow-places", "a-row-that-holds-still", "sized-to-the-value", "one-size-for-a-place"]) {
+      await openExample(page, "sizes", id);
+      const stage = example(page, id);
+      const stageBox = await box(stage);
+      const fields = stage.locator("input, select, textarea, [aria-haspopup]");
+      for (let i = 0; i < (await fields.count()); i++) {
+        const field = fields.nth(i);
+        if (!(await field.isVisible())) continue;
+        const rect = await box(field);
+        expect(rect.x + rect.width, `${id} #${i}`).toBeLessThanOrEqual(stageBox.x + stageBox.width + 0.5);
+      }
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
+    }
+  });
+
+  test("a value too long for the place ends in an ellipsis", async ({ page }) => {
+    await openExample(page, "sizes", "narrow-places");
+    const slot = example(page, "narrow-places").getByRole("button", { name: "Window" });
+    const cut = await slot.evaluate((trigger) => {
+      const text = trigger.firstElementChild as HTMLElement;
+      return text.scrollWidth > text.clientWidth && getComputedStyle(text).textOverflow === "ellipsis";
+    });
+    expect(cut).toBe(true);
+  });
+});
+
+test("One size for a place reaches every control, and a dialog keeps its own", async ({ page }) => {
+  await openExample(page, "sizes", "one-size-for-a-place");
+  const stage = example(page, "one-size-for-a-place");
+  const small = await page.evaluate(() =>
+    Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--u-control-height-sm")),
+  );
+  const regular = await page.evaluate(() =>
+    Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--u-control-height")),
+  );
+  /* The layout height, which a dialog's entering scale does not touch. */
+  const height = (locator: Locator) => locator.evaluate((element) => (element as HTMLElement).offsetHeight);
+  for (const control of [
+    stage.getByLabel("Search the log").locator(".."),
+    stage.getByLabel("Line"),
+    stage.getByRole("button", { name: /17\/03\/2026/ }),
+    stage.getByRole("button", { name: "Early" }),
+    stage.getByRole("button", { name: "New entry" }),
+  ]) {
+    expect(await height(control)).toBe(small);
+  }
+  await stage.getByRole("button", { name: "New entry" }).click();
+  const save = page.getByRole("dialog").getByRole("button", { name: "Save" });
+  await expect(save).toBeVisible();
+  expect(await height(save)).toBe(regular);
+});

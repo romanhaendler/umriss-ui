@@ -47,7 +47,7 @@ export interface MultiSelectProps<T extends string = string>
   /** The width in characters - room for the chips; the field adds its own
       padding and chevron. Given, the field is that wide wherever it stands,
       and never wider than its place. Without it the field fills its place,
-      and is 20 characters wide where the place asks - in a toolbar or a row.
+      and is 16 characters wide where the place asks - in a toolbar or a row.
       Either way, choosing and removing values never moves it: the chips that
       do not fit stand as "+N". */
   chars?: number;
