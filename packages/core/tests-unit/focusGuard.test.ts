@@ -18,6 +18,8 @@ const STYLES = import.meta.glob("../src/components/**/*.module.css", {
 
 /** Focusable elements whose focus the reading cannot see, each with its reason. */
 const SHOWN_ELSEWHERE: Readonly<Record<string, string>> = {
+  "Input/Input.tsx input":
+    "The bare element is a hidden input (`type=\"hidden\"`): no field, never in the tab order. The field itself rings through `.wrapper:focus-within`.",
   "Select/Select.tsx select":
     "The element takes its classes from a variable; `.select:focus-visible` rings it.",
 };

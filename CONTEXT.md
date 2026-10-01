@@ -150,8 +150,8 @@ _Avoid_: root, configuration
 How wide a field is where its place asks it rather than giving it a width —
 a row, a toolbar, a column lined up at the start, a cell sized by its content.
 A count of characters of the field's own type, `ch`, plus its chrome: 16 for a
-text field, select, combobox and multiselect, 10 for a number, 40 for a
-textarea, the longest value of its formats for a date picker; `chars` names
+text field, select and combobox, 20 for a multiselect (two chips and the
+counter), 10 for a number, 40 for a textarea, the longest value of its formats for a date picker; `chars` names
 another count and fixes the field at it. Never what the field shows — its
 value, options, chips or files cannot move it. Where the place gives a width,
 the field fills it instead, and it is never wider than its place (ADR-0041).

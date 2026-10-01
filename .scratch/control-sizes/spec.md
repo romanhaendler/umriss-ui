@@ -44,9 +44,11 @@ the caller remembered `size="sm"` on each. `Select` called the same prop
 3. **`chars` says the width in characters** - the room for the value, in `ch`
    of the field's own type; the field adds its own chrome (padding, chevron,
    cross, steppers). Given, the field is that wide in every place. Defaults:
-   16 for `Input`, `Select`, `Combobox`, `MultiSelect` - a `ch` is a figure,
-   wider than the average letter the browser counts for `size`, and sixteen
-   make the browser's own text field (20 made a dispatcher's bar three lines);
+   16 for `Input`, `Select`, `Combobox` - a `ch` is a figure, wider than the
+   average letter the browser counts for `size`, and sixteen make the
+   browser's own text field (20 made a dispatcher's bar three lines); 20 for
+   `MultiSelect`, two short chips and the counter (at 16 the second chip never
+   came);
    10 for `NumberInput`, with a text prefix and suffix counted; 40 for
    `Textarea`; the date pickers the length of their longest value in the
    formats in use, so a date never truncates.

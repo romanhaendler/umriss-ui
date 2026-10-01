@@ -47,6 +47,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   const isInvalid = invalid ?? field?.invalid ?? false;
   const hasContent = String(rest.value ?? "").length > 0;
 
+  /* A hidden input is no field: it carries a value and nothing to see, and a
+     wrapper around it would draw an empty frame. */
+  if (rest.type === "hidden") return <input ref={ref} id={id} className={className} {...rest} />;
+
   return (
     <span
       className={cx(
