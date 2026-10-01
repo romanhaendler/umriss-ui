@@ -50,3 +50,18 @@ application does not need it", not "a plant screen does not need it".
 - The industrial standards umriss follows (`docs/standards.md`, ISA-18.2 and
   ISA-101) stay, as evidence of quality rather than as the reason it exists;
   `docs/standards.md` maps each ISA term to umriss's name for it.
+
+## Amended: an example carries its world
+
+"Their data lives once" held for the files, not for the reader. An example
+imported its world from `@umriss-ui/demo`, and the code view showed the world as
+a second tab beside it — but a reader copies one block, and the shell is never
+published, so the block did not run.
+
+Every example and scenario now carries the part of its world it uses, copied
+verbatim under the line `Data from the <world> world, written out here so the
+example runs on its own.` The values, seeds and generators are the world's, so
+nothing rendered changed. `packages/demo/src/worlds` stays the source those
+copies are taken from, and what the world tests read; an example imports only
+its package and npm (`checks/ownData`), and the code view has no tabs any more.
+The plant check finds the plant world by that line instead of by the import.

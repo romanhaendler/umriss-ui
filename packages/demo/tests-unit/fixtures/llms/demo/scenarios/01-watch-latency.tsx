@@ -1,5 +1,6 @@
 import { Gauge } from "../../src";
-import { SERVICES } from "@umriss-ui/demo/worlds/operations";
+
+const SERVICES = [{ name: "checkout", latency: 120 }];
 
 export const title = "Watch a service's latency";
 

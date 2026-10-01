@@ -1,7 +1,49 @@
 import { useState } from "react";
 import { Badge, Grid, Stack, Stat, Text } from "@umriss-ui/core";
 import { useTable } from "../../src";
-import { LEAVE, PEOPLE } from "@umriss-ui/demo/worlds/planning";
+
+/* Data from the planning world, written out here so the example runs on its own. */
+const at = (day: number, hours = 9, minutes = 0) => new Date(2026, 2, day, hours, minutes).getTime();
+
+interface Person {
+  id: string;
+  name: string;
+  role: "Developer" | "Designer" | "Product manager" | "QA engineer";
+  team: "Web" | "Apps";
+  /** Hours a week they can be planned for. */
+  capacity: number;
+}
+
+const PEOPLE: readonly Person[] = [
+  { id: "maya", name: "Maya Lindgren", role: "Product manager", team: "Web", capacity: 32 },
+  { id: "arjun", name: "Arjun Mehta", role: "Developer", team: "Web", capacity: 40 },
+  { id: "chloe", name: "Chloe Durand", role: "Developer", team: "Web", capacity: 40 },
+  { id: "noah", name: "Noah Fischer", role: "Designer", team: "Web", capacity: 24 },
+  { id: "eva", name: "Eva Novak", role: "QA engineer", team: "Web", capacity: 40 },
+  { id: "luis", name: "Luis Moreno", role: "Product manager", team: "Apps", capacity: 40 },
+  { id: "hana", name: "Hana Sato", role: "Developer", team: "Apps", capacity: 40 },
+  { id: "kofi", name: "Kofi Mensah", role: "Developer", team: "Apps", capacity: 32 },
+  { id: "freya", name: "Freya Olsen", role: "Designer", team: "Apps", capacity: 40 },
+  { id: "david", name: "David Kowalski", role: "QA engineer", team: "Apps", capacity: 20 },
+];
+
+interface Leave {
+  id: string;
+  person: string;
+  from: number;
+  to: number;
+  reason: "Holiday" | "Sick" | "Training";
+}
+
+/** When people are away: blocked time on their lane. */
+const LEAVE: readonly Leave[] = [
+  { id: "l-1", person: "noah", from: at(13, 0, 0), to: at(14, 0, 0), reason: "Sick" },
+  { id: "l-2", person: "arjun", from: at(18, 0, 0), to: at(21, 0, 0), reason: "Holiday" },
+  { id: "l-3", person: "kofi", from: at(13, 0, 0), to: at(14, 0, 0), reason: "Training" },
+  { id: "l-4", person: "freya", from: at(16, 0, 0), to: at(18, 0, 0), reason: "Holiday" },
+  { id: "l-5", person: "david", from: at(9, 0, 0), to: at(14, 0, 0), reason: "Holiday" },
+  { id: "l-6", person: "maya", from: at(19, 13, 0), to: at(20, 17, 0), reason: "Training" },
+];
 
 export const title = "Plan the team's capacity";
 

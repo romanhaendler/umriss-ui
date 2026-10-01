@@ -1,5 +1,5 @@
 /* Reading examples and scenarios out of the globs: the lead, the scenario's
-   lists, a world shown beside its importer, and the addresses of the
+   lists, the package name in the shown source, and the addresses of the
    scenarios page. */
 
 import { describe, expect, it } from "vitest";
@@ -17,14 +17,12 @@ const OUTLINE: readonly Rubric[] = [
 ];
 const { ALL_PAGES, placeOf, addressOf, fromPlace } = addresses(OUTLINE);
 const Screen = () => null;
-const WORLDS = { "../../demo/src/worlds/operations.ts": "export const SERVICES = [];\n" };
-const options = { pages: ALL_PAGES, packageName: "@umriss-ui/fixture", worlds: WORLDS };
+const options = { pages: ALL_PAGES, packageName: "@umriss-ui/fixture" };
 
 describe("readExamples", () => {
   const path = "./examples/Gauge/01-basic.tsx";
   const source = [
     'import { Gauge } from "../../../src";',
-    'import { SERVICES } from "@umriss-ui/demo/worlds/operations";',
     "",
     'export const title = "A basic gauge";',
     "",
@@ -44,9 +42,7 @@ describe("readExamples", () => {
     expect(example!.source).not.toContain("export const lead");
   });
 
-  it("shows an imported world beside the example, imported from there", () => {
-    expect(example!.files.map((file) => file.name)).toEqual(["01-basic.tsx", "operations.ts"]);
-    expect(example!.source).toContain('import { SERVICES } from "./operations";');
+  it("shows the package's name where the example imports its source", () => {
     expect(example!.source).toContain('import { Gauge } from "@umriss-ui/fixture";');
   });
 
@@ -57,16 +53,6 @@ describe("readExamples", () => {
       options,
     );
     expect(bare!.lead).toBeUndefined();
-  });
-
-  it("refuses a world the demo does not read", () => {
-    expect(() =>
-      readExamples(
-        { [path]: { default: Screen, title: "A basic gauge" } },
-        { [path]: 'import { X } from "@umriss-ui/demo/worlds/nowhere";\nexport const title = "A basic gauge";\n' },
-        options,
-      ),
-    ).toThrow(/nowhere/);
   });
 });
 
@@ -86,7 +72,7 @@ describe("readScenarios", () => {
     const [scenario] = read({});
     expect(scenario).toMatchObject({ id: "watch", rank: 2, title: "Watch latency", lead: "An on-call engineer.", callouts: ["The needle."] });
     expect(scenario!.builtFrom).toHaveLength(2);
-    expect(scenario!.files[0]!.source).toBe("export default function Watch() {}\n");
+    expect(scenario!.source).toBe("export default function Watch() {}\n");
   });
 
   it("orders by the number in the file name", () => {

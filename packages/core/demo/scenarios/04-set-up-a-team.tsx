@@ -19,10 +19,51 @@ import {
   Stack,
   Switch,
   Text,
+  ToastProvider,
   useToast,
 } from "../../src";
-import { PEOPLE, SPRINTS } from "@umriss-ui/demo/worlds/planning";
-import type { Person } from "@umriss-ui/demo/worlds/planning";
+
+/* Data from the planning world, written out here so the example runs on its own. */
+const at = (day: number, hours = 9, minutes = 0) => new Date(2026, 2, day, hours, minutes).getTime();
+
+interface Person {
+  id: string;
+  name: string;
+  role: "Developer" | "Designer" | "Product manager" | "QA engineer";
+  team: "Web" | "Apps";
+  /** Hours a week they can be planned for. */
+  capacity: number;
+}
+
+const PEOPLE: readonly Person[] = [
+  { id: "maya", name: "Maya Lindgren", role: "Product manager", team: "Web", capacity: 32 },
+  { id: "arjun", name: "Arjun Mehta", role: "Developer", team: "Web", capacity: 40 },
+  { id: "chloe", name: "Chloe Durand", role: "Developer", team: "Web", capacity: 40 },
+  { id: "noah", name: "Noah Fischer", role: "Designer", team: "Web", capacity: 24 },
+  { id: "eva", name: "Eva Novak", role: "QA engineer", team: "Web", capacity: 40 },
+  { id: "luis", name: "Luis Moreno", role: "Product manager", team: "Apps", capacity: 40 },
+  { id: "hana", name: "Hana Sato", role: "Developer", team: "Apps", capacity: 40 },
+  { id: "kofi", name: "Kofi Mensah", role: "Developer", team: "Apps", capacity: 32 },
+  { id: "freya", name: "Freya Olsen", role: "Designer", team: "Apps", capacity: 40 },
+  { id: "david", name: "David Kowalski", role: "QA engineer", team: "Apps", capacity: 20 },
+];
+
+interface Sprint {
+  id: string;
+  name: string;
+  from: number;
+  to: number;
+  goal: string;
+}
+
+/** Two weeks each, Monday 09:00 to the second Friday 17:00. */
+const SPRINTS: readonly Sprint[] = [
+  { name: "Sprint 12", day: 9 - 28, goal: "Shop checkout on the new design" },
+  { name: "Sprint 13", day: 9 - 14, goal: "Booking app in the stores' beta" },
+  { name: "Sprint 14", day: 9, goal: "Member portal sign-in and profile" },
+  { name: "Sprint 15", day: 23, goal: "Shop search and filters" },
+  { name: "Sprint 16", day: 37, goal: "Booking reminders" },
+].map(({ name, day, goal }) => ({ id: name.toLowerCase().replace(" ", "-"), name, from: at(day), to: at(day + 11, 17), goal }));
 
 export const title = "Set up a team";
 
@@ -87,7 +128,7 @@ function changes(a: Settings, b: Settings): number {
   return memberChanges + keys.filter((key) => JSON.stringify(a[key]) !== JSON.stringify(b[key])).length;
 }
 
-export default function SetUpATeam() {
+function Content() {
   const { toast } = useToast();
   const [saved, setSaved] = useState(INITIAL);
   const [draft, setDraft] = useState(INITIAL);
@@ -296,5 +337,15 @@ export default function SetUpATeam() {
         confirmLabel="Remove"
       />
     </Stack>
+  );
+}
+
+/* `useToast` needs a `ToastProvider` above it; at the root of an application
+   one provider serves every screen. */
+export default function SetUpATeam() {
+  return (
+    <ToastProvider>
+      <Content />
+    </ToastProvider>
   );
 }

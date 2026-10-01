@@ -8,8 +8,9 @@
    scanned, so `docs/standards.md` may name ISA's terms freely.
 
    The plant world is `packages/demo/src/worlds/plant.ts` and every file that
-   imports `@umriss-ui/demo/worlds/plant`. Plant words are at home there;
-   anywhere else each one is an offender, with file, line and word.
+   carries a part of it, written out under the line `Data from the plant
+   world` (an example imports no world: `checks/ownData`). Plant words are at
+   home there; anywhere else each one is an offender, with file, line and word.
 
    How a word is matched, kept simple on purpose:
    - `PLANT_WORDS`, whole words, case-insensitive. Whole words mean an
@@ -23,7 +24,7 @@
      (React batches), "production" or "sensor", which other worlds use.
 
    The quarter limit: a package's plant examples - `demo/examples/<page>/*.tsx`
-   that import the plant world - may be at most a quarter of its examples, and
+   that carry the plant world - may be at most a quarter of its examples, and
    of its scenarios (`demo/scenarios/*.tsx`) at most one may play in the plant.
 
    Pure Node, no browser: the repo-wide run is a unit test
@@ -91,10 +92,10 @@ export interface Report {
 }
 
 const WORLD = "packages/demo/src/worlds/plant.ts";
-const IMPORTS_PLANT = /from\s+["']@umriss-ui\/demo\/worlds\/plant["']/;
+const CARRIES_PLANT = /Data from the plant world\b/;
 const MATCHER = new RegExp(`\\b(${PLANT_WORDS.map((w) => w.replace(" ", "\\s+")).join("|")})\\b`, "gi");
 
-export const isPlantWorld = (file: string, text: string): boolean => file === WORLD || IMPORTS_PLANT.test(text);
+export const isPlantWorld = (file: string, text: string): boolean => file === WORLD || CARRIES_PLANT.test(text);
 
 /** The plant words of one text, line by line. */
 export function plantWordsIn(file: string, text: string): Offender[] {

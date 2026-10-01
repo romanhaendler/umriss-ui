@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Badge, Button, Stack, Text, useToast } from "../../../src";
+import { Badge, Button, Stack, Text, ToastProvider, useToast } from "../../../src";
 
 export const title = "Confirm an action in a list";
 export const lead = "The row changes where the reader looks; the toast confirms it in passing, so a second approval never waits on the first. Approve all three: the toasts stand as a deck with a count on the front one, and open under the pointer, on the count or with Alt+T.";
@@ -10,7 +10,7 @@ const INVOICES = [
   { id: "INV-26-0316", supplier: "Northgate Cloud Services", amount: "€ 4,284.00" },
 ];
 
-export default function AfterAnAction() {
+function Content() {
   const { toast } = useToast();
   const [approved, setApproved] = useState<string[]>([]);
 
@@ -45,5 +45,15 @@ export default function AfterAnAction() {
         );
       })}
     </Stack>
+  );
+}
+
+/* `useToast` needs a `ToastProvider` above it; at the root of an application
+   one provider serves every screen. */
+export default function AfterAnAction() {
+  return (
+    <ToastProvider>
+      <Content />
+    </ToastProvider>
   );
 }

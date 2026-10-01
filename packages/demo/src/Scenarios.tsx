@@ -124,7 +124,7 @@ function ScenarioBlock({ scenario, demo }: { scenario: Scenario; demo: Demo }) {
         Code
       </button>
       <div className="exampleCode" id={`${headId}-code`} hidden={!open}>
-        {open && <CodeBlock files={scenario.files} />}
+        {open && <CodeBlock name={scenario.title} source={scenario.source} />}
       </div>
     </section>
   );

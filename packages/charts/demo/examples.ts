@@ -17,6 +17,5 @@ export const DEMO = buildDemo({
   scenarios: import.meta.glob<Record<string, unknown>>("./scenarios/*.tsx", { eager: true }),
   examples: import.meta.glob<Record<string, unknown>>("./examples/*/*.tsx", { eager: true }),
   sources: import.meta.glob<string>(["./examples/*/*.tsx", "./scenarios/*.tsx"], { eager: true, query: "?raw", import: "default" }),
-  worlds: import.meta.glob<string>("../../demo/src/worlds/*.ts", { eager: true, query: "?raw", import: "default" }),
   props,
 });
