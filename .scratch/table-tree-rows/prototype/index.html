@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tree rows prototype</title>
+<style>
+  body { font: 15px/1.5 system-ui, sans-serif; margin: 2rem auto; max-width: 1450px; padding: 0 16px; color: #1d1d1f; background: #fafafa; }
+  h1 { font-size: 1.4rem; } h2 { font-size: 1.1rem; margin-top: 2.5rem; }
+  .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 1.5rem; }
+  figure { margin: 0; } img { width: 100%; border: 1px solid #ddd; border-radius: 6px; background: #fff; }
+  figcaption { font-size: .85rem; color: #555; margin-top: .4rem; }
+</style>
+<h1>Tree rows: how a branch looks (table-tree-rows 01)</h1>
+<p>Rendered from the real table on the demo page "Tree rows", example "An uneven organisation": every branch open except Sales. The forms are injected CSS over the shipped table; the screenshots were made with Playwright.</p>
+
+<h2>0 · Today (as built): no form, every row header medium</h2>
+<div class="row">
+  <figure><img src="0-today-light.png" /><figcaption>Light</figcaption></figure>
+  <figure><img src="0-today-dark.png" /><figcaption>Dark</figcaption></figure>
+</div>
+
+<h2>1 · Weight only: a branch medium, a leaf regular</h2>
+<div class="row">
+  <figure><img src="1-weight-light.png" /><figcaption>Light</figcaption></figure>
+  <figure><img src="1-weight-dark.png" /><figcaption>Dark</figcaption></figure>
+</div>
+
+<h2>2 · An open branch heads its rows: the group header's tone, a closed branch a plain medium row</h2>
+<div class="row">
+  <figure><img src="2-open-heads-light.png" /><figcaption>Light</figcaption></figure>
+  <figure><img src="2-open-heads-dark.png" /><figcaption>Dark</figcaption></figure>
+</div>
+
+<h2>3 · Form by level (ADR-0029): only the roots carry the tone, below weight only</h2>
+<div class="row">
+  <figure><img src="3-roots-head-light.png" /><figcaption>Light</figcaption></figure>
+  <figure><img src="3-roots-head-dark.png" /><figcaption>Dark</figcaption></figure>
+</div>
+
+<h2>Leaves with more fields</h2>
+<div class="row">
+  <figure><img src="absent-cells.png" /><figcaption>Absent cells: a postcode only places carry, absent on countries and states.</figcaption></figure>
+  <figure><img src="master-detail.png" /><figcaption>Master/detail: the employees of IT Operations in its RowDetail, a table of their own. Note the row detail's expander beside the fold - two chevrons on one row, and an expander on IT although it has no employees.</figcaption></figure>
+</div>
+</html>

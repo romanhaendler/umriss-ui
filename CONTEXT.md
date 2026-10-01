@@ -747,7 +747,9 @@ Bezeichnerspalte
 **Filtered set**:
 Every row the **Pre-filter** admits that also matches the current **Search** and
 every **Condition**, across all pages. Selecting all, exporting and footers operate on it,
-never on the rows on screen.
+never on the rows on screen. With **Tree rows** it is every matching row on every
+level, **Path rows** not; the footer then sums its roots only, since a parent
+already holds its children.
 _Avoid_: result, Ergebnis, visible rows, page
 
 **Pre-filter**:
@@ -861,6 +863,23 @@ line of its own. Open it carries no aggregate - its sums stand in the header
 above it -; folded, it is one line carrying the group's aggregates in the
 columns.
 _Avoid_: gutter, Randspalte, merged cell, rowspan (which it is not built from)
+
+**Tree rows**:
+A table whose rows have rows: the rows passed in are the roots, `childRows`
+names a row's children, and a **branch** opens its next level beneath it,
+indented, under the same columns. The levels are the application's - uneven
+as it holds them - and so are the figures of every level; the table sums
+nothing for a branch. It is not a **Grouping**, which builds its levels from
+values the rows share, and it excludes one. The tree's **Level** counts from
+zero here as anywhere; `aria-level` and the export's level column count from one.
+_Avoid_: tree data, nested rows, hierarchy table, Baumtabelle
+
+**Path row**:
+A row of **Tree rows** shown only because a descendant matches the search or
+the conditions — the way to a match, muted, and said to be one. It is not in the
+**Filtered set**. A child shown beneath a matching branch is neither: it is the
+branch's content and keeps its tone.
+_Avoid_: context row, signpost, ancestor row, Kontextzeile
 
 **Active cell**:
 Where a table in grid mode stands: one cell of a line — the head, a row, a

@@ -14,7 +14,8 @@
    That is exactly what the application had to know, and to assemble correctly
    itself, until now. */
 
-import { DEFAULT_FORMATS } from "@umriss-ui/core";
+import { DEFAULT_FORMATS, treeModel } from "@umriss-ui/core";
+import type { FlatteningEntry, NodeReader } from "@umriss-ui/core";
 import { groupRows, linesOf, pageLines, rowsOf } from "./grouping";
 import type { AggregateColumn, GroupLevel, Line, RowGroup } from "./grouping";
 /* Once stood in `Table.tsx` of @umriss-ui/core. */
@@ -81,6 +82,20 @@ export interface TableInput<Z = unknown, K extends string = string> {
       its filtered set. The model then searches, filters, sorts, groups and
       pages nothing - it would do it over one page and call that the whole. */
   manual?: { rowCount: number };
+  /** Tree rows: the rows are the roots, and these read their children. The
+      model then sorts every level on its own, filters by core's path rule and
+      pages nothing (table-tree-rows). */
+  tree?: TreeInput<Z>;
+}
+
+export interface TreeInput<Z> {
+  key: (row: Z) => string;
+  /** `undefined` a leaf, an array a branch - the rule of core's reader. */
+  children: (row: Z) => readonly Z[] | undefined;
+  /** The keys of the open branches. */
+  open: ReadonlySet<string>;
+  /** The pre-filter: a row it does not admit is gone with its subtree. */
+  admit?: (row: Z) => boolean;
 }
 
 export interface TableProjection<Z, K extends string = string> {
@@ -97,6 +112,20 @@ export interface TableProjection<Z, K extends string = string> {
   lines?: Line<Z>[];
   /** With a grouping: the lines of the current page, with what it repeats. */
   visibleLines?: Line<Z>[];
+  /** Tree rows: the flattening - the rows shown, in reading order, with
+      their level and state. `visible` holds their rows. */
+  entries?: readonly FlatteningEntry<Z>[];
+  /** Tree rows: every row the flattening shows, before a virtual window. */
+  shown?: Z[];
+  /** Tree rows: the roots that match or lead to a match - what a footer
+      sums, since a parent already holds its children. */
+  roots?: Z[];
+  /** Tree rows: every row of the filtered tree in reading order, open or
+      not, path rows included - what the export writes. */
+  exported?: readonly FlatteningEntry<Z>[];
+  /** Tree rows: how many rows the tree has on every level - what "of 1,204"
+      counts, as the rows the pre-filter admits do for a flat table. */
+  total?: number;
   /** The clamped page actually shown. */
   page: number;
   pageCount: number;
@@ -189,7 +218,7 @@ export function tableModel<Z, K extends string = string>(
       const value = s.value!(row);
       return !absent(value) && String(value).toLowerCase().includes(term);
     });
-  const filtered = rows.filter((row) => matchesSearch(row) && (filter ? filter(row) : true));
+  const matches = (row: Z) => matchesSearch(row) && (filter ? filter(row) : true);
 
   /* 2. Sort - stable, so that equal values keep their order. Levels act in
         turn: the next one comes into play only where the previous stays
@@ -223,16 +252,21 @@ export function tableModel<Z, K extends string = string>(
     })
     .filter((v): v is (a: Z, b: Z) => number => v !== null);
 
-  if (comparators.length > 0) {
+  const sorted = (list: readonly Z[]): Z[] =>
     // Array#sort is stable (ES2019), equal values keep their order.
-    filtered.sort((a, b) => {
-      for (const compare of comparators) {
-        const result = compare(a, b);
-        if (result !== 0) return result;
-      }
-      return 0;
-    });
-  }
+    comparators.length === 0
+      ? [...list]
+      : [...list].sort((a, b) => {
+          for (const compare of comparators) {
+            const result = compare(a, b);
+            if (result !== 0) return result;
+          }
+          return 0;
+        });
+
+  if (input.tree) return treeProjection(rows, input.tree, sorted, term || filter ? matches : undefined, visibleColumns);
+
+  const filtered = sorted(rows.filter(matches));
 
   /* 3. Group - after the sort, so that the rows within a group keep its
         order. A page then counts lines (table-grouping, Q9). */
@@ -268,6 +302,67 @@ export function tableModel<Z, K extends string = string>(
     page: currentPage,
     pageCount,
     columnCount: visibleColumns.length,
+  };
+}
+
+/* Tree rows: the levels are sorted one by one and handed to core's
+   flattening, never walked a second way. Sorting happens per level - siblings
+   among siblings - so a child never leaves its parent. */
+function treeProjection<Z, K extends string>(
+  rows: readonly Z[],
+  tree: TreeInput<Z>,
+  sorted: (list: readonly Z[]) => Z[],
+  matches: ((row: Z) => boolean) | undefined,
+  columns: readonly Column<Z, K>[],
+): TableProjection<Z, K> {
+  const { admit } = tree;
+  const level = (list: readonly Z[]) => sorted(admit ? list.filter(admit) : list);
+  const childrenOf = new Map<Z, readonly Z[] | undefined>();
+  const reader: NodeReader<Z> = {
+    key: tree.key,
+    children: (row) => {
+      if (!childrenOf.has(row)) {
+        const children = tree.children(row);
+        childrenOf.set(row, children && level(children));
+      }
+      return childrenOf.get(row);
+    },
+    label: () => "",
+    matches,
+  };
+  const roots = level(rows);
+  const state = { expanded: tree.open, checked: new Set<string>(), active: null, anchor: null, search: "" };
+  const entries = treeModel(roots, reader, state);
+
+  /* Every branch open: the whole filtered tree, for the export and the sets. */
+  const everyKey = new Set<string>();
+  let total = 0;
+  const walk = (list: readonly Z[]) => {
+    for (const row of list) {
+      total++;
+      const children = reader.children(row);
+      if (children) {
+        everyKey.add(tree.key(row));
+        walk(children);
+      }
+    }
+  };
+  walk(roots);
+  const whole = treeModel(roots, reader, { ...state, expanded: everyKey });
+  const shown = entries.map((e) => e.node);
+
+  return {
+    columns,
+    filtered: whole.filter((e) => e.matches).map((e) => e.node),
+    visible: shown,
+    entries,
+    shown,
+    roots: whole.filter((e) => e.level === 0).map((e) => e.node),
+    exported: whole.filter((e) => e.matches || e.pathOnly),
+    total,
+    page: 1,
+    pageCount: 1,
+    columnCount: columns.length,
   };
 }
 

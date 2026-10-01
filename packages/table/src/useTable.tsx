@@ -17,8 +17,9 @@
    the column filters the hook holds itself, in the order in which they were
    set. */
 
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { useFormats } from "@umriss-ui/core";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { allBranches, duplicateKey, useFormats, useWording } from "@umriss-ui/core";
+import type { NodeReader } from "@umriss-ui/core";
 import { useCompanion } from "./model/companion";
 import { MOST_LEVELS, livePaths } from "./model/grouping";
 import type { RowGroup } from "./model/grouping";
@@ -147,6 +148,23 @@ function foldablePaths(groups: readonly RowGroup<unknown>[] | undefined): string
   return out;
 }
 
+/** The keys of the branches on the first `levels` levels - `1` the roots. */
+function branchesTo(rows: readonly unknown[], reader: NodeReader<unknown>, levels: number): string[] {
+  const out: string[] = [];
+  const walk = (list: readonly unknown[], level: number) => {
+    if (level >= levels) return;
+    for (const row of list) {
+      const children = reader.children(row);
+      if (children?.length) {
+        out.push(reader.key(row));
+        walk(children, level + 1);
+      }
+    }
+  };
+  walk(rows, 0);
+  return out;
+}
+
 const sameSet = (a: ReadonlySet<string>, b: ReadonlySet<string>): boolean =>
   a.size === b.size && [...a].every((id) => b.has(id));
 
@@ -171,6 +189,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
      function is new (registry.ts). */
   useSyncExternalStore(registry.subscribe, registry.structureVersion, registry.structureVersion);
   const formats = useFormats();
+  const wording = useWording();
   const rowsUnknown = rows as readonly unknown[];
   const modelColumns = registry.modelColumns(rowsUnknown, formats);
 
@@ -218,8 +237,44 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
      are held here and not in the companion for the grouping's reason: what is
      declared only the registry knows. */
   const [pinsChosen, setPinsChosen] = useState<Pins | null>(() => (start?.pinned ? { ...start.pinned } : null));
+  const rowKey = options.rowKey as (row: unknown) => string;
+  /* Tree rows (table-tree-rows): the rows are the roots, and their levels
+     come from their children. A grouping would build levels a second way, and
+     pages would tear rows from their parents - both are passed over. The
+     children function is read through a holder the commit updates: written in
+     the call it is new on every render, and the model would recalculate on
+     every scroll. */
+  const childRows = options.manual ? undefined : (options.childRows as ((row: unknown) => readonly unknown[] | undefined) | undefined);
+  const isTree = childRows !== undefined;
+  registry.setTree(isTree);
+  const latest = useRef({ children: childRows, key: rowKey });
+  useLayoutEffect(() => {
+    latest.current = { children: childRows, key: rowKey };
+  });
+  const [reader] = useState<NodeReader<unknown>>(() => ({
+    key: (row) => latest.current.key(row),
+    children: (row) => latest.current.children?.(row),
+    label: () => "",
+  }));
+  const [defaultBranches] = useState<readonly string[]>(() => {
+    const given = options.manual ? undefined : options.defaultBranches;
+    if (!isTree || given === undefined) return [];
+    return typeof given === "number" ? branchesTo(rowsUnknown, reader, given) : [...given];
+  });
+  const [branchesState, setBranchesState] = useState<readonly string[]>(() => start?.branches ?? defaultBranches);
+  const liveBranches = useMemo(() => (isTree ? new Set(allBranches(rowsUnknown, reader)) : new Set<string>()), [isTree, rowsUnknown, reader]);
+  const branches = isTree ? branchesState.filter((key) => liveBranches.has(key)) : [];
+  useMemo(() => {
+    if (!isTree) return;
+    const twice = duplicateKey(rowsUnknown, reader);
+    if (twice !== null) warnOnce(`tree-duplicate:${twice}`, `The row key "${twice}" occurs twice in the tree: its fold and its selection would act on both rows.`);
+  }, [isTree, rowsUnknown, reader]);
+  if (isTree && (options.defaultGrouping !== undefined || start?.grouping?.length)) {
+    warnOnce("tree-grouping", "A grouping is passed over with `childRows`: tree rows and grouping both build levels.");
+  }
+
   const registered = registry.orderedColumns().length + registry.groupKeys.entries.size > 0;
-  const groupingNow = manual
+  const groupingNow = manual || isTree
     ? []
     : registered
       ? registry.effectiveGrouping(groupingState, rowsUnknown)
@@ -233,7 +288,16 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     [model, foldedSet, formats.compareText, groupingPrefix],
   );
 
-  const rowKey = options.rowKey as (row: unknown) => string;
+  const openKey = branches.join("\u0000");
+  const tree = useMemo(
+    () => (isTree ? { key: rowKey, children: reader.children, open: new Set(branches), admit: preFilter } : undefined),
+    /* ponytail: the pre-filter is read through the roots it admits - a new
+       pre-filter that only drops children takes hold with the next change of
+       rows or branches. Compare its admitted children, as useAdmitted does
+       the roots, if a caller needs that live. */
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the open keys by value; the rows the pre-filter admits stand for it
+    [isTree, openKey, admitted, reader],
+  );
   const b = useCompanion(admitted, modelColumns, {
     rowKey,
     pageSize: options.pageSize,
@@ -243,6 +307,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     virtual: manual ? undefined : options.virtual,
     grouping,
     manual: manualInput,
+    tree,
   });
 
   /* Changing a condition resets to page one, like another search. Only what
@@ -312,7 +377,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
 
   /* The grouping's default is the application's; the view carries a deviation
      only, and of the folds only those whose group still occurs. */
-  const defaultGrouping = manual
+  const defaultGrouping = manual || isTree
     ? []
     : registered
     ? registry.effectiveGrouping(listOf(options.defaultGrouping), rowsUnknown)
@@ -325,6 +390,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     ...(!sameList(groupingNow, defaultGrouping) ? { grouping: groupingNow } : {}),
     ...(folded.length ? { folded } : {}),
     ...(pinnedView ? { pinned: pinnedView } : {}),
+    ...(isTree && !sameSet(new Set(branches), new Set(defaultBranches.filter((key) => liveBranches.has(key)))) ? { branches } : {}),
   };
   /* Read on the call, not on the render: a column may have registered since. */
   const setPin = (column: string, pin: Pin | null) =>
@@ -341,7 +407,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
 
   /* Without a pagination bar there are no pages (registry.ts). */
   const virtual = !manual && options.virtual !== undefined;
-  const paginates = registry.paginates() || virtual;
+  const paginates = (!isTree && registry.paginates()) || virtual;
   const selection = options.selection ?? b.selection;
 
   /* The server's answer to the view (M1): reported after the commit, once when
@@ -388,7 +454,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
   const snapshot: TableSnapshot<Z> = {
     rows,
     filtered: b.filtered as Z[],
-    visible: (paginates ? b.visible : b.filtered) as Z[],
+    visible: (paginates || isTree ? b.visible : b.filtered) as Z[],
     page: paginates ? b.page : 1,
     pageCount: paginates ? b.pageCount : 1,
     pageSize: b.pageSize,
@@ -424,7 +490,14 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
       registry.noteFocusBeforeFold();
       setFoldedState([]);
     },
-    asCsv: () => csvOf(registry),
+    branches,
+    toggleBranch: (key: string) => {
+      if (!liveBranches.has(key)) return;
+      setBranchesState((old) => (old.includes(key) ? old.filter((k) => k !== key) : [...old, key]));
+    },
+    unfoldAllBranches: () => setBranchesState([...liveBranches]),
+    foldAllBranches: () => setBranchesState([]),
+    asCsv: () => csvOf(registry, wording.levelColumn),
     virtual,
     rowCount: manual ? rowCount : b.filtered.length,
     manual,
@@ -438,6 +511,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     companion: b,
     filter,
     grouping,
+    tree,
     folded: foldedSet,
     publicSnapshot: snapshot as unknown as TableSnapshot<unknown>,
     rowKey,

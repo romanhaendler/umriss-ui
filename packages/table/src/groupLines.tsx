@@ -107,9 +107,7 @@ function Fold({
         foldSiblings(group, open, hook);
       }}
     >
-      <svg viewBox="0 0 10 10" width="12" height="12" aria-hidden="true">
-        <path d="M2.5 3.75 5 6.25 7.5 3.75" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
+      <FoldMark />
     </button>
   );
 }
@@ -407,5 +405,15 @@ function AggregateCell({
         <AggregateValue entry={entry} rows={group.rows} formats={formats} wording={wording} />
       )}
     </td>
+  );
+}
+
+/** The fold's chevron - a group's and a tree row's, one glyph for "a level
+    opens here". */
+export function FoldMark() {
+  return (
+    <svg viewBox="0 0 10 10" width="12" height="12" aria-hidden="true">
+      <path d="M2.5 3.75 5 6.25 7.5 3.75" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   );
 }

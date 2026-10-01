@@ -29,6 +29,8 @@ export interface TableView<K extends string = string> {
   grouping?: readonly K[];
   /** The paths of the folded groups. A path that no longer occurs falls out. */
   folded?: readonly string[];
+  /** Tree rows: the keys of the open branches. A key that no longer occurs falls out. */
+  branches?: readonly string[];
   /** The pinned columns, whole, once the user's choice deviates from what the
       columns declare - `{}` when every declared pin was undone. A column that
       does not exist falls out. */

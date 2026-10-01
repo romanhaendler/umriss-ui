@@ -232,6 +232,33 @@ export const OUTLINE: readonly Rubric[] = [
         exports: ["useTable"],
       },
       {
+        id: "tree-rows",
+        name: "Tree rows",
+        sentence: "Rows that hold rows: a hierarchy of any number of levels whose every level carries the same figures (also called tree data). Reach for it to drill down an organisation, regions and places or cost centres - levels the application holds, uneven as they are.",
+        about: [
+          "`childRows` names the children of a row; the rows passed in are the roots. Every row with children gets a fold in its row header, and the next level stands beneath it, indented.",
+          "The figures of a row are the application's: the table sums nothing for a branch. The footer sums the top level only, since a parent already holds its children.",
+          "Every level sorts on its own, and a child never leaves its parent. A search or a filter shows a match with the rows above it, muted, and leaves the open branches as they were.",
+          "The export writes every row of the filtered tree, open or not, with its level first.",
+        ],
+        alternatives: [
+          { when: "Rows that share a value - a customer, a month", use: "grouping" },
+          { when: "A hierarchy without figures", use: "`TreeView` from @umriss-ui/core" },
+          { when: "Records of another kind beneath the bottom level", use: "rowdetail" },
+        ],
+        keys: [
+          { key: "→ / ←", action: "On a fold: opens or closes its branch; ← on a closed one goes to the parent's fold." },
+          { key: "Alt + → / Alt + ←", action: "On a fold: opens or closes the branch and all its siblings." },
+        ],
+        limits: [
+          "Not with grouping or pagination: both would build or cut levels a second way. A large tree uses virtualisation.",
+          "Not in [manual mode](#/manual-mode), and no branches loaded on demand yet.",
+          "One column set for every level; a level without a value shows it as absent.",
+        ],
+        types: [],
+        exports: ["useTable"],
+      },
+      {
         id: "aggregate",
         name: "Aggregate",
         sentence: "What a column's values come to: a sum, an average, the extremes, a count. It stands in the footer over the filtered rows and in each group header over the group's rows.",

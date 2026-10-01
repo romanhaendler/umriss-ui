@@ -40,7 +40,7 @@ import {
   useFormats,
   useWording,
 } from "@umriss-ui/core";
-import type { Formats, VirtualRows, Wording } from "@umriss-ui/core";
+import type { FlatteningEntry, Formats, VirtualRows, Wording } from "@umriss-ui/core";
 import { cx } from "./cx";
 import { DEV, warnOnce } from "./dev";
 import { ColumnFilterButton } from "./filter";
@@ -55,7 +55,7 @@ import type { TableProps } from "./types";
 import { asText, isAbsent, isRightAligned } from "./values";
 import { withContinuation } from "./model/grouping";
 import type { Line } from "./model/grouping";
-import { GroupLine, SpanCell } from "./groupLines";
+import { FoldMark, GroupLine, SpanCell } from "./groupLines";
 import { Absent, AggregateValue, aggregateIsNumeric } from "./aggregateValue";
 import { useLineMotion } from "./motion";
 import { NOT_PINNED, pinnedCell } from "./pinned";
@@ -487,6 +487,44 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
   const spanEntry = lines && grouping.length > 1 ? entryOf(grouping.at(-1)) : undefined;
   const dataColumns = lines ? columns.filter((e) => !grouping.includes(e.spec.id)) : columns;
 
+  /* Tree rows (table-tree-rows): the row header carries the tree - without
+     one, the first visible column. The flattening is the whole list, also
+     under a virtual window: a row's parent and siblings may stand outside it. */
+  const entries = projection.entries;
+  let tree: TreeSetup | undefined;
+  if (entries) {
+    if (!header) warnOnce("tree-row-header", "A table with `childRows` has no `rowHeader` column; the first visible column carries the tree.");
+    const byKey = new Map<string, FlatteningEntry<unknown>>();
+    const parentOf = new Map<string, string | undefined>();
+    const path: string[] = [];
+    for (const entry of entries) {
+      byKey.set(entry.key, entry);
+      path.length = entry.level;
+      parentOf.set(entry.key, path.at(-1));
+      path.push(entry.key);
+    }
+    tree = {
+      column: header ?? dataColumns[0],
+      entry: (row) => byKey.get(hook.rowKey(row)),
+      parent: (key) => parentOf.get(key),
+      /* Against the open branches, not against what is shown: a branch open
+         only on the way to a match is not open, and folding it must not
+         open it once the search is gone. */
+      set: (key, open) => {
+        if (snapshot.branches.includes(key) !== open) snapshot.toggleBranch(key);
+      },
+      /* Alt on a fold acts on the branch and its siblings, as on a group header. */
+      siblings: (key, open) => {
+        const parent = parentOf.get(key);
+        for (const entry of entries) {
+          if (parentOf.get(entry.key) === parent && entry.branch && !entry.empty && snapshot.branches.includes(entry.key) !== open) {
+            snapshot.toggleBranch(entry.key);
+          }
+        }
+      },
+    };
+  }
+
   const controlColumns = (selectable ? 1 : 0) + (detail ? 1 : 0);
   const leading = controlColumns + (spanEntry ? 1 : 0);
   /* A grid that saves rows, adds or deletes them carries their buttons in the
@@ -539,7 +577,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
   const gridLinesNow = gridMode
     ? gridLines({
         layout: { controls: controlColumns, span: spanEntry !== undefined, aggregates: dataColumns.map((e) => e.spec.aggregate !== undefined), actions: trailing, blocks },
-        body: loading ? { rows: [] } : lines ? { lines: virtual ? projection.lines! : lines } : { rows: virtual ? projection.filtered : rows },
+        body: loading ? { rows: [] } : lines ? { lines: virtual ? projection.lines! : lines } : { rows: virtual ? (projection.shown ?? projection.filtered) : rows },
         rowKey: hook.rowKey,
         expanded: new Set(detail ? snapshot.expanded : []),
         foot: footerShown,
@@ -588,6 +626,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
       hook={hook}
       columns={dataColumns}
       line={line}
+      tree={tree}
       spanEntry={spanEntry}
       header={header}
       selectable={selectable}
@@ -763,7 +802,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
       >
         <table
           ref={tableRef}
-          role={lines ? "treegrid" : gridMode ? "grid" : undefined}
+          role={lines || entries ? "treegrid" : gridMode ? "grid" : undefined}
           aria-readonly={gridMode && !dataColumns.some((e) => e.spec.edit !== undefined) ? true : undefined}
           onKeyDown={gridEvents?.onKeyDown}
           onFocus={gridEvents?.onFocus}
@@ -774,7 +813,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
           aria-label={ariaLabel}
           /* With virtualisation not every row stands in the document; plus one
              for the header row and one for the footer row, which count per ARIA. */
-          aria-rowcount={virtual ? (projection.lines ?? projection.filtered).length + 1 + (footerShown ? 1 : 0) : undefined}
+          aria-rowcount={virtual ? (projection.lines ?? projection.shown ?? projection.filtered).length + 1 + (footerShown ? 1 : 0) : undefined}
           aria-busy={loading || undefined}
           className={cx(
             styles.table,
@@ -847,7 +886,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
           </GridContext.Provider>
           {footerShown && (
             <tfoot>
-              <tr aria-rowindex={virtual ? (projection.lines ?? projection.filtered).length + 2 : undefined} data-grid-line={lineKey("foot")}>
+              <tr aria-rowindex={virtual ? (projection.lines ?? projection.shown ?? projection.filtered).length + 2 : undefined} data-grid-line={lineKey("foot")}>
                 {Array.from({ length: controlColumns }, (_, i) => (
                   <td key={i} className={cx(styles.td, styles.control, pinAt(i).className)} style={pinAt(i).style} />
                 ))}
@@ -856,7 +895,9 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
                   <FooterCell
                     key={e.key}
                     entry={e}
-                    rows={projection.filtered}
+                    /* A tree sums its top level: a parent already holds its children. */
+                    rows={projection.roots ?? projection.filtered}
+                    topLevel={projection.roots !== undefined}
                     formats={formats}
                     wording={wording}
                     pin={pinAt(leading + i)}
@@ -1234,11 +1275,14 @@ function Row({
   formats,
   wording,
   line,
+  tree,
   spanEntry,
   grid,
   trailing,
   fresh = false,
 }: {
+  /** Tree rows: where the row stands in the tree. */
+  tree?: TreeSetup;
   row: unknown;
   /** Grid mode: the cells are the stops, not the row. */
   grid: boolean;
@@ -1281,21 +1325,25 @@ function Row({
   const controls = (selectable ? 1 : 0) + (detail ? 1 : 0);
   const leading = controls + (spanEntry ? 1 : 0);
   const pinAt = (at: number) => pinnedCell(blocks, at);
+  const entry = fresh ? undefined : tree?.entry(row);
+  const opens = entry !== undefined && entry.branch && !entry.empty;
 
   return (
     <>
       <tr
         {...data}
-        className={cx(rowClass, virtual && styles.virtualRow)}
+        className={cx(rowClass, virtual && styles.virtualRow, entry?.pathOnly && styles.pathRow)}
         data-row={virtual ? absolute : undefined}
         data-line={line ? "row" : undefined}
         data-motion={key}
         data-selected={selectable && snapshot.selection.isSelected(key) ? "" : undefined}
         data-group-first={line?.first ? "" : undefined}
         data-group={group?.path}
-        aria-level={line ? line.parents.length + 1 : undefined}
-        aria-posinset={group ? group.rows.indexOf(row) + 1 : undefined}
-        aria-setsize={group?.rows.length}
+        aria-level={line ? line.parents.length + 1 : entry ? entry.level + 1 : undefined}
+        aria-posinset={group ? group.rows.indexOf(row) + 1 : entry?.position}
+        aria-setsize={group ? group.rows.length : entry?.siblings}
+        aria-expanded={opens ? entry.expanded : undefined}
+        data-branch={opens ? (entry.expanded ? "open" : "closed") : undefined}
         tabIndex={virtual && !grid ? (absolute === tabStop ? 0 : -1) : undefined}
         data-grid-line={grid ? gridLine : undefined}
         data-draft={draft ? "" : undefined}
@@ -1350,6 +1398,7 @@ function Row({
             wording={wording}
             line={gridLine}
             rowName={name}
+            tree={entry && e === tree?.column ? { setup: tree, entry } : undefined}
           />
         ))}
         {trailing && (
@@ -1392,7 +1441,10 @@ function Cell({
   wording,
   line,
   rowName,
+  tree,
 }: {
+  /** Tree rows: this cell carries the indent and the fold. */
+  tree?: { setup: TreeSetup; entry: FlatteningEntry<unknown> };
   entry: ColumnEntry;
   row: unknown;
   kind: ReturnType<Registry["kindOf"]>;
@@ -1427,6 +1479,7 @@ function Cell({
      time window. WebKit broke "FP-1004223", "2026-03-16" and "06:00–08:00"
      where the column was a hair too narrow, and their neighbours not. */
   const token = typeof content === "string" && content.length <= TOKEN_LENGTH && !/\s/.test(content);
+  if (tree) content = <TreeCellContent {...tree} name={rowName} wording={wording}>{content}</TreeCellContent>;
 
   const Tag = spec.rowHeader ? "th" : "td";
   return (
@@ -1451,24 +1504,102 @@ function Cell({
   );
 }
 
+/** What the body needs to draw tree rows - built once per render in the frame. */
+interface TreeSetup {
+  /** The column that carries the tree. */
+  column: ColumnEntry | undefined;
+  entry: (row: unknown) => FlatteningEntry<unknown> | undefined;
+  parent: (key: string) => string | undefined;
+  /** Opens or closes a branch - the open branches, never the search's path. */
+  set: (key: string, open: boolean) => void;
+  siblings: (key: string, open: boolean) => void;
+}
+
+/* The indent per level, then the fold - a leaf keeps its slot so that the
+   labels of one level align - then the cell. The fold is the group header's,
+   with its keys: Right opens, Left closes or goes to the parent's fold, Alt
+   acts on the siblings as well. */
+function TreeCellContent({
+  setup,
+  entry,
+  name,
+  wording,
+  children,
+}: {
+  setup: TreeSetup;
+  entry: FlatteningEntry<unknown>;
+  name: string;
+  wording: Wording;
+  children: ReactNode;
+}) {
+  const opens = entry.branch && !entry.empty;
+  const open = entry.expanded;
+  const onKeyDown = (event: ReactKeyboardEvent<HTMLButtonElement>) => {
+    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+    event.preventDefault();
+    if (event.altKey) return setup.siblings(entry.key, event.key === "ArrowRight");
+    if (event.key === "ArrowRight") {
+      if (!open) setup.set(entry.key, true);
+    } else if (open) setup.set(entry.key, false);
+    else {
+      const parent = setup.parent(entry.key);
+      const table = event.currentTarget.closest("table");
+      const target = Array.from(table?.querySelectorAll<HTMLButtonElement>("[data-branch-key]") ?? []).find((b) => b.dataset.branchKey === parent);
+      target?.focus();
+    }
+  };
+  return (
+    <span className={styles.treeCell} style={{ "--tree-level": entry.level } as CSSProperties}>
+      {opens ? (
+        <button
+          type="button"
+          className={cx(styles.fold, !open && styles.foldClosed)}
+          data-branch-key={entry.key}
+          aria-expanded={open}
+          aria-label={open ? wording.foldBranch(name) : wording.unfoldBranch(name)}
+          onKeyDown={onKeyDown}
+          onClick={(event) => (event.altKey ? setup.siblings(entry.key, !open) : setup.set(entry.key, !open))}
+        >
+          <FoldMark />
+        </button>
+      ) : (
+        <span className={styles.foldSlot} />
+      )}
+      <span>
+        {children}
+        {entry.pathOnly && <VisuallyHidden>{`, ${wording.pathRow}`}</VisuallyHidden>}
+      </span>
+    </span>
+  );
+}
+
 function FooterCell({
   entry,
   rows,
   formats,
   wording,
   pin = NOT_PINNED,
+  topLevel = false,
 }: {
   entry: ColumnEntry;
   rows: readonly unknown[];
   formats: Formats;
   wording: Wording;
   pin?: PinnedCell;
+  /** Tree rows: the aggregate is over the roots, and says so. */
+  topLevel?: boolean;
 }) {
   if (!entry.spec.aggregate) return <td className={cx(styles.td, pin.className)} style={pin.style} />;
   const kind = typeof entry.spec.aggregate === "function" ? "own" : entry.spec.aggregate;
   return (
-    <td className={cx(styles.td, aggregateIsNumeric(entry, rows) && styles.numeric, pin.className)} style={pin.style} data-footer={kind}>
+    <td
+      className={cx(styles.td, aggregateIsNumeric(entry, rows) && styles.numeric, pin.className)}
+      style={pin.style}
+      data-footer={kind}
+      title={topLevel ? wording.footerTopLevel : undefined}
+    >
       <AggregateValue entry={entry} rows={rows} formats={formats} wording={wording} signed />
+      {topLevel && <VisuallyHidden>{` (${wording.footerTopLevel})`}</VisuallyHidden>}
     </td>
   );
 }

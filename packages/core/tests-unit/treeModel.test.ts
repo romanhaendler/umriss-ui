@@ -302,6 +302,18 @@ describe("Search", () => {
     expect(entry(deeper, "d1a")).toMatchObject({ matches: true, pathOnly: false });
   });
 
+  it("lets a match predicate decide instead of the label, and the path rule stays", () => {
+    // A table matches by its columns and filters, not by one text: with
+    // `matches` the filter runs even without a search text.
+    const byId: NodeReader<Folder> = { ...READER, matches: (o) => o.id === "d1a" };
+    const f = treeModel(TREE, byId, snapshot());
+    expect(ids(f)).toEqual(["d", "d1", "d1a"]);
+    expect(entry(f, "d")).toMatchObject({ matches: false, pathOnly: true, siblings: 1 });
+    expect(entry(f, "d1a")).toMatchObject({ matches: true, pathOnly: false });
+    // The search text is not read once the predicate is there.
+    expect(ids(treeModel(TREE, byId, snapshot({ search: "Anlagen" })))).toEqual(["d", "d1", "d1a"]);
+  });
+
   it("searches without regard to case and to surrounding whitespace", () => {
     expect(ids(flattening(snapshot({ search: "  kAsSeNbUcH  " })))).toEqual([
       "d",

@@ -21,8 +21,9 @@ import { createPortal } from "react-dom";
 import { Button, Checkbox, Input, Popover, Select, Tooltip, useFormats, useWording } from "@umriss-ui/core";
 import { cx } from "./cx";
 import { useConnection } from "./context";
+import { warnOnce } from "./dev";
 import { TableToolbar } from "./toolbar";
-import { GroupingChoice } from "./groupingChoice";
+import { GroupingChoice, TreeChoice } from "./groupingChoice";
 import type { PartKind, Registry } from "./registry";
 import { orderColumns } from "./model/tableModel";
 import type { TableRef } from "./types";
@@ -275,6 +276,7 @@ export function ColumnMenu({ of }: ColumnMenuProps) {
           })}
         </ul>
         <GroupingChoice registry={registry} hook={hook} />
+        <TreeChoice registry={registry} hook={hook} />
       </Popover>
     </>
   );
@@ -347,7 +349,10 @@ export function Pagination({ pageSizes = [10, 25, 50], className, of }: Paginati
   // Only with a pagination bar does the table page.
   useRegistration(connection?.registry, "pagination");
 
-  if (!connection || connection.snapshot.virtual) return null;
+  if (connection?.registry.tree) {
+    warnOnce("tree-pagination", "`Pagination` is passed over with `childRows`: a page cut through a branch tears rows from their parent. A large tree uses `virtual`.");
+  }
+  if (!connection || connection.snapshot.virtual || connection.registry.tree) return null;
   const { snapshot } = connection;
   const count = snapshot.rowCount;
   const sizes = pageSizes.includes(snapshot.pageSize)

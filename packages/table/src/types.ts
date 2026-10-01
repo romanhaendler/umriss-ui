@@ -550,9 +550,18 @@ interface TableOptionsCommon<Z> {
 }
 
 /** The table holds every row and does the work itself. */
-interface AutomaticMode {
+interface AutomaticMode<Z> {
   /** Without it the table holds every row and does the work itself. */
   manual?: false;
+  /** Tree rows: the children of a row - `undefined` for a leaf, an array for a
+      branch. The rows passed in are then the roots, and every branch gets a
+      fold in its row header. Every level sorts on its own, a search shows a
+      match with the rows above it, and the footer sums the top level. Not
+      with grouping or pagination. */
+  childRows?: (row: Z) => readonly Z[] | undefined;
+  /** Tree rows: the branches open on the first render - their keys, or how
+      many levels stand open (`1` = the roots open). It is the default `view` leaves out. */
+  defaultBranches?: readonly string[] | number;
   rowCount?: never;
   onViewChange?: never;
   filterOptions?: never;
@@ -566,6 +575,8 @@ interface AutomaticMode {
 interface ManualMode {
   /** Manual mode: the rows are one page a server answered. */
   manual: true;
+  childRows?: never;
+  defaultBranches?: never;
   /** How many rows the server's filtered set has - the pages and the counts
       read it. */
   rowCount: number;
@@ -579,7 +590,7 @@ interface ManualMode {
 }
 
 /** The options of `useTable`: automatic, or manual over a server. */
-export type TableOptions<Z> = TableOptionsCommon<Z> & (AutomaticMode | ManualMode);
+export type TableOptions<Z> = TableOptionsCommon<Z> & (AutomaticMode<Z> | ManualMode);
 
 /** The state of a table, as everything outside the columns reads it. */
 export interface TableSnapshot<Z> {
@@ -650,6 +661,14 @@ export interface TableSnapshot<Z> {
   foldAll: () => void;
   /** Unfolds every group. */
   unfoldAll: () => void;
+  /** Tree rows: the keys of the open branches. */
+  branches: readonly string[];
+  /** Tree rows: opens a branch or closes it. */
+  toggleBranch: (key: string) => void;
+  /** Tree rows: opens every branch that has children. */
+  unfoldAllBranches: () => void;
+  /** Tree rows: closes every branch. */
+  foldAllBranches: () => void;
   /** The part of the state an application can keep; whatever is at its default is absent. */
   view: TableView;
   /** The filtered set in the visible columns as text for a spreadsheet - in
