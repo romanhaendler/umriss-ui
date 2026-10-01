@@ -24,26 +24,26 @@ export default function OneSizeForAPlace() {
   return (
     <ControlSizeProvider size="sm">
       <Stack direction="row" gap={2} align="center" wrap>
-        <Input aria-label="Search the log" placeholder="Search the log" />
-        <Select aria-label="Line" defaultValue="all">
-          <option value="all">Every line</option>
-          <option value="1">Line 1</option>
-          <option value="2">Line 2</option>
+        <Input aria-label="Search tickets" placeholder="Search tickets" />
+        <Select aria-label="Team" defaultValue="all">
+          <option value="all">Every team</option>
+          <option value="billing">Billing</option>
+          <option value="accounts">Accounts</option>
         </Select>
-        <DatePicker aria-label="Shift day" value={day} onChange={setDay} />
-        <ButtonGroup aria-label="Shift">
-          <Button>Early</Button>
-          <Button>Late</Button>
-          <Button>Night</Button>
+        <DatePicker aria-label="Opened on" value={day} onChange={setDay} />
+        <ButtonGroup aria-label="State">
+          <Button>Open</Button>
+          <Button>Waiting</Button>
+          <Button>Solved</Button>
         </ButtonGroup>
         <Button variant="primary" onClick={() => setOpen(true)}>
-          New entry
+          New ticket
         </Button>
       </Stack>
       <Modal open={open} onClose={() => setOpen(false)}>
-        <ModalHeader title="New log entry" description="Opened from the small bar, it keeps a dialog's controls." />
+        <ModalHeader title="New ticket" description="Opened from the small bar, it keeps a dialog's controls." />
         <ModalBody>
-          <Input aria-label="What happened" placeholder="What happened" />
+          <Input aria-label="Subject" placeholder="Subject" />
         </ModalBody>
         <ModalFooter>
           <Button onClick={() => setOpen(false)}>Cancel</Button>

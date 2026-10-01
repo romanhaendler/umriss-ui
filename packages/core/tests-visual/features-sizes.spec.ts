@@ -166,15 +166,15 @@ test("One size for a place reaches every control, and a dialog keeps its own", a
   /* The layout height, which a dialog's entering scale does not touch. */
   const height = (locator: Locator) => locator.evaluate((element) => (element as HTMLElement).offsetHeight);
   for (const control of [
-    stage.getByLabel("Search the log").locator(".."),
-    stage.getByLabel("Line"),
+    stage.getByLabel("Search tickets").locator(".."),
+    stage.getByLabel("Team"),
     stage.getByRole("button", { name: /17\/03\/2026/ }),
-    stage.getByRole("button", { name: "Early" }),
-    stage.getByRole("button", { name: "New entry" }),
+    stage.getByRole("button", { name: "Open", exact: true }),
+    stage.getByRole("button", { name: "New ticket" }),
   ]) {
     expect(await height(control)).toBe(small);
   }
-  await stage.getByRole("button", { name: "New entry" }).click();
+  await stage.getByRole("button", { name: "New ticket" }).click();
   const save = page.getByRole("dialog").getByRole("button", { name: "Save" });
   await expect(save).toBeVisible();
   expect(await height(save)).toBe(regular);
