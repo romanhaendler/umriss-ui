@@ -198,6 +198,19 @@ The prototype also renders both ways for levels with more fields (next
 section), and whether heads stick under a sticky head on five levels. The
 chosen form is recorded here, and in an ADR if it departs from ADR-0029.
 
+**Decided (2026-10-01), on research the user asked for:** weight, never a
+tone. A branch is medium across its row - label and figures - a leaf regular,
+its row header too; open and closed look alike, only the fold turns. A root
+after the first has the stronger line above it that a group header has. No
+tone: banding every open branch greys most of a deep tree, fights hover and
+selection, and forced colours drop backgrounds, while weight and lines survive;
+changing a row's look on open is done by none of the systems checked. Sources:
+SAP Fiori tree table (bold for emphasis, no fill), financial-statement
+convention (bold subtotals, indentation, rules rather than fills), Power BI's
+stepped matrix (level rows bold), Carbon (an expanded row keeps its
+background), Excel pivot styles (level styling stops at three). It does not
+depart from ADR-0029, which is about row groups; no ADR.
+
 ### Levels with more fields
 
 One column set for all levels (ADR-0017); the documentation names two ways
@@ -209,6 +222,15 @@ for leaves that carry more than their branches:
   `RowDetail` holds a table of its own with every detail column: the employees
   of a unit, the orders of a place. Right when the details are records of
   another kind. No new API: RowDetail renders anything, on every row.
+- **How a detail stands in a tree** (decided rendered, 2026-10-01, from three
+  variants in `prototype/details.html` - sub-list, last tree level, side by
+  side; the user chose the sub-list): one chevron per row, in the first column
+  at its level - the row's fold opens what stands under it, its detail, then
+  its children; a tree has no expander column. The detail is no box: it hangs
+  from the fold on a rail, a level deeper, on the table's surface, and a table
+  inside it drops its frame. Precedents: SAP Fiori's tree table (the first
+  column is the tree column and carries the only expand control), AG Grid's
+  tree data with master/detail (the detail opens from the group cell).
 
 Different column sets per level in one table stay out: one header row describes
 one schema, and sorting, filtering, export and the cell-to-header association of

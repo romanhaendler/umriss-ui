@@ -102,20 +102,19 @@ describe("tree rows - the fold", () => {
     expect(north).toMatchObject({ ariaLevel: "2", ariaPosInSet: "1", ariaSetSize: "2", ariaExpanded: "false" });
   });
 
-  it("names the fold apart from the row detail's expander", () => {
-    render(<Units detail />);
-    expect(screen.getByRole("button", { name: "Expand Staff" })).toBeTruthy();
-    expect(screen.queryAllByRole("button", { name: /Staff/ })).toHaveLength(1);
-    expect(screen.queryAllByRole("button", { name: /Sales/ })).toHaveLength(1);
+  it("opens a leaf's detail with its own fold - one chevron per row, no expander column", () => {
+    const { container } = render(<Units detail defaultBranches={1} />);
+    expect(screen.queryByRole("button", { name: /^Expand/ })).toBeNull();
+    expect(container.querySelector("thead tr")!.children).toHaveLength(2);
+    fireEvent.click(screen.getByRole("button", { name: "Unfold rows under Staff" }));
+    expect(screen.getByText("Detail of Staff")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Fold rows under Staff" }).getAttribute("aria-expanded")).toBe("true");
   });
 
-  it("gives a row whose detail is nothing no expander and no detail line", () => {
+  it("gives a branch whose detail is nothing no detail line", () => {
     const { container } = render(<Units detail defaultBranches={1} />);
-    expect(screen.queryByRole("button", { name: "Expand Sales" })).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "Expand Staff" }));
-    expect(screen.getByText("Detail of Staff")).toBeTruthy();
     act(() => current!.toggleRow("v"));
-    expect(container.querySelectorAll("tbody tr:not([data-motion])")).toHaveLength(1);
+    expect(container.querySelectorAll("tbody tr:not([data-motion])")).toHaveLength(0);
   });
 
   it("answers the group fold's keys: Right opens, Left closes, Left on a closed one goes to the parent", () => {
