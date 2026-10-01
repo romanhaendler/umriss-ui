@@ -19,7 +19,7 @@ export interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement
   /** The width in characters - room for the chosen option; the field adds
       its own padding, chevron and cross. Given, the field is that wide
       wherever it stands, and never wider than its place. Without it the field
-      fills its place, and is 20 characters wide where the place asks - never
+      fills its place, and is 16 characters wide where the place asks - never
       as wide as its longest option. */
   chars?: number;
   /** Marks the field as invalid. `FormField` sets it itself as soon as it

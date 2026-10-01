@@ -15,7 +15,7 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
   /** The width in characters - room for the value; the field adds its own
       padding and cross. Given, the field is that wide wherever it stands, and
       never wider than its place. Without it the field fills its place, and is
-      20 characters wide where the place asks - in a toolbar or a row. */
+      16 characters wide where the place asks - in a toolbar or a row. */
   chars?: number;
   /** Marks the field as invalid. `FormField` sets it itself as soon as it
       carries an `error` - by hand only necessary without `FormField`. */

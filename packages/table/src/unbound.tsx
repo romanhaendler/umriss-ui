@@ -114,7 +114,7 @@ export function Search({ placeholder, "aria-label": name, className, size: own, 
     <Input
       size={size}
       type="search"
-      className={cx(styles.search, className)}
+      className={className}
       value={snapshot.search}
       onChange={(event) => snapshot.setSearch(event.target.value)}
       clearable
@@ -382,6 +382,8 @@ export function Pagination({ pageSizes = [10, 25, 50], className, of }: Paginati
           {wording.rows}
           <Select
             size="sm"
+            /* As wide as the longest size offered - it stood at 64 px. */
+            chars={Math.max(...sizes.map((size) => String(size).length))}
             value={snapshot.pageSize}
             onChange={(event) => snapshot.setPageSize(Number(event.target.value))}
             aria-label={wording.rowsPerPage}

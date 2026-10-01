@@ -40,7 +40,7 @@ export interface ComboboxProps<T extends string = string>
   /** The width in characters - room for the typed text and the chosen
       option; the field adds its own padding, chevron and cross. Given, the
       field is that wide wherever it stands, and never wider than its place.
-      Without it the field fills its place, and is 20 characters wide where the
+      Without it the field fills its place, and is 16 characters wide where the
       place asks - in a toolbar or a row. The panel is never narrower than the
       field. */
   chars?: number;

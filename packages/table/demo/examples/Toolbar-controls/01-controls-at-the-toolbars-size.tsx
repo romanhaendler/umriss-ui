@@ -4,7 +4,7 @@ import type { Shipment } from "@umriss-ui/demo/worlds/logistics";
 import { Pagination, Search, Toolbar, rowFilter, useTable } from "../../../src";
 
 export const title = "Controls of your own at the toolbar's size";
-export const lead = "The toolbar is `sm` unless it says otherwise; a control from @umriss-ui/core stands level with the search at its own small size. Behind each control a row filter.";
+export const lead = "The toolbar is `sm` unless it says otherwise, and a control from @umriss-ui/core put into it takes that size without a word - level with the search, at its natural width, whatever it shows. Behind each control a row filter.";
 
 type Status = Shipment["status"];
 
@@ -31,17 +31,13 @@ export default function ControlsAtTheToolbarsSize() {
       <Toolbar>
         <Search placeholder="Shipment or customer" />
         <MultiSelect
-          size="sm"
           aria-label="Tours"
           placeholder="All tours"
           options={TOURS}
-          style={{ width: 200 }}
           value={t.conditionOf(tours) ?? []}
           onChange={(next) => t.setFilter(tours, next.length > 0 ? next : null)}
         />
-        {/* `Select` is the native field: its size is `selectSize`, since `size` is the element's own. */}
         <Select
-          size="sm"
           aria-label="Status"
           value={t.conditionOf(status) ?? ""}
           onChange={(event) => t.setFilter(status, event.target.value === "" ? null : (event.target.value as Status))}

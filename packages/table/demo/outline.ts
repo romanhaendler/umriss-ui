@@ -366,7 +366,8 @@ export const OUTLINE: readonly Rubric[] = [
         name: "Toolbar controls",
         sentence: "Put controls of your own into the toolbar - a multiselect, a select, a combobox - and let them stand level with the table's: one size for the whole bar, and a row filter behind each control.",
         about: [
-          "`Toolbar` takes `size`, `sm` or `md`, and the parts the table puts into it follow: search, column menu, export, “Reset” and the bulk actions. A part says its own size with its own `size`. A control from @umriss-ui/core takes the same size by its own prop - `size` on `Input`, `MultiSelect` and `Combobox`, `selectSize` on `Select`.",
+          "`Toolbar` takes `size`, `sm` or `md`, and the parts the table puts into it follow: search, column menu, export, “Reset” and the bulk actions. A part says its own size with its own `size`. A control from @umriss-ui/core that you put in takes the toolbar's size as well, without a word - the toolbar is a `ControlSizeProvider`, as @umriss-ui/core's Sizes page shows - and keeps its own `size` if it says one.",
+          "No widths to set: a field from @umriss-ui/core is its natural width in the bar - sixteen characters of its type, or its `chars` - and never what it shows, so choosing in a multiselect moves nothing beside it.",
           "A control of your own restricts the table through a [row filter](#/filter): it sets the condition with `t.setFilter(filter, condition)` and reads it with `t.conditionOf(filter)`, so “Reset”, the count of matches and the view include it.",
         ],
         alternatives: [{ when: "A filter on a column the table offers itself, in its header", use: "filter" }],

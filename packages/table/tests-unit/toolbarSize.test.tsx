@@ -3,6 +3,7 @@
 
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+import { Button, MultiSelect, Select } from "@umriss-ui/core";
 import { ColumnMenu, Export, Search, Toolbar, useTable } from "../src";
 
 interface Order {
@@ -53,5 +54,50 @@ describe("the toolbar's size", () => {
   it("a control's own size wins over the toolbar's", () => {
     render(<Orders size="md" searchSize="sm" />);
     expect(searchSmall()).toBe(true);
+  });
+});
+
+/* A control from @umriss-ui/core that a caller puts into the toolbar takes
+   the toolbar's size without a word (control-sizes 03, ADR-0041): it used to
+   stand at its own `md` beside the `sm` search unless the caller said `sm`. */
+function OwnControls({ size, own }: { size?: "sm" | "md"; own?: "sm" | "md" }) {
+  const { Table, Column } = useTable(ORDERS, { rowKey: (o) => o.id });
+  return (
+    <Table ariaLabel="Orders">
+      <Toolbar size={size}>
+        <Select aria-label="Status" size={own}>
+          <option>Open</option>
+        </Select>
+        <MultiSelect aria-label="Carriers" value={[]} onChange={() => {}} options={[]} />
+        <Button>Assign</Button>
+      </Toolbar>
+      <Column value="number" label="Order" rowHeader />
+    </Table>
+  );
+}
+
+const smallWithin = (element: HTMLElement) =>
+  [element, ...element.querySelectorAll<HTMLElement>("*")].some((e) =>
+    [...e.classList].some((c) => /(^|_)(sm|\w+Sm)_/.test(c)),
+  );
+
+describe("a control of one's own in the toolbar", () => {
+  it("takes the toolbar's sm", () => {
+    render(<OwnControls />);
+    expect(smallWithin(screen.getByRole("combobox", { name: "Status" }).parentElement!)).toBe(true);
+    expect(smallWithin(screen.getByLabelText("Carriers"))).toBe(true);
+    expect(small(screen.getByRole("button", { name: "Assign" }))).toBe(true);
+  });
+
+  it("takes the toolbar's md", () => {
+    render(<OwnControls size="md" />);
+    expect(smallWithin(screen.getByRole("combobox", { name: "Status" }).parentElement!)).toBe(false);
+    expect(smallWithin(screen.getByLabelText("Carriers"))).toBe(false);
+    expect(small(screen.getByRole("button", { name: "Assign" }))).toBe(false);
+  });
+
+  it("keeps its own size", () => {
+    render(<OwnControls own="md" />);
+    expect(smallWithin(screen.getByRole("combobox", { name: "Status" }).parentElement!)).toBe(false);
   });
 });

@@ -4,7 +4,7 @@ import type { Shipment } from "@umriss-ui/demo/worlds/logistics";
 import { ColumnMenu, Export, Pagination, Search, Toolbar, rowFilter, useTable } from "../../../src";
 
 export const title = "A larger toolbar";
-export const lead = "`size=\"md\"` on the toolbar, and search, column menu, export and “Reset” follow; the multiselect is `md` by default. One size for the whole bar, said once.";
+export const lead = "`size=\"md\"` on the toolbar, and search, column menu, export, “Reset” and the multiselect of one's own follow. One size for the whole bar, said once.";
 
 const tours = rowFilter({
   id: "tours",
@@ -26,7 +26,6 @@ export default function ALargerToolbar() {
           aria-label="Tours"
           placeholder="All tours"
           options={TOURS}
-          style={{ width: 240 }}
           value={t.conditionOf(tours) ?? []}
           onChange={(next) => t.setFilter(tours, next.length > 0 ? next : null)}
         />

@@ -341,6 +341,28 @@ export const OUTLINE: readonly Rubric[] = [
         exports: ["FormField", "useFormField"],
       },
       {
+        id: "sizes",
+        name: "Sizes",
+        sentence: "How wide and how tall a field is (width, height, field size). A field fills its place, holds still in a row whatever it shows, takes the width of its value with `chars`, and takes one size from the place it stands in.",
+        about: [
+          "Width. Say nothing, and a field fills the place that gives it a width - a form's column, a grid's cell, a dialog. Where the place asks the field instead - a row, a toolbar, a column that lines up at the start - the field is its natural width: 16 characters of its own type for a text field, select, combobox and multiselect, 10 for a number, 40 for a textarea, the longest value of its formats for a date picker. What it shows never moves it: not its value, not its options, not its chips (ADR-0041).",
+          "`chars` gives the width in characters - the room for the value, with the field's padding, glyph, cross and steppers added. Given, the field is that wide in every place. Either way it is never wider than its place, and what does not fit ends in an ellipsis.",
+          "Height. Every control with two heights takes `size`, `sm` or `md`. `ControlSizeProvider` sets it for a place - a toolbar, a dense form; a control's own `size` wins, and a popover, dialog or tooltip opened from inside starts without it.",
+        ],
+        alternatives: [
+          { when: "A width the layout decides - two columns, a field beside a button", use: "stack-and-grid" },
+          { when: "A whole table's density, rows and controls together", use: "umrissprovider" },
+        ],
+        limits: [
+          "No width in pixels: a width in characters scales with the type, under a finger too; a place's width is the layout's.",
+          "`Slider` and `FileInput` take no `chars` - they show no text to count; their width is the place's, or their natural width where the place asks.",
+          "A field does not grow to fill a row: give it room with the row's own layout (`flex: 1` on its FormField, or a grid).",
+          "A place that sizes itself by its content and has no width to stop at - an `auto` grid track, an inline block, a row that does not wrap - gives a field at least its natural width, as it gives a native input its own; on a narrow screen let such a row wrap, or size the track with `minmax(0, auto)`.",
+        ],
+        types: ["ControlSizeProviderProps"],
+        exports: ["ControlSizeProvider"],
+      },
+      {
         id: "textarea",
         name: "Textarea",
         sentence: "Text over several lines (multi-line text field): a comment, a summary, a note to the driver. It can grow with its text and count the characters left.",

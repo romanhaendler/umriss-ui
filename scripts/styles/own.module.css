@@ -54,12 +54,14 @@
      and may grow narrower than its natural width; what does not fit then ends
      in an ellipsis. Measured alike in Chromium, Firefox and WebKit.
 
-     The component sets its chrome, and its own count where 20 - the
-     browser's own default for a text field - is not it; `chars` hands a count
-     in as an inline style (`lib/extent.ts`) and fixes the field at it. In this
+     The default count is 16: a `ch` is the width of a figure, wider than the
+     average letter a browser counts for `size`, and sixteen of them make the
+     width of the browser's own text field (`size="20"`). The component sets
+     its chrome, and its own count where 16 is not it; `chars` hands a count in
+     as an inline style (`lib/extent.ts`) and fixes the field at it. In this
      layer, so that both win. */
   .extent {
-    --_chars: 20;
+    --_chars: 16;
     --_extra: 0;
     --_tracking: 0px;
     --_chrome: 0px;
@@ -127,7 +129,7 @@
 
     /* The root around such a field writes at the field's size as well, so
        that a character of its width (`.extent`, ADR-0041) is a character of
-       the text in it: twenty characters stay twenty under a finger. */
+       the text in it: sixteen characters stay sixteen under a finger. */
     .fieldRoot.fieldRoot {
       font-size: 16px;
     }
