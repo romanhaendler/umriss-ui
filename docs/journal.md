@@ -18,6 +18,22 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Oct. 2026 — A box plot
+
+- **A box plot** (`.scratch/box-plot/`, ADR-0040; `@umriss-ui/charts`
+  0.9.0). The seventh series kind, from a grilling session: the caller
+  brings every number and the library computes none, so a box aggregated in
+  a database draws as well as one computed in the browser. A box carries its
+  outliers in two named channels rather than a second, composed scatter -
+  one legend entry, one colour, one toggle.
+- **Decided on the rendered page, not the sketch:** eight cards of three
+  variants, every value of the spec kept against a precedent in the library
+  (Area's fill, Scatter's radius, Bar's width; a mean that must not look
+  like a marker shape). Three faults showed only rendered - 1px lines blurred
+  between pixels, grouped boxes sharing an outline, a whisker one pixel
+  beside its grid line - and a screenshot tolerance that kept the old
+  picture of a one-pixel fix.
+
 ## Oct. 2026 — Tree rows
 
 - **Tree rows** (`.scratch/table-tree-rows/`; `@umriss-ui/table` 0.8.0,

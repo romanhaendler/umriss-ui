@@ -29,7 +29,7 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
-## Unreleased
+## 0.9.0 – A box plot (Oct. 2026)
 
 ### Changed
 
