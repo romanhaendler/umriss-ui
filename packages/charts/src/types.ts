@@ -10,6 +10,10 @@ import type { WorkingInterval } from "./workingTime";
     data reference then. A native or bound function is compared by identity. */
 export type Accessor<T> = (d: T, index: number) => number | null | undefined;
 
+/** A list per datum - a box's outliers (ADR-0040). null/undefined or an
+    empty array is none; a value that is not finite is left out. */
+export type ListAccessor<T> = (d: T, index: number) => readonly number[] | null | undefined;
+
 /* ---------------- Series ----------------
 
    The series kind belongs to the series, never to the chart - which is exactly
@@ -92,7 +96,7 @@ export interface BoxSeriesConfig<T = unknown> extends SeriesBase<T> {
   lowerWhisker: Accessor<T>;
   upperWhisker: Accessor<T>;
   /** The values beyond the whiskers, per box (ADR-0040). */
-  outliers?: (d: T, index: number) => readonly number[] | null | undefined;
+  outliers?: ListAccessor<T>;
   mean?: Accessor<T>;
   /** Both bounds or neither (CONTEXT.md: Notch). */
   notchLower?: Accessor<T>;

@@ -263,6 +263,40 @@ describe("The hover marker of grouped boxes", () => {
     scene.unbind();
     host.remove();
   });
+
+  it("under \"nearest\" hits the box the pointer is over, not the first at its x", async () => {
+    const scene = new ChartScene();
+    const host = document.createElement("div");
+    document.body.appendChild(host);
+    scene.setData(data.filter((d) => d.med !== null));
+    scene.registerAxis({ id: "x", orientation: "x", position: "bottom", accessor: (d) => (d as Machine).at, domain: "data" });
+    scene.registerAxis({ id: "y", orientation: "y", position: "left", accessor: (d) => (d as Machine).hi, domain: "data" });
+    const box = (name: string): BoxSeriesConfig => ({
+      kind: "box",
+      name,
+      accessor: (d) => (d as Machine).med,
+      lowerQuartile: (d) => (d as Machine).q1,
+      upperQuartile: (d) => (d as Machine).q3,
+      lowerWhisker: (d) => (d as Machine).lo,
+      upperWhisker: (d) => (d as Machine).hi,
+      boxWidth: 0.8,
+      xAxisId: "x",
+      yAxisId: "y",
+    });
+    scene.registerSeries(box("Before"));
+    scene.registerSeries(box("After"));
+    scene.registerTooltip({ mode: "nearest" });
+    scene.bind(host, document.createElement("canvas"), document.createElement("canvas"), host);
+    scene.requestResize(400, 300);
+    await frame();
+    const layout = scene.getLayoutSnapshot().layout;
+    const xScale = layout.axes.find((a) => a.key === "x:x")?.scale;
+    const yScale = layout.axes.find((a) => a.key === "y:y")?.scale;
+    scene.pointerMove((xScale?.toPx(1) ?? 0) + (xScale?.m ?? 0) * 0.2, yScale?.toPx(6) ?? 0);
+    expect(scene.getHoverSnapshot().hover?.hit.points.map((p) => p.seriesName)).toEqual(["After"]);
+    scene.unbind();
+    host.remove();
+  });
 });
 
 /* box-plot 03: outliers belong to their box (ADR-0040) - read in its tooltip
