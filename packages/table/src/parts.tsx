@@ -51,7 +51,7 @@ import type { TableContextValue } from "./context";
 import type { HookSnapshot, Registry, ColumnSpec, ColumnEntry } from "./registry";
 import { link } from "./registry";
 import { resetSearchAndFilters, visibleColumns } from "./export";
-import type { TableProps } from "./types";
+import type { TableProps, TableSnapshot } from "./types";
 import { asText, isAbsent, isRightAligned } from "./values";
 import { withContinuation } from "./model/grouping";
 import type { Line } from "./model/grouping";
@@ -586,7 +586,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
         layout: { controls: controlColumns, span: spanEntry !== undefined, aggregates: dataColumns.map((e) => e.spec.aggregate !== undefined), actions: trailing, blocks },
         body: loading ? { rows: [] } : lines ? { lines: virtual ? projection.lines! : lines } : { rows: virtual ? (projection.shown ?? projection.filtered) : rows },
         rowKey: hook.rowKey,
-        expanded: new Set(detail ? snapshot.expanded : []),
+        expanded: detail ? openDetails(registry, snapshot, projection.shown ?? projection.filtered, hook.rowKey, tree) : new Set(),
         foot: footerShown,
       })
     : [];
@@ -1323,18 +1323,16 @@ function Row({
   const editing = useContext(GridContext)?.editing;
   const draft = editing?.row === true && editing.line === gridLine;
   const detail = registry.detail;
-  /* A detail that comes to nothing - a branch whose records hang only from
-     its leaves - gets no expander and no empty line. Asked on every render:
-     it is an element the caller returns, not yet rendered. */
-  const detailContent = fresh || !detail ? null : detail.presentation(row as never);
-  const hasDetail = detailContent !== null && detailContent !== undefined && detailContent !== false;
-  const open = hasDetail && snapshot.expanded.includes(key);
+  const entry = fresh ? undefined : tree?.entry(row);
+  const shownDetail = fresh ? null : detailOf(registry, snapshot, row, key, entry);
+  const hasDetail = shownDetail !== null;
+  const open = shownDetail?.open ?? false;
+  const detailContent = shownDetail?.content;
   const detailId = `${baseId}-detail-${index}`;
   const { className: rowClass, ...data } = rowProps?.(row) ?? {};
 
   const virtual = absolute !== undefined;
   const group = line ? (line.span ?? line.parents.at(-1))! : undefined;
-  const entry = fresh ? undefined : tree?.entry(row);
   const expanderColumn = detail !== null && !tree;
   const controls = (selectable ? 1 : 0) + (expanderColumn ? 1 : 0);
   const leading = controls + (spanEntry ? 1 : 0);
@@ -1422,7 +1420,7 @@ function Row({
             rowName={name}
             tree={
               entry && e === tree?.column
-                ? { setup: tree, entry, detail: hasDetail ? { open, toggle: () => snapshot.toggleRow(key) } : undefined }
+                ? { setup: tree, entry, detail: hasDetail && !opens ? { open, toggle: () => snapshot.toggleRow(key) } : undefined }
                 : undefined
             }
           />
@@ -1538,6 +1536,43 @@ function Cell({
       )}
     </Tag>
   );
+}
+
+/** A row's detail as it stands, or null where it comes to nothing - a
+    branch whose records hang only from its leaves gets no expander and no
+    empty line. In a tree a branch's detail follows the branch: one fold, one
+    state - opened by default, by a view or by unfolding all along with its
+    children. Elsewhere the row's own expansion. Asked on every render: it is
+    an element the caller returns, not yet rendered. */
+function detailOf(
+  registry: Registry,
+  snapshot: TableSnapshot<unknown>,
+  row: unknown,
+  key: string,
+  entry: FlatteningEntry<unknown> | undefined,
+): { content: ReactNode; open: boolean } | null {
+  const content = registry.detail?.presentation(row as never);
+  if (content === null || content === undefined || content === false) return null;
+  const branch = entry !== undefined && entry.branch && !entry.empty;
+  return { content, open: branch ? snapshot.branches.includes(key) : snapshot.expanded.includes(key) };
+}
+
+/** The keys whose detail stands open - for the grid's walk, which needs the
+    lines the body draws. */
+function openDetails(
+  registry: Registry,
+  snapshot: TableSnapshot<unknown>,
+  rows: readonly unknown[],
+  rowKey: (row: unknown) => string,
+  tree: TreeSetup | undefined,
+): Set<string> {
+  const wanted = new Set([...snapshot.expanded, ...snapshot.branches]);
+  const out = new Set<string>();
+  for (const row of rows) {
+    const key = rowKey(row);
+    if (wanted.has(key) && detailOf(registry, snapshot, row, key, tree?.entry(row))?.open) out.add(key);
+  }
+  return out;
 }
 
 /** What the body needs to draw tree rows - built once per render in the frame. */

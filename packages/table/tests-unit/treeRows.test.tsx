@@ -111,6 +111,43 @@ describe("tree rows - the fold", () => {
     expect(screen.getByRole("button", { name: "Fold rows under Staff" }).getAttribute("aria-expanded")).toBe("true");
   });
 
+  it("opens a branch's detail and its children with one fold - the detail first", () => {
+    function Mixed() {
+      const { Table: Frame, Column, RowDetail } = useTable(UNITS, { rowKey: (u) => u.id, childRows: (u) => u.children });
+      return (
+        <Frame>
+          <Column value="name" label="Unit" rowHeader />
+          <RowDetail>{(u) => (u.id === "v" ? <p>Own staff of Sales</p> : null)}</RowDetail>
+        </Frame>
+      );
+    }
+    const { container } = render(<Mixed />);
+    fireEvent.click(screen.getByRole("button", { name: "Unfold rows under Sales" }));
+    const lines = Array.from(container.querySelectorAll("tbody tr"), (tr) => tr.textContent?.trim());
+    expect(lines.slice(0, 4)).toEqual(["Sales", "Own staff of Sales", "North", "South"]);
+    fireEvent.click(screen.getByRole("button", { name: "Fold rows under Sales" }));
+    expect(container.querySelectorAll("tbody tr")).toHaveLength(3);
+  });
+
+  it("lets a branch's detail follow the branch - opened by default, by a view or by unfolding all", () => {
+    function Mixed() {
+      const t = useTable(UNITS, { rowKey: (u) => u.id, childRows: (u) => u.children, defaultBranches: ["v"] });
+      capture(t);
+      return (
+        <t.Table>
+          <t.Column value="name" label="Unit" rowHeader />
+          <t.RowDetail>{(u) => (u.id === "v" ? <p>Own staff of Sales</p> : null)}</t.RowDetail>
+        </t.Table>
+      );
+    }
+    render(<Mixed />);
+    expect(screen.getByText("Own staff of Sales")).toBeTruthy();
+    act(() => current!.foldAllBranches());
+    expect(screen.queryByText("Own staff of Sales")).toBeNull();
+    act(() => current!.unfoldAllBranches());
+    expect(screen.getByText("Own staff of Sales")).toBeTruthy();
+  });
+
   it("gives a branch whose detail is nothing no detail line", () => {
     const { container } = render(<Units detail defaultBranches={1} />);
     act(() => current!.toggleRow("v"));
