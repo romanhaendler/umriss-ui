@@ -41,7 +41,7 @@ export default function AFilterBar() {
       <Stack direction="row" gap={3} align="center" wrap>
         <div style={{ width: 200 }}>
           <Select
-            selectSize="sm"
+            size="sm"
             aria-label="Add a filter"
             value=""
             onChange={(event) => {

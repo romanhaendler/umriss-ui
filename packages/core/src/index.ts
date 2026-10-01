@@ -44,6 +44,9 @@ export * from "./lib/virtual";
 export * from "./lib/useVirtual";
 export * from "./lib/language";
 export * from "./lib/provider";
+/* The provider only - the reset the surfaces use stays inside. No styles. */
+export { ControlSizeProvider } from "./lib/controlSize";
+export type { ControlSize, ControlSizeProviderProps } from "./lib/controlSize";
 export * from "./lib/glyphs";
 
 /* The building blocks of the monitoring view stand at the end on purpose and not

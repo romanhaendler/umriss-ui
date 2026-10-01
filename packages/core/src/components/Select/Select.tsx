@@ -3,14 +3,18 @@ import type { SelectHTMLAttributes } from "react";
 import { cx } from "../../lib/cx";
 import { useFormField } from "../FormField";
 import styles from "./Select.module.css";
+import { useControlSize } from "../../lib/controlSize";
 import { useWording } from "../../lib/language";
 import { AngleGlyph, CrossGlyph } from "../../lib/glyphs";
 
-export interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
-  /** `sm` for dense forms and table rows, `md` otherwise. Not called `size`,
-      because `<select size>` on the native element is the number of visible
-      rows – two meanings, one name, that would go wrong. */
-  selectSize?: "sm" | "md";
+/* `size` is the controls' two heights here, as on every other field. The
+   native `<select size>` - the number of rows a list box shows - is left out:
+   this select is a dropdown, and it used to be called `selectSize` to spare
+   that meaning, which made it the one field with another name (ADR-0041). */
+export interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, "size"> {
+  /** `sm` for a toolbar and dense forms, `md` otherwise. Default: the size of a
+      `ControlSizeProvider` around it, else `md`. */
+  size?: "sm" | "md";
   /** Marks the field as invalid. `FormField` sets it itself as soon as it
       carries an `error` – by hand only necessary without `FormField`. */
   invalid?: boolean;
@@ -30,9 +34,10 @@ export interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
  * theme tokens.
  */
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select(
-  { selectSize = "md", invalid, clearable = false, onClear, className, id, children, disabled, ...rest },
+  { size: ownSize, invalid, clearable = false, onClear, className, id, children, disabled, ...rest },
   ref,
 ) {
+  const size = useControlSize(ownSize);
   const field = useFormField();
   const wording = useWording();
   const isInvalid = invalid ?? field?.invalid ?? false;
@@ -49,7 +54,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
         aria-invalid={isInvalid || undefined}
         className={cx(
           styles.select,
-          selectSize === "sm" && styles.sm,
+          size === "sm" && styles.sm,
           clearable && styles.selectClearable,
           isInvalid && styles.invalid,
         )}

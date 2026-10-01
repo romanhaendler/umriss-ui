@@ -381,7 +381,7 @@ export function Pagination({ pageSizes = [10, 25, 50], className, of }: Paginati
         <label className={styles.pageSize}>
           {wording.rows}
           <Select
-            selectSize="sm"
+            size="sm"
             value={snapshot.pageSize}
             onChange={(event) => snapshot.setPageSize(Number(event.target.value))}
             aria-label={wording.rowsPerPage}

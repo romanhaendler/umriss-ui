@@ -5,6 +5,7 @@ import { useFormField } from "../FormField";
 import { filterOptions, nextIndex, startIndex } from "../../lib/options";
 import { Popover } from "../Popover";
 import styles from "./Combobox.module.css";
+import { useControlSize } from "../../lib/controlSize";
 import { useWording } from "../../lib/language";
 import { AngleGlyph, CrossGlyph } from "../../lib/glyphs";
 import { announce, silence } from "../../lib/announce";
@@ -32,8 +33,8 @@ export interface ComboboxProps<T extends string = string>
   onChange: (value: T | null) => void;
   /** What stands in the empty field. */
   placeholder?: string;
-  /** `sm` for a table toolbar and dense forms, `md` otherwise - the heights of
-      `Input`'s two sizes. */
+  /** `sm` for a toolbar and dense forms, `md` otherwise. Default: the size of a
+      `ControlSizeProvider` around it, else `md`. */
   size?: "sm" | "md";
   /** Locks field and panel. */
   disabled?: boolean;
@@ -53,7 +54,7 @@ export const Combobox = forwardRef(function Combobox<T extends string = string>(
     value,
     onChange,
     placeholder,
-    size = "md",
+    size: ownSize,
     disabled = false,
     invalid,
     emptyText,
@@ -65,6 +66,7 @@ export const Combobox = forwardRef(function Combobox<T extends string = string>(
   }: ComboboxProps<T>,
   ref: ForwardedRef<HTMLDivElement>,
 ) {
+  const size = useControlSize(ownSize);
   const field = useFormField();
   const wording = useWording();
   const placeholderText = placeholder ?? wording.comboboxPlaceholder;

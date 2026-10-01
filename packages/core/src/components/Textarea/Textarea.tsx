@@ -25,9 +25,11 @@ import { cx } from "../../lib/cx";
 import { useFormField } from "../FormField";
 import { clampedHeight, remainingChars } from "./measure";
 import styles from "./Textarea.module.css";
+import { useControlSize } from "../../lib/controlSize";
 
 export interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
-  /** `sm` for dense forms and table rows, `md` otherwise. */
+  /** `sm` for a toolbar and dense forms, `md` otherwise. Default: the size of a
+      `ControlSizeProvider` around it, else `md`. */
   size?: "sm" | "md";
   /** Marks the field as invalid. `FormField` sets it itself as soon as it
       carries an `error` – by hand only needed without `FormField`. */
@@ -46,7 +48,7 @@ export interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElemen
 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function Textarea(
   {
-    size = "md",
+    size: ownSize,
     invalid,
     autoGrow = false,
     maxRows,
@@ -61,6 +63,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function 
   },
   ref,
 ) {
+  const size = useControlSize(ownSize);
   const field = useFormField();
   const isInvalid = invalid ?? field?.invalid ?? false;
 

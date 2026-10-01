@@ -698,7 +698,7 @@ export function CellEditor({ entry, row, rowName, grid }: { entry: ColumnEntry; 
     const options = spec.editOptions ?? occurringValues(grid.hook.admitted, entry.read, formats).values;
     const index = options.findIndex((o) => same(o, draft));
     field = (
-      <Select selectSize="sm" value={index < 0 ? "" : String(index)} onChange={(event) => setDraft(options[Number(event.target.value)])}>
+      <Select size="sm" value={index < 0 ? "" : String(index)} onChange={(event) => setDraft(options[Number(event.target.value)])}>
         {index < 0 && <option value="" />}
         {options.map((option, i) => (
           <option key={i} value={i}>

@@ -130,7 +130,7 @@ export default function SetUpATeam() {
                 <Stack direction="row" gap={3} align="center" wrap style={{ flex: "1 1 18rem" }}>
                   <div style={{ flex: "1 1 10rem", minWidth: 0 }}>
                     <Select
-                      selectSize="sm"
+                      size="sm"
                       aria-label={`Role of ${one.name}`}
                       data-callout={i === 0 ? "2" : undefined}
                       value={one.role}

@@ -34,7 +34,7 @@ export default function PreFilter() {
 
   return (
     <Stack gap={3}>
-      <Select selectSize="sm" value={depot} onChange={(event) => setDepot(event.target.value)} aria-label="Depot">
+      <Select size="sm" value={depot} onChange={(event) => setDepot(event.target.value)} aria-label="Depot">
         {DEPOTS.map((d) => (
           <option key={d} value={d}>
             {d}

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 import type { CSSProperties, ReactNode, RefObject } from "react";
 import { createPortal } from "react-dom";
 import { cx } from "../../lib/cx";
+import { SurfaceSizeReset } from "../../lib/controlSize";
 import { FormFieldBoundary } from "../FormField";
 import { computePosition, motionOrigin, visibleViewport } from "./position";
 import type { Align, PopoverPosition } from "./position";
@@ -257,7 +258,11 @@ export function Popover({
         opacity: position ? undefined : 0,
       } as CSSProperties}
     >
-      <FormFieldBoundary>{children}</FormFieldBoundary>
+      {/* A surface of its own: no field and no size from the place it was
+          opened from (ADR-0041). */}
+      <FormFieldBoundary>
+        <SurfaceSizeReset>{children}</SurfaceSizeReset>
+      </FormFieldBoundary>
     </div>,
     target,
   );

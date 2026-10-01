@@ -2,6 +2,7 @@ import { createContext, forwardRef, useContext, useId, useRef } from "react";
 import { useDialogChoreography } from "../../lib/dialogChoreography";
 import type { DialogHTMLAttributes, HTMLAttributes, MouseEvent, ReactNode } from "react";
 import { cx } from "../../lib/cx";
+import { SurfaceSizeReset } from "../../lib/controlSize";
 import { mergeRefs } from "../../lib/mergeRefs";
 import styles from "./Modal.module.css";
 import { useWording } from "../../lib/language";
@@ -153,7 +154,11 @@ const DialogFrame = forwardRef<HTMLDialogElement, DialogFrameProps>(function Dia
           the full height – above as well as below. */}
       {spacers && <div className={styles.spacerTop} aria-hidden="true" />}
       <div ref={sheetRef} className={sheetClassName}>
-        <ModalContext.Provider value={{ onClose, titleId }}>{children}</ModalContext.Provider>
+        {/* A dialog keeps a dialog's controls, whatever size the place it
+            was opened from has (ADR-0041). */}
+        <SurfaceSizeReset>
+          <ModalContext.Provider value={{ onClose, titleId }}>{children}</ModalContext.Provider>
+        </SurfaceSizeReset>
       </div>
       {spacers && <div className={styles.spacerBottom} aria-hidden="true" />}
     </dialog>

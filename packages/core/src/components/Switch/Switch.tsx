@@ -3,12 +3,13 @@ import type { InputHTMLAttributes, ReactNode } from "react";
 import { cx } from "../../lib/cx";
 import { useFormField } from "../FormField";
 import styles from "./Switch.module.css";
+import { useControlSize } from "../../lib/controlSize";
 
 export interface SwitchProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "size" | "role"> {
   /** Label to the right of the switch. */
   label?: ReactNode;
-  /** `sm` for dense forms and table rows, `md` otherwise - the sizes of the
-      fields beside it. */
+  /** `sm` for a toolbar and dense forms, `md` otherwise. Default: the size of a
+      `ControlSizeProvider` around it, else `md`. */
   size?: "sm" | "md";
   /** Marks the switch as invalid. `FormField` sets it itself as soon as it
       carries an `error` - by hand only necessary without `FormField`. */
@@ -22,9 +23,10 @@ export interface SwitchProps extends Omit<InputHTMLAttributes<HTMLInputElement>,
    checkbox is the honest control. The construction is the checkbox's, and so
    is the pass-through: the class on the label, ref and rest on the input. */
 export const Switch = forwardRef<HTMLInputElement, SwitchProps>(function Switch(
-  { label, size = "md", invalid, className, id, ...rest },
+  { label, size: ownSize, invalid, className, id, ...rest },
   ref,
 ) {
+  const size = useControlSize(ownSize);
   const field = useFormField();
   const inputId = id ?? field?.id;
   const isInvalid = invalid ?? field?.invalid ?? false;

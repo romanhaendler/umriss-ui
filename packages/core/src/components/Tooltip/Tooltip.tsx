@@ -8,6 +8,7 @@ import { usePresence } from "../../lib/motion";
 import { mergeRefs } from "../../lib/mergeRefs";
 import { elementRef } from "../../lib/elementRef";
 import styles from "./Tooltip.module.css";
+import { SurfaceSizeReset } from "../../lib/controlSize";
 
 export interface TooltipProps {
   /** Short help text; no interaction, no long content. */
@@ -149,7 +150,7 @@ export function Tooltip({ content, children, delay = 300 }: TooltipProps) {
             // Do not show before the first measurement, or it flashes in the top left.
             style={{ ...position, visibility: position ? undefined : "hidden" }}
           >
-            {content}
+            <SurfaceSizeReset>{content}</SurfaceSizeReset>
           </div>,
           target,
         )}

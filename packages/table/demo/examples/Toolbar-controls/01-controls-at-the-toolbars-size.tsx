@@ -41,7 +41,7 @@ export default function ControlsAtTheToolbarsSize() {
         />
         {/* `Select` is the native field: its size is `selectSize`, since `size` is the element's own. */}
         <Select
-          selectSize="sm"
+          size="sm"
           aria-label="Status"
           value={t.conditionOf(status) ?? ""}
           onChange={(event) => t.setFilter(status, event.target.value === "" ? null : (event.target.value as Status))}
