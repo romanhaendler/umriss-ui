@@ -6,7 +6,7 @@ import { useFormField } from "../FormField";
 import { Calendar, startOfMonth } from "./Calendar";
 import { dstChoiceFor, resolveLocalTime, pad2, truncateInstant } from "./time";
 import type { DstStatus, DstChoice } from "./time";
-import { RangeTrigger } from "./RangeTrigger";
+import { RangeTrigger, naturalChars } from "./RangeTrigger";
 import { TimeField } from "./TimeField";
 import styles from "./DatePicker.module.css";
 import { useControlSize } from "../../lib/controlSize";
@@ -50,6 +50,12 @@ export interface DateTimePickerProps
   /** `sm` for a toolbar and dense forms, `md` otherwise. Default: the size of a
       `ControlSizeProvider` around it, else `md`. */
   size?: "sm" | "md";
+  /** The width in characters - room for the value; the field adds its own
+      padding, glyph and cross. Given, the field is that wide wherever it
+      stands, and never wider than its place. Without it the field fills its
+      place, and where the place asks - in a toolbar or a row - it is as wide
+      as its longest value in the formats in use, so a date never truncates. */
+  chars?: number;
   /** Marks the field as invalid. `FormField` sets it itself as soon as it
       carries an `error` - by hand only necessary without `FormField`. */
   invalid?: boolean;
@@ -66,6 +72,7 @@ export const DateTimePicker = forwardRef<HTMLSpanElement, DateTimePickerProps>(f
     placeholder,
     disabled = false,
     size: ownSize,
+    chars,
     invalid,
     clearable = false,
     className,
@@ -172,6 +179,8 @@ export const DateTimePicker = forwardRef<HTMLSpanElement, DateTimePickerProps>(f
           if (open) closePanel(false);
         }}
         ariaLabel={wording.dateTimeClear}
+        chars={chars}
+        natural={naturalChars((sample) => formats.dateTime(sample, withSeconds).length, placeholderText)}
       />
       <Popover
         open={open}

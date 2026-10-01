@@ -18,8 +18,6 @@ const STYLES = import.meta.glob("../src/components/**/*.module.css", {
 
 /** Focusable elements whose focus the reading cannot see, each with its reason. */
 const SHOWN_ELSEWHERE: Readonly<Record<string, string>> = {
-  "Input/Input.tsx input":
-    "The element takes its classes from a variable; `.input:focus-visible` rings it, and inside the clearable wrapper `.wrapper:focus-within` does.",
   "Select/Select.tsx select":
     "The element takes its classes from a variable; `.select:focus-visible` rings it.",
 };

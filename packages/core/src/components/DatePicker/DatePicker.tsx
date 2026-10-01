@@ -5,7 +5,7 @@ import { Popover } from "../Popover";
 import { useFormField } from "../FormField";
 import { Calendar, startOfMonth } from "./Calendar";
 import { startOfDay } from "./contract";
-import { RangeTrigger } from "./RangeTrigger";
+import { RangeTrigger, naturalChars } from "./RangeTrigger";
 import styles from "./DatePicker.module.css";
 import { useControlSize } from "../../lib/controlSize";
 import { useFormats, useWording } from "../../lib/language";
@@ -35,6 +35,12 @@ export interface DatePickerProps
   /** `sm` for a toolbar and dense forms, `md` otherwise. Default: the size of a
       `ControlSizeProvider` around it, else `md`. */
   size?: "sm" | "md";
+  /** The width in characters - room for the value; the field adds its own
+      padding, glyph and cross. Given, the field is that wide wherever it
+      stands, and never wider than its place. Without it the field fills its
+      place, and where the place asks - in a toolbar or a row - it is as wide
+      as its longest value in the formats in use, so a date never truncates. */
+  chars?: number;
   /** Shows a cross where a value is set, which fades in on hover/focus and
       clears the value. */
   clearable?: boolean;
@@ -49,6 +55,7 @@ export const DatePicker = forwardRef<HTMLSpanElement, DatePickerProps>(function 
     disabled = false,
     invalid,
     size: ownSize,
+    chars,
     clearable = false,
     className,
     ...rest
@@ -109,6 +116,8 @@ export const DatePicker = forwardRef<HTMLSpanElement, DatePickerProps>(function 
           if (open) closePanel(false);
         }}
         ariaLabel={wording.dateClear}
+        chars={chars}
+        natural={naturalChars((sample) => formats.date(sample).length, placeholderText)}
       />
       <Popover
         open={open}
