@@ -54,3 +54,8 @@ export type { AggregateOptions, AggregateFunction, GroupByComponent, GroupingId 
 
 /* Grid mode and editing in place (table-grid-mode, ADR-0034, ADR-0036). */
 export type { CellEdit, CellEditorProps, EditFor, EditOptions, RowAdd, RowDelete, RowSave } from "./types";
+
+/* Row filters: a condition the application defines over the whole row
+   (table-filters 08). */
+export { rowFilter } from "./rowFilter";
+export type { RowFilter } from "./rowFilter";

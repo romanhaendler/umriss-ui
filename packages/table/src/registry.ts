@@ -31,6 +31,7 @@
 
 import type { ReactNode } from "react";
 import type { Formats } from "@umriss-ui/core";
+import type { RowFilter } from "./rowFilter";
 import { tableModel } from "./model/tableModel";
 import type { Column, TableProjection, TableInput } from "./model/tableModel";
 import type { Companion } from "./model/companion";
@@ -137,6 +138,8 @@ export interface HookSnapshot {
   /** Manual mode: the selected rows the table has seen, on this page or an
       earlier one - what a bulk action receives. */
   selectedRows?: readonly unknown[];
+  /** The row filters the table was given, by id - their chips read them. */
+  rowFilters: ReadonlyMap<string, RowFilter<unknown, unknown>>;
 }
 
 /* --- An ordered list of entries ----------------------------------------------- */

@@ -6,7 +6,7 @@
    that loosens it must not slip through the check. Derived from the prototype of
    Ticket 01. */
 
-import { Search, column, columnFilter, useTable } from "../src";
+import { Search, column, columnFilter, rowFilter, useTable } from "../src";
 import type { ReactNode } from "react";
 import type { Table } from "../src";
 
@@ -362,4 +362,35 @@ export function TreeRows() {
   // @ts-expect-error a tree in manual mode
   useTable(units, { rowKey: (u) => u.id, manual: true, rowCount: 0, onViewChange: () => {}, childRows: (u) => u.children });
   return null;
+}
+
+/* Row filters (table-filters 08): the condition's type comes from `matches`. */
+const atLeast = rowFilter({
+  id: "atLeast",
+  label: "At least",
+  matches: (a: Order, o: { amount: number; urgentOnly: boolean }) => a.amount >= o.amount && (!o.urgentOnly || a.urgent),
+  describe: (o) => `${o.amount}`,
+});
+const ofReading = rowFilter({ id: "high", label: "High", matches: (r: Reading, limit: number) => r.measured > limit });
+
+export function RowFilters() {
+  const t = useTable(orders, { rowKey: (a) => a.id, rowFilters: [atLeast] });
+  const { Table: Frame, Column } = t;
+
+  t.setFilter(atLeast, { amount: 100, urgentOnly: true });
+  t.setFilter(atLeast, null);
+  const condition: { amount: number; urgentOnly: boolean } | null = t.conditionOf(atLeast);
+  // @ts-expect-error a condition of another type
+  t.setFilter(atLeast, { amount: "100", urgentOnly: true });
+  // @ts-expect-error a row filter over other rows
+  t.setFilter(ofReading, 3);
+  // @ts-expect-error a row filter over other rows, in the options
+  useTable(orders, { rowKey: (a) => a.id, rowFilters: [ofReading] });
+  void condition;
+
+  return (
+    <Frame>
+      <Column value="amount" label="Quantity" />
+    </Frame>
+  );
 }

@@ -29,16 +29,21 @@ import { manualViewKey } from "./model/view";
 import type { ManualView, TableView } from "./model/view";
 import type { Column } from "./model/tableModel";
 import { Registry } from "./registry";
-import type { ColumnEntry } from "./registry";
 import { buildParts } from "./parts";
 import { buildVerdictColumn } from "./VerdictColumn";
 import { csvOf } from "./export";
 import { warnOnce } from "./dev";
 import { satisfies, filterOf, checkCondition } from "./columnFilter";
+import type { RowFilter } from "./rowFilter";
 import type { SetFilter, Table, TableOptions, TableSnapshot } from "./types";
 
-/** The conditions per column, in the order in which they were set. */
+/** The conditions per column or row filter, in the order in which they were set. */
 type ConditionList = readonly (readonly [string, unknown])[];
+
+/** The row filters a table was given, by id. */
+type RowFilters = ReadonlyMap<string, RowFilter<unknown, unknown>>;
+
+const NO_ROW_FILTERS: readonly RowFilter<unknown, unknown>[] = [];
 
 const warnForeign = (column: string) =>
   warnOnce(
@@ -61,24 +66,35 @@ function appliesTo(registry: Registry, column: string, condition: unknown): bool
 /** The conditions, united into one function. The columns are looked up on the
     call, not on building: that way the function stays stable when columns
     register, and a filter of one's own is asked with its latest spec each
-    time. */
-function combineConditions(conditions: ConditionList, registry: Registry): ((row: unknown) => boolean) | undefined {
+    time. A row filter is asked the whole row. */
+function combineConditions(
+  conditions: ConditionList,
+  registry: Registry,
+  rowFilters: RowFilters,
+): ((row: unknown) => boolean) | undefined {
   if (conditions.length === 0) return undefined;
   let resolvedFor = -1;
-  let resolved: { entry: ColumnEntry; condition: unknown }[] = [];
+  let resolved: ((row: unknown) => boolean)[] = [];
   return (row) => {
     if (resolvedFor !== registry.structureVersion()) {
       resolvedFor = registry.structureVersion();
       resolved = [];
-      for (const [column, condition] of conditions) {
-        const entry = registry.columnById(column);
-        if (entry && appliesTo(registry, column, condition)) resolved.push({ entry, condition });
+      for (const [id, condition] of conditions) {
+        const own = rowFilters.get(id);
+        if (own) {
+          resolved.push((r) => own.matches(r, condition));
+          continue;
+        }
+        const entry = registry.columnById(id);
+        if (entry && appliesTo(registry, id, condition)) {
+          resolved.push((r) => {
+            const filter = filterOf(entry.spec.filter);
+            return !filter || satisfies(filter, entry.read(r), condition);
+          });
+        }
       }
     }
-    return resolved.every(({ entry, condition }) => {
-      const filter = filterOf(entry.spec.filter);
-      return !filter || satisfies(filter, entry.read(row), condition);
-    });
+    return resolved.every((matches) => matches(row));
   };
 }
 
@@ -218,7 +234,22 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
   /* The conditions of the view hold already in the first render: the table
      never appears unfiltered only to jump afterwards. */
   const [conditions, setConditions] = useState<ConditionList>(() => Object.entries(start?.conditions ?? {}));
-  const filter = useMemo(() => combineConditions(conditions, registry), [conditions, registry]);
+
+  /* The row filters by id. They are defined outside the component; a list
+     written in the call is new on every render, so the map follows the ids. */
+  const rowFilterList = (options.rowFilters ?? NO_ROW_FILTERS) as readonly RowFilter<unknown, unknown>[];
+  const rowFilterIds = rowFilterList.map((f) => f.id).join("\u0000");
+  const rowFilters: RowFilters = useMemo(
+    () => new Map(rowFilterList.map((f) => [f.id, f])),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the filters by their ids; they are defined outside the component
+    [rowFilterIds],
+  );
+  for (const f of rowFilterList) {
+    if (registry.columnById(f.id)) {
+      warnOnce(`row-filter-column:${f.id}`, `The row filter "${f.id}" has the id of a column; the column's filter is passed over.`);
+    }
+  }
+  const filter = useMemo(() => combineConditions(conditions, registry, rowFilters), [conditions, registry, rowFilters]);
 
   /* The pre-filter determines which rows the table has - it is not a condition
      it reacts to. It runs before search and conditions, and everything further
@@ -315,9 +346,18 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
      is checked - then there is nothing known to check against. */
   const { setPage } = b;
   const setFilter = useCallback(
-    (column: string, condition: unknown) => {
+    (target: string | RowFilter<unknown, unknown>, condition: unknown) => {
+      const column = typeof target === "string" ? target : target.id;
       let clear = condition === null || condition === undefined;
-      if (!clear && registry.orderedColumns().length > 0) {
+      const own = rowFilters.get(column);
+      if (typeof target !== "string" && own !== target) {
+        warnOnce(
+          `row-filter-unknown:${column}`,
+          `The row filter "${column}" is not among the table's \`rowFilters\`; its condition is passed over.`,
+        );
+        return;
+      }
+      if (!clear && !own && registry.orderedColumns().length > 0) {
         const entry = registry.columnById(column);
         const kind = entry ? filterOf(entry.spec.filter) : undefined;
         if (!kind) {
@@ -346,7 +386,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
       });
       setPage(1);
     },
-    [registry, setPage],
+    [registry, setPage, rowFilters],
   );
 
   const known = new Set(registry.orderedColumns().map((e) => e.spec.id));
@@ -369,7 +409,10 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     }
   }
 
-  const effective = known.size === 0 ? conditions : conditions.filter(([id, condition]) => appliesTo(registry, id, condition));
+  const effective =
+    known.size === 0
+      ? conditions
+      : conditions.filter(([id, condition]) => rowFilters.has(id) || appliesTo(registry, id, condition));
   const withoutConditions = onlyKnown(b.view, known);
   const view: TableView =
     effective.length > 0 ? { ...withoutConditions, conditions: Object.fromEntries(effective) } : withoutConditions;
@@ -476,6 +519,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     toggleRow: b.toggleRow,
     filter: Object.fromEntries(effective),
     setFilter: setFilter as SetFilter<Z>,
+    conditionOf: <B,>(own: RowFilter<Z, B>) => (effective.find(([id]) => id === own.id)?.[1] ?? null) as B | null,
     selection,
     view: groupedView,
     grouping: groupingNow,
@@ -519,6 +563,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     pins: pinsChosen,
     filterOptions: manual ? options.filterOptions : undefined,
     selectedRows,
+    rowFilters,
   });
 
   return { ...snapshot, ...parts } as unknown as Table<Z>;

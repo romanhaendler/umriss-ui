@@ -11,6 +11,7 @@ import type { ManualView, TableView } from "./model/view";
 import type { SortLevel } from "./model/tableModel";
 import type { TableSelection } from "./model/useTableSelection";
 import type { ColumnFilter } from "./columnFilter";
+import type { RowFilter } from "./rowFilter";
 import type { DateFormat, NumberFormat } from "./values";
 import type { DatePeriod } from "./model/grouping";
 import type { Pin } from "./model/pinning";
@@ -514,6 +515,7 @@ export type FieldCondition<W> =
     one's own – takes any condition; through it the condition of a filter of
     one's own is set as well. */
 export interface SetFilter<Z> {
+  <B>(filter: RowFilter<Z, B>, condition: B | null): void;
   <K extends Field<Z>>(column: K, condition: FieldCondition<Z[K]> | null): void;
   <I extends string>(column: I & (I extends Field<Z> ? never : unknown), condition: unknown): void;
 }
@@ -540,6 +542,12 @@ interface TableOptionsCommon<Z> {
   /** The old name of `preFilter` – the same filter, the same meaning.
       @deprecated Is called `preFilter` now; the old name goes with the next minor version. */
   filter?: (row: Z) => boolean;
+  /** The row filters the table has: conditions the application defines over
+      the whole row and sets with `t.setFilter(filter, condition)` from a
+      control of its own. Named here so that a condition from `initialView`,
+      which arrives by id, is known in the first render. */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- each filter has a condition of its own; at the table only the row counts
+  rowFilters?: readonly RowFilter<Z, any>[];
   /** The view on the first render. The table remembers none: where a view is
       kept is the application's decision. Names no column carries fall out. */
   initialView?: TableView;
@@ -638,14 +646,16 @@ export interface TableSnapshot<Z> {
   expanded: readonly string[];
   /** Expands a row or collapses it. */
   toggleRow: (key: string) => void;
-  /** The conditions of the column filters per column, in the order in which
-      they were set. Whatever fits no column is absent. */
+  /** The conditions of the column filters and row filters by id, in the order
+      in which they were set. Whatever fits no column and no row filter is absent. */
   filter: Readonly<Record<string, unknown>>;
-  /** Sets the condition of a column filter; `null` clears it. Back to page one.
-      A condition that does not fit the kind of the filter – a range on a list
-      filter, a column without a filter – is passed over with a warning in
-      development. */
+  /** Sets the condition of a column filter or a row filter; `null` clears it.
+      Back to page one. A condition that does not fit the kind of the filter – a
+      range on a list filter, a column without a filter, a row filter not in
+      `rowFilters` – is passed over with a warning in development. */
   setFilter: SetFilter<Z>;
+  /** The condition of a row filter, as its type - `null` while it is lifted. */
+  conditionOf: <B>(filter: RowFilter<Z, B>) => B | null;
   /** The selection – its own or the one handed in through `selection`. */
   selection: TableSelection<string>;
   /** The ids the table is grouped by, the outermost first – only those a
@@ -683,7 +693,7 @@ export interface TableSnapshot<Z> {
 }
 
 /** What a part without a row type needs from a table – for `of`. */
-export type TableRef = Omit<TableSnapshot<unknown>, "setFilter"> & {
+export type TableRef = Omit<TableSnapshot<unknown>, "setFilter" | "conditionOf"> & {
   readonly Table: unknown;
   /** Without a row kind: any id, any condition. */
   setFilter(column: string, condition: unknown): void;
