@@ -66,7 +66,7 @@ function Units({
       {menu && <ColumnMenu />}
       <Column value="name" label="Unit" rowHeader searchable />
       <Column value="budget" label="Budget" aggregate="sum" />
-      {detail && <RowDetail>{(u) => <p>Detail of {u.name}</p>}</RowDetail>}
+      {detail && <RowDetail>{(u) => (u.children ? null : <p>Detail of {u.name}</p>)}</RowDetail>}
     </Frame>
   );
 }
@@ -102,9 +102,20 @@ describe("tree rows - the fold", () => {
     expect(north).toMatchObject({ ariaLevel: "2", ariaPosInSet: "1", ariaSetSize: "2", ariaExpanded: "false" });
   });
 
-  it("names the fold apart from the row detail's expander on the same row", () => {
+  it("names the fold apart from the row detail's expander", () => {
     render(<Units detail />);
-    expect(screen.getByRole("button", { name: "Expand Sales" })).not.toBe(screen.getByRole("button", { name: "Unfold rows under Sales" }));
+    expect(screen.getByRole("button", { name: "Expand Staff" })).toBeTruthy();
+    expect(screen.queryAllByRole("button", { name: /Staff/ })).toHaveLength(1);
+    expect(screen.queryAllByRole("button", { name: /Sales/ })).toHaveLength(1);
+  });
+
+  it("gives a row whose detail is nothing no expander and no detail line", () => {
+    const { container } = render(<Units detail defaultBranches={1} />);
+    expect(screen.queryByRole("button", { name: "Expand Sales" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Expand Staff" }));
+    expect(screen.getByText("Detail of Staff")).toBeTruthy();
+    act(() => current!.toggleRow("v"));
+    expect(container.querySelectorAll("tbody tr:not([data-motion])")).toHaveLength(1);
   });
 
   it("answers the group fold's keys: Right opens, Left closes, Left on a closed one goes to the parent", () => {
@@ -122,6 +133,24 @@ describe("tree rows - the fold", () => {
     render(<Units defaultBranches={1} />);
     fireEvent.click(screen.getByRole("button", { name: "Unfold rows under North" }), { altKey: true });
     expect(current?.branches).toEqual(["v", "vn"]);
+  });
+});
+
+describe("tree rows - the column that carries the tree", () => {
+  it("is the first visible column, wherever the row header stands", () => {
+    function CodeFirst() {
+      const { Table: Frame, Column } = useTable(UNITS, { rowKey: (u) => u.id, childRows: (u) => u.children, defaultBranches: 1 });
+      return (
+        <Frame>
+          <Column value="id" label="Code" />
+          <Column value="name" label="Unit" rowHeader />
+        </Frame>
+      );
+    }
+    const { container } = render(<CodeFirst />);
+    const [sales, north] = bodyRows(container);
+    expect(sales!.cells[0]!.querySelector("button")?.getAttribute("aria-label")).toBe("Fold rows under Sales");
+    expect(north!.cells[0]!.querySelector("[style]")?.getAttribute("style")).toContain("--tree-level: 1");
   });
 });
 

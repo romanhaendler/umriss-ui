@@ -1,7 +1,7 @@
 import { useTable } from "../../../src";
 
 export const title = "A small tree";
-export const lead = "Name the children of a row with `childRows`: the table shows the roots, and every row with children gets a fold in its row header that opens the next level beneath it.";
+export const lead = "Name the children of a row with `childRows`: the table shows the roots, and every row with children gets a fold in the first column that opens the next level beneath it.";
 
 interface Unit {
   id: string;

@@ -487,13 +487,13 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
   const spanEntry = lines && grouping.length > 1 ? entryOf(grouping.at(-1)) : undefined;
   const dataColumns = lines ? columns.filter((e) => !grouping.includes(e.spec.id)) : columns;
 
-  /* Tree rows (table-tree-rows): the row header carries the tree - without
-     one, the first visible column. The flattening is the whole list, also
+  /* Tree rows (table-tree-rows): the first visible column carries the tree,
+     wherever the row header stands - the structure reads down the left edge,
+     as a grouping's span stands first. The flattening is the whole list, also
      under a virtual window: a row's parent and siblings may stand outside it. */
   const entries = projection.entries;
   let tree: TreeSetup | undefined;
   if (entries) {
-    if (!header) warnOnce("tree-row-header", "A table with `childRows` has no `rowHeader` column; the first visible column carries the tree.");
     const byKey = new Map<string, FlatteningEntry<unknown>>();
     const parentOf = new Map<string, string | undefined>();
     const path: string[] = [];
@@ -504,7 +504,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
       path.push(entry.key);
     }
     tree = {
-      column: header ?? dataColumns[0],
+      column: dataColumns[0],
       entry: (row) => byKey.get(hook.rowKey(row)),
       parent: (key) => parentOf.get(key),
       /* Against the open branches, not against what is shown: a branch open
@@ -1316,7 +1316,12 @@ function Row({
   const editing = useContext(GridContext)?.editing;
   const draft = editing?.row === true && editing.line === gridLine;
   const detail = registry.detail;
-  const open = !fresh && detail !== null && snapshot.expanded.includes(key);
+  /* A detail that comes to nothing - a branch whose records hang only from
+     its leaves - gets no expander and no empty line. Asked on every render:
+     it is an element the caller returns, not yet rendered. */
+  const detailContent = fresh || !detail ? null : detail.presentation(row as never);
+  const hasDetail = detailContent !== null && detailContent !== undefined && detailContent !== false;
+  const open = hasDetail && snapshot.expanded.includes(key);
   const detailId = `${baseId}-detail-${index}`;
   const { className: rowClass, ...data } = rowProps?.(row) ?? {};
 
@@ -1364,16 +1369,18 @@ function Row({
         )}
         {!fresh && detail && (
           <td className={cx(styles.td, styles.control, pinAt(controls - 1).className)} style={pinAt(controls - 1).style}>
-            <button
-              type="button"
-              aria-expanded={open}
-              aria-controls={open ? detailId : undefined}
-              aria-label={open ? wording.collapseRowNamed(name) : wording.expandRowNamed(name)}
-              className={cx(styles.expander, open && styles.expanderOpen)}
-              onClick={() => snapshot.toggleRow(key)}
-            >
-              <AngleGlyph />
-            </button>
+            {hasDetail && (
+              <button
+                type="button"
+                aria-expanded={open}
+                aria-controls={open ? detailId : undefined}
+                aria-label={open ? wording.collapseRowNamed(name) : wording.expandRowNamed(name)}
+                className={cx(styles.expander, open && styles.expanderOpen)}
+                onClick={() => snapshot.toggleRow(key)}
+              >
+                <AngleGlyph />
+              </button>
+            )}
           </td>
         )}
         {line && line.span && (
@@ -1417,10 +1424,10 @@ function Row({
           </td>
         )}
       </tr>
-      {open && detail && (
+      {open && (
         <tr id={detailId} className={styles.detailRow} data-group={group?.path} data-grid-line={grid ? `detail:${key}` : undefined}>
           <td colSpan={columnCount} className={styles.detailCell}>
-            {detail.presentation(row as never)}
+            {detailContent}
           </td>
         </tr>
       )}

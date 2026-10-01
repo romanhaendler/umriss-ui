@@ -39,8 +39,8 @@ export default function FromAFlatList() {
   const { Table, Column } = useTable(rows, { rowKey: (c) => c.id, childRows: (c) => c.children, defaultBranches: 1 });
   return (
     <Table ariaLabel="Cost centres">
-      <Column value="id" label="Cost centre" />
       <Column value="name" label="Name" rowHeader />
+      <Column value="id" label="Cost centre" />
       <Column value="amount" label="Amount (k€)" />
     </Table>
   );
