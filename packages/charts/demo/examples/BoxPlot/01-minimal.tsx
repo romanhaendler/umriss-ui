@@ -1,10 +1,10 @@
 import { BoxPlot, Chart, Tooltip, XAxis, YAxis } from "../../../src";
 
-export const title = "One box per machine";
-export const lead = "Five numbers per row, computed wherever the caller likes. Machines are positions 0, 1, 2 on the numeric x axis; `tickFormat` names them.";
+export const title = "One box per service";
+export const lead = "Five numbers per row, computed wherever the caller likes. Services are positions 0, 1, 2 on the numeric x axis; `tickFormat` names them.";
 
-interface CycleTime {
-  machine: string;
+interface ResponseTime {
+  service: string;
   low: number;
   q1: number;
   median: number;
@@ -12,25 +12,25 @@ interface CycleTime {
   high: number;
 }
 
-/* Seconds per part over the last shift, aggregated by the database. */
-const CYCLE_TIMES: CycleTime[] = [
-  { machine: "Press", low: 41.2, q1: 43.8, median: 44.9, q3: 46.1, high: 49.5 },
-  { machine: "Dryer", low: 38.5, q1: 42.1, median: 44.0, q3: 47.3, high: 53.8 },
-  { machine: "Kiln", low: 44.0, q1: 45.2, median: 45.8, q3: 46.5, high: 48.1 },
+/* Milliseconds per request over the last hour, aggregated by the database. */
+const RESPONSE_TIMES: ResponseTime[] = [
+  { service: "Checkout", low: 112, q1: 138, median: 149, q3: 161, high: 195 },
+  { service: "Billing", low: 85, q1: 121, median: 140, q3: 173, high: 238 },
+  { service: "Search", low: 140, q1: 152, median: 158, q3: 165, high: 181 },
 ];
 
 export default function Minimal() {
   return (
-    <Chart data={CYCLE_TIMES} height={260} ariaLabel="Cycle time per machine over the last shift">
-      <XAxis accessor={(_: CycleTime, i) => i} ticks={[0, 1, 2]} tickFormat={(v) => CYCLE_TIMES[v]?.machine ?? ""} />
-      <YAxis accessor={(d: CycleTime) => d.median} tickFormat={(v) => `${v} s`} />
+    <Chart data={RESPONSE_TIMES} height={260} ariaLabel="Response time per service over the last hour">
+      <XAxis accessor={(_: ResponseTime, i) => i} ticks={[0, 1, 2]} tickFormat={(v) => RESPONSE_TIMES[v]?.service ?? ""} />
+      <YAxis accessor={(d: ResponseTime) => d.median} tickFormat={(v) => `${v} ms`} />
       <BoxPlot
-        name="Cycle time"
-        median={(d: CycleTime) => d.median}
-        lowerQuartile={(d: CycleTime) => d.q1}
-        upperQuartile={(d: CycleTime) => d.q3}
-        lowerWhisker={(d: CycleTime) => d.low}
-        upperWhisker={(d: CycleTime) => d.high}
+        name="Response time"
+        median={(d: ResponseTime) => d.median}
+        lowerQuartile={(d: ResponseTime) => d.q1}
+        upperQuartile={(d: ResponseTime) => d.q3}
+        lowerWhisker={(d: ResponseTime) => d.low}
+        upperWhisker={(d: ResponseTime) => d.high}
       />
       <Tooltip />
     </Chart>
