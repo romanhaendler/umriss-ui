@@ -36,6 +36,10 @@ export interface NodeReader<K, S extends Key = string> {
       against `undefined` would be the kind of distinction that is got wrong
       more often than right. */
   unloaded?: (node: K) => boolean;
+  /** Does this node match? Given, it filters instead of the search text,
+      which is then not read - a table matches by its columns and filters,
+      not by one label. The path rule stays the same. */
+  matches?: (node: K) => boolean;
 }
 
 export interface TreeSnapshot<S extends Key = string> {
@@ -124,7 +128,9 @@ function prepare<K, S extends Key>(
     const id = reader.key(node);
     const children = reader.children(node);
     const selfChecked = snapshot.checked.has(id);
-    const selfMatches = text === "" || reader.label(node).toLowerCase().includes(text);
+    const selfMatches = reader.matches
+      ? reader.matches(node)
+      : text === "" || reader.label(node).toLowerCase().includes(text);
     if (selfMatches) pre.matches.add(id);
 
     let anyChecked = selfChecked;
@@ -167,7 +173,7 @@ export function treeModel<K, S extends Key = string>(
   reader: NodeReader<K, S>,
   snapshot: TreeSnapshot<S>,
 ): readonly FlatteningEntry<K, S>[] {
-  const searching = snapshot.search.trim() !== "";
+  const searching = reader.matches !== undefined || snapshot.search.trim() !== "";
   const pre = prepare(roots, reader, snapshot);
   const out: FlatteningEntry<K, S>[] = [];
 

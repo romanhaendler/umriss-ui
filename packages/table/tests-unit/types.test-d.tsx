@@ -346,3 +346,20 @@ export function Editing() {
     </Frame>
   );
 }
+
+/* Tree rows (table-tree-rows): the children are rows of the same type, and a
+   tree is not a server's page. */
+export function TreeRows() {
+  interface Unit {
+    id: string;
+    name: string;
+    children?: Unit[];
+  }
+  const units: Unit[] = [];
+  useTable(units, { rowKey: (u) => u.id, childRows: (u) => u.children, defaultBranches: 1 });
+  // @ts-expect-error children of another type
+  useTable(units, { rowKey: (u) => u.id, childRows: () => [1, 2] });
+  // @ts-expect-error a tree in manual mode
+  useTable(units, { rowKey: (u) => u.id, manual: true, rowCount: 0, onViewChange: () => {}, childRows: (u) => u.children });
+  return null;
+}

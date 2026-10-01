@@ -127,7 +127,7 @@ bodies. Placement follows ownership: with the module it belongs to, and in
 | `DatePicker/contract.ts` | the value contract: `day` or `instant` |
 | `DataViz/scale.ts` | projection and clamping of the marks |
 | `Popover/position.ts` | clamping and flipping, pure arithmetic |
-| `table/model/tableModel.ts` | filter → sort → group → page, column order and visibility; in manual mode none of it but the page count |
+| `table/model/tableModel.ts` | filter → sort → group → page, column order and visibility; in manual mode none of it but the page count; with tree rows the sort per level, the path rule and the sets footer and export read |
 | `table/model/grouping.ts` | row groups, aggregates, the order of groups, date periods, the lines of a page and of a window |
 | `table/model/pinning.ts` | pinned columns: the order, the declaration, the choice, the view, where a cell sticks |
 | `table/model/gridWalk.ts` | grid mode: the lines and their cells, the step per key, the next cell that edits, where the Active cell stands |

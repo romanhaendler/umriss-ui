@@ -53,6 +53,25 @@ export function GroupingChoice({ registry, hook }: { registry: Registry; hook: H
   );
 }
 
+/** In a table with tree rows the column menu offers no grouping - tree rows
+    and grouping both build levels - but opens and closes every branch, with
+    the grouping menu's words. */
+export function TreeChoice({ registry, hook }: { registry: Registry; hook: HookSnapshot }) {
+  const wording = useWording();
+  if (!registry.tree) return null;
+  const snapshot = hook.publicSnapshot;
+  return (
+    <div className={cx(styles.groupingChoice, styles.groupingOptions)}>
+      <button type="button" className={styles.groupingOption} onClick={snapshot.unfoldAllBranches}>
+        {wording.unfoldAll}
+      </button>
+      <button type="button" className={styles.groupingOption} onClick={snapshot.foldAllBranches}>
+        {wording.foldAll}
+      </button>
+    </div>
+  );
+}
+
 /** The grouping's tag in the table toolbar while the table is grouped. */
 export function GroupingTag({ registry, hook }: { registry: Registry; hook: HookSnapshot }) {
   const wording = useWording();

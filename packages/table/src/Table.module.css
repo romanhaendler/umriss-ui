@@ -1044,6 +1044,28 @@
     color: var(--u-color-text-muted);
   }
 
+  /* Tree rows (table-tree-rows): the indent per level as in the tree view, then
+     the fold slot - a leaf keeps it empty, so that the labels of one level
+     start on one vertical. */
+  .treeCell {
+    --tree-indent: var(--u-space-4);
+    display: flex;
+    align-items: center;
+    padding-left: calc(var(--tree-level, 0) * var(--tree-indent));
+  }
+
+  .foldSlot {
+    flex: none;
+    width: 16px;
+    margin-right: 4px;
+  }
+
+  /* Shown only for a match beneath it: muted, so that the matches stand out -
+     as the tree view's path nodes. Its row header says so to a screen reader. */
+  .pathRow > .td {
+    color: var(--u-color-text-muted);
+  }
+
   /* One fold slot of 20 px on every level. */
   .fold {
     flex: none;

@@ -122,6 +122,8 @@ export interface HookSnapshot {
   filter: ((row: unknown) => boolean) | undefined;
   /** What the table is grouped by, as the model takes it - absent when not. */
   grouping: TableInput<unknown>["grouping"];
+  /** Tree rows, as the model takes them - absent when the rows are flat. */
+  tree: TableInput<unknown>["tree"];
   /** The folded paths - for a grouping the body resolves itself. */
   folded: ReadonlySet<string>;
   publicSnapshot: TableSnapshot<unknown>;
@@ -466,6 +468,14 @@ export class Registry {
     this.manual = manual;
   }
 
+  /** Tree rows: the table builds its levels from the rows' children, and
+      nothing groups it. Set by the hook during its render, as `manual` is. */
+  tree = false;
+
+  setTree(tree: boolean) {
+    this.tree = tree;
+  }
+
   setTableGroupable(groupable: boolean) {
     if (this.tableGroupable === groupable) return;
     this.tableGroupable = groupable;
@@ -474,7 +484,7 @@ export class Registry {
 
   /** Everything a table can be grouped by: its columns, then its group keys. */
   groupingEntries(rows: readonly unknown[]): ColumnEntry[] {
-    if (!this.tableGroupable) return [];
+    if (!this.tableGroupable || this.tree) return [];
     if (this.manual) {
       if (this.orderedColumns().some((e) => e.spec.groupable === true)) {
         warnOnce("manual-groupable-column", "`groupable` on a column is passed over in manual mode: the groups would be the page's, not the server's.");
@@ -631,7 +641,7 @@ export class Registry {
     if (this.unpaged?.from !== projection) {
       this.unpaged = {
         from: projection,
-        projection: { ...projection, visible: projection.filtered, visibleLines: projection.lines, page: 1, pageCount: 1 },
+        projection: { ...projection, visible: projection.shown ?? projection.filtered, visibleLines: projection.lines, page: 1, pageCount: 1 },
       };
     }
     return this.unpaged.projection;
@@ -657,6 +667,7 @@ export class Registry {
       order: b.order,
       grouping: this.groupingFor(hook),
       manual: b.manual,
+      tree: hook.tree,
     };
     const fresh = tableModel(hook.admitted, columns, input);
     const projection = b.virtual ? windowed(fresh, b.virtual.from, b.virtual.to) : fresh;
@@ -794,7 +805,7 @@ export class Registry {
 /** The virtual window of a projection: of its lines when it is grouped, of its
     rows otherwise. */
 export function windowed<Z>(projection: TableProjection<Z>, from: number, to: number): TableProjection<Z> {
-  if (!projection.lines) return { ...projection, visible: projection.filtered.slice(from, to) };
+  if (!projection.lines) return { ...projection, visible: (projection.shown ?? projection.filtered).slice(from, to) };
   const visibleLines = projection.lines.slice(from, to);
   return { ...projection, visibleLines, visible: rowsOf(visibleLines) };
 }

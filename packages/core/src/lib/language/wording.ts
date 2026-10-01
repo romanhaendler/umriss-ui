@@ -325,6 +325,16 @@ export interface Wording {
   /** The fold of a group, with its value and its count. */
   foldGroup: (name: string, count: string) => string;
   unfoldGroup: (name: string, count: string) => string;
+  /** The fold of a branch in a table with tree rows, named after its row -
+      not `expandRowNamed`, which names the row detail's expander on the same row. */
+  foldBranch: (row: string) => string;
+  unfoldBranch: (row: string) => string;
+  /** The first column of a tree's export. */
+  levelColumn: string;
+  /** A row shown only because a descendant matches the search or a filter. */
+  pathRow: string;
+  /** The footer of a tree: it sums the top level, since a parent holds its children. */
+  footerTopLevel: string;
   /** The box that selects every row of a group. */
   selectGroup: (name: string) => string;
   /** A group of the week key: "Week 42, 2026". */
@@ -759,6 +769,11 @@ export const DEFAULT_WORDING: Wording = {
   groupContinued: "continued",
   foldGroup: (name, count) => `Fold ${name}, ${count}`,
   unfoldGroup: (name, count) => `Unfold ${name}, ${count}`,
+  foldBranch: (row) => `Fold rows under ${row}`,
+  unfoldBranch: (row) => `Unfold rows under ${row}`,
+  levelColumn: "Level",
+  pathRow: "on the path to a match",
+  footerTopLevel: "Top level only",
   selectGroup: (name) => `Select ${name}`,
   calendarWeek: (week, year) => `Week ${week}, ${year}`,
   entries: (count, formatted) => (count === 1 ? "1 entry" : `${formatted} entries`),

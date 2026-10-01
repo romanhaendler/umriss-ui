@@ -28,7 +28,7 @@ export function resetSearchAndFilters(snapshot: TableSnapshot<unknown>) {
   for (const id of Object.keys(snapshot.filter)) snapshot.setFilter(id, null);
 }
 
-export function csvOf(registry: Registry): string {
+export function csvOf(registry: Registry, levelLabel: string): string {
   const hook = registry.hook;
   if (!hook) return "";
   const columns = visibleColumns(registry)
@@ -43,5 +43,11 @@ export function csvOf(registry: Registry): string {
         value: (row) => exportValue(e.read(row), e.spec.ownExportValue),
       }),
     );
-  return asCsv(registry.projection().filtered, columns);
+  /* A tree writes every row of its filtered tree, open or not, with its level
+     first: a consumer filtering by level gets a whole level. */
+  const { exported, filtered } = registry.projection();
+  if (!exported) return asCsv(filtered, columns);
+  const level = new Map(exported.map((e) => [e.node, e.level + 1]));
+  const levelColumn: Column<unknown> = { id: "#level", label: levelLabel, value: (row) => level.get(row) };
+  return asCsv(exported.map((e) => e.node), [levelColumn, ...columns]);
 }

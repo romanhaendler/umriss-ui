@@ -58,6 +58,8 @@ export interface CompanionOptions<Z, K extends string> {
   grouping?: TableInput<Z, K>["grouping"];
   /** Manual mode: the rows are a server's page, `rowCount` its total. */
   manual?: TableInput<Z, K>["manual"];
+  /** Tree rows: the rows are the roots. A tree has no pages. */
+  tree?: TableInput<Z, K>["tree"];
 }
 
 export interface Companion<Z, K extends string> extends TableProjection<Z, K> {
@@ -126,7 +128,7 @@ export function useCompanion<Z, K extends string = string>(
   columns: readonly Column<Z, K>[],
   options: CompanionOptions<Z, K>,
 ): Companion<Z, K> {
-  const { rowKey, filter, defaultSort = null, initialView, virtual, grouping, manual } = options;
+  const { rowKey, filter, defaultSort = null, initialView, virtual, grouping, manual, tree } = options;
 
   const [search, setSearchRaw] = useState(initialView?.search ?? "");
   const [sort, setSort] = useState<readonly Sort<K>[]>(() => {
@@ -157,7 +159,7 @@ export function useCompanion<Z, K extends string = string>(
   /* Virtualising means: no pages. The model is handed the size zero, which it
      reads as "everything on one page" - the same rule it already had for a
      table without paging. */
-  const modelPageSize = virtual ? 0 : pageSize;
+  const modelPageSize = virtual || tree ? 0 : pageSize;
 
   const projection = useMemo(
     () =>
@@ -171,14 +173,15 @@ export function useCompanion<Z, K extends string = string>(
         order,
         grouping,
         manual,
+        tree,
       }),
-    [rows, columns, search, filter, sort, page, modelPageSize, hidden, order, grouping, manual],
+    [rows, columns, search, filter, sort, page, modelPageSize, hidden, order, grouping, manual, tree],
   );
 
   /* The hook always runs - the number of hooks must not hang on whether it
      virtualises. Without virtualisation it calculates over zero rows and the
      result is not handed out. */
-  const rowWindow = useVirtual(virtual ? (projection.lines ?? projection.filtered).length : 0, {
+  const rowWindow = useVirtual(virtual ? (projection.lines ?? projection.shown ?? projection.filtered).length : 0, {
     rowHeight: virtual?.rowHeight ?? 0,
     overscan: virtual?.overscan,
   });
@@ -196,8 +199,8 @@ export function useCompanion<Z, K extends string = string>(
         ? projection.visible
         : windowLines
           ? rowsOf(windowLines)
-          : projection.filtered.slice(rowWindow.from, rowWindow.to),
-    [virtual, windowLines, projection.filtered, projection.visible, rowWindow.from, rowWindow.to],
+          : (projection.shown ?? projection.filtered).slice(rowWindow.from, rowWindow.to),
+    [virtual, windowLines, projection.shown, projection.filtered, projection.visible, rowWindow.from, rowWindow.to],
   );
 
   // The keys of the filtered set – that is why "select all" reaches across
