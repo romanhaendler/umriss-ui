@@ -161,8 +161,8 @@ _Avoid_: intrinsic width, auto width, content width (the very thing it is not)
 One of a control's two heights, `sm` or `md`, said with `size` on every control
 that has them. A place says it once for every control in it with
 `ControlSizeProvider` — @umriss-ui/table's toolbar does; a control's own `size`
-wins, and a popover, dialog, tooltip or toast opened from the place starts
-without it (ADR-0041). Not the **Provider**'s density, which is how close a
+wins, and a popover, dialog or tooltip opened from the place starts without
+it (ADR-0041). Not the **Provider**'s density, which is how close a
 table sets its rows.
 _Avoid_: scale, variant, `selectSize` (retired)
 
