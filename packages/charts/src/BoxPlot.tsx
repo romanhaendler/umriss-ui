@@ -24,6 +24,11 @@ export interface BoxPlotProps<T> {
   lowerWhisker: Accessor<T>;
   /** Where the upper whisker ends - the caller's rule, not the maximum. */
   upperWhisker: Accessor<T>;
+  /** The values beyond the whiskers, per box: an array, empty or missing
+      where there are none. Drawn with their box in its colour - one beyond
+      three IQR of the box's own quartiles as a ring -, read in its tooltip
+      and table row, never hit on their own (ADR-0040). */
+  outliers?: (d: T, index: number) => readonly number[] | null | undefined;
   /** Binding to an x axis (R-4.12). */
   xAxisId?: string;
   /** Binding to a y axis (R-4.12). */
@@ -57,6 +62,7 @@ export function BoxPlot<T>(props: BoxPlotProps<T>): null {
     upperQuartile,
     lowerWhisker,
     upperWhisker,
+    outliers,
     xAxisId = "x",
     yAxisId = "y",
     data,
@@ -77,6 +83,7 @@ export function BoxPlot<T>(props: BoxPlotProps<T>): null {
         upperQuartile,
         lowerWhisker,
         upperWhisker,
+        outliers,
         xAxisId,
         yAxisId,
         data,
@@ -87,7 +94,7 @@ export function BoxPlot<T>(props: BoxPlotProps<T>): null {
         tone,
         boxWidth,
       }) as BoxSeriesConfig,
-    [median, lowerQuartile, upperQuartile, lowerWhisker, upperWhisker, xAxisId, yAxisId, data, name, hidden, format, color, tone, boxWidth],
+    [median, lowerQuartile, upperQuartile, lowerWhisker, upperWhisker, outliers, xAxisId, yAxisId, data, name, hidden, format, color, tone, boxWidth],
   );
 
   useSeries("BoxPlot", config);

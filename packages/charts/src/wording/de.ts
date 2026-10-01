@@ -25,6 +25,8 @@ export const GERMAN_CHARTS_WORDING: ChartsWording = {
   median: "Median",
   lowerQuartile: "Unteres Quartil",
   lowerWhisker: "Unterer Whisker",
+  outliers: "Ausreißer",
+  outlierList: (values, more) => `${values.length + more}: ${values.join(", ")}${more > 0 ? ` und ${more} weitere` : ""}`,
   downsampled: (readings) =>
     `Ausgedünnt aus ${readings.toLocaleString("de-DE")} Messwerten: erster, kleinster, größter und letzter Wert je Abschnitt.`,
 };

@@ -264,3 +264,85 @@ describe("The hover marker of grouped boxes", () => {
     host.remove();
   });
 });
+
+/* box-plot 03: outliers belong to their box (ADR-0040) - read in its tooltip
+   and table row as a count and their values, cut after five. */
+describe("A box's outliers", () => {
+  interface WithOutliers {
+    at: number;
+    med: number | null;
+    out: number[];
+  }
+  const rowsWith: WithOutliers[] = [
+    { at: 0, med: 5, out: [11, 12, 13, 14, 15, 16, 17, 1] },
+    { at: 1, med: 6, out: [] },
+    { at: 2, med: null, out: [500] },
+  ];
+  function chartWith(extra: { outliers?: boolean; wording?: ChartsWording; hidden?: boolean } = {}): ReactNode {
+    return (
+      <Chart data={rowsWith} ariaLabel="Outliers" wording={extra.wording}>
+        <XAxis accessor={(d: WithOutliers) => d.at} ticks={[0, 1, 2]} tickFormat={(v) => MACHINES[v] ?? ""} />
+        <YAxis accessor={(d: WithOutliers) => d.med ?? 0} tickFormat={(v) => `${v} s`} />
+        <BoxPlot
+          name="Cycle time"
+          hidden={extra.hidden}
+          median={(d: WithOutliers) => d.med}
+          lowerQuartile={() => 4}
+          upperQuartile={() => 7}
+          lowerWhisker={() => 3}
+          upperWhisker={() => 9}
+          outliers={extra.outliers === false ? undefined : (d: WithOutliers) => d.out}
+        />
+        <Line accessor={() => 2} name="Floor" />
+        <Tooltip />
+        <DataTable />
+      </Chart>
+    );
+  }
+
+  it("lists them in the tooltip as a count and their values, top to bottom, cut after five", async () => {
+    const host = await mount(chartWith());
+    await focusPlot(host);
+    await press(host, "Home");
+    expect(rows(host)).toContain("Outliers8: 17 s, 16 s, 15 s, 14 s, 13 s and 3 more");
+  });
+
+  it("cuts them in German as well", async () => {
+    const host = await mount(chartWith({ wording: GERMAN_CHARTS_WORDING }));
+    await focusPlot(host);
+    await press(host, "Home");
+    expect(rows(host)).toContain("Ausreißer8: 17 s, 16 s, 15 s, 14 s, 13 s und 3 weitere");
+  });
+
+  it("leaves the row out where a box has none", async () => {
+    const host = await mount(chartWith());
+    await focusPlot(host);
+    await press(host, "Home");
+    await press(host, "ArrowRight");
+    expect(head(host)).toBe("Dryer");
+    expect(rows(host).some((r) => r?.startsWith("Outliers"))).toBe(false);
+  });
+
+  it("gives the table a column only where they are given", async () => {
+    const withThem = await mount(chartWith());
+    await act(async () => (withThem.querySelector(".uc-data-key") as HTMLButtonElement).click());
+    await frame();
+    const table = tableOf(withThem);
+    expect(table[0]).toContain("Cycle time – Outliers");
+    expect(table[1]).toContain("8: 17 s, 16 s, 15 s, 14 s, 13 s and 3 more");
+    unmount?.();
+    const without = await mount(chartWith({ outliers: false }));
+    await act(async () => (without.querySelector(".uc-data-key") as HTMLButtonElement).click());
+    await frame();
+    expect(tableOf(without)[0]).not.toContain("Outliers");
+  });
+
+  it("pull the y axis, and leave it with their hidden box", async () => {
+    const shown = await mount(chartWith());
+    expect(ticks(shown)).toContain("15 s");
+    expect(ticks(shown)).not.toContain("500 s");
+    unmount?.();
+    const hidden = await mount(chartWith({ hidden: true }));
+    expect(ticks(hidden)).not.toContain("15 s");
+  });
+});

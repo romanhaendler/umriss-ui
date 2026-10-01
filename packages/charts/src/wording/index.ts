@@ -45,6 +45,10 @@ export interface ChartsWording {
   median: string;
   lowerQuartile: string;
   lowerWhisker: string;
+  /** A box's outliers: the row's name, and the row's value - their count and
+      the first few values, the rest counted (box-plot B9). */
+  outliers: string;
+  outlierList: (values: readonly string[], more: number) => string;
   /** Added to the caption where the table shows the downsampled course (C2):
       how many readings its rows stand for. */
   downsampled: (readings: number) => string;
@@ -72,6 +76,8 @@ export const DEFAULT_CHARTS_WORDING: ChartsWording = {
   median: "Median",
   lowerQuartile: "Lower quartile",
   lowerWhisker: "Lower whisker",
+  outliers: "Outliers",
+  outlierList: (values, more) => `${values.length + more}: ${values.join(", ")}${more > 0 ? ` and ${more} more` : ""}`,
   downsampled: (readings) =>
     `Downsampled from ${readings.toLocaleString("en-GB")} readings: the first, lowest, highest and last value of each stretch.`,
 };

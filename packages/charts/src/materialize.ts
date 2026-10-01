@@ -6,7 +6,7 @@
    encoded as NaN (R-2.5). */
 
 import { lowerBound } from "./hit";
-import type { Accessor, BoxChannels, MaterializedSeries } from "./types";
+import type { Accessor, BoxChannels, BoxNumbers, MaterializedSeries } from "./types";
 
 /** An accessor's value, or NaN for a gap. An infinity is a gap as well: it is no
     value a chart can place, and in the extent it would leave no finite range -
@@ -39,7 +39,10 @@ export interface ExtraChannels<T> {
   /** Value channel of the matrix: the third value per point. */
   value?: Accessor<T>;
   /** A box's further numbers (ADR-0011): one channel each. */
-  box?: { [K in keyof BoxChannels]: Accessor<T> };
+  box?: BoxNumbers<Accessor<T>> & {
+    /** Its outliers, a list per point (ADR-0040). */
+    outliers?: (d: T, index: number) => readonly number[] | null | undefined;
+  };
   /** Pre-mapping of the x values, before anything calculates. The working
       calendar comes in here: the scale stays affine, because the channel already
       stands in working time (ADR-0001).
@@ -81,7 +84,12 @@ export function materializeSeries<T>(
           upperQuartile: new Float64Array(n),
           lowerWhisker: new Float64Array(n),
           upperWhisker: new Float64Array(n),
+          outliers: null,
+          outlierOffsets: boxAccessors.outliers === undefined ? null : new Uint32Array(n + 1),
         };
+  const outlierAccessor = boxAccessors?.outliers ?? null;
+  const offsets = box?.outlierOffsets ?? null;
+  const outliers: number[] = [];
   const map = extra?.xMap ?? null;
   const isGap = extra?.xGap ?? null;
   let xMin = Number.POSITIVE_INFINITY;
@@ -129,6 +137,17 @@ export function materializeSeries<T>(
         if (v < yMin) yMin = v;
         if (v > yMax) yMax = v;
       }
+      if (outlierAccessor !== null) {
+        const list = Number.isNaN(yv) ? null : outlierAccessor(d, i);
+        for (const raw of list ?? []) {
+          // A value that is no place is left out, as a gap is.
+          if (!Number.isFinite(raw)) continue;
+          outliers.push(raw);
+          if (raw < yMin) yMin = raw;
+          if (raw > yMax) yMax = raw;
+        }
+        if (offsets !== null) offsets[i + 1] = outliers.length;
+      }
     }
     if (baseAccessor !== null) {
       const uv = unplaced ? Number.NaN : valueOf(baseAccessor(d, i));
@@ -137,6 +156,7 @@ export function materializeSeries<T>(
       if (uv > yMax) yMax = uv;
     }
   }
+  if (box !== null && outlierAccessor !== null) box.outliers = Float64Array.from(outliers);
   return { series: { x, y, y0, w, box, length: n }, extent: { xMin, xMax, yMin, yMax } };
 }
 
@@ -177,6 +197,14 @@ export function visibleExtent(
         const u = box[key][i] as number;
         if (u < min) min = u;
         if (u > max) max = u;
+      }
+      const { outliers, outlierOffsets } = box;
+      if (outliers !== null && outlierOffsets !== null) {
+        for (let k = outlierOffsets[i] as number; k < (outlierOffsets[i + 1] as number); k++) {
+          const u = outliers[k] as number;
+          if (u < min) min = u;
+          if (u > max) max = u;
+        }
       }
     }
   }

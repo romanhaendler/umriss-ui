@@ -468,11 +468,16 @@ function drawBars(ctx: CanvasRenderingContext2D, item: BarDrawItem, plot: Rect, 
 
    Placed as a bar is (ADR-0002). Four paths for the whole series, each
    stroked or filled once: the boxes, filled faintly and outlined in full;
-   the medians, heavier; the whiskers with their caps, half a box wide. A gap
-   - a missing median - leaves its box out whole (R-2.5). */
+   the medians, heavier; the whiskers with their caps, half a box wide. Two
+   more for the outliers on the box's centre line: dots, and rings for the far
+   out. A gap - a missing median - leaves its box out whole (R-2.5). */
 
 const BOX_FILL = 0.18;
 const BOX_MEDIAN = 2;
+const OUTLIER_RADIUS = 3;
+/** An outlier this many IQR of its own box beyond a quartile is far out: a
+    ring, not a dot (ADR-0040). */
+const FAR_OUT = 3;
 
 function drawBoxes(ctx: CanvasRenderingContext2D, item: BoxDrawItem, plot: Rect): void {
   const n = item.length;
@@ -482,7 +487,7 @@ function drawBoxes(ctx: CanvasRenderingContext2D, item: BoxDrawItem, plot: Rect)
   const yb = item.yScale.b;
   const xs = item.x;
   const ys = item.y;
-  const { lowerQuartile, upperQuartile, lowerWhisker, upperWhisker } = item.box;
+  const { lowerQuartile, upperQuartile, lowerWhisker, upperWhisker, outliers, outlierOffsets } = item.box;
   const edgePx = item.offset * xm;
   const widthPx = item.width * xm;
   const capPx = widthPx / 4;
@@ -490,6 +495,8 @@ function drawBoxes(ctx: CanvasRenderingContext2D, item: BoxDrawItem, plot: Rect)
   const boxes = new Path2D();
   const medians = new Path2D();
   const whiskers = new Path2D();
+  const dots = new Path2D();
+  const rings = new Path2D();
   for (let i = 0; i < n; i++) {
     const median = ys[i] as number;
     if (Number.isNaN(median)) continue;
@@ -511,6 +518,20 @@ function drawBoxes(ctx: CanvasRenderingContext2D, item: BoxDrawItem, plot: Rect)
       whiskers.moveTo(mid - capPx, to);
       whiskers.lineTo(mid + capPx, to);
     }
+    if (outliers !== null && outlierOffsets !== null) {
+      // Far out by the box's own quartiles, in domain units; a box without
+      // them has no far.
+      const lower = lowerQuartile[i] as number;
+      const upper = upperQuartile[i] as number;
+      const reach = FAR_OUT * (upper - lower);
+      for (let k = outlierOffsets[i] as number; k < (outlierOffsets[i + 1] as number); k++) {
+        const v = outliers[k] as number;
+        const path = v > upper + reach || v < lower - reach ? rings : dots;
+        const py = v * ym + yb;
+        path.moveTo(mid + OUTLIER_RADIUS, py);
+        path.arc(mid, py, OUTLIER_RADIUS, 0, Math.PI * 2);
+      }
+    }
   }
   const alpha = ctx.globalAlpha;
   const cap = ctx.lineCap;
@@ -526,6 +547,9 @@ function drawBoxes(ctx: CanvasRenderingContext2D, item: BoxDrawItem, plot: Rect)
   ctx.lineWidth = 1;
   ctx.stroke(boxes);
   ctx.stroke(whiskers);
+  ctx.stroke(rings);
+  ctx.fillStyle = item.color;
+  ctx.fill(dots);
   ctx.lineWidth = BOX_MEDIAN;
   ctx.stroke(medians);
   ctx.lineCap = cap;

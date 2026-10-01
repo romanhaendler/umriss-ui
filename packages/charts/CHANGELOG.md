@@ -46,7 +46,11 @@ interface was still expected to move before `0.3.0`.
   top to bottom as drawn, in `format` or the y axis' `tickFormat`; the arrows
   walk box to box, the marker on the median of its own box. The library
   computes no statistics.
-- **`ChartsWording`** gains `upperWhisker`, `upperQuartile`, `median`,
+- **`BoxPlot outliers`** - the values beyond the whiskers, an array per box
+  (ADR-0040): drawn with their box in its colour, one beyond three IQR as a
+  ring, read in its tooltip and table row as a count and the first five
+  values. They pull the y axis and hide with their box.
+- **`ChartsWording`** gains `outliers` and `outlierList`, and `upperWhisker`, `upperQuartile`, `median`,
   `lowerQuartile` and `lowerWhisker`; German in `wording/de`.
 - **`MaterializedSeries.box`** holds a box's further numbers; null for every
   other kind. **`TooltipPoint.box`** carries them to a custom `render`.

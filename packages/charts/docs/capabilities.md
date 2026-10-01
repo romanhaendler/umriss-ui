@@ -187,6 +187,9 @@ Screenshot pages carry their name in brackets.
 | The hover marker on the median of its own box; the crosshair on the x value | box-plot B11 | Unit (jsdom boxPlot) |
 | `hidden`: out of drawing, hit and extent, the legend entry stays; a bar's hatched swatch under encoding by marks | R-4.13, C3 | Unit (jsdom boxPlot) |
 | Mixed with `Line` and `LimitLine`; `tone` per series | Q11 | Screenshot (`specification-limits`, `detailed`) |
+| `outliers`: a list per box in two named channels - values flat, offsets per box -, null without it and for every other kind | ADR-0040 | Unit (materialize) |
+| Outliers drawn in the box's colour on its centre line, filled; beyond three IQR of the box's own quartiles a ring; in the extent, hidden with their box, never a hit of their own | ADR-0040, B12 | Unit (materialize, jsdom boxPlot), Screenshot (`outliers`) |
+| Tooltip and table: a count and the values top to bottom, cut after five; a row and a column only where given | box-plot B9 | Unit (jsdom boxPlot) |
 | Colours from the theme, light and dark; under forced colours the text colour | Q11, C4 | Screenshot (`minimal`, `over-time`), Manual (forced colours emulated) |
 
 ## `Scatter`
