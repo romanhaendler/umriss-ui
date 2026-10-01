@@ -80,9 +80,9 @@ function combineConditions(
       resolvedFor = registry.structureVersion();
       resolved = [];
       for (const [id, condition] of conditions) {
-        const own = rowFilters.get(id);
-        if (own) {
-          resolved.push((r) => own.matches(r, condition));
+        const rowFilter = rowFilters.get(id);
+        if (rowFilter) {
+          resolved.push((r) => rowFilter.matches(r, condition));
           continue;
         }
         const entry = registry.columnById(id);
@@ -236,7 +236,9 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
   const [conditions, setConditions] = useState<ConditionList>(() => Object.entries(start?.conditions ?? {}));
 
   /* The row filters by id. They are defined outside the component; a list
-     written in the call is new on every render, so the map follows the ids. */
+     written in the call is new on every render, so the map follows the ids -
+     and a filter is known by its id, not by the object (one made anew in a
+     render is the same filter). */
   const rowFilterList = (options.rowFilters ?? NO_ROW_FILTERS) as readonly RowFilter<unknown, unknown>[];
   const rowFilterIds = rowFilterList.map((f) => f.id).join("\u0000");
   const rowFilters: RowFilters = useMemo(
@@ -246,7 +248,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
   );
   for (const f of rowFilterList) {
     if (registry.columnById(f.id)) {
-      warnOnce(`row-filter-column:${f.id}`, `The row filter "${f.id}" has the id of a column; the column's filter is passed over.`);
+      warnOnce(`row-filter-column:${f.id}`, `The row filter "${f.id}" has the id of a column; a condition under that id is the row filter's, and the column's filter cannot hold one of its own.`);
     }
   }
   const filter = useMemo(() => combineConditions(conditions, registry, rowFilters), [conditions, registry, rowFilters]);
@@ -349,15 +351,15 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     (target: string | RowFilter<unknown, unknown>, condition: unknown) => {
       const column = typeof target === "string" ? target : target.id;
       let clear = condition === null || condition === undefined;
-      const own = rowFilters.get(column);
-      if (typeof target !== "string" && own !== target) {
+      const isRowFilter = rowFilters.has(column);
+      if (typeof target !== "string" && !isRowFilter) {
         warnOnce(
           `row-filter-unknown:${column}`,
           `The row filter "${column}" is not among the table's \`rowFilters\`; its condition is passed over.`,
         );
         return;
       }
-      if (!clear && !own && registry.orderedColumns().length > 0) {
+      if (!clear && !isRowFilter && registry.orderedColumns().length > 0) {
         const entry = registry.columnById(column);
         const kind = entry ? filterOf(entry.spec.filter) : undefined;
         if (!kind) {
@@ -404,8 +406,10 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
   if (!sameSet(seen, known)) {
     const gone = new Set([...seen].filter((id) => !known.has(id)));
     setSeen(known);
-    if (conditions.some(([id]) => gone.has(id))) {
-      setConditions((old) => old.filter(([id]) => !gone.has(id)));
+    /* A row filter's condition stays: it never belonged to the column. */
+    const dropped = (id: string) => gone.has(id) && !rowFilters.has(id);
+    if (conditions.some(([id]) => dropped(id))) {
+      setConditions((old) => old.filter(([id]) => !dropped(id)));
     }
   }
 

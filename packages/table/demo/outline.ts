@@ -165,7 +165,8 @@ export const OUTLINE: readonly Rubric[] = [
         sentence: "Narrow a column to some of its values: those that occur, a range between two bounds, or a condition the application defines. Reach for it when people look for records by a field rather than by free text.",
         about: [
           "Every condition stands in the table toolbar with the count of matches, a cross to lift it and “Reset” for all. A click on a condition opens its filter again.",
-          "An absent value matches no condition. The list filter offers only values the pre-filter admits, so it never gives away rows a user may not see.",        ],
+          "An absent value matches no condition. The list filter offers only values the pre-filter admits, so it never gives away rows a user may not see.",
+        ],
         alternatives: [
           { when: "Free text across the columns", use: "search" },
           { when: "Rows a user may not see at all, invisibly", use: "pre-filter" },
@@ -359,6 +360,18 @@ export const OUTLINE: readonly Rubric[] = [
         alternatives: [{ when: "Actions that should stay in view while the page scrolls", use: "`Dock` from @umriss-ui/core" }],
         types: ["ToolbarProps"],
         exports: ["Toolbar"],
+      },
+      {
+        id: "toolbar-controls",
+        name: "Toolbar controls",
+        sentence: "Put controls of your own into the toolbar - a multiselect, a select, a combobox - and let them stand level with the table's: one size for the whole bar, and a row filter behind each control.",
+        about: [
+          "`Toolbar` takes `size`, `sm` or `md`, and the parts the table puts into it follow: search, column menu, export, “Reset” and the bulk actions. A part says its own size with its own `size`. A control from @umriss-ui/core takes the same size by its own prop - `size` on `Input`, `MultiSelect` and `Combobox`, `selectSize` on `Select`.",
+          "A control of your own restricts the table through a [row filter](#/filter): it sets the condition with `t.setFilter(filter, condition)` and reads it with `t.conditionOf(filter)`, so “Reset”, the count of matches and the view include it.",
+        ],
+        alternatives: [{ when: "A filter on a column the table offers itself, in its header", use: "filter" }],
+        types: ["ToolbarProps", "RowFilter"],
+        exports: ["Toolbar", "rowFilter"],
       },
       {
         id: "columnmenu",
