@@ -470,13 +470,14 @@ function drawBars(ctx: CanvasRenderingContext2D, item: BarDrawItem, plot: Rect, 
    stroked or filled once: the boxes, filled faintly and outlined in full;
    the medians, heavier; the whiskers with their caps, half a box wide. Two
    more for the outliers on the box's centre line: dots, and rings for the far
-   out. A gap - a missing median - leaves its box out whole (R-2.5). */
+   out; and one for the means' crosses. A gap - a missing median - leaves its box out whole (R-2.5). */
 
 const BOX_FILL = 0.18;
 const BOX_MEDIAN = 2;
 const OUTLIER_RADIUS = 3;
 /** Half the mean's ×, in pixels. */
 const MEAN_SIZE = 3.5;
+const MEAN_STROKE = 1.5;
 /** How deep a notch cuts into each side, as a share of the box's width. */
 const NOTCH_DEPTH = 0.2;
 /** An outlier this many IQR of its own box beyond a quartile is far out: a
@@ -582,7 +583,7 @@ function drawBoxes(ctx: CanvasRenderingContext2D, item: BoxDrawItem, plot: Rect)
   ctx.stroke(boxes);
   ctx.stroke(whiskers);
   ctx.stroke(rings);
-  ctx.lineWidth = 1.5;
+  ctx.lineWidth = MEAN_STROKE;
   ctx.stroke(means);
   ctx.lineWidth = 1;
   ctx.fillStyle = item.color;

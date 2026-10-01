@@ -1166,11 +1166,11 @@ export class ChartScene {
       }
     }
     // A notch needs both bounds; one alone is not drawn (box-plot 04).
-    for (const { config } of this.series.values()) {
+    for (const { order, config } of this.series.values()) {
       if (config.kind !== "box" || (config.notchLower === undefined) === (config.notchUpper === undefined)) continue;
       const name = config.name ?? "?";
       warnOnce(
-        `box-notch-${name}`,
+        `box-notch-${order}`,
         `BoxPlot "${name}" gives only one of notchLower and notchUpper. A notch needs both bounds; none is drawn.`,
       );
     }
@@ -1290,7 +1290,7 @@ export class ChartScene {
         if (index >= 0) {
           const name = config.name ?? "?";
           warnOnce(
-            `box-order-${name}`,
+            `box-order-${entry.order}`,
             `BoxPlot "${name}": the numbers at index ${index} are out of order - expected lowerWhisker ≤ lowerQuartile ≤ median ≤ upperQuartile ≤ upperWhisker. It is drawn as given.`,
           );
         }
@@ -2010,7 +2010,8 @@ export class ChartScene {
           });
           break;
         case "bar": {
-          const placement = placements.get(entry.order) as BarPlacement;
+          const placement = placements.get(entry.order);
+          if (placement === undefined) break;
           items.push({
             ...base,
             kind: "bar",
@@ -2024,7 +2025,8 @@ export class ChartScene {
           break;
         }
         case "box": {
-          const placement = placements.get(entry.order) as BarPlacement;
+          const placement = placements.get(entry.order);
+          if (placement === undefined) break;
           items.push({
             ...base,
             kind: "box",

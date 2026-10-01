@@ -6,7 +6,7 @@
    encoded as NaN (R-2.5). */
 
 import { lowerBound } from "./hit";
-import type { Accessor, BoxChannels, BoxExtras, BoxNumbers, MaterializedSeries } from "./types";
+import type { Accessor, BoxChannels, ListAccessor, BoxExtras, BoxNumbers, MaterializedSeries } from "./types";
 
 /** An accessor's value, or NaN for a gap. An infinity is a gap as well: it is no
     value a chart can place, and in the extent it would leave no finite range -
@@ -42,7 +42,7 @@ export interface ExtraChannels<T> {
   box?: BoxNumbers<Accessor<T>> &
     Partial<BoxExtras<Accessor<T>>> & {
     /** Its outliers, a list per point (ADR-0040). */
-    outliers?: (d: T, index: number) => readonly number[] | null | undefined;
+    outliers?: ListAccessor<T>;
   };
   /** Pre-mapping of the x values, before anything calculates. The working
       calendar comes in here: the scale stays affine, because the channel already
@@ -148,8 +148,7 @@ export function materializeSeries<T>(
         if (accessor === undefined || channel === null) continue;
         const v = Number.isNaN(yv) ? Number.NaN : valueOf(accessor(d, i));
         channel[i] = v;
-        // A count is no place on the y axis.
-        if (key === "count") continue;
+        if (!BOX_EXTENT_EXTRAS.includes(key)) continue;
         if (v < yMin) yMin = v;
         if (v > yMax) yMax = v;
       }
@@ -180,8 +179,12 @@ export function materializeSeries<T>(
     rows, readout and table columns (box-plot B9). */
 export const BOX_KEYS = ["upperWhisker", "upperQuartile", "lowerQuartile", "lowerWhisker"] as const;
 
-/** A box's optional numbers, in the order its tooltip reads them. */
+/** A box's optional numbers. */
 export const BOX_EXTRA_KEYS = ["mean", "notchUpper", "notchLower", "count"] as const;
+
+/** Those of them that are places on the y axis and pull its extent; a count
+    is none. */
+const BOX_EXTENT_EXTRAS: readonly (typeof BOX_EXTRA_KEYS)[number][] = ["mean", "notchUpper", "notchLower"];
 
 /** Index of the first box whose numbers are not lower whisker ≤ lower
     quartile ≤ median ≤ upper quartile ≤ upper whisker, otherwise -1 (DEV
@@ -235,7 +238,8 @@ export function visibleExtent(
         if (u < min) min = u;
         if (u > max) max = u;
       }
-      for (const channel of [box.mean, box.notchLower, box.notchUpper]) {
+      for (const key of BOX_EXTENT_EXTRAS) {
+        const channel = box[key];
         if (channel === null) continue;
         const u = channel[i] as number;
         if (u < min) min = u;

@@ -10,7 +10,7 @@
 
 import { useMemo } from "react";
 import { useSeries } from "./context";
-import type { Accessor, BoxSeriesConfig } from "./types";
+import type { Accessor, BoxSeriesConfig, ListAccessor } from "./types";
 
 export interface BoxPlotProps<T> {
   /** The line across the box; null/undefined/NaN/±Infinity means a gap - no
@@ -28,7 +28,7 @@ export interface BoxPlotProps<T> {
       where there are none. Drawn with their box in its colour - one beyond
       three IQR of the box's own quartiles as a ring -, read in its tooltip
       and table row, never hit on their own (ADR-0040). */
-  outliers?: (d: T, index: number) => readonly number[] | null | undefined;
+  outliers?: ListAccessor<T>;
   /** The mean, drawn as a small ×: beside the median it shows a skew. */
   mean?: Accessor<T>;
   /** The notch's lower bound - usually of a confidence interval of the
