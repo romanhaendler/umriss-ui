@@ -122,7 +122,7 @@ The table and the alarm list are not part of this package. They live in
 | `VisuallyHidden` | text for the screen reader only; `focusable` turns it into a skip link |
 | `ButtonGroup` / `SplitButton` | connected buttons; a main action plus variants through the existing menu |
 | `Text` / `Heading` / `Link` | typography on the token scale; for `Heading`, level and size are independent |
-| `Input` / `Select` / `Checkbox` | form elements; `Input numeric` in Geist Mono, `Input clearable` with a softly fading-in × button (clears without losing focus); `Checkbox indeterminate` |
+| `Input` / `Select` / `Checkbox` | form elements; `Input numeric` in Geist Mono, `Input clearable` with a softly fading-in × button (clears without losing focus); `Checkbox indeterminate`; every field fills its place or is its natural width, never what it shows, and takes `chars` for a width in characters (ADR-0041) |
 | `Modal` / `ModalHeader` / `ModalBody` / `ModalFooter` | dialogs built on `<dialog>`; free space is distributed in the golden ratio (38 : 62) above and below the surface – small modals sit in the upper third, long ones use the full height, and only the body scrolls while head and foot stay put |
 | `ConfirmDialog` | a compact confirmation dialog, `tone="danger"` for destructive actions, loading state |
 | `ToastProvider` / `useToast` | passing messages as a deck at one of six places: four tones and `loading`, one action, `update` in place, a close reason, a limit, Alt+T, `aria-live` |
@@ -175,7 +175,7 @@ The table and the alarm list are not part of this package. They live in
    `ConfirmDialog` and `CommandPalette`, the field's wrapper of the pickers
    and the combobox family, the `role="tree"` list of `TreeView`. The native
    fields that wear a wrapper (`Checkbox`, `Switch`, `Slider`, `NumberInput`,
-   `Select`, `FileInput`, a clearable `Input`) put the class on the wrapper and
+   `Select`, `FileInput`, `Input`, `Textarea`) put the class on the wrapper and
    ref and rest on the control. The component's own
    `role`, the `aria-*` it computes and its handlers are not replaced by
    `rest`: a caller's handler runs first and can `preventDefault`. Held by
@@ -194,6 +194,14 @@ The table and the alarm list are not part of this package. They live in
    reversed ADR-0015). What still stands from ADR-0015 is the spelling of the
    accessible name: it is `aria-label` where it names the root element, and
    `ariaLabel` only where it does not.
+7. A field's root composes `extent` from `#own-styles`: it fills the place
+   that gives it a width, is its natural width where the place asks, and is
+   never wider than its place; what it shows never moves it (ADR-0041). A field
+   that shows text takes `chars` and sets its chrome; every control with two
+   heights takes `size` and reads it through `useControlSize`, so a
+   `ControlSizeProvider` reaches it, and a surface of its own resets it.
+   Held by `tests-unit/controlSize.test.tsx` and
+   `tests-visual/features-sizes.spec.ts`.
 
 ## Roadmap
 

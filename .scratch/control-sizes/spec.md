@@ -32,35 +32,48 @@ the caller remembered `size="sm"` on each. `Select` called the same prop
 
 ## Decided (ADR-0041)
 
-1. **A field fills the width its parent gives it** - unchanged.
-2. **Where the parent asks, a field answers with its natural width, never with
-   what it shows.** Every field's root carries size containment in the inline
-   axis and a `contain-intrinsic-inline-size`: chosen values, options, a
-   clearing cross, a file list cannot move it.
+1. **A field fills the width its place gives it** - a form's column, a grid's
+   cell, a dialog, a table's cell. Its root is a block with `width: auto`, not
+   `100%`: it fills as a `div` would.
+2. **Where the place asks, a field answers with its natural width, never with
+   what it shows.** A row, a toolbar, a column lined up at the start, a cell
+   sized by its content. Every field's root carries size containment in the
+   inline axis and a `contain-intrinsic-inline-size` (`.extent` in
+   `#own-styles`): chosen values, options, chips, a clearing cross, a file list
+   cannot move it. Measured alike in Chromium, Firefox and WebKit.
 3. **`chars` says the width in characters** - the room for the value, in `ch`
-   of the field's own type; the field's own chrome (padding, chevron, cross,
-   steppers) is added by the field. Given, the field is exactly that wide in
-   every parent; not given, the field's default is its natural width.
-   Defaults: 20 (the browser's own default for a text field) for `Input`,
-   `Textarea`, `Select`, `Combobox`, `MultiSelect`; 10 for `NumberInput`; the
-   date pickers the length of their own format, so a date never truncates.
-4. **A field is never wider than its parent** (`max-inline-size: 100%`) and
-   may shrink below its natural width (`min-inline-size: 0`); what does not fit
-   ends in an ellipsis.
+   of the field's own type; the field adds its own chrome (padding, chevron,
+   cross, steppers). Given, the field is that wide in every place. Defaults:
+   16 for `Input`, `Select`, `Combobox`, `MultiSelect` - a `ch` is a figure,
+   wider than the average letter the browser counts for `size`, and sixteen
+   make the browser's own text field (20 made a dispatcher's bar three lines);
+   10 for `NumberInput`, with a text prefix and suffix counted; 40 for
+   `Textarea`; the date pickers the length of their longest value in the
+   formats in use, so a date never truncates.
+4. **A field is never wider than its place** (`max-inline-size: 100%`) and may
+   shrink below its natural width (`min-inline-size: 0`); what does not fit
+   ends in an ellipsis. A `FormField` is never wider than its place either,
+   and its hint or error wraps inside its field's width instead of widening
+   it.
 5. **Every field has a root that is not the native element** - `Input` and
    `Textarea` always wear their wrapper (Firefox applies no size containment
-   to a bare `<input>`). Principle 1 holds: the class on the wrapper, ref and
-   rest on the control.
+   to a bare native field). Principle 1 holds: the class on the wrapper, ref
+   and rest on the control. Under a finger a text field's root writes at the
+   field's 16 px, so sixteen characters stay sixteen.
 6. **One size, one name, one scope.** `size` is `"sm" | "md"` on every control
    that has two heights (`ControlSize`); `Select`'s `selectSize` becomes
-   `size`. `ControlSizeProvider` sets the default for the controls inside it;
-   a control's own `size` wins. The table's `Toolbar` provides it. A surface of
-   its own - popover, dialog, drawer, tooltip, toast - starts without it, so a
-   dialog opened from a small toolbar keeps its buttons.
+   `size`, `ButtonGroup` gains one for its buttons. `ControlSizeProvider` sets
+   the default for the controls inside it; a control's own `size` wins. The
+   table's `Toolbar` provides it. A popover, dialog, drawer and tooltip start
+   without it, so a dialog opened from a small toolbar keeps its buttons; the
+   toast region stands where the `ToastProvider` stands, at the application's
+   root, and needs no reset.
+
+Also: the combobox's panel is never narrower than 200 px.
 
 Not decided here: `Slider` and `FileInput` take no `chars` - they show no text
-to measure; they get the containment and a natural width, and their width is
-the layout's. `Stack` stays pure layout.
+to measure; they get the containment and a natural width. `Stack` stays pure
+layout: a field does not grow to fill a row, the row's layout gives it room.
 
 ## Tickets
 
@@ -74,11 +87,16 @@ the layout's. `Stack` stays pure layout.
 
 core, **Added**: `chars` on `Input`, `Textarea`, `Select`, `Combobox`,
 `MultiSelect`, `NumberInput` and the four date pickers; `ControlSize`,
-`ControlSizeProvider`. **Changed**: a field's width no longer follows what it
-shows - where its parent asks, it is its natural width; `selectSize` is now
-`size` (no alias); `Input` and `Textarea` always render their wrapper, so
-`className` lands on the wrapper; every control with `size` follows a
-`ControlSizeProvider` around it.
+`ControlSizeProvider`; `size` on `ButtonGroup`; the demo page Sizes.
+**Changed**: a field's width no longer follows what it shows - where its place
+asks, it is its natural width, and it is never wider than its place; a field's
+root is a block (it was `inline-flex` for `Input`, `Select`, `Combobox`,
+`NumberInput`), so in a row it no longer takes the row's width; `selectSize`
+is now `size` (no alias); `Input` and `Textarea` always render their wrapper,
+so `className` lands on the wrapper; `Textarea` no longer takes `cols`; every
+control with `size` follows a `ControlSizeProvider` around it; a FormField's
+message wraps inside its field's width; the combobox's panel is at least 200 px.
 
 table, **Changed**: `Toolbar` sets the size of core controls put into it;
-the search is as wide as its natural width (20 characters) instead of 160 px.
+no part of the toolbar is given a width any more - the search is its natural
+width instead of 160 px, the page-size select as wide as its longest size.
