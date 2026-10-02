@@ -64,7 +64,8 @@ test.describe("Scenarios › find a late shipment", () => {
   const table = (page: Page) => page.locator('[data-scenario="find-a-late-shipment"]');
   const searchField = (page: Page) => table(page).getByPlaceholder("Shipment or customer");
   const conditions = (page: Page) => table(page).getByRole("list", { name: "Active filters" });
-  const dataRows = (page: Page) => table(page).locator("tbody tr");
+  /* A short last page ends in a filler row (ADR-0042); it is no data. */
+  const dataRows = (page: Page) => table(page).locator("tbody tr:not([data-filler])");
 
   async function choose(page: Page, column: string, value: string) {
     await table(page).getByRole("button", { name: `Filter ${column}` }).click();
@@ -159,9 +160,12 @@ test.describe("Scenarios › find a late shipment", () => {
     await choose(page, "Status", "Out for delivery");
     await expect(dataRows(page)).toHaveCount(10);
     const next = table(page).getByRole("button", { name: "Next", exact: true });
+    const at = (await next.boundingBox())!.y;
     await next.click();
     await next.click();
     await expect(dataRows(page)).toHaveCount(5);
+    // The short last page fills up: the bar stays where it was (ADR-0042).
+    expect((await next.boundingBox())!.y).toBe(at);
   });
 
   test("A bulk action asks once and takes the row out", async ({ page }) => {
