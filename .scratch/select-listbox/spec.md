@@ -32,9 +32,10 @@ the measurement below: "Ja aber wie lösen wir das denn jetzt?", and the choice 
    children. The list is drawn from its options; choosing writes the select's
    value and fires its `input` and `change` events, so a controlled and an
    uncontrolled select behave as before. Nothing in the API changes.
-3. **The keys of the Combobox.** Closed: ArrowDown/ArrowUp, Alt+Arrow, F4,
-   Space and Enter open the list on the chosen option (each of them opens the
-   system's list somewhere, so each is ours). Open: the arrows move, Home/End,
+3. **The keys of the Combobox.** Closed: ArrowDown/ArrowUp, Alt+Arrow, F4 and
+   Space open the list on the chosen option. Enter does not - a closed select
+   passes it on to a form or the table's grid, whose editor commits with it;
+   found by the table's own test, `cellEditing`. Open: the arrows move, Home/End,
    PageUp/PageDown, typing jumps to the next option that starts with it,
    Enter/Space choose, Escape and Tab close. Typing in a closed select keeps the
    system's behaviour.

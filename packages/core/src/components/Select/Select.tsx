@@ -262,8 +262,10 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
   );
 });
 
-/** Every key that opens the system's list somewhere opens ours (ADR-0043). */
-const OPENING_KEYS = new Set(["ArrowDown", "ArrowUp", " ", "Enter", "F4"]);
+/** The keys that open the system's list open ours (ADR-0043). Not Enter: a
+    closed select passes it on, to a form or a table's grid that commits an
+    edit with it, and the Combobox's Enter opens nothing either. */
+const OPENING_KEYS = new Set(["ArrowDown", "ArrowUp", " ", "F4"]);
 
 /** How far the keys move in the open list; Page Up and Down jump ten. */
 const STEPS: Record<string, number> = { ArrowDown: 1, ArrowUp: -1, PageDown: 10, PageUp: -10 };

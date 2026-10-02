@@ -29,6 +29,30 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## Unreleased
+
+### Changed
+
+- **The `Select` opens its own list under a mouse, a pen and the keys**
+  (ADR-0043) - the Combobox's, in the library's look. The system's list
+  flickered as it opened in Firefox on Windows, an unstyled select too, out of
+  the page's reach. Under a finger the system's picker stays. The field is
+  still the native `<select>`: `value`, `defaultValue`, `onChange`, `name`,
+  `required`, a form's reset, the `ref` and the `<option>`/`<optgroup>`
+  children work as before. What a caller may notice: the list follows the
+  page's tokens instead of the system's colours; Arrow Up and Arrow Down open
+  it instead of changing the choice in a closed field; the select carries
+  `aria-expanded` and, while open, `aria-activedescendant`; a test that fires
+  `change` on the select still works, one that clicks an option opens the
+  list first and finds the option in the `listbox`.
+  `multiple` and a disabled select are unchanged.
+
+### Fixed
+
+- 0.23.0's "a `Select` no longer flickers as it opens" fixed the focus ring
+  fading in under Chromium's list, not the flicker of Firefox on Windows; that
+  one goes with the list above.
+
 ## 0.23.0 – A multiselect that clears (Oct. 2026)
 
 ### Added

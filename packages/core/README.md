@@ -122,7 +122,7 @@ The table and the alarm list are not part of this package. They live in
 | `VisuallyHidden` | text for the screen reader only; `focusable` turns it into a skip link |
 | `ButtonGroup` / `SplitButton` | connected buttons; a main action plus variants through the existing menu |
 | `Text` / `Heading` / `Link` | typography on the token scale; for `Heading`, level and size are independent |
-| `Input` / `Select` / `Checkbox` | form elements; `Input numeric` in Geist Mono, `Input clearable` with a softly fading-in × button (clears without losing focus); `Checkbox indeterminate`; every field fills its place or is its natural width, never what it shows, and takes `chars` for a width in characters (ADR-0041) |
+| `Input` / `Select` / `Checkbox` | form elements; `Input numeric` in Geist Mono, `Input clearable` with a softly fading-in × button (clears without losing focus); `Select` a native `<select>` that opens the Combobox's list under a mouse and the keys and the system's picker under a finger (ADR-0043); `Checkbox indeterminate`; every field fills its place or is its natural width, never what it shows, and takes `chars` for a width in characters (ADR-0041) |
 | `Modal` / `ModalHeader` / `ModalBody` / `ModalFooter` | dialogs built on `<dialog>`; free space is distributed in the golden ratio (38 : 62) above and below the surface – small modals sit in the upper third, long ones use the full height, and only the body scrolls while head and foot stay put |
 | `ConfirmDialog` | a compact confirmation dialog, `tone="danger"` for destructive actions, loading state |
 | `ToastProvider` / `useToast` | passing messages as a deck at one of six places: four tones and `loading`, one action, `update` in place, a close reason, a limit, Alt+T, `aria-live` |

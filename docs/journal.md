@@ -18,6 +18,23 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Oct. 2026 — The select's own list
+
+- **The `Select` opens its own list under a pointer and the keys** (ADR-0043;
+  `.scratch/select-listbox/`). Reported by the user: the "Cost centre" select
+  flickered as it opened, in Firefox on Windows - "als ob der Inhalt minimalst
+  später da wäre". Measured before anything changed: our CSS changes nothing
+  at the opening in Chromium, WebKit or Firefox; Firefox on Linux in Docker,
+  the whole screen recorded at 60 fps with real X clicks, draws the list in one
+  frame; on Windows a test page of eight variants flickered in all eight, the
+  unstyled select too. The user chose the library's own list for mouse and
+  keys over leaving it native, keeping the system's picker under a finger. The
+  Combobox's list moved to one internal piece both draw, its pictures
+  unchanged; the `<select>` stays the field, so the API did not move. Found on
+  the way: Enter opened the list and took the table grid's commit from its
+  select editor - a closed select passes Enter on again. Recorded once more in
+  Linux Firefox: no system popup under a mouse.
+
 ## Oct. 2026 — A multiselect that clears
 
 - **A clearable `MultiSelect`, the `Combobox`'s chevron as a handle, a
