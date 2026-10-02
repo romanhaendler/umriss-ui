@@ -26,11 +26,13 @@ fires its `input` and `change` events. A controlled select stays at its prop,
 an uncontrolled one keeps what was chosen, and no caller changes a line. A
 select with `multiple` is a list box with no popup and stays as it is.
 
-**The keys are the Combobox's.** Every key that opens the system's list on some
-platform - the arrows, Alt with an arrow, F4, Space, Enter - opens ours, on the
-chosen option. Open, the arrows move, Home and End, Page Up and Page Down jump,
-typing goes to the next option that begins with it, Enter and Space choose,
-Escape and Tab close. Typing in a closed select keeps the system's behaviour.
+**The keys are the Combobox's.** The keys that open the system's list - the
+arrows, Alt with an arrow, F4, Space - open ours, on the chosen option. Enter
+does not: a closed select passes it on, so a form submits and a table's grid
+commits its edit (ADR-0036), and the Combobox's Enter opens nothing either.
+Open, the arrows move, Home and End, Page Up and Page Down jump, typing goes to
+the next option that begins with it, Enter and Space choose, Escape and Tab
+close. Typing in a closed select keeps the system's behaviour.
 
 **What it costs.** The select is no longer "maximum accessibility without
 building one ourselves": the focus stays on the `<select>`, which carries

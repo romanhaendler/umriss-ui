@@ -1,6 +1,6 @@
 # 04 — Docs
 
-Status: ready-for-agent
+Status: done
 Type: feature
 
 ## What

@@ -469,18 +469,24 @@ export const OUTLINE: readonly Rubric[] = [
       {
         id: "select",
         name: "Select",
-        sentence: "One choice from a short, known list (dropdown), shown with the system's own control: a wheel on the phone, the keyboard on the desktop.",
+        sentence: "One choice from a short, known list (dropdown). Under a mouse and the keys it opens the Combobox's list; under a finger the system's picker, a wheel on the phone.",
+        about: [
+          "The field is a native `<select>`: it holds the value and the form, and `onChange` fires as it always did. Write the choices as `<option>` and `<optgroup>`; the list is drawn from them.",
+          "An option with the empty value is the placeholder: muted in the field, and never marked as the choice in the list.",
+        ],
         alternatives: [
           { when: "A long list that is searched by typing", use: "combobox" },
           { when: "Several values at once", use: "multiselect" },
           { when: "A few options that should all stay in view or need a sentence each", use: "radiogroup" },
         ],
         keys: [
-          { key: "Arrow Up / Arrow Down", action: "Changes the choice, or moves in the open list." },
-          { key: "Space or Alt + Arrow Down", action: "Opens the list (as the system does)." },
-          { key: "Typing a letter", action: "Jumps to the next option starting with it." },
+          { key: "Arrow Down / Arrow Up, Space, Alt + Arrow, F4", action: "Opens the list on the chosen option. Enter in a closed field is passed on, to a form or a grid." },
+          { key: "Arrow Up / Arrow Down, Home / End, Page Up / Page Down", action: "Moves in the open list." },
+          { key: "Typing a letter", action: "Jumps to the next option starting with it; in a closed field it changes the choice." },
+          { key: "Enter or Space", action: "Chooses the option the list stands on." },
+          { key: "Escape or Tab", action: "Closes the list." },
         ],
-        limits: ["The open list is the system's: no icons, descriptions or search inside it."],
+        limits: ["The list shows the options' text: no icons, descriptions or search inside it - the Combobox searches."],
         types: ["SelectProps"],
         exports: ["Select"],
       },
@@ -493,7 +499,7 @@ export const OUTLINE: readonly Rubric[] = [
           "The list keeps its given order while it filters; sort the options before you pass them if you want an order.",
         ],
         alternatives: [
-          { when: "A short list, better served by the system's own control", use: "select" },
+          { when: "A short list that needs no search, with the system's picker under a finger", use: "select" },
           { when: "Several values at once", use: "multiselect" },
         ],
         keys: [

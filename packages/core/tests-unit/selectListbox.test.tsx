@@ -161,7 +161,7 @@ describe("Select - its own list", () => {
 
 describe("Select - its keys", () => {
   it("opens on the keys that open a system's list, on the chosen option", () => {
-    for (const init of [{ key: "ArrowDown" }, { key: "ArrowUp" }, { key: " " }, { key: "Enter" }, { key: "F4" }, { key: "ArrowDown", altKey: true }]) {
+    for (const init of [{ key: "ArrowDown" }, { key: "ArrowUp" }, { key: " " }, { key: "F4" }, { key: "ArrowDown", altKey: true }]) {
       const { unmount } = render(<Select aria-label="Cost centre" defaultValue="1200">{CENTRES}</Select>);
       // fireEvent returns false when the default was prevented.
       expect(fireEvent.keyDown(select(), init), JSON.stringify(init)).toBe(false);
@@ -176,6 +176,15 @@ describe("Select - its keys", () => {
   it("leaves typing in a closed select to the system", () => {
     render(<Select aria-label="Cost centre" defaultValue="">{CENTRES}</Select>);
     expect(fireEvent.keyDown(select(), { key: "c" })).toBe(true);
+    expect(listbox()).toBeNull();
+  });
+
+  /* A closed select does nothing on Enter and passes it on - a form submits,
+     a table's grid commits its edit (ADR-0036). The Combobox's Enter opens
+     nothing either. */
+  it("passes Enter on while closed", () => {
+    render(<Select aria-label="Cost centre" defaultValue="">{CENTRES}</Select>);
+    expect(fireEvent.keyDown(select(), { key: "Enter" })).toBe(true);
     expect(listbox()).toBeNull();
   });
 
