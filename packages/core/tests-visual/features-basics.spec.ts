@@ -411,3 +411,34 @@ for (const colorScheme of ["light", "dark"] as const) test(`Text inside a toolti
   expect(ratios).toHaveLength(2);
   for (const ratio of ratios) expect(ratio).toBeGreaterThanOrEqual(4.5);
 });
+
+/* ADR-0043: under a mouse and the keys the select opens the Combobox's list,
+   not the system's; the <select> keeps the value, and the field its width. */
+test("Select opens its own list under the mouse and the keys, and holds its width", async ({ page }) => {
+  await openExample(page, "select", "select");
+  const field = page.getByRole("combobox", { name: "Cost centre" });
+  const width = (await field.boundingBox())!.width;
+
+  await field.click();
+  const list = page.getByRole("listbox", { name: "Cost centre" });
+  await expect(list).toBeVisible();
+  await expect(field).toHaveAttribute("aria-expanded", "true");
+  // The system's own list stays shut.
+  expect(await field.evaluate((element) => element.matches(":open"))).toBe(false);
+  await list.getByRole("option", { name: "CC-2200 Design" }).click();
+  await expect(list).toBeHidden();
+  await expect(field).toHaveValue("CC-2200");
+  await expect(field).toBeFocused();
+  expect((await field.boundingBox())!.width).toBe(width);
+
+  await page.keyboard.press("ArrowDown");
+  await expect(list).toBeVisible();
+  await expect(list.getByRole("option", { name: "CC-2200 Design" })).toHaveAttribute("aria-selected", "true");
+  await page.keyboard.press("ArrowUp");
+  await page.keyboard.press("Enter");
+  await expect(field).toHaveValue("CC-2100");
+  await page.keyboard.press("Space");
+  await page.keyboard.press("Escape");
+  await expect(list).toBeHidden();
+  await expect(field).toBeFocused();
+});

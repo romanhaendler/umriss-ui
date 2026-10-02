@@ -6,7 +6,6 @@
 import { useEffect, useRef } from "react";
 import type { ReactNode, RefObject } from "react";
 import { cx } from "../cx";
-import { mergeRefs } from "../mergeRefs";
 import { Popover } from "../../components/Popover";
 import styles from "./Listbox.module.css";
 
@@ -57,7 +56,8 @@ export function Listbox({
   emptyText,
   listRef: outerListRef,
 }: ListboxProps) {
-  const listRef = useRef<HTMLDivElement>(null);
+  const ownListRef = useRef<HTMLDivElement>(null);
+  const listRef = outerListRef ?? ownListRef;
 
   // Keep the active option in view
   useEffect(() => {
@@ -65,7 +65,7 @@ export function Listbox({
     listRef.current
       ?.querySelector<HTMLElement>(`[data-index="${activeIndex}"]`)
       ?.scrollIntoView({ block: "nearest" });
-  }, [open, activeIndex]);
+  }, [open, activeIndex, listRef]);
 
   const option = (item: ListboxItem, index: number) => (
     <div
@@ -135,7 +135,7 @@ export function Listbox({
       minWidth={200}
       className={styles.panel}
     >
-      <div ref={outerListRef ? mergeRefs(listRef, outerListRef) : listRef} role="listbox" id={id} className={styles.list} aria-label={ariaLabel}>
+      <div ref={listRef} role="listbox" id={id} className={styles.list} aria-label={ariaLabel}>
         {items.length === 0 ? <div className={styles.empty}>{emptyText}</div> : rows}
       </div>
     </Popover>

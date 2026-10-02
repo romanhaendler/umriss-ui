@@ -79,6 +79,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<ListboxItem[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [listName, setListName] = useState("");
   const pointerType = useRef("mouse");
   const typed = useRef({ text: "", at: 0 });
 
@@ -87,6 +88,8 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
     if (!element) return;
     const next = readItems(element);
     setItems(next);
+    // The list is named as its field: a label, or the select's own aria-label.
+    setListName(rest["aria-label"] ?? element.labels?.[0]?.textContent ?? wording.options);
     setActiveIndex(Math.max(0, element.selectedIndex));
     setOpen(true);
     announce(next.length === 0 ? wording.noMatches : wording.optionCount(next.length), element);
@@ -250,7 +253,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
           onClose={closeList}
           anchorRef={selectRef}
           id={listboxId}
-          ariaLabel={rest["aria-label"] ?? wording.options}
+          ariaLabel={listName}
           items={items}
           activeIndex={activeIndex}
           onActivate={setActiveIndex}

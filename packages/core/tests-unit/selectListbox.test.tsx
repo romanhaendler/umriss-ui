@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from "vitest";
 import { useState } from "react";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { Select } from "../src/components/Select";
+import { FormField } from "../src/components/FormField";
 
 const CENTRES = (
   <>
@@ -50,6 +51,20 @@ describe("Select - its own list", () => {
     // A second press closes it.
     press(select());
     expect(listbox()).toBeNull();
+  });
+
+  it("names the list as its field: the label, or the select's aria-label", () => {
+    const { unmount } = render(
+      <FormField label="Cost centre">
+        <Select defaultValue="">{CENTRES}</Select>
+      </FormField>,
+    );
+    press(select());
+    expect(screen.getByRole("listbox", { name: "Cost centre" })).not.toBeNull();
+    unmount();
+    render(<Select aria-label="Depot" defaultValue="">{CENTRES}</Select>);
+    press(select());
+    expect(screen.getByRole("listbox", { name: "Depot" })).not.toBeNull();
   });
 
   it("leaves a finger the system's picker", () => {
