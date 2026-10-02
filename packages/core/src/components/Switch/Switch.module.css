@@ -11,6 +11,9 @@
     --_track-height: 16px;
     --_thumb: 12px;
     --_label: var(--u-text-sm);
+    /* The frame of the hidden input, as the checkbox's: in a scrolling
+       panel a click otherwise scrolled the panel away. */
+    position: relative;
     display: inline-flex;
     /* The track stands at the label's first line, not at the middle of a
        label that wraps. */
