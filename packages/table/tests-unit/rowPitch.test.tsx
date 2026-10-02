@@ -5,7 +5,8 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { Button } from "@umriss-ui/core";
-import { useTable } from "../src";
+import { Pagination, Search, useTable } from "../src";
+import type { TableSnapshot } from "../src";
 
 interface Order {
   id: string;
@@ -76,5 +77,63 @@ describe("the tip of a cut value", () => {
     expect(screen.getByRole("tooltip")).toBeTruthy();
     fireEvent.keyDown(document, { key: "Escape" });
     expect(screen.queryByRole("tooltip")).toBeNull();
+  });
+});
+
+/* A page holds its height (row-pitch 02, 03). */
+interface Shipment {
+  id: string;
+  depot: string;
+}
+
+const SHIPMENTS: Shipment[] = Array.from({ length: 23 }, (_, i) => ({ id: `FP-${1000 + i}`, depot: i < 9 ? "North" : "River" }));
+let snapshot: TableSnapshot<Shipment> | null = null;
+
+function Shipments({ rows = SHIPMENTS, grouped = false, paged = true }: { rows?: Shipment[]; grouped?: boolean; paged?: boolean }) {
+  const t = useTable(rows, { rowKey: (s) => s.id, pageSize: 10, defaultGrouping: grouped ? "depot" : undefined });
+  snapshot = t;
+  return (
+    <t.Table ariaLabel="Shipments">
+      <Search />
+      <t.Column value="id" label="Shipment" rowHeader />
+      <t.Column value="depot" label="Depot" />
+      {paged && <Pagination />}
+    </t.Table>
+  );
+}
+
+const filler = (container: HTMLElement) => container.querySelector<HTMLElement>("tbody tr[data-filler] td");
+const lines = (container: HTMLElement) => container.querySelectorAll("tbody tr:not([data-filler])").length;
+
+describe("a page holds its height", () => {
+  it("fills a short last page up to the page size, and a table of one page not at all", () => {
+    const { container, unmount } = render(<Shipments />);
+    expect(filler(container)).toBeNull();
+    act(() => snapshot!.setPage(3));
+    expect(lines(container)).toBe(3);
+    expect(filler(container)!.style.height).toBe("calc(var(--_pitch) * 7)");
+    unmount();
+    const one = render(<Shipments rows={SHIPMENTS.slice(0, 4)} />);
+    expect(filler(one.container)).toBeNull();
+  });
+
+  it("fills a grouped page as well, whose lines count its headers", () => {
+    const { container } = render(<Shipments grouped />);
+    expect(lines(container)).toBe(10);
+    act(() => snapshot!.setPage(snapshot!.pageCount));
+    const last = lines(container);
+    expect(last).toBeLessThan(10);
+    expect(filler(container)!.style.height).toBe(`calc(var(--_pitch) * ${10 - last})`);
+  });
+
+  it("keeps the height of a page when nothing matches, and leaves a table without a bar as it is", () => {
+    const { container, unmount } = render(<Shipments />);
+    act(() => snapshot!.setSearch("nothing like it"));
+    const cell = container.querySelector<HTMLElement>("tbody td")!;
+    expect(cell.style.height).toBe("calc(var(--_pitch) * 10)");
+    unmount();
+    const bare = render(<Shipments paged={false} />);
+    act(() => snapshot!.setSearch("nothing like it"));
+    expect(bare.container.querySelector<HTMLElement>("tbody td")!.style.height).toBe("");
   });
 });

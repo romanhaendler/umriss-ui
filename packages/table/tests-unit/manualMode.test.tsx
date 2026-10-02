@@ -179,7 +179,7 @@ describe("Manual mode - the view goes out", () => {
 });
 
 describe("Manual mode - loading (M2)", () => {
-  it("shows as many placeholders as the page had rows, and is busy", () => {
+  it("shows a page of placeholders before the first answer, then keeps the page it has while the next is on its way", () => {
     const { container } = render(<Server />);
     // Before the first answer: a page's worth.
     expect(container.querySelectorAll("tbody tr[aria-hidden]")).toHaveLength(10);
@@ -188,10 +188,14 @@ describe("Manual mode - loading (M2)", () => {
     settle();
     expect(bodyNumbers()).toHaveLength(6);
     act(() => current!.toggleSort("amount"));
-    expect(container.querySelector("table")!.getAttribute("aria-busy")).toBe("true");
-    expect(container.querySelectorAll("tbody tr[aria-hidden]")).toHaveLength(6);
+    const table = container.querySelector("table")!;
+    expect(table.getAttribute("aria-busy")).toBe("true");
+    expect(table.getAttribute("data-stale")).toBe("true");
+    expect(bodyNumbers()).toHaveLength(6);
+    expect(container.querySelectorAll("tbody tr[aria-hidden]")).toHaveLength(0);
     settle();
-    expect(container.querySelector("table")!.getAttribute("aria-busy")).toBeNull();
+    expect(table.getAttribute("aria-busy")).toBeNull();
+    expect(table.getAttribute("data-stale")).toBeNull();
   });
 });
 

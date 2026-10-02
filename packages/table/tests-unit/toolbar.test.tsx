@@ -318,9 +318,14 @@ describe("Empty and loading", () => {
     expect(current!.search).toBe("");
   });
 
-  it("shows placeholders instead of rows while loading", () => {
-    const { container } = render(<List loading />);
-    expect(container.querySelectorAll('tbody tr[aria-hidden="true"]').length).toBeGreaterThan(0);
-    expect(container.querySelectorAll("tbody th")).toHaveLength(0);
+  it("keeps the rows while it loads over them, marked stale, and shows placeholders only without rows (ADR-0042)", () => {
+    const { container, unmount } = render(<List loading />);
+    expect(container.querySelectorAll("tbody th").length).toBeGreaterThan(0);
+    expect(container.querySelectorAll('tbody tr[aria-hidden="true"]')).toHaveLength(0);
+    expect(container.querySelector("table")!.getAttribute("data-stale")).toBe("true");
+    unmount();
+    const empty = render(<List rows={[]} loading />);
+    expect(empty.container.querySelectorAll('tbody tr[aria-hidden="true"]').length).toBeGreaterThan(0);
+    expect(empty.container.querySelector("table")!.getAttribute("data-stale")).toBeNull();
   });
 });
