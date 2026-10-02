@@ -195,7 +195,7 @@ describe("a virtualised table", () => {
   const MANY: Reading[] = Array.from({ length: 200 }, (_, i) => ({ id: String(i), tag: `T-${i}`, value: i }));
 
   function Big() {
-    const { Table: Frame, Column } = useTable(MANY, { rowKey: (r) => r.id, virtual: { rowHeight: 20 } });
+    const { Table: Frame, Column } = useTable(MANY, { rowKey: (r) => r.id, virtual: true });
     return (
       <Frame maxHeight="100px" selectable>
         <Column value="value" label="Value" />

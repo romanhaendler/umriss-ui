@@ -453,7 +453,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
   };
 
   /* Without a pagination bar there are no pages (registry.ts). */
-  const virtual = !manual && options.virtual !== undefined;
+  const virtual = !manual && Boolean(options.virtual);
   const paginates = (!isTree && registry.paginates()) || virtual;
   const selection = options.selection ?? b.selection;
 

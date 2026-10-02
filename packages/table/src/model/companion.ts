@@ -20,7 +20,7 @@ import type { Column, SortLevel, TableInput, TableProjection } from "./tableMode
 import type { SortDirection } from "./tableModel";
 import type { TableView } from "./view";
 import { useVirtual } from "@umriss-ui/core";
-import type { VirtualRows, VirtualOptions } from "@umriss-ui/core";
+import type { VirtualRows } from "@umriss-ui/core";
 
 /** One sort level. The companion's older name for it; the sort itself is a
     list. */
@@ -50,9 +50,10 @@ export interface CompanionOptions<Z, K extends string> {
    * Paging is off with it. Both at once would be a control that contradicts
    * itself - a page number promising something the scroll undoes again a
    * moment later. `pageSize` and `setPage` therefore stay without effect as
-   * long as this is set.
+   * long as this is set. The window counts in row pitches, which the table
+   * measures from its head (ADR-0042) - no height is given.
    */
-  virtual?: VirtualOptions;
+  virtual?: boolean | { overscan?: number };
   /** Groups the filtered set; a page and the virtual window then count lines.
       Its identity should stay while nothing in it changes. */
   grouping?: TableInput<Z, K>["grouping"];
@@ -119,6 +120,9 @@ export interface Companion<Z, K extends string> extends TableProjection<Z, K> {
    * touch its loop.
    */
   virtual?: VirtualRows;
+  /** The row pitch the table measured from its head, for the virtual window
+      (ADR-0042). Internal: the frame reports it after every layout. */
+  setPitch: (pitch: number) => void;
   /** Manual mode, as it was handed in. */
   manual?: TableInput<Z, K>["manual"];
 }
@@ -181,9 +185,11 @@ export function useCompanion<Z, K extends string = string>(
   /* The hook always runs - the number of hooks must not hang on whether it
      virtualises. Without virtualisation it calculates over zero rows and the
      result is not handed out. */
+  /* The pitch of a regular row until the table has measured its own. */
+  const [pitch, setPitch] = useState(36);
   const rowWindow = useVirtual(virtual ? (projection.lines ?? projection.shown ?? projection.filtered).length : 0, {
-    rowHeight: virtual?.rowHeight ?? 0,
-    overscan: virtual?.overscan,
+    rowHeight: virtual ? pitch : 0,
+    overscan: typeof virtual === "object" ? virtual.overscan : undefined,
   });
 
   /* `visible` is always "what is to be rendered now": with paging the page,
@@ -385,6 +391,7 @@ export function useCompanion<Z, K extends string = string>(
     visible,
     visibleLines: windowLines,
     virtual: virtual ? rowWindow : undefined,
+    setPitch,
     manual,
     view,
     search,

@@ -166,7 +166,7 @@ describe("Virtualisation", () => {
   const MANY: Reading[] = Array.from({ length: 1000 }, (_, i) => ({ id: String(i), number: `M-${i}` }));
 
   function Big() {
-    const { Table: Frame, Column } = useTable(MANY, { rowKey: (m) => m.id, virtual: { rowHeight: 20 } });
+    const { Table: Frame, Column } = useTable(MANY, { rowKey: (m) => m.id, virtual: true });
     return (
       <Frame maxHeight="100px">
         <Column value="number" label="Messung" rowHeader />
@@ -175,8 +175,14 @@ describe("Virtualisation", () => {
     );
   }
 
+  /* The window counts in row pitches, which the table measures from its head
+     (ADR-0042): a head of 20 px makes every row 20 px. */
+  const pitchOf20 = () =>
+    vi.spyOn(HTMLTableRowElement.prototype, "getBoundingClientRect").mockReturnValue({ height: 20, width: 0, top: 0, left: 0, right: 0, bottom: 20, x: 0, y: 0, toJSON: () => ({}) });
+
   it("renders only the window, but counts every row and does not page", () => {
     vi.spyOn(HTMLElement.prototype, "clientHeight", "get").mockReturnValue(100);
+    pitchOf20();
     const { container } = render(<Big />);
     const data = container.querySelectorAll("tbody tr[data-row]");
     // 100 px / 20 px = 5 rows, one of them cut off, four buffer rows below.
@@ -189,6 +195,7 @@ describe("Virtualisation", () => {
 
   it("moves the window with the scrolling", () => {
     vi.spyOn(HTMLElement.prototype, "clientHeight", "get").mockReturnValue(100);
+    pitchOf20();
     const { container } = render(<Big />);
     const scroll = container.querySelector("table")!.parentElement!;
     scroll.scrollTop = 2000;
