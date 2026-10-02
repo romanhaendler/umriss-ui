@@ -3,7 +3,7 @@
    popover, the options, the list's cursor and the check; the field keeps the
    focus, the keys and the value, and tells the list which option is active. */
 
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import type { ReactNode, RefObject } from "react";
 import { cx } from "../cx";
 import { Popover } from "../../components/Popover";
@@ -35,8 +35,6 @@ export interface ListboxProps {
   onChoose: (index: number) => void;
   /** What stands in the list when it has no options. */
   emptyText: ReactNode;
-  /** The listbox element - for a field that asks whether the focus went there. */
-  listRef?: RefObject<HTMLDivElement | null>;
 }
 
 /** The id of option `index` in the listbox `id` - for `aria-activedescendant`. */
@@ -54,18 +52,28 @@ export function Listbox({
   onActivate,
   onChoose,
   emptyText,
-  listRef: outerListRef,
 }: ListboxProps) {
-  const ownListRef = useRef<HTMLDivElement>(null);
-  const listRef = outerListRef ?? ownListRef;
+  /* The list's element as state: on the first opening the popover finds its
+     portal only after this render, and the list arrives a render later than
+     `open` - its arrival must show the active option too (found in review). */
+  const [list, setList] = useState<HTMLDivElement | null>(null);
 
   // Keep the active option in view
   useEffect(() => {
     if (!open) return;
-    listRef.current
-      ?.querySelector<HTMLElement>(`[data-index="${activeIndex}"]`)
-      ?.scrollIntoView({ block: "nearest" });
-  }, [open, activeIndex, listRef]);
+    list?.querySelector<HTMLElement>(`[data-index="${activeIndex}"]`)?.scrollIntoView({ block: "nearest" });
+  }, [open, activeIndex, list]);
+
+  /* A press anywhere in the panel keeps the focus in the field: a group's
+     label, the padding and the scrollbar closed the list on the field's blur
+     (found in review). */
+  useEffect(() => {
+    const panel = list?.parentElement;
+    if (!panel) return;
+    const keep = (event: MouseEvent) => event.preventDefault();
+    panel.addEventListener("mousedown", keep);
+    return () => panel.removeEventListener("mousedown", keep);
+  }, [list]);
 
   const option = (item: ListboxItem, index: number) => (
     <div
@@ -85,7 +93,6 @@ export function Listbox({
       // disabled element reacts to nothing. The arrow keys still reach it, so
       // that the list reads through in order.
       onMouseEnter={() => !item.disabled && onActivate(index)}
-      onMouseDown={(event) => event.preventDefault() /* focus stays in the field */}
       onClick={() => !item.disabled && onChoose(index)}
     >
       <span className={styles.optionLabel}>{item.label}</span>
@@ -135,7 +142,7 @@ export function Listbox({
       minWidth={200}
       className={styles.panel}
     >
-      <div ref={listRef} role="listbox" id={id} className={styles.list} aria-label={ariaLabel}>
+      <div ref={setList} role="listbox" id={id} className={styles.list} aria-label={ariaLabel}>
         {items.length === 0 ? <div className={styles.empty}>{emptyText}</div> : rows}
       </div>
     </Popover>
