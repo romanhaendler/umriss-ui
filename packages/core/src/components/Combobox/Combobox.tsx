@@ -1,9 +1,9 @@
-import { forwardRef, useEffect, useId, useMemo, useRef, useState } from "react";
+import { forwardRef, useId, useMemo, useRef, useState } from "react";
 import type { ForwardedRef, HTMLAttributes, KeyboardEvent as ReactKeyboardEvent, ReactElement } from "react";
 import { cx } from "../../lib/cx";
 import { useFormField } from "../FormField";
 import { filterOptions, nextIndex, startIndex } from "../../lib/options";
-import { Popover } from "../Popover";
+import { Listbox, optionId } from "../../lib/listbox";
 import styles from "./Combobox.module.css";
 import { useControlSize } from "../../lib/controlSize";
 import { extentStyle } from "../../lib/extent";
@@ -122,14 +122,6 @@ export const Combobox = forwardRef(function Combobox<T extends string = string>(
     inputRef.current?.focus();
   };
 
-  // Keep the active option in view
-  useEffect(() => {
-    if (!open) return;
-    panelRef.current
-      ?.querySelector<HTMLElement>(`[data-index="${activeIndex}"]`)
-      ?.scrollIntoView({ block: "nearest" });
-  }, [open, activeIndex]);
-
   const handleKeyDown = (event: ReactKeyboardEvent<HTMLInputElement>) => {
     // An input method's own keys (Enter ends the composition) are not ours.
     if (event.nativeEvent.isComposing || event.defaultPrevented) return;
@@ -197,7 +189,7 @@ export const Combobox = forwardRef(function Combobox<T extends string = string>(
           aria-expanded={open}
           aria-controls={open ? listboxId : undefined}
           aria-autocomplete="list"
-          aria-activedescendant={open && filtered[activeIndex] ? `${listboxId}-${activeIndex}` : undefined}
+          aria-activedescendant={open && filtered[activeIndex] ? optionId(listboxId, activeIndex) : undefined}
           aria-describedby={field?.describedBy}
           aria-required={field?.required || undefined}
           aria-invalid={isInvalid || undefined}
@@ -256,57 +248,20 @@ export const Combobox = forwardRef(function Combobox<T extends string = string>(
           <AngleGlyph className={styles.chevron} />
         </span>
       </div>
-      <Popover
+      <Listbox
         open={open}
-        onOpenChange={(isOpen) => {
-          if (!isOpen) closePanel();
-        }}
+        onClose={closePanel}
         anchorRef={inputRef}
         insideRefs={[toggleRef]}
-        width="anchor"
-        /* As wide as the field, and never narrower than a list can be read:
-           a field of six characters (`chars`) - a country code - would
-           otherwise have cut every option to an ellipsis. The multiselect's
-           panel has the same floor for its own content. */
-        minWidth={200}
-        className={styles.panel}
-      >
-          <div ref={panelRef} role="listbox" id={listboxId} className={styles.list} aria-label={placeholderText}>
-              {filtered.length === 0 ? (
-                <div className={styles.empty}>{emptyLabel}</div>
-              ) : (
-                filtered.map((option, index) => (
-                  <div
-                    key={option.value}
-                    id={`${listboxId}-${index}`}
-                    data-index={index}
-                    role="option"
-                    aria-selected={option.value === value}
-                    aria-disabled={option.disabled || undefined}
-                    className={cx(
-                      styles.option,
-                      index === activeIndex && styles.active,
-                      option.value === value && styles.selected,
-                      option.disabled && styles.optionDisabled,
-                    )}
-                    // The pointer does not move the cursor onto a disabled option: a
-                    // disabled element reacts to nothing. The arrow keys still reach
-                    // it, so that the list reads through in order.
-                    onMouseEnter={() => !option.disabled && setActiveIndex(index)}
-                    onMouseDown={(event) => event.preventDefault()}
-                    onClick={() => choose(option)}
-                  >
-                    <span className={styles.optionLabel}>{option.label}</span>
-                    {option.value === value && (
-                      <svg viewBox="0 0 10 8" width="10" height="8" aria-hidden="true">
-                        <path d="M1 4l2.5 2.5L9 1" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    )}
-                  </div>
-                ))
-              )}
-          </div>
-      </Popover>
+        id={listboxId}
+        ariaLabel={placeholderText}
+        items={filtered.map((option) => ({ ...option, selected: option.value === value }))}
+        activeIndex={activeIndex}
+        onActivate={setActiveIndex}
+        onChoose={(index) => choose(filtered[index]!)}
+        emptyText={emptyLabel}
+        listRef={panelRef}
+      />
     </>
   );
 }) as <T extends string = string>(

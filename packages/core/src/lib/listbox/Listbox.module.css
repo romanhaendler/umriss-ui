@@ -1,0 +1,86 @@
+@layer umriss.tokens, umriss.base, umriss.components;
+
+/* The one list of options that opens under a field: the Combobox's and the
+   Select's (ADR-0043). */
+@layer umriss.components {
+  .panel {
+    background: var(--u-color-surface);
+    border-radius: var(--u-radius-md);
+    outline: 1px solid transparent;
+    box-shadow: var(--u-shadow-overlay);
+    padding: var(--u-space-1);
+  }
+
+  .list {
+    composes: scroll from "#own-styles";
+    max-height: 240px;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--u-space-2);
+    padding: var(--u-space-2) var(--u-space-3);
+    border-radius: var(--u-radius-sm);
+    font-size: var(--u-text-sm);
+    color: var(--u-color-text);
+    cursor: pointer;
+  }
+
+  /* The list's cursor, not its focus: DOM focus stays in the field, which
+     carries the ring, and the cursor is what the arrow keys and the pointer
+     both move - so it is the hover surface (the interaction-state canon). */
+  .active {
+    background: var(--u-color-surface-sunken);
+  }
+
+  .selected {
+    color: var(--u-color-accent-text);
+    font-weight: var(--u-weight-medium);
+  }
+
+  .option:active:not(.optionDisabled) {
+    background: var(--u-color-surface-pressed);
+  }
+
+  .optionDisabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .optionLabel {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* An <optgroup>'s label: the native list's heading, quiet and not an
+     option. */
+  .groupLabel {
+    padding: var(--u-space-2) var(--u-space-3) var(--u-space-1);
+    font-size: var(--u-text-xs);
+    font-weight: var(--u-weight-medium);
+    color: var(--u-color-text-secondary);
+  }
+
+  .empty {
+    padding: var(--u-space-4) var(--u-space-3);
+    font-size: var(--u-text-sm);
+    color: var(--u-color-text-muted);
+    text-align: center;
+  }
+
+  /* The list's cursor is a surface, and forced colours repaint it with the
+     page's (forced-colors 02): it takes an outline in the system's selection
+     colour, inside the option. */
+  @media (forced-colors: active) {
+    .active {
+      outline: 2px solid Highlight;
+      outline-offset: -2px;
+    }
+  }
+}

@@ -97,68 +97,6 @@
     pointer-events: none;
   }
 
-  .panel {
-    background: var(--u-color-surface);
-    border-radius: var(--u-radius-md);
-    outline: 1px solid transparent;
-    box-shadow: var(--u-shadow-overlay);
-    padding: var(--u-space-1);
-  }
-
-  .list {
-    composes: scroll from "#own-styles";
-    max-height: 240px;
-    overflow: auto;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .option {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--u-space-2);
-    padding: var(--u-space-2) var(--u-space-3);
-    border-radius: var(--u-radius-sm);
-    font-size: var(--u-text-sm);
-    color: var(--u-color-text);
-    cursor: pointer;
-  }
-
-  /* The list's cursor, not its focus: DOM focus stays in the field, which
-     carries the ring, and the cursor is what the arrow keys and the pointer
-     both move - so it is the hover surface (the interaction-state canon). */
-  .active {
-    background: var(--u-color-surface-sunken);
-  }
-
-  .selected {
-    color: var(--u-color-accent-text);
-    font-weight: var(--u-weight-medium);
-  }
-
-  .option:active:not(.optionDisabled) {
-    background: var(--u-color-surface-pressed);
-  }
-
-  .optionDisabled {
-    cursor: not-allowed;
-    opacity: 0.5;
-  }
-
-  .optionLabel {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .empty {
-    padding: var(--u-space-4) var(--u-space-3);
-    font-size: var(--u-text-sm);
-    color: var(--u-color-text-muted);
-    text-align: center;
-  }
-
   /* Clearable: the cross sits left of the chevron and fades in gently. */
   .inputClearable {
     padding-right: 52px;
@@ -204,16 +142,6 @@
   @media (prefers-reduced-motion: reduce) {
     .clear {
       animation: none;
-    }
-  }
-
-  /* The list's cursor is a surface, and forced colours repaint it with the
-     page's (forced-colors 02): it takes an outline in the system's selection
-     colour, inside the option. */
-  @media (forced-colors: active) {
-    .active {
-      outline: 2px solid Highlight;
-      outline-offset: -2px;
     }
   }
 }

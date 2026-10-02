@@ -56,5 +56,6 @@ half a later reader needs most. Exactly one is superseded today.
 | [0040](0040-a-box-carries-its-outliers.md) | A box carries its outliers | accepted | charts |
 | [0041](0041-a-fields-width-never-follows-what-it-shows.md) | A field's width never follows what it shows | accepted | components |
 | [0042](0042-a-rows-height-never-follows-what-it-shows.md) | A row's height never follows what it shows | accepted | table |
+| [0043](0043-the-select-draws-its-own-list-under-a-pointer.md) | The select draws its own list under a pointer and the keys | accepted | components |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).
