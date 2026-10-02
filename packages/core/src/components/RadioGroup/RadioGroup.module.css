@@ -19,6 +19,9 @@
   }
 
   .option {
+    /* The frame of the input, as the checkbox's: in a scrolling panel a
+       click otherwise scrolled the panel away. */
+    position: relative;
     display: flex;
     align-items: flex-start;
     gap: var(--u-space-2);

@@ -20,6 +20,26 @@ as it stood.
 
 ## Oct. 2026 — Sizes
 
+- **`Text` stood black on black in a tooltip** (`@umriss-ui/core` 0.21.2).
+  Found by the user, building a table cell whose tooltip shows a small
+  calculation. The tooltip's ground is `--u-color-text`, and `Text` sets that
+  same token as its colour. A first fix redefined the tokens in the tooltip's
+  stylesheet, and the stylesheet rule that no component declares a `--u-`
+  name refused it; the place for a surface that trades tokens is
+  `own.module.css`, as `dense` does for the table. It now carries `ink`, which
+  turns the three text colours round for content on ink - the quieter tones
+  as the ground let partly through - and the tooltip wraps its content in an
+  element that takes it, so its own ground still reads the token. A browser
+  test measures every tone against the composed ground at 4.5:1 in both
+  themes; it measured 1:1 before. No existing screenshot moved.
+
+- **A long multiselect went white after a tick** (`@umriss-ui/core` 0.21.1).
+  Found by the user in an example of their own with 125 options. The hidden
+  input of the checkbox, the switch and the radio had no positioned row: it
+  hung from the popover's panel, stood where its row would stand unscrolled,
+  and the focus a click gave it scrolled the panel there. Each row is now its
+  input's frame; a browser test holds that the input's `offsetParent` is its
+  row, and the screenshots stayed as they were.
 - **A field's width never follows what it shows** (`.scratch/control-sizes/`,
   ADR-0041; `@umriss-ui/core` 0.21.0, `@umriss-ui/table` 0.10.0, schedule and
   calculation moving their core range along). It began as a question about how wide the core fields are, and a

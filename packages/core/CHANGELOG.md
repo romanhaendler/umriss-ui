@@ -43,6 +43,32 @@ commit.
   the table's toolbar lost its tail, by a pixel in WebKit. The line is 16 px
   now, inside the tag's unchanged 22 px.
 
+## 0.21.2 – Text that reads in a tooltip (Oct. 2026)
+
+### Fixed
+
+- **`Text` and `Heading` read inside a `Tooltip`.** The tooltip stands on the
+  text colour, and `Text` set that same colour on itself: a tooltip built from
+  `Text` stood black on black, in the dark theme light on light. The
+  tooltip's content now reads the three text colours turned round - `default`
+  in the tooltip's own type colour, `secondary` and `muted` stepping back
+  towards its ground, each above 4.5:1 in both themes. A tooltip of plain text
+  looks as before. The Tooltip page shows it in "Show how a figure came
+  about".
+
+## 0.21.1 – A long list that stays (Oct. 2026)
+
+### Fixed
+
+- **A tick in a long `MultiSelect` no longer empties the panel.** The hidden
+  input of `Checkbox`, `Switch` and `RadioGroup` hung from the nearest
+  positioned ancestor - in a popover the panel, past the list that scrolls -
+  and the focus a click gave it scrolled the whole panel down to where the
+  row would stand unscrolled: the panel stayed open and white. Each row now
+  holds its own input; nothing moves on the page.
+
+---
+
 ## 0.21.0 – Fields that hold still (Oct. 2026)
 
 A field's width no longer follows what it shows, and one size reaches every
