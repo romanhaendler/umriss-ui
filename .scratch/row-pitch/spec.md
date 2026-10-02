@@ -46,10 +46,13 @@ The state of the art behind it: `reports/Datentabellen Stand der Technik.md`
    dragged or fitted - cuts at its width and never grows past it.
 5. **A cut value shows whole in a tip** under the pointer, and at once on the
    Active cell in grid mode; only where it is actually cut. One tip per table.
-6. **A page holds its height.** With a pagination bar and more than one page,
-   a short last page fills up with an unlined filler; the first load shows a
-   page of placeholders; a result that is empty after rows were shown keeps the
-   height of a page of them, its message at the top.
+6. **A page holds its height.** With a pagination bar a page keeps the most
+   lines it has shown, up to `pageSize`: a short last page, a search or a
+   condition that leaves a few rows, and an empty result (its message at the
+   top) fill up with an unlined filler; the first load shows a page of
+   placeholders. Amended after the acceptance: first it held only over more
+   than one page, and a status filter leaving seven rows of twenty-four still
+   moved the bar from 405 to 297 px.
 7. **A grouped page is `pageSize` lines, the repeated headers counted.** A page
    that begins inside a group repeats its headers; they now take their room
    from the page instead of lengthening it.

@@ -382,8 +382,8 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
   const resolvedDensity = useDensityFor(density, "regular");
   const baseId = useId();
   const tableRef = useRef<HTMLTableElement>(null);
-  /* How many lines a page of the table last held - what an empty result and
-     placeholders keep the height of (ADR-0042). Kept from an earlier render,
+  /* The most lines a page of the table has shown - what a short page, an
+     empty result and placeholders keep the height of (ADR-0042). Kept from an earlier render,
      as React keeps information from previous renders: set while rendering. */
   const [heldBefore, setHeldBefore] = useState(0);
   const grid = useGridState();
@@ -685,18 +685,20 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
 
   /* A page holds its height (ADR-0042). Every line is one pitch, so a page
      of the table is `pageSize` pitches whatever it shows: with a pagination
-     bar and more than one page, a short last page ends in a filler of the
-     lines it lacks, and an empty result keeps the height of the lines a page
-     last held. A grouped page is `pageSize` lines as well, its repeated
-     headers counted (grouping.ts, `pageLines`). */
+     bar, a page keeps the most lines it has shown, up to `pageSize` - a short
+     last page fills up, a search or a condition that leaves three rows of
+     seventy fills up to ten, an empty result keeps the same height, and a
+     table that never had more than three rows stays three rows tall. A
+     grouped page is `pageSize` lines as well, its repeated headers counted
+     (grouping.ts, `pageLines`). */
   const pageSize = (registry.paginates() || snapshot.manual) && !virtual ? snapshot.pageSize : 0;
   const shownLines = lines ? lines.length : rows.length;
-  const heldNow = pageSize && !loading && shownLines > 0 ? Math.min(projection.lines?.length ?? projection.filtered.length, pageSize) : 0;
-  if (heldNow && heldNow !== heldBefore) setHeldBefore(heldNow);
-  const heldLines = heldNow || heldBefore;
+  const shownNow = pageSize && !loading ? Math.min(shownLines, pageSize) : 0;
+  if (shownNow > heldBefore) setHeldBefore(shownNow);
+  const heldLines = Math.min(Math.max(shownNow, heldBefore, snapshot.pageCount > 1 ? pageSize : 0), pageSize);
   const filler =
-    pageSize && snapshot.pageCount > 1 && shownLines > 0 && shownLines < pageSize ? (
-      <FillerRow height={`calc(var(--_pitch) * ${pageSize - shownLines})`} colSpan={columnCount} />
+    pageSize && shownLines > 0 && shownLines < heldLines ? (
+      <FillerRow height={`calc(var(--_pitch) * ${heldLines - shownLines})`} colSpan={columnCount} />
     ) : null;
   /* Loading over rows keeps the rows: they dim, after a moment, and take no
      pointer until the answer is in. Placeholders stand only where there is

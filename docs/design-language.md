@@ -290,7 +290,8 @@ record is the row detail's.
 **Small controls in the table.** The table sets `ControlSizeProvider
 size="sm"`, so a button, select or badge in a cell fits the pitch.
 
-**A page keeps its height.** A short last page fills up, a grouped page counts
+**A page keeps its height.** It keeps the most rows it has shown: a short last
+page, a search or a filter that leaves a few rows fill up, a grouped page counts
 the headers it repeats, the first load shows a page of placeholders, an empty
 result keeps the page's height with its message at the top, and loading over
 rows dims them after `--u-delay-stale` instead of replacing them.

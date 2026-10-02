@@ -42,12 +42,13 @@ A row's height never follows what it shows (ADR-0042). Needs `@umriss-ui/core`
   text takes `closest("td, th")`.
 - **Controls in the table are small.** The table is a `ControlSizeProvider`
   at `sm`, so a `Button`, `Select` or editor in a cell fits the row.
-- **A page holds its height.** With a `Pagination` and more than one page, a
-  short last page ends in a filler of the rows it lacks; a grouped page is
-  `pageSize` lines, the group headers it repeats counted (one page may now end
-  a line earlier than before); the first load shows a page of placeholders; a
-  result that is empty after rows were shown keeps the height they had, its
-  message at the top.
+- **A page holds its height.** With a `Pagination`, a page keeps the most
+  rows it has shown, up to `pageSize`: a short last page, a search or a filter
+  that leaves a few rows, and an empty result end in a filler of the rows they
+  lack - the empty result with its message at the top; a table that never had
+  more rows stays as it is. A grouped page is `pageSize` lines, the group
+  headers it repeats counted (one page may now end a line earlier than
+  before); the first load shows a page of placeholders.
 - **`loading` over rows keeps them.** The rows stay, dim after 200 ms and take
   no pointer until `loading` is false; placeholders stand only where there are
   no rows. An application that wants placeholders on every request hands in

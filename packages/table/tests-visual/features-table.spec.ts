@@ -33,7 +33,8 @@ test("The head of the table stays put while one searches, filters and resets", {
      taken after every step, as soon as the rows show it. */
   await openScenario(page, "find-a-late-shipment");
   const table = page.locator('[data-scenario="find-a-late-shipment"]');
-  const rows = table.locator("tbody tr");
+  /* The filler that holds the page's height is no row (ADR-0042). */
+  const rows = table.locator("tbody tr:not([data-filler])");
   /* Measured against the scenario, not the window: the scenario stands last on
      its page, and a page that grows shorter moves the scroll position. */
   const top = async () => (await table.locator("thead").boundingBox())!.y - (await table.boundingBox())!.y;

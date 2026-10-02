@@ -36,11 +36,13 @@ size="sm"`, as its toolbar does; a compact table's dense surface takes `sm` as
 `xs`. Every control from @umriss-ui/core fits the pitch without the application
 saying a size.
 
-**A page holds its height.** With a pagination bar and more than one page, a
-short last page ends in an unlined filler of the lines it lacks; a grouped page
-is `pageSize` lines, the headers it repeats counted; the first load shows a
-page of placeholders; an empty result keeps the height of the lines a page last
-held, its message at the top. Loading over rows keeps the rows - they dim after
+**A page holds its height.** With a pagination bar, a page keeps the most
+lines it has shown, up to `pageSize`: a short last page, a search or a
+condition that leaves a few rows, and an empty result end in an unlined filler
+of the lines they lack - the empty result with its message at the top - and a
+table that never had more rows than it shows stays as it is. A grouped page is
+`pageSize` lines, the headers it repeats counted; the first load shows a page of
+placeholders. Loading over rows keeps the rows - they dim after
 `--u-delay-stale` and take no pointer; placeholders stand only where there is
 nothing to keep.
 

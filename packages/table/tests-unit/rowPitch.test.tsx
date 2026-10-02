@@ -129,6 +129,16 @@ describe("a page holds its height", () => {
     expect(filler(container)!.style.height).toBe(`calc(var(--_pitch) * ${10 - last})`);
   });
 
+  it("keeps the height of a page while a search or a condition leaves few rows on one page", () => {
+    const { container } = render(<Shipments />);
+    act(() => snapshot!.setSearch("FP-102"));
+    expect(snapshot!.pageCount).toBe(1);
+    expect(lines(container)).toBe(3);
+    expect(filler(container)!.style.height).toBe("calc(var(--_pitch) * 7)");
+    act(() => snapshot!.setSearch(""));
+    expect(filler(container)).toBeNull();
+  });
+
   it("keeps the height of a page when nothing matches, and leaves a table without a bar as it is", () => {
     const { container, unmount } = render(<Shipments />);
     act(() => snapshot!.setSearch("nothing like it"));
