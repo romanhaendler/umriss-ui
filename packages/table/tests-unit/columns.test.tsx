@@ -203,28 +203,30 @@ describe("Value and presentation", () => {
   });
 });
 
-describe("A value that is one token", () => {
-  it("stays one piece: an id or a date does not break at its hyphen, a name still wraps", () => {
+describe("A value on one line (ADR-0042)", () => {
+  it("stands in one box per cell, whatever it is, and a column with a width fills it", () => {
     function Shipments() {
-      const rows = [{ id: "FP-1004223", customer: "Holloway Garden Supplies", url: "https://example.com/a/very/long/path/to/it" }];
+      const rows = [{ id: "FP-1004223", customer: "Holloway Garden Supplies", url: null as string | null }];
       const { Table: Frame, Column } = useTable(rows, { rowKey: (s) => s.id });
       return (
         <Frame>
           <Column value="id" label="Shipment" rowHeader />
-          <Column value="customer" label="Customer" />
+          <Column value="customer" label="Customer" width={180} />
           <Column value="url" label="Link" />
           <Column id="window" label="Window" value={() => 6}>
-            {(hour) => `0${hour}:00–0${hour + 2}:00`}
+            {(hour) => <b>{`0${hour}:00–0${hour + 2}:00`}</b>}
           </Column>
         </Frame>
       );
     }
-    render(<Shipments />);
-    const cell = (text: string) => screen.getByText(text).closest("td, th")!.className;
-    expect(cell("FP-1004223")).toContain("token");
-    expect(cell("Holloway Garden Supplies")).not.toContain("token");
-    expect(cell("https://example.com/a/very/long/path/to/it")).not.toContain("token");
-    expect(cell("06:00–08:00")).toContain("token");
+    const { container } = render(<Shipments />);
+    const boxes = (cell: Element) => Array.from(cell.children).filter((c) => c.className.includes("value"));
+    const cells = Array.from(container.querySelectorAll("tbody tr")[0]!.children);
+    expect(cells.map((c) => boxes(c).length)).toEqual([1, 1, 1, 1]);
+    const box = (text: string) => screen.getByText(text).closest("[class*=value]")!.className;
+    expect(box("FP-1004223")).not.toContain("sized");
+    expect(box("Holloway Garden Supplies")).toContain("sized");
+    expect(box("06:00–08:00")).not.toContain("sized");
   });
 });
 

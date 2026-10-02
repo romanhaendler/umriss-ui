@@ -41,7 +41,7 @@ function Loops({ onCellEdit }: { onCellEdit: (edit: CellEdit<Loop>) => void }) {
 const active = () => document.activeElement as HTMLElement;
 const press = (key: string, init: Partial<KeyboardEventInit> = {}) => fireEvent.keyDown(active(), { key, ...init });
 const focusCell = (text: string) => {
-  const cell = screen.getByText(text);
+  const cell = screen.getByText(text).closest<HTMLElement>("td, th")!;
   act(() => cell.focus());
   fireEvent.focus(cell);
 };

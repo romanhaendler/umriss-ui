@@ -63,7 +63,20 @@
     display: contents;
   }
 
+  /* The row pitch (ADR-0042): every line of the table - head, row, group
+     header, placeholder, footer - is this tall, and never what it shows. One
+     whole-pixel line of text and the density's padding, and never less than
+     a small control and 4 px above and below it, so that whatever stands in
+     a cell fits: under a fine pointer a compact table's small control is
+     18 px (`dense`), under a finger it stays 26 px and the compact pitch
+     grows with it. + 1px for the line under the row. A whole pixel is the
+     point: at 13 px type and a line of 1.5 a row was 36.5 px, and Chromium,
+     Firefox and WebKit each rounded the half their own way. */
   .table {
+    --_line: 19px;
+    --_pad: var(--u-space-2);
+    --_pitch: calc(max(var(--_line) + 2 * var(--_pad), var(--u-control-height-sm) + 2 * var(--u-space-1)) + 1px);
+    --_padY: calc((var(--_pitch) - 1px - var(--_line)) / 2);
     width: 100%;
     border-collapse: collapse;
     font-size: var(--u-text-sm);
@@ -74,7 +87,9 @@
   .th {
     composes: ring from "#own-styles";
     position: relative;
-    padding: var(--u-space-2) var(--u-space-2);
+    height: var(--_pitch);
+    padding: 0 var(--u-space-2);
+    line-height: var(--_line);
     background: var(--u-color-surface);
     border-bottom: 1px solid var(--u-hairline-strong);
     text-align: left;
@@ -95,7 +110,9 @@
   /* ---- Cells ----------------------------------------------------------- */
 
   .td {
-    padding: var(--u-space-2) var(--u-space-2);
+    height: var(--_pitch);
+    padding: 0 var(--u-space-2);
+    line-height: var(--_line);
     border-bottom: 1px solid var(--u-hairline);
     color: var(--u-color-text);
     vertical-align: middle;
@@ -129,26 +146,12 @@
      than one without. */
   .compact {
     composes: dense from "#own-styles";
+    --_line: 18px;
+    --_pad: var(--u-space-1);
   }
 
   .compact .td {
-    padding: var(--u-space-1) var(--u-space-2);
     font-size: var(--u-text-xs);
-  }
-
-  /* The head follows the density: at the regular one it stood half again as
-     tall as a compact row beneath it. The sort button's surface follows the
-     head's padding, or it reaches past the head. */
-  .compact .th {
-    padding-top: var(--u-space-1);
-    padding-bottom: var(--u-space-1);
-  }
-
-  .compact .sortButton {
-    margin-top: calc(-1 * var(--u-space-1));
-    margin-bottom: calc(-1 * var(--u-space-1));
-    padding-top: var(--u-space-1);
-    padding-bottom: var(--u-space-1);
   }
 
   /* A selected row carries the accent's quiet surface - selection is one of
@@ -183,9 +186,67 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* A short value without a space stays one piece (parts.tsx, `Cell`). */
-  .token {
+  /* A cell's value: one line, whatever it is (ADR-0042). Nothing wraps, text
+     ends in an ellipsis, and the clip leaves room for a focus ring. A column
+     without a width grows with its values up to the cap - the group span's
+     measure - instead of setting every word on a line of its own; a column
+     with a width (given, dragged, fitted) is exactly that wide, which
+     inline-size containment and the width as its intrinsic size say, as they
+     do for a field (ADR-0041; parts.tsx, `Cell`). */
+  .value {
+    max-width: min(20rem, 60vw);
+    overflow: clip;
+    overflow-clip-margin: 3px;
+    text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .value.sized {
+    max-width: none;
+    contain: inline-size;
+    contain-intrinsic-inline-size: calc(var(--_width) - 2 * var(--u-space-2));
+  }
+
+  .td:first-child > .value.sized,
+  .td:last-child > .value.sized {
+    contain-intrinsic-inline-size: calc(var(--_width) - var(--u-space-2) - var(--u-space-3));
+  }
+
+  .numeric > .value {
+    margin-left: auto;
+  }
+
+  /* The whole of a cut value, drawn as core's tooltip (parts.tsx,
+     `CutValueTip`). */
+  .cutTip {
+    composes: text from "#own-styles";
+    position: fixed;
+    z-index: var(--u-z-tooltip);
+    max-width: min(360px, calc(100vw - 16px));
+    padding: var(--u-space-1) var(--u-space-3);
+    background: var(--u-color-text);
+    color: var(--u-color-bg);
+    border-radius: var(--u-radius-sm);
+    font-family: var(--u-font-sans);
+    font-size: var(--u-text-xs);
+    font-weight: var(--u-weight-medium);
+    line-height: var(--u-leading-normal);
+    overflow-wrap: anywhere;
+    pointer-events: none;
+    animation: cutTipIn var(--u-duration-fast) var(--u-ease-out);
+  }
+
+  @keyframes cutTipIn {
+    from {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cutTip {
+      animation: none;
+    }
   }
 
   /* An absent value: a muted dash, not a zero and not an empty field. */
@@ -273,8 +334,8 @@
     vertical-align: top;
     align-items: center;
     gap: var(--u-space-1);
-    margin: calc(-1 * var(--u-space-2)) calc(-1 * var(--u-space-3));
-    padding: var(--u-space-2) var(--u-space-3);
+    margin: calc(-1 * var(--_padY)) calc(-1 * var(--u-space-3));
+    padding: var(--_padY) var(--u-space-3);
     border: none;
     background: none;
     font: inherit;
@@ -845,11 +906,13 @@
     background: var(--u-color-surface-sunken);
   }
 
+  /* A group header is one line as a row is (ADR-0042). */
   .groupHeader > .td {
     background: none;
     border-top: 1px solid transparent;
     border-bottom: none;
     font-weight: var(--u-weight-medium);
+    white-space: nowrap;
   }
 
   .table tbody tr.groupHeader:first-child > .td {
@@ -1055,6 +1118,11 @@
     padding-left: calc(var(--tree-level, 0) * var(--tree-indent));
   }
 
+  /* The text beside the fold may shrink, so that its value can cut. */
+  .treeText {
+    min-width: 0;
+  }
+
   .foldSlot {
     flex: none;
     width: 16px;
@@ -1236,24 +1304,10 @@
 
   /* ---- Row actions: the quiet gesture ---------------------------------- */
 
-  /* Its buttons are taller than a line of text: with the cells' padding a
-     row with actions stood taller than a row without. */
   .actionsCell {
     width: 1%;
     white-space: nowrap;
     text-align: right;
-  }
-
-  .td.actionsCell {
-    padding-top: var(--u-space-1);
-    padding-bottom: var(--u-space-1);
-  }
-
-  /* In a compact row the expander, 20 px, too stood taller than the text. */
-  .compact .td.actionsCell,
-  .compact .td.control {
-    padding-top: 2px;
-    padding-bottom: 2px;
   }
 
   /* At rest the secondary type, on hover OR focus within the row the accent

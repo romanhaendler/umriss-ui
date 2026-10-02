@@ -19,6 +19,7 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
+import { createPortal } from "react-dom";
 import type {
   CSSProperties,
   KeyboardEvent as ReactKeyboardEvent,
@@ -31,6 +32,7 @@ import {
   AngleGlyph,
   Button,
   Checkbox,
+  ControlSizeProvider,
   IconButton,
   Menu,
   MenuItem,
@@ -38,6 +40,7 @@ import {
   VisuallyHidden,
   useDensityFor,
   useFormats,
+  usePortalTarget,
   useWording,
 } from "@umriss-ui/core";
 import type { FlatteningEntry, Formats, VirtualRows, Wording } from "@umriss-ui/core";
@@ -807,6 +810,9 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
         className={styles.scroll}
         style={maxHeight ? { maxHeight } : undefined}
       >
+        {/* Every control in the table is small: a row is one pitch tall, and a
+            control of the regular size would not fit it (ADR-0042). */}
+        <ControlSizeProvider size="sm">
         <table
           ref={tableRef}
           role={lines || entries ? "treegrid" : gridMode ? "grid" : undefined}
@@ -917,8 +923,10 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
             </tfoot>
           )}
         </table>
+        </ControlSizeProvider>
         {body === emptyBody && <ViewWidth table={tableRef} />}
         <Beyond table={tableRef} blocks={blocks} />
+        <CutValueTip table={tableRef} />
         <PinPlacement
           table={tableRef}
           blocks={pinned}
@@ -1047,6 +1055,72 @@ function ViewWidth({ table: tableRef }: { table: RefObject<HTMLTableElement | nu
    "1,951.24" to "1,951.2" at the edge and read as cut, not as a table that
    scrolls. Marked on the scroll, and whenever the area or the table changes
    its width. */
+/* The whole of a cut value (ADR-0042): one tip per table, under the pointer
+   after the core tooltip's 300 ms, at once on the Active cell of grid mode,
+   and only where a value is actually cut. It goes with Escape, a scroll and
+   the pointer leaving; it stands below its cell, above it where the window
+   ends. Drawn as core's tooltip is, from the same tokens. */
+function CutValueTip({ table: tableRef }: { table: RefObject<HTMLTableElement | null> }) {
+  const [tip, setTip] = useState<{ text: string; cell: DOMRect; target: Element } | null>(null);
+  const portalTarget = usePortalTarget();
+  const tipRef = useRef<HTMLDivElement>(null);
+  const [place, setPlace] = useState<CSSProperties | null>(null);
+  useEffect(() => {
+    const table = tableRef.current;
+    if (!table) return;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const hide = () => {
+      clearTimeout(timer);
+      setTip(null);
+    };
+    const show = (target: EventTarget | null, wait: number) => {
+      clearTimeout(timer);
+      const cell = target instanceof Element ? target.closest("td, th") : null;
+      const box = cell?.querySelector<HTMLElement>(`:scope > .${styles.value}, :scope .${styles.treeText} > .${styles.value}`);
+      if (!cell || !box || box.scrollWidth <= box.clientWidth + 1) return setTip(null);
+      /* Inside a dialog the tip portals there, or it lies behind the dialog -
+         the order of core's floating surfaces. */
+      const portal = table.closest("dialog") ?? portalTarget() ?? document.body;
+      timer = setTimeout(() => setTip({ text: box.textContent ?? "", cell: cell.getBoundingClientRect(), target: portal }), wait);
+    };
+    const over = (event: PointerEvent) => show(event.target, 300);
+    const focus = (event: FocusEvent) => show(event.target, 0);
+    const key = (event: KeyboardEvent) => {
+      if (event.key === "Escape") hide();
+    };
+    table.addEventListener("pointerover", over);
+    table.addEventListener("pointerleave", hide);
+    table.addEventListener("focusin", focus);
+    table.addEventListener("focusout", hide);
+    document.addEventListener("keydown", key);
+    window.addEventListener("scroll", hide, true);
+    return () => {
+      clearTimeout(timer);
+      table.removeEventListener("pointerover", over);
+      table.removeEventListener("pointerleave", hide);
+      table.removeEventListener("focusin", focus);
+      table.removeEventListener("focusout", hide);
+      document.removeEventListener("keydown", key);
+      window.removeEventListener("scroll", hide, true);
+    };
+  }, [tableRef, portalTarget]);
+  useLayoutEffect(() => {
+    if (!tip) return setPlace(null);
+    const height = tipRef.current?.offsetHeight ?? 0;
+    const gap = 4;
+    const below = tip.cell.bottom + gap + height <= window.innerHeight;
+    const left = Math.max(8, Math.min(tip.cell.left, window.innerWidth - 8 - (tipRef.current?.offsetWidth ?? 0)));
+    setPlace({ top: below ? tip.cell.bottom + gap : tip.cell.top - gap - height, left });
+  }, [tip]);
+  if (!tip) return null;
+  return createPortal(
+    <div ref={tipRef} role="tooltip" className={styles.cutTip} style={place ?? { visibility: "hidden", top: 0, left: 0 }}>
+      {tip.text}
+    </div>,
+    tip.target,
+  );
+}
+
 function Beyond({ table: tableRef, blocks }: { table: RefObject<HTMLTableElement | null>; blocks: PinBlocks }) {
   const latest = useRef(blocks);
   useLayoutEffect(() => {
@@ -1165,7 +1239,13 @@ function HeaderCell({
     for (const tableRow of Array.from(table.rows)) {
       if (tableRow.cells.length !== count) continue;
       const c = tableRow.cells[index];
-      if (c) widest = Math.max(widest, c.scrollWidth);
+      if (!c) continue;
+      /* A value cut at the cap is wider than its box: its whole width, and
+         the cell's padding beside it. */
+      const box = c.querySelector<HTMLElement>(`.${styles.value}`);
+      const style = getComputedStyle(c);
+      const padding = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
+      widest = Math.max(widest, c.scrollWidth, box ? box.scrollWidth + padding : 0);
     }
     cell.style.width = before.cell;
     table.style.width = before.table;
@@ -1418,6 +1498,7 @@ function Row({
             wording={wording}
             line={gridLine}
             rowName={name}
+            width={snapshot.widths[e.spec.id]}
             tree={
               entry && e === tree?.column
                 ? { setup: tree, entry, detail: hasDetail && !opens ? { open, toggle: () => snapshot.toggleRow(key) } : undefined }
@@ -1462,10 +1543,6 @@ function Row({
   );
 }
 
-/* A longer text without a space - a URL - keeps the breaks it has rather
-   than widening its column past the table. */
-const TOKEN_LENGTH = 24;
-
 function Cell({
   entry,
   row,
@@ -1476,6 +1553,7 @@ function Cell({
   line,
   rowName,
   tree,
+  width,
 }: {
   /** Tree rows: this cell carries the indent and the fold. */
   tree?: { setup: TreeSetup; entry: FlatteningEntry<unknown>; detail?: TreeDetail };
@@ -1489,6 +1567,9 @@ function Cell({
   line: string;
   /** The row's name, for its editor's. */
   rowName: string;
+  /** The column's width - given, dragged or fitted: its value is that wide,
+      never wider and never narrower. */
+  width: number | undefined;
 }) {
   const { spec } = entry;
   const value = entry.read(row);
@@ -1509,31 +1590,33 @@ function Cell({
   } else {
     content = asText(value, spec.format, formats, wording);
   }
-  /* A short text without a space is one token - an id, a date, a code, a
-     time window. WebKit broke "FP-1004223", "2026-03-16" and "06:00–08:00"
-     where the column was a hair too narrow, and their neighbours not. */
-  const token = typeof content === "string" && content.length <= TOKEN_LENGTH && !/\s/.test(content);
+  /* One line, whatever the value is (ADR-0042): the box neither wraps nor
+     grows the row, and what does not fit ends in an ellipsis that the tip
+     completes. Beneath an editor it stays, unseen, to hold the cell's size. */
+  content = (
+    <div
+      className={cx(styles.value, width !== undefined && styles.sized, editor && styles.editingValue)}
+      /* Contained, the box answers the layout with the column's width less its
+         cell's padding (Table.module.css, `.sized`): the value neither widens
+         the column nor lets a narrow page squeeze it. */
+      style={width !== undefined ? ({ "--_width": `${width}px` } as CSSProperties) : undefined}
+      aria-hidden={editor ? true : undefined}
+    >
+      {content}
+    </div>
+  );
   if (tree) content = <TreeCellContent {...tree} name={rowName} wording={wording}>{content}</TreeCellContent>;
 
   const Tag = spec.rowHeader ? "th" : "td";
   return (
     <Tag
       scope={spec.rowHeader ? "row" : undefined}
-      className={cx(styles.td, rightAligned && styles.numeric, spec.rowHeader && styles.rowHeader, token && styles.token, pin.className, editor && styles.editing)}
+      className={cx(styles.td, rightAligned && styles.numeric, spec.rowHeader && styles.rowHeader, pin.className, editor && styles.editing)}
       style={pin.style}
       data-edit={editKind}
     >
-      {editor ? (
-        <>
-          <CellEditor entry={entry} row={row} rowName={rowName} grid={editor} />
-          {/* The value holds the cell's size while the editor lies over it. */}
-          <span className={styles.editingValue} aria-hidden="true">
-            {content}
-          </span>
-        </>
-      ) : (
-        content
-      )}
+      {editor && <CellEditor entry={entry} row={row} rowName={rowName} grid={editor} />}
+      {content}
     </Tag>
   );
 }
@@ -1652,7 +1735,7 @@ function TreeCellContent({
       ) : (
         <span className={styles.foldSlot} />
       )}
-      <span>
+      <span className={styles.treeText}>
         {children}
         {entry.pathOnly && <VisuallyHidden>{`, ${wording.pathRow}`}</VisuallyHidden>}
       </span>

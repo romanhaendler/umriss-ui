@@ -43,6 +43,8 @@ function Pumps({ grid = true, grouped = false, rows = PUMPS, detail = false, sel
 const table = () => screen.getByRole(current?.grouping.length ? "treegrid" : "grid");
 const tabStops = (root: Element) => Array.from(root.querySelectorAll<HTMLElement>("[tabindex='0'], button:not([tabindex]), input:not([tabindex])"));
 const active = () => document.activeElement as HTMLElement;
+/** The cell a text stands in - the text itself stands in the cell's value box. */
+const cellOf = (text: string) => screen.getByText(text).closest<HTMLElement>("td, th")!;
 const press = (key: string, init: Partial<KeyboardEventInit> = {}) => fireEvent.keyDown(active(), { key, ...init });
 /** The Active cell's text, and its line's key. */
 const at = () => [active().textContent, active().parentElement!.getAttribute("data-grid-line")];
@@ -111,7 +113,7 @@ describe("Grid mode", () => {
 
   it("makes a clicked cell the Active one, and moves the tab stop with it", () => {
     render(<Pumps />);
-    const cell = screen.getByText("Pump 3");
+    const cell = cellOf("Pump 3");
     act(() => cell.focus());
     fireEvent.focus(cell);
     expect(cell.getAttribute("tabindex")).toBe("0");
@@ -171,8 +173,8 @@ describe("Grid mode", () => {
 
   it("holds on to its row across a sort", () => {
     render(<Pumps />);
-    act(() => screen.getByText("Pump 1").focus());
-    fireEvent.focus(screen.getByText("Pump 1"));
+    act(() => cellOf("Pump 1").focus());
+    fireEvent.focus(cellOf("Pump 1"));
     act(() => current!.toggleSort("flow"));
     act(() => current!.toggleSort("flow"));
     /* Descending: Pump 2, Pump 1, Pump 3 - the tab stop went along. */
@@ -182,7 +184,7 @@ describe("Grid mode", () => {
 
   it("skips a hidden column, and stands in the next one where its own is hidden", () => {
     render(<Pumps />);
-    act(() => screen.getAllByText("North")[0]!.focus());
+    act(() => screen.getAllByText("North")[0]!.closest<HTMLElement>("td, th")!.focus());
     fireEvent.focus(active());
     act(() => current!.toggleColumn("area"));
     expect(tabStops(table())[0]!.textContent).toBe("12");
@@ -194,7 +196,7 @@ describe("Grid mode", () => {
   it("is a treegrid when grouped, and keeps its column through a group header", () => {
     render(<Pumps grouped />);
     expect(table().getAttribute("role")).toBe("treegrid");
-    act(() => screen.getByText("12").focus());
+    act(() => cellOf("12").focus());
     fireEvent.focus(active());
     press("ArrowUp");
     /* The group header's sum under the same column. */
@@ -234,7 +236,7 @@ describe("Grid mode through a spanning cell", () => {
 
   it("keeps its column through a group header whose label spans it", () => {
     render(<Parts />);
-    act(() => screen.getByText("Keller").focus());
+    act(() => cellOf("Keller").focus());
     fireEvent.focus(active());
     /* The header's label spans Part and Maker; up and up again lands on Maker's head. */
     press("ArrowUp");
@@ -267,12 +269,12 @@ describe("Grid mode in a virtual window", () => {
     vi.spyOn(HTMLElement.prototype, "clientHeight", "get").mockReturnValue(100);
     const { container } = render(<Big />);
     expect(container.querySelector("tr[tabindex]")).toBeNull();
-    act(() => screen.getByText("M-0").focus());
+    act(() => cellOf("M-0").focus());
     fireEvent.focus(active());
     press("End", { ctrlKey: true });
     /* M-999 is rendered once the window has moved there, and then focused. */
     const scroll = container.querySelector("table")!.parentElement!;
     fireEvent.scroll(scroll);
-    expect(screen.getByText("M-999").getAttribute("tabindex")).toBe("0");
+    expect(cellOf("M-999").getAttribute("tabindex")).toBe("0");
   });
 });
