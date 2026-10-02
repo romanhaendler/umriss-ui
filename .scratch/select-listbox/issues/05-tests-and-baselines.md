@@ -1,6 +1,6 @@
 # 05 — Tests and baselines
 
-Status: ready-for-agent
+Status: done
 Type: feature
 
 ## What
