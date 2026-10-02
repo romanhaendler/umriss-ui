@@ -18,6 +18,20 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Oct. 2026 — Found as umriss-ui, shown with a picture
+
+- **Search Console holds the site** (`.scratch/search-visibility/` D11): the
+  user verified the URL-prefix property with Google's file in
+  `scripts/site-verification/`, submitted the sitemap and asked for the front
+  page and the five package pages to be indexed.
+- **The front page is called `umriss-ui`** in its title, `h1` and
+  `og:site_name` - the name a searcher types; `umriss` alone is a German word
+  and competes with it.
+- **One preview image for every page** (revises D9 and the spec's out of
+  scope): the kiln scenario's control room at 1200 x 630, `og:image` with its
+  size and alt text and `twitter:card`. Taken by hand from the built core demo;
+  renewed by hand when the scenario changes.
+
 ## Oct. 2026 — The select's own list
 
 - **The `Select` opens its own list under a pointer and the keys** (ADR-0043;

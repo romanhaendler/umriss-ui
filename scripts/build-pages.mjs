@@ -6,6 +6,7 @@
      site/<package>/<page>/     one of its pages, prerendered
      site/sitemap.xml           every address above
      site/llms.txt              the index for coding agents
+     site/og-image.png          the picture every page shows where it is shared
 
    Every page of a demo is a path with an `index.html` of its own, carrying the
    page's text, its examples' source and its props tables - what a search
@@ -40,6 +41,12 @@ const PACKAGES = ["core", "charts", "table", "schedule", "calculation"];
    the manifests, which already carry it, rather than written a second time. */
 const HOME = new URL("../", JSON.parse(readFileSync(join(ROOT, "packages", PACKAGES[0], "package.json"), "utf8")).homepage).href;
 
+/* The picture a link to any page shows where it is shared: the control room
+   of the core demo's kiln scenario, cut to 1200 x 630. One for every page -
+   it is taken by hand, so it is renewed by hand when the scenario changes. */
+const PREVIEW = "og-image.png";
+const PREVIEW_ALT = "A control room built with umriss-ui: line status tiles, a kiln temperature over its alarm limit, and a trend chart.";
+
 const escape = (text) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 /** What every page's head says about itself to a search engine. */
@@ -49,10 +56,15 @@ function headOf({ title, description, url }) {
     `<meta name="description" content="${escape(description)}" />`,
     `<link rel="canonical" href="${escape(url)}" />`,
     `<meta property="og:type" content="website" />`,
-    `<meta property="og:site_name" content="umriss" />`,
+    `<meta property="og:site_name" content="umriss-ui" />`,
     `<meta property="og:title" content="${escape(title)}" />`,
     `<meta property="og:description" content="${escape(description)}" />`,
     `<meta property="og:url" content="${escape(url)}" />`,
+    `<meta property="og:image" content="${HOME}${PREVIEW}" />`,
+    `<meta property="og:image:width" content="1200" />`,
+    `<meta property="og:image:height" content="630" />`,
+    `<meta property="og:image:alt" content="${escape(PREVIEW_ALT)}" />`,
+    `<meta name="twitter:card" content="summary_large_image" />`,
   ].join("\n    ");
 }
 
@@ -128,7 +140,7 @@ writeFileSync(
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     ${headOf({
-      title: "umriss – React component library, canvas charts, data table and Gantt schedule for data-dense dashboards",
+      title: "umriss-ui – React component library, canvas charts, data table and Gantt schedule for data-dense dashboards",
       description:
         "Open-source React components for data-dense applications: a component library, canvas charts, a typed data table, a Gantt-style schedule and a calculation view. TypeScript, MIT, light and dark.",
       url: HOME,
@@ -157,7 +169,7 @@ writeFileSync(
   </head>
   <body>
     <main>
-      <h1>umriss</h1>
+      <h1>umriss-ui</h1>
       <p>React components for data-dense applications - dashboards, monitoring, planning. Each demo is the documentation of its package: running examples, their source, and the props generated from the code.</p>
 ${rows
   .map(
@@ -197,7 +209,7 @@ writeFileSync(
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex" />
-    <title>Not found – umriss</title>
+    <title>Not found – umriss-ui</title>
     <style>:root{color-scheme:light dark}body{margin:0;font:15px/1.5 system-ui,sans-serif}main{max-width:44rem;margin:0 auto;padding:4rem 1rem}</style>
   </head>
   <body>
@@ -245,6 +257,7 @@ const VERIFICATION = join(ROOT, "scripts", "site-verification");
 if (existsSync(VERIFICATION)) {
   for (const file of readdirSync(VERIFICATION)) cpSync(join(VERIFICATION, file), join(SITE, file));
 }
+cpSync(join(ROOT, "scripts", PREVIEW), join(SITE, PREVIEW));
 
 /* The workspace's index for an agent: which package is which, and where each
    one's own index and full text stand. */
