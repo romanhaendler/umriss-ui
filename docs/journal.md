@@ -28,9 +28,11 @@ as it stood.
   `og:site_name` - the name a searcher types; `umriss` alone is a German word
   and competes with it.
 - **One preview image for every page** (revises D9 and the spec's out of
-  scope): the kiln scenario's control room at 1200 x 630, `og:image` with its
-  size and alt text and `twitter:card`. Taken by hand from the built core demo;
-  renewed by hand when the scenario changes.
+  scope), 1200 x 630, `og:image` with its size and alt text and
+  `twitter:card`. A first cut of the kiln scenario alone read as a charts
+  library, by the user's eye; the picture now shows core's controls opened -
+  date range picker, multi-select, command palette, tree - above one part each
+  of the other packages. Taken by hand from the built demos; renewed by hand.
 
 ## Oct. 2026 — The select's own list
 
