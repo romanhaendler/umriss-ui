@@ -20,6 +20,13 @@ as it stood.
 
 ## Oct. 2026 — Sizes
 
+- **A long multiselect went white after a tick** (`@umriss-ui/core` 0.21.1).
+  Found by the user in an example of their own with 125 options. The hidden
+  input of the checkbox, the switch and the radio had no positioned row: it
+  hung from the popover's panel, stood where its row would stand unscrolled,
+  and the focus a click gave it scrolled the panel there. Each row is now its
+  input's frame; a browser test holds that the input's `offsetParent` is its
+  row, and the screenshots stayed as they were.
 - **A field's width never follows what it shows** (`.scratch/control-sizes/`,
   ADR-0041; `@umriss-ui/core` 0.21.0, `@umriss-ui/table` 0.10.0, schedule and
   calculation moving their core range along). It began as a question about how wide the core fields are, and a
