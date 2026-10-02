@@ -88,10 +88,13 @@ interface Shipment {
 
 const SHIPMENTS: Shipment[] = Array.from({ length: 23 }, (_, i) => ({ id: `FP-${1000 + i}`, depot: i < 9 ? "North" : "River" }));
 let snapshot: TableSnapshot<Shipment> | null = null;
+const capture = (t: TableSnapshot<Shipment>) => {
+  snapshot = t;
+};
 
 function Shipments({ rows = SHIPMENTS, grouped = false, paged = true }: { rows?: Shipment[]; grouped?: boolean; paged?: boolean }) {
   const t = useTable(rows, { rowKey: (s) => s.id, pageSize: 10, defaultGrouping: grouped ? "depot" : undefined });
-  snapshot = t;
+  capture(t);
   return (
     <t.Table ariaLabel="Shipments">
       <Search />
