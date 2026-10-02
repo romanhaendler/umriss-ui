@@ -41,11 +41,12 @@ const PACKAGES = ["core", "charts", "table", "schedule", "calculation"];
    the manifests, which already carry it, rather than written a second time. */
 const HOME = new URL("../", JSON.parse(readFileSync(join(ROOT, "packages", PACKAGES[0], "package.json"), "utf8")).homepage).href;
 
-/* The picture a link to any page shows where it is shared: the control room
-   of the core demo's kiln scenario, cut to 1200 x 630. One for every page -
-   it is taken by hand, so it is renewed by hand when the scenario changes. */
+/* The picture a link to any page shows where it is shared: six parts of the
+   core demo's kiln scenario, one scale, one paused moment, 1200 x 630 - every
+   package in it. One for every page - it is taken by hand, so it is renewed
+   by hand when the scenario changes. */
 const PREVIEW = "og-image.png";
-const PREVIEW_ALT = "A control room built with umriss-ui: line status tiles, a kiln temperature over its alarm limit, and a trend chart.";
+const PREVIEW_ALT = "A kiln control room built with umriss-ui: status tiles, a trend and a control chart, an alarm table, a production plan and an OEE calculation.";
 
 const escape = (text) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
