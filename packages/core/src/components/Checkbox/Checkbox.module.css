@@ -5,6 +5,11 @@
      that wraps. */
   .wrapper {
     composes: text from "#own-styles";
+    /* The frame of the hidden input. Without it the input hung from the
+       nearest positioned ancestor - in a popover the panel, past the list
+       that scrolls - and the focus a click gives it scrolled the whole
+       panel down to where the row would stand unscrolled: white. */
+    position: relative;
     display: inline-flex;
     align-items: flex-start;
     gap: var(--u-space-2);

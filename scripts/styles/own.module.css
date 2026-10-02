@@ -41,6 +41,18 @@
     }
   }
 
+  /* What stands on ink - the tooltip's content - reads its three text colours
+     turned round: a `Text` took the ink as its colour and stood black on
+     black. The quieter tones are the page's ground let partly through, so
+     the ink behind them mixes in; each stays above 4.5:1 in both themes. The
+     class goes on the content, not on the inked surface: that surface still
+     reads the ink from the token. */
+  .ink {
+    --u-color-text: var(--u-color-bg);
+    --u-color-text-secondary: color-mix(in srgb, var(--u-color-bg) 75%, transparent);
+    --u-color-text-muted: color-mix(in srgb, var(--u-color-bg) 60%, transparent);
+  }
+
   /* A field's width (ADR-0041) - the width a block takes, on a root that is a
      block: `auto`, not `100%`. In a form's column, a grid's cell, a dialog or
      any block it fills its place. Where the place asks how wide it is
