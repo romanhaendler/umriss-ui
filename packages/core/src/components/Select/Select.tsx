@@ -80,6 +80,9 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
   const [items, setItems] = useState<ListboxItem[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [listName, setListName] = useState("");
+  /* A select disabled with its list open forgets it, or the list came back
+     on its own once the field was enabled again (found in review). */
+  if (open && !ownList) setOpen(false);
   const pointerType = useRef("mouse");
   const typed = useRef({ text: "", at: 0 });
 

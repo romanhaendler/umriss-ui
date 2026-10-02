@@ -155,6 +155,42 @@ describe("Select - its own list", () => {
     expect(inList().getByRole("option", { name: "Choose a cost centre" }).getAttribute("aria-selected")).toBe("false");
   });
 
+  /* Found in review: the panel was not in the page yet when the first
+     opening asked for the chosen option to be shown. */
+  it("shows the chosen option on the very first opening", () => {
+    const scrolled = vi.spyOn(Element.prototype, "scrollIntoView");
+    render(<Select aria-label="Cost centre" defaultValue="2200">{CENTRES}</Select>);
+    press(select());
+    expect(scrolled.mock.contexts).toContain(inList().getByRole("option", { name: "CC-2200 Design" }));
+    scrolled.mockRestore();
+  });
+
+  /* Found in review: a press in the panel off an option - a group's label,
+     the padding, the scrollbar - took the focus and closed the list. */
+  it("stays open on a press in the panel that is not on an option", () => {
+    render(
+      <Select aria-label="Depot" defaultValue="ham">
+        <optgroup label="North">
+          <option value="ham">Hamburg</option>
+        </optgroup>
+      </Select>,
+    );
+    press(select());
+    const heading = inList().getByText("North");
+    expect(fireEvent.mouseDown(heading)).toBe(false);
+    expect(fireEvent.mouseDown(screen.getByRole("listbox").parentElement!)).toBe(false);
+  });
+
+  it("forgets an open list when it is disabled", () => {
+    const { rerender } = render(<Select aria-label="Cost centre" defaultValue="">{CENTRES}</Select>);
+    press(select());
+    rerender(<Select aria-label="Cost centre" defaultValue="" disabled>{CENTRES}</Select>);
+    expect(select().hasAttribute("aria-activedescendant")).toBe(false);
+    rerender(<Select aria-label="Cost centre" defaultValue="">{CENTRES}</Select>);
+    expect(listbox()).toBeNull();
+    expect(select().getAttribute("aria-expanded")).toBe("false");
+  });
+
   it("draws an optgroup as a group with its label", () => {
     render(
       <Select aria-label="Depot" defaultValue="ham">

@@ -87,7 +87,6 @@ export const Combobox = forwardRef(function Combobox<T extends string = string>(
   const [query, setQuery] = useState<string | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
   const toggleRef = useRef<HTMLSpanElement>(null);
   const listboxId = useId();
 
@@ -207,10 +206,7 @@ export const Combobox = forwardRef(function Combobox<T extends string = string>(
             if (!open) openPanel();
           }}
           onKeyDown={handleKeyDown}
-          onBlur={(event) => {
-            if (panelRef.current?.contains(event.relatedTarget as Node)) return;
-            closePanel();
-          }}
+          onBlur={() => closePanel()}
         />
         {clearable && !disabled && (value !== null || (query ?? "") !== "") && (
           <button
@@ -260,7 +256,6 @@ export const Combobox = forwardRef(function Combobox<T extends string = string>(
         onActivate={setActiveIndex}
         onChoose={(index) => choose(filtered[index]!)}
         emptyText={emptyLabel}
-        listRef={panelRef}
       />
     </>
   );
