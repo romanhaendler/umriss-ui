@@ -1,6 +1,6 @@
 # The select draws its own list
 
-Status: ready-for-agent
+Status: done
 Date:   2026-10-02
 Origin: the user, on the `Select` "Cost centre": "Da ist für einen winzigen
 Moment irgendwie die Farbe oder der Inhalt anders" - in Firefox on Windows. After
