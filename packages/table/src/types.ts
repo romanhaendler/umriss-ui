@@ -551,8 +551,9 @@ interface TableOptionsCommon<Z> {
   /** The view on the first render. The table remembers none: where a view is
       kept is the application's decision. Names no column carries fall out. */
   initialView?: TableView;
-  /** Renders only what stands in the scroll area; paging is then off. */
-  virtual?: { rowHeight: number; overscan?: number };
+  /** Renders only what stands in the scroll area; paging is then off. Every
+      row is one row pitch tall, which the table measures itself (ADR-0042). */
+  virtual?: boolean | { overscan?: number };
   /** A selection from outside instead of its own – when the application holds it. */
   selection?: TableSelection<string>;
 }

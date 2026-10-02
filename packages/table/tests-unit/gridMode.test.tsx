@@ -257,7 +257,7 @@ describe("Grid mode in a virtual window", () => {
   const MANY: Reading[] = Array.from({ length: 1000 }, (_, i) => ({ id: String(i), tag: `M-${i}` }));
 
   function Big() {
-    const { Table: Frame, Column } = useTable(MANY, { rowKey: (m) => m.id, virtual: { rowHeight: 20 } });
+    const { Table: Frame, Column } = useTable(MANY, { rowKey: (m) => m.id, virtual: true });
     return (
       <Frame grid maxHeight="100px">
         <Column value="tag" label="Tag" rowHeader />

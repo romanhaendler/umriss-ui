@@ -62,7 +62,7 @@ export default function Virtualisation() {
   const t = useTable(requests, {
     rowKey: (r) => r.id,
     defaultSort: { column: "id", direction: "asc" },
-    virtual: { rowHeight: 37 },
+    virtual: true,
   });
   const { Table, Column } = t;
 

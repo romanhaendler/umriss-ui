@@ -39,7 +39,7 @@ export default function TheWholeGrid() {
     rowKey: (p) => p.id,
     defaultGrouping: "depot",
     defaultSort: { column: "parcel", direction: "asc" },
-    virtual: { rowHeight: 37 },
+    virtual: true,
   });
   return (
     <Table

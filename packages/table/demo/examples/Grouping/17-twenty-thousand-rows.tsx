@@ -42,7 +42,7 @@ export default function TwentyThousand() {
   const { Table, Column, GroupBy } = useTable(requests, {
     rowKey: (r) => r.id,
     defaultGrouping: ["service", "part"],
-    virtual: { rowHeight: 37 },
+    virtual: true,
   });
   return (
     <Table ariaLabel="Requests" maxHeight="480px" stickyHeader>

@@ -455,6 +455,14 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
     }
   });
 
+  /* A virtual window counts in row pitches (ADR-0042): the head is one, and
+     the window learns it from there - the density, a finger, a theme of the
+     application's may each change it. */
+  useLayoutEffect(() => {
+    const head = tableRef.current?.tHead?.rows[0]?.getBoundingClientRect().height;
+    if (head && registry.hook?.companion.virtual) registry.hook.companion.setPitch(head);
+  });
+
   /* Regrouping and folding move the lines that stay; a virtual window does
      not - its rows come and go with the scroll. */
   const moving = registry.hook && !registry.hook.companion.virtual ? registry.hook.publicSnapshot : null;

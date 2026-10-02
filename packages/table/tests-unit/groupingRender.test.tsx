@@ -198,7 +198,7 @@ describe("all siblings at once, and a virtual window (table-grouping 04, 05)", (
       const { Table: Frame, Column } = useTable(ORDERS, {
         rowKey: (o) => o.id,
         defaultGrouping: ["line", "customer"],
-        virtual: { rowHeight: 36 },
+        virtual: true,
       });
       return (
         <Frame maxHeight="300px">
