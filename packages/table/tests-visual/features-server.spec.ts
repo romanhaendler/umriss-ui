@@ -1,6 +1,6 @@
 /* Manual mode in the browser (table-server-mode 02, 03), against the example's
-   fake server with its 400 ms: placeholders over the previous page while an
-   answer is out, the next page, a list filter offering the server's values,
+   fake server with its 400 ms: the previous page kept, dimmed, while an answer
+   is out (ADR-0042), the next page, a list filter offering the server's values,
    and "select all" saying it selects the page. Behaviour, light only; the
    settled picture is the example's own in `screenshots.spec.ts`. */
 
@@ -11,15 +11,17 @@ test.skip(({ colorScheme }) => colorScheme === "dark", "Behaviour tests only onc
 
 const ID = "a-million-rows-on-a-server";
 
-test("the next page: busy over the previous page's height, then the server's rows", async ({ page }) => {
+test("the next page: the previous page kept and busy at its height, then the server's rows", async ({ page }) => {
   await openExample(page, "manual-mode", ID);
   const example = page.locator(`[data-example="${ID}"]`);
   const table = example.locator("table");
   const before = await table.boundingBox();
   await example.getByRole("button", { name: "Next" }).click();
   await expect(table).toHaveAttribute("aria-busy", "true");
-  await expect(table.locator("tbody tr[aria-hidden]")).toHaveCount(10);
-  expect(Math.abs((await table.boundingBox())!.height - before!.height)).toBeLessThanOrEqual(10);
+  await expect(table).toHaveAttribute("data-stale", "true");
+  await expect(table.locator("tbody tr[aria-hidden]")).toHaveCount(0);
+  await expect(table.locator("tbody th").first()).toHaveText("REQ-0000001");
+  expect((await table.boundingBox())!.height).toBe(before!.height);
   await expect(table).not.toHaveAttribute("aria-busy", "true");
   await expect(table.locator("tbody th").first()).toHaveText("REQ-0000011");
   await expect(example.getByText("Page 2 of 100,000")).toBeVisible();

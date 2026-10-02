@@ -1021,9 +1021,10 @@
   }
 
   /* The span: the group's value beside its rows. It belongs to the group, not
-     to the row - hover lights the row, not the span. */
+     to the row - hover lights the row, not the span. It stands in the middle
+     of its line as every value does: a row is one line (ADR-0042), so there
+     is no first line of a taller row to align it with. */
   .spanCell {
-    vertical-align: top;
     font-weight: var(--u-weight-medium);
     border-bottom: none;
     box-shadow: inset -1px 0 0 var(--u-hairline);
