@@ -383,8 +383,9 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
   const baseId = useId();
   const tableRef = useRef<HTMLTableElement>(null);
   /* How many lines a page of the table last held - what an empty result and
-     placeholders keep the height of (ADR-0042). */
-  const heldLines = useRef(0);
+     placeholders keep the height of (ADR-0042). Kept from an earlier render,
+     as React keeps information from previous renders: set while rendering. */
+  const [heldBefore, setHeldBefore] = useState(0);
   const grid = useGridState();
   /* Which pinned blocks stick in the width the scroll area has - measured
      (`PinPlacement`, `blocksThatStick`). */
@@ -690,9 +691,9 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
      headers counted (grouping.ts, `pageLines`). */
   const pageSize = (registry.paginates() || snapshot.manual) && !virtual ? snapshot.pageSize : 0;
   const shownLines = lines ? lines.length : rows.length;
-  if (pageSize && !loading && shownLines > 0) {
-    heldLines.current = Math.min(projection.lines?.length ?? projection.filtered.length, pageSize);
-  }
+  const heldNow = pageSize && !loading && shownLines > 0 ? Math.min(projection.lines?.length ?? projection.filtered.length, pageSize) : 0;
+  if (heldNow && heldNow !== heldBefore) setHeldBefore(heldNow);
+  const heldLines = heldNow || heldBefore;
   const filler =
     pageSize && snapshot.pageCount > 1 && shownLines > 0 && shownLines < pageSize ? (
       <FillerRow height={`calc(var(--_pitch) * ${pageSize - shownLines})`} colSpan={columnCount} />
@@ -711,7 +712,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
           columns={columnCount}
           /* A page's worth, or the lines the page last held: nothing below
              moves while the answer is on its way. */
-          rows={pageSize ? heldLines.current || pageSize : undefined}
+          rows={pageSize ? heldLines || pageSize : undefined}
           rightAligned={[
             ...Array.from({ length: controlColumns + (spanEntry ? 1 : 0) }, () => false),
             ...dataColumns.map((e) => isRightAligned(registry.kindOf(e, hook.rows), e.spec.rightAligned)),
@@ -728,7 +729,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
             className={styles.emptyCell}
             /* The height the page last had; the message at its top, where the
                rows began. */
-            style={pageSize && heldLines.current ? { height: `calc(var(--_pitch) * ${heldLines.current})`, verticalAlign: "top" } : undefined}
+            style={pageSize && heldLines ? { height: `calc(var(--_pitch) * ${heldLines})`, verticalAlign: "top" } : undefined}
           >
             <div className={styles.empty}>
               {(snapshot.manual || hook.admitted.length > 0) && restricted ? (
@@ -1103,7 +1104,6 @@ function CutValueTip({ table: tableRef }: { table: RefObject<HTMLTableElement | 
   const [tip, setTip] = useState<{ text: string; cell: DOMRect; target: Element } | null>(null);
   const portalTarget = usePortalTarget();
   const tipRef = useRef<HTMLDivElement>(null);
-  const [place, setPlace] = useState<CSSProperties | null>(null);
   useEffect(() => {
     const table = tableRef.current;
     if (!table) return;
@@ -1143,17 +1143,20 @@ function CutValueTip({ table: tableRef }: { table: RefObject<HTMLTableElement | 
       window.removeEventListener("scroll", hide, true);
     };
   }, [tableRef, portalTarget]);
+  /* Placed once it is measured: below its cell, above it where the window
+     ends, and inside the window's sides. */
   useLayoutEffect(() => {
-    if (!tip) return setPlace(null);
-    const height = tipRef.current?.offsetHeight ?? 0;
+    const el = tipRef.current;
+    if (!tip || !el) return;
     const gap = 4;
-    const below = tip.cell.bottom + gap + height <= window.innerHeight;
-    const left = Math.max(8, Math.min(tip.cell.left, window.innerWidth - 8 - (tipRef.current?.offsetWidth ?? 0)));
-    setPlace({ top: below ? tip.cell.bottom + gap : tip.cell.top - gap - height, left });
+    const below = tip.cell.bottom + gap + el.offsetHeight <= window.innerHeight;
+    el.style.top = `${below ? tip.cell.bottom + gap : tip.cell.top - gap - el.offsetHeight}px`;
+    el.style.left = `${Math.max(8, Math.min(tip.cell.left, window.innerWidth - 8 - el.offsetWidth))}px`;
+    el.style.visibility = "";
   }, [tip]);
   if (!tip) return null;
   return createPortal(
-    <div ref={tipRef} role="tooltip" className={styles.cutTip} style={place ?? { visibility: "hidden", top: 0, left: 0 }}>
+    <div ref={tipRef} role="tooltip" className={styles.cutTip} style={{ visibility: "hidden", top: 0, left: 0 }}>
       {tip.text}
     </div>,
     tip.target,
