@@ -84,6 +84,13 @@ layout: a field does not grow to fill a row, the row's layout gives it room.
 - `issues/03-table-follows.md`
 - `issues/04-docs.md`
 - `issues/05-final-polish.md`
+- `issues/06-own-styles-copied-per-module.md` - a finding of the developer's round
+- `issues/07-the-default-counts.md`, `08-the-multiselects-gap.md`,
+  `09-the-sliders-readout.md`, `10-a-field-that-fills-a-row.md` - the
+  questions the acceptance left open
+
+The decisions, as the design language states them for later work:
+`docs/design-language.md`, "Sizes".
 
 ## For the changelogs (written at release)
 

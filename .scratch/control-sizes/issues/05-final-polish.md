@@ -34,4 +34,4 @@ live pages: `pnpm dev:core` → `/sizes`, `pnpm dev:table` →
 **Accepted by the user, 2 Oct 2026**, on the rendered pages ("Alles klar,
 top"), and released as core 0.21.0 and table 0.10.0. The four questions above
 were not answered then; they stand open for a later round and are not decided
-by this release.
+by this release - as tickets 07 to 10, one question each.

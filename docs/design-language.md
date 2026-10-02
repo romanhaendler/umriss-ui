@@ -195,9 +195,85 @@ the surface (the layer logic is preserved), accent and semantic colours are
 lightened but stay muted. The primary button reverses its polarity: light
 surface, ink as the text.
 
+## Sizes: how wide and how tall a control is
+
+Decided in `control-sizes` (ADR-0041, core 0.21.0, table 0.10.0) and accepted by
+the user on the rendered pages. The demo page **Sizes** shows every rule below.
+
+**A field's width never follows what it shows.** Not its value, its options, its
+chips, its files, a clearing cross that comes and goes, nor a message under it.
+A row of filters holds still while a person works in it - that is the one
+promise everything else serves. A multiselect that grew with its chips, or a
+select as wide as its longest option, moved its neighbours with every choice.
+
+**Fill where the place gives a width; a natural width where the place asks.**
+A field's root is a block with `width: auto`, as a `div` is: in a form's
+column, a grid's cell, a dialog or a table's cell it fills its place. In a row,
+a toolbar, a column lined up at the start or a cell sized by its content, it
+is its *natural width*. No prop says which: the place decides, as it does for
+every block on the web. A field does not grow to fill a row on its own; the
+row's layout gives it room (`flex: 1`, a grid).
+
+**The natural width is counted in characters of the field's own type.** A count
+of `ch` - the width of a figure - plus the field's chrome (padding, chevron,
+cross, steppers), which the field adds itself. Characters, not pixels: the width
+grows with the type, under a finger too, where a text field writes at 16 px
+and its root with it. The defaults:
+
+| Field | Characters | Why |
+|---|---|---|
+| Input, Select, Combobox | 16 | A `ch` is wider than the average letter a browser counts for `size`; sixteen make the browser's own text field. Twenty made a dispatcher's bar three lines |
+| MultiSelect | 20 | A chip costs more than its letters; twenty hold two short chips and the counter |
+| NumberInput | 10 | A figure; a prefix and suffix given as text are counted on top |
+| Textarea | 40 | A line of prose |
+| The date pickers | their longest value | The length of the formats in use, so a date never truncates, in English or German |
+| Slider, FileInput | 16, 32 | They show no text to count, and take no `chars` |
+
+**`chars` says the width when the value has a known length** - a postcode
+`chars={5}`, an IBAN `chars={27}`. A field's width tells what goes into it.
+Given, the field is that wide in every place.
+
+**Never wider than its place.** A field shrinks with a narrow place and ends
+what does not fit in an ellipsis; a page never scrolls sideways because of a
+field. A `FormField` holds to its place as well, and its message wraps inside
+the field's width. Panels have a floor of their own (combobox 200 px,
+multiselect 260 px), so a narrow field still opens a readable list.
+
+**Two heights, one name, one scope.** Every control with two heights takes
+`size`, `sm` or `md` - never another name (`selectSize` was the last). `md` is
+the default; `sm` is for toolbars and dense forms. A place that is dense says
+it once with `ControlSizeProvider` - the table's toolbar is one - and every
+control inside follows unless it says its own. A surface of its own (popover,
+dialog, drawer, tooltip) starts without the place's size: a dialog opened from a
+small toolbar keeps a dialog's controls.
+
+**Presentation on the root, behaviour on the control.** A wrapped field puts
+`className` and `style` on the wrapper a place lays out and sizes, and `ref`,
+`name`, `value` and the handlers on the native control a form library reaches
+for. `<Input style={{ width: 120 }} />` sizes the field.
+
+**Building a new field** follows from this:
+
+1. A root that is not the native element (Firefox applies no size containment
+   to a bare `<input>`), with `className` and `style` on it.
+2. The root composes `extent` from `#own-styles` (and `fieldRoot` if it holds
+   a text field), sets `--_chrome` to its padding and glyphs, and `--_chars`
+   if 16 is not its count.
+3. `chars` as a prop, handed to `extentStyle()` (`lib/extent.ts`); `size`
+   through `useControlSize()` (`lib/controlSize.tsx`).
+4. Add it to `controlSize.test.tsx` and `fieldWidth.test.tsx`, and to the
+   Sizes page if it brings a case the page does not show yet.
+
+**Open** - questions the acceptance left for later, each a ticket under
+`.scratch/control-sizes/issues/`: the default counts (07), the room a
+multiselect leaves when the next chip does not fit (08), the slider's readout
+far from its track (09), a prop for a field that fills a row (10); and
+`#own-styles` copied into the bundle once per module (06).
+
 ## The words for all this
 
 This document describes the language. `CONTEXT.md` fixes the vocabulary, and the
 two do not repeat each other — where a word here has a definition, it stands
 there: **Token**, **Vocabulary**, **Edge**, **Shadow step**, **Tone**,
-**Glyph**, **Motion origin** and the **Interaction-state canon**.
+**Glyph**, **Motion origin**, the **Interaction-state canon**, **Natural width**
+and **Control size**.
