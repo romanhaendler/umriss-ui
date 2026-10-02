@@ -17,8 +17,9 @@ of the table toolbar, and every removable tag.
 
 ## What
 
-- `.text` in `Tag.module.css` takes a line of 1.5: 18 px at the tag's 12 px,
-  whole, and inside its 22 px.
+- `.text` in `Tag.module.css` takes a line of 16 px: the 11 px type's
+  descenders fit, it is a whole pixel (1.5 would be 16.5), and it stands 3 px
+  from either edge of the 22 px tag.
 - A probe over every page of the table and core demos for an element that
   clips and whose content is taller than its box.
 

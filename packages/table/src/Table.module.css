@@ -426,7 +426,7 @@
   .table[data-stale] > tbody {
     opacity: 0.5;
     pointer-events: none;
-    transition: opacity var(--u-duration-fast) var(--u-ease-out) 200ms;
+    transition: opacity var(--u-duration-fast) var(--u-ease-out) var(--u-delay-stale);
   }
 
   .emptyCell {

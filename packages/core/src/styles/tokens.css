@@ -292,6 +292,7 @@
     --u-duration-medium: 240ms;              /* entry of a sheet; a layout change */
     --u-duration-draw: 320ms;                /* a stroke drawn slowly enough to watch: the tick */
     --u-delay-draw: 60ms;                    /* the box fills first, then the tick is drawn */
+    --u-delay-stale: 200ms;                  /* content being reloaded dims only after this: a quick answer never flickers */
 
     /* Exits. They stood twice - as a number in the code waiting for the end, and
        in the stylesheet drawing the movement - and for the toast the two had
