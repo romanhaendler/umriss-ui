@@ -1,5 +1,5 @@
-import { forwardRef } from "react";
-import type { SelectHTMLAttributes } from "react";
+import { forwardRef, useEffect, useId, useRef, useState } from "react";
+import type { KeyboardEvent, SelectHTMLAttributes } from "react";
 import { cx } from "../../lib/cx";
 import { useFormField } from "../FormField";
 import styles from "./Select.module.css";
@@ -7,6 +7,10 @@ import { useControlSize } from "../../lib/controlSize";
 import { extentStyle } from "../../lib/extent";
 import { useWording } from "../../lib/language";
 import { AngleGlyph, CrossGlyph } from "../../lib/glyphs";
+import { mergeRefs } from "../../lib/mergeRefs";
+import { announce, silence } from "../../lib/announce";
+import { Listbox, optionId } from "../../lib/listbox";
+import type { ListboxItem } from "../../lib/listbox";
 
 /* `size` is the controls' two heights here, as on every other field. The
    native `<select size>` - the number of rows a list box shows - is left out:
@@ -36,12 +40,29 @@ export interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement
 }
 
 /**
- * Native select with the library's looks – maximum accessibility without
- * building one ourselves. The arrow is drawn in CSS and therefore follows the
- * theme tokens.
+ * The select field. The `<select>` holds the value, the form and the keys;
+ * under a mouse, a pen and the keyboard it opens the library's own list - the
+ * Combobox's - and under a finger the system's picker (ADR-0043). The arrow is
+ * drawn in CSS and therefore follows the theme tokens.
  */
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select(
-  { size: ownSize, chars, invalid, clearable = false, onClear, className, style, id, children, disabled, ...rest },
+  {
+    size: ownSize,
+    chars,
+    invalid,
+    clearable = false,
+    onClear,
+    className,
+    style,
+    id,
+    children,
+    disabled,
+    onPointerDown,
+    onMouseDown,
+    onKeyDown,
+    onBlur,
+    ...rest
+  },
   ref,
 ) {
   const size = useControlSize(ownSize);
@@ -49,6 +70,115 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
   const wording = useWording();
   const isInvalid = invalid ?? field?.invalid ?? false;
   const hasSelection = clearable && !rest.multiple && String(rest.value ?? "") !== "";
+
+  /* `multiple` is a list box without a popup, and a disabled select opens
+     nothing: both stay the system's. */
+  const ownList = !rest.multiple && !disabled;
+  const selectRef = useRef<HTMLSelectElement>(null);
+  const listboxId = useId();
+  const [open, setOpen] = useState(false);
+  const [items, setItems] = useState<ListboxItem[]>([]);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const pointerType = useRef("mouse");
+  const typed = useRef({ text: "", at: 0 });
+
+  const openList = () => {
+    const element = selectRef.current;
+    if (!element) return;
+    const next = readItems(element);
+    setItems(next);
+    setActiveIndex(Math.max(0, element.selectedIndex));
+    setOpen(true);
+    announce(next.length === 0 ? wording.noMatches : wording.optionCount(next.length), element);
+  };
+
+  const closeList = () => {
+    // A count still waiting would be spoken after the choice or the Escape.
+    silence();
+    setOpen(false);
+  };
+
+  /* The options as they stand: a caller's children may change while the
+     list is open. */
+  useEffect(() => {
+    if (open && selectRef.current) setItems(readItems(selectRef.current));
+  }, [open, children]);
+
+  /* Choosing writes the select's value and fires its own events: React's
+     onChange, a form's listeners and a reset all see what the system's list
+     would have done. A controlled select is put back to its prop by React. */
+  const choose = (index: number) => {
+    const element = selectRef.current;
+    if (!element || items[index] === undefined || items[index].disabled) return;
+    closeList();
+    element.focus();
+    if (element.selectedIndex === index) return;
+    element.selectedIndex = index;
+    element.dispatchEvent(new Event("input", { bubbles: true }));
+    element.dispatchEvent(new Event("change", { bubbles: true }));
+  };
+
+  const moveTo = (index: number) => {
+    const item = items[index];
+    if (item === undefined) return;
+    setActiveIndex(index);
+    announce(
+      wording.optionActive(item.label, { selected: item.selected, disabled: item.disabled }),
+      selectRef.current,
+    );
+  };
+
+  /* Typing jumps to the next option that begins with what was typed in the
+     last half second; the same letter again walks through those with it. */
+  const typeTo = (key: string, timeStamp: number) => {
+    const letter = key.toLowerCase();
+    const text = timeStamp - typed.current.at < 500 ? typed.current.text + letter : letter;
+    typed.current = { text, at: timeStamp };
+    const repeat = [...text].every((each) => each === letter);
+    const term = repeat ? letter : text;
+    const from = repeat ? activeIndex + 1 : activeIndex;
+    for (let offset = 0; offset < items.length; offset += 1) {
+      const index = (from + offset) % items.length;
+      if (items[index]!.label.toLowerCase().startsWith(term)) {
+        moveTo(index);
+        return;
+      }
+    }
+  };
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLSelectElement>) => {
+    onKeyDown?.(event);
+    if (!ownList || event.defaultPrevented || event.nativeEvent.isComposing) return;
+    const { key } = event;
+    if (!open) {
+      if (OPENING_KEYS.has(key)) {
+        event.preventDefault();
+        openList();
+      }
+      return;
+    }
+    if (key === "Tab") {
+      closeList();
+      return;
+    }
+    // Escape is the popover's: it closes the list and keeps the focus here.
+    if (key === "Escape") return;
+    const last = items.length - 1;
+    const step = STEPS[key];
+    if (step !== undefined) {
+      event.preventDefault();
+      moveTo(Math.max(0, Math.min(last, activeIndex + step)));
+    } else if (key === "Home" || key === "End") {
+      event.preventDefault();
+      moveTo(key === "Home" ? 0 : last);
+    } else if (key === "Enter" || (key === " " && event.timeStamp - typed.current.at >= 500)) {
+      event.preventDefault();
+      choose(activeIndex);
+    } else if (key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      event.preventDefault();
+      typeTo(key, event.timeStamp);
+    }
+  };
 
   return (
     <span
@@ -61,12 +191,15 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
       style={{ ...extentStyle(chars), ...style }}
     >
       <select
-        ref={ref}
+        ref={mergeRefs(selectRef, ref)}
         id={id ?? field?.id}
         disabled={disabled}
         aria-describedby={rest["aria-describedby"] ?? field?.describedBy}
         aria-required={field?.required || undefined}
         aria-invalid={isInvalid || undefined}
+        aria-expanded={ownList ? open : undefined}
+        aria-controls={open ? listboxId : undefined}
+        aria-activedescendant={open && items[activeIndex] ? optionId(listboxId, activeIndex) : undefined}
         className={cx(
           styles.select,
           size === "sm" && styles.sm,
@@ -74,6 +207,27 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
           isInvalid && styles.invalid,
         )}
         {...rest}
+        /* The caller's handlers run first and can prevent the field's own
+           (P3 of core-passthrough). */
+        onPointerDown={(event) => {
+          onPointerDown?.(event);
+          pointerType.current = event.pointerType;
+        }}
+        onMouseDown={(event) => {
+          onMouseDown?.(event);
+          /* A finger keeps the system's picker; a mouse and a pen take ours,
+             and the press that would open the system's list opens it. */
+          if (!ownList || event.defaultPrevented || event.button !== 0 || pointerType.current === "touch") return;
+          event.preventDefault();
+          selectRef.current?.focus();
+          if (open) closeList();
+          else openList();
+        }}
+        onKeyDown={handleKeyDown}
+        onBlur={(event) => {
+          onBlur?.(event);
+          if (open) closeList();
+        }}
       >
         {children}
       </select>
@@ -90,6 +244,41 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
         </button>
       )}
       <AngleGlyph className={styles.chevron} />
+      {ownList && (
+        <Listbox
+          open={open}
+          onClose={closeList}
+          anchorRef={selectRef}
+          id={listboxId}
+          ariaLabel={rest["aria-label"] ?? wording.options}
+          items={items}
+          activeIndex={activeIndex}
+          onActivate={setActiveIndex}
+          onChoose={choose}
+          emptyText={wording.noMatches}
+        />
+      )}
     </span>
   );
 });
+
+/** Every key that opens the system's list somewhere opens ours (ADR-0043). */
+const OPENING_KEYS = new Set(["ArrowDown", "ArrowUp", " ", "Enter", "F4"]);
+
+/** How far the keys move in the open list; Page Up and Down jump ten. */
+const STEPS: Record<string, number> = { ArrowDown: 1, ArrowUp: -1, PageDown: 10, PageUp: -10 };
+
+/** The list's options, read from the select - an <optgroup> as their group. */
+function readItems(element: HTMLSelectElement): ListboxItem[] {
+  return Array.from(element.options, (option) => {
+    const group = option.parentElement instanceof HTMLOptGroupElement ? option.parentElement : null;
+    return {
+      label: option.label,
+      disabled: option.disabled || (group?.disabled ?? false),
+      // The empty value is the placeholder (the select's muted colour): it
+      // stands in the list, never as the choice.
+      selected: option.selected && option.value !== "",
+      group: group?.label,
+    };
+  });
+}

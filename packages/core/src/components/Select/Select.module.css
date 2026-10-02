@@ -44,8 +44,11 @@
   }
 
   /* The ring comes at once: Chromium takes a click for keyboard focus here,
-     and a ring fading in while the native list opens over it flickered. */
-  .select:focus-visible {
+     and a ring fading in while the native list opens over it flickered. A
+     field with its list open carries it as well, as the Combobox and the
+     MultiSelect do (ADR-0043). */
+  .select:focus-visible,
+  .select[aria-expanded="true"] {
     outline: 2px solid transparent;
     box-shadow: var(--u-focus-ring);
     transition: none;
@@ -82,7 +85,8 @@
     box-shadow: 0 0 0 1px var(--u-color-danger);
   }
 
-  .invalid:focus-visible {
+  .invalid:focus-visible,
+  .invalid[aria-expanded="true"] {
     outline: 2px solid transparent;
     box-shadow: var(--u-focus-ring-danger);
   }
