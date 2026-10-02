@@ -64,6 +64,23 @@ test("A multiselect holds still while values are chosen and removed", async ({ p
   await expect(stage.getByText("Every carrier")).toBeVisible();
   expect(await box(field)).toEqual(before);
   expect(await box(range)).toEqual(rangeBefore);
+  // Its cross is counted in the width: it comes with the first value and
+  // goes with all of them, and nothing moves. The panel may scroll the page,
+  // so the row is compared across, not down.
+  const across = async (locator: Locator) => {
+    const { x, width } = await box(locator);
+    return { x, width };
+  };
+  await field.locator("[aria-haspopup]").click();
+  await panel.getByText("DHL", { exact: true }).click();
+  await page.keyboard.press("Escape");
+  const clear = field.getByRole("button", { name: "Clear selection" });
+  await expect(clear).toBeVisible();
+  expect(await across(field)).toEqual({ x: before.x, width: before.width });
+  await clear.click();
+  await expect(stage.getByText("Every carrier")).toBeVisible();
+  expect(await across(field)).toEqual({ x: before.x, width: before.width });
+  expect(await across(range)).toEqual({ x: rangeBefore.x, width: rangeBefore.width });
 });
 
 test("A select is as wide as its natural width, not as its longest option", async ({ page }) => {

@@ -88,6 +88,7 @@ export const Combobox = forwardRef(function Combobox<T extends string = string>(
   const [activeIndex, setActiveIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const toggleRef = useRef<HTMLSpanElement>(null);
   const listboxId = useId();
 
   const selected = useMemo(() => options.find((option) => option.value === value) ?? null, [options, value]);
@@ -235,7 +236,25 @@ export const Combobox = forwardRef(function Combobox<T extends string = string>(
             <CrossGlyph />
           </button>
         )}
-        <AngleGlyph className={styles.chevron} />
+        {/* The chevron is the pointer's handle on the panel; the keys have
+            the arrows. Not a button: it is never a tab stop of its own. */}
+        <span
+          ref={toggleRef}
+          className={styles.toggle}
+          aria-hidden="true"
+          onMouseDown={(event) => event.preventDefault() /* focus stays in the field */}
+          onClick={() => {
+            if (disabled) return;
+            if (open) {
+              closePanel();
+            } else {
+              inputRef.current?.focus();
+              openPanel();
+            }
+          }}
+        >
+          <AngleGlyph className={styles.chevron} />
+        </span>
       </div>
       <Popover
         open={open}
@@ -243,6 +262,7 @@ export const Combobox = forwardRef(function Combobox<T extends string = string>(
           if (!isOpen) closePanel();
         }}
         anchorRef={inputRef}
+        insideRefs={[toggleRef]}
         width="anchor"
         /* As wide as the field, and never narrower than a list can be read:
            a field of six characters (`chars`) - a country code - would

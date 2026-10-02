@@ -56,6 +56,10 @@ export interface MultiSelectProps<T extends string = string>
   /** Marks the field as invalid. `FormField` sets it itself as soon as it
       carries an `error` – by hand only necessary without `FormField`. */
   invalid?: boolean;
+  /** Shows a cross beside the chips that empties the selection, as "Select
+      none" does: a chosen value whose option is disabled stays. The field
+      keeps room for it, chosen values or none, so that it never moves. */
+  clearable?: boolean;
 }
 
 type Scope = "all" | "selected";
@@ -85,6 +89,7 @@ export const MultiSelect = forwardRef(function MultiSelect<T extends string = st
     chars,
     disabled = false,
     invalid,
+    clearable = false,
     className,
     style,
     onClick,
@@ -330,6 +335,10 @@ export const MultiSelect = forwardRef(function MultiSelect<T extends string = st
 
   const overflowCount = value.length - visibleChips;
 
+  /* The cross empties what "Select none" would: a chosen value whose option
+     is disabled stays. */
+  const cleared = Options.selectNoneOf(value, Options.selectableValues(options));
+
   const chipRemoveX = <CrossGlyph size={8} />;
 
   return (
@@ -339,7 +348,7 @@ export const MultiSelect = forwardRef(function MultiSelect<T extends string = st
           the field's own and can prevent them (P3). */}
       <div
         ref={mergeRefs(fieldRef, ref)}
-        className={cx(styles.field, size === "sm" && styles.sm, isInvalid && styles.invalid, disabled && styles.fieldDisabled, className)}
+        className={cx(styles.field, size === "sm" && styles.sm, clearable && styles.fieldClearable, isInvalid && styles.invalid, disabled && styles.fieldDisabled, className)}
         {...rest}
         /* The width in characters, and the caller's own style over it. */
         style={{ ...extentStyle(chars), ...style }}
@@ -403,6 +412,22 @@ export const MultiSelect = forwardRef(function MultiSelect<T extends string = st
               <span className={styles.counter}>+{value.length}</span>
             </span>
           </>
+        )}
+        {clearable && !disabled && cleared.length < value.length && (
+          <button
+            type="button"
+            tabIndex={-1}
+            aria-label={wording.clearSelection}
+            className={styles.clear}
+            onMouseDown={(event) => event.preventDefault() /* focus stays where it is */}
+            onClick={(event) => {
+              event.stopPropagation();
+              onChange(cleared);
+              mainRef.current?.focus();
+            }}
+          >
+            <CrossGlyph />
+          </button>
         )}
         <button
           ref={mainRef}
