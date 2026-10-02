@@ -31,7 +31,7 @@ metadata, npm's metadata, Google Search Console, Bing Webmaster Tools.
 | D6 | Prerendering | Static HTML per page from the data of `packages/demo/src/tooling/llms.ts` — heading, lead, every example's source, the props tables — inside `#root`; the app replaces it with `createRoot` (not hydration). |
 | D7 | Old hash links | Forwarded at start: `/core/#/card/x` → `/core/card/#x`. `llms.txt`, READMEs and changelog links move to paths. |
 | D8 | Title and description | By formula, no SEO fields of their own. Title `<Page> – React <noun> · @umriss-ui/<package>`, the noun from one map per package (component, chart, table, schedule, calculation). Description = the page's existing summary line. A weak page is fixed in its summary, which improves the demo and `llms.txt` too. |
-| D9 | The front page | `site/index.html` becomes the hub: a searchable title, a link to every page of every package, `sitemap.xml`, `canonical`, `og:` tags without an image, JSON-LD `SoftwareSourceCode` per package. |
+| D9 | The front page | `site/index.html` becomes the hub: a searchable title, a link to every page of every package, `sitemap.xml`, `canonical`, `og:` tags, JSON-LD `SoftwareSourceCode` per package. **Revised 2 Oct 2026:** the front page is named `umriss-ui`, as searched, not `umriss`; and every page carries one preview image (`scripts/og-image.png`, the kiln scenario's control room), by the user's choice. |
 | D10 | Wording | English only (ADR-0018). The first line (the part before the dash) of every package description and README carries the search terms; the voice after it stays. |
 | D11 | Search consoles | Google Search Console and Bing, URL-prefix property on the Pages address. The user creates them; the verification file is copied into `site/` by `build-pages.mjs`. |
 | D12 | GitHub metadata | Done on 27 Sep via `gh`: description, homepage, 15 topics. |
@@ -61,5 +61,5 @@ inspection on three pages shows the rendered text.
 
 ## Out of scope
 
-Backlinks of any kind. An own domain. Social preview images. Translated pages.
+Backlinks of any kind. An own domain. Social preview images (revised in D9: one image for all pages). Translated pages.
 Paid search. A blog.
