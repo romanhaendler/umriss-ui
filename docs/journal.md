@@ -18,6 +18,19 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Oct. 2026 — A multiselect that clears
+
+- **A clearable `MultiSelect`, the `Combobox`'s chevron as a handle, a
+  `Select` that opens without a flicker** (`@umriss-ui/core` 0.23.0). Asked
+  for by the user. The multiselect's cross empties what "Select none" would -
+  the review found it had taken the disabled options' values too - and its
+  room stands in the field's chrome whether it shows or not, so the width
+  holds still; the Sizes row and the incident filter show it. The chevron
+  showed the input's text cursor; it is a target of its own now, which the
+  popover counts as inside. The flicker, measured in Chromium: a click on a
+  select is keyboard focus there, and the ring faded in under the opening
+  list. 4 core pictures looked at.
+
 ## Oct. 2026 — Rows that hold still
 
 - **A row's height never follows what it shows** (ADR-0042; `@umriss-ui/table`
