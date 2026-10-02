@@ -22,7 +22,7 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
-## 0.11.0 – Rows that hold still (unreleased)
+## 0.11.0 – Rows that hold still (Oct. 2026)
 
 A row's height never follows what it shows (ADR-0042). Needs `@umriss-ui/core`
 0.22 for `--u-delay-stale`; the peer range moves to `^0.22.0`.

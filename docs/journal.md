@@ -18,6 +18,28 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Oct. 2026 — Rows that hold still
+
+- **A row's height never follows what it shows** (ADR-0042; `@umriss-ui/table`
+  0.11.0, `@umriss-ui/core` 0.22.0; `.scratch/row-pitch/`). Asked for by the
+  user: a table's height jumped while data loaded, on a short last page, as
+  rows wrapped, and a row was 36.5 px in Firefox and 36 in Safari. Researched
+  first (a report on the state of the art for data tables), then a prototype
+  behind a URL switch, accepted on the rendered page. Measured over all 116
+  tables of the demo: 91 had rows of uneven height at 1280 px, 98 at 390 px;
+  after it one, an open row detail. Every line is one row pitch - a whole
+  pixel, never less than a small control - the table takes `sm` for its
+  controls, a value stays on one line and what does not fit is cut at its
+  edge, a page keeps the most rows it has shown, a grouped page counts the
+  headers it repeats, loading over rows keeps them, and `virtual` measures the
+  pitch itself. Found on the way: a span's value sat above its row, a column
+  with a width was squeezed on a phone, and - in the acceptance - a status
+  filter still shrank a table of one page. 317 table and 15 core pictures
+  looked at.
+- **A tag lost its descenders** (`@umriss-ui/core` 0.22.0). Found by the user
+  in the table toolbar's chips: a line of 1 and a text that clips for its
+  ellipsis cut the tail of a g by a pixel in WebKit.
+
 ## Oct. 2026 — Sizes
 
 - **`Text` stood black on black in a tooltip** (`@umriss-ui/core` 0.21.2).
