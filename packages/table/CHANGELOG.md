@@ -36,7 +36,10 @@ A row's height never follows what it shows (ADR-0042). Needs `@umriss-ui/core`
   longer taller than one without; a row was 36.5 px before, rounded three ways.
 - **A value stays on one line.** Nothing in a cell wraps; text ends in an
   ellipsis, and a tip shows a cut value whole under the pointer, or at once on
-  the Active cell. A column without a width grows with its values up to
+  the Active cell. A component that does not fit - a row of badges, one of the
+  application's own - is cut at the column's edge, and one taller than a row
+  at the row's, which a warning in development names. The page Formats shows
+  it in "Fit what does not fit". A column without a width grows with its values up to
   `min(20rem, 60vw)`; a column with a width is exactly that wide. A cell's
   content now stands in a box inside the cell: a test that finds a cell by its
   text takes `closest("td, th")`.
