@@ -376,3 +376,38 @@ test("Stepper takes a column on a phone and a row on the desktop, and no label o
   await expect(list).toHaveAttribute("data-fit", "column");
   expect(await labelsApart()).toBe(true);
 });
+
+/* A tooltip stands on ink: `Text` inside it took the ink as its own colour
+   and stood black on black. Measured, not looked at - every tone must read
+   on the tooltip's ground at 4.5:1, in both themes. */
+for (const colorScheme of ["light", "dark"] as const) test(`Text inside a tooltip reads on its ground in every tone (${colorScheme})`, async ({ page }) => {
+  await page.emulateMedia({ colorScheme });
+  await openExample(page, "tooltip", "a-calculation");
+  await page.getByText("37.50 €", { exact: true }).hover();
+  const tooltip = page.getByRole("tooltip");
+  await expect(tooltip).toBeVisible();
+  const ratios = await tooltip.evaluate((tip) => {
+    /* The canvas turns any colour syntax (color-mix, light-dark) into sRGB
+       bytes, and lays a translucent colour over the ground as the eye sees it. */
+    const ctx = document.createElement("canvas").getContext("2d")!;
+    const background = getComputedStyle(tip).backgroundColor;
+    const luminance = (...layers: string[]) => {
+      for (const layer of layers) {
+        ctx.fillStyle = layer;
+        ctx.fillRect(0, 0, 1, 1);
+      }
+      const [r = 0, g = 0, b = 0] = [...ctx.getImageData(0, 0, 1, 1).data].map((v) => {
+        const c = v / 255;
+        return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+      });
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+    const ground = luminance(background);
+    return [...tip.querySelectorAll("p")].map((p) => {
+      const ink = luminance(background, getComputedStyle(p).color);
+      return (Math.max(ink, ground) + 0.05) / (Math.min(ink, ground) + 0.05);
+    });
+  });
+  expect(ratios).toHaveLength(2);
+  for (const ratio of ratios) expect(ratio).toBeGreaterThanOrEqual(4.5);
+});
