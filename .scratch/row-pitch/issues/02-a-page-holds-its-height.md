@@ -1,6 +1,6 @@
 # 02 — A page holds its height
 
-Status: ready-for-agent
+Status: done
 Type: feature
 Blocked by: 01
 
@@ -20,3 +20,7 @@ With a pagination bar and more than one page:
   one page; placeholders = pageSize; the empty body's height.
 - Browser: "Next" stands on the same pixel on page 1, the last page and an
   empty result, at 1280 and 390 px.
+
+## Comments
+
+**Delivered, 2 Oct 2026.** c7c08ec. Filler, a page of placeholders, the empty result's height. "Next" stood 954 → 772 → 178 px before and stands 945 → 945 → 945 now (1280 px; 390 px: 1562 → 1262 → 239, now 1007).

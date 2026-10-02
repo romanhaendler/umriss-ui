@@ -1,6 +1,6 @@
 # 04 — Loading over rows keeps the rows
 
-Status: ready-for-agent
+Status: done
 Type: feature
 Blocked by: 01
 
@@ -16,3 +16,7 @@ Blocked by: 01
 
 - Unit: rows stay rendered and the body is marked stale while loading; no
   placeholders then; placeholders without rows.
+
+## Comments
+
+**Delivered, 2 Oct 2026.** c7c08ec. data-stale, dimmed after --u-delay-stale (91a70c9). Manual mode keeps its placeholders' widths, measures no heights.

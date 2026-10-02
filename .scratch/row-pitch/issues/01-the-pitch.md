@@ -1,6 +1,6 @@
 # 01 — The pitch
 
-Status: ready-for-agent
+Status: done
 Type: feature
 
 ## What
@@ -25,3 +25,7 @@ Type: feature
   for a cut value (scrollWidth mocked) and goes on Escape.
 - Browser: in Chromium, Firefox and WebKit every row of a table is the same
   whole-pixel height, with and without checkboxes, folds and badges.
+
+## Comments
+
+**Delivered, 2 Oct 2026.** 8c26932, 74a9544. Every line one pitch, 36/27/35 px, alike in Chromium, Firefox and WebKit over all 116 demo tables. The value box with the cap and the width as its intrinsic size; the tip; fit to content measures the whole value. Found on the way: a column with a width was squeezed on a phone (130 → 77 px) - it now holds its width.
