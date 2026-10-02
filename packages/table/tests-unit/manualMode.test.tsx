@@ -192,7 +192,8 @@ describe("Manual mode - loading (M2)", () => {
     expect(table.getAttribute("aria-busy")).toBe("true");
     expect(table.getAttribute("data-stale")).toBe("true");
     expect(bodyNumbers()).toHaveLength(6);
-    expect(container.querySelectorAll("tbody tr[aria-hidden]")).toHaveLength(0);
+    // No placeholders - only the filler that holds the page's ten lines while a search restricts it.
+    expect(container.querySelectorAll("tbody tr[aria-hidden]:not([data-filler])")).toHaveLength(0);
     settle();
     expect(table.getAttribute("aria-busy")).toBeNull();
     expect(table.getAttribute("data-stale")).toBeNull();

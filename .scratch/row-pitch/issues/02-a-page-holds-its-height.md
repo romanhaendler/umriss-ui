@@ -24,3 +24,10 @@ With a pagination bar and more than one page:
 ## Comments
 
 **Delivered, 2 Oct 2026.** c7c08ec. Filler, a page of placeholders, the empty result's height. "Next" stood 954 → 772 → 178 px before and stands 945 → 945 → 945 now (1280 px; 390 px: 1562 → 1262 → 239, now 1007).
+
+**Amended, 2 Oct 2026.** In the acceptance the user found that a status filter
+still shrank the table: the page held only over more than one page, and seven
+rows of twenty-four were one page. A page now keeps the most lines it has
+shown, up to `pageSize`, whatever restricts it - in "A dispatcher's bar"
+"Next" stands at 405 px for every status, flat and grouped (before: 407, 297,
+178).

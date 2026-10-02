@@ -116,7 +116,7 @@ stylesheets by hand.
 * **Rows that hold still** (ADR-0042): every line - head, row, group header,
   placeholder, footer - is one row pitch tall in every browser, a value stays
   on its line and shows whole in a tip, and a page keeps its height over a
-  short last page, a grouping, an empty result and a reload.
+  short last page, a search, a filter, a grouping and a reload.
 * **Around the table**: toolbar, search, column menu, export, paging — each
   usable inside the table toolbar or anywhere else on the page with `of`, and
   one `size` for the whole bar that a control of one's own can match.
