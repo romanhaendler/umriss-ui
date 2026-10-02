@@ -29,6 +29,61 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.21.0 – Fields that hold still (Oct. 2026)
+
+A field's width no longer follows what it shows, and one size reaches every
+control in a place (ADR-0041). The new demo page **Sizes** shows both.
+
+### Added
+
+- **`chars`** on `Input`, `Textarea`, `Select`, `Combobox`, `MultiSelect`,
+  `NumberInput` and the four date pickers: the width in characters of the
+  field's own type - the room for its value, with its padding, glyph, cross and
+  steppers added. A postcode is `chars={5}`, an IBAN `chars={27}`. Given, the
+  field is that wide in every place, and never wider than its place.
+- **`ControlSizeProvider`** (with the type **`ControlSize`**): every control
+  with two heights inside it takes its `size` - `Input`, `Textarea`,
+  `NumberInput`, `Select`, `Combobox`, `MultiSelect`, the date pickers,
+  `Button`, `IconButton`, `ButtonGroup`, `SplitButton`, `Switch`, `RadioGroup`.
+  A control's own `size` wins; a popover, dialog, drawer or tooltip opened from
+  inside starts without it.
+- **`size` on `ButtonGroup`**, for the buttons in it that say none.
+- **Demo:** the page **Sizes** after FormField - a field that fills its place,
+  sized to its value, a row that holds still while values are chosen (its
+  widths measured live), one size for a place, narrow places.
+
+### Changed
+
+- **A field's width never follows what it shows.** Its root is a block: in a
+  form's column, a grid's cell or a dialog it fills its place, as before. Where
+  the place asks it instead - a row, a toolbar, a column lined up at the start,
+  a cell sized by its content - it is its natural width: 16 characters for a
+  text field, select and combobox, 20 for a multiselect, 10 for a number, 40
+  for a textarea, the longest value of its formats for a date picker. Its
+  value, its options, its chips and its files no longer move it: a multiselect
+  stood 83, 96 and 133 px wide for none, one and two values in a toolbar, and
+  a select as wide as its longest option. In a row, a field used to take the
+  whole row's width; give it room with the row's own layout (`flex: 1`, a
+  grid).
+- **A field is never wider than its place**, and what does not fit ends in an
+  ellipsis - a range of instants scrolled a 320 px page sideways. A
+  `FormField` is never wider than its place either, and its hint or error
+  wraps inside its field's width instead of widening it.
+- **`Select`'s `selectSize` is now `size`**, as on every other field, with no
+  alias. The native `size` of the `<select>` is left out.
+- **`Input` and `Textarea` always render their wrapper**, and on every wrapped
+  field - `Input`, `Textarea`, `Select`, `NumberInput`, `Checkbox`, `Switch`,
+  `Slider`, `FileInput` - **`className` and `style` land on the wrapper**, ref
+  and every other attribute on the control. `<Input style={{ width: 120 }} />`
+  sizes the field. A `style` meant for the native control itself now dresses
+  the wrapper.
+- **`Textarea` no longer takes `cols`**; it never reached the screen.
+- **Every control with `size` follows a `ControlSizeProvider`** around it.
+- **The combobox's panel is never narrower than 200 px**, as the
+  multiselect's is never narrower than 260.
+- **Under a finger** a text field's root writes at the field's 16 px, so a
+  width in characters holds there too.
+
 ## 0.20.0 – A small multiselect and combobox (Oct. 2026)
 
 ### Added

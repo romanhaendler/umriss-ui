@@ -22,6 +22,27 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.10.0 – A toolbar that sizes its controls (Oct. 2026)
+
+Needs `@umriss-ui/core` 0.21, whose fields hold still and take a place's size;
+the peer range moves to `^0.21.0`.
+
+### Changed
+
+- **`Toolbar` sets the size of the controls a caller puts into it.** It is a
+  `ControlSizeProvider` at its `size`: a `Select`, `MultiSelect` or `Button` of
+  one's own stands at `sm` beside the search without a word, at `md` in
+  `Toolbar size="md"`, and keeps its own `size` if it says one.
+- **No part of the toolbar is given a width any more.** A field from
+  `@umriss-ui/core` is its natural width there by itself and never what it
+  shows: the search is no longer 160 px, the page-size select of `Pagination`
+  is as wide as its longest size instead of 64 px, and a multiselect no longer
+  grows with its chips.
+- **Demo:** the Toolbar controls and Filter examples lost their widths in
+  `style` and their `size="sm"`.
+
+---
+
 ## 0.9.0 – Row filters, and one size for the toolbar (Oct. 2026)
 
 Needs `@umriss-ui/core` 0.20, whose `MultiSelect` and `Combobox` take the

@@ -21,7 +21,8 @@ as it stood.
 ## Oct. 2026 — Sizes
 
 - **A field's width never follows what it shows** (`.scratch/control-sizes/`,
-  ADR-0041). It began as a question about how wide the core fields are, and a
+  ADR-0041; `@umriss-ui/core` 0.21.0, `@umriss-ui/table` 0.10.0, schedule and
+  calculation moving their core range along). It began as a question about how wide the core fields are, and a
   probe of every control in the table toolbar at five widths answered it: in
   a place that asks, a field was whatever it happened to show - a multiselect
   83, 96 and 133 px for none, one and two values, a select its longest option.

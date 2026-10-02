@@ -11,6 +11,14 @@ under a heading "Changed" of its own, no matter which digit rose.
 
 ---
 
+## 0.4.5 – Core 0.21.0 (Oct. 2026)
+
+Needs `@umriss-ui/core` 0.21; the peer range moves to `^0.21.0`. Its record
+picker in the scenarios is a `Select` at its natural width now, beside its
+line of text instead of before it. Nothing else changes for a caller.
+
+---
+
 ## 0.4.4 – Core 0.20.0 (Oct. 2026)
 
 Needs `@umriss-ui/core` 0.20; the peer range moves to `^0.20.0`. Nothing else changes for a caller.
