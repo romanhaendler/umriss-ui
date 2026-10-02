@@ -21,7 +21,7 @@ as it stood.
 ## Oct. 2026 — The select's own list
 
 - **The `Select` opens its own list under a pointer and the keys** (ADR-0043;
-  `.scratch/select-listbox/`). Reported by the user: the "Cost centre" select
+  `@umriss-ui/core` 0.24.0; `.scratch/select-listbox/`). Reported by the user: the "Cost centre" select
   flickered as it opened, in Firefox on Windows - "als ob der Inhalt minimalst
   später da wäre". Measured before anything changed: our CSS changes nothing
   at the opening in Chromium, WebKit or Firefox; Firefox on Linux in Docker,
@@ -33,7 +33,11 @@ as it stood.
   unchanged; the `<select>` stays the field, so the API did not move. Found on
   the way: Enter opened the list and took the table grid's commit from its
   select editor - a closed select passes Enter on again. Recorded once more in
-  Linux Firefox: no system popup under a mouse.
+  Linux Firefox: no system popup under a mouse. The review found three more:
+  the first opening did not scroll to the chosen option (the Combobox's too),
+  a press on the panel's padding closed the list, and a select disabled while
+  open opened again by itself. Accepted by the user in Safari; the Windows
+  check could not be made.
 
 ## Oct. 2026 — A multiselect that clears
 

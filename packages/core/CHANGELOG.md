@@ -29,7 +29,7 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
-## Unreleased
+## 0.24.0 – The select's own list (Oct. 2026)
 
 ### Changed
 
