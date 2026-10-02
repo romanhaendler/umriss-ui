@@ -1,7 +1,7 @@
 import { useTable } from "../../../src";
 
 export const title = "Fit long values";
-export const lead = "Long text wraps in its cell; give a column a `width` to start from, and a table wider than its place scrolls in its own frame.";
+export const lead = "A long value stays on its line and ends in an ellipsis; point at it, or make it the Active cell, and a tip shows it whole. A column with a `width` is exactly that wide, and a table wider than its place scrolls in its own frame.";
 
 interface Shipment {
   id: string;

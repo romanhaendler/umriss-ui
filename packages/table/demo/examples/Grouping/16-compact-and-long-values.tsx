@@ -1,7 +1,7 @@
 import { useTable } from "../../../src";
 
 export const title = "Fit long group names in a compact table";
-export const lead = "A long value in a span is cut and kept in its title, so no other column has to wrap; rows without a project gather last.";
+export const lead = "A long value in a span is cut and kept in its title, as every value in the table stays on its line; rows without a project gather last.";
 
 interface WorkItem {
   id: string;

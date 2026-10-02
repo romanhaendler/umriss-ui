@@ -3,7 +3,7 @@ import { Alert, Button, EmptyState, Stack } from "@umriss-ui/core";
 import { Search, Toolbar, useTable } from "../../../src";
 
 export const title = "Show loading, empty, failed and no match";
-export const lead = "`loading` shows placeholder rows, `empty` what stands without rows, a failed load too; that nothing matches the table recognises itself.";
+export const lead = "`loading` shows placeholder rows where there are none yet, and dims the rows that stand while new ones are on their way; `empty` what stands without rows, a failed load too; that nothing matches the table recognises itself.";
 
 interface Incident {
   id: string;

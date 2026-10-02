@@ -22,6 +22,43 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.11.0 – Rows that hold still (unreleased)
+
+A row's height never follows what it shows (ADR-0042). Needs `@umriss-ui/core`
+0.22 for `--u-delay-stale`; the peer range moves to `^0.22.0`.
+
+### Changed
+
+- **Every line of the table is one row pitch.** The head, a row, a group
+  header, a placeholder and the footer are 36 px at the regular density, 27 px
+  at the compact one under a mouse and 35 px under a finger - in Chromium,
+  Firefox and WebKit alike. A row with a checkbox, a fold or a badge is no
+  longer taller than one without; a row was 36.5 px before, rounded three ways.
+- **A value stays on one line.** Nothing in a cell wraps; text ends in an
+  ellipsis, and a tip shows a cut value whole under the pointer, or at once on
+  the Active cell. A column without a width grows with its values up to
+  `min(20rem, 60vw)`; a column with a width is exactly that wide. A cell's
+  content now stands in a box inside the cell: a test that finds a cell by its
+  text takes `closest("td, th")`.
+- **Controls in the table are small.** The table is a `ControlSizeProvider`
+  at `sm`, so a `Button`, `Select` or editor in a cell fits the row.
+- **A page holds its height.** With a `Pagination` and more than one page, a
+  short last page ends in a filler of the rows it lacks; a grouped page is
+  `pageSize` lines, the group headers it repeats counted (one page may now end
+  a line earlier than before); the first load shows a page of placeholders; a
+  result that is empty after rows were shown keeps the height they had, its
+  message at the top.
+- **`loading` over rows keeps them.** The rows stay, dim after 200 ms and take
+  no pointer until `loading` is false; placeholders stand only where there are
+  no rows. An application that wants placeholders on every request hands in
+  no rows while it loads.
+
+### Removed
+
+- **`virtual.rowHeight`.** The window counts in the pitch the table measures
+  from its head. `virtual: { rowHeight: 37 }` becomes `virtual: true`;
+  `virtual: { rowHeight: 37, overscan: 8 }` becomes `virtual: { overscan: 8 }`.
+
 ## 0.10.0 – A toolbar that sizes its controls (Oct. 2026)
 
 Needs `@umriss-ui/core` 0.21, whose fields hold still and take a place's size;

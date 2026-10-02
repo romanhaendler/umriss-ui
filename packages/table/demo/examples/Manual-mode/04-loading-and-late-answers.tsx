@@ -155,7 +155,7 @@ const SHIPMENTS: readonly Shipment[] = TOURS.flatMap((one) =>
 );
 
 export const title = "Show loading, and drop a late answer";
-export const lead = "`loading` marks the table while a request runs. An answer to a view the user has already left is the application's to drop; the table shows whatever rows it is given.";
+export const lead = "`loading` marks the table while a request runs: the page it has stays, dimmed after a moment, and nothing below it moves. An answer to a view the user has already left is the application's to drop; the table shows whatever rows it is given.";
 
 /* Every answer takes 600 ms. Page on quickly: only the last request lands. */
 const LATENCY = 600;
