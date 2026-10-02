@@ -68,6 +68,15 @@ describe("the tip of a cut value", () => {
     expect(screen.getByRole("tooltip").textContent).toBe(ORDERS[0]!.customer);
   });
 
+  it("stays away from a cut component: a badge has no words that say it whole", () => {
+    vi.useFakeTimers();
+    cutWhere((box) => box.textContent?.startsWith("Open") ?? false);
+    render(<Orders />);
+    fireEvent.pointerOver(screen.getByRole("button", { name: "Open A-1" }));
+    act(() => vi.advanceTimersByTime(400));
+    expect(screen.queryByRole("tooltip")).toBeNull();
+  });
+
   it("goes with Escape", () => {
     vi.useFakeTimers();
     cutWhere((box) => box.textContent?.startsWith("Holloway") ?? false);
@@ -148,5 +157,20 @@ describe("a page holds its height", () => {
     const bare = render(<Shipments paged={false} />);
     act(() => snapshot!.setSearch("nothing like it"));
     expect(bare.container.querySelector<HTMLElement>("tbody td")!.style.height).toBe("");
+  });
+});
+
+describe("a value taller than a row", () => {
+  it("is cut, and the table says so once in development, naming the column", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    vi.spyOn(HTMLElement.prototype, "scrollHeight", "get").mockImplementation(function (this: HTMLElement) {
+      return this.textContent?.startsWith("Open") ? 48 : 0;
+    });
+    vi.spyOn(HTMLElement.prototype, "clientHeight", "get").mockReturnValue(35);
+    const { rerender } = render(<Orders />);
+    rerender(<Orders />);
+    const said = warn.mock.calls.map((c) => String(c[0])).filter((m) => m.includes("taller than a row"));
+    expect(said).toHaveLength(1);
+    expect(said[0]).toContain('"Open"');
   });
 });

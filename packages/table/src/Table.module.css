@@ -187,7 +187,9 @@
   }
 
   /* A cell's value: one line, whatever it is (ADR-0042). Nothing wraps, text
-     ends in an ellipsis, and the clip leaves room for a focus ring. A column
+     ends in an ellipsis, a component that is wider or taller than its place
+     is cut at its edge - never the row grown - and the clip leaves room for
+     a focus ring. A column
      without a width grows with its values up to the cap - the group span's
      measure - instead of setting every word on a line of its own; a column
      with a width (given, dragged, fitted) is exactly that wide, which
@@ -195,10 +197,16 @@
      do for a field (ADR-0041; parts.tsx, `Cell`). */
   .value {
     max-width: min(20rem, 60vw);
+    max-height: calc(var(--_pitch) - 1px);
     overflow: clip;
     overflow-clip-margin: 3px;
-    text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  /* The ellipsis is text's: a component ends at the edge, where an ellipsis
+     beside the next badge's first pixels read as neither. */
+  .valueText {
+    text-overflow: ellipsis;
   }
 
   .value.sized {
