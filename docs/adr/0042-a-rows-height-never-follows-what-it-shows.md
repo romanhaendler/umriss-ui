@@ -25,8 +25,12 @@ where it stays 26. A row detail is the one line that is as tall as it is - the
 user opened it.
 
 **One line, always.** Nothing in a cell wraps. A cell's value stands in one box
-that ends in an ellipsis; a tip shows a cut value whole, under the pointer and
-at once on the Active cell. A column without a width grows with its values up
+that is never wider than its column nor taller than its row, and what does not
+fit is cut at the box's edge: text with an ellipsis, which a tip completes under
+the pointer and at once on the Active cell; a component plainly, without an
+ellipsis or a tip - beside a cut badge an ellipsis read as neither. A component
+taller than a row is cut as well, and in development the table says so once per
+column. A column without a width grows with its values up
 to `min(20rem, 60vw)` - the group span's measure - and cuts there; a column
 with a width is that wide, never wider and never narrower, by the same
 inline-size containment a field takes (ADR-0041).
