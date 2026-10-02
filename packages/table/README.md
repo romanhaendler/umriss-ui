@@ -113,6 +113,10 @@ stylesheets by hand.
   ("overdue" = past its window and not delivered) through a control of the
   application's own, and counts, resets and travels in the view like any
   other condition.
+* **Rows that hold still** (ADR-0042): every line - head, row, group header,
+  placeholder, footer - is one row pitch tall in every browser, a value stays
+  on its line and shows whole in a tip, and a page keeps its height over a
+  short last page, a grouping, an empty result and a reload.
 * **Around the table**: toolbar, search, column menu, export, paging — each
   usable inside the table toolbar or anywhere else on the page with `of`, and
   one `size` for the whole bar that a control of one's own can match.
@@ -124,8 +128,8 @@ stylesheets by hand.
   resolved, acknowledged or not. The library generates no alarms (ADR-0009).
 * **A million rows on a server**: in manual mode the rows are one page a server
   answered; the table reports the view - search, conditions, sort, page -
-  once per change and shows placeholders over the previous page while the
-  next is on its way.
+  once per change and keeps the previous page, dimmed, while the next is on
+  its way.
 * **Twenty thousand rows** where it has to be: virtualisation, sticky parts,
   columns pinned to either side and column widths that survive a view being
   restored.

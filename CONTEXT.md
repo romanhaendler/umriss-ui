@@ -921,6 +921,17 @@ above it -; folded, it is one line carrying the group's aggregates in the
 columns.
 _Avoid_: gutter, Randspalte, merged cell, rowspan (which it is not built from)
 
+**Row pitch**:
+The one height every line of a table has - the head, a row, a **Group
+header**, a placeholder, the footer: one whole-pixel line of text and the
+density's padding, never less than a small control and 4 px above and below
+it. It follows the density and the pointer, never what a line shows; a value
+that does not fit ends in an ellipsis on its line (ADR-0042). A row detail is
+not held to it - the user opened it. Not the **Provider**'s density, which
+chooses the pitch, and not a **Control size**, which the pitch makes room for.
+_Avoid_: row height, slot (a **Resting place**'s word), Zeilenhöhe, line height
+(the type's)
+
 **Tree rows**:
 A table whose rows have rows: the rows passed in are the roots, `childRows`
 names a row's children, and a **branch** opens its next level beneath it,

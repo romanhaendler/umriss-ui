@@ -29,6 +29,20 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.22.0 – A tag keeps its descenders (unreleased)
+
+### Added
+
+- **`--u-delay-stale`** (200 ms): the moment content being reloaded dims - a
+  quick answer never flickers. `@umriss-ui/table` dims its rows by it.
+
+### Fixed
+
+- **A `Tag`'s text keeps its descenders.** Its line was as tall as its type,
+  and the text clips for its ellipsis: a g, a y or the "kg" of a condition in
+  the table's toolbar lost its tail, by a pixel in WebKit. The line is 16 px
+  now, inside the tag's unchanged 22 px.
+
 ## 0.21.0 – Fields that hold still (Oct. 2026)
 
 A field's width no longer follows what it shows, and one size reaches every

@@ -270,10 +270,35 @@ multiselect leaves when the next chip does not fit (08), the slider's readout
 far from its track (09), a prop for a field that fills a row (10); and
 `#own-styles` copied into the bundle once per module (06).
 
+## Rows: a table holds still
+
+Decided in `row-pitch` (ADR-0042). The promise is the one the widths gave a
+row of filters: **a table holds still while a person reads it** - while it
+pages, filters, groups and reloads.
+
+**Every line is one row pitch.** The head, a row, a group header, a
+placeholder and the footer are one whole-pixel line and the density's padding
+tall, and never less than a small control with 4 px above and below: regular
+36 px, compact 27 under a mouse and 35 under a finger. A whole pixel is the
+point: a row of 36.5 px was rounded three ways by three engines.
+
+**One line per value.** Nothing in a cell wraps; text ends in an ellipsis, and
+a tip shows a cut value whole. A column without a width grows with its values
+up to `min(20rem, 60vw)`; a column with a width is exactly that wide. A whole
+record is the row detail's.
+
+**Small controls in the table.** The table sets `ControlSizeProvider
+size="sm"`, so a button, select or badge in a cell fits the pitch.
+
+**A page keeps its height.** A short last page fills up, a grouped page counts
+the headers it repeats, the first load shows a page of placeholders, an empty
+result keeps the page's height with its message at the top, and loading over
+rows dims them after `--u-delay-stale` instead of replacing them.
+
 ## The words for all this
 
 This document describes the language. `CONTEXT.md` fixes the vocabulary, and the
 two do not repeat each other — where a word here has a definition, it stands
 there: **Token**, **Vocabulary**, **Edge**, **Shadow step**, **Tone**,
-**Glyph**, **Motion origin**, the **Interaction-state canon**, **Natural width**
-and **Control size**.
+**Glyph**, **Motion origin**, the **Interaction-state canon**, **Natural width**,
+**Control size** and **Row pitch**.
