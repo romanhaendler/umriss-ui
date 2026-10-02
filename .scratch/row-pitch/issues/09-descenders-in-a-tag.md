@@ -1,6 +1,6 @@
 # 09 — Descenders in a tag
 
-Status: ready-for-agent
+Status: done
 Type: fix
 
 Found by the user on 2 Oct 2026, in the table toolbar's chips: "dass in den
@@ -27,3 +27,7 @@ of the table toolbar, and every removable tag.
 
 - The probe finds nothing but visually hidden text.
 - The tag's height stays 22 px.
+
+## Comments
+
+**Delivered, 2 Oct 2026.** 91a70c9. WebKit measured the tag's text box 11 px for 12 px of content; now 16/16. The probe over the table demo finds only visually hidden text.

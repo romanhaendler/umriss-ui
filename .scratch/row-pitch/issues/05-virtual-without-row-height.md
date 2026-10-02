@@ -1,6 +1,6 @@
 # 05 — `virtual` without `rowHeight`; no measured heights
 
-Status: ready-for-agent
+Status: done
 Type: refactor
 Blocked by: 01
 
@@ -16,3 +16,7 @@ Blocked by: 01
 
 - Typecheck: `rowHeight` is no longer accepted.
 - The virtualisation suite stays green.
+
+## Comments
+
+**Delivered, 2 Oct 2026.** c95570f. virtual is true or { overscan }; the window measures the head. 20,000 rows scroll 720,036 px in all three engines.
