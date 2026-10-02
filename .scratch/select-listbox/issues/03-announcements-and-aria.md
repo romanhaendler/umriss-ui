@@ -1,6 +1,6 @@
 # 03 — Announcements and ARIA
 
-Status: ready-for-agent
+Status: done
 Type: feature
 
 ## What

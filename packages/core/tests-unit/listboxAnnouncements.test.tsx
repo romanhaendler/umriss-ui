@@ -12,6 +12,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { Combobox } from "../src/components/Combobox";
 import { MultiSelect } from "../src/components/MultiSelect";
 import { CommandPalette } from "../src/components/CommandPalette";
+import { Select } from "../src/components/Select";
 import { LanguageProvider } from "../src/lib/language";
 import { GERMAN_WORDING } from "../src/lib/language/de";
 import { ANNOUNCE_REST } from "../src/lib/announce";
@@ -182,5 +183,46 @@ describe("CommandPalette - what it says", () => {
     expect(heard(dialog)).toBe("TableFilterStrip, Data");
     fireEvent.keyDown(field, { key: "ArrowDown" });
     expect(heard(dialog)).toBe("TreeView, Structure");
+  });
+});
+
+/* The select's own list says what the Combobox's says (ADR-0043). */
+describe("Select - what it says", () => {
+  const setup = (value: string) => {
+    render(
+      <Select aria-label="Letter" defaultValue={value}>
+        {OPTIONS.map((option) => (
+          <option key={option.value} value={option.value} disabled={option.disabled}>
+            {option.label}
+          </option>
+        ))}
+      </Select>,
+    );
+    return screen.getByRole("combobox");
+  };
+
+  it("counts the options on opening, by the pointer and by the keys", () => {
+    const select = setup("a");
+    fireEvent.mouseDown(select, { button: 0 });
+    expect(heard()).toBe("4 options");
+    fireEvent.mouseDown(select, { button: 0 });
+    fireEvent.keyDown(select, { key: "ArrowDown" });
+    expect(heard()).toBe("4 options");
+  });
+
+  it("names the option the keys moved onto, with its state", () => {
+    const select = setup("c");
+    fireEvent.keyDown(select, { key: "ArrowDown" });
+    fireEvent.keyDown(select, { key: "ArrowUp" });
+    expect(heard()).toBe("Beta, unavailable");
+    fireEvent.keyDown(select, { key: "ArrowDown" });
+    expect(heard()).toBe("Gamma, selected");
+  });
+
+  it("counts nothing after a choice made before the rest", () => {
+    const select = setup("a");
+    fireEvent.keyDown(select, { key: "ArrowDown" });
+    fireEvent.keyDown(select, { key: "Enter" });
+    expect(heard()).toBe("");
   });
 });

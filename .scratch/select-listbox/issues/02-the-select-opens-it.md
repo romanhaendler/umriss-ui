@@ -1,6 +1,6 @@
 # 02 — The select opens it
 
-Status: ready-for-agent
+Status: done
 Type: feature
 
 ## What
