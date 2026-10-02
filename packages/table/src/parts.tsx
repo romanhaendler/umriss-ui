@@ -456,6 +456,24 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
     }
   });
 
+  /* A value taller than a row is cut at the row's edge (ADR-0042); in
+     development the table says so once per column, so that a component of the
+     application's own is not cut unnoticed. */
+  useEffect(() => {
+    const table = tableRef.current;
+    if (!DEV || !table) return;
+    for (const box of Array.from(table.querySelectorAll<HTMLElement>(`tbody .${styles.value}`))) {
+      if (box.scrollHeight <= box.clientHeight + 1) continue;
+      const cell = box.closest("td, th");
+      const at = cell?.parentElement ? Array.from(cell.parentElement.children).indexOf(cell) : -1;
+      const label = table.tHead?.rows[0]?.cells[at]?.textContent?.trim() || `column ${at + 1}`;
+      warnOnce(
+        `taller-than-a-row:${label}`,
+        `a value in "${label}" is taller than a row and is cut at its edge. A row's height never follows what it shows (ADR-0042): draw it with a small control, or show it whole in the row's detail.`,
+      );
+    }
+  });
+
   /* A virtual window counts in row pitches (ADR-0042): the head is one, and
      the window learns it from there - the density, a finger, a theme of the
      application's may each change it. */
@@ -1118,7 +1136,8 @@ function CutValueTip({ table: tableRef }: { table: RefObject<HTMLTableElement | 
       clearTimeout(timer);
       const cell = target instanceof Element ? target.closest("td, th") : null;
       const box = cell?.querySelector<HTMLElement>(`:scope > .${styles.value}, :scope .${styles.treeText} > .${styles.value}`);
-      if (!cell || !box || box.scrollWidth <= box.clientWidth + 1) return setTip(null);
+      /* Text only: a cut badge or meter has no words that say it whole. */
+      if (!cell || !box || box.childElementCount > 0 || box.scrollWidth <= box.clientWidth + 1) return setTip(null);
       /* Inside a dialog the tip portals there, or it lies behind the dialog -
          the order of core's floating surfaces. */
       const portal = table.closest("dialog") ?? portalTarget() ?? document.body;
@@ -1637,9 +1656,10 @@ function Cell({
   /* One line, whatever the value is (ADR-0042): the box neither wraps nor
      grows the row, and what does not fit ends in an ellipsis that the tip
      completes. Beneath an editor it stays, unseen, to hold the cell's size. */
+  const text = typeof content === "string";
   content = (
     <div
-      className={cx(styles.value, width !== undefined && styles.sized, editor && styles.editingValue)}
+      className={cx(styles.value, text && styles.valueText, width !== undefined && styles.sized, editor && styles.editingValue)}
       /* Contained, the box answers the layout with the column's width less its
          cell's padding (Table.module.css, `.sized`): the value neither widens
          the column nor lets a narrow page squeeze it. */
