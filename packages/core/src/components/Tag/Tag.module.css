@@ -42,9 +42,14 @@
     opacity: 0.5;
   }
 
+  /* The text clips for its ellipsis, so its line must hold the descenders:
+     at the tag's line of 1 a "g" or "y" lost its tail (row-pitch 09). 16 px
+     for the 11 px type, a whole pixel - 1.5 would be 16.5 - and 3 px from
+     either edge of the 22 px tag. */
   .text {
     overflow: hidden;
     text-overflow: ellipsis;
+    line-height: 16px;
   }
 
   /* ---- Tones: the same surfaces as with the badge ---- */
