@@ -150,7 +150,9 @@ export function Tooltip({ content, children, delay = 300 }: TooltipProps) {
             // Do not show before the first measurement, or it flashes in the top left.
             style={{ ...position, visibility: position ? undefined : "hidden" }}
           >
-            <SurfaceSizeReset>{content}</SurfaceSizeReset>
+            <SurfaceSizeReset>
+              <div className={styles.content}>{content}</div>
+            </SurfaceSizeReset>
           </div>,
           target,
         )}

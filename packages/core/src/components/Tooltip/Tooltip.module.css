@@ -21,6 +21,10 @@
     animation: tooltipIn var(--u-duration-fast) var(--u-ease-out);
   }
 
+  .content {
+    composes: ink from "#own-styles";
+  }
+
   /* Exit: faster, fading where it stands. */
   .tooltip[data-closing] {
     animation: tooltipOut var(--u-duration-exit-fast) var(--u-ease-exit) forwards;
