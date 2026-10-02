@@ -35,6 +35,12 @@
     overflow: hidden;
   }
 
+  /* Clearable: room for the cross and its gap, kept whether it stands or
+     not - the chips share what is left. */
+  .fieldClearable {
+    --_chrome: calc(var(--u-space-2) + var(--u-space-1) + 10px + var(--u-space-3) + 18px + var(--u-space-2));
+  }
+
   /* The small size: `Input`'s, so that the two stand level in a toolbar. The
      chips are 20px and keep their size; the texts take the small one. */
   .sm {
@@ -244,6 +250,49 @@
     /* Core's AngleGlyph turned down, as in Select and Combobox. */
     color: var(--u-color-text-secondary);
     transform: rotate(90deg);
+  }
+
+  /* The cross that empties the selection: Combobox's, between the chips and
+     the chevron. */
+  .clear {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    border: none;
+    background: none;
+    border-radius: var(--u-radius-full);
+    color: var(--u-color-text-muted);
+    cursor: pointer;
+    animation: clearIn var(--u-duration-fast) var(--u-ease-out);
+    transition:
+      background-color var(--u-transition),
+      color var(--u-transition);
+  }
+
+  .clear:hover {
+    background: var(--u-color-surface-sunken);
+    color: var(--u-color-text);
+  }
+
+  .clear:active {
+    background: var(--u-color-surface-pressed);
+  }
+
+  @keyframes clearIn {
+    from {
+      opacity: 0;
+      transform: scale(0.7);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .clear {
+      animation: none;
+    }
   }
 
   /* ---------------- Panel ---------------- */

@@ -5,7 +5,7 @@ import type { DateRange } from "../../../src";
 
 export const title = "A row that holds still";
 export const lead =
-  "In a row a field is its natural width - a count of characters of its own type - and never what it shows. Choose carriers, clear them, pick the long status: nothing in the row moves. The chips that do not fit stand as \"+N\", and the figures below are the fields' widths, measured live.";
+  "In a row a field is its natural width - a count of characters of its own type - and never what it shows. Choose carriers, clear them one by one or all at once, pick the long status: nothing in the row moves. The chips that do not fit stand as \"+N\", and the figures below are the fields' widths, measured live.";
 
 const CARRIERS = ["DHL", "UPS", "DPD", "GLS", "Hermes", "FedEx", "TNT", "DB Schenker", "Kühne + Nagel", "Dachser"].map(
   (name) => ({ value: name, label: name }),
@@ -49,7 +49,7 @@ export default function ARowThatHoldsStill() {
           <option>Out for delivery</option>
           <option>Held at customs until the papers of origin are checked</option>
         </Select>
-        <MultiSelect ref={carriersRef} aria-label="Carriers" placeholder="Every carrier" options={CARRIERS} value={carriers} onChange={setCarriers} />
+        <MultiSelect ref={carriersRef} aria-label="Carriers" placeholder="Every carrier" options={CARRIERS} value={carriers} onChange={setCarriers} clearable />
         <DateRangePicker aria-label="Shipped" value={period} onChange={setPeriod} clearable />
         <Switch label="Late only" />
       </Stack>

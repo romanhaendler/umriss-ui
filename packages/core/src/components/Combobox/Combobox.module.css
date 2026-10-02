@@ -83,6 +83,20 @@
     pointer-events: none;
   }
 
+  /* The chevron's target: the field's right edge up to the cross, so that
+     the pointer says the panel opens there and not that text is typed. */
+  .toggle {
+    position: absolute;
+    inset-block: 0;
+    right: 0;
+    width: calc(var(--u-space-3) + 16px);
+    cursor: pointer;
+  }
+
+  .input:disabled ~ .toggle {
+    pointer-events: none;
+  }
+
   .panel {
     background: var(--u-color-surface);
     border-radius: var(--u-radius-md);

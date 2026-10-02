@@ -51,7 +51,7 @@ const INCIDENTS: readonly Incident[] = [
 ];
 
 export const title = "Filter incidents by service";
-export const lead = "An empty value means no filter; the panel's search, select-all and chosen view help once the list is long.";
+export const lead = "An empty value means no filter, and the cross takes the field back there in one click; the panel's search, select-all and chosen view help once the list is long.";
 
 export default function FilterIncidentsByService() {
   const [services, setServices] = useState<string[]>(["checkout", "billing"]);
@@ -66,6 +66,7 @@ export default function FilterIncidentsByService() {
           placeholder="All services"
           searchPlaceholder="Search services"
           options={SERVICES.map((s) => ({ value: s.id, label: s.name }))}
+          clearable
         />
       </FormField>
       <Stack gap={2}>

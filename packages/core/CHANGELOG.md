@@ -29,6 +29,27 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## Unreleased
+
+### Added
+
+- **`clearable` on `MultiSelect`**, as on `Select` and `Combobox`: a cross
+  between the chips and the chevron empties the selection, without opening
+  the panel; a chosen value whose option is disabled stays, as with "Select
+  none". The field keeps the cross's room whether it stands or
+  not, so a clearable multiselect is 26 px wider at the same `chars`, and the
+  chips share what is left. The page MultiSelect shows it in "Filter
+  incidents by service".
+
+### Fixed
+
+- **The `Combobox`'s chevron shows the pointer** and opens the panel, or
+  closes it; the focus stays in the field. It showed the text cursor of the
+  input beneath it.
+- **A `Select` no longer flickers as it opens.** Chromium takes a click on a
+  select for keyboard focus, and the focus ring faded in while the native list
+  opened over it; the ring now comes at once.
+
 ## 0.22.0 – A tag keeps its descenders (Oct. 2026)
 
 ### Added
