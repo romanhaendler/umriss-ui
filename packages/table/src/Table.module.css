@@ -419,6 +419,16 @@
 
   /* ---- Empty and loading ----------------------------------------------- */
 
+  /* Loading over rows keeps them (ADR-0042): they dim and take no pointer
+     until the answer is in - after 200 ms, so that a quick answer never
+     flickers. Leaving, the transition is the plain one: the rows come back at
+     once. */
+  .table[data-stale] > tbody {
+    opacity: 0.5;
+    pointer-events: none;
+    transition: opacity var(--u-duration-fast) var(--u-ease-out) 200ms;
+  }
+
   .emptyCell {
     padding: 0;
     border-bottom: none;

@@ -382,6 +382,9 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
   const resolvedDensity = useDensityFor(density, "regular");
   const baseId = useId();
   const tableRef = useRef<HTMLTableElement>(null);
+  /* How many lines a page of the table last held - what an empty result and
+     placeholders keep the height of (ADR-0042). */
+  const heldLines = useRef(0);
   const grid = useGridState();
   /* Which pinned blocks stick in the width the scroll area has - measured
      (`PinPlacement`, `blocksThatStick`). */
@@ -431,31 +434,24 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
     }
   });
 
-  /* Manual mode (M2): the placeholders stand where the previous page stood,
-     at the height its rows had and in the widths its columns had - a
-     placeholder is lower than a row with a checkbox in it, and the columns of
-     an automatic layout would shift to the placeholders' widths while the
-     answer is out. Measured from the rendered rows, since only the layout
-     knows them. */
-  const previousPage = useRef<{ height: number; widths: number[] } | null>(null);
+  /* Manual mode (M2): placeholders that stand where a page of rows stood
+     keep its columns' widths - the columns of an automatic layout would
+     shift to the placeholders' while the answer is out. Their height is the
+     pitch's (ADR-0042). Measured from the rendered rows, since only the
+     layout knows them. */
+  const previousWidths = useRef<number[] | null>(null);
   useLayoutEffect(() => {
     const body = tableRef.current?.tBodies[0];
     if (!body || !registry.manual) return;
     if (!loading) {
-      const rendered = Array.from(body.querySelectorAll<HTMLTableRowElement>(":scope > tr[data-motion]"));
-      if (rendered.length === 0) return;
-      previousPage.current = {
-        height: rendered.reduce((sum, tr) => sum + tr.getBoundingClientRect().height, 0) / rendered.length,
-        widths: Array.from(rendered[0]!.cells, (cell) => cell.getBoundingClientRect().width),
-      };
+      const first = body.querySelector<HTMLTableRowElement>(":scope > tr[data-motion]");
+      if (first) previousWidths.current = Array.from(first.cells, (cell) => cell.getBoundingClientRect().width);
       return;
     }
-    const previous = previousPage.current;
-    if (!previous) return;
-    for (const tr of Array.from(body.rows)) tr.style.height = `${previous.height}px`;
+    const widths = previousWidths.current;
     const first = body.rows[0];
-    if (first?.cells.length === previous.widths.length) {
-      Array.from(first.cells).forEach((cell, i) => (cell.style.width = `${previous.widths[i]}px`));
+    if (widths && first?.cells.length === widths.length) {
+      Array.from(first.cells).forEach((cell, i) => (cell.style.width = `${widths[i]}px`));
     }
   });
 
@@ -678,16 +674,36 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
     </tbody>
   );
 
+  /* A page holds its height (ADR-0042). Every line is one pitch, so a page
+     of the table is `pageSize` pitches whatever it shows: with a pagination
+     bar and more than one page, a short last page ends in a filler of the
+     lines it lacks, and an empty result keeps the height of the lines a page
+     last held. A grouped page is `pageSize` lines as well, its repeated
+     headers counted (grouping.ts, `pageLines`). */
+  const pageSize = (registry.paginates() || snapshot.manual) && !virtual ? snapshot.pageSize : 0;
+  const shownLines = lines ? lines.length : rows.length;
+  if (pageSize && !loading && shownLines > 0) {
+    heldLines.current = Math.min(projection.lines?.length ?? projection.filtered.length, pageSize);
+  }
+  const filler =
+    pageSize && snapshot.pageCount > 1 && shownLines > 0 && shownLines < pageSize ? (
+      <FillerRow height={`calc(var(--_pitch) * ${pageSize - shownLines})`} colSpan={columnCount} />
+    ) : null;
+  /* Loading over rows keeps the rows: they dim, after a moment, and take no
+     pointer until the answer is in. Placeholders stand only where there is
+     nothing to keep. */
+  const stale = loading && shownLines > 0;
+
   let body: ReactNode;
   let emptyBody: ReactNode = null;
-  if (loading) {
+  if (loading && !stale) {
     body = (
       <tbody>
         <LoadingRows
           columns={columnCount}
-          /* Over a server's page: as many placeholders as the page had rows,
-             so that nothing below jumps while the next one is on its way. */
-          rows={snapshot.manual ? rows.length || snapshot.pageSize : undefined}
+          /* A page's worth, or the lines the page last held: nothing below
+             moves while the answer is on its way. */
+          rows={pageSize ? heldLines.current || pageSize : undefined}
           rightAligned={[
             ...Array.from({ length: controlColumns + (spanEntry ? 1 : 0) }, () => false),
             ...dataColumns.map((e) => isRightAligned(registry.kindOf(e, hook.rows), e.spec.rightAligned)),
@@ -699,7 +715,13 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
     body = emptyBody = (
       <tbody>
         <tr data-grid-line={lineKey("empty")}>
-          <td colSpan={columnCount} className={styles.emptyCell}>
+          <td
+            colSpan={columnCount}
+            className={styles.emptyCell}
+            /* The height the page last had; the message at its top, where the
+               rows began. */
+            style={pageSize && heldLines.current ? { height: `calc(var(--_pitch) * ${heldLines.current})`, verticalAlign: "top" } : undefined}
+          >
             <div className={styles.empty}>
               {(snapshot.manual || hook.admitted.length > 0) && restricted ? (
                 <>
@@ -785,7 +807,10 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
         {shown.map(renderLine)}
       </VirtualBody>
     ) : (
-      <tbody>{lines.map(renderLine)}</tbody>
+      <tbody>
+        {lines.map(renderLine)}
+        {filler}
+      </tbody>
     );
   } else if (virtual) {
     body = (
@@ -794,7 +819,12 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
       </VirtualBody>
     );
   } else {
-    body = <tbody>{rows.map((row, i) => renderRow(row, i, i))}</tbody>;
+    body = (
+      <tbody>
+        {rows.map((row, i) => renderRow(row, i, i))}
+        {filler}
+      </tbody>
+    );
   }
 
   return (
@@ -828,6 +858,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
              for the header row and one for the footer row, which count per ARIA. */
           aria-rowcount={virtual ? (projection.lines ?? projection.shown ?? projection.filtered).length + 1 + (footerShown ? 1 : 0) : undefined}
           aria-busy={loading || undefined}
+          data-stale={stale || undefined}
           className={cx(
             styles.table,
             resolvedDensity === "compact" && styles.compact,
@@ -1942,8 +1973,8 @@ function LoadingRows({ columns, rightAligned = [], rows = 4 }: { columns: number
 
 const TabStopContext = createContext<number>(0);
 
-function FillerRow({ height, colSpan }: { height: number; colSpan: number }) {
-  if (height <= 0) return null;
+function FillerRow({ height, colSpan }: { height: number | string; colSpan: number }) {
+  if (typeof height === "number" && height <= 0) return null;
   return (
     <tr aria-hidden="true" data-filler="" className={styles.fillerRow}>
       <td colSpan={colSpan} style={{ height }} />
