@@ -29,6 +29,19 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.21.1 – A long list that stays (Oct. 2026)
+
+### Fixed
+
+- **A tick in a long `MultiSelect` no longer empties the panel.** The hidden
+  input of `Checkbox`, `Switch` and `RadioGroup` hung from the nearest
+  positioned ancestor - in a popover the panel, past the list that scrolls -
+  and the focus a click gave it scrolled the whole panel down to where the
+  row would stand unscrolled: the panel stayed open and white. Each row now
+  holds its own input; nothing moves on the page.
+
+---
+
 ## 0.21.0 – Fields that hold still (Oct. 2026)
 
 A field's width no longer follows what it shows, and one size reaches every
