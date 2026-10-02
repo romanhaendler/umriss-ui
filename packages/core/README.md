@@ -208,8 +208,8 @@ The table and the alarm list are not part of this package. They live in
 
 The core scope is complete, and so are the command palette, `Dock`, the
 danger text tone, the pass-through of rules 1 and 2 above, the six basic
-components and the layout extras, forced colours and the listbox
-announcements. What is still open is one check a person makes: the listbox
+components and the layout extras, forced colours, the listbox
+announcements, and the fields' widths and sizes (ADR-0041). What is still open is one check a person makes: the listbox
 announcements heard through VoiceOver (`.scratch/listbox-announcements/`,
 ticket 02).
 
