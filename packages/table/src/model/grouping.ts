@@ -302,20 +302,30 @@ export function linesOf<Z>(groups: readonly RowGroup<Z>[], folded: ReadonlySet<s
 }
 
 /**
- * One page of lines. A page counts lines - headers and rows alike; a page that
- * begins inside a group repeats its headers above it, uncounted and marked
- * continued, and its first row shows the span's value again. A size of zero
- * is one page holding everything.
+ * One page of lines. A page counts lines - headers and rows alike - and is
+ * `size` lines long, the last one excepted: a page that begins inside a group
+ * repeats its headers above it, marked continued, and they take their room
+ * from the page instead of lengthening it, so that every page of a grouped
+ * table is as tall as the next (ADR-0042). Its first row shows the span's
+ * value again. The pages are cut one after the other, each with at least one
+ * line of its own. A size of zero is one page holding everything.
  */
 export function pageLines<Z>(
   lines: readonly Line<Z>[],
   page: number,
   size: number,
 ): { lines: Line<Z>[]; page: number; pageCount: number } {
-  const per = size > 0 ? size : lines.length || 1;
-  const pageCount = Math.max(1, Math.ceil(lines.length / per));
+  const starts = [0];
+  if (size > 0) {
+    for (let at = 0; ; ) {
+      at += Math.max(1, size - (lines[at]?.parents.length ?? 0));
+      if (at >= lines.length) break;
+      starts.push(at);
+    }
+  }
+  const pageCount = starts.length;
   const current = Math.min(Math.max(1, page), pageCount);
-  const slice = lines.slice((current - 1) * per, current * per);
+  const slice = size > 0 ? lines.slice(starts[current - 1], starts[current] ?? lines.length) : [...lines];
   return { lines: withContinuation(slice), page: current, pageCount };
 }
 

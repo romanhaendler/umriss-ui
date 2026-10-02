@@ -196,10 +196,22 @@ describe("lines – what a grouped table shows", () => {
   it("pages over lines, repeating at the top of a page what it begins inside of", () => {
     const lines = linesOf(groups, new Set());
     const second = pageLines(lines, 2, 5);
-    expect(second.pageCount).toBe(4);
-    // Line 5 is A-1058, the first of Otto & Söhne; line 6 is A-1060.
-    expect(shape(second.lines)).toEqual(["H Line 1 …", "S Otto & Söhne … · A-1060", "A-1061", "H Line 2", "S Brenner GmbH · A-1043", "S Hartmann KG · A-1049"]);
-    expect(pageLines(lines, 9, 5).page).toBe(4);
+    // Line 5 is A-1058, the first of Otto & Söhne; line 6 is A-1060. The
+    // repeated header takes its room from the page (ADR-0042).
+    expect(shape(second.lines)).toEqual(["H Line 1 …", "S Otto & Söhne … · A-1060", "A-1061", "H Line 2", "S Brenner GmbH · A-1043"]);
+    expect(pageLines(lines, 99, 5).page).toBe(second.pageCount);
+  });
+
+  it("makes every page but the last as long as the page size, and loses no line", () => {
+    const lines = linesOf(groups, new Set());
+    for (const size of [1, 2, 3, 5, 7]) {
+      const { pageCount } = pageLines(lines, 1, size);
+      const pages = Array.from({ length: pageCount }, (_, i) => pageLines(lines, i + 1, size).lines);
+      pages.slice(0, -1).forEach((page) => expect(page.length).toBe(Math.max(size, page.filter((l) => l.kind === "header" && l.continued).length + 1)));
+      expect(pages.at(-1)!.length).toBeLessThanOrEqual(Math.max(size, pages.at(-1)!.filter((l) => l.kind === "header" && l.continued).length + 1));
+      const own = pages.flatMap((page) => page.filter((l) => !(l.kind === "header" && l.continued)));
+      expect(own).toHaveLength(lines.length);
+    }
   });
 });
 
