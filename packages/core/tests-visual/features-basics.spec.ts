@@ -136,6 +136,26 @@ test("Switch toggles on Space and on its label", async ({ page }) => {
   await expect(control).toBeChecked();
 });
 
+/* The hidden input hangs from its own row. It hung from the nearest
+   positioned ancestor - in the multi-select's panel the panel, past the list
+   that scrolls - and the focus a click gave it scrolled the whole panel down
+   to where the row would stand unscrolled: a long list went white. */
+test("Checkbox, switch and radio hold their input in their row", async ({ page }) => {
+  const ownRow = (input: Element) => (input as HTMLElement).offsetParent === input.closest("label");
+
+  await openExample(page, "multiselect", "chips-in-the-field");
+  await page.locator('[data-example="chips-in-the-field"] [aria-haspopup="dialog"]').first().click();
+  const boxes = page.getByRole("dialog").getByRole("checkbox");
+  await expect(boxes.first()).toBeVisible();
+  for (const box of await boxes.all()) expect(await box.evaluate(ownRow)).toBe(true);
+
+  await openExample(page, "switch", "on-and-off");
+  expect(await page.getByRole("switch", { name: "Page me at night", exact: true }).evaluate(ownRow)).toBe(true);
+
+  await openExample(page, "radiogroup", "states");
+  expect(await page.locator('[data-example="states"]').getByRole("radio").first().evaluate(ownRow)).toBe(true);
+});
+
 test("Slider follows the keys of the slider pattern", async ({ page }) => {
   await openExample(page, "slider", "canary-traffic");
   const slider = page.getByRole("slider", { name: "Canary traffic, %" });
