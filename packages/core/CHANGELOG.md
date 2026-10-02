@@ -29,6 +29,19 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.21.2 – Text that reads in a tooltip (Oct. 2026)
+
+### Fixed
+
+- **`Text` and `Heading` read inside a `Tooltip`.** The tooltip stands on the
+  text colour, and `Text` set that same colour on itself: a tooltip built from
+  `Text` stood black on black, in the dark theme light on light. The
+  tooltip's content now reads the three text colours turned round - `default`
+  in the tooltip's own type colour, `secondary` and `muted` stepping back
+  towards its ground, each above 4.5:1 in both themes. A tooltip of plain text
+  looks as before. The Tooltip page shows it in "Show how a figure came
+  about".
+
 ## 0.21.1 – A long list that stays (Oct. 2026)
 
 ### Fixed
