@@ -8,6 +8,7 @@
      site/<package>/<page>.md   the same page as Markdown - its twin
      site/<package>/index.md    the twin of the demo's scenarios page
      site/<package>/<old>/      a forwarder where a page's id has changed
+     site/<package>/changelog/  its CHANGELOG.md, rendered in the front page's layout
      site/sitemap.xml           every address above, no forwarder
      site/llms.txt              the index for coding agents
      site/<package>/search.json the package's search fragment
@@ -41,7 +42,7 @@
    files stand in `scripts/site-verification/` and are copied as they are.
 
    The documents are the workspace's own markdown - the design language, the
-   standards, what umriss-ui is not - read and rendered here, never copied
+   standards, what umriss-ui is not, each package's changelog - read and rendered here, never copied
    (.scratch/concepts-and-changelog-pages, ADR-0046). Their list stands in
    `packages/demo/src/tooling/documents.ts`.
 
@@ -57,9 +58,9 @@ import { fileURLToPath } from "node:url";
    imports nothing (and why `build:pages` strips types). */
 import { PACKAGES as LIST } from "../packages/demo/src/packages.ts";
 import { dependencyLine, installCommand } from "../packages/demo/src/tooling/install.ts";
-import { documentFaults, forwarderHtml, frontFaults, searchFaults, siteFaults, siteSearch, twinFaults, typeLinkFaults } from "../packages/demo/src/tooling/site.ts";
+import { documentFaults, forwarderHtml, frontFaults, searchFaults, siteFaults, siteSearch, twinFaults, typeLinkFaults, whatsNewFaults } from "../packages/demo/src/tooling/site.ts";
 import { adrLinksOf, siteLeaks } from "../packages/demo/src/tooling/references.ts";
-import { DOCUMENTS, renderDocument } from "../packages/demo/src/tooling/documents.ts";
+import { DOCUMENTS, newestRelease, renderDocument } from "../packages/demo/src/tooling/documents.ts";
 import { EDIT_LINK, editHref } from "../packages/demo/src/tooling/edit.ts";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -196,13 +197,24 @@ for (const dir of PACKAGES) {
 
 /* The workspace's own documents (.scratch/concepts-and-changelog-pages): each
    rendered from its file as it stands now. A link to a file that does not
-   exist stops the build here. */
+   exist stops the build here, and so does a changelog whose newest release is
+   not its manifest's version - a release without its entry. */
 const adrs = adrLinksOf(readdirSync(join(ROOT, "docs", "adr")));
-const documents = DOCUMENTS.map((document) => ({
-  ...document,
-  url: HOME + document.path,
-  ...renderDocument(readFileSync(join(ROOT, document.source), "utf8"), document.source, { home: HOME, exists: (path) => existsSync(join(ROOT, path)), adrs }),
-}));
+const documents = DOCUMENTS.map((document) => {
+  const markdown = readFileSync(join(ROOT, document.source), "utf8");
+  return {
+    ...document,
+    url: HOME + document.path,
+    ...renderDocument(markdown, document.source, { home: HOME, exists: (path) => existsSync(join(ROOT, path)), adrs }),
+    release: document.changelogOf === undefined ? undefined : newestRelease(markdown, document.source),
+  };
+});
+for (const row of rows) {
+  row.changelog = documents.find((document) => document.changelogOf === row.dir);
+  const { release, source } = row.changelog;
+  if (release.version !== row.version) throw new Error(`${source}: its newest release is ${release.version}, its manifest's version ${row.version}.`);
+}
+const concepts = documents.filter((document) => document.changelogOf === undefined);
 for (const document of documents) {
   urls.push(document.url);
   leaks.push(...siteLeaks(document.html).map((leak) => `${document.url}: ${leak} in the text`));
@@ -254,16 +266,22 @@ const front = {
             <span class="needs">${dependencyLine(row)}</span>
           </a></li>`;
   }).join("\n          "),
+  /* Each package's newest release, linked to its heading in the changelog. */
+  news: LIST.map((p, i) => {
+    const { path, release } = rows[i].changelog;
+    return `<li><a href="./${path}#${release.anchor}"><strong>${escape(p.name)} ${escape(release.version)}</strong> – ${escape(release.title)} <span>(${escape(release.month)})</span></a></li>`;
+  }).join("\n          "),
   count: String(urls.length - 1),
+  /* A package's changelog stands in its group, the other documents in theirs. */
   index: rows
     .map(
       (row) => `<h3><a href="./${row.dir}/"><code>${escape(row.name)}</code></a></h3>
-        <ul>${row.pages.map((page) => `<li><a href="./${row.dir}/${page.path}">${escape(page.name)}</a></li>`).join("")}</ul>`,
+        <ul>${row.pages.map((page) => `<li><a href="./${row.dir}/${page.path}">${escape(page.name)}</a></li>`).join("")}<li><a href="./${row.changelog.path}">${escape(row.changelog.name)}</a></li></ul>`,
     )
     .concat(`<h3>Documents</h3>
-        <ul>${documents.map((document) => `<li><a href="./${document.path}">${escape(document.name)}</a></li>`).join("")}</ul>`)
+        <ul>${concepts.map((document) => `<li><a href="./${document.path}">${escape(document.name)}</a></li>`).join("")}</ul>`)
     .join("\n        "),
-  documents: documents.map((document) => `<a href="./${document.path}">${escape(document.name)}</a>`).join(" · "),
+  documents: concepts.map((document) => `<a href="./${document.path}">${escape(document.name)}</a>`).join(" · "),
   repository: REPOSITORY,
 };
 const FRONT_PAGE = readFileSync(join(ROOT, "scripts", "front-page.html"), "utf8");
@@ -347,6 +365,17 @@ Every package carries the full text of its installed version as \`node_modules/<
 ## Packages
 
 ${rows.map((row) => `- [${row.name}](${HOME}${row.dir}/llms.txt): ${row.description} Full text: [llms-full.txt](${HOME}${row.dir}/llms-full.txt)`).join("\n")}
+
+## Documents
+
+What the library is about as a whole, and what each release changed for a caller.
+
+${documents
+  .map(({ title, url, description, release }) => {
+    const what = release === undefined ? description : `Every version's changes for a caller, newest first; the newest is ${release.version} – ${release.title} (${release.month}).`;
+    return `- [${title.replace(/ – umriss-ui$/, "")}](${url}): ${what}`;
+  })
+  .join("\n")}
 `,
 );
 
@@ -358,11 +387,11 @@ ${rows.map((row) => `- [${row.name}](${HOME}${row.dir}/llms.txt): ${row.descript
    in every llms.txt leads to a file (pages-as-markdown); the front page keeps
    its words, its links lead into the site and its tiles' previews are there
    and light enough (site-front-page); every document has its page, its links
-   lead to sitemap addresses, it ends with a suggested edit naming it, and
-   no page links ADR-0032 on GitHub
-   (concepts-and-changelog-pages); every find of the search lands on a
-   sitemap page and an anchor it carries, and the index keeps its budget
-   (one-search). A build that breaks
+   lead to sitemap addresses, it ends with a suggested edit naming it, no
+   page links ADR-0032 or a changelog on GitHub, and "What's new" leads to a
+   version on each changelog (concepts-and-changelog-pages); every find of
+   the search lands on a sitemap page and an anchor it carries, and the index
+   keeps its budget (one-search). A build that breaks
    it fails here, before it is deployed. */
 const files = new Map();
 const texts = new Map();
@@ -398,9 +427,17 @@ const faults = [
   ...documentFaults(
     documents.map((document) => document.url),
     files,
-    urls,
+    /* A changelog may name a package's `llms-full.txt` - a file of the site,
+       though no page of it. */
+    [...urls, ...texts.keys()],
     HOME,
   ),
+  ...whatsNewFaults(
+    files.get(HOME) ?? "",
+    HOME,
+    files,
+    rows.map((row) => row.changelog.url),
+  ).map((fault) => `${HOME}: ${fault}`),
   ...urls.filter((url) => files.has(url) && !linksFavicon(files.get(url), url)).map((url) => `${url}: no favicon`),
   /* No props row says a prop accepts nothing: a `never` is a prohibition the
      reader merges away (types-without-holes), never a type to show. Every type

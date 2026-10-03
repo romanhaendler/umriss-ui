@@ -8,6 +8,7 @@
    `site.ts`. It runs in Node, as the tooling beside it does. */
 
 import { Marked, type Token, type Tokens } from "marked";
+import { PACKAGES } from "../packages.ts";
 import { linkAdrs, type AdrLinks } from "./references.ts";
 
 /** A document of the repository that is a page of the site. */
@@ -20,16 +21,57 @@ export interface SiteDocument {
   title: string;
   /** What a link to it says, in the front page's foot and index. */
   name: string;
+  /** The package whose changelog it is: linked from that package's pages and
+      its group of the front page's index, not from the front page's foot. */
+  changelogOf?: string;
 }
 
 /** Every document the site renders, and only these: what a caller reads to
     understand the library as a whole. The other ADRs, the journal, CONTEXT.md
-    and the contributor documents stay on GitHub. Adding one is a line here. */
+    and the contributor documents stay on GitHub. Adding one is a line here.
+    Each package's changelog stands in its package's directory. */
 export const DOCUMENTS: readonly SiteDocument[] = [
   { source: "docs/design-language.md", path: "design-language/", title: "Design language – umriss-ui", name: "Design language" },
   { source: "docs/standards.md", path: "standards/", title: "Industrial standards – umriss-ui", name: "Standards" },
   { source: "docs/adr/0032-what-umriss-is-not.md", path: "what-umriss-ui-is-not/", title: "What umriss-ui is not – umriss-ui", name: "What umriss-ui is not" },
+  ...PACKAGES.map((p) => ({ source: `packages/${p.id}/CHANGELOG.md`, path: `${p.id}/changelog/`, title: `Changelog – ${p.npm}`, name: "Changelog", changelogOf: p.id })),
 ];
+
+/** A version of a package, as its changelog's heading names it. */
+export interface Release {
+  version: string;
+  title: string;
+  /** "Oct. 2026" */
+  month: string;
+  /** The heading's id on the changelog's page: `v0-24-0`. */
+  anchor: string;
+}
+
+/* A version at the head of a heading - `internal` before the first release -
+   and its id, the dots made dashes. */
+const VERSION = /^(?:internal )?(\d+\.\d+\.\d+(?:-[\da-z.]+)?)(?= |$)/i;
+const versionAnchor = (text: string) => {
+  const version = VERSION.exec(text)?.[1];
+  return version === undefined ? undefined : `v${version.replace(/\./g, "-")}`;
+};
+
+/** A changelog's version heading of the released shape, `0.24.0 – The
+    select's own list (Oct. 2026)`, read; any other heading is undefined. */
+export function readRelease(heading: string): Release | undefined {
+  const match = /^(\d+\.\d+\.\d+(?:-[\da-z.]+)?) – (.+) \(([A-Z][a-z]+\.? \d{4})\)$/.exec(heading.trim());
+  if (match === null) return undefined;
+  return { version: match[1]!, title: match[2]!, month: match[3]!, anchor: versionAnchor(match[1]!)! };
+}
+
+/** The newest release a changelog records: its first version heading after
+    the unreleased work. A heading of another shape there throws, naming the
+    file `from` - the build stops on it. */
+export function newestRelease(markdown: string, from: string): Release {
+  const heading = [...markdown.matchAll(/^## (.+)$/gm)].map((match) => match[1]!.trim()).find((text) => text !== "Unreleased");
+  const release = heading === undefined ? undefined : readRelease(heading);
+  if (release === undefined) throw new Error(`${from}: its newest version heading "${heading ?? ""}" is not "<version> – <title> (<month>)".`);
+  return release;
+}
 
 /** Where a file of the repository is read on GitHub: on `main`. */
 export const SOURCE_HOME = "https://github.com/romanhaendler/umriss-ui/blob/main/";
@@ -61,7 +103,8 @@ const plain = (tokens: readonly Token[]): string =>
 /** A document as the site shows it: its markdown rendered as the prerendered
     pages are (marked, markup in the text shown and never passed through),
     each ADR number a link, each link led by `documentHref`, each heading
-    addressed as GitHub addresses it. Its first heading is the page's h1, so
+    addressed as GitHub addresses it - a changelog's version by an id of its
+    own, `v0-24-0` - and a "Changed" section marked, the word kept. Its first heading is the page's h1, so
     it is written as one. The description is its first paragraph - after an
     ADR's status lines - as plain text, cut at a word before 160 characters. */
 export function renderDocument(markdown: string, from: string, { home, exists, adrs }: { home: string; exists: (path: string) => boolean; adrs: AdrLinks }): { html: string; description: string } {
@@ -70,10 +113,11 @@ export function renderDocument(markdown: string, from: string, { home, exists, a
     renderer: {
       html: ({ text }: Tokens.HTML | Tokens.Tag) => escapeHtml(text),
       heading({ tokens, depth, text }: Tokens.Heading) {
-        const slug = text.toLowerCase().replace(/[^\p{L}\p{N}\s_-]/gu, "").replace(/\s/g, "-");
+        const slug = (depth === 2 ? versionAnchor(text) : undefined) ?? text.toLowerCase().replace(/[^\p{L}\p{N}\s_-]/gu, "").replace(/\s/g, "-");
         const count = seen.get(slug) ?? 0;
         seen.set(slug, count + 1);
-        return `<h${depth} id="${count === 0 ? slug : `${slug}-${count}`}">${this.parser.parseInline(tokens)}</h${depth}>\n`;
+        const changed = text.startsWith("Changed") ? ' class="changed"' : "";
+        return `<h${depth} id="${count === 0 ? slug : `${slug}-${count}`}"${changed}>${this.parser.parseInline(tokens)}</h${depth}>\n`;
       },
     },
     walkTokens(token) {

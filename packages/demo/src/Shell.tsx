@@ -128,11 +128,19 @@ const SITE = BASE.replace(/[^/]+\/$/, "");
 
 const REPOSITORY = "https://github.com/romanhaendler/umriss-ui";
 
-/** The three ways out of the site: the source, the package on npm, the text
-    for a coding agent. In the header on a wide screen, at the foot of the
-    sidebar on a narrow one - so the narrow header loses no destination. */
+/** The ways out of the demo: the package's changelog - a static page of the
+    site beside its pages, which the click handler leaves to the browser - the
+    source, the package on npm, the text for a coding agent. In the header on
+    a wide screen, at the foot of the sidebar on a narrow one - so the narrow
+    header loses no destination. */
 function OutLinks({ npm, where }: { npm: string; where: "head" | "rail" }) {
   const links = [
+    {
+      label: "Changelog",
+      href: `${BASE}changelog/`,
+      // A clock: what happened when.
+      d: "M5 1a4 4 0 1 0 0 8 4 4 0 1 0 0-8ZM5 2.8V5l1.6 1",
+    },
     {
       label: "Source on GitHub",
       href: REPOSITORY,
