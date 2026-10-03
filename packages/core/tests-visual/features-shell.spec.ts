@@ -33,8 +33,13 @@ checkShell({
      which carries t-a-g and therefore survived "tag"; the mark stayed on it,
      correctly, and the test read that as the defect it guards. "tab" drops it.
      "tabelle" stopped finding anything once the table moved to
-     @umriss-ui/table. */
-  pointer: { wide: "ta", narrow: "tab" },
+     @umriss-ui/table.
+
+     "ta" and "tab" went when the pages came to rank above every example
+     (one-search 02): the fourth row under "ta" became `Meter`, a page, whose
+     lede says "tables" and kept it under "tab". Under "se"
+     the fourth row is `Slider`, which "sel" drops. */
+  pointer: { wide: "se", narrow: "sel" },
   contents: { pageId: "select", id: "states", title: "States" },
   foldedRow: { pageId: "popover", id: "PopoverProps-role" },
   synonyms: [
