@@ -1163,6 +1163,19 @@ test("a page with German on is accessible", async ({ page }) => {
   expect(findings(result)).toEqual([]);
 });
 
+test("on the built site, German chosen in core is still on in this demo", async ({ page }) => {
+  /* The demos share the site's origin and so the one stored choice. A demo of
+     the test build stands at its own port, so only the built site shows it. */
+  test.skip(p.language === undefined || p.packageId === "core", "core chooses, the other demos with the switch follow");
+  test.skip(!existsSync(join(SITE_DIR, "search.json")), "the site is not built (`pnpm build:pages`)");
+  const home = await serveSite(page);
+  await page.goto(`${home}core/`);
+  await languageSwitch(page).getByRole("button", { name: "Deutsch", exact: true }).click();
+  await page.goto(`${home}${p.packageId}/${p.language!.pageId}/`);
+  await expect(languageSwitch(page).getByRole("button", { name: "Deutsch", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await readsIn(page, 1);
+});
+
 test("the shell is accessible - header, sidebar, scenarios page", async ({ page }) => {
   /* The screens themselves are the demo's, checked with its pages
      (accessibility.spec.ts, "scenarios"); here the frame around them. */

@@ -33,6 +33,16 @@ checkShell({
   prop: { query: "padding", label: "padding", group: "charts · ChartProps", pageId: "chart", id: "ChartProps-padding" },
 });
 
+test("the Installation page says how German reaches a chart, where the other demos have a switch", async ({ page }) => {
+  /* The shell suite asserts that this header carries no EN/DE switch; the
+     reason stands here (.scratch/language-switch). */
+  test.skip(test.info().project.name.endsWith("dark"), "a behaviour test runs once (light)");
+  await page.goto("/installation/");
+  const sentence = page.getByRole("main").locator("p", { hasText: "The charts take German per chart" });
+  await expect(sentence).toContainText("GERMAN_CHARTS_WORDING");
+  await expect(sentence.getByRole("link", { name: "the keyboard and screen reader example" })).toHaveAttribute("href", /chart\/#keyboard-and-screen-reader$/);
+});
+
 test("the benchmark does not run on the front door", async ({ page }) => {
   /* It measures the moment it exists. A front door is to measure nothing - and
      the reason the benchmark is not photographed either (R-5.1, `pages.ts`). */

@@ -22,4 +22,15 @@ checkShell({
   contents: { pageId: "dependencies", id: "violated-dependency", title: "Show a lag that does not fit" },
   foldedRow: { pageId: "schedule", id: "ScheduleProps-onIntent" },
   prop: { query: "laneHeight", label: "laneHeight", group: "schedule · ScheduleProps", pageId: "schedule", id: "ScheduleProps-laneHeight" },
+  /* The day above the plot, a group's lane count and its fold button. What
+     the readout speaks once a key rests is proven in German by
+     `tests-unit/readout.test.tsx`. */
+  language: {
+    pageId: "lane-groups",
+    texts: [
+      ["Tuesday, 17 March 2026", "Dienstag, 17. März 2026"],
+      ["2 lanes", "2 Bahnen"],
+    ],
+    buttons: [["Fold group: Developers", "Gruppe einklappen: Developers"]],
+  },
 });
