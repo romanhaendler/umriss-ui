@@ -286,7 +286,7 @@ describe("the pages' Markdown twins (.scratch/pages-as-markdown)", () => {
   it("gives the scenarios page the scenarios' cut under the package's name", () => {
     const scenarios = full.slice(full.indexOf("## Scenarios"), full.indexOf("\n## Instruments")).trimEnd();
     expect(byPath.get("index.md")).toBe(
-      `# @umriss-ui/fixture\n\n${header("")}\n\nA fixture package for the llms.txt generator.\n\nInstall with \`npm install @umriss-ui/fixture @umriss-ui/core\`.\n\n${scenarios}\n`,
+      `# @umriss-ui/fixture\n\n${header("")}\n\nA fixture package for the llms.txt generator.\n\n\`\`\`sh\nnpm install @umriss-ui/fixture @umriss-ui/core\n\`\`\`\n\n[Start with Meter →](https://example.test/fixture/meter/)\n\n${scenarios}\n`,
     );
   });
 
