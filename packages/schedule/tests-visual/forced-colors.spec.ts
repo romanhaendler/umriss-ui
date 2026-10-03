@@ -7,6 +7,7 @@
 
 import { test, expect } from "@playwright/test";
 import { checkForcedColours } from "@umriss-ui/demo/checks/forcedColors";
+import { focusBeforeStage } from "@umriss-ui/demo/checks/navigation";
 import { EXAMPLE_ADDRESSES, SAMPLE } from "./pages";
 import { drawn, open, openExample } from "./navigation";
 
@@ -16,7 +17,7 @@ test("A focused schedule with an active subtask under forced colours", async ({ 
   await openExample(page, "schedule", "first-schedule");
   const example = page.locator('[data-example="first-schedule"]');
   const plot = example.locator("[role='application']");
-  await example.locator(".exampleToggle").first().focus();
+  await focusBeforeStage(example);
   for (let i = 0; i < 8 && !(await plot.evaluate((el) => el === document.activeElement)); i++) await page.keyboard.press("Tab");
   await page.keyboard.press("ArrowDown");
   await page.keyboard.press("ArrowRight");

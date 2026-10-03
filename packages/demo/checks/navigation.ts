@@ -4,7 +4,7 @@
    outline (`addressOf`) and not from a second list here: a page that moves
    there moves with it here. */
 
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 
 export function navigation(addressOf: (pageId: string, exampleId?: string) => string) {
   return {
@@ -57,4 +57,18 @@ export async function standstill(page: Page): Promise<void> {
 /** Switches on "all examples with code" on the open page. */
 export async function allWithCode(page: Page): Promise<void> {
   await page.getByLabel("all examples with code").check();
+}
+
+/** Puts the focus right before an example's stage, so that the next Tab
+    enters it - whether the example's code toggle stands above the stage or,
+    on a page's first example, under it.
+
+    The stage takes the focus for that one step only: it gives up being
+    focusable as soon as the focus leaves it. */
+export async function focusBeforeStage(example: Locator): Promise<void> {
+  await example.locator(".exampleStage").evaluate((stage: HTMLElement) => {
+    stage.tabIndex = -1;
+    stage.addEventListener("blur", () => stage.removeAttribute("tabindex"), { once: true });
+    stage.focus();
+  });
 }

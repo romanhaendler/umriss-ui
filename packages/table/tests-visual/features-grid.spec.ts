@@ -6,6 +6,7 @@
 
 import { test, expect } from "@playwright/test";
 import type { Locator, Page } from "@playwright/test";
+import { focusBeforeStage } from "@umriss-ui/demo/checks/navigation";
 import { openExample } from "./navigation";
 import { EXAMPLE_ADDRESSES } from "./pages";
 
@@ -19,11 +20,11 @@ const example = (page: Page, id: string) => page.locator(`[data-example="${id}"]
 /** The page an example stands on: grid mode and edits are two pages. */
 const pageOf = (id: string) => EXAMPLE_ADDRESSES.find((a) => a.exampleId === id)!.pageId;
 
-/** Tab from the example's code toggle into its table: the table's one stop. */
+/** Tab from before the example's stage into its table: the table's one stop. */
 async function tabIn(page: Page, id: string) {
   await openExample(page, pageOf(id), id);
   await example(page, id).scrollIntoViewIfNeeded();
-  await example(page, id).locator(".exampleToggle").first().focus();
+  await focusBeforeStage(example(page, id));
   await page.keyboard.press("Tab");
 }
 
