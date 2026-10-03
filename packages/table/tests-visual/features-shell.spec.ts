@@ -31,4 +31,14 @@ checkShell({
   synonyms: [{ query: "frozen", name: "Width and pinning", pageId: "width-and-pinning" }],
   elsewhere: [{ query: "select", group: "core · Choosing", label: "Select", address: "/core/select/" }],
   prop: { query: "pageSize", label: "pageSize", group: "table · TableOptions", pageId: "first-table", id: "TableOptions-pageSize" },
+  /* The States example's empty body, where a search matches nothing, and the
+     due dates of the Styling rows example. */
+  language: {
+    pageId: "row-appearance",
+    texts: [
+      ["Nothing matches the search and filters", "Nichts passt zu Suche und Filtern"],
+      ["15/04/2026", "15.04.2026"],
+    ],
+    buttons: [["Clear input", "Eingabe leeren"]],
+  },
 });

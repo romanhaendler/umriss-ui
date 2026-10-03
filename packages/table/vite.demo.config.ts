@@ -16,6 +16,9 @@ export default defineConfig({
   plugins: [react(), ownStyles()],
   resolve: {
     alias: [
+      /* The German wording, for the header's EN/DE switch - the subpath first,
+         or the entry's alias would swallow it. */
+      { find: /^@umriss-ui\/core\/wording\/de$/, replacement: fileURLToPath(new URL("../core/src/lib/language/de.ts", import.meta.url)) },
       { find: /^@umriss-ui\/core$/, replacement: fileURLToPath(new URL("../core/src/index.ts", import.meta.url)) },
       /* The package's stylesheet exists only once it has been built. In its
          place the token and base layer; the components' styles come with

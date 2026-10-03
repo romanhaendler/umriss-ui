@@ -22,4 +22,11 @@ checkShell({
   contents: { pageId: "chain", id: "payslip", title: "Fold a group of lines into one" },
   prop: { query: "metrics", label: "metrics", group: "calculation · CalculationProps", pageId: "calculation", id: "CalculationProps-metrics" },
   apiIndex: { anchor: "type-MetricValues" },
+  /* The invoice: a figure in the library's notation, and the button that
+     unfolds a line's working. */
+  language: {
+    pageId: "calculation",
+    texts: [["1,173.60", "1.173,60"]],
+    buttons: [["Show how Discount is derived", "Herleitung von Discount zeigen"]],
+  },
 });
