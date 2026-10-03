@@ -508,6 +508,12 @@
   color: var(--u-color-text-secondary);
 }
 
+/* `Deprecated` opens the description it stands before, so it needs no gap
+   to a name. */
+.apiDeprecated .apiBadge {
+  margin-left: 0;
+}
+
 .code:focus-visible {
   outline: 2px solid transparent;
   box-shadow: var(--u-focus-ring);

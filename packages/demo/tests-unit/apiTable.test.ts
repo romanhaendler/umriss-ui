@@ -21,6 +21,7 @@ const ENTRY: TypeEntry = {
   alsoTakes: ["LimitProps", "ToneProps", "SizeProps"],
   props: [
     { name: "value", type: "number", optional: false, description: "The value the needle points at." },
+    { name: "limit", type: "number", optional: true, deprecated: "Is called `max` now.", description: "The old name of `max`." },
     { name: "onChange", type: "(value: number) => void", optional: true, description: "Called with the value\nthe needle moved to." },
     {
       name: "tone",
@@ -29,6 +30,14 @@ const ENTRY: TypeEntry = {
       defaultValue: '"neutral"',
       description: "What the needle says, as the **verdict** of a `Limit` - see the [Meter](#/meter).",
       inheritedFrom: "ToneProps",
+    },
+    {
+      name: "max",
+      type: "number",
+      optional: true,
+      defaultValue: "the largest value, else `100`",
+      defaultIsPhrase: true,
+      description: "Where the scale ends.",
     },
     { name: "rows", type: "readonly T[]", optional: false, description: "Every row, `<b>` and all." },
   ],
@@ -39,6 +48,7 @@ interface Row {
   type: string;
   defaultValue: string;
   required: boolean;
+  deprecated: boolean;
 }
 
 function htmlFacts(html: string): { heading: string; anchor: string; groups: Row[][]; closing: string[] } {
@@ -54,6 +64,7 @@ function htmlFacts(html: string): { heading: string; anchor: string; groups: Row
         type: tr.querySelector(".apiType")!.textContent!,
         defaultValue: tr.querySelectorAll("td")[1]!.textContent!,
         required: tr.querySelector("th")!.textContent!.endsWith("required"),
+        deprecated: tr.querySelectorAll("td")[2]!.textContent!.startsWith("Deprecated "),
       })),
     ),
     closing: [...host.querySelectorAll(":scope > div > p")].map((p) => p.textContent!),
@@ -70,12 +81,13 @@ function markdownFacts(markdown: string): { heading: string; groups: Row[][]; cl
   for (const line of lines) {
     if (line.startsWith("|---")) groups.push([]);
     else if (line.startsWith("| ") && groups.length > 0 && !line.startsWith("| Prop |")) {
-      const [name, type, defaultValue] = line.slice(2, -2).split(/ (?<!\\)\| /);
+      const [name, type, defaultValue, description] = line.slice(2, -2).split(/ (?<!\\)\| /);
       groups.at(-1)!.push({
         name: unmark(name!.replace(/ \*required\*$/, "")),
         type: unmark(type!),
         defaultValue: unmark(defaultValue!),
         required: name!.endsWith(" *required*"),
+        deprecated: unmark(description!).startsWith("Deprecated "),
       });
     }
   }
@@ -100,10 +112,27 @@ describe("one table model, two writers", () => {
       expect(html.groups.flat().find((row) => row.name === "tone")!.defaultValue).toBe('"neutral"');
       expect(html.groups.flat().find((row) => row.name === "value")!.defaultValue).toBe("—");
       expect(html.groups.map((group) => group.map((row) => row.name))).toEqual(
-        eventsApart ? [["value", "tone", "rows"], ["onChange"]] : [["value", "onChange", "tone", "rows"]],
+        eventsApart ? [["value", "tone", "max", "rows", "limit"], ["onChange"]] : [["value", "onChange", "tone", "max", "rows", "limit"]],
       );
+      expect(html.groups.flat().filter((row) => row.deprecated).map((row) => row.name)).toEqual(["limit"]);
+      expect(html.groups.flat().find((row) => row.name === "max")!.defaultValue).toBe("the largest value, else 100");
     });
   }
+
+  it("sets a deprecated prop last, with the badge and the tag's sentence before its description", () => {
+    const model = tableModel(ENTRY, false);
+    expect(tableHtml(model)).toContain(
+      '<td><span class="apiDeprecated"><span class="apiBadge">Deprecated</span> Is called <code>max</code> now.</span> The old name of <code>max</code>.</td></tr></tbody>',
+    );
+    expect(tableMarkdown(model)).toMatch(/\| \*Deprecated\* Is called `max` now\. The old name of `max`\. \|$/m);
+  });
+
+  it("writes a default as code, and a phrase as prose", () => {
+    const model = tableModel(ENTRY, false);
+    expect(tableHtml(model)).toContain('<td><code>&quot;neutral&quot;</code></td>');
+    expect(tableHtml(model)).toContain("<td>the largest value, else <code>100</code></td>");
+    expect(tableMarkdown(model)).toContain("| `number` | the largest value, else `100` | Where the scale ends. |");
+  });
 
   it("anchors the heading at #type-<Name>", () => {
     expect(htmlFacts(tableHtml(tableModel(ENTRY, false))).anchor).toBe("type-GaugeProps");

@@ -36,8 +36,14 @@ export interface PropEntry {
   /** The type, exactly as it stands in the source. */
   type: string;
   optional: boolean;
-  /** Out of the component's destructuring pattern, where there is one. */
+  /** Out of the `@default` tag, else out of the component's destructuring
+      pattern, where there is one. */
   defaultValue?: string;
+  /** Set where the default is a phrase and no value: "the size of a
+      `ControlSizeProvider`, else `md`" stands as prose, not as code. */
+  defaultIsPhrase?: true;
+  /** The `@deprecated` tag's sentence; set, even empty, where the prop is. */
+  deprecated?: string;
   description: string;
   /** Set where the prop comes from another type of THIS library. */
   inheritedFrom?: string;
@@ -281,6 +287,37 @@ export function readProps(files: readonly string[], typeNames: readonly string[]
   const substitute = (text: string, substitutions: ReadonlyMap<string, string>): string =>
     substitutions.size === 0 ? text : text.replace(/[A-Za-z_$][\w$]*/g, (identifier) => substitutions.get(identifier) ?? identifier);
 
+  /** A member's tag, its text on one line; `undefined` where it has none. Of
+      all tags only `@default` and `@deprecated` are read - `@remarks`,
+      `@since` and the rest are dropped with the description they are not part
+      of. */
+  const tagOf = (member: ts.PropertySignature, name: string): string | undefined => {
+    const tag = ts.getJSDocTags(member).find((t) => t.tagName.text === name);
+    return tag === undefined ? undefined : (ts.getTextOfJSDocComment(tag.comment) ?? "").replace(/\s+/g, " ").trim();
+  };
+
+  /** Does a default read as code: a literal, an identifier or a property
+      access? Everything else is a phrase. */
+  const isValue = (text: string): boolean => {
+    const statement = ts.createSourceFile("default.ts", `(${text});`, ts.ScriptTarget.Latest).statements;
+    if (statement.length !== 1 || !ts.isExpressionStatement(statement[0]!)) return false;
+    const wrapped = statement[0].expression;
+    /* The parenthesis closes right behind the text, or the text was more than
+       one expression. */
+    if (!ts.isParenthesizedExpression(wrapped) || wrapped.end !== text.length + 2) return false;
+    const inner = wrapped.expression;
+    const accessed = (node: ts.Expression): boolean =>
+      ts.isIdentifier(node) || (ts.isPropertyAccessExpression(node) && accessed(node.expression));
+    return (
+      ts.isLiteralExpression(inner) ||
+      [ts.SyntaxKind.TrueKeyword, ts.SyntaxKind.FalseKeyword, ts.SyntaxKind.NullKeyword].includes(inner.kind) ||
+      (ts.isPrefixUnaryExpression(inner) && ts.isNumericLiteral(inner.operand)) ||
+      ts.isArrayLiteralExpression(inner) ||
+      ts.isObjectLiteralExpression(inner) ||
+      accessed(inner)
+    );
+  };
+
   /** One member as an entry, together with the component's default. */
   const entryOf = (
     member: ts.PropertySignature,
@@ -288,17 +325,30 @@ export function readProps(files: readonly string[], typeNames: readonly string[]
     substitutions: ReadonlyMap<string, string> = new Map(),
   ): PropEntry => {
     const key = propName(member);
-    const defaultValue = defaults.get(key);
+    const file = member.getSourceFile();
+    const line = file.getLineAndCharacterOfPosition(member.getStart(file)).line + 1;
+    const fromPattern = defaults.get(key);
+    const fromTag = tagOf(member, "default");
+    /* The tag wins, and it may not say what the code does not do: a table
+       showing a default the component never sets is worse than an empty
+       column. */
+    if (fromTag !== undefined && fromPattern !== undefined && fromTag !== fromPattern.trim()) {
+      throw new Error(
+        `${file.fileName}:${line}  ${key}: \`@default\` says \`${fromTag}\`, the destructuring pattern \`${fromPattern}\`.`,
+      );
+    }
+    const defaultValue = fromTag ?? fromPattern;
+    const deprecated = tagOf(member, "deprecated");
     const entry: PropEntry = {
       name: key,
       type: member.type === undefined ? "unknown" : substitute(textOf(member.type), substitutions),
       optional: member.questionToken !== undefined,
       ...(defaultValue === undefined ? {} : { defaultValue }),
+      ...(fromTag !== undefined && !isValue(fromTag) ? { defaultIsPhrase: true as const } : {}),
+      ...(deprecated === undefined ? {} : { deprecated }),
       description: descriptionOf(member.name),
     };
-    const file = member.getSourceFile();
-    const { line } = file.getLineAndCharacterOfPosition(member.getStart(file));
-    places.set(entry, { file: file.fileName, line: line + 1 });
+    places.set(entry, { file: file.fileName, line });
     return entry;
   };
 
@@ -361,8 +411,12 @@ export function readProps(files: readonly string[], typeNames: readonly string[]
       const type =
         shapes.length === 1 ? shapes[0]! : shapes.map((f) => (f.includes("=>") ? `(${f})` : f)).join(" | ");
       const description = [...new Set(present.map((p) => p.description).filter((b) => b !== ""))].join(" ");
+      /* Deprecated in one arm is deprecated: the arm that forbids it beside
+         its new name does not carry the tag. */
+      const deprecated = present.find((p) => p.deprecated !== undefined)?.deprecated;
       return withPlace(first, {
         ...first,
+        ...(deprecated === undefined ? {} : { deprecated }),
         type,
         optional: present.length < arms.length || present.some((p) => p.optional),
         description,

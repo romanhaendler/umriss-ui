@@ -25,7 +25,10 @@ export interface ApiRow {
   name: string;
   /** The type cell. One piece today; a later step links the library's types in it. */
   type: readonly Span[];
-  defaultValue?: string;
+  /** A value as one piece of code; a phrase as the text it was written as. */
+  defaultValue?: readonly Span[];
+  /** The `@deprecated` sentence - its row stands last in its group. */
+  deprecated?: readonly Span[];
   description: readonly Span[];
   /** The type of this library the prop is inherited from. */
   origin?: string;
@@ -90,12 +93,19 @@ function row(prop: PropEntry): ApiRow {
   return {
     name: prop.name,
     type: [text(prop.type)],
-    ...(prop.defaultValue === undefined ? {} : { defaultValue: prop.defaultValue }),
+    ...(prop.defaultValue === undefined
+      ? {}
+      : { defaultValue: prop.defaultIsPhrase === true ? spansOf(prop.defaultValue) : [code(prop.defaultValue)] }),
+    ...(prop.deprecated === undefined ? {} : { deprecated: spansOf(prop.deprecated) }),
     description: spansOf(prop.description),
     ...(prop.inheritedFrom === undefined ? {} : { origin: prop.inheritedFrom }),
     badges: prop.optional ? [] : ["required"],
   };
 }
+
+/** A group's rows, the deprecated last: the current API reads first. */
+const rowsOf = (props: readonly PropEntry[]): ApiRow[] =>
+  [...props.filter((prop) => prop.deprecated === undefined), ...props.filter((prop) => prop.deprecated !== undefined)].map(row);
 
 /** One entry as a table. `eventsApart` sets the `on…` props in a group of
     their own - the table's and the schedule's demos, whose callbacks are a
@@ -125,8 +135,8 @@ export function tableModel(entry: TypeEntry, eventsApart: boolean): ApiTableMode
     heading: entry.parameter.length === 0 ? entry.name : `${entry.name}<${entry.parameter.join(", ")}>`,
     anchor: `type-${entry.name}`,
     groups: [
-      ...(props.length === 0 ? [] : [{ label: "props", rows: props.map(row) }]),
-      ...(events.length === 0 ? [] : [{ label: "events", title: "Events", rows: events.map(row) }]),
+      ...(props.length === 0 ? [] : [{ label: "props", rows: rowsOf(props) }]),
+      ...(events.length === 0 ? [] : [{ label: "events", title: "Events", rows: rowsOf(events) }]),
     ],
     closing,
   };
@@ -166,8 +176,8 @@ function groupHtml(name: string, group: ApiGroup): string {
       "<tr>" +
       `<th scope="row"><code>${escape(one.name)}</code>${one.badges.map((badge) => `<span class="apiBadge">${escape(badge)}</span>`).join("")}</th>` +
       `<td><code class="apiType">${spansHtml(one.type)}</code></td>` +
-      `<td>${one.defaultValue === undefined ? "—" : `<code>${escape(one.defaultValue)}</code>`}</td>` +
-      `<td>${spansHtml(one.description)}${one.origin === undefined ? "" : `<span class="apiOrigin"> from <code>${escape(one.origin)}</code></span>`}</td>` +
+      `<td>${one.defaultValue === undefined ? "—" : spansHtml(one.defaultValue)}</td>` +
+      `<td>${one.deprecated === undefined ? "" : `<span class="apiDeprecated"><span class="apiBadge">Deprecated</span> ${spansHtml(one.deprecated)}</span> `}${spansHtml(one.description)}${one.origin === undefined ? "" : `<span class="apiOrigin"> from <code>${escape(one.origin)}</code></span>`}</td>` +
       "</tr>",
   );
   return (
@@ -233,8 +243,9 @@ export function tableMarkdown(model: ApiTableModel): string {
     for (const one of group.rows) {
       const name = `${markdownCode(one.name)}${one.badges.map((badge) => ` *${badge}*`).join("")}`;
       const origin = one.origin === undefined ? "" : ` From ${markdownCode(one.origin)}.`;
+      const deprecated = one.deprecated === undefined ? "" : `*Deprecated* ${spansMarkdown(one.deprecated)} `;
       lines.push(
-        `| ${name} | ${markdownCell(markdownCode(spansMarkdown(one.type)))} | ${one.defaultValue === undefined ? "—" : markdownCell(markdownCode(one.defaultValue))} | ${markdownCell(spansMarkdown(one.description) + origin)} |`,
+        `| ${name} | ${markdownCell(markdownCode(spansMarkdown(one.type)))} | ${one.defaultValue === undefined ? "—" : markdownCell(spansMarkdown(one.defaultValue))} | ${markdownCell(deprecated + spansMarkdown(one.description) + origin)} |`,
       );
     }
   });
