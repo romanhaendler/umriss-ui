@@ -688,7 +688,7 @@ test("the pane rests on the translucent material", async ({ page }) => {
 test("Escape closes the palette and gives focus back", async ({ page }) => {
   /* The shell's own search button, named exactly: core and table both have a page
      called "Search", so a loose /Search/ matches the rail entry as well. */
-  const trigger = page.getByRole("button", { name: "Search … ⌘K" });
+  const trigger = page.getByRole("button", { name: "Search pages, examples, props, tokens … ⌘K" });
   await trigger.click();
   await expect(page.getByRole("dialog")).toBeVisible();
   await page.keyboard.press("Escape");

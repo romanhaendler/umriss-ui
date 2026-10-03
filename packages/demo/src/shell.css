@@ -126,6 +126,15 @@ body {
   transition: box-shadow var(--u-transition);
 }
 
+/* The label is the palette's placeholder; where the button narrows, it ends
+   in an ellipsis and the key stays. */
+.shellSearch > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .shellSearch:hover {
   box-shadow: var(--u-edge-strong);
 }
