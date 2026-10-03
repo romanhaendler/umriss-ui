@@ -113,15 +113,37 @@ describe("the guard over the text for agents (.scratch/pages-as-markdown)", () =
 
 describe("the guard over the front page (.scratch/site-front-page)", () => {
   const ROOT = "https://example.test/umriss-ui/";
-  const sitemap = [ROOT, `${ROOT}core/`, `${ROOT}core/installation/`, `${ROOT}core/language/`, `${ROOT}table/alarmlist/`, `${ROOT}charts/limitline/`, `${ROOT}charts/benchmark/`];
+  const sitemap = [
+    ROOT,
+    `${ROOT}core/`,
+    `${ROOT}core/installation/`,
+    `${ROOT}core/language/`,
+    `${ROOT}table/`,
+    `${ROOT}table/alarmlist/`,
+    `${ROOT}charts/limitline/`,
+    `${ROOT}charts/benchmark/`,
+  ];
   const PROMISE =
     "React components for data-dense screens – control rooms, dashboards, planning – built to the industrial standards for alarms and limits, in English and German.";
-  const front = ({ h1 = "<h1>umriss-ui</h1>", started = "./core/installation/", claim = "./charts/benchmark/", extra = "", index = sitemap.slice(1) } = {}) => `
+  /* Two packages are enough to hold the tiles to their order. */
+  const landings = [`${ROOT}core/`, `${ROOT}table/`];
+  const images = new Map(["core", "table"].flatMap((id) => [`${ROOT}previews/${id}-light.png`, `${ROOT}previews/${id}-dark.png`].map((url) => [url, 120_000])));
+  const tile = (id: string, name: string, { href = `./${id}/`, dark = `./previews/${id}-dark.png`, alt = `${name}: Work through the alerts` } = {}) =>
+    `<a class="tile" href="${href}"><img class="light" src="./previews/${id}-light.png" alt="${alt}" loading="lazy" /><img class="dark" src="${dark}" alt="${alt}" loading="lazy" /><h3>${name}</h3><code>@umriss-ui/${id}</code></a>`;
+  const front = ({
+    h1 = "<h1>umriss-ui</h1>",
+    started = "./core/installation/",
+    claim = "./charts/benchmark/",
+    extra = "",
+    index = sitemap.slice(1),
+    tiles = tile("core", "Core") + tile("table", "Table"),
+  } = {}) => `
     <script>try { localStorage.getItem("umriss-ui:theme") } catch (e) {}</script>
     <header><a href="./">umriss-ui</a><nav aria-label="Packages"><a href="./core/">Core</a></nav></header>
     <main>${h1}<p>${PROMISE}</p>
       <a class="button" href="${started}">Get started</a><a class="button" href="./core/">Explore the scenarios</a>
       <code>npm install @umriss-ui/core</code>
+      ${tiles}
       <a href="./table/alarmlist/">ISA-18.2 alarm lists</a><a href="./charts/limitline/">ISA-101 limits and verdicts</a>
       <a href="${claim}"><strong>Canvas charts, measured</strong> Benchmark</a><a href="./core/language/">English and German wording</a>
       <a href="./llms.txt">Written for coding agents too</a>${extra}
@@ -129,31 +151,56 @@ describe("the guard over the front page (.scratch/site-front-page)", () => {
     </main>`;
 
   it("passes a front page with its words, its buttons, its claims and its index", () => {
-    expect(frontFaults(front(), ROOT, sitemap, PROMISE)).toEqual([]);
+    expect(frontFaults(front(), ROOT, sitemap, PROMISE, landings, images)).toEqual([]);
   });
 
   it("fails without exactly one h1 reading umriss-ui", () => {
-    expect(frontFaults(front({ h1: "<h1>Umriss UI</h1>" }), ROOT, sitemap, PROMISE)).toEqual(['not one h1 "umriss-ui" (found: Umriss UI)']);
-    expect(frontFaults(front({ h1: "<h1>umriss-ui</h1><h1>umriss-ui</h1>" }), ROOT, sitemap, PROMISE)).toEqual(['not one h1 "umriss-ui" (found: umriss-ui, umriss-ui)']);
+    expect(frontFaults(front({ h1: "<h1>Umriss UI</h1>" }), ROOT, sitemap, PROMISE, landings, images)).toEqual(['not one h1 "umriss-ui" (found: Umriss UI)']);
+    expect(frontFaults(front({ h1: "<h1>umriss-ui</h1><h1>umriss-ui</h1>" }), ROOT, sitemap, PROMISE, landings, images)).toEqual(['not one h1 "umriss-ui" (found: umriss-ui, umriss-ui)']);
   });
 
   it("fails on a button or a claim that leads to no page of the site", () => {
-    expect(frontFaults(front({ started: "./core/getting-started/" }), ROOT, sitemap, PROMISE)).toEqual([
+    expect(frontFaults(front({ started: "./core/getting-started/" }), ROOT, sitemap, PROMISE, landings, images)).toEqual([
       `"Get started" links ${ROOT}core/getting-started/, which is no sitemap address`,
     ]);
-    expect(frontFaults(front({ claim: "./charts/bench/" }), ROOT, sitemap, PROMISE)).toEqual([`"Canvas charts, measured" links ${ROOT}charts/bench/, which is no sitemap address`]);
-    expect(frontFaults(front().replace("Get started", "Start"), ROOT, sitemap, PROMISE)).toEqual(['no link "Get started"']);
+    expect(frontFaults(front({ claim: "./charts/bench/" }), ROOT, sitemap, PROMISE, landings, images)).toEqual([`"Canvas charts, measured" links ${ROOT}charts/bench/, which is no sitemap address`]);
+    expect(frontFaults(front().replace("Get started", "Start"), ROOT, sitemap, PROMISE, landings, images)).toEqual(['no link "Get started"']);
   });
 
   it("fails on twenty addresses linked outside the index, or a sitemap address the index leaves out", () => {
-    const many = Array.from({ length: 12 }, (_, i) => `<a href="https://example.test/${i}">${i}</a>`).join("");
-    expect(frontFaults(front({ extra: many }), ROOT, sitemap, PROMISE)).toEqual(["20 addresses linked outside the index, not fewer than 20"]);
-    expect(frontFaults(front({ index: sitemap.slice(2) }), ROOT, sitemap, PROMISE)).toEqual([`the index does not link ${ROOT}core/`]);
+    const many = Array.from({ length: 11 }, (_, i) => `<a href="https://example.test/${i}">${i}</a>`).join("");
+    expect(frontFaults(front({ extra: many }), ROOT, sitemap, PROMISE, landings, images)).toEqual(["20 addresses linked outside the index, not fewer than 20"]);
+    expect(frontFaults(front({ index: sitemap.slice(2) }), ROOT, sitemap, PROMISE, landings, images)).toEqual([`the index does not link ${ROOT}core/`]);
   });
 
   it("fails without the promise, the install command or the theme script", () => {
     const bare = front().replace(PROMISE, "").replace("npm install @umriss-ui/core", "").replace("umriss-ui:theme", "");
-    expect(frontFaults(bare, ROOT, sitemap, PROMISE)).toEqual(["no promise", "no install command", "no theme script"]);
+    expect(frontFaults(bare, ROOT, sitemap, PROMISE, landings, images)).toEqual(["no promise", "no install command", "no theme script"]);
+  });
+
+  it("fails on a tile missing, out of order or leading to no landing page", () => {
+    expect(frontFaults(front({ tiles: tile("core", "Core") }), ROOT, sitemap, PROMISE, landings, images)).toEqual(["1 tiles, not 2"]);
+    expect(frontFaults(front({ tiles: tile("table", "Table") + tile("core", "Core") }), ROOT, sitemap, PROMISE, landings, images)).toEqual([
+      `the tile "Table" links ${ROOT}table/, not ${ROOT}core/`,
+      `the tile "Core" links ${ROOT}core/, not ${ROOT}table/`,
+    ]);
+    expect(frontFaults(front(), ROOT, sitemap.filter((url) => url !== `${ROOT}table/`), PROMISE, landings, images)).toContain(`the tile "Table" links ${ROOT}table/, which is no sitemap address`);
+  });
+
+  it("fails on a preview that is not in the site, or not under 300 kB", () => {
+    expect(frontFaults(front({ tiles: tile("core", "Core", { dark: "./previews/core-night.png" }) + tile("table", "Table") }), ROOT, sitemap, PROMISE, landings, images)).toEqual([
+      `the tile "Core" shows ${ROOT}previews/core-night.png, which is no file of the site`,
+    ]);
+    const heavy = new Map([...images, [`${ROOT}previews/table-dark.png`, 300_000]]);
+    expect(frontFaults(front(), ROOT, sitemap, PROMISE, landings, heavy)).toEqual([`the tile "Table" shows ${ROOT}previews/table-dark.png at 300000 bytes, not under 300 kB`]);
+    const one = tile("core", "Core").replace(/<img class="dark"[^>]*>/, "");
+    expect(frontFaults(front({ tiles: one + tile("table", "Table") }), ROOT, sitemap, PROMISE, landings, images)).toEqual(['the tile "Core" has 1 previews, not a light and a dark one']);
+  });
+
+  it("fails on a preview whose alternative text does not name its package and what it shows", () => {
+    expect(frontFaults(front({ tiles: tile("core", "Core", { alt: "Core" }) + tile("table", "Table") }), ROOT, sitemap, PROMISE, landings, images)).toEqual([
+      'the tile "Core" has a preview whose alternative text is not "Core: <what it shows>"',
+    ]);
   });
 });
 

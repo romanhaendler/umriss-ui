@@ -5,6 +5,7 @@
   "scripts": {
     "build": "pnpm -r build",
     "build:pages": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/build-pages.mjs",
+    "previews": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/previews.mjs",
     "typecheck": "pnpm -r typecheck",
     "lint": "eslint --max-warnings 0 packages/charts packages/core packages/table packages/schedule packages/calculation packages/demo",
     "dev:core": "pnpm --filter @umriss-ui/core dev",
