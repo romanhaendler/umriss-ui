@@ -285,6 +285,15 @@ body {
   min-width: 0;
 }
 
+/* From 1300 px a page sets "On this page" beside itself (page.css): the
+   column widens by the list, so the page keeps its width where there is
+   room. */
+@media (min-width: 1300px) {
+  .shellContent {
+    max-width: calc(1080px + 15rem + var(--u-space-8));
+  }
+}
+
 /* ---------------- Narrow windows ---------------- */
 
 @media (max-width: 900px) {

@@ -17,4 +17,5 @@ checkShell({
   palettePage: { query: "findings as data", name: "Findings as data", pageId: "findings", rubricName: "Reading" },
   abbreviation: { query: "sbt", find: "Subtasks", glyphs: ["S", "bt"] },
   pointer: { wide: "s", narrow: "lag that does" },
+  contents: { pageId: "dependencies", id: "violated-dependency", title: "Show a lag that does not fit" },
 });

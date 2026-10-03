@@ -27,6 +27,7 @@ checkShell({
   abbreviation: { query: "sb", find: "StateBand", glyphs: ["S", "B"] },
   pointer: { wide: "a", narrow: "matrix" },
   moved: { from: "getting-started", pageId: "installation", example: "in-its-container" },
+  contents: { pageId: "limitline", id: "limits-and-state", title: "Read limits above the states" },
 });
 
 test("the benchmark does not run on the front door", async ({ page }) => {

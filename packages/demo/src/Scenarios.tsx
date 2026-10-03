@@ -23,11 +23,13 @@
 
 import { useLayoutEffect, useRef, useState } from "react";
 import { CodeBlock } from "./Example";
+import { useContents } from "./Contents";
 import { hrefOf, hrefOfNeighbour } from "./href";
 import { PACKAGES } from "./packages";
 import { InstallLine } from "./Page";
 import { Prose } from "./Prose";
 import type { Demo } from "./demo";
+import { SCENARIOS } from "./outline";
 import type { ForeignPage, Scenario } from "./tooling/examples";
 
 interface Mark {
@@ -147,6 +149,14 @@ function ScenarioBlock({ scenario, demo }: { scenario: Scenario; demo: Demo }) {
 export function Scenarios({ demo, sentence }: { demo: Demo; sentence: string }) {
   const startId = PACKAGES.find((one) => one.npm === demo.packageName)?.start;
   const start = demo.addresses.ALL_PAGES.find((one) => one.id === startId);
+  const contents = useContents([
+    { label: demo.packageName, href: hrefOf(demo.addresses.addressOf(SCENARIOS)), target: "#scenarios-title" },
+    ...demo.scenarios.map((scenario) => ({
+      label: scenario.title,
+      href: hrefOf(demo.addresses.addressOf(SCENARIOS, scenario.id)),
+      target: `[data-scenario="${scenario.id}"]`,
+    })),
+  ]);
   return (
     <article className="page scenarios" data-block="scenarios" aria-labelledby="scenarios-title">
       <header className="pageHead">
@@ -162,11 +172,13 @@ export function Scenarios({ demo, sentence }: { demo: Demo; sentence: string }) 
           </p>
         )}
       </header>
+      {contents.disclosure}
       {demo.scenarios.length === 0 ? (
         <p className="pageEmpty">There is no scenario for this demo yet. The pages in the sidebar show every component.</p>
       ) : (
         demo.scenarios.map((scenario) => <ScenarioBlock key={scenario.id} scenario={scenario} demo={demo} />)
       )}
+      {contents.column}
     </article>
   );
 }

@@ -17,4 +17,5 @@ checkShell({
   palettePage: { query: "metrics", name: "Metrics", pageId: "metrics", rubricName: "Writing a calculation" },
   abbreviation: { query: "wcgw", find: "What can go wrong", glyphs: ["W", "c", "g", "w"] },
   pointer: { wide: "ta", narrow: "tab" },
+  contents: { pageId: "chain", id: "payslip", title: "Fold a group of lines into one" },
 });
