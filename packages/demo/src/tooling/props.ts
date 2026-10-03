@@ -3,9 +3,11 @@
    (`exportDocs.ts`), at an internal reference in a reader's text - a
    requirement number, a source path, an ADR number no file answers
    (`references.ts`) -, at a default stated in prose and not in `@default`,
-   and at a type a page names that no entry exports (`propsReader.ts`). Each
-   row it writes carries the examples and scenarios that use it
-   (`shownIn.ts`).
+   at a type a page names that no entry exports (`propsReader.ts`), and at a
+   prop no example or scenario uses that `demo/unshown.json` does not list -
+   as at an entry of that list whose prop is shown now or does not exist
+   (`shownIn.ts`). Each row it writes carries the examples and scenarios that
+   use it.
 
    What is generated is not checked in - `demo/.generated/` is ignored. A
    checked-in generation drifts away from its source, and this whole mechanism
@@ -28,7 +30,7 @@ import { fileURLToPath } from "node:url";
 import type { Rubric } from "../outline.ts";
 import { readProps } from "./propsReader.ts";
 import type { Flag, PropEntry, Reading, ShownIn, TypeEntry } from "./propsReader.ts";
-import { shownIn } from "./shownIn.ts";
+import { exampleFaults, shownIn } from "./shownIn.ts";
 import { compilerOptionsOf, entriesOf, exportedDeclarations, typesOnTheIndex, undocumentedExports } from "./exportDocs.ts";
 import { adrLinksOf, internalReferences, linkAdrs, pageTexts, type AdrLinks } from "./references.ts";
 
@@ -161,7 +163,12 @@ export function generateProps({ packageName, outline }: PropsJob): Record<string
   const pageFlags = outlineFlags(outline, existsSync(outlineFile) ? readFileSync(outlineFile, "utf8") : "", links);
 
   const bareExports = undocumentedExports(packageName);
-  if (gaps.length > 0 || bareExports.length > 0 || flags.length > 0 || pageFlags.length > 0) {
+  const shown = shownIn(join(packageName, "demo"), outline, declaredAt, compilerOptionsOf(packageName));
+  const notYetFile = join(packageName, "demo", "unshown.json");
+  const notYet = (existsSync(notYetFile) ? JSON.parse(readFileSync(notYetFile, "utf8")) : {}) as Record<string, string>;
+  const { unshown, stale, unknown } = exampleFaults(Object.keys(declaredAt), shown, notYet);
+  const unshownFaults = unshown.length + stale.length + unknown.length;
+  if (gaps.length > 0 || bareExports.length > 0 || flags.length > 0 || pageFlags.length > 0 || unshownFaults > 0) {
     /* All of them, not the first: finding a hundred and fifty missing
        comments in a hundred and fifty runs is not a workflow. */
     if (gaps.length > 0) {
@@ -206,13 +213,27 @@ export function generateProps({ packageName, outline }: PropsJob): Record<string
           `\nEvery name a reader sees can be imported: export the type from the entry or a subpath.\n`,
       );
     }
+    const list = relative(packageName, notYetFile);
+    const entries = (n: number) => `${n} entr${n === 1 ? "y" : "ies"} of ${list}`;
+    if (unshown.length > 0) {
+      process.stderr.write(
+        `${unshown.length} prop${unshown.length === 1 ? "" : "s"} without an example:\n${unshown.map((row) => `  ${row}\n`).join("")}` +
+          `\nEvery prop that lands in a table is used by an example or a scenario of its package. Add one, or - only for a prop not shown yet - an entry to ${list}.\n`,
+      );
+    }
+    if (stale.length > 0) {
+      process.stderr.write(`${entries(stale.length)} ${stale.length === 1 ? "is" : "are"} shown now - stale, remove ${stale.length === 1 ? "it" : "them"}:\n${stale.map((row) => `  ${row}\n`).join("")}`);
+    }
+    if (unknown.length > 0) {
+      process.stderr.write(`${entries(unknown.length)} name${unknown.length === 1 ? "s" : ""} no row:\n${unknown.map((row) => `  ${row}\n`).join("")}`);
+    }
     process.exit(1);
   }
 
   mkdirSync(dirname(target), { recursive: true });
   /* A fixed indent and a closing newline: two runs yield the same file, byte
      for byte. */
-  const output: Record<string, TypeEntry> = linkedTables(withShownIn(types, shownIn(join(packageName, "demo"), outline, declaredAt, compilerOptionsOf(packageName))), links);
+  const output: Record<string, TypeEntry> = linkedTables(withShownIn(types, shown), links);
   writeFileSync(target, `${JSON.stringify(output, null, 2)}\n`, "utf8");
   writeFileSync(join(dirname(target), "adrs.json"), `${JSON.stringify(links, null, 2)}\n`, "utf8");
   process.stdout.write(`props.json: ${Object.keys(output).length} types.\n`);
