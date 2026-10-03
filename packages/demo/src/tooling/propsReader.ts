@@ -25,11 +25,14 @@
    3. A prop without JSDoc is reported. Whether that breaks the build is for
       `props.ts` to decide; here it is only established.
 
-   The type stands as it was written, and beside it what it resolves to.
-   `"primary" | "secondary" | "ghost" | "danger"` is what the reader needs; the
-   resolved form of a mapped type is unreadable. So a named alias that comes to
-   a list of literals keeps its name - whoever types a wrapper imports
-   `ButtonVariant` - and carries the list as well; nothing else is resolved. */
+   The type stands as it was written, and beside it what it resolves to and
+   where it is defined. `"primary" | "secondary" | "ghost" | "danger"` is what
+   the reader needs; the resolved form of a mapped type is unreadable. So a
+   named alias that comes to a list of literals keeps its name - whoever types
+   a wrapper imports `ButtonVariant` - and carries the list as well; nothing
+   else is resolved. Every other type of the library a cell names is recorded
+   by name, and one that has no table of its own is read as a definition: its
+   members as a table, or its declaration as it is written. */
 
 import ts from "typescript";
 
@@ -49,6 +52,9 @@ export interface PropEntry {
   defaultIsPhrase?: true;
   /** The `@deprecated` tag's sentence; set, even empty, where the prop is. */
   deprecated?: string;
+  /** The types of the library the type names, in the order they stand - each
+      has a table or a definition. */
+  references?: readonly string[];
   description: string;
   /** Set where the prop comes from another type of THIS library. */
   inheritedFrom?: string;
@@ -67,6 +73,23 @@ export interface TypeEntry {
   /** Types of THIS library the type is also made of and which have a table of
       their own - named rather than copied out. */
   alsoTakes?: readonly string[];
+  /** Set where the type has no table and a table names it: what "Types on
+      this page" shows of it. */
+  definition?: Definition;
+}
+
+export interface Definition {
+  /** The type's own JSDoc. */
+  description: string;
+  /** The package it comes from, where that is not the package read:
+      `"@umriss-ui/core"`. */
+  from?: string;
+  /** Where the type is no list of named members - a union, a function, a
+      mapped type, an interface with methods: its declaration as written,
+      without `export`. The members table is drawn otherwise. */
+  declaration?: string;
+  /** The library's types the declaration names. */
+  references?: readonly string[];
 }
 
 export interface Gap {
@@ -137,15 +160,20 @@ const UNKNOWN_ELEMENT = "the rendered element";
 
 type Declaration = ts.InterfaceDeclaration | ts.TypeAliasDeclaration;
 
-/** Reads the named types out of the named files.
+/** Reads the named types out of the named files, and after them every type
+    of the library they name that has no table: as a definition.
 
     `files` are absolute paths. The order of the output follows `typeNames`, so
     that two runs produce the same file. `check` says what a row's text may
-    not carry; the reader only notes where it stands, as it does a gap. */
+    not carry; the reader only notes where it stands, as it does a gap.
+    `options` are the package's own compiler options where it has them: with
+    the `paths` to its neighbours' source, a type from core is read where it is
+    written, not from a dist that may not be built. */
 export function readProps(
   files: readonly string[],
   typeNames: readonly string[],
   check: (text: string) => readonly string[] = () => [],
+  options: ts.CompilerOptions = {},
 ): Reading {
   const program = ts.createProgram([...files], {
     target: ts.ScriptTarget.ES2022,
@@ -154,9 +182,12 @@ export function readProps(
     module: ts.ModuleKind.ESNext,
     strict: true,
     skipLibCheck: true,
+    ...options,
     noEmit: true,
   });
   const checker = program.getTypeChecker();
+  /* The package read; a neighbour's source stands in the program as well. */
+  const own = new Set(files);
 
   const isExported = (declaration: Declaration): boolean =>
     (ts.getCombinedModifierFlags(declaration) & ts.ModifierFlags.Export) !== 0;
@@ -167,7 +198,7 @@ export function readProps(
      `CommonProps` in two files are two types. */
   const declarations = new Map<string, Declaration>();
   for (const file of program.getSourceFiles()) {
-    if (file.isDeclarationFile) continue;
+    if (!own.has(file.fileName)) continue;
     ts.forEachChild(file, (node) => {
       if (ts.isInterfaceDeclaration(node) || ts.isTypeAliasDeclaration(node)) {
         const known = declarations.get(node.name.text);
@@ -184,7 +215,7 @@ export function readProps(
     if (ts.isTypeParameterDeclaration(node) && !declarations.has(node.name.text)) parameterNames.add(node.name.text);
     ts.forEachChild(node, collectParameters);
   };
-  for (const file of program.getSourceFiles()) if (!file.isDeclarationFile) collectParameters(file);
+  for (const file of program.getSourceFiles()) if (own.has(file.fileName)) collectParameters(file);
 
   /** The type parameters a written type names and does not bind itself - as
       a generic function or a mapped type inside it does. */
@@ -284,6 +315,30 @@ export function readProps(
       (d): d is Declaration =>
         (ts.isInterfaceDeclaration(d) || ts.isTypeAliasDeclaration(d)) && !d.getSourceFile().isDeclarationFile,
     );
+  };
+
+  /** Every type of the library a cell or a declaration names, by the name it
+      is declared under - and what that name means, for the definitions. */
+  const named = new Map<string, Declaration>();
+  const referencesOf = (node: ts.Node): string[] => {
+    const found: string[] = [];
+    const visit = (child: ts.Node): void => {
+      const declaration = ts.isTypeReferenceNode(child) ? declarationOf(child) : undefined;
+      if (declaration !== undefined && !declaration.getSourceFile().fileName.includes("/node_modules/")) {
+        const name = declaration.name.text;
+        const known = named.get(name);
+        /* One name, one anchor (`#type-<Name>`): two types under it would
+           be one link to two places. */
+        if (known !== undefined && known !== declaration) {
+          throw new Error(`\`${name}\` names two types, in ${known.getSourceFile().fileName} and ${declaration.getSourceFile().fileName}.`);
+        }
+        named.set(name, declaration);
+        if (!found.includes(name)) found.push(name);
+      }
+      ts.forEachChild(child, visit);
+    };
+    visit(node);
+    return found;
   };
 
   /* ---------------------------------------------------------------- */
@@ -473,6 +528,7 @@ export function readProps(
     const fromTag = tagOf(member, "default");
     const deprecated = tagOf(member, "deprecated");
     const expansion = member.type === undefined ? undefined : expansionOf(member.type);
+    const references = member.type === undefined ? [] : referencesOf(member.type);
     const entry: PropEntry = {
       name: propName(member),
       type: member.type === undefined ? "unknown" : substitute(textOf(member.type), substitutions),
@@ -481,6 +537,7 @@ export function readProps(
       ...(fromTag === undefined ? {} : { defaultValue: fromTag }),
       ...(fromTag !== undefined && !isValue(fromTag) ? { defaultIsPhrase: true as const } : {}),
       ...(deprecated === undefined ? {} : { deprecated }),
+      ...(references.length === 0 ? {} : { references }),
       description: descriptionOf(member.name),
     };
     sources.set(entry, member);
@@ -609,10 +666,12 @@ export function readProps(
       const deprecated = present.find((p) => p.deprecated !== undefined)?.deprecated;
       /* The values belong to the one name; two shapes are no name. */
       const { expansion, ...rest } = first;
+      const references = [...new Set(shaped.flatMap((p) => p.references ?? []))];
       return withPlace(first, {
         ...rest,
         ...(expansion === undefined || shapes.length > 1 ? {} : { expansion }),
         ...(deprecated === undefined ? {} : { deprecated }),
+        ...(references.length === 0 ? {} : { references }),
         type,
         optional: present.length < arms.length || present.some((p) => p.optional),
         description,
@@ -843,11 +902,75 @@ export function readProps(
     types[typeName] = entry;
   }
 
+  /* The definitions: every type a table names and no table is, then every
+     type those name, in the order they are first named. A type with a table
+     is linked, not defined again. */
+  const packageOf = (fileName: string): string | undefined => {
+    for (let dir = fileName.slice(0, fileName.lastIndexOf("/")); dir.includes("/"); dir = dir.slice(0, dir.lastIndexOf("/"))) {
+      const manifest = ts.sys.readFile(`${dir}/package.json`);
+      if (manifest !== undefined) return (JSON.parse(manifest) as { name?: string }).name;
+    }
+    return undefined;
+  };
+  /** Does the type read as a table - nothing but named members? */
+  const hasMembers = (declaration: Declaration): boolean => {
+    const members = ts.isInterfaceDeclaration(declaration)
+      ? declaration.members
+      : ts.isTypeLiteralNode(declaration.type)
+        ? declaration.type.members
+        : undefined;
+    return members !== undefined && members.every(ts.isPropertySignature);
+  };
+  const queue = Object.values(types).flatMap((entry) => entry.props.flatMap((p) => p.references ?? []));
+  /** What a page shows: the tables, and the definitions. */
+  const shown = new Set<Declaration>(isPublic);
+  for (let i = 0; i < queue.length; i++) {
+    const name = queue[i]!;
+    const declaration = named.get(name)!;
+    if (typeNames.includes(name) && declarations.get(name) !== declaration) {
+      throw new Error(`\`${name}\` names two types: a table's and the one in ${declaration.getSourceFile().fileName}.`);
+    }
+    if (types[name] !== undefined) continue;
+    const fileName = declaration.getSourceFile().fileName;
+    const from = own.has(fileName) ? undefined : packageOf(fileName);
+    const description = descriptionOf(declaration.name);
+    const parameter = (declaration.typeParameters ?? []).map(textOf);
+    /* A definition stands on a page: its texts are a reader's, like a row's. */
+    shown.add(declaration);
+    const found = check(description);
+    if (found.length > 0) {
+      const file = declaration.getSourceFile();
+      const line = file.getLineAndCharacterOfPosition(declaration.getStart(file)).line + 1;
+      flags.push({ of: declaration, flag: { type: name, prop: "(its comment)", file: fileName, line, found } });
+    }
+    if (hasMembers(declaration)) {
+      const entry = readType(declaration);
+      types[name] = { ...entry, definition: { description, ...(from === undefined ? {} : { from }) } };
+      queue.push(...entry.props.flatMap((p) => p.references ?? []));
+    } else {
+      const references = referencesOf(declaration);
+      const text = declaration.getText().replace(/^export /, "").replace(/^declare /, "");
+      types[name] = {
+        name,
+        parameter,
+        omitted: [],
+        props: [],
+        definition: {
+          description,
+          ...(from === undefined ? {} : { from }),
+          declaration: text,
+          ...(references.length === 0 ? {} : { references }),
+        },
+      };
+      queue.push(...references);
+    }
+  }
+
   /* Only what really ends up in a table. A type that was read only as a
      parent and has no page of its own is not chased. */
   return {
     types,
     gaps: gaps.filter((l) => isPublic.has(l.of)).map((l) => l.gap),
-    flags: flags.filter((f) => isPublic.has(f.of)).map((f) => f.flag),
+    flags: flags.filter((f) => shown.has(f.of)).map((f) => f.flag),
   };
 }

@@ -68,6 +68,12 @@ commit.
   for. Below them, under `#charts-tokens`, the 29 `--uc-…` tokens of
   `@umriss-ui/charts`, with the core token each one takes, linked. The tokens
   themselves are unchanged.
+- **`docs/llms-full.md` defines every type a props table names**: a type
+  without a table of its own (`ButtonSize`, `Wording`, `Limit`) stands under
+  "Types on this page" of each page that names it, with its comment and its
+  members or its declaration. "The rest of the API" holds every export that
+  neither a table nor such a definition explains, `useTree` and `useToast`
+  among them.
 
 ## 0.24.0 – The select's own list (Oct. 2026)
 

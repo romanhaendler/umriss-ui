@@ -11,8 +11,9 @@
    The entries are the ones each package's `vite.config.ts` builds, subpaths
    included: a German wording is an export a reader imports too.
 
-   Every export of the main entry that no page names gets its declaration in
-   "The rest of the API" - so for those the first check holds by construction,
+   Every export of the main entry that no table and no definition explains
+   gets its declaration in "The rest of the API" - so for those the first check
+   holds by construction,
    and a second one keeps the guard honest: a COMPONENT (an export with a
    `<Name>Props` beside it) must be named by the pages themselves. A new
    component without a page, or dropped from its page, fails here instead of
@@ -23,9 +24,8 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import ts from "typescript";
 import { missingFrom, renderLlms } from "../src/tooling/llms";
-import { apiHtml, tableModel } from "../src/tooling/apiTable";
-import { adrLinks, linkedTables, requiredTypes, sourceFiles } from "../src/tooling/props";
-import { readProps } from "../src/tooling/propsReader";
+import { apiHtml, apiSection } from "../src/tooling/apiTable";
+import { adrLinks, linkedTables, readPackage } from "../src/tooling/props";
 import { siteLeaks } from "../src/tooling/references";
 import type { Rubric } from "../src/outline";
 
@@ -65,7 +65,7 @@ describe.each(Object.keys(ENTRIES))("the llms-full.txt of %s", (dir) => {
   it("names every export of the package, and carries the app's API section on every page", async () => {
     const packageDir = join(PACKAGES, dir);
     const { OUTLINE } = (await import(join(packageDir, "demo", "outline.ts"))) as { OUTLINE: readonly Rubric[] };
-    const types = linkedTables(readProps(sourceFiles(join(packageDir, "src")), requiredTypes(OUTLINE)).types, adrLinks());
+    const types = linkedTables(readPackage(packageDir, OUTLINE).types, adrLinks());
     const { full, pages: sitePages } = renderLlms({ packageDir, outline: OUTLINE, tables: types });
 
     /* No page sends its reader to a requirement they cannot see, and every
@@ -74,8 +74,9 @@ describe.each(Object.keys(ENTRIES))("the llms-full.txt of %s", (dir) => {
 
     /* The API section the app mounts (`Page.tsx`: the same call) is the one the
        prerendered page carries. */
-    for (const page of OUTLINE.flatMap((rubric) => rubric.pages).filter((one) => one.types.length > 0)) {
-      const app = apiHtml(page.types.map((type) => tableModel(types[type]!)));
+    const all = OUTLINE.flatMap((rubric) => rubric.pages);
+    for (const page of all.filter((one) => one.types.length > 0)) {
+      const app = apiHtml(apiSection(page, all, types));
       expect(sitePages.find((one) => one.path === `${page.id}/`)!.html, page.id).toContain(`<div class="apiTables">${app}</div>`);
     }
 
@@ -87,5 +88,21 @@ describe.each(Object.keys(ENTRIES))("the llms-full.txt of %s", (dir) => {
     const components = names.filter((name) => names.includes(`${name}Props`));
     expect(components.length).toBeGreaterThan(0);
     expect(missingFrom(pages, components)).toEqual([]);
+
+    /* The holes the spec names: a type a table names is defined on its page,
+       and what neither a table nor a definition explains stands in the
+       appendix with its declaration (types-without-holes). */
+    const { defined, appendix } = KNOWN[dir]!;
+    for (const name of defined) expect(pages, name).toMatch(new RegExp(`^###### \`${name}(<[^\`]*>)?\`$`, "m"));
+    const rest = full.split("\n## The rest of the API\n")[1] ?? "";
+    for (const name of appendix) expect(rest, name).toContain(`### \`${name}\`\n\n\`\`\`ts\n`);
   }, 60_000);
 });
+
+const KNOWN: Readonly<Record<string, { defined: readonly string[]; appendix: readonly string[] }>> = {
+  core: { defined: ["ButtonSize", "Wording"], appendix: ["useTree", "useToast"] },
+  charts: { defined: ["Accessor"], appendix: ["controlLimits"] },
+  table: { defined: ["TableRef", "Limit"], appendix: ["useTable"] },
+  schedule: { defined: ["Intent"], appendix: ["applyIntent"] },
+  calculation: { defined: ["Limit"], appendix: [] },
+};

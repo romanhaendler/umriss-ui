@@ -10,7 +10,7 @@
    through its table syntax. */
 
 import { describe, expect, it } from "vitest";
-import { apiHtml, tableHtml, tableMarkdown, tableModel } from "../src/tooling/apiTable";
+import { apiHtml, apiMarkdown, apiSection, tableHtml, tableMarkdown, tableModel } from "../src/tooling/apiTable";
 import type { TypeEntry } from "../src/tooling/tables";
 
 const ENTRY: TypeEntry = {
@@ -39,8 +39,8 @@ const ENTRY: TypeEntry = {
       defaultIsPhrase: true,
       description: "Where the scale ends.",
     },
-    { name: "rows", type: "readonly T[]", optional: false, description: "Every row, `<b>` and all." },
-    { name: "size", type: "GaugeSize", expansion: '"sm" | "md"', optional: true, description: "How tall the gauge stands." },
+    { name: "rows", type: "readonly Reading<T>[]", references: ["Reading"], optional: false, description: "Every row, `<b>` and all." },
+    { name: "size", type: "GaugeSize", expansion: '"sm" | "md"', references: ["GaugeSize"], optional: true, description: "How tall the gauge stands." },
   ],
 };
 
@@ -99,15 +99,24 @@ describe("the groups of a table (.scratch/props-table-hygiene)", () => {
   });
 });
 
+/** `GaugeSize` is defined on the page, `Reading` has a table on the Meter's. */
+const LINK_OF = (name: string) => (name === "GaugeSize" ? "#type-GaugeSize" : `#/meter/type-${name}`);
+
 interface Row {
   name: string;
   type: string;
+  /** Where the names in the type lead, as `page#anchor` (`#anchor` on the page itself). */
+  links: string[];
   /** The values beneath an alias's name; empty where there are none. */
   expansion: string;
   defaultValue: string;
   required: boolean;
   deprecated: boolean;
 }
+
+/** An address the HTML writes (`../meter/#type-X`) and a place the Markdown
+    writes (`#/meter/type-X`) as one form: `meter#type-X`. */
+const target = (href: string) => href.replace(/^\.\.\/([^/]+)\/#/, "$1#").replace(/^#\/([^/]+)\//, "$1#");
 
 function htmlFacts(html: string): { heading: string; anchor: string; titles: string[]; groups: Row[][]; closing: string[] } {
   const host = document.createElement("div");
@@ -121,6 +130,7 @@ function htmlFacts(html: string): { heading: string; anchor: string; titles: str
       [...table.querySelectorAll("tbody tr")].map((tr) => ({
         name: tr.querySelector("th code")!.textContent!,
         type: tr.querySelector(".apiType")!.textContent!,
+        links: [...tr.querySelectorAll(".apiType a")].map((a) => target(a.getAttribute("href")!)),
         expansion: tr.querySelector(".apiType + br + code")?.textContent ?? "",
         defaultValue: tr.querySelectorAll("td")[1]!.textContent!,
         required: tr.querySelector("th")!.textContent!.endsWith("required"),
@@ -133,7 +143,14 @@ function htmlFacts(html: string): { heading: string; anchor: string; titles: str
 
 /** A Markdown cell as a reader sees it: the inline code unwrapped, the
     escaped pipe a pipe again. */
-const unmark = (text: string) => text.trim().replace(/\\\|/g, "|").replace(/`+ ?([^`]+?) ?`+/g, "$1").replace(/\*\*([^*]+)\*\*|\*([^*]+)\*/g, "$1$2");
+const unmark = (text: string) =>
+  text
+    .trim()
+    .replace(/\\\|/g, "|")
+    .replace(/\[([^\]]+)\]\([^)\s]+\)/g, "$1")
+    /* A space is stripped where one stands on each side, as GFM does. */
+    .replace(/(`+)(?: ([^`]+) |([^`]+))\1/g, "$2$3")
+    .replace(/\*\*([^*]+)\*\*|\*([^*]+)\*/g, "$1$2");
 
 function markdownFacts(markdown: string): { heading: string; titles: string[]; groups: Row[][]; closing: string[] } {
   const lines = markdown.split("\n");
@@ -146,6 +163,7 @@ function markdownFacts(markdown: string): { heading: string; titles: string[]; g
       groups.at(-1)!.push({
         name: unmark(name!.replace(/ \*required\*$/, "")),
         type: unmark(type!),
+        links: [...type!.matchAll(/\]\(([^)\s]+)\)/g)].map((match) => target(match[1]!)),
         expansion: expansion === undefined ? "" : unmark(expansion),
         defaultValue: unmark(defaultValue!),
         required: name!.endsWith(" *required*"),
@@ -162,8 +180,8 @@ function markdownFacts(markdown: string): { heading: string; titles: string[]; g
 }
 
 describe("one table model, two writers", () => {
-  it("write the same groups and rows, in the same order, with the same type, default and required label", () => {
-    const model = tableModel(ENTRY);
+  it("write the same groups and rows, in the same order, with the same type, links, default and required label", () => {
+    const model = tableModel(ENTRY, LINK_OF);
     const html = htmlFacts(tableHtml(model));
     const markdown = markdownFacts(tableMarkdown(model));
     expect(html.heading).toBe("GaugeProps<T>");
@@ -180,6 +198,8 @@ describe("one table model, two writers", () => {
     expect(html.groups.flat().find((row) => row.name === "max")!.defaultValue).toBe("the largest value, else 100");
     expect(html.groups.flat().find((row) => row.name === "size")).toMatchObject({ type: "GaugeSize", expansion: '"sm" | "md"' });
     expect(html.groups.flat().filter((row) => row.expansion !== "").map((row) => row.name)).toEqual(["size"]);
+    expect(html.groups.flat().find((row) => row.name === "rows")).toMatchObject({ type: "readonly Reading<T>[]", links: ["meter#type-Reading"] });
+    expect(html.groups.flat().find((row) => row.name === "size")!.links).toEqual(["#type-GaugeSize"]);
   });
 
   it("write the four groups alike, each secondary one under its sub-heading", () => {
@@ -189,6 +209,12 @@ describe("one table model, two writers", () => {
     expect(html.titles).toEqual(["Events", "Accessibility", "Styling"]);
     expect(markdown.titles).toEqual(html.titles);
     expect(markdown.groups).toEqual(html.groups);
+  });
+
+  it("links a name inside the type's code, in each medium", () => {
+    const model = tableModel(ENTRY, LINK_OF);
+    expect(tableHtml(model)).toContain('<code class="apiType">readonly <a href="../meter/#type-Reading">Reading</a>&lt;T&gt;[]</code>');
+    expect(tableMarkdown(model)).toContain("| `readonly `[`Reading`](#/meter/type-Reading)`<T>[]` |");
   });
 
   it("sets a deprecated prop last, with the badge and the tag's sentence before its description", () => {
@@ -246,6 +272,69 @@ describe("one table model, two writers", () => {
 
   it("joins a page's tables into one API section", () => {
     const models = [tableModel(ENTRY), tableModel({ ...ENTRY, name: "MeterProps" })];
-    expect(apiHtml(models)).toBe(models.map(tableHtml).join(""));
+    expect(apiHtml({ tables: models, definitions: [] })).toBe(models.map((model) => tableHtml(model)).join(""));
+  });
+});
+
+describe("Types on this page", () => {
+  const ENTRIES: Record<string, TypeEntry> = {
+    GaugeProps: ENTRY,
+    Reading: { name: "Reading", parameter: ["T"], omitted: [], props: [{ name: "at", type: "T", optional: false, description: "When." }] },
+    GaugeSize: {
+      name: "GaugeSize",
+      parameter: [],
+      omitted: [],
+      props: [],
+      definition: { description: "How tall a `Gauge` stands.", declaration: "type GaugeSize = Size;", references: ["Size"] },
+    },
+    Size: {
+      name: "Size",
+      parameter: [],
+      omitted: [],
+      props: [{ name: "rem", type: "number", optional: false, description: "In rem." }],
+      definition: { description: "A size.", from: "@umriss-ui/core" },
+    },
+  };
+  const PAGES = [
+    { id: "gauge", types: ["GaugeProps"] },
+    { id: "meter", types: ["Reading"] },
+  ];
+  const section = apiSection(PAGES[0]!, PAGES, ENTRIES);
+
+  it("defines what the tables name and what the definitions name, and links what has a table", () => {
+    expect(section.definitions.map((one) => one.name)).toEqual(["GaugeSize", "Size"]);
+    expect(section.definitions[0]!.declaration).toEqual([
+      { kind: "text", text: "type GaugeSize = " },
+      { kind: "link", text: "Size", href: "#type-Size" },
+      { kind: "text", text: ";" },
+    ]);
+  });
+
+  it("writes the same definitions, in the same order, in each medium", () => {
+    const host = document.createElement("div");
+    host.innerHTML = apiHtml(section);
+    const block = host.querySelector(".apiDefinitions")!;
+    expect(block.querySelector("h3")!.textContent).toBe("Types on this page");
+    const html = [...block.querySelectorAll("h4")].map((h) => [h.id, h.textContent]);
+    expect(html).toEqual([
+      ["type-GaugeSize", "GaugeSize"],
+      ["type-Size", "Size"],
+    ]);
+    const markdown = apiMarkdown(section).join("\n\n");
+    expect([...markdown.matchAll(/^###### `([^`]+)`$/gm)].map((match) => [`type-${match[1]}`, match[1]])).toEqual(html);
+    expect(markdown).toContain("##### Types on this page");
+    expect(markdown).toContain("###### `GaugeSize`\n\nHow tall a `Gauge` stands.\n\n```ts\ntype GaugeSize = Size;\n```");
+    expect(markdown).toContain("###### `Size`\n\nFrom `@umriss-ui/core`.\n\nA size.\n\n| Prop | Type | Default | Description |");
+    expect(host.innerHTML).toContain('<pre class="apiDeclaration"><code>type GaugeSize = <a href="#type-Size">Size</a>;</code></pre>');
+    expect(host.innerHTML).toContain('<p class="apiInherited">From <code>@umriss-ui/core</code>.</p><p class="apiProse">A size.</p>');
+  });
+
+  it("stops the generator at a name with neither a table nor a definition", () => {
+    const without = Object.fromEntries(Object.entries(ENTRIES).filter(([name]) => name !== "Size"));
+    expect(() => apiSection(PAGES[0]!, PAGES, without)).toThrow("`Size` is named on the page `gauge` and has neither a table nor a definition.");
+  });
+
+  it("leaves the block out where nothing needs defining", () => {
+    expect(apiHtml(apiSection(PAGES[1]!, PAGES, ENTRIES))).not.toContain("Types on this page");
   });
 });

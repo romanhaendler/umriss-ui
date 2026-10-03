@@ -318,6 +318,59 @@ describe("readProps over a named alias in a type cell", () => {
     expect(row("tone").type).toBe('"quiet" | "loud"');
     expect(row("tone").expansion).toBeUndefined();
   });
+
+  it("names each type of the library a cell names, and none for an inline union", () => {
+    expect(row("size").references).toEqual(["FixtureButtonSize"]);
+    expect(row("shape").references).toEqual(["FixtureShapeAlias"]);
+    expect(row("tone").references).toBeUndefined();
+  });
+});
+
+describe("readProps over the types a table names and no table is", () => {
+  const ALIASES = join(FIXTURES, "aliases.tsx");
+  const BASE = join(FIXTURES, "aliasBase.ts");
+
+  it("defines them, and what those name, in the order they are first named", () => {
+    const { types } = readProps([ALIASES, BASE], ["FixtureAliasProps"]);
+    expect(Object.keys(types)).toEqual([
+      "FixtureAliasProps",
+      "FixtureButtonSize",
+      "FixtureStep",
+      "FixtureShapeAlias",
+      "FixtureMixed",
+      "FixtureControlSize",
+      "FixtureShape",
+    ]);
+    expect(types.FixtureAliasProps!.definition).toBeUndefined();
+  });
+
+  it("gives a union, a function or an alias its declaration, and an interface its members", () => {
+    const { types } = readProps([ALIASES, BASE], ["FixtureAliasProps"]);
+    expect(types.FixtureShapeAlias!.definition).toEqual({
+      description: "The shape under another name.",
+      declaration: "type FixtureShapeAlias = FixtureShape;",
+      references: ["FixtureShape"],
+    });
+    expect(types.FixtureShape!.definition).toEqual({ description: "A shape with members." });
+    expect(types.FixtureShape!.props.map((p) => p.name)).toEqual(["kind"]);
+  });
+
+  it("stops at a type with a table of its own", () => {
+    const { types } = readProps([ALIASES, BASE], ["FixtureAliasProps", "FixtureShape"]);
+    expect(types.FixtureShape!.definition).toBeUndefined();
+    expect(types.FixtureShapeAlias!.definition!.references).toEqual(["FixtureShape"]);
+  });
+
+  it("checks a definition's comment as it checks a row's", () => {
+    const { flags } = readProps([ALIASES, BASE], ["FixtureAliasProps"], (text) => (text.includes("another name") ? ["another name"] : []));
+    expect(flags).toEqual([expect.objectContaining({ type: "FixtureShapeAlias", prop: "(its comment)", found: ["another name"] })]);
+  });
+
+  it("names the package of a type from outside the files read", () => {
+    const { types } = readProps([ALIASES], ["FixtureAliasProps"]);
+    expect(types.FixtureControlSize!.definition).toMatchObject({ from: "@umriss-ui/demo", declaration: 'type FixtureControlSize = "sm" | "md";' });
+    expect(types.FixtureShape!.definition!.from).toBeUndefined();
+  });
 });
 
 describe("readProps with the gate's check for internal references", () => {

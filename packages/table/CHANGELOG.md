@@ -42,6 +42,11 @@ is one of the internal numbers from before core's first publication as `0.1.0`
   finds too narrow for a pinned block - it measures the place and decides. A
   column pinned to the end still takes the actions with it, and an open Row
   draft's Save still sticks. The default, `true`, is the behaviour so far.
+- **`docs/llms-full.md` defines every type a props table names**: a type
+  without a table of its own (`TableRef`, `Pin`, core's `Limit`) stands under
+  "Types on this page" of each page that names it, with its comment and its
+  members or its declaration. "The rest of the API" holds every export that
+  neither a table nor such a definition explains, `useTable` among them.
 
 ### Fixed
 

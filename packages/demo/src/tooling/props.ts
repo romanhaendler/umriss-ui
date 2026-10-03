@@ -22,9 +22,10 @@
 import { existsSync, readdirSync, readFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { join, dirname, relative } from "node:path";
 import { fileURLToPath } from "node:url";
+import ts from "typescript";
 import type { Rubric } from "../outline.ts";
 import { readProps } from "./propsReader.ts";
-import type { PropEntry, TypeEntry } from "./propsReader.ts";
+import type { PropEntry, Reading, TypeEntry } from "./propsReader.ts";
 import { undocumentedExports } from "./exportDocs.ts";
 import { adrLinksOf, internalReferences, linkAdrs, pageTexts, type AdrLinks } from "./references.ts";
 
@@ -90,7 +91,32 @@ export function linkedTables(types: Readonly<Record<string, TypeEntry>>, links: 
     ...(prop.deprecated === undefined ? {} : { deprecated: link(prop.deprecated) }),
     ...(prop.defaultIsPhrase === true ? { defaultValue: link(prop.defaultValue!) } : {}),
   });
-  return Object.fromEntries(Object.entries(types).map(([name, entry]) => [name, { ...entry, props: entry.props.map(linked) }]));
+  return Object.fromEntries(
+    Object.entries(types).map(([name, entry]) => [
+      name,
+      {
+        ...entry,
+        props: entry.props.map(linked),
+        ...(entry.definition === undefined ? {} : { definition: { ...entry.definition, description: link(entry.definition.description) } }),
+      },
+    ]),
+  );
+}
+
+/** The package's own compiler options, from its `tsconfig.json` - the paths
+    to its neighbours' source above all, so that a type from core reads as it
+    is written and not as `any` from a dist that was never built. Empty where
+    the package has none. */
+export function compilerOptionsOf(packageDir: string): ts.CompilerOptions {
+  const configPath = join(packageDir, "tsconfig.json");
+  if (!existsSync(configPath)) return {};
+  return ts.getParsedCommandLineOfConfigFile(configPath, {}, { ...ts.sys, onUnRecoverableConfigFileDiagnostic: () => {} })?.options ?? {};
+}
+
+/** A package's tables and the definitions they need, read as `generateProps`
+    reads them; `check` as for `readProps`. */
+export function readPackage(packageDir: string, outline: readonly Rubric[], check?: (text: string) => readonly string[]): Reading {
+  return readProps(sourceFiles(join(packageDir, "src")), requiredTypes(outline), check, compilerOptionsOf(packageDir));
 }
 
 export interface PropsJob {
@@ -105,11 +131,7 @@ export interface PropsJob {
 export function generateProps({ packageName, outline }: PropsJob): Record<string, TypeEntry> {
   const target = join(packageName, "demo", ".generated", "props.json");
   const links = adrLinks();
-  const { types: types, gaps: gaps, flags } = readProps(
-    sourceFiles(join(packageName, "src")),
-    requiredTypes(outline),
-    (text) => internalReferences(text, links),
-  );
+  const { types: types, gaps: gaps, flags } = readPackage(packageName, outline, (text) => internalReferences(text, links));
   const outlineFile = join(packageName, "demo", "outline.ts");
   /* The outline is handed in; its file only tells the lines. */
   const pageFlags = outlineFlags(outline, existsSync(outlineFile) ? readFileSync(outlineFile, "utf8") : "", links);

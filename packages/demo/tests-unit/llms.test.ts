@@ -8,7 +8,7 @@ import { describe, expect, it, vi } from "vitest";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { renderLlms } from "../src/tooling/llms";
-import { apiHtml, tableModel } from "../src/tooling/apiTable";
+import { apiHtml, apiSection } from "../src/tooling/apiTable";
 import type { Rubric } from "../src/outline";
 import type { TypeEntry } from "../src/tooling/tables";
 
@@ -70,7 +70,7 @@ const TABLES: Record<string, TypeEntry> = {
 
 const { index, full, pages, twins } = renderLlms({ packageDir: PACKAGE_DIR, outline: OUTLINE, tables: TABLES });
 /** The Gauge page's tables, as the app mounts them. */
-const API = apiHtml([tableModel(TABLES.GaugeProps!)]);
+const API = apiHtml(apiSection(OUTLINE[0]!.pages[0]!, OUTLINE[0]!.pages, TABLES));
 
 describe("llms.txt", () => {
   it("names the package, its summary and where the full text is", () => {
@@ -296,5 +296,76 @@ describe("the pages' Markdown twins (.scratch/pages-as-markdown)", () => {
       ["gauge/", "https://example.test/fixture/gauge.md"],
       ["meter/", "https://example.test/fixture/meter.md"],
     ]);
+  });
+});
+
+describe("Types on this page (.scratch/types-without-holes)", () => {
+  /* The Gauge names `Limit`, which has no table: it is defined on the Gauge's
+     page, and so is `Bound`, which only `Limit` names. `Bound` names the
+     Meter's props, which have a table on the Meter's page - a link, not a
+     definition. A row's type also names `fraction` as text, with no table and
+     no definition. */
+  const outline: readonly Rubric[] = [
+    { ...OUTLINE[0]!, pages: [OUTLINE[0]!.pages[0]!, { ...OUTLINE[0]!.pages[1]!, types: ["MeterProps"] }] },
+  ];
+  const tables: Record<string, TypeEntry> = {
+    GaugeProps: {
+      ...TABLES.GaugeProps!,
+      props: [
+        ...TABLES.GaugeProps!.props,
+        { name: "limit", type: "Limit | null", references: ["Limit"], optional: true, description: "Where the needle turns red." },
+        { name: "scale", type: "typeof fraction", optional: true, description: "How a value becomes an angle." },
+      ],
+    },
+    MeterProps: { name: "MeterProps", parameter: [], omitted: [], props: [{ name: "value", type: "number", optional: false, description: "The value." }] },
+    Limit: {
+      name: "Limit",
+      parameter: [],
+      omitted: [],
+      props: [],
+      definition: { description: "A limit and the side it holds.", declaration: "type Limit = { bound: Bound };", references: ["Bound"] },
+    },
+    Bound: {
+      name: "Bound",
+      parameter: [],
+      omitted: [],
+      props: [{ name: "meter", type: "MeterProps", references: ["MeterProps"], optional: false, description: "Where it is shown." }],
+      definition: { description: "One end of a limit.", from: "@umriss-ui/core" },
+    },
+  };
+  const { full: text, pages: sitePages, twins: twinTexts } = renderLlms({ packageDir: PACKAGE_DIR, outline, tables });
+  const gauge = text.slice(text.indexOf("### Gauge"), text.indexOf("### Meter"));
+  const gaugeHtml = sitePages.find((one) => one.path === "gauge/")!.html;
+
+  it("defines a type the page names and no table is, after the tables", () => {
+    expect(gauge).toContain("| `limit` | [`Limit`](#type-Limit)` \\| null` |");
+    expect(gauge).toContain("##### Types on this page\n\n###### `Limit`\n\nA limit and the side it holds.\n\n```ts\ntype Limit = { bound: Bound };\n```");
+    expect(gauge.indexOf("##### `GaugeProps`")).toBeLessThan(gauge.indexOf("##### Types on this page"));
+    expect(gauge.indexOf("##### Types on this page")).toBeLessThan(gauge.indexOf("#### Known limits"));
+  });
+
+  it("defines a type only a definition names, with its package, and stops at a type with a table", () => {
+    expect(gauge).toContain("###### `Bound`\n\nFrom `@umriss-ui/core`.\n\nOne end of a limit.\n\n| Prop | Type | Default | Description |");
+    expect(gauge).toContain("| `meter` *required* | [`MeterProps`](#/meter/type-MeterProps) |");
+    expect(gauge).not.toContain("###### `MeterProps`");
+  });
+
+  it("carries the definitions and their links in the prerendered HTML", () => {
+    expect(gaugeHtml).toContain('<a href="#type-Limit">Limit</a>');
+    expect(gaugeHtml).toContain('<h4 class="apiTitle" id="type-Limit">');
+    expect(gaugeHtml).toContain('<a href="../meter/#type-MeterProps">MeterProps</a>');
+    expect(sitePages.find((one) => one.path === "meter/")!.html).toContain('id="type-MeterProps"');
+  });
+
+  it("makes a twin's links to a definition absolute, at the page's anchor", () => {
+    const twin = twinTexts.find((one) => one.path === "gauge.md")!.text;
+    expect(twin).toContain("[`Limit`](https://example.test/fixture/gauge/#type-Limit)");
+    expect(twin).toContain("[`MeterProps`](https://example.test/fixture/meter/#type-MeterProps)");
+  });
+
+  it("keeps in the appendix an export a cell names that has no table and no definition", () => {
+    const rest = text.slice(text.indexOf("## The rest of the API"));
+    expect(rest).toContain("### `fraction`\n\n```ts\n/** Where the needle stands, as a fraction of the range. */\nfunction fraction(value: number): number;\n```");
+    expect(rest).not.toContain("### `GaugeProps`");
   });
 });

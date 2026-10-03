@@ -47,6 +47,11 @@ interface was still expected to move before `0.3.0`.
 - **A prop's comment cites no requirement number**: "Binding to a y axis
   (R-4.12)." reads "Binding to a y axis."; the number stands in a `@remarks`
   tag. Nothing else changes.
+- **`docs/llms-full.md` defines every type a props table names**: a type
+  without a table of its own (`Accessor`, `MatrixColoring`) stands under
+  "Types on this page" of each page that names it, with its comment and its
+  members or its declaration. "The rest of the API" holds every export that
+  neither a table nor such a definition explains, `controlLimits` among them.
 
 ## 0.9.0 – A box plot (Oct. 2026)
 
