@@ -11,21 +11,22 @@
    A resting place is a NAME and not a coordinate (ADR-0013). Nothing in this
    file returns a position; it answers questions about names exclusively. */
 
-/** One of the four edges of the host. There is no fifth and no corner. */
-export type Place = "top" | "right" | "bottom" | "left";
+/** The outside of the resting place: one of the four edges of the host.
+    There is no fifth and no corner. */
+export type DockPlace = "top" | "right" | "bottom" | "left";
 
 /** The resting place a dock starts with - and the answer everywhere two places
     would be equally good. */
-export const DEFAULT_PLACE: Place = "bottom";
+export const DEFAULT_PLACE: DockPlace = "bottom";
 
 /** The four places clockwise. Only for the ring distance. */
-const RING: readonly Place[] = ["top", "right", "bottom", "left"];
+const RING: readonly DockPlace[] = ["top", "right", "bottom", "left"];
 
 /* The order in which places equally far away are decided. Equally far means:
    there is no nearer one, so the same thing decides as would decide without any
    current place - the default first, and the lying ones before the standing
    ones, because a lying dock has room more often. */
-const PREFERENCE: readonly Place[] = ["bottom", "top", "right", "left"];
+const PREFERENCE: readonly DockPlace[] = ["bottom", "top", "right", "left"];
 
 /** The rectangle of the host, as `getBoundingClientRect` delivers it. */
 export interface Rect {
@@ -63,7 +64,7 @@ export interface StripMetrics {
 
 /** Whether the place stands the dock upright. Both - the component and the
     transition - need the answer, and neither of them shall derive it itself. */
-export function isUpright(place: Place): boolean {
+export function isUpright(place: DockPlace): boolean {
   return place === "left" || place === "right";
 }
 
@@ -86,7 +87,7 @@ export function isUpright(place: Place): boolean {
  * often than a standing one, so the doubtful point falls on the place that is
  * more likely to exist.
  */
-export function placeAtPointer(point: Point, host: Rect): Place {
+export function placeAtPointer(point: Point, host: Rect): DockPlace {
   // Without an area there are no zones. The function stays total nonetheless.
   if (host.width <= 0 || host.height <= 0) return DEFAULT_PLACE;
 
@@ -121,7 +122,7 @@ export function stripLength(toolCount: number, metrics: StripMetrics): number {
  * and then corrected.
  */
 export function fits(
-  place: Place,
+  place: DockPlace,
   toolCount: number,
   host: Rect,
   metrics: StripMetrics,
@@ -141,7 +142,7 @@ export function fits(
  * Every other key yields "no place". That is the honest answer and not a gap:
  * the component passes such keys on instead of swallowing them.
  */
-export function placeForKey(key: string): Place | undefined {
+export function placeForKey(key: string): DockPlace | undefined {
   switch (key) {
     case "ArrowUp":
       return "top";
@@ -157,7 +158,7 @@ export function placeForKey(key: string): Place | undefined {
 }
 
 /** The ring distance of two places: 0 the same, 1 adjacent, 2 opposite. */
-function distance(a: Place, b: Place): number {
+function distance(a: DockPlace, b: DockPlace): number {
   const gap = Math.abs(RING.indexOf(a) - RING.indexOf(b));
   return Math.min(gap, RING.length - gap);
 }
@@ -174,11 +175,11 @@ function distance(a: Place, b: Place): number {
  * fall back to.
  */
 export function nearestFittingPlace(
-  place: Place,
+  place: DockPlace,
   toolCount: number,
   host: Rect,
   metrics: StripMetrics,
-): Place | undefined {
+): DockPlace | undefined {
   return [...RING]
     .sort(
       (a, b) =>

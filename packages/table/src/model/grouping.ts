@@ -204,6 +204,7 @@ export function livePaths<Z>(groups: readonly RowGroup<Z>[], folded: readonly st
 
 /* --- Date periods ----------------------------------------------------------------- */
 
+/** The span a point in time is grouped by. */
 export type DatePeriod = "day" | "week" | "month" | "year";
 
 /** A point in time brought to the start of its day, ISO week (Monday), month

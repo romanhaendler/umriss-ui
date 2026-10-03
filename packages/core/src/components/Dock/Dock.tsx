@@ -55,14 +55,14 @@ import {
   placeAtPointer,
   placeForKey,
   DEFAULT_PLACE,
-  type Place,
+  type DockPlace,
   type Rect,
   type StripMetrics,
 } from "./place";
 import styles from "./Dock.module.css";
 
-/** The outside of the resting place. */
-export type DockPlace = Place;
+/* The resting place: the one name of `place.ts` the caller has in hand. */
+export type { DockPlace };
 
 /** A tool: something one TAKES. That distinguishes it from the candidate of the
     command palette, which one FINDS (CONTEXT.md, "Reaching for a tool"). */
@@ -121,7 +121,7 @@ export interface DockProps extends Omit<HTMLAttributes<HTMLDivElement>, "onSelec
 }
 
 interface Snapshot {
-  place: Place;
+  place: DockPlace;
   root: DOMRect;
   strip: DOMRect;
   children: DOMRect[];
@@ -161,7 +161,7 @@ export const Dock = forwardRef<HTMLDivElement, DockProps>(function Dock(
   const stripRef = useRef<HTMLDivElement>(null);
   useImperativeHandle(ref, () => rootRef.current as HTMLDivElement, []);
 
-  const [ownPlace, setOwnPlace] = useState<Place>(defaultPlace);
+  const [ownPlace, setOwnPlace] = useState<DockPlace>(defaultPlace);
   const controlled = place !== undefined;
   const currentPlace = place ?? ownPlace;
 
@@ -175,7 +175,7 @@ export const Dock = forwardRef<HTMLDivElement, DockProps>(function Dock(
      mean reading the layout in every render - and precisely in those renders
      that come about during a drag. */
   const [refused, setRefused] = useState<{
-    place: Place;
+    place: DockPlace;
     width: string;
     height: string;
   } | null>(null);
@@ -248,7 +248,7 @@ export const Dock = forwardRef<HTMLDivElement, DockProps>(function Dock(
   const last = useRef<Snapshot | null>(null);
   const running = useRef<Animation[]>([]);
 
-  const measureAll = useCallback((forPlace: Place): Snapshot | null => {
+  const measureAll = useCallback((forPlace: DockPlace): Snapshot | null => {
     const strip = stripRef.current;
     const root = rootRef.current;
     if (strip === null || root === null) return null;
@@ -273,7 +273,7 @@ export const Dock = forwardRef<HTMLDivElement, DockProps>(function Dock(
   }, []);
 
   const setPlace = useCallback(
-    (target: Place) => {
+    (target: DockPlace) => {
       if (target === placeRef.current) return;
       /* The visible state BEFORE the change. It is taken here and not in the
          layout effect: there the new place has long been rendered. And it is
@@ -295,7 +295,7 @@ export const Dock = forwardRef<HTMLDivElement, DockProps>(function Dock(
       Silence would be the alternative and is worse - a zone that does nothing
       and says nothing reads as a broken control. */
   const refuse = useCallback(
-    (target: Place, metrics: StripMetrics, count: number, withTimer: boolean) => {
+    (target: DockPlace, metrics: StripMetrics, count: number, withTimer: boolean) => {
       const length = stripLength(count, metrics);
       setRefused({
         place: target,
@@ -324,7 +324,7 @@ export const Dock = forwardRef<HTMLDivElement, DockProps>(function Dock(
 
   /** The one way along which both gestures choose a place. */
   const choosePlace = useCallback(
-    (target: Place, host: Rect | null, metrics: StripMetrics | null, withTimer: boolean) => {
+    (target: DockPlace, host: Rect | null, metrics: StripMetrics | null, withTimer: boolean) => {
       if (target === placeRef.current) return;
       if (host !== null && metrics !== null && !fits(target, tools.length, host, metrics)) {
         refuse(target, metrics, tools.length, withTimer);

@@ -95,7 +95,10 @@ export type FilterFor<W> =
 /** What a column draws in a cell: the value present and its row. */
 export type Presentation<W, Z> = (value: Present<W>, row: Z) => ReactNode;
 
-type IsDisplayable<W> = [Present<W>] extends [never]
+/** `true` where the value present can appear as text without `children`
+    (`Displayable`), `false` otherwise - what decides the filters and
+    aggregates a column offers. */
+export type IsDisplayable<W> = [Present<W>] extends [never]
   ? false
   : [Present<W>] extends [Displayable]
     ? true
@@ -196,6 +199,8 @@ export interface RowDelete<Z> {
 
 /* --- Columns -------------------------------------------------------------- */
 
+/** What every column takes, whatever its value: label, width, pinning and
+    what the user may do with it. */
 export interface ColumnBase {
   /** Names the column in its header, in the column menu and in the header row of the export. */
   label: string;
@@ -244,6 +249,9 @@ export interface ValuePaths<W> {
     year. */
 export type GroupFor<W> = [Present<W>] extends [Date] ? DatePeriod : never;
 
+/** The props of a column over a field `K` of the row `Z`: what every column
+    takes, and what the field's value decides - its format, filter, grouping,
+    aggregate and editing. */
 export type FieldColumn<Z, K extends Field<Z>> = ColumnBase &
   ValuePaths<Z[K]> & {
     /** A field of the row. Supplies the column's `id` at the same time. */
@@ -350,7 +358,8 @@ export interface ColumnComponent<Z> {
 
 /* --- Group keys ----------------------------------------------------------- */
 
-interface GroupByBase {
+/** What every group key takes, whatever its value. */
+export interface GroupByBase {
   /** Names the group key where a grouping is chosen, and in the grouping's tag in the table toolbar. */
   label: string;
 }
@@ -383,7 +392,9 @@ export type ColumnPreset<P, K extends Field<P> = Field<P>> = FieldColumn<P, K>;
 
 /* --- The verdict column --------------------------------------------------- */
 
-interface VerdictBase {
+/** What every verdict column takes, whether its value is a field or a
+    function. */
+export interface VerdictBase {
   /** Names the column in its header, in the column menu and in the header row of the export. */
   label: string;
   /** The limit set every value is read against. */

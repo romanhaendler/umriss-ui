@@ -74,3 +74,8 @@ export type {
 } from "./types";
 export type { Pin } from "./model/pinning";
 export type { ToolbarSize } from "./toolbarSize";
+
+/* The types a header, a cell or a definition on a page names, so that the
+   gate finds no name a reader cannot import (props-table-hygiene 04). */
+export type { ColumnBase, Displayable, FieldColumn, GroupByBase, IsDisplayable, ValuePaths, VerdictBase } from "./types";
+export type { DatePeriod, RowGroup } from "./model/grouping";

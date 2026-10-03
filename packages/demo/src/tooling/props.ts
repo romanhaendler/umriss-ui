@@ -1,8 +1,9 @@
 /* The gate: generates a demo's `demo/.generated/props.json` and stops at a
    prop without JSDoc, at an export of the entry or a subpath without one
-   (`exportDocs.ts`), and at an internal reference in a reader's text - a
+   (`exportDocs.ts`), at an internal reference in a reader's text - a
    requirement number, a source path, an ADR number no file answers
-   (`references.ts`).
+   (`references.ts`) -, at a default stated in prose and not in `@default`,
+   and at a type a page names that no entry exports (`propsReader.ts`).
 
    What is generated is not checked in - `demo/.generated/` is ignored. A
    checked-in generation drifts away from its source, and this whole mechanism
@@ -25,8 +26,8 @@ import { fileURLToPath } from "node:url";
 import ts from "typescript";
 import type { Rubric } from "../outline.ts";
 import { readProps } from "./propsReader.ts";
-import type { PropEntry, Reading, TypeEntry } from "./propsReader.ts";
-import { undocumentedExports } from "./exportDocs.ts";
+import type { Flag, PropEntry, Reading, TypeEntry } from "./propsReader.ts";
+import { entriesOf, undocumentedExports } from "./exportDocs.ts";
 import { adrLinksOf, internalReferences, linkAdrs, pageTexts, type AdrLinks } from "./references.ts";
 
 /** Every `.ts`/`.tsx` under a directory, sorted.
@@ -113,10 +114,22 @@ export function compilerOptionsOf(packageDir: string): ts.CompilerOptions {
   return ts.getParsedCommandLineOfConfigFile(configPath, {}, { ...ts.sys, onUnRecoverableConfigFileDiagnostic: () => {} })?.options ?? {};
 }
 
+/** The entries a reader of the package's pages imports from: the package's
+    own and those of the workspace packages it depends on (`peerDependencies`),
+    each with its subpaths. */
+export function importableEntries(packageDir: string): string[] {
+  const manifestPath = join(packageDir, "package.json");
+  const manifest = (existsSync(manifestPath) ? JSON.parse(readFileSync(manifestPath, "utf8")) : {}) as { peerDependencies?: Record<string, string> };
+  const neighbours = Object.keys(manifest.peerDependencies ?? {})
+    .filter((name) => name.startsWith("@umriss-ui/"))
+    .map((name) => join(packageDir, "..", name.slice("@umriss-ui/".length)));
+  return [packageDir, ...neighbours].flatMap(entriesOf);
+}
+
 /** A package's tables and the definitions they need, read as `generateProps`
     reads them; `check` as for `readProps`. */
 export function readPackage(packageDir: string, outline: readonly Rubric[], check?: (text: string) => readonly string[]): Reading {
-  return readProps(sourceFiles(join(packageDir, "src")), requiredTypes(outline), check, compilerOptionsOf(packageDir));
+  return readProps(sourceFiles(join(packageDir, "src")), requiredTypes(outline), check, compilerOptionsOf(packageDir), importableEntries(packageDir));
 }
 
 export interface PropsJob {
@@ -156,14 +169,30 @@ export function generateProps({ packageName, outline }: PropsJob): Record<string
           `\nEvery export of the entry and its subpaths says what it is for.\n`,
       );
     }
-    if (flags.length > 0 || pageFlags.length > 0) {
-      const lines = [
-        ...flags.map((f) => `  ${relative(packageName, f.file)}:${f.line}  ${f.type}.${f.prop}: ${f.found.join(", ")}`),
-        ...pageFlags.map((f) => `  ${relative(packageName, outlineFile)}:${f.line}  ${f.where}: ${f.found.join(", ")}`),
-      ];
+    const flagLines = (kind: Flag["kind"]) =>
+      flags.filter((f) => f.kind === kind).map((f) => `  ${relative(packageName, f.file)}:${f.line}  ${f.type}.${f.prop}: ${f.found.join(", ")}`);
+    const references = [
+      ...flagLines("reference"),
+      ...pageFlags.map((f) => `  ${relative(packageName, outlineFile)}:${f.line}  ${f.where}: ${f.found.join(", ")}`),
+    ];
+    if (references.length > 0) {
       process.stderr.write(
-        `${lines.length} text${lines.length === 1 ? "" : "s"} with an internal reference:\n${lines.join("\n")}\n` +
+        `${references.length} text${references.length === 1 ? "" : "s"} with an internal reference:\n${references.join("\n")}\n` +
           `\nA reader is sent nowhere they cannot go: a requirement number goes into \`@remarks\`, a source path becomes a link to its page, an ADR number needs its file in docs/adr.\n`,
+      );
+    }
+    const defaults = flagLines("default");
+    if (defaults.length > 0) {
+      process.stderr.write(
+        `${defaults.length} default${defaults.length === 1 ? "" : "s"} stated in prose:\n${defaults.join("\n")}\n` +
+          `\nThe Default column is the one place for a default: a \`@default\` tag, a phrase where it is no value - "no default" included.\n`,
+      );
+    }
+    const hidden = flagLines("unexported");
+    if (hidden.length > 0) {
+      process.stderr.write(
+        `${hidden.length} place${hidden.length === 1 ? "" : "s"} naming a type no entry exports:\n${hidden.join("\n")}\n` +
+          `\nEvery name a reader sees can be imported: export the type from the entry or a subpath.\n`,
       );
     }
     process.exit(1);

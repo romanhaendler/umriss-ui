@@ -23,7 +23,7 @@ export interface UndocumentedExport {
 
     ponytail: read as text, not run - a config that computes its entries
     instead of naming them as string literals has to be run here instead. */
-function entriesOf(packageDir: string): string[] {
+export function entriesOf(packageDir: string): string[] {
   const config = readFileSync(join(packageDir, "vite.config.ts"), "utf8");
   const entry = /\bentry:\s*("[^"]*"|\{[^}]*\})/.exec(config)?.[1];
   const files = [...(entry ?? "").matchAll(/"([^"]+\.tsx?)"/g)].map((match) => join(packageDir, match[1]!));
