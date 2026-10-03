@@ -190,6 +190,45 @@ describe("readProps over a discriminated union", () => {
   });
 });
 
+describe("readProps over JSDoc tags", () => {
+  const TAGS = join(FIXTURES, "tags.tsx");
+  const byName = () =>
+    Object.fromEntries(readProps([TAGS], ["FixtureTaggedProps"]).types.FixtureTaggedProps!.props.map((p) => [p.name, p]));
+
+  it("reads `@default` as the default, and a phrase as a phrase", () => {
+    const props = byName();
+    expect(props.pageSize!.defaultValue).toBe("10");
+    expect(props.pageSize!.defaultIsPhrase).toBeUndefined();
+    expect(props.pageSize!.description).toBe("How many rows a page holds.");
+    expect(props.size!.defaultValue).toBe('the size of a `SizeProvider`, else `"md"`');
+    expect(props.size!.defaultIsPhrase).toBe(true);
+  });
+
+  it("takes a `@default` that agrees with the destructuring pattern", () => {
+    expect(byName().tone!.defaultValue).toBe('"neutral"');
+  });
+
+  it("reads `@deprecated` with its sentence, and drops `@remarks` and `@since`", () => {
+    const props = byName();
+    expect(props.match!.deprecated).toBe("Is called `filter` now; the old name goes with the next minor version.");
+    expect(props.match!.description).toBe("The old name of `filter`.");
+    expect(props.filter!.deprecated).toBeUndefined();
+    expect(props.filter!.description).toBe("Which rows the table has.");
+    expect(JSON.stringify(props.filter)).not.toMatch(/since|0\.3|Never part/);
+  });
+
+  it("keeps `@deprecated` where only one arm of a union carries it", () => {
+    const { types } = readProps([TAGS], ["FixtureRenamed"]);
+    const footer = types.FixtureRenamed!.props.find((p) => p.name === "footer")!;
+    expect(footer.deprecated).toBe("Is called `aggregate` now.");
+    expect(footer.description).toBe("The old name of `aggregate`.");
+  });
+
+  it("stops where `@default` and the destructuring pattern disagree, with file, line and both values", () => {
+    expect(() => readProps([TAGS], ["FixtureConflictProps"])).toThrow(/tags\.tsx:45 .*pageSize.*`10`.*`20`/);
+  });
+});
+
 describe("readProps over an interface of call signatures", () => {
   it("finds no props and reports no gap", () => {
     /* `ColumnComponent` is an overload, not a props type. `Column`'s page
