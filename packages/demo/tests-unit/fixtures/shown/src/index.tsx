@@ -3,11 +3,13 @@
 
 import type { ReactNode } from "react";
 
+/** What every instrument takes. */
 export interface BaseProps {
   /** An id, declared once and inherited by two tables. */
   id?: string;
 }
 
+/** The props of a dial. */
 export interface DialProps extends BaseProps {
   /** The value the needle points at. */
   value: number;
@@ -19,11 +21,13 @@ export interface DialProps extends BaseProps {
   label?: string;
 }
 
+/** A dial. */
 export function Dial(props: DialProps): null {
   void props;
   return null;
 }
 
+/** The props of a slider. */
 export interface SliderProps extends BaseProps {
   /** Shares its name with the dial's - and nothing else. */
   value?: number;
@@ -31,23 +35,37 @@ export interface SliderProps extends BaseProps {
   step?: number;
 }
 
+/** A slider. */
 export function Slider(props: SliderProps): null {
   void props;
   return null;
 }
 
+/** The props of a panel. */
 export interface PanelProps {
   /** What the panel holds. */
   children?: ReactNode;
   /** Its heading. */
   heading?: string;
+  /** Marks along its edge. */
+  marks?: readonly PanelMark[];
 }
 
+/** A mark on a panel's edge. */
+export interface PanelMark {
+  /** Where it stands. */
+  at: number;
+  /** What it says. */
+  note?: string;
+}
+
+/** A panel. */
 export function Panel(props: PanelProps): null {
   void props;
   return null;
 }
 
+/** What a meter is set up with. */
 export interface MeterOptions {
   /** The unit read out. */
   unit: string;
@@ -55,6 +73,7 @@ export interface MeterOptions {
   keep?: number;
 }
 
+/** What a meter hands back. */
 export interface MeterHandle {
   /** The latest reading. */
   latest: number;
@@ -62,6 +81,7 @@ export interface MeterHandle {
   reset: () => void;
 }
 
+/** A meter. */
 export function useMeter(options: MeterOptions): MeterHandle {
   void options;
   return { latest: 0, reset: () => {} };

@@ -4,12 +4,12 @@
    row sees - the examples it names and their order - never how the scan
    walks the tree. */
 
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { readProps } from "../src/tooling/propsReader";
-import { shownIn } from "../src/tooling/shownIn";
-import { sourceFiles } from "../src/tooling/props";
+import { exampleFaults, shownIn } from "../src/tooling/shownIn";
+import { generateProps, sourceFiles } from "../src/tooling/props";
 import type { Rubric } from "../src/outline";
 
 const PACKAGE_DIR = join(dirname(fileURLToPath(import.meta.url)), "fixtures", "shown");
@@ -51,6 +51,11 @@ describe("what an example uses", () => {
     expect(at("MeterOptions.keep")).toEqual([]);
   });
 
+  it("counts a property of an object literal a callback maps into the array a prop takes", () => {
+    expect(at("PanelMark.at")).toEqual(["panel/in-a-panel"]);
+    expect(at("PanelMark.note")).toEqual([]);
+  });
+
   it("counts a property access on an output type", () => {
     expect(at("MeterHandle.latest")).toEqual(["meter/readings"]);
     expect(at("MeterHandle.reset")).toEqual([]);
@@ -84,5 +89,53 @@ describe("the order of a row's examples", () => {
 
   it("is the same on every run", () => {
     expect(JSON.stringify(shownIn(join(PACKAGE_DIR, "demo"), OUTLINE, declaredAt))).toBe(JSON.stringify(shown));
+  });
+});
+
+/* The rows no example of the fixture uses. */
+const UNSHOWN = ["PanelProps.heading", "PanelMark.note", "DialProps.label", "SliderProps.value", "MeterOptions.keep", "MeterHandle.reset"];
+const rows = Object.keys(declaredAt);
+const listed = (names: readonly string[]) => Object.fromEntries(names.map((name) => [name, "not shown yet"]));
+
+describe("the gate on examples", () => {
+  it("passes a list that holds exactly the rows shown nowhere", () => {
+    expect(exampleFaults(rows, shown, listed(UNSHOWN))).toEqual({ unshown: [], stale: [], unknown: [] });
+  });
+
+  it("names every row without a use that is not on the list", () => {
+    expect([...exampleFaults(rows, shown, listed(["DialProps.label"])).unshown].sort()).toEqual(UNSHOWN.filter((row) => row !== "DialProps.label").sort());
+  });
+
+  it("names an entry whose row an example now uses as stale", () => {
+    expect(exampleFaults(rows, shown, listed([...UNSHOWN, "DialProps.tone"])).stale).toEqual(["DialProps.tone"]);
+  });
+
+  it("names an entry whose row does not exist", () => {
+    expect(exampleFaults(rows, shown, listed([...UNSHOWN, "DialProps.colour", "Gauge.value"])).unknown).toEqual(["DialProps.colour", "Gauge.value"]);
+  });
+});
+
+describe("generateProps", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  /* The fixture's `demo/unshown.json` lists one row rightly, one that an
+     example uses and one that does not exist. */
+  it("stops at all three kinds in one run and names every offender", () => {
+    let written = "";
+    vi.spyOn(process.stderr, "write").mockImplementation((text) => {
+      written += String(text);
+      return true;
+    });
+    vi.spyOn(process, "exit").mockImplementation((code) => {
+      throw new Error(`exit ${code}`);
+    });
+
+    expect(() => generateProps({ packageName: PACKAGE_DIR, outline: OUTLINE })).toThrow("exit 1");
+    expect(written).not.toContain("without JSDoc");
+    expect(written).toContain("5 props without an example:\n");
+    for (const row of ["PanelMark.note", "DialProps.label", "SliderProps.value", "MeterOptions.keep", "MeterHandle.reset"]) expect(written).toContain(`  ${row}\n`);
+    expect(written).not.toContain("  PanelProps.heading\n");
+    expect(written).toContain("1 entry of demo/unshown.json is shown now - stale, remove it:\n  DialProps.tone\n");
+    expect(written).toContain("1 entry of demo/unshown.json names no row:\n  DialProps.colour\n");
   });
 });

@@ -90,5 +90,10 @@ Each of these is argued somewhere; the link is the argument, not the rule.
   and `pretypecheck`. The same gate stops at a requirement number (`R-4.12`, it
   goes into `@remarks`) or a source path in a reader's text; an ADR number is
   written bare and becomes a link to its file.
+* **A prop without an example breaks the build.** Every row of a props table
+  is used by an example or a scenario of its package, or stands in the
+  package's `demo/unshown.json`. That list only shrinks: the same gate stops at
+  an entry whose prop an example now uses (remove the line) and at one naming
+  no row.
 * **A word this workspace has is used as it is defined.** `CONTEXT.md` is the
   vocabulary, including the words each term may not collide with.

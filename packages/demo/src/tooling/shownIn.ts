@@ -56,10 +56,27 @@ export function usesOf(files: readonly string[], options: ts.CompilerOptions = {
     };
     const nameOf = (name: ts.Node | undefined): string | undefined =>
       name !== undefined && (ts.isIdentifier(name) || ts.isStringLiteral(name)) ? name.text : undefined;
+    /** The element type of the array a literal is mapped into: of
+        `options={xs.map((x) => ({ value, label }))}`, the option type - the
+        callback's own context is the type `map` infers from the literal,
+        which declares nothing of the package's. */
+    const mappedInto = (node: ts.ObjectLiteralExpression): ts.Type | undefined => {
+      let at: ts.Node = node;
+      while (ts.isParenthesizedExpression(at.parent)) at = at.parent;
+      if (ts.isReturnStatement(at.parent)) at = ts.findAncestor(at.parent, ts.isFunctionLike) ?? at;
+      else if (ts.isArrowFunction(at.parent) && at.parent.body === at) at = at.parent;
+      if (!ts.isFunctionLike(at) || !ts.isCallExpression(at.parent) || !at.parent.arguments.includes(at as ts.Expression)) return undefined;
+      /* Only where the callback's context is what `map` inferred from the
+         literal itself: a callback typed by its caller keeps that type. */
+      const own = checker.getContextualType(node);
+      if (own !== undefined && !(own.flags & ts.TypeFlags.TypeParameter) && own.symbol?.valueDeclaration !== node) return undefined;
+      const array = checker.getContextualType(at.parent);
+      return array === undefined ? undefined : checker.getIndexTypeOfType(checker.getNonNullableType(array), ts.IndexKind.Number);
+    };
     /** What an object literal or an element's attributes are written
         against: the arms of a union the literal fits, else all of them. */
     const contextOf = (node: ts.ObjectLiteralExpression | ts.JsxAttributes): readonly ts.Type[] => {
-      const contextual = checker.getContextualType(node);
+      const contextual = ts.isObjectLiteralExpression(node) ? mappedInto(node) ?? checker.getContextualType(node) : checker.getContextualType(node);
       if (contextual === undefined) return [];
       const arms = contextual.isUnion() ? contextual.types : [contextual];
       const own = checker.getTypeAtLocation(node);
@@ -137,6 +154,23 @@ export function demonstrationsOf(demoDir: string, outline: readonly Rubric[]): D
     .sort(byRank)
     .map(({ file, id }) => ({ file, page: SCENARIOS, example: id, title: titleOf(file, read(file)), pageName: "Scenarios" }));
   return [...examples, ...scenarios];
+}
+
+/** What the gate finds against a package's list of rows not shown yet
+    (`demo/unshown.json`, `Type.prop` to a reason): a row without a use that
+    is not on it, an entry whose row has a use now, an entry naming no row.
+    The list can only shrink: whoever adds the example removes the line. */
+export function exampleFaults(
+  rows: readonly string[],
+  shown: Readonly<Record<string, readonly ShownIn[]>>,
+  notYet: Readonly<Record<string, string>>,
+): { unshown: string[]; stale: string[]; unknown: string[] } {
+  const listed = Object.keys(notYet);
+  return {
+    unshown: rows.filter((row) => shown[row] === undefined && !Object.hasOwn(notYet, row)),
+    stale: listed.filter((row) => rows.includes(row) && shown[row] !== undefined),
+    unknown: listed.filter((row) => !rows.includes(row)),
+  };
 }
 
 /** Each row's demonstrations by `Type.prop`, a row without one left out: the
