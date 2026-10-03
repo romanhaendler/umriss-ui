@@ -35,6 +35,9 @@ export interface PageProbes {
   importLine: string;
   /** A page with known limits. */
   limits: string;
+  /** A page whose props table names an example on that page; `pageId`
+      where omitted. */
+  tablePageId?: string;
 }
 
 export function checkPage(p: PageProbes): void {
@@ -170,25 +173,26 @@ test("the page ends with a suggested edit on GitHub that names it", async ({ pag
 });
 
 /* Every row names the examples that show it, and is an address of its own
-   (.scratch/props-to-examples). A row of the main group: it never folds. */
-const mainRows = (page: Page) => page.locator(".apiBlock > .apiRole tbody tr");
+   (.scratch/props-to-examples). A row outside a closed fold. */
+const tablePage = p.tablePageId ?? p.pageId;
+const rows = (page: Page) => page.locator(".apiTables tbody tr").filter({ visible: true });
 
 test("a row's \"Shown in\" link lands on the example, in view", async ({ page }) => {
-  await open(page, p.pageId);
-  const link = mainRows(page).locator(`.apiShown a[href^="../${p.pageId}/#"]`).first();
+  await open(page, tablePage);
+  const link = rows(page).locator(`.apiShown a[href^="../${tablePage}/#"]`).first();
   const anchor = (await link.getAttribute("href"))!.split("#")[1]!;
   await link.click();
-  await expect(page).toHaveURL(new RegExp(`/${p.pageId}/#${anchor}$`));
+  await expect(page).toHaveURL(new RegExp(`/${tablePage}/#${anchor}$`));
   await expect(example(page, anchor)).toBeInViewport();
 });
 
 test("a row's name puts the row's anchor into the address", async ({ page }) => {
-  await open(page, p.pageId);
-  const row = mainRows(page).first();
+  await open(page, tablePage);
+  const row = rows(page).first();
   const id = (await row.getAttribute("id"))!;
   expect(id).toMatch(/^[A-Z]\w*-/);
   await row.locator("th a").click();
-  await expect(page).toHaveURL(new RegExp(`/${p.pageId}/#${id}$`));
+  await expect(page).toHaveURL(new RegExp(`/${tablePage}/#${id}$`));
   await expect(row).toBeInViewport();
 });
 }

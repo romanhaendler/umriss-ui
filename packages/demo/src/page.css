@@ -715,7 +715,6 @@
    widening the table. */
 .apiShown {
   margin: var(--u-space-1) 0 0;
-  font-size: var(--u-text-sm);
 }
 
 .apiShown a {

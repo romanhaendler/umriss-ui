@@ -17,6 +17,8 @@ checkPage({
   packageName: "@umriss-ui/schedule",
   importLine: 'import { Subtasks, resolveAppearance } from "@umriss-ui/schedule";',
   limits: "overlap",
+  /* Appearances is a feature page without a table of its own. */
+  tablePageId: "schedule",
 });
 
 /* ------------------------------------------------------------------ */
