@@ -55,6 +55,8 @@ export interface ShellProbes {
   pointer: { wide: string; narrow: string };
   /** A scenario's anchor, where the demo has one. */
   scenario?: string;
+  /** A scenario whose table pins a block on a wide stage, where the demo has one. */
+  pinnedScenario?: string;
   /** A page id that changed (`MOVED` in the outline), the page it is now and
       an example on it - where the demo has one. */
   moved?: { from: string; pageId: string; example: string };
@@ -331,6 +333,70 @@ test("section headings are set larger than the examples' titles", async ({ page 
   const size = (selector: string) =>
     page.locator(selector).first().evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
   expect(await size(".sectionTitle")).toBeGreaterThan(await size("h3.exampleTitle"));
+});
+
+test("a scenario's Code toggle is an example's, apart from its ids", async ({ page }) => {
+  const markup = (where: string) =>
+    page
+      .locator(where)
+      .first()
+      .getByRole("button", { name: "Code", exact: true })
+      .evaluate((el) => el.outerHTML.replace(/ aria-controls="[^"]*"/, ""));
+  const scenario = await markup(".scenario");
+  await page.goto(`/${p.example.pageId}/#${p.example.id}`);
+  expect(scenario).toBe(await markup(`[data-example="${p.example.id}"]`));
+});
+
+/* Every mark's box against every box of visible text in its stage and every
+   other mark, every table
+   cell that sticks, and how far the page reaches sideways. Text a screen keeps
+   for the screen reader only - one pixel, clipped - is no text a mark covers. */
+const scenarioFaults = (page: Page) =>
+  page.evaluate(() => {
+    const faults: string[] = [];
+    for (const stage of document.querySelectorAll<HTMLElement>(".scenarioStage")) {
+      const id = stage.closest<HTMLElement>("[data-scenario]")!.dataset.scenario;
+      const marks = [...stage.querySelectorAll<HTMLElement>(".calloutMark")].map((m) => [m.textContent, m.getBoundingClientRect()] as const);
+      const walker = document.createTreeWalker(stage, NodeFilter.SHOW_TEXT);
+      for (let node = walker.nextNode(); node !== null; node = walker.nextNode()) {
+        const parent = node.parentElement!;
+        const own = parent.getBoundingClientRect();
+        if (parent.closest(".calloutMark") || !node.textContent!.trim() || own.width <= 1 || own.height <= 1 || !parent.checkVisibility()) continue;
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        for (const r of range.getClientRects()) {
+          for (const [n, m] of marks) {
+            if (m.left < r.right && r.left < m.right && m.top < r.bottom && r.top < m.bottom) faults.push(`${id}: mark ${n} on "${node.textContent!.trim().slice(0, 30)}"`);
+          }
+        }
+      }
+      for (const [n, m] of marks) {
+        for (const [k, other] of marks) {
+          if (Number(n) < Number(k) && m.left < other.right && other.left < m.right && m.top < other.bottom && other.top < m.bottom) faults.push(`${id}: marks ${n} and ${k} on each other`);
+        }
+      }
+      if (stage.querySelector('td[style*="--u-table-pin"], th[style*="--u-table-pin"]')) faults.push(`${id}: a pinned block`);
+    }
+    const root = document.documentElement;
+    if (root.scrollWidth > root.clientWidth) faults.push(`the page scrolls sideways by ${root.scrollWidth - root.clientWidth} px`);
+    return faults;
+  });
+
+test.describe("the scenarios on a phone, 390 px wide", () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test("no mark lies on a text of its screen or on another mark, no table pins a block, and the page does not scroll sideways", async ({ page }) => {
+    await expect.poll(() => scenarioFaults(page)).toEqual([]);
+  });
+});
+
+test("from a stage of 640 px the marks stand at their corners and a table keeps its pins", async ({ page }) => {
+  for (const stage of await page.locator(".scenarioStage").all()) {
+    expect((await stage.boundingBox())!.width).toBeGreaterThanOrEqual(640);
+    await expect(stage).not.toHaveAttribute("data-narrow");
+  }
+  test.skip(p.pinnedScenario === undefined, "no scenario of this demo pins a block");
+  await expect(page.locator(`[data-scenario="${p.pinnedScenario}"] td[style*="--u-table-pin"]`).first()).toBeAttached();
 });
 
 test("the palette filters and jumps", async ({ page }) => {

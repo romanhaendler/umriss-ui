@@ -901,6 +901,17 @@
   pointer-events: none;
 }
 
+/* A narrow stage: the marks in a gutter of their own, beside the screen and
+   never on it (Scenarios.tsx). */
+.scenarioStage[data-narrow] {
+  padding-left: calc(var(--u-space-4) + 20px);
+}
+
+.scenarioStage[data-narrow] .calloutMark {
+  left: var(--u-space-2);
+  margin: 0;
+}
+
 .callouts {
   margin: 0;
   padding-left: var(--u-space-5);

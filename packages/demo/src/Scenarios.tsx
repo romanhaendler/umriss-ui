@@ -18,11 +18,15 @@
    stage lays a numbered badge just outside the element's corner, above and
    to the left - on the corner itself it had covered a label's first letter. Laid over, not put
    in: an attribute is harmless in copied code, a badge element would not be.
+   A stage narrower than 640 px has no room around its elements - a phone's
+   screen fills it edge to edge, and a mark outside a corner lay on the title
+   above. There the stage keeps a gutter at its left, one mark wide, and each
+   mark stands in it, level with its element's top edge.
    The positions are measured, and measured again whenever the stage changes
    size. */
 
 import { useLayoutEffect, useRef, useState } from "react";
-import { CodeBlock } from "./Example";
+import { CodeBlock, CodeToggle } from "./Example";
 import { useContents } from "./Contents";
 import { hrefOf, hrefOfNeighbour } from "./href";
 import { PACKAGES } from "./packages";
@@ -38,9 +42,15 @@ interface Mark {
   top: number;
 }
 
+/** Below this stage width the marks move into a gutter at the left. */
+const NARROW = 640;
+/** A mark's height and its ring (`.calloutMark`), and a pixel between two. */
+const MARK_STEP = 25;
+
 function Stage({ scenario }: { scenario: Scenario }) {
   const stage = useRef<HTMLDivElement>(null);
   const [marks, setMarks] = useState<readonly Mark[]>([]);
+  const [narrow, setNarrow] = useState(false);
 
   useLayoutEffect(() => {
     const host = stage.current;
@@ -50,6 +60,8 @@ function Stage({ scenario }: { scenario: Scenario }) {
        the way, and not beyond it, where it had pushed the page sideways. */
     const measure = () => {
       const origin = host.getBoundingClientRect();
+      const inGutter = origin.width < NARROW;
+      setNarrow(inGutter);
       const found = [...host.querySelectorAll<HTMLElement>("[data-callout]")].map((el) => {
         const box = el.getBoundingClientRect();
         return {
@@ -58,6 +70,12 @@ function Stage({ scenario }: { scenario: Scenario }) {
           top: Math.min(Math.max(box.top - origin.top, 0), origin.height),
         };
       });
+      /* In the gutter, two spots on one line - a search and a column menu in
+         one toolbar - would share a place: the higher number steps down. */
+      if (inGutter) {
+        found.sort((a, b) => a.top - b.top || Number(a.n) - Number(b.n));
+        for (let i = 1; i < found.length; i++) found[i]!.top = Math.max(found[i]!.top, found[i - 1]!.top + MARK_STEP);
+      }
       setMarks((old) => (JSON.stringify(old) === JSON.stringify(found) ? old : found));
     };
     measure();
@@ -74,10 +92,10 @@ function Stage({ scenario }: { scenario: Scenario }) {
   }, []);
 
   return (
-    <div className="scenarioStage" ref={stage}>
+    <div className="scenarioStage" ref={stage} data-narrow={narrow ? "" : undefined}>
       <scenario.Component />
       {marks.map((mark) => (
-        <span key={mark.n} className="calloutMark" aria-hidden="true" style={{ left: mark.left, top: mark.top }}>
+        <span key={mark.n} className="calloutMark" aria-hidden="true" style={{ left: narrow ? undefined : mark.left, top: mark.top }}>
           {mark.n}
         </span>
       ))}
@@ -127,15 +145,7 @@ function ScenarioBlock({ scenario, demo }: { scenario: Scenario; demo: Demo }) {
           );
         })}
       </p>
-      <button
-        type="button"
-        className="exampleToggle"
-        aria-expanded={open}
-        aria-controls={`${headId}-code`}
-        onClick={() => setOpen(!open)}
-      >
-        Code
-      </button>
+      <CodeToggle open={open} controls={`${headId}-code`} onToggle={() => setOpen(!open)} />
       <div className="exampleCode" id={`${headId}-code`} hidden={!open}>
         {open && <CodeBlock name={scenario.title} source={scenario.source} />}
       </div>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState, type RefObject } from "react";
 import { Badge, Grid, Stack, Stat, Text } from "@umriss-ui/core";
 import { useTable } from "../../src";
 
@@ -111,13 +111,31 @@ const free = (r: Row) => (r.capacity * (5 - r.away)) / 5 - r.week16;
 
 const hours = (value: number | null) => (value === null || value < 0 || value > 60 ? "Between 0 and 60 hours" : undefined);
 
+/* A pinned column needs room beside it: on a phone it covers half the table.
+   So the column sticks only where the place the screen stands in is at least
+   640 px wide - measured on the place itself, not on the window, which knows
+   nothing of a sidebar or a split view. Narrower, the table scrolls whole. */
+function useWide(): [RefObject<HTMLDivElement | null>, boolean] {
+  const ref = useRef<HTMLDivElement>(null);
+  const [wide, setWide] = useState(true);
+  useLayoutEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+    const observer = new ResizeObserver(() => setWide(element.getBoundingClientRect().width >= 640));
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+  return [ref, wide];
+}
+
 export default function PlanTheTeamCapacity() {
   const [rows, setRows] = useState(START);
   const [last, setLast] = useState("No change yet.");
+  const [place, wide] = useWide();
   const { Table, Column } = useTable(rows, { rowKey: (r) => r.id, defaultGrouping: "team" });
 
   return (
-    <Stack gap={4}>
+    <Stack ref={place} gap={4}>
       <div data-callout="1">
         <Grid minItemWidth="180px" gap={3}>
           <Stat label="Free this week" value={rows.reduce((s, r) => s + Math.max(0, free(r)), 0)} unit="h" decimals={0} />
@@ -135,7 +153,7 @@ export default function PlanTheTeamCapacity() {
           }}
         >
           <Column value="team" label="Team" />
-          <Column value="name" label="Person" rowHeader pin="start" />
+          <Column value="name" label="Person" rowHeader pin={wide ? "start" : undefined} />
           <Column value="role" label="Role" />
           <Column value="capacity" label="Capacity (h)" edit="number" validate={hours} aggregate="sum" share={false} />
           <Column value="away" label="Away (days)" aggregate="sum" share={false} />
