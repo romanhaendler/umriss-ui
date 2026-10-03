@@ -36,8 +36,10 @@ interface was still expected to move before `0.3.0`.
 - **The Chart page says what a screen reader meets**: a section
   Accessibility after Keyboard names the plot's role and name, the summary,
   the readout after a key, the label to pass and what forced colours change.
-  The Line page's Keyboard section links the Chart page's keys. In the
-  demo, the Markdown twins and `docs/llms-full.md`; the chart is unchanged.
+  Every other page with a chart in its examples - Installation, Axis, the
+  series, the limits, Tooltip & Legend and Benchmark as well as Line - has a
+  Keyboard section linking the Chart page's keys. In the demo, the Markdown
+  twins and `docs/llms-full.md`; the chart is unchanged.
 - **Every token listed**: core's Theming page lists the 29 `--uc-…` tokens
   of the chart's root, with the core token each one takes, and the
   Installation page links there. The tokens themselves are unchanged.
