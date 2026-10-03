@@ -40,10 +40,16 @@ export interface Candidate {
    * recency; the library keeps no memory of its own.
    */
   gewicht?: number;
+  /**
+   * Searched last, and only for a query of `KEYWORD_MINIMUM` characters or
+   * more: words the reader may type that neither the name nor the group
+   * carries, such as a synonym from another library.
+   */
+  keywords?: readonly string[];
 }
 
 /* ------------------------------------------------------------------ */
-/* The formula                                                         */
+/* The formula                                                        */
 /* ------------------------------------------------------------------ */
 
 /** A character sitting at the start of a word. The strongest of the three
@@ -66,6 +72,11 @@ const RUN_BONUS = 8;
     the better answer, even when it is longer. The test for it names exactly
     this case. */
 const COST_PER_CHARACTER = 0.5;
+
+/** The shortest query that searches the keywords. Below it a substring of
+    sixty words of prose matches almost anything, and the keyword finds would
+    bury the list under candidates the reader did not mean. */
+const KEYWORD_MINIMUM = 3;
 
 const IS_WORD_CHARACTER = /[\p{L}\p{N}]/u;
 
@@ -196,6 +207,10 @@ function mergeAdjacent(positions: readonly number[]): readonly MatchSpan[] {
  * find stands behind EVERY name find, whatever the numbers say: someone typing
  * "struktur" means the component of that name rather than the one that happens
  * to be filed beneath it.
+ *
+ * The keywords come third, behind every group find: a contiguous substring,
+ * unmarked, ranked by the caller's weight alone - a substring has no word
+ * starts to judge that the reader could see.
  */
 export function find<K extends Candidate>(
   kandidaten: readonly K[],
@@ -203,37 +218,38 @@ export function find<K extends Candidate>(
 ): readonly Find<K>[] {
   const wanted = term.trim();
   if (wanted === "") return [];
+  const lowerWanted = wanted.toLowerCase();
+  const searchesKeywords = wanted.length >= KEYWORD_MINIMUM;
 
-  const funde: Find<K>[] = [];
+  /* The tier stands beside the find and not in it: 0 name, 1 group,
+     2 keyword. */
+  const funde: { tier: number; find: Find<K> }[] = [];
   for (const kandidat of kandidaten) {
+    const gewicht = kandidat.gewicht ?? 0;
     const imNamen = findInName(wanted, kandidat.name);
     if (imNamen !== null) {
-      funde.push({
-        kandidat,
-        rank: imNamen.rank + (kandidat.gewicht ?? 0),
-        finds: imNamen.finds,
-      });
+      funde.push({ tier: 0, find: { kandidat, rank: imNamen.rank + gewicht, finds: imNamen.finds } });
       continue;
     }
     const inDerGruppe =
       kandidat.gruppe === undefined ? null : findInName(wanted, kandidat.gruppe);
     if (inDerGruppe !== null) {
-      funde.push({
-        kandidat,
-        rank: inDerGruppe.rank + (kandidat.gewicht ?? 0),
-        finds: [],
-      });
+      funde.push({ tier: 1, find: { kandidat, rank: inDerGruppe.rank + gewicht, finds: [] } });
+      continue;
+    }
+    if (
+      searchesKeywords &&
+      kandidat.keywords?.some((keyword) => keyword.toLowerCase().includes(lowerWanted))
+    ) {
+      funde.push({ tier: 2, find: { kandidat, rank: gewicht, finds: [] } });
     }
   }
 
-  /* The gap between name finds and group finds lives here and not in the
-     number: a weight the caller assigns should be able to turn the order
-     within one sort and not mix the sorts. Array#sort is stable, so a tie
-     falls back on the incoming order - without an index being carried. */
-  return funde.sort((a, b) => {
-    const aImNamen = a.finds.length > 0;
-    const bImNamen = b.finds.length > 0;
-    if (aImNamen !== bImNamen) return aImNamen ? -1 : 1;
-    return b.rank - a.rank;
-  });
+  /* The gaps between the tiers live here and not in the number: a weight the
+     caller assigns should be able to turn the order within one tier and not
+     mix the tiers. Array#sort is stable, so a tie falls back on the incoming
+     order - without an index being carried. */
+  return funde
+    .sort((a, b) => a.tier - b.tier || b.find.rank - a.find.rank)
+    .map((tiered) => tiered.find);
 }
