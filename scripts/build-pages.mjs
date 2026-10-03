@@ -18,8 +18,9 @@
    when it starts. The text comes from the same run as `llms.txt`
    (`packages/demo/src/tooling/llms.ts`, written as `demo/.generated/pages.json`),
    so it cannot say anything the demo does not. Each page's head announces its
-   twin, which the same run writes to `demo/.generated/twins/`
-   (.scratch/pages-as-markdown).
+   twin, which the same run writes to `demo/.generated/twins/` and the demo's
+   build carries in `dist-demo` as its public files (.scratch/pages-as-markdown) -
+   the dev server serves them from there too.
 
    The demos are built with the absolute base their homepage names
    (`/umriss-ui/core/`): a page two directories deep must find the same assets.
@@ -143,7 +144,6 @@ for (const dir of PACKAGES) {
   cpSync(join(packageDir, "dist-demo"), out, { recursive: true });
   cpSync(join(packageDir, "demo", ".generated", "llms.txt"), join(out, "llms.txt"));
   cpSync(join(packageDir, "docs", "llms-full.md"), join(out, "llms-full.txt"));
-  cpSync(join(packageDir, "demo", ".generated", "twins"), out, { recursive: true });
 
   const row = { dir, ...manifest, pages: [] };
   const template = readFileSync(join(out, "index.html"), "utf8");

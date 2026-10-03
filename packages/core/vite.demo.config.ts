@@ -5,6 +5,10 @@ import { ownStyles } from "../../scripts/styles/ownStyles.ts";
 
 export default defineConfig({
   root: "demo",
+  /* Every page's Markdown twin (.scratch/pages-as-markdown), written by
+     `props` beside the tables: served at its address in `dev`, and copied
+     into the build - the same files the site carries. */
+  publicDir: ".generated/twins",
   plugins: [react(), ownStyles()],
   resolve: {
     /* The shell (@umriss-ui/demo) fetches @umriss-ui/core by its package name.

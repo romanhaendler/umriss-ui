@@ -113,6 +113,33 @@ test("history carries: back and forward again", async ({ page }) => {
   await expect(page.locator(`[data-block="${p.neighbours[1].pageId}"]`)).toBeVisible();
 });
 
+/* THE HEAD FOLLOWS THE PAGE (.scratch/pages-as-markdown 02). The title and
+   the one alternate link to the page's Markdown twin are set in one place of
+   the shell, on the first load and on every move; the twin itself is a file
+   the server serves at that address. */
+const titled = (name: string) => new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")} – React [a-z]+ · @umriss-ui/[a-z]+$`);
+
+test("the head follows the page: its title, and one link to its Markdown twin", async ({ page }) => {
+  const twins = page.locator('head link[rel="alternate"][type="text/markdown"]');
+  await expect(twins).toHaveCount(1);
+  await expect(twins).toHaveAttribute("href", "/index.md");
+
+  const rail = page.getByRole("navigation", { name: "Components" });
+  await rail.getByText(p.neighbours[0].name, { exact: true }).click();
+  await rail.getByText(p.neighbours[1].name, { exact: true }).click();
+  await expect(page.locator(`[data-block="${p.neighbours[1].pageId}"]`)).toBeVisible();
+  await expect(twins).toHaveCount(1);
+  await expect(twins).toHaveAttribute("href", `/${p.neighbours[1].pageId}.md`);
+  await expect(page).toHaveTitle(titled(p.neighbours[1].name));
+  const twin = await page.request.get(`/${p.neighbours[1].pageId}.md`);
+  expect(twin.ok()).toBe(true);
+  expect((await twin.text()).startsWith(`# ${p.neighbours[1].name}\n`)).toBe(true);
+
+  await page.goBack();
+  await expect(twins).toHaveAttribute("href", `/${p.neighbours[0].pageId}.md`);
+  await expect(page).toHaveTitle(titled(p.neighbours[0].name));
+});
+
 test("the address is the place: a deep link lands on the page", async ({ page }) => {
   await page.goto(`/${p.deepLink.pageId}/`);
   await expect(page.locator(`[data-block="${p.deepLink.pageId}"]`)).toBeVisible();

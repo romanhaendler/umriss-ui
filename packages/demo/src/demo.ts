@@ -12,6 +12,7 @@
 import { addresses, type Addresses } from "./outline";
 import { linkAdrs, outlineTexts, type AdrLinks } from "./tooling/references";
 import { installCommand, type InstallManifest } from "./tooling/install";
+import type { TitleManifest } from "./tooling/title";
 import { readExamples, readScenarios } from "./tooling/examples";
 import type { Example, ExampleModule, Scenario, ScenarioModule } from "./tooling/examples";
 import type { TypeEntry } from "./tooling/propsReader";
@@ -20,6 +21,9 @@ import type { ReferenceTable } from "./tooling/referenceTable";
 export interface Demo {
   /** The package name a reader takes the package under: `"@umriss-ui/core"`. */
   packageName: string;
+  /** What the package is, as its manifest says: the scenarios page's title
+      (`tooling/title.ts`). */
+  description: string;
   /** The command that installs it, peers and all (`tooling/install.ts`). */
   install: string;
   addresses: Addresses;
@@ -36,7 +40,7 @@ export interface Demo {
 
 export interface DemoSources {
   /** The package's `package.json`. */
-  manifest: InstallManifest;
+  manifest: InstallManifest & TitleManifest;
   addresses: Addresses;
   /** `import.meta.glob("./scenarios/*.tsx", { eager: true })` */
   scenarios: Record<string, ScenarioModule>;
@@ -65,6 +69,7 @@ export function buildDemo(sources: DemoSources): Demo {
   const link = (text: string) => linkAdrs(text, sources.adrs);
   return {
     packageName: sources.manifest.name,
+    description: sources.manifest.description,
     install: installCommand(sources.manifest),
     addresses: addresses(outlineTexts(sources.addresses.OUTLINE, link)),
     scenarios: readScenarios(sources.scenarios, sources.sources, options).map((scenario) => ({
