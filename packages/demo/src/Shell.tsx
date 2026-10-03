@@ -74,6 +74,10 @@ const KIND_WEIGHT: Readonly<Record<SearchKind, number>> = {
 };
 const OWN_PACKAGE_WEIGHT = 0.25;
 
+/** What the palette's empty field says, and the header's search button with
+    it: the button promises what the field searches. */
+const PALETTE_PLACEHOLDER = "Search pages, examples, props, tokens …";
+
 function placeAt(path: string, hash: string): string {
   return placeOfLocation(path.startsWith(BASE) ? path.slice(BASE.length - 1) : "/", hash);
 }
@@ -336,7 +340,7 @@ export function Shell({ demo, sentence }: ShellProps) {
           onClick={() => setPaletteOpen(true)}
           aria-haspopup="dialog"
         >
-          <span>Search …</span>
+          <span>{PALETTE_PLACEHOLDER}</span>
           <kbd className="shellKbd">⌘K</kbd>
         </button>
         <div className="shellActions">
@@ -394,7 +398,7 @@ export function Shell({ demo, sentence }: ShellProps) {
           for - the component need not be touched for it. */}
       <LanguageProvider
         wording={{
-          palettePlaceholder: "Search pages, examples, props, tokens …",
+          palettePlaceholder: PALETTE_PLACEHOLDER,
           paletteField: "Search umriss-ui",
           palettePanel: "Jump anywhere in umriss-ui",
           paletteList: "Found",
