@@ -428,6 +428,12 @@ export interface RowDetailProps<Z> {
 export interface RowActionsProps {
   /** The row's `Action`s. */
   children: ReactNode;
+  /** Whether the actions column sticks at the end of the row while the table
+      scrolls sideways. `false` leaves it in the flow, for a place too narrow
+      for a pinned block - the application decides, by its own measure. A
+      column pinned to the end takes the actions with it regardless.
+      @default true */
+  pin?: boolean;
 }
 
 interface ActionBase {

@@ -37,6 +37,11 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 - **A prop's default stands in a `@default` tag** where its comment used to say
   it in words: the editor shows it on hover, and the props table in its Default
   column. Nothing else changes.
+- **`RowActions` takes `pin`**: `pin={false}` leaves the actions column in the
+  flow instead of sticking at the end of the row, for a place the application
+  finds too narrow for a pinned block - it measures the place and decides. A
+  column pinned to the end still takes the actions with it, and an open Row
+  draft's Save still sticks. The default, `true`, is the behaviour so far.
 
 ### Fixed
 

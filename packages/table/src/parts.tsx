@@ -118,7 +118,7 @@ export interface Parts {
   Table: (props: TableProps<unknown>) => ReactNode;
   Column: (props: RuntimeColumnProps) => ReactNode;
   RowDetail: (props: { children: (row: never) => ReactNode }) => ReactNode;
-  RowActions: (props: { children: ReactNode }) => ReactNode;
+  RowActions: (props: { children: ReactNode; pin?: boolean }) => ReactNode;
   Action: (props: RuntimeActionProps) => ReactNode;
   GroupBy: (props: RuntimeGroupByProps) => ReactNode;
 }
@@ -231,9 +231,9 @@ export function buildParts(registry: Registry): Parts {
 
   /* ------------------------------------------------------ RowActions, Action */
 
-  function RowActions({ children }: { children: ReactNode }): ReactNode {
+  function RowActions({ children, pin = true }: { children: ReactNode; pin?: boolean }): ReactNode {
     const key = useId();
-    registry.registerActionGroup(key);
+    registry.registerActionGroup(key, pin);
     useLayoutEffect(
       () => () => {
         registry.removeActionGroup(key);
@@ -242,7 +242,7 @@ export function buildParts(registry: Registry): Parts {
       [key],
     );
     useLayoutEffect(() => {
-      registry.registerActionGroup(key);
+      registry.registerActionGroup(key, pin);
       registry.commit();
     });
     return <>{children}</>;
@@ -581,12 +581,15 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
      column that holds nothing at rest - a Row draft's buttons,
      no Delete, no action - sticks only while a draft is open: pinned blank,
      it took half of a phone's table. Its width is reserved either way, so
-     sticking moves nothing. */
+     sticking moves nothing. `RowActions pin={false}` leaves it in the flow,
+     where the application finds its place too narrow - except for an open
+     Row draft's Save (ADR-0036). */
   const drafting = grid.state.editing?.row === true;
   const toolsShow = actions.length > 0 || props.onRowDelete !== undefined || drafting;
+  const toolsStick = registry.actionsPinned() ? toolsShow : drafting && rowTools;
   const pinned: PinBlocks = {
     start: startPinned > 0 || spanPinned ? leading + startPinned : 0,
-    end: endPinned > 0 ? endPinned + (trailing ? 1 : 0) : trailing && toolsShow ? 1 : 0,
+    end: endPinned > 0 ? endPinned + (trailing ? 1 : 0) : trailing && toolsStick ? 1 : 0,
     count: columnCount,
   };
   /* A block the narrow table has no room for scrolls with the rest; the pin

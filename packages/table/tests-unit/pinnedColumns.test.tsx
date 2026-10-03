@@ -40,11 +40,13 @@ function Plant({
   grouping,
   stickyRowHeader = false,
   declared = true,
+  actionsPin,
 }: {
   initialView?: TableView;
   grouping?: string[];
   stickyRowHeader?: boolean;
   declared?: boolean;
+  actionsPin?: boolean;
 }) {
   const t = useTable(MACHINES, { rowKey: (m) => m.id, initialView, defaultGrouping: grouping });
   capture(t);
@@ -59,7 +61,7 @@ function Plant({
       <Column value="tag" label="Tag" rowHeader pin={declared ? "start" : undefined} />
       <Column value="scrap" label="Scrap" aggregate="sum" />
       <RowDetail>{(m) => m.tag}</RowDetail>
-      <RowActions>
+      <RowActions pin={actionsPin}>
         <Action onSelect={() => {}}>Open</Action>
       </RowActions>
     </Frame>
@@ -105,6 +107,15 @@ describe("the pinned blocks", () => {
     expect(container.querySelector("[style*='--u-table-pin-start-']")).toBeNull();
     const head = container.querySelector("thead tr") as HTMLTableRowElement;
     expect(Array.from(head.cells).map((c) => c.className.includes("pinned"))).toEqual([...Array(8).fill(false), true]);
+  });
+
+  it("leave the row actions in the flow with `pin={false}`, and take them along behind a column pinned to the end", () => {
+    const { container, rerender } = render(<Plant declared={false} actionsPin={false} />);
+    expect(container.querySelector("[style*='--u-table-pin-']")).toBeNull();
+    rerender(<Plant declared={false} />);
+    expect(place(Array.from(headRow(container).cells).at(-1)!)).toBe("end 0");
+    rerender(<Plant actionsPin={false} />);
+    expect(places(headRow(container)).slice(-2)).toEqual(["end 1", "end 0"]);
   });
 
   it("stickyRowHeader is `pin=\"start\"` on the row header, and nothing the view carries", () => {
