@@ -64,7 +64,9 @@ const realProps = () => {
   );
 };
 
-describe("A default in the comment", () => {
+/* The reading starts the TypeScript compiler over the whole of src/, which
+   takes seconds on a busy machine - more than vitest's five. */
+describe("A default in the comment", { timeout: 60_000 }, () => {
   it("is never written in words - it stands in the Default column", () => {
     const inWords = realProps()
       .filter((e) => e.comment !== undefined)
