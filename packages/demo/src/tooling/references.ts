@@ -109,7 +109,12 @@ export function linkReferences(
       tables.map((table) => ({
         ...table,
         lead: link(table.lead),
-        groups: table.groups.map((group) => ({ ...group, rows: group.rows.map((row) => ({ ...row, cells: row.cells.map(link) })) })),
+        groups: table.groups.map((group) => ({
+          ...group,
+          ...(group.title === undefined ? {} : { title: link(group.title) }),
+          ...(group.note === undefined ? {} : { note: group.note.map(link) }),
+          rows: group.rows.map((row) => ({ ...row, cells: row.cells.map(link) })),
+        })),
       })),
     ]),
   );

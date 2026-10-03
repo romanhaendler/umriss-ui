@@ -146,5 +146,11 @@ export function wordingTable({ title, anchor, lead, entries, english, german }: 
       ],
     });
   }
-  return { title, anchor, lead: spansOf(lead), columns: ["Key", "English", "German", "Description"], groups };
+  return {
+    title,
+    anchor,
+    lead: spansOf(lead),
+    columns: ["Key", "English", "German", "Description"],
+    groups: groups.map(({ title: group, rows }) => (group === undefined ? { rows } : { title: [{ kind: "text", text: group }], rows })),
+  };
 }

@@ -22,8 +22,9 @@ export interface ReferenceRow {
 }
 
 export interface ReferenceGroup {
-  /** A sub-heading above the group's table - none for a table of one group. */
-  title?: string;
+  /** A sub-heading above the group's table - none for a table of one group.
+      Pieces, so that an ADR number in it can be a link. */
+  title?: readonly Span[];
   /** Paragraphs between the sub-heading and the table - a stylesheet
       section's own text above its tokens. */
   note?: readonly (readonly Span[])[];
@@ -41,6 +42,18 @@ export interface ReferenceTable {
   groups: readonly ReferenceGroup[];
 }
 
+/** A group title as a table's accessible name: its words without the links,
+    "Scrim (ADR-0012)" as "Scrim" - an ADR number is for the eye that can
+    follow it, and a label is no link. */
+function labelOf(title: readonly Span[]): string {
+  return title
+    .filter((span) => span.kind !== "link")
+    .map((span) => span.text)
+    .join("")
+    .replace(/\s*\(\s*\)/g, "")
+    .trim();
+}
+
 /** The section's body as HTML - no whitespace between the elements, as
     React writes it. A cell carries its column's name for a phone, where the
     table stands as one block a row. */
@@ -52,9 +65,9 @@ export function referenceHtml(table: ReferenceTable): string {
       .map(
         (group) =>
           '<div class="apiBlock">' +
-          (group.title === undefined ? "" : `<h3 class="apiTitle">${escape(group.title)}</h3>`) +
+          (group.title === undefined ? "" : `<h3 class="apiTitle">${spansHtml(group.title)}</h3>`) +
           (group.note ?? []).map((paragraph) => `<p class="apiInherited">${spansHtml(paragraph)}</p>`).join("") +
-          `<div class="apiRole"><table class="apiTable referenceTable" aria-label="${escape(group.title === undefined ? table.title : `${table.title}: ${group.title}`)}">${head}<tbody>` +
+          `<div class="apiRole"><table class="apiTable referenceTable" aria-label="${escape(group.title === undefined ? table.title : `${table.title}: ${labelOf(group.title)}`)}">${head}<tbody>` +
           group.rows
             .map(
               (row) =>
@@ -74,7 +87,7 @@ export function referenceHtml(table: ReferenceTable): string {
 export function referenceMarkdown(table: ReferenceTable): string {
   const lines = [spansMarkdown(table.lead)];
   for (const group of table.groups) {
-    if (group.title !== undefined) lines.push("", `##### ${group.title}`);
+    if (group.title !== undefined) lines.push("", `##### ${spansMarkdown(group.title)}`);
     for (const paragraph of group.note ?? []) lines.push("", spansMarkdown(paragraph));
     lines.push("", `| ${table.columns.join(" | ")} |`, `|${table.columns.map(() => "---|").join("")}`);
     for (const row of group.rows) lines.push(`| ${row.cells.map((cell) => markdownCell(spansMarkdown(cell))).join(" | ")} |`);
