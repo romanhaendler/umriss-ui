@@ -5,7 +5,8 @@
    demos in `llmsGuard.test.ts`. */
 
 import { describe, expect, it } from "vitest";
-import { adrLinksOf, internalReferences, linkAdrs, linkAdrSpans, siteLeaks, ADR_HOME } from "../src/tooling/references";
+import { adrLinksOf, internalReferences, linkAdrs, linkAdrSpans, linkReferences, siteLeaks, ADR_HOME } from "../src/tooling/references";
+import { referenceHtml, type ReferenceTable } from "../src/tooling/referenceTable";
 import { adrLinks, linkedTables, outlineFlags } from "../src/tooling/props";
 import { tableHtml, tableMarkdown, tableModel } from "../src/tooling/apiTable";
 import type { Rubric } from "../src/outline";
@@ -31,6 +32,20 @@ describe("the ADR links", () => {
       { kind: "text", text: "): how many." },
       { kind: "code", text: "ADR-0032" },
     ]);
+  });
+
+  it("link a reference table's group titles and notes as well as its rows", () => {
+    const table: ReferenceTable = {
+      title: "Tokens",
+      anchor: "tokens",
+      lead: [],
+      columns: ["Token"],
+      groups: [{ title: [{ kind: "text", text: "Styles (ADR-0021)" }], note: [[{ kind: "text", text: "See ADR-0032." }]], rows: [] }],
+    };
+    const [group] = linkReferences({ theming: [table] }, LINKS).theming![0]!.groups;
+    expect(group!.title).toContainEqual({ kind: "link", text: "ADR-0021", href: STYLES });
+    expect(group!.note![0]).toContainEqual({ kind: "link", text: "ADR-0032", href: `${ADR_HOME}0032-what-umriss-is-not.md` });
+    expect(siteLeaks(referenceHtml(linkReferences({ theming: [table] }, LINKS).theming![0]!))).toEqual([]);
   });
 
   it("stop at a number no file answers", () => {

@@ -80,7 +80,7 @@ describe("the wording reader", () => {
   });
 
   it("groups by the interface's section comments", () => {
-    expect(TABLE.groups.map((group) => [group.title, group.rows.length])).toEqual([
+    expect(TABLE.groups.map((group) => [group.title?.map((span) => span.text).join(""), group.rows.length])).toEqual([
       [undefined, 1],
       ["Lists", 5],
     ]);

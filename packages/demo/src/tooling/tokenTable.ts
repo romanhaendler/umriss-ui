@@ -56,7 +56,7 @@ function descriptionCell(token: Token): Span[] {
 
 function groupsOf(groups: readonly TokenGroup[], drawn: Drawn, linked: Linked): ReferenceTable["groups"] {
   return groups.map((group) => ({
-    ...(group.name === "" ? {} : { title: group.name }),
+    ...(group.name === "" ? {} : { title: [{ kind: "text" as const, text: group.name }] }),
     ...(group.note.length === 0 ? {} : { note: group.note.map(spansOf) }),
     rows: group.tokens.map((token) => ({
       anchor: tokenAnchor(token.name),
