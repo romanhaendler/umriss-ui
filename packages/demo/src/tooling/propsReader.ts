@@ -51,7 +51,8 @@ export interface PropEntry {
 
 export interface TypeEntry {
   name: string;
-  /** The type parameters as they stand: `["T"]`, `["K", "S"]`. */
+  /** The type parameters as they stand, with constraint and default:
+      `["T"]`, `["Z", "K extends Field<Z>"]`. */
   parameter: readonly string[];
   /** What the closing sentence names, where React is inherited from: `"<button>"`. */
   inherits?: string;
@@ -148,6 +149,30 @@ export function readProps(files: readonly string[], typeNames: readonly string[]
       }
     });
   }
+
+  /* Every name a declaration of these files takes as a type parameter and no
+     declaration takes as its own name: what a free parameter in a table would
+     be called. */
+  const parameterNames = new Set<string>();
+  const collectParameters = (node: ts.Node): void => {
+    if (ts.isTypeParameterDeclaration(node) && !declarations.has(node.name.text)) parameterNames.add(node.name.text);
+    ts.forEachChild(node, collectParameters);
+  };
+  for (const file of program.getSourceFiles()) if (!file.isDeclarationFile) collectParameters(file);
+
+  /** The type parameters a written type names and does not bind itself - as
+      a generic function or a mapped type inside it does. */
+  const parametersNamed = (text: string): string[] => {
+    const bound = new Set<string>();
+    const named = new Set<string>();
+    const visit = (node: ts.Node): void => {
+      if (ts.isTypeParameterDeclaration(node)) bound.add(node.name.text);
+      if (ts.isTypeReferenceNode(node) && ts.isIdentifier(node.typeName)) named.add(node.typeName.text);
+      ts.forEachChild(node, visit);
+    };
+    visit(ts.createSourceFile("type.ts", `type Read = ${text};`, ts.ScriptTarget.Latest));
+    return [...named].filter((name) => parameterNames.has(name) && !bound.has(name));
+  };
 
   const cache = new Map<string, TypeEntry>();
   const gaps: Gap[] = [];
@@ -318,6 +343,20 @@ export function readProps(files: readonly string[], typeNames: readonly string[]
     );
   };
 
+  /** What a helper's type parameters stand for at one use: the arguments
+      given there, or the defaults - themselves in the arguments before them. */
+  const substitutionsOf = (declaration: Declaration, args: readonly ts.TypeNode[]): Map<string, string> => {
+    const substitutions = new Map<string, string>();
+    (declaration.typeParameters ?? []).forEach((parameter, i) => {
+      const argument = args[i];
+      if (argument !== undefined) substitutions.set(parameter.name.text, textOf(argument));
+      else if (parameter.default !== undefined) {
+        substitutions.set(parameter.name.text, substitute(textOf(parameter.default), substitutions));
+      }
+    });
+    return substitutions;
+  };
+
   /** One member as an entry, together with the component's default. */
   const entryOf = (
     member: ts.PropertySignature,
@@ -399,18 +438,27 @@ export function readProps(files: readonly string[], typeNames: readonly string[]
       The order is that of first appearance. A member is optional where an arm
       carries it as optional or not at all; its type is the differing shapes of
       the arms, a function put in parentheses so that `(a: Z) => void | …` is
-      not read as a return type. */
+      not read as a return type.
+
+      A member typed `never` in an arm is a prohibition there, not a shape: it
+      gives the row no type, and its sentence ("not together with `footer`")
+      stands after those of the arms that do. A member `never` in every arm
+      stays `never`, and `readType` leaves it out. */
   const mergeArms = (arms: readonly (readonly PropEntry[])[]): PropEntry[] => {
     const names: string[] = [];
     for (const arm of arms) for (const p of arm) if (!names.includes(p.name)) names.push(p.name);
     return names.map((name) => {
       const occurrences = arms.map((arm) => arm.find((p) => p.name === name));
       const present = occurrences.filter((p): p is PropEntry => p !== undefined);
-      const first = present[0]!;
-      const shapes = [...new Set(present.map((p) => p.type))];
+      const shaped = present.filter((p) => p.type !== "never");
+      const forbidding = present.filter((p) => p.type === "never");
+      const first = shaped[0] ?? present[0]!;
+      const shapes = [...new Set((shaped.length === 0 ? present : shaped).map((p) => p.type))];
       const type =
         shapes.length === 1 ? shapes[0]! : shapes.map((f) => (f.includes("=>") ? `(${f})` : f)).join(" | ");
-      const description = [...new Set(present.map((p) => p.description).filter((b) => b !== ""))].join(" ");
+      const description = [
+        ...new Set([...shaped, ...forbidding].map((p) => p.description).filter((b) => b !== "")),
+      ].join(" ");
       /* Deprecated in one arm is deprecated: the arm that forbids it beside
          its new name does not carry the tag. */
       const deprecated = present.find((p) => p.deprecated !== undefined)?.deprecated;
@@ -498,28 +546,32 @@ export function readProps(files: readonly string[], typeNames: readonly string[]
       /* A conditional helper type is a mechanism and not a type a reader
          knows: its members stand without an origin, with the type arguments of
          this use rather than with its own parameters. */
-      const substitutions = new Map<string, string>();
-      (own.typeParameters ?? []).forEach((parameter, i) => {
-        const argument = args[i];
-        if (argument !== undefined) substitutions.set(parameter.name.text, textOf(argument));
-      });
       return {
         omitted: [],
-        props: branchMembers(own.type, substitutions).filter((p) => !omitted.includes(p.name)),
+        props: branchMembers(own.type, substitutionsOf(own, args)).filter((p) => !omitted.includes(p.name)),
       };
     }
     if (own !== undefined) {
       const parentType = readType(own, depth + 1);
       /* "from ButtonProps" tells the reader something; the name of a type the
-         package does not export names nothing they could import. */
+         package does not export names nothing they could import. The members
+         are written in the parameters of this use: `EditOptions<Z[K], Z>`
+         makes `W` into `Z[K]`, since the table they land in has no `W`. */
       const origin = isExported(own) ? name : undefined;
+      const substitutions = substitutionsOf(own, args);
       return {
         inherits: parentType.inherits,
         omitted: [...parentType.omitted],
         ownLibrary: true,
         props: parentType.props
           .filter((p) => !omitted.includes(p.name))
-          .map((p) => withPlace(p, { ...p, ...(p.inheritedFrom ?? origin ? { inheritedFrom: p.inheritedFrom ?? origin } : {}) })),
+          .map((p) =>
+            withPlace(p, {
+              ...p,
+              type: substitute(p.type, substitutions),
+              ...(p.inheritedFrom ?? origin ? { inheritedFrom: p.inheritedFrom ?? origin } : {}),
+            }),
+          ),
       };
     }
 
@@ -536,7 +588,7 @@ export function readProps(files: readonly string[], typeNames: readonly string[]
     if (done !== undefined) return done;
 
     const defaults = defaultValues(declaration);
-    const parameter = (declaration.typeParameters ?? []).map((p) => p.name.text);
+    const parameter = (declaration.typeParameters ?? []).map(textOf);
 
     const props: PropEntry[] = [];
     let inherits: string | undefined;
@@ -561,14 +613,17 @@ export function readProps(files: readonly string[], typeNames: readonly string[]
       }
       props.push(...inherited);
     } else {
-      /* A type alias: its parts in the order in which they stand. */
-      const readArm = (arm: ts.TypeNode, into: PropEntry[]): void => {
+      /* A type alias: its parts in the order in which they stand. A part with
+         a table of its own is named rather than copied out - except in the arm
+         of a union, where it holds for that arm only and is merged with the
+         other arms member by member. */
+      const readArm = (arm: ts.TypeNode, into: PropEntry[], inUnion = false): void => {
         const parts = ts.isIntersectionTypeNode(arm) ? arm.types : [arm];
         for (const part of parts) {
           const partName = rootName(part);
           if (ts.isTypeLiteralNode(part)) {
             for (const member of membersOf(part)) into.push(entryOf(member, defaults));
-          } else if (partName !== undefined && isPublic.has(partName) && declarations.has(partName)) {
+          } else if (!inUnion && partName !== undefined && isPublic.has(partName) && declarations.has(partName)) {
             if (!alsoTakes.includes(partName)) alsoTakes.push(partName);
           } else {
             takeInheritance(part, into);
@@ -583,7 +638,7 @@ export function readProps(files: readonly string[], typeNames: readonly string[]
            declare a member differently, both shapes stand there. */
         const arms = declaration.type.types.map((arm) => {
           const list: PropEntry[] = [];
-          readArm(withoutParens(arm), list);
+          readArm(withoutParens(arm), list, true);
           return uniqueByName(list);
         });
         props.push(...mergeArms(arms));
@@ -592,7 +647,9 @@ export function readProps(files: readonly string[], typeNames: readonly string[]
       }
     }
 
-    const unique = uniqueByName(props);
+    /* A member that is `never` and nothing else is a prohibition with nothing
+       to pass: no row. */
+    const unique = uniqueByName(props).filter((p) => p.type !== "never");
 
     /* A gap belongs to the table in which the prop stands without an origin:
        that is where somebody reads it. With an origin it is reported at the
@@ -621,7 +678,18 @@ export function readProps(files: readonly string[], typeNames: readonly string[]
     if (declaration === undefined) {
       throw new Error(`\`${typeName}\` is required, but is not declared in the files that were read.`);
     }
-    types[typeName] = readType(declaration);
+    const entry = readType(declaration);
+    const introduced = new Set((declaration.typeParameters ?? []).map((p) => p.name.text));
+    for (const prop of entry.props) {
+      const free = parametersNamed(prop.type).filter((p) => !introduced.has(p));
+      if (free.length > 0) {
+        throw new Error(
+          `\`${typeName}.${prop.name}\` is typed \`${prop.type}\`, which names ${free.map((p) => `\`${p}\``).join(", ")}: ` +
+            `a type parameter the table's header does not introduce.`,
+        );
+      }
+    }
+    types[typeName] = entry;
   }
 
   /* Only what really ends up in a table. A type that was read only as a

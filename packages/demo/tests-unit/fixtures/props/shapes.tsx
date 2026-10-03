@@ -62,3 +62,46 @@ export interface FixtureComponent<Z> {
   <K extends keyof Z>(props: FixtureFieldColumn<Z, K>): ReactNode;
   (props: { id: string; value: (row: Z) => unknown }): ReactNode;
 }
+
+/* `aggregate` and its old name `footer` in @umriss-ui/table: a union whose
+   arms forbid each other's member with `never`, one arm taking a type that has
+   a table of its own, the whole reached through a helper's parameters. */
+export interface FixtureTotals<W> {
+  /** What the values come to. */
+  total?: (values: readonly W[]) => W;
+}
+
+type FixtureRenamed<W> =
+  | (FixtureTotals<W> & {
+      /** The old name of `total` – not together with it. */
+      sum?: never;
+      /** Gone in every arm. */
+      legacy?: never;
+    })
+  | {
+      /** Not together with `sum`, its old name. */
+      total?: never;
+      sum?: FixtureFormat<W>;
+      /** Gone in every arm. */
+      legacy?: never;
+    };
+
+/* Not exported: a helper whose parameters the table must not show. */
+interface FixtureDraft<W, Z> {
+  /** Checks a draft. */
+  validate?: (value: W, row: Z) => string;
+}
+
+export type FixtureMeasure<Z, K extends keyof Z = keyof Z> = {
+  /** A field of the row. */
+  value: K;
+} & FixtureRenamed<Z[K]> &
+  FixtureDraft<Z[K], Z>;
+
+/* The helper taken with one argument too few: its `Z` stands in the table
+   unreplaced, and no header introduces it. */
+// @ts-expect-error -- the reader must report the `Z` this leaves behind
+export interface FixtureLoose<T> extends FixtureDraft<T> {
+  /** A value. */
+  value: T;
+}
