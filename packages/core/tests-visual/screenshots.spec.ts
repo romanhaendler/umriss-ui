@@ -21,7 +21,7 @@
    that rebuilds them. */
 
 import { test, expect } from "@playwright/test";
-import { EXAMPLE_ADDRESSES, PAGES, SCENARIO_IDS } from "./pages";
+import { CONFIGURATOR_PAGES, EXAMPLE_ADDRESSES, PAGES, SCENARIO_IDS } from "./pages";
 import { open, openExample, standstill, openScenario } from "./navigation";
 
 test.beforeEach(async ({ page }) => {
@@ -36,6 +36,17 @@ for (const pageId of PAGES) {
     const target = page.locator(`[data-block="${pageId}"] .pageHead`);
     await target.scrollIntoViewIfNeeded();
     await expect(target).toHaveScreenshot(`page-${pageId}-${testInfo.project.name}.png`);
+  });
+}
+
+/* One per configurator, at rest - in the first example's slot, with its
+   short code open as it always is (.scratch/configurator). */
+for (const pageId of CONFIGURATOR_PAGES) {
+  test(`Configurator ${pageId}`, async ({ page }, testInfo) => {
+    await open(page, pageId);
+    const target = page.locator(`[data-configurator="${pageId}"]`);
+    await target.scrollIntoViewIfNeeded();
+    await expect(target).toHaveScreenshot(`configurator-${pageId}-${testInfo.project.name}.png`);
   });
 }
 

@@ -418,6 +418,55 @@
   }
 }
 
+/* ---------------- The configurator ---------------- */
+
+/* The example's card, with the panel beside the stage from 900 px and under
+   it below that; the code always under the stage. */
+.configurator {
+  display: grid;
+  grid-template-areas: "stage" "panel" "code";
+  border-radius: var(--u-radius-md);
+  box-shadow: var(--u-edge);
+  background: var(--u-color-surface);
+  overflow: hidden;
+}
+
+.configuratorStage {
+  grid-area: stage;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+}
+
+.configuratorPanel {
+  grid-area: panel;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--u-space-4);
+  padding: var(--u-space-4);
+  border-top: 1px solid var(--u-edge-color);
+}
+
+.configuratorCode {
+  grid-area: code;
+  min-width: 0;
+}
+
+@media (min-width: 900px) {
+  .configurator {
+    grid-template-areas: "stage panel" "code panel";
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: 1fr auto;
+  }
+
+  .configuratorPanel {
+    border-top: none;
+    border-left: 1px solid var(--u-edge-color);
+  }
+}
+
 /* ---------------- Der Codeblock ---------------- */
 
 .codeBlock {
