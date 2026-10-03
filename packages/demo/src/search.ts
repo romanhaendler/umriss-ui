@@ -41,6 +41,35 @@ export function plain(text: string): string {
   return text.replace(/\[([^\]]+)\]\([^)\s]+\)/g, "$1").replace(/`+ ?([^`]+?) ?`+/g, "$1");
 }
 
+/** A page's props tables, as far as the search reads them: each table's
+    type, and each row's name and the type it is inherited from. */
+export interface PropsOfPage {
+  pageId: string;
+  tables: readonly { name: string; groups: readonly { rows: readonly { name: string; origin?: string }[] }[] }[];
+}
+
+/** A package's props (.scratch/one-search 04): one entry per row, at its
+    anchor `#<Type>-<prop>`, grouped under its type - `size` of `ButtonProps`
+    is not `size` of `TableProps`. A table shown on several pages is found on
+    the first; a row inherited from a type whose own row is found already is
+    not found twice. */
+export function propEntries(packageId: string, pages: readonly PropsOfPage[]): SearchEntry[] {
+  const rows = new Map<string, { entry: SearchEntry; declared?: string }>();
+  for (const { pageId, tables } of pages) {
+    for (const table of tables) {
+      for (const row of table.groups.flatMap((group) => group.rows)) {
+        const anchor = `${table.name}-${row.name}`;
+        if (rows.has(anchor)) continue;
+        rows.set(anchor, {
+          entry: { address: `/${packageId}${addressOfPlace(`/${pageId}/${anchor}`)}`, label: row.name, group: `${packageId} · ${table.name}`, kind: "prop" },
+          ...(row.origin === undefined ? {} : { declared: `${row.origin}-${row.name}` }),
+        });
+      }
+    }
+  }
+  return [...rows.values()].filter(({ declared }) => declared === undefined || !rows.has(declared)).map(({ entry }) => entry);
+}
+
 /** A package's entries: its front page, its scenarios, its pages and its
     examples. `packageId` is the package's directory on the site (`core`). */
 export function searchEntries(

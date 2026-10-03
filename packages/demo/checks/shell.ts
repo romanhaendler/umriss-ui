@@ -80,10 +80,14 @@ export interface ShellProbes {
       name, a wording key by its English or German text - its label, its page
       and the row's anchor (.scratch/one-search 06) - where the demo has one. */
   rows?: readonly { query: string; label: string; pageId: string; anchor: string }[];
-  /** A find in another package on the built site: what is typed, the find's
+  /** Finds in another package on the built site: what is typed, the find's
       group and label, and the site's address it opens (.scratch/one-search
-      03) - where the demo has one. */
-  elsewhere?: { query: string; group: string; label: string; address: string };
+      03) - where the demo has them. */
+  elsewhere?: readonly { query: string; group: string; label: string; address: string }[];
+  /** A prop of this package: what is typed, the find's label and group
+      (`<package> · <Type>`), and the page and anchor `<Type>-<prop>` of its
+      row (.scratch/one-search 04). */
+  prop: { query: string; label: string; group: string; pageId: string; id: string };
 }
 
 /* ON THE BUILT SITE (.scratch/one-search 03). A demo of the test build stands
@@ -618,9 +622,25 @@ for (const row of p.rows ?? []) {
   });
 }
 
-if (p.elsewhere !== undefined) {
-  const elsewhere = p.elsewhere;
-  test("on the built site, the palette finds another package's page and opens it at its address", async ({ page }) => {
+/** A find by its accessible name: its label followed by its group. */
+const findOf = (page: Page, label: string, group: string) => {
+  const literal = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return page.getByRole("dialog").getByRole("option", { name: new RegExp(`^${literal(label)}\\s*${literal(group)}$`) });
+};
+
+/* A prop's find lands on its row (.scratch/one-search 04) - in a folded
+   group too, which the jump opens. */
+test(`a prop's name finds its row: ${p.prop.label} of ${p.prop.group}`, async ({ page }) => {
+  await page.keyboard.press("ControlOrMeta+k");
+  const field = page.getByRole("combobox", { name: "Search umriss-ui" });
+  await field.fill(p.prop.query);
+  await findOf(page, p.prop.label, p.prop.group).click();
+  await expect(page).toHaveURL(new RegExp(`/${p.prop.pageId}/#${p.prop.id}$`));
+  await expect(page.locator(`[id="${p.prop.id}"]`)).toBeInViewport();
+});
+
+for (const elsewhere of p.elsewhere ?? []) {
+  test(`on the built site, the palette finds another package's ${elsewhere.label} and opens it at its address`, async ({ page }) => {
     test.skip(!existsSync(join(SITE_DIR, "search.json")), "the site is not built (`pnpm build:pages`)");
     const home = await serveSite(page);
     await page.goto(`${home}${p.packageId}/`);
@@ -628,23 +648,23 @@ if (p.elsewhere !== undefined) {
     await page.keyboard.press("ControlOrMeta+k");
     await index;
     const field = page.getByRole("combobox", { name: "Search umriss-ui" });
-    /* A find's name is its label followed by its group. */
-    const literal = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const find = (label: string, group: string) => page.getByRole("dialog").getByRole("option", { name: new RegExp(`^${literal(label)}\\s*${literal(group)}$`) });
 
     // The own package's finds stand once: the site's index brings them too.
     await field.fill(p.example.title);
-    await expect(find(p.example.title, `${p.packageId} · ${p.example.pageName}`)).toHaveCount(1);
+    await expect(findOf(page, p.example.title, `${p.packageId} · ${p.example.pageName}`)).toHaveCount(1);
 
     await field.fill(elsewhere.query);
-    await find(elsewhere.label, elsewhere.group).click();
+    await findOf(page, elsewhere.label, elsewhere.group).click();
     // A full navigation into the other demo's directory, anchor and all.
     await expect(page).toHaveURL(home + elsewhere.address.slice(1));
     const [path = "", anchor] = elsewhere.address.split("#");
     if (anchor === undefined) await expect(page.locator(`[data-block="${path.split("/")[2]}"]`)).toBeVisible();
-    else await expect(page.locator(`[data-example="${anchor}"]`)).toBeInViewport();
+    // An example, or a props table's row.
+    else await expect(page.locator(`[data-example="${anchor}"], tr[id="${anchor}"]`)).toBeInViewport();
   });
+}
 
+if (p.elsewhere !== undefined) {
   test("on the built site, without its index the palette still searches the own package, silently", async ({ page }) => {
     test.skip(!existsSync(join(SITE_DIR, "search.json")), "the site is not built (`pnpm build:pages`)");
     const home = await serveSite(page);

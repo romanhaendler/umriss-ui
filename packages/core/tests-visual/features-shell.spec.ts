@@ -51,10 +51,15 @@ checkShell({
     { query: "No matches", label: "noMatches", pageId: "language", anchor: "wording-noMatches" },
     { query: "Stand unbekannt", label: "asOfUnknown", pageId: "language", anchor: "wording-asOfUnknown" },
   ],
-  elsewhere: {
-    query: "loading, empty",
-    group: "table · Row appearance",
-    label: "Show loading, empty, failed and no match",
-    address: "/table/row-appearance/#states",
-  },
+  elsewhere: [
+    {
+      query: "loading, empty",
+      group: "table · Row appearance",
+      label: "Show loading, empty, failed and no match",
+      address: "/table/row-appearance/#states",
+    },
+    { query: "pageSize", group: "table · TableOptions", label: "pageSize", address: "/table/first-table/#TableOptions-pageSize" },
+  ],
+  /* A row in a folded group: the jump opens it. */
+  prop: { query: "role", label: "role", group: "core · PopoverProps", pageId: "popover", id: "PopoverProps-role" },
 });

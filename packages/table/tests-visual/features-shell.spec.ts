@@ -29,5 +29,6 @@ checkShell({
   contents: { pageId: "toolbar", id: "place-it-outside", title: "Place it outside the table" },
   foldedRow: { pageId: "first-table", id: "TableProps-onCellEdit" },
   synonyms: [{ query: "frozen", name: "Width and pinning", pageId: "width-and-pinning" }],
-  elsewhere: { query: "select", group: "core · Choosing", label: "Select", address: "/core/select/" },
+  elsewhere: [{ query: "select", group: "core · Choosing", label: "Select", address: "/core/select/" }],
+  prop: { query: "pageSize", label: "pageSize", group: "table · TableOptions", pageId: "first-table", id: "TableOptions-pageSize" },
 });

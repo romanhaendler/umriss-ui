@@ -30,6 +30,7 @@ checkShell({
   pointer: { wide: "a", narrow: "matrix" },
   moved: { from: "getting-started", pageId: "installation", example: "in-its-container" },
   contents: { pageId: "limitline", id: "limits-and-state", title: "Read limits above the states" },
+  prop: { query: "padding", label: "padding", group: "charts · ChartProps", pageId: "chart", id: "ChartProps-padding" },
 });
 
 test("the benchmark does not run on the front door", async ({ page }) => {

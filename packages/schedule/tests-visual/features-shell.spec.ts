@@ -21,4 +21,5 @@ checkShell({
   pointer: { wide: "s", narrow: "lag that does" },
   contents: { pageId: "dependencies", id: "violated-dependency", title: "Show a lag that does not fit" },
   foldedRow: { pageId: "schedule", id: "ScheduleProps-onIntent" },
+  prop: { query: "laneHeight", label: "laneHeight", group: "schedule · ScheduleProps", pageId: "schedule", id: "ScheduleProps-laneHeight" },
 });

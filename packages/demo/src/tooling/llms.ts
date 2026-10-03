@@ -34,7 +34,7 @@ import { apiHtml, apiMarkdown, apiSection, propsOnPage, PROPS_ON_PAGE_TITLE, fen
 import { referenceHtml, referenceMarkdown, type ReferenceTable } from "./referenceTable.ts";
 import { adrLinks, compilerOptionsOf } from "./props.ts";
 import { linkAdrs, linkReferences, outlineTexts } from "./references.ts";
-import { plain, referenceEntries, searchEntries, type SearchEntry } from "../search.ts";
+import { plain, propEntries, referenceEntries, searchEntries, type PropsOfPage, type SearchEntry } from "../search.ts";
 
 export interface LlmsJob {
   /** The package's directory: `package.json` and `demo/` are read there. */
@@ -453,6 +453,8 @@ export function renderLlms({ packageDir, outline: written, tables, moved = {}, r
   }
   /* The types some page's "Types on this page" defines. */
   const defined = new Set<string>();
+  /* The props tables each page shows, for the search (`propEntries`). */
+  const propsOfPages: PropsOfPage[] = [];
   for (const rubric of outline) {
     parts.push("", `## ${rubric.name}`, "", rubric.sentence);
     for (const page of rubric.pages) {
@@ -494,6 +496,7 @@ export function renderLlms({ packageDir, outline: written, tables, moved = {}, r
         parts.push("", "#### API");
         const section = apiSection(page, pages, tables);
         for (const definition of section.definitions) defined.add(definition.name);
+        propsOfPages.push({ pageId: page.id, tables: section.tables });
         const at = parts.length;
         for (const block of apiMarkdown(section)) parts.push("", block);
         spliced.push({ from: at, to: parts.length, html: apiHtml(section) });
@@ -637,7 +640,11 @@ export function renderLlms({ packageDir, outline: written, tables, moved = {}, r
   /* The package's directory on the site is the second half of its name, as
      in `hrefOfNeighbour`. */
   const packageId = manifest.name.split("/")[1]!;
-  const search = [...searchEntries(packageId, outline, scenarios, examples), ...referenceEntries(packageId, outline, references)];
+  const search = [
+    ...searchEntries(packageId, outline, scenarios, examples),
+    ...propEntries(packageId, propsOfPages),
+    ...referenceEntries(packageId, outline, references),
+  ];
 
   return { index, full: `${parts.join("\n")}\n`, pages: sitePages, forwarders, twins, search };
 }
