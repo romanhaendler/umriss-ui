@@ -40,12 +40,15 @@ const ENTRY: TypeEntry = {
       description: "Where the scale ends.",
     },
     { name: "rows", type: "readonly T[]", optional: false, description: "Every row, `<b>` and all." },
+    { name: "size", type: "GaugeSize", expansion: '"sm" | "md"', optional: true, description: "How tall the gauge stands." },
   ],
 };
 
 interface Row {
   name: string;
   type: string;
+  /** The values beneath an alias's name; empty where there are none. */
+  expansion: string;
   defaultValue: string;
   required: boolean;
   deprecated: boolean;
@@ -62,6 +65,7 @@ function htmlFacts(html: string): { heading: string; anchor: string; groups: Row
       [...table.querySelectorAll("tbody tr")].map((tr) => ({
         name: tr.querySelector("th code")!.textContent!,
         type: tr.querySelector(".apiType")!.textContent!,
+        expansion: tr.querySelector(".apiType + br + code")?.textContent ?? "",
         defaultValue: tr.querySelectorAll("td")[1]!.textContent!,
         required: tr.querySelector("th")!.textContent!.endsWith("required"),
         deprecated: tr.querySelectorAll("td")[2]!.textContent!.startsWith("Deprecated "),
@@ -81,10 +85,12 @@ function markdownFacts(markdown: string): { heading: string; groups: Row[][]; cl
   for (const line of lines) {
     if (line.startsWith("|---")) groups.push([]);
     else if (line.startsWith("| ") && groups.length > 0 && !line.startsWith("| Prop |")) {
-      const [name, type, defaultValue, description] = line.slice(2, -2).split(/ (?<!\\)\| /);
+      const [name, typeCell, defaultValue, description] = line.slice(2, -2).split(/ (?<!\\)\| /);
+      const [type, expansion] = typeCell!.split("<br>");
       groups.at(-1)!.push({
         name: unmark(name!.replace(/ \*required\*$/, "")),
         type: unmark(type!),
+        expansion: expansion === undefined ? "" : unmark(expansion),
         defaultValue: unmark(defaultValue!),
         required: name!.endsWith(" *required*"),
         deprecated: unmark(description!).startsWith("Deprecated "),
@@ -112,10 +118,12 @@ describe("one table model, two writers", () => {
       expect(html.groups.flat().find((row) => row.name === "tone")!.defaultValue).toBe('"neutral"');
       expect(html.groups.flat().find((row) => row.name === "value")!.defaultValue).toBe("—");
       expect(html.groups.map((group) => group.map((row) => row.name))).toEqual(
-        eventsApart ? [["value", "tone", "max", "rows", "limit"], ["onChange"]] : [["value", "onChange", "tone", "max", "rows", "limit"]],
+        eventsApart ? [["value", "tone", "max", "rows", "size", "limit"], ["onChange"]] : [["value", "onChange", "tone", "max", "rows", "size", "limit"]],
       );
       expect(html.groups.flat().filter((row) => row.deprecated).map((row) => row.name)).toEqual(["limit"]);
       expect(html.groups.flat().find((row) => row.name === "max")!.defaultValue).toBe("the largest value, else 100");
+      expect(html.groups.flat().find((row) => row.name === "size")).toMatchObject({ type: "GaugeSize", expansion: '"sm" | "md"' });
+      expect(html.groups.flat().filter((row) => row.expansion !== "").map((row) => row.name)).toEqual(["size"]);
     });
   }
 
@@ -132,6 +140,12 @@ describe("one table model, two writers", () => {
     expect(tableHtml(model)).toContain('<td><code>&quot;neutral&quot;</code></td>');
     expect(tableHtml(model)).toContain("<td>the largest value, else <code>100</code></td>");
     expect(tableMarkdown(model)).toContain("| `number` | the largest value, else `100` | Where the scale ends. |");
+  });
+
+  it("writes an alias's values on the line beneath its name", () => {
+    const model = tableModel(ENTRY, false);
+    expect(tableHtml(model)).toContain('<td><code class="apiType">GaugeSize</code><br><code>&quot;sm&quot; | &quot;md&quot;</code></td>');
+    expect(tableMarkdown(model)).toContain('| `GaugeSize`<br>`"sm" \\| "md"` |');
   });
 
   it("anchors the heading at #type-<Name>", () => {

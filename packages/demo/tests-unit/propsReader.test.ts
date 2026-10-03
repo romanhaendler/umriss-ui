@@ -266,6 +266,28 @@ describe("readProps over a union whose arms forbid a member", () => {
   });
 });
 
+describe("readProps over a named alias in a type cell", () => {
+  /* `ButtonSize` in @umriss-ui/core: an alias of `ControlSize`, which is
+     `"sm" | "md"` - the name stays, and the values stand beneath it. */
+  const row = (name: string) =>
+    readProps([join(FIXTURES, "aliases.tsx")], ["FixtureAliasProps"]).types.FixtureAliasProps!.props.find((p) => p.name === name)!;
+
+  it("keeps the name of an alias that comes over two hops to a literal union, and carries its values", () => {
+    expect(row("size")).toMatchObject({ type: "FixtureButtonSize", expansion: '"sm" | "md"' });
+  });
+
+  it("carries the values of an array of one", () => {
+    expect(row("steps")).toMatchObject({ type: "FixtureStep[]", expansion: "1 | 2 | 3" });
+  });
+
+  it("expands no alias of an interface, no union with a member that is no literal, and no inline union", () => {
+    expect(row("shape").expansion).toBeUndefined();
+    expect(row("format").expansion).toBeUndefined();
+    expect(row("tone").type).toBe('"quiet" | "loud"');
+    expect(row("tone").expansion).toBeUndefined();
+  });
+});
+
 describe("readProps over an interface of call signatures", () => {
   it("finds no props and reports no gap", () => {
     /* `ColumnComponent` is an overload, not a props type. `Column`'s page

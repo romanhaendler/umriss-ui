@@ -25,6 +25,9 @@ export interface ApiRow {
   name: string;
   /** The type cell. One piece today; a later step links the library's types in it. */
   type: readonly Span[];
+  /** The values of a literal-union alias, on the line beneath its name:
+      `"sm" | "md"` under `ButtonSize`. */
+  expansion?: string;
   /** A value as one piece of code; a phrase as the text it was written as. */
   defaultValue?: readonly Span[];
   /** The `@deprecated` sentence - its row stands last in its group. */
@@ -93,6 +96,7 @@ function row(prop: PropEntry): ApiRow {
   return {
     name: prop.name,
     type: [text(prop.type)],
+    ...(prop.expansion === undefined ? {} : { expansion: prop.expansion }),
     ...(prop.defaultValue === undefined
       ? {}
       : { defaultValue: prop.defaultIsPhrase === true ? spansOf(prop.defaultValue) : [code(prop.defaultValue)] }),
@@ -175,7 +179,7 @@ function groupHtml(name: string, group: ApiGroup): string {
     (one) =>
       "<tr>" +
       `<th scope="row"><code>${escape(one.name)}</code>${one.badges.map((badge) => `<span class="apiBadge">${escape(badge)}</span>`).join("")}</th>` +
-      `<td><code class="apiType">${spansHtml(one.type)}</code></td>` +
+      `<td><code class="apiType">${spansHtml(one.type)}</code>${one.expansion === undefined ? "" : `<br><code>${escape(one.expansion)}</code>`}</td>` +
       `<td>${one.defaultValue === undefined ? "—" : spansHtml(one.defaultValue)}</td>` +
       `<td>${one.deprecated === undefined ? "" : `<span class="apiDeprecated"><span class="apiBadge">Deprecated</span> ${spansHtml(one.deprecated)}</span> `}${spansHtml(one.description)}${one.origin === undefined ? "" : `<span class="apiOrigin"> from <code>${escape(one.origin)}</code></span>`}</td>` +
       "</tr>",
@@ -244,8 +248,10 @@ export function tableMarkdown(model: ApiTableModel): string {
       const name = `${markdownCode(one.name)}${one.badges.map((badge) => ` *${badge}*`).join("")}`;
       const origin = one.origin === undefined ? "" : ` From ${markdownCode(one.origin)}.`;
       const deprecated = one.deprecated === undefined ? "" : `*Deprecated* ${spansMarkdown(one.deprecated)} `;
+      /* A cell holds one line; `<br>` is how a table cell breaks in GFM. */
+      const expansion = one.expansion === undefined ? "" : `<br>${markdownCode(one.expansion)}`;
       lines.push(
-        `| ${name} | ${markdownCell(markdownCode(spansMarkdown(one.type)))} | ${one.defaultValue === undefined ? "—" : markdownCell(spansMarkdown(one.defaultValue))} | ${markdownCell(deprecated + spansMarkdown(one.description) + origin)} |`,
+        `| ${name} | ${markdownCell(markdownCode(spansMarkdown(one.type)) + expansion)} | ${one.defaultValue === undefined ? "—" : markdownCell(spansMarkdown(one.defaultValue))} | ${markdownCell(deprecated + spansMarkdown(one.description) + origin)} |`,
       );
     }
   });
