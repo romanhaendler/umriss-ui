@@ -19,12 +19,14 @@
    `demo/examples/` and from nothing else - a list beside them would be exactly
    the second truth this head argues against.
 
-   On the cut. The rubrics of the demo rework (.scratch/demo-rework/spec.md):
-   Getting started, Layout, Typography, Actions, Forms, Feedback, Overlays,
-   Navigation and Data display, after the Scenarios page that opens the demo.
-   Within a rubric the pages run from the simple to the composed and not
-   alphabetically: an alphabet is an index, and the palette is already one
-   (CONTEXT.md, "Rubric").
+   On the cut. The rubrics of the sidebar tree (.scratch/sidebar-tree/spec.md):
+   Getting started, Customising, Layout, Typography, Actions, Forms, Choosing,
+   Dates and times, Feedback, Overlays, Navigation and Data display, after the
+   Scenarios page that opens the demo. Within a rubric the pages run from the
+   simple to the composed and not alphabetically: an alphabet is an index, and
+   the palette is already one (CONTEXT.md, "Rubric"). One exception, by the
+   same entry: `FormField` stands right after `Input`, because every later
+   page of Forms, Choosing and Dates and times labels its control with it.
 
    The order follows the page, not taste: a sidebar sorted differently from
    what it jumps to confuses precisely when one trusts it. */
@@ -73,6 +75,35 @@ export const OUTLINE: readonly Rubric[] = [
         types: ["UmrissProviderProps", "ToastConfig"],
         exports: ["UmrissProvider"],
       },
+    ],
+  },
+  {
+    id: "customising",
+    name: "Customising",
+    sentence: "What every component shares and an application sets once: its colours, its size, its words.",
+    pages: [
+      {
+        id: "sizes",
+        name: "Sizes",
+        sentence: "How wide and how tall a field is (width, height, field size). A field fills its place, holds still in a row whatever it shows, takes the width of its value with `chars`, and takes one size from the place it stands in.",
+        about: [
+          "Width. Say nothing, and a field fills the place that gives it a width - a form's column, a grid's cell, a dialog. Where the place asks the field instead - a row, a toolbar, a column that lines up at the start - the field is its natural width: 16 characters of its own type for a text field, select and combobox, 20 for a multiselect (two chips and the counter), 10 for a number, 40 for a textarea, the longest value of its formats for a date picker. What it shows never moves it: not its value, not its options, not its chips (ADR-0041).",
+          "`chars` gives the width in characters - the room for the value, with the field's padding, glyph, cross and steppers added. Given, the field is that wide in every place. Either way it is never wider than its place, and what does not fit ends in an ellipsis.",
+          "Height. Every control with two heights takes `size`, `sm` or `md`. `ControlSizeProvider` sets it for a place - a toolbar, a dense form; a control's own `size` wins, and a popover, dialog or tooltip opened from inside starts without it.",
+        ],
+        alternatives: [
+          { when: "A width the layout decides - two columns, a field beside a button", use: "stack-and-grid" },
+          { when: "A whole table's density, rows and controls together", use: "umrissprovider" },
+        ],
+        limits: [
+          "No width in pixels: a width in characters scales with the type, under a finger too; a place's width is the layout's.",
+          "`Slider` and `FileInput` take no `chars` - they show no text to count; their width is the place's, or their natural width where the place asks.",
+          "A field does not grow to fill a row: give it room with the row's own layout (`flex: 1` on its FormField, or a grid).",
+          "A place that sizes itself by its content and has no width to stop at - an `auto` grid track, an inline block, a row that does not wrap - gives a field at least its natural width, as it gives a native input its own; on a narrow screen let such a row wrap, or size the track with `minmax(0, auto)`.",
+        ],
+        types: ["ControlSizeProviderProps"],
+        exports: ["ControlSizeProvider"],
+      },
       {
         id: "language",
         name: "Language",
@@ -110,6 +141,14 @@ export const OUTLINE: readonly Rubric[] = [
         exports: ["Stack", "Grid"],
       },
       {
+        id: "divider",
+        name: "Divider",
+        sentence: "A line between two groups of content, across or upright, that may name the part after it (also called a separator or rule).",
+        alternatives: [{ when: "A group that needs a surface and a heading of its own", use: "card" }],
+        types: ["DividerProps"],
+        exports: ["Divider"],
+      },
+      {
         id: "card",
         name: "Card",
         sentence: "A surface that holds one block of a screen together: a head with its title and actions, and a body (also called a panel or tile). Reach for it for each block of a dashboard or a detail view.",
@@ -123,14 +162,6 @@ export const OUTLINE: readonly Rubric[] = [
         ],
         types: ["CardProps", "CardHeaderProps", "CardBodyProps"],
         exports: ["Card", "CardHeader", "CardBody"],
-      },
-      {
-        id: "divider",
-        name: "Divider",
-        sentence: "A line between two groups of content, across or upright, that may name the part after it (also called a separator or rule).",
-        alternatives: [{ when: "A group that needs a surface and a heading of its own", use: "card" }],
-        types: ["DividerProps"],
-        exports: ["Divider"],
       },
       {
         id: "splitter",
@@ -305,7 +336,7 @@ export const OUTLINE: readonly Rubric[] = [
   {
     id: "forms",
     name: "Forms",
-    sentence: "Where a user enters and picks values.",
+    sentence: "Where a user types a value or sets one directly on the screen.",
     pages: [
       {
         id: "input",
@@ -332,7 +363,7 @@ export const OUTLINE: readonly Rubric[] = [
         name: "FormField",
         sentence: "The frame around a field: its label, a hint below it and the error that replaces the hint. Wrap every field in one, so the question, the help and the problem are read out together.",
         about: [
-          "Every field of this rubric reads its id, description, invalid and required state from the surrounding `FormField`; an `error` marks the field invalid by itself. A control of your own gets the same through `useFormField`.",
+          "Every field of Forms, Choosing and Dates and times reads its id, description, invalid and required state from the surrounding `FormField`; an `error` marks the field invalid by itself. A control of your own gets the same through `useFormField`.",
           "`required` sets the mark and `aria-required`; it checks nothing. When and how a value is checked stays with the application.",
         ],
         limits: [
@@ -341,28 +372,6 @@ export const OUTLINE: readonly Rubric[] = [
         ],
         types: ["FormFieldProps"],
         exports: ["FormField", "useFormField"],
-      },
-      {
-        id: "sizes",
-        name: "Sizes",
-        sentence: "How wide and how tall a field is (width, height, field size). A field fills its place, holds still in a row whatever it shows, takes the width of its value with `chars`, and takes one size from the place it stands in.",
-        about: [
-          "Width. Say nothing, and a field fills the place that gives it a width - a form's column, a grid's cell, a dialog. Where the place asks the field instead - a row, a toolbar, a column that lines up at the start - the field is its natural width: 16 characters of its own type for a text field, select and combobox, 20 for a multiselect (two chips and the counter), 10 for a number, 40 for a textarea, the longest value of its formats for a date picker. What it shows never moves it: not its value, not its options, not its chips (ADR-0041).",
-          "`chars` gives the width in characters - the room for the value, with the field's padding, glyph, cross and steppers added. Given, the field is that wide in every place. Either way it is never wider than its place, and what does not fit ends in an ellipsis.",
-          "Height. Every control with two heights takes `size`, `sm` or `md`. `ControlSizeProvider` sets it for a place - a toolbar, a dense form; a control's own `size` wins, and a popover, dialog or tooltip opened from inside starts without it.",
-        ],
-        alternatives: [
-          { when: "A width the layout decides - two columns, a field beside a button", use: "stack-and-grid" },
-          { when: "A whole table's density, rows and controls together", use: "umrissprovider" },
-        ],
-        limits: [
-          "No width in pixels: a width in characters scales with the type, under a finger too; a place's width is the layout's.",
-          "`Slider` and `FileInput` take no `chars` - they show no text to count; their width is the place's, or their natural width where the place asks.",
-          "A field does not grow to fill a row: give it room with the row's own layout (`flex: 1` on its FormField, or a grid).",
-          "A place that sizes itself by its content and has no width to stop at - an `auto` grid track, an inline block, a row that does not wrap - gives a field at least its natural width, as it gives a native input its own; on a narrow screen let such a row wrap, or size the track with `minmax(0, auto)`.",
-        ],
-        types: ["ControlSizeProviderProps"],
-        exports: ["ControlSizeProvider"],
       },
       {
         id: "textarea",
@@ -394,6 +403,24 @@ export const OUTLINE: readonly Rubric[] = [
         exports: ["NumberInput"],
       },
       {
+        id: "slider",
+        name: "Slider",
+        sentence: "A value set roughly between two bounds (range slider): a share of traffic, an alert threshold, weekly hours. The position on the track says as much as the figure.",
+        about: [
+          "`onChange` reports a number already on the step and inside the bounds, by pointer and by key alike. Pair it with a [NumberInput](#/numberinput) on the same state when the exact figure matters too.",
+        ],
+        alternatives: [{ when: "An exact figure, or a range without sensible bounds", use: "numberinput" }],
+        keys: [
+          { key: "Arrow Right / Arrow Up", action: "Increases the value by one step." },
+          { key: "Arrow Left / Arrow Down", action: "Decreases the value by one step." },
+          { key: "Page Up / Page Down", action: "Moves by a tenth of the range." },
+          { key: "Home / End", action: "Moves to the lower or upper bound." },
+        ],
+        limits: ["One thumb: no range with two ends.", "Marks show values; they do not catch the thumb."],
+        types: ["SliderProps"],
+        exports: ["Slider"],
+      },
+      {
         id: "checkbox",
         name: "Checkbox",
         sentence: "A yes or no that counts when the form is saved (tick box). It also shows the mixed state of a parent whose children are partly checked.",
@@ -419,37 +446,6 @@ export const OUTLINE: readonly Rubric[] = [
         exports: ["Switch"],
       },
       {
-        id: "slider",
-        name: "Slider",
-        sentence: "A value set roughly between two bounds (range slider): a share of traffic, an alert threshold, weekly hours. The position on the track says as much as the figure.",
-        about: [
-          "`onChange` reports a number already on the step and inside the bounds, by pointer and by key alike. Pair it with a [NumberInput](#/numberinput) on the same state when the exact figure matters too.",
-        ],
-        alternatives: [{ when: "An exact figure, or a range without sensible bounds", use: "numberinput" }],
-        keys: [
-          { key: "Arrow Right / Arrow Up", action: "Increases the value by one step." },
-          { key: "Arrow Left / Arrow Down", action: "Decreases the value by one step." },
-          { key: "Page Up / Page Down", action: "Moves by a tenth of the range." },
-          { key: "Home / End", action: "Moves to the lower or upper bound." },
-        ],
-        limits: ["One thumb: no range with two ends.", "Marks show values; they do not catch the thumb."],
-        types: ["SliderProps"],
-        exports: ["Slider"],
-      },
-      {
-        id: "fileinput",
-        name: "FileInput",
-        sentence: "Choose files from the system's dialog or drop them on the zone (file picker, upload field). The chosen files are listed with their size and can be removed one by one.",
-        about: [
-          "`accept` holds for the dialog and for a drop alike; a dropped file it refuses is named below the list instead of vanishing.",
-          "It only chooses. Reading, checking and uploading the files are the application's.",
-        ],
-        keys: [{ key: "Space or Enter", action: "Opens the system's file dialog." }],
-        limits: ["No upload, no progress and no size limit of its own; those belong to the application sending the files."],
-        types: ["FileInputProps"],
-        exports: ["FileInput"],
-      },
-      {
         id: "radiogroup",
         name: "RadioGroup",
         sentence: "One choice out of a few that all stay in view (radio buttons, option group). Each option may carry a sentence that explains it.",
@@ -467,6 +463,26 @@ export const OUTLINE: readonly Rubric[] = [
         types: ["RadioGroupProps", "RadioOption"],
         exports: ["RadioGroup"],
       },
+      {
+        id: "fileinput",
+        name: "FileInput",
+        sentence: "Choose files from the system's dialog or drop them on the zone (file picker, upload field). The chosen files are listed with their size and can be removed one by one.",
+        about: [
+          "`accept` holds for the dialog and for a drop alike; a dropped file it refuses is named below the list instead of vanishing.",
+          "It only chooses. Reading, checking and uploading the files are the application's.",
+        ],
+        keys: [{ key: "Space or Enter", action: "Opens the system's file dialog." }],
+        limits: ["No upload, no progress and no size limit of its own; those belong to the application sending the files."],
+        types: ["FileInputProps"],
+        exports: ["FileInput"],
+      },
+    ],
+  },
+  {
+    id: "choosing",
+    name: "Choosing",
+    sentence: "Where a user chooses one value or several from a list that opens.",
+    pages: [
       {
         id: "select",
         name: "Select",
@@ -536,6 +552,13 @@ export const OUTLINE: readonly Rubric[] = [
         types: ["MultiSelectProps", "MultiSelectOption"],
         exports: ["MultiSelect"],
       },
+    ],
+  },
+  {
+    id: "dates-and-times",
+    name: "Dates and times",
+    sentence: "Where a user picks a day, a moment or a span of them from a calendar that opens.",
+    pages: [
       {
         id: "datepicker",
         name: "DatePicker",
@@ -633,50 +656,6 @@ export const OUTLINE: readonly Rubric[] = [
     sentence: "What tells a user how things stand and that something is under way.",
     pages: [
       {
-        id: "alert",
-        name: "Alert",
-        sentence: "A message that stays in the page until its matter is settled (also called a banner or callout). Reach for it when the reader must notice something here: a failed import, an approval waiting, a form that did not save.",
-        about: [
-          "`warning` and `danger` interrupt a screen reader at once; `neutral`, `accent` and `success` are read out politely when the reader is free. Choose the tone by what the reader has to do, not by the colour you want.",
-          "Dismissing is reported through `onDismiss` and nothing more: whether and when the message comes back is your state.",
-        ],
-        alternatives: [
-          { when: "Confirming something that has already happened, which may pass unnoticed", use: "toast" },
-          { when: "A question the user must answer before an action goes ahead", use: "confirmdialog" },
-          { when: "A list or panel with nothing in it", use: "emptystate" },
-        ],
-        limits: [
-          "No timer: an alert stays until you remove it. A message that goes by itself is a toast.",
-          "No stack or queue of messages; place each alert where its matter is.",
-        ],
-        types: ["AlertProps"],
-        exports: ["Alert"],
-      },
-      {
-        id: "toast",
-        name: "Toast",
-        sentence: "Short feedback in the corner of the window that interrupts nothing and goes away by itself (also called a snackbar or notification). Reach for it to confirm what has just happened: saved, exported, approved.",
-        about: [
-          "`useToast` needs a `ToastProvider` around the application, once, at the root.",
-          "A toast stays five seconds by default. Its clock stops while the deck is open – under the pointer, with the focus inside it – and runs on with the time that was left.",
-          "The title says what has happened, in about one line: “Invoice not sent”. Why, and what to do next, go in the description.",
-          "Nothing that must be read goes in a toast: whoever looked elsewhere has missed it. `duration: 0` keeps one until it is closed – for the rare message whose loss costs something, since a corner full of standing toasts stops being read.",
-          "Several toasts stand as a deck: the newest in front, a count on it, two edges behind it. It opens under the pointer, on the count, with the focus inside it, or with Alt+T; Escape gives the focus back.",
-          "At most three stand at once (`toast.limit` in the [UmrissProvider](#/umrissprovider)); the oldest gives way to a new one, as if closed.",
-        ],
-        alternatives: [
-          { when: "The reader must see it, or it stays true until something is done", use: "alert" },
-          { when: "The reader must decide before going on", use: "confirmdialog" },
-        ],
-        limits: [
-          "One action at most, and never the only way to what it offers: the toast leaves by itself. What needs a decision needs an [Alert](#/alert) or a [ConfirmDialog](#/confirmdialog).",
-          "One position for the whole application, set in the [UmrissProvider](#/umrissprovider); none per toast.",
-          "No queue: a toast over the limit pushes the oldest out rather than waiting.",
-        ],
-        types: ["ToastOptions", "ToastAction"],
-        exports: ["ToastProvider", "useToast"],
-      },
-      {
         id: "spinner",
         name: "Spinner",
         sentence: "A turning circle that says something is running, without saying how far (also called a loading indicator). Reach for it for short waits whose length nobody knows, beside a word that says what runs.",
@@ -722,6 +701,50 @@ export const OUTLINE: readonly Rubric[] = [
         limits: ["It draws a shape and nothing else; the rows, cards and layout it stands in for are yours."],
         types: ["SkeletonProps"],
         exports: ["Skeleton"],
+      },
+      {
+        id: "alert",
+        name: "Alert",
+        sentence: "A message that stays in the page until its matter is settled (also called a banner or callout). Reach for it when the reader must notice something here: a failed import, an approval waiting, a form that did not save.",
+        about: [
+          "`warning` and `danger` interrupt a screen reader at once; `neutral`, `accent` and `success` are read out politely when the reader is free. Choose the tone by what the reader has to do, not by the colour you want.",
+          "Dismissing is reported through `onDismiss` and nothing more: whether and when the message comes back is your state.",
+        ],
+        alternatives: [
+          { when: "Confirming something that has already happened, which may pass unnoticed", use: "toast" },
+          { when: "A question the user must answer before an action goes ahead", use: "confirmdialog" },
+          { when: "A list or panel with nothing in it", use: "emptystate" },
+        ],
+        limits: [
+          "No timer: an alert stays until you remove it. A message that goes by itself is a toast.",
+          "No stack or queue of messages; place each alert where its matter is.",
+        ],
+        types: ["AlertProps"],
+        exports: ["Alert"],
+      },
+      {
+        id: "toast",
+        name: "Toast",
+        sentence: "Short feedback in the corner of the window that interrupts nothing and goes away by itself (also called a snackbar or notification). Reach for it to confirm what has just happened: saved, exported, approved.",
+        about: [
+          "`useToast` needs a `ToastProvider` around the application, once, at the root.",
+          "A toast stays five seconds by default. Its clock stops while the deck is open – under the pointer, with the focus inside it – and runs on with the time that was left.",
+          "The title says what has happened, in about one line: “Invoice not sent”. Why, and what to do next, go in the description.",
+          "Nothing that must be read goes in a toast: whoever looked elsewhere has missed it. `duration: 0` keeps one until it is closed – for the rare message whose loss costs something, since a corner full of standing toasts stops being read.",
+          "Several toasts stand as a deck: the newest in front, a count on it, two edges behind it. It opens under the pointer, on the count, with the focus inside it, or with Alt+T; Escape gives the focus back.",
+          "At most three stand at once (`toast.limit` in the [UmrissProvider](#/umrissprovider)); the oldest gives way to a new one, as if closed.",
+        ],
+        alternatives: [
+          { when: "The reader must see it, or it stays true until something is done", use: "alert" },
+          { when: "The reader must decide before going on", use: "confirmdialog" },
+        ],
+        limits: [
+          "One action at most, and never the only way to what it offers: the toast leaves by itself. What needs a decision needs an [Alert](#/alert) or a [ConfirmDialog](#/confirmdialog).",
+          "One position for the whole application, set in the [UmrissProvider](#/umrissprovider); none per toast.",
+          "No queue: a toast over the limit pushes the oldest out rather than waiting.",
+        ],
+        types: ["ToastOptions", "ToastAction"],
+        exports: ["ToastProvider", "useToast"],
       },
       {
         id: "emptystate",
@@ -967,24 +990,6 @@ export const OUTLINE: readonly Rubric[] = [
         exports: ["Breadcrumb"],
       },
       {
-        id: "stepper",
-        name: "Stepper",
-        sentence: "Shows how far a procedure has come: which steps are done, which one is being worked on, which lie ahead and which failed (also called a progress tracker). Reach for it for approvals, rollouts and closing routines.",
-        about: [
-          "Each state is said as a word as well as drawn, so a screen reader hears \"done\", \"current step\", \"upcoming\" or \"failed\". A failed step stays failed when the procedure moves past it; past the last step, every step is done.",
-        ],
-        alternatives: [
-          { when: "Progress as a share of a known amount, without named steps", use: "progressbar" },
-          { when: "Where a page sits in a hierarchy", use: "breadcrumb" },
-        ],
-        limits: [
-          "The steps are read, not navigated: no keys, no clicks, and no next or back of its own. Moving on is your application's decision.",
-          "No branching or optional steps; pass the steps that apply.",
-        ],
-        types: ["StepperProps", "StepperStep"],
-        exports: ["Stepper"],
-      },
-      {
         id: "tabs",
         name: "Tabs",
         sentence: "Several views of one thing in one place, exactly one of them visible (also called a tab bar). Reach for tabs when the views are alternatives the user switches between, not content to compare side by side.",
@@ -1027,6 +1032,24 @@ export const OUTLINE: readonly Rubric[] = [
         exports: ["Accordion", "AccordionItem"],
       },
       {
+        id: "stepper",
+        name: "Stepper",
+        sentence: "Shows how far a procedure has come: which steps are done, which one is being worked on, which lie ahead and which failed (also called a progress tracker). Reach for it for approvals, rollouts and closing routines.",
+        about: [
+          "Each state is said as a word as well as drawn, so a screen reader hears \"done\", \"current step\", \"upcoming\" or \"failed\". A failed step stays failed when the procedure moves past it; past the last step, every step is done.",
+        ],
+        alternatives: [
+          { when: "Progress as a share of a known amount, without named steps", use: "progressbar" },
+          { when: "Where a page sits in a hierarchy", use: "breadcrumb" },
+        ],
+        limits: [
+          "The steps are read, not navigated: no keys, no clicks, and no next or back of its own. Moving on is your application's decision.",
+          "No branching or optional steps; pass the steps that apply.",
+        ],
+        types: ["StepperProps", "StepperStep"],
+        exports: ["Stepper"],
+      },
+      {
         id: "treeview",
         name: "TreeView",
         sentence: "A hierarchy the user expands, walks with the keys and optionally ticks (also called a tree or outline). Reach for it for folders, teams and cost-centre structures; large trees stay quick because only the visible rows are drawn.",
@@ -1065,6 +1088,49 @@ export const OUTLINE: readonly Rubric[] = [
     name: "Data display",
     sentence: "Single values and labels, read at a glance.",
     pages: [
+      {
+        id: "badge",
+        name: "Badge",
+        sentence: "A small word or number at the edge of something else: a status, a count (also called a label or chip). Reach for it to mark the state of a row, or how many items wait behind a button.",
+        about: [
+          "It is never the only place a state is said: the word inside carries the meaning, and the tone repeats it for the eye.",
+        ],
+        alternatives: [
+          { when: "The user can remove it, or it stands for a chosen filter", use: "tag" },
+          { when: "A figure read against limits", use: "stat" },
+        ],
+        limits: [
+          "It cannot be clicked or removed; a label the user acts on is a [Tag](#/tag).",
+          "It counts nothing itself: capping at “99+” is yours.",
+        ],
+        types: ["BadgeProps"],
+        exports: ["Badge"],
+      },
+      {
+        id: "tag",
+        name: "Tag",
+        sentence: "A short label on content that the user can remove where you allow it (also called a chip). Reach for it for active filters, chosen values and assignments.",
+        about: [
+          "`onRemove` turns the label into a control. In a `TagGroup` the whole group is one tab stop, and focus moves to the neighbour after a removal instead of falling to the top of the page.",
+          "A `disabled` tag keeps its place and loses its remove button: disabled speaks about the button, not the label. Every tone keeps its contrast in both themes, and the word carries the meaning.",
+        ],
+        alternatives: [
+          { when: "A status that cannot be acted on", use: "badge" },
+          { when: "The user picks several values from a list", use: "multiselect" },
+        ],
+        keys: [
+          { key: "Tab", action: "Enters the group on one tag and leaves it on the next Tab." },
+          { key: "← / → or ↑ / ↓", action: "Moves to the previous or next tag in the group." },
+          { key: "Home / End", action: "Moves to the first or last tag." },
+          { key: "Delete or Backspace", action: "Removes the focused tag and moves focus to its neighbour." },
+        ],
+        limits: [
+          "No field for typing new tags: a tag input is a [MultiSelect](#/multiselect).",
+          "Tags are not toggles: a set of choices to switch on and off is a group of [Checkbox](#/checkbox) or a [ButtonGroup](#/buttongroup).",
+        ],
+        types: ["TagProps", "TagGroupProps"],
+        exports: ["Tag", "TagGroup"],
+      },
       {
         id: "stat",
         name: "Stat",
@@ -1121,49 +1187,6 @@ export const OUTLINE: readonly Rubric[] = [
         ],
         types: ["SparklineProps"],
         exports: ["Sparkline"],
-      },
-      {
-        id: "badge",
-        name: "Badge",
-        sentence: "A small word or number at the edge of something else: a status, a count (also called a label or chip). Reach for it to mark the state of a row, or how many items wait behind a button.",
-        about: [
-          "It is never the only place a state is said: the word inside carries the meaning, and the tone repeats it for the eye.",
-        ],
-        alternatives: [
-          { when: "The user can remove it, or it stands for a chosen filter", use: "tag" },
-          { when: "A figure read against limits", use: "stat" },
-        ],
-        limits: [
-          "It cannot be clicked or removed; a label the user acts on is a [Tag](#/tag).",
-          "It counts nothing itself: capping at “99+” is yours.",
-        ],
-        types: ["BadgeProps"],
-        exports: ["Badge"],
-      },
-      {
-        id: "tag",
-        name: "Tag",
-        sentence: "A short label on content that the user can remove where you allow it (also called a chip). Reach for it for active filters, chosen values and assignments.",
-        about: [
-          "`onRemove` turns the label into a control. In a `TagGroup` the whole group is one tab stop, and focus moves to the neighbour after a removal instead of falling to the top of the page.",
-          "A `disabled` tag keeps its place and loses its remove button: disabled speaks about the button, not the label. Every tone keeps its contrast in both themes, and the word carries the meaning.",
-        ],
-        alternatives: [
-          { when: "A status that cannot be acted on", use: "badge" },
-          { when: "The user picks several values from a list", use: "multiselect" },
-        ],
-        keys: [
-          { key: "Tab", action: "Enters the group on one tag and leaves it on the next Tab." },
-          { key: "← / → or ↑ / ↓", action: "Moves to the previous or next tag in the group." },
-          { key: "Home / End", action: "Moves to the first or last tag." },
-          { key: "Delete or Backspace", action: "Removes the focused tag and moves focus to its neighbour." },
-        ],
-        limits: [
-          "No field for typing new tags: a tag input is a [MultiSelect](#/multiselect).",
-          "Tags are not toggles: a set of choices to switch on and off is a group of [Checkbox](#/checkbox) or a [ButtonGroup](#/buttongroup).",
-        ],
-        types: ["TagProps", "TagGroupProps"],
-        exports: ["Tag", "TagGroup"],
       },
     ],
   },
