@@ -33,6 +33,7 @@ import styles from "./TreeView.module.css";
 /** After this pause typeahead starts over. */
 const TYPEAHEAD_PAUSE = 600;
 
+/** The props of `TreeView`. */
 export interface TreeViewProps<K, S extends Key = string>
   extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
   /** The tree from `useTree`. It is the whole state: flattening, active node,
@@ -47,6 +48,9 @@ export interface TreeViewProps<K, S extends Key = string>
   children: (entry: FlatteningEntry<K, S>) => ReactNode;
 }
 
+/** The tree as a control: draws the nodes of a `Tree` from `useTree` as a
+    `tree` with keyboard navigation, typeahead and, with `checkable`, ticks.
+    What a node says is yours - `children` renders it. */
 export const TreeView = forwardRef(function TreeView<K, S extends Key = string>(
   {
     tree,

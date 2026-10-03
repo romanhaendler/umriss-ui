@@ -29,6 +29,15 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## Unreleased
+
+### Added
+
+- **Every export carries a comment**, the German wording's included: what a
+  component, a hook, a function, a constant or a type is for, and for a hook
+  `@param` and `@returns` where its type alone does not say it. The editor shows
+  it on hover, from the package's `.d.ts`. Nothing else changes.
+
 ## 0.24.0 – The select's own list (Oct. 2026)
 
 ### Changed

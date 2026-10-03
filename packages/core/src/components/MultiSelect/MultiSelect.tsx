@@ -15,6 +15,7 @@ import { useWording } from "../../lib/language";
 import { AngleGlyph, CrossGlyph } from "../../lib/glyphs";
 import { announce } from "../../lib/announce";
 
+/** One possibility of a `MultiSelect`: the value it stands for and its label. */
 export interface MultiSelectOption<T extends string = string> {
   /** What stands in `value` when this row is ticked. */
   value: T;
@@ -25,6 +26,7 @@ export interface MultiSelectOption<T extends string = string> {
   disabled?: boolean;
 }
 
+/** The props of `MultiSelect`. */
 export interface MultiSelectProps<T extends string = string>
   extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
   /** The possibilities, in their natural order. The list never re-sorts –

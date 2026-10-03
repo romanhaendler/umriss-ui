@@ -26,6 +26,7 @@ function useTabs(component: string): TabsContextValue {
 /* defaultValue (rule 2 of the README).                               */
 /* ------------------------------------------------------------------ */
 
+/** The props of `Tabs`. */
 export interface TabsProps extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
   /** The value of the visible tab. Controlled, `Tabs` remember nothing, so
       that the tab can come out of an address. */
@@ -38,6 +39,8 @@ export interface TabsProps extends Omit<HTMLAttributes<HTMLDivElement>, "onChang
   onChange?: (value: string) => void;
 }
 
+/** Tabs: a `TabList` of `Tab`s and one `TabPanel` per value. Controlled
+    through `value` and `onChange`, or uncontrolled from `defaultValue`. */
 export const Tabs = forwardRef<HTMLDivElement, TabsProps>(function Tabs(
   { value, defaultValue, onChange, className, children, ...rest },
   ref,
@@ -63,6 +66,8 @@ export const Tabs = forwardRef<HTMLDivElement, TabsProps>(function Tabs(
 /* TabList – the arrow keys switch and activate                        */
 /* ------------------------------------------------------------------ */
 
+/** The row of `Tab`s inside `Tabs`. The arrow keys, Home and End move
+    between the tabs and choose them. */
 export const TabList = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(function TabList(
   { className, children, onKeyDown, ...rest },
   ref,
@@ -145,11 +150,14 @@ export const TabList = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>
 /* Tab                                                                 */
 /* ------------------------------------------------------------------ */
 
+/** The props of `Tab`. */
 export interface TabProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   /** The value this tab reports – and under which its panel stands. */
   value: string;
 }
 
+/** One tab of a `TabList`; choosing it shows the `TabPanel` of the same
+    `value`. */
 export const Tab = forwardRef<HTMLButtonElement, TabProps>(function Tab(
   { value, className, children, onClick, ...rest },
   ref,
@@ -192,6 +200,7 @@ export const Tab = forwardRef<HTMLButtonElement, TabProps>(function Tab(
 /* TabPanel                                                            */
 /* ------------------------------------------------------------------ */
 
+/** The props of `TabPanel`. */
 export interface TabPanelProps extends HTMLAttributes<HTMLDivElement> {
   /** The value of the tab this panel belongs to. Only the matching panel
       stands in the document – a hidden panel would keep focus, scroll
@@ -199,6 +208,8 @@ export interface TabPanelProps extends HTMLAttributes<HTMLDivElement> {
   value: string;
 }
 
+/** The content of one tab. Only the panel whose `value` is chosen stands in
+    the document. */
 export const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(function TabPanel(
   { value, className, children, ...rest },
   ref,

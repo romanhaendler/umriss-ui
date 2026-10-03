@@ -20,12 +20,17 @@ import type { AnchorHTMLAttributes, ElementType, HTMLAttributes } from "react";
 import { cx } from "../../lib/cx";
 import styles from "./Typography.module.css";
 
+/** A type size of the token set. */
 export type TextSize = "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
+/** A font weight of the token set. */
 export type TextWeight = "regular" | "medium" | "semibold";
+/** How loud a text is; `secondary` and `muted` step back without falling below
+    the contrast threshold. */
 export type TextTone = "default" | "secondary" | "muted";
 export type TextTracking = "normal" | "tight" | "display" | "caps";
 export type TextLeading = "normal" | "tight";
 
+/** The props of `Text`. */
 export interface TextProps extends HTMLAttributes<HTMLElement> {
   /** Element to render as. Default `p`. */
   as?: ElementType;
@@ -47,6 +52,8 @@ export interface TextProps extends HTMLAttributes<HTMLElement> {
   leading?: TextLeading;
 }
 
+/** Body text from the token set; `as` chooses the element, independent of the
+    size. */
 export const Text = forwardRef<HTMLElement, TextProps>(function Text(
   {
     as: Element = "p",
@@ -86,6 +93,7 @@ export const Text = forwardRef<HTMLElement, TextProps>(function Text(
 /* Heading – level and size are independent                            */
 /* ------------------------------------------------------------------ */
 
+/** The props of `Heading`. */
 export interface HeadingProps extends HTMLAttributes<HTMLHeadingElement> {
   /** The page's outline level (h1–h6). Default 2. */
   level?: 1 | 2 | 3 | 4 | 5 | 6;
@@ -107,6 +115,8 @@ const sizeForLevel: Record<1 | 2 | 3 | 4 | 5 | 6, TextSize> = {
   6: "xs",
 };
 
+/** A heading whose level and size are independent: a small heading can still
+    be the second level of the page. */
 export const Heading = forwardRef<HTMLHeadingElement, HeadingProps>(function Heading(
   { level = 2, size, weight = "semibold", tone = "default", className, children, ...rest },
   ref,
@@ -138,6 +148,7 @@ export const Heading = forwardRef<HTMLHeadingElement, HeadingProps>(function Hea
 /* Link                                                                */
 /* ------------------------------------------------------------------ */
 
+/** The props of `Link`. */
 export interface LinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
   /** Size from the token set – a link has to match its body text. */
   size?: TextSize;
@@ -145,6 +156,8 @@ export interface LinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
   external?: boolean;
 }
 
+/** A link in the size of its text; `external` opens it in a new tab with the
+    protective attributes set. */
 export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
   { size = "md", external = false, className, children, ...rest },
   ref,

@@ -35,6 +35,7 @@
 import type { SVGProps } from "react";
 import { forwardRef } from "react";
 
+/** The props of a glyph: an SVG's attributes and its edge length. */
 export interface GlyphProps extends Omit<SVGProps<SVGSVGElement>, "viewBox" | "children"> {
   /**
    * Edge length in pixels. The default is the size the glyph is already drawn
@@ -65,6 +66,7 @@ export const CrossGlyph = forwardRef<SVGSVGElement, GlyphProps>(function CrossGl
 /* Plus and minus of the stepper buttons - together with the cross, the glyphs
    the specification was read off. */
 
+/** The plus of `NumberInput`'s step buttons. */
 export const PlusGlyph = forwardRef<SVGSVGElement, GlyphProps>(function PlusGlyph(
   { size = 10, ...rest },
   ref,
@@ -76,6 +78,7 @@ export const PlusGlyph = forwardRef<SVGSVGElement, GlyphProps>(function PlusGlyp
   );
 });
 
+/** The minus of `NumberInput`'s step buttons. */
 export const MinusGlyph = forwardRef<SVGSVGElement, GlyphProps>(function MinusGlyph(
   { size = 10, ...rest },
   ref,
@@ -94,6 +97,8 @@ export const MinusGlyph = forwardRef<SVGSVGElement, GlyphProps>(function MinusGl
    The table's row expander, the schedule's and the calculation's fold
    controls draw the same chevron, and take it from here. */
 
+/** The chevron that expands and collapses a branch. Drawn pointing right;
+    rotate it by 90 degrees for an open branch. */
 export const AngleGlyph = forwardRef<SVGSVGElement, GlyphProps>(function AngleGlyph(
   { size = 10, ...rest },
   ref,

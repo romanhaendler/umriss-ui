@@ -6,6 +6,7 @@ import { useWording } from "../../lib/language";
 import { mergeRefs } from "../../lib/mergeRefs";
 import styles from "./Splitter.module.css";
 
+/** The props of `Splitter`. */
 export interface SplitterProps extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue" | "children"> {
   /** How the two panes stand: `horizontal` side by side, `vertical` one
       above the other - a trend above, its alarms below. Default: `horizontal` */
@@ -39,6 +40,8 @@ export interface SplitterProps extends Omit<HTMLAttributes<HTMLDivElement>, "onC
    The shares are grid tracks in `fr`, so the separator's own width is taken
    off before the rest is shared: the panes add up to the box exactly, at any
    share. */
+/** Two panes and the line between them. The line can be dragged, moved with
+    the arrow keys, and Enter collapses the first pane and brings it back. */
 export const Splitter = forwardRef<HTMLDivElement, SplitterProps>(function Splitter(
   {
     orientation = "horizontal",

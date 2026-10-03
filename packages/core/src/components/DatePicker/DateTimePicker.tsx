@@ -64,6 +64,10 @@ export interface DateTimePickerProps
   clearable?: boolean;
 }
 
+/** A date and a time of day in one field, with a calendar panel. The value is
+    an exact instant and is reported only on "Apply", "Now" or "Clear"; the
+    missing and doubled hours of a daylight-saving change are asked about, not
+    guessed. */
 export const DateTimePicker = forwardRef<HTMLSpanElement, DateTimePickerProps>(function DateTimePicker(
   {
     value,

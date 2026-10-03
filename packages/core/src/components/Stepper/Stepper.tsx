@@ -20,6 +20,7 @@ export interface StepperStep {
   failed?: boolean;
 }
 
+/** The props of `Stepper`. */
 export interface StepperProps extends HTMLAttributes<HTMLOListElement> {
   /** The steps in the order they are walked. */
   steps: readonly StepperStep[];
@@ -42,6 +43,8 @@ const stateOf = (step: StepperStep, index: number, current: number): StepState =
    tick or cross and its colour say the same to the eye, and neither alone
    carries it (ISA-101). Moving on is the caller's: `current` is a prop, and
    the stepper has no key of its own. */
+/** Where a procedure stands: its steps in order, done, current, upcoming or
+    failed. Moving on is yours - `current` is a prop. */
 export const Stepper = forwardRef<HTMLOListElement, StepperProps>(function Stepper(
   { steps, current, orientation = "horizontal", className, ...rest },
   ref,

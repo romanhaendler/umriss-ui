@@ -31,6 +31,7 @@ export function FormFieldBoundary({ children }: { children: ReactNode }) {
   return <FormFieldContext.Provider value={null}>{children}</FormFieldContext.Provider>;
 }
 
+/** The props of `FormField`. */
 export interface FormFieldProps extends HTMLAttributes<HTMLDivElement> {
   /** The label of the field. It is mandatory: a field without a name is a
       field without a question for a screen reader. */
@@ -51,6 +52,9 @@ export interface FormFieldProps extends HTMLAttributes<HTMLDivElement> {
   fieldId?: string;
 }
 
+/** A label, a hint or error and the control they belong to. The control
+    inside takes the field's id, description, required and invalid state by
+    itself - no wiring by hand. */
 export const FormField = forwardRef<HTMLDivElement, FormFieldProps>(function FormField(
   { label, hint, error, required = false, fieldId, className, children, ...rest },
   ref,

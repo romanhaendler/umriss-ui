@@ -53,6 +53,7 @@ export interface CommandPaletteItem {
   weight?: number;
 }
 
+/** The props of `CommandPalette`. */
 export interface CommandPaletteProps
   extends Omit<DialogHTMLAttributes<HTMLDialogElement>, "open" | "onClose" | "children"> {
   /** Controlled like the modal: opening is the caller's decision. */
@@ -120,6 +121,9 @@ interface FindGroup {
   finds: Find<PaletteCandidate>[];
 }
 
+/** A window above the application in which one types and finds: it searches
+    `items` by subsequence, ranks and marks the matches, and reports the chosen
+    candidate's `id` to `onChoose`. Controlled through `open` and `onClose`. */
 export const CommandPalette = forwardRef<HTMLDialogElement, CommandPaletteProps>(function CommandPalette(
   {
     open,

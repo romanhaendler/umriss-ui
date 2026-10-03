@@ -4,6 +4,7 @@ import { Button } from "../Button";
 import { Modal, ModalFooter, ModalHeader } from "./Modal";
 import { useWording } from "../../lib/language";
 
+/** The props of `ConfirmDialog`. */
 export interface ConfirmDialogProps
   extends Omit<DialogHTMLAttributes<HTMLDialogElement>, "open" | "onClose" | "title" | "children"> {
   /** Whether the query stands. */

@@ -30,6 +30,7 @@ import type { Formats, Wording } from "../../lib/language";
 import { Sparkline } from "../DataViz";
 import styles from "./Stat.module.css";
 
+/** The props of `Stat`. */
 export interface StatProps extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
   /** What is being measured. */
   label: string;

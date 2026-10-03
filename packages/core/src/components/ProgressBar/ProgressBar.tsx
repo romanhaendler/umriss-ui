@@ -5,6 +5,7 @@ import { useFormats, useWording } from "../../lib/language";
 import { clampFraction, percentDisplay } from "../DataViz/scale";
 import styles from "./ProgressBar.module.css";
 
+/** The props of `ProgressBar`. */
 export interface ProgressBarProps extends HTMLAttributes<HTMLDivElement> {
   /** How far the task has come, from 0 to 1. Left out, the bar is
       indeterminate: the task runs, and nobody knows how far it is. */
@@ -26,6 +27,8 @@ export interface ProgressBarProps extends HTMLAttributes<HTMLDivElement> {
    reads a measured value against limits and takes its colour from that
    verdict, a progress bar only counts towards an end and has no tone at all.
    An upload that is 90 per cent done is not a warning. (CONTEXT.md, Progress.) */
+/** How far a task has come, from 0 to 1 - or, without a value, that it runs.
+    It has no tone: a measured value judged against limits is a `Meter`. */
 export const ProgressBar = forwardRef<HTMLDivElement, ProgressBarProps>(function ProgressBar(
   { value, label, valueText, showLabel = false, className, ...rest },
   ref,

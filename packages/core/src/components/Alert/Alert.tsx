@@ -17,10 +17,14 @@ import { useWording } from "../../lib/language";
 import { CrossGlyph } from "../../lib/glyphs";
 import { roleFromTone } from "../../lib/roleFromTone";
 
+/** How urgent an alert is; it also decides whether a screen reader is
+    interrupted. */
 export type AlertTone = "neutral" | "accent" | "success" | "warning" | "danger";
 
 /* `title` shadows the HTML attribute of the same name - the same omission as
    on CardHeader, so that the heading can take arbitrary nodes. */
+/** The props of `Alert`: a div's attributes, with `title` taking a heading
+    node instead of the HTML attribute. */
 export interface AlertProps extends Omit<HTMLAttributes<HTMLDivElement>, "title"> {
   /** How urgent the message is. Only `warning` and `danger` interrupt the
       screen reader - the other two report politely. */
@@ -35,6 +39,9 @@ export interface AlertProps extends Omit<HTMLAttributes<HTMLDivElement>, "title"
   dismissLabel?: string;
 }
 
+/** A message that stays put in the page - for what a toast would carry away
+    too soon. Warning and danger interrupt the screen reader, the other tones
+    report politely. */
 export const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
   { tone = "neutral", title, actions, onDismiss, dismissLabel, className, children, ...rest },
   ref,

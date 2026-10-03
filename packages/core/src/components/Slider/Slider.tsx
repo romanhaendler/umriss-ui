@@ -8,6 +8,7 @@ import styles from "./Slider.module.css";
 /** A mark on the track: a value, or a value with the word beneath it. */
 export type SliderMark = number | { value: number; label?: ReactNode };
 
+/** The props of `Slider`. */
 export interface SliderProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "defaultValue" | "onChange" | "min" | "max" | "step"> {
   /** Controlled: the value. */
@@ -79,6 +80,8 @@ function keyed(key: string, value: number, min: number, max: number, step: numbe
 
    The construction of the other native fields: the class on the wrapper,
    ref and rest on the input. */
+/** One value on a track between `min` and `max`, on the native range input;
+    `marks` set labelled points on the track. */
 export const Slider = forwardRef<HTMLInputElement, SliderProps>(function Slider(
   {
     value: valueProp,

@@ -11,6 +11,7 @@ import { usePortalTarget } from "../../lib/provider";
 import { portalTargetFor } from "../../lib/portalTarget";
 import { usePresence } from "../../lib/motion";
 
+/** The props of `Popover`. */
 export interface PopoverProps {
   /** Whether the surface stands. Controlled: the popover never opens itself. */
   open: boolean;

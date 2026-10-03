@@ -3,8 +3,11 @@ import type { HTMLAttributes } from "react";
 import { cx } from "../../lib/cx";
 import styles from "./Badge.module.css";
 
+/** What a badge stands for - never the only statement, a word stands beside
+    it. */
 export type BadgeTone = "neutral" | "accent" | "success" | "warning" | "danger";
 
+/** The props of `Badge`. */
 export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
   /** What the badge stands for. There is always a word beside it: a colour on
       its own is not a statement. */

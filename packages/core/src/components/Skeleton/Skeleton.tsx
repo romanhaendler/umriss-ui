@@ -3,6 +3,7 @@ import type { HTMLAttributes } from "react";
 import { cx } from "../../lib/cx";
 import styles from "./Skeleton.module.css";
 
+/** The props of `Skeleton`. */
 export interface SkeletonProps extends HTMLAttributes<HTMLSpanElement> {
   /** Width, e.g. "120px" or "60%". Default: 100 %. */
   width?: string | number;

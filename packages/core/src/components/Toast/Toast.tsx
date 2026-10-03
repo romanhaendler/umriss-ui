@@ -19,6 +19,7 @@ export type ToastTone = "neutral" | "success" | "warning" | "danger" | "loading"
     one), or its action was taken. */
 export type ToastCloseReason = "timeout" | "dismiss" | "action";
 
+/** The one action a toast may carry, e.g. "Undo". */
 export interface ToastAction {
   /** A verb for what it does - "Undo", "Show". */
   label: string;
@@ -26,6 +27,8 @@ export interface ToastAction {
   onClick: () => void;
 }
 
+/** What a toast says and how - what `toast()` and `update()` from `useToast`
+    take. */
 export interface ToastOptions {
   /** What has happened – short, about one line (some 45 characters), in the
       perfect tense and not a request: "Invoice not sent". Why, and
@@ -154,6 +157,9 @@ function ToneGlyph({ tone }: { tone: ToastTone }) {
   );
 }
 
+/** Holds the toasts and draws them; `useToast` works only below it. Put it
+    once at the root of the application. Duration, position and limit come from
+    `UmrissProvider`'s `toast` where one stands around it. */
 export function ToastProvider({ children }: { children: ReactNode }) {
   /* The defaults come from the root provider where there is one. The
      individual message beats it where it says a duration. */

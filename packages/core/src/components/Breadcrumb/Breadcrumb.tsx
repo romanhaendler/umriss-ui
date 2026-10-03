@@ -23,6 +23,7 @@ export interface BreadcrumbEntry {
   onSelect?: () => void;
 }
 
+/** The props of `Breadcrumb`. */
 export interface BreadcrumbProps extends HTMLAttributes<HTMLElement> {
   /** The trail from the root to the current page; the last is the page. */
   items: readonly BreadcrumbEntry[];
@@ -35,6 +36,8 @@ const separator = <AngleGlyph size={8} className={styles.separator} />;
    is wider than its place, the middle levels fold into a `Menu` behind one
    key - measured, not guessed: a hidden copy of the whole trail gives each
    level's width, and `foldedCount` decides. */
+/** Where a page stands: the trail from the root to the current page. Where it
+    is wider than its place, the middle levels fold into a menu. */
 export const Breadcrumb = forwardRef<HTMLElement, BreadcrumbProps>(function Breadcrumb(
   { items, className, ...rest },
   ref,

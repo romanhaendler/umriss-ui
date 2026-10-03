@@ -35,6 +35,8 @@ import {
   type Key,
 } from "./treeModel";
 
+/** The options of `useTree`: how a node is read, and each of its values
+    either uncontrolled (`default…`) or controlled with its `on…` handler. */
 export interface TreeOptions<K, S extends Key = string> {
   reader: NodeReader<K, S>;
   /** Initial values, where the tree holds its own state. */
@@ -71,6 +73,8 @@ export interface TreeOptions<K, S extends Key = string> {
   virtual?: VirtualOptions;
 }
 
+/** What `useTree` returns: the visible nodes and the gestures on them. Hand it
+    to `TreeView` and `TreeSearch`. */
 export interface Tree<K, S extends Key = string> {
   /** The visible nodes – complete, even where only a window of them is
       rendered. Positions and sibling counts come from here and never from
@@ -119,6 +123,14 @@ export interface Tree<K, S extends Key = string> {
   virtual?: VirtualRows;
 }
 
+/** The state of a tree - which branches are open, which nodes are checked,
+    the active node, the anchor and the search text - and the gestures on it.
+    Each of these can be controlled from outside, so that a tree can be
+    restored from a link.
+    @param roots The top-level nodes, in your own type.
+    @param options How a node is read, and the initial or controlled state with
+    its change handlers.
+    @returns The tree to hand to `TreeView` and `TreeSearch`. */
 export function useTree<K, S extends Key = string>(
   roots: readonly K[],
   options: TreeOptions<K, S>,

@@ -22,8 +22,11 @@ const ModalContext = createContext<ModalContextValue | null>(null);
 /* scroll lock come from the browser, we supply only the looks.        */
 /* ------------------------------------------------------------------ */
 
+/** The width of a `Modal`. */
 export type ModalSize = "sm" | "md" | "lg";
 
+/** The props of `Modal`: a native dialog's attributes, controlled through
+    `open` and `onClose`. */
 export interface ModalProps extends Omit<DialogHTMLAttributes<HTMLDialogElement>, "onClose"> {
   /** Whether the window stands. Controlled: the opening is the caller's
       decision, and only the caller knows whether something may be open. */
@@ -40,6 +43,10 @@ export interface ModalProps extends Omit<DialogHTMLAttributes<HTMLDialogElement>
 /* The Modal and the Drawer are one dialog in two placements: the frame below
    holds the choreography, the backdrop and the name, and each of the two says
    only where its sheet stands. */
+/** A dialog window in the middle of the screen, on the native `<dialog>`:
+    focus trap, Escape and scroll lock come from the browser. Controlled through
+    `open` and `onClose`; inside it stand `ModalHeader`, `ModalBody` and
+    `ModalFooter`. */
 export const Modal = forwardRef<HTMLDialogElement, ModalProps>(function Modal(
   { size = "md", closeOnBackdrop = true, ...rest },
   ref,
@@ -59,6 +66,7 @@ export const Modal = forwardRef<HTMLDialogElement, ModalProps>(function Modal(
 /* Drawer – the same dialog, entering from an edge.                    */
 /* ------------------------------------------------------------------ */
 
+/** The props of `Drawer`: a `Modal`'s, with `side` in place of `size`. */
 export interface DrawerProps extends Omit<ModalProps, "size"> {
   /** The edge the drawer stands at and enters from. Default: `right` */
   side?: "right" | "left";
@@ -71,6 +79,9 @@ export interface DrawerProps extends Omit<ModalProps, "size"> {
    operable is layout, not an overlay. Its width is the token
    `--u-drawer-width`, which an application or one drawer's `style`
    overrides. */
+/** A `Modal` that stands at an edge of the window and enters from it - the
+    same dialog with the same head, body and foot. Its width is the token
+    `--u-drawer-width`. */
 export const Drawer = forwardRef<HTMLDialogElement, DrawerProps>(function Drawer(
   { side = "right", className, ...rest },
   ref,
@@ -169,6 +180,8 @@ const DialogFrame = forwardRef<HTMLDialogElement, DialogFrameProps>(function Dia
 /* ModalHeader                                                         */
 /* ------------------------------------------------------------------ */
 
+/** The props of `ModalHeader`: a div's attributes, with `title` taking a node
+    instead of the HTML attribute. */
 export interface ModalHeaderProps extends Omit<HTMLAttributes<HTMLDivElement>, "title"> {
   /** The heading of the window. It names it for the screen reader at the same
       time – a dialog without a name says only "dialog". */
@@ -179,6 +192,8 @@ export interface ModalHeaderProps extends Omit<HTMLAttributes<HTMLDivElement>, "
   hideClose?: boolean;
 }
 
+/** The head of a `Modal` or `Drawer`: its title, which names the dialog for a
+    screen reader, an optional sentence below it, and the close cross. */
 export const ModalHeader = forwardRef<HTMLDivElement, ModalHeaderProps>(function ModalHeader(
   { title, description, hideClose = false, className, ...rest },
   ref,
@@ -207,6 +222,8 @@ export const ModalHeader = forwardRef<HTMLDivElement, ModalHeaderProps>(function
 /* ModalBody / ModalFooter                                             */
 /* ------------------------------------------------------------------ */
 
+/** The content of a `Modal` or `Drawer` - the part that scrolls while head and
+    foot stand fast. */
 export const ModalBody = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(function ModalBody(
   { className, children, ...rest },
   ref,
@@ -218,6 +235,7 @@ export const ModalBody = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElemen
   );
 });
 
+/** The foot of a `Modal` or `Drawer`, for its buttons; they stand at the end. */
 export const ModalFooter = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(function ModalFooter(
   { className, children, ...rest },
   ref,

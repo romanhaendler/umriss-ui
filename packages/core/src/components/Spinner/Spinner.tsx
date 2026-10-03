@@ -4,6 +4,7 @@ import { cx } from "../../lib/cx";
 import styles from "./Spinner.module.css";
 import { useWording } from "../../lib/language";
 
+/** The props of `Spinner`. */
 export interface SpinnerProps extends SVGAttributes<SVGSVGElement> {
   /** Edge length in pixels. */
   size?: number;

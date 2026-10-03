@@ -16,6 +16,8 @@ import styles from "./VisuallyHidden.module.css";
 /* Polymorphic, because the most important case is a skip link: `as="a"`
    needs `href`, and without the attributes of the chosen element it is
    exactly that one which could not be built. */
+/** The props of `VisuallyHidden`: those of the element `as` names, `span` by
+    default. */
 export type VisuallyHiddenProps<E extends ElementType = "span"> = {
   /** Element to render as. Default `span`. */
   as?: E;
@@ -23,6 +25,8 @@ export type VisuallyHiddenProps<E extends ElementType = "span"> = {
   focusable?: boolean;
 } & Omit<ComponentPropsWithoutRef<E>, "as">;
 
+/** Content for the screen reader only: out of sight, but read out. With
+    `focusable` it shows once it has the focus - a skip link. */
 export const VisuallyHidden = forwardRef(function VisuallyHidden<E extends ElementType = "span">(
   { as, focusable = false, className, children, ...rest }: VisuallyHiddenProps<E>,
   ref: ForwardedRef<HTMLElement>,

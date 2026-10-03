@@ -18,6 +18,7 @@ import { Menu } from "../Menu";
 import styles from "./ButtonGroup.module.css";
 import { useWording } from "../../lib/language";
 
+/** The props of `ButtonGroup`. */
 export interface ButtonGroupProps extends HTMLAttributes<HTMLDivElement> {
   /** Label of the group for the screen reader. */
   "aria-label"?: string;
@@ -26,6 +27,8 @@ export interface ButtonGroupProps extends HTMLAttributes<HTMLDivElement> {
   size?: ButtonSize;
 }
 
+/** Buttons standing side by side as one control: square inside, rounded
+    outside, a hairline between them. `size` sets one height for all. */
 export const ButtonGroup = forwardRef<HTMLDivElement, ButtonGroupProps>(function ButtonGroup(
   { size, className, children, ...rest },
   ref,
@@ -41,6 +44,8 @@ export const ButtonGroup = forwardRef<HTMLDivElement, ButtonGroupProps>(function
 /* SplitButton                                                         */
 /* ------------------------------------------------------------------ */
 
+/** The props of `SplitButton`: a `Button`'s for the main action, plus the
+    menu's entries. */
 export interface SplitButtonProps extends Omit<ButtonProps, "children" | "size" | "variant"> {
   /** Label of the main action. */
   children: ReactNode;
@@ -59,6 +64,9 @@ export interface SplitButtonProps extends Omit<ButtonProps, "children" | "size" 
   align?: "start" | "end";
 }
 
+/** A main action with a menu of its variants: the button on the left runs
+    `onClick`, the arrow on the right opens `menu`. The ref goes to the main
+    button. */
 export const SplitButton = forwardRef<HTMLButtonElement, SplitButtonProps>(function SplitButton(
   {
     children,

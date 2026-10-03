@@ -5,8 +5,10 @@ import { clampFraction, percentDisplay } from "./scale";
 import styles from "./DataViz.module.css";
 import { useFormats, useWording } from "../../lib/language";
 
+/** The colour of a meter's bar - an assessment, never the only statement. */
 export type MeterTone = "neutral" | "accent" | "success" | "warning" | "danger";
 
+/** The props of `Meter`. */
 export interface MeterProps extends HTMLAttributes<HTMLSpanElement> {
   /** Fill level from 0 to 1. */
   value: number;

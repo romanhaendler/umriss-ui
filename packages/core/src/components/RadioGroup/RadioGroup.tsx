@@ -23,6 +23,8 @@ import { useFormField } from "../FormField";
 import styles from "./RadioGroup.module.css";
 import { useControlSize } from "../../lib/controlSize";
 
+/** One possibility of a `RadioGroup`: its value, its label and an optional
+    line of explanation. */
 export interface RadioOption<T extends string> {
   /** What comes back when this possibility is chosen. */
   value: T;
@@ -36,6 +38,7 @@ export interface RadioOption<T extends string> {
   disabled?: boolean;
 }
 
+/** The props of `RadioGroup`. */
 export interface RadioGroupProps<T extends string>
   extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
   /** The possibilities, in the order in which they are meant to stand. */
@@ -59,6 +62,9 @@ export interface RadioGroupProps<T extends string>
   name?: string;
 }
 
+/** One choice out of a few possibilities, all of them visible. Controlled
+    through `value` and `onChange`, or uncontrolled from `defaultValue`; the
+    arrow keys move between the possibilities. */
 export const RadioGroup = forwardRef(function RadioGroup<T extends string>(
   {
     options,

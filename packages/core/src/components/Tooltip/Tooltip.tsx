@@ -10,6 +10,7 @@ import { elementRef } from "../../lib/elementRef";
 import styles from "./Tooltip.module.css";
 import { SurfaceSizeReset } from "../../lib/controlSize";
 
+/** The props of `Tooltip`. */
 export interface TooltipProps {
   /** Short help text; no interaction, no long content. */
   content: ReactNode;
