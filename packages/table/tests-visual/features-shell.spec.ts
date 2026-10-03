@@ -5,14 +5,14 @@
 import { checkShell } from "@umriss-ui/demo/checks/shell";
 
 checkShell({
-  notOnTheFrontDoor: ["table", "toolbar"],
+  notOnTheFrontDoor: ["first-table", "toolbar"],
   scenario: "find-a-late-shipment",
   rail: { name: "AlarmList", pageId: "alarmlist", rubricId: "limits-and-alarms" },
   neighbours: [
-    { name: "Toolbar", pageId: "toolbar" },
-    { name: "Search", pageId: "search" },
+    { name: "Pagination", pageId: "pagination" },
+    { name: "Virtualisation", pageId: "virtualisation" },
   ],
-  deepLink: { pageId: "columnmenu", absent: "table" },
+  deepLink: { pageId: "columnmenu", absent: "first-table" },
   example: { pageId: "row-appearance", id: "states", title: "Show loading, empty, failed and no match", pageName: "Row appearance" },
   palettePage: { query: "verdictcolumn", name: "VerdictColumn", pageId: "verdictcolumn", rubricName: "Limits and alarms" },
   abbreviation: { query: "vc", find: "VerdictColumn", glyphs: ["V", "C"] },
@@ -20,4 +20,5 @@ checkShell({
      ("Two actions") is no longer among them - were it, the palette would
      rightly keep it, and the test would be checking something else. */
   pointer: { wide: "ta", narrow: "tab" },
+  moved: { from: "table", pageId: "first-table", example: "first-table" },
 });
