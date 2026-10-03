@@ -8,6 +8,7 @@ checkShell({
   notOnTheFrontDoor: ["tree", "chain"],
   scenario: "price-a-tour",
   rail: { name: "Metrics", pageId: "metrics", rubricId: "writing" },
+  low: { name: "Worked examples", pageId: "worked-examples" },
   neighbours: [
     { name: "Tree", pageId: "tree" },
     { name: "Chain", pageId: "chain" },

@@ -8,6 +8,7 @@ checkShell({
   notOnTheFrontDoor: ["schedule", "move-and-lane"],
   scenario: "replan-the-day-on-the-line",
   rail: { name: "Dependencies", pageId: "dependencies", rubricId: "plan" },
+  low: { name: "Ripple", pageId: "ripple" },
   neighbours: [
     { name: "Installation", pageId: "installation" },
     { name: "First schedule", pageId: "schedule" },

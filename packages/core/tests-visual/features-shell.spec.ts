@@ -8,6 +8,7 @@ checkShell({
   notOnTheFrontDoor: ["tabs", "button"],
   scenario: "watch-a-kiln-line",
   rail: { name: "Sizes", pageId: "sizes", rubricId: "customising" },
+  low: { name: "Tag", pageId: "tag" },
   neighbours: [
     { name: "Select", pageId: "select" },
     { name: "MultiSelect", pageId: "multiselect" },

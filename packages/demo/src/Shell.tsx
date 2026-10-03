@@ -41,7 +41,7 @@
    first, the components after them. It stands at the head of the sidebar,
    above the rubrics. */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CommandPalette, LanguageProvider, useCommandPaletteShortcut } from "@umriss-ui/core";
 import type { Demo } from "./demo";
 import { BASE, hrefOf } from "./href";
@@ -143,9 +143,10 @@ export function Shell({ demo, brand, version, sentence }: ShellProps) {
       setPlace(readPlace(fromPlace));
       setJump((n) => n + 1);
     };
-    /* A link to a page of this demo moves without a reload, as a click in
-       the sidebar does. Anything else - another demo, `llms.txt` beside this
-       one, a new tab, a modified click - is the browser's. */
+    /* A link to a page of this demo moves without a reload - the sidebar's
+       entries are such links, with their page's real address. Anything else -
+       another demo, `llms.txt` beside this one, a new tab, a modified or
+       middle click, "copy link" - is the browser's. */
     const onClick = (event: MouseEvent) => {
       const link = (event.target as Element | null)?.closest?.("a");
       if (link === null || link === undefined || link.target !== "" || link.hasAttribute("download")) return;
@@ -201,6 +202,21 @@ export function Shell({ demo, brand, version, sentence }: ShellProps) {
     const t = window.setTimeout(() => el.removeAttribute("data-highlight"), 1400);
     return () => window.clearTimeout(t);
   }, [place.pageId, place.example, jump]);
+
+  /* THE ACTIVE ENTRY STAYS IN VIEW, on the first load and on every move: an
+     entry outside the sidebar's visible box is brought into its middle by
+     scrolling the sidebar alone - `scrollIntoView` would move the page as
+     well. Where the sidebar does not scroll (narrow widths) nothing moves. */
+  const railRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const rail = railRef.current;
+    const entry = rail?.querySelector('[aria-current="page"]');
+    if (rail === null || entry === null || entry === undefined) return;
+    const box = rail.getBoundingClientRect();
+    const at = entry.getBoundingClientRect();
+    if (at.top >= box.top && at.bottom <= box.bottom) return;
+    rail.scrollTop += at.top - box.top - (rail.clientHeight - at.height) / 2;
+  }, [place.pageId, jump]);
 
   /* Cmd-K/Ctrl+K as everywhere, "/" as in every documentation - including the
      rule that "/" in a text field stays a slash. That once stood here by hand;
@@ -258,16 +274,15 @@ export function Shell({ demo, brand, version, sentence }: ShellProps) {
       </header>
 
       <div className="shellBody">
-        <nav className="rail" aria-label="Components">
-          <button
-            type="button"
+        <nav className="rail" aria-label="Components" ref={railRef}>
+          <a
             className="railEntry railScenarios"
+            href={BASE}
             data-active={page === undefined ? "" : undefined}
             aria-current={page === undefined ? "page" : undefined}
-            onClick={() => goTo(SCENARIOS)}
           >
             Scenarios
-          </button>
+          </a>
           {OUTLINE.map((rubric) => (
             <div className="railRubric" key={rubric.id}>
               <h2 className="railHead">
@@ -277,15 +292,14 @@ export function Shell({ demo, brand, version, sentence }: ShellProps) {
               <ul className="railList">
                 {rubric.pages.map((entry) => (
                   <li key={entry.id}>
-                    <button
-                      type="button"
+                    <a
                       className="railEntry"
+                      href={hrefOf(addressOf(entry.id))}
                       data-active={place.pageId === entry.id ? "" : undefined}
                       aria-current={place.pageId === entry.id ? "page" : undefined}
-                      onClick={() => goTo(entry.id)}
                     >
                       {entry.name}
-                    </button>
+                    </a>
                   </li>
                 ))}
               </ul>
