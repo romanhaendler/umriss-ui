@@ -40,6 +40,12 @@ commit.
 - **Every type a props table names can be imported**: `TextTracking` and
   `TextLeading` (the text's letter spacing and line height) and `Align` (where
   a popover lines up with its anchor) are new public types.
+- **`keywords` on a `CommandPaletteItem`**: more words a candidate is found
+  by, such as synonyms, searched but never shown. They are searched only when
+  neither the label nor the group matched, and only for a query of three
+  characters or more, as a contiguous run and not as a subsequence. A find
+  through them stands behind every find in a label or a group and marks
+  nothing. A palette without keywords finds and orders as before.
 
 ## 0.24.0 – The select's own list (Oct. 2026)
 

@@ -51,6 +51,14 @@ export interface CommandPaletteItem {
    * library deliberately keeps no memory for that.
    */
   weight?: number;
+  /**
+   * More words the candidate is found by, such as synonyms - searched but never
+   * shown. Only when neither `label` nor `group` matched, only for a query of
+   * three characters or more, and as a contiguous run, not as a subsequence. A
+   * find through them stands behind every find in a label or a group and marks
+   * nothing.
+   */
+  keywords?: readonly string[];
 }
 
 /** The props of `CommandPalette`. */
@@ -91,12 +99,13 @@ function toCandidate(item: CommandPaletteItem): PaletteCandidate {
     name: item.label,
     gruppe: item.group,
     gewicht: item.weight,
+    keywords: item.keywords,
     id: item.id,
     icon: item.icon,
   };
 }
 
-/* What the matcher needs (name, gruppe, gewicht) and what the row needs (id,
+/* What the matcher needs (name, gruppe, gewicht, keywords) and what the row needs (id,
    icon) - flat, and not with the caller's prop nested inside it. Otherwise
    every access would run through `find.kandidat.eintrag.id`, and the caller
    would have smuggled fields past this point that are none of this component's
@@ -111,6 +120,7 @@ interface PaletteCandidate {
   name: string;
   gruppe?: string;
   gewicht?: number;
+  keywords?: readonly string[];
   id: string;
   icon?: ReactNode;
 }

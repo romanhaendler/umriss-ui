@@ -194,3 +194,51 @@ describe("find – the caller's weight", () => {
     );
   });
 });
+
+/* Keywords (one-search 01): a third tier behind the name and the group, for the
+   synonyms a reader brings from another library. A substring and not a
+   subsequence - over a lede of sixty words a subsequence matches almost
+   anything. */
+describe("find – the keywords count last", () => {
+  const TOAST = { name: "Toast", gruppe: "Feedback", keywords: ["snackbar", "notification"] };
+
+  it("finds through a keyword what the name and the group do not give", () => {
+    expect(names(find([TOAST], "snackbar"))).toEqual(["Toast"]);
+  });
+
+  it("pays no regard to case and finds the middle of a keyword", () => {
+    expect(names(find([TOAST], "NACKB"))).toEqual(["Toast"]);
+  });
+
+  it("puts every name find and every group find above every keyword find", () => {
+    // The keyword find carries the heaviest weight and still stands last: the
+    // weight turns the order within one tier, never across tiers.
+    const candidates = [
+      { ...TOAST, gewicht: 100 },
+      { name: "Log", gruppe: "Snackbar" },
+      { name: "Snackbar history", gruppe: "Log" },
+    ];
+    expect(names(find(candidates, "snackbar"))).toEqual(["Snackbar history", "Log", "Toast"]);
+  });
+
+  it("orders keyword finds by the caller's weight", () => {
+    const light = { name: "Alert", keywords: ["notification"] };
+    const heavy = { name: "Toast", keywords: ["notification"], gewicht: 2 };
+    expect(names(find([light, heavy], "notification"))).toEqual(["Toast", "Alert"]);
+  });
+
+  it("does not search keywords below three characters", () => {
+    expect(find([TOAST], "sn")).toEqual([]);
+    expect(names(find([TOAST], "sna"))).toEqual(["Toast"]);
+  });
+
+  it("matches a keyword as a substring, never as a subsequence", () => {
+    // `snbr` is a subsequence of "snackbar", but no run in it.
+    expect(find([TOAST], "snbr")).toEqual([]);
+  });
+
+  it("marks nothing on a keyword find", () => {
+    // The match spans index the name, and the keyword is not the name.
+    expect(find([TOAST], "snackbar")[0]!.finds).toEqual([]);
+  });
+});

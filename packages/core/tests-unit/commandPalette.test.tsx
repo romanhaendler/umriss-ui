@@ -418,6 +418,23 @@ describe("Command palette - the announcement and the build-up", () => {
       "DTP",
     );
   });
+
+  it("finds through a keyword, last and without a mark", () => {
+    // The keyword is searched, never shown: a mark in the label would point at
+    // characters the query did not hit.
+    render(
+      <Harness
+        items={[
+          { id: "toast", label: "Toast", group: "Feedback", keywords: ["snackbar"] },
+          { id: "bar", label: "Snackbar log", group: "Logs" },
+        ]}
+      />,
+    );
+    type("snack");
+    expect(labels()).toEqual(["Snackbar logLogs", "ToastFeedback"]);
+    expect(rows()[1]!.querySelectorAll("span span")).toHaveLength(0);
+    expect(rows()[1]!.textContent).not.toContain("snackbar");
+  });
 });
 
 describe("Command palette - the wording", () => {
