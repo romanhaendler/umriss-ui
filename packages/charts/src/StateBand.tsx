@@ -17,6 +17,7 @@ import { useMemo } from "react";
 import { useSeries } from "./context";
 import type { Accessor, StateEntry, StateSeriesConfig } from "./types";
 
+/** The props of `StateBand`. */
 export interface StateBandProps<T> {
   /** Index of the state in `states`; null/undefined/NaN/±Infinity is a gap -
       and a gap stays a hole, it gets no colour for "unknown". A colour would

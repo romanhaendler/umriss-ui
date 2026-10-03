@@ -7,6 +7,7 @@ import { LaneGroupContext, useLane, useLaneGroup, useLaneGroupRegistration, useL
 import type { LayerConfig } from "./scene";
 import type { BlockedTime, Subtask, Task, Dependency } from "./model";
 
+/** The props of `Lane`. */
 export interface LaneProps {
   /** The identity subtasks name in their `lane`. */
   id: string;
@@ -24,6 +25,7 @@ export function Lane({ id, label }: LaneProps): null {
   return null;
 }
 
+/** The props of `LaneGroup`. */
 export interface LaneGroupProps {
   /** The group's identity - what `collapsedGroups` names. It is never a lane:
       no subtask sits on it, no finding is reported for it, and no intent names
@@ -50,6 +52,7 @@ export function LaneGroup({ id, label, children }: LaneGroupProps): ReactNode {
   return <LaneGroupContext.Provider value={id}>{children}</LaneGroupContext.Provider>;
 }
 
+/** The props of `Subtasks`. */
 export interface SubtasksProps {
   /** The subtasks, as the caller holds them. The schedule never changes one. */
   data: readonly Subtask[];
@@ -65,6 +68,7 @@ export function Subtasks({ data, tasks }: SubtasksProps): null {
   return null;
 }
 
+/** The props of `Dependencies`. */
 export interface DependenciesProps {
   /** The dependencies, as the caller holds them. */
   data: readonly Dependency[];
@@ -78,6 +82,7 @@ export function Dependencies({ data }: DependenciesProps): null {
   return null;
 }
 
+/** The props of `BlockedTimes`. */
 export interface BlockedTimesProps {
   /** The blocked time of the lanes - leave, maintenance, unavailability -, as
       the caller holds it: one list, each interval naming its lane. */

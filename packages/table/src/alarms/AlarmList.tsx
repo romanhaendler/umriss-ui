@@ -42,6 +42,8 @@ import styles from "./AlarmList.module.css";
 /* The props carry the names from library-audit 09. With ADR-0018 the
    identifiers behind them are English too, so there is no longer a seam at the
    destructuring pattern. */
+/** The props of `AlarmList`: a div's attributes, the projection to show, and
+    the hooks for selection, acknowledgement and freshness. */
 export interface AlarmListProps extends Omit<HTMLAttributes<HTMLDivElement>, "children"> {
   /** The projection from `alarmModel`. */
   view: AlarmProjection;
@@ -136,6 +138,10 @@ function durationWord(ms: number, wording: Wording): string {
     the whole table every minute. */
 type BodyProps = Omit<AlarmListProps, "asOf" | "freshness">;
 
+/** The list of alarms, operable: a table over the rows of `alarmModel`, with
+    priority, lifecycle state and age, the acknowledgement of one alarm or of
+    the selection, and - with `asOf` and `freshness` - how old the data is. It
+    acknowledges nothing itself: it hands the ids to `onAcknowledge`. */
 export function AlarmList(props: AlarmListProps) {
   const { asOf, freshness: ages, ...rest } = props;
   if (asOf === undefined || ages === undefined) {

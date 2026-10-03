@@ -3,6 +3,7 @@
    `@umriss-ui/charts/wording/de`. The charts depend on nothing, so core's
    register is not borrowed - its pattern is (ADR-0019). */
 
+/** Everything the charts put out as text. */
 export interface ChartsWording {
   /** What a screen reader calls the plot area that takes the keys
       (`aria-roledescription`). */
@@ -59,6 +60,9 @@ export interface ChartsWording {
   downsampled: (readings: number) => string;
 }
 
+/** The instance shipped by default. English; German is
+    `GERMAN_CHARTS_WORDING` in `@umriss-ui/charts/wording/de`. A chart takes
+    its own through `wording`. */
 export const DEFAULT_CHARTS_WORDING: ChartsWording = {
   roleDescription: "chart",
   empty: "No data",

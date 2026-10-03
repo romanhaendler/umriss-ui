@@ -194,6 +194,17 @@ function effectiveWidths(
   return { ...out, ...dragged };
 }
 
+/** A table over your rows: the hook holds its state - sort, filters, search,
+    grouping, page, selection, column widths -, and the parts it returns are
+    typed at your row, so that a field name in `Column` is checked by the
+    compiler.
+    @param rows All rows in automatic mode; in manual mode the page a server
+    delivered for the current view.
+    @param options How a row is keyed, the initial view, and in manual mode the
+    server's count and the handler that hears every change of the view.
+    @returns The table's state and its parts: `Table`, `Column`,
+    `VerdictColumn`, `RowDetail`, `RowActions`, `Action` and `GroupBy`. Pass it
+    as `of` to a part that stands outside the table. */
 export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table<Z> {
   const [registry] = useState(() => new Registry());
   const [parts] = useState(() => {

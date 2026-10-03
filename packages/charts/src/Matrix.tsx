@@ -29,6 +29,7 @@ export const DEFAULT_GRADIENT: readonly string[] = [
   "#4338ca",
 ];
 
+/** The props of `Matrix`. */
 export interface MatrixProps<T> {
   /** Row position on the y axis. */
   accessor: Accessor<T>;
@@ -55,6 +56,10 @@ export interface MatrixProps<T> {
   format?: (value: number) => string;
 }
 
+/** A series drawn as a grid of coloured cells: the accessor gives the row,
+    `value` the colour - by the limits of an assessment or across a gradient.
+    A missing value is a hole, not a zero. Renders nothing itself: it registers
+    with the surrounding `Chart`. */
 export function Matrix<T>(props: MatrixProps<T>): null {
   const {
     accessor,

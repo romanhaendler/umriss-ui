@@ -22,6 +22,15 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## Unreleased
+
+### Added
+
+- **Every export carries a comment**: what a component, a hook, a function or a
+  type is for, and for a hook or a function `@param` and `@returns` where its
+  type alone does not say it. The editor shows it on hover, from the package's
+  `.d.ts`. Nothing else changes.
+
 ## 0.11.2 – Core 0.24.0 (Oct. 2026)
 
 Needs `@umriss-ui/core` 0.24; the peer range moves to `^0.24.0`. Nothing else changes for a caller.

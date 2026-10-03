@@ -10,6 +10,7 @@ import { useMemo } from "react";
 import { useSeries } from "./context";
 import type { Accessor, ScatterSeriesConfig } from "./types";
 
+/** The props of `Scatter`. */
 export interface ScatterProps<T> {
   /** Y value; null/undefined/NaN/±Infinity means a gap (R-2.5). */
   accessor: Accessor<T>;
@@ -38,6 +39,8 @@ export interface ScatterProps<T> {
   radius?: number;
 }
 
+/** A series drawn as points only, one per value. Renders nothing itself: it
+    registers with the surrounding `Chart`. */
 export function Scatter<T>(props: ScatterProps<T>): null {
   const {
     accessor,

@@ -33,6 +33,8 @@ export interface ParetoEntry {
   readonly remainder: boolean;
 }
 
+/** What `pareto` returns: the entries as they are drawn, their total and
+    where the cutoff is crossed. */
 export interface ParetoResult {
   readonly entries: readonly ParetoEntry[];
   /** Total of the drawn entries - after collecting, the same as before. */
@@ -42,6 +44,7 @@ export interface ParetoResult {
   readonly cutoffIndex: number;
 }
 
+/** The settings of `pareto`, complete; a call gives `ParetoSettings`. */
 export interface ParetoOptions {
   /** The share whose crossing is sought. Whoever lands exactly on it counts as
       the crossing: the question is "which reasons make up eighty per cent", and
@@ -66,6 +69,8 @@ export type ParetoSettings = { readonly cutoff?: number } & (
   | { readonly collectRank: number; readonly remainderName: string }
 );
 
+/** What `pareto` assumes where a call says nothing: a cutoff of 80 %, and no
+    collecting of the tail. */
 export const defaultOptions: Omit<ParetoOptions, "remainderName"> = {
   cutoff: 0.8,
   collectRank: Number.POSITIVE_INFINITY,

@@ -52,9 +52,11 @@ export type LifecycleState =
   | "resolved-unacknowledged"
   | "resolved-acknowledged";
 
+/** Whether the condition still holds: active, acknowledged or not. */
 export const isActive = (state: LifecycleState): boolean =>
   state === "active-unacknowledged" || state === "active-acknowledged";
 
+/** Whether someone has acknowledged the alarm, active or resolved. */
 export const isAcknowledged = (state: LifecycleState): boolean =>
   state === "active-acknowledged" || state === "resolved-acknowledged";
 
@@ -314,10 +316,6 @@ export interface Flood {
   alarms: readonly string[];
 }
 
-/**
- * Is there a flood in the window before the as-of time? Pure calculation over
- * timestamps, with window, threshold and as-of time as parameters.
- */
 function smallest(values: readonly number[]): number {
   let m = Number.POSITIVE_INFINITY;
   for (const w of values) if (w < m) m = w;
@@ -330,6 +328,12 @@ function largest(values: readonly number[]): number {
   return m;
 }
 
+/**
+ * Is there a flood in the window before the as-of time? Pure calculation over
+ * timestamps, with window, threshold and as-of time as parameters.
+ * @returns The flood, or `null` when fewer alarms than the rule's `atLeast`
+ * were raised in its window.
+ */
 export function detectFlood(
   alarms: readonly Alarm[],
   rule: FloodRule,
@@ -364,6 +368,7 @@ export function countAcknowledgeable(
   );
 }
 
+/** What `acknowledge` returns: the alarms afterwards, and how many it changed. */
 export interface Acknowledgement {
   alarms: Alarm[];
   /** How many alarms the acknowledgement actually changed. Acknowledging twice
@@ -481,6 +486,8 @@ export const DEFAULT_ORDER: readonly SortLevel<AlarmColumn>[] = [
 
 /* --- The model ---------------------------------------------------------- */
 
+/** The input of `alarmModel`: the alarms, their types, the as-of time, and
+    the rules for chatter and floods. */
 export interface AlarmInput {
   alarms: readonly Alarm[];
   /** The catalogue of conditions. An alarm whose type is missing is not thrown
@@ -503,6 +510,9 @@ export interface AlarmInput {
   columns?: readonly Column<AlarmRow, AlarmColumn>[];
 }
 
+/** What `alarmModel` returns: the table's projection of the alarm rows -
+    filtered, sorted, paged -, and beside it the flood and the counts the list
+    announces. Give it to `AlarmList` as `view`. */
 export interface AlarmProjection extends TableProjection<AlarmRow, AlarmColumn> {
   /** The flood that was detected, when a rule was given and it applies. A
       marking beside the complete list, not a replacement for it. */

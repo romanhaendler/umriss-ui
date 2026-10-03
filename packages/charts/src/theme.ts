@@ -26,6 +26,8 @@
    severities in `Highlight` - and every series, told apart no longer by
    colour, is told apart by its marks (marks.ts). */
 
+/** A chart's colours and fonts, resolved from the `--uc-*` tokens where the
+    chart stands. */
 export interface ResolvedTheme {
   colorAxis: string;
   colorGrid: string;

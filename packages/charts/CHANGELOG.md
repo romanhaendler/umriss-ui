@@ -29,6 +29,14 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## Unreleased
+
+### Added
+
+- **Every export carries a comment**, the German wording's included: what a
+  component, a function, a constant or a type is for. The editor shows it on
+  hover, from the package's `.d.ts`. Nothing else changes.
+
 ## 0.9.0 – A box plot (Oct. 2026)
 
 ### Changed

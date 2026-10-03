@@ -31,6 +31,7 @@ interface CommonProps<T> {
   ticks?: readonly number[];
 }
 
+/** The props of `XAxis`. */
 export interface XAxisProps<T> extends CommonProps<T> {
   /** `"nice"` widens the data's extent to ticks - to named `ticks` where
       there are any, on a time axis to whole units of a step of hours or
@@ -62,6 +63,7 @@ export interface XAxisProps<T> extends CommonProps<T> {
   onDomainChange?: (domain: [number, number]) => void;
 }
 
+/** The props of `YAxis`. */
 export interface YAxisProps<T> extends CommonProps<T> {
   /** As on the x axis, and `"visible"`: what the series show inside their x
       axis' domain - a zoomed hour gets the hour's range, not the week's -,
@@ -78,6 +80,9 @@ export interface YAxisProps<T> extends CommonProps<T> {
   position?: "left" | "right";
 }
 
+/** A horizontal axis: where a datum lies along x, its ticks, title and grid.
+    A chart may have several; series bind to one by its `id`. With `time` or a
+    `calendar` it reads instants, with `onDomainChange` it zooms. */
 export function XAxis<T>(props: XAxisProps<T>): null {
   const {
     id = "x",
@@ -118,6 +123,8 @@ export function XAxis<T>(props: XAxisProps<T>): null {
   return null;
 }
 
+/** A vertical axis: the scale series draw their values on, its ticks, title
+    and grid. A chart may have several; series bind to one by its `id`. */
 export function YAxis<T>(props: YAxisProps<T>): null {
   const {
     id = "y",

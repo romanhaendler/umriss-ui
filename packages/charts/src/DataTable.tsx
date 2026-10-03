@@ -107,6 +107,10 @@ function DataTableInner({ scene }: { scene: ChartScene }): ReactNode {
   );
 }
 
+/** The chart's values as a table, on demand: a key - in the legend where
+    there is one - opens a table of what the chart shows, one column per
+    visible series, in the tooltip's format. For a reader who wants every value
+    at once. Place it inside a `Chart`. */
 export function DataTable(): ReactNode {
   const scene = useChartScene("DataTable");
   if (scene === null) return null; // PROD outside a Chart (R-2.3)

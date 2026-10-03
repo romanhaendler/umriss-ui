@@ -19,6 +19,8 @@ import type { FlatteningEntry, NodeReader } from "@umriss-ui/core";
 import { groupRows, linesOf, pageLines, rowsOf } from "./grouping";
 import type { AggregateColumn, GroupLevel, Line, RowGroup } from "./grouping";
 /* Once stood in `Table.tsx` of @umriss-ui/core. */
+/** The direction of one sort level: `asc` puts the smallest value on top,
+    `desc` the largest. */
 export type SortDirection = "asc" | "desc";
 
 export interface Column<Z, K extends string = string> {

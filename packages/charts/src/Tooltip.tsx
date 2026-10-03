@@ -8,6 +8,7 @@ import { useTooltip } from "./context";
 import type { TooltipConfig, TooltipHit } from "./types";
 import type { ReactNode } from "react";
 
+/** The props of `Tooltip`. */
 export interface TooltipProps<T> {
   /** "x": every series at the x position; "nearest": only the nearest point. */
   mode?: "x" | "nearest";
@@ -17,6 +18,9 @@ export interface TooltipProps<T> {
   render?: (hit: TooltipHit<T>) => ReactNode;
 }
 
+/** Turns on the pointer's interaction with a chart: crosshair, hover markers
+    and the tooltip, built in or from `render`. Without it the chart does not
+    answer the pointer. */
 export function Tooltip<T>(props: TooltipProps<T>): null {
   const { mode = "x", render } = props;
   const config = useMemo<TooltipConfig>(

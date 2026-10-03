@@ -52,6 +52,7 @@ function useRegistration(registry: Registry | undefined, kind: PartKind) {
 
 /* ---------------------------------------------------------------- Toolbar */
 
+/** The props of `Toolbar`. */
 export interface ToolbarProps {
   /** Search, column menu, export – on the left in the table toolbar, before the conditions. */
   children?: ReactNode;
@@ -88,6 +89,7 @@ export function Toolbar({ children, className, size = "sm", of }: ToolbarProps) 
 
 /* ----------------------------------------------------------------- Search */
 
+/** The props of `Search`. */
 export interface SearchProps {
   /** The placeholder in the field; without it "Search …" from the wording. */
   placeholder?: string;
@@ -101,6 +103,9 @@ export interface SearchProps {
   of?: TableRef;
 }
 
+/** The table's search field: one text over every column that searches, in
+    the table toolbar. With a search the table puts up a toolbar of its own
+    where none stands. Outside the table it needs `of`. */
 export function Search({ placeholder, "aria-label": name, className, size: own, of }: SearchProps) {
   const connection = useConnection(of);
   const size = useToolbarSize(own);
@@ -127,6 +132,7 @@ export function Search({ placeholder, "aria-label": name, className, size: own, 
 
 /* ------------------------------------------------------------- ColumnMenu */
 
+/** The props of `ColumnMenu`. */
 export interface ColumnMenuProps {
   /** `sm` or `md`; without it the size of the toolbar it stands in, `sm` outside one. */
   size?: ToolbarSize;
@@ -296,6 +302,8 @@ export function ColumnMenu({ size: own, of }: ColumnMenuProps) {
 
 /* ----------------------------------------------------------------- Export */
 
+/** The props of `Export`: by default a CSV file is downloaded; with
+    `onExport` the text is handed over instead. */
 export interface ExportProps {
   /** File name of the download. Without it the one from the wording ("table.csv"). */
   filename?: string;
@@ -342,6 +350,7 @@ export function Export({ filename, onExport, size: own, of }: ExportProps) {
 
 /* ------------------------------------------------------------- Pagination */
 
+/** The props of `Pagination`. */
 export interface PaginationProps {
   /** The selectable page sizes; default 10, 25, 50. */
   pageSizes?: readonly number[];

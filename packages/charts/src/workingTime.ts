@@ -23,9 +23,14 @@
 
 import { tickStep } from "./ticks";
 
+/** One second in milliseconds, the unit of a time axis. */
 export const SECOND = 1000;
+/** One minute in milliseconds. */
 export const MINUTE = 60 * SECOND;
+/** One hour in milliseconds. */
 export const HOUR = 60 * MINUTE;
+/** One day of 24 hours in milliseconds; across a clock change a calendar day
+    is an hour longer or shorter. */
 export const DAY = 24 * HOUR;
 
 /** An interval in which time counts; thought of as half-open, but mappable from

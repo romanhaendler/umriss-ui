@@ -1,5 +1,8 @@
 import { useCallback, useMemo, useState } from "react";
 
+/** What `useTableSelection` returns: the selected keys and the gestures on
+    them. Give it to `useTable` as `selection` when the application holds the
+    selection. */
 export interface TableSelection<T extends string | number> {
   /** The keys currently selected. */
   selected: ReadonlySet<T>;

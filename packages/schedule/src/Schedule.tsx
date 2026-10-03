@@ -52,6 +52,7 @@ import { dayRun, opensRun, type ZoomLimits } from "./timeAxis";
 import type { SnapRaster } from "./snap";
 import styles from "./Schedule.module.css";
 
+/** The props of `Schedule`. */
 export interface ScheduleProps {
   /** What the schedule shows, for a screen reader: "Plan of week 38". */
   ariaLabel: string;
@@ -188,6 +189,12 @@ export interface ScheduleHandle {
   visibleDomain: () => readonly [number, number];
 }
 
+/** A plan of subtasks on lanes over time - people, vehicles, rooms - with
+    dependencies between them. The contents are declared as children (`Lane`,
+    `LaneGroup`, `Subtasks`, `Dependencies`, `BlockedTimes`); the planner pans,
+    zooms and drags, and every drag ends as an **Intent** through `onIntent`.
+    The data changes only where the caller applies it; without `intents` the
+    schedule is read-only. A ref gives the `ScheduleHandle`. */
 export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Schedule(props, ref): ReactNode {
   const {
     ariaLabel,
