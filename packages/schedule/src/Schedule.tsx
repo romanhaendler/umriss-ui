@@ -398,10 +398,11 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
      them, so that the heads of one column read alike. On a phone the column
      is a hundred pixels, and "2 lanes" kept its width while the name shrank to
      "De…". Measured, since only the rendered name knows its
-     width - anew whenever the column or the rows change, and once the fonts
-     are in. `hidden` is not React's here, so a render leaves it alone. */
+     width - anew whenever the column, the rows or the count's wording change
+     ("2 Bahnen" is wider than "2 lanes"), and once the fonts are in. `hidden`
+     is not React's here, so a render leaves it alone. */
   const headersRef = useRef<HTMLDivElement | null>(null);
-  const fitKey = `${snapshot.width}|${snapshot.headers.map((header) => `${header.key}:${header.kind}:${typeof header.label === "string" ? header.label : ""}`).join("|")}`;
+  const fitKey = `${snapshot.width}|${snapshot.headers.map((header) => `${header.key}:${header.kind}:${typeof header.label === "string" ? header.label : ""}:${header.kind === "lane" ? "" : wording.scheduleLaneCount(header.lanes)}`).join("|")}`;
   useLayoutEffect(() => {
     let live = true;
     const fit = () => {
