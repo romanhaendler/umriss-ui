@@ -395,7 +395,7 @@ test("from a stage of 640 px the marks stand at their corners and a table keeps 
     expect((await stage.boundingBox())!.width).toBeGreaterThanOrEqual(640);
     await expect(stage).not.toHaveAttribute("data-narrow");
   }
-  test.skip(p.pinnedScenario === undefined, "no scenario of this demo pins a block");
+  if (p.pinnedScenario === undefined) return;
   await expect(page.locator(`[data-scenario="${p.pinnedScenario}"] td[style*="--u-table-pin"]`).first()).toBeAttached();
 });
 
