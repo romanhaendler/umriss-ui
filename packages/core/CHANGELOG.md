@@ -85,6 +85,11 @@ commit.
   is announced and when, the label to pass, and what forced colours and reduced
   motion change. In the demo, the Markdown twins and `docs/llms-full.md`; the
   components are unchanged.
+- **`invalid` has an example on every control that takes it**: Input,
+  Textarea, NumberInput, Switch, FileInput, Select, Combobox, MultiSelect, the
+  four pickers and `TreeSearch` on the TreeView page each show "With an
+  error", a field marked by a live check with the reason in its `FormField`.
+  In the demo and `docs/llms-full.md`; the components are unchanged.
 
 ## 0.24.0 – The select's own list (Oct. 2026)
 
