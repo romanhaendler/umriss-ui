@@ -50,15 +50,14 @@ Results:
 
 - `pnpm lint`, `pnpm typecheck` and `pnpm test:unit` are green. One table smoke test timed out under load and passed on rerun.
 - Under the lock, `features-shell` and `features-page` in ui-light and table-light: 105 passed. The one failure, the Button configurator's background check, was a flake and passed 3 of 3 on rerun.
-- After the last rebase (onto `3b2c9109`, which brings the site-wide search, the narrow Menu drawer and a fourth header link), `features-shell` in ui-light and table-light: 114 passed, 9 skipped. The palette-placeholder assertion follows main's new wording. Core's header pictures (palettes, toasts, drawers, scenarios), light and dark: all pass after `toast-top-center` was renewed once more for the fourth link.
+- After the last rebase (onto `9e1c7602`, which brings the site-wide search, the narrow Menu drawer and a fourth header link), `features-shell` in ui-light and table-light: 116 passed, 10 skipped. The palette-placeholder assertion follows main's new wording. Core's header pictures (palettes, toasts, drawers, scenarios), light and dark: all pass after `toast-top-center` was renewed once more for the fourth link.
 
-**Baselines moved.** Three of core's pictures show the header and moved. I looked at the new images.
+**Baselines moved.** Two of core's pictures show the header and moved. I looked at the new images.
 
 - `toast-top-center`, light and dark: the search moved left to make room for the new switch.
-- `palette-window`, light only: the switch stands in the header behind the palette. The dark picture stays within tolerance.
 - `scenario-set-up-a-team`, light and dark: the sticky header lies over the top of this tall scenario.
 
-`drawer-beside-a-service-list` was renewed here at first, then dropped in the rebase in favour of main's renewal, which passes. `palette-resting`, `toast-phone` and the forced-colours pictures still pass. One failure is not this ticket's and stays as it was: `example-language--own-components` (ui-light, already reported in shell-across-packages 01). Before the last rebase, `tokens-first-group` (light and dark) also failed, because the token table's rows differ. It does not show the header, so it is not this ticket's, and I did not run it again afterwards.
+`drawer-beside-a-service-list` and `palette-window` (light) were renewed here at first, then dropped in the rebases in favour of main's renewals, which pass with the switch. `palette-resting`, `toast-phone` and the forced-colours pictures still pass. One failure is not this ticket's and stays as it was: `example-language--own-components` (ui-light, already reported in shell-across-packages 01). Before the last rebase, `tokens-first-group` (light and dark) also failed, because the token table's rows differ. It does not show the header, so it is not this ticket's, and I did not run it again afterwards.
 
 **Deviations.**
 
