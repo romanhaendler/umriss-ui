@@ -41,6 +41,8 @@ const LIVE = ["status", "alert", "log", "timer", "progressbar", "meter"]
 const UNANNOUNCED: Readonly<Record<string, string>> = {
   ".uc-sr[aria-live]":
     "The chart's readout speaks only after a key on the plot, so a page where it can speak has a Keyboard section, and every chart page's leads by `keysOf` to Chart, whose Accessibility section describes the readout.",
+  "[data-schedule-plot] ~ [aria-live]":
+    "The schedule's readout, for the chart's reason: it speaks only after a key on the plot, and every schedule page's Keyboard section leads by `keysOf` to First schedule, whose Accessibility section describes the readout.",
 };
 
 /** The slots that hold a stage: the examples, and the configurator a page may

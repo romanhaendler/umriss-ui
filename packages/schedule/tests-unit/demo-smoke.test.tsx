@@ -88,6 +88,27 @@ describe("Demo smoke test", () => {
     await unmount();
   });
 
+  it("gives Dependencies and Pan and zoom their own keys beside First schedule's, and says on First schedule what a screen reader meets", async () => {
+    const page = (id: string) => ALL_PAGES.find((one) => one.id === id)!;
+    for (const [id, own] of [
+      ["dependencies", ["] or t", "[ or Shift+T"]],
+      ["pan-and-zoom", ["Home / End", "PageUp / PageDown"]],
+    ] as const) {
+      const { host, unmount } = await mount(<Page demo={DEMO} page={page(id)} />);
+      const keyboard = host.querySelector(`section[aria-labelledby="keyboard-${id}"]`);
+      for (const key of own) expect(keyboard?.textContent, id).toContain(key);
+      expect(keyboard?.textContent).toContain("The keys of First schedule apply here.");
+      expect(keyboard?.querySelector("p a")?.getAttribute("href")).toBe("/schedule/#keyboard-schedule");
+      await unmount();
+    }
+
+    const first = await mount(<Page demo={DEMO} page={page("schedule")} />);
+    const sections = [...first.host.querySelectorAll(".section h2")].map((h) => h.textContent);
+    expect(sections.indexOf("Accessibility")).toBe(sections.indexOf("Keyboard") + 1);
+    expect(first.host.querySelector('section[aria-labelledby="accessibility-schedule"] p')).not.toBeNull();
+    await first.unmount();
+  });
+
   it.each(EXAMPLES.map((b) => [`${b.pageId}/${b.id}`, b] as const))("renders the example %s", async (_name, example) => {
     const { unmount } = await mount(<example.Component />);
     await unmount();

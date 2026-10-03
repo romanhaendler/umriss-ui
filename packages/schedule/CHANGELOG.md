@@ -19,6 +19,13 @@ moves from here under the rule above.
 
 ### Added
 
+- **The First schedule page says what a screen reader meets**: a section
+  Accessibility after Keyboard names the plot's role, name and summary, the
+  readout after a key, the label to pass and what forced colours and reduced
+  motion change. Every other page with a schedule in its examples has a
+  Keyboard section linking First schedule's keys; Dependencies and Pan and
+  zoom also list the keys of their own feature there. In the demo, the
+  Markdown twins and `docs/llms-full.md`; the schedule is unchanged.
 - **Every export carries a comment**: what a component, a function or a type is
   for, and for a function `@param` and `@returns` where its type alone does not
   say it. The editor shows it on hover, from the package's `.d.ts`. Nothing
