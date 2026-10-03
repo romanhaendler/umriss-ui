@@ -1,0 +1,253 @@
+<!doctype html>
+<!-- The front page (.scratch/site-front-page): what a search for "umriss-ui"
+     or a shared link lands on before any demo. `build-pages.mjs` fills the
+     slots in double braces; everything else is fixed here, and the built-site guard
+     (`frontFaults` in packages/demo/src/tooling/site.ts) holds the words and
+     the links to what they promise.
+
+     Static, with no bundle: the theme script before the first paint (the
+     demos' own, taken from their index.html), and one script at the end for
+     the theme switch and the copy button - both hidden until it runs, so a
+     reader without JavaScript gets the system's theme and a selectable
+     command. Every colour is a design token: the token stylesheet is copied
+     in by the build. The type is the demos' Geist, its files copied by the
+     build into fonts/. -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {{themeScript}}
+    {{favicon}}
+    {{head}}
+    {{jsonLd}}
+    <style>{{tokens}}</style>
+    <style>
+      @font-face { font-family: "Geist Sans"; font-weight: 400; font-display: swap; src: url(./fonts/geist-sans-latin-400-normal.woff2) format("woff2"); }
+      @font-face { font-family: "Geist Sans"; font-weight: 500; font-display: swap; src: url(./fonts/geist-sans-latin-500-normal.woff2) format("woff2"); }
+      @font-face { font-family: "Geist Sans"; font-weight: 600; font-display: swap; src: url(./fonts/geist-sans-latin-600-normal.woff2) format("woff2"); }
+      @font-face { font-family: "Geist Mono"; font-weight: 400; font-display: swap; src: url(./fonts/geist-mono-latin-400-normal.woff2) format("woff2"); }
+
+      /* Without the theme script the system decides; with it, the style it
+         sets on the root wins. */
+      :root { color-scheme: light dark; }
+      body {
+        margin: 0;
+        background: var(--u-color-bg);
+        color: var(--u-color-text);
+        font-family: var(--u-font-sans);
+        font-size: var(--u-text-md);
+        line-height: var(--u-leading-normal);
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+      }
+      code { font-family: var(--u-font-mono); }
+      a { color: inherit; }
+      a:focus-visible, button:focus-visible, summary:focus-visible { outline: none; box-shadow: var(--u-focus-ring); }
+      [hidden] { display: none !important; }
+
+      /* The demos' top bar, still (shell.css): wordmark, packages, theme. */
+      .head {
+        position: sticky; top: 0; z-index: 20;
+        display: flex; align-items: center; gap: var(--u-space-4);
+        height: 56px; padding: 0 var(--u-space-5);
+        border-bottom: 1px solid var(--u-edge-color);
+        background: color-mix(in srgb, var(--u-color-surface) 82%, transparent);
+        backdrop-filter: saturate(160%) blur(10px);
+      }
+      .mark { font-size: var(--u-text-sm); font-weight: var(--u-weight-semibold); letter-spacing: var(--u-tracking-tight); text-decoration: none; border-radius: var(--u-radius-sm); }
+      .head nav { display: flex; gap: var(--u-space-1); }
+      .head nav a { padding: var(--u-space-1) var(--u-space-2); border-radius: var(--u-radius-sm); font-size: var(--u-text-sm); color: var(--u-color-text-secondary); text-decoration: none; white-space: nowrap; }
+      .head nav a:hover { color: var(--u-color-text); background: var(--u-color-surface-sunken); }
+      .theme {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 32px; height: 32px; margin-left: auto; padding: 0;
+        border: none; border-radius: var(--u-radius-md);
+        background: transparent; color: var(--u-color-text-secondary); cursor: pointer;
+      }
+      .theme:hover { background: var(--u-color-surface-sunken); color: var(--u-color-text); }
+      .theme[data-next="dark"] .sun, .theme[data-next="light"] .moon { display: none; }
+      @media (max-width: 900px) {
+        .head { flex-wrap: wrap; height: auto; padding: var(--u-space-2) var(--u-space-4); row-gap: var(--u-space-1); }
+        .head nav { order: 3; width: 100%; overflow-x: auto; margin: 0 calc(-1 * var(--u-space-2)); }
+        .head nav a { font-size: 13px; }
+      }
+
+      main { max-width: 68rem; margin: 0 auto; padding: 0 var(--u-space-5); }
+
+      .hero { padding: 72px 0 var(--u-space-8); }
+      h1 { margin: 0 0 var(--u-space-4); font-size: var(--u-text-2xl); font-weight: var(--u-weight-semibold); letter-spacing: var(--u-tracking-display); }
+      .promise { max-width: 40rem; margin: 0; font-size: 1.75rem; line-height: var(--u-leading-tight); font-weight: var(--u-weight-medium); letter-spacing: var(--u-tracking-display); }
+      .family { max-width: 40rem; margin: var(--u-space-4) 0 0; font-size: var(--u-text-lg); color: var(--u-color-text-secondary); }
+      .actions { display: flex; flex-wrap: wrap; gap: var(--u-space-3); margin-top: var(--u-space-7); }
+      .button {
+        display: inline-flex; align-items: center; height: 40px; padding: 0 var(--u-space-5);
+        border-radius: var(--u-radius-md); font-size: var(--u-text-md); font-weight: var(--u-weight-medium); text-decoration: none;
+        background: var(--u-color-surface); box-shadow: var(--u-edge-strong);
+      }
+      .button:hover { background: var(--u-color-surface-sunken); }
+      .button.primary { background: var(--u-color-primary-bg); color: var(--u-color-primary-fg); box-shadow: none; }
+      .button.primary:hover { background: var(--u-color-primary-hover); }
+      /* The demos' install line (page.css), the copy key beside the command. */
+      .install {
+        display: inline-flex; align-items: center; gap: var(--u-space-4); max-width: 100%; box-sizing: border-box;
+        margin-top: var(--u-space-4); padding: var(--u-space-2) var(--u-space-2) var(--u-space-2) var(--u-space-4);
+        border-radius: var(--u-radius-md); background: var(--u-color-surface-sunken); box-shadow: var(--u-edge);
+      }
+      .install code { min-width: 0; font-size: var(--u-text-sm); overflow-wrap: anywhere; }
+      .copy {
+        flex: none; padding: 3px var(--u-space-3); border: none; border-radius: var(--u-radius-sm);
+        background: var(--u-color-surface); box-shadow: var(--u-edge);
+        font: inherit; font-size: var(--u-text-xs); color: var(--u-color-text-secondary); cursor: pointer;
+      }
+      .copy:hover { color: var(--u-color-text); }
+      .copy[data-state="copied"] { color: var(--u-color-success); }
+      .copy[data-state="failed"] { color: var(--u-color-text-muted); }
+
+      .proof { margin: 0; }
+      .proof a { display: block; border-radius: var(--u-radius-lg); }
+      .proof img { display: block; width: 100%; height: auto; border-radius: var(--u-radius-lg); box-shadow: var(--u-shadow-card); }
+      .proof figcaption { margin-top: var(--u-space-3); font-size: var(--u-text-sm); color: var(--u-color-text-secondary); }
+
+      h2 { margin: 0; font-size: var(--u-text-lg); font-weight: var(--u-weight-semibold); letter-spacing: var(--u-tracking-tight); }
+      .apart { margin-top: 72px; }
+      .claims { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: var(--u-space-3); margin: var(--u-space-4) 0 0; padding: 0; list-style: none; }
+      .claims a {
+        display: flex; flex-direction: column; gap: var(--u-space-1); height: 100%; box-sizing: border-box;
+        padding: var(--u-space-4); border-radius: var(--u-radius-md);
+        background: var(--u-color-surface); box-shadow: var(--u-edge); text-decoration: none;
+      }
+      .claims a:hover { box-shadow: var(--u-edge-strong); }
+      .claims strong { font-weight: var(--u-weight-medium); }
+      .claims span { font-size: var(--u-text-xs); color: var(--u-color-text-secondary); }
+
+      .index { margin-top: 72px; padding-top: var(--u-space-5); border-top: 1px solid var(--u-edge-color); }
+      .index summary { cursor: pointer; border-radius: var(--u-radius-sm); }
+      .index summary h2 { display: inline; }
+      .index h3 { margin: var(--u-space-6) 0 var(--u-space-2); font-size: var(--u-text-md); font-weight: var(--u-weight-semibold); }
+      .index h3 a { text-decoration: none; }
+      .index h3 a:hover { text-decoration: underline; }
+      .index ul { display: flex; flex-wrap: wrap; gap: var(--u-space-1) var(--u-space-4); margin: 0; padding: 0; list-style: none; font-size: var(--u-text-sm); }
+      .index ul a { color: var(--u-color-text-secondary); }
+      .index ul a:hover { color: var(--u-color-text); }
+
+      footer { max-width: 68rem; margin: 72px auto 0; padding: var(--u-space-6) var(--u-space-5) var(--u-space-8); font-size: var(--u-text-sm); color: var(--u-color-text-secondary); }
+      footer a:hover { color: var(--u-color-text); }
+
+      @media (max-width: 600px) {
+        main { padding: 0 var(--u-space-4); }
+        .hero { padding-top: var(--u-space-8); }
+        .promise { font-size: 1.375rem; }
+        .family { font-size: var(--u-text-md); }
+        .actions { margin-top: var(--u-space-6); }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="head">
+      <a class="mark" href="./">umriss-ui</a>
+      <nav aria-label="Packages">{{packages}}</nav>
+      <button type="button" class="theme" hidden>
+        <svg class="moon" viewBox="0 0 10 10" width="16" height="16" aria-hidden="true"><path d="M5 1.2a2.5 2.5 0 0 0 3.8 3.8A3.8 3.8 0 1 1 5 1.2Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" /></svg>
+        <svg class="sun" viewBox="0 0 10 10" width="16" height="16" aria-hidden="true"><path d="M5 3a2 2 0 1 0 0 4 2 2 0 1 0 0-4ZM5 .7v0M5 9.3v0M.7 5h0M9.3 5h0M1.96 1.96h0M8.04 8.04h0M1.96 8.04h0M8.04 1.96h0" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" /></svg>
+      </button>
+    </header>
+    <main>
+      <section class="hero">
+        <h1>umriss-ui</h1>
+        <p class="promise">React components for data-dense screens – control rooms, dashboards, planning – built to the industrial standards for alarms and limits, in English and German.</p>
+        <p class="family">Five packages: a component library, canvas charts, a typed data table, a Gantt-style schedule and a calculation view. TypeScript, MIT, light and dark.</p>
+        <div class="actions">
+          <a class="button primary" href="./core/installation/">Get started</a>
+          <a class="button" href="./core/">Explore the scenarios</a>
+        </div>
+        <div class="install"><code>{{install}}</code><button type="button" class="copy" hidden>Copy</button></div>
+      </section>
+
+      <figure class="proof">
+        <a href="./core/"><img src="./og-image.png" width="1200" height="630" alt="{{collageAlt}}" /></a>
+        <figcaption>Every picture on this site is a running component. The scenarios show them working.</figcaption>
+      </figure>
+
+      <section class="apart" aria-labelledby="apart">
+        <h2 id="apart">What sets it apart</h2>
+        <ul class="claims">
+          <li><a href="./table/alarmlist/"><strong>ISA-18.2 alarm lists</strong> <span>Table · AlarmList</span></a></li>
+          <li><a href="./charts/limitline/"><strong>ISA-101 limits and verdicts</strong> <span>Charts · LimitLine</span></a></li>
+          <li><a href="./charts/benchmark/"><strong>Canvas charts, measured</strong> <span>Charts · Benchmark</span></a></li>
+          <li><a href="./core/language/"><strong>English and German wording</strong> <span>Core · Language</span></a></li>
+          <li><a href="./llms.txt"><strong>Written for coding agents too</strong> <span>llms.txt</span></a></li>
+        </ul>
+      </section>
+
+      <details class="index">
+        <summary><h2>Every page ({{count}})</h2></summary>
+        {{index}}
+      </details>
+    </main>
+    <footer>
+      <a href="{{repository}}">Source on GitHub</a> · <a href="https://www.npmjs.com/org/umriss-ui">npm</a> · <a href="./llms.txt"><code>llms.txt</code>, for coding agents</a> ·
+      <a href="{{repository}}/blob/main/LICENSE">MIT licence</a>
+    </footer>
+    <script>
+      (function () {
+        /* The theme switch, as the demos' (ThemeSwitch.tsx): the same key, a
+           press stores the other theme, nothing stored follows the system
+           live, storage that throws costs only the memory. */
+        var root = document.documentElement;
+        var system = matchMedia("(prefers-color-scheme: dark)");
+        var theme = document.querySelector(".theme");
+        var chosen;
+        try {
+          chosen = localStorage.getItem("umriss-ui:theme");
+        } catch (e) {}
+        function show() {
+          var now = chosen === "light" || chosen === "dark" ? chosen : system.matches ? "dark" : "light";
+          var next = now === "dark" ? "light" : "dark";
+          root.style.colorScheme = now;
+          theme.dataset.next = next;
+          theme.setAttribute("aria-label", "Switch to " + next + " theme");
+        }
+        system.addEventListener("change", show);
+        theme.addEventListener("click", function () {
+          chosen = theme.dataset.next;
+          try {
+            localStorage.setItem("umriss-ui:theme", chosen);
+          } catch (e) {}
+          show();
+        });
+        show();
+        theme.hidden = false;
+
+        /* The copy key, as the demos' (CopyButton.tsx): "Copied" for 1.6 s,
+           "Failed" where there is no clipboard. */
+        var copy = document.querySelector(".copy");
+        var command = document.querySelector(".install code").textContent;
+        var timer;
+        function say(state, word) {
+          copy.dataset.state = state;
+          copy.textContent = word;
+          clearTimeout(timer);
+          timer = setTimeout(function () {
+            copy.dataset.state = "settle";
+            copy.textContent = "Copy";
+          }, 1600);
+        }
+        copy.addEventListener("click", function () {
+          Promise.resolve()
+            .then(function () {
+              return navigator.clipboard.writeText(command);
+            })
+            .then(
+              function () {
+                say("copied", "Copied");
+              },
+              function () {
+                say("failed", "Failed");
+              },
+            );
+        });
+        copy.hidden = false;
+      })();
+    </script>
+  </body>
+</html>
