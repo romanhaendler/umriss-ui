@@ -29,7 +29,7 @@ export const OUTLINE: readonly Rubric[] = [
         name: "Installation",
         sentence: "Install the package, draw a first chart and size it in its container. Read this once before the component pages; everything after it assumes it.",
         about: [
-          "The command installs the package alone: React 18 or 19 is its only peer and stays the application's own, and the package depends on nothing else. The stylesheet comes with the JavaScript, so there is nothing to import - `@umriss-ui/charts/styles.css` is there for setups that link stylesheets by hand.",
+          "The command installs the package alone: React 18 or 19 is its only peer and stays the application's own, and the package depends on nothing else. The stylesheet comes with the JavaScript, so there is nothing to import - `@umriss-ui/charts/styles.css` is there for setups that link stylesheets by hand. Its colours, type and sizes are `--uc-` tokens that fall back onto core's; [core's Theming page](https://romanhaendler.github.io/umriss-ui/core/theming/#charts-tokens) lists them all.",
           "A chart takes its container's width and follows it; give it a `height` (300 px without one). Series and axes are children of `Chart` and read the rows through accessors - a value that is `null`, `undefined` or not finite is a gap, never a zero.",
           "Time is a number: milliseconds since 1970, as `Date.getTime()` gives them. With `time` on the x axis the ticks stand on the viewer's local clock, so a day begins at local midnight. The words are English; German comes from `@umriss-ui/charts/wording/de`.",
         ],

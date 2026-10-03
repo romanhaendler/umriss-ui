@@ -65,6 +65,9 @@ commit.
   change in any version. The page Theming says so and shows the accent for the
   application, a token for one region and a dark region; the Installation page
   links there instead of explaining the tokens itself.
+  for. Below them, under `#charts-tokens`, the 29 `--uc-…` tokens of
+  `@umriss-ui/charts`, with the core token each one takes, linked. The tokens
+  themselves are unchanged.
 
 ## 0.24.0 – The select's own list (Oct. 2026)
 
