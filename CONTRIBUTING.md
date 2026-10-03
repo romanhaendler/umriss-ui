@@ -91,7 +91,7 @@ Each of these is argued somewhere; the link is the argument, not the rule.
   goes into `@remarks`) or a source path in a reader's text; an ADR number is
   written bare and becomes a link to its file.
 * **A prop without an example breaks the build.** Every row of a props table
-  is used by an example or a scenario of its package, or stands in the
+  a page lists (not a reference or definition table) is used by an example or a scenario of its package, or stands in the
   package's `demo/unshown.json`. That list only shrinks: the same gate stops at
   an entry whose prop an example now uses (remove the line) and at one naming
   no row.
