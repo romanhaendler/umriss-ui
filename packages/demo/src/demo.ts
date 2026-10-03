@@ -29,7 +29,7 @@ export interface Demo {
   /** The command that installs it, peers and all (`tooling/install.ts`). */
   install: string;
   /** The version in the package's manifest - the number beside its name in
-      the header. */
+      the header, and the one the "Copy page" prompt names (`CopyPage.tsx`). */
   version: string;
   addresses: Addresses;
   scenarios: readonly Scenario[];

@@ -30,8 +30,9 @@
    once; all of it is obvious at the fiftieth Cmd-K. This shell is the only
    place in the repository where something is used daily.
 
-   The rule above still holds for everything else. It has been broken once and
-   not abolished.
+   The rule above still holds for everything else. It has been broken once
+   more - "Copy page" in every page head is the library's split button and
+   menu (`CopyPage.tsx`) - and not abolished.
 
    The palette finds pages, scenarios AND examples, examples grouped under
    their component, pages by the words of their lede too - around a hundred

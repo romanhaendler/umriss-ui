@@ -22,7 +22,10 @@ type CopyState = "settle" | "copied" | "failed";
 
 const RESET_AFTER = 1600;
 
-export function CopyButton({ text }: { text: string }) {
+/** A copy's state and the call that copies: `copy(write)` runs `write` and
+    stands at "copied" or "failed" for 1600 ms. The page head's "Copy page"
+    (`CopyPage.tsx`) keeps the same time with it. */
+export function useCopy(): [CopyState, (write: () => Promise<void>) => Promise<void>] {
   const [state, setState] = useState<CopyState>("settle");
 
   useEffect(() => {
@@ -31,17 +34,27 @@ export function CopyButton({ text }: { text: string }) {
     return () => window.clearTimeout(t);
   }, [state]);
 
-  const copy = async () => {
+  const copy = async (write: () => Promise<void>) => {
     try {
-      await navigator.clipboard.writeText(text);
+      await write();
       setState("copied");
     } catch {
       setState("failed");
     }
   };
+  return [state, copy];
+}
+
+export function CopyButton({ text }: { text: string }) {
+  const [state, copy] = useCopy();
 
   return (
-    <button type="button" className="codeCopy" onClick={() => void copy()} data-state={state}>
+    <button
+      type="button"
+      className="codeCopy"
+      onClick={() => void copy(() => navigator.clipboard.writeText(text))}
+      data-state={state}
+    >
       {state === "settle" ? "Copy" : state === "copied" ? "Copied" : "Failed"}
     </button>
   );
