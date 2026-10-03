@@ -12,6 +12,7 @@ import { checkShell } from "@umriss-ui/demo/checks/shell";
 checkShell({
   notOnTheFrontDoor: ["line", "benchmark"],
   rail: { name: "Pareto", pageId: "pareto", rubricId: "limits-and-alarms" },
+  low: { name: "Benchmark", pageId: "benchmark" },
   neighbours: [
     { name: "Line", pageId: "line" },
     { name: "Area", pageId: "area" },

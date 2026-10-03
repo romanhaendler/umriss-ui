@@ -8,6 +8,7 @@ checkShell({
   notOnTheFrontDoor: ["first-table", "toolbar"],
   scenario: "find-a-late-shipment",
   rail: { name: "AlarmList", pageId: "alarmlist", rubricId: "limits-and-alarms" },
+  low: { name: "AlarmList", pageId: "alarmlist" },
   neighbours: [
     { name: "Pagination", pageId: "pagination" },
     { name: "Virtualisation", pageId: "virtualisation" },

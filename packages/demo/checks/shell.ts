@@ -24,7 +24,10 @@
 
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { STANDARDS } from "./accessibility";
+import { pageTitle, type TitleManifest } from "../src/tooling/title";
 
 interface NamedPage {
   /** The name in sidebar and palette. */
@@ -58,6 +61,16 @@ export interface ShellProbes {
   /** A page with several examples and an API section, and one of its
       examples after the first, for "On this page". */
   contents: { pageId: string; id: string; title: string };
+  /** A page whose entry lies low in the sidebar (core: Tag; elsewhere the
+      last page). */
+  low: NamedPage;
+}
+
+/** The title the prerendering writes for a page - by the same function, from
+    the manifest of the package under test (`<package>/tests-visual/..`). */
+function prerenderedTitle(pageName?: string): string {
+  const manifest = JSON.parse(readFileSync(join(test.info().project.testDir, "..", "package.json"), "utf8")) as TitleManifest;
+  return pageTitle(manifest, pageName);
 }
 
 export function checkShell(p: ShellProbes): void {
@@ -79,9 +92,45 @@ test("the sidebar's first entry leads back to the scenarios page", async ({ page
   const rail = page.getByRole("navigation", { name: "Components" });
   await rail.getByText(p.rail.name, { exact: true }).click();
   await expect(page.locator(`[data-block="${p.rail.pageId}"]`)).toBeVisible();
-  await rail.getByRole("button", { name: "Scenarios", exact: true }).click();
+  await rail.getByRole("link", { name: "Scenarios", exact: true }).click();
   await expect(page.locator('[data-block="scenarios"]')).toBeVisible();
   await expect(page.locator(`[data-block="${p.rail.pageId}"]`)).toHaveCount(0);
+});
+
+test("the sidebar's entries are links with their page's address", async ({ page }) => {
+  /* So that a middle click opens a new tab and "copy link" copies the page -
+     a plain click still moves without a reload. */
+  const rail = page.getByRole("navigation", { name: "Components" });
+  await expect(rail.getByRole("button")).toHaveCount(0);
+  await expect(rail.getByRole("link", { name: "Scenarios", exact: true })).toHaveAttribute("href", "/");
+  const entry = rail.getByRole("link", { name: p.rail.name, exact: true });
+  await expect(entry).toHaveAttribute("href", `/${p.rail.pageId}/`);
+
+  await page.evaluate(() => ((window as unknown as { __noReload?: boolean }).__noReload = true));
+  await entry.click();
+  await expect(page.locator(`[data-block="${p.rail.pageId}"]`)).toBeVisible();
+  expect(await page.evaluate(() => (window as unknown as { __noReload?: boolean }).__noReload)).toBe(true);
+});
+
+test("the active entry stands in the sidebar's view, after load and after a jump", async ({ page }) => {
+  const rail = page.getByRole("navigation", { name: "Components" });
+  const entry = rail.getByRole("link", { name: p.low.name, exact: true });
+  const pageScroll = () => page.evaluate(() => document.documentElement.scrollTop);
+
+  await page.goto(`/${p.low.pageId}/`);
+  await expect(entry).toHaveAttribute("aria-current", "page");
+  await expect(entry).toBeInViewport({ ratio: 1 });
+  expect(await pageScroll()).toBe(0);
+
+  await page.goto("/");
+  await page.keyboard.press("ControlOrMeta+k");
+  const field = page.getByRole("combobox", { name: "Search a page or example" });
+  await field.fill(p.low.name);
+  await expect(page.getByRole("dialog").getByRole("option").first()).toContainText(p.low.name);
+  await field.press("Enter");
+  await expect(page.locator(`[data-block="${p.low.pageId}"]`)).toBeVisible();
+  await expect(entry).toBeInViewport({ ratio: 1 });
+  expect(await pageScroll()).toBe(0);
 });
 
 test("an entry in the sidebar opens its page", async ({ page }) => {
@@ -119,13 +168,13 @@ test("history carries: back and forward again", async ({ page }) => {
 /* THE HEAD FOLLOWS THE PAGE (.scratch/pages-as-markdown 02). The title and
    the one alternate link to the page's Markdown twin are set in one place of
    the shell, on the first load and on every move; the twin itself is a file
-   the server serves at that address. */
-const titled = (name: string) => new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")} – React [a-z]+ · @umriss-ui/[a-z]+$`);
-
+   the server serves at that address. The title is the very one the
+   prerendering writes for the page (`shell-across-packages` 03). */
 test("the head follows the page: its title, and one link to its Markdown twin", async ({ page }) => {
   const twins = page.locator('head link[rel="alternate"][type="text/markdown"]');
   await expect(twins).toHaveCount(1);
   await expect(twins).toHaveAttribute("href", "/index.md");
+  await expect(page).toHaveTitle(prerenderedTitle());
 
   const rail = page.getByRole("navigation", { name: "Components" });
   await rail.getByText(p.neighbours[0].name, { exact: true }).click();
@@ -133,14 +182,18 @@ test("the head follows the page: its title, and one link to its Markdown twin", 
   await expect(page.locator(`[data-block="${p.neighbours[1].pageId}"]`)).toBeVisible();
   await expect(twins).toHaveCount(1);
   await expect(twins).toHaveAttribute("href", `/${p.neighbours[1].pageId}.md`);
-  await expect(page).toHaveTitle(titled(p.neighbours[1].name));
+  await expect(page).toHaveTitle(prerenderedTitle(p.neighbours[1].name));
   const twin = await page.request.get(`/${p.neighbours[1].pageId}.md`);
   expect(twin.ok()).toBe(true);
   expect((await twin.text()).startsWith(`# ${p.neighbours[1].name}\n`)).toBe(true);
 
   await page.goBack();
   await expect(twins).toHaveAttribute("href", `/${p.neighbours[0].pageId}.md`);
-  await expect(page).toHaveTitle(titled(p.neighbours[0].name));
+  await expect(page).toHaveTitle(prerenderedTitle(p.neighbours[0].name));
+
+  // An example's anchor stands in its page's text and keeps the title.
+  await page.goto(`/${p.example.pageId}/#${p.example.id}`);
+  await expect(page).toHaveTitle(prerenderedTitle(p.example.pageName));
 });
 
 test("the address is the place: a deep link lands on the page", async ({ page }) => {
