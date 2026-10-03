@@ -3,7 +3,7 @@
    seam 1). */
 
 import { describe, expect, it } from "vitest";
-import { forwarderHtml, siteFaults, twinFaults } from "../src/tooling/site";
+import { forwarderHtml, frontFaults, siteFaults, twinFaults } from "../src/tooling/site";
 
 const HOME = "https://example.test/umriss-ui/charts/";
 const page = (url: string) =>
@@ -108,5 +108,51 @@ describe("the guard over the text for agents (.scratch/pages-as-markdown)", () =
   it("fails on a link in an llms.txt that leads to no file of the site", () => {
     const astray = new Map([...texts, [`${HOME}llms.txt`, `- [Axis](${HOME}axis.md): Axes.\n- [Installation](${HOME}installation/)\n`]]);
     expect(twinFaults(twinPages, pages, astray)).toEqual([`${HOME}llms.txt: links ${HOME}axis.md, which is no file of the site`]);
+  });
+});
+
+describe("the guard over the front page (.scratch/site-front-page)", () => {
+  const ROOT = "https://example.test/umriss-ui/";
+  const sitemap = [ROOT, `${ROOT}core/`, `${ROOT}core/installation/`, `${ROOT}core/language/`, `${ROOT}table/alarmlist/`, `${ROOT}charts/limitline/`, `${ROOT}charts/benchmark/`];
+  const PROMISE =
+    "React components for data-dense screens – control rooms, dashboards, planning – built to the industrial standards for alarms and limits, in English and German.";
+  const front = ({ h1 = "<h1>umriss-ui</h1>", started = "./core/installation/", claim = "./charts/benchmark/", extra = "", index = sitemap.slice(1) } = {}) => `
+    <script>try { localStorage.getItem("umriss-ui:theme") } catch (e) {}</script>
+    <header><a href="./">umriss-ui</a><nav aria-label="Packages"><a href="./core/">Core</a></nav></header>
+    <main>${h1}<p>${PROMISE}</p>
+      <a class="button" href="${started}">Get started</a><a class="button" href="./core/">Explore the scenarios</a>
+      <code>npm install @umriss-ui/core</code>
+      <a href="./table/alarmlist/">ISA-18.2 alarm lists</a><a href="./charts/limitline/">ISA-101 limits and verdicts</a>
+      <a href="${claim}"><strong>Canvas charts, measured</strong> Benchmark</a><a href="./core/language/">English and German wording</a>
+      <a href="./llms.txt">Written for coding agents too</a>${extra}
+      <details><summary>Every page (${index.length})</summary>${index.map((url) => `<a href="${url}">a page</a>`).join("")}</details>
+    </main>`;
+
+  it("passes a front page with its words, its buttons, its claims and its index", () => {
+    expect(frontFaults(front(), ROOT, sitemap, PROMISE)).toEqual([]);
+  });
+
+  it("fails without exactly one h1 reading umriss-ui", () => {
+    expect(frontFaults(front({ h1: "<h1>Umriss UI</h1>" }), ROOT, sitemap, PROMISE)).toEqual(['not one h1 "umriss-ui" (found: Umriss UI)']);
+    expect(frontFaults(front({ h1: "<h1>umriss-ui</h1><h1>umriss-ui</h1>" }), ROOT, sitemap, PROMISE)).toEqual(['not one h1 "umriss-ui" (found: umriss-ui, umriss-ui)']);
+  });
+
+  it("fails on a button or a claim that leads to no page of the site", () => {
+    expect(frontFaults(front({ started: "./core/getting-started/" }), ROOT, sitemap, PROMISE)).toEqual([
+      `"Get started" links ${ROOT}core/getting-started/, which is no sitemap address`,
+    ]);
+    expect(frontFaults(front({ claim: "./charts/bench/" }), ROOT, sitemap, PROMISE)).toEqual([`"Canvas charts, measured" links ${ROOT}charts/bench/, which is no sitemap address`]);
+    expect(frontFaults(front().replace("Get started", "Start"), ROOT, sitemap, PROMISE)).toEqual(['no link "Get started"']);
+  });
+
+  it("fails on twenty addresses linked outside the index, or a sitemap address the index leaves out", () => {
+    const many = Array.from({ length: 12 }, (_, i) => `<a href="https://example.test/${i}">${i}</a>`).join("");
+    expect(frontFaults(front({ extra: many }), ROOT, sitemap, PROMISE)).toEqual(["20 addresses linked outside the index, not fewer than 20"]);
+    expect(frontFaults(front({ index: sitemap.slice(2) }), ROOT, sitemap, PROMISE)).toEqual([`the index does not link ${ROOT}core/`]);
+  });
+
+  it("fails without the promise, the install command or the theme script", () => {
+    const bare = front().replace(PROMISE, "").replace("npm install @umriss-ui/core", "").replace("umriss-ui:theme", "");
+    expect(frontFaults(bare, ROOT, sitemap, PROMISE)).toEqual(["no promise", "no install command", "no theme script"]);
   });
 });

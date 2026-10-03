@@ -1,7 +1,7 @@
 /* The site on GitHub Pages: the five demos under one address, each in a
    directory of its own, and a page in front that points at every page of them.
 
-     site/index.html            the front page - the hub
+     site/index.html            the front page - the hub (scripts/front-page.html)
      site/<package>/            the demo of @umriss-ui/<package>
      site/<package>/<page>/     one of its pages, prerendered
      site/<package>/<page>.md   the same page as Markdown - its twin
@@ -11,6 +11,7 @@
      site/llms.txt              the index for coding agents
      site/og-image.png          the picture every page shows where it is shared
      site/favicon.svg           the front page's favicon (each demo bundles its own copy)
+     site/fonts/                the front page's Geist (each demo bundles its own copy)
 
    Every page of a demo is a path with an `index.html` of its own, carrying the
    page's text, its examples' source and its props tables - what a search
@@ -37,13 +38,15 @@
    tooling (`packages/demo/src/tooling/site.ts`). */
 
 import { execFileSync } from "node:child_process";
+import { createRequire } from "node:module";
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 /* The one list of the packages - read in Node as it stands, which is why it
    imports nothing (and why `build:pages` strips types). */
 import { PACKAGES as LIST } from "../packages/demo/src/packages.ts";
-import { forwarderHtml, siteFaults, twinFaults } from "../packages/demo/src/tooling/site.ts";
+import { installCommand } from "../packages/demo/src/tooling/install.ts";
+import { forwarderHtml, frontFaults, siteFaults, twinFaults } from "../packages/demo/src/tooling/site.ts";
 import { siteLeaks } from "../packages/demo/src/tooling/references.ts";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -168,62 +171,52 @@ for (const dir of PACKAGES) {
   rows.push(row);
 }
 
-/* The front page: every package, and under it every one of its pages - the
-   links a crawler walks, since no other site points here. */
+/* The front page (.scratch/site-front-page): its own template, filled here.
+   The index of every page stays in it, folded - the links a crawler walks,
+   since no other site points here. The theme script is the demos' own, from
+   core's `index.html`; the colours are the token stylesheet's, copied in; the
+   type is the demos' Geist, its files copied from the installed packages. */
+/* The promise, as the template writes it - the guard checks it is there. */
+const PROMISE =
+  "React components for data-dense screens – control rooms, dashboards, planning – built to the industrial standards for alarms and limits, in English and German.";
+const fromCore = createRequire(join(ROOT, "packages", "core", "package.json"));
+mkdirSync(join(SITE, "fonts"));
+for (const [family, weights] of [["geist-sans", [400, 500, 600]], ["geist-mono", [400]]]) {
+  const files = join(dirname(fromCore.resolve(`@fontsource/${family}/400.css`)), "files");
+  for (const weight of weights) cpSync(join(files, `${family}-latin-${weight}-normal.woff2`), join(SITE, "fonts", `${family}-latin-${weight}-normal.woff2`));
+}
+const themeScript = /<script>[\s\S]*?<\/script>/.exec(readFileSync(join(ROOT, "packages", "core", "demo", "index.html"), "utf8"))?.[0];
+if (themeScript === undefined || !themeScript.includes("umriss-ui:theme")) throw new Error("core's demo/index.html has lost its theme script.");
+const front = {
+  themeScript,
+  favicon: FAVICON_LINK,
+  head: headOf({
+    title: "umriss-ui – React component library, canvas charts, data table and Gantt schedule for data-dense dashboards",
+    description:
+      "Open-source React components for data-dense applications: a component library, canvas charts, a typed data table, a Gantt-style schedule and a calculation view. TypeScript, MIT, light and dark.",
+    url: HOME,
+  }),
+  jsonLd: jsonLd({ "@context": "https://schema.org", "@graph": rows.map(structuredData) }),
+  /* Comments out: they are the stylesheet's, not the page's. */
+  tokens: readFileSync(join(ROOT, "packages", "core", "src", "styles", "tokens.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\n\s*\n/g, "\n"),
+  packages: LIST.map((p) => `<a href="./${p.id}/">${escape(p.name)}</a>`).join(""),
+  install: escape(installCommand(rows[0])),
+  collageAlt: escape(PREVIEW_ALT),
+  count: String(urls.length - 1),
+  index: rows
+    .map(
+      (row) => `<h3><a href="./${row.dir}/"><code>${escape(row.name)}</code></a></h3>
+        <ul>${row.pages.map((page) => `<li><a href="./${row.dir}/${page.path}">${escape(page.name)}</a></li>`).join("")}</ul>`,
+    )
+    .join("\n        "),
+  repository: REPOSITORY,
+};
 writeFileSync(
   join(SITE, "index.html"),
-  `<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    ${FAVICON_LINK}
-    ${headOf({
-      title: "umriss-ui – React component library, canvas charts, data table and Gantt schedule for data-dense dashboards",
-      description:
-        "Open-source React components for data-dense applications: a component library, canvas charts, a typed data table, a Gantt-style schedule and a calculation view. TypeScript, MIT, light and dark.",
-      url: HOME,
-    })}
-    ${jsonLd({ "@context": "https://schema.org", "@graph": rows.map(structuredData) })}
-    <style>
-      :root { color-scheme: light dark; --ink: #1b1d21; --muted: #5d636e; --paper: #f7f7f5; --card: #ffffff; --edge: #e3e3df; }
-      @media (prefers-color-scheme: dark) { :root { --ink: #e8e9ec; --muted: #9aa0ab; --paper: #141518; --card: #1c1d21; --edge: #2c2e33; } }
-      body { margin: 0; background: var(--paper); color: var(--ink); font: 15px/1.5 system-ui, sans-serif; }
-      main { max-width: 44rem; margin: 0 auto; padding: 4rem 1rem; }
-      h1 { font-size: 1.6rem; font-weight: 600; margin: 0 0 .25rem; }
-      main > p { color: var(--muted); margin: 0 0 2rem; }
-      section { padding: 1rem 1.25rem; margin-bottom: .75rem; background: var(--card); border: 1px solid var(--edge); border-radius: 10px; }
-      h2 { margin: 0; font-size: 1rem; }
-      h2 a { color: inherit; text-decoration: none; }
-      h2 a:hover, h2 a:focus-visible { text-decoration: underline; }
-      code { font: 600 .95rem ui-monospace, monospace; }
-      .version { color: var(--muted); font: .85rem ui-monospace, monospace; margin-left: .5rem; font-weight: 400; }
-      section > p { color: var(--muted); margin: .25rem 0 .75rem; }
-      ul.pages { display: flex; flex-wrap: wrap; gap: .25rem .9rem; margin: 0; padding: 0; list-style: none; font-size: .9rem; }
-      ul.pages a { color: var(--muted); }
-      ul.pages a:hover, ul.pages a:focus-visible { color: var(--ink); }
-      footer { margin-top: 2rem; }
-      footer a { color: var(--muted); }
-    </style>
-  </head>
-  <body>
-    <main>
-      <h1>umriss-ui</h1>
-      <p>React components for data-dense applications - dashboards, monitoring, planning. Each demo is the documentation of its package: running examples, their source, and the props generated from the code.</p>
-${rows
-  .map(
-    (row) => `      <section>
-        <h2><a href="./${row.dir}/"><code>${escape(row.name)}</code><span class="version">${escape(row.version)}</span></a></h2>
-        <p>${escape(row.description)}</p>
-        <ul class="pages">${row.pages.map((page) => `<li><a href="./${row.dir}/${page.path}">${escape(page.name)}</a></li>`).join("")}</ul>
-      </section>`,
-  )
-  .join("\n")}
-      <footer><a href="${REPOSITORY}">Source on GitHub</a> · <a href="./llms.txt">llms.txt</a>, for coding agents</footer>
-    </main>
-  </body>
-</html>
-`,
+  readFileSync(join(ROOT, "scripts", "front-page.html"), "utf8").replace(/\{\{(\w+)\}\}/g, (slot, name) => {
+    if (!(name in front)) throw new Error(`front-page.html has a slot nobody fills: ${slot}`);
+    return front[name];
+  }),
 );
 
 /* Every address, once. Google reads `lastmod` only where it is true; the
@@ -283,7 +276,8 @@ ${rows.map((row) => `- [${row.name}](${HOME}${row.dir}/llms.txt): ${row.descript
    a description, a canonical pointing at itself, an h1 and a favicon that is there, every forwarder
    stands outside the sitemap and points into it, and there is no other page
    file; every page has its Markdown twin and announces it, and every link
-   in every llms.txt leads to a file (pages-as-markdown). A build that breaks
+   in every llms.txt leads to a file (pages-as-markdown); the front page keeps
+   its words and its links lead into the site (site-front-page). A build that breaks
    it fails here, before it is deployed. */
 const files = new Map();
 const texts = new Map();
@@ -306,6 +300,7 @@ const linksFavicon = (html, url) => {
 const faults = [
   ...siteFaults(urls, forwarders, files),
   ...twinFaults(twinPages, files, texts),
+  ...frontFaults(files.get(HOME) ?? "", HOME, urls, PROMISE).map((fault) => `${HOME}: ${fault}`),
   ...urls.filter((url) => files.has(url) && !linksFavicon(files.get(url), url)).map((url) => `${url}: no favicon`),
   /* No props row says a prop accepts nothing: a `never` is a prohibition the
      reader merges away (types-without-holes), never a type to show. */

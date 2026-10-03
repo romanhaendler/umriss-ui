@@ -74,6 +74,47 @@ export function siteFaults(urls: readonly string[], forwarders: readonly Forward
   ];
 }
 
+/* The front page's fixed words that the guard holds it to
+   (.scratch/site-front-page): the template writes them, this checks they are
+   still there and lead somewhere. The promise comes from the caller: it names
+   a word of the industrial world, which this source may not (ADR-0035). */
+const BUTTONS = ["Get started", "Explore the scenarios"];
+const CLAIMS = ["ISA-18.2 alarm lists", "ISA-101 limits and verdicts", "Canvas charts, measured", "English and German wording", "Written for coding agents too"];
+
+/** What the front page gets wrong, one line each (.scratch/site-front-page):
+    one h1 "umriss-ui", the promise, the install command and the theme
+    script; both buttons and every claim lead to a sitemap address (a claim
+    may lead to the site's `llms.txt`); fewer than twenty addresses are linked
+    outside the "Every page" disclosure, and inside it every sitemap address
+    but the front page itself. `home` is the front page's address. */
+export function frontFaults(html: string, home: string, urls: readonly string[], promise: string): string[] {
+  const links = (part: string) =>
+    [...part.matchAll(/<a\b[^>]*\bhref="([^"]*)"[^>]*>([\s\S]*?)<\/a>/g)].map((match) => ({
+      href: new URL(match[1]!, home).href,
+      text: match[2]!.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim(),
+    }));
+  const index = /<details[\s>][\s\S]*?<\/details>/.exec(html)?.[0] ?? "";
+  const outside = links(html.replace(index, ""));
+  const inside = new Set(links(index).map((link) => link.href));
+  const h1s = [...html.matchAll(/<h1[^>]*>([\s\S]*?)<\/h1>/g)].map((match) => match[1]!.trim());
+  const leads = (name: string, also: readonly string[] = []) => {
+    const link = outside.find((one) => one.text === name || one.text.startsWith(`${name} `));
+    if (link === undefined) return [`no link "${name}"`];
+    return urls.includes(link.href) || also.includes(link.href) ? [] : [`"${name}" links ${link.href}, which is no sitemap address`];
+  };
+  const distinct = new Set(outside.map((link) => link.href)).size;
+  return [
+    ...(h1s.length === 1 && h1s[0] === "umriss-ui" ? [] : [`not one h1 "umriss-ui" (found: ${h1s.join(", ")})`]),
+    ...(html.includes(promise) ? [] : ["no promise"]),
+    ...(html.includes("npm install @umriss-ui/core") ? [] : ["no install command"]),
+    ...(html.includes('localStorage.getItem("umriss-ui:theme")') ? [] : ["no theme script"]),
+    ...BUTTONS.flatMap((name) => leads(name)),
+    ...CLAIMS.flatMap((name) => leads(name, [new URL("llms.txt", home).href])),
+    ...(distinct < 20 ? [] : [`${distinct} addresses linked outside the index, not fewer than 20`]),
+    ...urls.filter((url) => url !== home && !inside.has(url)).map((url) => `the index does not link ${url}`),
+  ];
+}
+
 /** A page of a demo as the twins' guard sees it: its address, its name and
     the address of its Markdown twin. */
 export interface TwinPage {

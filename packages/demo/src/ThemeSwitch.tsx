@@ -17,8 +17,9 @@
 
    The theme must stand before the first paint, so each demo's `index.html`
    carries a short script in its head that reads the same key and sets the same
-   style. It and this module are the only two places that know the key, and the
-   shell suite checks them together. */
+   style. It and this module know the key, and the shell suite checks them
+   together; the front page (`scripts/front-page.html`) takes the same script
+   and repeats this switch in a few lines of its own, since it has no bundle. */
 
 import { useEffect, useState } from "react";
 
