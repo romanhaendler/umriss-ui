@@ -189,7 +189,7 @@ export function Page({ demo, page }: PageProps) {
               ordinary addresses, which the shell takes like any other. */}
           <div
             className="apiTables"
-            dangerouslySetInnerHTML={{ __html: apiHtml(tables.map((entry) => tableModel(entry, demo.eventsApart))) }}
+            dangerouslySetInnerHTML={{ __html: apiHtml(tables.map((entry) => tableModel(entry))) }}
           />
         </Section>
       )}

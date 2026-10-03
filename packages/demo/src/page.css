@@ -648,7 +648,7 @@
   }
 }
 
-.apiEvents {
+.apiGroupTitle {
   margin: var(--u-space-3) 0 var(--u-space-2);
   font-size: var(--u-text-xs);
   font-weight: var(--u-weight-semibold);

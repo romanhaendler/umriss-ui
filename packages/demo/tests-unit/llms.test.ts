@@ -70,7 +70,7 @@ const TABLES: Record<string, TypeEntry> = {
 
 const { index, full, pages, twins } = renderLlms({ packageDir: PACKAGE_DIR, outline: OUTLINE, tables: TABLES });
 /** The Gauge page's tables, as the app mounts them. */
-const API = apiHtml([tableModel(TABLES.GaugeProps!, false)]);
+const API = apiHtml([tableModel(TABLES.GaugeProps!)]);
 
 describe("llms.txt", () => {
   it("names the package, its summary and where the full text is", () => {

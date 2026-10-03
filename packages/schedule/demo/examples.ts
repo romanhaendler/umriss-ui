@@ -5,7 +5,7 @@ import { buildDemo } from "@umriss-ui/demo";
 import manifest from "../package.json";
 import adrs from "./.generated/adrs.json";
 import props from "./.generated/props.json";
-import { ADDRESSES, EVENTS_APART } from "./outline";
+import { ADDRESSES } from "./outline";
 
 export const DEMO = buildDemo({
   manifest,
@@ -15,5 +15,4 @@ export const DEMO = buildDemo({
   examples: import.meta.glob<Record<string, unknown>>("./examples/*/*.tsx", { eager: true }),
   sources: import.meta.glob<string>(["./examples/*/*.tsx", "./scenarios/*.tsx"], { eager: true, query: "?raw", import: "default" }),
   props,
-  eventsApart: EVENTS_APART,
 });

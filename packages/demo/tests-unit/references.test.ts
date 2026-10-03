@@ -90,7 +90,7 @@ describe("both writers", () => {
       },
       LINKS,
     );
-    const model = tableModel(tables.LanguageProps!, false);
+    const model = tableModel(tables.LanguageProps!);
     expect(tableHtml(model)).toContain(`Formats (<a href="${STYLES}">ADR-0021</a>) - see <a href="../language/">Language</a>.`);
     expect(tableMarkdown(model)).toContain(`Formats ([ADR-0021](${STYLES})) - see [Language](#/language).`);
   });

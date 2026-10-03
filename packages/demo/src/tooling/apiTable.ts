@@ -40,9 +40,9 @@ export interface ApiRow {
 }
 
 export interface ApiGroup {
-  /** Names the table for a screen reader: `props`, `events`. */
+  /** Names the table for a screen reader: `props`, `events`, `accessibility`, `styling`. */
   label: string;
-  /** A heading above the table - only where the group is set apart. */
+  /** A heading above the table - every group but the main one. */
   title?: string;
   rows: readonly ApiRow[];
 }
@@ -90,8 +90,6 @@ function listed(names: readonly string[]): Span[] {
   ]);
 }
 
-const EVENT = /^on[A-Z]/;
-
 function row(prop: PropEntry): ApiRow {
   return {
     name: prop.name,
@@ -107,16 +105,59 @@ function row(prop: PropEntry): ApiRow {
   };
 }
 
-/** A group's rows, the deprecated last: the current API reads first. */
-const rowsOf = (props: readonly PropEntry[]): ApiRow[] =>
-  [...props.filter((prop) => prop.deprecated === undefined), ...props.filter((prop) => prop.deprecated !== undefined)].map(row);
+/* The groups (.scratch/props-table-hygiene): decided by rules on the name, the
+   same in every table of every package and every output, so that nobody
+   curates them by hand. In the order a table reads; the main group has no
+   heading. */
+const GROUPS = [
+  { label: "props" },
+  { label: "events", title: "Events" },
+  { label: "accessibility", title: "Accessibility" },
+  { label: "styling", title: "Styling" },
+] as const;
 
-/** One entry as a table. `eventsApart` sets the `on…` props in a group of
-    their own - the table's and the schedule's demos, whose callbacks are a
-    subject apart. */
-export function tableModel(entry: TypeEntry, eventsApart: boolean): ApiTableModel {
-  const events = eventsApart ? entry.props.filter((prop) => EVENT.test(prop.name)) : [];
-  const props = entry.props.filter((prop) => !events.includes(prop));
+type GroupLabel = (typeof GROUPS)[number]["label"];
+
+const lowered = (name: string) => name.charAt(0).toLowerCase() + name.slice(1);
+const raised = (name: string) => name.charAt(0).toUpperCase() + name.slice(1);
+/** `onValueChange` → `value`. */
+const changed = (name: string) => /^on([A-Z]\w*)Change$/.exec(name)?.[1];
+/** `defaultValue` → `value`. */
+const defaulted = (name: string) => /^default([A-Z]\w*)$/.exec(name)?.[1];
+
+/** The rules, in this order; a name no rule takes stands in the main group,
+    so a new prop is never lost. */
+function groupOf(name: string, names: ReadonlySet<string>): GroupLabel {
+  if (/^(className|style)$|(ClassName|Style)$/.test(name)) return "styling";
+  if (/^aria(-|[A-Z])/.test(name) || name === "role") return "accessibility";
+  /* A controlled callback is no event: it stands by the prop it controls. */
+  const controlled = changed(name);
+  if (controlled !== undefined && names.has(lowered(controlled))) return groupOf(lowered(controlled), names);
+  if (/^on[A-Z]/.test(name)) return "events";
+  return "props";
+}
+
+/** One group's rows: declaration order with two moves - `defaultValue` just
+    before `value`, `onValueChange` just after it - and the deprecated last,
+    so that the current API reads first. */
+function arranged(props: readonly PropEntry[]): PropEntry[] {
+  const arrange = (some: readonly PropEntry[]) => {
+    const named = new Map(some.map((prop) => [prop.name, prop]));
+    const moved = (name: string) => {
+      const x = changed(name) ?? defaulted(name);
+      return x !== undefined && named.has(lowered(x));
+    };
+    return some.flatMap((prop) =>
+      moved(prop.name) ? [] : [named.get(`default${raised(prop.name)}`), prop, named.get(`on${raised(prop.name)}Change`)].filter((one) => one !== undefined),
+    );
+  };
+  return [...arrange(props.filter((prop) => prop.deprecated === undefined)), ...arrange(props.filter((prop) => prop.deprecated !== undefined))];
+}
+
+/** One entry as a table: the main group, then Events, Accessibility and
+    Styling - each only where a row falls into it. */
+export function tableModel(entry: TypeEntry): ApiTableModel {
+  const names = new Set(entry.props.map((prop) => prop.name));
   const alsoTakes = entry.alsoTakes ?? [];
   const closing: Span[][] = [];
   /* The parts of a type that have a table of their own on the page - named
@@ -138,10 +179,10 @@ export function tableModel(entry: TypeEntry, eventsApart: boolean): ApiTableMode
     name: entry.name,
     heading: entry.parameter.length === 0 ? entry.name : `${entry.name}<${entry.parameter.join(", ")}>`,
     anchor: `type-${entry.name}`,
-    groups: [
-      ...(props.length === 0 ? [] : [{ label: "props", rows: rowsOf(props) }]),
-      ...(events.length === 0 ? [] : [{ label: "events", title: "Events", rows: rowsOf(events) }]),
-    ],
+    groups: GROUPS.flatMap((group) => {
+      const rows = arranged(entry.props.filter((prop) => groupOf(prop.name, names) === group.label)).map(row);
+      return rows.length === 0 ? [] : [{ ...group, rows }];
+    }),
     closing,
   };
 }
@@ -186,7 +227,7 @@ function groupHtml(name: string, group: ApiGroup): string {
       "</tr>",
   );
   return (
-    (group.title === undefined ? "" : `<h4 class="apiEvents">${escape(group.title)}</h4>`) +
+    (group.title === undefined ? "" : `<h4 class="apiGroupTitle">${escape(group.title)}</h4>`) +
     `<div class="apiRole"><table class="apiTable" aria-label="${escape(`${name}: ${group.label}`)}">` +
     '<thead><tr><th scope="col">Name</th><th scope="col">Type</th><th scope="col">Default</th><th scope="col">Description</th></tr></thead>' +
     `<tbody>${rows.join("")}</tbody></table></div>`
