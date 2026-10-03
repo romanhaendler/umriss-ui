@@ -565,9 +565,3 @@ export const MOVED: Moved = { table: "first-table" };
    (`@umriss-ui/demo`, `outline.ts`) and to nobody else. */
 export const ADDRESSES = addresses(OUTLINE, MOVED);
 export const { ALL_PAGES, placeOf, addressOf, fromPlace } = ADDRESSES;
-
-/* The `on…` props in a table of their own: the table's callbacks are a
-   subject apart. One value for the page the app shows and the text the
-   generator writes (`examples.ts`, `props.ts`), so the two set them apart
-   alike. */
-export const EVENTS_APART = true;

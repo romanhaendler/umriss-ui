@@ -64,18 +64,18 @@ describe("missingFrom", () => {
 describe.each(Object.keys(ENTRIES))("the llms-full.txt of %s", (dir) => {
   it("names every export of the package, and carries the app's API section on every page", async () => {
     const packageDir = join(PACKAGES, dir);
-    const { OUTLINE, EVENTS_APART = false } = (await import(join(packageDir, "demo", "outline.ts"))) as { OUTLINE: readonly Rubric[]; EVENTS_APART?: boolean };
+    const { OUTLINE } = (await import(join(packageDir, "demo", "outline.ts"))) as { OUTLINE: readonly Rubric[] };
     const types = linkedTables(readProps(sourceFiles(join(packageDir, "src")), requiredTypes(OUTLINE)).types, adrLinks());
-    const { full, pages: sitePages } = renderLlms({ packageDir, outline: OUTLINE, tables: types, eventsApart: EVENTS_APART });
+    const { full, pages: sitePages } = renderLlms({ packageDir, outline: OUTLINE, tables: types });
 
     /* No page sends its reader to a requirement they cannot see, and every
        ADR it names is a link (.scratch/props-table-hygiene, 03). */
     for (const page of sitePages) expect(siteLeaks(page.html), page.path).toEqual([]);
 
-    /* The API section the app mounts (`Page.tsx`: the same call, with the
-       demo's `EVENTS_APART`) is the one the prerendered page carries. */
+    /* The API section the app mounts (`Page.tsx`: the same call) is the one the
+       prerendered page carries. */
     for (const page of OUTLINE.flatMap((rubric) => rubric.pages).filter((one) => one.types.length > 0)) {
-      const app = apiHtml(page.types.map((type) => tableModel(types[type]!, EVENTS_APART)));
+      const app = apiHtml(page.types.map((type) => tableModel(types[type]!)));
       expect(sitePages.find((one) => one.path === `${page.id}/`)!.html, page.id).toContain(`<div class="apiTables">${app}</div>`);
     }
 

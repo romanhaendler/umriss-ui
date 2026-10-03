@@ -41,9 +41,6 @@ export interface LlmsJob {
   outline: readonly Rubric[];
   /** The generated props tables - what `generateProps` just wrote. */
   tables: Readonly<Record<string, TypeEntry>>;
-  /** The `on…` props in a table of their own, as the demo shows them
-      (`EVENTS_APART` in the table's and the schedule's outline). */
-  eventsApart?: boolean;
   /** The page ids that changed (`MOVED` in the outline): each gets a
       forwarder on the site. */
   moved?: Moved;
@@ -374,7 +371,7 @@ function markdownTwin(markdown: string, homepage: string, lift: number, header: 
 }
 
 /** Both texts of one package, from its directory. Pure apart from reading. */
-export function renderLlms({ packageDir, outline: written, tables, eventsApart = false, moved = {}, references = {} }: LlmsJob): {
+export function renderLlms({ packageDir, outline: written, tables, moved = {}, references = {} }: LlmsJob): {
   index: string;
   full: string;
   pages: SitePage[];
@@ -502,7 +499,7 @@ export function renderLlms({ packageDir, outline: written, tables, eventsApart =
         const models = page.types.map((type) => {
           const entry = tables[type];
           if (entry === undefined) throw new Error(`\`${type}\` has no generated table - did \`pnpm props\` run?`);
-          return tableModel(entry, eventsApart);
+          return tableModel(entry);
         });
         const at = parts.length;
         for (const model of models) parts.push("", tableMarkdown(model));

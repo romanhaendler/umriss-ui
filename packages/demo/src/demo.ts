@@ -31,8 +31,6 @@ export interface Demo {
   examples: readonly Example[];
   /** The generated props tables (`demo/.generated/props.json`). */
   tables: Readonly<Record<string, TypeEntry>>;
-  /** Whether the API tables list the `on…` props in a table of their own. */
-  eventsApart: boolean;
   /** The reference tables a page carries after its examples, by page id
       (`demo/.generated/references.json`). */
   references: Readonly<Record<string, readonly ReferenceTable[]>>;
@@ -52,9 +50,6 @@ export interface DemoSources {
   props: unknown;
   /** The generated `adrs.json`: the link of every ADR number a text names. */
   adrs: AdrLinks;
-  /** The events in a table of their own - for the table and the schedule,
-      whose callbacks are a subject apart. */
-  eventsApart?: boolean;
   /** The generated `references.json`, where the demo has one. */
   references?: unknown;
 }
@@ -83,7 +78,6 @@ export function buildDemo(sources: DemoSources): Demo {
     /* The JSON file is generated; its literal type says nothing the
        generating type does not say better. */
     tables: sources.props as Record<string, TypeEntry>,
-    eventsApart: sources.eventsApart ?? false,
     references: (sources.references ?? {}) as Record<string, readonly ReferenceTable[]>,
   };
 }

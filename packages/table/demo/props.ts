@@ -12,10 +12,10 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { generateLlms } from "@umriss-ui/demo/tooling/llms";
 import { generateProps } from "@umriss-ui/demo/tooling/props";
-import { EVENTS_APART, MOVED, OUTLINE } from "./outline.ts";
+import { MOVED, OUTLINE } from "./outline.ts";
 
 const packageDir = join(dirname(fileURLToPath(import.meta.url)), "..");
 /* The text for coding agents comes from the same tables, right after them:
    `llms.txt` beside the demo, `docs/llms-full.md` into the npm package
    (.scratch/ai-readable-docs). */
-generateLlms({ packageDir, outline: OUTLINE, moved: MOVED, eventsApart: EVENTS_APART, tables: generateProps({ packageName: packageDir, outline: OUTLINE }) });
+generateLlms({ packageDir, outline: OUTLINE, moved: MOVED, tables: generateProps({ packageName: packageDir, outline: OUTLINE }) });
