@@ -4,11 +4,11 @@
    The cheapest place at which an example that does not run at all shows up – the
    browser suite pays for the same proof with two pictures per example. */
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { StrictMode, act } from "react";
 import type { ReactNode } from "react";
 import { createRoot } from "react-dom/client";
-import { ToastProvider } from "@umriss-ui/core";
+import { DEFAULT_WORDING, ToastProvider } from "@umriss-ui/core";
 import { Page } from "@umriss-ui/demo";
 import { App } from "../demo/App";
 import { DEMO } from "../demo/examples";
@@ -99,6 +99,30 @@ describe("The examples as a set", () => {
   it.each(DEMO.scenarios.map((s) => [s.id, s] as const))("renders the scenario %s", async (_name, scenario) => {
     const { unmount } = await mount(<scenario.Component />);
     await unmount();
+  });
+
+  it("show no stale or lost feed when the page is loaded in 2030", async () => {
+    /* A world has a fixed moment; a feed's freshness counts from page load.
+       The modules are loaded anew under the clock, as a visitor's page would
+       be: a scenario that ties its feed to the world's date shows it lost. */
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date(2030, 0, 1));
+    try {
+      vi.resetModules();
+      const [{ DEMO: loaded }, core] = await Promise.all([import("../demo/examples"), import("@umriss-ui/core")]);
+      for (const scenario of loaded.scenarios) {
+        const { host, unmount } = await mount(
+          <core.ToastProvider>
+            <scenario.Component />
+          </core.ToastProvider>,
+        );
+        expect(host.textContent, scenario.id).not.toContain(DEFAULT_WORDING.freshnessDisconnected);
+        expect(host.textContent, scenario.id).not.toContain(DEFAULT_WORDING.freshnessStale);
+        await unmount();
+      }
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("leave no page without an example", () => {

@@ -147,6 +147,10 @@ const ELECTRIC = TOURS.filter((tour) => typeOf(tour.vehicle) === "e-van");
 const STOPS = TOURS.reduce((sum, tour) => sum + tour.stops.length, 0);
 
 const AGES = { stale: 24 * 3_600_000, lost: 14 * 24 * 3_600_000 };
+/* The price was read on Saturday at 06:00, seen from Tuesday 10:30; its
+   freshness counts from page load, the tours keep their Tuesday. */
+const LOADED = Date.now();
+const DIESEL_READ = LOADED - (at(10, 30) - new Date(2026, 2, 14, 6, 0).getTime());
 
 export default function CostPerTour() {
   return (
@@ -176,7 +180,7 @@ export default function CostPerTour() {
               unit="€/l"
               decimals={2}
               source="Fuel card, weekly price"
-              asOf={new Date(2026, 2, 14, 6, 0)}
+              asOf={DIESEL_READ}
               ages={AGES}
             />
           </Product>

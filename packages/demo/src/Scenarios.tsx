@@ -5,6 +5,15 @@
    sentence on who uses the screen, the live screen with numbered marks, the
    marks explained below, the pages it is built from, the code collapsed.
 
+   The worlds (`worlds/`). A world has a fixed moment; a feed's freshness
+   counts from page load. Alarms, acknowledgements, tasks and readings keep the
+   world's moment; only the `asOf` handed to a component that judges freshness
+   (AlarmList, Stat, Given) is the moment the page was loaded, less the feed's
+   plausible delay - so no screen ages into a stale or lost feed while the site
+   stands. An example whose subject is a stale or lost feed shows it relative
+   to load as well. Each demo's smoke test loads its scenarios under a clock in
+   2030 to hold this.
+
    The marks. A screen names a spot with `data-callout="1"` on any element; the
    stage lays a numbered badge just outside the element's corner, above and
    to the left - on the corner itself it had covered a label's first letter. Laid over, not put

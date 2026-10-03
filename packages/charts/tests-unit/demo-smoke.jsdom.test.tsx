@@ -8,10 +8,11 @@
    shape is the one the demo of @umriss-ui/table uses, because since ADR-0020
    the two run in the same shell. */
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { StrictMode, act } from "react";
 import type { ReactNode } from "react";
 import { createRoot } from "react-dom/client";
+import { DEFAULT_WORDING } from "@umriss-ui/core";
 import { Page } from "@umriss-ui/demo";
 import { App } from "../demo/App";
 import { DEMO } from "../demo/examples";
@@ -96,6 +97,26 @@ describe("The examples as a set", () => {
       expect(example.source, where).not.toContain("export const title");
       expect(example.source, where).not.toContain("../../../src");
       expect(example.source, where).toContain('from "@umriss-ui/charts"');
+    }
+  });
+
+  it("show no stale or lost feed when the page is loaded in 2030", async () => {
+    /* A world has a fixed moment; a feed's freshness counts from page load.
+       The modules are loaded anew under the clock, as a visitor's page would
+       be: a scenario that ties its feed to the world's date shows it lost. */
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date(2030, 0, 1));
+    try {
+      vi.resetModules();
+      const { DEMO: loaded } = await import("../demo/examples");
+      for (const scenario of loaded.scenarios) {
+        const { host, unmount } = await mount(<scenario.Component />);
+        expect(host.textContent, scenario.id).not.toContain(DEFAULT_WORDING.freshnessDisconnected);
+        expect(host.textContent, scenario.id).not.toContain(DEFAULT_WORDING.freshnessStale);
+        await unmount();
+      }
+    } finally {
+      vi.useRealTimers();
     }
   });
 
