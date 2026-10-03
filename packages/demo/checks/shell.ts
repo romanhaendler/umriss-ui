@@ -22,7 +22,7 @@
       finds `DateTimePicker`. The price is that a search finds more than it
       used to - which is why the palette marks the characters it hit. */
 
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { STANDARDS } from "./accessibility";
 
@@ -299,6 +299,68 @@ test("Escape closes the palette and gives focus back", async ({ page }) => {
   await expect(trigger).toBeFocused();
 });
 
+/* THE THEME. One choice for the site, stored under one key, standing before
+   the first paint (`ThemeSwitch.tsx` and the script in each `index.html`).
+   What is asserted is what a reader gets: the root's `color-scheme`, the key in
+   storage, the switch's name - never the shell's state. */
+
+const THEME_KEY = "umriss-ui:theme";
+const scheme = (page: Page) => page.evaluate(() => document.documentElement.style.colorScheme);
+
+/** Records the root's `color-scheme` the moment parsing ends - after the
+    head's script, before the app's module runs - as `window.__firstScheme`. */
+async function recordFirstScheme(page: Page) {
+  await page.addInitScript(() => {
+    document.addEventListener("readystatechange", () => {
+      const w = window as unknown as { __firstScheme?: string };
+      if (document.readyState === "interactive" && w.__firstScheme === undefined) {
+        w.__firstScheme = getComputedStyle(document.documentElement).colorScheme;
+      }
+    });
+  });
+}
+
+test("the theme switch stores its choice, and a reload is dark before the app runs", async ({ page }) => {
+  await recordFirstScheme(page);
+  expect(await scheme(page)).toBe("light");
+  await page.getByRole("button", { name: "Switch to dark theme" }).click();
+  expect(await scheme(page)).toBe("dark");
+  expect(await page.evaluate((key) => localStorage.getItem(key), THEME_KEY)).toBe("dark");
+
+  await page.reload();
+  expect(await page.evaluate(() => (window as unknown as { __firstScheme?: string }).__firstScheme)).toBe("dark");
+  await expect(page.getByRole("button", { name: "Switch to light theme" })).toBeVisible();
+  expect(await scheme(page)).toBe("dark");
+});
+
+test("with nothing stored the system decides, live", async ({ page }) => {
+  await recordFirstScheme(page);
+  await page.emulateMedia({ colorScheme: "dark" });
+  await expect.poll(() => scheme(page)).toBe("dark");
+  await page.reload();
+  expect(await page.evaluate(() => (window as unknown as { __firstScheme?: string }).__firstScheme)).toBe("dark");
+  await page.emulateMedia({ colorScheme: "light" });
+  await expect.poll(() => scheme(page)).toBe("light");
+  await expect(page.getByRole("button", { name: "Switch to dark theme" })).toBeVisible();
+});
+
+test("with storage throwing, the switch still switches", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.addInitScript(() => {
+    Object.defineProperty(window, "localStorage", {
+      get() {
+        throw new DOMException("The operation is insecure.", "SecurityError");
+      },
+    });
+  });
+  await page.reload();
+  await page.getByRole("button", { name: "Switch to dark theme" }).click();
+  expect(await scheme(page)).toBe("dark");
+  await page.getByRole("button", { name: "Switch to light theme" }).click();
+  expect(await scheme(page)).toBe("light");
+  expect(errors).toEqual([]);
+});
 
 test("the shell is accessible - header, sidebar, scenarios page", async ({ page }) => {
   /* The screens themselves are the demo's, checked with its pages

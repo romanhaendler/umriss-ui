@@ -196,7 +196,7 @@ test("switching the theme changes the axis and series colours without a reload",
   const colorBefore = await labelColor();
   const signatureBefore = await layerSignature();
 
-  await page.getByRole("button", { name: /Light theme|Dark theme/ }).click();
+  await page.getByRole("button", { name: /Switch to (light|dark) theme/ }).click();
   await page.waitForTimeout(250);
 
   expect(await labelColor()).not.toBe(colorBefore);

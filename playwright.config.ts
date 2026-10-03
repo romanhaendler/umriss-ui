@@ -3,8 +3,9 @@
      schedule on 4176, calculation on 4177.
    - Screenshot comparisons run against the real demo build (vite preview),
      not against the dev server.
-   - Light/dark via colorScheme emulation: all three demos initialise their
-     theme from prefers-color-scheme.
+   - Light/dark via colorScheme emulation: with nothing stored, the shell's
+     theme follows prefers-color-scheme, and every test starts with empty
+     storage.
    - Baselines are platform-specific (suffix -linux/-darwin/-win32) and come
      into being on the first run with --update-snapshots. */
 

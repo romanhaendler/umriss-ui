@@ -32,11 +32,14 @@ import { execFileSync } from "node:child_process";
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+/* The one list of the packages - read in Node as it stands, which is why it
+   imports nothing (and why `build:pages` strips types). */
+import { PACKAGES as LIST } from "../packages/demo/src/packages.ts";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SITE = join(ROOT, "site");
 const REPOSITORY = "https://github.com/romanhaendler/umriss-ui";
-const PACKAGES = ["core", "charts", "table", "schedule", "calculation"];
+const PACKAGES = LIST.map((p) => p.id);
 /* The site's address is the one above every package's homepage - read from
    the manifests, which already carry it, rather than written a second time. */
 const HOME = new URL("../", JSON.parse(readFileSync(join(ROOT, "packages", PACKAGES[0], "package.json"), "utf8")).homepage).href;
