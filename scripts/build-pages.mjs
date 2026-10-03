@@ -12,6 +12,8 @@
      site/og-image.png          the picture every page shows where it is shared
      site/favicon.svg           the front page's favicon (each demo bundles its own copy)
      site/fonts/                the front page's Geist (each demo bundles its own copy)
+     site/previews/             the front page's tiles: each package's first scenario,
+                                light and dark (scripts/previews/, by `pnpm previews`)
 
    Every page of a demo is a path with an `index.html` of its own, carrying the
    page's text, its examples' source and its props tables - what a search
@@ -39,13 +41,13 @@
 
 import { execFileSync } from "node:child_process";
 import { createRequire } from "node:module";
-import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 /* The one list of the packages - read in Node as it stands, which is why it
    imports nothing (and why `build:pages` strips types). */
 import { PACKAGES as LIST } from "../packages/demo/src/packages.ts";
-import { installCommand } from "../packages/demo/src/tooling/install.ts";
+import { dependencyLine, installCommand } from "../packages/demo/src/tooling/install.ts";
 import { forwarderHtml, frontFaults, siteFaults, twinFaults, typeLinkFaults } from "../packages/demo/src/tooling/site.ts";
 import { siteLeaks } from "../packages/demo/src/tooling/references.ts";
 
@@ -63,6 +65,11 @@ const HOME = new URL("../", JSON.parse(readFileSync(join(ROOT, "packages", PACKA
    every page - it is taken by hand, so it is renewed by hand when they change. */
 const PREVIEW = "og-image.png";
 const PREVIEW_ALT = "Components of umriss-ui: an open date range picker, a multi-select, a command palette and a tree, with a trend chart, an alarm table, a production plan and an OEE calculation.";
+
+/* The front page's tiles: each package's first scenario, light and dark,
+   1200 x 750 - photographed by `pnpm previews` (scripts/previews.mjs) and
+   checked in, so renewed by that one command when a first scenario changes. */
+const PREVIEWS = "previews";
 
 /* The favicon: the demos link it from their `index.html`, and vite bundles it
    into their assets; the front page and the 404 page take this copy. */
@@ -159,7 +166,11 @@ for (const dir of PACKAGES) {
     twinPages.push(page);
     leaks.push(...siteLeaks(page.html).map((leak) => `${page.url}: ${leak} in the text`));
     if (!front) row.pages.push(page);
+    /* The first scenario's title, as the landing page's text names it (already
+       escaped): what the front page's tile shows a picture of. */
+    else row.scenario = /<h2>Scenarios<\/h2>[\s\S]*?<h3[^>]*>([^<]+)<\/h3>/.exec(page.html)?.[1];
   }
+  if (row.scenario === undefined) throw new Error(`${dir}'s landing page names no scenario - the front page's tile has nothing to show.`);
   /* An old address of a page whose id changed: a forwarder, never in the
      sitemap. */
   for (const forwarder of JSON.parse(readFileSync(join(packageDir, "demo", ".generated", "forwarders.json"), "utf8"))) {
@@ -202,6 +213,21 @@ const front = {
   packages: LIST.map((p) => `<a href="./${p.id}/">${escape(p.name)}</a>`).join(""),
   install: escape(installCommand(rows[0])),
   collageAlt: escape(PREVIEW_ALT),
+  /* One tile a package, in the list's order: its first scenario in either
+     theme (the CSS shows one), what it is and what it needs. The first of
+     the list, core, is where to start. */
+  tiles: LIST.map((p, i) => {
+    const row = rows[i];
+    const img = (theme) =>
+      `<img class="${theme}" src="./${PREVIEWS}/${p.id}-${theme}.png" width="1200" height="750" loading="lazy" alt="${escape(p.name)}: ${row.scenario}" />`;
+    return `<li><a class="tile" href="./${p.id}/">
+            <span class="shot">${img("light")}${img("dark")}${i === 0 ? '<span class="start">Start here</span>' : ""}</span>
+            <h3>${escape(p.name)}</h3>
+            <code>${escape(p.npm)} ${escape(row.version)}</code>
+            <span class="role">${escape(p.role)}</span>
+            <span class="needs">${dependencyLine(row)}</span>
+          </a></li>`;
+  }).join("\n          "),
   count: String(urls.length - 1),
   index: rows
     .map(
@@ -218,6 +244,8 @@ writeFileSync(
     return front[name];
   }),
 );
+/* Before the guard, which fails on a preview that is not there. */
+if (existsSync(join(ROOT, "scripts", PREVIEWS))) cpSync(join(ROOT, "scripts", PREVIEWS), join(SITE, PREVIEWS), { recursive: true });
 
 /* Every address, once. Google reads `lastmod` only where it is true; the
    build date is, since every page is written anew. */
@@ -277,10 +305,12 @@ ${rows.map((row) => `- [${row.name}](${HOME}${row.dir}/llms.txt): ${row.descript
    stands outside the sitemap and points into it, and there is no other page
    file; every page has its Markdown twin and announces it, and every link
    in every llms.txt leads to a file (pages-as-markdown); the front page keeps
-   its words and its links lead into the site (site-front-page). A build that breaks
+   its words, its links lead into the site and its tiles' previews are there
+   and light enough (site-front-page). A build that breaks
    it fails here, before it is deployed. */
 const files = new Map();
 const texts = new Map();
+const images = new Map();
 const walk = (dir) => {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     const below = relative(SITE, dir);
@@ -288,6 +318,7 @@ const walk = (dir) => {
     if (entry.isDirectory() && entry.name !== "assets") walk(join(dir, entry.name));
     else if (entry.name === "index.html") files.set(at, readFileSync(join(dir, entry.name), "utf8"));
     else if (/\.(md|txt)$/.test(entry.name)) texts.set(at + entry.name, readFileSync(join(dir, entry.name), "utf8"));
+    else if (entry.name.endsWith(".png")) images.set(at + entry.name, statSync(join(dir, entry.name)).size);
   }
 };
 walk(SITE);
@@ -300,7 +331,14 @@ const linksFavicon = (html, url) => {
 const faults = [
   ...siteFaults(urls, forwarders, files),
   ...twinFaults(twinPages, files, texts),
-  ...frontFaults(files.get(HOME) ?? "", HOME, urls, PROMISE).map((fault) => `${HOME}: ${fault}`),
+  ...frontFaults(
+    files.get(HOME) ?? "",
+    HOME,
+    urls,
+    PROMISE,
+    rows.map((row) => `${HOME}${row.dir}/`),
+    images,
+  ).map((fault) => `${HOME}: ${fault}`),
   ...urls.filter((url) => files.has(url) && !linksFavicon(files.get(url), url)).map((url) => `${url}: no favicon`),
   /* No props row says a prop accepts nothing: a `never` is a prohibition the
      reader merges away (types-without-holes), never a type to show. Every type

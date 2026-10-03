@@ -86,8 +86,20 @@ const CLAIMS = ["ISA-18.2 alarm lists", "ISA-101 limits and verdicts", "Canvas c
     script; both buttons and every claim lead to a sitemap address (a claim
     may lead to the site's `llms.txt`); fewer than twenty addresses are linked
     outside the "Every page" disclosure, and inside it every sitemap address
-    but the front page itself. `home` is the front page's address. */
-export function frontFaults(html: string, home: string, urls: readonly string[], promise: string): string[] {
+    but the front page itself. One tile per package, in the order of
+    `landings`, each linking its landing page and showing a light and a dark
+    preview - files of the site under 300 kB, their alternative text
+    "<Display name>: <what it shows>". `home` is the front page's address;
+    `images` maps the address of every preview in the site to its size in
+    bytes. */
+export function frontFaults(
+  html: string,
+  home: string,
+  urls: readonly string[],
+  promise: string,
+  landings: readonly string[],
+  images: ReadonlyMap<string, number>,
+): string[] {
   const links = (part: string) =>
     [...part.matchAll(/<a\b[^>]*\bhref="([^"]*)"[^>]*>([\s\S]*?)<\/a>/g)].map((match) => ({
       href: new URL(match[1]!, home).href,
@@ -103,6 +115,30 @@ export function frontFaults(html: string, home: string, urls: readonly string[],
     return urls.includes(link.href) || also.includes(link.href) ? [] : [`"${name}" links ${link.href}, which is no sitemap address`];
   };
   const distinct = new Set(outside.map((link) => link.href)).size;
+  const tiles = [...html.matchAll(/<a class="tile" href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/g)].map((match) => ({
+    href: new URL(match[1]!, home).href,
+    name: /<h3[^>]*>([\s\S]*?)<\/h3>/.exec(match[2]!)?.[1]!.trim() ?? "",
+    previews: [...match[2]!.matchAll(/<img\b[^>]*>/g)].map(([img]) => ({
+      src: new URL(/\bsrc="([^"]*)"/.exec(img)?.[1] ?? "", home).href,
+      alt: /\balt="([^"]*)"/.exec(img)?.[1] ?? "",
+    })),
+  }));
+  const tileFaults = tiles.flatMap(({ href, name, previews }, i) => {
+    const tile = `the tile "${name}"`;
+    return [
+      ...(href === landings[i] ? [] : [`${tile} links ${href}, not ${landings[i]}`]),
+      ...(urls.includes(href) ? [] : [`${tile} links ${href}, which is no sitemap address`]),
+      ...(previews.length === 2 ? [] : [`${tile} has ${previews.length} previews, not a light and a dark one`]),
+      ...previews.flatMap(({ src }) => {
+        const bytes = images.get(src);
+        if (bytes === undefined) return [`${tile} shows ${src}, which is no file of the site`];
+        return bytes < 300_000 ? [] : [`${tile} shows ${src} at ${bytes} bytes, not under 300 kB`];
+      }),
+      ...(previews.every(({ alt }) => alt.startsWith(`${name}: `) && alt.length > name.length + 2)
+        ? []
+        : [`${tile} has a preview whose alternative text is not "${name}: <what it shows>"`]),
+    ];
+  });
   return [
     ...(h1s.length === 1 && h1s[0] === "umriss-ui" ? [] : [`not one h1 "umriss-ui" (found: ${h1s.join(", ")})`]),
     ...(html.includes(promise) ? [] : ["no promise"]),
@@ -110,6 +146,7 @@ export function frontFaults(html: string, home: string, urls: readonly string[],
     ...(html.includes('localStorage.getItem("umriss-ui:theme")') ? [] : ["no theme script"]),
     ...BUTTONS.flatMap((name) => leads(name)),
     ...CLAIMS.flatMap((name) => leads(name, [new URL("llms.txt", home).href])),
+    ...(tiles.length === landings.length ? tileFaults : [`${tiles.length} tiles, not ${landings.length}`]),
     ...(distinct < 20 ? [] : [`${distinct} addresses linked outside the index, not fewer than 20`]),
     ...urls.filter((url) => url !== home && !inside.has(url)).map((url) => `the index does not link ${url}`),
   ];

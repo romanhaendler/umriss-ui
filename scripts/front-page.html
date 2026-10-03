@@ -11,7 +11,8 @@
      reader without JavaScript gets the system's theme and a selectable
      command. Every colour is a design token: the token stylesheet is copied
      in by the build. The type is the demos' Geist, its files copied by the
-     build into fonts/. -->
+     build into fonts/. The tiles' previews are pictures that `pnpm previews`
+     takes of each package's first scenario, light and dark. -->
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -109,6 +110,39 @@
       .proof figcaption { margin-top: var(--u-space-3); font-size: var(--u-text-sm); color: var(--u-color-text-secondary); }
 
       h2 { margin: 0; font-size: var(--u-text-lg); font-weight: var(--u-weight-semibold); letter-spacing: var(--u-tracking-tight); }
+
+      /* A tile a package, the whole tile one link. */
+      .packages { margin-top: 72px; }
+      .tiles { display: grid; grid-template-columns: 1fr; gap: var(--u-space-4); margin: var(--u-space-4) 0 0; padding: 0; list-style: none; }
+      @media (min-width: 700px) { .tiles { grid-template-columns: repeat(2, 1fr); } }
+      @media (min-width: 1100px) { .tiles { grid-template-columns: repeat(3, 1fr); } }
+      .tile {
+        display: flex; flex-direction: column; gap: var(--u-space-1); height: 100%; box-sizing: border-box;
+        padding: var(--u-space-3) var(--u-space-3) var(--u-space-4); border-radius: var(--u-radius-lg);
+        background: var(--u-color-surface); box-shadow: var(--u-edge); text-decoration: none;
+      }
+      .tile:hover { box-shadow: var(--u-edge-strong); }
+      .shot { position: relative; margin-bottom: var(--u-space-2); }
+      .shot img { display: block; width: 100%; height: auto; border-radius: var(--u-radius-md); box-shadow: var(--u-edge); }
+      .start {
+        position: absolute; top: var(--u-space-2); left: var(--u-space-2); padding: 2px var(--u-space-2); border-radius: var(--u-radius-sm);
+        background: var(--u-color-primary-bg); color: var(--u-color-primary-fg); font-size: var(--u-text-xs); font-weight: var(--u-weight-medium);
+      }
+      .tile h3 { margin: 0; font-size: var(--u-text-md); font-weight: var(--u-weight-semibold); }
+      .tile code { font-size: var(--u-text-xs); color: var(--u-color-text-secondary); }
+      .tile .role { font-size: var(--u-text-sm); }
+      .tile .needs { font-size: var(--u-text-xs); color: var(--u-color-text-secondary); }
+      /* One preview shows, so only one is fetched (a hidden lazy image is
+         not): the system's theme, unless the theme script has set one on the
+         root's style - it writes `color-scheme`, not an attribute. */
+      .shot .dark { display: none; }
+      :root[style*="dark"] .shot .light { display: none; }
+      :root[style*="dark"] .shot .dark { display: block; }
+      @media (prefers-color-scheme: dark) {
+        :root:not([style*="light"]) .shot .light { display: none; }
+        :root:not([style*="light"]) .shot .dark { display: block; }
+      }
+
       .apart { margin-top: 72px; }
       .claims { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: var(--u-space-3); margin: var(--u-space-4) 0 0; padding: 0; list-style: none; }
       .claims a {
@@ -167,6 +201,13 @@
         <a href="./core/"><img src="./og-image.png" width="1200" height="630" alt="{{collageAlt}}" /></a>
         <figcaption>Every picture on this site is a running component. The scenarios show them working.</figcaption>
       </figure>
+
+      <section class="packages" aria-labelledby="packages">
+        <h2 id="packages">Packages</h2>
+        <ul class="tiles">
+          {{tiles}}
+        </ul>
+      </section>
 
       <section class="apart" aria-labelledby="apart">
         <h2 id="apart">What sets it apart</h2>

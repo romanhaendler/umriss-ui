@@ -68,7 +68,9 @@ Online at **<https://romanhaendler.github.io/umriss-ui/>** —
 [schedule](https://romanhaendler.github.io/umriss-ui/schedule/),
 [calculation](https://romanhaendler.github.io/umriss-ui/calculation/). Rebuilt on every push
 to `main` (`.github/workflows/pages.yml`); `pnpm build:pages` assembles the same
-site locally into `site/`.
+site locally into `site/`. After a package's first scenario changes, `pnpm previews`
+renews the front page's pictures of it from that built site (`scripts/previews/`,
+checked in).
 
 Locally:
 
