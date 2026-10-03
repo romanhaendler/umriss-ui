@@ -46,7 +46,8 @@ export interface ApiRow {
 export interface ApiGroup {
   /** Names the table for a screen reader: `props`, `events`, `accessibility`, `styling`. */
   label: string;
-  /** A heading above the table - every group but the main one. */
+  /** A heading above the table - every group but the main one; in a long
+      table the summary of the group's fold. */
   title?: string;
   rows: readonly ApiRow[];
 }
@@ -309,27 +310,37 @@ export function spansHtml(spans: readonly Span[]): string {
     .join("");
 }
 
-function groupHtml(name: string, group: ApiGroup): string {
+/* A table of more than this many rows folds its secondary groups
+   (.scratch/props-table-hygiene, 02). Folding is the HTML's matter alone: the
+   Markdown writes every group out, and the folded rows stand in the HTML too -
+   the browser's find reaches them, and the shell opens a fold that holds the
+   row an address names (`Shell.tsx`). */
+const FOLD_OVER = 15;
+
+function groupHtml(name: string, group: ApiGroup, fold: boolean): string {
   const rows = group.rows.map(
     (one) =>
-      "<tr>" +
+      /* `<Type>-<prop>`: a row is an address (.scratch/props-to-examples). */
+      `<tr id="${escape(`${name}-${one.name}`)}">` +
       `<th scope="row"><code>${escape(one.name)}</code>${one.badges.map((badge) => `<span class="apiBadge">${escape(badge)}</span>`).join("")}</th>` +
       `<td><code class="apiType">${spansHtml(one.type)}</code>${one.expansion === undefined ? "" : `<br><code>${escape(one.expansion)}</code>`}</td>` +
       `<td>${one.defaultValue === undefined ? "—" : spansHtml(one.defaultValue)}</td>` +
       `<td>${one.deprecated === undefined ? "" : `<span class="apiDeprecated"><span class="apiBadge">Deprecated</span> ${spansHtml(one.deprecated)}</span> `}${spansHtml(one.description)}${one.origin === undefined ? "" : `<span class="apiOrigin"> from <code>${escape(one.origin)}</code></span>`}</td>` +
       "</tr>",
   );
-  return (
-    (group.title === undefined ? "" : `<h4 class="apiGroupTitle">${escape(group.title)}</h4>`) +
+  const table =
     `<div class="apiRole"><table class="apiTable" aria-label="${escape(`${name}: ${group.label}`)}">` +
     '<thead><tr><th scope="col">Name</th><th scope="col">Type</th><th scope="col">Default</th><th scope="col">Description</th></tr></thead>' +
-    `<tbody>${rows.join("")}</tbody></table></div>`
-  );
+    `<tbody>${rows.join("")}</tbody></table></div>`;
+  if (group.title === undefined) return table;
+  if (fold) return `<details class="apiFold"><summary class="apiGroupTitle">${escape(`${group.title} · ${group.rows.length}`)}</summary>${table}</details>`;
+  return `<h4 class="apiGroupTitle">${escape(group.title)}</h4>${table}`;
 }
 
 /** One table as HTML - no whitespace between the elements, as React writes it. */
 export function tableHtml(model: ApiTableModel | ApiDefinitionModel, level = 3): string {
   const definition = "description" in model ? model : undefined;
+  const fold = model.groups.reduce((count, group) => count + group.rows.length, 0) > FOLD_OVER;
   return (
     `<div class="apiBlock" data-type="${escape(model.name)}">` +
     `<h${level} class="apiTitle" id="${escape(model.anchor)}"><code>${escape(model.heading)}</code></h${level}>` +
@@ -339,7 +350,7 @@ export function tableHtml(model: ApiTableModel | ApiDefinitionModel, level = 3):
       ? `<pre class="apiDeclaration"><code>${spansHtml(definition.declaration)}</code></pre>`
       : model.groups.length === 0
         ? '<p class="apiInherited">Declares no props of its own.</p>'
-        : model.groups.map((group) => groupHtml(model.name, group)).join("")) +
+        : model.groups.map((group) => groupHtml(model.name, group, fold)).join("")) +
     model.closing.map((sentence) => `<p class="apiInherited">${spansHtml(sentence)}</p>`).join("") +
     "</div>"
   );

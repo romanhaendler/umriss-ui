@@ -102,6 +102,60 @@ describe("the groups of a table (.scratch/props-table-hygiene)", () => {
 /** `GaugeSize` is defined on the page, `Reading` has a table on the Meter's. */
 const LINK_OF = (name: string) => (name === "GaugeSize" ? "#type-GaugeSize" : `#/meter/type-${name}`);
 
+/** GROUPED with main rows added until it has `count` rows. */
+const grown = (count: number): TypeEntry => ({
+  ...GROUPED,
+  props: [
+    ...GROUPED.props,
+    ...Array.from({ length: count - GROUPED.props.length }, (_, i) => ({ name: `extra${i}`, type: "string", optional: true, description: "More." })),
+  ],
+});
+
+describe("folding a long table (.scratch/props-table-hygiene, 02)", () => {
+  const fold = (count: number) => {
+    const host = document.createElement("div");
+    host.innerHTML = tableHtml(tableModel(grown(count)));
+    return host;
+  };
+
+  it("folds the secondary groups of a table over 15 rows, closed, the summary naming group and count", () => {
+    const host = fold(16);
+    const folds = [...host.querySelectorAll("details")];
+    expect(folds.map((one) => [one.open, one.querySelector(":scope > summary")!.textContent])).toEqual([
+      [false, "Events · 2"],
+      [false, "Accessibility · 3"],
+      [false, "Styling · 3"],
+    ]);
+    /* Everything is in the HTML either way; the main group never folds. */
+    expect(host.querySelectorAll("tbody tr")).toHaveLength(16);
+    expect(host.querySelector('table[aria-label="PickerProps: props"]')!.closest("details")).toBeNull();
+    expect(host.querySelector("h4")).toBeNull();
+  });
+
+  it("leaves a table of 15 rows open and plain", () => {
+    const host = fold(15);
+    expect(host.querySelector("details")).toBeNull();
+    expect([...host.querySelectorAll("h4")].map((h4) => h4.textContent)).toEqual(["Events", "Accessibility", "Styling"]);
+  });
+
+  it("writes every group of a long table as a sub-heading with its rows in the Markdown", () => {
+    const model = tableModel(grown(16));
+    const html = htmlFacts(tableHtml(model));
+    const markdown = markdownFacts(tableMarkdown(model));
+    expect(markdown.titles).toEqual(["Events", "Accessibility", "Styling"]);
+    expect(markdown.titles).toEqual(html.titles);
+    expect(markdown.groups).toEqual(html.groups);
+  });
+
+  it("anchors every row at #<Type>-<prop>, so that an address can name it", () => {
+    expect([...fold(16).querySelectorAll("tbody tr")].map((tr) => tr.id).slice(0, 3)).toEqual([
+      "PickerProps-defaultValue",
+      "PickerProps-value",
+      "PickerProps-onValueChange",
+    ]);
+  });
+});
+
 interface Row {
   name: string;
   type: string;
@@ -125,7 +179,8 @@ function htmlFacts(html: string): { heading: string; anchor: string; titles: str
   return {
     heading: heading.textContent!,
     anchor: heading.id,
-    titles: [...host.querySelectorAll("h4")].map((h4) => h4.textContent!),
+    /* A folded group names itself in its summary, with its count. */
+    titles: [...host.querySelectorAll("h4, summary")].map((title) => title.textContent!.replace(/ · \d+$/, "")),
     groups: [...host.querySelectorAll("table")].map((table) =>
       [...table.querySelectorAll("tbody tr")].map((tr) => ({
         name: tr.querySelector("th code")!.textContent!,

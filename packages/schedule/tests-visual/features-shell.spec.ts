@@ -20,4 +20,5 @@ checkShell({
   abbreviation: { query: "sbt", find: "Subtasks", glyphs: ["S", "bt"] },
   pointer: { wide: "s", narrow: "lag that does" },
   contents: { pageId: "dependencies", id: "violated-dependency", title: "Show a lag that does not fit" },
+  foldedRow: { pageId: "schedule", id: "ScheduleProps-onIntent" },
 });

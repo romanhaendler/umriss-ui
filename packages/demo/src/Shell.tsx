@@ -232,6 +232,11 @@ export function Shell({ demo, sentence }: ShellProps) {
       document.documentElement.scrollTop = 0;
       return;
     }
+    /* A fold never hides a target (.scratch/props-table-hygiene, 02): a row
+       of a long props table's folded group opens its group first. The
+       browser's own opening on a fragment is not relied on - not every engine
+       does it, and none does it on a jump without a reload. */
+    for (let fold = el.parentElement?.closest("details"); fold; fold = fold.parentElement?.closest("details")) fold.open = true;
     /* scroll-margin-top keeps the sticky header away from the example;
        without it the jump lands a little too high. */
     el.scrollIntoView({ block: "start", behavior: "auto" });
