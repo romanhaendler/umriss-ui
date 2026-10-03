@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { renderLlms } from "../src/tooling/llms";
 import { apiHtml, apiSection, propsOnPage } from "../src/tooling/apiTable";
-import type { Rubric } from "../src/outline";
+import { apiIndexRubric, type Rubric } from "../src/outline";
 import type { TypeEntry } from "../src/tooling/tables";
 
 /* The fixture stands in the one list of packages as a sixth, starting at its
@@ -426,5 +426,91 @@ describe("Props on this page", () => {
   it("is not on a page with a table of its own", () => {
     expect(propsOnPage(gauge!, OUTLINE[0]!.pages, SHOWN)).toEqual([]);
     expect(rendered.full.slice(rendered.full.indexOf("### Gauge"), rendered.full.indexOf("### Meter"))).not.toContain("Props on this page");
+  });
+});
+
+describe("the API index (.scratch/api-index, ADR-0044)", () => {
+  /* The fixture's outline with the index as its last rubric. The fixture
+     exports a component with a page (`Gauge`) and one without
+     (`GaugeNeedle`), a hook with its tags, a function, two constants - one
+     deprecated - and two types, one with a table and one without. */
+  const outline: readonly Rubric[] = [...OUTLINE, apiIndexRubric("@umriss-ui/fixture")];
+  const tables: Record<string, TypeEntry> = {
+    ...TABLES,
+    GaugeTone: {
+      name: "GaugeTone",
+      parameter: [],
+      omitted: [],
+      props: [],
+      definition: { description: "What the needle says.", declaration: 'type GaugeTone = "neutral" | "alarm";' },
+    },
+  };
+  const { full: text, index: llmsIndex, pages: sitePages, twins: twinTexts, apiIndex } = renderLlms({ packageDir: PACKAGE_DIR, outline, tables });
+  const page = text.slice(text.indexOf("### API index"));
+  /** One entry of the index's text, up to the next heading of its level. */
+  const entry = (name: string) => {
+    const from = page.indexOf(`##### \`${name}\`\n`);
+    const next = page.indexOf("\n####", from + 1);
+    return page.slice(from, next === -1 ? undefined : next + 1);
+  };
+  const html = sitePages.find((one) => one.path === "api/")!.html;
+
+  it("groups every export by what it is, alphabetical within a group", () => {
+    expect(apiIndex!.groups.map((group) => [group.title, group.entries.map((one) => one.name)])).toEqual([
+      ["Components", ["Gauge", "GaugeNeedle"]],
+      ["Hooks", ["useGauge"]],
+      ["Functions", ["fraction"]],
+      ["Constants", ["GAUGE_RANGE", "RANGE"]],
+      ["Types", ["GaugeProps", "GaugeTone"]],
+    ]);
+    expect(page.indexOf("#### Components")).toBeLessThan(page.indexOf("#### Hooks"));
+    expect(page.indexOf("#### Constants")).toBeLessThan(page.indexOf("#### Types"));
+  });
+
+  it("links a component with a page there, with the page's lede, and shows one without a page as a function", () => {
+    expect(entry("Gauge")).toContain("[Gauge](#/gauge) – One value as a needle (also called a `dial`)");
+    expect(entry("Gauge")).not.toContain("```");
+    expect(entry("GaugeNeedle")).toContain("The needle alone, for a gauge of your own.\n\n```ts\nfunction GaugeNeedle(");
+  });
+
+  it("shows a hook's comment, its tags as a list and its declaration, the library's types in it linked", () => {
+    expect(entry("useGauge")).toContain(
+      "Follows a value as it moves.\n\n- `initial` – The value it starts at.\n- Returns The value now, and what the needle says of it.\n\n```ts\nfunction useGauge(initial: number): {",
+    );
+    expect(html).toContain('<a href="#type-GaugeTone">GaugeTone</a>');
+  });
+
+  it("links a type with a table to it, and defines one without a table as a page does", () => {
+    expect(entry("GaugeProps")).toContain("Its table stands on [Gauge](#/gauge/type-GaugeProps).");
+    expect(entry("GaugeTone")).toBe('##### `GaugeTone`\n\nWhat the needle says.\n\n```ts\ntype GaugeTone = "neutral" | "alarm";\n```\n');
+  });
+
+  it("names the pages that mention an export in code - import line, examples, scenarios - and not their tables", () => {
+    expect(entry("Gauge")).toContain("Used on [Scenarios](#/) and [Gauge](#/gauge).");
+    /* The Gauge page's table is `GaugeProps`; its text never names it. */
+    expect(entry("GaugeProps")).not.toContain("Used on");
+    expect(entry("fraction")).not.toContain("Used on");
+  });
+
+  it("marks a deprecated export as a deprecated prop is marked", () => {
+    expect(entry("RANGE")).toContain("*Deprecated* Read `GAUGE_RANGE` instead.");
+    expect(html).toContain('<p class="apiProse apiDeprecated"><span class="apiBadge">Deprecated</span> Read <code>GAUGE_RANGE</code> instead.</p>');
+  });
+
+  it("anchors every export on the prerendered page: a value at its name, a type at type-<Name>", () => {
+    expect([...apiIndex!.anchors].sort()).toEqual(["GAUGE_RANGE", "Gauge", "GaugeNeedle", "RANGE", "fraction", "type-GaugeProps", "type-GaugeTone", "useGauge"]);
+    for (const anchor of apiIndex!.anchors) expect(html, anchor).toContain(`id="${anchor}"`);
+    expect(html).toMatch(/^<h1>API index<\/h1>/);
+    expect(html).toContain('<h2 class="sectionTitle" id="group-hooks">Hooks</h2>');
+  });
+
+  it("is a page like any other: last in the outline, in llms.txt, with its twin and without an import line", () => {
+    expect(llmsIndex).toContain("## API index\n\nEvery name the package exports, in one place.\n\n- [API index](https://example.test/fixture/api.md): ");
+    expect(page).toMatch(/^### API index\n\nEverything `@umriss-ui\/fixture` exports, with its signature\. A component's props stand on its own page\.\n\nDemo page: [^\n]+\n\n#### Components\n/);
+    expect(twinTexts.find((one) => one.path === "api.md")!.text).toContain("[Gauge](https://example.test/fixture/gauge/#type-GaugeProps)");
+  });
+
+  it("takes the place of the appendix", () => {
+    expect(text).not.toContain("## The rest of the API");
   });
 });

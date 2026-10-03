@@ -207,13 +207,16 @@ export function declarationKey(node: ts.Node): string {
     the `paths` to its neighbours' source, a type from core is read where it is
     written, not from a dist that may not be built. `entries` are the modules
     a reader imports from - the package's and its neighbours'; where they are
-    given, every type a page names must be exported by one of them. */
+    given, every type a page names must be exported by one of them.
+    `alsoDefine` names further types to define where they have no table -
+    what the API index shows. */
 export function readProps(
   files: readonly string[],
   typeNames: readonly string[],
   check: (text: string) => readonly string[] = () => [],
   options: ts.CompilerOptions = {},
   entries: readonly string[] = [],
+  alsoDefine: readonly string[] = [],
 ): Reading {
   const program = ts.createProgram([...files, ...entries], {
     target: ts.ScriptTarget.ES2022,
@@ -1016,6 +1019,15 @@ export function readProps(
     return members !== undefined && members.every(ts.isPropertySignature);
   };
   const queue = Object.values(types).flatMap((entry) => entry.props.flatMap((p) => p.references ?? []));
+  /* What the API index names besides (ADR-0044): an exported type, a type a
+     hook's or a function's signature names - by name, as the index links it.
+     A name the package does not declare (`ReactNode`) is no type of it. */
+  for (const name of alsoDefine) {
+    const declaration = declarations.get(name);
+    if (declaration === undefined || (named.get(name) ?? declaration) !== declaration) continue;
+    named.set(name, declaration);
+    queue.push(name);
+  }
   /** What a page shows: the tables, and the definitions. */
   const shown = new Set<Declaration>(isPublic);
   for (let i = 0; i < queue.length; i++) {

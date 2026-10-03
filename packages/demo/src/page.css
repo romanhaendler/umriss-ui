@@ -799,6 +799,17 @@
   color: var(--u-color-text);
 }
 
+/* A hook's or a function's `@param` and `@returns` lines (`tooling/apiIndex.ts`). */
+ul.apiProse {
+  padding-left: var(--u-space-5);
+}
+
+/* The API index arrives as one piece of HTML; its group sections stand as
+   the page's own, in the page's column and gap. */
+.apiIndex {
+  display: contents;
+}
+
 /* A declaration breaks its lines rather than scroll: a box that scrolls
    needs a tab stop of its own. */
 .apiDeclaration {

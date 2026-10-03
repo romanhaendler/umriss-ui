@@ -1080,6 +1080,17 @@ already this workspace's word for what lies above a surface and collides with
 nothing. **Status and waiting** and not "State": **State** is the charts' word
 (ADR-0007), and a rubric may not take a word a series already owns.
 
+**API index**:
+The one generated page of a demo, at `/api/`, alone in a last rubric of the
+same name: every name the package's entries export, grouped as Components,
+Hooks, Functions, Constants and Types (and a group per subpath), each with its
+signature or a link to the page or table where it stands (ADR-0044). Nobody
+writes it; an export appears on it as soon as it exists, with its comment. A
+component's props stay on its page. The calculation's demo has it first; the
+other four follow.
+_Avoid_: API reference, reference page, appendix (the llms text's former "The
+rest of the API", which it replaces)
+
 An **Example**'s file exports its name as `title`. A page's address is its
 component name, lower-cased, and a rename of the outline never touches it - with
 one exception, taken once: the page `Stack and Grid` is `/stack-and-grid/`,

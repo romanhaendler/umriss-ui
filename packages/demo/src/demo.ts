@@ -17,6 +17,7 @@ import { readExamples, readScenarios } from "./tooling/examples";
 import type { Example, ExampleModule, Scenario, ScenarioModule } from "./tooling/examples";
 import type { TypeEntry } from "./tooling/propsReader";
 import type { ReferenceTable } from "./tooling/referenceTable";
+import type { ApiIndexModel } from "./tooling/apiIndex";
 import { readConfigurators, type Configurator, type ConfiguratorModule } from "./tooling/configurator";
 import type { SearchEntry } from "./search";
 
@@ -44,6 +45,9 @@ export interface Demo {
   /** The package's search fragment (`demo/.generated/search.json`), loaded
       when the palette first opens. */
   search: () => Promise<readonly SearchEntry[]>;
+  /** The API index's body (`demo/.generated/api-index.json`), where the
+      outline has one (ADR-0044). */
+  apiIndex?: ApiIndexModel;
 }
 
 export interface DemoSources {
@@ -68,6 +72,8 @@ export interface DemoSources {
   /** `() => import("./.generated/search.json")`: a part of the bundle of its
       own, which only the palette's first opening fetches. */
   search: () => Promise<{ default: unknown }>;
+  /** The generated `api-index.json`, where the outline has an API index. */
+  apiIndex?: unknown;
 }
 
 export function buildDemo(sources: DemoSources): Demo {
@@ -99,5 +105,6 @@ export function buildDemo(sources: DemoSources): Demo {
     references: (sources.references ?? {}) as Record<string, readonly ReferenceTable[]>,
     configurators: readConfigurators(sources.configurators ?? {}, tables, sources.addresses.ALL_PAGES),
     search: () => sources.search().then((module) => module.default as SearchEntry[]),
+    ...(sources.apiIndex === undefined ? {} : { apiIndex: sources.apiIndex as ApiIndexModel }),
   };
 }

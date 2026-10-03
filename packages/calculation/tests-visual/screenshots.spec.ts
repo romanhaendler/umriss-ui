@@ -14,7 +14,8 @@ test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(new Date("2026-03-17T10:30:00"));
 });
 
-for (const pageId of PAGES) {
+/* Not the API index: its content is text, which the guards hold (ADR-0044). */
+for (const pageId of PAGES.filter((one) => one !== "api")) {
   test(`Seitenkopf ${pageId}`, async ({ page }, testInfo) => {
     await open(page, pageId);
     const target = page.locator(`[data-block="${pageId}"] .pageHead`);

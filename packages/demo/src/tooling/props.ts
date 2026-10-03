@@ -25,12 +25,11 @@
 import { existsSync, readdirSync, readFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { join, dirname, relative } from "node:path";
 import { fileURLToPath } from "node:url";
-import ts from "typescript";
 import type { Rubric } from "../outline.ts";
 import { readProps } from "./propsReader.ts";
 import type { Flag, PropEntry, Reading, ShownIn, TypeEntry } from "./propsReader.ts";
 import { shownIn } from "./shownIn.ts";
-import { entriesOf, undocumentedExports } from "./exportDocs.ts";
+import { compilerOptionsOf, entriesOf, exportedDeclarations, typesOnTheIndex, undocumentedExports } from "./exportDocs.ts";
 import { adrLinksOf, internalReferences, linkAdrs, pageTexts, type AdrLinks } from "./references.ts";
 
 /** Every `.ts`/`.tsx` under a directory, sorted.
@@ -117,16 +116,6 @@ export function withShownIn(types: Readonly<Record<string, TypeEntry>>, shown: R
   );
 }
 
-/** The package's own compiler options, from its `tsconfig.json` - the paths
-    to its neighbours' source above all, so that a type from core reads as it
-    is written and not as `any` from a dist that was never built. Empty where
-    the package has none. */
-export function compilerOptionsOf(packageDir: string): ts.CompilerOptions {
-  const configPath = join(packageDir, "tsconfig.json");
-  if (!existsSync(configPath)) return {};
-  return ts.getParsedCommandLineOfConfigFile(configPath, {}, { ...ts.sys, onUnRecoverableConfigFileDiagnostic: () => {} })?.options ?? {};
-}
-
 /** The entries a reader of the package's pages imports from: the package's
     own and those of the workspace packages it depends on (`peerDependencies`),
     each with its subpaths. */
@@ -136,13 +125,22 @@ export function importableEntries(packageDir: string): string[] {
   const neighbours = Object.keys(manifest.peerDependencies ?? {})
     .filter((name) => name.startsWith("@umriss-ui/"))
     .map((name) => join(packageDir, "..", name.slice("@umriss-ui/".length)));
-  return [packageDir, ...neighbours].flatMap(entriesOf);
+  return [packageDir, ...neighbours].flatMap((dir) => entriesOf(dir).map((one) => one.file));
 }
 
 /** A package's tables and the definitions they need, read as `generateProps`
-    reads them; `check` as for `readProps`. */
+    reads them; `check` as for `readProps`. Where the outline has an API
+    index, also the definitions it needs (ADR-0044). */
 export function readPackage(packageDir: string, outline: readonly Rubric[], check?: (text: string) => readonly string[]): Reading {
-  return readProps(sourceFiles(join(packageDir, "src")), requiredTypes(outline), check, compilerOptionsOf(packageDir), importableEntries(packageDir));
+  const indexed = outline.some((rubric) => rubric.pages.some((page) => page.body === "api-index"));
+  return readProps(
+    sourceFiles(join(packageDir, "src")),
+    requiredTypes(outline),
+    check,
+    compilerOptionsOf(packageDir),
+    importableEntries(packageDir),
+    indexed ? typesOnTheIndex(exportedDeclarations(packageDir)) : [],
+  );
 }
 
 export interface PropsJob {

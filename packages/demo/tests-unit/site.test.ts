@@ -3,7 +3,7 @@
    seam 1). */
 
 import { describe, expect, it } from "vitest";
-import { SEARCH_BUDGET, documentFaults, forwarderHtml, frontFaults, searchFaults, siteFaults, siteSearch, twinFaults, typeLinkFaults, whatsNewFaults } from "../src/tooling/site";
+import { SEARCH_BUDGET, apiIndexFaults, documentFaults, forwarderHtml, frontFaults, searchFaults, siteFaults, siteSearch, twinFaults, typeLinkFaults, whatsNewFaults } from "../src/tooling/site";
 
 const HOME = "https://example.test/umriss-ui/charts/";
 const page = (url: string) =>
@@ -341,5 +341,22 @@ describe("the guard over \"What's new\" (.scratch/concepts-and-changelog-pages)"
 
   it("fails on a line whose anchor is not on its changelog's page", () => {
     expect(whatsNewFaults(strip("./core/changelog/#v0-25-0"), SITE, pages, changelogs)).toEqual([`"What's new" links ${SITE}core/changelog/#v0-25-0, which has no such anchor`]);
+  });
+});
+
+describe("the API index's guard (ADR-0044)", () => {
+  const api = `${HOME}api/`;
+  const index = new Map([[api, '<h1>API index</h1><h3 id="Chart"><code>Chart</code></h3><h3 id="type-Accessor"><code>Accessor</code></h3>']]);
+
+  it("passes where every export has an element with its anchor", () => {
+    expect(apiIndexFaults(api, ["Chart", "type-Accessor"], index)).toEqual([]);
+  });
+
+  it("names every export without one, and an index that is not there", () => {
+    expect(apiIndexFaults(api, ["Chart", "controlLimits", "type-Accessor", "type-Series"], index)).toEqual([
+      `${api}: no element with the id controlLimits`,
+      `${api}: no element with the id type-Series`,
+    ]);
+    expect(apiIndexFaults(`${HOME}gone/`, ["Chart"], index)).toEqual([`${HOME}gone/: no API index`]);
   });
 });

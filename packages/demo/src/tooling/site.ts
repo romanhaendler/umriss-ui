@@ -171,6 +171,15 @@ export function typeLinkFaults(files: ReadonlyMap<string, string>): string[] {
   );
 }
 
+/** What an API index gets wrong, one line each (ADR-0044): every export of
+    the package - its anchor, `Name` or `type-Name` - has an element with
+    that id on the index at `url`. `files` as for `siteFaults`. */
+export function apiIndexFaults(url: string, anchors: readonly string[], files: ReadonlyMap<string, string>): string[] {
+  const html = files.get(url);
+  if (html === undefined) return [`${url}: no API index`];
+  return anchors.filter((anchor) => !html.includes(`id="${escape(anchor)}"`)).map((anchor) => `${url}: no element with the id ${anchor}`);
+}
+
 /** A page of a demo as the twins' guard sees it: its address, its name and
     the address of its Markdown twin. */
 export interface TwinPage {

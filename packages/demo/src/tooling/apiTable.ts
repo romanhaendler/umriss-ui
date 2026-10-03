@@ -132,7 +132,7 @@ const TOKEN = /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`|[A-Za-z_$][
 
 /** Code as pieces: each name of `references` that leads somewhere a link,
     the rest text - a name inside a string literal stays text. */
-function linked(value: string, references: readonly string[], linkOf: LinkOf): Span[] {
+export function linked(value: string, references: readonly string[], linkOf: LinkOf): Span[] {
   const out: Span[] = [];
   let at = 0;
   const flush = (to: number) => {
@@ -294,17 +294,7 @@ export function apiSection(page: ApiPage, pages: readonly ApiPage[], entries: Re
   const tables = page.types.map((name) => tableModel(entryOf(name), linkOf, page.id));
   const definitions: ApiDefinitionModel[] = [];
   /* `linkOf` adds to `defined` while it is walked. */
-  for (let i = 0; i < defined.length; i++) {
-    const entry = entryOf(defined[i]!);
-    const definition = entry.definition!;
-    definitions.push({
-      ...tableModel(entry, linkOf, page.id),
-      ...(definition.from === undefined ? {} : { from: definition.from }),
-      description: spansOf(definition.description),
-      ...(definition.declaration === undefined ? {} : { declaration: linked(definition.declaration, definition.references ?? [], linkOf) }),
-      ...(definition.expansion === undefined ? {} : { expansion: definition.expansion }),
-    });
-  }
+  for (let i = 0; i < defined.length; i++) definitions.push(definitionModel(entryOf(defined[i]!), linkOf, page.id));
   return { tables, definitions };
 }
 
@@ -345,6 +335,20 @@ export function propsOnPage(page: ApiPage, pages: readonly (ApiPage & { name: st
       },
     ];
   });
+}
+
+/** A type without a table as its definition: its members as a table's, or
+    its declaration - on a page's "Types on this page" and on the API index
+    alike. */
+export function definitionModel(entry: TypeEntry, linkOf: LinkOf, pageId?: string): ApiDefinitionModel {
+  const definition = entry.definition!;
+  return {
+    ...tableModel(entry, linkOf, pageId),
+    ...(definition.from === undefined ? {} : { from: definition.from }),
+    description: spansOf(definition.description),
+    ...(definition.declaration === undefined ? {} : { declaration: linked(definition.declaration, definition.references ?? [], linkOf) }),
+    ...(definition.expansion === undefined ? {} : { expansion: definition.expansion }),
+  };
 }
 
 /* ------------------------------------------------------------------ */

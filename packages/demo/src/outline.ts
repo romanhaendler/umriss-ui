@@ -79,6 +79,10 @@ export interface Page {
   /** The page that installs the package: its head shows the install command,
       derived from the manifest, under the import line. One page per demo. */
   installs?: true;
+  /** A page whose body is generated rather than written: the shell gives it
+      the page head without an import line, and the generated body after it.
+      One kind so far, the API index (ADR-0044). */
+  body?: "api-index";
 }
 
 export interface Rubric {
@@ -188,6 +192,26 @@ export function keysOfText(
 
 /** The address of the scenarios page, as `placeOf`'s page id. */
 export const SCENARIOS = "scenarios";
+
+/** The last rubric of a demo, alone in it: the API index - every name the
+    package exports, generated from its entries (ADR-0044). At `/api/`. */
+export function apiIndexRubric(packageName: string): Rubric {
+  return {
+    id: "api-index",
+    name: "API index",
+    sentence: "Every name the package exports, in one place.",
+    pages: [
+      {
+        id: "api",
+        name: "API index",
+        sentence: `Everything \`${packageName}\` exports, with its signature. A component's props stand on its own page.`,
+        types: [],
+        exports: [],
+        body: "api-index",
+      },
+    ],
+  };
+}
 
 /** The addresses of an outline, and of the page ids it moved away from.
 

@@ -30,8 +30,12 @@ under a heading "Changed" of its own, no matter which digit rose.
 - **`docs/llms-full.md` defines every type a props table names**: a type
   without a table of its own (`MetricValues`, core's `Limit`) stands under
   "Types on this page" of each page that names it, with its comment and its
-  members or its declaration. "The rest of the API" holds every export that
-  neither a table nor such a definition explains.
+  members or its declaration.
+- **`docs/llms-full.md` ends with the API index**: every export of the
+  package, grouped as components and types, alphabetical, each with its
+  comment and declaration or a link to the page and table where it stands, and
+  the pages that use it. It replaces the appendix "The rest of the API". The
+  same index is a page of the demo, at `/calculation/api/`.
 
 ### Fixed
 
