@@ -44,7 +44,7 @@ describe("the ADR links", () => {
     };
     const [group] = linkReferences({ theming: [table] }, LINKS).theming![0]!.groups;
     expect(group!.title).toContainEqual({ kind: "link", text: "ADR-0021", href: STYLES });
-    expect(group!.note![0]).toContainEqual({ kind: "link", text: "ADR-0032", href: `${ADR_HOME}0032-what-umriss-is-not.md` });
+    expect(group!.note![0]).toContainEqual({ kind: "link", text: "ADR-0032", href: ADR_0032 });
     expect(siteLeaks(referenceHtml(linkReferences({ theming: [table] }, LINKS).theming![0]!))).toEqual([]);
   });
 
