@@ -1,5 +1,6 @@
 /* The gate: generates a demo's `demo/.generated/props.json` and stops at a
-   prop without JSDoc.
+   prop without JSDoc, and at an export of the entry or a subpath without one
+   (`exportDocs.ts`).
 
    What is generated is not checked in - `demo/.generated/` is ignored. A
    checked-in generation drifts away from its source, and this whole mechanism
@@ -21,6 +22,7 @@ import { join, dirname, relative } from "node:path";
 import type { Rubric } from "../outline.ts";
 import { readProps } from "./propsReader.ts";
 import type { TypeEntry } from "./propsReader.ts";
+import { undocumentedExports } from "./exportDocs.ts";
 
 /** Every `.ts`/`.tsx` under a directory, sorted.
 
@@ -56,16 +58,26 @@ export function generateProps({ packageName, outline }: PropsJob): Record<string
     requiredTypes(outline),
   );
 
-  if (gaps.length > 0) {
+  const bareExports = undocumentedExports(packageName);
+  if (gaps.length > 0 || bareExports.length > 0) {
     /* All of them, not the first: finding a hundred and fifty missing
        comments in a hundred and fifty runs is not a workflow. */
-    const lines = gaps.map(
-      (l) => `  ${relative(packageName, l.file)}:${l.line}  ${l.type}.${l.prop}`,
-    );
-    process.stderr.write(
-      `${gaps.length} prop${gaps.length === 1 ? "" : "s"} without JSDoc:\n${lines.join("\n")}\n` +
-        `\nEvery prop that lands in a table explains itself.\n`,
-    );
+    if (gaps.length > 0) {
+      const lines = gaps.map(
+        (l) => `  ${relative(packageName, l.file)}:${l.line}  ${l.type}.${l.prop}`,
+      );
+      process.stderr.write(
+        `${gaps.length} prop${gaps.length === 1 ? "" : "s"} without JSDoc:\n${lines.join("\n")}\n` +
+          `\nEvery prop that lands in a table explains itself.\n`,
+      );
+    }
+    if (bareExports.length > 0) {
+      const lines = bareExports.map((e) => `  ${relative(packageName, e.file)}:${e.line}  ${e.name}`);
+      process.stderr.write(
+        `${bareExports.length} export${bareExports.length === 1 ? "" : "s"} without JSDoc:\n${lines.join("\n")}\n` +
+          `\nEvery export of the entry and its subpaths says what it is for.\n`,
+      );
+    }
     process.exit(1);
   }
 
