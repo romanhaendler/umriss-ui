@@ -10,6 +10,7 @@ import { test, expect } from "@playwright/test";
 import { checkShell } from "@umriss-ui/demo/checks/shell";
 
 checkShell({
+  packageId: "charts",
   notOnTheFrontDoor: ["line", "benchmark"],
   rail: { name: "Pareto", pageId: "pareto", rubricId: "limits-and-alarms" },
   low: { name: "Benchmark", pageId: "benchmark" },

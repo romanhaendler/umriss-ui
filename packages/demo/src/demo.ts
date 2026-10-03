@@ -27,6 +27,9 @@ export interface Demo {
   description: string;
   /** The command that installs it, peers and all (`tooling/install.ts`). */
   install: string;
+  /** The version in the package's manifest - the number beside its name in
+      the header. */
+  version: string;
   addresses: Addresses;
   scenarios: readonly Scenario[];
   examples: readonly Example[];
@@ -41,7 +44,7 @@ export interface Demo {
 
 export interface DemoSources {
   /** The package's `package.json`. */
-  manifest: InstallManifest & TitleManifest;
+  manifest: InstallManifest & TitleManifest & { version: string };
   addresses: Addresses;
   /** `import.meta.glob("./scenarios/*.tsx", { eager: true })` */
   scenarios: Record<string, ScenarioModule>;
@@ -75,6 +78,7 @@ export function buildDemo(sources: DemoSources): Demo {
     packageName: sources.manifest.name,
     description: sources.manifest.description,
     install: installCommand(sources.manifest),
+    version: sources.manifest.version,
     addresses: addresses(outlineTexts(sources.addresses.OUTLINE, link), sources.addresses.MOVED),
     scenarios: readScenarios(sources.scenarios, sources.sources, options).map((scenario) => ({
       ...scenario,

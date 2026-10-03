@@ -47,30 +47,57 @@ body {
   backdrop-filter: saturate(160%) blur(10px);
 }
 
+/* The wordmark: the site's one name, leading to its front page. */
 .shellMark {
-  display: inline-flex;
-  align-items: baseline;
-  gap: var(--u-space-2);
-  text-decoration: none;
-  color: inherit;
-  border-radius: var(--u-radius-sm);
-}
-
-.shellMark:focus-visible {
-  outline: none;
-  box-shadow: var(--u-focus-ring);
-}
-
-.shellMarkName {
+  flex: none;
   font-size: var(--u-text-sm);
   font-weight: var(--u-weight-semibold);
   letter-spacing: var(--u-tracking-tight);
   color: var(--u-color-text);
+  text-decoration: none;
+  border-radius: var(--u-radius-sm);
+}
+
+.shellMark:focus-visible,
+.shellPackage:focus-visible {
+  outline: none;
+  box-shadow: var(--u-focus-ring);
+}
+
+/* The five packages: plain words, the current one in the text colour with its
+   version beside it. No pills, no underline bar - the header is to stay quiet. */
+.shellPackages {
+  display: flex;
+  align-items: center;
+  gap: var(--u-space-1);
+}
+
+.shellPackage {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--u-space-1);
+  padding: 4px var(--u-space-2);
+  border-radius: var(--u-radius-sm);
+  font-size: var(--u-text-sm);
+  white-space: nowrap;
+  color: var(--u-color-text-secondary);
+  text-decoration: none;
+  transition: color var(--u-transition);
+}
+
+.shellPackage:hover {
+  color: var(--u-color-text);
+}
+
+.shellPackage[aria-current] {
+  color: var(--u-color-text);
+  font-weight: var(--u-weight-medium);
 }
 
 .shellVersion {
   font-family: var(--u-font-mono);
   font-size: var(--u-text-xs);
+  font-weight: var(--u-weight-regular);
   color: var(--u-color-text-secondary);
 }
 
@@ -82,6 +109,9 @@ body {
   justify-content: space-between;
   gap: var(--u-space-4);
   width: 260px;
+  min-width: 140px;
+  flex: 0 1 auto;
+  margin-left: auto;
   height: 32px;
   padding: 0 var(--u-space-2) 0 var(--u-space-3);
   border: none;
@@ -121,15 +151,18 @@ body {
   color: var(--u-color-text-secondary);
 }
 
-.shellActions {
+.shellActions,
+.shellOut {
+  flex: none;
   display: flex;
   align-items: center;
-  gap: var(--u-space-3);
-  margin-left: auto;
+  gap: var(--u-space-1);
 }
 
-/* The theme switch: a glyph, quiet until the pointer is on it. */
-.shellTheme {
+/* The theme switch and the three links out: a glyph, quiet until the pointer
+   is on it. */
+.shellTheme,
+.shellIcon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -146,31 +179,22 @@ body {
     color var(--u-transition);
 }
 
-.shellTheme:hover {
+.shellTheme:hover,
+.shellIcon:hover {
   background: var(--u-color-surface-sunken);
   color: var(--u-color-text);
 }
 
-.shellTheme:focus-visible {
+.shellTheme:focus-visible,
+.shellIcon:focus-visible {
   outline: none;
   box-shadow: var(--u-focus-ring);
 }
 
-.shellLink {
-  font-size: var(--u-text-xs);
-  color: var(--u-color-text-secondary);
-  text-decoration: none;
-  border-radius: var(--u-radius-xs);
-}
-
-.shellLink:hover {
-  color: var(--u-color-text);
-  text-decoration: underline;
-}
-
-.shellLink:focus-visible {
-  outline: none;
-  box-shadow: var(--u-focus-ring);
+/* The same three links at the foot of the sidebar - shown only when the
+   header has no room for them. */
+.railOut {
+  display: none;
 }
 
 /* ---------------- Body: bar + content ---------------- */
@@ -292,6 +316,51 @@ body {
 /* ---------------- Narrow windows ---------------- */
 
 @media (max-width: 900px) {
+  /* Two lines: wordmark, search and theme on the first, the five packages on
+     the second, scrolling sideways inside themselves if they must - the page
+     never does. The three links out move to the foot of the sidebar. */
+  /* The header's height, which page.css keeps a jump's target clear of. */
+  .shell {
+    --shell-head: 96px;
+  }
+  .shellHead {
+    flex-wrap: wrap;
+    row-gap: 0;
+    height: auto;
+  }
+  .shellMark,
+  .shellSearch,
+  .shellActions {
+    margin-block: var(--u-space-3);
+  }
+  .shellPackages {
+    order: 1;
+    flex: 1 0 100%;
+    /* The first name's padding left of it is the header's own margin. */
+    margin-left: calc(-1 * var(--u-space-2));
+    height: 40px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .shellOut {
+    display: none;
+  }
+  .railOut {
+    display: flex;
+    flex-direction: column;
+    gap: var(--u-space-1);
+    margin-top: var(--u-space-6);
+    padding-top: var(--u-space-4);
+    border-top: 1px solid var(--u-edge-color);
+  }
+  .railOut .shellIcon {
+    justify-content: flex-start;
+    gap: var(--u-space-2);
+    width: auto;
+    padding: 0 var(--u-space-3);
+    font-size: var(--u-text-sm);
+    text-decoration: none;
+  }
   .shellBody {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -310,17 +379,16 @@ body {
   }
 }
 
-/* A phone: the bar keeps one line. The version and the key hint give way -
-   there is no keyboard to press ⌘K on - and the search takes what the name and
-   the actions leave, down to its own word. Before, the bar ran past the
-   screen's edge and cut the theme button in half. */
+/* A phone: the first line stays one line. The version and the key hint give
+   way - there is no keyboard to press ⌘K on - and the search takes what the
+   name and the theme switch leave, down to its own word. Before, the bar ran
+   past the screen's edge and cut the theme button in half. */
 @media (max-width: 560px) {
   .shellHead {
-    gap: var(--u-space-3);
+    column-gap: var(--u-space-3);
     padding: 0 var(--u-space-4);
   }
   .shellMark {
-    flex: none;
     white-space: nowrap;
   }
   .shellVersion,
@@ -337,8 +405,5 @@ body {
   .shellSearch > span {
     overflow: hidden;
     text-overflow: ellipsis;
-  }
-  .shellActions {
-    flex: none;
   }
 }
