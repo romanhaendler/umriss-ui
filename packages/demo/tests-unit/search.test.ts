@@ -1,0 +1,64 @@
+/* The search fragment against the fixture package (.scratch/one-search 02):
+   one entry per page, scenario and example, each with the address a page of
+   the site carries - the path a prerendered page and the anchor on it. A find
+   that lands on nothing is the one defect a reader cannot work around. */
+
+import { describe, expect, it } from "vitest";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
+import { renderLlms } from "../src/tooling/llms";
+import type { Rubric } from "../src/outline";
+
+const PACKAGE_DIR = join(dirname(fileURLToPath(import.meta.url)), "fixtures", "llms");
+
+const OUTLINE: readonly Rubric[] = [
+  {
+    id: "instruments",
+    name: "Instruments",
+    sentence: "What a value is read on.",
+    pages: [
+      { id: "gauge", name: "Gauge", sentence: "One value as a needle (also called a `dial`), beside the [Meter](#/meter).", types: [], exports: ["Gauge"] },
+      { id: "meter", name: "Meter", sentence: "One value as a bar.", types: [], exports: ["Meter"] },
+    ],
+  },
+];
+
+const { pages, search } = renderLlms({ packageDir: PACKAGE_DIR, outline: OUTLINE, tables: {} });
+
+describe("the search fragment", () => {
+  it("holds the front page, every scenario, every page and every example, in that order", () => {
+    expect(search.map(({ kind, label, group }) => [kind, label, group])).toEqual([
+      ["page", "Scenarios", "fixture · Scenarios"],
+      ["scenario", "Watch a service's latency", "fixture · Scenarios"],
+      ["page", "Gauge", "fixture · Instruments"],
+      ["page", "Meter", "fixture · Instruments"],
+      ["example", "A basic gauge", "fixture · Gauge"],
+      ["example", "Show several readings", "fixture · Gauge"],
+      ["example", "Compact", "fixture · Gauge"],
+    ]);
+  });
+
+  it("lands every entry on a page of the site and an anchor that page carries", () => {
+    expect(search.map((entry) => entry.address)).toEqual([
+      "/fixture/",
+      "/fixture/#watch-latency",
+      "/fixture/gauge/",
+      "/fixture/meter/",
+      "/fixture/gauge/#basic",
+      "/fixture/gauge/#readings",
+      "/fixture/gauge/#compact",
+    ]);
+    for (const { address } of search) {
+      const [path, anchor] = address.replace(/^\/fixture\//, "").split("#");
+      const page = pages.find((one) => one.path === path);
+      expect(page, address).toBeDefined();
+      if (anchor !== undefined) expect(page!.html, address).toContain(`id="${anchor}"`);
+    }
+  });
+
+  it("finds a page by its lede and an example by its lead, as plain text", () => {
+    expect(search.find((entry) => entry.label === "Gauge")?.keywords).toEqual(["One value as a needle (also called a dial), beside the Meter."]);
+    expect(search.find((entry) => entry.label === "A basic gauge")?.keywords).toEqual(["Pass the value; the needle points at it."]);
+    expect(search.find((entry) => entry.label === "Compact")).not.toHaveProperty("keywords");
+  });
+});

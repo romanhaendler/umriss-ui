@@ -19,6 +19,7 @@ export const DEMO = buildDemo({
   examples: import.meta.glob<Record<string, unknown>>("./examples/*/*.tsx", { eager: true }),
   sources: import.meta.glob<string>(["./examples/*/*.tsx", "./scenarios/*.tsx"], { eager: true, query: "?raw", import: "default" }),
   props,
+  search: () => import("./.generated/search.json"),
   references,
   configurators: import.meta.glob("./configurators/*.tsx", { eager: true }),
 });

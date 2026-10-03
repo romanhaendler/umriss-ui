@@ -26,4 +26,5 @@ checkShell({
   moved: { from: "table", pageId: "first-table", example: "first-table" },
   contents: { pageId: "toolbar", id: "place-it-outside", title: "Place it outside the table" },
   foldedRow: { pageId: "first-table", id: "TableProps-onCellEdit" },
+  synonyms: [{ query: "frozen", name: "Width and pinning", pageId: "width-and-pinning" }],
 });

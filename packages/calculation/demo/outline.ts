@@ -42,7 +42,7 @@ export const OUTLINE: readonly Rubric[] = [
       {
         id: "calculation",
         name: "Calculation",
-        sentence: "Lets a reader follow and redo a figure: each line a quantity with its operator, derived lines folded until opened beneath themselves. Reach for it where a number on the screen gets questioned: a cost, an availability, an invoice total.",
+        sentence: "Lets a reader follow and redo a figure (also called a KPI tree or calculation tree): each line a quantity with its operator, derived lines folded until opened beneath themselves. Reach for it where a number on the screen gets questioned: a cost, an availability, an invoice total.",
         about: [
           "There is no prop for a result. Every derived number is computed with the operator its line names, at full precision; only the screen rounds.",
           "The nesting is the fold structure and the child order is the operand order. What TypeScript cannot check – a `Ref` to nothing, a circle through references, a wrong operand count, a duplicate id, a component of your own wrapping `Given` – fails on the first render with a message saying which (ADR-0027).",

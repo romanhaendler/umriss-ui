@@ -181,7 +181,7 @@ export const OUTLINE: readonly Rubric[] = [
       {
         id: "splitter",
         name: "Splitter",
-        sentence: "Two panes with a draggable line between them (also called a split view or resizable panels). Use it when the user needs both at once and decides how much of each: a list beside its detail, a chart above its alerts.",
+        sentence: "Two panes with a draggable line between them (also called a split view or resizable panes). Use it when the user needs both at once and decides how much of each: a list beside its detail, a chart above its alerts.",
         about: [
           "A splitter divides the room it is given and does not size it: give its box a height. For three panes, nest a splitter in one of the two.",
           "Name the separator after the pane it sizes, so a screen reader says \"Services, 35\" instead of the general name.",
@@ -525,7 +525,7 @@ export const OUTLINE: readonly Rubric[] = [
       {
         id: "combobox",
         name: "Combobox",
-        sentence: "One choice from a long list, found by typing (autocomplete, searchable select): a driver, a service, an account. The list filters along while the value stays exactly one.",
+        sentence: "One choice from a long list, found by typing (autocomplete, typeahead, searchable select): a driver, a service, an account. The list filters along while the value stays exactly one.",
         about: [
           "What is typed is a search term, not a value: the value changes only when a row is chosen or the field is cleared, and it is one option or `null`.",
           "The list keeps its given order while it filters; sort the options before you pass them if you want an order.",
@@ -806,7 +806,7 @@ export const OUTLINE: readonly Rubric[] = [
       {
         id: "popover",
         name: "Popover",
-        sentence: "A surface that hangs from a trigger and closes on Escape, an outside click or scrolling (also called a flyout or dropdown panel). Reach for it for a small panel of your own: a filter, a detail, a short form.",
+        sentence: "A surface that hangs from a trigger and closes on Escape, an outside click or scrolling (also called a popup, flyout or dropdown panel). Reach for it for a small panel of your own: a filter, a detail, a short form.",
         about: [
           "It is controlled: you hold `open`, and `onOpenChange` reports each wish to close. Only you know whether it may close now, for instance with a half-filled form in it.",
           "It places itself below its anchor, flips above where there is no room and stays inside the window. Inside a dialog it portals into that dialog, so it never lands behind it.",
@@ -906,7 +906,7 @@ export const OUTLINE: readonly Rubric[] = [
       {
         id: "drawer",
         name: "Drawer",
-        sentence: "A modal window that slides in from the left or right edge of the screen (also called a side sheet). Reach for it for the detail of something picked from a list, while the list stays in sight behind it.",
+        sentence: "A modal window that slides in from the left or right edge of the screen (also called a side sheet or side panel). Reach for it for the detail of something picked from a list, while the list stays in sight behind it.",
         about: [
           "Everything the modal promises holds: the focus stays inside, Escape and a click beside it ask to close, and the focus returns to the button that opened it. Header, body and footer are the modal's parts.",
           "Its width is the token `--u-drawer-width`: set it once for the application, or in one drawer's `style` where it needs more room.",
@@ -1028,7 +1028,7 @@ export const OUTLINE: readonly Rubric[] = [
       {
         id: "accordion",
         name: "Accordion",
-        sentence: "Long content in sections behind headers the user opens one or several at a time (also called collapsible sections). Reach for it where a reader needs a few of many sections, such as settings, a runbook or a report.",
+        sentence: "Long content in sections behind headers the user opens one or several at a time (also called collapsible sections or a disclosure). Reach for it where a reader needs a few of many sections, such as settings, a runbook or a report.",
         about: [
           "Each header is a button inside a heading; set the heading level that fits the page's outline. A folded section keeps its content and its fields' values, hidden and inert.",
         ],

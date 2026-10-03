@@ -72,6 +72,9 @@ export interface ShellProbes {
   /** A row of a props table long enough to fold, in a secondary group - its
       page and its anchor `<Type>-<prop>` - where the demo has one. */
   foldedRow?: { pageId: string; id: string };
+  /** Another library's word for a page, which only its lede carries
+      (.scratch/one-search) - where the demo has one. */
+  synonyms?: readonly (NamedPage & { query: string })[];
 }
 
 /** The title the prerendering writes for a page - by the same function, from
@@ -132,7 +135,7 @@ test("the active entry stands in the sidebar's view, after load and after a jump
 
   await page.goto("/");
   await page.keyboard.press("ControlOrMeta+k");
-  const field = page.getByRole("combobox", { name: "Search a page or example" });
+  const field = page.getByRole("combobox", { name: "Search umriss-ui" });
   await field.fill(p.low.name);
   await expect(page.getByRole("dialog").getByRole("option").first()).toContainText(p.low.name);
   await field.press("Enter");
@@ -510,7 +513,7 @@ test("a fold is a disclosure the keyboard opens, and the API section stays acces
 
 test("the palette filters and jumps", async ({ page }) => {
   await page.keyboard.press("ControlOrMeta+k");
-  const field = page.getByRole("combobox", { name: "Search a page or example" });
+  const field = page.getByRole("combobox", { name: "Search umriss-ui" });
   await expect(field).toBeFocused();
 
   /* CHANGED (see the head, point 1): every entry used to stand here. The
@@ -533,7 +536,7 @@ test("the palette finds an example too, under its component", async ({ page }) =
   /* The reason it carries both: "look at this" becomes a link, and that is
      half the purpose of an address space. */
   await page.keyboard.press("ControlOrMeta+k");
-  const field = page.getByRole("combobox", { name: "Search a page or example" });
+  const field = page.getByRole("combobox", { name: "Search umriss-ui" });
   await field.fill(p.example.title);
   const finds = page.getByRole("dialog").getByRole("option");
   await expect(finds.first()).toContainText(p.example.title);
@@ -542,9 +545,36 @@ test("the palette finds an example too, under its component", async ({ page }) =
   await expect(page.locator(`[data-example="${p.example.id}"]`)).toBeInViewport();
 });
 
+test("a component's name finds its page first, above its examples", async ({ page }) => {
+  await page.keyboard.press("ControlOrMeta+k");
+  const field = page.getByRole("combobox", { name: "Search umriss-ui" });
+  await field.fill(p.example.pageName);
+  await expect(page.getByRole("dialog").getByRole("option", { name: p.example.title })).toBeVisible();
+  await field.press("Enter");
+  await expect(page.locator(`[data-block="${p.example.pageId}"]`)).toBeVisible();
+  // The page itself, not an example on it: no anchor.
+  await expect(page).toHaveURL(new RegExp(`/${p.example.pageId}/$`));
+});
+
+for (const synonym of p.synonyms ?? []) {
+  test(`another library's "${synonym.query}" finds ${synonym.name}`, async ({ page }) => {
+    /* The word stands only in the page's lede, which arrives with the
+       package's search fragment on the first opening. */
+    await page.keyboard.press("ControlOrMeta+k");
+    const field = page.getByRole("combobox", { name: "Search umriss-ui" });
+    await field.fill(synonym.query);
+    const find = page.getByRole("dialog").getByRole("option").filter({ has: page.getByText(synonym.name, { exact: true }) });
+    await expect(find.first()).toBeVisible();
+    // A keyword find marks nothing: the word is not in the name.
+    await expect(find.first().locator("span span")).toHaveCount(0);
+    await find.first().click();
+    await expect(page.locator(`[data-block="${synonym.pageId}"]`)).toBeVisible();
+  });
+}
+
 test("the palette finds abbreviations and is operable with the arrows", async ({ page }) => {
   await page.keyboard.press("/");
-  const field = page.getByRole("combobox", { name: "Search a page or example" });
+  const field = page.getByRole("combobox", { name: "Search umriss-ui" });
 
   /* CHANGED (see the head, point 2): the query used to be "tabelle" and hit
      as a substring. `dtp` is the case the module was built for - as a
@@ -567,7 +597,7 @@ test("the palette finds abbreviations and is operable with the arrows", async ({
 test("before the first character the palette is only the field, and then grows", async ({ page }) => {
   await page.keyboard.press("ControlOrMeta+k");
   const pane = page.locator("dialog[open] > div").first();
-  const field = page.getByRole("combobox", { name: "Search a page or example" });
+  const field = page.getByRole("combobox", { name: "Search umriss-ui" });
 
   const restingHeight = (await pane.boundingBox())!.height;
   // The field is 56 high; nothing more stands there at rest.
@@ -591,7 +621,7 @@ test("the resting pointer does not take the tick away from the keyboard", async 
      between `pointermove` and `pointerenter` under a repaint - which is why
      it stands here. */
   await page.keyboard.press("ControlOrMeta+k");
-  const field = page.getByRole("combobox", { name: "Search a page or example" });
+  const field = page.getByRole("combobox", { name: "Search umriss-ui" });
   const finds = page.getByRole("dialog").getByRole("option");
 
   await field.fill(p.pointer.wide);
@@ -627,7 +657,7 @@ test("the field carries no focus ring", async ({ page }) => {
      in it. That is why the computed style is asked here rather than the image
      compared. */
   await page.keyboard.press("ControlOrMeta+k");
-  const field = page.getByRole("combobox", { name: "Search a page or example" });
+  const field = page.getByRole("combobox", { name: "Search umriss-ui" });
   await expect(field).toBeFocused();
   const style = await field.evaluate((el) => {
     const s = getComputedStyle(el);

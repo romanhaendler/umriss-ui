@@ -33,9 +33,10 @@
    The rule above still holds for everything else. It has been broken once and
    not abolished.
 
-   The palette finds pages AND examples, examples grouped under their component
-   - around a hundred and eighty candidates, which is nothing for a filtered
-   list. Its worth grows with what it can find.
+   The palette finds pages, scenarios AND examples, examples grouped under
+   their component, pages by the words of their lede too - around a hundred
+   and eighty candidates, which is nothing for a filtered list. Its worth
+   grows with what it can find (.scratch/one-search).
 
    The front door is the scenarios page (`Scenarios.tsx`): composed screens
    first, the components after them. It stands at the head of the sidebar,
@@ -47,43 +48,31 @@ import type { Demo } from "./demo";
 import { BASE, hrefOf } from "./href";
 import { SCENARIOS, placeOfLocation, twinOfPlace } from "./outline";
 import { PACKAGES } from "./packages";
+import { searchEntries, type SearchEntry, type SearchKind } from "./search";
 import { Page } from "./Page";
 import { Scenarios } from "./Scenarios";
 import { ThemeSwitch } from "./ThemeSwitch";
 import { pageTitle } from "./tooling/title";
 
-/* The palette's candidates: the flat view of the outline and the run of
-   example files, translated into the palette's language (CONTEXT.md,
-   "Finding"). Two lists beside each other would drift apart - so they come
-   from there.
+/* The palette's candidates are the search entries (`search.ts`) translated
+   into the palette's language (CONTEXT.md, "Finding"): the id IS the entry's
+   address, so that choosing has nothing to look up.
 
-   The id IS the place, so that choosing has nothing to look up - and it comes
-   from `placeOf()` and not from a template here. One spot knows the format;
-   whoever rebuilds it holds a second truth about it. */
-function paletteCandidates({ addresses, examples, scenarios }: Demo) {
-  const { ALL_PAGES, placeOf } = addresses;
-  return [
-    { id: "/", label: "Scenarios", group: "Scenarios" },
-    ...scenarios.map((scenario) => ({
-      id: placeOf(SCENARIOS, scenario.id),
-      label: scenario.title,
-      group: "Scenarios",
-    })),
-    ...ALL_PAGES.map((page) => ({
-      id: placeOf(page.id),
-      label: page.name,
-      group: page.rubric.name,
-    })),
-    ...examples.map((example) => {
-      const page = ALL_PAGES.find((p) => p.id === example.pageId);
-      return {
-        id: placeOf(example.pageId, example.id),
-        label: example.title,
-        group: page?.name ?? example.pageId,
-      };
-    }),
-  ];
-}
+   The matcher sorts name finds before group finds before keyword finds.
+   Inside one of those tiers the kind decides, broadest first - a page above
+   its examples, an example above a prop - in steps far wider than any rank a
+   match earns. The own package wins a tie and nothing more: half a point is
+   the smallest step between two matches. */
+const KIND_WEIGHT: Readonly<Record<SearchKind, number>> = {
+  page: 60_000,
+  scenario: 50_000,
+  example: 40_000,
+  export: 30_000,
+  prop: 20_000,
+  token: 10_000,
+  wording: 0,
+};
+const OWN_PACKAGE_WEIGHT = 0.25;
 
 function placeAt(path: string, hash: string): string {
   return placeOfLocation(path.startsWith(BASE) ? path.slice(BASE.length - 1) : "/", hash);
@@ -154,9 +143,31 @@ export interface ShellProps {
 
 export function Shell({ demo, sentence }: ShellProps) {
   const { OUTLINE, ALL_PAGES, fromPlace, addressOf } = demo.addresses;
-  const candidates = useMemo(() => paletteCandidates(demo), [demo]);
   const [place, setPlace] = useState(() => readPlace(fromPlace));
   const [paletteOpen, setPaletteOpen] = useState(false);
+
+  /* THE PALETTE'S TWO SOURCES. The package's search fragment is a part of
+     the bundle of its own, fetched on the palette's first opening and kept.
+     Until it has arrived - or if it never does - the palette searches the
+     same pages, scenarios and examples from the outline in hand, so the
+     window is never empty and a lost request breaks nothing. */
+  const ownId = demo.packageName.split("/")[1]!;
+  const [fragment, setFragment] = useState<readonly SearchEntry[] | null>(null);
+  useEffect(() => {
+    if (!paletteOpen || fragment !== null) return;
+    demo.search().then(setFragment, () => {});
+  }, [paletteOpen, fragment, demo]);
+  const candidates = useMemo(
+    () =>
+      (fragment ?? searchEntries(ownId, OUTLINE, demo.scenarios, demo.examples)).map((entry) => ({
+        id: entry.address,
+        label: entry.label,
+        group: entry.group,
+        keywords: entry.keywords,
+        weight: KIND_WEIGHT[entry.kind] + (entry.address.startsWith(`/${ownId}/`) ? OWN_PACKAGE_WEIGHT : 0),
+      })),
+    [fragment, ownId, OUTLINE, demo.scenarios, demo.examples],
+  );
   /* The jump needs a counter of its own. Two examples on the same page one
      after the other do not change the page - an effect hanging only on that
      would not run at all on the second click, and the jump would not happen. */
@@ -378,15 +389,15 @@ export function Shell({ demo, sentence }: ShellProps) {
         </main>
       </div>
 
-      {/* The library's wording is general ("search", "open"); this demo jumps to
-          pages and examples and says so. That is exactly what the seam is for -
-          the component need not be touched for it. */}
+      {/* The library's wording is general ("search", "open"); this demo jumps
+          anywhere in umriss-ui and says so. That is exactly what the seam is
+          for - the component need not be touched for it. */}
       <LanguageProvider
         wording={{
-          palettePlaceholder: "Search a page or example …",
-          paletteField: "Search a page or example",
-          palettePanel: "Jump to a page or example",
-          paletteList: "Pages and examples found",
+          palettePlaceholder: "Search pages, examples, props, tokens …",
+          paletteField: "Search umriss-ui",
+          palettePanel: "Jump anywhere in umriss-ui",
+          paletteList: "Found",
           paletteHintChoose: "jump",
         }}
       >
@@ -394,10 +405,18 @@ export function Shell({ demo, sentence }: ShellProps) {
           open={paletteOpen}
           onClose={() => setPaletteOpen(false)}
           items={candidates}
-          onChoose={(id) => {
-            /* Split with the same function that splits the address bar - not
-               with a `split` beside it. */
-            const { page: target, example } = fromPlace(id);
+          onChoose={(address) => {
+            /* Another package's find is that demo's page, a full navigation:
+               the site keeps it in a directory beside this one. */
+            if (!address.startsWith(`/${ownId}/`)) {
+              window.location.assign(`${SITE}${address.slice(1)}`);
+              return;
+            }
+            /* An own one is split with the same functions that split the
+               address bar - not with a `split` beside them - and jumps in
+               place. */
+            const [path = "/", hash = ""] = address.slice(ownId.length + 1).split("#");
+            const { page: target, example } = fromPlace(placeOfLocation(path, hash));
             goTo(target?.id ?? SCENARIOS, example);
           }}
         />
