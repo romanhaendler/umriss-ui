@@ -25,6 +25,7 @@ import { ADR_0032, SCENARIOS, addressOfPlace, addresses, twinOfPlace } from "../
 import type { Moved, Rubric, Page } from "../outline.ts";
 import type { Forwarder } from "./site.ts";
 import { byRank, parseFileName, parseScenarioName } from "./fileName.ts";
+import { pageTitle } from "./title.ts";
 import { displaySource } from "./source.ts";
 import type { TypeEntry } from "./propsReader.ts";
 import { installCommand, type InstallManifest } from "./install.ts";
@@ -326,15 +327,6 @@ export interface Twin {
   text: string;
 }
 
-/** What a search engine should read after the page's name, per package -
-    the title's formula (search-visibility D8). */
-const NOUN: Readonly<Record<string, string>> = {
-  "@umriss-ui/charts": "chart",
-  "@umriss-ui/table": "table",
-  "@umriss-ui/schedule": "schedule",
-  "@umriss-ui/calculation": "calculation",
-};
-
 function plain(text: string): string {
   return text.replace(/\[([^\]]+)\]\([^)\s]+\)/g, "$1").replace(/`+ ?([^`]+?) ?`+/g, "$1");
 }
@@ -551,7 +543,6 @@ export function renderLlms({ packageDir, outline: written, tables, eventsApart =
     "",
     ...outline.flatMap((rubric) => [`##### ${rubric.name}`, "", ...rubric.pages.map((page) => `- [${page.name}](${pageUrl(manifest, page)})`), ""]),
   ].join("\n");
-  const noun = NOUN[manifest.name] ?? "component";
   /* The landing's head as the app shows it: the npm name, the install
      command as a block, and the page to start with from the one list. */
   const startId = PACKAGES.find((one) => one.npm === manifest.name)?.start;
@@ -576,7 +567,7 @@ export function renderLlms({ packageDir, outline: written, tables, eventsApart =
       path: "",
       url: home,
       name: manifest.name,
-      title: `${manifest.name} – ${manifest.description}`,
+      title: pageTitle(manifest),
       description: manifest.description,
       twin: twinUrl(home, ""),
       html: markdownToHtml(
@@ -623,7 +614,7 @@ export function renderLlms({ packageDir, outline: written, tables, eventsApart =
           path: addressOfPlace(`/${page.id}`).slice(1),
           url: pageUrl(manifest, page),
           name: page.name,
-          title: `${page.name} – React ${noun} · ${manifest.name}`,
+          title: pageTitle(manifest, page.name),
           description: plain(page.sentence),
           twin: twinUrl(home, `/${page.id}`),
           html: `${body}${html(at, to, `\n\n${everyPage}`)}`,
@@ -645,7 +636,8 @@ export function renderLlms({ packageDir, outline: written, tables, eventsApart =
 /** Writes `demo/.generated/llms.txt`, `demo/.generated/pages.json` and
     `forwarders.json` (the site's pages and the forwarders at old addresses,
     which `scripts/build-pages.mjs` writes out), every page's Markdown twin
-    under `demo/.generated/twins/` (which it copies beside them),
+    under `demo/.generated/twins/` (the demo's public files, so that the dev
+    server serves them and the build carries them beside the pages),
     `docs/llms-full.md`, and `demo/.generated/references.json` where there are
     reference tables, which the app mounts. None is checked in: a generation
     drifts from its source (`.gitignore`). Hands the site's pages back for a

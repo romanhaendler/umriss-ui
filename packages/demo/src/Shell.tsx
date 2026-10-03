@@ -45,10 +45,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { CommandPalette, LanguageProvider, useCommandPaletteShortcut } from "@umriss-ui/core";
 import type { Demo } from "./demo";
 import { BASE, hrefOf } from "./href";
-import { SCENARIOS, placeOfLocation } from "./outline";
+import { SCENARIOS, placeOfLocation, twinOfPlace } from "./outline";
 import { Page } from "./Page";
 import { Scenarios } from "./Scenarios";
 import { ThemeSwitch } from "./ThemeSwitch";
+import { pageTitle } from "./tooling/title";
 
 /* The palette's candidates: the flat view of the outline and the run of
    example files, translated into the palette's language (CONTEXT.md,
@@ -205,6 +206,26 @@ export function Shell({ demo, brand, version, sentence }: ShellProps) {
   useCommandPaletteShortcut(useCallback(() => setPaletteOpen(true), []));
 
   const page = ALL_PAGES.find((p) => p.id === place.pageId);
+
+  /* THE HEAD FOLLOWS THE PAGE - the one place that does it, on the first
+     load and on every move: the title, by the formula the prerendering writes
+     it with, and the one alternate link to the page's Markdown twin
+     (.scratch/pages-as-markdown), which the prerendering writes as well and a
+     page outside it lacks. An example anchor changes neither: it stands in
+     its page's text. */
+  const pageName = page?.name;
+  const twin = hrefOf(twinOfPlace(page === undefined ? "" : `/${page.id}`));
+  useEffect(() => {
+    document.title = pageTitle({ name: demo.packageName, description: demo.description }, pageName);
+    let link = document.head.querySelector<HTMLLinkElement>('link[rel="alternate"][type="text/markdown"]');
+    if (link === null) {
+      link = document.createElement("link");
+      link.rel = "alternate";
+      link.type = "text/markdown";
+      document.head.append(link);
+    }
+    link.setAttribute("href", twin);
+  }, [demo.packageName, demo.description, pageName, twin]);
 
   return (
     <div className="shell">
