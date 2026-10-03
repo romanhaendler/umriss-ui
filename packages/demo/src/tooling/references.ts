@@ -67,7 +67,7 @@ export function internalReferences(text: string, links: AdrLinks): string[] {
 }
 
 /** A page with each of its texts passed through `edit`: the lede, about,
-    alternatives, keys and limits - what `Page.tsx` shows and the llms text
+    alternatives, keys, accessibility and limits - what `Page.tsx` shows and the llms text
     carries. */
 export function pageTexts(page: Page, edit: (text: string) => string): Page {
   return {
@@ -76,6 +76,7 @@ export function pageTexts(page: Page, edit: (text: string) => string): Page {
     ...(page.about === undefined ? {} : { about: page.about.map(edit) }),
     ...(page.alternatives === undefined ? {} : { alternatives: page.alternatives.map(({ when, use }) => ({ when: edit(when), use: edit(use) })) }),
     ...(page.keys === undefined ? {} : { keys: page.keys.map(({ key, action }) => ({ key, action: edit(action) })) }),
+    ...(page.accessibility === undefined ? {} : { accessibility: page.accessibility.map(edit) }),
     ...(page.limits === undefined ? {} : { limits: page.limits.map(edit) }),
   };
 }

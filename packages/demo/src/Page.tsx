@@ -4,7 +4,8 @@
    import line to copy, what a user must know where there is something, the
    first example without a heading, the run of examples from simple to rich,
    the reference tables a page carries (the Language page's wording), when to
-   use something else, the keyboard, the API tables, and what it
+   use something else, the keyboard, what a screen reader meets, the API
+   tables, and what it
    deliberately does not do. Each section appears only where it has something
    to say - a section that is always there carries no information.
 
@@ -18,11 +19,11 @@ import { Configurator } from "./Configurator";
 import { CopyButton } from "./CopyButton";
 import { Prose } from "./Prose";
 import type { Demo } from "./demo";
-import { hrefOf } from "./href";
+import { hrefOf, hrefOfNeighbour } from "./href";
 import { examplesOf } from "./tooling/examples";
 import { apiHtml, apiSection, DEFINITIONS_ID, DEFINITIONS_TITLE } from "./tooling/apiTable";
 import { referenceHtml } from "./tooling/referenceTable";
-import { ADR_0032, SCENARIOS } from "./outline";
+import { ADR_0032, SCENARIOS, keyboardAnchor, keysOfText } from "./outline";
 import type { Rubric, Page as PageData } from "./outline";
 
 function ImportLine({ exports, packageName }: { exports: readonly string[]; packageName: string }) {
@@ -127,6 +128,8 @@ export function Page({ demo, page }: PageProps) {
   const known = new Set(demo.addresses.ALL_PAGES.map((one) => one.id));
   const nameOf = (id: string) => demo.addresses.ALL_PAGES.find((one) => one.id === id)?.name ?? id;
 
+  const hasKeys = page.keys !== undefined || page.keysOf !== undefined;
+
   /* What stands on the page, in its order - built from the same values that
      decide below whether a section is there at all. */
   const here = hrefOf(demo.addresses.addressOf(page.id));
@@ -143,7 +146,8 @@ export function Page({ demo, page }: PageProps) {
       ? []
       : [section(`examples-${page.id}`, "Examples"), ...rest.map((one) => ({ ...exampleEntry(one), sub: true as const }))]),
     ...(page.alternatives === undefined ? [] : [section(`alternatives-${page.id}`, "When to use something else")]),
-    ...(page.keys === undefined ? [] : [section(`keyboard-${page.id}`, "Keyboard")]),
+    ...(hasKeys ? [section(keyboardAnchor(page.id), "Keyboard")] : []),
+    ...(page.accessibility === undefined ? [] : [section(`accessibility-${page.id}`, "Accessibility")]),
     ...(tables.length === 0
       ? []
       : [
@@ -227,28 +231,47 @@ export function Page({ demo, page }: PageProps) {
         </Section>
       )}
 
-      {page.keys !== undefined && (
-        <Section id={`keyboard-${page.id}`} title="Keyboard">
-          <table className="keyTable">
-            <thead>
-              <tr>
-                <th scope="col">Key</th>
-                <th scope="col">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {page.keys.map(({ key, action }) => (
-                <tr key={key}>
-                  <th scope="row">
-                    <kbd>{key}</kbd>
-                  </th>
-                  <td>
-                    <Prose text={action} />
-                  </td>
+      {hasKeys && (
+        <Section id={keyboardAnchor(page.id)} title="Keyboard">
+          {page.keys !== undefined && (
+            <table className="keyTable">
+              <thead>
+                <tr>
+                  <th scope="col">Key</th>
+                  <th scope="col">Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {page.keys.map(({ key, action }) => (
+                  <tr key={key}>
+                    <th scope="row">
+                      <kbd>{key}</kbd>
+                    </th>
+                    <td>
+                      <Prose text={action} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+          {page.keysOf !== undefined && (
+            <p className="pageAbout">
+              <Prose text={keysOfText(page.keysOf, demo.addresses.ALL_PAGES, hrefOfNeighbour)} />
+            </p>
+          )}
+        </Section>
+      )}
+
+      {page.accessibility !== undefined && (
+        <Section id={`accessibility-${page.id}`} title="Accessibility">
+          <div className="pageAbout">
+            {page.accessibility.map((text) => (
+              <p key={text}>
+                <Prose text={text} />
+              </p>
+            ))}
+          </div>
         </Section>
       )}
 

@@ -12,8 +12,8 @@
    break every link (CONTEXT.md, "Rubric"). Component names are unique within a
    package, so one segment is enough.
 
-   The texts of a page - lede, about, alternatives, keys, limits - are plain
-   strings with two marks: `code` in backticks and a [link](#/page). The demo
+   The texts of a page - lede, about, alternatives, keys, accessibility,
+   limits - are plain strings with two marks: `code` in backticks and a [link](#/page). The demo
    renders them, turning `#/page` into the page's address; the llms text
    carries them as they are.
 
@@ -29,6 +29,14 @@
 
    This file runs without a bundler too: the props generator loads a demo's
    outline in Node. That is why it imports nothing. */
+
+/** A page this demo does not have: a component of a neighbouring package,
+    linked into that package's demo. */
+export interface ForeignPage {
+  name: string;
+  /** `"@umriss-ui/charts#trend"` - the package and the page's address. */
+  page: string;
+}
 
 export interface Page {
   /** The page's address: the component name, lower-cased. */
@@ -46,6 +54,16 @@ export interface Page {
   alternatives?: readonly { when: string; use: string }[];
   /** The keyboard table: a key or chord, and what it does. */
   keys?: readonly { key: string; action: string }[];
+  /** The pages whose keyboard tables apply here too: an id of this demo, or
+      a neighbour's page as a scenario's `builtFrom` names it. Linked under
+      the page's own table, never copied into it (`keysOfText`). */
+  keysOf?: readonly (string | ForeignPage)[];
+  /** What a screen reader meets, at most three short paragraphs, each only
+      where it says something: the role and accessible name it exposes and
+      where the name comes from; what it announces, through which live
+      region, and when; what the caller must supply and what happens
+      without it; where forced colours or reduced motion change it. */
+  accessibility?: readonly string[];
   /** What it deliberately does not do (ADR-0032). */
   limits?: readonly string[];
   /** The props types whose tables stand on this page, in the order they
@@ -135,13 +153,45 @@ export function placeOfLocation(path: string, hash: string): string {
 /** The record of what umriss is not - every page's known limits point there. */
 export const ADR_0032 = "https://github.com/romanhaendler/umriss-ui/blob/main/docs/adr/0032-what-umriss-is-not.md";
 
+/** Is it a neighbour's page as `{ name, page }`? */
+export function isForeign(value: unknown): value is ForeignPage {
+  if (typeof value !== "object" || value === null) return false;
+  const { name, page } = value as Record<string, unknown>;
+  return typeof name === "string" && typeof page === "string" && /^@[\w-]+\/[\w-]+#[\w-]+$/.test(page);
+}
+
+/** The anchor of a page's Keyboard section - in the app and on the site. */
+export const keyboardAnchor = (pageId: string): string => `keyboard-${pageId}`;
+
+/** The sentence under a page's keyboard table: "The keys of [Chart] apply
+    here.", each page a link to its Keyboard section. Written in the texts'
+    format, so that every medium writes it as it writes the page's other
+    texts. Where a neighbour's page lies only the medium knows: `neighbour`
+    gives its address. */
+export function keysOfText(
+  keysOf: readonly (string | ForeignPage)[],
+  pages: readonly Page[],
+  neighbour: (packageName: string, pageId: string) => string,
+): string {
+  const links = keysOf.map((one) => {
+    if (typeof one !== "string") {
+      const [packageName, pageId] = one.page.split("#") as [string, string];
+      return `[${one.name}](${neighbour(packageName, pageId)}#${keyboardAnchor(pageId)})`;
+    }
+    return `[${pages.find((page) => page.id === one)?.name ?? one}](#/${one}/${keyboardAnchor(one)})`;
+  });
+  const listed = links.length === 1 ? links[0] : `${links.slice(0, -1).join(", ")} and ${links.at(-1)}`;
+  return `The keys of ${listed} apply here.`;
+}
+
 /** The address of the scenarios page, as `placeOf`'s page id. */
 export const SCENARIOS = "scenarios";
 
 /** The addresses of an outline, and of the page ids it moved away from.
 
     A moved id that is still a page's id would shadow that page, and one that
-    points at no page would land nowhere - both throw. */
+    points at no page would land nowhere - both throw. So does a `keysOf`
+    entry that names no page with a keyboard table: its link would be dead. */
 export function addresses(outline: readonly Rubric[], MOVED: Moved = {}): Addresses {
   const ALL_PAGES: readonly PageWithRubric[] = outline.flatMap((rubric) =>
     rubric.pages.map((page) => ({ ...page, rubric })),
@@ -149,6 +199,13 @@ export function addresses(outline: readonly Rubric[], MOVED: Moved = {}): Addres
   for (const [old, current] of Object.entries(MOVED)) {
     if (ALL_PAGES.some((page) => page.id === old)) throw new Error(`The moved id \`${old}\` is still the id of a page.`);
     if (!ALL_PAGES.some((page) => page.id === current)) throw new Error(`\`${old}\` moved to \`${current}\`, which is no page.`);
+  }
+  for (const page of ALL_PAGES) {
+    for (const one of (page.keysOf ?? []) as unknown[]) {
+      if (typeof one === "string" ? !ALL_PAGES.some((s) => s.id === one && s.keys !== undefined) : !isForeign(one)) {
+        throw new Error(`\`demo/outline.ts\`: \`${page.id}\` takes the keys of \`${JSON.stringify(one)}\`, which is no page of this demo with a keyboard table and no \`{ name, page }\`.`);
+      }
+    }
   }
 
   const placeOf = (pageId: string, exampleId?: string): string => {
