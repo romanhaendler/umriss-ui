@@ -1045,14 +1045,18 @@ rubric's name is not in the address. The order inside a rubric is part of that
 sorting: the pages run from the simple to the composed — `Button` before
 `ButtonGroup`, `Tooltip` before `Popover` before `Menu` — and not in the order
 in which they happened to be delivered, which is how a sidebar quietly becomes
-a list of arrivals.
+a list of arrivals. When every later page of a rubric uses a page, that page
+comes right after the first, and reading order beats composition order there:
+`FormField` stands after `Input`, because every field after it is labelled
+with one.
 _Avoid_: Gruppe, group (a chart legend groups series), category, Kategorie,
 section
 
 Every demo opens with its scenarios page, which is no rubric, and then
 "Getting started" (demo rework, `.scratch/demo-rework/spec.md`). The rubrics of
-the `@umriss-ui/core` demo are Getting started, Layout, Typography, Actions,
-Forms, Feedback, Overlays, Navigation and Data display; `@umriss-ui/table` has
+the `@umriss-ui/core` demo are Getting started, Customising, Layout,
+Typography, Actions, Forms, Choosing, Dates and times, Feedback, Overlays,
+Navigation and Data display; `@umriss-ui/table` has
 Columns, Finding rows, Grouping, Rows, Around the table, Many rows, Editing
 and Limits and alarms; `@umriss-ui/charts`
 has Chart, Series, Limits and alarms and Around the chart; `@umriss-ui/schedule`
