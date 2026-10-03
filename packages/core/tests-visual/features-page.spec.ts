@@ -12,7 +12,7 @@ import { ALL_PAGES, open, openExample } from "./navigation";
 checkInstall({ open, pages: ALL_PAGES, command: "npm install @umriss-ui/core" });
 
 /* Not the Button page: a configurator takes its first slot (.scratch/configurator). */
-checkFirstExample({ open, pageId: "card", title: "Head and body" });
+checkFirstExample({ open, pageId: "select", title: "Select" });
 
 checkPage({
   open,
