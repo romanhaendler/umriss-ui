@@ -23,7 +23,7 @@ import { examplesOf } from "./tooling/examples";
 import { tablesOf } from "./tooling/tables";
 import { apiHtml, tableModel } from "./tooling/apiTable";
 import { referenceHtml } from "./tooling/referenceTable";
-import { ADR_0032 } from "./outline";
+import { ADR_0032, SCENARIOS } from "./outline";
 import type { Rubric, Page as PageData } from "./outline";
 
 function ImportLine({ exports, packageName }: { exports: readonly string[]; packageName: string }) {
@@ -69,6 +69,37 @@ function Section({ id, title, children, extra }: { id: string; title: string; ch
       </div>
       {children}
     </section>
+  );
+}
+
+/** The way on at a page's foot: the page before and the page after in the
+    outline's flat order, across rubrics - the order the sidebar shows. The
+    chain begins at the scenarios page (no `pageId`) and ends at the last
+    page. Plain links to the pages' addresses, which the shell moves on
+    without a reload. */
+export function PageTurn({ demo, pageId }: { demo: Demo; pageId?: string }) {
+  const { ALL_PAGES, addressOf } = demo.addresses;
+  /* -1 on the scenarios page, which stands before the first page. */
+  const at = ALL_PAGES.findIndex((one) => one.id === pageId);
+  const previous = at === -1 ? undefined : (ALL_PAGES[at - 1] ?? { id: SCENARIOS, name: "Scenarios", rubric: undefined });
+  const next = ALL_PAGES[at + 1];
+  return (
+    <nav className="pageTurn" aria-label="Previous and next page">
+      {previous !== undefined && (
+        <a href={hrefOf(addressOf(previous.id))} rel="prev">
+          <span className="pageTurnLabel">
+            {previous.rubric === undefined ? "Previous" : `Previous · ${previous.rubric.name}`}
+          </span>
+          <span className="pageTurnName">{previous.name}</span>
+        </a>
+      )}
+      {next !== undefined && (
+        <a href={hrefOf(addressOf(next.id))} rel="next">
+          <span className="pageTurnLabel">{`Next · ${next.rubric.name}`}</span>
+          <span className="pageTurnName">{next.name}</span>
+        </a>
+      )}
+    </nav>
   );
 }
 
@@ -246,6 +277,8 @@ export function Page({ demo, page }: PageProps) {
           </p>
         </Section>
       )}
+
+      <PageTurn demo={demo} pageId={page.id} />
 
       {contents.column}
     </article>
