@@ -462,7 +462,12 @@ body {
     grid-template-columns: minmax(0, 1fr);
   }
   /* The sidebar is in the drawer now (Shell.tsx): the page has the width to
-     itself. */
+     itself. Until React has moved it there - a frame or two after the window
+     narrows - the standing sidebar would fall into a row above the page and
+     push it down by its height; the rule keeps it out of that row. */
+  .shellBody > .rail {
+    display: none;
+  }
   .shellSearch {
     width: 160px;
   }
