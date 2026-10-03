@@ -90,6 +90,9 @@ export interface ShellProbes {
       (`<package> · <Type>`), and the page and anchor `<Type>-<prop>` of its
       row (.scratch/one-search 04). */
   prop: { query: string; label: string; group: string; pageId: string; id: string };
+  /** An export that only the API index shows: what is typed, the find's
+      label and its anchor on the index (.scratch/one-search 05). */
+  exported: { query: string; label: string; anchor: string };
   /** Where the demo's components read core's language and the header carries
       the EN/DE switch: a page, texts the library writes on it and names of
       buttons it writes there, each as [English, German]. Without it, the
@@ -664,6 +667,17 @@ test(`a prop's name finds its row: ${p.prop.label} of ${p.prop.group}`, async ({
   await expect(page.locator(`[id="${p.prop.id}"]`)).toBeInViewport();
 });
 
+/* An export's find lands on its signature in the API index
+   (.scratch/one-search 05). */
+test(`an export's name finds its entry in the API index: ${p.exported.label}`, async ({ page }) => {
+  await page.keyboard.press("ControlOrMeta+k");
+  const field = page.getByRole("combobox", { name: "Search umriss-ui" });
+  await field.fill(p.exported.query);
+  await findOf(page, p.exported.label, `${p.packageId} · API index`).click();
+  await expect(page).toHaveURL(new RegExp(`/api/#${p.exported.anchor}$`));
+  await expect(page.locator(`[data-block="api"] [id="${p.exported.anchor}"]`)).toBeInViewport();
+});
+
 for (const elsewhere of p.elsewhere ?? []) {
   test(`on the built site, the palette finds another package's ${elsewhere.label} and opens it at its address`, async ({ page }) => {
     test.skip(!existsSync(join(SITE_DIR, "search.json")), "the site is not built (`pnpm build:pages`)");
@@ -684,8 +698,8 @@ for (const elsewhere of p.elsewhere ?? []) {
     await expect(page).toHaveURL(home + elsewhere.address.slice(1));
     const [path = "", anchor] = elsewhere.address.split("#");
     if (anchor === undefined) await expect(page.locator(`[data-block="${path.split("/")[2]}"]`)).toBeVisible();
-    // An example, or a props table's row.
-    else await expect(page.locator(`[data-example="${anchor}"], tr[id="${anchor}"]`)).toBeInViewport();
+    // An example, a props table's row, or an entry of the API index.
+    else await expect(page.locator(`[data-example="${anchor}"], tr[id="${anchor}"], [data-block="api"] [id="${anchor}"]`)).toBeInViewport();
   });
 }
 

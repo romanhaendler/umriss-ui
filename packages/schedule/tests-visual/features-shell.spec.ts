@@ -23,6 +23,8 @@ checkShell({
   foldedRow: { pageId: "schedule", id: "ScheduleProps-onIntent" },
   prop: { query: "laneHeight", label: "laneHeight", group: "schedule · ScheduleProps", pageId: "schedule", id: "ScheduleProps-laneHeight" },
   apiIndex: { anchor: "applyIntent" },
+  exported: { query: "applyIntent", label: "applyIntent", anchor: "applyIntent" },
+  elsewhere: [{ query: "controlLimits", group: "charts · API index", label: "controlLimits", address: "/charts/api/#controlLimits" }],
   /* The day above the plot, a group's lane count and its fold button. What
      the readout speaks once a key rests is proven in German by
      `tests-unit/readout.test.tsx`. */

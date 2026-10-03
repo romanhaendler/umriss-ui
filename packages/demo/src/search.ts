@@ -14,7 +14,8 @@
    Like the outline, this file imports nothing but the outline (and types):
    the generator loads it in Node without a bundler. */
 
-import { SCENARIOS, addressOfPlace, type Rubric } from "./outline.ts";
+import { API_INDEX, SCENARIOS, addressOfPlace, type Rubric } from "./outline.ts";
+import type { ApiIndexModel } from "./tooling/apiIndex.ts";
 import type { Span } from "./tooling/apiTable.ts";
 import type { ReferenceTable } from "./tooling/referenceTable.ts";
 
@@ -125,6 +126,20 @@ export function referenceEntries(packageId: string, outline: readonly Rubric[], 
           ),
         );
       }),
+    ),
+  );
+}
+
+/** A package's exports as its API index shows them (.scratch/one-search 05),
+    each landing on its entry there: `/core/api/#useToast`. An export the
+    index only refers onwards is found where it leads - a component as its
+    page, a type with a table by its props. */
+export function exportEntries(packageId: string, index: ApiIndexModel): SearchEntry[] {
+  return index.groups.flatMap((group) =>
+    group.entries.flatMap((entry): SearchEntry[] =>
+      entry.home === undefined
+        ? [{ address: `/${packageId}${addressOfPlace(`/${API_INDEX}/${entry.anchor}`)}`, label: entry.name, group: `${packageId} · API index`, kind: "export" }]
+        : [],
     ),
   );
 }
