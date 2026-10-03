@@ -942,6 +942,31 @@
   color: var(--u-color-text-secondary);
 }
 
+/* A long table's secondary group, folded (.scratch/props-table-hygiene, 02):
+   the summary is the group's title with its count, a native disclosure the
+   keyboard and a screen reader know, tall enough to tap on a phone. */
+.apiFold > summary {
+  width: fit-content;
+  min-height: 24px;
+  margin-bottom: 0;
+  cursor: pointer;
+  border-radius: var(--u-radius-xs);
+}
+
+.apiFold[open] > summary {
+  margin-bottom: var(--u-space-2);
+}
+
+.apiFold > summary:focus-visible {
+  outline: 2px solid transparent;
+  box-shadow: var(--u-focus-ring);
+}
+
+/* A row's `#<Type>-<prop>` is an address; the sticky header must not cover it. */
+.apiTable tbody tr {
+  scroll-margin-top: 76px;
+}
+
 /* Links between pages. Without this rule the browser would fall back on its
    own blue, and the demo allows itself nothing the library does not offer. */
 .pageHead a,

@@ -36,4 +36,5 @@ checkShell({
      @umriss-ui/table. */
   pointer: { wide: "ta", narrow: "tab" },
   contents: { pageId: "select", id: "states", title: "States" },
+  foldedRow: { pageId: "popover", id: "PopoverProps-role" },
 });

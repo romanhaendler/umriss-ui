@@ -69,6 +69,9 @@ export interface ShellProbes {
   /** A page whose entry lies low in the sidebar (core: Tag; elsewhere the
       last page). */
   low: NamedPage;
+  /** A row of a props table long enough to fold, in a secondary group - its
+      page and its anchor `<Type>-<prop>` - where the demo has one. */
+  foldedRow?: { pageId: string; id: string };
 }
 
 /** The title the prerendering writes for a page - by the same function, from
@@ -451,6 +454,58 @@ test("the chain begins at the scenarios page and ends at the last page", async (
   await page.goto(last);
   await expect(turn(page).getByRole("link", { name: /^Previous/ })).toHaveCount(1);
   await expect(turn(page).getByRole("link", { name: /^Next/ })).toHaveCount(0);
+});
+
+/* A fold never hides a target (.scratch/props-table-hygiene, 02): the shell
+   opens the folded group before it scrolls, on a full load and on a jump
+   without one alike. */
+test("the address of a row in a folded group opens the group and shows the row", async ({ page }) => {
+  test.skip(p.foldedRow === undefined, "this demo has no table long enough to fold");
+  const { pageId, id } = p.foldedRow!;
+  await page.goto(`/${pageId}/#${id}`);
+  const row = page.locator(`[id="${id}"]`);
+  await expect(row).toBeInViewport();
+  await expect(page.locator("details", { has: row })).toHaveAttribute("open", "");
+});
+
+test("a jump to a row in a folded group, without a reload, opens the group", async ({ page }) => {
+  test.skip(p.foldedRow === undefined, "this demo has no table long enough to fold");
+  const { pageId, id } = p.foldedRow!;
+  /* A link in a page's text or a search find would carry the address; the
+     shell takes the click and moves without a reload. */
+  await page.evaluate(
+    ([pageId, id]) => {
+      (window as unknown as { stayed: boolean }).stayed = true;
+      const link = document.createElement("a");
+      link.href = `${pageId}/#${id}`;
+      link.textContent = "to the row";
+      document.querySelector("main")!.prepend(link);
+    },
+    [pageId, id] as const,
+  );
+  await page.getByRole("link", { name: "to the row" }).click();
+  const row = page.locator(`[id="${id}"]`);
+  await expect(row).toBeInViewport();
+  await expect(page.locator("details", { has: row })).toHaveAttribute("open", "");
+  expect(await page.evaluate(() => (window as unknown as { stayed?: boolean }).stayed)).toBe(true);
+});
+
+test("a fold is a disclosure the keyboard opens, and the API section stays accessible", async ({ page }) => {
+  test.skip(p.foldedRow === undefined, "this demo has no table long enough to fold");
+  const { pageId, id } = p.foldedRow!;
+  await page.goto(`/${pageId}/`);
+  const fold = page.locator("details", { has: page.locator(`[id="${id}"]`) });
+  await expect(fold).not.toHaveAttribute("open");
+  const violations = async () =>
+    (await new AxeBuilder({ page }).include(".apiTables").withTags(STANDARDS).analyze()).violations.map(
+      (v) => `${v.id}: ${v.nodes.map((n) => n.target).join(" ")}`,
+    );
+  expect(await violations()).toEqual([]);
+  await fold.locator("summary").focus();
+  await page.keyboard.press("Enter");
+  await expect(fold).toHaveAttribute("open", "");
+  await expect(page.locator(`[id="${id}"]`)).toBeVisible();
+  expect(await violations()).toEqual([]);
 });
 
 test("the palette filters and jumps", async ({ page }) => {
