@@ -70,8 +70,9 @@ export interface ScheduleProps {
       @default 160 */
   headerWidth?: number;
   /** A working calendar: the intervals in which time counts. Nights and
-      weekends outside them are cut out of the axis.
-      @default the wall clock */
+      weekends outside them are cut out of the axis. Without intervals every
+      hour counts, as on the wall clock.
+      @default [] */
   calendar?: CalendarInput;
   /** The narrowest and widest time span zoom may reach, in milliseconds.
       @default one hour to 28 days */
@@ -83,7 +84,8 @@ export interface ScheduleProps {
       @default "ticks" */
   snap?: "ticks" | number | SnapRaster | false;
   /** The intents the caller handles. Each one enables its interaction; none
-      leaves a read-only schedule (ADR-0023). */
+      leaves a read-only schedule (ADR-0023).
+      @default [] */
   intents?: readonly IntentKind[];
   /** Whether a subtask may go to a lane. It narrows `"lane"`, it does not
       enable it.
