@@ -699,6 +699,31 @@
   color: var(--u-color-text);
 }
 
+/* A row's name links to the row itself (.scratch/props-to-examples): it reads
+   as the name, and is underlined only under the pointer. */
+.apiAnchor {
+  color: inherit;
+  text-decoration: none;
+}
+
+.apiAnchor:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* "Shown in": its own line under the description, wrapping rather than
+   widening the table. */
+.apiShown {
+  margin: var(--u-space-1) 0 0;
+  font-size: var(--u-text-sm);
+}
+
+.apiShown a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .apiTable td {
   color: var(--u-color-text-secondary);
   max-width: 46ch;

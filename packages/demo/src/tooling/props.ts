@@ -3,7 +3,9 @@
    (`exportDocs.ts`), at an internal reference in a reader's text - a
    requirement number, a source path, an ADR number no file answers
    (`references.ts`) -, at a default stated in prose and not in `@default`,
-   and at a type a page names that no entry exports (`propsReader.ts`).
+   and at a type a page names that no entry exports (`propsReader.ts`). Each
+   row it writes carries the examples and scenarios that use it
+   (`shownIn.ts`).
 
    What is generated is not checked in - `demo/.generated/` is ignored. A
    checked-in generation drifts away from its source, and this whole mechanism
@@ -26,7 +28,8 @@ import { fileURLToPath } from "node:url";
 import ts from "typescript";
 import type { Rubric } from "../outline.ts";
 import { readProps } from "./propsReader.ts";
-import type { Flag, PropEntry, Reading, TypeEntry } from "./propsReader.ts";
+import type { Flag, PropEntry, Reading, ShownIn, TypeEntry } from "./propsReader.ts";
+import { shownIn } from "./shownIn.ts";
 import { entriesOf, undocumentedExports } from "./exportDocs.ts";
 import { adrLinksOf, internalReferences, linkAdrs, pageTexts, type AdrLinks } from "./references.ts";
 
@@ -104,6 +107,16 @@ export function linkedTables(types: Readonly<Record<string, TypeEntry>>, links: 
   );
 }
 
+/** The tables with each row's demonstrations (`shownIn.ts`), by `Type.prop`. */
+export function withShownIn(types: Readonly<Record<string, TypeEntry>>, shown: Readonly<Record<string, readonly ShownIn[]>>): Record<string, TypeEntry> {
+  return Object.fromEntries(
+    Object.entries(types).map(([name, entry]) => [
+      name,
+      { ...entry, props: entry.props.map((prop) => (shown[`${name}.${prop.name}`] === undefined ? prop : { ...prop, shownIn: shown[`${name}.${prop.name}`] })) },
+    ]),
+  );
+}
+
 /** The package's own compiler options, from its `tsconfig.json` - the paths
     to its neighbours' source above all, so that a type from core reads as it
     is written and not as `any` from a dist that was never built. Empty where
@@ -144,7 +157,7 @@ export interface PropsJob {
 export function generateProps({ packageName, outline }: PropsJob): Record<string, TypeEntry> {
   const target = join(packageName, "demo", ".generated", "props.json");
   const links = adrLinks();
-  const { types: types, gaps: gaps, flags } = readPackage(packageName, outline, (text) => internalReferences(text, links));
+  const { types, gaps, flags, declaredAt } = readPackage(packageName, outline, (text) => internalReferences(text, links));
   const outlineFile = join(packageName, "demo", "outline.ts");
   /* The outline is handed in; its file only tells the lines. */
   const pageFlags = outlineFlags(outline, existsSync(outlineFile) ? readFileSync(outlineFile, "utf8") : "", links);
@@ -201,7 +214,7 @@ export function generateProps({ packageName, outline }: PropsJob): Record<string
   mkdirSync(dirname(target), { recursive: true });
   /* A fixed indent and a closing newline: two runs yield the same file, byte
      for byte. */
-  const output: Record<string, TypeEntry> = linkedTables(types, links);
+  const output: Record<string, TypeEntry> = linkedTables(withShownIn(types, shownIn(join(packageName, "demo"), outline, declaredAt, compilerOptionsOf(packageName))), links);
   writeFileSync(target, `${JSON.stringify(output, null, 2)}\n`, "utf8");
   writeFileSync(join(dirname(target), "adrs.json"), `${JSON.stringify(links, null, 2)}\n`, "utf8");
   process.stdout.write(`props.json: ${Object.keys(output).length} types.\n`);

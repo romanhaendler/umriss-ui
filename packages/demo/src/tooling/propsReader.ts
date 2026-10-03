@@ -58,6 +58,21 @@ export interface PropEntry {
   description: string;
   /** Set where the prop comes from another type of THIS library. */
   inheritedFrom?: string;
+  /** The examples and scenarios that use it - set by the generator, not by
+      the reader (`shownIn.ts`); absent where none does. */
+  shownIn?: readonly ShownIn[];
+}
+
+/** An example or a scenario that uses a row. */
+export interface ShownIn {
+  /** The page's id; `scenarios` for a scenario. */
+  page: string;
+  /** Its anchor on that page. */
+  example: string;
+  title: string;
+  /** The page's name - "Scenarios" for a scenario - which a link to it
+      from another page carries. */
+  pageName: string;
 }
 
 export interface TypeEntry {
@@ -117,6 +132,11 @@ export interface Flag extends Gap {
 
 export interface Reading {
   types: Record<string, TypeEntry>;
+  /** Where each row of `types` is declared, by `Type.prop`: one place per
+      member it was read from - two where it merges two arms of a union - as
+      `declarationKey` writes it. What an example uses is matched against
+      these (`shownIn.ts`). */
+  declaredAt: Record<string, readonly string[]>;
   gaps: readonly Gap[];
   /** The rows and definitions whose texts `check` found something in, the
       rows that state a default in prose, and - where entries are given -
@@ -170,6 +190,12 @@ const POLYMORPH = "the chosen element";
 const UNKNOWN_ELEMENT = "the rendered element";
 
 type Declaration = ts.InterfaceDeclaration | ts.TypeAliasDeclaration;
+
+/** A declaration's place as one string - the same in two programs over the
+    same files, which is what lets a use in an example find its row. */
+export function declarationKey(node: ts.Node): string {
+  return `${node.getSourceFile().fileName}:${node.getStart()}`;
+}
 
 /** Reads the named types out of the named files, and after them every type
     of the library they name that has no table: as a definition.
@@ -457,9 +483,13 @@ export function readProps(
   /** The member an entry is read from - for reporting a gap and checking a
       default, even where the entry ends up as a copy in another table. */
   const sources = new WeakMap<PropEntry, ts.PropertySignature>();
-  const withPlace = (from: PropEntry, to: PropEntry): PropEntry => {
+  /** Every member an entry is read from - more than one where arms or
+      branches merge: a use of any of them shows the row. */
+  const members = new WeakMap<PropEntry, readonly ts.PropertySignature[]>();
+  const withPlace = (from: PropEntry, to: PropEntry, ...also: readonly PropEntry[]): PropEntry => {
     const source = sources.get(from);
     if (source !== undefined) sources.set(to, source);
+    members.set(to, [...new Set([from, ...also].flatMap((one) => members.get(one) ?? []))]);
     return to;
   };
   const placeOf = (member: ts.PropertySignature): { file: string; line: number } => {
@@ -570,6 +600,7 @@ export function readProps(
       description: descriptionOf(member.name),
     };
     sources.set(entry, member);
+    members.set(entry, [member]);
     return entry;
   };
 
@@ -646,11 +677,15 @@ export function readProps(
           found.set(entry.name, entry);
           continue;
         }
-        const merged = withPlace(previous, {
-          ...previous,
-          optional: previous.optional || entry.optional,
-          description: previous.description || entry.description,
-        });
+        const merged = withPlace(
+          previous,
+          {
+            ...previous,
+            optional: previous.optional || entry.optional,
+            description: previous.description || entry.description,
+          },
+          entry,
+        );
         found.set(entry.name, merged);
       }
     }
@@ -696,15 +731,19 @@ export function readProps(
       /* The values belong to the one name; two shapes are no name. */
       const { expansion, ...rest } = first;
       const references = [...new Set(shaped.flatMap((p) => p.references ?? []))];
-      return withPlace(first, {
-        ...rest,
-        ...(expansion === undefined || shapes.length > 1 ? {} : { expansion }),
-        ...(deprecated === undefined ? {} : { deprecated }),
-        ...(references.length === 0 ? {} : { references }),
-        type,
-        optional: present.length < arms.length || present.some((p) => p.optional),
-        description,
-      });
+      return withPlace(
+        first,
+        {
+          ...rest,
+          ...(expansion === undefined || shapes.length > 1 ? {} : { expansion }),
+          ...(deprecated === undefined ? {} : { deprecated }),
+          ...(references.length === 0 ? {} : { references }),
+          type,
+          optional: present.length < arms.length || present.some((p) => p.optional),
+          description,
+        },
+        ...present,
+      );
     });
   };
 
@@ -1022,10 +1061,16 @@ export function readProps(
     }
   }
 
+  const declaredAt: Record<string, readonly string[]> = {};
+  for (const entry of Object.values(types)) {
+    for (const prop of entry.props) declaredAt[`${entry.name}.${prop.name}`] = (members.get(prop) ?? []).map(declarationKey);
+  }
+
   /* Only what really ends up in a table. A type that was read only as a
      parent and has no page of its own is not chased. */
   return {
     types,
+    declaredAt,
     gaps: gaps.filter((l) => isPublic.has(l.of)).map((l) => l.gap),
     flags: flags.filter((f) => shown.has(f.of)).map((f) => f.flag),
   };

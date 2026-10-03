@@ -306,7 +306,7 @@ describe("one table model, two writers", () => {
 
   it("reads `required` as a label in both", () => {
     const model = tableModel(ENTRY);
-    expect(tableHtml(model)).toContain('<code>value</code><span class="apiBadge">required</span>');
+    expect(tableHtml(model)).toContain('<code>value</code></a><span class="apiBadge">required</span>');
     expect(tableMarkdown(model)).toContain("| `value` *required* | `number` |");
   });
 
@@ -454,5 +454,62 @@ describe("long unions and the preview of a definition (.scratch/a11y-and-finish,
     expect(preview.slice(0, 3)).toEqual(["{", "  m0: number;", "  m1?: number;"]);
     expect(preview.at(-1)).toBe("…");
     expect(previewOf(definition({ props: props.slice(0, 2), definition: { description: "Members." } }))).toBe("{\n  m0: number;\n  m1?: number;\n}");
+  });
+});
+
+/* Every row names the examples that show it (.scratch/props-to-examples). */
+describe("Shown in", () => {
+  const shown = (page: string, example: string, title: string, pageName: string) => ({ page, example, title, pageName });
+  const DIAL: TypeEntry = {
+    name: "DialProps",
+    parameter: [],
+    omitted: [],
+    props: [
+      {
+        name: "value",
+        type: "number",
+        optional: false,
+        description: "The value.",
+        shownIn: [
+          shown("dial", "basic", "A basic dial", "Dial"),
+          shown("panel", "in-a-panel", "In a panel", "Panel"),
+          shown("scenarios", "watch", "Watch the pressure", "Scenarios"),
+          shown("meter", "readings", "Readings", "Meter"),
+        ],
+      },
+      { name: "tone", type: "string", optional: true, description: "Red or not." },
+    ],
+  };
+  const html = document.createElement("div");
+  html.innerHTML = tableHtml(tableModel(DIAL, undefined, "dial"));
+  const markdown = tableMarkdown(tableModel(DIAL, undefined, "dial"));
+  const cell = (id: string) => html.querySelector(`[id="${id}"] td:last-child`)!;
+
+  it("names three examples as links and counts the rest, in the HTML", () => {
+    const line = cell("DialProps-value").querySelector(".apiShown")!;
+    expect(line.textContent).toBe("Shown in: A basic dial, In a panel (Panel), Watch the pressure (Scenarios) and 1 more");
+    expect([...line.querySelectorAll("a")].map((a) => a.getAttribute("href"))).toEqual(["../dial/#basic", "../panel/#in-a-panel", "../#watch"]);
+  });
+
+  it("writes the same line in the Markdown", () => {
+    expect(markdown).toContain(
+      "The value.<br>Shown in: [A basic dial](#/dial/basic), [In a panel (Panel)](#/panel/in-a-panel), [Watch the pressure (Scenarios)](#/scenarios/watch) and 1 more |",
+    );
+  });
+
+  it("puts the examples of the page the table stands on first", () => {
+    const elsewhere = tableModel(DIAL, undefined, "panel").groups[0]!.rows[0]!.shownIn!;
+    expect(elsewhere.filter((span) => span.kind === "link").map((span) => span.text)).toEqual(["In a panel", "A basic dial (Dial)", "Watch the pressure (Scenarios)"]);
+  });
+
+  it("shows no line for a row no example uses", () => {
+    expect(cell("DialProps-tone").querySelector(".apiShown")).toBeNull();
+    expect(markdown).toContain("| Red or not. |");
+  });
+
+  it("makes a row's name the link to its own anchor", () => {
+    const name = html.querySelector('[id="DialProps-value"] th a')!;
+    expect(name.getAttribute("href")).toBe("#DialProps-value");
+    expect(name.textContent).toBe("value");
   });
 });
