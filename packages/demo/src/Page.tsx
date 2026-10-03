@@ -3,7 +3,8 @@
    The skeleton (.scratch/demo-rework/spec.md): rubric and name, the lede, the
    import line to copy, what a user must know where there is something, the
    first example without a heading, the run of examples from simple to rich,
-   when to use something else, the keyboard, the API tables, and what it
+   the reference tables a page carries (the Language page's wording), when to
+   use something else, the keyboard, the API tables, and what it
    deliberately does not do. Each section appears only where it has something
    to say - a section that is always there carries no information.
 
@@ -19,6 +20,7 @@ import { hrefOf } from "./href";
 import { examplesOf } from "./tooling/examples";
 import { tablesOf } from "./tooling/tables";
 import { apiHtml, tableModel } from "./tooling/apiTable";
+import { referenceHtml } from "./tooling/referenceTable";
 import { ADR_0032 } from "./outline";
 import type { Rubric, Page as PageData } from "./outline";
 
@@ -132,6 +134,14 @@ export function Page({ demo, page }: PageProps) {
           ))}
         </Section>
       )}
+
+      {(demo.references[page.id] ?? []).map((table) => (
+        <Section key={table.anchor} id={table.anchor} title={table.title}>
+          {/* Written like the API section, from one model
+              (`tooling/referenceTable.ts`); every row is an anchor. */}
+          <div className="apiTables" dangerouslySetInnerHTML={{ __html: referenceHtml(table) }} />
+        </Section>
+      ))}
 
       {page.alternatives !== undefined && (
         <Section id={`alternatives-${page.id}`} title="When to use something else">

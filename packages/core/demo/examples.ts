@@ -7,6 +7,7 @@
 import { buildDemo } from "@umriss-ui/demo";
 import manifest from "../package.json";
 import props from "./.generated/props.json";
+import references from "./.generated/references.json";
 import { ADDRESSES } from "./outline";
 
 export const DEMO = buildDemo({
@@ -16,4 +17,5 @@ export const DEMO = buildDemo({
   examples: import.meta.glob<Record<string, unknown>>("./examples/*/*.tsx", { eager: true }),
   sources: import.meta.glob<string>(["./examples/*/*.tsx", "./scenarios/*.tsx"], { eager: true, query: "?raw", import: "default" }),
   props,
+  references,
 });
