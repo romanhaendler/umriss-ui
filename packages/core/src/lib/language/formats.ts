@@ -51,8 +51,8 @@ export interface Formats {
   number: (n: number, decimals?: number) => string;
   /**
    * A count. Kept apart from `number` because it makes a different promise: a
-   * count is whole, and Intl's default (at most three decimal places) is right
-   * for it and wrong for a measurement.
+   * count is whole, and Intl's own rounding (at most three decimal places) is
+   * right for it and wrong for a measurement.
    */
   count: (n: number) => string;
   /** A share from 0 to 1 as whole per cent: 74 % */

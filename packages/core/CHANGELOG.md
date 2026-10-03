@@ -39,7 +39,9 @@ commit.
   it on hover, from the package's `.d.ts`. Nothing else changes.
 - **Every type a props table names can be imported**: `TextTracking` and
   `TextLeading` (the text's letter spacing and line height) and `Align` (where
-  a popover lines up with its anchor) are new public types.
+  a popover lines up with its anchor) are new public types. `DockPlace` is
+  declared as its four edges itself, no longer as another name for an
+  internal type; what it accepts is unchanged.
 - **`keywords` on a `CommandPaletteItem`**: more words a candidate is found
   by, such as synonyms, searched but never shown. They are searched only when
   neither the label nor the group matched, and only for a query of three

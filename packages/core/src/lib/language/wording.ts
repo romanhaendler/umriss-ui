@@ -116,7 +116,7 @@ export interface Wording {
   dockTools: string;
   /** Accessible name of the grip - it says what it does, not what it is. */
   dockGrip: string;
-  /** The four resting places, named. The keys are the `Place` type's, and a
+  /** The four resting places, named. The keys are the `DockPlace` type's, and a
       register translates them: the German one answers "oben" where the
       English one answers "top". */
   dockPlace: (place: "top" | "right" | "bottom" | "left") => string;

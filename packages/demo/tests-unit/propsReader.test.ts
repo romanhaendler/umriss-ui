@@ -393,6 +393,43 @@ describe("readProps with the gate's check for internal references", () => {
   });
 });
 
+describe("readProps with the gate's default in prose", () => {
+  const PROSE = join(FIXTURES, "prose.tsx");
+
+  it("flags a description that says \"default\" where the row shows none, with file and line", () => {
+    const { flags } = readProps([PROSE], ["FixtureProseProps"]);
+    expect(flags.map(({ kind, file, line, type, prop, found }) => ({ kind, file, line, type, prop, found }))).toEqual([
+      { kind: "default", file: PROSE, line: 8, type: "FixtureProseProps", prop: "pageSize", found: ["Default 10."] },
+      { kind: "default", file: PROSE, line: 10, type: "FixtureProseProps", prop: "wrap", found: ["Whether rows wrap; by default they do not."] },
+    ]);
+  });
+
+  it("passes a value, a phrase - \"no default\" too - and a destructuring default", () => {
+    const { flags, types } = readProps([PROSE], ["FixtureTaggedDefaultProps"]);
+    expect(flags).toEqual([]);
+    expect(types.FixtureTaggedDefaultProps!.props.map((p) => p.defaultValue)).toEqual(["10", "no default", '"neutral"']);
+  });
+});
+
+describe("readProps with the gate's unexported type", () => {
+  const HIDDEN = join(FIXTURES, "exports", "hidden.tsx");
+  const ENTRY = join(FIXTURES, "exports", "index.ts");
+
+  it("flags a type in a cell, a definition and a header that the entries do not export, each with file and line", () => {
+    const { flags } = readProps([HIDDEN], ["FixtureHiddenProps", "FixtureUnlistedProps"], undefined, {}, [ENTRY]);
+    expect(flags.map(({ kind, file, line, type, prop, found }) => ({ kind, file, line, type, prop, found }))).toEqual([
+      { kind: "unexported", file: HIDDEN, line: 24, type: "FixtureHiddenProps", prop: "(its header)", found: ["FixtureHiddenKey"] },
+      { kind: "unexported", file: HIDDEN, line: 26, type: "FixtureHiddenProps", prop: "shape", found: ["FixtureHiddenShape"] },
+      { kind: "unexported", file: HIDDEN, line: 33, type: "FixtureUnlistedProps", prop: "(its header)", found: ["FixtureUnlistedProps"] },
+      { kind: "unexported", file: HIDDEN, line: 22, type: "FixtureOpenUnion", prop: "(its declaration)", found: ["FixtureHiddenShape"] },
+    ]);
+  });
+
+  it("passes a table that names only what the entries export", () => {
+    expect(readProps([HIDDEN], ["FixtureOpenProps"], undefined, {}, [ENTRY]).flags).toEqual([]);
+  });
+});
+
 describe("readProps over an interface of call signatures", () => {
   it("finds no props and reports no gap", () => {
     /* `ColumnComponent` is an overload, not a props type. `Column`'s page

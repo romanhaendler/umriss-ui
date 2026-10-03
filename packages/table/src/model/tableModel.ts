@@ -33,14 +33,16 @@ export interface Column<Z, K extends string = string> {
   value?: (row: Z) => string | number | null | undefined;
   /** A comparison of one's own; otherwise by the kind of the value. */
   compare?: (a: Z, b: Z) => number;
-  /** Takes part in the free-text search (default: no). */
+  /** Takes part in the free-text search.
+      @default false */
   searchable?: boolean;
-  /** May the user switch this column away? Default yes. `false` for columns
-      that identify the row – without them the table is no longer
-      readable. */
+  /** May the user switch this column away? `false` for columns that identify
+      the row – without them the table is no longer readable.
+      @default true */
   hideable?: boolean;
-  /** May the user drag the width? Default no – a column whose content fits
-      anyway needs no grip. */
+  /** May the user drag the width? A column whose content fits anyway needs
+      no grip.
+      @default false */
   resizable?: boolean;
   /** Initial width in pixels; without it the browser decides. */
   width?: number;

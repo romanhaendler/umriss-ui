@@ -100,16 +100,24 @@ export interface Gap {
   line: number;
 }
 
-/** A row whose text carries what the caller's `check` found in it. */
+/** What the gate stops at, where it stands.
+
+    - `reference`: a text carries what the caller's `check` found in it.
+    - `default`: a description says "default" and the row shows none - the
+      default belongs in `@default`, as a phrase where it is no value.
+    - `unexported`: a cell, a definition or a header names a type of the
+      library that no entry exports - a name the reader cannot import. */
 export interface Flag extends Gap {
+  kind: "reference" | "default" | "unexported";
   found: readonly string[];
 }
 
 export interface Reading {
   types: Record<string, TypeEntry>;
   gaps: readonly Gap[];
-  /** The rows whose description, deprecation or phrase default `check`
-      found something in. */
+  /** The rows and definitions whose texts `check` found something in, the
+      rows that state a default in prose, and - where entries are given -
+      every name of a type no entry exports. */
   flags: readonly Flag[];
 }
 
@@ -168,14 +176,17 @@ type Declaration = ts.InterfaceDeclaration | ts.TypeAliasDeclaration;
     not carry; the reader only notes where it stands, as it does a gap.
     `options` are the package's own compiler options where it has them: with
     the `paths` to its neighbours' source, a type from core is read where it is
-    written, not from a dist that may not be built. */
+    written, not from a dist that may not be built. `entries` are the modules
+    a reader imports from - the package's and its neighbours'; where they are
+    given, every type a page names must be exported by one of them. */
 export function readProps(
   files: readonly string[],
   typeNames: readonly string[],
   check: (text: string) => readonly string[] = () => [],
   options: ts.CompilerOptions = {},
+  entries: readonly string[] = [],
 ): Reading {
-  const program = ts.createProgram([...files], {
+  const program = ts.createProgram([...files, ...entries], {
     target: ts.ScriptTarget.ES2022,
     jsx: ts.JsxEmit.ReactJSX,
     moduleResolution: ts.ModuleResolutionKind.Bundler,
@@ -191,6 +202,21 @@ export function readProps(
 
   const isExported = (declaration: Declaration): boolean =>
     (ts.getCombinedModifierFlags(declaration) & ts.ModifierFlags.Export) !== 0;
+
+  /* What the entries export, re-exports followed to their declaration. */
+  const importable = new Set<ts.Declaration>();
+  for (const entry of entries) {
+    const module = checker.getSymbolAtLocation(program.getSourceFile(entry)!);
+    if (module === undefined) throw new Error(`\`${entry}\` is not a module the compiler can read.`);
+    for (const exported of checker.getExportsOfModule(module)) {
+      const target = (exported.flags & ts.SymbolFlags.Alias) !== 0 ? checker.getAliasedSymbol(exported) : exported;
+      for (const declaration of target.declarations ?? []) importable.add(declaration);
+    }
+  }
+  /** The names among these that no entry exports - none where no entries
+      are given. */
+  const unexported = (names: readonly string[]): string[] =>
+    entries.length === 0 ? [] : names.filter((name) => !importable.has(named.get(name)!));
 
   /* By name only for what the caller asks for, and there an exported
      declaration wins over a private one of the same name. Inside the source a
@@ -869,8 +895,17 @@ export function readProps(
       const source = sources.get(prop);
       if (prop.inheritedFrom !== undefined || source === undefined) continue;
       if (prop.description === "") gaps.push({ of: declaration, gap: { type: name, prop: prop.name, ...placeOf(source) } });
-      const found = [prop.description, prop.deprecated ?? "", prop.defaultIsPhrase === true ? prop.defaultValue! : ""].flatMap(check);
-      if (found.length > 0) flags.push({ of: declaration, flag: { type: name, prop: prop.name, ...placeOf(source), found } });
+      const flag = (kind: Flag["kind"], found: readonly string[]): void => {
+        if (found.length > 0) flags.push({ of: declaration, flag: { kind, type: name, prop: prop.name, ...placeOf(source), found } });
+      };
+      flag("reference", [prop.description, prop.deprecated ?? "", prop.defaultIsPhrase === true ? prop.defaultValue! : ""].flatMap(check));
+      /* No exception list: where the default is no value, the tag is a
+         phrase - "no default" included. */
+      if (prop.defaultValue === undefined) {
+        const sentences = prop.description.replace(/\s+/g, " ").split(/(?<=\.) /);
+        flag("default", sentences.filter((sentence) => /\bdefault\b/i.test(sentence)));
+      }
+      flag("unexported", unexported(prop.references ?? []));
     }
 
     const entry: TypeEntry = {
@@ -885,9 +920,26 @@ export function readProps(
     return entry;
   }
 
+  /** A flag that belongs to a declaration as a whole: its comment, its
+      header, its declaration as written. */
+  const flagAt = (declaration: Declaration, kind: Flag["kind"], prop: string, found: readonly string[]): void => {
+    if (found.length === 0) return;
+    const file = declaration.getSourceFile();
+    const line = file.getLineAndCharacterOfPosition(declaration.getStart(file)).line + 1;
+    flags.push({ of: declaration, flag: { kind, type: declaration.name.text, prop, file: file.fileName, line, found } });
+  };
+  /** The names a header shows that no entry exports: a table's own, and what
+      its parameters' constraints and defaults name. */
+  const flagHeader = (declaration: Declaration, table: boolean): void => {
+    const own = table && entries.length > 0 && !importable.has(declaration) ? [declaration.name.text] : [];
+    const constraints = [...new Set((declaration.typeParameters ?? []).flatMap(referencesOf))];
+    flagAt(declaration, "unexported", "(its header)", [...own, ...unexported(constraints)]);
+  };
+
   const types: Record<string, TypeEntry> = {};
   for (const typeName of typeNames) {
     const declaration = declarations.get(typeName)!;
+    if (types[typeName] === undefined) flagHeader(declaration, true);
     const entry = readType(declaration);
     const introduced = new Set((declaration.typeParameters ?? []).map((p) => p.name.text));
     for (const prop of entry.props) {
@@ -937,18 +989,15 @@ export function readProps(
     const parameter = (declaration.typeParameters ?? []).map(textOf);
     /* A definition stands on a page: its texts are a reader's, like a row's. */
     shown.add(declaration);
-    const found = check(description);
-    if (found.length > 0) {
-      const file = declaration.getSourceFile();
-      const line = file.getLineAndCharacterOfPosition(declaration.getStart(file)).line + 1;
-      flags.push({ of: declaration, flag: { type: name, prop: "(its comment)", file: fileName, line, found } });
-    }
+    flagAt(declaration, "reference", "(its comment)", check(description));
     if (hasMembers(declaration)) {
+      flagHeader(declaration, false);
       const entry = readType(declaration);
       types[name] = { ...entry, definition: { description, ...(from === undefined ? {} : { from }) } };
       queue.push(...entry.props.flatMap((p) => p.references ?? []));
     } else {
       const references = referencesOf(declaration);
+      flagAt(declaration, "unexported", "(its declaration)", unexported(references));
       const text = declaration.getText().replace(/^export /, "").replace(/^declare /, "");
       types[name] = {
         name,
