@@ -11,6 +11,9 @@
 
 import type { Field, ColumnPreset } from "./types";
 
+/** A column preset that fits every table whose rows carry its field: create it
+    once, outside the component, and spread it into a `Column`. With more than
+    one field in `P`, name the field as the second type argument. */
 export function column<P, K extends Field<P> = Field<P>>(preset: ColumnPreset<P, K>): ColumnPreset<P, K> {
   return preset;
 }

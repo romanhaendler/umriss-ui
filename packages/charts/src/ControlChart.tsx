@@ -31,6 +31,7 @@ import { fnEqual } from "./scene";
 import type { Accessor } from "./types";
 import type { ReactNode } from "react";
 
+/** The props of `ControlChart`. */
 export interface ControlChartProps<T> {
   /** The values of the chart. */
   accessor: Accessor<T>;
@@ -104,6 +105,10 @@ function violationsEqual(a: readonly Violation[], b: readonly Violation[]): bool
   return true;
 }
 
+/** A control chart inside a `Chart`: the values as a line, the control limits
+    and zones computed from them, and the points that break a rule marked.
+    It draws nothing of its own - it composes `Line`, `LimitLine` and
+    `Scatter`, so that limits, zones and violations come from the same values. */
 export function ControlChart<T>(props: ControlChartProps<T>): ReactNode {
   const {
     data,

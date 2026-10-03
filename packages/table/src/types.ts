@@ -281,6 +281,10 @@ type Computed<Z, W> = ColumnBase &
    one drops out before it fixes the parameters of `children`; the field column
    stands last, because TypeScript shows the message of the last one and a
    mistyped field name is the most frequent error. */
+/** The `Column` of a table, typed at its row: a field column names a field in
+    `value`, a computed column a function and an `id`. What it accepts as
+    `aggregate`, `filter`, `format` and `edit` follows from the type of its
+    value. */
 export interface ColumnComponent<Z> {
   <W extends number | Absent>(
     props: Computed<Z, W> & { footer: "sum" | "avg"; aggregate?: never; format?: NumberFormat; children?: Presentation<W, Z>; share?: boolean },
@@ -390,6 +394,9 @@ interface VerdictBase {
   aggregate?: "worst";
 }
 
+/** The `VerdictColumn` of a table, typed at its row: a numeric field, or a
+    function with an `id`, whose value is read against `limits` and shown with
+    its verdict. */
 export interface VerdictColumnComponent<Z> {
   (props: VerdictBase & { id: string; value: (row: Z) => number | Absent }): ReactNode;
   <K extends NumberField<Z>>(props: VerdictBase & { value: K; id?: string }): ReactNode;
@@ -397,11 +404,13 @@ export interface VerdictColumnComponent<Z> {
 
 /* --- Row trimmings -------------------------------------------------------- */
 
+/** The props of `RowDetail`: what an expanded row shows underneath it. */
 export interface RowDetailProps<Z> {
   /** What stands underneath an expanded row. */
   children: (row: Z) => ReactNode;
 }
 
+/** The props of `RowActions`: the `Action`s of each row, in its menu. */
 export interface RowActionsProps {
   /** The row's `Action`s. */
   children: ReactNode;
@@ -414,6 +423,8 @@ interface ActionBase {
   tone?: "default" | "danger";
 }
 
+/** The props of `Action`: one action on a row, or with `bulk` on a list of
+    rows - then it also stands in the table toolbar for the selection. */
 export type ActionProps<Z> =
   | (ActionBase & {
       bulk?: false;
@@ -433,6 +444,8 @@ export type RowAttributes = { className?: string } & {
   [data: `data-${string}`]: string | undefined;
 };
 
+/** The props of `Table`: how the table looks and behaves. Its state comes from
+    `useTable`, its columns from the JSX inside it. */
 export interface TableProps<Z> {
   /** Adds the selection column. "All" means: the filtered set. */
   selectable?: boolean;
@@ -700,6 +713,8 @@ export type TableRef = Omit<TableSnapshot<unknown>, "setFilter" | "conditionOf">
   setFilter(column: string, condition: unknown): void;
 };
 
+/** What `useTable` returns: the table's state, and its parts typed at the
+    row. Pass it as `of` to a part that stands outside the table. */
 export interface Table<Z> extends TableSnapshot<Z> {
   Table: (props: TableProps<Z>) => ReactNode;
   Column: ColumnComponent<Z>;

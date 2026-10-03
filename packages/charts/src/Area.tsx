@@ -9,6 +9,7 @@ import { useMemo } from "react";
 import { useSeries } from "./context";
 import type { Accessor, AreaSeriesConfig } from "./types";
 
+/** The props of `Area`. */
 export interface AreaProps<T> {
   /** Upper edge; null/undefined/NaN/±Infinity means a gap (R-2.5). */
   accessor: Accessor<T>;
@@ -57,6 +58,9 @@ export interface AreaProps<T> {
   dash?: readonly number[];
 }
 
+/** A series drawn as a filled area between its values and a baseline, 0
+    without one. Renders nothing itself: it registers with the surrounding
+    `Chart`. With `stack`, areas stand on each other. */
 export function Area<T>(props: AreaProps<T>): null {
   const {
     accessor,

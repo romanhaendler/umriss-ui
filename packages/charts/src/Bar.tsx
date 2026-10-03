@@ -11,6 +11,7 @@ import { useMemo } from "react";
 import { useSeries } from "./context";
 import type { Accessor, BarSeriesConfig } from "./types";
 
+/** The props of `Bar`. */
 export interface BarProps<T> {
   /** Height; null/undefined/NaN/±Infinity means a gap (R-2.5). */
   accessor: Accessor<T>;
@@ -51,6 +52,10 @@ export interface BarProps<T> {
   barWidth?: number;
 }
 
+/** A series drawn as bars from 0 to its values, on the numeric x axis.
+    Several bar series on one x axis stand side by side, or on each other with
+    `stack`. Renders nothing itself: it registers with the surrounding
+    `Chart`. */
 export function Bar<T>(props: BarProps<T>): null {
   const {
     accessor,

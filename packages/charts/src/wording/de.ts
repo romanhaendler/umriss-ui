@@ -3,6 +3,8 @@
 
 import type { ChartsWording } from "./index";
 
+/** The German instance, for a chart's `wording`. Complete, because it is
+    typed `ChartsWording`. */
 export const GERMAN_CHARTS_WORDING: ChartsWording = {
   roleDescription: "Diagramm",
   empty: "Keine Daten",

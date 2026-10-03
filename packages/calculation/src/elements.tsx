@@ -60,6 +60,8 @@ export interface Metric {
     `null` where the number is absent. */
 export type MetricValues = Readonly<Record<string, number | null>>;
 
+/** The props of `Given`: a quantity's, with the number it starts from and
+    where and when that number came from. */
 export interface GivenProps extends QuantityProps {
   /** The number the calculation starts from. Absent (`null`, `undefined`,
       not finite) makes every quantity that depends on it absent, with the
@@ -75,11 +77,14 @@ export interface GivenProps extends QuantityProps {
   ages?: FreshnessAges;
 }
 
+/** The props of `Sum`, `Difference`, `Product` and `Quotient`: a quantity's,
+    with its operands as children. */
 export interface OperatorProps extends QuantityProps {
   /** The operands, in order: quantities, givens and references. */
   children?: ReactNode;
 }
 
+/** The props of `Ref`. */
 export interface RefProps {
   /** The `id` of the quantity this reference stands for. */
   to: string;
@@ -106,6 +111,7 @@ export const Ref: (props: RefProps) => null = () => null;
 /* The chain (ADR-0028): read top to bottom, each operand worked into the value
    before it, strictly in order, ended by an interim. */
 
+/** The props of `Chain`. */
 export interface ChainProps {
   /** The operands, top to bottom: a first quantity with no operator, then
       `Plus`, `Minus`, `Times` and `DividedBy` with their operands and
@@ -115,6 +121,8 @@ export interface ChainProps {
   children?: ReactNode;
 }
 
+/** The props of `Plus`, `Minus`, `Times` and `DividedBy`: a given written in
+    place - `label` and `value` - or a quantity as the child. */
 export interface ChainOperandProps extends Omit<GivenProps, "label" | "value"> {
   /** The operand's name, where the line is a given written in place. Left
       out where the line holds a quantity as its child. */

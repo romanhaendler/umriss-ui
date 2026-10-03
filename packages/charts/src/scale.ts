@@ -15,6 +15,8 @@
 import { ticksFor } from "./ticks";
 import type { Scale } from "./types";
 
+/** The affine mapping from a domain onto a pixel range, and back; the scale
+    every axis of the library uses. */
 export class LinearScale implements Scale {
   readonly domain: readonly [number, number];
   readonly range: readonly [number, number];

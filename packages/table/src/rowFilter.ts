@@ -4,6 +4,8 @@
    server - and asks `matches` of every admitted row. The object itself is the
    key: after its definition no call names it by its id. */
 
+/** A row filter, as `rowFilter` makes it: a condition over the whole row
+    that a control of the application sets through `setFilter`. */
 export interface RowFilter<Z, B> {
   /** Its name in `t.view.conditions` and in what manual mode reports - the one
       place the filter is spelled. Not the id of a column of the same table. */

@@ -33,6 +33,7 @@ import { DEFAULT_CHARTS_WORDING, type ChartsWording } from "./wording";
 import type { ChartPerf, Padding } from "./types";
 import "./styles/charts.css";
 
+/** The props of `Chart`. */
 export interface ChartProps<T> {
   /** Shared data basis (required); access only through accessors (R-2.4). */
   data: readonly T[];
@@ -80,6 +81,9 @@ export interface ChartProps<T> {
   children?: ReactNode;
 }
 
+/** The container of a chart: it holds the data, measures the plot area and
+    draws on canvas whatever its children register - axes, series, limits,
+    legend and tooltip. The order of the children is the drawing order. */
 export function Chart<T>(props: ChartProps<T>): ReactNode {
   const {
     data,

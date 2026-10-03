@@ -24,6 +24,8 @@ import styles from "./Table.module.css";
 
 /* --- The interface ----------------------------------------------------------- */
 
+/** What the `Input` of a filter of one's own receives: the condition, its
+    setter, and the values the column holds. */
 export interface FilterInputProps<W, B> {
   /** The condition that holds right now; `null` as long as the filter requires nothing. */
   condition: B | null;
@@ -36,6 +38,9 @@ export interface FilterInputProps<W, B> {
   column: { id: string; label: string };
 }
 
+/** A column filter of one's own, as `columnFilter` makes it: when a value
+    satisfies a condition, the control that sets it, and its text in the table
+    toolbar. Give it to a column's `filter`. */
 export interface ColumnFilter<W, B> {
   /** Whether a value that is present satisfies the condition. Never called for
       an absent value: that satisfies none. */

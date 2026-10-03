@@ -12,6 +12,7 @@ import { useMemo } from "react";
 import { useSeries } from "./context";
 import type { Accessor, BoxSeriesConfig, ListAccessor } from "./types";
 
+/** The props of `BoxPlot`. */
 export interface BoxPlotProps<T> {
   /** The line across the box; null/undefined/NaN/±Infinity means a gap - no
       box is drawn there, whatever the other numbers say (R-2.5). */
@@ -66,6 +67,10 @@ export interface BoxPlotProps<T> {
   boxWidth?: number;
 }
 
+/** A series drawn as a box per x: median, quartiles and whiskers, optionally
+    outliers, a mean and a notch. The caller brings every number - the library
+    computes none. Renders nothing itself: it registers with the surrounding
+    `Chart`. */
 export function BoxPlot<T>(props: BoxPlotProps<T>): null {
   const {
     median,

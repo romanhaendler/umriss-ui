@@ -6,6 +6,7 @@ import { useMemo } from "react";
 import { useSeries } from "./context";
 import type { Accessor, LineSeriesConfig } from "./types";
 
+/** The props of `Line`. */
 export interface LineProps<T> {
   /** Y value; null/undefined/NaN/±Infinity means a gap (R-2.5). */
   accessor: Accessor<T>;
@@ -44,6 +45,8 @@ export interface LineProps<T> {
   step?: boolean;
 }
 
+/** A series drawn as a line through its values; a gap breaks it. Renders
+    nothing itself: it registers with the surrounding `Chart`. */
 export function Line<T>(props: LineProps<T>): null {
   const {
     accessor,

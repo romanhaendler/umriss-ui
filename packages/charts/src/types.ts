@@ -25,6 +25,8 @@ export type ListAccessor<T> = (d: T, index: number) => readonly number[] | null 
    stands in the respective member of the union. A property that makes sense only
    for some kinds belongs in their members, not in the base with a comment. */
 
+/** What every series registers, whatever its kind: where its values come from,
+    which axes it stands on, and how it is named and coloured. */
 export interface SeriesBase<T = unknown> {
   /** Y value; null/undefined/NaN/±Infinity means a gap (R-2.5). */
   accessor: Accessor<T>;
@@ -45,6 +47,7 @@ export interface SeriesBase<T = unknown> {
   hidden?: boolean;
 }
 
+/** A `Line` as the chart holds it once registered. */
 export interface LineSeriesConfig<T = unknown> extends SeriesBase<T> {
   kind: "line";
   strokeWidth: number;
@@ -54,6 +57,7 @@ export interface LineSeriesConfig<T = unknown> extends SeriesBase<T> {
   step?: boolean;
 }
 
+/** A `Scatter` as the chart holds it once registered. */
 export interface ScatterSeriesConfig<T = unknown> extends SeriesBase<T> {
   kind: "scatter";
   /** Point radius in CSS pixels. */
@@ -69,6 +73,7 @@ export interface Stackable {
   normalize?: boolean;
 }
 
+/** An `Area` as the chart holds it once registered. */
 export interface AreaSeriesConfig<T = unknown> extends SeriesBase<T>, Stackable {
   kind: "area";
   /** Lower edge; without a value the fixed baseline 0. */
@@ -80,6 +85,7 @@ export interface AreaSeriesConfig<T = unknown> extends SeriesBase<T>, Stackable 
   dash?: readonly number[];
 }
 
+/** A `Bar` as the chart holds it once registered. */
 export interface BarSeriesConfig<T = unknown> extends SeriesBase<T>, Stackable {
   kind: "bar";
   /** Width as a fraction of the step; the group shares this fraction. */
@@ -113,6 +119,8 @@ export interface StateEntry {
   color: string;
 }
 
+/** A `StateBand` as the chart holds it once registered: its accessor yields
+    an index into `states`. */
 export interface StateSeriesConfig<T = unknown> extends SeriesBase<T> {
   kind: "state";
   /** The closed set of states. The accessor yields the index into it - a number,
@@ -141,6 +149,8 @@ export type MatrixColoring =
       range?: readonly [number, number];
     };
 
+/** A `Matrix` as the chart holds it once registered: its base accessor is the
+    row, `value` the colour. */
 export interface MatrixSeriesConfig<T = unknown> extends SeriesBase<T> {
   kind: "matrix";
   /** The value that decides the colour - the third channel (ADR-0011).
@@ -149,6 +159,7 @@ export interface MatrixSeriesConfig<T = unknown> extends SeriesBase<T> {
   coloring: MatrixColoring;
 }
 
+/** Any registered series, told apart by `kind`. */
 export type SeriesConfig<T = unknown> =
   | LineSeriesConfig<T>
   | AreaSeriesConfig<T>
@@ -158,14 +169,20 @@ export type SeriesConfig<T = unknown> =
   | StateSeriesConfig<T>
   | MatrixSeriesConfig<T>;
 
+/** The kinds of series a chart draws: `line`, `area`, `bar`, `box`, `scatter`,
+    `state` and `matrix`. The set is closed. */
 export type SeriesKind = SeriesConfig["kind"];
 
 export type { Assessment, Limit, LimitSet, Side, Severity, Verdict };
 export type { WorkingInterval, WorkingCalendar } from "./workingTime";
 
+/** Whether an axis or a limit runs along x or along y. */
 export type AxisOrientation = "x" | "y";
+/** The edge of the plot an axis stands at: `bottom` or `top` for x, `left` or
+    `right` for y. */
 export type AxisPosition = "bottom" | "top" | "left" | "right";
 
+/** An `XAxis` or `YAxis` as the chart holds it once registered. */
 export interface AxisConfig<T = unknown> {
   id: string;
   orientation: AxisOrientation;
@@ -198,6 +215,7 @@ export interface AxisConfig<T = unknown> {
   onDomainChange?: (domain: [number, number]) => void;
 }
 
+/** Space in CSS pixels on each side of a rectangle. */
 export interface Padding {
   top: number;
   right: number;
@@ -205,6 +223,7 @@ export interface Padding {
   left: number;
 }
 
+/** A rectangle in CSS pixels, from its top left corner. */
 export interface Rect {
   x: number;
   y: number;
@@ -265,6 +284,8 @@ export interface BoxExtras<V = number> {
 }
 
 /* The Scale interface is fixed (R-2.14); V0 implements only LinearScale. */
+/** The mapping of an axis' values onto pixels and back, with its ticks. Every
+    scale of the library is affine; `LinearScale` implements it. */
 export interface Scale {
   domain: readonly [number, number];
   range: readonly [number, number];
@@ -314,21 +335,26 @@ export interface LimitBase {
   inExtent: boolean;
 }
 
+/** A `LimitLine` as the chart holds it once registered. */
 export interface LimitLineConfig extends LimitBase {
   kind: "line";
   value: number;
 }
 
+/** A `LimitBand` as the chart holds it once registered: the range from `from`
+    to `to`. */
 export interface LimitBandConfig extends LimitBase {
   kind: "band";
   from: number;
   to: number;
 }
 
+/** Any registered limit, a line or a band, told apart by `kind`. */
 export type LimitConfig = LimitLineConfig | LimitBandConfig;
 
 /* ---------------- Legend and tooltip ---------------- */
 
+/** A `Legend` as the chart holds it once registered. */
 export interface LegendConfig {
   placement: "top" | "bottom";
 }
@@ -364,6 +390,8 @@ export interface TooltipPoint<T = unknown> {
     };
 }
 
+/** What the pointer hit: the x value under it and one point per series there.
+    A custom tooltip's `render` receives it. */
 export interface TooltipHit<T = unknown> {
   xValue: number;
   points: readonly TooltipPoint<T>[];
@@ -373,6 +401,7 @@ export interface TooltipHit<T = unknown> {
   yPx: number;
 }
 
+/** A `Tooltip` as the chart holds it once registered. */
 export interface TooltipConfig<T = unknown> {
   mode: "x" | "nearest";
   render?: (hit: TooltipHit<T>) => ReactNode;

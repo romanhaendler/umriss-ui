@@ -101,6 +101,12 @@ interface Place {
   position?: Position;
 }
 
+/** A derivation the package works out itself and shows as a statement, from
+    the givens up to the result: one quantity as its child, written with
+    `Given`, the operators, `Chain` and `Ref`. Because it performs every
+    operation it shows, the number cannot disagree with the lines above it.
+    Every tree below the outermost statement starts folded and opens beneath
+    the row that is clicked. */
 export function Calculation({ children, className, style, metrics, ...rest }: CalculationProps) {
   const formats = useFormats();
   const wording = useWording();

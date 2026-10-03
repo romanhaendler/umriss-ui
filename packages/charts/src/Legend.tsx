@@ -13,6 +13,7 @@ import { hatchLines, markerPath, type Hatch, type MarkerShape } from "./marks";
 import type { ChartScene, LegendMark } from "./scene";
 import type { Rect } from "./types";
 
+/** The props of `Legend`. */
 export interface LegendProps {
   /** Which side of the plot area the legend stands on. Without a value, above
       it. */
@@ -172,6 +173,9 @@ function markerD(shape: MarkerShape, cx: number, cy: number, r: number): string 
   return d;
 }
 
+/** The legend of a chart: one entry per series, or per state of a state band.
+    Hovering an entry highlights its series; with `onToggle` a click hides and
+    shows it. */
 export function Legend({ placement = "top", onToggle }: LegendProps): ReactNode {
   const scene = useChartScene("Legend");
   if (scene === null) return null; // PROD outside a Chart (R-2.3)

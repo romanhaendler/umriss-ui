@@ -37,6 +37,10 @@ export interface ResolvedAppearance {
   readonly open: boolean;
 }
 
+/** Settles a subtask's appearances into what is drawn. `provisional` and
+    `fixed` contradict each other; the later one in the list wins.
+    @param appearance The subtask's `appearance`, in the order it was given.
+    @returns Which of the four channels are on. */
 export function resolveAppearance(appearance: readonly SubtaskAppearance[] | undefined): ResolvedAppearance {
   let dashed = false;
   let hatched = false;

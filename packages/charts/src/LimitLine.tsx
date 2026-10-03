@@ -46,11 +46,14 @@ interface CommonProps {
   role?: LimitRole;
 }
 
+/** The props of `LimitLine`. */
 export interface LimitLineProps extends CommonProps {
   /** Where the line lies, in domain units of its axis. */
   value: number;
 }
 
+/** The props of `LimitBand`: a `LimitLine`'s, with a range in place of
+    `value`. */
 export interface LimitBandProps extends CommonProps {
   /** Lower edge of the band, in domain units of its axis. */
   from: number;
@@ -59,6 +62,10 @@ export interface LimitBandProps extends CommonProps {
   to: number;
 }
 
+/** A limit drawn as a line across the plot at one value of an axis - a
+    specification limit, or with `role` a control limit. Not a series: no data,
+    no legend entry, no hit. By default it widens its axis so that it is
+    always seen. */
 export function LimitLine(props: LimitLineProps): null {
   const {
     value,
@@ -90,6 +97,8 @@ export function LimitLine(props: LimitLineProps): null {
   return null;
 }
 
+/** A limit drawn as a band between two values of an axis - a tolerance or a
+    zone. Otherwise a `LimitLine`. */
 export function LimitBand(props: LimitBandProps): null {
   const {
     from,
