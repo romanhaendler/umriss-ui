@@ -750,6 +750,23 @@
   overflow-wrap: break-word;
 }
 
+/* The preview a link to a definition shows in its tooltip (`Page.tsx`): the
+   declaration in the tooltip's own colours, broken like the block's. */
+.apiPreview {
+  margin: 0;
+  font-family: var(--u-font-mono);
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+.apiPreviewValues {
+  margin: var(--u-space-1) 0 0;
+}
+
+.apiPreviewValues code {
+  font-family: var(--u-font-mono);
+}
+
 /* A phone: one block a prop - name and type, the default, the
    description beneath. As a table the description column lay outside the box
    and every row stood a hand high and empty. */

@@ -90,6 +90,9 @@ export interface Definition {
   declaration?: string;
   /** The library's types the declaration names. */
   references?: readonly string[];
+  /** Where the declaration is an alias of one named alias (or an array of
+      one) that comes to literals: its values, as a row's `expansion`. */
+  expansion?: string;
 }
 
 export interface Gap {
@@ -999,6 +1002,9 @@ export function readProps(
       const references = referencesOf(declaration);
       flagAt(declaration, "unexported", "(its declaration)", unexported(references));
       const text = declaration.getText().replace(/^export /, "").replace(/^declare /, "");
+      /* `type ButtonSize = ControlSize` says nothing of its values; a literal
+         union written out here says them already, and `expansionOf` leaves it. */
+      const expansion = ts.isTypeAliasDeclaration(declaration) ? expansionOf(declaration.type) : undefined;
       types[name] = {
         name,
         parameter,
@@ -1009,6 +1015,7 @@ export function readProps(
           ...(from === undefined ? {} : { from }),
           declaration: text,
           ...(references.length === 0 ? {} : { references }),
+          ...(expansion === undefined ? {} : { expansion }),
         },
       };
       queue.push(...references);

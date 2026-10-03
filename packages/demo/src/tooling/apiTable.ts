@@ -73,6 +73,9 @@ export interface ApiDefinitionModel extends ApiTableModel {
   description: readonly Span[];
   /** The declaration as code, the library's types in it as links. */
   declaration?: readonly Span[];
+  /** The literals an alias of another alias comes to, as a row's beneath its
+      name: `"sm" | "md"` for `type ButtonSize = ControlSize`. */
+  expansion?: string;
 }
 
 /** A page's API section: its tables, in the order of its outline, and the
@@ -275,6 +278,7 @@ export function apiSection(page: ApiPage, pages: readonly ApiPage[], entries: Re
       ...(definition.from === undefined ? {} : { from: definition.from }),
       description: spansOf(definition.description),
       ...(definition.declaration === undefined ? {} : { declaration: linked(definition.declaration, definition.references ?? [], linkOf) }),
+      ...(definition.expansion === undefined ? {} : { expansion: definition.expansion }),
     });
   }
   return { tables, definitions };
@@ -294,6 +298,60 @@ export const escape = (value: string) =>
     shell takes the click like any other link to its own pages. */
 function hrefOf(href: string): string {
   return href.startsWith("#/") ? `..${addressOfPlace(href)}` : href;
+}
+
+/** A type's members where it is a union of more than two, else `undefined`
+    (.scratch/a11y-and-finish, 07). Split at a `|` outside brackets and
+    quotes; a function or a conditional type is one type, whatever unions its
+    parts hold. A name a link carries never holds a `|`. */
+export function unionMembers(spans: readonly Span[]): Span[][] | undefined {
+  const members: Span[][] = [[]];
+  let depth = 0;
+  let quote: string | undefined;
+  for (const span of spans) {
+    if (span.kind !== "text") {
+      members.at(-1)!.push(span);
+      continue;
+    }
+    const value = span.text;
+    let from = 0;
+    for (let i = 0; i < value.length; i++) {
+      const char = value[i]!;
+      if (quote !== undefined) {
+        if (char === "\\") i++;
+        else if (char === quote) quote = undefined;
+      } else if (char === '"' || char === "'" || char === "`") quote = char;
+      else if ("([{<".includes(char)) depth++;
+      else if (")]}".includes(char) || (char === ">" && value[i - 1] !== "=")) depth--;
+      else if (depth === 0 && (char === "?" || (char === "=" && value[i + 1] === ">"))) return undefined;
+      else if (depth === 0 && char === "|") {
+        members.at(-1)!.push(text(value.slice(from, i)));
+        members.push([]);
+        from = i + 1;
+      }
+    }
+    members.at(-1)!.push(text(value.slice(from)));
+  }
+  const trimmed = members
+    .map((member) =>
+      member
+        .map((span, i) => {
+          if (span.kind !== "text") return span;
+          const start = i === 0 ? span.text.trimStart() : span.text;
+          return text(i === member.length - 1 ? start.trimEnd() : start);
+        })
+        .filter((span) => span.text !== ""),
+    )
+    /* A union written with a leading `|`. */
+    .filter((member) => member.length > 0);
+  return trimmed.length > 2 ? trimmed : undefined;
+}
+
+/** A type as HTML: a union of more than two members one member a line, each
+    line starting with `|`; anything else as it stands. */
+function typeHtml(spans: readonly Span[]): string {
+  const members = unionMembers(spans);
+  return members === undefined ? spansHtml(spans) : members.map((member) => `| ${spansHtml(member)}`).join("<br>");
 }
 
 /** Pieces as HTML - the writers' one way of writing a text. */
@@ -323,7 +381,7 @@ function groupHtml(name: string, group: ApiGroup, fold: boolean): string {
       /* `<Type>-<prop>`: a row is an address (.scratch/props-to-examples). */
       `<tr id="${escape(`${name}-${one.name}`)}">` +
       `<th scope="row"><code>${escape(one.name)}</code>${one.badges.map((badge) => `<span class="apiBadge">${escape(badge)}</span>`).join("")}</th>` +
-      `<td><code class="apiType">${spansHtml(one.type)}</code>${one.expansion === undefined ? "" : `<br><code>${escape(one.expansion)}</code>`}</td>` +
+      `<td><code class="apiType">${typeHtml(one.type)}</code>${one.expansion === undefined ? "" : `<br><code>${typeHtml([text(one.expansion)])}</code>`}</td>` +
       `<td>${one.defaultValue === undefined ? "—" : spansHtml(one.defaultValue)}</td>` +
       `<td>${one.deprecated === undefined ? "" : `<span class="apiDeprecated"><span class="apiBadge">Deprecated</span> ${spansHtml(one.deprecated)}</span> `}${spansHtml(one.description)}${one.origin === undefined ? "" : `<span class="apiOrigin"> from <code>${escape(one.origin)}</code></span>`}</td>` +
       "</tr>",
@@ -347,13 +405,39 @@ export function tableHtml(model: ApiTableModel | ApiDefinitionModel, level = 3):
     (definition?.from === undefined ? "" : `<p class="apiInherited">From <code>${escape(definition.from)}</code>.</p>`) +
     (definition === undefined || definition.description.length === 0 ? "" : `<p class="apiProse">${spansHtml(definition.description)}</p>`) +
     (definition?.declaration !== undefined
-      ? `<pre class="apiDeclaration"><code>${spansHtml(definition.declaration)}</code></pre>`
+      ? `<pre class="apiDeclaration"><code>${spansHtml(definition.declaration)}</code></pre>` +
+        (definition.expansion === undefined ? "" : `<p class="apiInherited">${spansHtml(resolvesTo(definition.expansion))}</p>`)
       : model.groups.length === 0
         ? '<p class="apiInherited">Declares no props of its own.</p>'
         : model.groups.map((group) => groupHtml(model.name, group, fold)).join("")) +
     model.closing.map((sentence) => `<p class="apiInherited">${spansHtml(sentence)}</p>`).join("") +
     "</div>"
   );
+}
+
+/** The sentence under a definition's declaration that names its values. */
+const resolvesTo = (expansion: string): Span[] => [text("Resolves to "), code(expansion), text(".")];
+
+/* A definition's preview (.scratch/a11y-and-finish, 07): the app shows it in a
+   tooltip on a link to the definition; the prerendered page and the twin
+   carry the link alone. At most this many lines - the link leads to the whole. */
+const PREVIEW_LINES = 12;
+
+/** What the tooltip on a link to a definition shows: the declaration, or the
+    members as an object type, at most twelve lines, the last an ellipsis
+    where it is cut. The values beneath stand apart (`expansion`). */
+export function previewOf(model: ApiDefinitionModel): string {
+  const lines =
+    model.declaration !== undefined
+      ? model.declaration.map((span) => span.text).join("").split("\n")
+      : [
+          "{",
+          ...model.groups.flatMap((group) =>
+            group.rows.map((one) => `  ${one.name}${one.badges.includes("required") ? "" : "?"}: ${one.type.map((span) => span.text).join("")};`),
+          ),
+          "}",
+        ];
+  return (lines.length > PREVIEW_LINES ? [...lines.slice(0, PREVIEW_LINES - 1), "…"] : lines).join("\n");
 }
 
 /** The heading of the block that defines the types without a table. */
@@ -412,7 +496,10 @@ export function tableMarkdown(model: ApiTableModel | ApiDefinitionModel, level =
   if (definition?.from !== undefined) lines.push(`From ${markdownCode(definition.from)}.`, "");
   if (definition !== undefined && definition.description.length > 0) lines.push(spansMarkdown(definition.description), "");
   /* A fence holds no link; the names it uses are defined beside it. */
-  if (definition?.declaration !== undefined) lines.push(fencedCode("ts", definition.declaration.map((span) => span.text).join("")));
+  if (definition?.declaration !== undefined) {
+    lines.push(fencedCode("ts", definition.declaration.map((span) => span.text).join("")));
+    if (definition.expansion !== undefined) lines.push("", spansMarkdown(resolvesTo(definition.expansion)));
+  }
   else if (model.groups.length === 0) lines.push("Declares no props of its own.");
   model.groups.forEach((group, i) => {
     if (i > 0) lines.push("");

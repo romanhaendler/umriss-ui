@@ -10,7 +10,7 @@
    through its table syntax. */
 
 import { describe, expect, it } from "vitest";
-import { apiHtml, apiMarkdown, apiSection, tableHtml, tableMarkdown, tableModel } from "../src/tooling/apiTable";
+import { apiHtml, apiMarkdown, apiSection, previewOf, tableHtml, tableMarkdown, tableModel } from "../src/tooling/apiTable";
 import type { TypeEntry } from "../src/tooling/tables";
 
 const ENTRY: TypeEntry = {
@@ -391,5 +391,68 @@ describe("Types on this page", () => {
 
   it("leaves the block out where nothing needs defining", () => {
     expect(apiHtml(apiSection(PAGES[1]!, PAGES, ENTRIES))).not.toContain("Types on this page");
+  });
+});
+
+describe("long unions and the preview of a definition (.scratch/a11y-and-finish, 07)", () => {
+  const UNIONS: TypeEntry = {
+    name: "SwitchProps",
+    parameter: [],
+    omitted: [],
+    props: [
+      { name: "tone", type: '"quiet" | "loud" | "alarm"', optional: true, description: "Three, written out." },
+      { name: "pair", type: '"on" | "off"', optional: true, description: "Two." },
+      { name: "variant", type: "SwitchVariant", expansion: '"a" | "b" | "c"', references: ["SwitchVariant"], optional: true, description: "An alias." },
+      { name: "mixed", type: "readonly Reading[] | Record<string, 1 | 2> | null", references: ["Reading"], optional: true, description: "Nested." },
+      { name: "onPick", type: '(value: "a" | "b" | "c") => void', optional: true, description: "A function." },
+      { name: "label", type: '"a|b" | "c" | `d${"|"}e`', optional: true, description: "Pipes in strings." },
+    ],
+  };
+  const LINKS = (name: string) => `#type-${name}`;
+  const cell = (prop: string) => {
+    const host = document.createElement("div");
+    host.innerHTML = tableHtml(tableModel(UNIONS, LINKS));
+    return host.querySelector(`[id="SwitchProps-${prop}"] td`)!.innerHTML;
+  };
+
+  it("breaks a union of more than two members one member a line, each line starting with |", () => {
+    expect(cell("tone")).toBe('<code class="apiType">| "quiet"<br>| "loud"<br>| "alarm"</code>');
+    expect(cell("variant")).toBe('<code class="apiType"><a href="#type-SwitchVariant">SwitchVariant</a></code><br><code>| "a"<br>| "b"<br>| "c"</code>');
+    expect(cell("mixed")).toBe('<code class="apiType">| readonly <a href="#type-Reading">Reading</a>[]<br>| Record&lt;string, 1 | 2&gt;<br>| null</code>');
+    expect(cell("label")).toBe('<code class="apiType">| "a|b"<br>| "c"<br>| `d${"|"}e`</code>');
+  });
+
+  it("leaves a union of two and a function whose parts are unions on one line", () => {
+    expect(cell("pair")).toBe('<code class="apiType">"on" | "off"</code>');
+    expect(cell("onPick")).toBe('<code class="apiType">(value: "a" | "b" | "c") =&gt; void</code>');
+  });
+
+  it("keeps the Markdown cell on one line", () => {
+    const markdown = tableMarkdown(tableModel(UNIONS, LINKS));
+    expect(markdown).toContain('| `tone` | `"quiet" \\| "loud" \\| "alarm"` |');
+    expect(markdown).toContain('| `variant` | [`SwitchVariant`](#type-SwitchVariant)<br>`"a" \\| "b" \\| "c"` |');
+  });
+
+  const definition = (entry: Partial<TypeEntry> & Pick<TypeEntry, "definition">) =>
+    apiSection({ id: "switch", types: ["Host"] }, [{ id: "switch", types: ["Host"] }], {
+      Host: { name: "Host", parameter: [], omitted: [], props: [{ name: "x", type: "Shown", references: ["Shown"], optional: true, description: "X." }] },
+      Shown: { name: "Shown", parameter: [], omitted: [], props: [], ...entry },
+    }).definitions[0]!;
+
+  it("previews a declaration as it stands, and writes an alias's values beneath it in the block", () => {
+    const size = definition({ definition: { description: "A size.", declaration: "type Shown = ControlSize;", expansion: '"sm" | "md"' } });
+    expect(previewOf(size)).toBe("type Shown = ControlSize;");
+    expect(size.expansion).toBe('"sm" | "md"');
+    expect(tableHtml(size, 4)).toContain('</pre><p class="apiInherited">Resolves to <code>&quot;sm&quot; | &quot;md&quot;</code>.</p>');
+    expect(tableMarkdown(size, 6)).toContain('```ts\ntype Shown = ControlSize;\n```\n\nResolves to `"sm" | "md"`.');
+  });
+
+  it("previews members as an object type, and cuts at twelve lines with an ellipsis", () => {
+    const props = Array.from({ length: 14 }, (_, i) => ({ name: `m${i}`, type: "number", optional: i > 0, description: "M." }));
+    const preview = previewOf(definition({ props, definition: { description: "Members." } })).split("\n");
+    expect(preview).toHaveLength(12);
+    expect(preview.slice(0, 3)).toEqual(["{", "  m0: number;", "  m1?: number;"]);
+    expect(preview.at(-1)).toBe("…");
+    expect(previewOf(definition({ props: props.slice(0, 2), definition: { description: "Members." } }))).toBe("{\n  m0: number;\n  m1?: number;\n}");
   });
 });
