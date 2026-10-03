@@ -127,7 +127,8 @@ test("ContextMenu flips and stays inside the window at its edge", async ({ page 
 
 test("Switch toggles on Space and on its label", async ({ page }) => {
   await openExample(page, "switch", "on-and-off");
-  const control = page.getByRole("switch", { name: "Page me at night", exact: true });
+  /* The example's switch, not the configurator's of the same name above it. */
+  const control = page.locator('[data-example="on-and-off"]').getByRole("switch", { name: "Page me at night", exact: true });
   await expect(control).toBeChecked();
   await control.focus();
   await page.keyboard.press("Space");
@@ -150,7 +151,7 @@ test("Checkbox, switch and radio hold their input in their row", async ({ page }
   for (const box of await boxes.all()) expect(await box.evaluate(ownRow)).toBe(true);
 
   await openExample(page, "switch", "on-and-off");
-  expect(await page.getByRole("switch", { name: "Page me at night", exact: true }).evaluate(ownRow)).toBe(true);
+  expect(await page.locator('[data-example="on-and-off"]').getByRole("switch", { name: "Page me at night", exact: true }).evaluate(ownRow)).toBe(true);
 
   await openExample(page, "radiogroup", "states");
   expect(await page.locator('[data-example="states"]').getByRole("radio").first().evaluate(ownRow)).toBe(true);
