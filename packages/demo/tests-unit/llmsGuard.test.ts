@@ -88,6 +88,14 @@ describe.each(Object.keys(ENTRIES))("the llms-full.txt of %s", (dir) => {
         expect(html, page.id).toContain(`/${id}/#keyboard-${id}">`);
         expect(sitePages.find((one) => one.path === `${id}/`)!.html, id).toContain(`<h2 id="keyboard-${id}">Keyboard</h2>`);
       }
+      /* A neighbour's page is one of its demo's pages, and the link lands on
+         its Keyboard section there. */
+      for (const { page: foreign } of (page.keysOf ?? []).filter((one) => typeof one !== "string")) {
+        const [packageName, id] = foreign.split("#") as [string, string];
+        const { OUTLINE: theirs } = (await import(join(PACKAGES, packageName.split("/")[1]!, "demo", "outline.ts"))) as { OUTLINE: readonly Rubric[] };
+        expect(theirs.flatMap((rubric) => rubric.pages).map((one) => one.id), `${page.id} → ${foreign}`).toContain(id);
+        expect(html, `${page.id} → ${foreign}`).toContain(`/${id}/#keyboard-${id}">`);
+      }
       if (page.accessibility !== undefined) expect(html, page.id).toContain(`<h2 id="accessibility-${page.id}">Accessibility</h2>`);
     }
 

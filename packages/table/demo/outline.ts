@@ -27,6 +27,10 @@ import type { Moved, Rubric } from "@umriss-ui/demo/outline";
 
 export type { Rubric, Page } from "@umriss-ui/demo/outline";
 
+/** A control of @umriss-ui/core that a table part is built from: its keys
+    apply where the part stands (`keysOf`). */
+const core = (name: string) => ({ name, page: `@umriss-ui/core#${name.toLowerCase()}` });
+
 export const OUTLINE: readonly Rubric[] = [
   {
     id: "getting-started",
@@ -42,6 +46,7 @@ export const OUTLINE: readonly Rubric[] = [
           "There is no stylesheet to import. The table loads its own, and the core package loads the tokens it reads; both lie in cascade layers, so the application's CSS wins. `@umriss-ui/table/styles.css` stays exported for setups that link stylesheets by hand.",
           "A table is read by default: a native table, where every control is one Tab away and a screen reader keeps its table keys. Grid mode makes it one Tab stop whose cells the arrow keys walk, and it is the mode for editing. Switch it on only where people work in the cells (ADR-0034).",
         ],
+        keysOf: ["first-table"],
         types: [],
         exports: ["useTable"],
         installs: true,
@@ -63,6 +68,15 @@ export const OUTLINE: readonly Rubric[] = [
           "No cell range selection and no undo: an edit is reported, never applied, and the application owns the rows (ADR-0032).",
           "No pivot: compute the pivoted rows and declare their columns (ADR-0032).",
         ],
+        keys: [
+          { key: "Enter / Space", action: "On a sortable header: sorts by the column, ascending; pressed again, descending." },
+          { key: "Escape", action: "Closes the tip that shows a cut value whole." },
+        ],
+        accessibility: [
+          "A native `table`, named by `ariaLabel`: without it a screen reader announces a table with no name, so pass one, the more so where a page holds two. The `rowHeader` column's cells are row headers, so a reader names the row as it moves along it, and the row's checkbox, expander and actions are named after it too.",
+          "A sortable header holds a button, and its cell carries `aria-sort`, so the reader says which column orders the rows and in which direction. While `loading` is set the table is `aria-busy`.",
+          "A value cut short at the edge of its cell shows whole in a tip, under the pointer and on keyboard focus alike; the cell's text is the whole value all along, so a reader never meets the cut.",
+        ],
         types: ["TableProps", "TableOptions", "TableSnapshot"],
         exports: ["useTable"],
       },
@@ -73,6 +87,7 @@ export const OUTLINE: readonly Rubric[] = [
         about: [
           "The table has no provider of its own: it reads the one of @umriss-ui/core (ADR-0016). German wording ships as `@umriss-ui/core/wording/de` (ADR-0019).",
         ],
+        keysOf: ["first-table", core("Input"), "columnmenu", core("Button"), core("DatePicker")],
         types: [],
         exports: ["UmrissProvider"],
       },
@@ -96,6 +111,10 @@ export const OUTLINE: readonly Rubric[] = [
           { when: "A group key that should not be a column", use: "grouping" },
           { when: "A measured value read against a limit set", use: "verdictcolumn" },
         ],
+        keysOf: ["first-table", "columnmenu", "rowactions", core("Checkbox")],
+        accessibility: [
+          "The `label` is the column header's text, and so what a screen reader says for every cell under it. The `rowHeader` column's cells are row headers: a reader names the row by them, and the row's checkbox and actions are named after them - “Select INC-1048”, “Open: INC-1048”. Without one, each of those says only its own word.",
+        ],
         types: ["FieldColumn", "ColumnBase", "ValuePaths"],
         exports: ["useTable"],
       },
@@ -106,6 +125,11 @@ export const OUTLINE: readonly Rubric[] = [
         about: [
           "A format or a presentation changes what the cell shows and nothing else: sorting, search, export and totals keep working on the value.",
           "`null`, `undefined` and `NaN` are an absent value: a muted dash, last in either sort direction, counted in no total. The presentation is never called for it.",
+        ],
+        keysOf: ["first-table"],
+        accessibility: [
+          "A screen reader reads what the cell shows, not the value behind it: a format is read as formatted, and the absent value's dash is spoken as “No value”.",
+          "A presentation that draws a component brings that component's role along - a `Meter` is a meter - and names it per row: give it a label that says the row, “Error budget used, Checkout”, or every cell of the column sounds alike.",
         ],
         types: [],
         exports: ["useTable"],
@@ -125,6 +149,7 @@ export const OUTLINE: readonly Rubric[] = [
         id: "presets",
         name: "Presets",
         sentence: "A column written once and used in many tables: as a preset spread into a column, or as a component that brings its own presentation.",
+        keysOf: ["first-table"],
         types: [],
         exports: ["column"],
       },
@@ -156,6 +181,7 @@ export const OUTLINE: readonly Rubric[] = [
           "It searches the columns whose value is text, and it searches the value, not its presentation; `searchable` on a column adds or removes one. A search term goes back to page one and counts as a restriction – the toolbar shows the matches and “Reset” – but it is not listed as a condition, since the field already shows it.",
         ],
         alternatives: [{ when: "Restrict one column to some of its values or to a range", use: "filter" }],
+        keysOf: ["first-table", core("Input")],
         limits: ["In [manual mode](#/manual-mode) the table searches nothing itself; the term goes to the server in the view."],
         types: ["SearchProps"],
         exports: ["Search"],
@@ -172,6 +198,7 @@ export const OUTLINE: readonly Rubric[] = [
           { when: "Free text across the columns", use: "search" },
           { when: "Rows a user may not see at all, invisibly", use: "pre-filter" },
         ],
+        keysOf: ["first-table", core("Popover"), core("Checkbox"), core("Input"), core("MultiSelect"), core("Select"), core("Button")],
         limits: [
           "No text filter per column: the search covers text.",
           "In [manual mode](#/manual-mode) a list filter offers what the application names; the table cannot count values it does not hold.",
@@ -186,6 +213,7 @@ export const OUTLINE: readonly Rubric[] = [
         alternatives: [
           { when: "A restriction the user sees and can lift", use: "filter" },
         ],
+        keysOf: ["first-table", core("Input"), core("Select"), core("Button")],
         types: [],
         exports: ["useTable"],
       },
@@ -258,6 +286,7 @@ export const OUTLINE: readonly Rubric[] = [
         alternatives: [
           { when: "A key figure outside the table", use: "`Stat` from @umriss-ui/core" },
         ],
+        keysOf: ["first-table", core("Input")],
         limits: [
           "No footer in [manual mode](#/manual-mode): a sum over one page would misstate the server's set.",
         ],
@@ -281,6 +310,7 @@ export const OUTLINE: readonly Rubric[] = [
         alternatives: [
           { when: "Actions that act on the ticked rows", use: "rowactions" },
         ],
+        keysOf: ["first-table", core("Checkbox"), core("Input")],
         limits: [
           "In [manual mode](#/manual-mode) “select all” selects the page the table holds.",
         ],
@@ -293,6 +323,11 @@ export const OUTLINE: readonly Rubric[] = [
         sentence: "How rows look: dense or regular, marked by their state, and what stands while rows load, fail or do not exist.",
         about: [
           "A row's mark is the application's stylesheet at work; say the same in a word in a column too, so the colour is never the only sign.",
+        ],
+        keysOf: ["first-table", core("Input"), core("Button")],
+        accessibility: [
+          "While `loading` is set the table is `aria-busy`: a screen reader waits for the rows instead of reading the placeholders. Rows that stand while new ones load stay readable.",
+          "What stands in `empty` is the application's, and it is read where it stands. A failed load that must be heard on arrival goes there as core's `Alert` with `tone=\"danger\"`, which announces itself. That nothing matches a search or a filter the table says itself.",
         ],
         types: [],
         exports: ["useTable"],
@@ -328,6 +363,10 @@ export const OUTLINE: readonly Rubric[] = [
           { key: "Escape", action: "Close the menu; the focus returns to its button." },
           { key: "Tab", action: "Close the menu and move on." },
         ],
+        accessibility: [
+          "Each action is a button named after itself and the row - “Open: INV-26-0318” - so a reader that lists the buttons tells the rows apart. From three actions on, the row's menu button is named “Actions: INV-26-0318”. The row's name is its `rowHeader` cell.",
+          "What an action does is the application's to say: a result that should be heard - a row approved, a row gone - goes to a status region or core's `useToast`.",
+        ],
         types: ["RowActionsProps", "ActionProps"],
         exports: ["useTable"],
       },
@@ -347,6 +386,11 @@ export const OUTLINE: readonly Rubric[] = [
           "A table with a search or a column filter puts up a toolbar of its own when none stands. Outside the table, pass `of` to the toolbar and to each part in it, and place it before the table – after it, it registers only after the first paint.",
         ],
         alternatives: [{ when: "Actions that should stay in view while the page scrolls", use: "`Dock` from @umriss-ui/core" }],
+        keysOf: ["first-table", core("Input"), "columnmenu", "rowactions", core("Button"), core("Checkbox")],
+        accessibility: [
+          "The count of matches is a status region. It stays empty while nothing restricts the rows, and a screen reader hears “3 of 12” when a search or a filter narrows them, and the new count on every change after.",
+          "The parts the table puts in name themselves: the search field “Search table” unless its `aria-label` says otherwise, “Columns”, “Export”. A control of your own in the bar needs a label of its own, as anywhere.",
+        ],
         types: ["ToolbarProps"],
         exports: ["Toolbar"],
       },
@@ -360,6 +404,7 @@ export const OUTLINE: readonly Rubric[] = [
           "A control of your own restricts the table through a [row filter](#/filter): it sets the condition with `t.setFilter(filter, condition)` and reads it with `t.conditionOf(filter)`, so “Reset”, the count of matches and the view include it.",
         ],
         alternatives: [{ when: "A filter on a column the table offers itself, in its header", use: "filter" }],
+        keysOf: ["first-table", core("Input"), "columnmenu", core("Select"), core("MultiSelect"), core("Combobox"), core("Button")],
         types: ["ToolbarProps", "RowFilter"],
         exports: ["Toolbar", "rowFilter"],
       },
@@ -387,6 +432,7 @@ export const OUTLINE: readonly Rubric[] = [
           "It writes the filtered set across all pages, in the visible columns, in the order and sorting on screen – and the values, not their presentation: numbers with a decimal comma, a point in time as a timestamp, an absent value as an empty field. Fields are separated by semicolons, and a byte order mark tells the spreadsheet it is UTF-8.",
           "A verdict column exports its value, not the verdict. In [manual mode](#/manual-mode) the table holds one page of the server's, so it exports that page, and the button says so. The same text is `t.asCsv()`, without a button.",
         ],
+        keysOf: ["first-table", core("Input"), core("Button")],
         limits: ["One format, CSV: no workbook, PDF or print layout."],
         types: ["ExportProps"],
         exports: ["Export"],
@@ -398,6 +444,7 @@ export const OUTLINE: readonly Rubric[] = [
         about: [
           "The table remembers nothing, not in the address and not in any storage. Everything stands in `t.view`; keep it where the application keeps things and hand it back through `initialView`.",
         ],
+        keysOf: ["first-table", core("Input"), "columnmenu", core("Button")],
         types: [],
         exports: ["useTable"],
       },
@@ -416,6 +463,7 @@ export const OUTLINE: readonly Rubric[] = [
           "`pageSize` on the hook sets the rows per page, `pageSizes` the choices. A search, a filter, a new sort or a new page size go back to page one, and a page that no longer exists after a filter becomes the last one. A virtualised table does not page, and the bar is not drawn.",
         ],
         alternatives: [{ when: "Thousands of rows the user scrolls through without pages", use: "virtualisation" }],
+        keysOf: ["first-table", core("Input"), core("Select"), core("Button")],
         limits: ["In [manual mode](#/manual-mode) the page goes to the server in the view, and `rowCount` decides how many pages there are."],
         types: ["PaginationProps"],
         exports: ["Pagination"],
@@ -445,6 +493,7 @@ export const OUTLINE: readonly Rubric[] = [
         alternatives: [
           { when: "Thousands of rows that are all in the browser", use: "virtualisation" },
         ],
+        keysOf: ["first-table", core("Input"), "columnmenu", core("Select"), core("Button"), core("Checkbox")],
         limits: [
           "The table sorts, filters and pages nothing itself, and it shows no groups and no footer: they would be made of one page.",
           "“Select all” and the export act on the page the table holds, and the export button says so.",
@@ -521,6 +570,7 @@ export const OUTLINE: readonly Rubric[] = [
           { when: "A single reading in a tile or a bar", use: "`Meter` from @umriss-ui/core" },
           { when: "Alerts with a lifecycle that someone acknowledges", use: "alarmlist" },
         ],
+        keysOf: ["first-table"],
         limits: [
           "No list filter: four verdicts are sorted, not filtered.",
           "It does not judge whether a value is stale; a stale value keeps its verdict (ADR-0010).",
@@ -548,6 +598,11 @@ export const OUTLINE: readonly Rubric[] = [
           "It never removes an alert to thin out a flood; deciding that a person should not see one stays with the application.",
           "No latched alerts, and no alarm-system figures beyond the frequency per type.",
           "The columns do not sort and the list does not page: the model sets the order.",
+        ],
+        accessibility: [
+          "A native table named “Alarms”, each alert's type its row header. The state stands as a word in every row, never as a colour alone, and a hidden alert's short badge is spoken whole - snoozed until when, and by whom.",
+          "One polite live region says one number: the active alerts nobody has acknowledged, “3 active alarms, unacknowledged”. It speaks when that number changes, never per arrival, so a flood is one sentence and not forty.",
+          "Each row's box is named after the alert, and “Acknowledge” names how many it will acknowledge; while there is none it is disabled.",
         ],
         types: ["AlarmListProps"],
         exports: ["AlarmList", "alarmModel"],

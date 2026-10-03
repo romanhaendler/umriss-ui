@@ -59,6 +59,24 @@ describe("Demo smoke test", () => {
     await unmount();
   });
 
+  it("links First table's keys and core's Input keys from the Search page, and says on First table what a screen reader meets", async () => {
+    const page = (id: string) => ALL_PAGES.find((one) => one.id === id)!;
+    const search = await mount(<Page demo={DEMO} page={page("search")} />);
+    const keyboard = search.host.querySelector('section[aria-labelledby="keyboard-search"]');
+    expect(keyboard?.textContent).toContain("The keys of First table and Input apply here.");
+    expect([...(keyboard?.querySelectorAll("a") ?? [])].map((a) => a.getAttribute("href"))).toEqual([
+      "/first-table/#keyboard-first-table",
+      "/core/input/#keyboard-input",
+    ]);
+    await search.unmount();
+
+    const first = await mount(<Page demo={DEMO} page={page("first-table")} />);
+    const sections = [...first.host.querySelectorAll(".section h2")].map((h) => h.textContent);
+    expect(sections.indexOf("Accessibility")).toBe(sections.indexOf("Keyboard") + 1);
+    expect(first.host.querySelector('section[aria-labelledby="accessibility-first-table"] p')).not.toBeNull();
+    await first.unmount();
+  });
+
   it.each(EXAMPLES.map((b) => [`${b.pageId}/${b.id}`, b] as const))("renders the example %s", async (_name, example) => {
     const { unmount } = await mount(<example.Component />);
     await unmount();
