@@ -50,6 +50,13 @@
   color: var(--u-color-text);
 }
 
+/* The name takes the focus when a page is chosen in the drawer (Shell.tsx),
+   so that a screen reader announces it. It is no stop of its own and shows
+   no ring. */
+.pageName:focus {
+  outline: none;
+}
+
 .pageSentence {
   margin: 0;
   max-width: 68ch;

@@ -231,7 +231,7 @@ export function Page({ demo, page }: PageProps) {
     <article className="page" data-block={page.id} aria-labelledby={`page-${page.id}`}>
       <header className="pageHead">
         <p className="pageRubric">{page.rubric.name}</p>
-        <h1 className="pageName" id={`page-${page.id}`}>
+        <h1 className="pageName" id={`page-${page.id}`} tabIndex={-1}>
           {page.name}
         </h1>
         <p className="pageSentence">

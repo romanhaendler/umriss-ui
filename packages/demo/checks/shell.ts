@@ -819,12 +819,97 @@ test("on a phone the header takes two lines, loses no destination, and the page 
   }
   expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
 
-  // GitHub, npm and llms.txt stand at the foot of the sidebar instead.
+  // GitHub, npm and llms.txt stand at the foot of the sidebar instead - in the drawer.
   await expect(head.getByRole("link", { name: "Source on GitHub" })).toBeHidden();
-  const rail = page.getByRole("navigation", { name: "Components" });
+  await head.getByRole("button", { name: "Menu" }).click();
+  const rail = page.getByRole("dialog").getByRole("navigation", { name: "Components" });
   for (const name of ["Source on GitHub", "on npm", "llms.txt for coding agents"]) {
     await expect(rail.getByRole("link", { name })).toBeVisible();
   }
+});
+
+/* THE DRAWER. At 900 px and less the sidebar does not stand under the page:
+   the Menu button opens it in a modal dialog from the left, with the current
+   page in view and focused. The platform's dialog gives the trap, Escape and
+   the backdrop; the shell gives where the focus goes. */
+
+test.describe("the sidebar on a phone, 390 px wide", () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  const menu = (page: Page) => page.getByRole("banner").getByRole("button", { name: "Menu" });
+  const drawer = (page: Page) => page.getByRole("dialog", { name: "Menu" });
+
+  test("is not in the page flow, and the Menu button opens it with the current page focused", async ({ page }) => {
+    await page.goto(`/${p.low.pageId}/`);
+    await expect(page.getByRole("navigation", { name: "Components" })).toHaveCount(0);
+    await expect(menu(page)).toBeVisible();
+    await expect(menu(page)).toHaveAttribute("aria-haspopup", "dialog");
+    await expect(menu(page)).toHaveAttribute("aria-expanded", "false");
+
+    await menu(page).click();
+    await expect(drawer(page)).toBeVisible();
+    await expect(menu(page)).toHaveAttribute("aria-expanded", "true");
+    const entry = drawer(page).getByRole("link", { name: p.low.name, exact: true });
+    await expect(entry).toHaveAttribute("aria-current", "page");
+    await expect(entry).toBeFocused();
+    await expect(entry).toBeInViewport({ ratio: 1 });
+    // At the left edge, full height, at most 20 rem wide.
+    const box = (await drawer(page).boundingBox())!;
+    expect(box.x).toBe(0);
+    expect(box.height).toBe(844);
+    expect(box.width).toBeLessThanOrEqual(320);
+  });
+
+  test("holds the focus, and Escape gives it back to the Menu button", async ({ page }) => {
+    await menu(page).click();
+    await expect(drawer(page)).toBeVisible();
+    /* Backwards past the first stop. Chrome lets the focus pass through its
+       own chrome - the page then reports the body - but never onto the page. */
+    await drawer(page).getByRole("link").first().focus();
+    for (let i = 0; i < 3; i++) {
+      await page.keyboard.press("Shift+Tab");
+      const where = await drawer(page).evaluate((el) =>
+        el.contains(document.activeElement) ? "inside" : document.activeElement === document.body ? "chrome" : "page",
+      );
+      expect(where).not.toBe("page");
+    }
+    await page.keyboard.press("Escape");
+    await expect(drawer(page)).toBeHidden();
+    await expect(menu(page)).toBeFocused();
+    await expect(menu(page)).toHaveAttribute("aria-expanded", "false");
+  });
+
+  test("a click on the backdrop closes it, with focus back on the Menu button", async ({ page }) => {
+    await menu(page).click();
+    await expect(drawer(page)).toBeVisible();
+    await page.mouse.click(380, 600);
+    await expect(drawer(page)).toBeHidden();
+    await expect(menu(page)).toBeFocused();
+  });
+
+  test("choosing a page closes it and puts the focus on the new page's heading", async ({ page }) => {
+    await menu(page).click();
+    await drawer(page).getByRole("link", { name: p.rail.name, exact: true }).click();
+    await expect(drawer(page)).toBeHidden();
+    await expect(page.locator(`[data-block="${p.rail.pageId}"] h1`)).toBeFocused();
+    expect(new URL(page.url()).pathname).toBe(`/${p.rail.pageId}/`);
+  });
+
+  test("widening past 900 px closes it, and the standing sidebar shows", async ({ page }) => {
+    await menu(page).click();
+    await expect(drawer(page)).toBeVisible();
+    await page.setViewportSize({ width: 1200, height: 844 });
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await expect(page.getByRole("navigation", { name: "Components" })).toBeVisible();
+    await expect(menu(page)).toBeHidden();
+  });
+
+  test("is accessible when open", async ({ page }) => {
+    await menu(page).click();
+    await expect(drawer(page)).toBeVisible();
+    const result = await new AxeBuilder({ page }).exclude(".scenarioStage").withTags(STANDARDS).analyze();
+    expect(result.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target).join(" ")}`)).toEqual([]);
+  });
 });
 
 /* THE THEME. One choice for the site, stored under one key, standing before
