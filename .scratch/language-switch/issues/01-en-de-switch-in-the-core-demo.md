@@ -50,14 +50,15 @@ Results:
 
 - `pnpm lint`, `pnpm typecheck` and `pnpm test:unit` are green. One table smoke test timed out under load and passed on rerun.
 - Under the lock, `features-shell` and `features-page` in ui-light and table-light: 105 passed. The one failure, the Button configurator's background check, was a flake and passed 3 of 3 on rerun.
-- After the rebase, `features-shell` in ui-light and calculation-light: 90 passed, 9 skipped.
+- After the last rebase (onto `eccf0862`, which brings the site-wide search and the narrow Menu drawer), `features-shell` in ui-light and table-light: 111 passed, 9 skipped. The palette-placeholder assertion follows main's new wording.
 
-**Baselines moved.** Two of core's whole-viewport pictures show the header, and both moved, light and dark. I looked at the new images.
+**Baselines moved.** Three of core's pictures show the header and moved. I looked at the new images.
 
-- `toast-top-center`: the search moved left to make room for the new switch.
-- `drawer-beside-a-service-list`: this baseline was stale in other ways too (the old "Umriss UI" header, the old sidebar and section headings), and the renewal takes those in.
+- `toast-top-center`, light and dark: the search moved left to make room for the new switch.
+- `palette-window`, light only: the switch stands in the header behind the palette. The dark picture stays within tolerance.
+- `scenario-set-up-a-team`, light and dark: the sticky header lies over the top of this tall scenario.
 
-`palette-window`, `palette-resting`, `toast-phone` and the forced-colours pictures still pass. Two other failures are not this ticket's and stay as they were: `tokens-first-group` (light and dark; the token table's rows differ) and `example-language--own-components` (ui-light, already reported in shell-across-packages 01).
+`drawer-beside-a-service-list` was renewed here at first, then dropped in the rebase in favour of main's renewal, which passes. `palette-resting`, `toast-phone` and the forced-colours pictures still pass. One failure is not this ticket's and stays as it was: `example-language--own-components` (ui-light, already reported in shell-across-packages 01). Before the last rebase, `tokens-first-group` (light and dark) also failed, because the token table's rows differ. It does not show the header, so it is not this ticket's, and I did not run it again afterwards.
 
 **Deviations.**
 
