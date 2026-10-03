@@ -28,6 +28,7 @@ import { byRank, parseFileName, parseScenarioName } from "./fileName.ts";
 import { displaySource } from "./source.ts";
 import type { TypeEntry } from "./propsReader.ts";
 import { installCommand, type InstallManifest } from "./install.ts";
+import { PACKAGES } from "../packages.ts";
 import { apiHtml, markdownCell as cell, markdownCode as code, tableMarkdown, tableModel } from "./apiTable.ts";
 import { referenceHtml, referenceMarkdown, type ReferenceTable } from "./referenceTable.ts";
 
@@ -542,13 +543,18 @@ export function renderLlms({ packageDir, outline, tables, eventsApart = false, m
     ...outline.flatMap((rubric) => [`##### ${rubric.name}`, "", ...rubric.pages.map((page) => `- [${page.name}](${pageUrl(manifest, page)})`), ""]),
   ].join("\n");
   const noun = NOUN[manifest.name] ?? "component";
+  /* The landing's head as the app shows it: the npm name, the install
+     command as a block, and the page to start with from the one list. */
+  const startId = PACKAGES.find((one) => one.npm === manifest.name)?.start;
+  const start = pages.find((page) => page.id === startId);
   /* The scenarios page's own text: the package, and the scenarios' cut. */
   const front = [
     `# ${manifest.name}`,
     "",
     manifest.description,
     "",
-    `Install with \`${install}\`.`,
+    fenced("sh", install),
+    ...(start === undefined ? [] : ["", `[Start with ${start.name} →](${pageUrl(manifest, start)})`]),
     ...cuts.filter((cut) => cut.page === undefined).map((cut) => parts.slice(cut.from, cut.to).join("\n")),
   ].join("\n");
   /* What a twin says under its name: what it is part of, and where the rest

@@ -16,6 +16,7 @@
 import { test, expect } from "@playwright/test";
 import type { Page } from "@playwright/test";
 import { allWithCode } from "./navigation";
+import { PACKAGES } from "../src/packages.ts";
 
 export interface PageProbes {
   /** How the demo opens a page and an example (its `navigation.ts`). */
@@ -137,14 +138,15 @@ test("the import line copies itself as well", async ({ page, context }) => {
 
 export interface InstallProbes {
   open: (page: Page, pageId: string) => Promise<void>;
-  /** The demo's pages: the one flagged `installs` is opened. */
-  pages: readonly { id: string; installs?: true }[];
+  /** The demo's pages: the one flagged `installs` is opened, and the landing
+      leads to the one the package list names to start with. */
+  pages: readonly { id: string; name: string; installs?: true }[];
   /** The install command, as it must land in the clipboard. */
   command: string;
 }
 
-/** The page that installs: its command stands there and copies itself,
-    exactly. It runs against all five demos - those without `checkPage` call
+/** The page that installs and the landing: the command stands on both and
+    copies itself, exactly. It runs against all five demos - those without `checkPage` call
     it alone. */
 export function checkInstall({ open, pages, command }: InstallProbes): void {
   test("the install command stands on the page that installs and copies itself", async ({ page, context }) => {
@@ -158,5 +160,25 @@ export function checkInstall({ open, pages, command }: InstallProbes): void {
     await line.getByRole("button", { name: "Copy" }).click();
     await expect(line.getByRole("button", { name: "Copied" })).toBeVisible();
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(command);
+  });
+
+  /* The landing names its package, installs it with the same command and
+     says where to begin - on a page of this demo, which the link opens. */
+  test("the landing names its package, installs it and says where to start", async ({ page, context }) => {
+    test.skip(test.info().project.name.endsWith("dark"), "a behaviour test runs once (light)");
+    const npm = command.split(" ")[2];
+    const start = pages.find((one) => one.id === PACKAGES.find((entry) => entry.npm === npm)?.start);
+    expect(start, `the package list names a page of ${npm} to start with`).toBeDefined();
+    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    await open(page, "scenarios");
+    const head = page.locator('[data-block="scenarios"] .pageHead');
+    await expect(head.getByRole("heading", { level: 1 })).toHaveText(npm!);
+    const line = head.locator(".installLine");
+    await expect(line.locator("code")).toHaveText(command);
+    await line.getByRole("button", { name: "Copy" }).click();
+    await expect(line.getByRole("button", { name: "Copied" })).toBeVisible();
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(command);
+    await head.getByRole("link", { name: `Start with ${start!.name} →` }).click();
+    await expect(page.locator(`[data-block="${start!.id}"] h1`)).toHaveText(start!.name);
   });
 }

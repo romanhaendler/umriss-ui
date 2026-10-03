@@ -272,7 +272,7 @@ export function Shell({ demo, brand, version, sentence }: ShellProps) {
 
         <main className="shellContent">
           {page === undefined ? (
-            <Scenarios demo={demo} brand={brand} sentence={sentence} />
+            <Scenarios demo={demo} sentence={sentence} />
           ) : (
             <Page key={page.id} demo={demo} page={page} />
           )}

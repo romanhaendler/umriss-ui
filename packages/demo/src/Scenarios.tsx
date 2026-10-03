@@ -24,6 +24,8 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { CodeBlock } from "./Example";
 import { hrefOf, hrefOfNeighbour } from "./href";
+import { PACKAGES } from "./packages";
+import { InstallLine } from "./Page";
 import { Prose } from "./Prose";
 import type { Demo } from "./demo";
 import type { ForeignPage, Scenario } from "./tooling/examples";
@@ -139,15 +141,26 @@ function ScenarioBlock({ scenario, demo }: { scenario: Scenario; demo: Demo }) {
   );
 }
 
-export function Scenarios({ demo, brand, sentence }: { demo: Demo; brand: string; sentence: string }) {
+/* The landing's head names the package, not the page: a reader arriving here
+   learns which of the five this is, how to install it and where to begin. The
+   page to begin with comes from the one list of packages. */
+export function Scenarios({ demo, sentence }: { demo: Demo; sentence: string }) {
+  const startId = PACKAGES.find((one) => one.npm === demo.packageName)?.start;
+  const start = demo.addresses.ALL_PAGES.find((one) => one.id === startId);
   return (
     <article className="page scenarios" data-block="scenarios" aria-labelledby="scenarios-title">
       <header className="pageHead">
-        <p className="pageRubric">{brand}</p>
+        <p className="pageRubric">Scenarios</p>
         <h1 className="pageName" id="scenarios-title">
-          Scenarios
+          {demo.packageName}
         </h1>
         <p className="pageSentence">{sentence}</p>
+        <InstallLine command={demo.install} />
+        {start !== undefined && (
+          <p className="pageStart">
+            <a href={hrefOf(demo.addresses.addressOf(start.id))}>Start with {start.name} →</a>
+          </p>
+        )}
       </header>
       {demo.scenarios.length === 0 ? (
         <p className="pageEmpty">There is no scenario for this demo yet. The pages in the sidebar show every component.</p>

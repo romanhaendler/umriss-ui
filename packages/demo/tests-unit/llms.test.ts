@@ -4,13 +4,25 @@
    the text relies on - every page is there with its link, every example's
    source stands as the demo shows it, the table is complete. */
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { renderLlms } from "../src/tooling/llms";
 import { apiHtml, tableModel } from "../src/tooling/apiTable";
 import type { Rubric } from "../src/outline";
 import type { TypeEntry } from "../src/tooling/tables";
+
+/* The fixture stands in the one list of packages as a sixth, starting at its
+   Meter - so that the landing's "Start with" is seen to come from the list. */
+vi.mock("../src/packages", async (importOriginal) => {
+  const { PACKAGES } = await importOriginal<typeof import("../src/packages")>();
+  return {
+    PACKAGES: [
+      ...PACKAGES,
+      { id: "fixture", name: "Fixture", npm: "@umriss-ui/fixture", role: "A fixture", start: "meter" },
+    ],
+  };
+});
 
 const PACKAGE_DIR = join(dirname(fileURLToPath(import.meta.url)), "fixtures", "llms");
 
@@ -204,6 +216,13 @@ describe("the site's pages (ADR-0037)", () => {
     expect(front.title).toBe("@umriss-ui/fixture – A fixture package for the llms.txt generator.");
     expect(front.html).toContain("Watch a service&#39;s latency");
     expect(front.url).toBe("https://example.test/fixture/");
+  });
+
+  it("heads the front page with the npm name, the install command as a block and where to start", () => {
+    const html = byPath.get("")!.html;
+    expect(html).toMatch(/^<h1>@umriss-ui\/fixture<\/h1>/);
+    expect(html).toContain('<pre><code class="language-sh">npm install @umriss-ui/fixture @umriss-ui/core\n</code></pre>');
+    expect(html).toContain('<a href="https://example.test/fixture/meter/">Start with Meter →</a>');
   });
 
   it("carries in its API section the HTML the app mounts, from the same model", () => {
