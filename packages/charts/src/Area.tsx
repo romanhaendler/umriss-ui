@@ -13,8 +13,9 @@ import type { Accessor, AreaSeriesConfig } from "./types";
 export interface AreaProps<T> {
   /** Upper edge; null/undefined/NaN/±Infinity means a gap (R-2.5). */
   accessor: Accessor<T>;
-  /** Lower edge; without a value the fixed baseline 0. In a `stack` the stack
-      below is the lower edge, and this is not read. */
+  /** Lower edge. In a `stack` the stack below is the lower edge, and this is
+      not read.
+      @default a fixed baseline at 0 */
   baseline?: Accessor<T>;
   /** Binding to an x axis (R-4.12). */
   xAxisId?: string;
@@ -22,18 +23,19 @@ export interface AreaProps<T> {
   yAxisId?: string;
   /** Series-own data; overrides the container data (R-2.4). */
   data?: readonly T[];
-  /** The name in legend and tooltip. Without one the series is called
-      "Series n" and a warning stands in DEV - an unnamed series is a colour
-      nobody can look up. */
+  /** The name in legend and tooltip. Without one a warning stands in DEV - an
+      unnamed series is a colour nobody can look up.
+      @default "Series n", after its place in the chart */
   name?: string;
   /** Not drawn, not hit and not counted for its axes' extent - a fixed
       `domain` keeps the axis still. Its legend entry stays, drawn back.
       Controlled: the caller sets it, typically from `Legend onToggle`. */
   hidden?: boolean;
-  /** The value as the tooltip writes it; without one the y axis' `tickFormat`,
-      then the default. */
+  /** The value as the tooltip writes it.
+      @default the y axis' `tickFormat`, else the built-in number format */
   format?: (value: number) => string;
-  /** Any CSS colour value; without one the palette --uc-series-N. */
+  /** Any CSS colour value.
+      @default the palette's `--uc-series-N` */
   color?: string;
   /** A role instead of a colour value; the theme resolves it. `color` beats
       it. */
@@ -53,8 +55,9 @@ export interface AreaProps<T> {
   /** Width of the outline along the upper edge in CSS pixels; 0 leaves it
       out. */
   strokeWidth?: number;
-  /** Dash pattern of the outline as a run of lengths in CSS pixels; without
-      one a solid outline. The fill stays whole. */
+  /** Dash pattern of the outline as a run of lengths in CSS pixels. The fill
+      stays whole.
+      @default a solid outline */
   dash?: readonly number[];
 }
 

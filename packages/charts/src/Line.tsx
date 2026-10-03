@@ -16,24 +16,26 @@ export interface LineProps<T> {
   yAxisId?: string;
   /** Series-own data; overrides the container data (R-2.4). */
   data?: readonly T[];
-  /** The name in legend and tooltip. Without one the series is called
-      "Series n" and a warning stands in DEV - an unnamed series is a colour
-      nobody can look up. */
+  /** The name in legend and tooltip. Without one a warning stands in DEV - an
+      unnamed series is a colour nobody can look up.
+      @default "Series n", after its place in the chart */
   name?: string;
   /** Not drawn, not hit and not counted for its axes' extent - a fixed
       `domain` keeps the axis still. Its legend entry stays, drawn back.
       Controlled: the caller sets it, typically from `Legend onToggle`. */
   hidden?: boolean;
-  /** The value as the tooltip writes it; without one the y axis' `tickFormat`,
-      then the default. */
+  /** The value as the tooltip writes it.
+      @default the y axis' `tickFormat`, else the built-in number format */
   format?: (value: number) => string;
-  /** Any CSS colour value; without one the palette --uc-series-N. */
+  /** Any CSS colour value.
+      @default the palette's `--uc-series-N` */
   color?: string;
   /** A role instead of a colour value; the theme resolves it. */
   tone?: "ok" | "warning" | "alarm";
   /** Line width in CSS pixels. */
   strokeWidth?: number;
-  /** Dash pattern as a run of lengths in CSS pixels; without one a solid line. */
+  /** Dash pattern as a run of lengths in CSS pixels.
+      @default a solid line */
   dash?: readonly number[];
   /** When the individual points are drawn as marks: `auto` every point up to
       60 points and above that only a point between two gaps - it has no line

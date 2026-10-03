@@ -36,6 +36,10 @@ interface was still expected to move before `0.3.0`.
 - **Every export carries a comment**, the German wording's included: what a
   component, a function, a constant or a type is for. The editor shows it on
   hover, from the package's `.d.ts`. Nothing else changes.
+- **A prop's default stands in a `@default` tag**, no longer in a sentence of
+  its comment: `Chart height` is `300`, `LimitLine role` `"specification"`,
+  a series' `color` the palette's. The editor shows the tag on hover. Nothing
+  else changes.
 
 ## 0.9.0 – A box plot (Oct. 2026)
 

@@ -21,12 +21,13 @@ import { useMemo } from "react";
 import { useLimit } from "./context";
 import type { LimitBandConfig, LimitLineConfig, LimitRole, Severity } from "./types";
 
-interface CommonProps {
-  /** Axis on which the value lies. Without one, the first axis of the
-      orientation. */
+interface LimitCommonProps {
+  /** Axis on which the value lies.
+      @default the first axis of the orientation */
   axisId?: string;
-  /** Whether the value lies on the x or on the y axis. Without one, y: a limit
-      is nearly always a value and not a moment. */
+  /** Whether the value lies on the x or on the y axis - a limit is nearly
+      always a value and not a moment.
+      @default "y" */
   orientation?: "x" | "y";
   /** Two severities, not five: five urgencies are five colours, and five colours
       on a dense screen are noise. */
@@ -39,22 +40,24 @@ interface CommonProps {
       moves - so this is for the case that has no severity, not for taste. */
   color?: string;
   /** Whether the value widens the axis extent, so that the limit is certainly
-      visible. Default true; the head of this file says why. */
+      visible.
+      @default true */
   inExtent?: boolean;
-  /** A chosen specification limit (the default) or a calculated control limit.
-      They look different because they mean different things (ADR-0008). */
+  /** A chosen specification limit or a calculated control limit. They look
+      different because they mean different things (ADR-0008).
+      @default "specification" */
   role?: LimitRole;
 }
 
 /** The props of `LimitLine`. */
-export interface LimitLineProps extends CommonProps {
+export interface LimitLineProps extends LimitCommonProps {
   /** Where the line lies, in domain units of its axis. */
   value: number;
 }
 
 /** The props of `LimitBand`: a `LimitLine`'s, with a range in place of
     `value`. */
-export interface LimitBandProps extends CommonProps {
+export interface LimitBandProps extends LimitCommonProps {
   /** Lower edge of the band, in domain units of its axis. */
   from: number;
   /** Upper edge, in domain units of its axis. A band drawn backwards (`from` above `to`) is drawn between
