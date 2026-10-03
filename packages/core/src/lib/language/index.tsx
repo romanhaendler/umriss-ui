@@ -35,11 +35,14 @@ export interface LanguageOptions {
   wording?: Partial<Omit<Wording, "presets">> & { presets?: Partial<Wording["presets"]> };
 }
 
+/** A complete language: the formats for numbers and dates, and the wording. */
 export interface Language {
   formats: Formats;
   wording: Wording;
 }
 
+/** English formats and English wording - what every component uses without a
+    `LanguageProvider`. */
 export const DEFAULT_LANGUAGE: Language = {
   formats: DEFAULT_FORMATS,
   wording: DEFAULT_WORDING,
@@ -66,6 +69,8 @@ export function mergeLanguage(optionen: LanguageOptions | undefined): Language {
   };
 }
 
+/** The props of `LanguageProvider`: the parts of the formats and the wording
+    that differ from the default. */
 export interface LanguageProviderProps extends LanguageOptions {
   children: ReactNode;
 }

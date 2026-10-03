@@ -13,6 +13,8 @@ import { useEffect, useMemo, useState } from "react";
 import { freshness, age, cadence } from "./freshness";
 import type { Freshness, FreshnessAges } from "./freshness";
 
+/** What `useFreshness` returns: how fresh the value is, how old, and the time
+    the reading was taken at. */
 export interface FreshnessReading {
   /** `fresh`, `stale` or `lost` - never a verdict. */
   freshness: Freshness;

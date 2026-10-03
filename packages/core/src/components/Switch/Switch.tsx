@@ -5,6 +5,7 @@ import { useFormField } from "../FormField";
 import styles from "./Switch.module.css";
 import { useControlSize } from "../../lib/controlSize";
 
+/** The props of `Switch`: a native checkbox's attributes and its label. */
 export interface SwitchProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "size" | "role"> {
   /** Label to the right of the switch. */
   label?: ReactNode;
@@ -22,6 +23,8 @@ export interface SwitchProps extends Omit<InputHTMLAttributes<HTMLInputElement>,
    It takes effect at once - where a choice waits for a Save button, the
    checkbox is the honest control. The construction is the checkbox's, and so
    is the pass-through: the class on the label, ref and rest on the input. */
+/** An on/off switch that takes effect at once - a native checkbox with
+    `role="switch"`. Where the choice waits for a Save button, use `Checkbox`. */
 export const Switch = forwardRef<HTMLInputElement, SwitchProps>(function Switch(
   { label, size: ownSize, invalid, className, style, id, ...rest },
   ref,

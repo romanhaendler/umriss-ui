@@ -4,6 +4,7 @@ import { cx } from "../../lib/cx";
 import { useFormField } from "../FormField";
 import styles from "./Checkbox.module.css";
 
+/** The props of `Checkbox`: a native checkbox's attributes and its label. */
 export interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "size"> {
   /** Label to the right of the checkbox. */
   label?: ReactNode;
@@ -11,6 +12,8 @@ export interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement
   indeterminate?: boolean;
 }
 
+/** A native checkbox with its label beside it; `indeterminate` shows the mixed
+    state. Inside a `FormField` it takes the field's id and description. */
 export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(function Checkbox(
   { label, indeterminate = false, className, style, id, ...rest },
   ref,

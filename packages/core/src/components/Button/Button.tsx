@@ -7,10 +7,14 @@ import { Spinner } from "../Spinner";
 import { Tooltip } from "../Tooltip";
 import styles from "./Button.module.css";
 
+/** How loud a button is: `primary` for the one main action, `secondary` by
+    default, `ghost` quiet in the accent, `plain` quiet and neutral, `danger`
+    for a destructive action. */
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "plain" | "danger";
 /** A button's two heights - the controls' (`ControlSize`). */
 export type ButtonSize = ControlSize;
 
+/** The props of `Button`: a native button's attributes and its look. */
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   /** How loud the button is. `primary` exactly once per surface - two main
       actions side by side are no longer a main action. `ghost` is quiet in the
@@ -23,6 +27,8 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   loading?: boolean;
 }
 
+/** A button with a label. `primary` once per surface; `loading` shows a
+    spinner and locks it. `type` is `button` unless you say otherwise. */
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   { variant = "secondary", size: ownSize, loading = false, disabled, className, children, type, ...rest },
   ref,
@@ -43,6 +49,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   );
 });
 
+/** The props of `IconButton`: a `Button`'s, with a required `aria-label` and
+    the icon as its only child. */
 export interface IconButtonProps
   extends Omit<ButtonProps, "aria-label" | "aria-labelledby" | "title" | "children"> {
   /** The name: what a screen reader announces and the tooltip shows. Required -

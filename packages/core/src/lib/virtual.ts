@@ -15,6 +15,7 @@
    beside it, in the table's companion in @umriss-ui/table
    (`kern/begleiter.ts`). */
 
+/** What `visibleWindow` needs to know about a scroll area and its rows. */
 export interface WindowInput {
   /** Rows in total, not only the rendered ones. */
   count: number;
@@ -33,6 +34,8 @@ export interface WindowInput {
   overscan?: number;
 }
 
+/** The rows to render - `from` up to, not including, `to` - and the heights
+    of the filler rows that stand for the rest. */
 export interface RowWindow {
   /** First rendered index. */
   from: number;
@@ -81,6 +84,7 @@ export function visibleWindow({
   };
 }
 
+/** What `scrollForRow` needs to know about a scroll area. */
 export interface RowPlacement {
   rowHeight: number;
   scrollTop: number;

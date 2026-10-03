@@ -4,6 +4,7 @@ import { cx } from "../../lib/cx";
 import { project } from "./scale";
 import styles from "./DataViz.module.css";
 
+/** The props of `Sparkline`. */
 export interface SparklineProps extends HTMLAttributes<HTMLSpanElement> {
   /** Values in chronological order; at least two. */
   data: readonly number[];

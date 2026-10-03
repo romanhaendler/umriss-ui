@@ -8,6 +8,8 @@ import { extentStyle } from "../../lib/extent";
 import { useWording } from "../../lib/language";
 import { CrossGlyph } from "../../lib/glyphs";
 
+/** The props of `Input`: a native input's attributes, with `size` meaning the
+    control's height. */
 export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "size"> {
   /** `sm` for a toolbar and dense forms, `md` otherwise. Default: the size of a
       `ControlSizeProvider` around it, else `md`. */
@@ -37,6 +39,9 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
    containment to the native input element itself. The class and the style go
    to the wrapper, ref and rest to the input, as with every wrapped field
    (principle 1). */
+/** A one-line text field. `chars` sets its width in characters, `numeric`
+    sets figures right-aligned and tabular, `clearable` offers a cross. Inside
+    a `FormField` it takes the field's id, description and invalid state. */
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   { size: ownSize, chars, invalid, numeric = false, clearable = false, onClear, className, style, id, disabled, ...rest },
   ref,

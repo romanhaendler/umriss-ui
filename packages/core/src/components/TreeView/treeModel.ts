@@ -16,6 +16,7 @@
    companion a pure state holder without logic of its own, and everything that
    is hard about a tree can be checked without a browser. */
 
+/** A node's key, as `reader.key` returns it. */
 export type Key = string | number;
 
 /** How a node is read - handed over once, not per node. The node's own type
@@ -42,6 +43,9 @@ export interface NodeReader<K, S extends Key = string> {
   matches?: (node: K) => boolean;
 }
 
+/** The whole state of a tree, as plain values: the open branches, the checked
+    nodes, the active node, the anchor and the search text. The transitions take
+    one and return the next. */
 export interface TreeSnapshot<S extends Key = string> {
   expanded: ReadonlySet<S>;
   checked: ReadonlySet<S>;
@@ -53,6 +57,9 @@ export interface TreeSnapshot<S extends Key = string> {
   search: string;
 }
 
+/** One visible node of a tree, with everything a row needs to be drawn and
+    read out: level, branch or leaf, check state, search state and position
+    among its siblings. */
 export interface FlatteningEntry<K, S extends Key = string> {
   node: K;
   key: S;
@@ -87,6 +94,8 @@ export interface FlatteningEntry<K, S extends Key = string> {
   siblings: number;
 }
 
+/** Where the active node moves: up and down the visible rows, in and out of a
+    branch, to the first or the last row. */
 export type Direction = "up" | "down" | "in" | "out" | "start" | "end";
 
 /** A node the cascade may not touch: disabled, or with descendants nobody has
@@ -233,6 +242,7 @@ export function treeModel<K, S extends Key = string>(
 
 /* ================= Transitions ================= */
 
+/** Opens a branch. Returns the same snapshot where it is open already. */
 export function expand<S extends Key>(
   snapshot: TreeSnapshot<S>,
   key: S,
@@ -243,6 +253,7 @@ export function expand<S extends Key>(
   return { ...snapshot, expanded: next };
 }
 
+/** Closes a branch. Returns the same snapshot where it is closed already. */
 export function collapse<S extends Key>(
   snapshot: TreeSnapshot<S>,
   key: S,
@@ -253,6 +264,8 @@ export function collapse<S extends Key>(
   return { ...snapshot, expanded: next };
 }
 
+/** Sets the active node; `null` for none. Returns the same snapshot where
+    nothing changes. */
 export function setActive<S extends Key>(
   snapshot: TreeSnapshot<S>,
   key: S | null,
@@ -313,6 +326,8 @@ export function move<K, S extends Key = string>(
 
 /* ================= Checking ranges ================= */
 
+/** Sets the node a range selection spans from; `null` for none. Returns the
+    same snapshot where nothing changes. */
 export function setAnchor<S extends Key>(
   snapshot: TreeSnapshot<S>,
   key: S | null,

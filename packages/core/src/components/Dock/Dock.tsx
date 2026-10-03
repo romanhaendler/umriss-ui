@@ -81,6 +81,7 @@ export interface DockTool {
   disabled?: boolean;
 }
 
+/** The props of `Dock`. */
 export interface DockProps extends Omit<HTMLAttributes<HTMLDivElement>, "onSelect"> {
   /**
    * The tools - a property and expressly not children.
@@ -135,6 +136,10 @@ function numberFrom(style: CSSStyleDeclaration, name: string): number {
   return Number.isFinite(raw) ? raw : 0;
 }
 
+/** A strip of tools that lies at an edge of one surface and carries the
+    actions for it. It moves to another edge by pointer or keyboard and reports
+    the place through `onPlaceChange`; at a side edge it stands upright, where
+    there is room. */
 export const Dock = forwardRef<HTMLDivElement, DockProps>(function Dock(
   {
     tools,

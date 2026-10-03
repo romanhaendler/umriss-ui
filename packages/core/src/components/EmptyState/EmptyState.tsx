@@ -3,6 +3,8 @@ import type { HTMLAttributes, ReactNode } from "react";
 import { cx } from "../../lib/cx";
 import styles from "./EmptyState.module.css";
 
+/** The props of `EmptyState`: a div's attributes, with `title` taking a node
+    instead of the HTML attribute. */
 export interface EmptyStateProps extends Omit<HTMLAttributes<HTMLDivElement>, "title"> {
   /** What is missing here - as a statement, not as an apology. */
   title: ReactNode;

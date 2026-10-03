@@ -43,6 +43,7 @@ export type PortalTarget = HTMLElement | (() => HTMLElement | null) | null;
     phone they take the width of the window, and only the edge counts. */
 export type ToastPosition = "top-start" | "top-center" | "top-end" | "bottom-start" | "bottom-center" | "bottom-end";
 
+/** The defaults for every toast, set on `UmrissProvider`'s `toast`. */
 export interface ToastConfig {
   /** Display duration in ms, where the individual toast names none. */
   duration?: number;
@@ -54,6 +55,8 @@ export interface ToastConfig {
   limit?: number;
 }
 
+/** The settings of `UmrissProvider` as the components read them, every value
+    filled in. */
 export interface UmrissConfig {
   density: Density;
   portalTarget: PortalTarget;
@@ -97,6 +100,7 @@ export function usePortalTarget(): () => HTMLElement | null {
   );
 }
 
+/** The props of `UmrissProvider`. */
 export interface UmrissProviderProps {
   /**
    * The default for the `density` of every component that reads it with

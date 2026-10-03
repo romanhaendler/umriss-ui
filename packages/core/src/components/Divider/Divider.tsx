@@ -12,6 +12,7 @@ import type { HTMLAttributes, ReactNode } from "react";
 import { cx } from "../../lib/cx";
 import styles from "./Divider.module.css";
 
+/** The props of `Divider`. */
 export interface DividerProps extends HTMLAttributes<HTMLDivElement> {
   /** Horizontally it separates rows, vertically it separates columns. */
   orientation?: "horizontal" | "vertical";
@@ -21,6 +22,7 @@ export interface DividerProps extends HTMLAttributes<HTMLDivElement> {
   label?: ReactNode;
 }
 
+/** A line between rows or columns; with `label` a named separator. */
 export const Divider = forwardRef<HTMLDivElement, DividerProps>(function Divider(
   { orientation = "horizontal", strong = false, label, className, ...rest },
   ref,

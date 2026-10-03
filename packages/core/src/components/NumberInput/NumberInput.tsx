@@ -17,6 +17,8 @@ import { useFormats, useWording } from "../../lib/language";
 import { separatorsOf } from "../../lib/language/formats";
 import { MinusGlyph, PlusGlyph } from "../../lib/glyphs";
 
+/** The props of `NumberInput`: a native input's attributes, with the value a
+    number or `null`. */
 export interface NumberInputProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, "value" | "onChange" | "size" | "prefix" | "type"> {
   /** The number, or `null` for "not stated". An empty field is not zero:

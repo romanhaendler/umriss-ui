@@ -19,6 +19,7 @@ import styles from "./Tag.module.css";
 import { useWording } from "../../lib/language";
 import { CrossGlyph } from "../../lib/glyphs";
 
+/** What a tag stands for - never the only statement, its text says it too. */
 export type TagTone = "neutral" | "accent" | "success" | "warning" | "danger";
 
 /* The context carries no state: the tag only asks whether it stands inside a
@@ -30,11 +31,14 @@ const TagGroupContext = createContext<boolean>(false);
 /* TagGroup – roving tabindex across the tags                          */
 /* ------------------------------------------------------------------ */
 
+/** The props of `TagGroup`: a div's attributes, with a required name. */
 export interface TagGroupProps extends HTMLAttributes<HTMLDivElement> {
   /** Label of the group for the screen reader. */
   "aria-label": string;
 }
 
+/** A list of `Tag`s with one tab stop: the arrow keys move between them, and
+    the focus stays in the group when one is removed. */
 export const TagGroup = forwardRef<HTMLDivElement, TagGroupProps>(function TagGroup(
   { className, children, onKeyDown, onFocus, ...rest },
   ref,
@@ -125,6 +129,7 @@ export const TagGroup = forwardRef<HTMLDivElement, TagGroupProps>(function TagGr
 /* Tag                                                                 */
 /* ------------------------------------------------------------------ */
 
+/** The props of `Tag`. */
 export interface TagProps extends Omit<HTMLAttributes<HTMLSpanElement>, "onRemove"> {
   /** What the label stands for. The tone is never the only information: the
       text beside it says the same thing once more. */
@@ -143,6 +148,9 @@ export interface TagProps extends Omit<HTMLAttributes<HTMLSpanElement>, "onRemov
   disabled?: boolean;
 }
 
+/** A short label with a tone; with `onRemove` it carries a cross that removes
+    it. Inside a `TagGroup` it is a list entry, and Delete or Backspace remove
+    it too. */
 export const Tag = forwardRef<HTMLSpanElement, TagProps>(function Tag(
   { tone = "neutral", children, onRemove, removeLabel, disabled = false, className, onKeyDown, ...rest },
   ref,

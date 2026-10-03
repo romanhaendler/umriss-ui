@@ -10,6 +10,8 @@ import { useFormField } from "../FormField";
 import { accepts } from "./accept";
 import styles from "./FileInput.module.css";
 
+/** The props of `FileInput`: a native file input's attributes, with the files
+    as the value. */
 export interface FileInputProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "defaultValue" | "onChange" | "size"> {
   /** Controlled: the chosen files. Uncontrolled, the input keeps its own and
@@ -40,6 +42,8 @@ const sizeOf = (bytes: number, formats: Formats) =>
 
    The construction of the other native fields: the class on the zone, ref
    and rest on the input. */
+/** A file field with a drop zone: choose or drop files, and remove them from
+    the list again. Nothing is uploaded - that is the application's. */
 export const FileInput = forwardRef<HTMLInputElement, FileInputProps>(function FileInput(
   { value, onChange, invalid, accept, multiple = false, disabled = false, className, style, id, ...rest },
   ref,

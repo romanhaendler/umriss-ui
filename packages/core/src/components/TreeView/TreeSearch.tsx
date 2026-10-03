@@ -12,6 +12,8 @@ import { useWording } from "../../lib/language";
 import type { Key } from "./treeModel";
 import type { Tree } from "./useTree";
 
+/** The props of `TreeSearch`: an `Input`'s, with the tree in place of `value`
+    and `onChange`. */
 export interface TreeSearchProps<K, S extends Key = string>
   extends Omit<InputProps, "value" | "onChange" | "type"> {
   /** The same tree as the view's. The field does not hold the text itself –
@@ -19,6 +21,8 @@ export interface TreeSearchProps<K, S extends Key = string>
   tree: Tree<K, S>;
 }
 
+/** The search field of a tree: an `Input` that writes into the tree's search
+    text, so that the `TreeView` filters on it. */
 export const TreeSearch = forwardRef(function TreeSearch<K, S extends Key = string>(
   { tree, placeholder, ...rest }: TreeSearchProps<K, S>,
   ref: ForwardedRef<HTMLInputElement>,

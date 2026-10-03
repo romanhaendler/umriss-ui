@@ -8,6 +8,7 @@ import styles from "../Menu/Menu.module.css";
 /* ContextMenu – the menu of a point (schedule 01).                    */
 /* ------------------------------------------------------------------ */
 
+/** The props of `ContextMenu`. */
 export interface ContextMenuProps {
   /** Whether the menu stands. Controlled, like `Popover`: a right-click
       opens it only because the caller says so. */

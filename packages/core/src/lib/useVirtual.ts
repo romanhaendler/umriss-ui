@@ -9,6 +9,7 @@ import type { RefObject } from "react";
 import { scrollForRow, visibleWindow } from "./virtual";
 import type { RowWindow } from "./virtual";
 
+/** The options of `useVirtual`. */
 export interface VirtualOptions {
   /**
    * Expected row height in pixels. It is re-measured on a real row after the
@@ -20,6 +21,8 @@ export interface VirtualOptions {
   overscan?: number;
 }
 
+/** What `useVirtual` returns: the ref for the scroll area, the window of rows
+    to render and the heights of the filler rows around it. */
 export interface VirtualRows {
   /** Goes on the scroll area - in @umriss-ui/table on the table's frame; hangs
       the ref and the scroll listener on it. */

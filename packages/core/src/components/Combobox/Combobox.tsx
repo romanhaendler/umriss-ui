@@ -11,6 +11,8 @@ import { useWording } from "../../lib/language";
 import { AngleGlyph, CrossGlyph } from "../../lib/glyphs";
 import { announce, silence } from "../../lib/announce";
 
+/** One possibility of a `Combobox`: the value it stands for and the label it
+    is found by. */
 export interface ComboboxOption<T extends string = string> {
   /** What comes back when this row is chosen. */
   value: T;
@@ -21,6 +23,7 @@ export interface ComboboxOption<T extends string = string> {
   disabled?: boolean;
 }
 
+/** The props of `Combobox`. */
 export interface ComboboxProps<T extends string = string>
   extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
   /** The possibilities, in their natural order. Filtered while typing; never

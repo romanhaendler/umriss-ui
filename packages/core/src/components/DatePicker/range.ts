@@ -18,11 +18,16 @@ import { DEFAULT_WORDING } from "../../lib/language";
 import type { Wording } from "../../lib/language";
 import { startOfMonth, dayOnly, addMonths, addDays } from "./grid";
 
+/** A span between two dates, both ends included - the value of
+    `DateRangePicker` and `DateTimeRangePicker`. */
 export interface DateRange {
   from: Date;
   to: Date;
 }
 
+/** A shortcut in a range picker's panel: its label, and a function that
+    computes the range when it is chosen - so that "Last 7 days" is counted from
+    the moment of the click. */
 export interface RangePreset {
   label: string;
   range: () => DateRange;

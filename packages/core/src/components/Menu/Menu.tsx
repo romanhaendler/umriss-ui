@@ -64,6 +64,7 @@ export function handleMenuKeyDown(
 /* Menu – dropdown menu with a portal panel and keyboard handling.     */
 /* ------------------------------------------------------------------ */
 
+/** The props of `Menu`. */
 export interface MenuProps {
   /** Trigger, e.g. a <Button>; must accept refs. Its own ref keeps its
       element: the menu holds the same one beside it. */
@@ -74,6 +75,9 @@ export interface MenuProps {
   align?: "start" | "end";
 }
 
+/** A dropdown menu: `trigger` opens a panel of `MenuItem`s below it. The arrow
+    keys, Home and End move between the entries; Escape and an outside click
+    close it. */
 export function Menu({ trigger, children, align = "start" }: MenuProps) {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLElement>(null);
@@ -135,6 +139,8 @@ export function Menu({ trigger, children, align = "start" }: MenuProps) {
 /* MenuItem                                                            */
 /* ------------------------------------------------------------------ */
 
+/** The props of `MenuItem`: a button's attributes, with `onSelect` for what
+    the entry does. */
 export interface MenuItemProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onSelect"> {
   /** What the entry does. The menu closes afterwards by itself: a menu that
       stays open after something has happened hides the result. */
@@ -143,6 +149,8 @@ export interface MenuItemProps extends Omit<ButtonHTMLAttributes<HTMLButtonEleme
   tone?: "default" | "danger";
 }
 
+/** An entry of a `Menu` or a `ContextMenu`. It runs `onSelect` and closes the
+    menu. */
 export const MenuItem = forwardRef<HTMLButtonElement, MenuItemProps>(function MenuItem(
   { onSelect, tone = "default", className, children, onClick, ...rest },
   ref,

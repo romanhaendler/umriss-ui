@@ -21,6 +21,7 @@ export type ControlSize = "sm" | "md";
 
 const ControlSizeContext = createContext<ControlSize | null>(null);
 
+/** The props of `ControlSizeProvider`. */
 export interface ControlSizeProviderProps {
   /** The size of every control inside that does not say its own. */
   size: ControlSize;

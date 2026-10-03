@@ -16,6 +16,8 @@ import type { ListboxItem } from "../../lib/listbox";
    native `<select size>` - the number of rows a list box shows - is left out:
    this select is a dropdown, and it used to be called `selectSize` to spare
    that meaning, which made it the one field with another name (ADR-0041). */
+/** The props of `Select`: a native select's attributes, with `size` meaning
+    the control's height. */
 export interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, "size"> {
   /** `sm` for a toolbar and dense forms, `md` otherwise. Default: the size of a
       `ControlSizeProvider` around it, else `md`. */

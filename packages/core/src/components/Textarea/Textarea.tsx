@@ -30,6 +30,8 @@ import { extentStyle } from "../../lib/extent";
 
 /* The native `cols` is left out: the field's width is `chars` - the native
    attribute never reached the screen beside a width of 100 %. */
+/** The props of `Textarea`: a native textarea's attributes, with `chars` in
+    place of `cols`. */
 export interface TextareaProps extends Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "cols"> {
   /** `sm` for a toolbar and dense forms, `md` otherwise. Default: the size of a
       `ControlSizeProvider` around it, else `md`. */
@@ -54,6 +56,10 @@ export interface TextareaProps extends Omit<TextareaHTMLAttributes<HTMLTextAreaE
   resize?: "none" | "vertical";
 }
 
+/** A text field for several lines. `chars` sets the length of a line,
+    `autoGrow` lets it grow with its content up to `maxRows`, `showCount` counts
+    against `maxLength`. Inside a `FormField` it takes the field's id,
+    description and invalid state. */
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function Textarea(
   {
     size: ownSize,

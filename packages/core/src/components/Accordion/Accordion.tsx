@@ -16,6 +16,7 @@ const AccordionContext = createContext<AccordionContextValue | null>(null);
 /* Accordion                                                           */
 /* ------------------------------------------------------------------ */
 
+/** The props of `Accordion`. */
 export interface AccordionProps extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
   /** `single` keeps at most one section open, `multiple` any number.
       Default: `single` */
@@ -39,6 +40,8 @@ export interface AccordionProps extends Omit<HTMLAttributes<HTMLDivElement>, "on
    into a list, with the same animated height, and it leaves the card's own
    collapse as it is: one surface that folds is a card, several sections that
    fold against each other are this. */
+/** Sections behind headers that open and close: one at a time (`single`) or
+    any number (`multiple`). The arrow keys move between the headers. */
 export const Accordion = forwardRef<HTMLDivElement, AccordionProps>(function Accordion(
   { type = "single", value: valueProp, defaultValue = [], onChange, headingLevel = 3, className, onKeyDown, children, ...rest },
   ref,
@@ -89,6 +92,8 @@ export const Accordion = forwardRef<HTMLDivElement, AccordionProps>(function Acc
 /* AccordionItem                                                       */
 /* ------------------------------------------------------------------ */
 
+/** The props of `AccordionItem`: a div's attributes, with `title` taking the
+    header's node instead of the HTML attribute. */
 export interface AccordionItemProps extends Omit<HTMLAttributes<HTMLDivElement>, "title"> {
   /** What names the section in the accordion's `value`. */
   value: string;
@@ -98,6 +103,7 @@ export interface AccordionItemProps extends Omit<HTMLAttributes<HTMLDivElement>,
   disabled?: boolean;
 }
 
+/** One section of an `Accordion`: its header and the content it opens. */
 export const AccordionItem = forwardRef<HTMLDivElement, AccordionItemProps>(function AccordionItem(
   { value, title, disabled = false, className, children, ...rest },
   ref,
