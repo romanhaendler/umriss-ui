@@ -23,18 +23,24 @@ Each lists one `Type.prop` per line. CONTRIBUTING's rules and `docs/testing.md` 
 
 The scan is wider in one respect, and that was a choice. An object literal that a callback maps into the array a prop takes now counts against the array's element type: `options={xs.map((x) => ({ value, label }))}`. Before, the literal's context was only what `map` inferred from the literal itself. The new rule applies only to that inferred context; a callback that its caller types keeps its own type. This was the spec's intent (count real uses, never text), and it is checked by the type checker. It brings in `ComboboxOption.value/label`, `MultiSelectOption.value/label` and `BreadcrumbEntry.onSelect`, so they are not listed. One gap is left on purpose, and it is consistent with ticket 01's loose-spread rule. An untyped `const x = { … }` (with or without `as const`) that is passed on later does not count, because its literal has no contextual type. Example: schedule's `LaneIntent.lane` in Interactions/02. Those rows are on the lists.
 
-The lists hold exactly the 622 rows shown nowhere today: core 380, charts 97, table 114, schedule 29, calculation 2. The spec's "about 67" came from the audit and predates the definition tables of `types-without-holes`. That is where most of the difference comes from:
+The gate holds only the props tables a page lists (`Page.types` in the outlines). It leaves out reference tables (`Wording`, `ChartsWording`, `Formats`) and the definition tables under "Types on this page". The spec owner decided this: the gate is about a component's props. A reference or definition table is read, not set, and no example can sensibly show each of its rows. The comment in `props.ts` and `docs/testing.md` record this rule.
 
-- `Wording`: 284 rows
-- `ChartsWording`: 26 rows
-- the definitions `FlatteningEntry`, `Tree`, `AlarmProjection`, `TooltipPoint`, `PlaceIntent` and others
+The lists hold exactly the 155 rows of those tables that are shown nowhere today:
 
-The lists also hold the spec's expected gaps: 33 `TableSnapshot` members and 13 `invalid` props. Tickets 04 and 05 shrink these. The spec's target of "33 or fewer after the first wave" cannot be met while the 310 wording keys are listed. Whether wording tables should be held to examples at all is a decision for the spec owner.
+| Package | Rows |
+| --- | --- |
+| core | 52 |
+| charts | 44 |
+| table | 46 |
+| schedule | 13 |
+| calculation | 0 (`{}`) |
+
+They include the spec's expected gaps: 33 `TableSnapshot` members and 13 `invalid` props. Tickets 04 and 05 shrink the lists by those. (Before the spec owner's decision, the lists held 622 rows. 310 of them were wording keys, and most of the rest were definition tables added by `types-without-holes`.)
 
 Tests: `tests-unit/shownIn.test.ts`.
 
 - New use: a literal mapped into `PanelProps.marks` covers `PanelMark.at` and not `PanelMark.note`.
 - `exampleFaults` passes an exact list. It names every unlisted row, a stale entry and two unknown entries.
-- `generateProps` on the fixture (`fixtures/shown/demo/unshown.json` holds one correct entry, one stale entry and one unknown entry) exits with 1. In one run it names all five unshown rows, the stale entry and the unknown entry, and no JSDoc gap. For that, the fixture now has a `vite.config.ts` and JSDoc on its exports.
+- `generateProps` on the fixture (`fixtures/shown/demo/unshown.json` holds one correct entry, one stale entry and one unknown entry) exits with 1. In one run it names all four unshown rows of the listed tables, the stale entry and the unknown entry. It names neither `PanelMark.note` (a definition) nor a JSDoc gap. For that, the fixture now has a `vite.config.ts` and JSDoc on its exports.
 
-By hand: adding `invalid` to Input/01 failed `pnpm --filter @umriss-ui/core props` with `InputProps.invalid` and `TreeSearchProps.invalid` stale (one declaration); after the revert it passed. lint, typecheck and test:unit are green. Playwright ui-light `features-page.spec.ts`: 24 passed. One failure was already there and is not caused by this ticket: "a link to a definition previews it…" Tabs from the `variant` type link expecting the `size` type link next. The row-name links and "Shown in" links from ticket 01 now come between the two. Baselines moved: none.
+By hand: adding `invalid` to Input/01 failed `pnpm --filter @umriss-ui/core props` with `InputProps.invalid` and `TreeSearchProps.invalid` stale (one declaration); after the revert it passed. lint, typecheck and test:unit are green. Playwright ui-light `features-page.spec.ts`: 24 passed. The test "a link to a definition previews it…" failed after ticket 01. It Tabbed once from the `variant` type link, and the row-name and "Shown in" links now come between. It now Tabs until it reaches the `size` link (at most ten presses), so it still proves the link is reached by the keyboard. Baselines moved: none.
