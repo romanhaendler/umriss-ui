@@ -156,7 +156,8 @@ export interface EditOptions<W, Z> {
       starts it, Enter or Tab commits, Escape cancels. The table applies
       nothing - the edit is reported through the table's `onCellEdit`. */
   edit?: EditFor<W, Z>;
-  /** What `edit="select"` offers; without it, the values that occur. */
+  /** What `edit="select"` offers.
+      @default the values that occur */
   editOptions?: readonly Present<W>[];
   /** Checks a draft before it is reported: a message keeps the editor open
       and stands beneath the field, as in a `FormField`; nothing lets it
@@ -202,9 +203,11 @@ export interface ColumnBase {
       `stickyRowHeader` pins, and the name by which the row's selection, expander and
       actions are read out. At most one per table. */
   rowHeader?: boolean;
-  /** Right-aligned with tabular figures. Without it the first value present decides. */
+  /** Right-aligned with tabular figures.
+      @default decided by the first value present */
   numeric?: boolean;
-  /** Initial width in pixels; without it the browser decides. */
+  /** Initial width in pixels.
+      @default the browser's */
   width?: number;
   /** Shows the drag grip on the header cell. */
   resizable?: boolean;
@@ -214,13 +217,15 @@ export interface ColumnBase {
       half of the width the table shows: on a narrower one the end block, then
       the start block scrolls with the rest, and sticks again when there is room. */
   pin?: Pin;
-  /** Sortable unless stated otherwise, when the value is text, a number, a point in time or a boolean. */
+  /** Whether the column can be sorted by.
+      @default `true` when the value is text, a number, a point in time or a boolean */
   sortable?: boolean;
-  /** Takes part in the search. Without a statement: yes for text, no otherwise. */
+  /** Takes part in the search.
+      @default `true` for text, `false` otherwise */
   searchable?: boolean;
-  /** Can the table be grouped by this column? Without a statement: yes, when
-      its value is text, a number, a point in time or a boolean, or it has a
-      `groupValue`. */
+  /** Can the table be grouped by this column?
+      @default `true` when its value is text, a number, a point in time or a
+      boolean, or it has a `groupValue` */
   groupable?: boolean;
 }
 
@@ -277,7 +282,8 @@ type Computed<Z, W> = ColumnBase &
     filter?: "list" | "range" | ColumnFilter<Present<W>, any>;
     /** Edits the column's cells in place in grid mode - see a field column's `edit`. */
     edit?: "text" | "number" | "select" | "date" | ((editor: CellEditorProps<W, Z>) => ReactNode);
-    /** What `edit="select"` offers; without it, the values that occur. */
+    /** What `edit="select"` offers.
+      @default the values that occur */
     editOptions?: readonly Present<W>[];
     /** Checks a draft before it is reported; a message keeps the editor open. */
     validate?: (value: W | null, row: Z) => string | null | undefined;
@@ -384,10 +390,12 @@ interface VerdictBase {
   limits: LimitSet;
   /** How the value and its excess are written. */
   format?: NumberFormat;
-  /** What the column sorts by: by the weight of the verdict (the default; with
-      equal weight the existing order stays) – or by the value. */
+  /** What the column sorts by: by the weight of the verdict (with equal
+      weight the existing order stays) – or by the value.
+      @default "verdict" */
   sortBy?: "verdict" | "value";
-  /** Initial width in pixels; without it the browser decides. */
+  /** Initial width in pixels.
+      @default the browser's */
   width?: number;
   /** Shows the drag grip on the header cell. */
   resizable?: boolean;
@@ -462,7 +470,8 @@ export interface TableProps<Z> {
   stickyRowHeader?: boolean;
   /** Discreet zebra stripes. */
   striped?: boolean;
-  /** Without a statement the density of the `UmrissProvider`, without a provider "regular". */
+  /** How tightly the rows stand.
+      @default the density of the `UmrissProvider`, else `"regular"` */
   density?: "regular" | "compact";
   /** Height of the scroll area, e.g. "480px". A virtualised table needs it. */
   maxHeight?: string;
@@ -544,13 +553,15 @@ export interface SetFilter<Z> {
 interface TableOptionsCommon<Z> {
   /** A stable key per row – the basis of selection and expansion. */
   rowKey: (row: Z) => string;
-  /** Default 10. */
+  /** How many rows a page holds.
+      @default 10 */
   pageSize?: number;
-  /** The application's sort; it is the default that `view` leaves out. */
+  /** The application's sort; it is the default that `view` leaves out.
+      @default null */
   defaultSort?: SortLevel | readonly SortLevel[] | null;
   /** The application's grouping: a column or group key, or up to three, the
-      outermost first. It is the default that `view` leaves out; without it
-      the table is ungrouped until the user groups it. */
+      outermost first. It is the default that `view` leaves out.
+      @default ungrouped, until the user groups */
   defaultGrouping?: GroupingId<Z> | readonly GroupingId<Z>[];
   /** Which rows the table has at all – by permission, by tenant, by anything the
       user is not meant to undo. It is invisible: never a condition, never
@@ -699,7 +710,8 @@ export interface TableSnapshot<Z> {
   unfoldAllBranches: () => void;
   /** Tree rows: closes every branch. */
   foldAllBranches: () => void;
-  /** The part of the state an application can keep; whatever is at its default is absent. */
+  /** The part of the state an application can keep; whatever still stands as
+      the options set it up is absent. */
   view: TableView;
   /** The filtered set in the visible columns as text for a spreadsheet - in
       manual mode the page. */

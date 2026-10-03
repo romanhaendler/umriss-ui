@@ -61,9 +61,8 @@ export interface AlarmListProps extends Omit<HTMLAttributes<HTMLDivElement>, "ch
       them the list shows no freshness – a time without a rule for when it is
       too old is no information. */
   freshness?: FreshnessAges;
-  /** "compact" reduces the row height for very dense views. Without a
-      statement the density of the `UmrissProvider`, without a setting
-      "compact". */
+  /** "compact" reduces the row height for very dense views.
+      @default the density of the `UmrissProvider`, else `"compact"` */
   density?: "regular" | "compact";
   /** The view of hidden alarms is on. The list does not filter - the
       projection does, with the table's own `filter` and `isHidden`; this

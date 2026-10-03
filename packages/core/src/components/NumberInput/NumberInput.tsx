@@ -36,7 +36,7 @@ export interface NumberInputProps
   /** Upper bound. Every reported value is clamped; the text in the field
       follows on leaving. */
   max?: number;
-  /** Step size for the arrow keys; Shift multiplies it by ten. Default: 1. */
+  /** Step size for the arrow keys; Shift multiplies it by ten. */
   step?: number;
   /** Fixed decimal places; 0 = whole numbers, undefined = free. */
   decimals?: number;
@@ -44,8 +44,8 @@ export interface NumberInputProps
   prefix?: ReactNode;
   /** Adornment after the number, e.g. "€" or "%". */
   suffix?: ReactNode;
-  /** `sm` for a toolbar and dense forms, `md` otherwise. Default: the size of a
-      `ControlSizeProvider` around it, else `md`. */
+  /** `sm` for a toolbar and dense forms, `md` otherwise.
+      @default the size of a `ControlSizeProvider` around it, else `"md"` */
   size?: "sm" | "md";
   /** The width in characters - room for the number; the field adds its own
       padding and steppers, and the room for a `prefix` and `suffix` given as

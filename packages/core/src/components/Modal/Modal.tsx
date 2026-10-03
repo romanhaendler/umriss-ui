@@ -36,7 +36,7 @@ export interface ModalProps extends Omit<DialogHTMLAttributes<HTMLDialogElement>
   /** The width of the window. The height comes from the content; only the
       body scrolls, header and footer stand fast. */
   size?: ModalSize;
-  /** Closes on a click on the backdrop. Default: true. */
+  /** Closes on a click on the backdrop. */
   closeOnBackdrop?: boolean;
 }
 
@@ -68,7 +68,7 @@ export const Modal = forwardRef<HTMLDialogElement, ModalProps>(function Modal(
 
 /** The props of `Drawer`: a `Modal`'s, with `side` in place of `size`. */
 export interface DrawerProps extends Omit<ModalProps, "size"> {
-  /** The edge the drawer stands at and enters from. Default: `right` */
+  /** The edge the drawer stands at and enters from. */
   side?: "right" | "left";
 }
 

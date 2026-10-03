@@ -83,11 +83,12 @@ export interface Dependency {
       begin as soon as the predecessor ends. */
   readonly lag: number;
   /** Where it leaves: at the end of the main time, or after the lead-out.
-      Default `"leadOut"` - the predecessor counts as ended once its lead-out is. */
+      The predecessor counts as ended once its lead-out is.
+      @default "leadOut" */
   readonly leaves?: "main" | "leadOut";
   /** Where it arrives: at the start of the main time, or before the lead-in.
-      Default `"leadIn"` - the lag must have run out before the successor's
-      lead-in begins. */
+      The lag must have run out before the successor's lead-in begins.
+      @default "leadIn" */
   readonly arrives?: "main" | "leadIn";
   /** How this one is drawn, where it is not drawn like the rest. It changes
       the picture and never the finding: whether a dependency is violated follows

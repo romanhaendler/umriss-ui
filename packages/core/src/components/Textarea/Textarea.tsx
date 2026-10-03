@@ -33,8 +33,8 @@ import { extentStyle } from "../../lib/extent";
 /** The props of `Textarea`: a native textarea's attributes, with `chars` in
     place of `cols`. */
 export interface TextareaProps extends Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "cols"> {
-  /** `sm` for a toolbar and dense forms, `md` otherwise. Default: the size of a
-      `ControlSizeProvider` around it, else `md`. */
+  /** `sm` for a toolbar and dense forms, `md` otherwise.
+      @default the size of a `ControlSizeProvider` around it, else `"md"` */
   size?: "sm" | "md";
   /** The width in characters - the length of a line; the field adds its own
       padding. Given, the field is that wide wherever it stands, and never
@@ -51,8 +51,8 @@ export interface TextareaProps extends Omit<TextareaHTMLAttributes<HTMLTextAreaE
   /** Shows at the bottom right how many characters still fit.
       Needs `maxLength`. */
   showCount?: boolean;
-  /** Whether the browser's handle for dragging is offered. Default: only
-      vertically, and not at all while the field grows by itself. */
+  /** Whether the browser's handle for dragging is offered.
+      @default `"vertical"`, `"none"` while the field grows by itself */
   resize?: "none" | "vertical";
 }
 

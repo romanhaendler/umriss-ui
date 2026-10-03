@@ -12,7 +12,8 @@ export interface LaneProps {
   /** The identity subtasks name in their `lane`. */
   id: string;
   /** What the lane header says - the person, vehicle or room. Real text, read by a
-      screen reader; without one the header shows the id. */
+      screen reader.
+      @default id */
   label?: ReactNode;
 }
 
@@ -32,7 +33,8 @@ export interface LaneGroupProps {
       it (ADR-0025). */
   id: string;
   /** What the group's header says - the team, the depot, the region.
-      Real text, read by a screen reader; without one the header shows the id. */
+      Real text, read by a screen reader.
+      @default id */
   label?: ReactNode;
   /** `Lane`s and further `LaneGroup`s, to any depth. */
   children?: ReactNode;

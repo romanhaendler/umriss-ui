@@ -19,11 +19,12 @@ export interface ConfirmDialogProps
   /** What about it cannot be taken back. The most important line of the
       dialog. */
   description?: ReactNode;
-  /** Label of the agreeing button; the wording's confirm text by default.
-      Better is the verb of the action: "Delete" says what is about to
-      happen. */
+  /** Label of the agreeing button. Better is the verb of the action:
+      "Delete" says what is about to happen.
+      @default the wording's "Confirm" */
   confirmLabel?: string;
-  /** Label of the cancelling button; the wording's cancel text by default. */
+  /** Label of the cancelling button.
+      @default the wording's "Cancel" */
   cancelLabel?: string;
   /** "danger" for destructive actions. */
   tone?: "primary" | "danger";

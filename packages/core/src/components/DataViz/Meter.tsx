@@ -23,8 +23,10 @@ export interface MeterProps extends HTMLAttributes<HTMLSpanElement> {
    *
    * A role of `meter` needs a name from the author - the visible percentage
    * inside it does not count for that, and neither does the column heading
-   * beside it. Without a value the general term stands here; whoever knows
-   * what the bar measures says it better.
+   * beside it. Whoever knows what the bar measures says it better than the
+   * general term.
+   *
+   * @default the wording's "Fill level"
    */
   label?: string;
 }

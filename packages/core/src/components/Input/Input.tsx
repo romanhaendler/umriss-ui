@@ -11,8 +11,8 @@ import { CrossGlyph } from "../../lib/glyphs";
 /** The props of `Input`: a native input's attributes, with `size` meaning the
     control's height. */
 export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "size"> {
-  /** `sm` for a toolbar and dense forms, `md` otherwise. Default: the size of a
-      `ControlSizeProvider` around it, else `md`. */
+  /** `sm` for a toolbar and dense forms, `md` otherwise.
+      @default the size of a `ControlSizeProvider` around it, else `"md"` */
   size?: "sm" | "md";
   /** The width in characters - room for the value; the field adds its own
       padding and cross. Given, the field is that wide wherever it stands, and

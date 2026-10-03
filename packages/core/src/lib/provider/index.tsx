@@ -45,13 +45,16 @@ export type ToastPosition = "top-start" | "top-center" | "top-end" | "bottom-sta
 
 /** The defaults for every toast, set on `UmrissProvider`'s `toast`. */
 export interface ToastConfig {
-  /** Display duration in ms, where the individual toast names none. */
+  /** Display duration in ms, where the individual toast names none.
+      @default 5000 */
   duration?: number;
-  /** Where the toasts stand. Default: `bottom-end`. There is no position per
-      toast - toasts that stand in different places are not read as one. */
+  /** Where the toasts stand. There is no position per toast - toasts that
+      stand in different places are not read as one.
+      @default "bottom-end" */
   position?: ToastPosition;
   /** How many toasts stand at once; the oldest gives way to a new one, as if
-      it had been closed. Default: 3. */
+      it had been closed.
+      @default 3 */
   limit?: number;
 }
 
@@ -105,8 +108,9 @@ export interface UmrissProviderProps {
   /**
    * The default for the `density` of every component that reads it with
    * `useDensityFor` - in `@umriss-ui/table` `Table` and `AlarmList`
-   * ("comfortable" means "regular"). Without a value the provider touches no
-   * component: one that is compact of its own accord stays compact.
+   * ("comfortable" means "regular").
+   *
+   * @default none - a component keeps its own density
    */
   density?: Density;
   /**

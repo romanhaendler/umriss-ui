@@ -23,7 +23,8 @@ export interface ButtonGroupProps extends HTMLAttributes<HTMLDivElement> {
   /** Label of the group for the screen reader. */
   "aria-label"?: string;
   /** The size of the buttons in it that do not say their own - one group,
-      one height. Default: the size around it, else `md`. */
+      one height.
+      @default the size around it, else `"md"` */
   size?: ButtonSize;
 }
 
@@ -55,10 +56,11 @@ export interface SplitButtonProps extends Omit<ButtonProps, "children" | "size" 
   menu: ReactNode;
   /** How loud the main action is; the trigger beside it follows suit. */
   variant?: ButtonVariant;
-  /** `sm` for buttons in header bars and table rows, `md` otherwise. Default:
-      the size around it, else `md`. */
+  /** `sm` for buttons in header bars and table rows, `md` otherwise.
+      @default the size around it, else `"md"` */
   size?: ButtonSize;
-  /** Label of the trigger; default "More actions". */
+  /** Label of the trigger.
+      @default the wording's "More actions" */
   menuLabel?: string;
   /** Alignment of the menu relative to the trigger. */
   align?: "start" | "end";

@@ -86,7 +86,7 @@ export interface DateTimeRangePickerProps
       clicks. If the end lies before the start, both swap on applying - there is
       no error state. */
   onChange: (range: DateRange | null) => void;
-  /** Show the seconds fields (Default: false). */
+  /** Show the seconds fields. */
   withSeconds?: boolean;
   /** What stands in the empty field. */
   placeholder?: string;
@@ -95,8 +95,8 @@ export interface DateTimeRangePickerProps
   /** Marks the field as invalid. `FormField` sets it itself as soon as it
       carries an `error` - by hand only necessary without `FormField`. */
   invalid?: boolean;
-  /** `sm` for a toolbar and dense forms, `md` otherwise. Default: the size of a
-      `ControlSizeProvider` around it, else `md`. */
+  /** `sm` for a toolbar and dense forms, `md` otherwise.
+      @default the size of a `ControlSizeProvider` around it, else `"md"` */
   size?: "sm" | "md";
   /** The width in characters - room for the value; the field adds its own
       padding, glyph and cross. Given, the field is that wide wherever it
@@ -109,8 +109,9 @@ export interface DateTimeRangePickerProps
   clearable?: boolean;
   /**
    * The quick-select column in the panel; presets apply for the whole day and
-   * close immediately. Without a value the default presets; an empty array
-   * hides the column.
+   * close immediately. An empty array hides the column.
+   *
+   * @default `DEFAULT_PRESETS`, in the wording's labels
    */
   presets?: RangePreset[];
 }

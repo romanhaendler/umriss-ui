@@ -17,6 +17,9 @@ under a heading "Changed" of its own, no matter which digit rose.
 
 - **Every export carries a comment**: what a component or a type is for. The
   editor shows it on hover, from the package's `.d.ts`. Nothing else changes.
+- **A prop's default stands in a `@default` tag** where its comment used to say
+  it in words: the editor shows it on hover, and the props table in its Default
+  column. Nothing else changes.
 
 ### Fixed
 

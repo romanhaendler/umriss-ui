@@ -5,9 +5,11 @@ import styles from "./Skeleton.module.css";
 
 /** The props of `Skeleton`. */
 export interface SkeletonProps extends HTMLAttributes<HTMLSpanElement> {
-  /** Width, e.g. "120px" or "60%". Default: 100 %. */
+  /** Width, e.g. "120px" or "60%".
+      @default "100%" */
   width?: string | number;
-  /** Height, default: 12px. */
+  /** Height, e.g. "12px" or 16.
+      @default "12px" */
   height?: string | number;
   /** Circular shape, e.g. for an avatar placeholder. */
   circle?: boolean;

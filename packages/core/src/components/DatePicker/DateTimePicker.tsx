@@ -41,14 +41,14 @@ export interface DateTimePickerProps
       the click on a day: a day without a time would be a half-set value here,
       and a half value is no value. */
   onChange: (date: Date | null) => void;
-  /** Show the seconds field (Default: false). */
+  /** Show the seconds field. */
   withSeconds?: boolean;
   /** What stands in the empty field. */
   placeholder?: string;
   /** Locks the field and the panel. */
   disabled?: boolean;
-  /** `sm` for a toolbar and dense forms, `md` otherwise. Default: the size of a
-      `ControlSizeProvider` around it, else `md`. */
+  /** `sm` for a toolbar and dense forms, `md` otherwise.
+      @default the size of a `ControlSizeProvider` around it, else `"md"` */
   size?: "sm" | "md";
   /** The width in characters - room for the value; the field adds its own
       padding, glyph and cross. Given, the field is that wide wherever it

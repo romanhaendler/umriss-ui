@@ -115,7 +115,8 @@ export interface DockProps extends Omit<HTMLAttributes<HTMLDivElement>, "onSelec
   onModeChange?: (id: string) => void;
   /** A tool was taken. */
   onUse?: (id: string) => void;
-  /** The accessible name of the dock. Without a value the wording entry. */
+  /** The accessible name of the dock.
+      @default the wording's "Tools" */
   label?: string;
 }
 

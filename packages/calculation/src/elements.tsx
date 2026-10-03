@@ -23,9 +23,9 @@ export interface QuantityProps {
       The quantity stays a ratio in every operation. */
   format?: "percent";
   /** Fixed number of fraction digits as shown. Rounding happens only in
-      presentation; every operation uses the full value. Without it: one digit
-      for a percentage, at most two for a derived number, and a given as it
-      was given. */
+      presentation; every operation uses the full value.
+      @default one digit for a percentage, at most two for a derived number, a
+      given as it was given */
   decimals?: number;
   /** The value this quantity is meant to reach - missed, never violated. */
   target?: number;
@@ -52,7 +52,8 @@ export interface Metric {
       metric's name in the head. Never converted and never checked. */
   unit?: string;
   /** Fixed number of fraction digits as shown, for every quantity of this
-      metric. Without it: a given as given, at most two for a derived number. */
+      metric.
+      @default a given as it was given, at most two for a derived number */
   decimals?: number;
 }
 

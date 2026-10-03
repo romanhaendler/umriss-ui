@@ -15,8 +15,8 @@ const gapVar = (step: SpaceStep) => `var(--u-space-${step})`;
 
 /** The props of `Stack`. */
 export interface StackProps extends HTMLAttributes<HTMLDivElement> {
-  /** Below one another or beside one another. Default is below one another:
-      that is the direction content stands in anyway, without being asked. */
+  /** Below one another or beside one another. Below is the direction content
+      stands in anyway, without being asked. */
   direction?: "row" | "column";
   /** Spacing as a step of the 4 px spacing steps (1–8). */
   gap?: SpaceStep;

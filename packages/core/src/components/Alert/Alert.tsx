@@ -35,7 +35,8 @@ export interface AlertProps extends Omit<HTMLAttributes<HTMLDivElement>, "title"
   actions?: ReactNode;
   /** Shows a dismiss cross and calls this. */
   onDismiss?: () => void;
-  /** Label of the dismiss cross; default the wording's "Close message". */
+  /** Label of the dismiss cross.
+      @default the wording's "Close message" */
   dismissLabel?: string;
 }
 

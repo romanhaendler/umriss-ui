@@ -23,6 +23,9 @@ moves from here under the rule above.
   for, and for a function `@param` and `@returns` where its type alone does not
   say it. The editor shows it on hover, from the package's `.d.ts`. Nothing
   else changes.
+- **A prop's default stands in a `@default` tag** where its comment used to say
+  it in words: the editor shows it on hover, and the props table in its Default
+  column. Nothing else changes.
 
 ### Fixed
 

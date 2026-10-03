@@ -20,8 +20,8 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
       actions side by side are no longer a main action. `ghost` is quiet in the
       accent, `plain` quiet and neutral. */
   variant?: ButtonVariant;
-  /** `sm` for buttons in header bars and table rows, `md` otherwise. Default:
-      the size of a `ControlSizeProvider` around it, else `md`. */
+  /** `sm` for buttons in header bars and table rows, `md` otherwise.
+      @default the size of a `ControlSizeProvider` around it, else `"md"` */
   size?: ButtonSize;
   /** Shows a loading indicator and locks the button. */
   loading?: boolean;
@@ -60,7 +60,7 @@ export interface IconButtonProps
       button sets its size - `--u-icon-size`, `--u-icon-size-sm` at `sm`. */
   children: ReactNode;
   /** How loud the button is; `plain` is quiet and neutral, and the rest mean
-      what they mean on a `Button`. Default: `plain` */
+      what they mean on a `Button`. */
   variant?: ButtonVariant;
 }
 
