@@ -113,7 +113,7 @@ export const OUTLINE: readonly Rubric[] = [
       {
         id: "width-and-pinning",
         name: "Width and pinning",
-        sentence: "How wide a column stands, which columns stay in view while the table scrolls sideways, and a header that stays while it scrolls down.",
+        sentence: "How wide a column stands, which columns stay in view while the table scrolls sideways (frozen or sticky columns), and a header that stays while it scrolls down.",
         keys: [
           { key: "Alt + → / Alt + ←", action: "On a resizable header: wider or narrower. Alt + Shift + → and Alt + Shift + ← take larger steps." },
           { key: "Alt + Home", action: "On a resizable header: fits the width to the content." },

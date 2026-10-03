@@ -90,7 +90,7 @@ test("The command palette's window", async ({ page }, testInfo) => {
   await page.goto("/");
   await page.evaluate(() => document.fonts.ready);
   await page.keyboard.press("ControlOrMeta+k");
-  const field = page.getByRole("combobox", { name: "Search a page or example" });
+  const field = page.getByRole("combobox", { name: "Search umriss-ui" });
   await field.fill("dtp");
   await expect(page.getByRole("dialog").getByRole("option").first()).toBeVisible();
   await expect(page).toHaveScreenshot(`palette-window-${testInfo.project.name}.png`);

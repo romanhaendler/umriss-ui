@@ -1,0 +1,71 @@
+/* What the palette searches, in one shape for every kind of find
+   (.scratch/one-search).
+
+   The generator writes a package's entries as its search fragment
+   (`demo/.generated/search.json`, `tooling/llms.ts`), from the same outline
+   and example files as the pages, so that the search cannot find what the
+   site does not show. The shell searches them; until the fragment has
+   arrived it takes the same entries from the outline it already holds.
+
+   An entry's address is the site's, with the package's directory in it:
+   `/table/width-and-pinning/`, `/core/select/#clear-the-choice`. One form for
+   every package, so that fragments of five demos can stand in one index.
+
+   Like the outline, this file imports nothing but the outline: the generator
+   loads it in Node without a bundler. */
+
+import { SCENARIOS, addressOfPlace, type Rubric } from "./outline.ts";
+
+/** What a find is, from the broadest answer to the narrowest - the order the
+    palette ranks them in when they match alike. */
+export type SearchKind = "page" | "scenario" | "example" | "export" | "prop" | "token" | "wording";
+
+export interface SearchEntry {
+  /** Below the site's root, with an optional anchor: `/core/select/#basic`. */
+  address: string;
+  /** Searched first, and shown. */
+  label: string;
+  /** `<package> · <rubric or page>`: the heading it stands under, searched
+      second. */
+  group: string;
+  kind: SearchKind;
+  /** Searched last, never shown: a page's lede, an example's lead. */
+  keywords?: readonly string[];
+}
+
+/** A text of the outline without its marks: `code` and [links](#/page) as
+    the words they show. */
+export function plain(text: string): string {
+  return text.replace(/\[([^\]]+)\]\([^)\s]+\)/g, "$1").replace(/`+ ?([^`]+?) ?`+/g, "$1");
+}
+
+/** A package's entries: its front page, its scenarios, its pages and its
+    examples. `packageId` is the package's directory on the site (`core`). */
+export function searchEntries(
+  packageId: string,
+  outline: readonly Rubric[],
+  scenarios: readonly { id: string; title: string }[],
+  examples: readonly { pageId: string; id: string; title: string; lead?: string }[],
+): SearchEntry[] {
+  const at = (place: string) => `/${packageId}${addressOfPlace(place)}`;
+  const scenariosGroup = `${packageId} · Scenarios`;
+  const pages = outline.flatMap((rubric) => rubric.pages.map((page) => ({ page, rubric })));
+  return [
+    { address: at(""), label: "Scenarios", group: scenariosGroup, kind: "page" },
+    ...scenarios.map((scenario): SearchEntry => ({ address: at(`/${SCENARIOS}/${scenario.id}`), label: scenario.title, group: scenariosGroup, kind: "scenario" })),
+    ...pages.map(({ page, rubric }): SearchEntry => ({
+      address: at(`/${page.id}`),
+      label: page.name,
+      group: `${packageId} · ${rubric.name}`,
+      kind: "page",
+      keywords: [plain(page.sentence)],
+    })),
+    ...examples.map((example): SearchEntry => ({
+      address: at(`/${example.pageId}/${example.id}`),
+      label: example.title,
+      group: `${packageId} · ${pages.find(({ page }) => page.id === example.pageId)?.page.name ?? example.pageId}`,
+      kind: "example",
+      ...(example.lead === undefined ? {} : { keywords: [plain(example.lead)] }),
+    })),
+  ];
+}

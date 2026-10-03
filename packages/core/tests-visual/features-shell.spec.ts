@@ -37,4 +37,8 @@ checkShell({
   pointer: { wide: "ta", narrow: "tab" },
   contents: { pageId: "select", id: "states", title: "States" },
   foldedRow: { pageId: "popover", id: "PopoverProps-role" },
+  synonyms: [
+    { query: "snackbar", name: "Toast", pageId: "toast" },
+    { query: "chip", name: "Tag", pageId: "tag" },
+  ],
 });

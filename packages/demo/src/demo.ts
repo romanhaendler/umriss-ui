@@ -18,6 +18,7 @@ import type { Example, ExampleModule, Scenario, ScenarioModule } from "./tooling
 import type { TypeEntry } from "./tooling/propsReader";
 import type { ReferenceTable } from "./tooling/referenceTable";
 import { readConfigurators, type Configurator, type ConfiguratorModule } from "./tooling/configurator";
+import type { SearchEntry } from "./search";
 
 export interface Demo {
   /** The package name a reader takes the package under: `"@umriss-ui/core"`. */
@@ -40,6 +41,9 @@ export interface Demo {
   references: Readonly<Record<string, readonly ReferenceTable[]>>;
   /** The pages that open with a configurator instead of their first example. */
   configurators: readonly Configurator[];
+  /** The package's search fragment (`demo/.generated/search.json`), loaded
+      when the palette first opens. */
+  search: () => Promise<readonly SearchEntry[]>;
 }
 
 export interface DemoSources {
@@ -61,6 +65,9 @@ export interface DemoSources {
   /** `import.meta.glob("./configurators/*.tsx", { eager: true })` - core's
       demo alone has them (.scratch/configurator). */
   configurators?: Record<string, ConfiguratorModule>;
+  /** `() => import("./.generated/search.json")`: a part of the bundle of its
+      own, which only the palette's first opening fetches. */
+  search: () => Promise<{ default: unknown }>;
 }
 
 export function buildDemo(sources: DemoSources): Demo {
@@ -91,5 +98,6 @@ export function buildDemo(sources: DemoSources): Demo {
     tables,
     references: (sources.references ?? {}) as Record<string, readonly ReferenceTable[]>,
     configurators: readConfigurators(sources.configurators ?? {}, tables, sources.addresses.ALL_PAGES),
+    search: () => sources.search().then((module) => module.default as SearchEntry[]),
   };
 }

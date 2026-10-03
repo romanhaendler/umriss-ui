@@ -34,6 +34,7 @@ import { apiHtml, apiMarkdown, apiSection, fencedCode as fenced, markdownCell as
 import { referenceHtml, referenceMarkdown, type ReferenceTable } from "./referenceTable.ts";
 import { adrLinks, compilerOptionsOf } from "./props.ts";
 import { linkAdrs, linkReferences, outlineTexts } from "./references.ts";
+import { plain, searchEntries, type SearchEntry } from "../search.ts";
 
 export interface LlmsJob {
   /** The package's directory: `package.json` and `demo/` are read there. */
@@ -308,10 +309,6 @@ export interface Twin {
   text: string;
 }
 
-function plain(text: string): string {
-  return text.replace(/\[([^\]]+)\]\([^)\s]+\)/g, "$1").replace(/`+ ?([^`]+?) ?`+/g, "$1");
-}
-
 const escapeHtml = (text: string) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 /** The Markdown this file writes, as HTML. Headings are lifted by `lift`
@@ -365,6 +362,8 @@ export function renderLlms({ packageDir, outline: written, tables, moved = {}, r
   pages: SitePage[];
   forwarders: Forwarder[];
   twins: Twin[];
+  /** The package's search fragment (.scratch/one-search). */
+  search: SearchEntry[];
 } {
   const manifest = JSON.parse(readFileSync(join(packageDir, "package.json"), "utf8")) as Manifest;
   const demoDir = join(packageDir, "demo");
@@ -626,12 +625,17 @@ export function renderLlms({ packageDir, outline: written, tables, moved = {}, r
     return { url: urlOf(home, `/${old}`), to: to.url, title: to.title };
   });
 
-  return { index, full: `${parts.join("\n")}\n`, pages: sitePages, forwarders, twins };
+  /* The package's directory on the site is the second half of its name, as
+     in `hrefOfNeighbour`. */
+  const search = searchEntries(manifest.name.split("/")[1]!, outline, scenarios, examples);
+
+  return { index, full: `${parts.join("\n")}\n`, pages: sitePages, forwarders, twins, search };
 }
 
 /** Writes `demo/.generated/llms.txt`, `demo/.generated/pages.json` and
     `forwarders.json` (the site's pages and the forwarders at old addresses,
-    which `scripts/build-pages.mjs` writes out), every page's Markdown twin
+    which `scripts/build-pages.mjs` writes out), `search.json` (the
+    package's search fragment, which the palette loads), every page's Markdown twin
     under `demo/.generated/twins/` (the demo's public files, so that the dev
     server serves them and the build carries them beside the pages),
     `docs/llms-full.md`, and `demo/.generated/references.json` where there are
@@ -642,7 +646,7 @@ export function generateLlms(given: LlmsJob): SitePage[] {
   /* The reference tables' ADR numbers as links, for the text, the pages and
      the `references.json` the app mounts alike. */
   const job = given.references === undefined ? given : { ...given, references: linkReferences(given.references, adrLinks()) };
-  const { index, full, pages, forwarders, twins } = renderLlms(job);
+  const { index, full, pages, forwarders, twins, search } = renderLlms(job);
   const indexPath = join(job.packageDir, "demo", ".generated", "llms.txt");
   const fullPath = join(job.packageDir, "docs", "llms-full.md");
   mkdirSync(dirname(indexPath), { recursive: true });
@@ -650,6 +654,7 @@ export function generateLlms(given: LlmsJob): SitePage[] {
   writeFileSync(indexPath, index, "utf8");
   writeFileSync(join(dirname(indexPath), "pages.json"), JSON.stringify(pages), "utf8");
   writeFileSync(join(dirname(indexPath), "forwarders.json"), JSON.stringify(forwarders), "utf8");
+  writeFileSync(join(dirname(indexPath), "search.json"), JSON.stringify(search), "utf8");
   writeFileSync(fullPath, full, "utf8");
   /* Anew every time: a page that is gone must not leave its twin behind. */
   const twinsDir = join(dirname(indexPath), "twins");
