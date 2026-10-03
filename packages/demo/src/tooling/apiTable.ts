@@ -150,7 +150,7 @@ export function tableModel(entry: TypeEntry, eventsApart: boolean): ApiTableMode
 /* HTML                                                                */
 /* ------------------------------------------------------------------ */
 
-const escape = (value: string) =>
+export const escape = (value: string) =>
   value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 /** A link in a text is an ordinary address. `#/page` - the place as the texts
@@ -162,7 +162,8 @@ function hrefOf(href: string): string {
   return href.startsWith("#/") ? `..${addressOfPlace(href)}` : href;
 }
 
-function spansHtml(spans: readonly Span[]): string {
+/** Pieces as HTML - the writers' one way of writing a text. */
+export function spansHtml(spans: readonly Span[]): string {
   return spans
     .map((span) => {
       const inner = escape(span.text);
@@ -213,10 +214,12 @@ export function apiHtml(models: readonly ApiTableModel[]): string {
 /* Markdown                                                            */
 /* ------------------------------------------------------------------ */
 
-/** Inline code that survives a backtick in the text (a template literal type). */
+/** Inline code that survives backticks in the text (a template literal type,
+    a template literal's body): a fence longer than the longest run inside. */
 export function markdownCode(value: string): string {
   if (!value.includes("`")) return `\`${value}\``;
-  return `\`\` ${value} \`\``;
+  const fence = "`".repeat(Math.max(...(value.match(/`+/g) ?? []).map((run) => run.length)) + 1);
+  return `${fence} ${value} ${fence}`;
 }
 
 /** One table cell: one line, and a pipe that does not end the cell. */
@@ -225,7 +228,7 @@ export function markdownCell(value: string): string {
 }
 
 /** The pieces written back as the Markdown they were read from. */
-function spansMarkdown(spans: readonly Span[]): string {
+export function spansMarkdown(spans: readonly Span[]): string {
   return spans
     .map((span) => {
       if (span.kind === "code") return markdownCode(span.text);

@@ -500,6 +500,21 @@
     content: "Default ";
     color: var(--u-color-text-muted);
   }
+  /* A reference table names its own columns (`tooling/referenceTable.ts`);
+     the description, last, needs no name. */
+  .referenceTable td:nth-child(n)::before {
+    content: attr(data-label) " ";
+    color: var(--u-color-text-muted);
+  }
+  .referenceTable td:last-child::before {
+    content: none;
+  }
+}
+
+/* A reference table's row is an address (`#wording-noMatches`); the sticky
+   header must not cover it. */
+.referenceTable tr {
+  scroll-margin-top: 76px;
 }
 
 /* `required` as a word and not a red star: the label the llms text carries

@@ -14,6 +14,7 @@ import { installCommand, type InstallManifest } from "./tooling/install";
 import { readExamples, readScenarios } from "./tooling/examples";
 import type { Example, ExampleModule, Scenario, ScenarioModule } from "./tooling/examples";
 import type { TypeEntry } from "./tooling/propsReader";
+import type { ReferenceTable } from "./tooling/referenceTable";
 
 export interface Demo {
   /** The package name a reader takes the package under: `"@umriss-ui/core"`. */
@@ -27,6 +28,9 @@ export interface Demo {
   tables: Readonly<Record<string, TypeEntry>>;
   /** Whether the API tables list the `on…` props in a table of their own. */
   eventsApart: boolean;
+  /** The reference tables a page carries after its examples, by page id
+      (`demo/.generated/references.json`). */
+  references: Readonly<Record<string, readonly ReferenceTable[]>>;
 }
 
 export interface DemoSources {
@@ -44,6 +48,8 @@ export interface DemoSources {
   /** The events in a table of their own - for the table and the schedule,
       whose callbacks are a subject apart. */
   eventsApart?: boolean;
+  /** The generated `references.json`, where the demo has one. */
+  references?: unknown;
 }
 
 export function buildDemo(sources: DemoSources): Demo {
@@ -61,5 +67,6 @@ export function buildDemo(sources: DemoSources): Demo {
        generating type does not say better. */
     tables: sources.props as Record<string, TypeEntry>,
     eventsApart: sources.eventsApart ?? false,
+    references: (sources.references ?? {}) as Record<string, readonly ReferenceTable[]>,
   };
 }

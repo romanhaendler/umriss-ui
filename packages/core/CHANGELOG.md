@@ -49,6 +49,10 @@ commit.
 - **A prop's default stands in a `@default` tag** where its comment used to say
   it in words: the editor shows it on hover, and the props table in its Default
   column. Nothing else changes.
+- **Every wording entry is listed**, in `docs/llms-full.md` and on the Language
+  page: each key of `Wording`, of the charts' `ChartsWording` and of `Formats`,
+  its English beside its German and the comment its type carries. A row has an
+  address of its own, `#wording-noMatches`, `#format-date`.
 
 ## 0.24.0 – The select's own list (Oct. 2026)
 

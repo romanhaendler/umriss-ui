@@ -29,6 +29,7 @@ import { displaySource } from "./source.ts";
 import type { TypeEntry } from "./propsReader.ts";
 import { installCommand, type InstallManifest } from "./install.ts";
 import { apiHtml, markdownCell as cell, markdownCode as code, tableMarkdown, tableModel } from "./apiTable.ts";
+import { referenceHtml, referenceMarkdown, type ReferenceTable } from "./referenceTable.ts";
 
 export interface LlmsJob {
   /** The package's directory: `package.json` and `demo/` are read there. */
@@ -42,6 +43,9 @@ export interface LlmsJob {
   /** The page ids that changed (`MOVED` in the outline): each gets a
       forwarder on the site. */
   moved?: Moved;
+  /** The reference tables a page carries after its examples, by page id -
+      core's Language page has its wording (`demo/tooling/languageTables.ts`). */
+  references?: Readonly<Record<string, readonly ReferenceTable[]>>;
 }
 
 interface Manifest extends InstallManifest {
@@ -375,7 +379,7 @@ function markdownTwin(markdown: string, homepage: string, lift: number, header: 
 }
 
 /** Both texts of one package, from its directory. Pure apart from reading. */
-export function renderLlms({ packageDir, outline, tables, eventsApart = false, moved = {} }: LlmsJob): {
+export function renderLlms({ packageDir, outline, tables, eventsApart = false, moved = {}, references = {} }: LlmsJob): {
   index: string;
   full: string;
   pages: SitePage[];
@@ -439,9 +443,10 @@ export function renderLlms({ packageDir, outline, tables, eventsApart = false, m
   ];
   /* Where each page's part of the full text begins and ends - the site's
      pages are cut from it, so they cannot say anything else. The API section
-     is the one part a site page does not take as Markdown: it carries the
-     HTML the app mounts, written from the same model. */
-  const cuts: { page?: Page; from: number; to: number; api?: { from: number; to: number; html: string } }[] = [];
+     and the reference tables are the parts a site page does not take as
+     Markdown: it carries the HTML the app mounts, written from the same
+     model. */
+  const cuts: { page?: Page; from: number; to: number; spliced?: readonly { from: number; to: number; html: string }[] }[] = [];
   if (scenarios.length > 0) {
     const from = parts.length;
     parts.push("", "## Scenarios", "", "Composed, realistic screens built from the package. A numbered mark on the screen is an element with `data-callout`.");
@@ -475,6 +480,14 @@ export function renderLlms({ packageDir, outline, tables, eventsApart = false, m
         parts.push("", fenced("tsx", example.source));
       }
 
+      const spliced: { from: number; to: number; html: string }[] = [];
+      for (const table of references[page.id] ?? []) {
+        parts.push("", `#### ${table.title}`);
+        const at = parts.length;
+        parts.push("", referenceMarkdown(table));
+        spliced.push({ from: at, to: parts.length, html: referenceHtml(table) });
+      }
+
       if (page.alternatives !== undefined) {
         parts.push("", "#### When to use something else", "", page.alternatives.map(({ when, use }) => `- ${when} → ${pages.find((one) => one.id === use)?.name ?? use}`).join("\n"));
       }
@@ -482,7 +495,6 @@ export function renderLlms({ packageDir, outline, tables, eventsApart = false, m
         parts.push("", "#### Keyboard", "", "| Key | Action |", "|---|---|", ...page.keys.map(({ key, action }) => `| ${cell(code(key))} | ${cell(action)} |`));
       }
 
-      let api: { from: number; to: number; html: string } | undefined;
       if (page.types.length > 0) {
         parts.push("", "#### API");
         const models = page.types.map((type) => {
@@ -492,13 +504,13 @@ export function renderLlms({ packageDir, outline, tables, eventsApart = false, m
         });
         const at = parts.length;
         for (const model of models) parts.push("", tableMarkdown(model));
-        api = { from: at, to: parts.length, html: apiHtml(models) };
+        spliced.push({ from: at, to: parts.length, html: apiHtml(models) });
       }
 
       if (page.limits !== undefined) {
         parts.push("", "#### Known limits", "", page.limits.map((text) => `- ${text}`).join("\n"), "", `What umriss deliberately does not build, and why: [ADR-0032](${ADR_0032}).`);
       }
-      cuts.push({ page, from, to: parts.length, ...(api === undefined ? {} : { api }) });
+      cuts.push({ page, from, to: parts.length, spliced });
     }
   }
 
@@ -570,20 +582,27 @@ export function renderLlms({ packageDir, outline, tables, eventsApart = false, m
         new Map(scenarios.map((scenario) => [scenario.title, scenario.id])),
       ),
     },
-    ...cuts.flatMap(({ page, from, to, api }) => {
+    ...cuts.flatMap(({ page, from, to, spliced = [] }) => {
       if (page === undefined) return [];
       /* The twin is the cut as it stands in the full text, without the list
          of every page: that is for a crawler, and an agent has `llms.txt`. */
       twins.push({ path: twinOfPlace(`/${page.id}`).slice(1), text: markdownTwin(parts.slice(from, to).join("\n"), home, 2, header(pageUrl(manifest, page))) });
       /* "Demo page: <this page>" is for the agent reading the full text; on
-         the page itself it would point at itself. */
+         the page itself it would point at itself. A reference table's heading
+         carries the id the app gives it. */
+      const anchors = new Map([
+        ...examples.filter((example) => example.pageId === page.id).map((example) => [example.title, example.id] as const),
+        ...(references[page.id] ?? []).map((table) => [table.title, table.anchor] as const),
+      ]);
       const html = (a: number, b: number, tail = "") =>
-        markdownToHtml(
-          `${parts.slice(a, b).filter((line) => !line.startsWith("Demo page: ")).join("\n")}${tail}`,
-          home,
-          2,
-          new Map(examples.filter((example) => example.pageId === page.id).map((example) => [example.title, example.id])),
-        );
+        markdownToHtml(`${parts.slice(a, b).filter((line) => !line.startsWith("Demo page: ")).join("\n")}${tail}`, home, 2, anchors);
+      /* Markdown up to each spliced section, its HTML, and on. */
+      let at = from;
+      let body = "";
+      for (const one of spliced) {
+        body += `${html(at, one.from)}\n<div class="apiTables">${one.html}</div>\n`;
+        at = one.to;
+      }
       return [
         {
           path: addressOfPlace(`/${page.id}`).slice(1),
@@ -592,10 +611,7 @@ export function renderLlms({ packageDir, outline, tables, eventsApart = false, m
           title: `${page.name} – React ${noun} · ${manifest.name}`,
           description: plain(page.sentence),
           twin: twinUrl(home, `/${page.id}`),
-          html:
-            api === undefined
-              ? html(from, to, `\n\n${everyPage}`)
-              : `${html(from, api.from)}\n<div class="apiTables">${api.html}</div>\n${html(api.to, to, `\n\n${everyPage}`)}`,
+          html: `${body}${html(at, to, `\n\n${everyPage}`)}`,
         },
       ];
     }),
@@ -614,10 +630,12 @@ export function renderLlms({ packageDir, outline, tables, eventsApart = false, m
 /** Writes `demo/.generated/llms.txt`, `demo/.generated/pages.json` and
     `forwarders.json` (the site's pages and the forwarders at old addresses,
     which `scripts/build-pages.mjs` writes out), every page's Markdown twin
-    under `demo/.generated/twins/` (which it copies beside them) and
-    `docs/llms-full.md`. None is checked in: a generation drifts from its
-    source (`.gitignore`). */
-export function generateLlms(job: LlmsJob): void {
+    under `demo/.generated/twins/` (which it copies beside them),
+    `docs/llms-full.md`, and `demo/.generated/references.json` where there are
+    reference tables, which the app mounts. None is checked in: a generation
+    drifts from its source (`.gitignore`). Hands the site's pages back for a
+    demo's guard over them. */
+export function generateLlms(job: LlmsJob): SitePage[] {
   const { index, full, pages, forwarders, twins } = renderLlms(job);
   const indexPath = join(job.packageDir, "demo", ".generated", "llms.txt");
   const fullPath = join(job.packageDir, "docs", "llms-full.md");
@@ -632,5 +650,7 @@ export function generateLlms(job: LlmsJob): void {
   rmSync(twinsDir, { recursive: true, force: true });
   mkdirSync(twinsDir);
   for (const twin of twins) writeFileSync(join(twinsDir, twin.path), twin.text, "utf8");
+  if (job.references !== undefined) writeFileSync(join(dirname(indexPath), "references.json"), `${JSON.stringify(job.references, null, 2)}\n`, "utf8");
   process.stdout.write(`llms-full.md: ${Math.round(Buffer.byteLength(full) / 1024)} kB.\n`);
+  return pages;
 }
