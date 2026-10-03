@@ -13,12 +13,12 @@
 import { useState, type ReactNode } from "react";
 import { Example } from "./Example";
 import { CopyButton } from "./CopyButton";
-import { PropsTable } from "./PropsTable";
 import { Prose } from "./Prose";
 import type { Demo } from "./demo";
 import { hrefOf } from "./href";
 import { examplesOf } from "./tooling/examples";
 import { tablesOf } from "./tooling/tables";
+import { apiHtml, tableModel } from "./tooling/apiTable";
 import { ADR_0032 } from "./outline";
 import type { Rubric, Page as PageData } from "./outline";
 
@@ -154,9 +154,13 @@ export function Page({ demo, page }: PageProps) {
 
       {tables.length > 0 && (
         <Section id={`api-${page.id}`} title="API">
-          {tables.map((entry) => (
-            <PropsTable key={entry.name} entry={entry} eventsApart={demo.eventsApart} />
-          ))}
+          {/* Written, not drawn: the same HTML the prerendered page carries,
+              from the one table model (`tooling/apiTable.ts`). Its links are
+              ordinary addresses, which the shell takes like any other. */}
+          <div
+            className="apiTables"
+            dangerouslySetInnerHTML={{ __html: apiHtml(tables.map((entry) => tableModel(entry, demo.eventsApart))) }}
+          />
         </Section>
       )}
 

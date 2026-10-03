@@ -173,10 +173,12 @@ export function Shell({ demo, brand, version, sentence, actions }: ShellProps) {
      one lands at the head of a page and starts searching again. */
   useEffect(() => {
     const target = place.example;
+    /* An example, a scenario - or another anchor of the page, such as a
+       props table's `#type-<Name>`. */
     const el =
       target === undefined
         ? null
-        : document.querySelector(`[data-example="${target}"], [data-scenario="${target}"]`);
+        : (document.querySelector(`[data-example="${target}"], [data-scenario="${target}"]`) ?? document.getElementById(target));
     if (el === null) {
       /* A page change with no named target starts at the top. Otherwise one
          would stay at the height one was at on the previous page. scrollTop

@@ -8,6 +8,7 @@ import { describe, expect, it } from "vitest";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { renderLlms } from "../src/tooling/llms";
+import { apiHtml, tableModel } from "../src/tooling/apiTable";
 import type { Rubric } from "../src/outline";
 import type { TypeEntry } from "../src/tooling/tables";
 
@@ -55,6 +56,8 @@ const TABLES: Record<string, TypeEntry> = {
 };
 
 const { index, full, pages } = renderLlms({ packageDir: PACKAGE_DIR, outline: OUTLINE, tables: TABLES });
+/** The Gauge page's tables, as the app mounts them. */
+const API = apiHtml([tableModel(TABLES.GaugeProps!, false)]);
 
 describe("llms.txt", () => {
   it("names the package, its summary and where the full text is", () => {
@@ -120,7 +123,7 @@ describe("llms-full.txt", () => {
 
   it("writes the props table with every row, escaped for Markdown", () => {
     expect(full).toContain("##### `GaugeProps`\n\n| Prop | Type | Default | Description |\n|---|---|---|---|\n");
-    expect(full).toContain("| `value` (required) | `number` | — | The value the needle points at. |\n");
+    expect(full).toContain("| `value` *required* | `number` | — | The value the needle points at. |\n");
     expect(full).toContain('| `tone` | `"neutral" \\| "alarm"` | `"neutral"` | What the needle says. |\n');
     expect(full).toContain("Also takes every attribute of `<div>` – without `title`.");
   });
@@ -187,7 +190,13 @@ describe("the site's pages (ADR-0037)", () => {
     expect(front.url).toBe("https://example.test/fixture/");
   });
 
+  it("carries in its API section the HTML the app mounts, from the same model", () => {
+    expect(byPath.get("gauge/")!.html).toContain(`<h2>API</h2>\n<div class="apiTables">${API}</div>\n<h2>Known limits</h2>`);
+  });
+
   it("escapes markup written in a text instead of passing it through", () => {
-    expect(pages.map((one) => one.html).join("")).not.toMatch(/<(div|script)[ >]/);
+    /* The API section is written as HTML on purpose; everything around it
+       comes from texts. */
+    expect(pages.map((one) => one.html.replace(`<div class="apiTables">${API}</div>`, "")).join("")).not.toMatch(/<(div|script)[ >]/);
   });
 });
