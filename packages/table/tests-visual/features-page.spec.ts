@@ -17,4 +17,5 @@ checkPage({
   other: { name: "Column", pageId: "column" },
   packageName: "@umriss-ui/table",
   importLine: 'import { useTable } from "@umriss-ui/table";',
+  limits: "manual-mode",
 });

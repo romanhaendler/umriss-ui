@@ -9,14 +9,14 @@ import { adrLinksOf, internalReferences, linkAdrs, linkAdrSpans, linkReferences,
 import { referenceHtml, type ReferenceTable } from "../src/tooling/referenceTable";
 import { adrLinks, linkedTables, outlineFlags } from "../src/tooling/props";
 import { tableHtml, tableMarkdown, tableModel } from "../src/tooling/apiTable";
-import type { Rubric } from "../src/outline";
+import { ADR_0032, type Rubric } from "../src/outline";
 
 const LINKS = adrLinksOf(["0021-the-styles-load-themselves.md", "0032-what-umriss-is-not.md", "README.md"]);
 const STYLES = `${ADR_HOME}0021-the-styles-load-themselves.md`;
 
 describe("the ADR links", () => {
-  it("are read by number from the file names, and the repository's resolve", () => {
-    expect(LINKS).toEqual({ "0021": STYLES, "0032": `${ADR_HOME}0032-what-umriss-is-not.md` });
+  it("are read by number from the file names, and the repository's resolve - ADR-0032 to its page on the site", () => {
+    expect(LINKS).toEqual({ "0021": STYLES, "0032": ADR_0032 });
     expect(adrLinks()["0001"]).toMatch(/\/docs\/adr\/0001-[\w-]+\.md$/);
   });
 

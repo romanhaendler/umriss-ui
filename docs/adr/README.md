@@ -58,5 +58,6 @@ half a later reader needs most. Exactly one is superseded today.
 | [0042](0042-a-rows-height-never-follows-what-it-shows.md) | A row's height never follows what it shows | accepted | table |
 | [0043](0043-the-select-draws-its-own-list-under-a-pointer.md) | The select draws its own list under a pointer and the keys | accepted | components |
 | [0045](0045-tokens-are-the-styling-api-data-attributes-are-not.md) | Tokens are the styling API; data attributes are not | accepted | components |
+| [0046](0046-the-site-renders-the-workspaces-own-documents.md) | The site renders the workspace's own documents | accepted | demo |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).

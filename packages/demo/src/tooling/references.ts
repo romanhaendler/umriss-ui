@@ -7,13 +7,14 @@
    `@remarks` tag, which the reader drops. An ADR number is a decision the
    reader can read: every `ADR-0021` in a text becomes a link to that ADR's
    file, resolved by its number against `docs/adr/` when the texts are
-   generated - one place to retarget, should the ADRs ever stand on the site.
+   generated - one place to retarget. ADR-0032, the one ADR written for
+   callers, stands on the site (ADR-0046), and its number links its page there.
 
    Pure, and without Vite, React or Node: the shell links the outline's texts
    with it in the browser, the generator the descriptions and the llms text.
    The directory is read in `props.ts`. */
 
-import type { Page, Rubric } from "../outline.ts";
+import { ADR_0032, type Page, type Rubric } from "../outline.ts";
 import type { Span } from "./apiTable.ts";
 import type { ReferenceTable } from "./referenceTable.ts";
 
@@ -23,12 +24,13 @@ export const ADR_HOME = "https://github.com/romanhaendler/umriss-ui/blob/main/do
 /** An ADR's number to its address: `{ "0021": "https://…/0021-the-styles-….md" }`. */
 export type AdrLinks = Readonly<Record<string, string>>;
 
-/** The links of the ADR files a directory holds, by their number. */
+/** The links of the ADR files a directory holds, by their number - ADR-0032's
+    to its page on the site. */
 export function adrLinksOf(fileNames: readonly string[]): Record<string, string> {
   return Object.fromEntries(
     fileNames.flatMap((name) => {
       const number = /^(\d{4})-.+\.md$/.exec(name)?.[1];
-      return number === undefined ? [] : [[number, ADR_HOME + name]];
+      return number === undefined ? [] : [[number, number === "0032" ? ADR_0032 : ADR_HOME + name]];
     }),
   );
 }

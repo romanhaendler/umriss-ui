@@ -2,6 +2,7 @@
    directory of its own, and a page in front that points at every page of them.
 
      site/index.html            the front page - the hub (scripts/front-page.html)
+     site/<document>/           a document of the workspace, rendered in the front page's layout
      site/<package>/            the demo of @umriss-ui/<package>
      site/<package>/<page>/     one of its pages, prerendered
      site/<package>/<page>.md   the same page as Markdown - its twin
@@ -36,6 +37,11 @@
    Search Console and Bing prove the site is ours by a file at its root; those
    files stand in `scripts/site-verification/` and are copied as they are.
 
+   The documents are the workspace's own markdown - the design language, the
+   standards, what umriss-ui is not - read and rendered here, never copied
+   (.scratch/concepts-and-changelog-pages, ADR-0046). Their list stands in
+   `packages/demo/src/tooling/documents.ts`.
+
    Run: `pnpm build:pages`. The forwarders and the guard come from the demo's
    tooling (`packages/demo/src/tooling/site.ts`). */
 
@@ -48,8 +54,9 @@ import { fileURLToPath } from "node:url";
    imports nothing (and why `build:pages` strips types). */
 import { PACKAGES as LIST } from "../packages/demo/src/packages.ts";
 import { dependencyLine, installCommand } from "../packages/demo/src/tooling/install.ts";
-import { forwarderHtml, frontFaults, siteFaults, twinFaults, typeLinkFaults } from "../packages/demo/src/tooling/site.ts";
-import { siteLeaks } from "../packages/demo/src/tooling/references.ts";
+import { documentFaults, forwarderHtml, frontFaults, siteFaults, twinFaults, typeLinkFaults } from "../packages/demo/src/tooling/site.ts";
+import { adrLinksOf, siteLeaks } from "../packages/demo/src/tooling/references.ts";
+import { DOCUMENTS, renderDocument } from "../packages/demo/src/tooling/documents.ts";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SITE = join(ROOT, "site");
@@ -182,6 +189,20 @@ for (const dir of PACKAGES) {
   rows.push(row);
 }
 
+/* The workspace's own documents (.scratch/concepts-and-changelog-pages): each
+   rendered from its file as it stands now. A link to a file that does not
+   exist stops the build here. */
+const adrs = adrLinksOf(readdirSync(join(ROOT, "docs", "adr")));
+const documents = DOCUMENTS.map((document) => ({
+  ...document,
+  url: HOME + document.path,
+  ...renderDocument(readFileSync(join(ROOT, document.source), "utf8"), document.source, { home: HOME, exists: (path) => existsSync(join(ROOT, path)), adrs }),
+}));
+for (const document of documents) {
+  urls.push(document.url);
+  leaks.push(...siteLeaks(document.html).map((leak) => `${document.url}: ${leak} in the text`));
+}
+
 /* The front page (.scratch/site-front-page): its own template, filled here.
    The index of every page stays in it, folded - the links a crawler walks,
    since no other site points here. The theme script is the demos' own, from
@@ -234,18 +255,36 @@ const front = {
       (row) => `<h3><a href="./${row.dir}/"><code>${escape(row.name)}</code></a></h3>
         <ul>${row.pages.map((page) => `<li><a href="./${row.dir}/${page.path}">${escape(page.name)}</a></li>`).join("")}</ul>`,
     )
+    .concat(`<h3>Documents</h3>
+        <ul>${documents.map((document) => `<li><a href="./${document.path}">${escape(document.name)}</a></li>`).join("")}</ul>`)
     .join("\n        "),
+  documents: documents.map((document) => `<a href="./${document.path}">${escape(document.name)}</a>`).join(" · "),
   repository: REPOSITORY,
 };
-writeFileSync(
-  join(SITE, "index.html"),
-  readFileSync(join(ROOT, "scripts", "front-page.html"), "utf8").replace(/\{\{(\w+)\}\}/g, (slot, name) => {
-    if (!(name in front)) throw new Error(`front-page.html has a slot nobody fills: ${slot}`);
-    return front[name];
-  }),
-);
+const FRONT_PAGE = readFileSync(join(ROOT, "scripts", "front-page.html"), "utf8");
+const fill = (template, values) =>
+  template.replace(/\{\{(\w+)\}\}/g, (slot, name) => {
+    if (!(name in values)) throw new Error(`front-page.html has a slot nobody fills: ${slot}`);
+    return values[name];
+  });
+writeFileSync(join(SITE, "index.html"), fill(FRONT_PAGE, front));
 /* Before the guard, which fails on a preview that is not there. */
 if (existsSync(join(ROOT, "scripts", PREVIEWS))) cpSync(join(ROOT, "scripts", PREVIEWS), join(SITE, PREVIEWS), { recursive: true });
+
+/* A document page: the front page's layout - its head, header, foot and theme
+   - with the document in place of the front page's <main>, and the layout's
+   relative addresses climbing to the site's root. */
+if (!/<main>[\s\S]*<\/main>/.test(FRONT_PAGE)) throw new Error("front-page.html has lost its <main>.");
+for (const document of documents) {
+  const up = "../".repeat(document.path.split("/").filter(Boolean).length);
+  const layout = fill(FRONT_PAGE.replace(/<main>[\s\S]*<\/main>/, '<main class="document">\u0000</main>'), {
+    ...front,
+    head: headOf({ title: document.title, description: document.description, url: document.url }),
+    jsonLd: "",
+  }).replace(/(href="|src="|url\()\.\//g, `$1${up}`);
+  mkdirSync(join(SITE, document.path), { recursive: true });
+  writeFileSync(join(SITE, document.path, "index.html"), layout.replace("\u0000", () => document.html));
+}
 
 /* Every address, once. Google reads `lastmod` only where it is true; the
    build date is, since every page is written anew. */
@@ -306,7 +345,9 @@ ${rows.map((row) => `- [${row.name}](${HOME}${row.dir}/llms.txt): ${row.descript
    file; every page has its Markdown twin and announces it, and every link
    in every llms.txt leads to a file (pages-as-markdown); the front page keeps
    its words, its links lead into the site and its tiles' previews are there
-   and light enough (site-front-page). A build that breaks
+   and light enough (site-front-page); every document has its page, its links
+   lead to sitemap addresses, and no page links ADR-0032 on GitHub
+   (concepts-and-changelog-pages). A build that breaks
    it fails here, before it is deployed. */
 const files = new Map();
 const texts = new Map();
@@ -339,6 +380,12 @@ const faults = [
     rows.map((row) => `${HOME}${row.dir}/`),
     images,
   ).map((fault) => `${HOME}: ${fault}`),
+  ...documentFaults(
+    documents.map((document) => document.url),
+    files,
+    urls,
+    HOME,
+  ),
   ...urls.filter((url) => files.has(url) && !linksFavicon(files.get(url), url)).map((url) => `${url}: no favicon`),
   /* No props row says a prop accepts nothing: a `never` is a prohibition the
      reader merges away (types-without-holes), never a type to show. Every type
@@ -367,4 +414,4 @@ if (existsSync(VERIFICATION)) {
 }
 cpSync(join(ROOT, "scripts", PREVIEW), join(SITE, PREVIEW));
 
-console.log(`\nsite/ is ready: ${rows.map((row) => `${row.dir}/ (${row.pages.length} pages)`).join(", ")}, index.html, sitemap.xml and llms.txt - ${urls.length} addresses, ${forwarders.length} forwarded.`);
+console.log(`\nsite/ is ready: ${rows.map((row) => `${row.dir}/ (${row.pages.length} pages)`).join(", ")}, ${documents.length} documents, index.html, sitemap.xml and llms.txt - ${urls.length} addresses, ${forwarders.length} forwarded.`);

@@ -203,3 +203,27 @@ export function twinFaults(pages: readonly TwinPage[], files: ReadonlyMap<string
     ),
   ];
 }
+
+/** What the document pages get wrong, one line each
+    (.scratch/concepts-and-changelog-pages): every document in the list has a
+    page; every link of a document's text into the site leads to a sitemap
+    address (one to GitHub is checked when the link is rewritten, and fails
+    the build there); and no page of the site links ADR-0032 on GitHub, which
+    has its page here. `documents` are the documents' addresses, `files` as
+    for `siteFaults`, `home` the site's address. */
+export function documentFaults(documents: readonly string[], files: ReadonlyMap<string, string>, urls: readonly string[], home: string): string[] {
+  return [
+    ...documents.flatMap((url) => {
+      const html = files.get(url);
+      if (html === undefined) return [`${url}: no page for this document`];
+      const text = /<main[\s>][\s\S]*<\/main>/.exec(html)?.[0] ?? "";
+      return [...text.matchAll(/<a\b[^>]*\bhref="([^"]*)"/g)]
+        .map((match) => new URL(match[1]!.replace(/&amp;/g, "&"), url).href.replace(/#.*$/, ""))
+        .filter((target) => target.startsWith(home) && !urls.includes(target))
+        .map((target) => `${url}: links ${target}, which is no sitemap address`);
+    }),
+    ...[...files]
+      .filter(([, html]) => /href="https:\/\/github\.com\/[^"]*\/docs\/adr\/0032-/.test(html))
+      .map(([url]) => `${url}: links ADR-0032 on GitHub, not its page on the site`),
+  ];
+}
