@@ -9,7 +9,8 @@
    therefore stand in the demo itself (`demo/examples.ts`), and only what they
    found arrives here. */
 
-import type { Addresses } from "./outline";
+import { addresses, type Addresses } from "./outline";
+import { linkAdrs, outlineTexts, type AdrLinks } from "./tooling/references";
 import { installCommand, type InstallManifest } from "./tooling/install";
 import { readExamples, readScenarios } from "./tooling/examples";
 import type { Example, ExampleModule, Scenario, ScenarioModule } from "./tooling/examples";
@@ -45,6 +46,8 @@ export interface DemoSources {
   sources: Record<string, string>;
   /** The generated `props.json`. */
   props: unknown;
+  /** The generated `adrs.json`: the link of every ADR number a text names. */
+  adrs: AdrLinks;
   /** The events in a table of their own - for the table and the schedule,
       whose callbacks are a subject apart. */
   eventsApart?: boolean;
@@ -57,12 +60,21 @@ export function buildDemo(sources: DemoSources): Demo {
     pages: sources.addresses.ALL_PAGES,
     packageName: sources.manifest.name,
   };
+  /* The texts' ADR numbers become links here, once, as the generator links
+     them in the llms text and the tables (`tooling/references.ts`). */
+  const link = (text: string) => linkAdrs(text, sources.adrs);
   return {
     packageName: sources.manifest.name,
     install: installCommand(sources.manifest),
-    addresses: sources.addresses,
-    scenarios: readScenarios(sources.scenarios, sources.sources, options),
-    examples: readExamples(sources.examples, sources.sources, options),
+    addresses: addresses(outlineTexts(sources.addresses.OUTLINE, link)),
+    scenarios: readScenarios(sources.scenarios, sources.sources, options).map((scenario) => ({
+      ...scenario,
+      lead: link(scenario.lead),
+      callouts: scenario.callouts.map(link),
+    })),
+    examples: readExamples(sources.examples, sources.sources, options).map((example) =>
+      example.lead === undefined ? example : { ...example, lead: link(example.lead) },
+    ),
     /* The JSON file is generated; its literal type says nothing the
        generating type does not say better. */
     tables: sources.props as Record<string, TypeEntry>,

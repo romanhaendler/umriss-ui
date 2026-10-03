@@ -15,7 +15,8 @@ import type { Accessor, BoxSeriesConfig, ListAccessor } from "./types";
 /** The props of `BoxPlot`. */
 export interface BoxPlotProps<T> {
   /** The line across the box; null/undefined/NaN/±Infinity means a gap - no
-      box is drawn there, whatever the other numbers say (R-2.5). */
+      box is drawn there, whatever the other numbers say.
+      @remarks R-2.5 */
   median: Accessor<T>;
   /** The box's lower edge. */
   lowerQuartile: Accessor<T>;
@@ -41,11 +42,14 @@ export interface BoxPlotProps<T> {
   /** How many values stand behind the box; read in the tooltip and the
       table, not drawn. */
   count?: Accessor<T>;
-  /** Binding to an x axis (R-4.12). */
+  /** Binding to an x axis.
+      @remarks R-4.12 */
   xAxisId?: string;
-  /** Binding to a y axis (R-4.12). */
+  /** Binding to a y axis.
+      @remarks R-4.12 */
   yAxisId?: string;
-  /** Series-own data; overrides the container data (R-2.4). */
+  /** Series-own data; overrides the container data.
+      @remarks R-2.4 */
   data?: readonly T[];
   /** The name in legend and tooltip. Without one a warning stands in DEV.
       @default "Series n", after its place in the chart */

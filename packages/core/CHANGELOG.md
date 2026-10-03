@@ -53,6 +53,8 @@ commit.
   page: each key of `Wording`, of the charts' `ChartsWording` and of `Formats`,
   its English beside its German and the comment its type carries. A row has an
   address of its own, `#wording-noMatches`, `#format-date`.
+- **The comment on `UmrissProvider`'s `language` links the Language page**
+  instead of naming the source folder `lib/language`. Nothing else changes.
 
 ## 0.24.0 – The select's own list (Oct. 2026)
 

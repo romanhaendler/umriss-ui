@@ -41,9 +41,11 @@ export interface ControlChartProps<T> {
   /** Given, or from a named reference window - never tacitly from everything on
       the screen (ADR-0008). */
   origin: ControlLimitOrigin;
-  /** Binding to an x axis (R-4.12). */
+  /** Binding to an x axis.
+      @remarks R-4.12 */
   xAxisId?: string;
-  /** Binding to a y axis (R-4.12). */
+  /** Binding to a y axis.
+      @remarks R-4.12 */
   yAxisId?: string;
   /** The name in legend and tooltip. Without one a warning stands in DEV - an
       unnamed series is a colour nobody can look up.

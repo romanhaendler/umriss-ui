@@ -1,5 +1,4 @@
-/* Not photographed, like the benchmark above it: it measures the series draw
-   (R-5.1). */
+/* Not photographed, like the benchmark above it: it measures the series draw. */
 
 import { useCallback, useState } from "react";
 import { Chart, Legend, Line, Tooltip, XAxis, YAxis } from "../../../src";

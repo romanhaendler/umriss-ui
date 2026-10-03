@@ -9,6 +9,7 @@ import { describe, expect, it } from "vitest";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { readProps } from "../src/tooling/propsReader";
+import { internalReferences } from "../src/tooling/references";
 
 const FIXTURES = join(dirname(fileURLToPath(import.meta.url)), "fixtures", "props");
 const GOOD = join(FIXTURES, "good.tsx");
@@ -316,6 +317,26 @@ describe("readProps over a named alias in a type cell", () => {
     expect(row("format").expansion).toBeUndefined();
     expect(row("tone").type).toBe('"quiet" | "loud"');
     expect(row("tone").expansion).toBeUndefined();
+  });
+});
+
+describe("readProps with the gate's check for internal references", () => {
+  const REFERENCES = join(FIXTURES, "references.tsx");
+  const check = (text: string) => internalReferences(text, { "0001": "https://example.org/0001-a.md" });
+
+  it("flags a requirement number, a source path and an ADR number no file answers, each with file and line", () => {
+    const { flags } = readProps([REFERENCES], ["FixtureLeakyProps"], check);
+    expect(flags.map(({ file, line, type, prop, found }) => ({ file, line, type, prop, found }))).toEqual([
+      { file: REFERENCES, line: 7, type: "FixtureLeakyProps", prop: "yAxisId", found: ["R-4.12"] },
+      { file: REFERENCES, line: 9, type: "FixtureLeakyProps", prop: "language", found: ["lib/language"] },
+      { file: REFERENCES, line: 11, type: "FixtureLeakyProps", prop: "rule", found: ["ADR-9999"] },
+    ]);
+  });
+
+  it("passes the same props written right: the number in `@remarks`, the path a link, an ADR that exists", () => {
+    const { flags, types } = readProps([REFERENCES], ["FixtureCleanProps"], check);
+    expect(flags).toEqual([]);
+    expect(types.FixtureCleanProps!.props[0]!.description).toBe("Binding to a y axis.");
   });
 });
 

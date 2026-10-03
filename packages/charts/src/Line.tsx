@@ -8,13 +8,17 @@ import type { Accessor, LineSeriesConfig } from "./types";
 
 /** The props of `Line`. */
 export interface LineProps<T> {
-  /** Y value; null/undefined/NaN/±Infinity means a gap (R-2.5). */
+  /** Y value; null/undefined/NaN/±Infinity means a gap.
+      @remarks R-2.5 */
   accessor: Accessor<T>;
-  /** Binding to an x axis (R-4.12). */
+  /** Binding to an x axis.
+      @remarks R-4.12 */
   xAxisId?: string;
-  /** Binding to a y axis (R-4.12). */
+  /** Binding to a y axis.
+      @remarks R-4.12 */
   yAxisId?: string;
-  /** Series-own data; overrides the container data (R-2.4). */
+  /** Series-own data; overrides the container data.
+      @remarks R-2.4 */
   data?: readonly T[];
   /** The name in legend and tooltip. Without one a warning stands in DEV - an
       unnamed series is a colour nobody can look up.

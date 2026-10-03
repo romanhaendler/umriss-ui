@@ -24,8 +24,9 @@ import { dirname, join } from "node:path";
 import ts from "typescript";
 import { missingFrom, renderLlms } from "../src/tooling/llms";
 import { apiHtml, tableModel } from "../src/tooling/apiTable";
-import { requiredTypes, sourceFiles } from "../src/tooling/props";
+import { adrLinks, linkedTables, requiredTypes, sourceFiles } from "../src/tooling/props";
 import { readProps } from "../src/tooling/propsReader";
+import { siteLeaks } from "../src/tooling/references";
 import type { Rubric } from "../src/outline";
 
 const PACKAGES = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
@@ -64,8 +65,12 @@ describe.each(Object.keys(ENTRIES))("the llms-full.txt of %s", (dir) => {
   it("names every export of the package, and carries the app's API section on every page", async () => {
     const packageDir = join(PACKAGES, dir);
     const { OUTLINE, EVENTS_APART = false } = (await import(join(packageDir, "demo", "outline.ts"))) as { OUTLINE: readonly Rubric[]; EVENTS_APART?: boolean };
-    const { types } = readProps(sourceFiles(join(packageDir, "src")), requiredTypes(OUTLINE));
+    const types = linkedTables(readProps(sourceFiles(join(packageDir, "src")), requiredTypes(OUTLINE)).types, adrLinks());
     const { full, pages: sitePages } = renderLlms({ packageDir, outline: OUTLINE, tables: types, eventsApart: EVENTS_APART });
+
+    /* No page sends its reader to a requirement they cannot see, and every
+       ADR it names is a link (.scratch/props-table-hygiene, 03). */
+    for (const page of sitePages) expect(siteLeaks(page.html), page.path).toEqual([]);
 
     /* The API section the app mounts (`Page.tsx`: the same call, with the
        demo's `EVENTS_APART`) is the one the prerendered page carries. */

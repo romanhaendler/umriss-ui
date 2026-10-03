@@ -181,6 +181,23 @@ export function checkInstall({ open, pages, command }: InstallProbes): void {
     await head.getByRole("link", { name: `Start with ${start!.name} →` }).click();
     await expect(page.locator(`[data-block="${start!.id}"] h1`)).toHaveText(start!.name);
   });
+
+  /* The page that installs names its ADRs in most demos - and the shell links
+     them as the prerendered page does (.scratch/props-table-hygiene, 03). */
+  test("the page that installs names no requirement and no ADR outside a link", async ({ page }) => {
+    test.skip(test.info().project.name.endsWith("dark"), "a behaviour test runs once (light)");
+    await open(page, pages.find((one) => one.installs === true)!.id);
+    const leaks = await page.locator("article.page").evaluate((article) => {
+      const found: string[] = [];
+      const walker = document.createTreeWalker(article, NodeFilter.SHOW_TEXT);
+      for (let node = walker.nextNode(); node !== null; node = walker.nextNode()) {
+        if (node.parentElement?.closest("a, pre") !== null) continue;
+        found.push(...(node.textContent!.match(/ADR-\d{4}|\bR-\d+(?:\.\d+)*/g) ?? []));
+      }
+      return found;
+    });
+    expect(leaks).toEqual([]);
+  });
 }
 
 export interface FirstExampleProbes {

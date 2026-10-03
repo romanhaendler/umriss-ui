@@ -28,9 +28,11 @@ export type ListAccessor<T> = (d: T, index: number) => readonly number[] | null 
 /** What every series registers, whatever its kind: where its values come from,
     which axes it stands on, and how it is named and coloured. */
 export interface SeriesBase<T = unknown> {
-  /** Y value; null/undefined/NaN/±Infinity means a gap (R-2.5). */
+  /** Y value; null/undefined/NaN/±Infinity means a gap.
+      @remarks R-2.5 */
   accessor: Accessor<T>;
-  /** Series-own data; overrides the container data (R-2.4). */
+  /** Series-own data; overrides the container data.
+      @remarks R-2.4 */
   data?: readonly T[];
   xAxisId: string;
   yAxisId: string;
@@ -239,7 +241,8 @@ export interface MaterializedSeries {
   x: Float64Array;
   y: Float64Array;
   /** Lower edge, where the baseline is an accessor of its own; otherwise null.
-      A fixed baseline needs no channel - it is a number (R-2.7). */
+      A fixed baseline needs no channel - it is a number.
+      @remarks R-2.7 */
   y0: Float64Array | null;
   /** Value channel: the third value per point, which today only the matrix
       needs. Named rather than overloading y0 - a property that only some kinds

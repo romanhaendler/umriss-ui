@@ -9,11 +9,13 @@
 
 import { buildDemo } from "@umriss-ui/demo";
 import manifest from "../package.json";
+import adrs from "./.generated/adrs.json";
 import props from "./.generated/props.json";
 import { ADDRESSES } from "./outline";
 
 export const DEMO = buildDemo({
   manifest,
+  adrs,
   addresses: ADDRESSES,
   scenarios: import.meta.glob<Record<string, unknown>>("./scenarios/*.tsx", { eager: true }),
   examples: import.meta.glob<Record<string, unknown>>("./examples/*/*.tsx", { eager: true }),
