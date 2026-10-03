@@ -12,7 +12,9 @@
    The reasoning behind a component is not here: it stands in the ADRs. What a
    user must know to use it right is the "about" under the lede. */
 
-import { Fragment, useState, type ReactNode } from "react";
+import { Fragment, useCallback, useMemo, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
+import { Tooltip } from "@umriss-ui/core";
 import { Example } from "./Example";
 import { useContents, type ContentsEntry } from "./Contents";
 import { Configurator } from "./Configurator";
@@ -21,7 +23,8 @@ import { Prose } from "./Prose";
 import type { Demo } from "./demo";
 import { hrefOf, hrefOfNeighbour } from "./href";
 import { examplesOf } from "./tooling/examples";
-import { apiHtml, apiSection, DEFINITIONS_ID, DEFINITIONS_TITLE } from "./tooling/apiTable";
+import { apiHtml, apiSection, DEFINITIONS_ID, DEFINITIONS_TITLE, previewOf } from "./tooling/apiTable";
+import type { ApiDefinitionModel, ApiSection } from "./tooling/apiTable";
 import { referenceHtml } from "./tooling/referenceTable";
 import { ADR_0032, SCENARIOS, keyboardAnchor, keysOfText } from "./outline";
 import type { Rubric, Page as PageData } from "./outline";
@@ -55,6 +58,72 @@ export function InstallLine({ command }: { command: string }) {
       </code>
       <CopyButton text={command} />
     </div>
+  );
+}
+
+interface Preview {
+  /** Where the link stood; the link stands in it again, under a tooltip. */
+  host: HTMLElement;
+  href: string;
+}
+
+function PreviewOf({ definition }: { definition: ApiDefinitionModel }) {
+  return (
+    <>
+      <pre className="apiPreview">{previewOf(definition)}</pre>
+      {definition.expansion !== undefined && (
+        <p className="apiPreviewValues">
+          Resolves to <code>{definition.expansion}</code>.
+        </p>
+      )}
+    </>
+  );
+}
+
+/** The API section: written, not drawn - the same HTML the prerendered page
+    carries, from the one table model (`tooling/apiTable.ts`), "Types on this
+    page" included. Its links are ordinary addresses, which the shell takes
+    like any other.
+
+    Only here, in the app, does a link to a definition preview it in core's
+    Tooltip (.scratch/a11y-and-finish, 07): the written link gives way to the
+    same link under a tooltip, mounted where it stood. The prerendered page
+    and the twin keep the link alone, which leads to the whole definition. */
+function ApiTables({ api }: { api: ApiSection }) {
+  const [previews, setPreviews] = useState<readonly Preview[]>([]);
+  /* The section's HTML is the same for as long as the page stands - the shell
+     gives every page its id as the `key` - so the links are found once: those
+     whose target stands in "Types on this page". */
+  const found = useCallback((root: HTMLDivElement | null) => {
+    if (root === null) return;
+    const links = [...root.querySelectorAll<HTMLAnchorElement>('a[href^="#type-"]')].flatMap((link) => {
+      const href = link.getAttribute("href")!;
+      if (root.querySelector(`.apiDefinitions [id="${href.slice(1)}"]`) === null) return [];
+      const host = document.createElement("span");
+      link.replaceWith(host);
+      return [{ host, href, link }];
+    });
+    setPreviews(links);
+    return () => links.forEach(({ host, link }) => host.replaceWith(link));
+  }, []);
+  /* React 19 writes the HTML anew whenever the object is a new one - which
+     would put the plain links back over the previews on every render. */
+  const html = apiHtml(api);
+  const inner = useMemo(() => ({ __html: html }), [html]);
+  return (
+    <>
+      <div ref={found} className="apiTables" dangerouslySetInnerHTML={inner} />
+      {previews.map(({ host, href }, i) => {
+        const definition = api.definitions.find((one) => `#${one.anchor}` === href)!;
+        return createPortal(
+          <Tooltip content={<PreviewOf definition={definition} />}>
+            <a href={href}>{definition.name}</a>
+          </Tooltip>,
+          host,
+          String(i),
+        );
+      })}
+    </>
   );
 }
 
@@ -281,10 +350,7 @@ export function Page({ demo, page }: PageProps) {
               from the one table model (`tooling/apiTable.ts`), "Types on this
               page" included. Its links are ordinary addresses, which the shell
               takes like any other. */}
-          <div
-            className="apiTables"
-            dangerouslySetInnerHTML={{ __html: apiHtml(api) }}
-          />
+          <ApiTables api={api} />
         </Section>
       )}
 

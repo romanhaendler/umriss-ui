@@ -2,11 +2,15 @@
    The tests stand with the shell (`@umriss-ui/demo/checks/page.ts`).
 
    Beside them the configurator, which only this demo has
-   (.scratch/configurator): what the reader sees and copies on the Button page. */
+   (.scratch/configurator): what the reader sees and copies on the Button page.
+   And the API tables' type cells, which only the app draws more than the
+   prerendered page: a long union broken, a definition previewed. */
 
 import { test, expect } from "@playwright/test";
 import type { Page } from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
 import { checkFirstExample, checkInstall, checkPage } from "@umriss-ui/demo/checks/page";
+import { STANDARDS, findings } from "@umriss-ui/demo/checks/accessibility";
 import { ALL_PAGES, open, openExample } from "./navigation";
 
 checkInstall({ open, pages: ALL_PAGES, command: "npm install @umriss-ui/core" });
@@ -118,6 +122,56 @@ test.describe("The Button's configurator", () => {
     await expect(examples.first()).toHaveAttribute("data-example", "one-action");
     await expect(examples.first().getByRole("heading", { name: "One action" })).toBeVisible();
     await expect(examples.first()).toBeInViewport();
+  });
+});
+
+/* The type cells (.scratch/a11y-and-finish, 07): a long union one member a
+   line, and a link to a definition that previews it in core's Tooltip. */
+test.describe("The API tables' type cells", () => {
+  test.skip(({ colorScheme }) => colorScheme === "dark", "behaviour tests once only (light)");
+
+  const values = (page: Page, row: string) => page.locator(`[id="${row}"] .apiType + br + code`);
+
+  test("a union of more than two members stands one member a line", async ({ page }) => {
+    await open(page, "button");
+    expect(await values(page, "ButtonProps-variant").innerText()).toBe('| "primary"\n| "secondary"\n| "ghost"\n| "plain"\n| "danger"');
+    /* Two members stay on one line. */
+    expect(await values(page, "ButtonProps-size").innerText()).toBe('"sm" | "md"');
+    await open(page, "typography");
+    expect(await values(page, "TextProps-size").innerText()).toBe('| "xs"\n| "sm"\n| "md"\n| "lg"\n| "xl"\n| "2xl"');
+  });
+
+  test("a link to a definition previews it on hover and on focus, Escape closes it, a click follows it", async ({ page }) => {
+    await open(page, "button");
+    const link = page.locator('[id="ButtonProps-size"] .apiType a');
+    const tip = page.getByRole("tooltip");
+    await expect(link).toHaveText("ButtonSize");
+
+    await link.hover();
+    await expect(tip).toContainText('"sm" | "md"');
+    await expect(link).toHaveAccessibleDescription(/"sm" \| "md"/);
+    await page.mouse.move(0, 0);
+    await expect(tip).toHaveCount(0);
+
+    /* The link before it in the reading order is the variant's. */
+    await page.locator('[id="ButtonProps-variant"] .apiType a').focus();
+    await page.keyboard.press("Tab");
+    await expect(link).toBeFocused();
+    await expect(tip).toContainText('"sm" | "md"');
+    await page.keyboard.press("Escape");
+    await expect(tip).toHaveCount(0);
+
+    await link.click();
+    await expect(page).toHaveURL(/#type-ButtonSize$/);
+    await expect(page.locator('[id="type-ButtonSize"]')).toBeInViewport();
+  });
+
+  test("the Button page passes axe with a preview open", async ({ page }) => {
+    await open(page, "button");
+    await page.locator('[id="ButtonProps-size"] .apiType a').hover();
+    await expect(page.getByRole("tooltip")).toBeVisible();
+    const result = await new AxeBuilder({ page }).withTags(STANDARDS).analyze();
+    expect(findings(result).map((f) => `${f.rule}: ${f.where}`)).toEqual([]);
   });
 });
 

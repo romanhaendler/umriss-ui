@@ -355,6 +355,13 @@ describe("readProps over the types a table names and no table is", () => {
     expect(types.FixtureShape!.props.map((p) => p.name)).toEqual(["kind"]);
   });
 
+  it("carries the values of an alias of an alias that comes to literals, and none where the declaration writes them", () => {
+    const { types } = readProps([ALIASES, BASE], ["FixtureAliasProps"]);
+    expect(types.FixtureButtonSize!.definition).toMatchObject({ declaration: "type FixtureButtonSize = FixtureControlSize;", expansion: '"sm" | "md"' });
+    expect(types.FixtureControlSize!.definition!.expansion).toBeUndefined();
+    expect(types.FixtureShapeAlias!.definition!.expansion).toBeUndefined();
+  });
+
   it("stops at a type with a table of its own", () => {
     const { types } = readProps([ALIASES, BASE], ["FixtureAliasProps", "FixtureShape"]);
     expect(types.FixtureShape!.definition).toBeUndefined();

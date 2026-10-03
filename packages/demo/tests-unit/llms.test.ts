@@ -379,6 +379,14 @@ describe("Types on this page (.scratch/types-without-holes)", () => {
     expect(sitePages.find((one) => one.path === "meter/")!.html).toContain('id="type-MeterProps"');
   });
 
+  it("carries no preview of a definition: the prerendered page and the twin have the link (.scratch/a11y-and-finish, 07)", () => {
+    const twin = twinTexts.find((one) => one.path === "gauge.md")!.text;
+    for (const written of [gaugeHtml, twin]) {
+      expect(written).not.toContain("tooltip");
+      expect(written).not.toContain("apiPreview");
+    }
+  });
+
   it("makes a twin's links to a definition absolute, at the page's anchor", () => {
     const twin = twinTexts.find((one) => one.path === "gauge.md")!.text;
     expect(twin).toContain("[`Limit`](https://example.test/fixture/gauge/#type-Limit)");
