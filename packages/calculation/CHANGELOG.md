@@ -15,6 +15,13 @@ under a heading "Changed" of its own, no matter which digit rose.
 
 ### Added
 
+- **The Calculation page says what a screen reader meets**: a section
+  Accessibility after Keyboard gives the sentence each line is read as, in
+  English and in German, the derivation button's name and state, the label
+  to pass and what forced colours and reduced motion change. Every other page
+  links the Calculation page's keys from a Keyboard section of its own. In
+  the demo, the Markdown twins and `docs/llms-full.md`; the calculation is
+  unchanged.
 - **Every export carries a comment**: what a component or a type is for. The
   editor shows it on hover, from the package's `.d.ts`. Nothing else changes.
 - **A prop's default stands in a `@default` tag** where its comment used to say

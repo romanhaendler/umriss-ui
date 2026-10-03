@@ -28,6 +28,7 @@ export const OUTLINE: readonly Rubric[] = [
           "The stylesheet loads itself: the package imports it and marks CSS as a side effect, so a bundler keeps it. `@umriss-ui/calculation/styles.css` stays exported for setups that link stylesheets by hand.",
           "You write the figure as elements and hand in only the givens; the calculation performs every operation it shows, so the screen cannot disagree with the number. Start with [Calculation](#/calculation).",
         ],
+        keysOf: ["calculation"],
         types: [],
         exports: ["Calculation", "Given", "Difference", "Quotient", "Ref"],
         installs: true,
@@ -56,6 +57,11 @@ export const OUTLINE: readonly Rubric[] = [
           { key: "Tab", action: "Moves to the next line that can be opened." },
           { key: "Enter or Space", action: "Opens or closes the derivation beneath the focused line." },
         ],
+        accessibility: [
+          "The calculation is a nested list: every line an item, every derivation a list inside it. A screen reader reads each line as one sentence - \"Availability equals Run time divided by Planned production time, equals 412 min divided by 450 min, equals 91.6 percent, above target 90 percent\" - and the drawn operator, label and figures are hidden from it. A line that opens is a button named \"Show how Availability is derived\", or \"Hide …\" while open, with `aria-expanded`; opening it moves no focus and announces nothing beyond that state.",
+          "The sentence's words are core's wording, so under `@umriss-ui/core/wording/de` the same line reads \"Verfügbarkeit gleich Laufzeit geteilt durch Planbelegungszeit, gleich 412 min geteilt durch 450 min, gleich 91,6 Prozent, über Ziel 90 Prozent\" and its button \"Herleitung von Verfügbarkeit zeigen\" ([Given](#/given/in-german) shows one). The labels are yours and are read as you write them.",
+          "Name the calculation with `aria-label`, which lands on the list; without it a reader meets an unnamed list. Under forced colours the band that couples a line with its operands is drawn as an outline in the system's selection colour; with reduced motion a derivation opens without its movement.",
+        ],
         limits: [
           "No result, formula text or operator of your own: a written-out operation the library did not perform could say something the number does not (ADR-0027).",
           "No input: a calculation shows how a figure came about; changing a given is your application's form.",
@@ -71,6 +77,7 @@ export const OUTLINE: readonly Rubric[] = [
           "`Sum`, `Product` and `Difference` (a − b − c) take two or more operands, `Quotient` exactly two. A quantity used twice is defined once with an `id` and stands elsewhere as a `Ref`, which shows its name and number but never its derivation again.",
         ],
         alternatives: [{ when: "A sheet read top to bottom, line by line", use: "chain" }],
+        keysOf: ["calculation"],
         limits: [
           "Four operators and nothing else – no powers, roots or functions; compute those before and hand them in as givens.",
           "A unit is a label and is never converted or checked; the calculation does no unit algebra.",
@@ -87,6 +94,7 @@ export const OUTLINE: readonly Rubric[] = [
           "A chain in view stands open – it is the working itself. What should show only on request goes into one line as a tree, which folds. Only an `Interim` shows the running value (ADR-0028).",
         ],
         alternatives: [{ when: "A figure made of factors, folded to its formula", use: "tree" }],
+        keysOf: ["calculation"],
         limits: ["A chain in view does not fold; as an operand of a tree it folds to its last interim."],
         types: ["ChainProps", "ChainOperandProps", "QuantityProps"],
         exports: ["Chain", "Plus", "Minus", "Times", "DividedBy", "Interim"],
@@ -99,6 +107,7 @@ export const OUTLINE: readonly Rubric[] = [
           "A given with `asOf` and `ages` carries a freshness through core, as a `Stat` does – beside the number, never instead of its verdict. There are no default ages.",
           "The operator words, the reasons for absence and the number formats are core's wording; German comes from `@umriss-ui/core/wording/de` (ADR-0019).",
         ],
+        keysOf: ["calculation"],
         types: ["GivenProps"],
         exports: ["Given"],
       },
@@ -116,6 +125,7 @@ export const OUTLINE: readonly Rubric[] = [
           { when: "A ratio across two metrics, such as FTE per head", use: "a calculation of its own, a `Quotient` of two givens" },
           { when: "Many figures per row, sorted and filtered", use: "`Table` from @umriss-ui/table" },
         ],
+        keysOf: ["calculation"],
         limits: [
           "A calculation with metrics only adds and subtracts: `Product`, `Quotient`, `Times` and `DividedBy` fail on the first render, since a factor would need a unit in every metric.",
           "Unit, format and places belong to the metric; on a quantity they fail on the first render, and so does a missing or unknown metric key in a `value`.",
@@ -138,6 +148,7 @@ export const OUTLINE: readonly Rubric[] = [
         about: [
           "An absent given is never zero: every quantity that depends on it is absent too, with the reason, up to the result. A quotient by zero is absent with its own reason.",
         ],
+        keysOf: ["calculation"],
         types: [],
         exports: ["Calculation"],
       },
@@ -145,6 +156,7 @@ export const OUTLINE: readonly Rubric[] = [
         id: "worked-examples",
         name: "Worked examples",
         sentence: "Whole figures as a screen shows them: the cost per stop of a day's tours, invoices with discount and VAT, and the equipment effectiveness of a hall, each built from data.",
+        keysOf: ["calculation"],
         types: [],
         exports: ["Calculation", "Chain", "Given", "Ref"],
       },

@@ -41,5 +41,6 @@ export const EXAMPLE_ADDRESSES: readonly ExampleAddress[] = exampleAddresses(EXA
 /** A sample for the accessibility check: the scenarios page, the page with the
     densest chart, the one with two charts beside each other, the instrument
     with the most text, the page whose examples carry a custom tooltip, and
-    the Chart page with its Keyboard and Accessibility sections. */
-export const SAMPLE = ["scenarios", "limitline", "matrix", "controlchart", "axis", "chart"] as const;
+    the Chart page with its Keyboard and Accessibility sections, and Bar, whose
+    Keyboard section is the sentence linking Chart's keys. */
+export const SAMPLE = ["scenarios", "limitline", "matrix", "controlchart", "axis", "chart", "bar"] as const;
