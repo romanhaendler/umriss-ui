@@ -18,4 +18,6 @@ checkPage({
   packageName: "@umriss-ui/table",
   importLine: 'import { useTable } from "@umriss-ui/table";',
   limits: "manual-mode",
+  /* Manual mode is a feature page without a table of its own. */
+  tablePageId: "first-table",
 });
