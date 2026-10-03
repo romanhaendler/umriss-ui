@@ -64,4 +64,6 @@ export const SAMPLE = [
   "splitter",
   "stepper",
   "fileinput",
+  /* The token table: a column drawn in the other theme on every page. */
+  "theming",
 ] as const;

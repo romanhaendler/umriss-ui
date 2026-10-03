@@ -19,7 +19,11 @@ import type { PropEntry, TypeEntry } from "./propsReader.ts";
 /** A piece of a written text - the marks a page's texts may carry. */
 export type Span =
   | { kind: "text" | "code" | "bold"; text: string }
-  | { kind: "link"; text: string; href: string };
+  | { kind: "link"; text: string; href: string }
+  /** A colour drawn by the browser: `text` is the CSS value painted, in the
+      given `color-scheme` - the token table's swatches. Decoration: the
+      Markdown leaves it out, and the HTML hides it from a screen reader. */
+  | { kind: "swatch"; text: string; scheme: "light" | "dark" };
 
 export interface ApiRow {
   name: string;
@@ -211,6 +215,7 @@ export function spansHtml(spans: readonly Span[]): string {
       if (span.kind === "code") return `<code>${inner}</code>`;
       if (span.kind === "bold") return `<strong>${inner}</strong>`;
       if (span.kind === "link") return `<a href="${escape(hrefOf(span.href))}">${inner}</a>`;
+      if (span.kind === "swatch") return `<span class="tokenSwatch" aria-hidden="true" style="background:${inner};color-scheme:${span.scheme}"></span>`;
       return inner;
     })
     .join("");
@@ -275,6 +280,7 @@ export function spansMarkdown(spans: readonly Span[]): string {
       if (span.kind === "code") return markdownCode(span.text);
       if (span.kind === "bold") return `**${span.text}**`;
       if (span.kind === "link") return `[${span.text}](${span.href})`;
+      if (span.kind === "swatch") return "";
       return span.text;
     })
     .join("");

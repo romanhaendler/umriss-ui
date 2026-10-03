@@ -18,7 +18,7 @@
 
 @layer umriss.tokens {
   :root {
-    /* ---- Neutral: Tinte & Papier ---- */
+    /* ---- Neutral: Ink & Paper ---- */
     --u-color-bg: light-dark(#fafafa, #0f0f10);
     --u-color-surface: light-dark(#ffffff, #161618);
     --u-color-surface-sunken: light-dark(#f4f4f5, #1e1e21);
@@ -203,8 +203,8 @@
     --u-drawer-width: 400px;
 
     /* ---- Shadow stacks: every step has one job ----
-       Card:    edge - contact with the ground - soft depth
-       Overlay: edge - near shadow - depth                    */
+       Card: edge, contact with the ground, soft depth.
+       Overlay: edge, near shadow, depth. */
     --u-shadow-card:
       var(--u-edge),
       0 1px 2px light-dark(rgba(23, 23, 23, 0.04), rgba(0, 0, 0, 0.4)),
@@ -317,7 +317,8 @@
      ============================================================ */
 
 
-  /* Stacking order. Scattered literals stood here before (900 for panels, 1000
+  /* ---- Stacking order ----
+     Scattered literals stood here before (900 for panels, 1000
      toast, 1100 tooltip), which is how a menu inside a modal ended up behind the
      dialog. Popovers now portal into the nearest <dialog> ancestor, and this scale
      orders the rest. */

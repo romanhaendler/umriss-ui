@@ -83,6 +83,13 @@ export const OUTLINE: readonly Rubric[] = [
     sentence: "What every component shares and an application sets once: its colours, its size, its words.",
     pages: [
       {
+        id: "theming",
+        name: "Theming",
+        sentence: "Make the components look like your product (theme, colours, dark mode). Every colour, size, shadow and duration they draw with is a token, a `--u-…` custom property you override with ordinary CSS; the table lists each one with its light and dark value.",
+        types: [],
+        exports: [],
+      },
+      {
         id: "sizes",
         name: "Sizes",
         sentence: "How wide and how tall a field is (width, height, field size). A field fills its place, holds still in a row whatever it shows, takes the width of its value with `chars`, and takes one size from the place it stands in.",

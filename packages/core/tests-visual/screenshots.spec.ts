@@ -255,3 +255,14 @@ test("The toast deck on a phone", async ({ page }, testInfo) => {
   await page.mouse.move(0, 0);
   await toastRegion(page, "phone", testInfo.project.name);
 });
+
+/* The token table's first group (theming-and-wording-reference 01). Its
+   swatches take their column's theme whatever the page's: the dark column's
+   swatch is dark on a light page, the light column's light on a dark one - a
+   promise only pixels hold. */
+test("The token table's first group", async ({ page }, testInfo) => {
+  await open(page, "theming");
+  const group = page.locator('section[aria-labelledby="tokens"] .apiBlock').first();
+  await group.scrollIntoViewIfNeeded();
+  await expect(group).toHaveScreenshot(`tokens-first-group-${testInfo.project.name}.png`);
+});
