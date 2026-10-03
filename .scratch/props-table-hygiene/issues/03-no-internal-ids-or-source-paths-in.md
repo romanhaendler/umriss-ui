@@ -1,12 +1,22 @@
 # 03: No internal ids or source paths in user text; ADR numbers are links
 
-Status: ready-for-agent
+Status: done
 Blocked by: `types-without-holes` 01 (One table model, two writers)
 Spec: `.scratch/props-table-hygiene/spec.md`
 
 **What to build:** The 32 charts descriptions citing `R-x.y` move those numbers into `@remarks`, which the reader drops. Every `ADR-` with four digits in a description or page text (lede, about, alternatives, keys, limits) becomes a link to that ADR's file on GitHub, resolved by number at generation time; an unresolvable number stops the generator. "See `lib/language`" becomes a link to the Language page. The gate gains the class *internal reference*: a requirement number or a source path in user-facing text stops the build, no exception list.
 
-- [ ] Gate tests: a fixture with a requirement number and one with a source path fail with file and line; an unresolvable ADR number fails; corrected fixtures pass.
-- [ ] Built-site guard: no page text contains `R-` followed by digits; every `ADR-` mention is inside a link.
-- [ ] Both writers render the ADR and Language links identically.
-- [ ] The workspace passes the gate.
+- [x] Gate tests: a fixture with a requirement number and one with a source path fail with file and line; an unresolvable ADR number fails; corrected fixtures pass.
+- [x] Built-site guard: no page text contains `R-` followed by digits; every `ADR-` mention is inside a link.
+- [x] Both writers render the ADR and Language links identically.
+- [x] The workspace passes the gate.
+
+## Comments
+
+Delivered: `packages/demo/src/tooling/references.ts`, which is pure. It holds `internalReferences` (a requirement number `R-…`, a source path `src/…`/`lib/…` or a `.ts`/`.tsx`/`.css` file name outside a package subpath, and an ADR number that no file in `docs/adr` answers; link addresses are not read), `linkAdrs` (turns a bare `ADR-NNNN` into `[ADR-NNNN](https://github.com/…/docs/adr/<file>.md)`, leaves code and existing links alone, and throws on an unknown number), `outlineTexts`/`pageTexts` (lede, about, alternatives, keys, limits and rubric sentence) and `siteLeaks`. The props reader takes an optional `check` and returns `flags` with file, line, type and prop, the way it returns gaps. `generateProps` lists every flagged description and every flagged outline text (`demo/outline.ts:<line>  <page>`) in one run and exits. It then links the ADR numbers in props.json (descriptions, deprecations, phrase defaults) and writes `demo/.generated/adrs.json`. Each demo's `examples.ts` passes that file to `buildDemo`, which links the outline's texts, the example leads and the scenarios. `renderLlms` does the same for the llms text and the prerendered pages. The charts' 37 prop comments with `(R-x.y)` now carry `@remarks R-x.y`. This includes `SeriesBase` and `MaterializedSeries.y0`. The internal `layout.ts` was left alone. The two Benchmark examples' comments lost their R numbers. `UmrissProviderProps.language` reads "see [Language](#/language)".
+
+Tests: `references.test.ts` covers links by number, existing links and code untouched, the unknown ADR stopping, the finds and non-finds of `internalReferences`, `outlineFlags` with lines, both writers rendering the ADR and Language links identically, and `siteLeaks`. `propsReader.test.ts` uses the fixture `references.tsx`: a requirement number, a source path and ADR-9999 are flagged with file and line, and the corrected props pass. `llmsGuard.test.ts` checks that no prerendered page of the five demos leaks. `scripts/build-pages.mjs` runs the same guard over the built site. The shared page check got "the page that installs names no requirement and no ADR outside a link". A planted leak in `Legend.tsx` stopped `pnpm props` with `src/Legend.tsx:20  LegendProps.placement: R-4.11, src/Legend.tsx, ADR-0099`. lint, typecheck and test:unit are green. The demo smoke tests timed out once under a load average of about 90 and passed on rerun. Playwright ran the shell and page suites and the Page head screenshots in ui-light and table-light: 113 passed. 4 ui-light page tests failed on `browserType.launch` timeouts under load; on a rerun the ui-light page suite passed (8 passed), including the new check.
+
+Baselines moved: none. The Page head screenshots in ui-light and table-light passed unchanged.
+
+Deviations: the browser cannot read `docs/adr`, so the generator writes `adrs.json` and the shell gets it through `buildDemo`, with one line in each demo's `examples.ts`. Code blocks are exempt from the ADR half of the site guard, because a code block cannot hold a link: two example comments, ControlChart and TreeView, name ADR-0008 and ADR-0003. A package subpath such as `@umriss-ui/core/styles.css` is not a source path. That is part of the rule's definition, not an exception list. The "rest of the API" declarations in charts' `llms-full.md` still show `@remarks R-…` inside code, which is the source as written. Example titles and leads are linked but not part of the gate; the site guard covers them.
