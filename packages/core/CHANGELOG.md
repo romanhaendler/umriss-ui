@@ -76,6 +76,15 @@ commit.
   members or its declaration. "The rest of the API" holds every export that
   neither a table nor such a definition explains, `useTree` and `useToast`
   among them.
+- **Every page whose examples take the keyboard says its keys**: Button,
+  Input, Textarea, Card, Typography, Alert and Toast have a Keyboard table of
+  their own (Toast's names Alt+T and Escape on the deck); the other pages with
+  a control in their examples link the pages of those controls. Button,
+  Textarea, Spinner, ProgressBar, Skeleton, Alert, Toast, Stepper, Stat, Meter
+  and Dock have a section Accessibility after Keyboard: the role and name, what
+  is announced and when, the label to pass, and what forced colours and reduced
+  motion change. In the demo, the Markdown twins and `docs/llms-full.md`; the
+  components are unchanged.
 
 ## 0.24.0 – The select's own list (Oct. 2026)
 

@@ -43,22 +43,30 @@ const UNANNOUNCED: Readonly<Record<string, string>> = {
     "The chart's readout speaks only after a key on the plot, so a page where it can speak has a Keyboard section, and every chart page's leads by `keysOf` to Chart, whose Accessibility section describes the readout.",
 };
 
+/** The slots that hold a stage: the examples, and the configurator a page may
+    open with (.scratch/configurator), whose stage renders the component as an
+    example's does. A fault names a configurator "configurator". */
+const SLOTS = "[data-example], [data-configurator]";
+
 /** The first element of the page's stages that Tab reaches, named, or null. */
 async function firstTabStop(page: Page): Promise<string | null> {
   const ids = await page
-    .locator("[data-example]")
-    .evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.example!));
+    .locator(SLOTS)
+    .evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.example ?? "configurator"));
   for (const id of ids) {
-    const example = page.locator(`[data-example="${id}"]`);
+    const example = page.locator(id === "configurator" ? "[data-configurator]" : `[data-example="${id}"]`);
     if ((await example.locator(".exampleStage").count()) === 0) continue;
     await focusBeforeStage(example);
     await page.keyboard.press("Tab");
-    const reached = await page.evaluate((exampleId) => {
-      const el = document.activeElement;
-      const stage = el?.closest(".exampleStage");
-      if (!el || !stage || stage.closest("[data-example]")?.getAttribute("data-example") !== exampleId) return null;
-      return el.tagName.toLowerCase() + (el.getAttribute("aria-label") ? ` "${el.getAttribute("aria-label")}"` : "");
-    }, id);
+    const reached = await page.evaluate(
+      ({ slotId, slots }) => {
+        const el = document.activeElement;
+        const slot = el?.closest(".exampleStage")?.closest<HTMLElement>(slots);
+        if (!el || !slot || (slot.dataset.example ?? "configurator") !== slotId) return null;
+        return el.tagName.toLowerCase() + (el.getAttribute("aria-label") ? ` "${el.getAttribute("aria-label")}"` : "");
+      },
+      { slotId: id, slots: SLOTS },
+    );
     if (reached) return `${id} › ${reached}`;
   }
   return null;
@@ -67,16 +75,16 @@ async function firstTabStop(page: Page): Promise<string | null> {
 /** The first live region in the page's stages that no exception covers. */
 async function firstLiveRegion(page: Page): Promise<string | null> {
   return page.evaluate(
-    ({ live, excepted }) => {
+    ({ live, excepted, slots }) => {
       for (const el of document.querySelectorAll(`.exampleStage :is(${live})`)) {
         if (excepted.some((selector) => el.matches(selector))) continue;
-        const example = el.closest("[data-example]")?.getAttribute("data-example");
+        const example = el.closest<HTMLElement>(slots)?.dataset.example ?? "configurator";
         const role = el.getAttribute("role");
         return `${example} › ${el.tagName.toLowerCase()}${role ? `[role=${role}]` : `[aria-live=${el.getAttribute("aria-live")}]`}`;
       }
       return null;
     },
-    { live: LIVE, excepted: Object.keys(UNANNOUNCED) },
+    { live: LIVE, excepted: Object.keys(UNANNOUNCED), slots: SLOTS },
   );
 }
 
