@@ -348,6 +348,14 @@
 
 /* ---------------- API-Tabelle ---------------- */
 
+/* The tables arrive as one piece of HTML (`tooling/apiTable.ts`); they stand
+   apart as the section's own children would. */
+.apiTables {
+  display: flex;
+  flex-direction: column;
+  gap: var(--u-space-5);
+}
+
 .apiBlock {
   display: flex;
   flex-direction: column;
@@ -356,6 +364,8 @@
 
 .apiTitle {
   margin: 0;
+  /* Its `#type-<Name>` is an address; the sticky header must not cover it. */
+  scroll-margin-top: 76px;
   font-size: var(--u-text-sm);
   font-weight: var(--u-weight-medium);
 }
@@ -487,9 +497,15 @@
   }
 }
 
-.apiRequired {
-  margin-left: 2px;
-  color: var(--u-color-danger-text);
+/* `required` as a word and not a red star: the label the llms text carries
+   too, and one a screen reader reads out. */
+.apiBadge {
+  margin-left: var(--u-space-2);
+  padding: 0 var(--u-space-1);
+  border: 1px solid var(--u-edge-color);
+  border-radius: var(--u-radius-sm);
+  font-size: 10px;
+  color: var(--u-color-text-secondary);
 }
 
 .code:focus-visible {

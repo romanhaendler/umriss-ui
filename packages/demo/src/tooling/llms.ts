@@ -26,6 +26,7 @@ import type { Rubric, Page } from "../outline.ts";
 import { byRank, parseFileName, parseScenarioName } from "./fileName.ts";
 import { displaySource } from "./source.ts";
 import type { TypeEntry } from "./propsReader.ts";
+import { apiHtml, markdownCell as cell, markdownCode as code, tableMarkdown, tableModel } from "./apiTable.ts";
 
 export interface LlmsJob {
   /** The package's directory: `package.json` and `demo/` are read there. */
@@ -33,6 +34,9 @@ export interface LlmsJob {
   outline: readonly Rubric[];
   /** The generated props tables - what `generateProps` just wrote. */
   tables: Readonly<Record<string, TypeEntry>>;
+  /** The `on…` props in a table of their own, as the demo shows them
+      (`EVENTS_APART` in the table's and the schedule's outline). */
+  eventsApart?: boolean;
 }
 
 interface Manifest {
@@ -71,17 +75,6 @@ function fenced(language: string, text: string): string {
   const longest = Math.max(2, ...(text.match(/`+/g) ?? []).map((run) => run.length));
   const fence = "`".repeat(longest + 1);
   return `${fence}${language}\n${text.replace(/\n+$/, "")}\n${fence}`;
-}
-
-/** Inline code that survives a backtick in the text (a template literal type). */
-function code(text: string): string {
-  if (!text.includes("`")) return `\`${text}\``;
-  return `\`\` ${text} \`\``;
-}
-
-/** One table cell: one line, and a pipe that does not end the cell. */
-function cell(text: string): string {
-  return text.replace(/\s*\n\s*/g, " ").replace(/\|/g, "\\|");
 }
 
 /* ------------------------------------------------------------------ */
@@ -343,31 +336,8 @@ function markdownToHtml(markdown: string, homepage: string, lift: number, anchor
   return (marked.parse(markdown, { async: false }) as string).trim();
 }
 
-function tableMarkdown(entry: TypeEntry): string {
-  const parameter = entry.parameter.length === 0 ? "" : `<${entry.parameter.join(", ")}>`;
-  const lines = [`##### ${code(entry.name + parameter)}`, ""];
-  if (entry.props.length === 0) lines.push("Declares no props of its own.");
-  else {
-    lines.push("| Prop | Type | Default | Description |", "|---|---|---|---|");
-    for (const prop of entry.props) {
-      const name = `${code(prop.name)}${prop.optional ? "" : " (required)"}`;
-      const origin = prop.inheritedFrom === undefined ? "" : ` From ${code(prop.inheritedFrom)}.`;
-      lines.push(
-        `| ${name} | ${cell(code(prop.type))} | ${prop.defaultValue === undefined ? "—" : cell(code(prop.defaultValue))} | ${cell(prop.description + origin)} |`,
-      );
-    }
-  }
-  const also = entry.alsoTakes ?? [];
-  if (also.length > 0) lines.push("", `Also every prop of ${also.map(code).join(", ")}.`);
-  if (entry.inherits !== undefined) {
-    const without = entry.omitted.length === 0 ? "" : ` – without ${entry.omitted.map(code).join(", ")}`;
-    lines.push("", `Also takes every attribute of ${entry.inherits.startsWith("<") ? code(entry.inherits) : entry.inherits}${without}.`);
-  }
-  return lines.join("\n");
-}
-
 /** Both texts of one package, from its directory. Pure apart from reading. */
-export function renderLlms({ packageDir, outline, tables }: LlmsJob): { index: string; full: string; pages: SitePage[] } {
+export function renderLlms({ packageDir, outline, tables, eventsApart = false }: LlmsJob): { index: string; full: string; pages: SitePage[] } {
   const manifest = JSON.parse(readFileSync(join(packageDir, "package.json"), "utf8")) as Manifest;
   const demoDir = join(packageDir, "demo");
   const examples = listExamples(demoDir)
@@ -424,8 +394,10 @@ export function renderLlms({ packageDir, outline, tables }: LlmsJob): { index: s
     `Install with \`${install}\`. This text is generated from the package's demo (${manifest.homepage}): every page with its import line, its examples - the source exactly as it runs, with the package name where the demo imports its own source - its props tables generated from the code, and what it deliberately does not do. The pages index stands in ${manifest.homepage}llms.txt.`,
   ];
   /* Where each page's part of the full text begins and ends - the site's
-     pages are cut from it, so they cannot say anything else. */
-  const cuts: { page?: Page; from: number; to: number }[] = [];
+     pages are cut from it, so they cannot say anything else. The API section
+     is the one part a site page does not take as Markdown: it carries the
+     HTML the app mounts, written from the same model. */
+  const cuts: { page?: Page; from: number; to: number; api?: { from: number; to: number; html: string } }[] = [];
   if (scenarios.length > 0) {
     const from = parts.length;
     parts.push("", "## Scenarios", "", "Composed, realistic screens built from the package. A numbered mark on the screen is an element with `data-callout`.");
@@ -465,19 +437,23 @@ export function renderLlms({ packageDir, outline, tables }: LlmsJob): { index: s
         parts.push("", "#### Keyboard", "", "| Key | Action |", "|---|---|", ...page.keys.map(({ key, action }) => `| ${cell(code(key))} | ${cell(action)} |`));
       }
 
+      let api: { from: number; to: number; html: string } | undefined;
       if (page.types.length > 0) {
         parts.push("", "#### API");
-        for (const type of page.types) {
+        const models = page.types.map((type) => {
           const entry = tables[type];
           if (entry === undefined) throw new Error(`\`${type}\` has no generated table - did \`pnpm props\` run?`);
-          parts.push("", tableMarkdown(entry));
-        }
+          return tableModel(entry, eventsApart);
+        });
+        const at = parts.length;
+        for (const model of models) parts.push("", tableMarkdown(model));
+        api = { from: at, to: parts.length, html: apiHtml(models) };
       }
 
       if (page.limits !== undefined) {
         parts.push("", "#### Known limits", "", page.limits.map((text) => `- ${text}`).join("\n"), "", `What umriss deliberately does not build, and why: [ADR-0032](${ADR_0032}).`);
       }
-      cuts.push({ page, from, to: parts.length });
+      cuts.push({ page, from, to: parts.length, ...(api === undefined ? {} : { api }) });
     }
   }
 
@@ -539,27 +515,31 @@ export function renderLlms({ packageDir, outline, tables }: LlmsJob): { index: s
         new Map(scenarios.map((scenario) => [scenario.title, scenario.id])),
       ),
     },
-    ...cuts.flatMap(({ page, from, to }) =>
-      page === undefined
-        ? []
-        : [
-            {
-              path: addressOfPlace(`/${page.id}`).slice(1),
-              url: pageUrl(manifest, page),
-              name: page.name,
-              title: `${page.name} – React ${noun} · ${manifest.name}`,
-              description: plain(page.sentence),
-              /* "Demo page: <this page>" is for the agent reading the full
-                 text; on the page itself it would point at itself. */
-              html: markdownToHtml(
-                `${parts.slice(from, to).filter((line) => !line.startsWith("Demo page: ")).join("\n")}\n\n${everyPage}`,
-                home,
-                2,
-                new Map(examples.filter((example) => example.pageId === page.id).map((example) => [example.title, example.id])),
-              ),
-            },
-          ],
-    ),
+    ...cuts.flatMap(({ page, from, to, api }) => {
+      if (page === undefined) return [];
+      /* "Demo page: <this page>" is for the agent reading the full text; on
+         the page itself it would point at itself. */
+      const html = (a: number, b: number, tail = "") =>
+        markdownToHtml(
+          `${parts.slice(a, b).filter((line) => !line.startsWith("Demo page: ")).join("\n")}${tail}`,
+          home,
+          2,
+          new Map(examples.filter((example) => example.pageId === page.id).map((example) => [example.title, example.id])),
+        );
+      return [
+        {
+          path: addressOfPlace(`/${page.id}`).slice(1),
+          url: pageUrl(manifest, page),
+          name: page.name,
+          title: `${page.name} – React ${noun} · ${manifest.name}`,
+          description: plain(page.sentence),
+          html:
+            api === undefined
+              ? html(from, to, `\n\n${everyPage}`)
+              : `${html(from, api.from)}\n<div class="apiTables">${api.html}</div>\n${html(api.to, to, `\n\n${everyPage}`)}`,
+        },
+      ];
+    }),
   ];
 
   return { index, full: `${parts.join("\n")}\n`, pages: sitePages };
