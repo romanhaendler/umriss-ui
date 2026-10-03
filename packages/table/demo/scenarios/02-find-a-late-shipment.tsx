@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState, type RefObject } from "react";
 import { Badge, Button, ConfirmDialog, Grid, Stack, Text, useFormats } from "@umriss-ui/core";
 import { ColumnMenu, Export, Pagination, Search, Toolbar, useTable } from "../../src";
 
@@ -245,11 +245,29 @@ function Detail({ row }: { row: Row }) {
   );
 }
 
+/* A pinned column needs room beside it: on a phone it covers half the table.
+   So the column sticks only where the place the screen stands in is at least
+   640 px wide - measured on the place itself, not on the window, which knows
+   nothing of a sidebar or a split view. Narrower, the table scrolls whole. */
+function useWide(): [RefObject<HTMLDivElement | null>, boolean] {
+  const ref = useRef<HTMLDivElement>(null);
+  const [wide, setWide] = useState(true);
+  useLayoutEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+    const observer = new ResizeObserver(() => setWide(element.getBoundingClientRect().width >= 640));
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+  return [ref, wide];
+}
+
 export default function FindALateShipment() {
   const formats = useFormats();
   const [rows, setRows] = useState(START);
   const [toArchive, setToArchive] = useState<readonly Row[]>([]);
   const [message, setMessage] = useState("No action yet.");
+  const [place, wide] = useWide();
 
   const t = useTable(rows, {
     rowKey: (r) => r.id,
@@ -268,7 +286,7 @@ export default function FindALateShipment() {
   };
 
   return (
-    <Stack gap={3}>
+    <Stack ref={place} gap={3}>
       <Stack direction="row" gap={2} wrap>
         <span data-callout="1">
           <Button size="sm" onClick={() => t.setFilter("punctuality", ["Late"])}>
@@ -308,7 +326,7 @@ export default function FindALateShipment() {
         <Column value="delay" label="Delay (min)" aggregate="max" />
 
         <RowDetail>{(r) => <Detail row={r} />}</RowDetail>
-        <RowActions>
+        <RowActions pin={wide}>
           <Action onSelect={(r) => setMessage(`${r.id}: ${r.customer} notified`)}>Notify</Action>
           <Action bulk tone="danger" onSelect={(list) => setToArchive(list)}>
             Archive

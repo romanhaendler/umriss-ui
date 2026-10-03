@@ -7,6 +7,7 @@ import { checkShell } from "@umriss-ui/demo/checks/shell";
 checkShell({
   notOnTheFrontDoor: ["first-table", "toolbar"],
   scenario: "find-a-late-shipment",
+  pinnedScenario: "find-a-late-shipment",
   rail: { name: "AlarmList", pageId: "alarmlist", rubricId: "limits-and-alarms" },
   low: { name: "AlarmList", pageId: "alarmlist" },
   neighbours: [

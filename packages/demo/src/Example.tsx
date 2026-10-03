@@ -44,6 +44,16 @@ function Chevron({ open }: { open: boolean }) {
   );
 }
 
+/** The "Code" toggle of an example, and of a scenario - one control, one look. */
+export function CodeToggle({ open, controls, onToggle }: { open: boolean; controls: string; onToggle: () => void }) {
+  return (
+    <button type="button" className="exampleToggle" aria-expanded={open} aria-controls={controls} onClick={onToggle}>
+      <Chevron open={open} />
+      Code
+    </button>
+  );
+}
+
 export function CodeBlock({ name, source }: { name: string; source: string }) {
   const highlighted = useMemo(() => highlight(source), [source]);
   return (
@@ -87,18 +97,7 @@ export function Example({ example, allOpen, hero = false }: ExampleProps) {
 
   const headId = `example-${example.pageId}-${example.id}`;
   const codeId = `${headId}-code`;
-  const toggle = (
-    <button
-      type="button"
-      className="exampleToggle"
-      aria-expanded={open}
-      aria-controls={codeId}
-      onClick={() => setException(!open)}
-    >
-      <Chevron open={open} />
-      Code
-    </button>
-  );
+  const toggle = <CodeToggle open={open} controls={codeId} onToggle={() => setException(!open)} />;
 
   return (
     <section
