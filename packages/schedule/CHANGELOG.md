@@ -24,6 +24,13 @@ moves from here under the rule above.
   say it. The editor shows it on hover, from the package's `.d.ts`. Nothing
   else changes.
 
+### Fixed
+
+- **`docs/llms-full.md` names the peers in its install line**:
+  `npm install @umriss-ui/schedule @umriss-ui/core @umriss-ui/charts`, read
+  from the manifest. It had named the schedule alone, and an install after it
+  lacked core and charts.
+
 ## 0.3.16 – Core 0.24.0 (Oct. 2026)
 
 Needs `@umriss-ui/core` 0.24; the peer range moves to `^0.24.0`. Nothing else changes for a caller.

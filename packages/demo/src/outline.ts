@@ -52,6 +52,9 @@ export interface Page {
       which a reader imports only some. What one takes and what is documented
       are two questions. */
   exports: readonly string[];
+  /** The page that installs the package: its head shows the install command,
+      derived from the manifest, under the import line. One page per demo. */
+  installs?: true;
 }
 
 export interface Rubric {

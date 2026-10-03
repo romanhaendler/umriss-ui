@@ -30,6 +30,7 @@ const OUTLINE: readonly Rubric[] = [
         limits: ["No second needle."],
         types: ["GaugeProps"],
         exports: ["Gauge"],
+        installs: true,
       },
       { id: "meter", name: "Meter", sentence: "One value as a bar.", types: [], exports: ["Meter"] },
     ],
@@ -66,6 +67,11 @@ describe("llms.txt", () => {
     expect(index).toContain("`docs/llms-full.md`");
   });
 
+  it("says how to install it with the command derived from the manifest, peers and all", () => {
+    expect(index).toContain("Install with `npm install @umriss-ui/fixture @umriss-ui/core`.");
+    expect(full).toContain("Install with `npm install @umriss-ui/fixture @umriss-ui/core`.");
+  });
+
   it("lists the scenarios first, with their lead and a link", () => {
     expect(index).toContain("## Scenarios\n");
     expect(index).toContain("- [Watch a service's latency](https://example.test/fixture/#watch-latency): An on-call engineer keeps it open beside the incident channel.\n");
@@ -82,6 +88,11 @@ describe("llms.txt", () => {
 describe("llms-full.txt", () => {
   it("heads every page with its sentence and import line", () => {
     expect(full).toContain("### Gauge\n\nOne value as a needle (also called a `dial`), beside the [Meter](#/meter) and its [first example](#/meter/basic).\n\n```ts\nimport { Gauge } from \"@umriss-ui/fixture\";\n```\n");
+  });
+
+  it("sets the install command under the import line of the page that installs, and of no other", () => {
+    expect(full).toContain('import { Gauge } from "@umriss-ui/fixture";\n```\n\n```sh\nnpm install @umriss-ui/fixture @umriss-ui/core\n```\n');
+    expect(full.slice(full.indexOf("### Meter"))).not.toContain("```sh");
   });
 
   it("carries every example's source as the demo shows it - title gone, package name in", () => {
@@ -167,6 +178,10 @@ describe("the site's pages (ADR-0037)", () => {
     expect(html).toContain("The value the needle points at.");
     expect(html).toContain("<pre><code");
     expect(html).not.toContain("#/");
+  });
+
+  it("carries the install command as text on the page that installs", () => {
+    expect(byPath.get("gauge/")!.html).toContain('<pre><code class="language-sh">npm install @umriss-ui/fixture @umriss-ui/core\n</code></pre>');
   });
 
   it("links every page from every page", () => {

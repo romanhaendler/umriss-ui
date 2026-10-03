@@ -45,7 +45,7 @@ export const OUTLINE: readonly Rubric[] = [
         name: "Installation",
         sentence: "What an application does once before its first component: install the package, choose the fonts and let light and dark follow the page. The styles load themselves, and no provider is needed.",
         about: [
-          "Install with `pnpm add @umriss-ui/core` (React 18 or newer). Importing a component brings its stylesheet along; `@umriss-ui/core/styles.css` stays exported for setups that link stylesheets by hand. The styles touch nothing outside the components: no rule on `html`, `body` or `*` (ADR-0021).",
+          "The command installs the package alone: React 18 or newer is its only peer and stays the application's own. Importing a component brings its stylesheet along; `@umriss-ui/core/styles.css` stays exported for setups that link stylesheets by hand. The styles touch nothing outside the components: no rule on `html`, `body` or `*` (ADR-0021).",
           "Every token is a `--u-…` custom property in the cascade layer `umriss.tokens`, so CSS written outside a layer overrides it. The fonts are the application's: the tokens name Geist first and fall back to the system fonts, and nothing is loaded. For Geist, install `@fontsource/geist-sans` (400, 500, 600) and `@fontsource/geist-mono` (400).",
           "Light and dark follow the application's `color-scheme`, since every two-valued token is written `light-dark(…)`. Nothing set means light; one part of a page can be dark on its own.",
         ],
@@ -56,6 +56,7 @@ export const OUTLINE: readonly Rubric[] = [
         ],
         types: [],
         exports: [],
+        installs: true,
       },
       {
         id: "umrissprovider",

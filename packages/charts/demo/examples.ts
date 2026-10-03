@@ -8,11 +8,12 @@
    the shell accepts that one spelling and no other. */
 
 import { buildDemo } from "@umriss-ui/demo";
+import manifest from "../package.json";
 import props from "./.generated/props.json";
 import { ADDRESSES } from "./outline";
 
 export const DEMO = buildDemo({
-  packageName: "@umriss-ui/charts",
+  manifest,
   addresses: ADDRESSES,
   scenarios: import.meta.glob<Record<string, unknown>>("./scenarios/*.tsx", { eager: true }),
   examples: import.meta.glob<Record<string, unknown>>("./examples/*/*.tsx", { eager: true }),

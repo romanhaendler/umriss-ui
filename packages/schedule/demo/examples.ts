@@ -2,11 +2,12 @@
    shell: `import.meta.glob` resolves relative to the file that calls it. */
 
 import { buildDemo } from "@umriss-ui/demo";
+import manifest from "../package.json";
 import props from "./.generated/props.json";
 import { ADDRESSES, EVENTS_APART } from "./outline";
 
 export const DEMO = buildDemo({
-  packageName: "@umriss-ui/schedule",
+  manifest,
   addresses: ADDRESSES,
   scenarios: import.meta.glob<Record<string, unknown>>("./scenarios/*.tsx", { eager: true }),
   examples: import.meta.glob<Record<string, unknown>>("./examples/*/*.tsx", { eager: true }),

@@ -64,8 +64,10 @@
   color: var(--u-color-text-secondary);
 }
 
-/* The line one copies. It looks like code, because it is code. */
-.importLine {
+/* The lines one copies - the import, and the install command on the page
+   that installs. They look like code, because they are code. */
+.importLine,
+.installLine {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -79,7 +81,8 @@
 
 /* A line longer than the column wraps inside its box, and the copy key
    stays in sight: scrolled, it had hidden the key on a phone. */
-.importLine code {
+.importLine code,
+.installLine code {
   min-width: 0;
   font-family: var(--u-font-mono);
   font-size: var(--u-text-sm);
@@ -87,13 +90,15 @@
   overflow-wrap: anywhere;
 }
 
-/* The package's name is one word: it moves to the next line whole rather
+/* A package's name is one word: it moves to the next line whole rather
    than break at its hyphen. */
-.importLine code span {
+.importLine code span,
+.installLine code span {
   white-space: nowrap;
 }
 
-.importLine .codeCopy {
+.importLine .codeCopy,
+.installLine .codeCopy {
   flex: none;
 }
 

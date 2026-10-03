@@ -26,6 +26,7 @@ import type { Rubric, Page } from "../outline.ts";
 import { byRank, parseFileName, parseScenarioName } from "./fileName.ts";
 import { displaySource } from "./source.ts";
 import type { TypeEntry } from "./propsReader.ts";
+import { installCommand, type InstallManifest } from "./install.ts";
 import { apiHtml, markdownCell as cell, markdownCode as code, tableMarkdown, tableModel } from "./apiTable.ts";
 
 export interface LlmsJob {
@@ -39,8 +40,7 @@ export interface LlmsJob {
   eventsApart?: boolean;
 }
 
-interface Manifest {
-  name: string;
+interface Manifest extends InstallManifest {
   version: string;
   description: string;
   homepage: string;
@@ -355,7 +355,7 @@ export function renderLlms({ packageDir, outline, tables, eventsApart = false }:
   }
 
   const fullUrl = `${manifest.homepage}llms-full.txt`;
-  const install = `pnpm add ${manifest.name}`;
+  const install = installCommand(manifest);
 
   /* The index. */
   const index = [
@@ -418,6 +418,7 @@ export function renderLlms({ packageDir, outline, tables, eventsApart = false }:
       const from = parts.length;
       parts.push("", `### ${page.name}`, "", page.sentence);
       if (page.exports.length > 0) parts.push("", fenced("ts", `import { ${page.exports.join(", ")} } from "${manifest.name}";`));
+      if (page.installs === true) parts.push("", fenced("sh", install));
       parts.push("", `Demo page: ${pageUrl(manifest, page)}`);
       if (page.about !== undefined) parts.push("", page.about.join("\n\n"));
 

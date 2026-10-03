@@ -1,8 +1,10 @@
 /* One page, checked against this demo: code toggle, page toggle, copy button.
    The tests stand with the shell (`@umriss-ui/demo/checks/page.ts`). */
 
-import { checkPage } from "@umriss-ui/demo/checks/page";
-import { open, openExample, openScenario } from "./navigation";
+import { checkInstall, checkPage } from "@umriss-ui/demo/checks/page";
+import { ALL_PAGES, open, openExample, openScenario } from "./navigation";
+
+checkInstall({ open, pages: ALL_PAGES, command: "npm install @umriss-ui/schedule @umriss-ui/core @umriss-ui/charts" });
 
 checkPage({
   open,

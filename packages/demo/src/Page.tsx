@@ -10,7 +10,7 @@
    The reasoning behind a component is not here: it stands in the ADRs. What a
    user must know to use it right is the "about" under the lede. */
 
-import { useState, type ReactNode } from "react";
+import { Fragment, useState, type ReactNode } from "react";
 import { Example } from "./Example";
 import { CopyButton } from "./CopyButton";
 import { Prose } from "./Prose";
@@ -31,6 +31,24 @@ function ImportLine({ exports, packageName }: { exports: readonly string[]; pack
         <span>{`"${packageName}";`}</span>
       </code>
       <CopyButton text={text} />
+    </div>
+  );
+}
+
+/** The install command on the page that installs - one line, copied whole.
+    Every package name is a word of its own, as in the import line. */
+function InstallLine({ command }: { command: string }) {
+  return (
+    <div className="installLine">
+      <code>
+        {command.split(" ").map((word, i) => (
+          <Fragment key={i}>
+            {i > 0 && " "}
+            <span>{word}</span>
+          </Fragment>
+        ))}
+      </code>
+      <CopyButton text={command} />
     </div>
   );
 }
@@ -78,6 +96,7 @@ export function Page({ demo, page }: PageProps) {
           <Prose text={page.sentence} />
         </p>
         {page.exports.length > 0 && <ImportLine exports={page.exports} packageName={demo.packageName} />}
+        {page.installs === true && <InstallLine command={demo.install} />}
         {page.about !== undefined && (
           <div className="pageAbout">
             {page.about.map((text) => (

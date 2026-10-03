@@ -38,12 +38,13 @@ export const OUTLINE: readonly Rubric[] = [
         name: "Installation",
         sentence: "Two packages, no stylesheet to import, and one hook that turns an array of rows into a table.",
         about: [
-          "Install `pnpm add @umriss-ui/table @umriss-ui/core`. The core package is a peer dependency: the table reads its provider, its formats and its wording (ADR-0016). React 18 or 19 as a peer as well.",
+          "The command brings the core package along, a peer dependency: the table reads its provider, its formats and its wording (ADR-0016). React 18 or 19 is a peer as well and stays the application's own.",
           "There is no stylesheet to import. The table loads its own, and the core package loads the tokens it reads; both lie in cascade layers, so the application's CSS wins. `@umriss-ui/table/styles.css` stays exported for setups that link stylesheets by hand.",
           "A table is read by default: a native table, where every control is one Tab away and a screen reader keeps its table keys. Grid mode makes it one Tab stop whose cells the arrow keys walk, and it is the mode for editing. Switch it on only where people work in the cells (ADR-0034).",
         ],
         types: [],
         exports: ["useTable"],
+        installs: true,
       },
       {
         id: "table",
