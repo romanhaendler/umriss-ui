@@ -59,7 +59,10 @@ describe("Demo smoke test", () => {
     const { host, unmount } = await mount(<Page demo={DEMO} page={pageData} />);
     expect(host.querySelector(`[data-block="${pageData.id}"]`)).not.toBeNull();
     /* The generated page: an entry for every export, by its anchor. */
-    if (pageData.body === "api-index") for (const anchor of DEMO.apiIndex!.anchors) expect(host.querySelector(`[id="${anchor}"]`), anchor).not.toBeNull();
+    if (pageData.body === "api-index") {
+      const ids = new Set([...host.querySelectorAll("[id]")].map((one) => one.id));
+      for (const anchor of DEMO.apiIndex!.anchors) expect(ids.has(anchor), anchor).toBe(true);
+    }
     if (pageData.types.length > 0) {
       expect(host.querySelectorAll(".apiTable tbody tr").length).toBeGreaterThan(0);
     }
