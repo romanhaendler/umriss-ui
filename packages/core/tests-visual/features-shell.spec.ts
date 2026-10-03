@@ -46,6 +46,11 @@ checkShell({
     { query: "snackbar", name: "Toast", pageId: "toast" },
     { query: "chip", name: "Tag", pageId: "tag" },
   ],
+  rows: [
+    { query: "--u-accent", label: "--u-color-accent", pageId: "theming", anchor: "token-u-color-accent" },
+    { query: "No matches", label: "noMatches", pageId: "language", anchor: "wording-noMatches" },
+    { query: "Stand unbekannt", label: "asOfUnknown", pageId: "language", anchor: "wording-asOfUnknown" },
+  ],
   elsewhere: {
     query: "loading, empty",
     group: "table · Row appearance",
