@@ -70,14 +70,22 @@ describe("Demo smoke test", () => {
   /* A configurator renders in its page's first slot, and at rest its code is
      the bare element - every control starts at its default
      (.scratch/configurator). */
+  it("has the ten configurators of the closed list", () => {
+    expect(DEMO.configurators.map((one) => one.name).sort()).toEqual(
+      ["Alert", "Badge", "Button", "Checkbox", "IconButton", "Input", "Meter", "ProgressBar", "Switch", "Tag"],
+    );
+  });
+
   it.each(DEMO.configurators.map((c) => [c.name, c] as const))("renders the configurator of %s at rest", async (name, configurator) => {
     const { host, teardown } = await mount(<Page demo={DEMO} page={ALL_PAGES.find((p) => p.id === configurator.pageId)!} />);
     const code = host.querySelector(`[data-configurator="${configurator.pageId}"] pre code`)?.textContent ?? "";
     const element = code.split("\n\n")[1] ?? "";
     expect(element.startsWith(`<${name}`)).toBe(true);
-    /* The attributes it carries are the required ones, and no other. */
-    const attributes = [...element.slice(0, element.indexOf(">")).matchAll(/ ([\w-]+)(?==|[ />])/g)].map(([, prop]) => prop);
-    expect(attributes).toEqual(Object.keys(configurator.required));
+    /* The attributes it carries are the required ones, and no other - a
+       required glyph stands between the tags. */
+    const open = element.replace(/"[^"]*"/g, '""');
+    const attributes = [...open.slice(0, open.indexOf(">")).matchAll(/ ([\w-]+)(?==|[ />])/g)].map(([, prop]) => prop);
+    expect(attributes).toEqual(Object.keys(configurator.required).filter((prop) => prop !== "children"));
     await teardown();
   });
 

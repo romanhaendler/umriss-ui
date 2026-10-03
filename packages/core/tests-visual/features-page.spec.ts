@@ -119,3 +119,30 @@ test.describe("The Button's configurator", () => {
     await expect(examples.first()).toBeInViewport();
   });
 });
+
+test.describe("The other configurators", () => {
+  const code = async (page: Page, pageId: string) =>
+    (await page.locator(`[data-configurator="${pageId}"] pre code`).innerText()).trim();
+
+  test("the IconButton's required glyph stands between the tags, and its name joins the import", async ({ page }) => {
+    await open(page, "iconbutton");
+    expect(await code(page, "iconbutton")).toBe(
+      'import { IconButton, PlusGlyph } from "@umriss-ui/core";\n\n<IconButton aria-label="Add a stop"><PlusGlyph /></IconButton>',
+    );
+    await expect(page.locator('[data-configurator="iconbutton"] .exampleStage').getByRole("button", { name: "Add a stop" })).toBeVisible();
+  });
+
+  test("the Meter's value steps by a hundredth of its bounds, and the bar follows", async ({ page }) => {
+    await open(page, "meter");
+    const configurator = page.locator('[data-configurator="meter"]');
+    const meter = configurator.locator(".exampleStage").getByRole("meter");
+    const value = configurator.getByLabel("value", { exact: true });
+    await expect(meter).toHaveAttribute("aria-valuenow", "80");
+    await value.press("ArrowUp");
+    expect(await code(page, "meter")).toBe('import { Meter } from "@umriss-ui/core";\n\n<Meter value={0.81} />');
+    await expect(meter).toHaveAttribute("aria-valuenow", "81");
+    await value.press("Shift+ArrowUp");
+    await value.press("Shift+ArrowUp");
+    expect(await code(page, "meter")).toBe('import { Meter } from "@umriss-ui/core";\n\n<Meter value={1} />');
+  });
+});

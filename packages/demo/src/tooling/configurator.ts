@@ -11,11 +11,21 @@
    The code under the stage is written here too: the import line and one
    element, with every prop that still stands at its default left out. */
 
-import type { ComponentType } from "react";
+import type { ComponentType, ReactNode } from "react";
 import type { Page } from "../outline";
 import type { TypeEntry } from "./propsReader";
 
 export type Value = string | number | boolean | null;
+
+/** A node a required prop starts with - IconButton's glyph - and the code
+    that writes it. The names that code uses are the package's, and join the
+    import line. */
+export interface NodeValue {
+  node: ReactNode;
+  code: string;
+}
+
+const isNode = (value: unknown): value is NodeValue => typeof value === "object" && value !== null && "code" in value;
 
 export interface Control {
   /** The prop's name; `children` for the text between the tags. */
@@ -31,6 +41,9 @@ export interface Control {
   inherited?: true;
   min?: number;
   max?: number;
+  /** A hundredth of the bounds, with the decimals it needs. */
+  step?: number;
+  decimals?: number;
 }
 
 /** What a configurator file declares, beside the component. */
@@ -41,7 +54,7 @@ export interface Declaration {
   children?: string;
   /** The starting value of every prop the component requires; the code
       always shows these. */
-  required?: Readonly<Record<string, Value>>;
+  required?: Readonly<Record<string, Value | NodeValue>>;
   /** The bounds the component documents for a number. */
   bounds?: Readonly<Record<string, readonly [number, number]>>;
 }
@@ -72,18 +85,19 @@ function literals(text: string): (string | number)[] | undefined {
 export function controlsOf(file: string, entry: TypeEntry, declaration: Declaration): Control[] {
   const fail = (prop: string, why: string) => new Error(`\`${file}\` names \`${prop}\`, ${why}.`);
   const controls = declaration.controls.map((prop): Control => {
+    const row = entry.props.find((one) => one.name === prop);
     const own = FROM_THE_ELEMENT[prop];
-    if (own !== undefined) {
+    if (row === undefined && own !== undefined) {
       if (entry.inherits === undefined || !own.elements.includes(entry.inherits)) {
         throw fail(prop, `which ${entry.inherits ?? entry.name} does not have`);
       }
       return { prop, kind: own.kind, defaultValue: own.kind === "switch" ? false : "" };
     }
-    const row = entry.props.find((one) => one.name === prop);
     if (row === undefined) throw fail(prop, `which ${entry.name} does not have`);
     const cannot = () => fail(prop, `whose type \`${row.type}\` cannot become a control`);
 
     const declared = declaration.required?.[prop];
+    if (isNode(declared)) throw cannot();
     /* A default is code that reads as a value, or a phrase whose last value
        of the union is what it comes to with nothing around it. */
     const values = row.type.endsWith("[]") ? undefined : literals(row.expansion ?? row.type);
@@ -107,7 +121,10 @@ export function controlsOf(file: string, entry: TypeEntry, declaration: Declarat
       const bounds = declaration.bounds?.[prop];
       const start = declared ?? (row.defaultValue === undefined ? null : Number(row.defaultValue));
       if (Number.isNaN(start)) throw cannot();
-      return { prop, kind: "number", defaultValue: start, ...(bounds ? { min: bounds[0], max: bounds[1] } : {}) };
+      if (bounds === undefined) return { prop, kind: "number", defaultValue: start };
+      const [min, max] = bounds;
+      const step = (max - min) / 100;
+      return { prop, kind: "number", defaultValue: start, min, max, step, decimals: Math.max(0, -Math.floor(Math.log10(step))) };
     }
     throw cannot();
   });
@@ -121,25 +138,26 @@ export function startOf(controls: readonly Control[]): Record<string, Value> {
   return Object.fromEntries(controls.map((control) => [control.prop, control.defaultValue]));
 }
 
-function attribute(prop: string, value: Value): string {
+function attribute(prop: string, value: Value | NodeValue): string {
+  if (isNode(value)) return `${prop}={${value.code}}`;
   if (value === true) return prop;
   if (typeof value === "string" && !value.includes('"')) return `${prop}="${value}"`;
   return `${prop}={${JSON.stringify(value)}}`;
 }
 
 /** The import line and one element: a prop only where it differs from its
-    default, a required one always. */
+    default, a required one always, a required node as its code. */
 export function codeOf(
   name: string,
   packageName: string,
   controls: readonly Control[],
   values: Readonly<Record<string, Value>>,
-  required: Readonly<Record<string, Value>> = {},
+  required: Readonly<Record<string, Value | NodeValue>> = {},
 ): string {
   const controlled = new Set(controls.map((control) => control.prop));
   const attributes = [
     ...Object.entries(required)
-      .filter(([prop]) => !controlled.has(prop))
+      .filter(([prop]) => !controlled.has(prop) && prop !== "children")
       .map(([prop, value]) => attribute(prop, value)),
     ...controls
       .filter(({ prop }) => prop !== "children")
@@ -149,11 +167,12 @@ export function codeOf(
   ];
   const open = [name, ...attributes].join(" ");
   const text = typeof values.children === "string" ? values.children : "";
-  const element =
-    text === ""
-      ? `<${open} />`
-      : `<${open}>${/[{}<>]/.test(text) ? `{${JSON.stringify(text)}}` : text}</${name}>`;
-  return `import { ${name} } from "${packageName}";\n\n${element}`;
+  const node = isNode(required.children) ? required.children.code : "";
+  const inner = text !== "" ? (/[{}<>]/.test(text) ? `{${JSON.stringify(text)}}` : text) : node;
+  const element = inner === "" ? `<${open} />` : `<${open}>${inner}</${name}>`;
+  const nodes = Object.values(required).filter(isNode).map((one) => one.code);
+  const names = new Set([name, ...nodes.flatMap((code) => [...code.matchAll(/<([A-Z]\w*)/g)].map(([, used]) => used!))]);
+  return `import { ${[...names].join(", ")} } from "${packageName}";\n\n${element}`;
 }
 
 /** A configurator, read and checked: what a page renders in place of its
@@ -165,7 +184,7 @@ export interface Configurator {
   name: string;
   Component: ComponentType<Record<string, unknown>>;
   controls: readonly Control[];
-  required: Readonly<Record<string, Value>>;
+  required: Readonly<Record<string, Value | NodeValue>>;
 }
 
 export interface ConfiguratorModule {

@@ -50,6 +50,8 @@ function Field({ control, value, onChange }: { control: Control; value: Value; o
           onChange={onChange}
           min={control.min}
           max={control.max}
+          step={control.step}
+          decimals={control.decimals}
         />
       ) : (
         <Input value={String(value ?? "")} onChange={(event) => onChange(event.target.value)} />
@@ -62,7 +64,9 @@ export function Configurator({ configurator, packageName }: { configurator: Conf
   const { name, Component, controls, required } = configurator;
   const [values, setValues] = useState(() => startOf(controls));
 
-  const props: Record<string, unknown> = { ...required };
+  const props: Record<string, unknown> = Object.fromEntries(
+    Object.entries(required).map(([prop, value]) => [prop, typeof value === "object" && value !== null ? value.node : value]),
+  );
   for (const { prop, defaultValue } of controls) {
     const shown = prop === "children" || prop in required || values[prop] !== defaultValue;
     if (shown && values[prop] !== null) props[prop] = values[prop];
