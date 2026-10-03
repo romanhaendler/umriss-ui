@@ -168,7 +168,7 @@ body {
   gap: var(--u-space-1);
 }
 
-/* The theme switch and the three links out: a glyph, quiet until the pointer
+/* The theme switch and the four links out: a glyph, quiet until the pointer
    is on it. */
 .shellTheme,
 .shellIcon {
@@ -200,7 +200,7 @@ body {
   box-shadow: var(--u-focus-ring);
 }
 
-/* The same three links at the foot of the sidebar - shown only when the
+/* The same four links at the foot of the sidebar - shown only when the
    header has no room for them. */
 .railOut {
   display: none;
@@ -364,7 +364,7 @@ body {
 @media (max-width: 900px) {
   /* Two lines: wordmark, search and theme on the first, the five packages on
      the second, scrolling sideways inside themselves if they must - the page
-     never does. The three links out move to the foot of the sidebar. */
+     never does. The four links out move to the foot of the sidebar. */
   /* The header's height, which page.css keeps a jump's target clear of. */
   .shell {
     --shell-head: 96px;

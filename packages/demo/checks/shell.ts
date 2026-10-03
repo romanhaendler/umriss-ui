@@ -816,6 +816,8 @@ test("the header leads to the front page and to every package", async ({ page })
   await expect(head.getByRole("link", { name: "Source on GitHub" })).toHaveAttribute("href", /^https:\/\/github\.com\//);
   await expect(head.getByRole("link", { name: `${npm} on npm` })).toHaveAttribute("href", `https://www.npmjs.com/package/${npm}`);
   await expect(head.getByRole("link", { name: "llms.txt for coding agents" })).toHaveAttribute("href", "/llms.txt");
+  // The package's changelog, a page of the site beside the demo's.
+  await expect(head.getByRole("link", { name: "Changelog" })).toHaveAttribute("href", "/changelog/");
 });
 
 test("the header stands on every page, not only the front door", async ({ page }) => {
@@ -838,11 +840,11 @@ test("on a phone the header takes two lines, loses no destination, and the page 
   }
   expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
 
-  // GitHub, npm and llms.txt stand at the foot of the sidebar instead - in the drawer.
+  // The changelog, GitHub, npm and llms.txt stand at the foot of the sidebar instead - in the drawer.
   await expect(head.getByRole("link", { name: "Source on GitHub" })).toBeHidden();
   await head.getByRole("button", { name: "Menu" }).click();
   const rail = page.getByRole("dialog").getByRole("navigation", { name: "Components" });
-  for (const name of ["Source on GitHub", "on npm", "llms.txt for coding agents"]) {
+  for (const name of ["Changelog", "Source on GitHub", "on npm", "llms.txt for coding agents"]) {
     await expect(rail.getByRole("link", { name })).toBeVisible();
   }
 });

@@ -3,7 +3,7 @@
    seam 1). */
 
 import { describe, expect, it } from "vitest";
-import { SEARCH_BUDGET, documentFaults, forwarderHtml, frontFaults, searchFaults, siteFaults, siteSearch, twinFaults, typeLinkFaults } from "../src/tooling/site";
+import { SEARCH_BUDGET, documentFaults, forwarderHtml, frontFaults, searchFaults, siteFaults, siteSearch, twinFaults, typeLinkFaults, whatsNewFaults } from "../src/tooling/site";
 
 const HOME = "https://example.test/umriss-ui/charts/";
 const page = (url: string) =>
@@ -167,9 +167,11 @@ describe("the guard over the front page (.scratch/site-front-page)", () => {
     expect(frontFaults(front().replace("Get started", "Start"), ROOT, sitemap, PROMISE, landings, images)).toEqual(['no link "Get started"']);
   });
 
-  it("fails on twenty addresses linked outside the index, or a sitemap address the index leaves out", () => {
-    const many = Array.from({ length: 11 }, (_, i) => `<a href="https://example.test/${i}">${i}</a>`).join("");
-    expect(frontFaults(front({ extra: many }), ROOT, sitemap, PROMISE, landings, images)).toEqual(["20 addresses linked outside the index, not fewer than 20"]);
+  it("fails on twenty addresses and one per package linked outside the index, or a sitemap address the index leaves out", () => {
+    /* Nine addresses already, two packages: "What's new" may add one line each. */
+    const many = Array.from({ length: 13 }, (_, i) => `<a href="https://example.test/${i}">${i}</a>`).join("");
+    expect(frontFaults(front({ extra: many.replace(/<a[^>]*>12<\/a>/, "") }), ROOT, sitemap, PROMISE, landings, images)).toEqual([]);
+    expect(frontFaults(front({ extra: many }), ROOT, sitemap, PROMISE, landings, images)).toEqual(["22 addresses linked outside the index, not fewer than 22"]);
     expect(frontFaults(front({ index: sitemap.slice(2) }), ROOT, sitemap, PROMISE, landings, images)).toEqual([`the index does not link ${ROOT}core/`]);
   });
 
@@ -267,6 +269,11 @@ describe("the guard over the document pages (.scratch/concepts-and-changelog-pag
     expect(documentFaults([document], new Map([[document, astray]]), sitemap, SITE)).toEqual([fault]);
   });
 
+  it("fails on any page that links a changelog on GitHub", () => {
+    const old = `<a href="${github}/blob/main/packages/core/CHANGELOG.md#0240">0.24.0</a>`;
+    expect(documentFaults([document], new Map([[document, fine], [SITE, old]]), sitemap, SITE)).toEqual([`${SITE}: links a changelog on GitHub, not its page on the site`]);
+  });
+
   it("fails on any page that links ADR-0032 on GitHub", () => {
     const old = `<a href="${github}/blob/main/docs/adr/0032-what-umriss-is-not.md">ADR-0032</a>`;
     expect(documentFaults([document], new Map([[document, fine], [`${SITE}core/button/`, old]]), sitemap, SITE)).toEqual([
@@ -310,5 +317,29 @@ describe("the site's search index (.scratch/one-search 03)", () => {
   it("fails an index over its budget, naming its size", () => {
     const heavy = JSON.stringify([{ ...entry("/core/select/"), keywords: ["x".repeat(SEARCH_BUDGET)] }]);
     expect(searchFaults(heavy, SITE, sitemap, pages)).toEqual([`search.json: ${Buffer.byteLength(heavy)} bytes, over its budget of ${SEARCH_BUDGET}`]);
+  });
+});
+
+describe("the guard over \"What's new\" (.scratch/concepts-and-changelog-pages)", () => {
+  const SITE = "https://example.test/umriss-ui/";
+  const changelogs = [`${SITE}core/changelog/`, `${SITE}table/changelog/`];
+  const pages = new Map(changelogs.map((url) => [url, '<main class="document"><h2 id="v0-24-0">0.24.0 – Now (Oct. 2026)</h2></main>']));
+  const strip = (core = "./core/changelog/#v0-24-0") =>
+    `<section class="news"><h2>What's new</h2><ul><li><a href="${core}">Core 0.24.0 – Now (Oct. 2026)</a></li><li><a href="./table/changelog/#v0-24-0">Table 0.24.0 – Now (Oct. 2026)</a></li></ul></section>`;
+
+  it("passes a strip with one line per changelog, each linking a version's anchor on it", () => {
+    expect(whatsNewFaults(strip(), SITE, pages, changelogs)).toEqual([]);
+  });
+
+  it("fails without the strip, or without a line for a changelog", () => {
+    expect(whatsNewFaults("<main></main>", SITE, pages, changelogs)).toEqual(['no "What\'s new"']);
+    expect(whatsNewFaults(strip("./charts/"), SITE, pages, changelogs)).toEqual([
+      `"What's new" links no version of ${SITE}core/changelog/`,
+      `"What's new" links ${SITE}charts/, which has no such anchor`,
+    ]);
+  });
+
+  it("fails on a line whose anchor is not on its changelog's page", () => {
+    expect(whatsNewFaults(strip("./core/changelog/#v0-25-0"), SITE, pages, changelogs)).toEqual([`"What's new" links ${SITE}core/changelog/#v0-25-0, which has no such anchor`]);
   });
 });

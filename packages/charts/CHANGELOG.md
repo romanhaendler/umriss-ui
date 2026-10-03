@@ -51,9 +51,8 @@ interface was still expected to move before `0.3.0`.
   its comment: `Chart height` is `300`, `LimitLine role` `"specification"`,
   a series' `color` the palette's. The editor shows the tag on hover. Nothing
   else changes.
-- **A prop's comment cites no requirement number**: "Binding to a y axis
-  (R-4.12)." reads "Binding to a y axis."; the number stands in a `@remarks`
-  tag. Nothing else changes.
+- **A prop's comment cites no requirement number**: "Binding to a y axis."
+  ends there; the number stands in a `@remarks` tag. Nothing else changes.
 - **`docs/llms-full.md` defines every type a props table names**: a type
   without a table of its own (`Accessor`, `MatrixColoring`) stands under
   "Types on this page" of each page that names it, with its comment and its
@@ -304,7 +303,7 @@ interface was still expected to move before `0.3.0`.
 
 - **An axis band no longer keeps the width of the fallback font.** A chart
   laid out before its web font had arrived remembered the wider band under the
-  hysteresis (R-3.4) and kept it - the plot stood up to seven pixels too far in,
+  hysteresis and kept it - the plot stood up to seven pixels too far in,
   or not, depending on which came first. The band is now measured anew once the
   font is there, and on a change of theme.
 

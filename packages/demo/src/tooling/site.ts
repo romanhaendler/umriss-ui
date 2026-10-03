@@ -85,7 +85,8 @@ const CLAIMS = ["ISA-18.2 alarm lists", "ISA-101 limits and verdicts", "Canvas c
     one h1 "umriss-ui", the promise, the install command and the theme
     script; both buttons and every claim lead to a sitemap address (a claim
     may lead to the site's `llms.txt`); fewer than twenty addresses are linked
-    outside the "Every page" disclosure, and inside it every sitemap address
+    outside the "Every page" disclosure - and one more a package, for its line
+    in "What's new" - and inside it every sitemap address
     but the front page itself. One tile per package, in the order of
     `landings`, each linking its landing page and showing a light and a dark
     preview - files of the site under 300 kB, their alternative text
@@ -147,7 +148,7 @@ export function frontFaults(
     ...BUTTONS.flatMap((name) => leads(name)),
     ...CLAIMS.flatMap((name) => leads(name, [new URL("llms.txt", home).href])),
     ...(tiles.length === landings.length ? tileFaults : [`${tiles.length} tiles, not ${landings.length}`]),
-    ...(distinct < 20 ? [] : [`${distinct} addresses linked outside the index, not fewer than 20`]),
+    ...(distinct < 20 + landings.length ? [] : [`${distinct} addresses linked outside the index, not fewer than ${20 + landings.length}`]),
     ...urls.filter((url) => url !== home && !inside.has(url)).map((url) => `the index does not link ${url}`),
   ];
 }
@@ -209,13 +210,14 @@ export function twinFaults(pages: readonly TwinPage[], files: ReadonlyMap<string
 
 /** What the document pages get wrong, one line each
     (.scratch/concepts-and-changelog-pages): every document in the list has a
-    page; every link of a document's text into the site leads to a sitemap
-    address (one to GitHub is checked when the link is rewritten, and fails
-    the build there); every document page ends with "Suggest an edit on
-    GitHub", its issue titled after the page and naming its address; and no
-    page of the site links ADR-0032 on GitHub, which
-    has its page here. `documents` are the documents' addresses, `files` as
-    for `siteFaults`, `home` the site's address. */
+    page; every link of a document's text into the site leads to one of
+    `urls` - the sitemap's addresses and the site's text files (one to GitHub
+    is checked when the link is rewritten, and fails the build there); every
+    document page ends with "Suggest an edit on GitHub", its issue titled
+    after the page and naming its address; and no page of the site links
+    ADR-0032 or a changelog on GitHub, which have their pages here.
+    `documents` are the documents' addresses, `files` as for `siteFaults`,
+    `home` the site's address. */
 export function documentFaults(documents: readonly string[], files: ReadonlyMap<string, string>, urls: readonly string[], home: string): string[] {
   return [
     ...documents.flatMap((url) => {
@@ -240,6 +242,28 @@ export function documentFaults(documents: readonly string[], files: ReadonlyMap<
     ...[...files]
       .filter(([, html]) => /href="https:\/\/github\.com\/[^"]*\/docs\/adr\/0032-/.test(html))
       .map(([url]) => `${url}: links ADR-0032 on GitHub, not its page on the site`),
+    ...[...files]
+      .filter(([, html]) => /href="https:\/\/github\.com\/[^"]*\/packages\/[^/"]+\/CHANGELOG\.md/.test(html))
+      .map(([url]) => `${url}: links a changelog on GitHub, not its page on the site`),
+  ];
+}
+
+/** What the front page's "What's new" gets wrong, one line each
+    (.scratch/concepts-and-changelog-pages): there is the strip, it has a line
+    for every changelog, and every line leads to an anchor its page carries -
+    the version's heading. `html` and `home` as for `frontFaults`, `files` as
+    for `siteFaults`, `changelogs` the changelogs' addresses. */
+export function whatsNewFaults(html: string, home: string, files: ReadonlyMap<string, string>, changelogs: readonly string[]): string[] {
+  const strip = /<section class="news"[\s\S]*?<\/section>/.exec(html)?.[0];
+  if (strip === undefined) return ['no "What\'s new"'];
+  const targets = [...strip.matchAll(/<a\b[^>]*\bhref="([^"]*)"/g)].map((match) => new URL(match[1]!, home));
+  return [
+    ...changelogs.filter((url) => !targets.some((target) => target.href.replace(/#.*$/, "") === url)).map((url) => `"What's new" links no version of ${url}`),
+    ...targets.flatMap((target) => {
+      const id = target.hash.slice(1);
+      const page = files.get(target.href.replace(/#.*$/, ""));
+      return id !== "" && page?.includes(`id="${id}"`) === true ? [] : [`"What's new" links ${target.href}, which has no such anchor`];
+    }),
   ];
 }
 

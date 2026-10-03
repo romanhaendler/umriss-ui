@@ -149,6 +149,15 @@
         :root:not([style*="light"]) .shot .dark { display: block; }
       }
 
+      /* Each package's newest release, a line each, leading to its entry. */
+      .news { margin-top: var(--u-space-8); }
+      .news ul { margin: var(--u-space-3) 0 0; padding: 0; list-style: none; font-size: var(--u-text-sm); }
+      .news li + li { margin-top: var(--u-space-1); }
+      .news a { text-decoration: none; }
+      .news a:hover { text-decoration: underline; }
+      .news strong { font-weight: var(--u-weight-medium); }
+      .news span { color: var(--u-color-text-secondary); }
+
       .apart { margin-top: 72px; }
       .claims { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: var(--u-space-3); margin: var(--u-space-4) 0 0; padding: 0; list-style: none; }
       .claims a {
@@ -184,6 +193,9 @@
       .document th, .document td { padding: var(--u-space-1) var(--u-space-3); border-bottom: 1px solid var(--u-edge-color); text-align: left; vertical-align: top; }
       .document .edit { margin: var(--u-space-8) 0 0; font-size: var(--u-text-sm); }
       .document blockquote { padding-left: var(--u-space-4); border-left: 2px solid var(--u-edge-color-strong); color: var(--u-color-text-secondary); }
+      /* A changelog's "Changed": what breaks for a caller, read first - the
+         warning's edge beside the word, which stays. */
+      .document .changed { padding-left: var(--u-space-3); border-left: 3px solid var(--u-color-warning); }
 
       footer { max-width: 68rem; margin: 72px auto 0; padding: var(--u-space-6) var(--u-space-5) var(--u-space-8); font-size: var(--u-text-sm); color: var(--u-color-text-secondary); }
       footer a:hover { color: var(--u-color-text); }
@@ -227,6 +239,13 @@
         <h2 id="packages">Packages</h2>
         <ul class="tiles">
           {{tiles}}
+        </ul>
+      </section>
+
+      <section class="news" aria-labelledby="news">
+        <h2 id="news">What's new</h2>
+        <ul>
+          {{news}}
         </ul>
       </section>
 
