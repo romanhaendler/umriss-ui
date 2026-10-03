@@ -688,6 +688,20 @@
   margin-left: 0;
 }
 
+/* A token's swatch (`tooling/tokenTable.ts`). Its background is the token
+   and its `color-scheme` its column's, set where it is written - so
+   `light-dark()` resolves light in the light column and dark in the dark one,
+   whatever the page's theme. Its edge is a token too, and turns with it. */
+.tokenSwatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: var(--u-space-2);
+  vertical-align: -3px;
+  border-radius: var(--u-radius-xs);
+  box-shadow: var(--u-edge-strong);
+}
+
 .code:focus-visible {
   outline: 2px solid transparent;
   box-shadow: var(--u-focus-ring);

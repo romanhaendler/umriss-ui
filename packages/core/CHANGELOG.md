@@ -55,6 +55,10 @@ commit.
   address of its own, `#wording-noMatches`, `#format-date`.
 - **The comment on `UmrissProvider`'s `language` links the Language page**
   instead of naming the source folder `lib/language`. Nothing else changes.
+- **Every token listed**: the text the package carries (`docs/llms-full.md`)
+  and the demo's new page Theming list every `--u-…` token, grouped as the
+  stylesheet groups them, with its light and its dark value and what it is
+  for. The tokens themselves are unchanged.
 
 ## 0.24.0 – The select's own list (Oct. 2026)
 

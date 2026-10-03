@@ -24,6 +24,9 @@ export interface ReferenceRow {
 export interface ReferenceGroup {
   /** A sub-heading above the group's table - none for a table of one group. */
   title?: string;
+  /** Paragraphs between the sub-heading and the table - a stylesheet
+      section's own text above its tokens. */
+  note?: readonly (readonly Span[])[];
   rows: readonly ReferenceRow[];
 }
 
@@ -50,6 +53,7 @@ export function referenceHtml(table: ReferenceTable): string {
         (group) =>
           '<div class="apiBlock">' +
           (group.title === undefined ? "" : `<h3 class="apiTitle">${escape(group.title)}</h3>`) +
+          (group.note ?? []).map((paragraph) => `<p class="apiInherited">${spansHtml(paragraph)}</p>`).join("") +
           `<div class="apiRole"><table class="apiTable referenceTable" aria-label="${escape(group.title === undefined ? table.title : `${table.title}: ${group.title}`)}">${head}<tbody>` +
           group.rows
             .map(
@@ -71,6 +75,7 @@ export function referenceMarkdown(table: ReferenceTable): string {
   const lines = [spansMarkdown(table.lead)];
   for (const group of table.groups) {
     if (group.title !== undefined) lines.push("", `##### ${group.title}`);
+    for (const paragraph of group.note ?? []) lines.push("", spansMarkdown(paragraph));
     lines.push("", `| ${table.columns.join(" | ")} |`, `|${table.columns.map(() => "---|").join("")}`);
     for (const row of group.rows) lines.push(`| ${row.cells.map((cell) => markdownCell(spansMarkdown(cell))).join(" | ")} |`);
   }

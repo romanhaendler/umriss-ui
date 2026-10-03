@@ -12,6 +12,8 @@
     "./worlds/*": "./src/worlds/*.ts",
     "./tooling/props": "./src/tooling/props.ts",
     "./tooling/llms": "./src/tooling/llms.ts",
+    "./tooling/tokens": "./src/tooling/tokens.ts",
+    "./tooling/tokenTable": "./src/tooling/tokenTable.ts",
     "./tooling/propsReader": "./src/tooling/propsReader.ts",
     "./tooling/fileName": "./src/tooling/fileName.ts",
     "./tooling/source": "./src/tooling/source.ts",
