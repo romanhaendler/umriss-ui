@@ -104,6 +104,16 @@
   font-weight: var(--u-weight-medium);
 }
 
+/* While DE is chosen: one line above the head, part of the page's text. */
+.languageNotice {
+  margin: 0;
+  padding: var(--u-space-2) var(--u-space-3);
+  border-radius: var(--u-radius-md);
+  background: var(--u-color-surface-sunken);
+  font-size: var(--u-text-sm);
+  color: var(--u-color-text-secondary);
+}
+
 .pageEmpty {
   margin: 0;
   padding: var(--u-space-5);

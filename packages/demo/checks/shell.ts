@@ -90,6 +90,15 @@ export interface ShellProbes {
       (`<package> · <Type>`), and the page and anchor `<Type>-<prop>` of its
       row (.scratch/one-search 04). */
   prop: { query: string; label: string; group: string; pageId: string; id: string };
+  /** Where the demo's components read core's language and the header carries
+      the EN/DE switch: a page, texts the library writes on it and names of
+      buttons it writes there, each as [English, German]. Without it, the
+      suite asserts that the header carries no switch. */
+  language?: {
+    pageId: string;
+    texts: readonly (readonly [string, string])[];
+    buttons?: readonly (readonly [string, string])[];
+  };
 }
 
 /* ON THE BUILT SITE (.scratch/one-search 03). A demo of the test build stands
@@ -1030,6 +1039,128 @@ test("with storage throwing, the switch still switches", async ({ page }) => {
   await page.getByRole("button", { name: "Switch to light theme" }).click();
   expect(await scheme(page)).toBe("light");
   expect(errors).toEqual([]);
+});
+
+/* THE LANGUAGE OF THE COMPONENTS (.scratch/language-switch). Where a demo's
+   components read core's language, the header carries EN and DE, and DE
+   renders the examples and the scenarios in the library's German. What is
+   asserted is what a reader reads: the library's words and notation, the
+   notice, the frame that stays English - never how the provider is wired. */
+
+const LANGUAGE_KEY = "umriss-ui:language";
+const languageSwitch = (page: Page) =>
+  page.getByRole("banner").getByRole("group", { name: "Language of the components" });
+const notice = (page: Page) => page.getByRole("main").locator("p", { hasText: "The examples render in German" });
+
+/** The probe's texts and buttons stand in one language (0: English, 1:
+    German), and none of the other's. */
+async function readsIn(page: Page, i: 0 | 1) {
+  const main = page.getByRole("main");
+  for (const pair of p.language!.texts) {
+    await expect(main.getByText(pair[i], { exact: true }).first()).toBeVisible();
+    await expect(main.getByText(pair[1 - i]!, { exact: true })).toHaveCount(0);
+  }
+  for (const pair of p.language!.buttons ?? []) {
+    await expect(main.getByRole("button", { name: pair[i], exact: true }).first()).toBeVisible();
+    await expect(main.getByRole("button", { name: pair[1 - i]!, exact: true })).toHaveCount(0);
+  }
+}
+
+test("a demo whose components do not read core's language shows no language switch", async ({ page }) => {
+  test.skip(p.language !== undefined, "this demo has the switch");
+  await expect(page.getByRole("banner")).toBeVisible();
+  await expect(languageSwitch(page)).toHaveCount(0);
+});
+
+test("DE renders the examples in German at once, the frame stays English, a reload keeps it, EN restores it", async ({ page }) => {
+  test.skip(p.language === undefined, "this demo's components do not read core's language");
+  const { pageId } = p.language!;
+  await page.goto(`/${pageId}/`);
+  const english = languageSwitch(page).getByRole("button", { name: "English", exact: true });
+  const german = languageSwitch(page).getByRole("button", { name: "Deutsch", exact: true });
+  const stages = page.locator(".exampleStage");
+  const h1 = await page.getByRole("heading", { level: 1 }).textContent();
+  const address = page.url();
+
+  await expect(english).toHaveAttribute("aria-pressed", "true");
+  await expect(german).toHaveAttribute("aria-pressed", "false");
+  await readsIn(page, 0);
+  await expect(notice(page)).toHaveCount(0);
+
+  // At once, without a reload - and from the keyboard.
+  await page.evaluate(() => ((window as unknown as { __noReload?: boolean }).__noReload = true));
+  await german.focus();
+  await page.keyboard.press("Enter");
+  await expect(german).toHaveAttribute("aria-pressed", "true");
+  await expect(english).toHaveAttribute("aria-pressed", "false");
+  await readsIn(page, 1);
+  expect(await page.evaluate(() => (window as unknown as { __noReload?: boolean }).__noReload)).toBe(true);
+
+  // The notice, with its way to the Language page.
+  await expect(notice(page)).toBeVisible();
+  await expect(notice(page).getByRole("link", { name: "Language", exact: true })).toHaveAttribute("href", /\/language\/$/);
+
+  // The stages speak German; the document, the heading and the address do not change.
+  expect(await stages.count()).toBeGreaterThan(0);
+  for (const stage of await stages.all()) await expect(stage).toHaveAttribute("lang", "de");
+  expect(await page.evaluate(() => document.documentElement.lang)).toBe("en");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(h1!);
+  expect(page.url()).toBe(address);
+  expect(await page.evaluate((key) => localStorage.getItem(key), LANGUAGE_KEY)).toBe("de");
+
+  // The palette is the shell's and stays English.
+  await page.keyboard.press("ControlOrMeta+k");
+  await expect(page.getByRole("combobox", { name: "Search umriss-ui" })).toHaveAttribute(
+    "placeholder",
+    "Search pages, examples, props, tokens …",
+  );
+  await page.keyboard.press("Escape");
+
+  await page.reload();
+  await expect(german).toHaveAttribute("aria-pressed", "true");
+  await readsIn(page, 1);
+
+  // The scenarios too, where the demo has them.
+  if (p.scenario !== undefined) {
+    await page.goto("/");
+    await expect(notice(page)).toBeVisible();
+    for (const stage of await page.locator(".scenarioStage").all()) await expect(stage).toHaveAttribute("lang", "de");
+    await page.goto(`/${pageId}/`);
+  }
+
+  await english.click();
+  await expect(english).toHaveAttribute("aria-pressed", "true");
+  await readsIn(page, 0);
+  await expect(notice(page)).toHaveCount(0);
+  for (const stage of await stages.all()) await expect(stage).not.toHaveAttribute("lang");
+  expect(await page.evaluate((key) => localStorage.getItem(key), LANGUAGE_KEY)).toBe("en");
+});
+
+test("with storage throwing, the language is English and the switch still switches", async ({ page }) => {
+  test.skip(p.language === undefined, "this demo's components do not read core's language");
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.addInitScript(() => {
+    Object.defineProperty(window, "localStorage", {
+      get() {
+        throw new DOMException("The operation is insecure.", "SecurityError");
+      },
+    });
+  });
+  await page.goto(`/${p.language!.pageId}/`);
+  await readsIn(page, 0);
+  await languageSwitch(page).getByRole("button", { name: "Deutsch", exact: true }).click();
+  await readsIn(page, 1);
+  expect(errors).toEqual([]);
+});
+
+test("a page with German on is accessible", async ({ page }) => {
+  test.skip(p.language === undefined, "this demo's components do not read core's language");
+  await page.goto(`/${p.language!.pageId}/`);
+  await languageSwitch(page).getByRole("button", { name: "Deutsch", exact: true }).click();
+  await readsIn(page, 1);
+  const result = await new AxeBuilder({ page }).withTags(STANDARDS).analyze();
+  expect(findings(result)).toEqual([]);
 });
 
 test("the shell is accessible - header, sidebar, scenarios page", async ({ page }) => {

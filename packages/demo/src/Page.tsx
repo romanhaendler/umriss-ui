@@ -20,6 +20,7 @@ import { useContents, type ContentsEntry } from "./Contents";
 import { Configurator } from "./Configurator";
 import { CopyButton } from "./CopyButton";
 import { RubricLine } from "./CopyPage";
+import { GermanNotice } from "./Language";
 import { Prose } from "./Prose";
 import type { Demo } from "./demo";
 import { hrefOf, hrefOfNeighbour } from "./href";
@@ -283,6 +284,7 @@ export function Page({ demo, page }: PageProps) {
 
   return (
     <article className="page" data-block={page.id} aria-labelledby={`page-${page.id}`}>
+      <GermanNotice packageName={demo.packageName} />
       {head}
 
       {contents.disclosure}
