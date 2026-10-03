@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { readTokens } from "../src/tooling/tokens";
 import { referenceHtml, referenceMarkdown } from "../src/tooling/referenceTable";
-import { missingTokens, tokenTable } from "../src/tooling/tokenTable";
+import { chartsTokenTable, missingTokens, tokenTable } from "../src/tooling/tokenTable";
 
 const LAYERS = "@layer umriss.tokens, umriss.base, umriss.components;";
 
@@ -160,6 +160,68 @@ describe("the token table", () => {
   });
 });
 
+/* The charts' tokens live on the chart's root class, in the components
+   layer, and fall back onto core's (02). */
+const CHARTS_SHEET = `${LAYERS}
+@layer umriss.components {
+  .uc-root {
+    --uc-color-axis: var(--u-hairline, rgba(23, 23, 23, 0.17));
+    /* The first series. */
+    --uc-series-1: var(--u-chart-1, #2563eb);
+    --uc-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+    --uc-size-tick: 11.5px;
+    position: relative;
+  }
+
+  .uc-plot { --uc-not-a-token: 1px; }
+
+  /* ---------------- Legend ---------------- */
+
+  .uc-legend { color: var(--uc-color-axis); }
+}`;
+
+const CHARTS = { layer: "umriss.components", selector: ".uc-root" };
+
+describe("readTokens on the charts' stylesheet", () => {
+  const charts = readTokens(CHARTS_SHEET, CHARTS);
+  const chartToken = (name: string) => charts.flatMap((group) => group.tokens).find((one) => one.name === name);
+
+  it("reads what is declared on the chart's root class, in one group, and no section without a token", () => {
+    expect(charts.map((group) => [group.name, group.tokens.map((one) => one.name)])).toEqual([
+      ["", ["--uc-color-axis", "--uc-series-1", "--uc-shadow", "--uc-size-tick"]],
+    ]);
+  });
+
+  it("reads a declaration with the core token it falls back to, and its comment", () => {
+    expect(chartToken("--uc-color-axis")).toMatchObject({ light: "var(--u-hairline, rgba(23, 23, 23, 0.17))", comment: "" });
+    expect(chartToken("--uc-color-axis")!.dark).toBeUndefined();
+    expect(chartToken("--uc-series-1")!.comment).toBe("The first series.");
+  });
+
+  it("counts a token as a colour by a colour its fallback names", () => {
+    const colours = charts.flatMap((group) => group.tokens.filter((one) => one.colour).map((one) => one.name));
+    expect(colours).toEqual(["--uc-color-axis", "--uc-series-1"]);
+  });
+
+  it("writes its own section, a fallback linked only where core has the token, a swatch drawn from the value", () => {
+    const table = chartsTokenTable(charts, groups);
+    expect([table.title, table.anchor]).toEqual(["@umriss-ui/charts", "charts-tokens"]);
+    const host = document.createElement("div");
+    host.innerHTML = referenceHtml(table);
+    expect([...host.querySelectorAll("tbody tr")].map((one) => one.id)).toEqual(["token-uc-color-axis", "token-uc-series-1", "token-uc-shadow", "token-uc-size-tick"]);
+    expect(host.querySelector('#token-uc-color-axis a[href="#token-u-hairline"]')!.textContent).toBe("--u-hairline");
+    expect(host.querySelector("#token-uc-series-1 a")).toBeNull();
+    expect(host.querySelector('#token-uc-series-1 td[data-label="Light"]')!.textContent).toBe("var(--u-chart-1, #2563eb)");
+    /* The page declares no `--uc-` token - only a chart's root does - so the
+       swatch is drawn from what the token holds: core's token in the column's
+       scheme, or the literal. */
+    expect([...host.querySelectorAll("#token-uc-color-axis .tokenSwatch")].map((one) => one.getAttribute("style"))).toEqual([
+      "background:var(--u-hairline, rgba(23, 23, 23, 0.17));color-scheme:light",
+      "background:var(--u-hairline, rgba(23, 23, 23, 0.17));color-scheme:dark",
+    ]);
+  });
+});
+
 describe("core's stylesheet", () => {
   const css = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "..", "..", "core", "src", "styles", "tokens.css"), "utf8");
 
@@ -171,5 +233,17 @@ describe("core's stylesheet", () => {
 
   it("carries no German in its comments", () => {
     expect(css).not.toMatch(/Tinte|Papier|\b(und|der|die|das)\b/);
+  });
+});
+
+describe("the charts' stylesheet", () => {
+  const css = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "..", "..", "charts", "src", "styles", "charts.css"), "utf8");
+
+  it("yields a row and an anchor for every one of its 29 tokens, counted on the text", () => {
+    const tokens = readTokens(css, CHARTS);
+    expect(tokens.flatMap((group) => group.tokens)).toHaveLength(29);
+    const html = referenceHtml(chartsTokenTable(tokens, []));
+    expect(missingTokens(css, html)).toEqual([]);
+    expect(missingTokens(css, html.replace('id="token-uc-radius"', ""))).toEqual(["--uc-radius"]);
   });
 });

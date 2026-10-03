@@ -33,6 +33,10 @@ interface was still expected to move before `0.3.0`.
 
 ### Added
 
+- **Every token listed**: core's Theming page lists the 29 `--uc-…` tokens
+  of the chart's root, with the core token each one takes, and the
+  Installation page links there. The tokens themselves are unchanged.
+
 - **Every export carries a comment**, the German wording's included: what a
   component, a function, a constant or a type is for. The editor shows it on
   hover, from the package's `.d.ts`. Nothing else changes.

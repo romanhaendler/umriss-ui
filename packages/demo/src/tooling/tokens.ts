@@ -1,8 +1,11 @@
-/* The token reader: core's stylesheet of tokens as the rows of the Theming
-   page's table (.scratch/theming-and-wording-reference, 01).
+/* The token reader: core's stylesheet of tokens, and the charts' stylesheet,
+   as the rows of the Theming page's tables (.scratch/theming-and-wording-reference,
+   01 and 02).
 
    A token is a custom property declared on `:root` inside the layer
-   `umriss.tokens` - what a module declares for itself is not one. The groups
+   `umriss.tokens` - what a module declares for itself is not one. The charts
+   declare theirs on the chart's root class, inside `umriss.components`; the
+   scope says which rule and which layer to read. The groups
    are the stylesheet's own section comments (`/* ---- Name ---- *\/`), so the
    table is sorted as the file is, and a new token stands in it without
    anybody editing a page.
@@ -78,25 +81,32 @@ function commentOf(declaration: Declaration): string {
   return oneLine([...before, ...(trails(after) ? [(after as Comment).text] : [])].join(" "));
 }
 
-const inTokens = (node: ChildNode): boolean => {
+/** Where a stylesheet declares its tokens: core's on `:root` in the tokens
+    layer, the charts' on `.uc-root` in the components layer. */
+export interface TokenScope {
+  layer: string;
+  selector: string;
+}
+
+const inLayer = (node: ChildNode, layer: string): boolean => {
   for (let parent = node.parent as Node | undefined; parent !== undefined; parent = parent.parent as Node | undefined) {
-    if (parent.type === "atrule" && (parent as AtRule).name === "layer") return (parent as AtRule).params === "umriss.tokens";
+    if (parent.type === "atrule" && (parent as AtRule).name === "layer") return (parent as AtRule).params === layer;
   }
   return false;
 };
 
 /** The tokens of a stylesheet, in its groups and its order. */
-export function readTokens(css: string): TokenGroup[] {
+export function readTokens(css: string, scope: TokenScope = { layer: "umriss.tokens", selector: ":root" }): TokenGroup[] {
   const groups: TokenGroup[] = [{ name: "", note: [], tokens: [] }];
   const reduced = new Map<string, string>();
   postcss.parse(css).walk((node) => {
-    if (!inTokens(node)) return;
+    if (!inLayer(node, scope.layer)) return;
     if (isSection(node)) {
       const [, name, body] = SECTION.exec((node as Comment).text)!;
       groups.push({ name: name!, note: body!.split(/\n\s*\n/).map(oneLine).filter((text) => text !== ""), tokens: [] });
       return;
     }
-    if (node.type !== "decl" || !node.prop.startsWith("--") || node.parent?.type !== "rule" || (node.parent as Rule).selector !== ":root") return;
+    if (node.type !== "decl" || !node.prop.startsWith("--") || node.parent?.type !== "rule" || (node.parent as Rule).selector !== scope.selector) return;
     const value = oneLine(node.value);
     const media = node.parent.parent;
     if (media?.type === "atrule" && (media as AtRule).name === "media") {
@@ -112,11 +122,19 @@ export function readTokens(css: string): TokenGroup[] {
   const tokens = groups.flatMap((group) => group.tokens);
   const colours = new Set<string>();
   /* A reference to a colour may stand before the colour it names: two rounds
-     settle a chain of two, which is as deep as any stylesheet here goes. */
+     settle a chain of two, which is as deep as any stylesheet here goes. A
+     reference whose fallback is a colour is one too - a charts' series falls
+     back onto a core token that does not exist yet. */
   for (let round = 0; round < 2; round++) {
     for (const token of tokens) {
-      const target = /^var\((--[\w-]+)\)$/.exec(token.light)?.[1];
-      if (token.name.includes("color") || COLOUR_VALUE.test(token.light) || (target !== undefined && colours.has(target))) colours.add(token.name);
+      const [, target, fallback] = /^var\((--[\w-]+)(?:,\s*(.+))?\)$/.exec(token.light) ?? [];
+      if (
+        token.name.includes("color") ||
+        COLOUR_VALUE.test(token.light) ||
+        (target !== undefined && colours.has(target)) ||
+        (fallback !== undefined && COLOUR_VALUE.test(fallback))
+      )
+        colours.add(token.name);
     }
   }
   for (const token of tokens) {
@@ -124,5 +142,6 @@ export function readTokens(css: string): TokenGroup[] {
     const motion = reduced.get(token.name);
     if (motion !== undefined) token.reducedMotion = motion;
   }
-  return groups.filter((group) => group.name !== "" || group.tokens.length > 0);
+  /* A section of rules - the charts' Axes, Legend - holds no token. */
+  return groups.filter((group) => group.tokens.length > 0);
 }
