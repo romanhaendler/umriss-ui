@@ -94,6 +94,34 @@ function readPlace(fromPlace: Demo["addresses"]["fromPlace"]): { pageId: string;
   return { pageId: page?.id ?? "", ...(example === undefined ? {} : { example }) };
 }
 
+/** Brings the sidebar's active entry into the middle of its visible box when
+    it stands outside it, by scrolling the sidebar alone - `scrollIntoView`
+    would move the page as well. Where the sidebar does not scroll nothing
+    moves. */
+function activeInView(rail: HTMLElement) {
+  const entry = rail.querySelector('[aria-current="page"]');
+  if (entry === null) return;
+  const box = rail.getBoundingClientRect();
+  const at = entry.getBoundingClientRect();
+  if (at.top >= box.top && at.bottom <= box.bottom) return;
+  rail.scrollTop += at.top - box.top - (rail.clientHeight - at.height) / 2;
+}
+
+/* The width at which the sidebar becomes a drawer - the same query as in
+   shell.css. */
+const NARROW = "(max-width: 900px)";
+
+function useNarrow(): boolean {
+  const [narrow, setNarrow] = useState(() => window.matchMedia(NARROW).matches);
+  useEffect(() => {
+    const query = window.matchMedia(NARROW);
+    const follow = () => setNarrow(query.matches);
+    query.addEventListener("change", follow);
+    return () => query.removeEventListener("change", follow);
+  }, []);
+  return narrow;
+}
+
 /* The site's root, above every demo's directory: `/umriss-ui/` on the site,
    `/` in the dev server and the test build, where each demo stands alone. */
 const SITE = BASE.replace(/[^/]+\/$/, "");
@@ -283,20 +311,44 @@ export function Shell({ demo, sentence }: ShellProps) {
     return () => window.clearTimeout(t);
   }, [place.pageId, place.example, jump]);
 
-  /* THE ACTIVE ENTRY STAYS IN VIEW, on the first load and on every move: an
-     entry outside the sidebar's visible box is brought into its middle by
-     scrolling the sidebar alone - `scrollIntoView` would move the page as
-     well. Where the sidebar does not scroll (narrow widths) nothing moves. */
+  /* THE ACTIVE ENTRY STAYS IN VIEW, on the first load and on every move - and
+     when the drawer opens. */
   const railRef = useRef<HTMLElement>(null);
+  const narrow = useNarrow();
   useEffect(() => {
+    if (railRef.current !== null) activeInView(railRef.current);
+  }, [place.pageId, jump, narrow]);
+
+  /* THE DRAWER. At 900 px and less the sidebar does not stand under the page
+     but in a modal dialog behind the header's Menu button - the same `rail`
+     below, placed there instead of beside the content. The platform's dialog
+     holds the focus, closes on Escape and gives the focus back to the button.
+     The shell adds the rest: a click on the backdrop closes it, a page chosen
+     in it closes it with the focus on the new page's heading - where a screen
+     reader announces the arrival - and a window widened past 900 px closes
+     it, since the standing sidebar takes over. Plain elements, not the
+     library's `Drawer`: the rule at the top of this file. */
+  const drawerRef = useRef<HTMLDialogElement>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const openDrawer = () => {
+    const drawer = drawerRef.current;
     const rail = railRef.current;
-    const entry = rail?.querySelector('[aria-current="page"]');
-    if (rail === null || entry === null || entry === undefined) return;
-    const box = rail.getBoundingClientRect();
-    const at = entry.getBoundingClientRect();
-    if (at.top >= box.top && at.bottom <= box.bottom) return;
-    rail.scrollTop += at.top - box.top - (rail.clientHeight - at.height) / 2;
-  }, [place.pageId, jump]);
+    if (drawer === null || rail === null) return;
+    drawer.showModal();
+    setDrawerOpen(true);
+    activeInView(rail);
+    rail.querySelector<HTMLElement>('[aria-current="page"]')?.focus({ preventScroll: true });
+  };
+  /* Any move while the drawer is open was chosen in it: the drawer is modal. */
+  useEffect(() => {
+    const drawer = drawerRef.current;
+    if (drawer === null || !drawer.open) return;
+    drawer.close();
+    document.querySelector<HTMLElement>(".shellContent h1")?.focus({ preventScroll: true });
+  }, [place.pageId, place.example, jump]);
+  useEffect(() => {
+    if (!narrow && drawerRef.current?.open === true) drawerRef.current.close();
+  }, [narrow]);
 
   /* Cmd-K/Ctrl+K as everywhere, "/" as in every documentation - including the
      rule that "/" in a text field stays a slash. That once stood here by hand;
@@ -325,6 +377,42 @@ export function Shell({ demo, sentence }: ShellProps) {
     link.setAttribute("href", twin);
   }, [title, twin]);
 
+  const rail = (
+    <nav className="rail" aria-label="Components" ref={railRef}>
+      <a
+        className="railEntry railScenarios"
+        href={BASE}
+        data-active={page === undefined ? "" : undefined}
+        aria-current={page === undefined ? "page" : undefined}
+      >
+        Scenarios
+      </a>
+      {OUTLINE.map((rubric) => (
+        <div className="railRubric" key={rubric.id}>
+          <h2 className="railHead">
+            <span>{rubric.name}</span>
+            <span className="railCount">{rubric.pages.length}</span>
+          </h2>
+          <ul className="railList">
+            {rubric.pages.map((entry) => (
+              <li key={entry.id}>
+                <a
+                  className="railEntry"
+                  href={hrefOf(addressOf(entry.id))}
+                  data-active={place.pageId === entry.id ? "" : undefined}
+                  aria-current={place.pageId === entry.id ? "page" : undefined}
+                >
+                  {entry.name}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+      <OutLinks npm={demo.packageName} where="rail" />
+    </nav>
+  );
+
   return (
     <div className="shell">
       {/* One bar for every page of every demo: the way to the front page, to
@@ -333,6 +421,18 @@ export function Shell({ demo, sentence }: ShellProps) {
           load; the current package's link is a link into this demo, which the
           click handler above moves without one. */}
       <header className="shellHead">
+        <button
+          type="button"
+          className="shellIcon shellMenu"
+          aria-label="Menu"
+          aria-haspopup="dialog"
+          aria-expanded={drawerOpen}
+          onClick={openDrawer}
+        >
+          <svg viewBox="0 0 10 10" width="16" height="16" aria-hidden="true">
+            <path d="M1.5 2.5h7M1.5 5h7M1.5 7.5h7" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+          </svg>
+        </button>
         <a className="shellMark" href={SITE}>
           umriss-ui
         </a>
@@ -366,39 +466,7 @@ export function Shell({ demo, sentence }: ShellProps) {
       </header>
 
       <div className="shellBody">
-        <nav className="rail" aria-label="Components" ref={railRef}>
-          <a
-            className="railEntry railScenarios"
-            href={BASE}
-            data-active={page === undefined ? "" : undefined}
-            aria-current={page === undefined ? "page" : undefined}
-          >
-            Scenarios
-          </a>
-          {OUTLINE.map((rubric) => (
-            <div className="railRubric" key={rubric.id}>
-              <h2 className="railHead">
-                <span>{rubric.name}</span>
-                <span className="railCount">{rubric.pages.length}</span>
-              </h2>
-              <ul className="railList">
-                {rubric.pages.map((entry) => (
-                  <li key={entry.id}>
-                    <a
-                      className="railEntry"
-                      href={hrefOf(addressOf(entry.id))}
-                      data-active={place.pageId === entry.id ? "" : undefined}
-                      aria-current={place.pageId === entry.id ? "page" : undefined}
-                    >
-                      {entry.name}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-          <OutLinks npm={demo.packageName} where="rail" />
-        </nav>
+        {!narrow && rail}
 
         <main className="shellContent">
           {page === undefined ? (
@@ -415,6 +483,20 @@ export function Shell({ demo, sentence }: ShellProps) {
           </p>
         </main>
       </div>
+
+      {/* A click on the dialog itself is one on its backdrop: the sidebar
+          fills the dialog to its edges. */}
+      <dialog
+        ref={drawerRef}
+        className="shellDrawer"
+        aria-label="Menu"
+        onClose={() => setDrawerOpen(false)}
+        onClick={(event) => {
+          if (event.target === event.currentTarget) event.currentTarget.close();
+        }}
+      >
+        {narrow && rail}
+      </dialog>
 
       {/* The library's wording is general ("search", "open"); this demo jumps
           anywhere in umriss-ui and says so. That is exactly what the seam is

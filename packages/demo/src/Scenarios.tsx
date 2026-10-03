@@ -171,7 +171,7 @@ export function Scenarios({ demo, sentence }: { demo: Demo; sentence: string }) 
     <article className="page scenarios" data-block="scenarios" aria-labelledby="scenarios-title">
       <header className="pageHead">
         <p className="pageRubric">Scenarios</p>
-        <h1 className="pageName" id="scenarios-title">
+        <h1 className="pageName" id="scenarios-title" tabIndex={-1}>
           {demo.packageName}
         </h1>
         <p className="pageSentence">{sentence}</p>

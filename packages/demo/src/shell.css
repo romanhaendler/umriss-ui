@@ -206,6 +206,43 @@ body {
   display: none;
 }
 
+/* The Menu button opens the sidebar as a drawer - only where the sidebar does
+   not stand beside the page. */
+.shellMenu {
+  display: none;
+}
+
+/* ---------------- The drawer (900 px and less) ----------------
+
+   The sidebar in a modal dialog from the left, full height, at most 20 rem
+   wide and never the whole screen: the backdrop beside it is what a click
+   closes it on. */
+
+.shellDrawer {
+  width: min(20rem, 100vw - var(--u-space-8));
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  box-shadow: var(--u-shadow-overlay);
+}
+
+.shellDrawer::backdrop {
+  background: var(--u-color-scrim);
+}
+
+.shellDrawer .rail {
+  position: static;
+  height: 100%;
+  box-sizing: border-box;
+  overscroll-behavior: contain;
+  border-right: none;
+}
+
 /* ---------------- Body: bar + content ---------------- */
 
 .shellBody {
@@ -337,10 +374,16 @@ body {
     row-gap: 0;
     height: auto;
   }
+  .shellMenu,
   .shellMark,
   .shellSearch,
   .shellActions {
     margin-block: var(--u-space-3);
+  }
+  .shellMenu {
+    display: inline-flex;
+    /* The glyph's own inset is the header's margin. */
+    margin-left: calc(-1 * var(--u-space-2));
   }
   .shellPackages {
     order: 1;
@@ -373,16 +416,8 @@ body {
   .shellBody {
     grid-template-columns: minmax(0, 1fr);
   }
-  /* Below the page, not above it: on a phone the outline is forty entries
-     long and pushed every page out of sight. The search in the bar is the way
-     to another page up there, and a change of page starts at the top. */
-  .rail {
-    order: 1;
-    position: static;
-    height: auto;
-    border-right: none;
-    border-top: 1px solid var(--u-edge-color);
-  }
+  /* The sidebar is in the drawer now (Shell.tsx): the page has the width to
+     itself. */
   .shellSearch {
     width: 160px;
   }
