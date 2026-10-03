@@ -1,16 +1,19 @@
 import { Badge, Card, CardBody, CardHeader, Grid, Text } from "../../../src";
 
-export const title = "Light and dark";
-export const lead = "The tokens follow `color-scheme`: set it on the page for the whole application, or on one element for a part of it.";
+export const title = "A dark region";
+export const lead =
+  "The tokens follow the `color-scheme` an element inherits, and the library sets it nowhere: one element with `color-scheme: dark` makes everything inside it dark, on a light page too. The first tour follows the page; the second is always dark.";
 
-/* The application's switch is one CSS line, which its native controls need
-   anyway:
+/* The application's own switch is one CSS line, which its native controls
+   need anyway:
 
      html.dark { color-scheme: dark; }
      :root { color-scheme: light dark; }  (or: follow the system)
 
-   Nothing set means light. */
-function Tour({ scheme }: { scheme: "light" | "dark" }) {
+   Nothing set means light. A region is the same line on its element:
+
+     .dispatch-board { color-scheme: dark; background: var(--u-color-bg); } */
+function Tour({ scheme }: { scheme?: "dark" }) {
   return (
     <div style={{ colorScheme: scheme, background: "var(--u-color-bg)", padding: 16, borderRadius: 8 }}>
       <Card>
@@ -25,10 +28,10 @@ function Tour({ scheme }: { scheme: "light" | "dark" }) {
   );
 }
 
-export default function LightAndDark() {
+export default function ADarkRegion() {
   return (
     <Grid minItemWidth="240px" gap={4}>
-      <Tour scheme="light" />
+      <Tour />
       <Tour scheme="dark" />
     </Grid>
   );

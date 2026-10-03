@@ -48,11 +48,9 @@ export const OUTLINE: readonly Rubric[] = [
         sentence: "What an application does once before its first component: install the package, choose the fonts and let light and dark follow the page. The styles load themselves, and no provider is needed.",
         about: [
           "The command installs the package alone: React 18 or newer is its only peer and stays the application's own. Importing a component brings its stylesheet along; `@umriss-ui/core/styles.css` stays exported for setups that link stylesheets by hand. The styles touch nothing outside the components: no rule on `html`, `body` or `*` (ADR-0021).",
-          "Every token is a `--u-…` custom property in the cascade layer `umriss.tokens`, so CSS written outside a layer overrides it. The fonts are the application's: the tokens name Geist first and fall back to the system fonts, and nothing is loaded. For Geist, install `@fontsource/geist-sans` (400, 500, 600) and `@fontsource/geist-mono` (400).",
-          "Light and dark follow the application's `color-scheme`, since every two-valued token is written `light-dark(…)`. Nothing set means light; one part of a page can be dark on its own.",
+          "Colours, sizes, fonts and light and dark are tokens, `--u-…` custom properties you override with ordinary CSS: [Theming](#/theming) lists them. The fonts are the application's: the tokens name Geist first and fall back to the system fonts, and nothing is loaded. For Geist, install `@fontsource/geist-sans` (400, 500, 600) and `@fontsource/geist-mono` (400).",
         ],
         limits: [
-          "No theme object and no theme switch: the mode is the page's `color-scheme` (ADR-0021).",
           "No font is loaded or bundled.",
           "Chrome 123, Firefox 120 and Safari 17.5 or newer; an older browser discards the tokens and shows the components unstyled.",
         ],
@@ -85,7 +83,17 @@ export const OUTLINE: readonly Rubric[] = [
       {
         id: "theming",
         name: "Theming",
-        sentence: "Make the components look like your product (theme, colours, dark mode). Every colour, size, shadow and duration they draw with is a token, a `--u-…` custom property you override with ordinary CSS; the table lists each one with its light and dark value.",
+        sentence: "Make the components look like your product (theme, colours, dark mode, CSS variables). Every colour, size, shadow and duration they draw with is a token, a `--u-…` custom property, and the tokens are the whole styling API: override one with ordinary CSS, for the application or for one region. The table lists each with its light and dark value.",
+        about: [
+          "The library writes its CSS in three cascade layers, `umriss.tokens`, `umriss.base` and `umriss.components`. CSS outside any layer wins over every layered rule, whatever its specificity and whatever order the stylesheets load in, so one unlayered `:root { --u-color-accent: … }` in your stylesheet is the whole override: no `!important`, no import order (ADR-0021). Inside a layer of your own it wins only if that layer was named after the library's.",
+          "Every token with two values is written `light-dark(<light>, <dark>)` and resolves against the `color-scheme` the element inherits. The library sets `color-scheme` nowhere: your `html.dark { color-scheme: dark }`, or your theme library's, switches the components, nothing set means light, and an element with its own `color-scheme` is a region in the other mode. An override written `light-dark(…)` follows the mode; a single colour holds in both.",
+          "Style through tokens only. The tokens in the table are the styling API and change only with an entry in the changelog; the `data-*` attributes and class names in the components' markup are internal and may change in any version (ADR-0045). Where no token reaches what you want to change, ask for one: a selector on the markup breaks without warning.",
+        ],
+        limits: [
+          "No theme object, no theme provider and no theme switch: a theme is a set of token overrides in your stylesheet, the mode is the page's `color-scheme` (ADR-0021).",
+          "A token that names another resolves where it is declared: set `--u-color-accent` on a region, and `--u-focus-ring`, which names it on `:root`, still draws the application's accent there. Set the naming token in the region too.",
+          "A panel opened in a portal - a popover, a tooltip, a toast - takes the tokens and the `color-scheme` of the place it lands, not of the region it was opened from. Give [UmrissProvider](#/umrissprovider) a `portalTarget` inside the region, or override on `:root`.",
+        ],
         types: [],
         exports: [],
       },

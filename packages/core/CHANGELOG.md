@@ -59,6 +59,12 @@ commit.
   and the demo's new page Theming list every `--u-…` token, grouped as the
   stylesheet groups them, with its light and its dark value and what it is
   for. The tokens themselves are unchanged.
+- **Tokens are the styling API; `data-*` attributes and class names are not**
+  (ADR-0045). The `--u-…` tokens change only with an entry here; the
+  attributes and class names in the components' markup are internal and may
+  change in any version. The page Theming says so and shows the accent for the
+  application, a token for one region and a dark region; the Installation page
+  links there instead of explaining the tokens itself.
 
 ## 0.24.0 – The select's own list (Oct. 2026)
 
