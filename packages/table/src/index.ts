@@ -59,3 +59,18 @@ export type { CellEdit, CellEditorProps, EditFor, EditOptions, RowAdd, RowDelete
    (table-filters 08). */
 export { rowFilter } from "./rowFilter";
 export type { RowFilter } from "./rowFilter";
+
+/* The types a props table names, so that every name a reader sees can be
+   imported (types-without-holes 06). */
+export type {
+  Absent,
+  AggregateFor,
+  FilterFor,
+  FooterFor,
+  FormatFor,
+  GroupFor,
+  Present,
+  Presentation,
+} from "./types";
+export type { Pin } from "./model/pinning";
+export type { ToolbarSize } from "./toolbarSize";

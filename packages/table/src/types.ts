@@ -18,18 +18,23 @@ import type { Pin } from "./model/pinning";
 
 /* --- Values --------------------------------------------------------------- */
 
+/** A value that is not there: `null` or `undefined`. */
 export type Absent = null | undefined;
 /** The value without the absence - that is what `children` gets. */
 export type Present<W> = Exclude<W, Absent>;
 /** What can appear as text without `children`. */
 export type Displayable = string | number | boolean | Date;
 
+/** What a column accepts as `format`: a number format for numbers, a date
+    format for points in time, nothing for every other value. */
 export type FormatFor<W> = [Present<W>] extends [number]
   ? NumberFormat
   : [Present<W>] extends [Date]
     ? DateFormat
     : never;
 
+/** What the old `footer` accepts: `"sum"` and `"avg"` for numbers, nothing
+    for every other value. */
 export type FooterFor<W> = [Present<W>] extends [number] ? "sum" | "avg" : never;
 
 /** An aggregate of one's own: the values present and the rows of the group -
@@ -87,6 +92,7 @@ export type FilterFor<W> =
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- the condition belongs to the filter; at the column only the value counts
   | ColumnFilter<Present<W>, any>;
 
+/** What a column draws in a cell: the value present and its row. */
 export type Presentation<W, Z> = (value: Present<W>, row: Z) => ReactNode;
 
 type IsDisplayable<W> = [Present<W>] extends [never]

@@ -5,6 +5,7 @@
 
 import { createContext, useContext } from "react";
 
+/** The size of a toolbar's controls. */
 export type ToolbarSize = "sm" | "md";
 
 export const ToolbarSizeContext = createContext<ToolbarSize>("sm");

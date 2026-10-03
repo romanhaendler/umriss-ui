@@ -94,3 +94,8 @@ export * from "./components/FileInput";
    surfaces use stays inside. */
 export { ControlSizeProvider } from "./lib/controlSize";
 export type { ControlSize, ControlSizeProviderProps } from "./lib/controlSize";
+
+/* The types a props table names, so that every name a reader sees can be
+   imported (types-without-holes 06). They bring no stylesheet. */
+export type { TextTracking, TextLeading } from "./components/Typography/Typography";
+export type { Align } from "./components/Popover/position";
