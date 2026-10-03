@@ -58,7 +58,7 @@ export const callouts = [
 ];
 
 export const builtFrom = [
-  "table",
+  "first-table",
   "column",
   "grouping",
   "aggregate",

@@ -173,7 +173,7 @@ export const callouts = [
 ];
 
 export const builtFrom = [
-  "table",
+  "first-table",
   "filter",
   "search",
   "aggregate",

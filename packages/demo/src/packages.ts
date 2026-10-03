@@ -19,12 +19,10 @@ export interface Package {
   start: string;
 }
 
-/* The start pages carry today's ids. `sidebar-tree` moves the table's to
-   `first-table`; the entry follows it then. */
 export const PACKAGES: readonly Package[] = [
   { id: "core", name: "Core", npm: "@umriss-ui/core", role: "Controls, overlays and layout: the base of the others", start: "installation" },
   { id: "charts", name: "Charts", npm: "@umriss-ui/charts", role: "Canvas charts for series, states and limits", start: "installation" },
-  { id: "table", name: "Table", npm: "@umriss-ui/table", role: "A typed data table for many rows", start: "table" },
+  { id: "table", name: "Table", npm: "@umriss-ui/table", role: "A typed data table for many rows", start: "first-table" },
   { id: "schedule", name: "Schedule", npm: "@umriss-ui/schedule", role: "Work on lanes over time", start: "schedule" },
   { id: "calculation", name: "Calculation", npm: "@umriss-ui/calculation", role: "A figure shown with how it came about", start: "installation" },
 ];

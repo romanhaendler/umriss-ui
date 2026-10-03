@@ -30,7 +30,7 @@ export const EXAMPLE_ADDRESSES: readonly ExampleAddress[] = exampleAddresses(EXA
     dialog and the alarm list. */
 export const SAMPLE = [
   "scenarios",
-  "table",
+  "first-table",
   "provider",
   "column",
   "formats",

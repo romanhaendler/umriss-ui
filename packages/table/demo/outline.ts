@@ -11,9 +11,9 @@
 
    A feature that is a part imported by name - `Search`, `ColumnMenu`,
    `Export`, `Pagination`, `Toolbar`, `RowDetail`, `RowActions`, `AlarmList` -
-   keeps that name as its page name, and its address stays what it was. `Table`
-   stays at `#/table` as the first table, and the props of the hook stand there
-   in full: that is where a reader looks up what `useTable` takes.
+   keeps that name as its page name, and its address stays what it was. `First
+   table` stands at `/first-table/`, and the props of the hook stand there in
+   full: that is where a reader looks up what `useTable` takes.
 
    The rubrics sort by what the reader is about to do - build columns, find
    rows, work in cells - not by how a part is built.
@@ -23,7 +23,7 @@
 
 
 import { addresses } from "@umriss-ui/demo/outline";
-import type { Rubric } from "@umriss-ui/demo/outline";
+import type { Moved, Rubric } from "@umriss-ui/demo/outline";
 
 export type { Rubric, Page } from "@umriss-ui/demo/outline";
 
@@ -47,7 +47,7 @@ export const OUTLINE: readonly Rubric[] = [
         installs: true,
       },
       {
-        id: "table",
+        id: "first-table",
         name: "First table",
         sentence: "Rows of records to scan, sort, search and select (also called a data table or data grid). Reach for it when people compare many records by the same fields; from a few rows to a million on a server.",
         about: [
@@ -188,18 +188,6 @@ export const OUTLINE: readonly Rubric[] = [
         ],
         types: [],
         exports: ["useTable"],
-      },
-      {
-        id: "pagination",
-        name: "Pagination",
-        sentence: "The bar under the table that splits long results into pages, with the page size to choose (also called a pager). The table pages only where one stands; without it every filtered row is shown.",
-        about: [
-          "`pageSize` on the hook sets the rows per page, `pageSizes` the choices. A search, a filter, a new sort or a new page size go back to page one, and a page that no longer exists after a filter becomes the last one. A virtualised table does not page, and the bar is not drawn.",
-        ],
-        alternatives: [{ when: "Thousands of rows the user scrolls through without pages", use: "virtualisation" }],
-        limits: ["In [manual mode](#/manual-mode) the page goes to the server in the view, and `rowCount` decides how many pages there are."],
-        types: ["PaginationProps"],
-        exports: ["Pagination"],
       },
     ],
   },
@@ -421,6 +409,18 @@ export const OUTLINE: readonly Rubric[] = [
     sentence: "Tables of thousands of rows, in the browser or on a server.",
     pages: [
       {
+        id: "pagination",
+        name: "Pagination",
+        sentence: "The bar under the table that splits long results into pages, with the page size to choose (also called a pager). The table pages only where one stands; without it every filtered row is shown.",
+        about: [
+          "`pageSize` on the hook sets the rows per page, `pageSizes` the choices. A search, a filter, a new sort or a new page size go back to page one, and a page that no longer exists after a filter becomes the last one. A virtualised table does not page, and the bar is not drawn.",
+        ],
+        alternatives: [{ when: "Thousands of rows the user scrolls through without pages", use: "virtualisation" }],
+        limits: ["In [manual mode](#/manual-mode) the page goes to the server in the view, and `rowCount` decides how many pages there are."],
+        types: ["PaginationProps"],
+        exports: ["Pagination"],
+      },
+      {
         id: "virtualisation",
         name: "Virtualisation",
         sentence: "Thousands of rows the user scrolls through without pages: only the rows in view are rendered, and everything else still reaches every row.",
@@ -556,9 +556,14 @@ export const OUTLINE: readonly Rubric[] = [
   },
 ];
 
+/* The page ids that changed, and where each stands now - an old link still
+   lands. First table stood at `/table/table/`, an address that named the
+   package twice (.scratch/sidebar-tree). */
+export const MOVED: Moved = { table: "first-table" };
+
 /* The addresses follow from the outline; their format is known to the shell
    (`@umriss-ui/demo`, `outline.ts`) and to nobody else. */
-export const ADDRESSES = addresses(OUTLINE);
+export const ADDRESSES = addresses(OUTLINE, MOVED);
 export const { ALL_PAGES, placeOf, addressOf, fromPlace } = ADDRESSES;
 
 /* The `on…` props in a table of their own: the table's callbacks are a
