@@ -399,6 +399,57 @@ test("from a stage of 640 px the marks stand at their corners and a table keeps 
   await expect(page.locator(`[data-scenario="${p.pinnedScenario}"] td[style*="--u-table-pin"]`).first()).toBeAttached();
 });
 
+/* Previous and next (page-orientation 02): at the foot of every page, in the
+   sidebar's order across rubrics. The chain is read off the sidebar, so it
+   needs no probe - its order IS the order to follow. */
+const turn = (page: Page) => page.getByRole("navigation", { name: "Previous and next page" });
+const blockOf = (href: string) => `[data-block="${href.replace(/^\/|\/$/g, "") || "scenarios"}"]`;
+
+test("next on a rubric's last page opens the next rubric's first page, and names both", async ({ page }) => {
+  const rubrics = page.getByRole("navigation", { name: "Components" }).locator(".railRubric");
+  const last = (await rubrics.nth(0).getByRole("link").last().getAttribute("href"))!;
+  const first = rubrics.nth(1).getByRole("link").first();
+  const href = (await first.getAttribute("href"))!;
+  const name = (await first.textContent())!;
+  const rubric = (await rubrics.nth(1).locator(".railHead > span").first().textContent())!;
+
+  await page.goto(last);
+  const next = turn(page).getByRole("link", { name: /^Next/ });
+  await expect(next).toContainText(rubric);
+  await expect(next).toContainText(name);
+  await expect(next).toHaveAttribute("href", href);
+
+  await page.evaluate(() => ((window as unknown as { __noReload?: boolean }).__noReload = true));
+  await next.click();
+  await expect(page.locator(blockOf(href))).toBeVisible();
+  expect(new URL(page.url()).pathname).toBe(href);
+  expect(await page.evaluate(() => (window as unknown as { __noReload?: boolean }).__noReload)).toBe(true);
+});
+
+test("the chain begins at the scenarios page and ends at the last page", async ({ page }) => {
+  const entries = page.getByRole("navigation", { name: "Components" }).locator(".railRubric").getByRole("link");
+  const first = (await entries.first().getAttribute("href"))!;
+  const last = (await entries.last().getAttribute("href"))!;
+
+  // The scenarios page has a next link only, to the first page.
+  await expect(turn(page).getByRole("link")).toHaveCount(1);
+  await turn(page).getByRole("link", { name: /^Next/ }).click();
+  await expect(page.locator(blockOf(first))).toBeVisible();
+  expect(new URL(page.url()).pathname).toBe(first);
+
+  // The first page's previous link leads back to it.
+  const previous = turn(page).getByRole("link", { name: /^Previous/ });
+  await expect(previous).toContainText("Scenarios");
+  await previous.click();
+  await expect(page.locator(blockOf("/"))).toBeVisible();
+  expect(new URL(page.url()).pathname).toBe("/");
+
+  // The last page has no next link.
+  await page.goto(last);
+  await expect(turn(page).getByRole("link", { name: /^Previous/ })).toHaveCount(1);
+  await expect(turn(page).getByRole("link", { name: /^Next/ })).toHaveCount(0);
+});
+
 test("the palette filters and jumps", async ({ page }) => {
   await page.keyboard.press("ControlOrMeta+k");
   const field = page.getByRole("combobox", { name: "Search a page or example" });

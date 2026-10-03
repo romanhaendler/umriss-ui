@@ -30,7 +30,7 @@ import { CodeBlock, CodeToggle } from "./Example";
 import { useContents } from "./Contents";
 import { hrefOf, hrefOfNeighbour } from "./href";
 import { PACKAGES } from "./packages";
-import { InstallLine } from "./Page";
+import { InstallLine, PageTurn } from "./Page";
 import { Prose } from "./Prose";
 import type { Demo } from "./demo";
 import { SCENARIOS } from "./outline";
@@ -188,6 +188,7 @@ export function Scenarios({ demo, sentence }: { demo: Demo; sentence: string }) 
       ) : (
         demo.scenarios.map((scenario) => <ScenarioBlock key={scenario.id} scenario={scenario} demo={demo} />)
       )}
+      <PageTurn demo={demo} />
       {contents.column}
     </article>
   );

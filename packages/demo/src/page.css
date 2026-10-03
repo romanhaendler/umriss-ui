@@ -289,6 +289,54 @@
   }
 }
 
+/* ---------------- Previous and next ---------------- */
+
+/* Two cards side by side at the page's foot; the next one keeps the right
+   half even where it stands alone, as on the scenarios page. */
+.pageTurn {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--u-space-4);
+}
+
+.pageTurn a {
+  display: flex;
+  flex-direction: column;
+  gap: var(--u-space-1);
+  padding: var(--u-space-3) var(--u-space-4);
+  border-radius: var(--u-radius-md);
+  box-shadow: var(--u-edge);
+  background: var(--u-color-surface);
+  text-decoration: none;
+  transition: box-shadow var(--u-transition);
+}
+
+.pageTurn a[rel="next"] {
+  grid-column: 2;
+  text-align: right;
+}
+
+.pageTurn a:hover {
+  box-shadow: 0 0 0 1px var(--u-edge-color-strong);
+}
+
+.pageTurn a:focus-visible {
+  outline: none;
+  box-shadow: var(--u-focus-ring);
+}
+
+.pageTurnLabel {
+  font-size: var(--u-text-xs);
+  color: var(--u-color-text-secondary);
+}
+
+.pageTurnName {
+  font-size: var(--u-text-md);
+  font-weight: var(--u-weight-medium);
+  color: var(--u-color-accent-text);
+  overflow-wrap: anywhere;
+}
+
 /* ---------------- Ein Beispiel ---------------- */
 
 .example {
