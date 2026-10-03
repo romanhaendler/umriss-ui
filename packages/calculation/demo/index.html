@@ -3,6 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- The theme before the first paint: the choice the shell's switch stored
+         (ThemeSwitch.tsx, the one other place that knows the key), else the
+         system's. Every prerendered page is cut from this file and keeps it. -->
+    <script>
+      (function () {
+        var stored;
+        try {
+          stored = localStorage.getItem("umriss-ui:theme");
+        } catch (e) {}
+        document.documentElement.style.colorScheme =
+          stored === "light" || stored === "dark" ? stored : matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      })();
+    </script>
     <title>Umriss Calculation – the parts of the calculation</title>
   </head>
   <body>

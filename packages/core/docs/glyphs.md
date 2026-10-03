@@ -16,7 +16,7 @@ glyphs that deviate from it, which is empty.
 | 6 | `aria-hidden` – a glyph is decoration. |
 
 **Compliance is checked, not recorded:** the `glyphs.test.ts` of core, table,
-schedule and calculation read every component source through `?raw` and hold
+schedule, calculation and the demo shell read every component source through `?raw` and hold
 each inline `<svg>` to points 1–4 and 6, with the rules once in
 `scripts/glyphs.ts`.
 

@@ -41,13 +41,14 @@
    first, the components after them. It stands at the head of the sidebar,
    above the rubrics. */
 
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { CommandPalette, LanguageProvider, useCommandPaletteShortcut } from "@umriss-ui/core";
 import type { Demo } from "./demo";
 import { BASE, hrefOf } from "./href";
 import { SCENARIOS, placeOfLocation } from "./outline";
 import { Page } from "./Page";
 import { Scenarios } from "./Scenarios";
+import { ThemeSwitch } from "./ThemeSwitch";
 
 /* The palette's candidates: the flat view of the outline and the run of
    example files, translated into the palette's language (CONTEXT.md,
@@ -104,11 +105,9 @@ export interface ShellProps {
   version: string;
   /** What the demo is - under "Scenarios" on the front page. */
   sentence: string;
-  /** On the right of the header, e.g. the theme switch. */
-  actions?: ReactNode;
 }
 
-export function Shell({ demo, brand, version, sentence, actions }: ShellProps) {
+export function Shell({ demo, brand, version, sentence }: ShellProps) {
   const { OUTLINE, ALL_PAGES, fromPlace, addressOf } = demo.addresses;
   const candidates = useMemo(() => paletteCandidates(demo), [demo]);
   const [place, setPlace] = useState(() => readPlace(fromPlace));
@@ -229,7 +228,9 @@ export function Shell({ demo, brand, version, sentence, actions }: ShellProps) {
           <span>Search …</span>
           <kbd className="shellKbd">⌘K</kbd>
         </button>
-        <div className="shellActions">{actions}</div>
+        <div className="shellActions">
+          <ThemeSwitch />
+        </div>
       </header>
 
       <div className="shellBody">
