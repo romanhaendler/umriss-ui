@@ -5,6 +5,7 @@
 import { checkShell } from "@umriss-ui/demo/checks/shell";
 
 checkShell({
+  packageId: "calculation",
   notOnTheFrontDoor: ["tree", "chain"],
   scenario: "price-a-tour",
   rail: { name: "Metrics", pageId: "metrics", rubricId: "writing" },

@@ -6,16 +6,11 @@
 
 import { Shell } from "@umriss-ui/demo";
 import { DEMO } from "./examples";
-/* The number in the header is the one in the manifest - a literal here had
-   fallen a version behind before anybody saw it. */
-import manifest from "../package.json";
 
 export function App() {
   return (
     <Shell
       demo={DEMO}
-      brand="Umriss Charts"
-      version={manifest.version}
       sentence="Charts for data-dense applications: series, states and limits on shared axes, the marks on canvas and every label a reader has to read in the DOM. Each screen below is one a product could ship, built from them."
     />
   );

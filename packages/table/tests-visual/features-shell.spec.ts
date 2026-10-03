@@ -5,6 +5,7 @@
 import { checkShell } from "@umriss-ui/demo/checks/shell";
 
 checkShell({
+  packageId: "table",
   notOnTheFrontDoor: ["first-table", "toolbar"],
   scenario: "find-a-late-shipment",
   pinnedScenario: "find-a-late-shipment",

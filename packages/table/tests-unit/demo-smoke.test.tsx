@@ -45,7 +45,7 @@ describe("Demo smoke test", () => {
   it("mounts the shell without an error", async () => {
     const { host, unmount } = await mount(<App />);
     expect(host.querySelector("main")).not.toBeNull();
-    expect(host.textContent).toContain("Umriss Table");
+    expect(host.textContent).toContain("umriss-ui");
     await unmount();
   });
 

@@ -51,7 +51,7 @@ describe("Demo smoke test", () => {
   it("mounts the shell without an error", async () => {
     const { host, teardown } = await mount(<App />);
     expect(host.querySelector("main")).not.toBeNull();
-    expect(host.textContent).toContain("Umriss UI");
+    expect(host.textContent).toContain("umriss-ui");
     await teardown();
   });
 

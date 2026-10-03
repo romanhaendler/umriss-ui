@@ -46,6 +46,7 @@ import { CommandPalette, LanguageProvider, useCommandPaletteShortcut } from "@um
 import type { Demo } from "./demo";
 import { BASE, hrefOf } from "./href";
 import { SCENARIOS, placeOfLocation, twinOfPlace } from "./outline";
+import { PACKAGES } from "./packages";
 import { Page } from "./Page";
 import { Scenarios } from "./Scenarios";
 import { ThemeSwitch } from "./ThemeSwitch";
@@ -99,16 +100,59 @@ function readPlace(fromPlace: Demo["addresses"]["fromPlace"]): { pageId: string;
   return { pageId: page?.id ?? "", ...(example === undefined ? {} : { example }) };
 }
 
+/* The site's root, above every demo's directory: `/umriss-ui/` on the site,
+   `/` in the dev server and the test build, where each demo stands alone. */
+const SITE = BASE.replace(/[^/]+\/$/, "");
+
+const REPOSITORY = "https://github.com/romanhaendler/umriss-ui";
+
+/** The three ways out of the site: the source, the package on npm, the text
+    for a coding agent. In the header on a wide screen, at the foot of the
+    sidebar on a narrow one - so the narrow header loses no destination. */
+function OutLinks({ npm, where }: { npm: string; where: "head" | "rail" }) {
+  const links = [
+    {
+      label: "Source on GitHub",
+      href: REPOSITORY,
+      // Two angle brackets: code.
+      d: "M3.5 2.5 1 5l2.5 2.5M6.5 2.5 9 5 6.5 7.5",
+    },
+    {
+      label: `${npm} on npm`,
+      href: `https://www.npmjs.com/package/${npm}`,
+      // A box: a package.
+      d: "M5 1 9 3v4L5 9 1 7V3ZM1 3l4 2 4-2M5 5v4",
+    },
+    {
+      label: "llms.txt for coding agents",
+      href: `${BASE}llms.txt`,
+      // A leaf with lines: a text.
+      d: "M2 1h4.2L8 2.8V9H2ZM4 4.5h2M4 6.5h2",
+    },
+  ];
+  return (
+    <div className={where === "head" ? "shellOut" : "railOut"}>
+      {links.map((link) => (
+        <a key={link.href} className="shellIcon" href={link.href} aria-label={link.label} title={link.label}>
+          <svg viewBox="0 0 10 10" width="16" height="16" aria-hidden="true">
+            <path d={link.d} fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          {where === "rail" && <span>{link.label}</span>}
+        </a>
+      ))}
+    </div>
+  );
+}
+
 export interface ShellProps {
-  /** What makes this demo a particular one. */
+  /** What makes this demo a particular one - its package among the five
+      included, which the header reads its name and links from. */
   demo: Demo;
-  brand: string;
-  version: string;
   /** What the demo is - under "Scenarios" on the front page. */
   sentence: string;
 }
 
-export function Shell({ demo, brand, version, sentence }: ShellProps) {
+export function Shell({ demo, sentence }: ShellProps) {
   const { OUTLINE, ALL_PAGES, fromPlace, addressOf } = demo.addresses;
   const candidates = useMemo(() => paletteCandidates(demo), [demo]);
   const [place, setPlace] = useState(() => readPlace(fromPlace));
@@ -247,18 +291,29 @@ export function Shell({ demo, brand, version, sentence }: ShellProps) {
 
   return (
     <div className="shell">
+      {/* One bar for every page of every demo: the way to the front page, to
+          the four other packages and out of the site. The wordmark and the
+          other packages leave this demo, so they are plain links and a full
+          load; the current package's link is a link into this demo, which the
+          click handler above moves without one. */}
       <header className="shellHead">
-        <a
-          className="shellMark"
-          href={BASE}
-          onClick={(e) => {
-            e.preventDefault();
-            goTo(SCENARIOS);
-          }}
-        >
-          <span className="shellMarkName">{brand}</span>
-          <span className="shellVersion">{version}</span>
+        <a className="shellMark" href={SITE}>
+          umriss-ui
         </a>
+        <nav className="shellPackages" aria-label="Packages">
+          {PACKAGES.map((pkg) =>
+            pkg.npm === demo.packageName ? (
+              <a key={pkg.id} className="shellPackage" href={BASE} aria-current="page">
+                {pkg.name}{" "}
+                <span className="shellVersion">{demo.version}</span>
+              </a>
+            ) : (
+              <a key={pkg.id} className="shellPackage" href={`${SITE}${pkg.id}/`}>
+                {pkg.name}
+              </a>
+            ),
+          )}
+        </nav>
         <button
           type="button"
           className="shellSearch"
@@ -270,6 +325,7 @@ export function Shell({ demo, brand, version, sentence }: ShellProps) {
         </button>
         <div className="shellActions">
           <ThemeSwitch />
+          <OutLinks npm={demo.packageName} where="head" />
         </div>
       </header>
 
@@ -305,6 +361,7 @@ export function Shell({ demo, brand, version, sentence }: ShellProps) {
               </ul>
             </div>
           ))}
+          <OutLinks npm={demo.packageName} where="rail" />
         </nav>
 
         <main className="shellContent">

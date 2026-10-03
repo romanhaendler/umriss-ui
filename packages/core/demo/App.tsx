@@ -9,16 +9,11 @@
 
 import { Shell } from "@umriss-ui/demo";
 import { DEMO } from "./examples";
-/* The number in the header is the one in the manifest - a literal here had
-   fallen a version behind before anybody saw it. */
-import manifest from "../package.json";
 
 export function App() {
   return (
     <Shell
       demo={DEMO}
-      brand="Umriss UI"
-      version={manifest.version}
       sentence="Whole screens of data-dense applications, built from these components as a product would ship them. Each is named after the job it serves, and its numbered marks point to the parts that do the work."
     />
   );

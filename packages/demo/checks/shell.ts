@@ -28,6 +28,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { STANDARDS } from "./accessibility";
 import { pageTitle, type TitleManifest } from "../src/tooling/title";
+import { PACKAGES } from "../src/packages";
 
 interface NamedPage {
   /** The name in sidebar and palette. */
@@ -37,6 +38,8 @@ interface NamedPage {
 }
 
 export interface ShellProbes {
+  /** This demo's package, as the package list names it. */
+  packageId: string;
   /** Two pages, neither of which the front door may show. */
   notOnTheFrontDoor: readonly [string, string];
   /** An entry in the sidebar and the id of its rubric. */
@@ -607,6 +610,65 @@ test("Escape closes the palette and gives focus back", async ({ page }) => {
   // Focus goes back where it came from - otherwise it stands at the top of
   // the page after closing.
   await expect(trigger).toBeFocused();
+});
+
+/* THE HEADER. The same bar on every page of every demo: the way to the front
+   page, to the other packages and out of the site. The test build stands
+   alone at `/`, so the site's root is `/` here and a package's directory is
+   `/<package>/` below it - the same formula that gives `/umriss-ui/` and
+   `/umriss-ui/<package>/` on the site. */
+
+test("the header leads to the front page and to every package", async ({ page }) => {
+  const head = page.getByRole("banner");
+  await expect(head.getByRole("link", { name: "umriss-ui", exact: true })).toHaveAttribute("href", "/");
+
+  const packages = head.getByRole("navigation", { name: "Packages" }).getByRole("link");
+  await expect(packages).toHaveCount(PACKAGES.length);
+  for (const [i, pkg] of PACKAGES.entries()) {
+    const link = packages.nth(i);
+    if (pkg.id === p.packageId) {
+      await expect(link).toHaveAttribute("aria-current", "page");
+      // Its version beside its name.
+      await expect(link).toHaveText(new RegExp(`^${pkg.name}\\s*\\d+\\.\\d+\\.\\d+`));
+    } else {
+      await expect(link).toHaveText(pkg.name);
+      await expect(link).not.toHaveAttribute("aria-current");
+      await expect(link).toHaveAttribute("href", `/${pkg.id}/`);
+    }
+  }
+
+  const npm = PACKAGES.find((pkg) => pkg.id === p.packageId)!.npm;
+  await expect(head.getByRole("link", { name: "Source on GitHub" })).toHaveAttribute("href", /^https:\/\/github\.com\//);
+  await expect(head.getByRole("link", { name: `${npm} on npm` })).toHaveAttribute("href", `https://www.npmjs.com/package/${npm}`);
+  await expect(head.getByRole("link", { name: "llms.txt for coding agents" })).toHaveAttribute("href", "/llms.txt");
+});
+
+test("the header stands on every page, not only the front door", async ({ page }) => {
+  await page.goto(`/${p.deepLink.pageId}/`);
+  const head = page.getByRole("banner");
+  await expect(head.getByRole("link", { name: "umriss-ui", exact: true })).toBeVisible();
+  await expect(head.getByRole("navigation", { name: "Packages" }).getByRole("link")).toHaveCount(PACKAGES.length);
+});
+
+test("on a phone the header takes two lines, loses no destination, and the page does not scroll sideways", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const head = page.getByRole("banner");
+  const packages = head.getByRole("navigation", { name: "Packages" });
+  // The second line: below the wordmark.
+  const mark = (await head.getByRole("link", { name: "umriss-ui", exact: true }).boundingBox())!;
+  expect((await packages.boundingBox())!.y).toBeGreaterThanOrEqual(mark.y + mark.height);
+  for (const link of await packages.getByRole("link").all()) {
+    await link.scrollIntoViewIfNeeded();
+    await expect(link).toBeInViewport({ ratio: 1 });
+  }
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
+
+  // GitHub, npm and llms.txt stand at the foot of the sidebar instead.
+  await expect(head.getByRole("link", { name: "Source on GitHub" })).toBeHidden();
+  const rail = page.getByRole("navigation", { name: "Components" });
+  for (const name of ["Source on GitHub", "on npm", "llms.txt for coding agents"]) {
+    await expect(rail.getByRole("link", { name })).toBeVisible();
+  }
 });
 
 /* THE THEME. One choice for the site, stored under one key, standing before
