@@ -84,8 +84,9 @@ Each of these is argued somewhere; the link is the argument, not the rule.
   appearance".
 * **A baseline moves only when a ticket says it may.** A bulk rebuild without
   review is never admissible (`CONTEXT.md`, **Baseline**).
-* **A prop without JSDoc breaks the build.** Whatever lands in a props table on
-  some page explains itself; the gate runs in `predev`, `prebuild:demo` and
-  `pretypecheck`.
+* **A prop or an export without JSDoc breaks the build.** Whatever lands in a
+  props table on some page explains itself, and so does every export of a
+  package's entry and its subpaths; the gate runs in `predev`, `prebuild:demo`
+  and `pretypecheck`.
 * **A word this workspace has is used as it is defined.** `CONTEXT.md` is the
   vocabulary, including the words each term may not collide with.
