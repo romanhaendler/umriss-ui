@@ -42,7 +42,9 @@ Tests:
 - In the same file, a table with only main rows writes no `<h4>` and no `######`, and a group with no rows is left out. The parity test now also checks that HTML and Markdown have the same sub-headings in the same order.
 - `llmsGuard.test.ts` checks that the prerendered page's API section is the app's HTML, for every page of all five demos.
 - lint, typecheck and test:unit are green. Core's `propsStandard` timed out once under load and passed when run again.
-- In Playwright, the shell, page, screenshot and accessibility suites of all ten projects ran: 1597 passed, 2 failed. One failure is `language--own-components` (ui-light), which differs in the word "Today". That is the known failure, and its baseline was left as it is. The other is the Drawer picture below.
+- In Playwright, before the rebase onto main, the shell, page, screenshot and accessibility suites of all ten projects ran: 1597 passed, 2 failed. One failure is `language--own-components` (ui-light), which differs in the word "Today". That is the known failure, and its baseline was left as it is. The other is the Drawer picture below.
+- After the rebase, the shell and page suites ran in ui-light and table-light: 60 passed.
+- After the rebase, lint, typecheck and test:unit are green with one package at a time. With all packages in parallel, the smoke tests of core and table hit their 5 s limit. They pass on their own.
 
 Baselines moved: `drawer-beside-a-service-list` (ui-light, ui-dark). The picture shows `DrawerProps` behind the backdrop, and `onClose` moved from the main rows to Events. That move is this ticket's change. The spec expected no baseline to move because it assumed no picture shows an API table, but this one does.
 
