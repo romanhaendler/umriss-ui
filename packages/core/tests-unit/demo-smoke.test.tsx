@@ -9,10 +9,10 @@
    The three imports below still name the German modules of `demo/`, because
    that directory is renamed by its own ticket. */
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { StrictMode, act } from "react";
 import { createRoot } from "react-dom/client";
-import { ToastProvider } from "../src";
+import { DEFAULT_WORDING, ToastProvider } from "../src";
 import { Page } from "@umriss-ui/demo";
 import { App } from "../demo/App";
 import { DEMO } from "../demo/examples";
@@ -104,6 +104,30 @@ describe("The examples as a set", () => {
   it.each(DEMO.scenarios.map((s) => [s.id, s] as const))("renders the scenario %s", async (_name, scenario) => {
     const { teardown } = await mount(<scenario.Component />);
     await teardown();
+  });
+
+  it("show no stale or lost feed when the page is loaded in 2030", async () => {
+    /* A world has a fixed moment; a feed's freshness counts from page load.
+       The modules are loaded anew under the clock, as a visitor's page would
+       be: a scenario that ties its feed to the world's date shows it lost. */
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date(2030, 0, 1));
+    try {
+      vi.resetModules();
+      const [{ DEMO: loaded }, core] = await Promise.all([import("../demo/examples"), import("../src")]);
+      for (const scenario of loaded.scenarios) {
+        const { host, teardown } = await mount(
+          <core.ToastProvider>
+            <scenario.Component />
+          </core.ToastProvider>,
+        );
+        expect(host.textContent, scenario.id).not.toContain(DEFAULT_WORDING.freshnessDisconnected);
+        expect(host.textContent, scenario.id).not.toContain(DEFAULT_WORDING.freshnessStale);
+        await teardown();
+      }
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("leave no page without an example", () => {

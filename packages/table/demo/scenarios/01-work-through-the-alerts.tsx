@@ -110,6 +110,8 @@ export const builtFrom = [
 ];
 
 const MIN = 60_000;
+/* The feed's freshness counts from page load, the rest from the world's moment. */
+const LOADED = Date.now();
 
 const onCall = (rotation: "primary" | "secondary") => {
   const turn = ONCALL.find((one) => one.rotation === rotation && one.from <= NOW && NOW < one.to);
@@ -154,7 +156,7 @@ export default function WorkThroughTheAlerts() {
         <AlarmList
           view={view}
           selection={selection}
-          asOf={NOW}
+          asOf={LOADED - 40_000}
           freshness={{ stale: 5 * MIN, lost: 30 * MIN }}
           hiddenOnly={hiddenOnly}
           onAcknowledge={(ids) => {
