@@ -14,6 +14,7 @@
 import { useState } from "react";
 import { Button, FormField, Input, NumberInput, RadioGroup, Select, Switch } from "@umriss-ui/core";
 import { CodeBlock } from "./Example";
+import { Stage } from "./Language";
 import { codeOf, startOf, type Configurator as ConfiguratorData, type Control, type Value } from "./tooling/configurator";
 
 function Field({ control, value, onChange }: { control: Control; value: Value; onChange: (value: Value) => void }) {
@@ -74,9 +75,9 @@ export function Configurator({ configurator, packageName }: { configurator: Conf
 
   return (
     <section className="configurator" data-configurator={configurator.pageId} aria-label={`${name}, configured`}>
-      <div className="exampleStage configuratorStage">
+      <Stage className="exampleStage configuratorStage">
         <Component {...props} />
-      </div>
+      </Stage>
       <div className="configuratorPanel">
         {controls.map((control) => (
           <Field

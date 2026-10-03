@@ -200,6 +200,51 @@ body {
   box-shadow: var(--u-focus-ring);
 }
 
+/* The language of the components: two short words in a sunken well, the
+   chosen one lifted onto the surface. The transparent outline is drawn only
+   under forced colours, where backgrounds and shadows give way - the chosen
+   one keeps a frame there. */
+.shellLanguage {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: var(--u-radius-md);
+  background: var(--u-color-surface-sunken);
+}
+
+.shellLanguage > button {
+  height: 26px;
+  min-width: 28px;
+  padding: 0 6px;
+  border: none;
+  border-radius: var(--u-radius-xs);
+  background: transparent;
+  color: var(--u-color-text-secondary);
+  font: inherit;
+  font-size: var(--u-text-xs);
+  font-weight: var(--u-weight-medium);
+  cursor: pointer;
+  transition:
+    background var(--u-transition),
+    color var(--u-transition);
+}
+
+.shellLanguage > button:hover {
+  color: var(--u-color-text);
+}
+
+.shellLanguage > button[aria-pressed="true"] {
+  background: var(--u-color-surface);
+  box-shadow: var(--u-edge);
+  color: var(--u-color-text);
+  outline: 1px solid transparent;
+}
+
+.shellLanguage > button:focus-visible {
+  outline: none;
+  box-shadow: var(--u-focus-ring);
+}
+
 /* The same four links at the foot of the sidebar - shown only when the
    header has no room for them. */
 .railOut {

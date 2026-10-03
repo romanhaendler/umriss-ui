@@ -26,6 +26,7 @@
 import { useMemo, useState } from "react";
 import { highlight } from "sugar-high";
 import { CopyButton } from "./CopyButton";
+import { Stage } from "./Language";
 import { Prose } from "./Prose";
 import type { Example as ExampleData } from "./tooling/examples";
 
@@ -123,9 +124,9 @@ export function Example({ example, allOpen, hero = false }: ExampleProps) {
         </p>
       )}
 
-      <div className="exampleStage">
+      <Stage className="exampleStage" ownLanguage={example.source.includes("<LanguageProvider")}>
         <example.Component />
-      </div>
+      </Stage>
 
       {hero && <div className="exampleFoot">{toggle}</div>}
 

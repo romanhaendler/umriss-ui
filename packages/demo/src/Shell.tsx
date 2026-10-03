@@ -53,6 +53,7 @@ import { searchEntries, type SearchEntry, type SearchKind } from "./search";
 import { Page } from "./Page";
 import { Scenarios } from "./Scenarios";
 import { ThemeSwitch } from "./ThemeSwitch";
+import { LanguageSwitch, ShownGerman, useLanguage, type German } from "./Language";
 import { pageTitle } from "./tooling/title";
 import { EDIT_LINK, editHref } from "./tooling/edit";
 
@@ -181,12 +182,18 @@ export interface ShellProps {
   demo: Demo;
   /** What the demo is - under "Scenarios" on the front page. */
   sentence: string;
+  /** The German pair from `@umriss-ui/core/wording/de`, where this demo's
+      components read core's language: the header then carries the EN/DE
+      switch, and DE renders the examples and the scenarios in it
+      (`Language.tsx`). The charts take their words per chart and pass none. */
+  german?: German;
 }
 
-export function Shell({ demo, sentence }: ShellProps) {
+export function Shell({ demo, sentence, german }: ShellProps) {
   const { OUTLINE, ALL_PAGES, fromPlace, addressOf } = demo.addresses;
   const [place, setPlace] = useState(() => readPlace(fromPlace));
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [language, chooseLanguage] = useLanguage();
 
   /* THE PALETTE'S TWO SOURCES. The package's search fragment is a part of
      the bundle of its own, fetched on the palette's first opening and kept.
@@ -423,122 +430,125 @@ export function Shell({ demo, sentence }: ShellProps) {
   );
 
   return (
-    <div className="shell">
-      {/* One bar for every page of every demo: the way to the front page, to
-          the four other packages and out of the site. The wordmark and the
-          other packages leave this demo, so they are plain links and a full
-          load; the current package's link is a link into this demo, which the
-          click handler above moves without one. */}
-      <header className="shellHead">
-        <button
-          type="button"
-          className="shellIcon shellMenu"
-          aria-label="Menu"
-          aria-haspopup="dialog"
-          aria-expanded={drawerOpen}
-          onClick={openDrawer}
-        >
-          <svg viewBox="0 0 10 10" width="16" height="16" aria-hidden="true">
-            <path d="M1.5 2.5h7M1.5 5h7M1.5 7.5h7" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-          </svg>
-        </button>
-        <a className="shellMark" href={SITE}>
-          umriss-ui
-        </a>
-        <nav className="shellPackages" aria-label="Packages">
-          {PACKAGES.map((pkg) =>
-            pkg.npm === demo.packageName ? (
-              <a key={pkg.id} className="shellPackage" href={BASE} aria-current="page">
-                {pkg.name}{" "}
-                <span className="shellVersion">{demo.version}</span>
-              </a>
+    <ShownGerman.Provider value={language === "de" ? german : undefined}>
+      <div className="shell">
+        {/* One bar for every page of every demo: the way to the front page, to
+            the four other packages and out of the site. The wordmark and the
+            other packages leave this demo, so they are plain links and a full
+            load; the current package's link is a link into this demo, which the
+            click handler above moves without one. */}
+        <header className="shellHead">
+          <button
+            type="button"
+            className="shellIcon shellMenu"
+            aria-label="Menu"
+            aria-haspopup="dialog"
+            aria-expanded={drawerOpen}
+            onClick={openDrawer}
+          >
+            <svg viewBox="0 0 10 10" width="16" height="16" aria-hidden="true">
+              <path d="M1.5 2.5h7M1.5 5h7M1.5 7.5h7" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+            </svg>
+          </button>
+          <a className="shellMark" href={SITE}>
+            umriss-ui
+          </a>
+          <nav className="shellPackages" aria-label="Packages">
+            {PACKAGES.map((pkg) =>
+              pkg.npm === demo.packageName ? (
+                <a key={pkg.id} className="shellPackage" href={BASE} aria-current="page">
+                  {pkg.name}{" "}
+                  <span className="shellVersion">{demo.version}</span>
+                </a>
+              ) : (
+                <a key={pkg.id} className="shellPackage" href={`${SITE}${pkg.id}/`}>
+                  {pkg.name}
+                </a>
+              ),
+            )}
+          </nav>
+          <button
+            type="button"
+            className="shellSearch"
+            onClick={() => setPaletteOpen(true)}
+            aria-haspopup="dialog"
+          >
+            <span>{PALETTE_PLACEHOLDER}</span>
+            <kbd className="shellKbd">⌘K</kbd>
+          </button>
+          <div className="shellActions">
+            {german !== undefined && <LanguageSwitch language={language} onChoose={chooseLanguage} />}
+            <ThemeSwitch />
+            <OutLinks npm={demo.packageName} where="head" />
+          </div>
+        </header>
+
+        <div className="shellBody">
+          {!narrow && rail}
+
+          <main className="shellContent">
+            {page === undefined ? (
+              <Scenarios demo={demo} sentence={sentence} />
             ) : (
-              <a key={pkg.id} className="shellPackage" href={`${SITE}${pkg.id}/`}>
-                {pkg.name}
+              <Page key={page.id} demo={demo} page={page} />
+            )}
+            {/* Under every page, the scenarios page too: an issue that names the
+                page - its title, and its address without an example's anchor. */}
+            <p className="pageEdit">
+              <a href={editHref(title, new URL(page === undefined ? BASE : hrefOf(addressOf(page.id)), window.location.href).href)}>
+                {EDIT_LINK}
               </a>
-            ),
-          )}
-        </nav>
-        <button
-          type="button"
-          className="shellSearch"
-          onClick={() => setPaletteOpen(true)}
-          aria-haspopup="dialog"
-        >
-          <span>{PALETTE_PLACEHOLDER}</span>
-          <kbd className="shellKbd">⌘K</kbd>
-        </button>
-        <div className="shellActions">
-          <ThemeSwitch />
-          <OutLinks npm={demo.packageName} where="head" />
+            </p>
+          </main>
         </div>
-      </header>
 
-      <div className="shellBody">
-        {!narrow && rail}
-
-        <main className="shellContent">
-          {page === undefined ? (
-            <Scenarios demo={demo} sentence={sentence} />
-          ) : (
-            <Page key={page.id} demo={demo} page={page} />
-          )}
-          {/* Under every page, the scenarios page too: an issue that names the
-              page - its title, and its address without an example's anchor. */}
-          <p className="pageEdit">
-            <a href={editHref(title, new URL(page === undefined ? BASE : hrefOf(addressOf(page.id)), window.location.href).href)}>
-              {EDIT_LINK}
-            </a>
-          </p>
-        </main>
-      </div>
-
-      {/* A click on the dialog itself is one on its backdrop: the sidebar
-          fills the dialog to its edges. */}
-      <dialog
-        ref={drawerRef}
-        className="shellDrawer"
-        aria-label="Menu"
-        onClose={() => setDrawerOpen(false)}
-        onClick={(event) => {
-          if (event.target === event.currentTarget) event.currentTarget.close();
-        }}
-      >
-        {narrow && rail}
-      </dialog>
-
-      {/* The library's wording is general ("search", "open"); this demo jumps
-          anywhere in umriss-ui and says so. That is exactly what the seam is
-          for - the component need not be touched for it. */}
-      <LanguageProvider
-        wording={{
-          palettePlaceholder: PALETTE_PLACEHOLDER,
-          paletteField: "Search umriss-ui",
-          palettePanel: "Jump anywhere in umriss-ui",
-          paletteList: "Found",
-          paletteHintChoose: "jump",
-        }}
-      >
-        <CommandPalette
-          open={paletteOpen}
-          onClose={() => setPaletteOpen(false)}
-          items={candidates}
-          onChoose={(address) => {
-            /* Another package's find is that demo's page, a full navigation:
-               the site keeps it in a directory beside this one. */
-            if (!address.startsWith(`/${ownId}/`)) {
-              window.location.assign(`${SITE}${address.slice(1)}`);
-              return;
-            }
-            /* An own one is split with the same functions that split the
-               address bar - not with a `split` beside them - and jumps in
-               place. */
-            const [path = "/", hash = ""] = address.slice(ownId.length + 1).split("#");
-            const { page: target, example } = fromPlace(placeOfLocation(path, hash));
-            goTo(target?.id ?? SCENARIOS, example);
+        {/* A click on the dialog itself is one on its backdrop: the sidebar
+            fills the dialog to its edges. */}
+        <dialog
+          ref={drawerRef}
+          className="shellDrawer"
+          aria-label="Menu"
+          onClose={() => setDrawerOpen(false)}
+          onClick={(event) => {
+            if (event.target === event.currentTarget) event.currentTarget.close();
           }}
-        />
-      </LanguageProvider>
-    </div>
+        >
+          {narrow && rail}
+        </dialog>
+
+        {/* The library's wording is general ("search", "open"); this demo jumps
+            anywhere in umriss-ui and says so. That is exactly what the seam is
+            for - the component need not be touched for it. */}
+        <LanguageProvider
+          wording={{
+            palettePlaceholder: PALETTE_PLACEHOLDER,
+            paletteField: "Search umriss-ui",
+            palettePanel: "Jump anywhere in umriss-ui",
+            paletteList: "Found",
+            paletteHintChoose: "jump",
+          }}
+        >
+          <CommandPalette
+            open={paletteOpen}
+            onClose={() => setPaletteOpen(false)}
+            items={candidates}
+            onChoose={(address) => {
+              /* Another package's find is that demo's page, a full navigation:
+                 the site keeps it in a directory beside this one. */
+              if (!address.startsWith(`/${ownId}/`)) {
+                window.location.assign(`${SITE}${address.slice(1)}`);
+                return;
+              }
+              /* An own one is split with the same functions that split the
+                 address bar - not with a `split` beside them - and jumps in
+                 place. */
+              const [path = "/", hash = ""] = address.slice(ownId.length + 1).split("#");
+              const { page: target, example } = fromPlace(placeOfLocation(path, hash));
+              goTo(target?.id ?? SCENARIOS, example);
+            }}
+          />
+        </LanguageProvider>
+      </div>
+    </ShownGerman.Provider>
   );
 }

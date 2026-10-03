@@ -31,6 +31,7 @@ import { useContents } from "./Contents";
 import { RubricLine } from "./CopyPage";
 import { hrefOf, hrefOfNeighbour } from "./href";
 import { PACKAGES } from "./packages";
+import { GermanNotice, Stage as LanguageStage } from "./Language";
 import { InstallLine, PageTurn } from "./Page";
 import { Prose } from "./Prose";
 import type { Demo } from "./demo";
@@ -93,14 +94,14 @@ function Stage({ scenario }: { scenario: Scenario }) {
   }, []);
 
   return (
-    <div className="scenarioStage" ref={stage} data-narrow={narrow ? "" : undefined}>
+    <LanguageStage className="scenarioStage" ref={stage} data-narrow={narrow ? "" : undefined}>
       <scenario.Component />
       {marks.map((mark) => (
         <span key={mark.n} className="calloutMark" aria-hidden="true" style={{ left: narrow ? undefined : mark.left, top: mark.top }}>
           {mark.n}
         </span>
       ))}
-    </div>
+    </LanguageStage>
   );
 }
 
@@ -170,6 +171,7 @@ export function Scenarios({ demo, sentence }: { demo: Demo; sentence: string }) 
   ]);
   return (
     <article className="page scenarios" data-block="scenarios" aria-labelledby="scenarios-title">
+      <GermanNotice packageName={demo.packageName} />
       <header className="pageHead">
         <RubricLine demo={demo} rubric="Scenarios" place="" name="the scenarios" />
         <h1 className="pageName" id="scenarios-title" tabIndex={-1}>

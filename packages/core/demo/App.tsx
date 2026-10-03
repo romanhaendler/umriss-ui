@@ -8,12 +8,18 @@
    file IS the example: what runs is exactly what the reader sees. */
 
 import { Shell } from "@umriss-ui/demo";
+import { GERMAN_FORMATS, GERMAN_WORDING } from "@umriss-ui/core/wording/de";
 import { DEMO } from "./examples";
+
+/* The German pair, from the subpath an application imports it from: the
+   header's EN/DE switch renders every example and scenario in it. */
+const GERMAN = { wording: GERMAN_WORDING, formats: GERMAN_FORMATS };
 
 export function App() {
   return (
     <Shell
       demo={DEMO}
+      german={GERMAN}
       sentence="Whole screens of data-dense applications, built from these components as a product would ship them. Each is named after the job it serves, and its numbered marks point to the parts that do the work."
     />
   );

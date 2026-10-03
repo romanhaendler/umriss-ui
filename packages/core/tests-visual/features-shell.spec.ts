@@ -2,6 +2,7 @@
    the shell (`@umriss-ui/demo/checks/shell.ts`); here stand the pages and
    queries they can be checked against in @umriss-ui/core. */
 
+import { test, expect } from "@playwright/test";
 import { checkShell } from "@umriss-ui/demo/checks/shell";
 
 checkShell({
@@ -62,4 +63,19 @@ checkShell({
   ],
   /* A row in a folded group: the jump opens it. */
   prop: { query: "role", label: "role", group: "core · PopoverProps", pageId: "popover", id: "PopoverProps-role" },
+  /* The States example: a date already set, and the button that clears it. */
+  language: { pageId: "datepicker", texts: [["18/03/2026", "18.03.2026"]], buttons: [["Clear date", "Datum leeren"]] },
+});
+
+/* The Language page shows languages itself: an example that sets its own
+   provider keeps the languages its code names, under either choice of the
+   switch (.scratch/language-switch). */
+test("the Language page's side-by-side example stays side by side with German on", async ({ page }) => {
+  await page.goto("/language/");
+  await page.getByRole("group", { name: "Language of the components" }).getByRole("button", { name: "Deutsch" }).click();
+  await expect(page.getByRole("main").locator("p", { hasText: "The examples render in German" })).toBeVisible();
+  const example = page.locator('[data-example="side-by-side"]');
+  await expect(example.getByText("1,284,311", { exact: true })).toBeVisible();
+  await expect(example.getByText("1.284.311", { exact: true })).toBeVisible();
+  await expect(example.locator(".exampleStage")).not.toHaveAttribute("lang");
 });
