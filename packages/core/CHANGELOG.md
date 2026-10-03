@@ -46,6 +46,9 @@ commit.
   characters or more, as a contiguous run and not as a subsequence. A find
   through them stands behind every find in a label or a group and marks
   nothing. A palette without keywords finds and orders as before.
+- **A prop's default stands in a `@default` tag** where its comment used to say
+  it in words: the editor shows it on hover, and the props table in its Default
+  column. Nothing else changes.
 
 ## 0.24.0 – The select's own list (Oct. 2026)
 

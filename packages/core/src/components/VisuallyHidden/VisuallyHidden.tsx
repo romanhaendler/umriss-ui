@@ -19,7 +19,8 @@ import styles from "./VisuallyHidden.module.css";
 /** The props of `VisuallyHidden`: those of the element `as` names, `span` by
     default. */
 export type VisuallyHiddenProps<E extends ElementType = "span"> = {
-  /** Element to render as. Default `span`. */
+  /** Element to render as.
+      @default "span" */
   as?: E;
   /** Becomes visible as soon as the content receives the focus (skip link). */
   focusable?: boolean;

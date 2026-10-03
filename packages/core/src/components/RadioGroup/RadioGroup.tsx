@@ -50,15 +50,16 @@ export interface RadioGroupProps<T extends string>
   defaultValue?: T | null;
   /** Runs on every choice – on the one made with the arrow keys as well. */
   onChange?: (value: T) => void;
-  /** Arrangement; Default one below the other. */
+  /** Arrangement: one below the other, or side by side. */
   orientation?: "vertical" | "horizontal";
-  /** `sm` for a toolbar and dense forms, `md` otherwise. Default: the size of a
-      `ControlSizeProvider` around it, else `md`. */
+  /** `sm` for a toolbar and dense forms, `md` otherwise.
+      @default the size of a `ControlSizeProvider` around it, else `"md"` */
   size?: "sm" | "md";
   /** Disables the whole group. `RadioOption` disables single
       possibilities. */
   disabled?: boolean;
-  /** Name of the radio group within the form; otherwise automatic. */
+  /** Name of the radio group within the form.
+      @default a generated one */
   name?: string;
 }
 

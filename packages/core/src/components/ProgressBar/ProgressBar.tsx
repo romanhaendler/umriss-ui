@@ -12,7 +12,9 @@ export interface ProgressBarProps extends HTMLAttributes<HTMLDivElement> {
   value?: number;
   /**
    * What is progressing, e.g. "Import of the invoice records". A progress bar
-   * needs a name from the author; without one the general term stands here.
+   * needs a name from the author.
+   *
+   * @default the wording's "Progress"
    */
   label?: string;
   /** What a screen reader says instead of the percentage, where a count says

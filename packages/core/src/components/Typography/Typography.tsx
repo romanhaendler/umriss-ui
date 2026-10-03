@@ -34,7 +34,7 @@ export type TextLeading = "normal" | "tight";
 
 /** The props of `Text`. */
 export interface TextProps extends HTMLAttributes<HTMLElement> {
-  /** Element to render as. Default `p`. */
+  /** Element to render as. */
   as?: ElementType;
   /** Type size from the token set. It is independent of the element: a `p`
       may be small without becoming a different element. */
@@ -97,11 +97,12 @@ export const Text = forwardRef<HTMLElement, TextProps>(function Text(
 
 /** The props of `Heading`. */
 export interface HeadingProps extends HTMLAttributes<HTMLHeadingElement> {
-  /** The page's outline level (h1–h6). Default 2. */
+  /** The page's outline level (h1–h6). */
   level?: 1 | 2 | 3 | 4 | 5 | 6;
-  /** Optical size; independent of the level. Default matching the level. */
+  /** Optical size; independent of the level.
+      @default the size matching the level */
   size?: TextSize;
-  /** Font weight from the token set. Default `semibold`. */
+  /** Font weight from the token set. */
   weight?: TextWeight;
   /** How loud the heading is. */
   tone?: TextTone;

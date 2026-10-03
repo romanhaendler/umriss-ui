@@ -13,24 +13,26 @@ export interface SliderProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "defaultValue" | "onChange" | "min" | "max" | "step"> {
   /** Controlled: the value. */
   value?: number;
-  /** Uncontrolled: the value to start at. Default: `min`. */
+  /** Uncontrolled: the value to start at.
+      @default min */
   defaultValue?: number;
   /** Reports every change, by pointer or key, as a number on the step. */
   onChange?: (value: number) => void;
-  /** Default: 0 */
+  /** The smallest value. */
   min?: number;
-  /** Default: 100 */
+  /** The largest value. */
   max?: number;
-  /** Default: 1 */
+  /** The step the value moves by, by pointer or key. */
   step?: number;
   /** Values marked on the track; an object with a `label` writes the word
       beneath its mark. A mark shows a value, it does not catch the thumb. */
   marks?: readonly SliderMark[];
   /** The value as text: for the readout and for the screen reader
-      (`aria-valuetext`). Default: the number in the formats' notation, with
-      as many decimals as the step has. */
+      (`aria-valuetext`).
+      @default the number in the formats' notation, with as many decimals as
+      the step has */
   format?: (value: number) => string;
-  /** The value in mono beside the track. Default: true */
+  /** The value in mono beside the track. */
   showValue?: boolean;
 }
 

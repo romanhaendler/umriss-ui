@@ -43,8 +43,8 @@ export interface MultiSelectProps<T extends string = string>
   searchPlaceholder?: string;
   /** Text when the search finds nothing. */
   emptyText?: string;
-  /** `sm` for a toolbar and dense forms, `md` otherwise. Default: the size of a
-      `ControlSizeProvider` around it, else `md`. */
+  /** `sm` for a toolbar and dense forms, `md` otherwise.
+      @default the size of a `ControlSizeProvider` around it, else `"md"` */
   size?: "sm" | "md";
   /** The width in characters - room for the chips; the field adds its own
       padding and chevron. Given, the field is that wide wherever it stands,

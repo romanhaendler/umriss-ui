@@ -9,8 +9,8 @@ import { useControlSize } from "../../lib/controlSize";
 export interface SwitchProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "size" | "role"> {
   /** Label to the right of the switch. */
   label?: ReactNode;
-  /** `sm` for a toolbar and dense forms, `md` otherwise. Default: the size of a
-      `ControlSizeProvider` around it, else `md`. */
+  /** `sm` for a toolbar and dense forms, `md` otherwise.
+      @default the size of a `ControlSizeProvider` around it, else `"md"` */
   size?: "sm" | "md";
   /** Marks the switch as invalid. `FormField` sets it itself as soon as it
       carries an `error` - by hand only necessary without `FormField`. */

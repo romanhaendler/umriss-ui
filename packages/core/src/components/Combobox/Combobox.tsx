@@ -37,8 +37,8 @@ export interface ComboboxProps<T extends string = string>
   onChange: (value: T | null) => void;
   /** What stands in the empty field. */
   placeholder?: string;
-  /** `sm` for a toolbar and dense forms, `md` otherwise. Default: the size of a
-      `ControlSizeProvider` around it, else `md`. */
+  /** `sm` for a toolbar and dense forms, `md` otherwise.
+      @default the size of a `ControlSizeProvider` around it, else `"md"` */
   size?: "sm" | "md";
   /** The width in characters - room for the typed text and the chosen
       option; the field adds its own padding, chevron and cross. Given, the

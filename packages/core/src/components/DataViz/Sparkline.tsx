@@ -8,11 +8,11 @@ import styles from "./DataViz.module.css";
 export interface SparklineProps extends HTMLAttributes<HTMLSpanElement> {
   /** Values in chronological order; at least two. */
   data: readonly number[];
-  /** Width in pixels. Default 96 - a row width, not a chart width. `"fill"`
+  /** Width in pixels; the default is a row width, not a chart width. `"fill"`
       takes the width of its container, as a tile's history does; the line
       keeps its stroke and the end point stays round. */
   width?: number | "fill";
-  /** Height in pixels. Default 28 - as high as a table row. With `width`
+  /** Height in pixels; the default is as high as a table row. With `width`
       `"fill"` a stylesheet may set the height instead: the drawing follows
       its box. */
   height?: number;

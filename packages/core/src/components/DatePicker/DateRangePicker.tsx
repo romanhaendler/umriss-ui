@@ -41,8 +41,8 @@ export interface DateRangePickerProps
   /** Marks the field as invalid. `FormField` sets it itself as soon as it
       carries an `error` - by hand only necessary without `FormField`. */
   invalid?: boolean;
-  /** `sm` for a toolbar and dense forms, `md` otherwise. Default: the size of a
-      `ControlSizeProvider` around it, else `md`. */
+  /** `sm` for a toolbar and dense forms, `md` otherwise.
+      @default the size of a `ControlSizeProvider` around it, else `"md"` */
   size?: "sm" | "md";
   /** The width in characters - room for the value; the field adds its own
       padding, glyph and cross. Given, the field is that wide wherever it
@@ -54,8 +54,9 @@ export interface DateRangePickerProps
       clears the value. */
   clearable?: boolean;
   /**
-   * The quick-select column in the panel. Without a value the default presets;
-   * an empty array hides the column.
+   * The quick-select column in the panel. An empty array hides the column.
+   *
+   * @default `DEFAULT_PRESETS`, in the wording's labels
    */
   presets?: RangePreset[];
 }

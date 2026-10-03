@@ -34,6 +34,9 @@ is one of the internal numbers from before core's first publication as `0.1.0`
   `Pin`, `ToolbarSize`, `FormatFor`, `FilterFor`, `GroupFor`, `FooterFor`,
   `AggregateFor` and `Presentation` are new public types, for annotating one's
   own variables and wrappers with what a column or a toolbar part accepts.
+- **A prop's default stands in a `@default` tag** where its comment used to say
+  it in words: the editor shows it on hover, and the props table in its Default
+  column. Nothing else changes.
 
 ### Fixed
 

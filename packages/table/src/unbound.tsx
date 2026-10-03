@@ -59,7 +59,7 @@ export interface ToolbarProps {
   /** Classes on the table toolbar. */
   className?: string;
   /** The size of every control the table puts into it - search, column menu,
-      export, "reset", the bulk actions -: `sm` (the default) or `md`. A
+      export, "reset", the bulk actions -: `sm` or `md`. A
       control of one's own takes the same size by its own prop. */
   size?: ToolbarSize;
   /** The table, when the table toolbar does not stand inside it. If it then
@@ -91,13 +91,16 @@ export function Toolbar({ children, className, size = "sm", of }: ToolbarProps) 
 
 /** The props of `Search`. */
 export interface SearchProps {
-  /** The placeholder in the field; without it "Search …" from the wording. */
+  /** The placeholder in the field.
+      @default the wording's "Search …" */
   placeholder?: string;
-  /** Accessible name; without it "Search table" from the wording. */
+  /** Accessible name.
+      @default the wording's "Search table" */
   "aria-label"?: string;
   /** Classes on the field. */
   className?: string;
-  /** `sm` or `md`; without it the size of the toolbar it stands in, `sm` outside one. */
+  /** The size of the part: `sm` or `md`.
+      @default the size of the toolbar it stands in, `"sm"` outside one */
   size?: ToolbarSize;
   /** The table, when the part does not stand inside it: the return value of `useTable`. */
   of?: TableRef;
@@ -134,7 +137,8 @@ export function Search({ placeholder, "aria-label": name, className, size: own, 
 
 /** The props of `ColumnMenu`. */
 export interface ColumnMenuProps {
-  /** `sm` or `md`; without it the size of the toolbar it stands in, `sm` outside one. */
+  /** The size of the part: `sm` or `md`.
+      @default the size of the toolbar it stands in, `"sm"` outside one */
   size?: ToolbarSize;
   /** The table, when the part does not stand inside it: the return value of `useTable`. */
   of?: TableRef;
@@ -305,11 +309,13 @@ export function ColumnMenu({ size: own, of }: ColumnMenuProps) {
 /** The props of `Export`: by default a CSV file is downloaded; with
     `onExport` the text is handed over instead. */
 export interface ExportProps {
-  /** File name of the download. Without it the one from the wording ("table.csv"). */
+  /** File name of the download.
+      @default the wording's "table.csv" */
   filename?: string;
   /** Gets the text instead of triggering a file. */
   onExport?: (text: string) => void;
-  /** `sm` or `md`; without it the size of the toolbar it stands in, `sm` outside one. */
+  /** The size of the part: `sm` or `md`.
+      @default the size of the toolbar it stands in, `"sm"` outside one */
   size?: ToolbarSize;
   /** The table, when the part does not stand inside it: the return value of `useTable`. */
   of?: TableRef;
@@ -352,7 +358,7 @@ export function Export({ filename, onExport, size: own, of }: ExportProps) {
 
 /** The props of `Pagination`. */
 export interface PaginationProps {
-  /** The selectable page sizes; default 10, 25, 50. */
+  /** The selectable page sizes. */
   pageSizes?: readonly number[];
   /** Classes on the pagination bar. */
   className?: string;

@@ -28,7 +28,7 @@ export interface StepperProps extends HTMLAttributes<HTMLOListElement> {
       the ones after it upcoming; past the last step, every step is done. */
   current: number;
   /** `horizontal` in a row, `vertical` in a column for steps with longer
-      descriptions. Default: `horizontal` */
+      descriptions. */
   orientation?: "horizontal" | "vertical";
 }
 

@@ -19,8 +19,8 @@ import type { ListboxItem } from "../../lib/listbox";
 /** The props of `Select`: a native select's attributes, with `size` meaning
     the control's height. */
 export interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, "size"> {
-  /** `sm` for a toolbar and dense forms, `md` otherwise. Default: the size of a
-      `ControlSizeProvider` around it, else `md`. */
+  /** `sm` for a toolbar and dense forms, `md` otherwise.
+      @default the size of a `ControlSizeProvider` around it, else `"md"` */
   size?: "sm" | "md";
   /** The width in characters - room for the chosen option; the field adds
       its own padding, chevron and cross. Given, the field is that wide

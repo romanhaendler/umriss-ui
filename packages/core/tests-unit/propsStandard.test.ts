@@ -2,7 +2,7 @@
 
    The reader itself moved to @umriss-ui/demo with the shell and is checked
    against fixture sources there. What stays here is a statement about THIS
-   package: its comments and its default values say the same thing.
+   package: its comments leave its default values to the Default column.
 
    The reader's own field names (`types`, `description`, `defaultValue`) are still
    German; that is a recorded deviation of the shell's ticket, and this file
@@ -24,13 +24,17 @@ const SOURCE = join(dirname(fileURLToPath(import.meta.url)), "..", "src");
 
 /* A prop's comment lands in the generated table and is therefore public
    interface. `TablePagination` promised four page sizes there and delivered
-   three (the table now lives in @umriss-ui/table). Where a comment names a
-   default as a literal and the component sets one while destructuring, the two
-   must say the same thing.
+   three (the table now lives in @umriss-ui/table). The cure was first a check
+   that a default named in a comment matches the one the component sets while
+   destructuring; it is now that no comment names one at all. A default stands
+   in the Default column - out of the destructuring, or out of a `@default` tag,
+   and the reader stops where the two disagree (`@umriss-ui/demo`, its props
+   reader). A default written in words beside it could only drift.
 
-   Counts as a literal: `true`/`false`, a value in backticks, a number or a list
-   of numbers. "Default one below the other" or "Default: the anchor" are
-   sentences and stay unchecked; "Default: 12px" is not a number.
+   Counts as a default in words: "Default" or "Standard" followed by
+   `true`/`false`, a value in backticks, a number or a list of numbers.
+   "The default is the slightly rounded badge shape" is a sentence about the
+   shape and stays.
 
    Both the German "Standard" and the English "Default" are recognised: the
    components are translated directory by directory, and this guard must not
@@ -61,21 +65,22 @@ const realProps = () => {
 };
 
 describe("A default in the comment", () => {
-  it("never names a default other than the one the component sets", () => {
-    const contradictions = realProps()
-      .filter((e) => e.comment !== undefined && e.code !== undefined && e.comment !== e.code)
-      .map((e) => `${e.where}: comment ${e.comment}, code ${e.code}`);
-    expect(contradictions).toEqual([]);
+  it("is never written in words - it stands in the Default column", () => {
+    const inWords = realProps()
+      .filter((e) => e.comment !== undefined)
+      .map((e) => `${e.where}: comment ${e.comment}, code ${e.code ?? "none"}`);
+    expect(inWords).toEqual([]);
   });
 
-  /* So that the rule does not quietly run empty: three places at which it
-     really has to bite. */
-  it.each(["SparklineProps.width", "ModalProps.closeOnBackdrop", "NumberInputProps.step"])(
-    "bites at %s",
-    (where) => {
-      const entry = realProps().find((e) => e.where === where);
-      expect(entry?.comment).toBeDefined();
-      expect(entry?.comment).toBe(entry?.code);
-    },
-  );
+  /* So that the rule does not quietly run empty: three places whose comment
+     once named the default, and whose default now stands in the column only. */
+  it.each([
+    ["SparklineProps.width", "96"],
+    ["ModalProps.closeOnBackdrop", "true"],
+    ["NumberInputProps.step", "1"],
+  ])("%s carries its default in the column", (where, value) => {
+    const entry = realProps().find((e) => e.where === where);
+    expect(entry?.code).toBe(value);
+    expect(entry?.comment).toBeUndefined();
+  });
 });

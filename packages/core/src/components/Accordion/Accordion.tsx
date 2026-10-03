@@ -18,8 +18,7 @@ const AccordionContext = createContext<AccordionContextValue | null>(null);
 
 /** The props of `Accordion`. */
 export interface AccordionProps extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
-  /** `single` keeps at most one section open, `multiple` any number.
-      Default: `single` */
+  /** `single` keeps at most one section open, `multiple` any number. */
   type?: "single" | "multiple";
   /** Controlled: the values of the open sections. A list for both types, so
       that switching the type changes nothing else. */
@@ -30,7 +29,7 @@ export interface AccordionProps extends Omit<HTMLAttributes<HTMLDivElement>, "on
       accordion follows once `value` does; uncontrolled it is a message. */
   onChange?: (value: string[]) => void;
   /** The level of the heading each header stands in - the one that fits the
-      page's outline. Default: 3 */
+      page's outline. */
   headingLevel?: 2 | 3 | 4 | 5 | 6;
 }
 

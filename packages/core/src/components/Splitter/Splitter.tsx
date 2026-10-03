@@ -9,23 +9,22 @@ import styles from "./Splitter.module.css";
 /** The props of `Splitter`. */
 export interface SplitterProps extends Omit<HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue" | "children"> {
   /** How the two panes stand: `horizontal` side by side, `vertical` one
-      above the other - a trend above, its alarms below. Default: `horizontal` */
+      above the other - a trend above, its alarms below. */
   orientation?: "horizontal" | "vertical";
   /** Controlled: the first pane's share of the room, in per cent. */
   value?: number;
-  /** Uncontrolled: the share to start at. Default: 50 */
+  /** Uncontrolled: the share to start at. */
   defaultValue?: number;
   /** Reports every move, by pointer or key, as the first pane's share. */
   onChange?: (value: number) => void;
-  /** The smallest share of the first pane, and where Enter collapses it to.
-      Default: 0 */
+  /** The smallest share of the first pane, and where Enter collapses it to. */
   min?: number;
-  /** The largest share of the first pane. Default: 100 */
+  /** The largest share of the first pane. */
   max?: number;
-  /** How far an arrow key moves the separator, in per cent. Default: 5 */
+  /** How far an arrow key moves the separator, in per cent. */
   step?: number;
-  /** The separator's name. The APG names it after the first pane ("Trend");
-      without it the general term from the wording stands. */
+  /** The separator's name. The APG names it after the first pane ("Trend").
+      @default the wording's "Resize the panes" */
   separatorLabel?: string;
   /** The first pane and the second, in this order. */
   children: [ReactNode, ReactNode];

@@ -59,29 +59,34 @@ export interface ScheduleProps {
   /** The time in view when the schedule mounts, as two wall-clock instants.
       Pan and zoom take it from there; a new pair of values puts it back. */
   initialDomain: readonly [number, number];
-  /** Height in CSS pixels, both bands included. The width is the host's. */
+  /** Height in CSS pixels, both bands included. The width is the host's.
+      @default 400 */
   height?: number;
-  /** Height of one lane in pixels. */
+  /** Height of one lane in pixels.
+      @default 44 */
   laneHeight?: number;
   /** Width of the lane headers in pixels - at most 40 % of the schedule, so
-      that on a phone the plot keeps the larger part. */
+      that on a phone the plot keeps the larger part.
+      @default 160 */
   headerWidth?: number;
   /** A working calendar: the intervals in which time counts. Nights and
-      weekends outside them are cut out of the axis. Default: the wall clock. */
+      weekends outside them are cut out of the axis.
+      @default the wall clock */
   calendar?: CalendarInput;
   /** The narrowest and widest time span zoom may reach, in milliseconds.
-      Default: one hour to 28 days. */
+      @default one hour to 28 days */
   zoomLimits?: ZoomLimits;
   /** The raster a drag lands on: `"ticks"` - the fine band's current step -, a
       step in milliseconds from local midnight, a step with an offset (shifts at
       06:00, 14:00 and 22:00 are eight hours offset by six), or `false` for none.
-      It shapes the ghost and the intent, never the data. */
+      It shapes the ghost and the intent, never the data.
+      @default "ticks" */
   snap?: "ticks" | number | SnapRaster | false;
   /** The intents the caller handles. Each one enables its interaction; none
       leaves a read-only schedule (ADR-0023). */
   intents?: readonly IntentKind[];
-  /** Whether a subtask may go to a lane. Without it every lane is open; it
-      narrows `"lane"`, it does not enable it.
+  /** Whether a subtask may go to a lane. It narrows `"lane"`, it does not
+      enable it.
 
       Asked once per lane when a drag takes hold, and asked again at the drop.
       The lanes it turns down are marked from the first frame of the drag - a
@@ -91,7 +96,8 @@ export interface ScheduleProps {
       nothing else: a drop after it still reports the move in time.
 
       It is asked for work dragged in from outside as well, with the key and
-      task the application declared in `placing`. */
+      task the application declared in `placing`.
+      @default every lane is open */
   canMoveTo?: (subtask: Subtask, lane: string) => boolean;
   /** Called once per intent when a drag ends. The data changes only if the
       caller changes it. */
@@ -133,19 +139,22 @@ export interface ScheduleProps {
   placing?: PlacingItem | null;
   /** How the dependencies are drawn: a `"curve"` that leaves and arrives
       forwards, a `"straight"` line, or `"orthogonal"` segments. A dependency may
-      say otherwise for itself. */
+      say otherwise for itself.
+      @default "curve" */
   route?: DependencyRoute;
   /** Where a dependency's ends sit on their bars: the `"centre"` of both, or the
       `"nearest"` edge - which is the shortest line between two stops. Within
       one lane both mean the middle. A dependency may say otherwise for itself.
 
       It changes the picture and never a finding: whether a dependency is violated
-      follows from its `leaves` and `arrives` alone. */
+      follows from its `leaves` and `arrives` alone.
+      @default "centre" */
   attach?: DependencyAttachment;
-  /** Whether a dependency's two ends carry a dot (`"dot"`, the default) or the
-      line stands alone (`"none"`). The dot says where the line is anchored - a
+  /** Whether a dependency's two ends carry a dot (`"dot"`) or the line
+      stands alone (`"none"`). The dot says where the line is anchored - a
       help while a plan is being read, and noise in a plan full of short moves.
-      A dependency may say otherwise for itself. */
+      A dependency may say otherwise for itself.
+      @default "dot" */
   ends?: DependencyEnds;
   /** What stands written in a bar: a function from a subtask to a line of
       text, or nothing for bars without text. The text is cut off with an
@@ -158,7 +167,8 @@ export interface ScheduleProps {
       what the pointer rests on and returns content of the application's own. */
   tooltip?: false | ((target: ScheduleTooltipTarget) => ReactNode);
   /** A line marking the present across the lanes: `true` follows the clock by
-      the minute, an instant fixes it there. Off by default. */
+      the minute, an instant fixes it there.
+      @default false */
   now?: boolean | number;
   /** Goes to the root element. */
   className?: string;

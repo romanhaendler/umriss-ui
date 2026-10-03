@@ -43,7 +43,8 @@ export interface ToastOptions {
       shows a spinner, has no close button and does not leave by itself: turn
       it into its outcome with `update`. */
   tone?: ToastTone;
-  /** Display duration in ms; 0 = stays until closed by hand. Default: 5000. */
+  /** Display duration in ms; 0 = stays until closed by hand.
+      @default the provider's `duration`, else `5000` */
   duration?: number;
   /** One action - "Undo". Never the only way to do what it offers: the toast
       leaves by itself, and not everybody reaches it in time. More than one

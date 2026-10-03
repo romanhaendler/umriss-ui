@@ -21,9 +21,10 @@ export interface PopoverProps {
   /** Trigger the panel hangs from (the reference for the position). */
   anchorRef: RefObject<HTMLElement | null>;
   /**
-   * Element that receives the focus on closing. Default: the anchor.
-   * Needed where the anchor is a non-focusable shell and the actual
-   * trigger sits inside it.
+   * Element that receives the focus on closing. Needed where the anchor is
+   * a non-focusable shell and the actual trigger sits inside it.
+   *
+   * @default anchorRef
    */
   focusRef?: RefObject<HTMLElement | null>;
   /** Further elements whose click does not count as an outside click (e.g. the clear ×). */
