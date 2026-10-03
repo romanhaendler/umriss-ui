@@ -23,7 +23,8 @@ interface CommonProps<T> {
       a new text or remount. A bound `Intl.NumberFormat#format` is compared by
       identity. */
   tickFormat?: (v: number) => string;
-  /** Grid lines; the default follows R-4.15. */
+  /** Grid lines (R-4.15).
+      @default only on the first axis of its orientation */
   grid?: boolean;
   /** Fixed tick values instead of the 1-2-5 algorithm. For axes whose values are
       places and not numbers: the lanes of a state stack, the categories of a

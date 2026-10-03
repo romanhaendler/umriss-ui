@@ -48,11 +48,13 @@ export interface ParetoResult {
 export interface ParetoOptions {
   /** The share whose crossing is sought. Whoever lands exactly on it counts as
       the crossing: the question is "which reasons make up eighty per cent", and
-      whoever reaches eighty exactly belongs to them. */
+      whoever reaches eighty exactly belongs to them.
+      @default 0.8 */
   readonly cutoff: number;
   /** How many items stay on their own. Everything behind that becomes a single
       entry. Beyond the number of items no remainder arises at all - not an empty
-      one. Default: infinity, so no collecting. */
+      one.
+      @default Infinity */
   readonly collectRank: number;
   /** Name of the collected remainder. `@umriss-ui/charts` has no wording module
       - every string it draws comes from the caller - and no module is introduced

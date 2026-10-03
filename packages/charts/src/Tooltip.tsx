@@ -12,9 +12,9 @@ import type { ReactNode } from "react";
 export interface TooltipProps<T> {
   /** "x": every series at the x position; "nearest": only the nearest point. */
   mode?: "x" | "nearest";
-  /** Render prop for content of one's own; without it the built-in tooltip
-      applies. Compared by its source text, like `tickFormat` - with the same
-      closure limit. */
+  /** Render prop for content of one's own. Compared by its source text, like
+      `tickFormat` - with the same closure limit.
+      @default the built-in tooltip */
   render?: (hit: TooltipHit<T>) => ReactNode;
 }
 

@@ -45,14 +45,15 @@ export interface ControlChartProps<T> {
   xAxisId?: string;
   /** Binding to a y axis (R-4.12). */
   yAxisId?: string;
-  /** The name in legend and tooltip. Without one the series is called
-      "Series n" and a warning stands in DEV - an unnamed series is a colour
-      nobody can look up. */
+  /** The name in legend and tooltip. Without one a warning stands in DEV - an
+      unnamed series is a colour nobody can look up.
+      @default "Series n", after its place in the chart */
   name?: string;
-  /** The value as the tooltip writes it - on the line and on the violations;
-      without one the y axis' `tickFormat`, then the default. */
+  /** The value as the tooltip writes it - on the line and on the violations.
+      @default the y axis' `tickFormat`, else the built-in number format */
   format?: (value: number) => string;
-  /** Any CSS colour value; without one the palette --uc-series-N. */
+  /** Any CSS colour value.
+      @default the palette's `--uc-series-N` */
   color?: string;
   /** A role instead of a colour value for the line; the theme resolves it.
       The violations are always "alarm". */
@@ -62,15 +63,18 @@ export interface ControlChartProps<T> {
   /** The faint zone lines at one and two sigma. Rule 4 is about the two-sigma
       zone; without them a reader cannot check it. */
   zoneLines?: boolean;
-  /** Labels of the control limits in the axis band. Without a value, none: the
-      package brings no text along, not even "UCL" and "LCL". */
+  /** Label of the upper control limit in the axis band. The package brings no
+      text along, not even "UCL" and "LCL".
+      @default no label */
   labelUpper?: string;
   /** The same for the lower control limit. Named separately because a chart may
-      well want one of the two labelled and not the other. */
+      well want one of the two labelled and not the other.
+      @default no label */
   labelLower?: string;
-  /** Name of the scatter of violations in the legend and the tooltip. Without a
-      value, none: a legend then carries it as "Series n" and warns once in DEV.
-      Before this, a German suffix stood on the name of the chart. */
+  /** Name of the scatter of violations in the legend and the tooltip. Without
+      one a legend warns once in DEV. Before this, a German suffix stood on the
+      name of the chart.
+      @default "Series n", after its place in the chart */
   violationName?: string;
   /** The violations as data - they can be listed beside the chart as well as
       marked on it. */

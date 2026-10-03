@@ -37,11 +37,13 @@ import "./styles/charts.css";
 export interface ChartProps<T> {
   /** Shared data basis (required); access only through accessors (R-2.4). */
   data: readonly T[];
-  /** Width in CSS pixels, or `"100%"` for the host's. Without a value the chart
-      measures its host and follows it through a ResizeObserver. */
+  /** Width in CSS pixels, or `"100%"` for the host's: the chart measures its
+      host and follows it through a ResizeObserver.
+      @default "100%" */
   width?: number | "100%";
-  /** Height in CSS pixels; 300 without a value. Unlike the width, the chart
-      does not take its host's. */
+  /** Height in CSS pixels. Unlike the width, the chart does not take its
+      host's.
+      @default 300 */
   height?: number;
   /** Outer spacing of the plot area in CSS pixels. */
   padding?: number | Partial<Padding>;
@@ -55,18 +57,20 @@ export interface ChartProps<T> {
   style?: CSSProperties;
   /** Shown in the middle of the plot area when no visible series has a point
       to show - no data, only gaps, or every series hidden. Axes and frame
-      stay. Without a value the wording's `empty`; this prop wins over it. */
+      stay.
+      @default the wording's `empty` */
   empty?: ReactNode;
-  /** The chart's words (ADR-0031): English without a value, entries left out
-      fall back to English. German: `GERMAN_CHARTS_WORDING` from
-      `@umriss-ui/charts/wording/de`. */
+  /** The chart's words (ADR-0031); entries left out fall back to English.
+      German: `GERMAN_CHARTS_WORDING` from `@umriss-ui/charts/wording/de`.
+      @default DEFAULT_CHARTS_WORDING */
   wording?: Partial<ChartsWording>;
-  /** How series are told apart. `"color"` (the default): by their colour.
+  /** How series are told apart. `"color"`: by their colour.
       `"marks"`: by a dash and a marker shape as well - a line, an area and a
       scatter -, and by a hatch - a bar, a state, a matrix cell, a limit band -,
       chosen by the same palette place as the colour, so that a reader who does
       not see the colours still tells them apart; the legend's chips show the
-      same. A caller's own `dash` wins over the place's. */
+      same. A caller's own `dash` wins over the place's.
+      @default "color" */
   encoding?: "color" | "marks";
   /** Charts with the same id share the pointer's x position, in domain units:
       each draws its crosshair there, the tooltip stays with the chart under

@@ -15,8 +15,8 @@ import type { Rect } from "./types";
 
 /** The props of `Legend`. */
 export interface LegendProps {
-  /** Which side of the plot area the legend stands on. Without a value, above
-      it. */
+  /** Which side of the plot area the legend stands on.
+      @default "top" */
   placement?: "top" | "bottom";
   /** Called with an entry's name when it is clicked - the series' name, or a
       state's label. The caller flips `hidden` on the series it means. Without

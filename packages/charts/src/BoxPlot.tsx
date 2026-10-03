@@ -47,16 +47,17 @@ export interface BoxPlotProps<T> {
   yAxisId?: string;
   /** Series-own data; overrides the container data (R-2.4). */
   data?: readonly T[];
-  /** The name in legend and tooltip. Without one the series is called
-      "Series n" and a warning stands in DEV. */
+  /** The name in legend and tooltip. Without one a warning stands in DEV.
+      @default "Series n", after its place in the chart */
   name?: string;
   /** Not drawn, not hit and not counted for its axes' extent. Its legend
       entry stays, drawn back. Controlled, typically from `Legend onToggle`. */
   hidden?: boolean;
-  /** Every number of the box as the tooltip and the table write it; without
-      one the y axis' `tickFormat`, then the default. */
+  /** Every number of the box as the tooltip and the table write it.
+      @default the y axis' `tickFormat`, else the built-in number format */
   format?: (value: number) => string;
-  /** Any CSS colour value; without one the palette --uc-series-N. */
+  /** Any CSS colour value.
+      @default the palette's `--uc-series-N` */
   color?: string;
   /** A role instead of a colour value; the theme resolves it. `color` beats
       it. Set by the caller: a box out of its specification is the caller's

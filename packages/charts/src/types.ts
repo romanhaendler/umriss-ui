@@ -145,7 +145,8 @@ export type MatrixColoring =
           package does not have and is not to get (ADR-0011). Whoever wants a
           finer gradation names more colours. */
       stops: readonly string[];
-      /** Value range of the gradient; without a value taken from the data. */
+      /** Value range of the gradient.
+          @default the range of the data */
       range?: readonly [number, number];
     };
 

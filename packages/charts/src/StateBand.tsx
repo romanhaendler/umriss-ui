@@ -31,9 +31,9 @@ export interface StateBandProps<T> {
   yAxisId?: string;
   /** Series-own data; overrides the container data (R-2.4). */
   data?: readonly T[];
-  /** The name in legend and tooltip. Without one the series is called
-      "Series n" and a warning stands in DEV - an unnamed series is a colour
-      nobody can look up. */
+  /** The name in legend and tooltip. Without one a warning stands in DEV - an
+      unnamed series is a colour nobody can look up.
+      @default "Series n", after its place in the chart */
   name?: string;
   /** Not drawn, not hit and not counted for its axes' extent - a fixed
       `domain` keeps the axis still. Its legend entry stays, drawn back.
