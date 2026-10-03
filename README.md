@@ -1,4 +1,4 @@
-# umriss
+# umriss-ui
 
 React components, canvas charts, a data table and a Gantt-style schedule for
 data-dense applications — dashboards, monitoring, planning, and the tools in
