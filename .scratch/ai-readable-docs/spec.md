@@ -41,3 +41,14 @@ five packages.
 ## Out of scope
 
 An MCP server, agent skills, embeddings/search. Translating the docs.
+
+## Comments
+
+### A3 superseded (2026-10-03)
+
+Decision A3 (an MCP server "if the full file passes ~200 kB") is superseded by
+`.scratch/pages-as-markdown`. The size of `llms-full.txt` mattered only while
+it was the one way in; since every page has a Markdown twin at its address with
+`.md`, linked from `llms.txt` and announced in the page's head, an agent
+fetches one page of 5–20 kB rather than 580. An MCP server becomes a spec of
+its own when a user asks for one, not when a file passes a size.

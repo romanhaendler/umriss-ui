@@ -17,11 +17,11 @@
    It runs in Node (`demo/props.ts`, after the props tables), which is why the
    imports carry their extensions and nothing here touches Vite or React. */
 
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { Marked, type Tokens } from "marked";
 import ts from "typescript";
-import { ADR_0032, SCENARIOS, addressOfPlace, addresses } from "../outline.ts";
+import { ADR_0032, SCENARIOS, addressOfPlace, addresses, twinOfPlace } from "../outline.ts";
 import type { Moved, Rubric, Page } from "../outline.ts";
 import type { Forwarder } from "./site.ts";
 import { byRank, parseFileName, parseScenarioName } from "./fileName.ts";
@@ -283,6 +283,12 @@ function pageUrl(manifest: Manifest, page: Page): string {
   return urlOf(manifest.homepage, `/${page.id}`);
 }
 
+/** The absolute address of a place's Markdown twin - the format is
+    `outline.ts`'s too. */
+function twinUrl(homepage: string, place: string): string {
+  return homepage + twinOfPlace(place).slice(1);
+}
+
 /* ------------------------------------------------------------------ */
 /* The site's pages                                                    */
 /* ------------------------------------------------------------------ */
@@ -301,6 +307,16 @@ export interface SitePage {
   description: string;
   /** What stands in `#root` until the demo replaces it. */
   html: string;
+  /** The absolute address of the page's Markdown twin, which its head
+      announces. */
+  twin: string;
+}
+
+/** A page's Markdown twin (.scratch/pages-as-markdown), below the package's
+    directory on the site: `gauge.md`, `index.md` for the scenarios page. */
+export interface Twin {
+  path: string;
+  text: string;
 }
 
 /** What a search engine should read after the page's name, per package -
@@ -340,12 +356,31 @@ function markdownToHtml(markdown: string, homepage: string, lift: number, anchor
   return (marked.parse(markdown, { async: false }) as string).trim();
 }
 
+/** The same Markdown as a page's twin: headings lifted by `lift` levels, so
+    that the page's name is the `#`; `header` under that name; every `#/page`
+    link absolute, so that the text still leads somewhere once it is copied
+    out. Lifted token by token rather than line by line - an example's source
+    may well hold a line that begins with `#`. */
+function markdownTwin(markdown: string, homepage: string, lift: number, header: string): string {
+  const body = new Marked()
+    .lexer(markdown.trim())
+    .map((token) => {
+      if (token.type === "heading") return token.raw.replace(/^#+/, "#".repeat(Math.max(1, token.depth - lift)));
+      if (token.type === "code") return token.raw;
+      return token.raw.replace(/\]\((#\/[^)\s]*)\)/g, (_, href: string) => `](${urlOf(homepage, href)})`);
+    })
+    .join("");
+  const [name, ...rest] = body.trim().split("\n");
+  return `${[name, "", header, ...rest].join("\n")}\n`;
+}
+
 /** Both texts of one package, from its directory. Pure apart from reading. */
 export function renderLlms({ packageDir, outline, tables, eventsApart = false, moved = {} }: LlmsJob): {
   index: string;
   full: string;
   pages: SitePage[];
   forwarders: Forwarder[];
+  twins: Twin[];
 } {
   const manifest = JSON.parse(readFileSync(join(packageDir, "package.json"), "utf8")) as Manifest;
   const demoDir = join(packageDir, "demo");
@@ -372,7 +407,7 @@ export function renderLlms({ packageDir, outline, tables, eventsApart = false, m
     "",
     `> ${manifest.description}`,
     "",
-    `Version ${manifest.version}. Install with \`${install}\`. Every page below in full - its examples' source, its props tables generated from the code, and what it deliberately does not do - stands in one file: [llms-full.txt](${fullUrl}). The npm package carries the same text for the installed version as \`docs/llms-full.md\`; prefer that one when the package is installed.`,
+    `Version ${manifest.version}. Install with \`${install}\`. Each link below leads to that page as Markdown. Every page below in full - its examples' source, its props tables generated from the code, and what it deliberately does not do - stands in one file: [llms-full.txt](${fullUrl}). The npm package carries the same text for the installed version as \`docs/llms-full.md\`; prefer that one when the package is installed.`,
     "",
     ...(scenarios.length === 0
       ? []
@@ -381,7 +416,7 @@ export function renderLlms({ packageDir, outline, tables, eventsApart = false, m
           "",
           "Composed, realistic screens built from the package.",
           "",
-          ...scenarios.map((scenario) => `- [${scenario.title}](${urlOf(manifest.homepage, `/${SCENARIOS}/${scenario.id}`)}): ${scenario.lead}`),
+          ...scenarios.map((scenario) => `- [${scenario.title}](${twinUrl(manifest.homepage, `/${SCENARIOS}/${scenario.id}`)}): ${scenario.lead}`),
           "",
         ]),
     ...outline.flatMap((rubric) => [
@@ -389,7 +424,7 @@ export function renderLlms({ packageDir, outline, tables, eventsApart = false, m
       "",
       rubric.sentence,
       "",
-      ...rubric.pages.map((page) => `- [${page.name}](${pageUrl(manifest, page)}): ${page.sentence}`),
+      ...rubric.pages.map((page) => `- [${page.name}](${twinUrl(manifest.homepage, `/${page.id}`)}): ${page.sentence}`),
       "",
     ]),
   ].join("\n");
@@ -495,6 +530,20 @@ export function renderLlms({ packageDir, outline, tables, eventsApart = false, m
     ...outline.flatMap((rubric) => [`##### ${rubric.name}`, "", ...rubric.pages.map((page) => `- [${page.name}](${pageUrl(manifest, page)})`), ""]),
   ].join("\n");
   const noun = NOUN[manifest.name] ?? "component";
+  /* The scenarios page's own text: the package, and the scenarios' cut. */
+  const front = [
+    `# ${manifest.name}`,
+    "",
+    manifest.description,
+    "",
+    `Install with \`${install}\`.`,
+    ...cuts.filter((cut) => cut.page === undefined).map((cut) => parts.slice(cut.from, cut.to).join("\n")),
+  ].join("\n");
+  /* What a twin says under its name: what it is part of, and where the rest
+     stands. */
+  const header = (url: string) =>
+    `> Package \`${manifest.name}\`, version ${manifest.version}. Demo page: <${url}>. Every page in one line: [llms.txt](${home}llms.txt); every page in full: [llms-full.txt](${fullUrl}).`;
+  const twins: Twin[] = [{ path: twinOfPlace("").slice(1), text: markdownTwin(front, home, 0, header(home)) }];
   const sitePages: SitePage[] = [
     {
       path: "",
@@ -502,14 +551,10 @@ export function renderLlms({ packageDir, outline, tables, eventsApart = false, m
       name: manifest.name,
       title: `${manifest.name} – ${manifest.description}`,
       description: manifest.description,
+      twin: twinUrl(home, ""),
       html: markdownToHtml(
         [
-          `# ${manifest.name}`,
-          "",
-          manifest.description,
-          "",
-          `Install with \`${install}\`.`,
-          ...cuts.filter((cut) => cut.page === undefined).map((cut) => parts.slice(cut.from, cut.to).join("\n")),
+          front,
           "",
           ...outline.flatMap((rubric) => [
             `## ${rubric.name}`,
@@ -527,6 +572,9 @@ export function renderLlms({ packageDir, outline, tables, eventsApart = false, m
     },
     ...cuts.flatMap(({ page, from, to, api }) => {
       if (page === undefined) return [];
+      /* The twin is the cut as it stands in the full text, without the list
+         of every page: that is for a crawler, and an agent has `llms.txt`. */
+      twins.push({ path: twinOfPlace(`/${page.id}`).slice(1), text: markdownTwin(parts.slice(from, to).join("\n"), home, 2, header(pageUrl(manifest, page))) });
       /* "Demo page: <this page>" is for the agent reading the full text; on
          the page itself it would point at itself. */
       const html = (a: number, b: number, tail = "") =>
@@ -543,6 +591,7 @@ export function renderLlms({ packageDir, outline, tables, eventsApart = false, m
           name: page.name,
           title: `${page.name} – React ${noun} · ${manifest.name}`,
           description: plain(page.sentence),
+          twin: twinUrl(home, `/${page.id}`),
           html:
             api === undefined
               ? html(from, to, `\n\n${everyPage}`)
@@ -559,15 +608,17 @@ export function renderLlms({ packageDir, outline, tables, eventsApart = false, m
     return { url: urlOf(home, `/${old}`), to: to.url, title: to.title };
   });
 
-  return { index, full: `${parts.join("\n")}\n`, pages: sitePages, forwarders };
+  return { index, full: `${parts.join("\n")}\n`, pages: sitePages, forwarders, twins };
 }
 
 /** Writes `demo/.generated/llms.txt`, `demo/.generated/pages.json` and
     `forwarders.json` (the site's pages and the forwarders at old addresses,
-    which `scripts/build-pages.mjs` writes out) and `docs/llms-full.md`. None
-    is checked in: a generation drifts from its source (`.gitignore`). */
+    which `scripts/build-pages.mjs` writes out), every page's Markdown twin
+    under `demo/.generated/twins/` (which it copies beside them) and
+    `docs/llms-full.md`. None is checked in: a generation drifts from its
+    source (`.gitignore`). */
 export function generateLlms(job: LlmsJob): void {
-  const { index, full, pages, forwarders } = renderLlms(job);
+  const { index, full, pages, forwarders, twins } = renderLlms(job);
   const indexPath = join(job.packageDir, "demo", ".generated", "llms.txt");
   const fullPath = join(job.packageDir, "docs", "llms-full.md");
   mkdirSync(dirname(indexPath), { recursive: true });
@@ -576,5 +627,10 @@ export function generateLlms(job: LlmsJob): void {
   writeFileSync(join(dirname(indexPath), "pages.json"), JSON.stringify(pages), "utf8");
   writeFileSync(join(dirname(indexPath), "forwarders.json"), JSON.stringify(forwarders), "utf8");
   writeFileSync(fullPath, full, "utf8");
+  /* Anew every time: a page that is gone must not leave its twin behind. */
+  const twinsDir = join(dirname(indexPath), "twins");
+  rmSync(twinsDir, { recursive: true, force: true });
+  mkdirSync(twinsDir);
+  for (const twin of twins) writeFileSync(join(twinsDir, twin.path), twin.text, "utf8");
   process.stdout.write(`llms-full.md: ${Math.round(Buffer.byteLength(full) / 1024)} kB.\n`);
 }

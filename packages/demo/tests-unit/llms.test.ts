@@ -56,7 +56,7 @@ const TABLES: Record<string, TypeEntry> = {
   },
 };
 
-const { index, full, pages } = renderLlms({ packageDir: PACKAGE_DIR, outline: OUTLINE, tables: TABLES });
+const { index, full, pages, twins } = renderLlms({ packageDir: PACKAGE_DIR, outline: OUTLINE, tables: TABLES });
 /** The Gauge page's tables, as the app mounts them. */
 const API = apiHtml([tableModel(TABLES.GaugeProps!, false)]);
 
@@ -72,16 +72,17 @@ describe("llms.txt", () => {
     expect(full).toContain("Install with `npm install @umriss-ui/fixture @umriss-ui/core`.");
   });
 
-  it("lists the scenarios first, with their lead and a link", () => {
+  it("lists the scenarios first, with their lead and a link to the scenarios page's twin", () => {
     expect(index).toContain("## Scenarios\n");
-    expect(index).toContain("- [Watch a service's latency](https://example.test/fixture/#watch-latency): An on-call engineer keeps it open beside the incident channel.\n");
+    expect(index).toContain("- [Watch a service's latency](https://example.test/fixture/index.md): An on-call engineer keeps it open beside the incident channel.\n");
     expect(index.indexOf("## Scenarios")).toBeLessThan(index.indexOf("## Instruments"));
   });
 
-  it("lists every page under its rubric, with one line and a link", () => {
+  it("lists every page under its rubric, with one line and a link to its twin", () => {
     expect(index).toContain("## Instruments\n\nWhat a value is read on.\n\n");
-    expect(index).toContain("- [Gauge](https://example.test/fixture/gauge/): One value as a needle (also called a `dial`), beside the [Meter](#/meter) and its [first example](#/meter/basic).\n");
-    expect(index).toContain("- [Meter](https://example.test/fixture/meter/): One value as a bar.\n");
+    expect(index).toContain("- [Gauge](https://example.test/fixture/gauge.md): One value as a needle (also called a `dial`), beside the [Meter](#/meter) and its [first example](#/meter/basic).\n");
+    expect(index).toContain("- [Meter](https://example.test/fixture/meter.md): One value as a bar.\n");
+    expect(index).not.toMatch(/\]\(https:\/\/example\.test\/fixture\/[a-z-]*\/?\)/);
   });
 });
 
@@ -222,5 +223,59 @@ describe("the site's pages (ADR-0037)", () => {
     ]);
     expect(moved.map((one) => one.path)).not.toContain("dial/");
     expect(renderLlms({ packageDir: PACKAGE_DIR, outline: OUTLINE, tables: TABLES }).forwarders).toEqual([]);
+  });
+});
+
+describe("the pages' Markdown twins (.scratch/pages-as-markdown)", () => {
+  const byPath = new Map(twins.map((one) => [one.path, one.text]));
+  /** The header every twin carries under its name. */
+  const header = (page: string) =>
+    `> Package \`@umriss-ui/fixture\`, version 1.2.3. Demo page: <https://example.test/fixture/${page}>. Every page in one line: [llms.txt](https://example.test/fixture/llms.txt); every page in full: [llms-full.txt](https://example.test/fixture/llms-full.txt).`;
+  /** A page's cut of the full text as its twin carries it: the headings
+      lifted by two levels, the texts' `#/page` links absolute. */
+  const asTwin = (cut: string) =>
+    cut
+      .replace(/^(#{3,6}) /gm, (_, marks: string) => `${"#".repeat(marks.length - 2)} `)
+      .replaceAll("](#/meter/basic)", "](https://example.test/fixture/meter/#basic)")
+      .replaceAll("](#/meter)", "](https://example.test/fixture/meter/)");
+
+  it("has one per page of the outline, and one for the scenarios page", () => {
+    expect([...byPath.keys()].sort()).toEqual(["gauge.md", "index.md", "meter.md"]);
+  });
+
+  it("is the page's cut of the full text, lifted so that the page's name is the `#`, with the header under it", () => {
+    const gauge = asTwin(full.slice(full.indexOf("### Gauge"), full.indexOf("\n### Meter")).trimEnd());
+    expect(byPath.get("gauge.md")).toBe(`# Gauge\n\n${header("gauge/")}\n${gauge.slice("# Gauge\n".length)}\n`);
+    const meter = asTwin(full.slice(full.indexOf("### Meter"), full.indexOf("\n## The rest of the API")).trimEnd());
+    expect(byPath.get("meter.md")).toBe(`# Meter\n\n${header("meter/")}\n${meter.slice("# Meter\n".length)}\n`);
+  });
+
+  it("keeps the examples' source, the props table and the demo page line", () => {
+    const gauge = byPath.get("gauge.md")!;
+    expect(gauge).toContain("### A basic gauge\n\nPass the `value`; the needle points at it.\n\n```tsx\n");
+    expect(gauge).toContain("| `value` *required* | `number` | — | The value the needle points at. |\n");
+    expect(gauge).toContain("Demo page: https://example.test/fixture/gauge/\n");
+  });
+
+  it("links absolutely, and leaves out the list of every page", () => {
+    for (const [path, text] of byPath) {
+      expect(text, path).not.toMatch(/\]\((?!https:\/\/)/);
+      expect(text, path).not.toContain("Every page of");
+    }
+  });
+
+  it("gives the scenarios page the scenarios' cut under the package's name", () => {
+    const scenarios = full.slice(full.indexOf("## Scenarios"), full.indexOf("\n## Instruments")).trimEnd();
+    expect(byPath.get("index.md")).toBe(
+      `# @umriss-ui/fixture\n\n${header("")}\n\nA fixture package for the llms.txt generator.\n\nInstall with \`npm install @umriss-ui/fixture @umriss-ui/core\`.\n\n${scenarios}\n`,
+    );
+  });
+
+  it("is named on every site page, which announces it", () => {
+    expect(pages.map((one) => [one.path, one.twin])).toEqual([
+      ["", "https://example.test/fixture/index.md"],
+      ["gauge/", "https://example.test/fixture/gauge.md"],
+      ["meter/", "https://example.test/fixture/meter.md"],
+    ]);
   });
 });

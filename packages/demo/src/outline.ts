@@ -112,6 +112,15 @@ export function addressOfPlace(place: string): string {
   return page === undefined || page === "" || page === SCENARIOS ? `/${at}` : `/${page}/${at}`;
 }
 
+/** The address of a place's Markdown twin, below the demo's base
+    (.scratch/pages-as-markdown): the page's address with `.md` - `/button.md`
+    - and `/index.md` for the scenarios page. An example has no twin of its
+    own; it stands in its page's. */
+export function twinOfPlace(place: string): string {
+  const page = addressOfPlace(place).replace(/#.*$/, "").replace(/\/$/, "");
+  return page === "" ? "/index.md" : `${page}.md`;
+}
+
 /** The place an address names: the path below the demo's base and the hash
     as the browser reports them. An old hash address (`#/button/basic`) wins
     over the path - that is how old links still land. */
