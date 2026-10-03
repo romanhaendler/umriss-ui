@@ -21,7 +21,7 @@ what a reader has — the filename is what they are looking for.
 | what was worked on here, and when | [`journal.md`](journal.md) |
 | how umriss compares with other libraries, and what follows from it | [`research/library-comparison-2026-09/`](research/library-comparison-2026-09/), [`../.scratch/comparison-roadmap/spec.md`](../.scratch/comparison-roadmap/spec.md) |
 | what state-of-the-art component documentation looks like, and where the site stands against it | [`research/component-docs-2026-10/`](research/component-docs-2026-10/), [`../.scratch/docs-roadmap/spec.md`](../.scratch/docs-roadmap/spec.md) |
-| how a coding agent reads a package's documentation | `llms.txt` beside each demo online, or `docs/llms-full.md` inside the installed package — generated from the demo by `packages/demo/src/tooling/llms.ts` |
+| how a coding agent reads a package's documentation | `llms.txt` beside each demo online, linking every page's Markdown twin (the page's address with `.md`, `index.md` for the scenarios page); `llms-full.txt` for every page at once, or `docs/llms-full.md` inside the installed package — all generated from the demo by `packages/demo/src/tooling/llms.ts` |
 | how an agent should read this repository | [`../CLAUDE.md`](../CLAUDE.md), [`agents/`](agents/) |
 | what a document used to be called | **What moved**, below |
 

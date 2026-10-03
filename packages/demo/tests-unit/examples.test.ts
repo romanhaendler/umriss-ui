@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 import { readExamples, readScenarios } from "../src/tooling/examples";
-import { addressOfPlace, addresses, placeOfLocation } from "../src/outline";
+import { addressOfPlace, addresses, placeOfLocation, twinOfPlace } from "../src/outline";
 import type { Rubric } from "../src/outline";
 
 const OUTLINE: readonly Rubric[] = [
@@ -125,6 +125,13 @@ describe("a page's address is a path (ADR-0037)", () => {
     expect(addressOfPlace("#/gauge/basic")).toBe("/gauge/#basic");
     expect(addressOfPlace("#/scenarios/watch")).toBe("/#watch");
     expect(addressOfPlace("")).toBe("/");
+  });
+
+  it("gives every page, and the scenarios page, the address of its Markdown twin", () => {
+    expect(twinOfPlace("/gauge")).toBe("/gauge.md");
+    expect(twinOfPlace("#/gauge/basic")).toBe("/gauge.md");
+    expect(twinOfPlace("")).toBe("/index.md");
+    expect(twinOfPlace("/scenarios/watch")).toBe("/index.md");
   });
 
   it("still reads an old hash address, so old links land", () => {

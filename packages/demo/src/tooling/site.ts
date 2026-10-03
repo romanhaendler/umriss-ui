@@ -1,6 +1,7 @@
-/* The site's guard, and the one kind of file the site carries beside the
+/* The site's guards, and the one kind of file the site carries beside the
    demos' pages: a forwarder at the address of a page whose id has changed
-   (.scratch/sidebar-tree, "Forwarding a moved address").
+   (.scratch/sidebar-tree, "Forwarding a moved address"). A forwarder has no
+   Markdown twin; every page does (.scratch/pages-as-markdown).
 
    `scripts/build-pages.mjs` writes the forwarders and runs the guard over
    what it wrote; both stand here and not there so that a unit test reaches
@@ -70,5 +71,42 @@ export function siteFaults(urls: readonly string[], forwarders: readonly Forward
       if (html === undefined) return [`${url}: no forwarder file`];
       return html.includes(`<link rel="canonical" href="${to}"`) && html.includes('<meta name="robots" content="noindex"') ? [] : [`${url}: no canonical to ${to} or no noindex`];
     }),
+  ];
+}
+
+/** A page of a demo as the twins' guard sees it: its address, its name and
+    the address of its Markdown twin. */
+export interface TwinPage {
+  url: string;
+  name: string;
+  twin: string;
+}
+
+/** What the site's text for a coding agent gets wrong, one line each
+    (.scratch/pages-as-markdown): every page's twin is a file, not empty,
+    beginning with `# <its name>`; every page's head announces exactly one
+    twin, its own; and every link in every `llms.txt` leads to a file of the
+    site. `files` as for `siteFaults`; `texts` maps the address of every other
+    text file - the twins, each `llms.txt` and `llms-full.txt` - to its text. */
+export function twinFaults(pages: readonly TwinPage[], files: ReadonlyMap<string, string>, texts: ReadonlyMap<string, string>): string[] {
+  return [
+    ...pages.flatMap(({ twin, name }) => {
+      const text = texts.get(twin);
+      if (text === undefined || text === "") return [`${twin}: no twin`];
+      return text.startsWith(`# ${name}\n`) ? [] : [`${twin}: does not begin with "# ${name}"`];
+    }),
+    ...pages.flatMap(({ url, twin }) => {
+      const hrefs = [...(files.get(url) ?? "").matchAll(/<link rel="alternate" type="text\/markdown" href="([^"]+)"/g)].map((match) => new URL(match[1]!, url).href);
+      if (hrefs.length !== 1) return [`${url}: ${hrefs.length} alternate links to its twin, not 1`];
+      return hrefs[0] === twin ? [] : [`${url}: its alternate link points at ${hrefs[0]}, not at ${twin}`];
+    }),
+    ...[...texts].flatMap(([url, text]) =>
+      url.endsWith("/llms.txt")
+        ? [...text.matchAll(/\]\(([^)\s]+)\)/g)]
+            .map((match) => new URL(match[1]!, url).href.replace(/#.*$/, ""))
+            .filter((target) => !files.has(target) && !texts.has(target))
+            .map((target) => `${url}: links ${target}, which is no file of the site`)
+        : [],
+    ),
   ];
 }

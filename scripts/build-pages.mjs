@@ -4,6 +4,8 @@
      site/index.html            the front page - the hub
      site/<package>/            the demo of @umriss-ui/<package>
      site/<package>/<page>/     one of its pages, prerendered
+     site/<package>/<page>.md   the same page as Markdown - its twin
+     site/<package>/index.md    the twin of the demo's scenarios page
      site/<package>/<old>/      a forwarder where a page's id has changed
      site/sitemap.xml           every address above, no forwarder
      site/llms.txt              the index for coding agents
@@ -15,7 +17,9 @@
    engine reads, since it reads no hash (ADR-0037). The demo replaces that text
    when it starts. The text comes from the same run as `llms.txt`
    (`packages/demo/src/tooling/llms.ts`, written as `demo/.generated/pages.json`),
-   so it cannot say anything the demo does not.
+   so it cannot say anything the demo does not. Each page's head announces its
+   twin, which the same run writes to `demo/.generated/twins/`
+   (.scratch/pages-as-markdown).
 
    The demos are built with the absolute base their homepage names
    (`/umriss-ui/core/`): a page two directories deep must find the same assets.
@@ -38,7 +42,7 @@ import { fileURLToPath } from "node:url";
 /* The one list of the packages - read in Node as it stands, which is why it
    imports nothing (and why `build:pages` strips types). */
 import { PACKAGES as LIST } from "../packages/demo/src/packages.ts";
-import { forwarderHtml, siteFaults } from "../packages/demo/src/tooling/site.ts";
+import { forwarderHtml, siteFaults, twinFaults } from "../packages/demo/src/tooling/site.ts";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SITE = join(ROOT, "site");
@@ -105,13 +109,16 @@ const jsonLd = (data) => `<script type="application/ld+json">${JSON.stringify(da
    before the demo replaces it. */
 const PRERENDERED_STYLE = `<script>document.documentElement.classList.add("js")</script><style>.js .prerendered{visibility:hidden}.prerendered{max-width:48rem;margin:0 auto;padding:2rem 1rem;font:15px/1.55 system-ui,sans-serif}.prerendered pre{overflow:auto;padding:.75rem;background:rgba(127,127,127,.1)}.prerendered table{border-collapse:collapse;display:block;overflow:auto}.prerendered td,.prerendered th{border:1px solid rgba(127,127,127,.3);padding:.25rem .5rem;text-align:left;vertical-align:top}</style>`;
 
-/** A page of a demo: the built `index.html`, told which page it is. */
+/** A page of a demo: the built `index.html`, told which page it is and where
+    its Markdown twin stands - by path, so that a copy served locally stays
+    local. */
 function pageDocument(template, page, extraHead = "") {
   const title = /<title>[^<]*<\/title>/;
   const root = '<div id="root"></div>';
   if (!title.test(template) || !template.includes(root)) throw new Error("The demo's index.html has lost its <title> or its empty #root.");
+  const alternate = `<link rel="alternate" type="text/markdown" href="${escape(new URL(page.twin).pathname)}" />`;
   return template
-    .replace(title, `${headOf(page)}\n    ${PRERENDERED_STYLE}${extraHead === "" ? "" : `\n    ${extraHead}`}`)
+    .replace(title, `${headOf(page)}\n    ${alternate}\n    ${PRERENDERED_STYLE}${extraHead === "" ? "" : `\n    ${extraHead}`}`)
     .replace(root, () => `<div id="root"><div class="prerendered">${page.html}</div></div>`);
 }
 
@@ -122,6 +129,7 @@ cpSync(join(ROOT, "packages", "demo", "src", FAVICON), join(SITE, FAVICON));
 const rows = [];
 const urls = [HOME];
 const forwarders = [];
+const twinPages = [];
 for (const dir of PACKAGES) {
   const packageDir = join(ROOT, "packages", dir);
   const manifest = JSON.parse(readFileSync(join(packageDir, "package.json"), "utf8"));
@@ -131,6 +139,7 @@ for (const dir of PACKAGES) {
   cpSync(join(packageDir, "dist-demo"), out, { recursive: true });
   cpSync(join(packageDir, "demo", ".generated", "llms.txt"), join(out, "llms.txt"));
   cpSync(join(packageDir, "docs", "llms-full.md"), join(out, "llms-full.txt"));
+  cpSync(join(packageDir, "demo", ".generated", "twins"), out, { recursive: true });
 
   const row = { dir, ...manifest, pages: [] };
   const template = readFileSync(join(out, "index.html"), "utf8");
@@ -140,6 +149,7 @@ for (const dir of PACKAGES) {
     mkdirSync(join(out, page.path), { recursive: true });
     writeFileSync(join(out, page.path, "index.html"), pageDocument(template, page, front ? jsonLd(structuredData(row)) : ""));
     urls.push(page.url);
+    twinPages.push(page);
     if (!front) row.pages.push(page);
   }
   /* An old address of a page whose id changed: a forwarder, never in the
@@ -247,19 +257,38 @@ writeFileSync(
 `,
 );
 
+/* The workspace's index for an agent: which package is which, and where each
+   one's own index and full text stand. */
+writeFileSync(
+  join(SITE, "llms.txt"),
+  `# umriss-ui
+
+> React components for data-dense applications - dashboards, monitoring, planning: a component library, canvas charts, a table, a schedule and calculations, in English and German. Each package's demo is its documentation; the text below points at the same material as plain text.
+
+Every package carries the full text of its installed version as \`node_modules/<package>/docs/llms-full.md\`.
+
+## Packages
+
+${rows.map((row) => `- [${row.name}](${HOME}${row.dir}/llms.txt): ${row.description} Full text: [llms-full.txt](${HOME}${row.dir}/llms-full.txt)`).join("\n")}
+`,
+);
+
 /* The guard over what was written (search-visibility, Testing;
    sidebar-tree, seam 1): every address in the sitemap is a file with a title,
    a description, a canonical pointing at itself, an h1 and a favicon that is there, every forwarder
    stands outside the sitemap and points into it, and there is no other page
-   file. A build that breaks it fails here, before it is deployed. */
+   file; every page has its Markdown twin and announces it, and every link
+   in every llms.txt leads to a file (pages-as-markdown). A build that breaks
+   it fails here, before it is deployed. */
 const files = new Map();
+const texts = new Map();
 const walk = (dir) => {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const below = relative(SITE, dir);
+    const at = HOME + (below === "" ? "" : `${below.split(sep).join("/")}/`);
     if (entry.isDirectory() && entry.name !== "assets") walk(join(dir, entry.name));
-    else if (entry.name === "index.html") {
-      const below = relative(SITE, dir);
-      files.set(HOME + (below === "" ? "" : `${below.split(sep).join("/")}/`), readFileSync(join(dir, entry.name), "utf8"));
-    }
+    else if (entry.name === "index.html") files.set(at, readFileSync(join(dir, entry.name), "utf8"));
+    else if (/\.(md|txt)$/.test(entry.name)) texts.set(at + entry.name, readFileSync(join(dir, entry.name), "utf8"));
   }
 };
 walk(SITE);
@@ -271,6 +300,7 @@ const linksFavicon = (html, url) => {
 };
 const faults = [
   ...siteFaults(urls, forwarders, files),
+  ...twinFaults(twinPages, files, texts),
   ...urls.filter((url) => files.has(url) && !linksFavicon(files.get(url), url)).map((url) => `${url}: no favicon`),
   /* No props row says a prop accepts nothing: a `never` is a prohibition the
      reader merges away (types-without-holes), never a type to show. */
@@ -290,21 +320,5 @@ if (existsSync(VERIFICATION)) {
   for (const file of readdirSync(VERIFICATION)) cpSync(join(VERIFICATION, file), join(SITE, file));
 }
 cpSync(join(ROOT, "scripts", PREVIEW), join(SITE, PREVIEW));
-
-/* The workspace's index for an agent: which package is which, and where each
-   one's own index and full text stand. */
-writeFileSync(
-  join(SITE, "llms.txt"),
-  `# umriss-ui
-
-> React components for data-dense applications - dashboards, monitoring, planning: a component library, canvas charts, a table, a schedule and calculations, in English and German. Each package's demo is its documentation; the text below points at the same material as plain text.
-
-Every package carries the full text of its installed version as \`node_modules/<package>/docs/llms-full.md\`.
-
-## Packages
-
-${rows.map((row) => `- [${row.name}](${HOME}${row.dir}/llms.txt): ${row.description} Full text: [llms-full.txt](${HOME}${row.dir}/llms-full.txt)`).join("\n")}
-`,
-);
 
 console.log(`\nsite/ is ready: ${rows.map((row) => `${row.dir}/ (${row.pages.length} pages)`).join(", ")}, index.html, sitemap.xml and llms.txt - ${urls.length} addresses, ${forwarders.length} forwarded.`);
