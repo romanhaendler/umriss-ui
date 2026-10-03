@@ -7,7 +7,7 @@ Origin: session of 2-3 Oct 2026. The brief, in the words it was given in: "Unser
 Builds on: `.scratch/demo-as-documentation/spec.md` (the props table and its JSDoc gate), `.scratch/ai-readable-docs/spec.md` (the text for coding agents and its completeness guard), ADR-0018 (English), ADR-0037 (the prerendered site).
 Blocked by: nothing
 ADR: none — the reader's header comment changes its promise ("the type stands as it was written"), and that comment is where the decision is recorded.
-Tickets: `issues/01`–`08`; each names its blockers. The order across specs is in `.scratch/docs-roadmap/spec.md`.
+Tickets: `issues/01`–`09`; each names its blockers. The order across specs is in `.scratch/docs-roadmap/spec.md`.
 
 ## Problem Statement
 
