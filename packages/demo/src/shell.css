@@ -404,15 +404,13 @@ body {
   .shellKbd {
     display: none;
   }
+  /* From nothing, not from its label: a label as long as the palette's
+     placeholder would otherwise push the search onto a line of its own. */
   .shellSearch {
-    flex: 1 1 auto;
+    flex: 1 1 0;
     width: auto;
     min-width: 0;
     max-width: 260px;
     white-space: nowrap;
-  }
-  .shellSearch > span {
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 }
