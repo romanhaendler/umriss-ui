@@ -38,14 +38,17 @@ describe("controlsOf", () => {
     expect(control("invalid")).toEqual({ prop: "invalid", kind: "switch", defaultValue: false });
   });
 
-  it("makes a number a number field, with the bounds the declaration gives", () => {
+  it("makes a number a number field, with the bounds the declaration gives and a hundredth of them as its step", () => {
     expect(controlsOf(AT, ENTRY, { controls: ["count"], bounds: { count: [0, 100] } })[0]).toEqual({
       prop: "count",
       kind: "number",
       defaultValue: null,
       min: 0,
       max: 100,
+      step: 1,
+      decimals: 0,
     });
+    expect(controlsOf(AT, ENTRY, { controls: ["count"], bounds: { count: [0, 1] } })[0]).toMatchObject({ step: 0.01, decimals: 2 });
   });
 
   it("allows `disabled` and `placeholder` from the element, and the children text first", () => {
@@ -68,6 +71,11 @@ describe("controlsOf", () => {
     expect(() => control("onPress")).toThrow(/configurators\/FixtureConfigurable\.tsx.*`onPress`.*cannot become a control/);
     expect(() => control("extra")).toThrow(/`extra`.*cannot become a control/);
     expect(() => control("label")).toThrow(/`label`.*cannot become a control/);
+  });
+
+  it("takes `disabled` from the table where the component has its own, on an element without one", () => {
+    const own = { ...ENTRY, inherits: "<span>", props: [...ENTRY.props, { name: "disabled", type: "boolean", optional: true, description: "", defaultValue: "false" }] };
+    expect(controlsOf(AT, own, { controls: ["disabled"] })).toEqual([{ prop: "disabled", kind: "switch", defaultValue: false }]);
   });
 
   it("allows `placeholder` only on an element that has one", () => {
@@ -97,6 +105,12 @@ describe("codeOf", () => {
 
   it("closes itself without children text, and always shows a required prop", () => {
     expect(code({ children: "" }, { label: "Save the order" })).toContain('<FixtureConfigurable label="Save the order" />');
+  });
+
+  it("writes a required node as its code between the tags, and imports what that code names", () => {
+    expect(code({ children: "" }, { label: "Add a stop", children: { node: null, code: "<PlusGlyph />" } })).toBe(
+      'import { FixtureConfigurable, PlusGlyph } from "@umriss-ui/core";\n\n<FixtureConfigurable label="Add a stop"><PlusGlyph /></FixtureConfigurable>',
+    );
   });
 
   it("writes text that would not stand as written as an expression", () => {
