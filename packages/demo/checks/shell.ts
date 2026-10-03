@@ -26,7 +26,7 @@ import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { STANDARDS } from "./accessibility";
+import { STANDARDS, findings } from "./accessibility";
 import { pageTitle, type TitleManifest } from "../src/tooling/title";
 import { PACKAGES } from "../src/packages";
 
@@ -496,10 +496,10 @@ test("a fold is a disclosure the keyboard opens, and the API section stays acces
   await page.goto(`/${pageId}/`);
   const fold = page.locator("details", { has: page.locator(`[id="${id}"]`) });
   await expect(fold).not.toHaveAttribute("open");
+  /* With the page suite's tolerated colour pairs - the column heads are the
+     muted token (`accessibility.ts`). */
   const violations = async () =>
-    (await new AxeBuilder({ page }).include(".apiTables").withTags(STANDARDS).analyze()).violations.map(
-      (v) => `${v.id}: ${v.nodes.map((n) => n.target).join(" ")}`,
-    );
+    findings(await new AxeBuilder({ page }).include(".apiTables").withTags(STANDARDS).analyze()).map((f) => `${f.rule}: ${f.where}`);
   expect(await violations()).toEqual([]);
   await fold.locator("summary").focus();
   await page.keyboard.press("Enter");
