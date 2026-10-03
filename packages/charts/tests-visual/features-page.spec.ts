@@ -6,4 +6,4 @@ import { ALL_PAGES, open } from "./navigation";
 
 checkInstall({ open, pages: ALL_PAGES, command: "npm install @umriss-ui/charts" });
 
-checkFirstExample({ open, pageId: "getting-started", title: "Draw a first chart" });
+checkFirstExample({ open, pageId: "installation", title: "Draw a first chart" });
