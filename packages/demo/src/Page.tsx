@@ -27,6 +27,7 @@ import { examplesOf } from "./tooling/examples";
 import { apiHtml, apiSection, DEFINITIONS_ID, DEFINITIONS_TITLE, previewOf, propsOnPage, PROPS_ON_PAGE_TITLE } from "./tooling/apiTable";
 import type { ApiDefinitionModel, ApiSection } from "./tooling/apiTable";
 import { referenceHtml } from "./tooling/referenceTable";
+import { apiIndexHtml } from "./tooling/apiIndex";
 import { ADR_0032, SCENARIOS, keyboardAnchor, keysOfText } from "./outline";
 import type { Rubric, Page as PageData } from "./outline";
 
@@ -202,6 +203,9 @@ export function Page({ demo, page }: PageProps) {
   const nameOf = (id: string) => demo.addresses.ALL_PAGES.find((one) => one.id === id)?.name ?? id;
 
   const hasKeys = page.keys !== undefined || page.keysOf !== undefined;
+  /* A generated body (ADR-0044): the API index, written by the generator. */
+  const index = page.body === "api-index" ? demo.apiIndex : undefined;
+  if (page.body === "api-index" && index === undefined) throw new Error(`\`${page.id}\` is an API index, and the demo has none - did \`pnpm props\` run?`);
 
   /* What stands on the page, in its order - built from the same values that
      decide below whether a section is there at all. */
@@ -212,7 +216,14 @@ export function Page({ demo, page }: PageProps) {
     href: hrefOf(demo.addresses.addressOf(page.id, id)),
     target: `[data-example="${id}"]`,
   });
-  const contents = useContents([
+  /* The index's contents are its groups: core's runs to some two hundred
+     and fifty entries, which no list beside the page can hold. */
+  const indexContents = (model: NonNullable<typeof index>): ContentsEntry[] => [
+    { label: page.name, href: here, target: `#page-${page.id}` },
+    ...model.groups.map((group) => section(group.id, group.title)),
+    ...(model.definitions.length === 0 ? [] : [section(DEFINITIONS_ID, DEFINITIONS_TITLE)]),
+  ];
+  const contents = useContents(index !== undefined ? indexContents(index) : [
     { label: page.name, href: here, target: `#page-${page.id}` },
     ...(first === undefined ? [] : [exampleEntry(first)]),
     ...(rest.length === 0
@@ -232,28 +243,47 @@ export function Page({ demo, page }: PageProps) {
     ...(page.limits === undefined ? [] : [section(`limits-${page.id}`, "Known limits")]),
   ]);
 
+  const head = (
+    <header className="pageHead">
+      <RubricLine demo={demo} rubric={page.rubric.name} place={`/${page.id}`} name={page.name} />
+      <h1 className="pageName" id={`page-${page.id}`} tabIndex={-1}>
+        {page.name}
+      </h1>
+      <p className="pageSentence">
+        <Prose text={page.sentence} />
+      </p>
+      {page.exports.length > 0 && <ImportLine exports={page.exports} packageName={demo.packageName} />}
+      {page.installs === true && <InstallLine command={demo.install} />}
+      {page.about !== undefined && (
+        <div className="pageAbout">
+          {page.about.map((text) => (
+            <p key={text}>
+              <Prose text={text} />
+            </p>
+          ))}
+        </div>
+      )}
+    </header>
+  );
+
+  if (index !== undefined) {
+    return (
+      <article className="page" data-block={page.id} aria-labelledby={`page-${page.id}`}>
+        {head}
+        {contents.disclosure}
+        {/* Written, not drawn, as the API section is: the HTML the
+            prerendered page carries (`tooling/apiIndex.ts`). Its sections
+            stand as the page's own. */}
+        <div className="apiIndex" dangerouslySetInnerHTML={{ __html: apiIndexHtml(index) }} />
+        <PageTurn demo={demo} pageId={page.id} />
+        {contents.column}
+      </article>
+    );
+  }
+
   return (
     <article className="page" data-block={page.id} aria-labelledby={`page-${page.id}`}>
-      <header className="pageHead">
-        <RubricLine demo={demo} rubric={page.rubric.name} place={`/${page.id}`} name={page.name} />
-        <h1 className="pageName" id={`page-${page.id}`} tabIndex={-1}>
-          {page.name}
-        </h1>
-        <p className="pageSentence">
-          <Prose text={page.sentence} />
-        </p>
-        {page.exports.length > 0 && <ImportLine exports={page.exports} packageName={demo.packageName} />}
-        {page.installs === true && <InstallLine command={demo.install} />}
-        {page.about !== undefined && (
-          <div className="pageAbout">
-            {page.about.map((text) => (
-              <p key={text}>
-                <Prose text={text} />
-              </p>
-            ))}
-          </div>
-        )}
-      </header>
+      {head}
 
       {contents.disclosure}
 

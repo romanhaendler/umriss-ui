@@ -58,7 +58,7 @@ import { fileURLToPath } from "node:url";
    imports nothing (and why `build:pages` strips types). */
 import { PACKAGES as LIST } from "../packages/demo/src/packages.ts";
 import { dependencyLine, installCommand } from "../packages/demo/src/tooling/install.ts";
-import { documentFaults, forwarderHtml, frontFaults, searchFaults, siteFaults, siteSearch, twinFaults, typeLinkFaults, whatsNewFaults } from "../packages/demo/src/tooling/site.ts";
+import { apiIndexFaults, documentFaults, forwarderHtml, frontFaults, searchFaults, siteFaults, siteSearch, twinFaults, typeLinkFaults, whatsNewFaults } from "../packages/demo/src/tooling/site.ts";
 import { adrLinksOf, siteLeaks } from "../packages/demo/src/tooling/references.ts";
 import { DOCUMENTS, newestRelease, renderDocument } from "../packages/demo/src/tooling/documents.ts";
 import { EDIT_LINK, editHref } from "../packages/demo/src/tooling/edit.ts";
@@ -456,6 +456,12 @@ const faults = [
   }),
   ...typeLinkFaults(files),
   ...searchFaults(search, HOME, urls, files),
+  /* Every export has a place on the site (ADR-0044): each name a package's
+     entries export has an element with its anchor on its API index. */
+  ...rows.flatMap((row) => {
+    const index = join(ROOT, "packages", row.dir, "demo", ".generated", "api-index.json");
+    return existsSync(index) ? apiIndexFaults(`${row.homepage}api/`, JSON.parse(readFileSync(index, "utf8")).anchors, files) : [];
+  }),
   ...leaks,
 ];
 if (faults.length > 0) throw new Error(`The built site fails its guard:\n${faults.join("\n")}`);

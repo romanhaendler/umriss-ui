@@ -32,7 +32,9 @@ import { installCommand, type InstallManifest } from "./install.ts";
 import { PACKAGES } from "../packages.ts";
 import { apiHtml, apiMarkdown, apiSection, propsOnPage, PROPS_ON_PAGE_TITLE, fencedCode as fenced, markdownCell as cell, markdownCode as code } from "./apiTable.ts";
 import { referenceHtml, referenceMarkdown, type ReferenceTable } from "./referenceTable.ts";
-import { adrLinks, compilerOptionsOf } from "./props.ts";
+import { adrLinks } from "./props.ts";
+import { exportedDeclarations } from "./exportDocs.ts";
+import { apiIndexHtml, apiIndexMarkdown, apiIndexModel, type ApiIndexModel, type Mention } from "./apiIndex.ts";
 import { linkAdrs, linkReferences, outlineTexts } from "./references.ts";
 import { plain, propEntries, referenceEntries, searchEntries, type PropsOfPage, type SearchEntry } from "../search.ts";
 
@@ -172,91 +174,23 @@ function listExamples(demoDir: string): string[] {
 }
 
 /* ------------------------------------------------------------------ */
-/* What the package exports beyond its pages                           */
+/* What a text names as code                                           */
 /* ------------------------------------------------------------------ */
 
-export interface ExportedDeclaration {
-  /** The name a caller imports. */
-  name: string;
-  /** The declaration as its `.d.ts` shows it - no body, the JSDoc kept. */
-  text: string;
-}
-
-/** Every export of `src/index.ts`, in the order the entry names them, with its
-    declaration as the compiler emits it for a `.d.ts`.
-
-    The pages name what a reader looks up; the pure modules and the types the
-    components are made of are exported too, and an agent that never reads
-    their signature guesses it. The declaration emit is the one form that is
-    exact without being the implementation: bodies gone, comments kept, and
-    the same text the npm package's `dist/index.d.ts` carries. */
-export function exportedDeclarations(packageDir: string): ExportedDeclaration[] {
-  const entry = join(packageDir, "src", "index.ts");
-  /* The package's own options where it has them (`compilerOptionsOf`). */
-  const own = compilerOptionsOf(packageDir);
-  const options: ts.CompilerOptions = {
-    ...(Object.keys(own).length > 0 ? own : { jsx: ts.JsxEmit.ReactJSX, module: ts.ModuleKind.ESNext, moduleResolution: ts.ModuleResolutionKind.Bundler, target: ts.ScriptTarget.ES2022, strict: true, skipLibCheck: true }),
-    noEmit: false,
-    declaration: true,
-    emitDeclarationOnly: true,
-    removeComments: false,
-  };
-  const program = ts.createProgram([entry], options);
-  const checker = program.getTypeChecker();
-  const module = checker.getSymbolAtLocation(program.getSourceFile(entry)!);
-  if (module === undefined) throw new Error(`\`${entry}\` is not a module the compiler can read.`);
-
-  const emitted = new Map<string, ts.SourceFile>();
-  const declarationsOf = (file: ts.SourceFile): ts.SourceFile => {
-    const known = emitted.get(file.fileName);
-    if (known !== undefined) return known;
-    let text = "";
-    program.emit(file, (name, data) => {
-      if (name.endsWith(".d.ts")) text = data;
-    }, undefined, true);
-    const parsedFile = ts.createSourceFile(`${file.fileName}.d.ts`, text, ts.ScriptTarget.Latest, true);
-    emitted.set(file.fileName, parsedFile);
-    return parsedFile;
-  };
-
-  return checker.getExportsOfModule(module).map((exported) => {
-    const target = exported.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(exported) : exported;
-    const declaration = target.declarations?.[0];
-    if (declaration === undefined) return { name: exported.name, text: "" };
-    const emittedFile = declarationsOf(declaration.getSourceFile());
-    /* A symbol may have several statements (an overloaded function, an
-       interface merged with a const); all of them belong to its signature. */
-    const statements = emittedFile.statements.filter((statement) => declares(statement, target.name));
-    /* The keywords come off the statement, never off its comment - a JSDoc
-       line may well begin with "export" or say "declare". */
-    const text = statements
-      .map((statement) => {
-        const comment = statement.getFullText().slice(0, statement.getStart() - statement.getFullStart()).trim();
-        const body = statement.getText().replace(/^export /, "").replace(/^declare /, "");
-        return comment === "" ? body : `${comment}\n${body}`;
-      })
-      .join("\n");
-    return { name: exported.name, text: target.name === exported.name ? text : `${text}\n// exported as ${exported.name}` };
-  });
-}
-
-function declares(statement: ts.Statement, name: string): boolean {
-  if (ts.isVariableStatement(statement)) {
-    return statement.declarationList.declarations.some((one) => ts.isIdentifier(one.name) && one.name.text === name);
-  }
-  const named = statement as ts.Statement & { name?: ts.Node };
-  return named.name !== undefined && ts.isIdentifier(named.name) && named.name.text === name;
+/** Does a text mention `name` as code? Only code counts: fenced blocks and
+    inline spans, where a page's import line, its tables, its examples and its
+    texts' backticks stand. An export called `format` is not named by the
+    English word in a sentence. The code is taken out once per text. */
+function mentionsOf(text: string): (name: string) => boolean {
+  const codeOnly = (text.match(/^(`{3,})[^\n]*\n[\s\S]*?^\1$|`[^`\n]+`|``[^\n]+?``/gm) ?? []).join("\n");
+  return (name) => new RegExp(`(^|[^\\w$])${name.replace(/\$/g, "\\$")}($|[^\\w$])`).test(codeOnly);
 }
 
 /** The names a text never mentions as code - the completeness guard's
-    question.
-
-    Only code counts: fenced blocks and inline spans, where a page's import
-    line, its tables, its examples and its texts' backticks stand. An export
-    called `format` is not named by the English word in a sentence. */
+    question. */
 export function missingFrom(text: string, names: readonly string[]): string[] {
-  const codeOnly = (text.match(/^(`{3,})[^\n]*\n[\s\S]*?^\1$|`[^`\n]+`|``[^\n]+?``/gm) ?? []).join("\n");
-  return names.filter((name) => !new RegExp(`(^|[^\\w$])${name.replace(/\$/g, "\\$")}($|[^\\w$])`).test(codeOnly));
+  const mentions = mentionsOf(text);
+  return names.filter((name) => !mentions(name));
 }
 
 /* ------------------------------------------------------------------ */
@@ -364,6 +298,8 @@ export function renderLlms({ packageDir, outline: written, tables, moved = {}, r
   twins: Twin[];
   /** The package's search fragment (.scratch/one-search). */
   search: SearchEntry[];
+  /** The API index the app mounts, where the outline has one. */
+  apiIndex?: ApiIndexModel;
 } {
   const manifest = JSON.parse(readFileSync(join(packageDir, "package.json"), "utf8")) as Manifest;
   const demoDir = join(packageDir, "demo");
@@ -455,11 +391,20 @@ export function renderLlms({ packageDir, outline: written, tables, moved = {}, r
   const defined = new Set<string>();
   /* The props tables each page shows, for the search (`propEntries`). */
   const propsOfPages: PropsOfPage[] = [];
+  /* Where the API index's body goes: it is written once every other page is,
+     since it says which of them use each export (ADR-0044). */
+  let indexAt: { from: number; to: number; html: string } | undefined;
   for (const rubric of outline) {
     parts.push("", `## ${rubric.name}`, "", rubric.sentence);
     for (const page of rubric.pages) {
       const from = parts.length;
       parts.push("", `### ${page.name}`, "", page.sentence);
+      if (page.body === "api-index") {
+        parts.push("", `Demo page: ${pageUrl(manifest, page)}`, "", "");
+        indexAt = { from: parts.length - 2, to: parts.length, html: "" };
+        cuts.push({ page, from, to: parts.length, spliced: [indexAt] });
+        continue;
+      }
       if (page.exports.length > 0) parts.push("", fenced("ts", `import { ${page.exports.join(", ")} } from "${manifest.name}";`));
       if (page.installs === true) parts.push("", fenced("sh", install));
       parts.push("", `Demo page: ${pageUrl(manifest, page)}`);
@@ -517,12 +462,39 @@ export function renderLlms({ packageDir, outline: written, tables, moved = {}, r
     }
   }
 
-  /* What no table and no definition above explains - until the API index
-     takes its place (.scratch/api-index). A component counts as explained by
+  /* The API index: every export, and on each the pages that name it in code
+     - their import line, examples and prose, or the scenarios; not their
+     tables, and not the index itself. */
+  let apiIndex: ApiIndexModel | undefined;
+  if (indexAt !== undefined) {
+    const textOf = ({ from, to, spliced = [] }: (typeof cuts)[number]) =>
+      parts.slice(from, to).filter((_, i) => !spliced.some((one) => from + i >= one.from && from + i < one.to)).join("\n");
+    const readers = cuts
+      .filter((cut) => cut.page?.body === undefined)
+      .map((cut) => ({
+        mention: cut.page === undefined ? { name: "Scenarios", href: "#/" } : { name: cut.page.name, href: `#/${cut.page.id}` },
+        mentions: mentionsOf(textOf(cut)),
+      }));
+    const usedOn = (name: string): Mention[] => readers.filter((one) => one.mentions(name)).map((one) => one.mention);
+    /* Their comments are a reader's text now, their ADR numbers links. */
+    const exports = exportedDeclarations(packageDir).map((one) => ({
+      ...one,
+      description: link(one.description),
+      params: one.params.map((param) => ({ ...param, text: link(param.text) })),
+      ...(one.returns === undefined ? {} : { returns: link(one.returns) }),
+      ...(one.deprecated === undefined ? {} : { deprecated: link(one.deprecated) }),
+    }));
+    apiIndex = apiIndexModel({ packageName: manifest.name, exports, pages, entries: tables, usedOn });
+    parts[indexAt.to - 1] = apiIndexMarkdown(apiIndex).join("\n\n");
+    indexAt.html = apiIndexHtml(apiIndex);
+  }
+
+  /* What no table and no definition above explains, where the package has
+     no API index yet (.scratch/api-index). A component counts as explained by
      its `<Name>Props` table; a name merely used in an example does not. */
   const tabled = new Set(pages.flatMap((page) => page.types));
   const explained = (name: string) => tabled.has(name) || tabled.has(`${name}Props`) || defined.has(name);
-  const rest = exportedDeclarations(packageDir).filter((one) => !explained(one.name));
+  const rest = apiIndex !== undefined ? [] : exportedDeclarations(packageDir).filter((one) => one.subpath === undefined && !explained(one.name));
   if (rest.length > 0) {
     parts.push(
       "",
@@ -646,7 +618,7 @@ export function renderLlms({ packageDir, outline: written, tables, moved = {}, r
     ...referenceEntries(packageId, outline, references),
   ];
 
-  return { index, full: `${parts.join("\n")}\n`, pages: sitePages, forwarders, twins, search };
+  return { index, full: `${parts.join("\n")}\n`, pages: sitePages, forwarders, twins, search, ...(apiIndex === undefined ? {} : { apiIndex }) };
 }
 
 /** Writes `demo/.generated/llms.txt`, `demo/.generated/pages.json` and
@@ -663,7 +635,7 @@ export function generateLlms(given: LlmsJob): SitePage[] {
   /* The reference tables' ADR numbers as links, for the text, the pages and
      the `references.json` the app mounts alike. */
   const job = given.references === undefined ? given : { ...given, references: linkReferences(given.references, adrLinks()) };
-  const { index, full, pages, forwarders, twins, search } = renderLlms(job);
+  const { index, full, pages, forwarders, twins, search, apiIndex } = renderLlms(job);
   const indexPath = join(job.packageDir, "demo", ".generated", "llms.txt");
   const fullPath = join(job.packageDir, "docs", "llms-full.md");
   mkdirSync(dirname(indexPath), { recursive: true });
@@ -679,6 +651,10 @@ export function generateLlms(given: LlmsJob): SitePage[] {
   mkdirSync(twinsDir);
   for (const twin of twins) writeFileSync(join(twinsDir, twin.path), twin.text, "utf8");
   if (job.references !== undefined) writeFileSync(join(dirname(indexPath), "references.json"), `${JSON.stringify(job.references, null, 2)}\n`, "utf8");
+  /* The site's guard reads it too: no index, no file left behind. */
+  const indexFile = join(dirname(indexPath), "api-index.json");
+  if (apiIndex !== undefined) writeFileSync(indexFile, `${JSON.stringify(apiIndex)}\n`, "utf8");
+  else rmSync(indexFile, { force: true });
   process.stdout.write(`llms-full.md: ${Math.round(Buffer.byteLength(full) / 1024)} kB.\n`);
   return pages;
 }

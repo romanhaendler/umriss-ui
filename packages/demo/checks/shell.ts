@@ -64,6 +64,8 @@ export interface ShellProbes {
   /** A page id that changed (`MOVED` in the outline), the page it is now and
       an example on it - where the demo has one. */
   moved?: { from: string; pageId: string; example: string };
+  /** An export's anchor on the API index (ADR-0044), where the demo has one. */
+  apiIndex?: { anchor: string };
   /** A page with several examples and an API section, and one of its
       examples after the first, for "On this page". */
   contents: { pageId: string; id: string; title: string };
@@ -267,6 +269,20 @@ test("a moved address lands on the page, under its current address", async ({ pa
   await expect(target).toHaveAttribute("data-highlight", "");
   const url = new URL(page.url());
   expect(url.pathname + url.hash).toBe(`/${pageId}/#${example}`);
+});
+
+test("the sidebar's last entry is the API index, alone in its rubric, and opens it", async ({ page }) => {
+  test.skip(p.apiIndex === undefined, "this demo has no API index yet");
+  const rubric = page.getByRole("navigation", { name: "Components" }).locator(".railRubric").last();
+  await expect(rubric.locator(".railHead > span").first()).toHaveText("API index");
+  const entry = rubric.getByRole("link");
+  await expect(entry).toHaveCount(1);
+  await expect(entry).toHaveText("API index");
+  await expect(entry).toHaveAttribute("href", "/api/");
+  await entry.click();
+  await expect(page.locator('[data-block="api"]').getByRole("heading", { level: 1 })).toHaveText("API index");
+  await expect(page.locator(`[data-block="api"] [id="${p.apiIndex!.anchor}"]`)).toBeVisible();
+  expect(new URL(page.url()).pathname).toBe("/api/");
 });
 
 test("the address of an example brings it into view", async ({ page }) => {

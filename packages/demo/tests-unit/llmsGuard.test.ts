@@ -11,9 +11,10 @@
    The entries are the ones each package's `vite.config.ts` builds, subpaths
    included: a German wording is an export a reader imports too.
 
-   Every export of the main entry that no table and no definition explains
-   gets its declaration in "The rest of the API" - so for those the first check
-   holds by construction,
+   Every export stands on the package's API index (ADR-0044); where a package
+   has none yet, every export of the main entry that no table and no
+   definition explains gets its declaration in "The rest of the API" - so for
+   those the first check holds by construction,
    and a second one keeps the guard honest: a COMPONENT (an export with a
    `<Name>Props` beside it) must be named by the pages themselves. A new
    component without a page, or dropped from its page, fails here instead of
@@ -103,7 +104,14 @@ describe.each(Object.keys(ENTRIES))("the llms-full.txt of %s", (dir) => {
     expect(names.length).toBeGreaterThan(0);
     expect(missingFrom(full, names)).toEqual([]);
 
-    const pages = full.split("\n## The rest of the API\n")[0]!;
+    /* Where the package has an API index, every name stands there with its
+       anchor (ADR-0044) - and the index is no page that names a component
+       for the check below. */
+    const index = sitePages.find((one) => one.path === "api/");
+    if (index !== undefined) {
+      for (const name of names) expect(index.html.includes(`id="${name}"`) || index.html.includes(`id="type-${name}"`), name).toBe(true);
+    }
+    const pages = full.split("\n## The rest of the API\n")[0]!.split("\n## API index\n")[0]!;
     const components = names.filter((name) => names.includes(`${name}Props`));
     expect(components.length).toBeGreaterThan(0);
     expect(missingFrom(pages, components)).toEqual([]);
