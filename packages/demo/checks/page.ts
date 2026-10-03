@@ -1,5 +1,6 @@
 /* What makes a page operable: the code toggle, the page toggle and the copy
-   button - and, on the page that installs, the install command.
+   button - and, on the page that installs, the install command. Beside them,
+   where a page's known limits lead.
 
    None of it can be expressed in jsdom. The toggle hangs on a state two
    components share without either owning it; the clipboard does not exist
@@ -17,6 +18,7 @@ import { test, expect } from "@playwright/test";
 import type { Page } from "@playwright/test";
 import { allWithCode } from "./navigation";
 import { PACKAGES } from "../src/packages.ts";
+import { ADR_0032 } from "../src/outline.ts";
 
 export interface PageProbes {
   /** How the demo opens a page and an example (its `navigation.ts`). */
@@ -31,6 +33,8 @@ export interface PageProbes {
   packageName: string;
   /** The page's import line, as it must land in the clipboard. */
   importLine: string;
+  /** A page with known limits. */
+  limits: string;
 }
 
 export function checkPage(p: PageProbes): void {
@@ -133,6 +137,16 @@ test("the import line copies itself as well", async ({ page, context }) => {
   await page.locator(".importLine").getByRole("button", { name: "Copy" }).click();
   await expect(page.locator(".importLine").getByRole("button", { name: "Copied" })).toBeVisible();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(p.importLine);
+});
+
+/* What umriss-ui is not is a page of the site (.scratch/concepts-and-changelog-pages):
+   the known limits stay on it, the closing line and every limit that names
+   the ADR alike. */
+test("the known limits link what umriss-ui is not on the site", async ({ page }) => {
+  await open(page, p.limits);
+  const links = page.getByRole("region", { name: "Known limits" }).getByRole("link", { name: "ADR-0032" });
+  await expect(links.first()).toBeVisible();
+  for (const link of await links.all()) await expect(link).toHaveAttribute("href", ADR_0032);
 });
 }
 

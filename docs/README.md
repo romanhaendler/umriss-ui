@@ -55,8 +55,11 @@ above.
 for the components, online at <https://romanhaendler.github.io/umriss-ui/>, built
 by `pnpm build:pages`. Every demo page is a path with its text prerendered, so
 that a search engine reads it (ADR-0037) — the demos, prerendered, are the
-website. A site that hosts this prose beside them is still a product decision
-with a spec of its own; this page is its table of contents when it comes.
+website. The same build renders a fixed list of the documents here as pages of
+that site — the design language, the standards and ADR-0032 — read from their
+files when it runs, so that no second text exists to drift (ADR-0046). The list
+stands in `packages/demo/src/tooling/documents.ts`; a document not on it stays
+on GitHub.
 
 **No prose copy of the demos.** A component is described where it runs, with the
 source that produced it and a props table generated from `src/` — a second

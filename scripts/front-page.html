@@ -12,7 +12,13 @@
      command. Every colour is a design token: the token stylesheet is copied
      in by the build. The type is the demos' Geist, its files copied by the
      build into fonts/. The tiles' previews are pictures that `pnpm previews`
-     takes of each package's first scenario, light and dark. -->
+     takes of each package's first scenario, light and dark.
+
+     The workspace's own documents (.scratch/concepts-and-changelog-pages,
+     ADR-0046) wear this layout too: the build puts their rendered text in
+     place of the main element, as a reading column (.document), and lets
+     the relative addresses climb to the site's root. The copy key is then
+     missing, and the script stops before it. -->
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -164,6 +170,20 @@
       .index ul a { color: var(--u-color-text-secondary); }
       .index ul a:hover { color: var(--u-color-text); }
 
+      /* A document of the workspace, rendered: a reading column. */
+      .document { max-width: 46rem; padding-top: 48px; overflow-wrap: anywhere; }
+      .document h2 { margin: var(--u-space-8) 0 var(--u-space-3); }
+      .document h3 { margin: var(--u-space-6) 0 var(--u-space-2); font-size: var(--u-text-md); font-weight: var(--u-weight-semibold); }
+      .document p, .document ul, .document ol, .document pre, .document table, .document blockquote { margin: 0 0 var(--u-space-4); }
+      .document ul, .document ol { padding-left: var(--u-space-6); }
+      .document li + li { margin-top: var(--u-space-1); }
+      .document a:hover { color: var(--u-color-text-secondary); }
+      .document :not(pre) > code { padding: 1px var(--u-space-1); border-radius: var(--u-radius-xs); background: var(--u-color-surface-sunken); font-size: 0.9em; }
+      .document pre { overflow: auto; padding: var(--u-space-3) var(--u-space-4); border-radius: var(--u-radius-md); background: var(--u-color-surface-sunken); box-shadow: var(--u-edge); font-size: var(--u-text-sm); overflow-wrap: normal; }
+      .document table { display: block; overflow: auto; border-collapse: collapse; font-size: var(--u-text-sm); overflow-wrap: normal; }
+      .document th, .document td { padding: var(--u-space-1) var(--u-space-3); border-bottom: 1px solid var(--u-edge-color); text-align: left; vertical-align: top; }
+      .document blockquote { padding-left: var(--u-space-4); border-left: 2px solid var(--u-edge-color-strong); color: var(--u-color-text-secondary); }
+
       footer { max-width: 68rem; margin: 72px auto 0; padding: var(--u-space-6) var(--u-space-5) var(--u-space-8); font-size: var(--u-text-sm); color: var(--u-color-text-secondary); }
       footer a:hover { color: var(--u-color-text); }
 
@@ -227,7 +247,7 @@
     </main>
     <footer>
       <a href="{{repository}}">Source on GitHub</a> · <a href="https://www.npmjs.com/org/umriss-ui">npm</a> · <a href="./llms.txt"><code>llms.txt</code>, for coding agents</a> ·
-      <a href="{{repository}}/blob/main/LICENSE">MIT licence</a>
+      <a href="{{repository}}/blob/main/LICENSE">MIT licence</a> · {{documents}}
     </footer>
     <script>
       (function () {
@@ -262,6 +282,7 @@
         /* The copy key, as the demos' (CopyButton.tsx): "Copied" for 1.6 s,
            "Failed" where there is no clipboard. */
         var copy = document.querySelector(".copy");
+        if (copy === null) return;
         var command = document.querySelector(".install code").textContent;
         var timer;
         function say(state, word) {

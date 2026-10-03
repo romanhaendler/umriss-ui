@@ -150,8 +150,10 @@ export function placeOfLocation(path: string, hash: string): string {
   return anchor === "" ? `/${page}` : `/${page}/${anchor}`;
 }
 
-/** The record of what umriss is not - every page's known limits point there. */
-export const ADR_0032 = "https://github.com/romanhaendler/umriss-ui/blob/main/docs/adr/0032-what-umriss-is-not.md";
+/** The record of what umriss is not - every page's known limits point there,
+    and every mention of ADR-0032: its page on the site, rendered from the ADR
+    (ADR-0046), not its file on GitHub. */
+export const ADR_0032 = "https://romanhaendler.github.io/umriss-ui/what-umriss-ui-is-not/";
 
 /** Is it a neighbour's page as `{ name, page }`? */
 export function isForeign(value: unknown): value is ForeignPage {

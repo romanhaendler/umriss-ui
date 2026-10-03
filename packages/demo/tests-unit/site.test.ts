@@ -3,7 +3,7 @@
    seam 1). */
 
 import { describe, expect, it } from "vitest";
-import { forwarderHtml, frontFaults, siteFaults, twinFaults, typeLinkFaults } from "../src/tooling/site";
+import { documentFaults, forwarderHtml, frontFaults, siteFaults, twinFaults, typeLinkFaults } from "../src/tooling/site";
 
 const HOME = "https://example.test/umriss-ui/charts/";
 const page = (url: string) =>
@@ -221,6 +221,36 @@ describe("the type links' guard (.scratch/types-without-holes)", () => {
     expect(typeLinkFaults(astray)).toEqual([
       `${search}: links #type-TableSnapshot on ${view}, which has no such id`,
       `${HOME}axis/: links #type-Axis on ${HOME}gone/, which has no such id`,
+    ]);
+  });
+});
+
+describe("the guard over the document pages (.scratch/concepts-and-changelog-pages)", () => {
+  const SITE = "https://example.test/umriss-ui/";
+  const document = `${SITE}standards/`;
+  const github = "https://github.com/romanhaendler/umriss-ui";
+  const pageWith = (main: string) => `<header><a href="../">umriss-ui</a></header><main class="document">${main}</main><footer><a href="../llms.txt">llms.txt</a></footer>`;
+  const sitemap = [SITE, document, `${SITE}design-language/`];
+  const fine = pageWith(`<a href="/umriss-ui/design-language/#dark-theme">it</a> <a href="${github}/blob/main/docs/adr/0035-x.md">ADR-0035</a> <a href="https://www.isa.org/">ISA</a>`);
+
+  it("passes a document page whose links lead to sitemap addresses, to the repository or elsewhere", () => {
+    expect(documentFaults([document], new Map([[document, fine]]), sitemap, SITE)).toEqual([]);
+  });
+
+  it("fails on a document in the list without a page", () => {
+    expect(documentFaults([document], new Map(), sitemap, SITE)).toEqual([`${document}: no page for this document`]);
+  });
+
+  it("fails on a link of the document into the site that is no sitemap address", () => {
+    expect(documentFaults([document], new Map([[document, pageWith('<a href="/umriss-ui/palette/">it</a>')]]), sitemap, SITE)).toEqual([
+      `${document}: links ${SITE}palette/, which is no sitemap address`,
+    ]);
+  });
+
+  it("fails on any page that links ADR-0032 on GitHub", () => {
+    const old = `<a href="${github}/blob/main/docs/adr/0032-what-umriss-is-not.md">ADR-0032</a>`;
+    expect(documentFaults([document], new Map([[document, fine], [`${SITE}core/button/`, old]]), sitemap, SITE)).toEqual([
+      `${SITE}core/button/: links ADR-0032 on GitHub, not its page on the site`,
     ]);
   });
 });

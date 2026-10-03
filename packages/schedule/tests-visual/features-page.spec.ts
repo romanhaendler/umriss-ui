@@ -16,6 +16,7 @@ checkPage({
   other: { name: "Lanes", pageId: "lane" },
   packageName: "@umriss-ui/schedule",
   importLine: 'import { Subtasks, resolveAppearance } from "@umriss-ui/schedule";',
+  limits: "overlap",
 });
 
 /* ------------------------------------------------------------------ */

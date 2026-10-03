@@ -22,6 +22,7 @@ checkPage({
   other: { name: "Tag", pageId: "tag" },
   packageName: "@umriss-ui/core",
   importLine: 'import { Button } from "@umriss-ui/core";',
+  limits: "button",
 });
 
 test.describe("The Button's configurator", () => {
