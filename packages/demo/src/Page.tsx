@@ -13,6 +13,7 @@
 
 import { Fragment, useState, type ReactNode } from "react";
 import { Example } from "./Example";
+import { useContents, type ContentsEntry } from "./Contents";
 import { CopyButton } from "./CopyButton";
 import { Prose } from "./Prose";
 import type { Demo } from "./demo";
@@ -84,9 +85,35 @@ export function Page({ demo, page }: PageProps) {
   const [allOpen, setAllOpen] = useState(false);
 
   const [first, ...rest] = examplesOf(demo.examples, page.id);
-  const tables = tablesOf(demo.tables, page.types);
+  const tables = tablesOf(demo.tables, page.types).map((entry) => tableModel(entry));
   const known = new Set(demo.addresses.ALL_PAGES.map((one) => one.id));
   const nameOf = (id: string) => demo.addresses.ALL_PAGES.find((one) => one.id === id)?.name ?? id;
+
+  /* What stands on the page, in its order - built from the same values that
+     decide below whether a section is there at all. */
+  const here = hrefOf(demo.addresses.addressOf(page.id));
+  const section = (id: string, label: string): ContentsEntry => ({ label, href: `${here}#${id}`, target: `#${id}` });
+  const exampleEntry = ({ id, title }: { id: string; title: string }): ContentsEntry => ({
+    label: title,
+    href: hrefOf(demo.addresses.addressOf(page.id, id)),
+    target: `[data-example="${id}"]`,
+  });
+  const contents = useContents([
+    { label: page.name, href: here, target: `#page-${page.id}` },
+    ...(first === undefined ? [] : [exampleEntry(first)]),
+    ...(rest.length === 0
+      ? []
+      : [section(`examples-${page.id}`, "Examples"), ...rest.map((one) => ({ ...exampleEntry(one), sub: true as const }))]),
+    ...(page.alternatives === undefined ? [] : [section(`alternatives-${page.id}`, "When to use something else")]),
+    ...(page.keys === undefined ? [] : [section(`keyboard-${page.id}`, "Keyboard")]),
+    ...(tables.length === 0
+      ? []
+      : [
+          section(`api-${page.id}`, "API"),
+          ...tables.map((one) => ({ ...section(one.anchor, one.name), sub: true as const, code: true as const })),
+        ]),
+    ...(page.limits === undefined ? [] : [section(`limits-${page.id}`, "Known limits")]),
+  ]);
 
   return (
     <article className="page" data-block={page.id} aria-labelledby={`page-${page.id}`}>
@@ -110,6 +137,8 @@ export function Page({ demo, page }: PageProps) {
           </div>
         )}
       </header>
+
+      {contents.disclosure}
 
       {first === undefined ? (
         <p className="pageEmpty">
@@ -189,7 +218,7 @@ export function Page({ demo, page }: PageProps) {
               ordinary addresses, which the shell takes like any other. */}
           <div
             className="apiTables"
-            dangerouslySetInnerHTML={{ __html: apiHtml(tables.map((entry) => tableModel(entry))) }}
+            dangerouslySetInnerHTML={{ __html: apiHtml(tables) }}
           />
         </Section>
       )}
@@ -208,6 +237,8 @@ export function Page({ demo, page }: PageProps) {
           </p>
         </Section>
       )}
+
+      {contents.column}
     </article>
   );
 }

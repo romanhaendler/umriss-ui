@@ -55,6 +55,9 @@ export interface ShellProbes {
   /** A page id that changed (`MOVED` in the outline), the page it is now and
       an example on it - where the demo has one. */
   moved?: { from: string; pageId: string; example: string };
+  /** A page with several examples and an API section, and one of its
+      examples after the first, for "On this page". */
+  contents: { pageId: string; id: string; title: string };
 }
 
 export function checkShell(p: ShellProbes): void {
@@ -183,6 +186,98 @@ test("the address of a scenario brings it into view", async ({ page }) => {
   test.skip(p.scenario === undefined, "this demo has no scenario yet");
   await page.goto(`/#${p.scenario}`);
   await expect(page.locator(`[data-scenario="${p.scenario}"]`)).toBeInViewport();
+});
+
+/* "On this page" (page-orientation 01). From 1300 px a column beside the
+   page, narrower a closed disclosure under its head. */
+const onThisPage = (page: Page) => page.getByRole("navigation", { name: "On this page" });
+
+test("on this page stands beside the content, and an example entry jumps to it", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto(`/${p.contents.pageId}/`);
+  const list = onThisPage(page);
+  await expect(list).toBeVisible();
+  const head = await page.locator(`[data-block="${p.contents.pageId}"] .pageHead`).boundingBox();
+  const beside = await list.boundingBox();
+  expect(beside!.x).toBeGreaterThanOrEqual(head!.x + head!.width);
+
+  await list.getByRole("link", { name: p.contents.title, exact: true }).click();
+  const target = page.locator(`[data-example="${p.contents.id}"]`);
+  await expect(target).toBeInViewport();
+  await expect(target).toHaveAttribute("data-highlight", "");
+  const url = new URL(page.url());
+  expect(url.pathname + url.hash).toBe(`/${p.contents.pageId}/#${p.contents.id}`);
+});
+
+test("on this page: a section entry puts its heading below the header, unmarked", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto(`/${p.contents.pageId}/`);
+  await onThisPage(page).getByRole("link", { name: "API", exact: true }).click();
+  // Not an unknown example: the page stays, and does not start at the top.
+  await expect(page.locator(`[data-block="${p.contents.pageId}"]`)).toBeVisible();
+  const heading = page.getByRole("heading", { name: "API", exact: true, level: 2 });
+  await expect(heading).toBeInViewport();
+  const header = await page.locator(".shellHead").boundingBox();
+  const box = await heading.boundingBox();
+  expect(box!.y).toBeGreaterThanOrEqual(header!.y + header!.height);
+  // At the top of the window - or as high as the page's end lets it go.
+  const atEnd = await page.evaluate(
+    () => window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 1,
+  );
+  if (!atEnd) expect(box!.y).toBeLessThan(header!.y + header!.height + 60);
+  expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+  expect(new URL(page.url()).hash).toBe(`#api-${p.contents.pageId}`);
+  await expect(page.locator("[data-highlight]")).toHaveCount(0);
+});
+
+test("on this page marks where the reader is, the last entry at the end", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto(`/${p.contents.pageId}/`);
+  const list = onThisPage(page);
+  const current = list.locator('[aria-current="location"]');
+  await expect(current).toHaveCount(1);
+  await expect(current).toHaveText(await page.locator(".pageName").innerText());
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  await expect(list.getByRole("link").last()).toHaveAttribute("aria-current", "location");
+  await expect(current).toHaveCount(1);
+});
+
+test("on this page is a closed disclosure under the head at 1000 px", async ({ page }) => {
+  await page.setViewportSize({ width: 1000, height: 900 });
+  await page.goto(`/${p.contents.pageId}/`);
+  const block = page.locator(`[data-block="${p.contents.pageId}"]`);
+  const summary = block.locator("summary", { hasText: "On this page" });
+  await expect(summary).toBeVisible();
+  await expect(onThisPage(page)).toBeHidden();
+  // After the head, before the first example.
+  const head = await block.locator(".pageHead").boundingBox();
+  const hero = await block.locator("[data-hero]").boundingBox();
+  const at = await summary.boundingBox();
+  expect(at!.y).toBeGreaterThan(head!.y + head!.height);
+  expect(at!.y + at!.height).toBeLessThan(hero!.y);
+
+  await summary.click();
+  await onThisPage(page).getByRole("link", { name: p.contents.title, exact: true }).click();
+  await expect(page.locator(`[data-example="${p.contents.id}"]`)).toBeInViewport();
+  const url = new URL(page.url());
+  expect(url.pathname + url.hash).toBe(`/${p.contents.pageId}/#${p.contents.id}`);
+});
+
+test("on this page on the scenarios page lists the scenarios", async ({ page }) => {
+  test.skip(p.scenario === undefined, "this demo has no scenario yet");
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/");
+  const entry = onThisPage(page).locator(`a[href$="#${p.scenario}"]`);
+  await expect(entry).toBeVisible();
+  await entry.click();
+  await expect(page.locator(`[data-scenario="${p.scenario}"]`)).toBeInViewport();
+});
+
+test("section headings are set larger than the examples' titles", async ({ page }) => {
+  await page.goto(`/${p.contents.pageId}/`);
+  const size = (selector: string) =>
+    page.locator(selector).first().evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
+  expect(await size(".sectionTitle")).toBeGreaterThan(await size("h3.exampleTitle"));
 });
 
 test("the palette filters and jumps", async ({ page }) => {
@@ -411,6 +506,18 @@ test("the shell is accessible - header, sidebar, scenarios page", async ({ page 
   /* The screens themselves are the demo's, checked with its pages
      (accessibility.spec.ts, "scenarios"); here the frame around them. */
   const result = await new AxeBuilder({ page }).exclude(".scenarioStage").withTags(STANDARDS).analyze();
+  expect(result.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target).join(" ")}`)).toEqual([]);
+});
+
+test("on this page is accessible, as a column and as an open disclosure", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const axe = () => new AxeBuilder({ page }).exclude(".scenarioStage").withTags(STANDARDS).analyze();
+  let result = await axe();
+  expect(result.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target).join(" ")}`)).toEqual([]);
+  await page.setViewportSize({ width: 1000, height: 900 });
+  await page.locator("summary", { hasText: "On this page" }).click();
+  await expect(onThisPage(page)).toBeVisible();
+  result = await axe();
   expect(result.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target).join(" ")}`)).toEqual([]);
 });
 

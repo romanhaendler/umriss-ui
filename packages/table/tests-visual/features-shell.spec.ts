@@ -21,4 +21,5 @@ checkShell({
      rightly keep it, and the test would be checking something else. */
   pointer: { wide: "ta", narrow: "tab" },
   moved: { from: "table", pageId: "first-table", example: "first-table" },
+  contents: { pageId: "toolbar", id: "place-it-outside", title: "Place it outside the table" },
 });

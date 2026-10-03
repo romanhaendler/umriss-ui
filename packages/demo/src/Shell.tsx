@@ -175,11 +175,10 @@ export function Shell({ demo, brand, version, sentence }: ShellProps) {
   useEffect(() => {
     const target = place.example;
     /* An example, a scenario - or another anchor of the page, such as a
-       props table's `#type-<Name>`. */
-    const el =
-      target === undefined
-        ? null
-        : (document.querySelector(`[data-example="${target}"], [data-scenario="${target}"]`) ?? document.getElementById(target));
+       section's heading or a props table's `#type-<Name>`. */
+    const example =
+      target === undefined ? null : document.querySelector(`[data-example="${target}"], [data-scenario="${target}"]`);
+    const el = example ?? (target === undefined ? null : document.getElementById(target));
     if (el === null) {
       /* A page change with no named target starts at the top. Otherwise one
          would stay at the height one was at on the previous page. scrollTop
@@ -191,6 +190,9 @@ export function Shell({ demo, brand, version, sentence }: ShellProps) {
     /* scroll-margin-top keeps the sticky header away from the example;
        without it the jump lands a little too high. */
     el.scrollIntoView({ block: "start", behavior: "auto" });
+    /* An anchor that names no example is a plain scroll: the reader asked for
+       a heading, not for a place to be shown. */
+    if (example === null) return;
     /* Attribute off, force layout, attribute on again: otherwise the mark does
        not run a second time on a second jump to the same example. */
     el.removeAttribute("data-highlight");

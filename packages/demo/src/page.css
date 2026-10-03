@@ -16,6 +16,8 @@
 /* ---------------- Page head ---------------- */
 
 .page {
+  /* The column of "On this page" and the page's end stand against it. */
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: var(--u-space-8);
@@ -126,13 +128,22 @@
   border-bottom: 1px solid var(--u-edge-color);
 }
 
+/* A heading and not a label: one step above the examples' titles, so the
+   page's structure shows while scrolling. Set as a label it was the smallest
+   type on the page, and the eye skimmed past it. */
 .sectionTitle {
   margin: 0;
-  font-size: var(--u-text-xs);
+  /* Its anchor is an address; the sticky header must not cover it. */
+  scroll-margin-top: 76px;
+  font-size: var(--u-text-lg);
+  /* The quarter pixel is deliberate. The head of Examples stood 28.25 px
+     high, and every example below it was photographed on that quarter-pixel
+     phase; a whole-pixel head would shift all of them by a fraction and
+     re-raster every picture of an example without changing one. */
+  line-height: 24.25px;
   font-weight: var(--u-weight-semibold);
-  letter-spacing: var(--u-tracking-caps);
-  text-transform: uppercase;
-  color: var(--u-color-text-secondary);
+  letter-spacing: var(--u-tracking-tight);
+  color: var(--u-color-text);
 }
 
 .codeToggle {
@@ -147,6 +158,135 @@
 .codeToggle input {
   accent-color: var(--u-color-accent);
   margin: 0;
+}
+
+/* ---------------- On this page ---------------- */
+
+/* Narrower than 1300 px a closed disclosure under the page head: it costs
+   one line until it is opened. */
+.contentsDisclosure {
+  border-radius: var(--u-radius-md);
+  background: var(--u-color-surface);
+  box-shadow: var(--u-edge);
+}
+
+.contentsDisclosure > summary {
+  padding: var(--u-space-2) var(--u-space-4);
+  border-radius: var(--u-radius-md);
+  font-size: var(--u-text-sm);
+  /* Whole pixels: at 1.5 the closed disclosure stood 35.5 px high, and
+     everything below it landed on half pixels - a picture of an example
+     grew by a row without having changed. */
+  line-height: 20px;
+  font-weight: var(--u-weight-medium);
+  color: var(--u-color-text);
+  cursor: pointer;
+}
+
+.contentsDisclosure > summary:focus-visible {
+  outline: none;
+  box-shadow: var(--u-focus-ring);
+}
+
+.contentsDisclosure > nav {
+  padding: 0 var(--u-space-4) var(--u-space-3);
+}
+
+.contentsColumn {
+  display: none;
+}
+
+.contentsLabel {
+  margin: 0 0 var(--u-space-2);
+  padding: 0 var(--u-space-3);
+  font-size: var(--u-text-xs);
+  font-weight: var(--u-weight-semibold);
+  letter-spacing: var(--u-tracking-caps);
+  text-transform: uppercase;
+  color: var(--u-color-text-secondary);
+}
+
+.contentsList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* The sidebar's track and its mark: the line the entries hang from, thickened
+   in the accent where the reader is. */
+.contentsList a {
+  display: block;
+  padding: 3px var(--u-space-3);
+  border-left: 2px solid var(--u-hairline);
+  border-radius: 0;
+  font-size: var(--u-text-sm);
+  color: var(--u-color-text-secondary);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  transition: color var(--u-transition), border-color var(--u-transition);
+}
+
+.contentsList a[data-sub] {
+  padding-left: calc(var(--u-space-3) + var(--u-space-4));
+}
+
+.contentsList a:hover {
+  color: var(--u-color-text);
+  border-left-color: var(--u-edge-color-strong);
+}
+
+.contentsList a[aria-current] {
+  color: var(--u-color-text);
+  font-weight: var(--u-weight-medium);
+  border-left-color: var(--u-color-accent);
+}
+
+.contentsList a:focus-visible {
+  outline: none;
+  box-shadow: var(--u-focus-ring);
+}
+
+.contentsList code {
+  font-family: var(--u-font-mono);
+  font-size: 0.92em;
+}
+
+/* Where the page ends - what the mark watches to mark the last entry. Out of
+   the flow, so it adds no gap. */
+.pageEnd {
+  position: absolute;
+  bottom: 0;
+}
+
+/* From 1300 px the list stands in a column of its own on the right, sticky
+   under the header and scrolling on its own when it is taller than the
+   window. The column lies over the page's right margin and runs its full
+   height; the list sticks inside it.
+
+   1300 and not 1200: the pictures are taken at 1280, where the content
+   column has nothing to spare - a column there would narrow every example
+   and move every picture of one. */
+@media (min-width: 1300px) {
+  .page {
+    padding-right: calc(15rem + var(--u-space-8));
+  }
+  .contentsDisclosure {
+    display: none;
+  }
+  .contentsColumn {
+    display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 15rem;
+  }
+  .contentsSticky {
+    position: sticky;
+    top: calc(56px + var(--u-space-8));
+    max-height: calc(100vh - 56px - 2 * var(--u-space-8));
+    overflow-y: auto;
+  }
 }
 
 /* ---------------- Ein Beispiel ---------------- */
