@@ -50,7 +50,7 @@ Results:
 
 - `pnpm lint`, `pnpm typecheck` and `pnpm test:unit` are green. One table smoke test timed out under load and passed on rerun.
 - Under the lock, `features-shell` and `features-page` in ui-light and table-light: 105 passed. The one failure, the Button configurator's background check, was a flake and passed 3 of 3 on rerun.
-- After the last rebase (onto `eccf0862`, which brings the site-wide search and the narrow Menu drawer), `features-shell` in ui-light and table-light: 111 passed, 9 skipped. The palette-placeholder assertion follows main's new wording.
+- After the last rebase (onto `3b2c9109`, which brings the site-wide search, the narrow Menu drawer and a fourth header link), `features-shell` in ui-light and table-light: 114 passed, 9 skipped. The palette-placeholder assertion follows main's new wording. Core's header pictures (palettes, toasts, drawers, scenarios), light and dark: all pass after `toast-top-center` was renewed once more for the fourth link.
 
 **Baselines moved.** Three of core's pictures show the header and moved. I looked at the new images.
 
