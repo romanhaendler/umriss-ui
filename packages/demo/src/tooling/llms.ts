@@ -30,9 +30,9 @@ import { displaySource } from "./source.ts";
 import type { TypeEntry } from "./propsReader.ts";
 import { installCommand, type InstallManifest } from "./install.ts";
 import { PACKAGES } from "../packages.ts";
-import { apiHtml, markdownCell as cell, markdownCode as code, tableMarkdown, tableModel } from "./apiTable.ts";
+import { apiHtml, apiMarkdown, apiSection, fencedCode as fenced, markdownCell as cell, markdownCode as code } from "./apiTable.ts";
 import { referenceHtml, referenceMarkdown, type ReferenceTable } from "./referenceTable.ts";
-import { adrLinks } from "./props.ts";
+import { adrLinks, compilerOptionsOf } from "./props.ts";
 import { linkAdrs, linkReferences, outlineTexts } from "./references.ts";
 
 export interface LlmsJob {
@@ -73,17 +73,6 @@ interface ScenarioText {
   /** Page ids of this demo, or `{ name, page }` of a neighbour. */
   builtFrom: readonly (string | { name: string; page: string })[];
   source: string;
-}
-
-/* ------------------------------------------------------------------ */
-/* Markdown pieces                                                     */
-/* ------------------------------------------------------------------ */
-
-/** A fence longer than any run of backticks inside - a source may hold one. */
-function fenced(language: string, text: string): string {
-  const longest = Math.max(2, ...(text.match(/`+/g) ?? []).map((run) => run.length));
-  const fence = "`".repeat(longest + 1);
-  return `${fence}${language}\n${text.replace(/\n+$/, "")}\n${fence}`;
 }
 
 /* ------------------------------------------------------------------ */
@@ -202,15 +191,10 @@ export interface ExportedDeclaration {
     the same text the npm package's `dist/index.d.ts` carries. */
 export function exportedDeclarations(packageDir: string): ExportedDeclaration[] {
   const entry = join(packageDir, "src", "index.ts");
-  const configPath = join(packageDir, "tsconfig.json");
-  /* The package's own options where it has them - the paths to its
-     neighbours' source above all, so that a type from core reads as it is
-     written and not as `any` from a dist that was never built. */
-  const parsed = existsSync(configPath)
-    ? ts.getParsedCommandLineOfConfigFile(configPath, {}, { ...ts.sys, onUnRecoverableConfigFileDiagnostic: () => {} })
-    : undefined;
+  /* The package's own options where it has them (`compilerOptionsOf`). */
+  const own = compilerOptionsOf(packageDir);
   const options: ts.CompilerOptions = {
-    ...(parsed?.options ?? { jsx: ts.JsxEmit.ReactJSX, module: ts.ModuleKind.ESNext, moduleResolution: ts.ModuleResolutionKind.Bundler, target: ts.ScriptTarget.ES2022, strict: true, skipLibCheck: true }),
+    ...(Object.keys(own).length > 0 ? own : { jsx: ts.JsxEmit.ReactJSX, module: ts.ModuleKind.ESNext, moduleResolution: ts.ModuleResolutionKind.Bundler, target: ts.ScriptTarget.ES2022, strict: true, skipLibCheck: true }),
     noEmit: false,
     declaration: true,
     emitDeclarationOnly: true,
@@ -264,7 +248,7 @@ function declares(statement: ts.Statement, name: string): boolean {
 }
 
 /** The names a text never mentions as code - the completeness guard's
-    question, and the appendix's.
+    question.
 
     Only code counts: fenced blocks and inline spans, where a page's import
     line, its tables, its examples and its texts' backticks stand. An export
@@ -356,14 +340,18 @@ function markdownToHtml(markdown: string, homepage: string, lift: number, anchor
     that the page's name is the `#`; `header` under that name; every `#/page`
     link absolute, so that the text still leads somewhere once it is copied
     out. Lifted token by token rather than line by line - an example's source
-    may well hold a line that begins with `#`. */
-function markdownTwin(markdown: string, homepage: string, lift: number, header: string): string {
+    may well hold a line that begins with `#`. A type's `#type-<Name>` on the
+    page itself leads to that anchor of the page's HTML (`place`), where it
+    stands as an id. */
+function markdownTwin(markdown: string, homepage: string, lift: number, header: string, place = ""): string {
   const body = new Marked()
     .lexer(markdown.trim())
     .map((token) => {
       if (token.type === "heading") return token.raw.replace(/^#+/, "#".repeat(Math.max(1, token.depth - lift)));
       if (token.type === "code") return token.raw;
-      return token.raw.replace(/\]\((#\/[^)\s]*)\)/g, (_, href: string) => `](${urlOf(homepage, href)})`);
+      return token.raw
+        .replace(/\]\((#\/[^)\s]*)\)/g, (_, href: string) => `](${urlOf(homepage, href)})`)
+        .replace(/\]\(#(type-[^)\s]*)\)/g, (_, anchor: string) => `](${urlOf(homepage, `${place}/${anchor}`)})`);
     })
     .join("");
   const [name, ...rest] = body.trim().split("\n");
@@ -460,6 +448,8 @@ export function renderLlms({ packageDir, outline: written, tables, moved = {}, r
     }
     cuts.push({ from, to: parts.length });
   }
+  /* The types some page's "Types on this page" defines. */
+  const defined = new Set<string>();
   for (const rubric of outline) {
     parts.push("", `## ${rubric.name}`, "", rubric.sentence);
     for (const page of rubric.pages) {
@@ -496,14 +486,11 @@ export function renderLlms({ packageDir, outline: written, tables, moved = {}, r
 
       if (page.types.length > 0) {
         parts.push("", "#### API");
-        const models = page.types.map((type) => {
-          const entry = tables[type];
-          if (entry === undefined) throw new Error(`\`${type}\` has no generated table - did \`pnpm props\` run?`);
-          return tableModel(entry);
-        });
+        const section = apiSection(page, pages, tables);
+        for (const definition of section.definitions) defined.add(definition.name);
         const at = parts.length;
-        for (const model of models) parts.push("", tableMarkdown(model));
-        spliced.push({ from: at, to: parts.length, html: apiHtml(models) });
+        for (const block of apiMarkdown(section)) parts.push("", block);
+        spliced.push({ from: at, to: parts.length, html: apiHtml(section) });
       }
 
       if (page.limits !== undefined) {
@@ -513,16 +500,18 @@ export function renderLlms({ packageDir, outline: written, tables, moved = {}, r
     }
   }
 
-  /* What no page names. After the pages, so that a page's mention counts
-     first. */
-  const pagesText = parts.join("\n");
-  const rest = exportedDeclarations(packageDir).filter((one) => missingFrom(pagesText, [one.name]).length > 0);
+  /* What no table and no definition above explains - until the API index
+     takes its place (.scratch/api-index). A component counts as explained by
+     its `<Name>Props` table; a name merely used in an example does not. */
+  const tabled = new Set(pages.flatMap((page) => page.types));
+  const explained = (name: string) => tabled.has(name) || tabled.has(`${name}Props`) || defined.has(name);
+  const rest = exportedDeclarations(packageDir).filter((one) => !explained(one.name));
   if (rest.length > 0) {
     parts.push(
       "",
       "## The rest of the API",
       "",
-      "Exported as well, and named on no page above: the pure modules behind the components, and the types they are made of. Each with its declaration as the package's `.d.ts` carries it.",
+      "Exported as well, and explained by no table or definition above: the hooks and pure modules beside the components, and the types they are made of. Each with its declaration as the package's `.d.ts` carries it.",
     );
     for (const one of rest) {
       parts.push("", `### ${code(one.name)}`, "", fenced("ts", one.text === "" ? `// ${one.name}: no declaration found` : one.text));
@@ -589,7 +578,7 @@ export function renderLlms({ packageDir, outline: written, tables, moved = {}, r
       if (page === undefined) return [];
       /* The twin is the cut as it stands in the full text, without the list
          of every page: that is for a crawler, and an agent has `llms.txt`. */
-      twins.push({ path: twinOfPlace(`/${page.id}`).slice(1), text: markdownTwin(parts.slice(from, to).join("\n"), home, 2, header(pageUrl(manifest, page))) });
+      twins.push({ path: twinOfPlace(`/${page.id}`).slice(1), text: markdownTwin(parts.slice(from, to).join("\n"), home, 2, header(pageUrl(manifest, page)), `/${page.id}`) });
       /* "Demo page: <this page>" is for the agent reading the full text; on
          the page itself it would point at itself. A reference table's heading
          carries the id the app gives it. */

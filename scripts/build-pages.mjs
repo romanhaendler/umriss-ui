@@ -46,7 +46,7 @@ import { fileURLToPath } from "node:url";
    imports nothing (and why `build:pages` strips types). */
 import { PACKAGES as LIST } from "../packages/demo/src/packages.ts";
 import { installCommand } from "../packages/demo/src/tooling/install.ts";
-import { forwarderHtml, frontFaults, siteFaults, twinFaults } from "../packages/demo/src/tooling/site.ts";
+import { forwarderHtml, frontFaults, siteFaults, twinFaults, typeLinkFaults } from "../packages/demo/src/tooling/site.ts";
 import { siteLeaks } from "../packages/demo/src/tooling/references.ts";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -303,14 +303,21 @@ const faults = [
   ...frontFaults(files.get(HOME) ?? "", HOME, urls, PROMISE).map((fault) => `${HOME}: ${fault}`),
   ...urls.filter((url) => files.has(url) && !linksFavicon(files.get(url), url)).map((url) => `${url}: no favicon`),
   /* No props row says a prop accepts nothing: a `never` is a prohibition the
-     reader merges away (types-without-holes), never a type to show. */
-  ...PACKAGES.flatMap((dir) =>
-    Object.values(JSON.parse(readFileSync(join(ROOT, "packages", dir, "demo", ".generated", "props.json"), "utf8"))).flatMap((entry) =>
-      entry.props
+     reader merges away (types-without-holes), never a type to show. Every type
+     of the library a cell or a definition names has a table or a definition,
+     and every link to one finds its id. */
+  ...PACKAGES.flatMap((dir) => {
+    const types = JSON.parse(readFileSync(join(ROOT, "packages", dir, "demo", ".generated", "props.json"), "utf8"));
+    return Object.values(types).flatMap((entry) => [
+      ...entry.props
         .filter((prop) => prop.type === "never" || prop.type.startsWith("never |"))
         .map((prop) => `${dir}: ${entry.name}.${prop.name} is typed \`${prop.type}\``),
-    ),
-  ),
+      ...[...entry.props.flatMap((prop) => prop.references ?? []), ...(entry.definition?.references ?? [])]
+        .filter((name) => types[name] === undefined)
+        .map((name) => `${dir}: ${entry.name} names \`${name}\`, which has neither a table nor a definition`),
+    ]);
+  }),
+  ...typeLinkFaults(files),
   ...leaks,
 ];
 if (faults.length > 0) throw new Error(`The built site fails its guard:\n${faults.join("\n")}`);

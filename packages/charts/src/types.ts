@@ -363,7 +363,8 @@ export interface LegendConfig {
   placement: "top" | "bottom";
 }
 
-/** One hit per series in the tooltip (R-4.4). */
+/** One hit per series in the tooltip.
+    @remarks R-4.4 */
 export interface TooltipPoint<T = unknown> {
   seriesName: string;
   color: string;
@@ -420,7 +421,8 @@ export interface HoverState {
   mouseY: number;
 }
 
-/** Measurements of the instrumentation for the benchmark page (R-5.1). */
+/** Measurements of the instrumentation for the benchmark page.
+    @remarks R-5.1 */
 export interface ChartPerf {
   materializeMs: number;
   seriesDrawMs: number;

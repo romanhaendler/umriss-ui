@@ -26,6 +26,11 @@ moves from here under the rule above.
 - **A prop's default stands in a `@default` tag** where its comment used to say
   it in words: the editor shows it on hover, and the props table in its Default
   column. Nothing else changes.
+- **`docs/llms-full.md` defines every type a props table names**: a type
+  without a table of its own (`Intent`, the charts' `WorkingCalendar`) stands
+  under "Types on this page" of each page that names it, with its comment and
+  its members or its declaration. "The rest of the API" holds every export that
+  neither a table nor such a definition explains, `applyIntent` among them.
 
 ### Fixed
 

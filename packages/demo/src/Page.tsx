@@ -20,8 +20,7 @@ import { Prose } from "./Prose";
 import type { Demo } from "./demo";
 import { hrefOf } from "./href";
 import { examplesOf } from "./tooling/examples";
-import { tablesOf } from "./tooling/tables";
-import { apiHtml, tableModel } from "./tooling/apiTable";
+import { apiHtml, apiSection, DEFINITIONS_ID, DEFINITIONS_TITLE } from "./tooling/apiTable";
 import { referenceHtml } from "./tooling/referenceTable";
 import { ADR_0032, SCENARIOS } from "./outline";
 import type { Rubric, Page as PageData } from "./outline";
@@ -123,7 +122,8 @@ export function Page({ demo, page }: PageProps) {
   const examples = examplesOf(demo.examples, page.id);
   const first = configurator === undefined ? examples[0] : undefined;
   const rest = configurator === undefined ? examples.slice(1) : examples;
-  const tables = tablesOf(demo.tables, page.types).map((entry) => tableModel(entry));
+  const api = apiSection(page, demo.addresses.ALL_PAGES, demo.tables);
+  const { tables } = api;
   const known = new Set(demo.addresses.ALL_PAGES.map((one) => one.id));
   const nameOf = (id: string) => demo.addresses.ALL_PAGES.find((one) => one.id === id)?.name ?? id;
 
@@ -149,6 +149,7 @@ export function Page({ demo, page }: PageProps) {
       : [
           section(`api-${page.id}`, "API"),
           ...tables.map((one) => ({ ...section(one.anchor, one.name), sub: true as const, code: true as const })),
+          ...(api.definitions.length === 0 ? [] : [{ ...section(DEFINITIONS_ID, DEFINITIONS_TITLE), sub: true as const }]),
         ]),
     ...(page.limits === undefined ? [] : [section(`limits-${page.id}`, "Known limits")]),
   ]);
@@ -254,11 +255,12 @@ export function Page({ demo, page }: PageProps) {
       {tables.length > 0 && (
         <Section id={`api-${page.id}`} title="API">
           {/* Written, not drawn: the same HTML the prerendered page carries,
-              from the one table model (`tooling/apiTable.ts`). Its links are
-              ordinary addresses, which the shell takes like any other. */}
+              from the one table model (`tooling/apiTable.ts`), "Types on this
+              page" included. Its links are ordinary addresses, which the shell
+              takes like any other. */}
           <div
             className="apiTables"
-            dangerouslySetInnerHTML={{ __html: apiHtml(tables) }}
+            dangerouslySetInnerHTML={{ __html: apiHtml(api) }}
           />
         </Section>
       )}

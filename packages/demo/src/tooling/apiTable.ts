@@ -27,7 +27,7 @@ export type Span =
 
 export interface ApiRow {
   name: string;
-  /** The type cell. One piece today; a later step links the library's types in it. */
+  /** The type cell, the library's types in it as links. */
   type: readonly Span[];
   /** The values of a literal-union alias, on the line beneath its name:
       `"sm" | "md"` under `ButtonSize`. */
@@ -63,6 +63,27 @@ export interface ApiTableModel {
   closing: readonly (readonly Span[])[];
 }
 
+/** A type without a table, as "Types on this page" defines it: its heading
+    and members as a table's, or its declaration in place of the members. */
+export interface ApiDefinitionModel extends ApiTableModel {
+  /** The package it comes from, where that is another one. */
+  from?: string;
+  /** The type's own JSDoc. */
+  description: readonly Span[];
+  /** The declaration as code, the library's types in it as links. */
+  declaration?: readonly Span[];
+}
+
+/** A page's API section: its tables, in the order of its outline, and the
+    types they name that have no table on any page. */
+export interface ApiSection {
+  tables: readonly ApiTableModel[];
+  definitions: readonly ApiDefinitionModel[];
+}
+
+/** Where a type's name leads; `undefined` leaves it text. */
+export type LinkOf = (name: string) => string | undefined;
+
 /** The marks a text may carry: `code` in backticks, a [link](#/page) and
     **bold**. Everything else is plain text. */
 const MARK = /`([^`]+)`|\[([^\]]+)\]\(([^)\s]+)\)|\*\*([^*]+)\*\*/g;
@@ -94,10 +115,32 @@ function listed(names: readonly string[]): Span[] {
   ]);
 }
 
-function row(prop: PropEntry): ApiRow {
+/** A string literal, or a name. */
+const TOKEN = /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`|[A-Za-z_$][\w$]*/g;
+
+/** Code as pieces: each name of `references` that leads somewhere a link,
+    the rest text - a name inside a string literal stays text. */
+function linked(value: string, references: readonly string[], linkOf: LinkOf): Span[] {
+  const out: Span[] = [];
+  let at = 0;
+  const flush = (to: number) => {
+    if (to > at) out.push(text(value.slice(at, to)));
+  };
+  for (const match of value.matchAll(TOKEN)) {
+    const href = references.includes(match[0]) ? linkOf(match[0]) : undefined;
+    if (href === undefined) continue;
+    flush(match.index);
+    out.push({ kind: "link", text: match[0], href });
+    at = match.index + match[0].length;
+  }
+  flush(value.length);
+  return out;
+}
+
+function row(prop: PropEntry, linkOf: LinkOf): ApiRow {
   return {
     name: prop.name,
-    type: [text(prop.type)],
+    type: linked(prop.type, prop.references ?? [], linkOf),
     ...(prop.expansion === undefined ? {} : { expansion: prop.expansion }),
     ...(prop.defaultValue === undefined
       ? {}
@@ -159,8 +202,9 @@ function arranged(props: readonly PropEntry[]): PropEntry[] {
 }
 
 /** One entry as a table: the main group, then Events, Accessibility and
-    Styling - each only where a row falls into it. */
-export function tableModel(entry: TypeEntry): ApiTableModel {
+    Styling - each only where a row falls into it. `linkOf` says where a type
+    a cell names leads. */
+export function tableModel(entry: TypeEntry, linkOf: LinkOf = () => undefined): ApiTableModel {
   const names = new Set(entry.props.map((prop) => prop.name));
   const alsoTakes = entry.alsoTakes ?? [];
   const closing: Span[][] = [];
@@ -184,11 +228,55 @@ export function tableModel(entry: TypeEntry): ApiTableModel {
     heading: entry.parameter.length === 0 ? entry.name : `${entry.name}<${entry.parameter.join(", ")}>`,
     anchor: `type-${entry.name}`,
     groups: GROUPS.flatMap((group) => {
-      const rows = arranged(entry.props.filter((prop) => groupOf(prop.name, names) === group.label)).map(row);
+      const rows = arranged(entry.props.filter((prop) => groupOf(prop.name, names) === group.label)).map((prop) => row(prop, linkOf));
       return rows.length === 0 ? [] : [{ ...group, rows }];
     }),
     closing,
   };
+}
+
+/** A page with the tables it shows - what the outline says of it. */
+export interface ApiPage {
+  id: string;
+  types: readonly string[];
+}
+
+/** A page's API section. A type a cell names leads to its table - on this
+    page as an anchor, else on the page that has it - and otherwise to its
+    definition on this page, which is then defined here: every type the
+    tables name, and every type those definitions name, in the order they are
+    first named. A type that has neither stops the generator: a cell would
+    name what nobody explains. */
+export function apiSection(page: ApiPage, pages: readonly ApiPage[], entries: Readonly<Record<string, TypeEntry>>): ApiSection {
+  const entryOf = (name: string): TypeEntry => {
+    const entry = entries[name];
+    if (entry === undefined) throw new Error(`\`${name}\` has no generated table - did \`pnpm props\` run?`);
+    return entry;
+  };
+  const defined: string[] = [];
+  const linkOf = (name: string): string => {
+    const home = pages.find((one) => one.types.includes(name));
+    if (home !== undefined) return home.id === page.id ? `#type-${name}` : `#/${home.id}/type-${name}`;
+    if (entries[name]?.definition === undefined) {
+      throw new Error(`\`${name}\` is named on the page \`${page.id}\` and has neither a table nor a definition.`);
+    }
+    if (!defined.includes(name)) defined.push(name);
+    return `#type-${name}`;
+  };
+  const tables = page.types.map((name) => tableModel(entryOf(name), linkOf));
+  const definitions: ApiDefinitionModel[] = [];
+  /* `linkOf` adds to `defined` while it is walked. */
+  for (let i = 0; i < defined.length; i++) {
+    const entry = entryOf(defined[i]!);
+    const definition = entry.definition!;
+    definitions.push({
+      ...tableModel(entry, linkOf),
+      ...(definition.from === undefined ? {} : { from: definition.from }),
+      description: spansOf(definition.description),
+      ...(definition.declaration === undefined ? {} : { declaration: linked(definition.declaration, definition.references ?? [], linkOf) }),
+    });
+  }
+  return { tables, definitions };
 }
 
 /* ------------------------------------------------------------------ */
@@ -240,20 +328,38 @@ function groupHtml(name: string, group: ApiGroup): string {
 }
 
 /** One table as HTML - no whitespace between the elements, as React writes it. */
-export function tableHtml(model: ApiTableModel): string {
+export function tableHtml(model: ApiTableModel | ApiDefinitionModel, level = 3): string {
+  const definition = "description" in model ? model : undefined;
   return (
     `<div class="apiBlock" data-type="${escape(model.name)}">` +
-    `<h3 class="apiTitle" id="${escape(model.anchor)}"><code>${escape(model.heading)}</code></h3>` +
-    (model.groups.length === 0 ? '<p class="apiInherited">Declares no props of its own.</p>' : model.groups.map((group) => groupHtml(model.name, group)).join("")) +
+    `<h${level} class="apiTitle" id="${escape(model.anchor)}"><code>${escape(model.heading)}</code></h${level}>` +
+    (definition?.from === undefined ? "" : `<p class="apiInherited">From <code>${escape(definition.from)}</code>.</p>`) +
+    (definition === undefined || definition.description.length === 0 ? "" : `<p class="apiProse">${spansHtml(definition.description)}</p>`) +
+    (definition?.declaration !== undefined
+      ? `<pre class="apiDeclaration"><code>${spansHtml(definition.declaration)}</code></pre>`
+      : model.groups.length === 0
+        ? '<p class="apiInherited">Declares no props of its own.</p>'
+        : model.groups.map((group) => groupHtml(model.name, group)).join("")) +
     model.closing.map((sentence) => `<p class="apiInherited">${spansHtml(sentence)}</p>`).join("") +
     "</div>"
   );
 }
 
-/** A page's API section: its tables, in the order of its outline. The app
-    mounts this string; the prerendered page carries it. */
-export function apiHtml(models: readonly ApiTableModel[]): string {
-  return models.map(tableHtml).join("");
+/** The heading of the block that defines the types without a table. */
+export const DEFINITIONS_TITLE = "Types on this page";
+
+/** Its id - one block a page, so one id serves every page. */
+export const DEFINITIONS_ID = "types-on-this-page";
+
+/** A page's API section: its tables, in the order of its outline, then the
+    definitions. The app mounts this string; the prerendered page carries it. */
+export function apiHtml({ tables, definitions }: ApiSection): string {
+  return (
+    tables.map((model) => tableHtml(model)).join("") +
+    (definitions.length === 0
+      ? ""
+      : `<div class="apiBlock apiDefinitions"><h3 class="apiTitle" id="${DEFINITIONS_ID}">${DEFINITIONS_TITLE}</h3>${definitions.map((model) => tableHtml(model, 4)).join("")}</div>`)
+  );
 }
 
 /* ------------------------------------------------------------------ */
@@ -263,7 +369,9 @@ export function apiHtml(models: readonly ApiTableModel[]): string {
 /** Inline code that survives backticks in the text (a template literal type,
     a template literal's body): a fence longer than the longest run inside. */
 export function markdownCode(value: string): string {
-  if (!value.includes("`")) return `\`${value}\``;
+  /* A span that begins and ends with a space loses one each side (GFM): ` | `
+     between two linked names would read `|`. */
+  if (!value.includes("`")) return /^ .*[^ ].* $/.test(value) ? `\` ${value} \`` : `\`${value}\``;
   const fence = "`".repeat(Math.max(...(value.match(/`+/g) ?? []).map((run) => run.length)) + 1);
   return `${fence} ${value} ${fence}`;
 }
@@ -287,9 +395,14 @@ export function spansMarkdown(spans: readonly Span[]): string {
 }
 
 /** One table as Markdown, at the llms text's heading level for a table. */
-export function tableMarkdown(model: ApiTableModel): string {
-  const lines = [`##### ${markdownCode(model.heading)}`, ""];
-  if (model.groups.length === 0) lines.push("Declares no props of its own.");
+export function tableMarkdown(model: ApiTableModel | ApiDefinitionModel, level = 5): string {
+  const definition = "description" in model ? model : undefined;
+  const lines = [`${"#".repeat(level)} ${markdownCode(model.heading)}`, ""];
+  if (definition?.from !== undefined) lines.push(`From ${markdownCode(definition.from)}.`, "");
+  if (definition !== undefined && definition.description.length > 0) lines.push(spansMarkdown(definition.description), "");
+  /* A fence holds no link; the names it uses are defined beside it. */
+  if (definition?.declaration !== undefined) lines.push(fencedCode("ts", definition.declaration.map((span) => span.text).join("")));
+  else if (model.groups.length === 0) lines.push("Declares no props of its own.");
   model.groups.forEach((group, i) => {
     if (i > 0) lines.push("");
     if (group.title !== undefined) lines.push(`###### ${group.title}`, "");
@@ -301,10 +414,32 @@ export function tableMarkdown(model: ApiTableModel): string {
       /* A cell holds one line; `<br>` is how a table cell breaks in GFM. */
       const expansion = one.expansion === undefined ? "" : `<br>${markdownCode(one.expansion)}`;
       lines.push(
-        `| ${name} | ${markdownCell(markdownCode(spansMarkdown(one.type)) + expansion)} | ${one.defaultValue === undefined ? "—" : markdownCell(spansMarkdown(one.defaultValue))} | ${markdownCell(deprecated + spansMarkdown(one.description) + origin)} |`,
+        `| ${name} | ${markdownCell(typeMarkdown(one.type) + expansion)} | ${one.defaultValue === undefined ? "—" : markdownCell(spansMarkdown(one.defaultValue))} | ${markdownCell(deprecated + spansMarkdown(one.description) + origin)} |`,
       );
     }
   });
   for (const sentence of model.closing) lines.push("", spansMarkdown(sentence));
   return lines.join("\n");
+}
+
+/** A type cell as code, a linked name as a link around its own code:
+    [`Accessor`](#type-Accessor)`<T>`. */
+function typeMarkdown(spans: readonly Span[]): string {
+  return spans.map((span) => (span.kind === "link" ? `[${markdownCode(span.text)}](${span.href})` : markdownCode(span.text))).join("");
+}
+
+/** A fence longer than any run of backticks inside - a source may hold one. */
+export function fencedCode(language: string, value: string): string {
+  const longest = Math.max(2, ...(value.match(/`+/g) ?? []).map((run) => run.length));
+  const fence = "`".repeat(longest + 1);
+  return `${fence}${language}\n${value.replace(/\n+$/, "")}\n${fence}`;
+}
+
+/** A page's API section as Markdown: the tables, then the definitions, at
+    the llms text's heading levels - each part a block of its own. */
+export function apiMarkdown({ tables, definitions }: ApiSection): string[] {
+  return [
+    ...tables.map((model) => tableMarkdown(model)),
+    ...(definitions.length === 0 ? [] : [`##### ${DEFINITIONS_TITLE}`, ...definitions.map((model) => tableMarkdown(model, 6))]),
+  ];
 }

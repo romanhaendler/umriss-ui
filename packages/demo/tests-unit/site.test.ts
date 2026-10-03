@@ -3,7 +3,7 @@
    seam 1). */
 
 import { describe, expect, it } from "vitest";
-import { forwarderHtml, frontFaults, siteFaults, twinFaults } from "../src/tooling/site";
+import { forwarderHtml, frontFaults, siteFaults, twinFaults, typeLinkFaults } from "../src/tooling/site";
 
 const HOME = "https://example.test/umriss-ui/charts/";
 const page = (url: string) =>
@@ -154,5 +154,26 @@ describe("the guard over the front page (.scratch/site-front-page)", () => {
   it("fails without the promise, the install command or the theme script", () => {
     const bare = front().replace(PROMISE, "").replace("npm install @umriss-ui/core", "").replace("umriss-ui:theme", "");
     expect(frontFaults(bare, ROOT, sitemap, PROMISE)).toEqual(["no promise", "no install command", "no theme script"]);
+  });
+});
+
+describe("the type links' guard (.scratch/types-without-holes)", () => {
+  const search = `${HOME}search/`;
+  const view = `${HOME}view/`;
+  const linked = new Map([
+    [search, '<a href="#type-TableRef">TableRef</a><h4 id="type-TableRef"></h4><a href="../view/#type-TableSnapshot">TableSnapshot</a>'],
+    [view, '<h3 id="type-TableSnapshot"></h3>'],
+  ]);
+
+  it("passes where every link to a type finds its id on its page", () => {
+    expect(typeLinkFaults(linked)).toEqual([]);
+  });
+
+  it("fails on a link to a type whose id is not on the page it names, or to no page", () => {
+    const astray = new Map([...linked, [view, "<h3></h3>"], [`${HOME}axis/`, '<a href="../gone/#type-Axis">Axis</a>']]);
+    expect(typeLinkFaults(astray)).toEqual([
+      `${search}: links #type-TableSnapshot on ${view}, which has no such id`,
+      `${HOME}axis/: links #type-Axis on ${HOME}gone/, which has no such id`,
+    ]);
   });
 });

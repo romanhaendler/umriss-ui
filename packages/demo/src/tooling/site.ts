@@ -115,6 +115,21 @@ export function frontFaults(html: string, home: string, urls: readonly string[],
   ];
 }
 
+/** What the API sections' type links get wrong, one line each
+    (.scratch/types-without-holes): every link to a `#type-<Name>` leads to a
+    page of the site that carries that id - a props table's heading or a
+    definition in "Types on this page". `files` as for `siteFaults`. */
+export function typeLinkFaults(files: ReadonlyMap<string, string>): string[] {
+  return [...files].flatMap(([url, html]) =>
+    [...html.matchAll(/href="([^"]*#type-[^"]*)"/g)].flatMap((match) => {
+      const target = new URL(match[1]!.replace(/&amp;/g, "&"), url);
+      const id = target.hash.slice(1);
+      target.hash = "";
+      return files.get(target.href)?.includes(`id="${id}"`) === true ? [] : [`${url}: links #${id} on ${target.href}, which has no such id`];
+    }),
+  );
+}
+
 /** A page of a demo as the twins' guard sees it: its address, its name and
     the address of its Markdown twin. */
 export interface TwinPage {

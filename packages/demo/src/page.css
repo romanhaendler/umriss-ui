@@ -714,6 +714,42 @@
   overflow-wrap: break-word;
 }
 
+/* A type a cell or a declaration names leads to its table or its definition:
+   underlined, so that it reads as a link in either theme. */
+.apiType a,
+.apiDeclaration a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* "Types on this page": the definitions, after the tables. */
+.apiProse {
+  margin: 0;
+  font-size: var(--u-text-sm);
+  color: var(--u-color-text-secondary);
+}
+
+.apiProse code {
+  font-family: var(--u-font-mono);
+  color: var(--u-color-text);
+}
+
+/* A declaration breaks its lines rather than scroll: a box that scrolls
+   needs a tab stop of its own. */
+.apiDeclaration {
+  margin: 0;
+  padding: var(--u-space-3);
+  border-radius: var(--u-radius-md);
+  box-shadow: var(--u-edge);
+  background: var(--u-color-surface);
+  font-family: var(--u-font-mono);
+  font-size: var(--u-text-xs);
+  color: var(--u-color-text);
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
 /* A phone: one block a prop - name and type, the default, the
    description beneath. As a table the description column lay outside the box
    and every row stood a hand high and empty. */
