@@ -65,6 +65,11 @@ export interface ApiTableModel {
   groups: readonly ApiGroup[];
   /** The sentences after the tables. */
   closing: readonly (readonly Span[])[];
+  /** A table cut from the full one, for "Props on this page": the page the
+      full table stands on, and the sentence naming it, which stands in place
+      of the heading. Its rows carry no anchor - their names link to the full
+      rows. */
+  cut?: { home: string; sentence: readonly Span[] };
 }
 
 /** A type without a table, as "Types on this page" defines it: its heading
@@ -303,8 +308,47 @@ export function apiSection(page: ApiPage, pages: readonly ApiPage[], entries: Re
   return { tables, definitions };
 }
 
+/** The heading of the section a page without a table of its own shows. */
+export const PROPS_ON_PAGE_TITLE = "Props on this page";
+
+/** "Props on this page" (.scratch/props-to-examples, 02): on a page whose
+    outline lists no types, the rows its examples use, a table cut from each
+    full table in the full table's order, the tables in the order of the
+    outline. Without a "Shown in" line - the page's examples are on screen. A
+    type a cell names leads to its table, else to its definition on the page
+    of the full table, which defines it. Empty on a page with a table of its
+    own. */
+export function propsOnPage(page: ApiPage, pages: readonly (ApiPage & { name: string })[], entries: Readonly<Record<string, TypeEntry>>): ApiTableModel[] {
+  if (page.types.length > 0) return [];
+  const homes = new Map<string, ApiPage & { name: string }>();
+  for (const one of pages) for (const name of one.types) if (!homes.has(name)) homes.set(name, one);
+  return [...homes].flatMap(([name, home]): ApiTableModel[] => {
+    const entry = entries[name];
+    const used = new Set((entry?.props ?? []).filter((prop) => prop.shownIn?.some((one) => one.page === page.id)).map((prop) => prop.name));
+    if (entry === undefined || used.size === 0) return [];
+    const full = tableModel(
+      { ...entry, props: entry.props.map((prop) => ({ ...prop, shownIn: undefined })) },
+      (type) => `#/${(homes.get(type) ?? home).id}/type-${type}`,
+    );
+    return [
+      {
+        ...full,
+        groups: full.groups.flatMap((group) => {
+          const rows = group.rows.filter((one) => used.has(one.name));
+          return rows.length === 0 ? [] : [{ ...group, rows }];
+        }),
+        closing: [],
+        cut: {
+          home: home.id,
+          sentence: [text("From "), code(name), text(" — the full table stands on "), { kind: "link", text: home.name, href: `#/${home.id}/type-${name}` }, text(".")],
+        },
+      },
+    ];
+  });
+}
+
 /* ------------------------------------------------------------------ */
-/* HTML                                                                */
+/* HTML                                                              */
 /* ------------------------------------------------------------------ */
 
 export const escape = (value: string) =>
@@ -394,13 +438,14 @@ export function spansHtml(spans: readonly Span[]): string {
    row an address names (`Shell.tsx`). */
 const FOLD_OVER = 15;
 
-function groupHtml(name: string, group: ApiGroup, fold: boolean): string {
+function groupHtml(name: string, group: ApiGroup, fold: boolean, home?: string): string {
   const rows = group.rows.map(
     (one) =>
-      /* `<Type>-<prop>`: a row is an address (.scratch/props-to-examples). */
-      `<tr id="${escape(`${name}-${one.name}`)}">` +
+      /* `<Type>-<prop>`: a row is an address (.scratch/props-to-examples) -
+         the full row alone; a cut one links to it. */
+      (home === undefined ? `<tr id="${escape(`${name}-${one.name}`)}">` : "<tr>") +
       /* The name is a link to its own row, so that its address can be copied. */
-      `<th scope="row"><a class="apiAnchor" href="#${escape(`${name}-${one.name}`)}"><code>${escape(one.name)}</code></a>${one.badges.map((badge) => `<span class="apiBadge">${escape(badge)}</span>`).join("")}</th>` +
+      `<th scope="row"><a class="apiAnchor" href="${escape(home === undefined ? `#${name}-${one.name}` : hrefOf(`#/${home}/${name}-${one.name}`))}"><code>${escape(one.name)}</code></a>${one.badges.map((badge) => `<span class="apiBadge">${escape(badge)}</span>`).join("")}</th>` +
       `<td><code class="apiType">${typeHtml(one.type)}</code>${one.expansion === undefined ? "" : `<br><code>${typeHtml([text(one.expansion)])}</code>`}</td>` +
       `<td>${one.defaultValue === undefined ? "—" : spansHtml(one.defaultValue)}</td>` +
       `<td>${one.deprecated === undefined ? "" : `<span class="apiDeprecated"><span class="apiBadge">Deprecated</span> ${spansHtml(one.deprecated)}</span> `}${spansHtml(one.description)}${one.origin === undefined ? "" : `<span class="apiOrigin"> from <code>${escape(one.origin)}</code></span>`}${one.shownIn === undefined ? "" : `<p class="apiShown">${spansHtml(one.shownIn)}</p>`}</td>` +
@@ -421,7 +466,9 @@ export function tableHtml(model: ApiTableModel | ApiDefinitionModel, level = 3):
   const fold = model.groups.reduce((count, group) => count + group.rows.length, 0) > FOLD_OVER;
   return (
     `<div class="apiBlock" data-type="${escape(model.name)}">` +
-    `<h${level} class="apiTitle" id="${escape(model.anchor)}"><code>${escape(model.heading)}</code></h${level}>` +
+    (model.cut !== undefined
+      ? `<p class="apiInherited">${spansHtml(model.cut.sentence)}</p>`
+      : `<h${level} class="apiTitle" id="${escape(model.anchor)}"><code>${escape(model.heading)}</code></h${level}>`) +
     (definition?.from === undefined ? "" : `<p class="apiInherited">From <code>${escape(definition.from)}</code>.</p>`) +
     (definition === undefined || definition.description.length === 0 ? "" : `<p class="apiProse">${spansHtml(definition.description)}</p>`) +
     (definition?.declaration !== undefined
@@ -429,7 +476,7 @@ export function tableHtml(model: ApiTableModel | ApiDefinitionModel, level = 3):
         (definition.expansion === undefined ? "" : `<p class="apiInherited">${spansHtml(resolvesTo(definition.expansion))}</p>`)
       : model.groups.length === 0
         ? '<p class="apiInherited">Declares no props of its own.</p>'
-        : model.groups.map((group) => groupHtml(model.name, group, fold)).join("")) +
+        : model.groups.map((group) => groupHtml(model.name, group, fold, model.cut?.home)).join("")) +
     model.closing.map((sentence) => `<p class="apiInherited">${spansHtml(sentence)}</p>`).join("") +
     "</div>"
   );
@@ -512,7 +559,7 @@ export function spansMarkdown(spans: readonly Span[]): string {
 /** One table as Markdown, at the llms text's heading level for a table. */
 export function tableMarkdown(model: ApiTableModel | ApiDefinitionModel, level = 5): string {
   const definition = "description" in model ? model : undefined;
-  const lines = [`${"#".repeat(level)} ${markdownCode(model.heading)}`, ""];
+  const lines = [model.cut !== undefined ? spansMarkdown(model.cut.sentence) : `${"#".repeat(level)} ${markdownCode(model.heading)}`, ""];
   if (definition?.from !== undefined) lines.push(`From ${markdownCode(definition.from)}.`, "");
   if (definition !== undefined && definition.description.length > 0) lines.push(spansMarkdown(definition.description), "");
   /* A fence holds no link; the names it uses are defined beside it. */
@@ -526,7 +573,9 @@ export function tableMarkdown(model: ApiTableModel | ApiDefinitionModel, level =
     if (group.title !== undefined) lines.push(`###### ${group.title}`, "");
     lines.push("| Prop | Type | Default | Description |", "|---|---|---|---|");
     for (const one of group.rows) {
-      const name = `${markdownCode(one.name)}${one.badges.map((badge) => ` *${badge}*`).join("")}`;
+      /* Only a cut row's name is a link: to the full row, on its page. */
+      const own = model.cut === undefined ? markdownCode(one.name) : `[${markdownCode(one.name)}](#/${model.cut.home}/${model.name}-${one.name})`;
+      const name = `${own}${one.badges.map((badge) => ` *${badge}*`).join("")}`;
       const origin = one.origin === undefined ? "" : ` From ${markdownCode(one.origin)}.`;
       const deprecated = one.deprecated === undefined ? "" : `*Deprecated* ${spansMarkdown(one.deprecated)} `;
       /* A cell holds one line; `<br>` is how a table cell breaks in GFM. */

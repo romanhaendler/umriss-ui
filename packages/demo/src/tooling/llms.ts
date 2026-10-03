@@ -30,7 +30,7 @@ import { displaySource } from "./source.ts";
 import type { TypeEntry } from "./propsReader.ts";
 import { installCommand, type InstallManifest } from "./install.ts";
 import { PACKAGES } from "../packages.ts";
-import { apiHtml, apiMarkdown, apiSection, fencedCode as fenced, markdownCell as cell, markdownCode as code } from "./apiTable.ts";
+import { apiHtml, apiMarkdown, apiSection, propsOnPage, PROPS_ON_PAGE_TITLE, fencedCode as fenced, markdownCell as cell, markdownCode as code } from "./apiTable.ts";
 import { referenceHtml, referenceMarkdown, type ReferenceTable } from "./referenceTable.ts";
 import { adrLinks, compilerOptionsOf } from "./props.ts";
 import { linkAdrs, linkReferences, outlineTexts } from "./references.ts";
@@ -498,6 +498,14 @@ export function renderLlms({ packageDir, outline: written, tables, moved = {}, r
         for (const block of apiMarkdown(section)) parts.push("", block);
         spliced.push({ from: at, to: parts.length, html: apiHtml(section) });
       }
+      /* A page without a table of its own: the rows its examples use. */
+      const cut = { tables: propsOnPage(page, pages, tables), definitions: [] };
+      if (cut.tables.length > 0) {
+        parts.push("", `#### ${PROPS_ON_PAGE_TITLE}`);
+        const at = parts.length;
+        for (const block of apiMarkdown(cut)) parts.push("", block);
+        spliced.push({ from: at, to: parts.length, html: apiHtml(cut) });
+      }
 
       if (page.limits !== undefined) {
         parts.push("", "#### Known limits", "", page.limits.map((text) => `- ${text}`).join("\n"), "", `What umriss deliberately does not build, and why: [ADR-0032](${ADR_0032}).`);
@@ -588,12 +596,13 @@ export function renderLlms({ packageDir, outline: written, tables, moved = {}, r
       /* "Demo page: <this page>" is for the agent reading the full text; on
          the page itself it would point at itself. A reference table's heading
          carries the id the app gives it, and so do Keyboard - another page's
-         keys link there - and Accessibility. */
+         keys link there -, Accessibility and Props on this page. */
       const anchors = new Map([
         ...examples.filter((example) => example.pageId === page.id).map((example) => [example.title, example.id] as const),
         ...(references[page.id] ?? []).map((table) => [table.title, table.anchor] as const),
         ["Keyboard", keyboardAnchor(page.id)] as const,
         ["Accessibility", `accessibility-${page.id}`] as const,
+        [PROPS_ON_PAGE_TITLE, `props-${page.id}`] as const,
       ]);
       const html = (a: number, b: number, tail = "") =>
         markdownToHtml(`${parts.slice(a, b).filter((line) => !line.startsWith("Demo page: ")).join("\n")}${tail}`, home, 2, anchors);

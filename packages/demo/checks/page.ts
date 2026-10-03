@@ -195,6 +195,24 @@ test("a row's name puts the row's anchor into the address", async ({ page }) => 
   await expect(page).toHaveURL(new RegExp(`/${tablePage}/#${id}$`));
   await expect(row).toBeInViewport();
 });
+
+/* A feature page shows the props it is about (.scratch/props-to-examples, 02):
+   "On this page" names the section, and a row's name leads to the full row on
+   the page of the full table. */
+test("a feature page's \"Props on this page\" leads to the full row", async ({ page }) => {
+  test.skip(p.tablePageId === undefined, "the page has a table of its own");
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await open(page, p.pageId);
+  await expect(page.getByRole("navigation", { name: "On this page" }).getByRole("link", { name: "Props on this page", exact: true })).toHaveAttribute(
+    "href",
+    new RegExp(`#props-${p.pageId}$`),
+  );
+  const link = page.getByRole("region", { name: "Props on this page", exact: true }).locator("tbody th a").first();
+  const id = (await link.getAttribute("href"))!.split("#")[1]!;
+  await link.click();
+  await expect(page).toHaveURL(new RegExp(`/${tablePage}/#${id}$`));
+  await expect(page.locator(`tr[id="${id}"]`)).toBeInViewport();
+});
 }
 
 export interface InstallProbes {

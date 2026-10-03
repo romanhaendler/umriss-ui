@@ -153,8 +153,8 @@ test.describe("The API tables' type cells", () => {
     await page.mouse.move(0, 0);
     await expect(tip).toHaveCount(0);
 
-    /* The link before it in the reading order is the variant's. */
-    await page.locator('[id="ButtonProps-variant"] .apiType a').focus();
+    /* The link before it in the reading order is the row's own name. */
+    await page.locator('[id="ButtonProps-size"] th a').focus();
     await page.keyboard.press("Tab");
     await expect(link).toBeFocused();
     await expect(tip).toContainText('"sm" | "md"');
