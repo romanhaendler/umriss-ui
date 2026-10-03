@@ -66,7 +66,7 @@ export function buildDemo(sources: DemoSources): Demo {
     packageName: sources.manifest.name,
     description: sources.manifest.description,
     install: installCommand(sources.manifest),
-    addresses: addresses(outlineTexts(sources.addresses.OUTLINE, link)),
+    addresses: addresses(outlineTexts(sources.addresses.OUTLINE, link), sources.addresses.MOVED),
     scenarios: readScenarios(sources.scenarios, sources.sources, options).map((scenario) => ({
       ...scenario,
       lead: link(scenario.lead),
