@@ -182,3 +182,51 @@ export function checkInstall({ open, pages, command }: InstallProbes): void {
     await expect(page.locator(`[data-block="${start!.id}"] h1`)).toHaveText(start!.name);
   });
 }
+
+export interface FirstExampleProbes {
+  open: (page: Page, pageId: string) => Promise<void>;
+  /** A page, and the title of its first example. */
+  pageId: string;
+  title: string;
+}
+
+/** A page's first example starts with the component: no head row, its code
+    toggle under the stage. It runs against all five demos - the card is the
+    shell's, so one page each stands for every page. */
+export function checkFirstExample({ open, pageId, title }: FirstExampleProbes): void {
+  test("the first example starts with its stage, and its code toggle follows it", async ({ page }) => {
+    test.skip(test.info().project.name.endsWith("dark"), "a behaviour test runs once (light)");
+    await open(page, pageId);
+    const first = page.locator("[data-example]").first();
+
+    /* Named by its title for assistive technology, though no heading shows it. */
+    await expect(page.getByRole("region", { name: title, exact: true })).toHaveAttribute(
+      "data-example",
+      (await first.getAttribute("data-example"))!,
+    );
+    await expect(first.locator("header")).toHaveCount(0);
+    await expect(first.getByRole("heading")).toHaveCount(0);
+
+    /* No example card on the page has a head row that names nothing. */
+    for (const head of await page.locator("[data-example] > header").all()) {
+      await expect(head.getByRole("heading")).toHaveText(/\S/);
+    }
+
+    /* The toggle stands under the stage, and after it in the tab order: no
+       positive tabindex reorders the shell, so the order is the document's. */
+    const stage = first.locator(".exampleStage");
+    const toggle = first.getByRole("button", { name: "Code", exact: true });
+    const stageBox = (await stage.boundingBox())!;
+    const toggleBox = (await toggle.boundingBox())!;
+    expect(toggleBox.y).toBeGreaterThanOrEqual(stageBox.y + stageBox.height);
+    const follows = await toggle.evaluate(
+      (button, before) => !!(before!.compareDocumentPosition(button) & Node.DOCUMENT_POSITION_FOLLOWING),
+      await stage.elementHandle(),
+    );
+    expect(follows).toBe(true);
+
+    /* And it opens the code. */
+    await toggle.click();
+    await expect(first.locator(".codeBlock")).toBeVisible();
+  });
+}

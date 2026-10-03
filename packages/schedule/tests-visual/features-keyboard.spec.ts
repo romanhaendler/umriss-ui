@@ -6,6 +6,7 @@
    in both themes. */
 
 import { test, expect, type Locator, type Page } from "@playwright/test";
+import { focusBeforeStage } from "@umriss-ui/demo/checks/navigation";
 import { openExample } from "./navigation";
 import { DAY_OF_PLAN, plotOf } from "./plot";
 
@@ -15,10 +16,10 @@ test.beforeEach(async ({ page }) => {
 
 const behaviour = () => test.skip(test.info().project.name.endsWith("dark"), "a behaviour test runs once (light)");
 
-/** Tab from the example's code switch until the plot has the focus. */
+/** Tab from before the example's stage until the plot has the focus. */
 async function tabIn(page: Page, example: Locator): Promise<Locator> {
   const plot = example.locator("[role='application']");
-  await example.locator(".exampleToggle").first().focus();
+  await focusBeforeStage(example);
   for (let i = 0; i < 8 && !(await plot.evaluate((el) => el === document.activeElement)); i++) await page.keyboard.press("Tab");
   await expect(plot).toBeFocused();
   return plot;

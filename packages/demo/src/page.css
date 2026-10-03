@@ -178,6 +178,13 @@
   color: var(--u-color-text);
 }
 
+/* The first example's toggle: under the stage, where looking at it ends. */
+.exampleFoot {
+  display: flex;
+  padding: var(--u-space-1) var(--u-space-4);
+  border-top: 1px solid var(--u-edge-color);
+}
+
 /* The one sentence a skimmer reads: above the stage, never in the code. */
 .exampleLead {
   margin: 0;

@@ -25,6 +25,7 @@
 
 import { test, expect } from "@playwright/test";
 import type { Page } from "@playwright/test";
+import { focusBeforeStage } from "./navigation";
 
 export interface OwnBaseProbes {
   /** How the demo opens a page (its `navigation.ts`). */
@@ -132,7 +133,7 @@ async function visibleFocus(page: Page): Promise<string[]> {
   for (const id of ids) {
     const example = page.locator(`[data-example="${id}"]`);
     if ((await example.locator(".exampleStage").count()) === 0) continue;
-    await example.locator(".exampleToggle").first().focus();
+    await focusBeforeStage(example);
     await page.evaluate(() => {
       window.__ownBase!.walk = { previous: null, focused: "", seen: new WeakSet() };
     });

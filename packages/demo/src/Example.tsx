@@ -3,7 +3,10 @@
    Its lead - one sentence, the situation and the prop - stands visible above
    it: the skimmer is the reader who needs it, and a code comment inside a
    collapsed block never reaches them. The first example of a page stands
-   without a heading, right under the page head: the component at rest.
+   without a heading, right under the page head: the component at rest. It
+   has no head row either - a bar holding one small word was the first thing a
+   visitor saw. Its "Code" toggle stands in a slim foot under the stage, after
+   it in the tab order as on the screen, and its title names the section.
 
    Two controls, and they mean different things. Whoever skims wants the
    examples as a gallery; whoever has found the right one wants every block
@@ -84,6 +87,18 @@ export function Example({ example, allOpen, hero = false }: ExampleProps) {
 
   const headId = `example-${example.pageId}-${example.id}`;
   const codeId = `${headId}-code`;
+  const toggle = (
+    <button
+      type="button"
+      className="exampleToggle"
+      aria-expanded={open}
+      aria-controls={codeId}
+      onClick={() => setException(!open)}
+    >
+      <Chevron open={open} />
+      Code
+    </button>
+  );
 
   return (
     <section
@@ -94,25 +109,14 @@ export function Example({ example, allOpen, hero = false }: ExampleProps) {
       aria-labelledby={hero ? undefined : headId}
       aria-label={hero ? example.title : undefined}
     >
-      <header className="exampleHead">
-        {hero ? (
-          <span className="exampleTitle" />
-        ) : (
+      {!hero && (
+        <header className="exampleHead">
           <h3 className="exampleTitle" id={headId}>
             {example.title}
           </h3>
-        )}
-        <button
-          type="button"
-          className="exampleToggle"
-          aria-expanded={open}
-          aria-controls={codeId}
-          onClick={() => setException(!open)}
-        >
-          <Chevron open={open} />
-          Code
-        </button>
-      </header>
+          {toggle}
+        </header>
+      )}
 
       {example.lead !== undefined && (
         <p className="exampleLead">
@@ -123,6 +127,8 @@ export function Example({ example, allOpen, hero = false }: ExampleProps) {
       <div className="exampleStage">
         <example.Component />
       </div>
+
+      {hero && <div className="exampleFoot">{toggle}</div>}
 
       <div className="exampleCode" id={codeId} hidden={!open}>
         {/* Render it only once it is visible: forty highlighted blocks on one
