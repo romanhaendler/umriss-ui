@@ -59,7 +59,11 @@ describe("Demo smoke test", () => {
     const { host, teardown } = await mount(<Page demo={DEMO} page={page} />);
     expect(host.querySelector(`[data-block="${page.id}"]`)).not.toBeNull();
     /* The generated page: an entry for every export, by its anchor. */
-    if (page.body === "api-index") for (const anchor of DEMO.apiIndex!.anchors) expect(host.querySelector(`[id="${anchor}"]`), anchor).not.toBeNull();
+    if (page.body === "api-index") {
+      /* Read once: core's index has some 250 anchors. */
+      const ids = new Set([...host.querySelectorAll("[id]")].map((one) => one.id));
+      for (const anchor of DEMO.apiIndex!.anchors) expect(ids.has(anchor), anchor).toBe(true);
+    }
     await teardown();
   });
 
