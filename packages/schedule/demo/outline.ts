@@ -42,12 +42,13 @@ export const OUTLINE: readonly Rubric[] = [
         name: "Installation",
         sentence: "Install the schedule with its two peers and hand it plain data: lanes, tasks, subtasks and dependencies. It draws them and reports what a planner wants to change.",
         about: [
-          "Install it with its peers: `pnpm add @umriss-ui/schedule @umriss-ui/core @umriss-ui/charts`, with React 18 or 19. The stylesheets load themselves - each package's script imports its own, so there is nothing to import by hand; `@umriss-ui/schedule/styles.css` stays exported for setups that link stylesheets themselves.",
+          "The command brings its two peers along: core for the formats and the wording, charts for the time scale and the operating calendar (ADR-0022). React 18 or 19 is a peer as well and stays the application's own. The stylesheets load themselves - each package's script imports its own, so there is nothing to import by hand; `@umriss-ui/schedule/styles.css` stays exported for setups that link stylesheets themselves.",
           "The plan is plain data (ADR-0023). A lane is a person, a vehicle or a room, declared in JSX by its id. A task is an id, a colour and a name; a subtask is a main time on one lane, belonging to a task, with an optional lead-in and lead-out; a dependency joins two subtasks of one task with a lag. Times are epoch milliseconds.",
           "The schedule reports, the application decides. It draws the data it is given and changes none of it: a drag ends in an intent reported to `onIntent`, and only the application's own state update moves a bar. Without `intents` the schedule is read-only - see [Move and lane](#/move-and-lane).",
         ],
         types: [],
         exports: ["Schedule", "Lane", "Subtasks", "Dependencies"],
+        installs: true,
       },
       {
         id: "schedule",

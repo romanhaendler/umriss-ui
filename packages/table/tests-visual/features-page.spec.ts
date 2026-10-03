@@ -2,8 +2,10 @@
    The tests stand with the shell (`@umriss-ui/demo/checks/page.ts`) and run
    against every demo that uses the shell. */
 
-import { checkPage } from "@umriss-ui/demo/checks/page";
-import { open, openExample } from "./navigation";
+import { checkInstall, checkPage } from "@umriss-ui/demo/checks/page";
+import { ALL_PAGES, open, openExample } from "./navigation";
+
+checkInstall({ open, pages: ALL_PAGES, command: "npm install @umriss-ui/table @umriss-ui/core" });
 
 checkPage({
   open,

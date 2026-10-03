@@ -35,6 +35,12 @@ is one of the internal numbers from before core's first publication as `0.1.0`
   `AggregateFor` and `Presentation` are new public types, for annotating one's
   own variables and wrappers with what a column or a toolbar part accepts.
 
+### Fixed
+
+- **`docs/llms-full.md` names the peer in its install line**:
+  `npm install @umriss-ui/table @umriss-ui/core`, read from the manifest. It
+  had named the table alone, and an install after it lacked core.
+
 ## 0.11.2 – Core 0.24.0 (Oct. 2026)
 
 Needs `@umriss-ui/core` 0.24; the peer range moves to `^0.24.0`. Nothing else changes for a caller.

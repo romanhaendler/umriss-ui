@@ -2,13 +2,15 @@
 
    The shell is the same for all five packages (ADR-0020); what makes a demo a
    particular one comes in here: the outline, the scenarios, the examples, the
-   generated tables and the package name a reader takes the package under.
+   generated tables and the manifest: the package name a reader takes the
+   package under, and the peers its install command names.
 
    `import.meta.glob` resolves relative to the file that calls it. The globs
    therefore stand in the demo itself (`demo/examples.ts`), and only what they
    found arrives here. */
 
 import type { Addresses } from "./outline";
+import { installCommand, type InstallManifest } from "./tooling/install";
 import { readExamples, readScenarios } from "./tooling/examples";
 import type { Example, ExampleModule, Scenario, ScenarioModule } from "./tooling/examples";
 import type { TypeEntry } from "./tooling/propsReader";
@@ -16,6 +18,8 @@ import type { TypeEntry } from "./tooling/propsReader";
 export interface Demo {
   /** The package name a reader takes the package under: `"@umriss-ui/core"`. */
   packageName: string;
+  /** The command that installs it, peers and all (`tooling/install.ts`). */
+  install: string;
   addresses: Addresses;
   scenarios: readonly Scenario[];
   examples: readonly Example[];
@@ -26,7 +30,8 @@ export interface Demo {
 }
 
 export interface DemoSources {
-  packageName: string;
+  /** The package's `package.json`. */
+  manifest: InstallManifest;
   addresses: Addresses;
   /** `import.meta.glob("./scenarios/*.tsx", { eager: true })` */
   scenarios: Record<string, ScenarioModule>;
@@ -44,10 +49,11 @@ export interface DemoSources {
 export function buildDemo(sources: DemoSources): Demo {
   const options = {
     pages: sources.addresses.ALL_PAGES,
-    packageName: sources.packageName,
+    packageName: sources.manifest.name,
   };
   return {
-    packageName: sources.packageName,
+    packageName: sources.manifest.name,
+    install: installCommand(sources.manifest),
     addresses: sources.addresses,
     scenarios: readScenarios(sources.scenarios, sources.sources, options),
     examples: readExamples(sources.examples, sources.sources, options),

@@ -1,5 +1,5 @@
 /* What makes a page operable: the code toggle, the page toggle and the copy
-   button.
+   button - and, on the page that installs, the install command.
 
    None of it can be expressed in jsdom. The toggle hangs on a state two
    components share without either owning it; the clipboard does not exist
@@ -133,4 +133,30 @@ test("the import line copies itself as well", async ({ page, context }) => {
   await expect(page.locator(".importLine").getByRole("button", { name: "Copied" })).toBeVisible();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(p.importLine);
 });
+}
+
+export interface InstallProbes {
+  open: (page: Page, pageId: string) => Promise<void>;
+  /** The demo's pages: the one flagged `installs` is opened. */
+  pages: readonly { id: string; installs?: true }[];
+  /** The install command, as it must land in the clipboard. */
+  command: string;
+}
+
+/** The page that installs: its command stands there and copies itself,
+    exactly. It runs against all five demos - those without `checkPage` call
+    it alone. */
+export function checkInstall({ open, pages, command }: InstallProbes): void {
+  test("the install command stands on the page that installs and copies itself", async ({ page, context }) => {
+    test.skip(test.info().project.name.endsWith("dark"), "a behaviour test runs once (light)");
+    const installing = pages.filter((one) => one.installs === true);
+    expect(installing).toHaveLength(1);
+    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    await open(page, installing[0]!.id);
+    const line = page.locator(".installLine");
+    await expect(line.locator("code")).toHaveText(command);
+    await line.getByRole("button", { name: "Copy" }).click();
+    await expect(line.getByRole("button", { name: "Copied" })).toBeVisible();
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(command);
+  });
 }

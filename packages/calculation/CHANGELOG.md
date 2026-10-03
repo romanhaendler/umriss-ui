@@ -18,6 +18,13 @@ under a heading "Changed" of its own, no matter which digit rose.
 - **Every export carries a comment**: what a component or a type is for. The
   editor shows it on hover, from the package's `.d.ts`. Nothing else changes.
 
+### Fixed
+
+- **`docs/llms-full.md` names the peer in its install line**:
+  `npm install @umriss-ui/calculation @umriss-ui/core`, read from the
+  manifest. It had named the calculation alone, and an install after it
+  lacked core.
+
 ## 0.4.8 – Core 0.24.0 (Oct. 2026)
 
 Needs `@umriss-ui/core` 0.24; the peer range moves to `^0.24.0`. Nothing else changes for a caller.
