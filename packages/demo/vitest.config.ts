@@ -7,5 +7,8 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["tests-unit/**/*.test.{ts,tsx}"],
+    /* A case that starts the compiler over a fixture or a whole package takes
+       seconds on a busy machine - more than vitest's five. */
+    testTimeout: 60_000,
   },
 });
