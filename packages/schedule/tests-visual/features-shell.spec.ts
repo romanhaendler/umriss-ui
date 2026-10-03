@@ -9,12 +9,12 @@ checkShell({
   scenario: "replan-the-day-on-the-line",
   rail: { name: "Dependencies", pageId: "dependencies", rubricId: "plan" },
   neighbours: [
-    { name: "Lanes", pageId: "lane" },
-    { name: "Subtasks", pageId: "subtasks" },
+    { name: "Installation", pageId: "installation" },
+    { name: "First schedule", pageId: "schedule" },
   ],
   deepLink: { pageId: "findings", absent: "schedule" },
   example: { pageId: "dependencies", id: "violated-dependency", title: "Show a lag that does not fit", pageName: "Dependencies" },
-  palettePage: { query: "ripple", name: "Ripple", pageId: "ripple", rubricName: "Editing" },
+  palettePage: { query: "findings as data", name: "Findings as data", pageId: "findings", rubricName: "Reading" },
   abbreviation: { query: "sbt", find: "Subtasks", glyphs: ["S", "bt"] },
   pointer: { wide: "s", narrow: "lag that does" },
 });
