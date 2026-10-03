@@ -223,8 +223,8 @@ export class Registry {
 
   /** The row detail: the presentation of the `RowDetail` that registered last. */
   detail: { key: string; presentation: (row: never) => ReactNode } | null = null;
-  /** How many `RowActions` stand right now. */
-  private actionGroups = new Set<string>();
+  /** The `RowActions` that stand right now, with their `pin`. */
+  private actionGroups = new Map<string, boolean>();
 
   /** Whether the row header column sticks - `pin: "start"` on it. */
   stickyRowHeader = false;
@@ -769,9 +769,9 @@ export class Registry {
 
   /* --- Actions ---------------------------------------------------------------------- */
 
-  registerActionGroup(key: string) {
-    if (this.actionGroups.has(key)) return;
-    this.actionGroups.add(key);
+  registerActionGroup(key: string, pin: boolean) {
+    if (this.actionGroups.get(key) === pin) return;
+    this.actionGroups.set(key, pin);
     this.structure++;
   }
 
@@ -781,6 +781,11 @@ export class Registry {
 
   hasRowActions(): boolean {
     return this.actionGroups.size > 0 && this.actions.entries.size > 0;
+  }
+
+  /** Whether the actions column sticks: unless a `RowActions` says `pin={false}`. */
+  actionsPinned(): boolean {
+    return ![...this.actionGroups.values()].includes(false);
   }
 
   registerAction(key: string, spec: ActionSpec) {
