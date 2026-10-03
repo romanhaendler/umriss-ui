@@ -46,4 +46,10 @@ checkShell({
     { query: "snackbar", name: "Toast", pageId: "toast" },
     { query: "chip", name: "Tag", pageId: "tag" },
   ],
+  elsewhere: {
+    query: "loading, empty",
+    group: "table · Row appearance",
+    label: "Show loading, empty, failed and no match",
+    address: "/table/row-appearance/#states",
+  },
 });
