@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { renderLlms } from "../src/tooling/llms";
 import type { Rubric } from "../src/outline";
+import type { TypeEntry } from "../src/tooling/tables";
 
 const PACKAGE_DIR = join(dirname(fileURLToPath(import.meta.url)), "fixtures", "llms");
 
@@ -125,5 +126,62 @@ describe("the search fragment's tokens and wording keys", () => {
   it("lands every row's entry on an anchor its prerendered page carries", () => {
     const gauge = referenced.pages.find((one) => one.path === "gauge/")!;
     for (const { address } of rows) expect(gauge.html, address).toContain(`id="${address.split("#")[1]}"`);
+  });
+});
+
+/* Props (.scratch/one-search 04): one find per row of a page's props table,
+   under the type that declares it, at the row's own anchor. */
+describe("the props in the search fragment", () => {
+  const outline: readonly Rubric[] = [
+    {
+      ...OUTLINE[0]!,
+      pages: [
+        { ...OUTLINE[0]!.pages[0]!, types: ["GaugeProps"] },
+        /* The Meter shows the Gauge's table too: its props are found once, on
+           the Gauge's page. */
+        { ...OUTLINE[0]!.pages[1]!, types: ["MeterProps", "GaugeProps"] },
+      ],
+    },
+  ];
+  const tables: Record<string, TypeEntry> = {
+    GaugeProps: {
+      name: "GaugeProps",
+      parameter: [],
+      omitted: [],
+      props: [
+        { name: "value", type: "number", optional: false, description: "The value the needle points at." },
+        { name: "tone", type: '"neutral" | "alarm"', optional: true, description: "What the needle says." },
+      ],
+    },
+    MeterProps: {
+      name: "MeterProps",
+      parameter: [],
+      omitted: [],
+      props: [
+        { name: "max", type: "number", optional: true, description: "The full bar." },
+        /* Declared by the Gauge, whose table has it: found there. */
+        { name: "value", type: "number", optional: false, description: "The value.", inheritedFrom: "GaugeProps" },
+        /* Declared by a type with no table: found here, where it stands. */
+        { name: "unit", type: "string", optional: true, description: "After the value.", inheritedFrom: "UnitProps" },
+      ],
+    },
+  };
+  const rendered = renderLlms({ packageDir: PACKAGE_DIR, outline, tables });
+  const props = rendered.search.filter((entry) => entry.kind === "prop");
+
+  it("holds every row once, under the type that declares it, at the row's anchor", () => {
+    expect(props.map(({ address, label, group }) => [address, label, group])).toEqual([
+      ["/fixture/gauge/#GaugeProps-value", "value", "fixture · GaugeProps"],
+      ["/fixture/gauge/#GaugeProps-tone", "tone", "fixture · GaugeProps"],
+      ["/fixture/meter/#MeterProps-max", "max", "fixture · MeterProps"],
+      ["/fixture/meter/#MeterProps-unit", "unit", "fixture · MeterProps"],
+    ]);
+  });
+
+  it("lands every prop on its row of the prerendered page", () => {
+    for (const { address } of props) {
+      const [path, anchor] = address.replace(/^\/fixture\//, "").split("#");
+      expect(rendered.pages.find((one) => one.path === path)?.html, address).toContain(`<tr id="${anchor}"`);
+    }
   });
 });
