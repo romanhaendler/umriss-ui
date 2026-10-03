@@ -34,5 +34,5 @@ checkShell({
      "tabelle" stopped finding anything once the table moved to
      @umriss-ui/table. */
   pointer: { wide: "ta", narrow: "tab" },
-  contents: { pageId: "button", id: "loading-and-disabled", title: "Loading and disabled" },
+  contents: { pageId: "select", id: "states", title: "States" },
 });
