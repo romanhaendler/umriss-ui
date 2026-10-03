@@ -270,6 +270,15 @@ const faults = [
     ].filter(Boolean);
     return missing.length === 0 ? [] : [`${url}: no ${missing.join(", ")}`];
   }),
+  /* No props row says a prop accepts nothing: a `never` is a prohibition the
+     reader merges away (types-without-holes), never a type to show. */
+  ...PACKAGES.flatMap((dir) =>
+    Object.values(JSON.parse(readFileSync(join(ROOT, "packages", dir, "demo", ".generated", "props.json"), "utf8"))).flatMap((entry) =>
+      entry.props
+        .filter((prop) => prop.type === "never" || prop.type.startsWith("never |"))
+        .map((prop) => `${dir}: ${entry.name}.${prop.name} is typed \`${prop.type}\``),
+    ),
+  ),
 ];
 if (faults.length > 0) throw new Error(`The built site fails its guard:\n${faults.join("\n")}`);
 

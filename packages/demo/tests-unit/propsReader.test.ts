@@ -104,7 +104,7 @@ describe("readProps over a type alias as an intersection", () => {
   it("carries its own members in declaration order, with the type as it stands", () => {
     const { types } = readProps([SHAPES], ["FixtureFieldColumn", "FixtureBase", "FixturePaths"]);
     const entry = types.FixtureFieldColumn!;
-    expect(entry.parameter).toEqual(["Z", "K"]);
+    expect(entry.parameter).toEqual(["Z", "K extends keyof Z"]);
     const own = entry.props.filter((p) => p.name === "value" || p.name === "format");
     expect(own.map((p) => [p.name, p.type])).toEqual([
       ["value", "K"],
@@ -226,6 +226,43 @@ describe("readProps over JSDoc tags", () => {
 
   it("stops where `@default` and the destructuring pattern disagree, with file, line and both values", () => {
     expect(() => readProps([TAGS], ["FixtureConflictProps"])).toThrow(/tags\.tsx:45 .*pageSize.*`10`.*`20`/);
+  });
+});
+
+describe("readProps over a union whose arms forbid a member", () => {
+  /* `FieldColumn` in @umriss-ui/table: `aggregate` and its old name `footer`,
+     each `never` in the other's arm. A `never` is a prohibition, not a shape. */
+  const read = () => readProps([SHAPES], ["FixtureMeasure", "FixtureTotals"]);
+  const row = (name: string) => read().types.FixtureMeasure!.props.find((p) => p.name === name);
+
+  it("types a member by the arms that give it a type, and keeps the prohibition's sentence after theirs", () => {
+    expect(row("total")).toMatchObject({
+      type: "(values: readonly Z[K][]) => Z[K]",
+      description: "What the values come to. Not together with `sum`, its old name.",
+      inheritedFrom: "FixtureTotals",
+    });
+    expect(row("sum")).toMatchObject({
+      type: "FixtureFormat<Z[K]>",
+      description: "The old name of `total` – not together with it.",
+    });
+    expect(read().gaps).toEqual([]);
+  });
+
+  it("leaves out a member that is `never` in every arm", () => {
+    expect(row("legacy")).toBeUndefined();
+  });
+
+  it("writes an inherited member in the parameters of the table it stands in", () => {
+    /* `FixtureDraft<Z[K], Z>`: its `W` is nobody's parameter here. */
+    expect(row("validate")!.type).toBe("(value: Z[K], row: Z) => string");
+  });
+
+  it("shows each parameter with its constraint and its default", () => {
+    expect(read().types.FixtureMeasure!.parameter).toEqual(["Z", "K extends keyof Z = keyof Z"]);
+  });
+
+  it("stops at a member that names a parameter its header does not introduce", () => {
+    expect(() => readProps([SHAPES], ["FixtureLoose"])).toThrow(/FixtureLoose\.validate.*`Z`/);
   });
 });
 
