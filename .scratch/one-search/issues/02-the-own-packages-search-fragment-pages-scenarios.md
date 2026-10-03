@@ -67,16 +67,21 @@ fourth row survived the narrow query. Core now uses `se`/`sel`, which drops
 "table ·" and "tab" finds everything through the group. The field name in
 the probes and in core's palette screenshot is "Search umriss-ui".
 
-**Baselines.** `palette-window-ui-{light,dark}` moved. The groups now read
-"core · Dates and times", and the front page behind the window has its newer
-"On this page" row.
-Not moved: `palette-resting-*`, `drawer-beside-a-service-list-*`,
-`forced-combobox-cursor-*` and `forced-range-*` already fail on `main`. They
-show the sidebar from before sidebar-tree's rubrics. The drawer and combobox
-pictures will also pick up their new ledes when someone rebuilds them.
+**Header.** The header's search button now reads the palette's placeholder,
+"Search pages, examples, props, tokens …". Where the button narrows, the
+label ends in an ellipsis. On a phone the search now grows from nothing
+(`flex: 1 1 0`) rather than from its label. Otherwise the longer label
+pushed the search onto a row of its own.
 
-**Deviations.** The header's search button still reads "Search …". The
-spec has it follow the placeholder, but the header belongs to
-shell-across-packages 02, and changing it would move every picture with a
-header. Core's changelog is unchanged: nothing a caller of a package sees
-changed.
+**Baselines.** These moved after rebasing onto shell-across-packages 02:
+- `page-{combobox,popover,drawer,accordion}-ui-{light,dark}`, because their
+  ledes gained a synonym.
+- `drawer-beside-a-service-list-ui-{light,dark}`, because the Drawer lede
+  wraps one line further and the header label changed.
+
+`palette-window-*` stays within its tolerance: the dimmed header and the
+faint "core ·" group labels fall under the threshold. `toast-phone-*` was
+checked against the header change and stays put.
+
+**Deviations.** Core's changelog is unchanged, because nothing a caller of a
+package sees changed.
