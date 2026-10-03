@@ -229,7 +229,11 @@ describe("the guard over the document pages (.scratch/concepts-and-changelog-pag
   const SITE = "https://example.test/umriss-ui/";
   const document = `${SITE}standards/`;
   const github = "https://github.com/romanhaendler/umriss-ui";
-  const pageWith = (main: string) => `<header><a href="../">umriss-ui</a></header><main class="document">${main}</main><footer><a href="../llms.txt">llms.txt</a></footer>`;
+  const title = "Industrial standards – umriss-ui";
+  const edit = (on: string, url: string) =>
+    `<a href="${github}/issues/new?title=${encodeURIComponent(`Docs: ${on}`)}&amp;body=${encodeURIComponent(`${url}\n\n`)}">Suggest an edit on GitHub</a>`;
+  const pageWith = (main: string, end = edit(title, document)) =>
+    `<title>${title}</title><header><a href="../">umriss-ui</a></header><main class="document">${main}<p>${end}</p></main><footer><a href="../llms.txt">llms.txt</a></footer>`;
   const sitemap = [SITE, document, `${SITE}design-language/`];
   const fine = pageWith(`<a href="/umriss-ui/design-language/#dark-theme">it</a> <a href="${github}/blob/main/docs/adr/0035-x.md">ADR-0035</a> <a href="https://www.isa.org/">ISA</a>`);
 
@@ -245,6 +249,13 @@ describe("the guard over the document pages (.scratch/concepts-and-changelog-pag
     expect(documentFaults([document], new Map([[document, pageWith('<a href="/umriss-ui/palette/">it</a>')]]), sitemap, SITE)).toEqual([
       `${document}: links ${SITE}palette/, which is no sitemap address`,
     ]);
+  });
+
+  it("fails on a document page without a suggested edit, or with one naming another page", () => {
+    const fault = `${document}: no "Suggest an edit on GitHub" naming its title and address`;
+    expect(documentFaults([document], new Map([[document, pageWith("", "")]]), sitemap, SITE)).toEqual([fault]);
+    const astray = pageWith("", edit("Design language – umriss-ui", `${SITE}design-language/`));
+    expect(documentFaults([document], new Map([[document, astray]]), sitemap, SITE)).toEqual([fault]);
   });
 
   it("fails on any page that links ADR-0032 on GitHub", () => {

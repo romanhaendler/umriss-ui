@@ -53,6 +53,7 @@ import { Page } from "./Page";
 import { Scenarios } from "./Scenarios";
 import { ThemeSwitch } from "./ThemeSwitch";
 import { pageTitle } from "./tooling/title";
+import { EDIT_LINK, editHref } from "./tooling/edit";
 
 /* The palette's candidates are the search entries (`search.ts`) translated
    into the palette's language (CONTEXT.md, "Finding"): the id IS the entry's
@@ -295,10 +296,10 @@ export function Shell({ demo, sentence }: ShellProps) {
      (.scratch/pages-as-markdown), which the prerendering writes as well and a
      page outside it lacks. An example anchor changes neither: it stands in
      its page's text. */
-  const pageName = page?.name;
+  const title = pageTitle({ name: demo.packageName, description: demo.description }, page?.name);
   const twin = hrefOf(twinOfPlace(page === undefined ? "" : `/${page.id}`));
   useEffect(() => {
-    document.title = pageTitle({ name: demo.packageName, description: demo.description }, pageName);
+    document.title = title;
     let link = document.head.querySelector<HTMLLinkElement>('link[rel="alternate"][type="text/markdown"]');
     if (link === null) {
       link = document.createElement("link");
@@ -307,7 +308,7 @@ export function Shell({ demo, sentence }: ShellProps) {
       document.head.append(link);
     }
     link.setAttribute("href", twin);
-  }, [demo.packageName, demo.description, pageName, twin]);
+  }, [title, twin]);
 
   return (
     <div className="shell">
@@ -390,6 +391,13 @@ export function Shell({ demo, sentence }: ShellProps) {
           ) : (
             <Page key={page.id} demo={demo} page={page} />
           )}
+          {/* Under every page, the scenarios page too: an issue that names the
+              page - its title, and its address without an example's anchor. */}
+          <p className="pageEdit">
+            <a href={editHref(title, new URL(page === undefined ? BASE : hrefOf(addressOf(page.id)), window.location.href).href)}>
+              {EDIT_LINK}
+            </a>
+          </p>
         </main>
       </div>
 

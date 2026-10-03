@@ -208,7 +208,9 @@ export function twinFaults(pages: readonly TwinPage[], files: ReadonlyMap<string
     (.scratch/concepts-and-changelog-pages): every document in the list has a
     page; every link of a document's text into the site leads to a sitemap
     address (one to GitHub is checked when the link is rewritten, and fails
-    the build there); and no page of the site links ADR-0032 on GitHub, which
+    the build there); every document page ends with "Suggest an edit on
+    GitHub", its issue titled after the page and naming its address; and no
+    page of the site links ADR-0032 on GitHub, which
     has its page here. `documents` are the documents' addresses, `files` as
     for `siteFaults`, `home` the site's address. */
 export function documentFaults(documents: readonly string[], files: ReadonlyMap<string, string>, urls: readonly string[], home: string): string[] {
@@ -221,6 +223,16 @@ export function documentFaults(documents: readonly string[], files: ReadonlyMap<
         .map((match) => new URL(match[1]!.replace(/&amp;/g, "&"), url).href.replace(/#.*$/, ""))
         .filter((target) => target.startsWith(home) && !urls.includes(target))
         .map((target) => `${url}: links ${target}, which is no sitemap address`);
+    }),
+    ...documents.flatMap((url) => {
+      const html = files.get(url);
+      if (html === undefined) return [];
+      const edit = /<main[\s>][\s\S]*<a\b[^>]*\bhref="([^"]*)"[^>]*>Suggest an edit on GitHub<\/a>[\s\S]*<\/main>/.exec(html)?.[1];
+      const query = new URL((edit ?? "about:blank").replace(/&amp;/g, "&")).searchParams;
+      const title = /<title>([^<]*)<\/title>/.exec(html)?.[1];
+      return escape(query.get("title") ?? "") === `Docs: ${title}` && query.get("body")?.includes(url) === true
+        ? []
+        : [`${url}: no "Suggest an edit on GitHub" naming its title and address`];
     }),
     ...[...files]
       .filter(([, html]) => /href="https:\/\/github\.com\/[^"]*\/docs\/adr\/0032-/.test(html))

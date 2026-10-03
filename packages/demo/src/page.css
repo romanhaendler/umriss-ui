@@ -976,7 +976,8 @@
 .exampleLead a,
 .scenarioLead a,
 .callouts a,
-.builtFrom a {
+.builtFrom a,
+.pageEdit a {
   color: var(--u-color-accent-text);
   text-decoration-color: color-mix(in srgb, var(--u-color-accent-text) 40%, transparent);
   text-underline-offset: 2px;
@@ -989,7 +990,8 @@
 .exampleLead a:hover,
 .scenarioLead a:hover,
 .callouts a:hover,
-.builtFrom a:hover {
+.builtFrom a:hover,
+.pageEdit a:hover {
   text-decoration-color: currentColor;
 }
 
@@ -999,9 +1001,17 @@
 .exampleLead a:focus-visible,
 .scenarioLead a:focus-visible,
 .callouts a:focus-visible,
-.builtFrom a:focus-visible {
+.builtFrom a:focus-visible,
+.pageEdit a:focus-visible {
   outline: none;
   box-shadow: var(--u-focus-ring);
+}
+
+/* The column's last line, under every page: where a reader reports a
+   mistake (Shell.tsx). */
+.pageEdit {
+  margin: 0;
+  font-size: var(--u-text-sm);
 }
 
 /* ---------------- Scenarios ---------------- */
