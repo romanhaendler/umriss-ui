@@ -39,12 +39,14 @@ const OUTLINE: readonly Rubric[] = [
         about: ["Read it at a glance.", "One `value`, one limit set."],
         alternatives: [{ when: "A value over time", use: "meter" }],
         keys: [{ key: "Tab", action: "Moves focus to the gauge." }],
+        keysOf: [{ name: "Select", page: "@umriss-ui/core#select" }],
+        accessibility: ["An `img` named by its `ariaLabel`.", "A new reading is announced politely."],
         limits: ["No second needle."],
         types: ["GaugeProps"],
         exports: ["Gauge"],
         installs: true,
       },
-      { id: "meter", name: "Meter", sentence: "One value as a bar.", types: [], exports: ["Meter"] },
+      { id: "meter", name: "Meter", sentence: "One value as a bar.", keysOf: ["gauge"], types: [], exports: ["Meter"] },
     ],
   },
 ];
@@ -135,6 +137,17 @@ describe("llms-full.txt", () => {
     expect(gauge.indexOf("#### API")).toBeLessThan(gauge.indexOf("#### Known limits"));
   });
 
+  it("names under the keyboard table the pages whose keys apply, each linked to its Keyboard section, and the accessibility after it", () => {
+    const gauge = full.slice(full.indexOf("### Gauge"), full.indexOf("### Meter"));
+    expect(gauge).toContain(
+      "| `Tab` | Moves focus to the gauge. |\n\nThe keys of [Select](https://example.test/core/select/#keyboard-select) apply here.\n\n#### Accessibility\n\nAn `img` named by its `ariaLabel`.\n\nA new reading is announced politely.\n\n#### API",
+    );
+    /* A page with no table of its own has the section all the same. */
+    const meter = full.slice(full.indexOf("### Meter"));
+    expect(meter).toContain("#### Keyboard\n\nThe keys of [Gauge](#/gauge/keyboard-gauge) apply here.\n");
+    expect(meter).not.toContain("#### Accessibility");
+  });
+
   it("carries each scenario with its callouts, what it is built from, and its source", () => {
     const scenarios = full.slice(full.indexOf("## Scenarios"), full.indexOf("## Instruments"));
     expect(scenarios).toContain("### Watch a service's latency\n\nAn on-call engineer keeps it open beside the incident channel.");
@@ -191,6 +204,14 @@ describe("the site's pages (ADR-0037)", () => {
     expect(html).toContain("The value the needle points at.");
     expect(html).toContain("<pre><code");
     expect(html).not.toContain("#/");
+  });
+
+  it("anchors the Keyboard and Accessibility sections as the app does, and links the keys of other pages there", () => {
+    const gauge = byPath.get("gauge/")!.html;
+    expect(gauge).toContain('<h2 id="keyboard-gauge">Keyboard</h2>');
+    expect(gauge).toContain('<h2 id="accessibility-gauge">Accessibility</h2>');
+    expect(gauge).toContain('<a href="https://example.test/core/select/#keyboard-select">Select</a>');
+    expect(byPath.get("meter/")!.html).toContain('<a href="https://example.test/fixture/gauge/#keyboard-gauge">Gauge</a>');
   });
 
   it("carries the install command as text on the page that installs", () => {
@@ -256,6 +277,7 @@ describe("the pages' Markdown twins (.scratch/pages-as-markdown)", () => {
     cut
       .replace(/^(#{3,6}) /gm, (_, marks: string) => `${"#".repeat(marks.length - 2)} `)
       .replaceAll("](#/meter/basic)", "](https://example.test/fixture/meter/#basic)")
+      .replaceAll("](#/gauge/keyboard-gauge)", "](https://example.test/fixture/gauge/#keyboard-gauge)")
       .replaceAll("](#/meter)", "](https://example.test/fixture/meter/)");
 
   it("has one per page of the outline, and one for the scenarios page", () => {

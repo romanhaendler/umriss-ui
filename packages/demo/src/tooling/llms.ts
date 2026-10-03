@@ -21,7 +21,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync
 import { dirname, join } from "node:path";
 import { Marked, type Tokens } from "marked";
 import ts from "typescript";
-import { ADR_0032, SCENARIOS, addressOfPlace, addresses, twinOfPlace } from "../outline.ts";
+import { ADR_0032, SCENARIOS, addressOfPlace, addresses, keyboardAnchor, keysOfText, twinOfPlace } from "../outline.ts";
 import type { Moved, Rubric, Page } from "../outline.ts";
 import type { Forwarder } from "./site.ts";
 import { byRank, parseFileName, parseScenarioName } from "./fileName.ts";
@@ -391,6 +391,10 @@ export function renderLlms({ packageDir, outline: written, tables, moved = {}, r
 
   const fullUrl = `${manifest.homepage}llms-full.txt`;
   const install = installCommand(manifest);
+  /* A neighbour's demo stands beside this one on the site, in the directory
+     named after its package. */
+  const neighbour = (packageName: string, pageId: string) =>
+    `${manifest.homepage.replace(/[^/]+\/$/, "")}${packageName.split("/")[1]}${addressOfPlace(`/${pageId}`)}`;
 
   /* The index. */
   const index = [
@@ -480,9 +484,12 @@ export function renderLlms({ packageDir, outline: written, tables, moved = {}, r
       if (page.alternatives !== undefined) {
         parts.push("", "#### When to use something else", "", page.alternatives.map(({ when, use }) => `- ${when} → ${pages.find((one) => one.id === use)?.name ?? use}`).join("\n"));
       }
+      if (page.keys !== undefined || page.keysOf !== undefined) parts.push("", "#### Keyboard");
       if (page.keys !== undefined) {
-        parts.push("", "#### Keyboard", "", "| Key | Action |", "|---|---|", ...page.keys.map(({ key, action }) => `| ${cell(code(key))} | ${cell(action)} |`));
+        parts.push("", "| Key | Action |", "|---|---|", ...page.keys.map(({ key, action }) => `| ${cell(code(key))} | ${cell(action)} |`));
       }
+      if (page.keysOf !== undefined) parts.push("", keysOfText(page.keysOf, pages, neighbour));
+      if (page.accessibility !== undefined) parts.push("", "#### Accessibility", "", page.accessibility.join("\n\n"));
 
       if (page.types.length > 0) {
         parts.push("", "#### API");
@@ -581,10 +588,13 @@ export function renderLlms({ packageDir, outline: written, tables, moved = {}, r
       twins.push({ path: twinOfPlace(`/${page.id}`).slice(1), text: markdownTwin(parts.slice(from, to).join("\n"), home, 2, header(pageUrl(manifest, page)), `/${page.id}`) });
       /* "Demo page: <this page>" is for the agent reading the full text; on
          the page itself it would point at itself. A reference table's heading
-         carries the id the app gives it. */
+         carries the id the app gives it, and so do Keyboard - another page's
+         keys link there - and Accessibility. */
       const anchors = new Map([
         ...examples.filter((example) => example.pageId === page.id).map((example) => [example.title, example.id] as const),
         ...(references[page.id] ?? []).map((table) => [table.title, table.anchor] as const),
+        ["Keyboard", keyboardAnchor(page.id)] as const,
+        ["Accessibility", `accessibility-${page.id}`] as const,
       ]);
       const html = (a: number, b: number, tail = "") =>
         markdownToHtml(`${parts.slice(a, b).filter((line) => !line.startsWith("Demo page: ")).join("\n")}${tail}`, home, 2, anchors);

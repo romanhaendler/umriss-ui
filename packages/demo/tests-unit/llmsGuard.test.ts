@@ -80,6 +80,17 @@ describe.each(Object.keys(ENTRIES))("the llms-full.txt of %s", (dir) => {
       expect(sitePages.find((one) => one.path === `${page.id}/`)!.html, page.id).toContain(`<div class="apiTables">${app}</div>`);
     }
 
+    /* The keys of another page link its Keyboard section, and a page's
+       accessibility stands as a section of its own (.scratch/a11y-and-finish, 01). */
+    for (const page of OUTLINE.flatMap((rubric) => rubric.pages)) {
+      const html = sitePages.find((one) => one.path === `${page.id}/`)!.html;
+      for (const id of (page.keysOf ?? []).filter((one) => typeof one === "string")) {
+        expect(html, page.id).toContain(`/${id}/#keyboard-${id}">`);
+        expect(sitePages.find((one) => one.path === `${id}/`)!.html, id).toContain(`<h2 id="keyboard-${id}">Keyboard</h2>`);
+      }
+      if (page.accessibility !== undefined) expect(html, page.id).toContain(`<h2 id="accessibility-${page.id}">Accessibility</h2>`);
+    }
+
     const names = exportedNames(ENTRIES[dir]!.map((entry) => join(packageDir, entry)));
     expect(names.length).toBeGreaterThan(0);
     expect(missingFrom(full, names)).toEqual([]);

@@ -5,7 +5,7 @@
 import { describe, expect, it } from "vitest";
 import { readExamples, readScenarios } from "../src/tooling/examples";
 import { addressOfPlace, addresses, placeOfLocation, twinOfPlace } from "../src/outline";
-import type { Rubric } from "../src/outline";
+import type { Page, Rubric } from "../src/outline";
 
 const OUTLINE: readonly Rubric[] = [
   {
@@ -162,5 +162,30 @@ describe("a moved page id forwards to its current page", () => {
   it("refuses an old id that is a current page, or a current id that is none, naming the id", () => {
     expect(() => addresses(OUTLINE, { gauge: "gauge" })).toThrow(/`gauge`/);
     expect(() => addresses(OUTLINE, { meter: "dial" })).toThrow(/`dial`/);
+  });
+});
+
+describe("the pages whose keys apply on a page (`keysOf`)", () => {
+  const withKeys = (keysOf: readonly unknown[]): readonly Rubric[] => [
+    {
+      ...OUTLINE[0]!,
+      pages: [
+        { id: "gauge", name: "Gauge", sentence: "One value.", keys: [{ key: "Tab", action: "Moves focus." }], types: [], exports: ["Gauge"] },
+        { id: "meter", name: "Meter", sentence: "One bar.", keysOf: keysOf as Page["keysOf"], types: [], exports: ["Meter"] },
+      ],
+    },
+  ];
+
+  it("takes a page of this demo with a keyboard table, and a neighbour's page as `{ name, page }`", () => {
+    expect(() => addresses(withKeys(["gauge", { name: "Select", page: "@umriss-ui/core#select" }]))).not.toThrow();
+  });
+
+  it("refuses an unknown id at load time, naming the outline's file and the id", () => {
+    expect(() => addresses(withKeys(["dial"]))).toThrow(/demo\/outline\.ts.*`meter`.*"dial"/);
+  });
+
+  it("refuses a page without a keyboard table, and a neighbour's page not written as one", () => {
+    expect(() => addresses(withKeys(["meter"]))).toThrow(/"meter"/);
+    expect(() => addresses(withKeys([{ name: "Select", page: "select" }]))).toThrow(/Select/);
   });
 });

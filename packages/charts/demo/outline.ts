@@ -67,6 +67,11 @@ export const OUTLINE: readonly Rubric[] = [
           { key: "0", action: "Show the whole domain again." },
           { key: "Escape", action: "Clears the active point." },
         ],
+        accessibility: [
+          "The plot is an image named by `ariaLabel` and described by a summary: the series, the visible stretch and each series' lowest and highest value in it. With a `Tooltip` it becomes one tab stop, the role `application` read as \"chart\", and the summary adds the keys. Pass `ariaLabel`: without it the plot has no name, and the development build warns.",
+          "When a key comes to rest, a polite live region beside the plot reads the active position and every series' value there, as the tooltip shows it; a pointer announces nothing. A reader who wants every value at once opens the `DataTable` (on [Tooltip & Legend](#/tooltip)), a plain table of what the chart shows.",
+          "Under forced colours the chart draws in the system colours and tells its series apart by their marks instead of by colour. With reduced motion the tooltip appears without fading in.",
+        ],
         limits: [
           "No loading or error state of its own: show a `Skeleton` or an `Alert` from @umriss-ui/core until the rows are there.",
           "No pie, donut, radar or candlestick, no smoothing, animation or export, no WebGL (ADR-0032).",
@@ -102,6 +107,7 @@ export const OUTLINE: readonly Rubric[] = [
           { when: "A quantity read from its foot", use: "area" },
           { when: "Single samples with nothing measured between them", use: "scatter" },
         ],
+        keysOf: ["chart"],
         limits: ["No smoothing: a curve between two readings would invent values nobody measured (ADR-0032)."],
         types: ["LineProps"],
         exports: ["Line"],

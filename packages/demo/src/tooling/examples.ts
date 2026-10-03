@@ -29,7 +29,7 @@
    with the source still eager - not a hand-kept list. */
 
 import type { ComponentType } from "react";
-import type { Page } from "../outline";
+import { isForeign, type ForeignPage, type Page } from "../outline";
 import { byRank, parseFileName, parseScenarioName } from "./fileName";
 import { displaySource } from "./source";
 
@@ -58,13 +58,7 @@ export interface ExampleModule {
   lead?: unknown;
 }
 
-/** A page this demo does not have: a component of a neighbouring package,
-    linked into that package's demo. */
-export interface ForeignPage {
-  name: string;
-  /** `"@umriss-ui/charts#trend"` - the package and the page's address. */
-  page: string;
-}
+export type { ForeignPage };
 
 /** A composed screen on the scenarios page. */
 export interface Scenario {
@@ -176,8 +170,3 @@ export function readScenarios(
   return found.sort(byRank);
 }
 
-function isForeign(value: unknown): value is ForeignPage {
-  if (typeof value !== "object" || value === null) return false;
-  const { name, page } = value as Record<string, unknown>;
-  return typeof name === "string" && typeof page === "string" && /^@[\w-]+\/[\w-]+#[\w-]+$/.test(page);
-}

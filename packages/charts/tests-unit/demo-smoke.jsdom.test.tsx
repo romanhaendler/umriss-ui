@@ -64,6 +64,22 @@ describe("Demo smoke test", () => {
     await unmount();
   });
 
+  it("links the Chart page's keys from the Line page, and says on the Chart page what a screen reader meets", async () => {
+    const page = (id: string) => ALL_PAGES.find((one) => one.id === id)!;
+    const line = await mount(<Page demo={DEMO} page={page("line")} />);
+    const keyboard = line.host.querySelector('section[aria-labelledby="keyboard-line"]');
+    expect(keyboard?.textContent).toContain("The keys of Chart apply here.");
+    expect(keyboard?.querySelector("a")?.getAttribute("href")).toBe("/chart/#keyboard-chart");
+    await line.unmount();
+
+    const chart = await mount(<Page demo={DEMO} page={page("chart")} />);
+    const sections = [...chart.host.querySelectorAll(".section h2")].map((h) => h.textContent);
+    expect(sections.indexOf("Accessibility")).toBe(sections.indexOf("Keyboard") + 1);
+    expect(chart.host.querySelector("#keyboard-chart")).not.toBeNull();
+    expect(chart.host.querySelector('section[aria-labelledby="accessibility-chart"] p')).not.toBeNull();
+    await chart.unmount();
+  });
+
   it.each(EXAMPLES.map((b) => [`${b.pageId}/${b.id}`, b] as const))("renders the example %s", async (_name, example) => {
     const { unmount } = await mount(<example.Component />);
     await unmount();
