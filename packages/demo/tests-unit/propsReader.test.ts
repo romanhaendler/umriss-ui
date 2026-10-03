@@ -229,6 +229,37 @@ describe("readProps over JSDoc tags", () => {
   });
 });
 
+describe("readProps over a component that unpacks its props in its body", () => {
+  const BODY = join(FIXTURES, "body.tsx");
+  const TWIN = join(FIXTURES, "bodyTwin.tsx");
+
+  it("reads `const { … } = props` as it reads the parameter list", () => {
+    /* `Chart`, the series, the axes and the limits of @umriss-ui/charts. */
+    const { types } = readProps([BODY], ["FixtureMarkProps"]);
+    const defaults = Object.fromEntries(types.FixtureMarkProps!.props.map((p) => [p.name, p.defaultValue]));
+    expect(defaults).toEqual({ strokeWidth: "1.5", padding: "8", zoneLines: "true", gap: "4", axisId: '"x"' });
+  });
+
+  it("lets a tag name the value of a constant the pattern names", () => {
+    /* `laneHeight = DEFAULT_LANE_HEIGHT` in @umriss-ui/schedule, tagged `44`:
+       the reader cannot import the constant, the value it can read. */
+    const { types } = readProps([BODY], ["FixtureMarkProps"]);
+    expect(types.FixtureMarkProps!.props.find((p) => p.name === "gap")!.defaultValue).toBe("4");
+  });
+
+  it("stops where a body default and `@default` disagree, with file and line", () => {
+    expect(() => readProps([BODY], ["FixtureBodyConflictProps"])).toThrow(/body\.tsx:35 .*padding.*`4`.*`8`/);
+  });
+
+  it("gives each of two same-named private interfaces its own members", () => {
+    /* `CommonProps` of the axes and of the limits in @umriss-ui/charts: a
+       name means the declaration it refers to in its own file. */
+    const { types } = readProps([BODY, TWIN], ["FixtureMarkProps", "FixtureLimitProps"]);
+    expect(types.FixtureMarkProps!.props.map((p) => p.name)).toEqual(["strokeWidth", "padding", "zoneLines", "gap", "axisId"]);
+    expect(types.FixtureLimitProps!.props.map((p) => p.name)).toEqual(["severity", "value"]);
+  });
+});
+
 describe("readProps over a union whose arms forbid a member", () => {
   /* `FieldColumn` in @umriss-ui/table: `aggregate` and its old name `footer`,
      each `never` in the other's arm. A `never` is a prohibition, not a shape. */

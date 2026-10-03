@@ -145,12 +145,20 @@ export function readProps(files: readonly string[], typeNames: readonly string[]
   });
   const checker = program.getTypeChecker();
 
+  const isExported = (declaration: Declaration): boolean =>
+    (ts.getCombinedModifierFlags(declaration) & ts.ModifierFlags.Export) !== 0;
+
+  /* By name only for what the caller asks for, and there an exported
+     declaration wins over a private one of the same name. Inside the source a
+     name is resolved by the checker (`declarationOf`): two private
+     `CommonProps` in two files are two types. */
   const declarations = new Map<string, Declaration>();
   for (const file of program.getSourceFiles()) {
     if (file.isDeclarationFile) continue;
     ts.forEachChild(file, (node) => {
       if (ts.isInterfaceDeclaration(node) || ts.isTypeAliasDeclaration(node)) {
-        declarations.set(node.name.text, node);
+        const known = declarations.get(node.name.text);
+        if (known === undefined || !isExported(known)) declarations.set(node.name.text, node);
       }
     });
   }
@@ -179,10 +187,18 @@ export function readProps(files: readonly string[], typeNames: readonly string[]
     return [...named].filter((name) => parameterNames.has(name) && !bound.has(name));
   };
 
-  const cache = new Map<string, TypeEntry>();
-  const gaps: Gap[] = [];
+  const cache = new Map<Declaration, TypeEntry>();
+  const gaps: { of: Declaration; gap: Gap }[] = [];
   /* "Public" means here: stands in some table. */
-  const isPublic = new Set(typeNames);
+  const isPublic = new Set(
+    typeNames.map((typeName) => {
+      const declaration = declarations.get(typeName);
+      if (declaration === undefined) {
+        throw new Error(`\`${typeName}\` is required, but is not declared in the files that were read.`);
+      }
+      return declaration;
+    }),
+  );
 
   /* ---------------------------------------------------------------- */
 
@@ -240,6 +256,22 @@ export function readProps(files: readonly string[], typeNames: readonly string[]
   /** The name of a type reference without its arguments: `Foo<T>` -> `Foo`. */
   const rootName = (type: ts.Node): string | undefined => reference(type)?.name;
 
+  /** The declaration a reference means, in these files - through the
+      checker's symbol and any import, not by its name. */
+  const declarationOf = (node: ts.Node): Declaration | undefined => {
+    const at = ts.isTypeReferenceNode(node)
+      ? ts.isIdentifier(node.typeName) ? node.typeName : node.typeName.right
+      : ts.isExpressionWithTypeArguments(node)
+        ? ts.isPropertyAccessExpression(node.expression) ? node.expression.name : node.expression
+        : undefined;
+    let symbol = at === undefined ? undefined : checker.getSymbolAtLocation(at);
+    if (symbol !== undefined && (symbol.flags & ts.SymbolFlags.Alias) !== 0) symbol = checker.getAliasedSymbol(symbol);
+    return symbol?.declarations?.find(
+      (d): d is Declaration =>
+        (ts.isInterfaceDeclaration(d) || ts.isTypeAliasDeclaration(d)) && !d.getSourceFile().isDeclarationFile,
+    );
+  };
+
   /* ---------------------------------------------------------------- */
   /* Standardwerte                                                     */
   /* ---------------------------------------------------------------- */
@@ -252,13 +284,13 @@ export function readProps(files: readonly string[], typeNames: readonly string[]
   const belongsTo = (
     fn: ts.Node,
     parameter: ts.ParameterDeclaration,
-    typeName: string,
+    declaration: Declaration,
   ): boolean => {
-    if (parameter.type !== undefined && rootName(parameter.type) === typeName) return true;
+    if (parameter.type !== undefined && declarationOf(parameter.type) === declaration) return true;
     const parentNode: ts.Node | undefined = fn.parent;
     if (parentNode !== undefined && ts.isCallExpression(parentNode)) {
       for (const argument of parentNode.typeArguments ?? []) {
-        if (rootName(argument) === typeName) return true;
+        if (declarationOf(argument) === declaration) return true;
       }
     }
     return false;
@@ -268,10 +300,36 @@ export function readProps(files: readonly string[], typeNames: readonly string[]
 
       From there and nowhere else. Inventing a default out of a type - `boolean`
       therefore `false` - would be guessing, and a guessed default in a table is
-      worse than an empty column. */
-  const defaultValues = (declaration: Declaration): Map<string, string> => {
-    const values = new Map<string, string>();
-    const wanted = declaration.name.text;
+      worse than an empty column. The props are unpacked in the parameter list
+      (`({ size = "md" }: ButtonProps)`) or in the body (`const { height = 300 }
+      = props`), and both count. */
+  const defaultValues = (declaration: Declaration): Map<string, ts.Expression> => {
+    const values = new Map<string, ts.Expression>();
+    const take = (pattern: ts.ObjectBindingPattern): void => {
+      for (const element of pattern.elements) {
+        if (element.initializer === undefined) continue;
+        const name = element.propertyName ?? element.name;
+        if (ts.isIdentifier(name) || ts.isStringLiteral(name)) {
+          values.set(name.text, element.initializer);
+        }
+      }
+    };
+    /** Every `const { … } = props` in a body, where `props` is that parameter. */
+    const takeFromBody = (body: ts.Node, props: ts.Symbol): void => {
+      const visit = (node: ts.Node): void => {
+        if (
+          ts.isVariableDeclaration(node) &&
+          ts.isObjectBindingPattern(node.name) &&
+          node.initializer !== undefined &&
+          ts.isIdentifier(node.initializer) &&
+          checker.getSymbolAtLocation(node.initializer) === props
+        ) {
+          take(node.name);
+        }
+        ts.forEachChild(node, visit);
+      };
+      visit(body);
+    };
     const visit = (node: ts.Node): void => {
       if (
         (ts.isFunctionDeclaration(node) ||
@@ -280,13 +338,11 @@ export function readProps(files: readonly string[], typeNames: readonly string[]
         node.parameters.length > 0
       ) {
         const first = node.parameters[0]!;
-        if (ts.isObjectBindingPattern(first.name) && belongsTo(node, first, wanted)) {
-          for (const element of first.name.elements) {
-            if (element.initializer === undefined) continue;
-            const name = element.propertyName ?? element.name;
-            if (ts.isIdentifier(name) || ts.isStringLiteral(name)) {
-              values.set(name.text, textOf(element.initializer));
-            }
+        if (belongsTo(node, first, declaration)) {
+          if (ts.isObjectBindingPattern(first.name)) take(first.name);
+          else if (ts.isIdentifier(first.name) && node.body !== undefined) {
+            const props = checker.getSymbolAtLocation(first.name);
+            if (props !== undefined) takeFromBody(node.body, props);
           }
         }
       }
@@ -300,17 +356,18 @@ export function readProps(files: readonly string[], typeNames: readonly string[]
   /* Members and where they stand                                      */
   /* ---------------------------------------------------------------- */
 
-  /** Where an entry is explained - for reporting a gap, even where the entry
-      ends up as a copy in another table. */
-  const places = new WeakMap<PropEntry, { file: string; line: number }>();
+  /** The member an entry is read from - for reporting a gap and checking a
+      default, even where the entry ends up as a copy in another table. */
+  const sources = new WeakMap<PropEntry, ts.PropertySignature>();
   const withPlace = (from: PropEntry, to: PropEntry): PropEntry => {
-    const place = places.get(from);
-    if (place !== undefined) places.set(to, place);
+    const source = sources.get(from);
+    if (source !== undefined) sources.set(to, source);
     return to;
   };
-
-  const isExported = (declaration: Declaration): boolean =>
-    (ts.getCombinedModifierFlags(declaration) & ts.ModifierFlags.Export) !== 0;
+  const placeOf = (member: ts.PropertySignature): { file: string; line: number } => {
+    const file = member.getSourceFile();
+    return { file: file.fileName, line: file.getLineAndCharacterOfPosition(member.getStart(file)).line + 1 };
+  };
 
   /** A helper type's type parameters replaced by the arguments at its use -
       over identifiers, not over substrings. */
@@ -397,41 +454,73 @@ export function readProps(files: readonly string[], typeNames: readonly string[]
     return literals === undefined ? undefined : [...new Set(literals)].join(" | ");
   };
 
-  /** One member as an entry, together with the component's default. */
-  const entryOf = (
-    member: ts.PropertySignature,
-    defaults: ReadonlyMap<string, string>,
-    substitutions: ReadonlyMap<string, string> = new Map(),
-  ): PropEntry => {
-    const key = propName(member);
-    const file = member.getSourceFile();
-    const line = file.getLineAndCharacterOfPosition(member.getStart(file)).line + 1;
-    const fromPattern = defaults.get(key);
+  /** One member as an entry, with the default its `@default` tag names. */
+  const entryOf = (member: ts.PropertySignature, substitutions: ReadonlyMap<string, string> = new Map()): PropEntry => {
     const fromTag = tagOf(member, "default");
-    /* The tag wins, and it may not say what the code does not do: a table
-       showing a default the component never sets is worse than an empty
-       column. */
-    if (fromTag !== undefined && fromPattern !== undefined && fromTag !== fromPattern.trim()) {
-      throw new Error(
-        `${file.fileName}:${line}  ${key}: \`@default\` says \`${fromTag}\`, the destructuring pattern \`${fromPattern}\`.`,
-      );
-    }
-    const defaultValue = fromTag ?? fromPattern;
     const deprecated = tagOf(member, "deprecated");
     const expansion = member.type === undefined ? undefined : expansionOf(member.type);
     const entry: PropEntry = {
-      name: key,
+      name: propName(member),
       type: member.type === undefined ? "unknown" : substitute(textOf(member.type), substitutions),
       ...(expansion === undefined ? {} : { expansion }),
       optional: member.questionToken !== undefined,
-      ...(defaultValue === undefined ? {} : { defaultValue }),
+      ...(fromTag === undefined ? {} : { defaultValue: fromTag }),
       ...(fromTag !== undefined && !isValue(fromTag) ? { defaultIsPhrase: true as const } : {}),
       ...(deprecated === undefined ? {} : { deprecated }),
       description: descriptionOf(member.name),
     };
-    places.set(entry, { file: file.fileName, line });
+    sources.set(entry, member);
     return entry;
   };
+
+  /** What a constant in the pattern stands for: `DEFAULT_LANE_HEIGHT` is
+      `44`, and a tag may say so rather than name what nobody can import. */
+  const constantOf = (node: ts.Expression): string | undefined => {
+    if (!ts.isIdentifier(node)) return undefined;
+    let symbol = checker.getSymbolAtLocation(node);
+    if (symbol !== undefined && (symbol.flags & ts.SymbolFlags.Alias) !== 0) symbol = checker.getAliasedSymbol(symbol);
+    const declaration = symbol?.valueDeclaration;
+    return declaration !== undefined &&
+      ts.isVariableDeclaration(declaration) &&
+      declaration.initializer !== undefined &&
+      (ts.getCombinedNodeFlags(declaration) & ts.NodeFlags.Const) !== 0
+      ? textOf(declaration.initializer)
+      : undefined;
+  };
+
+  /** The component's defaults laid over a table's rows - its own members and
+      the inherited ones alike, since `XAxis` sets the `id` its parent declares.
+
+      The tag wins, and it may not say what the code does not do: a table
+      showing a default the component never sets is worse than an empty
+      column. */
+  const withDefaults = (props: readonly PropEntry[], defaults: ReadonlyMap<string, ts.Expression>): PropEntry[] =>
+    props.map((p) => {
+      const pattern = defaults.get(p.name);
+      if (pattern === undefined) return p;
+      const fromPattern = textOf(pattern);
+      const member = sources.get(p);
+      const fromTag = member === undefined ? undefined : tagOf(member, "default");
+      if (fromTag === undefined) {
+        /* The default stands where `entryOf` puts it, so that the JSON reads
+           the same row by row. */
+        const head = {
+          name: p.name,
+          type: p.type,
+          ...(p.expansion === undefined ? {} : { expansion: p.expansion }),
+          optional: p.optional,
+          defaultValue: fromPattern,
+        };
+        return withPlace(p, Object.assign(head, p, { defaultValue: fromPattern }));
+      }
+      if (fromTag !== fromPattern && fromTag !== constantOf(pattern)) {
+        const { file, line } = placeOf(member!);
+        throw new Error(
+          `${file}:${line}  ${p.name}: \`@default\` says \`${fromTag}\`, the destructuring pattern \`${fromPattern}\`.`,
+        );
+      }
+      return p;
+    });
 
   /** The members of every branch of a conditional type, once per name.
 
@@ -451,7 +540,7 @@ export function readProps(files: readonly string[], typeNames: readonly string[]
     const found = new Map<string, PropEntry>();
     for (const branch of branches) {
       for (const member of membersOf(branch)) {
-        const entry = entryOf(member, new Map(), substitutions);
+        const entry = entryOf(member, substitutions);
         const previous = found.get(entry.name);
         if (previous === undefined) {
           found.set(entry.name, entry);
@@ -586,7 +675,7 @@ export function readProps(files: readonly string[], typeNames: readonly string[]
       return { inherits: printed ?? UNKNOWN_ELEMENT, omitted: [], props: [] };
     }
 
-    const own = declarations.get(name);
+    const own = declarationOf(type);
     if (own !== undefined && ts.isTypeAliasDeclaration(own) && ts.isConditionalTypeNode(own.type)) {
       /* A conditional helper type is a mechanism and not a type a reader
          knows: its members stand without an origin, with the type arguments of
@@ -629,7 +718,7 @@ export function readProps(files: readonly string[], typeNames: readonly string[]
 
   function readType(declaration: Declaration, depth = 0): TypeEntry {
     const name = declaration.name.text;
-    const done = cache.get(name);
+    const done = cache.get(declaration);
     if (done !== undefined) return done;
 
     const defaults = defaultValues(declaration);
@@ -651,7 +740,7 @@ export function readProps(files: readonly string[], typeNames: readonly string[]
 
     if (ts.isInterfaceDeclaration(declaration)) {
       /* An interface: its own members, then what it inherits. */
-      for (const member of membersOf(declaration)) props.push(entryOf(member, defaults));
+      for (const member of membersOf(declaration)) props.push(entryOf(member));
       const inherited: PropEntry[] = [];
       for (const clause of declaration.heritageClauses ?? []) {
         for (const entry of clause.types) takeInheritance(entry, inherited);
@@ -666,9 +755,10 @@ export function readProps(files: readonly string[], typeNames: readonly string[]
         const parts = ts.isIntersectionTypeNode(arm) ? arm.types : [arm];
         for (const part of parts) {
           const partName = rootName(part);
+          const partDeclaration = declarationOf(part);
           if (ts.isTypeLiteralNode(part)) {
-            for (const member of membersOf(part)) into.push(entryOf(member, defaults));
-          } else if (!inUnion && partName !== undefined && isPublic.has(partName) && declarations.has(partName)) {
+            for (const member of membersOf(part)) into.push(entryOf(member));
+          } else if (!inUnion && partName !== undefined && partDeclaration !== undefined && isPublic.has(partDeclaration)) {
             if (!alsoTakes.includes(partName)) alsoTakes.push(partName);
           } else {
             takeInheritance(part, into);
@@ -694,15 +784,18 @@ export function readProps(files: readonly string[], typeNames: readonly string[]
 
     /* A member that is `never` and nothing else is a prohibition with nothing
        to pass: no row. */
-    const unique = uniqueByName(props).filter((p) => p.type !== "never");
+    const unique = withDefaults(
+      uniqueByName(props).filter((p) => p.type !== "never"),
+      defaults,
+    );
 
     /* A gap belongs to the table in which the prop stands without an origin:
        that is where somebody reads it. With an origin it is reported at the
        parent, where the parent has a page. */
     for (const prop of unique) {
       if (prop.description !== "" || prop.inheritedFrom !== undefined) continue;
-      const place = places.get(prop);
-      if (place !== undefined) gaps.push({ type: name, prop: prop.name, ...place });
+      const source = sources.get(prop);
+      if (source !== undefined) gaps.push({ of: declaration, gap: { type: name, prop: prop.name, ...placeOf(source) } });
     }
 
     const entry: TypeEntry = {
@@ -713,16 +806,13 @@ export function readProps(files: readonly string[], typeNames: readonly string[]
       props: unique,
       ...(alsoTakes.length === 0 ? {} : { alsoTakes }),
     };
-    cache.set(name, entry);
+    cache.set(declaration, entry);
     return entry;
   }
 
   const types: Record<string, TypeEntry> = {};
   for (const typeName of typeNames) {
-    const declaration = declarations.get(typeName);
-    if (declaration === undefined) {
-      throw new Error(`\`${typeName}\` is required, but is not declared in the files that were read.`);
-    }
+    const declaration = declarations.get(typeName)!;
     const entry = readType(declaration);
     const introduced = new Set((declaration.typeParameters ?? []).map((p) => p.name.text));
     for (const prop of entry.props) {
@@ -739,5 +829,5 @@ export function readProps(files: readonly string[], typeNames: readonly string[]
 
   /* Only what really ends up in a table. A type that was read only as a
      parent and has no page of its own is not chased. */
-  return { types, gaps: gaps.filter((l) => isPublic.has(l.type)) };
+  return { types, gaps: gaps.filter((l) => isPublic.has(l.of)).map((l) => l.gap) };
 }
