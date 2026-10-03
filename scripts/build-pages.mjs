@@ -57,6 +57,7 @@ import { dependencyLine, installCommand } from "../packages/demo/src/tooling/ins
 import { documentFaults, forwarderHtml, frontFaults, siteFaults, twinFaults, typeLinkFaults } from "../packages/demo/src/tooling/site.ts";
 import { adrLinksOf, siteLeaks } from "../packages/demo/src/tooling/references.ts";
 import { DOCUMENTS, renderDocument } from "../packages/demo/src/tooling/documents.ts";
+import { EDIT_LINK, editHref } from "../packages/demo/src/tooling/edit.ts";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SITE = join(ROOT, "site");
@@ -273,7 +274,8 @@ if (existsSync(join(ROOT, "scripts", PREVIEWS))) cpSync(join(ROOT, "scripts", PR
 
 /* A document page: the front page's layout - its head, header, foot and theme
    - with the document in place of the front page's <main>, and the layout's
-   relative addresses climbing to the site's root. */
+   relative addresses climbing to the site's root. The document ends with
+   "Suggest an edit on GitHub", as every demo page does. */
 if (!/<main>[\s\S]*<\/main>/.test(FRONT_PAGE)) throw new Error("front-page.html has lost its <main>.");
 for (const document of documents) {
   const up = "../".repeat(document.path.split("/").filter(Boolean).length);
@@ -283,7 +285,8 @@ for (const document of documents) {
     jsonLd: "",
   }).replace(/(href="|src="|url\()\.\//g, `$1${up}`);
   mkdirSync(join(SITE, document.path), { recursive: true });
-  writeFileSync(join(SITE, document.path, "index.html"), layout.replace("\u0000", () => document.html));
+  const edit = `<p class="edit"><a href="${escape(editHref(document.title, document.url))}">${EDIT_LINK}</a></p>`;
+  writeFileSync(join(SITE, document.path, "index.html"), layout.replace("\u0000", () => `${document.html}\n${edit}`));
 }
 
 /* Every address, once. Google reads `lastmod` only where it is true; the
@@ -346,7 +349,8 @@ ${rows.map((row) => `- [${row.name}](${HOME}${row.dir}/llms.txt): ${row.descript
    in every llms.txt leads to a file (pages-as-markdown); the front page keeps
    its words, its links lead into the site and its tiles' previews are there
    and light enough (site-front-page); every document has its page, its links
-   lead to sitemap addresses, and no page links ADR-0032 on GitHub
+   lead to sitemap addresses, it ends with a suggested edit naming it, and
+   no page links ADR-0032 on GitHub
    (concepts-and-changelog-pages). A build that breaks
    it fails here, before it is deployed. */
 const files = new Map();

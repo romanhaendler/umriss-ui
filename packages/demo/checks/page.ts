@@ -148,6 +148,26 @@ test("the known limits link what umriss-ui is not on the site", async ({ page })
   await expect(links.first()).toBeVisible();
   for (const link of await links.all()) await expect(link).toHaveAttribute("href", ADR_0032);
 });
+
+/* Suggest an edit (.scratch/concepts-and-changelog-pages): a page's last link
+   opens GitHub's new-issue form, already naming the page - its title and its
+   address - on the first page and after a move to another. */
+test("the page ends with a suggested edit on GitHub that names it", async ({ page }) => {
+  const expectNamed = async () => {
+    const link = page.getByRole("link", { name: "Suggest an edit on GitHub" });
+    await expect(page.locator("main a").last()).toHaveText("Suggest an edit on GitHub");
+    const href = new URL((await link.getAttribute("href")) ?? "");
+    const here = new URL(page.url());
+    expect(href.origin + href.pathname).toBe("https://github.com/romanhaendler/umriss-ui/issues/new");
+    expect(href.searchParams.get("title")).toBe(`Docs: ${await page.title()}`);
+    expect(href.searchParams.get("body")).toBe(`${here.origin}${here.pathname}\n\n`);
+  };
+  await open(page, p.pageId);
+  await expectNamed();
+  await page.getByRole("navigation", { name: "Components" }).getByText(p.other.name, { exact: true }).click();
+  await expect(page.locator(`[data-block="${p.other.pageId}"]`)).toBeVisible();
+  await expectNamed();
+});
 }
 
 export interface InstallProbes {
