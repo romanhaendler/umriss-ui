@@ -223,6 +223,15 @@ describe("the type links' guard (.scratch/types-without-holes)", () => {
       `${HOME}axis/: links #type-Axis on ${HOME}gone/, which has no such id`,
     ]);
   });
+
+  it("holds a row's link `#<Type>-<prop>` to a row with that id on its page, and leaves an example's anchor alone", () => {
+    const rows = new Map([
+      [search, '<tr id="TableProps-pageSize"><th><a href="#TableProps-pageSize">pageSize</a></th></tr><a href="../view/#TableSnapshot-setPage">setPage</a><a href="../view/#first-table">First table</a>'],
+      [view, '<tr id="TableSnapshot-setPage"></tr>'],
+    ]);
+    expect(typeLinkFaults(rows)).toEqual([]);
+    expect(typeLinkFaults(new Map([...rows, [view, "<tr></tr>"]]))).toEqual([`${search}: links #TableSnapshot-setPage on ${view}, which has no such id`]);
+  });
 });
 
 describe("the guard over the document pages (.scratch/concepts-and-changelog-pages)", () => {

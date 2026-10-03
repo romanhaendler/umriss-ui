@@ -152,13 +152,16 @@ export function frontFaults(
   ];
 }
 
-/** What the API sections' type links get wrong, one line each
-    (.scratch/types-without-holes): every link to a `#type-<Name>` leads to a
-    page of the site that carries that id - a props table's heading or a
-    definition in "Types on this page". `files` as for `siteFaults`. */
+/** What the API sections' type and row links get wrong, one line each
+    (.scratch/types-without-holes, .scratch/props-to-examples): every link to
+    a `#type-<Name>` or a `#<Type>-<prop>` leads to a page of the site that
+    carries that id - a props table's heading, a definition in "Types on this
+    page", a row. A type's name is PascalCase and an example's anchor lower
+    case, so the one pattern finds rows and never an example. `files` as for
+    `siteFaults`. */
 export function typeLinkFaults(files: ReadonlyMap<string, string>): string[] {
   return [...files].flatMap(([url, html]) =>
-    [...html.matchAll(/href="([^"]*#type-[^"]*)"/g)].flatMap((match) => {
+    [...html.matchAll(/href="([^"]*#(?:type-|[A-Z][A-Za-z0-9]*-)[^"]*)"/g)].flatMap((match) => {
       const target = new URL(match[1]!.replace(/&amp;/g, "&"), url);
       const id = target.hash.slice(1);
       target.hash = "";

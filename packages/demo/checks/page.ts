@@ -168,6 +168,29 @@ test("the page ends with a suggested edit on GitHub that names it", async ({ pag
   await expect(page.locator(`[data-block="${p.other.pageId}"]`)).toBeVisible();
   await expectNamed();
 });
+
+/* Every row names the examples that show it, and is an address of its own
+   (.scratch/props-to-examples). A row of the main group: it never folds. */
+const mainRows = (page: Page) => page.locator(".apiBlock > .apiRole tbody tr");
+
+test("a row's \"Shown in\" link lands on the example, in view", async ({ page }) => {
+  await open(page, p.pageId);
+  const link = mainRows(page).locator(`.apiShown a[href^="../${p.pageId}/#"]`).first();
+  const anchor = (await link.getAttribute("href"))!.split("#")[1]!;
+  await link.click();
+  await expect(page).toHaveURL(new RegExp(`/${p.pageId}/#${anchor}$`));
+  await expect(example(page, anchor)).toBeInViewport();
+});
+
+test("a row's name puts the row's anchor into the address", async ({ page }) => {
+  await open(page, p.pageId);
+  const row = mainRows(page).first();
+  const id = (await row.getAttribute("id"))!;
+  expect(id).toMatch(/^[A-Z]\w*-/);
+  await row.locator("th a").click();
+  await expect(page).toHaveURL(new RegExp(`/${p.pageId}/#${id}$`));
+  await expect(row).toBeInViewport();
+});
 }
 
 export interface InstallProbes {

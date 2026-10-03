@@ -14,7 +14,7 @@
    generator alike, which is why the import carries its extension. */
 
 import { addressOfPlace } from "../outline.ts";
-import type { PropEntry, TypeEntry } from "./propsReader.ts";
+import type { PropEntry, ShownIn, TypeEntry } from "./propsReader.ts";
 
 /** A piece of a written text - the marks a page's texts may carry. */
 export type Span =
@@ -41,6 +41,9 @@ export interface ApiRow {
   origin?: string;
   /** Small labels after the name - `required`. */
   badges: readonly string[];
+  /** "Shown in" and up to three examples as links, then "and N more" -
+      absent where no example uses the row (.scratch/props-to-examples). */
+  shownIn?: readonly Span[];
 }
 
 export interface ApiGroup {
@@ -141,7 +144,22 @@ function linked(value: string, references: readonly string[], linkOf: LinkOf): S
   return out;
 }
 
-function row(prop: PropEntry, linkOf: LinkOf): ApiRow {
+/** How many examples a row names before "and N more". */
+const SHOWN = 3;
+
+/** The "Shown in" line: the examples of the page the table stands on first,
+    in the data's order otherwise; one on another page with that page's name. */
+function shownLine(shown: readonly ShownIn[], pageId: string | undefined): Span[] {
+  const ordered = [...shown.filter((one) => one.page === pageId), ...shown.filter((one) => one.page !== pageId)];
+  const links = ordered.slice(0, SHOWN).flatMap((one, i): Span[] => [
+    ...(i === 0 ? [] : [text(", ")]),
+    { kind: "link", text: one.page === pageId ? one.title : `${one.title} (${one.pageName})`, href: `#/${one.page}/${one.example}` },
+  ]);
+  const more = ordered.length - SHOWN;
+  return [text("Shown in: "), ...links, ...(more > 0 ? [text(` and ${more} more`)] : [])];
+}
+
+function row(prop: PropEntry, linkOf: LinkOf, pageId?: string): ApiRow {
   return {
     name: prop.name,
     type: linked(prop.type, prop.references ?? [], linkOf),
@@ -153,6 +171,7 @@ function row(prop: PropEntry, linkOf: LinkOf): ApiRow {
     description: spansOf(prop.description),
     ...(prop.inheritedFrom === undefined ? {} : { origin: prop.inheritedFrom }),
     badges: prop.optional ? [] : ["required"],
+    ...(prop.shownIn === undefined || prop.shownIn.length === 0 ? {} : { shownIn: shownLine(prop.shownIn, pageId) }),
   };
 }
 
@@ -208,7 +227,7 @@ function arranged(props: readonly PropEntry[]): PropEntry[] {
 /** One entry as a table: the main group, then Events, Accessibility and
     Styling - each only where a row falls into it. `linkOf` says where a type
     a cell names leads. */
-export function tableModel(entry: TypeEntry, linkOf: LinkOf = () => undefined): ApiTableModel {
+export function tableModel(entry: TypeEntry, linkOf: LinkOf = () => undefined, pageId?: string): ApiTableModel {
   const names = new Set(entry.props.map((prop) => prop.name));
   const alsoTakes = entry.alsoTakes ?? [];
   const closing: Span[][] = [];
@@ -232,7 +251,7 @@ export function tableModel(entry: TypeEntry, linkOf: LinkOf = () => undefined): 
     heading: entry.parameter.length === 0 ? entry.name : `${entry.name}<${entry.parameter.join(", ")}>`,
     anchor: `type-${entry.name}`,
     groups: GROUPS.flatMap((group) => {
-      const rows = arranged(entry.props.filter((prop) => groupOf(prop.name, names) === group.label)).map((prop) => row(prop, linkOf));
+      const rows = arranged(entry.props.filter((prop) => groupOf(prop.name, names) === group.label)).map((prop) => row(prop, linkOf, pageId));
       return rows.length === 0 ? [] : [{ ...group, rows }];
     }),
     closing,
@@ -267,14 +286,14 @@ export function apiSection(page: ApiPage, pages: readonly ApiPage[], entries: Re
     if (!defined.includes(name)) defined.push(name);
     return `#type-${name}`;
   };
-  const tables = page.types.map((name) => tableModel(entryOf(name), linkOf));
+  const tables = page.types.map((name) => tableModel(entryOf(name), linkOf, page.id));
   const definitions: ApiDefinitionModel[] = [];
   /* `linkOf` adds to `defined` while it is walked. */
   for (let i = 0; i < defined.length; i++) {
     const entry = entryOf(defined[i]!);
     const definition = entry.definition!;
     definitions.push({
-      ...tableModel(entry, linkOf),
+      ...tableModel(entry, linkOf, page.id),
       ...(definition.from === undefined ? {} : { from: definition.from }),
       description: spansOf(definition.description),
       ...(definition.declaration === undefined ? {} : { declaration: linked(definition.declaration, definition.references ?? [], linkOf) }),
@@ -380,10 +399,11 @@ function groupHtml(name: string, group: ApiGroup, fold: boolean): string {
     (one) =>
       /* `<Type>-<prop>`: a row is an address (.scratch/props-to-examples). */
       `<tr id="${escape(`${name}-${one.name}`)}">` +
-      `<th scope="row"><code>${escape(one.name)}</code>${one.badges.map((badge) => `<span class="apiBadge">${escape(badge)}</span>`).join("")}</th>` +
+      /* The name is a link to its own row, so that its address can be copied. */
+      `<th scope="row"><a class="apiAnchor" href="#${escape(`${name}-${one.name}`)}"><code>${escape(one.name)}</code></a>${one.badges.map((badge) => `<span class="apiBadge">${escape(badge)}</span>`).join("")}</th>` +
       `<td><code class="apiType">${typeHtml(one.type)}</code>${one.expansion === undefined ? "" : `<br><code>${typeHtml([text(one.expansion)])}</code>`}</td>` +
       `<td>${one.defaultValue === undefined ? "—" : spansHtml(one.defaultValue)}</td>` +
-      `<td>${one.deprecated === undefined ? "" : `<span class="apiDeprecated"><span class="apiBadge">Deprecated</span> ${spansHtml(one.deprecated)}</span> `}${spansHtml(one.description)}${one.origin === undefined ? "" : `<span class="apiOrigin"> from <code>${escape(one.origin)}</code></span>`}</td>` +
+      `<td>${one.deprecated === undefined ? "" : `<span class="apiDeprecated"><span class="apiBadge">Deprecated</span> ${spansHtml(one.deprecated)}</span> `}${spansHtml(one.description)}${one.origin === undefined ? "" : `<span class="apiOrigin"> from <code>${escape(one.origin)}</code></span>`}${one.shownIn === undefined ? "" : `<p class="apiShown">${spansHtml(one.shownIn)}</p>`}</td>` +
       "</tr>",
   );
   const table =
@@ -511,8 +531,9 @@ export function tableMarkdown(model: ApiTableModel | ApiDefinitionModel, level =
       const deprecated = one.deprecated === undefined ? "" : `*Deprecated* ${spansMarkdown(one.deprecated)} `;
       /* A cell holds one line; `<br>` is how a table cell breaks in GFM. */
       const expansion = one.expansion === undefined ? "" : `<br>${markdownCode(one.expansion)}`;
+      const shown = one.shownIn === undefined ? "" : `<br>${spansMarkdown(one.shownIn)}`;
       lines.push(
-        `| ${name} | ${markdownCell(typeMarkdown(one.type) + expansion)} | ${one.defaultValue === undefined ? "—" : markdownCell(spansMarkdown(one.defaultValue))} | ${markdownCell(deprecated + spansMarkdown(one.description) + origin)} |`,
+        `| ${name} | ${markdownCell(typeMarkdown(one.type) + expansion)} | ${one.defaultValue === undefined ? "—" : markdownCell(spansMarkdown(one.defaultValue))} | ${markdownCell(deprecated + spansMarkdown(one.description) + origin + shown)} |`,
       );
     }
   });
