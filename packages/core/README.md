@@ -1,4 +1,4 @@
-# Umriss UI
+# @umriss-ui/core
 
 A React component library for data-dense dashboards, monitoring and tools:
 forms, date pickers, overlays, a tree view and a command palette.

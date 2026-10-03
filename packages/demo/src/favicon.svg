@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- The site's favicon: a "u" in an outlined rounded square, in the ink of
+       the tokens; a dark tab gets the dark theme's ink. Linked from every
+       demo's index.html and from the front page (scripts/build-pages.mjs). -->
+  <style>
+    g { stroke: #171717; }
+    @media (prefers-color-scheme: dark) { g { stroke: #ededed; } }
+  </style>
+  <g fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="2.25" y="2.25" width="27.5" height="27.5" rx="7" />
+    <path d="M11 10v7a5 5 0 0 0 10 0M21 10v12" />
+  </g>
+</svg>

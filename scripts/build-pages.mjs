@@ -7,6 +7,7 @@
      site/sitemap.xml           every address above
      site/llms.txt              the index for coding agents
      site/og-image.png          the picture every page shows where it is shared
+     site/favicon.svg           the front page's favicon (each demo bundles its own copy)
 
    Every page of a demo is a path with an `index.html` of its own, carrying the
    page's text, its examples' source and its props tables - what a search
@@ -50,6 +51,11 @@ const HOME = new URL("../", JSON.parse(readFileSync(join(ROOT, "packages", PACKA
    every page - it is taken by hand, so it is renewed by hand when they change. */
 const PREVIEW = "og-image.png";
 const PREVIEW_ALT = "Components of umriss-ui: an open date range picker, a multi-select, a command palette and a tree, with a trend chart, an alarm table, a production plan and an OEE calculation.";
+
+/* The favicon: the demos link it from their `index.html`, and vite bundles it
+   into their assets; the front page and the 404 page take this copy. */
+const FAVICON = "favicon.svg";
+const FAVICON_LINK = `<link rel="icon" type="image/svg+xml" href="${new URL(FAVICON, HOME).pathname}" />`;
 
 const escape = (text) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
@@ -108,6 +114,7 @@ function pageDocument(template, page, extraHead = "") {
 
 rmSync(SITE, { recursive: true, force: true });
 mkdirSync(SITE, { recursive: true });
+cpSync(join(ROOT, "packages", "demo", "src", FAVICON), join(SITE, FAVICON));
 
 const rows = [];
 const urls = [HOME];
@@ -143,6 +150,7 @@ writeFileSync(
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    ${FAVICON_LINK}
     ${headOf({
       title: "umriss-ui – React component library, canvas charts, data table and Gantt schedule for data-dense dashboards",
       description:
@@ -213,6 +221,7 @@ writeFileSync(
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex" />
+    ${FAVICON_LINK}
     <title>Not found – umriss-ui</title>
     <style>:root{color-scheme:light dark}body{margin:0;font:15px/1.5 system-ui,sans-serif}main{max-width:44rem;margin:0 auto;padding:4rem 1rem}</style>
   </head>
@@ -228,7 +237,8 @@ writeFileSync(
 
 /* The guard over what was written (search-visibility, Testing): every
    address in the sitemap is a file with a title, a description, a canonical
-   pointing at itself and an h1, and there is no page file the sitemap misses.
+   pointing at itself, an h1 and a favicon that is there, and there is no page
+   file the sitemap misses.
    A build that breaks it fails here, before it is deployed. */
 const written = [];
 const walk = (dir) => {
@@ -238,6 +248,12 @@ const walk = (dir) => {
   }
 };
 walk(SITE);
+const sitePath = new URL(HOME).pathname;
+const linksFavicon = (html, url) => {
+  const href = /<link rel="icon"[^>]* href="([^"]+)"/.exec(html)?.[1];
+  const path = href === undefined ? "" : new URL(href, url).pathname;
+  return path.startsWith(sitePath) && existsSync(join(SITE, path.slice(sitePath.length)));
+};
 const expected = urls.map((url) => join(SITE, url.slice(HOME.length), "index.html"));
 const faults = [
   ...written.filter((file) => !expected.includes(file)).map((file) => `${file}: in no sitemap entry`),
@@ -250,6 +266,7 @@ const faults = [
       /<meta name="description" content="[^"]+"/.test(html) ? null : "description",
       html.includes(`<link rel="canonical" href="${url}"`) ? null : "canonical",
       /<h1[ >]/.test(html) ? null : "h1",
+      linksFavicon(html, url) ? null : "favicon",
     ].filter(Boolean);
     return missing.length === 0 ? [] : [`${url}: no ${missing.join(", ")}`];
   }),
@@ -267,7 +284,7 @@ cpSync(join(ROOT, "scripts", PREVIEW), join(SITE, PREVIEW));
    one's own index and full text stand. */
 writeFileSync(
   join(SITE, "llms.txt"),
-  `# umriss
+  `# umriss-ui
 
 > React components for data-dense applications - dashboards, monitoring, planning: a component library, canvas charts, a table, a schedule and calculations, in English and German. Each package's demo is its documentation; the text below points at the same material as plain text.
 
