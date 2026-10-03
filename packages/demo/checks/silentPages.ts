@@ -43,6 +43,8 @@ const UNANNOUNCED: Readonly<Record<string, string>> = {
     "The chart's readout speaks only after a key on the plot, so a page where it can speak has a Keyboard section, and every chart page's leads by `keysOf` to Chart, whose Accessibility section describes the readout.",
   "[data-schedule-plot] ~ [aria-live]":
     "The schedule's readout, for the chart's reason: it speaks only after a key on the plot, and every schedule page's Keyboard section leads by `keysOf` to First schedule, whose Accessibility section describes the readout.",
+  '[role="status"][class*="filteredCount"]':
+    "The table toolbar's count of matches stands on every page with a toolbar, empty until a search or a filter narrows the rows - through a control the page's Keyboard section names. Toolbar's Accessibility section describes it; a section on each page would repeat it word for word.",
 };
 
 /** The slots that hold a stage: the examples, and the configurator a page may

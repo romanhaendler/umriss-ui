@@ -26,6 +26,16 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ### Added
 
+- **Every page says its keys**: First table has a Keyboard section of its
+  own (Enter and Space on a sortable header, Escape on a cut value's tip), and
+  every other page whose examples take Tab links the keys that apply there -
+  First table's, ColumnMenu's, RowActions', and those of core's Input, Select,
+  Popover, Checkbox, Button and the other controls a part is built from.
+  First table, Column, Formats, Row appearance, RowActions, Toolbar and
+  AlarmList gain a section Accessibility: the table's name and row header,
+  `aria-sort`, `aria-busy`, the toolbar's count of matches, the alarm list's
+  one live number, and the label a presentation's component needs. In the
+  demo, the Markdown twins and `docs/llms-full.md`; the table is unchanged.
 - **Every export carries a comment**: what a component, a hook, a function or a
   type is for, and for a hook or a function `@param` and `@returns` where its
   type alone does not say it. The editor shows it on hover, from the package's
