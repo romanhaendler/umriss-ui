@@ -549,7 +549,8 @@ test("a component's name finds its page first, above its examples", async ({ pag
   await page.keyboard.press("ControlOrMeta+k");
   const field = page.getByRole("combobox", { name: "Search umriss-ui" });
   await field.fill(p.example.pageName);
-  await expect(page.getByRole("dialog").getByRole("option", { name: p.example.title })).toBeVisible();
+  // Its examples are found as well, and stand below it.
+  await expect(page.getByRole("dialog").getByRole("option", { name: p.example.title }).first()).toBeVisible();
   await field.press("Enter");
   await expect(page.locator(`[data-block="${p.example.pageId}"]`)).toBeVisible();
   // The page itself, not an example on it: no anchor.

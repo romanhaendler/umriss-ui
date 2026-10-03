@@ -19,10 +19,12 @@ checkShell({
   example: { pageId: "row-appearance", id: "states", title: "Show loading, empty, failed and no match", pageName: "Row appearance" },
   palettePage: { query: "verdictcolumn", name: "VerdictColumn", pageId: "verdictcolumn", rubricName: "Limits and alarms" },
   abbreviation: { query: "vc", find: "VerdictColumn", glyphs: ["V", "C"] },
-  /* Sixty-four finds become thirty-one, and the find under the pointer
-     ("Two actions") is no longer among them - were it, the palette would
-     rightly keep it, and the test would be checking something else. */
-  pointer: { wide: "ta", narrow: "tab" },
+  /* The wide query finds many, the narrow one fewer, and the find under the
+     pointer (`Toolbar`) is no longer among them - were it, the palette would
+     rightly keep it, and the test would be checking something else. Not
+     "tab" since every group begins with "table ·" (one-search 02): "tab"
+     finds every entry of this demo through its group. */
+  pointer: { wide: "ta", narrow: "tag" },
   moved: { from: "table", pageId: "first-table", example: "first-table" },
   contents: { pageId: "toolbar", id: "place-it-outside", title: "Place it outside the table" },
   foldedRow: { pageId: "first-table", id: "TableProps-onCellEdit" },
