@@ -149,7 +149,7 @@ test("multiple axes: values per axis space, right labels right of the marks", as
 });
 
 test("container resize: collapsing and expanding without an error", async ({ page }) => {
-  await openExample(page, "getting-started", "in-its-container");
+  await openExample(page, "installation", "in-its-container");
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(String(e)));
   page.on("console", (msg) => {

@@ -14,7 +14,7 @@
    `demo/examples/` and from nothing else. */
 
 import { addresses } from "@umriss-ui/demo/outline";
-import type { Rubric } from "@umriss-ui/demo/outline";
+import type { Moved, Rubric } from "@umriss-ui/demo/outline";
 
 export type { Rubric, Page } from "@umriss-ui/demo/outline";
 
@@ -25,8 +25,8 @@ export const OUTLINE: readonly Rubric[] = [
     sentence: "What to know before the first chart.",
     pages: [
       {
-        id: "getting-started",
-        name: "Getting started",
+        id: "installation",
+        name: "Installation",
         sentence: "Install the package, draw a first chart and size it in its container. Read this once before the component pages; everything after it assumes it.",
         about: [
           "The command installs the package alone: React 18 or 19 is its only peer and stays the application's own, and the package depends on nothing else. The stylesheet comes with the JavaScript, so there is nothing to import - `@umriss-ui/charts/styles.css` is there for setups that link stylesheets by hand.",
@@ -126,6 +126,13 @@ export const OUTLINE: readonly Rubric[] = [
         exports: ["Bar"],
       },
       {
+        id: "scatter",
+        name: "Scatter",
+        sentence: "Single readings as points, joined by nothing (a scatter plot, dots). Reach for it for samples, checks and events - anything that is not a course.",
+        types: ["ScatterProps"],
+        exports: ["Scatter"],
+      },
+      {
         id: "boxplot",
         name: "BoxPlot",
         sentence: "A distribution per position (a box plot, box-and-whisker): quartiles, median and whiskers, per service, per group or per hour. Reach for it to compare spreads, not single values.",
@@ -136,13 +143,6 @@ export const OUTLINE: readonly Rubric[] = [
         limits: ["No horizontal boxes, no violin or jittered points, no box width by count: a density is smoothing, a jitter a picture that does not repeat."],
         types: ["BoxPlotProps"],
         exports: ["BoxPlot"],
-      },
-      {
-        id: "scatter",
-        name: "Scatter",
-        sentence: "Single readings as points, joined by nothing (a scatter plot, dots). Reach for it for samples, checks and events - anything that is not a course.",
-        types: ["ScatterProps"],
-        exports: ["Scatter"],
       },
       {
         id: "stateband",
@@ -227,7 +227,12 @@ export const OUTLINE: readonly Rubric[] = [
   },
 ];
 
+/* The page ids that changed, and where each stands now - an old link still
+   lands. Installation was called "Getting started" until the five demos
+   named their first page alike (.scratch/sidebar-tree). */
+export const MOVED: Moved = { "getting-started": "installation" };
+
 /* The addresses follow from the outline; their format is known to the shell
    (`@umriss-ui/demo`, `outline.ts`) and to nobody else. */
-export const ADDRESSES = addresses(OUTLINE);
+export const ADDRESSES = addresses(OUTLINE, MOVED);
 export const { ALL_PAGES, placeOf, addressOf, fromPlace } = ADDRESSES;

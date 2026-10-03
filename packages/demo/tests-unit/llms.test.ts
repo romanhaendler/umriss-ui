@@ -214,4 +214,13 @@ describe("the site's pages (ADR-0037)", () => {
        comes from texts. */
     expect(pages.map((one) => one.html.replace(`<div class="apiTables">${API}</div>`, "")).join("")).not.toMatch(/<(div|script)[ >]/);
   });
+
+  it("forwards a moved page id from its old address to its page, and declares no other", () => {
+    const { pages: moved, forwarders } = renderLlms({ packageDir: PACKAGE_DIR, outline: OUTLINE, tables: TABLES, moved: { dial: "gauge" } });
+    expect(forwarders).toEqual([
+      { url: "https://example.test/fixture/dial/", to: "https://example.test/fixture/gauge/", title: "Gauge – React component · @umriss-ui/fixture" },
+    ]);
+    expect(moved.map((one) => one.path)).not.toContain("dial/");
+    expect(renderLlms({ packageDir: PACKAGE_DIR, outline: OUTLINE, tables: TABLES }).forwarders).toEqual([]);
+  });
 });

@@ -4,7 +4,8 @@
      site/index.html            the front page - the hub
      site/<package>/            the demo of @umriss-ui/<package>
      site/<package>/<page>/     one of its pages, prerendered
-     site/sitemap.xml           every address above
+     site/<package>/<old>/      a forwarder where a page's id has changed
+     site/sitemap.xml           every address above, no forwarder
      site/llms.txt              the index for coding agents
      site/og-image.png          the picture every page shows where it is shared
      site/favicon.svg           the front page's favicon (each demo bundles its own copy)
@@ -27,15 +28,17 @@
    Search Console and Bing prove the site is ours by a file at its root; those
    files stand in `scripts/site-verification/` and are copied as they are.
 
-   Run: `pnpm build:pages`. */
+   Run: `pnpm build:pages`. The forwarders and the guard come from the demo's
+   tooling (`packages/demo/src/tooling/site.ts`). */
 
 import { execFileSync } from "node:child_process";
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 /* The one list of the packages - read in Node as it stands, which is why it
    imports nothing (and why `build:pages` strips types). */
 import { PACKAGES as LIST } from "../packages/demo/src/packages.ts";
+import { forwarderHtml, siteFaults } from "../packages/demo/src/tooling/site.ts";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SITE = join(ROOT, "site");
@@ -118,6 +121,7 @@ cpSync(join(ROOT, "packages", "demo", "src", FAVICON), join(SITE, FAVICON));
 
 const rows = [];
 const urls = [HOME];
+const forwarders = [];
 for (const dir of PACKAGES) {
   const packageDir = join(ROOT, "packages", dir);
   const manifest = JSON.parse(readFileSync(join(packageDir, "package.json"), "utf8"));
@@ -137,6 +141,14 @@ for (const dir of PACKAGES) {
     writeFileSync(join(out, page.path, "index.html"), pageDocument(template, page, front ? jsonLd(structuredData(row)) : ""));
     urls.push(page.url);
     if (!front) row.pages.push(page);
+  }
+  /* An old address of a page whose id changed: a forwarder, never in the
+     sitemap. */
+  for (const forwarder of JSON.parse(readFileSync(join(packageDir, "demo", ".generated", "forwarders.json"), "utf8"))) {
+    const dirOf = join(SITE, forwarder.url.slice(HOME.length));
+    mkdirSync(dirOf, { recursive: true });
+    writeFileSync(join(dirOf, "index.html"), forwarderHtml(forwarder));
+    forwarders.push(forwarder);
   }
   rows.push(row);
 }
@@ -235,16 +247,19 @@ writeFileSync(
 `,
 );
 
-/* The guard over what was written (search-visibility, Testing): every
-   address in the sitemap is a file with a title, a description, a canonical
-   pointing at itself, an h1 and a favicon that is there, and there is no page
-   file the sitemap misses.
-   A build that breaks it fails here, before it is deployed. */
-const written = [];
+/* The guard over what was written (search-visibility, Testing;
+   sidebar-tree, seam 1): every address in the sitemap is a file with a title,
+   a description, a canonical pointing at itself, an h1 and a favicon that is there, every forwarder
+   stands outside the sitemap and points into it, and there is no other page
+   file. A build that breaks it fails here, before it is deployed. */
+const files = new Map();
 const walk = (dir) => {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     if (entry.isDirectory() && entry.name !== "assets") walk(join(dir, entry.name));
-    else if (entry.name === "index.html") written.push(join(dir, entry.name));
+    else if (entry.name === "index.html") {
+      const below = relative(SITE, dir);
+      files.set(HOME + (below === "" ? "" : `${below.split(sep).join("/")}/`), readFileSync(join(dir, entry.name), "utf8"));
+    }
   }
 };
 walk(SITE);
@@ -254,22 +269,9 @@ const linksFavicon = (html, url) => {
   const path = href === undefined ? "" : new URL(href, url).pathname;
   return path.startsWith(sitePath) && existsSync(join(SITE, path.slice(sitePath.length)));
 };
-const expected = urls.map((url) => join(SITE, url.slice(HOME.length), "index.html"));
 const faults = [
-  ...written.filter((file) => !expected.includes(file)).map((file) => `${file}: in no sitemap entry`),
-  ...urls.flatMap((url, i) => {
-    const file = expected[i];
-    if (!existsSync(file)) return [`${url}: no file`];
-    const html = readFileSync(file, "utf8");
-    const missing = [
-      /<title>[^<]+<\/title>/.test(html) ? null : "title",
-      /<meta name="description" content="[^"]+"/.test(html) ? null : "description",
-      html.includes(`<link rel="canonical" href="${url}"`) ? null : "canonical",
-      /<h1[ >]/.test(html) ? null : "h1",
-      linksFavicon(html, url) ? null : "favicon",
-    ].filter(Boolean);
-    return missing.length === 0 ? [] : [`${url}: no ${missing.join(", ")}`];
-  }),
+  ...siteFaults(urls, forwarders, files),
+  ...urls.filter((url) => files.has(url) && !linksFavicon(files.get(url), url)).map((url) => `${url}: no favicon`),
   /* No props row says a prop accepts nothing: a `never` is a prohibition the
      reader merges away (types-without-holes), never a type to show. */
   ...PACKAGES.flatMap((dir) =>
@@ -305,4 +307,4 @@ ${rows.map((row) => `- [${row.name}](${HOME}${row.dir}/llms.txt): ${row.descript
 `,
 );
 
-console.log(`\nsite/ is ready: ${rows.map((row) => `${row.dir}/ (${row.pages.length} pages)`).join(", ")}, index.html, sitemap.xml and llms.txt - ${urls.length} addresses.`);
+console.log(`\nsite/ is ready: ${rows.map((row) => `${row.dir}/ (${row.pages.length} pages)`).join(", ")}, index.html, sitemap.xml and llms.txt - ${urls.length} addresses, ${forwarders.length} forwarded.`);

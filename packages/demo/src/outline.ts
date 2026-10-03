@@ -21,6 +21,12 @@
    stands at `/`, a scenario on it at `/#<anchor>`. Its place - what the
    palette and `fromPlace` speak - is `/scenarios/<anchor>` all the same.
 
+   A page whose id changes keeps its old address alive: the demo's outline
+   module declares the old id beside the current one (`MOVED`), and the old
+   address lands on the current page - in the app, which rewrites the address
+   bar, and on the site, where a forwarder stands at the old path
+   (.scratch/sidebar-tree, "Forwarding a moved address").
+
    This file runs without a bundler too: the props generator loads a demo's
    outline in Node. That is why it imports nothing. */
 
@@ -67,8 +73,13 @@ export interface Rubric {
 
 export type PageWithRubric = Page & { rubric: Rubric };
 
+/** Page ids that changed: the old id, and the id of the page it is now. */
+export type Moved = Readonly<Record<string, string>>;
+
 export interface Addresses {
   OUTLINE: readonly Rubric[];
+  /** The old ids this demo still answers to, and where each stands now. */
+  MOVED: Moved;
   /** Every page with its rubric - the flat view for palette and tests. */
   ALL_PAGES: readonly PageWithRubric[];
   /** The place of a page, optionally with an example on it: `/button/basic`
@@ -87,8 +98,9 @@ export interface Addresses {
 
       An unknown place yields no page - the shell then shows the scenarios
       page and not an empty surface. So does `scenarios/<anchor>`, with the
-      scenario as the example. */
-  fromPlace: (place: string) => { page?: PageWithRubric; example?: string };
+      scenario as the example. A moved id yields its current page and
+      `moved`, so that the shell rewrites the address. */
+  fromPlace: (place: string) => { page?: PageWithRubric; example?: string; moved?: true };
 }
 
 /** The address of a place, below the demo's base (ADR-0037): the page a
@@ -117,11 +129,18 @@ export const ADR_0032 = "https://github.com/romanhaendler/umriss-ui/blob/main/do
 /** The address of the scenarios page, as `placeOf`'s page id. */
 export const SCENARIOS = "scenarios";
 
-/** The addresses of an outline. */
-export function addresses(outline: readonly Rubric[]): Addresses {
+/** The addresses of an outline, and of the page ids it moved away from.
+
+    A moved id that is still a page's id would shadow that page, and one that
+    points at no page would land nowhere - both throw. */
+export function addresses(outline: readonly Rubric[], MOVED: Moved = {}): Addresses {
   const ALL_PAGES: readonly PageWithRubric[] = outline.flatMap((rubric) =>
     rubric.pages.map((page) => ({ ...page, rubric })),
   );
+  for (const [old, current] of Object.entries(MOVED)) {
+    if (ALL_PAGES.some((page) => page.id === old)) throw new Error(`The moved id \`${old}\` is still the id of a page.`);
+    if (!ALL_PAGES.some((page) => page.id === current)) throw new Error(`\`${old}\` moved to \`${current}\`, which is no page.`);
+  }
 
   const placeOf = (pageId: string, exampleId?: string): string => {
     if (pageId === SCENARIOS) return exampleId === undefined ? "" : `/${SCENARIOS}/${exampleId}`;
@@ -132,15 +151,20 @@ export function addresses(outline: readonly Rubric[]): Addresses {
 
   const addressOf = (pageId: string, exampleId?: string): string => addressOfPlace(placeOf(pageId, exampleId));
 
-  const fromPlace = (place: string): { page?: PageWithRubric; example?: string } => {
+  const fromPlace = (place: string): { page?: PageWithRubric; example?: string; moved?: true } => {
     const raw = place.replace(/^#/, "").replace(/^\//, "");
     if (raw === "") return {};
-    const [pageId, exampleId] = raw.split("/");
-    if (pageId === SCENARIOS) return exampleId === undefined || exampleId === "" ? {} : { example: exampleId };
+    const [named = "", exampleId] = raw.split("/");
+    if (named === SCENARIOS) return exampleId === undefined || exampleId === "" ? {} : { example: exampleId };
+    const pageId = Object.hasOwn(MOVED, named) ? MOVED[named] : named;
     const page = ALL_PAGES.find((s) => s.id === pageId);
     if (page === undefined) return {};
-    return exampleId === undefined || exampleId === "" ? { page } : { page, example: exampleId };
+    return {
+      page,
+      ...(exampleId === undefined || exampleId === "" ? {} : { example: exampleId }),
+      ...(pageId === named ? {} : { moved: true as const }),
+    };
   };
 
-  return { OUTLINE: outline, ALL_PAGES, placeOf, addressOf, fromPlace };
+  return { OUTLINE: outline, MOVED, ALL_PAGES, placeOf, addressOf, fromPlace };
 }

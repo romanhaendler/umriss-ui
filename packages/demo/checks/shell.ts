@@ -52,6 +52,9 @@ export interface ShellProbes {
   pointer: { wide: string; narrow: string };
   /** A scenario's anchor, where the demo has one. */
   scenario?: string;
+  /** A page id that changed (`MOVED` in the outline), the page it is now and
+      an example on it - where the demo has one. */
+  moved?: { from: string; pageId: string; example: string };
 }
 
 export function checkShell(p: ShellProbes): void {
@@ -121,6 +124,21 @@ test("an old hash address is forwarded to its path (ADR-0037)", async ({ page })
   await expect(page.locator(`[data-example="${p.example.id}"]`)).toBeInViewport();
   const url = new URL(page.url());
   expect(url.pathname + url.hash).toBe(`/${p.example.pageId}/#${p.example.id}`);
+});
+
+test("a moved address lands on the page, under its current address", async ({ page }) => {
+  test.skip(p.moved === undefined, "this demo has no moved page");
+  const { from, pageId, example } = p.moved!;
+  await page.goto(`/${from}/`);
+  await expect(page.locator(`[data-block="${pageId}"]`)).toBeVisible();
+  expect(new URL(page.url()).pathname).toBe(`/${pageId}/`);
+
+  await page.goto(`/${from}/#${example}`);
+  const target = page.locator(`[data-example="${example}"]`);
+  await expect(target).toBeInViewport();
+  await expect(target).toHaveAttribute("data-highlight", "");
+  const url = new URL(page.url());
+  expect(url.pathname + url.hash).toBe(`/${pageId}/#${example}`);
 });
 
 test("the address of an example brings it into view", async ({ page }) => {
