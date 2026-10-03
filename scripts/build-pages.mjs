@@ -43,6 +43,7 @@ import { fileURLToPath } from "node:url";
    imports nothing (and why `build:pages` strips types). */
 import { PACKAGES as LIST } from "../packages/demo/src/packages.ts";
 import { forwarderHtml, siteFaults, twinFaults } from "../packages/demo/src/tooling/site.ts";
+import { siteLeaks } from "../packages/demo/src/tooling/references.ts";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SITE = join(ROOT, "site");
@@ -130,6 +131,9 @@ const rows = [];
 const urls = [HOME];
 const forwarders = [];
 const twinPages = [];
+/* A requirement number or an unlinked ADR number in a page's text - the
+   guard below fails on them. */
+const leaks = [];
 for (const dir of PACKAGES) {
   const packageDir = join(ROOT, "packages", dir);
   const manifest = JSON.parse(readFileSync(join(packageDir, "package.json"), "utf8"));
@@ -150,6 +154,7 @@ for (const dir of PACKAGES) {
     writeFileSync(join(out, page.path, "index.html"), pageDocument(template, page, front ? jsonLd(structuredData(row)) : ""));
     urls.push(page.url);
     twinPages.push(page);
+    leaks.push(...siteLeaks(page.html).map((leak) => `${page.url}: ${leak} in the text`));
     if (!front) row.pages.push(page);
   }
   /* An old address of a page whose id changed: a forwarder, never in the
@@ -311,6 +316,7 @@ const faults = [
         .map((prop) => `${dir}: ${entry.name}.${prop.name} is typed \`${prop.type}\``),
     ),
   ),
+  ...leaks,
 ];
 if (faults.length > 0) throw new Error(`The built site fails its guard:\n${faults.join("\n")}`);
 

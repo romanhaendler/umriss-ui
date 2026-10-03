@@ -31,6 +31,8 @@ import { installCommand, type InstallManifest } from "./install.ts";
 import { PACKAGES } from "../packages.ts";
 import { apiHtml, markdownCell as cell, markdownCode as code, tableMarkdown, tableModel } from "./apiTable.ts";
 import { referenceHtml, referenceMarkdown, type ReferenceTable } from "./referenceTable.ts";
+import { adrLinks } from "./props.ts";
+import { linkAdrs, linkReferences, outlineTexts } from "./references.ts";
 
 export interface LlmsJob {
   /** The package's directory: `package.json` and `demo/` are read there. */
@@ -380,7 +382,7 @@ function markdownTwin(markdown: string, homepage: string, lift: number, header: 
 }
 
 /** Both texts of one package, from its directory. Pure apart from reading. */
-export function renderLlms({ packageDir, outline, tables, eventsApart = false, moved = {}, references = {} }: LlmsJob): {
+export function renderLlms({ packageDir, outline: written, tables, eventsApart = false, moved = {}, references = {} }: LlmsJob): {
   index: string;
   full: string;
   pages: SitePage[];
@@ -389,11 +391,18 @@ export function renderLlms({ packageDir, outline, tables, eventsApart = false, m
 } {
   const manifest = JSON.parse(readFileSync(join(packageDir, "package.json"), "utf8")) as Manifest;
   const demoDir = join(packageDir, "demo");
+  /* Every ADR number a text names, as a link to its file - as the shell
+     shows the same texts (`references.ts`). The tables come linked. */
+  const links = adrLinks();
+  const link = (text: string) => linkAdrs(text, links);
+  const outline = outlineTexts(written, link);
   const examples = listExamples(demoDir)
     .map((file) => readExample(demoDir, file, manifest.name))
+    .map((example) => (example.lead === undefined ? example : { ...example, lead: link(example.lead) }))
     .sort(byRank);
   const scenarios = listScenarios(demoDir)
     .map((file) => readScenario(demoDir, file, manifest.name))
+    .map((scenario) => ({ ...scenario, lead: link(scenario.lead), callouts: scenario.callouts.map(link) }))
     .sort(byRank);
 
   const pages = outline.flatMap((rubric) => rubric.pages);
@@ -641,7 +650,10 @@ export function renderLlms({ packageDir, outline, tables, eventsApart = false, m
     reference tables, which the app mounts. None is checked in: a generation
     drifts from its source (`.gitignore`). Hands the site's pages back for a
     demo's guard over them. */
-export function generateLlms(job: LlmsJob): SitePage[] {
+export function generateLlms(given: LlmsJob): SitePage[] {
+  /* The reference tables' ADR numbers as links, for the text, the pages and
+     the `references.json` the app mounts alike. */
+  const job = given.references === undefined ? given : { ...given, references: linkReferences(given.references, adrLinks()) };
   const { index, full, pages, forwarders, twins } = renderLlms(job);
   const indexPath = join(job.packageDir, "demo", ".generated", "llms.txt");
   const fullPath = join(job.packageDir, "docs", "llms-full.md");

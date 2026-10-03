@@ -9,7 +9,8 @@ import type { AxisConfig } from "./types";
 import type { WorkingInterval } from "./workingTime";
 
 interface CommonProps<T> {
-  /** Axis id, through which series bind themselves (R-4.12). */
+  /** Axis id, through which series bind themselves.
+      @remarks R-4.12 */
   id?: string;
   /** Value access of this axis. Compared by its source text, as a series'
       accessor is (`Accessor`) - with the same closure limit. */
@@ -23,8 +24,9 @@ interface CommonProps<T> {
       a new text or remount. A bound `Intl.NumberFormat#format` is compared by
       identity. */
   tickFormat?: (v: number) => string;
-  /** Grid lines (R-4.15).
-      @default only on the first axis of its orientation */
+  /** Grid lines.
+      @default only on the first axis of its orientation
+      @remarks R-4.15 */
   grid?: boolean;
   /** Fixed tick values instead of the 1-2-5 algorithm. For axes whose values are
       places and not numbers: the lanes of a state stack, the categories of a

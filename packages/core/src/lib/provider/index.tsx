@@ -124,7 +124,7 @@ export interface UmrissProviderProps {
   /** The setting for toasts: the display duration where the individual toast
       names none, where they stand, and how many stand at once. */
   toast?: ToastConfig;
-  /** Formats and wording, entry by entry. See `lib/language`. */
+  /** Formats and wording, entry by entry - see [Language](#/language). */
   language?: LanguageOptions;
   /** The subtree the settings apply to. */
   children: ReactNode;

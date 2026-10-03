@@ -77,9 +77,17 @@ export interface Gap {
   line: number;
 }
 
+/** A row whose text carries what the caller's `check` found in it. */
+export interface Flag extends Gap {
+  found: readonly string[];
+}
+
 export interface Reading {
   types: Record<string, TypeEntry>;
   gaps: readonly Gap[];
+  /** The rows whose description, deprecation or phrase default `check`
+      found something in. */
+  flags: readonly Flag[];
 }
 
 /* ------------------------------------------------------------------ */
@@ -132,8 +140,13 @@ type Declaration = ts.InterfaceDeclaration | ts.TypeAliasDeclaration;
 /** Reads the named types out of the named files.
 
     `files` are absolute paths. The order of the output follows `typeNames`, so
-    that two runs produce the same file. */
-export function readProps(files: readonly string[], typeNames: readonly string[]): Reading {
+    that two runs produce the same file. `check` says what a row's text may
+    not carry; the reader only notes where it stands, as it does a gap. */
+export function readProps(
+  files: readonly string[],
+  typeNames: readonly string[],
+  check: (text: string) => readonly string[] = () => [],
+): Reading {
   const program = ts.createProgram([...files], {
     target: ts.ScriptTarget.ES2022,
     jsx: ts.JsxEmit.ReactJSX,
@@ -189,6 +202,7 @@ export function readProps(files: readonly string[], typeNames: readonly string[]
 
   const cache = new Map<Declaration, TypeEntry>();
   const gaps: { of: Declaration; gap: Gap }[] = [];
+  const flags: { of: Declaration; flag: Flag }[] = [];
   /* "Public" means here: stands in some table. */
   const isPublic = new Set(
     typeNames.map((typeName) => {
@@ -789,13 +803,15 @@ export function readProps(files: readonly string[], typeNames: readonly string[]
       defaults,
     );
 
-    /* A gap belongs to the table in which the prop stands without an origin:
-       that is where somebody reads it. With an origin it is reported at the
-       parent, where the parent has a page. */
+    /* A gap - and a flag - belongs to the table in which the prop stands
+       without an origin: that is where somebody reads it. With an origin it is
+       reported at the parent, where the parent has a page. */
     for (const prop of unique) {
-      if (prop.description !== "" || prop.inheritedFrom !== undefined) continue;
       const source = sources.get(prop);
-      if (source !== undefined) gaps.push({ of: declaration, gap: { type: name, prop: prop.name, ...placeOf(source) } });
+      if (prop.inheritedFrom !== undefined || source === undefined) continue;
+      if (prop.description === "") gaps.push({ of: declaration, gap: { type: name, prop: prop.name, ...placeOf(source) } });
+      const found = [prop.description, prop.deprecated ?? "", prop.defaultIsPhrase === true ? prop.defaultValue! : ""].flatMap(check);
+      if (found.length > 0) flags.push({ of: declaration, flag: { type: name, prop: prop.name, ...placeOf(source), found } });
     }
 
     const entry: TypeEntry = {
@@ -829,5 +845,9 @@ export function readProps(files: readonly string[], typeNames: readonly string[]
 
   /* Only what really ends up in a table. A type that was read only as a
      parent and has no page of its own is not chased. */
-  return { types, gaps: gaps.filter((l) => isPublic.has(l.of)).map((l) => l.gap) };
+  return {
+    types,
+    gaps: gaps.filter((l) => isPublic.has(l.of)).map((l) => l.gap),
+    flags: flags.filter((f) => isPublic.has(f.of)).map((f) => f.flag),
+  };
 }

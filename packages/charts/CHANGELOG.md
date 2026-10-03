@@ -40,6 +40,9 @@ interface was still expected to move before `0.3.0`.
   its comment: `Chart height` is `300`, `LimitLine role` `"specification"`,
   a series' `color` the palette's. The editor shows the tag on hover. Nothing
   else changes.
+- **A prop's comment cites no requirement number**: "Binding to a y axis
+  (R-4.12)." reads "Binding to a y axis."; the number stands in a `@remarks`
+  tag. Nothing else changes.
 
 ## 0.9.0 – A box plot (Oct. 2026)
 

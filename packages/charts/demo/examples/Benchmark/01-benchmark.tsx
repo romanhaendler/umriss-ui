@@ -1,8 +1,8 @@
 /* Lines and the area downsample on their own above two points per pixel
    column; a hover draws the overlay layer only, which the FPS counter shows.
    Live appends 10 points a second in a moving window, and the axis width stays
-   calm through its hysteresis (R-5.3). Not photographed: it measures the
-   moment it runs (R-5.1). */
+   calm through its hysteresis. Not photographed: it measures the
+   moment it runs. */
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Area, Bar, Chart, Legend, Line, Tooltip, XAxis, YAxis } from "../../../src";
@@ -91,7 +91,7 @@ export default function Benchmark() {
   }, []);
   useEffect(() => stopMeasuring, [stopMeasuring]);
 
-  /* Streaming test (R-5.3): 10 points/s, a travelling window. */
+  /* Streaming test: 10 points/s, a travelling window. */
   useEffect(() => {
     if (!live) return;
     const r = random(4711);

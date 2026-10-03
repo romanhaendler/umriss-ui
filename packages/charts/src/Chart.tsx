@@ -35,7 +35,8 @@ import "./styles/charts.css";
 
 /** The props of `Chart`. */
 export interface ChartProps<T> {
-  /** Shared data basis (required); access only through accessors (R-2.4). */
+  /** Shared data basis (required); access only through accessors.
+      @remarks R-2.4 */
   data: readonly T[];
   /** Width in CSS pixels, or `"100%"` for the host's: the chart measures its
       host and follows it through a ResizeObserver.
@@ -47,7 +48,8 @@ export interface ChartProps<T> {
   height?: number;
   /** Outer spacing of the plot area in CSS pixels. */
   padding?: number | Partial<Padding>;
-  /** Required in DEV through a warning (R-7.6). */
+  /** Required in DEV through a warning.
+      @remarks R-7.6 */
   ariaLabel?: string;
   /** Goes to the root element, as it does everywhere in this workspace. */
   className?: string;
@@ -77,11 +79,13 @@ export interface ChartProps<T> {
       the pointer. Zoom is not shared - give every chart the same controlled
       `domain`. */
   syncId?: string;
-  /** Instrumentation for the benchmark page (R-5.1); not needed otherwise. */
+  /** Instrumentation for the benchmark page; not needed otherwise.
+      @remarks R-5.1 */
   onPerf?: (perf: ChartPerf) => void;
   /** The axes, series and companions of this chart. They draw nothing
-      themselves: each registers its configuration and the scene draws it
-      (R-2.1), and the order in the JSX is the drawing order. */
+      themselves: each registers its configuration and the scene draws it,
+      and the order in the JSX is the drawing order.
+      @remarks R-2.1 */
   children?: ReactNode;
 }
 

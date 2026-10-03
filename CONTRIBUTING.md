@@ -87,6 +87,8 @@ Each of these is argued somewhere; the link is the argument, not the rule.
 * **A prop or an export without JSDoc breaks the build.** Whatever lands in a
   props table on some page explains itself, and so does every export of a
   package's entry and its subpaths; the gate runs in `predev`, `prebuild:demo`
-  and `pretypecheck`.
+  and `pretypecheck`. The same gate stops at a requirement number (`R-4.12`, it
+  goes into `@remarks`) or a source path in a reader's text; an ADR number is
+  written bare and becomes a link to its file.
 * **A word this workspace has is used as it is defined.** `CONTEXT.md` is the
   vocabulary, including the words each term may not collide with.
