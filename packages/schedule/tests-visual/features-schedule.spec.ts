@@ -737,6 +737,21 @@ test("on a phone a group's name wins over its count, and the count comes back wh
   await expect(head).toContainText("Developers");
 });
 
+/* The count is measured anew when the language changes: "2 Bahnen" is wider
+   than "2 lanes", and in a column of 160 px it no longer leaves the name room. */
+test("a group's name wins over its count in German too, switched live", async ({ page }) => {
+  await openExample(page, "lane-groups", "controlled");
+  const head = page.locator('[data-example="controlled"] [data-row="groupHead"]');
+  const name = head.locator('[data-schedule-overlay="header label"]');
+  await expect(head.locator("[data-lane-count]")).toHaveText("2 lanes");
+  await expect(head.locator("[data-lane-count]")).toBeVisible();
+
+  await page.getByRole("banner").getByRole("group", { name: "Language of the components" }).getByRole("button", { name: "Deutsch", exact: true }).click();
+  await expect(head.locator("[data-lane-count]")).toHaveText("2 Bahnen");
+  await expect(head.locator("[data-lane-count]")).toBeHidden();
+  expect(await name.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
+});
+
 test("on a phone the dates of narrow days stand a run apart, and none runs into the next", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 800 });
   await openExample(page, "time-axis", "a-week");

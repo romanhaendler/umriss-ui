@@ -48,6 +48,11 @@ moves from here under the rule above.
 
 ### Fixed
 
+- **A group's lane count is measured anew when the language changes**: a
+  wording switched under a mounted schedule (English to German, say) left the
+  counts as the old wording had fitted them, so "2 Bahnen" stood beside a cut
+  name. Now the name wins over the count in every language, as it already did
+  after a reload.
 - **`docs/llms-full.md` names the peers in its install line**:
   `npm install @umriss-ui/schedule @umriss-ui/core @umriss-ui/charts`, read
   from the manifest. It had named the schedule alone, and an install after it
