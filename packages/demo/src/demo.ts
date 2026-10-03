@@ -10,7 +10,7 @@
    found arrives here. */
 
 import { addresses, type Addresses } from "./outline";
-import { linkAdrs, outlineTexts, type AdrLinks } from "./tooling/references";
+import { linkAdrs, linkApiNames, outlineTexts, type AdrLinks } from "./tooling/references";
 import { installCommand, type InstallManifest } from "./tooling/install";
 import type { TitleManifest } from "./tooling/title";
 import { readExamples, readScenarios } from "./tooling/examples";
@@ -82,8 +82,11 @@ export function buildDemo(sources: DemoSources): Demo {
     packageName: sources.manifest.name,
   };
   /* The texts' ADR numbers become links here, once, as the generator links
-     them in the llms text and the tables (`tooling/references.ts`). */
-  const link = (text: string) => linkAdrs(text, sources.adrs);
+     them in the llms text and the tables (`tooling/references.ts`) - and so
+     do the hooks and functions they name, to the API index. */
+  const apiIndex = sources.apiIndex as ApiIndexModel | undefined;
+  const linked = new Set(apiIndex?.linked ?? []);
+  const link = (text: string) => linkApiNames(linkAdrs(text, sources.adrs), linked);
   /* The JSON file is generated; its literal type says nothing the
      generating type does not say better. */
   const tables = sources.props as Record<string, TypeEntry>;
@@ -105,6 +108,6 @@ export function buildDemo(sources: DemoSources): Demo {
     references: (sources.references ?? {}) as Record<string, readonly ReferenceTable[]>,
     configurators: readConfigurators(sources.configurators ?? {}, tables, sources.addresses.ALL_PAGES),
     search: () => sources.search().then((module) => module.default as SearchEntry[]),
-    ...(sources.apiIndex === undefined ? {} : { apiIndex: sources.apiIndex as ApiIndexModel }),
+    ...(apiIndex === undefined ? {} : { apiIndex }),
   };
 }

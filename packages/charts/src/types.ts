@@ -197,8 +197,9 @@ export interface AxisConfig<T = unknown> {
   /** "visible" is a y axis' only: the extent of what its series show inside
       their x axis' domain. */
   domain: "nice" | "data" | "visible" | readonly [number, number];
-  /** undefined = the default per R-4.15 (only the first registered axis per
-      orientation). */
+  /** Whether the axis draws its grid lines.
+      @default only the first registered axis per orientation
+      @remarks R-4.15 */
   grid?: boolean;
   /** Fixed tick values instead of the 1-2-5 algorithm. For axes whose values are
       not numbers but places: the lanes of a state stack, the categories of a
@@ -234,9 +235,9 @@ export interface Rect {
   height: number;
 }
 
-/** Materialised series: the draw loop works only on this (R-2.7).
-    Gaps (null/undefined/NaN/±Infinity out of the accessor) are encoded as NaN
-    (R-2.5). */
+/** Materialised series: the draw loop works only on this.
+    Gaps (null/undefined/NaN/±Infinity out of the accessor) are encoded as NaN.
+    @remarks R-2.7, R-2.5 */
 export interface MaterializedSeries {
   x: Float64Array;
   y: Float64Array;

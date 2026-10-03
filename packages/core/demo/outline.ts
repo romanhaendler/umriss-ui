@@ -31,7 +31,7 @@
    The order follows the page, not taste: a sidebar sorted differently from
    what it jumps to confuses precisely when one trusts it. */
 
-import { addresses } from "@umriss-ui/demo/outline";
+import { addresses, apiIndexRubric } from "@umriss-ui/demo/outline";
 import type { Rubric } from "@umriss-ui/demo/outline";
 
 export type { Rubric, Page } from "@umriss-ui/demo/outline";
@@ -1313,6 +1313,12 @@ export const OUTLINE: readonly Rubric[] = [
       },
     ],
   },
+  apiIndexRubric("@umriss-ui/core", {
+    DEFAULT_WORDING: "the table [Wording](#/language/wording) on the Language page",
+    GERMAN_WORDING: "the table [Wording](#/language/wording) on the Language page",
+    DEFAULT_FORMATS: "the table [Formats](#/language/format) on the Language page",
+    GERMAN_FORMATS: "the table [Formats](#/language/format) on the Language page",
+  }),
 ];
 
 /* The addresses follow from the outline; their format is known to the shell

@@ -10,6 +10,7 @@
 import { buildDemo } from "@umriss-ui/demo";
 import manifest from "../package.json";
 import adrs from "./.generated/adrs.json";
+import apiIndex from "./.generated/api-index.json";
 import props from "./.generated/props.json";
 import { ADDRESSES } from "./outline";
 
@@ -22,4 +23,5 @@ export const DEMO = buildDemo({
   sources: import.meta.glob<string>(["./examples/*/*.tsx", "./scenarios/*.tsx"], { eager: true, query: "?raw", import: "default" }),
   props,
   search: () => import("./.generated/search.json"),
+  apiIndex,
 });

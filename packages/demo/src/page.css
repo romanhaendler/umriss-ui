@@ -156,6 +156,14 @@
   white-space: nowrap;
 }
 
+/* A hook or a function in it leads to its entry on the API index:
+   underlined, as a type in a declaration. */
+.importLine code a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .importLine .codeCopy,
 .installLine .codeCopy {
   flex: none;

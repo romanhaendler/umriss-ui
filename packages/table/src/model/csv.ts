@@ -10,7 +10,7 @@
    beside `sum` and not in the presentation: what the user writes out is what
    he filtered, no matter which page he happens to be on. */
 
-import type { Column } from "./tableModel";
+import type { ModelColumn } from "./tableModel";
 
 /* A semicolon, because the comma is taken as the decimal separator - German
    Excel expects exactly this. CRLF per RFC 4180. */
@@ -32,7 +32,7 @@ const asNumber = (value: number): string => String(value).replace(".", ",");
 const field = (raw: string): string =>
   /[";\r\n]/.test(raw) ? `"${raw.replace(/"/g, '""')}"` : raw;
 
-const cell = <Z,>(row: Z, column: Column<Z>): string => {
+const cell = <Z,>(row: Z, column: ModelColumn<Z>): string => {
   const value = column.value?.(row);
   if (value === undefined || value === null) return "";
   return field(typeof value === "number" ? asNumber(value) : String(value));
@@ -50,7 +50,7 @@ const cell = <Z,>(row: Z, column: Column<Z>): string => {
  */
 export function asCsv<Z, K extends string = string>(
   rows: readonly Z[],
-  columns: readonly Column<Z, K>[],
+  columns: readonly ModelColumn<Z, K>[],
 ): string {
   const header = columns.map((s) => field(s.label ?? s.id)).join(SEPARATOR);
   const body = rows.map((row) => columns.map((s) => cell(row, s)).join(SEPARATOR));

@@ -13,7 +13,7 @@
    What is NOT here: the examples. They come from the files under
    `demo/examples/` and from nothing else. */
 
-import { addresses } from "@umriss-ui/demo/outline";
+import { addresses, apiIndexRubric } from "@umriss-ui/demo/outline";
 import type { Moved, Rubric } from "@umriss-ui/demo/outline";
 
 export type { Rubric, Page } from "@umriss-ui/demo/outline";
@@ -245,6 +245,10 @@ export const OUTLINE: readonly Rubric[] = [
       },
     ],
   },
+  apiIndexRubric("@umriss-ui/charts", {
+    DEFAULT_CHARTS_WORDING: "the table [Charts wording](https://romanhaendler.github.io/umriss-ui/core/language/#charts-wording) on core's Language page",
+    GERMAN_CHARTS_WORDING: "the table [Charts wording](https://romanhaendler.github.io/umriss-ui/core/language/#charts-wording) on core's Language page",
+  }),
 ];
 
 /* The page ids that changed, and where each stands now - an old link still

@@ -82,7 +82,10 @@ describe("Demo smoke test", () => {
   it.each(ALL_PAGES.map((s) => [s.name, s] as const))("renders the page %s with its tables", async (_name, pageData) => {
     const { host, unmount } = await mount(<Page demo={DEMO} page={pageData} />);
     expect(host.querySelector(`[data-block="${pageData.id}"]`)).not.toBeNull();
-    if (WITHOUT_TABLE[pageData.id] === undefined) {
+    if (pageData.body === "api-index") {
+      /* The generated page: an entry for every export, by its anchor. */
+      for (const anchor of DEMO.apiIndex!.anchors) expect(host.querySelector(`[id="${anchor}"]`), anchor).not.toBeNull();
+    } else if (WITHOUT_TABLE[pageData.id] === undefined) {
       expect(host.querySelectorAll(".apiTable tbody tr").length).toBeGreaterThan(0);
     }
     await unmount();
@@ -169,8 +172,8 @@ describe("The examples as a set", () => {
     }
   });
 
-  it("leave no page without an example", () => {
-    const without = ALL_PAGES.filter((s) => !EXAMPLES.some((b) => b.pageId === s.id));
+  it("leave no written page without an example", () => {
+    const without = ALL_PAGES.filter((s) => s.body === undefined && !EXAMPLES.some((b) => b.pageId === s.id));
     expect(without.map((s) => s.id)).toEqual([]);
   });
 });

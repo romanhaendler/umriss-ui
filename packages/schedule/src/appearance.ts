@@ -19,8 +19,7 @@ export type SubtaskAppearance = "provisional" | "fixed" | "muted" | "open";
     The four names are the ones this module was born with, and they are kept so
     that a caller's code does not change because a picture did. Two of them are
     now named after a drawing they no longer use, and the channel each one
-    really owns stands beside it (`sceneDraw.ts`, "ONE CHANNEL PER
-    STATEMENT"). */
+    really owns stands beside it. */
 export interface ResolvedAppearance {
   /** `provisional`: the FILL - none at all, so the surface shows through, with
       a dashed outline in the task colour. Planned, not released. */

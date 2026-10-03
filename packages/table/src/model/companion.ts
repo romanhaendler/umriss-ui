@@ -16,7 +16,7 @@ import { useTableSelection } from "./useTableSelection";
 import type { TableSelection } from "./useTableSelection";
 import { orderColumns, tableModel } from "./tableModel";
 import { rowsOf } from "./grouping";
-import type { Column, SortLevel, TableInput, TableProjection } from "./tableModel";
+import type { ModelColumn, SortLevel, TableInput, TableProjection } from "./tableModel";
 import type { SortDirection } from "./tableModel";
 import type { TableView } from "./view";
 import { useVirtual } from "@umriss-ui/core";
@@ -129,7 +129,7 @@ export interface Companion<Z, K extends string> extends TableProjection<Z, K> {
 
 export function useCompanion<Z, K extends string = string>(
   rows: readonly Z[],
-  columns: readonly Column<Z, K>[],
+  columns: readonly ModelColumn<Z, K>[],
   options: CompanionOptions<Z, K>,
 ): Companion<Z, K> {
   const { rowKey, filter, defaultSort = null, initialView, virtual, grouping, manual, tree } = options;

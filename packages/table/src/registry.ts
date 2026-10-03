@@ -33,7 +33,7 @@ import type { ReactNode } from "react";
 import type { Formats } from "@umriss-ui/core";
 import type { RowFilter } from "./rowFilter";
 import { tableModel } from "./model/tableModel";
-import type { Column, TableProjection, TableInput } from "./model/tableModel";
+import type { ModelColumn, TableProjection, TableInput } from "./model/tableModel";
 import type { Companion } from "./model/companion";
 import type { TableSnapshot } from "./types";
 import { warnOnce } from "./dev";
@@ -118,7 +118,7 @@ export interface HookSnapshot {
       options, figures and the empty state read them. */
   admitted: readonly unknown[];
   /** The columns the hook calculated its model with. */
-  modelColumns: readonly Column<unknown>[];
+  modelColumns: readonly ModelColumn<unknown>[];
   companion: Companion<unknown, string>;
   filter: ((row: unknown) => boolean) | undefined;
   /** What the table is grouped by, as the model takes it - absent when not. */
@@ -589,13 +589,13 @@ export class Registry {
     key: string;
     rows: readonly unknown[];
     formats: Formats;
-    columns: readonly Column<unknown>[];
+    columns: readonly ModelColumn<unknown>[];
   } | null = null;
 
   /** The columns for tableModel. The same identity as long as nothing changed
       that the model reads - that is how the body recognises whether it may take
       over the hook's calculation. */
-  modelColumns(rows: readonly unknown[], formats: Formats): readonly Column<unknown>[] {
+  modelColumns(rows: readonly unknown[], formats: Formats): readonly ModelColumn<unknown>[] {
     const ordered = this.orderedColumns();
     const key = [this.structure, this.values, ordered.map((e) => e.key).join("|")].join(":");
     if (
@@ -605,7 +605,7 @@ export class Registry {
     ) {
       return this.modelCache.columns;
     }
-    const columns = ordered.map((entry): Column<unknown> => {
+    const columns = ordered.map((entry): ModelColumn<unknown> => {
       const { spec } = entry;
       const kind = this.kindOf(entry, rows);
       const sortable = this.isSortable(entry, rows);
@@ -631,7 +631,7 @@ export class Registry {
     return columns;
   }
 
-  private projectionCache: { hook: HookSnapshot; columns: readonly Column<unknown>[]; projection: TableProjection<unknown> } | null =
+  private projectionCache: { hook: HookSnapshot; columns: readonly ModelColumn<unknown>[]; projection: TableProjection<unknown> } | null =
     null;
 
   private unpaged: { from: TableProjection<unknown>; projection: TableProjection<unknown> } | null = null;

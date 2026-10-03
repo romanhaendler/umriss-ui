@@ -1,5 +1,5 @@
 /* The marks a page's texts may carry: `code` in backticks, a [link](#/page)
-   and **bold** - the last as the API descriptions, read from the sources'
+   - around code too - and **bold** - the last as the API descriptions, read from the sources'
    doc comments, write a defined term. Everything else is plain text - the outline is data, and the
    llms text carries these strings as the Markdown they already are.
 
@@ -22,7 +22,7 @@ export function Prose({ text }: { text: string }) {
           <strong key={i}>{span.text}</strong>
         ) : span.kind === "link" ? (
           <a key={i} href={hrefOfText(span.href)}>
-            {span.text}
+            {span.code === true ? <code>{span.text}</code> : span.text}
           </a>
         ) : (
           span.text

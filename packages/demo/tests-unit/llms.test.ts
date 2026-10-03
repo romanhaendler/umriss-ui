@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { renderLlms } from "../src/tooling/llms";
 import { apiHtml, apiSection, propsOnPage } from "../src/tooling/apiTable";
-import { apiIndexRubric, type Rubric } from "../src/outline";
+import { apiIndexRubric, type Page, type Rubric } from "../src/outline";
 import type { TypeEntry } from "../src/tooling/tables";
 
 /* The fixture stands in the one list of packages as a sixth, starting at its
@@ -171,13 +171,9 @@ describe("llms-full.txt", () => {
     expect(meter).not.toContain("#### API");
   });
 
-  it("adds what the package exports and no page names, with its declaration", () => {
-    const rest = full.slice(full.indexOf("## The rest of the API"));
-    expect(rest).toContain("### `GAUGE_RANGE`");
-    expect(rest).toContain("/** The range every gauge spans - exported, and named on no page. */\nconst GAUGE_RANGE: readonly [0, 100];");
-    expect(rest).toContain("function fraction(value: number): number;");
-    /* On a page already, so not again. */
-    expect(rest).not.toContain("### `Gauge`");
+  it("adds no appendix: what no page names stands on the API index alone (ADR-0044)", () => {
+    expect(full).not.toContain("## The rest of the API");
+    expect(full).not.toContain("GAUGE_RANGE");
   });
 });
 
@@ -287,7 +283,7 @@ describe("the pages' Markdown twins (.scratch/pages-as-markdown)", () => {
   it("is the page's cut of the full text, lifted so that the page's name is the `#`, with the header under it", () => {
     const gauge = asTwin(full.slice(full.indexOf("### Gauge"), full.indexOf("\n### Meter")).trimEnd());
     expect(byPath.get("gauge.md")).toBe(`# Gauge\n\n${header("gauge/")}\n${gauge.slice("# Gauge\n".length)}\n`);
-    const meter = asTwin(full.slice(full.indexOf("### Meter"), full.indexOf("\n## The rest of the API")).trimEnd());
+    const meter = asTwin(full.slice(full.indexOf("### Meter")).trimEnd());
     expect(byPath.get("meter.md")).toBe(`# Meter\n\n${header("meter/")}\n${meter.slice("# Meter\n".length)}\n`);
   });
 
@@ -393,11 +389,6 @@ describe("Types on this page (.scratch/types-without-holes)", () => {
     expect(twin).toContain("[`MeterProps`](https://example.test/fixture/meter/#type-MeterProps)");
   });
 
-  it("keeps in the appendix an export a cell names that has no table and no definition", () => {
-    const rest = text.slice(text.indexOf("## The rest of the API"));
-    expect(rest).toContain("### `fraction`\n\n```ts\n/** Where the needle stands, as a fraction of the range. */\nfunction fraction(value: number): number;\n```");
-    expect(rest).not.toContain("### `GaugeProps`");
-  });
 });
 
 /* A page without a table of its own shows the rows its examples use
@@ -415,7 +406,7 @@ describe("Props on this page", () => {
   const [gauge, meter] = OUTLINE[0]!.pages;
 
   it("stands where the API would, in the full text and on the prerendered page alike", () => {
-    const text = rendered.full.slice(rendered.full.indexOf("### Meter"), rendered.full.indexOf("## The rest of the API"));
+    const text = rendered.full.slice(rendered.full.indexOf("### Meter"));
     expect(text).toContain("#### Props on this page\n\nFrom `GaugeProps` — the full table stands on [Gauge](#/gauge/type-GaugeProps).\n\n| Prop |");
     expect(text).toContain('| [`tone`](#/gauge/GaugeProps-tone) | `"neutral" \\| "alarm"` |');
     expect(text).not.toContain("`value`");
@@ -433,8 +424,13 @@ describe("the API index (.scratch/api-index, ADR-0044)", () => {
   /* The fixture's outline with the index as its last rubric. The fixture
      exports a component with a page (`Gauge`) and one without
      (`GaugeNeedle`), a hook with its tags, a function, two constants - one
-     deprecated - and two types, one with a table and one without. */
-  const outline: readonly Rubric[] = [...OUTLINE, apiIndexRubric("@umriss-ui/fixture")];
+     deprecated - and two types, one with a table and one without; and a
+     German wording as the subpath `wording/de`. */
+  const [gauge, meter] = OUTLINE[0]!.pages as [Page, Page];
+  const outline: readonly Rubric[] = [
+    { ...OUTLINE[0]!, pages: [gauge, { ...meter, sentence: "One value as a bar; `fraction` says how full, and [`fraction`](#/gauge) stays." }] },
+    apiIndexRubric("@umriss-ui/fixture", { GERMAN_GAUGE_WORDING: "the table [Wording](#/gauge/wording) on the Gauge page" }),
+  ];
   const tables: Record<string, TypeEntry> = {
     ...TABLES,
     GaugeTone: {
@@ -462,6 +458,7 @@ describe("the API index (.scratch/api-index, ADR-0044)", () => {
       ["Functions", ["fraction"]],
       ["Constants", ["GAUGE_RANGE", "RANGE"]],
       ["Types", ["GaugeProps", "GaugeTone"]],
+      ["@umriss-ui/fixture/wording/de", ["GERMAN_GAUGE_WORDING"]],
     ]);
     expect(page.indexOf("#### Components")).toBeLessThan(page.indexOf("#### Hooks"));
     expect(page.indexOf("#### Constants")).toBeLessThan(page.indexOf("#### Types"));
@@ -482,14 +479,14 @@ describe("the API index (.scratch/api-index, ADR-0044)", () => {
 
   it("links a type with a table to it, and defines one without a table as a page does", () => {
     expect(entry("GaugeProps")).toContain("Its table stands on [Gauge](#/gauge/type-GaugeProps).");
-    expect(entry("GaugeTone")).toBe('##### `GaugeTone`\n\nWhat the needle says.\n\n```ts\ntype GaugeTone = "neutral" | "alarm";\n```\n');
+    expect(entry("GaugeTone").trimEnd()).toBe('##### `GaugeTone`\n\nWhat the needle says.\n\n```ts\ntype GaugeTone = "neutral" | "alarm";\n```');
   });
 
   it("names the pages that mention an export in code - import line, examples, scenarios - and not their tables", () => {
     expect(entry("Gauge")).toContain("Used on [Scenarios](#/) and [Gauge](#/gauge).");
     /* The Gauge page's table is `GaugeProps`; its text never names it. */
     expect(entry("GaugeProps")).not.toContain("Used on");
-    expect(entry("fraction")).not.toContain("Used on");
+    expect(entry("fraction")).toContain("Used on [Meter](#/meter).");
   });
 
   it("marks a deprecated export as a deprecated prop is marked", () => {
@@ -497,8 +494,37 @@ describe("the API index (.scratch/api-index, ADR-0044)", () => {
     expect(html).toContain('<p class="apiProse apiDeprecated"><span class="apiBadge">Deprecated</span> Read <code>GAUGE_RANGE</code> instead.</p>');
   });
 
+  it("groups a subpath's exports under its import path, after the main entry's groups", () => {
+    expect(page.indexOf("#### Types")).toBeLessThan(page.indexOf("#### @umriss-ui/fixture/wording/de\n\n##### `GERMAN_GAUGE_WORDING`"));
+    expect(html).toContain('<h2 class="sectionTitle" id="group-wording-de">@umriss-ui/fixture/wording/de</h2>');
+    expect(entry("GERMAN_GAUGE_WORDING")).toContain("The gauge's words in German.\n\n");
+    expect(entry("GERMAN_GAUGE_WORDING")).toContain("```ts\nconst GERMAN_GAUGE_WORDING: ");
+  });
+
+  it("links a hook or a function a page's text names as code to its entry, and leaves a link as it is", () => {
+    expect(text).toContain("### Meter\n\nOne value as a bar; [`fraction`](#/api/fraction) says how full, and [`fraction`](#/gauge) stays.");
+    expect(sitePages.find((one) => one.path === "meter/")!.html).toContain('<a href="https://example.test/fixture/api/#fraction"><code>fraction</code></a> says how full');
+    expect(twinTexts.find((one) => one.path === "meter.md")!.text).toContain("[`fraction`](https://example.test/fixture/api/#fraction)");
+    expect([...apiIndex!.linked].sort()).toEqual(["fraction", "useGauge"]);
+  });
+
+  it("leads from a wording directory to the table of its entries", () => {
+    expect(entry("GERMAN_GAUGE_WORDING")).toContain("Every entry, with its value, stands in the table [Wording](#/gauge/wording) on the Gauge page.");
+    expect(html).toContain('stands in the table <a href="../gauge/#wording">Wording</a> on the Gauge page.');
+  });
+
   it("anchors every export on the prerendered page: a value at its name, a type at type-<Name>", () => {
-    expect([...apiIndex!.anchors].sort()).toEqual(["GAUGE_RANGE", "Gauge", "GaugeNeedle", "RANGE", "fraction", "type-GaugeProps", "type-GaugeTone", "useGauge"]);
+    expect([...apiIndex!.anchors].sort()).toEqual([
+      "GAUGE_RANGE",
+      "GERMAN_GAUGE_WORDING",
+      "Gauge",
+      "GaugeNeedle",
+      "RANGE",
+      "fraction",
+      "type-GaugeProps",
+      "type-GaugeTone",
+      "useGauge",
+    ]);
     for (const anchor of apiIndex!.anchors) expect(html, anchor).toContain(`id="${anchor}"`);
     expect(html).toMatch(/^<h1>API index<\/h1>/);
     expect(html).toContain('<h2 class="sectionTitle" id="group-hooks">Hooks</h2>');

@@ -56,8 +56,17 @@ interface was still expected to move before `0.3.0`.
 - **`docs/llms-full.md` defines every type a props table names**: a type
   without a table of its own (`Accessor`, `MatrixColoring`) stands under
   "Types on this page" of each page that names it, with its comment and its
-  members or its declaration. "The rest of the API" holds every export that
-  neither a table nor such a definition explains, `controlLimits` among them.
+  members or its declaration.
+- **The demo has an API index**: `/charts/api/`, the last entry of the
+  sidebar, lists every export of `@umriss-ui/charts` and of
+  `@umriss-ui/charts/wording/de` under its import path, grouped as components,
+  functions, constants and types, alphabetical - each value with its comment
+  and its declaration, each type with a link to its table or its definition,
+  and the pages that use it. `DEFAULT_CHARTS_WORDING` and its German twin link
+  their table on core's Language page. A hook or a function a page names, in
+  its text or its import line, leads to its entry. `docs/llms-full.md` ends
+  with the same index, in place of the appendix "The rest of the API". The
+  library is unchanged.
 
 ## 0.9.0 – A box plot (Oct. 2026)
 
