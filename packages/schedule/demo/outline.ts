@@ -12,10 +12,12 @@
    component - a reader looks up "Bar labels" and finds a page about bar
    labels, with one example per feature on it.
 
-   Getting started comes first: what an application installs and hands over.
-   The other rubrics answer four questions a planner's application asks in turn: what
-   the schedule DRAWS, what a reader takes OUT of it, how it is EDITED, and
-   what it FINDS. There is no page called after the `Intent` type any more:
+   Getting started comes first: what an application installs and hands over,
+   ending with the first plan on the screen, as the table's ends with its first
+   table (sidebar-tree). The other rubrics answer the questions a planner's
+   application asks in turn: what the schedule DRAWS, on which TIME, what a
+   reader takes OUT of it - the findings as data among it, the last page of
+   Reading - and how it is EDITED. There is no page called after the `Intent` type any more:
    every editing chapter is about the intents it raises, and a reader looking
    for "how do I move a bar" looks up *Move and lane*, not a type name
    (ADR-0023 stands behind all of them).
@@ -47,13 +49,6 @@ export const OUTLINE: readonly Rubric[] = [
         types: [],
         exports: ["Schedule", "Lane", "Subtasks", "Dependencies"],
       },
-    ],
-  },
-  {
-    id: "plan",
-    name: "Plan",
-    sentence: "What the schedule draws: work on lanes, and everything a bar says besides its colour.",
-    pages: [
       {
         id: "schedule",
         name: "First schedule",
@@ -84,6 +79,13 @@ export const OUTLINE: readonly Rubric[] = [
         types: ["ScheduleProps"],
         exports: ["Schedule", "Lane", "Subtasks", "Dependencies"],
       },
+    ],
+  },
+  {
+    id: "plan",
+    name: "Plan",
+    sentence: "What the schedule draws: work on lanes, and everything a bar says besides its colour.",
+    pages: [
       {
         id: "lane",
         name: "Lanes",
@@ -306,6 +308,18 @@ export const OUTLINE: readonly Rubric[] = [
         types: [],
         exports: ["Schedule"],
       },
+      {
+        id: "findings",
+        name: "Findings as data",
+        sentence: "Lists what is wrong with a plan - double bookings on a lane, dependencies that do not fit, work in blocked time - from the same data the schedule draws. Reach for it to list, count or filter the problems beside the picture.",
+        about: [
+          "`findings(subtasks, dependencies, blocked)` returns all three kinds; `overlaps`, `violatedDependencies` and `inBlockedTime` return one each. They are pure functions: run them wherever the data changes, with or without a schedule on screen.",
+          "Lead-in and lead-out count as occupied time; touching at a shared edge is no overlap.",
+        ],
+        limits: ["Overlapping work is marked, not packed into sub-lanes; stacked overlap is not built yet."],
+        types: ["Overlap", "ViolatedDependency", "InBlockedTime"],
+        exports: ["findings", "overlaps", "violatedDependencies", "inBlockedTime"],
+      },
     ],
   },
   {
@@ -402,25 +416,6 @@ export const OUTLINE: readonly Rubric[] = [
         ],
         types: [],
         exports: ["ripple", "shiftTask", "applyIntent"],
-      },
-    ],
-  },
-  {
-    id: "findings",
-    name: "Findings",
-    sentence: "What a planner opens a schedule for, as data beside the picture.",
-    pages: [
-      {
-        id: "findings",
-        name: "Findings as data",
-        sentence: "Lists what is wrong with a plan - double bookings on a lane, dependencies that do not fit, work in blocked time - from the same data the schedule draws. Reach for it to list, count or filter the problems beside the picture.",
-        about: [
-          "`findings(subtasks, dependencies, blocked)` returns all three kinds; `overlaps`, `violatedDependencies` and `inBlockedTime` return one each. They are pure functions: run them wherever the data changes, with or without a schedule on screen.",
-          "Lead-in and lead-out count as occupied time; touching at a shared edge is no overlap.",
-        ],
-        limits: ["Overlapping work is marked, not packed into sub-lanes; stacked overlap is not built yet."],
-        types: ["Overlap", "ViolatedDependency", "InBlockedTime"],
-        exports: ["findings", "overlaps", "violatedDependencies", "inBlockedTime"],
       },
     ],
   },
