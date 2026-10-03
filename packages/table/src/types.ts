@@ -273,7 +273,9 @@ export type FieldColumn<Z, K extends Field<Z>> = ColumnBase &
   EditOptions<Z[K], Z> &
   ChildrenFor<Z[K], Z>;
 
-type Computed<Z, W> = ColumnBase &
+/** A computed column's props: its value is a function of the row, so it needs
+    an `id`. */
+export type Computed<Z, W> = ColumnBase &
   ValuePaths<W> & {
     /** The id is required where the value is a function. */
     id: string;

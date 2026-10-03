@@ -83,6 +83,10 @@ export interface Page {
       the page head without an import line, and the generated body after it.
       One kind so far, the API index (ADR-0044). */
   body?: "api-index";
+  /** On the API index: a constant whose entries a table shows elsewhere - a
+      wording or a format directory - and the link to that table, as a text
+      with marks: `{ DEFAULT_WORDING: "[Wording](#/language/wording)" }`. */
+  values?: Readonly<Record<string, string>>;
 }
 
 export interface Rubric {
@@ -193,21 +197,26 @@ export function keysOfText(
 /** The address of the scenarios page, as `placeOf`'s page id. */
 export const SCENARIOS = "scenarios";
 
+/** The API index's page id, as `placeOf`'s - an entry is at `#/api/<name>`. */
+export const API_INDEX = "api";
+
 /** The last rubric of a demo, alone in it: the API index - every name the
-    package exports, generated from its entries (ADR-0044). At `/api/`. */
-export function apiIndexRubric(packageName: string): Rubric {
+    package exports, generated from its entries (ADR-0044). At `/api/`;
+    `values` as `Page.values`. */
+export function apiIndexRubric(packageName: string, values?: Readonly<Record<string, string>>): Rubric {
   return {
     id: "api-index",
     name: "API index",
     sentence: "Every name the package exports, in one place.",
     pages: [
       {
-        id: "api",
+        id: API_INDEX,
         name: "API index",
         sentence: `Everything \`${packageName}\` exports, with its signature. A component's props stand on its own page.`,
         types: [],
         exports: [],
         body: "api-index",
+        ...(values === undefined ? {} : { values }),
       },
     ],
   };

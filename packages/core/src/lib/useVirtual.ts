@@ -17,7 +17,8 @@ export interface VirtualOptions {
    * window is not empty.
    */
   rowHeight: number;
-  /** Rows above and below the visible area. Default 4. */
+  /** Rows above and below the visible area.
+      @default 4 */
   overscan?: number;
 }
 

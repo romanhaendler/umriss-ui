@@ -251,16 +251,18 @@ export function readProps(
     entries.length === 0 ? [] : names.filter((name) => !importable.has(named.get(name)!));
 
   /* By name only for what the caller asks for, and there an exported
-     declaration wins over a private one of the same name. Inside the source a
-     name is resolved by the checker (`declarationOf`): two private
-     `CommonProps` in two files are two types. */
+     declaration wins over a private one of the same name - and one an entry
+     exports over one only its file does (core's `Side` of a limit, not the
+     popover's). Inside the source a name is resolved by the checker
+     (`declarationOf`): two private `CommonProps` in two files are two types. */
   const declarations = new Map<string, Declaration>();
+  const rank = (declaration: Declaration) => (importable.has(declaration) ? 2 : isExported(declaration) ? 1 : 0);
   for (const file of program.getSourceFiles()) {
     if (!own.has(file.fileName)) continue;
     ts.forEachChild(file, (node) => {
       if (ts.isInterfaceDeclaration(node) || ts.isTypeAliasDeclaration(node)) {
         const known = declarations.get(node.name.text);
-        if (known === undefined || !isExported(known)) declarations.set(node.name.text, node);
+        if (known === undefined || rank(node) > rank(known)) declarations.set(node.name.text, node);
       }
     });
   }

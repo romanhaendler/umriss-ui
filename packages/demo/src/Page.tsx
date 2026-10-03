@@ -23,21 +23,30 @@ import { RubricLine } from "./CopyPage";
 import { GermanNotice } from "./Language";
 import { Prose } from "./Prose";
 import type { Demo } from "./demo";
-import { hrefOf, hrefOfNeighbour } from "./href";
+import { hrefOf, hrefOfNeighbour, hrefOfText } from "./href";
 import { examplesOf } from "./tooling/examples";
 import { apiHtml, apiSection, DEFINITIONS_ID, DEFINITIONS_TITLE, previewOf, propsOnPage, PROPS_ON_PAGE_TITLE } from "./tooling/apiTable";
 import type { ApiDefinitionModel, ApiSection } from "./tooling/apiTable";
 import { referenceHtml } from "./tooling/referenceTable";
 import { apiIndexHtml } from "./tooling/apiIndex";
-import { ADR_0032, SCENARIOS, keyboardAnchor, keysOfText } from "./outline";
+import { ADR_0032, API_INDEX, SCENARIOS, keyboardAnchor, keysOfText } from "./outline";
 import type { Rubric, Page as PageData } from "./outline";
 
-function ImportLine({ exports, packageName }: { exports: readonly string[]; packageName: string }) {
+/** The page's import line; a hook or a function in it links to its entry on
+    the API index (ADR-0044). */
+function ImportLine({ exports, packageName, linked }: { exports: readonly string[]; packageName: string; linked: ReadonlySet<string> }) {
   const text = `import { ${exports.join(", ")} } from "${packageName}";`;
   return (
     <div className="importLine">
       <code>
-        {`import { ${exports.join(", ")} } from `}
+        {"import { "}
+        {exports.map((name, i) => (
+          <Fragment key={name}>
+            {i > 0 && ", "}
+            {linked.has(name) ? <a href={hrefOfText(`#/${API_INDEX}/${name}`)}>{name}</a> : name}
+          </Fragment>
+        ))}
+        {" } from "}
         <span>{`"${packageName}";`}</span>
       </code>
       <CopyButton text={text} />
@@ -253,7 +262,7 @@ export function Page({ demo, page }: PageProps) {
       <p className="pageSentence">
         <Prose text={page.sentence} />
       </p>
-      {page.exports.length > 0 && <ImportLine exports={page.exports} packageName={demo.packageName} />}
+      {page.exports.length > 0 && <ImportLine exports={page.exports} packageName={demo.packageName} linked={new Set(demo.apiIndex?.linked)} />}
       {page.installs === true && <InstallLine command={demo.install} />}
       {page.about !== undefined && (
         <div className="pageAbout">

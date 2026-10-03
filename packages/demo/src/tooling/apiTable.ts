@@ -19,7 +19,8 @@ import type { PropEntry, ShownIn, TypeEntry } from "./propsReader.ts";
 /** A piece of a written text - the marks a page's texts may carry. */
 export type Span =
   | { kind: "text" | "code" | "bold"; text: string }
-  | { kind: "link"; text: string; href: string }
+  /** `code` where the label is code: [`useToast`](#/api/useToast). */
+  | { kind: "link"; text: string; href: string; code?: true }
   /** A colour drawn by the browser: `text` is the CSS value painted, in the
       given `color-scheme` - the token table's swatches. Decoration: the
       Markdown leaves it out, and the HTML hides it from a screen reader. */
@@ -96,8 +97,8 @@ export interface ApiSection {
 /** Where a type's name leads; `undefined` leaves it text. */
 export type LinkOf = (name: string) => string | undefined;
 
-/** The marks a text may carry: `code` in backticks, a [link](#/page) and
-    **bold**. Everything else is plain text. */
+/** The marks a text may carry: `code` in backticks, a [link](#/page) - its
+    label code or text - and **bold**. Everything else is plain text. */
 const MARK = /`([^`]+)`|\[([^\]]+)\]\(([^)\s]+)\)|\*\*([^*]+)\*\*/g;
 
 /** A text written with marks, as its pieces. */
@@ -109,7 +110,10 @@ export function spansOf(text: string): Span[] {
     const [, code, label, href, bold] = match;
     if (code !== undefined) out.push({ kind: "code", text: code });
     else if (bold !== undefined) out.push({ kind: "bold", text: bold });
-    else out.push({ kind: "link", text: label!, href: href! });
+    else {
+      const labelCode = /^`([^`]+)`$/.exec(label!)?.[1];
+      out.push(labelCode === undefined ? { kind: "link", text: label!, href: href! } : { kind: "link", text: labelCode, href: href!, code: true });
+    }
     at = match.index + match[0].length;
   }
   if (at < text.length) out.push({ kind: "text", text: text.slice(at) });
@@ -428,7 +432,7 @@ export function spansHtml(spans: readonly Span[]): string {
       const inner = escape(span.text);
       if (span.kind === "code") return `<code>${inner}</code>`;
       if (span.kind === "bold") return `<strong>${inner}</strong>`;
-      if (span.kind === "link") return `<a href="${escape(hrefOf(span.href))}">${inner}</a>`;
+      if (span.kind === "link") return `<a href="${escape(hrefOf(span.href))}">${span.code === true ? `<code>${inner}</code>` : inner}</a>`;
       if (span.kind === "swatch") return `<span class="tokenSwatch" aria-hidden="true" style="background:${inner};color-scheme:${span.scheme}"></span>`;
       return inner;
     })
@@ -553,7 +557,7 @@ export function spansMarkdown(spans: readonly Span[]): string {
     .map((span) => {
       if (span.kind === "code") return markdownCode(span.text);
       if (span.kind === "bold") return `**${span.text}**`;
-      if (span.kind === "link") return `[${span.text}](${span.href})`;
+      if (span.kind === "link") return `[${span.code === true ? markdownCode(span.text) : span.text}](${span.href})`;
       if (span.kind === "swatch") return "";
       return span.text;
     })

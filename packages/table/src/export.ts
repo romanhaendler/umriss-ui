@@ -3,7 +3,7 @@
    rules (separator, decimal comma, BOM) belong to asCsv. */
 
 import { asCsv } from "./model/csv";
-import type { Column } from "./model/tableModel";
+import type { ModelColumn } from "./model/tableModel";
 import type { Registry, ColumnEntry } from "./registry";
 import type { TableSnapshot } from "./types";
 import { exportValue } from "./values";
@@ -37,7 +37,7 @@ export function csvOf(registry: Registry, levelLabel: string): string {
        one. */
     .filter((e) => registry.kindOf(e, hook.rows) !== "other" || e.spec.ownExportValue)
     .map(
-      (e): Column<unknown> => ({
+      (e): ModelColumn<unknown> => ({
         id: e.spec.id,
         label: e.spec.label,
         value: (row) => exportValue(e.read(row), e.spec.ownExportValue),
@@ -48,6 +48,6 @@ export function csvOf(registry: Registry, levelLabel: string): string {
   const { exported, filtered } = registry.projection();
   if (!exported) return asCsv(filtered, columns);
   const level = new Map(exported.map((e) => [e.node, e.level + 1]));
-  const levelColumn: Column<unknown> = { id: "#level", label: levelLabel, value: (row) => level.get(row) };
+  const levelColumn: ModelColumn<unknown> = { id: "#level", label: levelLabel, value: (row) => level.get(row) };
   return asCsv(exported.map((e) => e.node), [levelColumn, ...columns]);
 }

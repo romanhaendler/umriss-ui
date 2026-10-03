@@ -58,6 +58,15 @@ describe("Demo smoke test", () => {
   it.each(ALL_PAGES.map((p) => [p.name, p] as const))("renders the page %s", async (_name, page) => {
     const { host, teardown } = await mount(<Page demo={DEMO} page={page} />);
     expect(host.querySelector(`[data-block="${page.id}"]`)).not.toBeNull();
+    /* The generated page: an entry for every export, by its anchor. */
+    if (page.body === "api-index") for (const anchor of DEMO.apiIndex!.anchors) expect(host.querySelector(`[id="${anchor}"]`), anchor).not.toBeNull();
+    await teardown();
+  });
+
+  it("links a hook in a page's import line to its entry on the API index (ADR-0044)", async () => {
+    const { host, teardown } = await mount(<Page demo={DEMO} page={ALL_PAGES.find((p) => p.id === "toast")!} />);
+    const links = [...host.querySelectorAll(".importLine a")].map((a) => [a.textContent, a.getAttribute("href")]);
+    expect(links).toEqual([["useToast", "/api/#useToast"]]);
     await teardown();
   });
 
@@ -152,8 +161,8 @@ describe("The examples as a set", () => {
     }
   });
 
-  it("leave no page without an example", () => {
-    const without = ALL_PAGES.filter((p) => !EXAMPLES.some((e) => e.pageId === p.id));
+  it("leave no written page without an example", () => {
+    const without = ALL_PAGES.filter((p) => p.body === undefined && !EXAMPLES.some((e) => e.pageId === p.id));
     expect(without.map((p) => p.id)).toEqual([]);
   });
 });

@@ -58,8 +58,21 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 - **`docs/llms-full.md` defines every type a props table names**: a type
   without a table of its own (`TableRef`, `Pin`, core's `Limit`) stands under
   "Types on this page" of each page that names it, with its comment and its
-  members or its declaration. "The rest of the API" holds every export that
-  neither a table nor such a definition explains, `useTable` among them.
+  members or its declaration.
+- **The demo has an API index**: `/table/api/`, the last entry of the sidebar,
+  lists every export of `@umriss-ui/table`, grouped as components, hooks,
+  functions, constants and types, alphabetical - each value with its comment
+  and its declaration, each type with a link to its table or its definition,
+  and the pages that use it. A hook or a function a page names, in its text or
+  its import line, leads to its entry. `docs/llms-full.md` ends with the same
+  index, in place of the appendix "The rest of the API". The library is
+  unchanged.
+- **Every type a hook's or a function's signature names can be imported**:
+  `ModelColumn` - what `alarmModel` and `ALARM_COLUMNS` read of a column, so
+  far an unexported `Column` in the `.d.ts` -, `TableInput`, `TreeInput`,
+  `GroupLevel`, `AggregateColumn`, `AggregateKind`, `OwnAggregate`,
+  `Computed`, `NumberField`, `AlarmBase` and `AlarmAvailability`. Type exports
+  only; nothing else changes.
 
 ### Fixed
 

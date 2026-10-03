@@ -23,7 +23,10 @@ import type { AggregateColumn, GroupLevel, Line, RowGroup } from "./grouping";
     `desc` the largest. */
 export type SortDirection = "asc" | "desc";
 
-export interface Column<Z, K extends string = string> {
+/** A column as the model reads it - what sorting, search, hiding and the
+    export need of it, not its presentation. `alarmModel` takes them, and
+    `ALARM_COLUMNS` are the alarm list's. */
+export interface ModelColumn<Z, K extends string = string> {
   id: K;
   /** Human-readable label – for the column menu and the CSV header row.
       Not for the presentation of the header cell: that stays compositional. */
@@ -49,7 +52,7 @@ export interface Column<Z, K extends string = string> {
 }
 
 /** A small helper, so that the row type is inferred rather than typed out. */
-export const column = <Z,>(id: string, rest: Omit<Column<Z>, "id"> = {}): Column<Z> => ({ id, ...rest });
+export const column = <Z,>(id: string, rest: Omit<ModelColumn<Z>, "id"> = {}): ModelColumn<Z> => ({ id, ...rest });
 
 /** One level of the sort. Several levels act in their order: the second decides
     only what the first leaves open. */
@@ -58,6 +61,8 @@ export interface SortLevel<K extends string = string> {
   direction: SortDirection;
 }
 
+/** The view's state the model computes a table from, beside its rows and
+    columns: search, filter, sort, page, hidden columns, order, grouping, tree. */
 export interface TableInput<Z = unknown, K extends string = string> {
   search?: string;
   /** An additional filter beside the free-text search, e.g. a status choice. */
@@ -92,6 +97,8 @@ export interface TableInput<Z = unknown, K extends string = string> {
   tree?: TreeInput<Z>;
 }
 
+/** Tree rows for the model: how a row is keyed, how its children are read,
+    and which branches are open. */
 export interface TreeInput<Z> {
   key: (row: Z) => string;
   /** `undefined` a leaf, an array a branch - the rule of core's reader. */
@@ -105,7 +112,7 @@ export interface TreeInput<Z> {
 export interface TableProjection<Z, K extends string = string> {
   /** The visible columns in their order – the basis for the header row, the
       column menu and the CSV export. */
-  columns: readonly Column<Z, K>[];
+  columns: readonly ModelColumn<Z, K>[];
   /** Everything the filter leaves – the basis for figures and the selection. */
   filtered: Z[];
   /** Only the current page - with a grouping, the rows among its lines. */
@@ -146,14 +153,14 @@ export interface TableProjection<Z, K extends string = string> {
  * can drift apart.
  */
 export function orderColumns<Z, K extends string = string>(
-  columns: readonly Column<Z, K>[],
+  columns: readonly ModelColumn<Z, K>[],
   order: readonly K[] | undefined,
-): readonly Column<Z, K>[] {
+): readonly ModelColumn<Z, K>[] {
   if (!order?.length) return columns;
   return [
     ...order
       .map((id) => columns.find((s) => s.id === id))
-      .filter((s): s is Column<Z, K> => s !== undefined),
+      .filter((s): s is ModelColumn<Z, K> => s !== undefined),
     ...columns.filter((s) => !order.includes(s.id)),
   ];
 }
@@ -171,7 +178,7 @@ const defaultCompare = (a: string | number, b: string | number): number =>
 
 export function tableModel<Z, K extends string = string>(
   rows: readonly Z[],
-  columns: readonly Column<Z, K>[],
+  columns: readonly ModelColumn<Z, K>[],
   input: TableInput<Z, K>,
 ): TableProjection<Z, K> {
   const {
@@ -317,7 +324,7 @@ function treeProjection<Z, K extends string>(
   tree: TreeInput<Z>,
   sorted: (list: readonly Z[]) => Z[],
   matches: ((row: Z) => boolean) | undefined,
-  columns: readonly Column<Z, K>[],
+  columns: readonly ModelColumn<Z, K>[],
 ): TableProjection<Z, K> {
   const { admit } = tree;
   const level = (list: readonly Z[]) => sorted(admit ? list.filter(admit) : list);

@@ -7,5 +7,6 @@ import { PAGES } from "./pages";
 
 checkOwnBase({
   open,
-  pages: PAGES.filter((pageId) => pageId !== "scenarios"),
+  /* The API index carries no example. */
+  pages: PAGES.filter((pageId) => pageId !== "scenarios" && pageId !== "api"),
 });

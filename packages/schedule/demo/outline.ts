@@ -26,7 +26,7 @@
    `demo/examples/` and from nothing else - the folder is named like the page,
    in the component's spelling. */
 
-import { addresses } from "@umriss-ui/demo/outline";
+import { addresses, apiIndexRubric } from "@umriss-ui/demo/outline";
 import type { Rubric } from "@umriss-ui/demo/outline";
 
 export type { Rubric, Page } from "@umriss-ui/demo/outline";
@@ -458,6 +458,7 @@ export const OUTLINE: readonly Rubric[] = [
       },
     ],
   },
+  apiIndexRubric("@umriss-ui/schedule"),
 ];
 
 export const ADDRESSES = addresses(OUTLINE);

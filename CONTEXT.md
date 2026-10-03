@@ -1086,8 +1086,8 @@ same name: every name the package's entries export, grouped as Components,
 Hooks, Functions, Constants and Types (and a group per subpath), each with its
 signature or a link to the page or table where it stands (ADR-0044). Nobody
 writes it; an export appears on it as soon as it exists, with its comment. A
-component's props stay on its page. The calculation's demo has it first; the
-other four follow.
+component's props stay on its page. A hook or a function a page names as code
+links to its entry there. Every demo has one.
 _Avoid_: API reference, reference page, appendix (the llms text's former "The
 rest of the API", which it replaces)
 

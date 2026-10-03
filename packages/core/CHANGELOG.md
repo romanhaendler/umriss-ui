@@ -73,9 +73,7 @@ commit.
 - **`docs/llms-full.md` defines every type a props table names**: a type
   without a table of its own (`ButtonSize`, `Wording`, `Limit`) stands under
   "Types on this page" of each page that names it, with its comment and its
-  members or its declaration. "The rest of the API" holds every export that
-  neither a table nor such a definition explains, `useTree` and `useToast`
-  among them.
+  members or its declaration.
 - **Every page whose examples take the keyboard says its keys**: Button,
   Input, Textarea, Card, Typography, Alert and Toast have a Keyboard table of
   their own (Toast's names Alt+T and Escape on the deck); the other pages with
@@ -90,6 +88,16 @@ commit.
   four pickers and `TreeSearch` on the TreeView page each show "With an
   error", a field marked by a live check with the reason in its `FormField`.
   In the demo and `docs/llms-full.md`; the components are unchanged.
+- **The demo has an API index**: `/core/api/`, the last entry of the sidebar,
+  lists every export of `@umriss-ui/core` and of `@umriss-ui/core/wording/de`
+  under its import path, grouped as components, hooks, functions, constants
+  and types, alphabetical - each value with its comment and its declaration,
+  each type with a link to its table or its definition, and the pages that use
+  it. `DEFAULT_WORDING`, `DEFAULT_FORMATS` and their German twins link their
+  table on the Language page. A hook or a function a page names, in its text
+  or its import line, leads to its entry. `docs/llms-full.md` ends with the
+  same index, in place of the appendix "The rest of the API". The library is
+  unchanged.
 
 ## 0.24.0 – The select's own list (Oct. 2026)
 

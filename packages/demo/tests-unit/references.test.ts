@@ -5,10 +5,10 @@
    demos in `llmsGuard.test.ts`. */
 
 import { describe, expect, it } from "vitest";
-import { adrLinksOf, internalReferences, linkAdrs, linkAdrSpans, linkReferences, siteLeaks, ADR_HOME } from "../src/tooling/references";
+import { adrLinksOf, internalReferences, linkAdrs, linkAdrSpans, linkApiNames, linkReferences, siteLeaks, ADR_HOME } from "../src/tooling/references";
 import { referenceHtml, type ReferenceTable } from "../src/tooling/referenceTable";
 import { adrLinks, linkedTables, outlineFlags } from "../src/tooling/props";
-import { tableHtml, tableMarkdown, tableModel } from "../src/tooling/apiTable";
+import { spansHtml, spansOf, tableHtml, tableMarkdown, tableModel } from "../src/tooling/apiTable";
 import { ADR_0032, type Rubric } from "../src/outline";
 
 const LINKS = adrLinksOf(["0021-the-styles-load-themselves.md", "0032-what-umriss-is-not.md", "README.md"]);
@@ -115,5 +115,19 @@ describe("siteLeaks", () => {
   it("finds a requirement number anywhere and an ADR number outside a link - a code block may name one", () => {
     expect(siteLeaks(`<p>Gap (R-2.5), <a href="${STYLES}">ADR-0021</a></p><pre><code>// (ADR-0008)</code></pre>`)).toEqual(["R-2.5"]);
     expect(siteLeaks("<p>As decided (ADR-0021).</p>")).toEqual(["ADR-0021"]);
+  });
+});
+
+describe("the names on the API index (ADR-0044)", () => {
+  it("link a hook or a function written as code, and leave a link, longer code and other names alone", () => {
+    expect(linkApiNames("Call `useToast`, not `useToast()`; [`useToast`](#/toast) stays, `Toast` too.", new Set(["useToast"]))).toBe(
+      "Call [`useToast`](#/api/useToast), not `useToast()`; [`useToast`](#/toast) stays, `Toast` too.",
+    );
+  });
+
+  it("are read back as a link around code", () => {
+    const spans = spansOf("Call [`useToast`](#/api/useToast).");
+    expect(spans[1]).toEqual({ kind: "link", text: "useToast", href: "#/api/useToast", code: true });
+    expect(spansHtml(spans)).toContain("><code>useToast</code></a>.");
   });
 });

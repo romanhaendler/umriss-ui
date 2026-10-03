@@ -79,3 +79,12 @@ export type { ToolbarSize } from "./toolbarSize";
    gate finds no name a reader cannot import (props-table-hygiene 04). */
 export type { ColumnBase, Displayable, FieldColumn, GroupByBase, IsDisplayable, ValuePaths, VerdictBase } from "./types";
 export type { DatePeriod, RowGroup } from "./model/grouping";
+
+/* The types the API index names in a hook's or a function's signature, so
+   that every name a reader sees there can be imported (api-index 02,
+   ADR-0044). `ModelColumn` is what the model reads of a column - not the
+   hook's `Column` (ADR-0017). */
+export type { Computed, NumberField } from "./types";
+export type { ModelColumn, TableInput, TreeInput } from "./model/tableModel";
+export type { AggregateColumn, AggregateKind, GroupLevel, OwnAggregate } from "./model/grouping";
+export type { AlarmAvailability, AlarmBase } from "./alarms/alarmModel";

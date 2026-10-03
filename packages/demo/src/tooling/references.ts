@@ -14,7 +14,7 @@
    with it in the browser, the generator the descriptions and the llms text.
    The directory is read in `props.ts`. */
 
-import { ADR_0032, type Page, type Rubric } from "../outline.ts";
+import { ADR_0032, API_INDEX, type Page, type Rubric } from "../outline.ts";
 import type { Span } from "./apiTable.ts";
 import type { ReferenceTable } from "./referenceTable.ts";
 
@@ -66,6 +66,19 @@ export function internalReferences(text: string, links: AdrLinks): string[] {
     ...(shown.match(SOURCE_PATH) ?? []),
     ...[...shown.matchAll(/ADR-(\d{4})/g)].filter((match) => links[match[1]!] === undefined).map((match) => match[0]),
   ];
+}
+
+/* A link the text already carries stays as it is; code outside one is the
+   mention. */
+const CODE_MENTION = /(\[[^\]]+\]\([^)\s]+\))|`([^`]+)`/g;
+
+/** Every name of `names` a text writes as code, outside a link, as a link to
+    its entry on the API index (ADR-0044): `useToast` in a sentence leads to
+    its signature. */
+export function linkApiNames(text: string, names: ReadonlySet<string>): string {
+  return text.replace(CODE_MENTION, (mention, link: string | undefined, name: string | undefined) =>
+    link === undefined && names.has(name!) ? `[${mention}](#/${API_INDEX}/${name})` : mention,
+  );
 }
 
 /** A page with each of its texts passed through `edit`: the lede, about,

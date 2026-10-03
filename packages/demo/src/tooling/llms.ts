@@ -34,8 +34,8 @@ import { apiHtml, apiMarkdown, apiSection, propsOnPage, PROPS_ON_PAGE_TITLE, fen
 import { referenceHtml, referenceMarkdown, type ReferenceTable } from "./referenceTable.ts";
 import { adrLinks } from "./props.ts";
 import { exportedDeclarations } from "./exportDocs.ts";
-import { apiIndexHtml, apiIndexMarkdown, apiIndexModel, type ApiIndexModel, type Mention } from "./apiIndex.ts";
-import { linkAdrs, linkReferences, outlineTexts } from "./references.ts";
+import { apiIndexHtml, apiIndexMarkdown, apiIndexModel, linkedNames, type ApiIndexModel, type Mention } from "./apiIndex.ts";
+import { linkAdrs, linkApiNames, linkReferences, outlineTexts } from "./references.ts";
 import { plain, propEntries, referenceEntries, searchEntries, type PropsOfPage, type SearchEntry } from "../search.ts";
 
 export interface LlmsJob {
@@ -304,9 +304,13 @@ export function renderLlms({ packageDir, outline: written, tables, moved = {}, r
   const manifest = JSON.parse(readFileSync(join(packageDir, "package.json"), "utf8")) as Manifest;
   const demoDir = join(packageDir, "demo");
   /* Every ADR number a text names, as a link to its file - as the shell
-     shows the same texts (`references.ts`). The tables come linked. */
+     shows the same texts (`references.ts`) - and every hook and function
+     they name as code, as a link to its entry on the API index, where the
+     outline has one (ADR-0044). The tables come linked. */
   const links = adrLinks();
-  const link = (text: string) => linkAdrs(text, links);
+  const indexed = written.some((rubric) => rubric.pages.some((page) => page.body === "api-index"));
+  const linked = new Set(indexed ? linkedNames(exportedDeclarations(packageDir)) : []);
+  const link = (text: string) => linkApiNames(linkAdrs(text, links), linked);
   const outline = outlineTexts(written, link);
   const examples = listExamples(demoDir)
     .map((file) => readExample(demoDir, file, manifest.name))
@@ -387,8 +391,6 @@ export function renderLlms({ packageDir, outline: written, tables, moved = {}, r
     }
     cuts.push({ from, to: parts.length });
   }
-  /* The types some page's "Types on this page" defines. */
-  const defined = new Set<string>();
   /* The props tables each page shows, for the search (`propEntries`). */
   const propsOfPages: PropsOfPage[] = [];
   /* Where the API index's body goes: it is written once every other page is,
@@ -440,7 +442,6 @@ export function renderLlms({ packageDir, outline: written, tables, moved = {}, r
       if (page.types.length > 0) {
         parts.push("", "#### API");
         const section = apiSection(page, pages, tables);
-        for (const definition of section.definitions) defined.add(definition.name);
         propsOfPages.push({ pageId: page.id, tables: section.tables });
         const at = parts.length;
         for (const block of apiMarkdown(section)) parts.push("", block);
@@ -484,29 +485,10 @@ export function renderLlms({ packageDir, outline: written, tables, moved = {}, r
       ...(one.returns === undefined ? {} : { returns: link(one.returns) }),
       ...(one.deprecated === undefined ? {} : { deprecated: link(one.deprecated) }),
     }));
-    apiIndex = apiIndexModel({ packageName: manifest.name, exports, pages, entries: tables, usedOn });
+    apiIndex = apiIndexModel({ packageName: manifest.name, exports, pages, entries: tables, usedOn, values: pages.find((page) => page.body === "api-index")!.values });
     parts[indexAt.to - 1] = apiIndexMarkdown(apiIndex).join("\n\n");
     indexAt.html = apiIndexHtml(apiIndex);
   }
-
-  /* What no table and no definition above explains, where the package has
-     no API index yet (.scratch/api-index). A component counts as explained by
-     its `<Name>Props` table; a name merely used in an example does not. */
-  const tabled = new Set(pages.flatMap((page) => page.types));
-  const explained = (name: string) => tabled.has(name) || tabled.has(`${name}Props`) || defined.has(name);
-  const rest = apiIndex !== undefined ? [] : exportedDeclarations(packageDir).filter((one) => one.subpath === undefined && !explained(one.name));
-  if (rest.length > 0) {
-    parts.push(
-      "",
-      "## The rest of the API",
-      "",
-      "Exported as well, and explained by no table or definition above: the hooks and pure modules beside the components, and the types they are made of. Each with its declaration as the package's `.d.ts` carries it.",
-    );
-    for (const one of rest) {
-      parts.push("", `### ${code(one.name)}`, "", fenced("ts", one.text === "" ? `// ${one.name}: no declaration found` : one.text));
-    }
-  }
-
 
   /* The site's pages. Every one links every other, under its rubric - with
      no links from elsewhere (search-visibility, "only our own"), the links

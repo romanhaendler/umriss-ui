@@ -22,7 +22,7 @@
    `demo/examples/` and from nothing else. */
 
 
-import { addresses } from "@umriss-ui/demo/outline";
+import { addresses, apiIndexRubric } from "@umriss-ui/demo/outline";
 import type { Moved, Rubric } from "@umriss-ui/demo/outline";
 
 export type { Rubric, Page } from "@umriss-ui/demo/outline";
@@ -609,6 +609,7 @@ export const OUTLINE: readonly Rubric[] = [
       },
     ],
   },
+  apiIndexRubric("@umriss-ui/table"),
 ];
 
 /* The page ids that changed, and where each stands now - an old link still

@@ -59,6 +59,9 @@ export interface ApiIndexEntry {
   description: readonly Span[];
   /** The `@param` and `@returns` lines, under the prose. */
   notes: readonly (readonly Span[])[];
+  /** A wording or a format directory: the sentence leading to the table of
+      its entries. */
+  values?: readonly Span[];
   /** The declaration as code, the library's types in it as links. */
   declaration?: readonly Span[];
   /** A type without a table: its definition. */
@@ -80,6 +83,8 @@ export interface ApiIndexModel {
   definitions: readonly ApiDefinitionModel[];
   /** Every export's anchor - what the built site's guard looks for. */
   anchors: readonly string[];
+  /** What a page's text links to its entry (`linkedNames`). */
+  linked: readonly string[];
 }
 
 export interface ApiIndexJob {
@@ -91,6 +96,8 @@ export interface ApiIndexJob {
   entries: Readonly<Record<string, TypeEntry>>;
   /** The pages that name an export in code. */
   usedOn: (name: string) => readonly Mention[];
+  /** `Page.values` of the index. */
+  values?: Readonly<Record<string, string>>;
 }
 
 const GROUPS = [
@@ -101,6 +108,12 @@ const GROUPS = [
   { kind: "type", id: "types", title: "Types" },
 ] as const;
 
+/** The names a page's text and import line link to their entry on the index:
+    the hooks and the functions, whose signature stands nowhere else. */
+export function linkedNames(exports: readonly ExportedDeclaration[]): string[] {
+  return exports.filter((one) => one.kind === "hook" || one.kind === "function").map((one) => one.name);
+}
+
 const text = (value: string): Span => ({ kind: "text", text: value });
 const code = (value: string): Span => ({ kind: "code", text: value });
 
@@ -108,7 +121,7 @@ const code = (value: string): Span => ({ kind: "code", text: value });
 const byName = (a: { name: string }, b: { name: string }) =>
   a.name.toLowerCase() < b.name.toLowerCase() ? -1 : a.name.toLowerCase() > b.name.toLowerCase() ? 1 : a.name < b.name ? -1 : 1;
 
-export function apiIndexModel({ packageName, exports, pages, entries, usedOn }: ApiIndexJob): ApiIndexModel {
+export function apiIndexModel({ packageName, exports, pages, entries, usedOn, values = {} }: ApiIndexJob): ApiIndexModel {
   const exportedTypes = new Set(exports.filter((one) => one.kind === "type").map((one) => one.name));
   const tableOf = (name: string) => pages.find((page) => page.types.includes(name));
   /* A type a declaration or a definition names leads to its table, else to
@@ -129,6 +142,7 @@ export function apiIndexModel({ packageName, exports, pages, entries, usedOn }: 
       anchor: one.kind === "type" ? `type-${one.name}` : one.name,
       usedOn: usedOn(one.name),
       ...(one.deprecated === undefined ? {} : { deprecated: spansOf(one.deprecated) }),
+      ...(values[one.name] === undefined ? {} : { values: spansOf(`Every entry, with its value, stands in ${values[one.name]}.`) }),
       description: [],
       notes: [],
     };
@@ -170,7 +184,7 @@ export function apiIndexModel({ packageName, exports, pages, entries, usedOn }: 
   const definitions: ApiDefinitionModel[] = [];
   /* `linkOf` adds to `defined` while it is walked. */
   for (let i = 0; i < defined.length; i++) definitions.push(definitionModel(entries[defined[i]!]!, linkOf));
-  return { groups, definitions, anchors: exports.map((one) => (one.kind === "type" ? `type-${one.name}` : one.name)) };
+  return { groups, definitions, anchors: exports.map((one) => (one.kind === "type" ? `type-${one.name}` : one.name)), linked: linkedNames(exports) };
 }
 
 /* ------------------------------------------------------------------ */
@@ -201,6 +215,7 @@ function entryHtml(entry: ApiIndexEntry): string {
     (entry.deprecated === undefined ? "" : `<p class="apiProse apiDeprecated"><span class="apiBadge">Deprecated</span> ${spansHtml(entry.deprecated)}</p>`) +
     (entry.home === undefined ? "" : `<p class="apiProse">${spansHtml(homeSpans(entry))}</p>`) +
     (entry.description.length === 0 ? "" : `<p class="apiProse">${spansHtml(entry.description)}</p>`) +
+    (entry.values === undefined ? "" : `<p class="apiProse">${spansHtml(entry.values)}</p>`) +
     (entry.notes.length === 0 ? "" : `<ul class="apiProse">${entry.notes.map((note) => `<li>${spansHtml(note)}</li>`).join("")}</ul>`) +
     (entry.declaration === undefined ? "" : `<pre class="apiDeclaration"><code>${spansHtml(entry.declaration)}</code></pre>`) +
     (entry.usedOn.length === 0 ? "" : `<p class="apiInherited">${spansHtml(usedOnSpans(entry.usedOn))}</p>`) +
@@ -230,6 +245,7 @@ function entryMarkdown(entry: ApiIndexEntry): string {
   if (entry.deprecated !== undefined) lines.push("", `*Deprecated* ${spansMarkdown(entry.deprecated)}`);
   if (entry.home !== undefined) lines.push("", spansMarkdown(homeSpans(entry)));
   if (entry.description.length > 0) lines.push("", spansMarkdown(entry.description));
+  if (entry.values !== undefined) lines.push("", spansMarkdown(entry.values));
   if (entry.notes.length > 0) lines.push("", ...entry.notes.map((note) => `- ${spansMarkdown(note)}`));
   /* A fence holds no link; the names it uses stand on this page or link from it. */
   if (entry.declaration !== undefined) lines.push("", fencedCode("ts", entry.declaration.map((span) => span.text).join("")));

@@ -22,7 +22,7 @@
 import { DEFAULT_WORDING } from "@umriss-ui/core";
 import type { Wording } from "@umriss-ui/core";
 import { tableModel } from "../model/tableModel";
-import type { Column, SortLevel, TableProjection, TableInput } from "../model/tableModel";
+import type { ModelColumn, SortLevel, TableProjection, TableInput } from "../model/tableModel";
 
 /* --- Priority ----------------------------------------------------------- */
 
@@ -232,7 +232,9 @@ export interface AlarmType {
     against - an alarm switched off that nobody will remember switching off. */
 export type Alarm = AlarmBase & AlarmAvailability;
 
-interface AlarmBase {
+/** What every alarm has, whatever its availability: its id, its type, its
+    place in the lifecycle and its moments. */
+export interface AlarmBase {
   id: string;
   /** Id of the alarm type. */
   type: string;
@@ -245,7 +247,9 @@ interface AlarmBase {
   acknowledgedAt?: number;
 }
 
-type AlarmAvailability =
+/** Whether an alarm is in service, and while it is snoozed until when and by
+    whom. */
+export type AlarmAvailability =
   | {
       /** Without a statement: in service. */
       availability?: Exclude<Availability, "snoozed">;
@@ -443,7 +447,7 @@ export type AlarmColumn =
  * why it comes from the wording: the module is pure and can read no context, so
  * it is given one - like `standardPresets`.
  */
-export const alarmColumns = (wording: Wording): readonly Column<AlarmRow, AlarmColumn>[] => [
+export const alarmColumns = (wording: Wording): readonly ModelColumn<AlarmRow, AlarmColumn>[] => [
   {
     id: "type",
     label: wording.columnAlarm,
@@ -467,7 +471,7 @@ export const alarmColumns = (wording: Wording): readonly Column<AlarmRow, AlarmC
 ];
 
 /** The columns with the default labels - for callers without a wording. */
-export const ALARM_COLUMNS: readonly Column<AlarmRow, AlarmColumn>[] = alarmColumns(DEFAULT_WORDING);
+export const ALARM_COLUMNS: readonly ModelColumn<AlarmRow, AlarmColumn>[] = alarmColumns(DEFAULT_WORDING);
 
 /** In service before hidden, then priority, then acknowledgement, then time -
     the worst first, not the newest. As levels of the existing multi-level
@@ -507,7 +511,7 @@ export interface AlarmInput {
   /** The columns of the projection; without a statement `ALARM_COLUMNS`.
       Whoever changes the label in the column menu or the CSV header row passes
       `alarmColumns(wording)`. */
-  columns?: readonly Column<AlarmRow, AlarmColumn>[];
+  columns?: readonly ModelColumn<AlarmRow, AlarmColumn>[];
 }
 
 /** What `alarmModel` returns: the table's projection of the alarm rows -

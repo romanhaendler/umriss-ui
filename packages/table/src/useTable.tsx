@@ -27,7 +27,7 @@ import { pinsForView, withPin } from "./model/pinning";
 import type { Pin, Pins } from "./model/pinning";
 import { manualViewKey } from "./model/view";
 import type { ManualView, TableView } from "./model/view";
-import type { Column } from "./model/tableModel";
+import type { ModelColumn } from "./model/tableModel";
 import { Registry } from "./registry";
 import { buildParts } from "./parts";
 import { buildVerdictColumn } from "./VerdictColumn";
@@ -186,7 +186,7 @@ const sameSet = (a: ReadonlySet<string>, b: ReadonlySet<string>): boolean =>
 
 /** The widths that hold: those of the columns, and over them the dragged ones. */
 function effectiveWidths(
-  columns: readonly Column<unknown>[],
+  columns: readonly ModelColumn<unknown>[],
   dragged: Readonly<Record<string, number>>,
 ): Readonly<Record<string, number>> {
   const out: Record<string, number> = {};

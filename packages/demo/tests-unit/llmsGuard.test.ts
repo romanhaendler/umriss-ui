@@ -11,14 +11,12 @@
    The entries are the ones each package's `vite.config.ts` builds, subpaths
    included: a German wording is an export a reader imports too.
 
-   Every export stands on the package's API index (ADR-0044); where a package
-   has none yet, every export of the main entry that no table and no
-   definition explains gets its declaration in "The rest of the API" - so for
-   those the first check holds by construction,
-   and a second one keeps the guard honest: a COMPONENT (an export with a
-   `<Name>Props` beside it) must be named by the pages themselves. A new
-   component without a page, or dropped from its page, fails here instead of
-   sliding quietly into the appendix. */
+   Every export stands on the package's API index with its anchor (ADR-0044)
+   - so the first check holds by construction, and a second one keeps the
+   guard honest: a COMPONENT (an export with a `<Name>Props` beside it) must
+   be named by the pages themselves. A new component without a page, or
+   dropped from its page, fails here instead of sliding quietly onto the
+   index alone. */
 
 import { describe, expect, it } from "vitest";
 import { fileURLToPath } from "node:url";
@@ -104,32 +102,28 @@ describe.each(Object.keys(ENTRIES))("the llms-full.txt of %s", (dir) => {
     expect(names.length).toBeGreaterThan(0);
     expect(missingFrom(full, names)).toEqual([]);
 
-    /* Where the package has an API index, every name stands there with its
-       anchor (ADR-0044) - and the index is no page that names a component
-       for the check below. */
-    const index = sitePages.find((one) => one.path === "api/");
-    if (index !== undefined) {
-      for (const name of names) expect(index.html.includes(`id="${name}"`) || index.html.includes(`id="type-${name}"`), name).toBe(true);
-    }
-    const pages = full.split("\n## The rest of the API\n")[0]!.split("\n## API index\n")[0]!;
+    /* Every name stands on the API index with its anchor (ADR-0044) - and
+       the index is no page that names a component for the check below. */
+    const index = sitePages.find((one) => one.path === "api/")!.html;
+    for (const name of names) expect(index.includes(`id="${name}"`) || index.includes(`id="type-${name}"`), name).toBe(true);
+    const [pages, onIndex] = full.split("\n## API index\n") as [string, string];
     const components = names.filter((name) => names.includes(`${name}Props`));
     expect(components.length).toBeGreaterThan(0);
     expect(missingFrom(pages, components)).toEqual([]);
 
-    /* The holes the spec names: a type a table names is defined on its page,
-       and what neither a table nor a definition explains stands in the
-       appendix with its declaration (types-without-holes). */
-    const { defined, appendix } = KNOWN[dir]!;
+    /* The holes the specs name: a type a table names is defined on its page
+       (types-without-holes), and a hook or a function no page explains
+       stands on the index with its declaration (api-index). */
+    const { defined, declared } = KNOWN[dir]!;
     for (const name of defined) expect(pages, name).toMatch(new RegExp(`^###### \`${name}(<[^\`]*>)?\`$`, "m"));
-    const rest = full.split("\n## The rest of the API\n")[1] ?? "";
-    for (const name of appendix) expect(rest, name).toContain(`### \`${name}\`\n\n\`\`\`ts\n`);
+    for (const name of declared) expect(onIndex, name).toMatch(new RegExp(`^##### \`${name}\`\n[\\s\\S]*?\`\`\`ts\nfunction ${name}\\b`, "m"));
   }, 60_000);
 });
 
-const KNOWN: Readonly<Record<string, { defined: readonly string[]; appendix: readonly string[] }>> = {
-  core: { defined: ["ButtonSize", "Wording"], appendix: ["useTree", "useToast"] },
-  charts: { defined: ["Accessor"], appendix: ["controlLimits"] },
-  table: { defined: ["TableRef", "Limit"], appendix: ["useTable"] },
-  schedule: { defined: ["Intent"], appendix: ["applyIntent"] },
-  calculation: { defined: ["Limit"], appendix: [] },
+const KNOWN: Readonly<Record<string, { defined: readonly string[]; declared: readonly string[] }>> = {
+  core: { defined: ["ButtonSize", "Wording"], declared: ["useTree", "useToast"] },
+  charts: { defined: ["Accessor"], declared: ["controlLimits"] },
+  table: { defined: ["TableRef", "Limit"], declared: ["useTable"] },
+  schedule: { defined: ["Intent"], declared: ["applyIntent"] },
+  calculation: { defined: ["Limit"], declared: [] },
 };
