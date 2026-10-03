@@ -27,9 +27,42 @@
   display: flex;
   flex-direction: column;
   gap: var(--u-space-2);
+  /* "Copy page" stands a few pixels above the rubric line (below). The head's
+     box reaches over it, so that its picture holds the button whole, and the
+     margin gives the space back: nothing moves. */
+  padding-top: var(--u-space-2);
+  margin-top: calc(-1 * var(--u-space-2));
+}
+
+/* The rubric, and "Copy page" at the end of its line (`CopyPage.tsx`). The
+   button is taller than the rubric's words; it stands in a box of no height,
+   centred on the line, so the line keeps the words' height and the title
+   below stays where it stood. */
+.pageRubricLine {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--u-space-3);
+}
+
+.pageCopy {
+  flex: none;
+  display: flex;
+  align-items: center;
+  height: 0;
+}
+
+.pageCopyStatus {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .pageRubric {
+  min-width: 0;
   margin: 0;
   font-size: var(--u-text-xs);
   font-weight: var(--u-weight-semibold);

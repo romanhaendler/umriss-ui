@@ -28,6 +28,7 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { CodeBlock, CodeToggle } from "./Example";
 import { useContents } from "./Contents";
+import { RubricLine } from "./CopyPage";
 import { hrefOf, hrefOfNeighbour } from "./href";
 import { PACKAGES } from "./packages";
 import { InstallLine, PageTurn } from "./Page";
@@ -170,7 +171,7 @@ export function Scenarios({ demo, sentence }: { demo: Demo; sentence: string }) 
   return (
     <article className="page scenarios" data-block="scenarios" aria-labelledby="scenarios-title">
       <header className="pageHead">
-        <p className="pageRubric">Scenarios</p>
+        <RubricLine demo={demo} rubric="Scenarios" place="" name="the scenarios" />
         <h1 className="pageName" id="scenarios-title" tabIndex={-1}>
           {demo.packageName}
         </h1>

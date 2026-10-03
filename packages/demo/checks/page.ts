@@ -213,6 +213,105 @@ test("a feature page's \"Props on this page\" leads to the full row", async ({ p
   await expect(page).toHaveURL(new RegExp(`/${tablePage}/#${id}$`));
   await expect(page.locator(`tr[id="${id}"]`)).toBeInViewport();
 });
+
+/* "Copy page" (.scratch/pages-as-markdown, 03): what lands on the clipboard
+   is exactly what the server serves at the page's twin - and after a move in
+   the app, the new page's, never the one the reader came from. */
+const head = (page: Page, pageId: string) => page.locator(`[data-block="${pageId}"] .pageHead`);
+const twinOf = async (page: Page, address: string, name: string) => {
+  const twin = await (await page.request.get(address)).text();
+  expect(twin.startsWith(`# ${name}\n`), `${address} is the twin of ${name}`).toBe(true);
+  return twin;
+};
+
+test("Copy page puts the page's Markdown twin on the clipboard, and follows the page", async ({ page, context }) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await open(page, "scenarios");
+  await page.getByRole("navigation", { name: "Components" }).getByText(p.other.name, { exact: true }).click();
+  const here = head(page, p.other.pageId);
+  await here.getByRole("button", { name: "Copy page", exact: true }).click();
+  await expect(here.getByRole("button", { name: "Copied", exact: true })).toBeVisible();
+  /* The label alone is not reliably announced; the status region is. */
+  await expect(here.getByRole("status")).toHaveText("Copied");
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
+    await twinOf(page, `/${p.other.pageId}.md`, p.other.name),
+  );
+  await expect(here.getByRole("button", { name: "Copy page", exact: true })).toBeVisible();
+  await expect(here.getByRole("status")).toHaveText("");
+});
+
+test("the Copy page menu: the keys of core's menu, the twin, and the prompt for two assistants", async ({ page, context }) => {
+  await context.route(/^https:\/\/(claude\.ai|chatgpt\.com)\//, (route) => route.fulfill({ body: "" }));
+  await open(page, p.other.pageId);
+  const origin = new URL(page.url()).origin;
+  const version = (await page.locator(".shellVersion").textContent())!;
+  const triggerOf = (pageId: string) => head(page, pageId).getByRole("button", { name: "More ways to use this page" });
+  const trigger = triggerOf(p.other.pageId);
+  const menu = page.getByRole("menu");
+  const items = menu.getByRole("menuitem");
+
+  await trigger.focus();
+  await page.keyboard.press("Enter");
+  await expect(items).toHaveText(["View as Markdown", "Open in Claude", "Open in ChatGPT"]);
+  await expect(items.nth(0)).toBeFocused();
+  await page.keyboard.press("ArrowDown");
+  await expect(items.nth(1)).toBeFocused();
+  await page.keyboard.press("End");
+  await expect(items.nth(2)).toBeFocused();
+  await page.keyboard.press("ArrowDown");
+  await expect(items.nth(0)).toBeFocused();
+  await page.keyboard.press("ArrowUp");
+  await expect(items.nth(2)).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(menu).toBeHidden();
+  await expect(trigger).toBeFocused();
+
+  const opened = async (name: string, pageId = p.other.pageId) => {
+    await triggerOf(pageId).click();
+    const popup = page.waitForEvent("popup");
+    await items.getByText(name, { exact: true }).click();
+    const tab = await popup;
+    await tab.waitForLoadState();
+    const url = tab.url();
+    await tab.close();
+    return url;
+  };
+  const twin = `${origin}/${p.other.pageId}.md`;
+  expect(await opened("View as Markdown")).toBe(twin);
+  const prompt = encodeURIComponent(
+    `Read ${twin} — the documentation of ${p.other.name} in ${p.packageName}@${version}. Then help me use it in my React app.`,
+  );
+  expect(await opened("Open in Claude")).toBe(`https://claude.ai/new?q=${prompt}`);
+  expect(await opened("Open in ChatGPT")).toBe(`https://chatgpt.com/?hints=search&q=${prompt}`);
+
+  /* The scenarios page has a twin as well, and the prompt names it so. */
+  await open(page, "scenarios");
+  await twinOf(page, "/index.md", p.packageName);
+  expect(await opened("Open in Claude", "scenarios")).toBe(
+    `https://claude.ai/new?q=${encodeURIComponent(
+      `Read ${origin}/index.md — the documentation of the scenarios in ${p.packageName}@${version}. Then help me use it in my React app.`,
+    )}`,
+  );
+});
+
+test("Copy page fits the rubric line at 390 px and moves nothing", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (const pageId of ["scenarios", p.pageId]) {
+    await open(page, pageId);
+    const line = head(page, pageId).locator(".pageRubricLine");
+    const rubric = (await line.locator(".pageRubric").boundingBox())!;
+    const lineBox = (await line.boundingBox())!;
+    const button = (await line.getByRole("group").boundingBox())!;
+    const pageHead = (await head(page, pageId).boundingBox())!;
+    /* The line is as tall as the rubric's words: the button adds no height,
+       so the title below stands where it stood. */
+    expect(lineBox.height).toBeCloseTo(rubric.height, 0);
+    expect(Math.abs(button.y + button.height / 2 - (rubric.y + rubric.height / 2))).toBeLessThan(1);
+    expect(button.x + button.width).toBeLessThanOrEqual(pageHead.x + pageHead.width + 0.5);
+    expect(button.x).toBeGreaterThan(rubric.x + rubric.width);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  }
+});
 }
 
 export interface InstallProbes {

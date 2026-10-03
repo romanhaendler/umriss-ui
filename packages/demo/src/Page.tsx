@@ -19,6 +19,7 @@ import { Example } from "./Example";
 import { useContents, type ContentsEntry } from "./Contents";
 import { Configurator } from "./Configurator";
 import { CopyButton } from "./CopyButton";
+import { RubricLine } from "./CopyPage";
 import { Prose } from "./Prose";
 import type { Demo } from "./demo";
 import { hrefOf, hrefOfNeighbour } from "./href";
@@ -234,7 +235,7 @@ export function Page({ demo, page }: PageProps) {
   return (
     <article className="page" data-block={page.id} aria-labelledby={`page-${page.id}`}>
       <header className="pageHead">
-        <p className="pageRubric">{page.rubric.name}</p>
+        <RubricLine demo={demo} rubric={page.rubric.name} place={`/${page.id}`} name={page.name} />
         <h1 className="pageName" id={`page-${page.id}`} tabIndex={-1}>
           {page.name}
         </h1>
