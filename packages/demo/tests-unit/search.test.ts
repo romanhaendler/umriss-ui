@@ -62,3 +62,68 @@ describe("the search fragment", () => {
     expect(search.find((entry) => entry.label === "Compact")).not.toHaveProperty("keywords");
   });
 });
+
+/* Tokens and wording keys (.scratch/one-search 06): every row of a page's
+   reference tables, landing on the row. A table with an English and a German
+   column is a wording table, and its texts are the keywords - so that a
+   string seen on screen, in either language, finds the key behind it. */
+const code = (text: string) => [{ kind: "code" as const, text }];
+const word = (text: string) => [{ kind: "text" as const, text }];
+const referenced = renderLlms({
+  packageDir: PACKAGE_DIR,
+  outline: OUTLINE,
+  tables: {},
+  references: {
+    gauge: [
+      {
+        title: "Tokens",
+        anchor: "tokens",
+        lead: word("Every token."),
+        columns: ["Token", "Light", "Dark", "Description"],
+        groups: [
+          {
+            rows: [
+              {
+                anchor: "token-u-color-accent",
+                cells: [code("--u-color-accent"), [{ kind: "swatch", text: "#06c", scheme: "light" }, ...code("#06c")], code("#4af"), word("The accent.")],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "Wording",
+        anchor: "wording",
+        lead: word("Every entry."),
+        columns: ["Key", "English", "German", "Description"],
+        groups: [
+          { rows: [{ anchor: "wording-noMatches", cells: [code("noMatches"), word("No matches"), word("Keine Treffer"), word("—")] }] },
+          { title: word("Presets"), rows: [{ anchor: "wording-presets.today", cells: [code("presets.today"), word("Today"), word("Heute"), word("—")] }] },
+        ],
+      },
+    ],
+  },
+});
+
+describe("the search fragment's tokens and wording keys", () => {
+  const rows = referenced.search.filter((entry) => entry.kind === "token" || entry.kind === "wording");
+
+  it("holds one entry per row, under its package and page, after the examples", () => {
+    expect(rows.map(({ kind, label, group, address }) => [kind, label, group, address])).toEqual([
+      ["token", "--u-color-accent", "fixture · Gauge", "/fixture/gauge/#token-u-color-accent"],
+      ["wording", "noMatches", "fixture · Gauge", "/fixture/gauge/#wording-noMatches"],
+      ["wording", "presets.today", "fixture · Gauge", "/fixture/gauge/#wording-presets.today"],
+    ]);
+    expect(referenced.search.slice(0, -3).map((entry) => entry.kind)).not.toContain("token");
+  });
+
+  it("finds a wording key by its English and its German text; a token by its name alone", () => {
+    expect(rows.find((entry) => entry.label === "noMatches")?.keywords).toEqual(["No matches", "Keine Treffer"]);
+    expect(rows.find((entry) => entry.label === "--u-color-accent")).not.toHaveProperty("keywords");
+  });
+
+  it("lands every row's entry on an anchor its prerendered page carries", () => {
+    const gauge = referenced.pages.find((one) => one.path === "gauge/")!;
+    for (const { address } of rows) expect(gauge.html, address).toContain(`id="${address.split("#")[1]}"`);
+  });
+});

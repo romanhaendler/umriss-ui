@@ -11,10 +11,12 @@
    `/table/width-and-pinning/`, `/core/select/#clear-the-choice`. One form for
    every package, so that fragments of five demos can stand in one index.
 
-   Like the outline, this file imports nothing but the outline: the generator
-   loads it in Node without a bundler. */
+   Like the outline, this file imports nothing but the outline (and types):
+   the generator loads it in Node without a bundler. */
 
 import { SCENARIOS, addressOfPlace, type Rubric } from "./outline.ts";
+import type { Span } from "./tooling/apiTable.ts";
+import type { ReferenceTable } from "./tooling/referenceTable.ts";
 
 /** What a find is, from the broadest answer to the narrowest - the order the
     palette ranks them in when they match alike. */
@@ -68,4 +70,32 @@ export function searchEntries(
       ...(example.lead === undefined ? {} : { keywords: [plain(example.lead)] }),
     })),
   ];
+}
+
+/** A page's reference tables as entries, one a row, landing on the row
+    (.scratch/one-search 06): the Theming page's tokens, the Language page's
+    wording keys. A table with an English and a German column is wording, and
+    its two texts are the keywords - a string seen on screen, in either
+    language, finds the key behind it. A row's label is its first cell. */
+export function referenceEntries(packageId: string, outline: readonly Rubric[], references: Readonly<Record<string, readonly ReferenceTable[]>>): SearchEntry[] {
+  const words = (cell: readonly Span[] | undefined) => (cell ?? []).flatMap((span) => (span.kind === "swatch" ? [] : [span.text])).join("");
+  return outline.flatMap((rubric) =>
+    rubric.pages.flatMap((page) =>
+      (references[page.id] ?? []).flatMap((table) => {
+        const texts = [table.columns.indexOf("English"), table.columns.indexOf("German")];
+        const wording = !texts.includes(-1);
+        return table.groups.flatMap((group) =>
+          group.rows.map(
+            (row): SearchEntry => ({
+              address: `/${packageId}${addressOfPlace(`/${page.id}/${row.anchor}`)}`,
+              label: words(row.cells[0]),
+              group: `${packageId} · ${page.name}`,
+              kind: wording ? "wording" : "token",
+              ...(wording ? { keywords: texts.map((at) => words(row.cells[at])) } : {}),
+            }),
+          ),
+        );
+      }),
+    ),
+  );
 }

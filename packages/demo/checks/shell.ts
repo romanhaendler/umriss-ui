@@ -76,6 +76,10 @@ export interface ShellProbes {
   /** Another library's word for a page, which only its lede carries
       (.scratch/one-search) - where the demo has one. */
   synonyms?: readonly (NamedPage & { query: string })[];
+  /** A row of a reference table and what finds it: a token by part of its
+      name, a wording key by its English or German text - its label, its page
+      and the row's anchor (.scratch/one-search 06) - where the demo has one. */
+  rows?: readonly { query: string; label: string; pageId: string; anchor: string }[];
   /** A find in another package on the built site: what is typed, the find's
       group and label, and the site's address it opens (.scratch/one-search
       03) - where the demo has one. */
@@ -596,6 +600,21 @@ for (const synonym of p.synonyms ?? []) {
     await expect(find.first().locator("span span")).toHaveCount(0);
     await find.first().click();
     await expect(page.locator(`[data-block="${synonym.pageId}"]`)).toBeVisible();
+  });
+}
+
+for (const row of p.rows ?? []) {
+  test(`"${row.query}" finds ${row.label} and lands on its row`, async ({ page }) => {
+    /* The row arrives with the package's search fragment on the first
+       opening; a text on screen is a keyword, the key the find's name. */
+    await page.keyboard.press("ControlOrMeta+k");
+    const field = page.getByRole("combobox", { name: "Search umriss-ui" });
+    await field.fill(row.query);
+    const first = page.getByRole("dialog").getByRole("option").first();
+    await expect(first).toContainText(row.label);
+    await field.press("Enter");
+    await expect(page).toHaveURL(new RegExp(`/${row.pageId}/#${row.anchor.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`));
+    await expect(page.locator(`[id="${row.anchor}"]`)).toBeInViewport();
   });
 }
 
