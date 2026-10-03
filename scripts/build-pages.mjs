@@ -10,6 +10,9 @@
      site/<package>/<old>/      a forwarder where a page's id has changed
      site/sitemap.xml           every address above, no forwarder
      site/llms.txt              the index for coding agents
+     site/<package>/search.json the package's search fragment
+     site/search.json           the five fragments in one: the palette's index of the
+                                whole site (.scratch/one-search)
      site/og-image.png          the picture every page shows where it is shared
      site/favicon.svg           the front page's favicon (each demo bundles its own copy)
      site/fonts/                the front page's Geist (each demo bundles its own copy)
@@ -54,7 +57,7 @@ import { fileURLToPath } from "node:url";
    imports nothing (and why `build:pages` strips types). */
 import { PACKAGES as LIST } from "../packages/demo/src/packages.ts";
 import { dependencyLine, installCommand } from "../packages/demo/src/tooling/install.ts";
-import { documentFaults, forwarderHtml, frontFaults, siteFaults, twinFaults, typeLinkFaults } from "../packages/demo/src/tooling/site.ts";
+import { documentFaults, forwarderHtml, frontFaults, searchFaults, siteFaults, siteSearch, twinFaults, typeLinkFaults } from "../packages/demo/src/tooling/site.ts";
 import { adrLinksOf, siteLeaks } from "../packages/demo/src/tooling/references.ts";
 import { DOCUMENTS, renderDocument } from "../packages/demo/src/tooling/documents.ts";
 import { EDIT_LINK, editHref } from "../packages/demo/src/tooling/edit.ts";
@@ -161,6 +164,7 @@ for (const dir of PACKAGES) {
   const out = join(SITE, dir);
   cpSync(join(packageDir, "dist-demo"), out, { recursive: true });
   cpSync(join(packageDir, "demo", ".generated", "llms.txt"), join(out, "llms.txt"));
+  cpSync(join(packageDir, "demo", ".generated", "search.json"), join(out, "search.json"));
   cpSync(join(packageDir, "docs", "llms-full.md"), join(out, "llms-full.txt"));
 
   const row = { dir, ...manifest, pages: [] };
@@ -301,6 +305,11 @@ ${urls.map((url) => `  <url><loc>${escape(url)}</loc><lastmod>${today}</lastmod>
 `,
 );
 
+/* The palette's index of the whole site: each demo searches its own fragment
+   at once and fetches this for the other four on its first opening. */
+const search = siteSearch(PACKAGES.map((dir) => readFileSync(join(SITE, dir, "search.json"), "utf8")));
+writeFileSync(join(SITE, "search.json"), search);
+
 /* An address that is no page. GitHub Pages serves this file for it; there is
    no fallback to a demo's index.html as in the dev server. */
 writeFileSync(
@@ -351,7 +360,9 @@ ${rows.map((row) => `- [${row.name}](${HOME}${row.dir}/llms.txt): ${row.descript
    and light enough (site-front-page); every document has its page, its links
    lead to sitemap addresses, it ends with a suggested edit naming it, and
    no page links ADR-0032 on GitHub
-   (concepts-and-changelog-pages). A build that breaks
+   (concepts-and-changelog-pages); every find of the search lands on a
+   sitemap page and an anchor it carries, and the index keeps its budget
+   (one-search). A build that breaks
    it fails here, before it is deployed. */
 const files = new Map();
 const texts = new Map();
@@ -407,6 +418,7 @@ const faults = [
     ]);
   }),
   ...typeLinkFaults(files),
+  ...searchFaults(search, HOME, urls, files),
   ...leaks,
 ];
 if (faults.length > 0) throw new Error(`The built site fails its guard:\n${faults.join("\n")}`);

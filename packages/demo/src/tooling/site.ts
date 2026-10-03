@@ -239,3 +239,32 @@ export function documentFaults(documents: readonly string[], files: ReadonlyMap<
       .map(([url]) => `${url}: links ADR-0032 on GitHub, not its page on the site`),
   ];
 }
+
+/** What the site's search index may weigh, uncompressed: the palette fetches
+    all of it on its first opening (.scratch/one-search). */
+export const SEARCH_BUDGET = 500_000;
+
+/** The site's search index, `search.json` at its root: the five packages'
+    fragments (`demo/.generated/search.json`, as text) in one list. */
+export function siteSearch(fragments: readonly string[]): string {
+  return JSON.stringify(fragments.flatMap((fragment) => JSON.parse(fragment) as unknown[]));
+}
+
+/** What the site's search index gets wrong, one line each
+    (.scratch/one-search 03): every entry's path is a sitemap address - not a
+    forwarder - whose page carries the entry's anchor, and the whole stays
+    within its budget. A find that lands on nothing is the one defect a
+    reader cannot work around. `home` is the site's address, `files` as for
+    `siteFaults`. */
+export function searchFaults(index: string, home: string, urls: readonly string[], files: ReadonlyMap<string, string>): string[] {
+  const size = new TextEncoder().encode(index).length;
+  return [
+    ...(size > SEARCH_BUDGET ? [`search.json: ${size} bytes, over its budget of ${SEARCH_BUDGET}`] : []),
+    ...(JSON.parse(index) as { address: string; label: string }[]).flatMap(({ address, label }) => {
+      const [path = "", anchor] = address.slice(1).split("#");
+      const url = home + path;
+      if (!urls.includes(url)) return [`search.json: "${label}" points at ${url}, which is no sitemap address`];
+      return anchor === undefined || files.get(url)?.includes(`id="${anchor}"`) === true ? [] : [`search.json: "${label}" points at #${anchor}, which ${url} does not carry`];
+    }),
+  ];
+}

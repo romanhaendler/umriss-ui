@@ -24,8 +24,9 @@
 
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { STANDARDS, findings } from "./accessibility";
 import { pageTitle, type TitleManifest } from "../src/tooling/title";
 import { PACKAGES } from "../src/packages";
@@ -75,6 +76,31 @@ export interface ShellProbes {
   /** Another library's word for a page, which only its lede carries
       (.scratch/one-search) - where the demo has one. */
   synonyms?: readonly (NamedPage & { query: string })[];
+  /** A find in another package on the built site: what is typed, the find's
+      group and label, and the site's address it opens (.scratch/one-search
+      03) - where the demo has one. */
+  elsewhere?: { query: string; group: string; label: string; address: string };
+}
+
+/* ON THE BUILT SITE (.scratch/one-search 03). A demo of the test build stands
+   alone at `/`, with no site above it, and searches its own package only. The
+   other four come from the site's index, which only `pnpm build:pages`
+   writes. These probes hand that build (`site/`) to the browser at the site's
+   own address - by route, without a server or a port - and are skipped where
+   it has not been built. */
+const SITE_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "site");
+
+/** Serves `site/` at the site's address - the one above the package's
+    homepage - and hands that address back. */
+async function serveSite(page: Page): Promise<string> {
+  const manifest = JSON.parse(readFileSync(join(test.info().project.testDir, "..", "package.json"), "utf8")) as { homepage: string };
+  const home = new URL("../", manifest.homepage);
+  await page.route(`${home.href}**`, (route) => {
+    const rest = decodeURIComponent(new URL(route.request().url()).pathname.slice(home.pathname.length));
+    const file = join(SITE_DIR, rest === "" || rest.endsWith("/") ? `${rest}index.html` : rest);
+    return existsSync(file) ? route.fulfill({ path: file }) : route.fulfill({ status: 404 });
+  });
+  return home.href;
 }
 
 /** The title the prerendering writes for a page - by the same function, from
@@ -570,6 +596,50 @@ for (const synonym of p.synonyms ?? []) {
     await expect(find.first().locator("span span")).toHaveCount(0);
     await find.first().click();
     await expect(page.locator(`[data-block="${synonym.pageId}"]`)).toBeVisible();
+  });
+}
+
+if (p.elsewhere !== undefined) {
+  const elsewhere = p.elsewhere;
+  test("on the built site, the palette finds another package's page and opens it at its address", async ({ page }) => {
+    test.skip(!existsSync(join(SITE_DIR, "search.json")), "the site is not built (`pnpm build:pages`)");
+    const home = await serveSite(page);
+    await page.goto(`${home}${p.packageId}/`);
+    const index = page.waitForResponse(`${home}search.json`);
+    await page.keyboard.press("ControlOrMeta+k");
+    await index;
+    const field = page.getByRole("combobox", { name: "Search umriss-ui" });
+    /* A find's name is its label followed by its group. */
+    const literal = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const find = (label: string, group: string) => page.getByRole("dialog").getByRole("option", { name: new RegExp(`^${literal(label)}\\s*${literal(group)}$`) });
+
+    // The own package's finds stand once: the site's index brings them too.
+    await field.fill(p.example.title);
+    await expect(find(p.example.title, `${p.packageId} · ${p.example.pageName}`)).toHaveCount(1);
+
+    await field.fill(elsewhere.query);
+    await find(elsewhere.label, elsewhere.group).click();
+    // A full navigation into the other demo's directory, anchor and all.
+    await expect(page).toHaveURL(home + elsewhere.address.slice(1));
+    const [path = "", anchor] = elsewhere.address.split("#");
+    if (anchor === undefined) await expect(page.locator(`[data-block="${path.split("/")[2]}"]`)).toBeVisible();
+    else await expect(page.locator(`[data-example="${anchor}"]`)).toBeInViewport();
+  });
+
+  test("on the built site, without its index the palette still searches the own package, silently", async ({ page }) => {
+    test.skip(!existsSync(join(SITE_DIR, "search.json")), "the site is not built (`pnpm build:pages`)");
+    const home = await serveSite(page);
+    await page.route(`${home}search.json`, (route) => route.abort());
+    await page.goto(`${home}${p.packageId}/`);
+    const failed = page.waitForEvent("requestfailed", (request) => request.url() === `${home}search.json`);
+    await page.keyboard.press("ControlOrMeta+k");
+    await failed;
+    const field = page.getByRole("combobox", { name: "Search umriss-ui" });
+    await field.fill(p.palettePage.query);
+    await expect(page.getByRole("dialog").getByRole("option").first()).toContainText(p.palettePage.name);
+    await expect(page.getByRole("dialog").getByRole("alert")).toHaveCount(0);
+    await field.press("Enter");
+    await expect(page.locator(`[data-block="${p.palettePage.pageId}"]`)).toBeVisible();
   });
 }
 

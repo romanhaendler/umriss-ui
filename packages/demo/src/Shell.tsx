@@ -155,23 +155,38 @@ export function Shell({ demo, sentence }: ShellProps) {
      the bundle of its own, fetched on the palette's first opening and kept.
      Until it has arrived - or if it never does - the palette searches the
      same pages, scenarios and examples from the outline in hand, so the
-     window is never empty and a lost request breaks nothing. */
+     window is never empty and a lost request breaks nothing.
+
+     The other four packages come from the site's index (`search.json` at the
+     site's root, `scripts/build-pages.mjs`), fetched on the same first
+     opening, without the own package's entries, which the fragment already
+     has. A demo standing alone - the dev server, the test build - has no
+     site above it and fetches nothing. A failed fetch is silent: the reader
+     can do nothing about it, and the own package is still searched. */
   const ownId = demo.packageName.split("/")[1]!;
   const [fragment, setFragment] = useState<readonly SearchEntry[] | null>(null);
+  const [elsewhere, setElsewhere] = useState<readonly SearchEntry[] | null>(null);
   useEffect(() => {
     if (!paletteOpen || fragment !== null) return;
     demo.search().then(setFragment, () => {});
   }, [paletteOpen, fragment, demo]);
+  useEffect(() => {
+    if (!paletteOpen || elsewhere !== null || SITE === BASE) return;
+    fetch(`${SITE}search.json`)
+      .then((response) => (response.ok ? (response.json() as Promise<SearchEntry[]>) : []))
+      .then((entries) => setElsewhere(entries.filter((entry) => !entry.address.startsWith(`/${ownId}/`))))
+      .catch(() => setElsewhere([]));
+  }, [paletteOpen, elsewhere, ownId]);
   const candidates = useMemo(
     () =>
-      (fragment ?? searchEntries(ownId, OUTLINE, demo.scenarios, demo.examples)).map((entry) => ({
+      [...(fragment ?? searchEntries(ownId, OUTLINE, demo.scenarios, demo.examples)), ...(elsewhere ?? [])].map((entry) => ({
         id: entry.address,
         label: entry.label,
         group: entry.group,
         keywords: entry.keywords,
         weight: KIND_WEIGHT[entry.kind] + (entry.address.startsWith(`/${ownId}/`) ? OWN_PACKAGE_WEIGHT : 0),
       })),
-    [fragment, ownId, OUTLINE, demo.scenarios, demo.examples],
+    [fragment, elsewhere, ownId, OUTLINE, demo.scenarios, demo.examples],
   );
   /* The jump needs a counter of its own. Two examples on the same page one
      after the other do not change the page - an effect hanging only on that

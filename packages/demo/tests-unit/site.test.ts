@@ -3,7 +3,7 @@
    seam 1). */
 
 import { describe, expect, it } from "vitest";
-import { documentFaults, forwarderHtml, frontFaults, siteFaults, twinFaults, typeLinkFaults } from "../src/tooling/site";
+import { SEARCH_BUDGET, documentFaults, forwarderHtml, frontFaults, searchFaults, siteFaults, siteSearch, twinFaults, typeLinkFaults } from "../src/tooling/site";
 
 const HOME = "https://example.test/umriss-ui/charts/";
 const page = (url: string) =>
@@ -263,5 +263,43 @@ describe("the guard over the document pages (.scratch/concepts-and-changelog-pag
     expect(documentFaults([document], new Map([[document, fine], [`${SITE}core/button/`, old]]), sitemap, SITE)).toEqual([
       `${SITE}core/button/: links ADR-0032 on GitHub, not its page on the site`,
     ]);
+  });
+});
+
+describe("the site's search index (.scratch/one-search 03)", () => {
+  const SITE = "https://example.test/umriss-ui/";
+  const sitemap = [SITE, `${SITE}core/`, `${SITE}core/select/`, `${SITE}table/width-and-pinning/`];
+  const pages = new Map([
+    [`${SITE}core/`, '<h3 id="resolve-an-incident">Resolve an incident</h3>'],
+    [`${SITE}core/select/`, '<h1>Select</h1><section id="clear-the-choice"></section>'],
+    [`${SITE}table/width-and-pinning/`, "<h1>Width and pinning</h1>"],
+    // A forwarder: a file of the site, but no sitemap address.
+    [`${SITE}core/old-select/`, "<p>This page has moved.</p>"],
+  ]);
+  const entry = (address: string, label = "Select") => ({ address, label, group: "core · Inputs", kind: "page" });
+  const core = [entry("/core/select/"), entry("/core/select/#clear-the-choice", "Clear the choice"), entry("/core/#resolve-an-incident", "Resolve an incident")];
+  const table = [entry("/table/width-and-pinning/", "Width and pinning")];
+  const index = siteSearch([JSON.stringify(core), JSON.stringify(table)]);
+
+  it("keeps every fragment it merges, in their order", () => {
+    expect(JSON.parse(index)).toEqual([...core, ...table]);
+  });
+
+  it("passes an index whose every entry lands on a sitemap page and an anchor that page carries", () => {
+    expect(searchFaults(index, SITE, sitemap, pages)).toEqual([]);
+  });
+
+  it("lists an entry pointing at a missing anchor, at a page outside the sitemap and at a forwarder", () => {
+    const astray = [entry("/core/select/#nothing"), entry("/core/combobox/"), entry("/core/old-select/")];
+    expect(searchFaults(JSON.stringify(astray), SITE, sitemap, pages)).toEqual([
+      `search.json: "Select" points at #nothing, which ${SITE}core/select/ does not carry`,
+      `search.json: "Select" points at ${SITE}core/combobox/, which is no sitemap address`,
+      `search.json: "Select" points at ${SITE}core/old-select/, which is no sitemap address`,
+    ]);
+  });
+
+  it("fails an index over its budget, naming its size", () => {
+    const heavy = JSON.stringify([{ ...entry("/core/select/"), keywords: ["x".repeat(SEARCH_BUDGET)] }]);
+    expect(searchFaults(heavy, SITE, sitemap, pages)).toEqual([`search.json: ${Buffer.byteLength(heavy)} bytes, over its budget of ${SEARCH_BUDGET}`]);
   });
 });
