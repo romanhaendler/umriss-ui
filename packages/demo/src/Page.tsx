@@ -37,9 +37,10 @@ function ImportLine({ exports, packageName }: { exports: readonly string[]; pack
   );
 }
 
-/** The install command on the page that installs - one line, copied whole.
-    Every package name is a word of its own, as in the import line. */
-function InstallLine({ command }: { command: string }) {
+/** The install command on the page that installs, and on the landing - one
+    line, copied whole. Every package name is a word of its own, as in the
+    import line. */
+export function InstallLine({ command }: { command: string }) {
   return (
     <div className="installLine">
       <code>
