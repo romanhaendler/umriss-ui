@@ -441,7 +441,7 @@ describe("the API index (.scratch/api-index, ADR-0044)", () => {
       definition: { description: "What the needle says.", declaration: 'type GaugeTone = "neutral" | "alarm";' },
     },
   };
-  const { full: text, index: llmsIndex, pages: sitePages, twins: twinTexts, apiIndex } = renderLlms({ packageDir: PACKAGE_DIR, outline, tables });
+  const { full: text, index: llmsIndex, pages: sitePages, twins: twinTexts, apiIndex, search } = renderLlms({ packageDir: PACKAGE_DIR, outline, tables });
   const page = text.slice(text.indexOf("### API index"));
   /** One entry of the index's text, up to the next heading of its level. */
   const entry = (name: string) => {
@@ -538,5 +538,21 @@ describe("the API index (.scratch/api-index, ADR-0044)", () => {
 
   it("takes the place of the appendix", () => {
     expect(text).not.toContain("## The rest of the API");
+  });
+
+  /* .scratch/one-search 05: what only the index shows is found there; the
+     Gauge as its page and `GaugeProps` by its props are found elsewhere. */
+  it("puts every export it alone shows in the search, landing on its entry", () => {
+    const exports = search.filter((one) => one.kind === "export");
+    expect(exports.map(({ label, group, address }) => [label, group, address])).toEqual([
+      ["GaugeNeedle", "fixture · API index", "/fixture/api/#GaugeNeedle"],
+      ["useGauge", "fixture · API index", "/fixture/api/#useGauge"],
+      ["fraction", "fixture · API index", "/fixture/api/#fraction"],
+      ["GAUGE_RANGE", "fixture · API index", "/fixture/api/#GAUGE_RANGE"],
+      ["RANGE", "fixture · API index", "/fixture/api/#RANGE"],
+      ["GaugeTone", "fixture · API index", "/fixture/api/#type-GaugeTone"],
+      ["GERMAN_GAUGE_WORDING", "fixture · API index", "/fixture/api/#GERMAN_GAUGE_WORDING"],
+    ]);
+    for (const { address } of exports) expect(html, address).toContain(`id="${address.split("#")[1]}"`);
   });
 });

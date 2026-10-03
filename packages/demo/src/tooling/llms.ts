@@ -36,7 +36,7 @@ import { adrLinks } from "./props.ts";
 import { exportedDeclarations } from "./exportDocs.ts";
 import { apiIndexHtml, apiIndexMarkdown, apiIndexModel, linkedNames, type ApiIndexModel, type Mention } from "./apiIndex.ts";
 import { linkAdrs, linkApiNames, linkReferences, outlineTexts } from "./references.ts";
-import { plain, propEntries, referenceEntries, searchEntries, type PropsOfPage, type SearchEntry } from "../search.ts";
+import { exportEntries, plain, propEntries, referenceEntries, searchEntries, type PropsOfPage, type SearchEntry } from "../search.ts";
 
 export interface LlmsJob {
   /** The package's directory: `package.json` and `demo/` are read there. */
@@ -598,6 +598,7 @@ export function renderLlms({ packageDir, outline: written, tables, moved = {}, r
     ...searchEntries(packageId, outline, scenarios, examples),
     ...propEntries(packageId, propsOfPages),
     ...referenceEntries(packageId, outline, references),
+    ...(apiIndex === undefined ? [] : exportEntries(packageId, apiIndex)),
   ];
 
   return { index, full: `${parts.join("\n")}\n`, pages: sitePages, forwarders, twins, search, ...(apiIndex === undefined ? {} : { apiIndex }) };

@@ -32,6 +32,7 @@ checkShell({
   contents: { pageId: "limitline", id: "limits-and-state", title: "Read limits above the states" },
   prop: { query: "padding", label: "padding", group: "charts · ChartProps", pageId: "chart", id: "ChartProps-padding" },
   apiIndex: { anchor: "GERMAN_CHARTS_WORDING" },
+  exported: { query: "controlLimits", label: "controlLimits", anchor: "controlLimits" },
 });
 
 test("the Installation page says how German reaches a chart, where the other demos have a switch", async ({ page }) => {

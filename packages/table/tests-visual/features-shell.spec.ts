@@ -29,9 +29,13 @@ checkShell({
   contents: { pageId: "toolbar", id: "place-it-outside", title: "Place it outside the table" },
   foldedRow: { pageId: "first-table", id: "TableProps-onCellEdit" },
   synonyms: [{ query: "frozen", name: "Width and pinning", pageId: "width-and-pinning" }],
-  elsewhere: [{ query: "select", group: "core · Choosing", label: "Select", address: "/core/select/" }],
+  elsewhere: [
+    { query: "select", group: "core · Choosing", label: "Select", address: "/core/select/" },
+    { query: "useToast", group: "core · API index", label: "useToast", address: "/core/api/#useToast" },
+  ],
   prop: { query: "pageSize", label: "pageSize", group: "table · TableOptions", pageId: "first-table", id: "TableOptions-pageSize" },
   apiIndex: { anchor: "useTable" },
+  exported: { query: "useTableSelection", label: "useTableSelection", anchor: "useTableSelection" },
   /* The States example's empty body, where a search matches nothing, and the
      due dates of the Styling rows example. */
   language: {

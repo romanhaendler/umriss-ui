@@ -64,6 +64,7 @@ checkShell({
   /* A row in a folded group: the jump opens it. */
   prop: { query: "role", label: "role", group: "core · PopoverProps", pageId: "popover", id: "PopoverProps-role" },
   apiIndex: { anchor: "GERMAN_WORDING" },
+  exported: { query: "useToast", label: "useToast", anchor: "useToast" },
   /* The States example: a date already set, and the button that clears it. */
   language: { pageId: "datepicker", texts: [["18/03/2026", "18.03.2026"]], buttons: [["Clear date", "Datum leeren"]] },
 });
