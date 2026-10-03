@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { Card, CardBody, CardHeader, Checkbox, Grid, Slider, Stack, Switch } from "../../../src";
+import { Card, CardBody, CardHeader, Checkbox, Grid, Stack, Switch } from "../../../src";
 
 export const title = "A token for one region";
 export const lead =
@@ -20,7 +20,6 @@ function Settings({ title }: { title: string }) {
         <Stack gap={3}>
           <Switch label="Send a weekly summary" defaultChecked />
           <Checkbox label="Copy the account owner" defaultChecked />
-          <Slider aria-label="Reminder, days before due" min={0} max={14} defaultValue={5} />
         </Stack>
       </CardBody>
     </Card>
