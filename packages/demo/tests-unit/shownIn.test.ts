@@ -120,7 +120,7 @@ describe("generateProps", () => {
 
   /* The fixture's `demo/unshown.json` lists one row rightly, one that an
      example uses and one that does not exist. */
-  it("stops at all three kinds in one run and names every offender", () => {
+  it("stops at all three kinds in one run and names every offender of the tables the pages list", () => {
     let written = "";
     vi.spyOn(process.stderr, "write").mockImplementation((text) => {
       written += String(text);
@@ -132,8 +132,10 @@ describe("generateProps", () => {
 
     expect(() => generateProps({ packageName: PACKAGE_DIR, outline: OUTLINE })).toThrow("exit 1");
     expect(written).not.toContain("without JSDoc");
-    expect(written).toContain("5 props without an example:\n");
-    for (const row of ["PanelMark.note", "DialProps.label", "SliderProps.value", "MeterOptions.keep", "MeterHandle.reset"]) expect(written).toContain(`  ${row}\n`);
+    expect(written).toContain("4 props without an example:\n");
+    /* `PanelMark` is a definition, not a table a page lists. */
+    expect(written).not.toContain("PanelMark.note");
+    for (const row of ["DialProps.label", "SliderProps.value", "MeterOptions.keep", "MeterHandle.reset"]) expect(written).toContain(`  ${row}\n`);
     expect(written).not.toContain("  PanelProps.heading\n");
     expect(written).toContain("1 entry of demo/unshown.json is shown now - stale, remove it:\n  DialProps.tone\n");
     expect(written).toContain("1 entry of demo/unshown.json names no row:\n  DialProps.colour\n");

@@ -4,7 +4,8 @@
    requirement number, a source path, an ADR number no file answers
    (`references.ts`) -, at a default stated in prose and not in `@default`,
    at a type a page names that no entry exports (`propsReader.ts`), and at a
-   prop no example or scenario uses that `demo/unshown.json` does not list -
+   prop of a table a page lists that no example or scenario uses and
+   `demo/unshown.json` does not list -
    as at an entry of that list whose prop is shown now or does not exist
    (`shownIn.ts`). Each row it writes carries the examples and scenarios that
    use it.
@@ -166,7 +167,13 @@ export function generateProps({ packageName, outline }: PropsJob): Record<string
   const shown = shownIn(join(packageName, "demo"), outline, declaredAt, compilerOptionsOf(packageName));
   const notYetFile = join(packageName, "demo", "unshown.json");
   const notYet = (existsSync(notYetFile) ? JSON.parse(readFileSync(notYetFile, "utf8")) : {}) as Record<string, string>;
-  const { unshown, stale, unknown } = exampleFaults(Object.keys(declaredAt), shown, notYet);
+  /* Only the props tables a page lists (`Page.types`): the gate is about a
+     component's props. A reference table - wording keys, formats - or a
+     definition under "Types on this page" is read, not set, and no example
+     can sensibly show each of its rows. */
+  const listed = new Set(requiredTypes(outline));
+  const rows = Object.keys(declaredAt).filter((row) => listed.has(row.slice(0, row.indexOf("."))));
+  const { unshown, stale, unknown } = exampleFaults(rows, shown, notYet);
   const unshownFaults = unshown.length + stale.length + unknown.length;
   if (gaps.length > 0 || bareExports.length > 0 || flags.length > 0 || pageFlags.length > 0 || unshownFaults > 0) {
     /* All of them, not the first: finding a hundred and fifty missing
