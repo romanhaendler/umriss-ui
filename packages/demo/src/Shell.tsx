@@ -130,10 +130,11 @@ export function Shell({ demo, brand, version, sentence }: ShellProps) {
   useEffect(() => {
     /* An old hash address - a bookmark, a link from before ADR-0037, a
        `#/page` in a page's text - is replaced by its path, so the address bar
-       only ever shows the one form. */
+       only ever shows the one form. So is the path of a page whose id has
+       changed (`MOVED` in the outline): the bar shows the current one. */
     const forward = () => {
-      if (!window.location.hash.startsWith("#/")) return;
-      const { page, example } = fromPlace(placeHere());
+      const { page, example, moved } = fromPlace(placeHere());
+      if (!window.location.hash.startsWith("#/") && moved === undefined) return;
       window.history.replaceState(null, "", hrefOf(addressOf(page?.id ?? SCENARIOS, example)));
     };
     const onMove = () => {

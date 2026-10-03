@@ -21,8 +21,9 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 
 import { dirname, join } from "node:path";
 import { Marked, type Tokens } from "marked";
 import ts from "typescript";
-import { ADR_0032, SCENARIOS, addressOfPlace } from "../outline.ts";
-import type { Rubric, Page } from "../outline.ts";
+import { ADR_0032, SCENARIOS, addressOfPlace, addresses } from "../outline.ts";
+import type { Moved, Rubric, Page } from "../outline.ts";
+import type { Forwarder } from "./site.ts";
 import { byRank, parseFileName, parseScenarioName } from "./fileName.ts";
 import { displaySource } from "./source.ts";
 import type { TypeEntry } from "./propsReader.ts";
@@ -38,6 +39,9 @@ export interface LlmsJob {
   /** The `on…` props in a table of their own, as the demo shows them
       (`EVENTS_APART` in the table's and the schedule's outline). */
   eventsApart?: boolean;
+  /** The page ids that changed (`MOVED` in the outline): each gets a
+      forwarder on the site. */
+  moved?: Moved;
 }
 
 interface Manifest extends InstallManifest {
@@ -337,7 +341,12 @@ function markdownToHtml(markdown: string, homepage: string, lift: number, anchor
 }
 
 /** Both texts of one package, from its directory. Pure apart from reading. */
-export function renderLlms({ packageDir, outline, tables, eventsApart = false }: LlmsJob): { index: string; full: string; pages: SitePage[] } {
+export function renderLlms({ packageDir, outline, tables, eventsApart = false, moved = {} }: LlmsJob): {
+  index: string;
+  full: string;
+  pages: SitePage[];
+  forwarders: Forwarder[];
+} {
   const manifest = JSON.parse(readFileSync(join(packageDir, "package.json"), "utf8")) as Manifest;
   const demoDir = join(packageDir, "demo");
   const examples = listExamples(demoDir)
@@ -543,21 +552,29 @@ export function renderLlms({ packageDir, outline, tables, eventsApart = false }:
     }),
   ];
 
-  return { index, full: `${parts.join("\n")}\n`, pages: sitePages };
+  /* An old address forwards to the page it is now; `addresses` throws on a
+     moved id that collides or points nowhere. */
+  const forwarders = Object.entries(addresses(outline, moved).MOVED).map(([old, current]): Forwarder => {
+    const to = sitePages.find((page) => page.path === addressOfPlace(`/${current}`).slice(1))!;
+    return { url: urlOf(home, `/${old}`), to: to.url, title: to.title };
+  });
+
+  return { index, full: `${parts.join("\n")}\n`, pages: sitePages, forwarders };
 }
 
-/** Writes `demo/.generated/llms.txt`, `demo/.generated/pages.json` (the
-    site's pages, which `scripts/build-pages.mjs` writes out) and
-    `docs/llms-full.md`. None is checked in: a generation drifts from its
-    source (`.gitignore`). */
+/** Writes `demo/.generated/llms.txt`, `demo/.generated/pages.json` and
+    `forwarders.json` (the site's pages and the forwarders at old addresses,
+    which `scripts/build-pages.mjs` writes out) and `docs/llms-full.md`. None
+    is checked in: a generation drifts from its source (`.gitignore`). */
 export function generateLlms(job: LlmsJob): void {
-  const { index, full, pages } = renderLlms(job);
+  const { index, full, pages, forwarders } = renderLlms(job);
   const indexPath = join(job.packageDir, "demo", ".generated", "llms.txt");
   const fullPath = join(job.packageDir, "docs", "llms-full.md");
   mkdirSync(dirname(indexPath), { recursive: true });
   mkdirSync(dirname(fullPath), { recursive: true });
   writeFileSync(indexPath, index, "utf8");
   writeFileSync(join(dirname(indexPath), "pages.json"), JSON.stringify(pages), "utf8");
+  writeFileSync(join(dirname(indexPath), "forwarders.json"), JSON.stringify(forwarders), "utf8");
   writeFileSync(fullPath, full, "utf8");
   process.stdout.write(`llms-full.md: ${Math.round(Buffer.byteLength(full) / 1024)} kB.\n`);
 }

@@ -26,6 +26,7 @@ checkShell({
   palettePage: { query: "controlchart", name: "ControlChart", pageId: "controlchart", rubricName: "Limits and alarms" },
   abbreviation: { query: "sb", find: "StateBand", glyphs: ["S", "B"] },
   pointer: { wide: "a", narrow: "matrix" },
+  moved: { from: "getting-started", pageId: "installation", example: "in-its-container" },
 });
 
 test("the benchmark does not run on the front door", async ({ page }) => {

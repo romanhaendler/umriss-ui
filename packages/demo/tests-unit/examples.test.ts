@@ -139,3 +139,21 @@ describe("a page's address is a path (ADR-0037)", () => {
     }
   });
 });
+
+describe("a moved page id forwards to its current page", () => {
+  const moved = addresses(OUTLINE, { meter: "gauge" });
+
+  it("reads the old id as the current page, keeping the example, and says it moved", () => {
+    expect(moved.fromPlace("/meter").page?.id).toBe("gauge");
+    expect(moved.fromPlace("/meter")).toMatchObject({ moved: true });
+    expect(moved.fromPlace("/meter/basic")).toMatchObject({ example: "basic", moved: true });
+    expect(moved.fromPlace("/meter/basic").page?.id).toBe("gauge");
+    expect(moved.fromPlace("/gauge/basic").moved).toBeUndefined();
+    expect(addressOfPlace(moved.placeOf("gauge", "basic"))).toBe("/gauge/#basic");
+  });
+
+  it("refuses an old id that is a current page, or a current id that is none, naming the id", () => {
+    expect(() => addresses(OUTLINE, { gauge: "gauge" })).toThrow(/`gauge`/);
+    expect(() => addresses(OUTLINE, { meter: "dial" })).toThrow(/`dial`/);
+  });
+});
