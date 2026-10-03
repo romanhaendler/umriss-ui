@@ -10,7 +10,7 @@
    through its table syntax. */
 
 import { describe, expect, it } from "vitest";
-import { apiHtml, apiMarkdown, apiSection, previewOf, tableHtml, tableMarkdown, tableModel } from "../src/tooling/apiTable";
+import { apiHtml, apiMarkdown, apiSection, previewOf, propsOnPage, tableHtml, tableMarkdown, tableModel } from "../src/tooling/apiTable";
 import type { TypeEntry } from "../src/tooling/tables";
 
 const ENTRY: TypeEntry = {
@@ -511,5 +511,77 @@ describe("Shown in", () => {
     const name = html.querySelector('[id="DialProps-value"] th a')!;
     expect(name.getAttribute("href")).toBe("#DialProps-value");
     expect(name.textContent).toBe("value");
+  });
+});
+
+/* Feature pages show the props they are about (.scratch/props-to-examples, 02). */
+describe("Props on this page", () => {
+  const prop = (name: string, ...pages: string[]) => ({
+    name,
+    type: "number",
+    optional: true,
+    description: `The ${name}.`,
+    shownIn: pages.map((page) => ({ page, example: `${name}-example`, title: name, pageName: page })),
+  });
+  const ENTRIES: Record<string, TypeEntry> = {
+    DialProps: {
+      name: "DialProps",
+      parameter: ["T"],
+      inherits: "<div>",
+      omitted: [],
+      props: [
+        prop("max", "dial"),
+        prop("onValueChange", "sorting"),
+        prop("value", "dial", "sorting"),
+        { ...prop("size", "sorting"), type: "DialSize", references: ["DialSize"] },
+      ],
+    },
+    DialSize: { name: "DialSize", parameter: [], omitted: [], props: [], definition: { description: "A size.", declaration: "type DialSize = 1 | 2;" } },
+    MeterProps: { name: "MeterProps", parameter: [], omitted: [], props: [prop("min", "meter"), prop("tone", "sorting")] },
+    Unused: { name: "Unused", parameter: [], omitted: [], props: [prop("x", "meter")] },
+  };
+  const PAGES = [
+    { id: "dial", name: "Dial", types: ["DialProps"] },
+    { id: "meter", name: "Meter", types: ["MeterProps", "Unused"] },
+    { id: "sorting", name: "Sorting", types: [] },
+    { id: "plain", name: "Plain", types: [] },
+  ];
+  const models = propsOnPage(PAGES[2]!, PAGES, ENTRIES);
+  const host = document.createElement("div");
+  host.innerHTML = apiHtml({ tables: models, definitions: [] });
+  const markdown = apiMarkdown({ tables: models, definitions: [] }).join("\n\n");
+
+  it("holds exactly the rows the page's examples use, grouped by their table in the full table's order", () => {
+    expect(models.map((model) => [model.name, model.groups.flatMap((group) => group.rows.map((one) => one.name))])).toEqual([
+      ["DialProps", ["value", "onValueChange", "size"]],
+      ["MeterProps", ["tone"]],
+    ]);
+  });
+
+  it("introduces each group with the full table and the page it stands on, as a link", () => {
+    const intros = [...host.querySelectorAll(".apiBlock > p.apiInherited:first-child")];
+    expect(intros.map((p) => p.textContent)).toEqual(["From DialProps — the full table stands on Dial.", "From MeterProps — the full table stands on Meter."]);
+    expect(intros[0]!.querySelector("a")!.getAttribute("href")).toBe("../dial/#type-DialProps");
+    expect(host.querySelector("h3")).toBeNull();
+    expect(markdown).toContain("From `DialProps` — the full table stands on [Dial](#/dial/type-DialProps).\n\n| Prop |");
+  });
+
+  it("links each row's name to the full row, and carries no anchor of its own and no Shown in line", () => {
+    const names = [...host.querySelectorAll("tbody th a")].map((a) => a.getAttribute("href"));
+    expect(names).toEqual(["../dial/#DialProps-value", "../dial/#DialProps-onValueChange", "../dial/#DialProps-size", "../meter/#MeterProps-tone"]);
+    expect(host.querySelectorAll("tr[id]")).toHaveLength(0);
+    expect(host.querySelector(".apiShown")).toBeNull();
+    expect(markdown).toContain("| [`value`](#/dial/DialProps-value) | `number` |");
+    expect(markdown).not.toContain("Shown in");
+  });
+
+  it("links a type a cell names to where the full table's page defines it, and closes with no sentence", () => {
+    expect(host.querySelector('[href="../dial/#type-DialSize"]')).not.toBeNull();
+    expect(host.textContent).not.toContain("Also takes");
+  });
+
+  it("is empty on a page with a table of its own, and on a page whose examples use no row", () => {
+    expect(propsOnPage(PAGES[0]!, PAGES, ENTRIES)).toEqual([]);
+    expect(propsOnPage(PAGES[3]!, PAGES, ENTRIES)).toEqual([]);
   });
 });

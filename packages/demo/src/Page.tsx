@@ -5,7 +5,7 @@
    first example without a heading, the run of examples from simple to rich,
    the reference tables a page carries (the Language page's wording), when to
    use something else, the keyboard, what a screen reader meets, the API
-   tables, and what it
+   tables - on a page without, the props its examples use -, and what it
    deliberately does not do. Each section appears only where it has something
    to say - a section that is always there carries no information.
 
@@ -23,7 +23,7 @@ import { Prose } from "./Prose";
 import type { Demo } from "./demo";
 import { hrefOf, hrefOfNeighbour } from "./href";
 import { examplesOf } from "./tooling/examples";
-import { apiHtml, apiSection, DEFINITIONS_ID, DEFINITIONS_TITLE, previewOf } from "./tooling/apiTable";
+import { apiHtml, apiSection, DEFINITIONS_ID, DEFINITIONS_TITLE, previewOf, propsOnPage, PROPS_ON_PAGE_TITLE } from "./tooling/apiTable";
 import type { ApiDefinitionModel, ApiSection } from "./tooling/apiTable";
 import { referenceHtml } from "./tooling/referenceTable";
 import { ADR_0032, SCENARIOS, keyboardAnchor, keysOfText } from "./outline";
@@ -194,6 +194,9 @@ export function Page({ demo, page }: PageProps) {
   const rest = configurator === undefined ? examples.slice(1) : examples;
   const api = apiSection(page, demo.addresses.ALL_PAGES, demo.tables);
   const { tables } = api;
+  /* A page without a table of its own shows the rows its examples use, where
+     the API section would stand (.scratch/props-to-examples, 02). */
+  const cut: ApiSection = { tables: propsOnPage(page, demo.addresses.ALL_PAGES, demo.tables), definitions: [] };
   const known = new Set(demo.addresses.ALL_PAGES.map((one) => one.id));
   const nameOf = (id: string) => demo.addresses.ALL_PAGES.find((one) => one.id === id)?.name ?? id;
 
@@ -224,6 +227,7 @@ export function Page({ demo, page }: PageProps) {
           ...tables.map((one) => ({ ...section(one.anchor, one.name), sub: true as const, code: true as const })),
           ...(api.definitions.length === 0 ? [] : [{ ...section(DEFINITIONS_ID, DEFINITIONS_TITLE), sub: true as const }]),
         ]),
+    ...(cut.tables.length === 0 ? [] : [section(`props-${page.id}`, PROPS_ON_PAGE_TITLE)]),
     ...(page.limits === undefined ? [] : [section(`limits-${page.id}`, "Known limits")]),
   ]);
 
@@ -351,6 +355,12 @@ export function Page({ demo, page }: PageProps) {
               page" included. Its links are ordinary addresses, which the shell
               takes like any other. */}
           <ApiTables api={api} />
+        </Section>
+      )}
+
+      {cut.tables.length > 0 && (
+        <Section id={`props-${page.id}`} title={PROPS_ON_PAGE_TITLE}>
+          <ApiTables api={cut} />
         </Section>
       )}
 

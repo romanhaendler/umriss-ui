@@ -8,7 +8,7 @@ import { describe, expect, it, vi } from "vitest";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { renderLlms } from "../src/tooling/llms";
-import { apiHtml, apiSection } from "../src/tooling/apiTable";
+import { apiHtml, apiSection, propsOnPage } from "../src/tooling/apiTable";
 import type { Rubric } from "../src/outline";
 import type { TypeEntry } from "../src/tooling/tables";
 
@@ -397,5 +397,34 @@ describe("Types on this page (.scratch/types-without-holes)", () => {
     const rest = text.slice(text.indexOf("## The rest of the API"));
     expect(rest).toContain("### `fraction`\n\n```ts\n/** Where the needle stands, as a fraction of the range. */\nfunction fraction(value: number): number;\n```");
     expect(rest).not.toContain("### `GaugeProps`");
+  });
+});
+
+/* A page without a table of its own shows the rows its examples use
+   (.scratch/props-to-examples, 02). */
+describe("Props on this page", () => {
+  const SHOWN: Record<string, TypeEntry> = {
+    GaugeProps: {
+      ...TABLES.GaugeProps!,
+      props: TABLES.GaugeProps!.props.map((prop) =>
+        prop.name === "tone" ? { ...prop, shownIn: [{ page: "meter", example: "basic", title: "A basic meter", pageName: "Meter" }] } : prop,
+      ),
+    },
+  };
+  const rendered = renderLlms({ packageDir: PACKAGE_DIR, outline: OUTLINE, tables: SHOWN });
+  const [gauge, meter] = OUTLINE[0]!.pages;
+
+  it("stands where the API would, in the full text and on the prerendered page alike", () => {
+    const text = rendered.full.slice(rendered.full.indexOf("### Meter"), rendered.full.indexOf("## The rest of the API"));
+    expect(text).toContain("#### Props on this page\n\nFrom `GaugeProps` — the full table stands on [Gauge](#/gauge/type-GaugeProps).\n\n| Prop |");
+    expect(text).toContain('| [`tone`](#/gauge/GaugeProps-tone) | `"neutral" \\| "alarm"` |');
+    expect(text).not.toContain("`value`");
+    const cut = apiHtml({ tables: propsOnPage(meter!, OUTLINE[0]!.pages, SHOWN), definitions: [] });
+    expect(rendered.pages.find((one) => one.path === "meter/")!.html).toContain(`<h2 id="props-meter">Props on this page</h2>\n<div class="apiTables">${cut}</div>`);
+  });
+
+  it("is not on a page with a table of its own", () => {
+    expect(propsOnPage(gauge!, OUTLINE[0]!.pages, SHOWN)).toEqual([]);
+    expect(rendered.full.slice(rendered.full.indexOf("### Gauge"), rendered.full.indexOf("### Meter"))).not.toContain("Props on this page");
   });
 });
