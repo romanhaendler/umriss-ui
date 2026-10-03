@@ -1027,6 +1027,15 @@ reader saw; the file *is* the example, and there is no list of examples to keep
 in step with it. Every example has an anchor and is linkable on its own.
 _Avoid_: Demo, snippet, Schnipsel, Ausschnitt, sample, usage
 
+**Configurator**:
+The component in place of a page's first example, with one control per value
+prop and the code of what stands on the stage, every prop at its default left
+out. Its file names only the props it controls and the text it starts with; the
+controls, their values and their defaults come from the props table. It is no
+example: it is not in the prerendered page, the Markdown twin or the llms text,
+and the former first example stands as the first titled one under it.
+_Avoid_: Playground, sandbox, knobs, controls panel
+
 **Scenario**:
 One realistic screen, composed from several components, on the scenarios page
 that opens every demo. Each plays in one world a reader recognises — operations,

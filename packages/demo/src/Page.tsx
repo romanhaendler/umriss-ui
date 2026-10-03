@@ -14,6 +14,7 @@
 import { Fragment, useState, type ReactNode } from "react";
 import { Example } from "./Example";
 import { useContents, type ContentsEntry } from "./Contents";
+import { Configurator } from "./Configurator";
 import { CopyButton } from "./CopyButton";
 import { Prose } from "./Prose";
 import type { Demo } from "./demo";
@@ -84,7 +85,13 @@ export function Page({ demo, page }: PageProps) {
      needs no effect, the shell gives the page its id as the `key`. */
   const [allOpen, setAllOpen] = useState(false);
 
-  const [first, ...rest] = examplesOf(demo.examples, page.id);
+  /* A configurator takes the first example's slot, and the first example
+     moves into the run as its first titled one, anchor and all
+     (.scratch/configurator). */
+  const configurator = demo.configurators.find((one) => one.pageId === page.id);
+  const examples = examplesOf(demo.examples, page.id);
+  const first = configurator === undefined ? examples[0] : undefined;
+  const rest = configurator === undefined ? examples.slice(1) : examples;
   const tables = tablesOf(demo.tables, page.types).map((entry) => tableModel(entry));
   const known = new Set(demo.addresses.ALL_PAGES.map((one) => one.id));
   const nameOf = (id: string) => demo.addresses.ALL_PAGES.find((one) => one.id === id)?.name ?? id;
@@ -140,7 +147,9 @@ export function Page({ demo, page }: PageProps) {
 
       {contents.disclosure}
 
-      {first === undefined ? (
+      {configurator !== undefined ? (
+        <Configurator configurator={configurator} packageName={demo.packageName} />
+      ) : first === undefined ? (
         <p className="pageEmpty">
           There is no example for this page yet.
         </p>

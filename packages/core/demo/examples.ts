@@ -20,4 +20,5 @@ export const DEMO = buildDemo({
   sources: import.meta.glob<string>(["./examples/*/*.tsx", "./scenarios/*.tsx"], { eager: true, query: "?raw", import: "default" }),
   props,
   references,
+  configurators: import.meta.glob("./configurators/*.tsx", { eager: true }),
 });

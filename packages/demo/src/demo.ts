@@ -17,6 +17,7 @@ import { readExamples, readScenarios } from "./tooling/examples";
 import type { Example, ExampleModule, Scenario, ScenarioModule } from "./tooling/examples";
 import type { TypeEntry } from "./tooling/propsReader";
 import type { ReferenceTable } from "./tooling/referenceTable";
+import { readConfigurators, type Configurator, type ConfiguratorModule } from "./tooling/configurator";
 
 export interface Demo {
   /** The package name a reader takes the package under: `"@umriss-ui/core"`. */
@@ -34,6 +35,8 @@ export interface Demo {
   /** The reference tables a page carries after its examples, by page id
       (`demo/.generated/references.json`). */
   references: Readonly<Record<string, readonly ReferenceTable[]>>;
+  /** The pages that open with a configurator instead of their first example. */
+  configurators: readonly Configurator[];
 }
 
 export interface DemoSources {
@@ -52,6 +55,9 @@ export interface DemoSources {
   adrs: AdrLinks;
   /** The generated `references.json`, where the demo has one. */
   references?: unknown;
+  /** `import.meta.glob("./configurators/*.tsx", { eager: true })` - core's
+      demo alone has them (.scratch/configurator). */
+  configurators?: Record<string, ConfiguratorModule>;
 }
 
 export function buildDemo(sources: DemoSources): Demo {
@@ -62,6 +68,9 @@ export function buildDemo(sources: DemoSources): Demo {
   /* The texts' ADR numbers become links here, once, as the generator links
      them in the llms text and the tables (`tooling/references.ts`). */
   const link = (text: string) => linkAdrs(text, sources.adrs);
+  /* The JSON file is generated; its literal type says nothing the
+     generating type does not say better. */
+  const tables = sources.props as Record<string, TypeEntry>;
   return {
     packageName: sources.manifest.name,
     description: sources.manifest.description,
@@ -75,9 +84,8 @@ export function buildDemo(sources: DemoSources): Demo {
     examples: readExamples(sources.examples, sources.sources, options).map((example) =>
       example.lead === undefined ? example : { ...example, lead: link(example.lead) },
     ),
-    /* The JSON file is generated; its literal type says nothing the
-       generating type does not say better. */
-    tables: sources.props as Record<string, TypeEntry>,
+    tables,
     references: (sources.references ?? {}) as Record<string, readonly ReferenceTable[]>,
+    configurators: readConfigurators(sources.configurators ?? {}, tables, sources.addresses.ALL_PAGES),
   };
 }

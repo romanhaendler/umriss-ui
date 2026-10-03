@@ -14,6 +14,7 @@
    The scenarios page stands first: it is itself a page, so that the shell is not the
    only unchecked part of the demo. */
 
+import { readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { exampleAddresses, scenarioIds } from "@umriss-ui/demo/checks/pages";
@@ -31,6 +32,12 @@ export const PAGES = ["scenarios", ...ALL_PAGES.map((p) => p.id)] as const;
 export type { ExampleAddress };
 
 export const EXAMPLE_ADDRESSES: readonly ExampleAddress[] = exampleAddresses(EXAMPLES_DIR);
+
+/** The pages that open with a configurator: one file each in
+    `demo/configurators/`, named after its page (.scratch/configurator). */
+export const CONFIGURATOR_PAGES: readonly string[] = readdirSync(join(dirname(fileURLToPath(import.meta.url)), "..", "demo", "configurators"))
+  .filter((file) => file.endsWith(".tsx"))
+  .map((file) => file.slice(0, -".tsx".length).toLowerCase());
 
 /** A sample for the accessibility check.
 
