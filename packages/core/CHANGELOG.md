@@ -37,6 +37,9 @@ commit.
   component, a hook, a function, a constant or a type is for, and for a hook
   `@param` and `@returns` where its type alone does not say it. The editor shows
   it on hover, from the package's `.d.ts`. Nothing else changes.
+- **Every type a props table names can be imported**: `TextTracking` and
+  `TextLeading` (the text's letter spacing and line height) and `Align` (where
+  a popover lines up with its anchor) are new public types.
 
 ## 0.24.0 – The select's own list (Oct. 2026)
 

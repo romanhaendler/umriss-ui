@@ -30,6 +30,7 @@ export interface Viewport extends Size {
   left?: number;
 }
 
+/** Where the panel lines up with its anchor along the side it stands on. */
 export type Align = "start" | "end" | "center";
 
 /** Preferred side; the other one is taken when there is no room there. */

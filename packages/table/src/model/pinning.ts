@@ -10,6 +10,7 @@
    rule as the grouping, so that the view carries a deviation and nothing
    else. */
 
+/** Where a pinned column stands: in the block before or after the others. */
 export type Pin = "start" | "end";
 
 /** The pinned columns by id; a column not named is not pinned. */

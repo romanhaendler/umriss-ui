@@ -30,6 +30,10 @@ is one of the internal numbers from before core's first publication as `0.1.0`
   type is for, and for a hook or a function `@param` and `@returns` where its
   type alone does not say it. The editor shows it on hover, from the package's
   `.d.ts`. Nothing else changes.
+- **Every type a props table names can be imported**: `Present`, `Absent`,
+  `Pin`, `ToolbarSize`, `FormatFor`, `FilterFor`, `GroupFor`, `FooterFor`,
+  `AggregateFor` and `Presentation` are new public types, for annotating one's
+  own variables and wrappers with what a column or a toolbar part accepts.
 
 ## 0.11.2 – Core 0.24.0 (Oct. 2026)
 

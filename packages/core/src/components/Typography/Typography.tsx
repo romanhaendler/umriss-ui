@@ -27,7 +27,9 @@ export type TextWeight = "regular" | "medium" | "semibold";
 /** How loud a text is; `secondary` and `muted` step back without falling below
     the contrast threshold. */
 export type TextTone = "default" | "secondary" | "muted";
+/** The letter spacing of the token set. */
 export type TextTracking = "normal" | "tight" | "display" | "caps";
+/** The line height of the token set. */
 export type TextLeading = "normal" | "tight";
 
 /** The props of `Text`. */
