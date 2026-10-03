@@ -25,9 +25,11 @@
    3. A prop without JSDoc is reported. Whether that breaks the build is for
       `props.ts` to decide; here it is only established.
 
-   The type stands as it was written. `"primary" | "secondary" | "ghost" |
-   "danger"` is what the reader needs; the resolved form of a mapped type is
-   unreadable. */
+   The type stands as it was written, and beside it what it resolves to.
+   `"primary" | "secondary" | "ghost" | "danger"` is what the reader needs; the
+   resolved form of a mapped type is unreadable. So a named alias that comes to
+   a list of literals keeps its name - whoever types a wrapper imports
+   `ButtonVariant` - and carries the list as well; nothing else is resolved. */
 
 import ts from "typescript";
 
@@ -35,6 +37,9 @@ export interface PropEntry {
   name: string;
   /** The type, exactly as it stands in the source. */
   type: string;
+  /** Where the type is one named alias of the library (or an array of one)
+      that comes to literals only: its values, `"sm" | "md"` for `ButtonSize`. */
+  expansion?: string;
   optional: boolean;
   /** Out of the `@default` tag, else out of the component's destructuring
       pattern, where there is one. */
@@ -357,6 +362,41 @@ export function readProps(files: readonly string[], typeNames: readonly string[]
     return substitutions;
   };
 
+  /** The type alias of the library a reference names, through an import:
+      declared in the source read, not in a `.d.ts`. */
+  const aliasOf = (node: ts.TypeReferenceNode): ts.TypeAliasDeclaration | undefined => {
+    let symbol = checker.getSymbolAtLocation(node.typeName);
+    if (symbol !== undefined && (symbol.flags & ts.SymbolFlags.Alias) !== 0) symbol = checker.getAliasedSymbol(symbol);
+    const declaration = symbol?.declarations?.find(ts.isTypeAliasDeclaration);
+    return declaration === undefined || declaration.getSourceFile().isDeclarationFile ? undefined : declaration;
+  };
+
+  /** The literals a type comes to over any number of alias hops, in the order
+      they are written; `undefined` where any part is no string, number or
+      boolean literal. */
+  const literalsOf = (node: ts.TypeNode, depth: number): string[] | undefined => {
+    /* A chain this long is a cycle, not a list. */
+    if (depth > 8) return undefined;
+    if (ts.isParenthesizedTypeNode(node)) return literalsOf(node.type, depth);
+    if (ts.isLiteralTypeNode(node)) return node.literal.kind === ts.SyntaxKind.NullKeyword ? undefined : [textOf(node)];
+    if (ts.isUnionTypeNode(node)) {
+      const parts = node.types.map((part) => literalsOf(part, depth));
+      return parts.every((part) => part !== undefined) ? parts.flat() : undefined;
+    }
+    const alias = ts.isTypeReferenceNode(node) ? aliasOf(node) : undefined;
+    return alias === undefined ? undefined : literalsOf(alias.type, depth + 1);
+  };
+
+  /** A type cell's values beneath its name: only where the cell is one named
+      alias (or an array of one) - an inline union shows its values already,
+      and an interface, a function or a mixed union is no list. */
+  const expansionOf = (node: ts.TypeNode): string | undefined => {
+    const named = ts.isArrayTypeNode(node) ? node.elementType : node;
+    if (!ts.isTypeReferenceNode(named) || aliasOf(named) === undefined) return undefined;
+    const literals = literalsOf(named, 0);
+    return literals === undefined ? undefined : [...new Set(literals)].join(" | ");
+  };
+
   /** One member as an entry, together with the component's default. */
   const entryOf = (
     member: ts.PropertySignature,
@@ -378,9 +418,11 @@ export function readProps(files: readonly string[], typeNames: readonly string[]
     }
     const defaultValue = fromTag ?? fromPattern;
     const deprecated = tagOf(member, "deprecated");
+    const expansion = member.type === undefined ? undefined : expansionOf(member.type);
     const entry: PropEntry = {
       name: key,
       type: member.type === undefined ? "unknown" : substitute(textOf(member.type), substitutions),
+      ...(expansion === undefined ? {} : { expansion }),
       optional: member.questionToken !== undefined,
       ...(defaultValue === undefined ? {} : { defaultValue }),
       ...(fromTag !== undefined && !isValue(fromTag) ? { defaultIsPhrase: true as const } : {}),
@@ -462,8 +504,11 @@ export function readProps(files: readonly string[], typeNames: readonly string[]
       /* Deprecated in one arm is deprecated: the arm that forbids it beside
          its new name does not carry the tag. */
       const deprecated = present.find((p) => p.deprecated !== undefined)?.deprecated;
+      /* The values belong to the one name; two shapes are no name. */
+      const { expansion, ...rest } = first;
       return withPlace(first, {
-        ...first,
+        ...rest,
+        ...(expansion === undefined || shapes.length > 1 ? {} : { expansion }),
         ...(deprecated === undefined ? {} : { deprecated }),
         type,
         optional: present.length < arms.length || present.some((p) => p.optional),
