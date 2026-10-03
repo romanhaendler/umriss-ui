@@ -54,6 +54,7 @@ export const OUTLINE: readonly Rubric[] = [
           "No font is loaded or bundled.",
           "Chrome 123, Firefox 120 and Safari 17.5 or newer; an older browser discards the tokens and shows the components unstyled.",
         ],
+        keysOf: ["button"],
         types: [],
         exports: [],
         installs: true,
@@ -69,6 +70,7 @@ export const OUTLINE: readonly Rubric[] = [
         alternatives: [
           { when: "Only the wording or the formats of one section differ", use: "language" },
         ],
+        keysOf: ["button", "menu", "datepicker"],
         limits: ["No theme and no default variants for components: a component is configured by its own props."],
         types: ["UmrissProviderProps", "ToastConfig"],
         exports: ["UmrissProvider"],
@@ -89,6 +91,7 @@ export const OUTLINE: readonly Rubric[] = [
           "Every token with two values is written `light-dark(<light>, <dark>)` and resolves against the `color-scheme` the element inherits. The library sets `color-scheme` nowhere: your `html.dark { color-scheme: dark }`, or your theme library's, switches the components, nothing set means light, and an element with its own `color-scheme` is a region in the other mode. An override written `light-dark(…)` follows the mode; a single colour holds in both.",
           "Style through tokens only. The tokens in the table are the styling API and change only with an entry in the changelog; the `data-*` attributes and class names in the components' markup are internal and may change in any version (ADR-0045). Where no token reaches what you want to change, ask for one: a selector on the markup breaks without warning.",
         ],
+        keysOf: ["button", "checkbox", "switch", "typography"],
         limits: [
           "No theme object, no theme provider and no theme switch: a theme is a set of token overrides in your stylesheet, the mode is the page's `color-scheme` (ADR-0021).",
           "A token that names another resolves where it is declared: set `--u-color-accent` on a region, and `--u-focus-ring`, which names it on `:root`, still draws the application's accent there. Set the naming token in the region too.",
@@ -116,6 +119,20 @@ export const OUTLINE: readonly Rubric[] = [
           "A field does not grow to fill a row: give it room with the row's own layout (`flex: 1` on its FormField, or a grid).",
           "A place that sizes itself by its content and has no width to stop at - an `auto` grid track, an inline block, a row that does not wrap - gives a field at least its natural width, as it gives a native input its own; on a narrow screen let such a row wrap, or size the track with `minmax(0, auto)`.",
         ],
+        keysOf: [
+          "button",
+          "buttongroup",
+          "input",
+          "textarea",
+          "numberinput",
+          "switch",
+          "select",
+          "multiselect",
+          "datepicker",
+          "daterangepicker",
+          "datetimerangepicker",
+          "modal",
+        ],
         types: ["ControlSizeProviderProps"],
         exports: ["ControlSizeProvider"],
       },
@@ -134,6 +151,7 @@ export const OUTLINE: readonly Rubric[] = [
           "Two languages ship; a third is a `Wording` object of your own. No right-to-left (ADR-0032).",
           "It holds only what the components say themselves; your labels, titles and data are yours to translate.",
         ],
+        keysOf: ["button", "numberinput", "combobox", "datepicker"],
         types: ["LanguageOptions"],
         exports: ["LanguageProvider", "useWording", "useFormats"],
       },
@@ -152,6 +170,7 @@ export const OUTLINE: readonly Rubric[] = [
           "A gap is a step of the 4 px scale from 1 to 8, the same steps every component spaces itself by, so a screen keeps its proportions. `align` and `justify` pass `alignItems` and `justifyContent` through unchanged; for the rest of flexbox and grid, set `style`.",
         ],
         limits: ["No breakpoints and no responsive props: a grid follows the width through `minItemWidth`, anything else is your stylesheet's."],
+        keysOf: ["button"],
         types: ["StackProps", "GridProps"],
         exports: ["Stack", "Grid"],
       },
@@ -160,6 +179,7 @@ export const OUTLINE: readonly Rubric[] = [
         name: "Divider",
         sentence: "A line between two groups of content, across or upright, that may name the part after it (also called a separator or rule).",
         alternatives: [{ when: "A group that needs a surface and a heading of its own", use: "card" }],
+        keysOf: ["button"],
         types: ["DividerProps"],
         exports: ["Divider"],
       },
@@ -175,6 +195,11 @@ export const OUTLINE: readonly Rubric[] = [
           { when: "Many sections of one long content, opened one or several at a time", use: "accordion" },
           { when: "A line between two groups without a surface", use: "divider" },
         ],
+        keys: [
+          { key: "Tab", action: "Reaches the actions in the head and, in a collapsible card, its Show or Hide button; a folded body is inert and passed over." },
+          { key: "Enter / Space", action: "On Show or Hide, unfolds or folds the body." },
+        ],
+        keysOf: ["button"],
         types: ["CardProps", "CardHeaderProps", "CardBodyProps"],
         exports: ["Card", "CardHeader", "CardBody"],
       },
@@ -218,6 +243,10 @@ export const OUTLINE: readonly Rubric[] = [
           { key: "Arrow Up / Right / Down / Left (on the handle)", action: "Moves the dock to the top, right, bottom or left edge." },
           { key: "Escape (while dragging)", action: "Puts the dock back where the drag started." },
         ],
+        accessibility: [
+          "The strip is a `group` named by `label`, \"Tools\" by default. The handle is a button named \"Move dock\", and each tool a button named by its `label`, which its tooltip shows too. Only the tool of the current `mode` carries `aria-pressed`; the others are not announced as switches that are off, since which tools are modes is yours to say.",
+          "A polite live region beside the strip says where the dock has gone - \"Dock at the top\" - or that an edge has no room for it - \"No room for the dock on the left\" - so a move by the arrow keys on the handle is heard, not only seen.",
+        ],
         limits: [
           "No free position and no corner: four resting places only (ADR-0013).",
           "No overflow menu and no shrinking; a dock with more tools than an edge holds is refused at that edge.",
@@ -245,6 +274,10 @@ export const OUTLINE: readonly Rubric[] = [
           { when: "Text only a screen reader should hear", use: "visuallyhidden" },
           { when: "A figure read against its limits, with unit and verdict", use: "stat" },
           { when: "A short status word in colour", use: "badge" },
+        ],
+        keys: [
+          { key: "Tab", action: "Reaches each `Link`; `Text` and `Heading` are not stops." },
+          { key: "Enter", action: "Follows the link; an `external` one opens in a new tab." },
         ],
         limits: [
           "No truncation and no line length: both depend on the column, which only the application knows.",
@@ -288,6 +321,14 @@ export const OUTLINE: readonly Rubric[] = [
           { when: "One main action with rarer variants", use: "buttongroup" },
           { when: "Going to another page rather than doing something", use: "typography" },
           { when: "A setting that is on or off", use: "switch" },
+        ],
+        keys: [
+          { key: "Tab", action: "Reaches the button; a `disabled` or `loading` one is not a stop." },
+          { key: "Enter / Space", action: "Presses it." },
+        ],
+        accessibility: [
+          "A native `button`, named by its label. While `loading` it is disabled and `aria-busy`, and the spinner inside it is a `status` named \"Loading\"; the label stays, so the name does not change.",
+          "Under forced colours every variant keeps an outline where its edge would lie, and the primary one's is twice as wide, so it still stands out among its neighbours. With reduced motion a pressed button does not give way; only its colour changes.",
         ],
         limits: [
           "The label stays on one line; keep it short rather than let it wrap.",
@@ -366,6 +407,10 @@ export const OUTLINE: readonly Rubric[] = [
           { when: "Text over several lines", use: "textarea" },
           { when: "One value out of a known list, found by typing", use: "combobox" },
         ],
+        keys: [
+          { key: "Tab", action: "Moves into the field and on. The cross of a `clearable` field is not a stop: the keyboard clears the field by its own editing keys." },
+          { key: "Typing, arrows, Home / End", action: "The browser's own editing keys; the field adds none." },
+        ],
         limits: [
           "No input masks or formatting while typing; check the value on leave or on submit.",
           "No validation of its own: the error is the application's, handed to the `FormField`.",
@@ -381,6 +426,7 @@ export const OUTLINE: readonly Rubric[] = [
           "Every field of Forms, Choosing and Dates and times reads its id, description, invalid and required state from the surrounding `FormField`; an `error` marks the field invalid by itself. A control of your own gets the same through `useFormField`.",
           "`required` sets the mark and `aria-required`; it checks nothing. When and how a value is checked stays with the application.",
         ],
+        keysOf: ["input", "numberinput", "checkbox", "select", "datepicker", "button"],
         limits: [
           "No form state, no validation rules, no submit handling: use your own state or a form library, and hand each message to its field.",
           "One field per `FormField`; a group of fields that share one label is a fieldset of your own.",
@@ -393,7 +439,16 @@ export const OUTLINE: readonly Rubric[] = [
         name: "Textarea",
         sentence: "Text over several lines (multi-line text field): a comment, a summary, a note to the driver. It can grow with its text and count the characters left.",
         alternatives: [{ when: "A short answer on one line", use: "input" }],
-        limits: ["Plain text only: no formatting, mentions or rich text."],
+        keys: [
+          { key: "Tab", action: "Moves into the field and on; it is never typed into the text." },
+          { key: "Enter", action: "Starts a new line; it does not send the form." },
+          { key: "Typing, arrows, Home / End", action: "The browser's own editing keys; the field adds none." },
+        ],
+        accessibility: [
+          "A native `textarea`. Inside a [FormField](#/formfield) it takes the field's label, hint, required and invalid state; without one, give it an `aria-label`.",
+          "With `showCount` the characters left stand in a polite live region: a screen reader reads the count when it is free, not after every letter typed.",
+        ],
+        limits:["Plain text only: no formatting, mentions or rich text."],
         types: ["TextareaProps"],
         exports: ["Textarea"],
       },
@@ -682,6 +737,11 @@ export const OUTLINE: readonly Rubric[] = [
           { when: "You know the shape of the content that is coming", use: "skeleton" },
           { when: "A button waiting for the action it started", use: "`loading` on [Button](#/button)" },
         ],
+        keysOf: ["button"],
+        accessibility: [
+          "An `svg` with the role `status`, named \"Loading\" by the wording or by your `aria-label`; the role stays whatever you pass. It draws no text, so its name is all a screen reader hears of it. Where a word beside it already says what runs, as in a loading toast, hide it with `aria-hidden`.",
+          "With reduced motion it turns at less than half its speed instead of stopping, so it still says that something runs.",
+        ],
         limits: ["One shape and no figure: for how far a job has come, use a [ProgressBar](#/progressbar)."],
         types: ["SpinnerProps"],
         exports: ["Spinner"],
@@ -698,6 +758,12 @@ export const OUTLINE: readonly Rubric[] = [
           { when: "A measured share read against a bound: utilisation, budget used", use: "meter" },
           { when: "A short wait with nothing to count", use: "spinner" },
         ],
+        keysOf: ["button"],
+        accessibility: [
+          "The role `progressbar`, named by `label` - \"Progress\" if you give none - or by your `aria-labelledby`. With a `value` it carries the whole percentage as `aria-valuenow`, and `valueText` as `aria-valuetext`; without one it carries no value, the state a screen reader knows as indeterminate.",
+          "It is no live region: a screen reader reads the value when it reaches the bar, and a job that finishes announces nothing. Say the end in words, in an [Alert](#/alert) or a [Toast](#/toast).",
+          "Under forced colours the track takes an edge and the fill the system's selection colour. With reduced motion the sweep of a bar without a value runs three times slower.",
+        ],
         limits: ["No colour of verdict and no steps of its own; for a job in steps, stack one bar per step."],
         types: ["ProgressBarProps"],
         exports: ["ProgressBar"],
@@ -712,6 +778,11 @@ export const OUTLINE: readonly Rubric[] = [
         alternatives: [
           { when: "The layout of what is coming is unknown", use: "spinner" },
           { when: "You can say how far the loading has come", use: "progressbar" },
+        ],
+        keysOf: ["button"],
+        accessibility: [
+          "Every skeleton is `aria-hidden`: a screen reader meets nothing where it stands, and nothing is announced when the content replaces it. The region that loads carries `aria-busy` from you, and a word where the wait matters.",
+          "With reduced motion the shimmer stops, and the shape stands in a still, faint grey.",
         ],
         limits: ["It draws a shape and nothing else; the rows, cards and layout it stands in for are yours."],
         types: ["SkeletonProps"],
@@ -729,6 +800,15 @@ export const OUTLINE: readonly Rubric[] = [
           { when: "Confirming something that has already happened, which may pass unnoticed", use: "toast" },
           { when: "A question the user must answer before an action goes ahead", use: "confirmdialog" },
           { when: "A list or panel with nothing in it", use: "emptystate" },
+        ],
+        keys: [
+          { key: "Tab", action: "Reaches the actions, then the dismiss cross." },
+          { key: "Enter / Space", action: "On the cross, calls `onDismiss`; the alert goes when you remove it." },
+        ],
+        keysOf: ["button"],
+        accessibility: [
+          "The role follows the tone: `warning` and `danger` are an `alert`, which interrupts a screen reader; `neutral`, `accent` and `success` are a polite `status`, read when the reader is free.",
+          "The title is a paragraph, not a heading, so an alert does not enter the page's outline. The dismiss cross is named \"Close message\", or by `dismissLabel`.",
         ],
         limits: [
           "No timer: an alert stays until you remove it. A message that goes by itself is a toast.",
@@ -753,6 +833,18 @@ export const OUTLINE: readonly Rubric[] = [
           { when: "The reader must see it, or it stays true until something is done", use: "alert" },
           { when: "The reader must decide before going on", use: "confirmdialog" },
         ],
+        keys: [
+          { key: "Alt + T", action: "While a toast stands, moves the focus into the messages and opens the deck." },
+          { key: "Tab / Shift + Tab", action: "Moves through the toasts' actions and close crosses; a keyboard focus inside opens the deck and holds every toast's clock." },
+          { key: "Enter / Space", action: "On an action, runs it and closes its toast; on a cross, closes the toast." },
+          { key: "Escape", action: "Closes the deck; after Alt + T, the focus goes back to where it was." },
+        ],
+        keysOf: ["button"],
+        accessibility: [
+          "Two live regions stand in the corner before the first message, since a region that arrives with its text is often not read: a neutral, success or loading toast goes into a polite `status`, a warning or danger one into an `alert` that interrupts, the table [Alert](#/alert) follows too. While a toast stands, the corner is a region named \"Messages (Alt+T)\".",
+          "The count on a deck of several is out of the tab order, since a focus on it would open the deck and take the count away; the keyboard opens the deck by Alt + T or by moving into it. A loading toast has no cross and does not leave by itself: `update` turns it into its outcome.",
+          "With reduced motion toasts appear, stack and leave without movement.",
+        ],
         limits: [
           "One action at most, and never the only way to what it offers: the toast leaves by itself. What needs a decision needs an [Alert](#/alert) or a [ConfirmDialog](#/confirmdialog).",
           "One position for the whole application, set in the [UmrissProvider](#/umrissprovider); none per toast.",
@@ -769,6 +861,7 @@ export const OUTLINE: readonly Rubric[] = [
           { when: "Something went wrong and the reader must act", use: "alert" },
           { when: "The content is still loading", use: "skeleton" },
         ],
+        keysOf: ["button", "tag"],
         types: ["EmptyStateProps"],
         exports: ["EmptyState"],
       },
@@ -1057,6 +1150,12 @@ export const OUTLINE: readonly Rubric[] = [
           { when: "Progress as a share of a known amount, without named steps", use: "progressbar" },
           { when: "Where a page sits in a hierarchy", use: "breadcrumb" },
         ],
+        keysOf: ["button"],
+        accessibility: [
+          "An ordered list, so a screen reader says how many steps there are and which one it reads. The current step carries `aria-current=\"step\"`; every other step's state follows its label as a word only a screen reader hears, and the drawn number, tick or cross is hidden from it.",
+          "It announces nothing when `current` moves on: a reader hears the new state where it reads the list. A step that must be heard as it fails is said in an [Alert](#/alert); a share of a step's work stands in a [ProgressBar](#/progressbar), as in the deployment.",
+          "Under forced colours the lines between the steps take the system's text colour, and the current step's marker an outline in the selection colour.",
+        ],
         limits: [
           "The steps are read, not navigated: no keys, no clicks, and no next or back of its own. Moving on is your application's decision.",
           "No branching or optional steps; pass the steps that apply.",
@@ -1114,6 +1213,7 @@ export const OUTLINE: readonly Rubric[] = [
           { when: "The user can remove it, or it stands for a chosen filter", use: "tag" },
           { when: "A figure read against limits", use: "stat" },
         ],
+        keysOf: ["button"],
         limits: [
           "It cannot be clicked or removed; a label the user acts on is a [Tag](#/tag).",
           "It counts nothing itself: capping at “99+” is yours.",
@@ -1160,6 +1260,10 @@ export const OUTLINE: readonly Rubric[] = [
           { when: "Only the shape of a history, in a row or a cell", use: "sparkline" },
           { when: "A value over time with axes and limit lines", use: "`Line` and `LimitLine` from @umriss-ui/charts" },
         ],
+        accessibility: [
+          "A `group` whose name says what the tile shows: the label, the value with its unit, and where the verdict is not OK its words, as in \"p95 latency at 09:50: 498 ms, Alarm limit exceeded\". A missing value is named \"No value\". The verdict also stands in the tile as a word, so the colour is never alone; the history line is hidden from screen readers.",
+          "It announces nothing: a value that changes or a verdict that turns is read when a reader reaches the tile. Where a change must be heard at once, say it in an [Alert](#/alert).",
+        ],
         limits: [
           "No trend arrow: a direction from two noisy points is read as information it does not carry; the history line shows the shape.",
           "It fetches and polls nothing: freshness is judged from the `asOf` you give it.",
@@ -1179,6 +1283,10 @@ export const OUTLINE: readonly Rubric[] = [
         alternatives: [
           { when: "How far a job has come towards its end", use: "progressbar" },
           { when: "One figure read against limits, with its history", use: "stat" },
+        ],
+        accessibility: [
+          "The role `meter`, from 0 to 100, with the whole percentage as its value. It is named by `label`, or by your `aria-labelledby`; without either it is named \"Fill level\", which says nothing about what is measured. The tone is not read out: say the verdict in a word beside the bar.",
+          "It is no live region: a new value is read when a reader reaches the bar. Under forced colours the track takes an edge and the fill the system's selection colour, whatever its tone.",
         ],
         limits: [
           "No limit marks, target tick or scale on the bar; for a value against limits use a [Stat](#/stat).",
