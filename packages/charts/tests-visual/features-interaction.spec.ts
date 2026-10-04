@@ -447,6 +447,32 @@ test("zoom: Ctrl with the wheel zooms in around the pointer, a double click show
   await expect.poll(() => xLabels(example)).toEqual(week);
 });
 
+/* component-view 04: 'Show all' - there once zoomed, a tab stop after the
+   plot's, its key and its click bring the whole back; it goes, and the focus
+   it had goes to the plot. */
+test("zoom: 'Show all' brings the whole back by key and by click", async ({ page }) => {
+  const { example, box } = await openZoom(page);
+  const plot = example.locator(".uc-plot").first();
+  const showAll = example.getByRole("button", { name: "Show all", exact: true });
+  const week = await xLabels(example);
+  await expect(showAll).toHaveCount(0);
+
+  await zoomIn(page, box.x + box.width / 2, box.y + box.height / 2, 4);
+  await expect(showAll).toBeVisible();
+  await plot.focus();
+  await page.keyboard.press("Tab");
+  await expect(showAll).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect.poll(() => xLabels(example)).toEqual(week);
+  await expect(showAll).toHaveCount(0);
+  await expect(plot).toBeFocused();
+
+  await zoomIn(page, box.x + box.width / 2, box.y + box.height / 2, 4);
+  await showAll.click();
+  await expect.poll(() => xLabels(example)).toEqual(week);
+  await expect(showAll).toHaveCount(0);
+});
+
 test("zoom: a drag pans - to the left shows what comes later", async ({ page }) => {
   const { example, box } = await openZoom(page);
   const y = box.y + box.height / 2;

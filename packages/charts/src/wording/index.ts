@@ -34,6 +34,9 @@ export interface ChartsWording {
   /** Read out where hiding would leave nothing to see, and every series is
       shown instead. */
   allShown: string;
+  /** The control over a zoomed plot that brings every zoomed axis back to
+      its own domain (component-view 04). */
+  showAll: string;
   /** The data table's disclosure key, closed and open (charts-alternatives
       C1). */
   showData: string;
@@ -82,6 +85,7 @@ export const DEFAULT_CHARTS_WORDING: ChartsWording = {
   zoomHelp: "Plus and minus zoom, Shift with left or right pans, 0 goes back to the axis' own span.",
   legendHelp: "In the legend, Enter hides or shows a series, Shift+Enter shows only it.",
   allShown: "Nothing would be left to see, so every series is shown.",
+  showAll: "Show all",
   showData: "Show data",
   hideData: "Hide data",
   positionColumn: "Position",

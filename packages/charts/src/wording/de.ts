@@ -19,6 +19,7 @@ export const GERMAN_CHARTS_WORDING: ChartsWording = {
   zoomHelp: "Plus und Minus zoomen, Umschalt mit Pfeil links oder rechts verschiebt, 0 kehrt zum eigenen Bereich der Achse zurück.",
   legendHelp: "In der Legende blendet Enter eine Serie aus oder ein, Umschalt+Enter zeigt nur sie.",
   allShown: "Sonst wäre nichts mehr zu sehen, darum werden alle Serien gezeigt.",
+  showAll: "Alles zeigen",
   showData: "Daten zeigen",
   hideData: "Daten verbergen",
   positionColumn: "Position",

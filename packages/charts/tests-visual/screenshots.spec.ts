@@ -80,3 +80,22 @@ for (const exampleId of ["data-table", "a-week-as-a-table"]) {
     await expect(target).toHaveScreenshot(`open-${exampleId}-${testInfo.project.name}.png`);
   });
 }
+
+/* component-view 04: 'Show all' over a zoomed chart, at rest - the pointer
+   gone, so neither tooltip nor crosshair. */
+test("Show all over a zoomed chart", async ({ page }, testInfo) => {
+  await openExample(page, "zoom-and-pan", "gestures-and-keys");
+  const target = page.locator('[data-example="gestures-and-keys"]');
+  await target.scrollIntoViewIfNeeded();
+  await drawn(page);
+  const box = await target.locator(".uc-plot").first().boundingBox();
+  if (box === null) throw new Error("plot area not found");
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.keyboard.down("Control");
+  for (let i = 0; i < 3; i++) await page.mouse.wheel(0, -400);
+  await page.keyboard.up("Control");
+  await page.mouse.move(0, 0);
+  await expect(target.locator(".uc-show-all")).toBeVisible();
+  await drawn(page);
+  await expect(target).toHaveScreenshot(`show-all-${testInfo.project.name}.png`);
+});
