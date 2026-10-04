@@ -89,7 +89,7 @@ const CHECKOUT = metrics("checkout");
 export default function AlongTime() {
   return (
     <Chart data={CHECKOUT} height={260} ariaLabel="Checkout's latency across a maintenance window and the start of a release freeze">
-      <XAxis accessor={(d: MetricPoint) => d.t} time ticks={[0, 2, 4, 6, 8, 10].map((hours) => at(17, hours))} />
+      <XAxis accessor={(d: MetricPoint) => d.t} time />
       <YAxis accessor={(d: MetricPoint) => d.p95} label="ms" />
       <LimitBand orientation="x" from={at(17, 2)} to={at(17, 3)} color="#5b7c99" label="Maintenance" />
       <LimitLine orientation="x" value={at(17, 8, 30)} color="#7b61c9" label="Release freeze" />

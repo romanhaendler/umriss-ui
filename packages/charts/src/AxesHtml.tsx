@@ -51,18 +51,24 @@ function renderAxis(axis: AxisLayout, limits: readonly LimitLabel[], plot: Rect)
           );
         }
         const anchor = Math.round(tick.px - band.x);
+        // As on a y axis: the limit's label covers the tick label it reaches over.
+        const covered = limits.some(
+          (g) => g.labelLeft < tick.labelLeft + tick.labelWidth && tick.labelLeft < g.labelLeft + g.width,
+        );
         return (
           <span key={tick.value} className="uc-tick" style={{ left: `${anchor}px` }}>
             <span className="uc-tick-mark" />
-            <span
-              className="uc-tick-label"
-              style={{
-                left: `${Math.round(tick.labelLeft - band.x) - anchor}px`,
-                [position === "top" ? "bottom" : "top"]: `${offset}px`,
-              }}
-            >
-              {tick.label}
-            </span>
+            {!covered && (
+              <span
+                className="uc-tick-label"
+                style={{
+                  left: `${Math.round(tick.labelLeft - band.x) - anchor}px`,
+                  [position === "top" ? "bottom" : "top"]: `${offset}px`,
+                }}
+              >
+                {tick.label}
+              </span>
+            )}
           </span>
         );
       })}
@@ -86,6 +92,7 @@ function renderAxis(axis: AxisLayout, limits: readonly LimitLabel[], plot: Rect)
             data-severity={g.severity}
             data-role={g.role}
             style={{
+              color: g.color,
               top: `${Math.round(g.px - band.y)}px`,
               // Inside: against the plot's far edge, 4 px in.
               ...(g.inside
@@ -104,6 +111,7 @@ function renderAxis(axis: AxisLayout, limits: readonly LimitLabel[], plot: Rect)
             data-severity={g.severity}
             data-role={g.role}
             style={{
+              color: g.color,
               left: `${Math.round(g.labelLeft - band.x)}px`,
               [position === "top" ? "bottom" : "top"]: `${offset}px`,
             }}

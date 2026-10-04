@@ -215,6 +215,9 @@ export interface LimitLabel {
   /** An x limit's label: its left edge in container coordinates, kept inside
       the container as a tick label is. */
   labelLeft: number;
+  /** An x limit's label: its width with its padding; a tick label it reaches
+      over would stand half covered and is left out. */
+  width: number;
   /** The line a y limit's label takes; a tick label closer than that would
       stand half covered and is left out. */
   height: number;
@@ -224,6 +227,9 @@ export interface LimitLabel {
   label: string;
   severity: string;
   role: string;
+  /** The limit's own colour, which its line takes too; without one the
+      stylesheet colours the label by severity and role. */
+  color?: string;
 }
 
 export interface LayoutSnapshot {
@@ -1927,11 +1933,13 @@ export class ChartScene {
         axisKey: axis.key,
         px,
         labelLeft: insideContainer(px, width, this.cssWidth),
+        width,
         height,
         inside: axis.limitsInside,
         label: config.label,
         severity: config.severity,
         role: config.role,
+        ...(config.color !== undefined ? { color: config.color } : {}),
       });
     }
     // A y label stands centred on its limit; two limits closer than a line
