@@ -37,14 +37,13 @@ const describe = (interaction: ScheduleInteraction): string => {
 };
 
 export default function ReportThePointer() {
-  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule({ initialView: { domain: [at(5, 30), at(18)] } });
   const [last, setLast] = useState("Move the pointer over the plan");
 
   return (
     <Stack gap={3}>
       <Schedule
         ariaLabel="One consignment on a truck and a van"
-        initialDomain={[at(5, 30), at(18)]}
         height={152}
         onInteraction={(interaction) => setLast(describe(interaction))}
       >

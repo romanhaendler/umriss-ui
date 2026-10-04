@@ -16,9 +16,9 @@ const LEGS: Subtask[] = [
 ];
 
 export default function LaneHeaders() {
-  const { Schedule, Lane, Subtasks } = useSchedule();
+  const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [at(6), at(12)] } });
   return (
-    <Schedule ariaLabel="Two vans of the North depot" initialDomain={[at(6), at(12)]} height={150} headerWidth={210}>
+    <Schedule ariaLabel="Two vans of the North depot" height={150} headerWidth={210}>
       <Lane
         id="v1"
         label={

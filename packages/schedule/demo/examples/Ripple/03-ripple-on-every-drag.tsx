@@ -23,7 +23,7 @@ const HANDOVERS: readonly Dependency[] = [
 ];
 
 export default function RippleOnEveryDrag() {
-  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule({ initialView: { domain: [day(16, 0), day(24, 0)] } });
   const [work, setWork] = useState<readonly Subtask[]>(START);
 
   const onIntent = (intent: Intent) =>
@@ -35,7 +35,6 @@ export default function RippleOnEveryDrag() {
   return (
     <Schedule
       ariaLabel="Design, build and test of the shop search, rippling"
-      initialDomain={[day(16, 0), day(24, 0)]}
       height={184}
       intents={["move", "stretch"]}
       onIntent={onIntent}

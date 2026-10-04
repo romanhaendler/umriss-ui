@@ -25,9 +25,9 @@ const DUTIES: Subtask[] = [
 ];
 
 export default function FollowTheClock() {
-  const { Schedule, Lane, Subtasks } = useSchedule();
+  const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [current - 6 * HOUR, current + 6 * HOUR] } });
   return (
-    <Schedule ariaLabel="Today's on-call rota, with the present" initialDomain={[current - 6 * HOUR, current + 6 * HOUR]} height={188} now>
+    <Schedule ariaLabel="Today's on-call rota, with the present" height={188} now>
       <Lane id="ada" label="Ada Mwangi" />
       <Lane id="tomasz" label="Tomasz Nowak" />
       <Lane id="leila" label="Leila Haddad" />

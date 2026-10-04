@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Stack, Text } from "@umriss-ui/core";
 import { useSchedule } from "../../../src";
-import type { Subtask, Task } from "../../../src";
+import type { ScheduleView, Subtask, Task } from "../../../src";
 
 export const title = "Keep two schedules in step";
 
-export const lead = "Hand the span `onDomainChange` reports to both schedules' `initialDomain`: pan or zoom either one and the other follows.";
+export const lead = "Hand the view `onViewChange` reports to both schedules' `initialView`: pan or zoom either one and the other follows - no `key`, no remount.";
 
 const at = (hours: number, minutes = 0) => new Date(2026, 2, 17, hours, minutes).getTime();
 const min = (n: number) => n * 60_000;
@@ -40,28 +40,34 @@ const LEGS: readonly Subtask[] = [
 ];
 
 const on = (lanes: readonly { id: string }[]) => LEGS.filter((leg) => lanes.some((lane) => lane.id === leg.lane));
+const DIESEL_LEGS = on(DIESEL);
+const ELECTRIC_LEGS = on(ELECTRIC);
 
 const time = (instant: number) => new Date(instant).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 
 export default function InStep() {
-  const { Schedule, Lane, Subtasks } = useSchedule();
-  const [domain, setDomain] = useState<readonly [number, number]>([at(5, 30), at(18)]);
+  /* One view for both: each schedule reports its own, and goes to the other's
+     because it differs from the last one handed in. */
+  const [view, setView] = useState<ScheduleView>({ domain: [at(5, 30), at(18)] });
+  const diesel = useSchedule({ initialView: view, onViewChange: setView });
+  const electric = useSchedule({ initialView: view, onViewChange: setView });
+  const span = view.domain ?? [at(5, 30), at(18)];
   return (
     <Stack gap={2}>
-      <Schedule ariaLabel="Diesel vehicles on Tuesday, 17 March" initialDomain={domain} height={240} onDomainChange={setDomain}>
+      <diesel.Schedule ariaLabel="Diesel vehicles on Tuesday, 17 March" height={240}>
         {DIESEL.map((vehicle) => (
-          <Lane key={vehicle.id} id={vehicle.id} label={vehicle.label} />
+          <diesel.Lane key={vehicle.id} id={vehicle.id} label={vehicle.label} />
         ))}
-        <Subtasks data={on(DIESEL)} tasks={CONSIGNMENTS} />
-      </Schedule>
-      <Schedule ariaLabel="Electric vans, the same hours" initialDomain={domain} height={152} onDomainChange={setDomain}>
+        <diesel.Subtasks data={DIESEL_LEGS} tasks={CONSIGNMENTS} />
+      </diesel.Schedule>
+      <electric.Schedule ariaLabel="Electric vans, the same hours" height={152}>
         {ELECTRIC.map((vehicle) => (
-          <Lane key={vehicle.id} id={vehicle.id} label={vehicle.label} />
+          <electric.Lane key={vehicle.id} id={vehicle.id} label={vehicle.label} />
         ))}
-        <Subtasks data={on(ELECTRIC)} tasks={CONSIGNMENTS} />
-      </Schedule>
+        <electric.Subtasks data={ELECTRIC_LEGS} tasks={CONSIGNMENTS} />
+      </electric.Schedule>
       <Text size="xs" mono tone="muted" data-span>
-        {time(domain[0])} – {time(domain[1])}
+        {time(span[0])} – {time(span[1])}
       </Text>
     </Stack>
   );

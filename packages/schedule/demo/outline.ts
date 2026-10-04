@@ -113,7 +113,7 @@ export const OUTLINE: readonly Rubric[] = [
         about: [
           "A group is structure, never a lane: nothing sits on it, no finding is reported for it and no intent names it (ADR-0025). The lanes keep the order they were declared in, whatever group they are in.",
           "Folded, a group shows a miniature: every lane in it as a thin strip with its work in the tasks' colours. Dependencies still arrive at the right strip, findings are marked on the row, and a strip can be hovered and selected. Labels, appearances and grips need room and wait for the group to open.",
-          "Folding is a view state and never an intent. `collapsedGroups` and `onCollapsedGroupsChange` hand it to the application; left out, the schedule keeps it.",
+          "Folding is part of the schedule's view and never an intent: `folded` in `initialView` starts with groups folded, `toggleGroup`, `foldAll` and `unfoldAll` fold from outside, and `onViewChange` reports every fold - see [View](#/view).",
         ],
         keys: [
           { key: "Tab", action: "Reaches each group's fold button - the only buttons the schedule puts in the tab order." },
@@ -243,7 +243,7 @@ export const OUTLINE: readonly Rubric[] = [
         sentence: "Moving through a plan with the gestures of any scrolling surface: drag, wheel, Ctrl with the wheel, and a pinch. Only the view moves; the plan stays as it is.",
         about: [
           "Dragging the background pans through time and through the lanes. The wheel scrolls the lanes and hands the scroll back to the page at their end; Shift with the wheel pans through time; Ctrl or ⌘ with the wheel, or a pinch, zooms around the pointer.",
-          "Nothing is reported and no intent is raised: pan and zoom change the visible span and nothing else (ADR-0001). `onDomainChange` reports the span for a second view to follow - see [Linked schedules](#/linked-schedules).",
+          "No intent is raised: pan and zoom change the visible span and nothing else (ADR-0001). The span is part of the schedule's view, which `onViewChange` reports at most once per frame - see [View](#/view) and [Linked schedules](#/linked-schedules).",
         ],
         keys: [
           { key: "Home / End", action: "The first or last subtask on the lane; the view pans to bring it in." },
@@ -314,15 +314,29 @@ export const OUTLINE: readonly Rubric[] = [
         exports: ["useSchedule"],
       },
       {
+        id: "view",
+        name: "View",
+        sentence: "How the planner is looking at the plan - the span in view and the folded lane groups - as one value to keep and hand back.",
+        about: [
+          "The schedule keeps its view itself and puts it nowhere, not in the address and not in any storage. `view` on what `useSchedule` hands back holds it, and `onViewChange` reports every change of it - a pan or zoom at most once per frame; keep it where the application keeps things and hand it back through `initialView`.",
+          "A view that differs in content from the last one handed in applies at once, and what it leaves out goes back to its default; the same one again changes nothing. Without a span the schedule shows the extent of its subtasks, within `zoomLimits`. A group no `LaneGroup` declares falls out.",
+          "`setDomain`, `toggleGroup`, `foldAll` and `unfoldAll` change the view from outside - a button of the application's own that shows the whole plan or folds every team. The selection is not part of the view (`selectedTask`).",
+        ],
+        alternatives: [{ when: "Two schedules on the same hours", use: "linked-schedules" }],
+        keysOf: ["schedule"],
+        types: ["ScheduleOptions", "ScheduleView"],
+        exports: ["useSchedule"],
+      },
+      {
         id: "linked-schedules",
         name: "Linked schedules",
         sentence: "Keeps two schedules on the same hours: pan or zoom one and the other follows (also called synchronised views). Reach for it when two sets of lanes stand apart on a screen but belong to the same time.",
         about: [
-          "`onDomainChange` reports the visible span after a pan or zoom, at most once per frame. A span handed in as `initialDomain` is not reported back, so two schedules never feed each other.",
+          "Each schedule has its own `useSchedule`. Hand both the view one of them reports, through `initialView`: a view that differs from the last one handed in applies at once, without a remount, and the same one again changes nothing, so the two never feed each other.",
           "While a drag is in flight the two can stand a frame apart; they settle as soon as it ends.",
         ],
         alternatives: [{ when: "The lanes belong together in one plan", use: "lane-groups" }],
-        limits: ["Only the span is shared - not the selection, the hover or the vertical scroll."],
+        limits: ["Only the view is shared - the span and the folded groups, not the selection, the hover or the vertical scroll."],
         keysOf: ["schedule"],
         types: [],
         exports: ["useSchedule"],
@@ -333,7 +347,7 @@ export const OUTLINE: readonly Rubric[] = [
         sentence: "Converts between a point on the screen and a time on a lane, so marks of your own - a cut-off, a delivery window, a pin - stand at the right place beside the plan.",
         about: [
           "The handle holds three functions and nothing else: `clientPointOf(time, lane?)`, `positionAt(clientX, clientY)` and `visibleDomain()`. Everything else the schedule does is props.",
-          "Place your marks again whenever `onDomainChange` reports a new span.",
+          "Place your marks again whenever `view.domain` changes.",
         ],
         alternatives: [{ when: "You need the time under the pointer during a hover or a click", use: "interactions" }],
         keysOf: ["schedule"],

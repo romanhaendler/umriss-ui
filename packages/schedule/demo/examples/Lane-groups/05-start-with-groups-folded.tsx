@@ -3,10 +3,11 @@ import type { Subtask, Task } from "../../../src";
 
 export const title = "Start with groups folded";
 
-export const lead = "`defaultCollapsedGroups` folds groups when the schedule mounts and leaves the rest to the planner: Discovery starts folded, and its chevron opens it.";
+export const lead = "`folded` in `initialView` folds groups when the schedule mounts and leaves the rest to the planner: Discovery starts folded, and its chevron opens it.";
 
-/* Uncontrolled: the schedule keeps the fold from here on. To store it or
-   steer it, pass `collapsedGroups` instead. */
+/* The schedule keeps the fold from here on. To store it, keep what
+   `onViewChange` reports; to steer it, use the setters `useSchedule` hands
+   back. */
 
 const at = (hours: number, minutes = 0) => new Date(2026, 2, 17, hours, minutes).getTime();
 
@@ -20,14 +21,9 @@ const WORK: Subtask[] = [
 ];
 
 export default function StartWithGroupsFolded() {
-  const { Schedule, Lane, LaneGroup, Subtasks } = useSchedule();
+  const { Schedule, Lane, LaneGroup, Subtasks } = useSchedule({ initialView: { domain: [at(6), at(15)], folded: ["discovery"] } });
   return (
-    <Schedule
-      ariaLabel="Two teams rolling out a release, Discovery folded at the start"
-      initialDomain={[at(6), at(15)]}
-      height={280}
-      defaultCollapsedGroups={["discovery"]}
-    >
+    <Schedule ariaLabel="Two teams rolling out a release, Discovery folded at the start" height={280}>
       <LaneGroup id="payments" label="Payments">
         <Lane id="priya" label="Priya Raman" />
         <Lane id="jonas" label="Jonas Keller" />

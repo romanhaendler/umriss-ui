@@ -28,7 +28,7 @@ export function Lane({ id, label }: LaneProps): null {
 
 /** The props of `LaneGroup`. */
 export interface LaneGroupProps {
-  /** The group's identity - what `collapsedGroups` names. It is never a lane:
+  /** The group's identity - what the view's `folded` names. It is never a lane:
       no subtask sits on it, no finding is reported for it, and no intent names
       it (ADR-0025). */
   id: string;
@@ -45,8 +45,8 @@ export interface LaneGroupProps {
     It gives its id to its children through context, so a lane never names its
     group and a group reads in JSX as it reads in the organisation. Folded, it becomes
     one row showing a **Miniature** of everything in it; open, it shows a slim
-    head above its lanes. Which groups are folded is `collapsedGroups` on
-    `Schedule` - a view state, never an **Intent**. */
+    head above its lanes. Which groups are folded is part of the schedule's
+    view (`useSchedule`) - never an **Intent**. */
 export function LaneGroup({ id, label, children }: LaneGroupProps): ReactNode {
   const parent = useLaneGroup();
   const config = useMemo(() => ({ id, label: label ?? id, ...(parent === null ? {} : { parent }) }), [id, label, parent]);

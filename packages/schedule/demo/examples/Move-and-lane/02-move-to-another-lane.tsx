@@ -40,7 +40,7 @@ const TRANSFERS: readonly Dependency[] = [
 ];
 
 export default function MoveToAnotherLane() {
-  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule({ initialView: { domain: [at(5, 30), at(18)] } });
   const [legs, setLegs] = useState(LEGS);
   const [last, setLast] = useState<Intent | null>(null);
 
@@ -48,7 +48,6 @@ export default function MoveToAnotherLane() {
     <Stack gap={3}>
       <Schedule
         ariaLabel="Five vehicles on Tuesday, 17 March, editable"
-        initialDomain={[at(5, 30), at(18)]}
         height={284}
         intents={["move", "lane"]}
         onIntent={(intent) => {

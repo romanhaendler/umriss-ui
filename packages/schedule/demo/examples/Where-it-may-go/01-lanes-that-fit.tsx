@@ -30,7 +30,7 @@ const START: Subtask[] = [
 const mayGo = (subtask: Subtask, lane: string) => subtask.task !== "chilled" || COOLED.includes(lane);
 
 export default function LanesThatFit() {
-  const { Schedule, Lane, Subtasks } = useSchedule();
+  const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [at(6, 30), at(15)] } });
   const [work, setWork] = useState<readonly Subtask[]>(START);
   const [last, setLast] = useState("Drag the vaccines onto the dry van");
 
@@ -46,7 +46,6 @@ export default function LanesThatFit() {
     <Stack gap={3}>
       <Schedule
         ariaLabel="Two cooled vans and a dry van"
-        initialDomain={[at(6, 30), at(15)]}
         height={190}
         intents={["move", "lane"]}
         canMoveTo={mayGo}

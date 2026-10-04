@@ -19,7 +19,7 @@
    The data is the caller's and stays as it came (ADR-0023). */
 
 import type { ReactNode } from "react";
-import { HOUR, calendarFrom, subscribeTheme, toWallClock } from "@umriss-ui/charts";
+import { DAY, HOUR, calendarFrom, subscribeTheme, toWallClock, toWorkingTimeClamped } from "@umriss-ui/charts";
 import { resolveAppearance } from "./appearance";
 import { slotAt, xOf } from "./geometry";
 import { SceneData, type GroupConfig, type LaneConfig, type LayerConfig, type ScheduleTooltipTarget } from "./sceneData";
@@ -29,6 +29,7 @@ import { barLabelBox, inView } from "./geometry";
 import { SceneGestures, type GhostSummary, type PlacingItem, type SceneHandlers } from "./sceneGestures";
 import { SceneKeys, type Spoken } from "./sceneKeys";
 import { DEFAULT_LANE_HEIGHT, SceneView, type SceneOptions } from "./sceneView";
+import { defaultSpan, onlyKnown, viewKey, type ScheduleView } from "./view";
 
 export type { GroupConfig, LaneConfig, LayerConfig, ScheduleTooltipTarget } from "./sceneData";
 export type { SceneOptions, ScheduleHit } from "./sceneView";
@@ -139,11 +140,20 @@ export class ScheduleScene {
   private controlledTask: string | null | undefined = undefined;
   private ownTask: string | null = null;
   private selected: string | null = null;
-  /** Which **Lane group**s are folded. Controlled where the caller passes a
-      list, kept here otherwise - the shape `selectedTask` has. Folding changes
-      the view and not the plan, so it is no **Intent** (ADR-0025). */
-  private controlledCollapsed: readonly string[] | undefined = undefined;
-  private ownCollapsed: readonly string[] = [];
+  /** Which **Lane group**s are folded. Folding changes the view and not the
+      plan, so it is no **Intent** (ADR-0025). */
+  private folded: readonly string[];
+  /** The span the view names, in wall-clock time - null while it names none
+      and the schedule shows the subtasks' extent. */
+  private domainInView: readonly [number, number] | null;
+  /** Whether the extent has been put in view since the view stopped naming a
+      span. Once, and not after every change of the data: a bar the planner
+      dragged past the end must not make the whole plan jump. */
+  private fitted = false;
+  /** The view as `useSchedule` reads it - a new object only when its content
+      changed. */
+  private viewNow: ScheduleView;
+  private readonly viewListeners = new Set<() => void>();
 
   private root: HTMLElement | null = null;
   private plot: HTMLElement | null = null;
@@ -156,7 +166,13 @@ export class ScheduleScene {
   private snapshot: ScheduleSnapshot = EMPTY_SNAPSHOT;
   private readonly listeners = new Set<() => void>();
 
-  constructor() {
+  constructor(initial: ScheduleView = {}) {
+    this.folded = initial.folded ?? [];
+    this.domainInView = initial.domain ?? null;
+    /* No calendar is known yet: working time is the wall clock, and the first
+       options carry the span over into theirs. */
+    if (this.domainInView !== null) this.view.showWall(this.domainInView);
+    this.viewNow = this.currentView();
     this.gestures = new SceneGestures({
       data: this.data,
       view: this.view,
@@ -200,8 +216,8 @@ export class ScheduleScene {
   updateLayer = (id: number, config: LayerConfig): void => this.data.updateLayer(id, config);
   unregisterLayer = (id: number): void => this.data.unregisterLayer(id);
 
-  setOptions(options: SceneOptions, initialDomain: readonly [number, number] | null): void {
-    this.view.setOptions(options, initialDomain);
+  setOptions(options: SceneOptions): void {
+    this.view.setOptions(options);
     this.viewChanged();
   }
 
@@ -215,31 +231,82 @@ export class ScheduleScene {
     if (placing === null) this.gestures.clearPlacing();
   }
 
-  /** `undefined`: the scene keeps the folded groups itself. */
-  setCollapsedGroups(groups: readonly string[] | undefined): void {
-    if (groups === this.controlledCollapsed) return;
-    this.controlledCollapsed = groups;
-    this.viewChanged();
+  /* ---------------------------------------------------------------- */
+  /* The view (ADR-0047)                                               */
+  /* ---------------------------------------------------------------- */
+
+  subscribeView = (listener: () => void): (() => void) => {
+    this.viewListeners.add(listener);
+    return () => {
+      this.viewListeners.delete(listener);
+    };
+  };
+
+  getView = (): ScheduleView => this.viewNow;
+
+  /** Goes to a view handed in; what it leaves out goes back to its default. */
+  applyView(view: ScheduleView): void {
+    if (viewKey(view) === viewKey(this.viewNow)) return;
+    this.folded = view.folded ?? [];
+    this.setDomain(view.domain ?? null);
   }
 
-  /** The uncontrolled starting point, taken once. */
-  setDefaultCollapsedGroups(groups: readonly string[]): void {
-    this.ownCollapsed = groups;
+  /** Puts a span of two wall-clock instants in view; null shows the
+      subtasks' extent. */
+  setDomain = (span: readonly [number, number] | null): void => {
+    /* A frame still to report a pan would overwrite the span just set. */
+    if (this.domainFrame !== 0) cancelAnimationFrame(this.domainFrame);
+    this.domainFrame = 0;
+    this.domainInView = span === null ? null : [span[0], span[1]];
+    if (span === null) this.fitted = false;
+    else this.view.showWall(span);
     this.viewChanged();
+  };
+
+  /** Folds or unfolds one group. */
+  toggleGroup = (group: string): void => {
+    const now = this.viewNow.folded ?? [];
+    this.folded = now.includes(group) ? now.filter((g) => g !== group) : [...now, group];
+    this.viewChanged();
+  };
+
+  foldAll = (): void => {
+    this.folded = this.data.groups.map((group) => group.id);
+    this.viewChanged();
+  };
+
+  unfoldAll = (): void => {
+    this.folded = [];
+    this.viewChanged();
+  };
+
+  private currentView(): ScheduleView {
+    return onlyKnown(
+      { ...(this.domainInView === null ? {} : { domain: this.domainInView }), ...(this.folded.length > 0 ? { folded: this.folded } : {}) },
+      new Set(this.data.groups.map((group) => group.id)),
+    );
   }
 
-  get collapsedGroups(): readonly string[] {
-    return this.controlledCollapsed ?? this.ownCollapsed;
+  private publishView(): void {
+    const next = this.currentView();
+    if (viewKey(next) === viewKey(this.viewNow)) return;
+    this.viewNow = next;
+    for (const listener of this.viewListeners) listener();
   }
 
-  /** Folds or unfolds one group. The caller's list is never written to: where
-      the state is controlled, only the report goes out. */
-  toggleGroup(group: string): void {
-    const now = this.collapsedGroups;
-    const next = now.includes(group) ? now.filter((g) => g !== group) : [...now, group];
-    if (this.controlledCollapsed === undefined) this.ownCollapsed = next;
-    this.handlersNow.onCollapsedGroupsChange?.(next);
-    this.viewChanged();
+  /** The subtasks' extent within the zoom limits, while the view names no
+      span - and the local day of today while there is no work to show. */
+  private fit(): void {
+    const calendar = this.view.options.calendar;
+    const span = defaultSpan(this.data.subtasks, this.view.options.zoomLimits, (v) => toWorkingTimeClamped(v, calendar));
+    if (span !== null) {
+      this.view.domain = span;
+      this.fitted = true;
+      return;
+    }
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    this.view.showWall([today.getTime(), today.getTime() + DAY]);
   }
 
   /** `undefined`: the scene keeps the selection itself. */
@@ -326,11 +393,13 @@ export class ScheduleScene {
   /* ---------------------------------------------------------------- */
 
   private viewChanged(): void {
-    this.view.collapsed = new Set(this.collapsedGroups);
+    this.view.collapsed = new Set(this.folded);
     if (this.data.rebuild()) {
       this.colours = null;
       if (this.selected !== null && !this.data.subtaskById.has(this.selected)) this.selected = null;
     }
+    if (this.domainInView === null && !this.fitted) this.fit();
+    this.publishView();
     this.view.layout();
     this.gestures.refreshHover();
     this.keys.refresh();
@@ -378,7 +447,7 @@ export class ScheduleScene {
   private headers(): readonly ScheduleHeader[] {
     const labelOfLane = new Map(this.data.lanes.map((lane) => [lane.id, lane.label] as const));
     const labelOfGroup = new Map(this.data.groups.map((group) => [group.id, group.label] as const));
-    const collapsed = new Set(this.collapsedGroups);
+    const collapsed = new Set(this.folded);
     return this.view.rows.rows.map((row) => ({
       key: row.lane ?? row.group ?? "",
       kind: row.kind,
@@ -454,20 +523,16 @@ export class ScheduleScene {
     return [wall(this.view.domain[0]), wall(this.view.domain[1])];
   }
 
-  /** Reported once per frame, however many wheel steps a planner turns - and
-      only for their gestures: a span handed in from outside is not news to the
-      caller who handed it in, and reporting it would let two schedules
-      synchronised with each other feed one another for ever. */
+  /** A pan or zoom of the planner's goes into the view once per frame,
+      however many wheel steps they turn. */
   private reportDomain(): void {
-    if (typeof requestAnimationFrame !== "function") {
-      this.handlersNow.onDomainChange?.(this.visibleDomain());
-      return;
-    }
-    if (this.domainFrame !== 0) return;
-    this.domainFrame = requestAnimationFrame(() => {
+    const take = () => {
       this.domainFrame = 0;
-      this.handlersNow.onDomainChange?.(this.visibleDomain());
-    });
+      this.domainInView = this.visibleDomain();
+      this.publishView();
+    };
+    if (typeof requestAnimationFrame !== "function") return take();
+    if (this.domainFrame === 0) this.domainFrame = requestAnimationFrame(take);
   }
 
   /** The time and the lane at a client point, or null outside the plot. */

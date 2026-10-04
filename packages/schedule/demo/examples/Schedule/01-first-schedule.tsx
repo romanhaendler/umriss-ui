@@ -46,9 +46,9 @@ const HANDOVERS: readonly Dependency[] = [
 ];
 
 export default function FirstSchedule() {
-  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule({ initialView: { domain: DAY } });
   return (
-    <Schedule ariaLabel="Tours of Tuesday, 17 March" initialDomain={DAY} height={240}>
+    <Schedule ariaLabel="Tours of Tuesday, 17 March" height={240}>
       {VEHICLES.map((vehicle) => (
         <Lane key={vehicle.id} id={vehicle.id} label={vehicle.label} />
       ))}

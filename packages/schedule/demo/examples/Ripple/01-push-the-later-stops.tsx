@@ -30,7 +30,7 @@ const DRIVES: readonly Dependency[] = [
 const LATE: MoveIntent = { kind: "move", subtask: "stop-1", from: at(8, 10), to: at(8, 20) };
 
 export default function PushTheLaterStops() {
-  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule({ initialView: { domain: [at(7, 15), at(10, 30)] } });
   const [stops, setStops] = useState<readonly Subtask[]>(START);
   /* Nothing to push until the first stop runs late. */
   const late = stops.some((s) => s.id === LATE.subtask && s.from === LATE.from);
@@ -38,7 +38,7 @@ export default function PushTheLaterStops() {
 
   return (
     <Stack gap={3}>
-      <Schedule ariaLabel="Tour T-01 on van FP 214 K" initialDomain={[at(7, 15), at(10, 30)]} height={100}>
+      <Schedule ariaLabel="Tour T-01 on van FP 214 K" height={100}>
         <Lane id="van-214" label="Van FP 214 K" />
         <Dependencies data={DRIVES} />
         <Subtasks data={stops} tasks={TOURS} />

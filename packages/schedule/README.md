@@ -37,9 +37,9 @@ const subtasks: Subtask[] = [
 const dependencies: Dependency[] = [{ id: "move", from: "cut", to: "mill", lag: 15 * 60_000 }];
 
 export function Plan() {
-  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule({ initialView: { domain: [at(5), at(12)] } });
   return (
-    <Schedule ariaLabel="Plan of Tuesday" initialDomain={[at(5), at(12)]}>
+    <Schedule ariaLabel="Plan of Tuesday">
       <Lane id="saw" label="Saw" />
       <Lane id="mill" label="Mill" />
       <Dependencies data={dependencies} />
@@ -116,9 +116,8 @@ reported for it, and no intent names it (ADR-0025).
 Folded, a group becomes one row showing a **miniature** — every lane in it as a
 thin strip, the real work smaller. Dependencies still arrive at the right strip,
 findings are still marked, and a strip can still be hovered and selected:
-folding costs a planner detail and never access. `collapsedGroups`,
-`defaultCollapsedGroups` and `onCollapsedGroupsChange` put the state in the
-application's hands; it is a view state, never an intent.
+folding costs a planner detail and never access. Which groups are folded is
+part of the schedule's view, never an intent.
 
 ## Reading and moving
 
@@ -128,9 +127,18 @@ off. `now` draws the present across the lanes. The wheel over the schedule,
 lane headers included, scrolls the lanes and releases the page at their end,
 Ctrl or ⌘ and a pinch zoom, Shift pans; on a touch screen one finger pans and a
 tap selects. The lane headers take at most 40 % of the width, so that on a
-phone the plot keeps the larger part;
-`onDomainChange` reports the visible span, and a ref handle turns a client
-point into a time and a lane and back.
+phone the plot keeps the larger part; a ref handle turns a client point into a
+time and a lane and back.
+
+## The view
+
+The schedule holds its own view (ADR-0047): the span in view and the folded
+groups. `useSchedule({ initialView, onViewChange })` takes a start and reports
+every change, always the whole view; a view handed in that differs from the
+last one applies at once, so two schedules keep in step by handing each other
+what they report. Without a span the schedule shows the extent of its subtasks.
+`view`, `setDomain`, `toggleGroup`, `foldAll` and `unfoldAll` stand on what the
+hook hands back.
 
 ## Blocked time
 

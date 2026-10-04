@@ -34,10 +34,9 @@ const CUT_OFF = at(14);
 const clock = (time: number) => new Date(time).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 
 export default function PlaceAMark() {
-  const { Schedule, Lane, Subtasks } = useSchedule();
+  const { Schedule, Lane, Subtasks, view } = useSchedule({ initialView: { domain: [at(5, 30), at(18)] } });
   const plan = useRef<ScheduleHandle>(null);
   const host = useRef<HTMLDivElement>(null);
-  const [domain, setDomain] = useState<readonly [number, number]>([at(5, 30), at(18)]);
   const [pin, setPin] = useState<number | null>(null);
   const [under, setUnder] = useState("Move the pointer over the plan");
 
@@ -46,7 +45,7 @@ export default function PlaceAMark() {
     const point = plan.current?.clientPointOf(CUT_OFF);
     const left = host.current?.getBoundingClientRect().left;
     setPin(point == null || left === undefined ? null : point.x - left);
-  }, [domain]);
+  }, [view.domain]);
 
   return (
     <Stack gap={2}>
@@ -60,9 +59,7 @@ export default function PlaceAMark() {
       <Schedule
         ref={plan}
         ariaLabel="Three vehicles with a cut-off of the application's own"
-        initialDomain={domain}
         height={196}
-        onDomainChange={setDomain}
         onInteraction={(interaction) => {
           /* The interaction carries time and lane already; `positionAt` is for
              listeners of your own, which have only a point. */

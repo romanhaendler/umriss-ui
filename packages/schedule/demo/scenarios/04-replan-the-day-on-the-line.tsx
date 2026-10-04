@@ -128,7 +128,7 @@ function applied(plan: Plan, intent: Intent, cascade: boolean): Plan {
 }
 
 export default function ReplanTheDay() {
-  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule({ initialView: { domain: DAY_OF_PLAN } });
   const [plan, setPlan] = useState<Plan>(START);
   const [cascade, setCascade] = useState(true);
   const [menu, setMenu] = useState<Menu | null>(null);
@@ -152,7 +152,6 @@ export default function ReplanTheDay() {
       <div data-callout="2">
         <Schedule
           ariaLabel="Plan of Tuesday, 17 March, in the planner's hands"
-          initialDomain={DAY_OF_PLAN}
           height={380}
           intents={["move", "lane", "stretch", "leadIn", "leadOut"]}
           onIntent={apply}

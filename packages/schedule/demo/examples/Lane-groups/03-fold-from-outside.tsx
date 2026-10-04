@@ -1,15 +1,13 @@
-import { useState } from "react";
 import { Button, Stack, Text } from "@umriss-ui/core";
 import { useSchedule } from "../../../src";
 import type { Subtask, Task } from "../../../src";
 
 export const title = "Fold groups from outside";
 
-export const lead = "Pass `collapsedGroups` and `onCollapsedGroupsChange` to own the fold: store it with the planner's preferences, or fold two views together.";
+export const lead = "`foldAll`, `unfoldAll` and `toggleGroup` fold from outside, and `view.folded` says what is folded - start from `initialView`, keep what `onViewChange` reports.";
 
-/* The shape `selectedTask` has: left out, the schedule keeps the state
-   itself. A fold is not an intent - it says what is on screen, nothing about
-   the plan. */
+/* The fold is part of the schedule's view, not of the plan: no intent, and
+   nothing the application has to hold for the chevrons to work. */
 
 const at = (hours: number, minutes = 0) => new Date(2026, 2, 17, hours, minutes).getTime();
 
@@ -22,29 +20,21 @@ const WORK: Subtask[] = [
   { id: "s4", task: "release", lane: "leila", from: at(13), to: at(14, 30) },
 ];
 
-const ALL = ["payments", "discovery"];
-
-export default function Controlled() {
-  const { Schedule, Lane, LaneGroup, Subtasks } = useSchedule();
-  const [folded, setFolded] = useState<readonly string[]>(["discovery"]);
+export default function FoldFromOutside() {
+  const { Schedule, Lane, LaneGroup, Subtasks, view, foldAll, unfoldAll } = useSchedule({ initialView: { domain: [at(6), at(15)], folded: ["discovery"] } });
+  const folded = view.folded ?? [];
 
   return (
     <Stack gap={3}>
       <Stack direction="row" gap={2}>
-        <Button size="sm" variant="secondary" onClick={() => setFolded(ALL)} data-fold-all>
+        <Button size="sm" variant="secondary" onClick={foldAll} data-fold-all>
           Fold everything
         </Button>
-        <Button size="sm" variant="secondary" onClick={() => setFolded([])} data-unfold-all>
+        <Button size="sm" variant="secondary" onClick={unfoldAll} data-unfold-all>
           Unfold everything
         </Button>
       </Stack>
-      <Schedule
-        ariaLabel="Two teams rolling out a release, folded from outside"
-        initialDomain={[at(6), at(15)]}
-        height={280}
-        collapsedGroups={folded}
-        onCollapsedGroupsChange={setFolded}
-      >
+      <Schedule ariaLabel="Two teams rolling out a release, folded from outside" height={280}>
         <LaneGroup id="payments" label="Payments">
           <Lane id="priya" label="Priya Raman" />
           <Lane id="jonas" label="Jonas Keller" />

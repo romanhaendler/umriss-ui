@@ -89,11 +89,10 @@ const WEB_TEAM = PEOPLE.filter((person) => person.team === "Web");
 const ON_THE_WEB_TEAM = new Set(WEB_TEAM.map((person) => person.id));
 
 export default function OfficeHours() {
-  const { Schedule, Lane, Subtasks } = useSchedule();
+  const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [at(9, 9), at(20, 17)] } });
   return (
     <Schedule
       ariaLabel="Sprint 14 of the web team, office hours only"
-      initialDomain={[at(9, 9), at(20, 17)]}
       calendar={OFFICE_HOURS}
       height={280}
       label={(item) => item.name ?? item.id}

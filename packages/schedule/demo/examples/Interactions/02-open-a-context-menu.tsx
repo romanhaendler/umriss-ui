@@ -67,7 +67,7 @@ const START: readonly Subtask[] = ONCALL.map((duty) => ({
 }));
 
 export default function OpenAContextMenu() {
-  const { Schedule, Lane, Subtasks } = useSchedule();
+  const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [day(16, 6), day(23, 12)] } });
   const [rota, setRota] = useState<readonly Subtask[]>(START);
   const [menu, setMenu] = useState<{ interaction: ScheduleInteraction; duty: Subtask } | null>(null);
 
@@ -81,7 +81,6 @@ export default function OpenAContextMenu() {
     <>
       <Schedule
         ariaLabel="On-call rota, 16 to 23 March"
-        initialDomain={[day(16, 6), day(23, 12)]}
         height={420}
         onInteraction={onInteraction}
       >

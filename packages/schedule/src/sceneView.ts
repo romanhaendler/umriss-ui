@@ -88,15 +88,12 @@ export class SceneView {
 
   constructor(private readonly data: SceneData) {}
 
-  /** Takes new options; an initial domain in wall-clock time puts the view
-      there, and a new calendar keeps the wall-clock span in view. */
-  setOptions(options: SceneOptions, initialDomain: readonly [number, number] | null): void {
+  /** Takes new options; a new calendar keeps the wall-clock span in view. */
+  setOptions(options: SceneOptions): void {
     const calendarChanged = options.calendar !== this.options.calendar;
     const previous = this.options.calendar;
     this.options = options;
-    if (initialDomain !== null) {
-      this.domain = [toWorkingTimeClamped(initialDomain[0], options.calendar), toWorkingTimeClamped(initialDomain[1], options.calendar)];
-    } else if (calendarChanged) {
+    if (calendarChanged) {
       /* A view panned past the old calendar's ends has no wall clock there; the
          distance beyond the end is carried over as it is, or the domain would
          become NaN. */
@@ -107,6 +104,11 @@ export class SceneView {
       };
       this.domain = [carry(this.domain[0]), carry(this.domain[1])];
     }
+  }
+
+  /** Puts a span of two wall-clock instants in view. */
+  showWall(span: readonly [number, number]): void {
+    this.domain = [toWorkingTimeClamped(span[0], this.options.calendar), toWorkingTimeClamped(span[1], this.options.calendar)];
   }
 
   viewport(): Viewport {

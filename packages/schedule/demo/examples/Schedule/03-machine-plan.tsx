@@ -79,11 +79,10 @@ const NAMES = new Map(ORDERS.map((order) => [order.id, order.name ?? order.id]))
 const HALF_PAST_TEN = new Date(2026, 2, 17, 10, 30).getTime();
 
 export default function MachinePlan() {
-  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule({ initialView: { domain: DAY_OF_PLAN } });
   return (
     <Schedule
       ariaLabel="Machine shop, Tuesday 17 March"
-      initialDomain={DAY_OF_PLAN}
       height={380}
       now={HALF_PAST_TEN}
       label={(step) => NAMES.get(step.task) ?? step.task}

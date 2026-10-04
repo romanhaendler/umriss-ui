@@ -28,11 +28,10 @@ const ROUNDS: Subtask[] = VANS.map((van, i) => ({
 }));
 
 export default function ManyLanes() {
-  const { Schedule, Lane, Subtasks } = useSchedule();
+  const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [at(6), at(14)] } });
   return (
     <Schedule
       ariaLabel="Twenty vans, Tuesday morning"
-      initialDomain={[at(6), at(14)]}
       height={300}
       laneHeight={32}
       headerWidth={110}

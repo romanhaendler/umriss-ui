@@ -13,12 +13,11 @@ const ENGINEERS: readonly Task[] = [{ id: "sam", name: "Sam Okafor", color: "lig
 const START: readonly Subtask[] = [{ id: "window-1", task: "sam", lane: "notifications", from: at(13, 5), to: at(13, 50), name: "Maintenance window" }];
 
 export default function NoSnapping() {
-  const { Schedule, Lane, Subtasks } = useSchedule();
+  const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [at(10), at(18)] } });
   const [windows, setWindows] = useState(START);
   return (
     <Schedule
       ariaLabel="A maintenance window placed freely"
-      initialDomain={[at(10), at(18)]}
       height={100}
       snap={false}
       intents={["move"]}

@@ -27,12 +27,11 @@ const HANDOVERS: Dependency[] = [
 ];
 
 export default function WorkingCalendar() {
-  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule({ initialView: { domain: [at(0, 6), at(2, 22)] } });
   const [legs, setLegs] = useState<readonly Subtask[]>(LEGS);
   return (
     <Schedule
       ariaLabel="Three days at East Gate depot, nights removed"
-      initialDomain={[at(0, 6), at(2, 22)]}
       calendar={OPENING_HOURS}
       height={220}
       intents={["move"]}

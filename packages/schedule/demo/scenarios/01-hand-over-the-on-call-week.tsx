@@ -108,7 +108,7 @@ const when = (instant: number) =>
   });
 
 export default function HandOver() {
-  const { Schedule, Lane, Subtasks, BlockedTimes } = useSchedule();
+  const { Schedule, Lane, Subtasks, BlockedTimes } = useSchedule({ initialView: { domain: [day(16, 6), day(23, 12)] } });
   const [rota, setRota] = useState<readonly Subtask[]>(START);
 
   const onIntent = (intent: Intent) => {
@@ -134,7 +134,6 @@ export default function HandOver() {
       <div data-callout="2">
         <Schedule
           ariaLabel="On-call rota, 16 to 23 March"
-          initialDomain={[day(16, 6), day(23, 12)]}
           height={420}
           now={NOW}
           intents={["lane"]}

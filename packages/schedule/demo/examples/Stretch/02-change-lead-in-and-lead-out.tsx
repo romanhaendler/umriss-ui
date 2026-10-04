@@ -18,13 +18,12 @@ const START: Subtask[] = [
 ];
 
 export default function ChangeLeadInAndLeadOut() {
-  const { Schedule, Lane, Subtasks } = useSchedule();
+  const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [at(6), at(13, 30)] } });
   const [tours, setTours] = useState(START);
 
   return (
     <Schedule
       ariaLabel="Two tours from North depot"
-      initialDomain={[at(6), at(13, 30)]}
       height={150}
       intents={["stretch", "leadIn", "leadOut"]}
       onIntent={(intent) => setTours((current) => current.map((tour) => applyIntent(tour, intent)))}

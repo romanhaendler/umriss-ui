@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Stack } from "@umriss-ui/core";
 import { useSchedule } from "../../../src";
-import type { Subtask, Task } from "../../../src";
+import type { ScheduleView, Subtask, Task } from "../../../src";
 
 /* Data from the operations world, written out here so the example runs on its own. */
 
@@ -132,21 +132,22 @@ const PAGED: readonly Subtask[] = INCIDENTS.map((incident) => ({
 const HIT = SERVICES.filter((service) => PAGED.some((incident) => incident.lane === service.id));
 
 export default function RotaBesideIncidents() {
-  const { Schedule, Lane, Subtasks } = useSchedule();
-  const [domain, setDomain] = useState<readonly [number, number]>([day(16, 6), day(17, 14)]);
+  const [view, setView] = useState<ScheduleView>({ domain: [day(16, 6), day(17, 14)] });
+  const rota = useSchedule({ initialView: view, onViewChange: setView });
+  const incidents = useSchedule({ initialView: view, onViewChange: setView });
   return (
     <Stack gap={2}>
-      <Schedule ariaLabel="Who was on call" initialDomain={domain} height={140} onDomainChange={setDomain}>
-        <Lane id="primary" label="Primary" />
-        <Lane id="secondary" label="Secondary" />
-        <Subtasks data={DUTIES} tasks={PEOPLE} />
-      </Schedule>
-      <Schedule ariaLabel="Incidents, the same hours" initialDomain={domain} height={290} onDomainChange={setDomain}>
+      <rota.Schedule ariaLabel="Who was on call" height={140}>
+        <rota.Lane id="primary" label="Primary" />
+        <rota.Lane id="secondary" label="Secondary" />
+        <rota.Subtasks data={DUTIES} tasks={PEOPLE} />
+      </rota.Schedule>
+      <incidents.Schedule ariaLabel="Incidents, the same hours" height={290}>
         {HIT.map((service) => (
-          <Lane key={service.id} id={service.id} label={service.name} />
+          <incidents.Lane key={service.id} id={service.id} label={service.name} />
         ))}
-        <Subtasks data={PAGED} tasks={SEVERITIES} />
-      </Schedule>
+        <incidents.Subtasks data={PAGED} tasks={SEVERITIES} />
+      </incidents.Schedule>
     </Stack>
   );
 }

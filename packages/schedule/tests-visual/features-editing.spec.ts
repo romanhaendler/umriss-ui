@@ -591,10 +591,9 @@ test("what a gesture opened, it closes again - and the application is never told
   await page.mouse.move(plot.x(14), after.y("van-1"), { steps: 4 });
   await page.mouse.up();
 
-  /* And the depot folds again by itself: the application did not fold anything,
-     so its own list is untouched and it hears nothing. The example passes
-     `onCollapsedGroupsChange` straight into its state, so the group coming
-     back is the proof. */
+  /* And the depot folds again by itself: the planner did not fold anything,
+     so the view is untouched - a fold the gesture held open never enters it.
+     The group coming back is the proof. */
   await expect.poll(async () => await lanes().count(), { timeout: 4000 }).toBe(2);
   await expect(example.getByRole("button", { name: /Unfold group: North depot/ })).toHaveCount(1);
 });

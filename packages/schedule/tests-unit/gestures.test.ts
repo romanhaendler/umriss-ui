@@ -26,11 +26,11 @@ const OPTIONS: SceneOptions = {
 const SUBTASK: Subtask = { id: "a-1", task: "a", lane: "press", from: 2 * HOUR, to: 4 * HOUR };
 
 function sceneWith(options: Partial<SceneOptions> = {}) {
-  const scene = new ScheduleScene();
+  const scene = new ScheduleScene({ domain: [0, 8 * HOUR] });
   const selected: (string | null)[] = [];
   scene.registerLane({ id: "press", label: "Press" });
   scene.registerLayer({ kind: "subtasks", data: [SUBTASK], tasks: [{ id: "a", color: "red" }] });
-  scene.setOptions({ ...OPTIONS, ...options }, [0, 8 * HOUR]);
+  scene.setOptions({ ...OPTIONS, ...options });
   scene.setHandlers({ onSelectedTaskChange: (task) => selected.push(task) });
   const root = document.createElement("div");
   const plot = document.createElement("div");
@@ -100,7 +100,7 @@ describe("a new calendar", () => {
     const [from, to] = scene.view.domain;
     expect(from).toBeLessThan(0);
     /* The same calendar, as a caller writing it inline hands it over anew. */
-    scene.setOptions({ ...OPTIONS, calendar: [{ ...day }] }, null);
+    scene.setOptions({ ...OPTIONS, calendar: [{ ...day }] });
     expect(scene.view.domain[0]).toBeCloseTo(from);
     expect(scene.view.domain[1]).toBeCloseTo(to);
   });

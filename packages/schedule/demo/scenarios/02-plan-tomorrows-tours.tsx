@@ -217,7 +217,7 @@ const plateOf = (vehicle: string) => VEHICLES.find((one) => one.id === vehicle)?
 const driverOf = (driver: string) => DRIVERS.find((one) => one.id === driver)?.name ?? driver;
 
 export default function TourPlan() {
-  const { Schedule, Lane, LaneGroup, Subtasks, Dependencies } = useSchedule();
+  const { Schedule, Lane, LaneGroup, Subtasks, Dependencies } = useSchedule({ initialView: { domain: [tomorrow(5, 30), tomorrow(15)] } });
   const [plan, setPlan] = useState<readonly Subtask[]>(START);
 
   const apply = (intent: Intent) =>
@@ -245,7 +245,6 @@ export default function TourPlan() {
       <div data-callout="1">
         <Schedule
           ariaLabel="Tours of Wednesday, 18 March"
-          initialDomain={[tomorrow(5, 30), tomorrow(15)]}
           height={470}
           intents={["move"]}
           onIntent={apply}

@@ -16,12 +16,11 @@ const START: readonly Subtask[] = [
 ];
 
 export default function MoveInTime() {
-  const { Schedule, Lane, Subtasks } = useSchedule();
+  const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [day(16, 0), day(21, 0)] } });
   const [work, setWork] = useState(START);
   return (
     <Schedule
       ariaLabel="Two people's work this week"
-      initialDomain={[day(16, 0), day(21, 0)]}
       height={140}
       intents={["move"]}
       onIntent={(intent) => setWork((current) => current.map((item) => applyIntent(item, intent)))}

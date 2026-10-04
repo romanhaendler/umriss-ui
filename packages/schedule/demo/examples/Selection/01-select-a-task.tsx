@@ -27,9 +27,9 @@ const TRANSFERS: readonly Dependency[] = [
 ];
 
 export default function SelectATask() {
-  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule({ initialView: { domain: [at(5, 30), at(13, 30)] } });
   return (
-    <Schedule ariaLabel="Two consignments at North depot" initialDomain={[at(5, 30), at(13, 30)]} height={140}>
+    <Schedule ariaLabel="Two consignments at North depot" height={140}>
       <Lane id="truck-118" label="Truck FP 118 R" />
       <Lane id="van-214" label="Van FP 214 K" />
       <Dependencies data={TRANSFERS} />

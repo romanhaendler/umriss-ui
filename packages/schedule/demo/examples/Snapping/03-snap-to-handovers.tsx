@@ -17,12 +17,11 @@ const ENGINEERS: readonly Task[] = [{ id: "ada", name: "Ada Mwangi", color: "lig
 const START: readonly Subtask[] = [{ id: "watch-1", task: "ada", lane: "primary", from: at(6), to: at(14) }];
 
 export default function SnapToHandovers() {
-  const { Schedule, Lane, Subtasks } = useSchedule();
+  const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [at(4), at(24)] } });
   const [watches, setWatches] = useState(START);
   return (
     <Schedule
       ariaLabel="An on-call watch on the handover raster"
-      initialDomain={[at(4), at(24)]}
       height={110}
       snap={HANDOVERS}
       intents={["move"]}

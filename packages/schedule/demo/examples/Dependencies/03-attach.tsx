@@ -29,13 +29,13 @@ const HANDOVERS: Dependency[] = [
 ];
 
 function Variant({ attach }: { attach: DependencyAttachment }) {
-  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule({ initialView: { domain: [at(6, 30), at(13, 30)] } });
   return (
     <Stack gap={1}>
       <Text size="xs" tone="muted" mono>
         attach=&quot;{attach}&quot;
       </Text>
-      <Schedule ariaLabel={`A release through three engineers, lines from the ${attach}`} initialDomain={[at(6, 30), at(13, 30)]} height={188} attach={attach}>
+      <Schedule ariaLabel={`A release through three engineers, lines from the ${attach}`} height={188} attach={attach}>
         <Lane id="priya" label="Priya Raman" />
         <Lane id="ada" label="Ada Mwangi" />
         <Lane id="sam" label="Sam Okafor" />

@@ -29,7 +29,7 @@ const START: readonly Subtask[] = [
 const BLOCKED: readonly BlockedTime[] = [{ id: "anna-leave", lane: "anna", from: day(2, 0), to: day(4, 0), label: "Leave" }];
 
 export default function DragAround() {
-  const { Schedule, Lane, Subtasks, BlockedTimes } = useSchedule();
+  const { Schedule, Lane, Subtasks, BlockedTimes } = useSchedule({ initialView: { domain: [day(0, 6), day(5, 0)] } });
   const [work, setWork] = useState<readonly Subtask[]>(START);
   const [last, setLast] = useState("Drag the design review into Anna's leave");
 
@@ -43,7 +43,6 @@ export default function DragAround() {
     <Stack gap={3}>
       <Schedule
         ariaLabel="Two people, one on leave"
-        initialDomain={[day(0, 6), day(5, 0)]}
         height={150}
         intents={["move", "lane"]}
         onIntent={onIntent}

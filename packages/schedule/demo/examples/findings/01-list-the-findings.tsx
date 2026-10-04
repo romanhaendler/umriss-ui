@@ -29,12 +29,12 @@ const when = (instant: number) => new Date(instant).toLocaleString("en-GB", { we
 const hours = (ms: number) => Math.round(ms / 3_600_000);
 
 export default function ListTheFindings() {
-  const { Schedule, Lane, Subtasks, Dependencies, BlockedTimes } = useSchedule();
+  const { Schedule, Lane, Subtasks, Dependencies, BlockedTimes } = useSchedule({ initialView: { domain: [day(16, 0), day(21, 0)] } });
   const found = findings(WORK, HANDOVERS, LEAVE);
 
   return (
     <Stack gap={3}>
-      <Schedule ariaLabel="Three people's week with its findings" initialDomain={[day(16, 0), day(21, 0)]} height={184}>
+      <Schedule ariaLabel="Three people's week with its findings" height={184}>
         <Lane id="noah" label="Noah Fischer" />
         <Lane id="chloe" label="Chloe Durand" />
         <Lane id="arjun" label="Arjun Mehta" />

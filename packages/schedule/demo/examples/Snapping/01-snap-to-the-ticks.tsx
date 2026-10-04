@@ -13,12 +13,11 @@ const TOURS: readonly Task[] = [{ id: "river", name: "Riverside depot tours", co
 const START: readonly Subtask[] = [{ id: "T-04", task: "river", lane: "van-402", from: at(7, 30), to: at(12, 10) }];
 
 export default function SnapToTheTicks() {
-  const { Schedule, Lane, Subtasks } = useSchedule();
+  const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [at(6), at(16)] } });
   const [tours, setTours] = useState(START);
   return (
     <Schedule
       ariaLabel="A tour on the default raster"
-      initialDomain={[at(6), at(16)]}
       height={100}
       intents={["move"]}
       onIntent={(intent) => setTours((current) => current.map((tour) => applyIntent(tour, intent)))}

@@ -149,9 +149,9 @@ const ROUNDS: Subtask[] = TOURS.map((tour) => ({
 }));
 
 export default function NowLine() {
-  const { Schedule, Lane, Subtasks } = useSchedule();
+  const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [at(5, 30), at(18)] } });
   return (
-    <Schedule ariaLabel="Today's tours, with the present" initialDomain={[at(5, 30), at(18)]} height={420} now={NOW}>
+    <Schedule ariaLabel="Today's tours, with the present" height={420} now={NOW}>
       {VEHICLES.map((vehicle) => (
         <Lane key={vehicle.id} id={vehicle.id} label={vehicle.plate} />
       ))}

@@ -44,7 +44,7 @@ import {
 import { DAY, HOUR, MINUTE, type CalendarInput } from "@umriss-ui/charts";
 import { AngleGlyph, VisuallyHidden, useFormats, useWording } from "@umriss-ui/core";
 import { ScheduleContext } from "./context";
-import { ScheduleScene, type PlacingItem, type ScheduleInteraction, type ScheduleTooltipTarget } from "./scene";
+import type { ScheduleScene, PlacingItem, ScheduleInteraction, ScheduleTooltipTarget } from "./scene";
 import { DEFAULT_LANE_HEIGHT } from "./sceneView";
 import { ScheduleReadout, ScheduleTooltipContent } from "./ScheduleTooltip";
 import type { Intent, IntentKind, Subtask, DependencyAttachment, DependencyEnds, DependencyRoute } from "./model";
@@ -56,9 +56,6 @@ import styles from "./Schedule.module.css";
 export interface ScheduleProps {
   /** What the schedule shows, for a screen reader: "Plan of week 38". */
   ariaLabel: string;
-  /** The time in view when the schedule mounts, as two wall-clock instants.
-      Pan and zoom take it from there; a new pair of values puts it back. */
-  initialDomain: readonly [number, number];
   /** Height in CSS pixels, both bands included. The width is the host's.
       @default 400 */
   height?: number;
@@ -115,24 +112,6 @@ export interface ScheduleProps {
       nothing. It is called again when another subtask of the same task is
       clicked. */
   onSelectedTaskChange?: (task: string | null, subtask: string | null) => void;
-  /** The **Lane group**s that are folded, controlled. Leave it out and the
-      schedule keeps them itself, starting from `defaultCollapsedGroups`.
-
-      Folding changes the view and not the plan, which is why it is no intent:
-      a caller that applies every intent it receives must never find a fold
-      among them (ADR-0025). A folded outer group hides the inner ones without
-      their entries leaving the list, so unfolding it gives back the view that
-      was there. */
-  collapsedGroups?: readonly string[];
-  /** Which groups are folded when the schedule mounts, where the schedule
-      keeps the state itself. Ignored while `collapsedGroups` is given. */
-  defaultCollapsedGroups?: readonly string[];
-  /** Called with the whole list when the planner folds or unfolds a group. */
-  onCollapsedGroupsChange?: (groups: readonly string[]) => void;
-  /** The visible time span after the planner panned or zoomed, as two
-      wall-clock instants - for keeping a second schedule or a chart in step. A
-      span handed in through `initialDomain` is not reported back. */
-  onDomainChange?: (domain: readonly [number, number]) => void;
   /** What the application is dragging in from outside while it drags it - its
       key, task, the length of its main time, its lead-in and lead-out. The
       browser hands the dragged data over only on the drop, so the ghost before
@@ -207,10 +186,10 @@ export interface ScheduleHandle {
     zooms and drags, and every drag ends as an **Intent** through `onIntent`.
     The data changes only where the caller applies it; without `intents` the
     schedule is read-only. A ref gives the `ScheduleHandle`. */
-export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Schedule(props, ref): ReactNode {
+export const Schedule = forwardRef<ScheduleHandle, ScheduleProps & { scene: ScheduleScene }>(function Schedule(props, ref): ReactNode {
   const {
+    scene,
     ariaLabel,
-    initialDomain,
     height = 400,
     laneHeight = DEFAULT_LANE_HEIGHT,
     headerWidth = 160,
@@ -223,10 +202,6 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
     onInteraction,
     selectedTask,
     onSelectedTaskChange,
-    collapsedGroups,
-    defaultCollapsedGroups,
-    onCollapsedGroupsChange,
-    onDomainChange,
     placing,
     route = "curve",
     attach = "centre",
@@ -239,7 +214,6 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
     children,
   } = props;
 
-  const [scene] = useState(() => new ScheduleScene());
   /* One id per schedule, so that two on a page do not both claim
      `#…-group-presses` for their chevron's `aria-controls`. */
   const plotId = useId();
@@ -251,10 +225,8 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
   const formats = useFormats();
   const wording = useWording();
 
-  const [domainFrom, domainTo] = initialDomain;
   const limitMin = zoomLimits?.min ?? DEFAULT_LIMITS.min;
   const limitMax = zoomLimits?.max ?? DEFAULT_LIMITS.max;
-  const lastDomain = useRef<string | null>(null);
   /* A raster written inline is a new object on every render; its two numbers
      are what counts. */
   const snapStep = typeof snap === "object" ? snap.step : null;
@@ -273,31 +245,13 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
   const nowAt = now === true ? clock : typeof now === "number" ? now : null;
 
   useLayoutEffect(() => {
-    const key = `${domainFrom}|${domainTo}`;
-    const fresh = lastDomain.current !== key;
-    lastDomain.current = key;
     const raster = snapKind ?? { step: snapStep ?? 0, offset: snapOffset ?? 0 };
-    scene.setOptions(
-      { laneHeight, calendar, zoomLimits: { min: limitMin, max: limitMax }, snap: raster, intents, now: nowAt, route, attach, ends },
-      fresh ? [domainFrom, domainTo] : null,
-    );
-  }, [scene, domainFrom, domainTo, laneHeight, calendar, limitMin, limitMax, snapKind, snapStep, snapOffset, intents, nowAt, route, attach, ends]);
+    scene.setOptions({ laneHeight, calendar, zoomLimits: { min: limitMin, max: limitMax }, snap: raster, intents, now: nowAt, route, attach, ends });
+  }, [scene, laneHeight, calendar, limitMin, limitMax, snapKind, snapStep, snapOffset, intents, nowAt, route, attach, ends]);
 
   useEffect(() => {
-    scene.setHandlers({ onIntent, canMoveTo, onInteraction, onSelectedTaskChange, onCollapsedGroupsChange, onDomainChange });
-  }, [scene, onIntent, canMoveTo, onInteraction, onSelectedTaskChange, onCollapsedGroupsChange, onDomainChange]);
-
-  /* The default is taken once, at the mount: after that the state is the
-     scene's, and a caller who wants to move it uses `collapsedGroups`. */
-  const firstDefault = useRef(defaultCollapsedGroups);
-  useEffect(() => {
-    const first = firstDefault.current;
-    if (first !== undefined) scene.setDefaultCollapsedGroups(first);
-  }, [scene]);
-
-  useEffect(() => {
-    scene.setCollapsedGroups(collapsedGroups);
-  }, [scene, collapsedGroups]);
+    scene.setHandlers({ onIntent, canMoveTo, onInteraction, onSelectedTaskChange });
+  }, [scene, onIntent, canMoveTo, onInteraction, onSelectedTaskChange]);
 
   useImperativeHandle(
     ref,

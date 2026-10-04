@@ -29,9 +29,9 @@ const HANDOVERS: Dependency[] = [
 ];
 
 export default function Anchors() {
-  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule({ initialView: { domain: [at(6, 30), at(16, 30)] } });
   return (
-    <Schedule ariaLabel="Two handovers with different anchors" initialDomain={[at(6, 30), at(16, 30)]} height={150}>
+    <Schedule ariaLabel="Two handovers with different anchors" height={150}>
       <Lane id="truck" label="Truck FP 520 E" />
       <Lane id="van" label="Van FP 290 E" />
       <Dependencies data={HANDOVERS} />

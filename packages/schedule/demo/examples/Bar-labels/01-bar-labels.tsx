@@ -33,11 +33,10 @@ const WORK: readonly Subtask[] = [
 ];
 
 export default function BarLabels() {
-  const { Schedule, Lane, Subtasks } = useSchedule();
+  const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: DAY } });
   return (
     <Schedule
       ariaLabel="Tuesday, 17 March, with the work items written in"
-      initialDomain={DAY}
       height={196}
       label={(subtask) => subtask.name ?? subtask.id}
     >

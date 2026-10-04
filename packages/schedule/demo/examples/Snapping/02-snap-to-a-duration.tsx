@@ -17,12 +17,11 @@ const START: readonly Subtask[] = [
 ];
 
 export default function SnapToADuration() {
-  const { Schedule, Lane, Subtasks } = useSchedule();
+  const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [day(16), day(21)] } });
   const [work, setWork] = useState(START);
   return (
     <Schedule
       ariaLabel="Work planned in half days"
-      initialDomain={[day(16), day(21)]}
       height={140}
       snap={HALF_DAY}
       intents={["move", "stretch"]}
