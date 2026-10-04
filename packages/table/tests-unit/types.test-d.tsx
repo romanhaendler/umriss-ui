@@ -360,7 +360,7 @@ export function TreeRows() {
   // @ts-expect-error children of another type
   useTable(units, { rowKey: (u) => u.id, childRows: () => [1, 2] });
   // @ts-expect-error a tree in manual mode
-  useTable(units, { rowKey: (u) => u.id, manual: true, rowCount: 0, onViewChange: () => {}, childRows: (u) => u.children });
+  useTable(units, { rowKey: (u) => u.id, manual: true, rowCount: 0, onRequest: () => {}, childRows: (u) => u.children });
   return null;
 }
 

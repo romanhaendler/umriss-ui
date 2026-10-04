@@ -442,7 +442,7 @@ export const OUTLINE: readonly Rubric[] = [
         name: "View",
         sentence: "What the user did to the table – search, conditions, sort, hidden columns, widths, page – as one value to keep and hand back.",
         about: [
-          "The table remembers nothing, not in the address and not in any storage. Everything stands in `t.view`; keep it where the application keeps things and hand it back through `initialView`.",
+          "The table remembers nothing, not in the address and not in any storage. Everything stands in `t.view`, and `onViewChange` reports every change of it; keep it where the application keeps things and hand it back through `initialView`. A view that differs from the last one handed in applies at once, the same one again changes nothing - two tables stay in step by handing each other what they report.",
         ],
         keysOf: ["first-table", core("Input"), "columnmenu", core("Button")],
         types: [],
@@ -487,7 +487,7 @@ export const OUTLINE: readonly Rubric[] = [
         name: "Manual mode",
         sentence: "A table over rows a server holds: the application hands in one page and the server's count, and the table reports what to fetch next (also called server-side paging, sorting and filtering).",
         about: [
-          "`onViewChange` reports the view whenever what decides the rows changes – search, conditions, sort, page, page size – complete, defaults included, since a server has no default of the table's.",
+          "`onRequest` reports the request whenever what decides the rows changes – search, conditions, sort, page, page size – complete, defaults included, since a server has no default of the table's.",
           "Requests are the application's: the table shows whatever rows it is given, so an answer to a view the user has already left is the application's to drop.",
         ],
         alternatives: [

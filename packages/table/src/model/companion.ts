@@ -38,9 +38,8 @@ export interface CompanionOptions<Z, K extends string> {
    */
   filter?: (row: Z) => boolean;
   /**
-   * The starting state, as the application kept it. Heeded only on the first
-   * render – whoever wants to set the view from outside later changes the
-   * component's `key`.
+   * The starting state, as the application kept it. Heeded on the first
+   * render; a view handed in later goes through `restart`.
    */
   initialView?: TableView<K>;
   /**
@@ -125,6 +124,9 @@ export interface Companion<Z, K extends string> extends TableProjection<Z, K> {
   setPitch: (pitch: number) => void;
   /** Manual mode, as it was handed in. */
   manual?: TableInput<Z, K>["manual"];
+  /** Takes a view handed in later as if it were the start: what it leaves out
+      goes back to its default. */
+  restart: (view: TableView<K>) => void;
 }
 
 export function useCompanion<Z, K extends string = string>(
@@ -134,14 +136,26 @@ export function useCompanion<Z, K extends string = string>(
 ): Companion<Z, K> {
   const { rowKey, filter, defaultSort = null, initialView, virtual, grouping, manual, tree } = options;
 
-  const [search, setSearchRaw] = useState(initialView?.search ?? "");
-  const [sort, setSort] = useState<readonly Sort<K>[]>(() => {
+  /* What a view sets, and what it leaves out falls back to: the start as well
+     as a view handed in later (`restart`). */
+  const sortOf = (view: TableView<K> | undefined): readonly Sort<K>[] => {
     /* The view handed in beats the application's default: whoever opens a kept
        view wants to see its sort, not the house's. */
-    if (initialView?.sort?.length) return [...initialView.sort];
+    if (view?.sort?.length) return [...view.sort];
     if (!defaultSort) return [];
     return Array.isArray(defaultSort) ? [...defaultSort] : [defaultSort as Sort<K>];
-  });
+  };
+  /* The widths come from the view, otherwise from the columns. */
+  const widthsOf = (view: TableView<K> | undefined): Readonly<Record<string, number>> => {
+    if (view?.widths) return { ...view.widths };
+    const out: Record<string, number> = {};
+    for (const column of columns) {
+      if (column.width !== undefined) out[column.id] = column.width;
+    }
+    return out;
+  };
+  const [search, setSearchRaw] = useState(initialView?.search ?? "");
+  const [sort, setSort] = useState<readonly Sort<K>[]>(() => sortOf(initialView));
   const [page, setPage] = useState(initialView?.page ?? 1);
   const [pageSize, setPageSizeRaw] = useState(
     initialView?.pageSize ?? options.pageSize ?? 10,
@@ -149,16 +163,17 @@ export function useCompanion<Z, K extends string = string>(
   const [expanded, setExpanded] = useState<readonly string[]>([]);
   const [hidden, setHidden] = useState<readonly K[]>(initialView?.hidden ?? []);
   const [order, setOrder] = useState<readonly K[]>(initialView?.order ?? []);
-  /* The initial widths come from the view, otherwise from the columns. */
-  const [widths, setWidths] = useState<Readonly<Record<string, number>>>(() => {
-    if (initialView?.widths) return { ...initialView.widths };
-    const out: Record<string, number> = {};
-    for (const column of columns) {
-      if (column.width !== undefined) out[column.id] = column.width;
-    }
-    return out;
-  });
-
+  const [widths, setWidths] = useState<Readonly<Record<string, number>>>(() => widthsOf(initialView));
+  /** Takes a view as if it were the start: what it leaves out goes back to its default. */
+  const restart = (view: TableView<K>) => {
+    setSearchRaw(view.search ?? "");
+    setSort(sortOf(view));
+    setPage(view.page ?? 1);
+    setPageSizeRaw(view.pageSize ?? options.pageSize ?? 10);
+    setHidden(view.hidden ?? []);
+    setOrder(view.order ?? []);
+    setWidths(widthsOf(view));
+  };
 
   /* Virtualising means: no pages. The model is handed the size zero, which it
      reads as "everything on one page" - the same rule it already had for a
@@ -393,6 +408,7 @@ export function useCompanion<Z, K extends string = string>(
     virtual: virtual ? rowWindow : undefined,
     setPitch,
     manual,
+    restart,
     view,
     search,
     setSearch,

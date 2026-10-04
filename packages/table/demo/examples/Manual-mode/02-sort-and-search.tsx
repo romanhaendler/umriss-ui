@@ -156,7 +156,7 @@ const SHIPMENTS: readonly Shipment[] = TOURS.flatMap((one) =>
 );
 
 export const title = "Sort and search on the server";
-export const lead = "The view `onViewChange` reports is complete: search, sort, page and page size, defaults included. The line below shows what the server received.";
+export const lead = "The request `onRequest` reports is complete: search, sort, page and page size, defaults included. The line below shows what the server received.";
 
 const serve = (view: ManualView) => {
   const term = view.search.trim().toLowerCase();
@@ -180,7 +180,7 @@ export default function SortAndSearch() {
     defaultSort: FIRST.sort[0],
     manual: true,
     rowCount: answer.rowCount,
-    onViewChange: (view) => setAnswer(serve(view)),
+    onRequest: (view) => setAnswer(serve(view)),
   });
   const { search, sort, page, pageSize } = answer.view;
 

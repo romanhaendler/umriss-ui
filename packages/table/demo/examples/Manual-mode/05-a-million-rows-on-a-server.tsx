@@ -4,7 +4,7 @@ import { ColumnMenu, Export, Pagination, Search, Toolbar, useTable } from "../..
 import type { ManualView } from "../../../src";
 
 export const title = "Load pages from a server";
-export const lead = "`manual` hands the table one page and the server's `rowCount`; `onViewChange` reports search, conditions, sort and page to fetch the next.";
+export const lead = "`manual` hands the table one page and the server's `rowCount`; `onRequest` reports search, conditions, sort and page to fetch the next.";
 
 /* The server below is a fake: a million requests computed from their index,
    every answer delayed by 400 ms. Dropping a late answer to an older view is
@@ -89,7 +89,7 @@ export default function AMillionRowsOnAServer() {
     defaultSort: BY_ID,
     manual: true,
     rowCount: answer.rowCount,
-    onViewChange: (view) => {
+    onRequest: (view) => {
       latest.current = view;
       /* Back to the view on screen before its successor was answered: the
          pending answer is dropped, so nothing is loading any more. */
