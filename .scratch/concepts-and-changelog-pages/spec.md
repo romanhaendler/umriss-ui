@@ -1,6 +1,6 @@
 # Spec: Concepts and changelogs on the site
 
-Status: ready-for-agent
+Status: done
 
 Origin: session of 2-3 Oct 2026. The brief, in the words it was given in: "Unsere Demo-Seite gefällt mir noch immer nicht zu 100%. ... State of the Art, sehr einladend, alles entdecken und benutzen zu wollen. Keine offenen Fragen." Research and gap analysis: `docs/research/component-docs-2026-10/` (six notes: landing_pages, component_api_reference, discoverability_interactivity, data_library_docs, asis_site_ux, asis_props_types). Roadmap of all sixteen specs: `.scratch/docs-roadmap/spec.md`.
 
@@ -127,3 +127,7 @@ A good test reads the built site: which pages exist, what their head says, where
   - [ ] The build fails when a changelog's newest version differs from its manifest's, or a document link resolves nowhere.
   - [ ] "Suggest an edit on GitHub" on every demo and document page, prefilled with title and address.
   - [ ] ADR-0046 written; `docs/README.md` amended.
+
+## Comments
+
+Delivered on `main` on 4 Oct 2026: every ticket under `issues/` is `Status: done` and carries its own delivery report. The whole effort was checked once more on `main` afterwards — lint, typecheck, unit and the full visual suite green.

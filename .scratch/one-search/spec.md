@@ -1,6 +1,6 @@
 # Spec: One search across all five packages — pages, examples, props, tokens, words and exports
 
-Status: ready-for-agent
+Status: done
 
 Origin: session of 2–3 Oct 2026. The brief, in the words it was given in:
 "Unsere Demo-Seite gefällt mir noch immer nicht zu 100%. ... State of the Art,
@@ -307,3 +307,7 @@ there.**
       and leaves palettes without keywords unchanged.
 - [ ] The pages build fails on a dangling search entry and on an index over
       budget.
+
+## Comments
+
+Delivered on `main` on 4 Oct 2026: every ticket under `issues/` is `Status: done` and carries its own delivery report. The whole effort was checked once more on `main` afterwards — lint, typecheck, unit and the full visual suite green.

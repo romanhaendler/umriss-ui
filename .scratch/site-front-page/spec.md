@@ -1,6 +1,6 @@
 # Spec: The front page as an invitation
 
-Status: ready-for-agent
+Status: done
 
 Origin: session of 2-3 Oct 2026. The brief, in the words it was given in: "Unsere Demo-Seite gefällt mir noch immer nicht zu 100%. Die Startseite ist zwar funktional, aber nicht gerade einladend. ... State of the Art, sehr einladend, alles entdecken und benutzen zu wollen. Keine offenen Fragen." Research and gap analysis: `docs/research/component-docs-2026-10/` (six notes: landing_pages, component_api_reference, discoverability_interactivity, data_library_docs, asis_site_ux, asis_props_types). Roadmap of all sixteen specs: `.scratch/docs-roadmap/spec.md`.
 
@@ -150,3 +150,7 @@ A good test reads the built page as a crawler or a visitor would: what text, lin
   - [ ] Fewer than 20 visible links before "Every page" is opened; every sitemap address linked inside it.
   - [ ] Theme switch shared with the demos, favicon, Geist faces, token colours.
   - [ ] `pnpm previews` renews the ten preview images; the build fails if one is missing or too large.
+
+## Comments
+
+Delivered on `main` on 4 Oct 2026: every ticket under `issues/` is `Status: done` and carries its own delivery report. The whole effort was checked once more on `main` afterwards — lint, typecheck, unit and the full visual suite green.

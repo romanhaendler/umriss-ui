@@ -1,6 +1,6 @@
 # Spec: The sidebar tree, read again: rubrics by subject, pages by reading order
 
-Status: ready-for-agent
+Status: done
 
 Origin: session of 2–3 Oct 2026. The brief, in the words it was given in:
 "Unsere Demo-Seite gefällt mir noch immer nicht zu 100%. ... State of the Art,
@@ -473,3 +473,7 @@ will use, and owns it. No other spec renames a page.
       started.
 - [ ] `CONTEXT.md` **Rubric** carries the reading-order sentence.
 - [ ] Shell suite, guard and unit tests green; no `example-*` picture changed.
+
+## Comments
+
+Delivered on `main` on 4 Oct 2026: every ticket under `issues/` is `Status: done` and carries its own delivery report. The whole effort was checked once more on `main` afterwards — lint, typecheck, unit and the full visual suite green.

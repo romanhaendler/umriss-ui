@@ -1,6 +1,6 @@
 # Spec: The API index — every export has a place on the site
 
-Status: ready-for-agent
+Status: done
 
 Origin: session of 2-3 Oct 2026. The brief, in the words it was given in: "Unsere Demo-Seite gefällt mir noch immer nicht zu 100%. ... State of the Art, sehr einladend, alles entdecken und benutzen zu wollen. Keine offenen Fragen." Research and gap analysis: `docs/research/component-docs-2026-10/` (six notes: landing_pages, component_api_reference, discoverability_interactivity, data_library_docs, asis_site_ux, asis_props_types). Roadmap of all sixteen specs: `.scratch/docs-roadmap/spec.md`.
 
@@ -116,3 +116,7 @@ Acceptance:
 - [ ] Every export of every entry and subpath has an anchor on its index; the guard fails on one missing.
 - [ ] The gate fails on an export without JSDoc; no export lacks one.
 - [ ] The llms appendix is gone and the llms guard is still green.
+
+## Comments
+
+Delivered on `main` on 4 Oct 2026: every ticket under `issues/` is `Status: done` and carries its own delivery report. The whole effort was checked once more on `main` afterwards — lint, typecheck, unit and the full visual suite green.
