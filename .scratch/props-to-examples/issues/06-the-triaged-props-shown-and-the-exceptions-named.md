@@ -1,6 +1,6 @@
 # 06: The triaged props shown, and the exceptions named
 
-Status: ready-for-agent
+Status: done
 Blocked by: `configurator` 03 (Every core page that can be configured opens with a configurator)
 Spec: `.scratch/props-to-examples/spec.md`
 
