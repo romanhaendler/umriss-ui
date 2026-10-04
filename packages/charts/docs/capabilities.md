@@ -52,7 +52,7 @@ Screenshot pages carry their name in brackets.
 | A palette place by name: in order on first mounting, and a returning series gets its colour back; without a name by position, with a DEV warning on a change | R-2.1 | Unit (scene) |
 | A config change only sets dirty flags, no synchronous draw | R-2.2 | Unit (scene) |
 | A child outside `Chart`: DEV error, silent in PROD | R-2.3 | Manual |
-| Accessors, generic `T`, a series' own `data` | R-2.4 | Unit (materialisation), Screenshot |
+| `useChart(rows)` binds `Chart`, the axes and every series kind to the rows, typed at the row; `value` a field name of the row or a function; a series with its own `data` is typed by it | R-2.4, ADR-0048 | Type (`useChart.test-d`), Unit (useChart, materialisation), Screenshot |
 | `null`/`undefined`/`NaN`/±Infinity = a gap, no joining across it, outside the extent | R-2.5 | Unit (materialisation), Interaction, Screenshot |
 | DEV sortedness check once per data change, for every series with a binary-search hit (not the matrix), naming the series | R-2.6 | Unit (materialisation, scene) |
 | Materialisation into `Float64Array`, once per change | R-2.7 | Unit (materialisation) |
@@ -132,7 +132,7 @@ Screenshot pages carry their name in brackets.
 | Capability | Rule | Proved at |
 |---|---|---|
 | Fill down to baseline 0 when none is given | ADR-0002 | Unit (materialisation, scene), Screenshot (`filled`) |
-| A band area between two accessors | 4.3 | Screenshot (`mixed`, `corridor`) |
+| A band area between two values, `baseline` and `value` | 4.3 | Screenshot (`mixed`, `corridor`) |
 | The baseline pulls its Y axis' value range | R-4.13 | Unit (materialisation, scene) |
 | Fill and outline as separate paths | R-2.12 | Screenshot (`mixed`) |
 | A gap produces a hole, not a straight line across it | R-2.5 | Screenshot (`mixed`, `corridor`) |
@@ -374,7 +374,7 @@ same within noise. Above that a line
 costs a pass over its window and a path of four points per column: the pass is
 what is left of the 8 ms at a million. The mixed set keeps its bar, which is
 never thinned - a rectangle per point - and that is most of its 57 ms.
-Materialisation does not change: every accessor still runs once per point.
+Materialisation does not change: every value is still read once per point.
 
 The second example on the benchmark page, a week of a service at one reading a
 second (2 × 604,800 points, zoomable), drew the whole week in 8 to 23 ms and
