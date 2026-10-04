@@ -96,6 +96,9 @@ export const MultiSelect = forwardRef(function MultiSelect<T extends string = st
     style,
     onClick,
     onKeyDown,
+    "aria-label": ariaLabel,
+    "aria-labelledby": ariaLabelledBy,
+    "aria-describedby": ariaDescribedBy,
     ...rest
   }: MultiSelectProps<T>,
   ref: ForwardedRef<HTMLDivElement>,
@@ -347,7 +350,8 @@ export const MultiSelect = forwardRef(function MultiSelect<T extends string = st
     <>
       {/* The caller's ref, class and rest go to the field, the element that
           carries the ring (P1 of core-passthrough); its handlers run before
-          the field's own and can prevent them (P3). */}
+          the field's own and can prevent them (P3). The caller's name and
+          description go to the button, for a field without `FormField`. */}
       <div
         ref={mergeRefs(fieldRef, ref)}
         className={cx(styles.field, size === "sm" && styles.sm, clearable && styles.fieldClearable, isInvalid && styles.invalid, disabled && styles.fieldDisabled, className)}
@@ -439,7 +443,9 @@ export const MultiSelect = forwardRef(function MultiSelect<T extends string = st
           aria-haspopup="dialog"
           aria-expanded={open}
           aria-controls={open ? panelId : undefined}
-          aria-describedby={field?.describedBy}
+          aria-label={ariaLabel}
+          aria-labelledby={ariaLabelledBy}
+          aria-describedby={ariaDescribedBy ?? field?.describedBy}
           aria-invalid={isInvalid || undefined}
           className={cx(styles.main, value.length === 0 && styles.mainEmpty)}
           onClick={(event) => {

@@ -44,7 +44,8 @@ export interface RangeTriggerProps {
   wrapRef: RefObject<HTMLSpanElement | null>;
   /** The picker's caller's ref, class and rest: they go to the wrapper around
       button and cross, the field's outermost element (P1 of
-      core-passthrough). The field id from `FormField` stays on the button. */
+      core-passthrough). The field id from `FormField` stays on the button,
+      and so do the caller's name and description, for a field without one. */
   rootRef?: ForwardedRef<HTMLSpanElement>;
   root?: HTMLAttributes<HTMLSpanElement>;
   className?: string;
@@ -99,13 +100,14 @@ export function RangeTrigger({
   natural,
 }: RangeTriggerProps) {
   const { disabled, invalid, clearable, size } = state;
+  const { "aria-label": name, "aria-labelledby": labelledBy, "aria-describedby": describedBy, ...rest } = root ?? {};
   return (
     <span
       ref={mergeRefs(wrapRef, rootRef)}
       className={cx(styles.triggerWrap, clearable && styles.triggerWrapClearable, className)}
-      {...root}
+      {...rest}
       /* The width in characters, and the caller's own style over it. */
-      style={{ ...extentStyle(chars, { natural }), ...root?.style }}
+      style={{ ...extentStyle(chars, { natural }), ...rest.style }}
     >
       <button
         ref={triggerRef}
@@ -115,7 +117,9 @@ export function RangeTrigger({
         aria-haspopup="dialog"
         aria-expanded={panel.open}
         aria-controls={panel.open ? panel.id : undefined}
-        aria-describedby={field?.describedBy}
+        aria-label={name}
+        aria-labelledby={labelledBy}
+        aria-describedby={describedBy ?? field?.describedBy}
         aria-invalid={invalid || undefined}
         className={cx(
           styles.trigger,

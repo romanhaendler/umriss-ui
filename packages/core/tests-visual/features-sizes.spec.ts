@@ -42,8 +42,8 @@ test("A field fills the place that gives it a width", async ({ page }) => {
 test("A multiselect holds still while values are chosen and removed", async ({ page }) => {
   await openExample(page, "sizes", "a-row-that-holds-still");
   const stage = example(page, "a-row-that-holds-still");
-  const field = stage.locator('[aria-label="Carriers"]');
-  const range = stage.getByRole("button", { name: /Select range/ });
+  const field = stage.getByRole("button", { name: "Carriers", exact: true }).locator("..");
+  const range = stage.getByRole("button", { name: "Shipped", exact: true });
   const before = await box(field);
   const rangeBefore = await box(range);
 
@@ -138,7 +138,7 @@ test("chars at the default count is the natural width, and every character count
   for (const [field, natural] of [
     [stage.getByLabel("Search shipments").locator(".."), 16],
     [stage.getByLabel("Status").locator(".."), 16],
-    [stage.locator('[aria-label="Carriers"]'), 20],
+    [stage.getByRole("button", { name: "Carriers", exact: true }).locator(".."), 20],
   ] as const) {
     const width = (await box(field)).width;
     expect(Math.abs((await widthAt(field, natural)) - width)).toBeLessThanOrEqual(0.5);
@@ -241,7 +241,7 @@ test("One size for a place reaches every control, and a dialog keeps its own", a
   for (const control of [
     stage.getByLabel("Search tickets").locator(".."),
     stage.getByLabel("Team"),
-    stage.getByRole("button", { name: /17\/03\/2026/ }),
+    stage.getByRole("button", { name: "Opened on", exact: true }),
     stage.getByRole("button", { name: "Open", exact: true }),
     stage.getByRole("button", { name: "New ticket" }),
   ]) {

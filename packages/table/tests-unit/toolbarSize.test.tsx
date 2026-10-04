@@ -85,7 +85,7 @@ describe("a control of one's own in the toolbar", () => {
   it("takes the toolbar's sm", () => {
     render(<OwnControls />);
     expect(smallWithin(screen.getByRole("combobox", { name: "Status" }).parentElement!)).toBe(true);
-    expect(smallWithin(screen.getByLabelText("Carriers"))).toBe(true);
+    expect(smallWithin(screen.getByRole("button", { name: "Carriers" }).parentElement!)).toBe(true);
     expect(small(screen.getByRole("button", { name: "Assign" }))).toBe(true);
   });
 
