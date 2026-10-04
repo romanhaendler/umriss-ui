@@ -23,7 +23,7 @@ does so because it chose to, not because this one required it (ADR-0020).
 ## The smallest chart that runs
 
 ```tsx
-import { Chart, Line, XAxis, YAxis, Tooltip } from "@umriss-ui/charts";
+import { Tooltip, useChart } from "@umriss-ui/charts";
 
 interface Point {
   t: number;
@@ -38,16 +38,24 @@ const DATA: Point[] = [
 ];
 
 export function Course() {
+  const { Chart, XAxis, YAxis, Line } = useChart(DATA);
   return (
-    <Chart data={DATA} height={280} ariaLabel="Course of one series">
-      <XAxis accessor={(d: Point) => d.t} label="Index" />
-      <YAxis accessor={(d: Point) => d.a} />
-      <Line accessor={(d: Point) => d.a} name="Series A" />
+    <Chart height={280} ariaLabel="Course of one series">
+      <XAxis value="t" label="Index" />
+      <YAxis value="a" />
+      <Line value="a" name="Series A" />
       <Tooltip />
     </Chart>
   );
 }
 ```
+
+`useChart(rows)` binds the chart to its rows, as `useTable` binds a table: it
+hands back `Chart`, the axes and every series kind, typed at the row, so that
+`value` is a field name the compiler checks - or a function where a field does
+not suffice. A series with its own `data` is typed by that data instead.
+`Tooltip`, `Legend`, `DataTable`, `LimitLine` and `LimitBand` read no row and
+are imported as they are (ADR-0048).
 
 A series is an element, not an entry in a configuration object: the order in the
 JSX decides what lies over what, and at the same time the palette colour.
@@ -63,7 +71,7 @@ words are English; German comes from its own subpath:
 ```tsx
 import { GERMAN_CHARTS_WORDING } from "@umriss-ui/charts/wording/de";
 
-<Chart data={DATA} ariaLabel="Verlauf" wording={GERMAN_CHARTS_WORDING}>…</Chart>
+<Chart ariaLabel="Verlauf" wording={GERMAN_CHARTS_WORDING}>…</Chart>
 ```
 
 ## Styles

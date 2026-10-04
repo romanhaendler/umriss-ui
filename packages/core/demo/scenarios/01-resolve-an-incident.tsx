@@ -33,7 +33,7 @@ import {
   useToast,
 } from "../../src";
 import type { LimitSet } from "../../src";
-import { Chart, LimitLine, Line, Tooltip, XAxis, YAxis } from "@umriss-ui/charts";
+import { LimitLine, Tooltip, useChart } from "@umriss-ui/charts";
 import { AlarmList, alarmModel, useTableSelection } from "@umriss-ui/table";
 
 /* Data from the operations world, written out here so the example runs on its own. */
@@ -287,6 +287,7 @@ const OWN = new Set(["checkout-latency", "checkout-errors"]);
 
 function Content() {
   const { toast } = useToast();
+  const { Chart, XAxis, YAxis, Line } = useChart(TODAY);
   const [alerts, setAlerts] = useState<readonly Alert[]>(() => ALERTS.filter((one) => OWN.has(one.type)));
   const [resolved, setResolved] = useState<number | null>(null);
   const [resolving, setResolving] = useState(false);
@@ -396,11 +397,11 @@ function Content() {
       <Card data-callout="3">
         <CardHeader title="p95 latency since 08:00" />
         <CardBody>
-          <Chart data={TODAY} height={200} ariaLabel={`${SERVICE.name}, p95 latency since 08:00`}>
-            <XAxis accessor={(d: MetricPoint) => d.t} time />
-            <YAxis accessor={(d: MetricPoint) => d.p95} domain={[0, 700]} label="ms" />
+          <Chart height={200} ariaLabel={`${SERVICE.name}, p95 latency since 08:00`}>
+            <XAxis value="t" time />
+            <YAxis value="p95" domain={[0, 700]} label="ms" />
             <LimitLine value={SERVICE.latencySlo} severity="alarm" label="Objective" />
-            <Line accessor={(d: MetricPoint) => d.p95} name="p95" format={(v) => `${Math.round(v)} ms`} />
+            <Line value="p95" name="p95" format={(v) => `${Math.round(v)} ms`} />
             <Tooltip mode="x" />
           </Chart>
         </CardBody>
