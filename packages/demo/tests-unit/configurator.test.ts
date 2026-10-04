@@ -49,6 +49,8 @@ describe("controlsOf", () => {
       decimals: 0,
     });
     expect(controlsOf(AT, ENTRY, { controls: ["count"], bounds: { count: [0, 1] } })[0]).toMatchObject({ step: 0.01, decimals: 2 });
+    // A step of 2.5 is above 1 and still has a decimal place to show.
+    expect(controlsOf(AT, ENTRY, { controls: ["count"], bounds: { count: [0, 250] } })[0]).toMatchObject({ step: 2.5, decimals: 1 });
   });
 
   it("allows `disabled` and `placeholder` from the element, and the children text first", () => {
