@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Chart, Line, Tooltip, XAxis, YAxis } from "../../../src";
+import { Tooltip, useChart } from "../../../src";
 
 /* Data from the operations world, written out here so the example runs on its own. */
 
@@ -103,14 +103,15 @@ export const lead = "With `onDomainChange` the x axis proposes a domain on Ctrl 
 const SEARCH_WEEK = week("search", 60_000);
 
 export default function ZoomAndPan() {
+  const { Chart, XAxis, YAxis, Line } = useChart(SEARCH_WEEK);
   const [domain, setDomain] = useState<"data" | readonly [number, number]>("data");
   return (
-    <Chart data={SEARCH_WEEK} height={260} ariaLabel="Search latency over last week, a reading a minute, zoomable">
+    <Chart height={260} ariaLabel="Search latency over last week, a reading a minute, zoomable">
       {/* The domain stays yours: clamp it on the way back if you need to. A
           double click shows the whole week again. */}
-      <XAxis accessor={(d: MetricPoint) => d.t} time domain={domain} onDomainChange={setDomain} />
-      <YAxis accessor={(d: MetricPoint) => d.p95} label="ms" />
-      <Line accessor={(d: MetricPoint) => d.p95} name="p95" />
+      <XAxis value="t" time domain={domain} onDomainChange={setDomain} />
+      <YAxis value="p95" label="ms" />
+      <Line value="p95" name="p95" />
       <Tooltip mode="x" />
     </Chart>
   );

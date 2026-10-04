@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Chart, Line, Tooltip, XAxis, YAxis } from "../../../src";
+import { Tooltip, useChart } from "../../../src";
 
 /* Data from the operations world, written out here so the example runs on its own. */
 
@@ -103,22 +103,23 @@ export const lead = "Charts with one `syncId` share the pointer; pass them one c
 const IMAGES_WEEK = week("images", 5 * 60_000);
 
 const CHANNELS = [
-  { name: "Requests", unit: "/min", value: (d: MetricPoint) => d.requests },
-  { name: "p95", unit: "ms", value: (d: MetricPoint) => d.p95 },
-  { name: "p50", unit: "ms", value: (d: MetricPoint) => d.p50 },
+  { name: "Requests", unit: "/min", value: "requests" },
+  { name: "p95", unit: "ms", value: "p95" },
+  { name: "p50", unit: "ms", value: "p50" },
 ] as const;
 
 export default function CursorSync() {
+  const { Chart, XAxis, YAxis, Line } = useChart(IMAGES_WEEK);
   const [domain, setDomain] = useState<"data" | readonly [number, number]>("data");
   return (
     <div>
       {/* Each plot begins where its y axis ends: labels of one width - three
           figures here - keep the crosshairs in one column. */}
       {CHANNELS.map((c) => (
-        <Chart key={c.name} data={IMAGES_WEEK} height={140} syncId="images" ariaLabel={`Image service ${c.name} over last week`}>
-          <XAxis accessor={(d: MetricPoint) => d.t} time domain={domain} onDomainChange={setDomain} />
-          <YAxis accessor={c.value} label={c.unit} domain="visible" tickCount={4} />
-          <Line accessor={c.value} name={c.name} />
+        <Chart key={c.name} height={140} syncId="images" ariaLabel={`Image service ${c.name} over last week`}>
+          <XAxis value="t" time domain={domain} onDomainChange={setDomain} />
+          <YAxis value={c.value} label={c.unit} domain="visible" tickCount={4} />
+          <Line value={c.value} name={c.name} />
           <Tooltip mode="x" />
         </Chart>
       ))}

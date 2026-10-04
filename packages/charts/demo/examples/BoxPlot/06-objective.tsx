@@ -1,4 +1,4 @@
-import { BoxPlot, Chart, Legend, LimitLine, Tooltip, XAxis, YAxis } from "../../../src";
+import { Legend, LimitLine, Tooltip, useChart } from "../../../src";
 
 export const title = "Against the objective";
 export const lead = "A `LimitLine` shows what was promised. Whether a box breaks it is your judgement, not the library's: this week's whiskers reach past the objective in every region, so its series carries `tone=\"alarm\"`.";
@@ -27,27 +27,28 @@ const THIS_WEEK: Spread[] = [
 ];
 
 export default function AgainstTheObjective() {
+  const { Chart, XAxis, YAxis, BoxPlot } = useChart(LAST_WEEK);
   return (
-    <Chart data={LAST_WEEK} height={280} ariaLabel="Checkout 95th percentile per region and week against its objective">
-      <XAxis accessor={(d: Spread) => d.region} ticks={[0, 1, 2]} tickFormat={(v) => REGIONS[v] ?? ""} />
-      <YAxis accessor={(d: Spread) => d.median} tickFormat={(v) => `${v} ms`} />
+    <Chart height={280} ariaLabel="Checkout 95th percentile per region and week against its objective">
+      <XAxis value="region" ticks={[0, 1, 2]} tickFormat={(v) => REGIONS[v] ?? ""} />
+      <YAxis value="median" tickFormat={(v) => `${v} ms`} />
       <BoxPlot
         name="Last week"
-        median={(d: Spread) => d.median}
-        lowerQuartile={(d: Spread) => d.q1}
-        upperQuartile={(d: Spread) => d.q3}
-        lowerWhisker={(d: Spread) => d.low}
-        upperWhisker={(d: Spread) => d.high}
+        median="median"
+        lowerQuartile="q1"
+        upperQuartile="q3"
+        lowerWhisker="low"
+        upperWhisker="high"
       />
       <BoxPlot
         name="This week"
         data={THIS_WEEK}
         tone="alarm"
-        median={(d: Spread) => d.median}
-        lowerQuartile={(d: Spread) => d.q1}
-        upperQuartile={(d: Spread) => d.q3}
-        lowerWhisker={(d: Spread) => d.low}
-        upperWhisker={(d: Spread) => d.high}
+        median="median"
+        lowerQuartile="q1"
+        upperQuartile="q3"
+        lowerWhisker="low"
+        upperWhisker="high"
       />
       <LimitLine value={300} severity="alarm" label="Objective" />
       <Legend />

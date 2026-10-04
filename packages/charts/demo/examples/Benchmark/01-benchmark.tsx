@@ -5,7 +5,7 @@
    moment it runs. */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Area, Bar, Chart, Legend, Line, Tooltip, XAxis, YAxis } from "../../../src";
+import { Legend, Tooltip, useChart } from "../../../src";
 import type { ChartPerf } from "../../../src";
 
 export const title = "Measure a million points";
@@ -53,6 +53,7 @@ type Mode = "lines" | "mixed";
 
 export default function Benchmark() {
   const [data, setData] = useState<readonly LoadPoint[]>(() => load(5, 1_000));
+  const { Chart, XAxis, YAxis, Line, Bar, Area } = useChart(data);
   const [perf, setPerf] = useState<ChartPerf>({
     materializeMs: 0,
     seriesDrawMs: 0,
@@ -154,24 +155,23 @@ export default function Benchmark() {
       </dl>
       <div onPointerEnter={startMeasuring} onPointerLeave={stopMeasuring}>
         <Chart
-          data={data}
           height={320}
           ariaLabel="Benchmark with three series"
           onPerf={onPerf}
         >
-          <XAxis accessor={(d: LoadPoint) => d.t} label="Index" />
-          <YAxis accessor={(d: LoadPoint) => d.s1} />
+          <XAxis value="t" label="Index" />
+          <YAxis value="s1" />
           {mode === "lines" ? (
-            <Line accessor={(d: LoadPoint) => d.s1} name="S1" />
+            <Line value="s1" name="S1" />
           ) : (
-            <Bar accessor={(d: LoadPoint) => d.s1} name="S1" />
+            <Bar value="s1" name="S1" />
           )}
           {mode === "lines" ? (
-            <Line accessor={(d: LoadPoint) => d.s2} name="S2" />
+            <Line value="s2" name="S2" />
           ) : (
-            <Area accessor={(d: LoadPoint) => d.s2} name="S2" />
+            <Area value="s2" name="S2" />
           )}
-          <Line accessor={(d: LoadPoint) => d.s3} name="S3" />
+          <Line value="s3" name="S3" />
           <Legend placement="top" />
           <Tooltip mode="x" />
         </Chart>

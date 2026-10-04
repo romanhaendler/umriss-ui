@@ -1,4 +1,4 @@
-import { Area, Bar, Chart, Legend, Line, Scatter, Tooltip, XAxis, YAxis } from "../../../src";
+import { Legend, Tooltip, useChart } from "../../../src";
 
 /* Data from the logistics world, written out here so the example runs on its own. */
 
@@ -52,15 +52,16 @@ export const title = "Mix series kinds";
 export const lead = "Bars, a range, a line and single counts share one pair of axes; the order of the children is the drawing order and the colour order.";
 
 export default function Mixed() {
+  const { Chart, XAxis, YAxis, Bar, Area, Line, Scatter } = useChart(DEPOT_DAYS);
   return (
-    <Chart data={DEPOT_DAYS} height={320} ariaLabel="North depot: pallets in, out and on hand over fourteen days">
-      <XAxis accessor={(d: DepotDay) => d.day} label="Day of March" tickCount={7} />
-      <YAxis accessor={(d: DepotDay) => d.onHand} label="Pallets" />
-      <Bar accessor={(d: DepotDay) => d.arrived} name="Arrived" />
-      <Bar accessor={(d: DepotDay) => d.dispatched} name="Dispatched" />
-      <Area accessor={(d: DepotDay) => d.targetHigh} baseline={(d: DepotDay) => d.targetLow} name="Target range" />
-      <Line accessor={(d: DepotDay) => d.onHand} name="On hand" strokeWidth={2} />
-      <Scatter accessor={(d: DepotDay) => d.counted} name="Counted" />
+    <Chart height={320} ariaLabel="North depot: pallets in, out and on hand over fourteen days">
+      <XAxis value="day" label="Day of March" tickCount={7} />
+      <YAxis value="onHand" label="Pallets" />
+      <Bar value="arrived" name="Arrived" />
+      <Bar value="dispatched" name="Dispatched" />
+      <Area value="targetHigh" baseline="targetLow" name="Target range" />
+      <Line value="onHand" name="On hand" strokeWidth={2} />
+      <Scatter value="counted" name="Counted" />
       <Legend placement="top" />
       <Tooltip mode="x" />
     </Chart>

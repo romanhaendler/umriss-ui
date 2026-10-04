@@ -1,4 +1,4 @@
-import { BoxPlot, Chart, Tooltip, XAxis, YAxis } from "../../../src";
+import { Tooltip, useChart } from "../../../src";
 
 export const title = "One box per service";
 export const lead = "Five numbers per row, computed wherever the caller likes. Services are positions 0, 1, 2 on the numeric x axis; `tickFormat` names them.";
@@ -20,17 +20,18 @@ const RESPONSE_TIMES: ResponseTime[] = [
 ];
 
 export default function Minimal() {
+  const { Chart, XAxis, YAxis, BoxPlot } = useChart(RESPONSE_TIMES);
   return (
-    <Chart data={RESPONSE_TIMES} height={260} ariaLabel="Response time per service over the last hour">
-      <XAxis accessor={(_: ResponseTime, i) => i} ticks={[0, 1, 2]} tickFormat={(v) => RESPONSE_TIMES[v]?.service ?? ""} />
-      <YAxis accessor={(d: ResponseTime) => d.median} tickFormat={(v) => `${v} ms`} />
+    <Chart height={260} ariaLabel="Response time per service over the last hour">
+      <XAxis value={(_, i) => i} ticks={[0, 1, 2]} tickFormat={(v) => RESPONSE_TIMES[v]?.service ?? ""} />
+      <YAxis value="median" tickFormat={(v) => `${v} ms`} />
       <BoxPlot
         name="Response time"
-        median={(d: ResponseTime) => d.median}
-        lowerQuartile={(d: ResponseTime) => d.q1}
-        upperQuartile={(d: ResponseTime) => d.q3}
-        lowerWhisker={(d: ResponseTime) => d.low}
-        upperWhisker={(d: ResponseTime) => d.high}
+        median="median"
+        lowerQuartile="q1"
+        upperQuartile="q3"
+        lowerWhisker="low"
+        upperWhisker="high"
       />
       <Tooltip />
     </Chart>

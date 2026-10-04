@@ -1,4 +1,4 @@
-import { Chart, Legend, Line, Tooltip, XAxis, YAxis } from "../../../src";
+import { Legend, Tooltip, useChart } from "../../../src";
 import type { TooltipHit } from "../../../src";
 
 export const title = "Fix the domain and name the ticks";
@@ -43,12 +43,13 @@ function WeekTooltip({ hit }: { hit: TooltipHit<Week> }) {
 }
 
 export default function Configuration() {
+  const { Chart, XAxis, YAxis, Line } = useChart(BOOKED);
   return (
-    <Chart data={BOOKED} height={280} padding={{ top: 12, right: 16, bottom: 8, left: 8 }} ariaLabel="Share of capacity booked per team and week">
-      <XAxis accessor={(d: Week) => d.week} label="Week" tickCount={6} />
-      <YAxis accessor={(d: Week) => d.web} domain={[0, 100]} tickFormat={percent} label="Booked" />
-      <Line accessor={(d: Week) => d.web} name="Web" markers="always" strokeWidth={2} />
-      <Line accessor={(d: Week) => d.apps} name="Apps" markers="always" color="#7c3aed" />
+    <Chart height={280} padding={{ top: 12, right: 16, bottom: 8, left: 8 }} ariaLabel="Share of capacity booked per team and week">
+      <XAxis value="week" label="Week" tickCount={6} />
+      <YAxis value="web" domain={[0, 100]} tickFormat={percent} label="Booked" />
+      <Line value="web" name="Web" markers="always" strokeWidth={2} />
+      <Line value="apps" name="Apps" markers="always" color="#7c3aed" />
       <Legend placement="bottom" />
       {/* The type argument makes the hit fully typed in the render prop. */}
       <Tooltip<Week> mode="nearest" render={(hit) => <WeekTooltip hit={hit} />} />

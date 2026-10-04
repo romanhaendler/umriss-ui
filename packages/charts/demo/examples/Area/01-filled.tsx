@@ -1,4 +1,4 @@
-import { Area, Chart, Tooltip, XAxis, YAxis } from "../../../src";
+import { Tooltip, useChart } from "../../../src";
 
 /* Data from the operations world, written out here so the example runs on its own. */
 
@@ -89,11 +89,12 @@ export const lead = "Without `baseline` an area is filled down to 0, and 0 stays
 const CHECKOUT = metrics("checkout");
 
 export default function Filled() {
+  const { Chart, XAxis, YAxis, Area } = useChart(CHECKOUT);
   return (
-    <Chart data={CHECKOUT} height={260} ariaLabel="Checkout's requests per minute today">
-      <XAxis accessor={(d: MetricPoint) => d.t} time />
-      <YAxis accessor={(d: MetricPoint) => d.requests} label="Requests/min" />
-      <Area accessor={(d: MetricPoint) => d.requests} name="Requests" fillOpacity={0.35} strokeWidth={2} />
+    <Chart height={260} ariaLabel="Checkout's requests per minute today">
+      <XAxis value="t" time />
+      <YAxis value="requests" label="Requests/min" />
+      <Area value="requests" name="Requests" fillOpacity={0.35} strokeWidth={2} />
       <Tooltip mode="x" />
     </Chart>
   );

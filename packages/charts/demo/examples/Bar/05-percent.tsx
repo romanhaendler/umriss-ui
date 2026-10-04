@@ -1,4 +1,4 @@
-import { Bar, Chart, Legend, Tooltip, XAxis, YAxis } from "../../../src";
+import { Legend, Tooltip, useChart } from "../../../src";
 
 /* Data from the logistics world, written out here so the example runs on its own. */
 
@@ -42,13 +42,14 @@ export const lead = "`normalize` makes each stack sum to 100 %, so the question 
 const minutes = (v: number) => `${v} min`;
 
 export default function Percent() {
+  const { Chart, XAxis, YAxis, Bar } = useChart(DELAYS);
   return (
-    <Chart data={DELAYS} height={280} ariaLabel="Share of each cause in the minutes late per working day">
-      <XAxis accessor={(d: DayDelays) => d.day} ticks={DELAYS.map((d) => d.day)} tickFormat={(v) => DELAYS[v]?.name ?? ""} />
-      <YAxis accessor={(d: DayDelays) => d.traffic} />
-      <Bar accessor={(d: DayDelays) => d.traffic} name="Traffic" stack="delay" normalize format={minutes} />
-      <Bar accessor={(d: DayDelays) => d.loading} name="Loading" stack="delay" normalize format={minutes} />
-      <Bar accessor={(d: DayDelays) => d.access} name="No access" stack="delay" normalize format={minutes} />
+    <Chart height={280} ariaLabel="Share of each cause in the minutes late per working day">
+      <XAxis value="day" ticks={DELAYS.map((d) => d.day)} tickFormat={(v) => DELAYS[v]?.name ?? ""} />
+      <YAxis value="traffic" />
+      <Bar value="traffic" name="Traffic" stack="delay" normalize format={minutes} />
+      <Bar value="loading" name="Loading" stack="delay" normalize format={minutes} />
+      <Bar value="access" name="No access" stack="delay" normalize format={minutes} />
       <Legend placement="top" />
       <Tooltip mode="x" />
     </Chart>

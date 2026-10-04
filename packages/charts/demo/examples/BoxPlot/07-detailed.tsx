@@ -1,4 +1,4 @@
-import { BoxPlot, Chart, DataTable, Legend, Line, Tooltip, XAxis, YAxis } from "../../../src";
+import { DataTable, Legend, Tooltip, useChart } from "../../../src";
 
 /* Data from the plant world, written out here so the example runs on its own. */
 
@@ -168,20 +168,21 @@ const BOXES: ShiftBox[] = SHIFTS.map((_, shift) => {
 const mm = (v: number) => `${v.toFixed(2)} mm`;
 
 export default function Detailed() {
+  const { Chart, XAxis, YAxis, BoxPlot, Line } = useChart(BOXES);
   return (
-    <Chart data={BOXES} height={320} ariaLabel="Tile length per shift, with the medians as a line">
-      <XAxis accessor={(d: ShiftBox) => d.shift} ticks={SHIFTS.map((_, i) => i)} tickFormat={(v) => SHIFTS[v] ?? ""} label="Shift" />
-      <YAxis accessor={(d: ShiftBox) => d.median} tickFormat={mm} />
+    <Chart height={320} ariaLabel="Tile length per shift, with the medians as a line">
+      <XAxis value="shift" ticks={SHIFTS.map((_, i) => i)} tickFormat={(v) => SHIFTS[v] ?? ""} label="Shift" />
+      <YAxis value="median" tickFormat={mm} />
       <BoxPlot
         name="Tile length"
-        median={(d: ShiftBox) => d.median}
-        lowerQuartile={(d: ShiftBox) => d.q1}
-        upperQuartile={(d: ShiftBox) => d.q3}
-        lowerWhisker={(d: ShiftBox) => d.low}
-        upperWhisker={(d: ShiftBox) => d.high}
+        median="median"
+        lowerQuartile="q1"
+        upperQuartile="q3"
+        lowerWhisker="low"
+        upperWhisker="high"
         boxWidth={0.5}
       />
-      <Line accessor={(d: ShiftBox) => d.median} name="Median" markers="always" />
+      <Line value="median" name="Median" markers="always" />
       <Legend />
       <Tooltip />
       <DataTable />
