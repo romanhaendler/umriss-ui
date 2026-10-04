@@ -7,8 +7,9 @@
    prop of a table a page lists that no example or scenario uses and
    `demo/unshown.json` does not list -
    as at an entry of that list whose prop is shown now or does not exist
-   (`shownIn.ts`). Each row it writes carries the examples and scenarios that
-   use it.
+   (`shownIn.ts`). An entry's reason is "not shown yet" or an exception's
+   category (a), (b), (f) or (g) with its one-line reason. Each row it writes
+   carries the examples, configurators and scenarios that use it.
 
    What is generated is not checked in - `demo/.generated/` is ignored. A
    checked-in generation drifts away from its source, and this whole mechanism
@@ -225,7 +226,7 @@ export function generateProps({ packageName, outline }: PropsJob): Record<string
     if (unshown.length > 0) {
       process.stderr.write(
         `${unshown.length} prop${unshown.length === 1 ? "" : "s"} without an example:\n${unshown.map((row) => `  ${row}\n`).join("")}` +
-          `\nEvery prop that lands in a table is used by an example or a scenario of its package. Add one, or - only for a prop not shown yet - an entry to ${list}.\n`,
+          `\nEvery prop that lands in a table is used by an example or a scenario of its package. Add one, or an entry to ${list} whose reason is "not shown yet" or an exception's category - (a) pass-through, (b) escape hatch, (f) twin, (g) deprecated alias - with its one-line reason.\n`,
       );
     }
     if (stale.length > 0) {

@@ -42,7 +42,7 @@ describe("what an example uses", () => {
   });
 
   it("counts JSX children as `children`", () => {
-    expect(at("PanelProps.children")).toEqual(["panel/in-a-panel"]);
+    expect(at("PanelProps.children")).toContain("panel/in-a-panel");
     expect(at("PanelProps.heading")).toEqual([]);
   });
 
@@ -77,9 +77,22 @@ describe("what an example uses", () => {
   });
 });
 
+describe("what a configurator sets", () => {
+  it("counts its controls and its text, first on its page", () => {
+    expect(at("PanelProps.framed")).toEqual(["panel/configurator-panel"]);
+    expect(at("PanelProps.children")).toEqual(["panel/configurator-panel", "panel/in-a-panel"]);
+  });
+
+  it("counts them against the component it names, and its required props too", () => {
+    expect(at("DialProps.unit")).toEqual(["slider/configurator-slider"]);
+    expect(shown["DialProps.unit"]![0]).toEqual({ page: "slider", example: "configurator-slider", title: "Configurator", pageName: "Slider" });
+    expect(at("DialProps.value")).toContain("slider/configurator-slider");
+  });
+});
+
 describe("the order of a row's examples", () => {
   it("is its own page, the other pages in the outline's order, then the scenarios", () => {
-    expect(at("DialProps.value")).toEqual(["dial/basic", "dial/spread", "panel/in-a-panel", "slider/steps", "meter/readings", "scenarios/watch-pressure"]);
+    expect(at("DialProps.value")).toEqual(["dial/basic", "dial/spread", "panel/in-a-panel", "slider/configurator-slider", "slider/steps", "meter/readings", "scenarios/watch-pressure"]);
   });
 
   it("carries each example's title and its page's name", () => {

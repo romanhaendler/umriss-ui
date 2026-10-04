@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button, Card, Splitter, Stack, Text } from "../../../src";
 
 export const title = "Keep the share";
-export const lead = "Control `value` with `onChange` to keep the share in the user's settings, or to set it from a button.";
+export const lead = "Control `value` with `onChange` to keep the share in the user's settings, or to set it from a button. Focus the separator and the arrow keys move it by `step`, here ten per cent at a time.";
 
 export default function KeepTheShare() {
   const [share, setShare] = useState(50);
@@ -21,7 +21,7 @@ export default function KeepTheShare() {
         </Text>
       </Stack>
       <Card style={{ height: 180 }}>
-        <Splitter value={share} onChange={setShare} min={20} max={80} separatorLabel="People" style={{ height: "100%" }}>
+        <Splitter value={share} onChange={setShare} min={20} max={80} step={10} separatorLabel="People" style={{ height: "100%" }}>
           <div style={{ padding: 16 }}>
             <Text size="sm">People of the Web team</Text>
           </div>

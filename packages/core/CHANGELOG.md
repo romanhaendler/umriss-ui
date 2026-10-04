@@ -31,6 +31,20 @@ commit.
 
 ## Unreleased
 
+### Added
+
+- **Every prop of a props table is shown, or named as an exception**: new
+  examples for `toast.limit`, a popover card at the right edge (`align`,
+  `offset`, `hideOnScroll`), a modal that must be answered (`closeOnBackdrop`,
+  `hideClose`) and a command palette over two hundred candidates (`icon`,
+  `searchedGroup`, `maxFinds`); existing examples now show `step` on the
+  Splitter, `weight` on a Heading, `size` on a ButtonGroup, `align` on a
+  SplitButton, `emptyText` on a MultiSelect, an own `placeholder` on both
+  date-time pickers and `removeLabel` on a Tag. A row a page's configurator
+  sets names "Configurator" under "Shown in". The eight props left without an
+  example are pass-throughs and escape hatches; the demo's list says so for
+  each. The components are unchanged.
+
 ### Changed
 
 - **`Combobox`, `MultiSelect` and the four pickers take `aria-label`,

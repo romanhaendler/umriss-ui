@@ -210,6 +210,10 @@ export interface ConfiguratorModule {
   bounds?: unknown;
 }
 
+/** The configurator's anchor, which "On this page" and a row's "Shown in"
+    link. */
+export const configuratorAnchor = (pageId: string) => `configurator-${pageId}`;
+
 const CONFIGURATOR_PATTERN = /\/configurators\/([^/]+)\.tsx$/;
 
 /** `demo/configurators/<Component>.tsx`, each checked against its props

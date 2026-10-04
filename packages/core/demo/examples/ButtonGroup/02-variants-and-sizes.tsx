@@ -1,7 +1,7 @@
 import { Button, ButtonGroup, Stack } from "../../../src";
 
 export const title = "Variants and sizes";
-export const lead = "Give every button in a group the same `variant` and `size`; a group that mixes them no longer reads as one control.";
+export const lead = "Give every button in a group the same `variant` and `size`; a group that mixes them no longer reads as one control. `size` on the group says it once for all of them.";
 
 export default function VariantsAndSizes() {
   return (
@@ -15,16 +15,10 @@ export default function VariantsAndSizes() {
         <Button variant="primary">Dispatch</Button>
         <Button variant="primary">Print manifest</Button>
       </ButtonGroup>
-      <ButtonGroup aria-label="Stops">
-        <Button size="sm" variant="ghost">
-          Move up
-        </Button>
-        <Button size="sm" variant="ghost">
-          Move down
-        </Button>
-        <Button size="sm" variant="ghost">
-          Remove
-        </Button>
+      <ButtonGroup aria-label="Stops" size="sm">
+        <Button variant="ghost">Move up</Button>
+        <Button variant="ghost">Move down</Button>
+        <Button variant="ghost">Remove</Button>
       </ButtonGroup>
     </Stack>
   );

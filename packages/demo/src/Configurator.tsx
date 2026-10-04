@@ -15,7 +15,7 @@ import { useState } from "react";
 import { Button, FormField, Input, NumberInput, RadioGroup, Select, Switch } from "@umriss-ui/core";
 import { CodeBlock } from "./Example";
 import { Stage } from "./Language";
-import { codeOf, startOf, type Configurator as ConfiguratorData, type Control, type Value } from "./tooling/configurator";
+import { codeOf, configuratorAnchor, startOf, type Configurator as ConfiguratorData, type Control, type Value } from "./tooling/configurator";
 
 function Field({ control, value, onChange }: { control: Control; value: Value; onChange: (value: Value) => void }) {
   const { prop, kind } = control;
@@ -60,9 +60,6 @@ function Field({ control, value, onChange }: { control: Control; value: Value; o
     </FormField>
   );
 }
-
-/** The configurator's anchor, which "On this page" links. */
-export const configuratorAnchor = (pageId: string) => `configurator-${pageId}`;
 
 export function Configurator({ configurator, packageName }: { configurator: ConfiguratorData; packageName: string }) {
   const { name, Component, controls, required } = configurator;
