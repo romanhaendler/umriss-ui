@@ -159,7 +159,8 @@ test("Checkbox, switch and radio hold their input in their row", async ({ page }
 
 test("Slider follows the keys of the slider pattern", async ({ page }) => {
   await openExample(page, "slider", "canary-traffic");
-  const slider = page.getByRole("slider", { name: "Canary traffic, %" });
+  /* The example's slider, not the configurator's of the same name above it. */
+  const slider = page.locator('[data-example="canary-traffic"]').getByRole("slider", { name: "Canary traffic, %" });
   /* The ring stands on the thumb, a pseudo-element neither the own-base probe
      nor getComputedStyle reads - so it is looked at: the focused slider has
      to look different from the resting one. */

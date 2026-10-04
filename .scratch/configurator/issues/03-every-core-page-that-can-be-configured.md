@@ -20,6 +20,38 @@ Where a control needs a value to show anything (a picker needs a value to show `
 
 ## Comments
 
+### Batch A
+
+Forms. Four pages qualify and now open with a configurator. Each is a declaration in `packages/core/demo/configurators/`, named after its page, with no change to the machinery:
+- **Textarea:** `size`, `placeholder`, `chars`, `resize`, `autoGrow`, `invalid`, `disabled`, and the required name `aria-label="Incident summary"`.
+- **NumberInput:** `size`, `chars`, `invalid`, `disabled`. The field is controlled (`value` and `onChange` are required), so the declaration's `component` is a small wrapper that holds the number. Through `{ node, code }` the code always writes the pair as state: `<NumberInput aria-label="Parcel weight" value={weight} onChange={setWeight} />`.
+- **Slider:** `min`, `max`, `showValue`, `disabled`, with a required name and `defaultValue={40}`. At `min` the track would stand empty.
+- **RadioGroup:** `orientation`, `size`, `disabled`, with a required name, `defaultValue="neighbour"` and `options` as `{ node, code }`. The code writes the three options as a literal, so the copied line runs as it stands.
+
+Does not reach three:
+- **FileInput:** only `invalid` and `disabled` are value props. `value` and `onChange` need wiring. `multiple` and `accept` are inherited attributes outside the two a configurator may name.
+
+Tests:
+- The smoke test's list now has fourteen names and is no longer called closed. Every configurator renders at rest with only its required attributes.
+- `features-page.spec.ts`, "The other configurators", has two new cases. NumberInput: "sm" gives exactly `… size="sm" />`, and ArrowUp moves the staged field from 18.5 to 19.5. RadioGroup: the options literal stands in the code, and the starting choice is checked.
+- `features-basics`' Slider test now scopes to its example, because the configurator's slider carries the same name. Switch did the same in ticket 02.
+- A one-off axe run over the four configurators passed. It was not checked in, because batch C adds the axe test over every configurator.
+
+Results: lint, typecheck and test:unit are green. Playwright ui-light/ui-dark ran screenshots, forced-colours, accessibility, features-page and features-basics, filtered to the four pages and every configurator test: green.
+
+Baselines (light and dark each):
+- New: `configurator-{textarea,numberinput,slider,radiogroup}`.
+- Renewed for the title: `example-` and `forced-` of `textarea--text-area`, `numberinput--number-field`, `slider--canary-traffic` and `radiogroup--radio-group`.
+- Renewed for the one-pixel shift: `textarea--{states,with-an-error,grow-with-the-text,count-the-characters}`, `numberinput--{units-and-decimals,states,keep-a-value-in-range}`, `radiogroup--{descriptions,side-by-side,states}` and `slider--units-and-marks`. Their content is unchanged; I looked at them.
+
+Deviations:
+- `unshown.json` is unchanged. The coverage gate (`shownIn.ts`) counts example files only, and a configurator names its props as strings. Removing `TextareaProps.chars` and `TextareaProps.resize` would fail the gate. As agreed with the coordinator, counting configurator controls comes once, after the three batches, as the first step of props-to-examples 06.
+- Textarea's `resize` `@default` now reads `"none"` while the field grows by itself, else `"vertical"`. Before, it named `"vertical"` first. The configurator takes the last named value as the effective default, and with the old order it took "none". The meaning is the same.
+- Left out on purpose:
+  - NumberInput's `decimals`, `min`, `max` and `step`, and Slider's `step`: unbounded number fields would let a reader type a value that breaks the component (`decimals={-1}`, `step={0}`). Batch C's step as a third `bounds` entry can add them.
+  - RadioGroup's `name`: a string that is neither `placeholder` nor the children text.
+- `packages/core/README.md` still says "ten pages open with a configurator". All three batches would change that line, so it is left for after the merge.
+
 ### Batch B
 
 Delivered: all seven pages qualify and open with a configurator. Each one is a declaration file in `packages/core/demo/configurators/`, and `configurator.ts` is unchanged.

@@ -223,4 +223,24 @@ test.describe("The other configurators", () => {
       'import { Sparkline } from "@umriss-ui/core";\n\n<Sparkline data={[42, 58, 71, 66, 80, 74, 88]} width={97} />',
     );
   });
+
+  test("the NumberInput's code writes its value as state, and the staged field takes a key", async ({ page }) => {
+    await open(page, "numberinput");
+    const configurator = page.locator('[data-configurator="numberinput"]');
+    const field = configurator.locator(".exampleStage").getByRole("textbox", { name: "Parcel weight" });
+    await configurator.getByRole("radiogroup", { name: "size" }).getByText("sm", { exact: true }).click();
+    expect(await code(page, "numberinput")).toBe(
+      'import { NumberInput } from "@umriss-ui/core";\n\n<NumberInput aria-label="Parcel weight" value={weight} onChange={setWeight} size="sm" />',
+    );
+    await field.press("ArrowUp");
+    await expect(field).toHaveValue("19.5");
+  });
+
+  test("the RadioGroup's required options stand in its code as written", async ({ page }) => {
+    await open(page, "radiogroup");
+    expect(await code(page, "radiogroup")).toBe(
+      'import { RadioGroup } from "@umriss-ui/core";\n\n<RadioGroup aria-label="If nobody is home" options={[{ value: "door", label: "Leave at the door" }, { value: "neighbour", label: "Hand to a neighbour" }, { value: "depot", label: "Take back to the depot" }]} defaultValue="neighbour" />',
+    );
+    await expect(page.locator('[data-configurator="radiogroup"] .exampleStage').getByRole("radio", { name: "Hand to a neighbour" })).toBeChecked();
+  });
 });
