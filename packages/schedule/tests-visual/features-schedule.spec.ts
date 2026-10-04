@@ -182,16 +182,16 @@ test("hover, click and right-click report their target", async ({ page }) => {
 
   /* C-2041 on the truck, 06:00 to 07:00. */
   await page.mouse.move(plot.x(6, 30), plot.y("truck-118"));
-  await expect(status).toHaveText("hover: subtask c-2041-1 (main) at 06:30");
+  await expect(status).toHaveText("hover: subtask c-2041-1 (main) at 06:30, lane truck-118");
   await page.mouse.move(plot.x(5, 50), plot.y("truck-118"));
   await expect(status).toHaveText(/^hover: subtask c-2041-1 \(leadIn\)/);
 
   await page.mouse.click(plot.x(15), plot.y("truck-118"), { button: "right" });
   /* A pixel is about a minute here; where the pointer lands on it decides. */
-  await expect(status).toHaveText(/^contextmenu: lane truck-118 at (14:59|15:00|15:01)$/);
+  await expect(status).toHaveText(/^contextmenu: free time at (14:59|15:00|15:01), lane truck-118$/);
 
   await page.mouse.click(plot.x(6, 30), plot.y("truck-118"));
-  await expect(status).toHaveText("click: subtask c-2041-1 (main) at 06:30");
+  await expect(status).toHaveText("click: subtask c-2041-1 (main) at 06:30, lane truck-118");
 });
 
 test("a click selects the whole task with the stop it hit, and a click on nothing clears it", async ({ page }) => {

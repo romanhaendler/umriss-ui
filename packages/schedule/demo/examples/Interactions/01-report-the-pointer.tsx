@@ -31,9 +31,9 @@ const describe = (interaction: ScheduleInteraction): string => {
       : hit.kind === "dependency"
         ? `dependency ${hit.dependency.id}`
         : hit.kind === "lane"
-          ? `lane ${hit.lane}`
+          ? "free time"
           : "nothing";
-  return `${interaction.type}: ${target} at ${time}`;
+  return `${interaction.type}: ${target} at ${time}, lane ${interaction.lane ?? "none"}`;
 };
 
 export default function ReportThePointer() {

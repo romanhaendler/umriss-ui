@@ -1,15 +1,4 @@
 {
-  "ScheduleProps.defaultCollapsedGroups": "not shown yet",
-  "ScheduleProps.className": "not shown yet",
-  "ScheduleProps.style": "not shown yet",
-  "Dependency.attach": "not shown yet",
-  "Dependency.ends": "not shown yet",
-  "ScheduleInteraction.lane": "not shown yet",
-  "ScheduleTooltipTarget.subtask": "not shown yet",
-  "ScheduleTooltipTarget.blocked": "not shown yet",
-  "ScheduleTooltipTarget.dependency": "not shown yet",
-  "ScheduleTooltipTarget.from": "not shown yet",
-  "ScheduleTooltipTarget.to": "not shown yet",
-  "ViolatedDependency.departure": "not shown yet",
-  "ViolatedDependency.arrival": "not shown yet"
+  "ScheduleProps.className": "(a) pass-through: goes to the root element",
+  "ScheduleProps.style": "(a) pass-through: goes to the root element"
 }

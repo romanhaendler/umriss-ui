@@ -40,3 +40,23 @@ Spec: `.scratch/props-to-examples/spec.md`
 - **Baselines:** charts-light/dark renewed for the 6 changed examples (area corridor/stacked, bar stacked, stateband under-a-course, matrix by-limits, controlchart list-the-violations) and taken for the 5 new ones; looked at. The "Known open" note on charts pictures is marked done (Sep. 2026); nothing outside these moved.
 - **Library findings, not fixed (out of scope):** a limit's label takes its severity's colour even when `color` is given (LimitLine/05 labels "Release freeze" in alarm red beside its own-coloured line); on an x axis a limit label covers a tick label only partly, where the y axis hides the covered tick - LimitLine/05 spaces its ticks to keep clear.
 - Tests: lint, typecheck (gate), `pnpm test:unit` green; Playwright charts-light/dark screenshots (changed/new), features-page, own-data, features-interaction, silent-pages, accessibility - 63 passed.
+
+### table
+
+Delivered: the 8 Missing entries are shown by 4 new examples - Row appearance/04 "Stripes across a wide table" (`striped`), Selection/02 "Hold the selection yourself" (`selection` from `useTableSelection`, counted, filled and cleared by controls outside), Filter/09 "Offer the values that occur" (the own filter's `Input` builds its thresholds from `values`) and Toolbar/03 "Parts outside a toolbar" (Search, ColumnMenu and Export at `size="md"` in a card header, the Pagination with `of`). `packages/table/demo/unshown.json` holds the 5 exceptions, each with its category and reason: `TableOptions.filter` (g), `SearchProps.className`, `ToolbarProps.className` and `PaginationProps.className` (a), `VerdictBase.resizable` (f).
+
+Proof: the table gate passes (`pnpm --filter @umriss-ui/table typecheck`); lint, typecheck and test:unit green. Playwright table-light + table-dark: own-data and features-page green; screenshots of the four pages' heads and examples green.
+
+Baselines: 8 new (4 examples x light/dark), each looked at. None moved.
+
+Deviations: the triage's "preselected" selection is left out - `useTableSelection` takes no initial keys, so a button "Select Oakridge Pharmacy" fills it from outside instead. The pager in Toolbar/03 stands above the rows, not in a card footer: `Pagination`'s JSDoc says a pager outside the table goes before it, or it registers only after the first frame.
+
+### schedule
+
+Delivered: the 11 Missing entries are shown. New: Lane groups/05 "Start with groups folded" (`defaultCollapsedGroups`), Dependencies/06 "Draw one handover its own way" (a dependency's own `attach` and `ends` over the schedule's), Tooltip/04 "Say what a bar covers and a line joins" (`subtask`, `blocked`, `dependency`, `from`, `to`). Extended: findings/01 writes "leaves ... for a start at ..." from `departure` and `arrival`; Interactions/01 now writes `interaction.lane` into its status line, as its lead promised (a lane hit reads "free time", so the lane is not named twice), and `features-schedule.spec.ts` asserts the new text. `packages/schedule/demo/unshown.json` holds the 2 (a) exceptions `ScheduleProps.className` and `ScheduleProps.style`.
+
+Proof: the schedule gate passes; lint, typecheck and test:unit green. Playwright schedule-light + schedule-dark: own-data, features-page and "hover, click and right-click report their target" green; screenshots of the five pages' heads and examples green after the renewal below.
+
+Baselines: 6 new (3 examples x light/dark), each looked at. Renewed: `findings--list-the-findings` light and dark - the extension lengthens its "Too early" line.
+
+Not done here: the gate's comment and `docs/testing.md` on the reason format belong to the core part of this ticket.

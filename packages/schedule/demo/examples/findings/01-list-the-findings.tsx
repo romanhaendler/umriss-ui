@@ -49,7 +49,7 @@ export default function ListTheFindings() {
         ))}
         {found.violatedDependencies.map((v) => (
           <Text as="li" size="sm" key={v.dependency}>
-            Too early: {v.dependency} is {hours(v.shortBy)} hours short
+            Too early: {v.dependency} leaves {when(v.departure)} for a start at {when(v.arrival)}, {hours(v.shortBy)} hours short
           </Text>
         ))}
         {found.inBlockedTime.map((b) => (
