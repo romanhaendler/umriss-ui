@@ -22,10 +22,53 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
-## Unreleased
+## 0.12.0 – Every export explained, and actions that may scroll (Oct. 2026)
+
+The package explains itself where it is used: every export carries a comment,
+every default a `@default` tag, every type it names can be imported, and the
+demo lists all of it in an API index (ADR-0044). `RowActions` may leave its
+column in the flow. Needs `@umriss-ui/core` 0.25; the peer range moves to
+`^0.25.0`.
 
 ### Added
 
+- **`RowActions` takes `pin`**: `pin={false}` leaves the actions column in the
+  flow instead of sticking at the end of the row, for a place the application
+  finds too narrow for a pinned block - it measures the place and decides. A
+  column pinned to the end still takes the actions with it, and an open Row
+  draft's Save still sticks. The default, `true`, is the behaviour so far.
+- **Every type a props table or a signature names can be imported**:
+  `Present`, `Absent`, `Pin`, `ToolbarSize`, `FormatFor`, `FilterFor`,
+  `GroupFor`, `FooterFor`, `AggregateFor` and `Presentation` are new public
+  types, for annotating one's own variables and wrappers with what a column or
+  a toolbar part accepts. So are the types a page's table headers and type
+  definitions name: `ColumnBase`, `FieldColumn`, `ValuePaths`, `GroupByBase`,
+  `VerdictBase`, `Displayable`, `IsDisplayable`, `DatePeriod` and `RowGroup`;
+  and those a hook's or a function's signature names: `ModelColumn` - what
+  `alarmModel` and `ALARM_COLUMNS` read of a column, so far an unexported
+  `Column` in the `.d.ts` -, `TableInput`, `TreeInput`, `GroupLevel`,
+  `AggregateColumn`, `AggregateKind`, `OwnAggregate`, `Computed`,
+  `NumberField`, `AlarmBase` and `AlarmAvailability`. Type exports only;
+  nothing else changes.
+- **Every export carries a comment**: what a component, a hook, a function or a
+  type is for, and for a hook or a function `@param` and `@returns` where its
+  type alone does not say it. The editor shows it on hover, from the package's
+  `.d.ts`. Nothing else changes.
+- **A prop's default stands in a `@default` tag** where its comment used to say
+  it in words: the editor shows it on hover, and the props table in its Default
+  column. Nothing else changes.
+- **The demo has an API index**: `/table/api/`, the last entry of the sidebar,
+  lists every export of `@umriss-ui/table`, grouped as components, hooks,
+  functions, constants and types, alphabetical - each value with its comment
+  and its declaration, each type with a link to its table or its definition,
+  and the pages that use it. A hook or a function a page names, in its text or
+  its import line, leads to its entry. `docs/llms-full.md` ends with the same
+  index, in place of the appendix "The rest of the API". The library is
+  unchanged.
+- **`docs/llms-full.md` defines every type a props table names**: a type
+  without a table of its own (`TableRef`, `Pin`, core's `Limit`) stands under
+  "Types on this page" of each page that names it, with its comment and its
+  members or its declaration.
 - **Every page says its keys**: First table has a Keyboard section of its
   own (Enter and Space on a sortable header, Escape on a cut value's tip), and
   every other page whose examples take Tab links the keys that apply there -
@@ -36,49 +79,14 @@ is one of the internal numbers from before core's first publication as `0.1.0`
   `aria-sort`, `aria-busy`, the toolbar's count of matches, the alarm list's
   one live number, and the label a presentation's component needs. In the
   demo, the Markdown twins and `docs/llms-full.md`; the table is unchanged.
-- **Every export carries a comment**: what a component, a hook, a function or a
-  type is for, and for a hook or a function `@param` and `@returns` where its
-  type alone does not say it. The editor shows it on hover, from the package's
-  `.d.ts`. Nothing else changes.
-- **Every type a props table names can be imported**: `Present`, `Absent`,
-  `Pin`, `ToolbarSize`, `FormatFor`, `FilterFor`, `GroupFor`, `FooterFor`,
-  `AggregateFor` and `Presentation` are new public types, for annotating one's
-  own variables and wrappers with what a column or a toolbar part accepts.
-  So are the types a page's table headers and type definitions name:
-  `ColumnBase`, `FieldColumn`, `ValuePaths`, `GroupByBase`, `VerdictBase`,
-  `Displayable`, `IsDisplayable`, `DatePeriod` and `RowGroup`.
-- **A prop's default stands in a `@default` tag** where its comment used to say
-  it in words: the editor shows it on hover, and the props table in its Default
-  column. Nothing else changes.
-- **`RowActions` takes `pin`**: `pin={false}` leaves the actions column in the
-  flow instead of sticking at the end of the row, for a place the application
-  finds too narrow for a pinned block - it measures the place and decides. A
-  column pinned to the end still takes the actions with it, and an open Row
-  draft's Save still sticks. The default, `true`, is the behaviour so far.
-- **`docs/llms-full.md` defines every type a props table names**: a type
-  without a table of its own (`TableRef`, `Pin`, core's `Limit`) stands under
-  "Types on this page" of each page that names it, with its comment and its
-  members or its declaration.
-- **The demo has an API index**: `/table/api/`, the last entry of the sidebar,
-  lists every export of `@umriss-ui/table`, grouped as components, hooks,
-  functions, constants and types, alphabetical - each value with its comment
-  and its declaration, each type with a link to its table or its definition,
-  and the pages that use it. A hook or a function a page names, in its text or
-  its import line, leads to its entry. `docs/llms-full.md` ends with the same
-  index, in place of the appendix "The rest of the API". The library is
-  unchanged.
-- **Every type a hook's or a function's signature names can be imported**:
-  `ModelColumn` - what `alarmModel` and `ALARM_COLUMNS` read of a column, so
-  far an unexported `Column` in the `.d.ts` -, `TableInput`, `TreeInput`,
-  `GroupLevel`, `AggregateColumn`, `AggregateKind`, `OwnAggregate`,
-  `Computed`, `NumberField`, `AlarmBase` and `AlarmAvailability`. Type exports
-  only; nothing else changes.
 
 ### Fixed
 
 - **`docs/llms-full.md` names the peer in its install line**:
   `npm install @umriss-ui/table @umriss-ui/core`, read from the manifest. It
   had named the table alone, and an install after it lacked core.
+
+---
 
 ## 0.11.2 – Core 0.24.0 (Oct. 2026)
 

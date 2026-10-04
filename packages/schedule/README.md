@@ -155,12 +155,16 @@ Done from this list: **blocked time** per lane.
 
 * The demo: <https://romanhaendler.github.io/umriss-ui/schedule/>, or locally
   `pnpm dev:schedule` (port 4176). It is the documentation — every page shows
-  running examples with their source and the props table generated from `src/`.
+  running examples with their source and the props table generated from `src/`,
+  each prop linked to the examples that show it. An API index lists every
+  export, one search finds across all five packages, and the header switches
+  the examples to German.
 * [`CHANGELOG.md`](CHANGELOG.md) — what changes for a caller.
 * **For a coding agent**: `docs/llms-full.md` inside the installed package —
   the demo as one Markdown file, pinned to the installed version: every page
   with its examples' source, its props tables and why it is built as it is,
-  and the declaration of every other export. Online, for the latest version:
+  and an index of every export with its comment and its declaration. Each
+  page also has a Markdown twin online; for the latest version:
   <https://romanhaendler.github.io/umriss-ui/schedule/llms.txt>.
 * The vocabulary — **Task**, **Subtask**, **Lead-in**, **Lead-out**,
   **Dependency**, **Violated dependency**, **Blocked time**, **Lane header**, **Lane group**,

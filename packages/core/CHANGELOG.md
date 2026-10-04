@@ -29,51 +29,76 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
-## Unreleased
+## 0.25.0 – Every export explained, and a palette that keeps count (Oct. 2026)
+
+The package explains itself where it is used: every export carries a comment,
+every default a `@default` tag, every type a props table names can be imported,
+and the demo lists all of it in an API index (ADR-0044). The command palette
+learns keywords and a limit to its finds. One thing behaves differently: a
+nested `UmrissProvider` without `language` keeps the language around it (see
+Changed).
 
 ### Added
 
-- **Every export carries a comment**, the German wording's included: what a
-  component, a hook, a function, a constant or a type is for, and for a hook
-  `@param` and `@returns` where its type alone does not say it. The editor shows
-  it on hover, from the package's `.d.ts`. Nothing else changes.
-- **Every type a props table names can be imported**: `TextTracking` and
-  `TextLeading` (the text's letter spacing and line height) and `Align` (where
-  a popover lines up with its anchor) are new public types. `DockPlace` is
-  declared as its four edges itself, no longer as another name for an
-  internal type; what it accepts is unchanged.
 - **`keywords` on a `CommandPaletteItem`**: more words a candidate is found
   by, such as synonyms, searched but never shown. They are searched only when
   neither the label nor the group matched, and only for a query of three
   characters or more, as a contiguous run and not as a subsequence. A find
   through them stands behind every find in a label or a group and marks
   nothing. A palette without keywords finds and orders as before.
+- **`maxFinds` on `CommandPalette`**: the most finds that stand at once, the
+  best by rank, with a last line that says how many more there are (the new
+  wording entry `paletteMoreFinds`, "26 more finds", "26 weitere Funde"). The
+  screen reader still hears the count of every find. Without it, every find
+  stands, as before.
+- **`searchedGroup` on a `CommandPaletteItem`**: the part of `group` that is
+  searched, where a prefix every candidate of a set shares would otherwise
+  let its few letters find the whole set. The heading shown is still `group`.
+  Without it, all of `group` is searched, as before.
+- **Every type a props table names can be imported**: `TextTracking` and
+  `TextLeading` (the text's letter spacing and line height) and `Align` (where
+  a popover lines up with its anchor) are new public types. `DockPlace` is
+  declared as its four edges itself, no longer as another name for an
+  internal type; what it accepts is unchanged.
+- **Every export carries a comment**, the German wording's included: what a
+  component, a hook, a function, a constant or a type is for, and for a hook
+  `@param` and `@returns` where its type alone does not say it. The editor shows
+  it on hover, from the package's `.d.ts`. The comment on `UmrissProvider`'s
+  `language` links the Language page instead of naming a source folder.
+  Nothing else changes.
 - **A prop's default stands in a `@default` tag** where its comment used to say
   it in words: the editor shows it on hover, and the props table in its Default
   column. Nothing else changes.
+- **The demo has an API index**: `/core/api/`, the last entry of the sidebar,
+  lists every export of `@umriss-ui/core` and of `@umriss-ui/core/wording/de`
+  under its import path, grouped as components, hooks, functions, constants
+  and types, alphabetical - each value with its comment and its declaration,
+  each type with a link to its table or its definition, and the pages that use
+  it. `DEFAULT_WORDING`, `DEFAULT_FORMATS` and their German twins link their
+  table on the Language page. A hook or a function a page names, in its text
+  or its import line, leads to its entry. `docs/llms-full.md` ends with the
+  same index, in place of the appendix "The rest of the API". The library is
+  unchanged.
+- **`docs/llms-full.md` defines every type a props table names**: a type
+  without a table of its own (`ButtonSize`, `Wording`, `Limit`) stands under
+  "Types on this page" of each page that names it, with its comment and its
+  members or its declaration.
 - **Every wording entry is listed**, in `docs/llms-full.md` and on the Language
   page: each key of `Wording`, of the charts' `ChartsWording` and of `Formats`,
   its English beside its German and the comment its type carries. A row has an
   address of its own, `#wording-noMatches`, `#format-date`.
-- **The comment on `UmrissProvider`'s `language` links the Language page**
-  instead of naming the source folder `lib/language`. Nothing else changes.
 - **Every token listed**: the text the package carries (`docs/llms-full.md`)
   and the demo's new page Theming list every `--u-…` token, grouped as the
   stylesheet groups them, with its light and its dark value and what it is
-  for. The tokens themselves are unchanged.
+  for. Below them, under `#charts-tokens`, the 29 `--uc-…` tokens of
+  `@umriss-ui/charts`, with the core token each one takes, linked. The tokens
+  themselves are unchanged.
 - **Tokens are the styling API; `data-*` attributes and class names are not**
   (ADR-0045). The `--u-…` tokens change only with an entry here; the
   attributes and class names in the components' markup are internal and may
   change in any version. The page Theming says so and shows the accent for the
   application, a token for one region and a dark region; the Installation page
   links there instead of explaining the tokens itself.
-  for. Below them, under `#charts-tokens`, the 29 `--uc-…` tokens of
-  `@umriss-ui/charts`, with the core token each one takes, linked. The tokens
-  themselves are unchanged.
-- **`docs/llms-full.md` defines every type a props table names**: a type
-  without a table of its own (`ButtonSize`, `Wording`, `Limit`) stands under
-  "Types on this page" of each page that names it, with its comment and its
-  members or its declaration.
 - **Every page whose examples take the keyboard says its keys**: Button,
   Input, Textarea, Card, Typography, Alert and Toast have a Keyboard table of
   their own (Toast's names Alt+T and Escape on the deck); the other pages with
@@ -88,25 +113,6 @@ commit.
   four pickers and `TreeSearch` on the TreeView page each show "With an
   error", a field marked by a live check with the reason in its `FormField`.
   In the demo and `docs/llms-full.md`; the components are unchanged.
-- **The demo has an API index**: `/core/api/`, the last entry of the sidebar,
-  lists every export of `@umriss-ui/core` and of `@umriss-ui/core/wording/de`
-  under its import path, grouped as components, hooks, functions, constants
-  and types, alphabetical - each value with its comment and its declaration,
-  each type with a link to its table or its definition, and the pages that use
-  it. `DEFAULT_WORDING`, `DEFAULT_FORMATS` and their German twins link their
-  table on the Language page. A hook or a function a page names, in its text
-  or its import line, leads to its entry. `docs/llms-full.md` ends with the
-  same index, in place of the appendix "The rest of the API". The library is
-  unchanged.
-- **`maxFinds` on `CommandPalette`**: the most finds that stand at once, the
-  best by rank, with a last line that says how many more there are (the new
-  wording entry `paletteMoreFinds`, "26 more finds", "26 weitere Funde"). The
-  screen reader still hears the count of every find. Without it, every find
-  stands, as before.
-- **`searchedGroup` on a `CommandPaletteItem`**: the part of `group` that is
-  searched, where a prefix every candidate of a set shares would otherwise
-  let its few letters find the whole set. The heading shown is still `group`.
-  Without it, all of `group` is searched, as before.
 
 ### Changed
 

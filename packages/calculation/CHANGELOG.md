@@ -11,7 +11,12 @@ under a heading "Changed" of its own, no matter which digit rose.
 
 ---
 
-## Unreleased
+## 0.5.0 – Every export explained (Oct. 2026)
+
+The package explains itself where it is used: every export carries a comment,
+every default a `@default` tag, and the demo lists all of it in an API index
+(ADR-0044). What a calculation shows and does is unchanged. Needs
+`@umriss-ui/core` 0.25; the peer range moves to `^0.25.0`.
 
 ### Added
 
@@ -43,6 +48,8 @@ under a heading "Changed" of its own, no matter which digit rose.
   `npm install @umriss-ui/calculation @umriss-ui/core`, read from the
   manifest. It had named the calculation alone, and an install after it
   lacked core.
+
+---
 
 ## 0.4.8 – Core 0.24.0 (Oct. 2026)
 

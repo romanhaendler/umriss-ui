@@ -114,17 +114,19 @@ them: bars and areas stack (`stack`, `normalize`).
 * The demo: <https://romanhaendler.github.io/umriss-ui/charts/>, or locally
   `pnpm dev:charts` (port 4174). It is the documentation — every page
   shows running examples with their source and the props table generated from
-  `src/`.
+  `src/`, each prop linked to the examples that show it. An API index lists
+  every export, and one search finds across all five packages.
 * [`CHANGELOG.md`](CHANGELOG.md) — what changes for a caller.
 * **For a coding agent**: `docs/llms-full.md` inside the installed package —
   the demo as one Markdown file, pinned to the installed version: every page
   with its examples' source, its props tables and why it is built as it is,
-  and the declaration of every other export. Online, for the latest version:
+  and an index of every export with its comment and its declaration. Each
+  page also has a Markdown twin online; for the latest version:
   <https://romanhaendler.github.io/umriss-ui/charts/llms.txt>.
 * [`docs/capabilities.md`](docs/capabilities.md) — every capability with the
   level at which it is proved.
 * [`../../docs/design-language.md`](../../docs/design-language.md) — the design
-  language all four packages share.
+  language all five packages share.
 
 ## Licence
 

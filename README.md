@@ -12,11 +12,11 @@ hard outlines or effects.
 
 | Package | Version | What it is |
 |---|---|---|
-| [`@umriss-ui/core`](packages/core/README.md) | 0.24.0 | The component library — forms, overlays, structure, the tree, the dock, the command palette. The package you install first |
-| [`@umriss-ui/charts`](packages/charts/README.md) | 0.9.0 | Canvas charts — few kinds, drawn well. Depends on nothing but React |
-| [`@umriss-ui/table`](packages/table/README.md) | 0.11.2 | The table, declared the way it reads: columns as JSX, typed against their rows — filtering by column and by row, grouping, tree rows and aggregates in a pure model. Takes `@umriss-ui/core` as a peer |
-| [`@umriss-ui/schedule`](packages/schedule/README.md) | 0.3.16 | The schedule: subtasks on lanes over time, with dependencies, blocked time, findings and controlled editing. Takes `@umriss-ui/core` and `@umriss-ui/charts` as peers |
-| [`@umriss-ui/calculation`](packages/calculation/README.md) | 0.4.8 | A calculation a reader can follow and redo: a derivation written as it is shown, evaluated by the library, in one metric or several side by side. Takes `@umriss-ui/core` as a peer |
+| [`@umriss-ui/core`](packages/core/README.md) | 0.25.0 | The component library — forms, overlays, structure, the tree, the dock, the command palette. The package you install first |
+| [`@umriss-ui/charts`](packages/charts/README.md) | 0.10.0 | Canvas charts — few kinds, drawn well. Depends on nothing but React |
+| [`@umriss-ui/table`](packages/table/README.md) | 0.12.0 | The table, declared the way it reads: columns as JSX, typed against their rows — filtering by column and by row, grouping, tree rows and aggregates in a pure model. Takes `@umriss-ui/core` as a peer |
+| [`@umriss-ui/schedule`](packages/schedule/README.md) | 0.4.0 | The schedule: subtasks on lanes over time, with dependencies, blocked time, findings and controlled editing. Takes `@umriss-ui/core` and `@umriss-ui/charts` as peers |
+| [`@umriss-ui/calculation`](packages/calculation/README.md) | 0.5.0 | A calculation a reader can follow and redo: a derivation written as it is shown, evaluated by the library, in one metric or several side by side. Takes `@umriss-ui/core` as a peer |
 | `@umriss-ui/demo` | — | The private shell all five demos are built from. Never published |
 
 All five published packages are released under the npm tag `latest`, so a plain
@@ -86,7 +86,15 @@ pnpm dev:calculation  # port 4177
 The demo **is** the documentation for the components. Every page shows running
 examples together with the source that produced them and a props table generated
 from `src/` — there is no prose description of a component that could drift away
-from the component.
+from the component. Every row of a props table links the examples that show it,
+and the build stops at a prop no example shows. Ten core pages open with a
+configurator. Each package has an API index of every export; one search (⌘K)
+finds pages, props, exports, tokens and wording keys across all five packages;
+the header switches the examples between English and German (the charts take
+German per chart, so their demo has no switch); and every page has a Markdown
+twin, listed in each package's `llms.txt`. The design language, the standards,
+what umriss-ui is not and each package's changelog are pages of the same site
+(ADR-0046).
 
 ## Where the documentation is
 

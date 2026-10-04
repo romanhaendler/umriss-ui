@@ -15,7 +15,13 @@ moves from here under the rule above.
 
 ---
 
-## Unreleased
+## 0.4.0 – Every export explained, and lane counts in every language (Oct. 2026)
+
+The package explains itself where it is used: every export carries a comment,
+every default a `@default` tag, and the demo lists all of it in an API index
+(ADR-0044). A group's lane count is fitted anew when the language changes.
+Needs `@umriss-ui/core` 0.25 and `@umriss-ui/charts` 0.10; the peer ranges move
+to `^0.25.0` and `^0.10.0`.
 
 ### Added
 
@@ -58,6 +64,8 @@ moves from here under the rule above.
   `npm install @umriss-ui/schedule @umriss-ui/core @umriss-ui/charts`, read
   from the manifest. It had named the schedule alone, and an install after it
   lacked core and charts.
+
+---
 
 ## 0.3.16 – Core 0.24.0 (Oct. 2026)
 
