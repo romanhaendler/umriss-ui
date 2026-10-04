@@ -47,10 +47,14 @@ Baselines (light and dark each):
 Deviations:
 - `unshown.json` is unchanged. The coverage gate (`shownIn.ts`) counts example files only, and a configurator names its props as strings. Removing `TextareaProps.chars` and `TextareaProps.resize` would fail the gate. As agreed with the coordinator, counting configurator controls comes once, after the three batches, as the first step of props-to-examples 06.
 - Textarea's `resize` `@default` now reads `"none"` while the field grows by itself, else `"vertical"`. Before, it named `"vertical"` first. The configurator takes the last named value as the effective default, and with the old order it took "none". The meaning is the same.
-- Left out on purpose:
-  - NumberInput's `decimals`, `min`, `max` and `step`, and Slider's `step`: unbounded number fields would let a reader type a value that breaks the component (`decimals={-1}`, `step={0}`). Batch C's step as a third `bounds` entry can add them.
-  - RadioGroup's `name`: a string that is neither `placeholder` nor the children text.
-- `packages/core/README.md` still says "ten pages open with a configurator". All three batches would change that line, so it is left for after the merge.
+- RadioGroup's `name` is left out: a string that is neither `placeholder` nor the children text.
+
+After the merge of B and C, on batch C's step as a third `bounds` entry:
+- NumberInput also controls `decimals` [0, 3, 1], `step` [0.1, 10, 0.1], `min` and `max` [0, 100, 1].
+- Slider controls `step` [1, 50, 1]. Bounded, none of them can reach a value that breaks the field, such as a step of 0.
+- The NumberInput page case now also presses Shift+ArrowDown on `step`. It clamps at `step={0.1}`, and the staged field then moves by 0.1.
+- `packages/core/README.md` now says 27 pages open with a configurator.
+- Baselines renewed again: `configurator-{numberinput,slider}` and the NumberInput and Slider examples below them, which moved with the taller panels. That is `example-numberinput--*` (five), `forced-numberinput--number-field`, and `example-slider--{units-and-marks,set-roughly-then-exactly,split-a-budget}`. I looked at them.
 
 ### Batch B
 
