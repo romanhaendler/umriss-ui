@@ -843,21 +843,32 @@ triggered on — and receives a list either way.
 _Avoid_: batch action, mass action, Massenaktion
 
 **View**:
-The part of a table's state an application can hand in at the start and read
-back: search, conditions, sort levels, page, page size, hidden columns, column
-order, widths, the grouping and the pinned columns. The table keeps it nowhere — not in the address, not in
-storage; where a view is remembered, if anywhere, is the application's business.
-Whatever is at its default is not part of it, and the pre-filter never is.
+The part of a component's state an application can hand in at the start and
+read back - how the reader is looking at the data, never the data itself. A
+table's view is search, conditions, sort levels, page, page size, hidden
+columns, column order, widths, the grouping and the pinned columns; a chart's
+is the span each x axis is zoomed to and the hidden series; a schedule's is the
+span in view and the folded lane groups. The component keeps it nowhere — not
+in the address, not in storage; where a view is remembered, if anywhere, is
+the application's business. Whatever is at its default is not part of it, and
+neither the pre-filter nor a selection ever is.
 _Avoid_: view state, settings, Einstellungen, preset, saved view, Ansichtslink
 
-**Manual mode**:
+**Server mode**:
 A table over rows a server holds: the rows passed in are one page, the
-server's count stands beside them, and the **View** goes out whenever what
-decides the rows changes — complete, defaults included, since a server has no
-default of the table's. The **Filtered set** is then the server's; what would
+server's count stands beside them, and the **Request** goes out whenever it
+changes — complete, defaults included, since a server has no default of the
+table's. The **Filtered set** is then the server's; what would
 act on it here — select all, the export — acts on the page and says so, and
 what would misstate it — a footer, a grouping — is not there.
-_Avoid_: server mode, server-side model, data source, remote table
+_Avoid_: manual mode, server-side model, data source, remote table
+
+**Request**:
+The part of a table's **View** in **Server mode** that decides which rows the
+server answers: search, conditions, sort levels, page and page size. A width,
+an order or a pin changes the view but not the request, and asks the server
+nothing.
+_Avoid_: query (that is the search), fetch, server view
 
 **Pinned column**:
 A column that stays in view while the table scrolls sideways, in a block at the
@@ -1005,7 +1016,7 @@ is the table of contents of the component
 (`.scratch/schedule-lane-groups/spec.md`, "The demo"). The table is the same
 case and was cut the same way after it had first been a shelf: its `Table`
 page carried nineteen examples - sorting, density, a server, grid mode - and a
-reader who came for one read past the rest. So *Sorting*, *Manual mode*,
+reader who came for one read past the rest. So *Sorting*, *Server mode*,
 *Grid mode* and the rest are pages, and `Table` is the first table. A feature
 that is a part imported by name - `Search`, `Export`, `RowActions` - keeps
 that name as its page's name.

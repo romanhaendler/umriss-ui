@@ -1,6 +1,6 @@
 # A chart is one tab stop that walks its hits
 
-Status: accepted
+Status: accepted, amended by ADR-0047 (zoom by key wherever an x axis is zoomable)
 Date:   2026-09
 
 A chart drew its points on a canvas and offered them to nobody without a

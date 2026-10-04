@@ -1,6 +1,6 @@
 # Decisions
 
-Forty-five decisions, each one written where it was made and kept afterwards. An
+Forty-eight decisions, each one written where it was made and kept afterwards. An
 ADR here is not an announcement: it states the question, the alternatives that
 were real at the time, and what the decision costs — which is what makes it
 worth reading a year later, when the code has changed and the reasoning has not.
@@ -43,7 +43,7 @@ half a later reader needs most. Exactly one is superseded today.
 | [0027](0027-a-calculation-is-written-as-it-is-shown.md) | A calculation is written as it is shown | accepted | calculation |
 | [0028](0028-a-calculation-is-a-tree-or-a-chain.md) | A calculation is a tree or a chain | accepted | calculation |
 | [0029](0029-a-row-groups-form-follows-its-level.md) | A row group's form follows its level | accepted | table |
-| [0030](0030-a-chart-is-one-tab-stop-that-walks-its-hits.md) | A chart is one tab stop that walks its hits | accepted | charts |
+| [0030](0030-a-chart-is-one-tab-stop-that-walks-its-hits.md) | A chart is one tab stop that walks its hits | accepted, amended by ADR-0047 | charts |
 | [0031](0031-the-charts-carry-their-own-wording.md) | The charts carry their own wording | accepted | charts, language |
 | [0032](0032-what-umriss-is-not.md) | What umriss is not | accepted | scope |
 | [0033](0033-the-schedules-keys-walk-past-the-view.md) | The schedule's keys walk past the view | accepted | schedule |
@@ -60,5 +60,7 @@ half a later reader needs most. Exactly one is superseded today.
 | [0044](0044-every-export-has-a-place-on-the-site.md) | Every export has a place on the site | accepted | demo |
 | [0045](0045-tokens-are-the-styling-api-data-attributes-are-not.md) | Tokens are the styling API; data attributes are not | accepted | components |
 | [0046](0046-the-site-renders-the-workspaces-own-documents.md) | The site renders the workspace's own documents | accepted | demo |
+| [0047](0047-a-component-holds-its-own-view.md) | A component holds its own view | accepted | architecture |
+| [0048](0048-charts-are-bound-to-their-rows-by-the-hook.md) | Charts are bound to their rows by the hook | accepted | charts |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).
