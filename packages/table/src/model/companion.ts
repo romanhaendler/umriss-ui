@@ -56,8 +56,8 @@ export interface CompanionOptions<Z, K extends string> {
   /** Groups the filtered set; a page and the virtual window then count lines.
       Its identity should stay while nothing in it changes. */
   grouping?: TableInput<Z, K>["grouping"];
-  /** Manual mode: the rows are a server's page, `rowCount` its total. */
-  manual?: TableInput<Z, K>["manual"];
+  /** Server mode: the rows are a server's page, `rowCount` its total. */
+  server?: TableInput<Z, K>["server"];
   /** Tree rows: the rows are the roots. A tree has no pages. */
   tree?: TableInput<Z, K>["tree"];
 }
@@ -122,8 +122,8 @@ export interface Companion<Z, K extends string> extends TableProjection<Z, K> {
   /** The row pitch the table measured from its head, for the virtual window
       (ADR-0042). Internal: the frame reports it after every layout. */
   setPitch: (pitch: number) => void;
-  /** Manual mode, as it was handed in. */
-  manual?: TableInput<Z, K>["manual"];
+  /** Server mode, as it was handed in. */
+  server?: TableInput<Z, K>["server"];
   /** Takes a view handed in later as if it were the start: what it leaves out
       goes back to its default. */
   restart: (view: TableView<K>) => void;
@@ -134,7 +134,7 @@ export function useCompanion<Z, K extends string = string>(
   columns: readonly ModelColumn<Z, K>[],
   options: CompanionOptions<Z, K>,
 ): Companion<Z, K> {
-  const { rowKey, filter, defaultSort = null, initialView, virtual, grouping, manual, tree } = options;
+  const { rowKey, filter, defaultSort = null, initialView, virtual, grouping, server, tree } = options;
 
   /* What a view sets, and what it leaves out falls back to: the start as well
      as a view handed in later (`restart`). */
@@ -191,10 +191,10 @@ export function useCompanion<Z, K extends string = string>(
         hidden,
         order,
         grouping,
-        manual,
+        server,
         tree,
       }),
-    [rows, columns, search, filter, sort, page, modelPageSize, hidden, order, grouping, manual, tree],
+    [rows, columns, search, filter, sort, page, modelPageSize, hidden, order, grouping, server, tree],
   );
 
   /* The hook always runs - the number of hooks must not hang on whether it
@@ -407,7 +407,7 @@ export function useCompanion<Z, K extends string = string>(
     visibleLines: windowLines,
     virtual: virtual ? rowWindow : undefined,
     setPitch,
-    manual,
+    server,
     restart,
     view,
     search,

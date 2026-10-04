@@ -168,7 +168,7 @@ export const OUTLINE: readonly Rubric[] = [
           { key: "Shift + click", action: "On a header: adds the column as a further sort level." },
         ],
         limits: [
-          "In [manual mode](#/manual-mode) the table sorts nothing itself; the sort goes to the server in the view.",
+          "In [server mode](#/server-mode) the table sorts nothing itself; the sort goes to the server in the request.",
         ],
         types: [],
         exports: ["useTable"],
@@ -182,7 +182,7 @@ export const OUTLINE: readonly Rubric[] = [
         ],
         alternatives: [{ when: "Restrict one column to some of its values or to a range", use: "filter" }],
         keysOf: ["first-table", core("Input")],
-        limits: ["In [manual mode](#/manual-mode) the table searches nothing itself; the term goes to the server in the view."],
+        limits: ["In [server mode](#/server-mode) the table searches nothing itself; the term goes to the server in the request."],
         types: ["SearchProps"],
         exports: ["Search"],
       },
@@ -201,7 +201,7 @@ export const OUTLINE: readonly Rubric[] = [
         keysOf: ["first-table", core("Popover"), core("Checkbox"), core("Input"), core("MultiSelect"), core("Select"), core("Button")],
         limits: [
           "No text filter per column: the search covers text.",
-          "In [manual mode](#/manual-mode) a list filter offers what the application names; the table cannot count values it does not hold.",
+          "In [server mode](#/server-mode) a list filter offers what the application names; the table cannot count values it does not hold.",
         ],
         types: ["ColumnFilter", "FilterInputProps", "RowFilter"],
         exports: ["columnFilter", "rowFilter"],
@@ -243,7 +243,7 @@ export const OUTLINE: readonly Rubric[] = [
         limits: [
           "No pivot and no more than three levels (ADR-0032).",
           "No bar to drag headers onto: grouping is chosen in the column menu.",
-          "No groups in [manual mode](#/manual-mode): they would be made of one page.",
+          "No groups in [server mode](#/server-mode): they would be made of one page.",
         ],
         types: ["GroupByBase"],
         exports: ["useTable"],
@@ -269,7 +269,7 @@ export const OUTLINE: readonly Rubric[] = [
         ],
         limits: [
           "Not with grouping or pagination: both would build or cut levels a second way. A large tree uses virtualisation.",
-          "Not in [manual mode](#/manual-mode), and no branches loaded on demand yet.",
+          "Not in [server mode](#/server-mode), and no branches loaded on demand yet.",
           "One column set for every level; a level without a value shows it as absent.",
         ],
         types: [],
@@ -288,7 +288,7 @@ export const OUTLINE: readonly Rubric[] = [
         ],
         keysOf: ["first-table", core("Input")],
         limits: [
-          "No footer in [manual mode](#/manual-mode): a sum over one page would misstate the server's set.",
+          "No footer in [server mode](#/server-mode): a sum over one page would misstate the server's set.",
         ],
         types: ["AggregateOptions"],
         exports: ["useTable"],
@@ -312,7 +312,7 @@ export const OUTLINE: readonly Rubric[] = [
         ],
         keysOf: ["first-table", core("Checkbox"), core("Input")],
         limits: [
-          "In [manual mode](#/manual-mode) “select all” selects the page the table holds.",
+          "In [server mode](#/server-mode) “select all” selects the page the table holds.",
         ],
         types: [],
         exports: ["useTable"],
@@ -430,7 +430,7 @@ export const OUTLINE: readonly Rubric[] = [
         sentence: "A button that writes the rows the user sees into a CSV file for a spreadsheet (also called download or export to Excel). Hand the application the text instead where it wants the clipboard or a file of its own.",
         about: [
           "It writes the filtered set across all pages, in the visible columns, in the order and sorting on screen – and the values, not their presentation: numbers with a decimal comma, a point in time as a timestamp, an absent value as an empty field. Fields are separated by semicolons, and a byte order mark tells the spreadsheet it is UTF-8.",
-          "A verdict column exports its value, not the verdict. In [manual mode](#/manual-mode) the table holds one page of the server's, so it exports that page, and the button says so. The same text is `t.asCsv()`, without a button.",
+          "A verdict column exports its value, not the verdict. In [server mode](#/server-mode) the table holds one page of the server's, so it exports that page, and the button says so. The same text is `t.asCsv()`, without a button.",
         ],
         keysOf: ["first-table", core("Input"), core("Button")],
         limits: ["One format, CSV: no workbook, PDF or print layout."],
@@ -464,7 +464,7 @@ export const OUTLINE: readonly Rubric[] = [
         ],
         alternatives: [{ when: "Thousands of rows the user scrolls through without pages", use: "virtualisation" }],
         keysOf: ["first-table", core("Input"), core("Select"), core("Button")],
-        limits: ["In [manual mode](#/manual-mode) the page goes to the server in the view, and `rowCount` decides how many pages there are."],
+        limits: ["In [server mode](#/server-mode) the page goes to the server in the request, and `rowCount` decides how many pages there are."],
         types: ["PaginationProps"],
         exports: ["Pagination"],
       },
@@ -477,14 +477,14 @@ export const OUTLINE: readonly Rubric[] = [
         ],
         limits: [
           "Paging and virtualisation do not combine; one table does one or the other.",
-          "No loading more rows while scrolling: a table on a server pages ([Manual mode](#/manual-mode)).",
+          "No loading more rows while scrolling: a table on a server pages ([Server mode](#/server-mode)).",
         ],
         types: [],
         exports: ["useTable"],
       },
       {
-        id: "manual-mode",
-        name: "Manual mode",
+        id: "server-mode",
+        name: "Server mode",
         sentence: "A table over rows a server holds: the application hands in one page and the server's count, and the table reports what to fetch next (also called server-side paging, sorting and filtering).",
         about: [
           "`onRequest` reports the request whenever what decides the rows changes – search, conditions, sort, page, page size – complete, defaults included, since a server has no default of the table's.",
@@ -614,8 +614,9 @@ export const OUTLINE: readonly Rubric[] = [
 
 /* The page ids that changed, and where each stands now - an old link still
    lands. First table stood at `/table/table/`, an address that named the
-   package twice (.scratch/sidebar-tree). */
-export const MOVED: Moved = { table: "first-table" };
+   package twice (.scratch/sidebar-tree); Server mode was called Manual mode
+   (ADR-0047). */
+export const MOVED: Moved = { table: "first-table", "manual-mode": "server-mode" };
 
 /* The addresses follow from the outline; their format is known to the shell
    (`@umriss-ui/demo`, `outline.ts`) and to nobody else. */

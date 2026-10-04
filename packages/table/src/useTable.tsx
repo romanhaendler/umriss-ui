@@ -25,8 +25,8 @@ import { MOST_LEVELS, livePaths } from "./model/grouping";
 import type { RowGroup } from "./model/grouping";
 import { pinsForView, withPin } from "./model/pinning";
 import type { Pin, Pins } from "./model/pinning";
-import { manualViewKey, onlyKnown, viewKey } from "./model/view";
-import type { ManualView, TableView } from "./model/view";
+import { requestKey, onlyKnown, viewKey } from "./model/view";
+import type { TableRequest, TableView } from "./model/view";
 import type { ModelColumn } from "./model/tableModel";
 import { Registry } from "./registry";
 import { buildParts } from "./parts";
@@ -170,10 +170,10 @@ function effectiveWidths(
     grouping, page, selection, column widths -, and the parts it returns are
     typed at your row, so that a field name in `Column` is checked by the
     compiler.
-    @param rows All rows in automatic mode; in manual mode the page a server
+    @param rows All rows in automatic mode; in server mode the page a server
     delivered for the current view.
     @param options How a row is keyed, the view to start from and the handler
-    that hears every change of it, and in manual mode the server's count and
+    that hears every change of it, and in server mode the server's count and
     the handler that hears every request.
     @returns The table's state and its parts: `Table`, `Column`,
     `VerdictColumn`, `RowDetail`, `RowActions`, `Action` and `GroupBy`. Pass it
@@ -195,23 +195,23 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
 
   const [start] = useState<TableView | undefined>(() => options.initialView);
 
-  /* Manual mode (table-server-mode, M1): the rows are one page of a server's.
+  /* Server mode (table-server-mode, M1): the rows are one page of a server's.
      What the table would otherwise do over all rows - the pre-filter, the
      grouping, virtualisation - it would do over one page and call that the
      whole, so it is passed over, and said so once in development. */
-  const manual = options.manual === true;
-  const rowCount = options.manual ? options.rowCount : 0;
-  const manualInput = useMemo(() => (manual ? { rowCount } : undefined), [manual, rowCount]);
-  registry.setManual(manual);
-  if (manual) {
+  const server = options.server === true;
+  const rowCount = options.server ? options.rowCount : 0;
+  const serverInput = useMemo(() => (server ? { rowCount } : undefined), [server, rowCount]);
+  registry.setServer(server);
+  if (server) {
     if (options.preFilter ?? options.filter) {
-      warnOnce("manual-prefilter", "`preFilter` is passed over in manual mode: the server decides which rows the table has.");
+      warnOnce("server-prefilter", "`preFilter` is passed over in server mode: the server decides which rows the table has.");
     }
     if (options.virtual) {
-      warnOnce("manual-virtual", "`virtual` is passed over in manual mode: the table pages instead.");
+      warnOnce("server-virtual", "`virtual` is passed over in server mode: the table pages instead.");
     }
     if (options.defaultGrouping !== undefined || start?.grouping?.length) {
-      warnOnce("manual-grouping", "A grouping is passed over in manual mode: the groups would be the page's, not the server's.");
+      warnOnce("server-grouping", "A grouping is passed over in server mode: the groups would be the page's, not the server's.");
     }
   }
 
@@ -241,7 +241,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
      it reacts to. It runs before search and conditions, and everything further
      calculates with what it admits. */
   const preFilter = (options.preFilter ?? options.filter) as ((row: unknown) => boolean) | undefined;
-  const admitted = useAdmitted(rowsUnknown, manual ? undefined : preFilter);
+  const admitted = useAdmitted(rowsUnknown, server ? undefined : preFilter);
 
   /* The grouping is held here, not in the companion: which ids it may carry
      only the registry knows. An id nothing groupable carries falls out on
@@ -261,7 +261,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
      children function is read through a holder the commit updates: written in
      the call it is new on every render, and the model would recalculate on
      every scroll. */
-  const childRows = options.manual ? undefined : (options.childRows as ((row: unknown) => readonly unknown[] | undefined) | undefined);
+  const childRows = options.server ? undefined : (options.childRows as ((row: unknown) => readonly unknown[] | undefined) | undefined);
   const isTree = childRows !== undefined;
   registry.setTree(isTree);
   const latest = useRef({ children: childRows, key: rowKey });
@@ -274,7 +274,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     label: () => "",
   }));
   const [defaultBranches] = useState<readonly string[]>(() => {
-    const given = options.manual ? undefined : options.defaultBranches;
+    const given = options.server ? undefined : options.defaultBranches;
     if (!isTree || given === undefined) return [];
     return typeof given === "number" ? branchesTo(rowsUnknown, reader, given) : [...given];
   });
@@ -291,7 +291,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
   }
 
   const registered = registry.orderedColumns().length + registry.groupKeys.entries.size > 0;
-  const groupingNow = manual || isTree
+  const groupingNow = server || isTree
     ? []
     : registered
       ? registry.effectiveGrouping(groupingState, rowsUnknown)
@@ -321,9 +321,9 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     defaultSort: options.defaultSort,
     filter,
     initialView: start,
-    virtual: manual ? undefined : options.virtual,
+    virtual: server ? undefined : options.virtual,
     grouping,
-    manual: manualInput,
+    server: serverInput,
     tree,
   });
 
@@ -426,7 +426,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
 
   /* The grouping's default is the application's; the view carries a deviation
      only, and of the folds only those whose group still occurs. */
-  const defaultGrouping = manual || isTree
+  const defaultGrouping = server || isTree
     ? []
     : registered
     ? registry.effectiveGrouping(listOf(options.defaultGrouping), rowsUnknown)
@@ -455,7 +455,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
   };
 
   /* Without a pagination bar there are no pages (registry.ts). */
-  const virtual = !manual && Boolean(options.virtual);
+  const virtual = !server && Boolean(options.virtual);
   const paginates = (!isTree && registry.paginates()) || virtual;
   const selection = options.selection ?? b.selection;
 
@@ -473,33 +473,32 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
 
   /* The server's request (M1): reported after the commit, once when
      the table first stands and once per change of what decides the rows - a
-     new width or a hidden column fetches nothing. The key is compared, not the
-     object: a second render with the same view (Strict Mode, a column
+     width, an order, a pin, a fold or a hidden column fetches nothing. The key
+     is compared, not the object: a second render with the same request (Strict Mode, a column
      registering) must not fetch twice. */
-  const manualView: ManualView = {
-    ...groupedView,
+  const request: TableRequest = {
     search: b.search,
     conditions: Object.fromEntries(effective),
     sort,
     page: b.page,
     pageSize: b.pageSize,
   };
-  const reportKey = manual ? manualViewKey(manualView) : "";
+  const reportKey = server ? requestKey(request) : "";
   const reported = useRef<string | null>(null);
   useEffect(() => {
-    if (!manual || reported.current === reportKey) return;
+    if (!server || reported.current === reportKey) return;
     reported.current = reportKey;
-    options.onRequest?.(manualView);
+    options.onRequest?.(request);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once per change of what decides the rows, with that render's view and handler
   }, [reportKey]);
 
-  /* A bulk action receives rows, and in manual mode a selected row may stand
+  /* A bulk action receives rows, and in server mode a selected row may stand
      on a page the table no longer holds (M5). It keeps the rows it has seen
      for as long as they are selected, as they were when last seen - never
      more than the selection and the page. */
   const [seenRows] = useState(() => new Map<string, unknown>());
   let selectedRows: readonly unknown[] | undefined;
-  if (manual) {
+  if (server) {
     const onPage = new Set<string>();
     for (const row of rowsUnknown) {
       const key = rowKey(row);
@@ -561,8 +560,8 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     foldAllBranches: () => setBranchesState([]),
     asCsv: () => csvOf(registry, wording.levelColumn),
     virtual,
-    rowCount: manual ? rowCount : b.filtered.length,
-    manual,
+    rowCount: server ? rowCount : b.filtered.length,
+    server,
   };
 
   // Idempotent for the same snapshot (registry.ts, guarantee 1).
@@ -579,7 +578,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     rowKey,
     formats,
     pins: pinsChosen,
-    filterOptions: manual ? options.filterOptions : undefined,
+    filterOptions: server ? options.filterOptions : undefined,
     selectedRows,
     rowFilters,
   });

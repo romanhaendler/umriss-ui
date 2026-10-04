@@ -322,7 +322,7 @@ export interface ExportProps {
 }
 
 /** Writes the filtered set in the visible columns and their order – with the
-    values, not with their presentation. In manual mode the table holds one
+    values, not with their presentation. In server mode the table holds one
     page of the server's, so it writes that page, and its button says so. */
 export function Export({ filename, onExport, size: own, of }: ExportProps) {
   const connection = useConnection(of);
@@ -349,7 +349,7 @@ export function Export({ filename, onExport, size: own, of }: ExportProps) {
 
   return (
     <Button size={size} onClick={exportCsv}>
-      {snapshot.manual ? wording.exportPageLabel : wording.exportLabel}
+      {snapshot.server ? wording.exportPageLabel : wording.exportLabel}
     </Button>
   );
 }

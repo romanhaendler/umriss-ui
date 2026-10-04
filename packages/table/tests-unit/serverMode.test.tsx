@@ -1,13 +1,13 @@
-/* Manual mode at the table's interface (table-server-mode 01 and 02): the view
+/* Server mode at the table's interface (table-server-mode 01 and 02): the request
    goes out once per change, a fake server with latency answers, and loading,
    list filters, selection, grouping, export and grid mode behave as M1-M5 say.
-   Without `manual` nothing changes - the rest of the suite is that proof. */
+   Without `server` nothing changes - the rest of the suite is that proof. */
 
 import { StrictMode, useState } from "react";
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ColumnMenu, Export, Pagination, Search, Toolbar, useTable } from "../src";
-import type { ManualView, Table } from "../src";
+import type { TableRequest, Table } from "../src";
 
 interface Order {
   id: string;
@@ -27,7 +27,7 @@ const ALL: Order[] = Array.from({ length: 95 }, (_, i) => ({
 const LATENCY = 300;
 
 /** What a server does with a view: search, conditions, sort, then the page. */
-function answer(view: ManualView): { rows: Order[]; rowCount: number } {
+function answer(view: TableRequest): { rows: Order[]; rowCount: number } {
   const lines = view.conditions.line as readonly string[] | undefined;
   let rows = ALL.filter((o) => o.number.toLowerCase().includes(view.search.toLowerCase()) && (!lines || lines.includes(o.line)));
   for (const level of [...view.sort].reverse()) {
@@ -42,7 +42,7 @@ let current: Table<Order> | null = null;
 const capture = (t: Table<Order>) => {
   current = t;
 };
-let reports: ManualView[] = [];
+let reports: TableRequest[] = [];
 let bulk: (readonly Order[])[] = [];
 let exported: string[] = [];
 
@@ -56,7 +56,7 @@ function Server({ grid = false, filterOptions = true, groupable }: { grid?: bool
   const t = useTable(data.rows, {
     rowKey: (o) => o.id,
     pageSize: 10,
-    manual: true,
+    server: true,
     rowCount: data.rowCount,
     onRequest: (view) => {
       reports.push(view);
@@ -111,7 +111,7 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-describe("Manual mode - the view goes out", () => {
+describe("Server mode - the request goes out", () => {
   it("reports the first view once, complete, even under Strict Mode", () => {
     render(
       <StrictMode>
@@ -130,17 +130,22 @@ describe("Manual mode - the view goes out", () => {
     act(() => t().setFilter("line", ["L2"]));
     act(() => t().setPage(2));
     act(() => t().setPageSize(25));
-    // A width and a hidden column fetch nothing.
+    // A width, an order, a pin, a fold and a hidden column ask the server nothing.
     act(() => t().setWidth("number", 200));
+    act(() => t().setOrder(["amount", "number", "line"]));
+    act(() => t().setPin("amount", "end"));
+    act(() => t().toggleFold("L1"));
     act(() => t().toggleColumn("line"));
-    act(() => t().setPage(1));
-    expect(reports.map(({ search, conditions, sort, page, pageSize }) => ({ search, conditions, sort, page, pageSize }))).toEqual([
+    act(() => t().setPage(2));
+    // The request is the five parts that decide the rows, and nothing else.
+    expect(reports).toEqual([
       { search: "", conditions: {}, sort: [], page: 1, pageSize: 10 },
       { search: "A-0", conditions: {}, sort: [], page: 1, pageSize: 10 },
       { search: "A-0", conditions: {}, sort: [{ column: "amount", direction: "asc" }], page: 1, pageSize: 10 },
       { search: "A-0", conditions: { line: ["L2"] }, sort: [{ column: "amount", direction: "asc" }], page: 1, pageSize: 10 },
       { search: "A-0", conditions: { line: ["L2"] }, sort: [{ column: "amount", direction: "asc" }], page: 2, pageSize: 10 },
       { search: "A-0", conditions: { line: ["L2"] }, sort: [{ column: "amount", direction: "asc" }], page: 1, pageSize: 25 },
+      { search: "A-0", conditions: { line: ["L2"] }, sort: [{ column: "amount", direction: "asc" }], page: 2, pageSize: 25 },
     ]);
   });
 
@@ -178,7 +183,7 @@ describe("Manual mode - the view goes out", () => {
   });
 });
 
-describe("Manual mode - loading (M2)", () => {
+describe("Server mode - loading (M2)", () => {
   it("shows a page of placeholders before the first answer, then keeps the page it has while the next is on its way", () => {
     const { container } = render(<Server />);
     // Before the first answer: a page's worth.
@@ -200,7 +205,7 @@ describe("Manual mode - loading (M2)", () => {
   });
 });
 
-describe("Manual mode - list filters (M4)", () => {
+describe("Server mode - list filters (M4)", () => {
   it("offers the values the application names, not the page's", () => {
     render(<Server />);
     settle();
@@ -225,7 +230,7 @@ describe("Manual mode - list filters (M4)", () => {
   });
 });
 
-describe("Manual mode - selection (M5)", () => {
+describe("Server mode - selection (M5)", () => {
   it("keeps keys of other pages, selects the page with 'select all' and says so, and hands a bulk action every selected row", () => {
     render(<Server />);
     settle();
@@ -244,7 +249,7 @@ describe("Manual mode - selection (M5)", () => {
   });
 });
 
-describe("Manual mode - what the table does not do over one page", () => {
+describe("Server mode - what the table does not do over one page", () => {
   it("has no footer, and no grouping - with a warning where one was asked for (M3)", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     const { container } = render(<Server groupable />);
@@ -268,7 +273,7 @@ describe("Manual mode - what the table does not do over one page", () => {
   });
 });
 
-describe("Manual mode - grid mode", () => {
+describe("Server mode - grid mode", () => {
   it("walks the page, and the Active cell stands at the same place on the next one", () => {
     render(<Server grid />);
     settle();

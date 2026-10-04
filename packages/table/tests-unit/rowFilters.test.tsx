@@ -6,7 +6,7 @@
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { Pagination, Toolbar, rowFilter, useTable } from "../src";
-import type { ManualView, Table, TableView } from "../src";
+import type { TableRequest, Table, TableView } from "../src";
 
 interface Shipment {
   id: string;
@@ -158,13 +158,13 @@ it("a row filter the table was not given is passed over, with a warning", () => 
   expect(warn).toHaveBeenCalledWith(expect.stringContaining('"stray"'));
 });
 
-it("in manual mode it goes to the server and the table filters nothing itself", () => {
-  const views: ManualView[] = [];
+it("in server mode it goes to the server and the table filters nothing itself", () => {
+  const views: TableRequest[] = [];
   function Server() {
     const table = useTable(SHIPMENTS, {
       rowKey: (s) => s.id,
       rowFilters: [tours],
-      manual: true,
+      server: true,
       rowCount: 4,
       onRequest: (view) => views.push(view),
     });

@@ -88,7 +88,7 @@ export function TableToolbar({
         <span role="status" className={styles.filteredCount}>
           {!restricted
             ? ""
-            : snapshot.manual
+            : snapshot.server
               ? /* The server counts the matches only; a total beside them would be a second request. */
                 wording.entries(snapshot.rowCount, formats.count(snapshot.rowCount))
               : wording.filteredOfTotal(formats.count(snapshot.filtered.length), formats.count(hook.companion.total ?? hook.admitted.length))}

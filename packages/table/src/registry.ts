@@ -133,9 +133,9 @@ export interface HookSnapshot {
   formats: Formats;
   /** The pins the user chose - absent while the declared ones hold. */
   pins: Pins | null;
-  /** Manual mode: the values a list filter offers, from the application. */
+  /** Server mode: the values a list filter offers, from the application. */
   filterOptions?: (column: string) => readonly unknown[];
-  /** Manual mode: the selected rows the table has seen, on this page or an
+  /** Server mode: the selected rows the table has seen, on this page or an
       earlier one - what a bulk action receives. */
   selectedRows?: readonly unknown[];
   /** The row filters the table was given, by id - their chips read them. */
@@ -461,18 +461,18 @@ export class Registry {
   /** Whether the table lets itself be grouped at all (`<Table groupable>`). */
   tableGroupable = true;
 
-  /** Manual mode: the rows are a server's page, and nothing groups them. */
-  manual = false;
+  /** Server mode: the rows are a server's page, and nothing groups them. */
+  server = false;
 
   /** The hook says during its render, before the table's, whether it is in
-      manual mode. Idempotent, and no version rises: the hook renders before
+      server mode. Idempotent, and no version rises: the hook renders before
       everything that reads it. */
-  setManual(manual: boolean) {
-    this.manual = manual;
+  setServer(server: boolean) {
+    this.server = server;
   }
 
   /** Tree rows: the table builds its levels from the rows' children, and
-      nothing groups it. Set by the hook during its render, as `manual` is. */
+      nothing groups it. Set by the hook during its render, as `server` is. */
   tree = false;
 
   setTree(tree: boolean) {
@@ -488,9 +488,9 @@ export class Registry {
   /** Everything a table can be grouped by: its columns, then its group keys. */
   groupingEntries(rows: readonly unknown[]): ColumnEntry[] {
     if (!this.tableGroupable || this.tree) return [];
-    if (this.manual) {
+    if (this.server) {
       if (this.orderedColumns().some((e) => e.spec.groupable === true)) {
-        warnOnce("manual-groupable-column", "`groupable` on a column is passed over in manual mode: the groups would be the page's, not the server's.");
+        warnOnce("server-groupable-column", "`groupable` on a column is passed over in server mode: the groups would be the page's, not the server's.");
       }
       return [];
     }
@@ -669,7 +669,7 @@ export class Registry {
       hidden: b.hidden,
       order: b.order,
       grouping: this.groupingFor(hook),
-      manual: b.manual,
+      server: b.server,
       tree: hook.tree,
     };
     const fresh = tableModel(hook.admitted, columns, input);

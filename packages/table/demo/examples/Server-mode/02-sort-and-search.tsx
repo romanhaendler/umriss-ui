@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Stack, Text } from "@umriss-ui/core";
 import { Pagination, Search, Toolbar, useTable } from "../../../src";
-import type { ManualView } from "../../../src";
+import type { TableRequest } from "../../../src";
 
 /* Data from the logistics world, written out here so the example runs on its own. */
 /** A small LCG - the same numbers on every computer. */
@@ -158,7 +158,7 @@ const SHIPMENTS: readonly Shipment[] = TOURS.flatMap((one) =>
 export const title = "Sort and search on the server";
 export const lead = "The request `onRequest` reports is complete: search, sort, page and page size, defaults included. The line below shows what the server received.";
 
-const serve = (view: ManualView) => {
+const serve = (view: TableRequest) => {
   const term = view.search.trim().toLowerCase();
   const hits = SHIPMENTS.filter((s) => !term || s.id.toLowerCase().includes(term) || s.customer.toLowerCase().includes(term));
   const sort = view.sort[0];
@@ -171,14 +171,14 @@ const serve = (view: ManualView) => {
   return { view, rows: hits.slice(start, start + view.pageSize), rowCount: hits.length };
 };
 
-const FIRST: ManualView = { search: "", conditions: {}, sort: [{ column: "id", direction: "asc" }], page: 1, pageSize: 10 };
+const FIRST: TableRequest = { search: "", conditions: {}, sort: [{ column: "id", direction: "asc" }], page: 1, pageSize: 10 };
 
 export default function SortAndSearch() {
   const [answer, setAnswer] = useState(() => serve(FIRST));
   const { Table, Column } = useTable(answer.rows, {
     rowKey: (s) => s.id,
     defaultSort: FIRST.sort[0],
-    manual: true,
+    server: true,
     rowCount: answer.rowCount,
     onRequest: (view) => setAnswer(serve(view)),
   });

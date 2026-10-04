@@ -7,7 +7,7 @@
 /** A row filter, as `rowFilter` makes it: a condition over the whole row
     that a control of the application sets through `setFilter`. */
 export interface RowFilter<Z, B> {
-  /** Its name in `t.view.conditions` and in what manual mode reports - the one
+  /** Its name in `t.view.conditions` and in what server mode reports - the one
       place the filter is spelled. Not the id of a column of the same table. */
   readonly id: string;
   /** What it is called: before the text of its chip, and in the chip's

@@ -29,7 +29,7 @@ const COLUMNS = [
   { id: "latencySlo", label: "Latency objective (ms)" },
 ] as const;
 
-/* Written once for every table of the application. In manual mode the table
+/* Written once for every table of the application. In server mode the table
    holds one page of the server's, and that is all `asCsv` can write - so the
    button says so instead of pretending to copy the whole list. */
 function CopyAsCsv({ of }: { of: TableRef }) {
@@ -41,7 +41,7 @@ function CopyAsCsv({ of }: { of: TableRef }) {
         void navigator.clipboard.writeText(of.asCsv()).then(() => setCopied(true));
       }}
     >
-      {copied ? "Copied" : of.manual ? "Copy this page as CSV" : "Copy as CSV"}
+      {copied ? "Copied" : of.server ? "Copy this page as CSV" : "Copy as CSV"}
     </Button>
   );
 }
