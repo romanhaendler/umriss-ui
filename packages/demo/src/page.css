@@ -535,6 +535,8 @@
   box-shadow: var(--u-edge);
   background: var(--u-color-surface);
   overflow: hidden;
+  /* "On this page" links it, like an example. */
+  scroll-margin-top: calc(var(--shell-head, 56px) + 20px);
 }
 
 .configuratorStage {

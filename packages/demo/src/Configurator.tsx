@@ -61,6 +61,9 @@ function Field({ control, value, onChange }: { control: Control; value: Value; o
   );
 }
 
+/** The configurator's anchor, which "On this page" links. */
+export const configuratorAnchor = (pageId: string) => `configurator-${pageId}`;
+
 export function Configurator({ configurator, packageName }: { configurator: ConfiguratorData; packageName: string }) {
   const { name, Component, controls, required } = configurator;
   const [values, setValues] = useState(() => startOf(controls));
@@ -74,7 +77,12 @@ export function Configurator({ configurator, packageName }: { configurator: Conf
   }
 
   return (
-    <section className="configurator" data-configurator={configurator.pageId} aria-label={`${name}, configured`}>
+    <section
+      className="configurator"
+      id={configuratorAnchor(configurator.pageId)}
+      data-configurator={configurator.pageId}
+      aria-label={`${name}, configured`}
+    >
       <Stage className="exampleStage configuratorStage">
         <Component {...props} />
       </Stage>

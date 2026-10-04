@@ -17,7 +17,7 @@ import { createPortal } from "react-dom";
 import { Tooltip } from "@umriss-ui/core";
 import { Example } from "./Example";
 import { useContents, type ContentsEntry } from "./Contents";
-import { Configurator } from "./Configurator";
+import { Configurator, configuratorAnchor } from "./Configurator";
 import { CopyButton } from "./CopyButton";
 import { RubricLine } from "./CopyPage";
 import { GermanNotice } from "./Language";
@@ -235,10 +235,12 @@ export function Page({ demo, page }: PageProps) {
   ];
   const contents = useContents(index !== undefined ? indexContents(index) : [
     { label: page.name, href: here, target: `#page-${page.id}` },
+    ...(configurator === undefined ? [] : [section(configuratorAnchor(page.id), "Configurator")]),
     ...(first === undefined ? [] : [exampleEntry(first)]),
     ...(rest.length === 0
       ? []
       : [section(`examples-${page.id}`, "Examples"), ...rest.map((one) => ({ ...exampleEntry(one), sub: true as const }))]),
+    ...(demo.references[page.id] ?? []).map((table) => section(table.anchor, table.title)),
     ...(page.alternatives === undefined ? [] : [section(`alternatives-${page.id}`, "When to use something else")]),
     ...(hasKeys ? [section(keyboardAnchor(page.id), "Keyboard")] : []),
     ...(page.accessibility === undefined ? [] : [section(`accessibility-${page.id}`, "Accessibility")]),

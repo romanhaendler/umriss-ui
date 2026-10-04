@@ -63,6 +63,12 @@ describe("Demo smoke test", () => {
       /* Read once: core's index has some 250 anchors. */
       const ids = new Set([...host.querySelectorAll("[id]")].map((one) => one.id));
       for (const anchor of DEMO.apiIndex!.anchors) expect(ids.has(anchor), anchor).toBe(true);
+    } else {
+      /* "On this page" names every section heading and the configurator, in
+         the page's order. */
+      const listed = [...host.querySelectorAll('nav[aria-label="On this page"] a')].map((a) => a.getAttribute("href")!.split("#")[1]);
+      const anchors = [...host.querySelectorAll(".sectionTitle[id], .configurator[id]")].map((el) => el.id);
+      expect(listed.filter((id) => anchors.includes(id!))).toEqual(anchors);
     }
     await teardown();
   });
