@@ -1,6 +1,6 @@
 # From the documentation research to work
 
-Status: ready-for-agent
+Status: done
 Date:   2026-10-03
 Origin: session of 2–3 Oct 2026. The brief, in the words it was given in:
 "Unsere Demo-Seite gefällt mir noch immer nicht zu 100%. Die Startseite ist zwar
@@ -70,3 +70,7 @@ in each spec is binding; the order here is only advice.
   attributes are not (ADR-0045).
 - *Sizes is a form control* (the current core outline): overturned by
   `sidebar-tree`.
+
+## Comments
+
+Delivered on `main` on 4 Oct 2026: every ticket under `issues/` is `Status: done` and carries its own delivery report. The whole effort was checked once more on `main` afterwards — lint, typecheck, unit and the full visual suite green.

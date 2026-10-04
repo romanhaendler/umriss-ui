@@ -1,6 +1,6 @@
 # Spec: Types without holes — every type in a props table says what it is
 
-Status: ready-for-agent
+Status: done
 
 Origin: session of 2-3 Oct 2026. The brief, in the words it was given in: "Unsere Demo-Seite gefällt mir noch immer nicht zu 100%. ... State of the Art, sehr einladend, alles entdecken und benutzen zu wollen. Keine offenen Fragen." Research and gap analysis: `docs/research/component-docs-2026-10/` (six notes: landing_pages, component_api_reference, discoverability_interactivity, data_library_docs, asis_site_ux, asis_props_types). Roadmap of all sixteen specs: `.scratch/docs-roadmap/spec.md`.
 
@@ -134,3 +134,7 @@ Acceptance:
 - [ ] The thirteen types are exported and in their packages' changelogs.
 - [ ] The app's API section and the prerendered page's are the same HTML; the Markdown writer passes the parity test.
 - [ ] Every type among `ButtonSize`, `Accessor`, `TableRef`, `Wording`, `Intent` is defined in the llms text, in a definition block or in the appendix, and the appendix holds `applyIntent`, `useTree`, `useToast` and `controlLimits` with their declarations.
+
+## Comments
+
+Delivered on `main` on 4 Oct 2026: every ticket under `issues/` is `Status: done` and carries its own delivery report. The whole effort was checked once more on `main` afterwards — lint, typecheck, unit and the full visual suite green.

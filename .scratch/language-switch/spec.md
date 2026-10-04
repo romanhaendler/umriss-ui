@@ -1,6 +1,6 @@
 # Spec: A language switch — every example in English or German, one click
 
-Status: ready-for-agent
+Status: done
 
 Origin: session of 2–3 Oct 2026. The brief, in the words it was given in:
 "Unsere Demo-Seite gefällt mir noch immer nicht zu 100%. ... State of the Art,
@@ -220,3 +220,7 @@ read core's language: core, table, schedule and calculation.
 - [ ] The choice survives a reload and a move to another demo.
 - [ ] Stages carry `lang="de"` under German; the address never changes.
 - [ ] Shell suite and axe green; no baseline changed.
+
+## Comments
+
+Delivered on `main` on 4 Oct 2026: every ticket under `issues/` is `Status: done` and carries its own delivery report. The whole effort was checked once more on `main` afterwards — lint, typecheck, unit and the full visual suite green.

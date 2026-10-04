@@ -1,6 +1,6 @@
 # Spec: Every page as Markdown, and a "Copy page" menu
 
-Status: ready-for-agent
+Status: done
 
 Origin: session of 2-3 Oct 2026. The brief, in the words it was given in: "Unsere Demo-Seite gefällt mir noch immer nicht zu 100%. ... State of the Art, sehr einladend, alles entdecken und benutzen zu wollen. Keine offenen Fragen." Research and gap analysis: `docs/research/component-docs-2026-10/` (six notes: landing_pages, component_api_reference, discoverability_interactivity, data_library_docs, asis_site_ux, asis_props_types). Roadmap of all sixteen specs: `.scratch/docs-roadmap/spec.md`.
 
@@ -191,3 +191,7 @@ the cut is computed.
   - every HTML page announces its twin; `llms.txt` links the twins;
   - the split button copies exactly the served text, and its three menu items
     open the right addresses, in the demo and on the built site.
+
+## Comments
+
+Delivered on `main` on 4 Oct 2026: every ticket under `issues/` is `Status: done` and carries its own delivery report. The whole effort was checked once more on `main` afterwards — lint, typecheck, unit and the full visual suite green.
