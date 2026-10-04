@@ -29,43 +29,17 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
-## Unreleased
-
-### Added
-
-- **Every prop of a props table is shown, or named as an exception**: new
-  examples for `toast.limit`, a popover card at the right edge (`align`,
-  `offset`, `hideOnScroll`), a modal that must be answered (`closeOnBackdrop`,
-  `hideClose`) and a command palette over two hundred candidates (`icon`,
-  `searchedGroup`, `maxFinds`); existing examples now show `step` on the
-  Splitter, `weight` on a Heading, `size` on a ButtonGroup, `align` on a
-  SplitButton, `emptyText` on a MultiSelect, an own `placeholder` on both
-  date-time pickers and `removeLabel` on a Tag. A row a page's configurator
-  sets names "Configurator" under "Shown in". The eight props left without an
-  example are pass-throughs and escape hatches; the demo's list says so for
-  each. The components are unchanged.
-
-### Changed
-
-- **`Combobox`, `MultiSelect` and the four pickers take `aria-label`,
-  `aria-labelledby` and `aria-describedby` on the field** – the input or the
-  button that has the focus – instead of the wrapper around it, as `Input`
-  and `Select` do. A field without a `FormField` can now be named and tied to
-  its own message; inside one, a caller's `aria-describedby` replaces the
-  field's message, as on `Input`.
-- **The examples "With an error" show `invalid` where it is needed**: a field
-  without a `FormField`, with its message tied by `aria-describedby`. Inside
-  a `FormField`, its `error` marks the field invalid by itself; the examples
-  no longer set `invalid` there by hand.
-
-## 0.25.0 – Every export explained, and a palette that keeps count (Oct. 2026)
+## 0.25.0 – Every export explained, 27 pages to configure, and a palette that keeps count (Oct. 2026)
 
 The package explains itself where it is used: every export carries a comment,
 every default a `@default` tag, every type a props table names can be imported,
-and the demo lists all of it in an API index (ADR-0044). The command palette
-learns keywords and a limit to its finds. One thing behaves differently: a
-nested `UmrissProvider` without `language` keeps the language around it (see
-Changed).
+and the demo lists all of it in an API index (ADR-0044). 27 of the demo's pages
+open with a configurator, and every prop of a props table is shown by an
+example or named as an exception. The command palette learns keywords and a
+limit to its finds. Two things behave differently: a nested `UmrissProvider`
+without `language` keeps the language around it, and the combobox family and
+the pickers put a caller's `aria-label` and `aria-describedby` on the field
+that has the focus (see Changed).
 
 ### Added
 
@@ -140,8 +114,30 @@ Changed).
 - **`invalid` has an example on every control that takes it**: Input,
   Textarea, NumberInput, Switch, FileInput, Select, Combobox, MultiSelect, the
   four pickers and `TreeSearch` on the TreeView page each show "With an
-  error", a field marked by a live check with the reason in its `FormField`.
-  In the demo and `docs/llms-full.md`; the components are unchanged.
+  error": a field without a `FormField`, marked by a live check and tied to
+  its message by `aria-describedby`. Inside a `FormField`, its `error` marks
+  the field invalid by itself; the lead of each example says so. In the demo
+  and `docs/llms-full.md`; the components are unchanged.
+- **27 pages open with a configurator**: Alert, Badge, Button, Checkbox,
+  Combobox, the four pickers, Divider, FormField, IconButton, Input, Meter,
+  MultiSelect, NumberInput, ProgressBar, RadioGroup, Select, Skeleton,
+  Slider, Sparkline, Stat, Switch, Tag, Textarea and Typography. The
+  component stands beside a control for each prop that takes a value - a
+  choice, a list, a switch, a number or a text field, bounded where the prop
+  is - and under it the code of what stands there, every prop at its default
+  left out. The controls, the values and the defaults come from the props
+  table. In the demo; the components are unchanged.
+- **Every prop of a props table is shown, or named as an exception**: new
+  examples for `toast.limit`, a popover card at the right edge (`align`,
+  `offset`, `hideOnScroll`), a modal that must be answered (`closeOnBackdrop`,
+  `hideClose`) and a command palette over two hundred candidates (`icon`,
+  `searchedGroup`, `maxFinds`); existing examples now show `step` on the
+  Splitter, `weight` on a Heading, `size` on a ButtonGroup, `align` on a
+  SplitButton, `emptyText` on a MultiSelect, an own `placeholder` on both
+  date-time pickers and `removeLabel` on a Tag. A row a page's configurator
+  sets names "Configurator" under "Shown in". The eight props left without an
+  example are pass-throughs and escape hatches; the demo's list says so for
+  each. The components are unchanged.
 
 ### Changed
 
@@ -150,6 +146,12 @@ Changed).
   a portal target or a density no longer undoes the wording and the formats
   of an outer `UmrissProvider` or `LanguageProvider`. At the root, without a
   provider around it, English holds as before.
+- **`Combobox`, `MultiSelect` and the four pickers take `aria-label`,
+  `aria-labelledby` and `aria-describedby` on the field** – the input or the
+  button that has the focus – instead of the wrapper around it, as `Input`
+  and `Select` do. A field without a `FormField` can now be named and tied to
+  its own message; inside one, a caller's `aria-describedby` replaces the
+  field's message, as on `Input`.
 
 ## 0.24.0 – The select's own list (Oct. 2026)
 

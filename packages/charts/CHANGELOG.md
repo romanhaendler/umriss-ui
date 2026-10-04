@@ -29,24 +29,14 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
-## Unreleased
-
-### Fixed
-
-- **A limit's label takes the limit's `color`**, as its line does; it kept
-  the severity's colour before - a "Release freeze" in alarm red beside its
-  own-coloured line. Without `color` the severity and the role colour it as
-  before.
-- **On an x axis a tick label a limit's label reaches over gives way**, as on
-  a y axis; it stood half covered before. Its tick mark stays.
-
----
-
-## 0.10.0 – Every export explained (Oct. 2026)
+## 0.10.0 – Every export explained, and a limit's colour at its label (Oct. 2026)
 
 The package explains itself where it is used: every export carries a comment,
 every default a `@default` tag, and the demo lists all of it in an API index
-(ADR-0044). What a chart draws and does is unchanged.
+(ADR-0044). Every prop of a props table is shown by an example or named as
+an exception. A limit's own `color` reaches its label, as a stroke before the
+text, and on an x axis the label leaves no tick label half covered (see
+Fixed).
 
 ### Added
 
@@ -83,6 +73,29 @@ every default a `@default` tag, and the demo lists all of it in an API index
   series, the limits, Tooltip & Legend and Benchmark as well as Line - has a
   Keyboard section linking the Chart page's keys. In the demo, the Markdown
   twins and `docs/llms-full.md`; the chart is unchanged.
+- **Every prop of a props table is shown, or named as an exception**: new
+  examples for shares of the whole over time (`normalize`), moments and
+  windows along time (a limit's `orientation="x"` and `color`), specification
+  and control limits side by side (`role="control"`), the rules of a control
+  chart (`rules`, `zoneLines`, `onViolations`) and every kind of series on a
+  second axis (`xAxisId`, `yAxisId`); existing examples now show `dash` on an
+  area, `hidden` from a legend's `onToggle` on a stack and a state band, and
+  `format` on a matrix. The 20 props left without an example are
+  pass-throughs and twins of a prop shown on a sibling type; the demo's list
+  says so for each. The charts are unchanged.
+
+### Fixed
+
+- **A limit with a `color` of its own marks its label with it**: a short
+  stroke before the text, in the limit's colour and its line's pattern
+  (dashed for a specification, solid for a control limit, dotted for a
+  zone). The text stays in the axis's text colour, legible in both themes,
+  which a colour chosen for a line need not be. The label kept the
+  severity's colour before - a "Release freeze" in alarm red beside its
+  own-coloured line. Without `color` the severity and the role colour the
+  text as before, with no stroke.
+- **On an x axis a tick label a limit's label reaches over gives way**, as on
+  a y axis; it stood half covered before. Its tick mark stays.
 
 ---
 

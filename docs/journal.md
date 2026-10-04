@@ -35,13 +35,15 @@ as it stood.
   both held by the gate; every type a props table names importable or defined
   on its page; every props row linked to the examples that show it, the build
   stopping at a prop shown nowhere unless its package's `demo/unshown.json`
-  lists it (155 rows, a list that only shrinks); an API index per package;
-  every token and wording key listed, the tokens named the styling API; one
+  lists it (155 rows at first; after a triage of each, 35, every one an
+  exception with its category - a pass-through, an escape hatch, a twin on a
+  sibling type, a deprecated alias - and none "not shown yet"); an API index
+  per package; every token and wording key listed, the tokens named the styling API; one
   search across the five packages; a Markdown twin and "Copy page" on every
   page; English and German at a switch in four demos; the design language,
   the standards, the non-goals and the changelogs as pages; configurators on
-  ten core pages; keys and accessibility on every page that takes them; a
-  drawer for the sidebar on a phone.
+  27 core pages, counted by the gate as an example is; keys and accessibility
+  on every page that takes them; a drawer for the sidebar on a phone.
 - **What the site asked of the packages.** The command palette took
   `keywords`, `maxFinds` and `searchedGroup` to carry the site's search: fifty
   finds at most with a line for the rest, and a package's name no longer
@@ -51,6 +53,16 @@ as it stood.
   to German; it is measured anew whenever the header column changes.
   `RowActions` takes `pin`, and the `llms-full.md` of table, schedule and
   calculation names the peers in its install line.
+- **What the examples asked of the packages.** Showing `invalid` on a field
+  without a `FormField` found that `Combobox`, `MultiSelect` and the four
+  pickers put a caller's `aria-label` and `aria-describedby` on the wrapper,
+  not on the field a screen reader announces; they go to the focused field
+  now (core's Changed). The charts' new limit examples found a limit's label
+  in its severity's colour despite its own `color`, and on an x axis a tick
+  label half covered by it; both are fixed (charts' Fixed). The label first
+  took the colour as its text, which the accessibility suite caught: no one
+  colour reaches 4.5:1 on both themes' surfaces. The text keeps the axis's
+  colour now, and a short stroke before it carries the limit's.
 
 ## Oct. 2026 — Found as umriss-ui, shown with a picture
 
