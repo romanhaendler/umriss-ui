@@ -216,7 +216,8 @@
     color: var(--u-color-text-secondary);
   }
 
-  .noFinds {
+  .noFinds,
+  .moreFinds {
     margin: 0;
     padding: var(--u-space-4) var(--u-space-5);
     font-size: var(--u-text-md);

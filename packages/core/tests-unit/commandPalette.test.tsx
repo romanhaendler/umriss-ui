@@ -30,11 +30,13 @@ function Harness({
   onChoose = vi.fn(),
   initiallyOpen = true,
   restingItems,
+  maxFinds,
 }: {
   items?: CommandPaletteItem[];
   onChoose?: (id: string) => void;
   initiallyOpen?: boolean;
   restingItems?: CommandPaletteItem[];
+  maxFinds?: number;
 }) {
   const [open, setOpen] = useState(initiallyOpen);
   return (
@@ -46,6 +48,7 @@ function Harness({
         items={items}
         onChoose={onChoose}
         restingItems={restingItems}
+        maxFinds={maxFinds}
       />
     </div>
   );
@@ -434,6 +437,39 @@ describe("Command palette - the announcement and the build-up", () => {
     expect(labels()).toEqual(["Snackbar logLogs", "ToastFeedback"]);
     expect(rows()[1]!.querySelectorAll("span span")).toHaveLength(0);
     expect(rows()[1]!.textContent).not.toContain("snackbar");
+  });
+});
+
+describe("Command palette - a long list of candidates", () => {
+  const MANY: CommandPaletteItem[] = Array.from({ length: 30 }, (_, i) => ({
+    id: `page-${i}`,
+    label: `Page ${i}`,
+    group: "core · Pages",
+    searchedGroup: "Pages",
+  }));
+
+  it("shows at most maxFinds finds, the best, and says how many more there are", () => {
+    render(<Harness items={[{ id: "pager", label: "Pager" }, ...MANY]} maxFinds={5} />);
+    type("pa");
+    expect(rows()).toHaveLength(5);
+    expect(rows()[0]!.textContent).toBe("Pager");
+    expect(screen.getByText("26 more finds")).toBeTruthy();
+  });
+
+  it("says nothing more when every find stands", () => {
+    render(<Harness items={MANY} maxFinds={30} />);
+    type("pa");
+    expect(rows()).toHaveLength(30);
+    expect(screen.queryByText(/more find/)).toBeNull();
+  });
+
+  it("searches the group's searched part only, and shows the whole group", () => {
+    render(<Harness items={MANY} />);
+    type("core");
+    expect(rows()).toHaveLength(0);
+    type("pages");
+    expect(rows()).toHaveLength(30);
+    expect(screen.getAllByRole("group")[0]!.textContent).toContain("core · Pages");
   });
 });
 

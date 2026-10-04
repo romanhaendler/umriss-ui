@@ -98,6 +98,8 @@ export interface Wording {
   paletteNoFinds: string;
   /** What the screen reader hears when the number of finds changes. */
   paletteFindCount: (count: number) => string;
+  /** The last line when more finds exist than `maxFinds` lets stand. */
+  paletteMoreFinds: (count: number) => string;
   /** The three key hints in the footer, each the text beside the key. */
   paletteHintMove: string;
   paletteHintChoose: string;
@@ -625,6 +627,7 @@ export const DEFAULT_WORDING: Wording = {
   paletteList: "Finds",
   paletteNoFinds: "Nothing found",
   paletteFindCount: (count) => (count === 1 ? "1 find" : `${count} finds`),
+  paletteMoreFinds: (count) => (count === 1 ? "1 more find" : `${count} more finds`),
   paletteHintMove: "select",
   paletteHintChoose: "open",
   paletteHintClose: "close",

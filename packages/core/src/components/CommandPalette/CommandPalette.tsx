@@ -44,6 +44,14 @@ export interface CommandPaletteItem {
   label: string;
   /** The heading the candidate stands under. It is searched as well. */
   group?: string;
+  /**
+   * The part of `group` that is searched, where not all of it should be: a
+   * prefix every candidate of a set shares - `core · ` before `core · Inputs` -
+   * would otherwise let its few letters find the whole set.
+   *
+   * @default the whole `group`
+   */
+  searchedGroup?: string;
   /** Optional glyph on the left of the row. */
   icon?: ReactNode;
   /**
@@ -91,13 +99,23 @@ export interface CommandPaletteProps
    * the order belongs to the caller.
    */
   restingItems?: readonly CommandPaletteItem[];
+  /**
+   * The most finds that stand at once - the best by rank. A last line says how
+   * many more there are, and typing on narrows them. For a long list of
+   * candidates, where a single letter finds hundreds and drawing them all
+   * would make every keystroke wait.
+   *
+   * @default every find
+   */
+  maxFinds?: number;
 }
 
 /** Translates the caller's prop into what the matcher and the row work with. */
 function toCandidate(item: CommandPaletteItem): PaletteCandidate {
   return {
     name: item.label,
-    gruppe: item.group,
+    gruppe: item.searchedGroup ?? item.group,
+    group: item.group,
     gewicht: item.weight,
     keywords: item.keywords,
     id: item.id,
@@ -115,10 +133,12 @@ function toCandidate(item: CommandPaletteItem): PaletteCandidate {
 
    `gruppe` and `gewicht` keep their spelling because `lib/search` reads them
    under those names: the matcher's `Candidate` is its contract, not this
-   component's. */
+   component's. `gruppe` is what is searched of the heading, `group` the
+   heading shown. */
 interface PaletteCandidate {
   name: string;
   gruppe?: string;
+  group?: string;
   gewicht?: number;
   keywords?: readonly string[];
   id: string;
@@ -141,6 +161,7 @@ export const CommandPalette = forwardRef<HTMLDialogElement, CommandPaletteProps>
     items,
     onChoose,
     restingItems,
+    maxFinds,
     className,
     onCancel,
     onMouseDown,
@@ -192,7 +213,8 @@ export const CommandPalette = forwardRef<HTMLDialogElement, CommandPaletteProps>
     [restingItems],
   );
 
-  const shown = searching ? finds : resting;
+  const shown = searching ? finds.slice(0, maxFinds) : resting;
+  const moreFinds = searching ? finds.length - shown.length : 0;
 
   /* The finds stand by rank; they are displayed under their heading. A group
      appears where its best find stands - that way the best answer stays the
@@ -200,7 +222,7 @@ export const CommandPalette = forwardRef<HTMLDialogElement, CommandPaletteProps>
   const groups = useMemo<FindGroup[]>(() => {
     const collected: FindGroup[] = [];
     for (const item of shown) {
-      const name = item.kandidat.gruppe;
+      const name = item.kandidat.group;
       let group = collected.find((g) => g.name === name);
       if (group === undefined) {
         group = { name, finds: [] };
@@ -282,7 +304,8 @@ export const CommandPalette = forwardRef<HTMLDialogElement, CommandPaletteProps>
      opening where a resting list stands. Through the shared announcer, whose
      region is this dialog's own: the page behind a modal is inert and its
      regions are silent (listbox-announcements). */
-  const count = order.length;
+  /* Every find counts, the ones beyond `maxFinds` too. */
+  const count = order.length + moreFinds;
   useEffect(() => {
     if (!open) {
       silence();
@@ -500,6 +523,8 @@ export const CommandPalette = forwardRef<HTMLDialogElement, CommandPaletteProps>
               </div>
             )}
 
+            {moreFinds > 0 && <p className={styles.moreFinds}>{wording.paletteMoreFinds(moreFinds)}</p>}
+
             {searching && order.length === 0 && (
               <p className={styles.noFinds}>{wording.paletteNoFinds}</p>
             )}
@@ -584,7 +609,7 @@ function Row({
         </span>
       )}
       <span className={styles.name}>{highlight(candidate.name, item.finds)}</span>
-      {candidate.gruppe !== undefined && <span className={styles.group}>{candidate.gruppe}</span>}
+      {candidate.group !== undefined && <span className={styles.group}>{candidate.group}</span>}
     </div>
   );
 }

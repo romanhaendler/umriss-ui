@@ -74,6 +74,7 @@ export const GERMAN_WORDING: Wording = {
   paletteList: "Funde",
   paletteNoFinds: "Nichts gefunden",
   paletteFindCount: (count) => (count === 1 ? "1 Fund" : `${count} Funde`),
+  paletteMoreFinds: (count) => (count === 1 ? "1 weiterer Fund" : `${count} weitere Funde`),
   paletteHintMove: "wählen",
   paletteHintChoose: "öffnen",
   paletteHintClose: "schließen",
