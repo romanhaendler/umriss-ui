@@ -27,7 +27,7 @@
    in the component's spelling. */
 
 import { addresses, apiIndexRubric } from "@umriss-ui/demo/outline";
-import type { Rubric } from "@umriss-ui/demo/outline";
+import type { Moved, Rubric } from "@umriss-ui/demo/outline";
 
 export type { Rubric, Page } from "@umriss-ui/demo/outline";
 
@@ -475,6 +475,11 @@ export const OUTLINE: readonly Rubric[] = [
   apiIndexRubric("@umriss-ui/schedule"),
 ];
 
-export const ADDRESSES = addresses(OUTLINE);
+/* Examples that moved, and where each stands now - an old anchor still lands.
+   Lane groups' 'controlled' folds from outside through the view now
+   (component-view 07). */
+export const MOVED: Moved = { "lane-groups/controlled": "lane-groups/fold-from-outside" };
+
+export const ADDRESSES = addresses(OUTLINE, MOVED);
 export const { ALL_PAGES, placeOf, addressOf, fromPlace } = ADDRESSES;
 

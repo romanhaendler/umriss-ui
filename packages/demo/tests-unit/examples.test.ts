@@ -163,6 +163,13 @@ describe("a moved page id forwards to its current page", () => {
     expect(() => addresses(OUTLINE, { gauge: "gauge" })).toThrow(/`gauge`/);
     expect(() => addresses(OUTLINE, { meter: "dial" })).toThrow(/`dial`/);
   });
+  it("forwards an example that moved to another page, by its anchor", () => {
+    const example = addresses(OUTLINE, { "meter/basic": "gauge/basic" });
+    expect(example.fromPlace("/meter/basic")).toMatchObject({ example: "basic", moved: true });
+    expect(example.fromPlace("/meter/basic").page?.id).toBe("gauge");
+    expect(example.fromPlace("/gauge/basic").moved).toBeUndefined();
+    expect(() => addresses(OUTLINE, { "meter/basic": "dial/basic" })).toThrow(/`dial\/basic`/);
+  });
 });
 
 describe("the pages whose keys apply on a page (`keysOf`)", () => {
