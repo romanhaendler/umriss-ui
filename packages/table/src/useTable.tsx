@@ -25,7 +25,7 @@ import { MOST_LEVELS, livePaths } from "./model/grouping";
 import type { RowGroup } from "./model/grouping";
 import { pinsForView, withPin } from "./model/pinning";
 import type { Pin, Pins } from "./model/pinning";
-import { requestKey, onlyKnown, viewKey } from "./model/view";
+import { Echoes, requestKey, onlyKnown, viewKey } from "./model/view";
 import type { TableRequest, TableView } from "./model/view";
 import type { ModelColumn } from "./model/tableModel";
 import { Registry } from "./registry";
@@ -328,21 +328,29 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
   });
 
   /* A view handed in applies whenever its content differs from the last one
-     handed in (ADR-0047) - adjusted during the render, as React has state
-     follow a prop, so the table never shows the old view for a frame. What it
-     leaves out goes back to its default; the same view again changes nothing,
-     and none at all keeps the table's own. */
+     handed in (ADR-0047) and is no report of the table's own coming back late
+     - adjusted during the render, as React has state follow a prop, so the
+     table never shows the old view for a frame. What it leaves out goes back
+     to its default; the same view again changes nothing, and none at all keeps
+     the table's own. The reports it answers are forgotten after the commit,
+     so the render itself stays free of effects. */
   const handed = options.initialView;
   const handedKey = handed ? viewKey(handed) : null;
   const [lastHanded, setLastHanded] = useState(handedKey);
+  const [echoes] = useState(() => new Echoes());
+  useEffect(() => {
+    if (lastHanded !== null) echoes.handed(lastHanded);
+  }, [echoes, lastHanded]);
   if (handed && handedKey !== lastHanded) {
     setLastHanded(handedKey);
-    b.restart(handed);
-    setConditions(Object.entries(handed.conditions ?? {}));
-    setGroupingState(handed.grouping ? [...handed.grouping] : listOf(options.defaultGrouping));
-    setFoldedState(handed.folded ?? []);
-    setPinsChosen(handed.pinned ? { ...handed.pinned } : null);
-    setBranchesState(handed.branches ?? defaultBranches);
+    if (!echoes.has(handedKey!)) {
+      b.restart(handed);
+      setConditions(Object.entries(handed.conditions ?? {}));
+      setGroupingState(handed.grouping ? [...handed.grouping] : listOf(options.defaultGrouping));
+      setFoldedState(handed.folded ?? []);
+      setPinsChosen(handed.pinned ? { ...handed.pinned } : null);
+      setBranchesState(handed.branches ?? defaultBranches);
+    }
   }
 
   /* Changing a condition resets to page one, like another search. Only what
@@ -467,6 +475,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
   useEffect(() => {
     if (viewReported.current === viewNowKey) return;
     viewReported.current = viewNowKey;
+    echoes.reported(viewNowKey);
     options.onViewChange?.(groupedView);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once per change of the view, with that render's view and handler
   }, [viewNowKey]);

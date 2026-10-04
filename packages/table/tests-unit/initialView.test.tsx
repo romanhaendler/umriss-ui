@@ -145,6 +145,23 @@ describe("A view handed in later (ADR-0047)", () => {
     expect(current!.view).toEqual({ search: "A-", hidden: ["line"] });
   });
 
+  it("is not gone to when it is a view the table reported, handed back late; one from outside still applies", () => {
+    const keep = vi.fn();
+    const { rerender } = render(<List report={keep} />);
+    act(() => current!.setSearch("A"));
+    act(() => current!.setSearch("A-"));
+    /* The application hands back the first report while the table is at the second: no jump back. */
+    rerender(<List start={{ search: "A" }} report={keep} />);
+    expect(current!.view).toEqual({ search: "A-" });
+    rerender(<List start={{ search: "A-" }} report={keep} />);
+    expect(current!.view).toEqual({ search: "A-" });
+    /* Both came back; the first again is a view from outside now - a restore. */
+    rerender(<List start={{ search: "A" }} report={keep} />);
+    expect(current!.view).toEqual({ search: "A" });
+    rerender(<List start={{ search: "B" }} report={keep} />);
+    expect(current!.view).toEqual({ search: "B" });
+  });
+
   it("lets names no column carries fall out of a view handed in later as well", () => {
     const { rerender } = render(<List />);
     rerender(<List start={{ hidden: ["gone", "line"], widths: { gone: 80 } }} />);

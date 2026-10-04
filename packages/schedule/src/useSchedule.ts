@@ -11,15 +11,16 @@ import type { ForwardRefExoticComponent, RefAttributes } from "react";
 import { Schedule as ScheduleOn, type ScheduleHandle, type ScheduleProps } from "./Schedule";
 import { BlockedTimes, Dependencies, Lane, LaneGroup, Subtasks } from "./parts";
 import { ScheduleScene } from "./scene";
-import { viewKey, type ScheduleView } from "./view";
+import { Echoes, viewKey, type ScheduleView } from "./view";
 
 /** What `useSchedule` takes: the view to start from and the handler that
     hears every change of it. */
 export interface ScheduleOptions {
   /** The view to start from, and to go to whenever one differing in content
       from the last is handed in - the same view again changes nothing, and
-      what it leaves out is reset. The schedule remembers none: where a view
-      is kept is the application's decision. */
+      what it leaves out is reset; one the schedule reported itself, handed
+      back late, is its own state coming back and not gone to. The schedule
+      remembers none: where a view is kept is the application's decision. */
   initialView?: ScheduleView;
   /** Every change of the view, once, always the whole view - the one to keep,
       or to hand another schedule as its `initialView`. A pan or zoom is
@@ -58,6 +59,7 @@ export interface ScheduleParts {
 export function useSchedule(options: ScheduleOptions = {}): ScheduleParts {
   const { initialView, onViewChange } = options;
   const [scene] = useState(() => new ScheduleScene(initialView));
+  const [echoes] = useState(() => new Echoes());
   const [parts] = useState(() => {
     const Schedule = forwardRef<ScheduleHandle, ScheduleProps>((props, ref) => createElement(ScheduleOn, { ...props, scene, ref }));
     Schedule.displayName = "Schedule";
@@ -77,13 +79,16 @@ export function useSchedule(options: ScheduleOptions = {}): ScheduleParts {
   const view = useSyncExternalStore(scene.subscribeView, scene.getView, scene.getView);
 
   /* A view handed in applies whenever its content differs from the last one
-     handed in - before the paint, so the old view never shows for a frame. */
+     handed in and is no report of the schedule's own coming back late - before
+     the paint, so the old view never shows for a frame. */
   const handedKey = initialView === undefined ? null : viewKey(initialView);
   const lastHanded = useRef(handedKey);
   useLayoutEffect(() => {
-    if (initialView === undefined || handedKey === lastHanded.current) return;
+    if (initialView === undefined || handedKey === null || handedKey === lastHanded.current) return;
     lastHanded.current = handedKey;
-    scene.applyView(initialView);
+    const echo = echoes.has(handedKey);
+    echoes.handed(handedKey);
+    if (!echo) scene.applyView(initialView);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- by content, not by identity
   }, [handedKey]);
 
@@ -94,6 +99,7 @@ export function useSchedule(options: ScheduleOptions = {}): ScheduleParts {
   useEffect(() => {
     if (reported.current === key) return;
     reported.current = key;
+    echoes.reported(key);
     onViewChange?.(view);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once per change of the view, with that render's view and handler
   }, [key]);

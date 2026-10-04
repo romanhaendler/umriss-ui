@@ -92,6 +92,23 @@ describe("a view handed in", () => {
     expect(handle!.visibleDomain()).toEqual([at(7.5), at(12)]);
   });
 
+  it("is not gone to when it is a view the schedule reported, handed back late; one from outside still applies", () => {
+    const keep = vi.fn();
+    const { rerender } = render(<Plan initialView={{ domain: [at(6), at(14)] }} onViewChange={keep} />);
+    act(() => hook.setDomain([at(9), at(10)]));
+    act(() => hook.setDomain([at(9), at(11)]));
+    /* The application hands back the first report while the schedule is at the second: no jump back. */
+    rerender(<Plan initialView={{ domain: [at(9), at(10)] }} onViewChange={keep} />);
+    expect(hook.view).toEqual({ domain: [at(9), at(11)] });
+    rerender(<Plan initialView={{ domain: [at(9), at(11)] }} onViewChange={keep} />);
+    expect(hook.view).toEqual({ domain: [at(9), at(11)] });
+    /* Both came back; the first again is a view from outside now - a restore. */
+    rerender(<Plan initialView={{ domain: [at(9), at(10)] }} onViewChange={keep} />);
+    expect(hook.view).toEqual({ domain: [at(9), at(10)] });
+    rerender(<Plan initialView={{ domain: [at(7), at(13)] }} onViewChange={keep} />);
+    expect(hook.view).toEqual({ domain: [at(7), at(13)] });
+  });
+
   it("loses the groups no LaneGroup declares", () => {
     const { container } = render(<Plan initialView={{ folded: ["gone", "hall"] }} />);
     expect(hook.view).toEqual({ folded: ["hall"] });
