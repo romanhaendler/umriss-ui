@@ -1,4 +1,4 @@
-import { Lane, Schedule, Subtasks } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Subtask, Task } from "../../../src";
 
 export const title = "Follow the clock";
@@ -25,6 +25,7 @@ const DUTIES: Subtask[] = [
 ];
 
 export default function FollowTheClock() {
+  const { Schedule, Lane, Subtasks } = useSchedule();
   return (
     <Schedule ariaLabel="Today's on-call rota, with the present" initialDomain={[current - 6 * HOUR, current + 6 * HOUR]} height={188} now>
       <Lane id="ada" label="Ada Mwangi" />

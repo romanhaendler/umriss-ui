@@ -1,4 +1,4 @@
-import { Lane, Schedule, Subtasks } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Subtask, Task } from "../../../src";
 
 export const title = "Write into the bars";
@@ -33,6 +33,7 @@ const WORK: readonly Subtask[] = [
 ];
 
 export default function BarLabels() {
+  const { Schedule, Lane, Subtasks } = useSchedule();
   return (
     <Schedule
       ariaLabel="Tuesday, 17 March, with the work items written in"

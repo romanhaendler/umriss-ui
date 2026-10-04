@@ -1,5 +1,5 @@
 import { Stack, Text } from "@umriss-ui/core";
-import { BlockedTimes, Lane, Schedule, Subtasks, findings } from "../../../src";
+import { findings, useSchedule } from "../../../src";
 import type { BlockedTime } from "../../../src";
 
 /* Data from the planning world, written out here so the example runs on its own. */
@@ -110,6 +110,7 @@ const NAME = new Map(WORK.map((item) => [item.id, item.name]));
 const PERSON = new Map(PEOPLE.map((person) => [person.id, person.name]));
 
 export default function TeamLeave() {
+  const { Schedule, Lane, Subtasks, BlockedTimes } = useSchedule();
   const clashes = findings(WORK, [], BLOCKED).inBlockedTime;
   return (
     <Stack gap={3}>

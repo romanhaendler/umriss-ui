@@ -1,5 +1,5 @@
 import { Stack, Text } from "@umriss-ui/core";
-import { Lane, Schedule, Subtasks, Dependencies } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Subtask, Task, Dependency, DependencyEnds } from "../../../src";
 
 export const title = "Mark the ends with a dot";
@@ -26,6 +26,7 @@ const HANDOVERS: Dependency[] = [
 ];
 
 function Variant({ ends }: { ends: DependencyEnds }) {
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
   return (
     <Stack gap={1}>
       <Text size="xs" tone="muted" mono>

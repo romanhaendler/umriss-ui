@@ -1,5 +1,5 @@
 import { Stack, Text } from "@umriss-ui/core";
-import { BlockedTimes, Dependencies, Lane, Schedule, Subtasks } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { BlockedTime, Dependency, ScheduleTooltipTarget, Subtask, Task } from "../../../src";
 
 export const title = "Say what a bar covers and a line joins";
@@ -57,6 +57,7 @@ function Covers({ target }: { target: ScheduleTooltipTarget }) {
 }
 
 export default function SayWhatABarCoversAndALineJoins() {
+  const { Schedule, Lane, Subtasks, Dependencies, BlockedTimes } = useSchedule();
   return (
     <Schedule ariaLabel="Design, build and test, with leave under the build" initialDomain={[at(6, 30), at(15, 30)]} height={188} tooltip={(target) => <Covers target={target} />}>
       <Lane id="noah" label="Noah Fischer" />

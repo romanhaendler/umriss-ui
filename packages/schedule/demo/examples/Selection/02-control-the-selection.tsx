@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Stack, Text } from "@umriss-ui/core";
-import { Dependencies, Lane, Schedule, Subtasks } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Dependency, Subtask, Task } from "../../../src";
 
 export const title = "Control the selection";
@@ -43,6 +43,7 @@ const TRANSFERS: readonly Dependency[] = [
 ];
 
 export default function ControlTheSelection() {
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
   const [selected, setSelected] = useState<string | null>("c-2043");
   const [leg, setLeg] = useState<string | null>(null);
   const consignment = CONSIGNMENTS.find((c) => c.id === selected);

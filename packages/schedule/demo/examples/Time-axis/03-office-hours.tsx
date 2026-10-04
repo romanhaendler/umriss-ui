@@ -1,4 +1,4 @@
-import { Lane, Schedule, Subtasks } from "../../../src";
+import { useSchedule } from "../../../src";
 
 /* Data from the planning world, written out here so the example runs on its own. */
 
@@ -89,6 +89,7 @@ const WEB_TEAM = PEOPLE.filter((person) => person.team === "Web");
 const ON_THE_WEB_TEAM = new Set(WEB_TEAM.map((person) => person.id));
 
 export default function OfficeHours() {
+  const { Schedule, Lane, Subtasks } = useSchedule();
   return (
     <Schedule
       ariaLabel="Sprint 14 of the web team, office hours only"

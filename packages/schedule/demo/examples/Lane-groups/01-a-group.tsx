@@ -1,4 +1,4 @@
-import { Lane, LaneGroup, Schedule, Subtasks } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Subtask, Task } from "../../../src";
 
 export const title = "Group lanes under a head";
@@ -24,6 +24,7 @@ const WORK: Subtask[] = [
 ];
 
 export default function AGroup() {
+  const { Schedule, Lane, LaneGroup, Subtasks } = useSchedule();
   return (
     <Schedule ariaLabel="Two developers in a team, a designer and a tester outside it" initialDomain={[at(6), at(15)]} height={240} headerWidth={200}>
       <LaneGroup id="developers" label="Developers">

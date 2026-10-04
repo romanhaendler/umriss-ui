@@ -1,4 +1,4 @@
-import { Lane, Schedule, Subtasks } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Subtask, Task } from "../../../src";
 
 export const title = "Scroll more lanes than fit";
@@ -28,6 +28,7 @@ const ROUNDS: Subtask[] = VANS.map((van, i) => ({
 }));
 
 export default function ManyLanes() {
+  const { Schedule, Lane, Subtasks } = useSchedule();
   return (
     <Schedule
       ariaLabel="Twenty vans, Tuesday morning"

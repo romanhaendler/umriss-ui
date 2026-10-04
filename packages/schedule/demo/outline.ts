@@ -48,7 +48,7 @@ export const OUTLINE: readonly Rubric[] = [
         ],
         keysOf: ["schedule"],
         types: [],
-        exports: ["Schedule", "Lane", "Subtasks", "Dependencies"],
+        exports: ["useSchedule"],
         installs: true,
       },
       {
@@ -84,7 +84,7 @@ export const OUTLINE: readonly Rubric[] = [
           "A dependency joins two subtasks of one task; dependencies across tasks are not yet possible.",
         ],
         types: ["ScheduleProps"],
-        exports: ["Schedule", "Lane", "Subtasks", "Dependencies"],
+        exports: ["useSchedule"],
       },
     ],
   },
@@ -104,7 +104,7 @@ export const OUTLINE: readonly Rubric[] = [
         alternatives: [{ when: "Lanes that belong together, folded into one row", use: "lane-groups" }],
         keysOf: ["schedule"],
         types: ["LaneProps"],
-        exports: ["Lane"],
+        exports: ["useSchedule"],
       },
       {
         id: "lane-groups",
@@ -122,7 +122,7 @@ export const OUTLINE: readonly Rubric[] = [
         limits: ["A folded group shows no summary - no utilisation band, no bar spanning its work: a computed claim would look like a drawn fact (ADR-0025)."],
         keysOf: ["schedule"],
         types: ["LaneGroupProps"],
-        exports: ["LaneGroup", "Lane"],
+        exports: ["useSchedule"],
       },
       {
         id: "subtasks",
@@ -133,7 +133,7 @@ export const OUTLINE: readonly Rubric[] = [
         ],
         keysOf: ["schedule"],
         types: ["SubtasksProps", "Subtask", "Task"],
-        exports: ["Subtasks"],
+        exports: ["useSchedule"],
       },
       {
         id: "bar-labels",
@@ -144,7 +144,7 @@ export const OUTLINE: readonly Rubric[] = [
         ],
         keysOf: ["schedule"],
         types: [],
-        exports: ["Schedule"],
+        exports: ["useSchedule"],
       },
       {
         id: "appearances",
@@ -156,7 +156,7 @@ export const OUTLINE: readonly Rubric[] = [
         ],
         keysOf: ["schedule"],
         types: [],
-        exports: ["Subtasks", "resolveAppearance"],
+        exports: ["useSchedule", "resolveAppearance"],
       },
       {
         id: "overlap",
@@ -169,7 +169,7 @@ export const OUTLINE: readonly Rubric[] = [
         limits: ["No stacked layout on request yet: an overlap is always drawn offset, as the finding it is."],
         keysOf: ["schedule"],
         types: [],
-        exports: ["Subtasks"],
+        exports: ["useSchedule"],
       },
       {
         id: "dependencies",
@@ -187,7 +187,7 @@ export const OUTLINE: readonly Rubric[] = [
         ],
         keysOf: ["schedule"],
         types: ["DependenciesProps", "Dependency"],
-        exports: ["Dependencies"],
+        exports: ["useSchedule"],
       },
       {
         id: "routes",
@@ -195,7 +195,7 @@ export const OUTLINE: readonly Rubric[] = [
         sentence: "The shape of a dependency's line: a curve that leaves and arrives forwards, a straight line, or orthogonal segments. Set it for the schedule, or for one dependency.",
         keysOf: ["schedule"],
         types: [],
-        exports: ["Dependencies"],
+        exports: ["useSchedule"],
       },
     ],
   },
@@ -214,7 +214,7 @@ export const OUTLINE: readonly Rubric[] = [
         alternatives: [{ when: "Time a single lane is not available", use: "blocked-time" }],
         keysOf: ["schedule"],
         types: [],
-        exports: ["Schedule"],
+        exports: ["useSchedule"],
       },
       {
         id: "blocked-time",
@@ -227,7 +227,7 @@ export const OUTLINE: readonly Rubric[] = [
         alternatives: [{ when: "Hours nobody works, on every lane", use: "time-axis" }],
         keysOf: ["schedule"],
         types: ["BlockedTimesProps", "BlockedTime"],
-        exports: ["BlockedTimes", "findings"],
+        exports: ["useSchedule", "findings"],
       },
       {
         id: "now-line",
@@ -235,7 +235,7 @@ export const OUTLINE: readonly Rubric[] = [
         sentence: "A line across the lanes at the present moment, so that whatever should have happened by now stands to its left. It follows the clock, or stays at a fixed instant for a replay.",
         keysOf: ["schedule"],
         types: [],
-        exports: ["Schedule"],
+        exports: ["useSchedule"],
       },
       {
         id: "pan-and-zoom",
@@ -251,7 +251,7 @@ export const OUTLINE: readonly Rubric[] = [
         ],
         keysOf: ["schedule"],
         types: [],
-        exports: ["Schedule"],
+        exports: ["useSchedule"],
       },
     ],
   },
@@ -283,7 +283,7 @@ export const OUTLINE: readonly Rubric[] = [
         limits: ["One task at a time: there is no multiple selection."],
         keysOf: ["schedule"],
         types: [],
-        exports: ["Schedule"],
+        exports: ["useSchedule"],
       },
       {
         id: "interactions",
@@ -299,7 +299,7 @@ export const OUTLINE: readonly Rubric[] = [
         ],
         keysOf: ["schedule"],
         types: ["ScheduleInteraction"],
-        exports: ["Schedule"],
+        exports: ["useSchedule"],
       },
       {
         id: "tooltip",
@@ -311,7 +311,7 @@ export const OUTLINE: readonly Rubric[] = [
         ],
         keysOf: ["schedule"],
         types: ["ScheduleTooltipTarget"],
-        exports: ["Schedule"],
+        exports: ["useSchedule"],
       },
       {
         id: "linked-schedules",
@@ -325,7 +325,7 @@ export const OUTLINE: readonly Rubric[] = [
         limits: ["Only the span is shared - not the selection, the hover or the vertical scroll."],
         keysOf: ["schedule"],
         types: [],
-        exports: ["Schedule"],
+        exports: ["useSchedule"],
       },
       {
         id: "handle",
@@ -338,7 +338,7 @@ export const OUTLINE: readonly Rubric[] = [
         alternatives: [{ when: "You need the time under the pointer during a hover or a click", use: "interactions" }],
         keysOf: ["schedule"],
         types: [],
-        exports: ["Schedule"],
+        exports: ["useSchedule"],
       },
       {
         id: "findings",
@@ -384,7 +384,7 @@ export const OUTLINE: readonly Rubric[] = [
         ],
         keysOf: ["schedule"],
         types: [],
-        exports: ["Schedule", "applyIntent"],
+        exports: ["useSchedule", "applyIntent"],
       },
       {
         id: "stretch",
@@ -398,7 +398,7 @@ export const OUTLINE: readonly Rubric[] = [
         limits: ["A main time never becomes shorter than one raster step, or a minute without a raster."],
         keysOf: ["schedule"],
         types: [],
-        exports: ["Schedule", "applyIntent"],
+        exports: ["useSchedule", "applyIntent"],
       },
       {
         id: "snapping",
@@ -410,7 +410,7 @@ export const OUTLINE: readonly Rubric[] = [
         ],
         keysOf: ["schedule"],
         types: [],
-        exports: ["Schedule", "snapTime"],
+        exports: ["useSchedule", "snapTime"],
       },
       {
         id: "placing",
@@ -423,7 +423,7 @@ export const OUTLINE: readonly Rubric[] = [
         alternatives: [{ when: "The work is already on the plan", use: "move-and-lane" }],
         keysOf: ["schedule"],
         types: [],
-        exports: ["Schedule", "subtaskFromPlace"],
+        exports: ["useSchedule", "subtaskFromPlace"],
       },
       {
         id: "where-it-may-go",
@@ -438,7 +438,7 @@ export const OUTLINE: readonly Rubric[] = [
         limits: ["A rule that changes while a drag runs is noticed at the drop, not before."],
         keysOf: ["schedule"],
         types: [],
-        exports: ["Schedule", "BlockedTimes"],
+        exports: ["useSchedule"],
       },
       {
         id: "ripple",

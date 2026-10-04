@@ -1,4 +1,4 @@
-import { Lane, Schedule, Subtasks } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Subtask, Task } from "../../../src";
 
 export const title = "Move through the plan";
@@ -30,6 +30,7 @@ const WORK: Subtask[] = [
 ];
 
 export default function PanAndZoom() {
+  const { Schedule, Lane, Subtasks } = useSchedule();
   return (
     <Schedule
       ariaLabel="A plan to pan and zoom"

@@ -1,4 +1,4 @@
-import { Lane, Schedule, Subtasks } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Subtask, Task } from "../../../src";
 
 export const title = "A person booked twice";
@@ -19,6 +19,7 @@ const WORK: Subtask[] = [
 ];
 
 export default function DoubleBooking() {
+  const { Schedule, Lane, Subtasks } = useSchedule();
   return (
     <Schedule ariaLabel="Kofi booked on two projects at once" initialDomain={[at(8), at(16)]} height={150}>
       <Lane id="kofi" label="Kofi Mensah" />

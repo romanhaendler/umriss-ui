@@ -1,5 +1,5 @@
 import { Stack, Text } from "@umriss-ui/core";
-import { BlockedTimes, Dependencies, Lane, Schedule, Subtasks, findings } from "../../../src";
+import { findings, useSchedule } from "../../../src";
 import type { BlockedTime, Dependency, Subtask, Task } from "../../../src";
 
 export const title = "List the findings";
@@ -29,6 +29,7 @@ const when = (instant: number) => new Date(instant).toLocaleString("en-GB", { we
 const hours = (ms: number) => Math.round(ms / 3_600_000);
 
 export default function ListTheFindings() {
+  const { Schedule, Lane, Subtasks, Dependencies, BlockedTimes } = useSchedule();
   const found = findings(WORK, HANDOVERS, LEAVE);
 
   return (

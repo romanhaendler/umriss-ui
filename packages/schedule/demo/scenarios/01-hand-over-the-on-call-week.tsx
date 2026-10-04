@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Alert, Badge, Stack, Text } from "@umriss-ui/core";
-import { BlockedTimes, Lane, Schedule, Subtasks, applyIntent, findings } from "../../src";
+import { applyIntent, findings, useSchedule } from "../../src";
 import type { BlockedTime, Intent, Subtask, Task } from "../../src";
 
 /* Data from the operations world, written out here so the example runs on its own. */
@@ -108,6 +108,7 @@ const when = (instant: number) =>
   });
 
 export default function HandOver() {
+  const { Schedule, Lane, Subtasks, BlockedTimes } = useSchedule();
   const [rota, setRota] = useState<readonly Subtask[]>(START);
 
   const onIntent = (intent: Intent) => {

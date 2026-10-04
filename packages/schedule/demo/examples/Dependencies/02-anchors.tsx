@@ -1,4 +1,4 @@
-import { Lane, Schedule, Subtasks, Dependencies } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Subtask, Task, Dependency } from "../../../src";
 
 export const title = "Choose what a dependency connects";
@@ -29,6 +29,7 @@ const HANDOVERS: Dependency[] = [
 ];
 
 export default function Anchors() {
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
   return (
     <Schedule ariaLabel="Two handovers with different anchors" initialDomain={[at(6, 30), at(16, 30)]} height={150}>
       <Lane id="truck" label="Truck FP 520 E" />

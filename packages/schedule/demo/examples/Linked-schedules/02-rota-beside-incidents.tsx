@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Stack } from "@umriss-ui/core";
-import { Lane, Schedule, Subtasks } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Subtask, Task } from "../../../src";
 
 /* Data from the operations world, written out here so the example runs on its own. */
@@ -132,6 +132,7 @@ const PAGED: readonly Subtask[] = INCIDENTS.map((incident) => ({
 const HIT = SERVICES.filter((service) => PAGED.some((incident) => incident.lane === service.id));
 
 export default function RotaBesideIncidents() {
+  const { Schedule, Lane, Subtasks } = useSchedule();
   const [domain, setDomain] = useState<readonly [number, number]>([day(16, 6), day(17, 14)]);
   return (
     <Stack gap={2}>

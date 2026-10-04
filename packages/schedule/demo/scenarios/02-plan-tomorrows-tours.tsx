@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Badge, Button, Stack, Text } from "@umriss-ui/core";
-import { Dependencies, Lane, LaneGroup, Schedule, Subtasks, applyIntent, ripple, shiftTask } from "../../src";
+import { applyIntent, ripple, shiftTask, useSchedule } from "../../src";
 import type { Dependency, Intent, Subtask, Task } from "../../src";
 
 /* Data from the logistics world, written out here so the example runs on its own. */
@@ -217,6 +217,7 @@ const plateOf = (vehicle: string) => VEHICLES.find((one) => one.id === vehicle)?
 const driverOf = (driver: string) => DRIVERS.find((one) => one.id === driver)?.name ?? driver;
 
 export default function TourPlan() {
+  const { Schedule, Lane, LaneGroup, Subtasks, Dependencies } = useSchedule();
   const [plan, setPlan] = useState<readonly Subtask[]>(START);
 
   const apply = (intent: Intent) =>

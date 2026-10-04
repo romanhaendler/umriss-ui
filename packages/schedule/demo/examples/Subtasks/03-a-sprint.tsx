@@ -1,4 +1,4 @@
-import { Lane, Schedule, Subtasks } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Subtask } from "../../../src";
 
 /* Data from the planning world, written out here so the example runs on its own. */
@@ -92,6 +92,7 @@ const SUBTASKS: Subtask[] = WORK.map((item): Subtask => ({
 const SPRINT_14: readonly [number, number] = [new Date(2026, 2, 9, 6).getTime(), new Date(2026, 2, 21).getTime()];
 
 export default function ASprint() {
+  const { Schedule, Lane, Subtasks } = useSchedule();
   return (
     <Schedule ariaLabel="Sprint 14, 9 to 20 March" initialDomain={SPRINT_14} height={500} label={(s) => s.name ?? s.id}>
       {PEOPLE.map((person) => (

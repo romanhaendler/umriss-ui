@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Lane, Schedule, Subtasks, applyIntent } from "../../../src";
+import { applyIntent, useSchedule } from "../../../src";
 import type { Subtask, Task } from "../../../src";
 
 export const title = "Place without snapping";
@@ -13,6 +13,7 @@ const ENGINEERS: readonly Task[] = [{ id: "sam", name: "Sam Okafor", color: "lig
 const START: readonly Subtask[] = [{ id: "window-1", task: "sam", lane: "notifications", from: at(13, 5), to: at(13, 50), name: "Maintenance window" }];
 
 export default function NoSnapping() {
+  const { Schedule, Lane, Subtasks } = useSchedule();
   const [windows, setWindows] = useState(START);
   return (
     <Schedule

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Checkbox, ContextMenu, MenuItem, MenuSeparator, Stack, Text } from "@umriss-ui/core";
-import { Lane, Schedule, Subtasks, Dependencies, applyIntent, findings, ripple, shiftTask } from "../../src";
+import { applyIntent, findings, ripple, shiftTask, useSchedule } from "../../src";
 import type { Dependency, Intent, ScheduleInteraction, Subtask, Task } from "../../src";
 
 /* Data from the plant world, written out here so the example runs on its own. */
@@ -128,6 +128,7 @@ function applied(plan: Plan, intent: Intent, cascade: boolean): Plan {
 }
 
 export default function ReplanTheDay() {
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
   const [plan, setPlan] = useState<Plan>(START);
   const [cascade, setCascade] = useState(true);
   const [menu, setMenu] = useState<Menu | null>(null);

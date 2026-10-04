@@ -1,4 +1,4 @@
-import { Lane, Schedule, Subtasks } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Subtask, Task } from "../../../src";
 
 export const title = "Lead-out meeting lead-in";
@@ -19,6 +19,7 @@ const LEGS: Subtask[] = [
 ];
 
 export default function LeadOutMeetsLeadIn() {
+  const { Schedule, Lane, Subtasks } = useSchedule();
   return (
     <Schedule ariaLabel="Two rounds of one van, touching at unloading and loading" initialDomain={[at(6, 30), at(11, 30)]} height={110}>
       <Lane id="fp-402" label="Van FP 402 R" />

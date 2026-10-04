@@ -1,5 +1,5 @@
 import { Badge, Stack, Text } from "@umriss-ui/core";
-import { Dependencies, Lane, Schedule, Subtasks } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Dependency, ScheduleTooltipTarget, Subtask, Task } from "../../../src";
 
 export const title = "Write your own tooltip content";
@@ -55,6 +55,7 @@ function LoadTooltip({ target }: { target: ScheduleTooltipTarget }) {
 }
 
 export default function OwnTooltip() {
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
   return (
     <Schedule
       ariaLabel="Three vehicles with the load in the tooltip"

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Card, Stack, Text } from "@umriss-ui/core";
-import { Dependencies, Lane, Schedule, Subtasks, applyIntent, subtaskFromPlace } from "../../../src";
+import { applyIntent, subtaskFromPlace, useSchedule } from "../../../src";
 import type { Dependency, Intent, PlacingItem, Subtask, Task } from "../../../src";
 
 export const title = "Drag work in from the backlog";
@@ -38,6 +38,7 @@ const BACKLOG: readonly (PlacingItem & { label: string })[] = [
 ];
 
 export default function DragFromTheBacklog() {
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
   const [plan, setPlan] = useState<{ work: readonly Subtask[]; placed: number; last: string }>({
     work: TODAY,
     placed: 0,

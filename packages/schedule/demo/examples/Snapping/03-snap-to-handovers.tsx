@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Lane, Schedule, Subtasks, applyIntent } from "../../../src";
+import { applyIntent, useSchedule } from "../../../src";
 import type { SnapRaster, Subtask, Task } from "../../../src";
 
 export const title = "Snap to handover times";
@@ -17,6 +17,7 @@ const ENGINEERS: readonly Task[] = [{ id: "ada", name: "Ada Mwangi", color: "lig
 const START: readonly Subtask[] = [{ id: "watch-1", task: "ada", lane: "primary", from: at(6), to: at(14) }];
 
 export default function SnapToHandovers() {
+  const { Schedule, Lane, Subtasks } = useSchedule();
   const [watches, setWatches] = useState(START);
   return (
     <Schedule

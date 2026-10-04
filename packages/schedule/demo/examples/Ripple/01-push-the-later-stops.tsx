@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button, Stack, Text } from "@umriss-ui/core";
-import { Dependencies, Lane, Schedule, Subtasks, applyIntent, ripple } from "../../../src";
+import { applyIntent, ripple, useSchedule } from "../../../src";
 import type { Dependency, MoveIntent, Subtask, Task } from "../../../src";
 
 export const title = "Push the later stops of a tour";
@@ -30,6 +30,7 @@ const DRIVES: readonly Dependency[] = [
 const LATE: MoveIntent = { kind: "move", subtask: "stop-1", from: at(8, 10), to: at(8, 20) };
 
 export default function PushTheLaterStops() {
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
   const [stops, setStops] = useState<readonly Subtask[]>(START);
   /* Nothing to push until the first stop runs late. */
   const late = stops.some((s) => s.id === LATE.subtask && s.from === LATE.from);

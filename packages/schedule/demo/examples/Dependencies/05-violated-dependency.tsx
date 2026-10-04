@@ -1,4 +1,4 @@
-import { Lane, Schedule, Subtasks, Dependencies } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Subtask, Task, Dependency } from "../../../src";
 
 export const title = "Show a lag that does not fit";
@@ -21,6 +21,7 @@ const LEGS: Subtask[] = [
 const HANDOVERS: Dependency[] = [{ id: "transfer", from: "line-haul", to: "round", lag: min(40) }];
 
 export default function ViolatedDependency() {
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
   return (
     <Schedule ariaLabel="A handover from the truck to the van that is too short" initialDomain={[at(6, 30), at(11)]} height={150}>
       <Lane id="truck" label="Truck FP 118 R" />

@@ -1,5 +1,5 @@
 import { Stack, Text } from "@umriss-ui/core";
-import { BlockedTimes, Lane, Schedule, Subtasks, findings } from "../../../src";
+import { findings, useSchedule } from "../../../src";
 import type { BlockedTime, Subtask, Task } from "../../../src";
 
 export const title = "Block out leave and maintenance";
@@ -47,6 +47,7 @@ const time = (instant: number) =>
   new Date(instant).toLocaleString("en-GB", { weekday: "short", hour: "2-digit", minute: "2-digit" });
 
 export default function Leave() {
+  const { Schedule, Lane, Subtasks, BlockedTimes } = useSchedule();
   const found = findings(WORK, [], BLOCKED);
 
   return (

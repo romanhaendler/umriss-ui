@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Stack, Text } from "@umriss-ui/core";
-import { Lane, Schedule, Subtasks, applyIntent, overlaps } from "../../../src";
+import { applyIntent, overlaps, useSchedule } from "../../../src";
 import type { Intent, Subtask } from "../../../src";
 
 /* Data from the planning world, written out here so the example runs on its own. */
@@ -91,6 +91,7 @@ const WEB = PEOPLE.filter((person) => person.team === "Web" && WORK.some((item) 
 const START: readonly Subtask[] = WORK.filter((item) => WEB.some((person) => person.id === item.lane));
 
 export default function RefuseADoubleBooking() {
+  const { Schedule, Lane, Subtasks } = useSchedule();
   const [work, setWork] = useState<readonly Subtask[]>(START);
   /* A drop onto another lane at another time reports two intents in one
      tick; each is decided on the plan the one before it left. */

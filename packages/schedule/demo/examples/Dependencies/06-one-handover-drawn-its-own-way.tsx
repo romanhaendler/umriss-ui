@@ -1,4 +1,4 @@
-import { Lane, Schedule, Subtasks, Dependencies } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Subtask, Task, Dependency } from "../../../src";
 
 export const title = "Draw one handover its own way";
@@ -28,6 +28,7 @@ const HANDOVERS: Dependency[] = [
 ];
 
 export default function OneHandoverDrawnItsOwnWay() {
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
   return (
     <Schedule ariaLabel="Design, build, test and a sign-off drawn its own way" initialDomain={[at(6, 30), at(12, 30)]} height={188} attach="nearest" ends="none">
       <Lane id="noah" label="Noah Fischer" />

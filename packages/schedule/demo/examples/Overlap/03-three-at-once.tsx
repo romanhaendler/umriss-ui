@@ -1,4 +1,4 @@
-import { Lane, Schedule, Subtasks } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Subtask, Task } from "../../../src";
 
 export const title = "Three at once";
@@ -21,6 +21,7 @@ const WORK: Subtask[] = [
 ];
 
 export default function ThreeAtOnce() {
+  const { Schedule, Lane, Subtasks } = useSchedule();
   return (
     <Schedule ariaLabel="Priya on three incidents at once" initialDomain={[at(7), at(14)]} height={150}>
       <Lane id="priya" label="Priya Raman" />

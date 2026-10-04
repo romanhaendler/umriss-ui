@@ -15,7 +15,7 @@ checkPage({
   examples: ["provisional", "fixed", "muted"],
   other: { name: "Lanes", pageId: "lane" },
   packageName: "@umriss-ui/schedule",
-  importLine: 'import { Subtasks, resolveAppearance } from "@umriss-ui/schedule";',
+  importLine: 'import { useSchedule, resolveAppearance } from "@umriss-ui/schedule";',
   limits: "overlap",
   /* Appearances is a feature page without a table of its own. */
   tablePageId: "schedule",

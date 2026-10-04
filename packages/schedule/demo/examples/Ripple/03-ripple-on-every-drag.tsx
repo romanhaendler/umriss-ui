@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dependencies, Lane, Schedule, Subtasks, applyIntent, ripple } from "../../../src";
+import { applyIntent, ripple, useSchedule } from "../../../src";
 import type { Dependency, Intent, Subtask, Task } from "../../../src";
 
 export const title = "Ripple on every drag";
@@ -23,6 +23,7 @@ const HANDOVERS: readonly Dependency[] = [
 ];
 
 export default function RippleOnEveryDrag() {
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
   const [work, setWork] = useState<readonly Subtask[]>(START);
 
   const onIntent = (intent: Intent) =>

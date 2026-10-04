@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Alert, Badge, Stack, Text } from "@umriss-ui/core";
-import { BlockedTimes, Lane, LaneGroup, Schedule, Subtasks, applyIntent, findings } from "../../src";
+import { applyIntent, findings, useSchedule } from "../../src";
 import type { BlockedTime, Intent, Subtask } from "../../src";
 
 /* Data from the planning world, written out here so the example runs on its own. */
@@ -175,6 +175,7 @@ const teamOf = (person: string) => PEOPLE.find((one) => one.id === person)?.team
 const nameOf = (person: string) => PEOPLE.find((one) => one.id === person)?.name ?? person;
 
 export default function SprintAroundLeave() {
+  const { Schedule, Lane, LaneGroup, Subtasks, BlockedTimes } = useSchedule();
   const [work, setWork] = useState<readonly Subtask[]>(START);
 
   const onIntent = (intent: Intent) => {

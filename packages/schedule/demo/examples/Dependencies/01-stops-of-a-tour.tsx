@@ -1,4 +1,4 @@
-import { Dependencies, Lane, Schedule, Subtasks } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Dependency, Subtask, Task } from "../../../src";
 
 export const title = "Join the stops of a tour";
@@ -28,6 +28,7 @@ const DRIVES: Dependency[] = [
 ];
 
 export default function StopsOfATour() {
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
   return (
     <Schedule ariaLabel="Two morning tours with their stops" initialDomain={[at(7), at(10)]} height={150}>
       <Lane id="fp-214" label="Van FP 214 K" />

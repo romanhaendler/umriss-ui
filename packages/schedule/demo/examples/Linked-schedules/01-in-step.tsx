@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Stack, Text } from "@umriss-ui/core";
-import { Lane, Schedule, Subtasks } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Subtask, Task } from "../../../src";
 
 export const title = "Keep two schedules in step";
@@ -44,6 +44,7 @@ const on = (lanes: readonly { id: string }[]) => LEGS.filter((leg) => lanes.some
 const time = (instant: number) => new Date(instant).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 
 export default function InStep() {
+  const { Schedule, Lane, Subtasks } = useSchedule();
   const [domain, setDomain] = useState<readonly [number, number]>([at(5, 30), at(18)]);
   return (
     <Stack gap={2}>

@@ -1,4 +1,4 @@
-import { Lane, Schedule, Subtasks } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Subtask, Task } from "../../../src";
 
 /* Data from the logistics world, written out here so the example runs on its own. */
@@ -149,6 +149,7 @@ const ROUNDS: Subtask[] = TOURS.map((tour) => ({
 }));
 
 export default function NowLine() {
+  const { Schedule, Lane, Subtasks } = useSchedule();
   return (
     <Schedule ariaLabel="Today's tours, with the present" initialDomain={[at(5, 30), at(18)]} height={420} now={NOW}>
       {VEHICLES.map((vehicle) => (
