@@ -1,13 +1,13 @@
 # Spec: Every prop points at the example that shows it
 
-Status: done
+Status: ready-for-agent
 
 Origin: session of 2-3 Oct 2026. The brief, in the words it was given in: "Unsere Demo-Seite gefällt mir noch immer nicht zu 100%. ... State of the Art, sehr einladend, alles entdecken und benutzen zu wollen. Keine offenen Fragen." Research and gap analysis: `docs/research/component-docs-2026-10/` (six notes: landing_pages, component_api_reference, discoverability_interactivity, data_library_docs, asis_site_ux, asis_props_types). Roadmap of all sixteen specs: `.scratch/docs-roadmap/spec.md`.
 
 Builds on: `.scratch/demo-as-documentation/spec.md` (props tables generated from `src/`, the JSDoc gate), `.scratch/demo-rework/spec.md` (page skeleton, examples from simple to rich), `.scratch/ai-readable-docs/spec.md` (the llms text renders the same tables), ADR-0037 (pages are paths, examples are anchors).
 Blocked by: `types-without-holes` (S3) — the rows this spec links must carry their real types first, and S3's definition-block anchors share the page with the prop anchors introduced here.
 ADR: none. Nothing here is surprising or hard to reverse; the gate is the only new rule, and it is written down where it fails.
-Tickets: `issues/01`–`05`; each names its blockers. The order across specs is in `.scratch/docs-roadmap/spec.md`.
+Tickets: `issues/01`–`06`; each names its blockers. The order across specs is in `.scratch/docs-roadmap/spec.md`.
 
 ## Problem Statement
 
