@@ -4,9 +4,9 @@
 
 **Blocked by:** 01-07 and `charts-bound-to-rows` 01-08
 
-**Status:** ready-for-agent
+**Status:** done (the release itself follows the acceptance)
 
-- [ ] Every removed prop and export appears in a migration table
+- [x] Every removed prop and export appears in a migration table
 - [ ] Every suite green; the release builds
 
 ## Comments
@@ -44,3 +44,47 @@ charts depends on nothing, so it cannot share core's copy.
   `domain` (usually the whole data). Reword (`zoomHelp`, both wordings).
 - The visual suite was not re-run after the last echo-rule change; the final
   full suite covers it.
+
+### Delivered (2026-10-04)
+
+Scope changed by the user: no version bump, no "Release:" commit - an
+acceptance comes first. So the records stand under `## Unreleased`.
+
+- **Changelogs.** charts, table and schedule each have an `## Unreleased`
+  section with "Changed" (a migration table first, then the broken
+  behaviours) and "Added". Rows: charts 16, table 5, schedule 6 - every name
+  checked against `git diff 63aa408b..HEAD` and the code. The echo rule's
+  one-second limit stands as "A known limit" where `initialView` is described
+  in all three. `YAxis value` was never released (it lived between 02 and
+  07), so charts' row names the released `YAxis accessor`. Core has no entry:
+  its changes are the demo's scenarios and two doc comments.
+- **Capability record.** View, `zoomable`, `zoomLimits`, 'Show all' and the
+  gestures were there (01-04); added a navigator under "Later"; the heading
+  `Chart<T>` is `Chart` (from `useChart`), and BoxPlot's `hidden` row speaks
+  of the view. Nothing says the caller clamps.
+- **Leftovers.** `docs/testing.md`: server mode and `serverMode.test.tsx`,
+  `serverModel.test.ts`, plus the charts' and the schedule's view tests;
+  core's `wording.ts` comments say server mode. `zoomHelp` confirmed reworded
+  (03). CONTEXT.md: "accessor" gone from Materialised series, Baseline and
+  State series; **View** says a view handed in applies whenever it differs.
+- **Old example anchors forwarded.** `Moved` in `@umriss-ui/demo` takes a
+  moved example as `page/example` on both sides; `fromPlace` reads it and the
+  shell rewrites the address as for a moved page; no static forwarder (the
+  anchor never reaches the server). charts: `axis/zoom-and-pan`,
+  `axis/visible-domain`, `chart/cursor-sync`, `tooltip/toggling-legend`,
+  `tooltip/legend-placement`; schedule: `lane-groups/controlled`. Test in
+  `examples.test.ts`.
+- **READMEs.** charts: a bullet on the view; table: server mode with
+  `server: true`, `rowCount`, `onRequest`. schedule and root agree already.
+- **Found on the way.** `llmsGuard.test.ts` failed on HEAD for schedule: it
+  took a component to be an export with a `…Props` beside it, and since
+  `useSchedule` the schedule exports none. `KNOWN` names the components a hook
+  hands out (charts', schedule's) now.
+
+The heading is `## Unreleased` alone, the effort's title in bold below it:
+the site's `newestRelease` (`packages/demo/src/tooling/documents.ts`) skips
+exactly that heading and throws on any other that is no version - the
+release renames it to `<version> – <title> (Oct. 2026)`.
+
+Checks: `pnpm typecheck`, `pnpm lint` green; demo unit suite 348/348. The full
+visual suites and the release build were not run - that is the acceptance's.

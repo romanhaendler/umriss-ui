@@ -18,6 +18,30 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Oct. 2026 — A component holds its own view
+
+- **Charts bound to their rows, and every component holding its own view**
+  (`.scratch/charts-bound-to-rows/`, `.scratch/component-view/`; ADR-0047,
+  ADR-0048; not released yet - the changelogs' "Unreleased" waits on the
+  user's acceptance). From the charts research "zoom and the legend" and its
+  grilling: zooming a chart or hiding a series cost every caller a
+  `useState` and a toggle, the table took its view only once, and the
+  schedule had controlled pairs. A chart is declared through `useChart(rows)`
+  now and reads through `value`, a field name the compiler checks - 406
+  accessors in the workspace, 346 of which only read a field; the schedule
+  through `useSchedule`. Built expand-contract: the new shape beside the old,
+  the callers moved in batches that each stayed green, the old shape removed
+  last. Then the view, in all three: applied by its content, reported whole
+  once per change. The chart zooms on `XAxis zoomable` within `zoomLimits`,
+  its legend toggles by default and shows only a series on a double click,
+  and a 'Show all' brings the whole back. The table's manual mode became
+  server mode, its report the **Request**. Found on the way: two schedules
+  in step jumped back mid-pan when a report came back late - each component
+  now keeps its reports for a second and takes one coming back for its own
+  echo; and the matrix's `value`, its colour, made way for `value` as the y
+  position on every kind, the colour becoming `level`. The demo's shell
+  forwards the anchors of examples that moved to another page.
+
 ## Oct. 2026 — Every export explained
 
 - **The documentation site, sixteen specs** (`.scratch/docs-roadmap/`;

@@ -1,6 +1,6 @@
 # Every component holds its own view
 
-Status: ready-for-agent
+Status: done for tickets 01–08 (2026-10-04) but the release itself: the version bumps and the "Release:" commit follow the user's acceptance.
 Date:   2026-10-04
 Origin: charts research "zoom and the legend" and its grilling, 2026-10-04; ADR-0047.
 Blocked by: per ticket - the chart's view waits for `.scratch/charts-bound-to-rows/` 07, the schedule's for 08.

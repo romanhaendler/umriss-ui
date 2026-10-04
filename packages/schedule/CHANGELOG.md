@@ -15,6 +15,68 @@ moves from here under the rule above.
 
 ---
 
+## Unreleased
+
+**Declared through useSchedule, with a view of its own.**
+Released together with `@umriss-ui/charts` and `@umriss-ui/table`, which
+break in the same release. A schedule is declared through `useSchedule`, as a
+table is through `useTable` and a chart through `useChart` (ADR-0048), and it
+holds its own **view** - the span in view and the folded lane groups -, taken
+as a start and reported whole (ADR-0047). The free components and the
+controlled pairs are removed, not deprecated.
+
+### Changed
+
+**Moving over.** Every export and prop that went, and what stands in its
+place:
+
+| Was | Is |
+|---|---|
+| `import { Schedule, Lane, LaneGroup, Subtasks, Dependencies, BlockedTimes }` | `const { Schedule, Lane, … } = useSchedule()` - one `Schedule` per call; a ref on it still gives the `ScheduleHandle` |
+| `Schedule initialDomain` (required) | `useSchedule({ initialView: { domain } })`; without a span the schedule shows the extent of its subtasks |
+| `Schedule collapsedGroups` (controlled) | `view.folded`, and `toggleGroup`, `foldAll`, `unfoldAll` from `useSchedule`; or a new `initialView: { folded }` |
+| `Schedule defaultCollapsedGroups` | `useSchedule({ initialView: { folded } })` |
+| `Schedule onCollapsedGroupsChange` | `useSchedule({ onViewChange })`, `view.folded` |
+| `Schedule onDomainChange` | `useSchedule({ onViewChange })`, `view.domain` |
+
+- **`Schedule` and its parts are no exports of their own.** `useSchedule()`
+  hands them out; they keep their identity over every render. Their props
+  stay public types.
+- **A span is optional.** `initialDomain` was required; without a `domain`
+  in the view the schedule shows the extent of its subtasks, lead-in and
+  lead-out included, widened or narrowed around its middle into
+  `zoomLimits` - fitted once, not after every change of the data, so a
+  dragged bar does not make the plan jump; without subtasks the local day of
+  today.
+- **A view handed in applies by its content.** `initialDomain` went back to
+  a new pair of values; `initialView` applies whenever it differs in content
+  from the last one handed in - the folded groups compared as a set -, the
+  same view again changes nothing, and what it leaves out is reset. A group
+  id no group carries falls out. **A known limit:** a view handed in that
+  equals one the schedule reported less than a second ago, and that has not
+  come back yet, is taken for the schedule's own report coming back late and
+  is not applied - so that linked schedules do not jump back mid-pan. An
+  application that restores a just-reported view within that second sees no
+  change.
+- **One report for both.** `onViewChange(view)` replaces
+  `onDomainChange` and `onCollapsedGroupsChange`: every change once, always
+  the whole view, a pan or zoom at most once per frame, not the view the
+  schedule starts with. `selectedTask` and `onSelectedTaskChange` are a
+  selection, not the view, and stay as they are; so does `zoomLimits`.
+
+### Added
+
+- **`useSchedule({ initialView, onViewChange })`** with `view`,
+  `setDomain(span | null)` (`null` = the subtasks' extent), `toggleGroup(id)`,
+  `foldAll()` and `unfoldAll()` on what it hands back.
+- **Types**: `ScheduleParts`, `ScheduleOptions`, `ScheduleView`.
+- **The demo** has a page 'View' (keep a view across a reload and restore
+  it); 'Linked schedules' keep in step through a shared view, and Lane
+  groups' "Fold groups from outside" folds through the setters, at the
+  anchor `#fold-from-outside` - the old `#controlled` lands there.
+
+---
+
 ## 0.4.0 – Every export explained, and lane counts in every language (Oct. 2026)
 
 The package explains itself where it is used: every export carries a comment,

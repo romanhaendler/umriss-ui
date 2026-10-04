@@ -254,7 +254,7 @@ export interface Wording {
   unpinHint: string;
   /** The export button. */
   exportLabel: string;
-  /** The export button of a table in manual mode, which holds and writes one page. */
+  /** The export button of a table in server mode, which holds and writes one page. */
   exportPageLabel: string;
   /** The export's file name, where the application names none. */
   exportFileName: string;
@@ -269,7 +269,7 @@ export interface Wording {
   selectRow: (row: string) => string;
   /** The selection of every row in the filtered set. */
   selectAllRows: string;
-  /** The same checkbox in manual mode, where the table holds one page of a server's. */
+  /** The same checkbox in server mode, where the table holds one page of a server's. */
   selectAllOnPage: string;
   /** The expand button, named after the row header. */
   expandRowNamed: (row: string) => string;

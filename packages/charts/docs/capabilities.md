@@ -14,7 +14,7 @@ operations packages (`judging-values`, `shopfloor-instruments`,
 `plant-at-a-glance`, the charts share) and `library-audit` 03/05 delivered.
 Screenshot pages carry their name in brackets.
 
-## `Chart<T>` (container)
+## `Chart` (container, from `useChart`)
 
 | Capability | Rule | Proved at |
 |---|---|---|
@@ -193,7 +193,7 @@ Screenshot pages carry their name in brackets.
 | Fill at 0.18 (as `Area`) with a full outline, median 2px, whisker caps half the box wide, mean a 3.5px ×, outliers r 3 (as `Scatter`), notch depth 0.2 | box-plot B12, 05 | Screenshot (`minimal`, `over-time`) |
 | Several box series side by side in the step; boxes and bars on one x axis share one group | ADR-0002 | Unit (jsdom boxPlot), Screenshot (`grouped`, `objective`) |
 | The hover marker on the median of its own box; the crosshair on the x value | box-plot B11 | Unit (jsdom boxPlot) |
-| `hidden`: out of drawing, hit and extent, the legend entry stays; a bar's hatched swatch under encoding by marks | R-4.13, C3 | Unit (jsdom boxPlot) |
+| Hidden (by `name`, through the view): out of drawing, hit and extent, the legend entry stays; a bar's hatched swatch under encoding by marks | R-4.13, C3, ADR-0047 | Unit (jsdom boxPlot) |
 | Mixed with `Line` and `LimitLine`; `tone` per series | Q11 | Screenshot (`objective`, `detailed`) |
 | `outliers`: a list per box in two named channels - values flat, offsets per box -, null without it and for every other kind | ADR-0040 | Unit (materialize) |
 | Outliers drawn in the box's colour on its centre line, filled; beyond three IQR of the box's own quartiles a ring; in the extent, hidden with their box, never a hit of their own | ADR-0040, B12 | Unit (materialize, jsdom boxPlot), Screenshot (`outliers`) |
@@ -414,6 +414,10 @@ Wanted, not yet built (charts-review Q12). Each waits for a caller who needs it.
   for a reader who misses the column.
 * **Line colour by limit.** A line that turns alarm-coloured above a limit; today
   a `LimitBand` and the ControlChart's violations say the same.
+* **A navigator.** A small overview of the whole course under the plot, its
+  window the span in view, dragged to pan and stretched to zoom. It builds on
+  the view - `domains` and `setDomain` are what it would read and set - and
+  waits for a caller.
 
 ## Out
 
