@@ -393,7 +393,7 @@ describe("The sortedness check (R-2.6)", () => {
       kind: "matrix",
       name: "Cells",
       accessor: (d) => (d as Row).a,
-      value: (d) => (d as Row).a,
+      level: (d) => (d as Row).a,
       coloring: { kind: "gradient", stops: ["#eee", "#333"] },
       xAxisId: "x",
       yAxisId: "y",

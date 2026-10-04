@@ -248,7 +248,7 @@ describe("A state band and a matrix colour themselves", () => {
       kind: "matrix",
       name: "OEE",
       accessor: (d) => (d as Row).a,
-      value: (d) => (d as Row).w,
+      level: (d) => (d as Row).w,
       coloring: { kind: "gradient", stops: ["#eeeeee", "#333333"] },
       xAxisId: "x",
       yAxisId: "y",
@@ -311,7 +311,7 @@ describe("The value channel exists only where a kind needs it (ADR-0011)", () =>
     const matrix: MatrixSeriesConfig = {
       kind: "matrix",
       accessor: (d) => (d as Row).a,
-      value: (d) => (d as Row).w,
+      level: (d) => (d as Row).w,
       coloring: { kind: "gradient", stops: ["#eee", "#333"] },
       xAxisId: "x",
       yAxisId: "y",
@@ -327,7 +327,7 @@ describe("The box channels exist only for a box (ADR-0011)", () => {
   const access = (s: ChartScene) => s.seriesInOrder()[0]?.materialized ?? null;
 
   it("leaves them null for a line, a state series and a matrix", () => {
-    for (const config of [line(), stateSeries(), { kind: "matrix", accessor: (d: unknown) => (d as Row).a, value: (d: unknown) => (d as Row).w, coloring: { kind: "gradient", stops: ["#eee", "#333"] }, xAxisId: "x", yAxisId: "y" } as MatrixSeriesConfig]) {
+    for (const config of [line(), stateSeries(), { kind: "matrix", accessor: (d: unknown) => (d as Row).a, level: (d: unknown) => (d as Row).w, coloring: { kind: "gradient", stops: ["#eee", "#333"] }, xAxisId: "x", yAxisId: "y" } as MatrixSeriesConfig]) {
       const s = makeScene();
       s.registerSeries(config);
       s.axisExtent("y", "y");
@@ -380,7 +380,7 @@ describe("Degenerate cases that look like an empty chart", () => {
     s.registerSeries({
       kind: "matrix",
       accessor: (d) => (d as Row).a,
-      value: (d) => (d as Row).w,
+      level: (d) => (d as Row).w,
       coloring: { kind: "gradient", stops: ["#eee", "#333"] },
       xAxisId: "x",
       yAxisId: "y",
@@ -406,7 +406,7 @@ describe("Degenerate cases that look like an empty chart", () => {
     s.registerSeries({
       kind: "matrix",
       accessor: (d) => (d as Row).a,
-      value: (d) => (d as Row).w,
+      level: (d) => (d as Row).w,
       coloring: { kind: "gradient", stops: ["#eee", "#333"] },
       xAxisId: "x",
       yAxisId: "y",

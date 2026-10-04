@@ -91,7 +91,7 @@ export default function Band() {
   return (
     <Chart height={260} ariaLabel="Checkout's error rate against its warning band and alarm limit">
       <XAxis value="t" time />
-      <YAxis value="errorRate" label="Errors %" />
+      <YAxis label="Errors %" />
       <LimitBand from={1} to={2} severity="warning" label="Watch" />
       <LimitLine value={2} severity="alarm" label="Alert" />
       <Line value="errorRate" name="Error rate" />

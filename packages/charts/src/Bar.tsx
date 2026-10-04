@@ -17,9 +17,7 @@ export interface BarProps<T> {
   /** Height - a number field of the row or a function of it;
       null/undefined/NaN/±Infinity means a gap.
       @remarks R-2.5 */
-  value?: Value<T>;
-  /** The older form of `value`: a function only. */
-  accessor?: Accessor<T>;
+  value: Value<T>;
   /** Binding to an x axis.
       @remarks R-4.12 */
   xAxisId?: string;
@@ -79,7 +77,7 @@ export function Bar<T>(props: BarProps<T>): null {
     normalize,
     barWidth = 0.8,
   } = props;
-  const accessor = readerOf<Accessor<T>>(props.value) ?? props.accessor;
+  const accessor = readerOf<Accessor<T>>(props.value);
 
   const config = useMemo<BarSeriesConfig>(
     () =>

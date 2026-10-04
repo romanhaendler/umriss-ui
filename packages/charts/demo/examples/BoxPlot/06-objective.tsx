@@ -31,7 +31,7 @@ export default function AgainstTheObjective() {
   return (
     <Chart height={280} ariaLabel="Checkout 95th percentile per region and week against its objective">
       <XAxis value="region" ticks={[0, 1, 2]} tickFormat={(v) => REGIONS[v] ?? ""} />
-      <YAxis value="median" tickFormat={(v) => `${v} ms`} />
+      <YAxis tickFormat={(v) => `${v} ms`} />
       <BoxPlot
         name="Last week"
         median="median"

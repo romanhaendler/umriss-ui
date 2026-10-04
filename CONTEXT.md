@@ -563,14 +563,15 @@ units. Four machines are one axis with a four-unit domain. There is no lane
 concept beyond the axis: no pixels, no fractions of plot height.
 _Avoid_: row, Zeile, track, swimlane
 
-**Value channel**:
-The third number per point that only the matrix uses; named rather than smuggled
-into the baseline channel (ADR-0011).
-_Avoid_: z, weight, y0 reused
+**Level channel**:
+The third number per point that only the matrix uses, given as its `level`;
+named rather than smuggled into the baseline channel (ADR-0011). `value` stays
+the y position, on the matrix as on every kind. Not a tree node's **Level**.
+_Avoid_: value channel, z, weight, y0 reused
 
 **Cell**:
 One value of a matrix, centred on its pair of axis values. Its edges come from
-the grid spacing of both axes — ADR-0002 in two dimensions. A missing value is a
+the grid spacing of both axes — ADR-0002 in two dimensions. A missing level is a
 hole, not a zero.
 _Avoid_: tile, Kachel (which the `@umriss-ui/core` demo no longer uses at all; the
 charts demo still does, and will lose it whenever its shell is rebuilt), bucket

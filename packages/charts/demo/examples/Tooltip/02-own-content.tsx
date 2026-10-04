@@ -113,7 +113,7 @@ export default function OwnContent() {
   return (
     <Chart height={280} ariaLabel="Checkout and billing latency, the tooltip against their objectives">
       <XAxis value="t" time />
-      <YAxis value="p95" label="ms" />
+      <YAxis label="ms" />
       <Line value="p95" name="Checkout" />
       <Line data={BILLING} value="p95" name="Billing" />
       <Legend placement="top" />

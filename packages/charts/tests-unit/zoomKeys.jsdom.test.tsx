@@ -27,7 +27,7 @@ function Zoomable({ onDomainChange }: { onDomainChange?: (d: [number, number]) =
   return (
     <Chart ariaLabel="Zoomable">
       <XAxis value="t" domain={[0, 100]} onDomainChange={onDomainChange} />
-      <YAxis value="a" />
+      <YAxis />
       <Line value="a" name="A" />
       <Tooltip />
     </Chart>

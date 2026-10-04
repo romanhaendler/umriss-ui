@@ -75,7 +75,7 @@ function Marketing({ placement }: { placement?: "bottom" }) {
   return (
     <Chart height={220} ariaLabel={`Marketing's budget and forecast, legend ${placement ?? "above"}`}>
       <XAxis value={month} ticks={MONTH_NAMES.map((_, i) => i)} tickFormat={(v) => MONTH_NAMES[v] ?? ""} />
-      <YAxis value="forecast" label="€" />
+      <YAxis label="€" />
       <Line value="budget" name="Budget" />
       <Line value="forecast" name="Forecast" />
       <Legend placement={placement} />

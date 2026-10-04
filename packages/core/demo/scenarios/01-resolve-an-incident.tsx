@@ -399,7 +399,7 @@ function Content() {
         <CardBody>
           <Chart height={200} ariaLabel={`${SERVICE.name}, p95 latency since 08:00`}>
             <XAxis value="t" time />
-            <YAxis value="p95" domain={[0, 700]} label="ms" />
+            <YAxis domain={[0, 700]} label="ms" />
             <LimitLine value={SERVICE.latencySlo} severity="alarm" label="Objective" />
             <Line value="p95" name="p95" format={(v) => `${Math.round(v)} ms`} />
             <Tooltip mode="x" />

@@ -3,7 +3,7 @@
 /* The violations reach the caller once per change (charts-fixes 07).
 
    A caller that keeps them in state renders anew with every report - and each
-   render handed the control chart a new inline accessor and a new origin, which
+   render handed the control chart a new inline value function and a new origin, which
    recomputed the limits, which made a new list of violations, which was
    reported again. The chart rendered forever. */
 
@@ -41,9 +41,9 @@ describe("ControlChart - onViolations", () => {
       return (
         <Chart ariaLabel="Control chart" height={240}>
           <XAxis value="n" />
-          <YAxis value="value" />
+          <YAxis />
           <ControlChart
-            accessor={(d: Point) => d.value}
+            value="value"
             data={DATA}
             origin={{ kind: "given", center: 10, sigma: 0.1 }}
             name="Feature"
@@ -70,16 +70,16 @@ describe("ControlChart - onViolations", () => {
     expect(shown).toEqual([{ rule: "outlier", indices: [20] }]);
   });
 
-  it("does not recompute the limits for an inline accessor and origin", async () => {
+  it("does not recompute the limits for an inline value function and origin", async () => {
     let calls = 0;
     function Drawn() {
       const { Chart, XAxis, YAxis } = useChart(DATA);
       return (
         <Chart ariaLabel="Control chart" height={240}>
           <XAxis value="n" />
-          <YAxis value="value" />
+          <YAxis />
           <ControlChart
-            accessor={(d: Point) => {
+            value={(d) => {
               calls++;
               return d.value;
             }}

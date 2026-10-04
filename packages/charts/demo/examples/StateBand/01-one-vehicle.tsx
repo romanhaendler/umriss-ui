@@ -165,7 +165,7 @@ export default function OneVehicle() {
     <Chart height={150} ariaLabel="States of van FP 214 K through the day">
       <XAxis value="t" time label="Time" />
       {/* Without a lane the band fills its y axis; one tick names it. */}
-      <YAxis value={() => 0} domain={[0, 1]} ticks={[0.5]} tickFormat={() => "FP 214 K"} grid={false} />
+      <YAxis domain={[0, 1]} ticks={[0.5]} tickFormat={() => "FP 214 K"} grid={false} />
       <StateBand value="state" states={VEHICLE_STATES} name="FP 214 K" />
       <Legend placement="top" />
       <Tooltip mode="x" />

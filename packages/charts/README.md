@@ -42,7 +42,7 @@ export function Course() {
   return (
     <Chart height={280} ariaLabel="Course of one series">
       <XAxis value="t" label="Index" />
-      <YAxis value="a" />
+      <YAxis />
       <Line value="a" name="Series A" />
       <Tooltip />
     </Chart>
@@ -53,8 +53,9 @@ export function Course() {
 `useChart(rows)` binds the chart to its rows, as `useTable` binds a table: it
 hands back `Chart`, the axes and every series kind, typed at the row, so that
 `value` is a field name the compiler checks - or a function where a field does
-not suffice. A series with its own `data` is typed by that data instead.
-`Tooltip`, `Legend`, `DataTable`, `LimitLine` and `LimitBand` read no row and
+not suffice. A series with its own `data` is typed by that data instead, and
+an x axis that reads such rows names their type: `<XAxis<Row> value="t" />`.
+A y axis reads no value: its series place the rows along y. `Tooltip`, `Legend`, `DataTable`, `LimitLine` and `LimitBand` read no row and
 are imported as they are (ADR-0048).
 
 A series is an element, not an entry in a configuration object: the order in the

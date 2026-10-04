@@ -111,7 +111,7 @@ export default function StepLine() {
   return (
     <Chart height={260} ariaLabel="Checkout's requests and the instances serving them today">
       <XAxis value="t" time />
-      <YAxis value="requests" label="Requests/min" />
+      <YAxis label="Requests/min" />
       <YAxis id="instances" position="right" domain={[0, 15]} label="Instances" />
       <Line value="requests" name="Requests" />
       <Line data={REPLICAS} value="replicas" yAxisId="instances" name="Instances" step strokeWidth={2} />

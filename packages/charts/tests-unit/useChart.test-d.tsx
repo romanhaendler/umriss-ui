@@ -5,7 +5,13 @@
    under `@ts-expect-error` MUST yield an error - if one stops doing so, the
    typecheck fails. The typing is the product, as the table's is (ADR-0017). */
 
-import { useChart } from "../src";
+import { ControlChart, useChart } from "../src";
+// @ts-expect-error no free Chart: it comes from the hook (ADR-0048)
+import { Chart as FreeChart } from "../src";
+// @ts-expect-error no free series
+import { Line as FreeLine } from "../src";
+// @ts-expect-error no free axes
+import { XAxis as FreeXAxis, YAxis as FreeYAxis } from "../src";
 
 interface Latency {
   t: number;
@@ -30,7 +36,7 @@ export function Fields() {
     <Chart ariaLabel="Latency">
       {/* The row type comes from the rows: a field name is checked. */}
       <XAxis value="t" time />
-      <YAxis value="p95" />
+      <YAxis label="ms" />
       <Line value="p95" name="p95" />
       <Line value="p99" name="p99" />
       {/* @ts-expect-error an unknown field */}
@@ -38,7 +44,13 @@ export function Fields() {
       {/* @ts-expect-error a field of the wrong type */}
       <Line value="host" />
       {/* @ts-expect-error the same on an axis */}
-      <YAxis value="host" />
+      <XAxis value="host" />
+      {/* @ts-expect-error a y axis reads no value: its series place the rows */}
+      <YAxis value="p95" />
+      {/* @ts-expect-error a series names its value */}
+      <Line name="p95" />
+      {/* @ts-expect-error the old accessor is gone */}
+      <Line accessor={(d) => d.p95} />
 
       {/* A function is typed at the row, without an annotation. */}
       <Line value={(d) => d.p95 * 2} name="Twice" />
@@ -59,12 +71,31 @@ export function Fields() {
       <BoxPlot median="p95" lowerQuartile="p95" upperQuartile="p99" lowerWhisker={(d) => d.p95} upperWhisker="p99" outliers="samples" />
       {/* @ts-expect-error outliers are a list, not a number */}
       <BoxPlot median="p95" lowerQuartile="p95" upperQuartile="p99" lowerWhisker="p95" upperWhisker="p99" outliers="p95" />
-      <Matrix accessor={(d) => d.t} value="p95" />
+      <Matrix value="t" level="p95" />
+      <Matrix value={(d) => d.t + 0.5} level={(d) => d.p99} />
+      {/* @ts-expect-error the colour channel is checked as well */}
+      <Matrix value="t" level="host" />
       <Scatter value="p95" />
       <StateBand value="p95" states={[]} />
 
-      {/* The accessor keeps working beside it until the contract. */}
-      <Line accessor={(d) => d.p95} />
+      {/* An axis read by series with their own data names their row. */}
+      <XAxis<Deploy> id="deploys" value="t" />
+      {/* @ts-expect-error a field of another row */}
+      <XAxis<Deploy> id="deploys" value="p95" />
+
+      {/* The control chart is typed by its own data. */}
+      <ControlChart data={deploys} value="minutes" origin={{ kind: "given", center: 5, sigma: 1 }} />
+      <ControlChart data={deploys} value={(d) => d.minutes} origin={{ kind: "given", center: 5, sigma: 1 }} />
+      {/* @ts-expect-error a field the control chart's rows do not have */}
+      <ControlChart data={deploys} value="p95" origin={{ kind: "given", center: 5, sigma: 1 }} />
     </Chart>
   );
 }
+
+export function NoData() {
+  const { Chart } = useChart(latencies);
+  // @ts-expect-error the rows are the hook's, the chart takes no data
+  return <Chart data={latencies} ariaLabel="Latency" />;
+}
+
+export const unused = [FreeChart, FreeLine, FreeXAxis, FreeYAxis];

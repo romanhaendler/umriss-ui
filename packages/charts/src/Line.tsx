@@ -12,9 +12,7 @@ export interface LineProps<T> {
   /** Y value - a number field of the row or a function of it;
       null/undefined/NaN/±Infinity means a gap.
       @remarks R-2.5 */
-  value?: Value<T>;
-  /** The older form of `value`: a function only. */
-  accessor?: Accessor<T>;
+  value: Value<T>;
   /** Binding to an x axis.
       @remarks R-4.12 */
   xAxisId?: string;
@@ -72,7 +70,7 @@ export function Line<T>(props: LineProps<T>): null {
     markers = "auto",
     step,
   } = props;
-  const accessor = readerOf<Accessor<T>>(props.value) ?? props.accessor;
+  const accessor = readerOf<Accessor<T>>(props.value);
 
   const config = useMemo<LineSeriesConfig>(
     () =>

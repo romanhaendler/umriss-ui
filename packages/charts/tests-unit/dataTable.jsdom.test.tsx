@@ -62,7 +62,7 @@ function TwoLines({ rows, extra }: { rows: Row[]; extra: Extra }) {
   return (
     <Chart ariaLabel="Two courses">
       <XAxis value="t" tickFormat={(v) => `t${v}`} label="Time" domain={extra.domain ?? "data"} />
-      <YAxis value="b" tickFormat={(v) => `${v} °C`} />
+      <YAxis tickFormat={(v) => `${v} °C`} />
       <Line value="a" name="A" format={(v) => `${v.toFixed(1)} bar`} />
       <Line value="b" name="B" hidden={extra.hidden} />
       {extra.legend !== false && <Legend />}
@@ -159,7 +159,7 @@ describe("The table", () => {
       return (
         <Chart ariaLabel="States">
           <XAxis value="t" tickFormat={(v) => `t${v}`} />
-          <YAxis value={() => 0} domain={[0, 1]} />
+          <YAxis domain={[0, 1]} />
           <StateBand value="s" states={states} name="Furnace" />
           <DataTable />
         </Chart>
@@ -177,7 +177,7 @@ describe("The table", () => {
       return (
         <Chart ariaLabel="A long course">
           <XAxis value="t" />
-          <YAxis value="v" />
+          <YAxis />
           <Line value="v" name="V" />
           <DataTable />
         </Chart>
@@ -197,7 +197,7 @@ describe("The table", () => {
       return (
         <Chart ariaLabel="Zwei Verläufe" wording={GERMAN_CHARTS_WORDING}>
           <XAxis value="t" tickFormat={(v) => `t${v}`} />
-          <YAxis value="b" />
+          <YAxis />
           <Line value="b" name="B" />
           <DataTable />
         </Chart>

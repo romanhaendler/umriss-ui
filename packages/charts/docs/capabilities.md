@@ -227,12 +227,12 @@ Screenshot pages carry their name in brackets.
 
 | Capability | Rule | Proved at |
 |---|---|---|
-| The value stands in its own, named value channel | ADR-0011 | Unit (limits and bands in the scene) |
+| The colour is `level`, its own named channel; `value` is the row, as it is the y position on every kind | ADR-0011, ADR-0048 | Unit (limits and bands in the scene) |
 | The cell edge from the smallest distance, in both dimensions; a substitute from the domain | ADR-0002 | Unit (cells) |
 | A hit: the cell under the pointer, in both dimensions; a gap never hits | R-4.6 | Unit (cells) |
 | A single row stays a point value range | R-4.13 | Unit (limits and bands in the scene) |
 | Colouring as a gradient or from a limit set | ADR-0006 | Screenshot (`matrix`) |
-| The tooltip carries the value, not the row number | R-4.8 | Interaction |
+| The tooltip carries the level, not the row number | R-4.8 | Interaction |
 | The legend chip shows the gradient's or the limit set's colours, the tooltip chip the cell's; no place in the palette | R-4.11 | Unit (limits and bands in the scene; jsdom scene) |
 
 ## `LimitLine` / `LimitBand`
@@ -259,7 +259,7 @@ Screenshot pages carry their name in brackets.
 | Zone lines at one and two sigma | — | Unit (control limits), Screenshot (`control-chart`) |
 | No text brought along: the labelling of the limits and the name of the violations come from the caller | — | Unit (jsdom, control chart) |
 | A constant reference window (sigma 0): no outlier and no two-of-three, and a DEV warning that the limits are degenerate | — | Unit (control limits) |
-| The violations as data through `onViolations`, once per change of their content; inline accessor and origin recompute nothing | — | Unit (jsdom, control chart violations) |
+| The violations as data through `onViolations`, once per change of their content; an inline `value` function and origin recompute nothing | — | Unit (jsdom, control chart violations) |
 | `tone` colours the line; the violations stay "alarm" | Q11 | Unit (jsdom tone) |
 
 ## The working-time axis (`calendar`)
@@ -438,9 +438,11 @@ here.
 
 ## Known limits
 
-* **The closure limit of change detection.** Accessors, `tickFormat` and the
-  tooltip's `render` are compared by their source text, because inline ones are
-  new on every render. Two functions of the same text that read different
-  captured values count as equal: an accessor is not run again, an axis not
-  relabelled. The remedy is a new data reference or a new text; solving it
-  would mean re-running every function on every render (Q10).
+* **The closure limit of change detection.** A `value` given as a function,
+  `tickFormat` and the tooltip's `render` are compared by their source text,
+  because inline ones are new on every render. Two functions of the same text
+  that read different captured values count as equal: a value is not read
+  again, an axis not relabelled. The remedy is a new data reference or a new
+  text; solving it would mean re-running every function on every render (Q10).
+  The limit holds for functions only: a `value` given as a field name is
+  compared by its name, and a switched name redraws (ADR-0048).

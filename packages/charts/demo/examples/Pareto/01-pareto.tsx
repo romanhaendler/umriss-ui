@@ -24,11 +24,10 @@ export default function ParetoExample() {
   return (
     <Chart height={300} ariaLabel="Failed deliveries by cause, sorted, with the cumulative share">
       <XAxis value="index" ticks={entries.map((e) => e.index)} tickFormat={(v) => entries[v]?.name ?? ""} />
-      <YAxis value="value" label="Failed deliveries" />
+      <YAxis label="Failed deliveries" />
       <YAxis
         id="share"
         position="right"
-        value={(d) => d.cumulative * 100}
         domain={[0, 100]}
         tickFormat={(v) => `${v.toFixed(0)} %`}
         label="cumulative"

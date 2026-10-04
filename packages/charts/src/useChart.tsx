@@ -21,10 +21,12 @@ import { BoxPlot, type BoxPlotProps } from "./BoxPlot";
 /** What `useChart` hands back: the chart and its parts, typed at the row `Z`.
     A series given `data` of its own is typed by that `data` instead. */
 export interface ChartParts<Z> {
-  /** The chart over the hook's rows: every prop of a `Chart` but `data`. */
-  Chart: (props: Omit<ChartProps<Z>, "data">) => ReactNode;
-  XAxis: (props: XAxisProps<Z>) => null;
-  YAxis: (props: YAxisProps<Z>) => null;
+  /** The chart over the hook's rows. */
+  Chart: (props: ChartProps) => ReactNode;
+  /** An x axis reads the rows of every series bound to it: the hook's, or
+      with `<XAxis<Row>>` those the series bring as their own `data`. */
+  XAxis: <T = Z>(props: XAxisProps<T>) => null;
+  YAxis: (props: YAxisProps) => null;
   Line: <T = Z>(props: LineProps<T>) => null;
   Area: <T = Z>(props: AreaProps<T>) => null;
   Bar: <T = Z>(props: BarProps<T>) => null;
@@ -42,7 +44,7 @@ export interface ChartParts<Z> {
 export function useChart<Z>(rows: readonly Z[]): ChartParts<Z> {
   const [bound] = useState(() => {
     const held = { rows };
-    function Chart(props: Omit<ChartProps<Z>, "data">): ReactNode {
+    function Chart(props: ChartProps): ReactNode {
       return <FreeChart {...props} data={held.rows} />;
     }
     const parts: ChartParts<Z> = { Chart, XAxis, YAxis, Line, Area, Bar, Scatter, StateBand, Matrix, BoxPlot };

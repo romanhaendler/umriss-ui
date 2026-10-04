@@ -84,7 +84,7 @@ function Frame({ content }: { content: ReactNode }) {
   return (
     <Chart ariaLabel="Control chart" height={240}>
       <XAxis value="n" />
-      <YAxis value="value" />
+      <YAxis />
       {content}
       <Legend placement="top" />
     </Chart>
@@ -115,7 +115,7 @@ const legend = (host: HTMLElement) =>
 describe("ControlChart - no text brought along", () => {
   it("does not label the control limits without a value", async () => {
     await render(
-      <ControlChart accessor={(d: Point) => d.value} data={DATA} origin={ORIGIN} name="Feature" />,
+      <ControlChart value="value" data={DATA} origin={ORIGIN} name="Feature" />,
     );
     const labels = controlLabels();
     expect(labels.length).toBeGreaterThan(0);
@@ -125,7 +125,7 @@ describe("ControlChart - no text brought along", () => {
   it("labels them when the caller names them", async () => {
     await render(
       <ControlChart
-        accessor={(d: Point) => d.value}
+        value="value"
         data={DATA}
         origin={ORIGIN}
         name="Feature"
@@ -140,7 +140,7 @@ describe("ControlChart - no text brought along", () => {
   it("appends no invented suffix to the name of the violations", async () => {
     vi.spyOn(console, "warn").mockImplementation(() => {});
     const host = await render(
-      <ControlChart accessor={(d: Point) => d.value} data={DATA} origin={ORIGIN} name="Feature" />,
+      <ControlChart value="value" data={DATA} origin={ORIGIN} name="Feature" />,
     );
     expect(legend(host).some((name) => name.includes("violation"))).toBe(false);
   });
@@ -148,7 +148,7 @@ describe("ControlChart - no text brought along", () => {
   it("names the violations the way the caller names them", async () => {
     const host = await render(
       <ControlChart
-        accessor={(d: Point) => d.value}
+        value="value"
         data={DATA}
         origin={ORIGIN}
         name="Feature"
@@ -165,7 +165,7 @@ describe("ControlChart - the value format", () => {
   it("passes format on to its line and its violations", async () => {
     const format = (v: number) => `${v.toFixed(2)} mm`;
     await render(
-      <ControlChart accessor={(d: Point) => d.value} data={DATA} origin={ORIGIN} name="Feature" format={format} />,
+      <ControlChart value="value" data={DATA} origin={ORIGIN} name="Feature" format={format} />,
     );
     expect(series.length).toBeGreaterThan(0);
     expect(series.every((props) => props.format === format)).toBe(true);

@@ -1,15 +1,18 @@
 import "./styles/charts.css";
 
-export { Chart, type ChartProps } from "./Chart";
-export { Area, type AreaProps } from "./Area";
-export { Bar, type BarProps } from "./Bar";
-export { Line, type LineProps } from "./Line";
-export { Scatter, type ScatterProps } from "./Scatter";
-export { StateBand, type StateBandProps } from "./StateBand";
-export { Matrix, DEFAULT_GRADIENT, type MatrixProps } from "./Matrix";
+/* `Chart`, the axes and the series kinds are not exported on their own:
+   `useChart(rows)` hands them out, bound to the rows (ADR-0048). Their props
+   stay public types. */
+export type { ChartProps } from "./Chart";
+export type { AreaProps } from "./Area";
+export type { BarProps } from "./Bar";
+export type { LineProps } from "./Line";
+export type { ScatterProps } from "./Scatter";
+export type { StateBandProps } from "./StateBand";
+export { DEFAULT_GRADIENT, type MatrixProps } from "./Matrix";
 export { LimitLine, LimitBand, type LimitLineProps, type LimitBandProps } from "./LimitLine";
 export { ControlChart, type ControlChartProps } from "./ControlChart";
-export { XAxis, YAxis, type XAxisProps, type YAxisProps } from "./Axis";
+export type { XAxisProps, YAxisProps } from "./Axis";
 export { Legend, type LegendProps } from "./Legend";
 export { Tooltip, type TooltipProps } from "./Tooltip";
 export { invalidateTheme, type ResolvedTheme } from "./theme";
@@ -123,7 +126,7 @@ export type { DataTableGroup } from "./scene";
 
 /* The box plot (box-plot 01). At the end, by the workspace's rule for new
    exports. */
-export { BoxPlot, type BoxPlotProps } from "./BoxPlot";
+export type { BoxPlotProps } from "./BoxPlot";
 export type { BoxSeriesConfig, BoxChannels } from "./types";
 /* What a custom tooltip `render` reads of a box (box-plot 03, 04). */
 export type { BoxNumbers, BoxExtras, ListAccessor } from "./types";

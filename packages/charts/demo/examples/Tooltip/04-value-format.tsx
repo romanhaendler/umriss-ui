@@ -94,8 +94,8 @@ export default function ValueFormat() {
   return (
     <Chart height={260} ariaLabel="Checkout's latency and error rate with their units">
       <XAxis value="t" time />
-      <YAxis value="p95" label="ms" />
-      <YAxis id="errors" position="right" value="errorRate" label="Errors %" />
+      <YAxis label="ms" />
+      <YAxis id="errors" position="right" label="Errors %" />
       <Line value="p95" name="p95" format={milliseconds} />
       <Line value="errorRate" yAxisId="errors" name="Error rate" format={percent} />
       <Legend />

@@ -51,7 +51,7 @@ function Stack({ kind, extra }: { kind: "bar" | "area"; extra: Extra }) {
   return (
     <Chart ariaLabel="A stack" wording={extra.wording}>
       <XAxis value="t" tickFormat={(v) => `t${v}`} />
-      <YAxis value="b" />
+      <YAxis />
       <Kind value="a" name="A" stack="s" normalize={extra.normalize} format={extra.format} />
       <Kind value="b" name="B" stack="s" normalize={extra.normalize} format={extra.format} />
       <Tooltip />
@@ -118,7 +118,7 @@ describe("A normalised stack", () => {
       return (
         <Chart ariaLabel="A stack and a line">
           <XAxis value="t" tickFormat={(v) => `t${v}`} />
-          <YAxis value="b" />
+          <YAxis />
           <Bar value="a" name="A" stack="s" normalize />
           <Bar value="b" name="B" stack="s" />
           <Line value="b" name="Target" />

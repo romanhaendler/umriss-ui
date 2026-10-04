@@ -37,7 +37,7 @@ function Marks({ encoding, series, tail }: { encoding?: "color" | "marks"; serie
   return (
     <Chart ariaLabel="Marks" encoding={encoding}>
       <XAxis value="t" />
-      <YAxis value="b" />
+      <YAxis />
       {series(parts)}
       {tail}
     </Chart>
@@ -201,7 +201,7 @@ describe("The legend under encoding by marks", () => {
     const [matrix] = await legendOf(
       "marks",
       ({ Matrix }) => (
-        <Matrix accessor={(d) => d.a} value="b" coloring={{ kind: "gradient", stops: ["#eee", "#999", "#333"] }} name="Load" />
+        <Matrix value="a" level="b" coloring={{ kind: "gradient", stops: ["#eee", "#999", "#333"] }} name="Load" />
       ),
     );
     expect(matrix?.querySelectorAll("rect")).toHaveLength(3);

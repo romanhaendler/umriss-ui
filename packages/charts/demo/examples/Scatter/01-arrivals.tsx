@@ -141,7 +141,7 @@ export default function Arrivals() {
   return (
     <Chart height={260} ariaLabel="Every stop of today's tours: minutes after its window closed">
       <XAxis value="t" time label="Arrival" />
-      <YAxis value="late" label="Minutes late" />
+      <YAxis label="Minutes late" />
       <Scatter value="late" name="Stop" radius={4} />
       <Tooltip mode="nearest" />
     </Chart>

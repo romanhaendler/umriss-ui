@@ -127,7 +127,7 @@ export default function OverTime() {
   return (
     <Chart height={280} ariaLabel="Checkout median latency per hour today">
       <XAxis value="hour" time />
-      <YAxis value="median" tickFormat={(v) => `${v} ms`} />
+      <YAxis tickFormat={(v) => `${v} ms`} />
       <BoxPlot
         name="Checkout p50"
         median="median"

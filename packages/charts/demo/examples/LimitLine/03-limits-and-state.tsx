@@ -190,11 +190,10 @@ export default function LimitsAndState() {
   return (
     <Chart height={340} ariaLabel="An e-van's charge against its limits, above the states of the North depot's vehicles">
       <XAxis value="t" time label="Time" />
-      <YAxis value={(d) => d.charge ?? 0} domain={[-100, 100]} ticks={[0, 20, 40, 60, 80, 100]} label="Charge %" />
+      <YAxis domain={[-100, 100]} ticks={[0, 20, 40, 60, 80, 100]} label="Charge %" />
       <YAxis
         id="lanes"
         position="right"
-        value={() => 0}
         domain={[0, 8]}
         ticks={LANES.map((_, i) => i + 0.45)}
         tickFormat={(v) => LANES[Math.floor(v)]?.vehicle.plate ?? ""}

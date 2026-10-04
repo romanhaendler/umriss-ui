@@ -197,11 +197,11 @@ function LengthInControl() {
   return (
     <Chart height={280} syncId="tiles" ariaLabel="Control chart of the tile length over the early shift">
       <XAxis value="minute" domain={DOMAIN} ticks={HOURS} tickFormat={clock} />
-      <YAxis value="length" label="mm" />
+      <YAxis label="mm" />
       <LimitLine value={SPEC.nominal + SPEC.tolerance} severity="alarm" label="USL" inExtent />
       <LimitLine value={SPEC.nominal - SPEC.tolerance} severity="alarm" label="LSL" inExtent />
       <ControlChart
-        accessor={(d: Sample) => d.length}
+        value="length"
         data={SHIFT.samples}
         origin={REFERENCE}
         name="Length"
@@ -219,7 +219,7 @@ function KilnZone() {
   return (
     <Chart height={200} syncId="tiles" ariaLabel="Kiln zone 3 temperature over the early shift">
       <XAxis value="minute" domain={DOMAIN} ticks={HOURS} tickFormat={clock} />
-      <YAxis value="kiln" label="°C" tickCount={4} />
+      <YAxis label="°C" tickCount={4} />
       <LimitBand from={KILN.tolerance[0]} to={KILN.tolerance[1]} severity="warning" label="Tolerance" />
       <LimitLine value={KILN.alarm} severity="alarm" label="Alarm limit" inExtent />
       <Line value="kiln" name="Zone 3" />

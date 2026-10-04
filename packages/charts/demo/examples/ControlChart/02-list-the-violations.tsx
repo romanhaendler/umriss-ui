@@ -162,8 +162,8 @@ export default function ListTheViolations() {
       <div style={{ flex: "1 1 320px" }}>
         <Chart height={240} ariaLabel="Control chart of the tile length, its violations listed beside it">
           <XAxis value="minute" label="Minute of the shift" />
-          <YAxis value="length" label="mm" />
-          <ControlChart accessor={(d: Sample) => d.length} data={SAMPLES} origin={REFERENCE_WINDOW} name="Tile length" onViolations={setFound} />
+          <YAxis label="mm" />
+          <ControlChart value="length" data={SAMPLES} origin={REFERENCE_WINDOW} name="Tile length" onViolations={setFound} />
           <Tooltip mode="x" />
         </Chart>
       </div>

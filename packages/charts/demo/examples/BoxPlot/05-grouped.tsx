@@ -36,7 +36,7 @@ export default function Grouped() {
   return (
     <Chart height={280} ariaLabel="Response time per service before and after the release">
       <XAxis value="service" ticks={[0, 1, 2, 3]} tickFormat={(v) => SERVICES[v] ?? ""} />
-      <YAxis value="median" tickFormat={(v) => `${v} ms`} />
+      <YAxis tickFormat={(v) => `${v} ms`} />
       {[
         { name: "Before", data: BEFORE },
         { name: "After", data: AFTER },

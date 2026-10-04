@@ -144,7 +144,7 @@ export default function KilnZone() {
   return (
     <Chart height={280} ariaLabel="Kiln K1 zone 3 against its tolerance and alarm limit over the early shift">
       <XAxis value={(d) => SHIFT_START + d.minute * 60_000} time />
-      <YAxis value="kiln" label="°C" />
+      <YAxis label="°C" />
       <LimitBand from={KILN.tolerance[0]} to={KILN.tolerance[1]} severity="warning" label="Tolerance" />
       <LimitLine value={KILN.alarm} severity="alarm" label="Alarm" />
       <Line value="kiln" name="Zone 3" />

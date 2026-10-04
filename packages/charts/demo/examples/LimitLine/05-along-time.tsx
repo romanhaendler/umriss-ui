@@ -91,7 +91,7 @@ export default function AlongTime() {
   return (
     <Chart height={260} ariaLabel="Checkout's latency across a maintenance window and the start of a release freeze">
       <XAxis value="t" time />
-      <YAxis value="p95" label="ms" />
+      <YAxis label="ms" />
       <LimitBand orientation="x" from={at(17, 2)} to={at(17, 3)} color="#5b7c99" label="Maintenance" />
       <LimitLine orientation="x" value={at(17, 8, 30)} color="#7b61c9" label="Release freeze" />
       <Line value="p95" name="p95" />

@@ -15,9 +15,7 @@ export interface AreaProps<T> {
   /** Upper edge - a number field of the row or a function of it;
       null/undefined/NaN/±Infinity means a gap.
       @remarks R-2.5 */
-  value?: Value<T>;
-  /** The older form of `value`: a function only. */
-  accessor?: Accessor<T>;
+  value: Value<T>;
   /** Lower edge - a number field of the row or a function of it. In a `stack` the stack below is the lower edge, and this is
       not read.
       @default a fixed baseline at 0 */
@@ -89,7 +87,7 @@ export function Area<T>(props: AreaProps<T>): null {
     strokeWidth = 1.5,
     dash,
   } = props;
-  const accessor = readerOf<Accessor<T>>(props.value) ?? props.accessor;
+  const accessor = readerOf<Accessor<T>>(props.value);
 
   const config = useMemo<AreaSeriesConfig>(
     () =>

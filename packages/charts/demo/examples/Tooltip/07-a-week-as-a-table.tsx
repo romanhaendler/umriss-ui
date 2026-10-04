@@ -107,7 +107,7 @@ export default function WeekAsTable() {
   return (
     <Chart height={240} ariaLabel="Search latency over last week, a reading a minute">
       <XAxis value="t" time domain={domain} onDomainChange={setDomain} label="Time" />
-      <YAxis value="p95" label="ms" />
+      <YAxis label="ms" />
       <Line value="p95" name="p95" format={milliseconds} />
       <Tooltip mode="x" />
       {/* Without a legend the key stands on a line of its own. */}

@@ -178,12 +178,12 @@ export type MatrixColoring =
     };
 
 /** A `Matrix` as the chart holds it once registered: its base accessor is the
-    row, `value` the colour. */
+    row, `level` the colour. */
 export interface MatrixSeriesConfig<T = unknown> extends SeriesBase<T> {
   kind: "matrix";
-  /** The value that decides the colour - the third channel (ADR-0011).
-      The base accessor yields the row position, not this value. */
-  value: Accessor<T>;
+  /** The level that decides the colour - the third channel (ADR-0011).
+      The base accessor yields the row position, not this level. */
+  level: Accessor<T>;
   coloring: MatrixColoring;
 }
 
@@ -215,7 +215,9 @@ export interface AxisConfig<T = unknown> {
   id: string;
   orientation: AxisOrientation;
   position: AxisPosition;
-  accessor: (d: T, index: number) => number;
+  /** Where a row lies along the axis; an x axis' only - along y the series
+      place their rows. */
+  accessor?: (d: T, index: number) => number;
   label?: string;
   tickCount?: number;
   tickFormat?: (v: number) => string;
@@ -270,7 +272,7 @@ export interface MaterializedSeries {
       A fixed baseline needs no channel - it is a number.
       @remarks R-2.7 */
   y0: Float64Array | null;
-  /** Value channel: the third value per point, which today only the matrix
+  /** Level channel: the third value per point, which today only the matrix
       needs. Named rather than overloading y0 - a property that only some kinds
       carry does not belong in the shared type with a comment (ADR-0011). null
       for every kind that does not use it. */
@@ -402,7 +404,7 @@ export interface TooltipPoint<T = unknown> {
   yValue: number;
   datum: T;
   index: number;
-  /** Only for the matrix: the value out of the value channel. It stands here and
+  /** Only for the matrix: its `level`, out of the level channel. It stands here and
       not in yValue, because yValue is the position on the y axis - for a matrix
       therefore the row. Putting both into one field would be exactly the
       overloading ADR-0011 is written against. */

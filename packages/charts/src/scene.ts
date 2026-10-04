@@ -472,7 +472,7 @@ function normalizes(config: SeriesConfig): boolean {
 
 /** The value channel, where the kind has one (ADR-0011). */
 function valueChannelOf(config: SeriesConfig): Accessor<unknown> | undefined {
-  return config.kind === "matrix" ? config.value : undefined;
+  return config.kind === "matrix" ? config.level : undefined;
 }
 
 /** Baseline per series kind; undefined where the kind has none. It enters the
@@ -1229,7 +1229,7 @@ export class ChartScene {
       const config = entry.config;
       const data = config.data ?? this.data;
       const xAxis = this.findAxisConfig("x", config.xAxisId);
-      if (xAxis === null) continue; // validate() reports this in DEV
+      if (xAxis?.accessor === undefined) continue; // validate() reports a missing axis in DEV
       const material = materializeSeries(
         data,
         xAxis.accessor,

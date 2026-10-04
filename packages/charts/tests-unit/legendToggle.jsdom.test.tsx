@@ -32,7 +32,7 @@ function Toggled({ onToggle }: { onToggle?: (name: string) => void }) {
   return (
     <Chart ariaLabel="Legend toggle" height={200}>
       <XAxis value="t" />
-      <YAxis value="a" />
+      <YAxis />
       <Line value="a" name="A" />
       <Line value="b" name="B" hidden />
       <Legend onToggle={onToggle} />

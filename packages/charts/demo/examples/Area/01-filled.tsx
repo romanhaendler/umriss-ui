@@ -93,7 +93,7 @@ export default function Filled() {
   return (
     <Chart height={260} ariaLabel="Checkout's requests per minute today">
       <XAxis value="t" time />
-      <YAxis value="requests" label="Requests/min" />
+      <YAxis label="Requests/min" />
       <Area value="requests" name="Requests" fillOpacity={0.35} strokeWidth={2} />
       <Tooltip mode="x" />
     </Chart>

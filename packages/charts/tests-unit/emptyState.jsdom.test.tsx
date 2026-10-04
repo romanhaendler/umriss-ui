@@ -38,7 +38,7 @@ function Empty({ data, extra }: { data: Row[]; extra: Extra }) {
   return (
     <Chart ariaLabel="Empty state" height={300} empty={extra.empty}>
       <XAxis value="t" />
-      <YAxis value={(d) => d.a ?? 0} />
+      <YAxis />
       <Line value="a" name="A" hidden={extra.hidden} />
     </Chart>
   );

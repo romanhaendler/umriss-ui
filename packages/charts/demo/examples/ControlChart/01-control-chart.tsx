@@ -149,12 +149,12 @@ export default function ControlChartExample() {
   return (
     <Chart height={300} ariaLabel="Control chart of the tile length after firing">
       <XAxis value="minute" label="Minute of the shift" />
-      <YAxis value="length" label="mm" />
+      <YAxis label="mm" />
       {/* Specification limits are chosen, control limits are computed. */}
       <LimitLine value={602.5} severity="alarm" label="USL" />
       <LimitLine value={597.5} severity="alarm" label="LSL" />
       <ControlChart
-        accessor={(d: Sample) => d.length}
+        value="length"
         data={SAMPLES}
         origin={REFERENCE_WINDOW}
         name="Tile length"

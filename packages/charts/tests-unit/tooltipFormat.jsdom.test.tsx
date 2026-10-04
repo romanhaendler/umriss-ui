@@ -126,7 +126,7 @@ describe("The built-in tooltip", () => {
     scene.registerSeries({
       kind: "matrix",
       accessor: () => 0,
-      value: (d) => (d as Row).a,
+      level: (d) => (d as Row).a,
       coloring: { kind: "gradient", stops: ["#000", "#fff"] },
       data: [{ t: 0, a: 0.5 }, { t: 1, a: 0.75 }],
       xAxisId: "x",

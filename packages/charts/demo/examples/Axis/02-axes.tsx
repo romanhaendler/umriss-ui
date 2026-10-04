@@ -45,9 +45,9 @@ export default function Axes() {
     <Chart height={340} ariaLabel="A load test: CPU, throughput and latency on three y axes">
       <XAxis value="minute" label="Minute of the test" />
       <XAxis id="seconds" position="top" value={(d) => d.minute * 60} label="Seconds into the test" />
-      <YAxis id="cpu" position="left" label="CPU %" value="cpu" />
-      <YAxis id="requests" position="right" label="Requests/h" value="requestsPerHour" />
-      <YAxis id="latency" position="right" label="p95 ms" value="p95" />
+      <YAxis id="cpu" position="left" label="CPU %" />
+      <YAxis id="requests" position="right" label="Requests/h" />
+      <YAxis id="latency" position="right" label="p95 ms" />
       <Line value="cpu" yAxisId="cpu" name="CPU" />
       <Line value="requestsPerHour" xAxisId="seconds" yAxisId="requests" name="Throughput" dash={[4, 4]} />
       <Line value="p95" yAxisId="latency" name="p95" />

@@ -1,9 +1,9 @@
 /* <StateBand> - the fifth series kind (ADR-0007).
 
-   The accessor yields a NUMBER: the index of the state in the state list. That
+   The `value` yields a NUMBER: the index of the state in the state list. That
    keeps the materialised series at the same three channels as every other kind,
    the drawing loop monomorphic and the affine scale contract untouched. A caller
-   whose data carries strings maps them in the accessor - one line, once per point
+   whose data carries strings maps them in a `value` function - one line, once per point
    during materialisation. Giving up R-5.2 for that would be a bad trade for
    cosmetic reasons.
 
@@ -24,9 +24,7 @@ export interface StateBandProps<T> {
       function of it; null/undefined/NaN/±Infinity is a gap -
       and a gap stays a hole, it gets no colour for "unknown". A colour would
       be a claim about the interval. */
-  value?: Value<T>;
-  /** The older form of `value`: a function only. */
-  accessor?: Accessor<T>;
+  value: Value<T>;
   /** The closed set of states, in the order of their codes. */
   states: readonly StateEntry[];
   /** Binding to an x axis.
@@ -69,7 +67,7 @@ export function StateBand<T>(props: StateBandProps<T>): null {
     laneFrom,
     laneTo,
   } = props;
-  const accessor = readerOf<Accessor<T>>(props.value) ?? props.accessor;
+  const accessor = readerOf<Accessor<T>>(props.value);
 
   const config = useMemo<StateSeriesConfig>(
     () =>

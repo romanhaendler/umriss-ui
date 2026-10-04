@@ -93,7 +93,7 @@ export default function TimeAxis() {
   return (
     <Chart height={260} ariaLabel="Checkout's error rate today">
       <XAxis value="t" time />
-      <YAxis value="errorRate" label="Errors %" />
+      <YAxis label="Errors %" />
       <Line value="errorRate" name="Error rate" />
       <Tooltip mode="x" />
     </Chart>

@@ -160,7 +160,7 @@ export default function Benchmark() {
           onPerf={onPerf}
         >
           <XAxis value="t" label="Index" />
-          <YAxis value="s1" />
+          <YAxis />
           {mode === "lines" ? (
             <Line value="s1" name="S1" />
           ) : (

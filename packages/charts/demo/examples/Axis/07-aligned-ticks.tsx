@@ -106,8 +106,8 @@ export default function AlignedTicks() {
   return (
     <Chart height={260} ariaLabel="Search requests and latency over last week on one grid">
       <XAxis value="t" time />
-      <YAxis value="requests" label="Requests/min" />
-      <YAxis id="latency" position="right" value="p95" label="ms" alignTicks />
+      <YAxis label="Requests/min" />
+      <YAxis id="latency" position="right" label="ms" alignTicks />
       <Line value="requests" name="Requests" />
       <Line value="p95" yAxisId="latency" name="p95" />
       <Legend placement="top" />

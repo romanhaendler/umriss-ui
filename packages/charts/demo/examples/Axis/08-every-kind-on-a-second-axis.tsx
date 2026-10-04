@@ -168,18 +168,18 @@ export default function EveryKind() {
   return (
     <Chart height={340} ariaLabel="The kiln's temperature by the minute above the tiles it fired by the hour">
       <XAxis value="minute" domain={[0, SHIFT_MINUTES]} label="Minute of the shift" />
-      {/* The hourly rows come in hour order: row i stands in the middle of hour i. */}
-      <XAxis
+      {/* This axis reads the hourly rows its series bring, so it names their type. */}
+      <XAxis<HourCount>
         id="hour"
         position="top"
-        value={(_, i) => i + 0.5}
+        value="hour"
         domain={[0, SHIFT_MINUTES / 60]}
         ticks={HOURS.map((d) => d.hour)}
         tickFormat={(v) => `Hour ${Math.ceil(v)}`}
       />
       {/* The kiln above, the counts below: each axis keeps to its own half. */}
-      <YAxis value="kiln" domain={[1050, 1250]} label="°C" />
-      <YAxis id="tiles" position="right" value="fired" domain={[0, 500]} label="Tiles per hour" />
+      <YAxis domain={[1050, 1250]} label="°C" />
+      <YAxis id="tiles" position="right" domain={[0, 500]} label="Tiles per hour" />
       <Line value="kiln" name="Zone 3" />
       <Area data={HOURS} value="planned" xAxisId="hour" yAxisId="tiles" name="Planned" strokeWidth={0} />
       <Bar data={HOURS} value="fired" xAxisId="hour" yAxisId="tiles" name="Fired" />

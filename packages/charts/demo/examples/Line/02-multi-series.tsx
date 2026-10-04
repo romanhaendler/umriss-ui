@@ -101,7 +101,7 @@ export default function MultiSeries() {
   return (
     <Chart height={300} ariaLabel="95th percentile latency of four services today">
       <XAxis value="t" time />
-      <YAxis value="p95" label="ms" />
+      <YAxis label="ms" />
       <Line value="p95" name="Checkout" />
       <Line data={BILLING} value="p95" name="Billing" />
       <Line data={SIGN_IN} value="p95" name="Sign-in" dash={[4, 4]} />

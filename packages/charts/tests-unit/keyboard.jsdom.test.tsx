@@ -36,7 +36,7 @@ function Courses({ mode }: { mode: "x" | "nearest" | null }) {
   return (
     <Chart ariaLabel="Two courses">
       <XAxis value="t" tickFormat={(v) => `t${v}`} />
-      <YAxis value="b" />
+      <YAxis />
       <Line value="a" name="A" />
       <Line value="b" name="B" />
       {mode !== null && <Tooltip mode={mode} />}
@@ -159,8 +159,8 @@ describe("The walk over a matrix", () => {
     return (
       <Chart ariaLabel="OEE">
         <XAxis value="hour" tickFormat={(v) => `h${v}`} />
-        <YAxis value="machine" />
-        <Matrix accessor={(d) => d.machine} value="oee" name="OEE" format={(v) => `${v} %`} />
+        <YAxis />
+        <Matrix value="machine" level="oee" name="OEE" format={(v) => `${v} %`} />
         <Tooltip mode="nearest" />
       </Chart>
     );
@@ -202,8 +202,8 @@ describe("A matrix among other series", () => {
     return (
       <Chart ariaLabel="Mixed">
         <XAxis value="hour" tickFormat={(v) => `h${v}`} />
-        <YAxis value="machine" />
-        <Matrix accessor={(d) => d.machine} value="oee" name="OEE" format={(v) => `${v} %`} />
+        <YAxis />
+        <Matrix value="machine" level="oee" name="OEE" format={(v) => `${v} %`} />
         <Scatter value={(d) => d.machine + 0.5} name="Probe" />
         <Tooltip mode="nearest" />
       </Chart>

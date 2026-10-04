@@ -94,7 +94,7 @@ function Requests({ width, height }: { width?: number; height: number }) {
   return (
     <Chart width={width} height={height} ariaLabel="Sign-in requests per minute today">
       <XAxis value="t" time />
-      <YAxis value="requests" />
+      <YAxis />
       <Line value="requests" name="Requests per minute" />
     </Chart>
   );
