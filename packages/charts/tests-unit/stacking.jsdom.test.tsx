@@ -7,7 +7,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, type ReactNode } from "react";
-import { Area, Bar, Chart, DataTable, Line, Tooltip, XAxis, YAxis } from "../src";
+import { DataTable, Tooltip, useChart } from "../src";
 import { ChartScene } from "../src/scene";
 import { GERMAN_CHARTS_WORDING } from "../src/wording/de";
 import type { BarSeriesConfig } from "../src/types";
@@ -43,19 +43,24 @@ const rest = (ms: number) => act(() => new Promise<void>((r) => setTimeout(r, ms
 const readout = (host: HTMLElement) => host.querySelector("[aria-live='polite']")?.textContent ?? "";
 const ticks = (host: HTMLElement) => [...host.querySelectorAll(".uc-tick")].map((t) => t.textContent);
 
-function stack(kind: "bar" | "area", extra: { normalize?: boolean; format?: (v: number) => string; wording?: typeof GERMAN_CHARTS_WORDING } = {}): ReactNode {
+type Extra = { normalize?: boolean; format?: (v: number) => string; wording?: typeof GERMAN_CHARTS_WORDING };
+
+function Stack({ kind, extra }: { kind: "bar" | "area"; extra: Extra }) {
+  const { Chart, XAxis, YAxis, Bar, Area } = useChart(data);
   const Kind = kind === "bar" ? Bar : Area;
   return (
-    <Chart data={data} ariaLabel="A stack" wording={extra.wording}>
-      <XAxis accessor={(d: Row) => d.t} tickFormat={(v) => `t${v}`} />
-      <YAxis accessor={(d: Row) => d.b} />
-      <Kind accessor={(d: Row) => d.a} name="A" stack="s" normalize={extra.normalize} format={extra.format} />
-      <Kind accessor={(d: Row) => d.b} name="B" stack="s" normalize={extra.normalize} format={extra.format} />
+    <Chart ariaLabel="A stack" wording={extra.wording}>
+      <XAxis value="t" tickFormat={(v) => `t${v}`} />
+      <YAxis value="b" />
+      <Kind value="a" name="A" stack="s" normalize={extra.normalize} format={extra.format} />
+      <Kind value="b" name="B" stack="s" normalize={extra.normalize} format={extra.format} />
       <Tooltip />
       <DataTable />
     </Chart>
   );
 }
+
+const stack = (kind: "bar" | "area", extra: Extra = {}): ReactNode => <Stack kind={kind} extra={extra} />;
 
 describe("A stack in the tooltip and the readout", () => {
   it("names each series' own value and the total as its last row", async () => {
@@ -108,16 +113,20 @@ describe("A normalised stack", () => {
   });
 
   it("leaves a line on its axis reading its own values, not percent", async () => {
-    const host = await mount(
-      <Chart data={data} ariaLabel="A stack and a line">
-        <XAxis accessor={(d: Row) => d.t} tickFormat={(v) => `t${v}`} />
-        <YAxis accessor={(d: Row) => d.b} />
-        <Bar accessor={(d: Row) => d.a} name="A" stack="s" normalize />
-        <Bar accessor={(d: Row) => d.b} name="B" stack="s" />
-        <Line accessor={(d: Row) => d.b} name="Target" />
-        <Tooltip />
-      </Chart>,
-    );
+    function StackAndLine() {
+      const { Chart, XAxis, YAxis, Bar, Line } = useChart(data);
+      return (
+        <Chart ariaLabel="A stack and a line">
+          <XAxis value="t" tickFormat={(v) => `t${v}`} />
+          <YAxis value="b" />
+          <Bar value="a" name="A" stack="s" normalize />
+          <Bar value="b" name="B" stack="s" />
+          <Line value="b" name="Target" />
+          <Tooltip />
+        </Chart>
+      );
+    }
+    const host = await mount(<StackAndLine />);
     await focusPlot(host);
     await press(host, "ArrowLeft");
     const rows = [...host.querySelectorAll(".uc-tooltip-row")].map((r) => r.textContent);

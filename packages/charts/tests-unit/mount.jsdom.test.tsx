@@ -6,7 +6,7 @@
 import { describe, expect, it } from "vitest";
 import { StrictMode, act } from "react";
 import { createRoot } from "react-dom/client";
-import { Chart, Line, XAxis, YAxis, Legend, Tooltip } from "../src";
+import { Legend, Tooltip, useChart } from "../src";
 
 interface Row {
   t: number;
@@ -20,6 +20,21 @@ const data: Row[] = [
   { t: 2, a: 3, b: 7 },
 ];
 
+function Full() {
+  const { Chart, XAxis, YAxis, Line } = useChart(data);
+  return (
+    <Chart ariaLabel="jsdom test" height={200}>
+      <XAxis value="t" label="Index" />
+      <YAxis value="a" />
+      <YAxis id="two" position="right" value={(d) => d.b ?? 0} />
+      <Line value="a" name="A" />
+      <Line value="b" yAxisId="two" name="B" dash={[4, 4]} />
+      <Legend placement="top" />
+      <Tooltip mode="x" />
+    </Chart>
+  );
+}
+
 describe("Mount in jsdom", () => {
   it("mounts the full composition and unmounts without an error", async () => {
     const host = document.createElement("div");
@@ -28,15 +43,7 @@ describe("Mount in jsdom", () => {
     await act(async () => {
       root.render(
         <StrictMode>
-          <Chart data={data} ariaLabel="jsdom test" height={200}>
-            <XAxis accessor={(d: Row) => d.t} label="Index" />
-            <YAxis accessor={(d: Row) => d.a} />
-            <YAxis id="two" position="right" accessor={(d: Row) => d.b ?? 0} />
-            <Line accessor={(d: Row) => d.a} name="A" />
-            <Line accessor={(d: Row) => d.b} yAxisId="two" name="B" dash={[4, 4]} />
-            <Legend placement="top" />
-            <Tooltip mode="x" />
-          </Chart>
+          <Full />
         </StrictMode>,
       );
     });

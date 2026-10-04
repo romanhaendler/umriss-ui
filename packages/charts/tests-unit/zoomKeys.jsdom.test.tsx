@@ -4,7 +4,7 @@
    domain - each key proposes what the matching gesture would. */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { Chart, Line, Tooltip, XAxis, YAxis } from "../src";
+import { Tooltip, useChart } from "../src";
 import { focusPlot, press as pressOn, renderChart, sizePlot } from "./renderChart";
 
 interface Row {
@@ -22,15 +22,20 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-async function chart(onDomainChange?: (d: [number, number]) => void): Promise<HTMLElement> {
-  const r = await renderChart(
-    <Chart data={data} ariaLabel="Zoomable">
-      <XAxis accessor={(d: Row) => d.t} domain={[0, 100]} onDomainChange={onDomainChange} />
-      <YAxis accessor={(d: Row) => d.a} />
-      <Line accessor={(d: Row) => d.a} name="A" />
+function Zoomable({ onDomainChange }: { onDomainChange?: (d: [number, number]) => void }) {
+  const { Chart, XAxis, YAxis, Line } = useChart(data);
+  return (
+    <Chart ariaLabel="Zoomable">
+      <XAxis value="t" domain={[0, 100]} onDomainChange={onDomainChange} />
+      <YAxis value="a" />
+      <Line value="a" name="A" />
       <Tooltip />
-    </Chart>,
+    </Chart>
   );
+}
+
+async function chart(onDomainChange?: (d: [number, number]) => void): Promise<HTMLElement> {
+  const r = await renderChart(<Zoomable onDomainChange={onDomainChange} />);
   unmount = r.unmount;
   await focusPlot(r.host);
   return r.host;

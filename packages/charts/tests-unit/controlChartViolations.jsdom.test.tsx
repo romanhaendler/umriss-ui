@@ -10,7 +10,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { act, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { Chart, ControlChart, XAxis, YAxis, type Violation } from "../src";
+import { ControlChart, useChart, type Violation } from "../src";
 
 interface Point {
   n: number;
@@ -37,10 +37,11 @@ describe("ControlChart - onViolations", () => {
     function Caller() {
       const [found, setFound] = useState<readonly Violation[]>([]);
       shown = found;
+      const { Chart, XAxis, YAxis } = useChart(DATA);
       return (
-        <Chart data={DATA} ariaLabel="Control chart" height={240}>
-          <XAxis accessor={(d: Point) => d.n} />
-          <YAxis accessor={(d: Point) => d.value} />
+        <Chart ariaLabel="Control chart" height={240}>
+          <XAxis value="n" />
+          <YAxis value="value" />
           <ControlChart
             accessor={(d: Point) => d.value}
             data={DATA}
@@ -71,21 +72,25 @@ describe("ControlChart - onViolations", () => {
 
   it("does not recompute the limits for an inline accessor and origin", async () => {
     let calls = 0;
-    const draw = () => (
-      <Chart data={DATA} ariaLabel="Control chart" height={240}>
-        <XAxis accessor={(d: Point) => d.n} />
-        <YAxis accessor={(d: Point) => d.value} />
-        <ControlChart
-          accessor={(d: Point) => {
-            calls++;
-            return d.value;
-          }}
-          data={DATA}
-          origin={{ kind: "given", center: 10, sigma: 0.1 }}
-          name="Feature"
-        />
-      </Chart>
-    );
+    function Drawn() {
+      const { Chart, XAxis, YAxis } = useChart(DATA);
+      return (
+        <Chart ariaLabel="Control chart" height={240}>
+          <XAxis value="n" />
+          <YAxis value="value" />
+          <ControlChart
+            accessor={(d: Point) => {
+              calls++;
+              return d.value;
+            }}
+            data={DATA}
+            origin={{ kind: "given", center: 10, sigma: 0.1 }}
+            name="Feature"
+          />
+        </Chart>
+      );
+    }
+    const draw = () => <Drawn />;
     const host = document.createElement("div");
     document.body.appendChild(host);
     const root = createRoot(host);

@@ -11,7 +11,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { act } from "react";
 import type { ReactNode } from "react";
 import { createRoot } from "react-dom/client";
-import { Chart, ControlChart, Legend, XAxis, YAxis } from "../src";
+import { ControlChart, Legend, useChart } from "../src";
 
 /* The label of a limit stands in the axis band, and jsdom does not lay that out:
    every element there is of size zero, no limit gets a position. What is
@@ -79,19 +79,24 @@ afterEach(async () => {
   vi.restoreAllMocks();
 });
 
+function Frame({ content }: { content: ReactNode }) {
+  const { Chart, XAxis, YAxis } = useChart(DATA);
+  return (
+    <Chart ariaLabel="Control chart" height={240}>
+      <XAxis value="n" />
+      <YAxis value="value" />
+      {content}
+      <Legend placement="top" />
+    </Chart>
+  );
+}
+
 async function render(content: ReactNode): Promise<HTMLElement> {
   const host = document.createElement("div");
   document.body.appendChild(host);
   const root = createRoot(host);
   await act(async () => {
-    root.render(
-      <Chart data={DATA} ariaLabel="Control chart" height={240}>
-        <XAxis accessor={(d: Point) => d.n} />
-        <YAxis accessor={(d: Point) => d.value} />
-        {content}
-        <Legend placement="top" />
-      </Chart>,
-    );
+    root.render(<Frame content={content} />);
   });
   // The scene publishes its state inside the rAF - wait one frame.
   await act(async () => {

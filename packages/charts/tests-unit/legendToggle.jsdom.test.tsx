@@ -8,7 +8,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
-import { Chart, Legend, Line, XAxis, YAxis } from "../src";
+import { Legend, useChart } from "../src";
 
 interface Row {
   t: number;
@@ -27,20 +27,25 @@ afterEach(() => {
   cleanup = null;
 });
 
+function Toggled({ onToggle }: { onToggle?: (name: string) => void }) {
+  const { Chart, XAxis, YAxis, Line } = useChart(data);
+  return (
+    <Chart ariaLabel="Legend toggle" height={200}>
+      <XAxis value="t" />
+      <YAxis value="a" />
+      <Line value="a" name="A" />
+      <Line value="b" name="B" hidden />
+      <Legend onToggle={onToggle} />
+    </Chart>
+  );
+}
+
 async function render(onToggle?: (name: string) => void): Promise<HTMLElement> {
   const host = document.createElement("div");
   document.body.appendChild(host);
   const root = createRoot(host);
   await act(async () => {
-    root.render(
-      <Chart data={data} ariaLabel="Legend toggle" height={200}>
-        <XAxis accessor={(d: Row) => d.t} />
-        <YAxis accessor={(d: Row) => d.a} />
-        <Line accessor={(d: Row) => d.a} name="A" />
-        <Line accessor={(d: Row) => d.b} name="B" hidden />
-        <Legend onToggle={onToggle} />
-      </Chart>,
-    );
+    root.render(<Toggled onToggle={onToggle} />);
   });
   await act(async () => {
     await new Promise<void>((r) => requestAnimationFrame(() => r()));

@@ -7,7 +7,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, type ReactNode } from "react";
-import { BoxPlot, Chart, DataTable, Legend, Line, Tooltip, XAxis, YAxis, type ChartsWording } from "../src";
+import { DataTable, Legend, Tooltip, useChart, type ChartsWording } from "../src";
 import { GERMAN_CHARTS_WORDING } from "../src/wording/de";
 import { ChartScene } from "../src/scene";
 import type { BoxSeriesConfig } from "../src/types";
@@ -44,18 +44,21 @@ async function mount(element: ReactNode): Promise<HTMLElement> {
   return r.host;
 }
 
-function chart(extra: { wording?: ChartsWording; format?: (v: number) => string; table?: boolean } = {}): ReactNode {
+type Extra = { wording?: ChartsWording; format?: (v: number) => string; table?: boolean };
+
+function CycleTime({ extra }: { extra: Extra }) {
+  const { Chart, XAxis, YAxis, BoxPlot } = useChart(data);
   return (
-    <Chart data={data} ariaLabel="Cycle time per machine" wording={extra.wording}>
-      <XAxis accessor={(d: Machine) => d.at} ticks={[0, 1, 2, 3]} tickFormat={(v) => MACHINES[v] ?? ""} />
-      <YAxis accessor={(d: Machine) => d.hi} tickFormat={(v) => `${v} s`} />
+    <Chart ariaLabel="Cycle time per machine" wording={extra.wording}>
+      <XAxis value="at" ticks={[0, 1, 2, 3]} tickFormat={(v) => MACHINES[v] ?? ""} />
+      <YAxis value="hi" tickFormat={(v) => `${v} s`} />
       <BoxPlot
         name="Cycle time"
-        median={(d: Machine) => d.med}
-        lowerQuartile={(d: Machine) => d.q1}
-        upperQuartile={(d: Machine) => d.q3}
-        lowerWhisker={(d: Machine) => d.lo}
-        upperWhisker={(d: Machine) => d.hi}
+        median="med"
+        lowerQuartile="q1"
+        upperQuartile="q3"
+        lowerWhisker="lo"
+        upperWhisker="hi"
         format={extra.format}
       />
       <Tooltip />
@@ -63,6 +66,8 @@ function chart(extra: { wording?: ChartsWording; format?: (v: number) => string;
     </Chart>
   );
 }
+
+const chart = (extra: Extra = {}): ReactNode => <CycleTime extra={extra} />;
 
 const rows = (host: HTMLElement) => [...host.querySelectorAll(".uc-tooltip-row")].map((r) => r.textContent);
 const head = (host: HTMLElement) => host.querySelector(".uc-tooltip-head")?.textContent ?? "";
@@ -164,35 +169,30 @@ describe("A box in the data table", () => {
 /* box-plot 02: several series - grouped beside each other, mixed with a line,
    toggled from the legend. */
 describe("Several box series", () => {
-  const before = (d: Machine) => d.med;
-  function grouped(extra: { hidden?: boolean; encoding?: "marks" } = {}): ReactNode {
+  type Extra = { hidden?: boolean; encoding?: "marks" };
+  function Grouped({ extra }: { extra: Extra }) {
+    const { Chart, XAxis, YAxis, BoxPlot, Line } = useChart(data);
     return (
-      <Chart data={data} ariaLabel="Before and after" encoding={extra.encoding}>
-        <XAxis accessor={(d: Machine) => d.at} ticks={[0, 1, 2, 3]} tickFormat={(v) => MACHINES[v] ?? ""} />
-        <YAxis accessor={(d: Machine) => d.q3} tickFormat={(v) => `${v} s`} />
-        <BoxPlot
-          name="Before"
-          median={before}
-          lowerQuartile={(d: Machine) => d.q1}
-          upperQuartile={(d: Machine) => d.q3}
-          lowerWhisker={(d: Machine) => d.lo}
-          upperWhisker={(d: Machine) => d.hi}
-        />
+      <Chart ariaLabel="Before and after" encoding={extra.encoding}>
+        <XAxis value="at" ticks={[0, 1, 2, 3]} tickFormat={(v) => MACHINES[v] ?? ""} />
+        <YAxis value="q3" tickFormat={(v) => `${v} s`} />
+        <BoxPlot name="Before" median="med" lowerQuartile="q1" upperQuartile="q3" lowerWhisker="lo" upperWhisker="hi" />
         <BoxPlot
           name="After"
           hidden={extra.hidden}
-          median={(d: Machine) => (d.med === null ? null : d.med - 1)}
-          lowerQuartile={(d: Machine) => d.q1 - 1}
-          upperQuartile={(d: Machine) => d.q3 - 1}
-          lowerWhisker={(d: Machine) => d.lo - 1}
-          upperWhisker={(d: Machine) => d.hi + 60}
+          median={(d) => (d.med === null ? null : d.med - 1)}
+          lowerQuartile={(d) => d.q1 - 1}
+          upperQuartile={(d) => d.q3 - 1}
+          lowerWhisker={(d) => d.lo - 1}
+          upperWhisker={(d) => d.hi + 60}
         />
-        <Line accessor={before} name="Median trend" />
+        <Line value="med" name="Median trend" />
         <Legend />
         <Tooltip />
       </Chart>
     );
   }
+  const grouped = (extra: Extra = {}): ReactNode => <Grouped extra={extra} />;
 
   it("reads both boxes and the line at one x in one tooltip", async () => {
     const host = await mount(grouped());
@@ -312,27 +312,30 @@ describe("A box's outliers", () => {
     { at: 1, med: 6, out: [] },
     { at: 2, med: null, out: [500] },
   ];
-  function chartWith(extra: { outliers?: boolean; wording?: ChartsWording; hidden?: boolean } = {}): ReactNode {
+  type Extra = { outliers?: boolean; wording?: ChartsWording; hidden?: boolean };
+  function Outliers({ extra }: { extra: Extra }) {
+    const { Chart, XAxis, YAxis, BoxPlot, Line } = useChart(rowsWith);
     return (
-      <Chart data={rowsWith} ariaLabel="Outliers" wording={extra.wording}>
-        <XAxis accessor={(d: WithOutliers) => d.at} ticks={[0, 1, 2]} tickFormat={(v) => MACHINES[v] ?? ""} />
-        <YAxis accessor={(d: WithOutliers) => d.med ?? 0} tickFormat={(v) => `${v} s`} />
+      <Chart ariaLabel="Outliers" wording={extra.wording}>
+        <XAxis value="at" ticks={[0, 1, 2]} tickFormat={(v) => MACHINES[v] ?? ""} />
+        <YAxis value={(d) => d.med ?? 0} tickFormat={(v) => `${v} s`} />
         <BoxPlot
           name="Cycle time"
           hidden={extra.hidden}
-          median={(d: WithOutliers) => d.med}
+          median="med"
           lowerQuartile={() => 4}
           upperQuartile={() => 7}
           lowerWhisker={() => 3}
           upperWhisker={() => 9}
-          outliers={extra.outliers === false ? undefined : (d: WithOutliers) => d.out}
+          outliers={extra.outliers === false ? undefined : "out"}
         />
-        <Line accessor={() => 2} name="Floor" />
+        <Line value={() => 2} name="Floor" />
         <Tooltip />
         <DataTable />
       </Chart>
     );
   }
+  const chartWith = (extra: Extra = {}): ReactNode => <Outliers extra={extra} />;
 
   it("lists them in the tooltip as a count and their values, top to bottom, cut after five", async () => {
     const host = await mount(chartWith());
@@ -394,22 +397,24 @@ describe("A box's mean, notch and count", () => {
     { at: 0, med: 5, lo: 3, hi: 9 },
     { at: 1, med: 6, lo: 4, hi: 10 },
   ];
-  function chartFull(extra: { wording?: ChartsWording; given?: boolean; notchUpper?: boolean; name?: string } = {}): ReactNode {
+  type Extra = { wording?: ChartsWording; given?: boolean; notchUpper?: boolean; name?: string };
+  function MeanAndNotch({ extra }: { extra: Extra }) {
+    const { Chart, XAxis, YAxis, BoxPlot } = useChart(full);
     const given = extra.given !== false;
     return (
-      <Chart data={full} ariaLabel="Mean and notch" wording={extra.wording}>
-        <XAxis accessor={(d: Full) => d.at} ticks={[0, 1]} tickFormat={(v) => MACHINES[v] ?? ""} />
-        <YAxis accessor={(d: Full) => d.hi} tickFormat={(v) => `${v} s`} />
+      <Chart ariaLabel="Mean and notch" wording={extra.wording}>
+        <XAxis value="at" ticks={[0, 1]} tickFormat={(v) => MACHINES[v] ?? ""} />
+        <YAxis value="hi" tickFormat={(v) => `${v} s`} />
         <BoxPlot
           name={extra.name ?? "Cycle time"}
-          median={(d: Full) => d.med}
-          lowerQuartile={(d: Full) => d.med - 1}
-          upperQuartile={(d: Full) => d.med + 1}
-          lowerWhisker={(d: Full) => d.lo}
-          upperWhisker={(d: Full) => d.hi}
-          mean={given ? (d: Full) => d.med + 0.5 : undefined}
-          notchLower={given ? (d: Full) => d.med - 0.25 : undefined}
-          notchUpper={given && extra.notchUpper !== false ? (d: Full) => d.med + 0.25 : undefined}
+          median="med"
+          lowerQuartile={(d) => d.med - 1}
+          upperQuartile={(d) => d.med + 1}
+          lowerWhisker="lo"
+          upperWhisker="hi"
+          mean={given ? (d) => d.med + 0.5 : undefined}
+          notchLower={given ? (d) => d.med - 0.25 : undefined}
+          notchUpper={given && extra.notchUpper !== false ? (d) => d.med + 0.25 : undefined}
           count={given ? () => 120 : undefined}
         />
         <Tooltip />
@@ -417,6 +422,7 @@ describe("A box's mean, notch and count", () => {
       </Chart>
     );
   }
+  const chartFull = (extra: Extra = {}): ReactNode => <MeanAndNotch extra={extra} />;
 
   it("reads mean, notch and n after the five, in the tooltip", async () => {
     const host = await mount(chartFull());
@@ -464,20 +470,24 @@ describe("A box's mean, notch and count", () => {
 
   it("warns once in DEV about numbers out of order, and still draws", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-    const r = await renderChart(
-      <Chart data={full} ariaLabel="Out of order">
-        <XAxis accessor={(d: Full) => d.at} />
-        <YAxis accessor={(d: Full) => d.hi} />
-        <BoxPlot
-          name="Disordered"
-          median={(d: Full) => d.med}
-          lowerQuartile={(d: Full) => d.med + 1}
-          upperQuartile={(d: Full) => d.med - 1}
-          lowerWhisker={(d: Full) => d.lo}
-          upperWhisker={(d: Full) => d.hi}
-        />
-      </Chart>,
-    );
+    function OutOfOrder() {
+      const { Chart, XAxis, YAxis, BoxPlot } = useChart(full);
+      return (
+        <Chart ariaLabel="Out of order">
+          <XAxis value="at" />
+          <YAxis value="hi" />
+          <BoxPlot
+            name="Disordered"
+            median="med"
+            lowerQuartile={(d) => d.med + 1}
+            upperQuartile={(d) => d.med - 1}
+            lowerWhisker="lo"
+            upperWhisker="hi"
+          />
+        </Chart>
+      );
+    }
+    const r = await renderChart(<OutOfOrder />);
     unmount = r.unmount;
     const order = warn.mock.calls.filter(([m]) => String(m).includes("Disordered") && String(m).includes("order"));
     expect(order).toHaveLength(1);
