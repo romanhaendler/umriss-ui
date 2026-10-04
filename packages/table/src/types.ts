@@ -7,7 +7,7 @@
 
 import type { ReactNode } from "react";
 import type { LimitSet } from "@umriss-ui/core";
-import type { ManualView, TableView } from "./model/view";
+import type { TableRequest, TableView } from "./model/view";
 import type { SortLevel } from "./model/tableModel";
 import type { TableSelection } from "./model/useTableSelection";
 import type { ColumnFilter } from "./columnFilter";
@@ -617,7 +617,7 @@ interface TableOptionsCommon<Z> {
 /** The table holds every row and does the work itself. */
 interface AutomaticMode<Z> {
   /** Without it the table holds every row and does the work itself. */
-  manual?: false;
+  server?: false;
   /** Tree rows: the children of a row - `undefined` for a leaf, an array for a
       branch. The rows passed in are then the roots, and every branch gets a
       fold in its row header. Every level sorts on its own, a search shows a
@@ -632,31 +632,31 @@ interface AutomaticMode<Z> {
   filterOptions?: never;
 }
 
-/** Manual mode: the rows are the page a server answered for the view the table
-    reported. The table searches, filters, sorts, groups and pages nothing of
+/** Server mode: the rows are the page a server answered for the request the
+    table reported. The table searches, filters, sorts, groups and pages nothing of
     its own; select all, the export and the footer would act on one page and
     call it the whole, so "select all" says it selects the page, the export
     writes the page and says so, and there is no footer and no grouping. */
-interface ManualMode {
-  /** Manual mode: the rows are one page a server answered. */
-  manual: true;
+interface ServerMode {
+  /** Server mode: the rows are one page a server answered. */
+  server: true;
   childRows?: never;
   defaultBranches?: never;
   /** How many rows the server's filtered set has - the pages and the counts
       read it. */
   rowCount: number;
-  /** The view changed where it decides the rows: search, conditions, sort,
-      page or page size. Called once when the table first stands and once per
-      change, with every one of the five present - a width or a hidden column
-      asks the server nothing. */
-  onRequest: (request: ManualView) => void;
+  /** The request changed: search, conditions, sort, page or page size. Called
+      once when the table first stands and once per change, with every one of
+      the five present - a width, an order, a pin, a fold or a hidden column
+      asks the server nothing; `onViewChange` hears those. */
+  onRequest: (request: TableRequest) => void;
   /** The values a list filter offers for a column, `null` for an absent one -
       the table cannot count what it does not hold. */
   filterOptions?: (column: string) => readonly unknown[];
 }
 
-/** The options of `useTable`: automatic, or manual over a server. */
-export type TableOptions<Z> = TableOptionsCommon<Z> & (AutomaticMode<Z> | ManualMode);
+/** The options of `useTable`: automatic, or in server mode over a server's rows. */
+export type TableOptions<Z> = TableOptionsCommon<Z> & (AutomaticMode<Z> | ServerMode);
 
 /** The state of a table, as everything outside the columns reads it. */
 export interface TableSnapshot<Z> {
@@ -741,14 +741,14 @@ export interface TableSnapshot<Z> {
       the options set it up is absent. */
   view: TableView;
   /** The filtered set in the visible columns as text for a spreadsheet - in
-      manual mode the page. */
+      server mode the page. */
   asCsv: () => string;
   /** Whether it virtualises. */
   virtual: boolean;
-  /** How many rows the filtered set has - in manual mode the server's count. */
+  /** How many rows the filtered set has - in server mode the server's count. */
   rowCount: number;
-  /** Whether it is in manual mode: the rows are one page of a server's. */
-  manual: boolean;
+  /** Whether it is in server mode: the rows are one page of a server's. */
+  server: boolean;
 }
 
 /** What a part without a row type needs from a table – for `of`. */

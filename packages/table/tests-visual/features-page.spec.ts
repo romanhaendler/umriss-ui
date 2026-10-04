@@ -7,17 +7,17 @@ import { ALL_PAGES, open, openExample } from "./navigation";
 
 checkInstall({ open, pages: ALL_PAGES, command: "npm install @umriss-ui/table @umriss-ui/core" });
 
-checkFirstExample({ open, pageId: "manual-mode", title: "Hand the table one page" });
+checkFirstExample({ open, pageId: "server-mode", title: "Hand the table one page" });
 
 checkPage({
   open,
   openExample,
-  pageId: "manual-mode",
+  pageId: "server-mode",
   examples: ["only-pages", "sort-and-search", "filter-options"],
   other: { name: "Column", pageId: "column" },
   packageName: "@umriss-ui/table",
   importLine: 'import { useTable } from "@umriss-ui/table";',
-  limits: "manual-mode",
-  /* Manual mode is a feature page without a table of its own. */
+  limits: "server-mode",
+  /* Server mode is a feature page without a table of its own. */
   tablePageId: "first-table",
 });

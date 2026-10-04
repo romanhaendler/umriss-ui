@@ -56,13 +56,13 @@ export function FilterPanel({
     [offered, hook.admitted, entry, formats],
   );
   const filter = filterOf(entry.spec.filter);
-  /* In manual mode the table holds one page: the values it could offer are
+  /* In server mode the table holds one page: the values it could offer are
      the page's, and a value that occurs only on page nine would not be offered
      (M4). */
-  if (hook.publicSnapshot.manual && !offered && entry.spec.filter === "list") {
+  if (hook.publicSnapshot.server && !offered && entry.spec.filter === "list") {
     warnOnce(
-      `manual-filter-options:${id}`,
-      `The list filter of "${id}" offers only the values of the page in manual mode; \`filterOptions\` gives it the server's.`,
+      `server-filter-options:${id}`,
+      `The list filter of "${id}" offers only the values of the page in server mode; \`filterOptions\` gives it the server's.`,
     );
   }
   if (!filter) return null;

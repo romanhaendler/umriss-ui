@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Pagination, useTable } from "../../../src";
-import type { ManualView } from "../../../src";
+import type { TableRequest } from "../../../src";
 
 /* Data from the logistics world, written out here so the example runs on its own. */
 /** A small LCG - the same numbers on every computer. */
@@ -159,7 +159,7 @@ export const lead = "The table holds one page and cannot count the values of the
 
 const STATUSES = ["delivered", "out for delivery", "failed attempt"] as const;
 
-const serve = (view: ManualView) => {
+const serve = (view: TableRequest) => {
   const chosen = view.conditions.status as readonly string[] | undefined;
   const hits = SHIPMENTS.filter((s) => !chosen || chosen.includes(s.status));
   const start = (view.page - 1) * view.pageSize;
@@ -170,7 +170,7 @@ export default function ListFilter() {
   const [answer, setAnswer] = useState(() => serve({ search: "", conditions: {}, sort: [], page: 1, pageSize: 10 }));
   const { Table, Column } = useTable(answer.rows, {
     rowKey: (s) => s.id,
-    manual: true,
+    server: true,
     rowCount: answer.rowCount,
     onRequest: (view) => setAnswer(serve(view)),
     filterOptions: (column) => (column === "status" ? STATUSES : []),

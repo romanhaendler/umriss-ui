@@ -359,8 +359,8 @@ export function TreeRows() {
   useTable(units, { rowKey: (u) => u.id, childRows: (u) => u.children, defaultBranches: 1 });
   // @ts-expect-error children of another type
   useTable(units, { rowKey: (u) => u.id, childRows: () => [1, 2] });
-  // @ts-expect-error a tree in manual mode
-  useTable(units, { rowKey: (u) => u.id, manual: true, rowCount: 0, onRequest: () => {}, childRows: (u) => u.children });
+  // @ts-expect-error a tree in server mode
+  useTable(units, { rowKey: (u) => u.id, server: true, rowCount: 0, onRequest: () => {}, childRows: (u) => u.children });
   return null;
 }
 

@@ -42,7 +42,7 @@ export const SAMPLE = [
   "row-appearance",
   "view",
   "virtualisation",
-  "manual-mode",
+  "server-mode",
   "grid-mode",
   "edits",
   "filter",

@@ -1,6 +1,6 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { Pagination, useTable } from "../../../src";
-import type { ManualView } from "../../../src";
+import type { TableRequest } from "../../../src";
 
 /* Data from the logistics world, written out here so the example runs on its own. */
 /** A small LCG - the same numbers on every computer. */
@@ -154,39 +154,26 @@ const SHIPMENTS: readonly Shipment[] = TOURS.flatMap((one) =>
   }),
 );
 
-export const title = "Show loading, and drop a late answer";
-export const lead = "`loading` marks the table while a request runs: the page it has stays, dimmed after a moment, and nothing below it moves. An answer to a view the user has already left is the application's to drop; the table shows whatever rows it is given.";
+export const title = "Hand the table one page";
+export const lead = "`server` takes the rows of one page and the server's `rowCount`; `onRequest` reports the page the user asks for next.";
 
-/* Every answer takes 600 ms. Page on quickly: only the last request lands. */
-const LATENCY = 600;
-
-const serve = (view: ManualView) => {
+/* The server is a slice of an array here; in an application it is a request. */
+const serve = (view: TableRequest) => {
   const start = (view.page - 1) * view.pageSize;
   return { rows: SHIPMENTS.slice(start, start + view.pageSize), rowCount: SHIPMENTS.length };
 };
 
-export default function LoadingAndLateAnswers() {
+export default function OnlyPages() {
   const [answer, setAnswer] = useState(() => serve({ search: "", conditions: {}, sort: [], page: 1, pageSize: 10 }));
-  const [loading, setLoading] = useState(false);
-  const latest = useRef<ManualView | null>(null);
-
   const { Table, Column } = useTable(answer.rows, {
     rowKey: (s) => s.id,
-    manual: true,
+    server: true,
     rowCount: answer.rowCount,
-    onRequest: (view) => {
-      latest.current = view;
-      setLoading(true);
-      setTimeout(() => {
-        if (latest.current !== view) return;
-        setAnswer(serve(view));
-        setLoading(false);
-      }, LATENCY);
-    },
+    onRequest: (view) => setAnswer(serve(view)),
   });
 
   return (
-    <Table ariaLabel="Shipments on the server" loading={loading}>
+    <Table ariaLabel="Shipments on the server">
       <Column value="id" label="Shipment" rowHeader sortable={false} />
       <Column value="customer" label="Customer" sortable={false} />
       <Column value="weight" label="Weight (kg)" sortable={false} />

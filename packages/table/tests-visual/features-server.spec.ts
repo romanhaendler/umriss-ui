@@ -1,4 +1,4 @@
-/* Manual mode in the browser (table-server-mode 02, 03), against the example's
+/* Server mode in the browser (table-server-mode 02, 03), against the example's
    fake server with its 400 ms: the previous page kept, dimmed, while an answer
    is out (ADR-0042), the next page, a list filter offering the server's values,
    and "select all" saying it selects the page. Behaviour, light only; the
@@ -12,7 +12,7 @@ test.skip(({ colorScheme }) => colorScheme === "dark", "Behaviour tests only onc
 const ID = "a-million-rows-on-a-server";
 
 test("the next page: the previous page kept and busy at its height, then the server's rows", async ({ page }) => {
-  await openExample(page, "manual-mode", ID);
+  await openExample(page, "server-mode", ID);
   const example = page.locator(`[data-example="${ID}"]`);
   const table = example.locator("table");
   const before = await table.boundingBox();
@@ -28,7 +28,7 @@ test("the next page: the previous page kept and busy at its height, then the ser
 });
 
 test("a list filter offers what the server names, and a condition reaches it", async ({ page }) => {
-  await openExample(page, "manual-mode", ID);
+  await openExample(page, "server-mode", ID);
   const example = page.locator(`[data-example="${ID}"]`);
   await example.getByRole("button", { name: "Filter Service" }).click();
   const panel = page.getByRole("dialog", { name: "Filter Service" });
@@ -42,7 +42,7 @@ test("a list filter offers what the server names, and a condition reaches it", a
 });
 
 test("'select all' selects the page and says so; a key from another page stays", async ({ page }) => {
-  await openExample(page, "manual-mode", ID);
+  await openExample(page, "server-mode", ID);
   const example = page.locator(`[data-example="${ID}"]`);
   await example.getByRole("checkbox", { name: "Select REQ-0000001" }).check({ force: true });
   await example.getByRole("button", { name: "Next" }).click();

@@ -313,8 +313,8 @@ export function buildParts(registry: Registry): Parts {
     registry.setStickyRowHeader(props.stickyRowHeader === true);
     registry.setTableGroupable(props.groupable !== false);
     registry.setRowAdding(props.grid === true && props.onRowAdd !== undefined);
-    if (registry.manual && props.groupable === true) {
-      warnOnce("manual-groupable", "`groupable` is passed over in manual mode: the groups would be the page's, not the server's.");
+    if (registry.server && props.groupable === true) {
+      warnOnce("server-groupable", "`groupable` is passed over in server mode: the groups would be the page's, not the server's.");
     }
     const childrenRef = useRef<HTMLDivElement>(null);
     const [footerTarget, setFooterTarget] = useState<HTMLDivElement | null>(null);
@@ -435,7 +435,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
     }
   });
 
-  /* Manual mode (M2): placeholders that stand where a page of rows stood
+  /* Server mode (M2): placeholders that stand where a page of rows stood
      keep its columns' widths - the columns of an automatic layout would
      shift to the placeholders' while the answer is out. Their height is the
      pitch's (ADR-0042). Measured from the rendered rows, since only the
@@ -443,7 +443,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
   const previousWidths = useRef<number[] | null>(null);
   useLayoutEffect(() => {
     const body = tableRef.current?.tBodies[0];
-    if (!body || !registry.manual) return;
+    if (!body || !registry.server) return;
     if (!loading) {
       const first = body.querySelector<HTMLTableRowElement>(":scope > tr[data-motion]");
       if (first) previousWidths.current = Array.from(first.cells, (cell) => cell.getBoundingClientRect().width);
@@ -603,9 +603,9 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
   const pinAt = (first: number, last = first) => pinnedCell(blocks, first, last);
 
   const rows = projection.visible;
-  /* In manual mode the aggregates would be the page's, standing where the
+  /* In server mode the aggregates would be the page's, standing where the
      filtered set's belong - no footer rather than a wrong one. */
-  const footerShown = !loading && !snapshot.manual && dataColumns.some((e) => e.spec.aggregate);
+  const footerShown = !loading && !snapshot.server && dataColumns.some((e) => e.spec.aggregate);
   const restricted = snapshot.search !== "" || Object.keys(snapshot.filter).length > 0;
 
   /* Grid mode (ADR-0034): every line the arrows walk - all of them, the ones a
@@ -712,7 +712,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
      table that never had more than three rows stays three rows tall. A
      grouped page is `pageSize` lines as well, its repeated headers counted
      (grouping.ts, `pageLines`). */
-  const pageSize = (registry.paginates() || snapshot.manual) && !virtual ? snapshot.pageSize : 0;
+  const pageSize = (registry.paginates() || snapshot.server) && !virtual ? snapshot.pageSize : 0;
   const shownLines = lines ? lines.length : rows.length;
   const shownNow = pageSize && !loading ? Math.min(shownLines, pageSize) : 0;
   if (shownNow > heldBefore) setHeldBefore(shownNow);
@@ -755,7 +755,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
             style={pageSize && heldLines ? { height: `calc(var(--_pitch) * ${heldLines})`, verticalAlign: "top" } : undefined}
           >
             <div className={styles.empty}>
-              {(snapshot.manual || hook.admitted.length > 0) && restricted ? (
+              {(snapshot.server || hook.admitted.length > 0) && restricted ? (
                 <>
                   <p className={styles.emptyTitle}>{wording.nothingMatchesFilters}</p>
                   <Button size="sm" variant="ghost" onClick={() => resetSearchAndFilters(snapshot)}>
@@ -904,7 +904,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
               {selectable && (
                 <th scope="col" className={cx(styles.th, styles.control, pinAt(0).className)} style={pinAt(0).style}>
                   <Checkbox
-                    aria-label={snapshot.manual ? wording.selectAllOnPage : wording.selectAllRows}
+                    aria-label={snapshot.server ? wording.selectAllOnPage : wording.selectAllRows}
                     checked={snapshot.selection.allSelected}
                     indeterminate={snapshot.selection.someSelected}
                     onChange={snapshot.selection.toggleAll}

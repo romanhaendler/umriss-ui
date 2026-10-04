@@ -1,10 +1,10 @@
 import { useRef, useState } from "react";
 import { Stack, Text } from "@umriss-ui/core";
 import { ColumnMenu, Export, Pagination, Search, Toolbar, useTable } from "../../../src";
-import type { ManualView } from "../../../src";
+import type { TableRequest } from "../../../src";
 
 export const title = "Load pages from a server";
-export const lead = "`manual` hands the table one page and the server's `rowCount`; `onRequest` reports search, conditions, sort and page to fetch the next.";
+export const lead = "`server` hands the table one page and the server's `rowCount`; `onRequest` reports search, conditions, sort and page to fetch the next.";
 
 /* The server below is a fake: a million requests computed from their index,
    every answer delayed by 400 ms. Dropping a late answer to an older view is
@@ -37,7 +37,7 @@ const request = (i: number): Request => ({
    the way a database keeps an index warm. */
 let warm: { key: string; order: Int32Array | null } = { key: "", order: null };
 
-function serve(view: ManualView): { rows: Request[]; rowCount: number } {
+function serve(view: TableRequest): { rows: Request[]; rowCount: number } {
   const search = view.search.trim().toLowerCase();
   const services = view.conditions.service as readonly string[] | undefined;
   const sort = view.sort[0] ?? BY_ID;
@@ -73,8 +73,8 @@ function serve(view: ManualView): { rows: Request[]; rowCount: number } {
   return { rows, rowCount };
 }
 
-const FIRST: ManualView = { search: "", conditions: {}, sort: [BY_ID], page: 1, pageSize: 10 };
-const same = (a: ManualView, b: ManualView) =>
+const FIRST: TableRequest = { search: "", conditions: {}, sort: [BY_ID], page: 1, pageSize: 10 };
+const same = (a: TableRequest, b: TableRequest) =>
   JSON.stringify([a.search, a.conditions, a.sort, a.page, a.pageSize]) ===
   JSON.stringify([b.search, b.conditions, b.sort, b.page, b.pageSize]);
 
@@ -87,7 +87,7 @@ export default function AMillionRowsOnAServer() {
   const t = useTable(answer.rows, {
     rowKey: (r) => r.id,
     defaultSort: BY_ID,
-    manual: true,
+    server: true,
     rowCount: answer.rowCount,
     onRequest: (view) => {
       latest.current = view;

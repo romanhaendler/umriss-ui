@@ -37,18 +37,17 @@ export interface TableView<K extends string = string> {
   pinned?: Readonly<Record<string, Pin>>;
 }
 
-/** The view as manual mode reports it to `onRequest`: the parts that decide
-    the rows - search, conditions, sort, page and page size - are always there,
-    at their default as well. A server has no default of the table's to fall
-    back on, and a view it has to complete is one it completes wrongly. */
-export type ManualView<K extends string = string> = TableView<K> &
-  Required<Pick<TableView<K>, "search" | "conditions" | "sort" | "page" | "pageSize">>;
+/** The request server mode reports to `onRequest`: the parts of the view that
+    decide the rows - search, conditions, sort, page and page size - and
+    nothing else, each at its default as well. A server has no default of the
+    table's to fall back on, and a request it has to complete is one it
+    completes wrongly. A width, an order, a pin or a fold is no part of it. */
+export type TableRequest<K extends string = string> = Required<Pick<TableView<K>, "search" | "conditions" | "sort" | "page" | "pageSize">>;
 
-/** What manual mode compares to report a view once: the five parts that decide
-    the rows, and nothing else - a new width fetches nothing. Conditions are
+/** What server mode compares to report a request once. Conditions are
     compared as JSON, which is what a server receives of them. */
-export const manualViewKey = (view: ManualView): string =>
-  JSON.stringify([view.search, view.conditions, view.sort, view.page, view.pageSize]);
+export const requestKey = (request: TableRequest): string =>
+  JSON.stringify([request.search, request.conditions, request.sort, request.page, request.pageSize]);
 
 /** What a view handed in is compared by (ADR-0047): its content, not its
     identity - a view written in the call is a new object on every render.
