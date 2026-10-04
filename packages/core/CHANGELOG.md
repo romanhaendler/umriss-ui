@@ -98,6 +98,15 @@ commit.
   or its import line, leads to its entry. `docs/llms-full.md` ends with the
   same index, in place of the appendix "The rest of the API". The library is
   unchanged.
+- **`maxFinds` on `CommandPalette`**: the most finds that stand at once, the
+  best by rank, with a last line that says how many more there are (the new
+  wording entry `paletteMoreFinds`, "26 more finds", "26 weitere Funde"). The
+  screen reader still hears the count of every find. Without it, every find
+  stands, as before.
+- **`searchedGroup` on a `CommandPaletteItem`**: the part of `group` that is
+  searched, where a prefix every candidate of a set shares would otherwise
+  let its few letters find the whole set. The heading shown is still `group`.
+  Without it, all of `group` is searched, as before.
 
 ### Changed
 
