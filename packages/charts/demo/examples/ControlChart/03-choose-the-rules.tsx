@@ -136,15 +136,19 @@ function plant(seed: number): Plant {
   return { readings, samples, batches };
 }
 
-export const title = "List the rule violations";
-export const lead = "In the plant: `onViolations` hands over the verdict the chart marks, so the same finds can stand beside it as text.";
+export const title = "Choose the rules";
+export const lead = "In the plant: `rules` switches rules off and sets their run lengths - here rule 4 is off and a run counts from eight - and without `zoneLines` the sigma zones stay unmarked.";
 
 const SAMPLES = plant(7).samples;
 const REFERENCE_WINDOW = { kind: "referenceWindow", from: 0, to: 15 } as const;
 
+/* Western Electric's run of eight in place of Nelson's nine; "two of three
+   near a limit" is not watched on this line, so its zones need no lines. */
+const CHOSEN = { twoOfThree: false, runLength: 8 } as const;
+
 const RULES: Record<RuleName, string> = {
   outlier: "Beyond a control limit",
-  run: "A run on one side of the centre",
+  run: "Eight on one side of the centre",
   trend: "A steady climb or fall",
   twoOfThree: "Two of three near a limit",
 };
@@ -154,15 +158,23 @@ const clock = (minute: number) => {
   return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
 };
 
-export default function ListTheViolations() {
+export default function ChooseTheRules() {
   const [found, setFound] = useState<readonly Violation[]>([]);
   return (
     <div className="side-by-side">
       <div style={{ flex: "1 1 320px" }}>
-        <Chart data={SAMPLES} height={240} ariaLabel="Control chart of the tile length, its violations listed beside it">
+        <Chart data={SAMPLES} height={240} ariaLabel="Control chart of the tile length under three of the four rules">
           <XAxis accessor={(d: Sample) => d.minute} label="Minute of the shift" />
           <YAxis accessor={(d: Sample) => d.length} label="mm" />
-          <ControlChart accessor={(d: Sample) => d.length} data={SAMPLES} origin={REFERENCE_WINDOW} name="Tile length" onViolations={setFound} />
+          <ControlChart
+            accessor={(d: Sample) => d.length}
+            data={SAMPLES}
+            origin={REFERENCE_WINDOW}
+            name="Tile length"
+            rules={CHOSEN}
+            zoneLines={false}
+            onViolations={setFound}
+          />
           <Tooltip mode="x" />
         </Chart>
       </div>

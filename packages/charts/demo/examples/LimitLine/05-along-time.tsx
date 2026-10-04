@@ -1,7 +1,6 @@
-import { Area, Chart, Legend, Line, Tooltip, XAxis, YAxis } from "../../../src";
+import { Chart, LimitBand, LimitLine, Line, Tooltip, XAxis, YAxis } from "../../../src";
 
 /* Data from the operations world, written out here so the example runs on its own. */
-
 /** A small LCG - the same numbers on every computer. */
 function random(seed: number): () => number {
   let s = seed >>> 0;
@@ -12,7 +11,6 @@ function random(seed: number): () => number {
 }
 
 const at = (day: number, hours: number, minutes = 0) => new Date(2026, 2, day, hours, minutes).getTime();
-
 const MINUTE = 60_000;
 
 /** Tuesday, 17 March 2026, 10:30 - the moment the screens are read at. */
@@ -83,54 +81,19 @@ function metrics(serviceId: string): MetricPoint[] {
   return points;
 }
 
-const HOUR = 60 * MINUTE;
-
-interface ExpectedPoint {
-  t: number;
-  /** The range the requests per minute are expected in; `null` where the
-      job that computes it did not run. */
-  low: number | null;
-  high: number | null;
-}
-
-/** The range a service's requests per minute are expected in today, every
-    five minutes - the day's usual curve, give or take 15 %. The job that
-    computes it skipped 03:00 to 04:00. */
-function expected(serviceId: string): ExpectedPoint[] {
-  const service = SERVICES.find((one) => one.id === serviceId);
-  if (service === undefined) throw new Error(`No service "${serviceId}".`);
-  const points: ExpectedPoint[] = [];
-  for (let t = at(17, 0); t <= NOW; t += 5 * MINUTE) {
-    const hour = (t - at(17, 0)) / HOUR;
-    const usual = VOLUME[service.tier] * (0.35 + 0.65 * Math.max(0, Math.sin((Math.PI * (hour - 5)) / 16)));
-    const skipped = hour >= 3 && hour < 4;
-    points.push({ t, low: skipped ? null : Math.round(usual * 0.85), high: skipped ? null : Math.round(usual * 1.15) });
-  }
-  return points;
-}
-
-export const title = "Fill a range between two edges";
-export const lead = "Give `baseline` the lower edge and the area becomes a range; where either edge is missing, the fill has a hole. `dash` breaks the outline, never the fill.";
+export const title = "Mark moments and windows along time";
+export const lead = "With `orientation=\"x\"` a limit lies on the time axis: a line for a moment, a band for a window. Neither carries a severity, so each takes a `color` of its own.";
 
 const CHECKOUT = metrics("checkout");
-const EXPECTED = expected("checkout");
 
-export default function Corridor() {
+export default function AlongTime() {
   return (
-    <Chart data={CHECKOUT} height={280} ariaLabel="Checkout's requests inside the range they are expected in">
-      <XAxis accessor={(d: { t: number }) => d.t} time />
-      <YAxis accessor={(d: MetricPoint) => d.requests} label="Requests/min" />
-      {/* The outline runs along the upper edge; dashed, it reads as expected, not measured. */}
-      <Area
-        data={EXPECTED}
-        accessor={(d: ExpectedPoint) => d.high}
-        baseline={(d: ExpectedPoint) => d.low}
-        name="Expected range"
-        strokeWidth={1}
-        dash={[4, 3]}
-      />
-      <Line accessor={(d: MetricPoint) => d.requests} name="Requests" strokeWidth={1.75} />
-      <Legend placement="top" />
+    <Chart data={CHECKOUT} height={260} ariaLabel="Checkout's latency across a maintenance window and the start of a release freeze">
+      <XAxis accessor={(d: MetricPoint) => d.t} time ticks={[0, 2, 4, 6, 8, 10].map((hours) => at(17, hours))} />
+      <YAxis accessor={(d: MetricPoint) => d.p95} label="ms" />
+      <LimitBand orientation="x" from={at(17, 2)} to={at(17, 3)} color="#5b7c99" label="Maintenance" />
+      <LimitLine orientation="x" value={at(17, 8, 30)} color="#7b61c9" label="Release freeze" />
+      <Line accessor={(d: MetricPoint) => d.p95} name="p95" />
       <Tooltip mode="x" />
     </Chart>
   );

@@ -1,6 +1,4 @@
-import { useState } from "react";
-import { Chart, ControlChart, Tooltip, XAxis, YAxis } from "../../../src";
-import type { RuleName, Violation } from "../../../src";
+import { Area, Bar, Chart, Legend, Line, Scatter, Tooltip, XAxis, YAxis } from "../../../src";
 
 /* Data from the plant world, written out here so the example runs on its own. */
 
@@ -136,47 +134,57 @@ function plant(seed: number): Plant {
   return { readings, samples, batches };
 }
 
-export const title = "List the rule violations";
-export const lead = "In the plant: `onViolations` hands over the verdict the chart marks, so the same finds can stand beside it as text.";
+/** One hour of the shift, counted. */
+interface HourCount {
+  /** The middle of the hour, in hours since the start of the shift. */
+  hour: number;
+  /** Tiles the plan expects while a batch is in the kiln. */
+  planned: number;
+  fired: number;
+  good: number;
+  /** Fired outside the tolerance. */
+  scrap: number;
+}
 
-const SAMPLES = plant(7).samples;
-const REFERENCE_WINDOW = { kind: "referenceWindow", from: 0, to: 15 } as const;
+/** The minutes of the shift, summed up hour by hour. */
+function hourly(shift: Plant): HourCount[] {
+  return Array.from({ length: SHIFT_MINUTES / 60 }, (_, h) => {
+    const minutes = shift.readings.slice(h * 60, (h + 1) * 60);
+    const loaded = minutes.filter((m) => shift.batches.some((b) => b.kiln[0] <= m.minute && m.minute < b.kiln[1])).length;
+    const fired = minutes.reduce((sum, m) => sum + m.fired, 0);
+    const good = minutes.reduce((sum, m) => sum + m.good, 0);
+    return { hour: h + 0.5, planned: loaded / IDEAL_CYCLE_MINUTES, fired, good, scrap: fired - good };
+  });
+}
 
-const RULES: Record<RuleName, string> = {
-  outlier: "Beyond a control limit",
-  run: "A run on one side of the centre",
-  trend: "A steady climb or fall",
-  twoOfThree: "Two of three near a limit",
-};
+export const title = "Bind every kind of series to a second axis";
+export const lead = "In the plant: `xAxisId` and `yAxisId` work alike on every series kind. An area, bars, a line and a scatter read hourly counts on the right and top axes; the kiln's minutes keep the first two.";
 
-const clock = (minute: number) => {
-  const total = 6 * 60 + minute;
-  return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
-};
+const SHIFT = plant(7);
+const HOURS = hourly(SHIFT);
 
-export default function ListTheViolations() {
-  const [found, setFound] = useState<readonly Violation[]>([]);
+export default function EveryKind() {
   return (
-    <div className="side-by-side">
-      <div style={{ flex: "1 1 320px" }}>
-        <Chart data={SAMPLES} height={240} ariaLabel="Control chart of the tile length, its violations listed beside it">
-          <XAxis accessor={(d: Sample) => d.minute} label="Minute of the shift" />
-          <YAxis accessor={(d: Sample) => d.length} label="mm" />
-          <ControlChart accessor={(d: Sample) => d.length} data={SAMPLES} origin={REFERENCE_WINDOW} name="Tile length" onViolations={setFound} />
-          <Tooltip mode="x" />
-        </Chart>
-      </div>
-      <ul className="side-note">
-        {found.length === 0 ? (
-          <li>No rule violated.</li>
-        ) : (
-          found.map((v) => (
-            <li key={v.rule}>
-              <strong>{RULES[v.rule]}</strong>: {v.indices.map((i) => clock(SAMPLES[i]!.minute)).join(", ")}
-            </li>
-          ))
-        )}
-      </ul>
-    </div>
+    <Chart data={SHIFT.readings} height={340} ariaLabel="The kiln's temperature by the minute above the tiles it fired by the hour">
+      <XAxis accessor={(d: Reading) => d.minute} domain={[0, SHIFT_MINUTES]} label="Minute of the shift" />
+      <XAxis
+        id="hour"
+        position="top"
+        accessor={(d: HourCount) => d.hour}
+        domain={[0, SHIFT_MINUTES / 60]}
+        ticks={HOURS.map((d) => d.hour)}
+        tickFormat={(v) => `Hour ${Math.ceil(v)}`}
+      />
+      {/* The kiln above, the counts below: each axis keeps to its own half. */}
+      <YAxis accessor={(d: Reading) => d.kiln} domain={[1050, 1250]} label="°C" />
+      <YAxis id="tiles" position="right" accessor={(d: HourCount) => d.fired} domain={[0, 500]} label="Tiles per hour" />
+      <Line accessor={(d: Reading) => d.kiln} name="Zone 3" />
+      <Area data={HOURS} accessor={(d: HourCount) => d.planned} xAxisId="hour" yAxisId="tiles" name="Planned" strokeWidth={0} />
+      <Bar data={HOURS} accessor={(d: HourCount) => d.fired} xAxisId="hour" yAxisId="tiles" name="Fired" />
+      <Line data={HOURS} accessor={(d: HourCount) => d.good} xAxisId="hour" yAxisId="tiles" name="Good" />
+      <Scatter data={HOURS} accessor={(d: HourCount) => d.scrap} xAxisId="hour" yAxisId="tiles" name="Scrap" />
+      <Legend placement="top" />
+      <Tooltip mode="x" />
+    </Chart>
   );
 }

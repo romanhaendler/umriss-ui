@@ -1,6 +1,4 @@
-import { useState } from "react";
-import { Chart, ControlChart, Tooltip, XAxis, YAxis } from "../../../src";
-import type { RuleName, Violation } from "../../../src";
+import { Chart, LimitBand, LimitLine, Line, Tooltip, XAxis, YAxis, controlLimits } from "../../../src";
 
 /* Data from the plant world, written out here so the example runs on its own. */
 
@@ -136,47 +134,27 @@ function plant(seed: number): Plant {
   return { readings, samples, batches };
 }
 
-export const title = "List the rule violations";
-export const lead = "In the plant: `onViolations` hands over the verdict the chart marks, so the same finds can stand beside it as text.";
+export const title = "Set specification and control limits side by side";
+export const lead = "In the plant: a specification is chosen, a control limit is computed from the process - `role` draws the two apart, so neither passes for the other (ADR-0008).";
 
 const SAMPLES = plant(7).samples;
-const REFERENCE_WINDOW = { kind: "referenceWindow", from: 0, to: 15 } as const;
 
-const RULES: Record<RuleName, string> = {
-  outlier: "Beyond a control limit",
-  run: "A run on one side of the centre",
-  trend: "A steady climb or fall",
-  twoOfThree: "Two of three near a limit",
-};
+/* Computed from the first fifteen samples, when the kiln ran in control. */
+const LIMITS = controlLimits(
+  SAMPLES.map((s) => s.length),
+  { kind: "referenceWindow", from: 0, to: 15 },
+);
 
-const clock = (minute: number) => {
-  const total = 6 * 60 + minute;
-  return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
-};
-
-export default function ListTheViolations() {
-  const [found, setFound] = useState<readonly Violation[]>([]);
+export default function SpecificationAndControl() {
   return (
-    <div className="side-by-side">
-      <div style={{ flex: "1 1 320px" }}>
-        <Chart data={SAMPLES} height={240} ariaLabel="Control chart of the tile length, its violations listed beside it">
-          <XAxis accessor={(d: Sample) => d.minute} label="Minute of the shift" />
-          <YAxis accessor={(d: Sample) => d.length} label="mm" />
-          <ControlChart accessor={(d: Sample) => d.length} data={SAMPLES} origin={REFERENCE_WINDOW} name="Tile length" onViolations={setFound} />
-          <Tooltip mode="x" />
-        </Chart>
-      </div>
-      <ul className="side-note">
-        {found.length === 0 ? (
-          <li>No rule violated.</li>
-        ) : (
-          found.map((v) => (
-            <li key={v.rule}>
-              <strong>{RULES[v.rule]}</strong>: {v.indices.map((i) => clock(SAMPLES[i]!.minute)).join(", ")}
-            </li>
-          ))
-        )}
-      </ul>
-    </div>
+    <Chart data={SAMPLES} height={300} ariaLabel="The tile length against its specification and its control limits">
+      <XAxis accessor={(d: Sample) => d.minute} label="Minute of the shift" />
+      <YAxis accessor={(d: Sample) => d.length} label="mm" />
+      <LimitBand from={597.5} to={602.5} severity="warning" label="Specification" />
+      <LimitBand role="control" from={LIMITS.lower} to={LIMITS.upper} label="±3σ" />
+      <LimitLine role="control" value={LIMITS.center} label="Centre" />
+      <Line accessor={(d: Sample) => d.length} name="Tile length" />
+      <Tooltip mode="x" />
+    </Chart>
   );
 }

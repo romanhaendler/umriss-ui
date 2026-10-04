@@ -61,7 +61,7 @@ const SUCCESS_BY_HOUR: readonly SuccessCell[] = (() => {
 
 
 export const title = "Colour cells by their limits";
-export const lead = "With `coloring` of kind `assessment` a cell takes the tone its limits give it: a bad hour everywhere reads differently from one bad service.";
+export const lead = "With `coloring` of kind `assessment` a cell takes the tone its limits give it: a bad hour everywhere reads differently from one bad service. `format` writes the value in the tooltip, while the y axis writes the row.";
 
 export default function ByLimits() {
   return (
@@ -81,6 +81,7 @@ export default function ByLimits() {
           },
         }}
         name="Success rate"
+        format={(v) => `${v.toFixed(2)} %`}
       />
       <Tooltip mode="nearest" />
     </Chart>
