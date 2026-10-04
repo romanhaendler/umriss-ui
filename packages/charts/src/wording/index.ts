@@ -29,6 +29,11 @@ export interface ChartsWording {
   walkHelp: string;
   /** The keys that zoom and pan it - only where the chart can be zoomed. */
   zoomHelp: string;
+  /** The keys of the legend's entries - only where it has one to press. */
+  legendHelp: string;
+  /** Read out where hiding would leave nothing to see, and every series is
+      shown instead. */
+  allShown: string;
   /** The data table's disclosure key, closed and open (charts-alternatives
       C1). */
   showData: string;
@@ -74,7 +79,9 @@ export const DEFAULT_CHARTS_WORDING: ChartsWording = {
   percent: (value) => `${value}%`,
   walkHelp:
     "Left and right arrows move through the values, up and down change the series, Home and End go to the first and the last, Escape clears.",
-  zoomHelp: "Plus and minus zoom, Shift with left or right pans, 0 shows everything.",
+  zoomHelp: "Plus and minus zoom, Shift with left or right pans, 0 goes back to the axis' own span.",
+  legendHelp: "In the legend, Enter hides or shows a series, Shift+Enter shows only it.",
+  allShown: "Nothing would be left to see, so every series is shown.",
   showData: "Show data",
   hideData: "Hide data",
   positionColumn: "Position",
