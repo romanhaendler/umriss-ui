@@ -79,6 +79,13 @@ column in the flow. Needs `@umriss-ui/core` 0.25; the peer range moves to
   `aria-sort`, `aria-busy`, the toolbar's count of matches, the alarm list's
   one live number, and the label a presentation's component needs. In the
   demo, the Markdown twins and `docs/llms-full.md`; the table is unchanged.
+- **Every prop of a props table is shown, or named as an exception**: new
+  examples for stripes across a wide table (`striped`), a selection held by
+  the application (`selection` from `useTableSelection`), an own filter that
+  offers the values that occur (`values`) and the toolbar's parts outside a
+  toolbar (`size`, the pager's `of`). The five props left without an example
+  are pass-throughs, a deprecated alias and a twin of a prop shown on a
+  sibling type; the demo's list says so for each. The table is unchanged.
 
 ### Fixed
 

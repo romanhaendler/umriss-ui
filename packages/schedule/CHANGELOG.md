@@ -51,6 +51,14 @@ to `^0.25.0` and `^0.10.0`.
   its import line, leads to its entry. `docs/llms-full.md` ends with the same
   index, in place of the appendix "The rest of the API". The library is
   unchanged.
+- **Every prop of a props table is shown, or named as an exception**: new
+  examples for groups that start folded (`defaultCollapsedGroups`), one
+  handover drawn its own way (a dependency's `attach` and `ends`) and a
+  tooltip that says what a bar covers and a line joins (`subtask`, `blocked`,
+  `dependency`, `from`, `to`); the list of findings now writes `departure`
+  and `arrival`, and "Report the pointer" names the lane, as its lead
+  promised. The two props left without an example, `className` and `style`,
+  are pass-throughs; the demo's list says so. The schedule is unchanged.
 
 ### Fixed
 

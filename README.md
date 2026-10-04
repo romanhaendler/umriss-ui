@@ -87,9 +87,10 @@ The demo **is** the documentation for the components. Every page shows running
 examples together with the source that produced them and a props table generated
 from `src/` — there is no prose description of a component that could drift away
 from the component. Every row of a props table links the examples that show it,
-and the build stops at a prop no example shows. Ten core pages open with a
-configurator. Each package has an API index of every export; one search (⌘K)
-finds pages, props, exports, tokens and wording keys across all five packages;
+and the build stops at a prop no example shows, unless its package names it
+as an exception with the reason. 27 core pages open with a configurator. Each
+package has an API index of every export; one search (⌘K) finds pages, props,
+exports, tokens and wording keys across all five packages;
 the header switches the examples between English and German (the charts take
 German per chart, so their demo has no switch); and every page has a Markdown
 twin, listed in each package's `llms.txt`. The design language, the standards,
