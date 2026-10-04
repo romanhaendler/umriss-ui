@@ -11,7 +11,8 @@ export interface ChartView {
       `"x"`. An axis absent here shows its own `domain`. An id that names no
       zoomable x axis falls out. */
   domains?: Readonly<Record<string, readonly [number, number]>>;
-  /** The hidden series, by `name`. Not built yet: component-view 02. */
+  /** The hidden series, by `name`; a series without one cannot be hidden. A
+      name no series carries falls out. */
   hidden?: readonly string[];
 }
 
@@ -31,16 +32,48 @@ export const viewKey = (view: ChartView): string =>
     [...(view.hidden ?? [])].sort(),
   ]);
 
-/** The view without the spans of axes that do not zoom here. `null` while no
-    axis is declared: then it stays as it is - otherwise the first render would
-    erase every span. */
-export function onlyKnown(view: ChartView, known: ReadonlySet<string> | null): ChartView {
-  if (known === null || view.domains === undefined) return view;
-  const entries = Object.entries(view.domains);
-  const kept = entries.filter(([id]) => known.has(id));
-  if (kept.length === entries.length) return view;
-  const rest: ChartView = view.hidden === undefined ? {} : { hidden: view.hidden };
-  return kept.length > 0 ? { ...rest, domains: Object.fromEntries(kept) } : rest;
+/** The view without what does not occur here: the spans of axes that do not
+    zoom, the hidden names no series carries. `null` while nothing of the kind
+    is declared: then that part stays as it is - otherwise the first render
+    would erase it. */
+export function onlyKnown(
+  view: ChartView,
+  axes: ReadonlySet<string> | null,
+  names: ReadonlySet<string> | null = null,
+): ChartView {
+  const domains = Object.entries(view.domains ?? {}).filter(([id]) => axes === null || axes.has(id));
+  const hidden = (view.hidden ?? []).filter((name) => names === null || names.has(name));
+  if (domains.length === Object.keys(view.domains ?? {}).length && hidden.length === (view.hidden ?? []).length) return view;
+  return {
+    ...(domains.length > 0 && { domains: Object.fromEntries(domains) }),
+    ...(hidden.length > 0 && { hidden }),
+  };
+}
+
+/** The hidden names after `names` are toggled among the chart's series - by
+    name, `undefined` for one without: shown together where every one is
+    hidden, hidden together otherwise. Never every series: where nothing would
+    be left to see, all are shown instead. */
+export function toggleHidden(
+  hidden: readonly string[],
+  names: readonly string[],
+  series: readonly (string | undefined)[],
+): string[] {
+  const show = names.every((name) => hidden.includes(name));
+  const next = show ? hidden.filter((name) => !names.includes(name)) : [...new Set([...hidden, ...names])];
+  return leftVisible(next, series);
+}
+
+/** The hidden names that show only the series named `name` - all, where no
+    series carries it. */
+export function showOnly(name: string, series: readonly (string | undefined)[]): string[] {
+  const others = series.filter((one): one is string => one !== undefined && one !== name);
+  return leftVisible([...new Set(others)], series);
+}
+
+/** `hidden`, unless it hides every series: then none. */
+function leftVisible(hidden: string[], series: readonly (string | undefined)[]): string[] {
+  return series.every((one) => one !== undefined && hidden.includes(one)) ? [] : hidden;
 }
 
 /** How long a view reported may take to come back as `initialView`. */

@@ -574,6 +574,39 @@ test("cursor sync: one shared view zooms all three", async ({ page }) => {
   expect(after.some((l) => HOURS.test(l))).toBe(true);
 });
 
+/* component-view 02 (ADR-0047): the legend hides through the view, and the
+   view - zoom and hidden series - outlives a reload where it is kept. */
+
+test("a view kept outlives a reload and comes back on restore", async ({ page }) => {
+  await openExample(page, "view", "keep-and-restore");
+  const example = () => page.locator('[data-example="keep-and-restore"]');
+  const view = () => example().locator('[data-role="view"]');
+  const billing = () => example().getByRole("button", { name: "Billing" });
+  await expect(view()).toHaveText("{}");
+
+  await billing().click();
+  await expect(billing()).toHaveAttribute("aria-pressed", "false");
+  await expect(view()).toHaveText('{"hidden":["Billing"]}');
+  const box = (await example().locator(".uc-plot").boundingBox())!;
+  await zoomIn(page, box.x + box.width / 2, box.y + box.height / 2, 2);
+  await expect(view()).toContainText('"domains":{"x":[');
+  await example().locator("[data-keep]").click();
+  const kept = await view().innerText();
+
+  await page.reload();
+  await openExample(page, "view", "keep-and-restore");
+  await expect(view()).toHaveText("{}");
+  await expect(billing()).toHaveAttribute("aria-pressed", "true");
+
+  await example().locator("[data-restore]").click();
+  await expect(view()).toHaveText(kept);
+  await expect(billing()).toHaveAttribute("aria-pressed", "false");
+
+  await example().locator("[data-start-over]").click();
+  await expect(view()).toHaveText("{}");
+  await expect(billing()).toHaveAttribute("aria-pressed", "true");
+});
+
 /* charts-a11y: the chart as one tab stop (ADR-0030). */
 
 test("Tab reaches the plot, and the keys walk its Active point", async ({ page }) => {

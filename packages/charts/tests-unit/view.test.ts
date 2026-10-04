@@ -1,9 +1,9 @@
-/* component-view 01 (ADR-0047): the chart's view model - compared by
-   content, an echo of its own report ignored, unknown axis ids out, zoom
-   inside its limits. */
+/* component-view 01 and 02 (ADR-0047): the chart's view model - compared by
+   content, an echo of its own report ignored, unknown axis ids and series
+   names out, zoom inside its limits, never every series hidden. */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { defaultLimits, Echoes, onlyKnown, viewKey, zoomSpan } from "../src/view";
+import { defaultLimits, Echoes, onlyKnown, showOnly, toggleHidden, viewKey, zoomSpan } from "../src/view";
 
 describe("viewKey", () => {
   it("compares by content, not by the order of the ids or the names", () => {
@@ -33,6 +33,46 @@ describe("onlyKnown", () => {
 
   it("drops the domains altogether when none is known", () => {
     expect(onlyKnown({ domains: { x: [0, 10] } }, new Set())).toEqual({});
+  });
+
+  it("drops the hidden names no series carries", () => {
+    expect(onlyKnown({ hidden: ["A", "gone"] }, null, new Set(["A", "B"]))).toEqual({ hidden: ["A"] });
+    expect(onlyKnown({ hidden: ["gone"] }, null, new Set(["A"]))).toEqual({});
+  });
+
+  it("leaves the hidden names alone while no series is declared", () => {
+    const view = { hidden: ["A"] };
+    expect(onlyKnown(view, null, null)).toBe(view);
+  });
+});
+
+describe("Hiding series", () => {
+  const series = ["A", "B", "C"];
+
+  it("hides a shown series and shows a hidden one", () => {
+    expect(toggleHidden([], ["B"], series)).toEqual(["B"]);
+    expect(toggleHidden(["B", "C"], ["B"], series)).toEqual(["C"]);
+  });
+
+  it("shows several names together where every one is hidden, and hides them together otherwise", () => {
+    expect(toggleHidden(["A", "B"], ["A", "B"], series)).toEqual([]);
+    expect(toggleHidden(["A"], ["A", "B"], series)).toEqual(["A", "B"]);
+  });
+
+  it("shows all instead of hiding the last series visible", () => {
+    expect(toggleHidden(["A", "B"], ["C"], series)).toEqual([]);
+  });
+
+  it("counts a series without a name as visible: it cannot be hidden", () => {
+    expect(toggleHidden(["A", "B"], ["C"], [...series, undefined])).toEqual(["A", "B", "C"]);
+  });
+
+  it("shows only one series", () => {
+    expect(showOnly("A", series)).toEqual(["B", "C"]);
+  });
+
+  it("shows all where the one to show only is not there", () => {
+    expect(showOnly("gone", series)).toEqual([]);
   });
 });
 

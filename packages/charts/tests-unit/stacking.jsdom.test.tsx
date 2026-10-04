@@ -168,8 +168,8 @@ describe("A stack in the scene", () => {
   });
 
   it("closes over a hidden member: the others stand on what is left", () => {
-    const { scene: s, lower } = scene();
-    s.updateSeries(lower, bar({ name: "A", accessor: (d) => (d as Row).a, hidden: true }));
+    const { scene: s } = scene();
+    s.toggleSeries("A");
     expect(s.axisExtent("y", "y")).toEqual([0, 5]);
   });
 
@@ -196,7 +196,8 @@ describe("A stack in the scene", () => {
 
   it("normalises by a hidden member's normalize, as its axis does", () => {
     const { scene: s, lower } = scene();
-    s.updateSeries(lower, bar({ name: "A", accessor: (d) => (d as Row).a, hidden: true, normalize: true }));
+    s.updateSeries(lower, bar({ name: "A", accessor: (d) => (d as Row).a, normalize: true }));
+    s.toggleSeries("A");
     expect(s.axisExtent("y", "y")).toEqual([0, 100]);
   });
 

@@ -63,16 +63,27 @@ export interface ChartParts<Z> {
   /** Puts a span in view on a zoomable x axis - a lone one is `"x"`; `null`
       shows the axis' own `domain` again. */
   setDomain: (axisId: string, span: readonly [number, number] | null) => void;
+  /** The hidden series, by `name`. */
+  hidden: readonly string[];
+  /** Hides the series `name`, or shows it where it is hidden - as a click on
+      its legend entry does. Hiding the last series visible shows all. */
+  toggleSeries: (name: string) => void;
+  /** Hides every series but `name`; all are shown where none carries it. */
+  showOnly: (name: string) => void;
+  /** Shows every series again. */
+  showAllSeries: () => void;
 }
 
 const NO_DOMAINS: Readonly<Record<string, readonly [number, number]>> = {};
+const NO_NAMES: readonly string[] = [];
 
 /** A chart over your rows: the parts it returns are typed at your row, so
     that a field name in `value` is checked by the compiler.
     @param rows The rows every series reads that brings no `data` of its own.
     @param options The view to start from and the handler of its changes.
     @returns `Chart`, `XAxis`, `YAxis` and every series kind - each keeps its
-    identity over the renders -, the `view`, its `domains` and `setDomain`. */
+    identity over the renders -, the `view`, its `domains` and `hidden`, and
+    the setters that change them. */
 export function useChart<Z>(rows: readonly Z[], options: ChartOptions = {}): ChartParts<Z> {
   const { initialView, onViewChange } = options;
   const [bound] = useState(() => {
@@ -81,7 +92,12 @@ export function useChart<Z>(rows: readonly Z[], options: ChartOptions = {}): Cha
     function Chart(props: ChartProps): ReactNode {
       return <FreeChart {...props} data={held.rows} scene={scene} />;
     }
-    const parts = { Chart, XAxis, YAxis, Line, Area, Bar, Scatter, StateBand, Matrix, BoxPlot, setDomain: scene.setDomain };
+    const parts = { Chart, XAxis, YAxis, Line, Area, Bar, Scatter, StateBand, Matrix, BoxPlot,
+      setDomain: scene.setDomain,
+      toggleSeries: scene.toggleSeries,
+      showOnly: scene.showOnly,
+      showAllSeries: scene.showAllSeries,
+    };
     return { held, scene, parts };
   });
   const { scene } = bound;
@@ -120,5 +136,5 @@ export function useChart<Z>(rows: readonly Z[], options: ChartOptions = {}): Cha
   // eslint-disable-next-line react-hooks/immutability -- the holder exists to be written here; its chart renders after this
   bound.held.rows = rows;
   // A new object only when the view changed: the parts keep their identity.
-  return useMemo(() => ({ ...bound.parts, view, domains: view.domains ?? NO_DOMAINS }), [bound, view]);
+  return useMemo(() => ({ ...bound.parts, view, domains: view.domains ?? NO_DOMAINS, hidden: view.hidden ?? NO_NAMES }), [bound, view]);
 }

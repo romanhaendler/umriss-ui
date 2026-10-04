@@ -56,9 +56,6 @@ export interface BoxPlotProps<T> {
   /** The name in legend and tooltip. Without one a warning stands in DEV.
       @default "Series n", after its place in the chart */
   name?: string;
-  /** Not drawn, not hit and not counted for its axes' extent. Its legend
-      entry stays, drawn back. Controlled, typically from `Legend onToggle`. */
-  hidden?: boolean;
   /** Every number of the box as the tooltip and the table write it.
       @default the y axis' `tickFormat`, else the built-in number format */
   format?: (value: number) => string;
@@ -94,7 +91,6 @@ export function BoxPlot<T>(props: BoxPlotProps<T>): null {
     yAxisId = "y",
     data,
     name,
-    hidden,
     format,
     color,
     tone,
@@ -119,13 +115,12 @@ export function BoxPlot<T>(props: BoxPlotProps<T>): null {
         yAxisId,
         data,
         name,
-        hidden,
         format,
         color,
         tone,
         boxWidth,
       }) as BoxSeriesConfig,
-    [median, lowerQuartile, upperQuartile, lowerWhisker, upperWhisker, outliers, mean, notchLower, notchUpper, count, xAxisId, yAxisId, data, name, hidden, format, color, tone, boxWidth],
+    [median, lowerQuartile, upperQuartile, lowerWhisker, upperWhisker, outliers, mean, notchLower, notchUpper, count, xAxisId, yAxisId, data, name, format, color, tone, boxWidth],
   );
 
   useSeries("BoxPlot", config);

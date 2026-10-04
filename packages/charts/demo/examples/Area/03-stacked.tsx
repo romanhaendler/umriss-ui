@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Legend, Tooltip, useChart } from "../../../src";
 
 /* Data from the logistics world, written out here so the example runs on its own. */
@@ -43,26 +42,19 @@ const PARCELS_PER_HOUR: readonly DepotHour[] = (() => {
 })();
 
 export const title = "Stack areas";
-export const lead = "Areas with the same `stack` stand on the ones before them: the top edge is the whole, each band one depot's part. A click in the legend sets `hidden`, and the stack closes over the gap.";
+export const lead = "Areas with the same `stack` stand on the ones before them: the top edge is the whole, each band one depot's part. Hide a depot from the legend, and the stack closes over the gap.";
 
 export default function StackedAreas() {
   const { Chart, XAxis, YAxis, Area } = useChart(PARCELS_PER_HOUR);
-  const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set());
-  const toggle = (name: string) =>
-    setHidden((previous) => {
-      const next = new Set(previous);
-      if (!next.delete(name)) next.add(name);
-      return next;
-    });
 
   return (
     <Chart height={280} ariaLabel="Parcels loaded per hour at three depots, stacked">
       <XAxis value="t" time domain="data" />
       <YAxis label="Parcels per hour" />
-      <Area value="north" name="North" hidden={hidden.has("North")} stack="depots" fillOpacity={0.5} strokeWidth={1} />
-      <Area value="river" name="Riverside" hidden={hidden.has("Riverside")} stack="depots" fillOpacity={0.5} strokeWidth={1} />
-      <Area value="east" name="East Gate" hidden={hidden.has("East Gate")} stack="depots" fillOpacity={0.5} strokeWidth={1} />
-      <Legend placement="top" onToggle={toggle} />
+      <Area value="north" name="North" stack="depots" fillOpacity={0.5} strokeWidth={1} />
+      <Area value="river" name="Riverside" stack="depots" fillOpacity={0.5} strokeWidth={1} />
+      <Area value="east" name="East Gate" stack="depots" fillOpacity={0.5} strokeWidth={1} />
+      <Legend placement="top" />
       <Tooltip mode="x" />
     </Chart>
   );

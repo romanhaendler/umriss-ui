@@ -171,7 +171,7 @@ describe("A box in the data table", () => {
 describe("Several box series", () => {
   type Extra = { hidden?: boolean; encoding?: "marks" };
   function Grouped({ extra }: { extra: Extra }) {
-    const { Chart, XAxis, YAxis, BoxPlot, Line } = useChart(data);
+    const { Chart, XAxis, YAxis, BoxPlot, Line } = useChart(data, { initialView: extra.hidden === true ? { hidden: ["After"] } : undefined });
     return (
       <Chart ariaLabel="Before and after" encoding={extra.encoding}>
         <XAxis value="at" ticks={[0, 1, 2, 3]} tickFormat={(v) => MACHINES[v] ?? ""} />
@@ -179,7 +179,6 @@ describe("Several box series", () => {
         <BoxPlot name="Before" median="med" lowerQuartile="q1" upperQuartile="q3" lowerWhisker="lo" upperWhisker="hi" />
         <BoxPlot
           name="After"
-          hidden={extra.hidden}
           median={(d) => (d.med === null ? null : d.med - 1)}
           lowerQuartile={(d) => d.q1 - 1}
           upperQuartile={(d) => d.q3 - 1}
@@ -314,14 +313,13 @@ describe("A box's outliers", () => {
   ];
   type Extra = { outliers?: boolean; wording?: ChartsWording; hidden?: boolean };
   function Outliers({ extra }: { extra: Extra }) {
-    const { Chart, XAxis, YAxis, BoxPlot, Line } = useChart(rowsWith);
+    const { Chart, XAxis, YAxis, BoxPlot, Line } = useChart(rowsWith, { initialView: extra.hidden === true ? { hidden: ["Cycle time"] } : undefined });
     return (
       <Chart ariaLabel="Outliers" wording={extra.wording}>
         <XAxis value="at" ticks={[0, 1, 2]} tickFormat={(v) => MACHINES[v] ?? ""} />
         <YAxis tickFormat={(v) => `${v} s`} />
         <BoxPlot
           name="Cycle time"
-          hidden={extra.hidden}
           median="med"
           lowerQuartile={() => 4}
           upperQuartile={() => 7}

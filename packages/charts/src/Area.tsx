@@ -33,10 +33,6 @@ export interface AreaProps<T> {
       unnamed series is a colour nobody can look up.
       @default "Series n", after its place in the chart */
   name?: string;
-  /** Not drawn, not hit and not counted for its axes' extent - a fixed
-      `domain` keeps the axis still. Its legend entry stays, drawn back.
-      Controlled: the caller sets it, typically from `Legend onToggle`. */
-  hidden?: boolean;
   /** The value as the tooltip writes it.
       @default the y axis' `tickFormat`, else the built-in number format */
   format?: (value: number) => string;
@@ -77,7 +73,6 @@ export function Area<T>(props: AreaProps<T>): null {
     yAxisId = "y",
     data,
     name,
-    hidden,
     format,
     color,
     tone,
@@ -99,7 +94,6 @@ export function Area<T>(props: AreaProps<T>): null {
         yAxisId,
         data,
         name,
-        hidden,
         format,
         color,
         tone,
@@ -109,7 +103,7 @@ export function Area<T>(props: AreaProps<T>): null {
         strokeWidth,
         dash,
       }) as AreaSeriesConfig,
-    [accessor, baseline, xAxisId, yAxisId, data, name, hidden, format, color, tone, stack, normalize, fillOpacity, strokeWidth, dash],
+    [accessor, baseline, xAxisId, yAxisId, data, name, format, color, tone, stack, normalize, fillOpacity, strokeWidth, dash],
   );
 
   useSeries("Area", config);

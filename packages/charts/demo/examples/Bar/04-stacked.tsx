@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Legend, Tooltip, useChart } from "../../../src";
 
 /* Data from the logistics world, written out here so the example runs on its own. */
@@ -38,26 +37,19 @@ const DELAYS: readonly DayDelays[] = (() => {
 })();
 
 export const title = "Stack bars";
-export const lead = "Bars with the same `stack` stand on the ones before them; a missing part stacks as nothing, and the tooltip names what is there. A cause `hidden` from the legend leaves no gap in the stack.";
+export const lead = "Bars with the same `stack` stand on the ones before them; a missing part stacks as nothing, and the tooltip names what is there. A cause hidden from the legend leaves no gap in the stack.";
 
 export default function Stacked() {
   const { Chart, XAxis, YAxis, Bar } = useChart(DELAYS);
-  const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set());
-  const toggle = (name: string) =>
-    setHidden((previous) => {
-      const next = new Set(previous);
-      if (!next.delete(name)) next.add(name);
-      return next;
-    });
 
   return (
     <Chart height={280} ariaLabel="Minutes late per working day, by cause">
       <XAxis value="day" ticks={DELAYS.map((d) => d.day)} tickFormat={(v) => DELAYS[v]?.name ?? ""} />
       <YAxis label="Minutes late" />
-      <Bar value="traffic" name="Traffic" hidden={hidden.has("Traffic")} stack="delay" />
-      <Bar value="loading" name="Loading" hidden={hidden.has("Loading")} stack="delay" />
-      <Bar value="access" name="No access" hidden={hidden.has("No access")} stack="delay" />
-      <Legend placement="top" onToggle={toggle} />
+      <Bar value="traffic" name="Traffic" stack="delay" />
+      <Bar value="loading" name="Loading" stack="delay" />
+      <Bar value="access" name="No access" stack="delay" />
+      <Legend placement="top" />
       <Tooltip mode="x" />
     </Chart>
   );
