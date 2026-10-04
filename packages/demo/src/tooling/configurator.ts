@@ -124,7 +124,10 @@ export function controlsOf(file: string, entry: TypeEntry, declaration: Declarat
       if (bounds === undefined) return { prop, kind: "number", defaultValue: start };
       const [min, max] = bounds;
       const step = (max - min) / 100;
-      return { prop, kind: "number", defaultValue: start, min, max, step, decimals: Math.max(0, -Math.floor(Math.log10(step))) };
+      /* The step's own decimal places, read off its shortest spelling once the
+         division's float noise is rounded away: 2.5 has one, 0.01 two. */
+      const decimals = String(Number(step.toPrecision(12))).split(".")[1]?.length ?? 0;
+      return { prop, kind: "number", defaultValue: start, min, max, step, decimals };
     }
     throw cannot();
   });
