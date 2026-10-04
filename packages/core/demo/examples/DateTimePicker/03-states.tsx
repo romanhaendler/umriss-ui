@@ -16,6 +16,9 @@ export default function States() {
       <FormField label="Resolved" error="Resolved lies before the incident was opened at 09:42.">
         <DateTimePicker value={resolved} onChange={setResolved} clearable />
       </FormField>
+      <FormField label="Closed" hint="Empty, with its own placeholder.">
+        <DateTimePicker value={null} onChange={() => {}} placeholder="Still open" />
+      </FormField>
       <FormField label="Opened" hint="Set by the alert.">
         <DateTimePicker value={new Date(2026, 2, 17, 9, 42)} onChange={() => {}} disabled />
       </FormField>

@@ -183,7 +183,8 @@ test("a row's \"Shown in\" link lands on the example, in view", async ({ page })
   const anchor = (await link.getAttribute("href"))!.split("#")[1]!;
   await link.click();
   await expect(page).toHaveURL(new RegExp(`/${tablePage}/#${anchor}$`));
-  await expect(example(page, anchor)).toBeInViewport();
+  /* On a page that opens with a configurator, the first row it sets names it. */
+  await expect(example(page, anchor).or(page.locator(`[id="${anchor}"]`))).toBeInViewport();
 });
 
 test("a row's name puts the row's anchor into the address", async ({ page }) => {

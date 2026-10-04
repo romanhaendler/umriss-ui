@@ -19,6 +19,8 @@ export interface DialProps extends BaseProps {
   size?: "sm" | "md";
   /** A label - set only through a spread of a loose object. */
   label?: string;
+  /** Its unit - set only by a configurator. */
+  unit?: string;
 }
 
 /** A dial. */
@@ -47,6 +49,8 @@ export interface PanelProps {
   children?: ReactNode;
   /** Its heading. */
   heading?: string;
+  /** A frame around it - set only by a configurator. */
+  framed?: boolean;
   /** Marks along its edge. */
   marks?: readonly PanelMark[];
 }

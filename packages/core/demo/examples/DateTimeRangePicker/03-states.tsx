@@ -20,6 +20,9 @@ export default function States() {
       <FormField label="Planned downtime, Search" error="Overlaps the downtime of Checkout, 03:00 to 04:00.">
         <DateTimeRangePicker value={downtime} onChange={setDowntime} clearable />
       </FormField>
+      <FormField label="Maintenance window, Payments" hint="Empty, with its own placeholder.">
+        <DateTimeRangePicker value={null} onChange={() => {}} placeholder="Not scheduled yet" />
+      </FormField>
       <FormField label="Downtime, last quarter" hint="Closed.">
         <DateTimeRangePicker
           value={{ from: new Date(2025, 11, 6, 1, 0), to: new Date(2025, 11, 6, 3, 30) }}

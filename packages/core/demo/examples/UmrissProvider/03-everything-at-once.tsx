@@ -1,13 +1,13 @@
 import { useRef, useState } from "react";
 import { Button, DatePicker, FormField, Stack, ToastProvider, UmrissProvider, useToast } from "../../../src";
-import type { UmrissProviderProps } from "../../../src";
+import type { ToastConfig, UmrissProviderProps } from "../../../src";
 import { GERMAN_FORMATS, GERMAN_WORDING } from "@umriss-ui/core/wording/de";
 
 export const title = "Set up an application";
 export const lead = "All four settings, as a root sets them: German wording and notation, compact tables, overlays in the application's element, short toasts.";
 
 const LANGUAGE: UmrissProviderProps["language"] = { wording: GERMAN_WORDING, formats: GERMAN_FORMATS };
-const TOAST = { duration: 3000 };
+const TOAST: ToastConfig = { duration: 3000 };
 
 function DeliveryDate() {
   const { toast } = useToast();

@@ -18,15 +18,19 @@
    - a property access, and a name an object pattern takes out - an output
      type such as `table.setPage(2)`;
    - a spread attribute: the properties of the spread's own type, never
-     everything the element accepts.
+     everything the element accepts;
+   - a configurator (`demo/configurators/<Page>.tsx`): its `controls`, its
+     `required` props and its `children`, against `<name>Props` as the demo
+     reads them - "Configurator", first on its page.
 
    It runs in Node, in the generator (`props.ts`), which is why the imports
    carry their extensions. */
 
 import { existsSync, readdirSync } from "node:fs";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import ts from "typescript";
 import { SCENARIOS, type Rubric } from "../outline.ts";
+import { configuratorAnchor } from "./configurator.ts";
 import { byRank, parseFileName, parseScenarioName } from "./fileName.ts";
 import { declarationKey, type ShownIn } from "./propsReader.ts";
 
@@ -112,9 +116,34 @@ export function usesOf(files: readonly string[], options: ts.CompilerOptions = {
   return found;
 }
 
-/** An example or a scenario, and its file. */
+/** An example, a scenario or a configurator, and its file. */
 interface Demonstration extends ShownIn {
   file: string;
+  /** A configurator's: the rows it sets, as `Type.prop` - its file is a
+      declaration, not code that uses them. */
+  sets?: readonly string[];
+}
+
+/** The rows a configurator sets: its `controls`, its `required` props and
+    its `children`, against `<name>Props` - the file's name, or the `name` it
+    exports (`configurator.ts`). Read from the file's text, as the demo reads
+    the module. */
+function setByConfigurator(file: string, source: ts.SourceFile): string[] {
+  let name = basename(file, ".tsx");
+  const props: string[] = [];
+  for (const statement of source.statements) {
+    if (!ts.isVariableStatement(statement)) continue;
+    for (const { name: id, initializer: value } of statement.declarationList.declarations) {
+      if (!ts.isIdentifier(id) || value === undefined) continue;
+      if (id.text === "name" && ts.isStringLiteralLike(value)) name = value.text;
+      else if (id.text === "children") props.push("children");
+      else if (id.text === "controls" && ts.isArrayLiteralExpression(value)) props.push(...value.elements.filter(ts.isStringLiteralLike).map((one) => one.text));
+      else if (id.text === "required" && ts.isObjectLiteralExpression(value)) {
+        for (const member of value.properties) if (member.name !== undefined && (ts.isIdentifier(member.name) || ts.isStringLiteral(member.name))) props.push(member.name.text);
+      }
+    }
+  }
+  return props.map((prop) => `${name}Props.${prop}`);
 }
 
 /** `export const title = "…"` - the name an example goes by. */
@@ -132,21 +161,27 @@ function titleOf(file: string, source: ts.SourceFile): string {
 
 const tsxIn = (dir: string): string[] => (existsSync(dir) ? readdirSync(dir).filter((name) => name.endsWith(".tsx")) : []);
 
-/** A demo's examples in the order of its outline, then its scenarios. */
+/** A demo's examples in the order of its outline - a page's configurator
+    first, where it stands -, then its scenarios. */
 export function demonstrationsOf(demoDir: string, outline: readonly Rubric[]): Demonstration[] {
   const pages = outline.flatMap((rubric) => rubric.pages);
   const read = (file: string) => ts.createSourceFile(file, ts.sys.readFile(file) ?? "", ts.ScriptTarget.Latest);
   const examplesDir = join(demoDir, "examples");
+  const configurators = tsxIn(join(demoDir, "configurators"))
+    .map((name) => join(demoDir, "configurators", name))
+    .map((file) => ({ file, pageId: basename(file, ".tsx").toLowerCase(), rank: 0, id: "" }));
   const examples = (existsSync(examplesDir) ? readdirSync(examplesDir) : [])
     .flatMap((folder) => tsxIn(join(examplesDir, folder)).map((name) => join(examplesDir, folder, name)))
     .map((file) => ({ file, ...parseFileName(file) }))
+    .concat(configurators)
     .sort((a, b) => pages.findIndex((page) => page.id === a.pageId) - pages.findIndex((page) => page.id === b.pageId) || byRank(a, b))
     .map(({ file, pageId, id }) => ({
       file,
       page: pageId,
-      example: id,
-      title: titleOf(file, read(file)),
       pageName: pages.find((page) => page.id === pageId)?.name ?? pageId,
+      ...(id === ""
+        ? { example: configuratorAnchor(pageId), title: "Configurator", sets: setByConfigurator(file, read(file)) }
+        : { example: id, title: titleOf(file, read(file)) }),
     }));
   const scenarios = tsxIn(join(demoDir, "scenarios"))
     .map((name) => join(demoDir, "scenarios", name))
@@ -159,7 +194,12 @@ export function demonstrationsOf(demoDir: string, outline: readonly Rubric[]): D
 /** What the gate finds against a package's list of rows not shown yet
     (`demo/unshown.json`, `Type.prop` to a reason): a row without a use that
     is not on it, an entry whose row has a use now, an entry naming no row.
-    The list can only shrink: whoever adds the example removes the line. */
+    The list can only shrink: whoever adds the example removes the line.
+    An entry's reason is either "not shown yet" - a gap - or the category of a
+    named exception and its one-line reason: (a) a pass-through to the DOM or
+    React, (b) an escape hatch the prose explains, (f) a twin of a prop shown
+    on a sibling type, (g) a deprecated alias of a shown prop. The gate reads
+    every reason alike. */
 export function exampleFaults(
   rows: readonly string[],
   shown: Readonly<Record<string, readonly ShownIn[]>>,
@@ -184,9 +224,12 @@ export function shownIn(
 ): Record<string, ShownIn[]> {
   const demonstrations = demonstrationsOf(demoDir, outline);
   const uses = usesOf(
-    demonstrations.map((one) => one.file),
+    demonstrations.filter((one) => one.sets === undefined).map((one) => one.file),
     options,
   );
+  /* A configurator's rows mean the declarations they were read from, so an
+     inherited row is shown by it as by an example. */
+  for (const { file, sets } of demonstrations) if (sets !== undefined) uses.set(file, new Set(sets.flatMap((row) => declaredAt[row] ?? [])));
   const pages = outline.flatMap((rubric) => rubric.pages);
   const out: Record<string, ShownIn[]> = {};
   for (const [row, keys] of Object.entries(declaredAt)) {

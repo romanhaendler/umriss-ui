@@ -1,9 +1,9 @@
-import { Combobox, FormField, Grid } from "../../../src";
+import { Combobox, FormField, Grid, type ComboboxOption } from "../../../src";
 
 export const title = "States";
 export const lead = "Set `emptyText` for a search that finds nothing; errors come from the `FormField`, and a `disabled` row stays in the list.";
 
-const VEHICLES = [
+const VEHICLES: ComboboxOption[] = [
   { value: "v1", label: "FP 214 K, van, North depot" },
   { value: "v2", label: "FP 377 K, e-van, North depot" },
   { value: "v3", label: "FP 118 R, truck, North depot, in the workshop until Thursday", disabled: true },

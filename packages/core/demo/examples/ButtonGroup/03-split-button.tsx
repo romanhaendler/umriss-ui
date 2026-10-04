@@ -2,7 +2,7 @@ import { useState } from "react";
 import { MenuItem, MenuSeparator, SplitButton, Stack, Text } from "../../../src";
 
 export const title = "Offer variants of the main action";
-export const lead = "A `SplitButton` runs its main action on a click and keeps the rarer variants in its `menu`, found but not hit by accident.";
+export const lead = "A `SplitButton` runs its main action on a click and keeps the rarer variants in its `menu`, found but not hit by accident. This one stands at the start of its bar, so `align=\"start\"` opens the menu along the bar rather than out over its edge.";
 
 export default function SplitButtonExample() {
   const [last, setLast] = useState("nothing yet");
@@ -11,6 +11,7 @@ export default function SplitButtonExample() {
     <Stack gap={3} align="flex-start">
       <SplitButton
         variant="primary"
+        align="start"
         onClick={() => setLast("labels for tour T-03")}
         menu={
           <>

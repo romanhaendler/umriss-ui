@@ -1,9 +1,9 @@
-import { FormField, Grid, MultiSelect } from "../../../src";
+import { FormField, Grid, MultiSelect, type MultiSelectOption } from "../../../src";
 
 export const title = "States";
-export const lead = "Errors come from the `FormField`; `disabled` locks the field but keeps what is chosen visible, even on a `disabled` row.";
+export const lead = "Set `emptyText` for a search that finds nothing; errors come from the `FormField`; `disabled` locks the field but keeps what is chosen visible, even on a `disabled` row.";
 
-const SKILLS = [
+const SKILLS: MultiSelectOption[] = [
   { value: "react", label: "React" },
   { value: "ios", label: "iOS" },
   { value: "android", label: "Android" },
@@ -15,8 +15,8 @@ const SKILLS = [
 export default function States() {
   return (
     <Grid minItemWidth="240px" gap={4}>
-      <FormField label="Skills" hint="Nothing chosen yet.">
-        <MultiSelect value={[]} onChange={() => {}} options={SKILLS} placeholder="Choose skills" />
+      <FormField label="Skills" hint="Search for “zz” to see the empty result.">
+        <MultiSelect value={[]} onChange={() => {}} options={SKILLS} placeholder="Choose skills" emptyText="No skill matches. Ask the team lead to add it." />
       </FormField>
       <FormField label="Skills" error="Choose at least one skill for the sprint.">
         <MultiSelect value={[]} onChange={() => {}} options={SKILLS} placeholder="Choose skills" />
