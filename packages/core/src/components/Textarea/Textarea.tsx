@@ -52,7 +52,7 @@ export interface TextareaProps extends Omit<TextareaHTMLAttributes<HTMLTextAreaE
       Needs `maxLength`. */
   showCount?: boolean;
   /** Whether the browser's handle for dragging is offered.
-      @default `"vertical"`, `"none"` while the field grows by itself */
+      @default `"none"` while the field grows by itself, else `"vertical"` */
   resize?: "none" | "vertical";
 }
 
