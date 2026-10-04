@@ -19,3 +19,9 @@ Still say "manual mode": `docs/testing.md` (also names the old test files
 `src/lib/language/wording.ts`. ADR-0042 and `docs/journal.md` mention it as
 history and stay. From charts-bound-to-rows 02: the Installation page's lead
 still says "through an accessor" - reword with 05 or here.
+
+### Open for the acceptance (from charts-bound-to-rows 07)
+
+`TooltipPoint.value` - what a custom tooltip `render` reads - is a matrix
+cell's colour, now called `level` everywhere else. Renaming it is a further
+public break; put the question to the user at the acceptance.
