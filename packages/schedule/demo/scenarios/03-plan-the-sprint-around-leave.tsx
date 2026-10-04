@@ -175,7 +175,7 @@ const teamOf = (person: string) => PEOPLE.find((one) => one.id === person)?.team
 const nameOf = (person: string) => PEOPLE.find((one) => one.id === person)?.name ?? person;
 
 export default function SprintAroundLeave() {
-  const { Schedule, Lane, LaneGroup, Subtasks, BlockedTimes } = useSchedule();
+  const { Schedule, Lane, LaneGroup, Subtasks, BlockedTimes } = useSchedule({ initialView: { domain: [SPRINT.from, SPRINT.to] } });
   const [work, setWork] = useState<readonly Subtask[]>(START);
 
   const onIntent = (intent: Intent) => {
@@ -197,7 +197,6 @@ export default function SprintAroundLeave() {
       <div data-callout="2">
         <Schedule
           ariaLabel="Sprint 14, work per person"
-          initialDomain={[SPRINT.from, SPRINT.to]}
           calendar={WORKING_DAYS}
           height={570}
           now={NOW}

@@ -28,9 +28,9 @@ const HANDOVERS: Dependency[] = [
 ];
 
 export default function OneHandoverDrawnItsOwnWay() {
-  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule({ initialView: { domain: [at(6, 30), at(12, 30)] } });
   return (
-    <Schedule ariaLabel="Design, build, test and a sign-off drawn its own way" initialDomain={[at(6, 30), at(12, 30)]} height={188} attach="nearest" ends="none">
+    <Schedule ariaLabel="Design, build, test and a sign-off drawn its own way" height={188} attach="nearest" ends="none">
       <Lane id="noah" label="Noah Fischer" />
       <Lane id="arjun" label="Arjun Mehta" />
       <Lane id="eva" label="Eva Novak" />

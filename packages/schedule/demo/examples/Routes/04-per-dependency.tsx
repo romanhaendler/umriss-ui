@@ -25,9 +25,9 @@ const HANDOVERS: Dependency[] = [
 ];
 
 export default function PerDependency() {
-  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule({ initialView: { domain: [at(6, 30), at(13, 30)] } });
   return (
-    <Schedule ariaLabel="Search results, from layout to polish, straight lines but one" initialDomain={[at(6, 30), at(13, 30)]} height={188} route="straight" attach="nearest">
+    <Schedule ariaLabel="Search results, from layout to polish, straight lines but one" height={188} route="straight" attach="nearest">
       <Lane id="noah" label="Noah Fischer" />
       <Lane id="chloe" label="Chloe Durand" />
       <Lane id="eva" label="Eva Novak" />

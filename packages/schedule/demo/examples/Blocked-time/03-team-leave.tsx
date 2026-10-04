@@ -110,11 +110,11 @@ const NAME = new Map(WORK.map((item) => [item.id, item.name]));
 const PERSON = new Map(PEOPLE.map((person) => [person.id, person.name]));
 
 export default function TeamLeave() {
-  const { Schedule, Lane, Subtasks, BlockedTimes } = useSchedule();
+  const { Schedule, Lane, Subtasks, BlockedTimes } = useSchedule({ initialView: { domain: SPRINT_14 } });
   const clashes = findings(WORK, [], BLOCKED).inBlockedTime;
   return (
     <Stack gap={3}>
-      <Schedule ariaLabel="Sprint 14 with the team's leave" initialDomain={SPRINT_14} height={500}>
+      <Schedule ariaLabel="Sprint 14 with the team's leave" height={500}>
         {PEOPLE.map((person) => (
           <Lane key={person.id} id={person.id} label={person.name} />
         ))}

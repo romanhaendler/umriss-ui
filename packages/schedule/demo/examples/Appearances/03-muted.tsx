@@ -16,11 +16,10 @@ const WORK: Subtask[] = [
 ];
 
 export default function Muted() {
-  const { Schedule, Lane, Subtasks } = useSchedule();
+  const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [at(6, 30), at(11)] } });
   return (
     <Schedule
       ariaLabel="Our team's work above, another team's below"
-      initialDomain={[at(6, 30), at(11)]}
       height={144}
       label={() => "Checkout migration"}
     >

@@ -35,7 +35,7 @@ const WAITING: PlacingItem & { label: string } = {
 };
 
 export default function DraggedIn() {
-  const { Schedule, Lane, Subtasks } = useSchedule();
+  const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [at(6, 30), at(15)] } });
   const [work, setWork] = useState<readonly Subtask[]>(START);
   const [placing, setPlacing] = useState<PlacingItem | null>(null);
   const [last, setLast] = useState("Drag the chilled delivery onto the dry van");
@@ -65,7 +65,6 @@ export default function DraggedIn() {
       </Card>
       <Schedule
         ariaLabel="A chilled delivery waiting beside two cooled vans and a dry van"
-        initialDomain={[at(6, 30), at(15)]}
         height={190}
         intents={["place"]}
         placing={placing}

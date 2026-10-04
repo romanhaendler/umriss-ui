@@ -16,13 +16,13 @@ const WORK: readonly Subtask[] = [
 ];
 
 export default function NothingToFix() {
-  const { Schedule, Lane, Subtasks } = useSchedule();
+  const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [day(16, 0), day(21, 0)] } });
   const found = findings(WORK, []);
   const count = found.overlaps.length + found.violatedDependencies.length + found.inBlockedTime.length;
 
   return (
     <Stack gap={3}>
-      <Schedule ariaLabel="Two developers' week, without findings" initialDomain={[day(16, 0), day(21, 0)]} height={140}>
+      <Schedule ariaLabel="Two developers' week, without findings" height={140}>
         <Lane id="hana" label="Hana Sato" />
         <Lane id="kofi" label="Kofi Mensah" />
         <Subtasks data={WORK} tasks={PROJECTS} />

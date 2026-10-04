@@ -24,9 +24,9 @@ const HANDOVERS: Dependency[] = [
 ];
 
 export default function Orthogonal() {
-  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule({ initialView: { domain: [at(6, 30), at(13, 30)] } });
   return (
-    <Schedule ariaLabel="Search results, from layout to polish, orthogonal lines" initialDomain={[at(6, 30), at(13, 30)]} height={188} route="orthogonal" attach="nearest">
+    <Schedule ariaLabel="Search results, from layout to polish, orthogonal lines" height={188} route="orthogonal" attach="nearest">
       <Lane id="noah" label="Noah Fischer" />
       <Lane id="chloe" label="Chloe Durand" />
       <Lane id="eva" label="Eva Novak" />

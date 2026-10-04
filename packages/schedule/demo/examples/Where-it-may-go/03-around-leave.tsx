@@ -121,7 +121,7 @@ const START_ROLE = new Map(START.map((item) => [item.id, roleOf(item.lane)]));
 const mayGo = (item: Subtask, lane: string) => START_ROLE.get(item.id) === roleOf(lane);
 
 export default function AroundLeave() {
-  const { Schedule, Lane, Subtasks, BlockedTimes } = useSchedule();
+  const { Schedule, Lane, Subtasks, BlockedTimes } = useSchedule({ initialView: { domain: [day(9), day(21)] } });
   const [work, setWork] = useState<readonly Subtask[]>(START);
   const [last, setLast] = useState("Drag Freya's store screenshots into her holiday");
 
@@ -135,7 +135,6 @@ export default function AroundLeave() {
     <Stack gap={3}>
       <Schedule
         ariaLabel="The apps team this week, with leave"
-        initialDomain={[day(9), day(21)]}
         height={236}
         intents={["move", "lane"]}
         canMoveTo={mayGo}

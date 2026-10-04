@@ -8,7 +8,7 @@ export const title = "Read a folded group";
 export const lead = "Folded, the depot shows each van as a thin strip: handovers still arrive, the double booking stays marked, and a held drag opens it.";
 
 /* A drag held over the folded depot opens it for the gesture and shuts it
-   again when the drag ends; the application's own list is never written to.
+   again when the drag ends; the schedule's view never learns of it.
    `findings()` is computed from the data, so the count below is the same
    folded or not. */
 
@@ -43,8 +43,7 @@ const HANDOVERS: Dependency[] = [
 const FOUND = findings(LEGS, HANDOVERS);
 
 export default function TheMiniature() {
-  const { Schedule, Lane, LaneGroup, Subtasks, Dependencies } = useSchedule();
-  const [folded, setFolded] = useState<readonly string[]>(["north"]);
+  const { Schedule, Lane, LaneGroup, Subtasks, Dependencies } = useSchedule({ initialView: { domain: [at(6), at(16)], folded: ["north"] } });
   const [legs, setLegs] = useState<readonly Subtask[]>(LEGS);
   const [last, setLast] = useState("Hold a bar over the folded depot");
 
@@ -52,10 +51,7 @@ export default function TheMiniature() {
     <Stack gap={3}>
       <Schedule
         ariaLabel="A depot that folds into one row"
-        initialDomain={[at(6), at(16)]}
         height={240}
-        collapsedGroups={folded}
-        onCollapsedGroupsChange={setFolded}
         intents={["move", "lane"]}
         onIntent={(intent) => {
           if (intent.kind === "place") return;

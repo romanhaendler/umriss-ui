@@ -21,9 +21,9 @@ const LEGS: Subtask[] = [
 const HANDOVERS: Dependency[] = [{ id: "transfer", from: "line-haul", to: "round", lag: min(40) }];
 
 export default function ViolatedDependency() {
-  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule({ initialView: { domain: [at(6, 30), at(11)] } });
   return (
-    <Schedule ariaLabel="A handover from the truck to the van that is too short" initialDomain={[at(6, 30), at(11)]} height={150}>
+    <Schedule ariaLabel="A handover from the truck to the van that is too short" height={150}>
       <Lane id="truck" label="Truck FP 118 R" />
       <Lane id="van" label="Van FP 214 K" />
       <Dependencies data={HANDOVERS} />

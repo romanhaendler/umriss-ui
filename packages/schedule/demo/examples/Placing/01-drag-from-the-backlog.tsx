@@ -38,7 +38,7 @@ const BACKLOG: readonly (PlacingItem & { label: string })[] = [
 ];
 
 export default function DragFromTheBacklog() {
-  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule({ initialView: { domain: [at(5, 30), at(18)] } });
   const [plan, setPlan] = useState<{ work: readonly Subtask[]; placed: number; last: string }>({
     work: TODAY,
     placed: 0,
@@ -81,7 +81,6 @@ export default function DragFromTheBacklog() {
       </Stack>
       <Schedule
         ariaLabel="Today's plan of three people, with the backlog beside it"
-        initialDomain={[at(5, 30), at(18)]}
         height={196}
         intents={["place", "move", "lane"]}
         placing={placing}

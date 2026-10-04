@@ -512,7 +512,7 @@ function skipTo(event: MouseEvent<HTMLAnchorElement>, id: string) {
 }
 
 export default function ControlRoom() {
-  const { Schedule, Lane, Subtasks } = useSchedule();
+  const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: PLAN_DOMAIN } });
   const { minute, wall, running, setRunning } = usePlantMinute();
   const now = at(minute);
   const reading = SHIFT.readings[minute]!;
@@ -670,7 +670,6 @@ export default function ControlRoom() {
       >
         <Schedule
           ariaLabel="Plan of the early shift: press, dryer and kiln"
-          initialDomain={PLAN_DOMAIN}
           height={196}
           now={now}
           selectedTask={batch}

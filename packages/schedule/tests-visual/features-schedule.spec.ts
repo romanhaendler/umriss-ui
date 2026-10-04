@@ -274,7 +274,7 @@ test("the now line stands at the present", async ({ page }) => {
   await expect(page.locator('[data-example="first-schedule"] [data-now]')).toHaveCount(0);
 });
 
-test("two schedules move together, and the span is reported", async ({ page }) => {
+test("two schedules move together through the view, and the span is reported", async ({ page }) => {
   await openExample(page, "linked-schedules", "in-step");
   const example = page.locator('[data-example="in-step"]');
   const span = example.locator("[data-span]");
@@ -285,6 +285,7 @@ test("two schedules move together, and the span is reported", async ({ page }) =
     return box === null ? NaN : box.x;
   };
   const before = await noonAt(1);
+  const lowerPlot = (await example.locator("[data-schedule-plot]").nth(1).elementHandle())!;
 
   const upper = example.locator("[data-schedule-plot]").first();
   const box = (await upper.boundingBox())!;
@@ -297,17 +298,37 @@ test("two schedules move together, and the span is reported", async ({ page }) =
   /* The lower plan followed, and the span says where they stand. How FAR it
      followed is deliberately not asserted: the pan is this test's means, not
      its subject, and a move event coalesced under load would otherwise fail a
-     test about something else.
-
-     Nor is it asserted that the two agree to the pixel. They can stand one
-     frame apart - a span is reported once per frame and handed back as the
-     other's `initialDomain`, and the round trip through React can arrive after
-     the plan has moved on. That is a defect of the synchronisation and not of
-     this example; it is recorded in `.scratch/schedule-lane-groups/issues/
-     04-examples-that-run-as-copied.md` and belongs to nothing in this
-     spec. */
+     test about something else. Once the gesture rests the two agree, through
+     the view and without a remount (ADR-0047). */
   await expect.poll(async () => await noonAt(1)).toBeLessThan(before - 20);
+  await expect.poll(async () => Math.abs((await noonAt(0)) - (await noonAt(1)))).toBeLessThan(1);
+  expect(await lowerPlot.evaluate((el) => el.isConnected)).toBe(true);
   await expect(span).not.toHaveText("05:30 – 18:00");
+});
+
+test("a view kept outlives a reload and comes back on restore", async ({ page }) => {
+  await openExample(page, "view", "keep-and-restore");
+  const example = () => page.locator('[data-example="keep-and-restore"]');
+  const view = () => example().locator('[data-role="view"]');
+  await expect(view()).not.toContainText("folded");
+
+  await example().getByRole("button", { name: /Fold group: Finance/ }).click();
+  await expect(view()).toContainText('"folded":["finance"]');
+  await example().locator("[data-keep]").click();
+
+  await page.reload();
+  await openExample(page, "view", "keep-and-restore");
+  await expect(view()).not.toContainText("folded");
+  await expect(example().locator("[data-schedule-headers] [data-lane]")).toHaveCount(4);
+
+  await example().locator("[data-restore]").click();
+  await expect(view()).toContainText('"folded":["finance"]');
+  await expect(example().locator("[data-schedule-headers] [data-lane]")).toHaveCount(2);
+
+  /* Without a span the schedule shows its subtasks' extent, and the view
+     says nothing of it. */
+  await example().locator("[data-whole-plan]").click();
+  await expect(view()).toHaveText('{"folded":["finance"]}');
 });
 
 test("the handle places the application's own mark at a time", async ({ page }) => {
@@ -740,8 +761,8 @@ test("on a phone a group's name wins over its count, and the count comes back wh
 /* The count is measured anew when the language changes: "2 Bahnen" is wider
    than "2 lanes", and in a column of 160 px it no longer leaves the name room. */
 test("a group's name wins over its count in German too, switched live", async ({ page }) => {
-  await openExample(page, "lane-groups", "controlled");
-  const head = page.locator('[data-example="controlled"] [data-row="groupHead"]');
+  await openExample(page, "lane-groups", "fold-from-outside");
+  const head = page.locator('[data-example="fold-from-outside"] [data-row="groupHead"]');
   const name = head.locator('[data-schedule-overlay="header label"]');
   await expect(head.locator("[data-lane-count]")).toHaveText("2 lanes");
   await expect(head.locator("[data-lane-count]")).toBeVisible();
@@ -800,9 +821,9 @@ test("a group folds by keyboard, because the control is a button", async ({ page
   await expect(example.getByRole("button", { name: /Fold group: Developers/ })).toHaveAttribute("aria-expanded", "true");
 });
 
-test("groups fold from outside, and the state is the application's", async ({ page }) => {
-  await openExample(page, "lane-groups", "controlled");
-  const example = page.locator('[data-example="controlled"]');
+test("groups fold from outside through the setters, and the view says what is folded", async ({ page }) => {
+  await openExample(page, "lane-groups", "fold-from-outside");
+  const example = page.locator('[data-example="fold-from-outside"]');
   const readout = example.locator("[data-folded]");
 
   await expect(readout).toHaveText("discovery");
@@ -814,7 +835,7 @@ test("groups fold from outside, and the state is the application's", async ({ pa
   await expect(readout).toHaveText("nothing folded");
   await expect(example.locator("[data-schedule-headers] [data-lane]")).toHaveCount(4);
 
-  /* And the chevron reports to the application rather than deciding for it. */
+  /* And a chevron's fold reaches the view as the setters' do. */
   await example.getByRole("button", { name: /Fold group: Payments/ }).click();
   await expect(readout).toHaveText("payments");
 });

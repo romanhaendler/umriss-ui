@@ -43,7 +43,7 @@ const TRANSFERS: readonly Dependency[] = [
 ];
 
 export default function ControlTheSelection() {
-  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule({ initialView: { domain: DAY } });
   const [selected, setSelected] = useState<string | null>("c-2043");
   const [leg, setLeg] = useState<string | null>(null);
   const consignment = CONSIGNMENTS.find((c) => c.id === selected);
@@ -52,7 +52,6 @@ export default function ControlTheSelection() {
     <Stack gap={3}>
       <Schedule
         ariaLabel="Legs at North depot on Tuesday, 17 March"
-        initialDomain={DAY}
         height={284}
         selectedTask={selected}
         onSelectedTaskChange={(task, subtask) => {

@@ -39,13 +39,8 @@ export interface SceneHandlers {
       again at the drop; absent means every lane is open. */
   canMoveTo?: (subtask: Subtask, lane: string) => boolean;
   onIntent?: (intent: Intent) => void;
-  onDomainChange?: (domain: readonly [number, number]) => void;
   onInteraction?: (interaction: ScheduleInteraction) => void;
   onSelectedTaskChange?: (task: string | null, subtask: string | null) => void;
-  /** Called when the planner folds or unfolds a **Lane group**, with the whole
-      list. It is a view state and not an **Intent**: it says what is on
-      screen, never what the plan is (ADR-0025). */
-  onCollapsedGroupsChange?: (groups: readonly string[]) => void;
 }
 
 /** What the gestures need from the scene they belong to. */

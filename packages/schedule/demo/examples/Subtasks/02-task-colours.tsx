@@ -25,9 +25,9 @@ const WORK: Subtask[] = [
 ];
 
 export default function TaskColours() {
-  const { Schedule, Lane, Subtasks } = useSchedule();
+  const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [at(16, 6), at(20, 20)] } });
   return (
-    <Schedule ariaLabel="Projects due this week among the rest" initialDomain={[at(16, 6), at(20, 20)]} height={150}>
+    <Schedule ariaLabel="Projects due this week among the rest" height={150}>
       <Lane id="chloe" label="Chloe Durand" />
       <Lane id="eva" label="Eva Novak" />
       <Subtasks data={WORK} tasks={PROJECTS} />

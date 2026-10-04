@@ -91,7 +91,7 @@ const WEB = PEOPLE.filter((person) => person.team === "Web");
 const WEB_WORK = WORK.filter((item) => WEB.some((person) => person.id === item.lane));
 
 export default function DetailPanelInstead() {
-  const { Schedule, Lane, Subtasks } = useSchedule();
+  const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [day(9), day(21)] } });
   const [item, setItem] = useState<WorkItem | null>(null);
 
   const onInteraction = (interaction: ScheduleInteraction) => {
@@ -104,7 +104,6 @@ export default function DetailPanelInstead() {
     <Stack gap={3}>
       <Schedule
         ariaLabel="Sprint 14 of the web team"
-        initialDomain={[day(9), day(21)]}
         height={260}
         tooltip={false}
         onInteraction={onInteraction}

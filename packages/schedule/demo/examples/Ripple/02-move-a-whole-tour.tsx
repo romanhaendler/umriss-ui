@@ -31,14 +31,14 @@ const DRIVES: readonly Dependency[] = [
 ];
 
 export default function MoveAWholeTour() {
-  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule({ initialView: { domain: [at(7), at(10, 30)] } });
   const [stops, setStops] = useState<readonly Subtask[]>(START);
   const move = (by: number) =>
     setStops((current) => shiftTask(current, "T-01", by).reduce((data, one) => data.map((s) => applyIntent(s, one)), current));
 
   return (
     <Stack gap={3}>
-      <Schedule ariaLabel="Two tours from North depot" initialDomain={[at(7), at(10, 30)]} height={140}>
+      <Schedule ariaLabel="Two tours from North depot" height={140}>
         <Lane id="van-214" label="Van FP 214 K" />
         <Lane id="van-377" label="E-van FP 377 K" />
         <Dependencies data={DRIVES} />

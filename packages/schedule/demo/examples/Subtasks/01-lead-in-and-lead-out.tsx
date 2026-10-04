@@ -17,9 +17,9 @@ const ROUNDS: Subtask[] = [
 ];
 
 export default function LeadInAndLeadOut() {
-  const { Schedule, Lane, Subtasks } = useSchedule();
+  const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [at(6), at(14, 30)] } });
   return (
-    <Schedule ariaLabel="Three rounds of one van" initialDomain={[at(6), at(14, 30)]} height={110}>
+    <Schedule ariaLabel="Three rounds of one van" height={110}>
       <Lane id="van" label="Van FP 214 K" />
       <Subtasks data={ROUNDS} tasks={TOURS} />
     </Schedule>

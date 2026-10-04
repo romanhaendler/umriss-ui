@@ -16,12 +16,11 @@ const START: readonly Subtask[] = [
 ];
 
 export default function StretchTheMainTime() {
-  const { Schedule, Lane, Subtasks } = useSchedule();
+  const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [day(16, 0), day(21, 0)] } });
   const [work, setWork] = useState(START);
   return (
     <Schedule
       ariaLabel="Two estimates to adjust"
-      initialDomain={[day(16, 0), day(21, 0)]}
       height={140}
       intents={["stretch"]}
       onIntent={(intent) => setWork((current) => current.map((item) => applyIntent(item, intent)))}

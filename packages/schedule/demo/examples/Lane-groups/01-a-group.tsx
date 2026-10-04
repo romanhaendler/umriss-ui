@@ -24,9 +24,9 @@ const WORK: Subtask[] = [
 ];
 
 export default function AGroup() {
-  const { Schedule, Lane, LaneGroup, Subtasks } = useSchedule();
+  const { Schedule, Lane, LaneGroup, Subtasks } = useSchedule({ initialView: { domain: [at(6), at(15)] } });
   return (
-    <Schedule ariaLabel="Two developers in a team, a designer and a tester outside it" initialDomain={[at(6), at(15)]} height={240} headerWidth={200}>
+    <Schedule ariaLabel="Two developers in a team, a designer and a tester outside it" height={240} headerWidth={200}>
       <LaneGroup id="developers" label="Developers">
         <Lane id="arjun" label="Arjun Mehta" />
         <Lane id="chloe" label="Chloe Durand" />

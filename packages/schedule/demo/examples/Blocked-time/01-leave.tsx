@@ -47,12 +47,12 @@ const time = (instant: number) =>
   new Date(instant).toLocaleString("en-GB", { weekday: "short", hour: "2-digit", minute: "2-digit" });
 
 export default function Leave() {
-  const { Schedule, Lane, Subtasks, BlockedTimes } = useSchedule();
+  const { Schedule, Lane, Subtasks, BlockedTimes } = useSchedule({ initialView: { domain: [day(0, 6), day(5, 0)] } });
   const found = findings(WORK, [], BLOCKED);
 
   return (
     <Stack gap={3}>
-      <Schedule ariaLabel="Team plan, week of 16 March" initialDomain={[day(0, 6), day(5, 0)]} height={240}>
+      <Schedule ariaLabel="Team plan, week of 16 March" height={240}>
         {PEOPLE.map((person) => (
           <Lane key={person.id} id={person.id} label={person.label} />
         ))}

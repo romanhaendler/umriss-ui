@@ -91,7 +91,7 @@ const WEB = PEOPLE.filter((person) => person.team === "Web" && WORK.some((item) 
 const START: readonly Subtask[] = WORK.filter((item) => WEB.some((person) => person.id === item.lane));
 
 export default function RefuseADoubleBooking() {
-  const { Schedule, Lane, Subtasks } = useSchedule();
+  const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [day(9), day(21)] } });
   const [work, setWork] = useState<readonly Subtask[]>(START);
   /* A drop onto another lane at another time reports two intents in one
      tick; each is decided on the plan the one before it left. */
@@ -116,7 +116,6 @@ export default function RefuseADoubleBooking() {
     <Stack gap={3}>
       <Schedule
         ariaLabel="Sprint 14 of the web team, editable"
-        initialDomain={[day(9), day(21)]}
         height={240}
         intents={["move", "lane"]}
         onIntent={onIntent}

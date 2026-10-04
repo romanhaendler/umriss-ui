@@ -50,11 +50,10 @@ const LANES = [
 ];
 
 export default function Combinations() {
-  const { Schedule, Lane, Subtasks } = useSchedule();
+  const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [at(6, 30), at(11)] } });
   return (
     <Schedule
       ariaLabel="Bars carrying several appearances at once"
-      initialDomain={[at(6, 30), at(11)]}
       height={230}
       label={(leg) => NAMES[leg.id] ?? leg.id}
     >

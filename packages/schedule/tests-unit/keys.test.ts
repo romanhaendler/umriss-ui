@@ -32,14 +32,14 @@ const WORK: Subtask[] = [
 const DEPENDENCIES: Dependency[] = [{ id: "t1", from: "p1", to: "w1", lag: HOUR / 2 }];
 
 function sceneWith(options: Partial<SceneOptions> = {}) {
-  const scene = new ScheduleScene();
+  const scene = new ScheduleScene({ domain: [0, 8 * HOUR] });
   const intents: Intent[] = [];
   const selected: [string | null, string | null][] = [];
   scene.registerLane({ id: "press", label: "Press" });
   scene.registerLane({ id: "weld", label: "Weld" });
   scene.registerLayer({ kind: "subtasks", data: WORK, tasks: [{ id: "a", color: "red" }, { id: "b", color: "blue" }] });
   scene.registerLayer({ kind: "dependencies", data: DEPENDENCIES });
-  scene.setOptions({ ...OPTIONS, ...options }, [0, 8 * HOUR]);
+  scene.setOptions({ ...OPTIONS, ...options });
   scene.setHandlers({ onIntent: (i) => intents.push(i), onSelectedTaskChange: (t, s) => selected.push([t, s]) });
   scene.bind(document.createElement("div"), document.createElement("div"), document.createElement("canvas"), document.createElement("canvas"));
   scene.resize(800, 200);
@@ -74,10 +74,10 @@ describe("the tab stop and the active subtask", () => {
     expect(scene.getSnapshot().tooltip?.target.kind).toBe("subtask");
   });
 
-  it("brings a subtask out of view into it, and reports the new span", async () => {
+  it("brings a subtask out of view into it, and the view takes the new span", async () => {
     const { scene } = sceneWith();
-    const domains: (readonly [number, number])[] = [];
-    scene.setHandlers({ onDomainChange: (d) => domains.push(d) });
+    const domains: (readonly [number, number] | undefined)[] = [];
+    scene.subscribeView(() => domains.push(scene.getView().domain));
     scene.focus(true);
     scene.key(key("End"));
     expect(active(scene)).toBe("p3");
@@ -87,7 +87,7 @@ describe("the tab stop and the active subtask", () => {
     expect(to - from).toBeCloseTo(8 * HOUR);
     /* Reported once per frame, as the gestures' pans are. */
     await new Promise((resolve) => requestAnimationFrame(resolve));
-    expect(domains).toHaveLength(1);
+    expect(domains).toEqual([scene.visibleDomain()]);
   });
 
   it("selects with Space and Enter as a click does", () => {

@@ -26,13 +26,13 @@ const HANDOVERS: Dependency[] = [
 ];
 
 function Variant({ ends }: { ends: DependencyEnds }) {
-  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule({ initialView: { domain: [at(6, 30), at(11, 30)] } });
   return (
     <Stack gap={1}>
       <Text size="xs" tone="muted" mono>
         ends=&quot;{ends}&quot;
       </Text>
-      <Schedule ariaLabel={`Design, build and test, ends ${ends}`} initialDomain={[at(6, 30), at(11, 30)]} height={188} attach="nearest" ends={ends}>
+      <Schedule ariaLabel={`Design, build and test, ends ${ends}`} height={188} attach="nearest" ends={ends}>
         <Lane id="noah" label="Noah Fischer" />
         <Lane id="arjun" label="Arjun Mehta" />
         <Lane id="eva" label="Eva Novak" />
