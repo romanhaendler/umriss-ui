@@ -9,3 +9,17 @@
 - [ ] Type tests: a free `Line` and an `accessor` no longer compile
 - [ ] The capability record's 'Known limits' says the source-text comparison holds for functions only
 - [ ] Every suite green; screenshots unchanged
+
+## Comments
+
+### Carried in from 02 and 03 (2026-10-04)
+
+- `value` becomes required (during the expand both `value` and `accessor`
+  are optional, so a series with neither compiles).
+- `ControlChart` still takes `accessor`; it gets `value` (field or function)
+  like every series.
+- Matrix: `value` is its colour channel today, its row position `accessor`.
+  The naming waits for the user (proposal: `value` is the y position on every
+  kind, the colour channel becomes `level`).
+- Scene-level tests and internal configs keep their internal `accessor`
+  field; only the public prop goes.
