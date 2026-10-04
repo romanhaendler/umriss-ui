@@ -179,3 +179,10 @@ with their reason, replacing "Deliberately open" (`charts-essentials` 07).
 ### Status corrected (2026-09-24)
 
 Delivered (`0c1e1ae`, `d9a9c72`, `ea7dadf`, `e0b8dd2`; journal "The charts examined"). Its last child, accessibility, is tracked as `.scratch/charts-a11y/`. The Status line had not been moved when the work landed.
+
+### Q17 and Q19 superseded (2026-10-04)
+
+The controlled `hidden` + `Legend.onToggle` (Q17) and the controlled
+`XAxis.onDomainChange` (Q19) give way to a view the chart holds itself
+(ADR-0047, `.scratch/component-view/`): the legend toggles by default, zoom is
+`XAxis zoomable`, and the application hands a view in and reads it back.
