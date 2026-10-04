@@ -8,6 +8,7 @@ import { useAxis } from "./context";
 import { readerOf } from "./value";
 import type { AxisConfig, NumberField } from "./types";
 import type { WorkingInterval } from "./workingTime";
+import type { ZoomLimits } from "./view";
 
 interface CommonProps {
   /** Axis id, through which series bind themselves.
@@ -42,8 +43,9 @@ export interface XAxisProps<T> extends CommonProps {
   value: NumberField<T> | ((d: T, index: number) => number);
   /** `"nice"` widens the data's extent to ticks - to named `ticks` where
       there are any, on a time axis to whole units of a step of hours or
-      longer -, `"data"` keeps it, a pair is fixed - the one a zoom passes
-      back. */
+      longer -, `"data"` keeps it, a pair is fixed. On a `zoomable` axis it is
+      the start: what the axis shows while the chart's view names no span for
+      it. */
   domain?: "nice" | "data" | readonly [number, number];
   /** Which edge the axis stands at. A second x axis on the opposite edge is how
       a series counts in a unit of its own. */
@@ -61,13 +63,18 @@ export interface XAxisProps<T> extends CommonProps {
       removed span gets a break mark. The scale stays affine; the mapping happens
       in materialisation (ADR-0001). */
   calendar?: readonly WorkingInterval[];
-  /** Zoom and pan, controlled: Ctrl or ⌘ with the wheel - and a pinch - zoom
-      around the pointer, a drag, a horizontal wheel or Shift with the wheel pan,
-      a double click proposes the whole data range. Each proposes a domain in
-      the axis' units and changes nothing; the caller passes it back as
-      `domain`, clamped as it likes. Without a handler the axis does not zoom,
-      and the plain wheel always scrolls the page. */
-  onDomainChange?: (domain: [number, number]) => void;
+  /** Zoom and pan: Ctrl or ⌘ with the wheel - and a pinch - zoom around the
+      pointer, a drag, a horizontal wheel or Shift with the wheel pan, a double
+      click goes back to `domain`; with the focus on the chart, + and − zoom,
+      Shift with ← or → pans and 0 goes back. The span shown is part of the
+      chart's view, by this axis' `id` (`useChart`'s `initialView`,
+      `onViewChange`, `setDomain`). The plain wheel always scrolls the page.
+      @default false */
+  zoomable?: boolean;
+  /** The narrowest and the widest span zoom may reach, in the axis' units -
+      milliseconds on a time axis.
+      @default at most the data's extent, at least three data steps */
+  zoomLimits?: ZoomLimits;
 }
 
 /** The props of `YAxis`. It reads no value of its own: where a row lies
@@ -90,7 +97,7 @@ export interface YAxisProps extends CommonProps {
 
 /** A horizontal axis: where a datum lies along x, its ticks, title and grid.
     A chart may have several; series bind to one by its `id`. With `time` or a
-    `calendar` it reads instants, with `onDomainChange` it zooms. It reads the
+    `calendar` it reads instants, with `zoomable` it zooms. It reads the
     rows of every series bound to it. */
 export function XAxis<T>(props: XAxisProps<T>): null {
   const {
@@ -104,8 +111,11 @@ export function XAxis<T>(props: XAxisProps<T>): null {
     ticks,
     time,
     calendar,
-    onDomainChange,
+    zoomable,
+    zoomLimits,
   } = props;
+  const limitMin = zoomLimits?.min;
+  const limitMax = zoomLimits?.max;
   const accessor = readerOf<(d: T, index: number) => number>(props.value);
 
   const config = useMemo<AxisConfig>(
@@ -123,9 +133,10 @@ export function XAxis<T>(props: XAxisProps<T>): null {
         ticks,
         time,
         calendar,
-        onDomainChange,
+        zoomable,
+        zoomLimits: limitMin === undefined || limitMax === undefined ? undefined : { min: limitMin, max: limitMax },
       }) as AxisConfig,
-    [id, position, accessor, label, tickCount, tickFormat, domain, grid, ticks, time, calendar, onDomainChange],
+    [id, position, accessor, label, tickCount, tickFormat, domain, grid, ticks, time, calendar, zoomable, limitMin, limitMax],
   );
 
   useAxis("XAxis", config);

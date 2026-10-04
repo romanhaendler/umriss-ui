@@ -395,8 +395,8 @@ test("scatter under \"nearest\": the hit follows the pointer up and down", async
 /* ------------------------------------------------------------------------
    Zoom and pan (charts-long-series 01).
 
-   The axis proposes, the example passes the proposal back: what is checked is
-   the axis the reader sees, its tick labels. A week reads in days; a zoom far
+   The axis is `zoomable`, and the chart holds the span itself (ADR-0047):
+   what is checked is the axis the reader sees, its tick labels. A week reads in days; a zoom far
    enough in reads in hours.
    ------------------------------------------------------------------------ */
 
@@ -408,8 +408,8 @@ async function xLabels(example: Locator): Promise<string[]> {
 const HOURS = /^\d\d:\d\d$/;
 
 async function openZoom(page: Page): Promise<{ example: Locator; box: { x: number; y: number; width: number; height: number } }> {
-  await openExample(page, "axis", "zoom-and-pan");
-  const example = page.locator('[data-example="zoom-and-pan"]');
+  await openExample(page, "zoom-and-pan", "gestures-and-keys");
+  const example = page.locator('[data-example="gestures-and-keys"]');
   await example.scrollIntoViewIfNeeded();
   const box = await example.locator(".uc-plot").first().boundingBox();
   if (box === null) throw new Error("plot area not found");
@@ -475,7 +475,7 @@ test("zoom: the plain wheel belongs to the page", async ({ page }) => {
   expect(await xLabels(example)).toEqual(before);
 });
 
-test("zoom: an axis without onDomainChange does not zoom", async ({ page }) => {
+test("zoom: an axis that is not zoomable does not zoom", async ({ page }) => {
   await openExample(page, "axis", "time");
   const example = page.locator('[data-example="time"]');
   await example.scrollIntoViewIfNeeded();
@@ -532,7 +532,7 @@ async function crosshairX(overlay: Locator): Promise<number | null> {
 }
 
 test("cursor sync: every chart draws its crosshair at the pointer's instant, one tooltip", async ({ page }) => {
-  await openExample(page, "chart", "cursor-sync");
+  await openExample(page, "zoom-and-pan", "cursor-sync");
   const example = page.locator('[data-example="cursor-sync"]');
   await example.scrollIntoViewIfNeeded();
   const overlays = example.locator("canvas.uc-layer-overlay");
@@ -560,8 +560,8 @@ test("cursor sync: every chart draws its crosshair at the pointer's instant, one
   for (let k = 0; k < 3; k++) expect(await crosshairX(overlays.nth(k))).toBeNull();
 });
 
-test("cursor sync: one controlled domain zooms all three", async ({ page }) => {
-  await openExample(page, "chart", "cursor-sync");
+test("cursor sync: one shared view zooms all three", async ({ page }) => {
+  await openExample(page, "zoom-and-pan", "cursor-sync");
   const example = page.locator('[data-example="cursor-sync"]');
   await example.scrollIntoViewIfNeeded();
   const bottom = example.locator(".uc-axis-bottom").nth(2).locator(".uc-tick-label");
@@ -600,7 +600,7 @@ test("Tab reaches the plot, and the keys walk its Active point", async ({ page }
 });
 
 test("the pointer takes the Active point over, and a synced chart follows the keys", async ({ page }) => {
-  await openExample(page, "chart", "cursor-sync");
+  await openExample(page, "zoom-and-pan", "cursor-sync");
   const example = page.locator('[data-example="cursor-sync"]');
   await example.scrollIntoViewIfNeeded();
   const first = example.locator(".uc-plot").nth(0);

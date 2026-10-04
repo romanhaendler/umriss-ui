@@ -18,14 +18,13 @@ import {
   useId,
   useMemo,
   useRef,
-  useState,
   useSyncExternalStore,
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react";
 import { ChartContext } from "./context";
-import { ChartScene } from "./scene";
+import type { ChartScene } from "./scene";
 import { AxesHtml } from "./AxesHtml";
 import { TooltipHtml } from "./TooltipHtml";
 import { warnOnce } from "./dev";
@@ -74,8 +73,9 @@ export interface ChartProps {
   encoding?: "color" | "marks";
   /** Charts with the same id share the pointer's x position, in domain units:
       each draws its crosshair there, the tooltip stays with the chart under
-      the pointer. Zoom is not shared - give every chart the same controlled
-      `domain`. */
+      the pointer. Zoom is not shared this way: charts zoom together by
+      handing each other their view (`useChart`'s `initialView` and
+      `onViewChange`). */
   syncId?: string;
   /** Instrumentation for the benchmark page; not needed otherwise.
       @remarks R-5.1 */
@@ -90,10 +90,12 @@ export interface ChartProps {
 /** The container of a chart: it holds the data, measures the plot area and
     draws on canvas whatever its children register - axes, series, limits,
     legend and tooltip. The order of the children is the drawing order.
-    Reached through `useChart`, which hands it the rows. */
-export function Chart(props: ChartProps & { data: readonly unknown[] }): ReactNode {
+    Reached through `useChart`, which hands it the rows and the scene that
+    holds its view. */
+export function Chart(props: ChartProps & { data: readonly unknown[]; scene: ChartScene }): ReactNode {
   const {
     data,
+    scene,
     width = "100%",
     height = 300,
     padding = 8,
@@ -111,7 +113,6 @@ export function Chart(props: ChartProps & { data: readonly unknown[] }): ReactNo
   const wording = useMemo<ChartsWording>(() => ({ ...DEFAULT_CHARTS_WORDING, ...wordingProp }), [wordingProp]);
   const empty = emptyProp ?? wording.empty;
 
-  const [scene] = useState(() => new ChartScene());
   const rootRef = useRef<HTMLDivElement | null>(null);
   const plotRef = useRef<HTMLDivElement | null>(null);
   const seriesRef = useRef<HTMLCanvasElement | null>(null);

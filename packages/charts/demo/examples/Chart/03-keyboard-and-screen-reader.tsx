@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Tooltip, useChart } from "../../../src";
+import { Tooltip, useChart, type ChartView } from "../../../src";
+import { GERMAN_CHARTS_WORDING } from "../../../src/wording/de";
 
 /* Data from the operations world, written out here so the example runs on its own. */
 
@@ -97,21 +98,34 @@ function week(serviceId: string, step: number): MetricPoint[] {
   return points;
 }
 
-export const title = "Fit the y axis to what is visible";
-export const lead = "With `domain=\"visible\"` the y axis fits the zoomed stretch - here Saturday evening's outage - and follows when you zoom out.";
+export const title = "Read it by keyboard and screen reader";
+export const lead = "A chart with a `Tooltip` is one tab stop: the keys walk its values, and a screen reader hears them; `wording` gives the German words.";
 
-const SEARCH_WEEK = week("search", 60_000);
-const SATURDAY = new Date(2026, 2, 14).getTime();
+const SEARCH_WEEK = week("search", 5 * 60_000);
 
-export default function VisibleDomain() {
-  const { Chart, XAxis, YAxis, Line } = useChart(SEARCH_WEEK);
-  const [domain, setDomain] = useState<readonly [number, number]>([SATURDAY + 16 * HOUR, SATURDAY + 22 * HOUR]);
+export default function KeyboardAndScreenReader() {
+  // The two charts zoom together: each hands the other what it reports.
+  const [view, setView] = useState<ChartView>({});
+  const english = useChart(SEARCH_WEEK, { initialView: view, onViewChange: setView });
+  const german = useChart(SEARCH_WEEK, { initialView: view, onViewChange: setView });
+  const { Chart, XAxis, YAxis, Line } = english;
+  const { Chart: Diagramm } = german;
   return (
-    <Chart height={260} ariaLabel="Search latency on Saturday evening, the y axis fitted to it">
-      <XAxis value="t" time domain={domain} onDomainChange={setDomain} />
-      <YAxis label="ms" domain="visible" />
-      <Line value="p95" name="p95" />
-      <Tooltip mode="x" />
-    </Chart>
+    <div>
+      <Chart height={200} ariaLabel="Search latency over last week">
+        <XAxis value="t" time domain="data" zoomable />
+        <YAxis label="ms" />
+        <Line value="p95" name="p95" />
+        <Line value="p50" name="p50" />
+        <Tooltip mode="x" />
+      </Chart>
+      <Diagramm height={200} ariaLabel="Antwortzeiten der Suche in der letzten Woche" wording={GERMAN_CHARTS_WORDING}>
+        <XAxis value="t" time domain="data" zoomable />
+        <YAxis label="ms" />
+        <Line value="p95" name="p95" />
+        <Line value="p50" name="p50" />
+        <Tooltip mode="x" />
+      </Diagramm>
+    </div>
   );
 }

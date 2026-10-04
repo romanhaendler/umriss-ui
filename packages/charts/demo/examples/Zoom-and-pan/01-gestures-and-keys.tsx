@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Tooltip, useChart } from "../../../src";
 
 /* Data from the operations world, written out here so the example runs on its own. */
@@ -97,19 +96,17 @@ function week(serviceId: string, step: number): MetricPoint[] {
   return points;
 }
 
-export const title = "Zoom and pan";
-export const lead = "With `onDomainChange` the x axis proposes a domain on Ctrl or ⌘ with the wheel, a pinch or a drag; you pass it back.";
+export const title = "Gestures and keys";
+export const lead = "With `zoomable` the x axis zooms on Ctrl or ⌘ with the wheel, a pinch or + and −, pans on a drag or Shift with the arrows, and goes back on a double click or 0 - without a line of state of yours.";
 
 const SEARCH_WEEK = week("search", 60_000);
 
-export default function ZoomAndPan() {
+export default function GesturesAndKeys() {
   const { Chart, XAxis, YAxis, Line } = useChart(SEARCH_WEEK);
-  const [domain, setDomain] = useState<"data" | readonly [number, number]>("data");
   return (
     <Chart height={260} ariaLabel="Search latency over last week, a reading a minute, zoomable">
-      {/* The domain stays yours: clamp it on the way back if you need to. A
-          double click shows the whole week again. */}
-      <XAxis value="t" time domain={domain} onDomainChange={setDomain} />
+      {/* The span shown is the chart's own: `domain` is where it starts. */}
+      <XAxis value="t" time domain="data" zoomable />
       <YAxis label="ms" />
       <Line value="p95" name="p95" />
       <Tooltip mode="x" />

@@ -108,7 +108,6 @@ export default function WeekOfSeconds() {
   // business until this one is open.
   const [data] = useState(() => week("search", 1000));
   const { Chart, XAxis, YAxis, Line } = useChart(data);
-  const [domain, setDomain] = useState<"data" | readonly [number, number]>("data");
   const [drawMs, setDrawMs] = useState(0);
   const onPerf = useCallback((p: ChartPerf) => setDrawMs(p.seriesDrawMs), []);
   return (
@@ -124,7 +123,7 @@ export default function WeekOfSeconds() {
         </div>
       </dl>
       <Chart height={300} ariaLabel="Search latency and requests over last week, a reading a second" onPerf={onPerf}>
-        <XAxis value="t" time domain={domain} onDomainChange={setDomain} />
+        <XAxis value="t" time domain="data" zoomable />
         <YAxis label="ms" domain="visible" />
         <YAxis id="requests" position="right" label="Requests/min" domain="visible" />
         <Line value="p95" name="p95" />

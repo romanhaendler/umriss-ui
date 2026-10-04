@@ -32,7 +32,7 @@ function Tree({ domain, zoom }: { domain?: [number, number]; zoom: boolean }) {
   const { Chart, XAxis, YAxis, Line } = useChart(data);
   return (
     <Chart ariaLabel="Two courses">
-      <XAxis value="t" tickFormat={(v) => `t${v}`} domain={domain} onDomainChange={zoom ? () => undefined : undefined} />
+      <XAxis value="t" tickFormat={(v) => `t${v}`} domain={domain} zoomable={zoom} />
       <YAxis tickFormat={(v) => `${v} u`} />
       <Line value="a" name="A" />
       <Line value="b" name="B" />

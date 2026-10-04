@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import type { Assessment, Limit, LimitSet, Side, Severity, Verdict } from "./limit";
 import type { WorkingInterval } from "./workingTime";
+import type { ZoomLimits } from "./view";
 
 /** Value access of a series. Compared by its source text, not its identity - an
     inline accessor is new on every render. Known limit: one that reads a
@@ -241,9 +242,12 @@ export interface AxisConfig<T = unknown> {
   calendar?: readonly WorkingInterval[];
   /** y axes only: this axis' ticks on the first y axis' grid. */
   alignTicks?: boolean;
-  /** x axes only: where wheel, drag, pinch and double click propose a
-      domain. Without it the axis does not zoom. */
-  onDomainChange?: (domain: [number, number]) => void;
+  /** x axes only: wheel, drag, pinch, double click and the zoom keys move
+      the span the chart's view holds for this axis (ADR-0047). */
+  zoomable?: boolean;
+  /** x axes only: the narrowest and the widest span zoom may reach.
+      @default at most the data's extent, at least three data steps */
+  zoomLimits?: ZoomLimits;
 }
 
 /** Space in CSS pixels on each side of a rectangle. */

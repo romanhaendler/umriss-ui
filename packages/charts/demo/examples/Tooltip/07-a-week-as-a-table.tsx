@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { DataTable, Tooltip, useChart } from "../../../src";
 
 /* Data from the operations world, written out here so the example runs on its own. */
@@ -102,11 +101,10 @@ const SEARCH_WEEK = week("search", 60_000);
 const milliseconds = (v: number) => `${v.toFixed(0)} ms`;
 
 export default function WeekAsTable() {
-  const [domain, setDomain] = useState<"data" | readonly [number, number]>("data");
   const { Chart, XAxis, YAxis, Line } = useChart(SEARCH_WEEK);
   return (
     <Chart height={240} ariaLabel="Search latency over last week, a reading a minute">
-      <XAxis value="t" time domain={domain} onDomainChange={setDomain} label="Time" />
+      <XAxis value="t" time domain="data" zoomable label="Time" />
       <YAxis label="ms" />
       <Line value="p95" name="p95" format={milliseconds} />
       <Tooltip mode="x" />

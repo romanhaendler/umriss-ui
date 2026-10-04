@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Tooltip, useChart } from "../../../src";
+import { Tooltip, useChart, type ChartView } from "../../../src";
 
 /* Data from the operations world, written out here so the example runs on its own. */
 
@@ -97,8 +97,8 @@ function week(serviceId: string, step: number): MetricPoint[] {
   return points;
 }
 
-export const title = "Sync the cursor across charts";
-export const lead = "Charts with one `syncId` share the pointer; pass them one controlled `domain` and a zoom in any of them zooms all.";
+export const title = "Keep charts in step";
+export const lead = "Charts with one `syncId` share the pointer; hand them one view through `initialView` and `onViewChange`, and a zoom in any of them zooms all.";
 
 const IMAGES_WEEK = week("images", 5 * 60_000);
 
@@ -109,20 +109,27 @@ const CHANNELS = [
 ] as const;
 
 export default function CursorSync() {
-  const { Chart, XAxis, YAxis, Line } = useChart(IMAGES_WEEK);
-  const [domain, setDomain] = useState<"data" | readonly [number, number]>("data");
+  // The view the three share: each hands it what it reports.
+  const [view, setView] = useState<ChartView>({});
   return (
     <div>
       {/* Each plot begins where its y axis ends: labels of one width - three
           figures here - keep the crosshairs in one column. */}
       {CHANNELS.map((c) => (
-        <Chart key={c.name} height={140} syncId="images" ariaLabel={`Image service ${c.name} over last week`}>
-          <XAxis value="t" time domain={domain} onDomainChange={setDomain} />
-          <YAxis label={c.unit} domain="visible" tickCount={4} />
-          <Line value={c.value} name={c.name} />
-          <Tooltip mode="x" />
-        </Chart>
+        <Channel key={c.name} channel={c} view={view} onViewChange={setView} />
       ))}
     </div>
+  );
+}
+
+function Channel({ channel: c, view, onViewChange }: { channel: (typeof CHANNELS)[number]; view: ChartView; onViewChange: (view: ChartView) => void }) {
+  const { Chart, XAxis, YAxis, Line } = useChart(IMAGES_WEEK, { initialView: view, onViewChange });
+  return (
+    <Chart height={140} syncId="images" ariaLabel={`Image service ${c.name} over last week`}>
+      <XAxis value="t" time domain="data" zoomable />
+      <YAxis label={c.unit} domain="visible" tickCount={4} />
+      <Line value={c.value} name={c.name} />
+      <Tooltip mode="x" />
+    </Chart>
   );
 }
