@@ -234,6 +234,14 @@ test.describe("The other configurators", () => {
     );
     await field.press("ArrowUp");
     await expect(field).toHaveValue("19.5");
+    /* The step is bounded: it cannot fall to 0, at which the field would
+       never move. */
+    await configurator.getByLabel("step", { exact: true }).press("Shift+ArrowDown");
+    expect(await code(page, "numberinput")).toBe(
+      'import { NumberInput } from "@umriss-ui/core";\n\n<NumberInput aria-label="Parcel weight" value={weight} onChange={setWeight} size="sm" step={0.1} />',
+    );
+    await field.press("ArrowUp");
+    await expect(field).toHaveValue("19.6");
   });
 
   test("the RadioGroup's required options stand in its code as written", async ({ page }) => {

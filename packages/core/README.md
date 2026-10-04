@@ -15,7 +15,7 @@ pnpm add @umriss-ui/core
 ```
 
 The demo is the documentation: <https://romanhaendler.github.io/umriss-ui/core/>.
-Every prop of a props table is linked to the examples that show it, ten pages
+Every prop of a props table is linked to the examples that show it, 27 pages
 open with a configurator, an API index lists every export, one search finds
 across all five packages, and the header switches the examples to German.
 For a coding agent the same material stands as one Markdown file inside the
