@@ -4,7 +4,20 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Every read of a series' hidden state and of an axis' zoom handler in the scene goes through the seam
-- [ ] All existing unit, interaction and screenshot tests pass unchanged
+- [x] Every read of a series' hidden state and of an axis' zoom handler in the scene goes through the seam
+- [x] All existing unit, interaction and screenshot tests pass unchanged
+
+## Comments
+
+Delivered. `packages/charts/src/scene.ts` has a new section "The view
+(ADR-0047)" with three private methods: `isHidden(series config)`,
+`zooms(axis config)` (an x axis with a handler) and `proposeDomain(axis
+config, domain)`. Every former read of `config.hidden` (stacking, extents,
+legend entries, drawing, bar placements, hover, the keyboard's walk, the
+empty check, the change detection in `updateSeries`) and of
+`onDomainChange` (`hasZoom`, `zoomAxes`, `propose`, the change detection in
+`updateAxis`) goes through them; nothing else in charts src read either.
+Tests: typecheck clean, `test:unit` 727/727, charts-light and charts-dark
+visual projects 311 passed (129 skipped, as before), `pnpm lint` clean.
