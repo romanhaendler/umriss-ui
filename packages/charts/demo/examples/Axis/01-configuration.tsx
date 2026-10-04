@@ -47,7 +47,7 @@ export default function Configuration() {
   return (
     <Chart height={280} padding={{ top: 12, right: 16, bottom: 8, left: 8 }} ariaLabel="Share of capacity booked per team and week">
       <XAxis value="week" label="Week" tickCount={6} />
-      <YAxis value="web" domain={[0, 100]} tickFormat={percent} label="Booked" />
+      <YAxis domain={[0, 100]} tickFormat={percent} label="Booked" />
       <Line value="web" name="Web" markers="always" strokeWidth={2} />
       <Line value="apps" name="Apps" markers="always" color="#7c3aed" />
       <Legend placement="bottom" />

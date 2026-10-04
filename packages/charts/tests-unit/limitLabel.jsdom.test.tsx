@@ -33,7 +33,7 @@ function Limited({ limit }: { limit: React.ReactNode }) {
   return (
     <Chart ariaLabel="Limit labels" height={300}>
       <XAxis value="t" domain={[0, 100]} ticks={[0, 20, 40, 60, 80, 100]} />
-      <YAxis value="a" domain={[0, 50]} />
+      <YAxis domain={[0, 50]} />
       <Line value="a" />
       {limit}
     </Chart>

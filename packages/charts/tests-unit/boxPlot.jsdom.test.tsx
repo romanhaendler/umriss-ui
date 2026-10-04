@@ -51,7 +51,7 @@ function CycleTime({ extra }: { extra: Extra }) {
   return (
     <Chart ariaLabel="Cycle time per machine" wording={extra.wording}>
       <XAxis value="at" ticks={[0, 1, 2, 3]} tickFormat={(v) => MACHINES[v] ?? ""} />
-      <YAxis value="hi" tickFormat={(v) => `${v} s`} />
+      <YAxis tickFormat={(v) => `${v} s`} />
       <BoxPlot
         name="Cycle time"
         median="med"
@@ -175,7 +175,7 @@ describe("Several box series", () => {
     return (
       <Chart ariaLabel="Before and after" encoding={extra.encoding}>
         <XAxis value="at" ticks={[0, 1, 2, 3]} tickFormat={(v) => MACHINES[v] ?? ""} />
-        <YAxis value="q3" tickFormat={(v) => `${v} s`} />
+        <YAxis tickFormat={(v) => `${v} s`} />
         <BoxPlot name="Before" median="med" lowerQuartile="q1" upperQuartile="q3" lowerWhisker="lo" upperWhisker="hi" />
         <BoxPlot
           name="After"
@@ -318,7 +318,7 @@ describe("A box's outliers", () => {
     return (
       <Chart ariaLabel="Outliers" wording={extra.wording}>
         <XAxis value="at" ticks={[0, 1, 2]} tickFormat={(v) => MACHINES[v] ?? ""} />
-        <YAxis value={(d) => d.med ?? 0} tickFormat={(v) => `${v} s`} />
+        <YAxis tickFormat={(v) => `${v} s`} />
         <BoxPlot
           name="Cycle time"
           hidden={extra.hidden}
@@ -404,7 +404,7 @@ describe("A box's mean, notch and count", () => {
     return (
       <Chart ariaLabel="Mean and notch" wording={extra.wording}>
         <XAxis value="at" ticks={[0, 1]} tickFormat={(v) => MACHINES[v] ?? ""} />
-        <YAxis value="hi" tickFormat={(v) => `${v} s`} />
+        <YAxis tickFormat={(v) => `${v} s`} />
         <BoxPlot
           name={extra.name ?? "Cycle time"}
           median="med"
@@ -475,7 +475,7 @@ describe("A box's mean, notch and count", () => {
       return (
         <Chart ariaLabel="Out of order">
           <XAxis value="at" />
-          <YAxis value="hi" />
+          <YAxis />
           <BoxPlot
             name="Disordered"
             median="med"

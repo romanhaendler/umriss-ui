@@ -120,7 +120,7 @@ export default function Corridor() {
   return (
     <Chart height={280} ariaLabel="Checkout's requests inside the range they are expected in">
       <XAxis value="t" time />
-      <YAxis value="requests" label="Requests/min" />
+      <YAxis label="Requests/min" />
       {/* The outline runs along the upper edge; dashed, it reads as expected, not measured. */}
       <Area
         data={EXPECTED}

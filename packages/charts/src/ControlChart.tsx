@@ -28,13 +28,15 @@ import {
   type Violation,
 } from "./controlLimits";
 import { fnEqual } from "./scene";
-import type { Accessor } from "./types";
+import { readerOf } from "./value";
+import type { Accessor, Value } from "./types";
 import type { ReactNode } from "react";
 
 /** The props of `ControlChart`. */
 export interface ControlChartProps<T> {
-  /** The values of the chart. */
-  accessor: Accessor<T>;
+  /** The values of the chart - a number field of its `data`'s rows or a
+      function of them. */
+  value: Value<T>;
   /** Required: the limits arise out of these values, not out of what happens to
       be visible. */
   data: readonly T[];
@@ -84,7 +86,7 @@ export interface ControlChartProps<T> {
 }
 
 /** The value of the previous render while it equals the new one. A caller
-    writes accessor and origin inline, and every render hands them over with a
+    writes a value function and origin inline, and every render hands them over with a
     new identity - as dependencies of a memo they would recompute the limits on
     every render. Boxed, because React would call a function it is handed. */
 function useKept<V>(value: V, equal: (a: V, b: V) => boolean): V {
@@ -131,8 +133,9 @@ export function ControlChart<T>(props: ControlChartProps<T>): ReactNode {
     violationName,
     onViolations,
   } = props;
-  // Compared as the scene compares a series' accessor: by source text.
-  const accessor = useKept(props.accessor, fnEqual);
+  // Compared as the scene compares a series' value: a field by its name, a
+  // function by its source text.
+  const accessor = useKept(readerOf<Accessor<T>>(props.value), fnEqual);
   const origin = useKept(props.origin, originEqual);
 
   const values = useMemo(() => {
@@ -197,7 +200,7 @@ export function ControlChart<T>(props: ControlChartProps<T>): ReactNode {
 
   return (
     <>
-      <Line accessor={accessor} data={data} xAxisId={xAxisId} yAxisId={yAxisId} name={name} format={format} color={color} tone={tone} />
+      <Line value={accessor} data={data} xAxisId={xAxisId} yAxisId={yAxisId} name={name} format={format} color={color} tone={tone} />
       {usable && (
         <>
           {zoneList.map((z) => (
@@ -224,7 +227,7 @@ export function ControlChart<T>(props: ControlChartProps<T>): ReactNode {
         </>
       )}
       <Scatter
-        accessor={violationAccessor}
+        value={violationAccessor}
         data={violationData}
         xAxisId={xAxisId}
         yAxisId={yAxisId}

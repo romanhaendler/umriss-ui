@@ -28,7 +28,7 @@ export default function MeanAndNotches() {
   return (
     <Chart height={300} ariaLabel="Breaking strength per clay supplier, with mean and notches">
       <XAxis value={(_, i) => i} ticks={[0, 1, 2]} tickFormat={(v) => BATCHES[v]?.supplier ?? ""} />
-      <YAxis value="median" tickFormat={(v) => `${v} N`} />
+      <YAxis tickFormat={(v) => `${v} N`} />
       <BoxPlot
         name="Breaking strength"
         median="median"

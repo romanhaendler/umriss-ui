@@ -82,7 +82,7 @@ function Forecasts({ encoding }: { encoding?: "marks" }) {
   return (
     <Chart height={240} ariaLabel="Forecast of four cost centres per month" encoding={encoding}>
       <XAxis value={month} tickFormat={(v) => MONTH_NAMES[v] ?? ""} tickCount={6} />
-      <YAxis value="forecast" label="€" />
+      <YAxis label="€" />
       {CENTRES.map((c) => (
         <Line
           key={c.id}

@@ -56,7 +56,7 @@ export default function MarksOnEveryKind() {
   return (
     <Chart height={320} ariaLabel="North depot's pallets, told apart by marks" encoding="marks">
       <XAxis value="day" label="Day of March" tickCount={7} />
-      <YAxis value="onHand" label="Pallets" />
+      <YAxis label="Pallets" />
       <Bar value="arrived" name="Arrived" />
       <Bar value="dispatched" name="Dispatched" />
       <Area value="targetHigh" baseline="targetLow" name="Target range" />

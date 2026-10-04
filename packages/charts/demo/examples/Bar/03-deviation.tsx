@@ -85,7 +85,7 @@ export default function Deviation() {
   return (
     <Chart height={280} ariaLabel="Forecast against budget for the year, per cost centre">
       <XAxis value="place" ticks={COST_CENTRES.map((_, i) => i)} tickFormat={(v) => COST_CENTRES[v]?.name ?? ""} />
-      <YAxis value="euros" tickFormat={signed} label="€" />
+      <YAxis tickFormat={signed} label="€" />
       <Bar value="euros" name="Over budget" />
       <Tooltip mode="x" />
     </Chart>

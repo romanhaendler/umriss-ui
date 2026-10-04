@@ -105,7 +105,7 @@ export default function TogglingLegend() {
   return (
     <Chart height={260} ariaLabel="Latency of three services, one hidden">
       <XAxis value="t" time />
-      <YAxis value="p95" label="ms" />
+      <YAxis label="ms" />
       {SERIES.map((one) => (
         <Line key={one.name} data={one.data} value="p95" name={one.name} hidden={hidden.has(one.name)} />
       ))}

@@ -25,8 +25,8 @@ function Full() {
   return (
     <Chart ariaLabel="jsdom test" height={200}>
       <XAxis value="t" label="Index" />
-      <YAxis value="a" />
-      <YAxis id="two" position="right" value={(d) => d.b ?? 0} />
+      <YAxis />
+      <YAxis id="two" position="right" />
       <Line value="a" name="A" />
       <Line value="b" yAxisId="two" name="B" dash={[4, 4]} />
       <Legend placement="top" />

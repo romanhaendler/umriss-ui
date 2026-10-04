@@ -68,8 +68,8 @@ export default function Gradient() {
   return (
     <Chart height={280} ariaLabel="Successful requests per service and hour yesterday, as a gradient">
       <XAxis value="hour" ticks={[0, 6, 12, 18]} tickFormat={(v) => `${v}:00`} label="Hour" />
-      <YAxis value="service" ticks={SERVICES.map((_, i) => i)} tickFormat={(v) => SERVICES[v]?.name ?? ""} />
-      <Matrix accessor={(d) => d.service} value="success" name="Success rate" />
+      <YAxis ticks={SERVICES.map((_, i) => i)} tickFormat={(v) => SERVICES[v]?.name ?? ""} />
+      <Matrix value="service" level="success" name="Success rate" />
       <Tooltip mode="nearest" />
     </Chart>
   );

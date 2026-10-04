@@ -166,9 +166,9 @@ export default function ChooseTheRules() {
       <div style={{ flex: "1 1 320px" }}>
         <Chart height={240} ariaLabel="Control chart of the tile length under three of the four rules">
           <XAxis value="minute" label="Minute of the shift" />
-          <YAxis value="length" label="mm" />
+          <YAxis label="mm" />
           <ControlChart
-            accessor={(d: Sample) => d.length}
+            value="length"
             data={SAMPLES}
             origin={REFERENCE_WINDOW}
             name="Tile length"

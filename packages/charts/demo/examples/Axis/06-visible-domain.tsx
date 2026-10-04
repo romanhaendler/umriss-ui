@@ -109,7 +109,7 @@ export default function VisibleDomain() {
   return (
     <Chart height={260} ariaLabel="Search latency on Saturday evening, the y axis fitted to it">
       <XAxis value="t" time domain={domain} onDomainChange={setDomain} />
-      <YAxis value="p95" label="ms" domain="visible" />
+      <YAxis label="ms" domain="visible" />
       <Line value="p95" name="p95" />
       <Tooltip mode="x" />
     </Chart>

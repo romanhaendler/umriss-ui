@@ -46,7 +46,7 @@ export default function Percent() {
   return (
     <Chart height={280} ariaLabel="Share of each cause in the minutes late per working day">
       <XAxis value="day" ticks={DELAYS.map((d) => d.day)} tickFormat={(v) => DELAYS[v]?.name ?? ""} />
-      <YAxis value="traffic" />
+      <YAxis />
       <Bar value="traffic" name="Traffic" stack="delay" normalize format={minutes} />
       <Bar value="loading" name="Loading" stack="delay" normalize format={minutes} />
       <Bar value="access" name="No access" stack="delay" normalize format={minutes} />

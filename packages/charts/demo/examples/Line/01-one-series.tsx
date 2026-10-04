@@ -91,7 +91,7 @@ export default function OneSeries() {
   return (
     <Chart height={280} ariaLabel="Checkout's 95th percentile latency today">
       <XAxis value="t" time />
-      <YAxis value="p95" label="ms" />
+      <YAxis label="ms" />
       <Line value="p95" name="Checkout p95" />
       <Tooltip />
     </Chart>

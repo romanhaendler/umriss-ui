@@ -211,7 +211,6 @@ function FleetLanes() {
     <Chart height={320} ariaLabel="What each vehicle has done today, lane by lane">
       <XAxis value="t" time domain={DAY} />
       <YAxis
-        value={() => 0}
         domain={[0, FLEET.length]}
         ticks={FLEET.map((_, i) => i + 0.5)}
         tickFormat={plateOnLane}
@@ -243,7 +242,7 @@ function IdleMinutes() {
         ticks={FLEET.map((_, i) => i)}
         tickFormat={(v) => FLEET[v]?.vehicle.plate ?? ""}
       />
-      <YAxis value="idle" label="min" tickCount={4} />
+      <YAxis label="min" tickCount={4} />
       <Bar value="idle" name="Idle" color={VEHICLE_STATES[IDLE]!.color} barWidth={0.6} />
       <Tooltip mode="x" />
     </Chart>

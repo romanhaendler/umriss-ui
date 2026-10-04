@@ -69,7 +69,7 @@ export default function AgainstATarget() {
   return (
     <Chart height={300} ariaLabel="Traced Checkout requests against the latency objective">
       <XAxis value="t" time />
-      <YAxis value="ms" label="ms" />
+      <YAxis label="ms" />
       <LimitLine value={OBJECTIVE} severity="warning" label="Objective" />
       {/* The two channels never both carry a value, so no trace is drawn twice. */}
       <Scatter value={(d) => (d.ms <= OBJECTIVE ? d.ms : null)} name="Request" radius={2.5} />

@@ -56,7 +56,7 @@ export default function Mixed() {
   return (
     <Chart height={320} ariaLabel="North depot: pallets in, out and on hand over fourteen days">
       <XAxis value="day" label="Day of March" tickCount={7} />
-      <YAxis value="onHand" label="Pallets" />
+      <YAxis label="Pallets" />
       <Bar value="arrived" name="Arrived" />
       <Bar value="dispatched" name="Dispatched" />
       <Area value="targetHigh" baseline="targetLow" name="Target range" />

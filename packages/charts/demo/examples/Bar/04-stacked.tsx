@@ -53,7 +53,7 @@ export default function Stacked() {
   return (
     <Chart height={280} ariaLabel="Minutes late per working day, by cause">
       <XAxis value="day" ticks={DELAYS.map((d) => d.day)} tickFormat={(v) => DELAYS[v]?.name ?? ""} />
-      <YAxis value="traffic" label="Minutes late" />
+      <YAxis label="Minutes late" />
       <Bar value="traffic" name="Traffic" hidden={hidden.has("Traffic")} stack="delay" />
       <Bar value="loading" name="Loading" hidden={hidden.has("Loading")} stack="delay" />
       <Bar value="access" name="No access" hidden={hidden.has("No access")} stack="delay" />

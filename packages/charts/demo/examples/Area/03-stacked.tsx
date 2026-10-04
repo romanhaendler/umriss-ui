@@ -58,7 +58,7 @@ export default function StackedAreas() {
   return (
     <Chart height={280} ariaLabel="Parcels loaded per hour at three depots, stacked">
       <XAxis value="t" time domain="data" />
-      <YAxis value="north" label="Parcels per hour" />
+      <YAxis label="Parcels per hour" />
       <Area value="north" name="North" hidden={hidden.has("North")} stack="depots" fillOpacity={0.5} strokeWidth={1} />
       <Area value="river" name="Riverside" hidden={hidden.has("Riverside")} stack="depots" fillOpacity={0.5} strokeWidth={1} />
       <Area value="east" name="East Gate" hidden={hidden.has("East Gate")} stack="depots" fillOpacity={0.5} strokeWidth={1} />

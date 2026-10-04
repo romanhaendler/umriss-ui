@@ -92,7 +92,7 @@ function Latencies({ mode }: { mode: "x" | "nearest" }) {
   return (
     <Chart height={220} ariaLabel={`Search and sign-in latency, tooltip mode ${mode}`}>
       <XAxis value="t" time tickCount={4} />
-      <YAxis value="p95" label="ms" />
+      <YAxis label="ms" />
       <Line value="p95" name="Search" />
       <Line data={SIGN_IN} value="p95" name="Sign-in" />
       <Tooltip mode={mode} />

@@ -110,14 +110,14 @@ export default function KeyboardAndScreenReader() {
     <div>
       <Chart height={200} ariaLabel="Search latency over last week">
         <XAxis value="t" time domain={domain} onDomainChange={setDomain} />
-        <YAxis value="p95" label="ms" />
+        <YAxis label="ms" />
         <Line value="p95" name="p95" />
         <Line value="p50" name="p50" />
         <Tooltip mode="x" />
       </Chart>
       <Chart height={200} ariaLabel="Antwortzeiten der Suche in der letzten Woche" wording={GERMAN_CHARTS_WORDING}>
         <XAxis value="t" time domain={domain} onDomainChange={setDomain} />
-        <YAxis value="p95" label="ms" />
+        <YAxis label="ms" />
         <Line value="p95" name="p95" />
         <Line value="p50" name="p50" />
         <Tooltip mode="x" />

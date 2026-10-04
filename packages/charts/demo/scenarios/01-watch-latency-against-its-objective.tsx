@@ -181,7 +181,7 @@ export default function WatchLatency() {
           <Chart height={260} syncId="checkout" ariaLabel="Checkout latency today against its objective">
             <XAxis value="t" time domain={TODAY} />
             {/* Tick labels as wide as the error rate's keep the two crosshairs in one column. */}
-            <YAxis value="p95" label="ms" />
+            <YAxis label="ms" />
             <LimitLine value={CHECKOUT.latencySlo} severity="alarm" label={`Objective ${CHECKOUT.latencySlo} ms`} inExtent />
             <Line value="p50" name="p50" color="var(--uc-color-text)" strokeWidth={1} />
             <Line value="p95" name="p95" strokeWidth={1.75} />
@@ -195,7 +195,7 @@ export default function WatchLatency() {
         <CardBody>
           <Chart height={140} syncId="checkout" ariaLabel="Checkout error rate today">
             <XAxis value="t" time domain={TODAY} />
-            <YAxis value="errorRate" label="%" tickCount={3} tickFormat={(v) => v.toFixed(1)} />
+            <YAxis label="%" tickCount={3} tickFormat={(v) => v.toFixed(1)} />
             <LimitLine value={ERROR_ALERT} severity="alarm" label={`Alert at ${ERROR_ALERT} %`} inExtent />
             <Line value="errorRate" name="Error rate" />
             <Tooltip mode="x" />

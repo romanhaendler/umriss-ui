@@ -56,7 +56,7 @@ export default function WorkingTime() {
         tickCount={8}
         label="Sorting hours"
       />
-      <YAxis value="parcels" label="Parcels/h" />
+      <YAxis label="Parcels/h" />
       <Line value="parcels" name="Sorted" />
       <Tooltip mode="x" />
     </Chart>

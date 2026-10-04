@@ -25,7 +25,7 @@ function Nothing(props: Props) {
   return (
     <Chart ariaLabel="Nothing" {...props}>
       <XAxis value="t" />
-      <YAxis value="a" />
+      <YAxis />
       <Line value="a" name="A" />
     </Chart>
   );

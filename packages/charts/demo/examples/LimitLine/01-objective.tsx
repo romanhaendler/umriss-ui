@@ -92,7 +92,7 @@ export default function Objective() {
   return (
     <Chart height={260} ariaLabel="Checkout's latency against its objective">
       <XAxis value="t" time />
-      <YAxis value="p95" label="ms" />
+      <YAxis label="ms" />
       <LimitLine value={OBJECTIVE} severity="alarm" label="Objective" />
       <Line value="p95" name="p95" />
       <Tooltip mode="x" />

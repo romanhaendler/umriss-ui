@@ -24,7 +24,7 @@ export default function Minimal() {
   return (
     <Chart height={260} ariaLabel="Response time per service over the last hour">
       <XAxis value={(_, i) => i} ticks={[0, 1, 2]} tickFormat={(v) => RESPONSE_TIMES[v]?.service ?? ""} />
-      <YAxis value="median" tickFormat={(v) => `${v} ms`} />
+      <YAxis tickFormat={(v) => `${v} ms`} />
       <BoxPlot
         name="Response time"
         median="median"

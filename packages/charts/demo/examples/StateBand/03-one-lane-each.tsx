@@ -166,7 +166,6 @@ export default function OneLaneEach() {
       <XAxis value="t" time label="Time" />
       {/* Lane 0 lies at the bottom, so the first vehicle takes the top lane. */}
       <YAxis
-        value={() => 0}
         domain={[0, FLEET.length]}
         ticks={FLEET.map((_, i) => i + 0.45)}
         tickFormat={(v) => FLEET[FLEET.length - 1 - Math.floor(v)]?.vehicle.plate ?? ""}

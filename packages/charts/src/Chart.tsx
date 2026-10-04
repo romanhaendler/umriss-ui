@@ -1,4 +1,4 @@
-/* Chart<T> - container and ChartScene provider (4.1, R-2.1, R-2.8-R-2.10).
+/* Chart - container and ChartScene provider (4.1, R-2.1, R-2.8-R-2.10).
 
    Structure of the DOM:
      .uc-root      flex column; the --uc-* variables live here (theme root)
@@ -33,11 +33,9 @@ import { DEFAULT_CHARTS_WORDING, type ChartsWording } from "./wording";
 import type { ChartPerf, Padding } from "./types";
 import "./styles/charts.css";
 
-/** The props of `Chart`. */
-export interface ChartProps<T> {
-  /** Shared data basis (required); access only through accessors.
-      @remarks R-2.4 */
-  data: readonly T[];
+/** The props of `Chart`. Its rows are not among them: `useChart(rows)` binds
+    them (ADR-0048). */
+export interface ChartProps {
   /** Width in CSS pixels, or `"100%"` for the host's: the chart measures its
       host and follows it through a ResizeObserver.
       @default "100%" */
@@ -91,8 +89,9 @@ export interface ChartProps<T> {
 
 /** The container of a chart: it holds the data, measures the plot area and
     draws on canvas whatever its children register - axes, series, limits,
-    legend and tooltip. The order of the children is the drawing order. */
-export function Chart<T>(props: ChartProps<T>): ReactNode {
+    legend and tooltip. The order of the children is the drawing order.
+    Reached through `useChart`, which hands it the rows. */
+export function Chart(props: ChartProps & { data: readonly unknown[] }): ReactNode {
   const {
     data,
     width = "100%",

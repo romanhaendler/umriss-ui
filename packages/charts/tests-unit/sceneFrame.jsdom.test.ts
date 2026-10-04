@@ -109,7 +109,7 @@ describe("ChartScene across frames", () => {
       kind: "matrix",
       name: "OEE",
       accessor: (d) => (d as Row).a,
-      value: (d) => (d as Row).t + 2 * (d as Row).a,
+      level: (d) => (d as Row).t + 2 * (d as Row).a,
       coloring: { kind: "gradient", stops: ["#000001", "#000002", "#000003", "#000004"] },
       xAxisId: "x",
       yAxisId: "y",

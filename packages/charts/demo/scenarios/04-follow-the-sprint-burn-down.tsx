@@ -156,7 +156,7 @@ function SprintBurnDown() {
         tickFormat={day}
         label="Working day"
       />
-      <YAxis value="ideal" label="Hours left" domain={[0, BURNDOWN[0]!.ideal]} />
+      <YAxis label="Hours left" domain={[0, BURNDOWN[0]!.ideal]} />
       <Line value="ideal" name="Even pace" color="var(--uc-color-text)" dash={[4, 4]} strokeWidth={1} />
       <Line value="remaining" name="Left" markers="always" strokeWidth={2} />
       <Legend placement="top" />
@@ -174,7 +174,7 @@ function OpenPerPerson() {
         ticks={HOLDERS.map((_, i) => i)}
         tickFormat={(v) => HOLDERS[v]?.name ?? ""}
       />
-      <YAxis value="open" label="h" tickCount={4} />
+      <YAxis label="h" tickCount={4} />
       <Bar value="open" name="Estimate" barWidth={0.6} />
       <Tooltip mode="x" />
     </Chart>

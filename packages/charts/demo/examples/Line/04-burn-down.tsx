@@ -74,7 +74,7 @@ export default function BurnDown() {
   return (
     <Chart height={260} ariaLabel="Sprint 14: hours left against the ideal">
       <XAxis value="t" ticks={BURNDOWN.map((d) => d.t)} tickFormat={day} />
-      <YAxis value="ideal" label="Hours left" />
+      <YAxis label="Hours left" />
       <Line value="ideal" name="Ideal" color="var(--uc-color-text)" dash={[4, 4]} />
       <Line value="remaining" name="Remaining" markers="always" strokeWidth={2} />
       <Legend />

@@ -172,7 +172,7 @@ export default function Detailed() {
   return (
     <Chart height={320} ariaLabel="Tile length per shift, with the medians as a line">
       <XAxis value="shift" ticks={SHIFTS.map((_, i) => i)} tickFormat={(v) => SHIFTS[v] ?? ""} label="Shift" />
-      <YAxis value="median" tickFormat={mm} />
+      <YAxis tickFormat={mm} />
       <BoxPlot
         name="Tile length"
         median="median"

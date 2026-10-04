@@ -237,8 +237,8 @@ function BatteryAndStates() {
   return (
     <Chart height={280} ariaLabel="An e-van's battery against its reserve, above its states" encoding="marks">
       <XAxis value="t" time label="Time" tickCount={4} />
-      <YAxis value={(d) => d.charge ?? 0} domain={[-40, 100]} ticks={[0, 20, 40, 60, 80, 100]} label="%" />
-      <YAxis id="lane" position="right" value={() => 0} domain={[0, 5]} ticks={[0.45]} tickFormat={() => "FP 377 K"} />
+      <YAxis domain={[-40, 100]} ticks={[0, 20, 40, 60, 80, 100]} label="%" />
+      <YAxis id="lane" position="right" domain={[0, 5]} ticks={[0.45]} tickFormat={() => "FP 377 K"} />
       <LimitBand from={10} to={20} severity="warning" label="Reserve" />
       <LimitLine value={10} severity="alarm" label="Empty soon" />
       <StateBand data={STATES} value="state" states={VEHICLE_STATES} yAxisId="lane" laneFrom={0} laneTo={0.9} name="FP 377 K" />
@@ -254,10 +254,10 @@ function SuccessCells() {
   return (
     <Chart height={280} ariaLabel="Successful requests per service and hour, by limits and by marks" encoding="marks">
       <XAxis value="hour" ticks={[0, 6, 12, 18]} tickFormat={(v) => `${v}:00`} label="Hour" />
-      <YAxis value="service" ticks={SERVICES.map((_, i) => i)} tickFormat={(v) => SERVICES[v]?.name ?? ""} />
+      <YAxis ticks={SERVICES.map((_, i) => i)} tickFormat={(v) => SERVICES[v]?.name ?? ""} />
       <Matrix
-        accessor={(d) => d.service}
-        value="success"
+        value="service"
+        level="success"
         coloring={{
           kind: "assessment",
           limits: {

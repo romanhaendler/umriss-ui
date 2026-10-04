@@ -31,7 +31,7 @@ function Toned({ series }: { series: Series }) {
   return (
     <Chart ariaLabel="Tone" height={200}>
       <XAxis value="t" />
-      <YAxis value="a" />
+      <YAxis />
       {series(parts)}
       <Legend />
     </Chart>
@@ -76,7 +76,7 @@ describe("tone", () => {
   it("colours a control chart's line by its role", async () => {
     const [line] = await chips(() => (
       <ControlChart
-        accessor={(d: Row) => d.a}
+        value="a"
         data={data}
         origin={{ kind: "given", center: 11, sigma: 1 }}
         name="Feature"

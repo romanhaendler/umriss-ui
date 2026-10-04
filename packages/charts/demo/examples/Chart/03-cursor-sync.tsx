@@ -118,7 +118,7 @@ export default function CursorSync() {
       {CHANNELS.map((c) => (
         <Chart key={c.name} height={140} syncId="images" ariaLabel={`Image service ${c.name} over last week`}>
           <XAxis value="t" time domain={domain} onDomainChange={setDomain} />
-          <YAxis value={c.value} label={c.unit} domain="visible" tickCount={4} />
+          <YAxis label={c.unit} domain="visible" tickCount={4} />
           <Line value={c.value} name={c.name} />
           <Tooltip mode="x" />
         </Chart>

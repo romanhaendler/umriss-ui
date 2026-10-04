@@ -15,7 +15,7 @@ function Latency({ empty }: { empty?: string }) {
   return (
     <Chart height={220} ariaLabel="Latency of a service without readings" empty={empty}>
       <XAxis value="t" time />
-      <YAxis value="p95" label="ms" />
+      <YAxis label="ms" />
       <Line value="p95" name="Refunds" />
     </Chart>
   );

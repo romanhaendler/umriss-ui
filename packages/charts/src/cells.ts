@@ -6,7 +6,7 @@
    same reason gives bars.ts its name; see CONTEXT.md on module names.
 
    A matrix sits on two ordinary numeric axes: x is the column, y the row, and
-   the colour comes from the value channel. The edge lengths of a cell therefore
+   the colour comes from the level channel. The edge lengths of a cell therefore
    come out of the grid spacing of both axes and are mapped by the same affine
    scale as every other mark - the same reasoning as in bars.ts, one dimension
    further on.
@@ -14,7 +14,7 @@
    Deliberately free of the DOM and of the scene: half a cell out of place does
    not show up on a canvas.
 
-   The gap is NaN in the value channel, not in the position channels - the
+   The gap is NaN in the level channel, not in the position channels - the
    encoding every series kind of this library uses. The cell then lies in the
    grid, but nothing is known about it; whoever tests the channel draws nothing
    and reports nothing. A position that is itself NaN drops out here of its own

@@ -49,7 +49,7 @@ export default function Shares() {
   return (
     <Chart height={280} ariaLabel="Each depot's share of the freight loaded per hour">
       <XAxis value="t" time domain="data" />
-      <YAxis value="north" label="Share of the hour" />
+      <YAxis label="Share of the hour" />
       <Area value="north" name="North" stack="depots" normalize format={tonnes} fillOpacity={0.5} strokeWidth={1} />
       <Area value="river" name="Riverside" stack="depots" normalize format={tonnes} fillOpacity={0.5} strokeWidth={1} />
       <Area value="east" name="East Gate" stack="depots" normalize format={tonnes} fillOpacity={0.5} strokeWidth={1} />

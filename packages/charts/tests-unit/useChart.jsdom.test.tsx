@@ -38,7 +38,7 @@ function Course({ rows, field }: { rows: Row[]; field: "a" | "b" }) {
   return (
     <Chart ariaLabel="One course">
       <XAxis value="t" tickFormat={(v) => `t${v}`} />
-      <YAxis value="b" />
+      <YAxis />
       <Line value={field} name="V" />
       <Tooltip />
     </Chart>

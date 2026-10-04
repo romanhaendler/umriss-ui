@@ -616,7 +616,7 @@ export default function ControlRoom() {
       <Region id="room-trend" title="Kiln trend" callout="3">
         <kilnTrend.Chart height={240} ariaLabel="Kiln K1, zone 3, over the shift">
           <kilnTrend.XAxis value="t" domain={[at(0), at(LAST)]} time />
-          <kilnTrend.YAxis value="kiln" domain={[1170, 1250]} label="°C" />
+          <kilnTrend.YAxis domain={[1170, 1250]} label="°C" />
           <LimitBand from={KILN.tolerance[0]} to={KILN.tolerance[1]} severity="warning" label="Tolerance" />
           <LimitLine value={KILN.alarm} severity="alarm" label="Alarm limit" />
           <kilnTrend.Line value="kiln" name="Zone 3" format={(v) => `${v.toFixed(1)} °C`} />
@@ -642,11 +642,11 @@ export default function ControlRoom() {
       <Region id="room-quality" title="Tile length">
         <tileLength.Chart height={220} ariaLabel="Tile length after firing, individuals chart">
           <tileLength.XAxis value="t" domain={[at(0), at(LAST)]} time />
-          <tileLength.YAxis value="length" domain={[597, 602]} label="mm" />
+          <tileLength.YAxis domain={[597, 602]} label="mm" />
           <LimitLine value={601.5} severity="alarm" label="USL" />
           <LimitLine value={598.5} severity="alarm" label="LSL" />
           <ControlChart
-            accessor={(d: Measured) => d.length}
+            value="length"
             data={measured}
             origin={REFERENCE}
             name="Length"

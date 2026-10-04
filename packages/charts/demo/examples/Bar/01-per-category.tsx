@@ -75,7 +75,7 @@ export default function PerCategory() {
   return (
     <Chart height={260} ariaLabel="Actual spend per cost centre in February">
       <XAxis value={place} ticks={COST_CENTRES.map((_, i) => i)} tickFormat={(v) => COST_CENTRES[v]?.name ?? ""} />
-      <YAxis value="budget" label="€" />
+      <YAxis label="€" />
       <Bar value="actual" name="Actual" />
       <Tooltip mode="x" />
     </Chart>

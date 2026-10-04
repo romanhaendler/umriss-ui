@@ -125,8 +125,8 @@ export default function WeekOfSeconds() {
       </dl>
       <Chart height={300} ariaLabel="Search latency and requests over last week, a reading a second" onPerf={onPerf}>
         <XAxis value="t" time domain={domain} onDomainChange={setDomain} />
-        <YAxis value="p95" label="ms" domain="visible" />
-        <YAxis id="requests" position="right" value="requests" label="Requests/min" domain="visible" />
+        <YAxis label="ms" domain="visible" />
+        <YAxis id="requests" position="right" label="Requests/min" domain="visible" />
         <Line value="p95" name="p95" />
         <Line value="requests" yAxisId="requests" name="Requests" />
         <Legend placement="top" />

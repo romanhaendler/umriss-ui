@@ -197,9 +197,9 @@ export default function UnderACourse() {
   return (
     <Chart height={320} ariaLabel="An e-van's charge above what it was doing">
       <XAxis value="t" time label="Time" />
-      <YAxis value={(d) => d.charge ?? 0} domain={[-40, 100]} ticks={[0, 25, 50, 75, 100]} label="Charge %" />
+      <YAxis domain={[-40, 100]} ticks={[0, 25, 50, 75, 100]} label="Charge %" />
       {/* The lane: the bottom unit of five, the rest is room for the course. */}
-      <YAxis id="lane" position="right" value={() => 0} domain={[0, 5]} ticks={[0.4]} tickFormat={() => "State"} />
+      <YAxis id="lane" position="right" domain={[0, 5]} ticks={[0.4]} tickFormat={() => "State"} />
       <StateBand data={STATES} value="state" states={VEHICLE_STATES} yAxisId="lane" laneFrom={0} laneTo={0.8} name="FP 377 K" hidden={hidden.has("FP 377 K")} />
       <Line value="charge" name="Charge" strokeWidth={1.75} hidden={hidden.has("Charge")} />
       <Legend placement="top" onToggle={toggle} />

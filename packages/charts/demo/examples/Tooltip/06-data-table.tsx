@@ -78,7 +78,7 @@ export default function ValuesAsTable() {
   return (
     <Chart height={260} ariaLabel="Sprint 14: hours left against the ideal">
       <XAxis value="t" ticks={BURNDOWN.map((d) => d.t)} tickFormat={day} />
-      <YAxis value="ideal" label="Hours left" />
+      <YAxis label="Hours left" />
       <Line value="ideal" name="Ideal" format={hours} hidden={hidden.includes("Ideal")} />
       <Line value="remaining" name="Remaining" format={hours} hidden={hidden.includes("Remaining")} />
       <Legend onToggle={toggle} />

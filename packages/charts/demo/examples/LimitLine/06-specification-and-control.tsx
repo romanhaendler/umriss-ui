@@ -150,7 +150,7 @@ export default function SpecificationAndControl() {
   return (
     <Chart height={300} ariaLabel="The tile length against its specification and its control limits">
       <XAxis value="minute" label="Minute of the shift" />
-      <YAxis value="length" label="mm" />
+      <YAxis label="mm" />
       <LimitBand from={597.5} to={602.5} severity="warning" label="Specification" />
       <LimitBand role="control" from={LIMITS.lower} to={LIMITS.upper} label="±3σ" />
       <LimitLine role="control" value={LIMITS.center} label="Centre" />

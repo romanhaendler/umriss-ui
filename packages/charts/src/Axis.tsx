@@ -9,16 +9,10 @@ import { readerOf } from "./value";
 import type { AxisConfig, NumberField } from "./types";
 import type { WorkingInterval } from "./workingTime";
 
-interface CommonProps<T> {
+interface CommonProps {
   /** Axis id, through which series bind themselves.
       @remarks R-4.12 */
   id?: string;
-  /** Where a row lies on this axis: a number field of the row, compared by
-      its name, or a function of it, compared by its source text as a series'
-      is (`Accessor`) - with the same closure limit. */
-  value?: NumberField<T> | ((d: T, index: number) => number);
-  /** The older form of `value`: a function only. */
-  accessor?: (d: T, index: number) => number;
   /** Axis title. */
   label?: string;
   /** Target value; the 1-2-5 algorithm may deviate. */
@@ -39,7 +33,13 @@ interface CommonProps<T> {
 }
 
 /** The props of `XAxis`. */
-export interface XAxisProps<T> extends CommonProps<T> {
+export interface XAxisProps<T> extends CommonProps {
+  /** Where a row lies on this axis: a number field of the row, compared by
+      its name, or a function of it, compared by its source text as a series'
+      is (`Accessor`) - with the same closure limit. The axis reads the rows of
+      every series bound to it; where those bring their own `data`, name
+      their row: `<XAxis<HourCount> value="hour" />`. */
+  value: NumberField<T> | ((d: T, index: number) => number);
   /** `"nice"` widens the data's extent to ticks - to named `ticks` where
       there are any, on a time axis to whole units of a step of hours or
       longer -, `"data"` keeps it, a pair is fixed - the one a zoom passes
@@ -70,8 +70,9 @@ export interface XAxisProps<T> extends CommonProps<T> {
   onDomainChange?: (domain: [number, number]) => void;
 }
 
-/** The props of `YAxis`. */
-export interface YAxisProps<T> extends CommonProps<T> {
+/** The props of `YAxis`. It reads no value of its own: where a row lies
+    along y is its series' `value`. */
+export interface YAxisProps extends CommonProps {
   /** As on the x axis, and `"visible"`: what the series show inside their x
       axis' domain - a zoomed hour gets the hour's range, not the week's -,
       widened to ticks as `"nice"` is. Where the x domain is not fixed that is
@@ -89,7 +90,8 @@ export interface YAxisProps<T> extends CommonProps<T> {
 
 /** A horizontal axis: where a datum lies along x, its ticks, title and grid.
     A chart may have several; series bind to one by its `id`. With `time` or a
-    `calendar` it reads instants, with `onDomainChange` it zooms. */
+    `calendar` it reads instants, with `onDomainChange` it zooms. It reads the
+    rows of every series bound to it. */
 export function XAxis<T>(props: XAxisProps<T>): null {
   const {
     id = "x",
@@ -104,7 +106,7 @@ export function XAxis<T>(props: XAxisProps<T>): null {
     calendar,
     onDomainChange,
   } = props;
-  const accessor = readerOf<(d: T, index: number) => number>(props.value) ?? props.accessor;
+  const accessor = readerOf<(d: T, index: number) => number>(props.value);
 
   const config = useMemo<AxisConfig>(
     () =>
@@ -132,7 +134,7 @@ export function XAxis<T>(props: XAxisProps<T>): null {
 
 /** A vertical axis: the scale series draw their values on, its ticks, title
     and grid. A chart may have several; series bind to one by its `id`. */
-export function YAxis<T>(props: YAxisProps<T>): null {
+export function YAxis(props: YAxisProps): null {
   const {
     id = "y",
     position = "left",
@@ -144,7 +146,6 @@ export function YAxis<T>(props: YAxisProps<T>): null {
     ticks,
     alignTicks,
   } = props;
-  const accessor = readerOf<(d: T, index: number) => number>(props.value) ?? props.accessor;
 
   const config = useMemo<AxisConfig>(
     () =>
@@ -152,7 +153,6 @@ export function YAxis<T>(props: YAxisProps<T>): null {
         id,
         orientation: "y",
         position,
-        accessor,
         label,
         tickCount,
         tickFormat,
@@ -161,7 +161,7 @@ export function YAxis<T>(props: YAxisProps<T>): null {
         ticks,
         alignTicks,
       }) as AxisConfig,
-    [id, position, accessor, label, tickCount, tickFormat, domain, grid, ticks, alignTicks],
+    [id, position, label, tickCount, tickFormat, domain, grid, ticks, alignTicks],
   );
 
   useAxis("YAxis", config);

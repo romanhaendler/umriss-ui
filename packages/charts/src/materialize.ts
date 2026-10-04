@@ -36,7 +36,7 @@ export type Baseline<T> = Accessor<T> | number;
     x axis. Named rather than overloading existing channels (ADR-0011);
     optional, so that every existing call stays correct unchanged. */
 export interface ExtraChannels<T> {
-  /** Value channel of the matrix: the third value per point. */
+  /** Level channel of the matrix (`level`): the third value per point. */
   value?: Accessor<T>;
   /** A box's further numbers (ADR-0011): one channel each. */
   box?: BoxNumbers<Accessor<T>> &

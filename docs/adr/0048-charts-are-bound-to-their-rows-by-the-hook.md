@@ -26,7 +26,13 @@ does.** The view (ADR-0047) lives on what the hook returns, beside the parts.
   the `data` prop of a generic component, so `value="p95"` is checked there
   too, and no second hook is needed per data source.
 - **Named channels stay named** (ADR-0011): `baseline` and the box channels
-  take a field name or a function, under their own names.
+  take a field name or a function, under their own names. `value` is the y
+  position on every kind, the matrix's row included; its colour channel is
+  `level`.
+- **An x axis reads the rows of every series bound to it**, so it is generic
+  as a series is: `<XAxis<HourCount> value="hour" />` names rows the series
+  bring as their own `data`. A y axis reads no row - its series place theirs -
+  and takes no `value`.
 - **Parts that never read a row are ordinary imports**: `Legend`, `Tooltip`,
   `DataTable`, `LimitLine`, `LimitBand`. `ControlChart` brings its own data
   and stays a component of its own, typed by its `data`.

@@ -110,7 +110,7 @@ export default function ZoomAndPan() {
       {/* The domain stays yours: clamp it on the way back if you need to. A
           double click shows the whole week again. */}
       <XAxis value="t" time domain={domain} onDomainChange={setDomain} />
-      <YAxis value="p95" label="ms" />
+      <YAxis label="ms" />
       <Line value="p95" name="p95" />
       <Tooltip mode="x" />
     </Chart>
