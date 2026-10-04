@@ -55,7 +55,7 @@ import { lastSegmentEnd, medianStep, segmentEnd, segmentIndex } from "./state";
 import { cellSize, cellIndex, measureSpacing } from "./cells";
 import { assess } from "./limit";
 import { formatValue } from "./format";
-import { defaultLimits, onlyKnown, showOnly, toggleHidden, viewKey, zoomSpan, type ChartView, type ZoomLimits } from "./view";
+import { defaultLimits, hidesAll, onlyKnown, onlyVisible, showOnly, toggleHidden, viewKey, zoomSpan, type ChartView, type ZoomLimits } from "./view";
 import { MINUTE, inRemovedTime, toWorkingTimeClamped } from "./workingTime";
 import {
   axisExtent,
@@ -2618,6 +2618,14 @@ export class ChartScene {
     }, READOUT_REST);
   }
 
+  /** Something to hear at once, in the readout's place - not a key's, so
+      not waiting for the keys to rest. */
+  private say(text: string): void {
+    if (this.readoutTimer !== null) clearTimeout(this.readoutTimer);
+    this.readoutTimer = null;
+    if (this.readoutEl !== null) this.readoutEl.textContent = text;
+  }
+
   private readoutText(): string {
     const hover = this.hover;
     if (hover === null) return "";
@@ -2688,6 +2696,7 @@ export class ChartScene {
       parts.push(w.walkHelp);
       if (this.hasZoom()) parts.push(w.zoomHelp);
     }
+    if (this.legend !== null && this.seriesNames().some((name) => name !== undefined)) parts.push(w.legendHelp);
     return parts.join(" ");
   }
 
@@ -3011,14 +3020,35 @@ export class ChartScene {
   /** Hides the series `names` together, or shows them where every one is
       hidden - a state's legend entry speaks for every band that shows it. */
   toggleNames(names: readonly string[]): void {
-    this.setHidden(toggleHidden(this.hiddenInView, names, this.seriesNames()));
+    this.hideSome(toggleHidden(this.hiddenInView, names));
   }
 
   /** Hides every series but `name`. */
-  showOnly = (name: string): void => this.setHidden(showOnly(name, this.seriesNames()));
+  showOnly = (name: string): void => this.hideSome(showOnly([name], this.seriesNames()));
+
+  /** The legend's gesture: shows only the series `names` - or all, where they
+      were the only ones visible. `from` is the hidden series it judges by: a
+      double click by those before its first click. */
+  showOnlyNames(names: readonly string[], from: readonly string[] = this.hiddenInView): void {
+    const series = this.seriesNames();
+    this.hideSome(onlyVisible(names, from, series) ? [] : showOnly(names, series));
+  }
 
   /** Shows every series again. */
   showAllSeries = (): void => this.setHidden([]);
+
+  /** The hidden series now, by name - what a double click comes back to. */
+  hiddenNow = (): readonly string[] => this.hiddenInView;
+
+  /** Hides `next` - unless it hides every series: then all are shown, and
+      the live region says so. */
+  private hideSome(next: string[]): void {
+    if (hidesAll(next, this.seriesNames())) {
+      next = [];
+      this.say(this.wording.allShown);
+    }
+    this.setHidden(next);
+  }
 
   /** The name of every series declared, `undefined` for one without. */
   private seriesNames(): (string | undefined)[] {

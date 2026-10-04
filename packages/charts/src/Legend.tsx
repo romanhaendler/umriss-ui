@@ -8,7 +8,7 @@
    be hidden, so its entry stays text - a button that changes nothing is worse
    than none. */
 
-import { useSyncExternalStore, type ReactNode } from "react";
+import { useRef, useSyncExternalStore, type ReactNode } from "react";
 import { useChartScene, useLegend } from "./context";
 import { DataKey } from "./DataTable";
 import { hatchLines, markerPath, type Hatch, type MarkerShape } from "./marks";
@@ -24,6 +24,8 @@ export interface LegendProps {
 
 function LegendInner({ scene, placement }: { scene: ChartScene; placement: "top" | "bottom" }): ReactNode {
   useLegend("Legend", { placement });
+  /** The entry clicked first and the hidden series before that click. */
+  const first = useRef<{ id: string; hidden: readonly string[] } | null>(null);
   const snapshot = useSyncExternalStore(
     scene.subscribeLayout,
     scene.getLayoutSnapshot,
@@ -59,7 +61,18 @@ function LegendInner({ scene, placement }: { scene: ChartScene; placement: "top"
             key={item.id}
             type="button"
             aria-pressed={!item.hidden}
-            onClick={() => scene.toggleNames(item.names)}
+            onClick={(e) => {
+              const before = first.current;
+              if (e.detail >= 2 && before?.id === item.id) return scene.showOnlyNames(item.names, before.hidden);
+              first.current = { id: item.id, hidden: scene.hiddenNow() };
+              if (e.altKey) scene.showOnlyNames(item.names);
+              else scene.toggleNames(item.names);
+            }}
+            onKeyDown={(e) => {
+              if (e.key !== "Enter" || !e.shiftKey) return;
+              e.preventDefault(); // or the button clicks as well
+              scene.showOnlyNames(item.names);
+            }}
             {...shared}
           >
             {content}
@@ -165,8 +178,10 @@ function markerD(shape: MarkerShape, cx: number, cy: number, r: number): string 
 
 /** The legend of a chart: one entry per series, or per state of a state band.
     Hovering an entry highlights its series; a click hides and shows it, a
-    state's entry the whole band - through the chart's view. Hiding the last
-    series visible shows all. */
+    state's entry the whole band - through the chart's view. A double click,
+    Alt+click or Shift+Enter shows only it, or all where it is the only one
+    visible. Nothing hides every series: what would shows all, and the live
+    region says so. */
 export function Legend({ placement = "top" }: LegendProps): ReactNode {
   const scene = useChartScene("Legend");
   if (scene === null) return null; // PROD outside a Chart (R-2.3)

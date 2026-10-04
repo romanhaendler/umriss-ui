@@ -3,7 +3,7 @@
    names out, zoom inside its limits, never every series hidden. */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { defaultLimits, Echoes, onlyKnown, showOnly, toggleHidden, viewKey, zoomSpan } from "../src/view";
+import { defaultLimits, Echoes, hidesAll, onlyKnown, onlyVisible, showOnly, toggleHidden, viewKey, zoomSpan } from "../src/view";
 
 describe("viewKey", () => {
   it("compares by content, not by the order of the ids or the names", () => {
@@ -50,29 +50,35 @@ describe("Hiding series", () => {
   const series = ["A", "B", "C"];
 
   it("hides a shown series and shows a hidden one", () => {
-    expect(toggleHidden([], ["B"], series)).toEqual(["B"]);
-    expect(toggleHidden(["B", "C"], ["B"], series)).toEqual(["C"]);
+    expect(toggleHidden([], ["B"])).toEqual(["B"]);
+    expect(toggleHidden(["B", "C"], ["B"])).toEqual(["C"]);
   });
 
   it("shows several names together where every one is hidden, and hides them together otherwise", () => {
-    expect(toggleHidden(["A", "B"], ["A", "B"], series)).toEqual([]);
-    expect(toggleHidden(["A"], ["A", "B"], series)).toEqual(["A", "B"]);
+    expect(toggleHidden(["A", "B"], ["A", "B"])).toEqual([]);
+    expect(toggleHidden(["A"], ["A", "B"])).toEqual(["A", "B"]);
   });
 
-  it("shows all instead of hiding the last series visible", () => {
-    expect(toggleHidden(["A", "B"], ["C"], series)).toEqual([]);
+  it("knows when every series would be hidden", () => {
+    expect(hidesAll(["A", "B", "C"], series)).toBe(true);
+    expect(hidesAll(["A", "B"], series)).toBe(false);
+    expect(hidesAll([], [])).toBe(false);
   });
 
   it("counts a series without a name as visible: it cannot be hidden", () => {
-    expect(toggleHidden(["A", "B"], ["C"], [...series, undefined])).toEqual(["A", "B", "C"]);
+    expect(hidesAll(["A", "B", "C"], [...series, undefined])).toBe(false);
   });
 
-  it("shows only one series", () => {
-    expect(showOnly("A", series)).toEqual(["B", "C"]);
+  it("shows only some series", () => {
+    expect(showOnly(["A"], series)).toEqual(["B", "C"]);
+    expect(showOnly(["A", "B"], series)).toEqual(["C"]);
+    expect(showOnly(["gone"], series)).toEqual(series);
   });
 
-  it("shows all where the one to show only is not there", () => {
-    expect(showOnly("gone", series)).toEqual([]);
+  it("knows when some series are the only ones visible, unnamed ones aside", () => {
+    expect(onlyVisible(["A"], ["B", "C"], [...series, undefined])).toBe(true);
+    expect(onlyVisible(["A"], ["B"], series)).toBe(false);
+    expect(onlyVisible(["A"], ["A", "B", "C"], series)).toBe(false);
   });
 });
 

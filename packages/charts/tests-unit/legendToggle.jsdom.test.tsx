@@ -8,7 +8,8 @@
 
 import { act } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { Legend, Tooltip, useChart, type ChartParts, type ChartView } from "../src";
+import { Legend, Tooltip, useChart, type ChartParts, type ChartView, type ChartsWording } from "../src";
+import { GERMAN_CHARTS_WORDING } from "../src/wording/de";
 import { focusPlot, frame, press, renderChart, sizePlot, tooltipOf } from "./renderChart";
 
 interface Row {
@@ -35,14 +36,15 @@ interface Props {
   onViewChange?: (view: ChartView) => void;
   seen?: (parts: ChartParts<Row>) => void;
   unnamed?: boolean;
+  wording?: ChartsWording;
 }
 
-function Toggled({ initialView, onViewChange, seen, unnamed }: Props) {
+function Toggled({ initialView, onViewChange, seen, unnamed, wording }: Props) {
   const parts = useChart(data, { initialView, onViewChange });
   seen?.(parts);
   const { Chart, XAxis, YAxis, Line } = parts;
   return (
-    <Chart ariaLabel="Legend toggle" height={200}>
+    <Chart ariaLabel="Legend toggle" height={200} wording={wording}>
       <XAxis value="t" />
       <YAxis />
       <Line value="a" name="A" />
@@ -92,6 +94,91 @@ describe("The legend toggles by default", () => {
     const host = await render({ initialView: { hidden: ["A"] } });
     await click(buttons(host)[1]);
     expect(pressed(host)).toEqual(["true", "true"]);
+  });
+});
+
+/* component-view 03: a double click, Alt+click and Shift+Enter show only that
+   series; on the only visible one, all. A single click stays immediate, so a
+   double click arrives as two clicks first: its result does not depend on
+   them. Whatever would leave nothing visible shows all, and the live region
+   says so. */
+
+/** A click as the browser sends it: `detail` counts the clicks in a row. */
+async function clickAs(button: HTMLButtonElement | undefined, init: MouseEventInit = {}): Promise<void> {
+  await act(async () => button?.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, detail: 1, ...init })));
+  await frame();
+}
+
+async function doubleClick(button: HTMLButtonElement | undefined): Promise<void> {
+  await clickAs(button, { detail: 1 });
+  await clickAs(button, { detail: 2 });
+  await act(async () => button?.dispatchEvent(new MouseEvent("dblclick", { bubbles: true, cancelable: true, detail: 2 })));
+  await frame();
+}
+
+/** Shift+Enter on an entry; true where the legend took it. */
+async function shiftEnter(button: HTMLButtonElement | undefined): Promise<boolean> {
+  const event = new KeyboardEvent("keydown", { key: "Enter", shiftKey: true, bubbles: true, cancelable: true });
+  await act(async () => button?.dispatchEvent(event));
+  await frame();
+  return event.defaultPrevented;
+}
+
+const live = (host: HTMLElement) => host.querySelector("[aria-live='polite']")?.textContent ?? "";
+
+describe("The legend's gestures", () => {
+  it("shows only the series double clicked, whatever its two clicks did", async () => {
+    const views: ChartView[] = [];
+    const host = await render({ onViewChange: (v) => views.push(v) });
+    await doubleClick(buttons(host)[1]);
+    expect(pressed(host)).toEqual(["false", "true"]);
+    expect(views.at(-1)).toEqual({ hidden: ["A"] });
+  });
+
+  it("shows all on a double click of the only series visible", async () => {
+    const host = await render({ initialView: { hidden: ["A"] } });
+    await doubleClick(buttons(host)[1]);
+    expect(pressed(host)).toEqual(["true", "true"]);
+  });
+
+  it("shows only the series on Alt+click, and all on the next", async () => {
+    const host = await render({ unnamed: true });
+    await clickAs(buttons(host)[0], { altKey: true });
+    expect(pressed(host)).toEqual(["true", "false"]);
+    await clickAs(buttons(host)[0], { altKey: true });
+    expect(pressed(host)).toEqual(["true", "true"]);
+  });
+
+  it("shows only the series on Shift+Enter, taking the key from the button", async () => {
+    const host = await render();
+    expect(await shiftEnter(buttons(host)[1])).toBe(true);
+    expect(pressed(host)).toEqual(["false", "true"]);
+    expect(await shiftEnter(buttons(host)[1])).toBe(true);
+    expect(pressed(host)).toEqual(["true", "true"]);
+  });
+
+  it("says so in the live region where it shows all instead of nothing", async () => {
+    const host = await render({ initialView: { hidden: ["A"] } });
+    await click(buttons(host)[1]);
+    expect(pressed(host)).toEqual(["true", "true"]);
+    expect(live(host)).toBe("Nothing would be left to see, so every series is shown.");
+  });
+
+  it("says so for a setter too, in the chart's wording", async () => {
+    let parts: ChartParts<Row> | null = null;
+    const host = await render({ wording: GERMAN_CHARTS_WORDING, seen: (p) => (parts = p) });
+    await act(async () => parts!.showOnly("A"));
+    expect(live(host)).toBe("");
+    await act(async () => parts!.toggleSeries("A"));
+    expect(parts!.hidden).toEqual([]);
+    expect(live(host)).toBe("Sonst wäre nichts mehr zu sehen, darum werden alle Serien gezeigt.");
+  });
+
+  it("names Shift+Enter in the plot's key help", async () => {
+    const host = await render();
+    await act(() => new Promise<void>((r) => setTimeout(r, 150)));
+    const id = host.querySelector(".uc-plot")?.getAttribute("aria-describedby");
+    expect(document.getElementById(id ?? "")?.textContent).toContain("Shift+Enter shows only it");
   });
 });
 
@@ -157,5 +244,13 @@ describe("A state band's entries", () => {
     await click(buttons(r.host)[1]);
     expect(parts!.hidden).toEqual(["Van"]);
     expect(pressed(r.host)).toEqual(["false", "false", "true"]);
+  });
+
+  it("show only the band on a double click, by its name", async () => {
+    let parts: ChartParts<Row> | null = null;
+    const r = await renderChart(<Bands seen={(p) => (parts = p)} />);
+    unmount = r.unmount;
+    await doubleClick(buttons(r.host)[0]);
+    expect(parts!.hidden).toEqual(["A"]);
   });
 });

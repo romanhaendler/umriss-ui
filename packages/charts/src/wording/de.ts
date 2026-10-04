@@ -16,7 +16,9 @@ export const GERMAN_CHARTS_WORDING: ChartsWording = {
   percent: (value) => `${value} %`,
   walkHelp:
     "Pfeil links und rechts gehen durch die Werte, Pfeil hoch und runter wechseln die Serie, Pos1 und Ende springen zum ersten und letzten Wert, Escape hebt die Markierung auf.",
-  zoomHelp: "Plus und Minus zoomen, Umschalt mit Pfeil links oder rechts verschiebt, 0 zeigt alles.",
+  zoomHelp: "Plus und Minus zoomen, Umschalt mit Pfeil links oder rechts verschiebt, 0 kehrt zum eigenen Bereich der Achse zurück.",
+  legendHelp: "In der Legende blendet Enter eine Serie aus oder ein, Umschalt+Enter zeigt nur sie.",
+  allShown: "Sonst wäre nichts mehr zu sehen, darum werden alle Serien gezeigt.",
   showData: "Daten zeigen",
   hideData: "Daten verbergen",
   positionColumn: "Position",

@@ -50,30 +50,34 @@ export function onlyKnown(
   };
 }
 
-/** The hidden names after `names` are toggled among the chart's series - by
-    name, `undefined` for one without: shown together where every one is
-    hidden, hidden together otherwise. Never every series: where nothing would
-    be left to see, all are shown instead. */
-export function toggleHidden(
-  hidden: readonly string[],
-  names: readonly string[],
-  series: readonly (string | undefined)[],
-): string[] {
+/** The hidden names after `names` are toggled: shown together where every
+    one is hidden, hidden together otherwise. */
+export function toggleHidden(hidden: readonly string[], names: readonly string[]): string[] {
   const show = names.every((name) => hidden.includes(name));
-  const next = show ? hidden.filter((name) => !names.includes(name)) : [...new Set([...hidden, ...names])];
-  return leftVisible(next, series);
+  return show ? hidden.filter((name) => !names.includes(name)) : [...new Set([...hidden, ...names])];
 }
 
-/** The hidden names that show only the series named `name` - all, where no
-    series carries it. */
-export function showOnly(name: string, series: readonly (string | undefined)[]): string[] {
-  const others = series.filter((one): one is string => one !== undefined && one !== name);
-  return leftVisible([...new Set(others)], series);
+/** The hidden names that show only the series `names` among the chart's
+    series - by name, `undefined` for one without. */
+export function showOnly(names: readonly string[], series: readonly (string | undefined)[]): string[] {
+  return [...new Set(series.filter((one): one is string => one !== undefined && !names.includes(one)))];
 }
 
-/** `hidden`, unless it hides every series: then none. */
-function leftVisible(hidden: string[], series: readonly (string | undefined)[]): string[] {
-  return series.every((one) => one !== undefined && hidden.includes(one)) ? [] : hidden;
+/** Whether `names` are the only series visible already - a legend gesture
+    then shows all. A series without a name does not count: it cannot be
+    hidden. */
+export function onlyVisible(
+  names: readonly string[],
+  hidden: readonly string[],
+  series: readonly (string | undefined)[],
+): boolean {
+  return series.every((one) => one === undefined || names.includes(one) !== hidden.includes(one));
+}
+
+/** Whether `hidden` hides every series - which nothing may do but a view
+    handed in: where it would, all are shown instead. */
+export function hidesAll(hidden: readonly string[], series: readonly (string | undefined)[]): boolean {
+  return series.length > 0 && series.every((one) => one !== undefined && hidden.includes(one));
 }
 
 /** How long a view reported may take to come back as `initialView`. */

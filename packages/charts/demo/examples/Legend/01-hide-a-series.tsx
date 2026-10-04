@@ -82,7 +82,7 @@ function metrics(serviceId: string): MetricPoint[] {
 }
 
 export const title = "Hide a series from the legend";
-export const lead = "A click on an entry hides its series and shows it again, through the chart's view - no state of yours; `showOnly` and `showAllSeries` on the hook do the same from your own buttons.";
+export const lead = "A click on an entry hides its series and shows it again, through the chart's view - no state of yours. A double click, Alt/⌥+click or Shift+Enter shows only it, and on the only one visible all again; `showOnly` and `showAllSeries` on the hook do the same from your own buttons.";
 
 const SERIES = [
   { name: "Checkout", data: metrics("checkout") },

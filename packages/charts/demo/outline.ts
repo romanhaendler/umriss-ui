@@ -264,11 +264,19 @@ export const OUTLINE: readonly Rubric[] = [
       {
         id: "legend",
         name: "Legend",
-        sentence: "What the colours mean (a key), and a switch for every series: a click hides it and shows it again.",
+        sentence: "What the colours mean (a key), and a switch for every series: a click hides it and shows it again, a double click shows only it (a solo).",
         about: [
           "The legend toggles by default: every entry of a named series is a button that says whether its series is shown. The hidden series are part of the chart's view, by `name` - no state of yours, and kept like the rest of the view, on [View](#/view). A series without a name cannot be hidden; its entry only explains.",
-          "A hidden series leaves the drawing, the y extent and the keys' walk; its entry stays, struck through, and keeps its colour, so showing it again moves nothing else. Nothing hides every series: hiding the last one visible shows all. A state band's entries are its states, and any of them hides the whole band.",
+          "A double click, Alt/⌥+click or Shift+Enter on an entry shows only its series; on the only one visible, all again. A click acts at once rather than wait for a second, so a double click first toggles the series and back - its result is the same either way.",
+          "A hidden series leaves the drawing, the y extent and the keys' walk; its entry stays, struck through, and keeps its colour, so showing it again moves nothing else. Nothing hides every series: what would shows all instead. A state band's entries are its states, and any of them hides or shows only the whole band.",
           "On the hook, `hidden`, `toggleSeries(name)`, `showOnly(name)` and `showAllSeries()` do the same from your own controls.",
+        ],
+        keys: [
+          { key: "Enter Space", action: "Hide the entry's series, or show it again." },
+          { key: "Shift+Enter", action: "Show only the entry's series; on the only one visible, all again." },
+        ],
+        accessibility: [
+          "Every entry of a named series is a button whose `aria-pressed` says whether its series is shown, and the plot's summary names Shift+Enter. Where a click, a gesture or a setter would leave nothing visible and shows all instead, the chart's polite live region says so.",
         ],
         keysOf: ["chart"],
         types: ["LegendProps"],

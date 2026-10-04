@@ -98,6 +98,7 @@ Screenshot pages carry their name in brackets.
 | `zoomLimits: { min, max }` keeps a zoom's span between the two; without them at most the data's extent and at least three data steps (the smallest distance between neighbouring points); no zoom reaches a span of no width | component-view Q12 | Unit (view), Unit (jsdom zoom keys, scene frame) |
 | Charts in step: one shared view as every chart's `initialView` and `onViewChange` | component-view Q14 | Unit (jsdom zoom keys), Interaction (cursor sync) |
 | The hidden series are the view's `hidden`, by `name`; `hidden`, `toggleSeries(name)`, `showOnly(name)` and `showAllSeries()` on the hook; a name no series carries falls out, and comes back hidden with its series | ADR-0047, component-view Q10, Q22 | Unit (view, jsdom legend toggle) |
+| The legend's gestures: a click toggles at once; a double click, Alt+click or Shift+Enter shows only that series (a state's entry: its bands), on the only one visible all; whatever would hide every series shows all, and the polite live region says so (`allShown`); the plot's summary names Shift+Enter (`legendHelp`) | component-view 03 | Unit (view, jsdom legend toggle), Interaction (legend's gestures) |
 | A view kept outlives a reload and is restored by handing it back | ADR-0047, component-view Q20 | Interaction (`keep-and-restore`) |
 
 ## The layout engine

@@ -607,6 +607,30 @@ test("a view kept outlives a reload and comes back on restore", async ({ page })
   await expect(billing()).toHaveAttribute("aria-pressed", "true");
 });
 
+/* component-view 03: a double click, Alt+click and Shift+Enter show only an
+   entry's series, and all on the only one visible - in a real browser, whose
+   double click arrives as two clicks first. */
+
+test("the legend's gestures show only a series, and all again", async ({ page }) => {
+  await openExample(page, "legend", "hide-a-series");
+  const example = page.locator('[data-example="hide-a-series"]');
+  const entries = example.locator("button.uc-legend-item");
+  const pressed = () => entries.evaluateAll((all) => all.map((b) => b.getAttribute("aria-pressed")));
+  const entry = (name: string) => example.getByRole("button", { name, exact: true });
+  await expect.poll(pressed).toEqual(["true", "true", "false"]);
+
+  await entry("Billing").dblclick();
+  await expect.poll(pressed).toEqual(["false", "true", "false"]);
+  await entry("Billing").dblclick();
+  await expect.poll(pressed).toEqual(["true", "true", "true"]);
+
+  await entry("Checkout").focus();
+  await page.keyboard.press("Shift+Enter");
+  await expect.poll(pressed).toEqual(["true", "false", "false"]);
+  await entry("Checkout").click({ modifiers: ["Alt"] });
+  await expect.poll(pressed).toEqual(["true", "true", "true"]);
+});
+
 /* charts-a11y: the chart as one tab stop (ADR-0030). */
 
 test("Tab reaches the plot, and the keys walk its Active point", async ({ page }) => {
