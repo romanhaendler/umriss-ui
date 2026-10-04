@@ -225,23 +225,23 @@ export function find<K extends Candidate>(
      2 keyword. */
   const funde: { tier: number; find: Find<K> }[] = [];
   for (const kandidat of kandidaten) {
-    const gewicht = kandidat.gewicht ?? 0;
+    const weight = kandidat.gewicht ?? 0;
     const imNamen = findInName(wanted, kandidat.name);
     if (imNamen !== null) {
-      funde.push({ tier: 0, find: { kandidat, rank: imNamen.rank + gewicht, finds: imNamen.finds } });
+      funde.push({ tier: 0, find: { kandidat, rank: imNamen.rank + weight, finds: imNamen.finds } });
       continue;
     }
     const inDerGruppe =
       kandidat.gruppe === undefined ? null : findInName(wanted, kandidat.gruppe);
     if (inDerGruppe !== null) {
-      funde.push({ tier: 1, find: { kandidat, rank: inDerGruppe.rank + gewicht, finds: [] } });
+      funde.push({ tier: 1, find: { kandidat, rank: inDerGruppe.rank + weight, finds: [] } });
       continue;
     }
     if (
       searchesKeywords &&
       kandidat.keywords?.some((keyword) => keyword.toLowerCase().includes(lowerWanted))
     ) {
-      funde.push({ tier: 2, find: { kandidat, rank: gewicht, finds: [] } });
+      funde.push({ tier: 2, find: { kandidat, rank: weight, finds: [] } });
     }
   }
 
