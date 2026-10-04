@@ -100,6 +100,7 @@ export const OUTLINE: readonly Rubric[] = [
         sentence: "Look closer at a stretch of a long series and move along it (zoom, pan, a viewport), by wheel, pinch, drag or key, and keep several charts on the same stretch.",
         about: [
           "`zoomable` on an x axis turns the gestures and keys on; nothing else is needed. The span shown is part of the chart's view (ADR-0047): `useChart(rows, { initialView, onViewChange })` takes a start and reports every change, whole, at most once per frame; `domains` and `setDomain(axisId, span | null)` stand on what the hook returns. A lone x axis is `\"x\"`.",
+          "Once an axis is zoomed, the chart offers 'Show all' over a corner of its plot - a button of its own, a tab stop beside the plot's, that brings every zoomed axis back and goes. Its words are the wording's `showAll`.",
           "Charts stay in step by handing each other what they report: one `useState` for the view, its value as every chart's `initialView` and its setter as every `onViewChange`. A view equal to the one a chart reported itself changes nothing, so a pan does not jump back. `syncId` shares only the pointer.",
           "A zoom stops at `zoomLimits`; without them at three readings and at the data's extent. A y axis with `domain=\"visible\"` follows the stretch shown.",
         ],

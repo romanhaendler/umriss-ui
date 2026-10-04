@@ -2481,7 +2481,7 @@ export class ChartScene {
     const at = this.hover?.hit.xPx ?? plot.x + plot.width / 2;
     if (event.key === "+" || event.key === "=") this.zoomAt(at, 1 / KEY_ZOOM);
     else if (event.key === "-" || event.key === "_") this.zoomAt(at, KEY_ZOOM);
-    else if (event.key === "0") this.doubleClick();
+    else if (event.key === "0") this.resetZoom();
     else if (event.shiftKey && (event.key === "ArrowLeft" || event.key === "ArrowRight"))
       this.panBy(((event.key === "ArrowLeft" ? 1 : -1) * plot.width) / 10);
     else return false;
@@ -3242,8 +3242,9 @@ export class ChartScene {
     return a === undefined || b === undefined ? 0 : Math.abs(a - b);
   }
 
-  /** Every zoomable axis back to its own domain. */
-  doubleClick(): void {
+  /** Every zoomable axis back to its own domain: a double click, the key 0
+      and 'Show all'. */
+  resetZoom(): void {
     if (!this.hasZoom()) return;
     const ids = new Set(this.zoomAxisIds());
     this.domainsInView = Object.fromEntries(Object.entries(this.domainsInView).filter(([id]) => !ids.has(id)));

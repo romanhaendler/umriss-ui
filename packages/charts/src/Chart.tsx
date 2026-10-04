@@ -16,12 +16,14 @@
 import {
   useEffect,
   useId,
+  useLayoutEffect,
   useMemo,
   useRef,
   useSyncExternalStore,
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
+  type RefObject,
 } from "react";
 import { ChartContext } from "./context";
 import type { ChartScene } from "./scene";
@@ -282,7 +284,7 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
           }}
           onPointerUp={(e) => scene.pointerUp(e.nativeEvent)}
           onPointerCancel={(e) => scene.pointerUp(e.nativeEvent)}
-          onDoubleClick={() => scene.doubleClick()}
+          onDoubleClick={() => scene.resetZoom()}
           onPointerLeave={(e) => {
             if (e.pointerType !== "touch") scene.pointerLeave();
           }}
@@ -292,6 +294,7 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
           <AxesHtml scene={scene} empty={empty} />
           <TooltipHtml scene={scene} />
         </div>
+        <ShowAll scene={scene} plotRef={plotRef} label={wording.showAll} />
         {/* What a screen reader hears (charts-a11y 03): the readout after a
             key, and the summary the plot is described by. Beside the plot,
             not in it: an image's descendants are presentational. */}
@@ -300,6 +303,78 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
         {children}
       </div>
     </ChartContext.Provider>
+  );
+}
+
+/** 'Show all' (component-view 04): while a zoomable x axis shows less than
+    its own domain, a quiet control brings every zoomed axis back. It stands
+    beside the plot, not in it - a tab stop of its own outside the plot's
+    application role -, laid over the corner of the plot area away from a
+    legend or data key above it. */
+function ShowAll({ scene, plotRef, label }: { scene: ChartScene; plotRef: RefObject<HTMLDivElement | null>; label: string }): ReactNode {
+  const zoomed = useSyncExternalStore(
+    scene.subscribeView,
+    () => scene.getView().domains !== undefined,
+    () => false,
+  );
+  const snapshot = useSyncExternalStore(scene.subscribeLayout, scene.getLayoutSnapshot, scene.getLayoutServerSnapshot);
+  const { plot } = snapshot.layout;
+  if (!zoomed || plot.width <= 0) return null;
+  // A legend above the plot - or the data key's line where there is none.
+  const top = snapshot.legend === null ? snapshot.dataTable !== null : snapshot.legend.placement === "top";
+  return (
+    <ShowAllButton
+      scene={scene}
+      plotRef={plotRef}
+      label={label}
+      // In the plot's coordinates; the plot's own offset in the root is added
+      // where it is known.
+      x={plot.x + plot.width}
+      y={top ? plot.y + plot.height : plot.y}
+      bottom={top}
+    />
+  );
+}
+
+function ShowAllButton(props: {
+  scene: ChartScene;
+  plotRef: RefObject<HTMLDivElement | null>;
+  label: string;
+  x: number;
+  y: number;
+  bottom: boolean;
+}): ReactNode {
+  const { scene, plotRef, label, x, y, bottom } = props;
+  const ref = useRef<HTMLButtonElement | null>(null);
+
+  // Where the plot stands in the root depends on a legend above it.
+  useLayoutEffect(() => {
+    const button = ref.current;
+    const plotEl = plotRef.current;
+    if (button === null || plotEl === null) return;
+    button.style.left = `${plotEl.offsetLeft + x}px`;
+    button.style.top = `${plotEl.offsetTop + y}px`;
+  });
+
+  // Gone with the focus, it hands the focus to the plot - before it leaves
+  // the document, while it still knows that it had it.
+  useLayoutEffect(() => {
+    const button = ref.current;
+    const plotEl = plotRef.current;
+    return () => {
+      if (button !== null && button.ownerDocument.activeElement === button) plotEl?.focus();
+    };
+  }, [plotRef]);
+
+  return (
+    <button
+      ref={ref}
+      type="button"
+      className={bottom ? "uc-show-all uc-show-all-bottom" : "uc-show-all"}
+      onClick={() => scene.resetZoom()}
+    >
+      {label}
+    </button>
   );
 }
 

@@ -367,6 +367,49 @@
     opacity: 0.3;
   }
 
+  /* ---------------- Show all (component-view 04) ---------------- */
+
+  /* Over the plot area's corner, its position measured inline (top right; at
+     the bottom where a legend stands above). Quiet - the tooltip's surface,
+     the legend entry's states -, under the tooltip and the data table. */
+  .uc-show-all {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    translate: calc(-100% - 6px) 6px;
+    padding: 2px 8px;
+    border: 1px solid var(--uc-color-axis);
+    border-radius: var(--uc-radius);
+    background: var(--uc-color-bg);
+    font: inherit;
+    font-size: var(--uc-size-tick);
+    line-height: var(--uc-leading-text);
+    color: var(--uc-color-text);
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      background-color var(--uc-transition-state),
+      box-shadow var(--uc-transition-state);
+  }
+
+  .uc-show-all-bottom {
+    translate: calc(-100% - 6px) calc(-100% - 6px);
+  }
+
+  .uc-show-all:hover {
+    background: var(--uc-color-hover);
+  }
+
+  .uc-show-all:active {
+    background: var(--uc-color-pressed);
+  }
+
+  .uc-show-all:focus-visible {
+    outline: 2px solid transparent;
+    box-shadow: var(--uc-focus-ring);
+  }
+
   /* ---------------- Data table (charts-alternatives 01) ---------------- */
 
   /* The key closes the legend's line, apart from the entries it does not
@@ -399,7 +442,8 @@
     box-shadow: var(--uc-focus-ring);
   }
 
-  .uc-root:has(> .uc-data-panel) > .uc-plot {
+  .uc-root:has(> .uc-data-panel) > .uc-plot,
+  .uc-root:has(> .uc-data-panel) > .uc-show-all {
     visibility: hidden;
   }
 
@@ -519,7 +563,8 @@
 
   @media (prefers-reduced-motion: reduce) {
     .uc-tooltip,
-    button.uc-legend-item {
+    button.uc-legend-item,
+    .uc-show-all {
       transition: none;
     }
   }

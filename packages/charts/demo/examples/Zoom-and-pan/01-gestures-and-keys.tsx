@@ -97,7 +97,7 @@ function week(serviceId: string, step: number): MetricPoint[] {
 }
 
 export const title = "Gestures and keys";
-export const lead = "With `zoomable` the x axis zooms on Ctrl or ⌘ with the wheel, a pinch or + and −, pans on a drag or Shift with the arrows, and goes back on a double click or 0 - without a line of state of yours.";
+export const lead = "With `zoomable` the x axis zooms on Ctrl or ⌘ with the wheel, a pinch or + and −, pans on a drag or Shift with the arrows, and goes back on a double click, 0 or 'Show all' - without a line of state of yours.";
 
 const SEARCH_WEEK = week("search", 60_000);
 
