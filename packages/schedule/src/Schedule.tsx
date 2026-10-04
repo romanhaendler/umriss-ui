@@ -397,17 +397,20 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
      onto a second line in a folded group's row, the counts give way - all of
      them, so that the heads of one column read alike. On a phone the column
      is a hundred pixels, and "2 lanes" kept its width while the name shrank to
-     "De…". Measured, since only the rendered name knows its
-     width - anew whenever the column, the rows or the count's wording change
-     ("2 Bahnen" is wider than "2 lanes"), and once the fonts are in. `hidden`
-     is not React's here, so a render leaves it alone. */
+     "De…". Measured, since only the rendered name knows its width - anew
+     whenever the column changes size or anything it renders changes (a row,
+     a name, the count's wording: "2 Bahnen" is wider than "2 lanes"), and
+     once the fonts are in. Observed rather than keyed: a key names what the
+     fit hangs on, and misses what it forgets. `hidden` is an attribute, which
+     the observer leaves out, and not React's, so a render leaves it alone. */
   const headersRef = useRef<HTMLDivElement | null>(null);
-  const fitKey = `${snapshot.width}|${snapshot.headers.map((header) => `${header.key}:${header.kind}:${typeof header.label === "string" ? header.label : ""}:${header.kind === "lane" ? "" : wording.scheduleLaneCount(header.lanes)}`).join("|")}`;
   useLayoutEffect(() => {
+    const column = headersRef.current;
+    if (column === null) return;
     let live = true;
     const fit = () => {
       if (!live) return;
-      const counts = [...(headersRef.current?.querySelectorAll<HTMLElement>("[data-lane-count]") ?? [])];
+      const counts = [...column.querySelectorAll<HTMLElement>("[data-lane-count]")];
       for (const count of counts) count.hidden = false;
       const cut = counts.some((count) => {
         const name = count.previousElementSibling;
@@ -419,10 +422,16 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps>(function Sched
     };
     fit();
     void document.fonts?.ready.then(fit);
+    const resized = new ResizeObserver(fit);
+    resized.observe(column);
+    const changed = new MutationObserver(fit);
+    changed.observe(column, { childList: true, characterData: true, subtree: true });
     return () => {
       live = false;
+      resized.disconnect();
+      changed.disconnect();
     };
-  }, [fitKey]);
+  }, []);
   const refused = useMemo(() => new Set(ghost?.refusedLanes ?? []), [ghost?.refusedLanes]);
 
   /* The ghost's label stands above its bar, and under it in the topmost lane:
