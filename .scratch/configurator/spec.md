@@ -1,13 +1,13 @@
 # Spec: A configurator for the ten simplest core components
 
-Status: done
+Status: ready-for-agent
 
 Origin: session of 2-3 Oct 2026. The brief, in the words it was given in: "Unsere Demo-Seite gefällt mir noch immer nicht zu 100%. ... State of the Art, sehr einladend, alles entdecken und benutzen zu wollen. Keine offenen Fragen." Research and gap analysis: `docs/research/component-docs-2026-10/` (six notes: landing_pages, component_api_reference, discoverability_interactivity, data_library_docs, asis_site_ux, asis_props_types). Roadmap of all sixteen specs: `.scratch/docs-roadmap/spec.md`.
 
 Builds on: `.scratch/demo-as-documentation/spec.md` (examples are files, code collapsed, no sandbox — all of which stay), `.scratch/demo-rework/spec.md` (the first example stands without a heading, as the component at rest), ADR-0041 (a control's size and the `ControlSizeProvider`).
 Blocked by: `types-without-holes` (S3) — the controls are derived from resolved literal unions and from `@default`, which S3 delivers.
 ADR: none.
-Tickets: `issues/01`–`02`; each names its blockers. The order across specs is in `.scratch/docs-roadmap/spec.md`.
+Tickets: `issues/01`–`03`; each names its blockers. The order across specs is in `.scratch/docs-roadmap/spec.md`.
 
 ## Problem Statement
 
