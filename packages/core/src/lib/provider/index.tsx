@@ -19,7 +19,7 @@
 
 import { useContext, useMemo } from "react";
 import type { ReactNode } from "react";
-import { LanguageProvider } from "../language";
+import { LanguageProvider, useLanguage } from "../language";
 import type { LanguageOptions } from "../language";
 import { UmrissContext } from "./context";
 import type { UmrissContextValue } from "./context";
@@ -124,7 +124,11 @@ export interface UmrissProviderProps {
   /** The setting for toasts: the display duration where the individual toast
       names none, where they stand, and how many stand at once. */
   toast?: ToastConfig;
-  /** Formats and wording, entry by entry - see [Language](#/language). */
+  /**
+   * Formats and wording, entry by entry - see [Language](#/language).
+   *
+   * @default none - the surrounding language holds, English at the root
+   */
   language?: LanguageOptions;
   /** The subtree the settings apply to. */
   children: ReactNode;
@@ -144,6 +148,11 @@ export function UmrissProvider({
   language,
   children,
 }: UmrissProviderProps) {
+  /* Without a language of its own the provider passes the surrounding one on,
+     so a nested provider for a toast or a portal target does not reset the
+     subtree to English; the element stays the same, so the subtree is not
+     remounted when `language` comes or goes. */
+  const outer = useLanguage();
   const value = useMemo<UmrissContextValue>(
     () => ({
       density: density ?? "comfortable",
@@ -156,7 +165,10 @@ export function UmrissProvider({
 
   return (
     <UmrissContext.Provider value={value}>
-      <LanguageProvider formats={language?.formats} wording={language?.wording}>
+      <LanguageProvider
+        formats={language ? language.formats : outer.formats}
+        wording={language ? language.wording : outer.wording}
+      >
         {children}
       </LanguageProvider>
     </UmrissContext.Provider>

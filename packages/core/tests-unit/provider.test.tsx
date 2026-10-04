@@ -238,6 +238,17 @@ describe("Wording through the root provider", () => {
     );
     expect(screen.getByLabelText("Loading")).toBeTruthy();
   });
+
+  it("leaves the surrounding language in place when a nested provider names none", () => {
+    render(
+      <UmrissProvider language={{ wording: { clearInput: "Eingabe leeren" } }}>
+        <UmrissProvider toast={{ duration: 1000 }}>
+          <Input value="etwas" onChange={() => {}} clearable onClear={() => {}} />
+        </UmrissProvider>
+      </UmrissProvider>,
+    );
+    expect(screen.getByLabelText("Eingabe leeren")).toBeTruthy();
+  });
 });
 
 /* Reads the density the way a component with a density of its own reads it. */

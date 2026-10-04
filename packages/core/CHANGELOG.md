@@ -99,6 +99,14 @@ commit.
   same index, in place of the appendix "The rest of the API". The library is
   unchanged.
 
+### Changed
+
+- **An `UmrissProvider` without `language` keeps the surrounding language**
+  instead of resetting its subtree to English. A provider nested for a toast,
+  a portal target or a density no longer undoes the wording and the formats
+  of an outer `UmrissProvider` or `LanguageProvider`. At the root, without a
+  provider around it, English holds as before.
+
 ## 0.24.0 – The select's own list (Oct. 2026)
 
 ### Changed
