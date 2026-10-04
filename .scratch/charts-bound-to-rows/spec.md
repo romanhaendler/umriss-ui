@@ -25,6 +25,7 @@ chart. The schedule is a third shape again: a component with a ref handle.
 | Q18 | Hook options vs props | `useChart(rows, { initialView, onViewChange })`; `<Chart>` keeps `ariaLabel`, `height`, `width`, `padding`, `wording`, `encoding`, `syncId`, `empty`, `onPerf`. `data` leaves `<Chart>`. |
 | Q7 | The schedule | `useSchedule(options)` returns `Schedule` and its parts with the view and its setters (shape in `component-view`); it binds no row type, the model types are the library's. |
 | Q11 | Migration | The old shape is removed, not deprecated. |
+| Q27 | Matrix naming (2026-10-04, after 02) | `value` is the y position on every series kind, Matrix included; Matrix's colour channel, `value` until now, becomes `level`. |
 
 ## Solution
 
