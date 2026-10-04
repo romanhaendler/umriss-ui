@@ -4,7 +4,7 @@ Status: ready-for-agent
 Blocked by: `configurator` 03 (Every core page that can be configured opens with a configurator)
 Spec: `.scratch/props-to-examples/spec.md`
 
-**What to build:** Carry out the owner-approved triage in `.scratch/props-to-examples/unshown-triage.md` (4 Oct 2026). Per package, in its own worktree (core, charts, table, schedule):
+**What to build:** Carry out the owner-approved triage in `.scratch/props-to-examples/unshown-triage.md` (4 Oct 2026). First, once: teach the coverage scan to count a configurator's `controls` (declared as prop names in `demo/configurators/*.tsx`) against its `<Component>Props`, so a prop a configurator sets counts as shown; then remove the entries the configurators of `configurator` 03 show. Then per package, in its own worktree (core, charts, table, schedule):
 
 - **Missing** entries get the example or extension the triage sketches. Before writing one, check whether `configurator` 03 already shows the prop (a configurator's use counts); if so, only remove the entry.
 - **Charts axes (owner's decision):** one new Axis example binds several series kinds (line, area, bar, scatter …) to a second y axis, so the twin entries `xAxisId`/`yAxisId` per series kind are shown for real, not excepted. Category (f) stays for the remaining twins.
