@@ -18,6 +18,40 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Oct. 2026 — Every export explained
+
+- **The documentation site, sixteen specs** (`.scratch/docs-roadmap/`;
+  ADR-0044, ADR-0045, ADR-0046; `@umriss-ui/core` 0.25.0, `@umriss-ui/charts`
+  0.10.0, `@umriss-ui/table` 0.12.0, `@umriss-ui/schedule` 0.4.0,
+  `@umriss-ui/calculation` 0.5.0). Asked for by the user: the site worked but
+  did not invite, not every prop was explained by an example, not every type
+  stated and defined - "Keine offenen Fragen." Researched first
+  (`docs/research/component-docs-2026-10/`): the site was stronger inside than
+  outside - every prop described, but 19 % typed with a library type defined
+  nowhere on the site, 13 % with a default shown, no signature for 16 hooks
+  and 91 functions, no list of 145 tokens or 288 wording keys. What came of
+  it: five demos as one site under one header, and a front page with a picture
+  per package; a comment on every export and a `@default` for every default,
+  both held by the gate; every type a props table names importable or defined
+  on its page; every props row linked to the examples that show it, the build
+  stopping at a prop shown nowhere unless its package's `demo/unshown.json`
+  lists it (155 rows, a list that only shrinks); an API index per package;
+  every token and wording key listed, the tokens named the styling API; one
+  search across the five packages; a Markdown twin and "Copy page" on every
+  page; English and German at a switch in four demos; the design language,
+  the standards, the non-goals and the changelogs as pages; configurators on
+  ten core pages; keys and accessibility on every page that takes them; a
+  drawer for the sidebar on a phone.
+- **What the site asked of the packages.** The command palette took
+  `keywords`, `maxFinds` and `searchedGroup` to carry the site's search: fifty
+  finds at most with a line for the rest, and a package's name no longer
+  finding all of it. A nested `UmrissProvider` without `language` reset its
+  subtree to English; it keeps the language around it now (core's Changed). A
+  schedule group's lane count stayed fitted to the old wording after a switch
+  to German; it is measured anew whenever the header column changes.
+  `RowActions` takes `pin`, and the `llms-full.md` of table, schedule and
+  calculation names the peers in its install line.
+
 ## Oct. 2026 — Found as umriss-ui, shown with a picture
 
 - **Search Console holds the site** (`.scratch/search-visibility/` D11): the

@@ -146,12 +146,15 @@ stylesheets by hand.
 * The demo: <https://romanhaendler.github.io/umriss-ui/table/>, or locally
   `pnpm dev:table` (port 4175). It is the documentation — one page per
   feature, each with running examples and their source, and the props tables
-  generated from `src/` where a page documents a type.
+  generated from `src/` where a page documents a type, each prop linked to the
+  examples that show it. An API index lists every export, one search finds
+  across all five packages, and the header switches the examples to German.
 * [`CHANGELOG.md`](CHANGELOG.md) — what changes for a caller.
 * **For a coding agent**: `docs/llms-full.md` inside the installed package —
   the demo as one Markdown file, pinned to the installed version: every page
   with its examples' source, its props tables and why it is built as it is,
-  and the declaration of every other export. Online, for the latest version:
+  and an index of every export with its comment and its declaration. Each
+  page also has a Markdown twin online; for the latest version:
   <https://romanhaendler.github.io/umriss-ui/table/llms.txt>.
 * [`../../docs/design-language.md`](../../docs/design-language.md) — the design
   language all five packages share.

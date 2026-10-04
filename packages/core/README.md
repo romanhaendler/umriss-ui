@@ -15,10 +15,14 @@ pnpm add @umriss-ui/core
 ```
 
 The demo is the documentation: <https://romanhaendler.github.io/umriss-ui/core/>.
+Every prop of a props table is linked to the examples that show it, ten pages
+open with a configurator, an API index lists every export, one search finds
+across all five packages, and the header switches the examples to German.
 For a coding agent the same material stands as one Markdown file inside the
 installed package, `docs/llms-full.md`, pinned to that version — every page
 with its examples' source, its props tables and why it is built as it is, and
-the declaration of every other export; online, for the latest version,
+an index of every export with its comment and its declaration; each page also
+has a Markdown twin; online, for the latest version,
 <https://romanhaendler.github.io/umriss-ui/core/llms.txt>.
 In an application:
 
@@ -88,7 +92,9 @@ import { GERMAN_WORDING } from "@umriss-ui/core/wording/de";
 ```
 
 Both objects are typed `Wording`, so a missing entry is a compile error rather
-than a gap that shows up in the interface (ADR-0018, ADR-0019).
+than a gap that shows up in the interface (ADR-0018, ADR-0019). An
+`UmrissProvider` without `language`, nested for a toast or a density, keeps the
+language around it.
 
 The formats — dates, numbers, durations — are a seam of their own. The default
 is English notation on a 24-hour clock (`17/03/2026`, `09:05`, `1,234.5`), and
@@ -150,7 +156,7 @@ The table and the alarm list are not part of this package. They live in
 | `Popover` | the one closable, anchored surface underneath Menu, Combobox and the pickers: portal (nearest `<dialog>`, then the portal target, then the body), position with flipping above and below and across its trigger's edges, a panel that fits nowhere cut to the larger side instead of laid over its trigger, clamping as the last resort, never larger than the window (it scrolls in itself beyond that), outside click, Escape with focus returned |
 | `TreeView` / `TreeSearch` / `useTree` | a tree with exactly one active node and optional ticking (cascade, indeterminate, locked, unloaded); arrow keys, type to jump, range selection, virtualisation. The search keeps its term in the tree |
 | `Stat` | a metric: one value, read against its limits – the verdict as a word and a colour, the deviation from the target value, history and freshness |
-| `CommandPalette` / `useCommandPaletteShortcut` | a command palette: subsequence search with rank and highlighted finds, groups, a populated resting state; opens on Ctrl/⌘+K and `/` |
+| `CommandPalette` / `useCommandPaletteShortcut` | a command palette: subsequence search with rank and highlighted finds, groups, keywords a candidate is found by, at most `maxFinds` finds with a line for the rest, a populated resting state; opens on Ctrl/⌘+K and `/` |
 | `CrossGlyph` / `PlusGlyph` / `MinusGlyph` / `AngleGlyph` / `CalendarGlyph` / `ClockGlyph` / `GripGlyph` / `GridGlyph` / `MeasureGlyph` | the shared character set, one stroke width at one nominal size; specification in `docs/glyphs.md` |
 | `Sparkline` | a miniature history line with an area gradient and an accent end point – for trends in cells |
 | `Spinner` | a functional loading indicator |

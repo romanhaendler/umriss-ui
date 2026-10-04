@@ -29,20 +29,13 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
-## Unreleased
+## 0.10.0 – Every export explained (Oct. 2026)
+
+The package explains itself where it is used: every export carries a comment,
+every default a `@default` tag, and the demo lists all of it in an API index
+(ADR-0044). What a chart draws and does is unchanged.
 
 ### Added
-
-- **The Chart page says what a screen reader meets**: a section
-  Accessibility after Keyboard names the plot's role and name, the summary,
-  the readout after a key, the label to pass and what forced colours change.
-  Every other page with a chart in its examples - Installation, Axis, the
-  series, the limits, Tooltip & Legend and Benchmark as well as Line - has a
-  Keyboard section linking the Chart page's keys. In the demo, the Markdown
-  twins and `docs/llms-full.md`; the chart is unchanged.
-- **Every token listed**: core's Theming page lists the 29 `--uc-…` tokens
-  of the chart's root, with the core token each one takes, and the
-  Installation page links there. The tokens themselves are unchanged.
 
 - **Every export carries a comment**, the German wording's included: what a
   component, a function, a constant or a type is for. The editor shows it on
@@ -53,10 +46,6 @@ interface was still expected to move before `0.3.0`.
   else changes.
 - **A prop's comment cites no requirement number**: "Binding to a y axis."
   ends there; the number stands in a `@remarks` tag. Nothing else changes.
-- **`docs/llms-full.md` defines every type a props table names**: a type
-  without a table of its own (`Accessor`, `MatrixColoring`) stands under
-  "Types on this page" of each page that names it, with its comment and its
-  members or its declaration.
 - **The demo has an API index**: `/charts/api/`, the last entry of the
   sidebar, lists every export of `@umriss-ui/charts` and of
   `@umriss-ui/charts/wording/de` under its import path, grouped as components,
@@ -67,6 +56,22 @@ interface was still expected to move before `0.3.0`.
   its text or its import line, leads to its entry. `docs/llms-full.md` ends
   with the same index, in place of the appendix "The rest of the API". The
   library is unchanged.
+- **`docs/llms-full.md` defines every type a props table names**: a type
+  without a table of its own (`Accessor`, `MatrixColoring`) stands under
+  "Types on this page" of each page that names it, with its comment and its
+  members or its declaration.
+- **Every token listed**: core's Theming page lists the 29 `--uc-…` tokens
+  of the chart's root, with the core token each one takes, and the
+  Installation page links there. The tokens themselves are unchanged.
+- **The Chart page says what a screen reader meets**: a section
+  Accessibility after Keyboard names the plot's role and name, the summary,
+  the readout after a key, the label to pass and what forced colours change.
+  Every other page with a chart in its examples - Installation, Axis, the
+  series, the limits, Tooltip & Legend and Benchmark as well as Line - has a
+  Keyboard section linking the Chart page's keys. In the demo, the Markdown
+  twins and `docs/llms-full.md`; the chart is unchanged.
+
+---
 
 ## 0.9.0 – A box plot (Oct. 2026)
 
