@@ -303,7 +303,16 @@ export const OUTLINE: readonly Rubric[] = [
 /* The page ids that changed, and where each stands now - an old link still
    lands. Installation was called "Getting started" until the five demos
    named their first page alike (.scratch/sidebar-tree). */
-export const MOVED: Moved = { "getting-started": "installation" };
+export const MOVED: Moved = {
+  "getting-started": "installation",
+  /* Examples that moved to the pages of the chart's view (component-view 01,
+     02): an old anchor still lands on its example. */
+  "axis/zoom-and-pan": "zoom-and-pan/gestures-and-keys",
+  "axis/visible-domain": "zoom-and-pan/visible-domain",
+  "chart/cursor-sync": "zoom-and-pan/cursor-sync",
+  "tooltip/toggling-legend": "legend/hide-a-series",
+  "tooltip/legend-placement": "legend/above-or-below",
+};
 
 /* The addresses follow from the outline; their format is known to the shell
    (`@umriss-ui/demo`, `outline.ts`) and to nobody else. */

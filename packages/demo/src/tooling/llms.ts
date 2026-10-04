@@ -585,8 +585,10 @@ export function renderLlms({ packageDir, outline: written, tables, moved = {}, r
   ];
 
   /* An old address forwards to the page it is now; `addresses` throws on a
-     moved id that collides or points nowhere. */
-  const forwarders = Object.entries(addresses(outline, moved).MOVED).map(([old, current]): Forwarder => {
+     moved id that collides or points nowhere. A moved example needs none: its
+     anchor never reaches the server, its old page still stands, and the app
+     forwards it there. */
+  const forwarders = Object.entries(addresses(outline, moved).MOVED).filter(([old]) => !old.includes("/")).map(([old, current]): Forwarder => {
     const to = sitePages.find((page) => page.path === addressOfPlace(`/${current}`).slice(1))!;
     return { url: urlOf(home, `/${old}`), to: to.url, title: to.title };
   });

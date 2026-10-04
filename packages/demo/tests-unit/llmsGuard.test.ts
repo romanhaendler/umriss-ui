@@ -107,7 +107,9 @@ describe.each(Object.keys(ENTRIES))("the llms-full.txt of %s", (dir) => {
     const index = sitePages.find((one) => one.path === "api/")!.html;
     for (const name of names) expect(index.includes(`id="${name}"`) || index.includes(`id="type-${name}"`), name).toBe(true);
     const [pages, onIndex] = full.split("\n## API index\n") as [string, string];
-    const components = names.filter((name) => names.includes(`${name}Props`));
+    /* A component a hook hands out (`useChart`, `useSchedule`) is no export
+       of its own; KNOWN names those. */
+    const components = [...names.filter((name) => names.includes(`${name}Props`)), ...KNOWN[dir]!.handed];
     expect(components.length).toBeGreaterThan(0);
     expect(missingFrom(pages, components)).toEqual([]);
 
@@ -120,10 +122,14 @@ describe.each(Object.keys(ENTRIES))("the llms-full.txt of %s", (dir) => {
   }, 60_000);
 });
 
-const KNOWN: Readonly<Record<string, { defined: readonly string[]; declared: readonly string[] }>> = {
-  core: { defined: ["ButtonSize", "Wording"], declared: ["useTree", "useToast"] },
-  charts: { defined: ["Accessor"], declared: ["controlLimits"] },
-  table: { defined: ["TableRef", "Limit"], declared: ["useTable"] },
-  schedule: { defined: ["Intent"], declared: ["applyIntent"] },
-  calculation: { defined: ["Limit"], declared: [] },
+const KNOWN: Readonly<Record<string, { defined: readonly string[]; declared: readonly string[]; handed: readonly string[] }>> = {
+  core: { defined: ["ButtonSize", "Wording"], declared: ["useTree", "useToast"], handed: [] },
+  charts: {
+    defined: ["Accessor"],
+    declared: ["controlLimits"],
+    handed: ["Chart", "XAxis", "YAxis", "Line", "Area", "Bar", "Scatter", "StateBand", "Matrix", "BoxPlot"],
+  },
+  table: { defined: ["TableRef", "Limit"], declared: ["useTable"], handed: [] },
+  schedule: { defined: ["Intent"], declared: ["applyIntent"], handed: ["Schedule", "Lane", "LaneGroup", "Subtasks", "Dependencies", "BlockedTimes"] },
+  calculation: { defined: ["Limit"], declared: [], handed: [] },
 };

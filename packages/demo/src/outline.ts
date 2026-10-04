@@ -99,7 +99,9 @@ export interface Rubric {
 
 export type PageWithRubric = Page & { rubric: Rubric };
 
-/** Page ids that changed: the old id, and the id of the page it is now. */
+/** Page ids that changed: the old id, and the id of the page it is now. An
+    example that moved to another page is written as its place, `page/example`
+    on both sides: `"axis/zoom-and-pan": "zoom-and-pan/gestures-and-keys"`. */
 export type Moved = Readonly<Record<string, string>>;
 
 export interface Addresses {
@@ -233,7 +235,7 @@ export function addresses(outline: readonly Rubric[], MOVED: Moved = {}): Addres
   );
   for (const [old, current] of Object.entries(MOVED)) {
     if (ALL_PAGES.some((page) => page.id === old)) throw new Error(`The moved id \`${old}\` is still the id of a page.`);
-    if (!ALL_PAGES.some((page) => page.id === current)) throw new Error(`\`${old}\` moved to \`${current}\`, which is no page.`);
+    if (!ALL_PAGES.some((page) => page.id === current.split("/")[0])) throw new Error(`\`${old}\` moved to \`${current}\`, which is no page.`);
   }
   for (const page of ALL_PAGES) {
     for (const one of (page.keysOf ?? []) as unknown[]) {
@@ -257,6 +259,12 @@ export function addresses(outline: readonly Rubric[], MOVED: Moved = {}): Addres
     if (raw === "") return {};
     const [named = "", exampleId] = raw.split("/");
     if (named === SCENARIOS) return exampleId === undefined || exampleId === "" ? {} : { example: exampleId };
+    // An example that moved to another page; its key holds a "/", which no prototype key does.
+    const movedExample: string | undefined = exampleId ? MOVED[`${named}/${exampleId}`] : undefined;
+    if (movedExample !== undefined) {
+      const [to = "", example] = movedExample.split("/");
+      return { page: ALL_PAGES.find((s) => s.id === to)!, ...(example === undefined ? {} : { example }), moved: true };
+    }
     const pageId = Object.hasOwn(MOVED, named) ? MOVED[named] : named;
     const page = ALL_PAGES.find((s) => s.id === pageId);
     if (page === undefined) return {};
