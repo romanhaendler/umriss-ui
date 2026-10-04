@@ -183,7 +183,9 @@ The table and the alarm list are not part of this package. They live in
    fields that wear a wrapper (`Checkbox`, `Switch`, `Slider`, `NumberInput`,
    `Select`, `FileInput`, `Input`, `Textarea`) put the class and the style on
    the wrapper - what a caller dresses and sizes - and ref and rest on the
-   control (ADR-0041). The component's own
+   control (ADR-0041). The pickers and the combobox family take a caller's
+   `aria-label`, `aria-labelledby` and `aria-describedby` out of the rest and
+   put them on the field that has the focus. The component's own
    `role`, the `aria-*` it computes and its handlers are not replaced by
    `rest`: a caller's handler runs first and can `preventDefault`. Held by
    `tests-unit/passthrough.test.tsx`, which renders every export.

@@ -29,6 +29,21 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## Unreleased
+
+### Changed
+
+- **`Combobox`, `MultiSelect` and the four pickers take `aria-label`,
+  `aria-labelledby` and `aria-describedby` on the field** – the input or the
+  button that has the focus – instead of the wrapper around it, as `Input`
+  and `Select` do. A field without a `FormField` can now be named and tied to
+  its own message; inside one, a caller's `aria-describedby` replaces the
+  field's message, as on `Input`.
+- **The examples "With an error" show `invalid` where it is needed**: a field
+  without a `FormField`, with its message tied by `aria-describedby`. Inside
+  a `FormField`, its `error` marks the field invalid by itself; the examples
+  no longer set `invalid` there by hand.
+
 ## 0.25.0 – Every export explained, and a palette that keeps count (Oct. 2026)
 
 The package explains itself where it is used: every export carries a comment,

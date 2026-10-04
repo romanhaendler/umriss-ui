@@ -75,6 +75,9 @@ export const Combobox = forwardRef(function Combobox<T extends string = string>(
     style,
     onKeyDown,
     onKeyDownCapture,
+    "aria-label": ariaLabel,
+    "aria-labelledby": ariaLabelledBy,
+    "aria-describedby": ariaDescribedBy,
     ...rest
   }: ComboboxProps<T>,
   ref: ForwardedRef<HTMLDivElement>,
@@ -162,7 +165,8 @@ export const Combobox = forwardRef(function Combobox<T extends string = string>(
     <>
       {/* The caller's ref, class and rest go to the wrapper, the field's
           outermost element (P1 of core-passthrough); the field id from
-          `FormField` stays on the input. The caller's `onKeyDown` listens in
+          `FormField` stays on the input, and so do the caller's name and
+          description, for a field without one. The caller's `onKeyDown` listens in
           the capture phase: the keys land on the input inside, and a handler
           on the wrapper would otherwise run after the field's own and could
           not prevent it (P3). */}
@@ -192,7 +196,9 @@ export const Combobox = forwardRef(function Combobox<T extends string = string>(
           aria-controls={open ? listboxId : undefined}
           aria-autocomplete="list"
           aria-activedescendant={open && filtered[activeIndex] ? optionId(listboxId, activeIndex) : undefined}
-          aria-describedby={field?.describedBy}
+          aria-label={ariaLabel}
+          aria-labelledby={ariaLabelledBy}
+          aria-describedby={ariaDescribedBy ?? field?.describedBy}
           aria-required={field?.required || undefined}
           aria-invalid={isInvalid || undefined}
           placeholder={placeholderText}

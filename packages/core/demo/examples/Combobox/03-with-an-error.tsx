@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { Combobox, FormField } from "../../../src";
+import { useId, useState } from "react";
+import { Combobox, Stack, Text } from "../../../src";
 
 export const title = "With an error";
-export const lead = "Set `invalid` while your check fails and give its reason to the `FormField` as `error`: the field turns red and reads the reason out.";
+export const lead = "A `FormField` with an `error` marks the field invalid by itself. Without one, set `invalid` and tie your message to the field with `aria-describedby`.";
 
 const VEHICLES = [
   { value: "v1", label: "FP 214 K, van, North depot" },
@@ -12,17 +12,25 @@ const VEHICLES = [
 
 export default function WithAnError() {
   const [vehicle, setVehicle] = useState<string | null>(null);
+  const messageId = useId();
   const error = vehicle === null ? "Tour T-04 needs a vehicle before it can be released." : undefined;
 
   return (
-    <FormField label="Vehicle" error={error} style={{ maxWidth: 360 }}>
+    <Stack gap={1} style={{ maxWidth: 360 }}>
       <Combobox
+        aria-label="Vehicle"
         value={vehicle}
         onChange={setVehicle}
         options={VEHICLES}
         placeholder="Choose a vehicle"
         invalid={error !== undefined}
+        aria-describedby={error ? messageId : undefined}
       />
-    </FormField>
+      {error && (
+        <Text id={messageId} size="xs" style={{ color: "var(--u-color-danger-text)" }}>
+          {error}
+        </Text>
+      )}
+    </Stack>
   );
 }
