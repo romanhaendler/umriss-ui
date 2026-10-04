@@ -33,3 +33,14 @@ ago (and not yet echoed) is taken for its own echo and not applied - so an
 application that restores a just-reported view within that second sees no
 change. The `Echoes` rule exists three times (table, schedule, charts):
 charts depends on nothing, so it cannot share core's copy.
+
+### Left over from component-view 01 (c6b8eb5a)
+
+- The demo shell forwards moved page ids, not example anchors:
+  `/axis/#zoom-and-pan`, `/axis/#visible-domain`, `/chart/#cursor-sync` land
+  on their old page without the example. Decide whether the shell should
+  forward anchors too, or name it in the changelog.
+- The keyboard help says "0 shows everything"; `0` returns to the axis' own
+  `domain` (usually the whole data). Reword (`zoomHelp`, both wordings).
+- The visual suite was not re-run after the last echo-rule change; the final
+  full suite covers it.
