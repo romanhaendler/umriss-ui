@@ -77,6 +77,11 @@ const KIND_WEIGHT: Readonly<Record<SearchKind, number>> = {
 };
 const OWN_PACKAGE_WEIGHT = 0.25;
 
+/* The most finds the palette draws: a single letter finds a few thousand
+   across five packages, and drawing them all made every keystroke wait. The
+   best fifty and a line saying how many more - typing on narrows them. */
+const MAX_FINDS = 50;
+
 /** What the palette's empty field says, and the header's search button with
     it: the button promises what the field searches. */
 const PALETTE_PLACEHOLDER = "Search pages, examples, props, tokens …";
@@ -227,6 +232,9 @@ export function Shell({ demo, sentence, german }: ShellProps) {
         id: entry.address,
         label: entry.label,
         group: entry.group,
+        /* The package before the heading is shown, not searched: "core" or
+           "tab" would otherwise find every entry of a package. */
+        searchedGroup: entry.group.replace(/^[^·]* · /, ""),
         keywords: entry.keywords,
         weight: KIND_WEIGHT[entry.kind] + (entry.address.startsWith(`/${ownId}/`) ? OWN_PACKAGE_WEIGHT : 0),
       })),
@@ -532,6 +540,7 @@ export function Shell({ demo, sentence, german }: ShellProps) {
             open={paletteOpen}
             onClose={() => setPaletteOpen(false)}
             items={candidates}
+            maxFinds={MAX_FINDS}
             onChoose={(address) => {
               /* Another package's find is that demo's page, a full navigation:
                  the site keeps it in a directory beside this one. */
