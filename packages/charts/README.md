@@ -99,6 +99,13 @@ loaded: Geist when the application has it, the system fonts otherwise.
   double bookings — is `@umriss-ui/schedule`'s (ADR-0026).
 * **Several axes per orientation**, each with its own extent; only the first
   registered axis per orientation draws a grid.
+* **The chart holds its own view** (ADR-0047): an `XAxis zoomable` zooms and
+  pans by wheel, pinch, drag and keys within its `zoomLimits`, and a 'Show
+  all' button brings the whole back; the legend hides and shows a series on a
+  click and shows only it on a double click. `useChart(rows, { initialView,
+  onViewChange })` takes a start and reports every change, always the whole
+  view - charts in step hand each other theirs; `setDomain`, `toggleSeries`,
+  `showOnly` and `showAllSeries` stand on what the hook hands back.
 * **The instruments**: `LimitLine` and `LimitBand`, `ControlChart` with its four
   rule violations, `pareto()` with a collected remainder, and a working-time
   axis that takes the empty hours out and marks every removed span.

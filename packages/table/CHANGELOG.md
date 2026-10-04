@@ -22,6 +22,63 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## Unreleased
+
+**The table holds its view, and server mode.**
+Released together with `@umriss-ui/charts` and `@umriss-ui/schedule`, which
+break in the same release (ADR-0047). A view handed in applies whenever its
+content changes, every change of it is reported in every mode, and manual mode
+is called what it is: server mode, reporting the **Request** - the five parts
+that decide the rows - and nothing else. The old names are removed, not
+deprecated.
+
+### Changed
+
+**Moving over.** Every name that went, and what stands in its place:
+
+| Was | Is |
+|---|---|
+| `useTable(rows, { manual: true, rowCount, onViewChange })` | `useTable(rows, { server: true, rowCount, onRequest })` |
+| `ManualView` (the whole view, the five parts always present) | `TableRequest` - search, conditions, sort, page and page size, and nothing else |
+| `onViewChange(view: ManualView)` in manual mode | `onRequest(request: TableRequest)`; `onViewChange` is the general report of every mode now (see Added) |
+| `t.manual`, `TableSnapshot.manual`, `TableRef.manual` | `t.server`, `TableSnapshot.server`, `TableRef.server` |
+| a `key` to start a table again from another view | the view handed in as `initialView` - a `key` still restarts |
+
+- **Manual mode is server mode.** The option, the snapshot's flag, the type
+  of its report and the report itself are renamed as above; what the mode
+  does is unchanged. The DEV warnings say so and their ids read
+  `server-prefilter`, `server-virtual`, `server-grouping`,
+  `server-groupable`, `server-groupable-column` and `server-filter-options`.
+- **The request is the five parts and nothing else.** `ManualView` carried
+  the whole view, widths, order and pins included, though it was reported
+  only when one of the five changed; `TableRequest` is exactly search,
+  conditions, sort, page and page size, each present at its default too. It
+  is still reported once when the table first stands and once per change.
+- **`initialView` applies whenever its content differs from the last one
+  handed in**, no longer on the first render only. The same view again
+  changes nothing - a view written in the call is compared by its content,
+  not its identity; what a new one leaves out goes back to its default,
+  conditions, grouping, folds, pins and branches included; leaving it out
+  keeps the table's own. A table that was handed a changing `initialView`
+  and ignored it now goes to it. **A known limit:** a view handed in that
+  equals one the table reported less than a second ago, and that has not
+  come back yet, is taken for the table's own report coming back late and is
+  not applied - so that tables kept in step do not jump back. An application
+  that restores a just-reported view within that second sees no change.
+
+### Added
+
+- **`onViewChange(view)` in every mode**: every change of the view, once,
+  always the whole view - the one to keep, or to hand another table as its
+  `initialView`; not the view the table starts with. In server mode it hears
+  what `onRequest` does not: a width, an order, a pin, a fold, a hidden
+  column.
+- **The demo**: the page 'Manual mode' is 'Server mode' at `/server-mode/`;
+  the old address lands there. The 'View' example keeps the reported view
+  and hands it back, without a `key`.
+
+---
+
 ## 0.12.0 – Every export explained, and actions that may scroll (Oct. 2026)
 
 The package explains itself where it is used: every export carries a comment,

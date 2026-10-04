@@ -29,6 +29,123 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## Unreleased
+
+**A chart bound to its rows, with a view of its own.**
+Two efforts in one break, released together with `@umriss-ui/table` and
+`@umriss-ui/schedule`. A chart is declared through `useChart(rows)`, as a
+table is through `useTable`, and every series and axis reads its rows through
+`value` - a field name the compiler checks, or a function (ADR-0048). And the
+chart holds its own **view**: the span each zoomable x axis shows and the
+hidden series, taken as a start and reported whole (ADR-0047) - zoom, the
+legend's toggle and a way back cost a caller no state of its own any more. The
+old shape is removed, not deprecated; the table below says what stands in
+each place.
+
+### Changed
+
+**Moving over.** Every export and prop that went, and what stands in its
+place:
+
+| Was | Is |
+|---|---|
+| `import { Chart } from "@umriss-ui/charts"`, `<Chart data={rows}>` | `const { Chart } = useChart(rows)`, `<Chart>` without `data` - one `Chart` per `useChart`, a second chart is a second call |
+| `import { XAxis, YAxis }` | `const { XAxis, YAxis } = useChart(rows)` |
+| `import { Line, Area, Bar, Scatter, StateBand, Matrix, BoxPlot }` | the same names from `useChart(rows)`; a series with its own `data` is still one, typed by that `data` |
+| `ChartProps<T>`, `ChartProps.data` | `ChartProps`, without a type parameter and without `data` |
+| `accessor={(d: Row) => d.a}` on `Line`, `Area`, `Bar`, `Scatter`, `StateBand` | `value="a"` - a field name of the row, or a function where a field does not suffice; required |
+| `XAxis accessor` | `XAxis value`; an axis over series that bring their own `data` names their row: `<XAxis<Row> value="t" />` |
+| `YAxis accessor`, `YAxisProps<T>` | nothing - along y the series place their rows; `YAxisProps` has no type parameter |
+| `Matrix accessor` (the row) | `Matrix value`, as the y position on every kind |
+| `Matrix value` (the colour) | `Matrix level`; `MatrixSeriesConfig.value` is `MatrixSeriesConfig.level` |
+| `ControlChart accessor` | `ControlChart value`, a field name or a function |
+| `hidden` on every series kind, `SeriesBase.hidden` | the view's `hidden`, by the series' `name`: `initialView: { hidden: ["…"] }`, or `toggleSeries`, `showOnly`, `showAllSeries` from `useChart` |
+| `Legend onToggle` | nothing - the legend toggles by itself; the change arrives in `onViewChange` |
+| `XAxis onDomainChange` | `XAxis zoomable`; the span arrives in `onViewChange` as `view.domains[axisId]` - a lone x axis is `"x"` |
+| a zoomed `XAxis domain` handed back (controlled) | `initialView: { domains: { x: span } }` or `setDomain("x", span)`; `domain` stays the axis' configuration and is a zoomable axis' start |
+| clamping the proposed domain in the handler | `XAxis zoomLimits={{ min, max }}`; without it at most the data's extent, at least three data steps |
+| `AxisConfig.onDomainChange` | `AxisConfig.zoomable`, `AxisConfig.zoomLimits` |
+
+- **`Chart`, the axes and the series kinds are no exports of their own.**
+  `useChart(rows)` hands them out, typed at the row; their props stay public
+  types. `Tooltip`, `Legend`, `DataTable`, `LimitLine` and `LimitBand` read no
+  row and are imported as before. A `Chart` taken from one `useChart` and
+  drawn twice at once warns in DEV: it holds the view, and two charts are two
+  calls.
+- **`value` replaces `accessor` everywhere**, and is required on every series
+  kind and on `XAxis`. A field name is checked by the compiler against the
+  row's number fields; it is compared by its name, so a switched name
+  redraws. A function is compared by its source text, as `accessor` was (see
+  `docs/capabilities.md`, "Known limits"). The named channels - `baseline`,
+  the box's five numbers, `mean`, `count`, the notch, `outliers` (a list
+  field) - take a field name as well.
+- **The legend toggles by default.** Every entry of a named series is a
+  button with `aria-pressed`; a click hides or shows the series at once, a
+  state's entry every band showing it. A series without a `name` cannot be
+  hidden and its entry stays text. A legend that should not toggle has no
+  switch; a caller who kept the legend static by leaving out `onToggle` now
+  gets the buttons.
+- **A zoom is the chart's own.** Wheel, pinch, drag and the keys move the
+  span on an `XAxis zoomable` at once, within `zoomLimits`; nothing is
+  proposed to the caller any more. The double click and the key `0` go back
+  to the axis' own `domain` - before, they proposed the whole data range. A
+  pan keeps its width and is not clamped; a view handed in or set is taken as
+  given.
+- **`ChartsWording` has three more keys**: `legendHelp`, `allShown` and
+  `showAll`. A complete wording object of one's own needs them; a
+  `Partial<ChartsWording>` handed to `Chart wording` does not. `zoomHelp`
+  says what `0` does now: "0 goes back to the axis' own span." / "0 kehrt
+  zum eigenen Bereich der Achse zurück."
+
+### Added
+
+- **`useChart(rows, { initialView, onViewChange })`** - the chart and its
+  parts over the rows, each keeping its identity over the renders, with the
+  chart's view and its setters: `view`, `domains`, `setDomain(axisId, span |
+  null)` (`null` = the axis' own `domain`), `hidden`, `toggleSeries(name)`,
+  `showOnly(name)`, `showAllSeries()`.
+  - `initialView` is the view to start from, and to go to whenever one
+    differing in content from the last one handed in arrives; the same view
+    again changes nothing, and what it leaves out is reset. Axis ids and
+    series names the chart does not carry fall out. **A known limit:** a view
+    handed in that equals one the chart reported less than a second ago, and
+    that has not come back yet, is taken for the chart's own report coming
+    back late and is not applied - so that two charts in step do not jump back
+    mid-pan. An application that restores a just-reported view within that
+    second sees no change.
+  - `onViewChange(view)` hears every change of the view once, always the
+    whole view, a pan or zoom at most once per frame; not the view the chart
+    starts with. Charts keep in step by handing each other what they report;
+    `syncId` keeps sharing the pointer only.
+- **`XAxis zoomable` and `zoomLimits: { min, max }`** - zoom and pan by Ctrl/⌘
+  + wheel, pinch, drag, a horizontal or Shift wheel and, with the focus on the
+  chart, + − Shift+←/→ and 0; without `zoomable` nothing zooms and the plain
+  wheel stays the page's.
+- **'Show all'**: once a zoomable x axis shows a span of its own, a quiet
+  button over the plot area's corner (top right; bottom right under a legend
+  or the data key above) brings every zoomed axis back, reported once, and
+  goes. A tab stop of its own after the plot's, handing the focus to the plot
+  as it goes; its label is the wording's `showAll` ("Show all" / "Alles
+  zeigen"); `--uc-*` tokens only, kept under forced colours, no transition
+  under reduced motion.
+- **The legend's gestures**: a double click, Alt/⌥+click or Shift+Enter on
+  an entry shows only that series (a state's entry: its bands), and on the
+  only one visible shows all again. Whatever would hide every series shows
+  all instead, and the polite live region says so (`allShown`); the plot's
+  summary names Shift+Enter (`legendHelp`). A view handed in is taken as
+  given and may hide every series.
+- **Types**: `ChartParts`, `ChartOptions`, `ChartView`, `ZoomLimits`, and the
+  forms a value takes - `Value`, `NumberField`, `ListValue`, `ListField`.
+- **The demo** has the pages 'Zoom and pan', 'Legend' (split from 'Tooltip &
+  Legend', which is 'Tooltip' now) and 'View' (a view kept across a reload
+  and restored), all in the rubric Chart. The zoom and legend examples moved
+  there; their old anchors - `/axis/#zoom-and-pan`, `/axis/#visible-domain`,
+  `/chart/#cursor-sync`, `/tooltip/#toggling-legend`,
+  `/tooltip/#legend-placement` - land on them. Every example declares its
+  chart through `useChart` and `value`.
+
+---
+
 ## 0.10.0 – Every export explained, and a limit's colour at its label (Oct. 2026)
 
 The package explains itself where it is used: every export carries a comment,

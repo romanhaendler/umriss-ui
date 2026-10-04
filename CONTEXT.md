@@ -233,7 +233,7 @@ its place.
 _Avoid_: z-order, Zeichenreihenfolge as a separate concept, draw order
 
 **Materialised series**:
-The form a series takes once its accessors have run: parallel `Float64Array`
+The form a series takes once its values have been read: parallel `Float64Array`
 channels of numbers. Everything that draws or hit-tests reads only this.
 _Avoid_: normalised data, prepared data
 
@@ -244,7 +244,7 @@ _Avoid_: null value, missing point, hole
 
 **Baseline**:
 The value a filled mark is drawn back to — zero for a bar, zero or a second
-accessor for an area. A baseline is part of the series' extent, so an axis that
+value (`baseline`) for an area. A baseline is part of the series' extent, so an axis that
 carries a filled mark always shows the baseline.
 _Avoid_: zero line, Nulllinie (which is the grid line at y = 0), floor
 
@@ -540,7 +540,7 @@ what keeps the fifth series kind inside the affine scale contract (ADR-0007).
 _Avoid_: Status, mode, phase
 
 **State series**:
-A series whose accessor returns a state code. Each point's state holds from that
+A series whose `value` returns a state code. Each point's state holds from that
 point's x until the next point's x.
 _Avoid_: timeline, Gantt, status strip
 
@@ -844,8 +844,9 @@ triggered on — and receives a list either way.
 _Avoid_: batch action, mass action, Massenaktion
 
 **View**:
-The part of a component's state an application can hand in at the start and
-read back - how the reader is looking at the data, never the data itself. A
+The part of a component's state an application can hand in and read back -
+how the reader is looking at the data, never the data itself. One handed in
+applies whenever it differs in content from the last one handed in. A
 table's view is search, conditions, sort levels, page, page size, hidden
 columns, column order, widths, the grouping and the pinned columns; a chart's
 is the span each x axis is zoomed to and the hidden series; a schedule's is the
