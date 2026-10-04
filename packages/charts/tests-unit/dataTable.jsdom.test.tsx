@@ -7,7 +7,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, type ReactNode } from "react";
-import { Chart, DataTable, Legend, Line, StateBand, XAxis, YAxis } from "../src";
+import { DataTable, Legend, useChart } from "../src";
 import { GERMAN_CHARTS_WORDING } from "../src/wording/de";
 import { frame, renderChart, sizePlot } from "./renderChart";
 
@@ -55,18 +55,23 @@ function tableOf(host: HTMLElement): string[] {
 
 const caption = (host: HTMLElement) => host.querySelector(".uc-data-panel caption")?.textContent ?? "";
 
-function twoLines(extra: { domain?: readonly [number, number]; hidden?: boolean; legend?: boolean } = {}): ReactNode {
+type Extra = { domain?: readonly [number, number]; hidden?: boolean; legend?: boolean };
+
+function TwoLines({ rows, extra }: { rows: Row[]; extra: Extra }) {
+  const { Chart, XAxis, YAxis, Line } = useChart(rows);
   return (
-    <Chart data={data} ariaLabel="Two courses">
-      <XAxis accessor={(d: Row) => d.t} tickFormat={(v) => `t${v}`} label="Time" domain={extra.domain ?? "data"} />
-      <YAxis accessor={(d: Row) => d.b} tickFormat={(v) => `${v} °C`} />
-      <Line accessor={(d: Row) => d.a} name="A" format={(v) => `${v.toFixed(1)} bar`} />
-      <Line accessor={(d: Row) => d.b} name="B" hidden={extra.hidden} />
+    <Chart ariaLabel="Two courses">
+      <XAxis value="t" tickFormat={(v) => `t${v}`} label="Time" domain={extra.domain ?? "data"} />
+      <YAxis value="b" tickFormat={(v) => `${v} °C`} />
+      <Line value="a" name="A" format={(v) => `${v.toFixed(1)} bar`} />
+      <Line value="b" name="B" hidden={extra.hidden} />
       {extra.legend !== false && <Legend />}
       <DataTable />
     </Chart>
   );
 }
+
+const twoLines = (extra: Extra = {}, rows = data): ReactNode => <TwoLines rows={rows} extra={extra} />;
 
 describe("The disclosure key", () => {
   it("stands in the legend, closed", async () => {
@@ -140,16 +145,7 @@ describe("The table", () => {
     unmount = r.unmount;
     await toggle(r.host);
     const more = [...data, { t: 5, a: 15, b: 105 }];
-    await r.rerender(
-      <Chart data={more} ariaLabel="Two courses">
-        <XAxis accessor={(d: Row) => d.t} tickFormat={(v) => `t${v}`} label="Time" />
-        <YAxis accessor={(d: Row) => d.b} tickFormat={(v) => `${v} °C`} />
-        <Line accessor={(d: Row) => d.a} name="A" format={(v) => `${v.toFixed(1)} bar`} />
-        <Line accessor={(d: Row) => d.b} name="B" />
-        <Legend />
-        <DataTable />
-      </Chart>,
-    );
+    await r.rerender(twoLines({}, more));
     expect(tableOf(r.host).at(-1)).toBe("t5|15.0 bar|105 °C");
   });
 
@@ -158,28 +154,36 @@ describe("The table", () => {
       { label: "Running", color: "green" },
       { label: "Fault", color: "red" },
     ];
-    const host = await mount(
-      <Chart data={[{ t: 0, s: 0 }, { t: 1, s: 1 }]} ariaLabel="States">
-        <XAxis accessor={(d: { t: number }) => d.t} tickFormat={(v) => `t${v}`} />
-        <YAxis accessor={() => 0} domain={[0, 1]} />
-        <StateBand accessor={(d: { s: number }) => d.s} states={states} name="Furnace" />
-        <DataTable />
-      </Chart>,
-    );
+    function States() {
+      const { Chart, XAxis, YAxis, StateBand } = useChart([{ t: 0, s: 0 }, { t: 1, s: 1 }]);
+      return (
+        <Chart ariaLabel="States">
+          <XAxis value="t" tickFormat={(v) => `t${v}`} />
+          <YAxis value={() => 0} domain={[0, 1]} />
+          <StateBand value="s" states={states} name="Furnace" />
+          <DataTable />
+        </Chart>
+      );
+    }
+    const host = await mount(<States />);
     await toggle(host);
     expect(tableOf(host)).toEqual(["Position|Furnace", "t0|Running", "t1|Fault"]);
   });
 
   it("shows the downsampled course of a long series and says so in its caption", async () => {
     const long = Array.from({ length: 5_000 }, (_, i) => ({ t: i, v: i % 7 }));
-    const host = await mount(
-      <Chart data={long} ariaLabel="A long course">
-        <XAxis accessor={(d: { t: number }) => d.t} />
-        <YAxis accessor={(d: { v: number }) => d.v} />
-        <Line accessor={(d: { v: number }) => d.v} name="V" />
-        <DataTable />
-      </Chart>,
-    );
+    function Long() {
+      const { Chart, XAxis, YAxis, Line } = useChart(long);
+      return (
+        <Chart ariaLabel="A long course">
+          <XAxis value="t" />
+          <YAxis value="v" />
+          <Line value="v" name="V" />
+          <DataTable />
+        </Chart>
+      );
+    }
+    const host = await mount(<Long />);
     await toggle(host);
     const rows = host.querySelectorAll(".uc-data-panel tbody tr");
     expect(rows.length).toBeGreaterThan(0);
@@ -188,14 +192,18 @@ describe("The table", () => {
   });
 
   it("speaks German from the chart's wording", async () => {
-    const host = await mount(
-      <Chart data={data} ariaLabel="Zwei Verläufe" wording={GERMAN_CHARTS_WORDING}>
-        <XAxis accessor={(d: Row) => d.t} tickFormat={(v) => `t${v}`} />
-        <YAxis accessor={(d: Row) => d.b} />
-        <Line accessor={(d: Row) => d.b} name="B" />
-        <DataTable />
-      </Chart>,
-    );
+    function German() {
+      const { Chart, XAxis, YAxis, Line } = useChart(data);
+      return (
+        <Chart ariaLabel="Zwei Verläufe" wording={GERMAN_CHARTS_WORDING}>
+          <XAxis value="t" tickFormat={(v) => `t${v}`} />
+          <YAxis value="b" />
+          <Line value="b" name="B" />
+          <DataTable />
+        </Chart>
+      );
+    }
+    const host = await mount(<German />);
     expect(keyOf(host).textContent).toBe("Daten zeigen");
     await toggle(host);
     expect(keyOf(host).textContent).toBe("Daten verbergen");

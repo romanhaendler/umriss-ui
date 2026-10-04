@@ -8,7 +8,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
-import { Chart, Line, XAxis, YAxis } from "../src";
+import { useChart } from "../src";
 
 interface Row {
   t: number;
@@ -31,18 +31,25 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-async function render(data: Row[], extra: { empty?: ReactNode; hidden?: boolean } = {}): Promise<HTMLElement> {
+type Extra = { empty?: ReactNode; hidden?: boolean };
+
+function Empty({ data, extra }: { data: Row[]; extra: Extra }) {
+  const { Chart, XAxis, YAxis, Line } = useChart(data);
+  return (
+    <Chart ariaLabel="Empty state" height={300} empty={extra.empty}>
+      <XAxis value="t" />
+      <YAxis value={(d) => d.a ?? 0} />
+      <Line value="a" name="A" hidden={extra.hidden} />
+    </Chart>
+  );
+}
+
+async function render(data: Row[], extra: Extra = {}): Promise<HTMLElement> {
   const host = document.createElement("div");
   document.body.appendChild(host);
   const root = createRoot(host);
   await act(async () => {
-    root.render(
-      <Chart data={data} ariaLabel="Empty state" height={300} empty={extra.empty}>
-        <XAxis accessor={(d: Row) => d.t} />
-        <YAxis accessor={(d: Row) => d.a ?? 0} />
-        <Line accessor={(d: Row) => d.a} name="A" hidden={extra.hidden} />
-      </Chart>,
-    );
+    root.render(<Empty data={data} extra={extra} />);
   });
   await act(async () => {
     await new Promise<void>((r) => requestAnimationFrame(() => r()));

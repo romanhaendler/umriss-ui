@@ -6,7 +6,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act } from "react";
-import { Chart, Line, Tooltip, XAxis, YAxis } from "../src";
+import { Tooltip, useChart } from "../src";
 import { focusPlot as focus, frame, plotOf as plot, press, renderChart, sizePlot, tooltipOf as tooltip } from "./renderChart";
 
 interface Row {
@@ -31,17 +31,22 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+function Courses({ mode }: { mode: "x" | "nearest" | null }) {
+  const { Chart, XAxis, YAxis, Line } = useChart(data);
+  return (
+    <Chart ariaLabel="Two courses">
+      <XAxis value="t" tickFormat={(v) => `t${v}`} />
+      <YAxis value="b" />
+      <Line value="a" name="A" />
+      <Line value="b" name="B" />
+      {mode !== null && <Tooltip mode={mode} />}
+    </Chart>
+  );
+}
+
 async function chart(options: { tooltip?: "x" | "nearest" | null } = {}): Promise<HTMLElement> {
   const mode = options.tooltip === undefined ? "x" : options.tooltip;
-  const r = await renderChart(
-    <Chart data={data} ariaLabel="Two courses">
-      <XAxis accessor={(d: Row) => d.t} tickFormat={(v) => `t${v}`} />
-      <YAxis accessor={(d: Row) => d.b} />
-      <Line accessor={(d: Row) => d.a} name="A" />
-      <Line accessor={(d: Row) => d.b} name="B" />
-      {mode !== null && <Tooltip mode={mode} />}
-    </Chart>,
-  );
+  const r = await renderChart(<Courses mode={mode} />);
   unmount = r.unmount;
   return r.host;
 }
@@ -149,16 +154,20 @@ describe("The walk over a matrix", () => {
     { hour: 2, machine: 1, oee: 62 },
   ];
 
-  it("goes cell by cell in two dimensions", async () => {
-    const { Matrix } = await import("../src");
-    const r = await renderChart(
-      <Chart data={cells} ariaLabel="OEE">
-        <XAxis accessor={(d: Cellish) => d.hour} tickFormat={(v) => `h${v}`} />
-        <YAxis accessor={(d: Cellish) => d.machine} />
-        <Matrix accessor={(d: Cellish) => d.machine} value={(d: Cellish) => d.oee} name="OEE" format={(v) => `${v} %`} />
+  function Oee() {
+    const { Chart, XAxis, YAxis, Matrix } = useChart(cells);
+    return (
+      <Chart ariaLabel="OEE">
+        <XAxis value="hour" tickFormat={(v) => `h${v}`} />
+        <YAxis value="machine" />
+        <Matrix accessor={(d) => d.machine} value="oee" name="OEE" format={(v) => `${v} %`} />
         <Tooltip mode="nearest" />
-      </Chart>,
+      </Chart>
     );
+  }
+
+  it("goes cell by cell in two dimensions", async () => {
+    const r = await renderChart(<Oee />);
     unmount = r.unmount;
     const host = r.host;
     await focus(host);
@@ -188,17 +197,21 @@ describe("A matrix among other series", () => {
     { hour: 1, machine: 1, oee: 61 },
   ];
 
-  it("hands ↑/↓ on at the edge of its column, and takes them back at a cell", async () => {
-    const { Matrix, Scatter } = await import("../src");
-    const r = await renderChart(
-      <Chart data={cells} ariaLabel="Mixed">
-        <XAxis accessor={(d: Mixed) => d.hour} tickFormat={(v) => `h${v}`} />
-        <YAxis accessor={(d: Mixed) => d.machine} />
-        <Matrix accessor={(d: Mixed) => d.machine} value={(d: Mixed) => d.oee} name="OEE" format={(v) => `${v} %`} />
-        <Scatter accessor={(d: Mixed) => d.machine + 0.5} name="Probe" />
+  function MixedChart() {
+    const { Chart, XAxis, YAxis, Matrix, Scatter } = useChart(cells);
+    return (
+      <Chart ariaLabel="Mixed">
+        <XAxis value="hour" tickFormat={(v) => `h${v}`} />
+        <YAxis value="machine" />
+        <Matrix accessor={(d) => d.machine} value="oee" name="OEE" format={(v) => `${v} %`} />
+        <Scatter value={(d) => d.machine + 0.5} name="Probe" />
         <Tooltip mode="nearest" />
-      </Chart>,
+      </Chart>
     );
+  }
+
+  it("hands ↑/↓ on at the edge of its column, and takes them back at a cell", async () => {
+    const r = await renderChart(<MixedChart />);
     unmount = r.unmount;
     const host = r.host;
     await focus(host);

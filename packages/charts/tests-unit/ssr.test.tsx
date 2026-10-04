@@ -3,13 +3,16 @@
 
 import { describe, expect, it } from "vitest";
 import { renderToString } from "react-dom/server";
-import { Chart } from "../src";
+import { useChart } from "../src";
+
+function Empty() {
+  const { Chart } = useChart<never>([]);
+  return <Chart ariaLabel="SSR test" height={200} />;
+}
 
 describe("SSR", () => {
   it("renderToString does not throw and yields the container plus the layers", () => {
-    const html = renderToString(
-      <Chart data={[]} ariaLabel="SSR test" height={200} />,
-    );
+    const html = renderToString(<Empty />);
     expect(html).toContain("uc-root");
     expect(html).toContain("uc-layer-series");
     expect(html).toContain("uc-layer-overlay");

@@ -5,7 +5,7 @@
    wins over the register. */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { Chart, Line, XAxis, YAxis } from "../src";
+import { useChart } from "../src";
 import { GERMAN_CHARTS_WORDING } from "../src/wording/de";
 import type { ChartsWording } from "../src";
 import { renderChart, sizePlot } from "./renderChart";
@@ -18,14 +18,21 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-async function empty(props: { wording?: Partial<ChartsWording>; empty?: string }): Promise<string | null> {
-  const r = await renderChart(
-    <Chart data={[]} ariaLabel="Nothing" {...props}>
-      <XAxis accessor={(d: { t: number }) => d.t} />
-      <YAxis accessor={(d: { a: number }) => d.a} />
-      <Line accessor={(d: { a: number }) => d.a} name="A" />
-    </Chart>,
+type Props = { wording?: Partial<ChartsWording>; empty?: string };
+
+function Nothing(props: Props) {
+  const { Chart, XAxis, YAxis, Line } = useChart<{ t: number; a: number }>([]);
+  return (
+    <Chart ariaLabel="Nothing" {...props}>
+      <XAxis value="t" />
+      <YAxis value="a" />
+      <Line value="a" name="A" />
+    </Chart>
   );
+}
+
+async function empty(props: Props): Promise<string | null> {
+  const r = await renderChart(<Nothing {...props} />);
   unmount = r.unmount;
   return r.host.querySelector(".uc-empty")?.textContent ?? null;
 }

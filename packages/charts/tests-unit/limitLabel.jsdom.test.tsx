@@ -8,7 +8,7 @@
    14 px line, as in the layout tests. */
 
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { Chart, LimitLine, Line, XAxis, YAxis } from "../src";
+import { LimitLine, useChart } from "../src";
 import { renderChart } from "./renderChart";
 
 interface Row {
@@ -28,20 +28,25 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+function Limited({ limit }: { limit: React.ReactNode }) {
+  const { Chart, XAxis, YAxis, Line } = useChart(data);
+  return (
+    <Chart ariaLabel="Limit labels" height={300}>
+      <XAxis value="t" domain={[0, 100]} ticks={[0, 20, 40, 60, 80, 100]} />
+      <YAxis value="a" domain={[0, 50]} />
+      <Line value="a" />
+      {limit}
+    </Chart>
+  );
+}
+
 async function chart(limit: React.ReactNode): Promise<HTMLElement> {
   vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) {
     if (this.classList.contains("uc-plot")) return rect(400, 300);
     if (this.classList.contains("uc-measure")) return rect((this.textContent ?? "").length * 7, 14);
     return rect(0, 0);
   });
-  const rendered = await renderChart(
-    <Chart data={data} ariaLabel="Limit labels" height={300}>
-      <XAxis accessor={(d: Row) => d.t} domain={[0, 100]} ticks={[0, 20, 40, 60, 80, 100]} />
-      <YAxis accessor={(d: Row) => d.a} domain={[0, 50]} />
-      <Line accessor={(d: Row) => d.a} />
-      {limit}
-    </Chart>,
-  );
+  const rendered = await renderChart(<Limited limit={limit} />);
   unmount = rendered.unmount;
   return rendered.host;
 }

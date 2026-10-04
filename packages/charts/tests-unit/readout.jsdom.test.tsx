@@ -6,7 +6,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act } from "react";
-import { Chart, Line, Tooltip, XAxis, YAxis } from "../src";
+import { Tooltip, useChart } from "../src";
 import { ChartScene } from "../src/scene";
 import { focusPlot, frame, plotOf as plot, press, renderChart, sizePlot } from "./renderChart";
 
@@ -28,17 +28,20 @@ afterEach(() => {
 
 const rest = (ms: number) => act(() => new Promise<void>((r) => setTimeout(r, ms)));
 
-function tree(domain?: [number, number], zoom = false) {
+function Tree({ domain, zoom }: { domain?: [number, number]; zoom: boolean }) {
+  const { Chart, XAxis, YAxis, Line } = useChart(data);
   return (
-    <Chart data={data} ariaLabel="Two courses">
-      <XAxis accessor={(d: Row) => d.t} tickFormat={(v) => `t${v}`} domain={domain} onDomainChange={zoom ? () => undefined : undefined} />
-      <YAxis accessor={(d: Row) => d.b} tickFormat={(v) => `${v} u`} />
-      <Line accessor={(d: Row) => d.a} name="A" />
-      <Line accessor={(d: Row) => d.b} name="B" />
+    <Chart ariaLabel="Two courses">
+      <XAxis value="t" tickFormat={(v) => `t${v}`} domain={domain} onDomainChange={zoom ? () => undefined : undefined} />
+      <YAxis value="b" tickFormat={(v) => `${v} u`} />
+      <Line value="a" name="A" />
+      <Line value="b" name="B" />
       <Tooltip />
     </Chart>
   );
 }
+
+const tree = (domain?: [number, number], zoom = false) => <Tree domain={domain} zoom={zoom} />;
 
 const readout = (host: HTMLElement) => host.querySelector("[aria-live='polite']")?.textContent ?? "";
 const summary = (host: HTMLElement) => {

@@ -6,7 +6,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ReactNode } from "react";
-import { Area, Bar, Chart, Legend, Line, Matrix, Scatter, StateBand, Tooltip, XAxis, YAxis } from "../src";
+import { Legend, Tooltip, useChart, type ChartParts } from "../src";
 import { focusPlot, press, renderChart, sizePlot } from "./renderChart";
 
 interface Row {
@@ -29,23 +29,31 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-async function legendOf(encoding: "color" | "marks" | undefined, series: ReactNode): Promise<HTMLElement[]> {
-  const r = await renderChart(
-    <Chart data={data} ariaLabel="Marks" encoding={encoding}>
-      <XAxis accessor={(d: Row) => d.t} />
-      <YAxis accessor={(d: Row) => d.b} />
-      {series}
-      <Legend />
-    </Chart>,
+type Series = (parts: ChartParts<Row>) => ReactNode;
+
+function Marks({ encoding, series, tail }: { encoding?: "color" | "marks"; series: Series; tail: ReactNode }) {
+  const parts = useChart(data);
+  const { Chart, XAxis, YAxis } = parts;
+  return (
+    <Chart ariaLabel="Marks" encoding={encoding}>
+      <XAxis value="t" />
+      <YAxis value="b" />
+      {series(parts)}
+      {tail}
+    </Chart>
   );
+}
+
+async function legendOf(encoding: "color" | "marks" | undefined, series: Series): Promise<HTMLElement[]> {
+  const r = await renderChart(<Marks encoding={encoding} series={series} tail={<Legend />} />);
   unmount = r.unmount;
   return [...r.host.querySelectorAll<HTMLElement>(".uc-legend-item")];
 }
 
-const lines = (
+const lines: Series = ({ Line }) => (
   <>
-    <Line accessor={(d: Row) => d.a} name="A" />
-    <Line accessor={(d: Row) => d.b} name="B" />
+    <Line value="a" name="A" />
+    <Line value="b" name="B" />
   </>
 );
 
@@ -73,10 +81,12 @@ describe("The legend under encoding by marks", () => {
   it("lets a dash of the caller's own win", async () => {
     const [, b] = await legendOf(
       "marks",
-      <>
-        <Line accessor={(d: Row) => d.a} name="A" />
-        <Line accessor={(d: Row) => d.b} name="B" dash={[2, 2]} />
-      </>,
+      ({ Line }) => (
+        <>
+          <Line value="a" name="A" />
+          <Line value="b" name="B" dash={[2, 2]} />
+        </>
+      ),
     );
     expect(b?.querySelector("line")?.getAttribute("stroke-dasharray")).toBe("2 2");
   });
@@ -84,10 +94,12 @@ describe("The legend under encoding by marks", () => {
   it("gives a scatter its marker alone, and a bar a hatched swatch", async () => {
     const [scatter, bar] = await legendOf(
       "marks",
-      <>
-        <Scatter accessor={(d: Row) => d.a} name="S" />
-        <Bar accessor={(d: Row) => d.b} name="B" />
-      </>,
+      ({ Scatter, Bar }) => (
+        <>
+          <Scatter value="a" name="S" />
+          <Bar value="b" name="B" />
+        </>
+      ),
     );
     expect(scatter?.querySelector("line")).toBeNull();
     expect(scatter?.querySelector("path")).not.toBeNull();
@@ -101,10 +113,12 @@ describe("The legend under encoding by marks", () => {
   it("gives an area its dash and its hatched fill", async () => {
     const [, area] = await legendOf(
       "marks",
-      <>
-        <Line accessor={(d: Row) => d.a} name="A" />
-        <Area accessor={(d: Row) => d.b} name="B" />
-      </>,
+      ({ Line, Area }) => (
+        <>
+          <Line value="a" name="A" />
+          <Area value="b" name="B" />
+        </>
+      ),
     );
     expect(area?.querySelector("line")?.getAttribute("stroke-dasharray")).toBe("7 4");
     expect(area?.querySelector("rect + path")?.getAttribute("d") ?? "").not.toBe("");
@@ -113,10 +127,12 @@ describe("The legend under encoding by marks", () => {
   it("hatches a state by its name, alike in every band that lists it", async () => {
     const items = await legendOf(
       "marks",
-      <>
-        <StateBand accessor={(d: Row) => d.s} states={[{ label: "Running", color: "green" }, { label: "Fault", color: "red" }]} name="One" />
-        <StateBand accessor={(d: Row) => d.s} states={[{ label: "Setup", color: "blue" }, { label: "Fault", color: "red" }]} name="Two" />
-      </>,
+      ({ StateBand }) => (
+        <>
+          <StateBand value="s" states={[{ label: "Running", color: "green" }, { label: "Fault", color: "red" }]} name="One" />
+          <StateBand value="s" states={[{ label: "Setup", color: "blue" }, { label: "Fault", color: "red" }]} name="Two" />
+        </>
+      ),
     );
     const hatchOf = (name: string) =>
       items.find((i) => i.textContent === name)?.querySelector("rect + path")?.getAttribute("d") ?? "";
@@ -134,7 +150,7 @@ describe("The legend under encoding by marks", () => {
       { label: "Running", color: "green" },
       { label: "Fault", color: "red" },
     ];
-    const items = await legendOf("marks", <StateBand accessor={(d: Row) => d.s} states={states} name="Furnace" />);
+    const items = await legendOf("marks", ({ StateBand }) => <StateBand value="s" states={states} name="Furnace" />);
     const hatches = items.map((i) => i.querySelector("rect + path")?.getAttribute("d") ?? "");
     expect(hatches[0]).toBe("");
     expect(hatches[1]).not.toBe("");
@@ -163,14 +179,7 @@ describe("The legend under encoding by marks", () => {
         ? ({ matches: true, addEventListener: () => undefined } as unknown as MediaQueryList)
         : real(query),
     );
-    const r = await renderChart(
-      <Chart data={data} ariaLabel="Marks">
-        <XAxis accessor={(d: Row) => d.t} />
-        <YAxis accessor={(d: Row) => d.b} />
-        {lines}
-        <Tooltip />
-      </Chart>,
-    );
+    const r = await renderChart(<Marks series={lines} tail={<Tooltip />} />);
     unmount = r.unmount;
     await focusPlot(r.host);
     await press(r.host, "ArrowLeft");
@@ -181,14 +190,7 @@ describe("The legend under encoding by marks", () => {
   });
 
   it("keeps the tooltip's colour chips otherwise", async () => {
-    const r = await renderChart(
-      <Chart data={data} ariaLabel="Marks" encoding="marks">
-        <XAxis accessor={(d: Row) => d.t} />
-        <YAxis accessor={(d: Row) => d.b} />
-        {lines}
-        <Tooltip />
-      </Chart>,
-    );
+    const r = await renderChart(<Marks encoding="marks" series={lines} tail={<Tooltip />} />);
     unmount = r.unmount;
     await focusPlot(r.host);
     await press(r.host, "ArrowLeft");
@@ -198,12 +200,9 @@ describe("The legend under encoding by marks", () => {
   it("shows a matrix' steps side by side, each with its hatch", async () => {
     const [matrix] = await legendOf(
       "marks",
-      <Matrix
-        accessor={(d: Row) => d.a}
-        value={(d: Row) => d.b}
-        coloring={{ kind: "gradient", stops: ["#eee", "#999", "#333"] }}
-        name="Load"
-      />,
+      ({ Matrix }) => (
+        <Matrix accessor={(d) => d.a} value="b" coloring={{ kind: "gradient", stops: ["#eee", "#999", "#333"] }} name="Load" />
+      ),
     );
     expect(matrix?.querySelectorAll("rect")).toHaveLength(3);
   });

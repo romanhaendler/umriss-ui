@@ -7,7 +7,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { act, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
-import { Area, Bar, Chart, ControlChart, Legend, XAxis, YAxis } from "../src";
+import { ControlChart, Legend, useChart, type ChartParts } from "../src";
 import { FALLBACK_THEME } from "../src/theme";
 
 interface Row {
@@ -23,19 +23,27 @@ afterEach(() => {
   cleanup = null;
 });
 
-async function chips(series: ReactNode): Promise<string[]> {
+type Series = (parts: ChartParts<Row>) => ReactNode;
+
+function Toned({ series }: { series: Series }) {
+  const parts = useChart(data);
+  const { Chart, XAxis, YAxis } = parts;
+  return (
+    <Chart ariaLabel="Tone" height={200}>
+      <XAxis value="t" />
+      <YAxis value="a" />
+      {series(parts)}
+      <Legend />
+    </Chart>
+  );
+}
+
+async function chips(series: Series): Promise<string[]> {
   const host = document.createElement("div");
   document.body.appendChild(host);
   const root = createRoot(host);
   await act(async () => {
-    root.render(
-      <Chart data={data} ariaLabel="Tone" height={200}>
-        <XAxis accessor={(d: Row) => d.t} />
-        <YAxis accessor={(d: Row) => d.a} />
-        {series}
-        <Legend />
-      </Chart>,
-    );
+    root.render(<Toned series={series} />);
   });
   await act(async () => {
     await new Promise<void>((r) => requestAnimationFrame(() => r()));
@@ -56,17 +64,17 @@ const colour = (css: string) => {
 describe("tone", () => {
   it("colours an area and a bar by their role", async () => {
     expect(
-      await chips(
+      await chips(({ Area, Bar }) => (
         <>
-          <Area accessor={(d: Row) => d.a} name="Scrap" tone="alarm" />
-          <Bar accessor={(d: Row) => d.a} name="Rework" tone="warning" />
-        </>,
-      ),
+          <Area value="a" name="Scrap" tone="alarm" />
+          <Bar value="a" name="Rework" tone="warning" />
+        </>
+      )),
     ).toEqual([colour(FALLBACK_THEME.colorAlarm), colour(FALLBACK_THEME.colorWarning)]);
   });
 
   it("colours a control chart's line by its role", async () => {
-    const [line] = await chips(
+    const [line] = await chips(() => (
       <ControlChart
         accessor={(d: Row) => d.a}
         data={data}
@@ -74,8 +82,8 @@ describe("tone", () => {
         name="Feature"
         violationName="Violations"
         tone="ok"
-      />,
-    );
+      />
+    ));
     expect(line).toBe(colour(FALLBACK_THEME.colorOk));
   });
 });
