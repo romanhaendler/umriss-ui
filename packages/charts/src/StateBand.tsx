@@ -15,14 +15,18 @@
 
 import { useMemo } from "react";
 import { useSeries } from "./context";
-import type { Accessor, StateEntry, StateSeriesConfig } from "./types";
+import { readerOf } from "./value";
+import type { Accessor, Value, StateEntry, StateSeriesConfig } from "./types";
 
 /** The props of `StateBand`. */
 export interface StateBandProps<T> {
-  /** Index of the state in `states`; null/undefined/NaN/±Infinity is a gap -
+  /** Index of the state in `states` - a number field of the row or a
+      function of it; null/undefined/NaN/±Infinity is a gap -
       and a gap stays a hole, it gets no colour for "unknown". A colour would
       be a claim about the interval. */
-  accessor: Accessor<T>;
+  value?: Value<T>;
+  /** The older form of `value`: a function only. */
+  accessor?: Accessor<T>;
   /** The closed set of states, in the order of their codes. */
   states: readonly StateEntry[];
   /** Binding to an x axis.
@@ -56,7 +60,6 @@ export interface StateBandProps<T> {
     reported, not until the axis' rounded end. */
 export function StateBand<T>(props: StateBandProps<T>): null {
   const {
-    accessor,
     states,
     xAxisId = "x",
     yAxisId = "y",
@@ -66,6 +69,7 @@ export function StateBand<T>(props: StateBandProps<T>): null {
     laneFrom,
     laneTo,
   } = props;
+  const accessor = readerOf<Accessor<T>>(props.value) ?? props.accessor;
 
   const config = useMemo<StateSeriesConfig>(
     () =>

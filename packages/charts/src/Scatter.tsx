@@ -8,13 +8,17 @@
 
 import { useMemo } from "react";
 import { useSeries } from "./context";
-import type { Accessor, ScatterSeriesConfig } from "./types";
+import { readerOf } from "./value";
+import type { Accessor, Value, ScatterSeriesConfig } from "./types";
 
 /** The props of `Scatter`. */
 export interface ScatterProps<T> {
-  /** Y value; null/undefined/NaN/±Infinity means a gap.
+  /** Y value - a number field of the row or a function of it;
+      null/undefined/NaN/±Infinity means a gap.
       @remarks R-2.5 */
-  accessor: Accessor<T>;
+  value?: Value<T>;
+  /** The older form of `value`: a function only. */
+  accessor?: Accessor<T>;
   /** Binding to an x axis.
       @remarks R-4.12 */
   xAxisId?: string;
@@ -48,7 +52,6 @@ export interface ScatterProps<T> {
     registers with the surrounding `Chart`. */
 export function Scatter<T>(props: ScatterProps<T>): null {
   const {
-    accessor,
     xAxisId = "x",
     yAxisId = "y",
     data,
@@ -59,6 +62,7 @@ export function Scatter<T>(props: ScatterProps<T>): null {
     tone,
     radius = 3,
   } = props;
+  const accessor = readerOf<Accessor<T>>(props.value) ?? props.accessor;
 
   const config = useMemo<ScatterSeriesConfig>(
     () =>

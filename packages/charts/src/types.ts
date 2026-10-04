@@ -14,6 +14,31 @@ export type Accessor<T> = (d: T, index: number) => number | null | undefined;
     empty array is none; a value that is not finite is left out. */
 export type ListAccessor<T> = (d: T, index: number) => readonly number[] | null | undefined;
 
+/* Both field types are NoInfer: the row type comes from the rows or a
+   series' own `data`, never from the name - else a misspelt name would make
+   up a row type of its own that has it. */
+
+/** The fields of a row whose value is a number, or absent. */
+export type NumberField<T> = NoInfer<
+  {
+    [K in keyof T & string]-?: T[K] extends number | null | undefined ? K : never;
+  }[keyof T & string]
+>;
+
+/** The fields of a row whose value is a list of numbers, or absent. */
+export type ListField<T> = NoInfer<
+  {
+    [K in keyof T & string]-?: T[K] extends readonly number[] | null | undefined ? K : never;
+  }[keyof T & string]
+>;
+
+/** A value read from the row (ADR-0048): the name of a number field, compared
+    by its name, or a function, compared by its source text (`Accessor`). */
+export type Value<T> = NumberField<T> | Accessor<T>;
+
+/** A list read from the row: the name of a list field or a function. */
+export type ListValue<T> = ListField<T> | ListAccessor<T>;
+
 /* ---------------- Series ----------------
 
    The series kind belongs to the series, never to the chart - which is exactly

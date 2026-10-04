@@ -4,13 +4,17 @@
 
 import { useMemo } from "react";
 import { useSeries } from "./context";
-import type { Accessor, LineSeriesConfig } from "./types";
+import { readerOf } from "./value";
+import type { Accessor, Value, LineSeriesConfig } from "./types";
 
 /** The props of `Line`. */
 export interface LineProps<T> {
-  /** Y value; null/undefined/NaN/±Infinity means a gap.
+  /** Y value - a number field of the row or a function of it;
+      null/undefined/NaN/±Infinity means a gap.
       @remarks R-2.5 */
-  accessor: Accessor<T>;
+  value?: Value<T>;
+  /** The older form of `value`: a function only. */
+  accessor?: Accessor<T>;
   /** Binding to an x axis.
       @remarks R-4.12 */
   xAxisId?: string;
@@ -55,7 +59,6 @@ export interface LineProps<T> {
     nothing itself: it registers with the surrounding `Chart`. */
 export function Line<T>(props: LineProps<T>): null {
   const {
-    accessor,
     xAxisId = "x",
     yAxisId = "y",
     data,
@@ -69,6 +72,7 @@ export function Line<T>(props: LineProps<T>): null {
     markers = "auto",
     step,
   } = props;
+  const accessor = readerOf<Accessor<T>>(props.value) ?? props.accessor;
 
   const config = useMemo<LineSeriesConfig>(
     () =>

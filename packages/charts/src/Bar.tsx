@@ -9,13 +9,17 @@
 
 import { useMemo } from "react";
 import { useSeries } from "./context";
-import type { Accessor, BarSeriesConfig } from "./types";
+import { readerOf } from "./value";
+import type { Accessor, Value, BarSeriesConfig } from "./types";
 
 /** The props of `Bar`. */
 export interface BarProps<T> {
-  /** Height; null/undefined/NaN/±Infinity means a gap.
+  /** Height - a number field of the row or a function of it;
+      null/undefined/NaN/±Infinity means a gap.
       @remarks R-2.5 */
-  accessor: Accessor<T>;
+  value?: Value<T>;
+  /** The older form of `value`: a function only. */
+  accessor?: Accessor<T>;
   /** Binding to an x axis.
       @remarks R-4.12 */
   xAxisId?: string;
@@ -63,7 +67,6 @@ export interface BarProps<T> {
     `Chart`. */
 export function Bar<T>(props: BarProps<T>): null {
   const {
-    accessor,
     xAxisId = "x",
     yAxisId = "y",
     data,
@@ -76,6 +79,7 @@ export function Bar<T>(props: BarProps<T>): null {
     normalize,
     barWidth = 0.8,
   } = props;
+  const accessor = readerOf<Accessor<T>>(props.value) ?? props.accessor;
 
   const config = useMemo<BarSeriesConfig>(
     () =>

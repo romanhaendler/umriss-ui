@@ -7,17 +7,21 @@
 
 import { useMemo } from "react";
 import { useSeries } from "./context";
-import type { Accessor, AreaSeriesConfig } from "./types";
+import { readerOf } from "./value";
+import type { Accessor, Value, AreaSeriesConfig } from "./types";
 
 /** The props of `Area`. */
 export interface AreaProps<T> {
-  /** Upper edge; null/undefined/NaN/±Infinity means a gap.
+  /** Upper edge - a number field of the row or a function of it;
+      null/undefined/NaN/±Infinity means a gap.
       @remarks R-2.5 */
-  accessor: Accessor<T>;
-  /** Lower edge. In a `stack` the stack below is the lower edge, and this is
+  value?: Value<T>;
+  /** The older form of `value`: a function only. */
+  accessor?: Accessor<T>;
+  /** Lower edge - a number field of the row or a function of it. In a `stack` the stack below is the lower edge, and this is
       not read.
       @default a fixed baseline at 0 */
-  baseline?: Accessor<T>;
+  baseline?: Value<T>;
   /** Binding to an x axis.
       @remarks R-4.12 */
   xAxisId?: string;
@@ -70,7 +74,6 @@ export interface AreaProps<T> {
     `Chart`. With `stack`, areas stand on each other. */
 export function Area<T>(props: AreaProps<T>): null {
   const {
-    accessor,
     baseline,
     xAxisId = "x",
     yAxisId = "y",
@@ -86,13 +89,14 @@ export function Area<T>(props: AreaProps<T>): null {
     strokeWidth = 1.5,
     dash,
   } = props;
+  const accessor = readerOf<Accessor<T>>(props.value) ?? props.accessor;
 
   const config = useMemo<AreaSeriesConfig>(
     () =>
       ({
         kind: "area",
         accessor,
-        baseline,
+        baseline: readerOf<Accessor<T>>(baseline),
         xAxisId,
         yAxisId,
         data,

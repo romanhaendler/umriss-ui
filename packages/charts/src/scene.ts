@@ -20,11 +20,13 @@
    accessor that reads a changed closure variable without its source text or its
    data reference changing is not re-materialised - in that case the app must
    pass a new data reference. The same holds for `tickFormat` and the tooltip's
-   `render`. */
+   `render`. A `value` given as a field name has none of it: it comes to one
+   reader per name and is compared by that name (value.ts, ADR-0048). */
 
 import { FALLBACK_THEME, resolveColours, resolveTheme, subscribeTheme, type ResolvedTheme } from "./theme";
 import { DEV, invariant, warnOnce } from "./dev";
 import { TextMeasurer } from "./measure";
+import { isFieldReader } from "./value";
 import {
   computeLayout,
   CLASS_TICK,
@@ -340,6 +342,8 @@ interface SyncedX {
 export function fnEqual(a: unknown, b: unknown): boolean {
   if (a === b) return true;
   if (typeof a !== "function" || typeof b !== "function") return false;
+  // A field's reader is one per name: identity is the name (value.ts).
+  if (isFieldReader(a) || isFieldReader(b)) return false;
   const source = String(a);
   // Every native and every bound function reads "[native code]" - a bound
   // `Intl.NumberFormat#format` among them. Their text says nothing; identity

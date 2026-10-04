@@ -14,7 +14,8 @@
 
 import { useMemo } from "react";
 import { useSeries } from "./context";
-import type { Accessor, MatrixColoring, MatrixSeriesConfig } from "./types";
+import { readerOf } from "./value";
+import type { Accessor, Value, MatrixColoring, MatrixSeriesConfig } from "./types";
 
 /** Default gradient: a sequential set, light to dark, so that it stays readable
     as an order of lightness even without colour. It is a default, not a
@@ -33,8 +34,9 @@ export const DEFAULT_GRADIENT: readonly string[] = [
 export interface MatrixProps<T> {
   /** Row position on the y axis. */
   accessor: Accessor<T>;
-  /** The value that decides the colour. */
-  value: Accessor<T>;
+  /** The value that decides the colour - a number field of the row or a
+      function of it. */
+  value: Value<T>;
   /** How the value colours a cell: by assessment against limits, or across
       a gradient.
       @default { kind: "gradient", stops: DEFAULT_GRADIENT } */
@@ -89,7 +91,7 @@ export function Matrix<T>(props: MatrixProps<T>): null {
       ({
         kind: "matrix",
         accessor,
-        value,
+        value: readerOf<Accessor<T>>(value),
         coloring: effectiveColoring,
         xAxisId,
         yAxisId,

@@ -10,38 +10,40 @@
 
 import { useMemo } from "react";
 import { useSeries } from "./context";
-import type { Accessor, BoxSeriesConfig, ListAccessor } from "./types";
+import { readerOf } from "./value";
+import type { Accessor, BoxSeriesConfig, ListAccessor, ListValue, Value } from "./types";
 
-/** The props of `BoxPlot`. */
+/** The props of `BoxPlot`. Every number is a number field of the row or a
+    function of it; `outliers` a list field or a function. */
 export interface BoxPlotProps<T> {
   /** The line across the box; null/undefined/NaN/±Infinity means a gap - no
       box is drawn there, whatever the other numbers say.
       @remarks R-2.5 */
-  median: Accessor<T>;
+  median: Value<T>;
   /** The box's lower edge. */
-  lowerQuartile: Accessor<T>;
+  lowerQuartile: Value<T>;
   /** The box's upper edge. */
-  upperQuartile: Accessor<T>;
+  upperQuartile: Value<T>;
   /** Where the lower whisker ends - the caller's rule, not the minimum. */
-  lowerWhisker: Accessor<T>;
+  lowerWhisker: Value<T>;
   /** Where the upper whisker ends - the caller's rule, not the maximum. */
-  upperWhisker: Accessor<T>;
+  upperWhisker: Value<T>;
   /** The values beyond the whiskers, per box: an array, empty or missing
       where there are none. Drawn with their box in its colour - one beyond
       three IQR of the box's own quartiles as a ring -, read in its tooltip
       and table row, never hit on their own (ADR-0040). */
-  outliers?: ListAccessor<T>;
+  outliers?: ListValue<T>;
   /** The mean, drawn as a small ×: beside the median it shows a skew. */
-  mean?: Accessor<T>;
+  mean?: Value<T>;
   /** The notch's lower bound - usually of a confidence interval of the
       median. Both bounds or neither: one alone warns in DEV and is not
       drawn. */
-  notchLower?: Accessor<T>;
+  notchLower?: Value<T>;
   /** The notch's upper bound; see `notchLower`. */
-  notchUpper?: Accessor<T>;
+  notchUpper?: Value<T>;
   /** How many values stand behind the box; read in the tooltip and the
       table, not drawn. */
-  count?: Accessor<T>;
+  count?: Value<T>;
   /** Binding to an x axis.
       @remarks R-4.12 */
   xAxisId?: string;
@@ -103,16 +105,16 @@ export function BoxPlot<T>(props: BoxPlotProps<T>): null {
     () =>
       ({
         kind: "box",
-        accessor: median,
-        lowerQuartile,
-        upperQuartile,
-        lowerWhisker,
-        upperWhisker,
-        outliers,
-        mean,
-        notchLower,
-        notchUpper,
-        count,
+        accessor: readerOf<Accessor<T>>(median),
+        lowerQuartile: readerOf<Accessor<T>>(lowerQuartile),
+        upperQuartile: readerOf<Accessor<T>>(upperQuartile),
+        lowerWhisker: readerOf<Accessor<T>>(lowerWhisker),
+        upperWhisker: readerOf<Accessor<T>>(upperWhisker),
+        outliers: readerOf<ListAccessor<T>>(outliers),
+        mean: readerOf<Accessor<T>>(mean),
+        notchLower: readerOf<Accessor<T>>(notchLower),
+        notchUpper: readerOf<Accessor<T>>(notchUpper),
+        count: readerOf<Accessor<T>>(count),
         xAxisId,
         yAxisId,
         data,
