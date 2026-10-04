@@ -574,6 +574,29 @@
     color: var(--uc-color-text);
   }
 
+  /* A limit in a colour of its own: the text stays as legible as a tick label,
+     a short stroke before it in the line's pattern carries the colour (its
+     width and gap are LIMIT_MARK in scene.ts). */
+  .uc-limit-label[data-own] {
+    color: var(--uc-color-text);
+  }
+
+  .uc-limit-mark {
+    display: inline-block;
+    width: 10px;
+    margin-right: 4px;
+    vertical-align: middle;
+    border-top: 2px dashed currentColor;
+  }
+
+  .uc-limit-label[data-role="control"] > .uc-limit-mark {
+    border-top-style: solid;
+  }
+
+  .uc-limit-label[data-role="zone"] > .uc-limit-mark {
+    border-top-style: dotted;
+  }
+
   .uc-axis-y .uc-limit-label {
     transform: translateY(-50%);
   }

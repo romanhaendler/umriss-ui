@@ -91,8 +91,8 @@ function renderAxis(axis: AxisLayout, limits: readonly LimitLabel[], plot: Rect)
             className="uc-limit-label"
             data-severity={g.severity}
             data-role={g.role}
+            data-own={g.color === undefined ? undefined : ""}
             style={{
-              color: g.color,
               top: `${Math.round(g.px - band.y)}px`,
               // Inside: against the plot's far edge, 4 px in.
               ...(g.inside
@@ -102,7 +102,7 @@ function renderAxis(axis: AxisLayout, limits: readonly LimitLabel[], plot: Rect)
                 : {}),
             }}
           >
-            {g.label}
+            {limitText(g)}
           </span>
         ) : (
           <span
@@ -110,13 +110,13 @@ function renderAxis(axis: AxisLayout, limits: readonly LimitLabel[], plot: Rect)
             className="uc-limit-label"
             data-severity={g.severity}
             data-role={g.role}
+            data-own={g.color === undefined ? undefined : ""}
             style={{
-              color: g.color,
               left: `${Math.round(g.labelLeft - band.x)}px`,
               [position === "top" ? "bottom" : "top"]: `${offset}px`,
             }}
           >
-            {g.label}
+            {limitText(g)}
           </span>
         ),
       )}
@@ -124,6 +124,20 @@ function renderAxis(axis: AxisLayout, limits: readonly LimitLabel[], plot: Rect)
         <span className="uc-axis-title">{axis.label}</span>
       )}
     </div>
+  );
+}
+
+/** A limit's label in its own colour would be text in a colour the caller
+    chose for a line, legible in one theme at best. So the text stays in the
+    axis's text colour, and a short stroke before it - the line's own pattern,
+    drawn by the stylesheet per role - carries the colour. */
+function limitText(g: LimitLabel): ReactNode {
+  if (g.color === undefined) return g.label;
+  return (
+    <>
+      <span className="uc-limit-mark" style={{ color: g.color }} aria-hidden="true" />
+      {g.label}
+    </>
   );
 }
 

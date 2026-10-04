@@ -37,7 +37,10 @@ interface LimitCommonProps {
   /** Any CSS colour value, in place of the one the severity yields. A colour
       handed in instead of a severity puts the rule in the application and the
       presentation in the library, and the two drift apart as soon as a bound
-      moves - so this is for the case that has no severity, not for taste. */
+      moves - so this is for the case that has no severity, not for taste.
+      The line or band takes it; its label keeps the axis's text colour, which
+      stays legible in both themes, and a short stroke before the text in the
+      line's pattern takes this colour. */
   color?: string;
   /** Whether the value widens the axis extent, so that the limit is certainly
       visible.

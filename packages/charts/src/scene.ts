@@ -227,8 +227,9 @@ export interface LimitLabel {
   label: string;
   severity: string;
   role: string;
-  /** The limit's own colour, which its line takes too; without one the
-      stylesheet colours the label by severity and role. */
+  /** The limit's own colour, which its line takes too. The label's text
+      stays in the axis's text colour and a short stroke before it takes this
+      one; without it the stylesheet colours the text by severity and role. */
   color?: string;
 }
 
@@ -314,6 +315,10 @@ const EMPTY_HOVER_SNAPSHOT: HoverSnapshot = {
 
 /** Tolerance within which hits of different series are grouped (R-4.7). */
 const GROUP_TOLERANCE = 4;
+
+/** The stroke before a limit's label in a colour of its own, and its gap to
+    the text (`.uc-limit-mark` in charts.css). */
+const LIMIT_MARK = 10 + 4;
 
 /** Under "nearest", a point this close to the pointer wins over a band or a
     cell under it: the area covers the pointer everywhere, the point is the
@@ -1926,8 +1931,9 @@ export class ChartScene {
       const size = this.measurer?.measure(config.label, CLASS_TICK);
       const height = size?.height ?? 0;
       const px = axis.scale.toPx(value);
-      // As wide as a tick label of its text, and its 2 px padding either side.
-      const width = (size?.width ?? 0) + 4;
+      // As wide as a tick label of its text, and its 2 px padding either side;
+      // in a colour of its own, the stroke before the text as well.
+      const width = (size?.width ?? 0) + 4 + (config.color === undefined ? 0 : LIMIT_MARK);
       out.push({
         id: order,
         axisKey: axis.key,

@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 
 /* The label of a limit in the axis band (props-to-examples 06, found while
-   writing LimitLine/05): it takes the limit's own `color`, and on an x axis it
+   writing LimitLine/05): a limit's own `color` goes to a stroke before its
+   text, the text stays legible in the axis's colour, and on an x axis it
    covers a tick label as it does on a y axis - the tick is left out, not shown
    half. jsdom measures nothing, so a text here is 7 px per character and one
    14 px line, as in the layout tests. */
@@ -50,16 +51,22 @@ const xTicks = (host: HTMLElement) =>
   [...host.querySelectorAll(".uc-axis-x .uc-tick-label")].map((t) => t.textContent);
 
 describe("A limit's label - its colour", () => {
-  it("takes the limit's own colour, as the line does", async () => {
+  it("keeps its text in the axis's colour and puts the limit's own colour on a stroke before it", async () => {
     const host = await chart(<LimitLine value={30} color="#123456" label="Release freeze" />);
     expect(label(host)?.textContent).toBe("Release freeze");
-    expect(label(host)?.style.color).toBe("rgb(18, 52, 86)");
+    // The stylesheet colours a label with `data-own` as a tick label.
+    expect(label(host)?.dataset.own).toBe("");
+    expect(label(host)?.style.color).toBe("");
+    const mark = label(host)?.querySelector<HTMLElement>(".uc-limit-mark");
+    expect(mark?.style.color).toBe("rgb(18, 52, 86)");
+    expect(mark?.getAttribute("aria-hidden")).toBe("true");
   });
 
-  it("leaves the colour to the severity without one", async () => {
+  it("leaves the colour to the severity without one, and draws no stroke", async () => {
     const host = await chart(<LimitLine value={30} label="Too warm" />);
     expect(label(host)?.dataset.severity).toBe("alarm");
-    expect(label(host)?.style.color).toBe("");
+    expect(label(host)?.dataset.own).toBeUndefined();
+    expect(label(host)?.querySelector(".uc-limit-mark")).toBeNull();
   });
 });
 
@@ -68,6 +75,16 @@ describe("A limit's label on an x axis", () => {
     // "Freeze" starts at 38 and reaches over the tick at 40, not to 60.
     const host = await chart(<LimitLine orientation="x" value={38} label="Freeze" />);
     expect(xTicks(host)).toEqual(["0", "20", "60", "80", "100"]);
+  });
+
+  it("counts the stroke of an own colour in its width", async () => {
+    // "Hi" at 50 is 18 px wide and clear of the label of 60; with the stroke
+    // and its gap it is 32 px and reaches over it.
+    const plain = await chart(<LimitLine orientation="x" value={50} label="Hi" />);
+    expect(xTicks(plain)).toContain("60");
+    unmount?.();
+    const own = await chart(<LimitLine orientation="x" value={50} label="Hi" color="#123456" />);
+    expect(xTicks(own)).not.toContain("60");
   });
 
   it("leaves every tick label where it stands clear of them", async () => {
