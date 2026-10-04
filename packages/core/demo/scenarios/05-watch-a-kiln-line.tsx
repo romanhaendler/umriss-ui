@@ -19,7 +19,7 @@ import {
 import type { FreshnessAges, LimitSet } from "../../src";
 import { Chart, ControlChart, DataTable, LimitBand, LimitLine, Line, Tooltip, XAxis, YAxis } from "@umriss-ui/charts";
 import { AlarmList, alarmModel, isHidden, useTableSelection } from "@umriss-ui/table";
-import { Lane, Schedule, Subtasks } from "@umriss-ui/schedule";
+import { useSchedule } from "@umriss-ui/schedule";
 import type { Subtask, Task } from "@umriss-ui/schedule";
 import { Calculation, Difference, Given, Product, Quotient, Ref } from "@umriss-ui/calculation";
 
@@ -512,6 +512,7 @@ function skipTo(event: MouseEvent<HTMLAnchorElement>, id: string) {
 }
 
 export default function ControlRoom() {
+  const { Schedule, Lane, Subtasks } = useSchedule();
   const { minute, wall, running, setRunning } = usePlantMinute();
   const now = at(minute);
   const reading = SHIFT.readings[minute]!;

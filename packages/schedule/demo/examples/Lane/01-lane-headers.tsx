@@ -1,5 +1,5 @@
 import { Badge, Stack, Text } from "@umriss-ui/core";
-import { Lane, Schedule, Subtasks } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Subtask, Task } from "../../../src";
 
 export const title = "What a lane header says";
@@ -16,6 +16,7 @@ const LEGS: Subtask[] = [
 ];
 
 export default function LaneHeaders() {
+  const { Schedule, Lane, Subtasks } = useSchedule();
   return (
     <Schedule ariaLabel="Two vans of the North depot" initialDomain={[at(6), at(12)]} height={150} headerWidth={210}>
       <Lane

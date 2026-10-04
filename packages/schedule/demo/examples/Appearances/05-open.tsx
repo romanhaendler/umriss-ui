@@ -1,4 +1,4 @@
-import { Lane, Schedule, Subtasks } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Subtask, Task } from "../../../src";
 
 export const title = "Open";
@@ -19,6 +19,7 @@ const WORK: Subtask[] = [
 ];
 
 export default function Open() {
+  const { Schedule, Lane, Subtasks } = useSchedule();
   return (
     <Schedule ariaLabel="Work running past the view at either edge" initialDomain={[at(6, 30), at(11)]} height={188}>
       <Lane id="runs-on" label="Runs on" />

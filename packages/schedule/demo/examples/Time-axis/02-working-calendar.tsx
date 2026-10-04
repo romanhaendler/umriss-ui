@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Lane, Schedule, Subtasks, Dependencies, applyIntent } from "../../../src";
+import { applyIntent, useSchedule } from "../../../src";
 import type { Subtask, Task, Dependency } from "../../../src";
 
 export const title = "Cut the nights out of the axis";
@@ -27,6 +27,7 @@ const HANDOVERS: Dependency[] = [
 ];
 
 export default function WorkingCalendar() {
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
   const [legs, setLegs] = useState<readonly Subtask[]>(LEGS);
   return (
     <Schedule

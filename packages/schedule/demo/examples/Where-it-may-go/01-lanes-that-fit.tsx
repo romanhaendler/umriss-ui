@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Stack, Text } from "@umriss-ui/core";
-import { Lane, Schedule, Subtasks, applyIntent } from "../../../src";
+import { applyIntent, useSchedule } from "../../../src";
 import type { Intent, Subtask, Task } from "../../../src";
 
 export const title = "Keep work on the lanes that fit";
@@ -30,6 +30,7 @@ const START: Subtask[] = [
 const mayGo = (subtask: Subtask, lane: string) => subtask.task !== "chilled" || COOLED.includes(lane);
 
 export default function LanesThatFit() {
+  const { Schedule, Lane, Subtasks } = useSchedule();
   const [work, setWork] = useState<readonly Subtask[]>(START);
   const [last, setLast] = useState("Drag the vaccines onto the dry van");
 

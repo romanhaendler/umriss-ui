@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Lane, Schedule, Subtasks, applyIntent } from "../../../src";
+import { applyIntent, useSchedule } from "../../../src";
 import type { Subtask, Task } from "../../../src";
 
 export const title = "Snap to the ticks";
@@ -13,6 +13,7 @@ const TOURS: readonly Task[] = [{ id: "river", name: "Riverside depot tours", co
 const START: readonly Subtask[] = [{ id: "T-04", task: "river", lane: "van-402", from: at(7, 30), to: at(12, 10) }];
 
 export default function SnapToTheTicks() {
+  const { Schedule, Lane, Subtasks } = useSchedule();
   const [tours, setTours] = useState(START);
   return (
     <Schedule

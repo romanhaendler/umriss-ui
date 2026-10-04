@@ -1,4 +1,4 @@
-import { Lane, Schedule, Subtasks } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Subtask, Task } from "../../../src";
 
 /* Data from the operations world, written out here so the example runs on its own. */
@@ -57,6 +57,7 @@ const DUTIES: Subtask[] = ONCALL.map((duty) => ({ id: duty.id, task: duty.rotati
 const WEEK: readonly [number, number] = [new Date(2026, 2, 16).getTime(), new Date(2026, 2, 23, 12).getTime()];
 
 export default function AWeek() {
+  const { Schedule, Lane, Subtasks } = useSchedule();
   return (
     <Schedule ariaLabel="On-call rota, 16 to 23 March" initialDomain={WEEK} height={420}>
       {ENGINEERS.map((engineer) => (

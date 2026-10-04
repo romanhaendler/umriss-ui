@@ -1,7 +1,10 @@
 /* @umriss-ui/schedule - subtasks on lanes over time (ADR-0022, ADR-0023). */
 
-export { Schedule, type ScheduleProps } from "./Schedule";
-export { Lane, Subtasks, Dependencies, type LaneProps, type SubtasksProps, type DependenciesProps } from "./parts";
+/* `useSchedule` stands where the free `Schedule` stood (charts-bound-to-rows
+   08): it brings the schedule's stylesheet, so its place keeps their order. */
+export { useSchedule, type ScheduleParts } from "./useSchedule";
+export type { ScheduleProps } from "./Schedule";
+export type { LaneProps, SubtasksProps, DependenciesProps } from "./parts";
 export type { ScheduleHit, ScheduleInteraction } from "./scene";
 
 /* The pure modules: the arithmetic a caller runs over its own data - the
@@ -41,12 +44,10 @@ export type { ResolvedAppearance, SubtaskAppearance } from "./appearance";
 
 /* What `schedule-lane-groups` added: the lane groups (ADR-0025), at the end by
    the workspace's rule for new exports. */
-export { LaneGroup } from "./parts";
 export type { LaneGroupProps } from "./parts";
 
 /* What `demo-rework` 08 added: blocked time per lane, at the end by the
    workspace's rule for new exports. */
-export { BlockedTimes } from "./parts";
 export type { BlockedTimesProps } from "./parts";
 export type { BlockedTime } from "./model";
 export { inBlockedTime } from "./findings";

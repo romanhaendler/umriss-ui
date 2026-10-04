@@ -1,4 +1,4 @@
-import { Lane, LaneGroup, Schedule, Subtasks } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Subtask, Task } from "../../../src";
 
 export const title = "Nest groups to any depth";
@@ -25,6 +25,7 @@ const LEGS: Subtask[] = [
 ];
 
 export default function Nesting() {
+  const { Schedule, Lane, LaneGroup, Subtasks } = useSchedule();
   return (
     <Schedule ariaLabel="North depot with its vans and a truck, and a van from Riverside" initialDomain={[at(6), at(15)]} height={330} headerWidth={200}>
       <LaneGroup id="north" label="North depot">

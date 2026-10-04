@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Stack, Text } from "@umriss-ui/core";
-import { BlockedTimes, Lane, Schedule, Subtasks, applyIntent } from "../../../src";
+import { applyIntent, useSchedule } from "../../../src";
 import type { BlockedTime, Intent, Subtask } from "../../../src";
 
 /* Data from the planning world, written out here so the example runs on its own. */
@@ -121,6 +121,7 @@ const START_ROLE = new Map(START.map((item) => [item.id, roleOf(item.lane)]));
 const mayGo = (item: Subtask, lane: string) => START_ROLE.get(item.id) === roleOf(lane);
 
 export default function AroundLeave() {
+  const { Schedule, Lane, Subtasks, BlockedTimes } = useSchedule();
   const [work, setWork] = useState<readonly Subtask[]>(START);
   const [last, setLast] = useState("Drag Freya's store screenshots into her holiday");
 

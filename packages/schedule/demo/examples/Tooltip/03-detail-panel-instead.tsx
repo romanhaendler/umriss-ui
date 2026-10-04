@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Badge, Card, CardBody, Stack, Text } from "@umriss-ui/core";
-import { Lane, Schedule, Subtasks } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { ScheduleInteraction } from "../../../src";
 
 /* Data from the planning world, written out here so the example runs on its own. */
@@ -91,6 +91,7 @@ const WEB = PEOPLE.filter((person) => person.team === "Web");
 const WEB_WORK = WORK.filter((item) => WEB.some((person) => person.id === item.lane));
 
 export default function DetailPanelInstead() {
+  const { Schedule, Lane, Subtasks } = useSchedule();
   const [item, setItem] = useState<WorkItem | null>(null);
 
   const onInteraction = (interaction: ScheduleInteraction) => {

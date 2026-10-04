@@ -1,4 +1,4 @@
-import { Lane, Schedule, Subtasks, Dependencies } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Subtask, Task, Dependency } from "../../../src";
 
 export const title = "A day of tours";
@@ -46,6 +46,7 @@ const HANDOVERS: readonly Dependency[] = [
 ];
 
 export default function FirstSchedule() {
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
   return (
     <Schedule ariaLabel="Tours of Tuesday, 17 March" initialDomain={DAY} height={240}>
       {VEHICLES.map((vehicle) => (

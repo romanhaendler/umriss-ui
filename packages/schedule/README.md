@@ -24,7 +24,7 @@ the working calendar, the canvas colour resolution — from charts. React 18 or
 ## The smallest schedule that runs
 
 ```tsx
-import { Lane, Schedule, Subtasks, Dependencies } from "@umriss-ui/schedule";
+import { useSchedule } from "@umriss-ui/schedule";
 import type { Subtask, Task, Dependency } from "@umriss-ui/schedule";
 
 const at = (h: number, m = 0) => new Date(2026, 2, 17, h, m).getTime();
@@ -37,6 +37,7 @@ const subtasks: Subtask[] = [
 const dependencies: Dependency[] = [{ id: "move", from: "cut", to: "mill", lag: 15 * 60_000 }];
 
 export function Plan() {
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
   return (
     <Schedule ariaLabel="Plan of Tuesday" initialDomain={[at(5), at(12)]}>
       <Lane id="saw" label="Saw" />

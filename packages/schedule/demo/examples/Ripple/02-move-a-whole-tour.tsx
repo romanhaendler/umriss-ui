@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button, Stack } from "@umriss-ui/core";
-import { Dependencies, Lane, Schedule, Subtasks, applyIntent, shiftTask } from "../../../src";
+import { applyIntent, shiftTask, useSchedule } from "../../../src";
 import type { Dependency, Subtask, Task } from "../../../src";
 
 export const title = "Move a whole tour";
@@ -31,6 +31,7 @@ const DRIVES: readonly Dependency[] = [
 ];
 
 export default function MoveAWholeTour() {
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
   const [stops, setStops] = useState<readonly Subtask[]>(START);
   const move = (by: number) =>
     setStops((current) => shiftTask(current, "T-01", by).reduce((data, one) => data.map((s) => applyIntent(s, one)), current));

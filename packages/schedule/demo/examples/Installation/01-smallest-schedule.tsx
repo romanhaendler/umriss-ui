@@ -1,4 +1,4 @@
-import { Dependencies, Lane, Schedule, Subtasks } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Dependency, Subtask, Task } from "../../../src";
 
 export const title = "The smallest schedule";
@@ -18,6 +18,7 @@ const subtasks: Subtask[] = [
 const dependencies: Dependency[] = [{ id: "handover", from: "design", to: "build", lag: min(15) }];
 
 export default function SmallestSchedule() {
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
   return (
     <Schedule ariaLabel="Tuesday, design and build" initialDomain={[at(8), at(16)]} height={150}>
       <Lane id="noah" label="Noah Fischer" />

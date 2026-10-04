@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Stack, Text } from "@umriss-ui/core";
-import { BlockedTimes, Lane, Schedule, Subtasks, applyIntent } from "../../../src";
+import { applyIntent, useSchedule } from "../../../src";
 import type { BlockedTime, Intent, Subtask, Task } from "../../../src";
 
 export const title = "Plan work around someone's leave";
@@ -29,6 +29,7 @@ const START: readonly Subtask[] = [
 const BLOCKED: readonly BlockedTime[] = [{ id: "anna-leave", lane: "anna", from: day(2, 0), to: day(4, 0), label: "Leave" }];
 
 export default function DragAround() {
+  const { Schedule, Lane, Subtasks, BlockedTimes } = useSchedule();
   const [work, setWork] = useState<readonly Subtask[]>(START);
   const [last, setLast] = useState("Drag the design review into Anna's leave");
 

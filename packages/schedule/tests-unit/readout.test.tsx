@@ -8,7 +8,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render } from "@testing-library/react";
 import { LanguageProvider } from "@umriss-ui/core";
 import { GERMAN_FORMATS, GERMAN_WORDING } from "@umriss-ui/core/wording/de";
-import { Lane, Schedule, Subtasks, Dependencies } from "../src";
+import { useSchedule } from "../src";
 import type { Subtask } from "../src";
 
 const at = (hour: number) => new Date(2026, 2, 17, hour).getTime();
@@ -25,14 +25,19 @@ beforeEach(() => {
 });
 afterEach(() => vi.restoreAllMocks());
 
-const plan = (
-  <Schedule ariaLabel="Plan of week 12" initialDomain={[at(6), at(14)]}>
-    <Lane id="press" label="Press" />
-    <Lane id="paint" label="Paint shop" />
-    <Dependencies data={[{ id: "t", from: "c", to: "p", lag: 5_400_000 }]} />
-    <Subtasks data={WORK} tasks={[{ id: "o1", color: "red", name: "Order 1" }, { id: "o2", color: "blue", name: "Order 2" }]} />
-  </Schedule>
-);
+function Plan() {
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
+  return (
+    <Schedule ariaLabel="Plan of week 12" initialDomain={[at(6), at(14)]}>
+      <Lane id="press" label="Press" />
+      <Lane id="paint" label="Paint shop" />
+      <Dependencies data={[{ id: "t", from: "c", to: "p", lag: 5_400_000 }]} />
+      <Subtasks data={WORK} tasks={[{ id: "o1", color: "red", name: "Order 1" }, { id: "o2", color: "blue", name: "Order 2" }]} />
+    </Schedule>
+  );
+}
+
+const plan = <Plan />;
 
 const plotOf = (host: HTMLElement) => host.querySelector<HTMLElement>("[role='application']")!;
 const readout = (host: HTMLElement) => host.querySelector("[aria-live='polite']")?.textContent ?? "";

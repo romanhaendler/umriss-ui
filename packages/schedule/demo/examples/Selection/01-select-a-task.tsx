@@ -1,4 +1,4 @@
-import { Dependencies, Lane, Schedule, Subtasks } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Dependency, Subtask, Task } from "../../../src";
 
 export const title = "Select a task";
@@ -27,6 +27,7 @@ const TRANSFERS: readonly Dependency[] = [
 ];
 
 export default function SelectATask() {
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
   return (
     <Schedule ariaLabel="Two consignments at North depot" initialDomain={[at(5, 30), at(13, 30)]} height={140}>
       <Lane id="truck-118" label="Truck FP 118 R" />

@@ -1,4 +1,4 @@
-import { Dependencies, Lane, Schedule, Subtasks } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Dependency, Subtask, Task } from "../../../src";
 
 /* Data from the plant world, written out here so the example runs on its own. */
@@ -79,6 +79,7 @@ const NAMES = new Map(ORDERS.map((order) => [order.id, order.name ?? order.id]))
 const HALF_PAST_TEN = new Date(2026, 2, 17, 10, 30).getTime();
 
 export default function MachinePlan() {
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
   return (
     <Schedule
       ariaLabel="Machine shop, Tuesday 17 March"

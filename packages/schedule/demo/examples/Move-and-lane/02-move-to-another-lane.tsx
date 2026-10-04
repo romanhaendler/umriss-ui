@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Stack, Text } from "@umriss-ui/core";
-import { Dependencies, Lane, Schedule, Subtasks, applyIntent } from "../../../src";
+import { applyIntent, useSchedule } from "../../../src";
 import type { Dependency, Intent, Subtask, Task } from "../../../src";
 
 export const title = "Move work onto another lane";
@@ -40,6 +40,7 @@ const TRANSFERS: readonly Dependency[] = [
 ];
 
 export default function MoveToAnotherLane() {
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
   const [legs, setLegs] = useState(LEGS);
   const [last, setLast] = useState<Intent | null>(null);
 

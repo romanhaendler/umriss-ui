@@ -1,4 +1,4 @@
-import { Lane, Schedule, Subtasks } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Subtask, Task } from "../../../src";
 
 export const title = "Provisional";
@@ -16,6 +16,7 @@ const WORK: Subtask[] = [
 ];
 
 export default function Provisional() {
+  const { Schedule, Lane, Subtasks } = useSchedule();
   return (
     <Schedule ariaLabel="Agreed work above, provisional work below" initialDomain={[at(6, 30), at(11)]} height={144}>
       <Lane id="released" label="Agreed, with lead-in" />

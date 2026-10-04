@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ContextMenu, MenuItem } from "@umriss-ui/core";
-import { Lane, Schedule, Subtasks, applyIntent } from "../../../src";
+import { applyIntent, useSchedule } from "../../../src";
 import type { ScheduleInteraction, Subtask, Task } from "../../../src";
 
 /* Data from the operations world, written out here so the example runs on its own. */
@@ -67,6 +67,7 @@ const START: readonly Subtask[] = ONCALL.map((duty) => ({
 }));
 
 export default function OpenAContextMenu() {
+  const { Schedule, Lane, Subtasks } = useSchedule();
   const [rota, setRota] = useState<readonly Subtask[]>(START);
   const [menu, setMenu] = useState<{ interaction: ScheduleInteraction; duty: Subtask } | null>(null);
 

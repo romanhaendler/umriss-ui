@@ -1,4 +1,4 @@
-import { Dependencies, Lane, Schedule, Subtasks } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Dependency, Subtask, Task } from "../../../src";
 
 export const title = "Read the default tooltip";
@@ -34,6 +34,7 @@ const TRANSFERS: readonly Dependency[] = [
 ];
 
 export default function DefaultTooltip() {
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
   return (
     <Schedule ariaLabel="Three vehicles with the default tooltip" initialDomain={[at(5, 30), at(18)]} height={196}>
       {VEHICLES.map((vehicle) => (

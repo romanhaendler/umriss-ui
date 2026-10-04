@@ -1,4 +1,4 @@
-import { Lane, Schedule, Subtasks } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Subtask, Task } from "../../../src";
 
 export const title = "Fixed";
@@ -15,6 +15,7 @@ const LEGS: Subtask[] = [
 ];
 
 export default function Fixed() {
+  const { Schedule, Lane, Subtasks } = useSchedule();
   return (
     <Schedule
       ariaLabel="A round that may move above, a booked slot below"

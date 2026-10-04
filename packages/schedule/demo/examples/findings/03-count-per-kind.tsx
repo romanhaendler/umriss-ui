@@ -1,5 +1,5 @@
 import { Badge, Stack } from "@umriss-ui/core";
-import { Dependencies, Lane, Schedule, Subtasks, overlaps, violatedDependencies } from "../../../src";
+import { overlaps, useSchedule, violatedDependencies } from "../../../src";
 import type { Dependency, Subtask, Task } from "../../../src";
 
 export const title = "Count the findings per kind";
@@ -33,6 +33,7 @@ const TRANSFERS: readonly Dependency[] = [
 ];
 
 export default function CountPerKind() {
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
   const doubleBooked = overlaps(LEGS).length;
   const late = violatedDependencies(LEGS, TRANSFERS).length;
 

@@ -1,4 +1,4 @@
-import { Lane, Schedule, Subtasks } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Subtask, Task } from "../../../src";
 
 export const title = "Colour by what the task means";
@@ -25,6 +25,7 @@ const WORK: Subtask[] = [
 ];
 
 export default function TaskColours() {
+  const { Schedule, Lane, Subtasks } = useSchedule();
   return (
     <Schedule ariaLabel="Projects due this week among the rest" initialDomain={[at(16, 6), at(20, 20)]} height={150}>
       <Lane id="chloe" label="Chloe Durand" />

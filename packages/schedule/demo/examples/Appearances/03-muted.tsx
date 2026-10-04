@@ -1,4 +1,4 @@
-import { Lane, Schedule, Subtasks } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Subtask, Task } from "../../../src";
 
 export const title = "Muted";
@@ -16,6 +16,7 @@ const WORK: Subtask[] = [
 ];
 
 export default function Muted() {
+  const { Schedule, Lane, Subtasks } = useSchedule();
   return (
     <Schedule
       ariaLabel="Our team's work above, another team's below"

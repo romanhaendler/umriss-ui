@@ -1,4 +1,4 @@
-import { Dependencies, Lane, Schedule, Subtasks } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Dependency, Subtask, Task } from "../../../src";
 
 export const title = "Per dependency";
@@ -25,6 +25,7 @@ const HANDOVERS: Dependency[] = [
 ];
 
 export default function PerDependency() {
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
   return (
     <Schedule ariaLabel="Search results, from layout to polish, straight lines but one" initialDomain={[at(6, 30), at(13, 30)]} height={188} route="straight" attach="nearest">
       <Lane id="noah" label="Noah Fischer" />

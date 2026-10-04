@@ -1,4 +1,4 @@
-import { Lane, LaneGroup, Schedule, Subtasks } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Subtask, Task } from "../../../src";
 
 export const title = "Start with groups folded";
@@ -20,6 +20,7 @@ const WORK: Subtask[] = [
 ];
 
 export default function StartWithGroupsFolded() {
+  const { Schedule, Lane, LaneGroup, Subtasks } = useSchedule();
   return (
     <Schedule
       ariaLabel="Two teams rolling out a release, Discovery folded at the start"

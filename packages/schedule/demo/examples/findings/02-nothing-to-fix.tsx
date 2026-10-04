@@ -1,5 +1,5 @@
 import { EmptyState, Stack } from "@umriss-ui/core";
-import { Lane, Schedule, Subtasks, findings } from "../../../src";
+import { findings, useSchedule } from "../../../src";
 import type { Subtask, Task } from "../../../src";
 
 export const title = "Say when there is nothing to fix";
@@ -16,6 +16,7 @@ const WORK: readonly Subtask[] = [
 ];
 
 export default function NothingToFix() {
+  const { Schedule, Lane, Subtasks } = useSchedule();
   const found = findings(WORK, []);
   const count = found.overlaps.length + found.violatedDependencies.length + found.inBlockedTime.length;
 

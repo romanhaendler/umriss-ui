@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Lane, Schedule, Subtasks, applyIntent } from "../../../src";
+import { applyIntent, useSchedule } from "../../../src";
 import type { Subtask, Task } from "../../../src";
 
 export const title = "Snap to a duration";
@@ -17,6 +17,7 @@ const START: readonly Subtask[] = [
 ];
 
 export default function SnapToADuration() {
+  const { Schedule, Lane, Subtasks } = useSchedule();
   const [work, setWork] = useState(START);
   return (
     <Schedule

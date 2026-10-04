@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Lane, LaneGroup, Schedule, Subtasks, Dependencies, applyIntent, findings } from "../../../src";
+import { applyIntent, findings, useSchedule } from "../../../src";
 import { Stack, Text } from "@umriss-ui/core";
 import type { Subtask, Task, Dependency } from "../../../src";
 
@@ -43,6 +43,7 @@ const HANDOVERS: Dependency[] = [
 const FOUND = findings(LEGS, HANDOVERS);
 
 export default function TheMiniature() {
+  const { Schedule, Lane, LaneGroup, Subtasks, Dependencies } = useSchedule();
   const [folded, setFolded] = useState<readonly string[]>(["north"]);
   const [legs, setLegs] = useState<readonly Subtask[]>(LEGS);
   const [last, setLast] = useState("Hold a bar over the folded depot");

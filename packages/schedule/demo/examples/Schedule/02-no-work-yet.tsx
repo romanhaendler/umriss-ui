@@ -1,4 +1,4 @@
-import { Lane, Schedule, Subtasks } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Subtask, Task } from "../../../src";
 
 export const title = "Start from an empty plan";
@@ -17,6 +17,7 @@ const PEOPLE = [
 ];
 
 export default function NoWorkYet() {
+  const { Schedule, Lane, Subtasks } = useSchedule();
   return (
     <Schedule ariaLabel="Sprint 15, nothing planned yet" initialDomain={[at(23, 8), at(27, 18)]} height={170}>
       {PEOPLE.map((person) => (

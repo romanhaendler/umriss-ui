@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Stack, Text } from "@umriss-ui/core";
-import { Lane, Schedule, Subtasks } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { ScheduleHandle, Subtask, Task } from "../../../src";
 
 export const title = "Place a mark of your own";
@@ -34,6 +34,7 @@ const CUT_OFF = at(14);
 const clock = (time: number) => new Date(time).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 
 export default function PlaceAMark() {
+  const { Schedule, Lane, Subtasks } = useSchedule();
   const plan = useRef<ScheduleHandle>(null);
   const host = useRef<HTMLDivElement>(null);
   const [domain, setDomain] = useState<readonly [number, number]>([at(5, 30), at(18)]);

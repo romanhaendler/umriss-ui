@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button, Stack, Text } from "@umriss-ui/core";
-import { Lane, LaneGroup, Schedule, Subtasks } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Subtask, Task } from "../../../src";
 
 export const title = "Fold groups from outside";
@@ -25,6 +25,7 @@ const WORK: Subtask[] = [
 const ALL = ["payments", "discovery"];
 
 export default function Controlled() {
+  const { Schedule, Lane, LaneGroup, Subtasks } = useSchedule();
   const [folded, setFolded] = useState<readonly string[]>(["discovery"]);
 
   return (

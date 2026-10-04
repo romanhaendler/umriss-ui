@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Lane, Schedule, Subtasks, applyIntent } from "../../../src";
+import { applyIntent, useSchedule } from "../../../src";
 import type { Subtask, Task } from "../../../src";
 
 export const title = "Change lead-in and lead-out";
@@ -18,6 +18,7 @@ const START: Subtask[] = [
 ];
 
 export default function ChangeLeadInAndLeadOut() {
+  const { Schedule, Lane, Subtasks } = useSchedule();
   const [tours, setTours] = useState(START);
 
   return (

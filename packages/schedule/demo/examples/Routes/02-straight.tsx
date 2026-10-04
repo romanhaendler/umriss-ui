@@ -1,4 +1,4 @@
-import { Dependencies, Lane, Schedule, Subtasks } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Dependency, Subtask, Task } from "../../../src";
 
 export const title = "Straight";
@@ -24,6 +24,7 @@ const HANDOVERS: Dependency[] = [
 ];
 
 export default function Straight() {
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
   return (
     <Schedule ariaLabel="Search results, from layout to polish, straight lines" initialDomain={[at(6, 30), at(13, 30)]} height={188} route="straight" attach="nearest">
       <Lane id="noah" label="Noah Fischer" />

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Stack, Text } from "@umriss-ui/core";
-import { Dependencies, Lane, Schedule, Subtasks } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Dependency, ScheduleInteraction, Subtask, Task } from "../../../src";
 
 export const title = "Report what the pointer is on";
@@ -37,6 +37,7 @@ const describe = (interaction: ScheduleInteraction): string => {
 };
 
 export default function ReportThePointer() {
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
   const [last, setLast] = useState("Move the pointer over the plan");
 
   return (

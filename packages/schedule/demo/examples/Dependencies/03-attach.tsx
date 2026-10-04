@@ -1,5 +1,5 @@
 import { Stack, Text } from "@umriss-ui/core";
-import { Lane, Schedule, Subtasks, Dependencies } from "../../../src";
+import { useSchedule } from "../../../src";
 import type { Subtask, Task, Dependency, DependencyAttachment } from "../../../src";
 
 export const title = "Choose where a line touches its bars";
@@ -29,6 +29,7 @@ const HANDOVERS: Dependency[] = [
 ];
 
 function Variant({ attach }: { attach: DependencyAttachment }) {
+  const { Schedule, Lane, Subtasks, Dependencies } = useSchedule();
   return (
     <Stack gap={1}>
       <Text size="xs" tone="muted" mono>
