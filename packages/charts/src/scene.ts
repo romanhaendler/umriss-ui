@@ -860,7 +860,7 @@ export class ChartScene {
       fnEqual(previous.format, config.format) &&
       previous.color === config.color &&
       previous.tone === config.tone &&
-      previous.hidden === config.hidden &&
+      this.isHidden(previous) === this.isHidden(config) &&
       ownFieldsEqual(previous, config);
     if (entry.slot < 0 && takesPalette(config)) {
       entry.slot = this.slotFor(config.name);
@@ -875,7 +875,7 @@ export class ChartScene {
     if (equal) return; // R-2.2: no dirty flag without a change of substance
     entry.buckets = null; // the colouring may have changed
     // A hidden member leaves its place in the stack: the others sum anew.
-    if (previous.hidden !== config.hidden && stackOf(config) !== undefined) this.materialsDirty = true;
+    if (this.isHidden(previous) !== this.isHidden(config) && stackOf(config) !== undefined) this.materialsDirty = true;
     if (!dataEqual) {
       entry.materialized = null;
       entry.extent = null;
@@ -920,7 +920,7 @@ export class ChartScene {
       previous.alignTicks === config.alignTicks &&
       listEqual(previous.ticks as number[] | undefined, config.ticks as number[] | undefined) &&
       domainEqual(previous.domain, config.domain) &&
-      (previous.onDomainChange === undefined) === (config.onDomainChange === undefined) &&
+      this.zooms(previous) === this.zooms(config) &&
       fnEqual(previous.tickFormat, config.tickFormat);
     entry.config = config;
     if (equal) return;
@@ -1335,7 +1335,7 @@ export class ChartScene {
     const stacks = new Map<string, SeriesEntry[]>();
     for (const entry of this.seriesInOrder()) {
       const key = stackOf(entry.config);
-      if (key === undefined || entry.config.hidden === true || entry.materialized === null || entry.own === null) continue;
+      if (key === undefined || this.isHidden(entry.config) || entry.materialized === null || entry.own === null) continue;
       const members = stacks.get(key);
       if (members === undefined) stacks.set(key, [entry]);
       else members.push(entry);
@@ -1593,7 +1593,7 @@ export class ChartScene {
       xAxisId: entry.config.xAxisId,
       yAxisId: entry.config.yAxisId,
       // A hidden series has no say: the axis fits what is shown.
-      extent: entry.config.hidden === true ? null : visible ? this.visibleExtentOf(entry) : entry.extent,
+      extent: this.isHidden(entry.config) ? null : visible ? this.visibleExtentOf(entry) : entry.extent,
     }));
     return axisExtent(orientation, id, bindings, this.limitValues(orientation, id));
   }
@@ -1801,13 +1801,13 @@ export class ChartScene {
           const known = seen.get(key);
           if (known !== undefined) {
             if (!known.seriesIds.includes(entry.order)) known.seriesIds.push(entry.order);
-            known.hidden &&= config.hidden === true;
+            known.hidden &&= this.isHidden(config);
             return;
           }
           const item: LegendItem = {
             id: `${entry.order}:${k}`,
             name: z.label,
-            hidden: config.hidden === true,
+            hidden: this.isHidden(config),
             color: z.color,
             seriesIds: [entry.order],
             mark: hatches === null ? null : { dash: null, marker: null, swatches: [{ color: this.paint(z.color), hatch: hatches.get(z.label) ?? "none" }], ground: theme.colorBg },
@@ -1820,7 +1820,7 @@ export class ChartScene {
       out.push({
         id: String(entry.order),
         name: this.nameFor(entry, i),
-        hidden: config.hidden === true,
+        hidden: this.isHidden(config),
         color:
           config.kind === "matrix"
             ? chipOf(matrixColors(config.coloring, theme))
@@ -1965,7 +1965,7 @@ export class ChartScene {
     const items: SeriesDrawItem[] = [];
     let hatches: Map<string, Hatch> | undefined;
     // A hidden bar leaves no empty place in its group.
-    const series = this.seriesInOrder().filter((e) => e.config.hidden !== true);
+    const series = this.seriesInOrder().filter((e) => !this.isHidden(e.config));
     // A highlight of nothing drawn - a hidden series' legend entry - dims nothing.
     const lit = this.highlight;
     const highlight = lit !== null && series.some((e) => lit.includes(e.order)) ? lit : null;
@@ -2098,7 +2098,7 @@ export class ChartScene {
       compute their offsets from different group widths and lie on top of one
       another. */
   private placements(): Map<number, BarPlacement> {
-    const series = this.seriesInOrder().filter((e) => e.config.hidden !== true);
+    const series = this.seriesInOrder().filter((e) => !this.isHidden(e.config));
     const groups = barGroups(
       series.map((e) => ({
         order: e.order,
@@ -2128,7 +2128,7 @@ export class ChartScene {
     let latest = Number.NEGATIVE_INFINITY;
     for (const e of this.series.values()) {
       const m = e.materialized;
-      if (m === null || m.length === 0 || e.config.hidden === true || e.config.xAxisId !== entry.config.xAxisId) continue;
+      if (m === null || m.length === 0 || this.isHidden(e.config) || e.config.xAxisId !== entry.config.xAxisId) continue;
       const x = m.x[m.length - 1] as number;
       if (x > latest) latest = x;
     }
@@ -2268,7 +2268,7 @@ export class ChartScene {
     let placements: Map<number, BarPlacement> | undefined;
     this.seriesInOrder().forEach((entry, i) => {
       const mat = entry.materialized;
-      if (mat === null || mat.length === 0 || entry.config.hidden === true) return;
+      if (mat === null || mat.length === 0 || this.isHidden(entry.config)) return;
       const config = entry.config;
       const xAxis = this.findAxis("x", config.xAxisId);
       const yAxis = this.findAxis("y", config.yAxisId);
@@ -2398,7 +2398,7 @@ export class ChartScene {
   /** The visible series with points, in registration order. */
   private walkable(): SeriesEntry[] {
     return this.seriesInOrder().filter(
-      (e) => e.config.hidden !== true && e.materialized !== null && e.materialized.length > 0,
+      (e) => !this.isHidden(e.config) && e.materialized !== null && e.materialized.length > 0,
     );
   }
 
@@ -2935,6 +2935,24 @@ export class ChartScene {
     return axis === null ? null : axis.scale.toPx(x.value);
   }
 
+  /* ---------- The view (ADR-0047) ----------
+
+     How the reader is looking: which series are hidden, which x axes zoom and
+     where a proposed domain goes. The scene asks only here; today the answers
+     are the caller's props, the chart's own view takes this place. */
+
+  private isHidden(config: SeriesConfig): boolean {
+    return config.hidden === true;
+  }
+
+  private zooms(config: AxisConfig): boolean {
+    return config.orientation === "x" && config.onDomainChange !== undefined;
+  }
+
+  private proposeDomain(config: AxisConfig, domain: [number, number]): void {
+    config.onDomainChange?.(domain);
+  }
+
   /* ---------- Zoom and pan (charts-long-series 01) ----------
 
      The schedule's model, not its code: Ctrl or ⌘ with the wheel zooms - a
@@ -2952,7 +2970,7 @@ export class ChartScene {
 
   private hasZoom(): boolean {
     for (const { config } of this.axes.values()) {
-      if (config.orientation === "x" && config.onDomainChange !== undefined) return true;
+      if (this.zooms(config)) return true;
     }
     return false;
   }
@@ -2961,7 +2979,7 @@ export class ChartScene {
   private zoomAxes(): { config: AxisConfig; layout: AxisLayout }[] {
     const out: { config: AxisConfig; layout: AxisLayout }[] = [];
     for (const { config } of this.axesInOrder()) {
-      if (config.orientation !== "x" || config.onDomainChange === undefined) continue;
+      if (!this.zooms(config)) continue;
       const layout = this.findAxis("x", config.id);
       if (layout !== null) out.push({ config, layout });
     }
@@ -2973,7 +2991,7 @@ export class ChartScene {
       const domain = next(this.proposed.get(config.id) ?? layout.scale.domain, config.id);
       if (!(domain[1] - domain[0] > 0) || !Number.isFinite(domain[1] - domain[0])) continue;
       this.proposed.set(config.id, domain);
-      config.onDomainChange?.(domain);
+      this.proposeDomain(config, domain);
     }
   }
 
@@ -3278,7 +3296,7 @@ export class ChartScene {
   private showsAPoint(): boolean {
     for (const entry of this.series.values()) {
       const mat = entry.materialized;
-      if (mat === null || entry.config.hidden === true) continue;
+      if (mat === null || this.isHidden(entry.config)) continue;
       for (let i = 0; i < mat.length; i++) {
         if (!Number.isNaN(mat.y[i] as number) && (mat.w === null || Number.isFinite(mat.w[i] as number))) return true;
       }
