@@ -43,7 +43,8 @@ checkShell({
      but finds more than the palette's fifty rows, so the list no longer
      shrank. */
   pointer: { wide: "se", narrow: "multiselect" },
-  contents: { pageId: "select", id: "states", title: "States" },
+  /* A page without a configurator: the check finds the first example under the head. */
+  contents: { pageId: "treeview", id: "tick-a-selection", title: "Tick a selection" },
   foldedRow: { pageId: "popover", id: "PopoverProps-role" },
   synonyms: [
     { query: "snackbar", name: "Toast", pageId: "toast" },

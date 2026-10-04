@@ -15,8 +15,8 @@ import { ALL_PAGES, open, openExample } from "./navigation";
 
 checkInstall({ open, pages: ALL_PAGES, command: "npm install @umriss-ui/core" });
 
-/* Not the Button page: a configurator takes its first slot (.scratch/configurator). */
-checkFirstExample({ open, pageId: "select", title: "Select" });
+/* A page without a configurator, which would take the first slot (.scratch/configurator). */
+checkFirstExample({ open, pageId: "treeview", title: "A tree" });
 
 checkPage({
   open,
