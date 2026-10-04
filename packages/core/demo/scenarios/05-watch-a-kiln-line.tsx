@@ -17,7 +17,7 @@ import {
   Text,
 } from "../../src";
 import type { FreshnessAges, LimitSet } from "../../src";
-import { Chart, ControlChart, DataTable, LimitBand, LimitLine, Line, Tooltip, XAxis, YAxis } from "@umriss-ui/charts";
+import { ControlChart, DataTable, LimitBand, LimitLine, Tooltip, useChart } from "@umriss-ui/charts";
 import { AlarmList, alarmModel, isHidden, useTableSelection } from "@umriss-ui/table";
 import { useSchedule } from "@umriss-ui/schedule";
 import type { Subtask, Task } from "@umriss-ui/schedule";
@@ -530,6 +530,8 @@ export default function ControlRoom() {
     () => upTo(SHIFT.samples, minute).map((one) => ({ ...one, t: at(one.minute) })),
     [minute],
   );
+  const kilnTrend = useChart(trend);
+  const tileLength = useChart(measured);
   const alarms = useMemo(
     () =>
       alarmModel(
@@ -612,15 +614,15 @@ export default function ControlRoom() {
       </Region>
 
       <Region id="room-trend" title="Kiln trend" callout="3">
-        <Chart data={trend} height={240} ariaLabel="Kiln K1, zone 3, over the shift">
-          <XAxis accessor={(d: Point) => d.t} domain={[at(0), at(LAST)]} time />
-          <YAxis accessor={(d: Point) => d.kiln} domain={[1170, 1250]} label="°C" />
+        <kilnTrend.Chart height={240} ariaLabel="Kiln K1, zone 3, over the shift">
+          <kilnTrend.XAxis value="t" domain={[at(0), at(LAST)]} time />
+          <kilnTrend.YAxis value="kiln" domain={[1170, 1250]} label="°C" />
           <LimitBand from={KILN.tolerance[0]} to={KILN.tolerance[1]} severity="warning" label="Tolerance" />
           <LimitLine value={KILN.alarm} severity="alarm" label="Alarm limit" />
-          <Line accessor={(d: Point) => d.kiln} name="Zone 3" format={(v) => `${v.toFixed(1)} °C`} />
+          <kilnTrend.Line value="kiln" name="Zone 3" format={(v) => `${v.toFixed(1)} °C`} />
           <Tooltip mode="x" />
           <DataTable />
-        </Chart>
+        </kilnTrend.Chart>
       </Region>
 
       <Region id="room-alarms" title="Alarms" quiet callout="4">
@@ -638,9 +640,9 @@ export default function ControlRoom() {
       </Region>
 
       <Region id="room-quality" title="Tile length">
-        <Chart data={measured} height={220} ariaLabel="Tile length after firing, individuals chart">
-          <XAxis accessor={(d: Measured) => d.t} domain={[at(0), at(LAST)]} time />
-          <YAxis accessor={(d: Measured) => d.length} domain={[597, 602]} label="mm" />
+        <tileLength.Chart height={220} ariaLabel="Tile length after firing, individuals chart">
+          <tileLength.XAxis value="t" domain={[at(0), at(LAST)]} time />
+          <tileLength.YAxis value="length" domain={[597, 602]} label="mm" />
           <LimitLine value={601.5} severity="alarm" label="USL" />
           <LimitLine value={598.5} severity="alarm" label="LSL" />
           <ControlChart
@@ -653,7 +655,7 @@ export default function ControlRoom() {
             violationName="Length - rule violation"
           />
           <Tooltip mode="x" />
-        </Chart>
+        </tileLength.Chart>
       </Region>
 
       <Region
