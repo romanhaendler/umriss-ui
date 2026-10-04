@@ -1,15 +1,7 @@
 {
-  "TableProps.striped": "not shown yet",
-  "TableOptions.filter": "not shown yet",
-  "TableOptions.selection": "not shown yet",
-  "SearchProps.className": "not shown yet",
-  "SearchProps.size": "not shown yet",
-  "FilterInputProps.values": "not shown yet",
-  "ToolbarProps.className": "not shown yet",
-  "ColumnMenuProps.size": "not shown yet",
-  "ColumnMenuProps.of": "not shown yet",
-  "ExportProps.size": "not shown yet",
-  "PaginationProps.className": "not shown yet",
-  "PaginationProps.of": "not shown yet",
-  "VerdictBase.resizable": "not shown yet"
+  "TableOptions.filter": "(g) deprecated alias: the old name of `preFilter`, which Pre-filter/01 shows",
+  "SearchProps.className": "(a) pass-through: a class on the field",
+  "ToolbarProps.className": "(a) pass-through: a class on the toolbar",
+  "PaginationProps.className": "(a) pass-through: a class on the bar",
+  "VerdictBase.resizable": "(f) twin of `ColumnBase.resizable`: the same grip, shown on Width and pinning"
 }
