@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Chart, ControlChart, Tooltip, XAxis, YAxis } from "../../../src";
+import { ControlChart, Tooltip, useChart } from "../../../src";
 import type { RuleName, Violation } from "../../../src";
 
 /* Data from the plant world, written out here so the example runs on its own. */
@@ -156,12 +156,13 @@ const clock = (minute: number) => {
 
 export default function ListTheViolations() {
   const [found, setFound] = useState<readonly Violation[]>([]);
+  const { Chart, XAxis, YAxis } = useChart(SAMPLES);
   return (
     <div className="side-by-side">
       <div style={{ flex: "1 1 320px" }}>
-        <Chart data={SAMPLES} height={240} ariaLabel="Control chart of the tile length, its violations listed beside it">
-          <XAxis accessor={(d: Sample) => d.minute} label="Minute of the shift" />
-          <YAxis accessor={(d: Sample) => d.length} label="mm" />
+        <Chart height={240} ariaLabel="Control chart of the tile length, its violations listed beside it">
+          <XAxis value="minute" label="Minute of the shift" />
+          <YAxis value="length" label="mm" />
           <ControlChart accessor={(d: Sample) => d.length} data={SAMPLES} origin={REFERENCE_WINDOW} name="Tile length" onViolations={setFound} />
           <Tooltip mode="x" />
         </Chart>

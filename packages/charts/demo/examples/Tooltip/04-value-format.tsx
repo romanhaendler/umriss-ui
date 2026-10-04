@@ -1,4 +1,4 @@
-import { Chart, Legend, Line, Tooltip, XAxis, YAxis } from "../../../src";
+import { Legend, Tooltip, useChart } from "../../../src";
 
 /* Data from the operations world, written out here so the example runs on its own. */
 /** A small LCG - the same numbers on every computer. */
@@ -90,13 +90,14 @@ const milliseconds = (v: number) => `${v.toFixed(0)} ms`;
 const percent = (v: number) => `${v.toFixed(2)} %`;
 
 export default function ValueFormat() {
+  const { Chart, XAxis, YAxis, Line } = useChart(CHECKOUT);
   return (
-    <Chart data={CHECKOUT} height={260} ariaLabel="Checkout's latency and error rate with their units">
-      <XAxis accessor={(d: MetricPoint) => d.t} time />
-      <YAxis accessor={(d: MetricPoint) => d.p95} label="ms" />
-      <YAxis id="errors" position="right" accessor={(d: MetricPoint) => d.errorRate} label="Errors %" />
-      <Line accessor={(d: MetricPoint) => d.p95} name="p95" format={milliseconds} />
-      <Line accessor={(d: MetricPoint) => d.errorRate} yAxisId="errors" name="Error rate" format={percent} />
+    <Chart height={260} ariaLabel="Checkout's latency and error rate with their units">
+      <XAxis value="t" time />
+      <YAxis value="p95" label="ms" />
+      <YAxis id="errors" position="right" value="errorRate" label="Errors %" />
+      <Line value="p95" name="p95" format={milliseconds} />
+      <Line value="errorRate" yAxisId="errors" name="Error rate" format={percent} />
       <Legend />
       <Tooltip mode="x" />
     </Chart>

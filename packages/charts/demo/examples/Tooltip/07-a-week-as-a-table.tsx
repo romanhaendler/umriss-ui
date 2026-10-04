@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Chart, DataTable, Line, Tooltip, XAxis, YAxis } from "../../../src";
+import { DataTable, Tooltip, useChart } from "../../../src";
 
 /* Data from the operations world, written out here so the example runs on its own. */
 /** A small LCG - the same numbers on every computer. */
@@ -103,11 +103,12 @@ const milliseconds = (v: number) => `${v.toFixed(0)} ms`;
 
 export default function WeekAsTable() {
   const [domain, setDomain] = useState<"data" | readonly [number, number]>("data");
+  const { Chart, XAxis, YAxis, Line } = useChart(SEARCH_WEEK);
   return (
-    <Chart data={SEARCH_WEEK} height={240} ariaLabel="Search latency over last week, a reading a minute">
-      <XAxis accessor={(d: MetricPoint) => d.t} time domain={domain} onDomainChange={setDomain} label="Time" />
-      <YAxis accessor={(d: MetricPoint) => d.p95} label="ms" />
-      <Line accessor={(d: MetricPoint) => d.p95} name="p95" format={milliseconds} />
+    <Chart height={240} ariaLabel="Search latency over last week, a reading a minute">
+      <XAxis value="t" time domain={domain} onDomainChange={setDomain} label="Time" />
+      <YAxis value="p95" label="ms" />
+      <Line value="p95" name="p95" format={milliseconds} />
       <Tooltip mode="x" />
       {/* Without a legend the key stands on a line of its own. */}
       <DataTable />

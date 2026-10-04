@@ -1,7 +1,7 @@
 import { Tooltip, useChart } from "../../../src";
 
 export const title = "Draw a first chart";
-export const lead = "Give `Chart` the rows, then an axis per direction and a series; each reads its value from a row through an accessor.";
+export const lead = "Hand `useChart` the rows, then give its `Chart` an axis per direction and a series; each reads its value from a row through `value`.";
 
 interface Hour {
   /** The hour's start, in milliseconds since 1970. */

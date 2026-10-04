@@ -1,4 +1,4 @@
-import { Chart, Legend, Line, Tooltip, XAxis, YAxis } from "../../../src";
+import { Legend, Tooltip, useChart } from "../../../src";
 
 /* Data from the operations world, written out here so the example runs on its own. */
 /** A small LCG - the same numbers on every computer. */
@@ -107,13 +107,14 @@ export const lead = "A value logged only when it changes holds until the next en
 const CHECKOUT = metrics("checkout");
 
 export default function StepLine() {
+  const { Chart, XAxis, YAxis, Line } = useChart(CHECKOUT);
   return (
-    <Chart data={CHECKOUT} height={260} ariaLabel="Checkout's requests and the instances serving them today">
-      <XAxis accessor={(d: { t: number }) => d.t} time />
-      <YAxis accessor={(d: MetricPoint) => d.requests} label="Requests/min" />
-      <YAxis id="instances" position="right" accessor={(d: ReplicaChange) => d.replicas ?? 0} domain={[0, 15]} label="Instances" />
-      <Line accessor={(d: MetricPoint) => d.requests} name="Requests" />
-      <Line data={REPLICAS} accessor={(d: ReplicaChange) => d.replicas} yAxisId="instances" name="Instances" step strokeWidth={2} />
+    <Chart height={260} ariaLabel="Checkout's requests and the instances serving them today">
+      <XAxis value="t" time />
+      <YAxis value="requests" label="Requests/min" />
+      <YAxis id="instances" position="right" domain={[0, 15]} label="Instances" />
+      <Line value="requests" name="Requests" />
+      <Line data={REPLICAS} value="replicas" yAxisId="instances" name="Instances" step strokeWidth={2} />
       <Legend />
       <Tooltip mode="x" />
     </Chart>

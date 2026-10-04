@@ -1,4 +1,4 @@
-import { Chart, Matrix, Tooltip, XAxis, YAxis } from "../../../src";
+import { Tooltip, useChart } from "../../../src";
 
 /* Data from the operations world, written out here so the example runs on its own. */
 /** A small LCG - the same numbers on every computer. */
@@ -64,13 +64,14 @@ export const title = "Colour cells by their limits";
 export const lead = "With `coloring` of kind `assessment` a cell takes the tone its limits give it: a bad hour everywhere reads differently from one bad service. `format` writes the value in the tooltip, while the y axis writes the row.";
 
 export default function ByLimits() {
+  const { Chart, XAxis, YAxis, Matrix } = useChart(SUCCESS_BY_HOUR);
   return (
-    <Chart data={SUCCESS_BY_HOUR} height={280} ariaLabel="Successful requests per service and hour yesterday, by limits">
-      <XAxis accessor={(d: SuccessCell) => d.hour} ticks={[0, 6, 12, 18]} tickFormat={(v) => `${v}:00`} label="Hour" />
-      <YAxis accessor={(d: SuccessCell) => d.service} ticks={SERVICES.map((_, i) => i)} tickFormat={(v) => SERVICES[v]?.name ?? ""} />
+    <Chart height={280} ariaLabel="Successful requests per service and hour yesterday, by limits">
+      <XAxis value="hour" ticks={[0, 6, 12, 18]} tickFormat={(v) => `${v}:00`} label="Hour" />
+      <YAxis value="service" ticks={SERVICES.map((_, i) => i)} tickFormat={(v) => SERVICES[v]?.name ?? ""} />
       <Matrix
-        accessor={(d: SuccessCell) => d.service}
-        value={(d: SuccessCell) => d.success}
+        accessor={(d) => d.service}
+        value="success"
         coloring={{
           kind: "assessment",
           limits: {

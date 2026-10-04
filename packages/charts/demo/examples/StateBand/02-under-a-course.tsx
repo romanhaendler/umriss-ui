@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Chart, Legend, Line, StateBand, Tooltip, XAxis, YAxis } from "../../../src";
+import { Legend, Tooltip, useChart } from "../../../src";
 
 /* Data from the logistics world, written out here so the example runs on its own. */
 /** A small LCG - the same numbers on every computer. */
@@ -193,14 +193,15 @@ export default function UnderACourse() {
       return next;
     });
 
+  const { Chart, XAxis, YAxis, StateBand, Line } = useChart(BATTERY);
   return (
-    <Chart data={BATTERY} height={320} ariaLabel="An e-van's charge above what it was doing">
-      <XAxis accessor={(d: BatteryPoint) => d.t} time label="Time" />
-      <YAxis accessor={(d: BatteryPoint) => d.charge ?? 0} domain={[-40, 100]} ticks={[0, 25, 50, 75, 100]} label="Charge %" />
+    <Chart height={320} ariaLabel="An e-van's charge above what it was doing">
+      <XAxis value="t" time label="Time" />
+      <YAxis value={(d) => d.charge ?? 0} domain={[-40, 100]} ticks={[0, 25, 50, 75, 100]} label="Charge %" />
       {/* The lane: the bottom unit of five, the rest is room for the course. */}
-      <YAxis id="lane" position="right" accessor={() => 0} domain={[0, 5]} ticks={[0.4]} tickFormat={() => "State"} />
-      <StateBand data={STATES} accessor={(d: StatePoint) => d.state} states={VEHICLE_STATES} yAxisId="lane" laneFrom={0} laneTo={0.8} name="FP 377 K" hidden={hidden.has("FP 377 K")} />
-      <Line accessor={(d: BatteryPoint) => d.charge} name="Charge" strokeWidth={1.75} hidden={hidden.has("Charge")} />
+      <YAxis id="lane" position="right" value={() => 0} domain={[0, 5]} ticks={[0.4]} tickFormat={() => "State"} />
+      <StateBand data={STATES} value="state" states={VEHICLE_STATES} yAxisId="lane" laneFrom={0} laneTo={0.8} name="FP 377 K" hidden={hidden.has("FP 377 K")} />
+      <Line value="charge" name="Charge" strokeWidth={1.75} hidden={hidden.has("Charge")} />
       <Legend placement="top" onToggle={toggle} />
       <Tooltip mode="x" />
     </Chart>

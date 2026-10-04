@@ -1,4 +1,4 @@
-import { Chart, Scatter, Tooltip, XAxis, YAxis } from "../../../src";
+import { Tooltip, useChart } from "../../../src";
 
 /* Data from the logistics world, written out here so the example runs on its own. */
 /** A small LCG - the same numbers on every computer. */
@@ -137,11 +137,12 @@ const ARRIVALS: Arrival[] = TOURS.flatMap((tour) =>
 ).sort((a, b) => a.t - b.t);
 
 export default function Arrivals() {
+  const { Chart, XAxis, YAxis, Scatter } = useChart(ARRIVALS);
   return (
-    <Chart data={ARRIVALS} height={260} ariaLabel="Every stop of today's tours: minutes after its window closed">
-      <XAxis accessor={(d: Arrival) => d.t} time label="Arrival" />
-      <YAxis accessor={(d: Arrival) => d.late} label="Minutes late" />
-      <Scatter accessor={(d: Arrival) => d.late} name="Stop" radius={4} />
+    <Chart height={260} ariaLabel="Every stop of today's tours: minutes after its window closed">
+      <XAxis value="t" time label="Arrival" />
+      <YAxis value="late" label="Minutes late" />
+      <Scatter value="late" name="Stop" radius={4} />
       <Tooltip mode="nearest" />
     </Chart>
   );

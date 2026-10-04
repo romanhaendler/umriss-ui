@@ -1,4 +1,4 @@
-import { Chart, Legend, LimitLine, Scatter, Tooltip, XAxis, YAxis } from "../../../src";
+import { Legend, LimitLine, Tooltip, useChart } from "../../../src";
 
 /* Data from the operations world, written out here so the example runs on its own. */
 /** A small LCG - the same numbers on every computer. */
@@ -65,14 +65,15 @@ export const lead = "Put the misses in a series of their own with `tone=\"alarm\
 const OBJECTIVE = SERVICES.find((one) => one.id === "checkout")!.latencySlo;
 
 export default function AgainstATarget() {
+  const { Chart, XAxis, YAxis, Scatter } = useChart(TRACES);
   return (
-    <Chart data={TRACES} height={300} ariaLabel="Traced Checkout requests against the latency objective">
-      <XAxis accessor={(d: Trace) => d.t} time />
-      <YAxis accessor={(d: Trace) => d.ms} label="ms" />
+    <Chart height={300} ariaLabel="Traced Checkout requests against the latency objective">
+      <XAxis value="t" time />
+      <YAxis value="ms" label="ms" />
       <LimitLine value={OBJECTIVE} severity="warning" label="Objective" />
       {/* The two channels never both carry a value, so no trace is drawn twice. */}
-      <Scatter accessor={(d: Trace) => (d.ms <= OBJECTIVE ? d.ms : null)} name="Request" radius={2.5} />
-      <Scatter accessor={(d: Trace) => (d.ms > OBJECTIVE ? d.ms : null)} name="Too slow" tone="alarm" radius={4} />
+      <Scatter value={(d) => (d.ms <= OBJECTIVE ? d.ms : null)} name="Request" radius={2.5} />
+      <Scatter value={(d) => (d.ms > OBJECTIVE ? d.ms : null)} name="Too slow" tone="alarm" radius={4} />
       <Legend placement="top" />
       <Tooltip mode="nearest" />
     </Chart>

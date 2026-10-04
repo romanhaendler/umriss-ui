@@ -1,4 +1,4 @@
-import { Chart, Line, Tooltip, XAxis, YAxis } from "../../../src";
+import { Tooltip, useChart } from "../../../src";
 
 /* Data from the operations world, written out here so the example runs on its own. */
 /** A small LCG - the same numbers on every computer. */
@@ -82,16 +82,17 @@ function metrics(serviceId: string): MetricPoint[] {
 }
 
 export const title = "One series";
-export const lead = "A `Line` joins the readings of one accessor in the order of x; the first y axis draws the grid.";
+export const lead = "A `Line` joins the readings of its `value` in the order of x; the first y axis draws the grid.";
 
 const CHECKOUT = metrics("checkout");
 
 export default function OneSeries() {
+  const { Chart, XAxis, YAxis, Line } = useChart(CHECKOUT);
   return (
-    <Chart data={CHECKOUT} height={280} ariaLabel="Checkout's 95th percentile latency today">
-      <XAxis accessor={(d: MetricPoint) => d.t} time />
-      <YAxis accessor={(d: MetricPoint) => d.p95} label="ms" />
-      <Line accessor={(d: MetricPoint) => d.p95} name="Checkout p95" />
+    <Chart height={280} ariaLabel="Checkout's 95th percentile latency today">
+      <XAxis value="t" time />
+      <YAxis value="p95" label="ms" />
+      <Line value="p95" name="Checkout p95" />
       <Tooltip />
     </Chart>
   );

@@ -1,6 +1,6 @@
 import { Card, CardBody, CardHeader, Grid, Stack, Stat } from "@umriss-ui/core";
 import type { LimitSet } from "@umriss-ui/core";
-import { Bar, Chart, Legend, Line, Tooltip, XAxis, YAxis } from "../../src";
+import { Legend, Tooltip, useChart } from "../../src";
 
 /* Data from the controlling world, written out here so the example runs on its own. */
 /** A small LCG - the same numbers on every computer. */
@@ -118,6 +118,50 @@ const MARKETING = COST_CENTRES.find((one) => one.name === "Marketing")!;
 const MONTHLY = LEDGER.filter((row) => row.costCentre === MARKETING.id);
 const MONTH_NAMES = MONTHS.map((month) => new Date(`${month}-01T00:00`).toLocaleString("en-GB", { month: "short" }));
 
+function GapPerCentre() {
+  const { Chart, XAxis, YAxis, Bar } = useChart(YEAR);
+  return (
+    <Chart height={240} ariaLabel="Outlook minus budget for the year, per cost centre">
+      <XAxis
+        value={(_d, i) => i}
+        ticks={YEAR.map((_, i) => i)}
+        tickFormat={(v) => YEAR[v]?.name ?? ""}
+      />
+      <YAxis value={(d) => thousands(d.gap)} label="k€" tickFormat={euros} />
+      {/* One series per sign, stacked on one another so that each bar stands centred on its cost centre. */}
+      <Bar value={(d) => (d.gap > 0 ? thousands(d.gap) : null)} name="Over budget" tone="alarm" stack="gap" format={euros} />
+      <Bar
+        value={(d) => (d.gap <= 0 ? thousands(d.gap) : null)}
+        name="Under budget"
+        color="var(--uc-color-text)"
+        stack="gap"
+        format={euros}
+      />
+      <Legend placement="top" />
+      <Tooltip mode="x" />
+    </Chart>
+  );
+}
+
+function MarketingByMonth() {
+  const { Chart, XAxis, YAxis, Bar, Line } = useChart(MONTHLY);
+  return (
+    <Chart height={260} ariaLabel="Marketing's budget, actual and forecast per month">
+      <XAxis
+        value={(_d, i) => i}
+        ticks={MONTHLY.map((_, i) => i)}
+        tickFormat={(v) => MONTH_NAMES[v] ?? ""}
+      />
+      <YAxis value={(d) => thousands(d.budget)} label="k€" tickFormat={euros} />
+      <Bar value={(d) => thousands(d.budget)} name="Budget" color="var(--uc-color-text)" barWidth={0.7} format={euros} />
+      <Bar value={(d) => (d.actual === null ? null : thousands(d.actual))} name="Actual" barWidth={0.7} format={euros} />
+      <Line value={(d) => thousands(d.forecast)} name="Forecast" tone="warning" markers="always" format={euros} />
+      <Legend placement="top" />
+      <Tooltip mode="x" />
+    </Chart>
+  );
+}
+
 export default function BudgetAndForecast() {
   return (
     <Stack gap={4}>
@@ -129,43 +173,13 @@ export default function BudgetAndForecast() {
       <Card data-callout="2">
         <CardHeader title="Over and under budget, by cost centre" />
         <CardBody>
-          <Chart data={YEAR} height={240} ariaLabel="Outlook minus budget for the year, per cost centre">
-            <XAxis
-              accessor={(_d: CentreYear, i: number) => i}
-              ticks={YEAR.map((_, i) => i)}
-              tickFormat={(v) => YEAR[v]?.name ?? ""}
-            />
-            <YAxis accessor={(d: CentreYear) => thousands(d.gap)} label="k€" tickFormat={euros} />
-            {/* One series per sign, stacked on one another so that each bar stands centred on its cost centre. */}
-            <Bar accessor={(d: CentreYear) => (d.gap > 0 ? thousands(d.gap) : null)} name="Over budget" tone="alarm" stack="gap" format={euros} />
-            <Bar
-              accessor={(d: CentreYear) => (d.gap <= 0 ? thousands(d.gap) : null)}
-              name="Under budget"
-              color="var(--uc-color-text)"
-              stack="gap"
-              format={euros}
-            />
-            <Legend placement="top" />
-            <Tooltip mode="x" />
-          </Chart>
+          <GapPerCentre />
         </CardBody>
       </Card>
       <Card data-callout="3">
         <CardHeader eyebrow={`${MARKETING.id} · ${MARKETING.owner}`} title="Marketing, month by month" />
         <CardBody>
-          <Chart data={MONTHLY} height={260} ariaLabel="Marketing's budget, actual and forecast per month">
-            <XAxis
-              accessor={(_d: LedgerRow, i: number) => i}
-              ticks={MONTHLY.map((_, i) => i)}
-              tickFormat={(v) => MONTH_NAMES[v] ?? ""}
-            />
-            <YAxis accessor={(d: LedgerRow) => thousands(d.budget)} label="k€" tickFormat={euros} />
-            <Bar accessor={(d: LedgerRow) => thousands(d.budget)} name="Budget" color="var(--uc-color-text)" barWidth={0.7} format={euros} />
-            <Bar accessor={(d: LedgerRow) => (d.actual === null ? null : thousands(d.actual))} name="Actual" barWidth={0.7} format={euros} />
-            <Line accessor={(d: LedgerRow) => thousands(d.forecast)} name="Forecast" tone="warning" markers="always" format={euros} />
-            <Legend placement="top" />
-            <Tooltip mode="x" />
-          </Chart>
+          <MarketingByMonth />
         </CardBody>
       </Card>
     </Stack>

@@ -1,4 +1,4 @@
-import { Chart, ControlChart, LimitLine, Tooltip, XAxis, YAxis } from "../../../src";
+import { ControlChart, LimitLine, Tooltip, useChart } from "../../../src";
 
 /* Data from the plant world, written out here so the example runs on its own. */
 
@@ -145,10 +145,11 @@ const SAMPLES = plant(7).samples;
 const REFERENCE_WINDOW = { kind: "referenceWindow", from: 0, to: 15 } as const;
 
 export default function ControlChartExample() {
+  const { Chart, XAxis, YAxis } = useChart(SAMPLES);
   return (
-    <Chart data={SAMPLES} height={300} ariaLabel="Control chart of the tile length after firing">
-      <XAxis accessor={(d: Sample) => d.minute} label="Minute of the shift" />
-      <YAxis accessor={(d: Sample) => d.length} label="mm" />
+    <Chart height={300} ariaLabel="Control chart of the tile length after firing">
+      <XAxis value="minute" label="Minute of the shift" />
+      <YAxis value="length" label="mm" />
       {/* Specification limits are chosen, control limits are computed. */}
       <LimitLine value={602.5} severity="alarm" label="USL" />
       <LimitLine value={597.5} severity="alarm" label="LSL" />

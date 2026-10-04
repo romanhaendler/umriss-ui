@@ -30,7 +30,7 @@ export const OUTLINE: readonly Rubric[] = [
         sentence: "Install the package, draw a first chart and size it in its container. Read this once before the component pages; everything after it assumes it.",
         about: [
           "The command installs the package alone: React 18 or 19 is its only peer and stays the application's own, and the package depends on nothing else. The stylesheet comes with the JavaScript, so there is nothing to import - `@umriss-ui/charts/styles.css` is there for setups that link stylesheets by hand. Its colours, type and sizes are `--uc-` tokens that fall back onto core's; [core's Theming page](https://romanhaendler.github.io/umriss-ui/core/theming/#charts-tokens) lists them all.",
-          "A chart takes its container's width and follows it; give it a `height` (300 px without one). Series and axes are children of `Chart` and read the rows through accessors - a value that is `null`, `undefined` or not finite is a gap, never a zero.",
+          "A chart takes its container's width and follows it; give it a `height` (300 px without one). `useChart(rows)` hands out `Chart`, its axes and its series, typed at the row; each reads its value from a row through `value`, a field name or a function - a value that is `null`, `undefined` or not finite is a gap, never a zero.",
           "Time is a number: milliseconds since 1970, as `Date.getTime()` gives them. With `time` on the x axis the ticks stand on the viewer's local clock, so a day begins at local midnight. The words are English; German comes from `@umriss-ui/charts/wording/de`.",
           "The charts take German per chart: `wording={GERMAN_CHARTS_WORDING}` from `@umriss-ui/charts/wording/de`, as [the keyboard and screen reader example](#/chart/keyboard-and-screen-reader) shows. They read no language provider, so this demo has no EN/DE switch in its header.",
         ],
@@ -162,7 +162,7 @@ export const OUTLINE: readonly Rubric[] = [
         name: "StateBand",
         sentence: "What something was doing over time, as a band of coloured segments (a status timeline, a state chart). Reach for it for a vehicle, a service or a device.",
         about: [
-          "The accessor returns a state's place in `states`, which fixes the order, the name and the colour in one place (ADR-0007). Each segment runs to the next reading; a `null` leaves a hole, never a colour for unknown.",
+          "`value` gives a state's place in `states`, which fixes the order, the name and the colour in one place (ADR-0007). Each segment runs to the next reading; a `null` leaves a hole, never a colour for unknown.",
           "Several bands share one axis as lanes: a y axis with one unit per lane, and `laneFrom` and `laneTo` on each band.",
         ],
         alternatives: [{ when: "Work with its own start and end, and gaps between", use: "`Schedule` from @umriss-ui/schedule" }],

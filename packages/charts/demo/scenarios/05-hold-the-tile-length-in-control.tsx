@@ -1,14 +1,11 @@
 import { Badge, Card, CardBody, CardHeader, Stack, Text } from "@umriss-ui/core";
 import {
-  Chart,
   ControlChart,
   LimitBand,
   LimitLine,
-  Line,
   Tooltip,
-  XAxis,
-  YAxis,
   controlLimits,
+  useChart,
   violations,
   type RuleName,
 } from "../../src";
@@ -195,28 +192,49 @@ const clock = (minute: number) => {
   return `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
 };
 
+function LengthInControl() {
+  const { Chart, XAxis, YAxis } = useChart(SHIFT.samples);
+  return (
+    <Chart height={280} syncId="tiles" ariaLabel="Control chart of the tile length over the early shift">
+      <XAxis value="minute" domain={DOMAIN} ticks={HOURS} tickFormat={clock} />
+      <YAxis value="length" label="mm" />
+      <LimitLine value={SPEC.nominal + SPEC.tolerance} severity="alarm" label="USL" inExtent />
+      <LimitLine value={SPEC.nominal - SPEC.tolerance} severity="alarm" label="LSL" inExtent />
+      <ControlChart
+        accessor={(d: Sample) => d.length}
+        data={SHIFT.samples}
+        origin={REFERENCE}
+        name="Length"
+        labelUpper="UCL"
+        labelLower="LCL"
+        violationName="Length - rule broken"
+      />
+      <Tooltip mode="x" />
+    </Chart>
+  );
+}
+
+function KilnZone() {
+  const { Chart, XAxis, YAxis, Line } = useChart(SHIFT.readings);
+  return (
+    <Chart height={200} syncId="tiles" ariaLabel="Kiln zone 3 temperature over the early shift">
+      <XAxis value="minute" domain={DOMAIN} ticks={HOURS} tickFormat={clock} />
+      <YAxis value="kiln" label="°C" tickCount={4} />
+      <LimitBand from={KILN.tolerance[0]} to={KILN.tolerance[1]} severity="warning" label="Tolerance" />
+      <LimitLine value={KILN.alarm} severity="alarm" label="Alarm limit" inExtent />
+      <Line value="kiln" name="Zone 3" />
+      <Tooltip mode="x" />
+    </Chart>
+  );
+}
+
 export default function TileLength() {
   return (
     <Stack gap={4}>
       <Card data-callout="1">
         <CardHeader title="Tile length after firing" eyebrow="Kiln K1 · early shift" />
         <CardBody>
-          <Chart data={SHIFT.samples} height={280} syncId="tiles" ariaLabel="Control chart of the tile length over the early shift">
-            <XAxis accessor={(d: Sample) => d.minute} domain={DOMAIN} ticks={HOURS} tickFormat={clock} />
-            <YAxis accessor={(d: Sample) => d.length} label="mm" />
-            <LimitLine value={SPEC.nominal + SPEC.tolerance} severity="alarm" label="USL" inExtent />
-            <LimitLine value={SPEC.nominal - SPEC.tolerance} severity="alarm" label="LSL" inExtent />
-            <ControlChart
-              accessor={(d: Sample) => d.length}
-              data={SHIFT.samples}
-              origin={REFERENCE}
-              name="Length"
-              labelUpper="UCL"
-              labelLower="LCL"
-              violationName="Length - rule broken"
-            />
-            <Tooltip mode="x" />
-          </Chart>
+          <LengthInControl />
         </CardBody>
       </Card>
       <Card data-callout="2">
@@ -238,14 +256,7 @@ export default function TileLength() {
       <Card data-callout="3">
         <CardHeader title="Kiln zone 3" />
         <CardBody>
-          <Chart data={SHIFT.readings} height={200} syncId="tiles" ariaLabel="Kiln zone 3 temperature over the early shift">
-            <XAxis accessor={(d: Reading) => d.minute} domain={DOMAIN} ticks={HOURS} tickFormat={clock} />
-            <YAxis accessor={(d: Reading) => d.kiln} label="°C" tickCount={4} />
-            <LimitBand from={KILN.tolerance[0]} to={KILN.tolerance[1]} severity="warning" label="Tolerance" />
-            <LimitLine value={KILN.alarm} severity="alarm" label="Alarm limit" inExtent />
-            <Line accessor={(d: Reading) => d.kiln} name="Zone 3" />
-            <Tooltip mode="x" />
-          </Chart>
+          <KilnZone />
         </CardBody>
       </Card>
     </Stack>

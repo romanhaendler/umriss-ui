@@ -1,4 +1,4 @@
-import { Chart, Line, Tooltip, XAxis, YAxis } from "../../../src";
+import { Tooltip, useChart } from "../../../src";
 
 /* Data from the operations world, written out here so the example runs on its own. */
 /** A small LCG - the same numbers on every computer. */
@@ -88,12 +88,13 @@ const SEARCH = metrics("search");
 const SIGN_IN = metrics("sign-in");
 
 function Latencies({ mode }: { mode: "x" | "nearest" }) {
+  const { Chart, XAxis, YAxis, Line } = useChart(SEARCH);
   return (
-    <Chart data={SEARCH} height={220} ariaLabel={`Search and sign-in latency, tooltip mode ${mode}`}>
-      <XAxis accessor={(d: MetricPoint) => d.t} time tickCount={4} />
-      <YAxis accessor={(d: MetricPoint) => d.p95} label="ms" />
-      <Line accessor={(d: MetricPoint) => d.p95} name="Search" />
-      <Line data={SIGN_IN} accessor={(d: MetricPoint) => d.p95} name="Sign-in" />
+    <Chart height={220} ariaLabel={`Search and sign-in latency, tooltip mode ${mode}`}>
+      <XAxis value="t" time tickCount={4} />
+      <YAxis value="p95" label="ms" />
+      <Line value="p95" name="Search" />
+      <Line data={SIGN_IN} value="p95" name="Sign-in" />
       <Tooltip mode={mode} />
     </Chart>
   );

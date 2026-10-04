@@ -1,4 +1,4 @@
-import { Chart, LimitBand, LimitLine, Line, Tooltip, XAxis, YAxis, controlLimits } from "../../../src";
+import { LimitBand, LimitLine, Tooltip, controlLimits, useChart } from "../../../src";
 
 /* Data from the plant world, written out here so the example runs on its own. */
 
@@ -146,14 +146,15 @@ const LIMITS = controlLimits(
 );
 
 export default function SpecificationAndControl() {
+  const { Chart, XAxis, YAxis, Line } = useChart(SAMPLES);
   return (
-    <Chart data={SAMPLES} height={300} ariaLabel="The tile length against its specification and its control limits">
-      <XAxis accessor={(d: Sample) => d.minute} label="Minute of the shift" />
-      <YAxis accessor={(d: Sample) => d.length} label="mm" />
+    <Chart height={300} ariaLabel="The tile length against its specification and its control limits">
+      <XAxis value="minute" label="Minute of the shift" />
+      <YAxis value="length" label="mm" />
       <LimitBand from={597.5} to={602.5} severity="warning" label="Specification" />
       <LimitBand role="control" from={LIMITS.lower} to={LIMITS.upper} label="±3σ" />
       <LimitLine role="control" value={LIMITS.center} label="Centre" />
-      <Line accessor={(d: Sample) => d.length} name="Tile length" />
+      <Line value="length" name="Tile length" />
       <Tooltip mode="x" />
     </Chart>
   );
