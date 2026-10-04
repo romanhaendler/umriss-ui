@@ -39,8 +39,10 @@ checkShell({
      "ta" and "tab" went when the pages came to rank above every example
      (one-search 02): the fourth row under "ta" became `Meter`, a page, whose
      lede says "tables" and kept it under "tab". Under "se"
-     the fourth row is `Slider`, which "sel" drops. */
-  pointer: { wide: "se", narrow: "sel" },
+     the fourth row is `Slider`, which "multiselect" drops - "sel" did too,
+     but finds more than the palette's fifty rows, so the list no longer
+     shrank. */
+  pointer: { wide: "se", narrow: "multiselect" },
   contents: { pageId: "select", id: "states", title: "States" },
   foldedRow: { pageId: "popover", id: "PopoverProps-role" },
   synonyms: [
