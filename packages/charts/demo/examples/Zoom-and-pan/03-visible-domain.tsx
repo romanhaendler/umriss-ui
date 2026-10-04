@@ -1,8 +1,4 @@
-/* Not photographed, like the benchmark above it: it measures the series draw. */
-
-import { useCallback, useState } from "react";
-import { Legend, Tooltip, useChart } from "../../../src";
-import type { ChartPerf } from "../../../src";
+import { Tooltip, useChart } from "../../../src";
 
 /* Data from the operations world, written out here so the example runs on its own. */
 
@@ -100,37 +96,23 @@ function week(serviceId: string, step: number): MetricPoint[] {
   return points;
 }
 
-export const title = "Draw a week of seconds";
-export const lead = "Two series of 604,800 readings each: every pixel column draws first, lowest, highest and last, so a spike stays; zoom in for every reading.";
+export const title = "Fit the y axis to what is visible";
+export const lead = "With `domain=\"visible\"` the y axis fits the zoomed stretch - here Saturday evening's outage, handed in as `initialView` - and follows when you zoom out.";
 
-export default function WeekOfSeconds() {
-  // Made on first render, not on import: 604,800 readings are no page's
-  // business until this one is open.
-  const [data] = useState(() => week("search", 1000));
-  const { Chart, XAxis, YAxis, Line } = useChart(data);
-  const [drawMs, setDrawMs] = useState(0);
-  const onPerf = useCallback((p: ChartPerf) => setDrawMs(p.seriesDrawMs), []);
+const SEARCH_WEEK = week("search", 60_000);
+const SATURDAY = new Date(2026, 2, 14).getTime();
+
+export default function VisibleDomain() {
+  const { Chart, XAxis, YAxis, Line } = useChart(SEARCH_WEEK, {
+    // The lone x axis is "x": its span is where the chart starts.
+    initialView: { domains: { x: [SATURDAY + 16 * HOUR, SATURDAY + 22 * HOUR] } },
+  });
   return (
-    <>
-      <dl className="metrics">
-        <div>
-          <dt>Points</dt>
-          <dd>{(2 * data.length).toLocaleString("en-US")}</dd>
-        </div>
-        <div>
-          <dt>Series draw</dt>
-          <dd>{drawMs.toFixed(1)} ms</dd>
-        </div>
-      </dl>
-      <Chart height={300} ariaLabel="Search latency and requests over last week, a reading a second" onPerf={onPerf}>
-        <XAxis value="t" time domain="data" zoomable />
-        <YAxis label="ms" domain="visible" />
-        <YAxis id="requests" position="right" label="Requests/min" domain="visible" />
-        <Line value="p95" name="p95" />
-        <Line value="requests" yAxisId="requests" name="Requests" />
-        <Legend placement="top" />
-        <Tooltip mode="x" />
-      </Chart>
-    </>
+    <Chart height={260} ariaLabel="Search latency on Saturday evening, the y axis fitted to it">
+      <XAxis value="t" time domain="data" zoomable />
+      <YAxis label="ms" domain="visible" />
+      <Line value="p95" name="p95" />
+      <Tooltip mode="x" />
+    </Chart>
   );
 }

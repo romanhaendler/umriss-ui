@@ -135,3 +135,9 @@ export type { BoxNumbers, BoxExtras, ListAccessor } from "./types";
    takes. At the end, by the workspace's rule for new exports. */
 export { useChart, type ChartParts } from "./useChart";
 export type { ListField, ListValue, NumberField, Value } from "./types";
+
+/* The chart's view (ADR-0047): what `useChart` takes as `initialView` and
+   reports through `onViewChange`, and the limits of a zoomable axis. At the
+   end, by the workspace's rule for new exports. */
+export type { ChartOptions } from "./useChart";
+export type { ChartView, ZoomLimits } from "./view";

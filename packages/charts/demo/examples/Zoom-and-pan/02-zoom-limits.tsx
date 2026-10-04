@@ -1,6 +1,4 @@
-import { useState } from "react";
 import { Tooltip, useChart } from "../../../src";
-import { GERMAN_CHARTS_WORDING } from "../../../src/wording/de";
 
 /* Data from the operations world, written out here so the example runs on its own. */
 
@@ -98,30 +96,21 @@ function week(serviceId: string, step: number): MetricPoint[] {
   return points;
 }
 
-export const title = "Read it by keyboard and screen reader";
-export const lead = "A chart with a `Tooltip` is one tab stop: the keys walk its values, and a screen reader hears them; `wording` gives the German words.";
+export const title = "Limit the zoom";
+export const lead = "`zoomLimits` keeps the span between a narrowest and a widest; without it a zoom stops at three readings and at the data's extent.";
 
-const SEARCH_WEEK = week("search", 5 * 60_000);
+const SEARCH_WEEK = week("search", 60_000);
 
-export default function KeyboardAndScreenReader() {
+export default function ZoomLimits() {
   const { Chart, XAxis, YAxis, Line } = useChart(SEARCH_WEEK);
-  const [domain, setDomain] = useState<"data" | readonly [number, number]>("data");
   return (
-    <div>
-      <Chart height={200} ariaLabel="Search latency over last week">
-        <XAxis value="t" time domain={domain} onDomainChange={setDomain} />
-        <YAxis label="ms" />
-        <Line value="p95" name="p95" />
-        <Line value="p50" name="p50" />
-        <Tooltip mode="x" />
-      </Chart>
-      <Chart height={200} ariaLabel="Antwortzeiten der Suche in der letzten Woche" wording={GERMAN_CHARTS_WORDING}>
-        <XAxis value="t" time domain={domain} onDomainChange={setDomain} />
-        <YAxis label="ms" />
-        <Line value="p95" name="p95" />
-        <Line value="p50" name="p50" />
-        <Tooltip mode="x" />
-      </Chart>
-    </div>
+    <Chart height={260} ariaLabel="Search latency over last week, zoomable between an hour and two days">
+      {/* Never closer than an hour, never wider than two days - the week
+          shows at the start and once more after a double click. */}
+      <XAxis value="t" time domain="data" zoomable zoomLimits={{ min: HOUR, max: 2 * DAY }} />
+      <YAxis label="ms" />
+      <Line value="p95" name="p95" />
+      <Tooltip mode="x" />
+    </Chart>
   );
 }

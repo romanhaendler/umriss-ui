@@ -5,7 +5,7 @@
    resting pointer. jsdom measures every text as zero and has no 2D context -
    neither matters to the layout or the hit test. */
 
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { ChartScene } from "../src/scene";
 import type {
   AxisConfig,
@@ -434,23 +434,24 @@ describe("ChartScene - cursor sync", () => {
   });
 });
 
-/* charts-review: a double click proposes the data extent - but never one of no
-   width, which no scale can show; the same check a wheel step passes. */
-describe("ChartScene - the double click", () => {
-  it("proposes no extent of a single point", async () => {
-    const onDomainChange = vi.fn();
+/* charts-review: zoom never reaches a span of no width, which no scale can
+   show - a single point's extent is one (component-view 01: at most the
+   data's extent). */
+describe("ChartScene - zoom on a single point", () => {
+  it("puts no span of no width in view", async () => {
     const root = document.createElement("div");
     document.body.appendChild(root);
     const scene = new ChartScene();
     scene.bind(root, document.createElement("canvas"), document.createElement("canvas"), root);
-    scene.registerAxis({ ...xAxis, onDomainChange });
+    scene.registerAxis({ ...xAxis, zoomable: true });
     scene.registerAxis(yAxis);
     scene.registerSeries(line);
     scene.requestResize(400, 300);
     scene.setData([{ t: 5, a: 10 }]);
     await frame();
-    scene.doubleClick();
-    expect(onDomainChange).not.toHaveBeenCalled();
+    scene.wheel(new WheelEvent("wheel", { ctrlKey: true, deltaY: -10, cancelable: true }));
+    await frame();
+    expect(scene.getView()).toEqual({});
     scene.unbind();
   });
 });

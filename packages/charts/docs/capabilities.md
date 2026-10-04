@@ -32,7 +32,7 @@ Screenshot pages carry their name in brackets.
 | One Active point for pointer and keyboard, the last input winning; a pointer's leave keeps the keyboard's; it travels over `syncId` | ADR-0030 | Unit (jsdom keyboard), Interaction |
 | A polite readout after a key, never after the pointer, once the keys rest 150 ms; the emphasised series first | charts-a11y Q4, R11 | Unit (jsdom readout) |
 | A summary the plot is described by: series, visible stretch, each series' range there, the keys | charts-a11y R10 | Unit (jsdom readout) |
-| `+`/`−`, Shift+←/→ and `0` zoom, pan and show everything - only with `onDomainChange` | charts-a11y Q6 | Unit (jsdom zoom keys) |
+| `+`/`−`, Shift+←/→ and `0` zoom, pan and go back to the axis' own `domain` - only where the x axis is `zoomable`; the Active point keeps its place across a view handed in | charts-a11y Q6, ADR-0047 | Unit (jsdom zoom keys) |
 | The charts' own wording, English by default, German from `@umriss-ui/charts/wording/de`; `empty` wins over it | ADR-0031 | Unit (jsdom wording) |
 | `encoding="marks"`: each series a dash and a marker shape (line, area outline, scatter) or a hatch (bar, area fill) by its palette place - the first plain -, a caller's `dash` winning; a state hatched by its name, alike in every band that lists it, a matrix step by index, a limit band hatched in its colour; the legend's chips show the same, an area's its dash over its hatched fill; default off | charts-alternatives C3, 04 | Unit (marks, draw, jsdom encoding), Screenshot (`told-apart-without-colour`, `marks-on-every-kind`, `bands-limits-and-cells`) |
 | DEV warning without `ariaLabel` | R-7.6 | Manual |
@@ -40,7 +40,7 @@ Screenshot pages carry their name in brackets.
 | Every series kind can be bound to every axis | R-4.12 | Unit (scene) |
 | SSR: `renderToString` does not throw | R-7.4 | Unit (SSR) |
 | `onPerf` instrumentation | R-5.1 | Manual (benchmark page) |
-| `syncId`: the pointer's x position, in domain units, shared by every chart of the id - a crosshair in each, the tooltip only under the pointer, cleared when the pointer leaves | Q21 | Interaction (cursor sync) |
+| `syncId`: the pointer's x position, in domain units, shared by every chart of the id - a crosshair in each, the tooltip only under the pointer, cleared when the pointer leaves; zoom is not shared by it | Q21 | Interaction (cursor sync) |
 | `empty`: "No data" or the caller's content, centred in the plot area when no visible series has a point; axes and frame stay | Q18 | Unit (jsdom empty state), Screenshot (`empty`) |
 
 ## Registration, data, materialisation
@@ -92,7 +92,11 @@ Screenshot pages carry their name in brackets.
 | `time` with `domain="nice"`: widened to whole local units of the step (the hour under six-hour ticks), a minute step to itself | Q15 | Unit (time axis) |
 | `ticks` with `domain="nice"`: widened to the named ticks, not to a 1-2-5 grid | — | Unit (layout), Screenshot (`per-category`, `by-limits`) |
 | `time` over less than a minute (an axis without data): no ticks | Q18 | Unit (time axis) |
-| `onDomainChange`: Ctrl/⌘ + wheel and a pinch zoom around the pointer, a drag and a horizontal or Shift wheel pan, a double click proposes the data range; without it nothing zooms and the plain wheel stays the page's | Q19 | Interaction (zoom and pan) |
+| `zoomable`: Ctrl/⌘ + wheel and a pinch zoom around the pointer, a drag and a horizontal or Shift wheel pan, a double click goes back to the axis' own `domain`; without it nothing zooms and the plain wheel stays the page's | Q19, ADR-0047 | Unit (jsdom zoom keys), Interaction (zoom and pan) |
+| The span shown is the chart's view (`domains`, by axis id, `"x"` for a lone axis): `useChart(rows, { initialView, onViewChange })`, applied when it differs in content from the last one handed in, reported whole once per change and at most once per frame, never for the start; `domains` and `setDomain(axisId, span \| null)` on the hook; an id that names no zoomable x axis falls out | ADR-0047, component-view Q5, Q6, Q10, Q22 | Unit (view), Unit (jsdom zoom keys) |
+| A view handed in that this chart reported since the last one handed in, within a second, is its own state coming back and changes nothing - two charts in step do not jump back mid-pan; echoes drop in order, a view from outside drops them all and applies; the schedule's and the table's rule | ADR-0047, component-view 07 | Unit (view), Unit (jsdom zoom keys) |
+| `zoomLimits: { min, max }` keeps a zoom's span between the two; without them at most the data's extent and at least three data steps (the smallest distance between neighbouring points); no zoom reaches a span of no width | component-view Q12 | Unit (view), Unit (jsdom zoom keys, scene frame) |
+| Charts in step: one shared view as every chart's `initialView` and `onViewChange` | component-view Q14 | Unit (jsdom zoom keys), Interaction (cursor sync) |
 
 ## The layout engine
 
@@ -124,7 +128,7 @@ Screenshot pages carry their name in brackets.
 | Binding through `xAxisId` / `yAxisId` | R-4.12 | Interaction (`axes`), Screenshot |
 | `step`: sample-and-hold, a gap ends the hold at its x | Q22 | Unit (draw), Screenshot (`step`) |
 | `step`: the tooltip reports the sample the hold began with | Q22 | Unit (jsdom scene) |
-| Downsampling above two points per pixel column: first, min, max and last per column, a gap kept; only the window of the x domain and one point beyond each edge | Q20 | Unit (downsample), Screenshot (`zoom-and-pan`, unchanged by it) |
+| Downsampling above two points per pixel column: first, min, max and last per column, a gap kept; only the window of the x domain and one point beyond each edge | Q20 | Unit (downsample), Screenshot (`gestures-and-keys`, unchanged by it) |
 | The tooltip searches the raw data, not what the drawing kept | Q20 | Unit (jsdom scene) |
 
 ## `Area`

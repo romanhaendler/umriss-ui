@@ -150,6 +150,8 @@ const TILES = SERVICES.map((service) => {
 
 export default function WatchLatency() {
   const { Chart, XAxis, YAxis, Line } = useChart(DETAIL);
+  // One chart per useChart: the error rate is a second call over the same rows.
+  const { Chart: ErrorChart } = useChart(DETAIL);
   return (
     <Stack gap={4}>
       <Grid minItemWidth="11rem" gap={3} data-callout="1">
@@ -193,13 +195,13 @@ export default function WatchLatency() {
       <Card data-callout="4">
         <CardHeader title={`${CHECKOUT.name} failed requests`} />
         <CardBody>
-          <Chart height={140} syncId="checkout" ariaLabel="Checkout error rate today">
+          <ErrorChart height={140} syncId="checkout" ariaLabel="Checkout error rate today">
             <XAxis value="t" time domain={TODAY} />
             <YAxis label="%" tickCount={3} tickFormat={(v) => v.toFixed(1)} />
             <LimitLine value={ERROR_ALERT} severity="alarm" label={`Alert at ${ERROR_ALERT} %`} inExtent />
             <Line value="errorRate" name="Error rate" />
             <Tooltip mode="x" />
-          </Chart>
+          </ErrorChart>
         </CardBody>
       </Card>
     </Stack>

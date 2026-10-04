@@ -55,6 +55,7 @@ import { lastSegmentEnd, medianStep, segmentEnd, segmentIndex } from "./state";
 import { cellSize, cellIndex, measureSpacing } from "./cells";
 import { assess } from "./limit";
 import { formatValue } from "./format";
+import { defaultLimits, onlyKnown, viewKey, zoomSpan, type ChartView, type ZoomLimits } from "./view";
 import { MINUTE, inRemovedTime, toWorkingTimeClamped } from "./workingTime";
 import {
   axisExtent,
@@ -702,6 +703,10 @@ const CELL_STEPS: Readonly<Record<string, "left" | "right" | "up" | "down">> = {
 
 /** One zoom key widens the domain by this much; its opposite narrows it back. */
 const KEY_ZOOM = 1.25;
+
+/** The smallest step of a materialised series, measured once per
+    materialisation - a gesture asks for it on every wheel step. */
+const STEPS = new WeakMap<MaterializedSeries, number>();
 
 export class ChartScene {
   /* ---------- Registration ---------- */
@@ -1373,6 +1378,9 @@ export class ChartScene {
     overlayCanvas: HTMLCanvasElement,
     themeRoot: HTMLElement,
   ): void {
+    if (this.container !== null && this.container !== container) {
+      warnOnce("chart-twice", "The Chart of one useChart is drawn twice at once: one Chart per useChart - a second chart is a second call.");
+    }
     this.container = container;
     this.themeRoot = themeRoot;
     this.seriesCanvas = seriesCanvas;
@@ -1606,7 +1614,8 @@ export class ChartScene {
       shows every point - "nice" and "data" both contain the data -, and a band
       and a cell keep theirs: a lane is no value, a cell's edge no point. */
   private visibleExtentOf(entry: SeriesEntry): Extent | null {
-    const domain = this.findAxisConfig("x", entry.config.xAxisId)?.domain;
+    const xConfig = this.findAxisConfig("x", entry.config.xAxisId);
+    const domain = xConfig === null ? undefined : this.domainOf(xConfig);
     const kind = entry.config.kind;
     if (!Array.isArray(domain) || entry.materialized === null || kind === "state" || kind === "matrix") {
       return entry.extent;
@@ -1669,8 +1678,9 @@ export class ChartScene {
 
   private updateLayout(): void {
     const measurer = this.measurer;
-    // A domain proposed before this layout has had its answer.
-    this.proposed.clear();
+    // A gesture's span goes out with the frame that draws it, and an axis
+    // declared or gone may take a span out of the view or give it back.
+    this.publishView();
     // A zooming chart keeps the horizontal drag and the pinch; the page keeps
     // the vertical scroll.
     if (this.container !== null) this.container.style.touchAction = this.hasZoom() ? "pan-y" : "";
@@ -1686,7 +1696,7 @@ export class ChartScene {
         label: c.label,
         grid: grid.get(id) ?? false,
         extent: this.extentFor(c),
-        domainMode: c.domain,
+        domainMode: this.domainOf(c),
         tickCount: c.tickCount,
         tickFormat: c.orientation === "y" ? this.yTickFormat(c.id) : c.tickFormat,
         tickValues: c.ticks,
@@ -2457,8 +2467,8 @@ export class ChartScene {
     return false;
   }
 
-  /** Zoom and pan by key (Q6), only where the caller controls the domain:
-      each key proposes what its gesture would. */
+  /** Zoom and pan by key (Q6), only where an x axis is zoomable: each key
+      does what its gesture would. */
   private zoomKey(event: KeyboardEvent): boolean {
     if (!this.hasZoom()) return false;
     const plot = this.layout.plot;
@@ -2941,20 +2951,108 @@ export class ChartScene {
 
   /* ---------- The view (ADR-0047) ----------
 
-     How the reader is looking: which series are hidden, which x axes zoom and
-     where a proposed domain goes. The scene asks only here; today the answers
-     are the caller's props, the chart's own view takes this place. */
+     How the reader is looking: which series are hidden and which span each
+     zoomable x axis shows. The scene holds it and asks only here; `useChart`
+     takes a start through `initialView` and reads it through `getView`. */
+
+  /** The span each zoomable x axis shows, by id - every one ever named, also
+      of an axis not declared at the moment: the view hands out only the known
+      ones, and an axis that comes back gets its span back. */
+  private domainsInView: Readonly<Record<string, readonly [number, number]>>;
+  /** The view as `useChart` reads it - a new object only when its content
+      changed. */
+  private viewNow: ChartView;
+  private readonly viewListeners = new Set<() => void>();
+
+  constructor(initial: ChartView = {}) {
+    this.domainsInView = { ...initial.domains };
+    this.viewNow = this.currentView();
+  }
+
+  subscribeView = (listener: () => void): (() => void) => {
+    this.viewListeners.add(listener);
+    return () => {
+      this.viewListeners.delete(listener);
+    };
+  };
+
+  getView = (): ChartView => this.viewNow;
+
+  /** Goes to a view handed in; what it leaves out goes back to its default. */
+  applyView(view: ChartView): void {
+    if (viewKey(view) === viewKey(this.viewNow)) return;
+    this.domainsInView = { ...view.domains };
+    this.viewMoved();
+  }
+
+  /** Puts a span in view on a zoomable x axis; `null` shows the axis' own
+      `domain` again. */
+  setDomain = (axisId: string, span: readonly [number, number] | null): void => {
+    const next = { ...this.domainsInView };
+    if (span === null) delete next[axisId];
+    else next[axisId] = [span[0], span[1]];
+    this.domainsInView = next;
+    this.viewMoved();
+  };
+
+  private viewMoved(): void {
+    this.publishView();
+    this.markLayoutDirty();
+  }
+
+  private currentView(): ChartView {
+    const known = this.axes.size === 0 ? null : new Set(this.zoomAxisIds());
+    const domains = this.domainsInView;
+    return onlyKnown(Object.keys(domains).length > 0 ? { domains } : {}, known);
+  }
+
+  /** Hands the view out where its content changed. A gesture calls it from
+      the frame, so that a pan is reported at most once per frame. */
+  private publishView(): void {
+    const next = this.currentView();
+    if (viewKey(next) === viewKey(this.viewNow)) return;
+    this.viewNow = next;
+    for (const listener of this.viewListeners) listener();
+  }
 
   private isHidden(config: SeriesConfig): boolean {
     return config.hidden === true;
   }
 
   private zooms(config: AxisConfig): boolean {
-    return config.orientation === "x" && config.onDomainChange !== undefined;
+    return config.orientation === "x" && config.zoomable === true;
   }
 
-  private proposeDomain(config: AxisConfig, domain: [number, number]): void {
-    config.onDomainChange?.(domain);
+  private zoomAxisIds(): string[] {
+    return [...this.axes.values()].filter(({ config }) => this.zooms(config)).map(({ config }) => config.id);
+  }
+
+  /** What an axis shows: on a zoomable x axis the span the view names, and
+      its own `domain` where the view names none. */
+  private domainOf(config: AxisConfig): AxisConfig["domain"] {
+    return (this.zooms(config) ? this.domainsInView[config.id] : undefined) ?? config.domain;
+  }
+
+  /** The narrowest and widest span zoom reaches on an axis: its own, or at
+      most the data's extent and at least three data steps. */
+  private limitsOf(config: AxisConfig): ZoomLimits {
+    return config.zoomLimits ?? defaultLimits(this.axisExtent("x", config.id), this.dataStep(config.id));
+  }
+
+  /** The smallest distance between two neighbouring points of the series on
+      an x axis; 0 where none can be measured. */
+  private dataStep(axisId: string): number {
+    let step = Number.POSITIVE_INFINITY;
+    for (const { config, materialized } of this.series.values()) {
+      if (config.xAxisId !== axisId || materialized === null) continue;
+      let own = STEPS.get(materialized);
+      if (own === undefined) {
+        own = measureStep(materialized.x, materialized.length);
+        STEPS.set(materialized, own);
+      }
+      if (own > 0) step = Math.min(step, own);
+    }
+    return Number.isFinite(step) ? step : 0;
   }
 
   /* ---------- Zoom and pan (charts-long-series 01) ----------
@@ -2962,13 +3060,9 @@ export class ChartScene {
      The schedule's model, not its code: Ctrl or ⌘ with the wheel zooms - a
      trackpad pinch arrives as exactly that -, a horizontal wheel or Shift pans,
      the plain wheel is the page's. A drag pans, two fingers pinch, a double
-     click asks for everything. Nothing here changes a domain: each gesture
-     proposes one to the axis' handler, and the caller passes it back. */
+     click goes back to the axis' own domain. Each moves the span the view
+     holds, only on an axis that is `zoomable`. */
 
-  /** What was last proposed per axis, until a layout has taken the answer: a
-      second wheel step in the same frame builds on the first, not on the
-      domain still drawn. */
-  private readonly proposed = new Map<string, readonly [number, number]>();
   private readonly pointers = new Map<number, number>();
   private pinch = 0;
 
@@ -2990,32 +3084,33 @@ export class ChartScene {
     return out;
   }
 
-  private propose(next: (domain: readonly [number, number], axisId: string) => [number, number]): void {
+  /** Moves the span of every zoomable axis; the view is handed out with the
+      next frame. A second wheel step in the same frame builds on the first,
+      not on the domain still drawn. */
+  private move(next: (domain: readonly [number, number], config: AxisConfig) => [number, number]): void {
+    let moved = false;
     for (const { config, layout } of this.zoomAxes()) {
-      const domain = next(this.proposed.get(config.id) ?? layout.scale.domain, config.id);
+      const domain = next(this.domainsInView[config.id] ?? layout.scale.domain, config);
       if (!(domain[1] - domain[0] > 0) || !Number.isFinite(domain[1] - domain[0])) continue;
-      this.proposed.set(config.id, domain);
-      this.proposeDomain(config, domain);
+      this.domainsInView = { ...this.domainsInView, [config.id]: domain };
+      moved = true;
     }
+    if (moved) this.markLayoutDirty();
   }
 
   /** Zoom by `factor` (below 1 is closer) around a pixel, which keeps its
-      value. */
+      value; the span stays within the axis' zoom limits. */
   private zoomAt(px: number, factor: number): void {
     const p = this.layout.plot;
     const share = p.width > 0 ? Math.min(1, Math.max(0, (px - p.x) / p.width)) : 0.5;
-    this.propose(([from, to]) => {
-      const anchor = from + share * (to - from);
-      const span = (to - from) * factor;
-      return [anchor - share * span, anchor - share * span + span];
-    });
+    this.move((domain, config) => zoomSpan(domain, share, factor, this.limitsOf(config)));
   }
 
   /** Pan by a distance in pixels; positive moves the content right. */
   private panBy(dx: number): void {
     const width = this.layout.plot.width;
     if (width <= 0 || dx === 0) return;
-    this.propose(([from, to]) => {
+    this.move(([from, to]) => {
       const delta = (-dx / width) * (to - from);
       return [from + delta, to + delta];
     });
@@ -3071,12 +3166,12 @@ export class ChartScene {
     return a === undefined || b === undefined ? 0 : Math.abs(a - b);
   }
 
-  /** The whole data range: the extent the axis has without a domain. */
+  /** Every zoomable axis back to its own domain. */
   doubleClick(): void {
-    this.propose((_, axisId) => {
-      const [from, to] = this.axisExtent("x", axisId);
-      return [from, to];
-    });
+    if (!this.hasZoom()) return;
+    const ids = new Set(this.zoomAxisIds());
+    this.domainsInView = Object.fromEntries(Object.entries(this.domainsInView).filter(([id]) => !ids.has(id)));
+    this.viewMoved();
   }
 
   /** An x value in the format of its x axis - the header's, or a point's own. */
