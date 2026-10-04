@@ -1,8 +1,7 @@
-import { useState } from "react";
 import { Legend, Tooltip, useChart } from "../../../src";
 
 export const title = "Before and after, side by side";
-export const lead = "Box series on one x axis stand beside each other, as bars do. `hidden` is your state and `onToggle` hands you the clicked entry; a hidden series leaves the drawing and the y extent.";
+export const lead = "Box series on one x axis stand beside each other, as bars do. A click in the legend hides one; it leaves the drawing and the y extent.";
 
 interface Spread {
   service: number;
@@ -31,8 +30,6 @@ const AFTER: Spread[] = [
 
 export default function Grouped() {
   const { Chart, XAxis, YAxis, BoxPlot } = useChart(BEFORE);
-  const [hidden, setHidden] = useState<readonly string[]>([]);
-  const toggle = (name: string) => setHidden((h) => (h.includes(name) ? h.filter((n) => n !== name) : [...h, name]));
   return (
     <Chart height={280} ariaLabel="Response time per service before and after the release">
       <XAxis value="service" ticks={[0, 1, 2, 3]} tickFormat={(v) => SERVICES[v] ?? ""} />
@@ -45,7 +42,6 @@ export default function Grouped() {
           key={one.name}
           name={one.name}
           data={one.data}
-          hidden={hidden.includes(one.name)}
           median="median"
           lowerQuartile="q1"
           upperQuartile="q3"
@@ -53,7 +49,7 @@ export default function Grouped() {
           upperWhisker="high"
         />
       ))}
-      <Legend onToggle={toggle} />
+      <Legend />
       <Tooltip />
     </Chart>
   );

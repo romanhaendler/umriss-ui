@@ -58,13 +58,13 @@ const caption = (host: HTMLElement) => host.querySelector(".uc-data-panel captio
 type Extra = { domain?: readonly [number, number]; hidden?: boolean; legend?: boolean };
 
 function TwoLines({ rows, extra }: { rows: Row[]; extra: Extra }) {
-  const { Chart, XAxis, YAxis, Line } = useChart(rows);
+  const { Chart, XAxis, YAxis, Line } = useChart(rows, { initialView: extra.hidden === true ? { hidden: ["B"] } : undefined });
   return (
     <Chart ariaLabel="Two courses">
       <XAxis value="t" tickFormat={(v) => `t${v}`} label="Time" domain={extra.domain ?? "data"} />
       <YAxis tickFormat={(v) => `${v} °C`} />
       <Line value="a" name="A" format={(v) => `${v.toFixed(1)} bar`} />
-      <Line value="b" name="B" hidden={extra.hidden} />
+      <Line value="b" name="B" />
       {extra.legend !== false && <Legend />}
       <DataTable />
     </Chart>

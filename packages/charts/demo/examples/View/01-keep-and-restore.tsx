@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Legend, Tooltip, useChart } from "../../../src";
+import { Legend, Tooltip, useChart, type ChartView } from "../../../src";
 
 /* Data from the operations world, written out here so the example runs on its own. */
 /** A small LCG - the same numbers on every computer. */
@@ -82,35 +82,79 @@ function metrics(serviceId: string): MetricPoint[] {
   return points;
 }
 
-export const title = "Hide a series from the legend";
-export const lead = "`hidden` is your state and `onToggle` hands you the clicked entry; a hidden series leaves the y extent, its entry stays struck through.";
+export const title = "Keep and restore a view";
+export const lead = "`onViewChange` reports the span in view and the hidden series as one view; keep it - here in the browser's storage, so it outlives a reload - and hand it back through `initialView`. Zoom, hide a series, keep, reload, restore.";
 
 const SERIES = [
   { name: "Checkout", data: metrics("checkout") },
   { name: "Billing", data: metrics("billing") },
-  { name: "Reporting", data: metrics("reports") },
+  { name: "Search", data: metrics("search") },
 ];
 
-export default function TogglingLegend() {
-  /* Reporting's slow jobs would flatten the other two. */
-  const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set(["Reporting"]));
-  const toggle = (name: string) =>
-    setHidden((previous) => {
-      const next = new Set(previous);
-      if (!next.delete(name)) next.add(name);
-      return next;
-    });
+const KEPT = "umriss-charts-demo-view";
 
-  const { Chart, XAxis, YAxis, Line } = useChart(SERIES[0]!.data);
+/* Storage can be missing or refuse - a private window, a blocked site. The
+   view is then simply not kept. */
+function readKept(): ChartView | null {
+  try {
+    const stored = localStorage.getItem(KEPT);
+    return stored === null ? null : (JSON.parse(stored) as ChartView);
+  } catch {
+    return null;
+  }
+}
+
+function keep(view: ChartView): void {
+  try {
+    localStorage.setItem(KEPT, JSON.stringify(view));
+  } catch {
+    /* Not kept; the chart works on regardless. */
+  }
+}
+
+export default function KeepAndRestore() {
+  /* The application holds the view the chart reports; handing it another one
+     is all it takes to restore. */
+  const [view, setView] = useState<ChartView>({});
+  const [kept, setKept] = useState<ChartView | null>(readKept);
+  const { Chart, XAxis, YAxis, Line } = useChart(SERIES[0]!.data, { initialView: view, onViewChange: setView });
   return (
-    <Chart height={260} ariaLabel="Latency of three services, one hidden">
-      <XAxis value="t" time />
-      <YAxis label="ms" />
-      {SERIES.map((one) => (
-        <Line key={one.name} data={one.data} value="p95" name={one.name} hidden={hidden.has(one.name)} />
-      ))}
-      <Legend onToggle={toggle} />
-      <Tooltip mode="x" />
-    </Chart>
+    <>
+      <Chart height={260} ariaLabel="Latency of three services today">
+        <XAxis value="t" time zoomable />
+        <YAxis label="ms" domain="visible" />
+        {SERIES.map((one) => (
+          <Line key={one.name} data={one.data} value="p95" name={one.name} />
+        ))}
+        <Legend />
+        <Tooltip mode="x" />
+      </Chart>
+      <div className="demo-kept">
+        <p className="pair-caption">What the application would keep</p>
+        {/* JSON has no space to break at: the class lets it break anywhere. */}
+        <code className="demo-view" data-role="view">
+          {JSON.stringify(view)}
+        </code>
+      </div>
+      <div className="demo-actions">
+        <button
+          type="button"
+          className="demo-button"
+          onClick={() => {
+            keep(view);
+            setKept(view);
+          }}
+          data-keep
+        >
+          Keep this view
+        </button>
+        <button type="button" className="demo-button" disabled={kept === null} onClick={() => kept && setView(kept)} data-restore>
+          Restore the kept view
+        </button>
+        <button type="button" className="demo-button" onClick={() => setView({})} data-start-over>
+          Start over
+        </button>
+      </div>
+    </>
   );
 }

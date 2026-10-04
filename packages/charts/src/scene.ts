@@ -55,7 +55,7 @@ import { lastSegmentEnd, medianStep, segmentEnd, segmentIndex } from "./state";
 import { cellSize, cellIndex, measureSpacing } from "./cells";
 import { assess } from "./limit";
 import { formatValue } from "./format";
-import { defaultLimits, onlyKnown, viewKey, zoomSpan, type ChartView, type ZoomLimits } from "./view";
+import { defaultLimits, onlyKnown, showOnly, toggleHidden, viewKey, zoomSpan, type ChartView, type ZoomLimits } from "./view";
 import { MINUTE, inRemovedTime, toWorkingTimeClamped } from "./workingTime";
 import {
   axisExtent,
@@ -187,6 +187,9 @@ export interface LegendItem {
   name: string;
   /** Its series is hidden - for a state, every band that shows it. */
   hidden: boolean;
+  /** The series names a click toggles - for a state, every band that shows
+      it; none for a series without a name, which cannot be hidden. */
+  names: string[];
   /** A CSS background for the chip: a colour, or a matrix' steps side by
       side. */
   color: string;
@@ -1816,12 +1819,14 @@ export class ChartScene {
           if (known !== undefined) {
             if (!known.seriesIds.includes(entry.order)) known.seriesIds.push(entry.order);
             known.hidden &&= this.isHidden(config);
+            if (config.name !== undefined && !known.names.includes(config.name)) known.names.push(config.name);
             return;
           }
           const item: LegendItem = {
             id: `${entry.order}:${k}`,
             name: z.label,
             hidden: this.isHidden(config),
+            names: config.name === undefined ? [] : [config.name],
             color: z.color,
             seriesIds: [entry.order],
             mark: hatches === null ? null : { dash: null, marker: null, swatches: [{ color: this.paint(z.color), hatch: hatches.get(z.label) ?? "none" }], ground: theme.colorBg },
@@ -1835,6 +1840,7 @@ export class ChartScene {
         id: String(entry.order),
         name: this.nameFor(entry, i),
         hidden: this.isHidden(config),
+        names: config.name === undefined ? [] : [config.name],
         color:
           config.kind === "matrix"
             ? chipOf(matrixColors(config.coloring, theme))
@@ -2959,6 +2965,9 @@ export class ChartScene {
       of an axis not declared at the moment: the view hands out only the known
       ones, and an axis that comes back gets its span back. */
   private domainsInView: Readonly<Record<string, readonly [number, number]>>;
+  /** The hidden series, by name - also of a series not declared at the
+      moment, which comes back hidden. */
+  private hiddenInView: readonly string[];
   /** The view as `useChart` reads it - a new object only when its content
       changed. */
   private viewNow: ChartView;
@@ -2966,6 +2975,7 @@ export class ChartScene {
 
   constructor(initial: ChartView = {}) {
     this.domainsInView = { ...initial.domains };
+    this.hiddenInView = [...(initial.hidden ?? [])];
     this.viewNow = this.currentView();
   }
 
@@ -2982,7 +2992,7 @@ export class ChartScene {
   applyView(view: ChartView): void {
     if (viewKey(view) === viewKey(this.viewNow)) return;
     this.domainsInView = { ...view.domains };
-    this.viewMoved();
+    this.setHidden([...(view.hidden ?? [])]);
   }
 
   /** Puts a span in view on a zoomable x axis; `null` shows the axis' own
@@ -2995,15 +3005,51 @@ export class ChartScene {
     this.viewMoved();
   };
 
+  /** Hides the series `name`, or shows it where it is hidden. */
+  toggleSeries = (name: string): void => this.toggleNames([name]);
+
+  /** Hides the series `names` together, or shows them where every one is
+      hidden - a state's legend entry speaks for every band that shows it. */
+  toggleNames(names: readonly string[]): void {
+    this.setHidden(toggleHidden(this.hiddenInView, names, this.seriesNames()));
+  }
+
+  /** Hides every series but `name`. */
+  showOnly = (name: string): void => this.setHidden(showOnly(name, this.seriesNames()));
+
+  /** Shows every series again. */
+  showAllSeries = (): void => this.setHidden([]);
+
+  /** The name of every series declared, `undefined` for one without. */
+  private seriesNames(): (string | undefined)[] {
+    return [...this.series.values()].map(({ config }) => config.name);
+  }
+
+  private setHidden(next: string[]): void {
+    const before = new Map([...this.series.values()].map((e) => [e, this.isHidden(e.config)]));
+    this.hiddenInView = next;
+    // A hidden member leaves its place in the stack: the others sum anew.
+    for (const [entry, was] of before) {
+      if (was !== this.isHidden(entry.config) && stackOf(entry.config) !== undefined) this.materialsDirty = true;
+    }
+    this.viewMoved();
+  }
+
   private viewMoved(): void {
     this.publishView();
     this.markLayoutDirty();
   }
 
   private currentView(): ChartView {
-    const known = this.axes.size === 0 ? null : new Set(this.zoomAxisIds());
+    const axes = this.axes.size === 0 ? null : new Set(this.zoomAxisIds());
+    const names = this.series.size === 0 ? null : new Set(this.seriesNames().filter((n) => n !== undefined));
     const domains = this.domainsInView;
-    return onlyKnown(Object.keys(domains).length > 0 ? { domains } : {}, known);
+    const hidden = this.hiddenInView;
+    return onlyKnown(
+      { ...(Object.keys(domains).length > 0 && { domains }), ...(hidden.length > 0 && { hidden }) },
+      axes,
+      names,
+    );
   }
 
   /** Hands the view out where its content changed. A gesture calls it from
@@ -3016,7 +3062,7 @@ export class ChartScene {
   }
 
   private isHidden(config: SeriesConfig): boolean {
-    return config.hidden === true;
+    return config.name !== undefined && this.hiddenInView.includes(config.name);
   }
 
   private zooms(config: AxisConfig): boolean {

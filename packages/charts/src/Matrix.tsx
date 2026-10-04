@@ -55,10 +55,6 @@ export interface MatrixProps<T> {
       unnamed series is a colour nobody can look up.
       @default "Series n", after its place in the chart */
   name?: string;
-  /** Not drawn, not hit and not counted for its axes' extent - a fixed
-      `domain` keeps the axis still. Its legend entry stays, drawn back.
-      Controlled: the caller sets it, typically from `Legend onToggle`. */
-  hidden?: boolean;
   /** The level as the tooltip writes it. The y axis' `tickFormat` writes the
       row, not the level.
       @default the built-in number format */
@@ -78,7 +74,6 @@ export function Matrix<T>(props: MatrixProps<T>): null {
     yAxisId = "y",
     data,
     name,
-    hidden,
     format,
   } = props;
 
@@ -98,10 +93,9 @@ export function Matrix<T>(props: MatrixProps<T>): null {
         yAxisId,
         data,
         name,
-        hidden,
         format,
       }) as MatrixSeriesConfig,
-    [value, level, effectiveColoring, xAxisId, yAxisId, data, name, hidden, format],
+    [value, level, effectiveColoring, xAxisId, yAxisId, data, name, format],
   );
 
   useSeries("Matrix", config);

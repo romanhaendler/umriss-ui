@@ -294,12 +294,12 @@ describe("ChartScene - a hidden series", () => {
   it("is not in the tooltip", async () => {
     const root = document.createElement("div");
     document.body.appendChild(root);
-    const scene = new ChartScene();
+    const scene = new ChartScene({ hidden: ["Hidden"] });
     scene.bind(root, document.createElement("canvas"), document.createElement("canvas"), root);
     scene.registerAxis(xAxis);
     scene.registerAxis(yAxis);
     scene.registerSeries(line);
-    scene.registerSeries({ ...line, name: "Hidden", hidden: true });
+    scene.registerSeries({ ...line, name: "Hidden" });
     scene.registerTooltip({ mode: "x" });
     scene.setData([
       { t: 0, a: 10 },
@@ -375,7 +375,8 @@ describe("ChartScene - the hit on a downsampled line", () => {
 describe("ChartScene - the highlight of a hidden series", () => {
   it("dims nothing", async () => {
     const scene = bound();
-    const hidden = scene.registerSeries({ ...line, name: "B", hidden: true });
+    const hidden = scene.registerSeries({ ...line, name: "B" });
+    scene.toggleSeries("B");
     scene.setData([
       { t: 0, a: 10 },
       { t: 1, a: 20 },

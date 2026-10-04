@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Legend, Tooltip, useChart } from "../../../src";
 
 /* Data from the logistics world, written out here so the example runs on its own. */
@@ -180,19 +179,7 @@ export const lead = "Put the band on a second y axis with `laneFrom` and `laneTo
 const BATTERY = batteryDay("v2");
 const STATES = vehicleDay("v2");
 
-/* The legend names the band's states, not the band. */
-const LABELS: ReadonlySet<string> = new Set(VEHICLE_STATES.map((one) => one.label));
-
 export default function UnderACourse() {
-  const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set());
-  const toggle = (name: string) =>
-    setHidden((previous) => {
-      const series = LABELS.has(name) ? "FP 377 K" : name;
-      const next = new Set(previous);
-      if (!next.delete(series)) next.add(series);
-      return next;
-    });
-
   const { Chart, XAxis, YAxis, StateBand, Line } = useChart(BATTERY);
   return (
     <Chart height={320} ariaLabel="An e-van's charge above what it was doing">
@@ -200,9 +187,9 @@ export default function UnderACourse() {
       <YAxis domain={[-40, 100]} ticks={[0, 25, 50, 75, 100]} label="Charge %" />
       {/* The lane: the bottom unit of five, the rest is room for the course. */}
       <YAxis id="lane" position="right" domain={[0, 5]} ticks={[0.4]} tickFormat={() => "State"} />
-      <StateBand data={STATES} value="state" states={VEHICLE_STATES} yAxisId="lane" laneFrom={0} laneTo={0.8} name="FP 377 K" hidden={hidden.has("FP 377 K")} />
-      <Line value="charge" name="Charge" strokeWidth={1.75} hidden={hidden.has("Charge")} />
-      <Legend placement="top" onToggle={toggle} />
+      <StateBand data={STATES} value="state" states={VEHICLE_STATES} yAxisId="lane" laneFrom={0} laneTo={0.8} name="FP 377 K" />
+      <Line value="charge" name="Charge" strokeWidth={1.75} />
+      <Legend placement="top" />
       <Tooltip mode="x" />
     </Chart>
   );

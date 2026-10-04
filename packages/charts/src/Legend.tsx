@@ -3,8 +3,10 @@
    are drawn on the series layer at 0.25 alpha. This is not a mousemove path,
    which is why a redraw of the series layer is explicitly allowed here.
 
-   A click toggles only where the caller listens (`onToggle`): `hidden` is the
-   caller's state, and a button that changes nothing is worse than none. */
+   A click hides and shows the series through the chart's view (ADR-0047):
+   every entry of a named series is a button. A series without a name cannot
+   be hidden, so its entry stays text - a button that changes nothing is worse
+   than none. */
 
 import { useSyncExternalStore, type ReactNode } from "react";
 import { useChartScene, useLegend } from "./context";
@@ -18,21 +20,9 @@ export interface LegendProps {
   /** Which side of the plot area the legend stands on.
       @default "top" */
   placement?: "top" | "bottom";
-  /** Called with an entry's name when it is clicked - the series' name, or a
-      state's label. The caller flips `hidden` on the series it means. Without
-      it the legend is not clickable. */
-  onToggle?: (name: string) => void;
 }
 
-function LegendInner({
-  scene,
-  placement,
-  onToggle,
-}: {
-  scene: ChartScene;
-  placement: "top" | "bottom";
-  onToggle?: (name: string) => void;
-}): ReactNode {
+function LegendInner({ scene, placement }: { scene: ChartScene; placement: "top" | "bottom" }): ReactNode {
   useLegend("Legend", { placement });
   const snapshot = useSyncExternalStore(
     scene.subscribeLayout,
@@ -60,7 +50,7 @@ function LegendInner({
             {item.name}
           </>
         );
-        return onToggle === undefined ? (
+        return item.names.length === 0 ? (
           <span key={item.id} {...shared}>
             {content}
           </span>
@@ -69,7 +59,7 @@ function LegendInner({
             key={item.id}
             type="button"
             aria-pressed={!item.hidden}
-            onClick={() => onToggle(item.name)}
+            onClick={() => scene.toggleNames(item.names)}
             {...shared}
           >
             {content}
@@ -174,10 +164,11 @@ function markerD(shape: MarkerShape, cx: number, cy: number, r: number): string 
 }
 
 /** The legend of a chart: one entry per series, or per state of a state band.
-    Hovering an entry highlights its series; with `onToggle` a click hides and
-    shows it. */
-export function Legend({ placement = "top", onToggle }: LegendProps): ReactNode {
+    Hovering an entry highlights its series; a click hides and shows it, a
+    state's entry the whole band - through the chart's view. Hiding the last
+    series visible shows all. */
+export function Legend({ placement = "top" }: LegendProps): ReactNode {
   const scene = useChartScene("Legend");
   if (scene === null) return null; // PROD outside a Chart (R-2.3)
-  return <LegendInner scene={scene} placement={placement} onToggle={onToggle} />;
+  return <LegendInner scene={scene} placement={placement} />;
 }

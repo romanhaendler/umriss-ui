@@ -71,7 +71,7 @@ export const OUTLINE: readonly Rubric[] = [
         ],
         accessibility: [
           "The plot is an image named by `ariaLabel` and described by a summary: the series, the visible stretch and each series' lowest and highest value in it. With a `Tooltip` it becomes one tab stop, the role `application` read as \"chart\", and the summary adds the keys. Pass `ariaLabel`: without it the plot has no name, and the development build warns.",
-          "When a key comes to rest, a polite live region beside the plot reads the active position and every series' value there, as the tooltip shows it; a pointer announces nothing. A reader who wants every value at once opens the `DataTable` (on [Tooltip & Legend](#/tooltip)), a plain table of what the chart shows.",
+          "When a key comes to rest, a polite live region beside the plot reads the active position and every series' value there, as the tooltip shows it; a pointer announces nothing. A reader who wants every value at once opens the `DataTable` (on [Tooltip](#/tooltip)), a plain table of what the chart shows.",
           "Under forced colours the chart draws in the system colours and tells its series apart by their marks instead of by colour. With reduced motion the tooltip appears without fading in.",
         ],
         limits: [
@@ -106,6 +106,19 @@ export const OUTLINE: readonly Rubric[] = [
         keysOf: ["chart"],
         limits: ["No zoom along y, no rectangle zoom and no navigator: the x span is the one zoom there is."],
         types: ["XAxisProps", "ChartOptions"],
+        exports: ["useChart"],
+      },
+      {
+        id: "view",
+        name: "View",
+        sentence: "How a reader is looking at a chart - the span in view and the hidden series - kept by the chart, reported whole, and handed back to restore it (saved state, a bookmark, a reload).",
+        about: [
+          "A chart holds its own view (ADR-0047): `{ domains, hidden }` - the span each zoomable x axis shows, by axis `id`, and the hidden series, by `name`. Whatever is at its default is absent, so a chart nobody touched reports `{}`.",
+          "`useChart(rows, { initialView, onViewChange })`: `onViewChange` hears every change once, always the whole view; `initialView` is the start, and a view handed in later is gone to whenever its content differs from the last one handed in. An axis id or a series name that no longer occurs falls out. Where a view is kept - state, storage, an address - is the application's decision; the chart remembers none.",
+        ],
+        keysOf: ["chart"],
+        limits: ["The active point and the open data table are not part of the view: they are where the reader is, not how the chart is looked at."],
+        types: ["ChartOptions", "ChartView"],
         exports: ["useChart"],
       },
     ],
@@ -241,12 +254,25 @@ export const OUTLINE: readonly Rubric[] = [
     pages: [
       {
         id: "tooltip",
-        name: "Tooltip & Legend",
-        sentence: "What a hover reports and what the colours mean (a hover card, a key), and the values as a table for a reader who wants them all at once.",
-        about: ["The crosshair snaps to a reading, never between two. A legend without `onToggle` only explains; with it, it switches series on and off, and the state stays yours."],
+        name: "Tooltip",
+        sentence: "What a hover reports (a hover card), and the values as a table for a reader who wants them all at once.",
+        about: ["The crosshair snaps to a reading, never between two. The data table's key stands at the end of the legend."],
         keysOf: ["chart"],
-        types: ["TooltipProps", "LegendProps"],
-        exports: ["Tooltip", "Legend", "DataTable"],
+        types: ["TooltipProps"],
+        exports: ["Tooltip", "DataTable"],
+      },
+      {
+        id: "legend",
+        name: "Legend",
+        sentence: "What the colours mean (a key), and a switch for every series: a click hides it and shows it again.",
+        about: [
+          "The legend toggles by default: every entry of a named series is a button that says whether its series is shown. The hidden series are part of the chart's view, by `name` - no state of yours, and kept like the rest of the view, on [View](#/view). A series without a name cannot be hidden; its entry only explains.",
+          "A hidden series leaves the drawing, the y extent and the keys' walk; its entry stays, struck through, and keeps its colour, so showing it again moves nothing else. Nothing hides every series: hiding the last one visible shows all. A state band's entries are its states, and any of them hides the whole band.",
+          "On the hook, `hidden`, `toggleSeries(name)`, `showOnly(name)` and `showAllSeries()` do the same from your own controls.",
+        ],
+        keysOf: ["chart"],
+        types: ["LegendProps"],
+        exports: ["Legend", "useChart"],
       },
       {
         id: "benchmark",

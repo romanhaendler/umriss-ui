@@ -51,6 +51,10 @@
    (ADR-0021). */
 .demo-actions { display: flex; gap: var(--u-space-2); margin-bottom: var(--u-space-2); flex-wrap: wrap; }
 
+/* The view an example keeps, written out (View). */
+.demo-kept { margin: var(--u-space-3) 0 var(--u-space-2); }
+.demo-view { display: block; font-family: var(--u-font-mono); font-size: var(--u-text-xs); color: var(--u-color-text); overflow-wrap: anywhere; }
+
 .demo-button {
   font-family: var(--u-font-sans);
   font-size: var(--u-text-sm);

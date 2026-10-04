@@ -318,7 +318,7 @@
     forced-color-adjust: none;
   }
 
-  /* With onToggle an entry is a button, and looks like the entry it was. */
+  /* The entry of a named series is a button, and looks like the plain entry. */
   button.uc-legend-item {
     padding: 0;
     border: 0;

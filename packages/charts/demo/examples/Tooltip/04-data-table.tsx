@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { DataTable, Legend, Tooltip, useChart } from "../../../src";
 
 /* Data from the planning world, written out here so the example runs on its own. */
@@ -72,16 +71,14 @@ const day = (v: number) => new Date(v).toLocaleDateString("en-GB", { weekday: "s
 const hours = (v: number) => `${v.toFixed(0)} h`;
 
 export default function ValuesAsTable() {
-  const [hidden, setHidden] = useState<readonly string[]>([]);
-  const toggle = (name: string) => setHidden((h) => (h.includes(name) ? h.filter((n) => n !== name) : [...h, name]));
   const { Chart, XAxis, YAxis, Line } = useChart(BURNDOWN);
   return (
     <Chart height={260} ariaLabel="Sprint 14: hours left against the ideal">
       <XAxis value="t" ticks={BURNDOWN.map((d) => d.t)} tickFormat={day} />
       <YAxis label="Hours left" />
-      <Line value="ideal" name="Ideal" format={hours} hidden={hidden.includes("Ideal")} />
-      <Line value="remaining" name="Remaining" format={hours} hidden={hidden.includes("Remaining")} />
-      <Legend onToggle={toggle} />
+      <Line value="ideal" name="Ideal" format={hours} />
+      <Line value="remaining" name="Remaining" format={hours} />
+      <Legend />
       <Tooltip mode="x" />
       {/* The table lists what the chart shows: hide a series and it follows. */}
       <DataTable />

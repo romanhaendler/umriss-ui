@@ -63,7 +63,7 @@ Screenshot pages carry their name in brackets.
 | The baseline enters the value range of its Y axis | R-4.13 | Unit (materialisation, scene) |
 | A fixed domain wins against the widened value range | 4.2 | Unit (layout) |
 | A change of baseline or series kind materialises afresh | R-2.2 | Unit (scene) |
-| `hidden`: not drawn, not hit, not in its axes' extent | Q17 | Unit (scene, jsdom scene), Screenshot (`toggling-legend`) |
+| A hidden series (by `name`, through the view): not drawn, not hit, not in its axes' extent nor the keys' walk; a stack closes over it | Q17, ADR-0047 | Unit (scene, jsdom scene, jsdom stacking, jsdom legend toggle), Screenshot (`hide-a-series`) |
 | Functions compared by source text, a native or bound one (`Intl.NumberFormat#format`) by identity; a `calendar` by its intervals | R-2.2 | Unit (jsdom scene, limits and bands in the scene) |
 
 ## `XAxis` / `YAxis`
@@ -97,6 +97,8 @@ Screenshot pages carry their name in brackets.
 | A view handed in that this chart reported since the last one handed in, within a second, is its own state coming back and changes nothing - two charts in step do not jump back mid-pan; echoes drop in order, a view from outside drops them all and applies; the schedule's and the table's rule | ADR-0047, component-view 07 | Unit (view), Unit (jsdom zoom keys) |
 | `zoomLimits: { min, max }` keeps a zoom's span between the two; without them at most the data's extent and at least three data steps (the smallest distance between neighbouring points); no zoom reaches a span of no width | component-view Q12 | Unit (view), Unit (jsdom zoom keys, scene frame) |
 | Charts in step: one shared view as every chart's `initialView` and `onViewChange` | component-view Q14 | Unit (jsdom zoom keys), Interaction (cursor sync) |
+| The hidden series are the view's `hidden`, by `name`; `hidden`, `toggleSeries(name)`, `showOnly(name)` and `showAllSeries()` on the hook; a name no series carries falls out, and comes back hidden with its series | ADR-0047, component-view Q10, Q22 | Unit (view, jsdom legend toggle) |
+| A view kept outlives a reload and is restored by handing it back | ADR-0047, component-view Q20 | Interaction (`keep-and-restore`) |
 
 ## The layout engine
 
@@ -314,11 +316,12 @@ Screenshot pages carry their name in brackets.
 
 | Capability | Rule | Proved at |
 |---|---|---|
-| `placement="top" \| "bottom"`, above without one | R-4.11 | Screenshot (`multi-series`, `configuration`, `legend-placement`) |
+| `placement="top" \| "bottom"`, above without one | R-4.11 | Screenshot (`multi-series`, `configuration`, `above-or-below`) |
 | A colour chip plus a name per series | R-4.11 | Unit (jsdom), Screenshot |
 | Hover highlights the series, the others at 0.25 alpha | R-4.11 | Manual |
-| `onToggle(name)`: entries become buttons with `aria-pressed`; without it no button | Q17 | Unit (jsdom legend toggle), Screenshot (`toggling-legend`) |
-| A hidden series keeps its entry, drawn back; a state's entry only when every band showing it is hidden | Q17 | Unit (scene, jsdom legend toggle), Screenshot (`toggling-legend`) |
+| Toggles by default: every entry of a named series is a button with `aria-pressed`, a click hides or shows it at once through the view; a state's entry hides every band showing it; a series without a name has no button | ADR-0047, component-view Q9, Q10 | Unit (scene, jsdom legend toggle), Screenshot (`hide-a-series`) |
+| Never every series hidden: hiding the last one visible - by a click or a setter - shows all; a view handed in is taken as given | component-view, legend gestures | Unit (view, jsdom legend toggle) |
+| A hidden series keeps its entry, drawn back, and its colour; a state's entry only when every band showing it is hidden | Q17 | Unit (scene, jsdom legend toggle), Screenshot (`hide-a-series`) |
 
 ## `DataTable`
 
