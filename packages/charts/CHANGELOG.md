@@ -29,6 +29,19 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## Unreleased
+
+### Fixed
+
+- **A limit's label takes the limit's `color`**, as its line does; it kept
+  the severity's colour before - a "Release freeze" in alarm red beside its
+  own-coloured line. Without `color` the severity and the role colour it as
+  before.
+- **On an x axis a tick label a limit's label reaches over gives way**, as on
+  a y axis; it stood half covered before. Its tick mark stays.
+
+---
+
 ## 0.10.0 – Every export explained (Oct. 2026)
 
 The package explains itself where it is used: every export carries a comment,
