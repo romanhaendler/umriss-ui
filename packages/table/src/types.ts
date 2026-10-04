@@ -599,9 +599,10 @@ interface TableOptionsCommon<Z> {
   rowFilters?: readonly RowFilter<Z, any>[];
   /** The view to start from, and to go to whenever one differing in content
       from the last is handed in - the same view again changes nothing, and
-      what it leaves out is reset. The table remembers none:
-      where a view is kept is the application's decision. Names no column
-      carries fall out. */
+      what it leaves out is reset; one the table reported itself, handed back
+      late, is its own state coming back and not gone to. The table remembers
+      none: where a view is kept is the application's decision. Names no
+      column carries fall out. */
   initialView?: TableView;
   /** Every change of the view, once, always the whole view - the one to keep,
       or to hand another table as its `initialView`. Not called for the view
