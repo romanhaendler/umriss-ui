@@ -1,4 +1,4 @@
-import { Chart, Legend, Line, Tooltip, XAxis, YAxis } from "../../../src";
+import { Legend, Tooltip, useChart } from "../../../src";
 
 /* Data from the planning world, written out here so the example runs on its own. */
 const at = (day: number, hours = 9, minutes = 0) => new Date(2026, 2, day, hours, minutes).getTime();
@@ -70,12 +70,13 @@ export const lead = "A sprint's burn-down: the ideal as a quiet dashed line, the
 const day = (v: number) => new Date(v).toLocaleDateString("en-GB", { weekday: "short", day: "numeric" });
 
 export default function BurnDown() {
+  const { Chart, XAxis, YAxis, Line } = useChart(BURNDOWN);
   return (
-    <Chart data={BURNDOWN} height={260} ariaLabel="Sprint 14: hours left against the ideal">
-      <XAxis accessor={(d: BurndownPoint) => d.t} ticks={BURNDOWN.map((d) => d.t)} tickFormat={day} />
-      <YAxis accessor={(d: BurndownPoint) => d.ideal} label="Hours left" />
-      <Line accessor={(d: BurndownPoint) => d.ideal} name="Ideal" color="var(--uc-color-text)" dash={[4, 4]} />
-      <Line accessor={(d: BurndownPoint) => d.remaining} name="Remaining" markers="always" strokeWidth={2} />
+    <Chart height={260} ariaLabel="Sprint 14: hours left against the ideal">
+      <XAxis value="t" ticks={BURNDOWN.map((d) => d.t)} tickFormat={day} />
+      <YAxis value="ideal" label="Hours left" />
+      <Line value="ideal" name="Ideal" color="var(--uc-color-text)" dash={[4, 4]} />
+      <Line value="remaining" name="Remaining" markers="always" strokeWidth={2} />
       <Legend />
       <Tooltip mode="x" />
     </Chart>

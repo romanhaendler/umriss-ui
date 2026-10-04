@@ -1,6 +1,5 @@
 import { useMemo } from "react";
-import { Bar, Chart, Legend, LimitLine, Line, Tooltip, XAxis, YAxis, pareto } from "../../../src";
-import type { ParetoEntry } from "../../../src";
+import { Legend, LimitLine, Tooltip, pareto, useChart } from "../../../src";
 
 export const title = "Sort causes and collect the tail";
 export const lead = "`pareto()` sorts descending, adds up and folds everything past `collectRank` into one entry that stands last; the bars and the line are yours.";
@@ -21,20 +20,21 @@ const FAILED_DELIVERIES = [
 
 export default function ParetoExample() {
   const { entries } = useMemo(() => pareto(FAILED_DELIVERIES, { collectRank: 6, remainderName: "Other" }), []);
+  const { Chart, XAxis, YAxis, Bar, Line } = useChart(entries);
   return (
-    <Chart data={entries as ParetoEntry[]} height={300} ariaLabel="Failed deliveries by cause, sorted, with the cumulative share">
-      <XAxis accessor={(d: ParetoEntry) => d.index} ticks={entries.map((e) => e.index)} tickFormat={(v) => entries[v]?.name ?? ""} />
-      <YAxis accessor={(d: ParetoEntry) => d.value} label="Failed deliveries" />
+    <Chart height={300} ariaLabel="Failed deliveries by cause, sorted, with the cumulative share">
+      <XAxis value="index" ticks={entries.map((e) => e.index)} tickFormat={(v) => entries[v]?.name ?? ""} />
+      <YAxis value="value" label="Failed deliveries" />
       <YAxis
         id="share"
         position="right"
-        accessor={(d: ParetoEntry) => d.cumulative * 100}
+        value={(d) => d.cumulative * 100}
         domain={[0, 100]}
         tickFormat={(v) => `${v.toFixed(0)} %`}
         label="cumulative"
       />
-      <Bar accessor={(d: ParetoEntry) => d.value} name="Failed" barWidth={0.72} />
-      <Line accessor={(d: ParetoEntry) => d.cumulative * 100} yAxisId="share" name="cumulative" markers="always" strokeWidth={1.75} />
+      <Bar value="value" name="Failed" barWidth={0.72} />
+      <Line value={(d) => d.cumulative * 100} yAxisId="share" name="cumulative" markers="always" strokeWidth={1.75} />
       <LimitLine value={80} axisId="share" severity="warning" label="80 %" inExtent={false} />
       <Legend placement="top" />
       <Tooltip mode="x" />

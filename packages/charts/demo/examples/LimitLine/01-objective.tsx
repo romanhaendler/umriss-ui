@@ -1,4 +1,4 @@
-import { Chart, LimitLine, Line, Tooltip, XAxis, YAxis } from "../../../src";
+import { LimitLine, Tooltip, useChart } from "../../../src";
 
 /* Data from the operations world, written out here so the example runs on its own. */
 /** A small LCG - the same numbers on every computer. */
@@ -88,12 +88,13 @@ const CHECKOUT = metrics("checkout");
 const OBJECTIVE = SERVICES.find((one) => one.id === "checkout")!.latencySlo;
 
 export default function Objective() {
+  const { Chart, XAxis, YAxis, Line } = useChart(CHECKOUT);
   return (
-    <Chart data={CHECKOUT} height={260} ariaLabel="Checkout's latency against its objective">
-      <XAxis accessor={(d: MetricPoint) => d.t} time />
-      <YAxis accessor={(d: MetricPoint) => d.p95} label="ms" />
+    <Chart height={260} ariaLabel="Checkout's latency against its objective">
+      <XAxis value="t" time />
+      <YAxis value="p95" label="ms" />
       <LimitLine value={OBJECTIVE} severity="alarm" label="Objective" />
-      <Line accessor={(d: MetricPoint) => d.p95} name="p95" />
+      <Line value="p95" name="p95" />
       <Tooltip mode="x" />
     </Chart>
   );

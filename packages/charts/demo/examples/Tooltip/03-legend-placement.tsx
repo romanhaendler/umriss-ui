@@ -1,4 +1,4 @@
-import { Chart, Legend, Line, XAxis, YAxis } from "../../../src";
+import { Legend, useChart } from "../../../src";
 
 /* Data from the controlling world, written out here so the example runs on its own. */
 /** A small LCG - the same numbers on every computer. */
@@ -71,12 +71,13 @@ const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Se
 const month = (row: LedgerRow) => Number(row.month.slice(5)) - 1;
 
 function Marketing({ placement }: { placement?: "bottom" }) {
+  const { Chart, XAxis, YAxis, Line } = useChart(MARKETING);
   return (
-    <Chart data={MARKETING} height={220} ariaLabel={`Marketing's budget and forecast, legend ${placement ?? "above"}`}>
-      <XAxis accessor={month} ticks={MONTH_NAMES.map((_, i) => i)} tickFormat={(v) => MONTH_NAMES[v] ?? ""} />
-      <YAxis accessor={(d: LedgerRow) => d.forecast} label="€" />
-      <Line accessor={(d: LedgerRow) => d.budget} name="Budget" />
-      <Line accessor={(d: LedgerRow) => d.forecast} name="Forecast" />
+    <Chart height={220} ariaLabel={`Marketing's budget and forecast, legend ${placement ?? "above"}`}>
+      <XAxis value={month} ticks={MONTH_NAMES.map((_, i) => i)} tickFormat={(v) => MONTH_NAMES[v] ?? ""} />
+      <YAxis value="forecast" label="€" />
+      <Line value="budget" name="Budget" />
+      <Line value="forecast" name="Forecast" />
       <Legend placement={placement} />
     </Chart>
   );

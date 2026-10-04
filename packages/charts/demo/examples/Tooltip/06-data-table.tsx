@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Chart, DataTable, Legend, Line, Tooltip, XAxis, YAxis } from "../../../src";
+import { DataTable, Legend, Tooltip, useChart } from "../../../src";
 
 /* Data from the planning world, written out here so the example runs on its own. */
 const at = (day: number, hours = 9, minutes = 0) => new Date(2026, 2, day, hours, minutes).getTime();
@@ -74,12 +74,13 @@ const hours = (v: number) => `${v.toFixed(0)} h`;
 export default function ValuesAsTable() {
   const [hidden, setHidden] = useState<readonly string[]>([]);
   const toggle = (name: string) => setHidden((h) => (h.includes(name) ? h.filter((n) => n !== name) : [...h, name]));
+  const { Chart, XAxis, YAxis, Line } = useChart(BURNDOWN);
   return (
-    <Chart data={BURNDOWN} height={260} ariaLabel="Sprint 14: hours left against the ideal">
-      <XAxis accessor={(d: BurndownPoint) => d.t} ticks={BURNDOWN.map((d) => d.t)} tickFormat={day} />
-      <YAxis accessor={(d: BurndownPoint) => d.ideal} label="Hours left" />
-      <Line accessor={(d: BurndownPoint) => d.ideal} name="Ideal" format={hours} hidden={hidden.includes("Ideal")} />
-      <Line accessor={(d: BurndownPoint) => d.remaining} name="Remaining" format={hours} hidden={hidden.includes("Remaining")} />
+    <Chart height={260} ariaLabel="Sprint 14: hours left against the ideal">
+      <XAxis value="t" ticks={BURNDOWN.map((d) => d.t)} tickFormat={day} />
+      <YAxis value="ideal" label="Hours left" />
+      <Line value="ideal" name="Ideal" format={hours} hidden={hidden.includes("Ideal")} />
+      <Line value="remaining" name="Remaining" format={hours} hidden={hidden.includes("Remaining")} />
       <Legend onToggle={toggle} />
       <Tooltip mode="x" />
       {/* The table lists what the chart shows: hide a series and it follows. */}

@@ -1,5 +1,5 @@
 import { Card, CardBody, CardHeader, Grid, Stack, Stat, Text } from "@umriss-ui/core";
-import { Bar, Chart, Legend, Line, Tooltip, XAxis, YAxis } from "../../src";
+import { Legend, Tooltip, useChart } from "../../src";
 
 /* Data from the planning world, written out here so the example runs on its own. */
 const at = (day: number, hours = 9, minutes = 0) => new Date(2026, 2, day, hours, minutes).getTime();
@@ -146,6 +146,41 @@ const HOLDERS: readonly Holder[] = PEOPLE.map((person) => ({
   open: WORK.filter((one: WorkItem) => one.lane === person.id && one.status !== "done").reduce((sum, one) => sum + one.estimate, 0),
 })).filter((one) => one.open > 0);
 
+function SprintBurnDown() {
+  const { Chart, XAxis, YAxis, Line } = useChart(BURNDOWN);
+  return (
+    <Chart height={280} ariaLabel={`${SPRINT.name}: hours left per working day against an even pace`}>
+      <XAxis
+        value={(_d, i) => i}
+        ticks={BURNDOWN.map((_, i) => i)}
+        tickFormat={day}
+        label="Working day"
+      />
+      <YAxis value="ideal" label="Hours left" domain={[0, BURNDOWN[0]!.ideal]} />
+      <Line value="ideal" name="Even pace" color="var(--uc-color-text)" dash={[4, 4]} strokeWidth={1} />
+      <Line value="remaining" name="Left" markers="always" strokeWidth={2} />
+      <Legend placement="top" />
+      <Tooltip mode="x" />
+    </Chart>
+  );
+}
+
+function OpenPerPerson() {
+  const { Chart, XAxis, YAxis, Bar } = useChart(HOLDERS);
+  return (
+    <Chart height={200} ariaLabel="Estimated hours of unfinished items per person">
+      <XAxis
+        value={(_d, i) => i}
+        ticks={HOLDERS.map((_, i) => i)}
+        tickFormat={(v) => HOLDERS[v]?.name ?? ""}
+      />
+      <YAxis value="open" label="h" tickCount={4} />
+      <Bar value="open" name="Estimate" barWidth={0.6} />
+      <Tooltip mode="x" />
+    </Chart>
+  );
+}
+
 export default function BurnDown() {
   return (
     <Stack gap={4}>
@@ -158,19 +193,7 @@ export default function BurnDown() {
         <CardHeader eyebrow={SPRINT.goal} title={`${SPRINT.name} burn-down`} />
         <CardBody>
           <Stack gap={2}>
-            <Chart data={BURNDOWN} height={280} ariaLabel={`${SPRINT.name}: hours left per working day against an even pace`}>
-              <XAxis
-                accessor={(_d: BurndownPoint, i: number) => i}
-                ticks={BURNDOWN.map((_, i) => i)}
-                tickFormat={day}
-                label="Working day"
-              />
-              <YAxis accessor={(d: BurndownPoint) => d.ideal} label="Hours left" domain={[0, BURNDOWN[0]!.ideal]} />
-              <Line accessor={(d: BurndownPoint) => d.ideal} name="Even pace" color="var(--uc-color-text)" dash={[4, 4]} strokeWidth={1} />
-              <Line accessor={(d: BurndownPoint) => d.remaining} name="Left" markers="always" strokeWidth={2} />
-              <Legend placement="top" />
-              <Tooltip mode="x" />
-            </Chart>
+            <SprintBurnDown />
             <Text size="sm" tone="muted">
               Ten working days, {day(0)} to {day(BURNDOWN.length - 1)}; the weekend between them is left out.
             </Text>
@@ -180,16 +203,7 @@ export default function BurnDown() {
       <Card data-callout="4">
         <CardHeader title="Unfinished items per person" />
         <CardBody>
-          <Chart data={HOLDERS} height={200} ariaLabel="Estimated hours of unfinished items per person">
-            <XAxis
-              accessor={(_d: Holder, i: number) => i}
-              ticks={HOLDERS.map((_, i) => i)}
-              tickFormat={(v) => HOLDERS[v]?.name ?? ""}
-            />
-            <YAxis accessor={(d: Holder) => d.open} label="h" tickCount={4} />
-            <Bar accessor={(d: Holder) => d.open} name="Estimate" barWidth={0.6} />
-            <Tooltip mode="x" />
-          </Chart>
+          <OpenPerPerson />
         </CardBody>
       </Card>
     </Stack>

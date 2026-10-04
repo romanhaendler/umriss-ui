@@ -1,6 +1,6 @@
 import { Badge, Card, CardBody, CardHeader, Grid, Stack, Stat } from "@umriss-ui/core";
 import type { LimitSet } from "@umriss-ui/core";
-import { Chart, Legend, LimitLine, Line, Tooltip, XAxis, YAxis } from "../../src";
+import { Legend, LimitLine, Tooltip, useChart } from "../../src";
 
 /* Data from the operations world, written out here so the example runs on its own. */
 /** A small LCG - the same numbers on every computer. */
@@ -149,6 +149,7 @@ const TILES = SERVICES.map((service) => {
 });
 
 export default function WatchLatency() {
+  const { Chart, XAxis, YAxis, Line } = useChart(DETAIL);
   return (
     <Stack gap={4}>
       <Grid minItemWidth="11rem" gap={3} data-callout="1">
@@ -177,13 +178,13 @@ export default function WatchLatency() {
           }
         />
         <CardBody>
-          <Chart data={DETAIL} height={260} syncId="checkout" ariaLabel="Checkout latency today against its objective">
-            <XAxis accessor={(d: MetricPoint) => d.t} time domain={TODAY} />
+          <Chart height={260} syncId="checkout" ariaLabel="Checkout latency today against its objective">
+            <XAxis value="t" time domain={TODAY} />
             {/* Tick labels as wide as the error rate's keep the two crosshairs in one column. */}
-            <YAxis accessor={(d: MetricPoint) => d.p95} label="ms" />
+            <YAxis value="p95" label="ms" />
             <LimitLine value={CHECKOUT.latencySlo} severity="alarm" label={`Objective ${CHECKOUT.latencySlo} ms`} inExtent />
-            <Line accessor={(d: MetricPoint) => d.p50} name="p50" color="var(--uc-color-text)" strokeWidth={1} />
-            <Line accessor={(d: MetricPoint) => d.p95} name="p95" strokeWidth={1.75} />
+            <Line value="p50" name="p50" color="var(--uc-color-text)" strokeWidth={1} />
+            <Line value="p95" name="p95" strokeWidth={1.75} />
             <Legend placement="top" />
             <Tooltip mode="x" />
           </Chart>
@@ -192,11 +193,11 @@ export default function WatchLatency() {
       <Card data-callout="4">
         <CardHeader title={`${CHECKOUT.name} failed requests`} />
         <CardBody>
-          <Chart data={DETAIL} height={140} syncId="checkout" ariaLabel="Checkout error rate today">
-            <XAxis accessor={(d: MetricPoint) => d.t} time domain={TODAY} />
-            <YAxis accessor={(d: MetricPoint) => d.errorRate} label="%" tickCount={3} tickFormat={(v) => v.toFixed(1)} />
+          <Chart height={140} syncId="checkout" ariaLabel="Checkout error rate today">
+            <XAxis value="t" time domain={TODAY} />
+            <YAxis value="errorRate" label="%" tickCount={3} tickFormat={(v) => v.toFixed(1)} />
             <LimitLine value={ERROR_ALERT} severity="alarm" label={`Alert at ${ERROR_ALERT} %`} inExtent />
-            <Line accessor={(d: MetricPoint) => d.errorRate} name="Error rate" />
+            <Line value="errorRate" name="Error rate" />
             <Tooltip mode="x" />
           </Chart>
         </CardBody>

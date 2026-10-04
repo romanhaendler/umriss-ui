@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Chart, Line, XAxis, YAxis } from "../../../src";
+import { useChart } from "../../../src";
 
 /* Data from the operations world, written out here so the example runs on its own. */
 
@@ -90,11 +90,12 @@ export const lead = "Without `width` a chart takes its container's width and fol
 const SIGN_IN = metrics("sign-in");
 
 function Requests({ width, height }: { width?: number; height: number }) {
+  const { Chart, XAxis, YAxis, Line } = useChart(SIGN_IN);
   return (
-    <Chart data={SIGN_IN} width={width} height={height} ariaLabel="Sign-in requests per minute today">
-      <XAxis accessor={(d: MetricPoint) => d.t} time />
-      <YAxis accessor={(d: MetricPoint) => d.requests} />
-      <Line accessor={(d: MetricPoint) => d.requests} name="Requests per minute" />
+    <Chart width={width} height={height} ariaLabel="Sign-in requests per minute today">
+      <XAxis value="t" time />
+      <YAxis value="requests" />
+      <Line value="requests" name="Requests per minute" />
     </Chart>
   );
 }

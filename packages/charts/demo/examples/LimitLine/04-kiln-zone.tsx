@@ -1,4 +1,4 @@
-import { Chart, Legend, LimitBand, LimitLine, Line, Tooltip, XAxis, YAxis } from "../../../src";
+import { Legend, LimitBand, LimitLine, Tooltip, useChart } from "../../../src";
 
 /* Data from the plant world, written out here so the example runs on its own. */
 /** A small LCG - reproducible across runs and platforms. */
@@ -140,13 +140,14 @@ const SHIFT = plant(7);
 const SHIFT_START = new Date(2026, 2, 17, 6).getTime();
 
 export default function KilnZone() {
+  const { Chart, XAxis, YAxis, Line } = useChart(SHIFT.readings);
   return (
-    <Chart data={SHIFT.readings} height={280} ariaLabel="Kiln K1 zone 3 against its tolerance and alarm limit over the early shift">
-      <XAxis accessor={(d: Reading) => SHIFT_START + d.minute * 60_000} time />
-      <YAxis accessor={(d: Reading) => d.kiln} label="°C" />
+    <Chart height={280} ariaLabel="Kiln K1 zone 3 against its tolerance and alarm limit over the early shift">
+      <XAxis value={(d) => SHIFT_START + d.minute * 60_000} time />
+      <YAxis value="kiln" label="°C" />
       <LimitBand from={KILN.tolerance[0]} to={KILN.tolerance[1]} severity="warning" label="Tolerance" />
       <LimitLine value={KILN.alarm} severity="alarm" label="Alarm" />
-      <Line accessor={(d: Reading) => d.kiln} name="Zone 3" />
+      <Line value="kiln" name="Zone 3" />
       <Legend placement="top" />
       <Tooltip mode="x" />
     </Chart>

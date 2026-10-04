@@ -1,4 +1,4 @@
-import { Chart, Matrix, Tooltip, XAxis, YAxis } from "../../../src";
+import { Tooltip, useChart } from "../../../src";
 
 /* Data from the operations world, written out here so the example runs on its own. */
 /** A small LCG - the same numbers on every computer. */
@@ -64,11 +64,12 @@ export const title = "Colour cells along a gradient";
 export const lead = "Without `coloring` the cells run along `DEFAULT_GRADIENT` from the lowest value to the highest; a cell without a value stays a hole.";
 
 export default function Gradient() {
+  const { Chart, XAxis, YAxis, Matrix } = useChart(SUCCESS_BY_HOUR);
   return (
-    <Chart data={SUCCESS_BY_HOUR} height={280} ariaLabel="Successful requests per service and hour yesterday, as a gradient">
-      <XAxis accessor={(d: SuccessCell) => d.hour} ticks={[0, 6, 12, 18]} tickFormat={(v) => `${v}:00`} label="Hour" />
-      <YAxis accessor={(d: SuccessCell) => d.service} ticks={SERVICES.map((_, i) => i)} tickFormat={(v) => SERVICES[v]?.name ?? ""} />
-      <Matrix accessor={(d: SuccessCell) => d.service} value={(d: SuccessCell) => d.success} name="Success rate" />
+    <Chart height={280} ariaLabel="Successful requests per service and hour yesterday, as a gradient">
+      <XAxis value="hour" ticks={[0, 6, 12, 18]} tickFormat={(v) => `${v}:00`} label="Hour" />
+      <YAxis value="service" ticks={SERVICES.map((_, i) => i)} tickFormat={(v) => SERVICES[v]?.name ?? ""} />
+      <Matrix accessor={(d) => d.service} value="success" name="Success rate" />
       <Tooltip mode="nearest" />
     </Chart>
   );

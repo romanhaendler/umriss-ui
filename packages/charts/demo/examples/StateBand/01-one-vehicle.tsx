@@ -1,4 +1,4 @@
-import { Chart, Legend, StateBand, Tooltip, XAxis, YAxis } from "../../../src";
+import { Legend, Tooltip, useChart } from "../../../src";
 
 /* Data from the logistics world, written out here so the example runs on its own. */
 /** A small LCG - the same numbers on every computer. */
@@ -155,17 +155,18 @@ function vehicleDay(vehicleId: string): StatePoint[] {
 }
 
 export const title = "One vehicle through the day";
-export const lead = "The accessor returns a state's place in `states`; each segment runs to the next reading, and a `null` leaves a hole.";
+export const lead = "`value` gives a state's place in `states`; each segment runs to the next reading, and a `null` leaves a hole.";
 
 const DAY = vehicleDay("v1");
 
 export default function OneVehicle() {
+  const { Chart, XAxis, YAxis, StateBand } = useChart(DAY);
   return (
-    <Chart data={DAY} height={150} ariaLabel="States of van FP 214 K through the day">
-      <XAxis accessor={(d: StatePoint) => d.t} time label="Time" />
+    <Chart height={150} ariaLabel="States of van FP 214 K through the day">
+      <XAxis value="t" time label="Time" />
       {/* Without a lane the band fills its y axis; one tick names it. */}
-      <YAxis accessor={() => 0} domain={[0, 1]} ticks={[0.5]} tickFormat={() => "FP 214 K"} grid={false} />
-      <StateBand accessor={(d: StatePoint) => d.state} states={VEHICLE_STATES} name="FP 214 K" />
+      <YAxis value={() => 0} domain={[0, 1]} ticks={[0.5]} tickFormat={() => "FP 214 K"} grid={false} />
+      <StateBand value="state" states={VEHICLE_STATES} name="FP 214 K" />
       <Legend placement="top" />
       <Tooltip mode="x" />
     </Chart>

@@ -1,4 +1,4 @@
-import { Chart, LimitBand, LimitLine, Line, Tooltip, XAxis, YAxis } from "../../../src";
+import { LimitBand, LimitLine, Tooltip, useChart } from "../../../src";
 
 /* Data from the operations world, written out here so the example runs on its own. */
 /** A small LCG - the same numbers on every computer. */
@@ -87,13 +87,14 @@ export const lead = "A `LimitBand` fills from `from` to `to` below every series 
 const CHECKOUT = metrics("checkout");
 
 export default function Band() {
+  const { Chart, XAxis, YAxis, Line } = useChart(CHECKOUT);
   return (
-    <Chart data={CHECKOUT} height={260} ariaLabel="Checkout's error rate against its warning band and alarm limit">
-      <XAxis accessor={(d: MetricPoint) => d.t} time />
-      <YAxis accessor={(d: MetricPoint) => d.errorRate} label="Errors %" />
+    <Chart height={260} ariaLabel="Checkout's error rate against its warning band and alarm limit">
+      <XAxis value="t" time />
+      <YAxis value="errorRate" label="Errors %" />
       <LimitBand from={1} to={2} severity="warning" label="Watch" />
       <LimitLine value={2} severity="alarm" label="Alert" />
-      <Line accessor={(d: MetricPoint) => d.errorRate} name="Error rate" />
+      <Line value="errorRate" name="Error rate" />
       <Tooltip mode="x" />
     </Chart>
   );

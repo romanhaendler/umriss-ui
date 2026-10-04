@@ -1,4 +1,4 @@
-import { Chart, LimitBand, LimitLine, Line, Tooltip, XAxis, YAxis } from "../../../src";
+import { LimitBand, LimitLine, Tooltip, useChart } from "../../../src";
 
 /* Data from the operations world, written out here so the example runs on its own. */
 /** A small LCG - the same numbers on every computer. */
@@ -87,13 +87,14 @@ export const lead = "With `orientation=\"x\"` a limit lies on the time axis: a l
 const CHECKOUT = metrics("checkout");
 
 export default function AlongTime() {
+  const { Chart, XAxis, YAxis, Line } = useChart(CHECKOUT);
   return (
-    <Chart data={CHECKOUT} height={260} ariaLabel="Checkout's latency across a maintenance window and the start of a release freeze">
-      <XAxis accessor={(d: MetricPoint) => d.t} time />
-      <YAxis accessor={(d: MetricPoint) => d.p95} label="ms" />
+    <Chart height={260} ariaLabel="Checkout's latency across a maintenance window and the start of a release freeze">
+      <XAxis value="t" time />
+      <YAxis value="p95" label="ms" />
       <LimitBand orientation="x" from={at(17, 2)} to={at(17, 3)} color="#5b7c99" label="Maintenance" />
       <LimitLine orientation="x" value={at(17, 8, 30)} color="#7b61c9" label="Release freeze" />
-      <Line accessor={(d: MetricPoint) => d.p95} name="p95" />
+      <Line value="p95" name="p95" />
       <Tooltip mode="x" />
     </Chart>
   );

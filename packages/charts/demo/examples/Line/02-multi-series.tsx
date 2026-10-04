@@ -1,4 +1,4 @@
-import { Chart, Legend, Line, Tooltip, XAxis, YAxis } from "../../../src";
+import { Legend, Tooltip, useChart } from "../../../src";
 
 /* Data from the operations world, written out here so the example runs on its own. */
 /** A small LCG - the same numbers on every computer. */
@@ -97,14 +97,15 @@ const IMAGES = metrics("images").map((d) => {
 });
 
 export default function MultiSeries() {
+  const { Chart, XAxis, YAxis, Line } = useChart(CHECKOUT);
   return (
-    <Chart data={CHECKOUT} height={300} ariaLabel="95th percentile latency of four services today">
-      <XAxis accessor={(d: MetricPoint) => d.t} time />
-      <YAxis accessor={(d: MetricPoint) => d.p95} label="ms" />
-      <Line accessor={(d: MetricPoint) => d.p95} name="Checkout" />
-      <Line data={BILLING} accessor={(d: MetricPoint) => d.p95} name="Billing" />
-      <Line data={SIGN_IN} accessor={(d: MetricPoint) => d.p95} name="Sign-in" dash={[4, 4]} />
-      <Line data={IMAGES} accessor={(d: { p95: number | null }) => d.p95} name="Image service" />
+    <Chart height={300} ariaLabel="95th percentile latency of four services today">
+      <XAxis value="t" time />
+      <YAxis value="p95" label="ms" />
+      <Line value="p95" name="Checkout" />
+      <Line data={BILLING} value="p95" name="Billing" />
+      <Line data={SIGN_IN} value="p95" name="Sign-in" dash={[4, 4]} />
+      <Line data={IMAGES} value="p95" name="Image service" />
       <Legend placement="top" />
       <Tooltip mode="x" />
     </Chart>

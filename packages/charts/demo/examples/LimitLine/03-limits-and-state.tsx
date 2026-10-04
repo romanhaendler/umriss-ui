@@ -1,4 +1,4 @@
-import { Chart, Legend, LimitBand, LimitLine, Line, StateBand, Tooltip, XAxis, YAxis } from "../../../src";
+import { Legend, LimitBand, LimitLine, Tooltip, useChart } from "../../../src";
 
 /* Data from the logistics world, written out here so the example runs on its own. */
 
@@ -186,14 +186,15 @@ const BATTERY = batteryDay("v2");
 const LANES = [...NORTH].reverse().map((vehicle) => ({ vehicle, day: vehicleDay(vehicle.id) }));
 
 export default function LimitsAndState() {
+  const { Chart, XAxis, YAxis, StateBand, Line } = useChart(BATTERY);
   return (
-    <Chart data={BATTERY} height={340} ariaLabel="An e-van's charge against its limits, above the states of the North depot's vehicles">
-      <XAxis accessor={(d: BatteryPoint) => d.t} time label="Time" />
-      <YAxis accessor={(d: BatteryPoint) => d.charge ?? 0} domain={[-100, 100]} ticks={[0, 20, 40, 60, 80, 100]} label="Charge %" />
+    <Chart height={340} ariaLabel="An e-van's charge against its limits, above the states of the North depot's vehicles">
+      <XAxis value="t" time label="Time" />
+      <YAxis value={(d) => d.charge ?? 0} domain={[-100, 100]} ticks={[0, 20, 40, 60, 80, 100]} label="Charge %" />
       <YAxis
         id="lanes"
         position="right"
-        accessor={() => 0}
+        value={() => 0}
         domain={[0, 8]}
         ticks={LANES.map((_, i) => i + 0.45)}
         tickFormat={(v) => LANES[Math.floor(v)]?.vehicle.plate ?? ""}
@@ -205,7 +206,7 @@ export default function LimitsAndState() {
         <StateBand
           key={vehicle.id}
           data={day}
-          accessor={(d: StatePoint) => d.state}
+          value="state"
           states={VEHICLE_STATES}
           yAxisId="lanes"
           laneFrom={i}
@@ -213,7 +214,7 @@ export default function LimitsAndState() {
           name={vehicle.plate}
         />
       ))}
-      <Line accessor={(d: BatteryPoint) => d.charge} name="Charge" strokeWidth={1.75} />
+      <Line value="charge" name="Charge" strokeWidth={1.75} />
       <Legend placement="top" />
       <Tooltip mode="x" />
     </Chart>

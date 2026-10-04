@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Chart, Legend, Line, Tooltip, XAxis, YAxis } from "../../../src";
+import { Legend, Tooltip, useChart } from "../../../src";
 
 /* Data from the operations world, written out here so the example runs on its own. */
 /** A small LCG - the same numbers on every computer. */
@@ -101,12 +101,13 @@ export default function TogglingLegend() {
       return next;
     });
 
+  const { Chart, XAxis, YAxis, Line } = useChart(SERIES[0]!.data);
   return (
-    <Chart data={SERIES[0]!.data} height={260} ariaLabel="Latency of three services, one hidden">
-      <XAxis accessor={(d: MetricPoint) => d.t} time />
-      <YAxis accessor={(d: MetricPoint) => d.p95} label="ms" />
+    <Chart height={260} ariaLabel="Latency of three services, one hidden">
+      <XAxis value="t" time />
+      <YAxis value="p95" label="ms" />
       {SERIES.map((one) => (
-        <Line key={one.name} data={one.data} accessor={(d: MetricPoint) => d.p95} name={one.name} hidden={hidden.has(one.name)} />
+        <Line key={one.name} data={one.data} value="p95" name={one.name} hidden={hidden.has(one.name)} />
       ))}
       <Legend onToggle={toggle} />
       <Tooltip mode="x" />

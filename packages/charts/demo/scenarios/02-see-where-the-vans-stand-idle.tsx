@@ -1,5 +1,5 @@
 import { Card, CardBody, CardHeader, Grid, Stack, Stat } from "@umriss-ui/core";
-import { Bar, Chart, Legend, StateBand, Tooltip, XAxis, YAxis } from "../../src";
+import { Legend, Tooltip, useChart } from "../../src";
 
 /* Data from the logistics world, written out here so the example runs on its own. */
 /** A small LCG - the same numbers on every computer. */
@@ -205,6 +205,51 @@ const depotOf = (id: string) => DEPOTS.find((one) => one.id === id)?.name ?? id;
 const IDLE_TODAY = FLEET.reduce((sum, one) => sum + one.idle, 0) / 60;
 const DRIVING_NOW = FLEET.filter((one) => one.driving).length;
 
+function FleetLanes() {
+  const { Chart, XAxis, YAxis, StateBand } = useChart(FLEET[0]!.points);
+  return (
+    <Chart height={320} ariaLabel="What each vehicle has done today, lane by lane">
+      <XAxis value="t" time domain={DAY} />
+      <YAxis
+        value={() => 0}
+        domain={[0, FLEET.length]}
+        ticks={FLEET.map((_, i) => i + 0.5)}
+        tickFormat={plateOnLane}
+        grid={false}
+      />
+      {FLEET.map((one, i) => (
+        <StateBand
+          key={one.vehicle.id}
+          data={one.points}
+          value="state"
+          states={VEHICLE_STATES}
+          laneFrom={lane(i) + 0.12}
+          laneTo={lane(i) + 0.88}
+          name={`${one.vehicle.plate} (${one.vehicle.type}, ${depotOf(one.vehicle.depot)})`}
+        />
+      ))}
+      <Legend placement="top" />
+      <Tooltip mode="x" />
+    </Chart>
+  );
+}
+
+function IdleMinutes() {
+  const { Chart, XAxis, YAxis, Bar } = useChart(FLEET);
+  return (
+    <Chart height={200} ariaLabel="Idle minutes per vehicle so far today">
+      <XAxis
+        value={(_d, i) => i}
+        ticks={FLEET.map((_, i) => i)}
+        tickFormat={(v) => FLEET[v]?.vehicle.plate ?? ""}
+      />
+      <YAxis value="idle" label="min" tickCount={4} />
+      <Bar value="idle" name="Idle" color={VEHICLE_STATES[IDLE]!.color} barWidth={0.6} />
+      <Tooltip mode="x" />
+    </Chart>
+  );
+}
+
 export default function IdleVans() {
   return (
     <Stack gap={4}>
@@ -216,45 +261,14 @@ export default function IdleVans() {
         <CardHeader title="The fleet since 05:00" />
         <CardBody>
           <div>
-            <Chart data={FLEET[0]!.points} height={320} ariaLabel="What each vehicle has done today, lane by lane">
-              <XAxis accessor={(d: StatePoint) => d.t} time domain={DAY} />
-              <YAxis
-                accessor={() => 0}
-                domain={[0, FLEET.length]}
-                ticks={FLEET.map((_, i) => i + 0.5)}
-                tickFormat={plateOnLane}
-                grid={false}
-              />
-              {FLEET.map((one, i) => (
-                <StateBand
-                  key={one.vehicle.id}
-                  data={one.points}
-                  accessor={(d: StatePoint) => d.state}
-                  states={VEHICLE_STATES}
-                  laneFrom={lane(i) + 0.12}
-                  laneTo={lane(i) + 0.88}
-                  name={`${one.vehicle.plate} (${one.vehicle.type}, ${depotOf(one.vehicle.depot)})`}
-                />
-              ))}
-              <Legend placement="top" />
-              <Tooltip mode="x" />
-            </Chart>
+            <FleetLanes />
           </div>
         </CardBody>
       </Card>
       <Card data-callout="4">
         <CardHeader title="Idle minutes per vehicle" />
         <CardBody>
-          <Chart data={FLEET} height={200} ariaLabel="Idle minutes per vehicle so far today">
-            <XAxis
-              accessor={(_d: (typeof FLEET)[number], i: number) => i}
-              ticks={FLEET.map((_, i) => i)}
-              tickFormat={(v) => FLEET[v]?.vehicle.plate ?? ""}
-            />
-            <YAxis accessor={(d: (typeof FLEET)[number]) => d.idle} label="min" tickCount={4} />
-            <Bar accessor={(d: (typeof FLEET)[number]) => d.idle} name="Idle" color={VEHICLE_STATES[IDLE]!.color} barWidth={0.6} />
-            <Tooltip mode="x" />
-          </Chart>
+          <IdleMinutes />
         </CardBody>
       </Card>
     </Stack>

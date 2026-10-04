@@ -19,5 +19,12 @@
   "ControlChartProps.format": "(f) twin of LineProps.format (Tooltip/04): the tooltip's value format",
   "ControlChartProps.color": "(f) twin of LineProps.color: any CSS colour for the line",
   "ControlChartProps.tone": "(f) twin of ScatterProps.tone (Scatter/02): a theme role for the line; violations stay alarm",
-  "AreaProps.accessor": "(g) deprecated alias: the older form of `value`, removed with charts-bound-to-rows 07"
+  "AreaProps.accessor": "(g) deprecated alias: the older form of `value`, removed with charts-bound-to-rows 07",
+  "XAxisProps.accessor": "(g) deprecated alias: the older form of `value`, removed with charts-bound-to-rows 07",
+  "YAxisProps.accessor": "(g) deprecated alias: the older form of `value`, removed with charts-bound-to-rows 07",
+  "LineProps.accessor": "(g) deprecated alias: the older form of `value`, removed with charts-bound-to-rows 07",
+  "BarProps.accessor": "(g) deprecated alias: the older form of `value`, removed with charts-bound-to-rows 07",
+  "ScatterProps.accessor": "(g) deprecated alias: the older form of `value`, removed with charts-bound-to-rows 07",
+  "StateBandProps.accessor": "(g) deprecated alias: the older form of `value`, removed with charts-bound-to-rows 07",
+  "ChartProps.data": "(g) deprecated alias: the older place of the rows, now `useChart(rows)`; removed with charts-bound-to-rows 07"
 }
