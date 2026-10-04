@@ -25,7 +25,7 @@ import { MOST_LEVELS, livePaths } from "./model/grouping";
 import type { RowGroup } from "./model/grouping";
 import { pinsForView, withPin } from "./model/pinning";
 import type { Pin, Pins } from "./model/pinning";
-import { manualViewKey } from "./model/view";
+import { manualViewKey, onlyKnown, viewKey } from "./model/view";
 import type { ManualView, TableView } from "./model/view";
 import type { ModelColumn } from "./model/tableModel";
 import { Registry } from "./registry";
@@ -118,34 +118,6 @@ function useAdmitted(
   return same ? memo : fresh;
 }
 
-/** The view without names that no registered column carries. As long as none
-    has registered it stays as it is - otherwise the first render would erase
-    every view. */
-function onlyKnown(view: TableView, known: ReadonlySet<string>): TableView {
-  if (known.size === 0) return view;
-  const sort = view.sort?.filter((s) => known.has(s.column));
-  const hidden = view.hidden?.filter((id) => known.has(id));
-  const order = view.order?.filter((id) => known.has(id));
-  const widths = view.widths
-    ? Object.fromEntries(Object.entries(view.widths).filter(([id]) => known.has(id)))
-    : undefined;
-  const unchanged =
-    sort?.length === view.sort?.length &&
-    hidden?.length === view.hidden?.length &&
-    order?.length === view.order?.length &&
-    Object.keys(widths ?? {}).length === Object.keys(view.widths ?? {}).length;
-  if (unchanged) return view;
-  return {
-    ...(view.search ? { search: view.search } : {}),
-    ...(view.page ? { page: view.page } : {}),
-    ...(view.pageSize ? { pageSize: view.pageSize } : {}),
-    ...(sort?.length ? { sort } : {}),
-    ...(hidden?.length ? { hidden } : {}),
-    ...(order?.length ? { order } : {}),
-    ...(widths && Object.keys(widths).length ? { widths } : {}),
-  };
-}
-
 const listOf = (grouping: string | readonly string[] | undefined): string[] =>
   grouping === undefined ? [] : typeof grouping === "string" ? [grouping] : [...grouping];
 
@@ -200,8 +172,9 @@ function effectiveWidths(
     compiler.
     @param rows All rows in automatic mode; in manual mode the page a server
     delivered for the current view.
-    @param options How a row is keyed, the initial view, and in manual mode the
-    server's count and the handler that hears every change of the view.
+    @param options How a row is keyed, the view to start from and the handler
+    that hears every change of it, and in manual mode the server's count and
+    the handler that hears every request.
     @returns The table's state and its parts: `Table`, `Column`,
     `VerdictColumn`, `RowDetail`, `RowActions`, `Action` and `GroupBy`. Pass it
     as `of` to a part that stands outside the table. */
@@ -354,6 +327,24 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     tree,
   });
 
+  /* A view handed in applies whenever its content differs from the last one
+     handed in (ADR-0047) - adjusted during the render, as React has state
+     follow a prop, so the table never shows the old view for a frame. What it
+     leaves out goes back to its default; the same view again changes nothing,
+     and none at all keeps the table's own. */
+  const handed = options.initialView;
+  const handedKey = handed ? viewKey(handed) : null;
+  const [lastHanded, setLastHanded] = useState(handedKey);
+  if (handed && handedKey !== lastHanded) {
+    setLastHanded(handedKey);
+    b.restart(handed);
+    setConditions(Object.entries(handed.conditions ?? {}));
+    setGroupingState(handed.grouping ? [...handed.grouping] : listOf(options.defaultGrouping));
+    setFoldedState(handed.folded ?? []);
+    setPinsChosen(handed.pinned ? { ...handed.pinned } : null);
+    setBranchesState(handed.branches ?? defaultBranches);
+  }
+
   /* Changing a condition resets to page one, like another search. Only what
      fits the registered column is set; as long as none has registered nothing
      is checked - then there is nothing known to check against. */
@@ -468,7 +459,19 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
   const paginates = (!isTree && registry.paginates()) || virtual;
   const selection = options.selection ?? b.selection;
 
-  /* The server's answer to the view (M1): reported after the commit, once when
+  /* Every change of the view, once and whole, after the commit (ADR-0047). The
+     first render's view is where it starts, not a change; the key is compared,
+     not the object, so a second render with the same view reports nothing. */
+  const viewNowKey = viewKey(groupedView);
+  const viewReported = useRef(viewNowKey);
+  useEffect(() => {
+    if (viewReported.current === viewNowKey) return;
+    viewReported.current = viewNowKey;
+    options.onViewChange?.(groupedView);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per change of the view, with that render's view and handler
+  }, [viewNowKey]);
+
+  /* The server's request (M1): reported after the commit, once when
      the table first stands and once per change of what decides the rows - a
      new width or a hidden column fetches nothing. The key is compared, not the
      object: a second render with the same view (Strict Mode, a column
@@ -486,7 +489,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
   useEffect(() => {
     if (!manual || reported.current === reportKey) return;
     reported.current = reportKey;
-    options.onViewChange?.(manualView);
+    options.onRequest?.(manualView);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once per change of what decides the rows, with that render's view and handler
   }, [reportKey]);
 

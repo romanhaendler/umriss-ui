@@ -172,7 +172,7 @@ export default function ListFilter() {
     rowKey: (s) => s.id,
     manual: true,
     rowCount: answer.rowCount,
-    onViewChange: (view) => setAnswer(serve(view)),
+    onRequest: (view) => setAnswer(serve(view)),
     filterOptions: (column) => (column === "status" ? STATUSES : []),
   });
 

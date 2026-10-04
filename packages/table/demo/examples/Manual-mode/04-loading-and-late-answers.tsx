@@ -174,7 +174,7 @@ export default function LoadingAndLateAnswers() {
     rowKey: (s) => s.id,
     manual: true,
     rowCount: answer.rowCount,
-    onViewChange: (view) => {
+    onRequest: (view) => {
       latest.current = view;
       setLoading(true);
       setTimeout(() => {

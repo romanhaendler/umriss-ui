@@ -597,9 +597,16 @@ interface TableOptionsCommon<Z> {
       which arrives by id, is known in the first render. */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- each filter has a condition of its own; at the table only the row counts
   rowFilters?: readonly RowFilter<Z, any>[];
-  /** The view on the first render. The table remembers none: where a view is
-      kept is the application's decision. Names no column carries fall out. */
+  /** The view to start from, and to go to whenever one differing in content
+      from the last is handed in - the same view again changes nothing, and
+      what it leaves out is reset. The table remembers none:
+      where a view is kept is the application's decision. Names no column
+      carries fall out. */
   initialView?: TableView;
+  /** Every change of the view, once, always the whole view - the one to keep,
+      or to hand another table as its `initialView`. Not called for the view
+      the table starts with. */
+  onViewChange?: (view: TableView) => void;
   /** Renders only what stands in the scroll area; paging is then off. Every
       row is one row pitch tall, which the table measures itself (ADR-0042). */
   virtual?: boolean | { overscan?: number };
@@ -621,7 +628,7 @@ interface AutomaticMode<Z> {
       many levels stand open (`1` = the roots open). It is the default `view` leaves out. */
   defaultBranches?: readonly string[] | number;
   rowCount?: never;
-  onViewChange?: never;
+  onRequest?: never;
   filterOptions?: never;
 }
 
@@ -640,8 +647,9 @@ interface ManualMode {
   rowCount: number;
   /** The view changed where it decides the rows: search, conditions, sort,
       page or page size. Called once when the table first stands and once per
-      change, with every one of the five present. */
-  onViewChange: (view: ManualView) => void;
+      change, with every one of the five present - a width or a hidden column
+      asks the server nothing. */
+  onRequest: (request: ManualView) => void;
   /** The values a list filter offers for a column, `null` for an absent one -
       the table cannot count what it does not hold. */
   filterOptions?: (column: string) => readonly unknown[];

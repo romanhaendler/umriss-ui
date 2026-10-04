@@ -155,7 +155,7 @@ const SHIPMENTS: readonly Shipment[] = TOURS.flatMap((one) =>
 );
 
 export const title = "Hand the table one page";
-export const lead = "`manual` takes the rows of one page and the server's `rowCount`; `onViewChange` reports the page the user asks for next.";
+export const lead = "`manual` takes the rows of one page and the server's `rowCount`; `onRequest` reports the page the user asks for next.";
 
 /* The server is a slice of an array here; in an application it is a request. */
 const serve = (view: ManualView) => {
@@ -169,7 +169,7 @@ export default function OnlyPages() {
     rowKey: (s) => s.id,
     manual: true,
     rowCount: answer.rowCount,
-    onViewChange: (view) => setAnswer(serve(view)),
+    onRequest: (view) => setAnswer(serve(view)),
   });
 
   return (

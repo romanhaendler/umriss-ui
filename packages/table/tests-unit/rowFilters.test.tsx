@@ -166,7 +166,7 @@ it("in manual mode it goes to the server and the table filters nothing itself", 
       rowFilters: [tours],
       manual: true,
       rowCount: 4,
-      onViewChange: (view) => views.push(view),
+      onRequest: (view) => views.push(view),
     });
     capture(table);
     const { Table: Frame, Column } = table;

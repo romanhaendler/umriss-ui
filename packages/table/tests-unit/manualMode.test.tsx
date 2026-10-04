@@ -58,7 +58,7 @@ function Server({ grid = false, filterOptions = true, groupable }: { grid?: bool
     pageSize: 10,
     manual: true,
     rowCount: data.rowCount,
-    onViewChange: (view) => {
+    onRequest: (view) => {
       reports.push(view);
       const ticket = asked + 1;
       setAsked(ticket);

@@ -4,7 +4,7 @@ import { ColumnMenu, Search, Toolbar, useTable } from "../../../src";
 import type { TableView } from "../../../src";
 
 export const title = "Keep and restore a view";
-export const lead = "`t.view` holds search, sort, hidden columns and widths; hand it back through `initialView` with a new `key`. Sort, hide, drag a width.";
+export const lead = "`onViewChange` reports search, sort, hidden columns and widths as one view; hand one back through `initialView` and the table goes to it, no `key` needed. Sort, hide, drag a width, then restore.";
 
 const START_VIEW: TableView = {
   sort: [{ column: "amount", direction: "desc" }],
@@ -25,8 +25,12 @@ const INVOICES: Invoice[] = [
   { id: "INV-26-0302", supplier: "Fenwright Legal", costCentre: "Finance", amount: 3770 },
 ];
 
-function InvoiceList({ start, restart }: { start: TableView; restart: (view: TableView) => void }) {
-  const t = useTable(INVOICES, { rowKey: (i) => i.id, initialView: start });
+export default function InitialView() {
+  /* The application keeps the view the table reports; handing it another one
+     is all it takes to restore. */
+  const [view, setView] = useState(START_VIEW);
+  const [kept, setKept] = useState<TableView | null>(null);
+  const t = useTable(INVOICES, { rowKey: (i) => i.id, initialView: view, onViewChange: setView });
   const { Table, Column } = t;
 
   return (
@@ -51,29 +55,16 @@ function InvoiceList({ start, restart }: { start: TableView; restart: (view: Tab
         </Text>
       </Stack>
       <Stack direction="row" gap={2} wrap>
-        <Button size="sm" onClick={() => restart(t.view)}>
-          Start again with this view
+        <Button size="sm" onClick={() => setKept(view)}>
+          Keep this view
         </Button>
-        <Button size="sm" variant="ghost" onClick={() => restart(START_VIEW)}>
+        <Button size="sm" variant="ghost" disabled={kept === null} onClick={() => kept && setView(kept)}>
+          Restore the kept view
+        </Button>
+        <Button size="sm" variant="ghost" onClick={() => setView(START_VIEW)}>
           Back to the beginning
         </Button>
       </Stack>
     </Stack>
-  );
-}
-
-export default function InitialView() {
-  const [start, setStart] = useState(START_VIEW);
-  const [generation, setGeneration] = useState(0);
-
-  return (
-    <InvoiceList
-      key={generation}
-      start={start}
-      restart={(view) => {
-        setStart(view);
-        setGeneration((n) => n + 1);
-      }}
-    />
   );
 }
