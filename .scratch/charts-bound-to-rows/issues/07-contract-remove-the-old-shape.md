@@ -23,3 +23,16 @@
   kind, the colour channel becomes `level`).
 - Scene-level tests and internal configs keep their internal `accessor`
   field; only the public prop goes.
+
+### Carried in from 04 (2026-10-04)
+
+- The hook's `XAxis`/`YAxis` are typed only at the hook's row, while series
+  are `<T = Z>`. An axis whose series all bring their own `data` cannot name
+  their fields (Axis/08 falls back to `value={(_, i) => i + 0.5}`), and an
+  axis read across series of different row types type-checks against the
+  hook's row only (Axis/08's `tiles` y axis reads `fired` from `HourCount`).
+  Give the axes `<T = Z>` as well, so `<XAxis<HourCount> value="hour" />`
+  names the rows it reads, restore Axis/08 to a field name, and say in the
+  axis' doc comment that it reads the rows of every series bound to it.
+- `unshown.json` holds `AreaProps.accessor` as "(g) deprecated alias";
+  remove it with the prop.
