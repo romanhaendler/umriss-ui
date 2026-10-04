@@ -37,5 +37,7 @@
   "ModalHeaderProps.hideClose": "not shown yet",
   "DrawerProps.closeOnBackdrop": "not shown yet",
   "CommandPaletteItem.icon": "not shown yet",
+  "CommandPaletteItem.searchedGroup": "not shown yet",
+  "CommandPaletteProps.maxFinds": "not shown yet",
   "TagProps.removeLabel": "not shown yet"
 }
