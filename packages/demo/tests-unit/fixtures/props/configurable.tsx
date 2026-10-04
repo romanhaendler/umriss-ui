@@ -33,6 +33,14 @@ export interface FixtureConfigurableProps extends ButtonHTMLAttributes<HTMLButto
   onPress?: () => void;
   /** What stands beside it. */
   extra?: ReactNode;
+  /** How wide it is, e.g. "60%" or 120.
+      @default "100%" */
+  span?: string | number;
+  /** What it reads; `null` while unknown. */
+  reading?: number | null;
+  /** How wide its line is, or "fill".
+      @default 96 */
+  width?: number | "fill";
 }
 
 export function FixtureConfigurable({ variant = "secondary", loading = false }: FixtureConfigurableProps) {

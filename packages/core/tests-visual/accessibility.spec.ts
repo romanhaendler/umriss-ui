@@ -30,7 +30,7 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { TOLERATED, STANDARDS, OPEN, findings } from "@umriss-ui/demo/checks/accessibility";
-import { SAMPLE } from "./pages";
+import { CONFIGURATOR_PAGES, SAMPLE } from "./pages";
 import { allWithCode, open } from "./navigation";
 
 
@@ -49,6 +49,21 @@ for (const pageId of SAMPLE) {
     const report = findings(result);
 
     expect(report, `${pageId} (${testInfo.project.name})`).toEqual([]);
+  });
+}
+
+/* Every configurator, the sample or not: its panel is built for each page
+   from that page's props, so one passing says nothing about the next
+   (.scratch/configurator 03). */
+for (const pageId of CONFIGURATOR_PAGES) {
+  test(`Configurator ${pageId} is accessible`, async ({ page }, testInfo) => {
+    await open(page, pageId);
+    const result = await new AxeBuilder({ page })
+      .include(`[data-configurator="${pageId}"]`)
+      .withTags(STANDARDS)
+      .analyze();
+
+    expect(findings(result), `${pageId} (${testInfo.project.name})`).toEqual([]);
   });
 }
 
