@@ -25,3 +25,11 @@ still says "through an accessor" - reword with 05 or here.
 `TooltipPoint.value` - what a custom tooltip `render` reads - is a matrix
 cell's colour, now called `level` everywhere else. Renaming it is a further
 public break; put the question to the user at the acceptance.
+
+### Known limit to name at the acceptance (from the echo fix, 75173127)
+
+A view handed in that equals one the component reported less than a second
+ago (and not yet echoed) is taken for its own echo and not applied - so an
+application that restores a just-reported view within that second sees no
+change. The `Echoes` rule exists three times (table, schedule, charts):
+charts depends on nothing, so it cannot share core's copy.
