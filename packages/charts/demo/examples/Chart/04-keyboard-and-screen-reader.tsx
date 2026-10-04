@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Chart, Line, Tooltip, XAxis, YAxis } from "../../../src";
+import { Tooltip, useChart } from "../../../src";
 import { GERMAN_CHARTS_WORDING } from "../../../src/wording/de";
 
 /* Data from the operations world, written out here so the example runs on its own. */
@@ -104,21 +104,22 @@ export const lead = "A chart with a `Tooltip` is one tab stop: the keys walk its
 const SEARCH_WEEK = week("search", 5 * 60_000);
 
 export default function KeyboardAndScreenReader() {
+  const { Chart, XAxis, YAxis, Line } = useChart(SEARCH_WEEK);
   const [domain, setDomain] = useState<"data" | readonly [number, number]>("data");
   return (
     <div>
-      <Chart data={SEARCH_WEEK} height={200} ariaLabel="Search latency over last week">
-        <XAxis accessor={(d: MetricPoint) => d.t} time domain={domain} onDomainChange={setDomain} />
-        <YAxis accessor={(d: MetricPoint) => d.p95} label="ms" />
-        <Line accessor={(d: MetricPoint) => d.p95} name="p95" />
-        <Line accessor={(d: MetricPoint) => d.p50} name="p50" />
+      <Chart height={200} ariaLabel="Search latency over last week">
+        <XAxis value="t" time domain={domain} onDomainChange={setDomain} />
+        <YAxis value="p95" label="ms" />
+        <Line value="p95" name="p95" />
+        <Line value="p50" name="p50" />
         <Tooltip mode="x" />
       </Chart>
-      <Chart data={SEARCH_WEEK} height={200} ariaLabel="Antwortzeiten der Suche in der letzten Woche" wording={GERMAN_CHARTS_WORDING}>
-        <XAxis accessor={(d: MetricPoint) => d.t} time domain={domain} onDomainChange={setDomain} />
-        <YAxis accessor={(d: MetricPoint) => d.p95} label="ms" />
-        <Line accessor={(d: MetricPoint) => d.p95} name="p95" />
-        <Line accessor={(d: MetricPoint) => d.p50} name="p50" />
+      <Chart height={200} ariaLabel="Antwortzeiten der Suche in der letzten Woche" wording={GERMAN_CHARTS_WORDING}>
+        <XAxis value="t" time domain={domain} onDomainChange={setDomain} />
+        <YAxis value="p95" label="ms" />
+        <Line value="p95" name="p95" />
+        <Line value="p50" name="p50" />
         <Tooltip mode="x" />
       </Chart>
     </div>

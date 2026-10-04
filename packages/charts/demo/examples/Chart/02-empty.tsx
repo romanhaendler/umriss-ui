@@ -1,4 +1,4 @@
-import { Chart, Line, XAxis, YAxis } from "../../../src";
+import { useChart } from "../../../src";
 
 export const title = "Say there is nothing to show";
 export const lead = "With no data, only gaps or every series hidden, the frame stays and the plot says so; `empty` puts your own words there.";
@@ -11,11 +11,12 @@ interface Reading {
 const NOTHING: Reading[] = [];
 
 function Latency({ empty }: { empty?: string }) {
+  const { Chart, XAxis, YAxis, Line } = useChart(NOTHING);
   return (
-    <Chart data={NOTHING} height={220} ariaLabel="Latency of a service without readings" empty={empty}>
-      <XAxis accessor={(d: Reading) => d.t} time />
-      <YAxis accessor={(d: Reading) => d.p95} label="ms" />
-      <Line accessor={(d: Reading) => d.p95} name="Refunds" />
+    <Chart height={220} ariaLabel="Latency of a service without readings" empty={empty}>
+      <XAxis value="t" time />
+      <YAxis value="p95" label="ms" />
+      <Line value="p95" name="Refunds" />
     </Chart>
   );
 }

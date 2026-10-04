@@ -1,4 +1,4 @@
-import { Area, Chart, Legend, Line, Tooltip, XAxis, YAxis } from "../../../src";
+import { Legend, Tooltip, useChart } from "../../../src";
 
 /* Data from the operations world, written out here so the example runs on its own. */
 
@@ -116,20 +116,21 @@ const CHECKOUT = metrics("checkout");
 const EXPECTED = expected("checkout");
 
 export default function Corridor() {
+  const { Chart, XAxis, YAxis, Area, Line } = useChart(CHECKOUT);
   return (
-    <Chart data={CHECKOUT} height={280} ariaLabel="Checkout's requests inside the range they are expected in">
-      <XAxis accessor={(d: { t: number }) => d.t} time />
-      <YAxis accessor={(d: MetricPoint) => d.requests} label="Requests/min" />
+    <Chart height={280} ariaLabel="Checkout's requests inside the range they are expected in">
+      <XAxis value="t" time />
+      <YAxis value="requests" label="Requests/min" />
       {/* The outline runs along the upper edge; dashed, it reads as expected, not measured. */}
       <Area
         data={EXPECTED}
-        accessor={(d: ExpectedPoint) => d.high}
-        baseline={(d: ExpectedPoint) => d.low}
+        value="high"
+        baseline="low"
         name="Expected range"
         strokeWidth={1}
         dash={[4, 3]}
       />
-      <Line accessor={(d: MetricPoint) => d.requests} name="Requests" strokeWidth={1.75} />
+      <Line value="requests" name="Requests" strokeWidth={1.75} />
       <Legend placement="top" />
       <Tooltip mode="x" />
     </Chart>

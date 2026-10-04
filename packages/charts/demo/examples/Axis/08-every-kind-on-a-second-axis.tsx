@@ -1,4 +1,4 @@
-import { Area, Bar, Chart, Legend, Line, Scatter, Tooltip, XAxis, YAxis } from "../../../src";
+import { Legend, Tooltip, useChart } from "../../../src";
 
 /* Data from the plant world, written out here so the example runs on its own. */
 
@@ -164,25 +164,27 @@ const SHIFT = plant(7);
 const HOURS = hourly(SHIFT);
 
 export default function EveryKind() {
+  const { Chart, XAxis, YAxis, Line, Area, Bar, Scatter } = useChart(SHIFT.readings);
   return (
-    <Chart data={SHIFT.readings} height={340} ariaLabel="The kiln's temperature by the minute above the tiles it fired by the hour">
-      <XAxis accessor={(d: Reading) => d.minute} domain={[0, SHIFT_MINUTES]} label="Minute of the shift" />
+    <Chart height={340} ariaLabel="The kiln's temperature by the minute above the tiles it fired by the hour">
+      <XAxis value="minute" domain={[0, SHIFT_MINUTES]} label="Minute of the shift" />
+      {/* The hourly rows come in hour order: row i stands in the middle of hour i. */}
       <XAxis
         id="hour"
         position="top"
-        accessor={(d: HourCount) => d.hour}
+        value={(_, i) => i + 0.5}
         domain={[0, SHIFT_MINUTES / 60]}
         ticks={HOURS.map((d) => d.hour)}
         tickFormat={(v) => `Hour ${Math.ceil(v)}`}
       />
       {/* The kiln above, the counts below: each axis keeps to its own half. */}
-      <YAxis accessor={(d: Reading) => d.kiln} domain={[1050, 1250]} label="°C" />
-      <YAxis id="tiles" position="right" accessor={(d: HourCount) => d.fired} domain={[0, 500]} label="Tiles per hour" />
-      <Line accessor={(d: Reading) => d.kiln} name="Zone 3" />
-      <Area data={HOURS} accessor={(d: HourCount) => d.planned} xAxisId="hour" yAxisId="tiles" name="Planned" strokeWidth={0} />
-      <Bar data={HOURS} accessor={(d: HourCount) => d.fired} xAxisId="hour" yAxisId="tiles" name="Fired" />
-      <Line data={HOURS} accessor={(d: HourCount) => d.good} xAxisId="hour" yAxisId="tiles" name="Good" />
-      <Scatter data={HOURS} accessor={(d: HourCount) => d.scrap} xAxisId="hour" yAxisId="tiles" name="Scrap" />
+      <YAxis value="kiln" domain={[1050, 1250]} label="°C" />
+      <YAxis id="tiles" position="right" value="fired" domain={[0, 500]} label="Tiles per hour" />
+      <Line value="kiln" name="Zone 3" />
+      <Area data={HOURS} value="planned" xAxisId="hour" yAxisId="tiles" name="Planned" strokeWidth={0} />
+      <Bar data={HOURS} value="fired" xAxisId="hour" yAxisId="tiles" name="Fired" />
+      <Line data={HOURS} value="good" xAxisId="hour" yAxisId="tiles" name="Good" />
+      <Scatter data={HOURS} value="scrap" xAxisId="hour" yAxisId="tiles" name="Scrap" />
       <Legend placement="top" />
       <Tooltip mode="x" />
     </Chart>

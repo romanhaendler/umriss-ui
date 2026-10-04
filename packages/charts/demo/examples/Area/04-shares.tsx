@@ -1,4 +1,4 @@
-import { Area, Chart, Legend, Tooltip, XAxis, YAxis } from "../../../src";
+import { Legend, Tooltip, useChart } from "../../../src";
 
 /* Data from the logistics world, written out here so the example runs on its own. */
 
@@ -45,13 +45,14 @@ export const lead = "`normalize` on a stack makes every hour sum to 100 %: the a
 const tonnes = (v: number) => `${v.toFixed(1)} t`;
 
 export default function Shares() {
+  const { Chart, XAxis, YAxis, Area } = useChart(TONNES_PER_HOUR);
   return (
-    <Chart data={TONNES_PER_HOUR} height={280} ariaLabel="Each depot's share of the freight loaded per hour">
-      <XAxis accessor={(d: DepotLoad) => d.t} time domain="data" />
-      <YAxis accessor={(d: DepotLoad) => d.north} label="Share of the hour" />
-      <Area accessor={(d: DepotLoad) => d.north} name="North" stack="depots" normalize format={tonnes} fillOpacity={0.5} strokeWidth={1} />
-      <Area accessor={(d: DepotLoad) => d.river} name="Riverside" stack="depots" normalize format={tonnes} fillOpacity={0.5} strokeWidth={1} />
-      <Area accessor={(d: DepotLoad) => d.east} name="East Gate" stack="depots" normalize format={tonnes} fillOpacity={0.5} strokeWidth={1} />
+    <Chart height={280} ariaLabel="Each depot's share of the freight loaded per hour">
+      <XAxis value="t" time domain="data" />
+      <YAxis value="north" label="Share of the hour" />
+      <Area value="north" name="North" stack="depots" normalize format={tonnes} fillOpacity={0.5} strokeWidth={1} />
+      <Area value="river" name="Riverside" stack="depots" normalize format={tonnes} fillOpacity={0.5} strokeWidth={1} />
+      <Area value="east" name="East Gate" stack="depots" normalize format={tonnes} fillOpacity={0.5} strokeWidth={1} />
       <Legend placement="top" />
       <Tooltip mode="x" />
     </Chart>

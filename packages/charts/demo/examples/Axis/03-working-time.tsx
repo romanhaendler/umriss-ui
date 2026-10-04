@@ -1,4 +1,4 @@
-import { Chart, Line, Tooltip, XAxis, YAxis } from "../../../src";
+import { Tooltip, useChart } from "../../../src";
 
 /* Data from the logistics world, written out here so the example runs on its own. */
 
@@ -46,17 +46,18 @@ const weekdayAndTime = (v: number) =>
   new Date(v).toLocaleString("en-GB", { weekday: "short", hour: "2-digit", minute: "2-digit" });
 
 export default function WorkingTime() {
+  const { Chart, XAxis, YAxis, Line } = useChart(SORTED);
   return (
-    <Chart data={SORTED} height={280} ariaLabel="Parcels sorted per hour across last week's sorting hours">
+    <Chart height={280} ariaLabel="Parcels sorted per hour across last week's sorting hours">
       <XAxis
-        accessor={(d: SortedPoint) => d.t}
+        value="t"
         calendar={SORTING_HOURS}
         tickFormat={weekdayAndTime}
         tickCount={8}
         label="Sorting hours"
       />
-      <YAxis accessor={(d: SortedPoint) => d.parcels} label="Parcels/h" />
-      <Line accessor={(d: SortedPoint) => d.parcels} name="Sorted" />
+      <YAxis value="parcels" label="Parcels/h" />
+      <Line value="parcels" name="Sorted" />
       <Tooltip mode="x" />
     </Chart>
   );

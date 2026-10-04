@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Area, Chart, Legend, Tooltip, XAxis, YAxis } from "../../../src";
+import { Legend, Tooltip, useChart } from "../../../src";
 
 /* Data from the logistics world, written out here so the example runs on its own. */
 
@@ -46,6 +46,7 @@ export const title = "Stack areas";
 export const lead = "Areas with the same `stack` stand on the ones before them: the top edge is the whole, each band one depot's part. A click in the legend sets `hidden`, and the stack closes over the gap.";
 
 export default function StackedAreas() {
+  const { Chart, XAxis, YAxis, Area } = useChart(PARCELS_PER_HOUR);
   const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set());
   const toggle = (name: string) =>
     setHidden((previous) => {
@@ -55,12 +56,12 @@ export default function StackedAreas() {
     });
 
   return (
-    <Chart data={PARCELS_PER_HOUR} height={280} ariaLabel="Parcels loaded per hour at three depots, stacked">
-      <XAxis accessor={(d: DepotHour) => d.t} time domain="data" />
-      <YAxis accessor={(d: DepotHour) => d.north} label="Parcels per hour" />
-      <Area accessor={(d: DepotHour) => d.north} name="North" hidden={hidden.has("North")} stack="depots" fillOpacity={0.5} strokeWidth={1} />
-      <Area accessor={(d: DepotHour) => d.river} name="Riverside" hidden={hidden.has("Riverside")} stack="depots" fillOpacity={0.5} strokeWidth={1} />
-      <Area accessor={(d: DepotHour) => d.east} name="East Gate" hidden={hidden.has("East Gate")} stack="depots" fillOpacity={0.5} strokeWidth={1} />
+    <Chart height={280} ariaLabel="Parcels loaded per hour at three depots, stacked">
+      <XAxis value="t" time domain="data" />
+      <YAxis value="north" label="Parcels per hour" />
+      <Area value="north" name="North" hidden={hidden.has("North")} stack="depots" fillOpacity={0.5} strokeWidth={1} />
+      <Area value="river" name="Riverside" hidden={hidden.has("Riverside")} stack="depots" fillOpacity={0.5} strokeWidth={1} />
+      <Area value="east" name="East Gate" hidden={hidden.has("East Gate")} stack="depots" fillOpacity={0.5} strokeWidth={1} />
       <Legend placement="top" onToggle={toggle} />
       <Tooltip mode="x" />
     </Chart>

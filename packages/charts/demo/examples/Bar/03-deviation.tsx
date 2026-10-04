@@ -1,4 +1,4 @@
-import { Bar, Chart, Tooltip, XAxis, YAxis } from "../../../src";
+import { Tooltip, useChart } from "../../../src";
 
 /* Data from the controlling world, written out here so the example runs on its own. */
 
@@ -81,11 +81,12 @@ const DEVIATION: Deviation[] = COST_CENTRES.map((centre, place) => {
 const signed = (v: number) => (v > 0 ? `+${(v / 1000).toFixed(0)}k` : `${(v / 1000).toFixed(0)}k`);
 
 export default function Deviation() {
+  const { Chart, XAxis, YAxis, Bar } = useChart(DEVIATION);
   return (
-    <Chart data={DEVIATION} height={280} ariaLabel="Forecast against budget for the year, per cost centre">
-      <XAxis accessor={(d: Deviation) => d.place} ticks={COST_CENTRES.map((_, i) => i)} tickFormat={(v) => COST_CENTRES[v]?.name ?? ""} />
-      <YAxis accessor={(d: Deviation) => d.euros} tickFormat={signed} label="€" />
-      <Bar accessor={(d: Deviation) => d.euros} name="Over budget" />
+    <Chart height={280} ariaLabel="Forecast against budget for the year, per cost centre">
+      <XAxis value="place" ticks={COST_CENTRES.map((_, i) => i)} tickFormat={(v) => COST_CENTRES[v]?.name ?? ""} />
+      <YAxis value="euros" tickFormat={signed} label="€" />
+      <Bar value="euros" name="Over budget" />
       <Tooltip mode="x" />
     </Chart>
   );

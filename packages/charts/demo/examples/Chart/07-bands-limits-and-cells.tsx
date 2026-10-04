@@ -1,4 +1,4 @@
-import { Chart, Legend, LimitBand, LimitLine, Line, Matrix, StateBand, Tooltip, XAxis, YAxis } from "../../../src";
+import { Legend, LimitBand, LimitLine, Tooltip, useChart } from "../../../src";
 
 /* Data from the logistics world, written out here so the example runs on its own. */
 
@@ -232,40 +232,54 @@ export const lead = "What is otherwise said in colour alone - a state, a limit b
 const BATTERY = batteryDay("v2");
 const STATES = vehicleDay("v2");
 
+function BatteryAndStates() {
+  const { Chart, XAxis, YAxis, Line, StateBand } = useChart(BATTERY);
+  return (
+    <Chart height={280} ariaLabel="An e-van's battery against its reserve, above its states" encoding="marks">
+      <XAxis value="t" time label="Time" tickCount={4} />
+      <YAxis value={(d) => d.charge ?? 0} domain={[-40, 100]} ticks={[0, 20, 40, 60, 80, 100]} label="%" />
+      <YAxis id="lane" position="right" value={() => 0} domain={[0, 5]} ticks={[0.45]} tickFormat={() => "FP 377 K"} />
+      <LimitBand from={10} to={20} severity="warning" label="Reserve" />
+      <LimitLine value={10} severity="alarm" label="Empty soon" />
+      <StateBand data={STATES} value="state" states={VEHICLE_STATES} yAxisId="lane" laneFrom={0} laneTo={0.9} name="FP 377 K" />
+      <Line value="charge" name="Charge" strokeWidth={1.75} />
+      <Legend placement="top" />
+      <Tooltip mode="x" />
+    </Chart>
+  );
+}
+
+function SuccessCells() {
+  const { Chart, XAxis, YAxis, Matrix } = useChart(SUCCESS_BY_HOUR);
+  return (
+    <Chart height={280} ariaLabel="Successful requests per service and hour, by limits and by marks" encoding="marks">
+      <XAxis value="hour" ticks={[0, 6, 12, 18]} tickFormat={(v) => `${v}:00`} label="Hour" />
+      <YAxis value="service" ticks={SERVICES.map((_, i) => i)} tickFormat={(v) => SERVICES[v]?.name ?? ""} />
+      <Matrix
+        accessor={(d) => d.service}
+        value="success"
+        coloring={{
+          kind: "assessment",
+          limits: {
+            limits: [
+              { value: 99, side: "lower", severity: "warning" },
+              { value: 98, side: "lower", severity: "alarm" },
+            ],
+          },
+        }}
+        name="Success rate"
+      />
+      <Legend placement="top" />
+      <Tooltip mode="nearest" />
+    </Chart>
+  );
+}
+
 export default function BandsLimitsAndCells() {
   return (
     <div className="side-by-side">
-      <Chart data={BATTERY} height={280} ariaLabel="An e-van's battery against its reserve, above its states" encoding="marks">
-        <XAxis accessor={(d: BatteryPoint) => d.t} time label="Time" tickCount={4} />
-        <YAxis accessor={(d: BatteryPoint) => d.charge ?? 0} domain={[-40, 100]} ticks={[0, 20, 40, 60, 80, 100]} label="%" />
-        <YAxis id="lane" position="right" accessor={() => 0} domain={[0, 5]} ticks={[0.45]} tickFormat={() => "FP 377 K"} />
-        <LimitBand from={10} to={20} severity="warning" label="Reserve" />
-        <LimitLine value={10} severity="alarm" label="Empty soon" />
-        <StateBand data={STATES} accessor={(d: StatePoint) => d.state} states={VEHICLE_STATES} yAxisId="lane" laneFrom={0} laneTo={0.9} name="FP 377 K" />
-        <Line accessor={(d: BatteryPoint) => d.charge} name="Charge" strokeWidth={1.75} />
-        <Legend placement="top" />
-        <Tooltip mode="x" />
-      </Chart>
-      <Chart data={SUCCESS_BY_HOUR} height={280} ariaLabel="Successful requests per service and hour, by limits and by marks" encoding="marks">
-        <XAxis accessor={(d: SuccessCell) => d.hour} ticks={[0, 6, 12, 18]} tickFormat={(v) => `${v}:00`} label="Hour" />
-        <YAxis accessor={(d: SuccessCell) => d.service} ticks={SERVICES.map((_, i) => i)} tickFormat={(v) => SERVICES[v]?.name ?? ""} />
-        <Matrix
-          accessor={(d: SuccessCell) => d.service}
-          value={(d: SuccessCell) => d.success}
-          coloring={{
-            kind: "assessment",
-            limits: {
-              limits: [
-                { value: 99, side: "lower", severity: "warning" },
-                { value: 98, side: "lower", severity: "alarm" },
-              ],
-            },
-          }}
-          name="Success rate"
-        />
-        <Legend placement="top" />
-        <Tooltip mode="nearest" />
-      </Chart>
+      <BatteryAndStates />
+      <SuccessCells />
     </div>
   );
 }

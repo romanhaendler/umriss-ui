@@ -1,4 +1,4 @@
-import { BoxPlot, Chart, Tooltip, XAxis, YAxis } from "../../../src";
+import { Tooltip, useChart } from "../../../src";
 
 export const title = "With outliers";
 export const lead = "`outliers` returns the values beyond the whiskers, a list per box. They are drawn with their box and read in its tooltip, the first five written out; one more than three IQR beyond its box is a ring.";
@@ -23,18 +23,19 @@ const RESPONSE_TIMES: ResponseTime[] = [
 ];
 
 export default function WithOutliers() {
+  const { Chart, XAxis, YAxis, BoxPlot } = useChart(RESPONSE_TIMES);
   return (
-    <Chart data={RESPONSE_TIMES} height={300} ariaLabel="Response time per service over the last hour, with outliers">
-      <XAxis accessor={(_: ResponseTime, i) => i} ticks={[0, 1, 2, 3]} tickFormat={(v) => RESPONSE_TIMES[v]?.service ?? ""} />
-      <YAxis accessor={(d: ResponseTime) => d.median} tickFormat={(v) => `${v} ms`} />
+    <Chart height={300} ariaLabel="Response time per service over the last hour, with outliers">
+      <XAxis value={(_, i) => i} ticks={[0, 1, 2, 3]} tickFormat={(v) => RESPONSE_TIMES[v]?.service ?? ""} />
+      <YAxis value="median" tickFormat={(v) => `${v} ms`} />
       <BoxPlot
         name="Response time"
-        median={(d: ResponseTime) => d.median}
-        lowerQuartile={(d: ResponseTime) => d.q1}
-        upperQuartile={(d: ResponseTime) => d.q3}
-        lowerWhisker={(d: ResponseTime) => d.low}
-        upperWhisker={(d: ResponseTime) => d.high}
-        outliers={(d: ResponseTime) => d.outliers}
+        median="median"
+        lowerQuartile="q1"
+        upperQuartile="q3"
+        lowerWhisker="low"
+        upperWhisker="high"
+        outliers="outliers"
       />
       <Tooltip />
     </Chart>

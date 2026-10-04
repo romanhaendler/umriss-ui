@@ -1,4 +1,4 @@
-import { Chart, Line, Tooltip, XAxis, YAxis } from "../../../src";
+import { Tooltip, useChart } from "../../../src";
 
 /* Data from the operations world, written out here so the example runs on its own. */
 
@@ -89,11 +89,12 @@ export const lead = "With `time` the values are instants: ticks stand on the loc
 const CHECKOUT = metrics("checkout");
 
 export default function TimeAxis() {
+  const { Chart, XAxis, YAxis, Line } = useChart(CHECKOUT);
   return (
-    <Chart data={CHECKOUT} height={260} ariaLabel="Checkout's error rate today">
-      <XAxis accessor={(d: MetricPoint) => d.t} time />
-      <YAxis accessor={(d: MetricPoint) => d.errorRate} label="Errors %" />
-      <Line accessor={(d: MetricPoint) => d.errorRate} name="Error rate" />
+    <Chart height={260} ariaLabel="Checkout's error rate today">
+      <XAxis value="t" time />
+      <YAxis value="errorRate" label="Errors %" />
+      <Line value="errorRate" name="Error rate" />
       <Tooltip mode="x" />
     </Chart>
   );

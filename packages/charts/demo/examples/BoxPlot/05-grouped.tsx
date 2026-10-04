@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BoxPlot, Chart, Legend, Tooltip, XAxis, YAxis } from "../../../src";
+import { Legend, Tooltip, useChart } from "../../../src";
 
 export const title = "Before and after, side by side";
 export const lead = "Box series on one x axis stand beside each other, as bars do. `hidden` is your state and `onToggle` hands you the clicked entry; a hidden series leaves the drawing and the y extent.";
@@ -30,12 +30,13 @@ const AFTER: Spread[] = [
 ];
 
 export default function Grouped() {
+  const { Chart, XAxis, YAxis, BoxPlot } = useChart(BEFORE);
   const [hidden, setHidden] = useState<readonly string[]>([]);
   const toggle = (name: string) => setHidden((h) => (h.includes(name) ? h.filter((n) => n !== name) : [...h, name]));
   return (
-    <Chart data={BEFORE} height={280} ariaLabel="Response time per service before and after the release">
-      <XAxis accessor={(d: Spread) => d.service} ticks={[0, 1, 2, 3]} tickFormat={(v) => SERVICES[v] ?? ""} />
-      <YAxis accessor={(d: Spread) => d.median} tickFormat={(v) => `${v} ms`} />
+    <Chart height={280} ariaLabel="Response time per service before and after the release">
+      <XAxis value="service" ticks={[0, 1, 2, 3]} tickFormat={(v) => SERVICES[v] ?? ""} />
+      <YAxis value="median" tickFormat={(v) => `${v} ms`} />
       {[
         { name: "Before", data: BEFORE },
         { name: "After", data: AFTER },
@@ -45,11 +46,11 @@ export default function Grouped() {
           name={one.name}
           data={one.data}
           hidden={hidden.includes(one.name)}
-          median={(d: Spread) => d.median}
-          lowerQuartile={(d: Spread) => d.q1}
-          upperQuartile={(d: Spread) => d.q3}
-          lowerWhisker={(d: Spread) => d.low}
-          upperWhisker={(d: Spread) => d.high}
+          median="median"
+          lowerQuartile="q1"
+          upperQuartile="q3"
+          lowerWhisker="low"
+          upperWhisker="high"
         />
       ))}
       <Legend onToggle={toggle} />

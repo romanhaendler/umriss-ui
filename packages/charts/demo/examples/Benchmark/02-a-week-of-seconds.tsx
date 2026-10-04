@@ -1,7 +1,7 @@
 /* Not photographed, like the benchmark above it: it measures the series draw. */
 
 import { useCallback, useState } from "react";
-import { Chart, Legend, Line, Tooltip, XAxis, YAxis } from "../../../src";
+import { Legend, Tooltip, useChart } from "../../../src";
 import type { ChartPerf } from "../../../src";
 
 /* Data from the operations world, written out here so the example runs on its own. */
@@ -107,6 +107,7 @@ export default function WeekOfSeconds() {
   // Made on first render, not on import: 604,800 readings are no page's
   // business until this one is open.
   const [data] = useState(() => week("search", 1000));
+  const { Chart, XAxis, YAxis, Line } = useChart(data);
   const [domain, setDomain] = useState<"data" | readonly [number, number]>("data");
   const [drawMs, setDrawMs] = useState(0);
   const onPerf = useCallback((p: ChartPerf) => setDrawMs(p.seriesDrawMs), []);
@@ -122,12 +123,12 @@ export default function WeekOfSeconds() {
           <dd>{drawMs.toFixed(1)} ms</dd>
         </div>
       </dl>
-      <Chart data={data} height={300} ariaLabel="Search latency and requests over last week, a reading a second" onPerf={onPerf}>
-        <XAxis accessor={(d: MetricPoint) => d.t} time domain={domain} onDomainChange={setDomain} />
-        <YAxis accessor={(d: MetricPoint) => d.p95} label="ms" domain="visible" />
-        <YAxis id="requests" position="right" accessor={(d: MetricPoint) => d.requests} label="Requests/min" domain="visible" />
-        <Line accessor={(d: MetricPoint) => d.p95} name="p95" />
-        <Line accessor={(d: MetricPoint) => d.requests} yAxisId="requests" name="Requests" />
+      <Chart height={300} ariaLabel="Search latency and requests over last week, a reading a second" onPerf={onPerf}>
+        <XAxis value="t" time domain={domain} onDomainChange={setDomain} />
+        <YAxis value="p95" label="ms" domain="visible" />
+        <YAxis id="requests" position="right" value="requests" label="Requests/min" domain="visible" />
+        <Line value="p95" name="p95" />
+        <Line value="requests" yAxisId="requests" name="Requests" />
         <Legend placement="top" />
         <Tooltip mode="x" />
       </Chart>

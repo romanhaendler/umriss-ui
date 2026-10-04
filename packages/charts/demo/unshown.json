@@ -19,8 +19,5 @@
   "ControlChartProps.format": "(f) twin of LineProps.format (Tooltip/04): the tooltip's value format",
   "ControlChartProps.color": "(f) twin of LineProps.color: any CSS colour for the line",
   "ControlChartProps.tone": "(f) twin of ScatterProps.tone (Scatter/02): a theme role for the line; violations stay alarm",
-  "AreaProps.value": "not shown yet: its page moves to useChart and value with charts-bound-to-rows 04/05",
-  "BarProps.value": "not shown yet: its page moves to useChart and value with charts-bound-to-rows 04/05",
-  "ScatterProps.value": "not shown yet: its page moves to useChart and value with charts-bound-to-rows 04/05",
-  "StateBandProps.value": "not shown yet: its page moves to useChart and value with charts-bound-to-rows 04/05"
+  "AreaProps.accessor": "(g) deprecated alias: the older form of `value`, removed with charts-bound-to-rows 07"
 }

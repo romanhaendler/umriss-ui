@@ -1,4 +1,4 @@
-import { Chart, Legend, Line, Tooltip, XAxis, YAxis } from "../../../src";
+import { Legend, Tooltip, useChart } from "../../../src";
 
 /* Data from the controlling world, written out here so the example runs on its own. */
 
@@ -78,15 +78,16 @@ const month = (row: LedgerRow) => Number(row.month.slice(5)) - 1;
 const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 function Forecasts({ encoding }: { encoding?: "marks" }) {
+  const { Chart, XAxis, YAxis, Line } = useChart(LEDGER);
   return (
-    <Chart data={LEDGER} height={240} ariaLabel="Forecast of four cost centres per month" encoding={encoding}>
-      <XAxis accessor={month} tickFormat={(v) => MONTH_NAMES[v] ?? ""} tickCount={6} />
-      <YAxis accessor={(d: LedgerRow) => d.forecast} label="€" />
+    <Chart height={240} ariaLabel="Forecast of four cost centres per month" encoding={encoding}>
+      <XAxis value={month} tickFormat={(v) => MONTH_NAMES[v] ?? ""} tickCount={6} />
+      <YAxis value="forecast" label="€" />
       {CENTRES.map((c) => (
         <Line
           key={c.id}
           data={LEDGER.filter((row) => row.costCentre === c.id)}
-          accessor={(d: LedgerRow) => d.forecast}
+          value="forecast"
           name={c.name}
         />
       ))}

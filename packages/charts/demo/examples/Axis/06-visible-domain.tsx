@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Chart, Line, Tooltip, XAxis, YAxis } from "../../../src";
+import { Tooltip, useChart } from "../../../src";
 
 /* Data from the operations world, written out here so the example runs on its own. */
 
@@ -104,12 +104,13 @@ const SEARCH_WEEK = week("search", 60_000);
 const SATURDAY = new Date(2026, 2, 14).getTime();
 
 export default function VisibleDomain() {
+  const { Chart, XAxis, YAxis, Line } = useChart(SEARCH_WEEK);
   const [domain, setDomain] = useState<readonly [number, number]>([SATURDAY + 16 * HOUR, SATURDAY + 22 * HOUR]);
   return (
-    <Chart data={SEARCH_WEEK} height={260} ariaLabel="Search latency on Saturday evening, the y axis fitted to it">
-      <XAxis accessor={(d: MetricPoint) => d.t} time domain={domain} onDomainChange={setDomain} />
-      <YAxis accessor={(d: MetricPoint) => d.p95} label="ms" domain="visible" />
-      <Line accessor={(d: MetricPoint) => d.p95} name="p95" />
+    <Chart height={260} ariaLabel="Search latency on Saturday evening, the y axis fitted to it">
+      <XAxis value="t" time domain={domain} onDomainChange={setDomain} />
+      <YAxis value="p95" label="ms" domain="visible" />
+      <Line value="p95" name="p95" />
       <Tooltip mode="x" />
     </Chart>
   );

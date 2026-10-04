@@ -1,4 +1,4 @@
-import { Bar, Chart, Legend, Tooltip, XAxis, YAxis } from "../../../src";
+import { Legend, Tooltip, useChart } from "../../../src";
 
 /* Data from the controlling world, written out here so the example runs on its own. */
 
@@ -71,13 +71,14 @@ const FEBRUARY = LEDGER.filter((row) => row.month === "2026-02");
 const place = (row: LedgerRow) => COST_CENTRES.findIndex((c) => c.id === row.costCentre);
 
 export default function Grouped() {
+  const { Chart, XAxis, YAxis, Bar } = useChart(FEBRUARY);
   return (
-    <Chart data={FEBRUARY} height={280} ariaLabel="Budget and actual per cost centre in February">
-      <XAxis accessor={place} ticks={COST_CENTRES.map((_, i) => i)} tickFormat={(v) => COST_CENTRES[v]?.name ?? ""} />
-      <YAxis accessor={(d: LedgerRow) => d.budget} label="€" />
+    <Chart height={280} ariaLabel="Budget and actual per cost centre in February">
+      <XAxis value={place} ticks={COST_CENTRES.map((_, i) => i)} tickFormat={(v) => COST_CENTRES[v]?.name ?? ""} />
+      <YAxis value="budget" label="€" />
       {/* A token, so that it follows the colour scheme. */}
-      <Bar accessor={(d: LedgerRow) => d.budget} name="Budget" color="var(--uc-color-text)" barWidth={0.7} />
-      <Bar accessor={(d: LedgerRow) => d.actual} name="Actual" barWidth={0.7} />
+      <Bar value="budget" name="Budget" color="var(--uc-color-text)" barWidth={0.7} />
+      <Bar value="actual" name="Actual" barWidth={0.7} />
       <Legend placement="top" />
       <Tooltip mode="x" />
     </Chart>

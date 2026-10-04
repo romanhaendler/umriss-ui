@@ -1,4 +1,4 @@
-import { BoxPlot, Chart, Tooltip, XAxis, YAxis } from "../../../src";
+import { Tooltip, useChart } from "../../../src";
 
 /* Data from the operations world, written out here so the example runs on its own. */
 
@@ -123,17 +123,18 @@ function hourBoxes(): HourBox[] {
 const BOXES = hourBoxes();
 
 export default function OverTime() {
+  const { Chart, XAxis, YAxis, BoxPlot } = useChart(BOXES);
   return (
-    <Chart data={BOXES} height={280} ariaLabel="Checkout median latency per hour today">
-      <XAxis accessor={(d: HourBox) => d.hour} time />
-      <YAxis accessor={(d: HourBox) => d.median} tickFormat={(v) => `${v} ms`} />
+    <Chart height={280} ariaLabel="Checkout median latency per hour today">
+      <XAxis value="hour" time />
+      <YAxis value="median" tickFormat={(v) => `${v} ms`} />
       <BoxPlot
         name="Checkout p50"
-        median={(d: HourBox) => d.median}
-        lowerQuartile={(d: HourBox) => d.q1}
-        upperQuartile={(d: HourBox) => d.q3}
-        lowerWhisker={(d: HourBox) => d.low}
-        upperWhisker={(d: HourBox) => d.high}
+        median="median"
+        lowerQuartile="q1"
+        upperQuartile="q3"
+        lowerWhisker="low"
+        upperWhisker="high"
       />
       <Tooltip />
     </Chart>
