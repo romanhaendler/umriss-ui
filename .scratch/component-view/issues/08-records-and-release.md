@@ -8,3 +8,14 @@
 
 - [ ] Every removed prop and export appears in a migration table
 - [ ] Every suite green; the release builds
+
+## Comments
+
+### Left over from 06 (2026-10-04)
+
+Still say "manual mode": `docs/testing.md` (also names the old test files
+`manualMode.test.tsx`, `manualModel.test.ts`, now `serverMode.test.tsx`,
+`serverModel.test.ts`) and two doc comments in core's
+`src/lib/language/wording.ts`. ADR-0042 and `docs/journal.md` mention it as
+history and stay. From charts-bound-to-rows 02: the Installation page's lead
+still says "through an accessor" - reword with 05 or here.
