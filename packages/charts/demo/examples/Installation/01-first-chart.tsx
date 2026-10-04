@@ -1,4 +1,4 @@
-import { Chart, Line, Tooltip, XAxis, YAxis } from "../../../src";
+import { Tooltip, useChart } from "../../../src";
 
 export const title = "Draw a first chart";
 export const lead = "Give `Chart` the rows, then an axis per direction and a series; each reads its value from a row through an accessor.";
@@ -26,11 +26,12 @@ const SIGN_INS: Hour[] = [
 ];
 
 export default function FirstChart() {
+  const { Chart, XAxis, YAxis, Line } = useChart(SIGN_INS);
   return (
-    <Chart data={SIGN_INS} height={240} ariaLabel="Sign-ins per hour today">
-      <XAxis accessor={(d: Hour) => d.t} time />
-      <YAxis accessor={(d: Hour) => d.signIns} label="Sign-ins per hour" />
-      <Line accessor={(d: Hour) => d.signIns} name="Sign-ins" />
+    <Chart height={240} ariaLabel="Sign-ins per hour today">
+      <XAxis value="t" time />
+      <YAxis value="signIns" label="Sign-ins per hour" />
+      <Line value="signIns" name="Sign-ins" />
       <Tooltip />
     </Chart>
   );

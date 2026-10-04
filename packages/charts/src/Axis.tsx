@@ -5,16 +5,20 @@
 
 import { useMemo } from "react";
 import { useAxis } from "./context";
-import type { AxisConfig } from "./types";
+import { readerOf } from "./value";
+import type { AxisConfig, NumberField } from "./types";
 import type { WorkingInterval } from "./workingTime";
 
 interface CommonProps<T> {
   /** Axis id, through which series bind themselves.
       @remarks R-4.12 */
   id?: string;
-  /** Value access of this axis. Compared by its source text, as a series'
-      accessor is (`Accessor`) - with the same closure limit. */
-  accessor: (d: T, index: number) => number;
+  /** Where a row lies on this axis: a number field of the row, compared by
+      its name, or a function of it, compared by its source text as a series'
+      is (`Accessor`) - with the same closure limit. */
+  value?: NumberField<T> | ((d: T, index: number) => number);
+  /** The older form of `value`: a function only. */
+  accessor?: (d: T, index: number) => number;
   /** Axis title. */
   label?: string;
   /** Target value; the 1-2-5 algorithm may deviate. */
@@ -90,7 +94,6 @@ export function XAxis<T>(props: XAxisProps<T>): null {
   const {
     id = "x",
     position = "bottom",
-    accessor,
     label,
     tickCount,
     tickFormat,
@@ -101,6 +104,7 @@ export function XAxis<T>(props: XAxisProps<T>): null {
     calendar,
     onDomainChange,
   } = props;
+  const accessor = readerOf<(d: T, index: number) => number>(props.value) ?? props.accessor;
 
   const config = useMemo<AxisConfig>(
     () =>
@@ -132,7 +136,6 @@ export function YAxis<T>(props: YAxisProps<T>): null {
   const {
     id = "y",
     position = "left",
-    accessor,
     label,
     tickCount,
     tickFormat,
@@ -141,6 +144,7 @@ export function YAxis<T>(props: YAxisProps<T>): null {
     ticks,
     alignTicks,
   } = props;
+  const accessor = readerOf<(d: T, index: number) => number>(props.value) ?? props.accessor;
 
   const config = useMemo<AxisConfig>(
     () =>

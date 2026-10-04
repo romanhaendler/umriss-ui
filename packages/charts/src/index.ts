@@ -127,3 +127,8 @@ export { BoxPlot, type BoxPlotProps } from "./BoxPlot";
 export type { BoxSeriesConfig, BoxChannels } from "./types";
 /* What a custom tooltip `render` reads of a box (box-plot 03, 04). */
 export type { BoxNumbers, BoxExtras, ListAccessor } from "./types";
+
+/* The chart bound to its rows (ADR-0048): the hook, and the forms a value
+   takes. At the end, by the workspace's rule for new exports. */
+export { useChart, type ChartParts } from "./useChart";
+export type { ListField, ListValue, NumberField, Value } from "./types";
