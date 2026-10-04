@@ -89,10 +89,11 @@ describe("Demo smoke test", () => {
   /* A configurator renders in its page's first slot, and at rest its code is
      the bare element - every control starts at its default
      (.scratch/configurator). */
-  it("has the ten configurators of the closed list", () => {
-    expect(DEMO.configurators.map((one) => one.name).sort()).toEqual(
-      ["Alert", "Badge", "Button", "Checkbox", "IconButton", "Input", "Meter", "ProgressBar", "Switch", "Tag"],
-    );
+  it("has a configurator on every page that qualifies", () => {
+    expect(DEMO.configurators.map((one) => one.name).sort()).toEqual([
+      "Alert", "Badge", "Button", "Checkbox", "Combobox", "DatePicker", "DateRangePicker", "DateTimePicker",
+      "DateTimeRangePicker", "IconButton", "Input", "Meter", "MultiSelect", "ProgressBar", "Select", "Switch", "Tag",
+    ]);
   });
 
   it.each(DEMO.configurators.map((c) => [c.name, c] as const))("renders the configurator of %s at rest", async (name, configurator) => {
