@@ -1,6 +1,6 @@
 # 03: Every core page that can be configured opens with a configurator
 
-Status: ready-for-agent
+Status: done
 Blocked by: 02 (Nine more configurators)
 Spec: `.scratch/configurator/spec.md`
 
