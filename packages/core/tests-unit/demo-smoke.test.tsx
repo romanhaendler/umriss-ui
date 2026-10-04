@@ -89,10 +89,11 @@ describe("Demo smoke test", () => {
   /* A configurator renders in its page's first slot, and at rest its code is
      the bare element - every control starts at its default
      (.scratch/configurator). */
-  it("has a configurator on every page that qualifies", () => {
+  it("has a configurator on every page that can be configured", () => {
     expect(DEMO.configurators.map((one) => one.name).sort()).toEqual([
       "Alert", "Badge", "Button", "Checkbox", "Combobox", "DatePicker", "DateRangePicker", "DateTimePicker",
-      "DateTimeRangePicker", "IconButton", "Input", "Meter", "MultiSelect", "ProgressBar", "Select", "Switch", "Tag",
+      "DateTimeRangePicker", "Divider", "FormField", "IconButton", "Input", "Meter", "MultiSelect", "ProgressBar",
+      "Select", "Skeleton", "Sparkline", "Stat", "Switch", "Tag", "Text",
     ]);
   });
 

@@ -4,9 +4,9 @@
    prop becomes, what values it offers and where it starts all come from the
    props table the reader made of the source, so they cannot drift from it.
    A union of literals becomes a choice, a boolean a switch, a number a number
-   field; the children text and `placeholder` are the only text. Anything else
-   - a callback, a node, an object - has no control, and naming it fails at
-   load time, as a prop the table does not have does.
+   field, a string or a node a text field. Anything else - a callback, an
+   element, an object - has no control, and naming it fails at load time, as a
+   prop the table does not have does.
 
    The code under the stage is written here too: the import line and one
    element, with every prop that still stands at its default left out. */
@@ -17,8 +17,8 @@ import type { TypeEntry } from "./propsReader";
 
 export type Value = string | number | boolean | null;
 
-/** A node a required prop starts with - IconButton's glyph - and the code
-    that writes it. The names that code uses are the package's, and join the
+/** A node a required prop starts with - IconButton's glyph, or Sparkline's
+    data - and the code that writes it. The names that code uses are the package's, and join the
     import line. */
 export interface NodeValue {
   node: ReactNode;
@@ -55,8 +55,9 @@ export interface Declaration {
   /** The starting value of every prop the component requires; the code
       always shows these. */
   required?: Readonly<Record<string, Value | NodeValue>>;
-  /** The bounds the component documents for a number. */
-  bounds?: Readonly<Record<string, readonly [number, number]>>;
+  /** The bounds the component documents for a number, and a step where a
+      hundredth of them is not one: a count steps by 1. */
+  bounds?: Readonly<Record<string, readonly [number, number] | readonly [number, number, number]>>;
 }
 
 /** The longest union that still stands as a segmented choice. */
@@ -114,16 +115,24 @@ export function controlsOf(file: string, entry: TypeEntry, declaration: Declarat
       if (value === undefined || !values.includes(value)) throw fail(prop, "which has no default among its values to start at");
       return { prop, kind, values, defaultValue: value };
     }
+    /* A number that may also be missing or a word (Sparkline's `"fill"`) is
+       a number field; the word is the code's to write. */
+    const members = row.type.split(" | ");
+    const isNumber = members.includes("number") && members.every((one) => one === "number" || one === "null" || one === "undefined" || literals(one) !== undefined);
+    /* A string, or a node that is text where it is shown - a label. */
+    if (row.type === "string" || row.type === "ReactNode" || row.type === "string | number") {
+      const start = declared ?? (row.defaultValue === undefined ? undefined : literals(row.defaultValue)?.[0]);
+      return { prop, kind: "text", defaultValue: start === undefined ? "" : String(start) };
+    }
     if (row.type === "boolean") {
       return { prop, kind: "switch", defaultValue: declared ?? row.defaultValue === "true" };
     }
-    if (row.type === "number") {
+    if (isNumber) {
       const bounds = declaration.bounds?.[prop];
       const start = declared ?? (row.defaultValue === undefined ? null : Number(row.defaultValue));
       if (Number.isNaN(start)) throw cannot();
       if (bounds === undefined) return { prop, kind: "number", defaultValue: start };
-      const [min, max] = bounds;
-      const step = (max - min) / 100;
+      const [min, max, step = (max - min) / 100] = bounds;
       /* The step's own decimal places, read off its shortest spelling once the
          division's float noise is rounded away: 2.5 has one, 0.01 two. */
       const decimals = String(Number(step.toPrecision(12))).split(".")[1]?.length ?? 0;
@@ -183,7 +192,8 @@ export function codeOf(
 export interface Configurator {
   /** The page it stands on: the file's name, lower-cased. */
   pageId: string;
-  /** The component's name, as the code writes it: the file's name. */
+  /** The component's name, as the code writes it: the file's name, or the
+      `name` it exports. */
   name: string;
   Component: ComponentType<Record<string, unknown>>;
   controls: readonly Control[];
@@ -191,6 +201,8 @@ export interface Configurator {
 }
 
 export interface ConfiguratorModule {
+  /** The component's name where it is not the page's (Typography's `Text`). */
+  name?: unknown;
   component?: unknown;
   controls?: unknown;
   children?: unknown;
@@ -208,9 +220,10 @@ export function readConfigurators(
   pages: readonly Page[],
 ): readonly Configurator[] {
   return Object.entries(modules).map(([path, mod]) => {
-    const name = CONFIGURATOR_PATTERN.exec(path)?.[1];
-    if (name === undefined) throw new Error(`\`${path}\` is not named like a configurator. Expected: configurators/<Component>.tsx`);
-    const pageId = name.toLowerCase();
+    const page = CONFIGURATOR_PATTERN.exec(path)?.[1];
+    if (page === undefined) throw new Error(`\`${path}\` is not named like a configurator. Expected: configurators/<Component>.tsx`);
+    const pageId = page.toLowerCase();
+    const name = typeof mod.name === "string" ? mod.name : page;
     if (!pages.some((page) => page.id === pageId)) throw new Error(`\`${path}\` is named for a page \`${pageId}\` there is not.`);
     const entry = tables[`${name}Props`];
     if (entry === undefined) throw new Error(`\`${path}\`: there is no props table \`${name}Props\` to read its controls from.`);

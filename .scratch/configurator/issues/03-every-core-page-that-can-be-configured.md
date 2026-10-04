@@ -53,3 +53,48 @@ Baselines (light and dark):
 - New: `configurator-{select,combobox,multiselect,datepicker,datetimepicker,daterangepicker,datetimerangepicker}`.
 - Renewed for the title: `example-` and `forced-` pictures of `select--select`, `combobox--pick-a-driver`, `multiselect--chips-in-the-field`, `datepicker--pick-a-day`, `datetimepicker--set-an-instant`, `daterangepicker--a-span-of-days` and `datetimerangepicker--a-downtime-window`.
 - Renewed for the shift: `example-{select,multiselect}--states` and `example-datetimepicker--{with-seconds,states,with-an-error}`. Also `example-datetimerangepicker--{with-seconds,states,with-an-error}`, `forced-combobox-cursor` and `forced-range`. Their content is unchanged; the viewport pictures scrolled with the page.
+
+### Batch C
+
+Delivered: six new configurators in `packages/core/demo/configurators/`. They are Typography (configures `Text`), Divider, Skeleton, Stat, Sparkline and FormField. The machinery in `packages/demo/src/tooling/configurator.ts` changed in four small ways, each with a unit case in `configurator.test.ts` (the coordinator gave batch C this file):
+- A configurator may export `name`, the component it configures, where that is not the page's. Typography.tsx names `Text` and reads `TextProps`.
+- `string`, `ReactNode` and `string | number` become a text field. It starts at the declared value, else the default, else empty, and empty is left out of the code. Before, only the children text and `placeholder` could. This covers Stat's `label`/`unit`, Divider's `label`, Skeleton's `width`/`height` and FormField's texts. A function still fails at load time. The old "a node or a string fails" case is now "a function fails".
+- A union of `number` with `null`, `undefined` or literals becomes a number field (Stat's `value`, Sparkline's `width`). Sparkline's `"fill"` is not offered: the examples show it.
+- `bounds` takes an optional third entry, the step. Stat's `decimals` is `[0, 6, 1]` and Sparkline's width and height step by a pixel.
+
+The declarations:
+- Sparkline's required `data` is a `{ node, code }` value.
+- FormField's required field is `<Input />` between the tags.
+- Stat's tile is a size container and collapsed on the flex stage. Its `component` wraps it in a 240 px box, the width the first example gives it, and the code still shows `Stat` alone.
+- `unshown.json` is untouched, as the coordinator said: configurators do not count for the coverage gate yet.
+
+Tests:
+- The jsdom smoke list now holds 16 configurators.
+- `accessibility.spec.ts` runs axe on the `[data-configurator]` section of every page in `CONFIGURATOR_PAGES`, so batches A and B are covered with no edit of theirs.
+- `features-page.spec.ts` has two new cases. Typography's tone "muted" gives `<Text tone="muted">…</Text>`. A typed Divider label shows on the stage and gives `<Divider label="Returns" />`. Sparkline's required data is written as code, and ArrowUp on width writes `width={97}`.
+
+Results: lint, typecheck and test:unit are green. Playwright ui-light/ui-dark ran the screenshots, forced-colours and accessibility suites filtered to the six pages, every configurator's axe case, the page suite and silent-pages: all passed.
+
+Baselines (light and dark each):
+- New: `configurator-{typography,divider,skeleton,stat,sparkline,formfield}`. I looked at all of them.
+- Renewed for the title: the six former first examples, `example-` and `forced-` each. They are `typography--text-heading-link`, `divider--a-line`, `skeleton--lines`, `stat--a-figure`, `sparkline--beside-a-value` and `formfield--label-and-hint`.
+- Renewed for the shift: the other examples on these pages whose picture moved by one pixel because they now lie lower. Their content is unchanged; I checked `stat--unknown`, which went from 220 to 219 px.
+
+Core pages without a configurator, and why (rule: three settable props whose effect shows without the reader's own state):
+- Installation, UmrissProvider, Theming, Sizes, Language: guides, with no component to configure.
+- Stack and Grid: layout primitives. Their effect needs children, and the ticket excludes them.
+- Card: its own props are fold state (`collapsible`, `defaultCollapsed`, `collapsed`/`onCollapsedChange`) and its content is composition. CardHeader's title, eyebrow and divider show only inside a Card.
+- Splitter: `min`/`max`/`step` show only while dragging, `defaultValue` only at mount, and the children are two panes.
+- Dock: excluded by the ticket. Its tools are data, and place and mode are state.
+- VisuallyHidden: invisible by design.
+- ButtonGroup: the group's own visible prop is `size`, one (`aria-label` is not seen). SplitButton on the same page would qualify (variant, size, loading, disabled). Opening the ButtonGroup page with a SplitButton would put the wrong component first, so that is left to the owner.
+- Spinner: one prop, `size`.
+- Toast: shows only when fired. Its options are a call's arguments.
+- EmptyState: two short texts (title, description). `action` and `icon` are nodes.
+- Tooltip: shows only on hover or focus. Besides that it has `content` and `delay`.
+- Popover, Menu, ContextMenu, Modal, Drawer, ConfirmDialog, CommandPalette: their effect needs opening.
+- Breadcrumb: `items` is data and nothing else.
+- Tabs: value/defaultValue/onChange are state, and the tabs are composition.
+- Accordion: `type` shows only as the reader opens sections, `headingLevel` is not seen, and the open set is state.
+- Stepper: two (`current`, `orientation`). `steps` is data.
+- TreeView: data and a render function.

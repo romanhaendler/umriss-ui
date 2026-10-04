@@ -200,4 +200,27 @@ test.describe("The other configurators", () => {
     await value.press("Shift+ArrowUp");
     expect(await code(page, "meter")).toBe('import { Meter } from "@umriss-ui/core";\n\n<Meter value={1} />');
   });
+
+  test("the Typography page configures Text, and a Divider's label is typed in", async ({ page }) => {
+    await open(page, "typography");
+    await page.locator('[data-configurator="typography"]').getByRole("radiogroup", { name: "tone" }).getByText("muted", { exact: true }).click();
+    expect(await code(page, "typography")).toBe(
+      'import { Text } from "@umriss-ui/core";\n\n<Text tone="muted">Takes card and wallet payments for every booking.</Text>',
+    );
+
+    await open(page, "divider");
+    const divider = page.locator('[data-configurator="divider"]');
+    await divider.getByLabel("label", { exact: true }).fill("Returns");
+    expect(await code(page, "divider")).toBe('import { Divider } from "@umriss-ui/core";\n\n<Divider label="Returns" />');
+    await expect(divider.locator(".exampleStage").getByText("Returns")).toBeVisible();
+  });
+
+  test("the Sparkline's required data is written as its code, and its width steps by a pixel", async ({ page }) => {
+    await open(page, "sparkline");
+    const width = page.locator('[data-configurator="sparkline"]').getByLabel("width", { exact: true });
+    await width.press("ArrowUp");
+    expect(await code(page, "sparkline")).toBe(
+      'import { Sparkline } from "@umriss-ui/core";\n\n<Sparkline data={[42, 58, 71, 66, 80, 74, 88]} width={97} />',
+    );
+  });
 });

@@ -7,7 +7,8 @@ import { describe, expect, it } from "vitest";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { readProps } from "../src/tooling/propsReader";
-import { codeOf, controlsOf, startOf, type Value } from "../src/tooling/configurator";
+import { codeOf, controlsOf, readConfigurators, startOf, type Value } from "../src/tooling/configurator";
+import type { Page } from "../src/outline";
 
 const FILE = join(dirname(fileURLToPath(import.meta.url)), "fixtures", "props", "configurable.tsx");
 const ENTRY = readProps([FILE], ["FixtureConfigurableProps"]).types.FixtureConfigurableProps!;
@@ -69,10 +70,23 @@ describe("controlsOf", () => {
     expect(() => control("tone")).toThrow(/configurators\/FixtureConfigurable\.tsx.*`tone`/);
   });
 
-  it("fails on a function, a node or a string, naming the file and the prop", () => {
+  it("fails on a function, naming the file and the prop", () => {
     expect(() => control("onPress")).toThrow(/configurators\/FixtureConfigurable\.tsx.*`onPress`.*cannot become a control/);
-    expect(() => control("extra")).toThrow(/`extra`.*cannot become a control/);
-    expect(() => control("label")).toThrow(/`label`.*cannot become a control/);
+  });
+
+  it("makes a string, a node and a string-or-number a text field, starting at the declared value, the default or empty", () => {
+    expect(controlsOf(AT, ENTRY, { controls: ["label"], required: { label: "Save" } })[0]).toEqual({ prop: "label", kind: "text", defaultValue: "Save" });
+    expect(control("extra")).toEqual({ prop: "extra", kind: "text", defaultValue: "" });
+    expect(control("span")).toEqual({ prop: "span", kind: "text", defaultValue: "100%" });
+  });
+
+  it("makes a number that may be missing or a word a number field", () => {
+    expect(control("reading")).toEqual({ prop: "reading", kind: "number", defaultValue: null });
+    expect(control("width")).toEqual({ prop: "width", kind: "number", defaultValue: 96 });
+  });
+
+  it("steps by a declared third bound", () => {
+    expect(controlsOf(AT, ENTRY, { controls: ["count"], bounds: { count: [0, 6, 1] } })[0]).toMatchObject({ min: 0, max: 6, step: 1, decimals: 0 });
   });
 
   it("takes `disabled` from the table where the component has its own, on an element without one", () => {
@@ -117,5 +131,17 @@ describe("codeOf", () => {
 
   it("writes text that would not stand as written as an expression", () => {
     expect(code({ children: "a <b> {c}" })).toContain('<FixtureConfigurable>{"a <b> {c}"}</FixtureConfigurable>');
+  });
+});
+
+describe("readConfigurators", () => {
+  it("reads a configurator named after its page against the props of the component it names", () => {
+    const pages = [{ id: "typography" } as Page];
+    const [read] = readConfigurators(
+      { "./configurators/Typography.tsx": { name: "FixtureConfigurable", component: () => null, controls: ["variant"] } },
+      { FixtureConfigurableProps: ENTRY },
+      pages,
+    );
+    expect(read).toMatchObject({ pageId: "typography", name: "FixtureConfigurable", controls: [{ prop: "variant" }] });
   });
 });
