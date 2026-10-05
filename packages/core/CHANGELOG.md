@@ -29,6 +29,17 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## Unreleased
+
+### Added
+
+- **`--u-toast-inset-top` and `--u-toast-inset-bottom`**, the toasts' distance
+  from the window's top and bottom edge. The default is the distance they had:
+  `--u-space-5`, `--u-space-4` up to 600 px wide. Set on `:root`, the top one
+  moves the three `top-*` positions at every width - below a fixed header - and
+  the bottom one the three `bottom-*` positions. A rule on the region's
+  `data-edge` is no longer needed, and was never safe (ADR-0045).
+
 ## 0.26.0 – A row of fields on one line, and the segmented control (Oct. 2026)
 
 Controls side by side in a row of fields share one line: their words stand on

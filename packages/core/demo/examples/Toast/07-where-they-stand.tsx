@@ -3,7 +3,7 @@ import { Button, Stack, ToastProvider, UmrissProvider, useToast } from "../../..
 import type { ToastConfig, ToastPosition } from "../../../src";
 
 export const title = "Where they stand";
-export const lead = "`toast.position` in the `UmrissProvider` puts every toast of the application at one edge and one place along it; the deck grows away from that edge. On a phone they take the window's width, and only the edge counts.";
+export const lead = "`toast.position` in the `UmrissProvider` puts every toast of the application at one edge and one place along it; the deck grows away from that edge. On a phone they take the window's width, and only the edge counts. How far they stand from the edge is `--u-toast-inset-top` and `--u-toast-inset-bottom` on `:root` - below a fixed header, above a toolbar at the bottom.";
 
 const POSITIONS: { position: ToastPosition; label: string }[] = [
   { position: "top-start", label: "Top start" },

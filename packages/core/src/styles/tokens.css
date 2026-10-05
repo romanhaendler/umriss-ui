@@ -202,6 +202,15 @@
        application, and one drawer that needs another sets it in its `style`. */
     --u-drawer-width: 400px;
 
+    /* ---- Toast (toast-inset-tokens) ----
+
+       How far the toasts stand from the window's top and bottom edge - set it
+       to keep them clear of a fixed header or a toolbar at the bottom. The
+       region hangs in `body`, so set them on `:root`; a media query of your
+       own may set another value per width. */
+    --u-toast-inset-top: var(--u-space-5);    /* for the three `top-*` positions; `var(--u-space-4)` up to 600 px wide */
+    --u-toast-inset-bottom: var(--u-space-5); /* for the three `bottom-*` positions; `var(--u-space-4)` up to 600 px wide */
+
     /* ---- Shadow stacks: every step has one job ----
        Card: edge, contact with the ground, soft depth.
        Overlay: edge, near shadow, depth. */
@@ -326,6 +335,15 @@
     --u-z-popover: 900;
     --u-z-toast: 1000;
     --u-z-tooltip: 1100;
+  }
+
+  /* On a phone the toast takes the window's width and stands closer to its
+     edge. */
+  @media (max-width: 600px) {
+    :root {
+      --u-toast-inset-top: var(--u-space-4);
+      --u-toast-inset-bottom: var(--u-space-4);
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
