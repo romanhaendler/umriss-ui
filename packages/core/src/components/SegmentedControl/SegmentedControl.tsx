@@ -84,6 +84,7 @@ export const SegmentedControl = forwardRef(function SegmentedControl<T extends s
     name,
     onKeyDown,
     describedBy: rest["aria-describedby"],
+    label: rest["aria-label"],
   });
 
   return (

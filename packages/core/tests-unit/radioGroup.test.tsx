@@ -213,6 +213,15 @@ describe("RadioGroup – click and form field", () => {
     expect(screen.getByRole("radiogroup", { name: "Zustellung" })).toBeTruthy();
   });
 
+  it("keeps a caller's own aria-label over the field's label", () => {
+    render(
+      <FormField label="Zustellung">
+        <RadioGroup aria-label="If nobody is home" options={OPTIONS} value="standard" onChange={vi.fn()} />
+      </FormField>,
+    );
+    expect(screen.getByRole("radiogroup", { name: "If nobody is home" })).toBeTruthy();
+  });
+
   it("reports itself as invalid where the field shows an error", () => {
     render(
       <FormField label="Zustellung" error="Please choose.">

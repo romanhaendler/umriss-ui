@@ -37,6 +37,9 @@ export interface UseRadioGroupOptions<T extends string> {
   onKeyDown?: (event: ReactKeyboardEvent<HTMLDivElement>) => void;
   /** The caller's own `aria-describedby`, which wins over the field's. */
   describedBy?: string;
+  /** The caller's own `aria-label`: it names the group, and the field's
+      label then does not - `aria-labelledby` would outrank it. */
+  label?: string;
 }
 
 export function useRadioGroup<T extends string>({
@@ -48,6 +51,7 @@ export function useRadioGroup<T extends string>({
   name,
   onKeyDown,
   describedBy,
+  label,
 }: UseRadioGroupOptions<T>) {
   const field = useFormField();
   const generatedName = useId();
@@ -138,7 +142,7 @@ export function useRadioGroup<T extends string>({
       role: "radiogroup",
       /* Named by the field's label: its `htmlFor` alone names nothing here,
          since a group is not an element HTML can label. */
-      "aria-labelledby": field?.labelId,
+      "aria-labelledby": label === undefined ? field?.labelId : undefined,
       "aria-describedby": describedBy ?? field?.describedBy,
       "aria-required": field?.required || undefined,
       "aria-invalid": field?.invalid || undefined,
