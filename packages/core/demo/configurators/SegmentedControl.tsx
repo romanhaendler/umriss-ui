@@ -12,7 +12,7 @@ const options = [
 ];
 
 export const component = SegmentedControl;
-export const controls = ["size", "disabled"];
+export const controls = ["size", "fill", "disabled"];
 export const required = {
   "aria-label": "State of the data",
   options: {

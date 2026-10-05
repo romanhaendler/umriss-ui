@@ -46,6 +46,10 @@ export interface SegmentedControlProps<T extends string>
   /** `sm` for a toolbar and dense forms, `md` otherwise.
       @default the size of a `ControlSizeProvider` around it, else `"md"` */
   size?: "sm" | "md";
+  /** Takes the whole width its place gives it, as a field in a column does,
+      and shares it equally between the segments. Without it the control is
+      as wide as its words. */
+  fill?: boolean;
   /** Disables the whole control. `SegmentedOption` disables single
       possibilities. */
   disabled?: boolean;
@@ -65,6 +69,7 @@ export const SegmentedControl = forwardRef(function SegmentedControl<T extends s
     defaultValue,
     onChange,
     size: ownSize,
+    fill = false,
     disabled = false,
     name,
     className,
@@ -94,6 +99,7 @@ export const SegmentedControl = forwardRef(function SegmentedControl<T extends s
       className={cx(
         styles.control,
         size === "sm" && styles.sm,
+        fill && styles.fill,
         disabled && styles.disabled,
         field?.invalid && styles.invalid,
         className,

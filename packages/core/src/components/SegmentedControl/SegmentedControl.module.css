@@ -8,7 +8,8 @@
 @layer umriss.components {
   /* Its width is the sum of its words, never the chosen one's, and never
      wider than its place. Unlike a field it does not fill a place that gives
-     it a width: stretched, its segments would stand in an empty box. */
+     it a width unless asked to (`fill`): stretched, segments as wide as their
+     words would stand in an empty box. */
   .control {
     composes: text from "#own-styles";
     --_radius: var(--u-radius-md);
@@ -21,6 +22,19 @@
     background: var(--u-color-surface);
     outline: 1px solid transparent;
     box-shadow: var(--u-edge-strong);
+  }
+
+  /* Filling: a block that takes its place's width, as a field in a column
+     does (ADR-0041), its segments equal shares of it - basis zero, so that no
+     word decides its segment's width - and its words centred. */
+  .fill {
+    display: flex;
+    inline-size: auto;
+  }
+
+  .fill .segment {
+    flex: 1 1 0;
+    justify-content: center;
   }
 
   /* An invalid field's edge, as the select's. */
