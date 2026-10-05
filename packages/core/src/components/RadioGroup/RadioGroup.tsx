@@ -85,6 +85,7 @@ export const RadioGroup = forwardRef(function RadioGroup<T extends string>(
     name,
     onKeyDown,
     describedBy: rest["aria-describedby"],
+    label: rest["aria-label"],
   });
 
   return (
