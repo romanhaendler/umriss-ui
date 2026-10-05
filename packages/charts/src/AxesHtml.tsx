@@ -152,7 +152,7 @@ export function AxesHtml({ scene, empty }: { scene: ChartScene; empty: ReactNode
   const { plot } = layout;
   return (
     <div className="uc-axes">
-      {snapshot.empty && (
+      {snapshot.empty && !snapshot.loading && (
         <div
           className="uc-empty"
           style={{ left: `${plot.x}px`, top: `${plot.y}px`, width: `${plot.width}px`, height: `${plot.height}px` }}

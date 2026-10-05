@@ -247,6 +247,9 @@ export interface LayoutSnapshot {
   limits: readonly LimitLabel[];
   /** No visible series has a point to show. */
   empty: boolean;
+  /** The rows are on their way, as of this layout: it ends with the frame
+      that lays out the answer, not before (chart-loading). */
+  loading: boolean;
   /** The registered data table - the id its panel carries, and whether it is
       open -, or null without one. The legend shows its key. */
   dataTable: { id: string; open: boolean } | null;
@@ -307,6 +310,7 @@ const EMPTY_LAYOUT_SNAPSHOT: LayoutSnapshot = {
   limits: [],
   // Unknown before the first frame: saying "No data" there would flash.
   empty: false,
+  loading: false,
   dataTable: null,
 };
 
@@ -2933,6 +2937,7 @@ export class ChartScene {
      caller gives every chart the same controlled domain. */
 
   private syncId: string | null = null;
+  private loading = false;
   /** Where another chart's pointer stands; null while none does. */
   private synced: SyncedX | null = null;
   private sent: SyncedX | null = null;
@@ -2956,7 +2961,28 @@ export class ChartScene {
     }
   }
 
+  /** The rows are on their way (chart-loading): the pointer's hover ends, as
+      the stale plot takes no pointer, and no position is shared either way. A
+      key's point stays - the keys still walk. */
+  setLoading(loading: boolean): void {
+    if (loading === this.loading) return;
+    this.loading = loading;
+    if (loading) {
+      this.pointerLeave();
+      this.share(null);
+      // A drag under way would pan on: a captured pointer passes the stale
+      // plot's pointer-events.
+      this.pointers.clear();
+      this.pinch = 0;
+    }
+    // Laid out anew: the layout snapshot carries it, so that the empty message
+    // waits for the frame that lays out the answer.
+    this.markLayoutDirty();
+  }
+
+  /** A loading chart shares no position either - its key's point included. */
   private share(x: SyncedX | null): void {
+    if (this.loading) x = null;
     if (this.syncId === null || (x?.value === this.sent?.value && x?.axisId === this.sent?.axisId)) return;
     this.sent = x;
     for (const other of syncGroups.get(this.syncId) ?? []) {
@@ -2966,10 +2992,11 @@ export class ChartScene {
     }
   }
 
-  /** The crosshair a synced position asks for, in this chart's pixels. */
+  /** The crosshair a synced position asks for, in this chart's pixels. None
+      while loading: it would point at values being replaced. */
   private syncedPx(): number | null {
     const x = this.synced;
-    if (x === null) return null;
+    if (x === null || this.loading) return null;
     const axis = this.findAxis("x", x.axisId) ?? this.layout.axes.find((a) => a.orientation === "x") ?? null;
     return axis === null ? null : axis.scale.toPx(x.value);
   }
@@ -3518,6 +3545,7 @@ export class ChartScene {
       series: this.legendItems(),
       limits: this.limitLabels(),
       empty: !this.showsAPoint(),
+      loading: this.loading,
       dataTable: this.dataTable,
     };
     for (const notify of this.layoutSubscribers) notify();

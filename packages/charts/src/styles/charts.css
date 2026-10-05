@@ -69,6 +69,9 @@
     /* The tooltip's fade: its own short duration - it follows the pointer and
        must not lag behind it - on core's curve where core is loaded. */
     --uc-transition: 80ms var(--u-ease-out, cubic-bezier(0.22, 1, 0.36, 1));
+    /* A course being reloaded dims as the table's rows do (ADR-0042): only
+       after this delay, so that a quick answer never flickers. */
+    --uc-delay-stale: var(--u-delay-stale, 200ms);
 
     position: relative;
     display: flex;
@@ -114,6 +117,21 @@
     inset: 0;
     display: block;
     pointer-events: none; /* .uc-plot catches the mouse events (R-2.8) */
+  }
+
+  /* Loading over a course keeps it (chart-loading): it dims and takes no
+     pointer until the answer is in, as the table's stale rows do. A limit's
+     label dims with its line; the axes stay as they are, as the table's
+     header does. Leaving, the transition is
+     the plain one: the course comes back at once. */
+  .uc-plot[data-stale] {
+    pointer-events: none;
+  }
+
+  .uc-plot[data-stale] .uc-limit-label,
+  .uc-plot[data-stale] > .uc-layer-series {
+    opacity: 0.5;
+    transition: opacity var(--uc-transition-state) var(--uc-delay-stale);
   }
 
   /* ---------------- Axes (HTML, no canvas text) ---------------- */
@@ -566,6 +584,13 @@
     button.uc-legend-item,
     .uc-show-all {
       transition: none;
+    }
+
+    /* The stale dim keeps its delay - a quick answer still never flickers -
+       and drops only the fade. */
+    .uc-plot[data-stale] .uc-limit-label,
+    .uc-plot[data-stale] > .uc-layer-series {
+      transition-duration: 0s;
     }
   }
 

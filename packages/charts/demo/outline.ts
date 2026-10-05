@@ -75,7 +75,7 @@ export const OUTLINE: readonly Rubric[] = [
           "Under forced colours the chart draws in the system colours and tells its series apart by their marks instead of by colour. With reduced motion the tooltip appears without fading in.",
         ],
         limits: [
-          "No loading or error state of its own: show a `Skeleton` or an `Alert` from @umriss-ui/core until the rows are there.",
+          "No error state of its own: where the rows could not be loaded, show an `Alert` from @umriss-ui/core. Waiting for them is `loading`.",
           "No pie, donut, radar or candlestick, no smoothing, animation or export, no WebGL (ADR-0032).",
         ],
         types: ["ChartProps"],
