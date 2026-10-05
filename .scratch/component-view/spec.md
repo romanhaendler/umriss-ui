@@ -1,6 +1,6 @@
 # Every component holds its own view
 
-Status: done for tickets 01–08 (2026-10-04) but the release itself: the version bumps and the "Release:" commit follow the user's acceptance.
+Status: done (released 2026-10-05: charts 0.11.0, table 0.13.0, schedule 0.5.0)
 Date:   2026-10-04
 Origin: charts research "zoom and the legend" and its grilling, 2026-10-04; ADR-0047.
 Blocked by: per ticket - the chart's view waits for `.scratch/charts-bound-to-rows/` 07, the schedule's for 08.

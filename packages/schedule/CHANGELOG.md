@@ -15,9 +15,8 @@ moves from here under the rule above.
 
 ---
 
-## Unreleased
+## 0.5.0 – Declared through useSchedule, with a view of its own (Oct. 2026)
 
-**Declared through useSchedule, with a view of its own.**
 Released together with `@umriss-ui/charts` and `@umriss-ui/table`, which
 break in the same release. A schedule is declared through `useSchedule`, as a
 table is through `useTable` and a chart through `useChart` (ADR-0048), and it

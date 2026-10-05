@@ -22,9 +22,8 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
-## Unreleased
+## 0.13.0 – The table holds its view, and server mode (Oct. 2026)
 
-**The table holds its view, and server mode.**
 Released together with `@umriss-ui/charts` and `@umriss-ui/schedule`, which
 break in the same release (ADR-0047). A view handed in applies whenever its
 content changes, every change of it is reported in every mode, and manual mode
