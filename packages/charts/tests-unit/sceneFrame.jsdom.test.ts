@@ -129,7 +129,7 @@ describe("ChartScene across frames", () => {
     // The cell at (1, 1) carries the value 3, the top of the range: the last stop.
     scene.pointerMove(x?.scale.toPx(1) ?? 0, y?.scale.toPx(1) ?? 0);
     const point = scene.getHoverSnapshot().hover?.hit.points[0];
-    expect(point?.value).toBe(3);
+    expect(point?.level).toBe(3);
     expect(point?.color).toBe("#000004");
     scene.unbind();
   });

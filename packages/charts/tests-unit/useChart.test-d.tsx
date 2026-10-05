@@ -5,7 +5,7 @@
    under `@ts-expect-error` MUST yield an error - if one stops doing so, the
    typecheck fails. The typing is the product, as the table's is (ADR-0017). */
 
-import { ControlChart, useChart } from "../src";
+import { ControlChart, useChart, type TooltipPoint } from "../src";
 // @ts-expect-error no free Chart: it comes from the hook (ADR-0048)
 import { Chart as FreeChart } from "../src";
 // @ts-expect-error no free series
@@ -99,3 +99,11 @@ export function NoData() {
 }
 
 export const unused = [FreeChart, FreeLine, FreeXAxis, FreeYAxis];
+
+/* A matrix cell's colour reaches a custom tooltip as `level`, its channel's
+   name everywhere (charts-bound-to-rows Q27). */
+export function CellLevel(point: TooltipPoint<Latency>) {
+  const level: number | undefined = point.level;
+  // @ts-expect-error `value` names the y position, never the colour
+  return [level, point.value];
+}

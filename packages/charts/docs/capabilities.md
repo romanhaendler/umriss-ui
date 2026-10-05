@@ -240,7 +240,7 @@ Screenshot pages carry their name in brackets.
 | A hit: the cell under the pointer, in both dimensions; a gap never hits | R-4.6 | Unit (cells) |
 | A single row stays a point value range | R-4.13 | Unit (limits and bands in the scene) |
 | Colouring as a gradient or from a limit set | ADR-0006 | Screenshot (`matrix`) |
-| The tooltip carries the level, not the row number | R-4.8 | Interaction |
+| The tooltip carries the level, not the row number; a render prop reads it as `level`, the row as `yValue` | R-4.8 | Interaction, Unit (jsdom tooltip format) |
 | The legend chip shows the gradient's or the limit set's colours, the tooltip chip the cell's; no place in the palette | R-4.11 | Unit (limits and bands in the scene; jsdom scene) |
 
 ## `LimitLine` / `LimitBand`

@@ -355,7 +355,7 @@ test("state band: every lane answers for itself", async ({ page }) => {
   expect(order).toEqual(VEHICLES);
 });
 
-test("matrix: the tooltip carries the value, not the row number", async ({ page }) => {
+test("matrix: the tooltip carries the level, not the row number", async ({ page }) => {
   await openExample(page, "matrix", "by-limits");
   // Colour alone can transport no number. The cell has to give up its value as
   // text, otherwise the matrix is empty for part of its readers.

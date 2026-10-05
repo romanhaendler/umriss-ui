@@ -408,18 +408,18 @@ export interface TooltipPoint<T = unknown> {
   yValue: number;
   datum: T;
   index: number;
-  /** Only for the matrix: its `level`, out of the level channel. It stands here and
+  /** Only for the matrix: its level, out of the level channel. It stands here and
       not in yValue, because yValue is the position on the y axis - for a matrix
       therefore the row. Putting both into one field would be exactly the
       overloading ADR-0011 is written against. */
-  value?: number;
+  level?: number;
   /** Only for state series: the section being pointed at.
       A duration does not stand here - it is the difference of two numbers the
       entry already carries, and formatting it would presuppose knowing what the
       x axis means. The caller knows that, not this library. */
   segment?: { from: number; to: number; label: string };
   /** Only for a box: its further numbers; yValue is its median. Fields of
-      their own for the reason `value` has one (ADR-0011). */
+      their own for the reason `level` has one (ADR-0011). */
   box?: BoxNumbers &
     Partial<BoxExtras> & {
       /** As the caller gave them; only where the series has `outliers`. */
