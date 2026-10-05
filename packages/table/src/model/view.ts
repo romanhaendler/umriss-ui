@@ -52,13 +52,19 @@ export const requestKey = (request: TableRequest): string =>
 /** What a view handed in is compared by (ADR-0047): its content, not its
     identity - a view written in the call is a new object on every render.
     Object keys are sorted, so the order they were written in does not count;
-    lists keep theirs, since a sort's or an order's is its content. */
+    the hidden columns, the folded groups and the open branches are sets and
+    are sorted too; the other lists keep their order, since a sort's, an
+    order's or a grouping's is its content. */
 export const viewKey = (view: TableView): string =>
-  JSON.stringify(view, (_, value: unknown) =>
-    value && typeof value === "object" && !Array.isArray(value)
-      ? Object.fromEntries(Object.entries(value).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)))
-      : value,
+  JSON.stringify(
+    { ...view, hidden: sorted(view.hidden), folded: sorted(view.folded), branches: sorted(view.branches) },
+    (_, value: unknown) =>
+      value && typeof value === "object" && !Array.isArray(value)
+        ? Object.fromEntries(Object.entries(value).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)))
+        : value,
   );
+
+const sorted = (set: readonly string[] | undefined) => (set === undefined ? undefined : [...set].sort());
 
 /** The view without names that no registered column carries. As long as none
     has registered it stays as it is - otherwise the first render would erase
