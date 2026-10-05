@@ -62,6 +62,13 @@ describe("SegmentedControl – icons (segmented-control-inset 02)", () => {
     expect(screen.getByTestId("sun").closest("[aria-hidden='true']")).not.toBeNull();
     expect(screen.queryByRole("radio", { name: /Sun/ })).toBeNull();
   });
+
+  it("draws no icon box for an icon that is not there", () => {
+    const { container } = render(
+      <SegmentedControl aria-label="Theme" options={[{ value: "light", label: "Light", icon: false }]} value="light" onChange={vi.fn()} />,
+    );
+    expect(container.querySelector("[aria-hidden='true']")).toBeNull();
+  });
 });
 
 describe("SegmentedControl – the keys", () => {

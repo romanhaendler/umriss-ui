@@ -43,7 +43,9 @@
     margin-inline: auto;
   }
 
-  /* On a phone the toast takes the window's width; only the edge counts. */
+  /* On a phone the toast takes the window's width; only the edge counts. The
+     distance from the edge changes at the same 600 px in the toast tokens
+     (tokens.css): a new breakpoint here is a new one there. */
   @media (max-width: 600px) {
     .region.region {
       width: auto;

@@ -60,6 +60,16 @@ test("An inset segmented control keeps its track and its choice under forced col
   });
   const chosen = control.getByRole("radio", { name: "System" }).locator("..");
   expect(await chosen.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(selected);
+  expect(await chosen.evaluate((el) => getComputedStyle(el).boxShadow)).toBe("none");
+  // The keys land on the choice: its ring is the outline, in the system's colour.
+  await control.getByRole("radio", { name: "System" }).focus();
+  const ring = await chosen.evaluate((el) => {
+    const style = getComputedStyle(el);
+    return { outline: `${style.outlineStyle} ${style.outlineWidth}`, colour: style.outlineColor };
+  });
+  expect(ring.outline).toBe("solid 2px");
+  expect(ring.colour).not.toBe("rgba(0, 0, 0, 0)");
+  await control.getByRole("radio", { name: "System" }).blur();
   await target.scrollIntoViewIfNeeded();
   await expect(target).toHaveScreenshot(`forced-segmented-inset-${testInfo.project.name}.png`);
 });

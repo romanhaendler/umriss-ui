@@ -59,3 +59,16 @@ reads as a selection; whether it reads as *lifted* is the owner's call.
 The page head's new paragraph moved every example on the page by a fraction
 of a pixel; the segmented control's baselines were redrawn for it. Without
 that paragraph every existing baseline held unchanged (checked).
+
+**Review (code-review, high).** Fixed: under forced colours the invalid inset
+ring kept a transparent outline on the chosen segment, and the chosen inset
+segment kept the card shadow beside the selection colour - both now as the
+field's, and the forced-colours test focuses the chosen segment, where the
+keys land; an `icon` of `false` or `null` drew an empty box with a gap; the
+toast's 600 px stands in two files, and the module now says so. Left: the
+dark pill (owner's call, above); the toast tokens resolve `--u-space-*` on
+`:root` (the Theming page's limit on a token that names another); the card
+shadow's reach below a 3 px padding (the requested look); icon sizing shared
+with the button through `#own-styles` (six lines, two places - shared when a
+third control takes icons); the redrawn field baselines (checked: unchanged
+without the page head's paragraph).
