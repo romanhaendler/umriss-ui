@@ -55,7 +55,7 @@ import { lastSegmentEnd, medianStep, segmentEnd, segmentIndex } from "./state";
 import { cellSize, cellIndex, measureSpacing } from "./cells";
 import { assess } from "./limit";
 import { formatValue } from "./format";
-import { defaultLimits, hidesAll, onlyKnown, onlyVisible, showOnly, toggleHidden, viewKey, zoomSpan, type ChartView, type ZoomLimits } from "./view";
+import { defaultLimits, hidesAll, onlyKnown, onlyVisible, sameSpan, showOnly, toggleHidden, viewKey, zoomSpan, type ChartView, type ZoomLimits } from "./view";
 import { MINUTE, inRemovedTime, toWorkingTimeClamped } from "./workingTime";
 import {
   axisExtent,
@@ -1681,9 +1681,6 @@ export class ChartScene {
 
   private updateLayout(): void {
     const measurer = this.measurer;
-    // A gesture's span goes out with the frame that draws it, and an axis
-    // declared or gone may take a span out of the view or give it back.
-    this.publishView();
     // A zooming chart keeps the horizontal drag and the pinch; the page keeps
     // the vertical scroll.
     if (this.container !== null) this.container.style.touchAction = this.hasZoom() ? "pan-y" : "";
@@ -1700,6 +1697,7 @@ export class ChartScene {
         grid: grid.get(id) ?? false,
         extent: this.extentFor(c),
         domainMode: this.domainOf(c),
+        ...(this.zooms(c) && { ownDomainMode: c.domain }),
         tickCount: c.tickCount,
         tickFormat: c.orientation === "y" ? this.yTickFormat(c.id) : c.tickFormat,
         tickValues: c.ticks,
@@ -1724,6 +1722,18 @@ export class ChartScene {
         measurer === null ? { width: 0, height: 0 } : measurer.measure(text, className),
       hysteresis: this.hysteresis,
     });
+    // A span that is the axis' own domain is its default, no part of the view.
+    for (const axis of this.layout.axes) {
+      const span = this.domainsInView[axis.id];
+      if (axis.ownDomain !== undefined && span !== undefined && sameSpan(span, axis.ownDomain)) {
+        const rest = { ...this.domainsInView };
+        delete rest[axis.id];
+        this.domainsInView = rest;
+      }
+    }
+    // A gesture's span goes out with the frame that draws it, and an axis
+    // declared or gone may take a span out of the view or give it back.
+    this.publishView();
   }
 
   private findAxis(orientation: "x" | "y", id: string): AxisLayout | null {
@@ -2981,6 +2991,13 @@ export class ChartScene {
       changed. */
   private viewNow: ChartView;
   private readonly viewListeners = new Set<() => void>();
+  /** Whether the reader, a setter or a view handed in has changed the view
+      yet. Until then a change is the start losing what does not occur here -
+      where the chart starts, not a change to report. */
+  private actedOn = false;
+  get acted(): boolean {
+    return this.actedOn;
+  }
 
   constructor(initial: ChartView = {}) {
     this.domainsInView = { ...initial.domains };
@@ -3066,6 +3083,7 @@ export class ChartScene {
   }
 
   private viewMoved(): void {
+    this.actedOn = true;
     this.publishView();
     this.markLayoutDirty();
   }
@@ -3112,7 +3130,10 @@ export class ChartScene {
   /** The narrowest and widest span zoom reaches on an axis: its own, or at
       most the data's extent and at least three data steps. */
   private limitsOf(config: AxisConfig): ZoomLimits {
-    return config.zoomLimits ?? defaultLimits(this.axisExtent("x", config.id), this.dataStep(config.id));
+    return (
+      config.zoomLimits ??
+      defaultLimits(this.axisExtent("x", config.id), this.dataStep(config.id), this.findAxis("x", config.id)?.ownDomain)
+    );
   }
 
   /** The smallest distance between two neighbouring points of the series on
@@ -3171,7 +3192,10 @@ export class ChartScene {
       this.domainsInView = { ...this.domainsInView, [config.id]: domain };
       moved = true;
     }
-    if (moved) this.markLayoutDirty();
+    if (moved) {
+      this.actedOn = true;
+      this.markLayoutDirty();
+    }
   }
 
   /** Zoom by `factor` (below 1 is closer) around a pixel, which keeps its

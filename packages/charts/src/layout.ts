@@ -55,6 +55,8 @@ export interface AxisInput {
   extent: readonly [number, number];
   /** "visible" arrives as its extent and is then widened as "nice" is. */
   domainMode: "nice" | "data" | "visible" | readonly [number, number];
+  /** A zoomed x axis: its own domain, where the view puts a span in its place. */
+  ownDomainMode?: "nice" | "data" | "visible" | readonly [number, number];
   tickCount?: number;
   tickFormat?: (v: number) => string;
   /** Fixed tick values instead of the 1-2-5 algorithm. */
@@ -96,6 +98,8 @@ export interface AxisLayout {
   /** Distance of the band from the plot: 0 = directly at the plot. */
   stack: number;
   domain: readonly [number, number];
+  /** What a zoomed x axis would show unzoomed: its own domain at this width. */
+  ownDomain?: readonly [number, number];
   scale: LinearScale;
   ticks: readonly TickLayout[];
   /** Formatter of this axis; the tooltip labels the x value with it too.
@@ -533,6 +537,8 @@ function layoutPass(
       // The domain comes from the count asked for; fewer labels below do not
       // widen it to a coarser step.
       const domain = domainOf(axis, count);
+      const own = axis.ownDomainMode;
+      const ownDomain = own === undefined ? undefined : domainOf({ ...axis, domainMode: own }, count);
       const scale = new LinearScale(domain, [plotLeft, plotLeft + plotWidth]);
       // Every `keep`-th tick at `tickCount`, measured and placed; `wrap`
       // breaks each label onto two lines.
@@ -609,6 +615,7 @@ function layoutPass(
         size,
         stack,
         domain,
+        ...(ownDomain !== undefined && { ownDomain }),
         scale,
         ticks,
         format,

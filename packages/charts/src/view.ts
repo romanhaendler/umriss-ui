@@ -132,8 +132,24 @@ export function zoomSpan(
   return [from, from + next];
 }
 
-/** The limits of an axis that names none: at most the data's extent, at least
-    three data steps - the smallest distance between two neighbouring points. */
-export function defaultLimits(extent: readonly [number, number], step: number): ZoomLimits {
-  return { min: 3 * step, max: extent[1] - extent[0] };
+/** The limits of an axis that names none: at most the data's extent - or the
+    axis' own domain, where that is wider, as a "nice" one is: zooming out
+    never narrows what the axis shows unzoomed -, at least three data steps,
+    the smallest distance between two neighbouring points. Where no step can
+    be measured - a lone point - there is nothing to zoom into. */
+export function defaultLimits(
+  extent: readonly [number, number],
+  step: number,
+  own: readonly [number, number] = extent,
+): ZoomLimits {
+  const max = Math.max(extent[1] - extent[0], own[1] - own[0]);
+  return { min: step > 0 ? 3 * step : max, max };
+}
+
+/** Whether a span is the axis' own domain - then it is the default and no
+    part of the view. Up to rounding: a zoom out to the widest span lands on
+    it by arithmetic, not exactly. */
+export function sameSpan(span: readonly [number, number], own: readonly [number, number]): boolean {
+  const near = 1e-9 * Math.max(Math.abs(own[1] - own[0]), Number.MIN_VALUE);
+  return Math.abs(span[0] - own[0]) <= near && Math.abs(span[1] - own[1]) <= near;
 }

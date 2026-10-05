@@ -141,6 +141,41 @@ describe("Show all", () => {
     outside.remove();
   });
 
+  it("goes for a span equal to the axis' own domain, which is no part of the view", async () => {
+    const views: ChartView[] = [];
+    const { host, parts } = await chart({ onViewChange: (v) => views.push(v) });
+    await setDomain(parts(), "x", [20, 60]);
+    await setDomain(parts(), "x", [0, 100]);
+    expect(parts().domains).toEqual({});
+    expect(views.at(-1)).toEqual({});
+    expect(showAllOf(host)).toBeNull();
+  });
+
+  it("is not there after a zoom out from the axis' own domain, where a nice one is wider than the data", async () => {
+    const onViewChange = vi.fn();
+    let parts: ChartParts<Row> | null = null;
+    function Nice({ seen }: { seen: (p: ChartParts<Row>) => void }) {
+      const p = useChart(data.map((r) => ({ ...r, t: 3 + r.t * 0.9 })), { onViewChange });
+      seen(p);
+      const { Chart, XAxis, YAxis, Line } = p;
+      return (
+        <Chart ariaLabel="Nice">
+          <XAxis value="t" zoomable />
+          <YAxis />
+          <Line value="a" name="A" />
+          <Tooltip />
+        </Chart>
+      );
+    }
+    const r = await renderChart(<Nice seen={(p) => (parts = p)} />);
+    unmount = r.unmount;
+    await focusPlot(r.host);
+    await press(r.host, "-");
+    expect(parts!.domains).toEqual({});
+    expect(onViewChange).not.toHaveBeenCalled();
+    expect(showAllOf(r.host)).toBeNull();
+  });
+
   it("is never there on a chart without a zoomable axis", async () => {
     const { host, parts } = await chart({ zoomable: false, initialView: { domains: { x: [20, 60] } } });
     expect(showAllOf(host)).toBeNull();

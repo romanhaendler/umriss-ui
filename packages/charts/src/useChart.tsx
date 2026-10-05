@@ -119,12 +119,14 @@ export function useChart<Z>(rows: readonly Z[], options: ChartOptions = {}): Cha
   }, [handedKey]);
 
   /* Every change of the view, once and whole, after the commit. The view the
-     chart starts with is where it starts, not a change. */
+     chart starts with is where it starts, not a change - also once the parts
+     declared took out what does not occur here. */
   const key = viewKey(view);
   const reported = useRef(key);
   useEffect(() => {
     if (reported.current === key) return;
     reported.current = key;
+    if (!scene.acted) return;
     echoes.reported(key);
     onViewChange?.(view);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once per change of the view, with that render's view and handler

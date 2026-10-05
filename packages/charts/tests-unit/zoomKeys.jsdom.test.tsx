@@ -77,9 +77,12 @@ describe("Zoom by key", () => {
     const [from, to] = lastSpan(views) ?? [0, 0];
     expect(to).toBeCloseTo(100);
     expect(to - from).toBeCloseTo(80);
+    // Back at the axis' own domain, the span leaves the view.
+    await press(host, "-");
+    expect(views.at(-1)).toEqual({});
     await press(host, "-");
     const [from2, to2] = lastSpan(views) ?? [0, 0];
-    expect(to2 - from2).toBeGreaterThan(to - from);
+    expect(to2 - from2).toBeCloseTo(125);
   });
 
   it("pans by a tenth with Shift and the arrows", async () => {
@@ -140,9 +143,9 @@ describe("Zoom limits", () => {
     for (let i = 0; i < 12; i++) await press(host, "+");
     const [from, to] = lastSpan(views) ?? [0, 0];
     expect(to - from).toBeCloseTo(30);
+    // The data's extent is the axis' own domain here: the default, no span.
     for (let i = 0; i < 12; i++) await press(host, "-");
-    const [from2, to2] = lastSpan(views) ?? [0, 0];
-    expect(to2 - from2).toBeCloseTo(100);
+    expect(views.at(-1)).toEqual({});
   });
 });
 
@@ -173,6 +176,20 @@ describe("The view on the hook", () => {
     let parts: (ChartParts<Row> & { view: ChartView }) | null = null;
     await chart({ initialView: { domains: { x: [40, 60], gone: [1, 2] } }, seen: (p) => (parts = p) });
     expect(parts!.view).toEqual({ domains: { x: [40, 60] } });
+  });
+
+  it("takes the start without what falls out of it as where it starts, and reports nothing until the reader acts", async () => {
+    const views: ChartView[] = [];
+    const host = await chart({
+      initialView: { domains: { x: [40, 60], gone: [1, 2] }, hidden: ["nobody"] },
+      onViewChange: (v) => views.push(v),
+    });
+    expect(views).toEqual([]);
+    await press(host, "ArrowLeft", true);
+    expect(views).toHaveLength(1);
+    expect(views[0]?.domains?.x?.[0]).toBeCloseTo(38);
+    expect(Object.keys(views[0]?.domains ?? {})).toEqual(["x"]);
+    expect(views[0]?.hidden).toBeUndefined();
   });
 });
 
