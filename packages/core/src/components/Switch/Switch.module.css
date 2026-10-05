@@ -34,6 +34,22 @@
     margin-top: calc((var(--_label) * var(--u-leading-tight) - var(--_track-height)) / 2);
   }
 
+  /* In a field the switch stands in a row of fields, as the checkbox does:
+     as tall as a control, its first line on the line a field's value stands
+     on (field-row-alignment 02). */
+  .field {
+    --_line: var(--_track-height);
+    padding-block: calc((var(--u-control-height) - var(--_line)) / 2);
+  }
+
+  .field:has(.label) {
+    --_line: calc(var(--_label) * var(--u-leading-tight));
+  }
+
+  .field.sm {
+    padding-block: calc((var(--u-control-height-sm) - var(--_line)) / 2);
+  }
+
   .input {
     position: absolute;
     opacity: 0;
