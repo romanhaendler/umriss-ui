@@ -444,3 +444,15 @@ test("Select opens its own list under the mouse and the keys, and holds its widt
   await expect(list).toBeHidden();
   await expect(field).toBeFocused();
 });
+
+/* A panel refreshing in place: the button carries the spinner, and the card
+   does not move - the spinner once took the button's place and the card shrank
+   by the difference. */
+test("Spinner in a card's head leaves the card's height alone", async ({ page }) => {
+  await openExample(page, "spinner", "a-panel-refreshing");
+  const card = page.getByRole("region", { name: "Refresh a panel in place" }).locator("section");
+  const height = (await card.boundingBox())!.height;
+  await card.getByRole("button", { name: "Refresh" }).click();
+  await expect(card.getByRole("button", { name: "Refresh" })).toHaveAttribute("aria-busy", "true");
+  expect((await card.boundingBox())!.height).toBe(height);
+});
