@@ -6,7 +6,7 @@
    encoded as NaN (R-2.5). */
 
 import { lowerBound } from "./hit";
-import type { Accessor, BoxChannels, ListAccessor, BoxExtras, BoxNumbers, MaterializedSeries } from "./types";
+import type { ValueFunction, BoxChannels, ListFunction, BoxExtras, BoxNumbers, MaterializedSeries } from "./types";
 
 /** An accessor's value, or NaN for a gap. An infinity is a gap as well: it is no
     value a chart can place, and in the extent it would leave no finite range -
@@ -30,19 +30,19 @@ export interface Material {
 /** Baseline of a series: a second accessor or a fixed value.
     It enters the extent of its y axis, so that an axis does not cut off the foot
     of a filled mark (CONTEXT.md: Baseline). */
-export type Baseline<T> = Accessor<T> | number;
+export type Baseline<T> = ValueFunction<T> | number;
 
 /** Channels that only individual series kinds need, and the pre-mapping of the
     x axis. Named rather than overloading existing channels (ADR-0011);
     optional, so that every existing call stays correct unchanged. */
 export interface ExtraChannels<T> {
   /** Level channel of the matrix (`level`): the third value per point. */
-  value?: Accessor<T>;
+  value?: ValueFunction<T>;
   /** A box's further numbers (ADR-0011): one channel each. */
-  box?: BoxNumbers<Accessor<T>> &
-    Partial<BoxExtras<Accessor<T>>> & {
+  box?: BoxNumbers<ValueFunction<T>> &
+    Partial<BoxExtras<ValueFunction<T>>> & {
     /** Its outliers, a list per point (ADR-0040). */
-    outliers?: ListAccessor<T>;
+    outliers?: ListFunction<T>;
   };
   /** Pre-mapping of the x values, before anything calculates. The working
       calendar comes in here: the scale stays affine, because the channel already
@@ -65,7 +65,7 @@ export interface ExtraChannels<T> {
 export function materializeSeries<T>(
   data: readonly T[],
   xAccessor: (d: T, index: number) => number,
-  yAccessor: Accessor<T>,
+  yAccessor: ValueFunction<T>,
   baseline?: Baseline<T>,
   extra?: ExtraChannels<T>,
 ): Material {

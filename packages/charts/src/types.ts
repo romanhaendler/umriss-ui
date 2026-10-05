@@ -5,15 +5,17 @@ import type { Assessment, Limit, LimitSet, Side, Severity, Verdict } from "./lim
 import type { WorkingInterval } from "./workingTime";
 import type { ZoomLimits } from "./view";
 
-/** Value access of a series. Compared by its source text, not its identity - an
-    inline accessor is new on every render. Known limit: one that reads a
+/** A **value** computed from the row - the function form of `Value`.
+    Compared by its source text, not its identity - an inline function is new
+    on every render. Known limit: one that reads a
     changed closure variable under the same text is not run again; pass a new
     data reference then. A native or bound function is compared by identity. */
-export type Accessor<T> = (d: T, index: number) => number | null | undefined;
+export type ValueFunction<T> = (d: T, index: number) => number | null | undefined;
 
-/** A list per datum - a box's outliers (ADR-0040). null/undefined or an
+/** A list computed from the row - a box's outliers (ADR-0040), the
+    function form of `ListValue`. null/undefined or an
     empty array is none; a value that is not finite is left out. */
-export type ListAccessor<T> = (d: T, index: number) => readonly number[] | null | undefined;
+export type ListFunction<T> = (d: T, index: number) => readonly number[] | null | undefined;
 
 /* Both field types are NoInfer: the row type comes from the rows or a
    series' own `data`, never from the name - else a misspelt name would make
@@ -34,11 +36,11 @@ export type ListField<T> = NoInfer<
 >;
 
 /** A value read from the row (ADR-0048): the name of a number field, compared
-    by its name, or a function, compared by its source text (`Accessor`). */
-export type Value<T> = NumberField<T> | Accessor<T>;
+    by its name, or a function, compared by its source text (`ValueFunction`). */
+export type Value<T> = NumberField<T> | ValueFunction<T>;
 
 /** A list read from the row: the name of a list field or a function. */
-export type ListValue<T> = ListField<T> | ListAccessor<T>;
+export type ListValue<T> = ListField<T> | ListFunction<T>;
 
 /* ---------------- Series ----------------
 
@@ -56,7 +58,7 @@ export type ListValue<T> = ListField<T> | ListAccessor<T>;
 export interface SeriesBase<T = unknown> {
   /** Y value; null/undefined/NaN/±Infinity means a gap.
       @remarks R-2.5 */
-  accessor: Accessor<T>;
+  accessor: ValueFunction<T>;
   /** Series-own data; overrides the container data.
       @remarks R-2.4 */
   data?: readonly T[];
@@ -103,7 +105,7 @@ export interface Stackable {
 export interface AreaSeriesConfig<T = unknown> extends SeriesBase<T>, Stackable {
   kind: "area";
   /** Lower edge; without a value the fixed baseline 0. */
-  baseline?: Accessor<T>;
+  baseline?: ValueFunction<T>;
   /** Opacity of the fill; the outline stays fully opaque. */
   fillOpacity: number;
   strokeWidth: number;
@@ -123,18 +125,18 @@ export interface BarSeriesConfig<T = unknown> extends SeriesBase<T>, Stackable {
     chose - the library draws them and computes none. */
 export interface BoxSeriesConfig<T = unknown> extends SeriesBase<T> {
   kind: "box";
-  lowerQuartile: Accessor<T>;
-  upperQuartile: Accessor<T>;
-  lowerWhisker: Accessor<T>;
-  upperWhisker: Accessor<T>;
+  lowerQuartile: ValueFunction<T>;
+  upperQuartile: ValueFunction<T>;
+  lowerWhisker: ValueFunction<T>;
+  upperWhisker: ValueFunction<T>;
   /** The values beyond the whiskers, per box (ADR-0040). */
-  outliers?: ListAccessor<T>;
-  mean?: Accessor<T>;
+  outliers?: ListFunction<T>;
+  mean?: ValueFunction<T>;
   /** Both bounds or neither (CONTEXT.md: Notch). */
-  notchLower?: Accessor<T>;
-  notchUpper?: Accessor<T>;
+  notchLower?: ValueFunction<T>;
+  notchUpper?: ValueFunction<T>;
   /** How many values stand behind the box; no y value. */
-  count?: Accessor<T>;
+  count?: ValueFunction<T>;
   /** Width as a fraction of the step; boxes and bars on one x axis share it. */
   boxWidth: number;
 }
@@ -182,7 +184,7 @@ export interface MatrixSeriesConfig<T = unknown> extends SeriesBase<T> {
   kind: "matrix";
   /** The level that decides the colour - the third channel (ADR-0011).
       The base accessor yields the row position, not this level. */
-  level: Accessor<T>;
+  level: ValueFunction<T>;
   coloring: MatrixColoring;
 }
 

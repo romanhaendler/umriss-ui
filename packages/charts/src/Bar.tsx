@@ -10,7 +10,7 @@
 import { useMemo } from "react";
 import { useSeries } from "./context";
 import { readerOf } from "./value";
-import type { Accessor, Value, BarSeriesConfig } from "./types";
+import type { ValueFunction, Value, BarSeriesConfig } from "./types";
 
 /** The props of `Bar`. */
 export interface BarProps<T> {
@@ -72,7 +72,7 @@ export function Bar<T>(props: BarProps<T>): null {
     normalize,
     barWidth = 0.8,
   } = props;
-  const accessor = readerOf<Accessor<T>>(props.value);
+  const accessor = readerOf<ValueFunction<T>>(props.value);
 
   const config = useMemo<BarSeriesConfig>(
     () =>

@@ -5,7 +5,7 @@
 import { useMemo } from "react";
 import { useSeries } from "./context";
 import { readerOf } from "./value";
-import type { Accessor, Value, LineSeriesConfig } from "./types";
+import type { ValueFunction, Value, LineSeriesConfig } from "./types";
 
 /** The props of `Line`. */
 export interface LineProps<T> {
@@ -65,7 +65,7 @@ export function Line<T>(props: LineProps<T>): null {
     markers = "auto",
     step,
   } = props;
-  const accessor = readerOf<Accessor<T>>(props.value);
+  const accessor = readerOf<ValueFunction<T>>(props.value);
 
   const config = useMemo<LineSeriesConfig>(
     () =>

@@ -37,8 +37,8 @@ interface CommonProps {
 export interface XAxisProps<T> extends CommonProps {
   /** Where a row lies on this axis: a number field of the row, compared by
       its name, or a function of it, compared by its source text as a series'
-      is (`Accessor`) - with the same closure limit. The axis reads the rows of
-      every series bound to it; where those bring their own `data`, name
+      is (`ValueFunction`) - with the same closure limit. The axis reads the
+      rows of every series bound to it; where those bring their own `data`, name
       their row: `<XAxis<HourCount> value="hour" />`. */
   value: NumberField<T> | ((d: T, index: number) => number);
   /** `"nice"` widens the data's extent to ticks - to named `ticks` where

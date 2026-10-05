@@ -84,7 +84,7 @@ import {
   effectiveStep,
 } from "./bars";
 import type {
-  Accessor,
+  ValueFunction,
   AreaSeriesConfig,
   AxisConfig,
   LimitConfig,
@@ -475,7 +475,7 @@ function normalizes(config: SeriesConfig): boolean {
 }
 
 /** The value channel, where the kind has one (ADR-0011). */
-function valueChannelOf(config: SeriesConfig): Accessor<unknown> | undefined {
+function valueChannelOf(config: SeriesConfig): ValueFunction<unknown> | undefined {
   return config.kind === "matrix" ? config.level : undefined;
 }
 

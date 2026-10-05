@@ -16,7 +16,7 @@
 import { useMemo } from "react";
 import { useSeries } from "./context";
 import { readerOf } from "./value";
-import type { Accessor, Value, StateEntry, StateSeriesConfig } from "./types";
+import type { ValueFunction, Value, StateEntry, StateSeriesConfig } from "./types";
 
 /** The props of `StateBand`. */
 export interface StateBandProps<T> {
@@ -62,7 +62,7 @@ export function StateBand<T>(props: StateBandProps<T>): null {
     laneFrom,
     laneTo,
   } = props;
-  const accessor = readerOf<Accessor<T>>(props.value);
+  const accessor = readerOf<ValueFunction<T>>(props.value);
 
   const config = useMemo<StateSeriesConfig>(
     () =>
