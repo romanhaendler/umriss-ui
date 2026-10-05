@@ -96,10 +96,18 @@ describe("Column width", () => {
     expect(cell.style.width).toBe("68px");
   });
 
+  /* jsdom's clientWidth is 0, which reads as a head label cut to nothing:
+     here every box shows all it holds. */
+  const labelsUncut = () =>
+    vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockImplementation(function (this: HTMLElement) {
+      return this.scrollWidth;
+    });
+
   it("a double click fits the column to its widest content", () => {
     const { container } = render(<List />);
     const { cell, grip } = gripAndCell(container);
     vi.spyOn(HTMLElement.prototype, "scrollWidth", "get").mockReturnValue(173);
+    labelsUncut();
     fireEvent.doubleClick(grip);
     expect(cell.style.width).toBe("174px");
   });
@@ -112,6 +120,7 @@ describe("Column width", () => {
     vi.spyOn(HTMLElement.prototype, "scrollWidth", "get").mockImplementation(function (this: HTMLElement) {
       return cell.style.width === "" ? 73 : 400;
     });
+    labelsUncut();
     fireEvent.doubleClick(grip);
     expect(cell.style.width).toBe("74px");
   });
