@@ -326,9 +326,12 @@ for (const width of [1280, 320]) {
     for (const name of ["Light", "Dark", "System"]) {
       const segment = await box(control.getByRole("radio", { name }));
       widths.push(segment.width);
-      // The word stands in the middle of its segment.
+      // Icon and word stand in the middle of their segment.
       const word = await box(control.getByText(name, { exact: true }));
-      expect(Math.abs(word.x + word.width / 2 - (segment.x + segment.width / 2)), name).toBeLessThanOrEqual(1);
+      const icon = await box(control.getByRole("radio", { name }).locator("+ * svg"));
+      const left = icon.x;
+      const right = word.x + word.width;
+      expect(Math.abs((left + right) / 2 - (segment.x + segment.width / 2)), name).toBeLessThanOrEqual(1);
     }
     expect(Math.max(...widths) - Math.min(...widths)).toBeLessThanOrEqual(1);
     await control.getByRole("radio", { name: "Dark" }).click();
@@ -336,3 +339,20 @@ for (const width of [1280, 320]) {
     expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
   });
 }
+
+/* segmented-control-inset 02: an icon stands on its word's line, at the size
+   the control gives it, and stays whole where the word gives way. */
+test("A segment's icon stands on its word's line and stays whole in a narrow place", async ({ page }) => {
+  await openExample(page, "segmentedcontrol", "a-theme-switch");
+  const control = example(page, "a-theme-switch").getByRole("radiogroup", { name: "Theme" });
+  const size = await page.evaluate(() => Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--u-icon-size")));
+  const icon = control.getByRole("radio", { name: "System" }).locator("+ * svg");
+  const word = control.getByText("System", { exact: true });
+  const middle = (rect: { y: number; height: number }) => rect.y + rect.height / 2;
+  expect(Math.abs(middle(await box(icon)) - middle(await box(word)))).toBeLessThanOrEqual(1);
+  expect((await box(icon)).width).toBe(size);
+  // Squeezed to 160 px, the word ends in an ellipsis and the icon keeps its size.
+  await control.evaluate((element) => ((element.parentElement as HTMLElement).style.width = "160px"));
+  expect((await box(icon)).width).toBe(size);
+  expect(await word.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(true);
+});

@@ -13,6 +13,9 @@
   .control {
     composes: text from "#own-styles";
     --_radius: var(--u-radius-md);
+    /* The size of an icon in a segment - the control decides it, as a button
+       does (CONTEXT.md, "Icon"). */
+    --_icon: var(--u-icon-size);
     display: inline-flex;
     inline-size: fit-content;
     min-inline-size: 0;
@@ -47,6 +50,7 @@
     display: flex;
     align-items: center;
     min-inline-size: 0;
+    gap: var(--u-space-2);
     padding-inline: var(--u-space-3);
     font-size: var(--u-text-sm);
     line-height: var(--u-leading-normal);
@@ -97,6 +101,20 @@
     margin: 0;
     opacity: 0;
     cursor: inherit;
+  }
+
+  /* The icon stands before the word with a button's gap - the input lies
+     outside the flow and takes none - and never gives way to it: the word
+     ends in an ellipsis, the icon stays whole. */
+  .icon {
+    display: inline-flex;
+    flex: none;
+    font-size: var(--_icon);
+  }
+
+  .icon > svg {
+    width: var(--_icon);
+    height: var(--_icon);
   }
 
   .label {
@@ -167,6 +185,7 @@
 
   .sm {
     --_radius: var(--u-radius-sm);
+    --_icon: var(--u-icon-size-sm);
     height: var(--u-control-height-sm);
   }
 

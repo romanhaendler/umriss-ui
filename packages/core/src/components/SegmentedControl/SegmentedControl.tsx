@@ -27,6 +27,11 @@ export interface SegmentedOption<T extends string> {
   value: T;
   /** The segment's word - a short one; a long label ends in an ellipsis. */
   label: ReactNode;
+  /** An icon before the word: an SVG, a glyph of the set or an icon font's
+      element. The control sets its size - `--u-icon-size`, `--u-icon-size-sm`
+      at `sm` - and hides it from assistive technology: the word names the
+      possibility. */
+  icon?: ReactNode;
   /** Takes the possibility out of the choice but leaves it visible. */
   disabled?: boolean;
 }
@@ -115,6 +120,11 @@ export const SegmentedControl = forwardRef(function SegmentedControl<T extends s
           htmlFor={radio.optionId(option)}
         >
           <input {...radio.inputProps(option)} className={styles.input} />
+          {option.icon !== undefined && (
+            <span className={styles.icon} aria-hidden="true">
+              {option.icon}
+            </span>
+          )}
           <span className={styles.label}>{option.label}</span>
         </label>
       ))}
