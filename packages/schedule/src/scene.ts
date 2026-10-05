@@ -154,6 +154,13 @@ export class ScheduleScene {
       changed. */
   private viewNow: ScheduleView;
   private readonly viewListeners = new Set<() => void>();
+  /** Whether the planner, a setter or a view handed in has changed the view
+      yet. Until then a change is the start losing the groups no LaneGroup
+      declares - where the schedule starts, not a change to report. */
+  private actedOn = false;
+  get acted(): boolean {
+    return this.actedOn;
+  }
 
   private root: HTMLElement | null = null;
   private plot: HTMLElement | null = null;
@@ -247,6 +254,7 @@ export class ScheduleScene {
   /** Goes to a view handed in; what it leaves out goes back to its default. */
   applyView(view: ScheduleView): void {
     if (viewKey(view) === viewKey(this.viewNow)) return;
+    this.actedOn = true;
     this.folded = view.folded ?? [];
     this.setDomain(view.domain ?? null);
   }
@@ -257,6 +265,7 @@ export class ScheduleScene {
     /* A frame still to report a pan would overwrite the span just set. */
     if (this.domainFrame !== 0) cancelAnimationFrame(this.domainFrame);
     this.domainFrame = 0;
+    this.actedOn = true;
     this.domainInView = span === null ? null : [span[0], span[1]];
     if (span === null) this.fitted = false;
     else this.view.showWall(span);
@@ -266,16 +275,19 @@ export class ScheduleScene {
   /** Folds or unfolds one group. */
   toggleGroup = (group: string): void => {
     const now = this.viewNow.folded ?? [];
+    this.actedOn = true;
     this.folded = now.includes(group) ? now.filter((g) => g !== group) : [...now, group];
     this.viewChanged();
   };
 
   foldAll = (): void => {
+    this.actedOn = true;
     this.folded = this.data.groups.map((group) => group.id);
     this.viewChanged();
   };
 
   unfoldAll = (): void => {
+    this.actedOn = true;
     this.folded = [];
     this.viewChanged();
   };
@@ -528,6 +540,7 @@ export class ScheduleScene {
   private reportDomain(): void {
     const take = () => {
       this.domainFrame = 0;
+      this.actedOn = true;
       this.domainInView = this.visibleDomain();
       this.publishView();
     };
