@@ -64,7 +64,7 @@ function LegendInner({ scene, placement }: { scene: ChartScene; placement: "top"
             onClick={(e) => {
               const before = first.current;
               if (e.detail >= 2 && before?.id === item.id) return scene.showOnlyNames(item.names, before.hidden);
-              first.current = { id: item.id, hidden: scene.hiddenNow() };
+              first.current = { id: item.id, hidden: scene.hiddenNames() };
               if (e.altKey) scene.showOnlyNames(item.names);
               else scene.toggleNames(item.names);
             }}
