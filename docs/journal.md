@@ -18,6 +18,29 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Oct. 2026 — A chart that is loading says so
+
+- **`loading` on the chart** (`.scratch/chart-loading/`; ADR-0042 extended;
+  released after the user's acceptance as charts 0.12.0, with schedule 0.5.1
+  following its peer range). The user wanted a loading animation like the
+  table's. The table's rule carried over: a course already drawn stays and
+  dims, and only where nothing is kept does a placeholder stand.
+- **The look was picked by eye, not argued.** The first spec copied the
+  table's shimmer onto the plot area. On review it was clear this would read
+  as a grey sheet, racing over a wide chart. Three variants went side by side
+  on a throwaway page in the charts demo, with the table's placeholders
+  beside them, and the user picked the silhouette shaped by the first series'
+  kind with one band at a fixed speed. The prototype stays on the branch
+  `prototype/chart-loading-silhouette`.
+- **Found in the building:**
+  - "No data" flashed for one frame between the answer and its layout. The
+    layout snapshot now carries `loading`, so the hold-back ends with the
+    frame that draws the rows.
+  - A drag under way kept panning a stale plot, because a captured pointer
+    passes `pointer-events: none`.
+  - In the prototype the band's gradient sat outside the band and showed only
+    its transparent end.
+
 ## Oct. 2026 — A component holds its own view
 
 - **Charts bound to their rows, and every component holding its own view**

@@ -72,11 +72,15 @@
     /* A course being reloaded dims as the table's rows do (ADR-0042): only
        after this delay, so that a quick answer never flickers. */
     --uc-delay-stale: var(--u-delay-stale, 200ms);
-    /* The silhouette of a chart waiting for its rows (chart-loading 03): its
-       shapes faint in the text colour, as the table's placeholders; its band
-       swells as theirs does; its fade lands as an entry does. */
+    /* The shapes of the silhouette a chart shows while it waits for its rows
+       (chart-loading 03): faint in the text colour, as the table's
+       placeholders. */
     --uc-silhouette: color-mix(in srgb, var(--u-color-text, #18181b) 10%, transparent);
+    /* The easing of the band that sweeps the silhouette: it swells as the
+       table's shimmer does. */
     --uc-ease-swell: var(--u-ease-swell, ease-in-out);
+    /* The silhouette fading out and the course in, once the rows are there:
+       core's motion for a layout change. */
     --uc-fade: var(--u-duration-medium, 240ms) var(--u-ease-out, cubic-bezier(0.22, 1, 0.36, 1));
 
     position: relative;

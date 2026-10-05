@@ -106,6 +106,9 @@ loaded: Geist when the application has it, the system fonts otherwise.
   onViewChange })` takes a start and reports every change, always the whole
   view - charts in step hand each other theirs; `setDomain`, `toggleSeries`,
   `showOnly` and `showAllSeries` stand on what the hook hands back.
+* **A chart that is loading says so**, as the table does: `loading` keeps
+  and dims a course already drawn, and where there is nothing yet a
+  silhouette of the chart to come shimmers in the plot (ADR-0042).
 * **The instruments**: `LimitLine` and `LimitBand`, `ControlChart` with its four
   rule violations, `pareto()` with a collected remainder, and a working-time
   axis that takes the empty hours out and marks every removed span.
