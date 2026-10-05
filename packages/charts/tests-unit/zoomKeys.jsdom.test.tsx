@@ -191,6 +191,17 @@ describe("The view on the hook", () => {
     expect(Object.keys(views[0]?.domains ?? {})).toEqual(["x"]);
     expect(views[0]?.hidden).toBeUndefined();
   });
+
+  it("resets the span of an axis not zoomable at the moment where a view handed in leaves it out", async () => {
+    let parts: (ChartParts<Row> & { view: ChartView }) | null = null;
+    const seen = (p: ChartParts<Row> & { view: ChartView }) => (parts = p);
+    const r = await renderChart(<Zoomable zoomable={false} initialView={{ domains: { x: [40, 60] } }} seen={seen} />);
+    unmount = r.unmount;
+    expect(parts!.view).toEqual({});
+    await r.rerender(<Zoomable zoomable={false} initialView={{}} seen={seen} />);
+    await r.rerender(<Zoomable initialView={{}} seen={seen} />);
+    expect(parts!.view).toEqual({});
+  });
 });
 
 describe("Two charts in step", () => {

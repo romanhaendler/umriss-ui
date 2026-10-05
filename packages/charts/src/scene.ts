@@ -3014,9 +3014,11 @@ export class ChartScene {
 
   getView = (): ChartView => this.viewNow;
 
-  /** Goes to a view handed in; what it leaves out goes back to its default. */
+  /** Goes to a view handed in; what it leaves out goes back to its default -
+      also the span or the hidden name of a part not declared at the moment,
+      which the view reported does not show. */
   applyView(view: ChartView): void {
-    if (viewKey(view) === viewKey(this.viewNow)) return;
+    if (viewKey(view) === viewKey(this.heldView())) return;
     this.domainsInView = { ...view.domains };
     this.setHidden([...(view.hidden ?? [])]);
   }
@@ -3088,16 +3090,18 @@ export class ChartScene {
     this.markLayoutDirty();
   }
 
+  /** Everything the scene holds, also of the parts not declared at the
+      moment. */
+  private heldView(): ChartView {
+    const domains = this.domainsInView;
+    const hidden = this.hiddenInView;
+    return { ...(Object.keys(domains).length > 0 && { domains }), ...(hidden.length > 0 && { hidden }) };
+  }
+
   private currentView(): ChartView {
     const axes = this.axes.size === 0 ? null : new Set(this.zoomAxisIds());
     const names = this.series.size === 0 ? null : new Set(this.seriesNames().filter((n) => n !== undefined));
-    const domains = this.domainsInView;
-    const hidden = this.hiddenInView;
-    return onlyKnown(
-      { ...(Object.keys(domains).length > 0 && { domains }), ...(hidden.length > 0 && { hidden }) },
-      axes,
-      names,
-    );
+    return onlyKnown(this.heldView(), axes, names);
   }
 
   /** Hands the view out where its content changed. A gesture calls it from
