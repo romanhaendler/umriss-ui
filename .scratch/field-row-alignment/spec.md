@@ -1,6 +1,6 @@
 # Field row alignment and the segmented control
 
-Status: ready-for-agent
+Status: done
 
 ## Problem Statement
 
@@ -112,3 +112,13 @@ is.
 
 - The look of the chosen segment (ink fill) was agreed with the reservation "we see it at the end": the implementing agent leaves a screenshot of the row of fields, light and dark, for that look.
 - Raised in a filter bar over a chart in an application; the screenshot showed three selects and a radio group of two possibilities, the radios some pixels too high.
+
+## Comments
+
+Delivered through tickets 01-05 (`issues/`), each with its report. Beyond
+the spec: a radio group inside a `FormField` was nameless (`label htmlFor`
+names no group) and is now named by the field's label; the segmented control
+does not fill a place that gives it a width (`fit-content`), unlike a field.
+Full check: lint, types, unit, build and visual over all five demos - one
+schedule interaction test failed once under load and passed three times on
+its own.

@@ -5,7 +5,7 @@ export const title = "Segmented control";
 export const lead = "Pass `options`, `value` and `onChange`; `value` is `null` until something is chosen.";
 
 export default function SegmentedControlExample() {
-  const [period, setPeriod] = useState<"shift" | "day" | "week" | null>("day");
+  const [period, setPeriod] = useState<"hour" | "day" | "week" | null>("day");
 
   return (
     <Stack gap={3} align="flex-start">
@@ -14,7 +14,7 @@ export default function SegmentedControlExample() {
         value={period}
         onChange={setPeriod}
         options={[
-          { value: "shift", label: "Shift" },
+          { value: "hour", label: "Hour" },
           { value: "day", label: "Day" },
           { value: "week", label: "Week" },
         ]}
