@@ -93,12 +93,14 @@ export function useSchedule(options: ScheduleOptions = {}): ScheduleParts {
   }, [handedKey]);
 
   /* Every change of the view, once and whole, after the commit. The view the
-     schedule starts with is where it starts, not a change. */
+     schedule starts with is where it starts, not a change - also once the
+     groups declared took out the folds no group carries. */
   const key = viewKey(view);
   const reported = useRef(key);
   useEffect(() => {
     if (reported.current === key) return;
     reported.current = key;
+    if (!scene.acted) return;
     echoes.reported(key);
     onViewChange?.(view);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once per change of the view, with that render's view and handler

@@ -123,6 +123,15 @@ describe("onViewChange", () => {
     expect(report).not.toHaveBeenCalled();
   });
 
+  it("is not called for the start losing a group no LaneGroup declares - only once the planner changes something", () => {
+    const report = vi.fn();
+    render(<Plan initialView={{ folded: ["gone", "hall"] }} onViewChange={report} />);
+    expect(report).not.toHaveBeenCalled();
+    act(() => hook.setDomain([at(9), at(10)]));
+    expect(report).toHaveBeenCalledTimes(1);
+    expect(report).toHaveBeenLastCalledWith({ domain: [at(9), at(10)], folded: ["hall"] });
+  });
+
   it("is called once per change, always with the whole view", () => {
     const report = vi.fn();
     const { container } = render(<Plan initialView={{ domain: [at(6), at(14)] }} onViewChange={report} />);
