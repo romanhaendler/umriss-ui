@@ -83,18 +83,20 @@ export function hidesAll(hidden: readonly string[], series: readonly (string | u
 /** How long a view reported may take to come back as `initialView`. */
 const ECHO_MS = 1000;
 
-/** The views a chart reported that may still come back - the schedule's and
-    the table's rule (component-view 07). An application keeping the view hands
+/** The views a component reported that may still come back, by their
+    content key - the chart's and the schedule's (ADR-0047), the table holding
+    a copy of its own. An application keeping the view hands
     it back a frame or more late - by then a pan has moved on, and going to the
     view handed in would jump back. So a view handed in that equals one
-    reported since the last one handed in, within a second, is the chart's own
-    state coming back, not a view to go to. The echoes come in order: one drops
+    reported since the last one handed in, within a second, is the component's
+    own state coming back, not a view to go to. The echoes come in order: one drops
     itself and every older report, a view from outside drops them all. The
     second bounds the list where nothing is handed back, and lets such an
     application still restore a view it kept. */
 export class Echoes {
   private reports: { key: string; at: number }[] = [];
 
+  /** Notes a view reported, by its key. */
   reported(key: string): void {
     const now = performance.now();
     this.reports = this.reports.filter((r) => now - r.at < ECHO_MS);
