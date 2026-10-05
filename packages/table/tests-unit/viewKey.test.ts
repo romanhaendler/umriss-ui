@@ -26,6 +26,20 @@ describe("viewKey - a view's content", () => {
     expect(viewKey(again)).toBe(viewKey(VIEW));
   });
 
+  it("takes the hidden columns, the folded groups and the open branches as sets - their order does not count", () => {
+    expect(viewKey({ hidden: ["a", "b"], folded: ["L1", "L2"], branches: ["x", "y"] })).toBe(
+      viewKey({ hidden: ["b", "a"], folded: ["L2", "L1"], branches: ["y", "x"] }),
+    );
+  });
+
+  it("keeps the order of the sort levels, the column order and the grouping - it is their content", () => {
+    expect(viewKey({ order: ["a", "b"] })).not.toBe(viewKey({ order: ["b", "a"] }));
+    expect(viewKey({ grouping: ["a", "b"] })).not.toBe(viewKey({ grouping: ["b", "a"] }));
+    expect(viewKey({ sort: [{ column: "a", direction: "asc" }, { column: "b", direction: "asc" }] })).not.toBe(
+      viewKey({ sort: [{ column: "b", direction: "asc" }, { column: "a", direction: "asc" }] }),
+    );
+  });
+
   it("changes with every part of the view", () => {
     const changed: TableView[] = [
       { ...VIEW, search: "bas" },
