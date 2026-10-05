@@ -58,9 +58,15 @@ export interface ChartProps {
   style?: CSSProperties;
   /** Shown in the middle of the plot area when no visible series has a point
       to show - no data, only gaps, or every series hidden. Axes and frame
-      stay.
+      stay. Not while `loading`.
       @default the wording's `empty` */
   empty?: ReactNode;
+  /** The rows are on their way, as the table's `loading` says (ADR-0042). A
+      course already drawn stays: it dims after a moment and takes no pointer
+      until the answer is in. Where there is nothing to show, the empty
+      message waits. The plot is `aria-busy` meanwhile.
+      @default false */
+  loading?: boolean;
   /** The chart's words (ADR-0031); entries left out fall back to English.
       German: `GERMAN_CHARTS_WORDING` from `@umriss-ui/charts/wording/de`.
       @default DEFAULT_CHARTS_WORDING */
@@ -107,6 +113,7 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
     onPerf,
     syncId,
     empty: emptyProp,
+    loading = false,
     wording: wordingProp,
     encoding = "color",
     children,
@@ -216,6 +223,10 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
   }, [scene, onPerf]);
 
   useEffect(() => {
+    scene.setLoading(loading);
+  }, [scene, loading]);
+
+  useEffect(() => {
     scene.setSyncId(syncId ?? null);
     return () => scene.setSyncId(null);
   }, [scene, syncId]);
@@ -231,6 +242,17 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
   const hasHits = useSyncExternalStore(
     scene.subscribeHover,
     () => scene.getHoverSnapshot().tooltip !== null,
+    () => false,
+  );
+
+  /* Loading over a course keeps the course, stale - as laid out, so that
+     the stale state ends with the frame that draws the answer. */
+  const stale = useSyncExternalStore(
+    scene.subscribeLayout,
+    () => {
+      const snapshot = scene.getLayoutSnapshot();
+      return snapshot.loading && !snapshot.empty;
+    },
     () => false,
   );
 
@@ -268,6 +290,8 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
           aria-roledescription={hasHits ? wording.roleDescription : undefined}
           aria-label={ariaLabel}
           aria-describedby={summaryId}
+          aria-busy={loading || undefined}
+          data-stale={stale || undefined}
           tabIndex={hasHits ? 0 : undefined}
           onKeyDown={(e) => {
             if (scene.key(e.nativeEvent)) e.preventDefault();

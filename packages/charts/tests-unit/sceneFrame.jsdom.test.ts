@@ -433,11 +433,65 @@ describe("ChartScene - cursor sync", () => {
     b.unbind();
     a.setSyncId(null);
   });
+
+  // chart-loading 02: a chart being reloaded points at no shared position.
+  it("draws no shared crosshair while loading", async () => {
+    const [a, b] = await pair();
+    const plot = a.getLayoutSnapshot().layout.plot;
+    a.pointerMove(plot.x + plot.width / 2, plot.y + plot.height / 2);
+    b.setLoading(true);
+    expect(syncedPx(b)).toBeNull();
+    b.setLoading(false);
+    expect(syncedPx(b)).toBeCloseTo(plot.x + plot.width / 2);
+    a.unbind();
+    b.unbind();
+    a.setSyncId(null);
+    b.setSyncId(null);
+  });
+
+  it("shares no position while loading", async () => {
+    const [a, b] = await pair();
+    a.setLoading(true);
+    const plot = a.getLayoutSnapshot().layout.plot;
+    a.pointerMove(plot.x + plot.width / 2, plot.y + plot.height / 2);
+    expect(syncedPx(b)).toBeNull();
+    a.unbind();
+    b.unbind();
+    a.setSyncId(null);
+    b.setSyncId(null);
+  });
 });
 
 /* charts-review: zoom never reaches a span of no width, which no scale can
    show - a single point's extent is one (component-view 01: at most the
    data's extent). */
+/* chart-loading 02: a drag under way ends when the reload begins - its
+   captured pointer would pass the stale plot's pointer-events. */
+describe("ChartScene - a drag and loading", () => {
+  it("pans no further once loading begins", async () => {
+    const root = document.createElement("div");
+    document.body.appendChild(root);
+    const scene = new ChartScene();
+    scene.bind(root, document.createElement("canvas"), document.createElement("canvas"), root);
+    scene.registerAxis({ ...xAxis, zoomable: true });
+    scene.registerAxis(yAxis);
+    scene.registerSeries(line);
+    scene.requestResize(400, 300);
+    scene.setData([
+      { t: 0, a: 10 },
+      { t: 10, a: 20 },
+    ]);
+    await frame();
+    const pointer = (offsetX: number) => ({ pointerId: 1, pointerType: "mouse", button: 0, offsetX }) as PointerEvent;
+    scene.pointerDown(pointer(200));
+    scene.setLoading(true);
+    scene.drag(pointer(100));
+    await frame();
+    expect(scene.getView()).toEqual({});
+    scene.unbind();
+  });
+});
+
 describe("ChartScene - zoom on a single point", () => {
   it("puts no span of no width in view", async () => {
     const root = document.createElement("div");
