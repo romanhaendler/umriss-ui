@@ -3,7 +3,10 @@
 /* chart-loading 02: a chart that is loading says so, as the table does
    (ADR-0042). Over nothing to show it holds its empty message back; over a
    course already drawn it keeps the course, marks the plot stale - dimmed and
-   deaf to the pointer, by CSS - and ends a pointer's hover. Busy in both. */
+   deaf to the pointer, by CSS - and ends a pointer's hover. Busy in both.
+   chart-loading 03: over nothing it shows a silhouette shaped by its first
+   series' kind, and its axes leave out their tick labels; when the answer is
+   in, the silhouette fades out and the course in. */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, type ReactNode } from "react";
@@ -27,15 +30,16 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-type Extra = { loading?: boolean; empty?: ReactNode; hidden?: boolean };
+type Extra = { loading?: boolean; empty?: ReactNode; hidden?: boolean; bars?: boolean };
 
 function Loading({ data, extra }: { data: Row[]; extra: Extra }) {
-  const { Chart, XAxis, YAxis, Line } = useChart(data, { initialView: extra.hidden === true ? { hidden: ["A", "B"] } : undefined });
+  const { Chart, XAxis, YAxis, Line, Bar } = useChart(data, { initialView: extra.hidden === true ? { hidden: ["A", "B"] } : undefined });
+  const Series = extra.bars === true ? Bar : Line;
   return (
     <Chart ariaLabel="Loading" loading={extra.loading} empty={extra.empty}>
       <XAxis value="t" tickFormat={(v) => `t${v}`} />
       <YAxis />
-      <Line value="a" name="A" />
+      <Series value="a" name="A" />
       <Line value="b" name="B" />
       <Tooltip />
       <Legend />
@@ -52,6 +56,9 @@ async function render(data: Row[], extra: Extra = {}) {
 const emptyOf = (host: HTMLElement) => host.querySelector(".uc-empty");
 const busy = (host: HTMLElement) => plot(host).getAttribute("aria-busy");
 const stale = (host: HTMLElement) => plot(host).hasAttribute("data-stale");
+const silhouette = (host: HTMLElement) => host.querySelector<HTMLElement>(".uc-silhouette");
+const tickLabels = (host: HTMLElement) => host.querySelectorAll(".uc-axis .uc-tick-label").length;
+const rest = (ms: number) => act(() => new Promise<void>((r) => setTimeout(r, ms)));
 
 describe("A chart loading over nothing to show", () => {
   it("holds \"No data\" back, keeps its axes and is busy", async () => {
@@ -147,5 +154,60 @@ describe("A chart loading over a course", () => {
     expect(tooltip(host)).toContain("t4");
     await press(host, "ArrowLeft");
     expect(tooltip(host)).toContain("t3");
+  });
+});
+
+describe("The silhouette", () => {
+  it("stands where there is nothing yet, hidden from a screen reader, shaped by the first series", async () => {
+    const line = await render([], { loading: true });
+    expect(silhouette(line.host)?.getAttribute("aria-hidden")).toBe("true");
+    expect(silhouette(line.host)?.dataset.shape).toBe("wave");
+    unmount?.();
+    const bars = await render([], { loading: true, bars: true });
+    expect(silhouette(bars.host)?.dataset.shape).toBe("columns");
+  });
+
+  it("stands over only gaps and over only hidden series", async () => {
+    const gaps = await render([{ t: 0, a: null }, { t: 1, a: null }], { loading: true });
+    expect(silhouette(gaps.host)).not.toBeNull();
+    unmount?.();
+    const hidden = await render(rows, { loading: true, hidden: true });
+    expect(silhouette(hidden.host)).not.toBeNull();
+  });
+
+  it("does not stand over a course, nor without loading", async () => {
+    const over = await render(rows, { loading: true });
+    expect(silhouette(over.host)).toBeNull();
+    unmount?.();
+    const idle = await render([]);
+    expect(silhouette(idle.host)).toBeNull();
+  });
+
+  it("takes the tick labels away while it stands, and gives them back with the answer", async () => {
+    const { host, rerender } = await render([], { loading: true });
+    expect(tickLabels(host)).toBe(0);
+    expect(host.querySelectorAll(".uc-axis")).toHaveLength(2);
+    await rerender(rows, {});
+    expect(tickLabels(host)).toBeGreaterThan(0);
+  });
+
+  it("fades out with the answer while the course fades in, then goes", async () => {
+    const { host, rerender } = await render([], { loading: true });
+    await rerender(rows, {});
+    expect(silhouette(host)?.hasAttribute("data-leaving")).toBe(true);
+    expect(plot(host).hasAttribute("data-arriving")).toBe(true);
+    await rest(300);
+    expect(silhouette(host)).toBeNull();
+    expect(plot(host).hasAttribute("data-arriving")).toBe(false);
+  });
+
+  it("goes at once under reduced motion", async () => {
+    vi.spyOn(window, "matchMedia").mockImplementation(
+      (query: string) => ({ matches: query.includes("reduce"), media: query, addEventListener: () => undefined, removeEventListener: () => undefined }) as unknown as MediaQueryList,
+    );
+    const { host, rerender } = await render([], { loading: true });
+    await rerender(rows, {});
+    await frame();
+    expect(silhouette(host)).toBeNull();
   });
 });

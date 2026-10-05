@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useChart } from "../../../src";
 
 export const title = "Show that rows are on their way";
-export const lead = "`loading`, as the table has it: before the first rows the frame stands and \"No data\" waits; over a course already drawn the course stays, dims after a moment and takes no pointer until the answer is in.";
+export const lead = "`loading`, as the table has it: before the first rows the frame stands and a silhouette of the chart to come shimmers in it, shaped by the first series; over a course already drawn the course stays, dims after a moment and takes no pointer until the answer is in.";
 
 interface Reading {
   t: number;

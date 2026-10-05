@@ -1,6 +1,6 @@
 # 01: Prototype - silhouette variants side by side
 
-Status: needs-info
+Status: resolved
 Type: prototype
 Blocked by: None (can start immediately)
 
@@ -24,11 +24,11 @@ The spec's variants:
 The variants differ in shape treatment, band width and speed. The fade from
 silhouette to course is shown on a button that "answers".
 
-- [ ] All variants stand on one page, in the light and the dark theme, and with reduced motion (a toggle or a forced media emulation note).
-- [ ] Each variant reads its kind from registered series, not from rows; a mixed chart takes the first series' kind.
-- [ ] The band's width and speed are in pixels and do not change with the chart's width (shown with one narrow and one wide chart).
-- [ ] The user's pick, with any adjustments (band width, speed, colour mix, shapes), is recorded under `## Comments` here, precise enough for 03 to build without asking.
-- [ ] The prototype page is deleted after the pick; nothing of it ships.
+- [x] All variants stand on one page, in the light and the dark theme, and with reduced motion (a toggle or a forced media emulation note).
+- [x] Each variant reads its kind from registered series, not from rows; a mixed chart takes the first series' kind.
+- [x] The band's width and speed are in pixels and do not change with the chart's width (shown with one narrow and one wide chart).
+- [x] The user's pick, with any adjustments (band width, speed, colour mix, shapes), is recorded under `## Comments` here, precise enough for 03 to build without asking.
+- [x] The prototype page is deleted after the pick; nothing of it ships.
 
 ## Comments
 
@@ -67,3 +67,34 @@ Seen in building it:
   skeleton does there.
 - The axes show their empty [0, 1] ticks while the chart waits. Whether they
   should be quieter is a question for the pick.
+
+## Answer
+
+The user picked (2026-10-05) by eye, in both themes and with reduced motion,
+and accepted every recommendation as it stood.
+
+**Variant A, at its preset.** Ticket 03 builds exactly this:
+
+- Shapes by series kind, with the first series in drawing order deciding:
+  - `bar` and `box`: rounded columns standing on the baseline.
+    - Count: `clamp(round(width / 34), 6, 18)`.
+    - Width: `min(step * 0.6, 36)` px, radius 4.
+    - Heights from a fixed pattern of 0.42 to 0.9 of 86 % of the height.
+  - `line` and `scatter`: one soft wave, a 4 px stroke with round caps,
+    `y = h * (0.5 + 0.17 sin(2π · 1.15t + 0.6) + 0.06 sin(2π · 3.1t))`.
+  - `area`: the same wave, with a fill beneath it at 0.4.
+  - `state`, `matrix` and no series: strips at 1/4, 1/2, 3/4 and the
+    baseline.
+- 6 px of air on every side of the plot area.
+- The shapes are 10 % of the text colour.
+- The band is 220 px wide and runs at 240 px/s. It sweeps 80 % of a cycle and
+  rests for 20 %, eased with `--u-ease-swell`. Its middle reaches the surface
+  colour at 0.9, so it darkens in dark mode, as the table's skeleton does.
+- Leaving: the silhouette fades out and the series layer fades in, both in
+  240 ms with `--u-ease-out`.
+- Reduced motion: no sweep, no fades.
+- **New:** while the chart waits, the axes keep their lines and titles but not
+  their tick labels. The [0, 1] a chart has before its rows means nothing.
+
+The losing variants B and C, and the switcher, stay on the branch
+`prototype/chart-loading-silhouette`.

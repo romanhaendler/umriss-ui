@@ -42,7 +42,9 @@ a quiet **silhouette** of the chart that is coming stands in the plot area:
   the same way the table shapes its placeholders by its columns.
 - One shimmer band of fixed pixel width sweeps across all of the silhouette's
   shapes together, at a calm and constant speed.
-- The frame, axes and legend stay where they are, as they do for `empty`.
+- The frame, axes and legend stay where they are, as they do for `empty`. The
+  axes leave out their tick labels while the chart waits: before its rows the
+  chart has no range, and the [0, 1] it would label means nothing.
 - The empty message never shows while loading.
 - When the rows arrive, the silhouette fades out and the course fades in.
 
