@@ -122,6 +122,7 @@ The table and the alarm list are not part of this package. They live in
 | `FormField` / `FormFieldBoundary` | label, help text, error; wires `id`/`aria-*` automatically through context. `FormFieldBoundary` resets the context inside panels so that their contents do not inherit the trigger's field id |
 | `Textarea` | multi-line input; grows with its content on request (`autoGrow`, `maxRows`), character counter (`showCount`) |
 | `RadioGroup` | one out of a few, each option with an optional explanatory line; one tab stop, arrow keys select |
+| `SegmentedControl` | one out of a few short options, drawn as one field with a segment each; a radio group to the keys and the screen reader |
 | `Alert` | a message that stays; five tones, actions, closable on request – the role follows the tone |
 | `Tag` / `TagGroup` | a removable label; one tab stop and arrow-key navigation within the group |
 | `Divider` | a dividing line beside Stack and Grid: horizontal/vertical, two weights, optionally with a label |

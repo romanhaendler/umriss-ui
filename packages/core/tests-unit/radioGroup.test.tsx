@@ -203,6 +203,16 @@ describe("RadioGroup – click and form field", () => {
     expect(descriptionOf(screen.getByRole("radiogroup"))).toBe("Please choose.");
   });
 
+  it("is named by the surrounding field's label", () => {
+    // `label htmlFor` names no group; it was nameless inside a field.
+    render(
+      <FormField label="Zustellung">
+        <RadioGroup options={OPTIONS} value="standard" onChange={vi.fn()} />
+      </FormField>,
+    );
+    expect(screen.getByRole("radiogroup", { name: "Zustellung" })).toBeTruthy();
+  });
+
   it("reports itself as invalid where the field shows an error", () => {
     render(
       <FormField label="Zustellung" error="Please choose.">

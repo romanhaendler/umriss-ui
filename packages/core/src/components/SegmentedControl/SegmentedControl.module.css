@@ -1,0 +1,137 @@
+/* Segmented control. One field - a select's surface, edge, radius and
+   height - with a segment for each possibility. The inputs lie invisibly over
+   their segments: they carry focus, keyboard and the click, and what is seen
+   is the segment. */
+
+@layer umriss.tokens, umriss.base, umriss.components;
+
+@layer umriss.components {
+  /* Its width is the sum of its words, never the chosen one's, and never
+     wider than its place. Unlike a field it does not fill a place that gives
+     it a width: stretched, its segments would stand in an empty box. */
+  .control {
+    composes: text from "#own-styles";
+    display: inline-flex;
+    inline-size: fit-content;
+    min-inline-size: 0;
+    max-inline-size: 100%;
+    height: var(--u-control-height);
+    border-radius: var(--u-radius-md);
+    background: var(--u-color-surface);
+    outline: 1px solid transparent;
+    box-shadow: var(--u-edge-strong);
+  }
+
+  .segment {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-inline-size: 0;
+    padding-inline: var(--u-space-3);
+    font-size: var(--u-text-sm);
+    line-height: var(--u-leading-normal);
+    color: var(--u-color-text);
+    cursor: pointer;
+    user-select: none;
+    transition:
+      background-color var(--u-transition),
+      color var(--u-transition),
+      box-shadow var(--u-transition);
+  }
+
+  /* Square inside, rounded where the field is. */
+  .segment:first-child {
+    border-start-start-radius: var(--u-radius-md);
+    border-end-start-radius: var(--u-radius-md);
+  }
+
+  .segment:last-child {
+    border-start-end-radius: var(--u-radius-md);
+    border-end-end-radius: var(--u-radius-md);
+  }
+
+  /* The seam: a hairline between two segments, as in the button group - a
+     line and not a border, which would change the height. Beside the chosen
+     segment its ink is the edge, and the seam would be a second one. */
+  .segment + .segment::before {
+    content: "";
+    position: absolute;
+    inset-inline-start: 0;
+    top: 25%;
+    bottom: 25%;
+    width: 1px;
+    background: var(--u-edge-color-strong);
+    pointer-events: none;
+  }
+
+  .segment:has(.input:checked)::before,
+  .segment:has(.input:checked) + .segment::before {
+    opacity: 0;
+  }
+
+  .input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: inherit;
+  }
+
+  .label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .segment:hover:not(:has(.input:disabled)):not(:has(.input:checked)) {
+    background: var(--u-color-surface-sunken);
+  }
+
+  .segment:active:not(:has(.input:disabled)):not(:has(.input:checked)) {
+    background: var(--u-color-surface-pressed);
+  }
+
+  /* The chosen segment: ink with light words, as the chosen radio dot - no
+     colour; the accent stays reserved for the focus. */
+  .segment:has(.input:checked) {
+    background: var(--u-color-primary-bg);
+    color: var(--u-color-primary-fg);
+  }
+
+  /* The ring stands on the segment the arrow keys are on, not around the
+     whole field, and above its neighbours. */
+  .segment:has(.input:focus-visible) {
+    z-index: 1;
+    outline: 2px solid transparent;
+    box-shadow: var(--u-focus-ring);
+  }
+
+  .disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  /* ---- Small size: a small select's height, type and radius ---- */
+
+  .sm {
+    height: var(--u-control-height-sm);
+    border-radius: var(--u-radius-sm);
+  }
+
+  .sm .segment {
+    padding-inline: var(--u-space-2);
+    font-size: var(--u-text-xs);
+  }
+
+  .sm .segment:first-child {
+    border-start-start-radius: var(--u-radius-sm);
+    border-end-start-radius: var(--u-radius-sm);
+  }
+
+  .sm .segment:last-child {
+    border-start-end-radius: var(--u-radius-sm);
+    border-end-end-radius: var(--u-radius-sm);
+  }
+}
