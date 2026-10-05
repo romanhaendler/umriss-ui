@@ -11,7 +11,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { Chart as FreeChart, type ChartProps } from "./Chart";
 import { ChartScene } from "./scene";
-import { Echoes, viewKey, type ChartView } from "./view";
+import { Echoes, viewKey, type AxisSpans, type ChartView } from "./view";
 import { XAxis, YAxis, type XAxisProps, type YAxisProps } from "./Axis";
 import { Line, type LineProps } from "./Line";
 import { Area, type AreaProps } from "./Area";
@@ -59,7 +59,7 @@ export interface ChartParts<Z> {
   view: ChartView;
   /** The span each zoomable x axis shows, by axis `id`; an axis absent shows
       its own `domain`. */
-  domains: Readonly<Record<string, readonly [number, number]>>;
+  domains: AxisSpans;
   /** Puts a span in view on a zoomable x axis - a lone one is `"x"`; `null`
       shows the axis' own `domain` again. */
   setDomain: (axisId: string, span: readonly [number, number] | null) => void;
@@ -74,7 +74,7 @@ export interface ChartParts<Z> {
   showAllSeries: () => void;
 }
 
-const NO_DOMAINS: Readonly<Record<string, readonly [number, number]>> = {};
+const NO_DOMAINS: AxisSpans = {};
 const NO_NAMES: readonly string[] = [];
 
 /** A chart over your rows: the parts it returns are typed at your row, so

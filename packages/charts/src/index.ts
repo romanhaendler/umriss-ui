@@ -146,3 +146,8 @@ export type { ChartView, ZoomLimits } from "./view";
    the rule that tells a view reported and handed back late from one handed
    in. At the end, by the workspace's rule for new exports. */
 export { Echoes } from "./view";
+
+/* The part of a chart's view that is a span per zoomable x axis - `ChartView`
+   and `useChart` name it. At the end, by the workspace's rule for new
+   exports. */
+export type { AxisSpans } from "./view";

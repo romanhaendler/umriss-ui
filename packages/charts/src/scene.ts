@@ -55,7 +55,7 @@ import { lastSegmentEnd, medianStep, segmentEnd, segmentIndex } from "./state";
 import { cellSize, cellIndex, measureSpacing } from "./cells";
 import { assess } from "./limit";
 import { formatValue } from "./format";
-import { defaultLimits, hidesAll, onlyKnown, onlyVisible, sameSpan, showOnly, toggleHidden, viewKey, zoomSpan, type ChartView, type ZoomLimits } from "./view";
+import { defaultLimits, hidesAll, onlyKnown, onlyVisible, sameSpan, showOnly, toggleHidden, viewKey, zoomSpan, type AxisSpans, type ChartView, type ZoomLimits } from "./view";
 import { MINUTE, inRemovedTime, toWorkingTimeClamped } from "./workingTime";
 import {
   axisExtent,
@@ -2983,7 +2983,7 @@ export class ChartScene {
   /** The span each zoomable x axis shows, by id - every one ever named, also
       of an axis not declared at the moment: the view hands out only the known
       ones, and an axis that comes back gets its span back. */
-  private domainsInView: Readonly<Record<string, readonly [number, number]>>;
+  private domainsInView: AxisSpans;
   /** The hidden series, by name - also of a series not declared at the
       moment, which comes back hidden. */
   private hiddenInView: readonly string[];
