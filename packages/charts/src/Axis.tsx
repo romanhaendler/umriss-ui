@@ -73,7 +73,8 @@ export interface XAxisProps<T> extends CommonProps {
   zoomable?: boolean;
   /** The narrowest and the widest span zoom may reach, in the axis' units -
       milliseconds on a time axis.
-      @default at most the data's extent, at least three data steps */
+      @default at most the data's extent or this axis' own `domain`, whichever
+      is wider, at least three data steps */
   zoomLimits?: ZoomLimits;
 }
 

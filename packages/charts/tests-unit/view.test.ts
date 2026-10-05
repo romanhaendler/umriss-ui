@@ -3,7 +3,7 @@
    names out, zoom inside its limits, never every series hidden. */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { defaultLimits, Echoes, hidesAll, onlyKnown, onlyVisible, showOnly, toggleHidden, viewKey, zoomSpan } from "../src/view";
+import { defaultLimits, Echoes, hidesAll, onlyKnown, onlyVisible, showOnly, sameSpan, toggleHidden, viewKey, zoomSpan } from "../src/view";
 
 describe("viewKey", () => {
   it("compares by content, not by the order of the ids or the names", () => {
@@ -137,12 +137,31 @@ describe("zoomSpan", () => {
   });
 });
 
+describe("sameSpan", () => {
+  it("takes a span for the axis' own domain where it differs by rounding only", () => {
+    expect(sameSpan([0, 100], [0, 100])).toBe(true);
+    expect(sameSpan([0.1 + 0.2 - 0.3, 100], [0, 100])).toBe(true);
+  });
+
+  it("tells a shifted, a narrower and a wider span apart", () => {
+    expect(sameSpan([1, 101], [0, 100])).toBe(false);
+    expect(sameSpan([0, 99], [0, 100])).toBe(false);
+    expect(sameSpan([-10, 110], [0, 100])).toBe(false);
+  });
+});
+
 describe("defaultLimits", () => {
   it("is at most the data's extent and at least three data steps", () => {
     expect(defaultLimits([0, 100], 10)).toEqual({ min: 30, max: 100 });
   });
 
-  it("has no narrowest span where no step can be measured", () => {
+  it("zooms into nothing where no step can be measured", () => {
     expect(defaultLimits([5, 5], 0)).toEqual({ min: 0, max: 0 });
+    expect(defaultLimits([5, 5], 0, [4, 6])).toEqual({ min: 2, max: 2 });
+  });
+
+  it("reaches at least the axis' own domain, where a nice one is wider than the data", () => {
+    expect(defaultLimits([3, 97], 10, [0, 100])).toEqual({ min: 30, max: 100 });
+    expect(defaultLimits([0, 100], 10, [40, 60])).toEqual({ min: 30, max: 100 });
   });
 });

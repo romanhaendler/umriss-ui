@@ -63,7 +63,7 @@ place:
 | `Legend onToggle` | nothing - the legend toggles by itself; the change arrives in `onViewChange` |
 | `XAxis onDomainChange` | `XAxis zoomable`; the span arrives in `onViewChange` as `view.domains[axisId]` - a lone x axis is `"x"` |
 | a zoomed `XAxis domain` handed back (controlled) | `initialView: { domains: { x: span } }` or `setDomain("x", span)`; `domain` stays the axis' configuration and is a zoomable axis' start |
-| clamping the proposed domain in the handler | `XAxis zoomLimits={{ min, max }}`; without it at most the data's extent, at least three data steps |
+| clamping the proposed domain in the handler | `XAxis zoomLimits={{ min, max }}`; without it at most the data's extent or the axis' own `domain`, whichever is wider, at least three data steps; a span equal to the axis' own domain is no part of the view |
 | `AxisConfig.onDomainChange` | `AxisConfig.zoomable`, `AxisConfig.zoomLimits` |
 
 - **`Chart`, the axes and the series kinds are no exports of their own.**
