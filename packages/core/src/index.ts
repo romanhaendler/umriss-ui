@@ -25,6 +25,7 @@ export * from "./components/Popover";
 export * from "./components/Modal";
 export * from "./components/MultiSelect";
 export * from "./components/RadioGroup";
+export * from "./components/SegmentedControl";
 export * from "./components/Select";
 export * from "./components/Skeleton";
 export * from "./components/Spinner";

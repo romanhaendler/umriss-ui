@@ -264,10 +264,28 @@ test("Every control in a row of fields stands on the select's line", async ({ pa
     const row = stage.getByRole("group", { name });
     const line = await middle(row.getByLabel("Caster"));
     // A word's own line: the box of its label, one line tall.
-    for (const word of ["Raw", "Show archived", "Live"]) {
+    for (const word of ["Raw", "Measured", "Show archived", "Live"]) {
       const words = row.getByText(word, { exact: true });
       expect(Math.abs((await middle(words)) - line), `${name}: ${word}`).toBeLessThanOrEqual(1);
     }
+  }
+});
+
+test("A segmented control is a field in the row, and holds still while it is switched", async ({ page }) => {
+  await openExample(page, "sizes", "a-row-of-fields");
+  for (const name of ["Medium", "Small"]) {
+    const row = example(page, "a-row-of-fields").getByRole("group", { name });
+    const select = await box(row.getByLabel("Caster"));
+    const control = row.getByRole("radiogroup", { name: "Values" });
+    const before = await box(control);
+    // The same box as the select's, top and bottom.
+    expect(Math.abs(before.y - select.y), `${name}: top`).toBeLessThanOrEqual(0.5);
+    expect(Math.abs(before.height - select.height), `${name}: height`).toBeLessThanOrEqual(0.5);
+    // The input lies over its whole segment: a click anywhere on it lands there.
+    const forecast = control.getByRole("radio", { name: "Forecast" });
+    await forecast.click();
+    await expect(forecast).toBeChecked();
+    expect(await box(control)).toEqual(before);
   }
 });
 

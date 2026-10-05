@@ -137,6 +137,9 @@ export function useRadioGroup<T extends string>({
          choose the first option. */
       id: field?.id,
       role: "radiogroup",
+      /* Named by the field's label: its `htmlFor` alone names nothing here,
+         since a group is not an element HTML can label. */
+      "aria-labelledby": field?.labelId,
       "aria-describedby": describedBy ?? field?.describedBy,
       "aria-required": field?.required || undefined,
       "aria-invalid": field?.invalid || undefined,

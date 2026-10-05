@@ -93,7 +93,7 @@ describe("Demo smoke test", () => {
     expect(DEMO.configurators.map((one) => one.name).sort()).toEqual([
       "Alert", "Badge", "Button", "Checkbox", "Combobox", "DatePicker", "DateRangePicker", "DateTimePicker",
       "DateTimeRangePicker", "Divider", "FormField", "IconButton", "Input", "Meter", "MultiSelect", "NumberInput",
-      "ProgressBar", "RadioGroup", "Select", "Skeleton", "Slider", "Sparkline", "Stat", "Switch", "Tag", "Text",
+      "ProgressBar", "RadioGroup", "SegmentedControl", "Select", "Skeleton", "Slider", "Sparkline", "Stat", "Switch", "Tag", "Text",
       "Textarea",
     ]);
   });

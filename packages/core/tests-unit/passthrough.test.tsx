@@ -131,6 +131,9 @@ const CASES: Record<string, Case> = {
   RadioGroup: (probe) => (
     <core.RadioGroup aria-label="Choice" options={[{ value: "a", label: "A" }]} {...p(probe)} />
   ),
+  SegmentedControl: (probe) => (
+    <core.SegmentedControl aria-label="Choice" options={[{ value: "a", label: "A" }]} {...p(probe)} />
+  ),
   Select: (probe) => <core.Select aria-label="Choice" {...p(probe)} />,
   Skeleton: (probe) => <core.Skeleton {...p(probe)} />,
   Spinner: (probe) => <core.Spinner {...p(probe)} />,

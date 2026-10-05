@@ -534,6 +534,31 @@ export const OUTLINE: readonly Rubric[] = [
         exports: ["RadioGroup"],
       },
       {
+        id: "segmentedcontrol",
+        name: "SegmentedControl",
+        sentence: "One choice out of a few short possibilities, drawn as one field with a segment for each (segmented button, button toggle). It stands in a row of fields as one of them: as tall, as edged and as rounded as a select.",
+        about: [
+          "A screen reader hears a radio group, each segment a radio with its position and whether it is chosen; the control is one tab stop, and the arrow keys move and choose at once, skipping disabled possibilities.",
+          "Each segment is as wide as its word, and the chosen one is filled with ink. The width never follows the choice.",
+        ],
+        alternatives: [
+          { when: "Possibilities that need a line of explanation each", use: "radiogroup" },
+          { when: "More than about four possibilities, or long ones", use: "select" },
+          { when: "A single yes or no", use: "switch" },
+        ],
+        keys: [
+          { key: "Tab", action: "Moves into the control, onto the chosen segment, and out again." },
+          { key: "Arrow Right / Arrow Down", action: "Chooses the next segment, wrapping at the end." },
+          { key: "Arrow Left / Arrow Up", action: "Chooses the previous segment." },
+        ],
+        limits: [
+          "Two to four short possibilities: a word that does not fit its place ends in an ellipsis.",
+          "No icons and no line of explanation in a segment; several chosen at once is not this control.",
+        ],
+        types: ["SegmentedControlProps", "SegmentedOption"],
+        exports: ["SegmentedControl"],
+      },
+      {
         id: "fileinput",
         name: "FileInput",
         sentence: "Choose files from the system's dialog or drop them on the zone (file picker, upload field). The chosen files are listed with their size and can be removed one by one.",

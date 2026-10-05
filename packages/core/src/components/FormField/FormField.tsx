@@ -5,6 +5,10 @@ import styles from "./FormField.module.css";
 
 interface FormFieldContextValue {
   id: string;
+  /** The label's own id. `label htmlFor` names only what HTML can label -
+      an input, a select, a button; a group (`role="radiogroup"`) is named
+      through `aria-labelledby` with this. */
+  labelId: string;
   describedBy?: string;
   invalid: boolean;
   /** A required field. Every field whose role carries it turns this into
@@ -62,11 +66,12 @@ export const FormField = forwardRef<HTMLDivElement, FormFieldProps>(function For
   const generatedId = useId();
   const id = fieldId ?? generatedId;
   const messageId = `${id}-message`;
+  const labelId = `${id}-label`;
   const hasMessage = Boolean(error ?? hint);
 
   return (
     <div ref={ref} className={cx(styles.field, className)} {...rest}>
-      <label className={styles.label} htmlFor={id}>
+      <label id={labelId} className={styles.label} htmlFor={id}>
         {label}
         {required && (
           <span className={styles.required} aria-hidden="true">
@@ -75,7 +80,7 @@ export const FormField = forwardRef<HTMLDivElement, FormFieldProps>(function For
         )}
       </label>
       <FormFieldContext.Provider
-        value={{ id, describedBy: hasMessage ? messageId : undefined, invalid: Boolean(error), required }}
+        value={{ id, labelId, describedBy: hasMessage ? messageId : undefined, invalid: Boolean(error), required }}
       >
         {children}
       </FormFieldContext.Provider>
