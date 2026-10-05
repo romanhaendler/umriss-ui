@@ -11,7 +11,7 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { ChartScene } from "../src/scene";
 import { TooltipHtml } from "../src/TooltipHtml";
-import type { AxisConfig, LineSeriesConfig } from "../src/types";
+import type { AxisConfig, LineSeriesConfig, TooltipHit } from "../src/types";
 
 interface Row {
   t: number;
@@ -135,5 +135,52 @@ describe("The built-in tooltip", () => {
       format: (v) => `${v * 100} per cent`,
     });
     expect(await tooltipAt(scene, 1)).toContain("75 per cent");
+  });
+});
+
+/* charts-bound-to-rows Q27: a matrix' colour channel is `level` everywhere, so
+   the point a custom `render` reads carries it as `level`; `yValue` stays the
+   cell's row, as it is the y position on every kind. */
+describe("A custom tooltip's render", () => {
+  it("receives a matrix cell's level as level and its row as yValue", async () => {
+    const scene = new ChartScene();
+    scene.registerAxis(axis({ id: "x", orientation: "x" }));
+    scene.registerAxis(axis({ id: "y", orientation: "y", accessor: () => 2 }));
+    scene.registerSeries({
+      kind: "matrix",
+      accessor: () => 2,
+      level: (d) => (d as Row).a,
+      coloring: { kind: "gradient", stops: ["#000", "#fff"] },
+      data: [{ t: 0, a: 0.5 }, { t: 1, a: 0.75 }],
+      xAxisId: "x",
+      yAxisId: "y",
+      name: "Utilisation",
+    });
+    const host = document.createElement("div");
+    document.body.appendChild(host);
+    scene.bind(host, document.createElement("canvas"), document.createElement("canvas"), host);
+    let hit: TooltipHit | undefined;
+    scene.registerTooltip({
+      mode: "x",
+      render: (h) => {
+        hit = h;
+        return null;
+      },
+    });
+    scene.requestResize(400, 300);
+    const root = createRoot(host);
+    await act(async () => {
+      root.render(<TooltipHtml scene={scene} />);
+      await frame();
+    });
+    const layout = scene.getLayoutSnapshot().layout;
+    const xAxis = layout.axes.find((a) => a.key === "x:x");
+    await act(async () => {
+      scene.pointerMove(xAxis?.scale.toPx(1) ?? 0, layout.plot.y + layout.plot.height / 2);
+    });
+    act(() => root.unmount());
+    scene.unbind();
+    expect(hit?.points[0]).toMatchObject({ level: 0.75, yValue: 2 });
+    expect(hit?.points[0]).not.toHaveProperty("value");
   });
 });

@@ -58,6 +58,7 @@ place:
 | `YAxis accessor`, `YAxisProps<T>` | nothing - along y the series place their rows; `YAxisProps` has no type parameter |
 | `Matrix accessor` (the row) | `Matrix value`, as the y position on every kind |
 | `Matrix value` (the colour) | `Matrix level`; `MatrixSeriesConfig.value` is `MatrixSeriesConfig.level` |
+| `TooltipPoint.value` of a matrix cell (its colour) | `TooltipPoint.level`; `yValue` stays the cell's row |
 | `ControlChart accessor` | `ControlChart value`, a field name or a function |
 | `hidden` on every series kind, `SeriesBase.hidden` | the view's `hidden`, by the series' `name`: `initialView: { hidden: ["…"] }`, or `toggleSeries`, `showOnly`, `showAllSeries` from `useChart` |
 | `Legend onToggle` | nothing - the legend toggles by itself; the change arrives in `onViewChange` |

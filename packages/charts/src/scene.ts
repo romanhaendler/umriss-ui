@@ -162,7 +162,7 @@ interface Candidate {
   /** A stacked segment reaching over the pointer's y: under "nearest" it wins
       over a nearer top, which may be the segment above's. */
   covers: boolean;
-  value?: number;
+  level?: number;
   segment?: { from: number; to: number; label: string };
   box?: TooltipPoint["box"];
   /** Where its marker stands, where that is not px: a grouped box's centre
@@ -2320,7 +2320,7 @@ export class ChartScene {
         marked: hit.marked,
         areal: hit.areal,
         covers: hit.covers === true,
-        value: hit.value,
+        level: hit.level,
         segment: hit.segment,
         box: hit.box,
         markX:
@@ -2394,7 +2394,7 @@ export class ChartScene {
       yValue: k.yValue,
       datum: (k.entry.config.data ?? this.data)[k.index],
       index: k.index,
-      value: k.value,
+      level: k.level,
       segment: k.segment,
       box: k.box,
     }));
@@ -3293,7 +3293,7 @@ export class ChartScene {
   private tooltipRow(k: Candidate, headerXAxisId: string): TooltipRow {
     const config = k.entry.config;
     const label = k.segment?.label;
-    const value = label !== undefined && label !== "" ? label : this.formatY(k.entry, k.value ?? k.yValue);
+    const value = label !== undefined && label !== "" ? label : this.formatY(k.entry, k.level ?? k.yValue);
     const x = config.xAxisId === headerXAxisId ? "" : this.xLabel(config.xAxisId, k.xValue);
     // A reading the box does not have is no row.
     const box = k.box === undefined ? null : this.boxParts(k.entry, { ...k.box, median: k.yValue }).filter((p) => p.value !== "");
@@ -3375,7 +3375,7 @@ export class ChartScene {
     areal: boolean;
     covers?: boolean;
     color?: string;
-    value?: number;
+    level?: number;
     segment?: { from: number; to: number; label: string };
     box?: TooltipPoint["box"];
   } | null {
@@ -3420,8 +3420,8 @@ export class ChartScene {
       );
       if (index < 0) return null;
       const w = mat.w;
-      const value = w === null ? Number.NaN : (w[index] as number);
-      if (!Number.isFinite(value)) return null; // a hole is no hit
+      const level = w === null ? Number.NaN : (w[index] as number);
+      if (!Number.isFinite(level)) return null; // a hole is no hit
       const xValue = mat.x[index] as number;
       const yValue = mat.y[index] as number;
       // The chip shows the cell's own colour, bucketed as the drawing does it.
@@ -3433,11 +3433,11 @@ export class ChartScene {
         py: yAxis.scale.toPx(yValue),
         color: colors[entry.buckets[index] as number],
         xValue,
-        // yValue stays the position on the y axis; the value that carries the
+        // yValue stays the position on the y axis; the level that carries the
         // colour stands in a field of its own. Colour alone can transport no
         // number - which is why the tooltip has to carry it.
         yValue,
-        value,
+        level,
         marked: false,
         areal: true,
       };
