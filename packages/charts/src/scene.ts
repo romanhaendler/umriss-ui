@@ -1724,11 +1724,11 @@ export class ChartScene {
     });
     // A span that is the axis' own domain is its default, no part of the view.
     for (const axis of this.layout.axes) {
-      const span = this.domainsInView[axis.id];
+      const span = this.heldSpans[axis.id];
       if (axis.ownDomain !== undefined && span !== undefined && sameSpan(span, axis.ownDomain)) {
-        const rest = { ...this.domainsInView };
+        const rest = { ...this.heldSpans };
         delete rest[axis.id];
-        this.domainsInView = rest;
+        this.heldSpans = rest;
       }
     }
     // A gesture's span goes out with the frame that draws it, and an axis
@@ -2980,16 +2980,15 @@ export class ChartScene {
      zoomable x axis shows. The scene holds it and asks only here; `useChart`
      takes a start through `initialView` and reads it through `getView`. */
 
-  /** The span each zoomable x axis shows, by id - every one ever named, also
-      of an axis not declared at the moment: the view hands out only the known
-      ones, and an axis that comes back gets its span back. */
-  private domainsInView: AxisSpans;
-  /** The hidden series, by name - also of a series not declared at the
-      moment, which comes back hidden. */
-  private hiddenInView: readonly string[];
-  /** The view as `useChart` reads it - a new object only when its content
-      changed. */
-  private viewNow: ChartView;
+  /** Held, and drawn: the span each zoomable x axis shows, by id - also of
+      an axis not declared at the moment, which gets its span back. */
+  private heldSpans: AxisSpans;
+  /** Held, and drawn: the hidden series, by name - also of a series not
+      declared at the moment, which comes back hidden. */
+  private heldHidden: readonly string[];
+  /** Reported: what is held less the parts not declared at the moment, as
+      `useChart` reads it - a new object only when its content changed. */
+  private reportedView: ChartView;
   private readonly viewListeners = new Set<() => void>();
   /** Whether the reader, a setter or a view handed in has changed the view
       yet. Until then a change is the start losing what does not occur here -
@@ -3000,9 +2999,9 @@ export class ChartScene {
   }
 
   constructor(initial: ChartView = {}) {
-    this.domainsInView = { ...initial.domains };
-    this.hiddenInView = [...(initial.hidden ?? [])];
-    this.viewNow = this.currentView();
+    this.heldSpans = { ...initial.domains };
+    this.heldHidden = [...(initial.hidden ?? [])];
+    this.reportedView = this.viewToReport();
   }
 
   subscribeView = (listener: () => void): (() => void) => {
@@ -3012,24 +3011,24 @@ export class ChartScene {
     };
   };
 
-  getView = (): ChartView => this.viewNow;
+  getView = (): ChartView => this.reportedView;
 
   /** Goes to a view handed in; what it leaves out goes back to its default -
       also the span or the hidden name of a part not declared at the moment,
       which the view reported does not show. */
   applyView(view: ChartView): void {
     if (viewKey(view) === viewKey(this.heldView())) return;
-    this.domainsInView = { ...view.domains };
+    this.heldSpans = { ...view.domains };
     this.setHidden([...(view.hidden ?? [])]);
   }
 
   /** Puts a span in view on a zoomable x axis; `null` shows the axis' own
       `domain` again. */
   setDomain = (axisId: string, span: readonly [number, number] | null): void => {
-    const next = { ...this.domainsInView };
+    const next = { ...this.heldSpans };
     if (span === null) delete next[axisId];
     else next[axisId] = [span[0], span[1]];
-    this.domainsInView = next;
+    this.heldSpans = next;
     this.viewMoved();
   };
 
@@ -3039,7 +3038,7 @@ export class ChartScene {
   /** Hides the series `names` together, or shows them where every one is
       hidden - a state's legend entry speaks for every band that shows it. */
   toggleNames(names: readonly string[]): void {
-    this.hideSome(toggleHidden(this.hiddenInView, names));
+    this.hideSome(toggleHidden(this.heldHidden, names));
   }
 
   /** Hides every series but `name`. */
@@ -3048,7 +3047,7 @@ export class ChartScene {
   /** The legend's gesture: shows only the series `names` - or all, where they
       were the only ones visible. `from` is the hidden series it judges by: a
       double click by those before its first click. */
-  showOnlyNames(names: readonly string[], from: readonly string[] = this.hiddenInView): void {
+  showOnlyNames(names: readonly string[], from: readonly string[] = this.heldHidden): void {
     const series = this.seriesNames();
     this.hideSome(onlyVisible(names, from, series) ? [] : showOnly(names, series));
   }
@@ -3056,8 +3055,9 @@ export class ChartScene {
   /** Shows every series again. */
   showAllSeries = (): void => this.setHidden([]);
 
-  /** The hidden series now, by name - what a double click comes back to. */
-  hiddenNow = (): readonly string[] => this.hiddenInView;
+  /** The hidden series held now, by name - what a double click comes back
+      to. */
+  hiddenNames = (): readonly string[] => this.heldHidden;
 
   /** Hides `next` - unless it hides every series: then all are shown, and
       the live region says so. */
@@ -3076,7 +3076,7 @@ export class ChartScene {
 
   private setHidden(next: string[]): void {
     const before = new Map([...this.series.values()].map((e) => [e, this.isHidden(e.config)]));
-    this.hiddenInView = next;
+    this.heldHidden = next;
     // A hidden member leaves its place in the stack: the others sum anew.
     for (const [entry, was] of before) {
       if (was !== this.isHidden(entry.config) && stackOf(entry.config) !== undefined) this.materialsDirty = true;
@@ -3093,12 +3093,13 @@ export class ChartScene {
   /** Everything the scene holds, also of the parts not declared at the
       moment. */
   private heldView(): ChartView {
-    const domains = this.domainsInView;
-    const hidden = this.hiddenInView;
+    const domains = this.heldSpans;
+    const hidden = this.heldHidden;
     return { ...(Object.keys(domains).length > 0 && { domains }), ...(hidden.length > 0 && { hidden }) };
   }
 
-  private currentView(): ChartView {
+  /** What is held as it would be reported now. */
+  private viewToReport(): ChartView {
     const axes = this.axes.size === 0 ? null : new Set(this.zoomAxisIds());
     const names = this.series.size === 0 ? null : new Set(this.seriesNames().filter((n) => n !== undefined));
     return onlyKnown(this.heldView(), axes, names);
@@ -3107,14 +3108,14 @@ export class ChartScene {
   /** Hands the view out where its content changed. A gesture calls it from
       the frame, so that a pan is reported at most once per frame. */
   private publishView(): void {
-    const next = this.currentView();
-    if (viewKey(next) === viewKey(this.viewNow)) return;
-    this.viewNow = next;
+    const next = this.viewToReport();
+    if (viewKey(next) === viewKey(this.reportedView)) return;
+    this.reportedView = next;
     for (const listener of this.viewListeners) listener();
   }
 
   private isHidden(config: SeriesConfig): boolean {
-    return config.name !== undefined && this.hiddenInView.includes(config.name);
+    return config.name !== undefined && this.heldHidden.includes(config.name);
   }
 
   private zooms(config: AxisConfig): boolean {
@@ -3128,7 +3129,7 @@ export class ChartScene {
   /** What an axis shows: on a zoomable x axis the span the view names, and
       its own `domain` where the view names none. */
   private domainOf(config: AxisConfig): AxisConfig["domain"] {
-    return (this.zooms(config) ? this.domainsInView[config.id] : undefined) ?? config.domain;
+    return (this.zooms(config) ? this.heldSpans[config.id] : undefined) ?? config.domain;
   }
 
   /** The narrowest and widest span zoom reaches on an axis: its own, or at
@@ -3191,9 +3192,9 @@ export class ChartScene {
   private move(next: (domain: readonly [number, number], config: AxisConfig) => [number, number]): void {
     let moved = false;
     for (const { config, layout } of this.zoomAxes()) {
-      const domain = next(this.domainsInView[config.id] ?? layout.scale.domain, config);
+      const domain = next(this.heldSpans[config.id] ?? layout.scale.domain, config);
       if (!(domain[1] - domain[0] > 0) || !Number.isFinite(domain[1] - domain[0])) continue;
-      this.domainsInView = { ...this.domainsInView, [config.id]: domain };
+      this.heldSpans = { ...this.heldSpans, [config.id]: domain };
       moved = true;
     }
     if (moved) {
@@ -3275,7 +3276,7 @@ export class ChartScene {
   resetZoom(): void {
     if (!this.hasZoom()) return;
     const ids = new Set(this.zoomAxisIds());
-    this.domainsInView = Object.fromEntries(Object.entries(this.domainsInView).filter(([id]) => !ids.has(id)));
+    this.heldSpans = Object.fromEntries(Object.entries(this.heldSpans).filter(([id]) => !ids.has(id)));
     this.viewMoved();
   }
 
