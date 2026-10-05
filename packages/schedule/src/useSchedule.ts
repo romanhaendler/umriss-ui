@@ -11,7 +11,8 @@ import type { ForwardRefExoticComponent, RefAttributes } from "react";
 import { Schedule as ScheduleOn, type ScheduleHandle, type ScheduleProps } from "./Schedule";
 import { BlockedTimes, Dependencies, Lane, LaneGroup, Subtasks } from "./parts";
 import { ScheduleScene } from "./scene";
-import { Echoes, viewKey, type ScheduleView } from "./view";
+import { Echoes } from "@umriss-ui/charts";
+import { viewKey, type ScheduleView } from "./view";
 
 /** What `useSchedule` takes: the view to start from and the handler that
     hears every change of it. */
