@@ -11,15 +11,21 @@
      it a width: stretched, its segments would stand in an empty box. */
   .control {
     composes: text from "#own-styles";
+    --_radius: var(--u-radius-md);
     display: inline-flex;
     inline-size: fit-content;
     min-inline-size: 0;
     max-inline-size: 100%;
     height: var(--u-control-height);
-    border-radius: var(--u-radius-md);
+    border-radius: var(--_radius);
     background: var(--u-color-surface);
     outline: 1px solid transparent;
     box-shadow: var(--u-edge-strong);
+  }
+
+  /* An invalid field's edge, as the select's. */
+  .invalid {
+    box-shadow: 0 0 0 1px var(--u-color-danger);
   }
 
   .segment {
@@ -41,17 +47,17 @@
 
   /* Square inside, rounded where the field is. */
   .segment:first-child {
-    border-start-start-radius: var(--u-radius-md);
-    border-end-start-radius: var(--u-radius-md);
+    border-start-start-radius: var(--_radius);
+    border-end-start-radius: var(--_radius);
   }
 
   .segment:last-child {
-    border-start-end-radius: var(--u-radius-md);
-    border-end-end-radius: var(--u-radius-md);
+    border-start-end-radius: var(--_radius);
+    border-end-end-radius: var(--_radius);
   }
 
-  /* The seam: a hairline between two segments, as in the button group - a
-     line and not a border, which would change the height. Beside the chosen
+  /* The seam: a hairline in the edge's colour between two segments - a line
+     and not a border, which would change the height. Beside the chosen
      segment its ink is the edge, and the seam would be a second one. */
   .segment + .segment::before {
     content: "";
@@ -108,9 +114,20 @@
     box-shadow: var(--u-focus-ring);
   }
 
+  .invalid .segment:has(.input:focus-visible) {
+    outline: 2px solid transparent;
+    box-shadow: var(--u-focus-ring-danger);
+  }
+
+  /* Dimmed once - on the control, or on a single possibility - and the
+     not-allowed cursor on every segment that cannot be chosen, the whole
+     control's included. */
   .disabled {
-    cursor: not-allowed;
     opacity: 0.5;
+  }
+
+  .segment:has(.input:disabled) {
+    cursor: not-allowed;
   }
 
   /* The chosen segment is a ground in the ink, and forced colours repaint
@@ -135,22 +152,12 @@
   /* ---- Small size: a small select's height, type and radius ---- */
 
   .sm {
+    --_radius: var(--u-radius-sm);
     height: var(--u-control-height-sm);
-    border-radius: var(--u-radius-sm);
   }
 
   .sm .segment {
     padding-inline: var(--u-space-2);
     font-size: var(--u-text-xs);
-  }
-
-  .sm .segment:first-child {
-    border-start-start-radius: var(--u-radius-sm);
-    border-end-start-radius: var(--u-radius-sm);
-  }
-
-  .sm .segment:last-child {
-    border-start-end-radius: var(--u-radius-sm);
-    border-end-end-radius: var(--u-radius-sm);
   }
 }

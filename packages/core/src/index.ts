@@ -25,7 +25,6 @@ export * from "./components/Popover";
 export * from "./components/Modal";
 export * from "./components/MultiSelect";
 export * from "./components/RadioGroup";
-export * from "./components/SegmentedControl";
 export * from "./components/Select";
 export * from "./components/Skeleton";
 export * from "./components/Spinner";
@@ -95,6 +94,10 @@ export * from "./components/FileInput";
    surfaces use stays inside. */
 export { ControlSizeProvider } from "./lib/controlSize";
 export type { ControlSize, ControlSizeProviderProps } from "./lib/controlSize";
+
+/* The segmented control (field-row-alignment 04) stands at the end for the
+   same rule, not at "RadioGroup" beside its mechanics. */
+export * from "./components/SegmentedControl";
 
 /* The types a props table names, so that every name a reader sees can be
    imported (types-without-holes 06). They bring no stylesheet. */

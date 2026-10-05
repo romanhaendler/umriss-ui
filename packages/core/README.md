@@ -211,7 +211,11 @@ The table and the alarm list are not part of this package. They live in
    heights takes `size` and reads it through `useControlSize`, so a
    `ControlSizeProvider` reaches it, and a surface of its own resets it.
    Held by `tests-unit/controlSize.test.tsx` and
-   `tests-visual/features-sizes.spec.ts`.
+   `tests-visual/features-sizes.spec.ts`. Two exceptions, by design: the
+   `SegmentedControl` is a field to the eye but shows no value, so it is as
+   wide as its words (`fit-content`) and fills no place; and the `Checkbox`
+   has one look and no `size` - in a field it reads the place's size only
+   for the height of the row it stands in (field-row-alignment).
 
 ## Roadmap
 

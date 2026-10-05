@@ -16,14 +16,13 @@
    MultiSelect. Not exported from the package. */
 
 import { useId, useRef } from "react";
-import type { InputHTMLAttributes, KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
+import type { InputHTMLAttributes, KeyboardEvent as ReactKeyboardEvent } from "react";
 import { idPart } from "../../lib/idPart";
 import { useFormField } from "../FormField";
 
 /** What the mechanics need of a possibility. */
 export interface RadioChoice<T extends string> {
   value: T;
-  label: ReactNode;
   disabled?: boolean;
 }
 
