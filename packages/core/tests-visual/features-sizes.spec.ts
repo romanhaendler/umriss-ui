@@ -264,9 +264,18 @@ test("Every control in a row of fields stands on the select's line", async ({ pa
     const row = stage.getByRole("group", { name });
     const line = await middle(row.getByLabel("Caster"));
     // A word's own line: the box of its label, one line tall.
-    for (const word of ["Raw"]) {
+    for (const word of ["Raw", "Show archived", "Live"]) {
       const words = row.getByText(word, { exact: true });
       expect(Math.abs((await middle(words)) - line), `${name}: ${word}`).toBeLessThanOrEqual(1);
     }
   }
+});
+
+test("A checkbox or switch outside a field keeps its own height", async ({ page }) => {
+  // Outside a field they stand in lists, where a control's height would spread them apart.
+  const height = async (locator: Locator) => (await box(locator)).height;
+  await openExample(page, "checkbox", "select-all-with-a-mixed-state");
+  expect(await height(page.getByText("Maya Lindgren", { exact: true }).locator(".."))).toBeLessThan(20);
+  await openExample(page, "switch", "settings-of-a-service");
+  expect(await height(page.getByRole("switch").first().locator(".."))).toBeLessThan(20);
 });

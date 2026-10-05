@@ -35,7 +35,7 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(function Switch(
   const isInvalid = invalid ?? field?.invalid ?? false;
 
   return (
-    <label className={cx(styles.wrapper, size === "sm" && styles.sm, className)} style={style} htmlFor={inputId}>
+    <label className={cx(styles.wrapper, size === "sm" && styles.sm, field && styles.field, className)} style={style} htmlFor={inputId}>
       <input
         ref={ref}
         type="checkbox"

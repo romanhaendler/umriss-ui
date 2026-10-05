@@ -131,6 +131,24 @@
     margin-top: calc((var(--u-text-sm) * var(--u-leading-tight) - 16px) / 2);
   }
 
+  /* In a field the checkbox stands in a row of fields: as tall as a control,
+     its first line - the label's, or the box alone - on the line a field's
+     value stands on. Outside one it stays as compact as a list needs it
+     (field-row-alignment 02). */
+  .field {
+    --_line: 16px;
+    --_control: var(--u-control-height);
+    padding-block: calc((var(--_control) - var(--_line)) / 2);
+  }
+
+  .field:has(.label) {
+    --_line: calc(var(--u-text-sm) * var(--u-leading-tight));
+  }
+
+  .field.sm {
+    --_control: var(--u-control-height-sm);
+  }
+
   /* Forced colours repaint every ground with the page's (forced-colors 02):
      the tick is a stroke and stays, the mixed state's dash is a ground and
      would go - so it takes the system's text colour, the tick's. */

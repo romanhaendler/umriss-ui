@@ -2,6 +2,7 @@ import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 import type { InputHTMLAttributes, ReactNode } from "react";
 import { cx } from "../../lib/cx";
 import { useFormField } from "../FormField";
+import { useControlSize } from "../../lib/controlSize";
 import styles from "./Checkbox.module.css";
 
 /** The props of `Checkbox`: a native checkbox's attributes and its label. */
@@ -29,9 +30,12 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(function Che
 
   const field = useFormField();
   const inputId = id ?? field?.id;
+  /* The checkbox has one look; the size of its place says only how tall a
+     field it stands in is. */
+  const size = useControlSize(undefined);
 
   return (
-    <label className={cx(styles.wrapper, className)} style={style} htmlFor={inputId}>
+    <label className={cx(styles.wrapper, field && styles.field, field && size === "sm" && styles.sm, className)} style={style} htmlFor={inputId}>
       <input
         ref={innerRef}
         type="checkbox"
