@@ -1,6 +1,6 @@
 # 01 — A head holds its width, never its state
 
-Status: ready-for-human
+Status: done
 
 ## Found
 
@@ -38,3 +38,16 @@ A head without a width grows with its label, as before.
   Width-and-pinning page's, and any other picture with a sized head, move with
   this ticket.
 - The changelog entry, in the release that carries this (docs/releasing.md).
+
+## Comments
+
+**Delivered in table 0.13.1 (2026-10-05).** Lint, types, every package's unit
+tests, the build and `pnpm test:visual` green. The suite's first run failed
+nine of core's accessibility and configurator checks by timeout under load;
+all nine passed on `--last-failed`, untouched by this change. No existing
+baseline moved. The new example's two baselines were looked at before they
+were kept: its first form gave the Shipment column a width as well, so the
+full-width table handed its surplus to the narrow columns and the picture
+showed no cut label - the Shipment column now takes the surplus. Firefox, where
+the arrow was cut, was not seen by the agent: the screenshot suite runs in
+Chromium, and Firefox would not start under Playwright here.
