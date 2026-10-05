@@ -108,3 +108,36 @@ visual suites and the release build were not run - that is the acceptance's.
 - Checks: charts, schedule, table typecheck and unit suites green; the
   charts visual tests for zoom, 'Show all', cursor sync and the view (light
   and dark) green, no screenshot renewed.
+
+### Fixed after the standards review (2026-10-05)
+
+- **A view handed in is compared with what the chart holds**, not with the
+  view it reported: the span or hidden name of a part not declared at the
+  moment no longer survives a view that leaves it out and comes back when
+  the part does. c657e629.
+- **`Accessor<T>`, `ListAccessor<T>` are `ValueFunction<T>`, `ListFunction<T>`**
+  (the glossary avoids "accessor"); a row in the charts changelog's
+  migration table. CONTEXT.md's **Value** names its chart meaning - a
+  series' y position, the x axis' position - and the matrix' colour as its
+  **Level channel**. The internal config field `accessor` stays: no
+  reader's word. 2b681076.
+- **`useSchedule` at the end of the schedule's entry**: the stylesheets of
+  the library, the schedule's demo and core's control room build byte for
+  byte the same, so the rule holds without an exception. a63f8b8a.
+- **`Echoes` once for charts and schedule**: exported from the charts'
+  entry, the schedule takes it from there (ADR-0022); the table keeps its
+  copy, as it may not depend on the charts. 6ef81ccf.
+- **`useSchedule` memoises** what it hands back, as `useChart` does.
+  4128ee48.
+- **`AxisSpans`** names the span per zoomable x axis (`ChartView.domains`,
+  `ChartParts.domains`, the scene's). `ScheduleView.domain` is one span, not
+  a record, and keeps its tuple. 62188bb9.
+- **The scene's view fields** say what they are: `heldSpans`, `heldHidden`
+  (held and drawn), `reportedView` (what `useChart` reads), `hiddenNames()`,
+  `viewToReport()`. aa0fe3c0.
+
+- Checks: `pnpm typecheck` and `pnpm lint` green; unit suites charts
+  797/797, schedule 337/337, table 778/778, the demo's site and llms guards
+  green. The schedule's screenshots, forced colours and keyboard images
+  (light and dark) 284 passed, none renewed; no charts run, nothing it draws
+  changed.
