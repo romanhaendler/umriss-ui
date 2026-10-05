@@ -135,8 +135,9 @@ place:
   all instead, and the polite live region says so (`allShown`); the plot's
   summary names Shift+Enter (`legendHelp`). A view handed in is taken as
   given and may hide every series.
-- **Types**: `ChartParts`, `ChartOptions`, `ChartView`, `ZoomLimits`, and the
-  forms a value takes - `Value`, `NumberField`, `ListValue`, `ListField`.
+- **Types**: `ChartParts`, `ChartOptions`, `ChartView`, `AxisSpans`,
+  `ZoomLimits`, and the forms a value takes - `Value`, `NumberField`,
+  `ListValue`, `ListField`.
 - **`Echoes`** - the rule that tells a view reported and handed back late
   from one handed in, which `@umriss-ui/schedule` takes from here (ADR-0022)
   instead of a copy of its own.

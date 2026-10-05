@@ -5,12 +5,15 @@
    reports every change through `onViewChange`. Pure, so that the rules can be
    tested without a canvas. */
 
+/** The span each zoomable x axis shows, by axis `id`, in the axis' units. */
+export type AxisSpans = Readonly<Record<string, readonly [number, number]>>;
+
 /** How a reader is looking at a chart. Whatever is at its default is absent. */
 export interface ChartView {
   /** The span each zoomable x axis shows, by axis `id` - a lone x axis is
       `"x"`. An axis absent here shows its own `domain`. An id that names no
       zoomable x axis falls out. */
-  domains?: Readonly<Record<string, readonly [number, number]>>;
+  domains?: AxisSpans;
   /** The hidden series, by `name`; a series without one cannot be hidden. A
       name no series carries falls out. */
   hidden?: readonly string[];
