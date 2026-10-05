@@ -45,6 +45,25 @@ describe("SegmentedControl – what it says", () => {
   });
 });
 
+describe("SegmentedControl – icons (segmented-control-inset 02)", () => {
+  it("names a possibility by its word alone, its icon hidden", () => {
+    render(
+      <SegmentedControl
+        aria-label="Theme"
+        options={[
+          { value: "light", label: "Light", icon: <svg data-testid="sun"><title>Sun</title></svg> },
+          { value: "dark", label: "Dark" },
+        ]}
+        value="light"
+        onChange={vi.fn()}
+      />,
+    );
+    expect(radio("Light").value).toBe("light");
+    expect(screen.getByTestId("sun").closest("[aria-hidden='true']")).not.toBeNull();
+    expect(screen.queryByRole("radio", { name: /Sun/ })).toBeNull();
+  });
+});
+
 describe("SegmentedControl – the keys", () => {
   it("is one tab stop, on the chosen possibility", () => {
     render(<SegmentedControl aria-label="State" options={OPTIONS} value="cleaned" onChange={vi.fn()} />);

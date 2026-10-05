@@ -43,6 +43,10 @@ commit.
   gives it, as a field in a column does, and shares it equally between its
   segments, their words centred. A word too long for its share still ends in
   an ellipsis. Without `fill` it is as wide as its words, as before.
+- **`SegmentedOption` takes `icon`**, drawn before the word with a button's
+  gap, at `--u-icon-size` (`--u-icon-size-sm` at `sm`) and hidden from
+  assistive technology - the word names the possibility. Where the word ends
+  in an ellipsis, the icon stays whole.
 
 ## 0.26.0 – A row of fields on one line, and the segmented control (Oct. 2026)
 
