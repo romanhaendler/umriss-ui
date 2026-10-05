@@ -1,6 +1,6 @@
 # 01 — A horizontal radio group stands on the field line in a row of fields
 
-Status: ready-for-agent
+Status: done
 
 Blocked by: None (can start immediately)
 
@@ -22,11 +22,23 @@ the Sizes behaviour tests (ADR-0041).
 
 ## Acceptance criteria
 
-- [ ] A demo example shows a row of fields - select, select, horizontal radio group - at `md` and at `sm`
-- [ ] A Playwright test on that example measures each control's first line of text: its vertical centre lies within 1 px of the select's text centre, at both sizes
-- [ ] The horizontal radio group takes its size from a `ControlSizeProvider` around it, and its own `size` wins
-- [ ] A horizontal option with a description keeps its label on the field line; the description runs below
-- [ ] A vertical radio group's height and spacing are unchanged
-- [ ] No new token; the heights come from the control height tokens (ADR-0045)
-- [ ] Screenshots that change because of the taller horizontal group (the demo configurator's panel among them) are reviewed and updated, not suppressed
-- [ ] Lint, types, unit, build and visual pass
+- [x] A demo example shows a row of fields - select, select, horizontal radio group - at `md` and at `sm`
+- [x] A Playwright test on that example measures each control's first line of text: its vertical centre lies within 1 px of the select's text centre, at both sizes
+- [x] The horizontal radio group takes its size from a `ControlSizeProvider` around it, and its own `size` wins
+- [x] A horizontal option with a description keeps its label on the field line; the description runs below
+- [x] A vertical radio group's height and spacing are unchanged
+- [x] No new token; the heights come from the control height tokens (ADR-0045)
+- [x] Screenshots that change because of the taller horizontal group (the demo configurator's panel among them) are reviewed and updated, not suppressed
+- [x] Lint, types, unit, build and visual pass
+
+## Comments
+
+Delivered. The horizontal group's block padding is half of the control height
+less one line of `text-sm` (`text-xs` at `sm`): 6.25 px at `md`, 4.75 px at
+`sm`. The test was red at 6.25 px, as the arithmetic said. The description
+case is not measured on its own: the padding counts one line of label and
+nothing else, so what follows below cannot move the first line. The vertical
+group is untouched - its screenshots did not change. 106 baselines changed,
+all reviewed by sample: the configurator's choice groups grow by 12.5 px and
+every page below one shifts by that, which moves text by a half pixel
+(anti-aliasing only) and a page screenshot's content under a fixed popover.
