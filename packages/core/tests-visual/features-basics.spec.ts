@@ -63,6 +63,47 @@ test("Toast deck opens with Alt+T and gives the focus back on Escape", async ({ 
   await expect(page.getByRole("button", { name: "2 messages, show all" })).toBeVisible();
 });
 
+/* toast-inset-tokens 01: the distance from the window's edge is a token per
+   edge. Unset, the region stands where it always stood - 20 px, 16 px on a
+   phone; set on `:root`, it moves every position of its edge at every width
+   and leaves the other edge alone. */
+const TOAST_POSITIONS = ["Top start", "Top center", "Top end", "Bottom start", "Bottom center", "Bottom end"];
+
+async function toastInsets(page: import("@playwright/test").Page, width: number, tokens = "") {
+  await page.setViewportSize({ width, height: 800 });
+  await openExample(page, "toast", "where-they-stand");
+  if (tokens !== "") await page.addStyleTag({ content: `:root { ${tokens} }` });
+  const insets: Record<string, number> = {};
+  for (const name of TOAST_POSITIONS) {
+    await page.getByRole("button", { name, exact: true }).click();
+    const region = page.locator("[data-edge]").filter({ has: page.getByText(`Standing ${name.toLowerCase()}.`) });
+    await expect(region).toBeVisible();
+    insets[name] = await region.evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      return element.getAttribute("data-edge") === "top" ? rect.top : innerHeight - rect.bottom;
+    });
+  }
+  return insets;
+}
+
+for (const width of [1280, 320]) {
+  const unset = width === 320 ? 16 : 20;
+
+  test(`Toasts stand where they always stood without the tokens (${width} px)`, async ({ page }) => {
+    for (const [name, inset] of Object.entries(await toastInsets(page, width))) expect(inset, name).toBeCloseTo(unset, 0);
+  });
+
+  test(`The top token moves the top toasts only (${width} px)`, async ({ page }) => {
+    const insets = await toastInsets(page, width, "--u-toast-inset-top: 72px;");
+    for (const [name, inset] of Object.entries(insets)) expect(inset, name).toBeCloseTo(name.startsWith("Top") ? 72 : unset, 0);
+  });
+
+  test(`The bottom token moves the bottom toasts only (${width} px)`, async ({ page }) => {
+    const insets = await toastInsets(page, width, "--u-toast-inset-bottom: 64px;");
+    for (const [name, inset] of Object.entries(insets)) expect(inset, name).toBeCloseTo(name.startsWith("Bottom") ? 64 : unset, 0);
+  });
+}
+
 test("Tabs change the content", async ({ page }) => {
   await openExample(page, "tabs", "loading-and-empty-panels");
   const example = page.locator('[data-example="loading-and-empty-panels"]');

@@ -20,12 +20,14 @@
     box-shadow: var(--u-focus-ring);
   }
 
+  /* The distance from the edge is the application's to set
+     (toast-inset-tokens); the tokens hold the phone's own. */
   .region[data-edge="bottom"] {
-    bottom: var(--u-space-5);
+    bottom: var(--u-toast-inset-bottom);
   }
 
   .region[data-edge="top"] {
-    top: var(--u-space-5);
+    top: var(--u-toast-inset-top);
   }
 
   .region[data-along="start"] {
@@ -47,14 +49,6 @@
       width: auto;
       inset-inline: var(--u-space-4);
       margin-inline: 0;
-    }
-
-    .region[data-edge="bottom"] {
-      bottom: var(--u-space-4);
-    }
-
-    .region[data-edge="top"] {
-      top: var(--u-space-4);
     }
   }
 

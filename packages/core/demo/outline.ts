@@ -95,7 +95,7 @@ export const OUTLINE: readonly Rubric[] = [
         limits: [
           "No theme object, no theme provider and no theme switch: a theme is a set of token overrides in your stylesheet, the mode is the page's `color-scheme` (ADR-0021).",
           "A token that names another resolves where it is declared: set `--u-color-accent` on a region, and `--u-focus-ring`, which names it on `:root`, still draws the application's accent there. Set the naming token in the region too.",
-          "A panel opened in a portal - a popover, a tooltip, a toast - takes the tokens and the `color-scheme` of the place it lands, not of the region it was opened from. Give [UmrissProvider](#/umrissprovider) a `portalTarget` inside the region, or override on `:root`.",
+          "A panel opened in a portal - a popover, a tooltip, a toast - takes the tokens and the `color-scheme` of the place it lands, not of the region it was opened from. Give [UmrissProvider](#/umrissprovider) a `portalTarget` inside the region, or override on `:root` - as for the toasts' distance from the window's edge, `--u-toast-inset-top` and `--u-toast-inset-bottom`.",
         ],
         types: [],
         exports: [],
