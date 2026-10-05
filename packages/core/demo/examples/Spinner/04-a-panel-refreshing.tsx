@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { Button, Card, CardBody, CardHeader, Spinner, Stack, Text } from "../../../src";
+import { Button, Card, CardBody, CardHeader, Stack, Text } from "../../../src";
 
 export const title = "Refresh a panel in place";
-export const lead = "While a panel reloads, a spinner in its head says so and the old figures stay readable below it.";
+export const lead = "While a panel reloads, the button that started it carries the spinner - `loading` on a `Button` - and the old figures stay readable below it. The button stays, so the head keeps its height.";
 
 export default function APanelRefreshing() {
   const [loading, setLoading] = useState(false);
@@ -18,18 +18,9 @@ export default function APanelRefreshing() {
       <CardHeader
         title="Open incidents"
         actions={
-          loading ? (
-            <Stack direction="row" gap={2} align="center">
-              <Spinner size={12} aria-label="Refreshing the incidents" />
-              <Text as="span" size="xs" tone="muted">
-                Refreshing
-              </Text>
-            </Stack>
-          ) : (
-            <Button size="sm" variant="ghost" onClick={() => setLoading(true)}>
-              Refresh
-            </Button>
-          )
+          <Button size="sm" variant="ghost" loading={loading} onClick={() => setLoading(true)}>
+            Refresh
+          </Button>
         }
       />
       <CardBody>
