@@ -20,7 +20,7 @@ export default function ALabelWiderThanItsColumn() {
 
   return (
     <Table ariaLabel="Shipments in narrow columns">
-      <Column value="id" label="Shipment" rowHeader width={120} />
+      <Column value="id" label="Shipment" rowHeader />
       <Column value="weight" label="Gross weight in kilograms" width={75} />
       <Column value="carrier" label="Carrier responsible for delivery" width={75} filter="list" />
     </Table>
