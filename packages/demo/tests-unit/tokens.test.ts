@@ -239,9 +239,9 @@ describe("core's stylesheet", () => {
 describe("the charts' stylesheet", () => {
   const css = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "..", "..", "charts", "src", "styles", "charts.css"), "utf8");
 
-  it("yields a row and an anchor for every one of its 29 tokens, counted on the text", () => {
+  it("yields a row and an anchor for every one of its 33 tokens, counted on the text", () => {
     const tokens = readTokens(css, CHARTS);
-    expect(tokens.flatMap((group) => group.tokens)).toHaveLength(29);
+    expect(tokens.flatMap((group) => group.tokens)).toHaveLength(33);
     const html = referenceHtml(chartsTokenTable(tokens, []));
     expect(missingTokens(css, html)).toEqual([]);
     expect(missingTokens(css, html.replace('id="token-uc-radius"', ""))).toEqual(["--uc-radius"]);

@@ -1,6 +1,6 @@
 # A chart that is loading says so
 
-Status: ready-for-agent
+Status: done
 Date:   2026-10-05
 Origin: "Mir fehlt eine Loading-Animation (analog zur Tabelle) in den Charts." In
 review, the user said the animation must look genuinely good. Its look is
@@ -256,3 +256,14 @@ variants side by side in the charts demo, and the user picks one by eye.
 - ADR-0035 (data-dense applications) supports a chart that is honest about
   stale data. A dashboard tile and a chart that refresh side by side should
   agree on what "reloading" looks like.
+
+## Comments
+
+Delivered (2026-10-05) in three tickets under `issues/`:
+
+- 02: `loading`, stale over a course.
+- 01: the prototype, from which the user picked variant A.
+- 03: the silhouette.
+
+Each ticket carries its own report. The prototype's variants stay on the
+branch `prototype/chart-loading-silhouette`.

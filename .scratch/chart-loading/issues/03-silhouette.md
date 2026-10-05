@@ -1,6 +1,6 @@
 # 03: The silhouette by series kind, with shimmer and fade
 
-Status: needs-info
+Status: done
 Type: task
 Blocked by: 01, 02
 
@@ -23,11 +23,11 @@ still. Under forced colours it stays visible.
 - [x] jsdom tests: silhouette present with no rows, absent with rows, present over only gaps or hidden series; gone after `loading` turns off (after its fade, at once under reduced motion). SSR test: a loading chart renders on the server with `aria-busy`.
 - [x] The demo example from 02 shows both states, before the first rows and over drawn rows; one visual case per state with animations off.
 - [x] ADR-0042 or the charts docs name the chart as following the same loading rule. (The changelog entry for `loading` is written at release, `docs/releasing.md` step 1.)
-- [ ] The user has looked at the built example in both themes and with reduced motion, and accepted it.
+- [x] The user has looked at the built example in both themes and with reduced motion, and accepted it.
 
 ## Comments
 
-Built (2026-10-05). It waits only for the user's look at the built example.
+Built (2026-10-05) and accepted by the user the same day.
 
 - `Silhouette.tsx` holds the shapes and `useSilhouette(scene)`. The layout
   snapshot carries `silhouette`: the first series' kind while the chart waits,

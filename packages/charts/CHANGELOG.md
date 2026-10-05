@@ -29,6 +29,55 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## 0.12.0 – A chart that is loading says so (Oct. 2026)
+
+A chart takes `loading`, as the table does (ADR-0042). Over a course already
+drawn, the course stays and dims. Over nothing to show, a silhouette of the
+chart to come stands in the plot and shimmers, where the chart used to say
+"No data" before the first rows. A chart without `loading` behaves exactly as
+before.
+
+### Added
+
+- **`Chart loading`.** Over a course already drawn:
+  - The course stays and dims after `--u-delay-stale`. A limit's label dims
+    with its line; the axes stay as they are.
+  - The plot takes no pointer until the answer is in: no tooltip, no drag, no
+    wheel zoom. An open tooltip and a drag under way end when the reload
+    begins.
+  - A chart in a `syncId` group neither shares a position nor draws one.
+  - The keys still walk and zoom, and the legend and "Show all" stay usable:
+    they change the view, not the data.
+  - Leaving, the course comes back at once.
+- **The silhouette.** Over nothing to show (no rows, only gaps, or every
+  series hidden), a quiet outline of the chart to come stands in the plot:
+  - Columns for a bar or box plot, a soft wave for a line or scatter, the wave
+    filled for an area, strips otherwise. The first series in drawing order
+    decides.
+  - One band sweeps across every shape at a constant speed, whatever the
+    chart's width.
+  - While it stands, `empty` waits, and the axes show no ticks: before its
+    rows a chart has no range.
+  - When the answer is laid out, the silhouette fades out and the course
+    fades in. "No data" never shows in between.
+  - With reduced motion it stands still and goes at once. Under forced colours
+    its shapes take `GrayText`.
+- **The plot is `aria-busy`** while the chart is loading, from the server's
+  HTML on. The silhouette is hidden from a screen reader.
+- **Four tokens** on `.uc-root`, each falling back on core's where it is
+  loaded:
+  - `--uc-delay-stale` (`--u-delay-stale`, 200ms): how long a reloaded course
+    waits before it dims.
+  - `--uc-silhouette`: the shapes' colour, 10 % of the text colour.
+  - `--uc-ease-swell` (`--u-ease-swell`): the band's easing.
+  - `--uc-fade` (`--u-duration-medium` and `--u-ease-out`): the fade between
+    silhouette and course.
+
+  The plot's `data-stale` and `data-arriving` are not part of the styling API
+  (ADR-0045).
+
+---
+
 ## 0.11.0 – A chart bound to its rows, with a view of its own (Oct. 2026)
 
 Two efforts in one break, released together with `@umriss-ui/table` and
