@@ -18,6 +18,31 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Oct. 2026 — A row of fields on one line
+
+- **Controls in a row of fields share one line, and the segmented control
+  stands among them** (`.scratch/field-row-alignment/`; released as
+  `@umriss-ui/core` 0.26.0, with table, schedule and calculation following
+  its peer range). Reported by the user from a filter bar: three selects and
+  a horizontal radio group, the radios some pixels too high. A select is a
+  control's height, a horizontal radio group was one line's; now the group,
+  and a checkbox or switch inside a field, take the control height with their
+  first line on the field line - measured to a pixel on a new example, "A row
+  of fields". Two short possibilities still read as a stranger among boxed
+  fields, so the user chose a new control over a variant: `SegmentedControl`,
+  a radio group to the keys and the screen reader, a field to the eye. Its
+  name was settled against "toggle button group", which promises several
+  pressed at once and a lone on/off button.
+- **Found on the way:** a radio group inside a `FormField` had no accessible
+  name (`label htmlFor` names no group); the field's label now names it. A
+  faint edge lies under the screenshot comparison's colour threshold - a
+  stretched control passed its baseline - and a computed style under forced
+  colours reports the stylesheet's colour, not the painted one, so surface
+  states there are judged by picture. The team scenario's "Working days" set
+  five checkboxes in one field, five equal ids; left as it is.
+- **The look of the chosen segment** - ink, as the chosen radio dot - was
+  agreed with "we see it at the end", and accepted by the user in the browser.
+
 ## Oct. 2026 — A chart that is loading says so
 
 - **`loading` on the chart** (`.scratch/chart-loading/`; ADR-0042 extended;
