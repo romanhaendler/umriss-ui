@@ -45,6 +45,7 @@ import {
   type SeriesDrawItem,
 } from "./draw";
 import { lowerBound, nearestIndex, nearestPoint } from "./hit";
+import type { SilhouetteKind } from "./Silhouette";
 import { DEFAULT_CHARTS_WORDING, type ChartsWording } from "./wording";
 import { hasCell, nearestPosition, rowEnd, stepCell, stepPosition, type Cell, type Move, type WalkSeries } from "./walk";
 import { downsample, type Course } from "./downsample";
@@ -250,6 +251,10 @@ export interface LayoutSnapshot {
   /** The rows are on their way, as of this layout: it ends with the frame
       that lays out the answer, not before (chart-loading). */
   loading: boolean;
+  /** While the chart is loading with nothing to show, the kind of its first
+      series in drawing order - the shape its silhouette takes -, "none"
+      without a series; null otherwise (chart-loading 03). */
+  silhouette: SilhouetteKind | null;
   /** The registered data table - the id its panel carries, and whether it is
       open -, or null without one. The legend shows its key. */
   dataTable: { id: string; open: boolean } | null;
@@ -311,6 +316,7 @@ const EMPTY_LAYOUT_SNAPSHOT: LayoutSnapshot = {
   // Unknown before the first frame: saying "No data" there would flash.
   empty: false,
   loading: false,
+  silhouette: null,
   dataTable: null,
 };
 
@@ -3538,14 +3544,16 @@ export class ChartScene {
 
   private pushLayoutSnapshot(): void {
     this.scheduleSummary();
+    const empty = !this.showsAPoint();
     this.layoutSnapshot = {
       version: this.layoutSnapshot.version + 1,
       layout: this.layout,
       legend: this.legend,
       series: this.legendItems(),
       limits: this.limitLabels(),
-      empty: !this.showsAPoint(),
+      empty,
       loading: this.loading,
+      silhouette: this.loading && empty ? (this.seriesInOrder()[0]?.config.kind ?? "none") : null,
       dataTable: this.dataTable,
     };
     for (const notify of this.layoutSubscribers) notify();

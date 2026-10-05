@@ -18,4 +18,12 @@ describe("SSR", () => {
     expect(html).toContain("uc-layer-overlay");
     expect(html).toContain('role="img"');
   });
+
+  it("marks a loading chart busy from the server on", () => {
+    function Loading() {
+      const { Chart } = useChart<never>([]);
+      return <Chart ariaLabel="SSR test" height={200} loading />;
+    }
+    expect(renderToString(<Loading />)).toContain('aria-busy="true"');
+  });
 });

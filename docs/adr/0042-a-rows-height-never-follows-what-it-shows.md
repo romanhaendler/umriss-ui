@@ -92,6 +92,14 @@ Loading over rows is a change a caller sees: the rows stay, dimmed. An
 application that wants placeholders on every request hands in no rows while it
 loads.
 
+The chart's `loading` follows the same rule (chart-loading). A course already
+drawn stays: it dims after `--u-delay-stale` and takes no pointer. Where there
+is nothing to keep, a silhouette of the coming chart, shaped by its first
+series' kind, stands in place of the table's placeholder rows. A chart has a
+fixed height, so it has nothing of its own to hold. Its band sweeps a
+placeholder and its course fades in once, when the answer arrives; neither
+animates the data, which ADR-0032 rules out.
+
 Measured, not argued: the table's browser suite holds every row of every demo
 table at one pitch in Chromium, Firefox and WebKit, and "Next" on one pixel
 over a short last page and an empty result.

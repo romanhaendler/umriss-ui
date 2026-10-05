@@ -7,10 +7,11 @@
 
 import { useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import type { ChartScene, LimitLabel } from "./scene";
+import { Silhouette, type SilhouetteState } from "./Silhouette";
 import { TICK_GAP, TICK_LEN, type AxisLayout } from "./layout";
 import type { Rect } from "./types";
 
-function renderAxis(axis: AxisLayout, limits: readonly LimitLabel[], plot: Rect): ReactNode {
+function renderAxis(axis: AxisLayout, limits: readonly LimitLabel[], plot: Rect, ticksShown: boolean): ReactNode {
   const { band, position, orientation } = axis;
   const bandStyle: CSSProperties = {
     left: `${band.x}px`,
@@ -28,7 +29,9 @@ function renderAxis(axis: AxisLayout, limits: readonly LimitLabel[], plot: Rect)
       data-axis={axis.id}
     >
       <span className="uc-axis-line" />
-      {axis.ticks.map((tick) => {
+      {/* A chart waiting for its rows has no range: the [0, 1] it would mark
+          means nothing (chart-loading 03). */}
+      {ticksShown && axis.ticks.map((tick) => {
         // Anchor on whole pixels: that coincides exactly with the grid line on
         // the canvas, which is aligned to half pixels (R-3.5).
         if (orientation === "y") {
@@ -141,7 +144,15 @@ function limitText(g: LimitLabel): ReactNode {
   );
 }
 
-export function AxesHtml({ scene, empty }: { scene: ChartScene; empty: ReactNode }): ReactNode {
+export function AxesHtml({
+  scene,
+  empty,
+  silhouette,
+}: {
+  scene: ChartScene;
+  empty: ReactNode;
+  silhouette: SilhouetteState | null;
+}): ReactNode {
   const snapshot = useSyncExternalStore(
     scene.subscribeLayout,
     scene.getLayoutSnapshot,
@@ -152,6 +163,7 @@ export function AxesHtml({ scene, empty }: { scene: ChartScene; empty: ReactNode
   const { plot } = layout;
   return (
     <div className="uc-axes">
+      {silhouette && <Silhouette kind={silhouette.kind} plot={plot} leaving={silhouette.leaving} />}
       {snapshot.empty && !snapshot.loading && (
         <div
           className="uc-empty"
@@ -165,6 +177,7 @@ export function AxesHtml({ scene, empty }: { scene: ChartScene; empty: ReactNode
           axis,
           snapshot.limits.filter((g) => g.axisKey === axis.key),
           plot,
+          silhouette === null || silhouette.leaving,
         ),
       )}
     </div>

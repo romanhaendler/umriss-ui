@@ -72,6 +72,12 @@
     /* A course being reloaded dims as the table's rows do (ADR-0042): only
        after this delay, so that a quick answer never flickers. */
     --uc-delay-stale: var(--u-delay-stale, 200ms);
+    /* The silhouette of a chart waiting for its rows (chart-loading 03): its
+       shapes faint in the text colour, as the table's placeholders; its band
+       swells as theirs does; its fade lands as an entry does. */
+    --uc-silhouette: color-mix(in srgb, var(--u-color-text, #18181b) 10%, transparent);
+    --uc-ease-swell: var(--u-ease-swell, ease-in-out);
+    --uc-fade: var(--u-duration-medium, 240ms) var(--u-ease-out, cubic-bezier(0.22, 1, 0.36, 1));
 
     position: relative;
     display: flex;
@@ -132,6 +138,65 @@
   .uc-plot[data-stale] > .uc-layer-series {
     opacity: 0.5;
     transition: opacity var(--uc-transition-state) var(--uc-delay-stale);
+  }
+
+  /* The silhouette (chart-loading 03, Silhouette.tsx): shapes over a faint
+     ground, and one band whose glint is the surface's - in a dark theme it
+     darkens, as the table's skeleton does. The band sweeps 80 % of a cycle
+     (SWEEP) and waits out the rest out of sight; its duration comes from its
+     travel, so that its speed is the same at every width. When the answer
+     is in, it fades out while the course fades in (FADE). */
+  .uc-silhouette {
+    position: absolute;
+    pointer-events: none;
+    transition: opacity var(--uc-fade);
+  }
+
+  .uc-silhouette[data-leaving] {
+    opacity: 0;
+  }
+
+  .uc-silhouette > svg {
+    display: block;
+  }
+
+  .uc-silhouette-ground {
+    fill: var(--uc-silhouette);
+  }
+
+  .uc-silhouette-glint {
+    stop-color: var(--uc-color-bg);
+  }
+
+  /* No duration here: Silhouette.tsx sets it from the band's travel. */
+  .uc-silhouette-band {
+    animation: uc-silhouette-sweep var(--uc-ease-swell) infinite;
+  }
+
+  @keyframes uc-silhouette-sweep {
+    0% { transform: translateX(0); }
+    80% { transform: translateX(var(--uc-travel)); }
+    100% { transform: translateX(var(--uc-travel)); }
+  }
+
+  .uc-plot[data-arriving] > .uc-layer-series {
+    animation: uc-silhouette-arrive var(--uc-fade);
+  }
+
+  @keyframes uc-silhouette-arrive {
+    from { opacity: 0; }
+  }
+
+  /* Under forced colours the ground takes the system's grey, so that the
+     shapes stay seen; the band, a mix of the surface, would be lost. */
+  @media (forced-colors: active) {
+    .uc-silhouette-ground {
+      fill: GrayText;
+    }
+
+    .uc-silhouette-band {
+      display: none;
+    }
   }
 
   /* ---------------- Axes (HTML, no canvas text) ---------------- */
@@ -584,6 +649,20 @@
     button.uc-legend-item,
     .uc-show-all {
       transition: none;
+    }
+
+    /* The silhouette stands still and goes at once, the course comes at once
+       (Chart.tsx reads the same query for the fade). */
+    .uc-silhouette-band {
+      display: none;
+    }
+
+    .uc-silhouette {
+      transition: none;
+    }
+
+    .uc-plot[data-arriving] > .uc-layer-series {
+      animation: none;
     }
 
     /* The stale dim keeps its delay - a quick answer still never flickers -

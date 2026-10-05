@@ -28,6 +28,7 @@ import {
 import { ChartContext } from "./context";
 import type { ChartScene } from "./scene";
 import { AxesHtml } from "./AxesHtml";
+import { useSilhouette } from "./Silhouette";
 import { TooltipHtml } from "./TooltipHtml";
 import { warnOnce } from "./dev";
 import { DEFAULT_CHARTS_WORDING, type ChartsWording } from "./wording";
@@ -256,6 +257,9 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
     () => false,
   );
 
+  const silhouette = useSilhouette(scene);
+  const arriving = silhouette?.leaving === true;
+
   const containerStyle: CSSProperties = {
     width: width === "100%" ? "100%" : `${width}px`,
     height: `${height}px`,
@@ -292,6 +296,7 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
           aria-describedby={summaryId}
           aria-busy={loading || undefined}
           data-stale={stale || undefined}
+          data-arriving={arriving || undefined}
           tabIndex={hasHits ? 0 : undefined}
           onKeyDown={(e) => {
             if (scene.key(e.nativeEvent)) e.preventDefault();
@@ -315,7 +320,7 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
         >
           <canvas ref={seriesRef} className="uc-layer-series" aria-hidden="true" />
           <canvas ref={overlayRef} className="uc-layer-overlay" aria-hidden="true" />
-          <AxesHtml scene={scene} empty={empty} />
+          <AxesHtml scene={scene} empty={empty} silhouette={silhouette} />
           <TooltipHtml scene={scene} />
         </div>
         <ShowAll scene={scene} plotRef={plotRef} label={wording.showAll} />

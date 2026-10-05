@@ -64,6 +64,20 @@ test("A focused chart with an Active point", async ({ page }, testInfo) => {
   await expect(target).toHaveScreenshot(`focused-active-point-${testInfo.project.name}.png`);
 });
 
+/* chart-loading 03: a course being reloaded, dimmed. The loop above
+   photographs the example before its reload, where only the silhouette
+   stands; here the reload is out - past the stale delay, before the answer. */
+test("A course being reloaded", async ({ page }, testInfo) => {
+  await openExample(page, "chart", "loading");
+  const target = page.locator('[data-example="loading"]');
+  await target.scrollIntoViewIfNeeded();
+  await drawn(page);
+  await target.getByRole("button", { name: "Reload" }).click();
+  await expect(target.locator(".uc-plot[data-stale]")).toBeVisible();
+  await page.waitForTimeout(500);
+  await expect(target).toHaveScreenshot(`reloading-${testInfo.project.name}.png`);
+});
+
 /* charts-alternatives 01: the data table open over the plot - every reading
    of a shift, and a week downsampled with its caption saying so. The loop
    above photographs both closed, with their key. */
