@@ -201,7 +201,7 @@ test.describe("on a phone", () => {
   test.use({ viewport: { width: 320, height: 800 } });
 
   test("no field is wider than its place, and the page does not scroll sideways", async ({ page }) => {
-    for (const id of ["narrow-places", "a-row-that-holds-still", "sized-to-the-value", "one-size-for-a-place"]) {
+    for (const id of ["narrow-places", "a-row-that-holds-still", "sized-to-the-value", "one-size-for-a-place", "a-row-of-fields"]) {
       await openExample(page, "sizes", id);
       const stage = example(page, id);
       const stageBox = await box(stage);
@@ -224,6 +224,20 @@ test.describe("on a phone", () => {
       return text.scrollWidth > text.clientWidth && getComputedStyle(text).textOverflow === "ellipsis";
     });
     expect(cut).toBe(true);
+  });
+
+  test("a segmented control too wide for the place ends its words in an ellipsis", async ({ page }) => {
+    await openExample(page, "segmentedcontrol", "long-words-in-a-narrow-place");
+    const stage = example(page, "long-words-in-a-narrow-place");
+    const control = stage.getByRole("radiogroup");
+    const room = await box(stage);
+    const rect = await box(control);
+    expect(rect.x + rect.width).toBeLessThanOrEqual(room.x + room.width + 0.5);
+    const cut = await control.getByText("Cleaned and validated readings", { exact: true }).evaluate(
+      (word) => word.scrollWidth > word.clientWidth && getComputedStyle(word).textOverflow === "ellipsis",
+    );
+    expect(cut).toBe(true);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
   });
 });
 

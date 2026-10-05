@@ -521,6 +521,7 @@ export const OUTLINE: readonly Rubric[] = [
         sentence: "One choice out of a few that all stay in view (radio buttons, option group). Each option may carry a sentence that explains it.",
         about: ["The group is one tab stop; the arrow keys move and choose at once, skipping disabled options, which stay visible."],
         alternatives: [
+          { when: "Two to four short options without explanations, standing among fields", use: "segmentedcontrol" },
           { when: "More than about five options, or options that need no explanation", use: "select" },
           { when: "A single yes or no", use: "checkbox" },
           { when: "Several options at once", use: "multiselect" },

@@ -113,6 +113,25 @@
     opacity: 0.5;
   }
 
+  /* The chosen segment is a ground in the ink, and forced colours repaint
+     every ground with the page's (forced-colors 02): it takes the system's
+     colours for a selection instead, as the switch's track does. Left to the
+     system, its word got the page's backplate - dark on dark in a dark
+     theme - so the segment keeps the two colours it names, and paints its
+     own ring, which the system no longer colours there. */
+  @media (forced-colors: active) {
+    .segment:has(.input:checked) {
+      forced-color-adjust: none;
+      background: SelectedItem;
+      color: SelectedItemText;
+    }
+
+    .segment:has(.input:checked:focus-visible) {
+      outline-color: Highlight;
+      outline-offset: 2px;
+    }
+  }
+
   /* ---- Small size: a small select's height, type and radius ---- */
 
   .sm {

@@ -31,6 +31,7 @@ for (const [pageId, exampleId, control, painted] of [
   ["button", "variants", "button", ":focus-visible"],
   ["input", "states", "input", ":has(> input:focus-visible)"],
   ["checkbox", "states", "input", ":focus-visible + *"],
+  ["segmentedcontrol", "segmented-control", "input", ":has(> input:focus-visible)"],
 ] as const) {
   test(`The ${pageId}'s ring survives forced colours`, async ({ page }) => {
     await openExample(page, pageId, exampleId);
