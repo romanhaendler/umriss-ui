@@ -311,3 +311,28 @@ test("A checkbox or switch outside a field keeps its own height", async ({ page 
   await openExample(page, "switch", "settings-of-a-service");
   expect(await height(page.getByRole("switch").first().locator(".."))).toBeLessThan(20);
 });
+
+/* segmented-control-inset 01: `fill` - the control takes its place's width,
+   its segments share it equally, and the choice moves nothing. */
+for (const width of [1280, 320]) {
+  test(`A filling segmented control takes its place and shares it equally (${width} px)`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 800 });
+    await openExample(page, "segmentedcontrol", "a-theme-switch");
+    const control = example(page, "a-theme-switch").getByRole("radiogroup", { name: "Theme" });
+    const place = await control.evaluate((element) => element.parentElement!.getBoundingClientRect().width);
+    const before = await box(control);
+    expect(Math.abs(before.width - place)).toBeLessThanOrEqual(0.5);
+    const widths: number[] = [];
+    for (const name of ["Light", "Dark", "System"]) {
+      const segment = await box(control.getByRole("radio", { name }));
+      widths.push(segment.width);
+      // The word stands in the middle of its segment.
+      const word = await box(control.getByText(name, { exact: true }));
+      expect(Math.abs(word.x + word.width / 2 - (segment.x + segment.width / 2)), name).toBeLessThanOrEqual(1);
+    }
+    expect(Math.max(...widths) - Math.min(...widths)).toBeLessThanOrEqual(1);
+    await control.getByRole("radio", { name: "Dark" }).click();
+    expect(await box(control)).toEqual(before);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
+  });
+}

@@ -39,6 +39,10 @@ commit.
   moves the three `top-*` positions at every width - below a fixed header - and
   the bottom one the three `bottom-*` positions. A rule on the region's
   `data-edge` is no longer needed, and was never safe (ADR-0045).
+- **`SegmentedControl` takes `fill`**: it takes the whole width its place
+  gives it, as a field in a column does, and shares it equally between its
+  segments, their words centred. A word too long for its share still ends in
+  an ellipsis. Without `fill` it is as wide as its words, as before.
 
 ## 0.26.0 – A row of fields on one line, and the segmented control (Oct. 2026)
 
