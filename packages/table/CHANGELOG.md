@@ -22,6 +22,28 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.13.1 – A head that holds its width (Oct. 2026)
+
+### Changed
+
+- **A column with a `width` is that wide, whatever its label says.** Chromium
+  and Safari let a long label widen the column past its width; now the label
+  ends in an ellipsis, and the tip that completes a cut value shows it whole -
+  under the pointer after the tooltip's delay, at once when the keyboard
+  reaches the sort button. A column without a width grows with its label, as
+  before. "Fit to content" counts the whole label.
+- **A width too narrow for the head's sort arrow, rank and filter is raised to
+  them**, and a warning in development names the column once.
+
+### Fixed
+
+- **The sort arrow is never cut.** In Firefox a 75 px column with a long label
+  cut its arrow at the edge, and a sorted column read as unsorted. The
+  rank and the filter's funnel stay as well. The page Width and pinning shows
+  it in "A label wider than its column".
+
+---
+
 ## 0.13.0 – The table holds its view, and server mode (Oct. 2026)
 
 Released together with `@umriss-ui/charts` and `@umriss-ui/schedule`, which

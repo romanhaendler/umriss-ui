@@ -33,7 +33,12 @@ taller than a row is cut as well, and in development the table says so once per
 column. A column without a width grows with its values up
 to `min(20rem, 60vw)` - the group span's measure - and cuts there; a column
 with a width is that wide, never wider and never narrower, by the same
-inline-size containment a field takes (ADR-0041).
+inline-size containment a field takes (ADR-0041). Its head holds to the
+width as well: the label gives way with an ellipsis and the tip, while the
+sort arrow, the rank and the filter stay - a head is never cut at its state.
+A width too narrow for those is raised to them, and in development the table
+says so once per column (Firefox cut the arrow of a 75 px column with a long
+label, and the column read as unsorted).
 
 **The table's controls are small.** The table sets `ControlSizeProvider
 size="sm"`, as its toolbar does; a compact table's dense surface takes `sm` as

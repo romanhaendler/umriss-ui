@@ -408,6 +408,42 @@
     justify-content: flex-end;
   }
 
+  /* A head with a width (ADR-0042): the column is that wide, whatever its
+     label says. The label's track starts at nothing and ends at the label, so
+     it adds nothing to the column's least width and gives way with an
+     ellipsis, which the cut-value tip completes; the arrow, the rank and the
+     funnel are auto tracks, so they stay - and a width below them is raised
+     to them by the table's own layout. Firefox cut the arrow of a 75 px
+     column with a long label before. A head without a width grows with its
+     label, as ever. */
+  .sized .headLine,
+  .sized .thFlex {
+    display: grid;
+    grid-auto-flow: column;
+    justify-content: start;
+    align-items: center;
+  }
+
+  .sized .headLine {
+    grid-template-columns: minmax(0, max-content);
+  }
+
+  .sized.numeric .headLine,
+  .sized.numeric .thFlex {
+    justify-content: end;
+  }
+
+  /* A button is as wide as it needs, not as its line: flush right, it is
+     pushed there. */
+  .sized.numeric > .headLine {
+    margin-left: auto;
+  }
+
+  .sized .headLabel {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   /* ---- Footer row ------------------------------------------------------ */
 
   .table tfoot .td {
