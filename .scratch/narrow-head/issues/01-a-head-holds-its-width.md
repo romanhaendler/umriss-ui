@@ -1,0 +1,53 @@
+# 01 — A head holds its width, never its state
+
+Status: done
+
+## Found
+
+Firefox, a column with `width={75}` and a long label, sorted: the sort arrow
+was cut at the column's edge, and the column read as unsorted. Chromium and
+WebKit let the head widen the column past its width instead - against
+ADR-0042, from the other side. The head had no rule for a label wider than its
+column.
+
+## Decided (grilled 2026-10-05)
+
+1. The label gives way, with an ellipsis that the cut-value tip completes;
+   the sort arrow, the rank and the funnel never do. The column is exactly its
+   width.
+2. A width below what those take is raised to them, and in development the
+   table says so once per column.
+
+A head without a width grows with its label, as before.
+
+## Done
+
+- `Table.module.css`: a sized head's line is a grid whose label track is
+  `minmax(0, max-content)`; the arrow, rank and funnel are auto tracks.
+- `parts.tsx`: the label in `.headLabel`; the cut-value tip reads it from the
+  head's line only (not from the funnel); "fit to content" counts what the
+  label hides; the warning `head-without-room`.
+- ADR-0042 says it; `docs/testing.md` names `narrowHead.test.tsx`.
+- Example: Width and pinning, "A label wider than its column".
+
+## Open
+
+- The look in Firefox, Chromium and WebKit: unseen by the agent (its browser
+  runs were stopped).
+- **Baselines may move**: the new example needs its screenshots, and the
+  Width-and-pinning page's, and any other picture with a sized head, move with
+  this ticket.
+- The changelog entry, in the release that carries this (docs/releasing.md).
+
+## Comments
+
+**Delivered in table 0.13.1 (2026-10-05).** Lint, types, every package's unit
+tests, the build and `pnpm test:visual` green. The suite's first run failed
+nine of core's accessibility and configurator checks by timeout under load;
+all nine passed on `--last-failed`, untouched by this change. No existing
+baseline moved. The new example's two baselines were looked at before they
+were kept: its first form gave the Shipment column a width as well, so the
+full-width table handed its surplus to the narrow columns and the picture
+showed no cut label - the Shipment column now takes the surplus. Firefox, where
+the arrow was cut, was not seen by the agent: the screenshot suite runs in
+Chromium, and Firefox would not start under Playwright here.

@@ -472,6 +472,18 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
         `a value in "${label}" is taller than a row and is cut at its edge. A row's height never follows what it shows (ADR-0042): draw it with a small control, or show it whole in the row's detail.`,
       );
     }
+    /* A width below what the head's arrow and funnel take is raised to it,
+       and the label has no room left at all. */
+    for (const box of Array.from(table.querySelectorAll<HTMLElement>(`thead .${styles.sized} .${styles.headLabel}`))) {
+      const label = box.textContent?.trim();
+      /* A line without a width is a table not laid out - in a closed panel,
+         say - not a label without room. */
+      if (!label || box.clientWidth > 0 || !box.parentElement?.clientWidth) continue;
+      warnOnce(
+        `head-without-room:${box.closest("th")?.dataset.column ?? label}`,
+        `the width of "${label}" leaves its label no room: the column is as wide as its sort arrow and filter, and the label shows only in its tip. A head is never cut at its state (ADR-0042): give the column a width its label can begin in.`,
+      );
+    }
   });
 
   /* A virtual window counts in row pitches (ADR-0042): the head is one, and
@@ -1138,7 +1150,12 @@ function CutValueTip({ table: tableRef }: { table: RefObject<HTMLTableElement | 
     const show = (target: EventTarget | null, wait: number) => {
       clearTimeout(timer);
       const cell = target instanceof Element ? target.closest("td, th") : null;
-      const box = cell?.querySelector<HTMLElement>(`:scope > .${styles.value}, :scope .${styles.treeText} > .${styles.value}`);
+      /* A head's label from its own line only: the funnel beside it has a
+         tip of its own. */
+      const head = target instanceof Element ? target.closest(`.${styles.headLine}`) : null;
+      const box = head
+        ? head.querySelector<HTMLElement>(`.${styles.headLabel}`)
+        : cell?.querySelector<HTMLElement>(`:scope > .${styles.value}, :scope .${styles.treeText} > .${styles.value}`);
       /* Text only: a cut badge or meter has no words that say it whole. */
       if (!cell || !box || box.childElementCount > 0 || box.scrollWidth <= box.clientWidth + 1) return setTip(null);
       /* Inside a dialog the tip portals there, or it lies behind the dialog -
@@ -1311,7 +1328,10 @@ function HeaderCell({
       const box = c.querySelector<HTMLElement>(`.${styles.value}`);
       const style = getComputedStyle(c);
       const padding = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
-      widest = Math.max(widest, c.scrollWidth, box ? box.scrollWidth + padding : 0);
+      /* A head's label gives way with an ellipsis: what it hides counts. */
+      const label = c.querySelector<HTMLElement>(`.${styles.headLabel}`);
+      const hidden = label ? label.scrollWidth - label.clientWidth : 0;
+      widest = Math.max(widest, c.scrollWidth + hidden, box ? box.scrollWidth + padding : 0);
     }
     cell.style.width = before.cell;
     table.style.width = before.table;
@@ -1338,10 +1358,10 @@ function HeaderCell({
   const label = sortable ? (
     <button
       type="button"
-      className={styles.sortButton}
+      className={cx(styles.sortButton, styles.headLine)}
       onClick={(event: ReactMouseEvent) => snapshot.toggleSort(id, event.shiftKey || event.metaKey)}
     >
-      <span>{spec.label}</span>
+      <span className={styles.headLabel}>{spec.label}</span>
       {rank !== undefined && (
         <span className={styles.sortRank} aria-hidden="true">
           {rank}
@@ -1362,7 +1382,9 @@ function HeaderCell({
       </span>
     </button>
   ) : (
-    spec.label
+    <span className={styles.headLine}>
+      <span className={styles.headLabel}>{spec.label}</span>
+    </span>
   );
 
   const ariaSort = direction === "asc" ? "ascending" : direction === "desc" ? "descending" : "none";
@@ -1377,7 +1399,7 @@ function HeaderCell({
       aria-sort={sortable ? ariaSort : undefined}
       tabIndex={spec.resizable && !sortable ? 0 : undefined}
       onKeyDown={handleKeyDown}
-      className={cx(styles.th, rightAligned && styles.numeric, pin.className)}
+      className={cx(styles.th, rightAligned && styles.numeric, width !== undefined && styles.sized, pin.className)}
       style={{
         ...(width !== undefined ? { width } : {}),
         ...pin.style,
