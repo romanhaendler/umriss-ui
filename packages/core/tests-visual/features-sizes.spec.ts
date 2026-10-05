@@ -252,3 +252,21 @@ test("One size for a place reaches every control, and a dialog keeps its own", a
   await expect(save).toBeVisible();
   expect(await height(save)).toBe(regular);
 });
+
+test("Every control in a row of fields stands on the select's line", async ({ page }) => {
+  await openExample(page, "sizes", "a-row-of-fields");
+  const stage = example(page, "a-row-of-fields");
+  const middle = async (locator: Locator) => {
+    const rect = await box(locator);
+    return rect.y + rect.height / 2;
+  };
+  for (const name of ["Medium", "Small"]) {
+    const row = stage.getByRole("group", { name });
+    const line = await middle(row.getByLabel("Caster"));
+    // A word's own line: the box of its label, one line tall.
+    for (const word of ["Raw"]) {
+      const words = row.getByText(word, { exact: true });
+      expect(Math.abs((await middle(words)) - line), `${name}: ${word}`).toBeLessThanOrEqual(1);
+    }
+  }
+});

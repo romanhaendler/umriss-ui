@@ -12,10 +12,19 @@
     gap: var(--u-space-3);
   }
 
+  /* A horizontal group stands in a row, among fields: it is as tall as a
+     control, and the line of its labels lies on the line a field's value
+     stands on. One line of label, not the group's own: an option's
+     description runs below and moves nothing (field-row-alignment 01). */
   .horizontal {
     flex-direction: row;
     flex-wrap: wrap;
     gap: var(--u-space-5);
+    padding-block: calc((var(--u-control-height) - var(--u-text-sm) * var(--u-leading-normal)) / 2);
+  }
+
+  .horizontal.sm {
+    padding-block: calc((var(--u-control-height-sm) - var(--u-text-xs) * var(--u-leading-normal)) / 2);
   }
 
   .option {
