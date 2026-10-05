@@ -1,6 +1,6 @@
 # The segmented control inset, filling its place, with icons
 
-Status: ready-for-agent
+Status: done
 
 ## Problem Statement
 

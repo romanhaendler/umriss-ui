@@ -169,9 +169,11 @@ _Avoid_: scale, variant, `selectSize` (retired)
 **Segmented control**:
 One choice out of a few short possibilities, drawn as one field with a segment
 for each — as tall and edged as the fields beside it, so it stands in a row of
-them as one of them. A radio group in what it says and how the keys move, not a
-row of buttons that stay pressed; where the possibilities need a line of
-explanation, they are a radio group's dots instead.
+them as one of them. Where it stands on its own - a menu, a settings panel - it
+may be drawn inset instead: a sunken track with the choice lifted out of it. A
+radio group in what it says and how the keys move, not a row of buttons that
+stay pressed; where the possibilities need a line of explanation, they are a
+radio group's dots instead.
 _Avoid_: toggle button group, button toggle, segmented radio group
 
 **Wording**:

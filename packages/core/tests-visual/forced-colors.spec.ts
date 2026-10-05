@@ -32,14 +32,37 @@ for (const [pageId, exampleId, control, painted] of [
   ["input", "states", "input", ":has(> input:focus-visible)"],
   ["checkbox", "states", "input", ":focus-visible + *"],
   ["segmentedcontrol", "segmented-control", "input", ":has(> input:focus-visible)"],
+  ["segmentedcontrol", "a-theme-switch", "input", ":has(> input:focus-visible)"],
 ] as const) {
-  test(`The ${pageId}'s ring survives forced colours`, async ({ page }) => {
+  test(`The ${pageId}'s ring survives forced colours (${exampleId})`, async ({ page }) => {
     await openExample(page, pageId, exampleId);
     const example = `[data-example="${exampleId}"] .exampleStage`;
     await page.locator(`${example} ${control}:not(:disabled)`).first().focus();
     expect(await outlineOf(page, `${example} ${painted}`)).toBe("solid 2px");
   });
 }
+
+/* segmented-control-inset 03: the inset track is a sunken ground and the
+   choice a lifted one - both repainted. The track keeps an edge, and the
+   choice the system's selection colours, as in the field drawing. */
+test("An inset segmented control keeps its track and its choice under forced colours", async ({ page }, testInfo) => {
+  await openExample(page, "segmentedcontrol", "a-theme-switch");
+  const target = page.locator('[data-example="a-theme-switch"]');
+  const control = target.getByRole("radiogroup", { name: "Theme" });
+  expect(await control.evaluate((el) => `${getComputedStyle(el).outlineStyle} ${getComputedStyle(el).outlineWidth}`)).toBe("solid 1px");
+  const selected = await page.evaluate(() => {
+    const probe = document.createElement("div");
+    probe.style.cssText = "forced-color-adjust: none; background: SelectedItem";
+    document.body.append(probe);
+    const colour = getComputedStyle(probe).backgroundColor;
+    probe.remove();
+    return colour;
+  });
+  const chosen = control.getByRole("radio", { name: "System" }).locator("..");
+  expect(await chosen.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(selected);
+  await target.scrollIntoViewIfNeeded();
+  await expect(target).toHaveScreenshot(`forced-segmented-inset-${testInfo.project.name}.png`);
+});
 
 test("A focused button under forced colours", async ({ page }, testInfo) => {
   await openExample(page, "button", "variants");

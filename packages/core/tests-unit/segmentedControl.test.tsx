@@ -113,6 +113,26 @@ describe("SegmentedControl – the keys", () => {
   });
 });
 
+/* segmented-control-inset 03: the inset drawing and `fill` change the look,
+   never what is said or how the keys move. */
+describe("SegmentedControl – inset and filling, the same radio group", () => {
+  it("is one tab stop whose arrow keys move, choose, skip and wrap", () => {
+    function Controlled() {
+      const [value, setValue] = useState<(typeof OPTIONS)[number]["value"]>("cleaned");
+      return <SegmentedControl aria-label="State" variant="inset" fill options={OPTIONS} value={value} onChange={setValue} />;
+    }
+    render(<Controlled />);
+    expect(screen.getByRole("radiogroup", { name: "State" })).toBeTruthy();
+    expect(screen.getAllByRole("radio").map((r) => r.tabIndex)).toEqual([-1, 0, -1, -1]);
+    const group = screen.getByRole("radiogroup");
+    fireEvent.keyDown(group, { key: "ArrowRight" });
+    expect(radio("Forecast").checked).toBe(true);
+    expect(document.activeElement).toBe(radio("Forecast"));
+    fireEvent.keyDown(group, { key: "ArrowRight" });
+    expect(radio("Raw").checked).toBe(true);
+  });
+});
+
 describe("SegmentedControl – in a field", () => {
   it("takes the field's label, hint, required and invalid state", () => {
     render(

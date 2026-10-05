@@ -47,6 +47,12 @@ commit.
   gap, at `--u-icon-size` (`--u-icon-size-sm` at `sm`) and hidden from
   assistive technology - the word names the possibility. Where the word ends
   in an ellipsis, the icon stays whole.
+- **`SegmentedControl` takes `variant="inset"`** for a choice that stands on
+  its own - in a menu, a settings panel, a sheet: a sunken track without an
+  edge, the choice a surface lifted out of it with the card shadow, the other
+  words in the secondary ink. It is a control's height at either size; focus,
+  invalid, disabled and forced colours behave as in the default
+  `variant="field"`, which is unchanged.
 
 ## 0.26.0 – A row of fields on one line, and the segmented control (Oct. 2026)
 

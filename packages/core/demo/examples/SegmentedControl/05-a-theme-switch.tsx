@@ -2,7 +2,7 @@ import { Card, CardBody, FormField, SegmentedControl } from "../../../src";
 
 export const title = "A theme switch";
 export const lead =
-  "A choice that stands on its own, in a menu or a settings panel. `fill` takes the panel's width and shares it equally between the segments; an option's `icon` stands before its word, at the size the control gives it.";
+  "A choice that stands on its own, in a menu or a settings panel, drawn `inset`: a sunken track, the choice lifted out of it. `fill` takes the panel's width and shares it equally between the segments; an option's `icon` stands before its word, at the size the control gives it.";
 
 /* Icons from outside the set: any SVG, sized by the control. */
 const stroke = { fill: "none", stroke: "currentColor", strokeWidth: 1.5, strokeLinecap: "round", strokeLinejoin: "round" } as const;
@@ -39,6 +39,7 @@ export default function ThemeSwitch() {
       <CardBody>
         <FormField label="Theme">
           <SegmentedControl
+            variant="inset"
             fill
             defaultValue="system"
             options={[

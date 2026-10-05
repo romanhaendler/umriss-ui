@@ -2,8 +2,10 @@
 
    It stands in a row of fields as one of them: as tall, as edged and as
    rounded as a select, a segment for each possibility, the chosen one filled
-   with ink. Where a possibility needs a line of explanation, the radio
-   group's dots are the form instead.
+   with ink. Where it stands on its own - a menu, a settings panel - it is
+   drawn `inset` instead: a sunken track, the choice lifted out of it
+   (segmented-control-inset). Where a possibility needs a line of
+   explanation, the radio group's dots are the form instead.
 
    It is a radio group and not a row of toggle buttons. Buttons that stay
    pressed announce "toggle button, pressed" each, are a tab stop each, and
@@ -51,6 +53,12 @@ export interface SegmentedControlProps<T extends string>
   /** `sm` for a toolbar and dense forms, `md` otherwise.
       @default the size of a `ControlSizeProvider` around it, else `"md"` */
   size?: "sm" | "md";
+  /** How it is drawn. `field` stands in a row of fields as one of them: a
+      field's edge, the choice filled with ink. `inset` stands on its own - in
+      a menu, a settings panel, a sheet: a sunken track without an edge, the
+      choice a surface lifted out of it.
+      @default "field" */
+  variant?: "field" | "inset";
   /** Takes the whole width its place gives it, as a field in a column does,
       and shares it equally between the segments. Without it the control is
       as wide as its words. */
@@ -74,6 +82,7 @@ export const SegmentedControl = forwardRef(function SegmentedControl<T extends s
     defaultValue,
     onChange,
     size: ownSize,
+    variant = "field",
     fill = false,
     disabled = false,
     name,
@@ -104,6 +113,7 @@ export const SegmentedControl = forwardRef(function SegmentedControl<T extends s
       className={cx(
         styles.control,
         size === "sm" && styles.sm,
+        variant === "inset" && styles.inset,
         fill && styles.fill,
         disabled && styles.disabled,
         field?.invalid && styles.invalid,
