@@ -15,6 +15,13 @@ describe("useSchedule", () => {
     }
   });
 
+  it("hands back the same object while the view stays - a dependency on it does not run again", () => {
+    const { result, rerender } = renderHook(() => useSchedule());
+    const first = result.current;
+    rerender();
+    expect(result.current).toBe(first);
+  });
+
   it("draws what its parts declare", () => {
     function Plan() {
       const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: [0, 3_600_000] } });

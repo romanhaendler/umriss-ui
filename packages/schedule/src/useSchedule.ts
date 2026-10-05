@@ -6,7 +6,7 @@
    from: the parts, the view and its setters. The parts are the same on every
    render, whatever the view does, so nothing is remounted. */
 
-import { createElement, forwardRef, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
+import { createElement, forwardRef, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type { ForwardRefExoticComponent, RefAttributes } from "react";
 import { Schedule as ScheduleOn, type ScheduleHandle, type ScheduleProps } from "./Schedule";
 import { BlockedTimes, Dependencies, Lane, LaneGroup, Subtasks } from "./parts";
@@ -107,5 +107,6 @@ export function useSchedule(options: ScheduleOptions = {}): ScheduleParts {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once per change of the view, with that render's view and handler
   }, [key]);
 
-  return { ...parts, view };
+  // A new object only when the view changed, as `useChart` hands its parts.
+  return useMemo(() => ({ ...parts, view }), [parts, view]);
 }
