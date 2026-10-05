@@ -39,7 +39,8 @@
      on (field-row-alignment 02). */
   .field {
     --_line: var(--_track-height);
-    padding-block: calc((var(--u-control-height) - var(--_line)) / 2);
+    --_control: var(--u-control-height);
+    padding-block: calc((var(--_control) - var(--_line)) / 2);
   }
 
   .field:has(.label) {
@@ -47,7 +48,7 @@
   }
 
   .field.sm {
-    padding-block: calc((var(--u-control-height-sm) - var(--_line)) / 2);
+    --_control: var(--u-control-height-sm);
   }
 
   .input {

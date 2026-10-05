@@ -73,6 +73,8 @@ const REGISTER: Readonly<Record<string, string>> = {
     "The invalid field's edge (with the form field's message), and the chip's remove key under the pointer, which carries the cross glyph and its label.",
   "core/NumberInput/NumberInput.module.css":
     "The invalid field's edge; the form field's error message is the word, and aria-invalid says it to a screen reader.",
+  "core/SegmentedControl/SegmentedControl.module.css":
+    "The invalid field's edge; the form field's error message is the word, and aria-invalid says it to a screen reader.",
   "core/Select/Select.module.css":
     "The invalid field's edge; the form field's error message is the word, and aria-invalid says it to a screen reader.",
   "core/Slider/Slider.module.css":

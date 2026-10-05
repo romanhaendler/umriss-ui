@@ -29,6 +29,7 @@ import {
   NumberInput,
   Popover,
   RadioGroup,
+  SegmentedControl,
   Select,
   Switch,
   Textarea,
@@ -74,6 +75,9 @@ const CONTROLS: Record<string, (size?: ControlSize) => ReactElement> = {
   Switch: (size) => <Switch label="On" size={size} />,
   RadioGroup: (size) => (
     <RadioGroup aria-label="Choice" size={size} value="a" onChange={() => {}} options={[{ value: "a", label: "A" }]} />
+  ),
+  SegmentedControl: (size) => (
+    <SegmentedControl aria-label="Choice" size={size} value="a" onChange={() => {}} options={[{ value: "a", label: "A" }]} />
   ),
 };
 

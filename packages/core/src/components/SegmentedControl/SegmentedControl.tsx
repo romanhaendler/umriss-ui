@@ -17,6 +17,7 @@ import type { HTMLAttributes, ReactNode } from "react";
 import { cx } from "../../lib/cx";
 import { mergeRefs } from "../../lib/mergeRefs";
 import { useControlSize } from "../../lib/controlSize";
+import { useFormField } from "../FormField";
 import { useRadioGroup } from "../RadioGroup/useRadioGroup";
 import styles from "./SegmentedControl.module.css";
 
@@ -73,6 +74,7 @@ export const SegmentedControl = forwardRef(function SegmentedControl<T extends s
   ref: React.ForwardedRef<HTMLDivElement>,
 ) {
   const size = useControlSize(ownSize);
+  const field = useFormField();
   const radio = useRadioGroup({
     options,
     value,
@@ -88,7 +90,13 @@ export const SegmentedControl = forwardRef(function SegmentedControl<T extends s
     <div
       ref={mergeRefs(radio.groupRef, ref)}
       {...radio.groupProps}
-      className={cx(styles.control, size === "sm" && styles.sm, disabled && styles.disabled, className)}
+      className={cx(
+        styles.control,
+        size === "sm" && styles.sm,
+        disabled && styles.disabled,
+        field?.invalid && styles.invalid,
+        className,
+      )}
       {...rest}
       onKeyDown={radio.onKeyDown}
     >
