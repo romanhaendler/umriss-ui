@@ -88,3 +88,23 @@ release renames it to `<version> – <title> (Oct. 2026)`.
 
 Checks: `pnpm typecheck`, `pnpm lint` green; demo unit suite 348/348. The full
 visual suites and the release build were not run - that is the acceptance's.
+
+### Fixed after the spec review (2026-10-05)
+
+- **Charts, the default is no view** (Q12, Q13). A span equal to the axis'
+  own domain - up to rounding, after a gesture or `setDomain` - leaves
+  `domains`, so 'Show all' goes and the report says `{}`. The default
+  `zoomLimits.max` is the data's extent or the axis' own domain, whichever
+  is wider: a `"nice"` domain no longer makes the first zoom out narrow the
+  view. A lone point (no step) zooms into nothing. bfa3e080.
+- **Start not reported** (Q5, charts and schedule). A start naming an
+  unknown axis id, series name or group is, less those, where the component
+  starts: nothing is reported until the reader, a setter or a view handed in
+  changes the view. bfa3e080, 0cf3b272.
+- **Table `viewKey`**: `hidden`, `folded` and `branches` are sets, their
+  order no content; `sort`, `order` and `grouping` keep theirs. 19f045ed.
+- **Pan not clamped**, as before: neither the chart's nor the schedule's pan
+  stops at the data's extent, and the charts changelog already says so. Left.
+- Checks: charts, schedule, table typecheck and unit suites green; the
+  charts visual tests for zoom, 'Show all', cursor sync and the view (light
+  and dark) green, no screenshot renewed.
