@@ -125,7 +125,7 @@ describe.each(Object.keys(ENTRIES))("the llms-full.txt of %s", (dir) => {
 const KNOWN: Readonly<Record<string, { defined: readonly string[]; declared: readonly string[]; handed: readonly string[] }>> = {
   core: { defined: ["ButtonSize", "Wording"], declared: ["useTree", "useToast"], handed: [] },
   charts: {
-    defined: ["Accessor"],
+    defined: ["ValueFunction"],
     declared: ["controlLimits"],
     handed: ["Chart", "XAxis", "YAxis", "Line", "Area", "Bar", "Scatter", "StateBand", "Matrix", "BoxPlot"],
   },

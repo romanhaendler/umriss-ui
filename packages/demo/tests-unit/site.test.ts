@@ -346,14 +346,14 @@ describe("the guard over \"What's new\" (.scratch/concepts-and-changelog-pages)"
 
 describe("the API index's guard (ADR-0044)", () => {
   const api = `${HOME}api/`;
-  const index = new Map([[api, '<h1>API index</h1><h3 id="Chart"><code>Chart</code></h3><h3 id="type-Accessor"><code>Accessor</code></h3>']]);
+  const index = new Map([[api, '<h1>API index</h1><h3 id="Chart"><code>Chart</code></h3><h3 id="type-ValueFunction"><code>ValueFunction</code></h3>']]);
 
   it("passes where every export has an element with its anchor", () => {
-    expect(apiIndexFaults(api, ["Chart", "type-Accessor"], index)).toEqual([]);
+    expect(apiIndexFaults(api, ["Chart", "type-ValueFunction"], index)).toEqual([]);
   });
 
   it("names every export without one, and an index that is not there", () => {
-    expect(apiIndexFaults(api, ["Chart", "controlLimits", "type-Accessor", "type-Series"], index)).toEqual([
+    expect(apiIndexFaults(api, ["Chart", "controlLimits", "type-ValueFunction", "type-Series"], index)).toEqual([
       `${api}: no element with the id controlLimits`,
       `${api}: no element with the id type-Series`,
     ]);

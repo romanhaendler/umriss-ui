@@ -599,7 +599,7 @@ export function tableMarkdown(model: ApiTableModel | ApiDefinitionModel, level =
 }
 
 /** A type cell as code, a linked name as a link around its own code:
-    [`Accessor`](#type-Accessor)`<T>`. */
+    [`ValueFunction`](#type-ValueFunction)`<T>`. */
 function typeMarkdown(spans: readonly Span[]): string {
   return spans.map((span) => (span.kind === "link" ? `[${markdownCode(span.text)}](${span.href})` : markdownCode(span.text))).join("");
 }

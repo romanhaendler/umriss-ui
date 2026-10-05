@@ -11,7 +11,7 @@
 import { useMemo } from "react";
 import { useSeries } from "./context";
 import { readerOf } from "./value";
-import type { Accessor, BoxSeriesConfig, ListAccessor, ListValue, Value } from "./types";
+import type { ValueFunction, BoxSeriesConfig, ListFunction, ListValue, Value } from "./types";
 
 /** The props of `BoxPlot`. Every number is a number field of the row or a
     function of it; `outliers` a list field or a function. */
@@ -101,16 +101,16 @@ export function BoxPlot<T>(props: BoxPlotProps<T>): null {
     () =>
       ({
         kind: "box",
-        accessor: readerOf<Accessor<T>>(median),
-        lowerQuartile: readerOf<Accessor<T>>(lowerQuartile),
-        upperQuartile: readerOf<Accessor<T>>(upperQuartile),
-        lowerWhisker: readerOf<Accessor<T>>(lowerWhisker),
-        upperWhisker: readerOf<Accessor<T>>(upperWhisker),
-        outliers: readerOf<ListAccessor<T>>(outliers),
-        mean: readerOf<Accessor<T>>(mean),
-        notchLower: readerOf<Accessor<T>>(notchLower),
-        notchUpper: readerOf<Accessor<T>>(notchUpper),
-        count: readerOf<Accessor<T>>(count),
+        accessor: readerOf<ValueFunction<T>>(median),
+        lowerQuartile: readerOf<ValueFunction<T>>(lowerQuartile),
+        upperQuartile: readerOf<ValueFunction<T>>(upperQuartile),
+        lowerWhisker: readerOf<ValueFunction<T>>(lowerWhisker),
+        upperWhisker: readerOf<ValueFunction<T>>(upperWhisker),
+        outliers: readerOf<ListFunction<T>>(outliers),
+        mean: readerOf<ValueFunction<T>>(mean),
+        notchLower: readerOf<ValueFunction<T>>(notchLower),
+        notchUpper: readerOf<ValueFunction<T>>(notchUpper),
+        count: readerOf<ValueFunction<T>>(count),
         xAxisId,
         yAxisId,
         data,

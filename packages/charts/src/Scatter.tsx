@@ -9,7 +9,7 @@
 import { useMemo } from "react";
 import { useSeries } from "./context";
 import { readerOf } from "./value";
-import type { Accessor, Value, ScatterSeriesConfig } from "./types";
+import type { ValueFunction, Value, ScatterSeriesConfig } from "./types";
 
 /** The props of `Scatter`. */
 export interface ScatterProps<T> {
@@ -55,7 +55,7 @@ export function Scatter<T>(props: ScatterProps<T>): null {
     tone,
     radius = 3,
   } = props;
-  const accessor = readerOf<Accessor<T>>(props.value);
+  const accessor = readerOf<ValueFunction<T>>(props.value);
 
   const config = useMemo<ScatterSeriesConfig>(
     () =>

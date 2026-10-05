@@ -65,6 +65,7 @@ place:
 | a zoomed `XAxis domain` handed back (controlled) | `initialView: { domains: { x: span } }` or `setDomain("x", span)`; `domain` stays the axis' configuration and is a zoomable axis' start |
 | clamping the proposed domain in the handler | `XAxis zoomLimits={{ min, max }}`; without it at most the data's extent or the axis' own `domain`, whichever is wider, at least three data steps; a span equal to the axis' own domain is no part of the view |
 | `AxisConfig.onDomainChange` | `AxisConfig.zoomable`, `AxisConfig.zoomLimits` |
+| the type `Accessor<T>`, `ListAccessor<T>` | `ValueFunction<T>`, `ListFunction<T>` - the function form of `Value<T>` and `ListValue<T>`, same shape |
 
 - **`Chart`, the axes and the series kinds are no exports of their own.**
   `useChart(rows)` hands them out, typed at the row; their props stay public

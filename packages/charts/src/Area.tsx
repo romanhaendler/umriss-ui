@@ -8,7 +8,7 @@
 import { useMemo } from "react";
 import { useSeries } from "./context";
 import { readerOf } from "./value";
-import type { Accessor, Value, AreaSeriesConfig } from "./types";
+import type { ValueFunction, Value, AreaSeriesConfig } from "./types";
 
 /** The props of `Area`. */
 export interface AreaProps<T> {
@@ -82,14 +82,14 @@ export function Area<T>(props: AreaProps<T>): null {
     strokeWidth = 1.5,
     dash,
   } = props;
-  const accessor = readerOf<Accessor<T>>(props.value);
+  const accessor = readerOf<ValueFunction<T>>(props.value);
 
   const config = useMemo<AreaSeriesConfig>(
     () =>
       ({
         kind: "area",
         accessor,
-        baseline: readerOf<Accessor<T>>(baseline),
+        baseline: readerOf<ValueFunction<T>>(baseline),
         xAxisId,
         yAxisId,
         data,

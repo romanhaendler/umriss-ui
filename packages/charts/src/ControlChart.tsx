@@ -29,7 +29,7 @@ import {
 } from "./controlLimits";
 import { fnEqual } from "./scene";
 import { readerOf } from "./value";
-import type { Accessor, Value } from "./types";
+import type { ValueFunction, Value } from "./types";
 import type { ReactNode } from "react";
 
 /** The props of `ControlChart`. */
@@ -135,7 +135,7 @@ export function ControlChart<T>(props: ControlChartProps<T>): ReactNode {
   } = props;
   // Compared as the scene compares a series' value: a field by its name, a
   // function by its source text.
-  const accessor = useKept(readerOf<Accessor<T>>(props.value), fnEqual);
+  const accessor = useKept(readerOf<ValueFunction<T>>(props.value), fnEqual);
   const origin = useKept(props.origin, originEqual);
 
   const values = useMemo(() => {
@@ -172,7 +172,7 @@ export function ControlChart<T>(props: ControlChartProps<T>): ReactNode {
 
   // The violations are an ordinary scatter over the same data: whatever does not
   // violate is a gap. No new series kind, no new drawing code.
-  const violationAccessor = useMemo<Accessor<T>>(
+  const violationAccessor = useMemo<ValueFunction<T>>(
     () => (d, i) => (marked.has(i) ? accessor(d, i) : null),
     [marked, accessor],
   );

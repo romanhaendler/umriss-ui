@@ -15,7 +15,7 @@
 import { useMemo } from "react";
 import { useSeries } from "./context";
 import { readerOf } from "./value";
-import type { Accessor, Value, MatrixColoring, MatrixSeriesConfig } from "./types";
+import type { ValueFunction, Value, MatrixColoring, MatrixSeriesConfig } from "./types";
 
 /** Default gradient: a sequential set, light to dark, so that it stays readable
     as an order of lightness even without colour. It is a default, not a
@@ -86,8 +86,8 @@ export function Matrix<T>(props: MatrixProps<T>): null {
     () =>
       ({
         kind: "matrix",
-        accessor: readerOf<Accessor<T>>(value),
-        level: readerOf<Accessor<T>>(level),
+        accessor: readerOf<ValueFunction<T>>(value),
+        level: readerOf<ValueFunction<T>>(level),
         coloring: effectiveColoring,
         xAxisId,
         yAxisId,

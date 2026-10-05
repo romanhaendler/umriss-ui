@@ -763,8 +763,11 @@ value), Zelle
 
 **Value**:
 What a column is for one row: the thing that is sorted, searched, exported,
-grouped and aggregated. It is read from the row by a field name or computed from it, and never
-read back from what the cell shows.
+grouped and aggregated. In a chart, what a series is for one row: its y
+position, on every **Series kind** alike; and what the x axis is for one row:
+its x position. It is read from the row by a field name or computed from it, and never
+read back from what the cell shows or the chart draws. A matrix's colour is
+not its value but its **Level channel**.
 _Avoid_: data, accessor, raw value, Rohwert
 
 **Presentation**:
