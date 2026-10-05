@@ -1,6 +1,6 @@
 {
   "name": "@umriss-ui/table",
-  "version": "0.13.1",
+  "version": "0.13.2",
   "description": "React data table for data-dense applications - sorting, filtering, grouping, aggregates, virtualisation. Declared the way it reads: columns as JSX, typed against their rows.",
   "license": "MIT",
   "author": "Roman Händler",

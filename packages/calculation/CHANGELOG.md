@@ -11,6 +11,12 @@ under a heading "Changed" of its own, no matter which digit rose.
 
 ---
 
+## 0.5.1 – Core 0.26.0 (Oct. 2026)
+
+Needs `@umriss-ui/core` 0.26; the peer range moves to `^0.26.0`. Nothing else changes for a caller.
+
+---
+
 ## 0.5.0 – Every export explained (Oct. 2026)
 
 The package explains itself where it is used: every export carries a comment,

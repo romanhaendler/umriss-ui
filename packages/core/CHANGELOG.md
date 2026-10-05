@@ -29,6 +29,44 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.26.0 – A row of fields on one line, and the segmented control (Oct. 2026)
+
+Controls side by side in a row of fields share one line: their words stand on
+the line a field's value stands on, at either size. A new control,
+`SegmentedControl`, stands in such a row as a field itself. Three things
+change height or name (see Changed).
+
+### Added
+
+- **`SegmentedControl`**: one choice out of a few short possibilities, drawn
+  as one field with a segment for each - as tall, as edged and as rounded as a
+  select, the chosen segment filled with ink. To the keys and the screen
+  reader it is a radio group: one tab stop, the arrow keys move and choose,
+  skipping disabled possibilities. It takes `options` (`value`, `label`,
+  `disabled`), `value` (`null` for none yet) and `onChange` or `defaultValue`,
+  `size`, `disabled` and `name`; inside a `FormField` it takes the field's
+  label, message, required and invalid state, and shows an invalid field's
+  edge. It is as wide as its words, never wider than its place - a word that
+  does not fit ends in an ellipsis - and fills no place by itself. Under
+  forced colours the chosen segment takes the system's selection colours.
+  New types `SegmentedControlProps` and `SegmentedOption`.
+
+### Changed
+
+- **A horizontal `RadioGroup` is as tall as a control** (32 px, 26 px at
+  `sm`) instead of one line of its labels: the line of its labels lies on the
+  line a field's value stands on. A layout that stacked a horizontal group
+  tightly under something else grows by 12.5 px (9.5 px at `sm`). A vertical
+  group is unchanged.
+- **A `Checkbox` or a `Switch` inside a `FormField` is as tall as a control**,
+  its label on the field line, for the same reason. Outside a `FormField` both
+  are as compact as before. The checkbox takes that height from the size of
+  its place (`ControlSizeProvider`); it still has one look and no `size`.
+- **A `RadioGroup` inside a `FormField` is named by the field's label**
+  (`aria-labelledby`). `label htmlFor` names no group, and such a group had no
+  accessible name before; a caller's own `aria-label` or `aria-labelledby`
+  still wins.
+
 ## 0.25.0 – Every export explained, 27 pages to configure, and a palette that keeps count (Oct. 2026)
 
 The package explains itself where it is used: every export carries a comment,
