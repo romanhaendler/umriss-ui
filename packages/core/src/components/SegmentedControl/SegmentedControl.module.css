@@ -162,6 +162,63 @@
     cursor: not-allowed;
   }
 
+  /* ---- Inset: a choice that stands on its own ----
+
+     A sunken track without an edge - the transparent outline stays, so forced
+     colours still draw one - and the choice a surface lifted out of it, its
+     corners concentric with the track's. No seams: the lifted surface parts
+     the segments. The other words stand back in the secondary ink and come
+     forward under the pointer. One weight for every word, so that the width
+     never follows the choice. The control height holds, the padding inside it. */
+  .inset {
+    --_pad: 3px;
+    box-sizing: border-box;
+    padding: var(--_pad);
+    background: var(--u-color-surface-sunken);
+  }
+
+  .inset:not(.invalid) {
+    box-shadow: none;
+  }
+
+  .inset .segment {
+    border-radius: calc(var(--_radius) - var(--_pad));
+    color: var(--u-color-text-secondary);
+    font-weight: var(--u-weight-medium);
+  }
+
+  .inset .segment::before {
+    content: none;
+  }
+
+  .inset .segment:hover:not(:has(.input:disabled)):not(:has(.input:checked)),
+  .inset .segment:active:not(:has(.input:disabled)):not(:has(.input:checked)) {
+    background: none;
+    color: var(--u-color-text);
+  }
+
+  .inset .segment:has(.input:checked) {
+    background: var(--u-color-surface);
+    color: var(--u-color-text);
+    outline: 1px solid transparent;
+    box-shadow: var(--u-shadow-card);
+  }
+
+  /* The ring outranks the lift, as on every segment. */
+  .inset .segment:has(.input:focus-visible) {
+    outline: 2px solid transparent;
+    box-shadow: var(--u-focus-ring);
+  }
+
+  .inset.invalid .segment:has(.input:focus-visible) {
+    outline: 2px solid transparent;
+    box-shadow: var(--u-focus-ring-danger);
+  }
+
+  .inset.sm {
+    --_pad: 2px;
+  }
+
   /* The chosen segment is a ground in the ink, and forced colours repaint
      every ground with the page's (forced-colors 02): it takes the system's
      colours for a selection instead, as the switch's track does. Left to the
@@ -169,7 +226,8 @@
      theme - so the segment keeps the two colours it names, and paints its
      own ring, which the system no longer colours there. */
   @media (forced-colors: active) {
-    .segment:has(.input:checked) {
+    .segment:has(.input:checked),
+    .inset .segment:has(.input:checked) {
       forced-color-adjust: none;
       background: SelectedItem;
       color: SelectedItemText;

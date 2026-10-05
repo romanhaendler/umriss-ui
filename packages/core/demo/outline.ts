@@ -540,7 +540,8 @@ export const OUTLINE: readonly Rubric[] = [
         sentence: "One choice out of a few short possibilities, drawn as one field with a segment for each (segmented button, button toggle). It stands in a row of fields as one of them: as tall, as edged and as rounded as a select.",
         about: [
           "A screen reader hears a radio group, each segment a radio with its position and whether it is chosen; the control is one tab stop, and the arrow keys move and choose at once, skipping disabled possibilities.",
-          "Each segment is as wide as its word, and the chosen one is filled with ink. The width never follows the choice.",
+          "Each segment is as wide as its word, and the chosen one is filled with ink. The width never follows the choice. `fill` takes the width of the place instead and shares it equally; an option's `icon` stands before its word.",
+          "Two drawings, chosen by place: `field`, the default, in a row of fields, as one of them; `inset` for a choice that stands on its own - in a menu, a settings panel, a sheet - a sunken track with the choice lifted out of it. Both are a control's height, and the keys are the same.",
         ],
         alternatives: [
           { when: "Possibilities that need a line of explanation each", use: "radiogroup" },

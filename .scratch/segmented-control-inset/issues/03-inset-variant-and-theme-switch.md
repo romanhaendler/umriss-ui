@@ -1,6 +1,6 @@
 # 03 — The inset variant and the theme switch example
 
-Status: ready-for-agent
+Status: done
 
 Blocked by: 01, 02
 
@@ -21,14 +21,41 @@ from a screenshot before it ships.
 
 ## Acceptance criteria
 
-- [ ] `variant?: "field" | "inset"` on `SegmentedControl`, default `"field"`; without it, everything is as in 0.26 (existing tests and baselines untouched).
-- [ ] Inset track: sunken surface, no edge, the field's radius for its size, a small inner padding (about 3 px at `md`, 2 px at `sm`), total height the control height of its size - equal to a select's box at `md` and `sm` (layout test).
-- [ ] Chosen inset segment: surface colour, text colour, card shadow, radius the track's minus the padding, written so the stylesheet guards pass.
-- [ ] Unchosen inset segments: secondary text colour, no seams, text colour under the pointer; every inset segment in medium weight, so the width does not follow the choice.
-- [ ] Focus ring on the focused segment, the invalid danger edge in a `FormField` with an error, disabled dimming and the not-allowed cursor: as in the field variant.
-- [ ] Forced colours: the chosen segment in the selection colours, the track with a visible boundary; the new example joins the forced-colours spec.
-- [ ] The keyboard and role unit tests run for the default and for `variant="inset" fill` alike.
-- [ ] A new example "Theme switch" on the segmented control's page: inset, `fill` in a narrow panel, icons from the shared set or small inline SVGs; `variant` named in the configurator.
-- [ ] The component's header comment and its page say when to use which variant (`field` in a row of fields, `inset` standing alone); the glossary entry **Segmented control** gains one sentence on the inset drawing.
-- [ ] The new example joins the screenshot baselines, light and dark; a screenshot of it in both themes is left in this ticket's comments for the owner (the dark pill stands darker than its track - the owner decides).
-- [ ] Core's changelog has a feature entry.
+- [x] `variant?: "field" | "inset"` on `SegmentedControl`, default `"field"`; without it, everything is as in 0.26 (existing tests and baselines untouched).
+- [x] Inset track: sunken surface, no edge, the field's radius for its size, a small inner padding (about 3 px at `md`, 2 px at `sm`), total height the control height of its size - equal to a select's box at `md` and `sm` (layout test).
+- [x] Chosen inset segment: surface colour, text colour, card shadow, radius the track's minus the padding, written so the stylesheet guards pass.
+- [x] Unchosen inset segments: secondary text colour, no seams, text colour under the pointer; every inset segment in medium weight, so the width does not follow the choice.
+- [x] Focus ring on the focused segment, the invalid danger edge in a `FormField` with an error, disabled dimming and the not-allowed cursor: as in the field variant.
+- [x] Forced colours: the chosen segment in the selection colours, the track with a visible boundary; the new example joins the forced-colours spec.
+- [x] The keyboard and role unit tests run for the default and for `variant="inset" fill` alike.
+- [x] A new example "Theme switch" on the segmented control's page: inset, `fill` in a narrow panel, icons from the shared set or small inline SVGs; `variant` named in the configurator.
+- [x] The component's header comment and its page say when to use which variant (`field` in a row of fields, `inset` standing alone); the glossary entry **Segmented control** gains one sentence on the inset drawing.
+- [x] The new example joins the screenshot baselines, light and dark; a screenshot of it in both themes is left in this ticket's comments for the owner (the dark pill stands darker than its track - the owner decides).
+- [x] Core's changelog has a feature entry.
+
+## Comments
+
+Delivered. `variant="inset"`: track in the sunken surface, padding 3 px (2 px
+at `sm`) inside the control height, the chosen segment in the surface colour,
+text colour and card shadow, radius `calc(var(--_radius) - var(--_pad))`;
+unchosen words in the secondary ink and medium weight, the text colour under
+the pointer, no seams. The inset rules stand before the forced-colours block,
+which names the inset choice too, so it keeps the selection colours; the
+stylesheet guard asked for the transparent outlines beside the lift and the
+ring, and has them. `variant` is in the configurator.
+
+Tests: the keys and roles for `variant="inset" fill` (unit); the theme switch
+at the control height and the configurator's inset at the small height, the
+chosen segment lifted (layout); the ring on the theme switch, the track's
+outline and the selection colours under forced colours, with a baseline.
+
+**For the owner - the dark theme.** The screenshots to judge are the theme
+switch example's baselines,
+`packages/core/tests-visual/screenshots.spec.ts-snapshots/example-segmentedcontrol--a-theme-switch-ui-{light,dark}-*.png`.
+In the dark one the pill (`#161618`) stands darker than its track
+(`#1e1e21`), held apart by the card shadow's edge, as the spec foresaw. It
+reads as a selection; whether it reads as *lifted* is the owner's call.
+
+The page head's new paragraph moved every example on the page by a fraction
+of a pixel; the segmented control's baselines were redrawn for it. Without
+that paragraph every existing baseline held unchanged (checked).

@@ -356,3 +356,23 @@ test("A segment's icon stands on its word's line and stays whole in a narrow pla
   expect((await box(icon)).width).toBe(size);
   expect(await word.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(true);
 });
+
+/* segmented-control-inset 03: the inset drawing is a control's height at
+   either size, its padding inside it - so it lines up with a field. */
+test("An inset segmented control is as tall as a field, at either size", async ({ page }) => {
+  await openExample(page, "segmentedcontrol", "a-theme-switch");
+  const token = (name: string) => page.evaluate((n) => Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue(n)), name);
+  const control = example(page, "a-theme-switch").getByRole("radiogroup", { name: "Theme" });
+  const height = () => control.evaluate((element) => (element as HTMLElement).offsetHeight);
+  expect(await height()).toBe(await token("--u-control-height"));
+  // The chosen segment is a surface of its own, lifted out of the track.
+  const chosen = control.getByRole("radio", { name: "System" }).locator("..");
+  expect(await chosen.evaluate((element) => getComputedStyle(element).boxShadow)).not.toBe("none");
+  expect((await box(chosen)).height).toBeLessThan(await height());
+
+  const configurator = page.locator('[data-configurator="segmentedcontrol"]');
+  await configurator.getByRole("radiogroup", { name: "variant" }).getByText("inset", { exact: true }).click();
+  await configurator.getByRole("radiogroup", { name: "size" }).getByText("sm", { exact: true }).click();
+  const staged = configurator.locator(".exampleStage").getByRole("radiogroup");
+  expect(await staged.evaluate((element) => (element as HTMLElement).offsetHeight)).toBe(await token("--u-control-height-sm"));
+});
