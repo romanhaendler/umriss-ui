@@ -1,6 +1,6 @@
 # Charts declared like the table
 
-Status: done for tickets 01–08 (2026-10-04); released with `component-view` once the user has accepted both.
+Status: done (released 2026-10-05: charts 0.11.0, table 0.13.0, schedule 0.5.0)
 Date:   2026-10-04
 Origin: grilling of 2026-10-04 (charts research "zoom and the legend"); ADR-0048.
 Released with: `.scratch/component-view/` - one release breaks charts, table and schedule once.

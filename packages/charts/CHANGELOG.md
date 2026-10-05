@@ -29,9 +29,8 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
-## Unreleased
+## 0.11.0 – A chart bound to its rows, with a view of its own (Oct. 2026)
 
-**A chart bound to its rows, with a view of its own.**
 Two efforts in one break, released together with `@umriss-ui/table` and
 `@umriss-ui/schedule`. A chart is declared through `useChart(rows)`, as a
 table is through `useTable`, and every series and axis reads its rows through

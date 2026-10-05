@@ -22,8 +22,8 @@ as it stood.
 
 - **Charts bound to their rows, and every component holding its own view**
   (`.scratch/charts-bound-to-rows/`, `.scratch/component-view/`; ADR-0047,
-  ADR-0048; not released yet - the changelogs' "Unreleased" waits on the
-  user's acceptance). From the charts research "zoom and the legend" and its
+  ADR-0048; released after the user's acceptance as charts 0.11.0, table
+  0.13.0 and schedule 0.5.0). From the charts research "zoom and the legend" and its
   grilling: zooming a chart or hiding a series cost every caller a
   `useState` and a toggle, the table took its view only once, and the
   schedule had controlled pairs. A chart is declared through `useChart(rows)`
