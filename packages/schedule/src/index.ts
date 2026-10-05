@@ -1,8 +1,5 @@
 /* @umriss-ui/schedule - subtasks on lanes over time (ADR-0022, ADR-0023). */
 
-/* `useSchedule` stands where the free `Schedule` stood (charts-bound-to-rows
-   08): it brings the schedule's stylesheet, so its place keeps their order. */
-export { useSchedule, type ScheduleParts, type ScheduleOptions } from "./useSchedule";
 export type { ScheduleProps } from "./Schedule";
 export type { LaneProps, SubtasksProps, DependenciesProps } from "./parts";
 export type { ScheduleHit, ScheduleInteraction } from "./scene";
@@ -56,3 +53,8 @@ export type { InBlockedTime } from "./findings";
 /* What `component-view` 07 added: the schedule's view (ADR-0047), at the end
    by the workspace's rule for new exports. */
 export type { ScheduleView } from "./view";
+
+/* `useSchedule` (charts-bound-to-rows 08), at the end by the workspace's rule
+   for new exports: it brings the schedule's stylesheet, the only one here, so
+   its place moves no other one. */
+export { useSchedule, type ScheduleParts, type ScheduleOptions } from "./useSchedule";
