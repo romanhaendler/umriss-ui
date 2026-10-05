@@ -233,7 +233,15 @@
       color: SelectedItemText;
     }
 
-    .segment:has(.input:checked:focus-visible) {
+    /* Out of the system's hands, the lift would be painted in the theme's
+       shadow around the selection colour; the field's choice has none. */
+    .inset .segment:has(.input:checked) {
+      box-shadow: none;
+    }
+
+    /* The invalid inset ring names the outline once more - outranked here. */
+    .segment:has(.input:checked:focus-visible),
+    .inset.invalid .segment:has(.input:checked:focus-visible) {
       outline-color: Highlight;
       outline-offset: 2px;
     }

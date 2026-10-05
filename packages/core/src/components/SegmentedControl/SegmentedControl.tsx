@@ -130,7 +130,7 @@ export const SegmentedControl = forwardRef(function SegmentedControl<T extends s
           htmlFor={radio.optionId(option)}
         >
           <input {...radio.inputProps(option)} className={styles.input} />
-          {option.icon !== undefined && (
+          {option.icon && (
             <span className={styles.icon} aria-hidden="true">
               {option.icon}
             </span>
