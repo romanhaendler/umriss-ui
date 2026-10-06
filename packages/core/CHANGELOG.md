@@ -29,7 +29,24 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
-## Unreleased
+## 0.27.0 – The toasts below a header, and the segmented control on its own (Oct. 2026)
+
+Two requests from an application shell. The toasts' distance from the
+window's edge is a token per edge, so they can stand below a fixed header
+without a selector on the toast's markup. The segmented control can stand on
+its own - drawn inset, filling its place, with an icon before each word, as a
+theme switch in a menu needs - and the inset drawing is now its default (see
+Changed).
+
+### Changed
+
+- **`SegmentedControl` is drawn inset by default**: a sunken track without an
+  edge, the choice a surface lifted out of it with the card shadow, the other
+  words in the secondary ink and medium weight. It is still a control's
+  height, with its words on a select's line in a row of fields; focus,
+  invalid, disabled, forced colours and the keys are as before.
+  `variant="field"` gives the 0.26 drawing - a field's edge, the choice filled
+  with ink - for a row whose fields it should match box for box.
 
 ### Added
 
@@ -47,12 +64,6 @@ commit.
   gap, at `--u-icon-size` (`--u-icon-size-sm` at `sm`) and hidden from
   assistive technology - the word names the possibility. Where the word ends
   in an ellipsis, the icon stays whole.
-- **`SegmentedControl` takes `variant="inset"`** for a choice that stands on
-  its own - in a menu, a settings panel, a sheet: a sunken track without an
-  edge, the choice a surface lifted out of it with the card shadow, the other
-  words in the secondary ink. It is a control's height at either size; focus,
-  invalid, disabled and forced colours behave as in the default
-  `variant="field"`, which is unchanged.
 
 ## 0.26.0 – A row of fields on one line, and the segmented control (Oct. 2026)
 
