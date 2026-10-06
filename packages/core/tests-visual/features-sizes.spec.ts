@@ -5,7 +5,9 @@
    The promises: a field fills the place that gives it a width; in a row it is
    its natural width and holds still whatever it shows - chips, an option, a
    message under it; `chars` fixes it; it is never wider than its place; one
-   size for a place reaches every control in it and stops at a dialog. */
+   size for a place reaches every control in it and stops at a dialog. The
+   segmented control and the grid's column widths keep the same promises on
+   their own pages. */
 
 import { test, expect } from "@playwright/test";
 import type { Locator, Page } from "@playwright/test";
@@ -389,3 +391,35 @@ test("An inset segmented control is as tall as a field, at either size", async (
   const staged = configurator.locator(".exampleStage").getByRole("radiogroup");
   expect(await staged.evaluate((element) => (element as HTMLElement).offsetHeight)).toBe(await token("--u-control-height-sm"));
 });
+
+/* grid-column-widths 01: a grid of its own widths - a number is a column that
+   holds its width, "fill" takes the rest and is never widened by what it shows. */
+for (const width of [1280, 320]) {
+  test(`A grid column of a number holds its width, and "fill" takes the rest (${width} px)`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 800 });
+    await openExample(page, "stack-and-grid", "columns-of-their-own-widths");
+    const stage = example(page, "columns-of-their-own-widths");
+    const label = stage.getByText("Owner", { exact: true });
+    const value = stage.getByText("Rafael Ortiz", { exact: true });
+    const grid = label.locator("..");
+    const gap = await grid.evaluate((element) => Number.parseFloat(getComputedStyle(element).columnGap));
+    const measure = async (cell: Locator) => {
+      const [labelBox, valueBox, gridBox] = [await box(label), await box(cell), await box(grid)];
+      expect(Math.abs(labelBox.width - 140)).toBeLessThanOrEqual(0.5);
+      expect(Math.abs(valueBox.x - (labelBox.x + labelBox.width + gap))).toBeLessThanOrEqual(0.5);
+      expect(Math.abs(valueBox.x + valueBox.width - (gridBox.x + gridBox.width))).toBeLessThanOrEqual(0.5);
+      // Every value, the one that wraps included, ends on the grid's edge.
+      const cells = grid.locator(":scope > *");
+      for (let i = 1; i < (await cells.count()); i += 2) {
+        const valueCell = await box(cells.nth(i));
+        expect(valueCell.x + valueCell.width, `value ${i}`).toBeLessThanOrEqual(gridBox.x + gridBox.width + 0.5);
+      }
+    };
+    await measure(value);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
+    // A value without a place to break does not widen its column.
+    const long = "R".repeat(120);
+    await value.evaluate((element, text) => (element.textContent = text), long);
+    await measure(stage.getByText(long, { exact: true }));
+  });
+}
