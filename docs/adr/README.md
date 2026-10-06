@@ -1,6 +1,6 @@
 # Decisions
 
-Forty-eight decisions, each one written where it was made and kept afterwards. An
+Forty-nine decisions, each one written where it was made and kept afterwards. An
 ADR here is not an announcement: it states the question, the alternatives that
 were real at the time, and what the decision costs — which is what makes it
 worth reading a year later, when the code has changed and the reasoning has not.
@@ -62,5 +62,6 @@ half a later reader needs most. Exactly one is superseded today.
 | [0046](0046-the-site-renders-the-workspaces-own-documents.md) | The site renders the workspace's own documents | accepted | demo |
 | [0047](0047-a-component-holds-its-own-view.md) | A component holds its own view | accepted | architecture |
 | [0048](0048-charts-are-bound-to-their-rows-by-the-hook.md) | Charts are bound to their rows by the hook | accepted | charts |
+| [0049](0049-a-sum-takes-rows-from-data.md) | A sum takes rows from data, and a line shows its contribution | accepted | calculation |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).

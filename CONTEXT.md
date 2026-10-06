@@ -1361,7 +1361,10 @@ _Avoid_: input (which is a core component), parameter, Eingabe, Ausgangswert
 **Operator**:
 How a derived quantity comes from its operands: sum, difference, product or
 quotient, and nothing else. In a **Chain** the same four stand beside each
-operand as plus, minus, times and divided by. There is no formula text and no operator of the
+operand as plus, minus, times and divided by. A sum alone takes any number of
+operands, one or none included - the sum of nothing is zero - so that rows that
+come from data can stand as one quantity whatever their count; a row's sign is
+its number's, shown as its **Contribution**. There is no formula text and no operator of the
 caller's own, because a written-out operation that the library did not perform
 could say something the number does not.
 _Avoid_: operation (taken twice over: set operations, and how a control is
@@ -1407,6 +1410,23 @@ their own number. The last interim is the chain's value, and, where the chain
 is the whole calculation, its **Result**.
 _Avoid_: subtotal (after a times it is no sum), checkpoint, carry,
 Zwischensumme
+
+**Contribution**:
+What an operand that is added or taken away does to the value it stands in:
+its direction, plus or minus, and its size. Its line shows the contribution,
+not the operand's own sign - a correction of −18 that is added stands as
+"− 18", never as "+ −18" - and so does the formula that names it. The quantity
+itself, where its derivation closes, as an interim or as the **Result**, keeps
+its own sign. Where the **Metrics** of one line point in different directions,
+the line keeps the operator as written and each number its sign.
+_Avoid_: share, portion, Anteil, Beitrag as an identifier
+
+**Emphasis**:
+How much a line of a **Calculation** stands out among the others: strong or
+muted. It is the writer's, not the number's - a muted line still counts in
+full - and it is never a **Tone** or a **Verdict**. The **Result** has none; it
+is already the heaviest line.
+_Avoid_: highlight, style, weight, Hervorhebung as an identifier
 
 **Metric**:
 One of several numbers every quantity of a **Calculation** carries side by
