@@ -285,23 +285,36 @@ test("Every control in a row of fields stands on the select's line", async ({ pa
   }
 });
 
-test("A segmented control is a field in the row, and holds still while it is switched", async ({ page }) => {
-  await openExample(page, "sizes", "a-row-of-fields");
-  for (const name of ["Medium", "Small"]) {
-    const row = example(page, "a-row-of-fields").getByRole("group", { name });
-    const select = await box(row.getByLabel("Caster"));
-    const control = row.getByRole("radiogroup", { name: "Values" });
-    const before = await box(control);
-    // The same box as the select's, top and bottom.
-    expect(Math.abs(before.y - select.y), `${name}: top`).toBeLessThanOrEqual(0.5);
-    expect(Math.abs(before.height - select.height), `${name}: height`).toBeLessThanOrEqual(0.5);
-    // The input lies over its whole segment: a click anywhere on it lands there.
-    const forecast = control.getByRole("radio", { name: "Forecast" });
-    await forecast.click();
-    await expect(forecast).toBeChecked();
-    expect(await box(control)).toEqual(before);
-  }
-});
+/* Inset by default (segmented-control-inset), as a field on request: either
+   drawing has the select's box and its words on the select's line. */
+for (const [pageId, exampleId] of [
+  ["sizes", "a-row-of-fields"],
+  ["segmentedcontrol", "drawn-as-a-field"],
+] as const) {
+  test(`A segmented control stands in the row, and holds still while it is switched (${exampleId})`, async ({ page }) => {
+    await openExample(page, pageId, exampleId);
+    for (const name of ["Medium", "Small"]) {
+      const row = example(page, exampleId).getByRole("group", { name });
+      const select = await box(row.getByLabel("Caster"));
+      const control = row.getByRole("radiogroup", { name: "Values" });
+      const before = await box(control);
+      // The same box as the select's, top and bottom.
+      expect(Math.abs(before.y - select.y), `${name}: top`).toBeLessThanOrEqual(0.5);
+      expect(Math.abs(before.height - select.height), `${name}: height`).toBeLessThanOrEqual(0.5);
+      // The input lies over its whole segment: a click anywhere on it lands there.
+      const forecast = control.getByRole("radio", { name: "Forecast" });
+      await forecast.click();
+      await expect(forecast).toBeChecked();
+      expect(await box(control)).toEqual(before);
+      // Its words on the select's line.
+      const middle = (rect: { y: number; height: number }) => rect.y + rect.height / 2;
+      const line = middle(await box(row.getByLabel("Caster")));
+      for (const word of ["Measured", "Forecast"]) {
+        expect(Math.abs(middle(await box(row.getByText(word, { exact: true }))) - line), `${name}: ${word}`).toBeLessThanOrEqual(1);
+      }
+    }
+  });
+}
 
 test("A checkbox or switch outside a field keeps its own height", async ({ page }) => {
   // Outside a field they stand in lists, where a control's height would spread them apart.

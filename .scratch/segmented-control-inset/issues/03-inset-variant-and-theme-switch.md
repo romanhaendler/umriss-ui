@@ -72,3 +72,10 @@ shadow's reach below a 3 px padding (the requested look); icon sizing shared
 with the button through `#own-styles` (six lines, two places - shared when a
 third control takes icons); the redrawn field baselines (checked: unchanged
 without the page head's paragraph).
+
+**Inset is the default (2026-10-06).** Having seen the theme switch in the
+browser, the owner made `inset` the default and kept `fill` opt-in (equal
+shares in a row would cut the longer word). `field` gives the 0.26 drawing.
+The row of fields now shows inset, and its alignment tests - box equal to the
+select's, words on the select's line, md and sm - run against it; a new
+example "Drawn as a field" holds the field drawing to the same test.

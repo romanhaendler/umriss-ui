@@ -122,7 +122,7 @@ The table and the alarm list are not part of this package. They live in
 | `FormField` / `FormFieldBoundary` | label, help text, error; wires `id`/`aria-*` automatically through context. `FormFieldBoundary` resets the context inside panels so that their contents do not inherit the trigger's field id |
 | `Textarea` | multi-line input; grows with its content on request (`autoGrow`, `maxRows`), character counter (`showCount`) |
 | `RadioGroup` | one out of a few, each option with an optional explanatory line; one tab stop, arrow keys select |
-| `SegmentedControl` | one out of a few short options, drawn as one field with a segment each; a radio group to the keys and the screen reader |
+| `SegmentedControl` | one out of a few short options, drawn inset - a sunken track, the choice lifted out of it - or as a `field`; `fill` shares its place equally, an option takes an `icon`; a radio group to the keys and the screen reader |
 | `Alert` | a message that stays; five tones, actions, closable on request – the role follows the tone |
 | `Tag` / `TagGroup` | a removable label; one tab stop and arrow-key navigation within the group |
 | `Divider` | a dividing line beside Stack and Grid: horizontal/vertical, two weights, optionally with a label |
@@ -212,8 +212,9 @@ The table and the alarm list are not part of this package. They live in
    `ControlSizeProvider` reaches it, and a surface of its own resets it.
    Held by `tests-unit/controlSize.test.tsx` and
    `tests-visual/features-sizes.spec.ts`. Two exceptions, by design: the
-   `SegmentedControl` is a field to the eye but shows no value, so it is as
-   wide as its words (`fit-content`) and fills no place; and the `Checkbox`
+   `SegmentedControl` stands among fields but shows no value, so it is as
+   wide as its words (`fit-content`) and fills a place only when told to
+   (`fill`); and the `Checkbox`
    has one look and no `size` - in a field it reads the place's size only
    for the height of the row it stands in (field-row-alignment).
 

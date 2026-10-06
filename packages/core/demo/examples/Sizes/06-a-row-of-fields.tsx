@@ -3,7 +3,7 @@ import type { ControlSize } from "../../../src";
 
 export const title = "A row of fields";
 export const lead =
-  "Fields side by side share one line: their labels on one line, their boxes on one height, their words on the line the select's value stands on. A segmented control is a field itself; a horizontal radio group is as tall as a control, and so are a checkbox and a switch in a field, so their words stand on that line too - at either size.";
+  "Fields side by side share one line: their labels on one line, their boxes on one height, their words on the line the select's value stands on. A segmented control is as tall as a field; a horizontal radio group is as tall as a control, and so are a checkbox and a switch in a field, so their words stand on that line too - at either size.";
 
 function Row({ size }: { size: ControlSize }) {
   return (
