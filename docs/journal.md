@@ -18,6 +18,30 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Oct. 2026 — Rows from data
+
+- **A sum takes rows from data, whatever their count** (`.scratch/calculation-rows-from-data/`,
+  ADR-0049; released as `@umriss-ui/calculation` 0.6.0). Asked for as "die
+  Menge der Zeilen ist dynamisch und kann zwischen 0 und n sein": the payslip
+  example's own pattern, `<Minus><Sum>{rows.map(…)}</Sum></Minus>`, threw as
+  soon as the data held one row or none. Only the sum is relaxed; an empty
+  product would be 1, which no reader expects.
+- **A line shows its contribution.** The first answer, the operator as written
+  and the number with its sign ("+ Corrections -18.00"), was turned down in the
+  grilling as read twice and still misread. With the line drawn by direction,
+  `Plus`/`Minus` inside a sum - proposed for rows of both signs - were no longer
+  needed, and a single signed element in place of `Plus` and `Minus` was
+  rejected: a derived quantity that is positive by nature could then only be
+  taken away by a factor of −1. Direction stays the writer's, sign the data's.
+- **Emphasis and rule** answer "das Aussehen von Zeilen ohne CSS ändern" with two
+  props that name what a line is to the reader; a tone and a hidden number were
+  turned down. The development error on the Result could not be shown on "What
+  can go wrong", whose examples all render; it stands in the Calculation page's
+  list of errors instead.
+- **Tested where it can fail:** one rendered seam for the whole work - rows,
+  folded formula, sentence, errors - and opened screenshots of six examples,
+  since what a group holds is in no example's first picture.
+
 ## Oct. 2026 — Grid columns of their own widths
 
 - **`Grid` takes a width per column** (`.scratch/grid-column-widths/`;

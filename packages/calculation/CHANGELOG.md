@@ -11,6 +11,43 @@ under a heading "Changed" of its own, no matter which digit rose.
 
 ---
 
+## 0.6.0 – Rows from data (Oct. 2026)
+
+A payslip's corrections, an invoice's surcharges, a team's movements: rows
+that come from data, any number of them and of either sign, as one line that
+folds (ADR-0049). Needs `@umriss-ui/core` 0.29; the peer range moves to
+`^0.29.0`.
+
+### Added
+
+- **`Sum` takes any number of operands**, one or none included. With one it
+  still folds and opens onto that one; with none it is worth zero, has no
+  disclosure, and says "no entries" where its formula would stand
+  (`calculationNoOperands` in core's wording). `Difference`, `Product` and
+  `Quotient` keep their counts.
+- **`emphasis="strong" | "muted"` and `rule="above"`** on every quantity:
+  a line read first, a line that recedes and still counts in full, a section
+  ruled off that is no interim - without CSS. On the Result either fails on
+  the first render.
+- **A demo page "Rows from data"**, ten examples from none to many rows, both
+  signs, a tree and metrics; four examples of emphasis and rule on the page
+  Calculation.
+
+### Changed
+
+- **A line that adds or takes away shows its contribution**: the direction as
+  its operator, the number without a sign. A negative operand of a sum used to
+  stand as "+ Corrections -18.00"; it now stands as "− Corrections 18.00", and
+  so do the folded formula and the sentence. This holds for the operands of
+  `Sum` and `Difference`, the first operand included (a negative one draws a
+  leading "−"), and for a chain's `Plus`, `Minus` and first quantity. The
+  quantity keeps its own sign where its derivation closes, as an interim, as
+  the Result and where a reference names it. A factor keeps its sign; a line
+  worth zero or missing, and a line whose metrics point in different
+  directions, keep the operator as written.
+
+---
+
 ## 0.5.3 – Core 0.28.0 (Oct. 2026)
 
 Needs `@umriss-ui/core` 0.28; the peer range moves to `^0.28.0`. Nothing else changes for a caller.
