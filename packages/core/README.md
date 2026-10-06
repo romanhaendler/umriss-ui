@@ -139,7 +139,7 @@ The table and the alarm list are not part of this package. They live in
 | `Tabs` / `TabList` / `Tab` / `TabPanel` | controlled tabs with an ink underline and arrow-key control |
 | `Skeleton` | a loading placeholder (bar or circle) with a discreet pulse |
 | `EmptyState` | an empty state with title, description, action and an optional symbol |
-| `Stack` / `Grid` | layout primitives with token spacing (a 4 px step), `Grid` fixed or responsive via `minItemWidth` |
+| `Stack` / `Grid` | layout primitives with token spacing (a 4 px step), `Grid` with a fixed count, a width per column (`columns={[140, "fill"]}`) or responsive via `minItemWidth` |
 | `DatePicker` | calendar selection: weeks from Monday, arrow keys across the month, today/clear, the date in Geist Mono |
 | `DateTimePicker` | date plus time: two-digit fields that advance automatically, visible up/down steppers and arrow-key counting; after the day is chosen the focus jumps into the time, `withSeconds`, "now"; the clock change is handled honestly – a missing hour (the start of summer time) is detected and corrected forwards with a note, a duplicated hour (the start of winter time) offers the choice between both occurrences including the UTC offset |
 | `Combobox` | a searchable select field (listbox panel, arrow keys, `aria-activedescendant`), optionally `clearable`; `Input`'s two sizes |

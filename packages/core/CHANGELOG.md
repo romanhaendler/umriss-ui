@@ -29,7 +29,11 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
-## Unreleased
+## 0.28.0 – Grid columns of their own widths (Oct. 2026)
+
+A grid of labels beside their values needed a `gridTemplateColumns` of its
+own - the one place a screen had to be laid out in CSS. `columns` now takes a
+width per column.
 
 ### Added
 

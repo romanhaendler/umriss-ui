@@ -18,6 +18,24 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Oct. 2026 — Grid columns of their own widths
+
+- **`Grid` takes a width per column** (`.scratch/grid-column-widths/`;
+  released as `@umriss-ui/core` 0.28.0). Asked for as "feste Spaltenbreiten":
+  labels beside their values could only be laid out with a
+  `gridTemplateColumns` in `style`, the one place a screen needed CSS of its
+  own. `columns` takes a list - a number in pixels, or `"fill"` - rather than
+  a second prop beside it, so count and widths cannot disagree. The
+  vocabulary is closed on purpose: a CSS string would let a bare `1fr`
+  through, which a long line widens; `"fill"` is the guarded
+  `minmax(0, 1fr)` a count already wrote, and the word `Sparkline` already
+  used. No breakpoints, no shrinking of a fixed column.
+- **A word kept apart:** on the Stack and Grid page "fixed columns" already
+  meant a fixed count, so the new example is "Columns of their own widths".
+- **Tested where it can fail:** the layout test writes a 120-character value
+  without a break into a cell and measures that its column holds; written as
+  a bare `1fr`, it fails.
+
 ## Oct. 2026 — The toasts below a header, and the segmented control on its own
 
 - **The toasts' distance from the window's edge is a token per edge**
