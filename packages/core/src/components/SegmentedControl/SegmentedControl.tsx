@@ -1,11 +1,12 @@
-/* One choice out of a few short possibilities, drawn as one field.
+/* One choice out of a few short possibilities, drawn as one control.
 
-   It stands in a row of fields as one of them: as tall, as edged and as
-   rounded as a select, a segment for each possibility, the chosen one filled
-   with ink. Where it stands on its own - a menu, a settings panel - it is
-   drawn `inset` instead: a sunken track, the choice lifted out of it
-   (segmented-control-inset). Where a possibility needs a line of
-   explanation, the radio group's dots are the form instead.
+   A sunken track as tall as a select, a segment for each possibility, the
+   chosen one a surface lifted out of the track (segmented-control-inset) -
+   in a menu, in a settings panel and in a row of fields alike, where its
+   words stand on the select's line. Drawn as a `field` it takes a field's
+   edge instead and fills the choice with ink, as a chosen radio dot
+   (field-row-alignment). Where a possibility needs a line of explanation,
+   the radio group's dots are the form instead.
 
    It is a radio group and not a row of toggle buttons. Buttons that stay
    pressed announce "toggle button, pressed" each, are a tab stop each, and
@@ -53,11 +54,10 @@ export interface SegmentedControlProps<T extends string>
   /** `sm` for a toolbar and dense forms, `md` otherwise.
       @default the size of a `ControlSizeProvider` around it, else `"md"` */
   size?: "sm" | "md";
-  /** How it is drawn. `field` stands in a row of fields as one of them: a
-      field's edge, the choice filled with ink. `inset` stands on its own - in
-      a menu, a settings panel, a sheet: a sunken track without an edge, the
-      choice a surface lifted out of it.
-      @default "field" */
+  /** How it is drawn. `inset`: a sunken track without an edge, the choice a
+      surface lifted out of it. `field`: a field's edge, the choice filled
+      with ink - for a row whose fields it should match box for box.
+      @default "inset" */
   variant?: "field" | "inset";
   /** Takes the whole width its place gives it, as a field in a column does,
       and shares it equally between the segments. Without it the control is
@@ -82,7 +82,7 @@ export const SegmentedControl = forwardRef(function SegmentedControl<T extends s
     defaultValue,
     onChange,
     size: ownSize,
-    variant = "field",
+    variant = "inset",
     fill = false,
     disabled = false,
     name,
