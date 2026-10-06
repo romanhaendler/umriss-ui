@@ -29,6 +29,15 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## 0.29.0 – A calculation's empty sum (Oct. 2026)
+
+### Added
+
+- **`calculationNoOperands`** in the wording - "no entries", German "keine
+  Einträge": what the line of a calculation's sum with no operands says where
+  its formula would stand (`@umriss-ui/calculation` 0.6.0). A wording of your
+  own that lists every entry needs it too.
+
 ## 0.28.0 – Grid columns of their own widths (Oct. 2026)
 
 A grid of labels beside their values needed a `gridTemplateColumns` of its
