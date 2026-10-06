@@ -18,6 +18,39 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Oct. 2026 — The toasts below a header, and the segmented control on its own
+
+- **The toasts' distance from the window's edge is a token per edge**
+  (`.scratch/toast-inset-tokens/`; released as `@umriss-ui/core` 0.27.0).
+  Requested by an application shell with a 60 px header, which had moved the
+  toasts with a rule on the region's `data-edge` - internal markup by
+  ADR-0045. `--u-toast-inset-top` and `--u-toast-inset-bottom` carry today's
+  distance, the phone's in a media block of the tokens layer; the token
+  reader ignores such a block, so the phone value stands in the token's
+  comment. Safe areas were left out: the dock and the sheet sit at the edge
+  too, and one of three knowing about a notch would make them disagree.
+- **The segmented control on its own** (`.scratch/segmented-control-inset/`).
+  The same shell's theme switch - Light | Dark | System in the account menu -
+  found the ink fill too loud alone in a menu, and could stretch the control
+  or put icons in it only through its markup. Three additions: `fill`, an
+  option's `icon`, and `variant="inset"` (named `variant`, as on the button;
+  **Appearance** is the schedule's). The previous spec had left equal widths
+  and icons out until a case came; this was it. Seen in the browser, the
+  user made inset the default - `field`, the 0.26 drawing, stays a prop - and
+  kept `fill` opt-in: equal shares in a row would cut the longer word. Inset
+  in the row of fields was measured like the field before it, box and words on
+  the select's line, at both sizes; a new example holds the field drawing in a
+  row.
+- **Found on the way:** under forced colours a chosen segment is taken out of
+  the system's hands, so whatever it draws stays - the inset lift's shadow
+  and the invalid ring's transparent outline had to be undone there (review).
+  A paragraph added to a page's head moves every example below it by a
+  fraction of a pixel, enough to fail their baselines; checked by taking it
+  out before redrawing them.
+- **In the dark theme** the surface is darker than the sunken surface, so the
+  inset choice stands darker than its track, held apart by the card shadow's
+  edge; the user saw it in the browser before making it the default.
+
 ## Oct. 2026 — A row of fields on one line
 
 - **Controls in a row of fields share one line, and the segmented control
