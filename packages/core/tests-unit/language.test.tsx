@@ -225,7 +225,7 @@ describe("The German wording from `@umriss-ui/core/wording/de`", () => {
 describe("The wording of @umriss-ui/calculation", () => {
   it("stands in both wordings", () => {
     const keys = Object.keys(DEFAULT_WORDING).filter((key) => key.startsWith("calculation"));
-    expect(keys.length).toBe(22);
+    expect(keys.length).toBe(23);
     for (const key of keys) {
       const en = DEFAULT_WORDING[key as keyof typeof DEFAULT_WORDING];
       const de = GERMAN_WORDING[key as keyof typeof GERMAN_WORDING];

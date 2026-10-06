@@ -57,8 +57,8 @@ describe("Development errors", () => {
   });
 
   it("a wrong operand count", () => {
-    expect(read(<Sum label="S"><Given label="A" value={1} /></Sum>)).toThrow(
-      "<Calculation> › S: <Sum> takes two or more operands; it was given 1.",
+    expect(read(<Difference label="D"><Given label="A" value={1} /></Difference>)).toThrow(
+      "<Calculation> › D: <Difference> takes two or more operands; it was given 1.",
     );
     expect(
       read(

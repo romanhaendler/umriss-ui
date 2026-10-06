@@ -44,7 +44,9 @@ The rules:
   -18.00" closes the derivation whose line reads "− Corrections 18.00".
 - **Zero and absence keep the operator as written**, and so does a line whose
   metrics (ADR-0038) point in different directions; there each number carries
-  its sign.
+  its sign. A metric that is zero or absent on a line takes no part in that
+  check, so that one empty cell does not turn a line back to signed numbers;
+  where every metric is zero or absent, the line keeps the written operator.
 - **`Plus` and `Minus` stay two.** Direction is the writer's statement, sign is
   the data's. Signed rows from data go into `Plus` or stand bare in a sum; a
   quantity that is positive by nature and taken away - income tax, a sum of

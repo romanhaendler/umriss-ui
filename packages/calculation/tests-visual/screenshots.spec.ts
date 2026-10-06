@@ -100,3 +100,31 @@ test("Beispiel metrics--whole-company, narrow", async ({ page }, testInfo) => {
   await expect(target).toHaveScreenshot(`example-metrics--whole-company-narrow-${testInfo.project.name}.png`);
 });
 
+
+/* Rows from data opened (ADR-0049): what a group of both signs holds - each
+   row's contribution, and the closing row with the quantity's own sign - is in
+   no example's first picture. The rule and the emphasis inside a group too. */
+for (const [example, group] of [
+  ["one-row", "Allowances"],
+  ["rows-of-both-signs", "Corrections"],
+  ["a-group-that-turns-negative", "Corrections"],
+  ["zero-and-missing-keep-their-sign", "Corrections"],
+  ["a-sum-from-data-in-a-tree", "Movements"],
+  ["rows-of-both-signs-with-metrics", "Movements"],
+] as const) {
+  test(`Beispiel rows-from-data--${example}, opened`, async ({ page }, testInfo) => {
+    await openExample(page, "rows-from-data", example);
+    const target = page.locator(`[data-example="${example}"]`);
+    await target.getByRole("button", { name: `Show how ${group} is derived` }).click();
+    await page.mouse.move(0, 0);
+    await expect(target).toHaveScreenshot(`example-rows-from-data--${example}-opened-${testInfo.project.name}.png`);
+  });
+}
+
+test("Beispiel calculation--emphasis-inside-a-group, opened", async ({ page }, testInfo) => {
+  await openExample(page, "calculation", "emphasis-inside-a-group");
+  const target = page.locator('[data-example="emphasis-inside-a-group"]');
+  await target.getByRole("button", { name: "Show how Cost centres is derived" }).click();
+  await page.mouse.move(0, 0);
+  await expect(target).toHaveScreenshot(`example-calculation--emphasis-inside-a-group-opened-${testInfo.project.name}.png`);
+});

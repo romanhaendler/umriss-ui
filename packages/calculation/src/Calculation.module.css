@@ -341,6 +341,32 @@
     font-weight: var(--u-weight-medium);
   }
 
+  /* Emphasis, the writer's (ADR-0049): a strong line is read first, a muted
+     one recedes - inside a derivation, whose numbers already recede, one step
+     further. A muted line still counts in full. */
+  .line[data-emphasis="strong"] .label,
+  .line[data-emphasis="strong"] > .amount {
+    font-weight: var(--u-weight-semibold);
+    color: var(--u-color-text);
+  }
+
+  .line[data-emphasis="muted"] .label,
+  .line[data-emphasis="muted"] > .amount {
+    color: var(--u-color-text-secondary);
+  }
+
+  .line[data-inner][data-emphasis="muted"] .label,
+  .line[data-inner][data-emphasis="muted"] > .amount {
+    color: var(--u-color-text-muted);
+  }
+
+  /* A section that is no interim starts under a rule across the whole row -
+     inside a group too, where the rows have no hairlines. */
+  .line[data-rule],
+  .derivation .line[data-rule] {
+    border-top: 1px solid var(--u-color-text-secondary);
+  }
+
   /* An interim closes the lines above it, as on paper: a rule across its
      figures. */
   .line[data-kind="interim"]::before {
@@ -577,6 +603,11 @@
 
     .derivation::before {
       background: CanvasText;
+    }
+
+    .line[data-emphasis="muted"] .label,
+    .line[data-emphasis="muted"] > .amount {
+      color: GrayText;
     }
   }
 }

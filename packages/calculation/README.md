@@ -79,8 +79,13 @@ folds:
 The two mix: a line of a chain can hold a tree, and a chain can be an operand
 in a tree - there it folds, and opens whole.
 
-- **Four operators, and nothing else:** `Sum`, `Product`, `Difference`
-  (a − b − c) take two or more operands, `Quotient` exactly two.
+- **Four operators, and nothing else:** `Product` and `Difference`
+  (a − b − c) take two or more operands, `Quotient` exactly two, and `Sum`
+  any number - rows from data, one or none included; the sum of none is zero.
+- **A line that adds or takes away shows its contribution:** the direction as
+  its operator, the number without a sign ("− Overpaid travel 120.00", never
+  "+ -120.00"). The quantity keeps its own sign where its derivation closes,
+  as an interim and as the result.
 - **A chain has no precedence**, so a `Times` or `DividedBy` stands alone
   between two named values; anything else fails on the first render.
 - **Full precision throughout**; rounding happens only on the screen. Where the
@@ -100,8 +105,11 @@ in a tree - there it folds, and opens whole.
 - **A declaration the calculation cannot evaluate fails on the first render**
   with a message saying which and where: a `Ref` to nothing (listing the ids
   that exist), a circle through references, a wrong operand count, a
-  duplicate id, a component of your own wrapping `Given`. `.map` inside an
-  operator works.
+  duplicate id, a component of your own wrapping `Given`, `emphasis` or `rule`
+  on the Result. `.map` inside an operator works.
+- **`emphasis="strong" | "muted"` and `rule="above"`** set a line apart
+  without CSS: read first, receding (and still counted in full), or ruled off
+  where a section starts that is no interim (ADR-0049).
 
 ## Several metrics side by side
 

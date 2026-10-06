@@ -1,6 +1,6 @@
 # 02 — A line shows its contribution
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Blocked by: 01
@@ -27,20 +27,24 @@ targets, limits and the approximation mark stay on the signed value.
 
 ## Acceptance
 
-- [ ] Rendered tests through `rows()`, `formulaOf()` and the sentence: the
+- [x] Rendered tests through `rows()`, `formulaOf()` and the sentence: the
       lead case of the spec (Corrections −35.97, Net salary 3551.53), a
       negative first operand, a `Difference` with a negative subtrahend, a
       chain's `Plus` with a negative value and `Minus` with a positive one
       reading alike, a negative first quantity of a chain, a negative factor,
       a zero and an absent line, a reference to a negative quantity, a
       negative interim.
-- [ ] Rendered test: a limit on a negative quantity is still assessed on its
+- [x] Rendered test: a limit on a negative quantity is still assessed on its
       signed value.
-- [ ] Examples on Rows from data: "Rows of both signs", "A group that turns
+- [x] Examples on Rows from data: "Rows of both signs", "A group that turns
       negative", "Plus or Minus", "A deduction first", "Zero and missing keep
       their sign", "A sum from data in a tree".
-- [ ] The payslip example's lead names `Minus` for a quantity positive by
+- [x] The payslip example's lead names `Minus` for a quantity positive by
       nature and points to Rows from data; the Tree "from data" example is
       checked and extended if it builds a `Sum` from an array.
-- [ ] Every existing screenshot baseline that changes is listed with its
+- [x] Every existing screenshot baseline that changes is listed with its
       reason in the comments below.
+
+## Comments
+
+Done - see the delivery report in `spec.md`.

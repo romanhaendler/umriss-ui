@@ -46,7 +46,8 @@ export function placesOf(quantity: Quantity): number | undefined {
 /** Rounds half away from zero on the exact decimal value, as the formats do. */
 function round(value: number, places: number | undefined): number {
   if (places === undefined) return value;
-  return Math.sign(value) * Number(Math.abs(value).toFixed(places));
+  /* `|| 0`: a number that rounds to zero is zero, never "-0". */
+  return Math.sign(value) * Number(Math.abs(value).toFixed(places)) || 0;
 }
 
 /** The number as shown: in per cent for a percentage, rounded. */
@@ -58,12 +59,12 @@ export function shownOf(quantity: Quantity, value: number): number {
 const asOperand = (quantity: Quantity, shown: number) => (quantity.format === "percent" ? shown / 100 : shown);
 
 /** The operator over the operands in order; in a sum, a negated operand (a
-    chain's `Minus`) is taken away. */
+    chain's `Minus`) is taken away. A sum starts at zero: it may have none. */
 function apply(operator: Operator, values: readonly number[], negated: readonly boolean[]): number {
   const [first, ...rest] = values as [number, ...number[]];
   switch (operator) {
     case "sum":
-      return rest.reduce((a, b, i) => (negated[i + 1] ? a - b : a + b), first);
+      return values.reduce((a, b, i) => (negated[i] ? a - b : a + b), 0);
     case "difference":
       return rest.reduce((a, b) => a - b, first);
     case "product":

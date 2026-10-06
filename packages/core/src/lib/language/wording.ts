@@ -589,6 +589,9 @@ export interface Wording {
   /** On a folded line whose operator has more operands than are written out
       beneath it (ADR-0028): how many there are. */
   calculationOperandCount: (count: number) => string;
+  /** On the line of a sum with no operands, where its formula would stand
+      (ADR-0049). */
+  calculationNoOperands: string;
 }
 
 /** The instance shipped by default. English; German is `GERMAN_WORDING` in
@@ -918,4 +921,5 @@ export const DEFAULT_WORDING: Wording = {
   calculationShowDerivation: (label) => `Show how ${label} is derived`,
   calculationHideDerivation: (label) => `Hide how ${label} is derived`,
   calculationOperandCount: (count) => `${count} operands`,
+  calculationNoOperands: "no entries",
 };

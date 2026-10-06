@@ -1,6 +1,6 @@
 # 03 — Contribution with metrics
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Blocked by: 02
@@ -18,10 +18,14 @@ operator stands. The sentence follows the drawn operator.
 
 ## Acceptance
 
-- [ ] Rendered tests with metrics: a line whose metrics agree (operator
+- [x] Rendered tests with metrics: a line whose metrics agree (operator
       turned, numbers unsigned), one whose metrics disagree (operator as
       written, signed numbers), one with a zero metric beside a negative one
       (turned), one with every metric zero or absent (as written).
-- [ ] Example "Rows of both signs with metrics" on Rows from data: a staff
+- [x] Example "Rows of both signs with metrics" on Rows from data: a staff
       movement with one line that disagrees, its lead saying so.
-- [ ] ADR-0049 gains the rule for zero and absent metrics in its rules list.
+- [x] ADR-0049 gains the rule for zero and absent metrics in its rules list.
+
+## Comments
+
+Done - see the delivery report in `spec.md`.
