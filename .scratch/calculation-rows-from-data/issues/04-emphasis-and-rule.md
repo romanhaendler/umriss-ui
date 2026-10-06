@@ -1,6 +1,6 @@
 # 04 — Emphasis and rule
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Blocked by: none (can run beside 01–03)
@@ -20,14 +20,18 @@ keeps its weight, muted falls back to `GrayText`, the rule stays visible.
 
 ## Acceptance
 
-- [ ] Both props on `QuantityProps`, documented for the props tables.
-- [ ] Rendered tests: the props reach the row on a given, a tree operator, a
+- [x] Both props on `QuantityProps`, documented for the props tables.
+- [x] Rendered tests: the props reach the row on a given, a tree operator, a
       chain's `Plus` and an `Interim`, inside an opened derivation, and with
       metrics; the sentence is unchanged; `emphasis` and `rule` on the Result
       each throw a message naming it.
-- [ ] Examples "A stronger line", "A quieter line", "A rule above",
+- [x] Examples "A stronger line", "A quieter line", "A rule above",
       "Emphasis inside a group" (on the Calculation page, or a page Emphasis
       if that grows too long), and "The Result takes no emphasis" on What can
       go wrong.
-- [ ] Screenshot and forced-colours baselines for the new examples; numbers
+- [x] Screenshot and forced-colours baselines for the new examples; numbers
       on emphasised lines still align on their last digit.
+
+## Comments
+
+Done - see the delivery report in `spec.md`.

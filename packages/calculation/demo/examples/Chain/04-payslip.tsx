@@ -1,7 +1,7 @@
 import { Calculation, Chain, Given, Interim, Minus, Plus, Product, Ref, Sum } from "../../../src";
 
 export const title = "Fold a group of lines into one";
-export const lead = "A chain in view never folds; to show items only on request, put them into one line as a tree: a `Sum` held by a `Minus`.";
+export const lead = "A chain in view never folds; to show items only on request, put them into one line as a tree: a `Sum` held by a `Minus` – a `Minus`, because contributions are positive by nature. Rows of either sign from data go into a `Plus` instead; the page Rows from data shows every case.";
 
 const CONTRIBUTIONS = [
   { name: "Pension insurance", rate: 0.093 },

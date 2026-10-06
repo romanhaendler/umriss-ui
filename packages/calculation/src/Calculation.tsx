@@ -29,8 +29,8 @@ import { evaluate } from "./evaluate";
 import type { Metric } from "./elements";
 import type { Evaluation } from "./evaluate";
 import { perMetric, readCalculation } from "./model";
-import type { Operand, Quantity } from "./model";
-import { lineText, metricsSentence, operatorText, verdictWord } from "./present";
+import type { Quantity } from "./model";
+import { lineText, metricsSentence, operatorText, positionOf, verdictWord } from "./present";
 import type { LineText, Position } from "./present";
 import styles from "./Calculation.module.css";
 
@@ -172,8 +172,14 @@ export function Calculation({ children, className, style, metrics, ...rest }: Ca
       return next;
     });
 
-  const positionIn = (parent: Quantity, operand: Operand, index: number): Position | undefined =>
-    index === 0 || operand.previous ? undefined : { operator: parent.operator!, negated: operand.negated === true };
+  /** Where the operand at `index` stands, from its number as shown in every
+      metric - a line that rounds to zero has no direction. */
+  const positionIn = (parent: Quantity, index: number): Position | undefined =>
+    positionOf(
+      parent,
+      index,
+      byMetric.map(({ results }) => results.get(parent.operands[index]!.key)!.shown),
+    );
 
   /* Whether anything can fold at all: where nothing can, the disclosure's
      column is not kept free, and the labels start at the surface's edge. */
@@ -197,7 +203,7 @@ export function Calculation({ children, className, style, metrics, ...rest }: Ca
             <span className={styles.approximate}>≈</span>
           </Tooltip>
         )}
-        {text.amount}
+        {closes ? text.ownAmount : text.amount}
       </span>,
       <span
         key={`unit-${i}`}
@@ -220,7 +226,7 @@ export function Calculation({ children, className, style, metrics, ...rest }: Ca
     const quantity = model.quantities.get(key)!;
     const readings: Reading[] = byMetric.map(({ view, results }) => ({
       own: results.get(key)!,
-      text: lineText(view, results, key, reference, formats, wording, place.position),
+      text: lineText(view, results, key, reference, formats, wording, place.position, (index) => positionIn(quantity, index)),
     }));
     /* With metrics nothing is assessed, and an absence always reaches the
        row itself: what the first metric says of verdicts holds for the row. */
@@ -231,8 +237,10 @@ export function Calculation({ children, className, style, metrics, ...rest }: Ca
        outermost tree, and every interim of a chain in view - a chain is the
        working itself, and folding it would take away what it is for. Trees in
        its lines fold, and so does a chain that is an operand. */
-    const statement = derived && (quantity.interim ? place.flat : isResult);
-    const foldable = derived && !statement;
+    /* An empty sum has nothing to stand above it, as a statement or folded;
+       its line says so instead. */
+    const statement = derived && quantity.operands.length > 0 && (quantity.interim ? place.flat : isResult);
+    const foldable = derived && !statement && quantity.operands.length > 0;
     const isOpen = foldable && open.has(key);
     folds ||= foldable;
     const listId = `${uid}-${key}`;
@@ -246,7 +254,7 @@ export function Calculation({ children, className, style, metrics, ...rest }: Ca
       ? quantity.operands.map((operand, index) =>
           operand.previous
             ? null
-            : items(operand.key, operand.reference, { ...inner, position: positionIn(quantity, operand, index) }, `${slot}-${index}`),
+            : items(operand.key, operand.reference, { ...inner, position: positionIn(quantity, index) }, `${slot}-${index}`),
         )
       : [];
     const worst: Verdict | undefined =
@@ -280,6 +288,8 @@ export function Calculation({ children, className, style, metrics, ...rest }: Ca
         data-kind={kind}
         data-foldable={foldable ? "" : undefined}
         data-reference={reference ? "" : undefined}
+        data-emphasis={reference ? undefined : quantity.emphasis}
+        data-rule={!reference && quantity.rule ? "" : undefined}
         data-mark={markOf(key, place.parent)}
         onPointerEnter={() => setMarked(key)}
         onPointerLeave={() => setMarked(null)}
@@ -327,7 +337,7 @@ export function Calculation({ children, className, style, metrics, ...rest }: Ca
           </span>
         </span>
         <span className={styles.names} aria-hidden="true">
-          {foldable && !isOpen ? text.names : undefined}
+          {derived && !statement && !isOpen ? text.names : undefined}
         </span>
         <span className={styles.operator} aria-hidden="true">
           {operator}

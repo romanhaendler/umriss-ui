@@ -217,7 +217,8 @@ export function readCalculation(children: ReactNode, metrics?: readonly Metric[]
     quantity.operator = operator;
     const nodes = flatten(operandNodes);
     const count = nodes.length;
-    if (operator === "quotient" ? count !== 2 : count < 2) {
+    /* A sum takes rows from data, whatever their count (ADR-0049). */
+    if (operator === "quotient" ? count !== 2 : operator !== "sum" && count < 2) {
       fail(
         `${here}: <${ELEMENT_NAMES[operator]}> takes ${operator === "quotient" ? "exactly two operands" : "two or more operands"}; it was given ${count}.`,
       );
@@ -296,6 +297,10 @@ export function readCalculation(children: ReactNode, metrics?: readonly Metric[]
   };
 
   const result = read(top[0], "0", "<Calculation>");
+  const last = quantities.get(result)!;
+  if (last.emphasis !== undefined || last.rule !== undefined) {
+    fail(`<Calculation> › ${last.label}: emphasis and rule do not stand on the Result, which is already the heaviest line.`);
+  }
 
   for (const { operand: reference, to, where } of refs) {
     const target = ids.get(to);

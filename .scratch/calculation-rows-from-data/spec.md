@@ -1,6 +1,6 @@
 # Rows from data: a sum of any count, a line that shows its contribution
 
-Status: ready-for-agent
+Status: done
 Date:   2026-10-06
 Origin: grilling session on `@umriss-ui/calculation` 0.5.3. The terms are in
 `CONTEXT.md`, "Calculations" (**Operator**, **Contribution**, **Emphasis**),
@@ -276,3 +276,35 @@ Existing pages:
   additive operand look; the changelog says so plainly.
 - ADR-0049 records the trade-offs, including the rejected "operator as
   written" and the rejected signed element.
+
+## Comments
+
+**Delivered** as `@umriss-ui/calculation` 0.6.0 with `@umriss-ui/core` 0.29.0
+(the wording entry `calculationNoOperands`); table 0.13.5 and schedule 0.5.5
+move their core peer range only.
+
+- Tickets 01-04 landed in one commit: 01 and 02 change the same lines of the
+  view and of the line text, so the slices could not be committed apart.
+- One rendered seam, as agreed: `rowsFromData.test.tsx`, `emphasis.test.tsx`
+  and a metrics case in `metricsView.test.tsx`. Two findings of the code review
+  are fixed and tested there: the direction is taken from the number as shown
+  (a line that rounds to 0.00 keeps its written operator, and a number that
+  rounds to zero is never "-0"), and an empty sum that is the Result itself
+  says "no entries" and draws no empty list above it.
+- Examples: ten on the new page Rows from data, four for emphasis and rule on
+  the page Calculation, the payslip's lead in Chain. Six of them are also
+  photographed opened, since what a group holds is in no example's first
+  picture.
+- Deviation: the development error for emphasis or rule on the Result has no
+  example on What can go wrong - every example there renders, and one that
+  throws would break the page. It stands in the Calculation page's list of
+  errors and in the README.
+- "Night shift bonus" became "Night work bonus": the plant-word check
+  (ADR-0035) keeps "shift" to the plant world.
+- Baselines redrawn without a change of their own: the Tree and Calculation
+  page heads grew by a sentence, and every example beneath them moved by a
+  fraction of a pixel (Tree: share-with-target, from-data, limits;
+  Calculation: first-sum, OEE narrow, the forced-colours hover coupling;
+  Chain: fifteen-items, chain-in-a-tree, error-budget beneath the longer
+  payslip lead). No existing example showed a negative additive operand, so
+  the contribution rule changed no existing picture.

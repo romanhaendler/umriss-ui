@@ -8,8 +8,12 @@ import type { Metric } from "./elements";
 import type { CalculationModel, Operator, Quantity } from "./model";
 
 export interface LineText {
-  /** The number as shown, without its unit, or the absent-value mark. */
+  /** The number as shown, without its unit, or the absent-value mark -
+      unsigned where the line stands as its contribution. */
   amount: string;
+  /** The quantity's own number, always with its sign: where its derivation
+      closes. */
+  ownAmount: string;
   /** The unit as shown - "%" for a percentage - where there is one and a
       number to stand beside. */
   unit?: string;
@@ -33,11 +37,37 @@ export interface LineText {
     all: the operands stand beside it anyway (ADR-0028). */
 export const OPERANDS_WRITTEN_OUT = 4;
 
-/** Where a line stands in its parent: the parent's operator, and whether it is
-    taken away. The first operand stands without one. */
+/** Where a line stands in its parent: the operator drawn before it, and
+    whether that operator is a minus. A line that adds or takes away is drawn
+    as its contribution (ADR-0049): `unsigned` then says that its numbers
+    stand without their sign, the direction being the operator's. */
 export interface Position {
   operator: Operator;
   negated: boolean;
+  unsigned?: boolean;
+}
+
+/**
+ * Where the operand at `index` of `parent` stands, from its numbers as shown -
+ * one per metric, one without metrics. A line that adds or takes away shows its
+ * contribution: the direction as its operator, its numbers unsigned - where
+ * every value that is neither zero nor absent points the same way. Otherwise,
+ * and on a factor, the operator as written. The first operand has none, unless
+ * it lowers a sum; the interim before, in a chain, is not drawn here at all.
+ */
+export function positionOf(parent: Quantity, index: number, values: readonly (number | null)[]): Position | undefined {
+  const operand = parent.operands[index]!;
+  if (operand.previous) return undefined;
+  const operator = parent.operator!;
+  const first = index === 0;
+  if (operator !== "sum" && operator !== "difference") return first ? undefined : { operator, negated: false };
+  const written = operator === "difference" ? !first : operand.negated === true;
+  const signs = new Set(values.filter((v): v is number => v !== null && v !== 0).map(Math.sign));
+  const position: Position =
+    signs.size === 1
+      ? { operator: "sum", negated: written !== signs.has(-1), unsigned: true }
+      : { operator: "sum", negated: written };
+  return first && !position.negated ? undefined : position;
 }
 
 const SYMBOL: Record<Operator, keyof Wording> = {
@@ -97,34 +127,41 @@ export function lineText(
   formats: Formats,
   wording: Wording,
   position?: Position,
+  /** Where each of the quantity's own operands stands, for its formula. */
+  operandPosition: (index: number) => Position | undefined = () => undefined,
 ): LineText {
   const quantity = model.quantities.get(key)!;
   const own = results.get(key)!;
-  const number = (q: Quantity, e: Evaluation, spoken: boolean) =>
-    e.shown === null
+  /** The number as shown - without its sign where the line stands as its
+      contribution. */
+  const shownAt = (e: Evaluation, at?: Position) => (e.shown !== null && at?.unsigned ? Math.abs(e.shown) : e.shown);
+  const number = (q: Quantity, e: Evaluation, spoken: boolean, at?: Position) => {
+    const shown = shownAt(e, at);
+    return shown === null
       ? spoken
         ? wording.verdictUnknown
         : wording.statAbsentValue
-      : withUnit(q, e.shown, formats, spoken ? wording.calculationPercent : "%");
+      : withUnit(q, shown, formats, spoken ? wording.calculationPercent : "%");
+  };
 
   const formula = (spoken: boolean): { names?: string; numbers?: string } => {
     if (reference || !quantity.operator) return {};
+    if (quantity.operands.length === 0) return { names: wording.calculationNoOperands };
     /* The count stands on the line only; the sentence keeps the formula. */
     if (!spoken && quantity.operands.length > OPERANDS_WRITTEN_OUT) {
       return { names: wording.calculationOperandCount(quantity.operands.length) };
     }
-    const terms = (text: (q: Quantity) => string) =>
+    const terms = (text: (q: Quantity, at?: Position) => string) =>
       quantity.operands
         .map((o, i) => {
           const q = model.quantities.get(o.key)!;
-          if (i === 0) return text(q);
-          const operator = operatorText({ operator: quantity.operator!, negated: o.negated === true }, spoken, wording);
-          return `${operator} ${text(q)}`;
+          const at = operandPosition(i);
+          return at ? `${operatorText(at, spoken, wording)} ${text(q, at)}` : text(q);
         })
         .join(" ");
     return {
       names: terms((q) => q.label),
-      numbers: terms((q) => number(q, results.get(q.key)!, spoken)),
+      numbers: terms((q, at) => number(q, results.get(q.key)!, spoken, at)),
     };
   };
 
@@ -138,13 +175,16 @@ export function lineText(
   };
 
   const shownNames = formula(false).names;
-  const names = shownNames === undefined || quantity.operands.length > OPERANDS_WRITTEN_OUT ? shownNames : `= ${shownNames}`;
+  const names =
+    shownNames === undefined || quantity.operands.length === 0 || quantity.operands.length > OPERANDS_WRITTEN_OUT
+      ? shownNames
+      : `= ${shownNames}`;
   const spoken = formula(true);
   const reason = own.absence ? reasonText(own.absence, wording) : undefined;
   const equals = ` ${wording.calculationEquals} `;
   const result = own.approximate
-    ? `${wording.calculationApproximately} ${number(quantity, own, true)}`
-    : number(quantity, own, true);
+    ? `${wording.calculationApproximately} ${number(quantity, own, true, position)}`
+    : number(quantity, own, true, position);
   const prefix = position ? `${operatorText(position, true, wording)} ` : "";
   const sentence = [
     prefix + quantity.label + equals + [spoken.names, spoken.numbers, result].filter(Boolean).join(`,${equals}`),
@@ -156,8 +196,8 @@ export function lineText(
     .join(", ");
 
   const unit = own.shown === null ? undefined : quantity.format === "percent" ? "%" : quantity.unit;
-  const amount = own.shown === null ? wording.statAbsentValue : formats.number(own.shown, quantity.decimals);
-  return { amount, unit, names, target: target(false), reason, sentence, spokenNames: spoken.names, spokenNumber: result };
+  const amountOf = (shown: number | null) => (shown === null ? wording.statAbsentValue : formats.number(shown, quantity.decimals));
+  return { amount: amountOf(shownAt(own, position)), ownAmount: amountOf(own.shown), unit, names, target: target(false), reason, sentence, spokenNames: spoken.names, spokenNumber: result };
 }
 
 /** A line of a calculation with metrics, read as one sentence: its formula in

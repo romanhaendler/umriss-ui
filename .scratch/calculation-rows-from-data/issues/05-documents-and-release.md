@@ -1,6 +1,6 @@
 # 05 — Documents and release
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Blocked by: 01, 02, 03, 04
@@ -16,10 +16,14 @@ tables) carry the new page and examples.
 
 ## Acceptance
 
-- [ ] Changelog entry and minor version bump of `@umriss-ui/calculation`.
-- [ ] Generated documents regenerated and checked into the repo where they
+- [x] Changelog entry and minor version bump of `@umriss-ui/calculation`.
+- [x] Generated documents regenerated and checked into the repo where they
       are checked in today.
-- [ ] The full check before a release: lint, types, unit, build, visual -
+- [x] The full check before a release: lint, types, unit, build, visual -
       parallel suites waited for, ports 4173–4177 free.
-- [ ] The spec's status set to `done`, with the delivery report under
+- [x] The spec's status set to `done`, with the delivery report under
       `## Comments`.
+
+## Comments
+
+Done - see the delivery report in `spec.md`.

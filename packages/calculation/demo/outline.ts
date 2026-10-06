@@ -46,7 +46,7 @@ export const OUTLINE: readonly Rubric[] = [
         sentence: "Lets a reader follow and redo a figure (also called a KPI tree or calculation tree): each line a quantity with its operator, derived lines folded until opened beneath themselves. Reach for it where a number on the screen gets questioned: a cost, an availability, an invoice total.",
         about: [
           "There is no prop for a result. Every derived number is computed with the operator its line names, at full precision; only the screen rounds.",
-          "The nesting is the fold structure and the child order is the operand order. What TypeScript cannot check – a `Ref` to nothing, a circle through references, a wrong operand count, a duplicate id, a component of your own wrapping `Given` – fails on the first render with a message saying which (ADR-0027).",
+          "The nesting is the fold structure and the child order is the operand order. What TypeScript cannot check – a `Ref` to nothing, a circle through references, a wrong operand count, a duplicate id, a component of your own wrapping `Given`, `emphasis` or `rule` on the Result – fails on the first render with a message saying which (ADR-0027). `emphasis` and `rule` set any other line apart without CSS (ADR-0049).",
           "Every line is read as one sentence by a screen reader, and every derivation is a disclosure: its button says whether it shows or hides how the line is derived.",
         ],
         alternatives: [
@@ -74,7 +74,7 @@ export const OUTLINE: readonly Rubric[] = [
         name: "Tree",
         sentence: "Sum, difference, product and quotient, each holding its operands: the form for a figure put together from factors, folded to its formula until a reader opens it.",
         about: [
-          "`Sum`, `Product` and `Difference` (a − b − c) take two or more operands, `Quotient` exactly two. A quantity used twice is defined once with an `id` and stands elsewhere as a `Ref`, which shows its name and number but never its derivation again.",
+          "`Product` and `Difference` (a − b − c) take two or more operands, `Quotient` exactly two, and `Sum` any number – rows from data, one or none included (see [Rows from data](#/rows-from-data)). A quantity used twice is defined once with an `id` and stands elsewhere as a `Ref`, which shows its name and number but never its derivation again.",
         ],
         alternatives: [{ when: "A sheet read top to bottom, line by line", use: "chain" }],
         keysOf: ["calculation"],
@@ -98,6 +98,21 @@ export const OUTLINE: readonly Rubric[] = [
         limits: ["A chain in view does not fold; as an operand of a tree it folds to its last interim."],
         types: ["ChainProps", "ChainOperandProps", "QuantityProps"],
         exports: ["Chain", "Plus", "Minus", "Times", "DividedBy", "Interim"],
+      },
+      {
+        id: "rows-from-data",
+        name: "Rows from data",
+        sentence: "Rows that come from data (line items, corrections, allowances), however many there are, as one line that folds: a payslip's corrections, an invoice's surcharges, a team's movements.",
+        about: [
+          "A `Sum` takes the rows of an array as they come: many, one, or none. With one it still folds and opens onto that one; with none it is worth zero, has nothing to open, and says \"no entries\" where its formula would stand. The line keeps its place either way, so the statement does not change shape with the data (ADR-0049).",
+          "Rows of both signs go into the sum as they come. A line that adds or takes away shows its contribution: the direction as its operator, the number without a sign – \"− Overpaid travel 120.00\", never \"+ -120.00\". The quantity itself keeps its sign where its derivation closes, as an interim, as the result and wherever it is referenced. A factor keeps its sign; a line worth zero or missing keeps the operator it is written with.",
+          "`Plus` and `Minus` say how a quantity enters, the number its sign. Signed rows from data go into `Plus`; a quantity that is positive by nature and taken away – income tax, a sum of contributions – into `Minus`, so that it is never quoted as negative.",
+        ],
+        alternatives: [{ when: "A fixed set of lines that is always in view", use: "chain" }],
+        keysOf: ["calculation"],
+        limits: ["Only a sum takes any count: an empty product, a difference of one and a quotient of anything but two still fail on the first render."],
+        types: [],
+        exports: ["Sum", "Plus", "Minus"],
       },
       {
         id: "given",

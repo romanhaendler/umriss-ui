@@ -37,6 +37,13 @@ export interface QuantityProps {
   /** Content of the caller's own beside the line - a sparkline, a link. It
       never takes part in the calculation. */
   aside?: ReactNode;
+  /** How much the line stands out among the others (ADR-0049): `strong` to
+      be read first, `muted` to recede - a muted line still counts in full.
+      Not on the Result, which is already the heaviest line. */
+  emphasis?: "strong" | "muted";
+  /** `above` rules the line off from the ones before it, where a section
+      starts that is not an interim. Not on the Result. */
+  rule?: "above";
 }
 
 /** One of several numbers every quantity carries side by side (ADR-0038):
@@ -94,7 +101,8 @@ export interface RefProps {
 /** A number the calculation does not derive. */
 export const Given: (props: GivenProps) => null = () => null;
 
-/** The sum of two or more operands. */
+/** The sum of its operands, however many: rows from data, one or none
+    included. The sum of none is zero, and its line says it has no entries. */
 export const Sum: (props: OperatorProps) => null = () => null;
 
 /** The first operand minus every other: a − b − c. */

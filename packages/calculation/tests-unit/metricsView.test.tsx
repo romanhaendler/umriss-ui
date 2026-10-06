@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { LanguageProvider } from "@umriss-ui/core";
 import { GERMAN_FORMATS, GERMAN_WORDING } from "@umriss-ui/core/wording/de";
-import { Calculation, Chain, Given, Interim, Minus, Plus } from "../src";
+import { Calculation, Chain, Given, Interim, Minus, Plus, Sum } from "../src";
 import { STAFF, staff } from "./staff";
 
 /** Every row a reader sees, as "operator label" and each metric's number and
@@ -104,6 +104,43 @@ describe("Metrics side by side", () => {
     );
     expect(screen.getByText(/^Industry gleich/).textContent).toBe(
       "Industry gleich Production plus Logistics: Headcount 160 HC; Full-time equivalents 133,4 FTE",
+    );
+  });
+});
+
+describe("Contribution with metrics", () => {
+  const movement = (
+    <Calculation aria-label="Movement" metrics={STAFF}>
+      <Chain>
+        <Given label="Staff on 30 June" value={{ heads: 154, fte: 131.2 }} />
+        <Plus>
+          <Sum label="Transfers">
+            <Given label="To sales" value={{ heads: -4, fte: -3.5 }} />
+            <Given label="Hours cut" value={{ heads: 0, fte: -1.5 }} />
+            <Given label="Part-timer joins" value={{ heads: 1, fte: -0.5 }} />
+            <Given label="Not yet booked" value={{ heads: 0, fte: null }} />
+          </Sum>
+        </Plus>
+        <Interim label="Staff on 30 September" />
+      </Chain>
+    </Calculation>
+  );
+
+  it("turns a line whose metrics point the same way, a zero metric left out, and keeps the others as written", () => {
+    render(movement);
+    open("Transfers");
+    expect(rows().slice(1)).toEqual([
+      "Staff on 30 June 154 131.2",
+      "− Transfers 3 —",
+      "− To sales 4 3.5",
+      "− Hours cut 0 1.5",
+      "+ Part-timer joins 1 -0.5",
+      "+ Not yet booked 0 —",
+      "= Transfers -3 HC —",
+      "Staff on 30 September 151 HC —",
+    ]);
+    expect(screen.getByText(/^plus Part-timer joins/).textContent).toBe(
+      "plus Part-timer joins: Headcount 1 HC; Full-time equivalents -0.5 FTE",
     );
   });
 });
