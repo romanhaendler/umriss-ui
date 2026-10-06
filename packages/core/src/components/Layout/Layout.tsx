@@ -54,22 +54,34 @@ export const Stack = forwardRef<HTMLDivElement, StackProps>(function Stack(
 });
 
 /* ------------------------------------------------------------------ */
-/* Grid – a grid with a fixed column count or responsive auto-fit      */
+/* Grid – a fixed column count, columns of their own widths, or        */
+/* responsive auto-fit                                                 */
 /* ------------------------------------------------------------------ */
+
+/* A share of the rest that a long line cannot widen - a count's columns and
+   a "fill" are the same track. */
+const FILL = "minmax(0, 1fr)";
+
+/** The width of one column in `Grid`'s list: a number in pixels, or
+    `"fill"` for a share of what the other columns leave. */
+export type GridColumnWidth = number | "fill";
 
 /** The props of `Grid`. */
 export interface GridProps extends HTMLAttributes<HTMLDivElement> {
-  /** Fixed column count; overridden by minItemWidth. */
-  columns?: number;
-  /** Responsive: as many columns as fit at this minimum width. */
+  /** How many columns, all of one width - or a list with one width per
+      column: a number in pixels, or `"fill"` for a share of what is left.
+      Overridden by minItemWidth. */
+  columns?: number | readonly GridColumnWidth[];
+  /** Responsive: as many columns as fit at this minimum width; wins over
+      `columns`, a list included. */
   minItemWidth?: string;
   /** Spacing as a step of the 4 px spacing steps (1–8); applies in both
       directions. */
   gap?: SpaceStep;
 }
 
-/** Children in a grid: a fixed number of columns, or as many as fit at
-    `minItemWidth`. */
+/** Children in a grid: a fixed number of columns, a list of column widths,
+    or as many columns as fit at `minItemWidth`. */
 export const Grid = forwardRef<HTMLDivElement, GridProps>(function Grid(
   { columns = 2, minItemWidth, gap = 4, className, style, children, ...rest },
   ref,
@@ -81,7 +93,9 @@ export const Grid = forwardRef<HTMLDivElement, GridProps>(function Grid(
       style={{
         gridTemplateColumns: minItemWidth
           ? `repeat(auto-fit, minmax(min(${minItemWidth}, 100%), 1fr))`
-          : `repeat(${columns}, minmax(0, 1fr))`,
+          : typeof columns === "number"
+            ? `repeat(${columns}, ${FILL})`
+            : columns.map((width) => (width === "fill" ? FILL : `${width}px`)).join(" "),
         gap: gapVar(gap),
         ...style,
       }}

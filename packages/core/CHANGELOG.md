@@ -29,6 +29,18 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## Unreleased
+
+### Added
+
+- **`Grid` takes a list for `columns`**, one width per column: a number in
+  pixels, or `"fill"` for a share of what the other columns leave -
+  `columns={[140, "fill"]}` for labels beside their values, without a
+  `gridTemplateColumns` of your own. A `"fill"` column is never widened by a
+  long line, as the equal columns of a count are not. The list's length is the
+  column count; `minItemWidth` wins over a list as over a count. The width's
+  type is exported as `GridColumnWidth`. A count behaves as before.
+
 ## 0.27.0 – The toasts below a header, and the segmented control on its own (Oct. 2026)
 
 Two requests from an application shell. The toasts' distance from the
