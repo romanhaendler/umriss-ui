@@ -11,6 +11,12 @@ under a heading "Changed" of its own, no matter which digit rose.
 
 ---
 
+## 0.6.1 – Core 0.30.0 (Oct. 2026)
+
+Needs `@umriss-ui/core` 0.30; the peer range moves to `^0.30.0`. Nothing else changes for a caller.
+
+---
+
 ## 0.6.0 – Rows from data (Oct. 2026)
 
 A payslip's corrections, an invoice's surcharges, a team's movements: rows

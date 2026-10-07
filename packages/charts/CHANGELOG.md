@@ -29,7 +29,7 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
-## Unreleased – A chart fills its frame, never below its floor
+## 0.13.0 – A chart fills its frame, never below its floor (Oct. 2026)
 
 ### Changed
 
@@ -40,6 +40,8 @@ interface was still expected to move before `0.3.0`.
   frame both ways as it grows and shrinks. A number still means a fixed height;
   a different floor goes through `style={{ minHeight }}`. The descriptions of
   `height` and `style` say so.
+
+---
 
 ## 0.12.0 – A chart that is loading says so (Oct. 2026)
 

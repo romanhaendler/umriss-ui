@@ -1,6 +1,6 @@
 {
   "name": "@umriss-ui/calculation",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "React calculation view for data-dense applications - a derivation written as it is shown, evaluated by the library, folded and read line by line.",
   "license": "MIT",
   "author": "Roman Händler",

@@ -1,6 +1,6 @@
 {
   "name": "@umriss-ui/charts",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "description": "React canvas chart library for data-dense dashboards - line, area, bar, box plot, scatter, control and Pareto charts. Few chart kinds, drawn well, fast.",
   "license": "MIT",
   "author": "Roman Händler",

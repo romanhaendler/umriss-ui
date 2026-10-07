@@ -22,6 +22,12 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## 0.13.6 – Core 0.30.0 (Oct. 2026)
+
+Needs `@umriss-ui/core` 0.30; the peer range moves to `^0.30.0`. Nothing else changes for a caller.
+
+---
+
 ## 0.13.5 – Core 0.29.0 (Oct. 2026)
 
 Needs `@umriss-ui/core` 0.29; the peer range moves to `^0.29.0`. Nothing else changes for a caller.

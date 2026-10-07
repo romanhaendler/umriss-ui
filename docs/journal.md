@@ -18,6 +18,22 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Oct. 2026 — A chart fills its frame
+
+- **A chart without `height` fills its frame, never below 300 px**
+  (`.scratch/chart-fills-its-frame/`, ADR-0050; released as `@umriss-ui/charts`
+  0.13.0 and `@umriss-ui/core` 0.30.0). Asked for as "die Höhe auf 100% setzen
+  und sich am Container ausrichten", for a calculation that grows beside a chart
+  in a grid. `height="100%"`, the width's answer, was turned down: in a card,
+  the usual frame, the body had no height to refer to and the chart collapsed
+  to its legend. The floor makes fill and default one rule, and a chart alone
+  stays at 300 px.
+- **The card hands its height to its body**, so that "Grid → Card → Chart"
+  fills with nothing written; a card that is not stretched is unchanged.
+- **Tested where it can fail:** one feature test on the kiln line, where the
+  tile length chart now stands beside the OEE and follows its groups folding
+  open and closed. jsdom lays nothing out, so no unit test was written for it.
+
 ## Oct. 2026 — Rows from data
 
 - **A sum takes rows from data, whatever their count** (`.scratch/calculation-rows-from-data/`,
