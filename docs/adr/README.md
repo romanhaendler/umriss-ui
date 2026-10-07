@@ -63,5 +63,6 @@ half a later reader needs most. Exactly one is superseded today.
 | [0047](0047-a-component-holds-its-own-view.md) | A component holds its own view | accepted | architecture |
 | [0048](0048-charts-are-bound-to-their-rows-by-the-hook.md) | Charts are bound to their rows by the hook | accepted | charts |
 | [0049](0049-a-sum-takes-rows-from-data.md) | A sum takes rows from data, and a line shows its contribution | accepted | calculation |
+| [0050](0050-a-chart-fills-its-frame-never-below-its-floor.md) | A chart fills its frame, never below its floor | accepted | charts |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).

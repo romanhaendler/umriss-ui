@@ -76,3 +76,42 @@ test("every region is a landmark, and its skip link moves the focus, not the add
   expect(await plan.evaluate((el) => getComputedStyle(el).boxShadow)).not.toBe(resting);
   expect(page.url()).toBe(address);
 });
+
+/* A chart without `height` fills its card, and the card the row's height
+   (chart-fills-its-frame 01): measured boxes, polled - never a fixed wait. */
+test("the tile length chart fills its card beside the OEE, and follows the row both ways", async ({ page }) => {
+  await openScenario(page, "watch-a-kiln-line");
+  const quality = room(page).getByRole("region", { name: "Tile length", exact: true });
+  const oee = room(page).getByRole("region", { name: "OEE so far", exact: true });
+  const plot = quality.locator(".uc-plot");
+  const body = quality.locator("xpath=./div[last()]");
+  const box = async (target: typeof plot) => (await target.boundingBox())!;
+  const bottom = async (target: typeof plot) => {
+    const b = await box(target);
+    return b.y + b.height;
+  };
+  const padding = async () =>
+    body.evaluate((el) => parseFloat(getComputedStyle(el).paddingBottom));
+
+  /* The two cards end on one line, and the plot area ends at the body's padding. */
+  await expect.poll(async () => Math.abs((await bottom(quality)) - (await bottom(oee)))).toBeLessThan(1);
+  await expect.poll(async () => Math.abs((await bottom(body)) - (await padding()) - (await bottom(plot)))).toBeLessThan(1);
+  const first = (await box(plot)).height;
+  const row = (await box(oee)).height;
+
+  /* The groups of the OEE folded open make the row taller than the chart's
+     floor; the plot area grows by as much. */
+  for (const group of ["Availability", "Performance", "Quality"]) {
+    await oee.getByRole("button", { name: `Show how ${group} is derived` }).click();
+  }
+  await expect.poll(async () => (await box(oee)).height).toBeGreaterThan(row + 20);
+  await expect.poll(async () => (await box(plot)).height - first).toBeCloseTo((await box(oee)).height - row, 0);
+  const opened = (await box(plot)).height;
+  expect(opened).toBeGreaterThan(first + 20);
+
+  /* Folded closed, it shrinks back to its first height. */
+  for (const group of ["Availability", "Performance", "Quality"]) {
+    await oee.getByRole("button", { name: `Hide how ${group} is derived` }).click();
+  }
+  await expect.poll(async () => (await box(plot)).height).toBeCloseTo(first, 0);
+});

@@ -9,6 +9,11 @@
     outline: 1px solid transparent;
     box-shadow: var(--u-shadow-card);
     overflow: hidden;
+    /* A flex column: a card the grid stretches hands its extra height to the
+       body (ADR-0050), so that a chart in it finds a definite height. The
+       header keeps its own. */
+    display: flex;
+    flex-direction: column;
   }
 
   /* The actions wrap beneath the title once the title would get less than
@@ -36,6 +41,7 @@
 
   /* Collapsing: the height is animated through grid-template-rows 1fr to 0fr. */
   .collapse {
+    flex: 1 1 auto;
     display: grid;
     grid-template-rows: 1fr;
     transition: grid-template-rows var(--u-duration-medium) var(--u-ease-out);
@@ -48,6 +54,8 @@
   .collapseInner {
     overflow: hidden;
     min-height: 0;
+    display: flex;
+    flex-direction: column;
   }
 
   .headerText {
@@ -105,6 +113,7 @@
   }
 
   .body {
+    flex: 1 1 auto;
     padding: var(--u-space-4);
   }
 

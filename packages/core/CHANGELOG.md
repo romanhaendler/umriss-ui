@@ -29,6 +29,18 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## Unreleased – A card hands its height to its body
+
+### Changed
+
+- **`Card` is a flex column, and its body takes the rest** (ADR-0050): a card
+  the grid stretches gives the extra height to its `CardBody` - in a
+  collapsible card, to the fold's wrapper and inner element - so that a `Chart`
+  without `height` fills it. A card that is not stretched looks as before.
+  Whatever stands directly in a card, beside `CardHeader` and `CardBody`, is now
+  a flex item: its width stays, but its margins no longer collapse with its
+  neighbours'.
+
 ## 0.29.0 – A calculation's empty sum (Oct. 2026)
 
 ### Added

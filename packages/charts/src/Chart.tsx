@@ -42,9 +42,12 @@ export interface ChartProps {
       host and follows it through a ResizeObserver.
       @default "100%" */
   width?: number | "100%";
-  /** Height in CSS pixels. Unlike the width, the chart does not take its
-      host's.
-      @default 300 */
+  /** Height in CSS pixels, fixed. Left out, the chart fills its frame - a
+      stretched grid cell, a card the grid stretches, a container of definite
+      height - and never goes below 300 px, which is also its height in a
+      frame without one. A different floor goes through `style`'s `minHeight`
+      (ADR-0050).
+      @default fills the frame, at least 300 px */
   height?: number;
   /** Outer spacing of the plot area in CSS pixels. */
   padding?: number | Partial<Padding>;
@@ -53,9 +56,9 @@ export interface ChartProps {
   ariaLabel?: string;
   /** Goes to the root element, as it does everywhere in this workspace. */
   className?: string;
-  /** Goes to the root element. The plot area is measured, never styled from
-      here: a height set past the component is a height the scene does not know
-      about. */
+  /** Goes to the root element, after the chart's own styles: a `height` or
+      `minHeight` set here wins. The plot area is observed in both directions
+      and the scene follows it. */
   style?: CSSProperties;
   /** Shown in the middle of the plot area when no visible series has a point
       to show - no data, only gaps, or every series hidden. Axes and frame
@@ -106,7 +109,7 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
     data,
     scene,
     width = "100%",
-    height = 300,
+    height,
     padding = 8,
     ariaLabel,
     className,
@@ -262,7 +265,11 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
 
   const containerStyle: CSSProperties = {
     width: width === "100%" ? "100%" : `${width}px`,
-    height: `${height}px`,
+    // Without a number: 100% where the frame has a definite height, auto where
+    // it has none, and the floor either way (ADR-0050).
+    ...(height === undefined
+      ? { height: "100%", minHeight: 300 }
+      : { height: `${height}px` }),
     ...style,
   };
 
