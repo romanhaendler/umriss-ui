@@ -29,6 +29,18 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## Unreleased – A chart fills its frame, never below its floor
+
+### Changed
+
+- **A `Chart` without `height` fills its frame** and never goes below 300 px
+  (ADR-0050). Standing alone in a block it is 300 px tall, as before. In a
+  frame taller than that - a stretched grid cell, a card the grid stretches, a
+  container of definite height - it now takes that height, and follows the
+  frame both ways as it grows and shrinks. A number still means a fixed height;
+  a different floor goes through `style={{ minHeight }}`. The descriptions of
+  `height` and `style` say so.
+
 ## 0.12.0 – A chart that is loading says so (Oct. 2026)
 
 A chart takes `loading`, as the table does (ADR-0042). Over a course already

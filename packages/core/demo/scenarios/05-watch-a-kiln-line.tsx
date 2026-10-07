@@ -497,8 +497,8 @@ const REGIONS = [
   { id: "room-status", title: "Line status" },
   { id: "room-trend", title: "Kiln trend" },
   { id: "room-alarms", title: "Alarms" },
-  { id: "room-quality", title: "Tile length" },
   { id: "room-plan", title: "Plan" },
+  { id: "room-quality", title: "Tile length" },
   { id: "room-oee", title: "OEE so far" },
 ] as const;
 
@@ -639,25 +639,6 @@ export default function ControlRoom() {
         />
       </Region>
 
-      <Region id="room-quality" title="Tile length">
-        <tileLength.Chart height={220} ariaLabel="Tile length after firing, individuals chart">
-          <tileLength.XAxis value="t" domain={[at(0), at(LAST)]} time />
-          <tileLength.YAxis domain={[597, 602]} label="mm" />
-          <LimitLine value={601.5} severity="alarm" label="USL" />
-          <LimitLine value={598.5} severity="alarm" label="LSL" />
-          <ControlChart
-            value="length"
-            data={measured}
-            origin={REFERENCE}
-            name="Length"
-            labelUpper="UCL"
-            labelLower="LCL"
-            violationName="Length - rule violation"
-          />
-          <Tooltip mode="x" />
-        </tileLength.Chart>
-      </Region>
-
       <Region
         id="room-plan"
         title="Plan"
@@ -683,30 +664,51 @@ export default function ControlRoom() {
         </Schedule>
       </Region>
 
-      <Region id="room-oee" title="OEE so far" callout="6">
-        <Calculation aria-label="OEE of the shift so far">
-          <Product label="OEE" format="percent" target={OEE_TARGET}>
-            <Quotient label="Availability" format="percent">
-              <Difference id="runtime" label="Run time" unit="min">
-                <Given id="planned" label="Planned production time" value={count.planned} unit="min" />
-                <Given label="Downtime" value={count.downtime} unit="min" />
-              </Difference>
-              <Ref to="planned" />
-            </Quotient>
-            <Quotient label="Performance" format="percent">
-              <Product label="Ideal run time" unit="min">
-                <Given label="Ideal cycle time" value={IDEAL_CYCLE_MINUTES} unit="min/pc" />
-                <Given id="total" label="Total count" value={count.total} unit="pcs" />
-              </Product>
-              <Ref to="runtime" />
-            </Quotient>
-            <Quotient label="Quality" format="percent">
-              <Given label="Good count" value={count.good} unit="pcs" />
-              <Ref to="total" />
-            </Quotient>
-          </Product>
-        </Calculation>
-      </Region>
+      <Grid columns={2} gap={4}>
+        <Region id="room-quality" title="Tile length">
+          <tileLength.Chart ariaLabel="Tile length after firing, individuals chart">
+            <tileLength.XAxis value="t" domain={[at(0), at(LAST)]} time />
+            <tileLength.YAxis domain={[597, 602]} label="mm" />
+            <LimitLine value={601.5} severity="alarm" label="USL" />
+            <LimitLine value={598.5} severity="alarm" label="LSL" />
+            <ControlChart
+              value="length"
+              data={measured}
+              origin={REFERENCE}
+              name="Length"
+              labelUpper="UCL"
+              labelLower="LCL"
+              violationName="Length - rule violation"
+            />
+            <Tooltip mode="x" />
+          </tileLength.Chart>
+        </Region>
+
+        <Region id="room-oee" title="OEE so far" callout="6">
+          <Calculation aria-label="OEE of the shift so far">
+            <Product label="OEE" format="percent" target={OEE_TARGET}>
+              <Quotient label="Availability" format="percent">
+                <Difference id="runtime" label="Run time" unit="min">
+                  <Given id="planned" label="Planned production time" value={count.planned} unit="min" />
+                  <Given label="Downtime" value={count.downtime} unit="min" />
+                </Difference>
+                <Ref to="planned" />
+              </Quotient>
+              <Quotient label="Performance" format="percent">
+                <Product label="Ideal run time" unit="min">
+                  <Given label="Ideal cycle time" value={IDEAL_CYCLE_MINUTES} unit="min/pc" />
+                  <Given id="total" label="Total count" value={count.total} unit="pcs" />
+                </Product>
+                <Ref to="runtime" />
+              </Quotient>
+              <Quotient label="Quality" format="percent">
+                <Given label="Good count" value={count.good} unit="pcs" />
+                <Ref to="total" />
+              </Quotient>
+            </Product>
+          </Calculation>
+        </Region>
+      </Grid>
 
       <Drawer open={details} onClose={() => setDetails(false)}>
         {chosen !== undefined && <BatchDetails batch={chosen} minute={minute} onClose={() => setDetails(false)} />}
