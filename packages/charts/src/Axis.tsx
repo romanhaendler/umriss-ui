@@ -27,10 +27,22 @@ interface CommonProps {
       @default only on the first axis of its orientation
       @remarks R-4.15 */
   grid?: boolean;
-  /** Fixed tick values instead of the 1-2-5 algorithm. For axes whose values are
-      places and not numbers: the lanes of a state stack, the categories of a
-      Pareto. */
+  /** Fixed tick values instead of the 1-2-5 algorithm, on a numeric axis: an
+      hour axis' named hours, a lane grid. An axis that reads categories needs
+      none - every category has its tick. */
   ticks?: readonly number[];
+  /** The categories of the axis, in their order. Without it they stand in
+      the order the rows first bring them. With it the list is the order and
+      the extent: a category no row carries keeps its empty place, and a row
+      whose category is not listed is not drawn - DEV names it. It makes the
+      axis a category axis whatever the rows hold (ADR-0051). */
+  categories?: readonly string[];
+  /** What is written for a category - under its tick, in the tooltip, the
+      readout and the data table - where the rows hold a key and not a name.
+      Two categories may share a label and keep two places. Compared by its
+      source text, as `tickFormat` is.
+      @default the category itself */
+  categoryLabel?: (category: string) => string;
 }
 
 /** The props of `XAxis`. */
@@ -114,6 +126,8 @@ export function XAxis<T>(props: XAxisProps<T>): null {
     domain = "nice",
     grid,
     ticks,
+    categories,
+    categoryLabel,
     time,
     calendar,
     zoomable,
@@ -136,12 +150,14 @@ export function XAxis<T>(props: XAxisProps<T>): null {
         domain,
         grid,
         ticks,
+        categories,
+        categoryLabel,
         time,
         calendar,
         zoomable,
         zoomLimits: limitMin === undefined || limitMax === undefined ? undefined : { min: limitMin, max: limitMax },
       }) as AxisConfig,
-    [id, position, accessor, label, tickCount, tickFormat, domain, grid, ticks, time, calendar, zoomable, limitMin, limitMax],
+    [id, position, accessor, label, tickCount, tickFormat, domain, grid, ticks, categories, categoryLabel, time, calendar, zoomable, limitMin, limitMax],
   );
 
   useAxis("XAxis", config);

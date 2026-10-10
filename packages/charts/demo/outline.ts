@@ -84,13 +84,13 @@ export const OUTLINE: readonly Rubric[] = [
       {
         id: "axis",
         name: "Axis",
-        sentence: "What a value is measured against: extent, ticks and labels, several axes per side, time on the local clock, and a working-time axis that leaves out the hours nobody works (a scale).",
+        sentence: "What a value is measured against: extent, ticks and labels, categories, several axes per side, time on the local clock, and a working-time axis that leaves out the hours nobody works (a scale).",
         about: [
-          "Every scale is linear. Categories are numbers 0, 1, 2 … with a `tickFormat` that names them (ADR-0002); a working calendar maps time before it is drawn and marks every seam it took out (ADR-0001).",
+          "Every scale is linear. An axis reads what its rows hold: a number is a position, a string a category, which gets a place, a tick and its name (ADR-0051); a working calendar maps time before it is drawn and marks every seam it took out (ADR-0001).",
           "An x axis zooms where it is `zoomable`; `domain` is then where it starts. That has a page of its own, [Zoom and pan](#/zoom-and-pan).",
         ],
         keysOf: ["chart"],
-        limits: ["No logarithmic and no category scale: compute the logarithm in `value`, and use positions for categories (ADR-0032)."],
+        limits: ["No logarithmic and no band scale: compute the logarithm in `value`; a category is a place on the linear scale (ADR-0032, ADR-0051)."],
         types: ["XAxisProps", "YAxisProps"],
         exports: ["useChart", "workingCalendar"],
       },

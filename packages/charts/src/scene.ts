@@ -203,6 +203,12 @@ function categoriesFrom(names: readonly string[]): Categories {
   };
 }
 
+/** What is written for a place: its category, or the caller's label for it. */
+function labelled(categories: Categories, label: AxisConfig["categoryLabel"]): (v: number) => string {
+  if (label === undefined) return categories.format;
+  return (v) => (categories.names.length === 0 ? "" : label(categories.format(v)));
+}
+
 /** Takes back everything materialisation gave a series. */
 function forget(entry: SeriesEntry): void {
   entry.materialized = null;
@@ -406,6 +412,12 @@ export function fnEqual(a: unknown, b: unknown): boolean {
     each new one would map every point again. */
 function sameNames(a: readonly string[], b: readonly string[]): boolean {
   return a.length === b.length && a.every((name, i) => name === b[i]);
+}
+
+/** A list of categories by its names: an inline array is new on every render. */
+function namesEqual(a: readonly string[] | undefined, b: readonly string[] | undefined): boolean {
+  if (a === b) return true;
+  return a !== undefined && b !== undefined && sameNames(a, b);
 }
 
 function calendarEqual(
@@ -985,11 +997,15 @@ export class ChartScene {
       previous.time === config.time &&
       previous.alignTicks === config.alignTicks &&
       listEqual(previous.ticks as number[] | undefined, config.ticks as number[] | undefined) &&
+      namesEqual(previous.categories, config.categories) &&
+      fnEqual(previous.categoryLabel, config.categoryLabel) &&
       domainEqual(previous.domain, config.domain) &&
       this.zooms(previous) === this.zooms(config) &&
       fnEqual(previous.tickFormat, config.tickFormat);
     entry.config = config;
     if (equal) return;
+    // Another list is other places: materialisation reads the categories anew.
+    if (!namesEqual(previous.categories, config.categories)) this.materialsDirty = true;
     if (!accessorEqual || previous.id !== config.id) {
       for (const entries of this.series.values()) {
         entries.materialized = null;
@@ -1290,10 +1306,14 @@ export class ChartScene {
       if (axis.orientation !== "x" || accessor === undefined) continue;
       live.add(axis.id);
       const bound = all.filter((e) => e.config.xAxisId === axis.id);
-      const names = categoriesOf(
-        bound.map((e) => e.config.data ?? this.data),
-        accessor,
-      );
+      // The caller's list is the order and the extent; without one, what the
+      // rows bring.
+      const names =
+        axis.categories ??
+        categoriesOf(
+          bound.map((e) => e.config.data ?? this.data),
+          accessor,
+        );
       const previous = this.categories.get(axis.id);
       if (names === null ? previous === undefined : previous !== undefined && sameNames(previous.names, names)) continue;
       if (names === null) this.categories.delete(axis.id);
@@ -1335,6 +1355,13 @@ export class ChartScene {
             "One axis has one kind: a number is no place there and is not drawn (ADR-0051).",
         );
       } else if (typeof v === "string" && v !== "") {
+        if (!categories.place.has(v)) {
+          warnOnce(
+            `category-unlisted-${xAxis.id}-${name}`,
+            `Series "${name}" brings the category "${v}", which the x axis "${xAxis.id}" does not list in \`categories\`. ` +
+              "It has no place and is not drawn (ADR-0051).",
+          );
+        }
         if (seen.has(v)) {
           warnOnce(
             `category-twice-${xAxis.id}-${name}`,
@@ -1843,7 +1870,10 @@ export class ChartScene {
         domainMode: this.domainOf(c),
         ...(this.zooms(c) && { ownDomainMode: c.domain }),
         tickCount: categories === undefined ? c.tickCount : undefined,
-        tickFormat: categories?.format ?? (c.orientation === "y" ? this.yTickFormat(c.id) : c.tickFormat),
+        tickFormat:
+          categories === undefined
+            ? c.orientation === "y" ? this.yTickFormat(c.id) : c.tickFormat
+            : labelled(categories, c.categoryLabel),
         tickValues: categories?.ticks ?? c.ticks,
         time: categories === undefined ? c.time : undefined,
         calendar: c.calendar,

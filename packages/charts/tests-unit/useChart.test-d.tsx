@@ -48,6 +48,12 @@ export function Fields() {
       <XAxis value={(d) => d.host} />
       {/* @ts-expect-error a list is no place on an axis */}
       <XAxis value="samples" />
+      {/* Its own list of categories, and what is written for one. */}
+      <XAxis value="host" categories={["a", "b"]} categoryLabel={(category) => category.toUpperCase()} />
+      {/* @ts-expect-error categories are names */}
+      <XAxis value="host" categories={[1, 2]} />
+      {/* @ts-expect-error a label is text */}
+      <XAxis value="host" categoryLabel={(category) => category.length} />
       {/* @ts-expect-error a y axis reads no value: its series place the rows */}
       <YAxis value="p95" />
       {/* @ts-expect-error a series names its value */}
