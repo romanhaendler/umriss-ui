@@ -1,6 +1,6 @@
 # Triage: the props no example shows
 
-Status: proposal (4 Oct 2026). No code changed.
+Status: done (2026-10-10; proposed 4 Oct 2026). Every entry judged Missing has its example; the 34 entries left in `packages/*/demo/unshown.json` each carry their category and reason. The open question at the end - one Axis example for the twins - was not taken up.
 
 This triage covers the 111 entries in `packages/*/demo/unshown.json` on `main` at `8aff3437`: core 41, charts 44, table 13, schedule 13 and calculation 0. Each entry got one verdict:
 
