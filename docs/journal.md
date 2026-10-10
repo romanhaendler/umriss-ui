@@ -18,6 +18,51 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Oct. 2026 — Five pieces built without a grilling
+
+A scan of the workspace against what comparable libraries ship (10 Oct 2026)
+ranked what to build next. The maintainer asked for the clear pieces to be
+built overnight, each by an agent with a short brief, and for the unclear one
+to be written down instead. None of them went through a grilling: every
+decision stands in its spec under `.scratch/`, each `ready-for-human`, and no
+ADR was numbered - two other jobs were taking the same number that night.
+
+- **Milestones** (`.scratch/schedule-milestones/`; `@umriss-ui/schedule`,
+  unreleased). `<Milestones data />`, the sibling of `BlockedTimes`: a diamond
+  on its lane, a stop in the keyboard's walk, named in the tooltip and the
+  readout. Read-only, no finding. The first cut left the word "milestone" out
+  of what a screen reader hears, because the wording lives in core and the
+  agent had been kept out of core; it was let in for one key. A tooltip
+  function that reads `target.task` without asking for the kind no longer
+  type-checks - noted as a change.
+- **`bin()` and limits a reader can reach** (`.scratch/charts-bin-and-limits/`;
+  `@umriss-ui/charts`, unreleased). A helper after `pareto()` for a histogram
+  on the numeric x axis. The last bin is closed, as d3's is, so integer data
+  at width 1 puts its two greatest values into one bin; a bin of its own for
+  the maximum was weighed and left, because it draws an empty-looking bin past
+  100 for every share that reaches 100. The summary names labelled limits;
+  `<Tooltip limits />` adds them on request, so no existing picture moved.
+- **`onSelect`** (`.scratch/charts-on-select/`). Report only, as decided: a
+  click on a hit and Enter on the Active point hand over the hit the tooltip's
+  `render` receives; the chart holds and draws nothing.
+- **Snoozing in the alarm list** (`.scratch/alarm-list-snooze/`;
+  `@umriss-ui/table` and four words in core, unreleased). The list's own
+  comment had called hiding an alarm a safety decision that does not belong in
+  a user-interface library. The maintainer decided it is offered and reported:
+  the list shows Snooze with the durations the caller gives and reports
+  `onSnooze`, the application applies it or refuses (ADR-0023's rule). A filter
+  by state and priority needed nothing new; an example shows it.
+- **A skill for coding agents** (`.scratch/agent-skill/`): `skills/umriss-ui/SKILL.md`
+  points at the documentation that already exists and states the rules an
+  agent would get wrong; a test fails when it names an export that does not
+  exist. The install command is taken from the `skills` tool's README and was
+  not run - the skill is on no remote yet.
+- **Not built: selecting a range, and a navigator**
+  (`.scratch/chart-range-selection-and-navigator/`, `needs-triage`). A drag
+  pans a zoomable chart, so a range needs a gesture of its own, and a
+  navigator is a part with keys of its own. The spec puts ten questions with
+  a recommendation each and decides none.
+
 ## Oct. 2026 — What was left open
 
 A scan of every `Status:` line under `.scratch/` on 10 Oct 2026 found a
