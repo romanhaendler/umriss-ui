@@ -3,8 +3,9 @@ import { DataTable, Legend, Tooltip, useChart } from "../../../src";
 export const title = "A box per shift, its medians as a line";
 export const lead = "The tiles measured in each of six shifts, one box each, and a `Line` through the medians to read the drift. The tooltip reads box and line together; `DataTable` lists every number as text.";
 
-/* Tile length per shift in millimetres, as the quality database sends it:
-   quartiles and median, the whiskers at the last length within 1.5 IQR. */
+/* Data from the plant world: tile length per shift in millimetres, as the
+   quality database sends it - quartiles and median, the whiskers at the last
+   length within 1.5 IQR. */
 const BOXES = [
   { shift: "Mon early", low: 599.72, q1: 599.855, median: 599.97, q3: 600.1575, high: 600.4 },
   { shift: "Mon late", low: 599.53, q1: 599.875, median: 600.025, q3: 600.15, high: 600.38 },
