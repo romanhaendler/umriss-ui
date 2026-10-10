@@ -6,7 +6,7 @@
 import { useMemo } from "react";
 import { useAxis } from "./context";
 import { readerOf } from "./value";
-import type { AxisConfig, NumberField } from "./types";
+import type { AxisConfig, AxisField, AxisValue } from "./types";
 import type { WorkingInterval } from "./workingTime";
 import type { ZoomLimits } from "./view";
 
@@ -35,12 +35,16 @@ interface CommonProps {
 
 /** The props of `XAxis`. */
 export interface XAxisProps<T> extends CommonProps {
-  /** Where a row lies on this axis: a number field of the row, compared by
-      its name, or a function of it, compared by its source text as a series'
-      is (`ValueFunction`) - with the same closure limit. The axis reads the
-      rows of every series bound to it; where those bring their own `data`, name
+  /** Where a row lies on this axis: a field of the row, compared by its
+      name, or a function of it, compared by its source text as a series' is
+      (`ValueFunction`) - with the same closure limit. A number is a position,
+      a string a category: every distinct one gets a place of its own, in the
+      order the rows bring them, a tick and its name as the label (ADR-0051).
+      The type decides, never the content - `"2024"` is a category, `2024` a
+      number - and a row without a value has no place. The axis reads the rows
+      of every series bound to it; where those bring their own `data`, name
       their row: `<XAxis<HourCount> value="hour" />`. */
-  value: NumberField<T> | ((d: T, index: number) => number);
+  value: AxisField<T> | ((d: T, index: number) => AxisValue);
   /** `"nice"` widens the data's extent to ticks - to named `ticks` where
       there are any, on a time axis to whole units of a step of hours or
       longer -, `"data"` keeps it, a pair is fixed. On a `zoomable` axis it is
@@ -117,7 +121,7 @@ export function XAxis<T>(props: XAxisProps<T>): null {
   } = props;
   const limitMin = zoomLimits?.min;
   const limitMax = zoomLimits?.max;
-  const accessor = readerOf<(d: T, index: number) => number>(props.value);
+  const accessor = readerOf<(d: T, index: number) => AxisValue>(props.value);
 
   const config = useMemo<AxisConfig>(
     () =>

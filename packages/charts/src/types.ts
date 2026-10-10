@@ -35,6 +35,19 @@ export type ListField<T> = NoInfer<
   }[keyof T & string]
 >;
 
+/** What an axis reads from a row (ADR-0051): a number - a position, or an
+    instant on a time axis - or a string, which is a category. The type of the
+    value decides what kind the axis is, never its content: `"2024"` is a
+    category, `2024` a number. null/undefined is no place. */
+export type AxisValue = number | string | null | undefined;
+
+/** The fields of a row an axis can read. */
+export type AxisField<T> = NoInfer<
+  {
+    [K in keyof T & string]-?: T[K] extends AxisValue ? K : never;
+  }[keyof T & string]
+>;
+
 /** A value read from the row (ADR-0048): the name of a number field, compared
     by its name, or a function, compared by its source text (`ValueFunction`). */
 export type Value<T> = NumberField<T> | ValueFunction<T>;
@@ -217,8 +230,9 @@ export interface AxisConfig<T = unknown> {
   orientation: AxisOrientation;
   position: AxisPosition;
   /** Where a row lies along the axis; an x axis' only - along y the series
-      place their rows. */
-  accessor?: (d: T, index: number) => number;
+      place their rows. A number is a position or an instant, a string a
+      category (ADR-0051). */
+  accessor?: (d: T, index: number) => AxisValue;
   label?: string;
   tickCount?: number;
   tickFormat?: (v: number) => string;

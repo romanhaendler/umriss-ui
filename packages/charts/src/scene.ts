@@ -60,6 +60,8 @@ import { defaultLimits, hidesAll, onlyKnown, onlyVisible, sameSpan, showOnly, to
 import { MINUTE, inRemovedTime, toWorkingTimeClamped } from "./workingTime";
 import {
   axisExtent,
+  categoriesOf,
+  categoryPlaces,
   firstUnsortedIndex,
   materializeSeries,
   visibleExtent,
@@ -122,6 +124,9 @@ interface SeriesEntry {
       it has changed. */
   lastSlot: number | null;
   materialized: MaterializedSeries | null;
+  /** Which of the caller's rows each point came from, where the series is
+      not held row by row: a category axis holds it by place (ADR-0051). */
+  rows: Uint32Array | null;
   extent: Extent | null;
   /** Bars only: the smallest x distance, computed once per materialisation. It
       does not belong in the materialised series - the other series kinds do not
@@ -174,6 +179,37 @@ interface Candidate {
 interface AxisEntry {
   order: number;
   config: AxisConfig;
+}
+
+/** The categories of an axis (ADR-0051): the library keeps the map from
+    category to place, and writes the ticks and their labels a caller once
+    wrote by hand. */
+interface Categories {
+  names: readonly string[];
+  place: ReadonlyMap<string, number>;
+  /** Every place, as the axis' named ticks. */
+  ticks: readonly number[];
+  /** A place's category; a value between two places reads as the nearer. */
+  format: (v: number) => string;
+}
+
+function categoriesFrom(names: readonly string[]): Categories {
+  const last = names.length - 1;
+  return {
+    names,
+    place: new Map(names.map((name, i) => [name, i])),
+    ticks: names.map((_, i) => i),
+    format: (v) => names[Math.min(Math.max(Math.round(v), 0), last)] ?? "",
+  };
+}
+
+/** Takes back everything materialisation gave a series. */
+function forget(entry: SeriesEntry): void {
+  entry.materialized = null;
+  entry.extent = null;
+  entry.step = null;
+  entry.cellHeight = null;
+  entry.buckets = null;
 }
 
 interface LimitEntry {
@@ -368,6 +404,10 @@ export function fnEqual(a: unknown, b: unknown): boolean {
 
 /** A calendar by its intervals: an inline array is new on every render, and
     each new one would map every point again. */
+function sameNames(a: readonly string[], b: readonly string[]): boolean {
+  return a.length === b.length && a.every((name, i) => name === b[i]);
+}
+
 function calendarEqual(
   a: AxisConfig["calendar"],
   b: AxisConfig["calendar"],
@@ -734,6 +774,9 @@ export class ChartScene {
 
   /* ---------- Data and layout inputs ---------- */
   private data: readonly unknown[] = [];
+  /** The categories of each x axis that reads them, by axis id; an axis
+      absent is numeric (ADR-0051). */
+  private readonly categories = new Map<string, Categories>();
   private padding: Padding = { top: 8, right: 8, bottom: 8, left: 8 };
 
   /* ---------- DOM binding ---------- */
@@ -857,6 +900,7 @@ export class ChartScene {
       slot: takesPalette(config) ? this.slotFor(config.name) : -1,
       lastSlot: null,
       materialized: null,
+      rows: null,
       extent: null,
       step: null,
       cellHeight: null,
@@ -1236,9 +1280,77 @@ export class ChartScene {
     return null;
   }
 
+  /** Reads the categories of every x axis anew. Where an axis' list changed,
+      every series on it lies somewhere else and is materialised again. */
+  private readCategories(): void {
+    const all = this.seriesInOrder();
+    const live = new Set<string>();
+    for (const { config: axis } of this.axes.values()) {
+      const accessor = axis.accessor;
+      if (axis.orientation !== "x" || accessor === undefined) continue;
+      live.add(axis.id);
+      const bound = all.filter((e) => e.config.xAxisId === axis.id);
+      const names = categoriesOf(
+        bound.map((e) => e.config.data ?? this.data),
+        accessor,
+      );
+      const previous = this.categories.get(axis.id);
+      if (names === null ? previous === undefined : previous !== undefined && sameNames(previous.names, names)) continue;
+      if (names === null) this.categories.delete(axis.id);
+      else this.categories.set(axis.id, categoriesFrom(names));
+      for (const entry of bound) forget(entry);
+    }
+    for (const id of [...this.categories.keys()]) if (!live.has(id)) this.categories.delete(id);
+  }
+
+  /** One axis has one kind (ADR-0051): DEV names the series that brings the
+      other one, and the one that brings a category twice. */
+  private checkKind(
+    config: SeriesConfig,
+    data: readonly unknown[],
+    xAxis: AxisConfig,
+    categories: Categories | undefined,
+  ): void {
+    const accessor = xAxis.accessor;
+    if (accessor === undefined) return;
+    const name = config.name ?? "?";
+    const seen = new Set<string>();
+    for (let i = 0; i < data.length; i++) {
+      const v = accessor(data[i], i);
+      if (categories === undefined) {
+        // A numeric axis: the first value that is a place tells the series' kind.
+        if (typeof v === "number" && Number.isFinite(v)) return;
+        if (typeof v !== "string" || v === "") continue;
+        warnOnce(
+          `axis-kind-${xAxis.id}-${name}`,
+          `Series "${name}" brings a category to the x axis "${xAxis.id}", which reads numbers. ` +
+            "One axis has one kind: a category is no place there and is not drawn (ADR-0051).",
+        );
+        return;
+      }
+      if (typeof v === "number" && Number.isFinite(v)) {
+        warnOnce(
+          `axis-kind-${xAxis.id}-${name}`,
+          `Series "${name}" brings a number to the x axis "${xAxis.id}", which reads categories. ` +
+            "One axis has one kind: a number is no place there and is not drawn (ADR-0051).",
+        );
+      } else if (typeof v === "string" && v !== "") {
+        if (seen.has(v)) {
+          warnOnce(
+            `category-twice-${xAxis.id}-${name}`,
+            `Series "${name}" brings the category "${v}" more than once to the x axis "${xAxis.id}". ` +
+              "Both rows are drawn in the one place; add them up before the chart (ADR-0051).",
+          );
+        }
+        seen.add(v);
+      }
+    }
+  }
+
   private materialize(): void {
     const start = typeof performance === "undefined" ? 0 : performance.now();
     let points = 0;
+    this.readCategories();
     for (const entry of this.series.values()) {
       if (entry.materialized !== null) {
         points += entry.materialized.length;
@@ -1248,14 +1360,20 @@ export class ChartScene {
       const data = config.data ?? this.data;
       const xAxis = this.findAxisConfig("x", config.xAxisId);
       if (xAxis?.accessor === undefined) continue; // validate() reports a missing axis in DEV
+      const categories = this.categories.get(xAxis.id);
+      // A category's place is a number like any other x from here on.
+      const places = categories === undefined ? null : categoryPlaces(data, xAxis.accessor, categories.place);
+      entry.rows = places?.rows ?? null;
+      if (DEV) this.checkKind(config, data, xAxis, categories);
       const material = materializeSeries(
         data,
-        xAxis.accessor,
+        places === null ? (xAxis.accessor as (d: unknown, index: number) => number) : (_d, i) => places.x[i] as number,
         config.accessor,
         baselineOf(config),
         {
           value: valueChannelOf(config),
           box: boxChannelsOf(config),
+          rows: entry.rows,
           xMap: this.mapFor(xAxis),
           xGap: this.gapFor(xAxis),
         },
@@ -1265,7 +1383,8 @@ export class ChartScene {
       entry.stacked = null;
       points += material.series.length;
       if (config.kind === "bar" || config.kind === "box") {
-        const step = measureStep(material.series.x, material.series.length);
+        // Neighbouring categories lie one apart, a lone one too.
+        const step = categories === undefined ? measureStep(material.series.x, material.series.length) : 1;
         entry.step = step;
         // A bar is centred on its x value, so half the step belongs to the left
         // and to the right of the extent - otherwise the axis cuts into the first
@@ -1613,6 +1732,13 @@ export class ChartScene {
     id: string,
   ): readonly [number, number] {
     if (this.materialsDirty) this.materialize();
+    const categories = orientation === "x" ? this.categories.get(id) : undefined;
+    if (categories !== undefined) {
+      // Every category has its place, half a step to either side - whatever
+      // kind stands on it, and whichever series is shown (ADR-0051).
+      const span = { xMin: -0.5, xMax: categories.names.length - 0.5, yMin: 0, yMax: 0 };
+      return axisExtent("x", id, [{ xAxisId: id, yAxisId: "", extent: span }], this.limitValues("x", id));
+    }
     const visible = orientation === "y" && this.findAxisConfig("y", id)?.domain === "visible";
     const bindings = [...this.series.values()].map((entry) => ({
       xAxisId: entry.config.xAxisId,
@@ -1698,6 +1824,14 @@ export class ChartScene {
     const inputs: AxisInput[] = [];
     for (const [id, entry] of [...this.axes.entries()].sort((a, b) => a[1].order - b[1].order)) {
       const c = entry.config;
+      const categories = c.orientation === "x" ? this.categories.get(c.id) : undefined;
+      if (categories !== undefined && (c.tickFormat !== undefined || c.ticks !== undefined || c.tickCount !== undefined)) {
+        warnOnce(
+          `category-ticks-${c.id}`,
+          `The x axis "${c.id}" reads categories: tickFormat, ticks and tickCount do not apply - ` +
+            "every category has its tick, and is its own label (ADR-0051).",
+        );
+      }
       inputs.push({
         key: `${c.orientation}:${c.id}`,
         id: c.id,
@@ -1708,10 +1842,10 @@ export class ChartScene {
         extent: this.extentFor(c),
         domainMode: this.domainOf(c),
         ...(this.zooms(c) && { ownDomainMode: c.domain }),
-        tickCount: c.tickCount,
-        tickFormat: c.orientation === "y" ? this.yTickFormat(c.id) : c.tickFormat,
-        tickValues: c.ticks,
-        time: c.time,
+        tickCount: categories === undefined ? c.tickCount : undefined,
+        tickFormat: categories?.format ?? (c.orientation === "y" ? this.yTickFormat(c.id) : c.tickFormat),
+        tickValues: categories?.ticks ?? c.ticks,
+        time: categories === undefined ? c.time : undefined,
         calendar: c.calendar,
         alignTicks: c.alignTicks,
         limitLabels:
@@ -2397,17 +2531,21 @@ export class ChartScene {
             (k) => k.areal || Math.abs(k.px - primary.px) <= GROUP_TOLERANCE,
           );
 
-    const points: TooltipPoint[] = chosen.map((k) => ({
-      seriesName: k.name,
-      color: k.color,
-      xValue: k.xValue,
-      yValue: k.yValue,
-      datum: (k.entry.config.data ?? this.data)[k.index],
-      index: k.index,
-      level: k.level,
-      segment: k.segment,
-      box: k.box,
-    }));
+    const points: TooltipPoint[] = chosen.map((k) => {
+      // The caller's row, also where the series is held in another order.
+      const row = k.entry.rows?.[k.index] ?? k.index;
+      return {
+        seriesName: k.name,
+        color: k.color,
+        xValue: k.xValue,
+        yValue: k.yValue,
+        datum: (k.entry.config.data ?? this.data)[row],
+        index: row,
+        level: k.level,
+        segment: k.segment,
+        box: k.box,
+      };
+    });
     const hit: TooltipHit = {
       xValue: primary.xValue,
       points,

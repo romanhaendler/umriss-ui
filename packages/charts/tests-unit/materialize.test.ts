@@ -3,6 +3,8 @@
 import { describe, expect, it } from "vitest";
 import {
   axisExtent,
+  categoriesOf,
+  categoryPlaces,
   firstUnsortedIndex,
   materializeSeries,
   visibleExtent,
@@ -441,5 +443,99 @@ describe("materializeSeries with a box's mean, notch and count", () => {
     expect(series.box?.notchLower).toBeNull();
     expect(series.box?.notchUpper).toBeNull();
     expect(series.box?.count).toBeNull();
+  });
+});
+
+/* ADR-0051: a category is a whole-number place, and the library keeps the map. */
+describe("The categories of an axis", () => {
+  interface Spend {
+    centre: string | number | null;
+    eur: number;
+  }
+  const centre = (d: Spend) => d.centre;
+
+  it("are the distinct strings in the order of first occurrence, list after list", () => {
+    const names = categoriesOf(
+      [
+        [{ centre: "Sales", eur: 1 }, { centre: "Design", eur: 2 }, { centre: "Sales", eur: 3 }],
+        [{ centre: "Design", eur: 4 }, { centre: "Finance", eur: 5 }],
+      ],
+      centre,
+    );
+    expect(names).toEqual(["Sales", "Design", "Finance"]);
+  });
+
+  it("leave out what is no category: null, the empty string, a number after a category", () => {
+    const rows: Spend[] = [{ centre: null, eur: 1 }, { centre: "", eur: 1 }, { centre: "Sales", eur: 1 }, { centre: 7, eur: 1 }];
+    expect(categoriesOf([rows], centre)).toEqual(["Sales"]);
+  });
+
+  it("are none where a number comes first - the type decides, and a numeric axis stays one", () => {
+    expect(categoriesOf([[{ centre: 2024, eur: 1 }, { centre: "Sales", eur: 1 }]], centre)).toBeNull();
+    expect(categoriesOf([[{ centre: "2024", eur: 1 }]], centre)).toEqual(["2024"]);
+    expect(categoriesOf([[]], centre)).toBeNull();
+  });
+});
+
+describe("A series on a category axis", () => {
+  interface Spend {
+    centre: string | null;
+    eur: number | null;
+  }
+  const place = new Map([["Sales", 0], ["Marketing", 1], ["Design", 2]]);
+  const centre = (d: Spend) => d.centre;
+
+  it("reads rows that come in axis order as they are", () => {
+    const rows: Spend[] = [{ centre: "Sales", eur: 1 }, { centre: "Design", eur: 3 }];
+    const places = categoryPlaces(rows, centre, place);
+    expect([...places.x]).toEqual([0, 2]);
+    expect(places.rows).toBeNull();
+  });
+
+  it("is held in axis order whatever the rows' order, each accessor handed its row's own index", () => {
+    const rows: Spend[] = [
+      { centre: "Design", eur: 30 },
+      { centre: "Sales", eur: 10 },
+      { centre: "Marketing", eur: null },
+    ];
+    const places = categoryPlaces(rows, centre, place);
+    expect([...(places.rows ?? [])]).toEqual([1, 2, 0]);
+    const seen: number[] = [];
+    const { series, extent } = materializeSeries(
+      rows,
+      (_d, i) => places.x[i] as number,
+      (d, i) => {
+        seen.push(i);
+        return d.eur;
+      },
+      undefined,
+      { rows: places.rows },
+    );
+    expect([...series.x]).toEqual([0, 1, 2]);
+    expect(series.y[0]).toBe(10);
+    expect(Number.isNaN(series.y[1] as number)).toBe(true);
+    expect(series.y[2]).toBe(30);
+    expect(seen).toEqual([1, 2, 0]);
+    expect(extent).toEqual({ xMin: 0, xMax: 2, yMin: 10, yMax: 30 });
+    // The channels a kind does not use stay null (ADR-0011).
+    expect(series.y0).toBeNull();
+    expect(series.w).toBeNull();
+    expect(series.box).toBeNull();
+  });
+
+  it("leaves out a row whose category has no place, and keeps rows of one place as given", () => {
+    const rows: Spend[] = [
+      { centre: "Sales", eur: 1 },
+      { centre: null, eur: 99 },
+      { centre: "Elsewhere", eur: 99 },
+      { centre: "Sales", eur: 2 },
+    ];
+    const places = categoryPlaces(rows, centre, place);
+    expect([...(places.rows ?? [])]).toEqual([0, 3]);
+    const { series, extent } = materializeSeries(rows, (_d, i) => places.x[i] as number, (d) => d.eur, undefined, { rows: places.rows });
+    expect(series.length).toBe(2);
+    expect([...series.x]).toEqual([0, 0]);
+    expect([...series.y]).toEqual([1, 2]);
+    expect(extent.yMax).toBe(2);
   });
 });

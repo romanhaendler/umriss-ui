@@ -1,6 +1,6 @@
 # 01 — A category on the x axis
 
-Status: ready-for-agent
+Status: done
 Type: task
 
 Blocked by: none
@@ -35,44 +35,64 @@ through the path the tick labels take (D21).
 
 ## Acceptance
 
-- [ ] ADR-0051 written; ADR-0002 and ADR-0032 each carry a pointer to it and
+- [x] ADR-0051 written; ADR-0002 and ADR-0032 each carry a pointer to it and
       are otherwise unchanged; the ADR index lists it. **Category** and
       **Category axis** stand in the glossary.
-- [ ] Type tests: a string field is accepted by `XAxis value` (the line that
+- [x] Type tests: a string field is accepted by `XAxis value` (the line that
       refuses one today turns round); an object or boolean field is refused; a
       function returning a string needs no annotation; a string field as a
       bar's or a line's `value` is refused. The new forms are exported as
       types at the end of the entry.
-- [ ] Mounted through `useChart`: the tick labels are the categories, in the
+- [x] Mounted through `useChart`: the tick labels are the categories, in the
       order of first occurrence; the tooltip, the keyboard readout, the
       summary and the data table's x column name the category.
-- [ ] Mounted: two bar series stand side by side and stack on a category
+- [x] Mounted: two bar series stand side by side and stack on a category
       axis; a line stands at the middle of each category; a series with its
       own `data` adds its categories after the hook's; hiding a series from
       the legend moves no category.
-- [ ] Mounted: rows given in an order other than the axis' land in the right
+- [x] Mounted: rows given in an order other than the axis' land in the right
       places, and the tooltip of a hit shows the row it came from; a `value`
       function receives the caller's row index.
-- [ ] Mounted: a row whose category is `null`, `undefined` or `""` is not
+- [x] Mounted: a row whose category is `null`, `undefined` or `""` is not
       placed and warns nothing; the same category twice in one series warns in
       DEV naming series and category; strings and numbers on one axis are
       reported in DEV naming the series, and the numbers are not placed;
       `tickFormat`, `ticks` or `tickCount` on a category axis is named in DEV.
-- [ ] Mounted: `zoomable` on a category axis zooms and pans by key as on a
+- [x] Mounted: `zoomable` on a category axis zooms and pans by key as on a
       numeric one; the view reports spans in positions.
-- [ ] Materialisation unit tests: positions from categories, a series in axis
+- [x] Materialisation unit tests: positions from categories, a series in axis
       order from rows in any order with the row index kept, a placeless
       category a gap outside the extent, the channels a kind does not use
       still `null`.
-- [ ] A string that looks like a number is a category; a number field stays a
+- [x] A string that looks like a number is a category; a number field stays a
       numeric axis exactly as today, and every existing test passes unchanged.
-- [ ] The Bar example "One bar per category" is written in the new shape, its
+- [x] The Bar example "One bar per category" is written in the new shape, its
       rows written out as literals with the numbers it draws today; its lead
       no longer speaks of positions. Its screenshots are looked at before they
       are accepted: the picture moves at the axis and nowhere else.
-- [ ] The benchmark example's figures stay inside what the capability record
+- [x] The benchmark example's figures stay inside what the capability record
       promises.
-- [ ] Typecheck, the charts' unit tests, the demo smoke test and the own-data
+- [x] Typecheck, the charts' unit tests, the demo smoke test and the own-data
       check pass.
 
 ## Comments
+
+Delivered. A category axis is the numeric axis with the map kept by the scene:
+`categoriesOf` and `categoryPlaces` (materialisation) give every distinct
+string its place and the order to read the rows in, `materializeSeries` reads
+them in that order (`rows`) and hands every accessor the row's own index, and
+the scene hands the layout the ticks and the label a caller once wrote by
+hand - so tooltip, readout, summary and data table follow without a line of
+their own. A series entry keeps `rows`, through which a hit finds the caller's
+row. A row without a place is left out of the series altogether, not held as a
+gap at its neighbour's x - a table row for it would be a row for nothing.
+
+Tests: `tests-unit/categories.jsdom.test.tsx` (mounted through `useChart`),
+the category blocks of `tests-unit/materialize.test.ts`, the turned line and
+the new refusal in `tests-unit/useChart.test-d.tsx`.
+
+The benchmark: a numeric axis pays one accessor call per series to learn its
+kind and reads no category; the page's figures are measured with the full
+check of ticket 07. The picture of "One bar per category" moved at its lead
+and by a pixel at the y labels beside it; bars, grid and x labels are the
+same.
