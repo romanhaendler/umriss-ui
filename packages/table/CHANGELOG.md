@@ -22,6 +22,16 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## Unreleased
+
+### Added
+
+- **`<Search grow />`.** The search takes the rest of its line in the table
+  toolbar; the parts after it - column menu, export - stand at the end of the
+  line. Without `grow` the search stays its natural width.
+
+---
+
 ## 0.13.6 – Core 0.30.0 (Oct. 2026)
 
 Needs `@umriss-ui/core` 0.30; the peer range moves to `^0.30.0`. Nothing else changes for a caller.

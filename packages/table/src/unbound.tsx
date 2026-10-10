@@ -102,6 +102,9 @@ export interface SearchProps {
   /** The size of the part: `sm` or `md`.
       @default the size of the toolbar it stands in, `"sm"` outside one */
   size?: ToolbarSize;
+  /** Take the rest of the toolbar's line: the parts after the search - column menu, export - stand at its end.
+      @default false */
+  grow?: boolean;
   /** The table, when the part does not stand inside it: the return value of `useTable`. */
   of?: TableRef;
 }
@@ -109,7 +112,7 @@ export interface SearchProps {
 /** The table's search field: one text over every column that searches, in
     the table toolbar. With a search the table puts up a toolbar of its own
     where none stands. Outside the table it needs `of`. */
-export function Search({ placeholder, "aria-label": name, className, size: own, of }: SearchProps) {
+export function Search({ placeholder, "aria-label": name, className, size: own, grow, of }: SearchProps) {
   const connection = useConnection(of);
   const size = useToolbarSize(own);
   const wording = useWording();
@@ -122,7 +125,7 @@ export function Search({ placeholder, "aria-label": name, className, size: own, 
     <Input
       size={size}
       type="search"
-      className={className}
+      className={cx(grow && styles.searchGrow, className)}
       value={snapshot.search}
       onChange={(event) => snapshot.setSearch(event.target.value)}
       clearable
