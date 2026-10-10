@@ -44,7 +44,7 @@ export default function ABarWithASearch() {
           <option>South</option>
         </Select>
       </Grid>
-      <Text size="sm" tone="secondary" role="status">
+      <Text size="sm" tone="secondary">
         {shown.length} of {ROWS.length} invoices: {shown.map((row) => row.name).join(", ") || "none"}
       </Text>
     </Stack>
