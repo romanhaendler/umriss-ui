@@ -31,6 +31,13 @@ commit.
 
 ## Unreleased
 
+### Added
+
+- **Wording for the alarm list's snooze** (`@umriss-ui/table`): `snoozeAlarm`,
+  `snoozeAlarms`, `unsnoozeAlarm`, `unsnoozeAlarms`, in English and German.
+- **Wording for the schedule's milestones** (`@umriss-ui/schedule`):
+  `scheduleMilestone(name)` - "Milestone: Release", "Meilenstein: Release".
+
 ### Changed
 
 - **One natural width of 20 characters** (ADR-0041): `Input`, `Select` and

@@ -585,13 +585,14 @@ export const OUTLINE: readonly Rubric[] = [
         about: [
           "The library receives alerts and raises none (ADR-0009). `alarmModel` turns them into a sorted view – priority, then acknowledgement, then time – and the list shows it; your application applies the transitions (`acknowledge`, `snooze`, `unsnooze`, `disable`, `enable`) to its own state. The lifecycle is one field with four values, active or resolved × acknowledged or not, so an alert that came and went unseen stays until someone acknowledges it.",
           "Availability is a second field: snoozed by a person, with an end and a name; suppressed by the application's logic; or disabled. A hidden alert keeps its lifecycle, stays in the list drawn neutral with its state as a word, and is counted; a snooze ends by the model's clock, with no timer. A flood is marked, never thinned out.",
-          "The live region announces one number, the active unacknowledged alerts, not each arrival. The terms follow ISA-18.2; `docs/standards.md` maps each to its name here.",
+          "The live region announces one number, the active unacknowledged alerts, not each arrival. With `onSnooze` and `snoozeDurations` the list offers snoozing beside “Acknowledge”, and with `onUnsnooze` the ending of a snooze: it reports what the operator asked for and snoozes nothing - your application calls `snooze()` or refuses. The durations are yours; there is no default list. A filter by state or priority is the projection's `filter`, fed by controls of your own. The terms follow ISA-18.2; `docs/standards.md` maps each to its name here.",
         ],
         alternatives: [{ when: "Measured values against limits, without a lifecycle", use: "verdictcolumn" }],
         keys: [
           { key: "Tab", action: "Move through the row boxes, “Acknowledge” and the hidden-alerts switch." },
           { key: "Space", action: "On a box: tick or untick the alert. On the switch: show only the hidden alerts, or all." },
-          { key: "Enter", action: "On “Acknowledge”: hand the ticked alerts to `onAcknowledge`." },
+          { key: "Enter", action: "On “Acknowledge”: hand the ticked alerts to `onAcknowledge`. On “Snooze”: open the durations; on a duration: hand the ticked alerts and the end to `onSnooze`. On “Unsnooze”: hand the ticked snoozed alerts to `onUnsnooze`." },
+          { key: "Arrow keys", action: "In the durations menu: move between them; Escape closes it." },
         ],
         limits: [
           "It raises no alerts: limits, delays and dead bands belong to the application (ADR-0009).",
