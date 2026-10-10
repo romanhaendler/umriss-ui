@@ -15,7 +15,7 @@ half a later reader needs most. Exactly one is superseded today.
 | ADR | Title | Status | Area |
 |---|---|---|---|
 | [0001](0001-affine-scale-contract.md) | Every scale is affine, and the draw loop may rely on it | accepted | charts |
-| [0002](0002-bars-on-a-numeric-x-axis.md) | Bars sit on a numeric x axis, not on a categorical band scale | accepted | charts |
+| [0002](0002-bars-on-a-numeric-x-axis.md) | Bars sit on a numeric x axis, not on a categorical band scale | accepted, superseded in one consequence by ADR-0051 | charts |
 | [0003](0003-an-active-node-is-not-a-selection.md) | The active node and the checked set are two states, not one | accepted | tree |
 | [0004](0004-a-flat-accessibility-tree.md) | The accessibility tree is flat, not nested | accepted | tree |
 | [0005](0005-what-cannot-be-checked.md) | A node that cannot be checked is simply not checked | accepted | tree |
@@ -45,7 +45,7 @@ half a later reader needs most. Exactly one is superseded today.
 | [0029](0029-a-row-groups-form-follows-its-level.md) | A row group's form follows its level | accepted | table |
 | [0030](0030-a-chart-is-one-tab-stop-that-walks-its-hits.md) | A chart is one tab stop that walks its hits | accepted, amended by ADR-0047 | charts |
 | [0031](0031-the-charts-carry-their-own-wording.md) | The charts carry their own wording | accepted | charts, language |
-| [0032](0032-what-umriss-is-not.md) | What umriss is not | accepted | scope |
+| [0032](0032-what-umriss-is-not.md) | What umriss is not | accepted, superseded in one point by ADR-0051 | scope |
 | [0033](0033-the-schedules-keys-walk-past-the-view.md) | The schedule's keys walk past the view | accepted | schedule |
 | [0034](0034-the-table-becomes-a-grid-only-on-request.md) | The table becomes a grid only on request | accepted | table |
 | [0035](0035-umriss-is-for-data-dense-applications.md) | umriss is for data-dense applications, not for plants alone | accepted | scope |
@@ -64,5 +64,6 @@ half a later reader needs most. Exactly one is superseded today.
 | [0048](0048-charts-are-bound-to-their-rows-by-the-hook.md) | Charts are bound to their rows by the hook | accepted | charts |
 | [0049](0049-a-sum-takes-rows-from-data.md) | A sum takes rows from data, and a line shows its contribution | accepted | calculation |
 | [0050](0050-a-chart-fills-its-frame-never-below-its-floor.md) | A chart fills its frame, never below its floor | accepted | charts |
+| [0051](0051-a-chart-reads-its-rows-as-they-come.md) | A chart reads its rows as they come | accepted | charts |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).

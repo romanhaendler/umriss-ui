@@ -52,6 +52,11 @@ export interface ExtraChannels<T> {
       for a segment boundary - assumes ascending x values, and every comparison
       with NaN is false: a search over a block of NaN silently lands on the wrong
       point. What does not exist at a place is reported through xGap instead. */
+  /** The rows to read, in this order, where it is not every row as given: a
+      category axis reads them by place, and leaves out those without one
+      (ADR-0051). The series holds its points in this order; every accessor
+      is still handed the row's own index. */
+  rows?: Uint32Array | null;
   xMap?: (v: number) => number;
   /** Does this x value belong to time which, according to the calendar, does not
       exist? Such a point gets a POSITION out of xMap, so that the channel stays
@@ -69,7 +74,8 @@ export function materializeSeries<T>(
   baseline?: Baseline<T>,
   extra?: ExtraChannels<T>,
 ): Material {
-  const n = data.length;
+  const rows = extra?.rows ?? null;
+  const n = rows === null ? data.length : rows.length;
   const x = new Float64Array(n);
   const y = new Float64Array(n);
   const baseAccessor = typeof baseline === "function" ? baseline : null;
@@ -108,8 +114,9 @@ export function materializeSeries<T>(
     yMax = baseline;
   }
   for (let i = 0; i < n; i++) {
-    const d = data[i] as T;
-    const xRaw = xAccessor(d, i);
+    const r = rows === null ? i : (rows[i] as number);
+    const d = data[r] as T;
+    const xRaw = xAccessor(d, r);
     // An x that is no place - an infinity or NaN - takes the place of the point
     // before it (−∞ before the first), so that the channel stays ascending.
     const placeless = !Number.isFinite(xRaw);
@@ -124,20 +131,20 @@ export function materializeSeries<T>(
       if (xv < xMin) xMin = xv;
       if (xv > xMax) xMax = xv;
     }
-    const yv = unplaced ? Number.NaN : valueOf(yAccessor(d, i));
+    const yv = unplaced ? Number.NaN : valueOf(yAccessor(d, r));
     y[i] = yv;
     // Comparisons with NaN are always false - gaps thereby drop out of the extent.
     if (yv < yMin) yMin = yv;
     if (yv > yMax) yMax = yv;
     if (valueAccessor !== null) {
       // A missing value is a hole in the matrix, not a zero.
-      (w as Float64Array)[i] = unplaced ? Number.NaN : valueOf(valueAccessor(d, i));
+      (w as Float64Array)[i] = unplaced ? Number.NaN : valueOf(valueAccessor(d, r));
     }
     if (boxAccessors !== null) {
       // A box without its median is a gap whole: nothing of it is drawn or
       // counted.
       for (const key of BOX_KEYS) {
-        const v = Number.isNaN(yv) ? Number.NaN : valueOf(boxAccessors[key](d, i));
+        const v = Number.isNaN(yv) ? Number.NaN : valueOf(boxAccessors[key](d, r));
         (box as BoxChannels)[key][i] = v;
         if (v < yMin) yMin = v;
         if (v > yMax) yMax = v;
@@ -146,14 +153,14 @@ export function materializeSeries<T>(
         const accessor = boxAccessors[key];
         const channel = (box as BoxChannels)[key];
         if (accessor === undefined || channel === null) continue;
-        const v = Number.isNaN(yv) ? Number.NaN : valueOf(accessor(d, i));
+        const v = Number.isNaN(yv) ? Number.NaN : valueOf(accessor(d, r));
         channel[i] = v;
         if (!BOX_EXTENT_EXTRAS.includes(key)) continue;
         if (v < yMin) yMin = v;
         if (v > yMax) yMax = v;
       }
       if (outlierAccessor !== null) {
-        const list = Number.isNaN(yv) ? null : outlierAccessor(d, i);
+        const list = Number.isNaN(yv) ? null : outlierAccessor(d, r);
         for (const raw of list ?? []) {
           // A value that is no place is left out, as a gap is.
           if (!Number.isFinite(raw)) continue;
@@ -165,7 +172,7 @@ export function materializeSeries<T>(
       }
     }
     if (baseAccessor !== null) {
-      const uv = unplaced ? Number.NaN : valueOf(baseAccessor(d, i));
+      const uv = unplaced ? Number.NaN : valueOf(baseAccessor(d, r));
       (y0 as Float64Array)[i] = uv;
       if (uv < yMin) yMin = uv;
       if (uv > yMax) yMax = uv;
@@ -173,6 +180,59 @@ export function materializeSeries<T>(
   }
   if (box !== null && outlierAccessor !== null) box.outliers = Float64Array.from(outliers);
   return { series: { x, y, y0, w, box, length: n }, extent: { xMin, xMax, yMin, yMax } };
+}
+
+/** The categories of an axis in the order of their places: every distinct
+    string the rows bring, by first occurrence, the lists taken in the order
+    given (ADR-0051). null where the first value that is a place is a number -
+    the type of the value decides what kind an axis is, never its content. */
+export function categoriesOf<T>(
+  lists: readonly (readonly T[])[],
+  accessor: (d: T, index: number) => unknown,
+): string[] | null {
+  const names: string[] = [];
+  const seen = new Set<string>();
+  for (const data of lists) {
+    for (let i = 0; i < data.length; i++) {
+      const v = accessor(data[i] as T, i);
+      if (typeof v === "string") {
+        if (v !== "" && !seen.has(v)) {
+          seen.add(v);
+          names.push(v);
+        }
+      } else if (names.length === 0 && typeof v === "number" && Number.isFinite(v)) {
+        return null;
+      }
+    }
+  }
+  return names.length === 0 ? null : names;
+}
+
+/** Where each row lies on a category axis: by row, its category's place, NaN
+    where it has none - no category, or one the axis does not know. And the
+    order to read the rows in (`ExtraChannels.rows`): those with a place, their
+    places ascending, rows of one place as given - null where that is every
+    row as it came. */
+export function categoryPlaces<T>(
+  data: readonly T[],
+  accessor: (d: T, index: number) => unknown,
+  place: ReadonlyMap<string, number>,
+): { x: Float64Array; rows: Uint32Array | null } {
+  const n = data.length;
+  const x = new Float64Array(n);
+  const placed: number[] = [];
+  let ascending = true;
+  for (let i = 0; i < n; i++) {
+    const v = accessor(data[i] as T, i);
+    const at = (typeof v === "string" ? place.get(v) : undefined) ?? Number.NaN;
+    x[i] = at;
+    if (Number.isNaN(at)) continue;
+    if (placed.length > 0 && at < (x[placed[placed.length - 1] as number] as number)) ascending = false;
+    placed.push(i);
+  }
+  if (ascending && placed.length === n) return { x, rows: null };
+  if (!ascending) placed.sort((a, b) => (x[a] as number) - (x[b] as number) || a - b);
+  return { x, rows: Uint32Array.from(placed) };
 }
 
 /** A box's further numbers, top to bottom as drawn: the order of its tooltip

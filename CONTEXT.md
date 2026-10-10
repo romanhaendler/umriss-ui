@@ -311,6 +311,22 @@ The affine mapping from an axis' domain to pixels within the plot area. Affine
 is a contract, not an implementation detail — see ADR-0001.
 _Avoid_: transform, projection, mapper
 
+**Category**:
+A string an axis reads from a row and gives a place of its own: a cost centre,
+a service, a weekday. The library keeps the map from category to place - a
+whole number, in the order the rows first bring the categories - and the
+category is its own label. What a category is follows from the type of the
+value, never from its content: `"2024"` is one, `2024` is a number. See
+ADR-0051.
+_Avoid_: Kategorie, label (which is what is written), class, bucket, item (a
+**Pareto item** is what a caller counts), index (which is its place)
+
+**Category axis**:
+An axis whose values are categories. It is the numeric axis with the map kept
+by the library, not a second kind of scale: every category lies one step from
+the next, and the scale stays affine (ADR-0001, ADR-0002).
+_Avoid_: band scale, ordinal axis, categorical scale
+
 **Hit**:
 The data point a pointer position resolves to within one series. Hits feed both
 the tooltip and the overlay markers.

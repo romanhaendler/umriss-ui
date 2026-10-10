@@ -151,3 +151,7 @@ export { Echoes } from "./view";
    and `useChart` name it. At the end, by the workspace's rule for new
    exports. */
 export type { AxisSpans } from "./view";
+
+/* What an axis reads from a row (ADR-0051): a number, or a string, which is a
+   category. At the end, by the workspace's rule for new exports. */
+export type { AxisField, AxisValue } from "./types";

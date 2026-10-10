@@ -1,6 +1,6 @@
 # What umriss is not
 
-Status: accepted
+Status: accepted, superseded in one point by ADR-0051 (the x axis reads categories; still no band scale)
 Date:   2026-09
 
 The library comparison of September 2026 (`docs/research/library-comparison-2026-09/`)

@@ -43,8 +43,11 @@ export function Fields() {
       <Line value="p96" />
       {/* @ts-expect-error a field of the wrong type */}
       <Line value="host" />
-      {/* @ts-expect-error the same on an axis */}
+      {/* A string field on the x axis is a category (ADR-0051). */}
       <XAxis value="host" />
+      <XAxis value={(d) => d.host} />
+      {/* @ts-expect-error a list is no place on an axis */}
+      <XAxis value="samples" />
       {/* @ts-expect-error a y axis reads no value: its series place the rows */}
       <YAxis value="p95" />
       {/* @ts-expect-error a series names its value */}

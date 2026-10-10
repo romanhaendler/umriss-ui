@@ -1,6 +1,6 @@
 # Bars sit on a numeric x axis, not on a categorical band scale
 
-Status: accepted
+Status: accepted, superseded in one consequence by ADR-0051 (a category is a value; the library keeps its position)
 Date:   2026-08
 
 Every other chart library draws bars against a band scale over categories. We do
