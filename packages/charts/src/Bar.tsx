@@ -2,8 +2,9 @@
    Renders nothing itself: children are configuration collectors, the drawing
    happens exclusively in the scene (R-2.1).
 
-   Bars sit on the numeric x axis (ADR-0002): barWidth is a fraction of the step,
-   not a width in pixels. Several bar series on the same x axis share this
+   Bars sit on the numeric x axis (ADR-0002) - a category's place is a number
+   there too (ADR-0051): barWidth is a fraction of the step, not a width in
+   pixels. Several bar series on the same x axis share this
    fraction and stand side by side. The foot lies at 0, and that 0 enters the
    extent of the y axis. */
 
@@ -55,8 +56,8 @@ export interface BarProps<T> {
   barWidth?: number;
 }
 
-/** A series drawn as bars from 0 to its values, on the numeric x axis.
-    Several bar series on one x axis stand side by side, or on each other with
+/** A series drawn as bars from 0 to its values, one at each x: a category
+    the x axis reads from the row, a number or an instant. Several bar series on one x axis stand side by side, or on each other with
     `stack`. Renders nothing itself: it registers with the surrounding
     `Chart`. */
 export function Bar<T>(props: BarProps<T>): null {

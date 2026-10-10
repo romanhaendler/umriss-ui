@@ -1,10 +1,10 @@
 /* Pareto: the arithmetic behind "which three reasons cost us the most".
 
    Sort, accumulate, find the cutoff crossing, collect the long tail into a
-   remainder. No more: the categories are indices on the numeric x axis
-   (ADR-0002) - category n lies at x = n, the labelling comes through
-   `tickFormat` - and the cumulative line sits on a second y axis that the caller
-   stacks. This module knows no axes.
+   remainder. No more: the entries come in the order they are drawn, so an x
+   axis that reads their `name` places them (ADR-0051), and the cumulative
+   line sits on a second y axis that the caller stacks. This module knows no
+   axes.
 
    Deliberately free of the DOM and of the scene, like bars.ts. */
 
@@ -20,8 +20,8 @@ export interface ParetoItem {
 export interface ParetoEntry {
   readonly name: string;
   readonly value: number;
-  /** Category and at the same time x value: category n lies at x = n
-      (ADR-0002). */
+  /** The entry's rank from 0, in the order drawn - its place on an x axis
+      that reads `name`, and an x value for one that reads numbers. */
   readonly index: number;
   /** Share of the total, 0…1. */
   readonly share: number;
