@@ -283,6 +283,7 @@ axis with the map kept by the library: every promise above holds on it.
 | No limit in the legend | R-4.11 | Unit (limits and bands in the scene) |
 | Without `axisId` the axis its orientation names; an unknown axis is a DEV error, as for a series | R-4.12 | Unit (limit line, scene) |
 | The label of an x limit stands in the row of the tick labels, set as they are | — | Unit (layout) |
+| The summary names each labelled limit with its value in its axis' format, a band's edges as one value | — | Unit (jsdom tooltip limits) |
 
 ## `ControlChart`
 
@@ -319,6 +320,15 @@ axis with the map kept by the library: every promise above holds on it.
 | The remainder collected and always last; a collecting rank requires `remainderName` | — | Unit (Pareto) |
 | Categories as indices on the numeric X axis | ADR-0002 | Screenshot (`pareto`) |
 
+## `bin`
+
+| Capability | Rule | Proved at |
+|---|---|---|
+| Rows of `from`, `to`, middle `x` and `count` for a `Bar` on the numeric X axis | ADR-0002 | Unit (bin) |
+| Nice edges on the 1-2-5 grid for a width or a count; none for no values | — | Unit (bin) |
+| A value on an edge falls into the bin the edge starts; the last bin is closed | — | Unit (bin) |
+| A given domain is taken as it is; values outside it and values that are not finite are left out | — | Unit (bin) |
+
 ## `Tooltip`
 
 | Capability | Rule | Proved at |
@@ -337,6 +347,7 @@ axis with the map kept by the library: every promise above holds on it.
 | A stack: each series' own value (a normalised one's share), and the stack's total as its last row - in the series' `format` where the stack is normalised; the readout the same, the totals last | charts-stacking K4 | Unit (jsdom stacking) |
 | `"nearest"` over a stack: the segment under the pointer, not the nearest top; at a shared edge the upper one, so the keys reach a segment of zero height | charts-stacking K4 | Unit (jsdom stacking) |
 | A render prop gets each stacked point's own value in `yValue` and no total - it sums the points itself | charts-stacking K4 | Unit (jsdom stacking) |
+| `limits`: a row per labelled limit of the hit's y axis, its label and value in that axis' format; the readout the same; off by default | — | Unit (jsdom tooltip limits) |
 | A render prop for one's own content | 4.4 | Screenshot (`configuration`), Manual |
 | 12 px beside the crosshair, flipping at the edge, clamped vertically | R-4.9 | Interaction |
 | Leaving the plot area and a window `blur` end the hover | R-4.10 | Interaction |

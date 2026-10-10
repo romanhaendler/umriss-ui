@@ -43,6 +43,8 @@ export type {
   Violation,
   Zone,
 } from "./controlLimits";
+export { bin } from "./bin";
+export type { Bin, BinOptions } from "./bin";
 export { pareto, defaultOptions as paretoDefaults } from "./pareto";
 export type { ParetoSettings } from "./pareto";
 export type {

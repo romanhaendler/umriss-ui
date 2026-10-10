@@ -86,6 +86,13 @@ export function TooltipHtml({ scene }: { scene: ChartScene }): ReactNode {
                       </Fragment>
                     );
                   })}
+                  {/* The limits of the hit's y axis, when asked for: no chip, a limit is no series. */}
+                  {snapshot.limits.map((l, i) => (
+                    <div className="uc-tooltip-row" key={`limit-${i}`}>
+                      <span className="uc-tooltip-name uc-tooltip-total">{l.name}</span>
+                      <span className="uc-tooltip-value">{l.value}</span>
+                    </div>
+                  ))}
                 </div>
               </>
             )}

@@ -90,6 +90,27 @@ named ticks keep working as they did; nothing is taken away.
   do nothing. After a zoom or pan key the polite live region reads the span in
   view ("From 10 to 90."); the summary names the zoom keys and not the walk's.
   A chart with a tooltip, and one with neither, are unchanged.
+- **The summary names the labelled limits.** A chart with a `LimitLine` or
+  `LimitBand` that has a `label` adds "Limits: Objective 300 ms, Warning band
+  250 ms – 300 ms." to the text the plot is described by - each value in its own
+  axis' format, a band's two edges as one value. A limit without a label is left
+  out; a chart without labelled limits reads as before. The wording has a new
+  entry, `limitList`, so a custom `ChartsWording` needs it.
+
+### Added
+
+- **`bin()`**, the arithmetic behind a histogram: `bin(values, { width, count,
+  domain })`, or `bin(rows, value, options)`, returns rows with `from`, `to`,
+  the middle `x` and `count` for a `Bar` on a numeric x axis. The edges are on
+  the 1-2-5 grid of the ticks; a value on an edge falls into the bin that edge
+  starts, the last bin is closed, and what is not a finite number is skipped.
+  A given `domain` is taken as it is, and values outside it are left out.
+  Exports `Bin` and `BinOptions`. One example, "Count readings into a
+  histogram", on the Bar page.
+- **`<Tooltip limits />`**, off by default: the built-in tooltip adds one row
+  per labelled limit of the hit's y axis, its label and value in that axis'
+  format, and what a key reads out says the same. One example on the Tooltip
+  page.
 
 ---
 
