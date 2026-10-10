@@ -408,6 +408,13 @@ export interface Wording {
   acknowledgeAlarm: string;
   /** Bulk acknowledgement; the number stands in the text on purpose. */
   acknowledgeAlarms: (count: number) => string;
+  /** The alarm list's snooze menu, beside "Acknowledge": the word on its
+      button, and the sentence with the number of alarms it acts on. */
+  snoozeAlarm: string;
+  snoozeAlarms: (count: number) => string;
+  /** Ends the snooze of the ticked alarms before its time. */
+  unsnoozeAlarm: string;
+  unsnoozeAlarms: (count: number) => string;
   priorityHigh: string;
   priorityMedium: string;
   priorityLow: string;
@@ -523,6 +530,9 @@ export interface Wording {
   /** "In blocked time (Leave)" - a subtask covering its lane's blocked time,
       with the blocked time's label where it has one. */
   scheduleInBlockedTime: (label: string | undefined) => string;
+  /** "Milestone: Release" - a milestone named by its label (or id), so that
+      the tooltip and the spoken readout say what kind of thing it is. */
+  scheduleMilestone: (name: string) => string;
   /** The chevron of a lane group's header, which folds it into one row and
       unfolds it again. The group's own label stands beside the button, so the
       name is what the ACTION is, not which group it acts on. */
@@ -823,6 +833,10 @@ export const DEFAULT_WORDING: Wording = {
   acknowledgeAlarm: "Acknowledge",
   acknowledgeAlarms: (count) =>
     count === 1 ? "Acknowledge 1 alarm" : `Acknowledge ${count} alarms`,
+  snoozeAlarm: "Snooze",
+  snoozeAlarms: (count) => (count === 1 ? "Snooze 1 alarm" : `Snooze ${count} alarms`),
+  unsnoozeAlarm: "Unsnooze",
+  unsnoozeAlarms: (count) => (count === 1 ? "Unsnooze 1 alarm" : `Unsnooze ${count} alarms`),
   priorityHigh: "High",
   priorityMedium: "Medium",
   priorityLow: "Low",
@@ -889,6 +903,7 @@ export const DEFAULT_WORDING: Wording = {
   scheduleLaneRefused: "Not this lane",
   scheduleBlockedTime: "Blocked time",
   scheduleInBlockedTime: (label) => (label === undefined ? "In blocked time" : `In blocked time (${label})`),
+  scheduleMilestone: (name) => `Milestone: ${name}`,
   scheduleFoldGroup: "Fold group",
   scheduleUnfoldGroup: "Unfold group",
   scheduleLaneCount: (count) => (count === 1 ? "1 lane" : `${count} lanes`),

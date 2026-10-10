@@ -267,6 +267,11 @@ export const GERMAN_WORDING: Wording = {
   acknowledgeAlarm: "Quittieren",
   acknowledgeAlarms: (count) =>
     count === 1 ? "1 Meldung quittieren" : `${count} Meldungen quittieren`,
+  snoozeAlarm: "Zurückstellen",
+  snoozeAlarms: (count) => (count === 1 ? "1 Meldung zurückstellen" : `${count} Meldungen zurückstellen`),
+  unsnoozeAlarm: "Zurückstellung aufheben",
+  unsnoozeAlarms: (count) =>
+    count === 1 ? "Zurückstellung von 1 Meldung aufheben" : `Zurückstellung von ${count} Meldungen aufheben`,
   priorityHigh: "Hoch",
   priorityMedium: "Mittel",
   priorityLow: "Niedrig",
@@ -333,6 +338,7 @@ export const GERMAN_WORDING: Wording = {
   scheduleLaneRefused: "Nicht hierher",
   scheduleBlockedTime: "Sperrzeit",
   scheduleInBlockedTime: (label) => (label === undefined ? "In der Sperrzeit" : `In der Sperrzeit (${label})`),
+  scheduleMilestone: (name) => `Meilenstein: ${name}`,
   scheduleFoldGroup: "Gruppe einklappen",
   scheduleUnfoldGroup: "Gruppe ausklappen",
   scheduleLaneCount: (count) => (count === 1 ? "1 Bahn" : `${count} Bahnen`),

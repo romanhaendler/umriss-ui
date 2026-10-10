@@ -26,6 +26,14 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ### Added
 
+- **`<AlarmList onSnooze snoozeDurations onUnsnooze />`.** The list offers
+  snoozing as a reported intent, beside "Acknowledge" and on the same ticked
+  alarms: `onSnooze(ids, until)` after the operator chose one of
+  `snoozeDurations` (milliseconds, no default list), `onUnsnooze(ids)` for the
+  snoozed ones. The list changes nothing; the application calls `snooze()` or
+  `unsnooze()` on its own data, or refuses. Each action appears only with its
+  handler. Needs `@umriss-ui/core` with the four new snooze wordings.
+
 - **`<Search grow />`.** The search takes the rest of its line in the table
   toolbar; the parts after it - column menu, export - stand at the end of the
   line. Without `grow` the search stays its natural width.

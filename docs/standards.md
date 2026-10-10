@@ -48,6 +48,13 @@ disabled for maintenance back in service. Nor does disabling overwrite
 suppressed: that field is the application's logic's, and enabling would lose
 it.
 
+The list offers shelving as a reported intent (`AlarmList`: `onSnooze`,
+`onUnsnooze`, `snoozeDurations`). It shows the action on the ticked alarms
+and reports their ids and the end the operator chose; it snoozes nothing.
+Whether the alarm is then snoozed - and for how long at most - is the
+application's, which calls `snooze()` on its own data or refuses. The
+durations on offer are the caller's, with no default list.
+
 A hidden alarm is still an alarm to the rest of the model: it can be
 acknowledged, and it counts towards frequency, chatter and a flood - a
 marking, never a removal. Only the live figure of active unacknowledged

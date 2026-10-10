@@ -14,6 +14,10 @@
    A flood is MARKED, never suppressed. All forty rows are there; the marking
    says that they came together. To decide that a human should not see an alarm
    is a safety decision and does not belong in a user-interface library.
+   Snoozing is offered, not done: the list shows the action and reports what
+   the operator asked for - which alarms, until when - and applies nothing. The
+   application then calls `snooze()` on its own data, or refuses. The list
+   reports, the application decides (ADR-0023 says the same of the schedule).
 
    The live region is polite and reports ONE number: the active unacknowledged
    ones. Not every arrival – a list that reads out forty arrivals during a flood
@@ -31,7 +35,7 @@
 
 import { useMemo } from "react";
 import type { HTMLAttributes } from "react";
-import { Badge, Button, Checkbox, Tooltip, VisuallyHidden, useFreshness, useDensityFor, useFormats, useWording } from "@umriss-ui/core";
+import { Badge, Button, Checkbox, Menu, MenuItem, Tooltip, VisuallyHidden, useFreshness, useDensityFor, useFormats, useWording } from "@umriss-ui/core";
 import type { Formats, FreshnessAges, FreshnessReading, Wording } from "@umriss-ui/core";
 import { useTable } from "../index";
 import type { TableSelection } from "../index";
@@ -55,6 +59,20 @@ export interface AlarmListProps extends Omit<HTMLAttributes<HTMLDivElement>, "ch
   /** Gets the ids that are to be acknowledged. The component does not
       acknowledge itself – it does not own the alarms. */
   onAcknowledge?: (ids: readonly string[]) => void;
+  /** Gets the ids the operator wants to snooze and the end they chose
+      (`asOf` of the view plus a duration of `snoozeDurations`). The component
+      snoozes nothing – the application calls `snooze()` on its own alarms, or
+      refuses. The action stands beside "Acknowledge", on the selection, and
+      needs `selection`, `snoozeDurations` and this handler. */
+  onSnooze?: (ids: readonly string[], until: number) => void;
+  /** The durations on offer, in milliseconds. Which are permitted is the
+      plant's rule, so there is no default list; empty or missing, there is no
+      snooze action.
+      @default no default */
+  snoozeDurations?: readonly number[];
+  /** Gets the ids whose snooze the operator wants to end early. Shown, beside
+      "Acknowledge", only with this handler and a selection. */
+  onUnsnooze?: (ids: readonly string[]) => void;
   /** When the data was true. */
   asOf?: Date | number | null;
   /** From when the data counts as stale and from when as disconnected. Without
@@ -162,6 +180,9 @@ function Body({
   view: projection,
   selection,
   onAcknowledge,
+  onSnooze,
+  snoozeDurations,
+  onUnsnooze,
   density: ownDensity,
   className,
   freshness,
@@ -192,6 +213,16 @@ function Body({
   }, [projection.filtered, selection]);
 
   const acknowledgeable = useMemo(() => countAcknowledgeable(alarms, affected), [alarms, affected]);
+
+  /* The same cut feeds both actions. Only an alarm in service or already
+     snoozed can be snoozed (`snooze()` leaves the others alone); only a
+     snoozed one can be unsnoozed. The end is counted from the view's own
+     as-of time, which every row carries as raised + age. */
+  const chosen = useMemo(() => projection.filtered.filter((row) => selection?.selected.has(row.id)), [projection.filtered, selection]);
+  const snoozable = chosen.filter((row) => row.availability === "in-service" || row.availability === "snoozed");
+  const snoozed = chosen.filter((row) => row.availability === "snoozed");
+  const first = projection.filtered[0];
+  const viewAsOf = first === undefined ? 0 : first.alarm.raised + first.age;
 
   /* Compact of its own accord; a provider that sets a density has a say
      (library-audit 07). */
@@ -229,6 +260,27 @@ function Body({
           )
         )}
         <span className={styles.filler} />
+        {selection !== undefined && onUnsnooze !== undefined && (
+          <Button size="sm" disabled={snoozed.length === 0} onClick={() => onUnsnooze(snoozed.map((row) => row.id))}>
+            {snoozed.length === 0 ? wording.unsnoozeAlarm : wording.unsnoozeAlarms(snoozed.length)}
+          </Button>
+        )}
+        {selection !== undefined && onSnooze !== undefined && snoozeDurations !== undefined && snoozeDurations.length > 0 && (
+          <Menu
+            align="end"
+            trigger={
+              <Button size="sm" disabled={snoozable.length === 0}>
+                {snoozable.length === 0 ? wording.snoozeAlarm : wording.snoozeAlarms(snoozable.length)}
+              </Button>
+            }
+          >
+            {snoozeDurations.map((ms) => (
+              <MenuItem key={ms} onSelect={() => onSnooze(snoozable.map((row) => row.id), viewAsOf + ms)}>
+                {durationWord(ms, wording)}
+              </MenuItem>
+            ))}
+          </Menu>
+        )}
         {selection !== undefined && onAcknowledge !== undefined && (
           <Button variant="primary" size="sm" disabled={acknowledgeable === 0} onClick={() => onAcknowledge(affected)}>
             {/* Without a selection it does not say "acknowledge 0 alarms" but
