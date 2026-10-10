@@ -34,5 +34,5 @@ get wrong. It must not become a second copy of the documentation.
    discovery in `skills/<name>/SKILL.md`); not run against this repository, which
    is not pushed with the skill yet. Run `npx skills add romanhaendler/umriss-ui --list` once it is.
 2. The listed `intents` (`move`, `lane`, `stretch`, `place`) and the `chars` default of 20 against the current schedule and core.
-3. The ADR-0032 table still matches the ADR. The category scale is left out of it on purpose: ADR-0051 lets an x axis read a category as it comes, and the ADR's own list is amended by `chart-rows-as-they-come` 07.
+3. The ADR-0032 table still matches the ADR. The category scale is left out of it on purpose: ADR-0052 lets an x axis read a category as it comes, and the ADR's own list is amended by `chart-rows-as-they-come` 07.
 4. Whether `skills/` belongs in the published packages' `files` (it does not now).

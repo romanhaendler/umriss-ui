@@ -29,6 +29,53 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## Unreleased
+
+### Changed
+
+- **A chart with a zoomable x axis is one tab stop even without a
+  `<Tooltip>`** (ADR-0030). Its plot is `role="application"` with the role
+  description "chart" and takes the focus, so `+`, `-`, Shift+←/→ and `0`
+  reach a keyboard. There is no Active point to walk: the arrows without Shift
+  do nothing. After a zoom or pan key the polite live region reads the span in
+  view ("From 10 to 90."); the summary names the zoom keys and not the walk's.
+  A chart with a tooltip, and one with neither, are unchanged.
+- **The summary names the labelled limits.** A chart with a `LimitLine` or
+  `LimitBand` that has a `label` adds "Limits: Objective 300 ms, Warning band
+  250 ms – 300 ms." to the text the plot is described by - each value in its own
+  axis' format, a band's two edges as one value. A limit without a label is left
+  out; a chart without labelled limits reads as before. The wording has a new
+  entry, `limitList`, so a custom `ChartsWording` needs it.
+
+### Added
+
+- **`bin()`**, the arithmetic behind a histogram: `bin(values, { width, count,
+  domain })`, or `bin(rows, value, options)`, returns rows with `from`, `to`,
+  the middle `x` and `count` for a `Bar` on a numeric x axis. The edges are on
+  the 1-2-5 grid of the ticks; a value on an edge falls into the bin that edge
+  starts, the last bin is closed, and what is not a finite number is skipped.
+  A given `domain` is taken as it is, and values outside it are left out.
+  Exports `Bin` and `BinOptions`. One example, "Count readings into a
+  histogram", on the Bar page.
+- **`<Tooltip limits />`**, off by default: the built-in tooltip adds one row
+  per labelled limit of the hit's y axis, its label and value in that axis'
+  format, and what a key reads out says the same. One example on the Tooltip
+  page.
+- **`onSelect`**, an option of `useChart(rows, { onSelect })`: a click or a tap
+  on a hit, and Enter on the Active point, call it with the hit - the
+  `TooltipHit` a custom tooltip's `render` receives, typed at the row. Once per
+  click; the end of a drag that pans does not report, a double click reports on
+  its first click and then resets the zoom as before. The chart holds no
+  selection and draws none: what is chosen is the application's state. It
+  needs a `<Tooltip>` for its hits (the development build warns without) and
+  the hit does not travel over `syncId`. Where it is given, the summary names
+  Enter; the wording has a new entry, `selectHelp`, so a custom
+  `ChartsWording` needs it. `ChartOptions` takes the row type as a parameter
+  (`ChartOptions<Z>`, default `unknown`). One example, "Choose a hit", on the
+  Tooltip page.
+
+---
+
 ## 0.14.0 – A chart reads its rows as they come (Oct. 2026)
 
 A chart takes rows as an application has them (ADR-0052). A category is a
@@ -79,50 +126,6 @@ named ticks keep working as they did; nothing is taken away.
   Only an axis that reads categories is affected.
 - **`tickFormat`, `ticks` and `tickCount` do not apply to an axis that reads
   categories**; DEV says so. They keep their job on a numeric and a time axis.
-## Unreleased
-
-### Changed
-
-- **A chart with a zoomable x axis is one tab stop even without a
-  `<Tooltip>`** (ADR-0030). Its plot is `role="application"` with the role
-  description "chart" and takes the focus, so `+`, `-`, Shift+←/→ and `0`
-  reach a keyboard. There is no Active point to walk: the arrows without Shift
-  do nothing. After a zoom or pan key the polite live region reads the span in
-  view ("From 10 to 90."); the summary names the zoom keys and not the walk's.
-  A chart with a tooltip, and one with neither, are unchanged.
-- **The summary names the labelled limits.** A chart with a `LimitLine` or
-  `LimitBand` that has a `label` adds "Limits: Objective 300 ms, Warning band
-  250 ms – 300 ms." to the text the plot is described by - each value in its own
-  axis' format, a band's two edges as one value. A limit without a label is left
-  out; a chart without labelled limits reads as before. The wording has a new
-  entry, `limitList`, so a custom `ChartsWording` needs it.
-
-### Added
-
-- **`bin()`**, the arithmetic behind a histogram: `bin(values, { width, count,
-  domain })`, or `bin(rows, value, options)`, returns rows with `from`, `to`,
-  the middle `x` and `count` for a `Bar` on a numeric x axis. The edges are on
-  the 1-2-5 grid of the ticks; a value on an edge falls into the bin that edge
-  starts, the last bin is closed, and what is not a finite number is skipped.
-  A given `domain` is taken as it is, and values outside it are left out.
-  Exports `Bin` and `BinOptions`. One example, "Count readings into a
-  histogram", on the Bar page.
-- **`<Tooltip limits />`**, off by default: the built-in tooltip adds one row
-  per labelled limit of the hit's y axis, its label and value in that axis'
-  format, and what a key reads out says the same. One example on the Tooltip
-  page.
-- **`onSelect`**, an option of `useChart(rows, { onSelect })`: a click or a tap
-  on a hit, and Enter on the Active point, call it with the hit - the
-  `TooltipHit` a custom tooltip's `render` receives, typed at the row. Once per
-  click; the end of a drag that pans does not report, a double click reports on
-  its first click and then resets the zoom as before. The chart holds no
-  selection and draws none: what is chosen is the application's state. It
-  needs a `<Tooltip>` for its hits (the development build warns without) and
-  the hit does not travel over `syncId`. Where it is given, the summary names
-  Enter; the wording has a new entry, `selectHelp`, so a custom
-  `ChartsWording` needs it. `ChartOptions` takes the row type as a parameter
-  (`ChartOptions<Z>`, default `unknown`). One example, "Choose a hit", on the
-  Tooltip page.
 
 ---
 

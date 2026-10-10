@@ -15,9 +15,6 @@ moves from here under the rule above.
 
 ---
 
-## 0.5.7 – Charts 0.14.0 (Oct. 2026)
-
-Needs `@umriss-ui/charts` 0.14; the peer range moves to `^0.14.0`. Nothing else changes for a caller.
 ## Unreleased
 
 ### Added
@@ -38,6 +35,12 @@ Needs `@umriss-ui/charts` 0.14; the peer range moves to `^0.14.0`. Nothing else 
   or `target.violated` without checking `target.kind` first no longer
   type-checks; add a case for the milestone (`target.milestone`) or return
   `null` for it.
+
+---
+
+## 0.5.7 – Charts 0.14.0 (Oct. 2026)
+
+Needs `@umriss-ui/charts` 0.14; the peer range moves to `^0.14.0`. Nothing else changes for a caller.
 
 ---
 
