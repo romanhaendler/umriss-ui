@@ -133,8 +133,8 @@ const BURNT = BURNDOWN[0]!.remaining! - LEFT;
 const DAYS_DONE = BOOKED.length - 1;
 const DAYS_LEFT = BURNDOWN.length - BOOKED.length;
 
-const DAY_NAMES = BURNDOWN.map((one) => new Date(one.t).toLocaleDateString("en-GB", { weekday: "short", day: "numeric" }));
-const day = (i: number) => DAY_NAMES[i] ?? "";
+/** A working day as the axis names it: a category, so the weekend takes no room. */
+const dayOf = (one: { t: number }) => new Date(one.t).toLocaleDateString("en-GB", { weekday: "short", day: "numeric" });
 
 interface Holder {
   name: string;
@@ -150,12 +150,7 @@ function SprintBurnDown() {
   const { Chart, XAxis, YAxis, Line } = useChart(BURNDOWN);
   return (
     <Chart height={280} ariaLabel={`${SPRINT.name}: hours left per working day against an even pace`}>
-      <XAxis
-        value={(_d, i) => i}
-        ticks={BURNDOWN.map((_, i) => i)}
-        tickFormat={day}
-        label="Working day"
-      />
+      <XAxis value={dayOf} label="Working day" />
       <YAxis label="Hours left" domain={[0, BURNDOWN[0]!.ideal]} />
       <Line value="ideal" name="Even pace" color="var(--uc-color-text)" dash={[4, 4]} strokeWidth={1} />
       <Line value="remaining" name="Left" markers="always" strokeWidth={2} />
@@ -169,11 +164,7 @@ function OpenPerPerson() {
   const { Chart, XAxis, YAxis, Bar } = useChart(HOLDERS);
   return (
     <Chart height={200} ariaLabel="Estimated hours of unfinished items per person">
-      <XAxis
-        value={(_d, i) => i}
-        ticks={HOLDERS.map((_, i) => i)}
-        tickFormat={(v) => HOLDERS[v]?.name ?? ""}
-      />
+      <XAxis value="name" />
       <YAxis label="h" tickCount={4} />
       <Bar value="open" name="Estimate" barWidth={0.6} />
       <Tooltip mode="x" />
@@ -195,7 +186,7 @@ export default function BurnDown() {
           <Stack gap={2}>
             <SprintBurnDown />
             <Text size="sm" tone="muted">
-              Ten working days, {day(0)} to {day(BURNDOWN.length - 1)}; the weekend between them is left out.
+              Ten working days, {dayOf(BURNDOWN[0]!)} to {dayOf(BURNDOWN.at(-1)!)}; the weekend between them is left out.
             </Text>
           </Stack>
         </CardBody>

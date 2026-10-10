@@ -68,13 +68,14 @@ export const lead = "A `Legend` stands above the plot by default, `placement=\"b
 
 const MARKETING = LEDGER.filter((row) => row.costCentre === "CC-1200");
 const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const month = (row: LedgerRow) => Number(row.month.slice(5)) - 1;
+/** `"2026-03"` as the axis writes it. */
+const monthName = (month: string) => MONTH_NAMES[Number(month.slice(5)) - 1] ?? month;
 
 function Marketing({ placement }: { placement?: "bottom" }) {
   const { Chart, XAxis, YAxis, Line } = useChart(MARKETING);
   return (
     <Chart height={220} ariaLabel={`Marketing's budget and forecast, legend ${placement ?? "above"}`}>
-      <XAxis value={month} ticks={MONTH_NAMES.map((_, i) => i)} tickFormat={(v) => MONTH_NAMES[v] ?? ""} />
+      <XAxis value="month" categoryLabel={monthName} />
       <YAxis label="€" />
       <Line value="budget" name="Budget" />
       <Line value="forecast" name="Forecast" />

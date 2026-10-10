@@ -197,9 +197,6 @@ const FLEET = VEHICLES.map((vehicle) => {
   return { vehicle, points: [...points, { t: NOW, state: null }], idle, driving: points.at(-1)?.state === DRIVING };
 });
 
-/* Lane 0 lies at the bottom, so the first vehicle takes the top lane. */
-const lane = (index: number) => FLEET.length - 1 - index;
-const plateOnLane = (v: number) => FLEET[FLEET.length - 1 - Math.floor(v)]?.vehicle.plate ?? "";
 const depotOf = (id: string) => DEPOTS.find((one) => one.id === id)?.name ?? id;
 
 const IDLE_TODAY = FLEET.reduce((sum, one) => sum + one.idle, 0) / 60;
@@ -210,20 +207,14 @@ function FleetLanes() {
   return (
     <Chart height={320} ariaLabel="What each vehicle has done today, lane by lane">
       <XAxis value="t" time domain={DAY} />
-      <YAxis
-        domain={[0, FLEET.length]}
-        ticks={FLEET.map((_, i) => i + 0.5)}
-        tickFormat={plateOnLane}
-        grid={false}
-      />
-      {FLEET.map((one, i) => (
+      <YAxis grid={false} />
+      {FLEET.map((one) => (
         <StateBand
           key={one.vehicle.id}
           data={one.points}
           value="state"
           states={VEHICLE_STATES}
-          laneFrom={lane(i) + 0.12}
-          laneTo={lane(i) + 0.88}
+          lane={one.vehicle.plate}
           name={`${one.vehicle.plate} (${one.vehicle.type}, ${depotOf(one.vehicle.depot)})`}
         />
       ))}
@@ -237,11 +228,7 @@ function IdleMinutes() {
   const { Chart, XAxis, YAxis, Bar } = useChart(FLEET);
   return (
     <Chart height={200} ariaLabel="Idle minutes per vehicle so far today">
-      <XAxis
-        value={(_d, i) => i}
-        ticks={FLEET.map((_, i) => i)}
-        tickFormat={(v) => FLEET[v]?.vehicle.plate ?? ""}
-      />
+      <XAxis value={(d) => d.vehicle.plate} />
       <YAxis label="min" tickCount={4} />
       <Bar value="idle" name="Idle" color={VEHICLE_STATES[IDLE]!.color} barWidth={0.6} />
       <Tooltip mode="x" />

@@ -2,69 +2,6 @@ import { Card, CardBody, CardHeader, Grid, Stack, Stat } from "@umriss-ui/core";
 import type { LimitSet } from "@umriss-ui/core";
 import { Legend, Tooltip, useChart } from "../../src";
 
-/* Data from the controlling world, written out here so the example runs on its own. */
-/** A small LCG - the same numbers on every computer. */
-function random(seed: number): () => number {
-  let s = seed >>> 0;
-  return () => {
-    s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
-    return s / 4294967296;
-  };
-}
-
-interface CostCentre {
-  id: string;
-  name: string;
-  owner: string;
-  /** The budget of one month. */
-  monthlyBudget: number;
-}
-
-const COST_CENTRES: readonly CostCentre[] = [
-  { id: "CC-1100", name: "Sales", owner: "Helen Marsh", monthlyBudget: 142_000 },
-  { id: "CC-1200", name: "Marketing", owner: "Rafael Ortiz", monthlyBudget: 68_000 },
-  { id: "CC-2100", name: "Engineering", owner: "Anika Sørensen", monthlyBudget: 188_000 },
-  { id: "CC-2200", name: "Design", owner: "Paul Whitaker", monthlyBudget: 54_000 },
-  { id: "CC-3100", name: "Customer service", owner: "Grace Obi", monthlyBudget: 61_000 },
-  { id: "CC-4100", name: "Finance", owner: "Martina Vogel", monthlyBudget: 47_000 },
-  { id: "CC-4200", name: "People", owner: "Daniel Frost", monthlyBudget: 39_000 },
-  { id: "CC-4300", name: "IT", owner: "Kenji Arai", monthlyBudget: 83_000 },
-  { id: "CC-4400", name: "Facilities", owner: "Olga Ivanova", monthlyBudget: 72_000 },
-];
-
-/** The year's months, as `"2026-01"` … `"2026-12"`. */
-const MONTHS: readonly string[] = Array.from({ length: 12 }, (_, i) => `2026-${String(i + 1).padStart(2, "0")}`);
-
-/** The months whose books are closed: they have an actual. */
-const CLOSED_MONTHS = 2;
-
-interface LedgerRow {
-  costCentre: string;
-  month: string;
-  budget: number;
-  /** `null` while the month is open. */
-  actual: number | null;
-  forecast: number;
-}
-
-/* Where a cost centre lands against its budget, as a factor: Marketing's
-   spring campaign overspends, IT's delayed licences underspend. */
-const TENDENCY: Readonly<Record<string, number>> = { "CC-1200": 1.14, "CC-4300": 0.88 };
-
-/** Budget, actual and forecast of every cost centre in every month. */
-const LEDGER: readonly LedgerRow[] = COST_CENTRES.flatMap((centre, c) => {
-  const r = random(310 + c);
-  const tendency = TENDENCY[centre.id] ?? 1;
-  return MONTHS.map((month, m) => {
-    /* December pays the bonuses, August is the quiet month. */
-    const season = m === 11 ? 1.12 : m === 7 ? 0.9 : 1;
-    const budget = Math.round(centre.monthlyBudget * season);
-    const forecast = Math.round((budget * (tendency + (r() - 0.5) * 0.06)) / 100) * 100;
-    const actual = m < CLOSED_MONTHS ? Math.round(forecast * (1 + (r() - 0.5) * 0.08)) : null;
-    return { costCentre: centre.id, month, budget, actual, forecast };
-  });
-});
-
 export const title = "Compare the budget with the forecast";
 
 export const lead =
@@ -85,22 +22,22 @@ export const builtFrom = [
 ];
 
 const thousands = (euros: number) => euros / 1000;
-const outlook = (row: LedgerRow) => row.actual ?? row.forecast;
 const euros = (v: number) => `${v.toLocaleString("en-GB", { maximumFractionDigits: 1 })} k€`;
 
-interface CentreYear {
-  name: string;
-  budget: number;
-  outlook: number;
-  gap: number;
-}
-
-const YEAR: readonly CentreYear[] = COST_CENTRES.map((centre) => {
-  const rows = LEDGER.filter((row) => row.costCentre === centre.id);
-  const budget = rows.reduce((sum, row) => sum + row.budget, 0);
-  const expected = rows.reduce((sum, row) => sum + outlook(row), 0);
-  return { name: centre.name, budget, outlook: expected, gap: expected - budget };
-});
+/* The year per cost centre, in euros, as the ledger sums it: the budget, and
+   the outlook - closed months at their actual, open months at their forecast. */
+const YEAR = [
+  { name: "Sales", budget: 1_706_840, outlook: 1_701_784 },
+  { name: "Marketing", budget: 817_360, outlook: 934_111 },
+  { name: "Engineering", budget: 2_259_760, outlook: 2_258_122 },
+  { name: "Design", budget: 649_080, outlook: 649_484 },
+  { name: "Customer service", budget: 733_220, outlook: 734_416 },
+  { name: "Finance", budget: 564_940, outlook: 563_659 },
+  { name: "People", budget: 468_780, outlook: 468_251 },
+  { name: "IT", budget: 997_660, outlook: 881_804 },
+  { name: "Facilities", budget: 865_440, outlook: 860_691 },
+];
+const gap = (one: { budget: number; outlook: number }) => one.outlook - one.budget;
 
 const BUDGET = YEAR.reduce((sum, one) => sum + one.budget, 0);
 const OUTLOOK = YEAR.reduce((sum, one) => sum + one.outlook, 0);
@@ -114,24 +51,37 @@ const GAP_LIMITS: LimitSet = {
   ],
 };
 
-const MARKETING = COST_CENTRES.find((one) => one.name === "Marketing")!;
-const MONTHLY = LEDGER.filter((row) => row.costCentre === MARKETING.id);
-const MONTH_NAMES = MONTHS.map((month) => new Date(`${month}-01T00:00`).toLocaleString("en-GB", { month: "short" }));
+const MARKETING = { id: "CC-1200", owner: "Rafael Ortiz" };
+
+/* Marketing's ledger month by month, in euros; `actual` is `null` while the
+   month's books are open. */
+const MONTHLY = [
+  { month: "2026-01", budget: 68_000, actual: 76_823, forecast: 76_900 },
+  { month: "2026-02", budget: 68_000, actual: 76_588, forecast: 78_600 },
+  { month: "2026-03", budget: 68_000, actual: null, forecast: 78_200 },
+  { month: "2026-04", budget: 68_000, actual: null, forecast: 76_100 },
+  { month: "2026-05", budget: 68_000, actual: null, forecast: 77_100 },
+  { month: "2026-06", budget: 68_000, actual: null, forecast: 77_800 },
+  { month: "2026-07", budget: 68_000, actual: null, forecast: 78_400 },
+  { month: "2026-08", budget: 61_200, actual: null, forecast: 69_600 },
+  { month: "2026-09", budget: 68_000, actual: null, forecast: 79_200 },
+  { month: "2026-10", budget: 68_000, actual: null, forecast: 78_400 },
+  { month: "2026-11", budget: 68_000, actual: null, forecast: 77_200 },
+  { month: "2026-12", budget: 76_160, actual: null, forecast: 88_700 },
+];
+/** `"2026-03"` as the axis writes it. */
+const monthName = (month: string) => new Date(`${month}-01T00:00`).toLocaleString("en-GB", { month: "short" });
 
 function GapPerCentre() {
   const { Chart, XAxis, YAxis, Bar } = useChart(YEAR);
   return (
     <Chart height={240} ariaLabel="Outlook minus budget for the year, per cost centre">
-      <XAxis
-        value={(_d, i) => i}
-        ticks={YEAR.map((_, i) => i)}
-        tickFormat={(v) => YEAR[v]?.name ?? ""}
-      />
+      <XAxis value="name" />
       <YAxis label="k€" tickFormat={euros} />
       {/* One series per sign, stacked on one another so that each bar stands centred on its cost centre. */}
-      <Bar value={(d) => (d.gap > 0 ? thousands(d.gap) : null)} name="Over budget" tone="alarm" stack="gap" format={euros} />
+      <Bar value={(d) => (gap(d) > 0 ? thousands(gap(d)) : null)} name="Over budget" tone="alarm" stack="gap" format={euros} />
       <Bar
-        value={(d) => (d.gap <= 0 ? thousands(d.gap) : null)}
+        value={(d) => (gap(d) <= 0 ? thousands(gap(d)) : null)}
         name="Under budget"
         color="var(--uc-color-text)"
         stack="gap"
@@ -147,11 +97,7 @@ function MarketingByMonth() {
   const { Chart, XAxis, YAxis, Bar, Line } = useChart(MONTHLY);
   return (
     <Chart height={260} ariaLabel="Marketing's budget, actual and forecast per month">
-      <XAxis
-        value={(_d, i) => i}
-        ticks={MONTHLY.map((_, i) => i)}
-        tickFormat={(v) => MONTH_NAMES[v] ?? ""}
-      />
+      <XAxis value="month" categoryLabel={monthName} />
       <YAxis label="k€" tickFormat={euros} />
       <Bar value={(d) => thousands(d.budget)} name="Budget" color="var(--uc-color-text)" barWidth={0.7} format={euros} />
       <Bar value={(d) => (d.actual === null ? null : thousands(d.actual))} name="Actual" barWidth={0.7} format={euros} />
