@@ -574,6 +574,17 @@
     position: absolute;
   }
 
+  /* `<Search grow />`: the group holding it takes the rest of the toolbar's
+     line, the search the rest of the group's. Grown from its natural width, not
+     from 0 (`flex: 1`): it still wraps where it did and is never squeezed away. */
+  .toolbarGroup:has(> .searchGrow) {
+    flex-grow: 1;
+  }
+
+  .searchGrow {
+    flex-grow: 1;
+  }
+
   /* At `md` a group is as tall as a control of that size, for the reason
      above. */
   .toolbarMd .toolbarGroup {
