@@ -257,9 +257,11 @@ export const OUTLINE: readonly Rubric[] = [
         id: "tooltip",
         name: "Tooltip",
         sentence: "What a hover reports (a hover card), and the values as a table for a reader who wants them all at once.",
-        about: ["The crosshair snaps to a reading, never between two. The data table's key stands at the end of the legend."],
+        about: ["The crosshair snaps to a reading, never between two. The data table's key stands at the end of the legend.",
+          "`useChart(rows, { onSelect })` hears a click or tap on a hit and Enter on the Active point, with the hit a custom `render` receives - once, never at the end of a drag, and for a double click only on its first click. The chart keeps and draws no selection; it needs a `Tooltip` for its hits and does not send the hit over `syncId`.",
+        ],
         keysOf: ["chart"],
-        types: ["TooltipProps"],
+        types: ["TooltipProps", "ChartOptions"],
         exports: ["Tooltip", "DataTable"],
       },
       {
