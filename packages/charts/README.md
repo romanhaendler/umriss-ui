@@ -97,7 +97,7 @@ loaded: Geist when the application has it, the system fonts otherwise.
 * **Seven series kinds** in one chart on shared axes: `Line`, `Area`, `Bar`,
   `BoxPlot`, `Scatter`, `StateBand`, `Matrix`. Occupancy — work on people or vehicles, idle time,
   double bookings — is `@umriss-ui/schedule`'s (ADR-0026).
-* **Rows as they come** (ADR-0051): an axis reads a category from a string -
+* **Rows as they come** (ADR-0052): an axis reads a category from a string -
   a place, a tick and its name each, in the rows' order or your own
   `categories` - and an instant from a `Date` or, with `time`, from the ISO
   string an API sends. No position computed per row, no tick list, no lookup.

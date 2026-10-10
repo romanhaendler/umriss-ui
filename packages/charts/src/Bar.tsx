@@ -3,7 +3,7 @@
    happens exclusively in the scene (R-2.1).
 
    Bars sit on the numeric x axis (ADR-0002) - a category's place is a number
-   there too (ADR-0051): barWidth is a fraction of the step, not a width in
+   there too (ADR-0052): barWidth is a fraction of the step, not a width in
    pixels. Several bar series on the same x axis share this
    fraction and stand side by side. The foot lies at 0, and that 0 enters the
    extent of the y axis. */

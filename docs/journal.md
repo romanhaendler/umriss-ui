@@ -21,7 +21,7 @@ as it stood.
 ## Oct. 2026 — A chart reads its rows as they come
 
 - **A category and an instant are values**
-  (`.scratch/chart-rows-as-they-come/`, ADR-0051). It began with the
+  (`.scratch/chart-rows-as-they-come/`, ADR-0052). It began with the
   maintainer reading the Bar examples: "zu viele zusätzliche Funktionen, um
   die Daten brauchbar zu machen". Counted, 22 of the 71 examples and scenarios
   computed a position per row, listed the positions as `ticks` and looked the

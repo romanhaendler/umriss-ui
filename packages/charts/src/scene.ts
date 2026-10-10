@@ -129,7 +129,7 @@ interface SeriesEntry {
   lastSlot: number | null;
   materialized: MaterializedSeries | null;
   /** Which of the caller's rows each point came from, where the series is
-      not held row by row: a category axis holds it by place (ADR-0051). */
+      not held row by row: a category axis holds it by place (ADR-0052). */
   rows: Uint32Array | null;
   extent: Extent | null;
   /** Bars only: the smallest x distance, computed once per materialisation. It
@@ -185,7 +185,7 @@ interface AxisEntry {
   config: AxisConfig;
 }
 
-/** The categories of an axis (ADR-0051): the library keeps the map from
+/** The categories of an axis (ADR-0052): the library keeps the map from
     category to place, and writes the ticks and their labels a caller once
     wrote by hand. */
 interface Categories {
@@ -806,10 +806,10 @@ export class ChartScene {
   /* ---------- Data and layout inputs ---------- */
   private data: readonly unknown[] = [];
   /** The categories of each axis that has them, by orientation and axis id
-      (`x:x`); an axis absent is numeric (ADR-0051). */
+      (`x:x`); an axis absent is numeric (ADR-0052). */
   private readonly categories = new Map<string, Categories>();
   /** The x axes whose rows bring a `Date`: they stand in time without `time`
-      being said (ADR-0051). */
+      being said (ADR-0052). */
   private readonly dated = new Set<string>();
   private padding: Padding = { top: 8, right: 8, bottom: 8, left: 8 };
 
@@ -1350,7 +1350,7 @@ export class ChartScene {
       warnOnce(
         `category-instants-${axis.id}`,
         `The x axis "${axis.id}" reads its rows' strings as categories, and every one is an ISO 8601 instant. ` +
-          "If they are moments, say \`time\` on the axis: a string is an instant only there (ADR-0051).",
+          "If they are moments, say \`time\` on the axis: a string is an instant only there (ADR-0052).",
       );
     }
     return names;
@@ -1382,7 +1382,7 @@ export class ChartScene {
 
   /** Where a row lies on a numeric or a time axis. Numbers go as they come -
       a week of seconds pays nothing; a series that brings a `Date` or, on a
-      time axis, a string has each read as its instant (ADR-0051). */
+      time axis, a string has each read as its instant (ADR-0052). */
   private placeOnX(config: SeriesConfig, data: readonly unknown[], xAxis: AxisConfig): (d: unknown, index: number) => number {
     const accessor = xAxis.accessor as (d: unknown, index: number) => unknown;
     const kind = this.inTime(xAxis) ? firstKind([data], accessor) : "number";
@@ -1397,7 +1397,7 @@ export class ChartScene {
         warnOnce(
           `instant-unread-${xAxis.id}-${name}`,
           `Series "${name}": row ${index} holds "${String(accessor(data[index], index))}" on the time axis "${xAxis.id}", ` +
-            "which is no ISO 8601 instant. It has no place and is not drawn (ADR-0051).",
+            "which is no ISO 8601 instant. It has no place and is not drawn (ADR-0052).",
         );
       }
     }
@@ -1416,7 +1416,7 @@ export class ChartScene {
     return names.size === 0 ? null : [...names];
   }
 
-  /** One axis has one kind (ADR-0051): DEV names the series that brings
+  /** One axis has one kind (ADR-0052): DEV names the series that brings
       another - a category among numbers, a number or a `Date` among
       categories -, the one that brings a category its axis does not list,
       and the one that brings a category twice. */
@@ -1433,7 +1433,7 @@ export class ChartScene {
       warnOnce(
         `axis-kind-${key}`,
         `Series "${name}" brings ${what} to the ${axis}, which reads ${reads}. ` +
-          "One axis has one kind: it is no place there and is not drawn (ADR-0051).",
+          "One axis has one kind: it is no place there and is not drawn (ADR-0052).",
       );
     const categories = this.categoriesAt(where.orientation, where.id);
     if (categories === undefined) {
@@ -1452,7 +1452,7 @@ export class ChartScene {
           warnOnce(
             `instant-mixed-${key}`,
             `Series "${name}": row ${index} holds a date or a string on the time axis "${where.id}" after numbers. ` +
-              "A series that begins with milliseconds is read as milliseconds: that row has no place and is not drawn (ADR-0051).",
+              "A series that begins with milliseconds is read as milliseconds: that row has no place and is not drawn (ADR-0052).",
           );
         }
         return;
@@ -1478,14 +1478,14 @@ export class ChartScene {
         warnOnce(
           `category-unlisted-${key}`,
           `Series "${name}" brings the category "${v}", which the ${axis} does not list in \`categories\`. ` +
-            "It has no place and is not drawn (ADR-0051).",
+            "It has no place and is not drawn (ADR-0052).",
         );
       }
       if (once && seen.has(v)) {
         warnOnce(
           `category-twice-${key}`,
           `Series "${name}" brings the category "${v}" more than once to the ${axis}. ` +
-            "Both rows are drawn in the one place; add them up before the chart (ADR-0051).",
+            "Both rows are drawn in the one place; add them up before the chart (ADR-0052).",
         );
       }
       seen.add(v);
@@ -1527,14 +1527,14 @@ export class ChartScene {
           warnOnce(
             `axis-kind-y-${config.yAxisId}-${config.name ?? "?"}`,
             `Series "${config.name ?? "?"}" brings numbers to the y axis "${config.yAxisId}", which reads categories. ` +
-              "One axis has one kind: a number is no place there and is not drawn (ADR-0051).",
+              "One axis has one kind: a number is no place there and is not drawn (ADR-0052).",
           );
         }
         if (unlisted) {
           warnOnce(
             `lane-unlisted-${config.yAxisId}-${lane}`,
             `StateBand "${config.name ?? "?"}" names the lane "${lane}", which the y axis "${config.yAxisId}" does not list in \`categories\`. ` +
-              "It has no place and is not drawn (ADR-0051).",
+              "It has no place and is not drawn (ADR-0052).",
           );
         }
       }
@@ -1916,7 +1916,7 @@ export class ChartScene {
     const categories = this.categoriesAt(orientation, id);
     if (categories !== undefined) {
       // Every category has its place, half a step to either side - whatever
-      // kind stands on it, and whichever series is shown (ADR-0051).
+      // kind stands on it, and whichever series is shown (ADR-0052).
       const from = -0.5;
       const to = categories.names.length - 0.5;
       const span = { xMin: from, xMax: to, yMin: from, yMax: to };
@@ -2020,7 +2020,7 @@ export class ChartScene {
         warnOnce(
           `category-ticks-${c.orientation}-${c.id}`,
           `The ${c.orientation} axis "${c.id}" reads categories: tickFormat, ticks and tickCount do not apply - ` +
-            "every category has its tick, and is its own label (ADR-0051).",
+            "every category has its tick, and is its own label (ADR-0052).",
         );
       }
       inputs.push({

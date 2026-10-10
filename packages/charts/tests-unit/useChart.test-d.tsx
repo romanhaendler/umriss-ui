@@ -43,7 +43,7 @@ export function Fields() {
       <Line value="p96" />
       {/* @ts-expect-error a field of the wrong type */}
       <Line value="host" />
-      {/* A string field on the x axis is a category (ADR-0051). */}
+      {/* A string field on the x axis is a category (ADR-0052). */}
       <XAxis value="host" />
       <XAxis value={(d) => d.host} />
       {/* @ts-expect-error a list is no place on an axis */}
@@ -97,7 +97,7 @@ export function Fields() {
       <Matrix value="t" level="host" />
       <Scatter value="p95" />
       <StateBand value="p95" states={[]} />
-      {/* A matrix' rows named by the data (ADR-0051). */}
+      {/* A matrix' rows named by the data (ADR-0052). */}
       <Matrix value="host" level="p95" />
       <Matrix value={(d) => d.host} level="p95" />
       {/* @ts-expect-error a list is no row */}

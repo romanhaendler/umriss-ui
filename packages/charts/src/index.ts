@@ -152,12 +152,12 @@ export { Echoes } from "./view";
    exports. */
 export type { AxisSpans } from "./view";
 
-/* What an axis reads from a row (ADR-0051): a number, a string, which is a
+/* What an axis reads from a row (ADR-0052): a number, a string, which is a
    category, or a `Date`, which is an instant. At the end, by the workspace's
    rule for new exports. */
 export type { AxisField, AxisValue } from "./types";
 
 /* A state band's lane, named or by its edges and never both - beside
-   `StateBandProps`, which stays an interface (ADR-0051). At the end, by the
+   `StateBandProps`, which stays an interface (ADR-0052). At the end, by the
    workspace's rule for new exports. */
 export type { OneLane } from "./StateBand";

@@ -2,7 +2,7 @@
 
    Sort, accumulate, find the cutoff crossing, collect the long tail into a
    remainder. No more: the entries come in the order they are drawn, so an x
-   axis that reads their `name` places them (ADR-0051), and the cumulative
+   axis that reads their `name` places them (ADR-0052), and the cumulative
    line sits on a second y axis that the caller stacks. This module knows no
    axes.
 

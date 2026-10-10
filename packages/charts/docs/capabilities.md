@@ -102,33 +102,33 @@ Screenshot pages carry their name in brackets.
 | The legend's gestures: a click toggles at once; a double click, Alt+click or Shift+Enter shows only that series (a state's entry: its bands), on the only one visible all; whatever would hide every series shows all, and the polite live region says so (`allShown`); the plot's summary names Shift+Enter (`legendHelp`) | component-view 03 | Unit (view, jsdom legend toggle), Interaction (legend's gestures) |
 | A view kept outlives a reload and is restored by handing it back | ADR-0047, component-view Q20 | Interaction (`keep-and-restore`) |
 
-## Categories and instants (ADR-0051)
+## Categories and instants (ADR-0052)
 
 What an axis reads from a row, beyond a number. A category axis is the numeric
 axis with the map kept by the library: every promise above holds on it.
 
 | Capability | Rule | Proved at |
 |---|---|---|
-| A string on the x axis is a category: every distinct one gets a place, a tick and its name, in the order of first occurrence - the series in registration order, a hidden one included | ADR-0051 | Unit (materialisation, jsdom categories), Screenshot (`per-category`) |
-| The type of the first value that is a place decides the axis' kind, never its content: `"2024"` is a category, `2024` a number | ADR-0051 | Unit (materialisation, jsdom categories) |
-| One kind per axis: a number or a `Date` among categories, a category or a `Date` among numbers, is not placed, and DEV names the series; along y, a series of numbers on an axis of categories | ADR-0051 | Unit (jsdom categories, categories on y, instants) |
-| A matrix with categories along both axes brings its column once per row: nothing to say in DEV | ADR-0051 | Unit (jsdom categories on y) |
-| A series moved to another axis takes its categories and its lane with it; `time` said later or taken back reads the axis anew | ADR-0051 | Unit (jsdom categories on y, instants) |
+| A string on the x axis is a category: every distinct one gets a place, a tick and its name, in the order of first occurrence - the series in registration order, a hidden one included | ADR-0052 | Unit (materialisation, jsdom categories), Screenshot (`per-category`) |
+| The type of the first value that is a place decides the axis' kind, never its content: `"2024"` is a category, `2024` a number | ADR-0052 | Unit (materialisation, jsdom categories) |
+| One kind per axis: a number or a `Date` among categories, a category or a `Date` among numbers, is not placed, and DEV names the series; along y, a series of numbers on an axis of categories | ADR-0052 | Unit (jsdom categories, categories on y, instants) |
+| A matrix with categories along both axes brings its column once per row: nothing to say in DEV | ADR-0052 | Unit (jsdom categories on y) |
+| A series moved to another axis takes its categories and its lane with it; `time` said later or taken back reads the axis anew | ADR-0052 | Unit (jsdom categories on y, instants) |
 | Long category names wrap onto two lines and thin out as named ticks do | — | Unit (layout), Screenshot (`pareto`) |
-| The rows of a category axis in any order; a hit and a `value` function's index are the caller's row; a row without a category is left out | ADR-0051 | Unit (materialisation, jsdom categories) |
-| The same category twice in one series: drawn in the one place, named in DEV | ADR-0051 | Unit (jsdom categories) |
-| Bars side by side and stacked, a line on the middle of a bar's place, a series' own `data` adding its categories | ADR-0002, ADR-0051 | Unit (jsdom categories), Screenshot (`grouped`, `stacked`, `pareto`, `detailed`) |
-| `categories`: the order and the extent - an empty place kept, a category not listed not drawn and named in DEV, the axis and the empty state where there are no rows; it makes a category axis whatever the rows hold, an empty list too | ADR-0051 | Unit (jsdom categories), Screenshot (`categories`) |
-| `categoryLabel`: what is written for a category, under the tick and in the tooltip, the readout, the summary and the data table; two categories of one label keep two places | ADR-0051 | Unit (jsdom categories), Screenshot (`categories`, `above-or-below`) |
-| `tickFormat`, `ticks` and `tickCount` on a category axis: not applied, named in DEV | ADR-0051 | Unit (jsdom categories) |
-| A category axis spans its places with half a step at either end, whatever stands on it; `zoomable` and the view's span count in places; a fixed `domain` pair is places | ADR-0051 | Unit (jsdom categories), Screenshot (`above-or-below`, `limits-and-state`) |
-| Along y: a `Matrix` whose `value` reads a string names its rows, and its tooltip the cell's row; a `StateBand` names its `lane`, 0.8 of its category's step; `categories` and `categoryLabel` on `YAxis`; the first category at the top | ADR-0051 | Unit (jsdom categories on y), type check, Screenshot (`by-limits`, `one-lane-each`, `limits-and-state`) |
-| A `Date` in the rows puts its x axis in time without `time` | ADR-0051 | Unit (materialisation, jsdom instants), Screenshot (`time`) |
-| With `time`, a string is an ISO 8601 instant by the platform's rule (a date with a time and no offset local, a date alone UTC); one that is none is not drawn, and DEV names its series and row | ADR-0051 | Unit (materialisation, jsdom instants), Screenshot (`first-chart`) |
-| Strings on an axis without `time` are categories; where each is an ISO instant with a time, DEV asks whether `time` was meant | ADR-0051 | Unit (jsdom instants) |
-| A fixed `domain` and a `LimitLine` or `LimitBand` along time take a `Date` | ADR-0051 | Unit (jsdom instants), type check, Screenshot (`along-time`) |
-| A series on a time axis that begins with milliseconds is read as milliseconds alone; a `Date` or a string after them is not drawn, and DEV names its row | ADR-0051 | Unit (jsdom instants) |
-| Numbers on a time axis go as they come: one accessor call per series tells its kind, and materialisation reads a million of them in the time it did (8.3 ms before, 8.4 ms after, the fastest of sixty runs each in Node) | ADR-0051 | Unit (materialisation); measured once, Oct. 2026 |
+| The rows of a category axis in any order; a hit and a `value` function's index are the caller's row; a row without a category is left out | ADR-0052 | Unit (materialisation, jsdom categories) |
+| The same category twice in one series: drawn in the one place, named in DEV | ADR-0052 | Unit (jsdom categories) |
+| Bars side by side and stacked, a line on the middle of a bar's place, a series' own `data` adding its categories | ADR-0002, ADR-0052 | Unit (jsdom categories), Screenshot (`grouped`, `stacked`, `pareto`, `detailed`) |
+| `categories`: the order and the extent - an empty place kept, a category not listed not drawn and named in DEV, the axis and the empty state where there are no rows; it makes a category axis whatever the rows hold, an empty list too | ADR-0052 | Unit (jsdom categories), Screenshot (`categories`) |
+| `categoryLabel`: what is written for a category, under the tick and in the tooltip, the readout, the summary and the data table; two categories of one label keep two places | ADR-0052 | Unit (jsdom categories), Screenshot (`categories`, `above-or-below`) |
+| `tickFormat`, `ticks` and `tickCount` on a category axis: not applied, named in DEV | ADR-0052 | Unit (jsdom categories) |
+| A category axis spans its places with half a step at either end, whatever stands on it; `zoomable` and the view's span count in places; a fixed `domain` pair is places | ADR-0052 | Unit (jsdom categories), Screenshot (`above-or-below`, `limits-and-state`) |
+| Along y: a `Matrix` whose `value` reads a string names its rows, and its tooltip the cell's row; a `StateBand` names its `lane`, 0.8 of its category's step; `categories` and `categoryLabel` on `YAxis`; the first category at the top | ADR-0052 | Unit (jsdom categories on y), type check, Screenshot (`by-limits`, `one-lane-each`, `limits-and-state`) |
+| A `Date` in the rows puts its x axis in time without `time` | ADR-0052 | Unit (materialisation, jsdom instants), Screenshot (`time`) |
+| With `time`, a string is an ISO 8601 instant by the platform's rule (a date with a time and no offset local, a date alone UTC); one that is none is not drawn, and DEV names its series and row | ADR-0052 | Unit (materialisation, jsdom instants), Screenshot (`first-chart`) |
+| Strings on an axis without `time` are categories; where each is an ISO instant with a time, DEV asks whether `time` was meant | ADR-0052 | Unit (jsdom instants) |
+| A fixed `domain` and a `LimitLine` or `LimitBand` along time take a `Date` | ADR-0052 | Unit (jsdom instants), type check, Screenshot (`along-time`) |
+| A series on a time axis that begins with milliseconds is read as milliseconds alone; a `Date` or a string after them is not drawn, and DEV names its row | ADR-0052 | Unit (jsdom instants) |
+| Numbers on a time axis go as they come: one accessor call per series tells its kind, and materialisation reads a million of them in the time it did (8.3 ms before, 8.4 ms after, the fastest of sixty runs each in Node) | ADR-0052 | Unit (materialisation); measured once, Oct. 2026 |
 
 ## The layout engine
 
@@ -455,7 +455,7 @@ The reasons across all five packages stand in
 here.
 
 * **A band scale.** Bars sit on the numeric X axis (ADR-0002). A category is
-  a place on it, and the library keeps the map (ADR-0051) - no second kind of
+  a place on it, and the library keeps the map (ADR-0052) - no second kind of
   scale draws it.
 * **Series derived from a field of the rows.** One element per series; long
   rows are grouped before the chart (`series-from-long-rows`).
