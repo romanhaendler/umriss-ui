@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Tooltip, useChart, type TooltipHit } from "../../../src";
 
 export const title = "Choose a hit";
-export const lead = "`onSelect` hears a click on a hit, a tap, or Enter on the Active point, with the same hit a custom tooltip receives. The chart keeps no choice and draws none: it is your state, here shown beside the chart.";
+export const lead = "`onSelect` hears a click on a hit, a tap, or Enter on the Active point, with the same hit a custom tooltip receives. The chart keeps no choice and draws none: it is your state, here shown below the chart.";
 
 /* Orders taken per hour of a shop's day, written out here so the example runs on its own. */
 const ORDERS = [
@@ -17,32 +17,26 @@ export default function ChooseAHit() {
   const [chosen, setChosen] = useState<TooltipHit<Order> | null>(null);
   const { Chart, XAxis, YAxis, Line } = useChart(ORDERS, { onSelect: setChosen });
   return (
-    <div style={{ display: "flex", gap: 24, alignItems: "flex-start" }}>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <Chart height={260} ariaLabel="Orders per hour, by channel">
-          <XAxis value="hour" tickFormat={(v) => `${v}:00`} />
-          <YAxis label="orders" />
-          <Line value="web" name="Web" />
-          <Line value="phone" name="Phone" />
-          <Tooltip mode="x" />
-        </Chart>
-      </div>
-      <dl style={{ width: 180, margin: 0 }} aria-live="polite">
-        {chosen === null ? (
-          <dd style={{ margin: 0 }}>Click a point, or press Enter on one.</dd>
-        ) : (
-          <>
-            <dt>Hour</dt>
-            <dd style={{ margin: 0 }}>{chosen.xValue}:00</dd>
-            {chosen.points.map((p) => (
-              <div key={p.seriesName}>
-                <dt>{p.seriesName}</dt>
-                <dd style={{ margin: 0 }}>{p.yValue} orders</dd>
-              </div>
-            ))}
-          </>
-        )}
+    <>
+      <Chart height={260} ariaLabel="Orders per hour, by channel">
+        <XAxis value="hour" tickFormat={(v) => `${v}:00`} />
+        <YAxis label="orders" />
+        <Line value="web" name="Web" />
+        <Line value="phone" name="Phone" />
+        <Tooltip mode="x" />
+      </Chart>
+      <dl className="metrics">
+        <div>
+          <dt>Chosen</dt>
+          <dd>{chosen === null ? "nothing yet - click a point, or press Enter on one" : `${chosen.xValue}:00`}</dd>
+        </div>
+        {chosen?.points.map((p) => (
+          <div key={p.seriesName}>
+            <dt>{p.seriesName}</dt>
+            <dd>{p.yValue} orders</dd>
+          </div>
+        ))}
       </dl>
-    </div>
+    </>
   );
 }
