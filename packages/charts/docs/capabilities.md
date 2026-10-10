@@ -27,7 +27,7 @@ Screenshot pages carry their name in brackets.
 | Hover draws the overlay layer only | R-2.11 | Manual (benchmark FPS: 60 at 3 million points) |
 | `padding` as a number and as an object | 4.1 | Unit (layout), Screenshot (`configuration`) |
 | `role="img"` + `aria-label` on the plot area, the legend beside it rather than inside it; canvas `aria-hidden` | R-7.6 | Unit (jsdom) |
-| With a tooltip the plot area is one tab stop: `role="application"`, `aria-roledescription`, its ring on `:focus-visible` | ADR-0030 | Unit (jsdom keyboard), Interaction, Screenshot (`focused-active-point`) |
+| With a tooltip, or a zoomable x axis, the plot area is one tab stop: `role="application"`, `aria-roledescription`, its ring on `:focus-visible`; without a tooltip there is no walk, the summary names the zoom keys only and the live region reads the span in view after a zoom key | ADR-0030 | Unit (jsdom keyboard), Interaction, Screenshot (`focused-active-point`) |
 | ←/→, Home/End, PageUp/PageDown walk the Active point over the visible positions, gaps skipped; ↑/↓ change the emphasised series; a matrix walks cell by cell; Escape clears, blur clears | charts-a11y Q2, R1-R7 | Unit (walk), Unit (jsdom keyboard), Interaction |
 | One Active point for pointer and keyboard, the last input winning; a pointer's leave keeps the keyboard's; it travels over `syncId` | ADR-0030 | Unit (jsdom keyboard), Interaction |
 | A polite readout after a key, never after the pointer, once the keys rest 150 ms; the emphasised series first | charts-a11y Q4, R11 | Unit (jsdom readout) |

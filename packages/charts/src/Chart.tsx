@@ -241,13 +241,14 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
     scene.validate();
   });
 
-  /* A chart with a tooltip has hits to walk: it is one tab stop whose keys
-     move its Active point (ADR-0030). Without one it stays an image. */
+  /* A chart with a tooltip has hits to walk, one with a zoomable x axis has
+     keys to zoom: either is one tab stop (ADR-0030). Neither stays an image. */
   const hasHits = useSyncExternalStore(
     scene.subscribeHover,
     () => scene.getHoverSnapshot().tooltip !== null,
     () => false,
   );
+  const keyed = useSyncExternalStore(scene.subscribeLayout, () => hasHits || scene.keyed(), () => false);
 
   /* Loading over a course keeps the course, stale - as laid out, so that
      the stale state ends with the frame that draws the answer. */
@@ -297,14 +298,14 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
         <div
           ref={plotRef}
           className="uc-plot"
-          role={hasHits ? "application" : "img"}
-          aria-roledescription={hasHits ? wording.roleDescription : undefined}
+          role={keyed ? "application" : "img"}
+          aria-roledescription={keyed ? wording.roleDescription : undefined}
           aria-label={ariaLabel}
           aria-describedby={summaryId}
           aria-busy={loading || undefined}
           data-stale={stale || undefined}
           data-arriving={arriving || undefined}
-          tabIndex={hasHits ? 0 : undefined}
+          tabIndex={keyed ? 0 : undefined}
           onKeyDown={(e) => {
             if (scene.key(e.nativeEvent)) e.preventDefault();
           }}
