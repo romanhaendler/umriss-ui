@@ -1,6 +1,6 @@
 # 09 — The slider's readout far from its track
 
-Status: needs-info
+Status: done
 Type: decision
 
 Left open at the acceptance of control-sizes (05, 2 Oct 2026); older than it.
@@ -13,3 +13,7 @@ follow the longest value the slider can show (`max` formatted) instead of a
 fixed six.
 
 The question for the user: take it on now, and which way?
+
+## Comments
+
+Decided 2026-10-10: the readout takes the room of the longer of `min` and `max` as formatted, instead of a fixed `6ch`.

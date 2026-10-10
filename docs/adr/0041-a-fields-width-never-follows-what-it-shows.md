@@ -38,6 +38,13 @@ and a date picker
 the length of its longest value in the formats in use - so a date never
 truncates, in English or in German.
 
+*Amended 2026-10-10 (control-sizes 07):* the default is 20 for a text field,
+select and combobox as well - the multiselect's count, one count for every field
+that shows text; the slider follows it, so `chars={20}` is the field without it.
+Sixteen, written above, made a bar that fitted; twenty is the rule now, and the
+row too full for it is the exception, which says `chars` on the field that can
+be narrower. The text above stands as it was decided.
+
 **`size` is one name for the two heights, and a place can say it once.**
 `Select`'s `selectSize` became `size`. `ControlSizeProvider` sets the size of
 every control inside it; a control's own `size` wins. The table's `Toolbar` is

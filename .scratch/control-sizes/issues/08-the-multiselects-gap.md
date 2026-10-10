@@ -1,6 +1,6 @@
 # 08 — The room a multiselect leaves
 
-Status: needs-info
+Status: done
 Type: decision
 
 Left open at the acceptance of control-sizes (05, 2 Oct 2026).
@@ -17,3 +17,7 @@ The alternative: let the last visible chip shrink and end in an ellipsis
 width on rather than at its full width.
 
 The question for the user: keep the room, or cut the last chip?
+
+## Comments
+
+Decided 2026-10-10: the MultiSelect keeps the empty room; nothing is cut. No code.

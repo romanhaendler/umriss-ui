@@ -1,6 +1,6 @@
 # 07 — The default counts
 
-Status: needs-info
+Status: done
 Type: decision
 
 Left open at the acceptance of control-sizes (05, 2 Oct 2026). Released as
@@ -20,3 +20,7 @@ or should a count change? A change is one custom property per component
 (`--_chars`), the prop docs, `docs/design-language.md` ("Sizes"), CONTEXT.md
 ("Natural width"), ADR-0041's paragraph on defaults - and every baseline whose
 picture holds such a field in a row.
+
+## Comments
+
+Decided 2026-10-10: Input, Select and Combobox take 20 characters, the MultiSelect's count - one count for every field that shows text. A row too full for it says `chars` on the field that can be narrower. NumberInput (10), Textarea (40) and the date pickers stay; the Slider follows the default.

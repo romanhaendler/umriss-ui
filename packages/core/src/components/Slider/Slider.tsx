@@ -109,7 +109,12 @@ export const Slider = forwardRef<HTMLInputElement, SliderProps>(function Slider(
   const [own, setOwn] = useState(() => snap(defaultValue ?? min, min, max, step));
   const controlled = valueProp !== undefined;
   const value = controlled ? valueProp : own;
-  const text = format ? format(value) : formats.number(value, decimalsOf(step));
+  const show = (x: number) => (format ? format(x) : formats.number(x, decimalsOf(step)));
+  const text = show(value);
+  /* The readout's room is its longest value's (control-sizes 09): the track
+     keeps its length while the figure changes, and a short figure stands at
+     the track rather than six characters from it. */
+  const room = Math.max(show(min).length, show(max).length);
   const share = (x: number) => (max > min ? ((x - min) / (max - min)) * 100 : 0);
 
   const commit = (next: number) => {
@@ -166,7 +171,7 @@ export const Slider = forwardRef<HTMLInputElement, SliderProps>(function Slider(
         )}
       </div>
       {showValue && (
-        <span className={styles.readout} aria-hidden="true">
+        <span className={styles.readout} style={{ "--_room": room } as CSSProperties} aria-hidden="true">
           {text}
         </span>
       )}

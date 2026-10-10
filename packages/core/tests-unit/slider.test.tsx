@@ -91,6 +91,16 @@ describe("Slider", () => {
     expect(screen.queryByText("42")).toBeNull();
   });
 
+  /* control-sizes 09: the readout keeps the room of the longest value the
+     slider can show, not a fixed six characters. */
+  it("gives its readout the room of its longest value", () => {
+    const room = (text: string) => (screen.getByText(text) as HTMLElement).style.getPropertyValue("--_room");
+    const { rerender } = render(<Slider aria-label="Speed" defaultValue={42} />);
+    expect(room("42")).toBe("3");
+    rerender(<Slider aria-label="Offset" min={-1000} max={10} value={0} format={(v) => `${v} mm`} />);
+    expect(room("0 mm")).toBe("8");
+  });
+
   it("controlled: reports and waits until value follows", () => {
     const changed = vi.fn();
     const { rerender } = render(<Slider aria-label="Speed" value={30} onChange={changed} />);

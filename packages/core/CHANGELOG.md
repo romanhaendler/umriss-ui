@@ -29,6 +29,18 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## Unreleased
+
+### Changed
+
+- **One natural width of 20 characters** (ADR-0041): `Input`, `Select` and
+  `Combobox` are 20 characters wide where the place asks, up from 16 - the
+  count the `MultiSelect` had; so is `Slider`. A row too full for it says
+  `chars` on the field that can be narrower. `NumberInput`, `Textarea` and the
+  date pickers keep theirs.
+- **The slider's readout takes the room of its longest value**: the longer of
+  `min` and `max` as formatted, where it was a fixed six characters.
+
 ## 0.30.0 – A card hands its height to its body (Oct. 2026)
 
 ### Changed
