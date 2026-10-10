@@ -9,14 +9,14 @@ function Row({ size }: { size: ControlSize }) {
   return (
     <Stack role="group" aria-label={size === "sm" ? "Small" : "Medium"} direction="row" gap={3} wrap>
       <FormField label="Caster">
-        <Select defaultValue="">
+        <Select defaultValue="" chars={12}>
           <option value="">Every caster</option>
           <option>Caster 1</option>
           <option>Caster 2</option>
         </Select>
       </FormField>
       <FormField label="Strand">
-        <Select defaultValue="">
+        <Select defaultValue="" chars={12}>
           <option value="">Every strand</option>
           <option>Strand 1</option>
           <option>Strand 2</option>

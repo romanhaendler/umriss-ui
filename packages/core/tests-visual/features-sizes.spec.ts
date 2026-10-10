@@ -136,10 +136,10 @@ const widthAt = (field: Locator, count: number) =>
 test("chars at the default count is the natural width, and every character counts", async ({ page }) => {
   await openExample(page, "sizes", "a-row-that-holds-still");
   const stage = example(page, "a-row-that-holds-still");
-  // A text field's sixteen, a select's sixteen, a multiselect's twenty.
+  // Twenty for each: one count for every field that shows text (control-sizes 07).
   for (const [field, natural] of [
-    [stage.getByLabel("Search shipments").locator(".."), 16],
-    [stage.getByLabel("Status").locator(".."), 16],
+    [stage.getByLabel("Search shipments").locator(".."), 20],
+    [stage.getByLabel("Status").locator(".."), 20],
     [stage.getByRole("button", { name: "Carriers", exact: true }).locator(".."), 20],
   ] as const) {
     const width = (await box(field)).width;
