@@ -8,7 +8,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, type ReactNode } from "react";
 import { DataTable, Tooltip, useChart } from "../src";
-import { frame, plotOf, renderChart, sizePlot, tooltipOf } from "./renderChart";
+import { focusPlot, frame, plotOf, press, renderChart, sizePlot, tooltipOf } from "./renderChart";
 
 let unmount: (() => void) | null = null;
 beforeEach(() => sizePlot());
@@ -181,9 +181,112 @@ describe("A state band that names its lane", () => {
     expect(tooltipOf(host)).toContain("Van A");
   });
 
+  it("has no place where the y axis' list leaves its lane out: not drawn, not walked, and named in DEV", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const host = await mount(<Fleet categories={["Van B"]} />);
+    expect(labels(host, "y")).toEqual(["Van B"]);
+    expect(warn.mock.calls.some((c) => String(c[0]).includes('"Van A"') && String(c[0]).includes("categories"))).toBe(true);
+    await focusPlot(host);
+    for (const key of ["Home", "ArrowUp", "ArrowDown", "End"]) {
+      await press(host, key);
+      expect(tooltipOf(host)).not.toContain("Van A");
+    }
+  });
+
   it("shares a chart with a line on a numeric y axis", async () => {
     const host = await mount(<Fleet withCharge />);
     expect(labels(host, "y")).toEqual(["Van A", "Van B"]);
     expect(labels(host, "y", "charge")).toContain("100");
+  });
+});
+
+describe("A matrix with categories along both axes", () => {
+  const GRID = [
+    { day: "Mon", shift: "Early", pieces: 410 },
+    { day: "Tue", shift: "Early", pieces: 395 },
+    { day: "Mon", shift: "Late", pieces: 380 },
+    { day: "Tue", shift: "Late", pieces: 402 },
+  ];
+
+  it("brings its column once per row and its row once per column, and DEV has nothing to say", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    function Grid() {
+      const { Chart, XAxis, YAxis, Matrix } = useChart(GRID);
+      return (
+        <Chart ariaLabel="Pieces per day and shift">
+          <XAxis value="day" />
+          <YAxis />
+          <Matrix value="shift" level="pieces" name="Pieces per cell" />
+          <Tooltip mode="nearest" />
+        </Chart>
+      );
+    }
+    const host = await mount(<Grid />);
+    expect(labels(host, "x")).toEqual(["Mon", "Tue"]);
+    expect(labels(host, "y")).toEqual(["Early", "Late"]);
+    await pointAt(host, at(host, "x", "Tue"), at(host, "y", "Late"));
+    expect(tooltipOf(host)).toContain("402");
+    expect(warn).not.toHaveBeenCalled();
+  });
+});
+
+/* The same rows on every render: only the series' axes change. */
+const BY_NUMBER_AND_NAME = [
+  { centre: "Sales", n: 5, eur: 3 },
+  { centre: "Design", n: 7, eur: 4 },
+];
+
+describe("A series moved to another axis", () => {
+  function Moved({ yAxisId, xAxisId }: { yAxisId: string; xAxisId: string }) {
+    const { Chart, XAxis, YAxis, StateBand, Bar } = useChart(BY_NUMBER_AND_NAME);
+    return (
+      <Chart ariaLabel="Moved">
+        <XAxis id="byNumber" value="n" tickFormat={(v) => `n${v}`} />
+        <XAxis id="byName" value="centre" position="top" />
+        <YAxis id="left" />
+        <YAxis id="right" position="right" />
+        <YAxis id="eur" position="right" />
+        <StateBand data={VAN_A} value="state" states={STATES} xAxisId="byNumber" yAxisId={yAxisId} lane="Van A" name="Van A" />
+        <Bar value="eur" xAxisId={xAxisId} yAxisId="eur" name="Moved bar" />
+        <Tooltip mode="nearest" />
+      </Chart>
+    );
+  }
+
+  it("takes its lane and its categories with it", async () => {
+    const r = await renderChart(<Moved yAxisId="left" xAxisId="byNumber" />);
+    unmount = r.unmount;
+    expect(labels(r.host, "y", "left")).toEqual(["Van A"]);
+    expect(labels(r.host, "x", "byName")).not.toContain("Sales");
+    await r.rerender(<Moved yAxisId="right" xAxisId="byName" />);
+    expect(labels(r.host, "y", "right")).toEqual(["Van A"]);
+    expect(labels(r.host, "y", "left")).not.toContain("Van A");
+    expect(labels(r.host, "x", "byName")).toEqual(["Sales", "Design"]);
+    // The bar stands on its category now: the pointer there meets it.
+    await pointAt(r.host, at(r.host, "x", "Design", "byName"), at(r.host, "y", "Van A", "right") + 40);
+    expect(tooltipOf(r.host)).toContain("Moved bar");
+  });
+});
+
+describe("A series of numbers on a y axis that has categories", () => {
+  it("is not placed, and DEV names it: one axis has one kind", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    function Mixed() {
+      const { Chart, XAxis, YAxis, Line } = useChart(CHARGE);
+      return (
+        <Chart ariaLabel="Mixed">
+          <XAxis value="t" />
+          <YAxis categories={["Van A", "Van B"]} />
+          <Line value="percent" name="A line among lanes" />
+          <DataTable />
+        </Chart>
+      );
+    }
+    const host = await mount(<Mixed />);
+    expect(labels(host, "y")).toEqual(["Van A", "Van B"]);
+    expect(warn.mock.calls.some((c) => String(c[0]).includes('"A line among lanes"') && String(c[0]).includes("categories"))).toBe(true);
+    await act(async () => (host.querySelector(".uc-data-key") as HTMLButtonElement | null)?.click());
+    await frame();
+    expect(tableRows(host).every((row) => row.endsWith("|"))).toBe(true);
   });
 });

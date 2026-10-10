@@ -94,7 +94,7 @@ axis.
 6. As a developer, I want to fix the order with a list of my own, so that months stand as months and not as the data happened to arrive.
 7. As a developer, I want a category on my list that has no row to keep its empty place, so that a week with a missing day still reads as a week.
 8. As a developer, I want a row whose category is not on my list to be left out and named in a DEV warning, so that a typo does not silently add a bar.
-9. As a developer, I want a row without a category - `null`, `undefined` or an empty string - to be left out as a point without a place is today, so that incomplete rows do not break the chart.
+9. As a developer, I want a row without a category - `null`, `undefined` or an empty string - to be left out, so that incomplete rows do not break the chart.
 10. As a developer, I want the rows of a category axis to be accepted in any order, so that two series bringing the same categories in different orders both land in the right places.
 11. As a developer, I want a DEV warning where one series names the same category twice, so that I learn of rows I forgot to add up.
 12. As a developer, I want several bar series on a category axis to stand side by side and to stack as they do on a numeric axis, so that grouping and stacking need nothing new.
@@ -188,7 +188,11 @@ axis.
 - **D5. One kind per axis.** Where the series of an axis bring values of
   different kinds, DEV reports it naming the series; in production the values
   that do not fit the axis' kind are not placed. A number on a category axis
-  is not a position.
+  is not a position. *As built:* that holds along y too, where every series
+  but a matrix and a state band brings numbers - a line on a y axis of lanes
+  is not drawn. And a series on a time axis that begins with milliseconds is
+  read as milliseconds alone (D17); a later `Date` or string in it is named
+  in DEV.
 
 ### Categories
 
@@ -200,7 +204,11 @@ axis.
 - **D8. Empty places and strangers.** A listed category without a row keeps
   its place. A row whose category is not on the list is not placed, and DEV
   names it. A row whose category is `null`, `undefined` or `""` is not placed,
-  silently, as a point without a place is today.
+  silently. *As built:* a row without a place is left out of the series
+  altogether - not held as a gap at its neighbour's x, as a point without a
+  place is on a numeric axis. A line therefore runs on across it, and the
+  data table has no row for it: between two categories there is nothing a gap
+  could stand for.
 - **D9. Row order is free on a category axis.** The materialised series is in
   axis order whatever order the rows came in; a hit, the tooltip and a `value`
   function's `index` refer to the caller's row. On numeric and time axes the
@@ -229,7 +237,10 @@ axis.
 - **D14. A state band's lane by name.** `StateBand` gains `lane`, a category
   of its y axis; the band occupies that category's place, as wide as a bar is.
   `laneFrom` and `laneTo` stay for a numeric axis; a band takes one way or the
-  other. The state itself stays a number (ADR-0007).
+  other. The state itself stays a number (ADR-0007). *As built:*
+  `StateBandProps` stays an interface with all three - nothing is taken from
+  a caller who extends it (D3) - and the compiler refuses both at once at the
+  call, through `OneLane` beside it.
 
 ### Instants
 
@@ -256,8 +267,8 @@ axis.
 
 - **D19. What `value` accepts.** On `XAxis`: a field holding a number, a
   string or a `Date` (or absent), or a function returning one of them. On
-  `Matrix`: a number or a string field. On every other series, and on every
-  named channel (ADR-0011), a number as today. The forms are exported as
+  `Matrix`: a number or a string field, never a `Date`. On every other
+  series, and on every named channel (ADR-0011), a number as today. The forms are exported as
   types, at the end of the entry by the workspace's rule for new exports.
 - **D20. The field name is still compared by its name** and a function by its
   source text (ADR-0048); nothing about identity changes.
@@ -273,7 +284,11 @@ axis.
 
 - **D22. No example names a category through positions.** All 22 files that
   carry the idiom move: Bar, BoxPlot, Pareto, the matrix's rows, the state
-  bands' lanes, and scenarios 02, 03 and 04.
+  bands' lanes, and scenarios 02, 03 and 04. *As built:* two StateBand
+  examples stay on a numeric y axis on purpose, and were not among the 22:
+  "One vehicle through the day" shows a band without a lane, which fills its
+  axis, and "Lay a state under a course" shows `laneFrom` and `laneTo` - the
+  numeric way, which stays and needs its example.
 - **D23. Small examples write their rows out.** An example that draws one mark
   per category - the Bar, BoxPlot and Pareto examples and the charts of
   scenario 03 - holds its rows as literals, shaped as an API would deliver
@@ -324,9 +339,9 @@ the three that exist; none is added (confirmed with the maintainer,
   object or boolean field on an axis, a string field as a bar's height.
 - **Materialisation, as a pure module** - prior art: its unit tests over
   typed arrays and extents. Covered here: positions from categories, the
-  series in axis order from rows in any order with the row index kept,
-  placeless categories as gaps outside the extent, instants from `Date` and
-  from strings, and the channels a kind does not use still `null` (ADR-0011).
+  series in axis order from rows in any order with the row index kept, rows
+  without a place left out, instants from `Date` and from strings, and the
+  channels a kind does not use still `null` (ADR-0011).
 - **The demo** - the smoke test over every page and example, the own-data
   check, and the screenshots. Pictures of the migrated examples are expected
   to move at the axis and nowhere else; each moved baseline is looked at
@@ -341,7 +356,9 @@ the three that exist; none is added (confirmed with the maintainer,
   category axis is positions on it.
 - **Series derived from a field of long rows.** One element per series stays.
   All nine React libraries examined ask the same, and the platform groups rows
-  in one call; D25 shows it. It is the first thing to reopen if the examples
+  in a line or two; D25 shows it - with a `Set` and a `filter`, since
+  `Object.groupBy` is not in the workspace's ES2022 lib nor in every
+  reader's. It is the first thing to reopen if the examples
   still read as heavy.
 - **Aggregation in the chart.** Sums, counts and means are computed before the
   chart, for the reason ADR-0032 gives for the pivot. Only the two grammars

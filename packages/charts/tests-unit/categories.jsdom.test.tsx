@@ -7,7 +7,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, type ReactNode } from "react";
-import { DataTable, Tooltip, useChart, type ChartView, type TooltipHit } from "../src";
+import { DataTable, Tooltip, pareto, useChart, type ChartView, type TooltipHit } from "../src";
 import { focusPlot, frame, press, renderChart, sizePlot, tooltipOf } from "./renderChart";
 
 interface Spend {
@@ -352,6 +352,90 @@ describe("An axis with its own list of categories", () => {
 });
 
 const CENTRES: Record<string, string> = { "CC-1100": "Sales", "CC-1200": "Marketing", "CC-9100": "Sales" };
+
+describe("An axis whose list of categories is empty", () => {
+  it("is a category axis still: nothing has a place, and nothing turns into numbers", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    function Empty() {
+      const { Chart, XAxis, YAxis, Bar } = useChart(LATE);
+      return (
+        <Chart ariaLabel="Nothing listed" empty="Nothing yet">
+          <XAxis id="unlisted" value="day" categories={[]} />
+          <YAxis />
+          <Bar value="minutes" name="Nowhere" xAxisId="unlisted" />
+        </Chart>
+      );
+    }
+    const host = await mount(<Empty />);
+    expect(ticks(host)).toEqual([]);
+    expect(host.querySelector(".uc-empty")?.textContent).toBe("Nothing yet");
+  });
+});
+
+describe("Other kinds on a category axis", () => {
+  it("takes a number as a category where a function says so", async () => {
+    function ByYear() {
+      const { Chart, XAxis, YAxis, Bar } = useChart([
+        { year: 2025, pieces: 4 },
+        { year: 2026, pieces: 6 },
+      ]);
+      return (
+        <Chart ariaLabel="Pieces per year">
+          <XAxis value={(d) => String(d.year)} />
+          <YAxis />
+          <Bar value="pieces" name="Pieces" />
+        </Chart>
+      );
+    }
+    expect(ticks(await mount(<ByYear />))).toEqual(["2025", "2026"]);
+  });
+
+  it("stands a box on its category, and reads it there", async () => {
+    function Boxes() {
+      const { Chart, XAxis, YAxis, BoxPlot } = useChart([
+        { service: "Checkout", low: 112, q1: 138, median: 149, q3: 161, high: 195 },
+        { service: "Billing", low: 85, q1: 121, median: 140, q3: 173, high: 238 },
+      ]);
+      return (
+        <Chart ariaLabel="Response time per service">
+          <XAxis value="service" />
+          <YAxis />
+          <BoxPlot name="Response time" median="median" lowerQuartile="q1" upperQuartile="q3" lowerWhisker="low" upperWhisker="high" />
+          <Tooltip />
+        </Chart>
+      );
+    }
+    const host = await mount(<Boxes />);
+    expect(ticks(host)).toEqual(["Checkout", "Billing"]);
+    await focusPlot(host);
+    await press(host, "End");
+    expect(tooltipOf(host)).toContain("Billing");
+    expect(tooltipOf(host)).toContain("238");
+  });
+
+  it("puts a Pareto's entries on the axis by their name, the remainder last", async () => {
+    const { entries } = pareto(
+      [
+        { name: "Refused", value: 34 },
+        { name: "Nobody home", value: 312 },
+        { name: "Weather", value: 6 },
+        { name: "No access code", value: 147 },
+      ],
+      { collectRank: 2, remainderName: "Other" },
+    );
+    function Causes() {
+      const { Chart, XAxis, YAxis, Bar } = useChart(entries);
+      return (
+        <Chart ariaLabel="Failed deliveries by cause">
+          <XAxis value="name" />
+          <YAxis />
+          <Bar value="value" name="Failed" />
+        </Chart>
+      );
+    }
+    expect(ticks(await mount(<Causes />))).toEqual(["Nobody home", "No access code", "Other"]);
+  });
+});
 
 describe("A category's label", () => {
   function ByKey() {

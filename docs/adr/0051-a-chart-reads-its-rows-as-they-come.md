@@ -27,11 +27,16 @@ zoom and downsampling read numbers and do not change.
 
 - **The type of the value decides what kind an axis is, never its content.**
   The first value read that is a place decides: a string makes a category
-  axis, a number a numeric one. `"2024"` is a category, `2024` a number. No
-  heuristic looks at what a value resembles - the libraries that guess name
-  that as their commonest trap.
+  axis, a number a numeric one, a `Date` an axis in time. `"2024"` is a
+  category, `2024` a number. No heuristic looks at what a value resembles -
+  the libraries that guess name that as their commonest trap. Two things an
+  axis says itself: `categories` makes it a category axis whatever the rows
+  hold, an empty list included, and `time` makes a string an ISO 8601
+  instant - only there.
 - **One kind per axis.** A number on a category axis is no place, nor a
   category on a numeric one; DEV names the series that brings the other kind.
+  Along y, where the series place their rows, that is every series but a
+  matrix and a state band: a line's numbers are no places among lanes.
 - **The order is the rows' order.** Categories stand in the order of first
   occurrence, the series taken in registration order, the hidden ones
   included - hiding a series moves no category.
@@ -73,6 +78,9 @@ zoom and downsampling read numbers and do not change.
 
 - The examples that named categories through positions move, and are the
   proof; the work stands in `.scratch/chart-rows-as-they-come/`.
-- `categories` and `categoryLabel` on the axis, categories on y and instants
-  as `Date` or ISO string follow in the same work, under this decision.
+- `categories` and `categoryLabel` on the axis, categories on y - a matrix'
+  rows, a state band's `lane`, the first at the top - and instants as `Date`
+  or ISO string follow in the same work, under this decision. A series that
+  begins with milliseconds is read as milliseconds alone, so that a week of
+  seconds pays one accessor call for the question.
 - The glossary gains **Category** and **Category axis**.

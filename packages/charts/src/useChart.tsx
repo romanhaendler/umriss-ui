@@ -17,7 +17,7 @@ import { Line, type LineProps } from "./Line";
 import { Area, type AreaProps } from "./Area";
 import { Bar, type BarProps } from "./Bar";
 import { Scatter, type ScatterProps } from "./Scatter";
-import { StateBand, type StateBandProps } from "./StateBand";
+import { StateBand, type OneLane, type StateBandProps } from "./StateBand";
 import { Matrix, type MatrixProps } from "./Matrix";
 import { BoxPlot, type BoxPlotProps } from "./BoxPlot";
 
@@ -52,7 +52,7 @@ export interface ChartParts<Z> {
   Area: <T = Z>(props: AreaProps<T>) => null;
   Bar: <T = Z>(props: BarProps<T>) => null;
   Scatter: <T = Z>(props: ScatterProps<T>) => null;
-  StateBand: <T = Z>(props: StateBandProps<T>) => null;
+  StateBand: <T = Z>(props: StateBandProps<T> & OneLane) => null;
   Matrix: <T = Z>(props: MatrixProps<T>) => null;
   BoxPlot: <T = Z>(props: BoxPlotProps<T>) => null;
   /** How the reader is looking at the chart. */

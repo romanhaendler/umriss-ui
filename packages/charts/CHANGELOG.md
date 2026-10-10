@@ -59,15 +59,17 @@ named ticks keep working as they did; nothing is taken away.
   where the rows hold a key and not a name. Two categories may share a label.
 - **Categories along y.** `Matrix value` reads a string field, and the y axis
   lists a row per category; the tooltip names a cell's row. `StateBand lane`
-  names the band's lane, a category of its y axis. The first category stands
-  at the top.
+  names the band's lane, a category of its y axis - instead of `laneFrom` and
+  `laneTo`, which stay for a numeric axis; the compiler refuses both at once.
+  The first category stands at the top. A series of numbers on a y axis that
+  has categories is not drawn: one axis has one kind.
 - **A `Date` on the x axis** puts the axis in time without `time`.
 - **ISO 8601 strings with `time`.** A date with a time and no offset is local
   time, a date alone is UTC - the platform's rule. A string that is no instant
   is not drawn, and DEV names its row.
 - **A `Date` where you name a place in time**: a fixed `domain` pair on
   `XAxis`, `value` on `LimitLine`, `from` and `to` on `LimitBand`.
-- **Types**: `AxisValue`, `AxisField`.
+- **Types**: `AxisValue`, `AxisField`, `OneLane`.
 
 ### Changed
 
@@ -75,9 +77,6 @@ named ticks keep working as they did; nothing is taken away.
   whatever stands on it. A line over categories therefore begins half a step
   inside the plot, where a line over the positions 0, 1, 2 began at its edge.
   Only an axis that reads categories is affected.
-- **`StateBandProps` is a union**, no longer an interface: a band names its
-  `lane` or gives `laneFrom` and `laneTo`, one way or the other. An interface
-  that extended it becomes a type that intersects it.
 - **`tickFormat`, `ticks` and `tickCount` do not apply to an axis that reads
   categories**; DEV says so. They keep their job on a numeric and a time axis.
 

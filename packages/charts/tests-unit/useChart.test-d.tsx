@@ -102,6 +102,8 @@ export function Fields() {
       <Matrix value={(d) => d.host} level="p95" />
       {/* @ts-expect-error a list is no row */}
       <Matrix value="samples" level="p95" />
+      {/* @ts-expect-error a row is a position or a name, not an instant */}
+      <Matrix value={(d) => new Date(d.t)} level="p95" />
       {/* A lane by its name, or by its edges - one way or the other. */}
       <StateBand value="p95" states={[]} lane="Kiln 2" />
       <StateBand value="p95" states={[]} laneFrom={0} laneTo={0.9} />
@@ -138,4 +140,11 @@ export function CellLevel(point: TooltipPoint<Latency>) {
   const level: number | undefined = point.level;
   // @ts-expect-error `value` names the y position, never the colour
   return [level, point.value];
+}
+
+/* The props of a state band stay an interface: one that extends them keeps
+   compiling (chart-rows-as-they-come, D3 - nothing is taken away). */
+import type { StateBandProps } from "../src";
+export interface OwnBandProps extends StateBandProps<Latency> {
+  title: string;
 }
