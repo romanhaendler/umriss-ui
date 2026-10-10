@@ -111,6 +111,18 @@ named ticks keep working as they did; nothing is taken away.
   per labelled limit of the hit's y axis, its label and value in that axis'
   format, and what a key reads out says the same. One example on the Tooltip
   page.
+- **`onSelect`**, an option of `useChart(rows, { onSelect })`: a click or a tap
+  on a hit, and Enter on the Active point, call it with the hit - the
+  `TooltipHit` a custom tooltip's `render` receives, typed at the row. Once per
+  click; the end of a drag that pans does not report, a double click reports on
+  its first click and then resets the zoom as before. The chart holds no
+  selection and draws none: what is chosen is the application's state. It
+  needs a `<Tooltip>` for its hits (the development build warns without) and
+  the hit does not travel over `syncId`. Where it is given, the summary names
+  Enter; the wording has a new entry, `selectHelp`, so a custom
+  `ChartsWording` needs it. `ChartOptions` takes the row type as a parameter
+  (`ChartOptions<Z>`, default `unknown`). One example, "Choose a hit", on the
+  Tooltip page.
 
 ---
 

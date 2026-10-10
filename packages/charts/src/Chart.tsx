@@ -321,6 +321,7 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
           }}
           onPointerUp={(e) => scene.pointerUp(e.nativeEvent)}
           onPointerCancel={(e) => scene.pointerUp(e.nativeEvent)}
+          onClick={(e) => scene.click(e.nativeEvent)}
           onDoubleClick={() => scene.resetZoom()}
           onPointerLeave={(e) => {
             if (e.pointerType !== "touch") scene.pointerLeave();

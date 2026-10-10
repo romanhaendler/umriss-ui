@@ -41,6 +41,7 @@ Screenshot pages carry their name in brackets.
 | SSR: `renderToString` does not throw | R-7.4 | Unit (SSR) |
 | `onPerf` instrumentation | R-5.1 | Manual (benchmark page) |
 | `syncId`: the pointer's x position, in domain units, shared by every chart of the id - a crosshair in each, the tooltip only under the pointer, cleared when the pointer leaves; zoom is not shared by it | Q21 | Interaction (cursor sync) |
+| `useChart(rows, { onSelect })`: a click or tap on a hit, and Enter on the Active point, report the hit the tooltip's `render` receives - once, not at the end of a drag, a double click on its first click only; the chart holds and draws no selection; DEV warning without a `<Tooltip>`; the summary names Enter only where it is given; the hit does not travel over `syncId` | ADR-0003, ADR-0023 | Unit (jsdom onSelect) |
 | `empty`: "No data" or the caller's content, centred in the plot area when no visible series has a point; axes and frame stay | Q18 | Unit (jsdom empty state), Screenshot (`empty`) |
 
 ## Registration, data, materialisation
@@ -446,8 +447,6 @@ constant over 5 s – the hysteresis from R-3.4 works (R-5.3).
 
 Wanted, not yet built (charts-review Q12). Each waits for a caller who needs it.
 
-* **`onSelect`.** A click that reports the hit; the hit model is there, the
-  question of what a selection is (ADR-0003 in core) is not.
 * **A stack's total in the data table.** The tooltip and the readout carry it
   (charts-stacking K4); the table lists the members' own values only, and waits
   for a reader who misses the column.

@@ -2818,6 +2818,33 @@ export class ChartScene {
     this.walk("last");
   }
 
+  /** Who hears the Active point chosen: a click on a hit, Enter on the Active
+      point. `useChart` sets it; the chart keeps no selection and draws none. */
+  onSelect: ((hit: TooltipHit) => void) | null = null;
+  /** Whether a tooltip is registered - the hits a selection is made of. */
+  get hasTooltip(): boolean {
+    return this.tooltip !== null;
+  }
+  /** Where the press that may become a click began; a click after the pointer
+      travelled is the end of a drag, and selects nothing. */
+  private downAt: number | null = null;
+  private travelled = false;
+
+  /** A click on the plot: reports the hit under the pointer, once. The second
+      click of a double click does not (that one resets the zoom). */
+  click(event: MouseEvent): void {
+    const travelled = this.travelled;
+    this.travelled = false;
+    if (travelled || event.detail > 1) return;
+    this.select();
+  }
+
+  private select(): boolean {
+    if (this.onSelect === null || this.hover === null) return false;
+    this.onSelect(this.hover.hit);
+    return true;
+  }
+
   /** The focus left: a point the keyboard set goes with it. */
   blur(): void {
     if (this.activeBy === "keyboard") this.clearActive();
@@ -2828,6 +2855,7 @@ export class ChartScene {
     if (event.altKey || event.ctrlKey || event.metaKey) return false;
     // Without a tooltip there is no Active point to walk: only the zoom keys.
     if (this.tooltip === null) return this.zoomKey(event);
+    if (event.key === "Enter" && !event.shiftKey) return this.select();
     if (event.key === "Escape") {
       if (this.hover === null) return false;
       this.clearActive();
@@ -3096,6 +3124,7 @@ export class ChartScene {
     const limits = this.limitTexts();
     if (limits.length > 0) parts.push(w.limitList(limits));
     if (this.tooltip !== null) parts.push(w.walkHelp);
+    if (this.tooltip !== null && this.onSelect !== null) parts.push(w.selectHelp);
     if (this.hasZoom()) parts.push(w.zoomHelp);
     if (this.legend !== null && this.seriesNames().some((name) => name !== undefined)) parts.push(w.legendHelp);
     return parts.join(" ");
@@ -3654,6 +3683,8 @@ export class ChartScene {
   }
 
   pointerDown(event: PointerEvent): void {
+    this.downAt = event.offsetX;
+    this.travelled = false;
     if (!this.hasZoom()) return;
     if (event.pointerType !== "touch" && event.button !== 0) return;
     this.pointers.set(event.pointerId, event.offsetX);
@@ -3663,6 +3694,7 @@ export class ChartScene {
 
   /** A drag pans, two fingers pinch. */
   drag(event: PointerEvent): void {
+    if (this.downAt !== null && Math.abs(event.offsetX - this.downAt) > 4 && event.buttons !== 0) this.travelled = true;
     const last = this.pointers.get(event.pointerId);
     if (last === undefined) return;
     this.pointers.set(event.pointerId, event.offsetX);

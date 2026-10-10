@@ -11,6 +11,8 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { Chart as FreeChart, type ChartProps } from "./Chart";
 import { ChartScene } from "./scene";
+import { warnOnce } from "./dev";
+import type { TooltipHit } from "./types";
 import { Echoes, viewKey, type AxisSpans, type ChartView } from "./view";
 import { XAxis, YAxis, type XAxisProps, type YAxisProps } from "./Axis";
 import { Line, type LineProps } from "./Line";
@@ -23,7 +25,7 @@ import { BoxPlot, type BoxPlotProps } from "./BoxPlot";
 
 /** What `useChart` takes besides the rows: the view to start from and the
     handler that hears every change of it. */
-export interface ChartOptions {
+export interface ChartOptions<Z = unknown> {
   /** The view to start from, and to go to whenever one differing in content
       from the last is handed in - the same view again changes nothing, and
       what it leaves out is reset; one the chart reported itself, handed back
@@ -35,6 +37,13 @@ export interface ChartOptions {
       or to hand another chart as its `initialView`. A pan or zoom is reported
       at most once per frame. Not called for the view the chart starts with. */
   onViewChange?: (view: ChartView) => void;
+  /** The reader chose a point: a click on a hit (a tap too), or Enter on the
+      Active point - the same hit the tooltip's `render` receives. Once per
+      click; the end of a drag does not report, and the second click of a
+      double click does not either. The chart holds no selection and draws
+      none: what is chosen is the application's state. Needs a `<Tooltip>`,
+      which makes the hits; the hit does not travel over `syncId`. */
+  onSelect?: (hit: TooltipHit<Z>) => void;
 }
 
 /** What `useChart` hands back: the chart and its parts, typed at the row `Z`,
@@ -84,8 +93,8 @@ const NO_NAMES: readonly string[] = [];
     @returns `Chart`, `XAxis`, `YAxis` and every series kind - each keeps its
     identity over the renders -, the `view`, its `domains` and `hidden`, and
     the setters that change them. */
-export function useChart<Z>(rows: readonly Z[], options: ChartOptions = {}): ChartParts<Z> {
-  const { initialView, onViewChange } = options;
+export function useChart<Z>(rows: readonly Z[], options: ChartOptions<Z> = {}): ChartParts<Z> {
+  const { initialView, onViewChange, onSelect } = options;
   const [bound] = useState(() => {
     const held = { rows };
     const scene = new ChartScene(initialView);
@@ -137,6 +146,12 @@ export function useChart<Z>(rows: readonly Z[], options: ChartOptions = {}): Cha
   // effect would hand the chart the rows one render late.
   // eslint-disable-next-line react-hooks/immutability -- the holder exists to be written here; its chart renders after this
   bound.held.rows = rows;
+  // eslint-disable-next-line react-hooks/immutability -- as the rows: read when the reader acts, never during a render
+  scene.onSelect = (onSelect ?? null) as ChartScene["onSelect"];
+  useEffect(() => {
+    if (onSelect !== undefined && !scene.hasTooltip)
+      warnOnce("select-without-tooltip", "`onSelect` needs a <Tooltip> - the hits it reports are the tooltip's.");
+  }, [onSelect === undefined, scene]); // eslint-disable-line react-hooks/exhaustive-deps -- presence only
   // A new object only when the view changed: the parts keep their identity.
   return useMemo(() => ({ ...bound.parts, view, domains: view.domains ?? NO_DOMAINS, hidden: view.hidden ?? NO_NAMES }), [bound, view]);
 }
