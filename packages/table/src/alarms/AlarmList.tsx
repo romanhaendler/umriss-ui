@@ -66,7 +66,7 @@ export interface AlarmListProps extends Omit<HTMLAttributes<HTMLDivElement>, "ch
       needs `selection`, `snoozeDurations` and this handler. */
   onSnooze?: (ids: readonly string[], until: number) => void;
   /** The durations on offer, in milliseconds. Which are permitted is the
-      plant's rule, so there is no default list; empty or missing, there is no
+      application's rule, so there is no default list; empty or missing, there is no
       snooze action.
       @default no default */
   snoozeDurations?: readonly number[];
