@@ -41,6 +41,12 @@ commit.
 - **The slider's readout takes the room of its longest value**: the longer of
   `min` and `max` as formatted, where it was a fixed six characters.
 
+### Fixed
+
+- **`core.css` is a third smaller**: 158 kB where it was 228 kB. The shared
+  rules every component takes (text, focus ring, caret, scrollbars) stood once
+  per component in it; they stand once now. Nothing looks different.
+
 ## 0.30.0 – A card hands its height to its body (Oct. 2026)
 
 ### Changed

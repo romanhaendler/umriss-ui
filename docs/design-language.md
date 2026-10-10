@@ -265,11 +265,13 @@ for. `<Input style={{ width: 120 }} />` sizes the field.
 4. Add it to `controlSize.test.tsx` and `fieldWidth.test.tsx`, and to the
    Sizes page if it brings a case the page does not show yet.
 
-**Open** - one question the acceptance left for later, a ticket under
-`.scratch/control-sizes/issues/`: `#own-styles` copied into the bundle once per
-module (06). The default counts (07), the room a multiselect leaves (08, kept),
-the slider's readout (09, the room of the longer of `min` and `max` as
-formatted) and a field that fills a row (10, no prop - `Grid`) are answered.
+**Open** - nothing the acceptance left for later is open now. The tickets
+under `.scratch/control-sizes/issues/` are answered: the default counts (07),
+the room a multiselect leaves (08, kept), the slider's readout (09, the room of
+the longer of `min` and `max` as formatted), a field that fills a row (10, no
+prop - `Grid`) and `#own-styles` copied into the bundle once per module (06,
+the build folds the copies into the last one; core's stylesheet 228 kB to
+158 kB).
 
 **One count is the rule; a full row is the exception.** Decided 2026-10-10
 (control-sizes 07): every field that shows text is 20 characters wide where the
