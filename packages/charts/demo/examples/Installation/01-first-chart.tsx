@@ -1,28 +1,21 @@
 import { Tooltip, useChart } from "../../../src";
 
 export const title = "Draw a first chart";
-export const lead = "Hand `useChart` the rows, then give its `Chart` an axis per direction and a series; the x axis and the series read a row through `value`.";
+export const lead = "Hand `useChart` the rows as they come, then give its `Chart` an axis per direction and a series; the x axis and the series read a row through `value`. With `time` the axis reads the instants an API sends as text.";
 
-interface Hour {
-  /** The hour's start, in milliseconds since 1970. */
-  t: number;
-  signIns: number;
-}
-
-const at = (hour: number) => new Date(2026, 2, 17, hour).getTime();
-
-const SIGN_INS: Hour[] = [
-  { t: at(0), signIns: 310 },
-  { t: at(1), signIns: 220 },
-  { t: at(2), signIns: 180 },
-  { t: at(3), signIns: 170 },
-  { t: at(4), signIns: 205 },
-  { t: at(5), signIns: 340 },
-  { t: at(6), signIns: 820 },
-  { t: at(7), signIns: 1460 },
-  { t: at(8), signIns: 2130 },
-  { t: at(9), signIns: 2480 },
-  { t: at(10), signIns: 2390 },
+/* Sign-ins per hour, as the API sends them: the hour's start in local time. */
+const SIGN_INS = [
+  { t: "2026-03-17T00:00", signIns: 310 },
+  { t: "2026-03-17T01:00", signIns: 220 },
+  { t: "2026-03-17T02:00", signIns: 180 },
+  { t: "2026-03-17T03:00", signIns: 170 },
+  { t: "2026-03-17T04:00", signIns: 205 },
+  { t: "2026-03-17T05:00", signIns: 340 },
+  { t: "2026-03-17T06:00", signIns: 820 },
+  { t: "2026-03-17T07:00", signIns: 1460 },
+  { t: "2026-03-17T08:00", signIns: 2130 },
+  { t: "2026-03-17T09:00", signIns: 2480 },
+  { t: "2026-03-17T10:00", signIns: 2390 },
 ];
 
 export default function FirstChart() {

@@ -5,7 +5,9 @@ import {
   axisExtent,
   categoriesOf,
   categoryPlaces,
+  firstKind,
   firstUnsortedIndex,
+  instantOf,
   materializeSeries,
   visibleExtent,
   type Binding,
@@ -537,5 +539,35 @@ describe("A series on a category axis", () => {
     expect([...series.x]).toEqual([0, 0]);
     expect([...series.y]).toEqual([1, 2]);
     expect(extent.yMax).toBe(2);
+  });
+});
+
+describe("An instant", () => {
+  it("is a number as it is, a Date's own milliseconds, an ISO 8601 string read by the platform", () => {
+    expect(instantOf(1_773_727_200_000)).toBe(1_773_727_200_000);
+    expect(instantOf(new Date(1_773_727_200_000))).toBe(1_773_727_200_000);
+    expect(instantOf("2026-03-17T06:00:00Z")).toBe(Date.UTC(2026, 2, 17, 6));
+    // A date alone is UTC; a date with a time and no offset is local.
+    expect(instantOf("2026-03-17")).toBe(Date.UTC(2026, 2, 17));
+    expect(instantOf("2026-03-17T06:00")).toBe(new Date(2026, 2, 17, 6).getTime());
+  });
+
+  it("is none for what is no instant", () => {
+    for (const v of ["next Tuesday", "", null, undefined, new Date("no date"), {}]) {
+      expect(Number.isNaN(instantOf(v))).toBe(true);
+    }
+  });
+
+  it("is told by the first value that is a place", () => {
+    const at = (d: { at: unknown }) => d.at;
+    expect(firstKind([[{ at: null }, { at: new Date(0) }, { at: 5 }]], at)).toBe("date");
+    expect(firstKind([[{ at: "" }, { at: Number.NaN }], [{ at: 5 }]], at)).toBe("number");
+    expect(firstKind([[{ at: "2026-03-17" }]], at)).toBe("string");
+    expect(firstKind([[], [{ at: null }]], at)).toBeNull();
+  });
+
+  it("is no category: a Date first leaves the axis without categories", () => {
+    const at = (d: { at: unknown }) => d.at;
+    expect(categoriesOf([[{ at: new Date(0) }, { at: "Sales" }]], at)).toBeNull();
   });
 });

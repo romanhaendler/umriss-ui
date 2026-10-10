@@ -42,7 +42,7 @@ const SERVICES: readonly Service[] = [
 ];
 
 interface MetricPoint {
-  t: number;
+  t: Date;
   /** Median and 95th percentile latency, in ms. */
   p50: number;
   p95: number;
@@ -73,7 +73,7 @@ function metrics(serviceId: string): MetricPoint[] {
     const surge = serviceId === "checkout" && t >= at(17, 9, 40) && t < at(17, 10, 10) ? 1.9 : 1;
     const p95 = Math.round(base * surge * (1 + r() * 0.08));
     points.push({
-      t,
+      t: new Date(t),
       p50: Math.round(p95 * (0.42 + r() * 0.06)),
       p95,
       errorRate: Math.round((0.05 + r() * 0.12 + (surge > 1 ? 2.4 + r() : 0)) * 100) / 100,
@@ -84,7 +84,7 @@ function metrics(serviceId: string): MetricPoint[] {
 }
 
 export const title = "Plot instants on a time axis";
-export const lead = "With `time` the values are instants: ticks stand on the local clock, labelled by hour, with the date where a day begins.";
+export const lead = "Rows that hold a `Date` put the axis in time; `time` does the same for milliseconds and for ISO strings. Ticks stand on the local clock, labelled by hour, with the date where a day begins.";
 
 const CHECKOUT = metrics("checkout");
 
@@ -92,7 +92,7 @@ export default function TimeAxis() {
   const { Chart, XAxis, YAxis, Line } = useChart(CHECKOUT);
   return (
     <Chart height={260} ariaLabel="Checkout's error rate today">
-      <XAxis value="t" time />
+      <XAxis value="t" />
       <YAxis label="Errors %" />
       <Line value="errorRate" name="Error rate" />
       <Tooltip mode="x" />

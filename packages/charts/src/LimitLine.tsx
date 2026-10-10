@@ -54,18 +54,20 @@ interface LimitCommonProps {
 
 /** The props of `LimitLine`. */
 export interface LimitLineProps extends LimitCommonProps {
-  /** Where the line lies, in domain units of its axis. */
-  value: number;
+  /** Where the line lies, in domain units of its axis; along a time axis
+      an instant, in milliseconds or as a `Date`. */
+  value: number | Date;
 }
 
 /** The props of `LimitBand`: a `LimitLine`'s, with a range in place of
     `value`. */
 export interface LimitBandProps extends LimitCommonProps {
-  /** Lower edge of the band, in domain units of its axis. */
-  from: number;
+  /** Lower edge of the band, in domain units of its axis; along a time axis
+      an instant, in milliseconds or as a `Date`. */
+  from: number | Date;
   /** Upper edge, in domain units of its axis. A band drawn backwards (`from` above `to`) is drawn between
       the two all the same - the pair is a range, not a direction. */
-  to: number;
+  to: number | Date;
 }
 
 /** A limit drawn as a line across the plot at one value of an axis - a
@@ -74,7 +76,6 @@ export interface LimitBandProps extends LimitCommonProps {
     always seen. */
 export function LimitLine(props: LimitLineProps): null {
   const {
-    value,
     orientation = "y",
     axisId,
     severity = "alarm",
@@ -83,6 +84,8 @@ export function LimitLine(props: LimitLineProps): null {
     inExtent = true,
     role = "specification",
   } = props;
+  // A `Date` is its instant; by its number, a new one each render is the same.
+  const value = +props.value;
 
   const config = useMemo<LimitLineConfig>(
     () => ({
@@ -107,8 +110,6 @@ export function LimitLine(props: LimitLineProps): null {
     zone. Otherwise a `LimitLine`. */
 export function LimitBand(props: LimitBandProps): null {
   const {
-    from,
-    to,
     orientation = "y",
     axisId,
     severity = "warning",
@@ -117,6 +118,8 @@ export function LimitBand(props: LimitBandProps): null {
     inExtent = true,
     role = "specification",
   } = props;
+  const from = +props.from;
+  const to = +props.to;
 
   const config = useMemo<LimitBandConfig>(
     () => ({

@@ -5,7 +5,7 @@
    under `@ts-expect-error` MUST yield an error - if one stops doing so, the
    typecheck fails. The typing is the product, as the table's is (ADR-0017). */
 
-import { ControlChart, useChart, type TooltipPoint } from "../src";
+import { ControlChart, LimitBand, LimitLine, useChart, type TooltipPoint } from "../src";
 // @ts-expect-error no free Chart: it comes from the hook (ADR-0048)
 import { Chart as FreeChart } from "../src";
 // @ts-expect-error no free series
@@ -48,6 +48,17 @@ export function Fields() {
       <XAxis value={(d) => d.host} />
       {/* @ts-expect-error a list is no place on an axis */}
       <XAxis value="samples" />
+      {/* A `Date` is an instant: in a field, out of a function, as a fixed domain. */}
+      <XAxis<Deploy & { at: Date }> value="at" />
+      <XAxis value={(d) => new Date(d.t)} domain={[new Date(0), new Date(1)]} />
+      {/* @ts-expect-error a domain is two of a kind */}
+      <XAxis value="t" domain={[0, new Date(1)]} />
+      {/* @ts-expect-error a series' value is a number, not an instant */}
+      <Line value={(d) => new Date(d.t)} />
+      <LimitLine orientation="x" value={new Date(0)} />
+      <LimitBand orientation="x" from={new Date(0)} to={new Date(1)} />
+      {/* @ts-expect-error a limit stands at a number or an instant */}
+      <LimitLine value="soon" />
       {/* Its own list of categories, and what is written for one. */}
       <XAxis value="host" categories={["a", "b"]} categoryLabel={(category) => category.toUpperCase()} />
       {/* @ts-expect-error categories are names */}

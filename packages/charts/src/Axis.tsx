@@ -50,29 +50,35 @@ export interface XAxisProps<T> extends CommonProps {
   /** Where a row lies on this axis: a field of the row, compared by its
       name, or a function of it, compared by its source text as a series' is
       (`ValueFunction`) - with the same closure limit. A number is a position,
-      a string a category: every distinct one gets a place of its own, in the
-      order the rows bring them, a tick and its name as the label (ADR-0051).
-      The type decides, never the content - `"2024"` is a category, `2024` a
-      number - and a row without a value has no place. The axis reads the rows
+      a `Date` an instant, a string a category: every distinct one gets a
+      place of its own, in the order the rows bring them, a tick and its name
+      as the label (ADR-0051). The type decides, never the content - `"2024"`
+      is a category, `2024` a number - and a row without a value has no
+      place. The axis reads the rows
       of every series bound to it; where those bring their own `data`, name
       their row: `<XAxis<HourCount> value="hour" />`. */
   value: AxisField<T> | ((d: T, index: number) => AxisValue);
   /** `"nice"` widens the data's extent to ticks - to named `ticks` where
       there are any, on a time axis to whole units of a step of hours or
-      longer -, `"data"` keeps it, a pair is fixed. On a `zoomable` axis it is
-      the start: what the axis shows while the chart's view names no span for
-      it. */
-  domain?: "nice" | "data" | readonly [number, number];
+      longer -, `"data"` keeps it, a pair is fixed: numbers, on a time axis
+      milliseconds or two `Date`s, on a category axis places. On a `zoomable`
+      axis it is the start: what the axis shows while the chart's view names
+      no span for it. */
+  domain?: "nice" | "data" | readonly [number, number] | readonly [Date, Date];
   /** Which edge the axis stands at. A second x axis on the opposite edge is how
       a series counts in a unit of its own. */
   position?: "bottom" | "top";
-  /** The values are instants (milliseconds since the epoch): ticks on local
-      boundaries from the minute to the month, labels by level in en-GB with a
-      24-hour clock - `15:00`, `17 Mar`, `Mar 2026` - and the date on the first
-      tick and on the first of a new day (`17 Mar 00:00`); a day tick there
-      carries the year. The tooltip's x value carries the seconds where the
-      readings lie less than a minute apart. Another language is a `tickFormat`,
-      which is handed the instant. `calendar` implies it. */
+  /** The values are instants: milliseconds since the epoch, or with `time`
+      said ISO 8601 strings as an API sends them, read by the platform's rule -
+      a date with a time and no offset is local time, a date alone is UTC; a
+      string that is none is not drawn. Rows that hold a `Date` put the axis
+      in time without `time`. Ticks on local boundaries from the minute to the
+      month, labels by level in en-GB with a 24-hour clock - `15:00`, `17 Mar`,
+      `Mar 2026` - and the date on the first tick and on the first of a new
+      day (`17 Mar 00:00`); a day tick there carries the year. The tooltip's x
+      value carries the seconds where the readings lie less than a minute
+      apart. Another language is a `tickFormat`, which is handed the instant
+      in milliseconds. `calendar` implies it. */
   time?: boolean;
   /** Working calendar: the intervals in which time counts. With it the axis
       stands in working time - nights and weekends are out, and every
@@ -149,7 +155,8 @@ export function XAxis<T>(props: XAxisProps<T>): null {
         label,
         tickCount,
         tickFormat,
-        domain,
+        // A `Date` is its instant.
+        domain: typeof domain === "string" ? domain : [+domain[0], +domain[1]],
         grid,
         ticks,
         categories,
