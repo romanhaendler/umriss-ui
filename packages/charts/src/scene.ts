@@ -2813,7 +2813,9 @@ export class ChartScene {
 
   /** A key on the plot area; true where the chart took it. */
   key(event: KeyboardEvent): boolean {
-    if (this.tooltip === null || event.altKey || event.ctrlKey || event.metaKey) return false;
+    if (event.altKey || event.ctrlKey || event.metaKey) return false;
+    // Without a tooltip there is no Active point to walk: only the zoom keys.
+    if (this.tooltip === null) return this.zoomKey(event);
     if (event.key === "Escape") {
       if (this.hover === null) return false;
       this.clearActive();
@@ -2847,7 +2849,15 @@ export class ChartScene {
     else if (event.shiftKey && (event.key === "ArrowLeft" || event.key === "ArrowRight"))
       this.panBy(((event.key === "ArrowLeft" ? 1 : -1) * plot.width) / 10);
     else return false;
+    // Nothing to read after a key where no tooltip does: the span in view
+    // is said once the layout has it.
+    if (this.tooltip === null) this.sayView = true;
     return true;
+  }
+
+  /** Whether the plot is a tab stop: it has hits to walk or an axis to zoom. */
+  keyed(): boolean {
+    return this.tooltip !== null || this.hasZoom();
   }
 
   /** Where the walk starts from: the keyboard's own place, or the pointer's. */
@@ -3054,10 +3064,8 @@ export class ChartScene {
       const name = this.nameFor(entry, all.indexOf(entry));
       parts.push(w.seriesExtent(name, this.formatY(entry, range[0]), this.formatY(entry, range[1])));
     }
-    if (this.tooltip !== null) {
-      parts.push(w.walkHelp);
-      if (this.hasZoom()) parts.push(w.zoomHelp);
-    }
+    if (this.tooltip !== null) parts.push(w.walkHelp);
+    if (this.hasZoom()) parts.push(w.zoomHelp);
     if (this.legend !== null && this.seriesNames().some((name) => name !== undefined)) parts.push(w.legendHelp);
     return parts.join(" ");
   }
@@ -3369,6 +3377,9 @@ export class ChartScene {
       yet. Until then a change is the start losing what does not occur here -
       where the chart starts, not a change to report. */
   private actedOn = false;
+  /** A zoom key was pressed on a chart without a tooltip: the next layout
+      says the span it shows. */
+  private sayView = false;
   get acted(): boolean {
     return this.actedOn;
   }
@@ -3890,6 +3901,14 @@ export class ChartScene {
 
   private pushLayoutSnapshot(): void {
     this.scheduleSummary();
+    if (this.sayView) {
+      this.sayView = false;
+      const first = this.zoomAxes()[0];
+      if (first !== undefined) {
+        const [from, to] = first.layout.scale.domain;
+        this.say(this.wording.visibleRange(this.xLabel(first.config.id, from), this.xLabel(first.config.id, to)));
+      }
+    }
     const empty = !this.showsAPoint();
     this.layoutSnapshot = {
       version: this.layoutSnapshot.version + 1,

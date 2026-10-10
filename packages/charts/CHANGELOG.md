@@ -79,6 +79,17 @@ named ticks keep working as they did; nothing is taken away.
   Only an axis that reads categories is affected.
 - **`tickFormat`, `ticks` and `tickCount` do not apply to an axis that reads
   categories**; DEV says so. They keep their job on a numeric and a time axis.
+## Unreleased
+
+### Changed
+
+- **A chart with a zoomable x axis is one tab stop even without a
+  `<Tooltip>`** (ADR-0030). Its plot is `role="application"` with the role
+  description "chart" and takes the focus, so `+`, `-`, Shift+←/→ and `0`
+  reach a keyboard. There is no Active point to walk: the arrows without Shift
+  do nothing. After a zoom or pan key the polite live region reads the span in
+  view ("From 10 to 90."); the summary names the zoom keys and not the walk's.
+  A chart with a tooltip, and one with neither, are unchanged.
 
 ---
 

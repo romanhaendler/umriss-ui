@@ -266,3 +266,35 @@ describe("Two charts in step", () => {
     expect(tooltipOf(r.host)).toContain("7");
   });
 });
+
+describe("Zoom keys without a tooltip (ADR-0030)", () => {
+  it("is one tab stop that zooms, says the span and helps with the zoom keys only", async () => {
+    const views: ChartView[] = [];
+    function Bare() {
+      const { Chart, XAxis, YAxis, Line } = useChart(data, { onViewChange: (v) => views.push(v) });
+      return (
+        <Chart ariaLabel="Bare">
+          <XAxis value="t" domain={[0, 100]} zoomable tickFormat={(v) => `t${v}`} />
+          <YAxis />
+          <Line value="a" name="A" />
+        </Chart>
+      );
+    }
+    const r = await renderChart(<Bare />);
+    unmount = r.unmount;
+    const plot = plotOf(r.host);
+    expect(plot.getAttribute("role")).toBe("application");
+    expect(plot.getAttribute("aria-roledescription")).toBe("chart");
+    expect(plot.tabIndex).toBe(0);
+    await focusPlot(r.host);
+    // No walk: an arrow is not taken.
+    expect(await press(r.host, "ArrowLeft")).toBe(false);
+    expect(await press(r.host, "+")).toBe(true);
+    expect(lastSpan(views)).toBeDefined();
+    expect(r.host.querySelector("[aria-live='polite']")?.textContent).toBe("From t10 to t90.");
+    await act(async () => new Promise<void>((done) => setTimeout(done, 400)));
+    const help = document.getElementById(plot.getAttribute("aria-describedby") ?? "")?.textContent ?? "";
+    expect(help).toContain("Plus and minus zoom");
+    expect(help).not.toContain("Left and right arrows");
+  });
+});

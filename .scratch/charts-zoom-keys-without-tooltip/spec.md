@@ -1,6 +1,6 @@
 # Zoom keys on a chart without a tooltip
 
-Status: needs-triage
+Status: done
 Date:   2026-10-05
 Origin: the acceptance of `.scratch/component-view/` (open decision 4); the user chose "later, its own ticket".
 
@@ -23,3 +23,13 @@ zoom key, and what the summary's key help says.
 ## Out of Scope
 
 The walk itself without a tooltip.
+
+## Comments
+
+**Decided 2026-10-10, delivered** (ADR-0030, amended). A chart with a zoomable
+x axis is one tab stop without a tooltip: `role="application"` with the same
+role description. No walk - arrows without Shift do nothing and are not taken.
+The summary names the zoom keys only. After a zoom or pan key the live region
+reads the span in view with the existing `visibleRange` wording ("From 10 to
+90."), in the axis' own format; after a pointer gesture it reads nothing. No
+new wording key. A chart with a tooltip, and one with neither, are unchanged.

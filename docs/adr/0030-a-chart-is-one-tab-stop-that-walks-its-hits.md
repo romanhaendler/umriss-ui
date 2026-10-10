@@ -1,6 +1,6 @@
 # A chart is one tab stop that walks its hits
 
-Status: accepted, amended by ADR-0047 (zoom by key wherever an x axis is zoomable)
+Status: accepted, amended by ADR-0047 (zoom by key wherever an x axis is zoomable) and on 2026-10-10 (the zoom keys without a tooltip)
 Date:   2026-09
 
 A chart drew its points on a canvas and offered them to nobody without a
@@ -48,3 +48,16 @@ it.
   where the caller controls the domain (`onDomainChange`), as the gestures do.
 - A data table is not part of this decision; a summary in the description
   covers what the walk does not.
+
+## Amendment, 2026-10-10: the zoom keys without a tooltip
+
+A chart with a zoomable x axis is one tab stop even without a `<Tooltip>`,
+so that a keyboard reaches what a pointer reaches. The plot carries
+`role="application"` with the same `aria-roledescription` as a chart with a
+tooltip. There is no walk: nothing is an Active point, the arrows without
+Shift do nothing and are not swallowed, Escape is not taken. After a zoom or
+pan key the polite live region reads the span now in view, in the axis' own
+format ("From 10 to 90."); after a pointer gesture it reads nothing. The
+summary names the zoom keys and not the walk's. A chart with neither a
+tooltip nor a zoomable axis stays an image; a chart with a tooltip is
+unchanged.
