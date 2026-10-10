@@ -243,10 +243,14 @@ export interface AxisConfig<T = unknown> {
       @default only the first registered axis per orientation
       @remarks R-4.15 */
   grid?: boolean;
-  /** Fixed tick values instead of the 1-2-5 algorithm. For axes whose values are
-      not numbers but places: the lanes of a state stack, the categories of a
-      Pareto. */
+  /** Fixed tick values instead of the 1-2-5 algorithm, on a numeric axis: an
+      hour axis' named hours, a lane grid. */
   ticks?: readonly number[];
+  /** The categories of the axis, in their order: the list is the order and
+      the extent, and makes the axis a category axis (ADR-0051). */
+  categories?: readonly string[];
+  /** What is written for a category, wherever it is written. */
+  categoryLabel?: (category: string) => string;
   /** The values are instants in milliseconds: ticks on local boundaries,
       labels by level. A calendar implies it. */
   time?: boolean;

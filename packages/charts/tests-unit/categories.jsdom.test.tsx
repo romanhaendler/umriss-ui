@@ -295,3 +295,98 @@ describe("Zoom on a category axis", () => {
     expect((views.at(-1)?.domains?.x as readonly [number, number])[0]).toBeGreaterThan(from);
   });
 });
+
+/* chart-rows-as-they-come 02: the caller's own order, and what is written. */
+const WEEK = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+const LATE = [
+  { day: "Thu", minutes: 40 },
+  { day: "Mon", minutes: 10 },
+  { day: "Sat", minutes: 99 },
+  { day: "Tue", minutes: 20 },
+];
+
+function Week({ rows = LATE, name = "Late" }: { rows?: readonly { day: string | number; minutes: number }[]; name?: string }) {
+  const { Chart, XAxis, YAxis, Bar } = useChart(rows);
+  return (
+    <Chart ariaLabel="Minutes late per working day" empty="Nothing yet">
+      <XAxis value="day" categories={WEEK} />
+      <YAxis />
+      <Bar value="minutes" name={name} />
+      <Tooltip mode="x" />
+      <DataTable />
+    </Chart>
+  );
+}
+
+describe("An axis with its own list of categories", () => {
+  const warnings = (warn: { mock: { calls: unknown[][] } }) => warn.mock.calls.map((c) => String(c[0]));
+
+  it("stands in the list's order whatever the rows' order, an empty place kept", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const host = await mount(<Week />);
+    expect(ticks(host)).toEqual(WEEK);
+    await act(async () => (host.querySelector(".uc-data-key") as HTMLButtonElement).click());
+    await frame();
+    // Wed and Fri have their tick and no row; Sat is not on the list.
+    expect(tableRows(host)).toEqual(["Mon|10", "Tue|20", "Thu|40"]);
+  });
+
+  it("names the series and the category that is not on the list", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    await mount(<Week name="With a Saturday" />);
+    expect(warnings(warn).some((m) => m.includes('"With a Saturday"') && m.includes('"Sat"'))).toBe(true);
+  });
+
+  it("shows every tick and the empty state where there are no rows", async () => {
+    const host = await mount(<Week rows={[]} />);
+    expect(ticks(host)).toEqual(WEEK);
+    expect(host.querySelector(".uc-empty")?.textContent).toBe("Nothing yet");
+  });
+
+  it("makes a category axis of an axis whose rows bring numbers, and places none of them", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const host = await mount(<Week rows={[{ day: 1, minutes: 5 }]} name="By number on a list" />);
+    expect(ticks(host)).toEqual(WEEK);
+    expect(host.querySelector(".uc-empty")?.textContent).toBe("Nothing yet");
+  });
+});
+
+const CENTRES: Record<string, string> = { "CC-1100": "Sales", "CC-1200": "Marketing", "CC-9100": "Sales" };
+
+describe("A category's label", () => {
+  function ByKey() {
+    const { Chart, XAxis, YAxis, Bar } = useChart([
+      { id: "CC-1100", actual: 139 },
+      { id: "CC-1200", actual: 78 },
+      { id: "CC-9100", actual: 12 },
+    ]);
+    return (
+      <Chart ariaLabel="Spend per cost centre">
+        <XAxis value="id" categoryLabel={(id) => CENTRES[id] ?? id} />
+        <YAxis />
+        <Bar value="actual" name="Actual" />
+        <Tooltip mode="x" />
+        <DataTable />
+      </Chart>
+    );
+  }
+
+  it("is written under the tick, and two categories of one label keep two places", async () => {
+    const host = await mount(<ByKey />);
+    expect(ticks(host)).toEqual(["Sales", "Marketing", "Sales"]);
+  });
+
+  it("is written in the tooltip, the readout, the summary and the data table", async () => {
+    const host = await mount(<ByKey />);
+    await focusPlot(host);
+    await press(host, "ArrowLeft");
+    expect(tooltipOf(host)).toContain("Marketing");
+    await rest(200);
+    expect(readout(host)).toBe("Marketing. Actual 78.");
+    const summary = document.getElementById(host.querySelector(".uc-plot")?.getAttribute("aria-describedby") ?? "")?.textContent;
+    expect(summary).toContain("Sales to Sales");
+    await act(async () => (host.querySelector(".uc-data-key") as HTMLButtonElement).click());
+    await frame();
+    expect(tableRows(host)).toEqual(["Sales|139", "Marketing|78", "Sales|12"]);
+  });
+});
