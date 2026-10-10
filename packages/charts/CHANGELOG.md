@@ -29,7 +29,7 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
-## Unreleased – A chart reads its rows as they come
+## 0.14.0 – A chart reads its rows as they come (Oct. 2026)
 
 A chart takes rows as an application has them (ADR-0052). A category is a
 value: `<XAxis value="costCentre" />` over rows that hold a name gives every

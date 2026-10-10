@@ -1,11 +1,11 @@
 # A chart reads its rows as they come
 
-Status: ready-for-agent
+Status: done (released 2026-10-10: charts 0.14.0, schedule 0.5.7)
 Date:   2026-10-10
 Origin: the maintainer's reading of the Bar examples, 2026-10-10 - "too many
 extra functions are needed to make the data usable" - and the research that
 followed, `docs/research/chart-data-input-2026-10/`. Reopens ADR-0002 and
-ADR-0032 in one point each; the decision is to be written down as ADR-0051 by
+ADR-0032 in one point each; the decision is to be written down as ADR-0052 by
 the first ticket.
 
 ## Problem Statement
@@ -165,7 +165,7 @@ axis.
   numbers and do not change. This is what ADR-0002 already draws; the ADR's
   consequence "labelled categories must be supplied as numeric positions with
   a `tickFormat` that names them" is what falls.
-- **D2. ADR-0051 records it and supersedes in part.** ADR-0002 stands in its
+- **D2. ADR-0052 records it and supersedes in part.** ADR-0002 stands in its
   title and its architecture - bars sit on a numeric axis, no band scale - and
   loses that one consequence. ADR-0032 keeps "no log scale" and "no band
   scale" and loses "for categories, their index on x". Both receive a pointer;
@@ -306,7 +306,7 @@ axis.
 
 ### Documents
 
-- **D27.** ADR-0051; the pointers in ADR-0002 and ADR-0032; **Category** and
+- **D27.** ADR-0052; the pointers in ADR-0002 and ADR-0032; **Category** and
   **Category axis** in the glossary, and the glossary's sentence on the lane
   extended by the named lane; the capability record's rows; the charts'
   changelog; the props comments of the axes, `Matrix` and `StateBand`. The
@@ -411,7 +411,7 @@ the three that exist; none is added (confirmed with the maintainer,
 
   | Ticket | Scope | Blocked by |
   |---|---|---|
-  | 01 | ADR-0051 and the glossary; a category on x by first occurrence, rows in any order; one Bar example as the tracer | - |
+  | 01 | ADR-0052 and the glossary; a category on x by first occurrence, rows in any order; one Bar example as the tracer | - |
   | 02 | `categories` and `categoryLabel`: order, empty places, strangers | 01 |
   | 03 | Categories on y: the matrix's rows, the state band's `lane` | 02 |
   | 04 | Instants: `Date`, ISO strings with `time`, `Date` in `domain` and limits | 01 |
@@ -422,3 +422,57 @@ the three that exist; none is added (confirmed with the maintainer,
 - **The one place that is more than a reading rule** is D9: how a hit and a
   `value` function's `index` find the caller's row once a series is held in
   axis order. Ticket 01 settles it first.
+
+## Comments
+
+### Delivery report (2026-10-10)
+
+Delivered in seven tickets and one review pass, each committed on its own;
+released as `@umriss-ui/charts` 0.14.0, with `@umriss-ui/schedule` 0.5.7
+moving its charts range.
+
+**What a caller writes now.** `<XAxis value="costCentre" />` for a bar per
+cost centre; `categories` for an order of their own and `categoryLabel` for a
+key's name; `<Matrix value="service" />` and `<StateBand lane="FP 214 K" />`
+along y; a `Date` field, or `time` over the ISO strings an API sends. The
+position, the tick list, the lookup and `getTime()` are gone from every
+example that had them, and numeric positions with named ticks work as before.
+
+**How it is built.** Ticket 01's comment has it in full. In one sentence: the
+scene reads each axis' categories before it materialises, writes every row's
+place into the x channel - rows read in axis order, each point keeping its
+row - and hands the layout the ticks and the label a caller once wrote, so
+that every place that writes an x follows without a line of its own.
+
+**Where it parts from the spec as written** - each marked *As built* in its
+decision above:
+
+- A row without a place is left out of its series, not held as a gap (D8).
+- One kind per axis holds along y for every series but a matrix and a state
+  band, and a series that begins with milliseconds is read as milliseconds
+  alone (D5, D17).
+- `StateBandProps` stays an interface; the refusal of a lane given both ways
+  stands at the call, through `OneLane` (D14).
+- Two StateBand examples stay numeric on purpose (D22); the month examples
+  write their label through `categoryLabel`, their rows being in order
+  (ticket 06); long rows are grouped with a `Set` and a `filter` (D25).
+- No prototype was needed for D9: `rows`, the reading order, settled it in
+  materialisation, and one line in the hit maps a point back to its row.
+
+**What the review found** (`/code-review`, standards and spec, both run
+against the code): `time` said after the first render left the categories
+standing; a series moved to another axis kept its old places; DEV spoke
+falsely on every time axis of ISO strings - the installation page's first
+chart among them - and on a matrix with named columns; a `Date` among numbers
+and a line among lanes vanished without a word; an empty `categories` turned
+the axis numeric; a band whose lane the axis did not list was still walked by
+the keys. Each got its test first and is fixed.
+
+**What a reader will notice.** A line over categories begins half a step
+inside the plot (D12) - the burn-down, the two month examples. Nothing else
+in a picture changed that was not a lead's wording: scenario 03 and "Show
+bars above and below zero" went from a generator to literal rows without a
+pixel moving.
+
+**Left for later, and why** - see Out of Scope: series derived from a field,
+sorting rows along a numeric axis, a limit at a category, states by key.
