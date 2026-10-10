@@ -47,6 +47,15 @@ export function ScheduleReadout({ target, lane }: { target: ScheduleTooltipTarge
       </>
     );
   }
+  if (target.kind === "milestone") {
+    const { milestone } = target;
+    return (
+      <>
+        {lane}
+        {`, ${wording.scheduleMilestone(milestone.label ?? milestone.id)}, ${formats.dateShort(new Date(milestone.at))} ${time(milestone.at)}`}
+      </>
+    );
+  }
   const { dependency, task, from, to, violated } = target;
   return [
     task?.name ?? task?.id ?? dependency.id,
@@ -86,6 +95,16 @@ export function ScheduleTooltipContent({ target }: { target: ScheduleTooltipTarg
             {wording.scheduleInBlockedTime(blocked.label)}
           </span>
         ))}
+      </>
+    );
+  }
+
+  if (target.kind === "milestone") {
+    const { milestone } = target;
+    return (
+      <>
+        <span className={styles.tooltipHead}>{wording.scheduleMilestone(milestone.label ?? milestone.id)}</span>
+        <span className={styles.tooltipTimes}>{`${formats.dateShort(new Date(milestone.at))} ${time(milestone.at)}`}</span>
       </>
     );
   }

@@ -108,6 +108,8 @@ function keyOf(hit: ScheduleHit): string {
       return `subtask:${hit.subtask.id}:${hit.part}`;
     case "dependency":
       return `dependency:${hit.dependency.id}`;
+    case "milestone":
+      return `milestone:${hit.milestone.id}`;
     case "lane":
       return `lane:${hit.lane}`;
     default:
@@ -344,6 +346,9 @@ export class SceneGestures {
   private modeAt(x: number, y: number): { mode: EditMode | "pan"; subtask: Subtask | null } {
     const view = this.host.view;
     const intents = view.options.intents;
+    /* A milestone is above the work and is not moved: a press on it pans, as
+       one on the empty lane does, and never takes the bar beneath it. */
+    if (view.hitAt(x, y).kind === "milestone") return { mode: "pan", subtask: null };
     for (let i = view.boxes.length - 1; i >= 0; i--) {
       const box = view.boxes[i]!;
       if (intents.includes("stretch")) {
@@ -596,7 +601,7 @@ export class SceneGestures {
     this.hoverPoint = { x, y };
     if (key === this.hoverKey) {
       /* The tooltip follows the pointer along its target. */
-      if (hit.kind === "subtask" || hit.kind === "dependency") this.host.interactionChanged();
+      if (hit.kind === "subtask" || hit.kind === "dependency" || hit.kind === "milestone") this.host.interactionChanged();
       return;
     }
     this.setHover(hit, key);

@@ -230,6 +230,19 @@ export const OUTLINE: readonly Rubric[] = [
         exports: ["useSchedule", "findings"],
       },
       {
+        id: "milestones",
+        name: "Milestones",
+        sentence: "A point in time on a lane - a handover, a release, a deadline - drawn as a diamond above the work, reached by the keys and named in the tooltip.",
+        about: [
+          "A milestone is data beside the work: one list, each point naming its lane and the instant it stands at (`{ id, lane, at, label? }`). It has no duration, no task and no tone; it is not dragged and reports no intent, and work beside it is never a finding.",
+          "The keys walk to it in time order among the subtasks of its lane, the tooltip names it by its label and time, and the live region reads its lane, label and time. It is named by its label, or its id without one.",
+        ],
+        alternatives: [{ when: "Time a lane is not available, as a span", use: "blocked-time" }],
+        keysOf: ["schedule"],
+        types: ["MilestonesProps", "Milestone"],
+        exports: ["useSchedule"],
+      },
+      {
         id: "now-line",
         name: "Now line",
         sentence: "A line across the lanes at the present moment, so that whatever should have happened by now stands to its left. It follows the clock, or stays at a fixed instant for a replay.",

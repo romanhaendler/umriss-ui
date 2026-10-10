@@ -12,6 +12,7 @@ import {
   CAP,
   CAP_INSET,
   inView,
+  milestoneMark,
   slotAt,
   subtaskBox,
   dependencyPath,
@@ -22,7 +23,7 @@ import {
 } from "./geometry";
 import { resolveAppearance, type ResolvedAppearance } from "./appearance";
 import { rowAt, slotOf } from "./rows";
-import type { BlockedTime, Subtask } from "./model";
+import type { BlockedTime, Milestone, Subtask } from "./model";
 import type { SceneData } from "./sceneData";
 import type { ScheduleHit, SceneView } from "./sceneView";
 
@@ -180,7 +181,7 @@ export function drawData(ctx: CanvasRenderingContext2D, input: DrawInput): void 
   for (const blocked of data.blocked) drawBlocked(ctx, input, viewport, blocked);
   drawNow(ctx, input);
   for (const layer of data.layers) {
-    if (layer.kind === "blocked") continue;
+    if (layer.kind === "blocked" || layer.kind === "milestones") continue;
     const own = new Set<unknown>(layer.data);
     if (layer.kind === "dependencies") {
       for (const path of view.paths) if (own.has(path.dependency)) drawDependency(ctx, input, path, false);
@@ -191,6 +192,7 @@ export function drawData(ctx: CanvasRenderingContext2D, input: DrawInput): void 
   for (const overlap of data.overlaps) drawOverlap(ctx, input, viewport, overlap);
   for (const found of data.inBlocked) drawOverlap(ctx, input, viewport, found);
   drawViolatedInFolds(ctx, input, viewport);
+  for (const milestone of data.milestones) drawMilestone(ctx, input, viewport, milestone, false);
   drawSelection(ctx, input);
 }
 
@@ -204,6 +206,8 @@ export function drawOverlay(ctx: CanvasRenderingContext2D, input: DrawInput): vo
     } else if (hover.kind === "dependency") {
       const path = view.paths.find((p) => p.dependency === hover.dependency);
       if (path !== undefined) drawDependency(ctx, input, path, true);
+    } else if (hover.kind === "milestone") {
+      drawMilestone(ctx, input, viewport, hover.milestone, true);
     }
     return;
   }
@@ -786,6 +790,33 @@ function drawBlocked(ctx: CanvasRenderingContext2D, input: DrawInput, viewport: 
   ctx.fillRect(x0, slot.top, x1 - x0, slot.height);
   ctx.globalAlpha = 1;
   hatch(ctx, x0, slot.top, x1 - x0, slot.height, input.colours.muted, 0.7, REFUSED_HATCH_STEP, 1);
+}
+
+/** A milestone: a diamond in the text ink on its lane's middle, ringed in the
+    surface colour so that it reads on a bar and on the bare lane alike. Hover
+    and the keys' stop add the accent ring. A mark off the plot is not drawn. */
+function drawMilestone(ctx: CanvasRenderingContext2D, input: DrawInput, viewport: Viewport, milestone: Milestone, active: boolean): void {
+  const mark = milestoneMark(viewport, milestone);
+  if (mark === null || mark.x < -mark.half || mark.x > input.view.width + mark.half) return;
+  const path = (half: number) => {
+    ctx.beginPath();
+    ctx.moveTo(mark.x, mark.y - half);
+    ctx.lineTo(mark.x + half, mark.y);
+    ctx.lineTo(mark.x, mark.y + half);
+    ctx.lineTo(mark.x - half, mark.y);
+    ctx.closePath();
+  };
+  if (active) {
+    path(mark.half + 3);
+    ctx.fillStyle = input.colours.active;
+    ctx.fill();
+  }
+  path(mark.half + 1);
+  ctx.fillStyle = input.colours.surface;
+  ctx.fill();
+  path(mark.half);
+  ctx.fillStyle = input.colours.text;
+  ctx.fill();
 }
 
 /** The mark of a finding on a lane - two subtasks overlapping, or a subtask in

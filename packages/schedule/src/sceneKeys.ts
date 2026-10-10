@@ -8,12 +8,17 @@
    readout once the keys rest, never after the pointer. */
 
 import { MINUTE } from "@umriss-ui/charts";
+import { milestoneMark, slotAt } from "./geometry";
 import type { Intent } from "./model";
 import { entersBlockedTime } from "./refusal";
 import type { SceneData, ScheduleTooltipTarget } from "./sceneData";
 import type { SceneGestures, SceneHandlers } from "./sceneGestures";
 import type { ScheduleHit, SceneView } from "./sceneView";
-import { alongDependency, stepSubtask, walkRows, type Active, type WalkMove } from "./walk";
+import { alongDependency, stepSubtask, walkRows, type Active, type WalkMove, type Walked } from "./walk";
+
+/** A milestone in the walk's shape. The key keeps its id apart from every
+    subtask's, whatever the caller named them. */
+const MILESTONE = "\u0000milestone:";
 
 /** The readout waits for the keys to rest this long - the charts' pause: a
     held key speaks where it stops, not at every step on the way. */
@@ -65,6 +70,7 @@ export class SceneKeys {
     const hover = this.host.gestures.hover;
     if (hover.kind === "subtask") return { kind: "subtask", id: hover.subtask.id };
     if (hover.kind === "dependency") return { kind: "dependency", id: hover.dependency.id };
+    if (hover.kind === "milestone") return { kind: "milestone", id: hover.milestone.id };
     return null;
   }
 
@@ -116,19 +122,28 @@ export class SceneKeys {
     const { data, view } = this.host;
     const at = this.active();
     /* From a dependency the walk goes on from the stop it left. */
-    const from = at === null ? null : at.kind === "subtask" ? at.id : (data.dependencies.find((t) => t.id === at.id)?.from ?? null);
-    let rows = walkRows(view.rows, data.subtasks);
+    const from =
+      at === null
+        ? null
+        : at.kind === "subtask"
+          ? at.id
+          : at.kind === "milestone"
+            ? MILESTONE + at.id
+            : (data.dependencies.find((t) => t.id === at.id)?.from ?? null);
+    /* The milestones stand in the walk beside the work, by their time. */
+    const stops: Walked[] = [...data.subtasks, ...data.milestones.map((m) => ({ id: MILESTONE + m.id, lane: m.lane, from: m.at, to: m.at }))];
+    let rows = walkRows(view.rows, stops);
     /* Coming in, the lanes scrolled into view are where to start: entering
        on a row scrolled away would scroll the plan back under the reader. */
     if (from === null) {
       const shown = rows.filter((row) => {
-        const box = view.boxById.get(row[0]!.id);
-        return box !== undefined && box.y + box.height > 0 && box.y < view.height;
+        const slot = slotAt(view.viewport(), row[0]!.lane);
+        return slot !== null && slot.top + slot.height > 0 && slot.top < view.height;
       });
       if (shown.length > 0) rows = shown;
     }
     const to = stepSubtask(rows, from, move, this.host.visibleDomain());
-    if (to !== null) this.show({ kind: "subtask", id: to.id });
+    if (to !== null) this.show(to.id.startsWith(MILESTONE) ? { kind: "milestone", id: to.id.slice(MILESTONE.length) } : { kind: "subtask", id: to.id });
   }
 
   /** Space and Enter select as a click does: the whole task, and the subtask. */
@@ -208,6 +223,10 @@ export class SceneKeys {
       const subtask = data.subtaskById.get(at.id);
       return subtask === undefined ? null : { kind: "subtask", subtask, part: "main" };
     }
+    if (at.kind === "milestone") {
+      const milestone = data.milestones.find((m) => m.id === at.id);
+      return milestone === undefined ? null : { kind: "milestone", milestone };
+    }
     const dependency = data.dependencies.find((t) => t.id === at.id);
     return dependency === undefined ? null : { kind: "dependency", dependency };
   }
@@ -220,6 +239,11 @@ export class SceneKeys {
     if (at.kind === "subtask") {
       const b = box(at.id);
       return b === undefined ? null : { x0: b.outerFrom, x1: b.outerTo, y0: b.y, y1: b.y + b.height };
+    }
+    if (at.kind === "milestone") {
+      const milestone = this.host.data.milestones.find((m) => m.id === at.id);
+      const mark = milestone === undefined ? null : milestoneMark(view.viewport(), milestone);
+      return mark === null ? null : { x0: mark.x - mark.half, x1: mark.x + mark.half, y0: mark.y - mark.half, y1: mark.y + mark.half };
     }
     const dependency = this.host.data.dependencies.find((t) => t.id === at.id);
     const from = dependency === undefined ? undefined : box(dependency.from);
@@ -267,7 +291,7 @@ export class SceneKeys {
       if (!this.host.gestures.byKeyboard) return;
       const target = this.host.data.tooltipTargetFor(hover);
       if (target === null) return;
-      this.spoken = { target, lane: hover.kind === "subtask" ? hover.subtask.lane : null, count: (this.spoken?.count ?? 0) + 1 };
+      this.spoken = { target, lane: hover.kind === "subtask" ? hover.subtask.lane : hover.kind === "milestone" ? hover.milestone.lane : null, count: (this.spoken?.count ?? 0) + 1 };
       this.host.spokenChanged();
     }, READOUT_REST);
   }

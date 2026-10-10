@@ -18,6 +18,7 @@ import {
 import {
   distanceTo,
   laneAt,
+  milestoneMark,
   partAt,
   subtaskBox,
   dependencyPath,
@@ -26,7 +27,7 @@ import {
   type Viewport,
 } from "./geometry";
 import { effectiveCollapsed, layOutRows, rowAt, slotOf, type Rows } from "./rows";
-import type { IntentKind, Subtask, Dependency, DependencyAttachment, DependencyEnds, DependencyRoute } from "./model";
+import type { IntentKind, Milestone, Subtask, Dependency, DependencyAttachment, DependencyEnds, DependencyRoute } from "./model";
 import type { SceneData } from "./sceneData";
 import type { SnapRaster } from "./snap";
 import { days, fineStep, fineTicks, panDomain, zoomDomain, type ZoomLimits } from "./timeAxis";
@@ -35,6 +36,7 @@ import { days, fineStep, fineTicks, panDomain, zoomDomain, type ZoomLimits } fro
 export type ScheduleHit =
   | { readonly kind: "subtask"; readonly subtask: Subtask; readonly part: "leadIn" | "main" | "leadOut" }
   | { readonly kind: "dependency"; readonly dependency: Dependency }
+  | { readonly kind: "milestone"; readonly milestone: Milestone }
   | { readonly kind: "lane"; readonly lane: string }
   | { readonly kind: "nothing" };
 
@@ -189,6 +191,13 @@ export class SceneView {
   }
 
   hitAt(x: number, y: number): ScheduleHit {
+    /* A milestone is drawn above the work, so it is hit before it. */
+    const viewport = this.viewport();
+    for (let i = this.data.milestones.length - 1; i >= 0; i--) {
+      const milestone = this.data.milestones[i]!;
+      const mark = milestoneMark(viewport, milestone);
+      if (mark !== null && Math.abs(x - mark.x) + Math.abs(y - mark.y) <= mark.half + 2) return { kind: "milestone", milestone };
+    }
     for (let i = this.boxes.length - 1; i >= 0; i--) {
       const box = this.boxes[i]!;
       const part = partAt(box, x, y);

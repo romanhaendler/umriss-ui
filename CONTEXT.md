@@ -1256,6 +1256,15 @@ except for the blocked time the work already covered, which never locks it in.
 _Avoid_: absence, downtime, Sperre (the alarms' word, see **Availability**),
 unavailability as a type name
 
+**Milestone**:
+A point in time on a lane — a handover, a release, a deadline. Plain data beside
+the work, `{ id, lane, at, label? }`, drawn as a diamond above everything on the
+lane. It has no duration and no **Task**, and it is read-only: not dragged, no
+**Intent**, no finding — whether a subtask ends after one is the planner's
+judgement. It is reached by the keys among the lane's work, in time order, and
+named in the tooltip and the readout by its label, or its id without one.
+_Avoid_: event, marker, deadline (one kind of milestone), Meilenstein-Balken
+
 **Lane header**:
 The label at the left edge naming what a lane is. The run of lane headers
 stands outside the plot area and holds still while the plot pans and zooms. It

@@ -50,6 +50,11 @@ export type { BlockedTime } from "./model";
 export { inBlockedTime } from "./findings";
 export type { InBlockedTime } from "./findings";
 
+/* What `schedule-milestones` added: a point in time on a lane, at the end by
+   the workspace's rule for new exports. */
+export type { MilestonesProps } from "./parts";
+export type { Milestone } from "./model";
+
 /* What `component-view` 07 added: the schedule's view (ADR-0047), at the end
    by the workspace's rule for new exports. */
 export type { ScheduleView } from "./view";

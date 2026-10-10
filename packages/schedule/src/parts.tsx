@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import type { ReactNode } from "react";
 import { LaneGroupContext, useLane, useLaneGroup, useLaneGroupRegistration, useLayer } from "./context";
 import type { LayerConfig } from "./scene";
-import type { BlockedTime, Subtask, Task, Dependency } from "./model";
+import type { BlockedTime, Milestone, Subtask, Task, Dependency } from "./model";
 
 /** The props of `Lane`. */
 export interface LaneProps {
@@ -96,5 +96,20 @@ export interface BlockedTimesProps {
 export function BlockedTimes({ data }: BlockedTimesProps): null {
   const config = useMemo<LayerConfig>(() => ({ kind: "blocked", data }), [data]);
   useLayer("BlockedTimes", config);
+  return null;
+}
+
+/** The props of `Milestones`. */
+export interface MilestonesProps {
+  /** The milestones of the lanes, as the caller holds them: one list, each
+      naming its lane and the instant it stands at. */
+  data: readonly Milestone[];
+}
+
+/** A layer of milestones. Wherever it is declared, it is drawn above the work:
+    a milestone is a mark that must not be hidden by a bar it stands on. */
+export function Milestones({ data }: MilestonesProps): null {
+  const config = useMemo<LayerConfig>(() => ({ kind: "milestones", data }), [data]);
+  useLayer("Milestones", config);
   return null;
 }

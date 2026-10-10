@@ -16,13 +16,17 @@
 import { rowAt, type Rows } from "./rows";
 import type { Subtask, Dependency } from "./model";
 
+/** What the walk can stand on: a subtask, or a milestone made into the shape
+    of one (`at` as both ends). */
+export type Walked = Pick<Subtask, "id" | "lane" | "from" | "to">;
+
 export type WalkMove = "next" | "previous" | "up" | "down" | "first" | "last" | "pageNext" | "pagePrevious";
 
 /** The rows the walk goes over, top to bottom, each with its work in time
     order - by the start of the main time, then its end. Empty rows are left
     out. */
-export function walkRows(rows: Rows, subtasks: readonly Subtask[]): Subtask[][] {
-  const byRow = new Map<number, Subtask[]>();
+export function walkRows<T extends Walked>(rows: Rows, subtasks: readonly T[]): T[][] {
+  const byRow = new Map<number, T[]>();
   for (const subtask of subtasks) {
     const slot = rows.slots.get(subtask.lane);
     const row = slot === undefined ? null : rowAt(rows, slot.top);
@@ -36,7 +40,7 @@ export function walkRows(rows: Rows, subtasks: readonly Subtask[]): Subtask[][] 
 }
 
 /** How far a subtask's main time lies from an instant: zero inside it. */
-const distance = (subtask: Subtask, time: number) =>
+const distance = (subtask: Walked, time: number) =>
   time < subtask.from ? subtask.from - time : time > subtask.to ? time - subtask.to : 0;
 
 /** Where a key takes the active subtask, from the one with id `from` (null, or
@@ -44,12 +48,12 @@ const distance = (subtask: Subtask, time: number) =>
     time: coming from nowhere, the walk starts at the first subtask in it on
     the topmost row that has one, and PageUp/PageDown jump a tenth of it. At an
     end the walk stays. Null only where there is nothing to walk at all. */
-export function stepSubtask(
-  rows: readonly (readonly Subtask[])[],
+export function stepSubtask<T extends Walked>(
+  rows: readonly (readonly T[])[],
   from: string | null,
   move: WalkMove,
   view: readonly [number, number],
-): Subtask | null {
+): T | null {
   let r = -1;
   let i = -1;
   for (let k = 0; k < rows.length && from !== null && r < 0; k++) {
@@ -91,8 +95,12 @@ export function stepSubtask(
   }
 }
 
-/** What the keyboard stands on: a subtask, or a dependency reached from one. */
-export type Active = { readonly kind: "subtask"; readonly id: string } | { readonly kind: "dependency"; readonly id: string };
+/** What the keyboard stands on: a subtask, a milestone, or a dependency
+    reached from a subtask. */
+export type Active =
+  | { readonly kind: "subtask"; readonly id: string }
+  | { readonly kind: "milestone"; readonly id: string }
+  | { readonly kind: "dependency"; readonly id: string };
 
 /** Along a dependency (`]` or `t` out, `[` or Shift+T back): from a subtask
     out along the dependency that leaves it, or back along the one that arrives
@@ -109,6 +117,8 @@ export function alongDependency(
   at: Active,
   direction: "out" | "back",
 ): Active {
+  /* A dependency joins subtasks: from a milestone there is none to follow. */
+  if (at.kind === "milestone") return at;
   if (at.kind === "dependency") {
     const dependency = dependencies.find((t) => t.id === at.id);
     const end = dependency === undefined ? undefined : direction === "out" ? dependency.to : dependency.from;

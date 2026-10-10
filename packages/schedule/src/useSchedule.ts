@@ -9,7 +9,7 @@
 import { createElement, forwardRef, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type { ForwardRefExoticComponent, RefAttributes } from "react";
 import { Schedule as ScheduleOn, type ScheduleHandle, type ScheduleProps } from "./Schedule";
-import { BlockedTimes, Dependencies, Lane, LaneGroup, Subtasks } from "./parts";
+import { BlockedTimes, Dependencies, Lane, LaneGroup, Milestones, Subtasks } from "./parts";
 import { ScheduleScene } from "./scene";
 import { Echoes } from "@umriss-ui/charts";
 import { viewKey, type ScheduleView } from "./view";
@@ -40,6 +40,7 @@ export interface ScheduleParts {
   Subtasks: typeof Subtasks;
   Dependencies: typeof Dependencies;
   BlockedTimes: typeof BlockedTimes;
+  Milestones: typeof Milestones;
   /** How the planner is looking at the plan: the span and the folded groups. */
   view: ScheduleView;
   /** Puts a span of two wall-clock instants in view; `null` shows the
@@ -54,7 +55,7 @@ export interface ScheduleParts {
 }
 
 /** Declares a schedule: hands back `Schedule` and the parts declared inside it
-    - `Lane`, `LaneGroup`, `Subtasks`, `Dependencies`, `BlockedTimes` -, its
+    - `Lane`, `LaneGroup`, `Subtasks`, `Dependencies`, `BlockedTimes`, `Milestones` -, its
     `view` and the setters `setDomain`, `toggleGroup`, `foldAll` and
     `unfoldAll`. A ref on `Schedule` still gives the `ScheduleHandle`. */
 export function useSchedule(options: ScheduleOptions = {}): ScheduleParts {
@@ -71,6 +72,7 @@ export function useSchedule(options: ScheduleOptions = {}): ScheduleParts {
       Subtasks,
       Dependencies,
       BlockedTimes,
+      Milestones,
       setDomain: scene.setDomain,
       toggleGroup: scene.toggleGroup,
       foldAll: scene.foldAll,
