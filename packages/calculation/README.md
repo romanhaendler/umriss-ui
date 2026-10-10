@@ -110,6 +110,10 @@ in a tree - there it folds, and opens whole.
 - **`emphasis="strong" | "muted"` and `rule="above"`** set a line apart
   without CSS: read first, receding (and still counted in full), or ruled off
   where a section starts that is no interim (ADR-0049).
+- **`density="compact"`** sets the lines as close as a compact table's rows -
+  27 px a line under a fine pointer, 35 under a finger - so the two read as
+  one surface side by side. Without the prop a calculation takes the density
+  of the `UmrissProvider`, else it is regular (ADR-0051).
 
 ## Several metrics side by side
 
