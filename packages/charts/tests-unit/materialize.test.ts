@@ -448,7 +448,7 @@ describe("materializeSeries with a box's mean, notch and count", () => {
   });
 });
 
-/* ADR-0051: a category is a whole-number place, and the library keeps the map. */
+/* ADR-0052: a category is a whole-number place, and the library keeps the map. */
 describe("The categories of an axis", () => {
   interface Spend {
     centre: string | number | null;

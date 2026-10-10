@@ -35,7 +35,7 @@ interface CommonProps {
       the order the rows first bring them. With it the list is the order and
       the extent: a category no row carries keeps its empty place, and a row
       whose category is not listed is not drawn - DEV names it. It makes the
-      axis a category axis whatever the rows hold (ADR-0051). */
+      axis a category axis whatever the rows hold (ADR-0052). */
   categories?: readonly string[];
   /** What is written for a category - under its tick, in the tooltip, the
       readout and the data table - where the rows hold a key and not a name.
@@ -52,7 +52,7 @@ export interface XAxisProps<T> extends CommonProps {
       (`ValueFunction`) - with the same closure limit. A number is a position,
       a `Date` an instant, a string a category: every distinct one gets a
       place of its own, in the order the rows bring them, a tick and its name
-      as the label (ADR-0051). The type decides, never the content - `"2024"`
+      as the label (ADR-0052). The type decides, never the content - `"2024"`
       is a category, `2024` a number - and a row without a value has no
       place. The axis reads the rows
       of every series bound to it; where those bring their own `data`, name
@@ -103,7 +103,7 @@ export interface XAxisProps<T> extends CommonProps {
 /** The props of `YAxis`. It reads no value of its own: where a row lies
     along y is its series' `value`. It has categories where a `Matrix` reads
     its rows from a string or a `StateBand` names its `lane`; the first stands
-    at the top (ADR-0051). */
+    at the top (ADR-0052). */
 export interface YAxisProps extends CommonProps {
   /** As on the x axis, and `"visible"`: what the series show inside their x
       axis' domain - a zoomed hour gets the hour's range, not the week's -,

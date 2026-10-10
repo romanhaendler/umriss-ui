@@ -44,7 +44,7 @@ export interface StateBandProps<T> {
   /** The lane by its name: a category of the y axis, whose place the band
       takes, as wide as a bar is. The y axis then lists a lane per name, the
       first at the top, in the bands' order or its own `categories`
-      (ADR-0051). Not together with `laneFrom` or `laneTo`. */
+      (ADR-0052). Not together with `laneFrom` or `laneTo`. */
   lane?: string;
   /** Lower edge of the lane in domain units of a numeric y axis.
       @default the beginning of the axis' domain */

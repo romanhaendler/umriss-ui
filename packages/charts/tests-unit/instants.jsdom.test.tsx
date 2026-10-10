@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-/* chart-rows-as-they-come 04, ADR-0051: an instant is a value. A `Date` puts
+/* chart-rows-as-they-come 04, ADR-0052: an instant is a value. A `Date` puts
    its axis in time; with `time` a string is read as an ISO 8601 instant; a
    place the caller names on a time axis may be a `Date`. Milliseconds stay
    what they were. */

@@ -1,7 +1,7 @@
 import { Tooltip, useChart } from "../../../src";
 
 export const title = "One bar per category";
-export const lead = "Give the x axis the field that holds the category: each one gets a place, a tick and its name, in the order of the rows (ADR-0051).";
+export const lead = "Give the x axis the field that holds the category: each one gets a place, a tick and its name, in the order of the rows (ADR-0052).";
 
 /* February's spend per cost centre, as the ledger sends it. */
 const SPEND = [

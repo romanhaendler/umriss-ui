@@ -14,7 +14,7 @@ over rows whose `costCentre` is a string - and gets one place per distinct
 category, a tick under each and the category as its label. No position, no
 `ticks`, no `tickFormat`.
 
-The decision is written down first: ADR-0051, with a pointer in ADR-0002 and
+The decision is written down first: ADR-0052, with a pointer in ADR-0002 and
 ADR-0032 to it (neither is rewritten), and **Category** and **Category axis**
 in the glossary.
 
@@ -35,7 +35,7 @@ through the path the tick labels take (D21).
 
 ## Acceptance
 
-- [x] ADR-0051 written; ADR-0002 and ADR-0032 each carry a pointer to it and
+- [x] ADR-0052 written; ADR-0002 and ADR-0032 each carry a pointer to it and
       are otherwise unchanged; the ADR index lists it. **Category** and
       **Category axis** stand in the glossary.
 - [x] Type tests: a string field is accepted by `XAxis value` (the line that

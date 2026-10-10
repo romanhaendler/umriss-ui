@@ -35,7 +35,7 @@ export type ListField<T> = NoInfer<
   }[keyof T & string]
 >;
 
-/** What an axis reads from a row (ADR-0051): a number - a position, or an
+/** What an axis reads from a row (ADR-0052): a number - a position, or an
     instant on a time axis -, a string, which is a category, or a `Date`,
     which is an instant. The type of the value decides what kind the axis is,
     never its content: `"2024"` is a category, `2024` a number. On an axis
@@ -172,7 +172,7 @@ export interface StateSeriesConfig<T = unknown> extends SeriesBase<T> {
       not a key (ADR-0007). */
   states: readonly StateEntry[];
   /** The lane by its name: a category of the y axis, whose place the band
-      takes (ADR-0051). */
+      takes (ADR-0052). */
   lane?: string;
   /** Lower edge of the lane in domain units of the y axis; without a value the
       beginning of the axis domain. */
@@ -200,7 +200,7 @@ export type MatrixColoring =
 
 /** A `Matrix` as the chart holds it once registered: its base accessor is the
     row, `level` the colour. The row may be named: where the accessor yields a
-    string, materialisation gives it its category's place (ADR-0051) - the one
+    string, materialisation gives it its category's place (ADR-0052) - the one
     series kind whose base accessor reads more than a number. */
 export interface MatrixSeriesConfig<T = unknown> extends SeriesBase<T> {
   kind: "matrix";
@@ -240,7 +240,7 @@ export interface AxisConfig<T = unknown> {
   position: AxisPosition;
   /** Where a row lies along the axis; an x axis' only - along y the series
       place their rows. A number is a position or an instant, a string a
-      category, a `Date` an instant (ADR-0051). */
+      category, a `Date` an instant (ADR-0052). */
   accessor?: (d: T, index: number) => AxisValue;
   label?: string;
   tickCount?: number;
@@ -256,13 +256,13 @@ export interface AxisConfig<T = unknown> {
       hour axis' named hours, a lane grid. */
   ticks?: readonly number[];
   /** The categories of the axis, in their order: the list is the order and
-      the extent, and makes the axis a category axis (ADR-0051). */
+      the extent, and makes the axis a category axis (ADR-0052). */
   categories?: readonly string[];
   /** What is written for a category, wherever it is written. */
   categoryLabel?: (category: string) => string;
   /** The values are instants - milliseconds, and where this is said ISO 8601
       strings as well: ticks on local boundaries, labels by level. A calendar
-      implies it, and so do rows that bring a `Date` (ADR-0051). */
+      implies it, and so do rows that bring a `Date` (ADR-0052). */
   time?: boolean;
   /** Working calendar: the intervals in which time counts. With it,
       materialisation maps wall clock time onto working time before the scale

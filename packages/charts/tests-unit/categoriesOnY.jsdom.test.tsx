@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-/* chart-rows-as-they-come 03, ADR-0051: categories on y. A y axis reads no
+/* chart-rows-as-they-come 03, ADR-0052: categories on y. A y axis reads no
    value; it becomes a category axis through what stands on it - a matrix
    whose rows are named by the data, a state band that names its lane. The
    first category stands at the top. */

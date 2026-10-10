@@ -36,7 +36,7 @@ export interface MatrixProps<T> {
       A number is a position, as every series' y is; a string is a category:
       the y axis then has a named row per distinct one, the first at the top,
       in the order the data bring them or the y axis' `categories`
-      (ADR-0051). Never an instant: a `Date` is refused. */
+      (ADR-0052). Never an instant: a `Date` is refused. */
   value: AxisField<T, number | string | null | undefined> | ((d: T, index: number) => number | string | null | undefined);
   /** The level that decides the colour - a number field of the row or a
       function of it. A missing level is a hole, not a zero. */

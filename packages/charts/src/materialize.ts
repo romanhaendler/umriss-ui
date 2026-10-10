@@ -54,7 +54,7 @@ export interface ExtraChannels<T> {
       point. What does not exist at a place is reported through xGap instead. */
   /** The rows to read, in this order, where it is not every row as given: a
       category axis reads them by place, and leaves out those without one
-      (ADR-0051). The series holds its points in this order; every accessor
+      (ADR-0052). The series holds its points in this order; every accessor
       is still handed the row's own index. */
   rows?: Uint32Array | null;
   xMap?: (v: number) => number;
@@ -190,7 +190,7 @@ export const isCategory = (v: unknown): v is string => typeof v === "string" && 
 
 /** The categories of an axis in the order of their places: every distinct
     string the rows bring, by first occurrence, the lists taken in the order
-    given (ADR-0051). null where the first value that is a place is a number
+    given (ADR-0052). null where the first value that is a place is a number
     or a `Date` - the type of the value decides what kind an axis is, never
     its content. */
 export function categoriesOf<T>(
@@ -216,7 +216,7 @@ export function categoriesOf<T>(
 }
 
 /** What the first value that is a place is - the type of the value decides
-    what kind an axis is (ADR-0051): a number, a string or a `Date`. null
+    what kind an axis is (ADR-0052): a number, a string or a `Date`. null
     where no row has a place. */
 export function firstKind<T>(
   lists: readonly (readonly T[])[],

@@ -31,7 +31,7 @@ interface was still expected to move before `0.3.0`.
 
 ## Unreleased – A chart reads its rows as they come
 
-A chart takes rows as an application has them (ADR-0051). A category is a
+A chart takes rows as an application has them (ADR-0052). A category is a
 value: `<XAxis value="costCentre" />` over rows that hold a name gives every
 distinct one a place, a tick and its label - no position computed per row, no
 `ticks` listed, no `tickFormat` that looks the name up. An instant is a value:
