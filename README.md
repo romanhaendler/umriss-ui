@@ -108,6 +108,13 @@ what umriss-ui is not and each package's changelog are pages of the same site
 * **[`CONTRIBUTING.md`](CONTRIBUTING.md)** — setup, commands, and how work is
   organised here.
 
+**For a coding agent**, an installable skill points it at the documentation above
+and states the rules it would otherwise get wrong (`skills/umriss-ui/SKILL.md`):
+
+```bash
+npx skills add romanhaendler/umriss-ui --skill umriss-ui
+```
+
 ## Maturity
 
 Every package is `0.x`, and while the first digit is `0` no version number
