@@ -51,7 +51,9 @@ test.describe("The Button's configurator", () => {
     expect(await code(page)).toBe('import { Button } from "@umriss-ui/core";\n\n<Button variant="primary" size="sm">Acknowledge</Button>');
     const after = await staged(page).evaluate((el) => ({ height: el.getBoundingClientRect().height, background: getComputedStyle(el).backgroundColor }));
     expect(after.height).toBeLessThan(before.height);
-    expect(after.background).not.toBe(before.background);
+    /* The colour moves in a transition: in its first frame it is still the
+       one before. */
+    await expect.poll(() => staged(page).evaluate((el) => getComputedStyle(el).backgroundColor)).not.toBe(before.background);
 
     await configurator(page).getByRole("button", { name: "Reset" }).click();
     expect(await code(page)).toBe(AT_REST);

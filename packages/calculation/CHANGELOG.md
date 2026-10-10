@@ -11,6 +11,30 @@ under a heading "Changed" of its own, no matter which digit rose.
 
 ---
 
+## 0.7.0 – Density (Oct. 2026)
+
+A calculation beside a compact table stood a third larger than it, on the same
+material. It follows the density now (ADR-0051).
+
+### Added
+
+- **`density="regular" | "compact"` on `Calculation`.** Compact sets the lines
+  at the compact table's measures: 11 px type and 27 px a line under a fine
+  pointer, 35 px under a finger. A compact line that says one thing is exactly
+  that tall - with a disclosure, with a verdict, the Result included. Columns,
+  folding, emphasis and rule, the narrow and the two-line form, and what a
+  screen reader hears stay as they are.
+
+### Changed
+
+- **A calculation takes the `UmrissProvider`'s density as its default.** Under
+  a provider that says `density="compact"` every calculation becomes compact,
+  without a change to your code; `density="regular"` on a calculation keeps
+  that one as it was. Without a provider, or under one that is silent about
+  density, nothing changes - a regular calculation does not move by a pixel.
+
+---
+
 ## 0.6.1 – Core 0.30.0 (Oct. 2026)
 
 Needs `@umriss-ui/core` 0.30; the peer range moves to `^0.30.0`. Nothing else changes for a caller.

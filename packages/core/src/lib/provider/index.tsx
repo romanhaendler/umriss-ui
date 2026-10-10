@@ -26,8 +26,9 @@ import type { UmrissContextValue } from "./context";
 
 /** How densely the library builds. A component with a density of its own
     takes it through `useDensityFor` as the default for its `density` - in
-    @umriss-ui/table the table and the alarm list; a compact set of tokens
-    exists only with work package B.13. */
+    @umriss-ui/table the table and the alarm list, in @umriss-ui/calculation
+    the calculation; a compact set of tokens exists only with work package
+    B.13. */
 export type Density = "comfortable" | "compact";
 
 /**
@@ -107,8 +108,8 @@ export function usePortalTarget(): () => HTMLElement | null {
 export interface UmrissProviderProps {
   /**
    * The default for the `density` of every component that reads it with
-   * `useDensityFor` - in `@umriss-ui/table` `Table` and `AlarmList`
-   * ("comfortable" means "regular").
+   * `useDensityFor` - in `@umriss-ui/table` `Table` and `AlarmList`, in
+   * `@umriss-ui/calculation` `Calculation` ("comfortable" means "regular").
    *
    * @default none - a component keeps its own density
    */
