@@ -30,7 +30,7 @@ export const lead = "Pass `onSnooze` with `snoozeDurations`, and `onUnsnooze`: t
 
 const MIN = 60_000;
 
-/* The plant's own rule: which durations an operator may choose. */
+/* The application's own rule: which durations an operator may choose. */
 const DURATIONS = [15 * MIN, 60 * MIN, 4 * 60 * MIN] as const;
 
 export default function OfferSnoozing() {
