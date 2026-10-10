@@ -1,6 +1,6 @@
 # Calculation density: a calculation stands as close as the table beside it
 
-Status: ready-for-agent
+Status: done
 Date:   2026-10-10
 Origin: the user's question on `@umriss-ui/calculation` 0.6.1: "Meinst du
 nicht, dass der kompakte Modus auch bei calculations Sinn ergeben würde?" The
@@ -14,12 +14,12 @@ An application built for a data-dense screen says `density="compact"` on its
 tables and alarm lists, or once on the `UmrissProvider`, and those surfaces
 close up: 11 px type, 27 px a row under a fine pointer. A `Calculation` on the
 same screen does not hear it. It has no `density` and does not read the
-provider's, so it stands at 13 px type and - by its stylesheet, not measured -
-36.5 px a line, whatever the surfaces around it do.
+provider's, so it stands at 13 px type and 37 px a line (measured in Chromium; 38.5 px
+with a verdict), whatever the surfaces around it do.
 
 - A calculation beside a compact table reads as a component from another
   screen: a third larger in type-and-line, on the same material.
-- A derivation of ten lines takes about 365 px where a compact table shows the
+- A derivation of ten lines takes about 370 px where a compact table shows the
   same ten lines in 270. In a side panel, a row detail or a control room
   region the calculation is the surface that pushes the fold down.
 - `<UmrissProvider density="compact">` promises "the default for the density
@@ -201,8 +201,9 @@ provider's, so it stands at 13 px type and - by its stylesheet, not measured -
     cramped, and still do not match the table beside them); a compact set of
     tokens for the whole library (work package B.13, still not built, and not
     needed for a third surface of rows).
-  - The provider's comments and core's README name the calculation beside
-    the table and the alarm list.
+  - The provider's comments name the calculation beside the table and the
+    alarm list. (Core's README names no surface for the density, so it has
+    nothing to correct.)
   - The calculation's README and changelog; a demo example on the
     Calculation page in the shape of the table's density example - one
     calculation three ways: regular, `density="compact"`, and under a
@@ -246,7 +247,9 @@ tests and is not tested again.
   in React's update-depth error) and never grows wider than its frame.
 - **Screenshots**: the new example is shot with every other example, light
   and dark, by the suite that reads the outline - the Result's double rule in
-  full is judged there. The forced-colours suite takes the example as well.
+  full is judged there. The forced-colours suite shoots the first example of
+  each page only, so it does not take this one; compact adds no rule of
+  colour, and what that suite holds for a regular calculation holds here.
 - **Nothing regular moves**: every existing snapshot of the calculation's
   demo passes unchanged. This is the regression guard of the release; a
   changed snapshot of a regular calculation is a defect, not a baseline to
@@ -267,22 +270,20 @@ tests and is not tested again.
 - **A fixed pitch for a calculation's lines.** No ellipsis on a label, no
   one-line rule: a calculation's label is the name of a quantity and is read
   in full.
-- **The regular line's half pixel.** By its stylesheet a regular line is
-  13 px × 1.5 + 16 + 1 = 36.5 px - the half pixel ADR-0042 removed from the
-  table. Setting it to a whole pixel would move every regular calculation and
-  renew every snapshot; it is a change of its own, with its own measurement in
-  three browsers first.
+- **The regular line's uneven height.** Measured in Chromium, a regular line
+  is 37 px, the Result 38 and a line with a verdict 38.5: cells that share a
+  baseline push the line out by the fraction they are set lower. Compact
+  repairs this for itself; doing the same for regular would move every regular
+  calculation and renew every snapshot, and is a change of its own.
 - **A third density**, or a density per line.
 - **Sized controls inside a note.** A caller who puts a control into a
   quantity's aside sizes it themselves.
 
 ## Further Notes
 
-- The numbers for the regular calculation above are read from the stylesheet,
-  not measured in a browser. The first step of the implementation is to
-  measure a regular and a compact line in the three browsers and correct this
-  spec's figures if they differ; the target - a compact line as tall as a
-  compact table's row - holds either way.
+- The numbers for the regular calculation were first read from the stylesheet
+  (36.5 px) and corrected to what the implementation measured; see the
+  delivery report under Comments.
 - The seams were not confirmed with the user before writing (the spec was
   produced unattended). If the browser suite on the density example is not
   the seam wanted, that section is the one to change; nothing else depends on
@@ -290,3 +291,49 @@ tests and is not tested again.
 - In compact a line and its note are both at 11 px and differ by colour and
   place alone. If that reads as too flat on the rendered page, the fix is the
   note's, not a smaller type step - there is none.
+
+## Comments
+
+### Delivery report (2026-10-10)
+
+Delivered as `@umriss-ui/calculation` 0.7.0; the decision is ADR-0051, the
+term **Density** stands in `CONTEXT.md`.
+
+**What the measurement said.** A regular line is 37 px in Chromium, not the
+36.5 px read from the stylesheet, and regular lines are not one height: the
+Result measures 38 px and a line with a verdict 38.5, because cells that share
+a baseline are set a fraction lower where their type differs. The same would
+have made a compact line 27, 27.5 or 28 px. Compact therefore gives the last
+pixel beneath the text to the line rather than to its cells, and lets the
+20 px disclosure and badge reach into the room above and below; every compact
+line that says one thing measures 27 px.
+
+**Where it departs from the text above.**
+
+- **The kiln line's OEE stays regular.** On that page it stands in a grid row
+  beside the tile length chart, whose floor of 300 px rules the row; a compact
+  OEE of 108 px would have left its card emptier, not the page denser.
+- **Firefox is not measured.** Playwright's build of it (153, v1538) hung on
+  launch under macOS 27. The suite measures Chromium and, where it is
+  installed, WebKit.
+- **Two things this spec said of other documents were wrong** and are
+  corrected in place: the forced-colours suite shoots the first example of a
+  page only, and core's README names no surface for the density.
+- **A second example**, a compact staff report on the Metrics page: the test
+  of metrics needed a compact calculation with metrics, and it is the picture
+  of the head and a note in compact.
+
+**What is known and left.**
+
+- The pixel a compact line keeps for the baseline holds while the Result's
+  number and its label differ by a pixel or less. Measured with the demo's
+  fonts in Chromium and WebKit; the library ships no font, and a face with a
+  very different baseline would bring a fraction back - what a regular line
+  does today.
+- 27 and 35 px are written in the calculation's stylesheet, not read from the
+  table's; they agree because both name the same tokens and ADR-0042, and each
+  suite holds its own.
+
+**Checked.** Lint, types, unit tests and build over the workspace; the browser
+suite over all five demos, light and dark. No existing snapshot changed; the
+four new ones are the two new examples.

@@ -79,7 +79,7 @@ test("metrics never push the frame wider than its place, at any width on the way
   await openExample(page, "metrics", "two-teams");
   /* Every 10 px, so that no width where the flag could flip is skipped. */
   for (let width = 900; width >= 300; width -= 10) {
-    for (const id of ["two-teams", "not-recorded", "business-line", "staff-movement", "staff-cost", "whole-company"]) {
+    for (const id of ["two-teams", "not-recorded", "business-line", "staff-movement", "staff-cost", "whole-company", "compact-report"]) {
       const frame = frameOf(page, id);
       await setWidth(frame, width);
       const [scroll, client] = await frame.evaluate((el) => [el.scrollWidth, el.clientWidth]);

@@ -36,6 +36,11 @@
        notes start past it. */
     --disclosure-size: 20px;
     --disclosure-gap: var(--u-space-2);
+    /* The room above and below a line's text, and the smaller one between a
+       label and what stands beneath it - the measures the density changes
+       besides the type. */
+    --line-pad: var(--u-space-2);
+    --line-gap: var(--u-space-1);
     /* Measured against its own width, not the window's: a calculation in a
        side panel is as narrow as one on a phone. A size container has no
        width of its own content, so it takes the width it is given. */
@@ -49,6 +54,65 @@
     margin: 0;
     padding: 0;
     list-style: none;
+  }
+
+  /* Compact (ADR-0051): the compact table's measures (ADR-0042), so that the
+     two stand side by side - its type on a whole-pixel line, a small step
+     above and below. Under a finger the line is its own target and takes the
+     regular room back. */
+  .frame[data-compact] {
+    --line-text: 18px;
+    --line-pad: var(--u-space-1);
+    --line-gap: calc(var(--u-space-1) / 2);
+    font-size: var(--u-text-xs);
+    line-height: var(--line-text);
+  }
+
+  @media (pointer: coarse) {
+    .frame[data-compact] {
+      --line-pad: var(--u-space-2);
+      --line-gap: var(--u-space-1);
+    }
+  }
+
+  /* A line that says one thing is exactly that tall, whatever stands on it.
+     Cells that share a baseline are set a fraction lower where their type
+     differs - the Result's number, a verdict - and each pushed its line out
+     by that fraction: a regular line measures 37 px, 38 or 38.5. Here the
+     last pixel beneath the text is the line's and not the cells', so it
+     gives way instead; a label that wraps still makes its line taller.
+     Not in the two-line form, where the figures stand on a row of their
+     own and nothing shares the label's. */
+  .frame[data-compact]:not([data-two-lines]) .line {
+    grid-template-rows: minmax(calc(var(--line-text) + 2 * var(--line-pad)), auto);
+  }
+
+  .frame[data-compact]:not([data-two-lines]) :is(.labelCell, .names, .operator, .amount, .unit) {
+    padding-bottom: calc(var(--line-pad) - 1px);
+  }
+
+  /* A badge's baseline lies higher in its box than a line's text, so the
+     assessment is set lower than any other cell: on the line it keeps no
+     room beneath at all, and its badge - 20 px on a line of 18 - reaches
+     into the room above and below rather than making it. */
+  .frame[data-compact]:not([data-two-lines]) .assessment {
+    padding-bottom: 0;
+  }
+
+  .frame[data-compact]:not([data-two-lines]) .assessment > :not(.target, .worst) {
+    margin-block: -1px;
+  }
+
+  /* The disclosure is 20 px as well, in every form. */
+  .frame[data-compact] .disclosure {
+    margin-block: -1px;
+  }
+
+  /* The Result: one step above its lines here too, and its double rule
+     drawn closer - at the regular offset it stood on the frame's edge. */
+  .frame[data-compact] .line[data-kind="result"] > .amount {
+    font-size: var(--u-text-sm);
+    text-underline-offset: 3px;
   }
 
   /* Nothing to fold: no column kept free for a disclosure. */
@@ -162,8 +226,8 @@
   .unit,
   .assessment {
     grid-row: 1;
-    padding-top: var(--u-space-2);
-    padding-bottom: var(--u-space-2);
+    padding-top: var(--line-pad);
+    padding-bottom: var(--line-pad);
   }
 
   .labelCell {
@@ -443,7 +507,7 @@
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    padding: var(--u-space-2) 0 var(--u-space-1);
+    padding: var(--line-pad) 0 var(--u-space-1);
     font-size: var(--u-text-xs);
     font-weight: var(--u-weight-medium);
     color: var(--u-color-text-secondary);
@@ -464,8 +528,8 @@
     flex-wrap: wrap;
     align-items: center;
     column-gap: var(--u-space-3);
-    margin-top: calc(-1 * var(--u-space-1));
-    padding: 0 var(--u-space-4) var(--u-space-2)
+    margin-top: calc(-1 * var(--line-gap));
+    padding: 0 var(--u-space-4) var(--line-pad)
       calc(var(--u-space-3) + var(--depth, 0) * var(--u-space-5) + var(--disclosure-size) + var(--disclosure-gap));
     font-size: var(--u-text-xs);
     color: var(--u-color-text-secondary);
@@ -522,9 +586,19 @@
          out of view. */
       min-width: 0;
       overflow: hidden;
-      padding: 0 var(--u-space-3) var(--u-space-2)
+      padding: 0 var(--u-space-3) var(--line-pad)
         calc(var(--u-space-3) + var(--depth, 0) * var(--u-space-5) + var(--disclosure-size) + var(--disclosure-gap));
       white-space: normal;
+    }
+
+    /* On a row of its own it has its room beneath again, and its badge
+       stands in full - it is cut at the cell's edge here. */
+    .frame[data-compact]:not([data-two-lines]) .assessment:not(:empty) {
+      padding-bottom: var(--line-pad);
+    }
+
+    .frame[data-compact]:not([data-two-lines]) .assessment:not(:empty) > :not(.target, .worst) {
+      margin-block: 0;
     }
 
     .notes {
@@ -550,7 +624,7 @@
   .frame[data-two-lines] .line > .amount,
   .frame[data-two-lines] .line > .unit {
     grid-row: 2;
-    padding-top: var(--u-space-1);
+    padding-top: var(--line-gap);
   }
 
   .frame[data-two-lines] .line[data-kind="interim"]::before,
@@ -564,7 +638,7 @@
     flex-wrap: wrap;
     min-width: 0;
     overflow: hidden;
-    padding: 0 var(--u-space-3) var(--u-space-2)
+    padding: 0 var(--u-space-3) var(--line-pad)
       calc(var(--u-space-3) + var(--depth, 0) * var(--u-space-5) + var(--disclosure-size) + var(--disclosure-gap));
     white-space: normal;
   }

@@ -23,7 +23,7 @@
 
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties, HTMLAttributes, ReactNode } from "react";
-import { AngleGlyph, Badge, Tooltip, VisuallyHidden, useFormats, useFreshness, useWording, verdictWeight } from "@umriss-ui/core";
+import { AngleGlyph, Badge, Tooltip, VisuallyHidden, useDensityFor, useFormats, useFreshness, useWording, verdictWeight } from "@umriss-ui/core";
 import type { BadgeTone, FreshnessAges, Verdict } from "@umriss-ui/core";
 import { evaluate } from "./evaluate";
 import type { Metric } from "./elements";
@@ -48,6 +48,11 @@ export interface CalculationProps extends Omit<HTMLAttributes<HTMLUListElement>,
       metric's. A calculation with metrics only adds and subtracts, and
       assesses no target or limits. */
   metrics?: readonly Metric[];
+  /** `"compact"` sets the lines as close as a compact table's rows: smaller
+      type and less room above and below, under a finger still tall enough to
+      tap. Columns, folding and wording stay as they are.
+      @default the density of the `UmrissProvider`, else `"regular"` */
+  density?: "regular" | "compact";
 }
 
 /** What the label keeps at least beside the figures before they move to a
@@ -107,7 +112,8 @@ interface Place {
     operation it shows, the number cannot disagree with the lines above it.
     Every tree below the outermost statement starts folded and opens beneath
     the row that is clicked. */
-export function Calculation({ children, className, style, metrics, ...rest }: CalculationProps) {
+export function Calculation({ children, className, style, metrics, density, ...rest }: CalculationProps) {
+  const compact = useDensityFor(density, "regular") === "compact";
   const formats = useFormats();
   const wording = useWording();
   const uid = useId();
@@ -438,6 +444,7 @@ export function Calculation({ children, className, style, metrics, ...rest }: Ca
       data-still={folds ? undefined : ""}
       data-metrics={metrics ? count : undefined}
       data-two-lines={twoLines ? "" : undefined}
+      data-compact={compact ? "" : undefined}
     >
       <ul className={styles.calculation} {...rest}>
         {metrics && (

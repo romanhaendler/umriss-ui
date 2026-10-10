@@ -162,9 +162,21 @@ One of a control's two heights, `sm` or `md`, said with `size` on every control
 that has them. A place says it once for every control in it with
 `ControlSizeProvider` — @umriss-ui/table's toolbar does; a control's own `size`
 wins, and a popover, dialog or tooltip opened from the place starts without
-it (ADR-0041). Not the **Provider**'s density, which is how close a
-table sets its rows.
+it (ADR-0041). Not a **Density**, which is how close a data surface sets its
+lines.
 _Avoid_: scale, variant, `selectSize` (retired)
+
+**Density**:
+How close a data surface sets its lines: regular or compact. Said with
+`density` on the surface, or once on the **Provider** for every surface under
+it, where regular is called `comfortable`; a surface's own wins. A table, an
+alarm list and a **Calculation** follow it, and compact is one set of measures
+for all three, so that they stand side by side: the smallest type step, and
+27 px under a fine pointer, 35 under a finger - a table's **Row pitch**, and
+the height of a calculation's line that says one thing (ADR-0042, ADR-0051).
+It changes the type and the room above and below a line, never the columns
+and never what a line says.
+_Avoid_: compact mode, dense mode, size (a **Control size**'s word), row height
 
 **Segmented control**:
 One choice out of a few short possibilities, drawn as one control with a segment
@@ -953,7 +965,7 @@ header**, a placeholder, the footer: one whole-pixel line of text and the
 density's padding, never less than a small control and 4 px above and below
 it. It follows the density and the pointer, never what a line shows; a value
 that does not fit ends in an ellipsis on its line (ADR-0042). A row detail is
-not held to it - the user opened it. Not the **Provider**'s density, which
+not held to it - the user opened it. Not a **Density**, which
 chooses the pitch, and not a **Control size**, which the pitch makes room for.
 _Avoid_: row height, slot (a **Resting place**'s word), Zeilenhöhe, line height
 (the type's)
