@@ -74,14 +74,15 @@ const CENTRES = [
   { id: "CC-4400", name: "Facilities" },
 ];
 
-const month = (row: LedgerRow) => Number(row.month.slice(5)) - 1;
 const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+/** `"2026-03"` as the axis writes it. */
+const monthName = (month: string) => MONTH_NAMES[Number(month.slice(5)) - 1] ?? month;
 
 function Forecasts({ encoding }: { encoding?: "marks" }) {
   const { Chart, XAxis, YAxis, Line } = useChart(LEDGER);
   return (
     <Chart height={240} ariaLabel="Forecast of four cost centres per month" encoding={encoding}>
-      <XAxis value={month} tickFormat={(v) => MONTH_NAMES[v] ?? ""} tickCount={6} />
+      <XAxis value="month" categoryLabel={monthName} />
       <YAxis label="€" />
       {CENTRES.map((c) => (
         <Line
