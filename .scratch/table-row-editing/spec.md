@@ -1,6 +1,6 @@
 # The grid: edit on the first click, save a row on purpose, add and delete rows
 
-Status: ready-for-agent
+Status: done
 Date:   2026-09-26
 Origin: the user, 26 Sep 2026: "Der Editiermodus der Tabelle ist so unbrauchbar" -
 a click opens nothing, nothing shows a cell edits, and every cell is saved on

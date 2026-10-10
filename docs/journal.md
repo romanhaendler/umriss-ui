@@ -18,6 +18,64 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Oct. 2026 — What was left open
+
+A scan of every `Status:` line under `.scratch/` on 10 Oct 2026 found a
+handful of tickets that were neither done nor moving; they were decided with
+the maintainer in one sitting and closed.
+
+- **One natural width of twenty characters** (control-sizes 07; `@umriss-ui/core`,
+  unreleased). Sixteen had been chosen because twenty "made a dispatcher's bar
+  three lines". Asked again, the maintainer put the rule before the bar: "eine
+  Vereinheitlichung der Breiten" is the right way, and the full row is changed
+  by hand. Input, Select and Combobox take the multiselect's count, the slider
+  follows. The dispatcher's bar itself came out as tall as before; one example
+  (`Sizes/06`) gives its selects the count of their values to stay on one line.
+  The same count is not the same width: the chrome is added per field, so a
+  select is some 16 px wider than an input. That was said and kept - `chars`
+  stays "the room for the value".
+- **The room a multiselect leaves stays** (08): nothing is cut. **The slider's
+  readout** takes the room of the longer of `min` and `max` as formatted (09).
+- **A field that fills a row gets no prop** (10). A bar of one's own puts it in
+  a `Grid` with a `"fill"` column. The first answer stopped there and was
+  wrong for the table's toolbar, which a caller cannot lay out - the
+  maintainer's objection. There the toolbar is the place that decides
+  (ADR-0041), so its own part offers it: `<Search grow />` (`@umriss-ui/table`,
+  unreleased), grown from its natural width so that it wraps where it did.
+- **The copies of `#own-styles` are folded in the build** (06). The plan was to
+  keep the first copy of each rule; that would have moved a picture - a
+  component's `.sm .input` would have beaten the field's 16 px touch size,
+  which today a later copy overrides. The last copy is the one that decides a
+  tie, so the last is kept, and every pair of rules keeps its order. `core.css`
+  goes from 228 kB to 158 kB raw. Proved in two runs of the visual suite: one
+  without the fold, renewing the 50 baselines the wider fields move, and one
+  with the fold and no renewal - 2828 passed, no picture differed.
+- **Zoom keys without a tooltip** (`charts-zoom-keys-without-tooltip`, ADR-0030
+  amended; `@umriss-ui/charts`, unreleased). A chart with a zoomable x axis is
+  one tab stop with the application role; there is no walk, and after a zoom
+  or pan key the live region reads the span in view with the wording the
+  summary already had.
+- **Closed as overtaken**, each with the work that overtook it: search-visibility
+  06 (npm shows the new metadata at the current versions) and 07 (the front
+  page was rebuilt by `site-front-page`), demo-rework 30 (the pages were
+  rebuilt and accepted with `docs-roadmap`), and the triage of props no example
+  shows (every missing example exists; 34 reasoned exceptions remain).
+- **Two final polish rounds judged without the maintainer**, by his leave:
+  table-row-editing 05 and row-pitch 08, on the rendered table demo in
+  Chromium and WebKit, light and dark, at 1280 and 390 px. Of the six findings
+  noted for the row editing on 26 Sep, three were gone (the row line at the
+  pinned cell, the hint running out of the table, the wrapping Item) and three
+  were matters of taste and were left (the black Save, text rather than
+  glyphs, the width of the action column at rest). No source changed. The
+  editing ticket is closed; the pitch is not, because its ticket names Firefox
+  and Firefox could not be started from the job - that one look is left.
+- **Still open, with the maintainer:** search-visibility 05 - the Google
+  property is verified, the sitemap is listed as "Couldn't fetch" although it
+  answers 200 as XML to a Googlebot user agent; Bing is not set up.
+- **Run on ports of its own.** The visual suite ran from an uncommitted twin of
+  the Playwright configuration on 5173-5177, so that it neither reused nor fed
+  the preview servers of the jobs working beside it.
+
 ## Oct. 2026 — A chart reads its rows as they come
 
 - **A category and an instant are values**

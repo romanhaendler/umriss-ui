@@ -3,7 +3,7 @@
    several times, the LAST copy stays where it stood, and nothing else moves. */
 
 import { describe, expect, it } from "vitest";
-import { foldOwnCopies } from "../../../scripts/styles/ownStyles.ts";
+import { foldOwnCopies } from "../../../scripts/styles/fold.ts";
 
 const squeeze = (css: string) => css.replace(/\s+/g, " ").trim();
 
