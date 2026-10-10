@@ -35,8 +35,8 @@ const SERVICES: readonly Service[] = [
 
 interface SuccessCell {
   hour: number;
-  /** The row: the service's place in `SERVICES`. */
-  service: number;
+  /** The row: the service's name. */
+  service: string;
   /** Requests that succeeded, in per cent; `null` where there were none. */
   success: number | null;
 }
@@ -47,13 +47,13 @@ interface SuccessCell {
 const SUCCESS_BY_HOUR: readonly SuccessCell[] = (() => {
   const r = random(23);
   const cells: SuccessCell[] = [];
-  SERVICES.forEach((one, service) => {
+  SERVICES.forEach((one) => {
     for (let hour = 0; hour < 24; hour++) {
       let success: number | null = 99.2 + r() * 0.8;
       if (one.id === "webhooks" && hour >= 9 && hour < 14) success = 96 + r() * 1.5;
       if (hour === 3) success = 97.4 + r() * 1;
       if (one.id === "reports" && hour < 6) success = null;
-      cells.push({ hour, service, success: success === null ? null : Math.round(success * 100) / 100 });
+      cells.push({ hour, service: one.name, success: success === null ? null : Math.round(success * 100) / 100 });
     }
   });
   return cells;
@@ -68,7 +68,7 @@ export default function Gradient() {
   return (
     <Chart height={280} ariaLabel="Successful requests per service and hour yesterday, as a gradient">
       <XAxis value="hour" ticks={[0, 6, 12, 18]} tickFormat={(v) => `${v}:00`} label="Hour" />
-      <YAxis ticks={SERVICES.map((_, i) => i)} tickFormat={(v) => SERVICES[v]?.name ?? ""} />
+      <YAxis />
       <Matrix value="service" level="success" name="Success rate" />
       <Tooltip mode="nearest" />
     </Chart>

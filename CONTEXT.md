@@ -584,9 +584,11 @@ across charts. It is what makes the same fault the same colour everywhere.
 _Avoid_: legend, palette, enum
 
 **Lane**:
-The strip of an axis' domain a band occupies, expressed in domain
-units. Four machines are one axis with a four-unit domain. There is no lane
-concept beyond the axis: no pixels, no fractions of plot height.
+The strip of an axis' domain a band occupies. A band names its lane - a
+**Category** of its y axis, whose place it takes, as wide as a bar is - or gives
+its two edges in the domain units of a numeric axis. Four machines are one axis
+with four categories. There is no lane concept beyond the axis: no pixels, no
+fractions of plot height.
 _Avoid_: row, Zeile, track, swimlane
 
 **Level channel**:

@@ -15,7 +15,7 @@
 import { useMemo } from "react";
 import { useSeries } from "./context";
 import { readerOf } from "./value";
-import type { ValueFunction, Value, MatrixColoring, MatrixSeriesConfig } from "./types";
+import type { AxisField, AxisValue, ValueFunction, Value, MatrixColoring, MatrixSeriesConfig } from "./types";
 
 /** Default gradient: a sequential set, light to dark, so that it stays readable
     as an order of lightness even without colour. It is a default, not a
@@ -32,9 +32,11 @@ export const DEFAULT_GRADIENT: readonly string[] = [
 
 /** The props of `Matrix`. */
 export interface MatrixProps<T> {
-  /** Row position on the y axis - a number field of the row or a function
-      of it, as every series' y position. */
-  value: Value<T>;
+  /** The row on the y axis - a field of the data's row or a function of it.
+      A number is a position, as every series' y is; a string is a category:
+      the y axis then has a named row per distinct one, the first at the top,
+      in the order the data bring them or the y axis' `categories` (ADR-0051). */
+  value: AxisField<T> | ((d: T, index: number) => AxisValue);
   /** The level that decides the colour - a number field of the row or a
       function of it. A missing level is a hole, not a zero. */
   level: Value<T>;
@@ -86,7 +88,8 @@ export function Matrix<T>(props: MatrixProps<T>): null {
     () =>
       ({
         kind: "matrix",
-        accessor: readerOf<ValueFunction<T>>(value),
+        // A row named by a string is given its place in materialisation.
+        accessor: readerOf<(d: T, index: number) => AxisValue>(value) as ValueFunction<T>,
         level: readerOf<ValueFunction<T>>(level),
         coloring: effectiveColoring,
         xAxisId,

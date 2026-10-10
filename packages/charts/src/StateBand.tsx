@@ -18,8 +18,7 @@ import { useSeries } from "./context";
 import { readerOf } from "./value";
 import type { ValueFunction, Value, StateEntry, StateSeriesConfig } from "./types";
 
-/** The props of `StateBand`. */
-export interface StateBandProps<T> {
+interface StateBandBase<T> {
   /** Index of the state in `states` - a number field of the row or a
       function of it; null/undefined/NaN/±Infinity is a gap -
       and a gap stays a hole, it gets no colour for "unknown". A colour would
@@ -40,11 +39,29 @@ export interface StateBandProps<T> {
       unnamed series is a colour nobody can look up.
       @default "Series n", after its place in the chart */
   name?: string;
-  /** Lower edge of the lane in domain units of the y axis. */
-  laneFrom?: number;
-  /** Upper edge of the lane in domain units of the y axis. */
-  laneTo?: number;
 }
+
+/** The props of `StateBand`. Its lane is named, or given by its two edges -
+    one way or the other. */
+export type StateBandProps<T> =
+  | (StateBandBase<T> & {
+      /** The lane by its name: a category of the y axis, whose place the band
+          takes, as wide as a bar is. The y axis then lists a lane per name,
+          the first at the top, in the bands' order or its own `categories`
+          (ADR-0051). */
+      lane: string;
+      laneFrom?: undefined;
+      laneTo?: undefined;
+    })
+  | (StateBandBase<T> & {
+      lane?: undefined;
+      /** Lower edge of the lane in domain units of a numeric y axis.
+          @default the beginning of the axis' domain */
+      laneFrom?: number;
+      /** Upper edge of the lane in domain units of a numeric y axis.
+          @default the end of the axis' domain */
+      laneTo?: number;
+    });
 
 /** A band of states: each point's state holds from its x until the next
     point's. The last one holds until the latest reading of the chart - the
@@ -59,6 +76,7 @@ export function StateBand<T>(props: StateBandProps<T>): null {
     yAxisId = "y",
     data,
     name,
+    lane,
     laneFrom,
     laneTo,
   } = props;
@@ -74,10 +92,11 @@ export function StateBand<T>(props: StateBandProps<T>): null {
         yAxisId,
         data,
         name,
+        lane,
         laneFrom,
         laneTo,
       }) as StateSeriesConfig,
-    [accessor, states, xAxisId, yAxisId, data, name, laneFrom, laneTo],
+    [accessor, states, xAxisId, yAxisId, data, name, lane, laneFrom, laneTo],
   );
 
   useSeries("StateBand", config);

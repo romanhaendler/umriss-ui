@@ -191,7 +191,7 @@ export const OUTLINE: readonly Rubric[] = [
         sentence: "What something was doing over time, as a band of coloured segments (a status timeline, a state chart). Reach for it for a vehicle, a service or a device.",
         about: [
           "`value` gives a state's place in `states`, which fixes the order, the name and the colour in one place (ADR-0007). Each segment runs to the next reading; a `null` leaves a hole, never a colour for unknown.",
-          "Several bands share one axis as lanes: a y axis with one unit per lane, and `laneFrom` and `laneTo` on each band.",
+          "Several bands share one axis as lanes: each names its `lane`, and the y axis lists one per name, the first at the top (ADR-0051). On a numeric y axis `laneFrom` and `laneTo` give a lane its edges instead.",
         ],
         alternatives: [{ when: "Work with its own start and end, and gaps between", use: "`Schedule` from @umriss-ui/schedule" }],
         keysOf: ["chart"],
@@ -202,7 +202,7 @@ export const OUTLINE: readonly Rubric[] = [
         id: "matrix",
         name: "Matrix",
         sentence: "One value per cell across two axes (a heatmap), coloured by its limits or along a gradient. Reach for it to see whether a bad hour hits everyone or one row.",
-        about: ["`value` places a cell's row, as it places every series along y; `level` decides its colour. A cell without a level stays a hole, not a zero. The tooltip carries the level as text, since colour alone carries no number."],
+        about: ["`value` places a cell's row, as it places every series along y - a string names the row, and the y axis lists one per name, the first at the top (ADR-0051); `level` decides its colour. A cell without a level stays a hole, not a zero. The tooltip carries the level as text, since colour alone carries no number."],
         keysOf: ["chart"],
         types: ["MatrixProps"],
         exports: ["useChart", "DEFAULT_GRADIENT"],

@@ -167,6 +167,9 @@ export interface StateSeriesConfig<T = unknown> extends SeriesBase<T> {
   /** The closed set of states. The accessor yields the index into it - a number,
       not a key (ADR-0007). */
   states: readonly StateEntry[];
+  /** The lane by its name: a category of the y axis, whose place the band
+      takes (ADR-0051). */
+  lane?: string;
   /** Lower edge of the lane in domain units of the y axis; without a value the
       beginning of the axis domain. */
   laneFrom?: number;

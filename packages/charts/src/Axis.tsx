@@ -95,7 +95,9 @@ export interface XAxisProps<T> extends CommonProps {
 }
 
 /** The props of `YAxis`. It reads no value of its own: where a row lies
-    along y is its series' `value`. */
+    along y is its series' `value`. It has categories where a `Matrix` reads
+    its rows from a string or a `StateBand` names its `lane`; the first stands
+    at the top (ADR-0051). */
 export interface YAxisProps extends CommonProps {
   /** As on the x axis, and `"visible"`: what the series show inside their x
       axis' domain - a zoomed hour gets the hour's range, not the week's -,
@@ -176,6 +178,8 @@ export function YAxis(props: YAxisProps): null {
     domain = "nice",
     grid,
     ticks,
+    categories,
+    categoryLabel,
     alignTicks,
   } = props;
 
@@ -191,9 +195,11 @@ export function YAxis(props: YAxisProps): null {
         domain,
         grid,
         ticks,
+        categories,
+        categoryLabel,
         alignTicks,
       }) as AxisConfig,
-    [id, position, label, tickCount, tickFormat, domain, grid, ticks, alignTicks],
+    [id, position, label, tickCount, tickFormat, domain, grid, ticks, categories, categoryLabel, alignTicks],
   );
 
   useAxis("YAxis", config);
