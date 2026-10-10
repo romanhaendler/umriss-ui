@@ -90,7 +90,7 @@ Screenshot pages carry their name in brackets.
 | `time`: ticks on local boundaries from the minute to the month, across a clock change | Q15 | Unit (time axis, under Europe/Berlin) |
 | `time`: labels by level in en-GB, 24 h (`15:00`, `17 Mar`, `Mar 2026`), the date on the first tick and on the first of a new day (the year on a day axis); `tickFormat` for any other language | Q15 | Unit (time axis), Screenshot (`time`) |
 | `time` with `domain="nice"`: widened to whole local units of the step (the hour under six-hour ticks), a minute step to itself | Q15 | Unit (time axis) |
-| `ticks` with `domain="nice"`: widened to the named ticks, not to a 1-2-5 grid | — | Unit (layout), Screenshot (`per-category`, `by-limits`) |
+| `ticks` with `domain="nice"`: widened to the named ticks, not to a 1-2-5 grid | — | Unit (layout), Screenshot (`by-limits`, `burn-down`) |
 | `time` over less than a minute (an axis without data): no ticks | Q18 | Unit (time axis) |
 | `zoomable`: Ctrl/⌘ + wheel and a pinch zoom around the pointer, a drag and a horizontal or Shift wheel pan, a double click goes back to the axis' own `domain`; without it nothing zooms and the plain wheel stays the page's | Q19, ADR-0047 | Unit (jsdom zoom keys), Interaction (zoom and pan) |
 | The span shown is the chart's view (`domains`, by axis id, `"x"` for a lone axis): `useChart(rows, { initialView, onViewChange })`, applied when it differs in content from the last one handed in, reported whole once per change and at most once per frame, never for the start; `domains` and `setDomain(axisId, span \| null)` on the hook; an id that names no zoomable x axis falls out | ADR-0047, component-view Q5, Q6, Q10, Q22 | Unit (view), Unit (jsdom zoom keys) |
@@ -101,6 +101,30 @@ Screenshot pages carry their name in brackets.
 | The hidden series are the view's `hidden`, by `name`; `hidden`, `toggleSeries(name)`, `showOnly(name)` and `showAllSeries()` on the hook; a name no series carries falls out, and comes back hidden with its series | ADR-0047, component-view Q10, Q22 | Unit (view, jsdom legend toggle) |
 | The legend's gestures: a click toggles at once; a double click, Alt+click or Shift+Enter shows only that series (a state's entry: its bands), on the only one visible all; whatever would hide every series shows all, and the polite live region says so (`allShown`); the plot's summary names Shift+Enter (`legendHelp`) | component-view 03 | Unit (view, jsdom legend toggle), Interaction (legend's gestures) |
 | A view kept outlives a reload and is restored by handing it back | ADR-0047, component-view Q20 | Interaction (`keep-and-restore`) |
+
+## Categories and instants (ADR-0051)
+
+What an axis reads from a row, beyond a number. A category axis is the numeric
+axis with the map kept by the library: every promise above holds on it.
+
+| Capability | Rule | Proved at |
+|---|---|---|
+| A string on the x axis is a category: every distinct one gets a place, a tick and its name, in the order of first occurrence - the series in registration order, a hidden one included | ADR-0051 | Unit (materialisation, jsdom categories), Screenshot (`per-category`) |
+| The type of the first value that is a place decides the axis' kind, never its content: `"2024"` is a category, `2024` a number | ADR-0051 | Unit (materialisation, jsdom categories) |
+| One kind per axis: a number among categories, a category among numbers, is not placed, and DEV names the series | ADR-0051 | Unit (jsdom categories) |
+| The rows of a category axis in any order; a hit and a `value` function's index are the caller's row; a row without a category is left out | ADR-0051 | Unit (materialisation, jsdom categories) |
+| The same category twice in one series: drawn in the one place, named in DEV | ADR-0051 | Unit (jsdom categories) |
+| Bars side by side and stacked, a line on the middle of a bar's place, a series' own `data` adding its categories | ADR-0002, ADR-0051 | Unit (jsdom categories), Screenshot (`grouped`, `stacked`, `pareto`, `detailed`) |
+| `categories`: the order and the extent - an empty place kept, a category not listed not drawn and named in DEV, the axis and the empty state where there are no rows; it makes a category axis whatever the rows hold | ADR-0051 | Unit (jsdom categories), Screenshot (`categories`) |
+| `categoryLabel`: what is written for a category, under the tick and in the tooltip, the readout, the summary and the data table; two categories of one label keep two places | ADR-0051 | Unit (jsdom categories), Screenshot (`categories`, `above-or-below`) |
+| `tickFormat`, `ticks` and `tickCount` on a category axis: not applied, named in DEV | ADR-0051 | Unit (jsdom categories) |
+| A category axis spans its places with half a step at either end, whatever stands on it; `zoomable` and the view's span count in places; a fixed `domain` pair is places | ADR-0051 | Unit (jsdom categories), Screenshot (`above-or-below`, `limits-and-state`) |
+| Along y: a `Matrix` whose `value` reads a string names its rows, and its tooltip the cell's row; a `StateBand` names its `lane`, 0.8 of its category's step; `categories` and `categoryLabel` on `YAxis`; the first category at the top | ADR-0051 | Unit (jsdom categories on y), type check, Screenshot (`by-limits`, `one-lane-each`, `limits-and-state`) |
+| A `Date` in the rows puts its x axis in time without `time` | ADR-0051 | Unit (materialisation, jsdom instants), Screenshot (`time`) |
+| With `time`, a string is an ISO 8601 instant by the platform's rule (a date with a time and no offset local, a date alone UTC); one that is none is not drawn, and DEV names its series and row | ADR-0051 | Unit (materialisation, jsdom instants), Screenshot (`first-chart`) |
+| Strings on an axis without `time` are categories; where each is an ISO instant with a time, DEV asks whether `time` was meant | ADR-0051 | Unit (jsdom instants) |
+| A fixed `domain` and a `LimitLine` or `LimitBand` along time take a `Date` | ADR-0051 | Unit (jsdom instants), type check, Screenshot (`along-time`) |
+| Numbers on a time axis go as they come: one accessor call per series tells its kind, and materialisation reads a million of them in the time it did (8.3 ms before, 8.4 ms after, the fastest of sixty runs each in Node) | ADR-0051 | Unit (materialisation); measured once, Oct. 2026 |
 
 ## The layout engine
 
@@ -426,8 +450,16 @@ The reasons across all five packages stand in
 [ADR-0032](../../../docs/adr/0032-what-umriss-is-not.md); the case for each one
 here.
 
-* **A category scale.** Bars sit on the numeric X axis (ADR-0002); categories are
-  passed as numeric positions with a naming `tickFormat`.
+* **A band scale.** Bars sit on the numeric X axis (ADR-0002). A category is
+  a place on it, and the library keeps the map (ADR-0051) - no second kind of
+  scale draws it.
+* **Series derived from a field of the rows.** One element per series; long
+  rows are grouped before the chart (`series-from-long-rows`).
+* **Aggregation.** Sums, counts and means are the application's, computed
+  before the chart: what changes the number shown is not the chart's to decide.
+* **Sorting rows along a numeric or time axis.** They come ascending (R-2.6),
+  and DEV says where they do not; a control chart's baseline is an index range
+  of the rows as given. A category axis orders its rows itself.
 * **Log scale.** Plant values are read linearly; a log axis breaks the affine
   scale that the working-time axis relies on (ADR-0001).
 * **Smoothing.** A curve between samples invents values the plant never

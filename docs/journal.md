@@ -18,6 +18,37 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Oct. 2026 — A chart reads its rows as they come
+
+- **A category and an instant are values**
+  (`.scratch/chart-rows-as-they-come/`, ADR-0051). It began with the
+  maintainer reading the Bar examples: "zu viele zusätzliche Funktionen, um
+  die Daten brauchbar zu machen". Counted, 22 of the 71 examples and scenarios
+  computed a position per row, listed the positions as `ticks` and looked the
+  name up in a `tickFormat`; 58 opened with a seeded generator, so that a bar
+  chart began at line 42 to 83 of its file.
+- **The research changed the question**
+  (`docs/research/chart-data-input-2026-10/`). It was whether the numeric
+  model had to go for the charts to become intuitive. Seventeen libraries
+  later: none asks a caller for the index, and the fast ones - ECharts,
+  Chart.js, Highcharts - keep a category as a whole number in front of a
+  linear scale. The model was never the obstacle; the map from category to
+  place had been left with the caller. ADR-0002 keeps its title and loses one
+  consequence.
+- **What was built is small for what it removes:** the scene reads an axis'
+  categories before it materialises, writes each row's place into the x
+  channel, and hands the layout the ticks and the label a caller used to
+  write. Tooltip, readout, summary and data table follow without a line of
+  their own, because they already asked the axis how to write an x.
+- **What stayed the caller's, on purpose:** one element per series, sums
+  before the chart, rows sorted along a numeric axis. The research report
+  would also sort those rows; the spec's "Out of Scope" says why not yet.
+- **The pictures:** scenario 03 and "Show bars above and below zero" were
+  rewritten from a generator to literal rows and did not move by a pixel.
+  Others moved by one, as a whole: a lead above them on the page changed its
+  height by a fraction, and a canvas at a fractional place is resampled. A
+  line over categories begins half a step inside the plot now.
+
 ## Oct. 2026 — A chart fills its frame
 
 - **A chart without `height` fills its frame, never below 300 px**

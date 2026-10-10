@@ -97,6 +97,10 @@ loaded: Geist when the application has it, the system fonts otherwise.
 * **Seven series kinds** in one chart on shared axes: `Line`, `Area`, `Bar`,
   `BoxPlot`, `Scatter`, `StateBand`, `Matrix`. Occupancy — work on people or vehicles, idle time,
   double bookings — is `@umriss-ui/schedule`'s (ADR-0026).
+* **Rows as they come** (ADR-0051): an axis reads a category from a string -
+  a place, a tick and its name each, in the rows' order or your own
+  `categories` - and an instant from a `Date` or, with `time`, from the ISO
+  string an API sends. No position computed per row, no tick list, no lookup.
 * **Several axes per orientation**, each with its own extent; only the first
   registered axis per orientation draws a grid.
 * **The chart holds its own view** (ADR-0047): an `XAxis zoomable` zooms and
@@ -122,7 +126,7 @@ loaded: Geist when the application has it, the system fonts otherwise.
   [`docs/capabilities.md`](docs/capabilities.md) under "Performance" — they are
   not repeated here, so that a new measurement has one place to go.
 
-What it deliberately cannot do — animations, a log or category scale,
+What it deliberately cannot do — animations, a log or band scale,
 horizontal bars, pie and radar — stands in the same record, with the reason,
 and across all five packages in
 [ADR-0032](../../docs/adr/0032-what-umriss-is-not.md). Stacking is not among

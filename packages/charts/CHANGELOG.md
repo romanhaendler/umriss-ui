@@ -29,6 +29,60 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## Unreleased – A chart reads its rows as they come
+
+A chart takes rows as an application has them (ADR-0051). A category is a
+value: `<XAxis value="costCentre" />` over rows that hold a name gives every
+distinct one a place, a tick and its label - no position computed per row, no
+`ticks` listed, no `tickFormat` that looks the name up. An instant is a value:
+a `Date`, or with `time` the ISO string an API sends. Numeric positions with
+named ticks keep working as they did; nothing is taken away.
+
+### Added
+
+- **A category on the x axis.** `XAxis value` reads a string field or a
+  function returning a string.
+  - Every distinct category gets a place, in the order the rows first bring
+    them - the series in the order they are declared, a hidden one included.
+  - The category is its label: under the tick, in the tooltip, the keyboard
+    readout, the summary and the data table.
+  - The rows may come in any order; a hit and a `value` function's `index`
+    still name your row. A row without a category is left out.
+  - The type decides, never the content: `"2024"` is a category, `2024` a
+    number. One axis has one kind; DEV names a series that brings the other.
+  - Bars stand side by side and stack, a line stands on the middle of a
+    category, zoom works in places.
+- **`categories` on `XAxis` and `YAxis`**: your own list, which is the order
+  and the extent. A category no row carries keeps its empty place; a row whose
+  category is not listed is not drawn, and DEV names it.
+- **`categoryLabel` on `XAxis` and `YAxis`**: what is written for a category
+  where the rows hold a key and not a name. Two categories may share a label.
+- **Categories along y.** `Matrix value` reads a string field, and the y axis
+  lists a row per category; the tooltip names a cell's row. `StateBand lane`
+  names the band's lane, a category of its y axis. The first category stands
+  at the top.
+- **A `Date` on the x axis** puts the axis in time without `time`.
+- **ISO 8601 strings with `time`.** A date with a time and no offset is local
+  time, a date alone is UTC - the platform's rule. A string that is no instant
+  is not drawn, and DEV names its row.
+- **A `Date` where you name a place in time**: a fixed `domain` pair on
+  `XAxis`, `value` on `LimitLine`, `from` and `to` on `LimitBand`.
+- **Types**: `AxisValue`, `AxisField`.
+
+### Changed
+
+- **A category axis spans its places with half a step at either end**,
+  whatever stands on it. A line over categories therefore begins half a step
+  inside the plot, where a line over the positions 0, 1, 2 began at its edge.
+  Only an axis that reads categories is affected.
+- **`StateBandProps` is a union**, no longer an interface: a band names its
+  `lane` or gives `laneFrom` and `laneTo`, one way or the other. An interface
+  that extended it becomes a type that intersects it.
+- **`tickFormat`, `ticks` and `tickCount` do not apply to an axis that reads
+  categories**; DEV says so. They keep their job on a numeric and a time axis.
+
+---
+
 ## 0.13.0 – A chart fills its frame, never below its floor (Oct. 2026)
 
 ### Changed
