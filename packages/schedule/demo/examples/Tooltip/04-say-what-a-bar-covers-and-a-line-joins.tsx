@@ -39,6 +39,7 @@ function Covers({ target }: { target: ScheduleTooltipTarget }) {
       </Stack>
     );
   }
+  if (target.kind === "milestone") return null;
   return (
     <Stack gap={1}>
       <Text size="sm" weight="semibold">

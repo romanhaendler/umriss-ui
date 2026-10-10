@@ -182,7 +182,7 @@ export interface ScheduleHandle {
 
 /** A plan of subtasks on lanes over time - people, vehicles, rooms - with
     dependencies between them. The contents are declared as children (`Lane`,
-    `LaneGroup`, `Subtasks`, `Dependencies`, `BlockedTimes`); the planner pans,
+    `LaneGroup`, `Subtasks`, `Dependencies`, `BlockedTimes`, `Milestones`); the planner pans,
     zooms and drags, and every drag ends as an **Intent** through `onIntent`.
     The data changes only where the caller applies it; without `intents` the
     schedule is read-only. A ref gives the `ScheduleHandle`. */

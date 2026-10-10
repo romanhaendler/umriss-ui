@@ -39,8 +39,9 @@ const LOADS: Record<string, string> = {
 };
 
 function LoadTooltip({ target }: { target: ScheduleTooltipTarget }) {
-  const task = target.task;
-  const found = target.kind === "subtask" ? target.overlapping.length + target.violatedDependencies.length : target.violated ? 1 : 0;
+  const task = target.kind === "milestone" ? undefined : target.task;
+  const found =
+    target.kind === "subtask" ? target.overlapping.length + target.violatedDependencies.length : target.kind === "dependency" && target.violated ? 1 : 0;
   return (
     <Stack gap={1}>
       <Text size="sm" weight="semibold">

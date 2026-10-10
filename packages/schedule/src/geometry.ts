@@ -17,6 +17,7 @@ import {
   arrival,
   departure,
   occupied,
+  type Milestone,
   type Subtask,
   type Dependency,
   type DependencyAttachment,
@@ -81,6 +82,15 @@ export function xOf(view: Viewport, instant: number): number {
 export function slotAt(view: Viewport, lane: string): Slot | null {
   const slot = slotOf(view.rows, lane);
   return slot === null ? null : { ...slot, top: slot.top - view.scrollY };
+}
+
+/** Where a milestone's diamond stands: its centre and half its width. Null on
+    a lane this plot does not have. In a folded group's strip it is as small
+    as the strip lets it be. */
+export function milestoneMark(view: Viewport, milestone: Milestone): { x: number; y: number; half: number } | null {
+  const slot = slotAt(view, milestone.lane);
+  if (slot === null) return null;
+  return { x: xOf(view, milestone.at), y: slot.top + slot.height / 2, half: Math.max(2, Math.min(7, slot.height * 0.3)) };
 }
 
 /** The lane under a y, or null off every lane - a group's head and the inset

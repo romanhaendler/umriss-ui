@@ -148,17 +148,26 @@ hatched behind the work; a subtask that covers some of it is a finding
 (`inBlockedTime`, and the third argument of `findings`), and a drag does not
 put work into it.
 
+## Milestones
+
+`<Milestones data={…} />` takes points in time on a lane — a handover, a
+release — as plain data, `{ id, lane, at, label? }`. Each is drawn as a diamond
+on its lane above the work, in the text ink; there is no tone and no size. It
+is read-only: it is not dragged, reports no intent and is no finding. The
+pointer's tooltip names it by label (or id) and time; the keys walk to it in
+time order among the work of its lane, and the live region reads its lane,
+label and time.
+
 ## Not yet
 
 What the schedule does not do today, and waits for a caller who needs it (what
 it never does stands in ADR-0032):
 
-* **Milestones** — a point in time on a lane, drawn as a mark rather than a bar.
 * **Stacked overlap** — overlapping subtasks packed into sub-lanes on request;
   today an overlap is always drawn offset, as the finding it is.
 * **Dependencies across tasks** — a dependency joins two subtasks of one task.
 
-Done from this list: **blocked time** per lane.
+Done from this list: **blocked time** per lane and **milestones**.
 
 ## Where to read on
 
@@ -176,7 +185,7 @@ Done from this list: **blocked time** per lane.
   page also has a Markdown twin online; for the latest version:
   <https://romanhaendler.github.io/umriss-ui/schedule/llms.txt>.
 * The vocabulary — **Task**, **Subtask**, **Lead-in**, **Lead-out**,
-  **Dependency**, **Violated dependency**, **Blocked time**, **Lane header**, **Lane group**,
+  **Dependency**, **Violated dependency**, **Blocked time**, **Milestone**, **Lane header**, **Lane group**,
   **Miniature**, **Intent**, **Ghost** — stands in the workspace's
   `CONTEXT.md`, section "The schedule".
 * [`../../docs/design-language.md`](../../docs/design-language.md) — the design

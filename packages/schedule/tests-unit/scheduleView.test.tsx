@@ -173,7 +173,7 @@ describe("folding through the setters", () => {
     render(<Plan />);
     const first = hook;
     act(() => hook.toggleGroup("hall"));
-    for (const name of ["Schedule", "Lane", "LaneGroup", "Subtasks", "Dependencies", "BlockedTimes"] as const) {
+    for (const name of ["Schedule", "Lane", "LaneGroup", "Subtasks", "Dependencies", "BlockedTimes", "Milestones"] as const) {
       expect(hook[name], name).toBe(first[name]);
     }
   });

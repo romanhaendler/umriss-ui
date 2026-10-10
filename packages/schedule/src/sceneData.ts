@@ -8,7 +8,7 @@
 
 import type { ReactNode } from "react";
 import { inBlockedTime, violatedDependencies, overlapDepth, overlaps, type InBlockedTime, type ViolatedDependency, type Overlap } from "./findings";
-import type { BlockedTime, Subtask, Task, Dependency } from "./model";
+import type { BlockedTime, Milestone, Subtask, Task, Dependency } from "./model";
 import type { ScheduleHit } from "./sceneView";
 
 export interface LaneConfig {
@@ -32,7 +32,8 @@ export interface GroupConfig {
 export type LayerConfig =
   | { readonly kind: "subtasks"; readonly data: readonly Subtask[]; readonly tasks: readonly Task[] }
   | { readonly kind: "dependencies"; readonly data: readonly Dependency[] }
-  | { readonly kind: "blocked"; readonly data: readonly BlockedTime[] };
+  | { readonly kind: "blocked"; readonly data: readonly BlockedTime[] }
+  | { readonly kind: "milestones"; readonly data: readonly Milestone[] };
 
 export class SceneData {
   private nextId = 1;
@@ -52,6 +53,8 @@ export class SceneData {
   dependencies: Dependency[] = [];
   /** Every blocked time, whichever layer declared it. */
   blocked: BlockedTime[] = [];
+  /** Every milestone, whichever layer declared it. */
+  milestones: Milestone[] = [];
   tasks = new Map<string, Task>();
   overlaps: Overlap[] = [];
   violatedById = new Map<string, ViolatedDependency>();
@@ -133,6 +136,7 @@ export class SceneData {
     this.subtasks = [];
     this.dependencies = [];
     this.blocked = [];
+    this.milestones = [];
     this.tasks = new Map();
     for (const layer of this.layers) {
       if (layer.kind === "subtasks") {
@@ -140,6 +144,8 @@ export class SceneData {
         for (const task of layer.tasks) this.tasks.set(task.id, task);
       } else if (layer.kind === "dependencies") {
         this.dependencies.push(...layer.data);
+      } else if (layer.kind === "milestones") {
+        this.milestones.push(...layer.data);
       } else {
         this.blocked.push(...layer.data);
       }
@@ -176,6 +182,7 @@ export class SceneData {
         .filter((b): b is BlockedTime => b !== undefined);
       return { kind: "subtask", subtask: hit.subtask, task: this.tasks.get(hit.subtask.task), overlapping, violatedDependencies, blocked };
     }
+    if (hit.kind === "milestone") return { kind: "milestone", milestone: hit.milestone };
     if (hit.kind !== "dependency") return null;
     const dependency = hit.dependency;
     const task = this.taskOfDependency(dependency);
@@ -206,6 +213,12 @@ export type ScheduleTooltipTarget =
       readonly violatedDependencies: readonly ViolatedDependency[];
       /** The blocked time it covers on its lane. */
       readonly blocked: readonly BlockedTime[];
+    }
+  | {
+      /** A milestone is hovered. */
+      readonly kind: "milestone";
+      /** The hovered milestone. */
+      readonly milestone: Milestone;
     }
   | {
       /** A dependency is hovered. */

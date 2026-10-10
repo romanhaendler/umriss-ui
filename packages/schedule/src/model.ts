@@ -70,6 +70,24 @@ export interface BlockedTime {
   readonly label?: string;
 }
 
+/** A point in time on a lane: a handover, a release, a deadline. Drawn as a
+    mark, not a bar - it has no duration and no task, and it is not moved: the
+    schedule reports no intent for it and finds nothing wrong with work beside
+    it.
+
+    A list of its own, like blocked time and for the same reason: it is data
+    the caller already holds (ADR-0023), keyed by lane. */
+export interface Milestone {
+  /** The caller's identity of the milestone. */
+  readonly id: string;
+  /** The id of the lane it stands on. */
+  readonly lane: string;
+  /** The instant it stands at. */
+  readonly at: number;
+  /** What it is called, where the schedule names it; without it, its id. */
+  readonly label?: string;
+}
+
 /** Two subtasks of one task in order: the later one may not begin before the
     earlier one ends plus a lag. Always from an end to a start. */
 export interface Dependency {

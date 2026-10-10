@@ -18,6 +18,26 @@ moves from here under the rule above.
 ## 0.5.7 – Charts 0.14.0 (Oct. 2026)
 
 Needs `@umriss-ui/charts` 0.14; the peer range moves to `^0.14.0`. Nothing else changes for a caller.
+## Unreleased
+
+### Added
+
+- **`<Milestones data />`.** A point in time on a lane, drawn as a diamond
+  above the work: plain data `{ id, lane, at, label? }`, declared inside the
+  `Schedule` like `BlockedTimes` and handed out by `useSchedule`. It is
+  read-only - not dragged, no intent, no finding. The tooltip names it by
+  label (or id) and time, and the keys walk to it in time order among the work
+  of its lane. New types `Milestone` and `MilestonesProps`; the words come
+  from core's new `scheduleMilestone` wording ("Milestone: Release"), so it
+  needs a core with it.
+
+### Changed
+
+- **`ScheduleTooltipTarget` and `ScheduleHit` have a third kind,
+  `"milestone"`.** A `tooltip` function of your own that reads `target.task`
+  or `target.violated` without checking `target.kind` first no longer
+  type-checks; add a case for the milestone (`target.milestone`) or return
+  `null` for it.
 
 ---
 
