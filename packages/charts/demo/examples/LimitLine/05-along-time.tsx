@@ -82,7 +82,7 @@ function metrics(serviceId: string): MetricPoint[] {
 }
 
 export const title = "Mark moments and windows along time";
-export const lead = "With `orientation=\"x\"` a limit lies on the time axis: a line for a moment, a band for a window. Neither carries a severity, so each takes a `color` of its own.";
+export const lead = "With `orientation=\"x\"` a limit lies on the time axis: a line for a moment, a band for a window, each named as a `Date` or in milliseconds. Neither carries a severity, so each takes a `color` of its own.";
 
 const CHECKOUT = metrics("checkout");
 
@@ -92,8 +92,8 @@ export default function AlongTime() {
     <Chart height={260} ariaLabel="Checkout's latency across a maintenance window and the start of a release freeze">
       <XAxis value="t" time />
       <YAxis label="ms" />
-      <LimitBand orientation="x" from={at(17, 2)} to={at(17, 3)} color="#5b7c99" label="Maintenance" />
-      <LimitLine orientation="x" value={at(17, 8, 30)} color="#7b61c9" label="Release freeze" />
+      <LimitBand orientation="x" from={new Date(2026, 2, 17, 2)} to={new Date(2026, 2, 17, 3)} color="#5b7c99" label="Maintenance" />
+      <LimitLine orientation="x" value={new Date(2026, 2, 17, 8, 30)} color="#7b61c9" label="Release freeze" />
       <Line value="p95" name="p95" />
       <Tooltip mode="x" />
     </Chart>

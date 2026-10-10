@@ -62,7 +62,9 @@ import {
   axisExtent,
   categoriesOf,
   categoryPlaces,
+  firstKind,
   firstUnsortedIndex,
+  instantOf,
   materializeSeries,
   visibleExtent,
   type Baseline,
@@ -217,6 +219,10 @@ function labelled(categories: Categories, label: AxisConfig["categoryLabel"]): (
   if (label === undefined) return categories.format;
   return (v) => (categories.names.length === 0 ? "" : label(categories.format(v)));
 }
+
+/** A date with a time, as an API writes an instant. A month or a day alone
+    is as likely a category. */
+const ISO_WITH_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/;
 
 /** Takes back everything materialisation gave a series. */
 function forget(entry: SeriesEntry): void {
@@ -799,6 +805,9 @@ export class ChartScene {
   /** The categories of each axis that has them, by orientation and axis id
       (`x:x`); an axis absent is numeric (ADR-0051). */
   private readonly categories = new Map<string, Categories>();
+  /** The x axes whose rows bring a `Date`: they stand in time without `time`
+      being said (ADR-0051). */
+  private readonly dated = new Set<string>();
   private padding: Padding = { top: 8, right: 8, bottom: 8, left: 8 };
 
   /* ---------- DOM binding ---------- */
@@ -1322,6 +1331,7 @@ export class ChartScene {
       // rows bring along x, and along y what stands on the axis.
       const listed = axis.categories !== undefined && axis.categories.length > 0 ? axis.categories : null;
       const names = listed ?? (x ? this.broughtAlongX(axis, bound) : this.broughtAlongY(bound));
+      if (x) this.readDated(axis, bound, names === null);
       const previous = this.categories.get(key);
       if (names === null ? previous === undefined : previous !== undefined && sameNames(previous.names, names)) continue;
       if (names === null) this.categories.delete(key);
@@ -1329,15 +1339,73 @@ export class ChartScene {
       for (const entry of bound) forget(entry);
     }
     for (const key of [...this.categories.keys()]) if (!live.has(key)) this.categories.delete(key);
+    for (const id of [...this.dated]) if (!live.has(`x:${id}`)) this.dated.delete(id);
   }
 
   private broughtAlongX(axis: AxisConfig, bound: readonly SeriesEntry[]): string[] | null {
     const accessor = axis.accessor;
-    if (accessor === undefined) return null;
-    return categoriesOf(
+    // On an axis that says `time` a string is an instant, never a category.
+    if (accessor === undefined || this.saysTime(axis)) return null;
+    const names = categoriesOf(
       bound.map((e) => e.config.data ?? this.data),
       accessor,
     );
+    if (DEV && names !== null && names.every((name) => ISO_WITH_TIME.test(name) && !Number.isNaN(Date.parse(name)))) {
+      warnOnce(
+        `category-instants-${axis.id}`,
+        `The x axis "${axis.id}" reads its rows' strings as categories, and every one is an ISO 8601 instant. ` +
+          "If they are moments, say \`time\` on the axis: a string is an instant only there (ADR-0051).",
+      );
+    }
+    return names;
+  }
+
+  /** Whether an x axis' rows bring a `Date` first: it stands in time then.
+      The series on it are read anew where that changed. */
+  private readDated(axis: AxisConfig, bound: readonly SeriesEntry[], numeric: boolean): void {
+    const accessor = axis.accessor;
+    const dated =
+      numeric &&
+      accessor !== undefined &&
+      !this.saysTime(axis) &&
+      firstKind(bound.map((e) => e.config.data ?? this.data), accessor) === "date";
+    if (dated === this.dated.has(axis.id)) return;
+    if (dated) this.dated.add(axis.id);
+    else this.dated.delete(axis.id);
+    for (const entry of bound) forget(entry);
+  }
+
+  private saysTime(axis: AxisConfig): boolean {
+    return axis.time === true || (axis.calendar !== undefined && axis.calendar.length > 0);
+  }
+
+  /** An axis in time: one that says so, or whose rows bring a `Date`. */
+  private inTime(axis: AxisConfig): boolean {
+    return this.saysTime(axis) || (axis.orientation === "x" && this.dated.has(axis.id));
+  }
+
+  /** Where a row lies on a numeric or a time axis. Numbers go as they come -
+      a week of seconds pays nothing; a series that brings a `Date` or, on a
+      time axis, a string has each read as its instant (ADR-0051). */
+  private placeOnX(config: SeriesConfig, data: readonly unknown[], xAxis: AxisConfig): (d: unknown, index: number) => number {
+    const accessor = xAxis.accessor as (d: unknown, index: number) => unknown;
+    const kind = this.inTime(xAxis) ? firstKind([data], accessor) : "number";
+    if (kind === "number" || kind === null) return accessor as (d: unknown, index: number) => number;
+    if (DEV && kind === "string") {
+      const name = config.name ?? "?";
+      const index = data.findIndex((d, i) => {
+        const v = accessor(d, i);
+        return typeof v === "string" && v !== "" && Number.isNaN(Date.parse(v));
+      });
+      if (index >= 0) {
+        warnOnce(
+          `instant-unread-${xAxis.id}-${name}`,
+          `Series "${name}": row ${index} holds "${String(accessor(data[index], index))}" on the time axis "${xAxis.id}", ` +
+            "which is no ISO 8601 instant. It has no place and is not drawn (ADR-0051).",
+        );
+      }
+    }
+    return (d, i) => instantOf(accessor(d, i));
   }
 
   /** A y axis reads no value (ADR-0048): its categories are the lanes its
@@ -1441,7 +1509,7 @@ export class ChartScene {
       }
       const material = materializeSeries(
         data,
-        places === null ? (xAxis.accessor as (d: unknown, index: number) => number) : (_d, i) => places.x[i] as number,
+        places === null ? this.placeOnX(config, data, xAxis) : (_d, i) => places.x[i] as number,
         named === undefined
           ? config.accessor
           : (d, i) => {
@@ -1930,7 +1998,7 @@ export class ChartScene {
             ? c.orientation === "y" ? this.yTickFormat(c.id) : c.tickFormat
             : labelled(categories, c.categoryLabel),
         tickValues: categories?.ticks ?? c.ticks,
-        time: categories === undefined ? c.time : undefined,
+        time: categories === undefined && this.inTime(c) ? true : undefined,
         calendar: c.calendar,
         alignTicks: c.alignTicks,
         limitLabels:

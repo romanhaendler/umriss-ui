@@ -184,8 +184,9 @@ export function materializeSeries<T>(
 
 /** The categories of an axis in the order of their places: every distinct
     string the rows bring, by first occurrence, the lists taken in the order
-    given (ADR-0051). null where the first value that is a place is a number -
-    the type of the value decides what kind an axis is, never its content. */
+    given (ADR-0051). null where the first value that is a place is a number
+    or a `Date` - the type of the value decides what kind an axis is, never
+    its content. */
 export function categoriesOf<T>(
   lists: readonly (readonly T[])[],
   accessor: (d: T, index: number) => unknown,
@@ -200,12 +201,39 @@ export function categoriesOf<T>(
           seen.add(v);
           names.push(v);
         }
-      } else if (names.length === 0 && typeof v === "number" && Number.isFinite(v)) {
+      } else if (names.length === 0 && ((typeof v === "number" && Number.isFinite(v)) || v instanceof Date)) {
         return null;
       }
     }
   }
   return names.length === 0 ? null : names;
+}
+
+/** What the first value that is a place is - the type of the value decides
+    what kind an axis is (ADR-0051): a number, a string or a `Date`. null
+    where no row has a place. */
+export function firstKind<T>(
+  lists: readonly (readonly T[])[],
+  accessor: (d: T, index: number) => unknown,
+): "number" | "string" | "date" | null {
+  for (const data of lists) {
+    for (let i = 0; i < data.length; i++) {
+      const v = accessor(data[i] as T, i);
+      if (typeof v === "number" && Number.isFinite(v)) return "number";
+      if (typeof v === "string" && v !== "") return "string";
+      if (v instanceof Date) return "date";
+    }
+  }
+  return null;
+}
+
+/** An instant in milliseconds: a number as it is, a `Date`'s own, a string
+    read as ISO 8601 by the platform - a date with a time and no offset is
+    local time, a date alone is UTC. NaN for what is none. */
+export function instantOf(v: unknown): number {
+  if (typeof v === "number") return v;
+  if (v instanceof Date) return v.getTime();
+  return typeof v === "string" ? Date.parse(v) : Number.NaN;
 }
 
 /** Where each row lies on a category axis: by row, its category's place, NaN
