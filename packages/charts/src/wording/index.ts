@@ -16,6 +16,9 @@ export interface ChartsWording {
   visibleRange: (from: string, to: string) => string;
   /** The summary's lowest and highest value of one series in that stretch. */
   seriesExtent: (name: string, min: string, max: string) => string;
+  /** The summary's labelled limits, each with its value in its axis' format
+      (a band's two edges as one value). */
+  limitList: (limits: readonly { name: string; value: string }[]) => string;
   /** What is read after a key: the position, then each series with its value
       (and its own x where it stands on another x axis), the emphasised one
       first. */
@@ -77,6 +80,7 @@ export const DEFAULT_CHARTS_WORDING: ChartsWording = {
   seriesList: (names) => `${names.length === 1 ? "1 series" : `${names.length} series`}: ${names.join(", ")}.`,
   visibleRange: (from, to) => `From ${from} to ${to}.`,
   seriesExtent: (name, min, max) => `${name} from ${min} to ${max}.`,
+  limitList: (limits) => `Limits: ${limits.map((l) => `${l.name} ${l.value}`).join(", ")}.`,
   readout: (x, rows) => [`${x}.`, ...rows.map((r) => `${r.name} ${r.value}${r.x === "" ? "" : ` at ${r.x}`}.`)].join(" "),
   stackTotal: "Total",
   percent: (value) => `${value}%`,

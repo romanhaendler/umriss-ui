@@ -346,6 +346,12 @@ export interface TooltipRow {
   box: readonly { label: string; value: string }[] | null;
 }
 
+/** A labelled limit as the tooltip, the readout and the summary write it. */
+export interface LimitText {
+  name: string;
+  value: string;
+}
+
 /** A stack's total in the built-in tooltip (charts-stacking K4). */
 export interface StackTotal {
   /** The index of the row it follows - its stack's last member in the hit. */
@@ -365,6 +371,8 @@ export interface HoverSnapshot {
   rows: readonly TooltipRow[];
   /** One per stack in the hit. */
   totals: readonly StackTotal[];
+  /** The labelled limits of the hit's y axis; empty unless `<Tooltip limits />`. */
+  limits: readonly LimitText[];
 }
 
 const EMPTY_LAYOUT_SNAPSHOT: LayoutSnapshot = {
@@ -387,6 +395,7 @@ const EMPTY_HOVER_SNAPSHOT: HoverSnapshot = {
   xLabel: "",
   rows: [],
   totals: [],
+  limits: [],
 };
 
 /** Tolerance within which hits of different series are grouped (R-4.7). */
@@ -866,6 +875,8 @@ export class ChartScene {
   private hoverXLabel = "";
   private hoverRows: readonly TooltipRow[] = [];
   private hoverTotals: readonly StackTotal[] = [];
+  /** The labelled limits of the hit's y axis, where the tooltip asks for them. */
+  private hoverLimits: readonly LimitText[] = [];
   /** The orders of the series in the current hit, beside its rows. */
   private hoverOrders: readonly number[] = [];
   private highlight: readonly number[] | null = null;
@@ -1108,7 +1119,7 @@ export class ChartScene {
 
   updateTooltip(config: TooltipConfig): void {
     const previous = this.tooltip;
-    if (previous !== null && previous.mode === config.mode && fnEqual(previous.render, config.render)) {
+    if (previous !== null && previous.mode === config.mode && previous.limits === config.limits && fnEqual(previous.render, config.render)) {
       this.tooltip = config;
       return;
     }
@@ -2614,6 +2625,7 @@ export class ChartScene {
       this.hoverRows = hit.chosen.map((k) => this.tooltipRow(k, xAxisId));
       this.hoverOrders = hit.chosen.map((k) => k.entry.order);
       this.hoverTotals = this.totalsOf(hit.chosen);
+      this.hoverLimits = this.tooltip?.limits === true ? this.limitTexts(hit.primary.entry.config.yAxisId) : [];
       this.pushHoverSnapshot();
     }
     return true;
@@ -3012,7 +3024,24 @@ export class ChartScene {
     rows.sort((a, b) => Number(b.order === emph) - Number(a.order === emph));
     // The totals after every series, as the tooltip's last rows.
     const totals = this.hoverTotals.map((t) => ({ name: t.name, value: t.value, x: "" }));
-    return this.wording.readout(this.hoverXLabel, [...rows, ...totals]);
+    const limits = this.hoverLimits.map((l) => ({ name: l.name, value: l.value, x: "" }));
+    return this.wording.readout(this.hoverXLabel, [...rows, ...totals, ...limits]);
+  }
+
+  /** The labelled limits with their value in their own axis' format, a band's
+      two edges as one value; only those on the y axis `yAxisId` where given. */
+  private limitTexts(yAxisId?: string): LimitText[] {
+    const out: LimitText[] = [];
+    for (const { config } of this.limitsInOrder()) {
+      if (config.label === undefined || config.label === "") continue;
+      const id = this.limitAxisId(config);
+      if (yAxisId !== undefined && (config.orientation !== "y" || id !== yAxisId)) continue;
+      const axis = this.findAxis(config.orientation, id);
+      if (axis === null) continue;
+      const at = (v: number) => axis.format(this.limitAt(config, v));
+      out.push({ name: config.label, value: config.kind === "line" ? at(config.value) : `${at(config.from)} – ${at(config.to)}` });
+    }
+    return out;
   }
 
   /** The totals of the stacks in a hit (K4), each after its stack's last
@@ -3064,6 +3093,8 @@ export class ChartScene {
       const name = this.nameFor(entry, all.indexOf(entry));
       parts.push(w.seriesExtent(name, this.formatY(entry, range[0]), this.formatY(entry, range[1])));
     }
+    const limits = this.limitTexts();
+    if (limits.length > 0) parts.push(w.limitList(limits));
     if (this.tooltip !== null) parts.push(w.walkHelp);
     if (this.hasZoom()) parts.push(w.zoomHelp);
     if (this.legend !== null && this.seriesNames().some((name) => name !== undefined)) parts.push(w.legendHelp);
@@ -3932,6 +3963,7 @@ export class ChartScene {
       xLabel: this.hoverXLabel,
       rows: this.hoverRows,
       totals: this.hoverTotals,
+      limits: this.hoverLimits,
     };
     for (const notify of this.hoverSubscribers) notify();
   }

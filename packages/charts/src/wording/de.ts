@@ -11,6 +11,7 @@ export const GERMAN_CHARTS_WORDING: ChartsWording = {
   seriesList: (names) => `${names.length === 1 ? "1 Serie" : `${names.length} Serien`}: ${names.join(", ")}.`,
   visibleRange: (from, to) => `Von ${from} bis ${to}.`,
   seriesExtent: (name, min, max) => `${name} von ${min} bis ${max}.`,
+  limitList: (limits) => `Grenzen: ${limits.map((l) => `${l.name} ${l.value}`).join(", ")}.`,
   readout: (x, rows) => [`${x}.`, ...rows.map((r) => `${r.name} ${r.value}${r.x === "" ? "" : ` bei ${r.x}`}.`)].join(" "),
   stackTotal: "Summe",
   percent: (value) => `${value} %`,

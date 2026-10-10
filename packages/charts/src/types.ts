@@ -469,6 +469,7 @@ export interface TooltipHit<T = unknown> {
 /** A `Tooltip` as the chart holds it once registered. */
 export interface TooltipConfig<T = unknown> {
   mode: "x" | "nearest";
+  limits?: boolean;
   render?: (hit: TooltipHit<T>) => ReactNode;
 }
 
