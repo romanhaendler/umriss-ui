@@ -182,6 +182,12 @@ export function materializeSeries<T>(
   return { series: { x, y, y0, w, box, length: n }, extent: { xMin, xMax, yMin, yMax } };
 }
 
+/** A number that is a place: a finite one. */
+export const isPosition = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v);
+
+/** A string that names a category: any but the empty one. */
+export const isCategory = (v: unknown): v is string => typeof v === "string" && v !== "";
+
 /** The categories of an axis in the order of their places: every distinct
     string the rows bring, by first occurrence, the lists taken in the order
     given (ADR-0051). null where the first value that is a place is a number
@@ -196,12 +202,12 @@ export function categoriesOf<T>(
   for (const data of lists) {
     for (let i = 0; i < data.length; i++) {
       const v = accessor(data[i] as T, i);
-      if (typeof v === "string") {
-        if (v !== "" && !seen.has(v)) {
+      if (isCategory(v)) {
+        if (!seen.has(v)) {
           seen.add(v);
           names.push(v);
         }
-      } else if (names.length === 0 && ((typeof v === "number" && Number.isFinite(v)) || v instanceof Date)) {
+      } else if (names.length === 0 && (isPosition(v) || v instanceof Date)) {
         return null;
       }
     }
@@ -219,8 +225,8 @@ export function firstKind<T>(
   for (const data of lists) {
     for (let i = 0; i < data.length; i++) {
       const v = accessor(data[i] as T, i);
-      if (typeof v === "number" && Number.isFinite(v)) return "number";
-      if (typeof v === "string" && v !== "") return "string";
+      if (isPosition(v)) return "number";
+      if (isCategory(v)) return "string";
       if (v instanceof Date) return "date";
     }
   }

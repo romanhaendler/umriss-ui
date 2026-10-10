@@ -57,9 +57,9 @@ export interface BarProps<T> {
 }
 
 /** A series drawn as bars from 0 to its values, one at each x: a category
-    the x axis reads from the row, a number or an instant. Several bar series on one x axis stand side by side, or on each other with
-    `stack`. Renders nothing itself: it registers with the surrounding
-    `Chart`. */
+    the x axis reads from the row, a number or an instant. Several bar series
+    on one x axis stand side by side, or on each other with `stack`. Renders
+    nothing itself: it registers with the surrounding `Chart`. */
 export function Bar<T>(props: BarProps<T>): null {
   const {
     xAxisId = "x",

@@ -36,13 +36,24 @@ const asMs = HOURS.map((iso, i) => ({ t: new Date(iso).getTime(), signIns: SIGN_
 const asDates = HOURS.map((iso, i) => ({ t: new Date(iso), signIns: SIGN_INS[i]! }));
 const asStrings = HOURS.map((iso, i) => ({ t: iso, signIns: SIGN_INS[i]! }));
 
-function Hours<T extends { t: number | string | Date; signIns: number }>({ rows, time, name = "Sign-ins" }: { rows: readonly T[]; time?: boolean; name?: string }) {
+function Hours<T extends { t: number | string | Date; signIns: number }>({
+  rows,
+  time,
+  name = "Sign-ins",
+  axisId,
+}: {
+  rows: readonly T[];
+  time?: boolean;
+  name?: string;
+  /** An axis of its own: DEV says a thing once per axis. */
+  axisId?: string;
+}) {
   const { Chart, XAxis, YAxis, Line } = useChart<{ t: number | string | Date; signIns: number }>(rows);
   return (
     <Chart ariaLabel="Sign-ins per hour">
-      <XAxis value="t" time={time} />
+      <XAxis id={axisId} value="t" time={time} />
       <YAxis />
-      <Line value="signIns" name={name} />
+      <Line value="signIns" name={name} xAxisId={axisId} />
       <Tooltip mode="x" />
     </Chart>
   );
@@ -68,9 +79,47 @@ describe("An instant on the x axis", () => {
     expect(await shown(<Hours rows={asDates} />)).toEqual(inMs);
   });
 
-  it("is an ISO 8601 string where the axis says `time`", async () => {
+  it("is an ISO 8601 string where the axis says `time`, and DEV has nothing to say", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     const inMs = await shown(<Hours rows={asMs} time />);
     expect(await shown(<Hours rows={asStrings} time />)).toEqual(inMs);
+    expect(warnings(warn)).toEqual([]);
+  });
+
+  it("is read anew where `time` is said later, and where it is taken back", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const inMs = await shown(<Hours rows={asMs} time />);
+    const r = await renderChart(<Hours rows={asStrings} name="Said later" />);
+    unmount = r.unmount;
+    expect(ticks(r.host)).toEqual(HOURS);
+    await r.rerender(<Hours rows={asStrings} time name="Said later" />);
+    expect(ticks(r.host)).toEqual(inMs.ticks);
+    await r.rerender(<Hours rows={asStrings} name="Said later" />);
+    expect(ticks(r.host)).toEqual(HOURS);
+  });
+
+  it("is named in DEV where a series mixes numbers with dates: after a number first, only numbers are read", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const rows = [asMs[0]!, { t: new Date(HOURS[1]!), signIns: 5 }, asMs[2]!];
+    await mount(<Hours rows={rows} time name="Numbers, then a date" />);
+    expect(warnings(warn).some((m) => m.includes('"Numbers, then a date"') && m.includes("row 1"))).toBe(true);
+  });
+
+  it("is named in DEV where a Date stands among numbers", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    function Mixed() {
+      const { Chart, XAxis, YAxis, Line } = useChart<{ t: number | Date; signIns: number }>(asMs);
+      return (
+        <Chart ariaLabel="Mixed">
+          <XAxis value="t" />
+          <YAxis />
+          <Line value="signIns" name="In numbers" />
+          <Line data={asDates} value="signIns" name="In dates" />
+        </Chart>
+      );
+    }
+    await mount(<Mixed />);
+    expect(warnings(warn).some((m) => m.includes('"In dates"') && m.includes("Date"))).toBe(true);
   });
 
   it("is not drawn where the string is no instant, and DEV names the series and the row", async () => {
@@ -89,9 +138,9 @@ describe("An instant on the x axis", () => {
 describe("Strings on an axis that does not say `time`", () => {
   it("are categories, and DEV asks whether `time` was meant where each is an instant with a time", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
-    const host = await mount(<Hours rows={asStrings} />);
+    const host = await mount(<Hours rows={asStrings} axisId="asked" />);
     expect(ticks(host)).toEqual(HOURS);
-    expect(warnings(warn).some((m) => m.includes("`time`"))).toBe(true);
+    expect(warnings(warn).some((m) => m.includes('"asked"') && m.includes("`time`"))).toBe(true);
   });
 
   it("raise nothing where they are months or days", async () => {

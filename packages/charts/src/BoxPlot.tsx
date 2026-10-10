@@ -4,9 +4,9 @@
 
    A box per x on the numeric x axis, as a bar stands there (ADR-0002): groups
    are categories the x axis reads from the rows (ADR-0051), and a time axis
-   carries a box per hour as well. The caller brings every number and the library computes none (B2), so
-   a box aggregated in a database draws as well as one computed in the
-   browser. */
+   carries a box per hour as well. The caller brings every number and the
+   library computes none (B2), so a box aggregated in a database draws as
+   well as one computed in the browser. */
 
 import { useMemo } from "react";
 import { useSeries } from "./context";

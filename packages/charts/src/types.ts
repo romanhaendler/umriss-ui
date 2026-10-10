@@ -43,10 +43,12 @@ export type ListField<T> = NoInfer<
     place. */
 export type AxisValue = number | string | Date | null | undefined;
 
-/** The fields of a row an axis can read. */
-export type AxisField<T> = NoInfer<
+/** The fields of a row an axis can read - or, with `V`, those that hold only
+    some of what an axis reads: a matrix' row is a position or a category,
+    never an instant. */
+export type AxisField<T, V = AxisValue> = NoInfer<
   {
-    [K in keyof T & string]-?: T[K] extends AxisValue ? K : never;
+    [K in keyof T & string]-?: T[K] extends V ? K : never;
   }[keyof T & string]
 >;
 
@@ -197,7 +199,9 @@ export type MatrixColoring =
     };
 
 /** A `Matrix` as the chart holds it once registered: its base accessor is the
-    row, `level` the colour. */
+    row, `level` the colour. The row may be named: where the accessor yields a
+    string, materialisation gives it its category's place (ADR-0051) - the one
+    series kind whose base accessor reads more than a number. */
 export interface MatrixSeriesConfig<T = unknown> extends SeriesBase<T> {
   kind: "matrix";
   /** The level that decides the colour - the third channel (ADR-0011).
@@ -256,8 +260,9 @@ export interface AxisConfig<T = unknown> {
   categories?: readonly string[];
   /** What is written for a category, wherever it is written. */
   categoryLabel?: (category: string) => string;
-  /** The values are instants in milliseconds: ticks on local boundaries,
-      labels by level. A calendar implies it. */
+  /** The values are instants - milliseconds, and where this is said ISO 8601
+      strings as well: ticks on local boundaries, labels by level. A calendar
+      implies it, and so do rows that bring a `Date` (ADR-0051). */
   time?: boolean;
   /** Working calendar: the intervals in which time counts. With it,
       materialisation maps wall clock time onto working time before the scale

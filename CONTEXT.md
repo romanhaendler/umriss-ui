@@ -315,7 +315,8 @@ _Avoid_: transform, projection, mapper
 A string an axis reads from a row and gives a place of its own: a cost centre,
 a service, a weekday. The library keeps the map from category to place - a
 whole number, in the order the rows first bring the categories - and the
-category is its own label. What a category is follows from the type of the
+category is its own label. "Place" is the plain word here, where on the axis;
+the schedule's **Place** is an intent and another thing. What a category is follows from the type of the
 value, never from its content: `"2024"` is one, `2024` is a number. See
 ADR-0051.
 _Avoid_: Kategorie, label (which is what is written), class, bucket, item (a

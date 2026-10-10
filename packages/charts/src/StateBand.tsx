@@ -18,7 +18,9 @@ import { useSeries } from "./context";
 import { readerOf } from "./value";
 import type { ValueFunction, Value, StateEntry, StateSeriesConfig } from "./types";
 
-interface StateBandBase<T> {
+/** The props of `StateBand`. Its lane is named, or given by its two edges -
+    one way or the other (`OneLane`). */
+export interface StateBandProps<T> {
   /** Index of the state in `states` - a number field of the row or a
       function of it; null/undefined/NaN/±Infinity is a gap -
       and a gap stays a hole, it gets no colour for "unknown". A colour would
@@ -39,29 +41,23 @@ interface StateBandBase<T> {
       unnamed series is a colour nobody can look up.
       @default "Series n", after its place in the chart */
   name?: string;
+  /** The lane by its name: a category of the y axis, whose place the band
+      takes, as wide as a bar is. The y axis then lists a lane per name, the
+      first at the top, in the bands' order or its own `categories`
+      (ADR-0051). Not together with `laneFrom` or `laneTo`. */
+  lane?: string;
+  /** Lower edge of the lane in domain units of a numeric y axis.
+      @default the beginning of the axis' domain */
+  laneFrom?: number;
+  /** Upper edge of the lane in domain units of a numeric y axis.
+      @default the end of the axis' domain */
+  laneTo?: number;
 }
 
-/** The props of `StateBand`. Its lane is named, or given by its two edges -
-    one way or the other. */
-export type StateBandProps<T> =
-  | (StateBandBase<T> & {
-      /** The lane by its name: a category of the y axis, whose place the band
-          takes, as wide as a bar is. The y axis then lists a lane per name,
-          the first at the top, in the bands' order or its own `categories`
-          (ADR-0051). */
-      lane: string;
-      laneFrom?: undefined;
-      laneTo?: undefined;
-    })
-  | (StateBandBase<T> & {
-      lane?: undefined;
-      /** Lower edge of the lane in domain units of a numeric y axis.
-          @default the beginning of the axis' domain */
-      laneFrom?: number;
-      /** Upper edge of the lane in domain units of a numeric y axis.
-          @default the end of the axis' domain */
-      laneTo?: number;
-    });
+/** A lane is named or given by its edges: the compiler refuses both at once.
+    Beside the props and not in them, so that `StateBandProps` stays an
+    interface another can extend. */
+export type OneLane = { lane: string; laneFrom?: undefined; laneTo?: undefined } | { lane?: undefined };
 
 /** A band of states: each point's state holds from its x until the next
     point's. The last one holds until the latest reading of the chart - the
@@ -69,7 +65,7 @@ export type StateBandProps<T> =
     reports last, one median step of its own x values past its last point;
     never beyond the x domain. A state is claimed for as long as it was
     reported, not until the axis' rounded end. */
-export function StateBand<T>(props: StateBandProps<T>): null {
+export function StateBand<T>(props: StateBandProps<T> & OneLane): null {
   const {
     states,
     xAxisId = "x",
