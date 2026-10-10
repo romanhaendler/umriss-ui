@@ -11,7 +11,7 @@ under a heading "Changed" of its own, no matter which digit rose.
 
 ---
 
-## Unreleased – Density
+## 0.7.0 – Density (Oct. 2026)
 
 A calculation beside a compact table stood a third larger than it, on the same
 material. It follows the density now (ADR-0051).

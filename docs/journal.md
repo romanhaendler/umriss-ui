@@ -18,6 +18,31 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Oct. 2026 — A calculation follows the density
+
+- **`Calculation` takes `density`, and the provider's as its default**
+  (`.scratch/calculation-density/`, ADR-0051; released as
+  `@umriss-ui/calculation` 0.7.0). Asked for as "Meinst du nicht, dass der
+  kompakte Modus auch bei calculations Sinn ergeben würde?" - beside a compact
+  table a calculation stood at 37 px a line against the table's 27. Compact is
+  the table's measures, not a second set: 27 px under a fine pointer, 35 under
+  a finger.
+- **A regular line turned out not to be one height.** Measured, it is 37 px,
+  the Result 38 and a line with a verdict 38.5: cells that share a baseline
+  push the line out by the fraction they are set lower. Compact gives the last
+  pixel beneath the text to the line instead, so every compact line that says
+  one thing is 27 px. Regular was left as it is - the same repair there moves
+  every calculation on a caller's screen.
+- **The kiln line's OEE stayed regular**, against the spec: the chart beside it
+  rules the row with its floor of 300 px, and a compact OEE would only have
+  emptied its card.
+- **Tested in the browser alone**, on a density example in the shape of the
+  table's: jsdom lays nothing out. Chromium and WebKit are measured; Firefox
+  is not - Playwright's build of it hung on launch under macOS 27.
+- **A test of core's that failed one run in three** was repaired on the way:
+  the Button configurator's read the button's colour in the first frame of its
+  transition.
+
 ## Oct. 2026 — A chart fills its frame
 
 - **A chart without `height` fills its frame, never below 300 px**
