@@ -86,6 +86,18 @@ export function Fields() {
       <Matrix value="t" level="host" />
       <Scatter value="p95" />
       <StateBand value="p95" states={[]} />
+      {/* A matrix' rows named by the data (ADR-0051). */}
+      <Matrix value="host" level="p95" />
+      <Matrix value={(d) => d.host} level="p95" />
+      {/* @ts-expect-error a list is no row */}
+      <Matrix value="samples" level="p95" />
+      {/* A lane by its name, or by its edges - one way or the other. */}
+      <StateBand value="p95" states={[]} lane="Kiln 2" />
+      <StateBand value="p95" states={[]} laneFrom={0} laneTo={0.9} />
+      {/* @ts-expect-error a named lane has no edges */}
+      <StateBand value="p95" states={[]} lane="Kiln 2" laneFrom={0} />
+      {/* @ts-expect-error a lane's name is text */}
+      <StateBand value="p95" states={[]} lane={2} />
 
       {/* An axis read by series with their own data names their row. */}
       <XAxis<Deploy> id="deploys" value="t" />

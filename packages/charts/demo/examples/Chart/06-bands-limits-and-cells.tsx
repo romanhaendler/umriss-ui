@@ -202,8 +202,8 @@ const SERVICES: readonly Service[] = [
 
 interface SuccessCell {
   hour: number;
-  /** The row: the service's place in `SERVICES`. */
-  service: number;
+  /** The row: the service's name. */
+  service: string;
   /** Requests that succeeded, in per cent; `null` where there were none. */
   success: number | null;
 }
@@ -214,13 +214,13 @@ interface SuccessCell {
 const SUCCESS_BY_HOUR: readonly SuccessCell[] = (() => {
   const r = random(23);
   const cells: SuccessCell[] = [];
-  SERVICES.forEach((one, service) => {
+  SERVICES.forEach((one) => {
     for (let hour = 0; hour < 24; hour++) {
       let success: number | null = 99.2 + r() * 0.8;
       if (one.id === "webhooks" && hour >= 9 && hour < 14) success = 96 + r() * 1.5;
       if (hour === 3) success = 97.4 + r() * 1;
       if (one.id === "reports" && hour < 6) success = null;
-      cells.push({ hour, service, success: success === null ? null : Math.round(success * 100) / 100 });
+      cells.push({ hour, service: one.name, success: success === null ? null : Math.round(success * 100) / 100 });
     }
   });
   return cells;
@@ -238,10 +238,11 @@ function BatteryAndStates() {
     <Chart height={280} ariaLabel="An e-van's battery against its reserve, above its states" encoding="marks">
       <XAxis value="t" time label="Time" tickCount={4} />
       <YAxis domain={[-40, 100]} ticks={[0, 20, 40, 60, 80, 100]} label="%" />
-      <YAxis id="lane" position="right" domain={[0, 5]} ticks={[0.45]} tickFormat={() => "FP 377 K"} />
+      {/* One lane, and four places of room above it for the course. */}
+      <YAxis id="lane" position="right" domain={[-0.5, 4.5]} />
       <LimitBand from={10} to={20} severity="warning" label="Reserve" />
       <LimitLine value={10} severity="alarm" label="Empty soon" />
-      <StateBand data={STATES} value="state" states={VEHICLE_STATES} yAxisId="lane" laneFrom={0} laneTo={0.9} name="FP 377 K" />
+      <StateBand data={STATES} value="state" states={VEHICLE_STATES} yAxisId="lane" lane="FP 377 K" name="FP 377 K" />
       <Line value="charge" name="Charge" strokeWidth={1.75} />
       <Legend placement="top" />
       <Tooltip mode="x" />
@@ -254,7 +255,7 @@ function SuccessCells() {
   return (
     <Chart height={280} ariaLabel="Successful requests per service and hour, by limits and by marks" encoding="marks">
       <XAxis value="hour" ticks={[0, 6, 12, 18]} tickFormat={(v) => `${v}:00`} label="Hour" />
-      <YAxis ticks={SERVICES.map((_, i) => i)} tickFormat={(v) => SERVICES[v]?.name ?? ""} />
+      <YAxis />
       <Matrix
         value="service"
         level="success"

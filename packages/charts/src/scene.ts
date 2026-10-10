@@ -193,15 +193,24 @@ interface Categories {
   format: (v: number) => string;
 }
 
-function categoriesFrom(names: readonly string[]): Categories {
+function categoriesFrom(names: readonly string[], topFirst: boolean): Categories {
   const last = names.length - 1;
+  // Along y the first category stands at the top, as the first row of a list
+  // does: it takes the highest place. The same step turns a place back.
+  const turn = (i: number) => (topFirst ? last - i : i);
   return {
     names,
-    place: new Map(names.map((name, i) => [name, i])),
+    place: new Map(names.map((name, i) => [name, turn(i)])),
     ticks: names.map((_, i) => i),
-    format: (v) => names[Math.min(Math.max(Math.round(v), 0), last)] ?? "",
+    format: (v) => names[turn(Math.min(Math.max(Math.round(v), 0), last))] ?? "",
   };
 }
+
+/** How much of its category's step a named lane takes: what a bar takes of
+    its own by default. */
+const LANE_WIDTH = 0.8;
+
+const laneOf = (config: SeriesConfig): string | undefined => (config.kind === "state" ? config.lane : undefined);
 
 /** What is written for a place: its category, or the caller's label for it. */
 function labelled(categories: Categories, label: AxisConfig["categoryLabel"]): (v: number) => string {
@@ -600,6 +609,7 @@ function ownFieldsEqual(previous: SeriesConfig, next: SeriesConfig): boolean {
     case "state": {
       const a = previous as StateSeriesConfig;
       return (
+        a.lane === next.lane &&
         a.laneFrom === next.laneFrom &&
         a.laneTo === next.laneTo &&
         statesEqual(a.states, next.states)
@@ -786,8 +796,8 @@ export class ChartScene {
 
   /* ---------- Data and layout inputs ---------- */
   private data: readonly unknown[] = [];
-  /** The categories of each x axis that reads them, by axis id; an axis
-      absent is numeric (ADR-0051). */
+  /** The categories of each axis that has them, by orientation and axis id
+      (`x:x`); an axis absent is numeric (ADR-0051). */
   private readonly categories = new Map<string, Categories>();
   private padding: Padding = { top: 8, right: 8, bottom: 8, left: 8 };
 
@@ -951,6 +961,8 @@ export class ChartScene {
     }
     entry.config = config;
     if (equal) return; // R-2.2: no dirty flag without a change of substance
+    // Another lane is another category of the y axis: they are read anew.
+    if (laneOf(previous) !== laneOf(config)) this.materialsDirty = true;
     entry.buckets = null; // the colouring may have changed
     // A hidden member leaves its place in the stack: the others sum anew.
     if (this.isHidden(previous) !== this.isHidden(config) && stackOf(config) !== undefined) this.materialsDirty = true;
@@ -1296,44 +1308,64 @@ export class ChartScene {
     return null;
   }
 
-  /** Reads the categories of every x axis anew. Where an axis' list changed,
+  /** Reads the categories of every axis anew. Where an axis' list changed,
       every series on it lies somewhere else and is materialised again. */
   private readCategories(): void {
     const all = this.seriesInOrder();
     const live = new Set<string>();
     for (const { config: axis } of this.axes.values()) {
-      const accessor = axis.accessor;
-      if (axis.orientation !== "x" || accessor === undefined) continue;
-      live.add(axis.id);
-      const bound = all.filter((e) => e.config.xAxisId === axis.id);
+      const x = axis.orientation === "x";
+      const key = `${axis.orientation}:${axis.id}`;
+      live.add(key);
+      const bound = all.filter((e) => (x ? e.config.xAxisId : e.config.yAxisId) === axis.id);
       // The caller's list is the order and the extent; without one, what the
-      // rows bring.
-      const names =
-        axis.categories ??
-        categoriesOf(
-          bound.map((e) => e.config.data ?? this.data),
-          accessor,
-        );
-      const previous = this.categories.get(axis.id);
+      // rows bring along x, and along y what stands on the axis.
+      const listed = axis.categories !== undefined && axis.categories.length > 0 ? axis.categories : null;
+      const names = listed ?? (x ? this.broughtAlongX(axis, bound) : this.broughtAlongY(bound));
+      const previous = this.categories.get(key);
       if (names === null ? previous === undefined : previous !== undefined && sameNames(previous.names, names)) continue;
-      if (names === null) this.categories.delete(axis.id);
-      else this.categories.set(axis.id, categoriesFrom(names));
+      if (names === null) this.categories.delete(key);
+      else this.categories.set(key, categoriesFrom(names, !x));
       for (const entry of bound) forget(entry);
     }
-    for (const id of [...this.categories.keys()]) if (!live.has(id)) this.categories.delete(id);
+    for (const key of [...this.categories.keys()]) if (!live.has(key)) this.categories.delete(key);
+  }
+
+  private broughtAlongX(axis: AxisConfig, bound: readonly SeriesEntry[]): string[] | null {
+    const accessor = axis.accessor;
+    if (accessor === undefined) return null;
+    return categoriesOf(
+      bound.map((e) => e.config.data ?? this.data),
+      accessor,
+    );
+  }
+
+  /** A y axis reads no value (ADR-0048): its categories are the lanes its
+      state bands name and the rows its matrices read, in the series' order. */
+  private broughtAlongY(bound: readonly SeriesEntry[]): string[] | null {
+    const names = new Set<string>();
+    for (const { config } of bound) {
+      if (config.kind === "state" && config.lane !== undefined) names.add(config.lane);
+      if (config.kind !== "matrix") continue;
+      for (const name of categoriesOf([config.data ?? this.data], config.accessor) ?? []) names.add(name);
+    }
+    return names.size === 0 ? null : [...names];
   }
 
   /** One axis has one kind (ADR-0051): DEV names the series that brings the
-      other one, and the one that brings a category twice. */
+      other one, the one that brings a category the axis does not list, and
+      along x the one that brings a category twice. */
   private checkKind(
     config: SeriesConfig,
     data: readonly unknown[],
-    xAxis: AxisConfig,
+    xAxis: { orientation: AxisOrientation; id: string },
+    accessor: ((d: unknown, index: number) => unknown) | undefined,
     categories: Categories | undefined,
   ): void {
-    const accessor = xAxis.accessor;
     if (accessor === undefined) return;
     const name = config.name ?? "?";
+    const axis = `${xAxis.orientation} axis "${xAxis.id}"`;
+    const key = `${xAxis.orientation}-${xAxis.id}-${name}`;
     const seen = new Set<string>();
     for (let i = 0; i < data.length; i++) {
       const v = accessor(data[i], i);
@@ -1342,30 +1374,31 @@ export class ChartScene {
         if (typeof v === "number" && Number.isFinite(v)) return;
         if (typeof v !== "string" || v === "") continue;
         warnOnce(
-          `axis-kind-${xAxis.id}-${name}`,
-          `Series "${name}" brings a category to the x axis "${xAxis.id}", which reads numbers. ` +
+          `axis-kind-${key}`,
+          `Series "${name}" brings a category to the ${axis}, which reads numbers. ` +
             "One axis has one kind: a category is no place there and is not drawn (ADR-0051).",
         );
         return;
       }
       if (typeof v === "number" && Number.isFinite(v)) {
         warnOnce(
-          `axis-kind-${xAxis.id}-${name}`,
-          `Series "${name}" brings a number to the x axis "${xAxis.id}", which reads categories. ` +
+          `axis-kind-${key}`,
+          `Series "${name}" brings a number to the ${axis}, which reads categories. ` +
             "One axis has one kind: a number is no place there and is not drawn (ADR-0051).",
         );
       } else if (typeof v === "string" && v !== "") {
         if (!categories.place.has(v)) {
           warnOnce(
-            `category-unlisted-${xAxis.id}-${name}`,
-            `Series "${name}" brings the category "${v}", which the x axis "${xAxis.id}" does not list in \`categories\`. ` +
+            `category-unlisted-${key}`,
+            `Series "${name}" brings the category "${v}", which the ${axis} does not list in \`categories\`. ` +
               "It has no place and is not drawn (ADR-0051).",
           );
         }
-        if (seen.has(v)) {
+        // Along y a matrix brings its row once per column, by right.
+        if (seen.has(v) && xAxis.orientation === "x") {
           warnOnce(
-            `category-twice-${xAxis.id}-${name}`,
-            `Series "${name}" brings the category "${v}" more than once to the x axis "${xAxis.id}". ` +
+            `category-twice-${key}`,
+            `Series "${name}" brings the category "${v}" more than once to the ${axis}. ` +
               "Both rows are drawn in the one place; add them up before the chart (ADR-0051).",
           );
         }
@@ -1387,15 +1420,34 @@ export class ChartScene {
       const data = config.data ?? this.data;
       const xAxis = this.findAxisConfig("x", config.xAxisId);
       if (xAxis?.accessor === undefined) continue; // validate() reports a missing axis in DEV
-      const categories = this.categories.get(xAxis.id);
+      const categories = this.categories.get(`x:${xAxis.id}`);
       // A category's place is a number like any other x from here on.
       const places = categories === undefined ? null : categoryPlaces(data, xAxis.accessor, categories.place);
       entry.rows = places?.rows ?? null;
-      if (DEV) this.checkKind(config, data, xAxis, categories);
+      // A matrix' row is named by the data where its y axis has categories.
+      const named = config.kind === "matrix" ? this.categories.get(`y:${config.yAxisId}`) : undefined;
+      const rowOf = config.accessor as (d: unknown, index: number) => unknown;
+      if (DEV) {
+        this.checkKind(config, data, xAxis, xAxis.accessor, categories);
+        if (config.kind === "matrix") this.checkKind(config, data, { orientation: "y", id: config.yAxisId }, rowOf, named);
+        const lane = laneOf(config);
+        if (lane !== undefined && this.categories.get(`y:${config.yAxisId}`)?.place.has(lane) !== true) {
+          warnOnce(
+            `lane-unlisted-${config.yAxisId}-${lane}`,
+            `StateBand "${config.name ?? "?"}" names the lane "${lane}", which the y axis "${config.yAxisId}" does not list in \`categories\`. ` +
+              "It has no place and is not drawn (ADR-0051).",
+          );
+        }
+      }
       const material = materializeSeries(
         data,
         places === null ? (xAxis.accessor as (d: unknown, index: number) => number) : (_d, i) => places.x[i] as number,
-        config.accessor,
+        named === undefined
+          ? config.accessor
+          : (d, i) => {
+              const v = rowOf(d, i);
+              return typeof v === "string" ? named.place.get(v) : undefined;
+            },
         baselineOf(config),
         {
           value: valueChannelOf(config),
@@ -1431,8 +1483,9 @@ export class ChartScene {
         // replacement only comes at drawing time out of the axis domain: with a
         // single row the series span is zero as well, and out of zero and zero no
         // visible cell arises.
-        const dx = measureSpacing(material.series.x, material.series.length);
-        const dy = measureSpacing(material.series.y, material.series.length);
+        // Neighbouring categories lie one apart, along either axis.
+        const dx = categories === undefined ? measureSpacing(material.series.x, material.series.length) : 1;
+        const dy = named === undefined ? measureSpacing(material.series.y, material.series.length) : 1;
         entry.step = dx;
         entry.cellHeight = dy;
         entry.extent = {
@@ -1759,12 +1812,14 @@ export class ChartScene {
     id: string,
   ): readonly [number, number] {
     if (this.materialsDirty) this.materialize();
-    const categories = orientation === "x" ? this.categories.get(id) : undefined;
+    const categories = this.categories.get(`${orientation}:${id}`);
     if (categories !== undefined) {
       // Every category has its place, half a step to either side - whatever
       // kind stands on it, and whichever series is shown (ADR-0051).
-      const span = { xMin: -0.5, xMax: categories.names.length - 0.5, yMin: 0, yMax: 0 };
-      return axisExtent("x", id, [{ xAxisId: id, yAxisId: "", extent: span }], this.limitValues("x", id));
+      const from = -0.5;
+      const to = categories.names.length - 0.5;
+      const span = { xMin: from, xMax: to, yMin: from, yMax: to };
+      return axisExtent(orientation, id, [{ xAxisId: id, yAxisId: id, extent: span }], this.limitValues(orientation, id));
     }
     const visible = orientation === "y" && this.findAxisConfig("y", id)?.domain === "visible";
     const bindings = [...this.series.values()].map((entry) => ({
@@ -1851,11 +1906,11 @@ export class ChartScene {
     const inputs: AxisInput[] = [];
     for (const [id, entry] of [...this.axes.entries()].sort((a, b) => a[1].order - b[1].order)) {
       const c = entry.config;
-      const categories = c.orientation === "x" ? this.categories.get(c.id) : undefined;
+      const categories = this.categories.get(`${c.orientation}:${c.id}`);
       if (categories !== undefined && (c.tickFormat !== undefined || c.ticks !== undefined || c.tickCount !== undefined)) {
         warnOnce(
-          `category-ticks-${c.id}`,
-          `The x axis "${c.id}" reads categories: tickFormat, ticks and tickCount do not apply - ` +
+          `category-ticks-${c.orientation}-${c.id}`,
+          `The ${c.orientation} axis "${c.id}" reads categories: tickFormat, ticks and tickCount do not apply - ` +
             "every category has its tick, and is its own label (ADR-0051).",
         );
       }
@@ -2347,8 +2402,18 @@ export class ChartScene {
     yAxis: AxisLayout,
   ): { top: number; bottom: number } {
     const domain = yAxis.scale.domain;
-    const a = yAxis.scale.toPx(config.laneFrom ?? domain[0]);
-    const b = yAxis.scale.toPx(config.laneTo ?? domain[1]);
+    let from = config.laneFrom ?? domain[0];
+    let to = config.laneTo ?? domain[1];
+    if (config.lane !== undefined) {
+      // A named lane takes its category's place; one the axis does not know
+      // has none.
+      const place = this.categories.get(`y:${yAxis.id}`)?.place.get(config.lane);
+      if (place === undefined) return { top: 0, bottom: 0 };
+      from = place - LANE_WIDTH / 2;
+      to = place + LANE_WIDTH / 2;
+    }
+    const a = yAxis.scale.toPx(from);
+    const b = yAxis.scale.toPx(to);
     return { top: Math.min(a, b), bottom: Math.max(a, b) };
   }
 
@@ -3495,7 +3560,11 @@ export class ChartScene {
     const config = k.entry.config;
     const label = k.segment?.label;
     const value = label !== undefined && label !== "" ? label : this.formatY(k.entry, k.level ?? k.yValue);
-    const x = config.xAxisId === headerXAxisId ? "" : this.xLabel(config.xAxisId, k.xValue);
+    const ownX = config.xAxisId === headerXAxisId ? "" : this.xLabel(config.xAxisId, k.xValue);
+    // A cell in a named row says which: its level alone would not.
+    const named = config.kind === "matrix" && this.categories.has(`y:${config.yAxisId}`);
+    const row = named ? (this.findAxis("y", config.yAxisId)?.format(k.yValue) ?? "") : "";
+    const x = [ownX, row].filter((part) => part !== "").join(", ");
     // A reading the box does not have is no row.
     const box = k.box === undefined ? null : this.boxParts(k.entry, { ...k.box, median: k.yValue }).filter((p) => p.value !== "");
     return { value, x, chip: this.theme?.forced === true ? this.tooltipChip(k, this.theme) : null, box };

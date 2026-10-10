@@ -181,9 +181,8 @@ export const lead = "A course, the limits it is read against and the states bene
 const NORTH = VEHICLES.filter((vehicle) => vehicle.depot === "north");
 const BATTERY = batteryDay("v2");
 
-/* The lanes: one domain unit per vehicle, the rest is room for the course.
-   Lane 0 lies at the bottom, so the list runs from the bottom up. */
-const LANES = [...NORTH].reverse().map((vehicle) => ({ vehicle, day: vehicleDay(vehicle.id) }));
+/* The lanes: one per vehicle, named by its plate. */
+const LANES = NORTH.map((vehicle) => ({ vehicle, day: vehicleDay(vehicle.id) }));
 
 export default function LimitsAndState() {
   const { Chart, XAxis, YAxis, StateBand, Line } = useChart(BATTERY);
@@ -191,27 +190,13 @@ export default function LimitsAndState() {
     <Chart height={340} ariaLabel="An e-van's charge against its limits, above the states of the North depot's vehicles">
       <XAxis value="t" time label="Time" />
       <YAxis domain={[-100, 100]} ticks={[0, 20, 40, 60, 80, 100]} label="Charge %" />
-      <YAxis
-        id="lanes"
-        position="right"
-        domain={[0, 8]}
-        ticks={LANES.map((_, i) => i + 0.45)}
-        tickFormat={(v) => LANES[Math.floor(v)]?.vehicle.plate ?? ""}
-      />
+      {/* The lanes take the lower places; the domain leaves the rest as room for the course. */}
+      <YAxis id="lanes" position="right" domain={[-0.5, 7.5]} />
       <LimitBand from={10} to={20} severity="warning" label="Reserve" />
       <LimitLine value={20} severity="warning" label="Charge soon" />
       <LimitLine value={10} severity="alarm" label="Return now" />
-      {LANES.map(({ vehicle, day }, i) => (
-        <StateBand
-          key={vehicle.id}
-          data={day}
-          value="state"
-          states={VEHICLE_STATES}
-          yAxisId="lanes"
-          laneFrom={i}
-          laneTo={i + 0.9}
-          name={vehicle.plate}
-        />
+      {LANES.map(({ vehicle, day }) => (
+        <StateBand key={vehicle.id} data={day} value="state" states={VEHICLE_STATES} yAxisId="lanes" lane={vehicle.plate} name={vehicle.plate} />
       ))}
       <Line value="charge" name="Charge" strokeWidth={1.75} />
       <Legend placement="top" />
