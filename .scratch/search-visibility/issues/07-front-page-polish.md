@@ -1,6 +1,6 @@
 # 07 - Polish of the front page
 
-Status: ready-for-human
+Status: done
 Type: task
 Blocked by: 03
 
@@ -22,3 +22,5 @@ dark, at phone width, with the long lists not turning into a wall.
 A first pass came with ticket 03: each package a card with its pages as a
 wrapping run of links. Waits for the user's look, light and dark, wide and
 narrow.
+
+**Closed as overtaken (2026-10-10).** The front page this ticket was to polish no longer exists: `.scratch/site-front-page/` rebuilt it (five package tiles with a preview each) and was accepted on 4 Oct 2026.
