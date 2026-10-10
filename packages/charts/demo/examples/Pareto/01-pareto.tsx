@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { Legend, LimitLine, Tooltip, pareto, useChart } from "../../../src";
 
 export const title = "Sort causes and collect the tail";
-export const lead = "`pareto()` sorts descending, adds up and folds everything past `collectRank` into one entry that stands last; the bars and the line are yours.";
+export const lead = "`pareto()` sorts descending, adds up and folds everything past `collectRank` into one entry that stands last; the bars and the line are yours, and the x axis reads each entry's `name`.";
 
 /* Why deliveries failed last month, in no particular order. */
 const FAILED_DELIVERIES = [
@@ -23,7 +23,7 @@ export default function ParetoExample() {
   const { Chart, XAxis, YAxis, Bar, Line } = useChart(entries);
   return (
     <Chart height={300} ariaLabel="Failed deliveries by cause, sorted, with the cumulative share">
-      <XAxis value="index" ticks={entries.map((e) => e.index)} tickFormat={(v) => entries[v]?.name ?? ""} />
+      <XAxis value="name" />
       <YAxis label="Failed deliveries" />
       <YAxis
         id="share"

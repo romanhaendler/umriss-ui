@@ -156,8 +156,8 @@ export const OUTLINE: readonly Rubric[] = [
       {
         id: "bar",
         name: "Bar",
-        sentence: "Bars on the numeric x axis (a bar or column chart): one per category, grouped side by side, stacked, or as shares of a whole.",
-        about: ["A category is a position the axis places and a `tickFormat` names (ADR-0002). A bar's foot is 0, so one series carries both signs."],
+        sentence: "Bars along the x axis (a bar or column chart): one per category, grouped side by side, stacked, or as shares of a whole.",
+        about: ["The x axis reads the category from the row - a cost centre, a weekday - and gives each a place, a tick and its name (ADR-0051); a number or an instant places a bar as well. A bar's foot is 0, so one series carries both signs."],
         alternatives: [{ when: "Causes ranked by how much they contribute", use: "pareto" }],
         keysOf: ["chart"],
         limits: ["No horizontal bars: bars grow along the y axis; for a ranking by name use `Matrix` or a `Table` (ADR-0032)."],
@@ -178,7 +178,7 @@ export const OUTLINE: readonly Rubric[] = [
         sentence: "A distribution per position (a box plot, box-and-whisker): quartiles, median and whiskers, per service, per group or per hour. Reach for it to compare spreads, not single values.",
         about: [
           "Every number is the caller's: `median`, the two quartiles and where each whisker ends. The library computes none of them and names no quartile method or whisker rule, so a box aggregated in a database draws as well as one computed in the browser.",
-          "A box stands on the numeric x axis as a bar does: a group is a position a `tickFormat` names, and a time axis carries a box per hour (ADR-0002). A missing median is a gap - no box is drawn there.",
+          "A box stands on the x axis as a bar does: a group is a category the axis reads from the row, and a time axis carries a box per hour (ADR-0051). A missing median is a gap - no box is drawn there.",
         ],
         keysOf: ["chart"],
         limits: ["No horizontal boxes, no violin or jittered points, no box width by count: a density is smoothing, a jitter a picture that does not repeat."],

@@ -1,7 +1,7 @@
 import { Tooltip, useChart } from "../../../src";
 
 export const title = "One box per service";
-export const lead = "Five numbers per row, computed wherever the caller likes. Services are positions 0, 1, 2 on the numeric x axis; `tickFormat` names them.";
+export const lead = "Five numbers per row, computed wherever the caller likes. The x axis reads the service's name: each one is a category with a place and a tick of its own.";
 
 interface ResponseTime {
   service: string;
@@ -23,7 +23,7 @@ export default function Minimal() {
   const { Chart, XAxis, YAxis, BoxPlot } = useChart(RESPONSE_TIMES);
   return (
     <Chart height={260} ariaLabel="Response time per service over the last hour">
-      <XAxis value={(_, i) => i} ticks={[0, 1, 2]} tickFormat={(v) => RESPONSE_TIMES[v]?.service ?? ""} />
+      <XAxis value="service" />
       <YAxis tickFormat={(v) => `${v} ms`} />
       <BoxPlot
         name="Response time"
