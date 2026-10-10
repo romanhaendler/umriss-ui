@@ -212,7 +212,9 @@ column, a grid's cell, a dialog or a table's cell it fills its place. In a row,
 a toolbar, a column lined up at the start or a cell sized by its content, it
 is its *natural width*. No prop says which: the place decides, as it does for
 every block on the web. A field does not grow to fill a row on its own; the
-row's layout gives it room (`flex: 1`, a grid).
+row's layout gives it room: a bar of one's own puts it in a `Grid` with
+`columns={["fill", …]}`, where a field fills its cell, and the table's toolbar
+lets its search take the rest with `<Search grow />`.
 
 **The natural width is counted in characters of the field's own type.** A count
 of `ch` - the width of a figure - plus the field's chrome (padding, chevron,
@@ -222,12 +224,11 @@ and its root with it. The defaults:
 
 | Field | Characters | Why |
 |---|---|---|
-| Input, Select, Combobox | 16 | A `ch` is wider than the average letter a browser counts for `size`; sixteen make the browser's own text field. Twenty made a dispatcher's bar three lines |
-| MultiSelect | 20 | A chip costs more than its letters; twenty hold two short chips and the counter |
+| Input, Select, Combobox, MultiSelect | 20 | One count for every field that shows text. A `ch` is wider than the average letter a browser counts for `size`; a chip costs more than its letters, and twenty hold two short chips and the counter |
 | NumberInput | 10 | A figure; a prefix and suffix given as text are counted on top |
 | Textarea | 40 | A line of prose |
 | The date pickers | their longest value | The length of the formats in use, so a date never truncates, in English or German |
-| Slider, FileInput | 16, 32 | They show no text to count, and take no `chars` |
+| Slider, FileInput | 20, 32 | They show no text to count, and take no `chars`; the slider follows the text fields |
 
 **`chars` says the width when the value has a known length** - a postcode
 `chars={5}`, an IBAN `chars={27}`. A field's width tells what goes into it.
@@ -258,17 +259,22 @@ for. `<Input style={{ width: 120 }} />` sizes the field.
    to a bare `<input>`), with `className` and `style` on it.
 2. The root composes `extent` from `#own-styles` (and `fieldRoot` if it holds
    a text field), sets `--_chrome` to its padding and glyphs, and `--_chars`
-   if 16 is not its count.
+   if 20 is not its count.
 3. `chars` as a prop, handed to `extentStyle()` (`lib/extent.ts`); `size`
    through `useControlSize()` (`lib/controlSize.tsx`).
 4. Add it to `controlSize.test.tsx` and `fieldWidth.test.tsx`, and to the
    Sizes page if it brings a case the page does not show yet.
 
-**Open** - questions the acceptance left for later, each a ticket under
-`.scratch/control-sizes/issues/`: the default counts (07), the room a
-multiselect leaves when the next chip does not fit (08), the slider's readout
-far from its track (09), a prop for a field that fills a row (10); and
-`#own-styles` copied into the bundle once per module (06).
+**Open** - one question the acceptance left for later, a ticket under
+`.scratch/control-sizes/issues/`: `#own-styles` copied into the bundle once per
+module (06). The default counts (07), the room a multiselect leaves (08, kept),
+the slider's readout (09, the room of the longer of `min` and `max` as
+formatted) and a field that fills a row (10, no prop - `Grid`) are answered.
+
+**One count is the rule; a full row is the exception.** Decided 2026-10-10
+(control-sizes 07): every field that shows text is 20 characters wide where the
+place asks. A row too full for it says `chars` on the field that can be
+narrower.
 
 ## Rows: a table holds still
 

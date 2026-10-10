@@ -1,6 +1,6 @@
 # 10 — A field that fills a row
 
-Status: needs-info
+Status: done
 Type: decision
 
 Left open at the acceptance of control-sizes (05, 2 Oct 2026).
@@ -16,3 +16,7 @@ child that takes the rest, or a documented class. Each would be checked against
 the README's principles and the existing names before it is built.
 
 The question for the user: is it wanted?
+
+## Comments
+
+Decided 2026-10-10: no prop on the fields. A bar of one's own uses `Grid columns={["fill", …]}`, where a field fills its cell; the table's own `Search` part gets a `grow` prop for its toolbar.
