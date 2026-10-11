@@ -6,7 +6,8 @@
    default values), taken over unchanged. What is new is where the columns come
    from: from the registration instead of from a field the caller writes.
 
-   The application's view is taken over on the first render, BEFORE a column has
+   The application's `initialView` is read once and taken over on the first
+   render, BEFORE a column has
    registered, and checked against the columns only on reading
    (umriss-table 11): names no registered column carries fall out of `view` and
    `sort`. Because the body calculates with the columns of its own pass, even the
@@ -25,7 +26,7 @@ import { MOST_LEVELS, livePaths } from "./model/grouping";
 import type { RowGroup } from "./model/grouping";
 import { pinsForView, withPin } from "./model/pinning";
 import type { Pin, Pins } from "./model/pinning";
-import { Echoes, requestKey, onlyKnown, viewKey } from "./model/view";
+import { requestKey, onlyKnown, viewKey } from "./model/view";
 import type { TableRequest, TableView } from "./model/view";
 import type { ModelColumn } from "./model/tableModel";
 import { Registry } from "./registry";
@@ -327,32 +328,6 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     tree,
   });
 
-  /* A view handed in applies whenever its content differs from the last one
-     handed in (ADR-0047) and is no report of the table's own coming back late
-     - adjusted during the render, as React has state follow a prop, so the
-     table never shows the old view for a frame. What it leaves out goes back
-     to its default; the same view again changes nothing, and none at all keeps
-     the table's own. The reports it answers are forgotten after the commit,
-     so the render itself stays free of effects. */
-  const handed = options.initialView;
-  const handedKey = handed ? viewKey(handed) : null;
-  const [lastHanded, setLastHanded] = useState(handedKey);
-  const [echoes] = useState(() => new Echoes());
-  useEffect(() => {
-    if (lastHanded !== null) echoes.handed(lastHanded);
-  }, [echoes, lastHanded]);
-  if (handed && handedKey !== lastHanded) {
-    setLastHanded(handedKey);
-    if (!echoes.has(handedKey!)) {
-      b.restart(handed);
-      setConditions(Object.entries(handed.conditions ?? {}));
-      setGroupingState(handed.grouping ? [...handed.grouping] : listOf(options.defaultGrouping));
-      setFoldedState(handed.folded ?? []);
-      setPinsChosen(handed.pinned ? { ...handed.pinned } : null);
-      setBranchesState(handed.branches ?? defaultBranches);
-    }
-  }
-
   /* Changing a condition resets to page one, like another search. Only what
      fits the registered column is set; as long as none has registered nothing
      is checked - then there is nothing known to check against. */
@@ -452,6 +427,18 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
   /* Read on the call, not on the render: a column may have registered since. */
   const setPin = (column: string, pin: Pin | null) =>
     setPinsChosen((old) => withPin(old ?? registry.declaredPins(), column, pin));
+  /* How many times `setView` was called: the render that carries its state
+     reports nothing, whatever the view became (ADR-0047). */
+  const [applied, setApplied] = useState(0);
+  const setView = (next: TableView) => {
+    b.restart(next);
+    setConditions(Object.entries(next.conditions ?? {}));
+    setGroupingState(next.grouping ? [...next.grouping] : listOf(options.defaultGrouping));
+    setFoldedState(next.folded ?? []);
+    setPinsChosen(next.pinned ? { ...next.pinned } : null);
+    setBranchesState(next.branches ?? defaultBranches);
+    setApplied((n) => n + 1);
+  };
   const setGrouping = (ids: readonly string[]) => {
     setGroupingState([...ids]);
     setPage(1);
@@ -467,18 +454,22 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
   const paginates = (!isTree && registry.paginates()) || virtual;
   const selection = options.selection ?? b.selection;
 
-  /* Every change of the view, once and whole, after the commit (ADR-0047). The
-     first render's view is where it starts, not a change; the key is compared,
-     not the object, so a second render with the same view reports nothing. */
+  /* Every change the reader makes, once and whole, after the commit
+     (ADR-0047). The first render's view is where it starts, not a change; the
+     key is compared, not the object, so a second render with the same view
+     reports nothing. The render after a `setView` takes its view as reported
+     without calling the handler. */
   const viewNowKey = viewKey(groupedView);
   const viewReported = useRef(viewNowKey);
+  const appliedSeen = useRef(0);
   useEffect(() => {
+    const silent = appliedSeen.current !== applied;
+    appliedSeen.current = applied;
     if (viewReported.current === viewNowKey) return;
     viewReported.current = viewNowKey;
-    echoes.reported(viewNowKey);
-    options.onViewChange?.(groupedView);
+    if (!silent) options.onViewChange?.(groupedView);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once per change of the view, with that render's view and handler
-  }, [viewNowKey]);
+  }, [viewNowKey, applied]);
 
   /* The server's request (M1): reported after the commit, once when
      the table first stands and once per change of what decides the rows - a
@@ -550,6 +541,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     view: groupedView,
     grouping: groupingNow,
     setGrouping,
+    setView,
     folded,
     toggleFold,
     foldAll: () => {

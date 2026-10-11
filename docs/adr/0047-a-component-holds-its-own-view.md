@@ -35,7 +35,8 @@ component's. In particular:
   own arrangement; making that uniform is a decision of its own.
 - **A chart's view** is the span each zoomable x axis shows, by axis `id`, and
   the hidden series, by `name`. **A schedule's** is the span in view and the
-  folded lane groups. **A table's** is unchanged. An id or a name that no
+  folded lane groups. **A table's** is search, conditions, sort, page, hidden columns, widths and the
+  like (CONTEXT.md, **View**). An id or a name that no
   longer occurs falls out, as the table's `onlyKnown` does with columns.
 - **An interaction is there by default where it is harmless, on request where
   it is not.** The legend hides and shows series without a prop, as the column

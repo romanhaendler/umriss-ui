@@ -4,7 +4,7 @@ import { ColumnMenu, Search, Toolbar, useTable } from "../../../src";
 import type { TableView } from "../../../src";
 
 export const title = "Keep and restore a view";
-export const lead = "`onViewChange` reports search, sort, hidden columns and widths as one view; hand one back through `initialView` and the table goes to it, no `key` needed. Sort, hide, drag a width, then restore.";
+export const lead = "`t.view` holds search, sort, hidden columns and widths as one value; keep one and go back to it with `t.setView`, no `key` needed. Sort, hide, drag a width, then restore.";
 
 const START_VIEW: TableView = {
   sort: [{ column: "amount", direction: "desc" }],
@@ -26,12 +26,12 @@ const INVOICES: Invoice[] = [
 ];
 
 export default function InitialView() {
-  /* The application keeps the view the table reports; handing it another one
-     is all it takes to restore. */
-  const [view, setView] = useState(START_VIEW);
+  /* The table holds its view and starts from `initialView`; `t.view` is what
+     it shows now, and `t.setView` restores a kept one. */
   const [kept, setKept] = useState<TableView | null>(null);
-  const t = useTable(INVOICES, { rowKey: (i) => i.id, initialView: view, onViewChange: setView });
-  const { Table, Column } = t;
+  const [reports, setReports] = useState(0);
+  const t = useTable(INVOICES, { rowKey: (i) => i.id, initialView: START_VIEW, onViewChange: () => setReports((n) => n + 1) });
+  const { Table, Column, view, setView } = t;
 
   return (
     <Stack gap={3}>
@@ -47,7 +47,7 @@ export default function InitialView() {
       </Table>
       <Stack gap={1}>
         <Text as="span" size="sm" tone="secondary">
-          What the application would keep
+          What the application would keep - reported {reports} times; a restore is not a report
         </Text>
         {/* JSON has no space to break at: without this it ran past a phone's card. */}
         <Text as="code" size="sm" mono data-role="view" style={{ overflowWrap: "anywhere" }}>

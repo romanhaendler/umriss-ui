@@ -573,16 +573,15 @@ interface TableOptionsCommon<Z> {
       which arrives by id, is known in the first render. */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- each filter has a condition of its own; at the table only the row counts
   rowFilters?: readonly RowFilter<Z, any>[];
-  /** The view to start from, and to go to whenever one differing in content
-      from the last is handed in - the same view again changes nothing, and
-      what it leaves out is reset; one the table reported itself, handed back
-      late, is its own state coming back and not gone to. The table remembers
-      none: where a view is kept is the application's decision. Names no
-      column carries fall out. */
+  /** The view to start from, read once when the hook first runs; a different
+      value on a later render is ignored, as React ignores a changed
+      `defaultValue`. To go to a view later, call `setView`. The table
+      remembers none: where a view is kept is the application's decision.
+      Names no column carries fall out. */
   initialView?: TableView;
-  /** Every change of the view, once, always the whole view - the one to keep,
-      or to hand another table as its `initialView`. Not called for the view
-      the table starts with. */
+  /** Every change the reader makes, once, always the whole view - the one to
+      keep, or to hand another table's `setView`. Not called for the view the
+      table starts with, nor for one `setView` applies. */
   onViewChange?: (view: TableView) => void;
   /** Renders only what stands in the scroll area; paging is then off. Every
       row is one row pitch tall, which the table measures itself (ADR-0042). */
@@ -698,6 +697,12 @@ export interface TableSnapshot<Z> {
   grouping: readonly string[];
   /** Groups by these columns or group keys; `[]` ungroups. Back to page one. */
   setGrouping: (grouping: readonly string[]) => void;
+  /** Goes to a whole view; what it leaves out goes back to where the table
+      starts, and names no column carries fall out. Not reported through `onViewChange`:
+      two tables kept in step by `onViewChange: (v) => other.setView(v)` in
+      both directions do not answer each other. A view with the content
+      already shown changes nothing. */
+  setView: (view: TableView) => void;
   /** The paths of the folded groups that still occur. */
   folded: readonly string[];
   /** Folds a group or unfolds it. A group of one row does not fold. */
