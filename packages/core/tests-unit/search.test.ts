@@ -7,14 +7,13 @@
    compares a pair that differs in exactly one property: if a rule falls, the
    test that names it falls, and not just any one.
 
-   The result fields (`rank`, `finds`, `kandidat`) keep their German
-   names: they are the module's, not this test's. */
+   The result fields are `rank`, `finds` and `candidate`. */
 
 import { describe, expect, it } from "vitest";
 import { find, findInName } from "../src/lib/search";
 
-const names = (finds: readonly { kandidat: { name: string } }[]) =>
-  finds.map((f) => f.kandidat.name);
+const names = (finds: readonly { candidate: { name: string } }[]) =>
+  finds.map((f) => f.candidate.name);
 
 /** Shorthand: a list of bare names. */
 const list = (...values: string[]) => values.map((name) => ({ name }));
@@ -147,14 +146,14 @@ describe("find – over a list", () => {
 
   it("returns the candidate itself, not a copy of its fields", () => {
     const candidate = { name: "Table", payload: 42 };
-    expect(find([candidate], "table")[0]!.kandidat).toBe(candidate);
+    expect(find([candidate], "table")[0]!.candidate).toBe(candidate);
   });
 });
 
 describe("find – the group counts too", () => {
   const CANDIDATES = [
-    { name: "TreeView", gruppe: "Struktur und Ebenen" },
-    { name: "Strukturbaum", gruppe: "Fundament" },
+    { name: "TreeView", group: "Struktur und Ebenen" },
+    { name: "Strukturbaum", group: "Fundament" },
   ];
 
   it("finds through the group name what the name does not give", () => {
@@ -164,7 +163,7 @@ describe("find – the group counts too", () => {
   it("marks nothing on a group-only find", () => {
     // The match spans index the name; a find through the group has nothing to
     // mark in the name, and marking something would be a lie.
-    const found = find(CANDIDATES, "struktur").find((f) => f.kandidat.name === "TreeView");
+    const found = find(CANDIDATES, "struktur").find((f) => f.candidate.name === "TreeView");
     expect(found!.finds).toEqual([]);
   });
 
@@ -178,12 +177,12 @@ describe("find – the group counts too", () => {
 describe("find – the caller's weight", () => {
   it("shifts the rank", () => {
     const without = find(list("Table"), "table")[0]!.rank;
-    const with_ = find([{ name: "Table", gewicht: 5 }], "table")[0]!.rank;
+    const with_ = find([{ name: "Table", weight: 5 }], "table")[0]!.rank;
     expect(with_).toBe(without + 5);
   });
 
   it("can turn the order round and leaves the match spans untouched", () => {
-    const heavy = { name: "TableFilterStrip", gewicht: 100 };
+    const heavy = { name: "TableFilterStrip", weight: 100 };
     const light = { name: "Table" };
     expect(names(find([light, heavy], "table"))).toEqual([
       "TableFilterStrip",
@@ -200,7 +199,7 @@ describe("find – the caller's weight", () => {
    subsequence - over a lede of sixty words a subsequence matches almost
    anything. */
 describe("find – the keywords count last", () => {
-  const TOAST = { name: "Toast", gruppe: "Feedback", keywords: ["snackbar", "notification"] };
+  const TOAST = { name: "Toast", group: "Feedback", keywords: ["snackbar", "notification"] };
 
   it("finds through a keyword what the name and the group do not give", () => {
     expect(names(find([TOAST], "snackbar"))).toEqual(["Toast"]);
@@ -214,16 +213,16 @@ describe("find – the keywords count last", () => {
     // The keyword find carries the heaviest weight and still stands last: the
     // weight turns the order within one tier, never across tiers.
     const candidates = [
-      { ...TOAST, gewicht: 100 },
-      { name: "Log", gruppe: "Snackbar" },
-      { name: "Snackbar history", gruppe: "Log" },
+      { ...TOAST, weight: 100 },
+      { name: "Log", group: "Snackbar" },
+      { name: "Snackbar history", group: "Log" },
     ];
     expect(names(find(candidates, "snackbar"))).toEqual(["Snackbar history", "Log", "Toast"]);
   });
 
   it("orders keyword finds by the caller's weight", () => {
     const light = { name: "Alert", keywords: ["notification"] };
-    const heavy = { name: "Toast", keywords: ["notification"], gewicht: 2 };
+    const heavy = { name: "Toast", keywords: ["notification"], weight: 2 };
     expect(names(find([light, heavy], "notification"))).toEqual(["Toast", "Alert"]);
   });
 

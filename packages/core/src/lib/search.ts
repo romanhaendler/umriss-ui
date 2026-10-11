@@ -23,7 +23,7 @@ export interface MatchSpan {
 
 /** A candidate that matched the query - with its rank and its match spans. */
 export interface Find<K> {
-  kandidat: K;
+  candidate: K;
   rank: number;
   /** Empty for a group-only find: there is then nothing to mark in the name,
       and marking something would be a lie. */
@@ -34,12 +34,12 @@ export interface Find<K> {
 export interface Candidate {
   name: string;
   /** Searched as well, so that "struktur" finds what lies under the heading. */
-  gruppe?: string;
+  group?: string;
   /**
    * Added to the rank last. With it an application can express frequency or
    * recency; the library keeps no memory of its own.
    */
-  gewicht?: number;
+  weight?: number;
   /**
    * Searched last, and only for a query of `KEYWORD_MINIMUM` characters or
    * more: words the reader may type that neither the name nor the group
@@ -54,7 +54,7 @@ export interface Candidate {
 
 /** A character sitting at the start of a word. The strongest of the three
     bonuses: it is what makes abbreviations like `dtp` meaningful at all. */
-const GRENZE_BONUS = 10;
+const BOUNDARY_BONUS = 10;
 
 /** A character immediately after the previous one. Closer together is better. */
 const RUN_BONUS = 8;
@@ -130,10 +130,10 @@ export function findInName(term: string, name: string): NameFind | null {
   const lowerName = name.toLowerCase();
 
   /* best[position] = the best bonus for the query characters so far, if the last
-     one considered sits at `position`. `woher` keeps its predecessor, so that the
+     one considered sits at `position`. `origins` keeps its predecessor, so that the
      match spans can be traced back afterwards. */
   let best: (number | null)[] = new Array<number | null>(name.length).fill(null);
-  const woher: (number | null)[][] = [];
+  const origins: (number | null)[][] = [];
 
   for (let i = 0; i < wanted.length; i++) {
     const next = new Array<number | null>(name.length).fill(null);
@@ -141,7 +141,7 @@ export function findInName(term: string, name: string): NameFind | null {
 
     for (let position = 0; position < name.length; position++) {
       if (lowerName[position] !== wanted[i]) continue;
-      const startBonus = isWordStart(name, position) ? GRENZE_BONUS : 0;
+      const startBonus = isWordStart(name, position) ? BOUNDARY_BONUS : 0;
 
       if (i === 0) {
         next[position] = startBonus;
@@ -159,7 +159,7 @@ export function findInName(term: string, name: string): NameFind | null {
     }
 
     best = next;
-    woher.push(trail);
+    origins.push(trail);
   }
 
   let end: number | null = null;
@@ -175,7 +175,7 @@ export function findInName(term: string, name: string): NameFind | null {
   let position: number | null = end;
   for (let i = wanted.length - 1; i >= 0 && position !== null; i--) {
     positions.push(position);
-    position = woher[i]![position]!;
+    position = origins[i]![position]!;
   }
   positions.reverse();
 
@@ -213,7 +213,7 @@ function mergeAdjacent(positions: readonly number[]): readonly MatchSpan[] {
  * starts to judge that the reader could see.
  */
 export function find<K extends Candidate>(
-  kandidaten: readonly K[],
+  candidates: readonly K[],
   term: string,
 ): readonly Find<K>[] {
   const wanted = term.trim();
@@ -223,25 +223,25 @@ export function find<K extends Candidate>(
 
   /* The tier stands beside the find and not in it: 0 name, 1 group,
      2 keyword. */
-  const funde: { tier: number; find: Find<K> }[] = [];
-  for (const kandidat of kandidaten) {
-    const weight = kandidat.gewicht ?? 0;
-    const imNamen = findInName(wanted, kandidat.name);
-    if (imNamen !== null) {
-      funde.push({ tier: 0, find: { kandidat, rank: imNamen.rank + weight, finds: imNamen.finds } });
+  const found: { tier: number; find: Find<K> }[] = [];
+  for (const candidate of candidates) {
+    const weight = candidate.weight ?? 0;
+    const inName = findInName(wanted, candidate.name);
+    if (inName !== null) {
+      found.push({ tier: 0, find: { candidate, rank: inName.rank + weight, finds: inName.finds } });
       continue;
     }
-    const inDerGruppe =
-      kandidat.gruppe === undefined ? null : findInName(wanted, kandidat.gruppe);
-    if (inDerGruppe !== null) {
-      funde.push({ tier: 1, find: { kandidat, rank: inDerGruppe.rank + weight, finds: [] } });
+    const inGroup =
+      candidate.group === undefined ? null : findInName(wanted, candidate.group);
+    if (inGroup !== null) {
+      found.push({ tier: 1, find: { candidate, rank: inGroup.rank + weight, finds: [] } });
       continue;
     }
     if (
       searchesKeywords &&
-      kandidat.keywords?.some((keyword) => keyword.toLowerCase().includes(lowerWanted))
+      candidate.keywords?.some((keyword) => keyword.toLowerCase().includes(lowerWanted))
     ) {
-      funde.push({ tier: 2, find: { kandidat, rank: weight, finds: [] } });
+      found.push({ tier: 2, find: { candidate, rank: weight, finds: [] } });
     }
   }
 
@@ -249,7 +249,7 @@ export function find<K extends Candidate>(
      caller assigns should be able to turn the order within one tier and not
      mix the tiers. Array#sort is stable, so a tie falls back on the incoming
      order - without an index being carried. */
-  return funde
+  return found
     .sort((a, b) => a.tier - b.tier || b.find.rank - a.find.rank)
     .map((tiered) => tiered.find);
 }

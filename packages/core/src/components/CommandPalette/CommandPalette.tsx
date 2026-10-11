@@ -110,36 +110,33 @@ export interface CommandPaletteProps
   maxFinds?: number;
 }
 
-/** Translates the caller's prop into what the matcher and the row work with. */
+/** Reads the caller's prop into what the matcher and the row work with. */
 function toCandidate(item: CommandPaletteItem): PaletteCandidate {
   return {
     name: item.label,
-    gruppe: item.searchedGroup ?? item.group,
-    group: item.group,
-    gewicht: item.weight,
+    group: item.searchedGroup ?? item.group,
+    heading: item.group,
+    weight: item.weight,
     keywords: item.keywords,
     id: item.id,
     icon: item.icon,
   };
 }
 
-/* What the matcher needs (name, gruppe, gewicht, keywords) and what the row needs (id,
+/* What the matcher needs (name, group, weight, keywords) and what the row needs (id,
    icon) - flat, and not with the caller's prop nested inside it. Otherwise
-   every access would run through `find.kandidat.eintrag.id`, and the caller
+   every access would run through `find.candidate.entry.id`, and the caller
    would have smuggled fields past this point that are none of this component's
-   business. The term is CANDIDATE: `Eintrag`, `item` and `entry` are on the
+   business. The term is CANDIDATE: `Entry`, `item` and `entry` are on the
    glossary's avoidance list (CONTEXT.md, "Finding"). Only the prop is still
    called `items` - that is the outside.
 
-   `gruppe` and `gewicht` keep their spelling because `lib/search` reads them
-   under those names: the matcher's `Candidate` is its contract, not this
-   component's. `gruppe` is what is searched of the heading, `group` the
-   heading shown. */
+   `group` is what is searched of the heading, `heading` the heading shown. */
 interface PaletteCandidate {
   name: string;
-  gruppe?: string;
   group?: string;
-  gewicht?: number;
+  heading?: string;
+  weight?: number;
   keywords?: readonly string[];
   id: string;
   icon?: ReactNode;
@@ -179,7 +176,7 @@ export const CommandPalette = forwardRef<HTMLDialogElement, CommandPaletteProps>
      the modal's `--u-duration-exit` is right for a sheet of paper and wrong
      here. If the entrance next to it seems too hard, the entrance gets shorter
      and the exit does not get longer. */
-  const { dialogRef, beimSchliessen, beimAbbrechen } = useDialogChoreography(open, 0, onClose);
+  const { dialogRef, onDialogClose, onDialogCancel } = useDialogChoreography(open, 0, onClose);
 
   const fieldRef = useRef<HTMLInputElement>(null);
   const previouslyFocused = useRef<Element | null>(null);
@@ -206,7 +203,7 @@ export const CommandPalette = forwardRef<HTMLDialogElement, CommandPaletteProps>
   const resting = useMemo<Find<PaletteCandidate>[]>(
     () =>
       (restingItems ?? []).map((item) => ({
-        kandidat: toCandidate(item),
+        candidate: toCandidate(item),
         rank: 0,
         finds: [],
       })),
@@ -222,7 +219,7 @@ export const CommandPalette = forwardRef<HTMLDialogElement, CommandPaletteProps>
   const groups = useMemo<FindGroup[]>(() => {
     const collected: FindGroup[] = [];
     for (const item of shown) {
-      const name = item.kandidat.group;
+      const name = item.candidate.heading;
       let group = collected.find((g) => g.name === name);
       if (group === undefined) {
         group = { name, finds: [] };
@@ -241,9 +238,9 @@ export const CommandPalette = forwardRef<HTMLDialogElement, CommandPaletteProps>
   /* Derived rather than stored: if the held candidate drops out of the list,
      the mark stands on the first and never on nothing. */
   const activeId =
-    held !== null && order.some((f) => f.kandidat.id === held)
+    held !== null && order.some((f) => f.candidate.id === held)
       ? held
-      : (order[0]?.kandidat.id ?? null);
+      : (order[0]?.candidate.id ?? null);
 
   /* ---------------------------------------------------------------- */
   /* Pointer against keyboard                                          */
@@ -369,13 +366,13 @@ export const CommandPalette = forwardRef<HTMLDialogElement, CommandPaletteProps>
   const move = (direction: 1 | -1) => {
     keyboardTakesOver();
     if (order.length === 0) return;
-    const current = order.findIndex((f) => f.kandidat.id === activeId);
-    const next = order[nextIndex(current === -1 ? 0 : current, order.length, direction)]!.kandidat;
+    const current = order.findIndex((f) => f.candidate.id === activeId);
+    const next = order[nextIndex(current === -1 ? 0 : current, order.length, direction)]!.candidate;
     setHeld(next.id);
     /* VoiceOver reads neither the active descendant's group nor, often, the
        row itself (listbox-announcements); a row here is never "selected" - its
        `aria-selected` is the mark. */
-    announce(wording.optionActive(next.name, { group: next.gruppe }), fieldRef.current);
+    announce(wording.optionActive(next.name, { group: next.group }), fieldRef.current);
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
@@ -432,7 +429,7 @@ export const CommandPalette = forwardRef<HTMLDialogElement, CommandPaletteProps>
       onClose={() => {
         /* Reports only a close the browser triggered - every gesture of its own
            has already called `onClose`. */
-        beimSchliessen();
+        onDialogClose();
         /* The focus goes back where it came from - and it does so HERE, in the
            close event, and not in the cleanup of an effect. React lets all
            cleanups run before all effect bodies; a cleanup would therefore
@@ -446,7 +443,7 @@ export const CommandPalette = forwardRef<HTMLDialogElement, CommandPaletteProps>
       }}
       onCancel={(event) => {
         onCancel?.(event);
-        if (!event.defaultPrevented) beimAbbrechen(event);
+        if (!event.defaultPrevented) onDialogCancel(event);
       }}
       onMouseDown={(event) => {
         onMouseDown?.(event);
@@ -496,10 +493,10 @@ export const CommandPalette = forwardRef<HTMLDialogElement, CommandPaletteProps>
                   const headingId = `${baseId}-group-${idPart(group.name ?? "")}`;
                   const rows = group.finds.map((item) => (
                     <Row
-                      key={item.kandidat.id}
+                      key={item.candidate.id}
                       find={item}
                       baseId={baseId}
-                      active={item.kandidat.id === activeId}
+                      active={item.candidate.id === activeId}
                       withIcon={withIcons}
                       onSweep={pointerSweeps}
                       onMove={pointerMoves}
@@ -581,7 +578,7 @@ function Row({
   onMove: (id: string) => void;
   onChoose: (id: string) => void;
 }) {
-  const { kandidat: candidate } = item;
+  const { candidate } = item;
   return (
     <div
       id={rowId(baseId, candidate.id)}

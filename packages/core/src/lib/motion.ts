@@ -17,13 +17,13 @@ export function prefersReducedMotion(): boolean {
  * Whoever reads a token back reads the unit with it. With lengths that does not
  * show, because `px` is the only one occurring; with times there are two.
  */
-export function durationFrom(stil: CSSStyleDeclaration, name: string): number {
-  const roh = stil.getPropertyValue(name).trim();
-  const zahl = Number.parseFloat(roh);
-  if (!Number.isFinite(zahl)) return 0;
-  // Auf "ms" zuerst pruefen - "ms" endet selbst auf "s".
-  if (roh.endsWith("ms")) return zahl;
-  return roh.endsWith("s") ? zahl * 1000 : zahl;
+export function durationFrom(style: CSSStyleDeclaration, name: string): number {
+  const raw = style.getPropertyValue(name).trim();
+  const amount = Number.parseFloat(raw);
+  if (!Number.isFinite(amount)) return 0;
+  // Check "ms" first - "ms" itself ends in "s".
+  if (raw.endsWith("ms")) return amount;
+  return raw.endsWith("s") ? amount * 1000 : amount;
 }
 
 /**
