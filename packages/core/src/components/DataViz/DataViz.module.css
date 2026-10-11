@@ -45,7 +45,7 @@
   .sparkline {
     composes: text from "#own-styles";
     display: inline-flex;
-    /* Its drawing has a fixed width: squeezed in a row, it drew over its
+    /* Its drawing has a fixed width: squeezed in a row, it would draw over its
        neighbours instead of letting them wrap. */
     flex: none;
     color: var(--u-color-text-secondary);
@@ -70,8 +70,7 @@
     transform: translate(-50%, -50%);
     border-radius: var(--u-radius-full);
     /* A circle and not the library's squircle, which the build adds to every
-       radius: this small a squircle is a rounded square (as the Stepper's
-       marker says). */
+       radius: this small a squircle is a rounded square. */
     corner-shape: round;
     background: var(--u-color-accent);
     forced-color-adjust: none;
@@ -87,9 +86,9 @@
   }
 
   /* The meter's track and fill are grounds, and forced colours repaint both
-     with the page's. The track takes an edge, the fill the
-     system's selection colour whatever its tone: the tone is a verdict told by
-     colour alone, and the fraction stands beside it as the figure. */
+     with the page's. The track takes an edge, the fill the system's selection
+     colour whatever its tone: the tone is told by colour alone, and the
+     fraction stands beside it as the figure. */
   @media (forced-colors: active) {
     .track {
       outline: 1px solid CanvasText;

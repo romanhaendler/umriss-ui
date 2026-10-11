@@ -1,4 +1,4 @@
-/* <LimitLine> and <LimitBand> - limits on the chart (judging-values 02).
+/* <LimitLine> and <LimitBand> - limits on the chart.
 
    Both render nothing themselves: children are configuration collectors, the
    drawing happens in the scene. And both are explicitly not series - no

@@ -1,23 +1,13 @@
 /* The limit model (ADR-0006).
 
-   The rule that says what a number is. On a data-dense screen no number
-   stands for itself - 82 % is above target or below it - and today the
-   application decides that in a question-mark-colon in the middle of the JSX,
-   again three components further on and there with a different bound. The
-   library holds the colour and gives the rule away; that is the wrong way
-   round, because the colour is the easy part.
+   The rule that says what a number is: on a data-dense screen no number
+   stands for itself - 82 % is above target or below it.
 
-   The same rule stands a second time in @umriss-ui/charts, and that is
-   deliberate. charts may import nothing from ui; making ui depend on
-   charts would pull a canvas library into the bundle of every consumer who
-   wanted a coloured tile; and a third package for thirty lines would be a
-   build, a version and a release for thirty lines. So the rule stands twice,
-   the word once (CONTEXT.md), and a conformance test runs both versions from
-   one case table. The doubling is explained, and the explanation is
-   executable.
+   The same rule stands a second time in @umriss-ui/charts, deliberately:
+   charts may import nothing from ui, and ui must not depend on charts. A
+   conformance test runs both versions from one case table.
 
-   It lives in lib/ and not with a component because more than one needs it:
-   the tile now, meter and matrix later.
+   It lives in lib/ because more than one component needs it.
 
    Pure functions, no React, no text. The words for the verdicts live in
    `wording`. */
@@ -26,25 +16,22 @@
 export type Side = "upper" | "lower";
 
 /** How seriously a violation weighs: one severity that advises and one that
-    calls for action. Exactly two - whoever offers five gets five colours on
-    the screen, and five colours are noise. For a third distinction one sets a
+    calls for action. Exactly two; for a third distinction one sets a
     second limit. */
 export type Severity = "warning" | "alarm";
 
 /** What a value is. Four outcomes, ordered by severity, `unknown` between
     `ok` and `warning`: a value nobody has is a reason to look.
 
-    The fourth outcome is not a `null`. A `null` would invite `?? "ok"` at the
-    call site, and that expression is exactly the defect this module exists
-    against: a dead data source would look like a healthy service. */
+    The fourth outcome is not a `null`, which would invite `?? "ok"` at the
+    call site: a dead data source would look like a healthy service. */
 export type Verdict = "ok" | "unknown" | "warning" | "alarm";
 
 /** A bound: a value, a side, a severity.
 
     No tolerance band as input. A band is derived - two limits of equal
     severity on opposite sides enclose one - and as an input type it would
-    force a `null` on one edge in the one-sided case. One-sided is the common
-    case, not the exception. */
+    force a `null` on one edge in the one-sided case. */
 export interface Limit {
   value: number;
   side: Side;
@@ -54,8 +41,7 @@ export interface Limit {
 /** The set a value is read against.
 
     The target stands beside the limits and is not one: it is missed, never
-    violated, and it is never the edge of a region. Conflating the two is how a
-    tile turns red for being above target. */
+    violated, and it is never the edge of a region. */
 export interface LimitSet {
   /** In any order; none, one or several. */
   limits?: readonly Limit[];
@@ -73,10 +59,7 @@ export interface Assessment {
   excess?: number;
   /** The signed distance from the target. Absent where none is set: no target
       means no deviation, not a deviation of zero.
-
-      Two fields, because they are two numbers. A single one meaning the one
-      thing when a bound is violated and the other otherwise reads well and is
-      wrong at three in the morning. */
+ */
   deviation?: number;
 }
 
@@ -143,8 +126,7 @@ function isMoreSevere(candidate: Violation, best: Violation): boolean {
  * alarm, even where the value lies further beyond the warning.
  *
  * No hysteresis: that would need the previous state, and a function of a
- * single value has none. Exactly that is what makes this module safe to
- * duplicate; the trailing of an alarm is not a property of a bound.
+ * single value has none.
  */
 export function assess(value: number | null | undefined, set: LimitSet = {}): Assessment {
   if (!isMeasurable(value)) return { verdict: "unknown" };

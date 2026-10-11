@@ -34,12 +34,9 @@ export interface AccordionProps extends Omit<HTMLAttributes<HTMLDivElement>, "on
   headingLevel?: 2 | 3 | 4 | 5 | 6;
 }
 
-/* Sections behind headers - the APG accordion: each header is a button
-   inside a heading, says with `aria-expanded` whether its section stands open,
-   and the arrow keys move between the headers. It is `Card`'s collapse made
-   into a list, with the same animated height, and it leaves the card's own
-   collapse as it is: one surface that folds is a card, several sections that
-   fold against each other are this. */
+/* The APG accordion: each header is a button inside a heading, says with
+   `aria-expanded` whether its section stands open, and the arrow keys move
+   between the headers. The height animates as `Card`'s collapse does. */
 /** Sections behind headers that open and close: one at a time (`single`) or
     any number (`multiple`). The arrow keys move between the headers. */
 export const Accordion = forwardRef<HTMLDivElement, AccordionProps>(function Accordion(
@@ -132,8 +129,7 @@ export const AccordionItem = forwardRef<HTMLDivElement, AccordionItemProps>(func
           <AngleGlyph className={cx(styles.chevron, isOpen && styles.chevronOpen)} />
         </button>
       </Heading>
-      {/* The height animates through the 0fr/1fr grid, as the card's
-          collapse does; a folded panel stays in the DOM, inert. */}
+      {/* The height animates through the 0fr/1fr grid; a folded panel stays in the DOM, inert. */}
       <div className={cx(styles.collapse, !isOpen && styles.collapsed)}>
         <div className={styles.collapseInner} {...inertWhen(!isOpen)}>
           <div id={panelId} role="region" aria-labelledby={headerId} className={styles.panel}>

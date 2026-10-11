@@ -28,8 +28,8 @@ export function PinPlacement({
   const { start, end } = blocks;
   /* A block's width as it stood while it stuck - for the pinned columns, not
      for the pin: a group header's label covers only the start block while
-     it sticks and widens it, and a block measured loose would have fitted
-     and stuck again, round and round. */
+     it sticks and widens it, so a block measured loose would fit and stick
+     again in a loop. */
   const known = useRef<{ key: string; sticking: { start: boolean; end: boolean }; start?: number; end?: number }>({
     key: "",
     sticking: { start: true, end: true },
@@ -88,8 +88,8 @@ export function PinPlacement({
 }
 
 /* The width the scroll area shows, for the empty body's message: it spans
-   every column, and centred across a table wider than the phone it stood
-   half out of view - "No alarms – the connection is dov". */
+   every column, and centred across a table wider than the screen it would
+   stand half out of view. */
 export function ViewWidth({ table: tableRef }: { table: RefObject<HTMLTableElement | null> }) {
   useLayoutEffect(() => {
     const scroller = tableRef.current?.parentElement;

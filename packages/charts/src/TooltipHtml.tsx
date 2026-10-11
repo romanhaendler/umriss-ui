@@ -65,7 +65,7 @@ export function TooltipHtml({ scene }: { scene: ChartScene }): ReactNode {
                               <span className="uc-tooltip-x">{row.x}</span>
                             ) : null}
                           </span>
-                          {/* A box names its numbers in rows of their own below (B9). */}
+                          {/* A box names its numbers in rows of their own below. */}
                           <span className="uc-tooltip-value">{row?.box == null ? row?.value : null}</span>
                         </div>
                         {row?.box?.map((part) => (

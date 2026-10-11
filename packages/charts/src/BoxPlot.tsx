@@ -1,4 +1,4 @@
-/* <BoxPlot> - series configuration (box-plot 01).
+/* <BoxPlot> - series configuration.
    Renders nothing itself: children are configuration collectors, the drawing
    happens exclusively in the scene.
 

@@ -24,7 +24,7 @@ import { MINUTE } from "./workingTime";
 
 
 /** A box's rows top to bottom as drawn: its further numbers with the median
-    between the quartiles (box-plot B9). */
+    between the quartiles. */
 export const BOX_ROWS = [...BOX_KEYS.slice(0, 2), "median", ...BOX_KEYS.slice(2)] as const;
 
 /** A box's tooltip and table write this many outliers, and count the rest. */
@@ -63,7 +63,7 @@ export function tooltipRow(s: ChartScene, k: Candidate, headerXAxisId: string): 
   return { value, x, chip: s.theme?.forced === true ? tooltipChip(s, k, s.theme) : null, box };
 }
 
-/** A box's readings top to bottom as drawn (B9): the five, then mean,
+/** A box's readings top to bottom as drawn: the five, then mean,
     notch, n and outliers - each only where the series has it. One list for
     the tooltip's rows and the table's columns; without numbers (a table
     row with no box) every value is empty, and so is one not given. */
@@ -93,8 +93,7 @@ export function boxParts(
   return parts;
 }
 
-/** A box's outliers top to bottom as drawn, the first five written out
-    (B9). */
+/** A box's outliers top to bottom as drawn, the first five written out. */
 export function outlierText(s: ChartScene, entry: SeriesEntry, outliers: readonly number[]): string {
   const sorted = [...outliers].sort((a, b) => b - a);
   return s.wording.outlierList(sorted.slice(0, OUTLIERS_SHOWN).map((v) => formatY(s, entry, v)), Math.max(0, sorted.length - OUTLIERS_SHOWN));

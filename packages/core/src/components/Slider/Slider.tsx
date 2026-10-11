@@ -78,10 +78,8 @@ function keyed(key: string, value: number, min: number, max: number, step: numbe
 /* One value on the native range input: the pointer, the focus, a form's
    `name` and the role come from the platform, and the drawing comes from the
    tokens. The keys are the component's own - PageUp and PageDown step
-   differently from engine to engine, and a data-dense screen should not.
-
-   The construction of the other native fields: the class on the wrapper,
-   ref and rest on the input. */
+   differently from engine to engine. Class on the wrapper, ref and rest on
+   the input. */
 /** One value on a track between `min` and `max`, on the native range input;
     `marks` set labelled points on the track. */
 export const Slider = forwardRef<HTMLInputElement, SliderProps>(function Slider(
@@ -111,9 +109,7 @@ export const Slider = forwardRef<HTMLInputElement, SliderProps>(function Slider(
   const value = controlled ? valueProp : own;
   const show = (x: number) => (format ? format(x) : formats.number(x, decimalsOf(step)));
   const text = show(value);
-  /* The readout's room is its longest value's: the track
-     keeps its length while the figure changes, and a short figure stands at
-     the track rather than six characters from it. */
+  // The readout's room is its longest value's: the track keeps its length as the figure changes.
   const room = Math.max(show(min).length, show(max).length);
   const share = (x: number) => (max > min ? ((x - min) / (max - min)) * 100 : 0);
 

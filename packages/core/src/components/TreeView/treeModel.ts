@@ -12,9 +12,8 @@
    upwards; the indeterminate state of a partially checked branch is computed
    from its descendants every time and never stored.
 
-   The state transitions live here and not in the hook: that keeps the
-   companion a pure state holder without logic of its own, and everything that
-   is hard about a tree can be checked without a browser. */
+   The state transitions live here and not in the hook, so that everything
+   that is hard about a tree can be checked without a browser. */
 
 /** A node's key, as `reader.key` returns it. */
 export type Key = string | number;
@@ -33,9 +32,7 @@ export interface NodeReader<K, S extends Key = string> {
       it stays navigable (ADR-0005). */
   disabled?: (node: K) => boolean;
   /** Can this branch have children that are not present? Without an answer:
-      no. Its own name instead of an overloaded return value: putting `null`
-      against `undefined` would be the kind of distinction that is got wrong
-      more often than right. */
+      no. */
   unloaded?: (node: K) => boolean;
   /** Does this node match? Given, it filters instead of the search text,
       which is then not read - a table matches by its columns and filters,
@@ -411,12 +408,10 @@ export function setChecked<K, S extends Key = string>(
 
   /** Reconciles a whole subtree from the bottom up.
 
-      The cascade sets every node inside it - intermediate branches included,
-      underneath which a disabled or unloaded node has been left behind.
-      Whoever reconciles only the path from the root to the touched node
-      leaves exactly those intermediate branches on what the cascade set:
-      they claimed to be full while something underneath them is outstanding.
-      That is rule 2 of ADR-0005, and it holds at every level. */
+      The cascade sets every node inside it, including intermediate branches
+      with a disabled or unloaded node underneath; those must be reconciled
+      too, not only the path from the root. Rule 2 of ADR-0005 holds at every
+      level. */
   function reconcileSubtree(n: K): void {
     const children = reader.children(n) ?? [];
     if (children.length === 0) return;
@@ -635,7 +630,7 @@ export function allBranches<K, S extends Key = string>(
 /* ================= Checking the data ================= */
 
 /** The first key that occurs twice, otherwise null. Two nodes with the same
-    key break the cascade and the active node silently - the companion reports
+    key break the cascade and the active node silently - `useTree` reports
     that during development. */
 export function duplicateKey<K, S extends Key = string>(
   roots: readonly K[],

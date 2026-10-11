@@ -6,20 +6,16 @@
    not only a colour, so the statement arrives without relying on colour
    vision.
 
-   Two of them contradict - work cannot be provisional and fixed at once - and
-   the rule is written here instead of falling out of the order in which the
-   drawing happens to paint: the later one in the list wins, because a list is
-   read forwards and the last word on a thing is the one that counts. */
+   Two of them contradict - work cannot be provisional and fixed at once: the
+   later one in the list wins. */
 
 /** The appearances a caller may give a subtask. */
 export type SubtaskAppearance = "provisional" | "fixed" | "muted" | "open";
 
 /** What the drawing needs to know, with the contradiction already settled.
 
-    The four names are the ones this module was born with, and they are kept so
-    that a caller's code does not change because a picture did. Two of them are
-    now named after a drawing they no longer use, and the channel each one
-    really owns stands beside it. */
+    Two of the field names (`dashed`, `hatched`) are older than the drawing;
+    the channel each one owns stands beside it. */
 export interface ResolvedAppearance {
   /** `provisional`: the FILL - none at all, so the surface shows through, with
       a dashed outline in the task colour. Planned, not released. */

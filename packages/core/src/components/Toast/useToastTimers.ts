@@ -14,7 +14,6 @@ interface TimerInfo {
     the provider. */
 export function useTimerStore() {
   const timersRef = useRef(new Map<number, TimerInfo>());
-  /* The teardowns of leaving toasts, cancelled with the provider. */
   const leavesRef = useRef(new Set<ReturnType<typeof setTimeout>>());
 
   const clearTimer = useCallback((id: number) => {

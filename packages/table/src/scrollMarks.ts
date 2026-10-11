@@ -5,9 +5,8 @@
 import type { PinBlocks } from "./model/pinning";
 
 /* Whether columns lie beyond a side of the scroll area where no block
-   sticks: that side fades out. A table a few pixels too wide for a phone cut
-   "1,951.24" to "1,951.2" at the edge and read as cut, not as a table that
-   scrolls. Marked on the scroll, and whenever the area or the table changes
+   sticks: that side fades out, so a value cut at the edge reads as a table
+   that scrolls. Marked on the scroll, and whenever the area or the table changes
    its width. */
 export function markBeyond(scroller: HTMLElement, blocks: PinBlocks) {
   const room = scroller.scrollWidth - scroller.clientWidth;

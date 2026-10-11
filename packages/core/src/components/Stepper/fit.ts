@@ -6,8 +6,7 @@
    the next step. Beneath the markers, every step takes an equal share, and the
    share has to hold the longest word of the widest step. Narrower than that -
    five steps on a phone - the steps take a column, as
-   `orientation="vertical"` does: a row had run the labels into each other and
-   struck them through with the lines. */
+   `orientation="vertical"` does. */
 
 export type StepperFit = "row" | "stacked" | "column";
 

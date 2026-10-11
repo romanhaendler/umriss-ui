@@ -14,11 +14,9 @@
     max-width: calc(100vw - 16px);
     max-height: calc(100dvh - 16px);
     overflow: auto;
-    /* The surface on the panel itself, not left to what it holds: the
-       panel scrolls (`overflow: auto`), and a surface drawn by its content
-       would lose its shadow and its round corners to that clip - a popover
-       used directly would stand flat on the page. The transparent outline is the edge
-       forced colours draw. */
+    /* The surface sits on the panel itself: the panel scrolls, and a surface
+       drawn by its content would lose shadow and corners to that clip. The
+       transparent outline is the edge forced colours draw. */
     background: var(--u-color-surface);
     border-radius: var(--u-radius-md);
     outline: 1px solid transparent;

@@ -1,4 +1,4 @@
-/* <Scatter> - series configuration (4.3).
+/* <Scatter> - series configuration.
    Renders nothing itself: children are configuration collectors, the drawing
    happens exclusively in the scene.
 

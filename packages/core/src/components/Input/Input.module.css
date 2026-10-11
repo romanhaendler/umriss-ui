@@ -29,7 +29,7 @@
   }
 
   /* The focus is the edge, grown to two pixels in the accent. No halo around
-     it, and no outline: Safari drew its own blue ring outside the edge. */
+     it, and no outline: Safari would draw its own blue ring outside the edge. */
   .wrapper:focus-within {
     outline: 2px solid transparent;
     box-shadow: var(--u-focus-ring);
@@ -41,8 +41,8 @@
     border-radius: var(--u-radius-sm);
   }
 
-  /* Room for the cross is part of the width whether it stands or not: a
-     field that grew by the cross with its first letter moved its neighbours. */
+  /* Room for the cross is part of the width whether it stands or not, so the
+     field does not grow with its first letter. */
   .wrapperClearable {
     --_chrome: calc(var(--u-space-3) + var(--u-space-1) + 18px);
     padding-right: var(--u-space-2);

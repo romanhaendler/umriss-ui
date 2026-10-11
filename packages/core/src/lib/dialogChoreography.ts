@@ -3,10 +3,8 @@
    The routine is small and it is delicate: `showModal()` on opening, on
    closing first the reverse choreography and then `close()`, and under reduced
    motion no choreography at all. Whoever writes it a second time above all
-   writes the duration down twice, and then the two windows eventually trail
-   for different lengths.
-
-   That is exactly why this module exists and not first at the eighth caller.
+   writes the duration down twice, and then the two windows trail for
+   different lengths.
 
    Internal. The library offers Modal and CommandPalette, not the mechanics
    they share - the same decision as for `computePosition`. */
@@ -43,10 +41,8 @@ export interface DialogChoreography {
  * that the reverse choreography can run - as a number of milliseconds or as
  * the name of a token read off the dialog while closing. The token is the
  * usual case: the duration then stands only once, and the stylesheet that
- * draws the motion and this hook that waits for its end cannot drift apart
+ * draws the motion and this hook that waits for its end cannot drift apart.
  * `0` means no exit, the window is gone in the same frame.
- * That is not a special case but a decision a calling component may make - a
- * sheet of paper may take its leave, a search window may not.
  *
  * Reduced motion always takes the same path as `0`.
  *

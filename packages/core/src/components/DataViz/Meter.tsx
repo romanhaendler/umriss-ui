@@ -47,8 +47,7 @@ export const Meter = forwardRef<HTMLSpanElement, MeterProps>(function Meter(
       className={cx(styles.meter, className)}
       {...rest}
       /* After `rest`: the role and the values are computed from `value`, and a
-         caller's attribute would make the bar say something else than it shows
-         (P3 of core-passthrough). */
+         caller's attribute would make the bar say something else than it shows. */
       role="meter"
       aria-valuemin={0}
       aria-valuemax={100}

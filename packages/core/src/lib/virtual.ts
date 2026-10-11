@@ -1,8 +1,7 @@
 /* Which rows are rendered, when not all of them are.
 
    Holding a very large table in the document costs not the computing but the
-   nodes: twenty thousand rows are a hundred thousand cells, and the browser
-   lays out a box for each. Virtualisation renders only what stands in the
+   nodes: the browser lays out a box for every cell. Virtualisation renders only what stands in the
    scroll area, and keeps the scrollbar at the right length with two empty rows
    - one above and one below the window.
 
@@ -12,8 +11,7 @@
 
    Everything here is pure arithmetic - the seam at which virtualisation is
    checked without a DOM. What moves the window (scrolling, keyboard) lies
-   beside it, in the table's companion in @umriss-ui/table
-   (`kern/begleiter.ts`). */
+   beside it, in `useVirtual`. */
 
 /** What `visibleWindow` needs to know about a scroll area and its rows. */
 export interface WindowInput {
@@ -96,9 +94,8 @@ export interface RowPlacement {
 /**
  * The scroll position at which a row is visible - or null where it already is.
  *
- * This is the arithmetic the keyboard handling hangs on. Without it the focus
- * moves into a row that is not rendered, and the focus ring disappears - a
- * virtualised table that cannot do this is worse than a paged one.
+ * This is the arithmetic the keyboard handling hangs on: without it the focus
+ * moves into a row that is not rendered.
  *
  * The sticky header counts against the upper edge: a row standing exactly at
  * `scrollTop` lies behind it.

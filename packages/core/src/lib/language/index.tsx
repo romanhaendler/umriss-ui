@@ -2,13 +2,10 @@
 
    The rule that governs everything else: without a provider every component
    behaves the same. The context has `null` as its base value, and the
-   hook then returns the defaults - no provider needed, no warning, no
-   difference. A library whose components work one by one can be introduced
-   component by component, and that is worth more than the slightly shorter
-   code a mandatory provider would give.
+   hook then returns the defaults - no provider needed, no warning.
 
    Overriding is entry by entry. Whoever passes `{ wording: { clear: "Clear" } }`
-   changes exactly that one entry; everything else stays German. A missing entry
+   changes exactly that one entry; everything else stays as the default has it. A missing entry
    falls back on the default and never on an empty text or a key name - that is
    the difference between an incomplete translation and a broken surface. */
 

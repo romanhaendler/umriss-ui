@@ -1,6 +1,5 @@
-/* The silhouette (chart-loading 03): what stands in the plot area while a
-   chart is loading with nothing to show. Variant A of the prototype, picked
-   by eye (chart-loading 01): a quiet outline of the chart that is coming,
+/* The silhouette: what stands in the plot area while a
+   chart is loading with nothing to show: a quiet outline of the chart that is coming,
    shaped by its first series' kind, and one band that sweeps across every
    shape together - in pixels, so that a wide chart does not race and a narrow
    one does not crawl.
@@ -29,8 +28,7 @@ export interface SilhouetteState {
 const FADE = 240;
 
 /** The band's width and speed. A speed, not core's `--u-duration-shimmer`: a
-    duration would race over a wide chart and crawl over a narrow one - the
-    user's pick in chart-loading 01. */
+    duration would race over a wide chart and crawl over a narrow one. */
 const BAND = 220;
 const SPEED = 240;
 /** The share of a cycle the band sweeps; the rest it waits out of sight -

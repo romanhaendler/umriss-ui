@@ -1,6 +1,5 @@
-/* How many middle levels of a breadcrumb fold into its menu - measured, not
-   guessed. Pure arithmetic over widths the component
-   reads off a hidden copy of the full trail.
+/* How many middle levels of a breadcrumb fold into its menu. Pure arithmetic
+   over widths the component reads off a hidden copy of the full trail.
 
    The first level and the current page always stand: the first says where
    the trail begins, the last where one is. What folds is the middle, from the

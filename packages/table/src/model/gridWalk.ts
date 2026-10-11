@@ -13,8 +13,7 @@
 
    It walks every line, not only those rendered: a virtual window renders a
    few dozen of twenty thousand, and the table brings the active cell into it
-   (the lesson of the schedule's walk, ADR-0033 - a walk held inside the view
-   leaves the keyboard stranded in it). */
+   (ADR-0033: a walk held inside the view strands the keyboard in it). */
 
 import type { PinBlocks } from "./pinning";
 import type { Line } from "./grouping";
@@ -52,9 +51,9 @@ export function groupLineLayout(layout: GridLayout): { lead: number; labelColumn
   /* The leading run stops before the end block: a cell over it would stick
      nowhere. */
   const endColumns = blocks.end > 0 ? blocks.end - (actions ? 1 : 0) : 0;
-  /* Without a span the label needs one column at least: over none it was a
-     cell of `colSpan` 0, which counts as one, and every aggregate after it
-     stood a column too far right. Where the first column carries an aggregate
+  /* Without a span the label needs one column at least: a cell of `colSpan` 0
+     counts as one and would push every aggregate after it a column too far
+     right. Where the first column carries an aggregate
      the label takes its place in the header, and the sum stands in the
      footer. */
   const lead = Math.max(span || n === 0 ? 0 : 1, Math.min(firstAggregate === -1 ? n : firstAggregate, n - endColumns));

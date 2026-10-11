@@ -1,13 +1,10 @@
 /* Working time: the mapping of wall clock time into working time and back.
 
-   A working week of data on a wall clock axis is, for a good forty per cent, a
-   flat line over hours in which nothing happens. A working calendar - a list of
-   intervals in which time counts - takes that time out.
+   A working calendar - a list of intervals in which time counts - takes the
+   time in between out of the axis.
 
-   The axis stays affine (ADR-0001): it is not the scale that calculates, it is
-   materialisation that maps the x channel beforehand. ADR-0001 itself names
-   exactly this route for a non-affine axis; the calendar is its first user. It
-   costs the drawing loop nothing.
+   The axis stays affine (ADR-0001): materialisation maps the x channel
+   beforehand, so the drawing loop pays nothing.
 
    The mapping is monotonically non-decreasing, constant across a removed
    interval, and both directions are needed: inwards for materialisation and
@@ -15,11 +12,9 @@
 
    Deliberately free of the DOM and of the scene, like bars.ts.
 
-   Explicitly not here: deriving the intervals from a roster or opening hours.
-   Turning a plan with its exceptions, holidays and handovers into a list of
-   intervals is a problem of the caller's data and belongs above this library.
-   The time zone is the data's: `localOffset` shifts a tick grid onto its local
-   boundaries, as it does the schedule's. */
+   Not here: deriving the intervals from a roster or opening hours; that is the
+   caller's data. The time zone is the data's: `localOffset` shifts a tick grid
+   onto its local boundaries. */
 
 import { tickStep } from "./ticks";
 
@@ -90,9 +85,8 @@ export function workingCalendar(
 }
 
 /* One calendar, built once per list. Materialisation calls the mapping once per
-   point - with a million points; were it to sort and accumulate every time, the
-   calendar would be the most expensive thing about the frame. The key is the
-   list itself, which is exactly what the axis holds. */
+   point, so it must not sort and accumulate every time. The key is the list
+   itself, which is what the axis holds. */
 const built = new WeakMap<object, WorkingCalendar>();
 
 /** Calendar from an input - a built calendar is passed straight through, a raw
@@ -188,10 +182,8 @@ export function toWallClock(workingTime: number, input: CalendarInput): number {
     before the first or after the last interval onto 0 or onto the whole
     working time respectively.
 
-    Why this exists: the materialised x values must stay ascending. Binary search
-    - for a hit as for a segment boundary - assumes that, and every comparison
-    with NaN is false, so that a search over a block of NaN silently lands on the
-    wrong point. The clamped value is a POSITION, not a statement: the point
+    The materialised x values must stay ascending: binary search assumes it, and
+    a search over NaN silently lands on the wrong point. The clamped value is a POSITION, not a statement: the point
     itself is carried as a gap and is never drawn and never hit. */
 export function toWorkingTimeClamped(wallClock: number, input: CalendarInput): number {
   const calendar = calendarFrom(input);

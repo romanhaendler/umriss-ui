@@ -87,9 +87,8 @@ export function bucketOf(
 ): number {
   if (coloring.kind === "assessment") {
     const b = assess(v, coloring.limits);
-    // Four outcomes, four answers. Folding "unknown" onto the same bucket as
-    // "ok" would be exactly the defect the limit model is written against: a
-    // value nobody has would look like a good one.
+    // Four outcomes, four answers: "unknown" never shares the bucket of "ok",
+    // or a value nobody has would look like a good one.
     return b.verdict === "alarm"
       ? 2
       : b.verdict === "warning"
@@ -126,12 +125,12 @@ export function matrixBuckets(
   return buckets;
 }
 
-/** A caller's CSS colour as the canvas can draw it (finding 15). */
+/** A caller's CSS colour as the canvas can draw it. */
 export function paint(s: ChartScene, color: string): string {
   const root = s.themeRoot;
   if (root === null) return color;
   // Under forced colours a caller's colour is the page's text colour, as
-  // the browser would force it on an element (C4).
+  // the browser would force it on an element.
   if (s.theme?.forced === true) return s.theme.colorText;
   let resolved = s.painted.get(color);
   if (resolved === undefined) {
@@ -160,7 +159,7 @@ export function colorFor(s: ChartScene, entry: SeriesEntry): string {
 }
 
 /** Named: the place of the name. Nameless: the position among the series that
-    take a palette place, as before - and a warning as soon as that shifts
+    take a palette place - and a warning as soon as that shifts
     underneath it. */
 export function paletteSlot(s: ChartScene, entry: SeriesEntry): number {
   if (entry.config.name !== undefined) return entry.slot;
@@ -180,9 +179,8 @@ export function paletteSlot(s: ChartScene, entry: SeriesEntry): number {
 
 export function nameFor(s: ChartScene, entry: SeriesEntry, index: number): string {
   if (entry.config.name !== undefined) return entry.config.name;
-  // The last resort of the legend, and it stays one: the package has no text
-  // layer, so every word it brings along itself is one word too many. Instead of
-  // replacing it, it is made conspicuous.
+  // The last resort of the legend: the package has no text layer of its own,
+  // so the fallback is made conspicuous instead of replaced.
   warnOnce(
     "series-without-name",
     `a series without a name is called "Series ${index + 1}" in the legend and the tooltip - the name belongs in \`name\`.`,
@@ -193,8 +191,7 @@ export function nameFor(s: ChartScene, entry: SeriesEntry, index: number): strin
 export function legendItems(s: ChartScene): LegendItem[] {
   const out: LegendItem[] = [];
   // Three lanes share one state list. The legend explains colours, not
-  // series - so it explains every colour once. Twelve entries for four states
-  // would not be a legend but a list.
+  // series, so it explains every colour once.
   // A band that shares an entry is highlighted with it.
   const seen = new Map<string, LegendItem>();
   const theme = s.theme ?? FALLBACK_THEME;
@@ -202,8 +199,7 @@ export function legendItems(s: ChartScene): LegendItem[] {
   s.seriesInOrder().forEach((entry, i) => {
     const config = entry.config;
     if (config.kind === "state") {
-      // A state series does not explain itself but its colours. "Line 4" next to
-      // a grey box says nothing; the reader wants to know what orange means.
+      // A state series does not explain itself but its colours.
       config.states.forEach((z, k) => {
         const key = `${z.label}\0${z.color}`;
         const known = seen.get(key);

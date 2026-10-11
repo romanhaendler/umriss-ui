@@ -1,24 +1,16 @@
 /* How this product writes numbers, dates and times - in exactly one place.
 
-   A language tag written into each module (date formats, the daylight-saving
-   offset label, number notation, percentages, counters, text sorting) would
-   multiply with every component. Here the tag stands once.
-
-   Why an object of functions and not the Intl objects themselves: an
-   application that wants something written differently replaces one function.
-   Otherwise it would have to rebuild an Intl.DateTimeFormat that understands
-   the same options - a promise far broader than what the library actually
-   needs.
+   The language tag stands once, here. The sets are objects of functions and
+   not Intl objects: an application that wants something written differently
+   replaces one function.
 
    **The locale is English, and one set is built per locale** (ADR-0024).
    `formatsFor` builds them; `DEFAULT_FORMATS` is the English set every
    component renders without a provider, and `GERMAN_FORMATS` behind
-   `@umriss-ui/core/wording/de` is freight a caller takes on purpose, beside
-   the German wording.
+   `@umriss-ui/core/wording/de` is taken on purpose, beside the German
+   wording.
 
-   The clock stays 24-hour. `en-GB` is chosen over `en-US` for exactly that:
-   a screen that writes 3 pm where 15:00 was meant is read wrongly once
-   and distrusted afterwards.
+   The clock stays 24-hour, which is why `en-GB` is chosen over `en-US`.
 
    Formatters are expensive. Each set builds them once when it is created, not
    on every render; the parameterised ones behind a small cache. */
@@ -135,9 +127,8 @@ export function formatsFor(locale: string): Formats {
     percent: (share) => percentFormat.format(share),
     compareText: (a, b) => collator.compare(a, b),
     relative: (ms) => {
-      // The coarsest unit that still yields at least one: "2 hours ago" reads
-      // better than "137 minutes ago", and on a monitoring screen the impression of
-      // magnitude counts for more than the exact number.
+      // The coarsest unit that still yields at least one: "2 hours ago", not
+      // "137 minutes ago".
       const seconds = Math.max(0, Math.round(ms / 1000));
       for (const [unit, size] of RELATIVE_STEPS) {
         if (seconds >= size) return relativeFormat.format(-Math.floor(seconds / size), unit);
@@ -164,9 +155,8 @@ export interface Separators {
 
     A field that formats a number must be able to read its own output back, and
     an application may have replaced `number` with anything. So the
-    separators are not declared a second time but measured: one number with one
-    decimal place, digits struck out, and what remains is the notation's own
-    punctuation. */
+    separators are measured: one number with one decimal place, digits struck
+    out, and what remains is the notation's own punctuation. */
 export function separatorsOf(formats: Formats): Separators {
   const punctuation = [...formats.number(1234.5, 1).replace(/[\d-]/g, "")];
   const decimal = punctuation[punctuation.length - 1] ?? ".";

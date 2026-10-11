@@ -81,8 +81,7 @@
   }
 
   /* Sits in the lower right inner edge. The room for it comes from the
-     field's inner spacing and not from a line of its own - otherwise the
-     layout would jump as it appears and disappears. */
+     field's inner spacing, so the layout does not jump as it appears. */
   .counted .textarea {
     padding-bottom: var(--u-space-6);
   }

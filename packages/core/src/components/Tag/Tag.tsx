@@ -50,13 +50,8 @@ export const TagGroup = forwardRef<HTMLDivElement, TagGroupProps>(function TagGr
     [],
   );
 
-  /* Exactly one tab stop for the whole group. Without it, a bar with five
-     filters would be five stops in the tab order – the reason the group
-     exists at all.
-
-     It is managed on the DOM and not through a state per tag: the group does
-     not know its children, and a registration per tag would be a lot of
-     machinery for one number. */
+  /* Exactly one tab stop for the whole group, managed on the DOM: the group
+     does not know its children. */
   const setTabStop = useCallback(
     (active: HTMLElement | undefined) => {
       const all = tags();
@@ -81,9 +76,7 @@ export const TagGroup = forwardRef<HTMLDivElement, TagGroupProps>(function TagGr
     if (containing) setTabStop(containing);
   };
 
-  /* The navigation reads the tags out of the DOM instead of out of a list:
-     that way the order is right even when the caller re-sorts them in
-     between. */
+  // The navigation reads the tags out of the DOM, so the order holds when the caller re-sorts.
   const handleKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     onKeyDown?.(event);
     if (event.defaultPrevented) return;
@@ -159,16 +152,13 @@ export const Tag = forwardRef<HTMLSpanElement, TagProps>(function Tag(
   const wording = useWording();
   const removable = Boolean(onRemove) && !disabled;
 
-  /* A label can only be derived from text. With anything else, "[object
-     Object] entfernen" would stand there – then it is better to name the key
-     alone after its function and let the caller be more precise through
-     `removeLabel`. */
+  /* A label can only be derived from text. With anything else the key is
+     named after its function alone; `removeLabel` is more precise. */
   const label =
     removeLabel ??
     (typeof children === "string" ? wording.removeTag(children) : wording.remove);
 
-  /* Focus the neighbour after removing, otherwise the focus falls to the
-     start of the page - the most frequent mistake with removable lists. */
+  // Focus the neighbour after removing, or the focus falls to the start of the page.
   const removeWithFocus = (element: HTMLElement | null) => {
     if (!element) {
       onRemove?.();
@@ -198,9 +188,7 @@ export const Tag = forwardRef<HTMLSpanElement, TagProps>(function Tag(
       ref={ref}
       data-tag={removable ? "" : undefined}
       role={inGroup ? "listitem" : undefined}
-      /* Being switched off is more than a class: the accessibility tree needs
-         the statement, and the contrast rule reads the pale text as an error
-         where nothing marks it as inactive. */
+      // Being switched off is more than a class: the accessibility tree needs the statement.
       aria-disabled={disabled || undefined}
       /* Inside the group, the group manages the tab stop – here stands only
          the initial value, so that nothing blinks before the first effect. */

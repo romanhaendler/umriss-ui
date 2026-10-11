@@ -1,7 +1,5 @@
 /* The table as text a spreadsheet reads back in.
 
-   Two decisions sit in here, and both are deliberate:
-
    The function returns text and triggers no download. How the text reaches the
    user - file name, moment, whether a file is made of it at all - only the
    application knows.

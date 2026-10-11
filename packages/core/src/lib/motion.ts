@@ -9,13 +9,9 @@ export function prefersReducedMotion(): boolean {
 /**
  * A duration from a token, in milliseconds - and read WITH its unit.
  *
- * `tokens.css` writes `240ms`; in the built bundle it says `.24s`, because a
- * CSS minifier may rewrite times in the shorter notation. A bare `parseFloat`
- * reads 0.24 out of that - a quarter of a thousandth of a second, too brief
- * to be seen.
- *
- * Whoever reads a token back reads the unit with it. With lengths that does not
- * show, because `px` is the only one occurring; with times there are two.
+ * `tokens.css` writes `240ms`; a CSS minifier may rewrite it as `.24s`, so a
+ * bare `parseFloat` would read 0.24. Times come in two units, so the unit is
+ * always read with the number.
  */
 export function durationFrom(style: CSSStyleDeclaration, name: string): number {
   const raw = style.getPropertyValue(name).trim();

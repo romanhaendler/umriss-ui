@@ -101,10 +101,8 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
   const size = useControlSize(ownSize);
   const field = useFormField();
   const wording = useWording();
-  /* Through the seam and not through `formatNumber`: otherwise the number
-     field would be the only field carrying the default, even where the
-     application has overridden the notation. That is exactly what the
-     comment in number.ts claimed without it being true. */
+  /* Through the seam and not through `formatNumber`, so that an override of
+     the notation by the application is followed. */
   const formats = useFormats();
   const write = (value: number) => formats.number(value, decimals);
   /* The field reads the notation it writes: an application that replaced the
@@ -114,8 +112,7 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
   const isInvalid = invalid ?? field?.invalid ?? false;
   const constraints = useMemo<NumberConstraints>(() => ({ min, max, decimals }), [min, max, decimals]);
 
-  /* In the notation of the formats from the first render on - the effect
-     below would correct it, but only after the default had been painted. */
+  // In the notation of the formats from the first render on, not after the effect.
   const [text, setText] = useState(() => (value === null ? "" : write(value)));
   const [focused, setFocused] = useState(false);
 
@@ -237,10 +234,8 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
           onChange(parsed === null ? null : clampNumber(parsed, constraints));
         }}
         {...rest}
-        /* After `rest` and composed with the caller's: a form library hands
-           in `onBlur` as a matter of course, and replacing the
-           commit on leaving would leave the field counting as focused for good,
-           taking no value from outside any more. */
+        /* After `rest` and composed with the caller's: replacing the commit on
+           leaving would leave the field counting as focused for good. */
         onKeyDown={handleKeyDown}
         onFocus={(event) => {
           onFocus?.(event);
@@ -249,8 +244,7 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
         onBlur={(event) => {
           onBlur?.(event);
           setFocused(false);
-          // Adopt the actual field content, not the state (which may be one
-          // render stale) – the same safeguard as in the TimeField.
+          // Adopt the actual field content, not the state (which may be one render stale).
           commit(read(event.currentTarget.value));
         }}
       />

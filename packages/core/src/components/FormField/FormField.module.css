@@ -7,9 +7,7 @@
     flex-direction: column;
     gap: var(--u-space-1);
     min-width: 0;
-    /* Never wider than its place, like the field in it (ADR-0041): in a
-       column that lines up at the start, a field of 27 characters stood out of
-       a phone's screen. */
+    /* Never wider than its place, like the field in it (ADR-0041). */
     max-inline-size: 100%;
   }
 
@@ -26,9 +24,8 @@
   }
 
   /* A hint or an error never widens the field it belongs to (ADR-0041): in a
-     row, a FormField is as wide as its label or its field, and a message that
-     appears with the first wrong value wraps inside that width rather than
-     pushing the row apart. In a block it fills the field's width as before. */
+     row, a FormField is as wide as its label or its field, and a message
+     wraps inside that width. In a block it fills the field's width. */
   .message {
     contain: inline-size;
     margin: 0;

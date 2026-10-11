@@ -3,10 +3,9 @@
 /* The model of the table: from rows and a description of the columns comes the
    projection - filtered, sorted, paged.
 
-   The rendering parts (Table, Th, Td) stay as they are: an application's cells
-   are its own (trend lines, bars, badges) and are meant to stay that way.
-   Columns are therefore described as data only for the pipeline - for how a
-   value is read and compared - never for presentation.
+   An application's cells are its own (trend lines, bars, badges), so columns
+   are described as data only for the pipeline - for how a value is read and
+   compared - never for presentation.
 
    The order filter -> sort -> page is guaranteed, and figures such as the
    selection's keys come from the filtered set, not from the visible page. */
@@ -63,8 +62,7 @@ export interface TableInput<Z = unknown, K extends string = string> {
   /** An additional filter beside the free-text search, e.g. a status choice. */
   filter?: (row: Z) => boolean;
   /** One level or several. A single level means the same as a list holding
-      only it – which is why callers that still pass a single object remain
-      correct unchanged. */
+      only it. */
   sort?: SortLevel<K> | readonly SortLevel<K>[] | null;
   /** 1-based; is clamped to the valid range. */
   page?: number;
@@ -143,9 +141,8 @@ export interface TableProjection<Z, K extends string = string> {
  * they are named; unnamed ones follow in natural order; unknown ids are
  * passed over.
  *
- * Lives here and not in the body of the model, because the tableState needs the
- * same order for the column menu – written twice they would be two orders that
- * can drift apart.
+ * The table state uses the same function for the column menu, so there is one
+ * order.
  */
 export function orderColumns<Z, K extends string = string>(
   columns: readonly ModelColumn<Z, K>[],

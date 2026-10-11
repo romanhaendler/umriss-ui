@@ -1,8 +1,5 @@
 /* A dividing line as a layout primitive, beside Stack and Grid.
 
-   Until now the hairline was a private rule in module after module. As a part
-   it is one token decision instead of a copy.
-
    Without a label it is decorative and taken out of the accessibility tree;
    with a label it really separates something and becomes a named
    separator. */

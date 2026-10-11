@@ -9,9 +9,7 @@
    that lands on nothing is a key that seems broken.
 
    It walks the whole row, not only the part in view: the scene brings the
-   subtask into view, as a drag near the edge pans along. A walk held inside
-   the view would leave a keyboard with no way to the rest of the plan
-   (ADR-0033). */
+   subtask into view, as a drag near the edge pans along (ADR-0033). */
 
 import { rowAt, type Rows } from "./rows";
 import type { Subtask, Dependency } from "./model";

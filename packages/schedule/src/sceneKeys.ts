@@ -93,7 +93,7 @@ export class SceneKeys {
     if (event.metaKey || !gestures.idle) return false;
     /* The brackets are matched by the character, whatever the modifiers: on a
        German keyboard they are AltGr+8 and AltGr+9, which arrive with Ctrl and
-       Alt. `t` and Shift+T are their equals without AltGr (schedule-a11y 06),
+       Alt. `t` and Shift+T are their equals without AltGr,
        and only bare: Ctrl+T and Alt+T belong to the browser and the system. */
     const letter = event.key.toLowerCase() === "t" && !event.ctrlKey && !event.altKey;
     if (event.key === "]" || event.key === "[" || letter) {

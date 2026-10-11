@@ -26,18 +26,12 @@
     border-bottom-right-radius: var(--u-radius-md);
   }
 
-  /* Every button draws its own edge, and it draws it on all four sides (`Button`,
-     `box-shadow`). Inside the group the two edges that face one another land
-     exactly where the seam already is - a line over the full height, next to the
-     inset hairline below, so that a group reads as three boxes shoved together
-     rather than as one control. The clip cuts those two edges away and keeps the
-     one above and below, which is where the outline of the group comes from; the
-     outer sides of the first and the last button keep theirs, rounded corner and
-     all.
-
-     It has to be the clip and not a different edge: the clip takes away the edge
-     a button happens to have, without giving one to a button that has none -
-     `primary`, `ghost` and `plain` carry no edge and must not gain one here. */
+  /* Every button draws its own edge (`box-shadow`) on all four sides. Inside
+     the group the two edges that face one another land where the seam is. The
+     clip cuts those two away and keeps the ones above and below, which form
+     the group's outline; the outer sides of the first and last button keep
+     theirs. A clip and not a different edge, because it removes the edge a
+     button has without giving one to `primary`, `ghost` and `plain`. */
   .group > * {
     clip-path: inset(-1px 0);
   }
@@ -80,10 +74,9 @@
     z-index: 1;
   }
 
-  /* The focus ring stands four pixels out, and the clip above would shear it off
-     on exactly the sides that face into the group. Focus therefore lifts the
-     clip. Hover does not: its edge is one pixel and would stand where the seam
-     already is - the very line this clip exists to remove. */
+  /* The focus ring stands four pixels out, and the clip would shear it off on
+     the sides facing into the group, so focus lifts the clip. Hover does not:
+     its one-pixel edge would stand where the seam is. */
   .group > *:focus-visible {
     clip-path: none;
   }
@@ -92,9 +85,8 @@
   /* SplitButton                                                         */
   /* ------------------------------------------------------------------ */
 
-  /* The trigger carries only the glyph and needs no room for text - but it
-     keeps 8 px a side, more than a small button's own: at 6 px it would be
-     21 px wide, under the 24 px a pointer target needs (WCAG 2.5.8). */
+  /* The trigger keeps 8 px a side, more than a small button's own: at 6 px it
+     would be 21 px wide, under the 24 px a pointer target needs (WCAG 2.5.8). */
   .split .trigger {
     padding-left: var(--u-space-2);
     padding-right: var(--u-space-2);
@@ -108,8 +100,7 @@
     transition: transform var(--u-transition-path);
   }
 
-  /* Open: the arrow turns - the only motion here, and it explains a change of
-     state. */
+  /* Open: the arrow turns. */
   .split .trigger[aria-expanded="true"] .arrow {
     transform: rotate(180deg);
   }

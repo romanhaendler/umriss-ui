@@ -2,9 +2,8 @@
 
    The column menu offers every groupable column and every group key; pressing
    one adds a level, pressing it again takes the level away, and at three levels
-   the others wait. The table toolbar carries ONE tag for the grouping - "Grouped
-   by Line › Customer" -, not a tag per level: the order of the levels is what
-   a reader must see, and two tags that look alike say nothing about it. */
+   the others wait. The table toolbar carries one tag for the whole grouping -
+   "Grouped by Line › Customer" - so that the order of the levels shows. */
 
 import { Menu, MenuItem, MenuSeparator, Tag, TagGroup, useWording } from "@umriss-ui/core";
 import type { HookSnapshot, Registry } from "./registry";

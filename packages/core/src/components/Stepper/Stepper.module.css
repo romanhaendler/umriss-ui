@@ -144,11 +144,10 @@
     margin: 0;
   }
 
-  /* Stacked: a row too tight for a label beside its marker - a tablet, a
-     side panel - puts the labels beneath the markers, and the line runs from
-     marker to marker above them. Every step takes an equal share, the last
-     one too: its label needs the room now that it stands below. Narrower
-     still, the component gives the list the column's class. */
+  /* Stacked: a row too tight for a label beside its marker puts the labels
+     beneath the markers, and the line runs from marker to marker above them.
+     Every step takes an equal share, the last one too. Narrower still, the
+     component gives the list the column's class. */
   .stepper[data-fit="stacked"] > .step {
     display: grid;
     flex: 1;

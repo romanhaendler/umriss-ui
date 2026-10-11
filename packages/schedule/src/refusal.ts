@@ -1,15 +1,12 @@
 /* Which lanes a gesture may not put its work on (CONTEXT.md, **Refusal**).
 
-   Asked once, when the gesture takes hold, and held until it ends. Two reasons,
-   and the first is the one a planner notices: a refusal that is known before
-   the pointer arrives can be DRAWN - the lanes are marked the moment a drag
-   begins, so nobody has to try a lane to learn it is closed. The second is
-   arithmetic: `canMoveTo` reads the application's master data, and a rule asked anew on
-   every pointer movement would be asked hundreds of times for one drag.
+   Asked once, when the gesture takes hold, and held until it ends: the refused
+   lanes can be drawn from the moment a drag begins, and `canMoveTo`, which
+   reads the application's master data, is not asked on every pointer movement.
 
-   Holding the answer means a rule that changes mid-drag is not noticed while
-   the drag runs. That is why the drop asks again (`sceneGestures.ts`): the
-   picture may be a moment old, the reported intent never is.
+   A rule that changes mid-drag is therefore not noticed while the drag runs;
+   the drop asks again (`sceneGestures.ts`), so the picture may be a moment
+   old, the reported intent never is.
 
    Free of the DOM, the canvas and the view - lanes by id, and the caller's
    rule. */

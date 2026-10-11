@@ -15,8 +15,8 @@
 import { portalTargetFor } from "./portalTarget";
 
 /** Announcements wait for the keys to rest this long - the charts' readout
-    pause (charts-a11y R11): a held arrow key speaks where it stops, and a
-    typed word is counted once and not per letter. */
+    pause: a held arrow key speaks where it stops, and a typed word is
+    counted once and not per letter. */
 export const ANNOUNCE_REST = 150;
 
 const regions = new WeakMap<Element, HTMLElement>();
@@ -62,8 +62,7 @@ export function announce(text: string, at?: Element | null): void {
   if (timer !== null) clearTimeout(timer);
   timer = setTimeout(() => {
     timer = null;
-    /* The page may be gone by now - a test's environment torn down within
-       the rest: nobody is left to hear it, and there is nothing to write to. */
+    // The page may be gone by now (a torn-down test environment).
     if (typeof document === "undefined") return;
     /* A new node every time: the same words twice - the count after a
        letter that changed nothing, the last option at the end of the list -

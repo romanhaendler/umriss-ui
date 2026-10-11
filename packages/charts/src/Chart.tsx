@@ -276,9 +276,8 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
   const onPointerMove = (e: ReactPointerEvent<HTMLDivElement>): void => {
     // offsetX/offsetY are already relative to .uc-plot - no
     // getBoundingClientRect, no layout read in the hover path. The hit
-    // test does allocate: a handful of small objects per move, whatever the
-    // point count - about 3 µs per move at 3 × 1,000,000 points, measured, a
-    // five-thousandth of a frame. Pooling them would buy nothing visible.
+    // test allocates a handful of small objects per move, whatever the
+    // point count.
     scene.drag(e.nativeEvent);
     scene.pointerMove(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
   };
@@ -342,7 +341,7 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
   );
 }
 
-/** 'Show all' (component-view 04): while a zoomable x axis shows less than
+/** 'Show all': while a zoomable x axis shows less than
     its own domain, a quiet control brings every zoomed axis back. It stands
     beside the plot, not in it - a tab stop of its own outside the plot's
     application role -, laid over the corner of the plot area away from a

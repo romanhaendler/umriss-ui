@@ -69,9 +69,8 @@
      a small control and 4 px above and below it, so that whatever stands in
      a cell fits: under a fine pointer a compact table's small control is
      18 px (`dense`), under a finger it stays 26 px and the compact pitch
-     grows with it. + 1px for the line under the row. A whole pixel is the
-     point: at 13 px type and a line of 1.5 a row was 36.5 px, and Chromium,
-     Firefox and WebKit each rounded the half their own way. */
+     grows with it. + 1px for the line under the row. The pitch is a whole
+     pixel, because engines round a half pixel their own way. */
   .table {
     --_line: 19px;
     --_pad: var(--u-space-2);
@@ -282,7 +281,7 @@
     padding-right: 0;
   }
 
-  /* ---- Pinned columns (table-column-pinning) --------------------------- */
+  /* ---- Pinned columns --------------------------- */
 
   /* A pinned cell sticks at the offset the table measured for its place
      (parts.tsx, `PinPlacement`) and needs a surface of its own: the cells that
@@ -332,8 +331,8 @@
   /* ---- Sorting --------------------------------------------------------- */
 
   /* Top-aligned in its cell: an inline-flex box sits on the baseline of its
-     first item, and a numeric head's label stood 1.13 px above its
-     neighbours' while its arrow came first. */
+     first item, so a head whose arrow comes first would sit lower
+     than its neighbours' labels. */
   .sortButton {
     composes: ring from "#own-styles";
     display: inline-flex;
@@ -400,8 +399,7 @@
 
   /* Every head reads the same way - label, arrow, funnel - so each tool
      sits beside its own label. A numeric head sets that group flush right:
-     it ends where the figures below it end. Mirrored, a numeric column's
-     funnel stood beside the funnel of the column before it. */
+     it ends where the figures below it end. */
   .numeric .thFlex {
     justify-content: flex-end;
   }
@@ -411,8 +409,7 @@
      it adds nothing to the column's least width and gives way with an
      ellipsis, which the cut-value tip completes; the arrow, the rank and the
      funnel are auto tracks, so they stay - and a width below them is raised
-     to them by the table's own layout. Firefox cut the arrow of a 75 px
-     column with a long label before. A head without a width grows with its
+     to them by the table's own layout. A head without a width grows with its
      label, as ever. */
   .sized .headLine,
   .sized .thFlex {
@@ -560,9 +557,8 @@
   }
 
   /* A group wraps when the table is narrower than its parts - the table's
-     width decides, not the window's: beside a sidebar the parts ran out of
-     the frame and over one another. The search holds a width of its own for
-     that: at a field's 100 % it took a line of its own at every width. */
+     width decides, not the window's. The search holds a width of its own for
+     that: at a field's 100 % it would take a line of its own at every width. */
   /* The right group holding nothing but the empty ratio - a status that
      stays in the document for its announcements - takes no place: wrapped
      beneath a narrow table's parts it stood there as an empty line. Which
@@ -706,7 +702,7 @@
 
   /* The secondary type and not the muted one: the label stands on the tag's
      surface, and there the muted type would not hold 4.5:1 in any theme
-     (3.09:1 light, 3.74:1 dark – found by the demo's accessibility check).
+     (3.09:1 light, 3.74:1 dark).
      The tolerated pairs apply to the page surface, not to this one. */
   .filterLabel {
     color: var(--u-color-text-secondary);
@@ -1044,11 +1040,9 @@
   }
 
   /* The strong line above a group header is drawn inside every cell, not as
-     the collapsed top border: with pinned cells Chromium left that border out
-     over the pinned selection and actions cells - the line broke off at both
-     ends - and one drawing for every table
-     keeps them alike. The border stays for the
-     height, transparent, and forced colours draw it (the shadow they drop). */
+     the collapsed top border: with pinned cells Chromium leaves that border
+     out over the pinned selection and actions cells. The border stays for
+     the height, transparent, and forced colours draw it (the shadow they drop). */
   /* Not while focused: the focus ring of a virtual line is an inset shadow as
      well, and this rule would take it off every cell between the ends - nor
      off a cell that is the Active one of a grid. */
@@ -1103,8 +1097,7 @@
 
   /* A long value is cut, not allowed to widen the span until every other
      column wraps; its full text stands in the title. On a phone a third of
-     the window: at 45 % the span took 60 % of the table, and the column the
-     groups were compared by stood out of view. */
+     the window, so that the column the groups are compared by stays in view. */
   .spanValue {
     max-width: min(18rem, 35vw);
   }
@@ -1128,7 +1121,7 @@
   }
 
   /* On the group header's sunken tone the muted type would not hold 4.5:1 (3.09:1
-     light, 3.74:1 dark - the same finding as the filter's label); there the
+     light, 3.74:1 dark); there the
      count and "continued" take the secondary type. */
   .groupHeader .groupCount,
   .groupHeader .continued {
@@ -1198,9 +1191,8 @@
 
   /* How a branch reads: by weight, never
      by a tone. A branch is medium across its row, a leaf regular - its row
-     header too; open or closed alike, the fold alone turns. A tone on every
-     open branch greyed most of a deep tree and fought hover and selection, and
-     forced colours drop it; weight and a line survive. */
+     header too; open or closed alike, the fold alone turns. A tone would fight hover
+     and selection, and forced colours drop it; weight and a line survive. */
   .treeRow > .rowHeader {
     font-weight: var(--u-weight-regular);
   }
@@ -1211,9 +1203,8 @@
 
   /* A root after the first starts a new top-level part with a group header's
      stronger line. It is the colour of the last line before it, which the body
-     marks: a border added above the root and taken from the row before -
-     through :has() - was redrawn only on the next hover in a collapsed table,
-     and shifted the rows by a pixel when it was. A colour moves nothing. */
+     marks: a colour moves nothing, where a border added above the root would
+     shift the rows and is redrawn late in a collapsed table. */
   .table tbody tr[data-before-root] > .td {
     border-bottom-color: var(--u-hairline-strong);
   }
@@ -1536,7 +1527,7 @@
     visibility: hidden;
   }
 
-  /* Its sides keep the cell's padding: at 4 px a field stood against the
+  /* Its sides keep the cell's padding: at 4 px a field would stand against the
      frame in the first column and against its neighbour's field. */
   .editor {
     position: absolute;
@@ -1733,8 +1724,7 @@
       border-inline-end-width: 2px;
     }
 
-    /* The group's share is a ground too: it takes the system's text colour,
-       as it took the ink before. */
+    /* The group's share is a ground too: it takes the system's text colour. */
     .shareBar {
       background: CanvasText;
     }

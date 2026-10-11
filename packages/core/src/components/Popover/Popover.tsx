@@ -95,9 +95,7 @@ export function Popover({
     insideRefsRef.current = insideRefs;
   });
   const [position, setPosition] = useState<PopoverPosition | null>(null);
-  /* Portal target determined in the effect, not while rendering: no ref may be
-     read during the render. Costs one pass, which however lies before painting
-     and is therefore not visible. */
+  /* Portal target, set in an effect: no ref may be read during the render. */
   const [target, setTarget] = useState<Element | null>(null);
   const portalTarget = usePortalTarget();
   /* Closed, it stays for its exit - inert, and no longer listening. */
@@ -112,10 +110,8 @@ export function Popover({
     [onOpenChange, restoreFocus, anchorRef, focusRef],
   );
 
-  /* Measure and set before painting: the measured panel size is the reason
-     the clamping already takes hold the first time it opens. Computed before the panel
-     is in the document, the measurement would be zero and a fixed fallback
-     value would decide. */
+  /* Measure and set before painting, so the clamping holds from the first
+     opening: before the panel is in the document its size would measure zero. */
   const measure = useCallback(() => {
     const anchorRect = anchorRef.current?.getBoundingClientRect();
     const panel = panelRef.current;
@@ -129,14 +125,12 @@ export function Popover({
       panel.style.width = `${width}px`;
     }
 
-    /* The cut from the last measurement off first, or a panel cut to its
-       room measures as if it fitted and loses the cut on the next scroll. Set
-       by hand like the width, and for the same reason: it has to hold before
-       the height is read. */
+    /* The previous cut goes first, or a panel cut to its room measures as if
+       it fitted. Set by hand like the width: it must hold before the height
+       is read. */
     panel.style.maxHeight = "";
 
-    // The exact size, not offsetWidth/-Height: those round, and half a pixel
-    // decided whether a panel at the window's edge fitted or stuck out.
+    // The exact size, not offsetWidth/-Height: those round.
     const size = panel.getBoundingClientRect();
     /* The entry animation scales the panel from 0.96, and the rectangle is
        taken while it runs: without dividing the scale out, a tall panel is
@@ -155,18 +149,14 @@ export function Popover({
 
   useLayoutEffect(() => {
     if (!open) return;
-    /* Dialog, then the setting, then the body - the rule stands in
-       `portalTargetFor` and holds for the tooltip just the same. It reads the
-       DOM, so it is to be fetched in the effect - and without writing state it
-       does not come back into the render. */
+    /* Dialog, then the setting, then the body (`portalTargetFor`). It reads
+       the DOM, so it runs in the effect. */
     setTarget(portalTargetFor(anchorRef.current, portalTarget));
   }, [open, anchorRef, portalTarget]);
 
   useLayoutEffect(() => {
     if (!open || !target) return;
-    /* Measuring and positioning is exactly the case a layout effect is there
-       for: without writing to state, a measurement cannot become a position.
-       Runs before painting, so it produces no flicker. */
+    // Runs before painting, so the position never flickers.
     measure();
   }, [open, target, measure]);
 
@@ -184,9 +174,8 @@ export function Popover({
     };
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
-      /* Escape closes the panel and nothing more: without this a menu in a
-         modal took the modal down with it, because the same key is the
-         dialog's close request. */
+      /* Escape closes the panel and nothing more: the same key is a dialog's
+         close request. */
       event.preventDefault();
       close(true);
     };
@@ -201,9 +190,8 @@ export function Popover({
       });
     };
     const handleScroll = (event: Event) => {
-      /* A scroll inside the panel moves nothing the position depends on. Taken
-         for a page scroll, it would measure the panel anew, drop its cut for
-         the measurement and jump it back to its top. */
+      /* A scroll inside the panel moves nothing the position depends on; a
+         re-measure would drop its cut and jump it back to its top. */
       if (event.target instanceof Node && panelRef.current?.contains(event.target)) return;
       if (hideOnScroll) close(false);
       else reposition();
@@ -252,11 +240,8 @@ export function Popover({
         left: position?.left ?? 0,
         /* The motion origin, computed here and drawn by the stylesheet. */
         "--_origin": position ? motionOrigin(position.side, position.align) : undefined,
-        /* Not shown before the first measurement, or it flashes in the top
-           left. Transparent and not `visibility: hidden`: a hidden panel takes
-           no focus, and the first opening of a menu lost its move to the first
-           entry exactly then. The measurement runs before painting, so the
-           transparent pass is never seen. */
+        /* Not shown before the first measurement. Transparent and not
+           `visibility: hidden`: a hidden panel takes no focus. */
         opacity: position ? undefined : 0,
       } as CSSProperties}
     >

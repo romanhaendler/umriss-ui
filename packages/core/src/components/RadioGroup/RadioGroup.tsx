@@ -1,9 +1,7 @@
 /* A choice among a few mutually exclusive possibilities.
 
-   The gap between Checkbox (several of them, independent of one another) and
-   Select (many of them, in a list): three or four possibilities, each of
-   which needs a line of explanation. A segmented control is the wrong form
-   for that as soon as the explanation belongs to it.
+   Between Checkbox (several, independent) and Select (many, in a list): three
+   or four possibilities, each with a line of explanation.
 
    Operation - one tab stop, arrow keys that move and choose - stands in
    `useRadioGroup`, which the segmented control shares. */

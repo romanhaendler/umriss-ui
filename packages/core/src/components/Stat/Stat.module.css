@@ -1,7 +1,5 @@
-/* The tile has a fixed inner grid: that way tiles of equal width align their
-   label, their value and their unit with one another, without a shell having
-   to know about it. That is why there is no StatRow – a row of tiles is a
-   layout problem, and this package already has a layout module for that. */
+/* The tile has a fixed inner grid, so that tiles of equal width align their
+   label, value and unit. A row of tiles is a layout problem, not the tile's. */
 
 @layer umriss.tokens, umriss.base, umriss.components;
 
@@ -112,9 +110,7 @@
     height: 32px;
   }
 
-  /* Wide: the history stands beside the figures and takes their height -
-     a tile three times as wide as its figures had kept its line at 96 px and
-     left the rest empty. */
+  /* Wide: the history stands beside the figures and takes their height. */
   @container (min-width: 380px) {
     .body {
       flex-direction: row;

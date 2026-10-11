@@ -4,9 +4,8 @@
    inside, rounded outside, a hairline instead of a gap between them.
 
    The split button is that group with two fixed roles: the main action on the
-   left, the trigger for its variants on the right. It opens the existing menu -
-   anchoring, dismissing, outside clicks and returning focus all come from the
-   popover seam and are not rebuilt here. */
+   left, the trigger for its variants on the right. It opens the existing menu;
+   anchoring, dismissing and returning focus come from the popover seam. */
 
 import { forwardRef } from "react";
 import type { HTMLAttributes, ReactNode } from "react";

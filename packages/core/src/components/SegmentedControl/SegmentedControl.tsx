@@ -1,19 +1,16 @@
 /* One choice out of a few short possibilities, drawn as one control.
 
    A sunken track as tall as a select, a segment for each possibility, the
-   chosen one a surface lifted out of the track (segmented-control-inset) -
-   in a menu, in a settings panel and in a row of fields alike, where its
-   words stand on the select's line. Drawn as a `field` it takes a field's
-   edge instead and fills the choice with ink, as a chosen radio dot
-   (field-row-alignment). Where a possibility needs a line of explanation,
-   the radio group's dots are the form instead.
+   chosen one a surface lifted out of the track - in a menu, in a settings
+   panel and in a row of fields alike, where its words stand on the select's
+   line. Drawn as a `field` it takes a field's edge instead and fills the
+   choice with ink, as a chosen radio dot. Where a possibility needs a line
+   of explanation, the radio group's dots are the form instead.
 
-   It is a radio group and not a row of toggle buttons. Buttons that stay
-   pressed announce "toggle button, pressed" each, are a tab stop each, and
-   say nowhere that only one of them can hold; real radio inputs say "radio,
-   1 of 2, selected", are one tab stop, and the arrow keys move and choose.
-   The mechanics are the radio group's own, shared through `useRadioGroup`
-. */
+   It is a radio group and not a row of toggle buttons: real radio inputs say
+   "radio, 1 of 2, selected", are one tab stop, and the arrow keys move and
+   choose. The mechanics are the radio group's own, shared through
+   `useRadioGroup`. */
 
 import { forwardRef } from "react";
 import type { HTMLAttributes, ReactNode } from "react";

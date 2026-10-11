@@ -10,10 +10,8 @@
      the chips plus the button with the chevron beside them - and choosing or
      removing a value moves nothing around it. The type size stands here so that
      a character is the field's own; every text inside sets its own. Twenty
-     characters, the count of every field that shows text: a chip costs more
-     than its letters - its padding and the room its cross keeps - and twenty
-     hold two short chips and the counter; at sixteen the second chip never
-     came. */
+     characters is the default of every field that shows text; a chip costs
+     more than its letters, and twenty hold two short chips and the counter. */
   .field {
     composes: text extent from "#own-styles";
     --_chrome: calc(var(--u-space-2) + var(--u-space-1) + 10px + var(--u-space-3));
@@ -138,7 +136,7 @@
   }
 
   /* The focused chip carries the ring; the danger surface is the pointer's
-     alone: on the focus as well, focus and hover could not be told apart. */
+     alone, so focus and hover stay distinct. */
   .chip:hover:not(:disabled) {
     background: var(--u-color-danger-subtle);
     color: var(--u-color-danger-text);
@@ -204,7 +202,7 @@
   }
 
   /* 24 % and no further: the accent type holds 4.64:1 on it in the light
-     theme (6.0:1 dark); at 26 % it slipped under 4.5:1. */
+     theme (6.0:1 dark); above that it falls under 4.5:1. */
   .counter:active:not(:disabled) {
     background: color-mix(in srgb, var(--u-color-accent) 24%, var(--u-color-surface));
   }
@@ -406,8 +404,7 @@
   }
 
   /* Chips and the counter are grounds, and forced colours repaint them with
-     the page's: three words would stand loose in the
-     field. An edge keeps each one a chip. */
+     the page's: an edge keeps each one a chip. */
   @media (forced-colors: active) {
     .chip,
     .counter {

@@ -42,9 +42,8 @@
     opacity: 0.5;
   }
 
-  /* The text clips for its ellipsis, so its line must hold the descenders:
-     at the tag's line of 1 a "g" or "y" lost its tail. 16 px
-     for the 11 px type, a whole pixel - 1.5 would be 16.5 - and 3 px from
+  /* The text clips for its ellipsis, so its line must hold the descenders.
+     16 px for the 11 px type, a whole pixel (1.5 would be 16.5), and 3 px from
      either edge of the 22 px tag. */
   .text {
     overflow: hidden;

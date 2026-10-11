@@ -23,7 +23,7 @@ function useTabs(component: string): TabsContextValue {
 
 /* ------------------------------------------------------------------ */
 /* Tabs – controlled through value + onChange, or on their own from   */
-/* defaultValue (rule 2 of the README).                               */
+/* defaultValue.                                                      */
 /* ------------------------------------------------------------------ */
 
 /** The props of `Tabs`. */
@@ -93,9 +93,7 @@ export const TabList = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>
 
   useEffect(() => {
     window.addEventListener("resize", measure);
-    /* The font arrives later than the first layout, and the tabs change their
-       width with it: without a second measurement the line stays a pixel or
-       two beside its tab until the window changed. As in Textarea. */
+    // The font arrives later than the first layout and changes the tabs' widths: measure again.
     let cancelled = false;
     void document.fonts?.ready.then(() => {
       if (!cancelled) measure();
@@ -174,11 +172,9 @@ export const Tab = forwardRef<HTMLButtonElement, TabProps>(function Tab(
       type="button"
       className={cx(styles.tab, className)}
       {...rest}
-      /* After `rest`: the role, the ids that tie tab
-         and panel together and the roving tab stop are the tab's own. The
-         value goes into the id masked: `aria-controls` and `aria-labelledby`
-         split at whitespace, and a tab "first page" would otherwise point at
-         two ids that do not exist. */
+      /* After `rest`: the role, the ids that tie tab and panel together and
+         the roving tab stop are the tab's own. The value goes into the id
+         masked: `aria-controls` and `aria-labelledby` split at whitespace. */
       role="tab"
       id={`${tabs.idBase}-tab-${idPart(value)}`}
       aria-selected={selected}

@@ -4,8 +4,8 @@
    lead-out included - an overlap that only touches a lead-in is still one. A violated
    dependency is one whose lag does not fit between its anchors. A subtask in
    blocked time covers time its lane is not available. All three are
-   the point of opening a schedule; packing overlaps into sub-lanes or pushing a
-   successor would hide exactly what a planner is looking for (ADR-0023).
+   shown and reported, never resolved: packing overlaps into sub-lanes or
+   pushing a successor would hide them (ADR-0023).
 
    Deliberately free of the DOM and of the scene. Quadratic per lane: a lane
    holds subtasks, not a measurement series, and this runs when the data

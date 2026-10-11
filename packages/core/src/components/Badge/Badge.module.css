@@ -56,17 +56,14 @@
     color: var(--u-color-danger-text);
   }
 
-  /* A badge is a ground with a word on it, and forced colours repaint the
-     ground with the page's: the word stays - it carries
-     the tone - and an edge keeps it a badge. */
+  /* Forced colours repaint the ground with the page's: the word stays - it
+     carries the tone - and an edge keeps it a badge. */
   @media (forced-colors: active) {
     .badge {
       outline: 1px solid CanvasText;
     }
 
-    /* The dot says "this badge has a tone", the word says which: it keeps
-       the text colour instead of vanishing into the ground (forced-colors
-       04). */
+    /* The dot keeps the text colour instead of vanishing into the ground. */
     .badge::before {
       background: CanvasText;
     }

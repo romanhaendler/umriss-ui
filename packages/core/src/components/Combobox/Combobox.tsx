@@ -101,9 +101,8 @@ export const Combobox = forwardRef(function Combobox<T extends string = string>(
   const filtered = useMemo(() => filterOptions(options, query ?? ""), [options, query]);
 
   /* What VoiceOver does not read of an active descendant - how many options
-     stand, and an option's state - the field says itself
-     (listbox-announcements). The count on every opening, the pointer's too;
-     the option moved onto only for the keys - the pointer sees it. */
+     stand, and an option's state - the field says itself. The count on every
+     opening, the pointer's too; the option moved onto only for the keys. */
   const sayCount = (count: number) =>
     announce(count === 0 ? emptyLabel : wording.optionCount(count), inputRef.current);
 
@@ -164,12 +163,11 @@ export const Combobox = forwardRef(function Combobox<T extends string = string>(
   return (
     <>
       {/* The caller's ref, class and rest go to the wrapper, the field's
-          outermost element (P1 of core-passthrough); the field id from
-          `FormField` stays on the input, and so do the caller's name and
-          description, for a field without one. The caller's `onKeyDown` listens in
-          the capture phase: the keys land on the input inside, and a handler
-          on the wrapper would otherwise run after the field's own and could
-          not prevent it (P3). */}
+          outermost element; the field id from `FormField` stays on the input,
+          and so do the caller's name and description. The caller's `onKeyDown`
+          listens in the capture phase: the keys land on the input inside, and
+          a handler on the wrapper would otherwise run after the field's own
+          and could not prevent it. */}
       <div
         ref={ref}
         className={cx(

@@ -17,8 +17,8 @@
   }
 
   /* The actions wrap beneath the title once the title would get less than
-     8rem beside them - on a phone they had squeezed it to a word a line.
-     Wider, a long title takes a second line beside its actions, as before. */
+     8rem beside them. Wider, a long title takes a second line beside its
+     actions. */
   .header {
     display: flex;
     flex-wrap: wrap;

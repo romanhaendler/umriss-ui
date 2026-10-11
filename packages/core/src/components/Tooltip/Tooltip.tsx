@@ -29,8 +29,7 @@ export function Tooltip({ content, children, delay = 300 }: TooltipProps) {
   const expanded = children.props["aria-expanded"] === true;
   const open = wanted && !expanded;
   const [position, setPosition] = useState<CSSProperties | null>(null);
-  /* Portal target determined in the effect, as with the popover: the rule
-     reads the DOM of the trigger, and rendering may not do that. */
+  // Portal target, set in an effect as in the popover: it reads the trigger's DOM.
   const [target, setTarget] = useState<Element | null>(null);
   const portalTarget = usePortalTarget();
   const targetRef = useRef<HTMLElement>(null);
@@ -52,15 +51,12 @@ export function Tooltip({ content, children, delay = 300 }: TooltipProps) {
 
   useLayoutEffect(() => {
     if (!open) return;
-    /* Dialog, then the setting, then the body - the same function as the
-       popover. Without it a tooltip in a modal lay behind the dialog, and
-       with it every tooltip inside one. */
+    // Dialog, then the setting, then the body - the same function as the popover.
     setTarget(portalTargetFor(targetRef.current, portalTarget));
   }, [open, portalTarget]);
 
-  /* Mount first, then measure and set - this way the measured height decides
-     the flipping instead of a fixed threshold. Runs before painting, so it is
-     not visible. */
+  /* Mount first, then measure and set: the measured height decides the
+     flipping. Runs before painting. */
   useLayoutEffect(() => {
     if (!open || !target) return;
     const rect = targetRef.current?.getBoundingClientRect();
@@ -95,8 +91,8 @@ export function Tooltip({ content, children, delay = 300 }: TooltipProps) {
   }, []);
 
   const childProps = children.props;
-  /* A tip that repeats the trigger's name is what the eye needs and the ear
-     hears already: described by it, a screen reader would say every icon button twice. */
+  /* A tip that repeats the trigger's name is not also its description: a
+     screen reader would say it twice. */
   const describes = open && content !== childProps["aria-label"];
 
   return (
@@ -107,8 +103,7 @@ export function Tooltip({ content, children, delay = 300 }: TooltipProps) {
       {cloneElement(children, {
         // eslint-disable-next-line react-hooks/refs
         ref: mergeRefs(targetRef, elementRef<HTMLElement>(children)),
-        /* Added to the child's own description, not put in its place: a field's
-           hint went silent for as long as the tooltip stood. */
+        // Added to the child's own description, not put in its place.
         "aria-describedby":
           [childProps["aria-describedby"] as string | undefined, describes ? id : undefined]
             .filter(Boolean)

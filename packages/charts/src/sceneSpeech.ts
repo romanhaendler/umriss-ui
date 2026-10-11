@@ -74,7 +74,7 @@ export function limitTexts(s: ChartScene, yAxisId?: string): LimitText[] {
   return out;
 }
 
-/** The totals of the stacks in a hit (K4), each after its stack's last
+/** The totals of the stacks in a hit, each after its stack's last
     member. A normalised stack's total is no share: it is written in the
     series' own `format`, as its readings would be. */
 export function totalsOf(s: ChartScene, chosen: readonly Candidate[]): StackTotal[] {
@@ -188,7 +188,7 @@ export function formatY(s: ChartScene, entry: SeriesEntry, v: number): string {
 }
 
 /** A y axis' `tickFormat`; without one, an axis that carries a normalised
-    stack reads in percent (K5). */
+    stack reads in percent. */
 export function yTickFormat(s: ChartScene, axisId: string): ((v: number) => string) | undefined {
   const own = s.findAxisConfig("y", axisId)?.tickFormat;
   if (own !== undefined) return own;

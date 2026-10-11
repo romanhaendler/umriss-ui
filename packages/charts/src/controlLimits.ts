@@ -10,9 +10,9 @@
    Control limits are never calculated from whatever happens to be on the screen.
    Either the caller gives them - from a baseline they have fixed - or they name
    a reference window and the limits are calculated from exactly that window.
-   That is why `controlLimits` has no third, tacit possibility: if it had, the
-   limits would wander while scrolling, a process out of control would redefine
-   "normal" around itself, and the chart would no longer find what it exists for.
+   `controlLimits` has no third, tacit possibility: the limits would wander
+   while scrolling, and a process out of control would redefine "normal" around
+   itself.
 
    Deliberately free of the DOM and of the scene, like bars.ts: arithmetic
    without pictorial intuition belongs in a pure module and is tested directly.

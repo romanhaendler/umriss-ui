@@ -334,7 +334,7 @@ export interface BoxChannels extends BoxNumbers<Float64Array> {
   count: Float64Array | null;
 }
 
-/** The optional numbers of a box (box-plot 04), by name. */
+/** The optional numbers of a box by name. */
 export interface BoxExtras<V = number> {
   mean: V;
   notchLower: V;
@@ -342,7 +342,6 @@ export interface BoxExtras<V = number> {
   count: V;
 }
 
-/* The Scale interface is fixed; V0 implements only LinearScale. */
 /** The mapping of an axis' values onto pixels and back, with its ticks. Every
     scale of the library is affine; `LinearScale` implements it. */
 export interface Scale {

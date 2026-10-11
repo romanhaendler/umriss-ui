@@ -1,19 +1,11 @@
 /* Text, heading, link.
 
-   The design concept rests on typographic rigour - and that was so far only
-   present as a global base and as a private rule inside components, not as
-   something an application can reach for. So every application reinvented
-   its hierarchy, and the system frayed out where the library stops.
-
    These three are deliberately narrow: they release the token set and
-   nothing else. No truncating, no permanent underlining - that would be
-   behaviour, and behaviour belongs to the application. A generous version
-   that takes on every size and every weight would be worse than none - it
-   would legitimise precisely the fraying it is there against.
+   nothing else. No truncating, no permanent underlining - that is behaviour,
+   and behaviour belongs to the application.
 
    `Heading` separates level and size: a visually small heading can still be
-   the second level of the page. Whoever couples the two chooses, sooner or
-   later, the wrong level in order to get the right size. */
+   the second level of the page. */
 
 import { forwardRef } from "react";
 import type { AnchorHTMLAttributes, ElementType, HTMLAttributes } from "react";
@@ -169,8 +161,7 @@ export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
     <a
       ref={ref}
       className={cx(styles.link, styles[`size-${size}`], className)}
-      /* `noreferrer` belongs with it: without it the opened page can reach
-         this one through `window.opener`. */
+      // `noreferrer` keeps the opened page from reaching this one through `window.opener`.
       {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
       {...rest}
     >

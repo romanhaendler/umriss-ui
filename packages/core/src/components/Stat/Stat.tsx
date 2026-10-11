@@ -1,23 +1,14 @@
 /* <Stat> – the tile that reads its own value.
 
-   The name is deliberately not `Metric`: this package already exports `Meter`,
-   and two exported names one letter apart, both about numbers, both in the
-   same import line, are a defect waiting for a tired reader.
+   No `tone` prop: the rule is kept away from the call site, `limits` carry it.
 
-   No `tone` prop. The whole point of the tile is that the rule has been pulled
-   away from the call site; a tone prop would push it back, and would look like
-   flexibility while doing it.
+   No trend arrow: a direction taken from two points of a noisy signal is
+   noise. The history line shows the shape; where a target is given, the
+   deviation from it is shown.
 
-   No trend arrow. A direction taken from two points of a noisy signal is noise
-   with an arrowhead, and it gets read as information. Whoever wants the shape
-   passes the history and gets the history line, which shows what actually
-   happened. Where a target is given, the deviation from it is shown – a fact
-   instead of a guess.
-
-   Assessment and freshness are TWO axes. A stale value keeps its verdict
-   (ADR-0010); it does not turn into `unknown`, because then a lost
-   connection would take away exactly what a person needs at that moment: the
-   last picture they had. */
+   Assessment and freshness are two axes. A stale value keeps its verdict
+   (ADR-0010) and does not turn into `unknown`: a lost connection must not
+   take away the last picture. */
 
 import { forwardRef } from "react";
 import type { HTMLAttributes } from "react";
@@ -118,9 +109,8 @@ export const Stat = forwardRef<HTMLDivElement, StatProps>(function Stat(
   const verdict = assessment.verdict;
   const word = verdictWord(verdict, wording);
   const known = verdict !== "unknown";
-  /* Without a limit there is no verdict to reach. Writing „in Ordnung" would
-     be a claim nobody has made – the tile stays neutral in that case. An
-     absent VALUE is untouched by this: it is unknown whether or not anyone
+  /* Without a limit there is no verdict to reach: the tile stays neutral
+     rather than claim "ok". An absent VALUE is unknown whether or not anyone
      has named a rule. */
   const hasRule = (limits?.limits?.length ?? 0) > 0;
   const showsVerdict = hasRule || !known;
@@ -130,9 +120,7 @@ export const Stat = forwardRef<HTMLDivElement, StatProps>(function Stat(
     ? formats.number(value as number, decimals)
     : wording.statAbsentValue;
 
-  // The accessible name carries both: what is being measured and how it
-  // stands. Colour alone carries no meaning – here it is stated twice,
-  // visibly and in the name.
+  // The accessible name carries both what is measured and how it stands.
   const name = `${label}: ${known ? `${display}${unit ? ` ${unit}` : ""}` : word}${
     known && showsVerdict && verdict !== "ok" ? `, ${word}` : ""
   }`;

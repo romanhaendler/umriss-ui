@@ -15,13 +15,12 @@
    canvas ignores it. Each colour is set on a probe element inside the chart
    root as `color: var(--uc-…)` and read back as the computed `color`, which
    the browser resolves in the scheme that applies there. Where no resolution
-   comes back (a DOM without a style engine), the variable's text is used, as
-   before.
+   comes back (a DOM without a style engine), the variable's text is used.
 
    Under `forced-colors: active` - the Windows contrast mode - the browser
    forces the colours of every element, and of nothing drawn on a canvas. So
    the chart forces itself: the theme resolves to the
-   system colours the page around it now wears - text and marks in
+   system colours of the page around it - text and marks in
    `CanvasText`, the ground in `Canvas`, the grid in `GrayText`, the two
    severities in `Highlight` - and every series, told apart no longer by
    colour, is told apart by its marks (marks.ts). */

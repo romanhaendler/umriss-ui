@@ -1,7 +1,7 @@
 /* The size of a table toolbar's controls: `Toolbar` says it once, and every
    part the table puts into it - search, column menu, export, "reset", the bulk
    actions, "new row" - stands at it, unless the part says its own. Outside a
-   toolbar the parts are `sm`, as they always were. */
+   toolbar the parts are `sm`. */
 
 import { createContext, useContext } from "react";
 

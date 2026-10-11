@@ -73,8 +73,7 @@ export function computePosition(
   const { align = "start", side = "bottom", offset = OFFSET, margin = MARGIN } = options;
 
   const { top: vTop = 0, left: vLeft = 0 } = viewport;
-  /* The room on each side, the window's margin already taken off: without it
-     a panel that fitted to the pixel stood flush against the window's edge. */
+  // The room on each side, the window's margin already taken off.
   const spaceBelow = vTop + viewport.height - anchor.bottom - offset - margin;
   const spaceAbove = anchor.top - vTop - offset - margin;
   const spacePreferred = side === "top" ? spaceAbove : spaceBelow;
@@ -116,10 +115,8 @@ export function computePosition(
         : anchor.left;
   const fitsAcross = (x: number) => x >= vLeft + margin && x + panel.width <= vLeft + viewport.width - margin;
   /* Across as along: where the edge asked for pushes the panel out of the
-     window and the other one does not, it lines up with the other one - flush
-     with the trigger rather than shoved against the window's edge. Where
-     neither edge fits (a phone), centred under the trigger still points at
-     it; only then is it shoved. */
+     window and the other one does not, it lines up with the other one. Where
+     neither fits (a phone), centred is tried; only then is it shoved. */
   const other: Align = align === "start" ? "end" : align === "end" ? "start" : "center";
   const used = ([align, other, "center"] as const).find((edge) => fitsAcross(leftFor(edge))) ?? align;
   // Clamp at the right edge first, then at the left: if the panel is wider than
@@ -146,10 +143,9 @@ export function motionOrigin(side: Side, align: Align): string {
 }
 
 /** The visible part of the window, read from the browser. Not `innerWidth` and
-    `innerHeight`: Safari reports the zoomed-in size there but
-    positions from the unzoomed corner, and neither of them knows the on-screen
-    keyboard - on an iPhone the combobox's list would stand above the field and cut
-    off at the left. Where `visualViewport` is missing (jsdom), the window. */
+    `innerHeight`: Safari reports the zoomed-in size there but positions from
+    the unzoomed corner, and neither knows the on-screen keyboard. Where
+    `visualViewport` is missing (jsdom), the window. */
 export function visibleViewport(): Viewport {
   const v = window.visualViewport;
   if (!v) return { width: window.innerWidth, height: window.innerHeight };

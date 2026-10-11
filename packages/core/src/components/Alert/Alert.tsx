@@ -1,13 +1,6 @@
-/* A message that stays put.
-
-   The point of it: the toast is fleeting and sits in the bottom right corner -
-   right for "saved", wrong for "this view shows data from the twelfth" or for
-   the summary of what went wrong in a form. There was nothing for that, and
-   every application built its own coloured surface.
-
+/* A message that stays put in the page, where a toast would carry it away.
    The role follows the tone, not the caller: warning and danger interrupt the
-   screen reader, the others do not. Whoever were allowed to decide that would
-   decide it wrongly at some point. */
+   screen reader, the others do not. */
 
 import { forwardRef } from "react";
 import type { HTMLAttributes, ReactNode } from "react";

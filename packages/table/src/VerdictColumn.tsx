@@ -1,30 +1,18 @@
 /* The verdict column: a numeric value and a limit set, read
    with `assess` from @umriss-ui/core.
 
-   It is built with NOTHING a caller of @umriss-ui/table would not have as well:
+   It is built with nothing a caller of @umriss-ui/table would not have as well:
    a `Column` from the hook, `assess`, `verdictWeight`, the formats and the
-   wording. Therein lies its second purpose - it proves that the limits layer
-   needs nothing private. That is why this file imports only @umriss-ui/core and
-   React.
+   wording; it imports only @umriss-ui/core and React.
 
-   Decided:
-
-   - **Sorting is by the weight of the verdict** (ascending ok, unknown,
-     warning, alarm), and `sortBy="value"` sorts by the value instead. By
-     weight the worst stands at one end - one more click, and it stands on top;
-     by value an alarm below a lower limit would stand among the small values,
-     far away from the alarm above the upper one. With equal weight the
-     existing order stays, because the sort is stable. By weight AND value in
-     one level would mean pressing two numbers into one sort value - over a
-     range of values nobody knows.
-   - **The export carries the value, not the verdict.** The verdict is a
-     function of value and limit set; whoever needs it in the spreadsheet has
-     the set. A second field per column would need a second header row that
-     nobody ordered.
-   - **An unknown verdict is a verdict**, not an absent value (glossary:
-     Verdict). The column's value is therefore never absent - it is the pair of
-     measured value and assessment - and `children` is called for `null` and
-     `NaN` as well. */
+   - Sorting is by the weight of the verdict (ascending ok, unknown, warning,
+     alarm), so the worst stands at one end; `sortBy="value"` sorts by the
+     value instead. With equal weight the existing order stays (stable sort).
+   - The export carries the value, not the verdict, which is a function of
+     value and limit set.
+   - An unknown verdict is a verdict (glossary: Verdict), not an absent value:
+     the column's value is never absent - it is the pair of measured value and
+     assessment - and `children` is called for `null` and `NaN` as well. */
 
 import { VisuallyHidden, assess, verdictWeight, useFormats, useWording } from "@umriss-ui/core";
 import type { Assessment, Formats, LimitSet, Verdict, Wording } from "@umriss-ui/core";

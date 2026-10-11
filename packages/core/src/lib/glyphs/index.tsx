@@ -7,8 +7,7 @@
    1. **Nominal size 10.** The `viewBox` is `0 0 10 10`, so that paths can
       be compared and carried between glyphs. A glyph flatter or narrower than
       a square crops one side (`0 0 10 6`); the longer side stays 10.
-   2. **Stroke width 1.4** at nominal size. Not 1.5, not 1.6: the width chosen
-      is the one that occurs most often in the existing set.
+   2. **Stroke width 1.4** at nominal size.
    3. **`currentColor`.** A glyph takes the text colour of its place and never
       carries one of its own.
    4. **No fill.** `fill="none"`; it is drawn with the stroke.
@@ -19,16 +18,12 @@
 
    ===========================================================================
 
-   Why this is written down: a new glyph needs a stroke width and an optical
-   size to hold to, not whatever the nearest component happens to do.
-
    The specification is held by a check, not by this comment: the glyph test
    of each package (`tests-unit/glyphs.test.ts`, rules in `scripts/glyphs.ts`)
    reads every component source and holds every inline `<svg>` to it. The
    width is relative to the nominal size - 1.4 per 10 units - so a glyph shown
-   at 13 pixels has the weight of one shown at 9. A glyph that needs less room
-   in one direction crops the box (`0 0 10 6`) rather than shrinking the unit.
-   What more than one component draws stands here, once. */
+   at 13 pixels has the weight of one shown at 9. What more than one component
+   draws stands here, once. */
 
 import type { SVGProps } from "react";
 import { forwardRef } from "react";
@@ -36,8 +31,8 @@ import { forwardRef } from "react";
 /** The props of a glyph: an SVG's attributes and its edge length. */
 export interface GlyphProps extends Omit<SVGProps<SVGSVGElement>, "viewBox" | "children"> {
   /**
-   * Edge length in pixels. The default is the size the glyph is already drawn
-   * at today - whoever changes it changes the picture.
+   * Edge length in pixels. The default is the size the glyph is drawn at in
+   * the components.
    */
   size?: number;
 }
@@ -60,9 +55,6 @@ export const CrossGlyph = forwardRef<SVGSVGElement, GlyphProps>(function CrossGl
     </svg>
   );
 });
-
-/* Plus and minus of the stepper buttons - together with the cross, the glyphs
-   the specification was read off. */
 
 /** The plus of `NumberInput`'s step buttons. */
 export const PlusGlyph = forwardRef<SVGSVGElement, GlyphProps>(function PlusGlyph(
@@ -88,9 +80,8 @@ export const MinusGlyph = forwardRef<SVGSVGElement, GlyphProps>(function MinusGl
   );
 });
 
-/* The chevron that expands and collapses a branch. It is not drawn rotated
-   but set rotated: the component tips it by 90 degrees when the branch is
-   open, so that the motion has the same spring as everywhere else.
+/* The component tips the chevron by 90 degrees when the branch is open, so
+   that the motion has the same spring as everywhere else.
 
    The table's row expander, the schedule's and the calculation's fold
    controls draw the same chevron, and take it from here. */
@@ -115,8 +106,7 @@ export const AngleGlyph = forwardRef<SVGSVGElement, GlyphProps>(function AngleGl
   );
 });
 
-/** The grip a drag is taken by: two grooves, the hand needs no more. Dotted
-    would be the obvious form and is wrong here - dots are fill, and point 4 of
+/** The grip a drag is taken by: two grooves. Dots are fill, and point 4 of
     the specification draws with the stroke. */
 export const GripGlyph = forwardRef<SVGSVGElement, GlyphProps>(function GripGlyph(
   { size = 10, ...rest },
@@ -154,7 +144,7 @@ export const GridGlyph = forwardRef<SVGSVGElement, GlyphProps>(function GridGlyp
   );
 });
 
-/** Measuring: a line with two end marks. Not a ruler with a scale - the teeth
+/** Measuring: a line with two end marks. Not a ruler with a scale: the teeth
     would be a grey stripe at ten nominal units. */
 export const MeasureGlyph = forwardRef<SVGSVGElement, GlyphProps>(function MeasureGlyph(
   { size = 10, ...rest },
@@ -174,8 +164,7 @@ export const MeasureGlyph = forwardRef<SVGSVGElement, GlyphProps>(function Measu
   );
 });
 
-/* The date pickers' two characters. They are drawn at nominal size 10, and set at 12
-   pixels - at 13 the relative stroke read heavier than the field's text. */
+/* The date pickers' two characters, set at 12 pixels. */
 
 /** A calendar leaf: a sheet with its header and two rings. With `range`, a
     bar across the sheet stands for the span a range picker chooses. */

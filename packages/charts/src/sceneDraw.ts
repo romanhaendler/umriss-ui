@@ -150,9 +150,7 @@ export function drawItems(s: ChartScene): SeriesDrawItem[] {
 /** Where each visible bar and box stands relative to its x value, by its
     place in the group of its x axis (ADR-0002). One pass over the series,
     not over the points. Step and fraction come from the group, not from
-    the series: otherwise members with data of differing density would
-    compute their offsets from different group widths and lie on top of one
-    another. */
+    the series, so members of differing density do not overlap. */
 export function placements(s: ChartScene): Map<number, BarPlacement> {
   const series = s.seriesInOrder().filter((e) => !isHidden(s, e.config));
   const groups = barGroups(

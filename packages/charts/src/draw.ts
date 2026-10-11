@@ -150,11 +150,9 @@ export interface SeriesLayerInput {
   axes: readonly AxisLayout[];
   theme: ResolvedTheme;
   series: readonly SeriesDrawItem[];
-  /** Bands lie below every series, lines above every series. Two answers,
-      because they are two things: a filled area behind a curve is ground, a
-      single line is a landmark. One common answer hides one of the two as soon
-      as an area series lies in the same chart - and since mixed kinds, that is
-      the normal case. */
+  /** Bands lie below every series, lines above every series: a band is ground,
+      a line is a landmark, and one common layer would hide one of them behind
+      an area series. */
   limitBands: readonly LimitDrawItem[];
   limitLines: readonly LimitDrawItem[];
 }
@@ -463,7 +461,7 @@ function drawBars(ctx: CanvasRenderingContext2D, item: BarDrawItem, plot: Rect, 
   }
 }
 
-/* ---------------- Box (box-plot B12) ----------------
+/* ---------------- Box ----------------
 
    Placed as a bar is (ADR-0002). Four paths for the whole series, each
    stroked or filled once: the boxes, filled faintly and outlined in full;
