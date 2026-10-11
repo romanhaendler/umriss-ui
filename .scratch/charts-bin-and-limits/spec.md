@@ -40,7 +40,7 @@ Status: done
 | Readout | With `limits`, the same rows are appended to the readout through the existing `readout` wording as `name value`, so no further wording is needed. |
 | Example | `Tooltip/06-limits.tsx`, a line, a labelled band and a labelled line, hand-written data. |
 | Row styling | The limit row reuses `uc-tooltip-total` (no chip, name across chip column); no CSS change. |
-| ADR | None, per the brief. |
+| ADR | None, per the brief; ADR-0054 and ADR-0055 were written after the release. |
 
 ## Out of scope
 
@@ -61,3 +61,5 @@ Status: done
 ## Comments
 
 **Accepted and released (2026-10-11).** The maintainer checked it by hand on the running demo ("Alles händisch geprüft, sieht gut aus") and took the decisions above as they stand; released in @umriss-ui/charts 0.15.0.
+
+The decisions are recorded in ADR-0054 (`bin()`) and ADR-0055 (limits), written after the release.

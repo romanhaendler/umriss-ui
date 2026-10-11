@@ -1,6 +1,6 @@
 # Decisions
 
-Forty-nine decisions, each one written where it was made and kept afterwards. An
+Fifty-eight decisions, each one written where it was made and kept afterwards. An
 ADR here is not an announcement: it states the question, the alternatives that
 were real at the time, and what the decision costs — which is what makes it
 worth reading a year later, when the code has changed and the reasoning has not.
@@ -66,5 +66,11 @@ half a later reader needs most. Exactly one is superseded today.
 | [0050](0050-a-chart-fills-its-frame-never-below-its-floor.md) | A chart fills its frame, never below its floor | accepted | charts |
 | [0051](0051-a-calculation-follows-the-density.md) | A calculation follows the density | accepted | calculation |
 | [0052](0052-a-chart-reads-its-rows-as-they-come.md) | A chart reads its rows as they come | accepted | charts |
+| [0053](0053-a-milestone-is-a-mark-on-a-lane.md) | A milestone is a mark on a lane, not a piece of work | accepted | schedule |
+| [0054](0054-a-histogram-is-a-helper-for-bar-not-a-chart-kind.md) | A histogram is a helper for Bar, not a chart kind, and its last bin is closed | accepted | charts |
+| [0055](0055-the-summary-names-labelled-limits-the-tooltip-only-on-request.md) | The summary always names labelled limits, and the tooltip only on request | accepted | charts |
+| [0056](0056-a-chart-reports-a-chosen-hit-and-holds-no-selection.md) | A chart reports a chosen hit and holds no selection | accepted | charts |
+| [0057](0057-the-alarm-list-offers-snoozing-the-application-decides.md) | The alarm list offers snoozing and reports it, and the application decides | accepted | limits and alarms |
+| [0058](0058-a-skill-points-an-agent-at-the-documentation.md) | A skill points a coding agent at the documentation, and there is no MCP server | accepted | architecture |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).
