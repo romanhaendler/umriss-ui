@@ -470,6 +470,7 @@ describe("Command palette - a long list of candidates", () => {
     type("pages");
     expect(rows()).toHaveLength(30);
     expect(screen.getAllByRole("group")[0]!.textContent).toContain("core · Pages");
+    expect(rows()[0]!.textContent).toContain("core · Pages");
   });
 });
 
