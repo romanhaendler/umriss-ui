@@ -19,6 +19,7 @@ what a reader has — the filename is what they are looking for.
 | what is tested, and how | [`testing.md`](testing.md) |
 | what capability is proved, and by what | the capability record of the package: [`../packages/charts/docs/capabilities.md`](../packages/charts/docs/capabilities.md), [`../packages/core/docs/capabilities-tree.md`](../packages/core/docs/capabilities-tree.md) |
 | what was worked on here, and when | [`journal.md`](journal.md) |
+| where the work stands today and what comes next | [`../.scratch/open-points-roadmap/next.md`](../.scratch/open-points-roadmap/next.md) |
 | what was still open in October 2026, what was decided about it and in which order it is built | [`research/open-points-2026-10/`](research/open-points-2026-10/), [`../.scratch/open-points-roadmap/spec.md`](../.scratch/open-points-roadmap/spec.md) |
 | how umriss compares with other libraries, and what follows from it | [`research/library-comparison-2026-09/`](research/library-comparison-2026-09/), [`../.scratch/comparison-roadmap/spec.md`](../.scratch/comparison-roadmap/spec.md) |
 | what state-of-the-art component documentation looks like, and where the site stands against it | [`research/component-docs-2026-10/`](research/component-docs-2026-10/), [`../.scratch/docs-roadmap/spec.md`](../.scratch/docs-roadmap/spec.md) |
