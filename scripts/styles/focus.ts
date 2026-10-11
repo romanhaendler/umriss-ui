@@ -1,10 +1,9 @@
 /* Every element a component makes reachable by keyboard shows the focus in a
    style of its own (ADR-0021).
 
-   The base layer once put a ring on every `:focus-visible` of the page, and the
-   components leaned on it without anyone noticing: when it went, the close
-   buttons of Modal and Toast, the calendar's days and the pickers' presets were
-   left with the browser's outline. The browser check (`ownBase.ts`) sees what a
+   No base layer puts a ring on every `:focus-visible` of the page, so a
+   component that leans on none would be left with the browser's outline: the
+   close buttons of Modal and Toast, the calendar's days, the pickers' presets. The browser check (`ownBase.ts`) sees what a
    Tab through an example reaches; a panel that is closed while it tabs stays
    invisible to it. This reads the source instead.
 

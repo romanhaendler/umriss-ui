@@ -168,7 +168,7 @@
     grid-row: 1;
   }
 
-  /* Grounds and edges are what forced colours take away (forced-colors 02):
+  /* Grounds and edges are what forced colours take away:
      the markers keep their outline, the lines take the system's text colour,
      and the current step - which was the accent's edge alone - takes the
      selection colour as an active item does. */

@@ -65,8 +65,7 @@ export function AggregateValue({
     /* Computed, so its trailing digits are arithmetic: a sum keeps the
        decimals of its most precise value, an average one more - whole hours
        average to tenths, not to 13.3333333333. A fixed count, so that the
-       totals of a column stand aligned on the point (table-aggregate-digits
-       01). */
+       totals of a column stand aligned on the point. */
     const places = Math.max(0, ...rows.map((row) => entry.read(row)).filter(isFiniteNumber).map(decimalsOf));
     content = formats.number(value, Math.min(10, kind === "avg" ? places + 1 : places));
   }

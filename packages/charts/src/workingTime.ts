@@ -208,7 +208,7 @@ export function toWorkingTimeClamped(wallClock: number, input: CalendarInput): n
 }
 
 /** Does this point in time lie in removed time? The question
-    `toWorkingTimeClamped` deliberately no longer answers. */
+    `toWorkingTimeClamped` does not answer. */
 export function inRemovedTime(wallClock: number, input: CalendarInput): boolean {
   const calendar = calendarFrom(input);
   if (calendar.intervals.length === 0) return false;

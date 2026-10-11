@@ -13,7 +13,7 @@
      site/llms.txt              the index for coding agents
      site/<package>/search.json the package's search fragment
      site/search.json           the five fragments in one: the palette's index of the
-                                whole site (.scratch/one-search)
+                                whole site
      site/og-image.png          the picture every page shows where it is shared
      site/favicon.svg           the front page's favicon (each demo bundles its own copy)
      site/fonts/                the front page's Geist (each demo bundles its own copy)
@@ -27,7 +27,7 @@
    (`packages/demo/src/tooling/llms.ts`, written as `demo/.generated/pages.json`),
    so it cannot say anything the demo does not. Each page's head announces its
    twin, which the same run writes to `demo/.generated/twins/` and the demo's
-   build carries in `dist-demo` as its public files (.scratch/pages-as-markdown) -
+   build carries in `dist-demo` as its public files -
    the dev server serves them from there too.
 
    The demos are built with the absolute base their homepage names
@@ -43,7 +43,7 @@
 
    The documents are the workspace's own markdown - the design language, the
    standards, what umriss-ui is not, each package's changelog - read and rendered here, never copied
-   (.scratch/concepts-and-changelog-pages, ADR-0046). Their list stands in
+   (ADR-0046). Their list stands in
    `packages/demo/src/tooling/documents.ts`.
 
    Run: `pnpm build:pages`. The forwarders and the guard come from the demo's
@@ -195,7 +195,7 @@ for (const dir of PACKAGES) {
   rows.push(row);
 }
 
-/* The workspace's own documents (.scratch/concepts-and-changelog-pages): each
+/* The workspace's own documents: each
    rendered from its file as it stands now. A link to a file that does not
    exist stops the build here, and so does a changelog whose newest release is
    not its manifest's version - a release without its entry. */
@@ -220,7 +220,7 @@ for (const document of documents) {
   leaks.push(...siteLeaks(document.html).map((leak) => `${document.url}: ${leak} in the text`));
 }
 
-/* The front page (.scratch/site-front-page): its own template, filled here.
+/* The front page: its own template, filled here.
    The index of every page stays in it, folded - the links a crawler walks,
    since no other site points here. The theme script is the demos' own, from
    core's `index.html`; the colours are the token stylesheet's, copied in; the
@@ -382,8 +382,7 @@ ${documents
 `,
 );
 
-/* The guard over what was written (search-visibility, Testing;
-   sidebar-tree, seam 1): every address in the sitemap is a file with a title,
+/* The guard over what was written: every address in the sitemap is a file with a title,
    a description, a canonical pointing at itself, an h1 and a favicon that is there, every forwarder
    stands outside the sitemap and points into it, and there is no other page
    file; every page has its Markdown twin and announces it, and every link
@@ -469,7 +468,7 @@ const faults = [
 ];
 if (faults.length > 0) throw new Error(`The built site fails its guard:\n${faults.join("\n")}`);
 
-/* The consoles' proof of ownership, where there is one yet. */
+/* The consoles' proof of ownership, where there is one. */
 const VERIFICATION = join(ROOT, "scripts", "site-verification");
 if (existsSync(VERIFICATION)) {
   for (const file of readdirSync(VERIFICATION)) cpSync(join(VERIFICATION, file), join(SITE, file));

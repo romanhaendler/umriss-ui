@@ -1,7 +1,6 @@
 /* The one panel shell. Position, stacking order, entrance and exit live here,
    and the overlay's surface - ground, corners, shadow; inner workings and
-   padding stay in the components' stylesheets, which may restate the surface.
-   Before this, @keyframes panelIn was defined five times. */
+   padding stay in the components' stylesheets, which may restate the surface. */
 
 @layer umriss.tokens, umriss.base, umriss.components;
 
@@ -17,8 +16,8 @@
     overflow: auto;
     /* The surface on the panel itself, not left to what it holds: the
        panel scrolls (`overflow: auto`), and a surface drawn by its content
-       lost its shadow and its round corners to that clip - a popover used
-       directly stood flat on the page. The transparent outline is the edge
+       would lose its shadow and its round corners to that clip - a popover
+       used directly would stand flat on the page. The transparent outline is the edge
        forced colours draw. */
     background: var(--u-color-surface);
     border-radius: var(--u-radius-md);

@@ -1,5 +1,5 @@
 /* `box-sizing: border-box` on the library's own elements, and only there
-   (ADR-0021). The page-wide `*, *::before, *::after` rule it replaces reached
+   (ADR-0021). Not a page-wide `*, *::before, *::after` rule, which would reach
    every element of the application; this step reaches the elements that carry
    a class of the stylesheet - and nothing a caller placed inside them.
 
@@ -73,11 +73,10 @@ export function ownBox(): Plugin {
 }
 ownBox.postcss = true;
 
-/* Squircle corners on the library's own elements (ADR-0021). The base layer
-   set `corner-shape: squircle` on `*` inside `@supports`, which reached every
-   rounded element of the application. This step gives it to every own rule that
-   sets a radius, right after the radius; a browser without `corner-shape`
-   ignores the declaration and keeps round corners, as before. */
+/* Squircle corners on the library's own elements (ADR-0021). This step gives
+   `corner-shape: squircle` to every own rule that sets a radius, right after
+   the radius; a browser without `corner-shape` ignores the declaration and
+   keeps round corners. */
 export function ownCorners(): Plugin {
   return {
     postcssPlugin: "umriss-own-corners",

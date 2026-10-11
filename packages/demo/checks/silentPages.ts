@@ -1,5 +1,4 @@
-/* No page may be silent about what its examples ask of a reader
-   (.scratch/a11y-and-finish).
+/* No page may be silent about what its examples ask of a reader.
 
    It looks only inside the example stages - what the library renders, not the
    shell around it - and asks two things of every page:
@@ -48,7 +47,7 @@ const UNANNOUNCED: Readonly<Record<string, string>> = {
 };
 
 /** The slots that hold a stage: the examples, and the configurator a page may
-    open with (.scratch/configurator), whose stage renders the component as an
+    open with; its stage renders the component as an
     example's does. A fault names a configurator "configurator". */
 const SLOTS = "[data-example], [data-configurator]";
 

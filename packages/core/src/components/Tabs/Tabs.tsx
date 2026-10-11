@@ -94,7 +94,7 @@ export const TabList = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>
   useEffect(() => {
     window.addEventListener("resize", measure);
     /* The font arrives later than the first layout, and the tabs change their
-       width with it: without a second measurement the line stayed a pixel or
+       width with it: without a second measurement the line stays a pixel or
        two beside its tab until the window changed. As in Textarea. */
     let cancelled = false;
     void document.fonts?.ready.then(() => {
@@ -174,7 +174,7 @@ export const Tab = forwardRef<HTMLButtonElement, TabProps>(function Tab(
       type="button"
       className={cx(styles.tab, className)}
       {...rest}
-      /* After `rest` (P3 of core-passthrough): the role, the ids that tie tab
+      /* After `rest`: the role, the ids that tie tab
          and panel together and the roving tab stop are the tab's own. The
          value goes into the id masked: `aria-controls` and `aria-labelledby`
          split at whitespace, and a tab "first page" would otherwise point at
@@ -184,7 +184,7 @@ export const Tab = forwardRef<HTMLButtonElement, TabProps>(function Tab(
       aria-selected={selected}
       aria-controls={`${tabs.idBase}-panel-${idPart(value)}`}
       tabIndex={selected || noneChosen ? 0 : -1}
-      /* Composed, not overridden by `rest`: a caller's `onClick` used to take
+      /* Composed, not overridden by `rest`: a caller's `onClick` would take
          the switching away from the tab. It runs first and can prevent it. */
       onClick={(event) => {
         onClick?.(event);

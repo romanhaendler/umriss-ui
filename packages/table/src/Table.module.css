@@ -142,7 +142,7 @@
   }
 
   /* The controls in a compact row - its actions, a Row draft's editors and
-     buttons - take the dense step: a row with actions stood a third taller
+     buttons - take the dense step: a row with actions would be a third taller
      than one without. */
   .compact {
     composes: dense from "#own-styles";
@@ -268,15 +268,13 @@
 
   /* ---- Control cells: selection and expander --------------------------- */
 
-  /* Exactly 34 px. The sticky offsets were once calculated from it; they are
-     measured now (parts.tsx, `PinPlacement`), but a control cell grown wider
+  /* Exactly 34 px. The sticky offsets are measured (parts.tsx, `PinPlacement`), but a control cell grown wider
      would still be a wide empty column. A pixel width would not hold that: if
      every column has a `width` and the table is wider than their sum, the
      automatic table layout distributes the surplus over every column with a
      pixel width, the control cells included – `max-width` does not apply to a
      cell – and the control cells took a share of every surplus. A
-     percentage width gets no surplus as long as other columns exist; `min-width` holds it at 34 px (table-demo,
-     features-browser.spec.ts). */
+     percentage width gets no surplus as long as other columns exist; `min-width` holds it at 34 px. */
   .control {
     width: 0.1%;
     min-width: 34px;
@@ -356,7 +354,7 @@
 
   /* The header's label, not a key: it has no surface to change, so hover
      darkens the type and shows the arrow, and the press sorts, which the arrow
-     answers (visuelle-wertigkeit 04). */
+     answers. */
   .sortButton:hover {
     color: var(--u-color-text);
   }
@@ -549,10 +547,9 @@
 
   /* Every group is at least as tall as a small button: a toolbar carrying only
      conditions and the ratio must not grow when "reset" appears with the first
-     keystroke (table-filters D1). Its parts are given no width: a field from
+     keystroke. Its parts are given no width: a field from
      @umriss-ui/core is its natural width in a row by itself (ADR-0041) - a
-     count of characters, or its `chars` - and never what it shows. Here stood
-     `width: auto` for every part and 160 px for the search. */
+     count of characters, or its `chars` - and never what it shows. */
   .toolbarGroup {
     display: flex;
     flex-wrap: wrap;
@@ -955,8 +952,8 @@
     color: var(--u-color-text-muted);
   }
 
-  /* ---- Grouped body (table-grouping 04, ADR-0029) ----------------------
-     The relations come from the prototype and bind (spec, "How it looks"):
+  /* ---- Grouped body (ADR-0029) ----------------------
+     The relations bind:
      a group header is exactly one row high - the row's padding, nothing more; every
      level has one fold slot of 20 px, so that the text of every level starts
      on one vertical; and a line is only as strong as the boundary it draws. */
@@ -1049,8 +1046,8 @@
   /* The strong line above a group header is drawn inside every cell, not as
      the collapsed top border: with pinned cells Chromium left that border out
      over the pinned selection and actions cells - the line broke off at both
-     ends (measured, table-column-pinning 01) - and one drawing for every table
-     keeps them alike (table-column-pinning 03). The border stays for the
+     ends - and one drawing for every table
+     keeps them alike. The border stays for the
      height, transparent, and forced colours draw it (the shadow they drop). */
   /* Not while focused: the focus ring of a virtual line is an inset shadow as
      well, and this rule would take it off every cell between the ends - nor
@@ -1178,7 +1175,7 @@
     color: var(--u-color-text-muted);
   }
 
-  /* Tree rows (table-tree-rows): the indent per level as in the tree view, then
+  /* Tree rows: the indent per level as in the tree view, then
      the fold slot - a leaf keeps it empty, so that the labels of one level
      start on one vertical. */
   .treeCell {
@@ -1199,8 +1196,7 @@
     margin-right: 4px;
   }
 
-  /* How a branch reads (table-tree-rows 09, decided on research - Fiori's tree
-     table, financial statements, Power BI's stepped matrix): by weight, never
+  /* How a branch reads: by weight, never
      by a tone. A branch is medium across its row, a leaf regular - its row
      header too; open or closed alike, the fold alone turns. A tone on every
      open branch greyed most of a deep tree and fought hover and selection, and
@@ -1351,7 +1347,7 @@
     box-shadow: inset 0 -1px 0 var(--u-hairline);
   }
 
-  /* A detail in a tree (table-tree-rows) is no box: its records hang from the
+  /* A detail in a tree is no box: its records hang from the
      row's fold on a rail, a level deeper, on the table's own surface. A table
      inside it drops its frame - it reads as the rows under the row. */
   .detailRow > .treeDetail {
@@ -1474,7 +1470,7 @@
   /* The ring's colour and width, drawn inside as an outline - against the
      canon's token, for a reason: the row fills its scroll area, which cuts an
      outer ring away left and right, and a <tr> does not paint a box-shadow in
-     every engine (visuelle-wertigkeit 04). */
+     every engine. */
   /* A focused virtual row draws the ring on its cells, not as the row's
      outline: the sticky selection and row-header cells paint over an outline,
      and the ring broke off where they stood. Inset, so that the neighbouring
@@ -1507,7 +1503,7 @@
     pointer-events: none;
   }
 
-  /* ---- Grid mode (table-grid-mode, ADR-0034) --------------------------- */
+  /* ---- Grid mode (ADR-0034) --------------------------- */
 
   /* The Active cell rings itself with the shared ring, drawn inside its
      edges: an outer ring is cut away by the scroll area at the table's sides
@@ -1530,7 +1526,7 @@
 
   /* The editor lies over its cell at the cell's size, and the value stays
      beneath it, unseen, to hold that size: nothing in the table shifts while
-     a cell is edited (table-grid-mode 05). A pinned cell sticks, which places
+     a cell is edited. A pinned cell sticks, which places
      the editor as well. */
   .editing:not(.pinned) {
     position: relative;
@@ -1650,7 +1646,7 @@
     color: var(--u-color-danger-text);
   }
 
-  /* ---- A copy, seen (table-copy-rows 03) --------------------------------- */
+  /* ---- A copy, seen --------------------------------- */
 
   /* What Ctrl+C copied flashes once: its cells take an accent tint, mixed into
      the surface so a pinned cell stays opaque, which fades back to what they
@@ -1694,7 +1690,7 @@
     }
   }
 
-  /* ---- Forced colours (forced-colors 03) ------------------------------- */
+  /* ---- Forced colours ------------------------------- */
 
   /* Forced colours repaint every ground with the page's and drop every
      box-shadow. A selected row loses its accent ground - the tick in its

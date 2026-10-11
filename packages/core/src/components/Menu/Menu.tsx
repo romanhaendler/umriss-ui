@@ -165,7 +165,7 @@ export const MenuItem = forwardRef<HTMLButtonElement, MenuItemProps>(function Me
       className={cx(styles.item, tone === "danger" && styles.danger, className)}
       {...rest}
       role="menuitem"
-      /* Composed, not overridden by `rest`: a caller's `onClick` used to take
+      /* Composed, not overridden by `rest`: a caller's `onClick` would take
          the closing away from the entry. It runs first and can prevent it. */
       onClick={(event) => {
         onClick?.(event);

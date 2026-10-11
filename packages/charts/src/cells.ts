@@ -26,7 +26,7 @@
 
     Unlike with bars, comparing only the neighbour will not do here: a matrix
     channel runs row by row and jumps back at the end of a row, so it is not
-    ascending (R-2.6 holds for the series, not for this grid). Hence a sorted
+    ascending (that holds for the series, not for this grid). Hence a sorted
     copy - it is made once during materialisation, not per frame, and n·log n
     beats the pairwise comparison clearly even on a modest grid. NaN sorts to the
     end and fails the test for a positive distance. */

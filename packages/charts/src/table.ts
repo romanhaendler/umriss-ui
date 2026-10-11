@@ -1,4 +1,4 @@
-/* The rows of the data table (charts-alternatives 01, C1-C2).
+/* The rows of the data table.
 
    A reader who opens the table wants the values the chart shows - its visible
    domain, not the whole history behind a zoom. The series of one x axis share
@@ -11,7 +11,7 @@
    domain -, and the table says how many readings the rows stand for. A state
    band's code is a name, not a height: its lowest and highest code say
    nothing, so a band is thinned to where its state changes, as the keyboard
-   walks it (charts-alternatives 04). Pure and free of the DOM, so that it can
+   walks it. Pure and free of the DOM, so that it can
    be tested. */
 
 import { downsample, type Course } from "./downsample";

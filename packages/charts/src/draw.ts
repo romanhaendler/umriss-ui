@@ -1,4 +1,4 @@
-/* Canvas drawing code (R-2.12, R-2.13, R-3.5, R-4.2, R-4.4, R-4.5).
+/* Canvas drawing code.
 
    Principles:
    - Exactly one stroke() call per series; gaps produce a moveTo, not separate
@@ -34,7 +34,7 @@ export interface LineDrawItem extends DrawBase {
   dash?: readonly number[];
   markers: "auto" | "always" | "never";
   step?: boolean;
-  /** The markers' shape (charts-alternatives C3); a circle without one. */
+  /** The markers' shape; a circle without one. */
   marker?: MarkerShape;
 }
 
@@ -47,16 +47,16 @@ export interface AreaDrawItem extends DrawBase {
   fillOpacity: number;
   strokeWidth: number;
   dash?: readonly number[];
-  /** Lines across the fill, in the series' colour (C3). */
+  /** Lines across the fill, in the series' colour. */
   hatch?: Hatch;
   /** A stacked member: a line in the ground's colour parts it from the
-      member above (charts-stacking 04). */
+      member above. */
   edges?: boolean;
 }
 
 export interface BarDrawItem extends DrawBase {
   kind: "bar";
-  /** Foot per bar - a stacked bar stands on the stack below (charts-stacking);
+  /** Foot per bar - a stacked bar stands on the stack below;
       null = the fixed baseline at `baseline`. */
   y0: Float64Array | null;
   /** Fixed lower edge in domain space; only effective where y0 is null. */
@@ -65,10 +65,10 @@ export interface BarDrawItem extends DrawBase {
   offset: number;
   /** Bar width in domain units. */
   width: number;
-  /** Lines across the bars, in the background's colour (C3). */
+  /** Lines across the bars, in the background's colour. */
   hatch?: Hatch;
   /** A stacked member: a line in the ground's colour along each foot parts
-      it from the bar below (charts-stacking 04). */
+      it from the bar below. */
   edges?: boolean;
 }
 
@@ -80,14 +80,14 @@ export interface BoxDrawItem extends DrawBase {
   offset: number;
   /** Box width in domain units. */
   width: number;
-  /** Lines across the box, in the series' colour (C3). */
+  /** Lines across the box, in the series' colour. */
   hatch?: Hatch;
 }
 
 export interface ScatterDrawItem extends DrawBase {
   kind: "scatter";
   radius: number;
-  /** The points' shape (C3); a circle without one. */
+  /** The points' shape; a circle without one. */
   marker?: MarkerShape;
 }
 
@@ -101,7 +101,7 @@ export interface StateDrawItem extends DrawBase {
   laneBottom: number;
   /** Where the last segment ends (lastSegmentEnd). */
   lastEnd: number;
-  /** A hatch per state code, across its colour (C3); null draws colour alone. */
+  /** A hatch per state code, across its colour; null draws colour alone. */
   hatches?: readonly Hatch[] | null;
 }
 
@@ -114,7 +114,7 @@ export interface MatrixDrawItem extends DrawBase {
   /** Cell edges in domain units. */
   width: number;
   height: number;
-  /** A hatch per bucket, across its colour (C3); null draws colour alone. */
+  /** A hatch per bucket, across its colour; null draws colour alone. */
   hatches?: readonly Hatch[] | null;
 }
 
@@ -139,7 +139,7 @@ export interface LimitDrawItem {
   /** Dash pattern; empty means solid. It carries the difference between a chosen
       and a calculated limit (ADR-0008). */
   dash: readonly number[];
-  /** A band hatched in its colour, not only tinted (C3). */
+  /** A band hatched in its colour, not only tinted. */
   hatch?: boolean;
 }
 
@@ -159,7 +159,7 @@ export interface SeriesLayerInput {
   limitLines: readonly LimitDrawItem[];
 }
 
-/** Align 1-px lines to half pixels (R-3.5). */
+/** Align 1-px lines to half pixels. */
 function crisp(px: number): number {
   return Math.round(px) + 0.5;
 }
@@ -174,7 +174,7 @@ function drawGrid(ctx: CanvasRenderingContext2D, input: SeriesLayerInput): void 
   ctx.lineWidth = 1;
   for (const axis of axes) {
     if (!axis.grid) continue;
-    // The zero line is stronger than the rest of the grid (R-4.2).
+    // The zero line is stronger than the rest of the grid.
     for (const pass of [0, 1] as const) {
       const zeroLine = pass === 1;
       ctx.beginPath();
@@ -200,7 +200,7 @@ function drawGrid(ctx: CanvasRenderingContext2D, input: SeriesLayerInput): void 
   }
 }
 
-/* ---------------- Hatches (charts-alternatives C3) ----------------
+/* ---------------- Hatches ----------------
 
    Lines across a fill, clipped to it: a pattern a reader can tell apart where
    the colours cannot be. One path of lines per filled path, across the plot,
@@ -225,15 +225,14 @@ function drawHatch(ctx: CanvasRenderingContext2D, area: Path2D, box: Rect, hatch
   ctx.restore();
 }
 
-/* ---------------- Line (R-2.12, R-4.4, R-4.5) ---------------- */
+/* ---------------- Line ---------------- */
 
-/** From this number of points on, markers="auto" marks only isolated points
-    (R-4.5). */
+/** From this number of points on, markers="auto" marks only isolated points. */
 const MARKER_LIMIT = 60;
 
 /** Is the value at i present, with a gap or the edge on either side? Such a
     point is a lone moveTo in the path - no stroke, no pixel - and only a marker
-    shows it (Q23). */
+    shows it. */
 function isolated(ys: Float64Array, n: number, i: number): boolean {
   return (
     (i === 0 || Number.isNaN(ys[i - 1] as number)) &&
@@ -244,7 +243,7 @@ function isolated(ys: Float64Array, n: number, i: number): boolean {
 /** Markers, filled after the plot's clip is lifted: a point on the plot's
     edge - the 100 % of a Pareto, the first day of a burn-down - is a whole
     point, not half of one. Only points whose centre lies in the plot are in
-    them, so nothing beyond a zoomed edge shows (R-2.13). */
+    them, so nothing beyond a zoomed edge shows. */
 interface Markers {
   path: Path2D;
   color: string;
@@ -277,7 +276,7 @@ function drawLine(ctx: CanvasRenderingContext2D, item: LineDrawItem, plot: Rect,
       // A held value holds until the gap's x: that sample says it is no longer
       // known from there, not that it never was.
       if (step && penDown) path.lineTo(px, held);
-      penDown = false; // gap (R-2.5)
+      penDown = false; // gap
       continue;
     }
     const py = value * ym + yb;
@@ -298,7 +297,7 @@ function drawLine(ctx: CanvasRenderingContext2D, item: LineDrawItem, plot: Rect,
   } else {
     ctx.setLineDash([]);
   }
-  ctx.stroke(path); // exactly one stroke per series (R-2.12)
+  ctx.stroke(path); // exactly one stroke per series
   ctx.setLineDash([]);
 
   if (item.markers !== "never") {
@@ -325,9 +324,9 @@ function drawLine(ctx: CanvasRenderingContext2D, item: LineDrawItem, plot: Rect,
    the baseline gets stroked along.
 
    A gap in either channel ends the current section; the next present point
-   begins a new one. A gap is a hole, not a straight line across it (R-2.5).
+   begins a new one. A gap is a hole, not a straight line across it.
    A section of one point has no width to fill: it is a stroke from its foot to
-   its value, or it would not be drawn at all (Q23). */
+   its value, or it would not be drawn at all. */
 
 function drawArea(ctx: CanvasRenderingContext2D, item: AreaDrawItem, plot: Rect, ground: string): void {
   const n = item.length;
@@ -443,7 +442,7 @@ function drawBars(ctx: CanvasRenderingContext2D, item: BarDrawItem, plot: Rect, 
   const feet = item.edges === true && us !== null ? new Path2D() : null;
   for (let i = 0; i < n; i++) {
     const value = ys[i] as number;
-    if (Number.isNaN(value)) continue; // a gap leaves its bar out (R-2.5)
+    if (Number.isNaN(value)) continue; // a gap leaves its bar out
     const px = (xs[i] as number) * xm + xb + edgePx;
     const py = value * ym + yb;
     const footPx = us === null ? baselinePx : (us[i] as number) * ym + yb;
@@ -470,7 +469,7 @@ function drawBars(ctx: CanvasRenderingContext2D, item: BarDrawItem, plot: Rect, 
    stroked or filled once: the boxes, filled faintly and outlined in full;
    the medians, heavier; the whiskers with their caps, half a box wide. Two
    more for the outliers on the box's centre line: dots, and rings for the far
-   out; and one for the means' crosses. A gap - a missing median - leaves its box out whole (R-2.5). */
+   out; and one for the means' crosses. A gap - a missing median - leaves its box out whole. */
 
 const BOX_FILL = 0.18;
 const BOX_MEDIAN = 2;
@@ -513,7 +512,7 @@ function drawBoxes(ctx: CanvasRenderingContext2D, item: BoxDrawItem, plot: Rect)
     const median = ys[i] as number;
     if (Number.isNaN(median)) continue;
     // The 1px outline, whiskers and caps on half pixels and the 2px median on
-    // whole ones, so that each stays crisp (R-3.5); a notch's slants cannot.
+    // whole ones, so that each stays crisp; a notch's slants cannot.
     const from = (xs[i] as number) * xm + xb + edgePx;
     const left = crisp(from + gap);
     const right = Math.round(from + widthPx - gap) - 0.5;
@@ -626,7 +625,7 @@ function drawScatter(item: ScatterDrawItem, plot: Rect, late: Markers[]): void {
   const points = new Path2D();
   for (let i = 0; i < n; i++) {
     const value = ys[i] as number;
-    if (Number.isNaN(value)) continue; // a gap leaves its point out (R-2.5)
+    if (Number.isNaN(value)) continue; // a gap leaves its point out
     const px = (xs[i] as number) * xm + xb;
     const py = value * ym + yb;
     if (inPlot(plot, px, py)) markerPath(points, shape, px, py, r);
@@ -712,7 +711,7 @@ function drawMatrix(ctx: CanvasRenderingContext2D, item: MatrixDrawItem, plot: R
 
   for (let i = 0; i < n; i++) {
     const k = buckets[i] as number;
-    if (k < 0) continue; // hole (R-2.5)
+    if (k < 0) continue; // hole
     const path = paths[k];
     if (path === undefined) continue;
     // A cell is centred on its pair of values.
@@ -793,7 +792,7 @@ export function drawSeriesLayer(
   ctx.save();
   ctx.beginPath();
   ctx.rect(plot.x, plot.y, plot.width, plot.height);
-  ctx.clip(); // R-2.13
+  ctx.clip();
 
   ctx.lineJoin = "round";
   ctx.lineCap = "round";
@@ -807,7 +806,7 @@ export function drawSeriesLayer(
     if (item.length === 0) continue;
     ctx.globalAlpha = item.alpha;
     // Exactly one branch per series, outside the point loop: the calculation in
-    // the loop thereby stays monomorphic and allocation-free (R-5.2).
+    // the loop thereby stays monomorphic and allocation-free.
     switch (item.kind) {
       case "line":
         drawLine(ctx, item, plot, late);
@@ -867,7 +866,7 @@ export function drawOverlayLayer(
   const at = hover?.hit.xPx ?? input.syncPx;
   if (at === null || plot.width <= 0 || plot.height <= 0) return;
 
-  // Crosshair at the snapped x pixel position (R-4.7).
+  // Crosshair at the snapped x pixel position.
   const px = crisp(at);
   if (px >= plot.x && px <= plot.x + plot.width) {
     ctx.beginPath();
@@ -880,7 +879,7 @@ export function drawOverlayLayer(
   }
 
   // Hover marker: fill in the series colour, a 2-px ring in the background
-  // colour (R-4.5). The overlay is not clipped: a reading beyond a zoomed edge
+  // colour. The overlay is not clipped: a reading beyond a zoomed edge
   // - the nearest one can lie there - gets no marker on the axis.
   for (const marker of hover?.marker ?? []) {
     if (marker.x < plot.x || marker.x > plot.x + plot.width || marker.y < plot.y || marker.y > plot.y + plot.height) {

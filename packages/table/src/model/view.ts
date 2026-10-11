@@ -3,7 +3,7 @@
    (`t.view`).
 
    The table puts it nowhere - not in the address, not in any storage. Whether
-   and where a view is kept is the application's decision (table-filters): a
+   and where a view is kept is the application's decision: a
    library that writes the address bar dictates what its callers' URLs contain.
    That is why the view is an object and not a string. */
 

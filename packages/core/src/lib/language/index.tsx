@@ -1,7 +1,7 @@
 /* The seam at which formatting and wording become exchangeable.
 
    The rule that governs everything else: without a provider every component
-   behaves as it did before. The context has `null` as its base value, and the
+   behaves the same. The context has `null` as its base value, and the
    hook then returns the defaults - no provider needed, no warning, no
    difference. A library whose components work one by one can be introduced
    component by component, and that is worth more than the slightly shorter

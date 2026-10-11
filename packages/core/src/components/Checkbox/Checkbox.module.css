@@ -149,7 +149,7 @@
     --_control: var(--u-control-height-sm);
   }
 
-  /* Forced colours repaint every ground with the page's (forced-colors 02):
+  /* Forced colours repaint every ground with the page's:
      the tick is a stroke and stays, the mixed state's dash is a ground and
      would go - so it takes the system's text colour, the tick's. */
   @media (forced-colors: active) {

@@ -1,6 +1,6 @@
 /* <BoxPlot> - series configuration (box-plot 01).
    Renders nothing itself: children are configuration collectors, the drawing
-   happens exclusively in the scene (R-2.1).
+   happens exclusively in the scene.
 
    A box per x on the numeric x axis, as a bar stands there (ADR-0002): groups
    are categories the x axis reads from the rows (ADR-0052), and a time axis
@@ -17,8 +17,7 @@ import type { ValueFunction, BoxSeriesConfig, ListFunction, ListValue, Value } f
     function of it; `outliers` a list field or a function. */
 export interface BoxPlotProps<T> {
   /** The line across the box; null/undefined/NaN/±Infinity means a gap - no
-      box is drawn there, whatever the other numbers say.
-      @remarks R-2.5 */
+      box is drawn there, whatever the other numbers say. */
   median: Value<T>;
   /** The box's lower edge. */
   lowerQuartile: Value<T>;
@@ -44,14 +43,11 @@ export interface BoxPlotProps<T> {
   /** How many values stand behind the box; read in the tooltip and the
       table, not drawn. */
   count?: Value<T>;
-  /** Binding to an x axis.
-      @remarks R-4.12 */
+  /** Binding to an x axis. */
   xAxisId?: string;
-  /** Binding to a y axis.
-      @remarks R-4.12 */
+  /** Binding to a y axis. */
   yAxisId?: string;
-  /** Series-own data; overrides the container data.
-      @remarks R-2.4 */
+  /** Series-own data; overrides the container data. */
   data?: readonly T[];
   /** The name in legend and tooltip. Without one a warning stands in DEV.
       @default "Series n", after its place in the chart */

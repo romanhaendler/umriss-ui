@@ -1,4 +1,4 @@
-/* What a bar says besides its colour (schedule-legibility 05).
+/* What a bar says besides its colour.
 
    A closed list, and a short one: released work against work still being
    planned, work that may move against work that may not, another team's plan,
@@ -24,9 +24,9 @@ export interface ResolvedAppearance {
   /** `provisional`: the FILL - none at all, so the surface shows through, with
       a dashed outline in the task colour. Planned, not released. */
   readonly dashed: boolean;
-  /** `fixed`: the ENDS - a cap at each end of the main time. Not a hatch any
-      more; a hatch now says "not available" of a refused lane, and the name is
-      kept only so that this type did not change with the picture. */
+  /** `fixed`: the ENDS - a cap at each end of the main time. Not a hatch: a
+      hatch says "not available" of a refused lane. The field keeps the name
+      `hatched`. */
   readonly hatched: boolean;
   /** `muted`: the SATURATION - the task colour mixed half into the surface,
       opaque and at full height. Another team's, another crew's. */

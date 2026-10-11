@@ -1,4 +1,4 @@
-/* An example runs as it is copied (schedule-lane-groups 04).
+/* An example runs as it is copied.
 
    The promise a demo makes is that the code shown is the code that ran. A demo
    keeps half of it by showing the file it rendered; the other half is that a

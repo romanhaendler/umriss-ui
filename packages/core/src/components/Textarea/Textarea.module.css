@@ -87,7 +87,7 @@
     padding-bottom: var(--u-space-6);
   }
 
-  /* Clear of the resize grip in the corner, which it had touched. */
+  /* Clear of the resize grip in the corner. */
   .count {
     position: absolute;
     right: var(--u-space-6);

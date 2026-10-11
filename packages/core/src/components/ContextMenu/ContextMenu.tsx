@@ -5,7 +5,7 @@ import { MenuContext, handleMenuKeyDown } from "../Menu/Menu";
 import styles from "../Menu/Menu.module.css";
 
 /* ------------------------------------------------------------------ */
-/* ContextMenu – the menu of a point (schedule 01).                    */
+/* ContextMenu – the menu of a point.                                 */
 /* ------------------------------------------------------------------ */
 
 /** The props of `ContextMenu`. */

@@ -1,6 +1,6 @@
-/* Hit testing (R-4.6).
+/* Hit testing.
    Binary search over the materialised x array of a series; x values are assumed
-   to be sorted ascending (R-2.6). The comparison between series of different x
+   to be sorted ascending. The comparison between series of different x
    axes always happens in pixel space, never in domain space. */
 
 import type { Scale } from "./types";

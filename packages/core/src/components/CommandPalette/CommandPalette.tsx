@@ -249,13 +249,9 @@ export const CommandPalette = forwardRef<HTMLDialogElement, CommandPaletteProps>
   /* Pointer against keyboard                                          */
   /* ---------------------------------------------------------------- */
 
-  /* The bug this prevents: one types, the list gets shorter, another row slides
+  /* Prevents this: one types, the list gets shorter, another row slides
      under the resting mouse, one presses Enter - and lands somewhere other than
-     where the arrow keys had shown. It has no name while it is happening, and
-     it is the difference between a palette that works and one that feels
-     right. Today's palette in the demo escapes it only because it has no
-     pointer behaviour at all - and that is what this component takes off its
-     hands.
+     where the arrow keys had shown.
 
      The rule: the mark has an owner. The keyboard takes it on every arrow key
      and on every change of the query. The pointer takes it only on
@@ -565,8 +561,7 @@ export const CommandPalette = forwardRef<HTMLDialogElement, CommandPaletteProps>
 /* ------------------------------------------------------------------ */
 
 /** The id of a row. A single IDREF and therefore readable raw as well - but one
-    rule for all ids built from the caller's values is easier to keep than two
-    (library-audit 04). */
+    rule for all ids built from the caller's values is easier to keep than two. */
 const rowId = (baseId: string, id: string) => `${baseId}-${idPart(id)}`;
 
 function Row({

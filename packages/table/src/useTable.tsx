@@ -196,7 +196,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
 
   const [start] = useState<TableView | undefined>(() => options.initialView);
 
-  /* Server mode (table-server-mode, M1): the rows are one page of a server's.
+  /* Server mode: the rows are one page of a server's.
      What the table would otherwise do over all rows - the pre-filter, the
      grouping, virtualisation - it would do over one page and call that the
      whole, so it is passed over, and said so once in development. */
@@ -256,7 +256,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
      declared only the registry knows. */
   const [pinsChosen, setPinsChosen] = useState<Pins | null>(() => (start?.pinned ? { ...start.pinned } : null));
   const rowKey = options.rowKey as (row: unknown) => string;
-  /* Tree rows (table-tree-rows): the rows are the roots, and their levels
+  /* Tree rows: the rows are the roots, and their levels
      come from their children. A grouping would build levels a second way, and
      pages would tear rows from their parents - both are passed over. The
      children function is read through a holder the commit updates: written in
@@ -378,7 +378,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
 
   const known = new Set(registry.orderedColumns().map((e) => e.spec.id));
 
-  /* D6: a condition goes with its column. If a column leaves the JSX, its
+  /* A condition goes with its column. If a column leaves the JSX, its
      condition is taken out of the state; when it comes back it has none. Unlike
      width and order, which survive a return: a returned width hides no row, a
      returned condition does - without the user having set it. A hidden column
@@ -473,7 +473,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once per change of the view, with that render's view and handler
   }, [viewNowKey, applied]);
 
-  /* The server's request (M1): reported after the commit, once when
+  /* The server's request: reported after the commit, once when
      the table first stands and once per change of what decides the rows - a
      width, an order, a pin, a fold or a hidden column fetches nothing. The key
      is compared, not the object: a second render with the same request (Strict Mode, a column
@@ -495,7 +495,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
   }, [reportKey]);
 
   /* A bulk action receives rows, and in server mode a selected row may stand
-     on a page the table no longer holds (M5). It keeps the rows it has seen
+     on a page the table no longer holds. It keeps the rows it has seen
      for as long as they are selected, as they were when last seen - never
      more than the selection and the page. */
   const [seenRows] = useState(() => new Map<string, unknown>());

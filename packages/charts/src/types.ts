@@ -1,4 +1,4 @@
-/* Types of the registration model (R-2.1) and of materialisation (R-2.7). */
+/* Types of the registration model and of materialisation. */
 
 import type { ReactNode } from "react";
 import type { Assessment, Limit, LimitSet, Side, Severity, Verdict } from "./limit";
@@ -64,7 +64,7 @@ export type ListValue<T> = ListField<T> | ListFunction<T>;
    The series kind belongs to the series, never to the chart - which is exactly
    why kinds can be mixed within one chart (CONTEXT.md: Series kind). The set of
    kinds is closed: there is no renderer interface for third parties, because the
-   drawing loop has to stay monomorphic (R-5.2).
+   drawing loop has to stay monomorphic.
 
    What every series carries stands in SeriesBase; what only one kind carries
    stands in the respective member of the union. A property that makes sense only
@@ -73,11 +73,9 @@ export type ListValue<T> = ListField<T> | ListFunction<T>;
 /** What every series registers, whatever its kind: where its values come from,
     which axes it stands on, and how it is named and coloured. */
 export interface SeriesBase<T = unknown> {
-  /** Y value; null/undefined/NaN/±Infinity means a gap.
-      @remarks R-2.5 */
+  /** Y value; null/undefined/NaN/±Infinity means a gap. */
   accessor: ValueFunction<T>;
-  /** Series-own data; overrides the container data.
-      @remarks R-2.4 */
+  /** Series-own data; overrides the container data. */
   data?: readonly T[];
   xAxisId: string;
   yAxisId: string;
@@ -109,12 +107,12 @@ export interface ScatterSeriesConfig<T = unknown> extends SeriesBase<T> {
   radius: number;
 }
 
-/** What the two filled kinds share: a place in a stack (charts-stacking). */
+/** What the two filled kinds share: a place in a stack. */
 export interface Stackable {
   /** The stack this series stands in: series with the same id, on the same x
-      and y axis, stack in registration order (K1). */
+      and y axis, stack in registration order. */
   stack?: string;
-  /** On any member, the whole stack sums to 100 at every x (K5). */
+  /** On any member, the whole stack sums to 100 at every x. */
   normalize?: boolean;
 }
 
@@ -249,8 +247,7 @@ export interface AxisConfig<T = unknown> {
       their x axis' domain. */
   domain: "nice" | "data" | "visible" | readonly [number, number];
   /** Whether the axis draws its grid lines.
-      @default only the first registered axis per orientation
-      @remarks R-4.15 */
+      @default only the first registered axis per orientation */
   grid?: boolean;
   /** Fixed tick values instead of the 1-2-5 algorithm, on a numeric axis: an
       hour axis' named hours, a lane grid. */
@@ -295,14 +292,12 @@ export interface Rect {
 }
 
 /** Materialised series: the draw loop works only on this.
-    Gaps (null/undefined/NaN/±Infinity out of the accessor) are encoded as NaN.
-    @remarks R-2.7, R-2.5 */
+    Gaps (null/undefined/NaN/±Infinity out of the accessor) are encoded as NaN. */
 export interface MaterializedSeries {
   x: Float64Array;
   y: Float64Array;
   /** Lower edge, where the baseline is an accessor of its own; otherwise null.
-      A fixed baseline needs no channel - it is a number.
-      @remarks R-2.7 */
+      A fixed baseline needs no channel - it is a number. */
   y0: Float64Array | null;
   /** Level channel: the third value per point, which today only the matrix
       needs. Named rather than overloading y0 - a property that only some kinds
@@ -347,7 +342,7 @@ export interface BoxExtras<V = number> {
   count: V;
 }
 
-/* The Scale interface is fixed (R-2.14); V0 implements only LinearScale. */
+/* The Scale interface is fixed; V0 implements only LinearScale. */
 /** The mapping of an axis' values onto pixels and back, with its ticks. Every
     scale of the library is affine; `LinearScale` implements it. */
 export interface Scale {
@@ -384,7 +379,7 @@ export type LimitRole = "specification" | "control" | "zone";
 
 export interface LimitBase {
   /** Axis on which the value lies; without one, the first axis of its
-      orientation (charts-fixes 08). */
+      orientation. */
   axisId?: string;
   orientation: AxisOrientation;
   severity: Severity;
@@ -423,8 +418,7 @@ export interface LegendConfig {
   placement: "top" | "bottom";
 }
 
-/** One hit per series in the tooltip.
-    @remarks R-4.4 */
+/** One hit per series in the tooltip. */
 export interface TooltipPoint<T = unknown> {
   seriesName: string;
   color: string;
@@ -482,8 +476,7 @@ export interface HoverState {
   mouseY: number;
 }
 
-/** Measurements of the instrumentation for the benchmark page.
-    @remarks R-5.1 */
+/** Measurements of the instrumentation for the benchmark page. */
 export interface ChartPerf {
   materializeMs: number;
   seriesDrawMs: number;

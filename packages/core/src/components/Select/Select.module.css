@@ -59,7 +59,7 @@
   }
 
   /* The placeholder option (value "") reads as a placeholder, muted like the
-     Combobox's and the pickers'; it stood in full ink. The options in the
+     Combobox's and the pickers', not full ink. The options in the
      open list keep the text colour. */
   .select:has(option[value=""]:checked) {
     color: var(--u-color-text-muted);
@@ -96,7 +96,7 @@
     right: var(--u-space-3);
     top: 50%;
     /* Core's AngleGlyph turned down: the field's chevron keeps the one
-       stroke width of every glyph (visuelle-wertigkeit 03). */
+       stroke width of every glyph. */
     color: var(--u-color-text-secondary);
     transform: translateY(-50%) rotate(90deg);
     pointer-events: none;

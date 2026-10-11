@@ -51,10 +51,9 @@ export type Colours = Record<keyof typeof TOKENS, string> & {
 
 /* Under forced colours - the Windows contrast mode - the browser repaints the
    page around the plot and none of its pixels, so the plot paints itself in
-   the system colours the page now wears (forced-colors 03), as the charts do
-   (charts-alternatives C4): the work in the text colour whatever its task's
+   the system colours the page now wears, as the charts do: the work in the text colour whatever its task's
    colour - lane and label tell the tasks apart - and lines in GrayText. The
-   selection colour is the active subtask's alone (forced-colors 04): the
+   selection colour is the active subtask's alone: the
    findings take the text colour and say what they are by a dash, and the
    present steps back to GrayText. A system colour an author names is kept
    under forced colours, so the probe reads these back as they are. */
@@ -246,10 +245,8 @@ export function drawOverlay(ctx: CanvasRenderingContext2D, input: DrawInput): vo
     of the surface, and hatched.
 
     The hatch is here and on blocked time (`drawBlocked`), and nowhere else on
-    the plot. "Not available" is what a
-    hatch says on a plan - which is a statement about a PLACE, not about a bar,
-    and the bars gave it up for that reason (schedule-lane-groups 02). No
-    warning colour: a mould that fits one press is nobody's mistake
+    the plot. "Not available" is what a hatch says on a plan - a statement about
+    a PLACE, not about a bar. No warning colour: a mould that fits one press is nobody's mistake
     (CONTEXT.md, **Refusal**). */
 function drawRefusedLanes(
   ctx: CanvasRenderingContext2D,
@@ -311,8 +308,7 @@ function drawGrid(ctx: CanvasRenderingContext2D, input: DrawInput, viewport: Vie
     ctx.moveTo(tick.x + 0.5, 0);
     ctx.lineTo(tick.x + 0.5, height);
   }
-  /* One line under every row - a lane's, a group's head, a miniature's. For a
-     flat plan that is the same set of lines the multiplication drew. */
+  /* One line under every row - a lane's, a group's head, a miniature's. */
   for (const row of viewport.rows.rows) {
     const y = row.top + row.height - viewport.scrollY - 0.5;
     if (y < 0 || y > height) continue;
@@ -401,8 +397,7 @@ function drawStrip(ctx: CanvasRenderingContext2D, input: DrawInput, box: Subtask
     Muted work is the task colour mixed half into the surface, OPAQUE. Opaque,
     because transparency is the lead-in's channel; and it carries no outline,
     because an outline is the lead-in's edge. Another team's work and one
-    team's preparation can then not be confused in either direction - the
-    distinction Roman objected to once, settled in the material. */
+    team's preparation can then not be confused in either direction. */
 export function barFace(
   look: ResolvedAppearance,
   colour: string,
@@ -413,11 +408,10 @@ export function barFace(
   if (look.dashed) return { fill: null, onDark: false };
   const fill = look.muted ? mix(colour, colours.surface, 0.5) : colour;
   /* Which of the two colours a label may take reads better on this fill -
-     measured, not decided by a threshold. A single luminance threshold worked
-     only as long as every bar was a saturated task colour; a muted bar is that
-     colour mixed half into the surface and lands in the middle, where one
-     theme wants the light answer and the other the dark one. Asking which of
-     the two actually contrasts is right in both, and needs no tuning. */
+     measured, not decided by a threshold: a muted bar is the task colour mixed
+     half into the surface and lands in the middle, where one theme wants the
+     light answer and the other the dark one. Asking which of the two actually
+     contrasts is right in both, and needs no tuning. */
   return { fill, onDark: contrast(fill, colours.onAccent) > contrast(fill, colours.text) };
 }
 
@@ -474,7 +468,7 @@ export function workColour(colours: Colours, selection: SelectionColouring, task
     to keep clear of them. */
 const RAIL_INSET = 2;
 
-/* ONE CHANNEL PER STATEMENT (schedule-lane-groups 02).
+/* ONE CHANNEL PER STATEMENT.
 
    Everything a bar has to say besides its colour owns exactly one property of
    the drawing, and no property says two things:
@@ -486,9 +480,9 @@ const RAIL_INSET = 2;
      progress          a rail          inside the main time, above the bottom
      open              a fade          where the bar passes the view's edge
 
-   The hatch is NOT among them any more. It left the bars in this ticket and
-   went to the refused lane (`drawRefusedLanes`), where "not available" is what
-   a hatch says on a plan. A mark that means two things means neither.
+   The hatch is NOT among them: it belongs to the refused lane
+   (`drawRefusedLanes`), where "not available" is what a hatch says on a plan.
+   A mark that means two things means neither.
 
    THE ORDER OF PAINTING IS FIXED, and it is this:
 
@@ -500,8 +494,7 @@ const RAIL_INSET = 2;
    outline is the whole identity of a provisional bar and must not be eaten by
    it; a provisional bar whose outline faded away would read as released work.
 
-   Adding a sixth statement means finding a sixth CHANNEL, not a sixth
-   invention. */
+   A sixth statement needs a sixth CHANNEL. */
 function drawSubtask(ctx: CanvasRenderingContext2D, input: DrawInput, box: SubtaskBox, alpha: number): void {
   const { view, colours } = input;
   if (!inView(box, view.width, view.height)) return;
@@ -512,7 +505,7 @@ function drawSubtask(ctx: CanvasRenderingContext2D, input: DrawInput, box: Subta
   const look = resolveAppearance(box.subtask.appearance);
   const colour = workColour(colours, input, box.subtask.task, box.subtask.id);
   const face = barFace(look, colour, colours);
-  /* The whole box: no appearance changes what a bar measures any more. */
+  /* The whole box: no appearance changes what a bar measures. */
   const top = box.y;
   const height = box.height;
   const width = Math.max(1, box.mainTo - box.mainFrom);
@@ -568,7 +561,7 @@ function drawSubtask(ctx: CanvasRenderingContext2D, input: DrawInput, box: Subta
         begins and ends - that is where it is nailed down.
 
         The caps sit INSIDE the bar, framed by its own colour on three sides.
-        Flush with the ends they were invisible: a light cap at the start of a
+        Flush with the ends they would be invisible: a light cap at the start of a
         bar on a light page reads as the bar beginning a few pixels later, not
         as a mark, and the dark scheme has the same problem with the other
         colour. A mark on a bar has to be surrounded by the bar. */
@@ -640,18 +633,12 @@ function hatch(
 
 /** A bar that goes on past what is drawn fades into the surface instead of
     ending in an edge a reader would take for its end - at EITHER edge of the
-    view, not only the right one. An edge of the screen is an edge of the
-    screen on both sides, and a bar that began before the view was saying
-    nothing at all about it.
+    view.
 
-    Where the bar passes NEITHER edge there is no fade at all. It was tempting
-    to fade its own end instead - the statement belongs to the work, after all -
-    and that was wrong: the painting order puts the fade after the caps so that
-    a FIXED bar running past the view loses its cap there, which is the
-    statement ("there is no end to mark"). A bar wholly in view has an end, and
-    eating its cap would have made a true picture into a false one. An `open`
-    bar that passes no edge says nothing about an edge, because there is none
-    for it to say anything about. */
+    Where the bar passes NEITHER edge there is no fade at all: the painting
+    order puts the fade after the caps so that a FIXED bar running past the
+    view loses its cap there ("there is no end to mark"). A bar wholly in view
+    has an end, and eating its cap would draw a false picture. */
 function fadeOpen(
   ctx: CanvasRenderingContext2D,
   box: SubtaskBox,
@@ -848,14 +835,12 @@ function drawOverlap(
 }
 
 /** Hover is a WASH over the bar; selection is an outline. Two different kinds
-    of mark, so that they can be seen at once: hovering a selected bar used to
-    draw a one-pixel outline inside a two-pixel one of the same colour, which
-    is to say it showed nothing at all.
+    of mark, so that they can be seen at once.
 
     The wash takes the colour the bar's LABEL takes (`barFace`), which is the
     colour that reads on this bar: a dark bar is lightened, a light one is
     darkened, and a hollow one - which has nothing to lighten - is greyed by
-    the page's own ink. One rule, and it is a rule the picture already had. */
+    the page's own ink. */
 function drawHover(ctx: CanvasRenderingContext2D, input: DrawInput, box: SubtaskBox): void {
   const { colours } = input;
   const look = resolveAppearance(box.subtask.appearance);

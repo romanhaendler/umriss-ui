@@ -94,9 +94,9 @@ export interface ScheduleSnapshot {
     /** Whether the bar's colour is dark, so its label needs light text. */
     readonly dark: boolean;
   }[];
-  /** What the live region reads, set once the keys rest (schedule-a11y S4). */
+  /** What the live region reads, set once the keys rest. */
   readonly spoken: Spoken | null;
-  /** What the plot is described by (S6): the plan's lanes and findings, the
+  /** What the plot is described by the plan's lanes and findings, the
       subtasks in view and the visible span in wall-clock time. */
   readonly summary: {
     readonly lanes: number;
@@ -589,8 +589,7 @@ export class ScheduleScene {
       /* Publish again, now that the colours are known. A bar label's contrast
          follows what its bar is actually painted in (`bars`), and the theme
          can only be read once the scene is bound - which is after the first
-         snapshot went out. Without this, every label kept the contrast of the
-         first publish, when nothing had a colour yet. */
+         snapshot went out. */
       this.publish();
     }
     const { width, height } = this.view;

@@ -43,7 +43,7 @@
   }
 
   /* The text clips for its ellipsis, so its line must hold the descenders:
-     at the tag's line of 1 a "g" or "y" lost its tail (row-pitch 09). 16 px
+     at the tag's line of 1 a "g" or "y" lost its tail. 16 px
      for the 11 px type, a whole pixel - 1.5 would be 16.5 - and 3 px from
      either edge of the 22 px tag. */
   .text {
@@ -125,7 +125,7 @@
   }
 
   /* A tag is a ground with a word on it, and forced colours repaint the
-     ground with the page's (forced-colors 02): the word would stand loose in
+     ground with the page's: the word would stand loose in
      the sentence. An edge keeps it a tag. */
   @media (forced-colors: active) {
     .tag {

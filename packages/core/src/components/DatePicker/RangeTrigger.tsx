@@ -4,8 +4,7 @@
    everything else lies here.
 
    At first only the two range pickers used it, and the other two drew the same
-   trigger by hand - exactly the drift the popover seam had described
-   (library-audit 02). */
+   trigger by hand - exactly the drift the popover seam had described. */
 
 import type { ForwardedRef, HTMLAttributes, ReactNode, RefObject } from "react";
 import { cx } from "../../lib/cx";

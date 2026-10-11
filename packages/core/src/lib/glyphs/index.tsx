@@ -19,10 +19,8 @@
 
    ===========================================================================
 
-   Why this is written down: until now there was no stroke width and no optical
-   size a new glyph could have held to - only whatever the nearest component
-   happened to do. The same cross shape stood in the code six times at width
-   1.4, once at 1.5 and once at 1.6.
+   Why this is written down: a new glyph needs a stroke width and an optical
+   size to hold to, not whatever the nearest component happens to do.
 
    The specification is held by a check, not by this comment: the glyph test
    of each package (`tests-unit/glyphs.test.ts`, rules in `scripts/glyphs.ts`)
@@ -176,8 +174,7 @@ export const MeasureGlyph = forwardRef<SVGSVGElement, GlyphProps>(function Measu
   );
 });
 
-/* The date pickers' two characters. Each stood twice, once per picker, at
-   nominal size 14 and width 1.3; they are drawn at 10 now, and set at 12
+/* The date pickers' two characters. They are drawn at nominal size 10, and set at 12
    pixels - at 13 the relative stroke read heavier than the field's text. */
 
 /** A calendar leaf: a sheet with its header and two rings. With `range`, a

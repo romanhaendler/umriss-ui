@@ -1,5 +1,5 @@
 /* DEV detection, robust for Vite consumers, Node/SSR and tests.
-   In PROD builds the invariants are silent (R-2.3). */
+   In PROD builds the invariants are silent. */
 
 interface MetaEnv {
   env?: { DEV?: boolean };

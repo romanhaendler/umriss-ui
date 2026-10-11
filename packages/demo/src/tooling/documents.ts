@@ -1,5 +1,5 @@
 /* The workspace's own documents the site renders as pages of its own
-   (.scratch/concepts-and-changelog-pages, ADR-0046): rendered from their
+   (ADR-0046): rendered from their
    markdown when the site is built, never copied - the file in the repository
    stays the only text.
 

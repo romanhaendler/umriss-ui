@@ -321,7 +321,7 @@
   }
 
   /* A disabled stepper stays at rest: the group's hover lifted it back to full
-     presence and painted it (visuelle-wertigkeit 04). */
+     presence and painted it. */
   .timeGroup:hover .timeStepper button:not(:disabled),
   .timeGroup:focus-within .timeStepper button:not(:disabled) {
     opacity: 1;
@@ -704,7 +704,7 @@
     cursor: not-allowed;
   }
 
-  /* Forced colours repaint every ground with the page's (forced-colors 02):
+  /* Forced colours repaint every ground with the page's:
      the chosen day, the range's ends and band, the chosen preset and today's
      dot would all be gone. The chosen ones take outlines in the system's
      selection colour - the ends two pixels, the band one - and the dot the

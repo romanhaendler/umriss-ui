@@ -1,4 +1,4 @@
-/* Default number format of the axes and of the tooltip (R-4.1).
+/* Default number format of the axes and of the tooltip.
    Locale from navigator.language (no hard-wired de-DE), decimal places derived
    from the step, thousands grouping on. Tabular figures are set by the CSS
    through font-variant-numeric. */

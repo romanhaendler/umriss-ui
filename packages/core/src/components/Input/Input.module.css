@@ -58,8 +58,7 @@
     box-shadow: var(--u-focus-ring-danger);
   }
 
-  /* Disabled dims the field as it dims a button - it used to repaint it sunken
-     and muted (visuelle-wertigkeit 04). */
+  /* Disabled dims the field as it dims a button. */
   .wrapperDisabled {
     cursor: not-allowed;
     opacity: 0.5;

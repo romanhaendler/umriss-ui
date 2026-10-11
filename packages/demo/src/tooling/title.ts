@@ -1,7 +1,6 @@
-/* The title of a page (search-visibility D8) - one formula for the
+/* The title of a page - one formula for the
    prerendering, which writes it into each page's `<title>`, and for the shell,
-   which sets it as `document.title` on every move (.scratch/pages-as-markdown
-   02; `shell-across-packages` 03 asks for the same). A title after a click
+   which sets it as `document.title` on every move. A title after a click
    therefore equals the title after a reload.
 
    It runs in the browser and in Node alike, which is why it imports nothing. */

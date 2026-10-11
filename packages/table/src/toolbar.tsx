@@ -1,4 +1,4 @@
-/* The table toolbar (umriss-table 08, table-filters 04).
+/* The table toolbar.
 
    On the left, whatever one puts into it, and the conditions of the column
    filters in the order in which they were set; on the right the ratio of the
@@ -7,8 +7,8 @@
 
    The toolbar is the one place where a condition appears, and it stands there
    before anything restricts: a row of its own that came into being with the
-   first keystroke would push the table down and, on clearing, up again (D1).
-   The search has no condition - its field shows it already (D2) - but it
+   first keystroke would push the table down and, on clearing, up again.
+   The search has no condition - its field shows it already - but it
    counts, and "reset" clears it. The ratio stands in a status that remains in
    the document even when empty: a screen reader announces changes only to a
    region it already knows. */
@@ -80,8 +80,7 @@ export function TableToolbar({
     );
     /* Holding nothing but the empty ratio, the group leaves the flow. Said
        here, not by `:has(:empty)` in the style: a browser that does not ask
-       that again when the ratio's text comes kept the group out of the flow,
-       and the ratio stood over the search. */
+       that again when the ratio's text comes keeps the group out of the flow. */
     const idle = !restricted && selected.length === 0 && !registry.rowAdding;
     right = (
       <div className={cx(styles.toolbarGroup, idle && styles.toolbarGroupIdle)}>

@@ -1,11 +1,10 @@
-/* The unbound parts: Toolbar, Search, ColumnMenu, Export, Pagination
-   (umriss-table 08). They touch no row and therefore need no binding - placed
+/* The unbound parts: Toolbar, Search, ColumnMenu, Export, Pagination. They touch no row and therefore need no binding - placed
    inside a table they read that one, outside they take `of={t}`.
 
    Two decisions stand here:
 
-   - **Export makes the file.** The old rule - the library gives text, the
-     application makes the file - remains as `t.asCsv()` and as `onExport`. But
+   - **Export makes the file.** The library gives text, the
+     application makes the file, as `t.asCsv()` and as `onExport`. But
      the part itself exists for exactly the case in which the application wants
      nothing further than a file; without `onExport` it therefore triggers the
      download.
@@ -400,7 +399,7 @@ export function Pagination({ pageSizes = [10, 25, 50], className, of }: Paginati
           {wording.rows}
           <Select
             size="sm"
-            /* As wide as the longest size offered - it stood at 64 px. */
+            /* As wide as the longest size offered */
             chars={Math.max(...sizes.map((size) => String(size).length))}
             value={snapshot.pageSize}
             onChange={(event) => snapshot.setPageSize(Number(event.target.value))}

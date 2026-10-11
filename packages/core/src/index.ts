@@ -36,10 +36,9 @@ export * from "./components/TreeView";
 export * from "./components/Typography";
 export * from "./components/Tooltip";
 export * from "./components/VisuallyHidden";
-/* The window arithmetic and its hook stand for themselves. Until now they came
-   out only through the table; the tree uses them, and @umriss-ui/table takes
-   them from here (umriss-table 04), since the table moved there. No styles -
-   the place in the list is a matter of indifference to the bundle. */
+/* The window arithmetic and its hook stand for themselves; the tree and
+   @umriss-ui/table use them. No styles - the place in the list is a matter of
+   indifference to the bundle. */
 export * from "./lib/virtual";
 export * from "./lib/useVirtual";
 export * from "./lib/language";
@@ -49,20 +48,18 @@ export * from "./lib/glyphs";
 /* The building blocks of the monitoring view stand at the end on purpose and not
    alphabetically in between: the order of the exports decides in which order
    the module styles land in the bundle, and two rules of equal specificity are
-   decided by it. Filed in here, they moved the table by two pixels – made
-   visible by the screenshot baselines, which otherwise do not move. The table
-   has since moved to @umriss-ui/table (umriss-table 14); the rule remains. */
+   decided by it. */
 export * from "./components/Stat";
 export * from "./lib/limit";
 export * from "./lib/freshness";
 export * from "./lib/useFreshness";
 
-/* The context menu stands at the end for the same rule (schedule 01). It
+/* The context menu stands at the end for the same rule. It
    brings no stylesheet of its own - it wears the menu's - so no baseline can
    move by its place; the rule is kept anyway, so that nobody has to check. */
 export * from "./components/ContextMenu";
 
-/* The six foundations (core-foundations) stand at the end for the same rule:
+/* Switch, Slider, ProgressBar, Accordion and Breadcrumb stand at the end for the same rule:
    filed in alphabetically, their stylesheets would land between older ones
    and could decide a tie the older ones decide today. */
 export * from "./components/Switch";
@@ -71,13 +68,12 @@ export * from "./components/ProgressBar";
 export * from "./components/Accordion";
 export * from "./components/Breadcrumb";
 
-/* The layout tier after the basics (core-layout-extras) stands at the end for
-   the same rule. */
+/* The layout tier after the basics stands at the end for the same rule. */
 export * from "./components/Splitter";
 export * from "./components/Stepper";
 export * from "./components/FileInput";
 
-/* One size for a place (control-sizes, ADR-0041) stands at the end for the
+/* One size for a place (ADR-0041) stands at the end for the
    same rule, though it brings no stylesheet. The provider only - the reset the
    surfaces use stays inside. */
 export { ControlSizeProvider } from "./lib/controlSize";
@@ -85,11 +81,11 @@ export type { ControlSize, ControlSizeProviderProps } from "./lib/controlSize";
 
 export { announce } from "./lib/announce";
 
-/* The segmented control (field-row-alignment 04) stands at the end for the
+/* The segmented control stands at the end for the
    same rule, not at "RadioGroup" beside its mechanics. */
 export * from "./components/SegmentedControl";
 
 /* The types a props table names, so that every name a reader sees can be
-   imported (types-without-holes 06). They bring no stylesheet. */
+   imported. They bring no stylesheet. */
 export type { TextTracking, TextLeading } from "./components/Typography/Typography";
 export type { Align } from "./components/Popover/position";

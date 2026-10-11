@@ -1,7 +1,7 @@
 /* The site's guards, and the one kind of file the site carries beside the
-   demos' pages: a forwarder at the address of a page whose id has changed
-   (.scratch/sidebar-tree, "Forwarding a moved address"). A forwarder has no
-   Markdown twin; every page does (.scratch/pages-as-markdown).
+   demos' pages: a forwarder at the address of a page whose id has changed.
+  A forwarder has no
+   Markdown twin; every page does.
 
    `scripts/build-pages.mjs` writes the forwarders and runs the guard over
    what it wrote; both stand here and not there so that a unit test reaches
@@ -74,14 +74,14 @@ export function siteFaults(urls: readonly string[], forwarders: readonly Forward
   ];
 }
 
-/* The front page's fixed words that the guard holds it to
-   (.scratch/site-front-page): the template writes them, this checks they are
+/* The front page's fixed words that the guard holds it to:
+  the template writes them, this checks they are
    still there and lead somewhere. The promise comes from the caller: it names
    a word of the industrial world, which this source may not (ADR-0035). */
 const BUTTONS = ["Get started", "Explore the scenarios"];
 const CLAIMS = ["ISA-101 limits and verdicts", "Canvas charts, measured", "English and German wording", "Written for coding agents too"];
 
-/** What the front page gets wrong, one line each (.scratch/site-front-page):
+/** What the front page gets wrong, one line each:
     one h1 "umriss-ui", the promise, the install command and the theme
     script; both buttons and every claim lead to a sitemap address (a claim
     may lead to the site's `llms.txt`); fewer than twenty addresses are linked
@@ -153,8 +153,8 @@ export function frontFaults(
   ];
 }
 
-/** What the API sections' type and row links get wrong, one line each
-    (.scratch/types-without-holes, .scratch/props-to-examples): every link to
+/** What the API sections' type and row links get wrong, one line each:
+    every link to
     a `#type-<Name>` or a `#<Type>-<prop>` leads to a page of the site that
     carries that id - a props table's heading, a definition in "Types on this
     page", a row. A type's name is PascalCase and an example's anchor lower
@@ -188,8 +188,8 @@ export interface TwinPage {
   twin: string;
 }
 
-/** What the site's text for a coding agent gets wrong, one line each
-    (.scratch/pages-as-markdown): every page's twin is a file, not empty,
+/** What the site's text for a coding agent gets wrong, one line each:
+   every page's twin is a file, not empty,
     beginning with `# <its name>`; every page's head announces exactly one
     twin, its own; and every link in every `llms.txt` leads to a file of the
     site. `files` as for `siteFaults`; `texts` maps the address of every other
@@ -217,8 +217,8 @@ export function twinFaults(pages: readonly TwinPage[], files: ReadonlyMap<string
   ];
 }
 
-/** What the document pages get wrong, one line each
-    (.scratch/concepts-and-changelog-pages): every document in the list has a
+/** What the document pages get wrong, one line each:
+   every document in the list has a
     page; every link of a document's text into the site leads to one of
     `urls` - the sitemap's addresses and the site's text files (one to GitHub
     is checked when the link is rewritten, and fails the build there); every
@@ -257,8 +257,8 @@ export function documentFaults(documents: readonly string[], files: ReadonlyMap<
   ];
 }
 
-/** What the front page's "What's new" gets wrong, one line each
-    (.scratch/concepts-and-changelog-pages): there is the strip, it has a line
+/** What the front page's "What's new" gets wrong, one line each:
+   there is the strip, it has a line
     for every changelog, and every line leads to an anchor its page carries -
     the version's heading. `html` and `home` as for `frontFaults`, `files` as
     for `siteFaults`, `changelogs` the changelogs' addresses. */
@@ -277,7 +277,7 @@ export function whatsNewFaults(html: string, home: string, files: ReadonlyMap<st
 }
 
 /** What the site's search index may weigh, uncompressed: the palette fetches
-    all of it on its first opening (.scratch/one-search). */
+    all of it on its first opening. */
 export const SEARCH_BUDGET = 500_000;
 
 /** The site's search index, `search.json` at its root: the five packages'
@@ -286,8 +286,8 @@ export function siteSearch(fragments: readonly string[]): string {
   return JSON.stringify(fragments.flatMap((fragment) => JSON.parse(fragment) as unknown[]));
 }
 
-/** What the site's search index gets wrong, one line each
-    (.scratch/one-search 03): every entry's path is a sitemap address - not a
+/** What the site's search index gets wrong, one line each:
+   every entry's path is a sitemap address - not a
     forwarder - whose page carries the entry's anchor, and the whole stays
     within its budget. A find that lands on nothing is the one defect a
     reader cannot work around. `home` is the site's address, `files` as for

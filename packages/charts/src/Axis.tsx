@@ -1,6 +1,6 @@
 /* <XAxis> / <YAxis> - axis configuration (4.2).
-   Instantiable any number of times; ids must be unique within their orientation
-   (R-4.12). The drawing happens in the scene, the labelling is rendered by the
+   Instantiable any number of times; ids must be unique within their orientation.
+   The drawing happens in the scene, the labelling is rendered by the
    HTML layer (AxesHtml). */
 
 import { useMemo } from "react";
@@ -11,8 +11,7 @@ import type { WorkingInterval } from "./workingTime";
 import type { ZoomLimits } from "./view";
 
 interface CommonProps {
-  /** Axis id, through which series bind themselves.
-      @remarks R-4.12 */
+  /** Axis id, through which series bind themselves. */
   id?: string;
   /** Axis title. */
   label?: string;
@@ -24,8 +23,7 @@ interface CommonProps {
       identity. */
   tickFormat?: (v: number) => string;
   /** Grid lines.
-      @default only on the first axis of its orientation
-      @remarks R-4.15 */
+      @default only on the first axis of its orientation */
   grid?: boolean;
   /** Fixed tick values instead of the 1-2-5 algorithm, on a numeric axis: an
       hour axis' named hours, a lane grid. An axis that reads categories needs

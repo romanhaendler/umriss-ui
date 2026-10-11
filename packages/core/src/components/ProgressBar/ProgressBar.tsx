@@ -46,8 +46,7 @@ export const ProgressBar = forwardRef<HTMLDivElement, ProgressBarProps>(function
       aria-label={rest["aria-labelledby"] ? undefined : (label ?? wording.progress)}
       className={cx(styles.progress, className)}
       {...rest}
-      /* After `rest`: the role and the values are what the bar shows (P3 of
-         core-passthrough). */
+      /* After `rest`: the role and the values are what the bar shows. */
       role="progressbar"
       aria-valuemin={determinate ? 0 : undefined}
       aria-valuemax={determinate ? 100 : undefined}

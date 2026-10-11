@@ -1,5 +1,5 @@
 /* A configurator: the component, a control per value prop, and the code of
-   what stands on the stage (.scratch/configurator).
+   what stands on the stage.
 
    It takes the first example's slot. What it may control, the values and the
    defaults come from the props table (`tooling/configurator.ts`); here they

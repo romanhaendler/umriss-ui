@@ -1,6 +1,6 @@
 /* What a component must carry itself, once nothing around it does (ADR-0021).
 
-   The library has no base layer any more, and the demo page puts every example
+   The library has no base layer, and the demo page puts every example
    back on the browser's defaults (`.exampleStage` in page.css). A screenshot
    shows most of what a component took from its surroundings - but not all of
    it: a focus ring appears only on focus, and a dependency can happen to look

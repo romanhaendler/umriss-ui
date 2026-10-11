@@ -38,7 +38,7 @@
   /* A tab has no surface to change - it is type over the strip's hairline, and
      the underline is its state. Hover therefore darkens the type, and a press
      selects, which the underline answers; a surface drawn only under the
-     pointer would show a box the tab does not have (visuelle-wertigkeit 04). */
+     pointer would show a box the tab does not have. */
   .tab:hover:not(:disabled) {
     color: var(--u-color-text);
   }
@@ -59,7 +59,7 @@
   }
 
   /* The underline is a ground, and forced colours repaint it with the page's
-     (forced-colors 02): the chosen tab would be told by nothing. It takes the
+: the chosen tab would be told by nothing. It takes the
      system's selection colour. */
   @media (forced-colors: active) {
     .indicator {

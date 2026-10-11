@@ -2,9 +2,8 @@
 
    A component that needs its own root element (to measure it, to open a
    <dialog>, to anchor a panel) and forwards the same element to the caller
-   (principle 1) hands both refs one callback. Written by hand it stood in
-   RadioGroup and Tag already; with the pass-through (core-passthrough) it
-   would have stood in five more places.
+   (principle 1) hands both refs one callback. Written by hand it would repeat
+   in every such component.
 
    Internal. */
 

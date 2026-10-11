@@ -25,7 +25,7 @@ export const Spinner = forwardRef<SVGSVGElement, SpinnerProps>(function Spinner(
       viewBox="0 0 16 16"
       fill="none"
       /* The name is a default a caller may say better; the role is what the
-         element is, and stays (P3 of core-passthrough). */
+         element is, and stays. */
       aria-label={wording.loading}
       {...rest}
       role="status"

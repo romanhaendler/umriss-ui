@@ -77,7 +77,7 @@
     right: var(--u-space-3);
     top: 50%;
     /* Core's AngleGlyph turned down: the field's chevron keeps the one
-       stroke width of every glyph (visuelle-wertigkeit 03). */
+       stroke width of every glyph. */
     color: var(--u-color-text-secondary);
     transform: translateY(-50%) rotate(90deg);
     pointer-events: none;

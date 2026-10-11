@@ -60,12 +60,12 @@ const GRENZE_BONUS = 10;
 const RUN_BONUS = 8;
 
 /** Cost per character the query did not hit. They are the reason the shorter
-    name comes first when two names begin alike - in the demo, `Table` before
+    name comes first when two names begin alike - e.g. `Table` before
     `TableFilterStrip`.
 
     Why half a point and not a whole one: the cost is meant to decide between
     names of EQUAL quality, not to overtake a real difference in quality. With
-    1 it did exactly that - noticed in the demo: `dtp` put "DateRangePicker"
+    1 it would do exactly that: `dtp` would put "DateRangePicker"
     (two word starts, 15 characters) ahead of "DatePicker and DateTimePicker"
     (three word starts, 29 characters), because fourteen characters of length
     outweighed a whole word start. A name the query hits on every word start is

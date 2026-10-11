@@ -24,8 +24,7 @@
    A page whose id changes keeps its old address alive: the demo's outline
    module declares the old id beside the current one (`MOVED`), and the old
    address lands on the current page - in the app, which rewrites the address
-   bar, and on the site, where a forwarder stands at the old path
-   (.scratch/sidebar-tree, "Forwarding a moved address").
+   bar, and on the site, where a forwarder stands at the old path.
 
    This file runs without a bundler too: the props generator loads a demo's
    outline in Node. That is why it imports nothing. */
@@ -140,8 +139,8 @@ export function addressOfPlace(place: string): string {
   return page === undefined || page === "" || page === SCENARIOS ? `/${at}` : `/${page}/${at}`;
 }
 
-/** The address of a place's Markdown twin, below the demo's base
-    (.scratch/pages-as-markdown): the page's address with `.md` - `/button.md`
+/** The address of a place's Markdown twin, below the demo's base:
+    the page's address with `.md` - `/button.md`
     - and `/index.md` for the scenarios page. An example has no twin of its
     own; it stands in its page's. */
 export function twinOfPlace(place: string): string {

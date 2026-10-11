@@ -4,7 +4,7 @@
    with a line of explanation, and the segmented control, as one field with a
    segment for each. What a screen reader hears, where the tab stop sits and
    how the arrow keys move must be the same in both - so it stands once, here,
-   and each draws around it (field-row-alignment 03).
+   and each draws around it.
 
    Operation: exactly one tab stop for the whole group. The arrow keys move
    *and* choose - that is what the pattern for radio groups demands -, skip
@@ -72,8 +72,8 @@ export function useRadioGroup<T extends string>({
   /* The arrow keys move and choose at once – that is how the radio pattern
      is meant to work, and the reason why the group has only one tab stop. */
   const handleKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
-    /* Composed with the caller's: `rest` used to replace it, and the arrow
-       keys then chose nothing. */
+    /* Composed with the caller's: `rest` would replace it, and the arrow
+       keys would then choose nothing. */
     onKeyDown?.(event);
     if (event.defaultPrevented) return;
     const forward = event.key === "ArrowDown" || event.key === "ArrowRight";
@@ -125,7 +125,7 @@ export function useRadioGroup<T extends string>({
 
   /* On its own useId and not on the name: that can come from the caller,
      and neither it nor the value may go raw into an id that
-     `aria-describedby` reads (library-audit 04). */
+     `aria-describedby` reads. */
   const optionId = (option: RadioChoice<T>) => `${generatedName}-${idPart(option.value)}`;
 
   return {

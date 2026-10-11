@@ -1,4 +1,4 @@
-/* Motion that explains the grouping (table-grouping 06).
+/* Motion that explains the grouping.
 
    When the grouping or a fold changes, every row that stays travels from where
    it stood to where it stands now (FLIP), and a line that is new - a group header, a

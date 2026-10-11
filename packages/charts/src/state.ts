@@ -19,7 +19,7 @@
 
 /** Index of the segment that contains `target`: the largest index i with
     x[i] <= target. -1 when target lies before the first point - there no state
-    is known. Assumes ascending x values (R-2.6).
+    is known. Assumes ascending x values.
 
     A boundary belongs to the segment that BEGINS THERE, not to the one that ends
     there: the new state holds from its own x value, otherwise the switching
@@ -62,7 +62,7 @@ export function segmentEnd(
     Leaving the last segment out would lose the current state - and that is the
     one a reader looks at first. Running it to the end of the domain claimed it
     for a time nobody reported: a "nice" domain's end is a rounding of the axis,
-    not a moment (charts-review, finding 16). A single point, having no step,
+    not a moment. A single point, having no step,
     keeps a segment to the end of the domain instead of one of width zero. */
 export function lastSegmentEnd(
   x: Float64Array,

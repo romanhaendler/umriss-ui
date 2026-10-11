@@ -20,7 +20,7 @@ function useDuration(): (ms: number) => string {
   };
 }
 
-/** What the live region reads after the keys rest (schedule-a11y S4): the
+/** What the live region reads after the keys rest: the
     lane, the task and the subtask, the day and the times, and every finding
     by its name - the findings are spoken, never only coloured. The lane's
     label is the header's own node, so an application's label is read as it

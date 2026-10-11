@@ -69,7 +69,7 @@
   /* The key of the folded levels: a quiet key, no surface at rest and its
      surface sinking under the pointer as every quiet key's does. It has a
      small key's size and a dotted underline under its dots, so that it reads
-     as something to click and not as a cut-off word (core-foundations 07). */
+     as something to click and not as a cut-off word. */
   .more {
     composes: ring from "#own-styles";
     display: inline-flex;

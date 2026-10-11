@@ -1,7 +1,6 @@
 /* The shell of a demo: header bar, sidebar, scenarios page, jump palette.
 
-   It is the same one for all three demos (table-demo decision A, extended to
-   charts by ADR-0020); what makes a demo a particular one arrives as `demo`.
+   It is the same one for all five demos (ADR-0020); what makes a demo a particular one arrives as `demo`.
 
    Why no tabs. The pages of a demo fit into no tab bar, and tabs assert ONE
    level while two exist here: rubric and page. What component libraries
@@ -19,9 +18,8 @@
 
    WITH ONE EXCEPTION, and it stands here so that the next reader does not take
    it for an oversight: the jump palette IS `CommandPalette` from the library.
-   It was once a hundred and fifteen lines in this spot, with no module
-   boundary, no test, and no way for a user of the package to get the same
-   thing (`command-palette` 07).
+   A palette written here would have no module boundary, no test, and no way
+   for a user of the package to get the same thing.
 
    The reason for the exception is the kind of fault it finds. Whether a palette
    feels right is not decided by whether it works, but by whether the ranking is
@@ -32,12 +30,12 @@
 
    The rule above still holds for everything else. It has been broken once
    more - "Copy page" in every page head is the library's split button and
-   menu (`CopyPage.tsx`) - and not abolished.
+   menu (`CopyPage.tsx`).
 
    The palette finds pages, scenarios AND examples, examples grouped under
    their component, pages by the words of their lede too - around a hundred
    and eighty candidates, which is nothing for a filtered list. Its worth
-   grows with what it can find (.scratch/one-search).
+   grows with what it can find.
 
    The front door is the scenarios page (`Scenarios.tsx`): composed screens
    first, the components after them. It stands at the head of the sidebar,
@@ -315,7 +313,7 @@ export function Shell({ demo, sentence, german }: ShellProps) {
       document.documentElement.scrollTop = 0;
       return;
     }
-    /* A fold never hides a target (.scratch/props-table-hygiene, 02): a row
+    /* A fold never hides a target a row
        of a long props table's folded group opens its group first. The
        browser's own opening on a fragment is not relied on - not every engine
        does it, and none does it on a jump without a reload. */
@@ -375,16 +373,15 @@ export function Shell({ demo, sentence, german }: ShellProps) {
   }, [narrow]);
 
   /* Cmd-K/Ctrl+K as everywhere, "/" as in every documentation - including the
-     rule that "/" in a text field stays a slash. That once stood here by hand;
-     it belongs to the shortcut and now travels with it. */
+     rule that "/" in a text field stays a slash. */
   useCommandPaletteShortcut(useCallback(() => setPaletteOpen(true), []));
 
   const page = ALL_PAGES.find((p) => p.id === place.pageId);
 
   /* THE HEAD FOLLOWS THE PAGE - the one place that does it, on the first
      load and on every move: the title, by the formula the prerendering writes
-     it with, and the one alternate link to the page's Markdown twin
-     (.scratch/pages-as-markdown), which the prerendering writes as well and a
+     it with, and the one alternate link to the page's Markdown twin,
+     which the prerendering writes as well and a
      page outside it lacks. An example anchor changes neither: it stands in
      its page's text. */
   const title = pageTitle({ name: demo.packageName, description: demo.description }, page?.name);

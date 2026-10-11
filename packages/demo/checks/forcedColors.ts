@@ -1,6 +1,5 @@
-/* Every demo under forced colours - the Windows contrast mode, emulated
-   (forced-colors 02, 03). One suite for all of them; each package's
-   `forced-colors.spec.ts` calls it and adds the states that belong to it.
+/* Every demo under forced colours - the Windows contrast mode, emulated.
+   One suite for all of them; each package's `forced-colors.spec.ts` calls it and adds the states that belong to it.
 
    The browser repaints every colour with a system colour and drops every
    box-shadow, so what is photographed is what the stylesheets give back: one

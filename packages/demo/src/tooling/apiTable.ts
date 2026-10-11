@@ -1,4 +1,4 @@
-/* A props table: one model, two writers (.scratch/types-without-holes).
+/* A props table: one model, two writers.
 
    `tableModel` turns one generated entry into what a reader takes from it - a
    heading with its anchor, the rows in their groups, each cell as a run of
@@ -43,7 +43,7 @@ export interface ApiRow {
   /** Small labels after the name - `required`. */
   badges: readonly string[];
   /** "Shown in" and up to three examples as links, then "and N more" -
-      absent where no example uses the row (.scratch/props-to-examples). */
+      absent where no example uses the row. */
   shownIn?: readonly Span[];
 }
 
@@ -184,7 +184,7 @@ function row(prop: PropEntry, linkOf: LinkOf, pageId?: string): ApiRow {
   };
 }
 
-/* The groups (.scratch/props-table-hygiene): decided by rules on the name, the
+/* The groups: decided by rules on the name, the
    same in every table of every package and every output, so that nobody
    curates them by hand. In the order a table reads; the main group has no
    heading. */
@@ -305,7 +305,7 @@ export function apiSection(page: ApiPage, pages: readonly ApiPage[], entries: Re
 /** The heading of the section a page without a table of its own shows. */
 export const PROPS_ON_PAGE_TITLE = "Props on this page";
 
-/** "Props on this page" (.scratch/props-to-examples, 02): on a page whose
+/** "Props on this page": on a page whose
     outline lists no types, the rows its examples use, a table cut from each
     full table in the full table's order, the tables in the order of the
     outline. Without a "Shown in" line - the page's examples are on screen. A
@@ -371,8 +371,8 @@ function hrefOf(href: string): string {
   return href.startsWith("#/") ? `..${addressOfPlace(href)}` : href;
 }
 
-/** A type's members where it is a union of more than two, else `undefined`
-    (.scratch/a11y-and-finish, 07). Split at a `|` outside brackets and
+/** A type's members where it is a union of more than two, else `undefined`.
+   Split at a `|` outside brackets and
     quotes; a function or a conditional type is one type, whatever unions its
     parts hold. A name a link carries never holds a `|`. */
 export function unionMembers(spans: readonly Span[]): Span[][] | undefined {
@@ -439,8 +439,8 @@ export function spansHtml(spans: readonly Span[]): string {
     .join("");
 }
 
-/* A table of more than this many rows folds its secondary groups
-   (.scratch/props-table-hygiene, 02). Folding is the HTML's matter alone: the
+/* A table of more than this many rows folds its secondary groups.
+  Folding is the HTML's matter alone: the
    Markdown writes every group out, and the folded rows stand in the HTML too -
    the browser's find reaches them, and the shell opens a fold that holds the
    row an address names (`Shell.tsx`). */
@@ -449,7 +449,7 @@ const FOLD_OVER = 15;
 function groupHtml(name: string, group: ApiGroup, fold: boolean, home?: string): string {
   const rows = group.rows.map(
     (one) =>
-      /* `<Type>-<prop>`: a row is an address (.scratch/props-to-examples) -
+      /* `<Type>-<prop>`: a row is an address -
          the full row alone; a cut one links to it. */
       (home === undefined ? `<tr id="${escape(`${name}-${one.name}`)}">` : "<tr>") +
       /* The name is a link to its own row, so that its address can be copied. */
@@ -493,7 +493,7 @@ export function tableHtml(model: ApiTableModel | ApiDefinitionModel, level = 3):
 /** The sentence under a definition's declaration that names its values. */
 const resolvesTo = (expansion: string): Span[] => [text("Resolves to "), code(expansion), text(".")];
 
-/* A definition's preview (.scratch/a11y-and-finish, 07): the app shows it in a
+/* A definition's preview: the app shows it in a
    tooltip on a link to the definition; the prerendered page and the twin
    carry the link alone. At most this many lines - the link leads to the whole. */
 const PREVIEW_LINES = 12;

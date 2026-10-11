@@ -45,8 +45,7 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(function Switch(
         aria-invalid={isInvalid || undefined}
         className={cx(styles.input, isInvalid && styles.invalid)}
         {...rest}
-        /* After `rest`: the role is what the control is (P3 of
-           core-passthrough). */
+        /* After `rest`: the role is what the control is. */
         role="switch"
       />
       <span className={styles.track} aria-hidden="true">

@@ -1,11 +1,11 @@
-/* The keyboard's walk (charts-a11y, ADR-0030): where the Active point goes
+/* The keyboard's walk (ADR-0030): where the Active point goes
    next, over the materialised series and inside the visible domain. Pure, so
    the keys can be tested without a canvas; the scene turns a position into a
    hit by asking the hit test at its pixel, as a pointer would.
 
    A position is an x value at which some walked series has a point: a y that
-   is no gap, and for a cell a finite value (the hit's own rule, R-4.6). x is
-   sorted ascending in every series (R-2.6). */
+   is no gap, and for a cell a finite value (the hit's own rule). x is
+   sorted ascending in every series. */
 
 import { lowerBound } from "./hit";
 
@@ -15,7 +15,7 @@ export interface WalkSeries {
   /** A cell's value; null for every kind but the matrix. */
   readonly w: Float64Array | null;
   readonly length: number;
-  /** A band: only where the state changes is a position (R7) - a report of
+  /** A band: only where the state changes is a position - a report of
       the state it already has is none. */
   readonly changesOnly?: boolean;
 }

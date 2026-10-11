@@ -55,7 +55,7 @@ export function Listbox({
 }: ListboxProps) {
   /* The list's element as state: on the first opening the popover finds its
      portal only after this render, and the list arrives a render later than
-     `open` - its arrival must show the active option too (found in review). */
+     `open` - its arrival must show the active option too. */
   const [list, setList] = useState<HTMLDivElement | null>(null);
 
   // Keep the active option in view
@@ -65,8 +65,7 @@ export function Listbox({
   }, [open, activeIndex, list]);
 
   /* A press anywhere in the panel keeps the focus in the field: a group's
-     label, the padding and the scrollbar closed the list on the field's blur
-     (found in review). */
+     label, the padding and the scrollbar closed the list on the field's blur. */
   useEffect(() => {
     const panel = list?.parentElement;
     if (!panel) return;

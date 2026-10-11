@@ -3,9 +3,9 @@
    A value may contain anything, an id may not, as soon as an IDREFS attribute
    reads it: `aria-labelledby`, `aria-describedby` and `aria-controls` split on
    whitespace. A tab named "erste seite" named its panel with two ids that do
-   not exist (library-audit 04).
+   not exist.
 
-   The spec had proposed `${useId()}-${index}`. That does not carry here: `Tab`
+   An id of `${useId()}-${index}` does not carry here: `Tab`
    and `TabPanel` are separate components and know no index, and the rows of the
    command palette reorder on every keystroke - an id by position would wander
    under `aria-activedescendant`. The value is therefore escaped rather than

@@ -15,13 +15,11 @@
    Every real lane resolves to a SLOT: its own row where it has one, or its
    strip inside a miniature where its group is folded. Everything that needs a
    y - a bar, a dependency's end, an overlap's band, a grip, the handle's
-   answers - asks for a slot and never multiplies an index by a height again.
+   answers - asks for a slot and never multiplies an index by a height.
 
    Free of the DOM, the canvas and the view: ids, a height, and arithmetic.
    `laneTop` is a prefix sum over the rows and `laneAt` a binary search over
-   them, and the first thing the tests ask is that a FLAT plan comes out
-   exactly as `laneIndex * laneHeight` did - the picture must not move because
-   the arithmetic did. */
+   them. A FLAT plan comes out exactly as `laneIndex * laneHeight`. */
 
 /** A lane, as the layout needs it: its identity and the group it sits in. */
 export interface LaneNode {

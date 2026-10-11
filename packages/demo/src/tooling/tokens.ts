@@ -1,6 +1,5 @@
 /* The token reader: core's stylesheet of tokens, and the charts' stylesheet,
-   as the rows of the Theming page's tables (.scratch/theming-and-wording-reference,
-   01 and 02).
+   as the rows of the Theming page's tables.
 
    A token is a custom property declared on `:root` inside the layer
    `umriss.tokens` - what a module declares for itself is not one. The charts

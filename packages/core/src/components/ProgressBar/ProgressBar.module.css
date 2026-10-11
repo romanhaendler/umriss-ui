@@ -4,7 +4,7 @@
    it carries no verdict. The indeterminate bar is a continuous process - a
    segment crossing the track steadily, with no start and no end - and under
    reduced motion it slows down instead of stopping, since a bar that stands
-   still would say the task has stopped (visuelle-wertigkeit 02). */
+   still would say the task has stopped. */
 
 @layer umriss.components {
   .progress {
@@ -35,9 +35,8 @@
 
   /* The segment rests in the middle of the track with ends that fade out,
      and sweeps from there: before the motion starts, or where animations are
-     off, a segment anchored at the left edge would read as a share done
-     (core-foundations 07). Centred, the sweep runs 65% of the track either
-     way - 217% of its own width. */
+     off, a segment anchored at the left edge would read as a share done.
+     Centred, the sweep runs 65% of the track either way - 217% of its own width. */
   .sweep {
     width: 30%;
     margin-inline: auto;
@@ -78,7 +77,7 @@
   }
 
   /* Track and fill are grounds, and forced colours repaint both with the
-     page's (forced-colors 02): how far a task has come would be the figure
+     page's: how far a task has come would be the figure
      alone. The track takes an edge, the fill the system's selection colour. */
   @media (forced-colors: active) {
     .track {

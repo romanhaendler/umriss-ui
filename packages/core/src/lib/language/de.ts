@@ -1,10 +1,8 @@
 /* The German wording and the German formats, shipped as
    `@umriss-ui/core/wording/de`.
 
-   It was the default until the library moved to an English scope, and it is
-   kept because it was already written and already reviewed: throwing away a
-   finished language to publish one is a loss nobody asked for. It is no longer
-   the default, and it is deliberately not exported from the main entry. A
+   It is not the default, and it is deliberately not exported from the main
+   entry. A
    subpath says without explanation that this is freight you take on purpose —
    an application that never imports it never pays for it, and one that does has
    written the language it wants into an import line (ADR-0019).
@@ -16,7 +14,7 @@
    than its English counterpart — and that is accepted as the price of shipping
    two.
 
-   Since ADR-0024 the formats travel with it: the library's default notation is
+   The formats travel with it (ADR-0024): the library's default notation is
    English, and `GERMAN_FORMATS` is the second half of what a German
    application needs. Both come from one import line, because a language is one
    decision even though it is two registers.
@@ -27,8 +25,7 @@
 
        <UmrissProvider language={{ wording: GERMAN_WORDING, formats: GERMAN_FORMATS }}>
 
-   The texts below are unchanged from when they were the default, down to the
-   thin spaces. */
+   The texts keep their thin spaces. */
 
 import { formatsFor } from "./formats";
 import type { Formats } from "./formats";

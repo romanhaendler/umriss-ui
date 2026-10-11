@@ -194,10 +194,9 @@
   /* Its anchor is an address; the sticky header must not cover it. */
   scroll-margin-top: 76px;
   font-size: var(--u-text-lg);
-  /* The quarter pixel is deliberate. The head of Examples stood 28.25 px
-     high, and every example below it was photographed on that quarter-pixel
-     phase; a whole-pixel head would shift all of them by a fraction and
-     re-raster every picture of an example without changing one. */
+  /* The quarter pixel is deliberate: the head of Examples is 28.25 px high,
+     and every example below it is photographed on that quarter-pixel phase;
+     a whole-pixel head would re-raster every picture of an example. */
   line-height: 24.25px;
   font-weight: var(--u-weight-semibold);
   letter-spacing: var(--u-tracking-tight);
@@ -232,9 +231,8 @@
   padding: var(--u-space-2) var(--u-space-4);
   border-radius: var(--u-radius-md);
   font-size: var(--u-text-sm);
-  /* Whole pixels: at 1.5 the closed disclosure stood 35.5 px high, and
-     everything below it landed on half pixels - a picture of an example
-     grew by a row without having changed. */
+  /* Whole pixels: at 1.5 the closed disclosure would be 35.5 px high, and
+     everything below it would land on half pixels. */
   line-height: 20px;
   font-weight: var(--u-weight-medium);
   color: var(--u-color-text);
@@ -482,9 +480,7 @@
 
 /* The stage carries the surface and not the page ground.
 
-   It once stood on `--u-color-bg`, on the thought that a building block in an
-   application stands on the page ground. The price was measurable:
-   `--u-color-text-muted` - help texts, units, labels - misses on that ground the
+   On `--u-color-bg`, the page ground, `--u-color-text-muted` - help texts, units, labels - misses on that ground the
    bound it just holds on the surface (tests-unit/contrast.test.ts, and the
    exception in accessibility.spec.ts). The separation from the head is carried
    by the line above it anyway; widening an exception for two per cent of
@@ -756,7 +752,7 @@
   color: var(--u-color-text);
 }
 
-/* A row's name links to the row itself (.scratch/props-to-examples): it reads
+/* A row's name links to the row itself: it reads
    as the name, and is underlined only under the pointer. */
 .apiAnchor {
   color: inherit;
@@ -1058,7 +1054,7 @@ ul.apiProse {
   color: var(--u-color-text-secondary);
 }
 
-/* A long table's secondary group, folded (.scratch/props-table-hygiene, 02):
+/* A long table's secondary group, folded:
    the summary is the group's title with its count, a native disclosure the
    keyboard and a screen reader know, tall enough to tap on a phone. */
 .apiFold > summary {

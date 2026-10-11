@@ -2,7 +2,7 @@
 
 /* The track is the checkbox's box stretched to two places, the thumb the one
    thing that moves: it travels on the path transition while the track changes
-   its colour in place (visuelle-wertigkeit 02). */
+   its colour in place. */
 
 @layer umriss.components {
   .wrapper {
@@ -36,7 +36,7 @@
 
   /* In a field the switch stands in a row of fields, as the checkbox does:
      as tall as a control, its first line on the line a field's value stands
-     on (field-row-alignment 02). */
+     on. */
   .field {
     --_line: var(--_track-height);
     --_control: var(--u-control-height);
@@ -141,9 +141,8 @@
     font-size: var(--_label);
   }
 
-  /* On is the accent's ground, which forced colours repaint with the page's
-     (forced-colors 02): the thumb's side alone would carry it. The track takes
-     the system's selection colour instead. */
+  /* On is the accent's ground, which forced colours repaint with the page's:
+     the thumb's side alone would carry it. The track takes the system's selection colour instead. */
   @media (forced-colors: active) {
     .input:checked + .track {
       background: Highlight;

@@ -1,4 +1,4 @@
-/* The lines of a grouped table (table-grouping 04, ADR-0029).
+/* The lines of a grouped table (ADR-0029).
 
    A group header heads a group of an outer level: its value and count in the
    first cell, stretched over every leading column without an aggregate, then
@@ -7,8 +7,7 @@
    a cell in every row, never a `rowspan`, because a spanning cell could not be
    cut by a page or a virtual window. Folded, a span is one line.
 
-   The relations are the prototype's (.scratch/table-grouping/spec.md, "How it
-   looks"): a group header is exactly one row high, every level has one fold slot of
+   Relations: a group header is exactly one row high, every level has one fold slot of
    20 px, and a line is only as strong as the boundary it draws. */
 
 import { useRef } from "react";

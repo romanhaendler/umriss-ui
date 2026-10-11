@@ -145,10 +145,9 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function 
         aria-invalid={isInvalid || undefined}
         className={cx(styles.textarea, size === "sm" && styles.sm, isInvalid && styles.invalid)}
         style={{ resize: resize ?? (autoGrow ? "none" : "vertical") }}
-        /* Composed, not overridden: the caller's onInput used to come along
-           behind with `...rest` and took the count and the growing away from
-           the field (library-audit 04). First the caller, then the
-           measuring. */
+        /* Composed, not overridden: the caller's onInput would otherwise come along
+           behind with `...rest` and take the count and the growing away from
+           the field. First the caller, then the measuring. */
         onInput={(event) => {
           onInput?.(event);
           if (!controlled) setOwnValue(event.currentTarget.value);

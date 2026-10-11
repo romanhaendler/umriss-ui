@@ -1,4 +1,4 @@
-/* The fold of `#own-styles` (control-sizes 06), on its own so that a package's
+/* The fold of `#own-styles`, on its own so that a package's
    tests reach it without the build plugin around it. */
 
 import postcss, { type AtRule, type Container, type Rule } from "postcss";

@@ -1,4 +1,4 @@
-/* "Suggest an edit" (.scratch/concepts-and-changelog-pages): the last link of
+/* "Suggest an edit": the last link of
    every demo page and every document page. A plain link to GitHub's new-issue
    form, prefilled - no backend, no form or widget of the site's own. One
    formula for the shell, which writes it under each demo page, and for the

@@ -124,8 +124,8 @@ const DialogFrame = forwardRef<HTMLDialogElement, DialogFrameProps>(function Dia
   const titleId = useId();
   /* Exit after `--u-duration-exit`: a sheet of paper taking its leave. The
      name stands here and not in the hook, because it belongs to the Modal -
-     the palette chooses the same routine without an exit. Here `160` stood
-     beside `160ms` in the stylesheet (library-audit 07). */
+     the palette chooses the same routine without an exit. The duration is read
+     from the token the stylesheet uses, not repeated as a number. */
   const { dialogRef, closing, beimSchliessen: handleDialogClose, beimAbbrechen: handleDialogCancel } =
     useDialogChoreography(open, "--u-duration-exit", onClose);
 
@@ -150,7 +150,7 @@ const DialogFrame = forwardRef<HTMLDialogElement, DialogFrameProps>(function Dia
       {...rest}
       /* After `rest` and composed with the caller's: a caller's `onCancel` or
          `onMouseDown` would otherwise take Escape's exit or the backdrop's
-         closing away from the window (P3 of core-passthrough). */
+         closing away from the window. */
       data-side={side}
       data-closing={closing || undefined}
       onClose={handleDialogClose}

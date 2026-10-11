@@ -1,5 +1,5 @@
 /* The language of the components: EN or DE, one choice for the four demos
-   whose components read core's language (.scratch/language-switch).
+   whose components read core's language.
 
    DE renders every example stage and every scenario stage inside the
    library's `LanguageProvider` with the German pair - the line an application

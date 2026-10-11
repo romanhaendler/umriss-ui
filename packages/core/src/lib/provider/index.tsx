@@ -27,8 +27,7 @@ import type { UmrissContextValue } from "./context";
 /** How densely the library builds. A component with a density of its own
     takes it through `useDensityFor` as the default for its `density` - in
     @umriss-ui/table the table, in @umriss-ui/calculation
-    the calculation; a compact set of tokens exists only with work package
-    B.13. */
+    the calculation; a compact set of tokens does not exist. */
 export type Density = "comfortable" | "compact";
 
 /**
@@ -74,8 +73,7 @@ const DEFAULTS: UmrissConfig = {
 };
 
 /* `useDensityFor` distinguishes "the provider says comfortable" from "nobody
-   said anything". It used to be meant for the library itself only; the table
-   moved to @umriss-ui/table and needs it from there (umriss-table 04). */
+   said anything". @umriss-ui/table reads it from here. */
 export { useDensityFor } from "./context";
 
 /** The whole configuration; without a provider, the defaults. */

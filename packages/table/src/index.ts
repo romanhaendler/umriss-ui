@@ -45,19 +45,18 @@ export type { SortDirection, SortLevel } from "./model/tableModel";
 export { useTableSelection } from "./model/useTableSelection";
 export type { TableSelection } from "./model/useTableSelection";
 
-/* Grouping and aggregates (table-grouping). */
+/* Grouping and aggregates. */
 export type { AggregateOptions, AggregateFunction, GroupByComponent, GroupingId } from "./types";
 
-/* Grid mode and editing in place (table-grid-mode, ADR-0034, ADR-0036). */
+/* Grid mode and editing in place (ADR-0034, ADR-0036). */
 export type { CellEdit, CellEditorProps, EditFor, EditOptions, RowAdd, RowDelete, RowSave } from "./types";
 
-/* Row filters: a condition the application defines over the whole row
-   (table-filters 08). */
+/* Row filters: a condition the application defines over the whole row. */
 export { rowFilter } from "./rowFilter";
 export type { RowFilter } from "./rowFilter";
 
 /* The types a props table names, so that every name a reader sees can be
-   imported (types-without-holes 06). */
+   imported. */
 export type {
   Absent,
   AggregateFor,
@@ -71,13 +70,12 @@ export type { Pin } from "./model/pinning";
 export type { ToolbarSize } from "./toolbarSize";
 
 /* The types a header, a cell or a definition on a page names, so that the
-   gate finds no name a reader cannot import (props-table-hygiene 04). */
+   gate finds no name a reader cannot import. */
 export type { ColumnBase, Displayable, FieldColumn, GroupByBase, IsDisplayable, ValuePaths, VerdictBase } from "./types";
 export type { DatePeriod, RowGroup } from "./model/grouping";
 
 /* The types the API index names in a hook's or a function's signature, so
-   that every name a reader sees there can be imported (api-index 02,
-   ADR-0044). `ModelColumn` is what the model reads of a column - not the
+   that every name a reader sees there can be imported (ADR-0044). `ModelColumn` is what the model reads of a column - not the
    hook's `Column` (ADR-0017). */
 export type { Computed, NumberField } from "./types";
 export type { ModelColumn, TableInput, TreeInput } from "./model/tableModel";

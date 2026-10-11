@@ -1,4 +1,4 @@
-/* <Stat> – the tile that reads its own value (judging-values 05).
+/* <Stat> – the tile that reads its own value.
 
    The name is deliberately not `Metric`: this package already exports `Meter`,
    and two exported names one letter apart, both about numbers, both in the
@@ -143,8 +143,7 @@ export const Stat = forwardRef<HTMLDivElement, StatProps>(function Stat(
       className={cx(styles.stat, className)}
       {...rest}
       /* After `rest`: the name and the verdict are what the tile has read, and
-         a caller's attribute would contradict what it shows (P3 of
-         core-passthrough). */
+         a caller's attribute would contradict what it shows. */
       role="group"
       aria-label={name}
       data-verdict={showsVerdict ? verdict : undefined}

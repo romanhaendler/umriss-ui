@@ -1,6 +1,6 @@
 /* What a package exports: the exports without JSDoc - the gate's second class
    beside the props - and every export with its declaration, what the API
-   index shows (.scratch/api-index, ADR-0044).
+   index shows (ADR-0044).
 
    What counts as an export is what the package builds: the entries its
    `vite.config.ts` hands to `build.lib.entry`, the main one and every subpath

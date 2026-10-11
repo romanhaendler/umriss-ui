@@ -56,10 +56,7 @@ export interface ParetoOptions {
       one.
       @default Infinity */
   readonly collectRank: number;
-  /** Name of the collected remainder. `@umriss-ui/charts` has no wording module
-      - every string it draws comes from the caller - and no module is introduced
-      for a single label. Until library-audit 03 the name here was
-      "Sonstige", the one German word the package brought along itself.
+  /** Name of the collected remainder. The helper has no default wording for it.
       @default none - the caller names it */
   readonly remainderName?: string;
 }

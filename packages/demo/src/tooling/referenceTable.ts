@@ -1,6 +1,6 @@
 /* A reference table: one model, two writers, as the props tables have them
    (`apiTable.ts`) - for the tables a page carries beside its API, such as the
-   Language page's wording (.scratch/theming-and-wording-reference).
+   Language page's wording.
 
    The model is a section of its own: a title, a sentence, then groups of rows
    under the same columns, every row with an anchor a link can name. The HTML

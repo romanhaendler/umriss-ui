@@ -106,7 +106,7 @@ export function useToast(): ToastContextValue {
    one's height. Open, they stand one after the other, GAP apart. Every card
    lies absolutely in the region and is moved by a transform, so that opening
    and closing are one transition - the heights that takes are measured once
-   per card, on its content, which is never cut (toast-refinement 01). */
+   per card, on its content, which is never cut. */
 const PEEK = 14;
 const GAP = 8;
 const SHRINK = 0.04;
@@ -260,8 +260,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       }
       /* Leaving through transitions (not animations), so that it does not
          compete with the entrance animation for the same properties. How long
-         it takes is said by the token that the stylesheet reads as well
-         (library-audit 07). Without a duration there is nothing to wait for. */
+         it takes is said by the token that the stylesheet reads as well.
+         Without a duration there is nothing to wait for. */
       const duration = region === null ? 0 : durationFrom(getComputedStyle(region), "--u-duration-exit-collapse");
       if (prefersReducedMotion() || duration <= 0) {
         remove(id);
@@ -572,8 +572,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         /* Two live regions that stand before the first message arrives: a
            region that comes into the document with its text already in it is
            often not read out at all by a screen reader. The message goes into
-           the region of its tone, following the same table as with `Alert`
-           (library-audit 03 and its review). Both regions are
+           the region of its tone, following the same table as with `Alert`.
+           Both regions are
            `display: contents`; the cards lie absolutely in the outer region,
            ordered by arrival whatever their tone. */
         <div

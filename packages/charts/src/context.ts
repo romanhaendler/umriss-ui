@@ -1,8 +1,8 @@
-/* Chart context and the registration hooks (R-2.1).
+/* Chart context and the registration hooks.
    Children such as Line/XAxis register themselves with their configuration on
-   mount and deregister on unmount; prop changes only update the scene entry
-   (R-2.2). Outside a Chart: a DEV invariant; in PROD the components render
-   nothing (R-2.3). */
+   mount and deregister on unmount; prop changes only update the scene entry.
+   Outside a Chart: a DEV invariant; in PROD the components render
+   nothing. */
 
 import { createContext, useContext, useEffect, useRef } from "react";
 import { DEV } from "./dev";
@@ -17,7 +17,7 @@ import type {
 
 export const ChartContext = createContext<ChartScene | null>(null);
 
-/** Scene out of the context; throws in DEV outside a Chart (R-2.3). */
+/** Scene out of the context; throws in DEV outside a Chart. */
 export function useChartScene(componentName: string): ChartScene | null {
   const scene = useContext(ChartContext);
   if (scene === null && DEV) {
@@ -51,7 +51,7 @@ export function useSeries(componentName: string, config: SeriesConfig): void {
   });
 }
 
-/** Registration of an axis (instantiable several times, R-4.12). */
+/** Registration of an axis (instantiable several times). */
 export function useAxis(componentName: string, config: AxisConfig): void {
   const scene = useChartScene(componentName);
   const idRef = useRef<number | null>(null);

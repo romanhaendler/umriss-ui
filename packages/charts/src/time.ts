@@ -1,5 +1,5 @@
 /* The time axis: ticks on LOCAL boundaries from the minute to the month, and
-   their labels by level (charts-essentials 01).
+   their labels by level.
 
    A candidate is built from the local calendar fields - `new Date(y, m, d + k)`
    and not `start + k · DAY` - so that a day is 23 or 25 hours long where the
@@ -8,7 +8,7 @@
 
    The labels are en-GB with a 24-hour clock, by level: `15:00`, `17 Mar`,
    `Mar 2026`, `2026`. Fixed, not the browser's locale: the same axis must look the same
-   on two computers (library-audit 03). Another language is a `tickFormat`.
+   on two computers. Another language is a `tickFormat`.
 
    Deliberately free of the DOM and of the scene, like workingTime.ts. */
 

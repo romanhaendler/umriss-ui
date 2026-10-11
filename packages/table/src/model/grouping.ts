@@ -1,4 +1,4 @@
-/* The grouping pipeline (table-grouping 01): from the sorted filtered set to row
+/* The grouping pipeline: from the sorted filtered set to row
    groups, their aggregates, their order, and the lines a page shows.
 
    It comes after the sort and before the page: the rows arrive in the order the

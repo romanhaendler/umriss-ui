@@ -67,7 +67,7 @@ export interface DemoSources {
   /** The generated `references.json`, where the demo has one. */
   references?: unknown;
   /** `import.meta.glob("./configurators/*.tsx", { eager: true })` - core's
-      demo alone has them (.scratch/configurator). */
+      demo alone has them. */
   configurators?: Record<string, ConfiguratorModule>;
   /** `() => import("./.generated/search.json")`: a part of the bundle of its
       own, which only the palette's first opening fetches. */

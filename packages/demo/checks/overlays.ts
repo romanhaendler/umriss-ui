@@ -1,12 +1,10 @@
-/* Nothing the library draws in the DOM may be in its own way
-   (schedule-legibility 02).
+/* Nothing the library draws in the DOM may be in its own way.
 
    A schedule draws its marks on canvas and everything a reader has to read in
    the DOM: lane headers, both band labels, the labels in the bars, the ghost's
    label, the tooltip, the grips. Each of those lies inside a box that clips -
    the plot, the day band, the time band - and a label that leaves its box is
-   simply cut off. That is how the ghost's label was lost in the topmost lane,
-   and it was found by eye, which is the part this check replaces.
+   simply cut off - the ghost's label in the topmost lane, say.
 
    Two invariants, and both are read off the rendered boxes:
 

@@ -1,4 +1,4 @@
-/* Downsampling (charts-long-series 03, Q20).
+/* Downsampling.
 
    A week of seconds is 600,000 points, and a plot a thousand pixels wide. A
    path through all of them strokes every pixel column hundreds of times; what

@@ -104,15 +104,15 @@ export type {
    exports - neither brings a stylesheet, so no picture could move. */
 export { resolveColours, subscribeTheme } from "./theme";
 export { toWorkingTimeClamped } from "./workingTime";
-/* The shift of a tick grid onto local time, moved here from the schedule
-   (charts-fixes 09): the calendar axis stands its days on it as well. */
+/* The shift of a tick grid onto local time:
+   the calendar axis stands its days on it as well. */
 export { localOffset } from "./workingTime";
 
 /* The charts' own wording (ADR-0031); German stands behind the subpath
    `@umriss-ui/charts/wording/de`. */
 export { DEFAULT_CHARTS_WORDING, type ChartsWording } from "./wording";
 
-/* The data table (charts-alternatives 01). At the end, by the workspace's rule
+/* The data table. At the end, by the workspace's rule
    for new exports. */
 export { DataTable } from "./DataTable";
 export type { DataTableGroup } from "./scene";

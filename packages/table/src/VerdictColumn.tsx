@@ -1,4 +1,4 @@
-/* The verdict column (umriss-table 12): a numeric value and a limit set, read
+/* The verdict column: a numeric value and a limit set, read
    with `assess` from @umriss-ui/core.
 
    It is built with NOTHING a caller of @umriss-ui/table would not have as well:

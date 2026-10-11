@@ -9,8 +9,7 @@
    two ways to the same files and must not be two opinions about what they are
    called. */
 
-/* One spelling. Both demos renamed the directory to `examples/`
-   (english-and-umriss-ui 10 and 12), so the alternation that bridged them is
+/* One spelling. Both demos renamed the directory to `examples/`, so the alternation that bridged them is
    gone - this pattern is the one opinion about what an example file is called,
    and it must not grow a second reason to be lenient. */
 export const EXAMPLE_PATTERN = /\/examples\/([^/]+)\/(\d+)-([^/]+)\.tsx$/;

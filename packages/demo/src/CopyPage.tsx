@@ -1,5 +1,4 @@
-/* The rubric line of a page head, and at its end "Copy page"
-   (.scratch/pages-as-markdown, 03).
+/* The rubric line of a page head, and at its end "Copy page".
 
    For a reader who hands one page to a coding agent: the main action copies
    the page's Markdown twin - the very file the site serves beside the page -

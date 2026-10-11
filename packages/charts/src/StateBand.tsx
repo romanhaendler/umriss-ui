@@ -4,8 +4,7 @@
    keeps the materialised series at the same three channels as every other kind,
    the drawing loop monomorphic and the affine scale contract untouched. A caller
    whose data carries strings maps them in a `value` function - one line, once per point
-   during materialisation. Giving up R-5.2 for that would be a bad trade for
-   cosmetic reasons.
+   during materialisation.
 
    The lane stands in domain units of the y axis, not in pixels and not in
    fractions of the plot height. Four resources are one axis with a domain of four
@@ -28,14 +27,11 @@ export interface StateBandProps<T> {
   value: Value<T>;
   /** The closed set of states, in the order of their codes. */
   states: readonly StateEntry[];
-  /** Binding to an x axis.
-      @remarks R-4.12 */
+  /** Binding to an x axis. */
   xAxisId?: string;
-  /** Binding to a y axis.
-      @remarks R-4.12 */
+  /** Binding to a y axis. */
   yAxisId?: string;
-  /** Series-own data; overrides the container data.
-      @remarks R-2.4 */
+  /** Series-own data; overrides the container data. */
   data?: readonly T[];
   /** The name in legend and tooltip. Without one a warning stands in DEV - an
       unnamed series is a colour nobody can look up.
