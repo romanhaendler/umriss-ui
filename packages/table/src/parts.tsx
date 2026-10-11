@@ -110,6 +110,26 @@ function specFrom(props: RuntimeColumnProps): ColumnSpec {
   };
 }
 
+/* What every registering part does after its render: take its entry out when it
+   unmounts, and on every commit make sure it stands (the Strict Mode's second
+   mount removed it in between), check the order against the DOM where the part
+   has a place in an order, and report. */
+function useRegistered(registry: Registry, key: string, remove: () => void, ensure: () => void, ordered: boolean) {
+  useLayoutEffect(
+    () => () => {
+      remove();
+      registry.commit();
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the cleanup runs on unmount only (or a new key), never on a new closure
+    [key],
+  );
+  useLayoutEffect(() => {
+    ensure();
+    if (ordered) registry.checkOrder();
+    registry.commit();
+  });
+}
+
 export function buildParts(registry: Registry): Parts {
   /* ---------------------------------------------------------------- Column */
 
@@ -120,18 +140,9 @@ export function buildParts(registry: Registry): Parts {
     // Writes idempotently (registry.ts, guarantee 1).
     registry.registerColumn(key, spec);
 
-    useLayoutEffect(
-      () => () => {
-        registry.removeColumn(key);
-        registry.commit();
-      },
-      [key],
-    );
-    useLayoutEffect(() => {
+    useRegistered(registry, key, () => registry.removeColumn(key), () => {
       registry.ensureColumn(key, spec);
-      registry.checkOrder();
-      registry.commit();
-    });
+    }, true);
 
     if (DEV && surrounding && surrounding.registry !== registry) {
       warnOnce(
@@ -147,17 +158,9 @@ export function buildParts(registry: Registry): Parts {
   function RowDetail({ children }: { children: (row: never) => ReactNode }): ReactNode {
     const key = useId();
     registry.registerDetail(key, children);
-    useLayoutEffect(
-      () => () => {
-        registry.removeDetail(key);
-        registry.commit();
-      },
-      [key],
-    );
-    useLayoutEffect(() => {
+    useRegistered(registry, key, () => registry.removeDetail(key), () => {
       if (!registry.detail) registry.registerDetail(key, children);
-      registry.commit();
-    });
+    }, false);
     return null;
   }
 
@@ -166,17 +169,9 @@ export function buildParts(registry: Registry): Parts {
   function RowActions({ children, pin = true }: { children: ReactNode; pin?: boolean }): ReactNode {
     const key = useId();
     registry.registerActionGroup(key, pin);
-    useLayoutEffect(
-      () => () => {
-        registry.removeActionGroup(key);
-        registry.commit();
-      },
-      [key],
-    );
-    useLayoutEffect(() => {
+    useRegistered(registry, key, () => registry.removeActionGroup(key), () => {
       registry.registerActionGroup(key, pin);
-      registry.commit();
-    });
+    }, false);
     return <>{children}</>;
   }
 
@@ -189,18 +184,9 @@ export function buildParts(registry: Registry): Parts {
       onSelect: props.onSelect,
     } as const;
     registry.registerAction(key, spec);
-    useLayoutEffect(
-      () => () => {
-        registry.removeAction(key);
-        registry.commit();
-      },
-      [key],
-    );
-    useLayoutEffect(() => {
+    useRegistered(registry, key, () => registry.removeAction(key), () => {
       registry.ensureAction(key, spec);
-      registry.checkOrder();
-      registry.commit();
-    });
+    }, true);
     return <span hidden data-umriss-action={key} />;
   }
 
@@ -222,18 +208,9 @@ export function buildParts(registry: Registry): Parts {
     };
     // Writes idempotently (registry.ts, guarantee 1).
     registry.registerGroupKey(key, spec);
-    useLayoutEffect(
-      () => () => {
-        registry.removeGroupKey(key);
-        registry.commit();
-      },
-      [key],
-    );
-    useLayoutEffect(() => {
+    useRegistered(registry, key, () => registry.removeGroupKey(key), () => {
       registry.ensureGroupKey(key, spec);
-      registry.checkOrder();
-      registry.commit();
-    });
+    }, true);
     return <span hidden data-umriss-groupkey={key} />;
   }
 

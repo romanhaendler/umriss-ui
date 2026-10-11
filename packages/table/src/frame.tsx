@@ -10,8 +10,8 @@ import { NewRowButton } from "./toolbar";
 import type { Registry } from "./registry";
 import type { TableProps } from "./types";
 import { useLineMotion } from "./motion";
-import { gridLines } from "./model/gridWalk";
-import { GridContext, GridFocus, NEW_LINE, gridHandlers, useGridState } from "./grid";
+import { GridContext, GridFocus, useGridState } from "./grid";
+import { frameGrid } from "./frameGrid";
 import { copyKeyHandler } from "./copyKey";
 import { CutValueTip } from "./cutValueTip";
 import {
@@ -26,7 +26,6 @@ import { newRowBody, pageFiller, renderBody } from "./frameBody";
 import type { BodyContext } from "./frameBody";
 import { frameLayout } from "./frameLayout";
 import { FootRow, HeadRow } from "./headFoot";
-import { openDetails } from "./tree";
 import { Beyond, PinPlacement, ViewWidth } from "./scrollArea";
 import { markBeyond, markStuck, markUnder } from "./scrollMarks";
 import styles from "./Table.module.css";
@@ -77,50 +76,12 @@ export function Frame({ registry, props }: { registry: Registry; props: TablePro
 
   const drafting = grid.state.editing?.row === true;
   const layout = frameLayout({ registry, hook, props, drafting, sticking });
-  const { snapshot, projection, virtual, lines, entries, grouping, spanEntry, dataColumns, expanderColumn, controlColumns, columnCount, trailing, pins, pinned, blocks, rows, footerShown } = layout;
+  const { snapshot, projection, virtual, lines, entries, grouping, dataColumns, columnCount, pins, pinned, blocks, rows, footerShown } = layout;
 
-  /* Grid mode (ADR-0034): every line the arrows walk - all of them, the ones a
-     virtual window leaves unrendered as well - and the head row's columns. */
-  const gridLinesNow = gridMode
-    ? gridLines({
-        layout: { controls: controlColumns, span: spanEntry !== undefined, aggregates: dataColumns.map((e) => e.spec.aggregate !== undefined), actions: trailing, blocks },
-        body: loading ? { rows: [] } : lines ? { lines: virtual ? projection.lines! : lines } : { rows: virtual ? (projection.shown ?? projection.filtered) : rows },
-        rowKey: hook.rowKey,
-        expanded: layout.detail ? openDetails(registry, snapshot, projection.shown ?? projection.filtered, hook.rowKey, layout.tree) : new Set(),
-        foot: footerShown,
-      })
-    : [];
-  /* A new row stands above the body's rows, whatever the sort, the filter or
-     the page - the walk finds it right beneath the head. */
-  const fresh = grid.state.editing?.line === NEW_LINE ? grid.state.editing : null;
-  if (fresh && gridLinesNow[0]) gridLinesNow.splice(1, 0, { key: NEW_LINE, cells: gridLinesNow[0].cells, at: -1, row: fresh.fresh });
+  const { lines: gridLinesNow, fresh, ids: gridIds, events: gridEvents } = frameGrid({ registry, hook, props, layout, grid });
   // eslint-disable-next-line react-hooks/refs -- the table is read when a key is pressed, not while rendering
   const onCopyKey = copyKeyHandler({ registry, hook, grid, gridMode, gridLines: gridLinesNow, dataColumns, formats, wording, tableElement: () => tableRef.current });
 
-  const gridIds = [
-    ...(selectable ? ["#select"] : []),
-    ...(expanderColumn ? ["#detail"] : []),
-    ...(spanEntry ? ["#span"] : []),
-    ...dataColumns.map((e) => e.spec.id),
-    ...(trailing ? ["#actions"] : []),
-  ];
-  const gridEvents = gridMode
-    ? gridHandlers({
-        grid,
-        lines: gridLinesNow,
-        ids: gridIds,
-        columnById: (id) => dataColumns.find((e) => e.spec.id === id),
-        rowKey: hook.rowKey,
-        virtual,
-        onCellEdit: props.onCellEdit,
-        rowMode: layout.rowMode,
-        onRowSave: props.onRowSave,
-        onRowAdd: props.onRowAdd,
-        newRow: props.newRow,
-        onRowDelete: props.onRowDelete,
-        select: selectable ? (row) => snapshot.selection.toggle(hook.rowKey(row)) : undefined,
-      })
-    : undefined;
   /* The toolbar's "New row" reaches the grid through the registry: this
      render's handler, over this render's lines. */
   registry.setAddRow(gridEvents?.addRow ?? null);

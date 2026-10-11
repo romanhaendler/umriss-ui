@@ -27,6 +27,14 @@ export function declaredWidths<Z, K extends string>(columns: readonly ModelColum
   return out;
 }
 
+/** The virtual window of a projection: of its lines when it is grouped, of its
+    rows otherwise. */
+export function windowed<Z>(projection: TableProjection<Z>, from: number, to: number): TableProjection<Z> {
+  if (!projection.lines) return { ...projection, visible: (projection.shown ?? projection.filtered).slice(from, to) };
+  const visibleLines = projection.lines.slice(from, to);
+  return { ...projection, visibleLines, visible: rowsOf(visibleLines) };
+}
+
 /** One sort level. The tableState's older name for it; the sort itself is a
     list. */
 export type Sort<K extends string> = SortLevel<K>;
@@ -200,19 +208,12 @@ export function useTableState<Z, K extends string = string>(
   /* `visible` is always "what is to be rendered now": with paging the page,
      with virtualisation the window. That way the loop in the caller stays the
      same. */
-  const windowLines = useMemo(
-    () => (virtual && projection.lines ? projection.lines.slice(rowWindow.from, rowWindow.to) : projection.visibleLines),
-    [virtual, projection.lines, projection.visibleLines, rowWindow.from, rowWindow.to],
+  const inWindow = useMemo(
+    () => (virtual ? windowed(projection, rowWindow.from, rowWindow.to) : projection),
+    [virtual, projection, rowWindow.from, rowWindow.to],
   );
-  const visible = useMemo(
-    () =>
-      !virtual
-        ? projection.visible
-        : windowLines
-          ? rowsOf(windowLines)
-          : (projection.shown ?? projection.filtered).slice(rowWindow.from, rowWindow.to),
-    [virtual, windowLines, projection.shown, projection.filtered, projection.visible, rowWindow.from, rowWindow.to],
-  );
+  const windowLines = inWindow.visibleLines;
+  const visible = inWindow.visible;
 
   // The keys of the filtered set – that is why "select all" reaches across
   // all pages and not only across the visible one.
