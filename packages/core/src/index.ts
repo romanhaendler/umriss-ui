@@ -95,6 +95,8 @@ export * from "./components/FileInput";
 export { ControlSizeProvider } from "./lib/controlSize";
 export type { ControlSize, ControlSizeProviderProps } from "./lib/controlSize";
 
+export { announce } from "./lib/announce";
+
 /* The segmented control (field-row-alignment 04) stands at the end for the
    same rule, not at "RadioGroup" beside its mechanics. */
 export * from "./components/SegmentedControl";

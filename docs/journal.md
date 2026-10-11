@@ -18,6 +18,62 @@ sentence here can summarise three entries there.
 name it as it is called today; where a thing is gone altogether, its name stands
 as it stood.
 
+## Oct. 2026 — The open points, grilled and begun
+
+- **Everything still open was grilled in one sitting** (11 Oct 2026;
+  `.scratch/open-points-roadmap/`, the facts in
+  `docs/research/open-points-2026-10/`). The list had mostly been "waiting for
+  a caller"; the maintainer ended that - "Selbst der Aufrufer" - and the
+  question became the order and the cut. Four things came out that were on no
+  list: the set of chart kinds is open again (ADR-0059), the CSV stops being
+  German under an English wording (ADR-0061), a late answer in server mode is a
+  fault and not a missing feature, and two claims of the READMEs are to be
+  proved. 1.0 is not a goal; the search consoles and the VoiceOver pass are put
+  aside. Twelve specs in three packages, A to C.
+- **A chart reports a Range and keeps none** - the word chosen so that
+  "selection" stays out of the charts (ADR-0003, ADR-0056). Written down, built
+  in package B.
+- **Package A, built the same day, unreleased:**
+  - *A stack's total in the data table* - the tooltip had it, the table for
+    the reader who cannot use the chart did not.
+  - *The CSV follows the language in use* (ADR-0061): the decimal mark, the
+    separator and the words for true and false. German is byte for byte what
+    it was.
+  - *Rows are copied*: Ctrl or Cmd with C writes the selected rows
+    tab-separated, the active cell's value in grid mode, and says so to a
+    screen reader. A refused clipboard is said as well; there is no fallback.
+  - *A snooze's stored reason is shown* in the tip and in what a screen reader
+    hears.
+  - *Copying speaks through the library's one voice.* The first cut gave
+    every table a live region of its own, and the check that no page is
+    silent about its announcements failed on 23 pages - rightly. core's
+    `announce`, internal until then, is exported, and the table uses it.
+  - *Rows that keep arriving*: thirteen cases under rows that change every
+    second found no fault - sort, selection by key, an open Row draft, the
+    Active cell, the window. What jsdom cannot show, the scroll position and
+    the motion under a re-sort, stands as four browser cases that are written
+    and not yet run: no demo page ticks, and the spec allowed no new API.
+  - *What is never and what is not yet* (ADR-0060): no form validation, no
+    editor for arranging a dashboard; the reader's time until a case asks for
+    another zone.
+- **Proving React 18 found a fault.** The READMEs said "React 18 or 19" and
+  only 19 was ever installed. Under 18 a boolean `inert` is dropped, so a
+  folded accordion panel, a popover in its exit and a splitter's folded pane
+  stayed in reach of the keyboard. `inertWhen` writes the value the React in
+  use reads. The first CI job for it would have proved nothing: with the
+  lockfile kept, the testing library stayed on a `react-dom` 19 beside a
+  `react` 18 and every render failed, while the check of the version passed.
+  The job resolves afresh now and checks both.
+- **`"use client"` heads every built entry.** Vite drops a directive written in
+  the source, so a post-step sets it and the dist check holds it there. The
+  READMEs say that and no more: an agent had written that the components "can
+  be imported from a Next.js App Router", which nothing tests, and the sentence
+  was taken back.
+- **What a server gives of a schedule** is its labelled frame and an empty
+  canvas; lanes and subtasks register after mount. The spec had assumed the
+  lane labels in the markup. The library was not rebuilt for it - the test
+  says what holds, and the maintainer is asked at the acceptance.
+
 ## Oct. 2026 — What the night's pieces still owed
 
 The morning after, three things were left of the five pieces: their decisions

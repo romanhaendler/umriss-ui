@@ -3,7 +3,7 @@
    header line; the key is heard on the frame and leaves the browser's own copy
    alone wherever text is marked or typed. */
 
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { LanguageProvider } from "@umriss-ui/core";
 import { GERMAN_FORMATS, GERMAN_WORDING } from "@umriss-ui/core/wording/de";
@@ -56,15 +56,27 @@ function Units({ tree = false, grid = false, editable = false, search = false }:
 }
 
 const pick = (...keys: string[]) => act(() => keys.forEach((k) => current!.selection.toggle(k)));
-const voice = (container: HTMLElement) => container.querySelector("[aria-live='polite']")!.textContent!.replace(/ /g, "");
+/* The library's one voice (core's `announce`): a region of the body, written
+   once the announcements have rested - 150 ms - and after the clipboard's promise. */
+const region = () => document.querySelector("[data-umriss-announcer]");
+const voice = async () => {
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(0);
+    await vi.advanceTimersByTimeAsync(150);
+  });
+  return region()?.textContent ?? "";
+};
 const copy = (target: Element, init: Partial<KeyboardEventInit> = { ctrlKey: true }) => fireEvent.keyDown(target, { key: "c", ...init });
 
 let writeText: ReturnType<typeof vi.fn>;
 beforeEach(() => {
+  vi.useFakeTimers();
+  region()?.replaceChildren();
   writeText = vi.fn().mockResolvedValue(undefined);
   Object.defineProperty(navigator, "clipboard", { value: { writeText }, configurable: true });
 });
 afterEach(() => {
+  vi.useRealTimers();
   vi.restoreAllMocks();
   Object.defineProperty(navigator, "clipboard", { value: undefined, configurable: true });
 });
@@ -112,15 +124,17 @@ describe("selectionAsText", () => {
 
 describe("Ctrl+C and Cmd+C", () => {
   it("write the text of selectionAsText() and announce the count, twice if pressed twice", async () => {
-    const { container } = render(<Units />);
+    render(<Units />);
     pick("s", "o");
     const row = screen.getByText("Sales");
     copy(row);
-    await waitFor(() => expect(voice(container)).toBe("2 rows copied"));
+    expect(await voice()).toBe("2 rows copied");
+    expect(region()!.getAttribute("role")).toBe("status");
     expect(writeText).toHaveBeenCalledWith(current!.selectionAsText());
-    const before = container.querySelector("[aria-live='polite']")!.textContent;
+    const before = region()!.firstChild;
     copy(row, { metaKey: true });
-    await waitFor(() => expect(container.querySelector("[aria-live='polite']")!.textContent).not.toBe(before));
+    expect(await voice()).toBe("2 rows copied");
+    expect(region()!.firstChild).not.toBe(before);
     expect(writeText).toHaveBeenCalledTimes(2);
   });
 
@@ -151,24 +165,24 @@ describe("Ctrl+C and Cmd+C", () => {
     expect(writeText).not.toHaveBeenCalled();
   });
 
-  it("pass with no selection in a table that is not a grid", () => {
-    const { container } = render(<Units />);
+  it("pass with no selection in a table that is not a grid", async () => {
+    render(<Units />);
     expect(copy(screen.getByText("Sales"))).toBe(true);
     expect(writeText).not.toHaveBeenCalled();
-    expect(voice(container)).toBe("");
+    expect(await voice()).toBe("");
   });
 
   it("copy the Active cell of a grid with no selection, the rows with one", async () => {
-    const { container } = render(<Units grid />);
+    render(<Units grid />);
     const cell = screen.getByText("Sales").closest<HTMLElement>("th, td")!;
     act(() => cell.focus());
     fireEvent.keyDown(cell, { key: "ArrowRight" });
     copy(document.activeElement!);
-    await waitFor(() => expect(voice(container)).toBe("Cell copied"));
+    expect(await voice()).toBe("Cell copied");
     expect(writeText).toHaveBeenLastCalledWith("300");
     pick("o");
     copy(document.activeElement!);
-    await waitFor(() => expect(voice(container)).toBe("1 row copied"));
+    expect(await voice()).toBe("1 row copied");
     expect(writeText).toHaveBeenLastCalledWith("Unit\tBudget\tOpen\nOps\t90\tno");
   });
 
@@ -178,7 +192,8 @@ describe("Ctrl+C and Cmd+C", () => {
     act(() => cell.focus());
     fireEvent.focus(cell);
     expect(copy(cell)).toBe(false);
-    await waitFor(() => expect(writeText).toHaveBeenCalledWith("Sales"));
+    await voice();
+    expect(writeText).toHaveBeenCalledWith("Sales");
   });
 
   it("leave a grid editor's own copy alone", () => {
@@ -195,12 +210,14 @@ describe("Ctrl+C and Cmd+C", () => {
   it("say that the copy failed when the clipboard refuses or is missing", async () => {
     vi.spyOn(console, "warn").mockImplementation(() => {});
     writeText.mockRejectedValue(new Error("denied"));
-    const { container } = render(<Units />);
+    render(<Units />);
     pick("s");
     copy(screen.getByText("Sales"));
-    await waitFor(() => expect(voice(container)).toBe("Could not copy"));
+    expect(await voice()).toBe("Could not copy");
     Object.defineProperty(navigator, "clipboard", { value: undefined, configurable: true });
     copy(screen.getByText("Sales"));
-    await waitFor(() => expect(container.querySelector("[aria-live='polite']")!.textContent).toBe("Could not copy "));
+    const before = region()!.firstChild;
+    expect(await voice()).toBe("Could not copy");
+    expect(region()!.firstChild).not.toBe(before);
   });
 });
