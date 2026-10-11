@@ -15,6 +15,14 @@ moves from here under the rule above.
 
 ---
 
+## Unreleased
+
+### Added
+
+- **Milestones in the summary**: the plot's description names how many milestones the plan shows ("2 milestones."), and nothing where there are none. Needs `@umriss-ui/core` with the new `scheduleSummary` argument.
+
+---
+
 ## 0.6.0 – Milestones (Oct. 2026)
 
 Needs `@umriss-ui/core` 0.31 and `@umriss-ui/charts` 0.15; the peer ranges move to `^0.31.0` and `^0.15.0`.

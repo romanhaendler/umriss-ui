@@ -33,9 +33,9 @@
    hidden alarm is a decision already taken; that it exists is not. "Not
    absent, only deliberately hidden." */
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { HTMLAttributes } from "react";
-import { Badge, Button, Checkbox, Menu, MenuItem, Tooltip, VisuallyHidden, useFreshness, useDensityFor, useFormats, useWording } from "@umriss-ui/core";
+import { Badge, Button, Checkbox, FormField, Input, Menu, MenuItem, Popover, RadioGroup, Tooltip, VisuallyHidden, useFreshness, useDensityFor, useFormats, useWording } from "@umriss-ui/core";
 import type { Formats, FreshnessAges, FreshnessReading, Wording } from "@umriss-ui/core";
 import { useTable } from "../index";
 import type { TableSelection } from "../index";
@@ -63,8 +63,16 @@ export interface AlarmListProps extends Omit<HTMLAttributes<HTMLDivElement>, "ch
       (`asOf` of the view plus a duration of `snoozeDurations`). The component
       snoozes nothing – the application calls `snooze()` on its own alarms, or
       refuses. The action stands beside "Acknowledge", on the selection, and
-      needs `selection`, `snoozeDurations` and this handler. */
-  onSnooze?: (ids: readonly string[], until: number) => void;
+      needs `selection`, `snoozeDurations` and this handler. With
+      `snoozeReason` there is a third argument: the reason, trimmed, or
+      `undefined` when it is optional and left empty. */
+  onSnooze?: (ids: readonly string[], until: number, reason?: string) => void;
+  /** Asks for a reason when snoozing: "Snooze" then opens a small panel with
+      the durations and a field for the reason, and its button reports. With
+      `"required"` the button waits for text. Without this prop "Snooze" is the
+      menu of durations and reports at once. The list keeps no draft once the
+      panel closes; Escape and a click outside close it without reporting. */
+  snoozeReason?: "optional" | "required";
   /** The durations on offer, in milliseconds. Which are permitted is the
       application's rule, so there is no default list; empty or missing, there is no
       snooze action.
@@ -89,6 +97,51 @@ export interface AlarmListProps extends Omit<HTMLAttributes<HTMLDivElement>, "ch
   /** Offers the view as a switch beside its count. Without it the count
       stands as text. */
   onHiddenOnlyChange?: (hiddenOnly: boolean) => void;
+}
+
+/** The panel behind "Snooze" when a reason is asked for. Its draft lives here
+    and goes with it: the panel is mounted afresh for every opening. */
+function SnoozePanel({
+  durations,
+  required,
+  onConfirm,
+}: {
+  durations: readonly number[];
+  required: boolean;
+  onConfirm: (ms: number, reason: string) => void;
+}) {
+  const wording = useWording();
+  const [ms, setMs] = useState(String(durations[0]));
+  const [reason, setReason] = useState("");
+  const group = useRef<HTMLDivElement>(null);
+  /* A popover does not take the focus in by itself. */
+  useEffect(() => group.current?.querySelector<HTMLInputElement>("input:checked")?.focus(), []);
+  const text = reason.trim();
+  const blocked = required && text === "";
+  return (
+    <form
+      className={styles.snoozeForm}
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (!blocked) onConfirm(Number(ms), text);
+      }}
+    >
+      <FormField label={wording.snoozeDuration}>
+        <RadioGroup
+          ref={group}
+          value={ms}
+          onChange={setMs}
+          options={durations.map((d) => ({ value: String(d), label: durationWord(d, wording) }))}
+        />
+      </FormField>
+      <FormField label={wording.snoozeReason} required={required}>
+        <Input value={reason} onChange={(event) => setReason(event.currentTarget.value)} />
+      </FormField>
+      <Button type="submit" variant="primary" size="sm" disabled={blocked}>
+        {wording.snoozeAlarm}
+      </Button>
+    </form>
+  );
 }
 
 function lifecycleWord(state: LifecycleState, wording: Wording): string {
@@ -182,6 +235,7 @@ function Body({
   onAcknowledge,
   onSnooze,
   snoozeDurations,
+  snoozeReason,
   onUnsnooze,
   density: ownDensity,
   className,
@@ -230,6 +284,11 @@ function Body({
 
   const hiddenCount = wording.hiddenAlarms(projection.hiddenAlarms);
 
+  /* The panel's anchor, and a counter so that each opening starts empty. */
+  const snoozeButton = useRef<HTMLButtonElement>(null);
+  const [panelOpen, setPanelOpen] = useState(false);
+  const [openings, setOpenings] = useState(0);
+
   return (
     <div className={[styles.list, className].filter(Boolean).join(" ")} {...rest}>
       <div className={styles.bar}>
@@ -265,7 +324,44 @@ function Body({
             {snoozed.length === 0 ? wording.unsnoozeAlarm : wording.unsnoozeAlarms(snoozed.length)}
           </Button>
         )}
-        {selection !== undefined && onSnooze !== undefined && snoozeDurations !== undefined && snoozeDurations.length > 0 && (
+        {selection !== undefined && onSnooze !== undefined && snoozeDurations !== undefined && snoozeDurations.length > 0 && snoozeReason !== undefined && (
+          <>
+            <Button
+              ref={snoozeButton}
+              size="sm"
+              disabled={snoozable.length === 0}
+              aria-haspopup="dialog"
+              aria-expanded={panelOpen}
+              onClick={() => {
+                setOpenings((n) => n + 1);
+                setPanelOpen(true);
+              }}
+            >
+              {snoozable.length === 0 ? wording.snoozeAlarm : wording.snoozeAlarms(snoozable.length)}
+            </Button>
+            <Popover
+              open={panelOpen}
+              onOpenChange={setPanelOpen}
+              anchorRef={snoozeButton}
+              align="end"
+              role="dialog"
+              ariaLabel={wording.snoozeAlarms(snoozable.length)}
+              className={styles.snoozePanel}
+            >
+              <SnoozePanel
+                key={openings}
+                durations={snoozeDurations}
+                required={snoozeReason === "required"}
+                onConfirm={(ms, reason) => {
+                  setPanelOpen(false);
+                  snoozeButton.current?.focus();
+                  onSnooze(snoozable.map((row) => row.id), viewAsOf + ms, reason === "" ? undefined : reason);
+                }}
+              />
+            </Popover>
+          </>
+        )}
+        {selection !== undefined && onSnooze !== undefined && snoozeDurations !== undefined && snoozeDurations.length > 0 && snoozeReason === undefined && (
           <Menu
             align="end"
             trigger={

@@ -22,6 +22,22 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## Unreleased
+
+### Added
+
+- **`<AlarmList snoozeReason="optional" | "required" />`.** "Snooze" opens a small
+  panel instead of the menu: the durations (the first chosen), a field for the
+  reason and a button that reports. `onSnooze(ids, until, reason)` gets the
+  reason trimmed, `undefined` when it is optional and left empty; with
+  `"required"` the button waits for text. Escape and a click outside close the
+  panel without reporting. Without the prop nothing changes. `snooze(alarm,
+  until, by, reason?)` stores the reason on the alarm's `snooze` record
+  (`Snooze.reason`); the list does not show it. Needs `@umriss-ui/core` wording
+  `snoozeDuration` and `snoozeReason`.
+
+---
+
 ## 0.14.0 – Snoozing offered, and a search that takes its line (Oct. 2026)
 
 Needs `@umriss-ui/core` 0.31; the peer range moves to `^0.31.0`.
