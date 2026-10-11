@@ -17,8 +17,8 @@
 
    Anything relative that is not the package is a fixture, and a fixture is
    what this check exists to catch. `@umriss-ui/demo` is one too, bare as it
-   looks: it is never published, so its worlds cannot be imported - an example
-   playing in a world carries the part of it it uses, written out in the file.
+   looks: it is never published, so an example carries the data it uses, written
+   out in the file.
 
    It stands once and runs against every demo, as the shell's and the page's
    checks do: their `own-data.spec.ts` calls `checkOwnData` with their

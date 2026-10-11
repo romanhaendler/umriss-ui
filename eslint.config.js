@@ -243,12 +243,4 @@ export default [
       ],
     },
   },
-  {
-    /* A world is copied beside an example and must compile there: plain
-       data, no import of anything. */
-    files: ["packages/demo/src/worlds/*.ts"],
-    rules: {
-      "no-restricted-syntax": ["error", { selector: "ImportDeclaration", message: "A world imports nothing - declare the shapes it needs locally." }],
-    },
-  },
 ];

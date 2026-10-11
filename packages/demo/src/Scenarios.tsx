@@ -5,7 +5,7 @@
    sentence on who uses the screen, the live screen with numbered marks, the
    marks explained below, the pages it is built from, the code collapsed.
 
-   The worlds (`worlds/`). A world has a fixed moment; a feed's freshness
+   A scenario's world has a fixed moment; a feed's freshness
    counts from page load. Alarms, acknowledgements, tasks and readings keep the
    world's moment; only the `asOf` handed to a component that judges freshness
    (AlarmList, Stat, Given) is the moment the page was loaded, less the feed's
