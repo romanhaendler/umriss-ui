@@ -15,7 +15,9 @@ moves from here under the rule above.
 
 ---
 
-## Unreleased
+## 0.7.0 – The summary counts the milestones (Oct. 2026)
+
+Needs `@umriss-ui/core` 0.32; the peer range moves to `^0.32.0`.
 
 ### Added
 
