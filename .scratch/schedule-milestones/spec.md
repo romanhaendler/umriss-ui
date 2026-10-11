@@ -38,7 +38,7 @@ second is the builder's.
 - Dragging or moving a milestone, any intent for it.
 - A finding (work ending after a milestone, a milestone in blocked time).
 - A tone, a size, a shape, an icon or a task colour.
-- A count of milestones in the summary (it would need a wording of its own).
+- A count of milestones in the summary (it would need a wording of its own) - since added, see Comments.
 - Selection of a milestone.
 - Milestones drawn on a group head, or without a lane.
 - Screenshot baselines of the new examples.
@@ -50,8 +50,12 @@ second is the builder's.
 3. **A breaking type change for tooltip functions.** `ScheduleTooltipTarget` gained a third kind, so `tooltip={(t) => t.task}` no longer type-checks without a check on `kind`; two existing examples (`Tooltip/02`, `Tooltip/04`) needed one line. The schedule's CHANGELOG lists it under "Changed".
 4. **The walk.** Milestones are walked among the subtasks (ArrowRight lands on one). Check that this is not noise for a plan with many milestones; the alternative is a separate key.
 5. **Hit area.** The diamond is hit within its half width plus 2 px (Manhattan distance) and wins over the bar beneath.
-6. `CONTEXT.md` has the new term **Milestone**. No ADR was written.
+6. `CONTEXT.md` has the new term **Milestone**. The decision is recorded in ADR-0053, written after the release.
 
 ## Comments
 
 **Accepted and released (2026-10-11).** The maintainer checked it by hand on the running demo ("Alles händisch geprüft, sieht gut aus") and took the decisions above as they stand; released in @umriss-ui/schedule 0.6.0.
+
+**The count is in the summary now.** The plot's description ends its findings with "2 milestones." ("2 Meilensteine."), one for one, nothing for none; `scheduleSummary` takes a `milestones` count.
+
+The decisions are recorded in ADR-0053, written after the release.

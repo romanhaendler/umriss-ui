@@ -40,3 +40,5 @@ get wrong. It must not become a second copy of the documentation.
 ## Comments
 
 **Accepted and released (2026-10-11).** The maintainer checked it by hand on the running demo ("Alles händisch geprüft, sieht gut aus") and took the decisions above as they stand; released in the repository, with the release of 11 Oct 2026.
+
+The decision is recorded in ADR-0058, written after the release.

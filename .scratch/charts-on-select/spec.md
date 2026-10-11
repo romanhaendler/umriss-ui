@@ -58,3 +58,5 @@ chart reports the hit and holds, draws and remembers nothing.
 ## Comments
 
 **Accepted and released (2026-10-11).** The maintainer checked it by hand on the running demo ("Alles händisch geprüft, sieht gut aus") and took the decisions above as they stand; released in @umriss-ui/charts 0.15.0.
+
+The decision is recorded in ADR-0056, written after the release.
