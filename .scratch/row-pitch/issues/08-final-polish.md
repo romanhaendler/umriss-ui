@@ -1,6 +1,6 @@
 # 08 — Final polish
 
-Status: ready-for-human
+Status: done
 Type: polish
 Blocked by: 07
 
@@ -21,3 +21,5 @@ Judged on the rendered table demo (2026-10-10), Chromium and WebKit, light and d
 - Alarm list: fine. Six rows at 27 px, badges (High, Snoozed, Disabled) included; the dimmed rows keep the pitch.
 - A cut value's tip (Formats, long values): fine. The tip opens beneath the cut cell, whole, in both schemes; at 390 px it is clamped inside the viewport (63 to 382 of 390).
 - Nothing needed fixing, so no source changed.
+
+**Accepted by the user in Firefox (2026-10-11).** He looked at the five items on the running table demo and found them good; with that the look named in this ticket is complete, and it is closed.
