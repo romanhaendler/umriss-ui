@@ -22,17 +22,19 @@
    carry two anatomies. What is shared instead is exactly the mechanics both
    need: `useDialogChoreography`. */
 
-import { forwardRef, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
-import type { DialogHTMLAttributes, KeyboardEvent, ReactNode } from "react";
+import { forwardRef, useEffect, useId, useRef, useState } from "react";
+import type { DialogHTMLAttributes, ReactNode } from "react";
 import { cx } from "../../lib/cx";
 import { mergeRefs } from "../../lib/mergeRefs";
 import { useDialogChoreography } from "../../lib/dialogChoreography";
 import { idPart } from "../../lib/idPart";
-import { nextIndex } from "../../lib/options";
 import { useWording } from "../../lib/language";
-import { find } from "../../lib/search";
-import type { Find, MatchSpan } from "../../lib/search";
 import { announce, silence } from "../../lib/announce";
+import { Row, rowId } from "./PaletteRow";
+import { usePaletteFinds } from "./usePaletteFinds";
+import { usePaletteGrowth } from "./usePaletteGrowth";
+import { usePaletteKeys } from "./usePaletteKeys";
+import { usePaletteMark } from "./usePaletteMark";
 import styles from "./CommandPalette.module.css";
 
 /** A candidate the palette can find - the outside of the term CONTEXT.md lists
@@ -110,44 +112,6 @@ export interface CommandPaletteProps
   maxFinds?: number;
 }
 
-/** Reads the caller's prop into what the matcher and the row work with. */
-function toCandidate(item: CommandPaletteItem): PaletteCandidate {
-  return {
-    name: item.label,
-    group: item.searchedGroup ?? item.group,
-    heading: item.group,
-    weight: item.weight,
-    keywords: item.keywords,
-    id: item.id,
-    icon: item.icon,
-  };
-}
-
-/* What the matcher needs (name, group, weight, keywords) and what the row needs (id,
-   icon) - flat, and not with the caller's prop nested inside it. Otherwise
-   every access would run through `find.candidate.entry.id`, and the caller
-   would have smuggled fields past this point that are none of this component's
-   business. The term is CANDIDATE: `Entry`, `item` and `entry` are on the
-   glossary's avoidance list (CONTEXT.md, "Finding"). Only the prop is still
-   called `items` - that is the outside.
-
-   `group` is what is searched of the heading, `heading` the heading shown. */
-interface PaletteCandidate {
-  name: string;
-  group?: string;
-  heading?: string;
-  weight?: number;
-  keywords?: readonly string[];
-  id: string;
-  icon?: ReactNode;
-}
-
-/** One heading with its finds below it. */
-interface FindGroup {
-  name: string | undefined;
-  finds: Find<PaletteCandidate>[];
-}
-
 /** A window above the application in which one types and finds: it searches
     `items` by subsequence, ranks and marks the matches, and reports the chosen
     candidate's `id` to `onChoose`. Controlled through `open` and `onClose`. */
@@ -182,99 +146,9 @@ export const CommandPalette = forwardRef<HTMLDialogElement, CommandPaletteProps>
   const previouslyFocused = useRef<Element | null>(null);
 
   const [query, setQuery] = useState("");
-  /* What is held is the id and not the index: while typing the list shrinks,
-     and afterwards an index points at something else. That is exactly the
-     promise that the mark stays on what one had already found. */
-  const [held, setHeld] = useState<string | null>(null);
 
-  /* ---------------------------------------------------------------- */
-  /* Finding                                                           */
-  /* ---------------------------------------------------------------- */
-
-  const searching = query.trim() !== "";
-
-  const candidates = useMemo(() => items.map(toCandidate), [items]);
-
-  const finds = useMemo(() => find(candidates, query), [candidates, query]);
-
-  /* The resting state carries no rank and no match spans: nothing has been
-     searched for, so there is nothing to judge and nothing to mark. The rows
-     stand in the caller's order. */
-  const resting = useMemo<Find<PaletteCandidate>[]>(
-    () =>
-      (restingItems ?? []).map((item) => ({
-        candidate: toCandidate(item),
-        rank: 0,
-        finds: [],
-      })),
-    [restingItems],
-  );
-
-  const shown = searching ? finds.slice(0, maxFinds) : resting;
-  const moreFinds = searching ? finds.length - shown.length : 0;
-
-  /* The finds stand by rank; they are displayed under their heading. A group
-     appears where its best find stands - that way the best answer stays the
-     first, and the list still has structure. */
-  const groups = useMemo<FindGroup[]>(() => {
-    const collected: FindGroup[] = [];
-    for (const item of shown) {
-      const name = item.candidate.heading;
-      let group = collected.find((g) => g.name === name);
-      if (group === undefined) {
-        group = { name, finds: [] };
-        collected.push(group);
-      }
-      group.finds.push(item);
-    }
-    return collected;
-  }, [shown]);
-
-  /* The order in which the arrow keys run is the DISPLAYED one and not that of
-     the rank - otherwise the mark visibly jumps about. Headings do not appear
-     in it, so that "down" always lands on something choosable. */
-  const order = useMemo(() => groups.flatMap((g) => g.finds), [groups]);
-
-  /* Derived rather than stored: if the held candidate drops out of the list,
-     the mark stands on the first and never on nothing. */
-  const activeId =
-    held !== null && order.some((f) => f.candidate.id === held)
-      ? held
-      : (order[0]?.candidate.id ?? null);
-
-  /* ---------------------------------------------------------------- */
-  /* Pointer against keyboard                                          */
-  /* ---------------------------------------------------------------- */
-
-  /* Prevents this: one types, the list gets shorter, another row slides
-     under the resting mouse, one presses Enter - and lands somewhere other than
-     where the arrow keys had shown.
-
-     The rule: the mark has an owner. The keyboard takes it on every arrow key
-     and on every change of the query. The pointer takes it only on
-     `pointermove`, that is, when it has really moved - and expressly NOT on
-     `pointerenter`, because that fires even when the row is repainted under a
-     motionless pointer.
-
-     A reader who has never experienced the bug takes this for a superfluous
-     safeguard and deletes it. That is why it is written out here in full and
-     not as "because of the pointer". */
-  const pointerHoldsTheMark = useRef(false);
-
-  const keyboardTakesOver = useCallback(() => {
-    pointerHoldsTheMark.current = false;
-  }, []);
-
-  /** A real movement. It takes the mark and sets it in one go. */
-  const pointerMoves = useCallback((id: string) => {
-    pointerHoldsTheMark.current = true;
-    setHeld(id);
-  }, []);
-
-  /** Mere sweeping over. It counts only if the pointer already has the mark. */
-  const pointerSweeps = useCallback((id: string) => {
-    if (pointerHoldsTheMark.current) setHeld(id);
-  }, []);
+  const { searching, groups, order, moreFinds } = usePaletteFinds(items, restingItems, query, maxFinds);
+  const { activeId, setHeld, keyboardTakesOver, pointerMoves, pointerSweeps } = usePaletteMark(order);
 
   /* ---------------------------------------------------------------- */
   /* Opening, focus, resting state                                     */
@@ -285,12 +159,11 @@ export const CommandPalette = forwardRef<HTMLDialogElement, CommandPaletteProps>
     previouslyFocused.current = document.activeElement;
     /* Every opening starts in the resting state: an empty field, no rows. That
        is what makes the growth on the first keystroke visible at all. */
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setQuery("");
     setHeld(null);
-    pointerHoldsTheMark.current = false;
+    keyboardTakesOver();
     fieldRef.current?.focus();
-  }, [open]);
+  }, [open, setHeld, keyboardTakesOver]);
 
   /* So that the screen reader learns what the typing left, without having to
      arrow through it - on every query, even one that changed nothing, and on
@@ -323,84 +196,9 @@ export const CommandPalette = forwardRef<HTMLDialogElement, CommandPaletteProps>
     document.getElementById(rowId(baseId, activeId))?.scrollIntoView({ block: "nearest" });
   }, [activeId, baseId]);
 
-  /* ---------------------------------------------------------------- */
-  /* Growing                                                          */
-  /* ---------------------------------------------------------------- */
+  const { bodyRef, bodyHeight } = usePaletteGrowth(open);
 
-  /* The height is measured and set as a number, so that `transition` can travel
-     towards it. A keyframe animation would be wrong here: it starts again from
-     the beginning on every keystroke, and `tab`, `tabe`, `tabel` then reads as
-     three jerks instead of one settling. A transition aims from the current
-     value.
-
-     It is measured through a ResizeObserver and not in a layout effect with
-     `[open, query, ...]` as dependencies. The reason is an order one cannot
-     see: `showModal()` runs in the choreography's passive effect, whereas a
-     layout effect runs before it - so it would measure a dialog that is still
-     `display: none` and would get zero.
-
-     As long as the resting state was always empty, zero happened to be the
-     right answer, and the bug stayed invisible. With `restingItems` the window
-     opened and remained a strip: the rows stood in the tree and had no height.
-     The observer hangs on what really counts - the size of the content - and
-     thereby manages without that knowledge too. */
-  const bodyRef = useRef<HTMLDivElement>(null);
-  const [bodyHeight, setBodyHeight] = useState(0);
-
-  useEffect(() => {
-    const body = bodyRef.current;
-    if (!open || body === null) return;
-    /* This stands after the choreography: the dialog is already open here, so
-       the first measurement is usable. The observer takes over everything else -
-       typing, fonts loaded later, longer labels. */
-    setBodyHeight(body.offsetHeight);
-    const observer = new ResizeObserver(() => setBodyHeight(body.offsetHeight));
-    observer.observe(body);
-    return () => observer.disconnect();
-  }, [open]);
-
-  /* ---------------------------------------------------------------- */
-  /* Keyboard                                                          */
-  /* ---------------------------------------------------------------- */
-
-  const move = (direction: 1 | -1) => {
-    keyboardTakesOver();
-    if (order.length === 0) return;
-    const current = order.findIndex((f) => f.candidate.id === activeId);
-    const next = order[nextIndex(current === -1 ? 0 : current, order.length, direction)]!.candidate;
-    setHeld(next.id);
-    /* VoiceOver reads neither the active descendant's group nor, often, the
-       row itself (listbox-announcements); a row here is never "selected" - its
-       `aria-selected` is the mark. */
-    announce(wording.optionActive(next.name, { group: next.group }), fieldRef.current);
-  };
-
-  const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    // An input method's own keys (Enter ends the composition) are not ours.
-    if (event.nativeEvent.isComposing || event.defaultPrevented) return;
-    if (event.key === "ArrowDown") {
-      event.preventDefault();
-      move(1);
-      return;
-    }
-    if (event.key === "ArrowUp") {
-      event.preventDefault();
-      move(-1);
-      return;
-    }
-    if (event.key === "Enter") {
-      event.preventDefault();
-      if (activeId !== null) onChoose(activeId);
-      return;
-    }
-    if (event.key === "Escape") {
-      /* Here too and not only through `cancel`: what this prevents is the
-         second way, not the first - whoever cancels shall close exactly
-         once. */
-      event.preventDefault();
-      onClose();
-    }
-  };
+  const onKeyDown = usePaletteKeys({ order, activeId, setHeld, keyboardTakesOver, fieldRef, onChoose, onClose });
 
   /* ---------------------------------------------------------------- */
   /* Presentation                                                      */
@@ -552,75 +350,3 @@ export const CommandPalette = forwardRef<HTMLDialogElement, CommandPaletteProps>
     </dialog>
   );
 });
-
-/* ------------------------------------------------------------------ */
-/* One row                                                             */
-/* ------------------------------------------------------------------ */
-
-/** The id of a row. A single IDREF and therefore readable raw as well - but one
-    rule for all ids built from the caller's values is easier to keep than two. */
-const rowId = (baseId: string, id: string) => `${baseId}-${idPart(id)}`;
-
-function Row({
-  find: item,
-  baseId,
-  active,
-  withIcon,
-  onSweep,
-  onMove,
-  onChoose,
-}: {
-  find: Find<PaletteCandidate>;
-  baseId: string;
-  active: boolean;
-  withIcon: boolean;
-  onSweep: (id: string) => void;
-  onMove: (id: string) => void;
-  onChoose: (id: string) => void;
-}) {
-  const { candidate } = item;
-  return (
-    <div
-      id={rowId(baseId, candidate.id)}
-      role="option"
-      aria-selected={active}
-      className={cx(styles.row, active && styles.rowActive)}
-      onPointerEnter={() => onSweep(candidate.id)}
-      onPointerMove={() => onMove(candidate.id)}
-      onMouseDown={(event) => {
-        // mousedown instead of click: the focus shall not leave the field first.
-        event.preventDefault();
-        // Only the main button chooses - whoever wants the context menu has not chosen.
-        if (event.button !== 0) return;
-        onChoose(candidate.id);
-      }}
-    >
-      {withIcon && (
-        <span className={styles.icon} aria-hidden="true">
-          {candidate.icon}
-        </span>
-      )}
-      <span className={styles.name}>{highlight(candidate.name, item.finds)}</span>
-      {candidate.heading !== undefined && <span className={styles.group}>{candidate.heading}</span>}
-    </div>
-  );
-}
-
-/** Draws the matched characters in the accent. Without that a find which no
-    substring explains looks like chance instead of like a reason. */
-function highlight(name: string, spans: readonly MatchSpan[]): ReactNode {
-  if (spans.length === 0) return name;
-  const parts: ReactNode[] = [];
-  let cursor = 0;
-  spans.forEach((span, i) => {
-    if (span.from > cursor) parts.push(name.slice(cursor, span.from));
-    parts.push(
-      <span className={styles.mark} key={i}>
-        {name.slice(span.from, span.to)}
-      </span>,
-    );
-    cursor = span.to;
-  });
-  if (cursor < name.length) parts.push(name.slice(cursor));
-  return parts;
-}
