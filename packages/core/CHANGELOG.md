@@ -33,6 +33,8 @@ commit.
 
 ### Changed
 
+- **The alarm list's wording keys are removed**: the alarm, priority, lifecycle, snooze, flood, chatter, availability and alarm-column keys. A wording that still carries them is ignored at runtime and reported by the type checker as an unknown key. `verdictAlarm` and the limit model are unchanged.
+
 - **`Dock` is removed**, with `DockProps`, `DockTool` and `DockPlace`, the eight `--u-dock-*` tokens and the wording keys `dockTools`, `dockGrip`, `dockPlace`, `dockPlaced` and `dockNoPlace` (a wording that still carries them is ignored at runtime and reported by the type checker as an unknown key). Nothing in the workspace used it. A caller that needs a strip of tools over a surface builds it from `Button`, `Tooltip` and the glyphs; `GripGlyph`, `GridGlyph` and `MeasureGlyph` stay. ADR-0013 and ADR-0014 are marked withdrawn.
 
 - **The tree's transition functions are no longer exported from the entry**: `move`, `toggleCheck`, `expand`, `collapse`, `keysBetween`, `toggleAll`, `setChecked`, `setActive`, `setAnchor`, `typeaheadTarget`, `pathTo` and `revealPath`. `treeModel`, `allBranches` and `duplicateKey` stay, and `useTree` is what a caller drives a tree with. The same holds for `remainingChars` and `clampedHeight` of `Textarea`. No type changed.

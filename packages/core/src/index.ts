@@ -51,8 +51,7 @@ export * from "./lib/glyphs";
    the module styles land in the bundle, and two rules of equal specificity are
    decided by it. Filed in here, they moved the table by two pixels – made
    visible by the screenshot baselines, which otherwise do not move. The table
-   and the alarm list have since moved to @umriss-ui/table (umriss-table 14);
-   the rule remains. */
+   has since moved to @umriss-ui/table (umriss-table 14); the rule remains. */
 export * from "./components/Stat";
 export * from "./lib/limit";
 export * from "./lib/freshness";

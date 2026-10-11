@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   Badge,
   Breadcrumb,
@@ -34,7 +34,7 @@ import {
 } from "../../src";
 import type { LimitSet } from "../../src";
 import { LimitLine, Tooltip, useChart } from "@umriss-ui/charts";
-import { AlarmList, alarmModel, useTableSelection } from "@umriss-ui/table";
+import { useTable } from "@umriss-ui/table";
 
 /* Data from the operations world, written out here so the example runs on its own. */
 /** A small LCG - the same numbers on every computer. */
@@ -178,44 +178,23 @@ const INCIDENTS: readonly Incident[] = [
   { id: "INC-1041", title: "Invoices generated twice", service: "billing", severity: "SEV2", opened: at(12, 16, 10), acknowledged: at(12, 16, 18), resolved: at(12, 18, 40), assignee: "priya" },
 ];
 
-/** A kind of alert, shaped as `@umriss-ui/table`'s alarm list reads it. */
-interface AlertType {
+type Priority = "high" | "medium" | "low";
+
+interface Alert {
   id: string;
-  label: string;
-  priority: "high" | "medium" | "low";
+  raised: number;
+  priority: Priority;
+  message: string;
+  state: "Active" | "Resolved";
+  acknowledgedAt?: number;
 }
 
-const ALERT_TYPES: readonly AlertType[] = [
-  { id: "checkout-latency", label: "Checkout · p95 latency above 300 ms", priority: "high" },
-  { id: "checkout-errors", label: "Checkout · error rate above 2\u00a0%", priority: "high" },
-  { id: "webhooks-queue", label: "Webhooks · queue older than 5 min", priority: "medium" },
-  { id: "search-latency", label: "Search · p95 latency above 250 ms", priority: "medium" },
-  { id: "images-disk", label: "Image service · disk 85 % full", priority: "low" },
-  { id: "reports-job", label: "Reporting · nightly job late", priority: "low" },
-];
-
-/** One alert, shaped as `@umriss-ui/table`'s alarm list reads it. */
-type Alert = {
-  id: string;
-  type: string;
-  lifecycle: "active-unacknowledged" | "active-acknowledged" | "resolved-unacknowledged" | "resolved-acknowledged";
-  raised: number;
-  resolved?: number;
-  acknowledgedAt?: number;
-} & (
-  | { availability?: "in-service" | "suppressed" | "disabled"; snooze?: undefined }
-  | { availability: "snoozed"; snooze: { until: number; by: string } }
-);
+const TONE = { high: "danger", medium: "warning", low: "neutral" } as const;
 
 /** The alerts as they stand at 10:30. */
 const ALERTS: readonly Alert[] = [
-  { id: "a-1", type: "checkout-latency", lifecycle: "active-acknowledged", raised: at(17, 9, 41), acknowledgedAt: at(17, 9, 46) },
-  { id: "a-2", type: "checkout-errors", lifecycle: "resolved-unacknowledged", raised: at(17, 9, 43), resolved: at(17, 10, 11) },
-  { id: "a-3", type: "webhooks-queue", lifecycle: "active-acknowledged", raised: at(17, 7, 12), acknowledgedAt: at(17, 8, 2) },
-  { id: "a-4", type: "search-latency", lifecycle: "active-unacknowledged", raised: at(17, 10, 24) },
-  { id: "a-5", type: "search-latency", lifecycle: "resolved-acknowledged", raised: at(17, 8, 5), resolved: at(17, 8, 9), acknowledgedAt: at(17, 8, 6) },
-  { id: "a-6", type: "images-disk", lifecycle: "active-unacknowledged", raised: at(17, 6, 0), availability: "snoozed", snooze: { until: at(17, 14), by: "Tomasz Nowak" } },
-  { id: "a-7", type: "reports-job", lifecycle: "active-unacknowledged", raised: at(17, 4, 30), availability: "disabled" },
+  { id: "a-1", raised: at(17, 9, 41), priority: "high", message: "Checkout · p95 latency above 300 ms", state: "Active", acknowledgedAt: at(17, 9, 46) },
+  { id: "a-2", raised: at(17, 9, 43), priority: "high", message: "Checkout · error rate above 2\u00a0%", state: "Resolved" },
 ];
 
 export const title = "Resolve an incident";
@@ -246,7 +225,7 @@ export const builtFrom = [
   "checkbox",
   "toast",
   { name: "Line", page: "@umriss-ui/charts#line" },
-  { name: "AlarmList", page: "@umriss-ui/table#alarmlist" },
+  { name: "Table", page: "@umriss-ui/table#first-table" },
 ];
 
 const INCIDENT = INCIDENTS.find((one) => one.id === "INC-1048")!;
@@ -282,31 +261,22 @@ const STEPS = [
   { label: "Resolved" },
 ];
 
-/* The alerts of the services this incident touches. */
-const OWN = new Set(["checkout-latency", "checkout-errors"]);
-
 function Content() {
   const { toast } = useToast();
   const { Chart, XAxis, YAxis, Line } = useChart(TODAY);
-  const [alerts, setAlerts] = useState<readonly Alert[]>(() => ALERTS.filter((one) => OWN.has(one.type)));
+  const [alerts, setAlerts] = useState<readonly Alert[]>(ALERTS);
   const [resolved, setResolved] = useState<number | null>(null);
   const [resolving, setResolving] = useState(false);
   const [cause, setCause] = useState("");
   const [summary, setSummary] = useState("");
   const [tried, setTried] = useState(false);
 
-  const view = useMemo(() => alarmModel({ alarms: [...alerts], types: ALERT_TYPES, asOf: NOW }), [alerts]);
-  const selection = useTableSelection(view.filtered.map((row) => row.id));
+  const t = useTable(alerts, { rowKey: (a) => a.id, defaultSort: { column: "raised", direction: "desc" } });
+  const { Table, Column } = t;
 
-  const acknowledge = (ids: readonly string[]) => {
-    setAlerts((before) =>
-      before.map((one) =>
-        ids.includes(one.id) && one.lifecycle.endsWith("-unacknowledged")
-          ? { ...one, lifecycle: one.lifecycle.replace("-unacknowledged", "-acknowledged") as Alert["lifecycle"], acknowledgedAt: NOW }
-          : one,
-      ),
-    );
-    selection.clear();
+  const acknowledge = () => {
+    setAlerts((before) => before.map((one) => (t.selection.selected.has(one.id) ? { ...one, acknowledgedAt: one.acknowledgedAt ?? NOW } : one)));
+    t.selection.clear();
   };
 
   const resolve = () => {
@@ -414,7 +384,24 @@ function Content() {
         </TabList>
         <TabPanel value="alerts">
           <div data-callout="4">
-            <AlarmList view={view} selection={selection} density="compact" onAcknowledge={acknowledge} />
+            <Stack gap={2} align="start">
+              <Table selectable ariaLabel="Alerts of the incident">
+                <Column value="raised" label="Raised">
+                  {(raised) => time(raised)}
+                </Column>
+                <Column value="priority" label="Priority">
+                  {(priority) => <Badge tone={TONE[priority]}>{priority}</Badge>}
+                </Column>
+                <Column value="message" label="Alert" rowHeader />
+                <Column value="state" label="State" />
+                <Column id="acknowledged" label="Acknowledged" value={(a) => a.acknowledgedAt ?? 0}>
+                  {(_, a) => (a.acknowledgedAt === undefined ? "No" : time(a.acknowledgedAt))}
+                </Column>
+              </Table>
+              <Button size="sm" disabled={t.selection.selected.size === 0} onClick={acknowledge}>
+                Acknowledge
+              </Button>
+            </Stack>
           </div>
         </TabPanel>
         <TabPanel value="earlier">

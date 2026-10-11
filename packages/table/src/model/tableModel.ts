@@ -24,8 +24,7 @@ import type { AggregateColumn, GroupLevel, Line, RowGroup } from "./grouping";
 export type SortDirection = "asc" | "desc";
 
 /** A column as the model reads it - what sorting, search, hiding and the
-    export need of it, not its presentation. `alarmModel` takes them, and
-    `ALARM_COLUMNS` are the alarm list's. */
+    export need of it, not its presentation. */
 export interface ModelColumn<Z, K extends string = string> {
   id: K;
   /** Human-readable label – for the column menu and the CSV header row.

@@ -45,10 +45,6 @@ export type { SortDirection, SortLevel } from "./model/tableModel";
 export { useTableSelection } from "./model/useTableSelection";
 export type { TableSelection } from "./model/useTableSelection";
 
-/* The alarm list, expressed in the same interface as any other table
-   (umriss-table 13), with its model. */
-export * from "./alarms";
-
 /* Grouping and aggregates (table-grouping). */
 export type { AggregateOptions, AggregateFunction, GroupByComponent, GroupingId } from "./types";
 
@@ -86,4 +82,3 @@ export type { DatePeriod, RowGroup } from "./model/grouping";
 export type { Computed, NumberField } from "./types";
 export type { ModelColumn, TableInput, TreeInput } from "./model/tableModel";
 export type { AggregateColumn, AggregateKind, GroupLevel, OwnAggregate } from "./model/grouping";
-export type { AlarmAvailability, AlarmBase } from "./alarms/alarmModel";

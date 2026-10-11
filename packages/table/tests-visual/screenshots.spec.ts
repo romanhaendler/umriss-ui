@@ -1,6 +1,6 @@
 /* Screenshot comparisons of the demo of @umriss-ui/table, light and dark (through
    the projects in playwright.config.ts). The clock is frozen, so that
-   time-dependent displays – the alarm list – stay deterministic.
+   time-dependent displays stay deterministic.
 
    The same two kinds of picture as in the demo of @umriss-ui/core, for the same
    reasons: one per example with the code COLLAPSED, one per page from the head

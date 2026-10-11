@@ -82,7 +82,7 @@ function metrics(serviceId: string): MetricPoint[] {
   return points;
 }
 
-/** A kind of alert, shaped as `@umriss-ui/table`'s alarm list reads it. */
+/** A kind of alert. */
 interface AlertType {
   id: string;
   label: string;
@@ -98,7 +98,7 @@ const ALERT_TYPES: readonly AlertType[] = [
   { id: "reports-job", label: "Reporting · nightly job late", priority: "low" },
 ];
 
-/** One alert, shaped as `@umriss-ui/table`'s alarm list reads it. */
+/** One alert. */
 type Alert = {
   id: string;
   type: string;

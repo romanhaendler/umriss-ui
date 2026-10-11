@@ -79,7 +79,7 @@ export function siteFaults(urls: readonly string[], forwarders: readonly Forward
    still there and lead somewhere. The promise comes from the caller: it names
    a word of the industrial world, which this source may not (ADR-0035). */
 const BUTTONS = ["Get started", "Explore the scenarios"];
-const CLAIMS = ["ISA-18.2 alarm lists", "ISA-101 limits and verdicts", "Canvas charts, measured", "English and German wording", "Written for coding agents too"];
+const CLAIMS = ["ISA-101 limits and verdicts", "Canvas charts, measured", "English and German wording", "Written for coding agents too"];
 
 /** What the front page gets wrong, one line each (.scratch/site-front-page):
     one h1 "umriss-ui", the promise, the install command and the theme

@@ -22,7 +22,7 @@ half a later reader needs most. Exactly one is superseded today.
 | [0006](0006-the-limit-model-lives-in-both-packages.md) | The limit model lives in both packages, on purpose | accepted | limits and alarms |
 | [0007](0007-a-state-is-a-number.md) | A state is a number | accepted | charts |
 | [0008](0008-control-limits-are-not-specification-limits.md) | A control limit is not a specification limit, and is never computed from the window | accepted | charts |
-| [0009](0009-the-library-owns-a-lifecycle-not-a-generation.md) | The library owns an alarm's lifecycle, not its generation | accepted | limits and alarms |
+| [0009](0009-the-library-owns-a-lifecycle-not-a-generation.md) | The library owns an alarm's lifecycle, not its generation | withdrawn, the alarm list was removed | limits and alarms |
 | [0010](0010-a-stale-value-keeps-its-verdict.md) | A stale value keeps its verdict | accepted | limits and alarms |
 | [0011](0011-named-channels-never-overloaded.md) | A channel is named, never overloaded | accepted | charts |
 | [0012](0012-a-translucent-material-needs-a-floor.md) | A translucent material needs a floor | accepted | surface and motion |
@@ -70,7 +70,7 @@ half a later reader needs most. Exactly one is superseded today.
 | [0054](0054-a-histogram-is-a-helper-for-bar-not-a-chart-kind.md) | A histogram is a helper for Bar, not a chart kind, and its last bin is closed | accepted | charts |
 | [0055](0055-the-summary-names-labelled-limits-the-tooltip-only-on-request.md) | The summary always names labelled limits, and the tooltip only on request | accepted | charts |
 | [0056](0056-a-chart-reports-a-chosen-hit-and-holds-no-selection.md) | A chart reports a chosen hit and holds no selection | accepted | charts |
-| [0057](0057-the-alarm-list-offers-snoozing-the-application-decides.md) | The alarm list offers snoozing and reports it, and the application decides | accepted | limits and alarms |
+| [0057](0057-the-alarm-list-offers-snoozing-the-application-decides.md) | The alarm list offers snoozing and reports it, and the application decides | withdrawn, the alarm list was removed | limits and alarms |
 | [0058](0058-a-skill-points-an-agent-at-the-documentation.md) | A skill points a coding agent at the documentation, and there is no MCP server | accepted | architecture |
 | [0059](0059-the-set-of-chart-kinds-is-open.md) | The set of chart kinds is open, and a kind is added when it answers a question no kind there answers better | accepted, supersedes ADR-0032 in two points | charts |
 | [0060](0060-validation-and-a-layout-editor-are-never-time-zones-not-yet.md) | Form validation and a dashboard a user arranges are never built, and time zones are not yet | accepted, extends ADR-0032 | scope |

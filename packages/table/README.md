@@ -135,10 +135,7 @@ stylesheets by hand.
   actions that stay quiet until the row is meant, and a bulk action that always
   receives a list.
 * **For monitoring**: `VerdictColumn` reads a measured value against a
-  limit set, and `AlarmList` shows alarms with a lifecycle — active or
-  resolved, acknowledged or not. It offers snoozing and reports what the
-  operator asked for; the application applies it or refuses. The library
-  generates no alarms (ADR-0009).
+  limit set. The library generates no alarms.
 * **A million rows on a server**: in server mode (`server: true`, `rowCount`)
   the rows are one page a server answered; the table reports the request -
   search, conditions, sort, page, page size - through `onRequest` once per

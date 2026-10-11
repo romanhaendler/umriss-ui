@@ -26,8 +26,8 @@ export const EXAMPLE_ADDRESSES: readonly ExampleAddress[] = exampleAddresses(EXA
 /** A sample for the accessibility check (table-demo, Testing Decisions): the
     scenarios page, every page that was once part of the two long pages `Table`
     and `Column` (the demo's features, table-demo-features), the filters with
-    their panels, the row actions with their menu, the column menu with its
-    dialog and the alarm list. */
+    their panels, the row actions with their menu and the column menu with its
+    dialog. */
 export const SAMPLE = [
   "scenarios",
   "first-table",
@@ -48,5 +48,4 @@ export const SAMPLE = [
   "filter",
   "rowactions",
   "columnmenu",
-  "alarmlist",
 ] as const;

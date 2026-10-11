@@ -6,9 +6,9 @@
    marks explained below, the pages it is built from, the code collapsed.
 
    A scenario's world has a fixed moment; a feed's freshness
-   counts from page load. Alarms, acknowledgements, tasks and readings keep the
+   counts from page load. Alerts, tasks and readings keep the
    world's moment; only the `asOf` handed to a component that judges freshness
-   (AlarmList, Stat, Given) is the moment the page was loaded, less the feed's
+   (Stat, Given) is the moment the page was loaded, less the feed's
    plausible delay - so no screen ages into a stale or lost feed while the site
    stands. An example whose subject is a stale or lost feed shows it relative
    to load as well. Each demo's smoke test loads its scenarios under a clock in
