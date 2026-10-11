@@ -45,7 +45,6 @@ export class SceneData {
   lanes: LaneConfig[] = [];
   /** The groups in registration order. */
   groups: GroupConfig[] = [];
-  laneIndex = new Map<string, number>();
   /** The layers in registration order - the drawing order. */
   layers: LayerConfig[] = [];
   subtasks: Subtask[] = [];
@@ -131,7 +130,6 @@ export class SceneData {
     const inOrder = <C>(entries: Map<number, C>) => [...entries.keys()].sort((a, b) => a - b).map((id) => entries.get(id)!);
     this.lanes = inOrder(this.laneEntries);
     this.groups = inOrder(this.groupEntries);
-    this.laneIndex = new Map(this.lanes.map((lane, i) => [lane.id, i] as const));
     this.layers = inOrder(this.layerEntries);
     this.subtasks = [];
     this.dependencies = [];

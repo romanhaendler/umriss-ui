@@ -19,7 +19,7 @@
    The data is the caller's and stays as it came (ADR-0023). */
 
 import type { ReactNode } from "react";
-import { DAY, HOUR, calendarFrom, subscribeTheme, toWallClock, toWorkingTimeClamped } from "@umriss-ui/charts";
+import { DAY, HOUR, subscribeTheme, toWorkingTimeClamped } from "@umriss-ui/charts";
 import { resolveAppearance } from "./appearance";
 import { slotAt, xOf } from "./geometry";
 import { SceneData, type GroupConfig, type LaneConfig, type LayerConfig, type ScheduleTooltipTarget } from "./sceneData";
@@ -28,7 +28,8 @@ import { barFace, drawData, drawOverlay, prepareCanvas, resolveSceneColours, wor
 import { barLabelBox, inView } from "./geometry";
 import { SceneGestures, type GhostSummary, type PlacingItem, type SceneHandlers } from "./sceneGestures";
 import { SceneKeys, type Spoken } from "./sceneKeys";
-import { DEFAULT_LANE_HEIGHT, SceneView, type SceneOptions } from "./sceneView";
+import { SceneView, type SceneOptions } from "./sceneView";
+import { wallClockWithin } from "./timeAxis";
 import { defaultSpan, onlyKnown, viewKey, type ScheduleView } from "./view";
 
 export type { GroupConfig, LaneConfig, LayerConfig, ScheduleTooltipTarget } from "./sceneData";
@@ -62,7 +63,6 @@ export interface ScheduleHeader {
 export interface ScheduleSnapshot {
   readonly width: number;
   readonly height: number;
-  readonly laneHeight: number;
   readonly scrollY: number;
   /** One entry per ROW of the plot, in the order they stand: a lane's header,
       an open group's head, or a folded group's one row. What a header shows
@@ -115,7 +115,6 @@ export interface ScheduleSnapshot {
 const EMPTY_SNAPSHOT: ScheduleSnapshot = {
   width: 0,
   height: 0,
-  laneHeight: DEFAULT_LANE_HEIGHT,
   scrollY: 0,
   headers: [],
   days: [],
@@ -439,7 +438,6 @@ export class ScheduleScene {
     this.snapshot = {
       width: view.width,
       height: view.height,
-      laneHeight: view.options.laneHeight,
       scrollY: view.scrollY,
       headers: this.headers(),
       ...view.bands(),
@@ -532,9 +530,7 @@ export class ScheduleScene {
 
   /** The visible span, as two wall-clock instants. */
   visibleDomain(): [number, number] {
-    const calendar = calendarFrom(this.view.options.calendar);
-    const wall = (v: number) =>
-      calendar.intervals.length === 0 ? v : toWallClock(Math.max(0, Math.min(calendar.total, v)), calendar);
+    const wall = (v: number) => wallClockWithin(v, this.view.options.calendar);
     return [wall(this.view.domain[0]), wall(this.view.domain[1])];
   }
 

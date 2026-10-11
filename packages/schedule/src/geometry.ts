@@ -30,8 +30,6 @@ export interface Viewport {
   /** Working time → pixel, across the plot's width. */
   readonly scale: Scale;
   readonly calendar: CalendarInput;
-  /** Height of one lane in pixels. */
-  readonly laneHeight: number;
   /** How far the lanes are scrolled up, in pixels. */
   readonly scrollY: number;
   /** What is laid out from top to bottom, and where every lane sits in it
@@ -57,8 +55,6 @@ export const MAX_DEPTH = 3;
 /** A subtask as drawn: its three parts along x, its bar along y. */
 export interface SubtaskBox {
   readonly subtask: Subtask;
-  /** The lane it sits on. */
-  readonly lane: string;
   /** Whether it is drawn as a strip inside a folded group. */
   readonly miniature: boolean;
   /** How many earlier subtasks it covers on its lane - its offset level. */
@@ -99,7 +95,7 @@ export function laneAt(view: Viewport, y: number): string | null {
   return laneAtY(view.rows, y + view.scrollY);
 }
 
-export function subtaskBox(view: Viewport, subtask: Subtask, lane: string, slot: Slot, depth: number): SubtaskBox {
+export function subtaskBox(view: Viewport, subtask: Subtask, slot: Slot, depth: number): SubtaskBox {
   /* Per SLOT, not per lane height: a strip inside a folded group is
      a few pixels tall, and a bar on it has to be too. */
   const inset = slot.miniature ? 0 : BAR_INSET;
@@ -110,7 +106,6 @@ export function subtaskBox(view: Viewport, subtask: Subtask, lane: string, slot:
   const outer = occupied(subtask);
   return {
     subtask,
-    lane,
     miniature: slot.miniature,
     depth,
     y: top + (slot.miniature ? 0 : Math.min(depth, MAX_DEPTH) * DEPTH_STEP),

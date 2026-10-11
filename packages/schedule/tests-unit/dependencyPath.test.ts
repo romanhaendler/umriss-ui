@@ -27,7 +27,6 @@ const rows = layOutRows({
 const view: Viewport = {
   scale: new LinearScale([at(0), at(100)], [0, 1000]),
   calendar: [],
-  laneHeight: 40,
   scrollY: 0,
   rows,
 };
@@ -40,7 +39,7 @@ const subtask = (id: string, lane: string, from: number, to: number): Subtask =>
   to: at(to),
 });
 
-const boxOn = (s: Subtask) => subtaskBox(view, s, s.lane, slotOf(rows, s.lane)!, 0);
+const boxOn = (s: Subtask) => subtaskBox(view, s, slotOf(rows, s.lane)!, 0);
 
 const first = boxOn(subtask("a", "one", 0, 20));
 const below = boxOn(subtask("b", "three", 40, 60));

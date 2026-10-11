@@ -8,97 +8,26 @@
 
 import { MINUTE, calendarFrom, toWorkingTimeClamped, toWallClock } from "@umriss-ui/charts";
 import { autoPanSpeed } from "./autoPan";
+import { wallClockWithin } from "./timeAxis";
 import { violatedDependencies, overlaps, type ViolatedDependency, type Overlap } from "./findings";
 import { edgeAt, partAt } from "./geometry";
 import { occupied, type Intent, type PlaceIntent, type Subtask } from "./model";
 import { entersBlockedTime, refusedLanes } from "./refusal";
-import type { SceneData } from "./sceneData";
 import { ghostBox, type GhostDrawing } from "./sceneDraw";
-import type { ScheduleHit, SceneView } from "./sceneView";
+import type { ScheduleHit } from "./sceneView";
+import {
+  NONE_REFUSED,
+  PLACING,
+  type EditMode,
+  type Gesture,
+  type GestureHost,
+  type GhostSummary,
+  type PlacingItem,
+} from "./sceneGestureTypes";
 import { snapTime, type SnapRaster } from "./snap";
 
-/** A pointer interaction, reported with its target and its position. */
-export interface ScheduleInteraction {
-  /** `"hover"` is reported when the target under the pointer changes, not on
-      every movement. */
-  readonly type: "click" | "contextmenu" | "hover";
-  /** What the pointer is on. */
-  readonly hit: ScheduleHit;
-  /** The pointer's horizontal client coordinate - where a `ContextMenu` opens. */
-  readonly clientX: number;
-  /** The pointer's vertical client coordinate. */
-  readonly clientY: number;
-  /** The wall-clock instant under the pointer. */
-  readonly time: number;
-  /** The lane under the pointer, or null below the last one. */
-  readonly lane: string | null;
-}
-
-export interface SceneHandlers {
-  /** Whether this subtask may go to this lane. Asked while a drag runs and
-      again at the drop; absent means every lane is open. */
-  canMoveTo?: (subtask: Subtask, lane: string) => boolean;
-  onIntent?: (intent: Intent) => void;
-  onInteraction?: (interaction: ScheduleInteraction) => void;
-  onSelectedTaskChange?: (task: string | null, subtask: string | null) => void;
-}
-
-/** What the gestures need from the scene they belong to. */
-export interface GestureHost {
-  readonly data: SceneData;
-  readonly view: SceneView;
-  plotElement(): HTMLElement | null;
-  handlers(): SceneHandlers;
-  selectedSubtask(): string | null;
-  /** A click chose a task and possibly one of its subtasks. */
-  select(task: string | null, subtask: string | null): void;
-  /** The view moved: lay out, publish, draw. */
-  viewChanged(): void;
-  /** The planner panned or zoomed. As `viewChanged`; where the span through
-      time changed, it is reported as well. */
-  viewMoved(time: boolean): void;
-  /** Only interaction state changed: publish and draw. */
-  interactionChanged(): void;
-}
-
-type EditMode = "move" | "stretch-from" | "stretch-to" | "leadIn" | "leadOut";
-
-/** What the application says it is dragging in, while it drags it: the
-    browser hands over the dragged data only on the drop, so the ghost before
-    the drop can only come from the caller. */
-export interface PlacingItem {
-  /** The caller's key for the dragged item; it comes back in the intent. */
-  readonly item: string;
-  /** The task the work belongs to. */
-  readonly task: string;
-  /** How long its main time is. */
-  readonly duration: number;
-  /** The lead-in it brings. */
-  readonly leadIn?: number;
-  /** The lead-out it brings. */
-  readonly leadOut?: number;
-}
-
-/** The id the ghost of a drag from outside carries while it is in flight. It
-    is never data: the placed subtask gets the caller's id (`subtaskFromPlace`). */
-const PLACING = "\u0000placing";
-
-/* `refused` is the set of lanes the dragged work may not go to, asked once when
-   the gesture took hold and carried by the gesture itself - so it cannot
-   outlive it (`refusal.ts`). */
-type Gesture =
-  | { kind: "none" }
-  | { kind: "place"; ghost: Subtask; item: PlacingItem; refused: ReadonlySet<string> }
-  | { kind: "pending"; pointerId: number; x0: number; y0: number; mode: EditMode | "pan"; subtask: Subtask | null }
-  | { kind: "pan"; pointerId: number; lastX: number; lastY: number }
-  /* `t0` is the working time the drag took hold at - not a pixel, because
-     auto-pan moves the scale under a drag in flight. */
-  | { kind: "edit"; pointerId: number; mode: EditMode; subtask: Subtask; t0: number; ghost: Subtask; refused: ReadonlySet<string> }
-  | { kind: "pinch"; distance: number };
-
-/** No lane refused - the answer for every gesture that cannot change a lane at
-    all, and the value a gesture starts from. */
-const NONE_REFUSED: ReadonlySet<string> = new Set<string>();
+export type { GestureHost, GhostSummary, PlacingItem, ScheduleInteraction, SceneHandlers } from "./sceneGestureTypes";
+import type { ScheduleInteraction } from "./sceneGestureTypes";
 
 /** What the pointer is on, as one comparable value: hover is drawn and
     reported when this changes, not on every movement. */
@@ -127,29 +56,6 @@ const TOUCH_SLOP = 10;
     gesture. Long enough that crossing one on the way somewhere else does not
     open it, short enough that a planner who meant it does not wonder. */
 const SPRING_OPEN_AFTER = 600;
-
-/** The ghost's label, as the DOM reads it. */
-export interface GhostSummary {
-  /** The pointer stands over a lane this subtask may not go to; the ghost
-      stayed where it was allowed. */
-  readonly refused: boolean;
-  /** Every lane this work may not go to, for the whole run of the gesture -
-      the ids, so that an application can mark its own parts beside the plot
-      the way the schedule marks the lanes. */
-  readonly refusedLanes: readonly string[];
-  /** The pointer stands where the work would cover blocked time; the ghost
-      stayed where it was allowed. */
-  readonly blocked: boolean;
-  readonly x: number;
-  readonly y: number;
-  /** The height of the bar the label belongs to, so the label can go under it
-      where there is no room above. */
-  readonly height: number;
-  readonly from: number;
-  readonly to: number;
-  readonly overlap: boolean;
-  readonly violated: boolean;
-}
 
 export class SceneGestures {
   private gesture: Gesture = { kind: "none" };
@@ -847,7 +753,7 @@ export class SceneGestures {
   shifted(time: number, delta: number, step: SnapRaster): number {
     const calendar = calendarFrom(this.host.view.options.calendar);
     const moved = toWorkingTimeClamped(time, calendar) + delta;
-    const wall = calendar.intervals.length === 0 ? moved : toWallClock(Math.max(0, Math.min(calendar.total, moved)), calendar);
+    const wall = wallClockWithin(moved, calendar);
     return this.snapInside(wall, step);
   }
 
