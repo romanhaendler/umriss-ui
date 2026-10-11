@@ -1,6 +1,6 @@
 # The CSV follows the language in use
 
-Status: ready-for-agent
+Status: ready-for-human
 Date:   2026-10-11
 Origin: roadmap `.scratch/open-points-roadmap/spec.md`, row T6 and "Taken as
 agreed" 4; facts in `docs/research/open-points-2026-10/export_copy_and_wording.md`

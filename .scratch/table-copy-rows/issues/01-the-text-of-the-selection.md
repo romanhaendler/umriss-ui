@@ -1,6 +1,6 @@
 # 01 - The text of the selection
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: M
 
@@ -25,3 +25,7 @@ The text a copy writes, and the function that hands it over - no key yet.
 - [ ] Fields with tab, newline and quote are quoted.
 - [ ] Three wording keys in English and German; wording completeness test passes.
 - [ ] Unit tests of the writer; a mounted test of `selectionAsText()`.
+
+## Comments
+
+Delivered 2026-10-11. `asTabbed` in `model/csv.ts` shares the column and quoting code with `asCsv`; `selectionText`, `selectedInOrder` and `cellText` in `export.ts`; `selectionAsText()` on the snapshot; wording keys `copiedRows`, `copiedCell`, `copyFailed` in English and German (`copiedRows` says "1 row copied" for one). Tests in `copyRows.test.tsx`.

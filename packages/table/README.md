@@ -120,6 +120,12 @@ stylesheets by hand.
 * **Around the table**: toolbar, search, column menu, export, paging — each
   usable inside the table toolbar or anywhere else on the page with `of`, and
   one `size` for the whole bar that a control of one's own can match.
+* **Export and copy follow the language** (ADR-0061): the CSV takes its decimal
+  mark from the formats, yes/no from the wording and its separator from the
+  mark - English gets commas and a point, `@umriss-ui/core/wording/de` the file
+  it always had. Ctrl or Cmd with C copies the selected rows as tab-separated
+  text (in grid mode with no selection, the Active cell), says so in a live
+  region, and `selectionAsText()` hands the same text to a button of one's own.
 * **On a row**: a detail row that stays open across a change of filter, row
   actions that stay quiet until the row is meant, and a bulk action that always
   receives a list.
@@ -135,6 +141,18 @@ stylesheets by hand.
 * **Twenty thousand rows** where it has to be: virtualisation, sticky parts,
   columns pinned to either side and column widths that survive a view being
   restored.
+* **Rows that change every second** (`tests-unit/rowsThatKeepArriving.test.tsx`):
+  `rows` may be a new array each second - values move, a row appears, one goes.
+  The sort stays and the rows stand in its order; a row keeps its place in the
+  markup by its `rowKey`; the selection holds by key (the count follows the rows
+  there are, and a key whose row is gone waits in the set and ticks again if the
+  row returns); an open Row draft stays open with what was typed and shows its
+  other fields as they were when it opened, and closes only when its row is gone
+  from `rows`; the Active cell stays on its row by key when a re-sort moves it,
+  and where its row is gone the cell now at its index takes over; the scroll
+  position and a `virtual` window stay on the same rows. Real scroll and focus
+  under the row motion are not proved (a browser case is open); nor are grouping
+  and tree rows.
 * **A grid, on request** (ADR-0034, ADR-0036): `<Table grid>` is one tab stop
   whose Active cell the arrows walk, and a column with `edit` is edited in
   place from the first click - with the core field for its value, a `validate`

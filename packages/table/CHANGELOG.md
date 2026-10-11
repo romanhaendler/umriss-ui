@@ -24,6 +24,18 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ## Unreleased
 
+### Added
+
+- **A snooze's reason is shown in the tip and spoken.** `<AlarmList>` passes the reason `snooze()` stored (trimmed, none when blank) to `availabilitySnoozed`: "Snoozed until 14:00 by M. Weber: valve being replaced". The badge stays one word. Needs `@umriss-ui/core` with the third argument.
+- **Rows that change every second were tested, and what holds is stated in the README**: sort, selection by key, an open Row draft, the Active cell, the scroll position and the virtual window across ticks (`tests-unit/rowsThatKeepArriving.test.tsx`). No fault was found, so no ticket follows; grouping, tree rows and real scroll and focus in a browser are not proved.
+
+- **Ctrl or Cmd with C copies the selected rows, or - in grid mode with no selection - the Active cell.** The rows come in the visible columns under a header line, tab-separated, with the export's values and the formats' decimal mark; a screen reader hears "3 rows copied", "Cell copied" or "Could not copy" from a live region on the table. Marked text and a focused field keep the browser's own copy. `selectionAsText()` on the table hands the same text to a button of your own. Needs `@umriss-ui/core` with `copiedRows`, `copiedCell` and `copyFailed`.
+
+### Changed
+
+- **The CSV follows the language in use (ADR-0061).** With the English defaults the export now has commas between fields, a decimal point and `yes`/`no`; `asCsv()` without a provider returns that text. A German application - wording and formats from `@umriss-ui/core/wording/de` - gets the file it got before, byte for byte. German wording with English formats gets German words with comma and point: take both halves (ADR-0024). The separator is a semicolon wherever the formats' decimal mark is a comma.
+- **Every entry begins with `"use client";`.** The built file `dist/table.js` starts with the directive, then the stylesheet import, so a bundler that splits server from client code takes each as client code. The directive is written to the built entries only; the sources are unchanged.
+
 ---
 
 ## 0.15.0 – A reason when snoozing (Oct. 2026)

@@ -1,6 +1,6 @@
 # The formats are English, and German is freight
 
-Status: accepted
+Status: accepted, extended by ADR-0061 (the CSV follows the language in use)
 Date:   2026-09
 
 ADR-0019 made the wording English and left a sentence standing that has been
@@ -61,7 +61,8 @@ semicolon. It is a machine format for a spreadsheet, argued at its site
 (`model/csv.ts`), and it never read the display formats; an English default
 says nothing about which dialect of CSV a spreadsheet expects. Whether that
 should follow the locale too is a question about a third object, and it is left
-open here on purpose — as ADR-0019 left this one.
+open here on purpose — as ADR-0019 left this one. *ADR-0061 answered it in
+October 2026: the CSV follows the language in use.*
 
 **The German test fixtures** that measure a property *of* German stay German
 (`docs/testing.md`, "German that is the subject and not a leftover"): a test

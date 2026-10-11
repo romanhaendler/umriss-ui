@@ -1,6 +1,6 @@
 # 03 - Documents and release
 
-Status: ready-for-agent
+Status: ready-for-human
 Type: task
 Size: S
 
@@ -21,3 +21,7 @@ Spec: `.scratch/table-copy-rows/spec.md`
 - [ ] Changelogs and versions as above.
 - [ ] Full check passes.
 - [ ] Spec status `done` with a delivery report under `## Comments`; ticket statuses `done`.
+
+## Comments
+
+Done: example `Export/03-copy-the-selection.tsx`, Export page text, README line, table and core changelog entries under Added. Left: the release (no version raised), the full check with build and visual, the manual paste check (Excel, Numbers, LibreOffice; VoiceOver and NVDA), and the non-goals wording - no page in `packages/table` calls the row clipboard "later"; only ADR-0032 does, which is not rewritten.

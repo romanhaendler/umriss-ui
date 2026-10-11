@@ -65,7 +65,9 @@ export interface AlarmListProps extends Omit<HTMLAttributes<HTMLDivElement>, "ch
       refuses. The action stands beside "Acknowledge", on the selection, and
       needs `selection`, `snoozeDurations` and this handler. With
       `snoozeReason` there is a third argument: the reason, trimmed, or
-      `undefined` when it is optional and left empty. */
+      `undefined` when it is optional and left empty. Stored with `snooze()`,
+      the reason is shown after the end and the name in the snoozed badge's
+      tip and in what is spoken. */
   onSnooze?: (ids: readonly string[], until: number, reason?: string) => void;
   /** Asks for a reason when snoozing: "Snooze" then opens a small panel with
       the durations and a field for the reason, and its button reports. With
@@ -170,7 +172,7 @@ function availabilityWords(row: AlarmRow, wording: Wording, formats: Formats): {
       const asOf = new Date(row.alarm.raised + row.age);
       const sameDay = until.toDateString() === asOf.toDateString();
       const end = sameDay ? formats.time(until, false) : formats.dateTime(until, false);
-      return { short: wording.availabilitySnoozedShort, full: wording.availabilitySnoozed(end, snooze.by) };
+      return { short: wording.availabilitySnoozedShort, full: wording.availabilitySnoozed(end, snooze.by, snooze.reason?.trim() || undefined) };
     }
     case "suppressed":
       return { short: wording.availabilitySuppressed, full: wording.availabilitySuppressed };

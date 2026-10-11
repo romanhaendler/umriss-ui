@@ -345,6 +345,12 @@ export interface Wording {
   entries: (count: number, formatted: string) => string;
   /** "3 selected" in the pagination bar and the table toolbar. */
   selectedCount: (count: number, formatted: string) => string;
+  /** Said to a screen reader after Ctrl+C copied rows: "3 rows copied". */
+  copiedRows: (count: number, formatted: string) => string;
+  /** Said after Ctrl+C copied the active cell of a grid. */
+  copiedCell: string;
+  /** Said when the clipboard refused or is not there. */
+  copyFailed: string;
   /** Empty because there are no rows. */
   noEntries: string;
   /** Empty because search and filters leave nothing - something else. */
@@ -446,8 +452,9 @@ export interface Wording {
   columnAge: string;
   /** The availability of an alarm (ISA-18.2's special states), written out.
       A snooze names its end and who snoozed it - a snooze is tracked, not
-      anonymous; the time comes from the formats. */
-  availabilitySnoozed: (until: string, by: string) => string;
+      anonymous; the time comes from the formats. The reason, when the snooze
+      has one, comes last and is optional: a wording of two parameters fits. */
+  availabilitySnoozed: (until: string, by: string, reason?: string) => string;
   /** A snooze as one word - the alarm list's badge; the sentence above stands
       in its tooltip and in what is spoken. */
   availabilitySnoozedShort: string;
@@ -800,6 +807,9 @@ export const DEFAULT_WORDING: Wording = {
   calendarWeek: (week, year) => `Week ${week}, ${year}`,
   entries: (count, formatted) => (count === 1 ? "1 entry" : `${formatted} entries`),
   selectedCount: (_count, formatted) => `${formatted} selected`,
+  copiedRows: (count, formatted) => (count === 1 ? "1 row copied" : `${formatted} rows copied`),
+  copiedCell: "Cell copied",
+  copyFailed: "Could not copy",
   noEntries: "No entries",
   nothingMatchesFilters: "Nothing matches the search and filters",
 
@@ -866,7 +876,7 @@ export const DEFAULT_WORDING: Wording = {
   columnFrequency: "Frequency",
   columnAcknowledgement: "Acknowledgement",
   columnAge: "Age",
-  availabilitySnoozed: (until, by) => `Snoozed until ${until} by ${by}`,
+  availabilitySnoozed: (until, by, reason) => `Snoozed until ${until} by ${by}${reason ? `: ${reason}` : ""}`,
   availabilitySnoozedShort: "Snoozed",
   availabilitySuppressed: "Suppressed",
   availabilityDisabled: "Disabled",

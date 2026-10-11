@@ -161,12 +161,12 @@ describe("Absent values", () => {
 });
 
 describe("Export", () => {
-  it("leaves numbers as numbers with a decimal comma - even behind a percent format", () => {
+  it("leaves numbers as numbers with the formats' decimal mark - even behind a percent format", () => {
     render(<Log />);
     const lines = current!.asCsv().replace("﻿", "").split("\r\n");
-    expect(lines[0]).toBe("Name;Menge;Anteil;Gemessen;Geprüft;Kennung;Lücke");
-    expect(lines[1]).toBe("Basalt;1204,5;0,4;2026-03-17T08:00:00.000Z;ja;K-9;");
-    expect(lines[2]).toBe("Änderung;3;;2026-03-16T08:00:00.000Z;nein;K-10;4");
+    expect(lines[0]).toBe("Name,Menge,Anteil,Gemessen,Geprüft,Kennung,Lücke");
+    expect(lines[1]).toBe("Basalt,1204.5,0.4,2026-03-17T08:00:00.000Z,yes,K-9,");
+    expect(lines[2]).toBe("Änderung,3,,2026-03-16T08:00:00.000Z,no,K-10,4");
   });
 
   it("contains the filtered set in the visible columns and their order", () => {
@@ -178,8 +178,8 @@ describe("Export", () => {
     });
     const lines = current!.asCsv().replace("﻿", "").split("\r\n");
     expect(lines).toHaveLength(2);
-    expect(lines[0]).toBe("Menge;Name;Anteil;Geprüft;Kennung;Lücke");
-    expect(lines[1]).toBe("10;Cirrus;0,5;ja;K-2;2");
+    expect(lines[0]).toBe("Menge,Name,Anteil,Geprüft,Kennung,Lücke");
+    expect(lines[1]).toBe("10,Cirrus,0.5,yes,K-2,2");
   });
 
   it("without a provider the cell writes the default notation", () => {

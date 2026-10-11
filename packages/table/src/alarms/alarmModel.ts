@@ -119,7 +119,7 @@ export interface Snooze {
   until: number;
   /** Who snoozed it - a snooze is tracked, not anonymous. */
   by: string;
-  /** Why, when the application asked for one. The list does not show it. */
+  /** Why, when the application asked for one. The list shows it in the badge's tip and in what is spoken. */
   reason?: string;
 }
 

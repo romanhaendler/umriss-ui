@@ -1,6 +1,6 @@
 # A table under rows that change every second
 
-Status: ready-for-agent
+Status: done
 Date:   2026-10-11
 Origin: session of 2026-10-11 (`.scratch/open-points-roadmap/spec.md`, row X3); the facts are in `docs/research/open-points-2026-10/five_topics.md`, section 1 ("Streaming / live").
 
@@ -101,3 +101,5 @@ active cell, `rowPitch.test.tsx` for the virtual window.
 - Grouping and tree rows are named as not proved, not tested.
 
 ## Comments
+
+Delivered by `issues/01` and `issues/02`. The test found no fault, so no ticket of a fault was produced and none is open. Open: a live example for the four `fixme` browser cases of `tests-visual/rows-that-keep-arriving.spec.ts`; the FLIP motion under a re-sort is not asserted.

@@ -1,6 +1,6 @@
 # 02 - The changelog line
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: S
 
@@ -19,3 +19,5 @@ test produced and are still open.
 
 - [ ] The changelog line is there, naming the tickets for faults found.
 - [ ] Spec and tickets set to `done`, with the report.
+
+Delivered. The line stands in `packages/table/CHANGELOG.md` under Unreleased/Added (the file has no "Documented" heading; the three headings are Added, Changed and Fixed). No fault ticket is open. The version is not raised.

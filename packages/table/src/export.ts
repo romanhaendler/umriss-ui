@@ -1,9 +1,12 @@
 /* The export of a table: the filtered set in the visible columns, in the order
    the user sees, with the values and not with their presentation. The writing
-   rules (separator, decimal comma, BOM) belong to asCsv. */
+   rules belong to asCsv; the language's part of them (separator, decimal mark,
+   words for true and false) is built here from the formats and the wording. */
 
-import { asCsv } from "./model/csv";
-import type { ModelColumn } from "./model/tableModel";
+import { separatorsOf } from "@umriss-ui/core";
+import type { Formats, Wording } from "@umriss-ui/core";
+import { asCsv, asTabbed, plain } from "./model/csv";
+import type { CsvColumn, CsvConventions } from "./model/csv";
 import type { Registry, ColumnEntry } from "./registry";
 import type { TableSnapshot } from "./types";
 import { exportValue } from "./values";
@@ -28,26 +31,76 @@ export function resetSearchAndFilters(snapshot: TableSnapshot<unknown>) {
   for (const id of Object.keys(snapshot.filter)) snapshot.setFilter(id, null);
 }
 
-export function csvOf(registry: Registry, levelLabel: string): string {
+/** The three conventions the language decides: the decimal mark is the
+    formats' (measured, as `NumberInput` reads its own output), the separator
+    follows from it - a separator equal to the mark would make the file
+    unreadable - and the words for true and false are the wording's, lower
+    case (ADR-0061). */
+export function conventionsOf(formats: Formats, wording: Wording): CsvConventions {
+  const { decimal } = separatorsOf(formats);
+  return {
+    separator: decimal === "," ? ";" : ",",
+    decimal,
+    yes: wording.booleanYes.toLocaleLowerCase(),
+    no: wording.booleanNo.toLocaleLowerCase(),
+  };
+}
+
+/** The columns a file or the clipboard holds: the visible ones, in the order
+    shown. */
+function exportColumns(registry: Registry, rows: readonly unknown[]): CsvColumn<unknown>[] {
+  return (
+    visibleColumns(registry)
+      /* A value without a text form and without an export path of its own does
+         not belong in a spreadsheet - a column full of "[object Object]" is not
+         one. */
+      .filter((e) => registry.kindOf(e, rows) !== "other" || e.spec.ownExportValue)
+      .map(
+        (e): CsvColumn<unknown> => ({
+          id: e.spec.id,
+          label: e.spec.label,
+          value: (row) => exportValue(e.read(row), e.spec.ownExportValue),
+        }),
+      )
+  );
+}
+
+export function csvOf(registry: Registry, levelLabel: string, formats: Formats, wording: Wording): string {
   const hook = registry.hook;
   if (!hook) return "";
-  const columns = visibleColumns(registry)
-    /* A value without a text form and without an export path of its own does
-       not belong in a spreadsheet - a column full of "[object Object]" is not
-       one. */
-    .filter((e) => registry.kindOf(e, hook.rows) !== "other" || e.spec.ownExportValue)
-    .map(
-      (e): ModelColumn<unknown> => ({
-        id: e.spec.id,
-        label: e.spec.label,
-        value: (row) => exportValue(e.read(row), e.spec.ownExportValue),
-      }),
-    );
+  const columns = exportColumns(registry, hook.rows);
+  const conventions = conventionsOf(formats, wording);
   /* A tree writes every row of its filtered tree, open or not, with its level
      first: a consumer filtering by level gets a whole level. */
   const { exported, filtered } = registry.projection();
-  if (!exported) return asCsv(filtered, columns);
+  if (!exported) return asCsv(filtered, columns, conventions);
   const level = new Map(exported.map((e) => [e.node, e.level + 1]));
-  const levelColumn: ModelColumn<unknown> = { id: "#level", label: levelLabel, value: (row) => level.get(row) };
-  return asCsv(exported.map((e) => e.node), [levelColumn, ...columns]);
+  const levelColumn: CsvColumn<unknown> = { id: "#level", label: levelLabel, value: (row) => level.get(row) };
+  return asCsv(exported.map((e) => e.node), [levelColumn, ...columns], conventions);
+}
+
+/** The selected rows within the filtered set, in the export's order - a tree's
+    open and closed branches alike, no group line. What lies outside the filter
+    stays selected but is not copied. */
+export function selectedInOrder(registry: Registry): readonly unknown[] {
+  const hook = registry.hook;
+  if (!hook) return [];
+  const { exported, filtered } = registry.projection();
+  const set = exported ? exported.map((e) => e.node) : filtered;
+  return hook.selectedRows ?? set.filter((row) => hook.publicSnapshot.selection.isSelected(hook.rowKey(row)));
+}
+
+/** What Ctrl+C writes: the selected rows under a header line, tab-separated,
+    in the visible columns with the export's values. Empty with no selection. */
+export function selectionText(registry: Registry, formats: Formats, wording: Wording): string {
+  const hook = registry.hook;
+  const rows = selectedInOrder(registry);
+  if (!hook || rows.length === 0) return "";
+  return asTabbed(rows, exportColumns(registry, hook.rows), conventionsOf(formats, wording));
+}
+
+/** One cell as the copy writes it: the export's value in the language's notation. */
+export function cellText(entry: ColumnEntry, row: unknown, formats: Formats, wording: Wording): string {
+  const value = exportValue(entry.read(row), entry.spec.ownExportValue);
+  return value === undefined ? "" : plain(value, conventionsOf(formats, wording));
 }
