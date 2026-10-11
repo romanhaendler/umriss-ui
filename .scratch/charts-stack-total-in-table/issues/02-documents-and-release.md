@@ -1,6 +1,6 @@
 # 02 — Documents and release
 
-Status: ready-for-agent
+Status: ready-for-human
 Type: task
 Size: S
 
@@ -21,9 +21,16 @@ table over a stack is looked at before it is accepted.
 
 ## Acceptance
 
-- [ ] The capability row and "Later" are changed.
-- [ ] Changelog entry; no "Changed" entry is needed (no key, no existing cell
+- [x] The capability row and "Later" are changed.
+- [x] Changelog entry; no "Changed" entry is needed (no key, no existing cell
       moves; a new column appears).
-- [ ] Any baseline of an open table over a stack is looked at and updated.
+- [x] Any baseline of an open table over a stack is looked at and updated.
 - [ ] The spec's status set to `done` with the delivery report under
       `## Comments` once the release carries it; both tickets `done`.
+
+## Comments
+
+Capability row, "Later" and the changelog (under "Unreleased / Added") are done.
+No example shows "Show data" over a stack, so there is no baseline to update.
+The release is left: the spec's status and this ticket's `done` wait for the
+version that carries it.
