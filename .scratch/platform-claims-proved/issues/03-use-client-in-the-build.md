@@ -1,6 +1,6 @@
 # 03 - "use client" at the head of every built entry, and checked
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: M
 
@@ -40,3 +40,9 @@ directive"). Do not put a directive in any `src/` file: the build drops it.
       `dist/`).
 - [ ] A node import of `dist/core.js` still works (a string expression statement
       is harmless outside a bundler).
+
+## Comments
+
+- `scripts/styles/useClient.ts` exports `clientDirective()` (a name starting with `use` trips `react-hooks/rules-of-hooks` in a `vite.config.ts`); it is listed after `importOwnCss(...)` in the five configs. After `pnpm build`, `dist/<pkg>.js` of all five and `dist/wording/de.js` of core and charts begin `"use client";`, then the stylesheet import on the main entries; `formats-*.js` is untouched.
+- `check-dist.ts` reads `exports[*].import` from `package.json`; checked by hand: directive removed, stylesheet import first, both fail with a message; the clean build passes. `ci.yml` runs `pnpm -r check:dist` after `pnpm build`. Changelog entries in the five packages.
+- Not run by hand: a node import of `dist/core.js` (it imports a `.css` file, which node cannot load, directive or not).

@@ -1,6 +1,10 @@
 # What can be checked without a screenshot: lint, types, unit tests, build.
 # The screenshot suite stays local - its baselines are taken on darwin
 # (CONTRIBUTING.md, "First run") and would report every image as missing here.
+#
+# `unit-react18` is a job of its own and not a matrix over `check`: it rewrites
+# the lockfile in the runner (the override below), and a job that does so must
+# not be the one that checks the lockfile is frozen. Nothing of it is committed.
 name: CI
 
 on:
@@ -27,3 +31,33 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test:unit
       - run: pnpm build
+      - run: pnpm -r check:dist
+
+  # The packages claim "React 18 or 19"; the devDependencies are 19. This job runs the unit tests on 18.3.1.
+  unit-react18:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Override react and react-dom with 18.3.1
+        run: |
+          node -e '
+            const fs = require("node:fs");
+            const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
+            pkg.pnpm = { ...pkg.pnpm, overrides: { ...pkg.pnpm?.overrides, react: "18.3.1", "react-dom": "18.3.1" } };
+            fs.writeFileSync("package.json", JSON.stringify(pkg, null, 2));
+          '
+          pnpm install --no-frozen-lockfile
+      # Without this a silent no-op override would pass every test and prove nothing.
+      - name: Fail unless React 18 is installed
+        working-directory: packages/core
+        run: |
+          version=$(node -p 'require("react/package.json").version')
+          echo "react $version"
+          case "$version" in 18.*) ;; *) echo "expected React 18, got $version"; exit 1 ;; esac
+      - run: pnpm test:unit
