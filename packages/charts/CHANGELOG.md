@@ -39,7 +39,8 @@ interface was still expected to move before `0.3.0`.
   stack's members with a "Total" column (German "Summe"): the sum of the
   stack's members at the row's x, written as the tooltip writes it - a
   normalised stack's members show their shares and its total the sum of the
-  readings. A hidden member is out of the total.
+  readings. A hidden member is out of the total. The charts demo shows it on
+  the Tooltip page, "Read a stack's total in the table".
 
 ### Changed
 
