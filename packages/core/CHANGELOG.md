@@ -29,6 +29,10 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## Unreleased
+
+---
+
 ## 0.32.0 – Words for a snooze's reason and a plan's milestones (Oct. 2026)
 
 ### Added
