@@ -132,6 +132,8 @@ export interface LayoutInput {
   measure: (text: string, className: string) => TextSize;
   /** Persistent hysteresis state per band key. */
   hysteresis: Map<string, number>;
+  /** The locale of the labels - the chart's wording's. */
+  locale?: string;
 }
 
 export const EMPTY_LAYOUT: LayoutResult = {
@@ -249,7 +251,7 @@ function tickValuesFor(
   return ticksFor(domain[0], domain[1], tickCount);
 }
 
-function formatterFor(axis: AxisInput, domain: readonly [number, number], tickCount: number) {
+function formatterFor(axis: AxisInput, domain: readonly [number, number], tickCount: number, locale: string) {
   const own = axis.tickFormat;
   const calendar = calendarOf(axis);
   if (calendar !== undefined) {
@@ -258,12 +260,12 @@ function formatterFor(axis: AxisInput, domain: readonly [number, number], tickCo
     // same route labels the tooltip later.
     return own !== undefined
       ? (v: number) => own(toWallClock(v, calendar))
-      : (v: number, seconds?: boolean) => timeText(toWallClock(v, calendar), seconds);
+      : (v: number, seconds?: boolean) => timeText(toWallClock(v, calendar), seconds, locale);
   }
   if (own !== undefined) return (v: number) => own(v);
-  if (axis.time === true) return timeText;
+  if (axis.time === true) return (v: number, seconds?: boolean) => timeText(v, seconds, locale);
   const step = tickStep(Math.abs(domain[1] - domain[0]), tickCount);
-  return (v: number) => formatTick(v, step);
+  return (v: number) => formatTick(v, step, locale);
 }
 
 /** The labels of the ticks. A time axis without a format of its own labels by
@@ -275,11 +277,12 @@ function labelsFor(
   tickCount: number,
   values: readonly number[],
   format: (v: number) => string,
+  locale: string,
 ): string[] {
   const calendar = calendarOf(axis);
   if (axis.tickFormat !== undefined || (axis.time !== true && calendar === undefined)) return values.map(format);
   const wall = calendar === undefined ? values : values.map((v) => toWallClock(v, calendar));
-  return timeLabels(wall, stepOf(domain, tickCount));
+  return timeLabels(wall, stepOf(domain, tickCount), locale);
 }
 
 /** A label's left edge, moved inside a container of `width`. */
@@ -368,6 +371,7 @@ function layoutPass(
   tall: ReadonlySet<string> | null,
 ): { layout: LayoutResult; wrapped: Set<string> } {
   const { width, height, padding, axes, measure } = input;
+  const locale = input.locale ?? "en-GB";
   const wrapped = new Set<string>();
 
   const left = axes.filter((a) => a.position === "left");
@@ -431,8 +435,8 @@ function layoutPass(
     const domain = aligned?.domain ?? domainOf(axis, tickCount);
     const values = aligned?.ticks ?? tickValuesFor(axis, domain, tickCount);
     const format =
-      aligned === null ? formatterFor(axis, domain, tickCount) : (axis.tickFormat ?? ((v: number) => formatTick(v, aligned.step)));
-    const labels = labelsFor(axis, domain, tickCount, values, format);
+      aligned === null ? formatterFor(axis, domain, tickCount, locale) : (axis.tickFormat ?? ((v: number) => formatTick(v, aligned.step, locale)));
+    const labels = labelsFor(axis, domain, tickCount, values, format, locale);
     const widths = labels.map((t) => measure(t, CLASS_TICK).width);
     let maxWidth = 0;
     for (const b of widths) if (b > maxWidth) maxWidth = b;
@@ -545,10 +549,10 @@ function layoutPass(
       const place = (tickCount: number, keep: number, wrap = false) => {
         const all = tickValuesFor(axis, domain, tickCount);
         const values = all.filter((_, i) => i % keep === 0);
-        const format = formatterFor(axis, domain, tickCount);
+        const format = formatterFor(axis, domain, tickCount, locale);
         // Labelled after thinning: a time label's date moves to the first tick
         // that is kept.
-        const plain = labelsFor(axis, domain, tickCount, values, format);
+        const plain = labelsFor(axis, domain, tickCount, values, format, locale);
         const labels = wrap ? plain.map((l) => twoLines(l, (t) => measure(t, CLASS_TICK).width)) : plain;
         const ticks: TickLayout[] = values.map((value, i) => {
           const label = labels[i] ?? "";

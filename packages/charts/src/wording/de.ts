@@ -6,6 +6,7 @@ import type { ChartsWording } from "./index";
 /** The German instance, for a chart's `wording`. Complete, because it is
     typed `ChartsWording`. */
 export const GERMAN_CHARTS_WORDING: ChartsWording = {
+  locale: "de-DE",
   roleDescription: "Diagramm",
   empty: "Keine Daten",
   seriesList: (names) => `${names.length === 1 ? "1 Serie" : `${names.length} Serien`}: ${names.join(", ")}.`,

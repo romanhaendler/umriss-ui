@@ -2068,6 +2068,7 @@ export class ChartScene {
       measure: (text, className) =>
         measurer === null ? { width: 0, height: 0 } : measurer.measure(text, className),
       hysteresis: this.hysteresis,
+      locale: this.wording.locale,
     });
     // A span that is the axis' own domain is its default, no part of the view.
     for (const axis of this.layout.axes) {
@@ -3087,7 +3088,7 @@ export class ChartScene {
 
   /** A stack's total as text, shared by the tooltip and the data table. */
   private totalText(entry: SeriesEntry, total: number): string {
-    return (entry.stacked as NonNullable<SeriesEntry["stacked"]>).normalize ? (entry.config.format ?? formatValue)(total) : this.formatY(entry, total);
+    return (entry.stacked as NonNullable<SeriesEntry["stacked"]>).normalize ? (entry.config.format ?? ((v: number) => formatValue(v, this.wording.locale)))(total) : this.formatY(entry, total);
   }
 
   /** The total of the stack `last` closes at the row's x, found in the
@@ -3173,14 +3174,14 @@ export class ChartScene {
     // A share is no reading: it reads as its axis does, in percent. The
     // series' `format` writes readings - the stack's total among them.
     if (config.format !== undefined && entry.stacked?.normalize !== true) return config.format(v);
-    if (config.kind === "matrix") return formatValue(v);
+    if (config.kind === "matrix") return formatValue(v, this.wording.locale);
     // Only a share takes the percent an axis gives a normalised stack: a line
     // on the same axis still reads its own values.
     const own =
       entry.stacked?.normalize === true
         ? this.yTickFormat(config.yAxisId)
         : this.findAxisConfig("y", config.yAxisId)?.tickFormat;
-    return own === undefined ? formatValue(v) : own(v);
+    return own === undefined ? formatValue(v, this.wording.locale) : own(v);
   }
 
   /** A y axis' `tickFormat`; without one, an axis that carries a normalised
@@ -3194,7 +3195,7 @@ export class ChartScene {
     return undefined;
   }
 
-  private readonly percent = (v: number): string => this.wording.percent(formatValue(v));
+  private readonly percent = (v: number): string => this.wording.percent(formatValue(v, this.wording.locale));
 
   /* ---------- The data table (charts-alternatives 01) ---------- */
 
@@ -3796,7 +3797,7 @@ export class ChartScene {
     }
     if (channels?.count != null) {
       const n = v?.count;
-      parts.push({ label: w.count, value: n === undefined || !Number.isFinite(n) ? "" : formatValue(n) });
+      parts.push({ label: w.count, value: n === undefined || !Number.isFinite(n) ? "" : formatValue(n, this.wording.locale) });
     }
     if (channels?.outliers != null) {
       const list = v?.outliers ?? [];

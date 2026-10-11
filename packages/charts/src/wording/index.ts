@@ -5,6 +5,10 @@
 
 /** Everything the charts put out as text. */
 export interface ChartsWording {
+  /** The BCP 47 tag every number and every date or time label of the chart is
+      formatted in (`en-GB`, `de-DE`). The one input for the locale: the
+      browser's language is not read. The clock stays 24-hour in both. */
+  locale: string;
   /** What a screen reader calls the plot area that takes the keys
       (`aria-roledescription`). */
   roleDescription: string;
@@ -76,6 +80,7 @@ export interface ChartsWording {
     `GERMAN_CHARTS_WORDING` in `@umriss-ui/charts/wording/de`. A chart takes
     its own through `wording`. */
 export const DEFAULT_CHARTS_WORDING: ChartsWording = {
+  locale: "en-GB",
   roleDescription: "chart",
   empty: "No data",
   seriesList: (names) => `${names.length === 1 ? "1 series" : `${names.length} series`}: ${names.join(", ")}.`,

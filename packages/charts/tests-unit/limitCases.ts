@@ -349,6 +349,32 @@ export const LIMIT_CASES: readonly Case[] = [
   },
   {
     group: "unusable limits",
+    name: "an infinite upper bound does not count",
+    value: 1e9,
+    set: { limits: [{ value: Number.POSITIVE_INFINITY, side: "upper", severity: "alarm" }] },
+    expected: { verdict: "ok" },
+  },
+  {
+    group: "unusable limits",
+    name: "an infinite lower bound does not count",
+    value: -1e9,
+    set: { limits: [{ value: Number.NEGATIVE_INFINITY, side: "lower", severity: "alarm" }] },
+    expected: { verdict: "ok" },
+  },
+  {
+    group: "unusable limits",
+    name: "an infinite bound on the wrong side does not count either",
+    value: 0,
+    set: {
+      limits: [
+        { value: Number.POSITIVE_INFINITY, side: "lower", severity: "alarm" },
+        { value: Number.NEGATIVE_INFINITY, side: "upper", severity: "alarm" },
+      ],
+    },
+    expected: { verdict: "ok" },
+  },
+  {
+    group: "unusable limits",
     name: "an unusable bound hides no usable one",
     value: 95,
     set: {

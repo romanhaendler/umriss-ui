@@ -103,6 +103,15 @@ describe("timeLabels - by level, en-GB, 24 hours", () => {
     ]);
   });
 
+  it("names the month in the locale given, on a 24-hour clock", () => {
+    expect(timeText(at(3, 17, 15, 23), false, "de-DE")).toMatch(/^17\. M(ä|a)rz?\.? 15:23$/);
+    expect(timeLabels([at(1, 1), at(4, 1)], timeStepFor(365 * DAY, 6), "de-DE")).toEqual([
+      expect.stringContaining("Jan"),
+      expect.stringContaining("Apr"),
+    ]);
+    expect(timeLabels([at(3, 16, 20)], timeStepFor(4 * HOUR, 4), "de-DE")[0]).toContain("20:00");
+  });
+
   it("writes the day, and the month with its year", () => {
     const days = timeStepFor(4 * DAY, 4);
     expect(timeLabels([at(3, 16), at(3, 17)], days)).toEqual(["16 Mar 2026", "17 Mar"]);
