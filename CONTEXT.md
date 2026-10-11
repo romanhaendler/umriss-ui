@@ -353,6 +353,14 @@ emphasised one, read first. It is never a selection and carries no choice (the
 chart's counterpart to core's active node, ADR-0003). See ADR-0030.
 _Avoid_: selected point, focus point, keyboard hit
 
+**Range**:
+A stretch of an x axis a reader marked, from one value to another, that a
+chart reports and does not keep: what the reader did with it - filtered a
+table, read the figures of that stretch, moved the view there - is the
+application's. A chart reports a range as it reports a chosen hit (ADR-0056);
+it never selects one, and to zoom into it is to hand it back as the **View**.
+_Avoid_: selection, range selection, brush, selected span
+
 ### Control charts and Pareto
 
 **Control limit**:
@@ -915,6 +923,20 @@ server answers: search, conditions, sort levels, page and page size. A width,
 an order or a pin changes the view but not the request, and asks the server
 nothing.
 _Avoid_: query (that is the search), fetch, server view
+
+**Late answer**:
+Rows that answer a **Request** older than the one a table in **Server mode**
+stands at now - the answer to page 2 arriving after the reader went on to
+page 3. A table that is told which request its rows answer treats a late
+answer as still loading, never as the page.
+_Avoid_: stale response, race, out-of-order response
+
+**All that match**:
+A selection in **Server mode** that is a state and not a list: every row of
+the server's **Filtered set** for the request it was made under, except the
+rows the reader unticked since. The table holds no rows for it; an action on
+it is the server's to carry out.
+_Avoid_: select all pages, global selection, select everything
 
 **Pinned column**:
 A column that stays in view while the table scrolls sideways, in a block at the
