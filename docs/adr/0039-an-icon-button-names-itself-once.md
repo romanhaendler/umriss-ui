@@ -6,7 +6,7 @@ Date:   2026-09
 A button that showed only an icon was a `Button` with an `aria-label`: the
 name was optional, the tooltip was the caller's to remember, and the result was
 an oblong 38 × 26 px. Inside the library a dozen components drew such a button
-by hand, at 20, 22, 24, 28 and 30 px (`.scratch/icon-button/spec.md`).
+by hand, at 20, 22, 24, 28 and 30 px.
 
 **`IconButton` is its own component.** Square at the control heights, a
 required `aria-label` that is both the accessible name and the tooltip, the

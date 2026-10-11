@@ -1,0 +1,6 @@
+# Read by ripgrep and the tools built on it: history and research stay in the
+# tree but out of a search for what the code does now.
+docs/archive/
+docs/research/
+docs/journal.md
+reports/

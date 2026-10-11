@@ -9,7 +9,7 @@ content a moment later than its window. Measured: our CSS changes nothing at
 the opening in Chromium, WebKit or Firefox; Firefox on Linux, drawing the list
 with the same code, shows it in one frame; and on Windows every select
 flickered, the unstyled one too. The list is the browser's window, out of the
-page's reach. The probe: `.scratch/select-listbox/spec.md`.
+page's reach.
 
 **Under a mouse, a pen and the keyboard the `Select` opens its own list**, in
 the one popover, with the look and the keys of the `Combobox`'s list - the

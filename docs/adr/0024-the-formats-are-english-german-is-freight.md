@@ -71,8 +71,7 @@ that shows German collation files Ä with A checks nothing in English.
 ## Consequences
 
 - Every picture that shows a date, a time or a grouped number moved once, in
-  all four demos. The delivery states the count
-  (`.scratch/schedule-legibility/issues/01-english-formats.md`).
+  all four demos. The delivery states the count.
 - The characterisation test of the formats was rewritten once and now pins both
   sets against one fixed instant. That file is the only place where this change
   is visible as a diff rather than as a surprise in some component's test.

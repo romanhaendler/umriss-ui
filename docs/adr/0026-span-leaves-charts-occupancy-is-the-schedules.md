@@ -17,8 +17,7 @@ as a process curve* — jobs under a temperature. That is the one argument for
 keeping it, and it does not carry two places that draw occupancy: every rule
 of the schedule (an overlap is never packed, a lane is a machine, a finding is
 reported) would have to be kept twice, and the span already disagreed with it —
-its overlap depth knew no lane, and its tooltip gave the lane index as a value
-(`.scratch/charts-review/spec.md`, bugs 1 and 4). A job over a curve can be
+its overlap depth knew no lane, and its tooltip gave the lane index as a value. A job over a curve can be
 hinted at with an x `LimitBand`; a plan stands in a schedule beside the chart.
 
 ## Considered Options

@@ -10,8 +10,7 @@ build - stood only on GitHub, in markdown files a visitor of the site never
 found. Every component page ended its "Known limits" with a link to ADR-0032,
 which dropped the reader out of the site onto a GitHub blob. `docs/README.md`
 ruled out "a documentation website beside the demos" and left a site that
-hosts the workspace's prose to "a product decision with a spec of its own"
-(`.scratch/concepts-and-changelog-pages/spec.md` is that spec).
+hosts the workspace's prose to "a product decision with a spec of its own".
 
 **The pages build renders a fixed list of the workspace's own markdown
 documents as pages of the same site, from their files, at build time.** The
@@ -53,7 +52,7 @@ exist twice, once in `docs/` and once as outline prose, and one of the two
 would be stale by the next release.
 
 **Render every markdown file of the repository.** The contributor documents
-speak to someone changing the code - specs under `.scratch/`, test conventions,
+speak to someone changing the code - open specs, test conventions,
 the release procedure - and on the site they would answer questions no
 caller asks while burying the three that matter. A list, extended one line at a
 time, keeps each document's presence a decision.

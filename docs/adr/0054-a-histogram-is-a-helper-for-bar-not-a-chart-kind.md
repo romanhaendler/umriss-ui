@@ -5,8 +5,7 @@ Date:   2026-10
 
 A histogram needs its counting done before the chart. `Bar` already draws on a
 numeric x axis (ADR-0002), so only the arithmetic was missing - the way
-`pareto()` is the arithmetic of a Pareto chart
-(`.scratch/charts-bin-and-limits/spec.md`).
+`pareto()` is the arithmetic of a Pareto chart.
 
 **A histogram is `bin()`, a function that returns rows for `Bar`; there is no
 `Histogram` component and no renderer. The last bin is closed, so the greatest

@@ -2,6 +2,8 @@
 
 Issues and specs for this repo live as markdown files in `.scratch/`.
 
+The tracker holds open work only: a feature folder is deleted when its last ticket is done.
+
 ## Conventions
 
 - One feature per directory: `.scratch/<feature-slug>/`

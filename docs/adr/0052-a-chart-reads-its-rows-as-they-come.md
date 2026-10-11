@@ -9,7 +9,7 @@ weekday - computed a position for every row, listed every position again as
 `ticks`, and wrote a `tickFormat` that looked the name up by it. 22 of the 71
 examples and scenarios of the charts demo carried that idiom, and the
 maintainer read them as a library that needs too many functions before a bar
-stands (`.scratch/chart-rows-as-they-come/spec.md`).
+stands.
 
 The research of October 2026 (`docs/research/chart-data-input-2026-10/`) looked
 at seventeen libraries. None asks a caller for an index, a tick list and a
@@ -77,7 +77,7 @@ zoom and downsampling read numbers and do not change.
 ## Consequences
 
 - The examples that named categories through positions move, and are the
-  proof; the work stands in `.scratch/chart-rows-as-they-come/`.
+  proof.
 - `categories` and `categoryLabel` on the axis, categories on y - a matrix'
   rows, a state band's `lane`, the first at the top - and instants as `Date`
   or ISO string follow in the same work, under this decision. A series that

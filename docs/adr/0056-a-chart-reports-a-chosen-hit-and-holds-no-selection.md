@@ -6,8 +6,7 @@ Date:   2026-10
 The chart had a hit model, the tooltip's, but no way to tell the application
 that the reader chose one. What a selection is stays the application's: an
 active node is not a selection (ADR-0003), and components report (ADR-0023).
-The maintainer decided on 10 October 2026: report only, no `selected` prop
-(`.scratch/charts-on-select/spec.md`).
+The maintainer decided on 10 October 2026: report only, no `selected` prop.
 
 **A chart reports the hit a reader chose through `onSelect` and holds, draws
 and remembers nothing.** The handler stands in the options of `useChart`

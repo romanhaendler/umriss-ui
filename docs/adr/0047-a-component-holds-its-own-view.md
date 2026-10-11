@@ -9,8 +9,7 @@ restarted by a new `key`. The schedule kept its span itself but re-applied a
 new `initialDomain`, kept its folded groups either way (`collapsedGroups` or
 `defaultCollapsedGroups`) and reported each part on its own. The charts kept
 nothing: `hidden` with `Legend onToggle`, and `domain` with
-`onDomainChange`, were the caller's state (`.scratch/charts-review/spec.md`,
-Q17 and Q19), so a caller wrote a `useState` and a toggle function before a
+`onDomainChange`, were the caller's state, so a caller wrote a `useState` and a toggle function before a
 legend would click or an axis would zoom. A developer who had learnt one
 package was a beginner in the next.
 
@@ -80,4 +79,3 @@ component's. In particular:
   the way back, because there is no way back.
 - The old props are removed, not deprecated: one release breaks the three
   packages once, together with ADR-0048.
-- The work stands in `.scratch/component-view/`.

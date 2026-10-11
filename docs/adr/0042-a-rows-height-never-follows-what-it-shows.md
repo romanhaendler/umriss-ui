@@ -14,7 +14,7 @@ moved the pagination bar - "Next" stood 954, 772 and 178 px below the head on
 page 1, the last page and an empty result. Loading replaced the rows with four
 placeholders, then ten rows came. A virtual window took a `rowHeight` the
 application guessed: the demos said 37 for rows of 36.5, 10,000 px off at the
-end of twenty thousand. The probe: `.scratch/row-pitch/spec.md`.
+end of twenty thousand.
 
 **Every line of a table is one row pitch tall, and never what it shows.** The
 head, a row, a group header, a placeholder, the aggregate footer: one whole-

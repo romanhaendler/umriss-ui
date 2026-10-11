@@ -7,8 +7,7 @@ Date:   2026-09
 of its own, a screen reader reads it with its table keys, and nothing in it is
 edited. Every mature grid does it the other way - one tab stop, arrows from
 cell to cell, a cell edited in place (the ARIA grid pattern) - and a plant
-screen edits daily: setpoints, comments, the text an acknowledgement carries
-(`.scratch/table-grid-mode/spec.md`).
+screen edits daily: setpoints, comments, the text an acknowledgement carries.
 
 **The grid is opt-in.** `<Table grid>` makes the table `role="grid"`
 (`treegrid` once it is grouped), one tab stop with one **Active cell** the

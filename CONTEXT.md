@@ -7,8 +7,7 @@ The shared vocabulary of this workspace. All five published packages —
 The codebase is English throughout: identifiers, file and directory names,
 comments, prose, and the text the library ships. Each term below names one
 concept with one word, and that word is the one to grep for — there is no second
-language to cross over into. See ADR-0018, which reversed ADR-0015 once the npm
-scope was settled as `umriss-ui`, the audience turned out not to be German-speaking, and nothing had been published yet.
+language to cross over into. See ADR-0018.
 
 `core` is the component library itself — the package you install first, not a
 layer the others sit on. `@umriss-ui/charts` deliberately depends on nothing and
@@ -24,28 +23,12 @@ branches rename the same concept without talking to each other.
 
 ## Language
 
-A prop and the identifier behind it are the same word. ADR-0015 drew a seam at
-the destructuring pattern, because props were English and everything below them
-was German; with ADR-0018 there is nothing on the other side of that seam and it
-is gone. What stands from ADR-0015 is the spelling of the accessible name:
-`aria-label` wherever the named element is the component's root, and `ariaLabel`
-only where it is not.
+A prop and the identifier behind it are the same word. The accessible name is
+spelled `aria-label` wherever the named element is the component's root, and
+`ariaLabel` only where it is not.
 
 
 ## Design language
-
-These entries arrived with `.scratch/visuelle-wertigkeit/` and stood beside this
-glossary for three efforts, in German and under a "not yet reconciled" marker,
-because five of their words collided with entries above and the collisions got
-worse in English rather than better. They are settled here and merged in;
-`english-and-umriss-ui` 15 is the ticket, and each decision is recorded at its
-own entry rather than in a note at the top.
-
-How the five went: **Kachel** is retired, because the thing it named no longer
-exists. **Ebene** moved out of the way of both Layer and Level. **Skala** and
-**Scale** turned out to be one idea in two packages and keep one word.
-**Raster** and **Zustands-Kanon** stand with a qualifier, which is what the
-glossary's own rule prescribes when two live concepts want the same word.
 
 **Token**:
 A named value of the design layer, declared as a CSS property with the prefix
@@ -87,10 +70,8 @@ _Avoid_: Border, frame, outline
 **Shadow step**:
 One step in a surface's shadow stack, with exactly one job — contact with the
 ground, near shadow, depth. Cards and overlays each have a stack of their own.
-_Avoid_: **Layer**, **Level**. This entry was `Ebene`, and neither English word
-was free: **Level** is a tree node's depth in the glossary above, and "layer" is
-already spoken for by the token layer. "Shadow step" says what it is and collides
-with nothing.
+_Avoid_: **Layer**, **Level** - **Level** is a tree node's depth, and "layer" is
+the token layer.
 
 **Tone**:
 A semantic colour role: success, warning, danger. A tone carries a surface and,
@@ -621,8 +602,7 @@ _Avoid_: value channel, z, weight, y0 reused
 One value of a matrix, centred on its pair of axis values. Its edges come from
 the grid spacing of both axes — ADR-0002 in two dimensions. A missing level is a
 hole, not a zero.
-_Avoid_: tile, Kachel (which the `@umriss-ui/core` demo no longer uses at all; the
-charts demo still does, and will lose it whenever its shell is rebuilt), bucket
+_Avoid_: tile, Kachel, bucket
 
 ### Working time
 
@@ -946,12 +926,9 @@ _Avoid_: pending changes, dirty row, Zeilenentwurf, row edit
 
 ### The demo
 
-The demos of all three packages are documentation, not decoration,
-and they share four words. They are here because a demo is the only artefact a
-reader of a package meets before the source, and two sessions calling the same
-thing by two names is how its structure comes apart. All three run in one shell, the
-private package `@umriss-ui/demo` (ADR-0020); each demo brings its own outline,
-examples and "Why it is like this" texts.
+The demos are documentation, not decoration. They run in one shell, the private
+package `@umriss-ui/demo` (ADR-0020); each demo brings its own outline, examples
+and "Why it is like this" texts.
 
 **Page**:
 Everything the demo says about one thing a reader looks up, at one address. A
@@ -962,24 +939,11 @@ page an anchor on it, `/card/#head-and-body` — a search engine reads no hash
 
 What that thing is depends on how many things the package has to say. Where a
 package is a shelf of components, a page is a component — with one exception: a
-concept that several components share and none owns may have its own page.
-**Filter** is one, because a list filter, a range filter and a filter the
-application writes itself are one subject that would otherwise be scattered
-over `Column` and `Table`.
-
-Where a package is ONE component with two dozen things to say, a page is a
-**feature**. That is the schedule: pages by component would have been four, and
-seven of its subjects would have shared one — a reader who came for the now
-line would have read past pan, zoom, the tooltip and the selection to reach it.
-So *Now line*, *Bar labels*, *Snapping* and the rest are pages, and the outline
-is the table of contents of the component
-(`.scratch/schedule-lane-groups/spec.md`, "The demo"). The table is the same
-case and was cut the same way after it had first been a shelf: its `Table`
-page carried nineteen examples - sorting, density, a server, grid mode - and a
-reader who came for one read past the rest. So *Sorting*, *Server mode*,
-*Grid mode* and the rest are pages, and `Table` is the first table. A feature
-that is a part imported by name - `Search`, `Export`, `RowActions` - keeps
-that name as its page's name.
+concept that several components share and none owns may have its own page
+(**Filter**). Where a package is one component with many things to say, as the
+schedule and the table, a page is a **feature**: *Now line*, *Server mode*,
+*Grid mode*; a feature that is a part imported by name - `Search`, `Export`,
+`RowActions` - keeps that name as its page's name.
 
 Either way a page names ONE thing and one only; a page covering three unrelated
 subjects would be a page nobody could link to.
@@ -1033,23 +997,9 @@ _Avoid_: Gruppe, group (a chart legend groups series), category, Kategorie,
 section
 
 Every demo opens with its scenarios page, which is no rubric, and then
-"Getting started" (demo rework, `.scratch/demo-rework/spec.md`). The rubrics of
-the `@umriss-ui/core` demo are Getting started, Customising, Layout,
-Typography, Actions, Forms, Choosing, Dates and times, Feedback, Overlays,
-Navigation and Data display; `@umriss-ui/table` has
-Columns, Finding rows, Grouping, Rows, Around the table, Many rows, Editing
-and Limits and alarms; `@umriss-ui/charts`
-has Chart, Series, Limits and alarms and Around the chart; `@umriss-ui/schedule`
-has Plan, Time, Reading, Editing and Findings; `@umriss-ui/calculation` has
-Writing a calculation and In practice. **Limits and alarms** and not
-"Monitoring": the pages hold what reads a value against a limit and what reports
-it, in any world.
-**Overlays** and not "Layers" on purpose: **Ebene** is one of the
-five words the design-language tail below leaves undecided, and "Layer" beside
-a tree node's **Level** is the collision that section warns about. "Overlay" is
-already this workspace's word for what lies above a surface and collides with
-nothing. **Status and waiting** and not "State": **State** is the charts' word
-(ADR-0007), and a rubric may not take a word a series already owns.
+"Getting started". A rubric may not take a word the workspace already owns:
+**Overlays** and not "Layers" (**Level**, the token layer), **Status and
+waiting** and not "State" (**State** is the charts' word, ADR-0007).
 
 **API index**:
 The one generated page of a demo, at `/api/`, alone in a last rubric of the
@@ -1063,23 +1013,16 @@ _Avoid_: API reference, reference page, appendix (the llms text's former "The
 rest of the API", which it replaces)
 
 An **Example**'s file exports its name as `title`. A page's address is its
-component name, lower-cased, and a rename of the outline never touches it - with
-one exception, taken once: the page `Stack and Grid` is `/stack-and-grid/`,
-because `/stack-und-grid/` carried a German word in an address that no
-component name put there.
+component name, lower-cased, and a rename of the outline never touches it.
 
 
 ### The schedule
 
-The vocabulary of `@umriss-ui/schedule`, the fourth package — fixed in
-`.scratch/schedule/` before the package exists, which is this glossary's own
-rule: a term appears when a decision has fixed its meaning. The schedule speaks
-the charts word where it already holds: a **Lane** is the same strip of a y
-domain — here one machine or station, named by its **Lane header**. What is new
-is that the intervals carry meaning: a **Subtask** has parts and belongs to a
-**Task**. Charts once drew bare intervals on a lane as a `Span`; it was
-removed in favour of the schedule, which draws occupancy with lanes, groups and
-editing (ADR-0026).
+The vocabulary of `@umriss-ui/schedule`. It speaks the charts word where it
+already holds: a **Lane** is the same strip of a y domain — here one machine or
+station, named by its **Lane header**. What is new is that the intervals carry
+meaning: a **Subtask** has parts and belongs to a **Task**. Charts no longer draw
+bare intervals as a `Span`; occupancy is the schedule's (ADR-0026).
 
 **Schedule**:
 The component that shows subtasks on lanes over time: lane headers at the left,
@@ -1392,81 +1335,22 @@ _Avoid_: column (which is a table's), Spalte as an identifier, series (which is
 the charts'), measure, Kennzahl
 
 
-## Module and directory names
-
-A file's name is an identifier too, and these are the ones where the obvious
-English word was already taken by something else. The reason is recorded so a
-later reader does not "fix" the name back.
-
-| File or directory | Why not the obvious one |
-|---|---|
-| `table/src/model/` | not `core/` — that would name both the package and the table's model layer, and one grep would have two answers |
-| `model/companion.ts` | not `state.ts` — **State** is taken by the charts (state series, state band, ADR-0007) |
-| `core/src/lib/language/` | holds the **Wording** and the **Formats**; not `i18n/`, which promises a translation function that does not exist |
-| `DatePicker/grid.ts` | the 42-cell month grid. There is no layout grid in this workspace and there should be none |
-| `DataViz/scale.ts` | the projection of the marks, which is not a chart axis' affine **Scale** — see the tail of this file |
-| `Textarea/measure.ts` | the height calculation, not a design unit of measure |
-| `charts/src/limit.ts` | the limit model, the same word as `core/src/lib/limit.ts` — ADR-0006 keeps the two in step. The component beside it therefore yields the bare word; see **Public names** |
-| `charts/src/bars.ts`, `cells.ts`, `controlLimits.ts` | plural or descriptive, because the singular collides with the component file beside it. On a case-insensitive file system an import of `./Bar` or `./ControlChart` resolves to `bar.ts` or `controlChart.ts`, and TypeScript then reports TS1149 ("differs only in casing") and resolves the wrong module. `cells.ts` recorded this first; the other two follow it |
-| `charts/src/state.ts` | the geometry of the state band. **State** is the charts' word (ADR-0007), and `StateBand.tsx` differs from it by more than case |
-| `table/src/groupingChoice.tsx` | the column menu's grouping section and the grouping's tag in the table toolbar; not `grouping.tsx`, which would sit beside `model/grouping.ts` and give one grep two answers |
-| `table/src/groupLines.tsx` | the lines of a grouped table - group headers, spans, folded spans; not `groups.tsx`, which reads as the model's **Row group** |
-| `demo/examples/Column/13-wrapper.tsx` | a column that brings its own presentation, taken as `of`; not `shell` — that is the demos' own shell (`@umriss-ui/demo`) |
-
-The rest are the plain word, recorded here so that no branch has to guess:
-`model/tableModel.ts`, `model/view.ts`, `parts.tsx`, `unbound.tsx` (the header's
-own word: these need no binding), `registry.ts`, `toolbar.tsx`, `export.ts`,
-`values.ts`, `column.ts`, `columnFilter.tsx`, `filter.tsx`, `types.ts`,
-`model/grouping.ts`, `aggregateValue.tsx`, `motion.ts`,
-`context.ts`, `useTable.tsx`; in the shell `shell`,
-`outline`, `examples`, `checks`; in a demo of its own `App.tsx`, `outline.ts`,
-`examples.ts`, `examples/`, `why/`; in `lib` `wording.ts`, `formats.ts`,
-`provider/`, `glyphs/`, `freshness.ts`, `limit.ts`, `search.ts`, `virtual.ts`,
-`options.ts`, `roleFromTone.ts`, `portalTarget.ts`, `idPart.ts`; in the pickers
-`range.ts`, `time.ts`, `contract.ts`, `Calendar.tsx`, `TimeField.tsx`,
-`RangePanel.tsx`, `RangeTrigger.tsx`; in the tree `treeModel.ts`, `useTree.ts`;
-and `NumberInput/number.ts`.
-
-Each package's browser suite follows one pattern, so that a reader who knows one
-package can find the same file in the next: `screenshots.spec.ts` for the
-pictures, `features-<subject>.spec.ts` for behaviour, `accessibility.spec.ts` for
-the axe run, and `pages.ts` and `navigation.ts` for the two derived lists every
-spec of that package reads. In the unit tests a file is named after its subject —
-`contrast.test.ts`, `identifiers.test.ts`, `wordingSource.test.ts` — and
-`demo/tooling/readmeTable.ts` is the guard over the README's component table.
-
-
 ## Public names
 
 The names that cross out of `@umriss-ui/core` into `@umriss-ui/table`, the demos
-and any application. What they were called before September 2026 is no longer
-vocabulary and stands in `docs/archive/rename-2026-09.md`; what follows is the
-part of that work which is still a rule.
+and any application. The old names stand in `docs/archive/rename-2026-09.md`.
 
-`@umriss-ui/charts` has one public name of its own that had to move, and it moved
-because of this list rather than in spite of it: its `<Limit>` component is now
-**`LimitLine`**, beside the unchanged `<LimitBand>`. **Limit** is the model type —
-the one ADR-0006 keeps in step with `core` — and one module cannot export a
-component and a type under that one name (TypeScript reports TS2300). The pair
-now reads as what it draws, a line and a band, and matches its own
-`LimitLineConfig` and `LimitBandConfig`. Its props follow: `von`/`bis` are
-`from`/`to`, `stufe` is `severity`, `imBereich` is `inExtent`.
-
-A `DateRange` is `{ from, to }` and a `RangePreset` is `{ label, range }`.
-Both were German, on the argument that they are a shape two packages agree on —
-`@umriss-ui/table` reads a chosen span out of a `DateRange` in `columnFilter`,
-and a caller writes its own presets against the second field. That argument
-names who has to move with them; it is not a reason to leave them. **A shape two
-parties agree on is the strongest reason to translate it, not to keep it**: it
-is the one name a caller has to type. The same held for the limit model, and both
-moved.
+`@umriss-ui/charts` has `<LimitLine>` beside `<LimitBand>`, not `<Limit>`:
+**Limit** is the model type (ADR-0006), and one module cannot export a component
+and a type under one name. A shape two parties agree on (`DateRange` is
+`{ from, to }`, `RangePreset` is `{ label, range }`) is the strongest reason to
+use the plain English name, for it is the one name a caller has to type.
 
 ## Words, and the German that stays
 
 What the rename left behind as a rule rather than as a record: where a word is
 taken twice over, which German is an identifier and which is display text, and
-which output conventions are deliberately still German. The rule about German
-test fixtures moved with the testing conventions and stands in `docs/testing.md`.
+which output conventions are deliberately still German.
 
 **The register rule.** German nouns are capitalised, so a *lowercase* German
 word in `de.ts` or `wording.ts` is an identifier and never display text. The
@@ -1489,13 +1373,10 @@ are different objects.
 
 ## Words already taken
 
-**Words already taken, twice over.** Three of these sets share a word with
-another set, and each cost a round when a pattern was let loose over the
-repository. `wert` is a
-limit's number, a filter's value, a context value and a set element. `seite` is
-a page number in `pageOfPages` and the side of a time range in the daylight
-saving hints. `alt` is a freshness state and an identifier in a test.
-A rename over a word list needs a file list; one grep does not give one answer
+**Words already taken, twice over.** `wert` is a limit's number, a filter's
+value, a context value and a set element. `seite` is a page number in
+`pageOfPages` and the side of a time range in the daylight saving hints. `alt` is
+a freshness state and an identifier in a test. One grep does not give one answer
 here.
 
 These three are already spoken for. For design terms they are to be avoided.
@@ -1528,7 +1409,6 @@ _Not_: a design unit of measure.
 
 **Kachel** named a section of the demo showing a group of components, and was the
 seam through which the image and accessibility checks reached every component.
-It is retired rather than translated: the demo has had one **Page** per component
-since `demo-as-documentation`, and an **Example** within it, and both of those are
-entries above. "Tile" stays on the avoid lists of **Page** and **Cell** — there is
+It is retired rather than translated: the demo has one **Page** per component and
+an **Example** within it. "Tile" stays on the avoid lists of **Page** and **Cell** — there is
 now nothing it could mean.
