@@ -601,7 +601,7 @@ function Row({
         </span>
       )}
       <span className={styles.name}>{highlight(candidate.name, item.finds)}</span>
-      {candidate.group !== undefined && <span className={styles.group}>{candidate.group}</span>}
+      {candidate.heading !== undefined && <span className={styles.group}>{candidate.heading}</span>}
     </div>
   );
 }
