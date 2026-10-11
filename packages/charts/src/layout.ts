@@ -363,62 +363,76 @@ export function computeLayout(input: LayoutInput): LayoutResult {
   return layoutPass(input, input.hysteresis, first.wrapped).layout;
 }
 
-/** One pass. `tall` null: every named x axis may wrap, as the probe;
-    otherwise only those it names, which have the band for it. */
-function layoutPass(
+/** Sum of the band sizes of one side, with the gap between neighbours. */
+function sumBands(list: readonly AxisInput[], sizes: Map<string, number>): number {
+  let s = 0;
+  for (let i = 0; i < list.length; i++) {
+    const a = list[i];
+    if (a === undefined) continue;
+    s += sizes.get(a.key) ?? 0;
+    if (i > 0) s += BAND_GAP;
+  }
+  return s;
+}
+
+/** An axis title: its height, and the band it takes (height and gap; 0 without a title). */
+interface TitleSize {
+  size: number;
+  band: number;
+}
+
+function titleOf(axis: AxisInput, measure: LayoutInput["measure"]): TitleSize {
+  if (axis.label === undefined || axis.label === "") return { size: 0, band: 0 };
+  const size = Math.ceil(measure(axis.label, CLASS_TITLE).height);
+  return { size, band: size + TITLE_GAP };
+}
+
+/** The plot's edges; the bands stack outwards from them. */
+interface PlotBox {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+  width: number;
+  height: number;
+}
+
+function bandRect(axis: AxisInput, p: PlotBox, offset: number, size: number): Rect {
+  switch (axis.position) {
+    case "left":
+      return { x: p.left - offset - size, y: p.top, width: size, height: p.height };
+    case "right":
+      return { x: p.right + offset, y: p.top, width: size, height: p.height };
+    case "top":
+      return { x: p.left, y: p.top - offset - size, width: p.width, height: size };
+    default:
+      return { x: p.left, y: p.bottom + offset, width: p.width, height: size };
+  }
+}
+
+interface Interim {
+  axis: AxisInput;
+  domain: readonly [number, number];
+  values: number[];
+  labels: string[];
+  widths: number[];
+  format: (v: number) => string;
+  limitsInside: boolean;
+}
+
+/** Step 3: the y ticks, their labels and band widths, out of the plot height. */
+function yInterims(
   input: LayoutInput,
+  locale: string,
+  plotHeight: number,
+  titles: Map<string, TitleSize>,
   hysteresis: Map<string, number>,
-  tall: ReadonlySet<string> | null,
-): { layout: LayoutResult; wrapped: Set<string> } {
-  const { width, height, padding, axes, measure } = input;
-  const locale = input.locale ?? "en-GB";
-  const wrapped = new Set<string>();
-
-  const left = axes.filter((a) => a.position === "left");
-  const right = axes.filter((a) => a.position === "right");
-  const top = axes.filter((a) => a.position === "top");
-  const bottom = axes.filter((a) => a.position === "bottom");
-
-  const lineHeight = Math.ceil(measure("0", CLASS_TICK).height) || 14;
-
-  /* --- Step 2: x band heights (independent of the ticks) --- */
-  const xHeight = new Map<string, number>();
-  for (const axis of [...top, ...bottom]) {
-    const title =
-      axis.label === undefined || axis.label === ""
-        ? 0
-        : Math.ceil(measure(axis.label, CLASS_TITLE).height) + TITLE_GAP;
-    const lines = tall?.has(axis.key) === true ? 2 : 1;
-    xHeight.set(axis.key, stabilize(axis.key, TICK_LEN + TICK_GAP + lines * lineHeight + title, hysteresis));
-  }
-
-  const sum = (list: readonly AxisInput[], sizes: Map<string, number>): number => {
-    let s = 0;
-    for (let i = 0; i < list.length; i++) {
-      const a = list[i];
-      if (a === undefined) continue;
-      s += sizes.get(a.key) ?? 0;
-      if (i > 0) s += BAND_GAP;
-    }
-    return s;
-  };
-
-  const plotTop = padding.top + sum(top, xHeight);
-  const plotBottom = height - padding.bottom - sum(bottom, xHeight);
-  const plotHeight = Math.max(0, plotBottom - plotTop);
-
-  /* --- Step 3: y ticks, label measurement, band widths --- */
-  interface Interim {
-    axis: AxisInput;
-    domain: readonly [number, number];
-    values: number[];
-    labels: string[];
-    widths: number[];
-    format: (v: number) => string;
-    limitsInside: boolean;
-  }
+): { interim: Map<string, Interim>; widths: Map<string, number> } {
+  const { width, axes, measure } = input;
   const yInterim = new Map<string, Interim>();
   const yWidth = new Map<string, number>();
+  const left = axes.filter((a) => a.position === "left");
+  const right = axes.filter((a) => a.position === "right");
 
   // The first y axis in registration order goes first: an aligned axis takes
   // its grid.
@@ -443,201 +457,264 @@ function layoutPass(
     // A limit label carries 2px padding on either side (its background covers a tick).
     let limitWidth = 0;
     for (const l of axis.limitLabels ?? []) limitWidth = Math.max(limitWidth, measure(l, CLASS_TICK).width + 4);
-    const title =
-      axis.label === undefined || axis.label === ""
-        ? 0
-        : Math.ceil(measure(axis.label, CLASS_TITLE).height) + TITLE_GAP;
+    const title = titles.get(axis.key)?.band ?? 0;
     // "Objective 300 ms" beside the ticks took a third of a phone's chart and
     // left the course a strip; inside the plot it costs no width.
     const limitsInside = limitWidth > maxWidth && TICK_LEN + TICK_GAP + limitWidth + title > width * LIMIT_SHARE;
     if (!limitsInside) maxWidth = Math.max(maxWidth, limitWidth);
     yInterim.set(axis.key, { axis, domain, values, labels, widths, format, limitsInside });
-    yWidth.set(
-      axis.key,
-      stabilize(axis.key, TICK_LEN + TICK_GAP + maxWidth + title, hysteresis),
-    );
+    yWidth.set(axis.key, stabilize(axis.key, TICK_LEN + TICK_GAP + maxWidth + title, hysteresis));
+  }
+  return { interim: yInterim, widths: yWidth };
+}
+
+function buildY(
+  list: readonly AxisInput[],
+  plot: PlotBox,
+  interim: Map<string, Interim>,
+  widths: Map<string, number>,
+  titles: Map<string, TitleSize>,
+  result: AxisLayout[],
+): void {
+  let offset = 0;
+  list.forEach((axis, stack) => {
+    const size = widths.get(axis.key) ?? 0;
+    const z = interim.get(axis.key);
+    const band = bandRect(axis, plot, offset, size);
+    offset += size + BAND_GAP;
+    const domain = z?.domain ?? ([0, 1] as const);
+    const format = z?.format ?? ((v: number) => String(v));
+    // The y range is inverted: the domain minimum lies at the bottom.
+    const scale = new LinearScale(domain, [plot.top + plot.height, plot.top]);
+    const ticks: TickLayout[] = (z?.values ?? []).map((value, i) => ({
+      value,
+      label: z?.labels[i] ?? "",
+      px: scale.toPx(value),
+      labelLeft: 0,
+      labelWidth: z?.widths[i] ?? 0,
+    }));
+    result.push({
+      key: axis.key,
+      id: axis.id,
+      orientation: "y",
+      position: axis.position,
+      label: axis.label,
+      grid: axis.grid,
+      band,
+      size,
+      stack,
+      domain,
+      scale,
+      ticks,
+      format,
+      titleSize: titles.get(axis.key)?.size ?? 0,
+      breaks: [],
+      limitsInside: z?.limitsInside ?? false,
+    });
+  });
+}
+
+interface XContext {
+  width: number;
+  locale: string;
+  measure: LayoutInput["measure"];
+}
+
+interface PlacedTicks {
+  format: (v: number) => string;
+  ticks: TickLayout[];
+  total: number;
+}
+
+/** Every `keep`-th tick at `tickCount`, measured and placed; `wrap` breaks
+    each label onto two lines. */
+function placeXTicks(
+  axis: AxisInput,
+  domain: readonly [number, number],
+  scale: LinearScale,
+  cx: XContext,
+  tickCount: number,
+  keep: number,
+  wrap = false,
+): PlacedTicks {
+  const { width, locale, measure } = cx;
+  const all = tickValuesFor(axis, domain, tickCount);
+  const values = all.filter((_, i) => i % keep === 0);
+  const format = formatterFor(axis, domain, tickCount, locale);
+  // Labelled after thinning: a time label's date moves to the first tick
+  // that is kept.
+  const plain = labelsFor(axis, domain, tickCount, values, format, locale);
+  const labels = wrap ? plain.map((l) => twoLines(l, (t) => measure(t, CLASS_TICK).width)) : plain;
+  const ticks: TickLayout[] = values.map((value, i) => {
+    const label = labels[i] ?? "";
+    const labelWidth = measure(label, CLASS_TICK).width;
+    const px = scale.toPx(value);
+    // Collision with the edge: the first and last label stay inside
+    // the container.
+    const labelLeft = insideContainer(px - labelWidth / 2, labelWidth, width);
+    return { value, label, px, labelLeft, labelWidth };
+  });
+  return { format, ticks, total: all.length };
+}
+
+/** The ticks of one x axis that stand apart. `wrapped` is true when the
+    named ticks needed their two lines. */
+function xTickLadder(
+  axis: AxisInput,
+  domain: readonly [number, number],
+  scale: LinearScale,
+  cx: XContext,
+  startCount: number,
+  tall: ReadonlySet<string> | null,
+): { placed: PlacedTicks; wrapped: boolean } {
+  const place = (tickCount: number, keep: number, wrap = false) =>
+    placeXTicks(axis, domain, scale, cx, tickCount, keep, wrap);
+  let count = startCount;
+  // Collision between the labels, measured and not guessed from a width
+  // per tick. Generated ticks first ask for fewer, so their step stays
+  // 1-2-5 or a calendar unit, as long as two remain; then - and named ticks,
+  // the categories, at once - every k-th is kept.
+  let placed = place(count, 1);
+  if (axis.tickValues === undefined) {
+    // One label cannot place a point: a week asked for three ticks gets a
+    // week's step and one tick. Ask for more until there are two; should
+    // they collide, keeping every other one below still leaves two.
+    for (const most = count + 8; placed.total < 2 && count < most; ) placed = place(++count, 1);
+    while (!apart(placed.ticks) && count > 1) {
+      const next = place(count - 1, 1);
+      if (next.total < 2) break;
+      count--;
+      placed = next;
+    }
+    // Below four ticks the steps jump far - six hours after three, a week
+    // after two days -, and ten hours on a phone got two labels. A narrow
+    // axis takes a denser step while its labels still stand apart.
+    if (axis.tickCount === undefined) {
+      for (let more = count + 1; placed.total < 4 && more <= count + 3; more++) {
+        const next = place(more, 1);
+        if (next.total <= placed.total) continue;
+        if (!apart(next.ticks)) break;
+        placed = next;
+      }
+    }
+    for (let keep = 2; !apart(placed.ticks) && placed.ticks.length > 1; keep++) placed = place(count, keep);
+    return { placed, wrapped: false };
+  }
+  // Named ticks are categories, and their names are the content: two
+  // lines before any is left out, and at every thinning again.
+  const wrap = tall === null || tall.has(axis.key);
+  for (let keep = 1; ; keep++) {
+    for (const lines of wrap ? [false, true] : [false]) {
+      placed = place(count, keep, lines);
+      if (apart(placed.ticks) || placed.ticks.length <= 1) return { placed, wrapped: lines };
+    }
+  }
+}
+
+/** Step 4: x ticks out of the now known plot width. */
+function buildX(
+  list: readonly AxisInput[],
+  plot: PlotBox,
+  cx: XContext,
+  heights: Map<string, number>,
+  titles: Map<string, TitleSize>,
+  tall: ReadonlySet<string> | null,
+  wrapped: Set<string>,
+  result: AxisLayout[],
+): void {
+  let offset = 0;
+  list.forEach((axis, stack) => {
+    const size = heights.get(axis.key) ?? 0;
+    const band = bandRect(axis, plot, offset, size);
+    offset += size + BAND_GAP;
+    const count = axis.tickCount ?? Math.max(2, Math.round(plot.width / 80));
+    // The domain comes from the count asked for; fewer labels below do not
+    // widen it to a coarser step.
+    const domain = domainOf(axis, count);
+    const own = axis.ownDomainMode;
+    const ownDomain = own === undefined ? undefined : domainOf({ ...axis, domainMode: own }, count);
+    const scale = new LinearScale(domain, [plot.left, plot.left + plot.width]);
+    const ladder = xTickLadder(axis, domain, scale, cx, count, tall);
+    if (ladder.wrapped) wrapped.add(axis.key);
+    const { format, ticks } = ladder.placed;
+    result.push({
+      key: axis.key,
+      id: axis.id,
+      orientation: "x",
+      position: axis.position,
+      label: axis.label,
+      grid: axis.grid,
+      band,
+      size,
+      stack,
+      domain,
+      ...(ownDomain !== undefined && { ownDomain }),
+      scale,
+      ticks,
+      format,
+      titleSize: titles.get(axis.key)?.size ?? 0,
+      breaks:
+        axis.calendar === undefined || axis.calendar.length === 0
+          ? []
+          : calendarBreaks(axis.calendar, domain[0], domain[1]).map((v) => scale.toPx(v)),
+      limitsInside: false,
+    });
+  });
+}
+
+/** One pass. `tall` null: every named x axis may wrap, as the probe;
+    otherwise only those it names, which have the band for it. */
+function layoutPass(
+  input: LayoutInput,
+  hysteresis: Map<string, number>,
+  tall: ReadonlySet<string> | null,
+): { layout: LayoutResult; wrapped: Set<string> } {
+  const { width, height, padding, axes, measure } = input;
+  const locale = input.locale ?? "en-GB";
+  const wrapped = new Set<string>();
+
+  const left = axes.filter((a) => a.position === "left");
+  const right = axes.filter((a) => a.position === "right");
+  const top = axes.filter((a) => a.position === "top");
+  const bottom = axes.filter((a) => a.position === "bottom");
+
+  const lineHeight = Math.ceil(measure("0", CLASS_TICK).height) || 14;
+  const titles = new Map(axes.map((a) => [a.key, titleOf(a, measure)]));
+
+  /* --- Step 2: x band heights (independent of the ticks) --- */
+  const xHeight = new Map<string, number>();
+  for (const axis of [...top, ...bottom]) {
+    const lines = tall?.has(axis.key) === true ? 2 : 1;
+    const title = titles.get(axis.key)?.band ?? 0;
+    xHeight.set(axis.key, stabilize(axis.key, TICK_LEN + TICK_GAP + lines * lineHeight + title, hysteresis));
   }
 
-  const plotLeft = padding.left + sum(left, yWidth);
-  const plotRight = width - padding.right - sum(right, yWidth);
+  const plotTop = padding.top + sumBands(top, xHeight);
+  const plotBottom = height - padding.bottom - sumBands(bottom, xHeight);
+  const plotHeight = Math.max(0, plotBottom - plotTop);
+
+  const y = yInterims(input, locale, plotHeight, titles, hysteresis);
+
+  const plotLeft = padding.left + sumBands(left, y.widths);
+  const plotRight = width - padding.right - sumBands(right, y.widths);
   const plotWidth = Math.max(0, plotRight - plotLeft);
 
   const plot: Rect = { x: plotLeft, y: plotTop, width: plotWidth, height: plotHeight };
-
-  /* --- Band rectangles: stack from the inside outwards --- */
-  const bandRect = (
-    axis: AxisInput,
-    stack: number,
-    offset: number,
-    size: number,
-  ): Rect => {
-    switch (axis.position) {
-      case "left":
-        return { x: plotLeft - offset - size, y: plotTop, width: size, height: plotHeight };
-      case "right":
-        return { x: plotRight + offset, y: plotTop, width: size, height: plotHeight };
-      case "top":
-        return { x: plotLeft, y: plotTop - offset - size, width: plotWidth, height: size };
-      default:
-        return { x: plotLeft, y: plotBottom + offset, width: plotWidth, height: size };
-    }
+  const box: PlotBox = {
+    left: plotLeft,
+    right: plotRight,
+    top: plotTop,
+    bottom: plotBottom,
+    width: plotWidth,
+    height: plotHeight,
   };
 
   const result: AxisLayout[] = [];
-
-  const buildY = (list: readonly AxisInput[]): void => {
-    let offset = 0;
-    list.forEach((axis, stack) => {
-      const size = yWidth.get(axis.key) ?? 0;
-      const z = yInterim.get(axis.key);
-      const band = bandRect(axis, stack, offset, size);
-      offset += size + BAND_GAP;
-      const domain = z?.domain ?? ([0, 1] as const);
-      const format = z?.format ?? ((v: number) => String(v));
-      // The y range is inverted: the domain minimum lies at the bottom.
-      const scale = new LinearScale(domain, [plotTop + plotHeight, plotTop]);
-      const ticks: TickLayout[] = (z?.values ?? []).map((value, i) => ({
-        value,
-        label: z?.labels[i] ?? "",
-        px: scale.toPx(value),
-        labelLeft: 0,
-        labelWidth: z?.widths[i] ?? 0,
-      }));
-      result.push({
-        key: axis.key,
-        id: axis.id,
-        orientation: "y",
-        position: axis.position,
-        label: axis.label,
-        grid: axis.grid,
-        band,
-        size,
-        stack,
-        domain,
-        scale,
-        ticks,
-        format,
-        titleSize:
-          axis.label === undefined || axis.label === ""
-            ? 0
-            : Math.ceil(measure(axis.label, CLASS_TITLE).height),
-        breaks: [],
-        limitsInside: z?.limitsInside ?? false,
-      });
-    });
-  };
-
-  buildY(left);
-  buildY(right);
-
-  /* --- Step 4: x ticks out of the now known plot width --- */
-  const buildX = (list: readonly AxisInput[]): void => {
-    let offset = 0;
-    list.forEach((axis, stack) => {
-      const size = xHeight.get(axis.key) ?? 0;
-      const band = bandRect(axis, stack, offset, size);
-      offset += size + BAND_GAP;
-      let count = axis.tickCount ?? Math.max(2, Math.round(plotWidth / 80));
-      // The domain comes from the count asked for; fewer labels below do not
-      // widen it to a coarser step.
-      const domain = domainOf(axis, count);
-      const own = axis.ownDomainMode;
-      const ownDomain = own === undefined ? undefined : domainOf({ ...axis, domainMode: own }, count);
-      const scale = new LinearScale(domain, [plotLeft, plotLeft + plotWidth]);
-      // Every `keep`-th tick at `tickCount`, measured and placed; `wrap`
-      // breaks each label onto two lines.
-      const place = (tickCount: number, keep: number, wrap = false) => {
-        const all = tickValuesFor(axis, domain, tickCount);
-        const values = all.filter((_, i) => i % keep === 0);
-        const format = formatterFor(axis, domain, tickCount, locale);
-        // Labelled after thinning: a time label's date moves to the first tick
-        // that is kept.
-        const plain = labelsFor(axis, domain, tickCount, values, format, locale);
-        const labels = wrap ? plain.map((l) => twoLines(l, (t) => measure(t, CLASS_TICK).width)) : plain;
-        const ticks: TickLayout[] = values.map((value, i) => {
-          const label = labels[i] ?? "";
-          const labelWidth = measure(label, CLASS_TICK).width;
-          const px = scale.toPx(value);
-          // Collision with the edge: the first and last label stay inside
-          // the container.
-          const labelLeft = insideContainer(px - labelWidth / 2, labelWidth, width);
-          return { value, label, px, labelLeft, labelWidth };
-        });
-        return { format, ticks, total: all.length };
-      };
-      // Collision between the labels, measured and not guessed from a width
-      // per tick. Generated ticks first ask for fewer, so their step stays
-      // 1-2-5 or a calendar unit, as long as two remain; then - and named ticks,
-      // the categories, at once - every k-th is kept.
-      let placed = place(count, 1);
-      if (axis.tickValues === undefined) {
-        // One label cannot place a point: a week asked for three ticks gets a
-        // week's step and one tick. Ask for more until there are two; should
-        // they collide, keeping every other one below still leaves two.
-        for (const most = count + 8; placed.total < 2 && count < most; ) placed = place(++count, 1);
-        while (!apart(placed.ticks) && count > 1) {
-          const next = place(count - 1, 1);
-          if (next.total < 2) break;
-          count--;
-          placed = next;
-        }
-        // Below four ticks the steps jump far - six hours after three, a week
-        // after two days -, and ten hours on a phone got two labels. A narrow
-        // axis takes a denser step while its labels still stand apart.
-        if (axis.tickCount === undefined) {
-          for (let more = count + 1; placed.total < 4 && more <= count + 3; more++) {
-            const next = place(more, 1);
-            if (next.total <= placed.total) continue;
-            if (!apart(next.ticks)) break;
-            placed = next;
-          }
-        }
-        for (let keep = 2; !apart(placed.ticks) && placed.ticks.length > 1; keep++) placed = place(count, keep);
-      } else {
-        // Named ticks are categories, and their names are the content: two
-        // lines before any is left out, and at every thinning again.
-        const wrap = tall === null || tall.has(axis.key);
-        ladder: for (let keep = 1; ; keep++) {
-          for (const lines of wrap ? [false, true] : [false]) {
-            placed = place(count, keep, lines);
-            if (apart(placed.ticks) || placed.ticks.length <= 1) {
-              if (lines) wrapped.add(axis.key);
-              break ladder;
-            }
-          }
-        }
-      }
-      const { format, ticks } = placed;
-      result.push({
-        key: axis.key,
-        id: axis.id,
-        orientation: "x",
-        position: axis.position,
-        label: axis.label,
-        grid: axis.grid,
-        band,
-        size,
-        stack,
-        domain,
-        ...(ownDomain !== undefined && { ownDomain }),
-        scale,
-        ticks,
-        format,
-        titleSize:
-          axis.label === undefined || axis.label === ""
-            ? 0
-            : Math.ceil(measure(axis.label, CLASS_TITLE).height),
-        breaks:
-          axis.calendar === undefined || axis.calendar.length === 0
-            ? []
-            : calendarBreaks(axis.calendar, domain[0], domain[1]).map((v) => scale.toPx(v)),
-        limitsInside: false,
-      });
-    });
-  };
-
-  buildX(top);
-  buildX(bottom);
+  buildY(left, box, y.interim, y.widths, titles, result);
+  buildY(right, box, y.interim, y.widths, titles, result);
+  const cx: XContext = { width, locale, measure };
+  buildX(top, box, cx, xHeight, titles, tall, wrapped, result);
+  buildX(bottom, box, cx, xHeight, titles, tall, wrapped, result);
 
   return { layout: { width, height, plot, axes: result }, wrapped };
 }

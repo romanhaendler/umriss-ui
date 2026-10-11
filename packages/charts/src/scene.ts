@@ -105,6 +105,7 @@ import {
   markOverlayDirty,
   markLayoutDirty,
 } from "./sceneBinding";
+import { newSyncState, setSyncId, setLoading, share, syncedPx } from "./sceneSync";
 import { pushLayoutSnapshot, pushHoverSnapshot } from "./sceneSnapshots";
 import { registerSeries, updateSeries, registerAxis, updateAxis, registerLimit, updateLimit } from "./sceneRegistry";
 
@@ -145,10 +146,6 @@ export type {
   StackTotal,
   TooltipRow,
 } from "./sceneModel";
-
-/** Charts that share a `syncId`: the pointer's x position goes to all of
-    them (charts-long-series 04). */
-const syncGroups = new Map<string, Set<ChartScene>>();
 
 export class ChartScene {
   /* ---------- Registration ----------
@@ -764,72 +761,27 @@ export class ChartScene {
      tooltip stays with the chart under the pointer. Zoom is not shared; the
      caller gives every chart the same controlled domain. */
 
-  private syncId: string | null = null;
+  /** @internal */
+  readonly sync = newSyncState();
   /** @internal */
   loading = false;
-  /** Where another chart's pointer stands; null while none does. */
-  private synced: SyncedX | null = null;
-  private sent: SyncedX | null = null;
 
   setSyncId(id: string | null): void {
-    if (id === this.syncId) return;
-    if (this.syncId !== null) {
-      this.share(null);
-      const group = syncGroups.get(this.syncId);
-      group?.delete(this);
-      if (group?.size === 0) syncGroups.delete(this.syncId);
-      // The crosshair the old group asked for is no longer this chart's.
-      this.synced = null;
-      markOverlayDirty(this);
-    }
-    this.syncId = id;
-    if (id !== null) {
-      const group = syncGroups.get(id) ?? new Set<ChartScene>();
-      group.add(this);
-      syncGroups.set(id, group);
-    }
+    setSyncId(this, id);
   }
 
-  /** The rows are on their way (chart-loading): the pointer's hover ends, as
-      the stale plot takes no pointer, and no position is shared either way. A
-      key's point stays - the keys still walk. */
   setLoading(loading: boolean): void {
-    if (loading === this.loading) return;
-    this.loading = loading;
-    if (loading) {
-      pointerLeave(this);
-      this.share(null);
-      // A drag under way would pan on: a captured pointer passes the stale
-      // plot's pointer-events.
-      this.pointers.clear();
-      this.pinch = 0;
-    }
-    // Laid out anew: the layout snapshot carries it, so that the empty message
-    // waits for the frame that lays out the answer.
-    markLayoutDirty(this);
+    setLoading(this, loading);
   }
 
-  /** A loading chart shares no position either - its key's point included.
-      @internal */
+  /** @internal */
   share(x: SyncedX | null): void {
-    if (this.loading) x = null;
-    if (this.syncId === null || (x?.value === this.sent?.value && x?.axisId === this.sent?.axisId)) return;
-    this.sent = x;
-    for (const other of syncGroups.get(this.syncId) ?? []) {
-      if (other === this) continue;
-      other.synced = x;
-      other.markOverlayDirty();
-    }
+    share(this, x);
   }
 
-  /** The crosshair a synced position asks for, in this chart's pixels. None
-      while loading: it would point at values being replaced.
-      @internal */
+  /** @internal */
   syncedPx(): number | null {
-    const x = this.synced;
-    if (x === null || this.loading) return null;
-    const axis = findAxis(this, "x", x.axisId) ?? this.layout.axes.find((a) => a.orientation === "x") ?? null;
-    return axis === null ? null : axis.scale.toPx(x.value);
+    return syncedPx(this);
   }
 
   /* ---------- The view (ADR-0047) ----------
