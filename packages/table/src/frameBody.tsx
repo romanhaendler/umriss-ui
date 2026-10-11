@@ -88,6 +88,7 @@ export function newRowBody(ctx: BodyContext, fresh: { fresh?: unknown }) {
         registry={registry}
         hook={hook}
         columns={layout.dataColumns}
+        tree={layout.tree}
         spanEntry={layout.spanEntry}
         header={layout.header}
         selectable={ctx.selectable}

@@ -31,154 +31,21 @@
 
 import type { ReactNode } from "react";
 import type { Formats } from "@umriss-ui/core";
-import type { RowFilter } from "./rowFilter";
 import { tableModel } from "./model/tableModel";
 import type { ModelColumn, TableProjection, TableInput } from "./model/tableModel";
-import type { TableState } from "./model/tableState";
-import type { TableSnapshot } from "./types";
+import { windowed } from "./model/tableState";
 import { warnOnce } from "./dev";
 import { columnKind, sortValue } from "./values";
-import type { Format, ValueKind } from "./values";
-import type { AggregateColumn, AggregateKind, DatePeriod, GroupLevel } from "./model/grouping";
-import { MOST_LEVELS, periodStart, rowsOf } from "./model/grouping";
+import type { ValueKind } from "./values";
+import type { AggregateColumn, GroupLevel } from "./model/grouping";
+import { MOST_LEVELS, periodStart } from "./model/grouping";
 import { filterOf } from "./columnFilter";
 import { declaredPins, inPinOrder } from "./model/pinning";
-import type { Pin, Pins } from "./model/pinning";
-import type { FilterSpec } from "./columnFilter";
+import type { Pins } from "./model/pinning";
+import { List } from "./registryEntries";
+import type { ActionEntry, ActionSpec, ColumnEntry, ColumnSpec, HookSnapshot, PartKind } from "./registryEntries";
 
-/* --- Specs ------------------------------------------------------------------- */
-
-/** What registers at a table beside the columns. Each kind counts for itself. */
-export type PartKind = "pagination" | "toolbar" | "search";
-
-/** A column as it registers - from its props, already laid out. */
-export interface ColumnSpec {
-  id: string;
-  label: string;
-  /** A field name or a function of the row. */
-  value: string | ((row: never) => unknown);
-  presentation?: (value: never, row: never) => ReactNode;
-  format?: Format;
-  /** What the values come to - in the footer and in a group's header. */
-  aggregate?: AggregateKind | ((values: readonly never[], rows: readonly never[]) => unknown);
-  /** The share bar under a sum in a group header; on unless `false`. */
-  share?: boolean;
-  rowHeader: boolean;
-  rightAligned?: boolean;
-  width?: number;
-  pin?: Pin;
-  resizable: boolean;
-  sortable?: boolean;
-  searchable?: boolean;
-  filter?: FilterSpec;
-  ownSortValue?: (value: never) => unknown;
-  ownExportValue?: (value: never) => unknown;
-  /** What is grouped by, when not the value itself. */
-  ownGroupValue?: (value: never) => unknown;
-  /** Groups a point in time by its day, week, month or year. */
-  group?: DatePeriod;
-  groupable?: boolean;
-  /** Edited in place in grid mode: by a core field of this kind, or by the column's own editor. */
-  edit?: "text" | "number" | "select" | "date" | ((editor: never) => ReactNode);
-  /** What `edit="select"` offers. */
-  editOptions?: readonly unknown[];
-  /** Checks a draft before it is reported. */
-  validate?: (value: never, row: never) => string | null | undefined;
-}
-
-export interface ColumnEntry {
-  key: string;
-  spec: ColumnSpec;
-  /** Reads the value with the latest spec each time. The function itself is
-      stable per entry - that is what the model remembers its columns by. */
-  read: (row: unknown) => unknown;
-}
-
-export interface ActionSpec {
-  label: string;
-  /** A bulk action always gets a list. */
-  bulk: boolean;
-  tone: "default" | "danger";
-  onSelect: (target: never) => void;
-}
-
-export interface ActionEntry {
-  key: string;
-  spec: ActionSpec;
-}
-
-/** What the hook deposits for the table on every pass. */
-export interface HookSnapshot {
-  /** All the rows passed in - like `t.rows`. The kind of a column is read off
-      them: a pre-filter that admits nothing does not turn a number column into
-      an empty one, and the model's columns do not recalculate when it
-      changes. */
-  rows: readonly unknown[];
-  /** The rows the pre-filter admits: the ones the table has. Model, filter
-      options, figures and the empty state read them. */
-  admitted: readonly unknown[];
-  /** The columns the hook calculated its model with. */
-  modelColumns: readonly ModelColumn<unknown>[];
-  tableState: TableState<unknown, string>;
-  filter: ((row: unknown) => boolean) | undefined;
-  /** What the table is grouped by, as the model takes it - absent when not. */
-  grouping: TableInput<unknown>["grouping"];
-  /** Tree rows, as the model takes them - absent when the rows are flat. */
-  tree: TableInput<unknown>["tree"];
-  /** The folded paths - for a grouping the body resolves itself. */
-  folded: ReadonlySet<string>;
-  publicSnapshot: TableSnapshot<unknown>;
-  rowKey: (row: unknown) => string;
-  /** The provider's formats - the text comparison of the sort comes from there. */
-  formats: Formats;
-  /** The pins the user chose - absent while the declared ones hold. */
-  pins: Pins | null;
-  /** Server mode: the values a list filter offers, from the application. */
-  filterOptions?: (column: string) => readonly unknown[];
-  /** Server mode: the selected rows the table has seen, on this page or an
-      earlier one - what a bulk action receives. */
-  selectedRows?: readonly unknown[];
-  /** The row filters the table was given, by id - their chips read them. */
-  rowFilters: ReadonlyMap<string, RowFilter<unknown, unknown>>;
-}
-
-/* --- An ordered list of entries ----------------------------------------------- */
-
-class List<E extends { key: string }> {
-  entries = new Map<string, E>();
-  /** Keys in the order of the running pass. */
-  pass: string[] = [];
-  /** Order from the markers in the DOM, after the last commit. */
-  dom: string[] = [];
-
-  constructor(readonly markerAttribute: string) {}
-
-  note(key: string) {
-    if (!this.pass.includes(key)) this.pass.push(key);
-  }
-
-  /** The entries in JSX order, as well as it is known right now: from the pass
-      when it knows every one, otherwise from the DOM. */
-  ordered(): E[] {
-    const all = [...this.entries.keys()];
-    const source = all.every((s) => this.pass.includes(s)) ? this.pass : this.dom;
-    return [
-      ...source.filter((s) => this.entries.has(s)),
-      ...all.filter((s) => !source.includes(s)),
-    ].map((s) => this.entries.get(s)!);
-  }
-
-  /** Reads the markers; reports whether the valid order changes because of it. */
-  check(root: HTMLElement): boolean {
-    const inDom = Array.from(root.querySelectorAll<HTMLElement>(`[${this.markerAttribute}]`))
-      .map((m) => m.getAttribute(this.markerAttribute)!)
-      .filter((s) => this.entries.has(s));
-    const before = this.ordered().map((e) => e.key).join("|");
-    this.dom = inDom;
-    this.pass = inDom;
-    return before !== this.ordered().map((e) => e.key).join("|");
-  }
-}
+export type { ActionEntry, ActionSpec, ColumnEntry, ColumnSpec, HookSnapshot, PartKind } from "./registryEntries";
 
 /* --- The registry ------------------------------------------------------------- */
 
@@ -213,6 +80,19 @@ const signatureOf = (a: ColumnSpec): string =>
 
 const readField = (row: unknown, field: string): unknown =>
   row === null || row === undefined ? undefined : (row as Record<string, unknown>)[field];
+
+/** A column entry whose `read` takes the value from the entry's latest spec. */
+const columnEntry = (key: string, spec: ColumnSpec): ColumnEntry => {
+  const entry: ColumnEntry = {
+    key,
+    spec,
+    read: (row) => {
+      const value = entry.spec.value;
+      return typeof value === "string" ? readField(row, value) : (value as (z: unknown) => unknown)(row);
+    },
+  };
+  return entry;
+};
 
 export class Registry {
   readonly columns = new List<ColumnEntry>("data-umriss-column");
@@ -299,14 +179,7 @@ export class Registry {
     const existing = this.columns.entries.get(key);
     const signature = signatureOf(spec);
     if (!existing) {
-      const entry: ColumnEntry = {
-        key,
-        spec,
-        read: (row) => {
-          const value = entry.spec.value;
-          return typeof value === "string" ? readField(row, value) : (value as (z: unknown) => unknown)(row);
-        },
-      };
+      const entry = columnEntry(key, spec);
       this.columns.entries.set(key, entry);
       this.structure++;
     } else {
@@ -408,14 +281,7 @@ export class Registry {
     const existing = this.groupKeys.entries.get(key);
     const signature = signatureOf(spec);
     if (!existing) {
-      const entry: ColumnEntry = {
-        key,
-        spec,
-        read: (row) => {
-          const value = entry.spec.value;
-          return typeof value === "string" ? readField(row, value) : (value as (z: unknown) => unknown)(row);
-        },
-      };
+      const entry = columnEntry(key, spec);
       this.groupKeys.entries.set(key, entry);
       this.structure++;
     } else {
@@ -809,14 +675,6 @@ export class Registry {
   removeAction(key: string) {
     if (this.actions.entries.delete(key)) this.structure++;
   }
-}
-
-/** The virtual window of a projection: of its lines when it is grouped, of its
-    rows otherwise. */
-export function windowed<Z>(projection: TableProjection<Z>, from: number, to: number): TableProjection<Z> {
-  if (!projection.lines) return { ...projection, visible: (projection.shown ?? projection.filtered).slice(from, to) };
-  const visibleLines = projection.lines.slice(from, to);
-  return { ...projection, visibleLines, visible: rowsOf(visibleLines) };
 }
 
 /* Which registry belongs to a table: fastened to the hook's stable `Table`, so
