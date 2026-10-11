@@ -98,7 +98,88 @@ describe("A stack in the data table", () => {
     const rows = [...host.querySelectorAll(".uc-data-panel tbody tr")].map((tr) =>
       [...tr.querySelectorAll("th, td")].map((c) => c.textContent).join("|"),
     );
-    expect(rows).toEqual(["t0|1|3", "t1|2|4", "t2||5"]);
+    expect(rows).toEqual(["t0|1|3|4", "t1|2|4|6", "t2||5|5"]);
+  });
+});
+
+/* The total column (K4): the scene's table groups, no mount needed. */
+describe("A stack's total in the data table", () => {
+  const bar = (part: Partial<BarSeriesConfig>): BarSeriesConfig => ({
+    kind: "bar",
+    accessor: (d) => (d as Row).b,
+    xAxisId: "x",
+    yAxisId: "y",
+    barWidth: 0.8,
+    stack: "s",
+    ...part,
+  });
+
+  async function table(rows: Row[], setup: (s: ChartScene) => void, wording?: typeof GERMAN_CHARTS_WORDING) {
+    const s = new ChartScene();
+    if (wording !== undefined) s.setWording(wording);
+    s.setData(rows);
+    s.registerAxis({ id: "x", orientation: "x", position: "bottom", accessor: (d) => (d as Row).t, domain: "data" });
+    s.registerAxis({ id: "y", orientation: "y", position: "left", accessor: (d) => (d as Row).b, domain: "data" });
+    setup(s);
+    const host = document.createElement("div");
+    document.body.appendChild(host);
+    s.bind(host, document.createElement("canvas"), document.createElement("canvas"), host);
+    s.requestResize(400, 300);
+    await frame();
+    const group = s.dataTableGroups()[0];
+    s.unbind();
+    host.remove();
+    return { columns: group?.columns, rows: group?.rows.map((r) => r.slice(1).join("|")) };
+  }
+
+  const members = (s: ChartScene, extra: Partial<BarSeriesConfig> = {}) => {
+    s.registerSeries(bar({ name: "A", accessor: (d) => (d as Row).a, ...extra }));
+    s.registerSeries(bar({ name: "B", ...extra }));
+  };
+
+  it("follows the last member, in the series' format; a gap sums the others", async () => {
+    const t = await table(data, (s) => members(s, { format: (v) => `${v} kg` }));
+    expect(t.columns?.slice(1)).toEqual(["A", "B", "Total"]);
+    expect(t.rows).toEqual(["1 kg|3 kg|4 kg", "2 kg|4 kg|6 kg", "|5 kg|5 kg"]);
+  });
+
+  it("leaves a hidden member out of the total", async () => {
+    const t = await table(data, (s) => {
+      members(s);
+      s.toggleSeries("A");
+    });
+    expect(t.columns?.slice(1)).toEqual(["B", "Total"]);
+    expect(t.rows).toEqual(["3|3", "4|4", "5|5"]);
+  });
+
+  it("shows a normalised stack's shares and the readings' sum", async () => {
+    const t = await table(data, (s) => members(s, { normalize: true, format: (v) => `${v} pcs` }));
+    expect(t.rows?.[1]).toBe("33.333%|66.667%|6 pcs");
+  });
+
+  it("gets one column per stack and none for a loose series", async () => {
+    const t = await table(data, (s) => {
+      members(s);
+      s.registerSeries(bar({ name: "C", stack: "u" }));
+      s.registerSeries(bar({ name: "D", stack: undefined }));
+    });
+    expect(t.columns?.slice(1)).toEqual(["A", "B", "Total", "C", "Total", "D"]);
+    expect(t.rows?.[1]).toBe("2|4|6|4|4|4");
+  });
+
+  it("writes the heading from the wording", async () => {
+    const t = await table(data, (s) => members(s), GERMAN_CHARTS_WORDING);
+    expect(t.columns?.[3]).toBe("Summe");
+  });
+
+  it("keeps each row's total in a thinned table", async () => {
+    const long = Array.from({ length: 2000 }, (_, i) => ({ t: i, a: i, b: 1 }));
+    const t = await table(long, (s) => members(s, { format: String }));
+    expect(t.rows?.length).toBeLessThan(2000);
+    for (const r of t.rows ?? []) {
+      const [a, b, total] = r.split("|").map(Number) as number[];
+      expect(total).toBe((a as number) + (b as number));
+    }
   });
 });
 

@@ -3082,11 +3082,27 @@ export class ChartScene {
       const stacked = k.entry.stacked;
       if (key === undefined || stacked === null) return;
       if (chosen.some((later, j) => j > i && stackOf(later.entry.config) === key)) return;
-      const total = stacked.total[k.index] as number;
-      const value = stacked.normalize ? (k.entry.config.format ?? formatValue)(total) : this.formatY(k.entry, total);
-      out.push({ after: i, name: this.wording.stackTotal, value });
+      out.push({ after: i, name: this.wording.stackTotal, value: this.totalText(k.entry, stacked.total[k.index] as number) });
     });
     return out;
+  }
+
+  /** A stack's total as text, shared by the tooltip and the data table. */
+  private totalText(entry: SeriesEntry, total: number): string {
+    return (entry.stacked as NonNullable<SeriesEntry["stacked"]>).normalize ? (entry.config.format ?? formatValue)(total) : this.formatY(entry, total);
+  }
+
+  /** The total of the stack `last` closes at the row's x, found in the
+      members' own channels (the table's courses may be thinned); empty where
+      no member reads there. */
+  private totalCell(members: readonly SeriesEntry[], last: SeriesEntry, x: number): string {
+    for (const m of members) {
+      const mat = m.materialized as MaterializedSeries;
+      const at = lowerBound(mat.x, mat.length, x);
+      const total = at < mat.length && mat.x[at] === x ? (m.stacked as NonNullable<SeriesEntry["stacked"]>).total[at] : undefined;
+      if (total !== undefined && !Number.isNaN(total)) return this.totalText(last, total);
+    }
+    return "";
   }
 
   /** The summary is rebuilt after a layout, but not on every one: a zoom lays
@@ -3235,6 +3251,13 @@ export class ChartScene {
       seconds = d > 0 && d < MINUTE;
     }
     const caption = w.tableCaption(this.xLabel(axisId, from), this.xLabel(axisId, to));
+    // A stack's total column follows its last member (K4).
+    const closes = (e: SeriesEntry): SeriesEntry[] | null => {
+      const key = stackOf(e.config);
+      if (key === undefined || e.stacked === null) return null;
+      const members = entries.filter((m) => stackOf(m.config) === key);
+      return members[members.length - 1] === e ? members : null;
+    };
     return {
       key: `x:${axisId}`,
       caption: rows.thinned ? `${caption} ${w.downsampled(rows.readings)}` : caption,
@@ -3242,8 +3265,8 @@ export class ChartScene {
         this.findAxisConfig("x", axisId)?.label ?? w.positionColumn,
         ...entries.flatMap((e) => {
           const name = this.nameFor(e, all.indexOf(e));
-          if (e.config.kind !== "box") return [name];
-          return this.boxParts(e, null).map((p) => `${name} – ${p.label}`);
+          const own = e.config.kind !== "box" ? [name] : this.boxParts(e, null).map((p) => `${name} – ${p.label}`);
+          return closes(e) === null ? own : [...own, w.stackTotal];
         }),
       ],
       rows: rows.x.map((x, r) => [
@@ -3251,7 +3274,9 @@ export class ChartScene {
         ...entries.flatMap((e, s) => {
           const course = rows.courses[s] as Course;
           const i = rows.at[r]?.[s] ?? -1;
-          return e.config.kind === "box" ? this.boxCells(e, course, i) : [this.cellText(e, course, i)];
+          const own = e.config.kind === "box" ? this.boxCells(e, course, i) : [this.cellText(e, course, i)];
+          const members = closes(e);
+          return members === null ? own : [...own, this.totalCell(members, e, x)];
         }),
       ]),
     };

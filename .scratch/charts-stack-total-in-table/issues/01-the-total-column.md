@@ -1,6 +1,6 @@
 # 01 — The total column
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: S
 
@@ -32,17 +32,26 @@ so it needs no change.
 
 ## Acceptance
 
-- [ ] Mounted: a plain stack of two bars gets "Total" after the second with
+- [x] Mounted: a plain stack of two bars gets "Total" after the second with
       the sum in the series' `format`; a hidden member leaves the total.
-- [ ] Mounted: a normalised stack lists shares and a total in the readings'
+- [x] Mounted: a normalised stack lists shares and a total in the readings'
       format, not a percent.
-- [ ] Mounted: two stacks on one x axis get two total columns, each after its
+- [x] Mounted: two stacks on one x axis get two total columns, each after its
       last member; an unstacked series gets none.
-- [ ] Mounted: a row with a gap in one member sums the others; a row with no
+- [x] Mounted: a row with a gap in one member sums the others; a row with no
       reading is empty; a stack of one visible member still gets the column.
-- [ ] A stack long enough to be thinned (above `TABLE_LIMIT`) keeps each row's
+- [x] A stack long enough to be thinned (above `TABLE_LIMIT`) keeps each row's
       total equal to the sum of the members' values at that x.
-- [ ] German heading "Summe"; a wording written out in full still type-checks.
-- [ ] The tooltip's and the readout's totals are unchanged (the existing
+- [x] German heading "Summe"; a wording written out in full still type-checks.
+- [x] The tooltip's and the readout's totals are unchanged (the existing
       stacking tests pass).
-- [ ] Typecheck, the charts' unit tests and the demo smoke test pass.
+- [x] Typecheck, the charts' unit tests and the demo smoke test pass.
+
+## Comments
+
+Delivered. `courseTable` adds the column after each stack's last member; the
+row's x is looked up in the members' own channels (`lowerBound`), and
+`totalText` is shared by `totalsOf` and the table. Tests in
+`stacking.jsdom.test.tsx` (scene-level table groups: plain, gap, hidden,
+normalised, two stacks plus a loose series, German, thinned). No example puts a
+`DataTable` over a stack, so no baseline moves.
