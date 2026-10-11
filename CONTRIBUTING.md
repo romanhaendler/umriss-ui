@@ -25,6 +25,15 @@ which `pnpm test:visual:update` creates and which are then checked in.
 ## Commands (repo root)
 
 
+* `pnpm check [package]` – the shrink guard, eslint, `typecheck` and `test:unit`
+  of one package (`core`, `charts`, `table`, `schedule`, `calculation`, `demo`)
+  or of all, stopping at the first failure. `typecheck` covers a package's own
+  `src`, `tests-unit` and `tests-visual`, writes nothing and needs no generated file
+* `pnpm typecheck` – `typecheck` and `typecheck:demo` of every package;
+  `typecheck:demo` generates the props first and checks `demo/` (core's control
+  room page reaches the other packages' sources there)
+* `pnpm check:site` – the gates of the demos: `props` in every package, and core's
+  README table
 * `pnpm test:unit` – vitest across all packages, the shell included
 * `pnpm test:visual` – Playwright; builds the five demos and starts
   `vite preview` automatically (ports 4173 core, 4174 charts, 4175 table,
@@ -55,17 +64,26 @@ else is a failing suite rather than a mystery.
 
 ## How work is organised here
 
-Specs and tickets live as markdown under `.scratch/<effort>/` — one directory
-per effort, `spec.md` beside `issues/NN-<slug>.md`, and a `Status:` line at the
-top of each ticket carrying the triage role. The conventions are written down
-for the agent skills that read them, and they hold for a person just the same:
-[`docs/agents/issue-tracker.md`](docs/agents/issue-tracker.md) for the layout,
-[`docs/agents/triage-labels.md`](docs/agents/triage-labels.md) for the five role
-strings, [`docs/agents/domain.md`](docs/agents/domain.md) for how `CONTEXT.md`
-and the ADRs are consumed.
+Open work lives as markdown under `.scratch/<effort>/` — one directory per
+effort, `spec.md` beside `issues/NN-<slug>.md`, and a `Status:` line at the top
+of each ticket carrying the triage role. A feature folder is deleted when its
+last ticket is done; the commit history keeps it. The conventions are written
+down for the agent skills that read them, and they hold for a person just the
+same: [`docs/agents/issue-tracker.md`](docs/agents/issue-tracker.md) for the
+layout, [`docs/agents/triage-labels.md`](docs/agents/triage-labels.md) for the
+five role strings, [`docs/agents/domain.md`](docs/agents/domain.md) for how
+`CONTEXT.md` and the ADRs are consumed.
 
-A delivered spec is a record: it is read backwards, it cites commit SHAs by
-hand, and it is not rewritten to look current.
+## Where a fact is written
+
+* **One fact, one place.** A change touches the source, its test, its example
+  and — at release — the changelog. Nothing else restates it.
+* **An ADR is written only for a decision that is costly to reverse.** Anything
+  smaller is the commit message.
+* **A comment says what the code does now and why it must be so.** No ticket
+  names, no history.
+* **The journal is frozen** (`docs/journal.md`, 2026-10-11): no new entries; the
+  commit history and the changelogs carry on. `.scratch/` holds open work only.
 
 ## The rules that bind a change
 
@@ -86,8 +104,8 @@ Each of these is argued somewhere; the link is the argument, not the rule.
   review is never admissible (`CONTEXT.md`, **Baseline**).
 * **A prop or an export without JSDoc breaks the build.** Whatever lands in a
   props table on some page explains itself, and so does every export of a
-  package's entry and its subpaths; the gate runs in `predev`, `prebuild:demo`
-  and `pretypecheck`. The same gate stops at a requirement number (`R-4.12`, it
+  package's entry and its subpaths; the gate runs in `predev`, `prebuild:demo`,
+  `typecheck:demo` and `check:site`. The same gate stops at a requirement number (`R-4.12`, it
   goes into `@remarks`) or a source path in a reader's text; an ADR number is
   written bare and becomes a link to its file.
 * **A prop without an example breaks the build.** Every row of a props table

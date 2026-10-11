@@ -1,7 +1,7 @@
 /* The guard over the README's component table (library-audit 08).
 
    What is checked is the reader against small texts, not the real README -
-   `pnpm typecheck` does that through `pretypecheck`, and a second run here
+   `pnpm check:site` does that, and a second run here
    would need the compiler's whole program.
 
    The fixture below is English, like the shipped README since ticket 14. The

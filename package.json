@@ -6,7 +6,10 @@
     "build": "pnpm -r build",
     "build:pages": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/build-pages.mjs",
     "previews": "node --disable-warning=ExperimentalWarning --experimental-strip-types scripts/previews.mjs",
-    "typecheck": "pnpm -r typecheck",
+    "prepare": "git config core.hooksPath .githooks",
+    "check": "node scripts/check.mjs",
+    "check:site": "pnpm -r --if-present check:site",
+    "typecheck": "pnpm -r typecheck && pnpm -r --if-present typecheck:demo",
     "lint": "eslint --max-warnings 0 packages/charts packages/core packages/table packages/schedule packages/calculation packages/demo",
     "dev:core": "pnpm --filter @umriss-ui/core dev",
     "dev:charts": "pnpm --filter @umriss-ui/charts dev",
@@ -15,6 +18,8 @@
     "dev:calculation": "pnpm --filter @umriss-ui/calculation dev",
     "test:unit": "pnpm -r test:unit",
     "test:visual": "playwright test",
+    "test:visual:quick": "node scripts/visual-quick.mjs",
+    "test:visual:on-main": "bash scripts/visual-on-main.sh",
     "test:visual:update": "playwright test --update-snapshots"
   },
   "devDependencies": {

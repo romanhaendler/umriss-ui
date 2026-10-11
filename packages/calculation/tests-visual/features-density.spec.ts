@@ -81,7 +81,7 @@ test("a compact line that is clicked stays where it is, its derivation opens lin
   expect([...rights]).toHaveLength(1);
 });
 
-test("narrow, a compact verdict moves beneath its label and is drawn in full", async ({ page }) => {
+test("narrow, a compact verdict moves beneath its label and is drawn in full", { tag: "@quick" }, async ({ page }) => {
   await openExample(page, "calculation", "density");
   const list = calculation(page, CAPTIONS.compact);
   /* The frame is the list's parent; it measures its own width, not the window's. */

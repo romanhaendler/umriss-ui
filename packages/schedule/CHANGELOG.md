@@ -1,8 +1,7 @@
 # Changes to `@umriss-ui/schedule`
 
 This document describes what changes for **callers** of the package: exports,
-props, behaviour. What was worked on in the repository stands in the
-repository's journal (`docs/journal.md`) and in the specs under `.scratch/`.
+props, behaviour.
 
 **The numbers.** The middle digit rises when something is added; the last one
 when something is repaired. As long as the first digit is `0`, no number

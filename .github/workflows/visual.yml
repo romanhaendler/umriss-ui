@@ -1,0 +1,33 @@
+# NOT RUN YET: this job has never run on GitHub. The baselines were taken on the
+# maintainer's Mac (-darwin); fonts on the runner may differ from his machine,
+# so the first runs may report image diffs that are not regressions.
+# The full visual suite on every push to main (20-50 minutes), on macOS because
+# the baselines are -darwin. Locally: `pnpm test:visual:quick <package>`.
+name: Visual
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  visual:
+    runs-on: macos-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install chromium
+      - run: pnpm test:visual
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-results
+          path: test-results/

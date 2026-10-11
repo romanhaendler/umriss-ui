@@ -32,6 +32,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm typecheck
+      - run: pnpm check:site
       - run: pnpm test:unit
       - run: pnpm build
       - run: pnpm -r check:dist
@@ -69,7 +70,7 @@ jobs:
             echo "$name $version"
             case "$version" in 18.*) ;; *) echo "expected $name 18, got $version"; exit 1 ;; esac
           done
-      # The typecheck writes what the demos' tests read (`demo/.generated`); the
-      # first run of this job went without it and one test found no file.
-      - run: pnpm typecheck
+      # The demos' tests read `demo/.generated`, which `props` writes and the
+      # typecheck no longer does.
+      - run: pnpm -r --if-present props
       - run: pnpm test:unit

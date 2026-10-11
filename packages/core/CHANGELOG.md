@@ -1,12 +1,7 @@
 # Changes to `@umriss-ui/core`
 
 This document describes what changes for **callers** of the package: exports,
-props, behaviour. The journal of the repository (`docs/journal.md`) describes
-something else — what was worked on here, including
-rebuilds, tests and decisions that are invisible from outside. The two therefore
-do not run in parallel: an entry there can be missing here because it changed
-nothing about the contract; and one sentence here can summarise three entries
-there.
+props, behaviour.
 
 **The numbers.** The middle digit rises when something is added; the last one
 when something is repaired. As long as the first digit is `0`, no number

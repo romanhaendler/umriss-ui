@@ -453,7 +453,7 @@ const scenarioFaults = (page: Page) =>
     return faults;
   });
 
-test.describe("the scenarios on a phone, 390 px wide", () => {
+test.describe("the scenarios on a phone, 390 px wide", { tag: "@quick" }, () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
   test("no mark lies on a text of its screen or on another mark, no table pins a block, and the page does not scroll sideways", async ({ page }) => {
@@ -461,7 +461,7 @@ test.describe("the scenarios on a phone, 390 px wide", () => {
   });
 });
 
-test("from a stage of 640 px the marks stand at their corners and a table keeps its pins", async ({ page }) => {
+test("from a stage of 640 px the marks stand at their corners and a table keeps its pins", { tag: "@quick" }, async ({ page }) => {
   for (const stage of await page.locator(".scenarioStage").all()) {
     expect((await stage.boundingBox())!.width).toBeGreaterThanOrEqual(640);
     await expect(stage).not.toHaveAttribute("data-narrow");
@@ -886,7 +886,7 @@ test("the header stands on every page, not only the front door", async ({ page }
   await expect(head.getByRole("navigation", { name: "Packages" }).getByRole("link")).toHaveCount(PACKAGES.length);
 });
 
-test("on a phone the header takes two lines, loses no destination, and the page does not scroll sideways", async ({ page }) => {
+test("on a phone the header takes two lines, loses no destination, and the page does not scroll sideways", { tag: "@quick" }, async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const head = page.getByRole("banner");
   const packages = head.getByRole("navigation", { name: "Packages" });

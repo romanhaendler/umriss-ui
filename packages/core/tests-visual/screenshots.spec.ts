@@ -30,7 +30,7 @@ test.beforeEach(async ({ page }) => {
 
 /* Not the API index: its content is text, which the guards hold (ADR-0044). */
 for (const pageId of PAGES.filter((one) => one !== "api")) {
-  test(`Page head ${pageId}`, async ({ page }, testInfo) => {
+  test(`Page head ${pageId}`, { tag: "@quick" }, async ({ page }, testInfo) => {
     await open(page, pageId);
     /* From the head to the first example: the first example itself already has
        a picture of its own, and so does everything below it. */
@@ -53,7 +53,7 @@ for (const pageId of CONFIGURATOR_PAGES) {
 
 /* One per scenario: the whole screen with its marks, the code folded away. */
 for (const scenarioId of SCENARIO_IDS) {
-  test(`Scenario ${scenarioId}`, async ({ page }, testInfo) => {
+  test(`Scenario ${scenarioId}`, { tag: "@quick" }, async ({ page }, testInfo) => {
     await openScenario(page, scenarioId);
     const target = page.locator(`[data-scenario="${scenarioId}"] .scenarioStage`);
     await target.scrollIntoViewIfNeeded();

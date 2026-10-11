@@ -745,7 +745,7 @@ test("a group is structure over lanes: a head above them, and its lanes in the o
   expect(lanes).toEqual(["arjun", "chloe", "noah", "eva"]);
 });
 
-test("on a phone a group's name wins over its count, and the count comes back where there is room", async ({ page }) => {
+test("on a phone a group's name wins over its count, and the count comes back where there is room", { tag: "@quick" }, async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 800 });
   await openExample(page, "lane-groups", "a-group");
   const head = page.locator('[data-example="a-group"] [data-row="groupHead"]');
@@ -773,7 +773,7 @@ test("a group's name wins over its count in German too, switched live", async ({
   expect(await name.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
 });
 
-test("on a phone the dates of narrow days stand a run apart, and none runs into the next", async ({ page }) => {
+test("on a phone the dates of narrow days stand a run apart, and none runs into the next", { tag: "@quick" }, async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 800 });
   await openExample(page, "time-axis", "a-week");
   const example = page.locator('[data-example="a-week"]');
