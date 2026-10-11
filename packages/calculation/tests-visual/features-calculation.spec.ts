@@ -74,7 +74,7 @@ test("two metrics stay on one line down to 300 px; three go to two lines at 360 
   expect(errors).toEqual([]);
 });
 
-test("metrics never push the frame wider than its place, at any width on the way down", async ({ page }) => {
+test("metrics never push the frame wider than its place, at any width on the way down", { tag: "@quick" }, async ({ page }) => {
   const errors = errorsOf(page);
   await openExample(page, "metrics", "two-teams");
   /* Every 10 px, so that no width where the flag could flip is skipped. */

@@ -15,8 +15,8 @@
    together, or this check finds no section and reports every component as
    missing.
 
-   Run: `pnpm --filter @umriss-ui/core readme`; `pretypecheck` does it before
-   every type check, after `props`. */
+   Run: `pnpm --filter @umriss-ui/core readme`; `check:site` does it after
+   `props`. */
 
 import { readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";

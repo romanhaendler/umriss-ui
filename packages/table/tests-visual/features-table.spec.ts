@@ -309,7 +309,7 @@ test("The dragged width stands in the view", async ({ page }) => {
   await expect(table.locator("[data-role='view']")).toContainText('"widths":{"supplier":');
 });
 
-test("A narrow table wraps its toolbar: no part runs out of it or over another", async ({ page }) => {
+test("A narrow table wraps its toolbar: no part runs out of it or over another", { tag: "@quick" }, async ({ page }) => {
   /* The toolbar wrapped by the window's width only: beside a sidebar the
      search, the buttons and the grouping's tag ran out of the frame. The
      frame is the table's scroll area's parent, the toolbar its first part. */

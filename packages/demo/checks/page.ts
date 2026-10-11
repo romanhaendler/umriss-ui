@@ -295,7 +295,7 @@ test("the Copy page menu: the keys of core's menu, the twin, and the prompt for 
   );
 });
 
-test("Copy page fits the rubric line at 390 px and moves nothing", async ({ page }) => {
+test("Copy page fits the rubric line at 390 px and moves nothing", { tag: "@quick" }, async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   for (const pageId of ["scenarios", p.pageId]) {
     await open(page, pageId);

@@ -13,7 +13,7 @@ mechanics.
 | Source | <https://github.com/romanhaendler/umriss-ui> |
 | Packages | the npm org <https://www.npmjs.com/org/umriss-ui> |
 | Demos | <https://romanhaendler.github.io/umriss-ui/> — deployed by `.github/workflows/pages.yml` on every push to `main` |
-| Checks | `.github/workflows/ci.yml` — lint, types, unit tests, build. The screenshot suite stays local (its baselines are darwin's) |
+| Checks | `.github/workflows/ci.yml` — lint, types, `check:site`, unit tests, build. The screenshot suite stays local (its baselines are darwin's) |
 | Publishing | `.github/workflows/publish.yml` — on every push to `main`, every version not on npm yet |
 
 ## Tags on npm
@@ -39,7 +39,8 @@ A version is released by raising it. On every push to `main`,
 `.github/workflows/publish.yml` asks npm for each package whether the version
 in its `package.json` stands there already; whatever is missing is published,
 in dependency order (`core` and `charts` before what depends on them), after
-lint, types, unit tests, build and `check:dist`. A version with a hyphen
+lint, types (`typecheck` and `typecheck:demo`), `check:site`, unit tests, build
+and `check:dist`. A version with a hyphen
 (`0.3.0-rc.1`) goes to `next`, every other to `latest`. A push that raises no
 version publishes nothing, and the same version is never published twice.
 
@@ -61,8 +62,8 @@ do Trusted Publishing.
    in its `CHANGELOG.md`, in one commit. Several packages may move in the same
    commit.
 2. The package's `README.md` read against what it now claims. Every roadmap
-   line against the status of the spec it names under `.scratch/` — a spec that
-   went `done` leaves the roadmap; a figure only by a link to the record that
+   line against the open work under `.scratch/` — work that
+   is done leaves the roadmap; a figure only by a link to the record that
    holds it (the charts' benchmark stands once, in `docs/capabilities.md`); a
    "cannot" against ADR-0032. No test holds this: a README is prose, and a lint
    over prose would check the wording, not the truth.

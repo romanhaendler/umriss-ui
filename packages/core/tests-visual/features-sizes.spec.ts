@@ -202,7 +202,7 @@ test("A date picker without chars shows its whole date", async ({ page }) => {
 test.describe("on a phone", () => {
   test.use({ viewport: { width: 320, height: 800 } });
 
-  test("no field is wider than its place, and the page does not scroll sideways", async ({ page }) => {
+  test("no field is wider than its place, and the page does not scroll sideways", { tag: "@quick" }, async ({ page }) => {
     for (const id of ["narrow-places", "a-row-that-holds-still", "sized-to-the-value", "one-size-for-a-place", "a-row-of-fields"]) {
       await openExample(page, "sizes", id);
       const stage = example(page, id);

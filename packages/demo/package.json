@@ -29,7 +29,11 @@
     "./checks/ownData": "./checks/ownData.ts",
     "./checks/overlays": "./checks/overlays.ts",
     "./checks/forcedColors": "./checks/forcedColors.ts",
-    "./checks/silentPages": "./checks/silentPages.ts"
+    "./checks/silentPages": "./checks/silentPages.ts",
+    "./tests-support/setup": "./tests-support/setup.ts",
+    "./tests-support/styleGuard": "./tests-support/styleGuard.ts",
+    "./tests-support/wordingGuard": "./tests-support/wordingGuard.ts",
+    "./tests-support/glyphGuard": "./tests-support/glyphGuard.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

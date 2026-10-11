@@ -1,4 +1,5 @@
-/* jsdom polyfills for browser APIs the components take for granted. */
+/* jsdom polyfills for browser APIs the components take for granted - the one
+   setup of every package's unit tests (vitest.config.ts, setupFiles). */
 
 import { afterEach } from "vitest";
 import { cleanup } from "@testing-library/react";
@@ -81,6 +82,11 @@ if (typeof window !== "undefined") {
     };
   }
 
+  /* jsdom knows no canvas 2D context; the scenes of charts and schedule cope
+     with null, and core's control room draws on one. The stub only keeps
+     jsdom's "not implemented" output out of the run. */
+  HTMLCanvasElement.prototype.getContext = (() => null) as HTMLCanvasElement["getContext"];
+
   if (typeof Element.prototype.scrollIntoView !== "function") {
     Element.prototype.scrollIntoView = () => undefined;
   }
@@ -114,4 +120,3 @@ if (typeof window !== "undefined") {
 
 /* React 19: switch on act() support in test environments explicitly. */
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
-

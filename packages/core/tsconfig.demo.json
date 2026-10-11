@@ -1,0 +1,16 @@
+{
+  /* The control room page reaches the other four packages by their sources. */
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@umriss-ui/core": ["./src/index.ts"],
+      "@umriss-ui/core/wording/de": ["./src/lib/language/de.ts"],
+      "@umriss-ui/charts": ["../charts/src/index.ts"],
+      "@umriss-ui/table": ["../table/src/index.ts"],
+      "@umriss-ui/schedule": ["../schedule/src/index.ts"],
+      "@umriss-ui/calculation": ["../calculation/src/index.ts"]
+    }
+  },
+  "include": ["demo", "tests-unit/demo-smoke*"],
+  "exclude": []
+}
