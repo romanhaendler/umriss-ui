@@ -1,10 +1,6 @@
-/* A resting message. The same pale surfaces as on the Badge, so that a warning
-   is the same warning everywhere in the product.
-
-   Deliberately without a symbol: colour and wording carry the meaning, and a
-   row of decorative glyphs would be noise in a system this quiet. Instead of a
-   symbol a 2px edge on the left carries the tone - the same gesture as the
-   active entry in the command list. */
+/* A resting message on the same pale surfaces as the Badge. Without a symbol:
+   colour and wording carry the meaning, and a 2px edge on the left carries
+   the tone. */
 
 @layer umriss.tokens, umriss.base, umriss.components;
 

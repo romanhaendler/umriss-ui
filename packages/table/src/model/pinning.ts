@@ -1,4 +1,4 @@
-/* Pinned columns (table-column-pinning, N1).
+/* Pinned columns.
 
    A column pinned to the start stands in a block before every other one, a
    column pinned to the end in a block after them; both blocks stay in view
@@ -88,11 +88,9 @@ const SCROLL_ROOM = 256;
 
 /** Which blocks stick in a scroll area `room` pixels wide, given their
     widths. They leave the columns that scroll half of it, or 256 px where
-    half is more: on a phone the end block of a Row draft's buttons alone
-    stood 200 px of 300, and both blocks of a wide table left nothing between
-    them to scroll. A block that would take more scrolls with the rest
-    instead - the start one, which names the row, is kept first. A room not
-    yet measured keeps both. */
+    half is more, so that the blocks never leave nothing to scroll. A block
+    that would take more scrolls with the rest instead - the start one, which
+    names the row, is kept first. A room not yet measured keeps both. */
 export function blocksThatStick(start: number, end: number, room: number): { start: boolean; end: boolean } {
   const most = room - Math.min(room / 2, SCROLL_ROOM);
   if (room <= 0 || start + end <= most) return { start: true, end: true };

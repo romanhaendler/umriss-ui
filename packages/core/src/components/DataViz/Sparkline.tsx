@@ -34,8 +34,8 @@ export const Sparkline = forwardRef<HTMLSpanElement, SparklineProps>(function Sp
      laid out on a field of 100 × 100 without padding, the stroke does not
      scale with it, and it may draw past its edge rather than be cut. The end
      point is no part of the stretched drawing: a circle there is pulled into
-     an ellipse, and a round cap on a zero-length stroke was drawn stretched
-     by Safari. It is an element of its own, set at the end in per cent. */
+     an ellipse, and Safari draws a round cap on a zero-length stroke
+     stretched. It is an element of its own, set at the end in per cent. */
   const w = fill ? 100 : width;
   const h = fill ? 100 : height;
   const padding = fill ? 0 : 3;

@@ -6,10 +6,8 @@
    exactly what the naive version stamps as fresh.
 
    Freshness and verdict are TWO SEPARATE AXES. A stale value keeps its
-   verdict. This module knows no verdict, takes none and returns none - it
-   knows nothing of `unknown`. That is the one reason the file exists:
-   whoever merges the axes while drawing greys away the last picture the
-   reader had, at exactly the moment they need it most.
+   verdict. This module knows no verdict, takes none and returns none: whoever
+   merges the axes while drawing greys away the last picture the reader had.
 
    The reference time is a parameter. No clock is read here; the cadence
    belongs to `useFreshness`. */

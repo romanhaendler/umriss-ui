@@ -1,4 +1,4 @@
-/* <Tooltip> - configuration of hit testing and tooltip content (4.4).
+/* <Tooltip> - configuration of hit testing and tooltip content.
    Renders nothing itself; the tooltip element belongs to the HTML layer of the
    container (TooltipHtml). Without a <Tooltip> there is neither a crosshair nor a
    hover marker - the interaction is explicitly opt-in. */

@@ -1,4 +1,4 @@
-/* <XAxis> / <YAxis> - axis configuration (4.2).
+/* <XAxis> / <YAxis> - axis configuration.
    Instantiable any number of times; ids must be unique within their orientation.
    The drawing happens in the scene, the labelling is rendered by the
    HTML layer (AxesHtml). */

@@ -1,4 +1,4 @@
-/* The registration model (R-2.1, R-2.2): series, axes and limits register with
+/* The registration model: series, axes and limits register with
    a configuration, and a changed configuration is compared field by field so
    that a re-render does not materialise again. Registration order is drawing
    order, palette assignment and band stacking. Functions over the scene. */

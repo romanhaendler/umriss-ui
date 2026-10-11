@@ -7,8 +7,7 @@
 
 @layer umriss.components {
   /* The width (ADR-0041): the place's, and where the place asks, twenty
-     characters - the text fields' natural width, so that a slider in a
-     toolbar stands as wide as a field beside it. Its value readout cannot
+     characters - the text fields' natural width. Its value readout cannot
      move it. */
   .slider {
     composes: text extent from "#own-styles";
@@ -186,10 +185,9 @@
   }
 
   /* The fill is a gradient in the track, and forced colours drop a gradient
-     with every other colour: only the thumb's place would
-     say the value. The track keeps its gradient, drawn in system colours -
-     the selection colour up to the value - and so takes its colours out of
-     the forcing; the moz track draws its fill as a ground of its own. */
+     with every other colour. The track keeps its gradient, drawn in system
+     colours (the selection colour up to the value), and so takes its colours
+     out of the forcing; the moz track draws its fill as a ground of its own. */
   @media (forced-colors: active) {
     .range::-webkit-slider-runnable-track {
       forced-color-adjust: none;

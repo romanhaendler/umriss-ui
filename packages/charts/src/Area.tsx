@@ -1,4 +1,4 @@
-/* <Area> - series configuration (4.3).
+/* <Area> - series configuration.
    Renders nothing itself: children are configuration collectors, the drawing
    happens exclusively in the scene.
 

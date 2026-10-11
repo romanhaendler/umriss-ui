@@ -71,7 +71,7 @@ export function courseTable(s: ChartScene, entries: readonly SeriesEntry[], all:
     seconds = d > 0 && d < MINUTE;
   }
   const caption = w.tableCaption(s.xLabel(axisId, from), s.xLabel(axisId, to));
-  // A stack's total column follows its last member (K4).
+  // A stack's total column follows its last member.
   const closes = (e: SeriesEntry): SeriesEntry[] | null => {
     const key = stackOf(e.config);
     if (key === undefined || e.stacked === null) return null;

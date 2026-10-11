@@ -20,8 +20,8 @@
     box-shadow: var(--u-focus-ring);
   }
 
-  /* The distance from the edge is the application's to set
-     (toast-inset-tokens); the tokens hold the phone's own. */
+  /* The distance from the edge is the application's to set; the tokens hold
+     the phone's own. */
   .region[data-edge="bottom"] {
     bottom: var(--u-toast-inset-bottom);
   }

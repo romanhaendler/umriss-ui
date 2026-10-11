@@ -4,18 +4,13 @@
    setting for toasts, and the configuration of formats and wording. No more. It
    holds no theme: light and dark are the application's `color-scheme`, which the
    tokens follow on their own (ADR-0021) - and it writes nothing onto the
-   document, because a provider that did would reach beyond its subtree. The
-   moment it can set the default variant of a button it is no longer a small
-   decision but a second interface beside the components' own props - and two ways
-   of saying the same thing are worse than one.
+   document, because a provider that did would reach beyond its subtree. It sets
+   no component's variant: that would be a second interface beside the
+   components' own props.
 
-   The more important rule stands beside it: it is optional, and its absence is
-   the tested normal case. Every component renders and behaves without it
-   exactly as it does today. Once the provider exists the temptation grows to
-   require it, because the code would be shorter with configuration always
-   present. As long as there are users who do not use it, that is the wrong
-   trade: a library whose components work one by one can be introduced
-   component by component, and that is worth more than the shortening. */
+   It is optional, and its absence is the tested normal case: every component
+   renders and behaves without it, so the library can be introduced component
+   by component. */
 
 import { useContext, useMemo } from "react";
 import type { ReactNode } from "react";

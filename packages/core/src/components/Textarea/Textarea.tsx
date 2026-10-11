@@ -1,8 +1,5 @@
 /* Multi-line input.
 
-   The most conspicuous gap in the form part: there were Input, Select,
-   Checkbox and NumberInput, but no field for free text.
-
    Operation: like a text field. With `autoGrow` it grows with its content
    until `maxRows` is reached, and scrolls from then on. With `showCount`
    the number of characters that still fit stands at the bottom right; once
@@ -28,8 +25,7 @@ import styles from "./Textarea.module.css";
 import { useControlSize } from "../../lib/controlSize";
 import { extentStyle } from "../../lib/extent";
 
-/* The native `cols` is left out: the field's width is `chars` - the native
-   attribute never reached the screen beside a width of 100 %. */
+/* The native `cols` is left out: the field's width is `chars`. */
 /** The props of `Textarea`: a native textarea's attributes, with `chars` in
     place of `cols`. */
 export interface TextareaProps extends Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "cols"> {
@@ -116,10 +112,8 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function 
     };
   }, [autoGrow, measure]);
 
-  /* Uncontrolled, the browser holds the value and not React - then there is
-     no re-render while typing, and a count derived from the props would
-     stay standing at the initial text. Hence a mirror of its own, which is
-     needed only in this case. */
+  /* Uncontrolled, the browser holds the value and nothing re-renders while
+     typing: a mirror of its own keeps the count current. */
   const [ownValue, setOwnValue] = useState(() => String(rest.defaultValue ?? ""));
   const controlled = rest.value !== undefined;
   const value = controlled ? String(rest.value ?? "") : ownValue;
@@ -128,8 +122,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function 
 
   /* The field always wears its wrapper (ADR-0041): the wrapper is what a place
      lays out and what carries the width - Firefox applies no size containment
-     to a bare textarea element - and the class lands in one place, with a count
-     or without. */
+     to a bare textarea element. */
   return (
     <span
       className={cx(styles.wrapper, size === "sm" && styles.wrapperSm, countVisible && styles.counted, className)}
@@ -145,9 +138,8 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function 
         aria-invalid={isInvalid || undefined}
         className={cx(styles.textarea, size === "sm" && styles.sm, isInvalid && styles.invalid)}
         style={{ resize: resize ?? (autoGrow ? "none" : "vertical") }}
-        /* Composed, not overridden: the caller's onInput would otherwise come along
-           behind with `...rest` and take the count and the growing away from
-           the field. First the caller, then the measuring. */
+        /* Composed, not overridden by `...rest`: first the caller, then the
+           count and the measuring. */
         onInput={(event) => {
           onInput?.(event);
           if (!controlled) setOwnValue(event.currentTarget.value);
@@ -156,8 +148,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function 
         {...rest}
       />
       {countVisible && (
-        /* Announced politely: the count changes on every keystroke, and a
-           reading after every letter would be unusable. */
+        // Announced politely: the count changes on every keystroke.
         <span aria-live="polite" className={cx(styles.count, remaining < 0 && styles.countOver)}>
           {remaining}
         </span>

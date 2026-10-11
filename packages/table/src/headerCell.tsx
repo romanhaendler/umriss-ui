@@ -132,7 +132,7 @@ export function HeaderCell({
           </svg>
         ) : (
           /* Drawn in the nominal box and set in the 12 pixels the indicator
-             has always taken, so that the head does not move. */
+             takes, so that the head does not move. */
           <svg viewBox="0 0 10 10" width="10" height="12" aria-hidden="true">
             <path d="M2.8 3.7 5 1.5l2.2 2.2M2.8 6.3 5 8.5l2.2-2.2" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
           </svg>

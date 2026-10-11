@@ -128,20 +128,16 @@
     font-size: var(--u-text-sm);
   }
 
-  /* Virtualised: the root is the scroll area. The caller sets the height -
-     without it there would be nothing to scroll -, and that is why none stands
-     here: setting it would be a prescription to every layout the component does
-     not know. */
+  /* Virtualised: the root is the scroll area. The caller sets its height; none
+     is set here. */
   .scrolls {
     composes: scroll from "#own-styles";
     overflow-y: auto;
   }
 
-  /* Disabled: visible, navigable, but the box does not react. Dimmed like a
-     signpost, but for a different reason - hence its own class and not a
-     shared one. By colour and not by opacity, against the canon: the row itself
-     stays focusable, and opacity would fade its focus ring with it; the
-     checkbox inside dims by its own disabled state. */
+  /* Disabled: visible, navigable, but the box does not react. By colour and
+     not by opacity: the row stays focusable, and opacity would fade its focus
+     ring; the checkbox inside dims by its own disabled state. */
   .disabled {
     color: var(--u-color-text-muted);
   }
@@ -149,8 +145,7 @@
   .loading {
     flex: none;
     margin-left: var(--u-space-2);
-    /* Secondary, not muted: the track is drawn at a quarter of this colour, and
-       a quarter of muted all but vanished on the dark surface. */
+    /* Secondary, not muted: the track is drawn at a quarter of this colour. */
     color: var(--u-color-text-secondary);
   }
 

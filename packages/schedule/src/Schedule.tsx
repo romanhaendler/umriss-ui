@@ -15,8 +15,8 @@
        .tickBand      the fine band: adaptive time ticks   (holds still)
 
    `data-row` on a header is the one place the layout's private word reaches
-   the DOM, and it is here because an application styling beside the schedule
-   has to be able to tell the three apart: `lane` is a resource's own row,
+   the DOM, so that an application styling beside the schedule can tell the
+   three apart: `lane` is a resource's own row,
    `groupHead` the slim line of an open **Lane group**, `miniature` the one row
    a folded group becomes. The word ROW is `rows.ts`'s and says what the plot
    lays out; a **Lane** is still a resource (ADR-0025). A lane's header also
@@ -326,15 +326,13 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps & { scene: Sche
   const summary = snapshot.summary;
   const instant = (at: number) => `${formats.dateShort(new Date(at))} ${formats.time(new Date(at), false)}`;
   /* What a group's chevron controls: every row that lies inside it - its heads
-     and lanes while it is open, its one miniature row while it is folded. The
-     ids therefore point at elements that exist either way, which is what a
-     disclosure has to promise. */
-  /* By the row's own key and NOT by its kind: a group's head and its folded
-     miniature are the same row in two states, and a key that changed with the
-     state would unmount the chevron on every fold - which takes the keyboard
-     focus away from the hand that just pressed it. */
-  /* Encoded, because an id may hold no space and a lane's may: `aria-controls`
-     is a list split at spaces. */
+     and lanes while it is open, its one miniature row while it is folded, so
+     the ids point at elements that exist either way. By the row's own key and
+     not by its kind: a group's head and its folded miniature are the same row
+     in two states, and a key that changed with the state would unmount the
+     chevron on every fold and take the keyboard focus with it. Encoded,
+     because `aria-controls` is a list split at spaces and a lane's id may hold
+     one. */
   const rowId = (header: { key: string }) => `${plotId}-row-${encodeURIComponent(header.key)}`;
   const controlledBy = useMemo(() => {
     const byGroup = new Map<string, string[]>();
@@ -349,14 +347,12 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps & { scene: Sche
   }, [snapshot.headers, plotId]);
   /* A group's name wins over its count: where a name would be cut, or pushed
      onto a second line in a folded group's row, the counts give way - all of
-     them, so that the heads of one column read alike. On a phone the column
-     is a hundred pixels, and "2 lanes" kept its width while the name shrank to
-     "De…". Measured, since only the rendered name knows its width - anew
-     whenever the column changes size or anything it renders changes (a row,
-     a name, the count's wording: "2 Bahnen" is wider than "2 lanes"), and
-     once the fonts are in. Observed rather than keyed: a key names what the
-     fit hangs on, and misses what it forgets. `hidden` is an attribute, which
-     the observer leaves out, and not React's, so a render leaves it alone. */
+     them, so that the heads of one column read alike. Measured, since only the
+     rendered name knows its width - anew whenever the column changes size or
+     anything it renders changes (a row, a name, the count's wording), and once
+     the fonts are in. Observed rather than keyed: a key misses what it
+     forgets. `hidden` is an attribute, which the observer leaves out, and not
+     React's, so a render leaves it alone. */
   const headersRef = useRef<HTMLDivElement | null>(null);
   useLayoutEffect(() => {
     const column = headersRef.current;
@@ -483,16 +479,11 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps & { scene: Sche
                 data-lane={header.lane}
                 data-group={header.group}
                 data-row={header.kind}
-                /* A header's ROW is the box its contents may not leave. Not
-                   the column: a header below the fold is scrolled to, not
-                   lost. What this catches is a label, a count or a chevron
-                   that outgrew its own row - a group's head is slim, and a
-                   slim row is where that happens first. */
+                /* A header's ROW is the box its contents may not leave, not the
+                   column: a label, a count or a chevron that outgrew its row. */
                 data-schedule-clip={`header ${header.kind}`}
-                /* The header says it too, for the whole run of a drag: the
-                   plot marks the lane, the header marks its name - and an
-                   application styling beside the schedule reads the same
-                   attribute. */
+                /* For the whole run of a drag: the plot marks the lane, the
+                   header its name. */
                 data-refused={header.lane !== undefined && refused.has(header.lane) ? "" : undefined}
               >
                 {header.kind !== "lane" && header.group !== undefined && (

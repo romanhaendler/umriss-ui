@@ -32,8 +32,7 @@ export function useCardMeasure() {
       observed.current.set(id, element);
       measure(id, element.offsetHeight);
       if (typeof ResizeObserver === "undefined") return;
-      /* The border box, unrounded and untransformed: offsetHeight rounds,
-         and eight pixels of gap became 7.6. */
+      // The border box, unrounded and untransformed: offsetHeight rounds.
       observer.current ??= new ResizeObserver((entries) => {
         for (const entry of entries) {
           const target = entry.target as HTMLElement;

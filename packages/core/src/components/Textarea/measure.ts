@@ -20,8 +20,7 @@ export const remainingChars = (value: string, maxLength: number | undefined): nu
  * further.
  *
  * A line height of 0 is treated as "not measurable yet" (the font has not
- * been loaded), because otherwise the field visibly collapsed while
- * loading.
+ * been loaded), so the field does not collapse while loading.
  */
 export const clampedHeight = (
   measured: number,

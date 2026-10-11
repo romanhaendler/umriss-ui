@@ -10,10 +10,7 @@
    *and* choose - that is what the pattern for radio groups demands -, skip
    over whatever is disabled and wrap around at the ends.
 
-   The arrow key navigation is built here and not fetched from a shared
-   helper: there is none (yet), and introducing one in the same change would
-   mean touching the calendar, the menu, the tabs, the combobox and the
-   MultiSelect. Not exported from the package. */
+   Not exported from the package. */
 
 import { useId, useRef } from "react";
 import type { InputHTMLAttributes, KeyboardEvent as ReactKeyboardEvent } from "react";
@@ -58,9 +55,7 @@ export function useRadioGroup<T extends string>({
   const groupName = name ?? field?.id ?? generatedName;
   const groupRef = useRef<HTMLDivElement>(null);
 
-  /* Uncontrolled, it is led by the DOM state of the inputs: the browser
-     holds the choice of a radio group anyway, and a second state beside it
-     would be a source of contradictions. */
+  // Uncontrolled, the DOM state of the inputs leads: the browser holds the choice anyway.
   const controlled = value !== undefined;
 
   const selectable = options.filter((option) => !option.disabled && !disabled);
@@ -69,11 +64,9 @@ export function useRadioGroup<T extends string>({
     onChange?.(next.value);
   };
 
-  /* The arrow keys move and choose at once – that is how the radio pattern
-     is meant to work, and the reason why the group has only one tab stop. */
+  // The arrow keys move and choose at once, as the radio pattern has it.
   const handleKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
-    /* Composed with the caller's: `rest` would replace it, and the arrow
-       keys would then choose nothing. */
+    // Composed with the caller's: `rest` would replace it.
     onKeyDown?.(event);
     if (event.defaultPrevented) return;
     const forward = event.key === "ArrowDown" || event.key === "ArrowRight";
@@ -93,10 +86,8 @@ export function useRadioGroup<T extends string>({
     const next = selectable[nextIndex];
     if (!next) return;
 
-    /* The input is searched for rather than addressed through a selector:
-       a value can contain quotation marks or backslashes, and then the
-       selector would need `CSS.escape` - which does not exist everywhere.
-       Searching is also simply the simpler thing here. */
+    /* The input is searched for rather than addressed through a selector: a
+       value can contain quotation marks or backslashes. */
     const inputs = Array.from(
       groupRef.current?.querySelectorAll<HTMLInputElement>('input[type="radio"]') ?? [],
     );
@@ -105,27 +96,23 @@ export function useRadioGroup<T extends string>({
   };
 
   /* The tab stop sits on the chosen option; where none is chosen, on the
-     first selectable one. Otherwise the group would have either no entry at
-     all or as many as it has options. */
+     first selectable one. */
   const tabStop = (option: RadioChoice<T>): number | undefined => {
-    /* Uncontrolled, no render follows a choice, so a tab stop written here
-       stayed on the initial option and Tab came back to it rather than to the
-       chosen one. The browser's own rule for a radio group is exactly the
-       one above, and it follows the choice. */
+    /* Uncontrolled, no render follows a choice and a tab stop written here
+       would stay on the initial option; the browser's own rule for a radio
+       group follows the choice. */
     if (!controlled) return undefined;
     if (option.disabled || disabled) return -1;
     if (value === option.value) return 0;
-    /* On the first selectable one in that case too, where the controlled
-       value points at a disabled option - otherwise the group would have no
-       entry at all and be unreachable with the keyboard. */
+    /* The first selectable one also where the controlled value points at a
+       disabled option, or the group would be unreachable by keyboard. */
     const chosenReachable = selectable.some((o) => o.value === value);
     if (!chosenReachable && selectable[0]?.value === option.value) return 0;
     return -1;
   };
 
-  /* On its own useId and not on the name: that can come from the caller,
-     and neither it nor the value may go raw into an id that
-     `aria-describedby` reads. */
+  /* On its own useId and not on the name: that can come from the caller, and
+     neither it nor the value may go raw into an id `aria-describedby` reads. */
   const optionId = (option: RadioChoice<T>) => `${generatedName}-${idPart(option.value)}`;
 
   return {
@@ -135,9 +122,8 @@ export function useRadioGroup<T extends string>({
     /** Spread onto the group's root, before the caller's own attributes. */
     groupProps: {
       /* The surrounding field's id is carried by the group itself, so that
-         `label htmlFor` does not point into the void. Putting it on one of
-         the options would be worse: a click on the field's label would then
-         choose the first option. */
+         `label htmlFor` finds it; on an option, a click on the field's label
+         would choose that option. */
       id: field?.id,
       role: "radiogroup",
       /* Named by the field's label: its `htmlFor` alone names nothing here,

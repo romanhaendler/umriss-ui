@@ -1,4 +1,4 @@
-/* A cell of a pinned block: its class and its offset (table-column-pinning).
+/* A cell of a pinned block: its class and its offset.
 
    The offset is a variable the table sets from the widths of its head row
    (parts.tsx, `PinPlacement`) - the cells only name it. That way a measurement

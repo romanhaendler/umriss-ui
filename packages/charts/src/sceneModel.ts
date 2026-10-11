@@ -48,11 +48,11 @@ export interface SeriesEntry {
       colouring - not per redraw, which a legend hover causes as well. */
   buckets: Int32Array | null;
   /** Stacked only: the series' own values, as its accessor gave them. Its
-      materialised y holds its top and y0 the stack below (charts-stacking K2);
+      materialised y holds its top and y0 the stack below;
       these are what the stack is summed from again when a member changes. */
   own: Float64Array | null;
   /** Stacked only: what each point shows as its value - its own, or its share
-      in a normalised stack - and the stack's total there (K4). */
+      in a normalised stack - and the stack's total there. */
   stacked: { value: Float64Array; total: Float64Array; normalize: boolean } | null;
 }
 
@@ -79,8 +79,8 @@ export interface Candidate {
   level?: number;
   segment?: { from: number; to: number; label: string };
   box?: TooltipPoint["box"];
-  /** Where its marker stands, where that is not px: a grouped box's centre
-      (B11). px stays the x value's, so that hits at one x group together. */
+  /** Where its marker stands, where that is not px: a grouped box's centre.
+      px stays the x value's, so that hits at one x group together. */
   markX?: number;
 }
 
@@ -122,7 +122,7 @@ export interface LegendItem {
   /** The series highlighted on hover - several where state bands share a
       state. */
   seriesIds: number[];
-  /** Under encoding by marks (charts-alternatives C3), what the chip shows
+  /** Under encoding by marks, what the chip shows
       besides the colour; null where the colour stands alone. */
   mark: LegendMark | null;
 }
@@ -174,11 +174,11 @@ export interface LayoutSnapshot {
   /** No visible series has a point to show. */
   empty: boolean;
   /** The rows are on their way, as of this layout: it ends with the frame
-      that lays out the answer, not before (chart-loading). */
+      that lays out the answer, not before. */
   loading: boolean;
   /** While the chart is loading with nothing to show, the kind of its first
       series in drawing order - the shape its silhouette takes -, "none"
-      without a series; null otherwise (chart-loading 03). */
+      without a series; null otherwise. */
   silhouette: SilhouetteKind | null;
   /** The registered data table - the id its panel carries, and whether it is
       open -, or null without one. The legend shows its key. */
@@ -203,10 +203,10 @@ export interface TooltipRow {
       is the x axis of the header. */
   x: string;
   /** Under forced colours the chip's background is forced away, so the chip
-      draws the legend's marks instead (charts-alternatives 04); null draws
+      draws the legend's marks instead; null draws
       the point's colour. */
   chip: { color: string; mark: LegendMark } | null;
-  /** A box's numbers top to bottom as drawn, each named (box-plot B9); null
+  /** A box's numbers top to bottom as drawn, each named; null
       for every other kind, whose value stands alone. */
   box: readonly { label: string; value: string }[] | null;
 }
@@ -217,7 +217,7 @@ export interface LimitText {
   value: string;
 }
 
-/** A stack's total in the built-in tooltip (charts-stacking K4). */
+/** A stack's total in the built-in tooltip. */
 export interface StackTotal {
   /** The index of the row it follows - its stack's last member in the hit. */
   after: number;

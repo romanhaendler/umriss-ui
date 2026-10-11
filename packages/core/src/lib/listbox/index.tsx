@@ -135,9 +135,8 @@ export function Listbox({
       insideRefs={insideRefs}
       width="anchor"
       /* As wide as the field, and never narrower than a list can be read: a
-         field of six characters (`chars`) - a country code - would otherwise
-         have cut every option to an ellipsis. The multiselect's panel has the
-         same floor for its own content. */
+         field of six characters would otherwise cut every option to an
+         ellipsis. */
       minWidth={200}
       className={styles.panel}
     >

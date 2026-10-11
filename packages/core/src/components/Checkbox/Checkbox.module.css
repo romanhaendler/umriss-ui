@@ -5,10 +5,9 @@
      that wraps. */
   .wrapper {
     composes: text from "#own-styles";
-    /* The frame of the hidden input. Without it the input hung from the
-       nearest positioned ancestor - in a popover the panel, past the list
-       that scrolls - and the focus a click gives it scrolled the whole
-       panel down to where the row would stand unscrolled: white. */
+    /* The frame of the hidden input. Without it the input is positioned from
+       the nearest positioned ancestor - in a popover the panel, past a list
+       that scrolls - and the focus a click gives it scrolls the panel. */
     position: relative;
     display: inline-flex;
     align-items: flex-start;
@@ -114,9 +113,7 @@
     box-shadow: var(--u-focus-ring);
   }
 
-  /* Disabled dims the whole control, box and label, as the radio does - it
-     used to repaint the box sunken and the label muted (visuelle-wertigkeit
-     04). */
+  /* Disabled dims the whole control, box and label, as the radio does. */
   .wrapper:has(.input:disabled) {
     cursor: not-allowed;
     opacity: 0.5;
@@ -133,8 +130,7 @@
 
   /* In a field the checkbox stands in a row of fields: as tall as a control,
      its first line - the label's, or the box alone - on the line a field's
-     value stands on. Outside one it stays as compact as a list needs it
-     (field-row-alignment 02). */
+     value stands on. Outside one it stays as compact as a list needs it. */
   .field {
     --_line: 16px;
     --_control: var(--u-control-height);
@@ -149,9 +145,9 @@
     --_control: var(--u-control-height-sm);
   }
 
-  /* Forced colours repaint every ground with the page's:
-     the tick is a stroke and stays, the mixed state's dash is a ground and
-     would go - so it takes the system's text colour, the tick's. */
+  /* Forced colours repaint every ground with the page's: the tick is a stroke
+     and stays, the mixed state's dash is a ground and would go - so it takes
+     the system's text colour, the tick's. */
   @media (forced-colors: active) {
     .dash {
       background: CanvasText;

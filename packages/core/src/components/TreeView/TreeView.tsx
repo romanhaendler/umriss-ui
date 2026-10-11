@@ -67,9 +67,7 @@ export const TreeView = forwardRef(function TreeView<K, S extends Key = string>(
   ref: ForwardedRef<HTMLDivElement>,
 ) {
   const wording = useWording();
-  /* Namespace of the box ids: two trees with the same keys would otherwise
-     hand out the same id, and a click on the label of the second one would
-     hit the box of the first. */
+  // Namespace of the box ids: two trees with the same keys must not share one.
   const idBase = useId();
   const rowWindow = tree.virtual;
   /* Virtualised, the root is at the same time the scroll area, and then its
@@ -83,10 +81,8 @@ export const TreeView = forwardRef(function TreeView<K, S extends Key = string>(
   const hasFocus = useRef(false);
   /** The last seen reading of the reveal counter. */
   const revealed = useRef(0);
-  /* The typeahead buffer - the only piece of state in this file, and
-     deliberately as small as possible: one string and one timer. Everything
-     with a decision in it stands in typeaheadTarget, where it can be checked
-     without waiting. */
+  /* The typeahead buffer: one string and one timer. Every decision stands in
+     typeaheadTarget. */
   const buffer = useRef("");
   const bufferTimer = useRef<number | null>(null);
 
@@ -143,9 +139,8 @@ export const TreeView = forwardRef(function TreeView<K, S extends Key = string>(
       return;
     }
     if (checkable && e.shiftKey && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
-      // Only this one gesture: moveAndCheck moves by itself. Calling move()
-      // first would mean computing twice from the same stale snapshot - and
-      // reporting the active node twice.
+      // Only this one call: moveAndCheck moves by itself, and a move() first
+      // would compute twice from the same snapshot.
       tree.moveAndCheck(e.key === "ArrowDown" ? "down" : "up");
       e.preventDefault();
       return;
@@ -282,11 +277,9 @@ export const TreeView = forwardRef(function TreeView<K, S extends Key = string>(
             {checkable ? (
               /* The span only keeps the click away from the row, so that
                  checking does not activate at the same time (ADR-0003).
-                 Toggling happens exclusively through the box's onChange.
-
-                 Doing both was a defect: the box lies inside a label, so a
-                 click ran through both paths and toggled twice - in the
-                 browser nothing happened at all. */
+                 Toggling happens exclusively through the box's onChange: the
+                 box lies inside a label, so a click would run through both
+                 paths and toggle twice. */
               <span className={styles.check} onClick={(e) => e.stopPropagation()}>
                 <Checkbox
                   id={`${idBase}-check-${idPart(String(entry.key))}`}

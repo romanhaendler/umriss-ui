@@ -1,18 +1,9 @@
-/* rowlessParts.tsx - the parts that touch no row ("unbound" in the docs): Toolbar, Search, ColumnMenu, Export, Pagination. They touch no row and therefore need no binding - placed
+/* rowlessParts.tsx - the parts that touch no row ("unbound" in the docs): Toolbar, Search, ColumnMenu, Export, Pagination. They need no binding - placed
    inside a table they read that one, outside they take `of={t}`.
 
-   Two decisions stand here:
-
-   - **Export makes the file.** The library gives text, the
-     application makes the file, as `t.asCsv()` and as `onExport`. But
-     the part itself exists for exactly the case in which the application wants
-     nothing further than a file; without `onExport` it therefore triggers the
-     download.
-   - **Empty and loading are props of the table** (`empty`, `loading`), not
-     parts. They are states of the one body, not pieces one puts somewhere -
-     and a part would need a registration that gains nothing. Empty because of
-     a search or a filter the table shows of its own accord, with the way
-     back. */
+   Export hands text to `onExport`; without it, it triggers the download.
+   Empty and loading are props of the table (`empty`, `loading`), not parts:
+   they are states of the one body. */
 
 import { useLayoutEffect, useRef, useState, useId } from "react";
 import type { ReactNode } from "react";

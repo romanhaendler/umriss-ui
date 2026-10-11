@@ -1,19 +1,17 @@
 /* useTable - where the row type is bound (ADR-0017).
 
    The hook derives the row type from the rows and hands out the parts that need
-   it. Its state is that of the tableState from table-model (page one after
-   search, sort and page size; the three-step additional sort; the view without
-   default values), taken over unchanged. What is new is where the columns come
-   from: from the registration instead of from a field the caller writes.
+   it. Its state is that of the tableState (page one after search, sort and page
+   size; the three-step additional sort; the view without default values). The
+   columns come from the registration, not from a field the caller writes.
 
    The application's `initialView` is read once and taken over on the first
-   render, BEFORE a column has
-   registered, and checked against the columns only on reading
-   (umriss-table 11): names no registered column carries fall out of `view` and
+   render, before a column has registered, and checked against the columns only
+   on reading: names no registered column carries fall out of `view` and
    `sort`. Because the body calculates with the columns of its own pass, even the
    first rendered rows show the sort of the view.
 
-   The order (table-filters): pre-filter -> search and conditions -> sort ->
+   The order: pre-filter -> search and conditions -> sort ->
    page. The pre-filter determines which rows the table has; the conditions of
    the column filters the hook holds itself, in the order in which they were
    set. */

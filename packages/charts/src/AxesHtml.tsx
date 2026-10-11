@@ -30,7 +30,7 @@ function renderAxis(axis: AxisLayout, limits: readonly LimitLabel[], plot: Rect,
     >
       <span className="uc-axis-line" />
       {/* A chart waiting for its rows has no range: the [0, 1] it would mark
-          means nothing (chart-loading 03). */}
+          means nothing. */}
       {ticksShown && axis.ticks.map((tick) => {
         // Anchor on whole pixels: that coincides exactly with the grid line on
         // the canvas, which is aligned to half pixels.

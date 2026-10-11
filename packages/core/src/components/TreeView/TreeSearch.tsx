@@ -1,8 +1,7 @@
 /* The search field above the tree.
 
-   Its own building block and not a prop on the tree: whoever puts the search
-   somewhere else - in a toolbar, in a panel header - should be able to, just
-   as the table keeps its toolbar separate. */
+   Its own building block and not a prop on the tree, so that it can stand
+   elsewhere - in a toolbar, in a panel header. */
 
 import { forwardRef } from "react";
 import type { ChangeEvent, ForwardedRef, ReactNode } from "react";

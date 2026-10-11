@@ -48,9 +48,8 @@ export interface VirtualRows {
  * from them.
  *
  * It is measured on the first rendered row rather than taken from the caller's
- * value: row height depends on density, font size and zoom, and an assumption
- * two pixels off adds up over twenty thousand rows to a scrollbar that lies by
- * forty thousand pixels.
+ * value: row height depends on density, font size and zoom, and a small error
+ * adds up over many rows to a scrollbar that lies.
  */
 export function useVirtual(count: number, options: VirtualOptions): VirtualRows {
   const { rowHeight: expected, overscan = 4 } = options;
@@ -85,8 +84,7 @@ export function useVirtual(count: number, options: VirtualOptions): VirtualRows 
      The dependencies are the occasion to re-measure: the first row appears
      (count), the layout changed (viewportHeight), or the previous measurement was
      off (rowHeight). The comparison lets the chain come to rest after one
-     pass - and it tolerates only rounding noise: a row half a pixel off is
-     off, and over twenty thousand rows a scrollbar ten thousand pixels short. */
+     pass - and it tolerates only rounding noise. */
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
@@ -102,8 +100,7 @@ export function useVirtual(count: number, options: VirtualOptions): VirtualRows 
    * Brings a row into view.
    *
    * The height of the sticky header is measured and not assumed: without it
-   * the row lands behind the header, and so is scrolled to and nevertheless
-   * invisible.
+   * the row lands behind the header.
    */
   const showRow = useCallback(
     (index: number) => {

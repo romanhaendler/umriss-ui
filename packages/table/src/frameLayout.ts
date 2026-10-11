@@ -63,7 +63,7 @@ export function frameLayout({
 
   /* A tree opens a row's detail with the row's own fold:
      one chevron per row, in the first column at its level - no expander
-     column, whose chevron stood left of the tree's own. */
+     column. */
   const expanderColumn = detail !== null && !entries;
   const controlColumns = (selectable ? 1 : 0) + (expanderColumn ? 1 : 0);
   const leading = controlColumns + (spanEntry ? 1 : 0);
@@ -83,11 +83,10 @@ export function frameLayout({
   const startPinned = dataColumns.filter((e) => pins[e.spec.id] === "start").length;
   const endPinned = dataColumns.filter((e) => pins[e.spec.id] === "end").length;
   const spanPinned = spanEntry !== undefined && pins[spanEntry.spec.id] === "start";
-  /* The actions column sticks at the end as a block of its own: a table a
-     little too wide for a phone cut its last button to "Forwa". An actions
-     column that holds nothing at rest - a Row draft's buttons,
-     no Delete, no action - sticks only while a draft is open: pinned blank,
-     it took half of a phone's table. Its width is reserved either way, so
+  /* The actions column sticks at the end as a block of its own, so a narrow table does not cut
+     its last button. An actions column that holds nothing at rest - a Row
+     draft's buttons, no Delete, no action - sticks only while a draft is
+     open: pinned blank, it would take much of a narrow table. Its width is reserved either way, so
      sticking moves nothing. `RowActions pin={false}` leaves it in the flow,
      where the application finds its place too narrow - except for an open
      Row draft's Save (ADR-0036). */

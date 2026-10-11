@@ -43,9 +43,7 @@ export function bind(
   });
   // A web font that arrives after the first layout makes every measured label
   // wider than its band: measure anew once it is there. The hysteresis goes
-  // with the cache - it remembers band widths measured in the fallback font,
-  // and would keep a band up to HYSTERESIS - 1 pixels too wide, depending on
-  // whether the first layout ran before or after the font arrived.
+  // with the cache, since it remembers band widths measured in the fallback font.
   const fonts = typeof document === "undefined" ? undefined : document.fonts;
   fonts?.addEventListener?.("loadingdone", s.onFontsLoaded);
   s.theme = null;
@@ -67,7 +65,7 @@ export function setWording(s: ChartScene, wording: ChartsWording): void {
   if (wording === s.wording) return;
   s.wording = wording;
   // The data table's key and caption are written from it, and a percent
-  // axis' labels (K5); a layout pushes both and the summary.
+  // axis' labels; a layout pushes both and the summary.
   markLayoutDirty(s);
 }
 

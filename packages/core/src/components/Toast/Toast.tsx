@@ -177,20 +177,18 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       if (!item || item.leaving) return;
       clearTimer(id);
       item.onClose?.(reason);
-      /* A keyboard focus on the leaving card would fall to the body with it -
-         without a blur, and with the reader's place lost. It stays in the
-         deck while another toast stands, and goes back where it came from
-         otherwise. */
+      /* A keyboard focus on the leaving card would fall to the body with it.
+         It stays in the deck while another toast stands, and goes back where
+         it came from otherwise. */
       const region = regionRef.current;
       const active = document.activeElement;
       if (region && active instanceof HTMLElement && region.querySelector(`[data-toast="${id}"]`)?.contains(active) && keyboardFocus(active, region)) {
         if (itemsRef.current.some((entry) => entry.id !== id && !entry.leaving)) region.focus();
         else leaveRegion();
       }
-      /* Leaving through transitions (not animations), so that it does not
-         compete with the entrance animation for the same properties. How long
-         it takes is said by the token that the stylesheet reads as well.
-         Without a duration there is nothing to wait for. */
+      /* Leaving runs through transitions, not animations, so it does not
+         compete with the entrance animation. Its length is the token the
+         stylesheet reads; without one there is nothing to wait for. */
       const duration = region === null ? 0 : durationFrom(getComputedStyle(region), "--u-duration-exit-collapse");
       if (prefersReducedMotion() || duration <= 0) {
         remove(id);
@@ -357,12 +355,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {children}
       {createPortal(
         /* Two live regions that stand before the first message arrives: a
-           region that comes into the document with its text already in it is
-           often not read out at all by a screen reader. The message goes into
-           the region of its tone, following the same table as with `Alert`.
-           Both regions are
-           `display: contents`; the cards lie absolutely in the outer region,
-           ordered by arrival whatever their tone. */
+           region that enters the document with its text is often not read out.
+           The message goes into the region of its tone, by the same table as
+           `Alert`. Both are `display: contents`; the cards lie absolutely in
+           the outer region, ordered by arrival whatever their tone. */
         <div
           ref={regionRef}
           className={styles.region}

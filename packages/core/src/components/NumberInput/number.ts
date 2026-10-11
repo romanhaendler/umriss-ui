@@ -1,9 +1,7 @@
-/* Reading and writing a number in the notation the formats use: which
-   character separates thousands and which separates the decimals comes from
-   there, measured rather than declared a second time (ADR-0024 moved the
-   default from German to English, and a field that cannot read its own output
-   is worse than one that writes the wrong comma). Pure functions without React
-   - the seam at which NumberInput is tested. */
+/* Reading and writing a number in the notation the formats use: the thousands
+   and decimal separators come from there, not declared a second time
+   (ADR-0024). Pure functions without React - the seam at which NumberInput is
+   tested. */
 
 import { DEFAULT_FORMATS, DEFAULT_SEPARATORS, type Separators } from "../../lib/language/formats";
 

@@ -1,10 +1,8 @@
-/* The stateful companion of the tree model.
+/* The stateful side of the tree model.
 
-   It is deliberately boring: it holds four values, calls the model and passes
-   the transitions through. Every gesture is a pure function from treeModel,
-   applied to its own snapshot. If logic wants to move in here, the model is
-   missing a transition - then it belongs there, where it can be checked
-   without a browser.
+   It holds the values, calls the model and passes the transitions through.
+   Every gesture is a pure function from treeModel, applied to its own
+   snapshot; logic belongs in the model, not here.
 
    Each of the four values can be controlled from outside, so that a tree can
    be restored from a link or from a stored view. */
@@ -66,9 +64,8 @@ export interface TreeOptions<K, S extends Key = string> {
    */
   onLoadChildren?: (node: K) => void;
   /**
-   * Render only what stands in the scroll area. Deliberately optional: a tree
-   * with thirty nodes should not pay for machinery it does not need, and
-   * whoever has not ordered it should not have to think about row heights.
+   * Render only what stands in the scroll area. Optional: without it every
+   * row is rendered and no row height is needed.
    */
   virtual?: VirtualOptions;
 }
@@ -194,9 +191,8 @@ export function useTree<K, S extends Key = string>(
   );
 
   /* Duplicate keys break the cascade and the active node silently. The check
-     runs only during development and only when the roots change - it goes
-     over the whole tree. In an effect and not in the render, so that it does
-     not run along on every pass. */
+     goes over the whole tree: development only, in an effect, when the roots
+     change. */
   useEffect(() => {
     if (!import.meta.env?.DEV) return;
     const duplicate = duplicateKey(roots, reader);
@@ -241,7 +237,7 @@ export function useTree<K, S extends Key = string>(
     ],
   );
 
-  /** The entry for a key, or undefined. Needed three times - written once. */
+  /** The entry for a key, or undefined. */
   const entryFor = useCallback(
     (key: S) => flattening.find((e) => e.key === key),
     [flattening],

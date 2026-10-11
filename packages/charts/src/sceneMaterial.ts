@@ -1,4 +1,4 @@
-/* Materialisation (R-2.6, R-2.7): the categories and instants the rows bring,
+/* Materialisation: the categories and instants the rows bring,
    the channels every series is read into, and the stacks summed over them.
    Functions over the scene. */
 
@@ -301,7 +301,7 @@ export function materialize(s: ChartScene): void {
   s.perf.points = points;
 }
 
-/** Sums every stack anew from its members' own values (charts-stacking K2),
+/** Sums every stack anew from its members' own values,
     once per materialisation: a member that changes moves every one above
     it. The stack is summed before anything is drawn, so an area's
     downsampling thins the stacked edges - each member keeps its own

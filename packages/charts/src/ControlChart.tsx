@@ -175,15 +175,10 @@ export function ControlChart<T>(props: ControlChartProps<T>): ReactNode {
     [marked, accessor],
   );
 
-  /* And a data reference of its own to go with it.
-
-     The scene recognises a changed series partly by the source text of its
-     accessor - and that is the same here on every render, although the closure
-     reads a different set. This is the limit scene.ts writes down itself: "in
-     that case the app must pass a new data reference". Here this app is the app.
-     Without it the red points would stay at the state of the first evaluation
-     while the limits move - a picture that looks as though one had understood
-     it. */
+  /* A data reference of its own: the scene recognises a changed series partly
+     by the source text of its accessor, which is the same on every render
+     although the closure reads a different set. Without a new reference the
+     violations would stay at the state of the first evaluation. */
   const violationData = useMemo(
     () => (marked.size === 0 ? data : data.slice()),
     [data, marked],

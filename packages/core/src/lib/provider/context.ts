@@ -3,9 +3,9 @@
    index.tsx is the public export: what stands there stands in the bundle. Here
    stands what only the library itself reads. For density, a component has to
    be able to tell whether a provider SAYS "comfortable" or whether nobody said
-   anything - the table is compact of its own accord and must not be pulled to "regular" by a provider
-   that is silent about density. `useDensity()` returns "comfortable" in both
-   cases and stays as it is. */
+   anything - the table is compact of its own accord and must not be pulled to
+   "regular" by a provider that is silent about density. `useDensity()` returns
+   "comfortable" in both cases. */
 
 import { createContext, useContext } from "react";
 import type { UmrissConfig } from "./index";

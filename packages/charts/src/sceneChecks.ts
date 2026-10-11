@@ -1,4 +1,4 @@
-/* Development-time checks (R-4.12, R-4.13): a registration or a materialised
+/* Development-time checks: a registration or a materialised
    series that cannot be drawn as it was given is said once, in development,
    and costs nothing in production. Functions over the scene. */
 
@@ -56,7 +56,7 @@ export function validate(s: ChartScene): void {
     }
   }
   // A bar group calculates with one width fraction - that of the first member.
-  // Tacitly, that would be an unwritten rule. Boxes stand in the same group.
+  // Boxes stand in the same group.
   const fractions = new Map<string, number>();
   for (const { config } of s.seriesInOrder()) {
     if (config.kind !== "bar" && config.kind !== "box") continue;
@@ -71,7 +71,7 @@ export function validate(s: ChartScene): void {
       );
     }
   }
-  // A notch needs both bounds; one alone is not drawn (box-plot 04).
+  // A notch needs both bounds; one alone is not drawn.
   for (const { order, config } of s.series.values()) {
     if (config.kind !== "box" || (config.notchLower === undefined) === (config.notchUpper === undefined)) continue;
     const name = config.name ?? "?";

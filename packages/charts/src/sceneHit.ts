@@ -1,4 +1,4 @@
-/* The pointer's hit test (4.4): which point of which series lies under the
+/* The pointer's hit test: which point of which series lies under the
    pointer, how hits of several series are grouped into one tooltip, and the
    Active point they set. Functions over the scene. */
 
@@ -154,10 +154,9 @@ export function hitTest(
   if (candidates.length === 0) return null;
 
   /* The primary hit determines the crosshair and the grouping, and for that
-     only whoever has a comparable place counts at all. The px of an area is the
-     BEGINNING of its section and lies arbitrarily far to the left of the
-     pointer; throwing it into the same distance comparison would mean pinning
-     the crosshair to a segment edge. */
+     only whoever has a comparable place counts. The px of an area is the
+     beginning of its section and lies arbitrarily far left of the pointer, so
+     it stays out of the distance comparison. */
   const pointLike = candidates.filter((k) => !k.areal);
   const comparable = pointLike.length > 0 ? pointLike : candidates;
   let primary = comparable[0] as Candidate;
@@ -329,8 +328,7 @@ export function hitIn(
       color: colors[entry.buckets[index] as number],
       xValue,
       // yValue stays the position on the y axis; the level that carries the
-      // colour stands in a field of its own. Colour alone can transport no
-      // number - which is why the tooltip has to carry it.
+      // colour stands in a field of its own, for the tooltip.
       yValue,
       level,
       marked: false,

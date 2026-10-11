@@ -10,7 +10,7 @@ import { GridContext } from "./grid";
 import styles from "./Table.module.css";
 
 /* Up to two actions stand as buttons in the row; from three on ALL of them
-   stand in a menu (umriss-table 09). A mixture - one button and one menu -
+   stand in a menu. A mixture - one button and one menu -
    would give the column a different width depending on the number, and an
    action would wander between row and menu when a third one is added. */
 export const AT_MOST_IN_THE_ROW = 2;

@@ -2,8 +2,7 @@
 
    The typing is the product here (ADR-0017): a column is typed against the rows
    of the hook it came from, and `tests-unit/types.test-d.tsx` records what must
-   compile and what must not. The shape of the overloads is the result of
-   Ticket 01 - whoever changes them reads the findings there first. */
+   compile and what must not. */
 
 import type { ReactNode } from "react";
 import type { LimitSet } from "@umriss-ui/core";
@@ -278,7 +277,7 @@ export type Computed<Z, W> = ColumnBase &
     validate?: (value: W | null, row: Z) => string | null | undefined;
   };
 
-/* Ticket 01: the overloads differ by REQUIRED properties, so that an unfitting
+/* The overloads differ by REQUIRED properties, so that an unfitting
    one drops out before it fixes the parameters of `children`; the field column
    stands last, because TypeScript shows the message of the last one and a
    mistyped field name is the most frequent error. */

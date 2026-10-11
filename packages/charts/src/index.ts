@@ -117,11 +117,11 @@ export { DEFAULT_CHARTS_WORDING, type ChartsWording } from "./wording";
 export { DataTable } from "./DataTable";
 export type { DataTableGroup } from "./scene";
 
-/* The box plot (box-plot 01). At the end, by the workspace's rule for new
+/* The box plot. At the end, by the workspace's rule for new
    exports. */
 export type { BoxPlotProps } from "./BoxPlot";
 export type { BoxSeriesConfig, BoxChannels } from "./types";
-/* What a custom tooltip `render` reads of a box (box-plot 03, 04). */
+/* What a custom tooltip `render` reads of a box. */
 export type { BoxNumbers, BoxExtras, ListFunction } from "./types";
 
 /* The chart bound to its rows (ADR-0048): the hook, and the forms a value

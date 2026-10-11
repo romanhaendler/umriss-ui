@@ -1,4 +1,4 @@
-/* The tree: pure model, stateful companion, presentation. */
+/* The tree: pure model, state hook, presentation. */
 export { TreeView } from "./TreeView";
 export type { TreeViewProps } from "./TreeView";
 export { TreeSearch } from "./TreeSearch";

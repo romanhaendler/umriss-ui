@@ -50,8 +50,8 @@ export interface MultiSelectProps<T extends string = string>
       padding and chevron. Given, the field is that wide wherever it stands,
       and never wider than its place. Without it the field fills its place,
       and is 20 characters wide where the place asks - in a toolbar or a row,
-      room for two short chips and the counter. Either way, choosing and removing values never moves it: the chips that
-      do not fit stand as "+N". */
+      room for two short chips and the counter. Either way, choosing and removing
+      values never moves it: the chips that do not fit stand as "+N". */
   chars?: number;
   /** Locks field and panel. */
   disabled?: boolean;

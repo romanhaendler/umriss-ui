@@ -32,7 +32,7 @@ export function resetSearchAndFilters(snapshot: TableSnapshot<unknown>) {
 }
 
 /** The three conventions the language decides: the decimal mark is the
-    formats' (measured, as `NumberInput` reads its own output), the separator
+    formats' (as `NumberInput` reads its own output), the separator
     follows from it - a separator equal to the mark would make the file
     unreadable - and the words for true and false are the wording's, lower
     case (ADR-0061). */

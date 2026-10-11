@@ -37,8 +37,7 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
 /* The field always wears its wrapper (ADR-0041): the wrapper is what a place
    lays out and what carries the natural width - Firefox applies no size
    containment to the native input element itself. The class and the style go
-   to the wrapper, ref and rest to the input, as with every wrapped field
-   (principle 1). */
+   to the wrapper, ref and rest to the input. */
 /** A one-line text field. `chars` sets its width in characters, `numeric`
     sets figures right-aligned and tabular, `clearable` offers a cross. Inside
     a `FormField` it takes the field's id, description and invalid state. */

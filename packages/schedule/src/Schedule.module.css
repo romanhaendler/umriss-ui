@@ -100,9 +100,8 @@
     text-overflow: ellipsis;
   }
 
-  /* A lane's name takes a second line where its row holds two. On a phone the
-     column is a hundred pixels wide, and two vans cut to the same "Cooled van
-     FP…" were two lanes nobody could tell apart. A folded group's row is a
+  /* A lane's name takes a second line where its row holds two, so that long
+     names stay telling apart in a narrow column. A folded group's row is a
      lane's height and does the same. A row too low for two lines - and an open
      group's slim head - keeps the one line and its ellipsis. Text only:
      the clamp cuts a label of elements down to its first line, and a label
@@ -158,8 +157,6 @@
       color var(--u-transition);
   }
 
-  /* A square key like the table's expander and the calculation's disclosure,
-     and with their surface. */
   .chevron:hover {
     background: var(--u-color-surface-sunken);
     color: var(--u-color-text);

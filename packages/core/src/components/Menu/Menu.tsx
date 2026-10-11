@@ -24,8 +24,8 @@ export const MenuContext = createContext<MenuContextValue | null>(null);
 
 /** Arrow keys, Home and End over the enabled entries; Tab closes. `close`
     gives the focus back to where the menu came from, and the Tab then moves on
-    from there - left in the panel, the portal at the end of the page sent it
-    to the top of the page. */
+    from there; left in the panel, it would leave from the portal at the end
+    of the page. */
 export function handleMenuKeyDown(
   event: ReactKeyboardEvent<HTMLElement>,
   panel: HTMLElement | null,
@@ -89,10 +89,9 @@ export function Menu({ trigger, children, align = "start" }: MenuProps) {
     triggerRef.current?.focus();
   };
 
-  /* On opening, on to the first selectable entry - as soon as the panel
-     stands, the way `ContextMenu` does it. An effect on `open` ran before the
-     popover had found its portal target, so the first opening of a menu left
-     the focus on the trigger. */
+  /* On opening, focus goes to the first selectable entry as soon as the panel
+     stands, as in `ContextMenu`. An effect on `open` runs before the popover
+     has found its portal target. */
   const attachPanel = useCallback((node: HTMLDivElement | null) => {
     panelRef.current = node;
     node?.querySelector<HTMLButtonElement>('[role="menuitem"]:not([disabled])')?.focus();

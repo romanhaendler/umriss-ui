@@ -161,8 +161,8 @@ export const CardBody = forwardRef<HTMLDivElement, CardBodyProps>(function CardB
     return body;
   }
 
-  // The height is animated through the 0fr/1fr grid trick; collapsed content
-  // stays in the DOM but is inert (no focus, no interaction).
+  // The height animates through the 0fr/1fr grid; collapsed content stays in
+  // the DOM but is inert.
   return (
     <div className={cx(styles.collapse, card.collapsed && styles.collapsed)}>
       <div className={styles.collapseInner} {...inertWhen(card.collapsed)}>

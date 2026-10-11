@@ -3,14 +3,11 @@
 
    ROW is this module's word. A **Lane** is a resource; a row is what the plot
    lays out - a lane's row, an open group's slim head, or the one row a folded
-   group becomes. The distinction is the whole reason the word exists here: "a
-   lane is not a row" is a standing sentence of this component, and a layout
-   that called them the same thing would break it by accident.
+   group becomes. A lane is not a row.
 
-   It is in no exported name, no prop and no intent. It reaches the outside in
-   exactly one place, `data-row` on a lane header, and that is deliberate and
-   written down (ADR-0025): an application styling beside the schedule has to
-   be able to tell the three apart.
+   It is in no exported name, no prop and no intent; it reaches the outside
+   only as `data-row` on a lane header (ADR-0025), so that an application
+   styling beside the schedule can tell the three apart.
 
    Every real lane resolves to a SLOT: its own row where it has one, or its
    strip inside a miniature where its group is folded. Everything that needs a
@@ -247,11 +244,8 @@ export function layOutRows(input: RowsInput): Rows {
     A drag that rests over a folded group opens it FOR THE GESTURE: the rows
     are laid out again, the ghost goes on, and at the end of the gesture the
     transient set is dropped and the group closes. The caller's list is never
-    touched and no change is reported, because the application did not fold
-    anything - a planner reached into a drawer and let it shut (ADR-0025).
-
-    Pure, so that the one thing worth being sure of can be checked without a
-    pointer: the caller's list goes in unchanged and comes out unchanged. */
+    touched and no change is reported (ADR-0025). Pure: the caller's list goes
+    in unchanged and comes out unchanged. */
 export function effectiveCollapsed(
   collapsed: ReadonlySet<string>,
   openForGesture: ReadonlySet<string>,

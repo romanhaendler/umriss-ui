@@ -13,7 +13,7 @@
     border: none;
     border-radius: var(--u-radius-md);
     /* The size of an icon in the button - the button decides it, not the icon
-       (CONTEXT.md, "Icon"): one beside a label and one alone are the same. */
+       (CONTEXT.md, "Icon"). */
     --_icon: var(--u-icon-size);
     font-family: var(--u-font-sans);
     font-size: var(--u-text-sm);
@@ -35,8 +35,7 @@
   }
 
   /* Loading locks the button but does not grey it out: it says "running", not
-     "not possible here". Faded to half, the spinner all but vanished - in the
-     dark theme most of all. */
+     "not possible here". */
   .button:disabled:not([aria-busy="true"]) {
     cursor: not-allowed;
     opacity: 0.5;
@@ -179,19 +178,18 @@
     }
   }
 
-  /* Forced colours drop the filled variants' ground with every other colour: the outline where the edge would lie is what still
-     says "button", on every variant. `.secondary` repeats it beside its edge
-     only because the stylesheet check reads a rule at a time. */
+  /* Forced colours drop the filled variants' ground with every other colour:
+     the outline where the edge would lie is what still says "button", on
+     every variant. */
   .button {
     outline: 1px solid transparent;
   }
 
   /* Without its ink the primary button would be one secondary among others:
      under forced colours its outline is twice as wide, the second pixel
-     inside, so that it stands as large as its neighbours.
-     Focused, the ring's outline moves out to where every ring lies - and the
-     move is needed: where rest and focus drew the same geometry, Chromium
-     kept painting the resting colour over the selection colour. */
+     inside. Focused, the ring's outline moves out to where every ring lies;
+     with the same geometry at rest and in focus, Chromium paints the resting
+     colour over the selection colour. */
   @media (forced-colors: active) {
     .primary {
       outline-width: 2px;

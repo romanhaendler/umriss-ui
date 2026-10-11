@@ -122,10 +122,9 @@ const DialogFrame = forwardRef<HTMLDialogElement, DialogFrameProps>(function Dia
 ) {
   const sheetRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
-  /* Exit after `--u-duration-exit`: a sheet of paper taking its leave. The
-     name stands here and not in the hook, because it belongs to the Modal -
-     the palette chooses the same routine without an exit. The duration is read
-     from the token the stylesheet uses, not repeated as a number. */
+  /* Exit after `--u-duration-exit`, read from the token the stylesheet uses.
+     The name belongs to the Modal; the palette uses the same routine without
+     an exit. */
   const { dialogRef, closing, onDialogClose: handleDialogClose, onDialogCancel: handleDialogCancel } =
     useDialogChoreography(open, "--u-duration-exit", onClose);
 
@@ -143,14 +142,13 @@ const DialogFrame = forwardRef<HTMLDialogElement, DialogFrameProps>(function Dia
     <dialog
       ref={mergeRefs(dialogRef, ref)}
       className={cx(styles.dialog, className)}
-      /* The heading of the header names the window. A <dialog> takes no name
-         from its content, so without this it said only "dialog" - what the
-         header's `title` promises is only true with the reference. */
+      /* The heading of the header names the window: a <dialog> takes no name
+         from its content. */
       aria-labelledby={titleId}
       {...rest}
-      /* After `rest` and composed with the caller's: a caller's `onCancel` or
-         `onMouseDown` would otherwise take Escape's exit or the backdrop's
-         closing away from the window. */
+      /* After `rest` and composed with the caller's, so that a caller's
+         `onCancel` or `onMouseDown` cannot take Escape's exit or the
+         backdrop's closing away. */
       data-side={side}
       data-closing={closing || undefined}
       onClose={handleDialogClose}

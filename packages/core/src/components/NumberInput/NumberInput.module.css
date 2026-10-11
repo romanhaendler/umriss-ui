@@ -138,9 +138,7 @@
     color: var(--u-color-text);
   }
 
-  /* The press point on the glyph, as on the time stepper: 0.8, and the surface
-     sinks once more. The whole key does not give way to a third value
-     beside the button's 0.98 and the glyph's 0.8. */
+  /* The press point is on the glyph (0.8), and the surface sinks once more. */
   .stepper button:active:not(:disabled) {
     background: var(--u-color-surface-pressed);
   }

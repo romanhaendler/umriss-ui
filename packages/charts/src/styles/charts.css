@@ -1,10 +1,8 @@
 /* @umriss-ui/charts - design coupling exclusively through CSS variables.
    Every --uc-* variable falls back through the var() cascade onto the --u-* token
    of @umriss-ui/core (where the app loads it) and finally onto a literal.
-   The --u-* names are checked against the real umriss-ui token set: Geist fonts,
-   --u-edge-color-strong / --u-hairline as line colours, --u-color-text-muted,
-   --u-color-surface. --u-chart-* palette tokens do not (yet) exist in umriss-ui -
-   the literal fallbacks carry.
+   The --u-chart-* palette tokens do not exist in core; the literal fallbacks
+   carry them.
    A dark mode arises from this by itself; the library contains no dark mode code
    of its own. */
 
@@ -129,7 +127,7 @@
     pointer-events: none; /* .uc-plot catches the mouse events */
   }
 
-  /* Loading over a course keeps it (chart-loading): it dims and takes no
+  /* Loading over a course keeps it: it dims and takes no
      pointer until the answer is in, as the table's stale rows do. A limit's
      label dims with its line; the axes stay as they are, as the table's
      header does. Leaving, the transition is
@@ -144,7 +142,7 @@
     transition: opacity var(--uc-transition-state) var(--uc-delay-stale);
   }
 
-  /* The silhouette (chart-loading 03, Silhouette.tsx): shapes over a faint
+  /* The silhouette (Silhouette.tsx): shapes over a faint
      ground, and one band whose glint is the surface's - in a dark theme it
      darkens, as the table's skeleton does. The band sweeps 80 % of a cycle
      (SWEEP) and waits out the rest out of sight; its duration comes from its
@@ -454,7 +452,7 @@
     opacity: 0.3;
   }
 
-  /* ---------------- Show all (component-view 04) ---------------- */
+  /* ---------------- Show all ---------------- */
 
   /* Over the plot area's corner, its position measured inline (top right; at
      the bottom where a legend stands above). Quiet - the tooltip's surface,

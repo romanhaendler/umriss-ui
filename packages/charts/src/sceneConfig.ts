@@ -114,8 +114,8 @@ export function listEqual(a: readonly number[] | undefined, b: readonly number[]
 
 /** Everything materialisation reads: the y accessor, the data reference, the
     baseline and the series kind - the kind, because it decides about the
-    baseline and the step. If any of that changes, the channels are stale and have to come
-    into being anew; a field comparison alone is not enough here. */
+    baseline and the step. If any of that changes, the channels are stale and
+    have to come into being anew; a field comparison alone is not enough. */
 export function materialEqual(previous: SeriesConfig, next: SeriesConfig): boolean {
   return (
     previous.kind === next.kind &&
@@ -176,7 +176,7 @@ export function widthOf(config: SeriesConfig): number {
 }
 
 /** The stack a series stands in, as a key: the same id on the same x and y
-    axis (charts-stacking K1); undefined where it stands alone. */
+    axis; undefined where it stands alone. */
 export function stackOf(config: SeriesConfig): string | undefined {
   if ((config.kind !== "bar" && config.kind !== "area") || config.stack === undefined) return undefined;
   return `${config.xAxisId}\n${config.yAxisId}\n${config.stack}`;

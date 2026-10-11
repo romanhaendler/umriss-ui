@@ -34,8 +34,8 @@ const separator = <AngleGlyph size={8} className={styles.separator} />;
 /* Where a page stands: region, cluster, service. A navigation landmark with an
    ordered list, and the last level says `aria-current="page"`. When the trail
    is wider than its place, the middle levels fold into a `Menu` behind one
-   key - measured, not guessed: a hidden copy of the whole trail gives each
-   level's width, and `foldedCount` decides. */
+   key: a hidden copy of the whole trail gives each level's width, and
+   `foldedCount` decides. */
 /** Where a page stands: the trail from the root to the current page. Where it
     is wider than its place, the middle levels fold into a menu. */
 export const Breadcrumb = forwardRef<HTMLElement, BreadcrumbProps>(function Breadcrumb(
