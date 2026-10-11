@@ -431,7 +431,7 @@ export const OUTLINE: readonly Rubric[] = [
         about: [
           "It writes the filtered set across all pages, in the visible columns, in the order and sorting on screen – and the values, not their presentation: numbers with the decimal mark of the formats, yes and no from the wording, a point in time as a timestamp, an absent value as an empty field. The separator follows the mark – a comma, or a semicolon where the mark is a comma – and a byte order mark tells the spreadsheet it is UTF-8. English gets commas and a point; the German wording and formats from `@umriss-ui/core/wording/de` get the file the table always wrote, and German wording with English formats gets German words with comma and point – take both halves (ADR-0061).",
           "A verdict column exports its value, not the verdict. In [server mode](#/server-mode) the table holds one page of the server's, so it exports that page, and the button says so. The same text is `t.asCsv()`, without a button.",
-          "Ctrl or Cmd with C copies the selected rows – the visible columns under a header line, tab-separated, with the same values and the formats' decimal mark – and in a grid with no selection the Active cell. A screen reader is told how many rows were copied, or that the copy failed. Marked text and a focused field keep the browser's own copy. `t.selectionAsText()` is the same text for a button of your own, as in the last example.",
+          "Ctrl or Cmd with C copies the selected rows – the visible columns under a header line, tab-separated, with the same values and the formats' decimal mark – and in a grid with no selection the Active cell. What was copied flashes once in an accent tint (shown without the fade under reduced motion), and a screen reader is told how many rows were copied, or that the copy failed. Marked text and a focused field keep the browser's own copy; in an open cell editor with nothing marked the key copies the value that stands in the field. `t.selectionAsText()` is the same text for a button of your own, as in the last example.",
         ],
         keysOf: ["first-table", core("Input"), core("Button")],
         limits: ["One format, CSV: no workbook, PDF or print layout."],
@@ -527,6 +527,7 @@ export const OUTLINE: readonly Rubric[] = [
           { key: "Click", action: "Opens the editor of a cell that edits; a select shows its list, a day its calendar." },
           { key: "Enter / F2", action: "Starts an edit, or reaches the cell's own controls." },
           { key: "Escape", action: "Cancels an edit, or goes back from a control to its cell." },
+          { key: "Ctrl / Cmd + C", action: "Copies the selected rows, or the active cell; its cell flashes. In an open editor with nothing marked it copies the field's value." },
           { key: "Space", action: "Selects the row of the active cell." },
         ],
         types: [],
