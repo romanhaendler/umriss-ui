@@ -63,6 +63,9 @@ export function announce(text: string, at?: Element | null): void {
   if (timer !== null) clearTimeout(timer);
   timer = setTimeout(() => {
     timer = null;
+    /* The page may be gone by now - a test's environment torn down within
+       the rest: nobody is left to hear it, and there is nothing to write to. */
+    if (typeof document === "undefined") return;
     /* A new node every time: the same words twice - the count after a
        letter that changed nothing, the last option at the end of the list -
        are an addition, and only additions are spoken. */

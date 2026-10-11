@@ -29,6 +29,18 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## Unreleased
+
+### Fixed
+
+- **An announcement that waits past its page no longer throws.** The library's
+  voice speaks after a rest of 150 ms; where the document was gone by then - a
+  test's environment torn down right after a combobox, a multi-select, the
+  command palette or a copy spoke - the timer ran into `document is not
+  defined` and a test run ended with an unhandled error. It says nothing now.
+
+---
+
 ## 0.33.0 – The library's one voice, and React 18 proved (Oct. 2026)
 
 ### Added
