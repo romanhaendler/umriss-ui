@@ -7,10 +7,8 @@
 import { describe, expect, it } from "vitest";
 import {
   workingCalendar,
-  workingTicks,
   workingTimeTicks,
   breaks,
-  mapSeries,
   removedIntervals,
   calendarFrom,
   toWorkingTime,
@@ -172,28 +170,6 @@ describe("the empty calendar", () => {
   });
 });
 
-describe("mapSeries - a whole series at once", () => {
-  it("maps every value and turns removed time into a gap", () => {
-    const source = Float64Array.from([
-      6 * HOUR,
-      10 * HOUR,
-      20 * HOUR,
-      30 * HOUR,
-      34 * HOUR,
-    ]);
-    const target = new Float64Array(source.length);
-    mapSeries(shifts, source, source.length, target);
-    expect([...target]).toEqual([0, 4 * HOUR, Number.NaN, 8 * HOUR, 12 * HOUR]);
-  });
-
-  it("touches only the first n values", () => {
-    const source = Float64Array.from([6 * HOUR, 10 * HOUR]);
-    const target = Float64Array.from([-1, -1]);
-    mapSeries(shifts, source, 1, target);
-    expect([...target]).toEqual([0, -1]);
-  });
-});
-
 describe("workingTimeTicks - candidates in wall clock time, then mapped", () => {
   it("throws candidates in removed intervals away and maps the rest", () => {
     // Candidates every four hours from 0 to 48: 0, 4, 8, …, 48.
@@ -314,30 +290,6 @@ describe("breaks - the break points within the extent of the axis", () => {
   it("leaves out what lies outside the extent", () => {
     expect(breaks(shifts, 0, 4 * HOUR)).toEqual([]);
     expect(breaks(shifts, 10 * HOUR, 16 * HOUR)).toEqual([]);
-  });
-});
-
-describe("workingTicks - ticks for an extent in working time", () => {
-  it("calculates the extent back, generates in wall clock time and maps", () => {
-    // Extent 0…16 h of working time, eight ticks: step 2 h. In wall clock time
-    // that is 6 o'clock to 38 o'clock; by hand 6, 8, 10, 12, 14 and 32, 34, 36, 38
-    // survive - 30 o'clock coincides with 14 o'clock.
-    expect(workingTicks(shifts, 0, 16 * HOUR, 8).map((v) => v / HOUR)).toEqual([
-      0, 2, 4, 6, 8, 10, 12, 14, 16,
-    ]);
-  });
-
-  it("copes with an extent widened to nice boundaries", () => {
-    // A "nice" domain reaches beyond the working time that exists; that must
-    // generate no ticks out of nowhere.
-    const values = workingTicks(shifts, -2 * HOUR, 20 * HOUR, 8);
-    expect(Math.min(...values)).toBeGreaterThanOrEqual(0);
-    expect(Math.max(...values)).toBeLessThanOrEqual(16 * HOUR);
-  });
-
-  it("yields nothing without a calendar and for a reversed extent", () => {
-    expect(workingTicks([], 0, 16 * HOUR, 8)).toEqual([]);
-    expect(workingTicks(shifts, 16 * HOUR, 0, 8)).toEqual([]);
   });
 });
 

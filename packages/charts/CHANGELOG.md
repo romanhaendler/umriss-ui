@@ -29,6 +29,14 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## Unreleased
+
+### Changed
+
+- **Ten exports and one dead member are gone.** `ruleOutlier`, `ruleRun`, `ruleTrend`, `ruleTwoOfThree`, `sigmaFromLimit`, `defaultRules`, `paretoDefaults`, `toWorkingTime`, `mapSeries` and `workingTicks` are no longer exported from the package; nothing in the library or its documentation asked a caller to import them. `ControlChart`'s `rules` prop is unchanged and still takes a `Partial<RuleOptions>`. The static `ChartScene.classTick` is removed as well. `workingCalendar`, `calendarFrom`, `toWallClock` and the other working-time helpers stay.
+
+---
+
 ## 0.16.0 – A stack's total in the data table (Oct. 2026)
 
 ### Added

@@ -183,20 +183,6 @@ export function toWallClock(workingTime: number, input: CalendarInput): number {
   );
 }
 
-/** Map a whole series inwards - the route materialisation takes when it wants to
-    go it in one piece. Only the first n values are touched. */
-export function mapSeries(
-  input: CalendarInput,
-  source: Float64Array,
-  n: number,
-  target: Float64Array,
-): void {
-  const calendar = calendarFrom(input);
-  for (let i = 0; i < n; i++) {
-    target[i] = toWorkingTime(source[i] as number, calendar);
-  }
-}
-
 /** Wall clock time → working time, but without NaN: whatever lies in removed
     time falls onto the seam that this span collapses onto anyway; whatever lies
     before the first or after the last interval onto 0 or onto the whole
@@ -335,35 +321,4 @@ export function workingTimeTicks(
     previous = workingTime;
   }
   return ticks;
-}
-
-/** Tick values for an axis extent that already stands in WORKING TIME - the
-    route the axis layout takes.
-
-    The extent is trimmed to the working time that exists (an extent widened to
-    nice boundaries reaches beyond it), calculated back into wall clock time, and
-    the candidates arise there. The step comes from the span in working time and
-    not from the one in wall clock time: roughly one candidate per step of
-    working time survives, and calculated from the wall clock span, four out of
-    ten wanted ticks would be left. */
-export function workingTicks(
-  input: CalendarInput,
-  from: number,
-  to: number,
-  count: number,
-  offset = 0,
-): number[] {
-  const calendar = calendarFrom(input);
-  if (calendar.intervals.length === 0 || !(to > from)) return [];
-  const insideFrom = Math.max(0, Math.min(calendar.total, from));
-  const insideTo = Math.max(0, Math.min(calendar.total, to));
-  const step = timeStep(to - from, count);
-  const ticks = workingTimeTicks(
-    calendar,
-    toWallClock(insideFrom, calendar),
-    toWallClock(insideTo, calendar),
-    step,
-    offset,
-  );
-  return ticks.map((t) => t.workingTime).filter((b) => b >= from && b <= to);
 }
