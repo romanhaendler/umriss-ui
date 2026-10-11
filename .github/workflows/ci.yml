@@ -69,4 +69,7 @@ jobs:
             echo "$name $version"
             case "$version" in 18.*) ;; *) echo "expected $name 18, got $version"; exit 1 ;; esac
           done
+      # The typecheck writes what the demos' tests read (`demo/.generated`); the
+      # first run of this job went without it and one test found no file.
+      - run: pnpm typecheck
       - run: pnpm test:unit

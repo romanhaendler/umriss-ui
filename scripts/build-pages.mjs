@@ -281,7 +281,10 @@ const front = {
     .concat(`<h3>Documents</h3>
         <ul>${concepts.map((document) => `<li><a href="./${document.path}">${escape(document.name)}</a></li>`).join("")}</ul>`)
     .join("\n        "),
-  documents: concepts.map((document) => `<a href="./${document.path}">${escape(document.name)}</a>`).join(" · "),
+  documents: concepts
+    .filter((document) => document.indexOnly !== true)
+    .map((document) => `<a href="./${document.path}">${escape(document.name)}</a>`)
+    .join(" · "),
   repository: REPOSITORY,
 };
 const FRONT_PAGE = readFileSync(join(ROOT, "scripts", "front-page.html"), "utf8");

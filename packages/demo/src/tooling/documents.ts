@@ -24,6 +24,10 @@ export interface SiteDocument {
   /** The package whose changelog it is: linked from that package's pages and
       its group of the front page's index, not from the front page's foot. */
   changelogOf?: string;
+  /** Linked from the front page's index only, not from its foot: a document
+      that extends another one the foot already names. The foot stays the few
+      a first reader needs - the front page is no wall of links. */
+  indexOnly?: true;
 }
 
 /** Every document the site renders, and only these: what a caller reads to
@@ -34,8 +38,8 @@ export const DOCUMENTS: readonly SiteDocument[] = [
   { source: "docs/design-language.md", path: "design-language/", title: "Design language – umriss-ui", name: "Design language" },
   { source: "docs/standards.md", path: "standards/", title: "Industrial standards – umriss-ui", name: "Standards" },
   { source: "docs/adr/0032-what-umriss-is-not.md", path: "what-umriss-ui-is-not/", title: "What umriss-ui is not – umriss-ui", name: "What umriss-ui is not" },
-  { source: "docs/adr/0059-the-set-of-chart-kinds-is-open.md", path: "chart-kinds-are-open/", title: "The set of chart kinds is open – umriss-ui", name: "The set of chart kinds is open" },
-  { source: "docs/adr/0060-validation-and-a-layout-editor-are-never-time-zones-not-yet.md", path: "validation-layout-time-zones/", title: "Validation, layout and time zones – umriss-ui", name: "Validation, layout and time zones" },
+  { source: "docs/adr/0059-the-set-of-chart-kinds-is-open.md", path: "chart-kinds-are-open/", title: "The set of chart kinds is open – umriss-ui", name: "The set of chart kinds is open", indexOnly: true },
+  { source: "docs/adr/0060-validation-and-a-layout-editor-are-never-time-zones-not-yet.md", path: "validation-layout-time-zones/", title: "Validation, layout and time zones – umriss-ui", name: "Validation, layout and time zones", indexOnly: true },
   ...PACKAGES.map((p) => ({ source: `packages/${p.id}/CHANGELOG.md`, path: `${p.id}/changelog/`, title: `Changelog – ${p.npm}`, name: "Changelog", changelogOf: p.id })),
 ];
 
