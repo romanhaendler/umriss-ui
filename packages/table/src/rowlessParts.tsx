@@ -1,4 +1,4 @@
-/* The unbound parts: Toolbar, Search, ColumnMenu, Export, Pagination. They touch no row and therefore need no binding - placed
+/* rowlessParts.tsx - the parts that touch no row ("unbound" in the docs): Toolbar, Search, ColumnMenu, Export, Pagination. They touch no row and therefore need no binding - placed
    inside a table they read that one, outside they take `of={t}`.
 
    Two decisions stand here:

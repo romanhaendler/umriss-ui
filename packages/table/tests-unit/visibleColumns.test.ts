@@ -6,7 +6,7 @@
 import { describe, expect, it } from "vitest";
 import { act, renderHook } from "@testing-library/react";
 import { column, tableModel } from "../src/model/tableModel";
-import { useCompanion } from "../src/model/companion";
+import { useCompanion } from "../src/model/tableState";
 
 interface Row {
   id: string;
@@ -136,7 +136,7 @@ describe("useCompanion – switching columns", () => {
     const { result } = setUp();
     act(() => result.current.toggleSort("budget"));
     act(() => result.current.setOrder(["status", "projekt", "budget"]));
-    expect(result.current.sortDirectionOf("budget")).toBe("asc");
+    expect(result.current.sort).toEqual([{ column: "budget", direction: "asc" }]);
     expect(ids(result.current.columns)).toEqual(["status", "projekt", "budget"]);
   });
 

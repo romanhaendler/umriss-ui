@@ -9,8 +9,8 @@ export { useTable } from "./useTable";
 export { column } from "./column";
 export { columnFilter } from "./columnFilter";
 export type { FilterInputProps, ColumnFilter } from "./columnFilter";
-export { ColumnMenu, Export, Pagination, Search, Toolbar } from "./unbound";
-export type { ColumnMenuProps, ExportProps, PaginationProps, SearchProps, ToolbarProps } from "./unbound";
+export { ColumnMenu, Export, Pagination, Search, Toolbar } from "./rowlessParts";
+export type { ColumnMenuProps, ExportProps, PaginationProps, SearchProps, ToolbarProps } from "./rowlessParts";
 /* The types a caller names by name - for a wrapper with `of`, a preset, props
    of one's own. The helper types behind them stay internal; the build's
    declarations carry them along anyway. */
