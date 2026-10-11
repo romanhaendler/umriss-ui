@@ -20,11 +20,11 @@ concurrency:
 jobs:
   # Outside the environment, so a push that releases nothing waits for no one.
   find:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       dirs: ${{ steps.find.outputs.dirs }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - id: find
         # In dependency order: core and charts before what depends on them.
         # A new package is added here.
@@ -45,16 +45,16 @@ jobs:
   publish:
     needs: find
     if: needs.find.outputs.dirs != ''
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment: npm
     permissions:
       contents: write
       id-token: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
       # Node 24 brings npm 11, which Trusted Publishing needs (>= 11.5.1).
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: pnpm
