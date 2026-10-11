@@ -115,9 +115,10 @@ loaded: Geist when the application has it, the system fonts otherwise.
   pans by wheel, pinch, drag and keys within its `zoomLimits`, and a 'Show
   all' button brings the whole back; the legend hides and shows a series on a
   click and shows only it on a double click. `useChart(rows, { initialView,
-  onViewChange })` takes a start and reports every change, always the whole
-  view - charts in step hand each other theirs; `setDomain`, `toggleSeries`,
-  `showOnly` and `showAllSeries` stand on what the hook hands back.
+  onViewChange })` takes a start, read once, and reports what the reader does,
+  always the whole view - charts in step send each other theirs through
+  `setView`, which is not reported; `setDomain`, `toggleSeries`, `showOnly`
+  and `showAllSeries` stand on what the hook hands back.
 * **A chart that is loading says so**, as the table does: `loading` keeps
   and dims a course already drawn, and where there is nothing yet a
   silhouette of the chart to come shimmers in the plot (ADR-0042).

@@ -1,8 +1,9 @@
 /* The view of a chart (ADR-0047): the span each zoomable x axis shows and the
    hidden series - how the reader is looking, never the data.
 
-   The scene holds it; `useChart` takes a start through `initialView` and
-   reports every change through `onViewChange`. Pure, so that the rules can be
+   The scene holds it; `useChart` takes a start through `initialView`, reports
+   what the reader did through `onViewChange` and goes to a whole view through
+   `setView`. Pure, so that the rules can be
    tested without a canvas. */
 
 /** The span each zoomable x axis shows, by axis `id`, in the axis' units. */
@@ -26,8 +27,7 @@ export interface ZoomLimits {
   readonly max: number;
 }
 
-/** What a view handed in is compared by: its content, not its identity - a
-    view written in the call is a new object on every render. Ids and names
+/** What a view is compared by: its content, not its identity. Ids and names
     are sets, so their order does not count, and an empty part is no part. */
 export const viewKey = (view: ChartView): string =>
   JSON.stringify([
@@ -81,46 +81,6 @@ export function onlyVisible(
     handed in: where it would, all are shown instead. */
 export function hidesAll(hidden: readonly string[], series: readonly (string | undefined)[]): boolean {
   return series.length > 0 && series.every((one) => one !== undefined && hidden.includes(one));
-}
-
-/** How long a view reported may take to come back as `initialView`. */
-const ECHO_MS = 1000;
-
-/** The views a component reported that may still come back, by their
-    content key - the chart's and the schedule's (ADR-0047), the table holding
-    a copy of its own. An application keeping the view hands
-    it back a frame or more late - by then a pan has moved on, and going to the
-    view handed in would jump back. So a view handed in that equals one
-    reported since the last one handed in, within a second, is the component's
-    own state coming back, not a view to go to. The echoes come in order: one drops
-    itself and every older report, a view from outside drops them all. The
-    second bounds the list where nothing is handed back, and lets such an
-    application still restore a view it kept. */
-export class Echoes {
-  private reports: { key: string; at: number }[] = [];
-
-  /** Notes a view reported, by its key. */
-  reported(key: string): void {
-    const now = performance.now();
-    this.reports = this.reports.filter((r) => now - r.at < ECHO_MS);
-    this.reports.push({ key, at: now });
-  }
-
-  /** Whether the view handed in is a report coming back. */
-  has(key: string): boolean {
-    return this.at(key) >= 0;
-  }
-
-  /** Forgets what the view handed in answers. */
-  handed(key: string): void {
-    const at = this.at(key);
-    this.reports = at < 0 ? [] : this.reports.slice(at + 1);
-  }
-
-  private at(key: string): number {
-    const now = performance.now();
-    return this.reports.findIndex((r) => r.key === key && now - r.at < ECHO_MS);
-  }
 }
 
 /** Zoom a span by `factor` (below 1 is closer) around a `share` of it, which

@@ -86,8 +86,8 @@ export interface ChartProps {
   /** Charts with the same id share the pointer's x position, in domain units:
       each draws its crosshair there, the tooltip stays with the chart under
       the pointer. Zoom is not shared this way: charts zoom together by
-      handing each other their view (`useChart`'s `initialView` and
-      `onViewChange`). */
+      sending each other their view (`useChart`'s `onViewChange` and
+      `setView`). */
   syncId?: string;
   /** Instrumentation for the benchmark page; not needed otherwise.
       @remarks R-5.1 */

@@ -18,8 +18,7 @@ export interface ScheduleView {
   folded?: readonly string[];
 }
 
-/** What a view handed in is compared by: its content, not its identity - a
-    view written in the call is a new object on every render. The folded groups
+/** What a view is compared by: its content, not its identity. The folded groups
     are a set, so their order does not count, and an empty fold is no fold. */
 export const viewKey = (view: ScheduleView): string =>
   JSON.stringify([view.domain ?? null, [...(view.folded ?? [])].sort()]);

@@ -8,12 +8,12 @@
    made once, so that it keeps its identity over every render, whatever the
    view does. */
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { Chart as FreeChart, type ChartProps } from "./Chart";
 import { ChartScene } from "./scene";
 import { warnOnce } from "./dev";
 import type { TooltipHit } from "./types";
-import { Echoes, viewKey, type AxisSpans, type ChartView } from "./view";
+import { viewKey, type AxisSpans, type ChartView } from "./view";
 import { XAxis, YAxis, type XAxisProps, type YAxisProps } from "./Axis";
 import { Line, type LineProps } from "./Line";
 import { Area, type AreaProps } from "./Area";
@@ -26,16 +26,15 @@ import { BoxPlot, type BoxPlotProps } from "./BoxPlot";
 /** What `useChart` takes besides the rows: the view to start from and the
     handler that hears every change of it. */
 export interface ChartOptions<Z = unknown> {
-  /** The view to start from, and to go to whenever one differing in content
-      from the last is handed in - the same view again changes nothing, and
-      what it leaves out is reset; one the chart reported itself, handed back
-      late, is its own state coming back and not gone to - two charts in step
-      do not jump back mid-pan. The chart remembers none: where a view is kept
-      is the application's decision. */
+  /** The view to start from, read once when the hook first runs; a different
+      value on a later render is ignored, as React ignores a changed
+      `defaultValue`. To go to a view later, call `setView`. The chart
+      remembers none: where a view is kept is the application's decision. */
   initialView?: ChartView;
-  /** Every change of the view, once, always the whole view - the one to keep,
-      or to hand another chart as its `initialView`. A pan or zoom is reported
-      at most once per frame. Not called for the view the chart starts with. */
+  /** Every change the reader makes, once, always the whole view - the one to
+      keep, or to hand another chart's `setView`. A pan or zoom is reported at
+      most once per frame. Not called for the view the chart starts with, nor
+      for one `setView` applies. */
   onViewChange?: (view: ChartView) => void;
   /** The reader chose a point: a click on a hit (a tap too), or Enter on the
       Active point - the same hit the tooltip's `render` receives. Once per
@@ -69,6 +68,11 @@ export interface ChartParts<Z> {
   /** The span each zoomable x axis shows, by axis `id`; an axis absent shows
       its own `domain`. */
   domains: AxisSpans;
+  /** Goes to a whole view; what it leaves out is shown whole again. Not
+      reported through `onViewChange`: two charts kept in step by
+      `onViewChange: (v) => other.setView(v)` in both directions do not answer
+      each other. A view with the content already shown changes nothing. */
+  setView: (view: ChartView) => void;
   /** Puts a span in view on a zoomable x axis - a lone one is `"x"`; `null`
       shows the axis' own `domain` again. */
   setDomain: (axisId: string, span: readonly [number, number] | null) => void;
@@ -95,6 +99,9 @@ const NO_NAMES: readonly string[] = [];
     the setters that change them. */
 export function useChart<Z>(rows: readonly Z[], options: ChartOptions<Z> = {}): ChartParts<Z> {
   const { initialView, onViewChange, onSelect } = options;
+  /* The key of the view last reported, or applied by `setView` - what the
+     effect below compares the view against. */
+  const reported = useRef("");
   const [bound] = useState(() => {
     const held = { rows };
     const scene = new ChartScene(initialView);
@@ -102,6 +109,10 @@ export function useChart<Z>(rows: readonly Z[], options: ChartOptions<Z> = {}): 
       return <FreeChart {...props} data={held.rows} scene={scene} />;
     }
     const parts = { Chart, XAxis, YAxis, Line, Area, Bar, Scatter, StateBand, Matrix, BoxPlot,
+      setView: (next: ChartView) => {
+        scene.applyView(next);
+        reported.current = viewKey(scene.getView());
+      },
       setDomain: scene.setDomain,
       toggleSeries: scene.toggleSeries,
       showOnly: scene.showOnly,
@@ -112,31 +123,15 @@ export function useChart<Z>(rows: readonly Z[], options: ChartOptions<Z> = {}): 
   const { scene } = bound;
   const view = useSyncExternalStore(scene.subscribeView, scene.getView, scene.getView);
 
-  /* A view handed in applies whenever its content differs from the last one
-     handed in - before the paint, so the old view never shows for a frame -,
-     unless it is the echo of one this chart reported. */
-  const handedKey = initialView === undefined ? null : viewKey(initialView);
-  const lastHanded = useRef(handedKey);
-  const [echoes] = useState(() => new Echoes());
-  useLayoutEffect(() => {
-    if (initialView === undefined || handedKey === null || handedKey === lastHanded.current) return;
-    lastHanded.current = handedKey;
-    const echo = echoes.has(handedKey);
-    echoes.handed(handedKey);
-    if (!echo) scene.applyView(initialView);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- by content, not by identity
-  }, [handedKey]);
-
-  /* Every change of the view, once and whole, after the commit. The view the
-     chart starts with is where it starts, not a change - also once the parts
-     declared took out what does not occur here. */
+  /* Every change the reader makes, once and whole, after the commit. The view
+     the chart starts with is where it starts, not a change - also once the
+     parts declared took out what does not occur here. `setView` has noted its
+     view as reported already, so it is not one. */
   const key = viewKey(view);
-  const reported = useRef(key);
   useEffect(() => {
     if (reported.current === key) return;
     reported.current = key;
     if (!scene.acted) return;
-    echoes.reported(key);
     onViewChange?.(view);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once per change of the view, with that render's view and handler
   }, [key]);

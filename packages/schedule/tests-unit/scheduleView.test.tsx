@@ -1,10 +1,8 @@
 /* The schedule holds its own view (ADR-0047, component-view 07): a start
-   through `initialView`, applied again whenever one of other content is
-   handed in, every change reported once through `onViewChange`, and the
-   setters on what `useSchedule` hands back. jsdom lays out nothing, so every
+   through `initialView`, read once, every change the planner makes reported
+   once through `onViewChange`, and `setView` and the setters on what `useSchedule` hands back. jsdom lays out nothing, so every
    element is given the plot's size: 800 by 200 pixels. */
 
-import { useState } from "react";
 import { act, fireEvent, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useSchedule } from "../src";
@@ -73,40 +71,33 @@ describe("the span in view", () => {
   });
 });
 
-describe("a view handed in", () => {
-  it("applies when it differs in content from the last one, and the same again changes nothing", () => {
-    const { rerender } = render(<Plan initialView={{ domain: [at(6), at(14)] }} />);
+describe("a view set", () => {
+  it("goes to a whole view, and a view with the content already shown changes nothing", () => {
+    render(<Plan initialView={{ domain: [at(6), at(14)] }} />);
     act(() => hook.setDomain([at(9), at(10)]));
-    /* A new object of the same content: the planner's span stays. */
-    rerender(<Plan initialView={{ domain: [at(6), at(14)] }} />);
+    act(() => hook.setView({ domain: [at(9), at(10)] }));
     expect(handle!.visibleDomain()).toEqual([at(9), at(10)]);
-    rerender(<Plan initialView={{ domain: [at(7), at(13)], folded: ["hall"] }} />);
+    act(() => hook.setView({ domain: [at(7), at(13)], folded: ["hall"] }));
     expect(handle!.visibleDomain()).toEqual([at(7), at(13)]);
     expect(hook.view).toEqual({ domain: [at(7), at(13)], folded: ["hall"] });
   });
 
   it("puts back what it leaves out", () => {
-    const { rerender } = render(<Plan initialView={{ domain: [at(6), at(14)], folded: ["hall"] }} />);
-    rerender(<Plan initialView={{}} />);
+    render(<Plan initialView={{ domain: [at(6), at(14)], folded: ["hall"] }} />);
+    act(() => hook.setView({}));
     expect(hook.view).toEqual({});
     expect(handle!.visibleDomain()).toEqual([at(7.5), at(12)]);
   });
 
-  it("is not gone to when it is a view the schedule reported, handed back late; one from outside still applies", () => {
+  it("is not reported, and a later change of the planner's is", () => {
     const keep = vi.fn();
-    const { rerender } = render(<Plan initialView={{ domain: [at(6), at(14)] }} onViewChange={keep} />);
+    render(<Plan initialView={{ domain: [at(6), at(14)] }} onViewChange={keep} />);
     act(() => hook.setDomain([at(9), at(10)]));
+    expect(keep).toHaveBeenCalledTimes(1);
+    act(() => hook.setView({ domain: [at(7), at(13)] }));
+    expect(keep).toHaveBeenCalledTimes(1);
     act(() => hook.setDomain([at(9), at(11)]));
-    /* The application hands back the first report while the schedule is at the second: no jump back. */
-    rerender(<Plan initialView={{ domain: [at(9), at(10)] }} onViewChange={keep} />);
-    expect(hook.view).toEqual({ domain: [at(9), at(11)] });
-    rerender(<Plan initialView={{ domain: [at(9), at(11)] }} onViewChange={keep} />);
-    expect(hook.view).toEqual({ domain: [at(9), at(11)] });
-    /* Both came back; the first again is a view from outside now - a restore. */
-    rerender(<Plan initialView={{ domain: [at(9), at(10)] }} onViewChange={keep} />);
-    expect(hook.view).toEqual({ domain: [at(9), at(10)] });
-    rerender(<Plan initialView={{ domain: [at(7), at(13)] }} onViewChange={keep} />);
-    expect(hook.view).toEqual({ domain: [at(7), at(13)] });
+    expect(keep).toHaveBeenLastCalledWith({ domain: [at(9), at(11)] });
   });
 
   it("loses the groups no LaneGroup declares", () => {
@@ -180,16 +171,16 @@ describe("folding through the setters", () => {
 });
 
 describe("two schedules in step", () => {
-  let upper: Hook;
-  let lower: Hook;
+  let upperNow: Hook;
+  let lowerNow: Hook;
   const both = (one: Hook, other: Hook) => {
-    upper = one;
-    lower = other;
+    upperNow = one;
+    lowerNow = other;
   };
   function Two() {
-    const [shared, setShared] = useState<ScheduleView>({ domain: [at(6), at(14)] });
-    const upper = useSchedule({ initialView: shared, onViewChange: setShared });
-    const lower = useSchedule({ initialView: shared, onViewChange: setShared });
+    const start: ScheduleView = { domain: [at(6), at(14)] };
+    const upper: Hook = useSchedule({ initialView: start, onViewChange: (v) => lowerNow.setView(v) });
+    const lower: Hook = useSchedule({ initialView: start, onViewChange: (v) => upperNow.setView(v) });
     both(upper, lower);
     const { Schedule: Upper, Lane: UpperLane } = upper;
     const { Schedule: Lower, Lane: LowerLane } = lower;
@@ -208,10 +199,10 @@ describe("two schedules in step", () => {
   it("follow each other through the view, without a remount", () => {
     const { container } = render(<Two />);
     const plots = [...container.querySelectorAll("[data-schedule-plot]")];
-    act(() => upper.setDomain([at(9), at(11)]));
-    expect(lower.view).toEqual({ domain: [at(9), at(11)] });
-    act(() => lower.setDomain([at(10), at(12)]));
-    expect(upper.view).toEqual({ domain: [at(10), at(12)] });
+    act(() => upperNow.setDomain([at(9), at(11)]));
+    expect(lowerNow.view).toEqual({ domain: [at(9), at(11)] });
+    act(() => lowerNow.setDomain([at(10), at(12)]));
+    expect(upperNow.view).toEqual({ domain: [at(10), at(12)] });
     expect([...container.querySelectorAll("[data-schedule-plot]")]).toEqual(plots);
   });
 });

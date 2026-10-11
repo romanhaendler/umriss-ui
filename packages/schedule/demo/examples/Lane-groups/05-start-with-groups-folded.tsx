@@ -6,8 +6,8 @@ export const title = "Start with groups folded";
 export const lead = "`folded` in `initialView` folds groups when the schedule mounts and leaves the rest to the planner: Discovery starts folded, and its chevron opens it.";
 
 /* The schedule keeps the fold from here on. To store it, keep what
-   `onViewChange` reports; to steer it, use the setters `useSchedule` hands
-   back. */
+   `onViewChange` reports; to steer it, use `setView` and the setters
+   `useSchedule` hands back. `initialView` is read once. */
 
 const at = (hours: number, minutes = 0) => new Date(2026, 2, 17, hours, minutes).getTime();
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Tooltip, useChart, type ChartView } from "../../../src";
 
 /* Data from the operations world, written out here so the example runs on its own. */
@@ -98,7 +98,7 @@ function week(serviceId: string, step: number): MetricPoint[] {
 }
 
 export const title = "Keep charts in step";
-export const lead = "Charts with one `syncId` share the pointer; hand them one view through `initialView` and `onViewChange`, and a zoom in any of them zooms all.";
+export const lead = "Charts with one `syncId` share the pointer; send each one's `onViewChange` to the others' `setView`, and a zoom in any of them zooms all.";
 
 const IMAGES_WEEK = week("images", 5 * 60_000);
 
@@ -109,21 +109,29 @@ const CHANNELS = [
 ] as const;
 
 export default function CursorSync() {
-  // The view the three share: each hands it what it reports.
-  const [view, setView] = useState<ChartView>({});
+  // The three share a view: each sends the others what the reader did to it.
+  const [peers] = useState(() => new Map<string, (view: ChartView) => void>());
   return (
     <div>
       {/* Each plot begins where its y axis ends: labels of one width - three
           figures here - keep the crosshairs in one column. */}
       {CHANNELS.map((c) => (
-        <Channel key={c.name} channel={c} view={view} onViewChange={setView} />
+        <Channel key={c.name} channel={c} peers={peers} />
       ))}
     </div>
   );
 }
 
-function Channel({ channel: c, view, onViewChange }: { channel: (typeof CHANNELS)[number]; view: ChartView; onViewChange: (view: ChartView) => void }) {
-  const { Chart, XAxis, YAxis, Line } = useChart(IMAGES_WEEK, { initialView: view, onViewChange });
+function Channel({ channel: c, peers }: { channel: (typeof CHANNELS)[number]; peers: Map<string, (view: ChartView) => void> }) {
+  const { Chart, XAxis, YAxis, Line, setView } = useChart(IMAGES_WEEK, {
+    onViewChange: (view) => {
+      for (const [name, goTo] of peers) if (name !== c.name) goTo(view);
+    },
+  });
+  useEffect(() => {
+    peers.set(c.name, setView);
+    return () => void peers.delete(c.name);
+  }, [peers, c.name, setView]);
   return (
     <Chart height={140} syncId="images" ariaLabel={`Image service ${c.name} over last week`}>
       <XAxis value="t" time domain="data" zoomable />

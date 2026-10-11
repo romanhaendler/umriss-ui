@@ -19,11 +19,16 @@ reports every change through `onViewChange`, always with the whole view.** The
 data stays the application's (ADR-0023); how it is being looked at is the
 component's. In particular:
 
-- **A view handed in is applied when it differs in content from the last one
-  handed in**; the same view again changes nothing. Two charts or two
-  schedules stay in step by handing each other what they report, without a
-  remount that would lose the **Active point**. A new `key` still restarts a
-  component; it is no longer needed for that.
+- **`initialView` is read once**, when the hook first runs; a different value
+  on a later render is ignored, as React ignores a changed `defaultValue`. To
+  go to a view later the hook hands back `setView(view)`, which applies a whole
+  view beside the setters for its parts. `setView` is not reported through
+  `onViewChange`: that reports what the reader did. So two charts or two
+  schedules stay in step by `onViewChange: (v) => other.setView(v)` in both
+  directions, without a remount that would lose the **Active point**, and
+  without answering each other; a `setView` with the content already shown
+  changes nothing. A new `key` still restarts a component; it is no longer
+  needed for that.
 - **There are no controlled pairs for view state.** No `hidden` on a series,
   no `collapsedGroups`, no `onDomainChange` beside the view: one way in, one
   way out. A selection is not view state (CONTEXT.md, **View**) and keeps its
@@ -55,6 +60,15 @@ component's. In particular:
   would have two sources.
 - **A start applied once, restarted by `key`** (the table's way). Simple to
   reason about; it makes keeping two components in step a remount per change.
+  That objection does not hold once there is a setter, and it is the option
+  taken, with `setView`.
+- **A view handed in, re-applied when its content differs** (the first form of
+  this decision). An application that stores the reported view hands it back a
+  frame late, and a pan has moved on by then; to tell that echo from an
+  instruction the hooks guessed by the clock, a view equal to a recent report
+  within a second being taken as the component's own. A start read once and
+  `setView` need no guess: what the reader did is reported, what the
+  application says is not.
 
 ## Consequences
 

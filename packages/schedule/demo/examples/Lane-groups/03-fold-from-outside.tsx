@@ -4,7 +4,7 @@ import type { Subtask, Task } from "../../../src";
 
 export const title = "Fold groups from outside";
 
-export const lead = "`foldAll`, `unfoldAll` and `toggleGroup` fold from outside, and `view.folded` says what is folded - start from `initialView`, keep what `onViewChange` reports.";
+export const lead = "`foldAll`, `unfoldAll` and `toggleGroup` fold from outside, and `view.folded` says what is folded - start from `initialView`, go to a whole view with `setView`, keep what `onViewChange` reports.";
 
 /* The fold is part of the schedule's view, not of the plan: no intent, and
    nothing the application has to hold for the chevrons to work. */

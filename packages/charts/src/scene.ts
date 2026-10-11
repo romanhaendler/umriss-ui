@@ -3446,7 +3446,7 @@ export class ChartScene {
 
      How the reader is looking: which series are hidden and which span each
      zoomable x axis shows. The scene holds it and asks only here; `useChart`
-     takes a start through `initialView` and reads it through `getView`. */
+     takes a start through `initialView`, goes to a view through `applyView` and reads it through `getView`. */
 
   /** Held, and drawn: the span each zoomable x axis shows, by id - also of
       an axis not declared at the moment, which gets its span back. */
@@ -3458,7 +3458,7 @@ export class ChartScene {
       `useChart` reads it - a new object only when its content changed. */
   private reportedView: ChartView;
   private readonly viewListeners = new Set<() => void>();
-  /** Whether the reader, a setter or a view handed in has changed the view
+  /** Whether the reader, a setter or `setView` has changed the view
       yet. Until then a change is the start losing what does not occur here -
       where the chart starts, not a change to report. */
   private actedOn = false;
@@ -3484,7 +3484,7 @@ export class ChartScene {
 
   getView = (): ChartView => this.reportedView;
 
-  /** Goes to a view handed in; what it leaves out goes back to its default -
+  /** Goes to a whole view (`setView`); what it leaves out goes back to its default -
       also the span or the hidden name of a part not declared at the moment,
       which the view reported does not show. */
   applyView(view: ChartView): void {

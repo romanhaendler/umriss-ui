@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { Tooltip, useChart, type ChartView } from "../../../src";
+import { Tooltip, useChart, type ChartParts } from "../../../src";
 import { GERMAN_CHARTS_WORDING } from "../../../src/wording/de";
 
 /* Data from the operations world, written out here so the example runs on its own. */
@@ -104,10 +103,9 @@ export const lead = "A chart with a `Tooltip` is one tab stop: the keys walk its
 const SEARCH_WEEK = week("search", 5 * 60_000);
 
 export default function KeyboardAndScreenReader() {
-  // The two charts zoom together: each hands the other what it reports.
-  const [view, setView] = useState<ChartView>({});
-  const english = useChart(SEARCH_WEEK, { initialView: view, onViewChange: setView });
-  const german = useChart(SEARCH_WEEK, { initialView: view, onViewChange: setView });
+  // The two charts zoom together: each sends the other what the reader did to it.
+  const english: ChartParts<MetricPoint> = useChart(SEARCH_WEEK, { onViewChange: (v) => german.setView(v) });
+  const german: ChartParts<MetricPoint> = useChart(SEARCH_WEEK, { onViewChange: (v) => english.setView(v) });
   const { Chart, XAxis, YAxis, Line } = english;
   const { Chart: Diagramm } = german;
   return (

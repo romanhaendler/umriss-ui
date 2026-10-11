@@ -3,9 +3,9 @@
 /* Zoom and pan through the chart's view (component-view 01, ADR-0047): only
    where the x axis is `zoomable`, by gesture and by key (charts-a11y 04),
    within the zoom limits, reported whole through `onViewChange`, and two
-   charts kept in step by handing each other what they report. */
+   charts kept in step through `onViewChange` and `setView`. */
 
-import { act, useState } from "react";
+import { act, useRef } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Tooltip, useChart, type ChartParts, type ChartView, type ZoomLimits } from "../src";
 import { focusPlot, frame, plotOf, press as pressOn, renderChart, sizePlot, tooltipOf } from "./renderChart";
@@ -191,31 +191,20 @@ describe("The view on the hook", () => {
     expect(Object.keys(views[0]?.domains ?? {})).toEqual(["x"]);
     expect(views[0]?.hidden).toBeUndefined();
   });
-
-  it("resets the span of an axis not zoomable at the moment where a view handed in leaves it out", async () => {
-    let parts: (ChartParts<Row> & { view: ChartView }) | null = null;
-    const seen = (p: ChartParts<Row> & { view: ChartView }) => (parts = p);
-    const r = await renderChart(<Zoomable zoomable={false} initialView={{ domains: { x: [40, 60] } }} seen={seen} />);
-    unmount = r.unmount;
-    expect(parts!.view).toEqual({});
-    await r.rerender(<Zoomable zoomable={false} initialView={{}} seen={seen} />);
-    await r.rerender(<Zoomable initialView={{}} seen={seen} />);
-    expect(parts!.view).toEqual({});
-  });
 });
 
 describe("Two charts in step", () => {
   function Pair({ log }: { log: { a: ChartView[]; b: ChartView[] } }) {
-    const [shared, setShared] = useState<ChartView>({});
+    const parts = useRef<{ a?: ChartParts<Row>; b?: ChartParts<Row> }>({});
     return (
       <>
-        <Zoomable initialView={shared} onViewChange={(v) => (log.a.push(v), setShared(v))} />
-        <Zoomable initialView={shared} onViewChange={(v) => (log.b.push(v), setShared(v))} />
+        <Zoomable seen={(p) => (parts.current.a = p)} onViewChange={(v) => (log.a.push(v), parts.current.b?.setView(v))} />
+        <Zoomable seen={(p) => (parts.current.b = p)} onViewChange={(v) => (log.b.push(v), parts.current.a?.setView(v))} />
       </>
     );
   }
 
-  it("zoom together through a shared view, and the echo changes nothing", async () => {
+  it("zoom together through setView, and the other reports nothing", async () => {
     const log = { a: [] as ChartView[], b: [] as ChartView[] };
     const r = await renderChart(<Pair log={log} />);
     unmount = r.unmount;
@@ -226,41 +215,22 @@ describe("Two charts in step", () => {
     await pressOn(a!, "ArrowLeft", { shiftKey: true });
     await frame();
     expect(log.a.map((v) => v.domains?.x?.[0])).toEqual([-10, -20]);
-    // B follows to where A stands, and A is not handed its own report back.
-    expect(log.b.at(-1)).toEqual(log.a.at(-1));
+    // B stands where A stands, and A is not answered.
+    expect(log.b).toEqual([]);
     await act(async () => plotOf(b!).focus());
     await pressOn(b!, "End");
     expect(tooltipOf(b!)).toContain("80");
   });
 
-  it("ignores the late echo of its own report, and takes it again once it has passed", async () => {
-    const views: ChartView[] = [];
-    const onViewChange = (v: ChartView) => views.push(v);
-    const r = await renderChart(<Zoomable initialView={{}} onViewChange={onViewChange} />);
-    unmount = r.unmount;
-    await focusPlot(r.host);
-    await press(r.host, "ArrowLeft", true);
-    await press(r.host, "ArrowLeft", true);
-    const [first, second] = views;
-    // The first report comes back while the chart already stands at the second.
-    await r.rerender(<Zoomable initialView={first} onViewChange={onViewChange} />);
-    await press(r.host, "End");
-    expect(tooltipOf(r.host)).toContain("80");
-    await r.rerender(<Zoomable initialView={second} onViewChange={onViewChange} />);
-    // Handed in once more, the first is the application's own wish.
-    await r.rerender(<Zoomable initialView={first} onViewChange={onViewChange} />);
-    await press(r.host, "End");
-    expect(tooltipOf(r.host)).toContain("90");
-  });
-
-  it("keeps the Active point across a view handed in", async () => {
-    const r = await renderChart(<Zoomable initialView={{}} />);
+  it("keeps the Active point across setView", async () => {
+    let parts: ChartParts<Row> | null = null;
+    const r = await renderChart(<Zoomable seen={(p) => (parts = p)} />);
     unmount = r.unmount;
     await focusPlot(r.host);
     await press(r.host, "ArrowLeft");
     await press(r.host, "ArrowLeft");
     expect(tooltipOf(r.host)).toContain("8");
-    await r.rerender(<Zoomable initialView={{ domains: { x: [50, 90] } }} />);
+    await act(async () => parts?.setView({ domains: { x: [50, 90] } }));
     expect(tooltipOf(r.host)).toContain("8");
     await press(r.host, "ArrowLeft");
     expect(tooltipOf(r.host)).toContain("7");
