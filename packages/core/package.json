@@ -63,7 +63,7 @@
     "build:demo": "vite build --config vite.demo.config.ts",
     "typecheck": "tsc --noEmit",
     "typecheck:demo": "pnpm run props && tsc --noEmit -p tsconfig.demo.json",
-    "check:site": "pnpm run props && pnpm run readme",
+    "check:site": "pnpm run props -- --check && pnpm run readme",
     "preview:demo": "vite preview --config vite.demo.config.ts --port 4173 --strictPort",
     "test:unit": "vitest run",
     "prepublishOnly": "pnpm run typecheck && pnpm run build && pnpm run check:dist",

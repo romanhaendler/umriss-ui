@@ -33,6 +33,7 @@ import { apiHtml, apiMarkdown, apiSection, propsOnPage, PROPS_ON_PAGE_TITLE, fen
 import { referenceHtml, referenceMarkdown, type ReferenceTable } from "./referenceTable.ts";
 import { adrLinks } from "./props.ts";
 import { exportedDeclarations } from "./exportDocs.ts";
+import { apiMd } from "./apiMd.ts";
 import { apiIndexHtml, apiIndexMarkdown, apiIndexModel, linkedNames, type ApiIndexModel, type Mention } from "./apiIndex.ts";
 import { linkAdrs, linkApiNames, linkReferences, outlineTexts } from "./references.ts";
 import { exportEntries, plain, propEntries, referenceEntries, searchEntries, type PropsOfPage, type SearchEntry } from "../search.ts";
@@ -639,6 +640,14 @@ export function generateLlms(given: LlmsJob): SitePage[] {
   const indexFile = join(dirname(indexPath), "api-index.json");
   if (apiIndex !== undefined) writeFileSync(indexFile, `${JSON.stringify(apiIndex)}\n`, "utf8");
   else rmSync(indexFile, { force: true });
+  /* `API.md`, checked in: written here; with `--check` (`pnpm check:site`) a stale one fails instead. */
+  const apiFile = join(job.packageDir, "API.md");
+  const apiText = apiMd({ packageName: JSON.parse(readFileSync(join(job.packageDir, "package.json"), "utf8")).name, exports: exportedDeclarations(job.packageDir), entries: job.tables });
+  if (!process.argv.includes("--check")) writeFileSync(apiFile, apiText, "utf8");
+  else if (!existsSync(apiFile) || readFileSync(apiFile, "utf8") !== apiText) {
+    throw new Error(`\`${apiFile}\` is out of date. Rewrite it with \`pnpm --filter ${JSON.parse(readFileSync(join(job.packageDir, "package.json"), "utf8")).name} props\` and commit it.`);
+  }
+  process.stdout.write(`API.md: ${Math.round(Buffer.byteLength(apiText) / 1024)} kB.\n`);
   process.stdout.write(`llms-full.md: ${Math.round(Buffer.byteLength(full) / 1024)} kB.\n`);
   return pages;
 }
