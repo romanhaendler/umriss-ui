@@ -29,6 +29,10 @@ interface was still expected to move before `0.3.0`.
 
 ---
 
+## Unreleased
+
+---
+
 ## 0.15.0 – A chosen hit, a histogram, and zoom keys without a tooltip (Oct. 2026)
 
 ### Changed

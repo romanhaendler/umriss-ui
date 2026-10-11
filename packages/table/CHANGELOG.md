@@ -22,6 +22,10 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
+## Unreleased
+
+---
+
 ## 0.15.0 – A reason when snoozing (Oct. 2026)
 
 Needs `@umriss-ui/core` 0.32; the peer range moves to `^0.32.0`.
