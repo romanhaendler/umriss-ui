@@ -42,7 +42,7 @@ export function frameLayout({
 
   const detail = registry.detail;
   const actions = registry.hasRowActions() ? registry.actions.ordered() : [];
-  const virtual = hook.companion.virtual;
+  const virtual = hook.tableState.virtual;
 
   /* Grouped (ADR-0029): the innermost grouped column or group key stands first
      as the span; the outer grouped columns leave the body - their value stands

@@ -34,7 +34,7 @@ import type { Formats } from "@umriss-ui/core";
 import type { RowFilter } from "./rowFilter";
 import { tableModel } from "./model/tableModel";
 import type { ModelColumn, TableProjection, TableInput } from "./model/tableModel";
-import type { Companion } from "./model/tableState";
+import type { TableState } from "./model/tableState";
 import type { TableSnapshot } from "./types";
 import { warnOnce } from "./dev";
 import { columnKind, sortValue } from "./values";
@@ -119,7 +119,7 @@ export interface HookSnapshot {
   admitted: readonly unknown[];
   /** The columns the hook calculated its model with. */
   modelColumns: readonly ModelColumn<unknown>[];
-  companion: Companion<unknown, string>;
+  tableState: TableState<unknown, string>;
   filter: ((row: unknown) => boolean) | undefined;
   /** What the table is grouped by, as the model takes it - absent when not. */
   grouping: TableInput<unknown>["grouping"];
@@ -640,7 +640,7 @@ export class Registry {
       holding all the filtered rows. */
   projection(): TableProjection<unknown> {
     const projection = this.computedProjection();
-    if (this.paginates() || this.hook!.companion.virtual) return projection;
+    if (this.paginates() || this.hook!.tableState.virtual) return projection;
     if (this.unpaged?.from !== projection) {
       this.unpaged = {
         from: projection,
@@ -655,7 +655,7 @@ export class Registry {
   private computedProjection(): TableProjection<unknown> {
     const hook = this.hook!;
     const columns = this.modelColumns(hook.rows, hook.formats);
-    const b = hook.companion;
+    const b = hook.tableState;
     if (columns === hook.modelColumns) {
       return b;
     }

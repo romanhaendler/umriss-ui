@@ -90,7 +90,7 @@ export function TableToolbar({
             : snapshot.server
               ? /* The server counts the matches only; a total beside them would be a second request. */
                 wording.entries(snapshot.rowCount, formats.count(snapshot.rowCount))
-              : wording.filteredOfTotal(formats.count(snapshot.filtered.length), formats.count(hook.companion.total ?? hook.admitted.length))}
+              : wording.filteredOfTotal(formats.count(snapshot.filtered.length), formats.count(hook.tableState.total ?? hook.admitted.length))}
         </span>
         {restricted && (
           <Button size={size} variant="ghost" onClick={() => resetSearchAndFilters(snapshot)}>

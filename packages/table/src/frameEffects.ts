@@ -126,6 +126,6 @@ export function useCutValueWarnings(tableRef: TableRef) {
 export function useVirtualPitch(registry: Registry, tableRef: TableRef) {
   useLayoutEffect(() => {
     const head = tableRef.current?.tHead?.rows[0]?.getBoundingClientRect().height;
-    if (head && registry.hook?.companion.virtual) registry.hook.companion.setPitch(head);
+    if (head && registry.hook?.tableState.virtual) registry.hook.tableState.setPitch(head);
   });
 }

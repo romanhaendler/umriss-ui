@@ -69,7 +69,7 @@ export function Frame({ registry, props }: { registry: Registry; props: TablePro
 
   /* Regrouping and folding move the lines that stay; a virtual window does
      not - its rows come and go with the scroll. */
-  const moving = registry.hook && !registry.hook.companion.virtual ? registry.hook.publicSnapshot : null;
+  const moving = registry.hook && !registry.hook.tableState.virtual ? registry.hook.publicSnapshot : null;
   useLineMotion(tableRef, moving ? `${moving.grouping.join("|")}#${moving.folded.join("|")}` : "");
 
   const hook = registry.hook;
