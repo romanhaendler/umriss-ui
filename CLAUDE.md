@@ -21,10 +21,15 @@ The five canonical triage roles, each label string equal to its name. See `docs/
 
 Single-context: one `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
 
+## What exists
+
+Before stating what a package can or cannot do, read its `packages/<pkg>/API.md`: every export, and the props, options and returns of each component and hook, one line each.
+Generated and checked in; do not edit it, and do not infer absence from `types.ts` alone.
+
 ## Checking a change
 
 - `pnpm check <package>`: shrink guard, eslint, `typecheck` and `test:unit` of one package (`core`, `charts`, `table`, `schedule`, `calculation`, `demo`); without a name, all of them. Stops at the first failure.
-- `pnpm check:site`: the demo gates (props, core's README table).
+- `pnpm check:site`: the demo gates (props, core's README table, and that each `packages/<pkg>/API.md` is current; `pnpm --filter @umriss-ui/<pkg> props` rewrites it).
 - `pnpm typecheck`: `typecheck` and `typecheck:demo` of every package.
 - `pnpm test:visual:quick <package>`: the cheap layout checks (tests tagged `@quick`) of one demo, light only, about a minute after the build.
 - `pnpm test:visual`: the full visual suite; `DEMOS=table,charts` limits servers and projects to those packages.
