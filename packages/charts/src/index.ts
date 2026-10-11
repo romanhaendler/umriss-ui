@@ -25,15 +25,9 @@ export { assess, verdictWeight } from "./limit";
 export type { Assessment, Limit, LimitSet, Side, Severity, Verdict } from "./limit";
 export {
   controlLimits,
-  sigmaFromLimit,
   zones,
-  ruleOutlier,
-  ruleRun,
-  ruleTrend,
-  ruleTwoOfThree,
   violations,
   violatedIndices,
-  defaultRules,
 } from "./controlLimits";
 export type {
   ControlLimits,
@@ -45,7 +39,7 @@ export type {
 } from "./controlLimits";
 export { bin } from "./bin";
 export type { Bin, BinOptions } from "./bin";
-export { pareto, defaultOptions as paretoDefaults } from "./pareto";
+export { pareto } from "./pareto";
 export type { ParetoSettings } from "./pareto";
 export type {
   ParetoEntry,
@@ -56,12 +50,9 @@ export type {
 export {
   workingCalendar,
   calendarFrom,
-  toWorkingTime,
   toWallClock,
-  mapSeries,
   removedIntervals,
   breaks,
-  workingTicks,
   workingTimeTicks,
   timeStep,
   SECOND,

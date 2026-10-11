@@ -2173,7 +2173,7 @@ export class ChartScene {
         // A state series does not explain itself but its colours. "Line 4" next to
         // a grey box says nothing; the reader wants to know what orange means.
         config.states.forEach((z, k) => {
-          const key = `${z.label} ${z.color}`;
+          const key = `${z.label}\0${z.color}`;
           const known = seen.get(key);
           if (known !== undefined) {
             if (!known.seriesIds.includes(entry.order)) known.seriesIds.push(entry.order);
@@ -4044,8 +4044,4 @@ export class ChartScene {
 
   readonly getHoverSnapshot = (): HoverSnapshot => this.hoverSnapshot;
   readonly getHoverServerSnapshot = (): HoverSnapshot => EMPTY_HOVER_SNAPSHOT;
-
-  /** Class name of the measuring span for tick labels - keeps the CSS and the
-      layout in step. */
-  static readonly classTick = CLASS_TICK;
 }
