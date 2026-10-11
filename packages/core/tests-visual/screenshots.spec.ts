@@ -20,9 +20,9 @@
    The baseline file names stay as they are: the pictures belong to the ticket
    that rebuilds them. */
 
-import { test, expect } from "@playwright/test";
+import { test, expect, type Locator } from "@playwright/test";
 import { CONFIGURATOR_PAGES, EXAMPLE_ADDRESSES, PAGES, SCENARIO_IDS } from "./pages";
-import { open, openExample, openScenario } from "./navigation";
+import { aloneStage, around, open, openExample, openScenario } from "./navigation";
 
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(new Date("2026-03-17T10:30:00"));
@@ -55,8 +55,7 @@ for (const pageId of CONFIGURATOR_PAGES) {
 for (const scenarioId of SCENARIO_IDS) {
   test(`Scenario ${scenarioId}`, { tag: "@quick" }, async ({ page }, testInfo) => {
     await openScenario(page, scenarioId);
-    const target = page.locator(`[data-scenario="${scenarioId}"] .scenarioStage`);
-    await target.scrollIntoViewIfNeeded();
+    const target = await aloneStage(page, scenarioId);
     await expect(target).toHaveScreenshot(`scenario-${scenarioId}-${testInfo.project.name}.png`);
   });
 }
@@ -72,11 +71,15 @@ for (const { pageId, exampleId, name } of EXAMPLE_ADDRESSES) {
   });
 }
 
+/** The entrance has come to rest (settled, not finished: a cancelled one is no reason to fail). */
+const settled = (pane: Locator) =>
+  pane.evaluate((el) => Promise.allSettled(el.ownerDocument.getAnimations().map((a) => a.finished)).then(() => undefined));
+
 /* The command palette's window, in both themes.
 
    It is not an example and cannot be one: it lies in the top layer and not in
    the page, and the example `befehle` therefore shows the trigger, like every
-   other overlay example. What is photographed here is the whole viewport –
+   other overlay example. What is photographed here is the window with a margin of what lies behind it –
    otherwise the translucent material cannot be seen at all, because it consists
    of what lies behind it.
 
@@ -93,8 +96,11 @@ test("The command palette's window", async ({ page }, testInfo) => {
   await page.keyboard.press("ControlOrMeta+k");
   const field = page.getByRole("combobox", { name: "Search umriss-ui" });
   await field.fill("dtp");
-  await expect(page.getByRole("dialog").getByRole("option").first()).toBeVisible();
-  await expect(page).toHaveScreenshot(`palette-window-${testInfo.project.name}.png`);
+  const window = page.getByRole("dialog");
+  await expect(window.getByRole("option").first()).toBeVisible();
+  const pane = window.locator(":scope > div").first();
+  await settled(pane);
+  await expect(page).toHaveScreenshot(`palette-window-${testInfo.project.name}.png`, { clip: await around(page, pane) });
 });
 
 /* The filled resting state that `restingItems` makes possible.
@@ -106,12 +112,15 @@ test("The command palette's window in the resting state", async ({ page }, testI
   await openExample(page, "commandpalette", "commands");
   await page.getByRole("button", { name: "Open the palette" }).click();
   await expect(page.getByRole("option")).toHaveCount(7);
-  await expect(page).toHaveScreenshot(`palette-resting-${testInfo.project.name}.png`);
+  await settled(page.getByRole("dialog").locator(":scope > div").first());
+  await expect(page).toHaveScreenshot(`palette-resting-${testInfo.project.name}.png`, {
+    clip: await around(page, page.getByRole("dialog").locator(":scope > div").first()),
+  });
 });
 
 /* The drawer standing open, at both edges (core-foundations 03). The example
    loop photographs its examples closed - a button - and the sheet at the edge
-   is the one thing about it that is appearance. The whole viewport, because
+   is the one thing about it that is appearance. The drawer with a margin, because
    the drawer is its edge and the scrim over the page behind; after the
    entrance has come to rest - a picture in the middle of a transition would test
    timing rather than appearance. */
@@ -130,7 +139,9 @@ for (const [example, button] of [
     await drawer.evaluate((el) =>
       Promise.allSettled(el.ownerDocument.getAnimations().map((a) => a.finished)).then(() => undefined),
     );
-    await expect(page).toHaveScreenshot(`drawer-${example}-${testInfo.project.name}.png`);
+    await expect(page).toHaveScreenshot(`drawer-${example}-${testInfo.project.name}.png`, {
+      clip: await around(page, drawer.locator(":scope > div").first()),
+    });
   });
 }
 

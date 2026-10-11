@@ -34,6 +34,19 @@ export function navigation(addressOf: (pageId: string, exampleId?: string) => st
   };
 }
 
+/** The stage of a scenario, photographable: the other scenarios are hidden.
+
+    All scenarios stand on one page, so a neighbour's height moves the stage
+    to a fractional offset and every glyph edge of its picture with it. Alone
+    on the page, from the top, the stage stands where its own content puts it. */
+export async function aloneStage(page: Page, scenarioId: string): Promise<Locator> {
+  await page.addStyleTag({ content: `.scenario:not([data-scenario="${scenarioId}"]) { display: none; }` });
+  await page.evaluate(() => window.scrollTo(0, 0));
+  const stage = page.locator(`[data-scenario="${scenarioId}"] .scenarioStage`);
+  await stage.scrollIntoViewIfNeeded();
+  return stage;
+}
+
 /** Waits until the jump marker has run out.
 
     The marker is an animation. Whoever measures while it runs measures an

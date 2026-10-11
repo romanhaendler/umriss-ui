@@ -10,7 +10,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { checkForcedColours } from "@umriss-ui/demo/checks/forcedColors";
 import { EXAMPLE_ADDRESSES, SAMPLE } from "./pages";
-import { open, openExample, standstill } from "./navigation";
+import { around, open, openExample, standstill } from "./navigation";
 
 checkForcedColours({ open, openExample, examples: EXAMPLE_ADDRESSES, sample: SAMPLE });
 
@@ -92,7 +92,9 @@ test("A combobox's cursor under forced colours", async ({ page }, testInfo) => {
   await page.keyboard.press("ArrowDown");
   await expect(page.getByRole("option").nth(1)).toBeVisible();
   await standstill(page);
-  await expect(page).toHaveScreenshot(`forced-combobox-cursor-${testInfo.project.name}.png`);
+  await expect(page).toHaveScreenshot(`forced-combobox-cursor-${testInfo.project.name}.png`, {
+    clip: await around(page, page.getByRole("listbox")),
+  });
 });
 
 test("A chosen range under forced colours", async ({ page }, testInfo) => {
@@ -101,7 +103,8 @@ test("A chosen range under forced colours", async ({ page }, testInfo) => {
   await trigger.click();
   await page.getByRole("button", { name: "Next 2 weeks" }).click();
   await trigger.click();
-  await expect(page.getByRole("dialog")).toBeVisible();
+  const panel = page.getByRole("dialog");
+  await expect(panel).toBeVisible();
   await standstill(page);
-  await expect(page).toHaveScreenshot(`forced-range-${testInfo.project.name}.png`);
+  await expect(page).toHaveScreenshot(`forced-range-${testInfo.project.name}.png`, { clip: await around(page, panel) });
 });
