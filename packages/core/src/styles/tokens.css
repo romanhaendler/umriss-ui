@@ -50,7 +50,6 @@
     /* ---- Accent (petrol) - interactive things only ---- */
     --u-color-accent: light-dark(#0e7d72, #17a292);
     --u-color-accent-hover: light-dark(#0a685f, #1cb5a3);
-    --u-color-accent-active: light-dark(#085a52, #128d7f);
     --u-color-accent-subtle: light-dark(#e9f4f2, #142e2b);
     --u-color-accent-subtle-pressed: light-dark(#d5e9e6, #1b3d39);
     --u-color-accent-text: light-dark(#0b6a61, #4cc4b5);

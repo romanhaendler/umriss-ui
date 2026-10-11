@@ -10,7 +10,7 @@ import { rangeDays, defaultPresets } from "./range";
 import { MonthPair, PresetColumn } from "./RangePanel";
 import { RangeTrigger, naturalChars } from "./RangeTrigger";
 import type { DateRange, RangePreset } from "./range";
-import { dstChoiceFor, resolveLocalTime, pad2 } from "./time";
+import { dstChoiceFor, resolveFields, pad2 } from "./time";
 import type { DstStatus, DstChoice } from "./time";
 import { TimeField } from "./TimeField";
 import { rangeFromDays, order, orderByDay } from "./contract";
@@ -45,21 +45,6 @@ const timeValuesOf = (d: Date, withSeconds: boolean): TimeValues => ({
   minute: pad2(d.getMinutes()),
   second: pad2(withSeconds ? d.getSeconds() : 0),
 });
-
-/* Outside the component, because they depend only on their arguments - closed
-   over inside the component, the list of memo dependencies hung on a function
-   that came into being anew on every render. */
-const resolve = (day: Date | null, time: TimeValues, withSeconds: boolean): DstStatus | null => {
-  if (!day) return null;
-  return resolveLocalTime(
-    day.getFullYear(),
-    day.getMonth(),
-    day.getDate(),
-    Math.min(23, Number.parseInt(time.hour, 10) || 0),
-    Math.min(59, Number.parseInt(time.minute, 10) || 0),
-    withSeconds ? Math.min(59, Number.parseInt(time.second, 10) || 0) : 0,
-  );
-};
 
 const resolveChoice = (status: DstStatus | null, choice: DstChoice): Date | null => {
   if (!status) return null;
@@ -252,8 +237,8 @@ export const DateTimeRangePicker = forwardRef<HTMLSpanElement, DateTimeRangePick
     [allDay, withSeconds, timeTo],
   );
 
-  const statusFrom = useMemo(() => resolve(dateFrom, effectiveFrom, withSeconds), [dateFrom, effectiveFrom, withSeconds]);
-  const statusTo = useMemo(() => resolve(dateTo, effectiveToTime, withSeconds), [dateTo, effectiveToTime, withSeconds]);
+  const statusFrom = useMemo(() => resolveFields(dateFrom, effectiveFrom, withSeconds), [dateFrom, effectiveFrom, withSeconds]);
+  const statusTo = useMemo(() => resolveFields(dateTo, effectiveToTime, withSeconds), [dateTo, effectiveToTime, withSeconds]);
 
   const resultFrom = useMemo(() => resolveChoice(statusFrom, choiceFrom), [statusFrom, choiceFrom]);
   const resultTo = useMemo(() => resolveChoice(statusTo, choiceTo), [statusTo, choiceTo]);

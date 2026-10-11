@@ -253,7 +253,6 @@ export const GERMAN_WORDING: Wording = {
   freshnessStale: "Veraltet",
   freshnessDisconnected: "Keine Verbindung",
   asOfAgo: (duration) => `Stand: ${duration}`,
-  asOfUnknown: "Stand unbekannt",
 
   close: "Schließen",
   closeToast: "Meldung schließen",

@@ -4,7 +4,7 @@ import { Button } from "../Button";
 import { Popover } from "../Popover";
 import { useFormField } from "../FormField";
 import { Calendar, startOfMonth } from "./Calendar";
-import { dstChoiceFor, resolveLocalTime, pad2, truncateInstant } from "./time";
+import { dstChoiceFor, resolveFields, pad2, truncateInstant } from "./time";
 import type { DstStatus, DstChoice } from "./time";
 import { RangeTrigger, naturalChars } from "./RangeTrigger";
 import { TimeField } from "./TimeField";
@@ -12,14 +12,6 @@ import styles from "./DatePicker.module.css";
 import { useControlSize } from "../../lib/controlSize";
 import { useFormats, useWording } from "../../lib/language";
 import { ClockGlyph } from "../../lib/glyphs";
-
-/* The time and daylight-saving logic lies in ./time, the time field in
-   ./TimeField. Passed on here so that existing import paths
-   ("./DateTimePicker") resolve unchanged. */
-export { resolveLocalTime, offsetLabel, pad2 } from "./time";
-export type { DstStatus } from "./time";
-export { TimeField } from "./TimeField";
-export type { TimeFieldProps } from "./TimeField";
 
 /* ------------------------------------------------------------------ */
 /* DateTimePicker                                                      */
@@ -102,7 +94,6 @@ export const DateTimePicker = forwardRef<HTMLSpanElement, DateTimePickerProps>(f
 
   const triggerRef = useRef<HTMLButtonElement>(null);
   const wrapRef = useRef<HTMLSpanElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
   const hourRef = useRef<HTMLInputElement>(null);
   const minuteRef = useRef<HTMLInputElement>(null);
   const secondRef = useRef<HTMLInputElement>(null);
@@ -130,14 +121,7 @@ export const DateTimePicker = forwardRef<HTMLSpanElement, DateTimePickerProps>(f
 
   const status: DstStatus | null = useMemo(() => {
     if (!day) return null;
-    return resolveLocalTime(
-      day.getFullYear(),
-      day.getMonth(),
-      day.getDate(),
-      Math.min(23, Number.parseInt(hour, 10) || 0),
-      Math.min(59, Number.parseInt(minute, 10) || 0),
-      withSeconds ? Math.min(59, Number.parseInt(second, 10) || 0) : 0,
-    );
+    return resolveFields(day, { hour, minute, second }, withSeconds);
   }, [day, hour, minute, second, withSeconds]);
 
   const result: Date | null = useMemo(() => {
@@ -197,7 +181,7 @@ export const DateTimePicker = forwardRef<HTMLSpanElement, DateTimePickerProps>(f
         id={panelId}
         className={styles.panel}
       >
-          <div ref={panelRef}>
+          <div>
             <Calendar
               autoFocus
               view={view}

@@ -21,8 +21,8 @@ export interface DatePickerProps
   extends Omit<HTMLAttributes<HTMLSpanElement>, "onChange" | "defaultValue"> {
   /** The day, as a `Date` on local midnight; `null` means none. */
   value: Date | null;
-  /** Runs as soon as a day is settled - on a click in the grid, on "Today", on
-      clearing (`null`) and on a valid input. Every one of these ways hands out
+  /** Runs as soon as a day is settled - on a click in the grid, on "Today" and
+      on clearing (`null`). Every one of these ways hands out
       local midnight; there is none that delivers a time along with it. */
   onChange: (date: Date | null) => void;
   /** What stands in the empty field. */
@@ -74,7 +74,6 @@ export const DatePicker = forwardRef<HTMLSpanElement, DatePickerProps>(function 
   const [active, setActive] = useState<Date>(() => value ?? new Date());
   const triggerRef = useRef<HTMLButtonElement>(null);
   const wrapRef = useRef<HTMLSpanElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
   const panelId = useId();
 
   const openPanel = () => {
@@ -131,7 +130,7 @@ export const DatePicker = forwardRef<HTMLSpanElement, DatePickerProps>(function 
         id={panelId}
         className={styles.panel}
       >
-          <div ref={panelRef}>
+          <div>
             <Calendar
               autoFocus
               view={view}

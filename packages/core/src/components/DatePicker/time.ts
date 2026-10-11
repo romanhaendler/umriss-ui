@@ -88,3 +88,21 @@ export function truncateInstant(instant: Date, withSeconds: boolean): Date {
 export const offsetLabel = (d: Date): string => DEFAULT_FORMATS.offset(d);
 
 export const pad2 = (n: number) => String(n).padStart(2, "0");
+
+/** Resolves the day and the typed hour, minute and second fields of a picker
+    (clamped to 23, 59, 59; the seconds count only with `withSeconds`). */
+export const resolveFields = (
+  day: Date | null,
+  time: { hour: string; minute: string; second: string },
+  withSeconds: boolean,
+): DstStatus | null => {
+  if (!day) return null;
+  return resolveLocalTime(
+    day.getFullYear(),
+    day.getMonth(),
+    day.getDate(),
+    Math.min(23, Number.parseInt(time.hour, 10) || 0),
+    Math.min(59, Number.parseInt(time.minute, 10) || 0),
+    withSeconds ? Math.min(59, Number.parseInt(time.second, 10) || 0) : 0,
+  );
+};

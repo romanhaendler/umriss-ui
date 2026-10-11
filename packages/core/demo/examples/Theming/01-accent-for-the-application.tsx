@@ -10,7 +10,6 @@ export const lead =
      :root {
        --u-color-accent: light-dark(#4338ca, #818cf8);
        --u-color-accent-hover: light-dark(#3730a3, #a5b4fc);
-       --u-color-accent-active: light-dark(#312e81, #6366f1);
        --u-color-accent-subtle: light-dark(#eef0fb, #1e1f3d);
        --u-color-accent-subtle-pressed: light-dark(#dfe2f7, #282a52);
        --u-color-accent-text: light-dark(#4338ca, #a5b4fc);
@@ -22,7 +21,6 @@ export const lead =
 const INDIGO = {
   "--u-color-accent": "light-dark(#4338ca, #818cf8)",
   "--u-color-accent-hover": "light-dark(#3730a3, #a5b4fc)",
-  "--u-color-accent-active": "light-dark(#312e81, #6366f1)",
   "--u-color-accent-subtle": "light-dark(#eef0fb, #1e1f3d)",
   "--u-color-accent-subtle-pressed": "light-dark(#dfe2f7, #282a52)",
   "--u-color-accent-text": "light-dark(#4338ca, #a5b4fc)",
