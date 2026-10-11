@@ -1,5 +1,5 @@
 /* What a caller sees of a milestone: the pointer's tooltip, the keys' walk and
-   the readout, the summary left alone, and a drag that never starts on it.
+   the readout, the summary's count, and a drag that never starts on it.
    The plot is laid out as in readout.test.tsx: 800 by 200 pixels, 06-14 h in
    view, so an hour is 100 pixels and the first lane's middle is at y 22. */
 
@@ -112,11 +112,25 @@ describe("the keys", () => {
 });
 
 describe("the summary", () => {
-  it("is the same with and without milestones - they make no finding and are no subtask", () => {
+  it("is the same without milestones, and with them says how many - they make no finding and are no subtask", () => {
     const without = render(<Plan data={[]} />);
     const text = summary(without.container);
     without.unmount();
+    expect(text).not.toMatch(/milestone/i);
     const { container } = render(<Plan />);
-    expect(summary(container)).toBe(text);
+    expect(summary(container)).toMatch(/violated dependencies\. 2 milestones\. Left and right/);
+    expect(summary(container).replace(" 2 milestones.", "")).toBe(text);
+  });
+
+  it("says one milestone in the singular, and in German", () => {
+    const one = render(<Plan data={MILESTONES.slice(0, 1)} />);
+    expect(summary(one.container)).toContain(" 1 milestone. ");
+    one.unmount();
+    const { container } = render(
+      <LanguageProvider wording={GERMAN_WORDING} formats={GERMAN_FORMATS}>
+        <Plan />
+      </LanguageProvider>,
+    );
+    expect(summary(container)).toMatch(/verletzte Abhängigkeiten\. 2 Meilensteine\. Pfeil links/);
   });
 });

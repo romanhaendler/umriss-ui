@@ -412,6 +412,10 @@ export interface Wording {
       button, and the sentence with the number of alarms it acts on. */
   snoozeAlarm: string;
   snoozeAlarms: (count: number) => string;
+  /** The labels in the panel that opens with `snoozeReason`: the duration to
+      choose and the reason to give. The panel's own button is `snoozeAlarm`. */
+  snoozeDuration: string;
+  snoozeReason: string;
   /** Ends the snooze of the ticked alarms before its time. */
   unsnoozeAlarm: string;
   unsnoozeAlarms: (count: number) => string;
@@ -555,6 +559,8 @@ export interface Wording {
     violated: number;
     /** Subtasks in blocked time; said only where there are any. */
     blocked: number;
+    /** Milestones of the plan; said only where there are any. */
+    milestones: number;
   }) => string;
   /** The keys that walk the plot, select and edit - read after the summary. */
   scheduleKeyHelp: string;
@@ -835,6 +841,8 @@ export const DEFAULT_WORDING: Wording = {
     count === 1 ? "Acknowledge 1 alarm" : `Acknowledge ${count} alarms`,
   snoozeAlarm: "Snooze",
   snoozeAlarms: (count) => (count === 1 ? "Snooze 1 alarm" : `Snooze ${count} alarms`),
+  snoozeDuration: "Duration",
+  snoozeReason: "Reason",
   unsnoozeAlarm: "Unsnooze",
   unsnoozeAlarms: (count) => (count === 1 ? "Unsnooze 1 alarm" : `Unsnooze ${count} alarms`),
   priorityHigh: "High",
@@ -908,10 +916,11 @@ export const DEFAULT_WORDING: Wording = {
   scheduleUnfoldGroup: "Unfold group",
   scheduleLaneCount: (count) => (count === 1 ? "1 lane" : `${count} lanes`),
   scheduleRoleDescription: "schedule",
-  scheduleSummary: ({ lanes, subtasks, from, to, overlaps, violated, blocked }) =>
+  scheduleSummary: ({ lanes, subtasks, from, to, overlaps, violated, blocked, milestones }) =>
     `${lanes === 1 ? "1 lane" : `${lanes} lanes`}, ${subtasks === 1 ? "1 subtask" : `${subtasks} subtasks`} in view from ${from} to ${to}. ` +
     `${overlaps === 1 ? "1 overlap" : `${overlaps} overlaps`}, ${violated === 1 ? "1 violated dependency" : `${violated} violated dependencies`}` +
-    (blocked === 0 ? "." : `, ${blocked === 1 ? "1 subtask" : `${blocked} subtasks`} in blocked time.`),
+    (blocked === 0 ? "." : `, ${blocked === 1 ? "1 subtask" : `${blocked} subtasks`} in blocked time.`) +
+    (milestones === 0 ? "" : ` ${milestones === 1 ? "1 milestone" : `${milestones} milestones`}.`),
   scheduleKeyHelp:
     "Left and right arrows move along the lane, up and down change the lane, Home and End go to its first and last, Page Up and Page Down jump a tenth of the view. Right bracket or T follows a dependency out, left bracket or Shift and T goes back. Space or Enter selects. Alt with left or right proposes a move, Alt and Shift a new end. Escape clears.",
   calculationSumSymbol: "+",

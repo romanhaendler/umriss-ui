@@ -29,6 +29,16 @@ package stood at `0.1.0` the whole time, because it had exactly one caller and t
 caller lay in the same repository — and are grouped by unit of delivery, not by
 commit.
 
+## Unreleased
+
+### Added
+
+- **Milestone count in the schedule's summary** (`@umriss-ui/schedule`): `scheduleSummary` takes a `milestones` count and ends with "2 milestones." / "2 Meilensteine." - nothing for none.
+- **Wording for the alarm list's snooze panel** (`@umriss-ui/table`): `snoozeDuration`
+  and `snoozeReason`, in English and German ("Dauer", "Grund").
+
+---
+
 ## 0.31.0 – One natural width of twenty characters (Oct. 2026)
 
 ### Added

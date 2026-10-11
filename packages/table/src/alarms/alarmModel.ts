@@ -119,6 +119,8 @@ export interface Snooze {
   until: number;
   /** Who snoozed it - a snooze is tracked, not anonymous. */
   by: string;
+  /** Why, when the application asked for one. The list does not show it. */
+  reason?: string;
 }
 
 /** Everything but in service: still in the list, drawn neutrally and counted,
@@ -146,9 +148,9 @@ export function availabilityAt(alarm: Alarm, asOf: number): Availability {
     or suppressed alarm stays as it is: the stronger removal is not
     overwritten by the weaker one, or the end of the snooze would put an alarm
     disabled for maintenance back in service. */
-export function snooze(alarm: Alarm, until: number, by: string): Alarm {
+export function snooze(alarm: Alarm, until: number, by: string, reason?: string): Alarm {
   if (alarm.availability === "disabled" || alarm.availability === "suppressed") return alarm;
-  return { ...alarm, availability: "snoozed", snooze: { until, by } };
+  return { ...alarm, availability: "snoozed", snooze: reason === undefined ? { until, by } : { until, by, reason } };
 }
 
 /** Ends a snooze before its time. */

@@ -119,4 +119,23 @@
   .row:not([data-availability="in-service"]) :is(td, th) {
     color: var(--u-color-text-secondary);
   }
+
+  /* The panel that asks for a duration and a reason: a surface of its own,
+     in the portal, so it sets its own text. */
+  .snoozePanel {
+    composes: text from "#own-styles";
+    min-width: 240px;
+    max-width: 320px;
+    background: var(--u-color-surface);
+    border-radius: var(--u-radius-md);
+    outline: 1px solid transparent;
+    box-shadow: var(--u-shadow-overlay);
+    padding: var(--u-space-3);
+  }
+
+  .snoozeForm {
+    display: flex;
+    flex-direction: column;
+    gap: var(--u-space-3);
+  }
 }

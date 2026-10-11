@@ -53,7 +53,11 @@ The list offers shelving as a reported intent (`AlarmList`: `onSnooze`,
 and reports their ids and the end the operator chose; it snoozes nothing.
 Whether the alarm is then snoozed - and for how long at most - is the
 application's, which calls `snooze()` on its own data or refuses. The
-durations on offer are the caller's, with no default list.
+durations on offer are the caller's, with no default list. With
+`snoozeReason` the operator also gives a reason, `"optional"` or
+`"required"`, and `onSnooze` carries it as a third argument; `snooze()` stores
+it on the record (`Snooze.reason`). Whether a reason is needed at all, and what
+counts as one, is the application's rule.
 
 A hidden alarm is still an alarm to the rest of the model: it can be
 acknowledged, and it counts towards frequency, chatter and a flood - a
