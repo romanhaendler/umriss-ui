@@ -15,6 +15,14 @@ moves from here under the rule above.
 
 ---
 
+## Unreleased
+
+### Changed
+
+- **`initialView` is read once, and `setView` is new.** A different `initialView` on a later render is now ignored, as React ignores a changed `defaultValue`; it used to be applied whenever its content differed from the last one handed in. To go to a view later, call the new `setView(view)` that `useSchedule` returns: it applies a whole view, and what the view leaves out goes back to its default. `setView` is not reported through `onViewChange`, which reports what the planner did, so two schedules kept in step by `onViewChange: (v) => other.setView(v)` in both directions do not answer each other. A caller that kept the reported view in state and handed it back as `initialView` writes `setView` instead: restoring a kept view is `setView(kept)`, and the state that mirrors the schedule's view becomes `view` from the hook.
+
+---
+
 ## 0.7.1 – Core 0.33.0, charts 0.16.0 (Oct. 2026)
 
 Needs `@umriss-ui/core` 0.33 and `@umriss-ui/charts` 0.16; the peer ranges move to `^0.33.0` and `^0.16.0`.

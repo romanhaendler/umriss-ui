@@ -90,7 +90,7 @@ export interface XAxisProps<T> extends CommonProps {
       click goes back to `domain`; with the focus on the chart, + and − zoom,
       Shift with ← or → pans and 0 goes back. The span shown is part of the
       chart's view, by this axis' `id` (`useChart`'s `initialView`,
-      `onViewChange`, `setDomain`). The plain wheel always scrolls the page.
+      `onViewChange`, `setView`, `setDomain`). The plain wheel always scrolls the page.
       @default false */
   zoomable?: boolean;
   /** The narrowest and the widest span zoom may reach, in the axis' units -

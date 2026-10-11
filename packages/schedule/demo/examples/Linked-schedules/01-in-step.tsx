@@ -1,11 +1,10 @@
-import { useState } from "react";
 import { Stack, Text } from "@umriss-ui/core";
 import { useSchedule } from "../../../src";
-import type { ScheduleView, Subtask, Task } from "../../../src";
+import type { ScheduleParts, Subtask, Task } from "../../../src";
 
 export const title = "Keep two schedules in step";
 
-export const lead = "Hand the view `onViewChange` reports to both schedules' `initialView`: pan or zoom either one and the other follows - no `key`, no remount.";
+export const lead = "Send what `onViewChange` reports to the other schedule's `setView`: pan or zoom either one and the other follows - no `key`, no remount.";
 
 const at = (hours: number, minutes = 0) => new Date(2026, 2, 17, hours, minutes).getTime();
 const min = (n: number) => n * 60_000;
@@ -46,12 +45,12 @@ const ELECTRIC_LEGS = on(ELECTRIC);
 const time = (instant: number) => new Date(instant).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 
 export default function InStep() {
-  /* One view for both: each schedule reports its own, and goes to the other's
-     because it differs from the last one handed in. */
-  const [view, setView] = useState<ScheduleView>({ domain: [at(5, 30), at(18)] });
-  const diesel = useSchedule({ initialView: view, onViewChange: setView });
-  const electric = useSchedule({ initialView: view, onViewChange: setView });
-  const span = view.domain ?? [at(5, 30), at(18)];
+  /* Both start on the same span; each reports what the reader does to it and
+     the other goes there by `setView`, which is not reported in turn. */
+  const start = { domain: [at(5, 30), at(18)] } as const;
+  const diesel: ScheduleParts = useSchedule({ initialView: start, onViewChange: (v) => electric.setView(v) });
+  const electric: ScheduleParts = useSchedule({ initialView: start, onViewChange: (v) => diesel.setView(v) });
+  const span = diesel.view.domain ?? start.domain;
   return (
     <Stack gap={2}>
       <diesel.Schedule ariaLabel="Diesel vehicles on Tuesday, 17 March" height={240}>

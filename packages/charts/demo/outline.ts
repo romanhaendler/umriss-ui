@@ -99,9 +99,9 @@ export const OUTLINE: readonly Rubric[] = [
         name: "Zoom and pan",
         sentence: "Look closer at a stretch of a long series and move along it (zoom, pan, a viewport), by wheel, pinch, drag or key, and keep several charts on the same stretch.",
         about: [
-          "`zoomable` on an x axis turns the gestures and keys on; nothing else is needed. The span shown is part of the chart's view (ADR-0047): `useChart(rows, { initialView, onViewChange })` takes a start and reports every change, whole, at most once per frame; `domains` and `setDomain(axisId, span | null)` stand on what the hook returns. A lone x axis is `\"x\"`.",
+          "`zoomable` on an x axis turns the gestures and keys on; nothing else is needed. The span shown is part of the chart's view (ADR-0047): `useChart(rows, { initialView, onViewChange })` takes a start and reports what the reader does, whole, at most once per frame; `setView(view)`, `domains` and `setDomain(axisId, span | null)` stand on what the hook returns. A lone x axis is `\"x\"`.",
           "Once an axis is zoomed, the chart offers 'Show all' over a corner of its plot - a button of its own, a tab stop beside the plot's, that brings every zoomed axis back and goes. Its words are the wording's `showAll`.",
-          "Charts stay in step by handing each other what they report: one `useState` for the view, its value as every chart's `initialView` and its setter as every `onViewChange`. A view equal to the one a chart reported itself changes nothing, so a pan does not jump back. `syncId` shares only the pointer.",
+          "Charts stay in step by sending each other what the reader did: each chart's `onViewChange` calls the other's `setView`. `setView` is not reported, so two charts linked both ways do not answer each other, and a pan does not jump back. `syncId` shares only the pointer.",
           "A zoom stops at `zoomLimits`; without them at three readings and at the data's extent. A y axis with `domain=\"visible\"` follows the stretch shown.",
         ],
         keysOf: ["chart"],
@@ -112,10 +112,10 @@ export const OUTLINE: readonly Rubric[] = [
       {
         id: "view",
         name: "View",
-        sentence: "How a reader is looking at a chart - the span in view and the hidden series - kept by the chart, reported whole, and handed back to restore it (saved state, a bookmark, a reload).",
+        sentence: "How a reader is looking at a chart - the span in view and the hidden series - kept by the chart, reported whole, and gone back to with `setView` to restore it (saved state, a bookmark, a reload).",
         about: [
           "A chart holds its own view (ADR-0047): `{ domains, hidden }` - the span each zoomable x axis shows, by axis `id`, and the hidden series, by `name`. Whatever is at its default is absent, so a chart nobody touched reports `{}`.",
-          "`useChart(rows, { initialView, onViewChange })`: `onViewChange` hears every change once, always the whole view; `initialView` is the start, and a view handed in later is gone to whenever its content differs from the last one handed in. An axis id or a series name that no longer occurs falls out. Where a view is kept - state, storage, an address - is the application's decision; the chart remembers none.",
+          "`useChart(rows, { initialView, onViewChange })`: `onViewChange` hears every change the reader makes once, always the whole view; `initialView` is the start, read once - a different value on a later render is ignored; `setView(view)` goes to a whole view later and is not reported. An axis id or a series name that no longer occurs falls out. Where a view is kept - state, storage, an address - is the application's decision; the chart remembers none.",
         ],
         keysOf: ["chart"],
         limits: ["The active point and the open data table are not part of the view: they are where the reader is, not how the chart is looked at."],

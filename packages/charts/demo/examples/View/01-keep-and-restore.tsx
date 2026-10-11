@@ -83,7 +83,7 @@ function metrics(serviceId: string): MetricPoint[] {
 }
 
 export const title = "Keep and restore a view";
-export const lead = "`onViewChange` reports the span in view and the hidden series as one view; keep it - here in the browser's storage, so it outlives a reload - and hand it back through `initialView`. Zoom, hide a series, keep, reload, restore.";
+export const lead = "`onViewChange` reports the span in view and the hidden series as one view; keep it - here in the browser's storage, so it outlives a reload - and go back to it with `setView`. Zoom, hide a series, keep, reload, restore.";
 
 const SERIES = [
   { name: "Checkout", data: metrics("checkout") },
@@ -113,11 +113,10 @@ function keep(view: ChartView): void {
 }
 
 export default function KeepAndRestore() {
-  /* The application holds the view the chart reports; handing it another one
-     is all it takes to restore. */
-  const [view, setView] = useState<ChartView>({});
+  /* The chart holds its view; `view` is what it shows now, and `setView`
+     restores a kept one. */
   const [kept, setKept] = useState<ChartView | null>(readKept);
-  const { Chart, XAxis, YAxis, Line } = useChart(SERIES[0]!.data, { initialView: view, onViewChange: setView });
+  const { Chart, XAxis, YAxis, Line, view, setView } = useChart(SERIES[0]!.data);
   return (
     <>
       <Chart height={260} ariaLabel="Latency of three services today">

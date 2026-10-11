@@ -5,7 +5,7 @@ import type { ScheduleView, Subtask, Task } from "../../../src";
 
 export const title = "Keep and restore a view";
 
-export const lead = "`onViewChange` reports the span and the folded groups as one view; keep it - here in the browser's storage, so it outlives a reload - and hand it back through `initialView`. Pan, zoom, fold, keep, reload, restore.";
+export const lead = "`onViewChange` reports the span and the folded groups as one view; keep it - here in the browser's storage, so it outlives a reload - and go back to it with `setView`. Pan, zoom, fold, keep, reload, restore.";
 
 const at = (hours: number, minutes = 0) => new Date(2026, 2, 17, hours, minutes).getTime();
 const min = (n: number) => n * 60_000;
@@ -45,11 +45,10 @@ const WORK: Subtask[] = [
 ];
 
 export default function KeepAndRestore() {
-  /* The application holds the view the schedule reports; handing it another
-     one is all it takes to restore. */
-  const [view, setView] = useState<ScheduleView>(START);
+  /* The schedule holds its view; `view` is what it shows now, and `setView`
+     restores a kept one. */
   const [kept, setKept] = useState<ScheduleView | null>(readKept);
-  const { Schedule, Lane, LaneGroup, Subtasks, setDomain } = useSchedule({ initialView: view, onViewChange: setView });
+  const { Schedule, Lane, LaneGroup, Subtasks, view, setView, setDomain } = useSchedule({ initialView: START });
 
   return (
     <Stack gap={3}>

@@ -113,7 +113,7 @@ export const OUTLINE: readonly Rubric[] = [
         about: [
           "A group is structure, never a lane: nothing sits on it, no finding is reported for it and no intent names it (ADR-0025). The lanes keep the order they were declared in, whatever group they are in.",
           "Folded, a group shows a miniature: every lane in it as a thin strip with its work in the tasks' colours. Dependencies still arrive at the right strip, findings are marked on the row, and a strip can be hovered and selected. Labels, appearances and grips need room and wait for the group to open.",
-          "Folding is part of the schedule's view and never an intent: `folded` in `initialView` starts with groups folded, `toggleGroup`, `foldAll` and `unfoldAll` fold from outside, and `onViewChange` reports every fold - see [View](#/view).",
+          "Folding is part of the schedule's view and never an intent: `folded` in `initialView` starts with groups folded, `toggleGroup`, `foldAll` and `unfoldAll` fold from outside, and `onViewChange` reports every fold the planner makes - see [View](#/view).",
         ],
         keys: [
           { key: "Tab", action: "Reaches each group's fold button - the only buttons the schedule puts in the tab order." },
@@ -331,8 +331,8 @@ export const OUTLINE: readonly Rubric[] = [
         name: "View",
         sentence: "How the planner is looking at the plan - the span in view and the folded lane groups - as one value to keep and hand back.",
         about: [
-          "The schedule keeps its view itself and puts it nowhere, not in the address and not in any storage. `view` on what `useSchedule` hands back holds it, and `onViewChange` reports every change of it - a pan or zoom at most once per frame; keep it where the application keeps things and hand it back through `initialView`.",
-          "A view that differs in content from the last one handed in applies at once, and what it leaves out goes back to its default; the same one again changes nothing. Without a span the schedule shows the extent of its subtasks, within `zoomLimits`. A group no `LaneGroup` declares falls out.",
+          "The schedule keeps its view itself and puts it nowhere, not in the address and not in any storage. `view` on what `useSchedule` hands back holds it, and `onViewChange` reports every change the planner makes to it - a pan or zoom at most once per frame; keep it where the application keeps things and go back to it with `setView`.",
+          "`initialView` is the start, read once: a different value on a later render is ignored. `setView(view)` goes to a whole view at once, and what it leaves out goes back to its default; the same view again changes nothing, and `onViewChange` does not hear it. Without a span the schedule shows the extent of its subtasks, within `zoomLimits`. A group no `LaneGroup` declares falls out.",
           "`setDomain`, `toggleGroup`, `foldAll` and `unfoldAll` change the view from outside - a button of the application's own that shows the whole plan or folds every team. The selection is not part of the view (`selectedTask`).",
         ],
         alternatives: [{ when: "Two schedules on the same hours", use: "linked-schedules" }],
@@ -345,7 +345,7 @@ export const OUTLINE: readonly Rubric[] = [
         name: "Linked schedules",
         sentence: "Keeps two schedules on the same hours: pan or zoom one and the other follows (also called synchronised views). Reach for it when two sets of lanes stand apart on a screen but belong to the same time.",
         about: [
-          "Each schedule has its own `useSchedule`. Hand both the view one of them reports, through `initialView`: a view that differs from the last one handed in applies at once, without a remount, and the same one again changes nothing, so the two never feed each other.",
+          "Each schedule has its own `useSchedule`. Send what one reports to the other's `setView`, in both directions: the other goes there at once, without a remount, and `setView` is not reported, so the two never answer each other.",
           "While a drag is in flight the two can stand a frame apart; they settle as soon as it ends.",
         ],
         alternatives: [{ when: "The lanes belong together in one plan", use: "lane-groups" }],

@@ -140,11 +140,11 @@ time and a lane and back.
 ## The view
 
 The schedule holds its own view (ADR-0047): the span in view and the folded
-groups. `useSchedule({ initialView, onViewChange })` takes a start and reports
-every change, always the whole view; a view handed in that differs from the
-last one applies at once, so two schedules keep in step by handing each other
-what they report. Without a span the schedule shows the extent of its subtasks.
-`view`, `setDomain`, `toggleGroup`, `foldAll` and `unfoldAll` stand on what the
+groups. `useSchedule({ initialView, onViewChange })` takes a start, read once, and
+reports what the planner does, always the whole view; two schedules keep in
+step by sending each other what they report through `setView`, which is not
+reported in turn. Without a span the schedule shows the extent of its subtasks.
+`view`, `setView`, `setDomain`, `toggleGroup`, `foldAll` and `unfoldAll` stand on what the
 hook hands back.
 
 ## Blocked time

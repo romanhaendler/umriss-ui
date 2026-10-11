@@ -2,8 +2,8 @@
    content, an echo of its own report ignored, unknown axis ids and series
    names out, zoom inside its limits, never every series hidden. */
 
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { defaultLimits, Echoes, hidesAll, onlyKnown, onlyVisible, showOnly, sameSpan, toggleHidden, viewKey, zoomSpan } from "../src/view";
+import { describe, expect, it } from "vitest";
+import { defaultLimits, hidesAll, onlyKnown, onlyVisible, showOnly, sameSpan, toggleHidden, viewKey, zoomSpan } from "../src/view";
 
 describe("viewKey", () => {
   it("compares by content, not by the order of the ids or the names", () => {
@@ -79,44 +79,6 @@ describe("Hiding series", () => {
     expect(onlyVisible(["A"], ["B", "C"], [...series, undefined])).toBe(true);
     expect(onlyVisible(["A"], ["B"], series)).toBe(false);
     expect(onlyVisible(["A"], ["A", "B", "C"], series)).toBe(false);
-  });
-});
-
-describe("Echoes", () => {
-  let now = 0;
-  beforeEach(() => {
-    now = 0;
-    vi.spyOn(performance, "now").mockImplementation(() => now);
-  });
-  afterEach(() => vi.restoreAllMocks());
-
-  const reported = (...keys: string[]) => {
-    const echoes = new Echoes();
-    for (const key of keys) echoes.reported(key);
-    return echoes;
-  };
-
-  it("knows a view the chart reported itself", () => {
-    expect(reported("a", "b").has("a")).toBe(true);
-    expect(reported("a", "b").has("z")).toBe(false);
-  });
-
-  it("drops an echo and every older report once it is handed in", () => {
-    const echoes = reported("a", "b", "c");
-    echoes.handed("b");
-    expect([echoes.has("a"), echoes.has("b"), echoes.has("c")]).toEqual([false, false, true]);
-  });
-
-  it("drops every report when a view from outside is handed in", () => {
-    const echoes = reported("a", "b");
-    echoes.handed("z");
-    expect([echoes.has("a"), echoes.has("b")]).toEqual([false, false]);
-  });
-
-  it("takes a report a second old for a view to go to", () => {
-    const echoes = reported("a");
-    now = 1000;
-    expect(echoes.has("a")).toBe(false);
   });
 });
 

@@ -6,8 +6,9 @@
    one field to another redraws the series - every field reader reads the same
    source text, so a comparison by text would miss it. */
 
+import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { Tooltip, useChart, type ChartParts } from "../src";
+import { Tooltip, useChart, type ChartParts, type ChartView } from "../src";
 import { focusPlot, press, renderChart, sizePlot, tooltipOf } from "./renderChart";
 
 interface Row {
@@ -78,5 +79,53 @@ describe("useChart", () => {
     await press(r.host, "ArrowLeft");
     expect(tooltipOf(r.host)).toContain("912");
     expect(tooltipOf(r.host)).not.toContain("41");
+  });
+});
+
+describe("useChart view", () => {
+  const hook = (initialView?: ChartView, onViewChange?: (v: ChartView) => void) =>
+    renderHook((p: { initialView?: ChartView }) => useChart(ROWS, { initialView: p.initialView, onViewChange }), {
+      initialProps: { initialView },
+    });
+
+  it("reads initialView once - a later one is ignored", () => {
+    const { result, rerender } = hook({ hidden: ["A"] });
+    rerender({ initialView: { hidden: ["B"] } });
+    expect(result.current.hidden).toEqual(["A"]);
+  });
+
+  it("goes to a view with setView", () => {
+    const { result } = hook();
+    act(() => result.current.setView({ hidden: ["A"] }));
+    expect(result.current.hidden).toEqual(["A"]);
+    act(() => result.current.setView({}));
+    expect(result.current.hidden).toEqual([]);
+  });
+
+  it("does not report setView through onViewChange, but reports what the reader does after it", () => {
+    const seenViews: ChartView[] = [];
+    const { result } = hook(undefined, (v) => seenViews.push(v));
+    act(() => result.current.toggleSeries("A"));
+    expect(seenViews).toEqual([{ hidden: ["A"] }]);
+    act(() => result.current.setView({ hidden: ["B"] }));
+    expect(seenViews).toHaveLength(1);
+    act(() => result.current.toggleSeries("C"));
+    expect(seenViews).toEqual([{ hidden: ["A"] }, { hidden: ["B", "C"] }]);
+  });
+
+  it("keeps two charts linked both ways in step; the other reports nothing", () => {
+    const toA: ChartView[] = [];
+    const toB: ChartView[] = [];
+    type Hooked = ReturnType<typeof renderHook<ChartParts<Row>, unknown>>;
+    const a: Hooked = renderHook(() => useChart(ROWS, { onViewChange: (v) => (toB.push(v), b.result.current.setView(v)) }));
+    const b: Hooked = renderHook(() => useChart(ROWS, { onViewChange: (v) => (toA.push(v), a.result.current.setView(v)) }));
+    act(() => a.result.current.toggleSeries("A"));
+    expect(b.result.current.hidden).toEqual(["A"]);
+    expect(toB).toHaveLength(1);
+    expect(toA).toHaveLength(0);
+    act(() => b.result.current.toggleSeries("B"));
+    expect(a.result.current.hidden).toEqual(["A", "B"]);
+    expect(toA).toHaveLength(1);
+    expect(toB).toHaveLength(1);
   });
 });

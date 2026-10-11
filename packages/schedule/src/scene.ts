@@ -156,7 +156,7 @@ export class ScheduleScene {
       changed. */
   private viewNow: ScheduleView;
   private readonly viewListeners = new Set<() => void>();
-  /** Whether the planner, a setter or a view handed in has changed the view
+  /** Whether the planner, a setter or `setView` has changed the view
       yet. Until then a change is the start losing the groups no LaneGroup
       declares - where the schedule starts, not a change to report. */
   private actedOn = false;
@@ -253,7 +253,7 @@ export class ScheduleScene {
 
   getView = (): ScheduleView => this.viewNow;
 
-  /** Goes to a view handed in; what it leaves out goes back to its default. */
+  /** Goes to a whole view (`setView`); what it leaves out goes back to its default. */
   applyView(view: ScheduleView): void {
     if (viewKey(view) === viewKey(this.viewNow)) return;
     this.actedOn = true;

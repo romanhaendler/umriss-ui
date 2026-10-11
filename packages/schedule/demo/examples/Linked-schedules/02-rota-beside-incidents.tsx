@@ -1,7 +1,6 @@
-import { useState } from "react";
 import { Stack } from "@umriss-ui/core";
 import { useSchedule } from "../../../src";
-import type { ScheduleView, Subtask, Task } from "../../../src";
+import type { ScheduleParts, Subtask, Task } from "../../../src";
 
 /* Data from the operations world, written out here so the example runs on its own. */
 
@@ -132,9 +131,9 @@ const PAGED: readonly Subtask[] = INCIDENTS.map((incident) => ({
 const HIT = SERVICES.filter((service) => PAGED.some((incident) => incident.lane === service.id));
 
 export default function RotaBesideIncidents() {
-  const [view, setView] = useState<ScheduleView>({ domain: [day(16, 6), day(17, 14)] });
-  const rota = useSchedule({ initialView: view, onViewChange: setView });
-  const incidents = useSchedule({ initialView: view, onViewChange: setView });
+  const start = { domain: [day(16, 6), day(17, 14)] } as const;
+  const rota: ScheduleParts = useSchedule({ initialView: start, onViewChange: (v) => incidents.setView(v) });
+  const incidents: ScheduleParts = useSchedule({ initialView: start, onViewChange: (v) => rota.setView(v) });
   return (
     <Stack gap={2}>
       <rota.Schedule ariaLabel="Who was on call" height={140}>

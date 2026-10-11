@@ -6,27 +6,25 @@
    from: the parts, the view and its setters. The parts are the same on every
    render, whatever the view does, so nothing is remounted. */
 
-import { createElement, forwardRef, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { createElement, forwardRef, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type { ForwardRefExoticComponent, RefAttributes } from "react";
 import { Schedule as ScheduleOn, type ScheduleHandle, type ScheduleProps } from "./Schedule";
 import { BlockedTimes, Dependencies, Lane, LaneGroup, Milestones, Subtasks } from "./parts";
 import { ScheduleScene } from "./scene";
-import { Echoes } from "@umriss-ui/charts";
 import { viewKey, type ScheduleView } from "./view";
 
 /** What `useSchedule` takes: the view to start from and the handler that
     hears every change of it. */
 export interface ScheduleOptions {
-  /** The view to start from, and to go to whenever one differing in content
-      from the last is handed in - the same view again changes nothing, and
-      what it leaves out is reset; one the schedule reported itself, handed
-      back late, is its own state coming back and not gone to. The schedule
+  /** The view to start from, read once when the hook first runs; a different
+      value on a later render is ignored, as React ignores a changed
+      `defaultValue`. To go to a view later, call `setView`. The schedule
       remembers none: where a view is kept is the application's decision. */
   initialView?: ScheduleView;
-  /** Every change of the view, once, always the whole view - the one to keep,
-      or to hand another schedule as its `initialView`. A pan or zoom is
-      reported at most once per frame. Not called for the view the schedule
-      starts with. */
+  /** Every change the planner makes, once, always the whole view - the one to
+      keep, or to hand another schedule's `setView`. A pan or zoom is reported
+      at most once per frame. Not called for the view the schedule starts
+      with, nor for one `setView` applies. */
   onViewChange?: (view: ScheduleView) => void;
 }
 
@@ -43,6 +41,11 @@ export interface ScheduleParts {
   Milestones: typeof Milestones;
   /** How the planner is looking at the plan: the span and the folded groups. */
   view: ScheduleView;
+  /** Goes to a whole view; what it leaves out is shown whole again. Not
+      reported through `onViewChange`: two schedules kept in step by
+      `onViewChange: (v) => other.setView(v)` in both directions do not answer
+      each other. A view with the content already shown changes nothing. */
+  setView: (view: ScheduleView) => void;
   /** Puts a span of two wall-clock instants in view; `null` shows the
       subtasks' extent. */
   setDomain: (span: readonly [number, number] | null) => void;
@@ -56,12 +59,14 @@ export interface ScheduleParts {
 
 /** Declares a schedule: hands back `Schedule` and the parts declared inside it
     - `Lane`, `LaneGroup`, `Subtasks`, `Dependencies`, `BlockedTimes`, `Milestones` -, its
-    `view` and the setters `setDomain`, `toggleGroup`, `foldAll` and
+    `view` and the setters `setView`, `setDomain`, `toggleGroup`, `foldAll` and
     `unfoldAll`. A ref on `Schedule` still gives the `ScheduleHandle`. */
 export function useSchedule(options: ScheduleOptions = {}): ScheduleParts {
   const { initialView, onViewChange } = options;
   const [scene] = useState(() => new ScheduleScene(initialView));
-  const [echoes] = useState(() => new Echoes());
+  /* The key of the view last reported, or applied by `setView` - what the
+     effect below compares the view against. */
+  const reported = useRef("");
   const [parts] = useState(() => {
     const Schedule = forwardRef<ScheduleHandle, ScheduleProps>((props, ref) => createElement(ScheduleOn, { ...props, scene, ref }));
     Schedule.displayName = "Schedule";
@@ -73,6 +78,10 @@ export function useSchedule(options: ScheduleOptions = {}): ScheduleParts {
       Dependencies,
       BlockedTimes,
       Milestones,
+      setView: (next: ScheduleView) => {
+        scene.applyView(next);
+        reported.current = viewKey(scene.getView());
+      },
       setDomain: scene.setDomain,
       toggleGroup: scene.toggleGroup,
       foldAll: scene.foldAll,
@@ -81,30 +90,15 @@ export function useSchedule(options: ScheduleOptions = {}): ScheduleParts {
   });
   const view = useSyncExternalStore(scene.subscribeView, scene.getView, scene.getView);
 
-  /* A view handed in applies whenever its content differs from the last one
-     handed in and is no report of the schedule's own coming back late - before
-     the paint, so the old view never shows for a frame. */
-  const handedKey = initialView === undefined ? null : viewKey(initialView);
-  const lastHanded = useRef(handedKey);
-  useLayoutEffect(() => {
-    if (initialView === undefined || handedKey === null || handedKey === lastHanded.current) return;
-    lastHanded.current = handedKey;
-    const echo = echoes.has(handedKey);
-    echoes.handed(handedKey);
-    if (!echo) scene.applyView(initialView);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- by content, not by identity
-  }, [handedKey]);
-
-  /* Every change of the view, once and whole, after the commit. The view the
-     schedule starts with is where it starts, not a change - also once the
-     groups declared took out the folds no group carries. */
+  /* Every change the planner makes, once and whole, after the commit. The view
+     the schedule starts with is where it starts, not a change - also once the
+     groups declared took out the folds no group carries. `setView` has noted
+     its view as reported already, so it is not one. */
   const key = viewKey(view);
-  const reported = useRef(key);
   useEffect(() => {
     if (reported.current === key) return;
     reported.current = key;
     if (!scene.acted) return;
-    echoes.reported(key);
     onViewChange?.(view);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once per change of the view, with that render's view and handler
   }, [key]);
