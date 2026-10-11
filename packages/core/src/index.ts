@@ -58,17 +58,6 @@ export * from "./lib/limit";
 export * from "./lib/freshness";
 export * from "./lib/useFreshness";
 
-/* The dock stands at the end and not alphabetically at "Divider" - for the
-   same reason as the building blocks above. It was looked at as well: after it
-   was filed in, the screenshot suite ran, and no existing baseline moved. That
-   is not chance but the situation: the dock's rules all hang on `.strip`,
-   `.tool` and `.refusal` and share a selector of equal specificity with no
-   other component.
-
-   The values it hangs on stand as `--u-dock-*` in tokens.css - and they do so
-   because the component reads them back at runtime. */
-export * from "./components/Dock";
-
 /* The context menu stands at the end for the same rule (schedule 01). It
    brings no stylesheet of its own - it wears the menu's - so no baseline can
    move by its place; the rule is kept anyway, so that nobody has to check. */

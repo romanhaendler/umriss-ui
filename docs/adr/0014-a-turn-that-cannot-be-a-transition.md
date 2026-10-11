@@ -1,6 +1,6 @@
 # A turn that cannot be a transition
 
-Status: accepted
+Status: withdrawn. The Dock was removed from `@umriss-ui/core`, so this decision no longer applies to any code.
 Date:   2026-09
 
 When a dock moves between a horizontal edge and a vertical one it changes

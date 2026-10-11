@@ -385,7 +385,6 @@ export const OUTLINE: readonly Rubric[] = [
           "It stands above the table wherever it stands in the JSX. On the left go the parts you put into it, then the conditions of the column filters; on the right the count of matches and “Reset” while something restricts, and the selection with its bulk actions while rows are ticked.",
           "A table with a search or a column filter puts up a toolbar of its own when none stands. Outside the table, pass `of` to the toolbar and to each part in it, and place it before the table – after it, it registers only after the first paint.",
         ],
-        alternatives: [{ when: "Actions that should stay in view while the page scrolls", use: "`Dock` from @umriss-ui/core" }],
         keysOf: ["first-table", core("Input"), "columnmenu", "rowactions", core("Button"), core("Checkbox")],
         accessibility: [
           "The count of matches is a status region. It stays empty while nothing restricts the rows, and a screen reader hears “3 of 12” when a search or a filter narrows them, and the new count on every change after.",

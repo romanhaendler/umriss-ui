@@ -164,39 +164,6 @@
     --u-button-padding: 10px;
     --u-button-padding-sm: 6px;
 
-    /* ---- Dock (floating-dock) ----
-
-       A dock's measurements stand here and not only in the module, because the
-       component READS THEM BACK at runtime: whether a resting place fits is a
-       calculation over exactly these values (Dock/place.ts), and a second copy of
-       them in JavaScript would be one that stops being true at some point.
-       Whoever changes them here also changes how many tools it takes for a side
-       edge to be refused - and that is as it should be.
-
-       The travel of the grip is the knob to turn when the gesture feels lifeless:
-       ADR-0013 lets the grip follow the pointer and not the dock, and if that
-       looks broken rather than like resistance, this value grows - the dock does
-       not become movable. */
-    --u-dock-tool: 30px;        /* edge length of one tool */
-    --u-dock-grip: 18px;        /* extent of the grip along the strip */
-    --u-dock-gap: 2px;          /* gap between two tools */
-    --u-dock-padding: 5px;      /* padding at the ends */
-    --u-dock-margin: 16px;      /* air between strip and host edge */
-    --u-dock-grip-travel: 6px;  /* how far the grip may follow the pointer */
-
-    /* The refusal: the outline the dock would have at a place it does not fit.
-       The same material, half as present - no warning colour, because nothing has
-       gone wrong here.
-
-       The duration deliberately does NOT stand in the `--u-duration-*` scale and
-       therefore does not fall to zero under `prefers-reduced-motion`: it measures
-       how long a statement stays readable, not how long a movement lasts. Whoever
-       switches motion off does not mean to switch a refusal off. It is needed only
-       for the keyboard - with the pointer the refusal ends as soon as it leaves
-       the zone. */
-    --u-dock-refusal-surface: color-mix(in srgb, var(--u-color-material-fallback) 55%, transparent);
-    --u-dock-refusal-duration: 1400ms;
-
     /* The width of a drawer (core-foundations 03). A token rather than a size
        prop: a detail beside a process picture wants one width across an
        application, and one drawer that needs another sets it in its `style`. */

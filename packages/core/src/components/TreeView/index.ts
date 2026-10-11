@@ -5,23 +5,7 @@ export { TreeSearch } from "./TreeSearch";
 export type { TreeSearchProps } from "./TreeSearch";
 export { useTree } from "./useTree";
 export type { Tree, TreeOptions } from "./useTree";
-export {
-  allBranches,
-  treeModel,
-  move,
-  duplicateKey,
-  toggleCheck,
-  expand,
-  collapse,
-  keysBetween,
-  toggleAll,
-  setChecked,
-  setActive,
-  setAnchor,
-  typeaheadTarget,
-  pathTo,
-  revealPath,
-} from "./treeModel";
+export { allBranches, treeModel, duplicateKey } from "./treeModel";
 export type {
   TreeSnapshot,
   FlatteningEntry,

@@ -157,7 +157,6 @@ The table and the alarm list are not part of this package. They live in
 | `ControlSizeProvider` | one size for the controls in a place - a toolbar, a dense form: every control with `size` inside takes it unless it says its own. A popover, dialog or tooltip opened from there starts without it |
 | `UmrissProvider` | one place to set things: density, portal target, toasts, language. **Optional** – without it everything behaves as it does unconfigured. It holds no theme (light and dark are the application's `color-scheme`) and writes nothing onto the document |
 | `LanguageProvider` / `useFormats` / `useWording` | formatting and wording as an overridable seam; the wording is a directory of entries, not a translation call. English is the default, German ships as `@umriss-ui/core/wording/de` |
-| `Dock` | a tool strip over *one* surface: four named resting places at the edges of the host, moved by the grip (dragging snaps, the four arrow keys are the four places), orientation follows the edge; translucent material like the palette; a place without room refuses visibly; `mode` marks at most one tool and belongs to the caller |
 | `DateRangePicker` | a period in two clicks across two chained months: backwards is allowed (the ends swap silently), a preview band on hovering, quick choices from the wording; on a phone the months stand one below the other |
 | `DateTimeRangePicker` | a period with a time at both ends: "all day" as the default, time fields that advance, Enter accepts; the clock change is handled per end |
 | `Popover` | the one closable, anchored surface underneath Menu, Combobox and the pickers: portal (nearest `<dialog>`, then the portal target, then the body), position with flipping above and below and across its trigger's edges, a panel that fits nowhere cut to the larger side instead of laid over its trigger, clamping as the last resort, never larger than the window (it scrolls in itself beyond that), outside click, Escape with focus returned |
@@ -226,15 +225,14 @@ The table and the alarm list are not part of this package. They live in
 
 ## Roadmap
 
-The core scope is complete, and so are the command palette, `Dock`, the
+The core scope is complete, and so are the command palette, the
 danger text tone, the pass-through of rules 1 and 2 above, the six basic
 components and the layout extras, forced colours, the listbox
 announcements, and the fields' widths and sizes (ADR-0041). What is still open is one check a person makes: the listbox
 announcements heard through VoiceOver (`.scratch/listbox-announcements/`,
 ticket 02) - put aside by the maintainer on 11 Oct 2026, not closed.
 
-Collapsing the dock onto its grip stays out of scope, because it doubles the
-state space. What core will not build at all stands in
+What core will not build at all stands in
 [ADR-0032](../../docs/adr/0032-what-umriss-is-not.md). Validation is the
 caller's, and a dashboard a user arranges is never built; umriss shows the
 reader's time ([ADR-0060](../../docs/adr/0060-validation-and-a-layout-editor-are-never-time-zones-not-yet.md)).

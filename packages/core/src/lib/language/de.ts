@@ -80,12 +80,6 @@ export const GERMAN_WORDING: Wording = {
   paletteHintClose: "schließen",
   paletteKeyEsc: "Esc",
 
-  dockTools: "Werkzeuge",
-  dockGrip: "Dock verschieben",
-  dockPlace: (place) => ({ top: "oben", right: "rechts", bottom: "unten", left: "links" })[place],
-  dockPlaced: (place) => `Dock ${place}`,
-  dockNoPlace: (place) => `Für das Dock ist ${place} kein Platz`,
-
   datePlaceholder: "Datum wählen",
   datePanel: "Datum wählen",
   dateClear: "Datum leeren",

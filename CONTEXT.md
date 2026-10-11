@@ -399,7 +399,7 @@ _Avoid_: Regel as an English word, check, test, signal
 An **item** is what the caller counts (a name and a value); an **entry** is that
 item as drawn, with its index, share and cumulative share. Two words because they
 are two things, and both are prefixed so that neither collides with the **Node**,
-the **Candidate** or the **Tool** that also avoid "item" and "entry".
+the **Candidate** that also avoids "item" and "entry".
 _Avoid_: Posten, Eintrag, bar, category
 
 **Remainder**:
@@ -727,44 +727,11 @@ ages, not of the component.
 _Avoid_: Takt, tick (which is an axis tick), poll, refresh (nothing is fetched),
 interval on its own
 
-### Reaching for a tool
-
-**Dock**:
-A strip of tools that floats over one host area and carries the actions for
-that area. It belongs to its host and never to the screen: two charts side by
-side have two docks, and a dock that outlived its host would lie about what it
-acts on. It is not a **Table toolbar**, which is a strip in the flow above a
-table — one floats and moves, the other does not, and a component that did both
-would carry two anatomies.
-_Avoid_: toolbar, Werkzeugleiste, Leiste, action bar, palette (which is the
-command palette)
-
-**Tool**:
-One entry in a dock: a glyph, a name, and what the caller wants done. It is
-something one *takes*, which is what separates it from a **Candidate** —
-something one *finds*. A tool shows no label, only its glyph, because a dock
-standing on a side edge has no room for text; the name reaches the eye through
-a tooltip and the screen reader through its accessible name.
-_Avoid_: Aktion, action (every button is an action), Befehl, Eintrag, item,
-entry
-
-**Resting place**:
-One of the four edges of the host area a dock can sit at, named rather than
-measured. A dock is always at one of them and never between them, so it cannot
-come to rest anywhere it would look unintended. The dock's orientation follows
-from the place — lying along the top and bottom edges, standing along the left
-and right — which is why a corner is not a resting place: a corner names no
-orientation, so the dock would have to invent one.
-_Avoid_: Position, Koordinate, Ecke, slot, anchor, Andockpunkt
+### Dragging
 
 **Grip**:
 The part of a component a drag takes hold of, where the thing being dragged is
-not itself the whole target. The **Dock** has one, and it is the one part that
-moves it: everything else in the strip is a tool, so without it every press
-would be ambiguous between taking a tool and moving the dock, and that
-ambiguity could only be settled by a drag threshold; it is also the single
-keyboard stop from which the dock is moved, four arrow keys for four resting
-places. The **Schedule** has two per selected **Subtask**, at the outer edges
+not itself the whole target. The **Schedule** has two per selected **Subtask**, at the outer edges
 of its **Lead-in** and **Lead-out**, and they appear on selection only — a plan
 where every bar bristles with grips is a plan nobody can read. One word,
 because it is one gesture: press the small thing to move the big one.
@@ -775,27 +742,16 @@ between a point on the screen and a time on a lane. Two live concepts, so the
 word stands with the qualifier the glossary's own rule prescribes — a *grip* is
 taken hold of, a *handle* is held by the code.
 
-**Mode**:
-The tool a dock currently stands in, at most one, and absent by default — a
-dock whose tools all simply fire has no mode. It is emphatically not an
-**Active node**: that word answers "where am I" and is not a
-selection (ADR-0003), whereas a mode is a chosen, lasting state that nothing
-about focus can change. Same word, two questions, so the word is not reused.
-_Avoid_: aktiv, active, selected, gewählt, Werkzeugzustand
-
 **Refusal**:
 What a place a drag may not land in answers with, drawn in material and edge
-rather than in a warning colour and said once in words. The **Dock** refuses a
-**Resting place** it does not fit into: the outline it would have there, and a
-line in the status line. The **Schedule** refuses a **Lane** a **Subtask** may
+rather than in a warning colour and said once in words. The **Schedule** refuses a **Lane** a **Subtask** may
 not go to, and says so before the pointer arrives: the lanes that are closed
 are drawn back and hatched from the first frame of the drag, their headers with
 them; over one of them the cursor says no, the **Ghost** stays on the last lane
 that was allowed, and a hairline ties it to the pointer it is not following, so
 that a held ghost is not read as a stuck one. **Blocked time** refuses the
-same way, for a place in time rather than a whole lane. Neither is an error — a wide, flat
-host with no room for a standing dock is nobody's mistake, and a mould that fits
-one press is nobody's either — which is why a refusal is neither a warning nor
+same way, for a place in time rather than a whole lane. Neither is an error — a mould that fits
+one press is nobody's mistake — which is why a refusal is neither a warning nor
 an alarm, and why the place is never travelled to and then corrected. And a
 refusal costs only what it refuses: a drop after a refused lane still reports
 the move in time.
@@ -952,9 +908,7 @@ The strip in the flow above a table carrying its search, column menu and export,
 its conditions with the count of the filtered set against every row the
 pre-filter admits, and the bulk actions of the selection. It is the one place a
 condition appears — there is no second strip for them — and a table with column
-filters or a search has one even where none is placed. It does not float and does not move;
-that is a **Dock**.
-_Avoid_: Dock, action bar, Werkzeugleiste, Filterleiste, Leiste on its own
+filters or a search has one even where none is placed. _Avoid_: action bar, Werkzeugleiste, Filterleiste, Leiste on its own
 
 **Aggregate**:
 What a column's values come to over a set of rows — a sum, an average, a
@@ -1008,7 +962,7 @@ it. It follows the density and the pointer, never what a line shows; a value
 that does not fit ends in an ellipsis on its line (ADR-0042). A row detail is
 not held to it - the user opened it. Not a **Density**, which
 chooses the pitch, and not a **Control size**, which the pitch makes room for.
-_Avoid_: row height, slot (a **Resting place**'s word), Zeilenhöhe, line height
+_Avoid_: row height, slot, Zeilenhöhe, line height
 (the type's)
 
 **Tree rows**:
@@ -1511,11 +1465,9 @@ later reader does not "fix" the name back.
 |---|---|
 | `table/src/model/` | not `core/` — that would name both the package and the table's model layer, and one grep would have two answers |
 | `model/companion.ts` | not `state.ts` — **State** is taken by the charts (state series, state band, ADR-0007) |
-| `demo/tooling/` | not `tools/` — a **Tool** is an entry in a dock |
 | `core/src/lib/language/` | holds the **Wording** and the **Formats**; not `i18n/`, which promises a translation function that does not exist |
 | `DatePicker/grid.ts` | the 42-cell month grid. There is no layout grid in this workspace and there should be none |
 | `DataViz/scale.ts` | the projection of the marks, which is not a chart axis' affine **Scale** — see the tail of this file |
-| `Dock/place.ts` | the arithmetic of the four **Resting places** |
 | `Textarea/measure.ts` | the height calculation, not a design unit of measure |
 | `charts/src/limit.ts` | the limit model, the same word as `core/src/lib/limit.ts` — ADR-0006 keeps the two in step. The component beside it therefore yields the bare word; see **Public names** |
 | `charts/src/bars.ts`, `cells.ts`, `controlLimits.ts` | plural or descriptive, because the singular collides with the component file beside it. On a case-insensitive file system an import of `./Bar` or `./ControlChart` resolves to `bar.ts` or `controlChart.ts`, and TypeScript then reports TS1149 ("differs only in casing") and resolves the wrong module. `cells.ts` recorded this first; the other two follow it |
@@ -1569,8 +1521,8 @@ Both were German, on the argument that they are a shape two packages agree on �
 and a caller writes its own presets against the second field. That argument
 names who has to move with them; it is not a reason to leave them. **A shape two
 parties agree on is the strongest reason to translate it, not to keep it**: it
-is the one name a caller has to type. The same held for the limit model and for
-the dock's four resting places, and all three moved.
+is the one name a caller has to type. The same held for the limit model, and both
+moved.
 
 ## Words, and the German that stays
 
@@ -1604,7 +1556,7 @@ before the alarm resolves.
 
 **Words already taken, twice over.** Three of these sets share a word with
 another set, and each cost a round when a pattern was let loose over the
-repository. `oben` is a dock place *and* the upper side of a limit. `wert` is a
+repository. `wert` is a
 limit's number, a filter's value, a context value and a set element. `seite` is
 a page number in `pageOfPages` and the side of a time range in the daylight
 saving hints. `alt` is a freshness state and an alarm's identifier in a test.

@@ -178,7 +178,6 @@ const CASES: Record<string, Case> = {
   CalendarGlyph: (probe) => <core.CalendarGlyph {...p(probe)} />,
   ClockGlyph: (probe) => <core.ClockGlyph {...p(probe)} />,
   Stat: (probe) => <core.Stat label="Temperature" value={21} {...p(probe)} />,
-  Dock: (probe) => <core.Dock tools={[]} {...p(probe)} />,
   Switch: (probe) => <core.Switch label="Automatic" {...p(probe)} />,
   Slider: (probe) => <core.Slider aria-label="Setpoint" {...p(probe)} />,
   Drawer: (probe) => <core.Drawer open={false} onClose={noop} {...p(probe)} />,

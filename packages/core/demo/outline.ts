@@ -225,36 +225,6 @@ export const OUTLINE: readonly Rubric[] = [
         types: ["SplitterProps"],
         exports: ["Splitter"],
       },
-      {
-        id: "dock",
-        name: "Dock",
-        sentence: "A strip of tools that floats above one surface, a chart or a map, and rests at the edge the user moves it to (also called a floating toolbar). Reach for it when the tools act on that surface and must not take room from it.",
-        about: [
-          "It snaps and does not follow: dragging moves the handle, and the dock jumps to the edge whose zone the pointer reaches. It always rests at one of four places, never in between and never in a corner (ADR-0013).",
-          "It belongs to one surface; two charts side by side have two docks. Which tools are modes is yours to say through `mode`; without it, every tool simply reports its use.",
-          "Where an edge has no room for the strip, as the side edges of a wide, flat chart, that edge refuses visibly and shows the outline the dock would take. Nothing shrinks and nothing overflows.",
-        ],
-        alternatives: [{ when: "A toolbar standing in the flow above a table", use: "`Toolbar` from @umriss-ui/table" }],
-        keys: [
-          { key: "Tab", action: "Moves to the handle, then into the tools: one stop for all of them." },
-          { key: "Arrow keys (on a tool)", action: "Moves to the next or previous tool, passing disabled ones." },
-          { key: "Home / End (on a tool)", action: "Moves to the first or the last tool." },
-          { key: "Enter or Space (on a tool)", action: "Takes the tool." },
-          { key: "Arrow Up / Right / Down / Left (on the handle)", action: "Moves the dock to the top, right, bottom or left edge." },
-          { key: "Escape (while dragging)", action: "Puts the dock back where the drag started." },
-        ],
-        accessibility: [
-          "The strip is a `group` named by `label`, \"Tools\" by default. The handle is a button named \"Move dock\", and each tool a button named by its `label`, which its tooltip shows too. Only the tool of the current `mode` carries `aria-pressed`; the others are not announced as switches that are off, since which tools are modes is yours to say.",
-          "A polite live region beside the strip says where the dock has gone - \"Dock at the top\" - or that an edge has no room for it - \"No room for the dock on the left\" - so a move by the arrow keys on the handle is heard, not only seen.",
-        ],
-        limits: [
-          "No free position and no corner: four resting places only (ADR-0013).",
-          "No overflow menu and no shrinking; a dock with more tools than an edge holds is refused at that edge.",
-          "It does not remember its place beyond its own life; keep it in the user's settings through `place`.",
-        ],
-        types: ["DockProps", "DockTool"],
-        exports: ["Dock"],
-      },
     ],
   },
   {
@@ -349,7 +319,6 @@ export const OUTLINE: readonly Rubric[] = [
         alternatives: [
           { when: "The action is clearer said than drawn", use: "button" },
           { when: "Icon buttons that act on the same thing", use: "buttongroup" },
-          { when: "A floating strip of tools over a canvas", use: "dock" },
         ],
         keys: [
           { key: "Tab", action: "Reaches the button and shows its name." },
@@ -1018,7 +987,7 @@ export const OUTLINE: readonly Rubric[] = [
           { key: "Escape", action: "Asks to close: `onClose` is called, and the window goes when you close it." },
         ],
         limits: [
-          "No non-modal window and no dragging or resizing: a panel that leaves the page usable is layout – a [Splitter](#/splitter) or a [Dock](#/dock).",
+          "No non-modal window and no dragging or resizing: a panel that leaves the page usable is layout – a [Splitter](#/splitter).",
         ],
         types: ["ModalProps", "ModalHeaderProps"],
         exports: ["Modal", "ModalHeader", "ModalBody", "ModalFooter"],

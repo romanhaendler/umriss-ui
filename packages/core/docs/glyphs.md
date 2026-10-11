@@ -53,8 +53,9 @@ the layout grid the **Month grid** entry in `CONTEXT.md` forbids, and
 | `AngleGlyph` | TreeView; the table's row expander, the schedule's lane-group fold and the calculation's disclosure, through core's public entry |
 | `CalendarGlyph` | DatePicker; DateRangePicker with `range` |
 | `ClockGlyph` | DateTimePicker, DateTimeRangePicker |
-| `GripGlyph` | Dock |
-| `GridGlyph`, `MeasureGlyph` | the demo's dock page |
+| `GripGlyph` | Splitter |
+| `GridGlyph` | the demo's command palette page |
+| `MeasureGlyph` | no component |
 
 A glyph drawn in more than one place stands here once. The four crosses (Alert
 at width 1.5, Tag at 1.6, MultiSelect in a box of 8, Modal and Toast in a box of
@@ -73,11 +74,7 @@ the sortable indicator, the column reordering's arrows and the group fold. The
 bar of two places decides whether **moving** something into the set is worth
 it, not where a **new** character belongs.
 
-Two notes on the drawing. `GripGlyph` carries its ridges the same way in both of
-the dock's orientations, although turning them with it would be prettier: the
-acceptance of ADR-0014 rules out a `rotate()` in that component, and a character
-that has to be rotated to be right would be rotated along on a change of
-orientation. `GripGlyph` is also deliberately not dotted – dots would be fill,
+One note on the drawing. `GripGlyph` is deliberately not dotted – dots would be fill,
 and point 4 draws with the stroke.
 
 ## What is not a glyph

@@ -1,5 +1,4 @@
 {
-  "DockProps.label": "(a) pass-through: sets only the dock's aria-label over the wording's \"Tools\"; nothing is visible",
   "SplitButtonProps.menuLabel": "(a) pass-through: sets only the trigger's aria-label over \"More actions\"; nothing is visible",
   "RadioGroupProps.name": "(a) pass-through: the native radio name for form posts; the default is generated, and nothing is visible",
   "SegmentedControlProps.name": "(a) pass-through: the native radio name for form posts; the default is generated, and nothing is visible",

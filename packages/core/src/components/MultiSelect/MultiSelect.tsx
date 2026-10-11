@@ -307,7 +307,7 @@ export const MultiSelect = forwardRef(function MultiSelect<T extends string = st
     const counterWidth = children[children.length - 1]?.offsetWidth ?? 0;
     const chipWidths = children.slice(0, -1).map((child) => child.offsetWidth);
     const available = container.clientWidth;
-    /* The gap from the stylesheet, the way the dock reads its own. Here stood
+    /* The gap from the stylesheet. Here stood
        8, with the token as a comment beside it (library-audit 07). */
     const GAP = Number.parseFloat(getComputedStyle(measureRow).columnGap) || 0;
     let fitting = 1;

@@ -117,20 +117,9 @@ export const AngleGlyph = forwardRef<SVGSVGElement, GlyphProps>(function AngleGl
   );
 });
 
-/* Three glyphs for the dock (floating-dock 06). They do not come from the
-   existing set but are drawn to the specification - that is the way packages/core/docs/glyphs.md
-   prescribes for a new glyph: take it from the set, and where the set does not
-   have it, draw it to the specification and put it in. */
-
-/** The grip a dock is moved by: two grooves, the hand needs no more. Dotted
+/** The grip a drag is taken by: two grooves, the hand needs no more. Dotted
     would be the obvious form and is wrong here - dots are fill, and point 4 of
-    the specification draws with the stroke.
-
-    The grooves stand the same way in both orientations of the dock. Turning
-    them with it would be prettier and would need a `rotate()` in a component
-    whose acceptance (ADR-0014, ticket 04) rules exactly that out - a glyph
-    that has to be rotated to be right is one that would be rotated along at
-    the change. */
+    the specification draws with the stroke. */
 export const GripGlyph = forwardRef<SVGSVGElement, GlyphProps>(function GripGlyph(
   { size = 10, ...rest },
   ref,
