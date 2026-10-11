@@ -115,10 +115,10 @@ import { GERMAN_FORMATS, GERMAN_WORDING } from "@umriss-ui/core/wording/de";
 
 ## Components
 
-The table and the alarm list are not part of this package. They live in
+The table is not part of this package. It lives in
 **`@umriss-ui/table`**:
 `useTable` with columns as elements, `Toolbar`, `Search`, `ColumnMenu`, `Export`,
-`Pagination`, `VerdictColumn`, `AlarmList` and `alarmModel`. That package takes
+`Pagination` and `VerdictColumn`. That package takes
 `@umriss-ui/core` as a peer and reads its provider, formats and wording.
 
 | Component | Purpose |

@@ -19,7 +19,6 @@ import {
   LanguageProvider,
   mergeLanguage,
 } from "../src/lib/language";
-import type { Wording } from "../src/lib/language";
 import { Input } from "../src/components/Input";
 import { Spinner } from "../src/components/Spinner";
 import { MultiSelect } from "../src/components/MultiSelect";
@@ -130,21 +129,6 @@ describe("Wording that used to stand as a literal", () => {
 /* library-audit 02: the panel of the range with time was named after a
    placeholder entry, and its clear × shared the entry of the range without
    time - an application could not name the two differently. */
-describe("A snooze's sentence takes a reason", () => {
-  it("appends it after a colon in both languages, and only when there is one", () => {
-    expect(DEFAULT_WORDING.availabilitySnoozed("12:00", "M. Keller", "valve")).toBe("Snoozed until 12:00 by M. Keller: valve");
-    expect(DEFAULT_WORDING.availabilitySnoozed("12:00", "M. Keller")).toBe("Snoozed until 12:00 by M. Keller");
-    expect(DEFAULT_WORDING.availabilitySnoozed("12:00", "M. Keller", "")).toBe("Snoozed until 12:00 by M. Keller");
-    expect(GERMAN_WORDING.availabilitySnoozed("12:00", "M. Keller", "Ventil")).toBe("Zurückgestellt bis 12:00 von M. Keller: Ventil");
-    expect(GERMAN_WORDING.availabilitySnoozed("12:00", "M. Keller")).toBe("Zurückgestellt bis 12:00 von M. Keller");
-  });
-
-  it("fits a hand-written wording of two parameters (the compiler checks the assignment)", () => {
-    const own: Partial<Wording> = { availabilitySnoozed: (until: string, by: string) => `${until} ${by}` };
-    expect(mergeLanguage({ wording: own }).wording.availabilitySnoozed("a", "b", "c")).toBe("a b");
-  });
-});
-
 describe("Wording of the range with time", () => {
   it("no longer carries the placeholder entry", () => {
     expect("zeitraumMitZeitPlatzhalter" in DEFAULT_WORDING).toBe(false);

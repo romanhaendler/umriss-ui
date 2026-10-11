@@ -9,8 +9,8 @@ checkShell({
   notOnTheFrontDoor: ["first-table", "toolbar"],
   scenario: "find-a-late-shipment",
   pinnedScenario: "find-a-late-shipment",
-  rail: { name: "AlarmList", pageId: "alarmlist", rubricId: "limits-and-alarms" },
-  low: { name: "AlarmList", pageId: "alarmlist" },
+  rail: { name: "VerdictColumn", pageId: "verdictcolumn", rubricId: "limits-and-alarms" },
+  low: { name: "VerdictColumn", pageId: "verdictcolumn" },
   neighbours: [
     { name: "Pagination", pageId: "pagination" },
     { name: "Virtualisation", pageId: "virtualisation" },

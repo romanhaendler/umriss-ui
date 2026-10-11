@@ -169,9 +169,9 @@ _Avoid_: scale, variant, `selectSize` (retired)
 **Density**:
 How close a data surface sets its lines: regular or compact. Said with
 `density` on the surface, or once on the **Provider** for every surface under
-it, where regular is called `comfortable`; a surface's own wins. A table, an
-alarm list and a **Calculation** follow it, and compact is one set of measures
-for all three, so that they stand side by side: the smallest type step, and
+it, where regular is called `comfortable`; a surface's own wins. A table and a
+**Calculation** follow it, and compact is one set of measures
+for both, so that they stand side by side: the smallest type step, and
 27 px under a fine pointer, 35 under a finger - a table's **Row pitch**, and
 the height of a calculation's line that says one thing (ADR-0042, ADR-0051).
 It changes the type and the room above and below a line, never the columns
@@ -510,8 +510,8 @@ _Avoid_: Trefferspanne, range, Markierung, highlight
 
 **Rank**:
 How well a candidate matches, deciding the order among finds. A different scale
-from a limit's **Severity**, an alarm's **Priority** and a value's **Verdict** —
-three scales already live in this glossary and none of them is this one.
+from a limit's **Severity** and a value's **Verdict** — two scales already live
+in this glossary and neither of them is this one.
 _Avoid_: Bewertung, Punktzahl, score, Relevanz
 
 ### Judging a value
@@ -536,9 +536,8 @@ _Avoid_: range, Bereich, corridor, Korridor
 
 **Severity**:
 How serious a limit is. Exactly two: advisory and actionable. It belongs to a
-**Limit**. An alarm's **Priority** is a different scale on a different object and
-is not the same word — see ADR-0009.
-_Avoid_: Priorität (which belongs to an alarm), level, Dringlichkeit
+**Limit**.
+_Avoid_: Priorität, level, Dringlichkeit
 
 **Verdict**:
 What a value is, given a set of limits. Four outcomes, ordered: ok, unknown,
@@ -624,67 +623,6 @@ the grid spacing of both axes — ADR-0002 in two dimensions. A missing level is
 hole, not a zero.
 _Avoid_: tile, Kachel (which the `@umriss-ui/core` demo no longer uses at all; the
 charts demo still does, and will lose it whenever its shell is rebuilt), bucket
-
-### Alarms
-
-**Alarm**:
-One occurrence of a condition becoming true. The library receives them and owns
-what happens next; it never generates them (ADR-0009).
-_Avoid_: Ereignis, event, notification, Fehler
-
-**Alarm type**:
-The condition that can become true. Many alarms share one type. Repeat counts,
-chatter and floods are statements about a *type* over a window and cannot be
-expressed without it.
-_Avoid_: category, Kategorie, kind
-
-**Lifecycle state**:
-One field with four values: active/unacknowledged, active/acknowledged,
-resolved/unacknowledged, resolved/acknowledged. One field and not two booleans,
-because a boolean pair invites `if (active)` and that filter loses the third —
-the fleeting alarm, which came and went unseen. **Active** is ISA-18.2's
-"standing" or "in alarm", **Resolved** its "cleared" or "returned to normal"
-(ADR-0035; the mapping stands in `docs/standards.md`).
-_Avoid_: two flags, open/closed, standing, cleared
-
-**Priority**:
-How urgent an alarm is. Three levels. A different scale from a limit's
-**Severity**, on a different object; mapping between them is the caller's.
-_Avoid_: Stufe, severity, Schweregrad
-
-**Flood**:
-A run of alarms exceeding a rate over a window. It is **marked**, never
-suppressed: deciding a human should not see an alarm is a safety decision.
-_Avoid_: burst, storm, Schwall
-
-**Availability**:
-Whether an alarm is in front of the people watching it: one field with four
-values — in service, **Snoozed**, **Suppressed**, **Disabled** (the special
-states of ISA-18.2: shelved, suppressed by design, out of service). A second field beside the **Lifecycle state** and
-never merged into it, because the two answer different questions and a hidden
-alarm keeps its lifecycle underneath. Everything but in service is *hidden*: still
-in the list, drawn neutrally with its state as a word, and
-counted — never removed.
-_Avoid_: enabled, active, muted, inhibited, hidden from operation, Sperre
-
-**Snoozed**:
-Taken out of the way by a person, for a time and under a name: a snooze has
-an end (`until`) and a person (`by`), and an alarm snoozed without either
-cannot be written down. It returns to service when the as-of time reaches the
-end — by the model's clock, not by a timer. ISA-18.2 says *shelved*.
-_Avoid_: shelved, silenced, parked
-
-**Suppressed**:
-Hidden by the application's own logic — a service that is switched off raises
-no error-rate alarm. The application writes it from that logic; the model has
-no transition for it. ISA-18.2 says *suppressed by design*.
-_Avoid_: suppressed by design, filtered, masked
-
-**Disabled**:
-Taken out of service for maintenance or repair, until enabled again. The
-strongest of the three: a snooze does not overwrite it. ISA-18.2 says *out of
-service*.
-_Avoid_: out of service, offline, deactivated
 
 ### Working time
 
@@ -853,9 +791,9 @@ _Avoid_: batch action, mass action, Massenaktion
 
 **View**:
 The part of a component's state an application can hand in and read back -
-how the reader is looking at the data, never the data itself. One handed in
-applies whenever it differs in content from the last one handed in. A
-table's view is search, conditions, sort levels, page, page size, hidden
+how the reader is looking at the data, never the data itself. It is started
+through `initialView`, read once, and gone to later through `setView`, which
+`onViewChange` does not report. A table's view is search, conditions, sort levels, page, page size, hidden
 columns, column order, widths, the grouping and the pinned columns; a chart's
 is the span each x axis is zoomed to and the hidden series; a schedule's is the
 span in view and the folded lane groups. The component keeps it nowhere — not
@@ -1229,8 +1167,7 @@ of it (lead-in and lead-out included) is a finding, drawn, named and counted
 like an **Overlap** and never resolved. A drag does not put work into it: it
 is a **Refusal** of a place in time, where `canMoveTo` refuses a whole lane —
 except for the blocked time the work already covered, which never locks it in.
-_Avoid_: absence, downtime, Sperre (the alarms' word, see **Availability**),
-unavailability as a type name
+_Avoid_: absence, downtime, Sperre, unavailability as a type name
 
 **Milestone**:
 A point in time on a lane — a handover, a release, a deadline. Plain data beside
@@ -1481,7 +1418,7 @@ The rest are the plain word, recorded here so that no branch has to guess:
 own word: these need no binding), `registry.ts`, `toolbar.tsx`, `export.ts`,
 `values.ts`, `column.ts`, `columnFilter.tsx`, `filter.tsx`, `types.ts`,
 `model/grouping.ts`, `aggregateValue.tsx`, `motion.ts`,
-`context.ts`, `useTable.tsx`, `alarms/alarmModel.ts`; in the shell `shell`,
+`context.ts`, `useTable.tsx`; in the shell `shell`,
 `outline`, `examples`, `checks`; in a demo of its own `App.tsx`, `outline.ts`,
 `examples.ts`, `examples/`, `why/`; in `lib` `wording.ts`, `formats.ts`,
 `provider/`, `glyphs/`, `freshness.ts`, `limit.ts`, `search.ts`, `virtual.ts`,
@@ -1545,12 +1482,10 @@ export: the decimal comma and the semicolon, argued in `model/csv.ts`, and
 the way a spreadsheet filters them". It is a machine format for a spreadsheet
 and wants its own ticket, not a rename.
 
-Four names the table needed and this file did not have. **Projection** is the
+One name the table needed and this file did not have: **Projection**, the
 model's computed output — visible columns, the filtered set, the page — and is
 deliberately not a **View**: a view is the part an application keeps, and the two
-are different objects. **Return band** avoids "threshold", which is an avoided
-word for a **Limit**; it is the dead band an alarm's reading must come back past
-before the alarm resolves.
+are different objects.
 
 ## Words already taken
 
@@ -1559,7 +1494,7 @@ another set, and each cost a round when a pattern was let loose over the
 repository. `wert` is a
 limit's number, a filter's value, a context value and a set element. `seite` is
 a page number in `pageOfPages` and the side of a time range in the daylight
-saving hints. `alt` is a freshness state and an alarm's identifier in a test.
+saving hints. `alt` is a freshness state and an identifier in a test.
 A rename over a word list needs a file list; one grep does not give one answer
 here.
 

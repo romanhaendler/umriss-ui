@@ -119,7 +119,6 @@ describe("the guard over the front page (.scratch/site-front-page)", () => {
     `${ROOT}core/installation/`,
     `${ROOT}core/language/`,
     `${ROOT}table/`,
-    `${ROOT}table/alarmlist/`,
     `${ROOT}charts/limitline/`,
     `${ROOT}charts/benchmark/`,
   ];
@@ -144,7 +143,7 @@ describe("the guard over the front page (.scratch/site-front-page)", () => {
       <a class="button" href="${started}">Get started</a><a class="button" href="./core/">Explore the scenarios</a>
       <code>npm install @umriss-ui/core</code>
       ${tiles}
-      <a href="./table/alarmlist/">ISA-18.2 alarm lists</a><a href="./charts/limitline/">ISA-101 limits and verdicts</a>
+      <a href="./charts/limitline/">ISA-101 limits and verdicts</a>
       <a href="${claim}"><strong>Canvas charts, measured</strong> Benchmark</a><a href="./core/language/">English and German wording</a>
       <a href="./llms.txt">Written for coding agents too</a>${extra}
       <details><summary>Every page (${index.length})</summary>${index.map((url) => `<a href="${url}">a page</a>`).join("")}</details>
@@ -168,9 +167,9 @@ describe("the guard over the front page (.scratch/site-front-page)", () => {
   });
 
   it("fails on twenty addresses and one per package linked outside the index, or a sitemap address the index leaves out", () => {
-    /* Nine addresses already, two packages: "What's new" may add one line each. */
-    const many = Array.from({ length: 13 }, (_, i) => `<a href="https://example.test/${i}">${i}</a>`).join("");
-    expect(frontFaults(front({ extra: many.replace(/<a[^>]*>12<\/a>/, "") }), ROOT, sitemap, PROMISE, landings, images)).toEqual([]);
+    /* Eight addresses already, two packages: "What's new" may add one line each. */
+    const many = Array.from({ length: 14 }, (_, i) => `<a href="https://example.test/${i}">${i}</a>`).join("");
+    expect(frontFaults(front({ extra: many.replace(/<a[^>]*>13<\/a>/, "") }), ROOT, sitemap, PROMISE, landings, images)).toEqual([]);
     expect(frontFaults(front({ extra: many }), ROOT, sitemap, PROMISE, landings, images)).toEqual(["22 addresses linked outside the index, not fewer than 22"]);
     expect(frontFaults(front({ index: sitemap.slice(2) }), ROOT, sitemap, PROMISE, landings, images)).toEqual([`the index does not link ${ROOT}core/`]);
   });

@@ -141,21 +141,18 @@ what umriss takes from it, and from which secondary sources, stands in
 [`standards.md`](standards.md)).
 
 **Grey is the normal state.** Ink on paper, the accent only for what can be
-operated. A value inside its limits, an alarm in service and acknowledged, a
+operated. A value inside its limits, a
 fresh reading - none of them needs a colour, and none gets one beyond the
 muted "ok" of a verdict word.
 
 **Colour is for the abnormal.** Danger, warning and success come from the
-verdict, the lifecycle or the freshness - never from a component's wish to look
-lively. A hidden alarm (snoozed, suppressed, disabled) is a decision
-already taken and is drawn without its colour: neutral, but there, with its
-state as a word.
+verdict or the freshness - never from a component's wish to look
+lively.
 
 **Never colour alone.** Every verdict colour stands beside a word or a glyph
-that says the same thing - the lifecycle written out beside its edge, the
-verdict glyph with a shape per verdict, the toast's tick, ring and triangle. A reader
-who cannot tell red from green, a grey-scale print and a screen reader lose
-nothing.
+that says the same thing - the verdict glyph with a shape per verdict, the
+toast's tick, ring and triangle. A reader who cannot tell red from green, a grey-scale print
+and a screen reader lose nothing.
 
 **Where umriss departs, and why.** The danger button and a menu's destructive
 item are red for a *consequence*, not for an abnormal state; their label names
@@ -168,8 +165,8 @@ register of every stylesheet of the library that reaches for a verdict colour,
 each with what carries its meaning without the colour; a new one fails until
 that is written down. It is per stylesheet, not per rule, and it cannot see
 the caller's content: a badge of tone "danger" with no children is colour
-alone, and only the caller can prevent it. The alarm list and the verdict
-column hold their promise beyond the register, in their component tests.
+alone, and only the caller can prevent it. The verdict
+column holds its promise beyond the register, in its component test.
 
 ## Dark theme
 

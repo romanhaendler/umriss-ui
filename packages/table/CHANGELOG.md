@@ -26,7 +26,11 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ### Changed
 
+- **`AlarmList`, `alarmModel` and every other export of the alarm model are removed.** An application shows its alerts in a `Table`; the scenario "Work through the alerts" does.
+
 - **`footer` on a column and `filter` in the hook's options are gone.** They were the old names of `aggregate` and `preFilter`, deprecated since the rename. A column with `footer="sum"` is `aggregate="sum"`, `useTable(rows, { filter })` is `useTable(rows, { preFilter })`; the old names are no longer read, so they do nothing, and the type `FooterFor` is no longer exported.
+
+- **`initialView` is read once, and `t.setView(view)` goes to another view later.** A different `initialView` on a later render used to be applied when its content differed, and a view the table had reported itself, handed back within a second, was told apart by the clock; now it is ignored, as React ignores a changed `defaultValue`. A caller who kept the reported view in state and handed it back (`useState` plus `onViewChange: setView` plus `initialView: view`) writes `const t = useTable(rows, { initialView })` and calls `t.setView(kept)` where it restored; two tables kept in step use `onViewChange: (v) => other.setView(v)` in both directions. `setView` is not reported through `onViewChange`, which reports what the reader did, and a view with the content already shown changes nothing.
 
 ---
 

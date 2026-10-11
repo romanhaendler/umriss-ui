@@ -270,9 +270,9 @@ const read = () => document.querySelector("[data-probe]")?.getAttribute("data-pr
    (ADR-0021): no stylesheet ever read it. A compact set of tokens does not exist
    with that; that is work package B.13.
 
-   The two readers this was checked against - table and alarm list - have stood
-   in @umriss-ui/table since umriss-table 14 and carry their cases there
-   (`breiten.test.tsx`, `alarmList.test.tsx`). What stays here is what
+   The reader this was checked against - the table - has stood in
+   @umriss-ui/table since umriss-table 14 and carries its cases there
+   (`breiten.test.tsx`). What stays here is what
    @umriss-ui/core promises itself: the hook through which every component reads
    the setting. The delicate case stays the first one: a component that is
    compact of its own accord must not be pulled to "regular" by a provider that

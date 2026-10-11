@@ -19,9 +19,9 @@
 
    Its ceiling: the register is per stylesheet, not per rule. A second use
    inside a registered stylesheet passes unread - the reviewer of that diff is
-   the check there. The alarm list's and the verdict column's own promise is
-   held beyond the register by their component tests: the word stands in the
-   row (`packages/table/tests-unit/alarmList.test.tsx`, `verdict.test.tsx`). */
+   the check there. The verdict column's own promise is
+   held beyond the register by its component test: the word stands in the
+   row (`packages/table/tests-unit/verdict.test.tsx`). */
 
 import { describe, expect, it } from "vitest";
 
@@ -90,8 +90,6 @@ const REGISTER: Readonly<Record<string, string>> = {
     "The invalid field's edge (with the form field's message), and the counter over its limit, which is a negative figure in its colour.",
   "core/Toast/Toast.module.css":
     "The tone's glyph - a tick, a cross, an exclamation mark - stands beside the message, and the role follows the tone.",
-  "table/alarms/AlarmList.module.css":
-    "The lifecycle edge stands beside the lifecycle written out, the freshness colour on its word; a hidden alarm gets no colour at all.",
   "table/Table.module.css":
     "A cell editor's message beneath it is the word itself, as the form field's is; the field carries aria-invalid and is described by it.",
   "table/VerdictColumn.module.css":

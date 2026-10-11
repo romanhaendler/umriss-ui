@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { MouseEvent, ReactNode } from "react";
 import {
+  Badge,
   Button,
   Card,
   CardBody,
@@ -18,29 +19,28 @@ import {
 } from "../../src";
 import type { FreshnessAges, LimitSet } from "../../src";
 import { ControlChart, DataTable, LimitBand, LimitLine, Tooltip, useChart } from "@umriss-ui/charts";
-import { AlarmList, alarmModel, isHidden, useTableSelection } from "@umriss-ui/table";
+import { useTable } from "@umriss-ui/table";
 import { useSchedule } from "@umriss-ui/schedule";
 import type { Subtask, Task } from "@umriss-ui/schedule";
 import { Calculation, Difference, Given, Product, Quotient, Ref } from "@umriss-ui/calculation";
 
 /* Data from the plant world, written out here so the example runs on its own. */
 
-/** An alarm's dead band, as `@umriss-ui/table` reads it. */
+/** An alarm's dead band. */
 interface ReturnBand {
   direction: "upper" | "lower";
   limit: number;
   returnTo: number;
 }
 
-/** A kind of alarm, as `@umriss-ui/table` reads it. */
+/** A kind of alarm. */
 interface AlarmType {
   id: string;
   label: string;
   priority: "high" | "medium" | "low";
-  returnBand?: ReturnBand;
 }
 
-/** One alarm, as `@umriss-ui/table` reads it. */
+/** One alarm. */
 interface Alarm {
   id: string;
   type: string;
@@ -82,7 +82,7 @@ const KILN_LIMITS: LimitSet = {
     the ideal cycle time of the OEE's performance. */
 const IDEAL_CYCLE_MINUTES = 0.25;
 
-/** The kiln alarm's condition and its dead band, as the table's model reads them. */
+/** The kiln alarm's condition and its dead band. */
 const KILN_RETURN: ReturnBand = { direction: "upper", limit: KILN.alarm, returnTo: KILN.returnTo };
 
 /** What the four measuring points of the line can report. */
@@ -91,9 +91,6 @@ const ALARM_TYPES: readonly AlarmType[] = [
     id: "kiln-high",
     label: "Kiln K1 · zone 3 above alarm limit",
     priority: "high",
-    /* The dead band: back below `returnTo`, not merely below the limit, or a
-       reading riding on the limit would raise an alarm a minute. */
-    returnBand: KILN_RETURN,
   },
   { id: "exit-silent", label: "Kiln K1 · exit pyrometer sends nothing", priority: "medium" },
   { id: "belt-empty", label: "Kiln K1 · belt empty", priority: "medium" },
@@ -255,8 +252,9 @@ function spans(
  * The alarms of the shift as they stand at the minute: raised, resolved - and
  * acknowledged where the operator did, at the instant he did.
  *
- * `start` is the instant the shift began; the alarms carry instants because the
- * table's model does.
+ * `start` is the instant the shift began; the alarms carry instants.
+ * The dead band applies: an alarm clears only below `returnTo`, not merely
+ * below the limit, or a reading riding on the limit would raise one a minute.
  */
 function alarmsAt(
   p: Plant,
@@ -334,14 +332,14 @@ export const lead =
 
 export const callouts = [
   "The shift runs a minute per second; Pause stops it, and under reduced motion it starts stopped. The skip links reach each region by keyboard.",
-  "The tile reads zone 3 against its limits and says the verdict in a word. The minute the kiln crosses its alarm limit is the same minute in the trend and in the alarm list.",
+  "The tile reads zone 3 against its limits and says the verdict in a word. The minute the kiln crosses its alarm limit is the same minute in the trend and in the alarm table.",
   "The trend draws the limits the tile reads, and its table view holds every reading for a screen reader.",
-  "The alarm the kiln raised stands in the list; acknowledging it records who knew when and changes nothing else on the screen.",
+  "The alarm the kiln raised stands in the table; acknowledging it records who knew when and changes nothing else on the screen.",
   "Choosing a batch in the plan and opening its details shows what the kiln has fired of it so far, in a drawer.",
   "The OEE shows its working, down to the counts it is made of, so the scrap from the excursion can be traced back.",
 ];
 
-export const builtFrom = ["stat", "card", "progressbar", "drawer", { name: "Line", page: "@umriss-ui/charts#line" }, { name: "ControlChart", page: "@umriss-ui/charts#controlchart" }, { name: "AlarmList", page: "@umriss-ui/table#alarmlist" }, { name: "Schedule", page: "@umriss-ui/schedule#schedule" }, { name: "Calculation", page: "@umriss-ui/calculation#calculation" }];
+export const builtFrom = ["stat", "card", "progressbar", "drawer", { name: "Line", page: "@umriss-ui/charts#line" }, { name: "ControlChart", page: "@umriss-ui/charts#controlchart" }, { name: "Table", page: "@umriss-ui/table#first-table" }, { name: "Schedule", page: "@umriss-ui/schedule#schedule" }, { name: "Calculation", page: "@umriss-ui/calculation#calculation" }];
 
 /* Every package on one page, fed by one plant. The kiln's excursion is the
    line above the limit in the trend, the alarm in the list, the scrap in the
@@ -511,6 +509,8 @@ function skipTo(event: MouseEvent<HTMLAnchorElement>, id: string) {
   region?.scrollIntoView({ block: "start" });
 }
 
+const clock = (t: number) => new Date(t).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+
 export default function ControlRoom() {
   const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: PLAN_DOMAIN } });
   const { minute, wall, running, setRunning } = usePlantMinute();
@@ -518,7 +518,6 @@ export default function ControlRoom() {
   const reading = SHIFT.readings[minute]!;
 
   const [acknowledged, setAcknowledged] = useState<ReadonlyMap<string, number>>(new Map());
-  const [hiddenOnly, setHiddenOnly] = useState(false);
   const [batch, setBatch] = useState<string | null>(() => inKiln(FROM)?.id ?? null);
   const [details, setDetails] = useState(false);
 
@@ -534,13 +533,22 @@ export default function ControlRoom() {
   const tileLength = useChart(measured);
   const alarms = useMemo(
     () =>
-      alarmModel(
-        { alarms: alarmsAt(SHIFT, minute, START, acknowledged), types: ALARM_TYPES, asOf: now },
-        hiddenOnly ? { filter: (row) => isHidden(row.availability) } : {},
-      ),
-    [minute, now, acknowledged, hiddenOnly],
+      alarmsAt(SHIFT, minute, START, acknowledged).map((one) => {
+        const type = ALARM_TYPES.find((kind) => kind.id === one.type)!;
+        const ended = one.resolved === undefined ? "Active" : "Resolved";
+        return {
+          id: one.id,
+          raised: one.raised,
+          priority: type.priority,
+          message: type.label,
+          state: one.availability === "suppressed" || one.availability === "disabled" ? `${ended}, ${one.availability}` : ended,
+          acknowledgedAt: one.acknowledgedAt,
+        };
+      }),
+    [minute, acknowledged],
   );
-  const selection = useTableSelection(alarms.filtered.map((row) => row.id));
+  const t = useTable(alarms, { rowKey: (a) => a.id, defaultSort: { column: "raised", direction: "desc" } });
+  const { Table, Column } = t;
 
   const count = countAt(SHIFT, minute);
   const oee = (IDEAL_CYCLE_MINUTES * count.good) / count.planned;
@@ -626,17 +634,31 @@ export default function ControlRoom() {
       </Region>
 
       <Region id="room-alarms" title="Alarms" quiet callout="4">
-        <AlarmList
-          view={alarms}
-          selection={selection}
-          density="compact"
-          hiddenOnly={hiddenOnly}
-          onHiddenOnlyChange={setHiddenOnly}
-          onAcknowledge={(ids) => {
-            setAcknowledged((before) => new Map([...before, ...ids.map((id) => [id, now] as const)]));
-            selection.clear();
-          }}
-        />
+        <Stack gap={2} align="start">
+          <Table selectable ariaLabel="Alarms">
+            <Column value="raised" label="Raised">
+              {(raised) => clock(raised)}
+            </Column>
+            <Column value="priority" label="Priority">
+              {(priority) => <Badge tone={priority === "high" ? "danger" : priority === "medium" ? "warning" : "neutral"}>{priority}</Badge>}
+            </Column>
+            <Column value="message" label="Alarm" rowHeader />
+            <Column value="state" label="State" />
+            <Column id="acknowledged" label="Acknowledged" value={(a) => a.acknowledgedAt ?? 0}>
+              {(_, a) => (a.acknowledgedAt === undefined ? "No" : clock(a.acknowledgedAt))}
+            </Column>
+          </Table>
+          <Button
+            size="sm"
+            disabled={t.selection.selected.size === 0}
+            onClick={() => {
+              setAcknowledged((before) => new Map([...before, ...[...t.selection.selected].map((id) => [String(id), now] as const)]));
+              t.selection.clear();
+            }}
+          >
+            Acknowledge
+          </Button>
+        </Stack>
       </Region>
 
       <Region

@@ -65,3 +65,5 @@ nothing rendered changed. `packages/demo/src/worlds` stays the source those
 copies are taken from, and what the world tests read; an example imports only
 its package and npm (`checks/ownData`), and the code view has no tabs any more.
 The plant check finds the plant world by that line instead of by the import.
+
+`packages/demo/src/worlds` and the plant-words check were removed later; the examples keep the data they carry.
