@@ -92,32 +92,42 @@ export function timeDomain(min: number, max: number, step: TimeStep): [number, n
   return [instant(floorFields(min, step), step, 0), end < max ? instant(upper, step, 1) : end];
 }
 
-const CLOCK = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
-const CLOCK_SECONDS = new Intl.DateTimeFormat("en-GB", {
-  hour: "2-digit",
-  minute: "2-digit",
-  second: "2-digit",
-  hourCycle: "h23",
-});
-const DAY_MONTH = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" });
-const DAY_MONTH_YEAR = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" });
-const MONTH_YEAR = new Intl.DateTimeFormat("en-GB", { month: "short", year: "numeric" });
-const YEAR_ONLY = new Intl.DateTimeFormat("en-GB", { year: "numeric" });
+const formats = new Map<string, Record<"clock" | "clockSeconds" | "dayMonth" | "dayMonthYear" | "monthYear" | "yearOnly", Intl.DateTimeFormat>>();
+
+/** The formatters of one locale, made once. The clock is 24-hour in every one. */
+function formatsFor(locale: string) {
+  let f = formats.get(locale);
+  if (f === undefined) {
+    const clock = { hour: "2-digit", minute: "2-digit", hourCycle: "h23" } as const;
+    f = {
+      clock: new Intl.DateTimeFormat(locale, clock),
+      clockSeconds: new Intl.DateTimeFormat(locale, { ...clock, second: "2-digit" }),
+      dayMonth: new Intl.DateTimeFormat(locale, { day: "numeric", month: "short" }),
+      dayMonthYear: new Intl.DateTimeFormat(locale, { day: "numeric", month: "short", year: "numeric" }),
+      monthYear: new Intl.DateTimeFormat(locale, { month: "short", year: "numeric" }),
+      yearOnly: new Intl.DateTimeFormat(locale, { year: "numeric" }),
+    };
+    formats.set(locale, f);
+  }
+  return f;
+}
 
 /** An instant with its date and clock: `17 Mar 15:23` - the tooltip's x value,
     and a tick's label where the day has changed. Composed, because en-GB would
     put a comma between the two. With `seconds` the clock carries them:
     readings less than a minute apart would otherwise share one text. */
-export function timeText(t: number, seconds = false): string {
+export function timeText(t: number, seconds = false, locale = "en-GB"): string {
   if (!Number.isFinite(t)) return "";
-  return `${DAY_MONTH.format(t)} ${(seconds ? CLOCK_SECONDS : CLOCK).format(t)}`;
+  const f = formatsFor(locale);
+  return `${f.dayMonth.format(t)} ${(seconds ? f.clockSeconds : f.clock).format(t)}`;
 }
 
 /** The labels of ascending ticks by the step's level. The first tick, and the
     first after a change of the level above, carries it: the clock its date,
     the day its year - a zoomed axis names its day even where no midnight
     falls into it. */
-export function timeLabels(ticks: readonly number[], step: TimeStep): string[] {
+export function timeLabels(ticks: readonly number[], step: TimeStep, locale = "en-GB"): string[] {
+  const f = formatsFor(locale);
   return ticks.map((t, i) => {
     const previous = i === 0 ? undefined : new Date(ticks[i - 1] as number);
     const d = new Date(t);
@@ -125,16 +135,16 @@ export function timeLabels(ticks: readonly number[], step: TimeStep): string[] {
       case "minute":
       case "hour":
         return previous === undefined || previous.toDateString() !== d.toDateString()
-          ? timeText(t)
-          : CLOCK.format(t);
+          ? timeText(t, false, locale)
+          : f.clock.format(t);
       case "day":
         return previous === undefined || previous.getFullYear() !== d.getFullYear()
-          ? DAY_MONTH_YEAR.format(t)
-          : DAY_MONTH.format(t);
+          ? f.dayMonthYear.format(t)
+          : f.dayMonth.format(t);
       case "month":
-        return MONTH_YEAR.format(t);
+        return f.monthYear.format(t);
       default:
-        return YEAR_ONLY.format(t);
+        return f.yearOnly.format(t);
     }
   });
 }

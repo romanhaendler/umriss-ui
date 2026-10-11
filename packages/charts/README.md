@@ -75,7 +75,10 @@ reader hears each value once the keys rest and a summary of the whole. A chart
 with a zoomable x axis is one as well, without a tooltip: there is nothing to
 walk, and plus, minus, Shift with an arrow and 0 zoom and pan it. `onSelect` on
 `useChart` hears a click on a hit and Enter on the walked one; the chart keeps
-no selection. The words are English; German comes from its own subpath:
+no selection. The words, and with them the numbers and the dates and times of the
+axes, tooltip, data table and screen-reader text, are English (`en-GB`, 24-hour
+clock); German (`de-DE`) comes from its own subpath. The `locale` of the
+wording is the one input - the browser's language is not read:
 
 ```tsx
 import { GERMAN_CHARTS_WORDING } from "@umriss-ui/charts/wording/de";

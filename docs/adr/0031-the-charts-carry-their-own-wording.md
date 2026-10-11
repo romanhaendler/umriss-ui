@@ -30,4 +30,7 @@ would make the one package that depends on nothing depend on everything.
 - The existing string props (`empty` and its kin) stay and win over the
   register, so no caller's text changes.
 - Numbers and times keep the formats the series and axes already declare
-  (`format`, `tickFormat`); the wording holds words, not formats.
+  (`format`, `tickFormat`); the wording holds words, not formats - except one
+  tag, `locale` (`en-GB`, `de-DE`): the default number and date formats of the
+  axes, tooltip, data table and screen-reader text are made in it, and the
+  browser's language is not read.

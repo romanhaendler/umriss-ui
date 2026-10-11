@@ -126,9 +126,10 @@ export function assess(value: number | null | undefined, set: LimitSet = {}): As
   let hit: Limit | undefined;
   let excess = 0;
   for (const bound of set.limits ?? []) {
-    /* Beyond, not on it: a distance of 0 is no violation. The test for `> 0`
-       also excludes bounds without a finite value - every comparison with NaN
-       is false, and a bound nobody knows nobody can exceed. */
+    /* A bound without a finite value (NaN or infinite) drops out: what nobody
+       knows, nobody can exceed. */
+    if (!Number.isFinite(bound.value)) continue;
+    /* Beyond, not on it: a distance of 0 is no violation. */
     const distance = bound.side === "upper" ? value - bound.value : bound.value - value;
     if (!(distance > 0)) continue;
     if (

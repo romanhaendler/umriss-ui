@@ -98,7 +98,7 @@ function week(serviceId: string, step: number): MetricPoint[] {
 }
 
 export const title = "Read it by keyboard and screen reader";
-export const lead = "A chart with a `Tooltip` is one tab stop: the keys walk its values, and a screen reader hears them; `wording` gives the German words.";
+export const lead = "A chart with a `Tooltip` is one tab stop: the keys walk its values, and a screen reader hears them; `wording` gives the German words, numbers and times.";
 
 const SEARCH_WEEK = week("search", 5 * 60_000);
 

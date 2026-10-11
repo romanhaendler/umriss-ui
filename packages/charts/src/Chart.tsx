@@ -71,7 +71,10 @@ export interface ChartProps {
       @default false */
   loading?: boolean;
   /** The chart's words (ADR-0031); entries left out fall back to English.
-      German: `GERMAN_CHARTS_WORDING` from `@umriss-ui/charts/wording/de`.
+      Its `locale` also formats every number and every date or time label the
+      chart makes itself (`en-GB`, `de-DE`; the browser's language is not
+      read) - a `tickFormat` or `format` of your own stays in charge of its
+      axis or series. German: `GERMAN_CHARTS_WORDING` from `@umriss-ui/charts/wording/de`.
       @default DEFAULT_CHARTS_WORDING */
   wording?: Partial<ChartsWording>;
   /** How series are told apart. `"color"`: by their colour.
