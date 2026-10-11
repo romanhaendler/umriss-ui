@@ -511,6 +511,15 @@ function skipTo(event: MouseEvent<HTMLAnchorElement>, id: string) {
 
 const clock = (t: number) => new Date(t).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 
+const RANK = { high: 0, medium: 1, low: 2 } as const;
+
+/** Worst first: by priority, then what nobody has acknowledged, then the newest. */
+const WORST_FIRST = [
+  { column: "priority", direction: "asc" },
+  { column: "acknowledged", direction: "asc" },
+  { column: "raised", direction: "desc" },
+] as const;
+
 export default function ControlRoom() {
   const { Schedule, Lane, Subtasks } = useSchedule({ initialView: { domain: PLAN_DOMAIN } });
   const { minute, wall, running, setRunning } = usePlantMinute();
@@ -547,7 +556,7 @@ export default function ControlRoom() {
       }),
     [minute, acknowledged],
   );
-  const t = useTable(alarms, { rowKey: (a) => a.id, defaultSort: { column: "raised", direction: "desc" } });
+  const t = useTable(alarms, { rowKey: (a) => a.id, defaultSort: WORST_FIRST });
   const { Table, Column } = t;
 
   const count = countAt(SHIFT, minute);
@@ -634,12 +643,12 @@ export default function ControlRoom() {
       </Region>
 
       <Region id="room-alarms" title="Alarms" quiet callout="4">
-        <Stack gap={2} align="start">
+        <Stack gap={2}>
           <Table selectable ariaLabel="Alarms">
             <Column value="raised" label="Raised">
               {(raised) => clock(raised)}
             </Column>
-            <Column value="priority" label="Priority">
+            <Column value="priority" label="Priority" sortValue={(priority) => RANK[priority]}>
               {(priority) => <Badge tone={priority === "high" ? "danger" : priority === "medium" ? "warning" : "neutral"}>{priority}</Badge>}
             </Column>
             <Column value="message" label="Alarm" rowHeader />
@@ -648,16 +657,18 @@ export default function ControlRoom() {
               {(_, a) => (a.acknowledgedAt === undefined ? "No" : clock(a.acknowledgedAt))}
             </Column>
           </Table>
-          <Button
-            size="sm"
-            disabled={t.selection.selected.size === 0}
-            onClick={() => {
-              setAcknowledged((before) => new Map([...before, ...[...t.selection.selected].map((id) => [String(id), now] as const)]));
-              t.selection.clear();
-            }}
-          >
-            Acknowledge
-          </Button>
+          <div>
+            <Button
+              size="sm"
+              disabled={t.selection.selected.size === 0}
+              onClick={() => {
+                setAcknowledged((before) => new Map([...before, ...[...t.selection.selected].map((id) => [String(id), now] as const)]));
+                t.selection.clear();
+              }}
+            >
+              Acknowledge
+            </Button>
+          </div>
         </Stack>
       </Region>
 

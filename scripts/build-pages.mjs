@@ -76,7 +76,7 @@ const HOME = new URL("../", JSON.parse(readFileSync(join(ROOT, "packages", PACKA
    a tree - above parts of the kiln scenario for the other packages. One for
    every page - it is taken by hand, so it is renewed by hand when they change. */
 const PREVIEW = "og-image.png";
-const PREVIEW_ALT = "Components of umriss-ui: an open date range picker, a multi-select, a command palette and a tree, with a trend chart, an alarm table, a production plan and an OEE calculation.";
+const PREVIEW_ALT = "Components of umriss-ui: an open date range picker, a multi-select, a command palette and a tree, with a trend chart, a table of alerts, a production plan and an OEE calculation.";
 
 /* The front page's tiles: each package's first scenario, light and dark,
    1200 x 750 - photographed by `pnpm previews` (scripts/previews.mjs) and

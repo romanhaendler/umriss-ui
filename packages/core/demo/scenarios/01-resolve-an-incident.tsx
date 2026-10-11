@@ -190,6 +190,14 @@ interface Alert {
 }
 
 const TONE = { high: "danger", medium: "warning", low: "neutral" } as const;
+const RANK = { high: 0, medium: 1, low: 2 } as const;
+
+/** Worst first: by priority, then what nobody has acknowledged, then the newest. */
+const WORST_FIRST = [
+  { column: "priority", direction: "asc" },
+  { column: "acknowledged", direction: "asc" },
+  { column: "raised", direction: "desc" },
+] as const;
 
 /** The alerts as they stand at 10:30. */
 const ALERTS: readonly Alert[] = [
@@ -271,7 +279,7 @@ function Content() {
   const [summary, setSummary] = useState("");
   const [tried, setTried] = useState(false);
 
-  const t = useTable(alerts, { rowKey: (a) => a.id, defaultSort: { column: "raised", direction: "desc" } });
+  const t = useTable(alerts, { rowKey: (a) => a.id, defaultSort: WORST_FIRST });
   const { Table, Column } = t;
 
   const acknowledge = () => {
@@ -384,12 +392,12 @@ function Content() {
         </TabList>
         <TabPanel value="alerts">
           <div data-callout="4">
-            <Stack gap={2} align="start">
+            <Stack gap={2}>
               <Table selectable ariaLabel="Alerts of the incident">
                 <Column value="raised" label="Raised">
                   {(raised) => time(raised)}
                 </Column>
-                <Column value="priority" label="Priority">
+                <Column value="priority" label="Priority" sortValue={(priority) => RANK[priority]}>
                   {(priority) => <Badge tone={TONE[priority]}>{priority}</Badge>}
                 </Column>
                 <Column value="message" label="Alert" rowHeader />
@@ -398,9 +406,11 @@ function Content() {
                   {(_, a) => (a.acknowledgedAt === undefined ? "No" : time(a.acknowledgedAt))}
                 </Column>
               </Table>
-              <Button size="sm" disabled={t.selection.selected.size === 0} onClick={acknowledge}>
-                Acknowledge
-              </Button>
+              <div>
+                <Button size="sm" disabled={t.selection.selected.size === 0} onClick={acknowledge}>
+                  Acknowledge
+                </Button>
+              </div>
             </Stack>
           </div>
         </TabPanel>
