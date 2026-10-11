@@ -1,4 +1,4 @@
-/* `aggregate` on a column, and `footer` as its old name (table-grouping 02).
+/* `aggregate` on a column (table-grouping 02).
    The footer is the aggregate over the filtered set. */
 
 import { render } from "@testing-library/react";
@@ -115,24 +115,5 @@ describe("a computed aggregate without float noise", () => {
   it("leaves a column's own format as it is", () => {
     const { container } = render(<Items kind="avg" of="hours" decimals={2} />);
     expect(footer(container, "avg")).toBe("⌀Average 13.33");
-  });
-});
-
-describe("footer, the old name", () => {
-  function Old() {
-    const { Table, Column } = useTable(ORDERS, { rowKey: (o) => o.id });
-    return (
-      <Table>
-        <Column value="id" label="Order" rowHeader />
-        <Column value="quantity" label="Quantity" footer="sum" />
-      </Table>
-    );
-  }
-
-  it("keeps working and names the new prop once", () => {
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-    const { container } = render(<Old />);
-    expect(footer(container, "sum")).toBe("ΣSum 2,600");
-    expect(warn.mock.calls.filter(([m]) => String(m).includes("`aggregate`"))).toHaveLength(1);
   });
 });

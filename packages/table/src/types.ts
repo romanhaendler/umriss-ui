@@ -33,10 +33,6 @@ export type FormatFor<W> = [Present<W>] extends [number]
     ? DateFormat
     : never;
 
-/** What the old `footer` accepts: `"sum"` and `"avg"` for numbers, nothing
-    for every other value. */
-export type FooterFor<W> = [Present<W>] extends [number] ? "sum" | "avg" : never;
-
 /** An aggregate of one's own: the values present and the rows of the group -
     or of the filtered set, in the footer. Its result runs through the column's
     presentation; `undefined` means there is none. */
@@ -65,23 +61,6 @@ export interface AggregateOptions<W, Z> {
       `false` passes it on to the next. */
   share?: boolean;
 }
-
-/** `aggregate`, or its old name `footer` - never both. */
-type AggregateProps<W, Z> =
-  | (AggregateOptions<W, Z> & {
-      /** The old name of `aggregate` – not together with it. */
-      footer?: never;
-    })
-  | {
-      /** Not together with `footer`, its old name. */
-      aggregate?: never;
-      /** @deprecated Is called `aggregate` now – the same values, and in a
-          grouped table the group's as well. The old name goes with the next
-          minor version. */
-      footer?: FooterFor<W>;
-      /** The share bar under a sum in a group's header. */
-      share?: boolean;
-    };
 
 /** What a column accepts as `filter`: `"list"` for every value with a text
     form, `"range"` for numbers and points in time, a filter from `columnFilter`
@@ -269,7 +248,7 @@ export type FieldColumn<Z, K extends Field<Z>> = ColumnBase &
     filter?: FilterFor<Z[K]>;
     /** Groups points in time by `"day"`, `"week"`, `"month"` or `"year"`. */
     group?: GroupFor<Z[K]>;
-  } & AggregateProps<Z[K], Z> &
+  } & AggregateOptions<Z[K], Z> &
   EditOptions<Z[K], Z> &
   ChildrenFor<Z[K], Z>;
 
@@ -588,9 +567,6 @@ interface TableOptionsCommon<Z> {
       admits. It may stand in the call; a change leaves the page standing, and
       the model clamps it. */
   preFilter?: (row: Z) => boolean;
-  /** The old name of `preFilter` – the same filter, the same meaning.
-      @deprecated Is called `preFilter` now; the old name goes with the next minor version. */
-  filter?: (row: Z) => boolean;
   /** The row filters the table has: conditions the application defines over
       the whole row and sets with `t.setFilter(filter, condition)` from a
       control of its own. Named here so that a condition from `initialView`,
