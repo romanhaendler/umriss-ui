@@ -42,3 +42,4 @@ reported cannot be read from outside the console. Still open, with the user:
 - Bing Webmaster Tools (it can import the Google property), or a decision to
   leave it out.
 
+**Put aside by the user (2026-10-11).** "search-visibility und voiceover erstmal komplett zurückstellen": this ticket stays open and is not worked on until he takes it up again. What is left is listed above.

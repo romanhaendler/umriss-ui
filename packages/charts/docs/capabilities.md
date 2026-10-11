@@ -445,17 +445,17 @@ constant over 5 s – the hysteresis from R-3.4 works (R-5.3).
 
 ## Later
 
-Wanted, not yet built (charts-review Q12). Each waits for a caller who needs it.
+Wanted, not yet built (charts-review Q12). The entries pointing at a spec are no longer waiting for a caller (roadmap G1); the others still wait for one.
 
-* **A stack's total in the data table.** The tooltip and the readout carry it
-  (charts-stacking K4); the table lists the members' own values only, and waits
-  for a reader who misses the column.
+* **A stack's total in the data table.** Specified, ready to build:
+  `.scratch/charts-stack-total-in-table/spec.md`.
+* **A range a reader marks.** Specified, ready to build:
+  `.scratch/chart-range-selection-and-navigator/spec.md`.
 * **Line colour by limit.** A line that turns alarm-coloured above a limit; today
   a `LimitBand` and the ControlChart's violations say the same.
 * **A navigator.** A small overview of the whole course under the plot, its
-  window the span in view, dragged to pan and stretched to zoom. It builds on
-  the view - `domains` and `setDomain` are what it would read and set - and
-  waits for a caller.
+  window the span in view. It waits for a design session of its own, after the
+  range: `.scratch/chart-navigator/spec.md`.
 
 ## Out
 

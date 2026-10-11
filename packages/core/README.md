@@ -225,7 +225,7 @@ danger text tone, the pass-through of rules 1 and 2 above, the six basic
 components and the layout extras, forced colours, the listbox
 announcements, and the fields' widths and sizes (ADR-0041). What is still open is one check a person makes: the listbox
 announcements heard through VoiceOver (`.scratch/listbox-announcements/`,
-ticket 02).
+ticket 02) - put aside by the maintainer on 11 Oct 2026, not closed.
 
 Collapsing the dock onto its grip stays out of scope, because it doubles the
 state space. What core will not build at all stands in
