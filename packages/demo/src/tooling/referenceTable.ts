@@ -11,7 +11,8 @@
    Pure, and without Vite, React or Node: it runs in the browser and in the
    generator alike, which is why the import carries its extension. */
 
-import { escape, markdownCell, spansHtml, spansMarkdown } from "./apiTable.ts";
+import { escapeAttribute } from "./escape.ts";
+import { markdownCell, spansHtml, spansMarkdown } from "./apiTable.ts";
 import type { Span } from "./apiTable.ts";
 
 export interface ReferenceRow {
@@ -58,7 +59,7 @@ function labelOf(title: readonly Span[]): string {
     React writes it. A cell carries its column's name for a phone, where the
     table stands as one block a row. */
 export function referenceHtml(table: ReferenceTable): string {
-  const head = `<thead><tr>${table.columns.map((column) => `<th scope="col">${escape(column)}</th>`).join("")}</tr></thead>`;
+  const head = `<thead><tr>${table.columns.map((column) => `<th scope="col">${escapeAttribute(column)}</th>`).join("")}</tr></thead>`;
   return (
     `<p class="apiInherited">${spansHtml(table.lead)}</p>` +
     table.groups
@@ -67,12 +68,12 @@ export function referenceHtml(table: ReferenceTable): string {
           '<div class="apiBlock">' +
           (group.title === undefined ? "" : `<h3 class="apiTitle">${spansHtml(group.title)}</h3>`) +
           (group.note ?? []).map((paragraph) => `<p class="apiInherited">${spansHtml(paragraph)}</p>`).join("") +
-          `<div class="apiRole"><table class="apiTable referenceTable" aria-label="${escape(group.title === undefined ? table.title : `${table.title}: ${labelOf(group.title)}`)}">${head}<tbody>` +
+          `<div class="apiRole"><table class="apiTable referenceTable" aria-label="${escapeAttribute(group.title === undefined ? table.title : `${table.title}: ${labelOf(group.title)}`)}">${head}<tbody>` +
           group.rows
             .map(
               (row) =>
-                `<tr id="${escape(row.anchor)}">` +
-                row.cells.map((cell, i) => (i === 0 ? `<th scope="row">${spansHtml(cell)}</th>` : `<td data-label="${escape(table.columns[i] ?? "")}">${spansHtml(cell)}</td>`)).join("") +
+                `<tr id="${escapeAttribute(row.anchor)}">` +
+                row.cells.map((cell, i) => (i === 0 ? `<th scope="row">${spansHtml(cell)}</th>` : `<td data-label="${escapeAttribute(table.columns[i] ?? "")}">${spansHtml(cell)}</td>`)).join("") +
                 "</tr>",
             )
             .join("") +

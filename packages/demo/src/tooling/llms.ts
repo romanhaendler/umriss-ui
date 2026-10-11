@@ -23,6 +23,7 @@ import ts from "typescript";
 import { ADR_0032, SCENARIOS, addressOfPlace, addresses, keyboardAnchor, keysOfText, twinOfPlace } from "../outline.ts";
 import type { Moved, Rubric, Page } from "../outline.ts";
 import type { Forwarder } from "./site.ts";
+import { escapeText } from "./escape.ts";
 import { byRank, parseFileName, parseScenarioName } from "./fileName.ts";
 import { pageTitle } from "./title.ts";
 import { displaySource } from "./source.ts";
@@ -243,8 +244,6 @@ export interface Twin {
   text: string;
 }
 
-const escapeHtml = (text: string) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
 /** The Markdown this file writes, as HTML. Headings are lifted by `lift`
     levels, so that a page's `###` becomes the document's `h1`; a heading
     named in `anchors` carries that id, so that an example's or a scenario's
@@ -253,7 +252,7 @@ const escapeHtml = (text: string) => text.replace(/&/g, "&amp;").replace(/</g, "
 function markdownToHtml(markdown: string, homepage: string, lift: number, anchors: ReadonlyMap<string, string> = new Map()): string {
   const marked = new Marked({
     renderer: {
-      html: ({ text }: Tokens.HTML | Tokens.Tag) => escapeHtml(text),
+      html: ({ text }: Tokens.HTML | Tokens.Tag) => escapeText(text),
       heading({ tokens, depth, text }: Tokens.Heading) {
         const id = anchors.get(text);
         return `<h${depth}${id === undefined ? "" : ` id="${id}"`}>${this.parser.parseInline(tokens)}</h${depth}>\n`;
@@ -289,54 +288,51 @@ function markdownTwin(markdown: string, homepage: string, lift: number, header: 
   return `${[name, "", header, ...rest].join("\n")}\n`;
 }
 
-/** Both texts of one package, from its directory. Pure apart from reading. */
-export function renderLlms({ packageDir, outline: written, tables, moved = {}, references = {} }: LlmsJob): {
-  index: string;
-  full: string;
-  pages: SitePage[];
-  forwarders: Forwarder[];
-  twins: Twin[];
-  /** The package's search fragment. */
-  search: SearchEntry[];
-  /** The API index the app mounts, where the outline has one. */
-  apiIndex?: ApiIndexModel;
-} {
-  const manifest = JSON.parse(readFileSync(join(packageDir, "package.json"), "utf8")) as Manifest;
-  const demoDir = join(packageDir, "demo");
-  /* Every ADR number a text names, as a link to its file - as the shell
-     shows the same texts (`references.ts`) - and every hook and function
-     they name as code, as a link to its entry on the API index, where the
-     outline has one (ADR-0044). The tables come linked. */
-  const links = adrLinks();
-  const indexed = written.some((rubric) => rubric.pages.some((page) => page.body === "api-index"));
-  const linked = new Set(indexed ? linkedNames(exportedDeclarations(packageDir)) : []);
-  const link = (text: string) => linkApiNames(linkAdrs(text, links), linked);
-  const outline = outlineTexts(written, link);
-  const examples = listExamples(demoDir)
-    .map((file) => readExample(demoDir, file, manifest.name))
-    .map((example) => (example.lead === undefined ? example : { ...example, lead: link(example.lead) }))
-    .sort(byRank);
-  const scenarios = listScenarios(demoDir)
-    .map((file) => readScenario(demoDir, file, manifest.name))
-    .map((scenario) => ({ ...scenario, lead: link(scenario.lead), callouts: scenario.callouts.map(link) }))
-    .sort(byRank);
+/* ------------------------------------------------------------------ */
+/* One package's texts, part by part                                   */
+/* ------------------------------------------------------------------ */
 
-  const pages = outline.flatMap((rubric) => rubric.pages);
-  for (const example of examples) {
-    if (!pages.some((page) => page.id === example.pageId)) {
-      throw new Error(`\`${example.pageId}/${example.id}\` is in a folder for which there is no page.`);
-    }
-  }
+type Outline = ReturnType<typeof outlineTexts>;
 
-  const fullUrl = `${manifest.homepage}llms-full.txt`;
-  const install = installCommand(manifest);
-  /* A neighbour's demo stands beside this one on the site, in the directory
-     named after its package. */
-  const neighbour = (packageName: string, pageId: string) =>
-    `${manifest.homepage.replace(/[^/]+\/$/, "")}${packageName.split("/")[1]}${addressOfPlace(`/${pageId}`)}`;
+/** Where a part of the full text stands in `parts`, and the spans in it that a
+    site page takes as HTML instead of Markdown. */
+interface Spliced {
+  from: number;
+  to: number;
+  html: string;
+}
 
-  /* The index. */
-  const index = [
+/** Where each page's part of the full text begins and ends - the site's
+    pages are cut from it, so they cannot say anything else. The API section
+    and the reference tables are the parts a site page does not take as
+    Markdown: it carries the HTML the app mounts, written from the same
+    model. */
+interface Cut {
+  page?: Page;
+  from: number;
+  to: number;
+  spliced?: readonly Spliced[];
+}
+
+/** What every part of one package's texts reads. */
+interface Run {
+  manifest: Manifest;
+  outline: Outline;
+  pages: readonly Page[];
+  examples: readonly ExampleText[];
+  scenarios: readonly ScenarioText[];
+  tables: Readonly<Record<string, TypeEntry>>;
+  references: Readonly<Record<string, readonly ReferenceTable[]>>;
+  install: string;
+  fullUrl: string;
+  /** A neighbour's page address on the site. */
+  neighbour: (packageName: string, pageId: string) => string;
+}
+
+/** `llms.txt`: the package, its scenarios and its pages with one line and a
+    link each. */
+function pageIndex({ manifest, outline, scenarios, install, fullUrl }: Run): string {
+  return [
     `# ${manifest.name}`,
     "",
     `> ${manifest.description}`,
@@ -362,137 +358,144 @@ export function renderLlms({ packageDir, outline: written, tables, moved = {}, r
       "",
     ]),
   ].join("\n");
+}
 
-  /* The full text. */
-  const parts: string[] = [
+/** The full text's opening lines. */
+function fullHead({ manifest, install }: Run): string[] {
+  return [
     `# ${manifest.name} ${manifest.version}`,
     "",
     `> ${manifest.description}`,
     "",
     `Install with \`${install}\`. This text is generated from the package's demo (${manifest.homepage}): every page with its import line, its examples - the source exactly as it runs, with the package name where the demo imports its own source - its props tables generated from the code, and what it deliberately does not do. The pages index stands in ${manifest.homepage}llms.txt.`,
   ];
-  /* Where each page's part of the full text begins and ends - the site's
-     pages are cut from it, so they cannot say anything else. The API section
-     and the reference tables are the parts a site page does not take as
-     Markdown: it carries the HTML the app mounts, written from the same
-     model. */
-  const cuts: { page?: Page; from: number; to: number; spliced?: readonly { from: number; to: number; html: string }[] }[] = [];
-  if (scenarios.length > 0) {
-    const from = parts.length;
-    parts.push("", "## Scenarios", "", "Composed, realistic screens built from the package. A numbered mark on the screen is an element with `data-callout`.");
-    for (const scenario of scenarios) {
-      parts.push("", `### ${scenario.title}`, "", scenario.lead);
-      if (scenario.callouts.length > 0) parts.push("", scenario.callouts.map((text, i) => `${i + 1}. ${text}`).join("\n"));
-      const built = scenario.builtFrom.map((entry) => {
-        if (typeof entry !== "string") return entry.name;
-        return pages.find((page) => page.id === entry)?.name ?? entry;
-      });
-      parts.push("", `Built from: ${built.join(", ")}.`, "", fenced("tsx", scenario.source));
-    }
-    cuts.push({ from, to: parts.length });
+}
+
+/** The scenarios' section of the full text. */
+function scenariosSection({ scenarios, pages }: Run, parts: string[]): Cut {
+  const from = parts.length;
+  parts.push("", "## Scenarios", "", "Composed, realistic screens built from the package. A numbered mark on the screen is an element with `data-callout`.");
+  for (const scenario of scenarios) {
+    parts.push("", `### ${scenario.title}`, "", scenario.lead);
+    if (scenario.callouts.length > 0) parts.push("", scenario.callouts.map((text, i) => `${i + 1}. ${text}`).join("\n"));
+    const built = scenario.builtFrom.map((entry) => {
+      if (typeof entry !== "string") return entry.name;
+      return pages.find((page) => page.id === entry)?.name ?? entry;
+    });
+    parts.push("", `Built from: ${built.join(", ")}.`, "", fenced("tsx", scenario.source));
   }
-  /* The props tables each page shows, for the search (`propEntries`). */
-  const propsOfPages: PropsOfPage[] = [];
-  /* Where the API index's body goes: it is written once every other page is,
-     since it says which of them use each export (ADR-0044). */
-  let indexAt: { from: number; to: number; html: string } | undefined;
-  for (const rubric of outline) {
-    parts.push("", `## ${rubric.name}`, "", rubric.sentence);
-    for (const page of rubric.pages) {
-      const from = parts.length;
-      parts.push("", `### ${page.name}`, "", page.sentence);
-      if (page.body === "api-index") {
-        parts.push("", `Demo page: ${pageUrl(manifest, page)}`, "", "");
-        indexAt = { from: parts.length - 2, to: parts.length, html: "" };
-        cuts.push({ page, from, to: parts.length, spliced: [indexAt] });
-        continue;
-      }
-      if (page.exports.length > 0) parts.push("", fenced("ts", `import { ${page.exports.join(", ")} } from "${manifest.name}";`));
-      if (page.installs === true) parts.push("", fenced("sh", install));
-      parts.push("", `Demo page: ${pageUrl(manifest, page)}`);
-      if (page.about !== undefined) parts.push("", page.about.join("\n\n"));
+  return { from, to: parts.length };
+}
 
-      const own = examples.filter((example) => example.pageId === page.id);
-      parts.push("", "#### Examples");
-      if (own.length === 0) parts.push("", "There is no example for this page yet. The tables below are complete all the same - they come from the source.");
-      for (const example of own) {
-        parts.push("", `##### ${example.title}`);
-        if (example.lead !== undefined) parts.push("", example.lead);
-        parts.push("", fenced("tsx", example.source));
-      }
+/** A page's examples, with their leads. */
+function examplesSection({ examples }: Run, parts: string[], page: Page): void {
+  const own = examples.filter((example) => example.pageId === page.id);
+  parts.push("", "#### Examples");
+  if (own.length === 0) parts.push("", "There is no example for this page yet. The tables below are complete all the same - they come from the source.");
+  for (const example of own) {
+    parts.push("", `##### ${example.title}`);
+    if (example.lead !== undefined) parts.push("", example.lead);
+    parts.push("", fenced("tsx", example.source));
+  }
+}
 
-      const spliced: { from: number; to: number; html: string }[] = [];
-      for (const table of references[page.id] ?? []) {
-        parts.push("", `#### ${table.title}`);
-        const at = parts.length;
-        parts.push("", referenceMarkdown(table));
-        spliced.push({ from: at, to: parts.length, html: referenceHtml(table) });
-      }
+/** A page's props tables as text - the API section, and the rows its examples
+    use where it has no table of its own - each with its HTML for the site. */
+function propsSection({ pages, tables }: Run, parts: string[], page: Page, spliced: Spliced[], propsOfPages: PropsOfPage[]): void {
+  if (page.types.length > 0) {
+    parts.push("", "#### API");
+    const section = apiSection(page, pages, tables);
+    propsOfPages.push({ pageId: page.id, tables: section.tables });
+    const at = parts.length;
+    for (const block of apiMarkdown(section)) parts.push("", block);
+    spliced.push({ from: at, to: parts.length, html: apiHtml(section) });
+  }
+  /* A page without a table of its own: the rows its examples use. */
+  const cut = { tables: propsOnPage(page, pages, tables), definitions: [] };
+  if (cut.tables.length > 0) {
+    parts.push("", `#### ${PROPS_ON_PAGE_TITLE}`);
+    const at = parts.length;
+    for (const block of apiMarkdown(cut)) parts.push("", block);
+    spliced.push({ from: at, to: parts.length, html: apiHtml(cut) });
+  }
+}
 
-      if (page.alternatives !== undefined) {
-        parts.push("", "#### When to use something else", "", page.alternatives.map(({ when, use }) => `- ${when} → ${pages.find((one) => one.id === use)?.name ?? use}`).join("\n"));
-      }
-      if (page.keys !== undefined || page.keysOf !== undefined) parts.push("", "#### Keyboard");
-      if (page.keys !== undefined) {
-        parts.push("", "| Key | Action |", "|---|---|", ...page.keys.map(({ key, action }) => `| ${cell(code(key))} | ${cell(action)} |`));
-      }
-      if (page.keysOf !== undefined) parts.push("", keysOfText(page.keysOf, pages, neighbour));
-      if (page.accessibility !== undefined) parts.push("", "#### Accessibility", "", page.accessibility.join("\n\n"));
+/** One page's section of the full text: its import line, examples, reference
+    tables, alternatives, keys, accessibility, props and limits. */
+function pageSection(run: Run, parts: string[], page: Page, propsOfPages: PropsOfPage[]): Cut {
+  const { manifest, pages, references, install, neighbour } = run;
+  const from = parts.length;
+  parts.push("", `### ${page.name}`, "", page.sentence);
+  if (page.body === "api-index") {
+    parts.push("", `Demo page: ${pageUrl(manifest, page)}`, "", "");
+    return { page, from, to: parts.length, spliced: [{ from: parts.length - 2, to: parts.length, html: "" }] };
+  }
+  if (page.exports.length > 0) parts.push("", fenced("ts", `import { ${page.exports.join(", ")} } from "${manifest.name}";`));
+  if (page.installs === true) parts.push("", fenced("sh", install));
+  parts.push("", `Demo page: ${pageUrl(manifest, page)}`);
+  if (page.about !== undefined) parts.push("", page.about.join("\n\n"));
 
-      if (page.types.length > 0) {
-        parts.push("", "#### API");
-        const section = apiSection(page, pages, tables);
-        propsOfPages.push({ pageId: page.id, tables: section.tables });
-        const at = parts.length;
-        for (const block of apiMarkdown(section)) parts.push("", block);
-        spliced.push({ from: at, to: parts.length, html: apiHtml(section) });
-      }
-      /* A page without a table of its own: the rows its examples use. */
-      const cut = { tables: propsOnPage(page, pages, tables), definitions: [] };
-      if (cut.tables.length > 0) {
-        parts.push("", `#### ${PROPS_ON_PAGE_TITLE}`);
-        const at = parts.length;
-        for (const block of apiMarkdown(cut)) parts.push("", block);
-        spliced.push({ from: at, to: parts.length, html: apiHtml(cut) });
-      }
+  examplesSection(run, parts, page);
 
-      if (page.limits !== undefined) {
-        parts.push("", "#### Known limits", "", page.limits.map((text) => `- ${text}`).join("\n"), "", `What umriss deliberately does not build, and why: [ADR-0032](${ADR_0032}).`);
-      }
-      cuts.push({ page, from, to: parts.length, spliced });
-    }
+  const spliced: Spliced[] = [];
+  for (const table of references[page.id] ?? []) {
+    parts.push("", `#### ${table.title}`);
+    const at = parts.length;
+    parts.push("", referenceMarkdown(table));
+    spliced.push({ from: at, to: parts.length, html: referenceHtml(table) });
   }
 
-  /* The API index: every export, and on each the pages that name it in code
-     - their import line, examples and prose, or the scenarios; not their
-     tables, and not the index itself. */
-  let apiIndex: ApiIndexModel | undefined;
-  if (indexAt !== undefined) {
-    const textOf = ({ from, to, spliced = [] }: (typeof cuts)[number]) =>
-      parts.slice(from, to).filter((_, i) => !spliced.some((one) => from + i >= one.from && from + i < one.to)).join("\n");
-    const readers = cuts
-      .filter((cut) => cut.page?.body === undefined)
-      .map((cut) => ({
-        mention: cut.page === undefined ? { name: "Scenarios", href: "#/" } : { name: cut.page.name, href: `#/${cut.page.id}` },
-        mentions: mentionsOf(textOf(cut)),
-      }));
-    const usedOn = (name: string): Mention[] => readers.filter((one) => one.mentions(name)).map((one) => one.mention);
-    /* Their comments are a reader's text now, their ADR numbers links. */
-    const exports = exportedDeclarations(packageDir).map((one) => ({
-      ...one,
-      description: link(one.description),
-      params: one.params.map((param) => ({ ...param, text: link(param.text) })),
-      ...(one.returns === undefined ? {} : { returns: link(one.returns) }),
-      ...(one.deprecated === undefined ? {} : { deprecated: link(one.deprecated) }),
+  if (page.alternatives !== undefined) {
+    parts.push("", "#### When to use something else", "", page.alternatives.map(({ when, use }) => `- ${when} → ${pages.find((one) => one.id === use)?.name ?? use}`).join("\n"));
+  }
+  if (page.keys !== undefined || page.keysOf !== undefined) parts.push("", "#### Keyboard");
+  if (page.keys !== undefined) {
+    parts.push("", "| Key | Action |", "|---|---|", ...page.keys.map(({ key, action }) => `| ${cell(code(key))} | ${cell(action)} |`));
+  }
+  if (page.keysOf !== undefined) parts.push("", keysOfText(page.keysOf, pages, neighbour));
+  if (page.accessibility !== undefined) parts.push("", "#### Accessibility", "", page.accessibility.join("\n\n"));
+
+  propsSection(run, parts, page, spliced, propsOfPages);
+
+  if (page.limits !== undefined) {
+    parts.push("", "#### Known limits", "", page.limits.map((text) => `- ${text}`).join("\n"), "", `What umriss deliberately does not build, and why: [ADR-0032](${ADR_0032}).`);
+  }
+  return { page, from, to: parts.length, spliced };
+}
+
+/** The API index: every export, and on each the pages that name it in code
+    - their import line, examples and prose, or the scenarios; not their
+    tables, and not the index itself. Fills the index's place in `parts`. */
+function apiIndexOf({ manifest, pages, tables }: Run, packageDir: string, link: (text: string) => string, parts: string[], cuts: readonly Cut[], indexAt: Spliced): ApiIndexModel {
+  const textOf = ({ from, to, spliced = [] }: Cut) =>
+    parts.slice(from, to).filter((_, i) => !spliced.some((one) => from + i >= one.from && from + i < one.to)).join("\n");
+  const readers = cuts
+    .filter((cut) => cut.page?.body === undefined)
+    .map((cut) => ({
+      mention: cut.page === undefined ? { name: "Scenarios", href: "#/" } : { name: cut.page.name, href: `#/${cut.page.id}` },
+      mentions: mentionsOf(textOf(cut)),
     }));
-    apiIndex = apiIndexModel({ packageName: manifest.name, exports, pages, entries: tables, usedOn, values: pages.find((page) => page.body === "api-index")!.values });
-    parts[indexAt.to - 1] = apiIndexMarkdown(apiIndex).join("\n\n");
-    indexAt.html = apiIndexHtml(apiIndex);
-  }
+  const usedOn = (name: string): Mention[] => readers.filter((one) => one.mentions(name)).map((one) => one.mention);
+  /* Their comments are a reader's text now, their ADR numbers links. */
+  const exports = exportedDeclarations(packageDir).map((one) => ({
+    ...one,
+    description: link(one.description),
+    params: one.params.map((param) => ({ ...param, text: link(param.text) })),
+    ...(one.returns === undefined ? {} : { returns: link(one.returns) }),
+    ...(one.deprecated === undefined ? {} : { deprecated: link(one.deprecated) }),
+  }));
+  const apiIndex = apiIndexModel({ packageName: manifest.name, exports, pages, entries: tables, usedOn, values: pages.find((page) => page.body === "api-index")!.values });
+  parts[indexAt.to - 1] = apiIndexMarkdown(apiIndex).join("\n\n");
+  indexAt.html = apiIndexHtml(apiIndex);
+  return apiIndex;
+}
 
-  /* The site's pages. Every one links every other, under its rubric - with
-     no links from elsewhere (search-visibility, "only our own"), the links
-     between our own pages are what a crawler walks. */
+/** The site's pages and the Markdown twins, cut from the full text. Every
+    page links every other, under its rubric - with no links from elsewhere
+    (search-visibility, "only our own"), the links between our own pages are
+    what a crawler walks. */
+function sitePagesOf(run: Run, parts: readonly string[], cuts: readonly Cut[]): { sitePages: SitePage[]; twins: Twin[] } {
+  const { manifest, outline, pages, examples, scenarios, references, install, fullUrl } = run;
   const home = manifest.homepage;
   /* Written at a page's heading levels: `###` is the page, so `####` is h2. */
   const everyPage = [
@@ -583,6 +586,85 @@ export function renderLlms({ packageDir, outline: written, tables, moved = {}, r
       ];
     }),
   ];
+  return { sitePages, twins };
+}
+
+/** Both texts of one package, from its directory. Pure apart from reading. */
+export function renderLlms({ packageDir, outline: written, tables, moved = {}, references = {} }: LlmsJob): {
+  index: string;
+  full: string;
+  pages: SitePage[];
+  forwarders: Forwarder[];
+  twins: Twin[];
+  /** The package's search fragment. */
+  search: SearchEntry[];
+  /** The API index the app mounts, where the outline has one. */
+  apiIndex?: ApiIndexModel;
+} {
+  const manifest = JSON.parse(readFileSync(join(packageDir, "package.json"), "utf8")) as Manifest;
+  const demoDir = join(packageDir, "demo");
+  /* Every ADR number a text names, as a link to its file - as the shell
+     shows the same texts (`references.ts`) - and every hook and function
+     they name as code, as a link to its entry on the API index, where the
+     outline has one (ADR-0044). The tables come linked. */
+  const links = adrLinks();
+  const indexed = written.some((rubric) => rubric.pages.some((page) => page.body === "api-index"));
+  const linked = new Set(indexed ? linkedNames(exportedDeclarations(packageDir)) : []);
+  const link = (text: string) => linkApiNames(linkAdrs(text, links), linked);
+  const outline = outlineTexts(written, link);
+  const examples = listExamples(demoDir)
+    .map((file) => readExample(demoDir, file, manifest.name))
+    .map((example) => (example.lead === undefined ? example : { ...example, lead: link(example.lead) }))
+    .sort(byRank);
+  const scenarios = listScenarios(demoDir)
+    .map((file) => readScenario(demoDir, file, manifest.name))
+    .map((scenario) => ({ ...scenario, lead: link(scenario.lead), callouts: scenario.callouts.map(link) }))
+    .sort(byRank);
+
+  const pages = outline.flatMap((rubric) => rubric.pages);
+  for (const example of examples) {
+    if (!pages.some((page) => page.id === example.pageId)) {
+      throw new Error(`\`${example.pageId}/${example.id}\` is in a folder for which there is no page.`);
+    }
+  }
+
+  const run: Run = {
+    manifest,
+    outline,
+    pages,
+    examples,
+    scenarios,
+    tables,
+    references,
+    install: installCommand(manifest),
+    fullUrl: `${manifest.homepage}llms-full.txt`,
+    /* A neighbour's demo stands beside this one on the site, in the directory
+       named after its package. */
+    neighbour: (packageName, pageId) => `${manifest.homepage.replace(/[^/]+\/$/, "")}${packageName.split("/")[1]}${addressOfPlace(`/${pageId}`)}`,
+  };
+  const index = pageIndex(run);
+
+  /* The full text. */
+  const parts = fullHead(run);
+  const cuts: Cut[] = [];
+  if (scenarios.length > 0) cuts.push(scenariosSection(run, parts));
+  /* The props tables each page shows, for the search (`propEntries`). */
+  const propsOfPages: PropsOfPage[] = [];
+  /* Where the API index's body goes: it is written once every other page is,
+     since it says which of them use each export (ADR-0044). */
+  let indexAt: Spliced | undefined;
+  for (const rubric of outline) {
+    parts.push("", `## ${rubric.name}`, "", rubric.sentence);
+    for (const page of rubric.pages) {
+      const cut = pageSection(run, parts, page, propsOfPages);
+      if (page.body === "api-index") indexAt = cut.spliced![0];
+      cuts.push(cut);
+    }
+  }
+
+  const apiIndex = indexAt === undefined ? undefined : apiIndexOf(run, packageDir, link, parts, cuts, indexAt);
+
+  const { sitePages, twins } = sitePagesOf(run, parts, cuts);
 
   /* An old address forwards to the page it is now; `addresses` throws on a
      moved id that collides or points nowhere. A moved example needs none: its
@@ -590,7 +672,7 @@ export function renderLlms({ packageDir, outline: written, tables, moved = {}, r
      forwards it there. */
   const forwarders = Object.entries(addresses(outline, moved).MOVED).filter(([old]) => !old.includes("/")).map(([old, current]): Forwarder => {
     const to = sitePages.find((page) => page.path === addressOfPlace(`/${current}`).slice(1))!;
-    return { url: urlOf(home, `/${old}`), to: to.url, title: to.title };
+    return { url: urlOf(manifest.homepage, `/${old}`), to: to.url, title: to.title };
   });
 
   /* The package's directory on the site is the second half of its name, as

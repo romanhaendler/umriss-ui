@@ -16,12 +16,12 @@
    and mounted in the browser, which is why the imports carry extensions. */
 
 import type { ExportedDeclaration } from "./exportDocs.ts";
+import { escapeAttribute } from "./escape.ts";
 import type { TypeEntry } from "./propsReader.ts";
 import {
   DEFINITIONS_ID,
   DEFINITIONS_TITLE,
   definitionModel,
-  escape,
   fencedCode,
   linked,
   markdownCode,
@@ -208,10 +208,10 @@ function homeSpans(entry: ApiIndexEntry): Span[] {
 
 function entryHtml(entry: ApiIndexEntry): string {
   return (
-    `<div class="apiBlock" data-export="${escape(entry.name)}">` +
+    `<div class="apiBlock" data-export="${escapeAttribute(entry.name)}">` +
     (entry.definition !== undefined
       ? tableHtml(entry.definition, 3)
-      : `<h3 class="apiTitle" id="${escape(entry.anchor)}"><code>${escape(entry.name)}</code></h3>`) +
+      : `<h3 class="apiTitle" id="${escapeAttribute(entry.anchor)}"><code>${escapeAttribute(entry.name)}</code></h3>`) +
     (entry.deprecated === undefined ? "" : `<p class="apiProse apiDeprecated"><span class="apiBadge">Deprecated</span> ${spansHtml(entry.deprecated)}</p>`) +
     (entry.home === undefined ? "" : `<p class="apiProse">${spansHtml(homeSpans(entry))}</p>`) +
     (entry.description.length === 0 ? "" : `<p class="apiProse">${spansHtml(entry.description)}</p>`) +
@@ -224,7 +224,7 @@ function entryHtml(entry: ApiIndexEntry): string {
 }
 
 function sectionHtml(id: string, title: string, body: string): string {
-  return `<section class="section" aria-labelledby="${escape(id)}"><div class="sectionHead"><h2 class="sectionTitle" id="${escape(id)}">${escape(title)}</h2></div><div class="apiTables">${body}</div></section>`;
+  return `<section class="section" aria-labelledby="${escapeAttribute(id)}"><div class="sectionHead"><h2 class="sectionTitle" id="${escapeAttribute(id)}">${escapeAttribute(title)}</h2></div><div class="apiTables">${body}</div></section>`;
 }
 
 /** The index's body as HTML: a section a group, then the definitions. The

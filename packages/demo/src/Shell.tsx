@@ -41,39 +41,21 @@
    first, the components after them. It stands at the head of the sidebar,
    above the rubrics. */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import { CommandPalette, LanguageProvider, useCommandPaletteShortcut } from "@umriss-ui/core";
 import type { Demo } from "./demo";
 import { BASE, hrefOf } from "./href";
-import { SCENARIOS, placeOfLocation, twinOfPlace } from "./outline";
+import { SCENARIOS, placeOfLocation } from "./outline";
 import { PACKAGES } from "./packages";
-import { searchEntries, type SearchEntry, type SearchKind } from "./search";
+import { useDocumentHead } from "./useDocumentHead";
+import { useDrawer } from "./useDrawer";
+import { usePaletteSearch } from "./usePaletteSearch";
+import { useRoute } from "./useRoute";
 import { Page } from "./Page";
 import { Scenarios } from "./Scenarios";
 import { ThemeSwitch } from "./ThemeSwitch";
 import { LanguageSwitch, ShownGerman, useLanguage, type German } from "./Language";
-import { pageTitle } from "./tooling/title";
 import { EDIT_LINK, editHref } from "./tooling/edit";
-
-/* The palette's candidates are the search entries (`search.ts`) translated
-   into the palette's language (CONTEXT.md, "Finding"): the id IS the entry's
-   address, so that choosing has nothing to look up.
-
-   The matcher sorts name finds before group finds before keyword finds.
-   Inside one of those tiers the kind decides, broadest first - a page above
-   its examples, an example above a prop - in steps far wider than any rank a
-   match earns. The own package wins a tie and nothing more: half a point is
-   the smallest step between two matches. */
-const KIND_WEIGHT: Readonly<Record<SearchKind, number>> = {
-  page: 60_000,
-  scenario: 50_000,
-  example: 40_000,
-  export: 30_000,
-  prop: 20_000,
-  token: 10_000,
-  wording: 0,
-};
-const OWN_PACKAGE_WEIGHT = 0.25;
 
 /* The most finds the palette draws: a single letter finds a few thousand
    across five packages, and drawing them all made every keystroke wait. The
@@ -83,49 +65,6 @@ const MAX_FINDS = 50;
 /** What the palette's empty field says, and the header's search button with
     it: the button promises what the field searches. */
 const PALETTE_PLACEHOLDER = "Search pages, examples, props, tokens …";
-
-function placeAt(path: string, hash: string): string {
-  return placeOfLocation(path.startsWith(BASE) ? path.slice(BASE.length - 1) : "/", hash);
-}
-
-function placeHere(): string {
-  return placeAt(window.location.pathname, window.location.hash);
-}
-
-function readPlace(fromPlace: Demo["addresses"]["fromPlace"]): { pageId: string; example?: string } {
-  const { page, example } = fromPlace(placeHere());
-  /* An unknown address lands on the scenarios page and not on an empty
-     surface: a typo is no reason for a white picture. */
-  return { pageId: page?.id ?? "", ...(example === undefined ? {} : { example }) };
-}
-
-/** Brings the sidebar's active entry into the middle of its visible box when
-    it stands outside it, by scrolling the sidebar alone - `scrollIntoView`
-    would move the page as well. Where the sidebar does not scroll nothing
-    moves. */
-function activeInView(rail: HTMLElement) {
-  const entry = rail.querySelector('[aria-current="page"]');
-  if (entry === null) return;
-  const box = rail.getBoundingClientRect();
-  const at = entry.getBoundingClientRect();
-  if (at.top >= box.top && at.bottom <= box.bottom) return;
-  rail.scrollTop += at.top - box.top - (rail.clientHeight - at.height) / 2;
-}
-
-/* The width at which the sidebar becomes a drawer - the same query as in
-   shell.css. */
-const NARROW = "(max-width: 900px)";
-
-function useNarrow(): boolean {
-  const [narrow, setNarrow] = useState(() => window.matchMedia(NARROW).matches);
-  useEffect(() => {
-    const query = window.matchMedia(NARROW);
-    const follow = () => setNarrow(query.matches);
-    query.addEventListener("change", follow);
-    return () => query.removeEventListener("change", follow);
-  }, []);
-  return narrow;
-}
 
 /* The site's root, above every demo's directory: `/umriss-ui/` on the site,
    `/` in the dev server and the test build, where each demo stands alone. */
@@ -194,209 +133,24 @@ export interface ShellProps {
 
 export function Shell({ demo, sentence, german }: ShellProps) {
   const { OUTLINE, ALL_PAGES, fromPlace, addressOf } = demo.addresses;
-  const [place, setPlace] = useState(() => readPlace(fromPlace));
+  const ownId = demo.packageName.split("/")[1]!;
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [language, chooseLanguage] = useLanguage();
 
-  /* THE PALETTE'S TWO SOURCES. The package's search fragment is a part of
-     the bundle of its own, fetched on the palette's first opening and kept.
-     Until it has arrived - or if it never does - the palette searches the
-     same pages, scenarios and examples from the outline in hand, so the
-     window is never empty and a lost request breaks nothing.
-
-     The other four packages come from the site's index (`search.json` at the
-     site's root, `scripts/build-pages.mjs`), fetched on the same first
-     opening, without the own package's entries, which the fragment already
-     has. A demo standing alone - the dev server, the test build - has no
-     site above it and fetches nothing. A failed fetch is silent: the reader
-     can do nothing about it, and the own package is still searched. */
-  const ownId = demo.packageName.split("/")[1]!;
-  const [fragment, setFragment] = useState<readonly SearchEntry[] | null>(null);
-  const [elsewhere, setElsewhere] = useState<readonly SearchEntry[] | null>(null);
-  useEffect(() => {
-    if (!paletteOpen || fragment !== null) return;
-    demo.search().then(setFragment, () => {});
-  }, [paletteOpen, fragment, demo]);
-  useEffect(() => {
-    if (!paletteOpen || elsewhere !== null || SITE === BASE) return;
-    fetch(`${SITE}search.json`)
-      .then((response) => (response.ok ? (response.json() as Promise<SearchEntry[]>) : []))
-      .then((entries) => setElsewhere(entries.filter((entry) => !entry.address.startsWith(`/${ownId}/`))))
-      .catch(() => setElsewhere([]));
-  }, [paletteOpen, elsewhere, ownId]);
-  const candidates = useMemo(
-    () =>
-      [...(fragment ?? searchEntries(ownId, OUTLINE, demo.scenarios, demo.examples)), ...(elsewhere ?? [])].map((entry) => ({
-        id: entry.address,
-        label: entry.label,
-        group: entry.group,
-        /* The package before the heading is shown, not searched: "core" or
-           "tab" would otherwise find every entry of a package. */
-        searchedGroup: entry.group.replace(/^[^·]* · /, ""),
-        keywords: entry.keywords,
-        weight: KIND_WEIGHT[entry.kind] + (entry.address.startsWith(`/${ownId}/`) ? OWN_PACKAGE_WEIGHT : 0),
-      })),
-    [fragment, elsewhere, ownId, OUTLINE, demo.scenarios, demo.examples],
-  );
-  /* The jump needs a counter of its own. Two examples on the same page one
-     after the other do not change the page - an effect hanging only on that
-     would not run at all on the second click, and the jump would not happen. */
-  const [jump, setJump] = useState(0);
-
-  const goTo = useCallback(
-    (pageId: string, exampleId?: string) => {
-      window.history.pushState(null, "", hrefOf(addressOf(pageId, exampleId)));
-      setPlace(readPlace(fromPlace));
-      setJump((n) => n + 1);
-      setPaletteOpen(false);
-    },
-    [addressOf, fromPlace],
-  );
-
-  useEffect(() => {
-    /* An old hash address - a bookmark, a link from before ADR-0037, a
-       `#/page` in a page's text - is replaced by its path, so the address bar
-       only ever shows the one form. So is the path of a page whose id has
-       changed (`MOVED` in the outline): the bar shows the current one. */
-    const forward = () => {
-      const { page, example, moved } = fromPlace(placeHere());
-      if (!window.location.hash.startsWith("#/") && moved === undefined) return;
-      window.history.replaceState(null, "", hrefOf(addressOf(page?.id ?? SCENARIOS, example)));
-    };
-    const onMove = () => {
-      forward();
-      setPlace(readPlace(fromPlace));
-      setJump((n) => n + 1);
-    };
-    /* A link to a page of this demo moves without a reload - the sidebar's
-       entries are such links, with their page's real address. Anything else -
-       another demo, `llms.txt` beside this one, a new tab, a modified or
-       middle click, "copy link" - is the browser's. */
-    const onClick = (event: MouseEvent) => {
-      const link = (event.target as Element | null)?.closest?.("a");
-      if (link === null || link === undefined || link.target !== "" || link.hasAttribute("download")) return;
-      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-      const url = new URL(link.href, window.location.href);
-      if (url.origin !== window.location.origin || !url.pathname.startsWith(BASE)) return;
-      const place = placeAt(url.pathname, url.hash);
-      const { page, example } = fromPlace(place);
-      if (place !== "" && page === undefined && example === undefined) return;
-      event.preventDefault();
-      window.history.pushState(null, "", url.pathname + url.hash);
-      onMove();
-    };
-    forward();
-    window.addEventListener("popstate", onMove);
-    window.addEventListener("hashchange", onMove);
-    document.addEventListener("click", onClick);
-    return () => {
-      window.removeEventListener("popstate", onMove);
-      window.removeEventListener("hashchange", onMove);
-      document.removeEventListener("click", onClick);
-    };
-  }, [addressOf, fromPlace]);
-
-  /* After the change, fetch the example meant and mark it briefly - otherwise
-     one lands at the head of a page and starts searching again. */
-  useEffect(() => {
-    const target = place.example;
-    /* An example, a scenario - or another anchor of the page, such as a
-       section's heading or a props table's `#type-<Name>`. */
-    const example =
-      target === undefined ? null : document.querySelector(`[data-example="${target}"], [data-scenario="${target}"]`);
-    const el = example ?? (target === undefined ? null : document.getElementById(target));
-    if (el === null) {
-      /* A page change with no named target starts at the top. Otherwise one
-         would stay at the height one was at on the previous page. scrollTop
-         rather than window.scrollTo: the same result in the browser, and jsdom
-         reports no "not implemented" into every smoke test for it. */
-      document.documentElement.scrollTop = 0;
-      return;
-    }
-    /* A fold never hides a target a row
-       of a long props table's folded group opens its group first. The
-       browser's own opening on a fragment is not relied on - not every engine
-       does it, and none does it on a jump without a reload. */
-    for (let fold = el.parentElement?.closest("details"); fold; fold = fold.parentElement?.closest("details")) fold.open = true;
-    /* scroll-margin-top keeps the sticky header away from the example;
-       without it the jump lands a little too high. */
-    el.scrollIntoView({ block: "start", behavior: "auto" });
-    /* An anchor that names no example is a plain scroll: the reader asked for
-       a heading, not for a place to be shown. */
-    if (example === null) return;
-    /* Attribute off, force layout, attribute on again: otherwise the mark does
-       not run a second time on a second jump to the same example. */
-    el.removeAttribute("data-highlight");
-    void (el as HTMLElement).offsetWidth;
-    el.setAttribute("data-highlight", "");
-    const t = window.setTimeout(() => el.removeAttribute("data-highlight"), 1400);
-    return () => window.clearTimeout(t);
-  }, [place.pageId, place.example, jump]);
-
-  /* THE ACTIVE ENTRY STAYS IN VIEW, on the first load and on every move - and
-     when the drawer opens. */
-  const railRef = useRef<HTMLElement>(null);
-  const narrow = useNarrow();
-  useEffect(() => {
-    if (railRef.current !== null) activeInView(railRef.current);
-  }, [place.pageId, jump, narrow]);
-
-  /* THE DRAWER. At 900 px and less the sidebar does not stand under the page
-     but in a modal dialog behind the header's Menu button - the same `rail`
-     below, placed there instead of beside the content. The platform's dialog
-     holds the focus, closes on Escape and gives the focus back to the button.
-     The shell adds the rest: a click on the backdrop closes it, a page chosen
-     in it closes it with the focus on the new page's heading - where a screen
-     reader announces the arrival - and a window widened past 900 px closes
-     it, since the standing sidebar takes over. Plain elements, not the
-     library's `Drawer`: the rule at the top of this file. */
-  const drawerRef = useRef<HTMLDialogElement>(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const openDrawer = () => {
-    const drawer = drawerRef.current;
-    const rail = railRef.current;
-    if (drawer === null || rail === null) return;
-    drawer.showModal();
-    setDrawerOpen(true);
-    activeInView(rail);
-    rail.querySelector<HTMLElement>('[aria-current="page"]')?.focus({ preventScroll: true });
-  };
-  /* Any move while the drawer is open was chosen in it: the drawer is modal. */
-  useEffect(() => {
-    const drawer = drawerRef.current;
-    if (drawer === null || !drawer.open) return;
-    drawer.close();
-    document.querySelector<HTMLElement>(".shellContent h1")?.focus({ preventScroll: true });
-  }, [place.pageId, place.example, jump]);
-  useEffect(() => {
-    if (!narrow && drawerRef.current?.open === true) drawerRef.current.close();
-  }, [narrow]);
+  /* The hooks stand in the order their effects must run in: the palette's
+     fetches, the route (address, then landing on the target), the drawer
+     (closing on a move, which follows the route's landing and its focus) and
+     the head. */
+  const candidates = usePaletteSearch(demo, paletteOpen, SITE);
+  const { place, jump, goTo } = useRoute(demo.addresses);
+  const { railRef, drawerRef, drawerOpen, setDrawerOpen, openDrawer, narrow } = useDrawer(place, jump);
 
   /* Cmd-K/Ctrl+K as everywhere, "/" as in every documentation - including the
      rule that "/" in a text field stays a slash. */
   useCommandPaletteShortcut(useCallback(() => setPaletteOpen(true), []));
 
   const page = ALL_PAGES.find((p) => p.id === place.pageId);
-
-  /* THE HEAD FOLLOWS THE PAGE - the one place that does it, on the first
-     load and on every move: the title, by the formula the prerendering writes
-     it with, and the one alternate link to the page's Markdown twin,
-     which the prerendering writes as well and a
-     page outside it lacks. An example anchor changes neither: it stands in
-     its page's text. */
-  const title = pageTitle({ name: demo.packageName, description: demo.description }, page?.name);
-  const twin = hrefOf(twinOfPlace(page === undefined ? "" : `/${page.id}`));
-  useEffect(() => {
-    document.title = title;
-    let link = document.head.querySelector<HTMLLinkElement>('link[rel="alternate"][type="text/markdown"]');
-    if (link === null) {
-      link = document.createElement("link");
-      link.rel = "alternate";
-      link.type = "text/markdown";
-      document.head.append(link);
-    }
-    link.setAttribute("href", twin);
-  }, [title, twin]);
+  const title = useDocumentHead(demo, page);
 
   const rail = (
     <nav className="rail" aria-label="Components" ref={railRef}>
@@ -551,6 +305,7 @@ export function Shell({ demo, sentence, german }: ShellProps) {
               const [path = "/", hash = ""] = address.slice(ownId.length + 1).split("#");
               const { page: target, example } = fromPlace(placeOfLocation(path, hash));
               goTo(target?.id ?? SCENARIOS, example);
+              setPaletteOpen(false);
             }}
           />
         </LanguageProvider>

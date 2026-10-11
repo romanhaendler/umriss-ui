@@ -62,6 +62,7 @@ import { apiIndexFaults, documentFaults, forwarderHtml, frontFaults, searchFault
 import { adrLinksOf, siteLeaks } from "../packages/demo/src/tooling/references.ts";
 import { DOCUMENTS, newestRelease, renderDocument } from "../packages/demo/src/tooling/documents.ts";
 import { EDIT_LINK, editHref } from "../packages/demo/src/tooling/edit.ts";
+import { escapeAttribute as escape } from "../packages/demo/src/tooling/escape.ts";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SITE = join(ROOT, "site");
@@ -87,8 +88,6 @@ const PREVIEWS = "previews";
    into their assets; the front page and the 404 page take this copy. */
 const FAVICON = "favicon.svg";
 const FAVICON_LINK = `<link rel="icon" type="image/svg+xml" href="${new URL(FAVICON, HOME).pathname}" />`;
-
-const escape = (text) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 /** What every page's head says about itself to a search engine. */
 function headOf({ title, description, url }) {
