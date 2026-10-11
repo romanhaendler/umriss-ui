@@ -22,7 +22,9 @@ is one of the internal numbers from before core's first publication as `0.1.0`
 
 ---
 
-## Unreleased
+## 0.14.0 – Snoozing offered, and a search that takes its line (Oct. 2026)
+
+Needs `@umriss-ui/core` 0.31; the peer range moves to `^0.31.0`.
 
 ### Added
 

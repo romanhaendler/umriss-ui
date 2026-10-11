@@ -1,6 +1,6 @@
 # Snooze as an operator's action in the AlarmList
 
-Status: ready-for-human
+Status: done
 
 ## Problem
 
@@ -47,3 +47,7 @@ applies nothing.
 - `onSnooze` reports only the alarms that `snooze()` would change; the others ticked are silently left out.
 - `until` is as-of plus duration, so a stale `asOf` in the model gives a stale end; the application may of course refuse or recompute.
 - Visual: the bar now may hold three buttons; no baselines were taken (no Playwright run).
+
+## Comments
+
+**Accepted and released (2026-10-11).** The maintainer checked it by hand on the running demo ("Alles händisch geprüft, sieht gut aus") and took the decisions above as they stand; released in @umriss-ui/table 0.14.0 and @umriss-ui/core 0.31.0.

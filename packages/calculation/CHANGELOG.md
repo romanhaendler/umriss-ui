@@ -11,6 +11,12 @@ under a heading "Changed" of its own, no matter which digit rose.
 
 ---
 
+## 0.7.1 – Core 0.31.0 (Oct. 2026)
+
+Needs `@umriss-ui/core` 0.31; the peer range moves to `^0.31.0`. Nothing else changes for a caller.
+
+---
+
 ## 0.7.0 – Density (Oct. 2026)
 
 A calculation beside a compact table stood a third larger than it, on the same

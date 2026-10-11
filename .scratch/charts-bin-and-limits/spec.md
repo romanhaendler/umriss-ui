@@ -1,6 +1,6 @@
 # charts: `bin()` and limits a reader can reach
 
-Status: ready-for-human
+Status: done
 
 ## Problem
 
@@ -57,3 +57,7 @@ Status: ready-for-human
 - The summary change on existing charts with labelled limits (`limitList` is a new required key of `ChartsWording`, so a hand-written wording must add it).
 - Visual check of the limit rows in the tooltip (`uc-tooltip-total` reuse) and of the histogram bars touching at `barWidth` 0.94; no screenshots were taken (no browser run).
 - `limits` is read when a hit changes; toggling the prop with a tooltip open shows on the next hit.
+
+## Comments
+
+**Accepted and released (2026-10-11).** The maintainer checked it by hand on the running demo ("Alles händisch geprüft, sieht gut aus") and took the decisions above as they stand; released in @umriss-ui/charts 0.15.0.
