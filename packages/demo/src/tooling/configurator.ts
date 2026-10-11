@@ -1,4 +1,4 @@
-/* The configurator, as data (.scratch/configurator).
+/* The configurator, as data.
 
    A configurator file names props and nothing about them: which control a
    prop becomes, what values it offers and where it starts all come from the

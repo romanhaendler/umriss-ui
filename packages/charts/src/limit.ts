@@ -5,7 +5,7 @@
    and the answer has to be on the tile and not in the reader's head.
 
    The same rule stands a second time in @umriss-ui/core. That is deliberate and
-   not an oversight: charts may import nothing from ui (R-1.2), and making ui
+   not an oversight: charts may import nothing from ui, and making ui
    depend on charts for thirty lines of comparison arithmetic would pull a canvas
    library into the bundle of every consumer who only wanted a coloured number.
    The two are held together by a case table in tests-unit/limitCases.ts, from

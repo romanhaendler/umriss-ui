@@ -2,8 +2,7 @@
 
 /* Sections as rows divided by hairlines, not as cards: the accordion stands
    on a surface - a card, a drawer - and adds no depth of its own. The chevron
-   turns on the path transition, the height unfolds on the sheet's duration
-   (visuelle-wertigkeit 02). */
+   turns on the path transition, the height unfolds on the sheet's duration. */
 
 @layer umriss.components {
   .accordion {
@@ -90,8 +89,7 @@
     color: var(--u-color-text-secondary);
   }
 
-  /* The line between two sections is a box-shadow, which forced colours drop
-     (forced-colors 02): it becomes a border there, a pixel of height the
+  /* The line between two sections is a box-shadow, which forced colours drop: it becomes a border there, a pixel of height the
      contrast mode alone pays. */
   @media (forced-colors: active) {
     .item + .item {

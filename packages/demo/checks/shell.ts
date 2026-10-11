@@ -9,18 +9,15 @@
    `checkShell` with the pages and queries it can be checked against in THAT
    demo. The promises are the same; only the names are not.
 
-   WHAT DELIBERATELY CHANGED ABOUT THE PALETTE (`command-palette` 07). The
-   palette is no longer a private function of this shell but `CommandPalette`
-   from the library. Two of the four tests here checked behaviour this work
-   package deliberately changed; the changes stand at the test in question, so
-   that a reader can tell an improvement from a regression:
+   The palette is `CommandPalette` from the library. Two of its behaviours
+   are deliberate and stand at the test in question:
 
-   1. RESTING STATE. Before, every candidate stood there ahead of the first
-      character. Now none does. A list that is already full can only shrink -
-      the growing that makes the window feel alive cannot be produced at all.
-   2. SUBSEQUENCE INSTEAD OF SUBSTRING. `dtp` used to find nothing and now
-      finds `DateTimePicker`. The price is that a search finds more than it
-      used to - which is why the palette marks the characters it hit. */
+   1. RESTING STATE. Ahead of the first character no candidate stands there. A
+      list that is already full can only shrink - the growing that makes the
+      window feel alive could not be produced at all.
+   2. SUBSEQUENCE INSTEAD OF SUBSTRING. `dtp` finds `DateTimePicker`. The
+      price is that a search finds more than a substring would - which is why
+      the palette marks the characters it hit. */
 
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
@@ -76,22 +73,21 @@ export interface ShellProbes {
       page and its anchor `<Type>-<prop>` - where the demo has one. */
   foldedRow?: { pageId: string; id: string };
   /** Another library's word for a page, which only its lede carries
-      (.scratch/one-search) - where the demo has one. */
+      - where the demo has one. */
   synonyms?: readonly (NamedPage & { query: string })[];
   /** A row of a reference table and what finds it: a token by part of its
       name, a wording key by its English or German text - its label, its page
-      and the row's anchor (.scratch/one-search 06) - where the demo has one. */
+      and the row's anchor - where the demo has one. */
   rows?: readonly { query: string; label: string; pageId: string; anchor: string }[];
   /** Finds in another package on the built site: what is typed, the find's
-      group and label, and the site's address it opens (.scratch/one-search
-      03) - where the demo has them. */
+      group and label, and the site's address it opens - where the demo has them. */
   elsewhere?: readonly { query: string; group: string; label: string; address: string }[];
   /** A prop of this package: what is typed, the find's label and group
       (`<package> · <Type>`), and the page and anchor `<Type>-<prop>` of its
-      row (.scratch/one-search 04). */
+      row. */
   prop: { query: string; label: string; group: string; pageId: string; id: string };
   /** An export that only the API index shows: what is typed, the find's
-      label and its anchor on the index (.scratch/one-search 05). */
+      label and its anchor on the index. */
   exported: { query: string; label: string; anchor: string };
   /** Where the demo's components read core's language and the header carries
       the EN/DE switch: a page, texts the library writes on it and names of
@@ -104,7 +100,7 @@ export interface ShellProbes {
   };
 }
 
-/* ON THE BUILT SITE (.scratch/one-search 03). A demo of the test build stands
+/* ON THE BUILT SITE. A demo of the test build stands
    alone at `/`, with no site above it, and searches its own package only. The
    other four come from the site's index, which only `pnpm build:pages`
    writes. These probes hand that build (`site/`) to the browser at the site's
@@ -224,7 +220,7 @@ test("history carries: back and forward again", async ({ page }) => {
   await expect(page.locator(`[data-block="${p.neighbours[1].pageId}"]`)).toBeVisible();
 });
 
-/* THE HEAD FOLLOWS THE PAGE (.scratch/pages-as-markdown 02). The title and
+/* THE HEAD FOLLOWS THE PAGE. The title and
    the one alternate link to the page's Markdown twin are set in one place of
    the shell, on the first load and on every move; the twin itself is a file
    the server serves at that address. The title is the very one the
@@ -314,7 +310,7 @@ test("the address of a scenario brings it into view", async ({ page }) => {
   await expect(page.locator(`[data-scenario="${p.scenario}"]`)).toBeInViewport();
 });
 
-/* "On this page" (page-orientation 01). From 1300 px a column beside the
+/* "On this page". From 1300 px a column beside the
    page, narrower a closed disclosure under its head. */
 const onThisPage = (page: Page) => page.getByRole("navigation", { name: "On this page" });
 
@@ -470,7 +466,7 @@ test("from a stage of 640 px the marks stand at their corners and a table keeps 
   await expect(page.locator(`[data-scenario="${p.pinnedScenario}"] td[style*="--u-table-pin"]`).first()).toBeAttached();
 });
 
-/* Previous and next (page-orientation 02): at the foot of every page, in the
+/* Previous and next: at the foot of every page, in the
    sidebar's order across rubrics. The chain is read off the sidebar, so it
    needs no probe - its order IS the order to follow. */
 const turn = (page: Page) => page.getByRole("navigation", { name: "Previous and next page" });
@@ -521,7 +517,7 @@ test("the chain begins at the scenarios page and ends at the last page", async (
   await expect(turn(page).getByRole("link", { name: /^Next/ })).toHaveCount(0);
 });
 
-/* A fold never hides a target (.scratch/props-table-hygiene, 02): the shell
+/* A fold never hides a target: the shell
    opens the folded group before it scrolls, on a full load and on a jump
    without one alike. */
 test("the address of a row in a folded group opens the group and shows the row", async ({ page }) => {
@@ -578,9 +574,7 @@ test("the palette filters and jumps", async ({ page }) => {
   const field = page.getByRole("combobox", { name: "Search umriss-ui" });
   await expect(field).toBeFocused();
 
-  /* CHANGED (see the head, point 1): every entry used to stand here. The
-     empty query is now not one that matches everything but one that matches
-     nothing. */
+  /* The empty query matches nothing, not everything (see the head, point 1). */
   await expect(page.getByRole("dialog").getByRole("option")).toHaveCount(0);
 
   await field.fill(p.palettePage.query);
@@ -656,7 +650,7 @@ const findOf = (page: Page, label: string, group: string) => {
   return page.getByRole("dialog").getByRole("option", { name: new RegExp(`^${literal(label)}\\s*${literal(group)}$`) });
 };
 
-/* A prop's find lands on its row (.scratch/one-search 04) - in a folded
+/* A prop's find lands on its row - in a folded
    group too, which the jump opens. */
 test(`a prop's name finds its row: ${p.prop.label} of ${p.prop.group}`, async ({ page }) => {
   await page.keyboard.press("ControlOrMeta+k");
@@ -667,8 +661,7 @@ test(`a prop's name finds its row: ${p.prop.label} of ${p.prop.group}`, async ({
   await expect(page.locator(`[id="${p.prop.id}"]`)).toBeInViewport();
 });
 
-/* An export's find lands on its signature in the API index
-   (.scratch/one-search 05). */
+/* An export's find lands on its signature in the API index. */
 test(`an export's name finds its entry in the API index: ${p.exported.label}`, async ({ page }) => {
   await page.keyboard.press("ControlOrMeta+k");
   const field = page.getByRole("combobox", { name: "Search umriss-ui" });
@@ -725,9 +718,8 @@ test("the palette finds abbreviations and is operable with the arrows", async ({
   await page.keyboard.press("/");
   const field = page.getByRole("combobox", { name: "Search umriss-ui" });
 
-  /* CHANGED (see the head, point 2): the query used to be "tabelle" and hit
-     as a substring. `dtp` is the case the module was built for - as a
-     substring it found nothing. */
+  /* A subsequence (see the head, point 2): `dtp` is the case the module was
+     built for - as a substring it finds nothing. */
   await field.fill(p.abbreviation.query);
   const finds = page.getByRole("dialog").getByRole("option");
   await expect(finds.first()).toContainText(p.abbreviation.find);
@@ -781,7 +773,7 @@ test("the resting pointer does not take the tick away from the keyboard", async 
      `hover()` and not `mouse.move()` to a place measured by hand: the list
      grows animated, and a box measured while it does points somewhere else by
      the time the movement runs. `hover()` waits until the row has stood still
-     for two frames. Walked into once under full load. */
+     for two frames. */
   await finds.nth(3).hover();
   await expect(finds.nth(3)).toHaveAttribute("aria-selected", "true");
 
@@ -794,16 +786,11 @@ test("the resting pointer does not take the tick away from the keyboard", async 
 });
 
 test("the field carries no focus ring", async ({ page }) => {
-  /* The pane IS the focus indicator. The base layer set the ring in
-     global.css as a `box-shadow`, not as an `outline` (it is gone since
-     ADR-0021, the lesson is not) - so an `outline: none`
-     alone left it standing, and because the field fills the pane's width,
-     `overflow: hidden` cut it away left, right and top. What remained was a
-     four-pixel bar in the accent colour under the field, looking like a very
-     thick coloured rule.
-
-     No screenshot would have found it: the baseline was taken with the defect
-     in it. That is why the computed style is asked here rather than the image
+  /* The pane IS the focus indicator. A ring drawn as a `box-shadow` is not
+     removed by `outline: none`, and because the field fills the pane's width,
+     `overflow: hidden` would cut it away left, right and top, leaving a
+     four-pixel bar in the accent colour under the field. A screenshot cannot
+     tell, so the computed style is asked here rather than the image
      compared. */
   await page.keyboard.press("ControlOrMeta+k");
   const field = page.getByRole("combobox", { name: "Search umriss-ui" });
@@ -1055,7 +1042,7 @@ test("with storage throwing, the switch still switches", async ({ page }) => {
   expect(errors).toEqual([]);
 });
 
-/* THE LANGUAGE OF THE COMPONENTS (.scratch/language-switch). Where a demo's
+/* THE LANGUAGE OF THE COMPONENTS. Where a demo's
    components read core's language, the header carries EN and DE, and DE
    renders the examples and the scenarios in the library's German. What is
    asserted is what a reader reads: the library's words and notation, the

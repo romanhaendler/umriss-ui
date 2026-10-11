@@ -1,10 +1,8 @@
 /* The copy button - one of them, in two places.
 
    The import line in the page head and every code block have the same button,
-   and it was once written twice: the same 1600 ms twice, the same class twice,
-   but the state attribute only once. The line in the head therefore stayed
-   silent when the copying succeeded, and the rule for it in `page.css` ran
-   into nothing.
+   and it is written once: one 1600 ms, one class, one state attribute, so
+   that the rule for it in `page.css` reaches both.
 
    That same fault had reappeared in a second form and is repaired here: the
    component wrote `data-state` while the stylesheet still selected

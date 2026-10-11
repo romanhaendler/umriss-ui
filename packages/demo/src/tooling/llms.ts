@@ -1,5 +1,4 @@
-/* The demo as text for a coding agent: `llms.txt` and `llms-full.txt`
-   (.scratch/ai-readable-docs, A1).
+/* The demo as text for a coding agent: `llms.txt` and `llms-full.txt`.
 
    Nothing here is written twice. The pages come from the outline, the tables
    from the same `props.json` the demo renders, the examples from the same files
@@ -236,7 +235,7 @@ export interface SitePage {
   twin: string;
 }
 
-/** A page's Markdown twin (.scratch/pages-as-markdown), below the package's
+/** A page's Markdown twin, below the package's
     directory on the site: `gauge.md`, `index.md` for the scenarios page. */
 export interface Twin {
   path: string;
@@ -296,7 +295,7 @@ export function renderLlms({ packageDir, outline: written, tables, moved = {}, r
   pages: SitePage[];
   forwarders: Forwarder[];
   twins: Twin[];
-  /** The package's search fragment (.scratch/one-search). */
+  /** The package's search fragment. */
   search: SearchEntry[];
   /** The API index the app mounts, where the outline has one. */
   apiIndex?: ApiIndexModel;

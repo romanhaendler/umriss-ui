@@ -1,5 +1,4 @@
-/* <DataTable> - the chart's values as a table, on demand (charts-alternatives
-   01, C1).
+/* <DataTable> - the chart's values as a table, on demand.
 
    A reader who wants every value at once should not have to walk a thousand
    positions with the arrow keys. The chart gets a disclosure key - in the
@@ -113,6 +112,6 @@ function DataTableInner({ scene }: { scene: ChartScene }): ReactNode {
     at once. Place it inside a `Chart`. */
 export function DataTable(): ReactNode {
   const scene = useChartScene("DataTable");
-  if (scene === null) return null; // PROD outside a Chart (R-2.3)
+  if (scene === null) return null; // PROD outside a Chart
   return <DataTableInner scene={scene} />;
 }

@@ -8,9 +8,7 @@
   /* Its width never follows its chips (ADR-0041): the chips follow the width.
      Where the place gives none, the field is its natural width - the room for
      the chips plus the button with the chevron beside them - and choosing or
-     removing a value moves nothing around it. It used to be 83, 96 and then
-     133 px for none, one and two chosen values in a toolbar, and it showed one
-     chip there whatever room the toolbar had. The type size stands here so that
+     removing a value moves nothing around it. The type size stands here so that
      a character is the field's own; every text inside sets its own. Twenty
      characters, the count of every field that shows text: a chip costs more
      than its letters - its padding and the room its cross keeps - and twenty
@@ -140,8 +138,7 @@
   }
 
   /* The focused chip carries the ring; the danger surface is the pointer's
-     alone. It stood on the focus as well, and focus and hover could not be told
-     apart (visuelle-wertigkeit 04). */
+     alone: on the focus as well, focus and hover could not be told apart. */
   .chip:hover:not(:disabled) {
     background: var(--u-color-danger-subtle);
     color: var(--u-color-danger-text);
@@ -335,7 +332,7 @@
   }
 
   /* A segment of a switch, like a tab: no surface of its own until chosen, so
-     hover darkens the type and the press chooses (visuelle-wertigkeit 04). */
+     hover darkens the type and the press chooses. */
   .scope:hover {
     color: var(--u-color-text);
   }
@@ -409,7 +406,7 @@
   }
 
   /* Chips and the counter are grounds, and forced colours repaint them with
-     the page's (forced-colors 02): three words would stand loose in the
+     the page's: three words would stand loose in the
      field. An edge keeps each one a chip. */
   @media (forced-colors: active) {
     .chip,

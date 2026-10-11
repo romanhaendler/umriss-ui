@@ -13,7 +13,7 @@
    say nowhere that only one of them can hold; real radio inputs say "radio,
    1 of 2, selected", are one tab stop, and the arrow keys move and choose.
    The mechanics are the radio group's own, shared through `useRadioGroup`
-   (field-row-alignment 04). */
+. */
 
 import { forwardRef } from "react";
 import type { HTMLAttributes, ReactNode } from "react";

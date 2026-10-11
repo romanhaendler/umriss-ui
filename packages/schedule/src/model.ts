@@ -209,7 +209,7 @@ export interface LaneIntent {
 }
 
 /** Put work on the plan that was not on it: the answer to a drag from outside
-    the schedule (schedule-refinement 07). It carries no subtask id - there is
+    the schedule. It carries no subtask id - there is
     no subtask yet; the caller creates one, with its own identity, from
     `subtaskFromPlace`. */
 export interface PlaceIntent {

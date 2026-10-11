@@ -1,9 +1,7 @@
 /* Where a floating surface portals to - in one place.
 
-   The rule stood only in the popover until library-audit 01, and the tooltip
-   had been forgotten when that was rebuilt: it went on portalling to the body
-   and lay behind the dialog inside a modal. Two callers writing the same order
-   by hand drift apart eventually; that has already happened here once.
+   A tooltip portalling to the body would lie behind the dialog inside a modal.
+   Two callers writing the same order by hand drift apart eventually.
 
    Internal, like `computePosition`. */
 

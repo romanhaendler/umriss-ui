@@ -35,8 +35,8 @@ export function exampleAddresses(folder: string): ExampleAddress[] {
 }
 
 /** The first example of every page - the simplest, the component at rest.
-    What each demo photographs a second time under forced colours
-    (forced-colors 02, 03): every example twice over would double the suite
+    What each demo photographs a second time under forced colours:
+    every example twice over would double the suite
     for pictures that differ only where a forced-colours rule stands, and
     those states get pictures of their own. */
 export function firstExamples(addresses: readonly ExampleAddress[]): ExampleAddress[] {
@@ -45,7 +45,7 @@ export function firstExamples(addresses: readonly ExampleAddress[]): ExampleAddr
 }
 
 /** The scenarios' anchors, in their order - from `demo/scenarios/`, which a
-    demo without scenarios does not have yet. */
+    demo without scenarios does not have. */
 export function scenarioIds(folder: string): string[] {
   if (!existsSync(folder)) return [];
   return readdirSync(folder)

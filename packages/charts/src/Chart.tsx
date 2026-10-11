@@ -1,4 +1,4 @@
-/* Chart - container and ChartScene provider (4.1, R-2.1, R-2.8-R-2.10).
+/* Chart - container and ChartScene provider.
 
    Structure of the DOM:
      .uc-root      flex column; the --uc-* variables live here (theme root)
@@ -9,8 +9,8 @@
          .uc-tooltip              tooltip (HTML)
        <Legend/>   optional, placed above or below the plot area through CSS order
 
-   Canvas access happens exclusively inside effects (SSR-safe, R-7.4).
-   Accessibility baseline (R-7.6): role="img" + aria-label on the container,
+   Canvas access happens exclusively inside effects (SSR-safe).
+   Accessibility baseline: role="img" + aria-label on the container,
    canvas elements aria-hidden. */
 
 import {
@@ -51,8 +51,7 @@ export interface ChartProps {
   height?: number;
   /** Outer spacing of the plot area in CSS pixels. */
   padding?: number | Partial<Padding>;
-  /** Required in DEV through a warning.
-      @remarks R-7.6 */
+  /** Required in DEV through a warning. */
   ariaLabel?: string;
   /** Goes to the root element, as it does everywhere in this workspace. */
   className?: string;
@@ -89,13 +88,11 @@ export interface ChartProps {
       sending each other their view (`useChart`'s `onViewChange` and
       `setView`). */
   syncId?: string;
-  /** Instrumentation for the benchmark page; not needed otherwise.
-      @remarks R-5.1 */
+  /** Instrumentation for the benchmark page; not needed otherwise. */
   onPerf?: (perf: ChartPerf) => void;
   /** The axes, series and companions of this chart. They draw nothing
       themselves: each registers its configuration and the scene draws it,
-      and the order in the JSX is the drawing order.
-      @remarks R-2.1 */
+      and the order in the JSX is the drawing order. */
   children?: ReactNode;
 }
 
@@ -183,7 +180,7 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
     });
     observer.observe(plot);
 
-    // Leaving the window ends the hover just as pointerleave does (R-4.10).
+    // Leaving the window ends the hover just as pointerleave does.
     const onBlur = (): void => scene.pointerLeave();
     window.addEventListener("blur", onBlur);
     const onTapOutside = (e: PointerEvent): void => {
@@ -204,8 +201,7 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
     };
   }, [scene]);
 
-  // Taking over data and configuration: only a scene entry plus a dirty flag
-  // (R-2.2).
+  // Taking over data and configuration: only a scene entry plus a dirty flag.
   useEffect(() => {
     scene.setData(data);
   }, [scene, data]);
@@ -236,7 +232,7 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
   }, [scene, syncId]);
 
   // Runs after the effects of all children: only then is every axis and series
-  // registered (R-4.12, R-4.13).
+  // registered.
   useEffect(() => {
     scene.validate();
   });
@@ -276,7 +272,7 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
 
   const onPointerMove = (e: ReactPointerEvent<HTMLDivElement>): void => {
     // offsetX/offsetY are already relative to .uc-plot - no
-    // getBoundingClientRect, no layout read in the hover path (R-5.4). The hit
+    // getBoundingClientRect, no layout read in the hover path. The hit
     // test does allocate: a handful of small objects per move, whatever the
     // point count - about 3 µs per move at 3 × 1,000,000 points, measured, a
     // five-thousandth of a frame. Pooling them would buy nothing visible.
@@ -293,8 +289,7 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
       >
         {/* The image is the plot area, not the root: the root contains the
             legend, and the descendants of an image are presentational to a
-            screen reader. The legend stands beside it and stays reachable
-            (library-audit 05). */}
+            screen reader. The legend stands beside it and stays reachable. */}
         <div
           ref={plotRef}
           className="uc-plot"
@@ -333,7 +328,7 @@ export function Chart(props: ChartProps & { data: readonly unknown[]; scene: Cha
           <TooltipHtml scene={scene} />
         </div>
         <ShowAll scene={scene} plotRef={plotRef} label={wording.showAll} />
-        {/* What a screen reader hears (charts-a11y 03): the readout after a
+        {/* What a screen reader hears: the readout after a
             key, and the summary the plot is described by. Beside the plot,
             not in it: an image's descendants are presentational. */}
         <div ref={readoutRef} className="uc-sr" aria-live="polite" />

@@ -64,7 +64,7 @@
   }
 
   /* The grip on the line's middle says the line can be taken hold of: quiet
-     at rest, clear under the pointer and while held (core-layout-extras 04). */
+     at rest, clear under the pointer and while held. */
   .grip {
     position: absolute;
     top: 50%;
@@ -88,9 +88,8 @@
     box-shadow: var(--u-focus-ring);
   }
 
-  /* The line is a ground, and forced colours repaint it with the page's
-     (forced-colors 02): the panes would meet with nothing between them. It
-     takes the system's text colour. */
+  /* The line is a ground, and forced colours repaint it with the page's:
+     the panes would meet with nothing between them. It takes the system's text colour. */
   @media (forced-colors: active) {
     .separator::before {
       background: CanvasText;

@@ -1,13 +1,13 @@
 /* ChartScene - the heart of the library.
 
    Responsible for:
-   - The registration model (R-2.1): series, axes, legend and tooltip register and
+   - The registration model: series, axes, legend and tooltip register and
      deregister themselves with a configuration; registration order is drawing
      order, palette assignment and band stacking.
-   - Materialisation (R-2.7): accessors run exactly once per change of data or
-     accessor, into Float64Arrays; gaps as NaN (R-2.5); a DEV sortedness check
-     once per change of data (R-2.6).
-   - Canvas setup (R-2.8/2.9), resize (R-2.10), scheduling (R-2.11).
+   - Materialisation: accessors run exactly once per change of data or
+     accessor, into Float64Arrays; gaps as NaN; a DEV sortedness check
+     once per change of data.
+   - Canvas setup, resize, scheduling.
    - Layout (section 3) and drawing (draw.ts).
    - Hit testing, crosshair and tooltip positioning (4.4).
 
@@ -16,7 +16,7 @@
    would be re-materialised on every parent render (unacceptable at a million
    points). That is why updateSeries/updateAxis compare field by field; accessors
    count as equal when their source text is equal - a native or bound function,
-   whose text is "[native code]", by identity. Known limit, not solved (Q10): an
+   whose text is "[native code]", by identity. Known limit, not solved: an
    accessor that reads a changed closure variable without its source text or its
    data reference changing is not re-materialised - in that case the app must
    pass a new data reference. The same holds for `tickFormat` and the tooltip's
@@ -398,7 +398,7 @@ const EMPTY_HOVER_SNAPSHOT: HoverSnapshot = {
   limits: [],
 };
 
-/** Tolerance within which hits of different series are grouped (R-4.7). */
+/** Tolerance within which hits of different series are grouped. */
 const GROUP_TOLERANCE = 4;
 
 /** The stroke before a limit's label in a colour of its own, and its gap to
@@ -771,12 +771,12 @@ function domainEqual(
   return false;
 }
 
-/** The readout waits for the keys to rest this long (charts-a11y R11). */
+/** The readout waits for the keys to rest this long. */
 const READOUT_REST = 150;
 /** The summary waits for layouts - a zoom - to rest this long. */
 const SUMMARY_REST = 100;
 
-/** The keys that walk a course, a band, bars or points (charts-a11y Q2). */
+/** The keys that walk a course, a band, bars or points. */
 const MOVES: Readonly<Record<string, Move>> = {
   ArrowRight: "next",
   ArrowLeft: "previous",
@@ -786,7 +786,7 @@ const MOVES: Readonly<Record<string, Move>> = {
   PageUp: "pagePrevious",
 };
 
-/** The keys that walk a matrix (R7). */
+/** The keys that walk a matrix. */
 const CELL_STEPS: Readonly<Record<string, "left" | "right" | "up" | "down">> = {
   ArrowLeft: "left",
   ArrowRight: "right",
@@ -829,8 +829,7 @@ export class ChartScene {
   private seriesCtx: CanvasRenderingContext2D | null = null;
   private overlayCtx: CanvasRenderingContext2D | null = null;
   private tooltipEl: HTMLElement | null = null;
-  /** The readout (polite live region) and the summary the plot is described
-      by (charts-a11y 03). */
+  /** The readout (polite live region) and the summary the plot is described by. */
   private readoutEl: HTMLElement | null = null;
   private summaryEl: HTMLElement | null = null;
   private readoutTimer: ReturnType<typeof setTimeout> | null = null;
@@ -898,9 +897,9 @@ export class ChartScene {
   private readonly layoutSubscribers = new Set<() => void>();
   private readonly hoverSubscribers = new Set<() => void>();
 
-  /* ---------- Instrumentation (R-5.1) ---------- */
+  /* ---------- Instrumentation ---------- */
   private perf: ChartPerf = { materializeMs: 0, seriesDrawMs: 0, points: 0 };
-  /* The palette follows the name (library-audit 05). The table only grows: a name
+  /* The palette follows the name. The table only grows: a name
      that goes away keeps its place, so that it finds it again on its return and
      no other name gets it in the meantime. */
   private readonly slotsByName = new Map<string, number>();
@@ -983,7 +982,7 @@ export class ChartScene {
       else if (!this.slotTaken(known, entry)) entry.slot = known;
     }
     entry.config = config;
-    if (equal) return; // R-2.2: no dirty flag without a change of substance
+    if (equal) return; // no dirty flag without a change of substance
     // Another lane is another category of the y axis: they are read anew.
     if (laneOf(previous) !== laneOf(config)) this.materialsDirty = true;
     entry.buckets = null; // the colouring may have changed
@@ -1788,7 +1787,7 @@ export class ChartScene {
     this.summaryTimer = null;
   }
 
-  /** Detect a change of DPR (a change of monitor): rebind matchMedia (R-2.9). */
+  /** Detect a change of DPR (a change of monitor): rebind matchMedia. */
   private rebindDprWatch(): void {
     if (typeof matchMedia !== "function") return;
     this.dprMedia?.removeEventListener("change", this.onDprChange);
@@ -1797,7 +1796,7 @@ export class ChartScene {
     this.dprMedia.addEventListener("change", this.onDprChange);
   }
 
-  /** Called by the ResizeObserver; coalesced onto one rAF (R-2.10). */
+  /** Called by the ResizeObserver; coalesced onto one rAF. */
   requestResize(cssWidth: number, cssHeight: number): void {
     // Against the size still to come, not the one applied: a resize there and
     // back within one frame would otherwise leave the "there" pending.
@@ -1823,12 +1822,12 @@ export class ChartScene {
       canvas.style.width = `${this.cssWidth}px`;
       canvas.style.height = `${this.cssHeight}px`;
     }
-    // Every drawing coordinate in CSS pixels (R-2.9):
+    // Every drawing coordinate in CSS pixels:
     seriesCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
     overlayCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
-  /* ================= Scheduling (R-2.11) ================= */
+  /* ================= Scheduling ================= */
 
   markSeriesDirty(): void {
     this.seriesDirty = true;
@@ -1865,7 +1864,7 @@ export class ChartScene {
       this.theme = resolveTheme(this.themeRoot);
     }
     if (this.cssWidth <= 0 || this.cssHeight <= 0) {
-      // R-2.10: at size 0, neither draw nor throw. The HTML layer gets its state
+      // at size 0, neither draw nor throw. The HTML layer gets its state
       // all the same (the legend does not depend on the plot area); layoutDirty
       // stays set, and the next resize calculates the layout.
       if (this.layoutDirty) this.pushLayoutSnapshot();
@@ -1899,8 +1898,7 @@ export class ChartScene {
 
   /* ================= Layout ================= */
 
-  /** The effective grid default: only the first registered axis per orientation
-      (R-4.15). */
+  /** The effective grid default: only the first registered axis per orientation has a grid. */
   private gridDefault(): Map<number, boolean> {
     const out = new Map<number, boolean>();
     let firstX = true;
@@ -1914,7 +1912,7 @@ export class ChartScene {
     return out;
   }
 
-  /** Extent of an axis out of the series bound to it (R-4.13).
+  /** Extent of an axis out of the series bound to it.
 
       Materialises on demand and manages without the DOM - that is the seam at
       which extents across series kinds can be tested without asking a canvas.
@@ -2150,7 +2148,7 @@ export class ChartScene {
     if (entry.config.name !== undefined) return entry.config.name;
     // The last resort of the legend, and it stays one: the package has no text
     // layer, so every word it brings along itself is one word too many. Instead of
-    // replacing it, it is made conspicuous (library-audit 03).
+    // replacing it, it is made conspicuous.
     warnOnce(
       "series-without-name",
       `a series without a name is called "Series ${index + 1}" in the legend and the tooltip - the name belongs in \`name\`.`,
@@ -2577,7 +2575,7 @@ export class ChartScene {
   setHighlight(ids: readonly number[] | null): void {
     if (this.highlight === ids) return;
     this.highlight = ids;
-    // Not a mousemove path: a redraw of the series layer is allowed here (R-4.11).
+    // Not a mousemove path: a redraw of the series layer is allowed here.
     this.markSeriesDirty();
   }
 
@@ -2614,7 +2612,7 @@ export class ChartScene {
     this.hover = hit.state;
     this.hover.mouseX = x;
     this.hover.mouseY = y;
-    this.markOverlayDirty(); // R-2.11: a hover never touches the series layer
+    this.markOverlayDirty(); // a hover never touches the series layer
     const xAxis = this.findAxis("x", hit.primary.entry.config.xAxisId);
     if (xAxis !== null) this.share({ axisId: xAxis.id, value: xAxis.scale.fromPx(hit.state.hit.xPx) });
     if (key !== this.hoverKey) {
@@ -2631,7 +2629,7 @@ export class ChartScene {
     return true;
   }
 
-  /** The pointer went away. A point the keyboard set stays (charts-a11y R3). */
+  /** The pointer went away. A point the keyboard set stays. */
   pointerLeave(): void {
     if (this.activeBy === "keyboard") return;
     this.clearActive();
@@ -2663,7 +2661,7 @@ export class ChartScene {
       const xAxis = this.findAxis("x", config.xAxisId);
       const yAxis = this.findAxis("y", config.yAxisId);
       if (xAxis === null || yAxis === null) return;
-      // Mouse position in the axis space of this series (R-4.6).
+      // Mouse position in the axis space of this series.
       const targetX = xAxis.scale.fromPx(mouseX);
       const targetY = yAxis.scale.fromPx(mouseY);
       const hit = this.hitIn(entry, mat, xAxis, yAxis, mouseY, targetX, targetY, mode);
@@ -2782,7 +2780,7 @@ export class ChartScene {
     return { key, state, primary, chosen };
   }
 
-  /* ---------- The keyboard's walk (charts-a11y, ADR-0030) ----------
+  /* ---------- The keyboard's walk (ADR-0030) ----------
 
      The plot area is one tab stop; the keys move the Active point over the
      positions the pointer would hit (walk.ts), and a position becomes a hit by
@@ -2811,7 +2809,7 @@ export class ChartScene {
   }
 
   /** The focus came in: the walk starts at the newest position, unless the
-      pointer already stands somewhere (R1). A pointer's focus - a click - does
+      pointer already stands somewhere. A pointer's focus - a click - does
       not start it. */
   focus(byKeyboard: boolean): void {
     if (this.tooltip === null || !byKeyboard || this.hover !== null) return;
@@ -2877,7 +2875,7 @@ export class ChartScene {
     return false;
   }
 
-  /** Zoom and pan by key (Q6), only where an x axis is zoomable: each key
+  /** Zoom and pan by key, only where an x axis is zoomable: each key
       does what its gesture would. */
   private zoomKey(event: KeyboardEvent): boolean {
     if (!this.hasZoom()) return false;
@@ -2941,7 +2939,7 @@ export class ChartScene {
     } else this.showPosition(next, to);
   }
 
-  /** A matrix walks cell by cell in two dimensions (R7). At the top or
+  /** A matrix walks cell by cell in two dimensions. At the top or
       bottom of its column ↑/↓ go on to the chart's other series, so a matrix
       among them does not keep the keys. */
   private cellKey(key: string, emph: SeriesEntry): boolean {
@@ -3016,9 +3014,9 @@ export class ChartScene {
     if (speak) this.scheduleReadout();
   }
 
-  /* ---------- What is spoken (charts-a11y 03) ---------- */
+  /* ---------- What is spoken ---------- */
 
-  /** The readout, written once the keys rest (R11): a held key speaks where
+  /** The readout, written once the keys rest: a held key speaks where
       it stops. It reads what the tooltip shows, the emphasised series first. */
   private scheduleReadout(): void {
     if (this.readoutEl === null) return;
@@ -3117,7 +3115,7 @@ export class ChartScene {
   }
 
   /** Kind of content, series by name, the visible stretch, each series' range
-      in it and the keys (R10). A band has no range - its values are states. */
+      in it and the keys. A band has no range - its values are states. */
   private summaryText(): string {
     const w = this.wording;
     const series = this.walkable();
@@ -3340,7 +3338,7 @@ export class ChartScene {
   }
 
   /** After a layout - new data, a new domain -, the keyboard's point goes to
-      the nearest position still visible (Q6), or goes away. */
+      the nearest position still visible, or goes away. */
   private reapplyKey(): void {
     const emph = this.emphasised();
     const xAxis = emph === null ? null : this.findAxis("x", emph.config.xAxisId);
@@ -3933,7 +3931,7 @@ export class ChartScene {
           : nearestIndex(mat.x, n, targetX);
     if (index < 0) return null;
     const top = mat.y[index] as number;
-    if (Number.isNaN(top)) return null; // gaps are no hits (R-4.6)
+    if (Number.isNaN(top)) return null; // gaps are no hits
     const xValue = mat.x[index] as number;
     // A stacked point is marked at its top and named by its own value.
     const foot = entry.stacked === null || mat.y0 === null ? Number.NaN : (mat.y0[index] as number);
@@ -3950,7 +3948,7 @@ export class ChartScene {
     };
   }
 
-  /** R-4.9: 12 px to the right of the crosshair, flipping at the right edge,
+  /** 12 px to the right of the crosshair, flipping at the right edge,
       clamped vertically. */
   private positionTooltip(): void {
     const el = this.tooltipEl;

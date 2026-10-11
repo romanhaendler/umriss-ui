@@ -1,10 +1,10 @@
-/* Layout engine (section 3 of the handoff).
+/* Layout engine.
 
    Layout area = container size minus the axis bands on all four sides minus the
-   padding (R-3.1). Several axes on the same side stack from the inside outwards
-   in registration order, separated by a fixed gap (R-3.2).
+   padding. Several axes on the same side stack from the inside outwards
+   in registration order, separated by a fixed gap.
 
-   Order of the calculation (R-3.3), the resolved chicken-and-egg chain:
+   Order of the calculation, the resolved chicken-and-egg chain:
    1. The extents of every axis are already known (independent of the layout, out
       of the bound series; see scene.ts).
    2. X band heights: these depend only on the line height of the labels and on
@@ -15,7 +15,7 @@
    4. X ticks out of the plot width; a collision of the first or last label with
       the edge is resolved by shifting, never by cutting off.
    Every band size is rounded to a whole number and stabilised individually with
-   hysteresis (R-3.4). */
+   hysteresis. */
 
 import { LinearScale } from "./scale";
 import { formatTick } from "./format";
@@ -34,10 +34,10 @@ import type { TextSize } from "./measure";
 
 export const TICK_LEN = 5;
 export const TICK_GAP = 4;
-/** Fixed gap between stacked bands on the same side (R-3.2). */
+/** Fixed gap between stacked bands on the same side. */
 export const BAND_GAP = 8;
 export const TITLE_GAP = 4;
-/** A band shrinks only once it is at least this much too large (R-3.4). */
+/** A band shrinks only once it is at least this much too large. */
 export const HYSTERESIS = 8;
 
 export const CLASS_TICK = "uc-tick-label";
@@ -130,7 +130,7 @@ export interface LayoutInput {
   /** Axes in registration order. */
   axes: readonly AxisInput[];
   measure: (text: string, className: string) => TextSize;
-  /** Persistent hysteresis state per band key (R-3.4). */
+  /** Persistent hysteresis state per band key. */
   hysteresis: Map<string, number>;
 }
 
@@ -141,7 +141,7 @@ export const EMPTY_LAYOUT: LayoutResult = {
   axes: [],
 };
 
-/** Round to a whole number and stabilise with hysteresis (R-3.4). */
+/** Round to a whole number and stabilise with hysteresis. */
 function stabilize(key: string, needed: number, hysteresis: Map<string, number>): number {
   const next = Math.ceil(needed);
   const previous = hysteresis.get(key);
@@ -282,7 +282,7 @@ function labelsFor(
   return timeLabels(wall, stepOf(domain, tickCount));
 }
 
-/** A label's left edge, moved inside a container of `width` (R-3.3.5). */
+/** A label's left edge, moved inside a container of `width`. */
 export function insideContainer(left: number, labelWidth: number, width: number): number {
   return Math.min(Math.max(left, 0), Math.max(0, width - labelWidth));
 }
@@ -460,7 +460,7 @@ function layoutPass(
 
   const plot: Rect = { x: plotLeft, y: plotTop, width: plotWidth, height: plotHeight };
 
-  /* --- Band rectangles: stack from the inside outwards (R-3.2) --- */
+  /* --- Band rectangles: stack from the inside outwards --- */
   const bandRect = (
     axis: AxisInput,
     stack: number,
@@ -554,7 +554,7 @@ function layoutPass(
           const label = labels[i] ?? "";
           const labelWidth = measure(label, CLASS_TICK).width;
           const px = scale.toPx(value);
-          // Collision with the edge (R-3.3.5): the first and last label stay inside
+          // Collision with the edge: the first and last label stay inside
           // the container.
           const labelLeft = insideContainer(px - labelWidth / 2, labelWidth, width);
           return { value, label, px, labelLeft, labelWidth };

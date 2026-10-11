@@ -1,5 +1,5 @@
 /* Filters: the funnel in the header, the panel of a column filter and the
-   conditions in the table toolbar (umriss-table 08, table-filters 03 and 04).
+   conditions in the table toolbar.
 
    How a filter asks and checks it says itself (columnFilter.tsx). Here stands
    what the table does the same for every filter: the funnel in the header, the
@@ -48,7 +48,7 @@ export function FilterPanel({
   const { id, label, format } = entry.spec;
   /* The values of the admitted rows - not of the filtered ones, otherwise a
      choice would vanish the moment one makes it, and not of all of them,
-     otherwise the filter would betray what the pre-filter hides (D5). */
+     otherwise the filter would betray what the pre-filter hides. */
   const { filterOptions } = hook;
   const offered = filterOptions?.(id);
   const { values, absent } = useMemo(
@@ -57,8 +57,7 @@ export function FilterPanel({
   );
   const filter = filterOf(entry.spec.filter);
   /* In server mode the table holds one page: the values it could offer are
-     the page's, and a value that occurs only on page nine would not be offered
-     (M4). */
+     the page's, and a value that occurs only on page nine  would not be offered. */
   if (hook.publicSnapshot.server && !offered && entry.spec.filter === "list") {
     warnOnce(
       `server-filter-options:${id}`,
@@ -168,7 +167,7 @@ export function ColumnFilterButton({
   );
 }
 
-/* The conditions in the table toolbar (table-filters 04): one tag per
+/* The conditions in the table toolbar: one tag per
    condition, whose content is a button that opens the panel of its filter - at
    the condition, because the funnel may be scrolled away or its column hidden -
    and whose cross lifts it. The tag has only the one button for removing; the
@@ -177,7 +176,7 @@ export function Conditions({ registry, hook }: { registry: Registry; hook: HookS
   const wording = useWording();
   const formats = useFormats();
   /* A row filter's condition stands here only with a `describe`: without one
-     the application's control is where it shows (table-filters 08). */
+     the application's control is where it shows. */
   type Item = { id: string; text: string } & ({ rowFilter: RowFilter<unknown, unknown> } | { entry: ColumnEntry });
   const list = Object.entries(hook.publicSnapshot.filter).flatMap(([id, condition]): Item[] => {
     const rowFilter = hook.rowFilters.get(id);

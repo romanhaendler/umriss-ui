@@ -62,15 +62,14 @@ export interface PopoverProps {
  * return, travelling along on scroll, stacking order, entrance from its motion
  * origin and exit.
  *
- * Two things it takes off the callers' hands that each of them had to carry
- * itself before:
+ * Two things it takes off the callers' hands:
  *
  * - It portals into the nearest <dialog> ancestor of the anchor, otherwise
- *   into the body. A menu in a modal landed behind the dialog otherwise,
+ *   into the body. A menu in a modal would land behind the dialog otherwise,
  *   because a portal at the body does not reach the top layer.
  * - It resets the FormField context inside the panel. Without that, form
  *   elements in the panel inherit the field id of the trigger, and a click on
- *   their label closes the panel (HANDOFF A.5 §1 – happened twice).
+ *   their label closes the panel.
  */
 export function Popover({
   open,
@@ -114,9 +113,9 @@ export function Popover({
   );
 
   /* Measure and set before painting: the measured panel size is the reason
-     the clamping already takes hold the first time it opens. Before this, the
-     position was computed before the panel stood in the document – the
-     measurement was then zero and a fixed fallback value decided. */
+     the clamping already takes hold the first time it opens. Computed before the panel
+     is in the document, the measurement would be zero and a fixed fallback
+     value would decide. */
   const measure = useCallback(() => {
     const anchorRect = anchorRef.current?.getBoundingClientRect();
     const panel = panelRef.current;
@@ -140,8 +139,8 @@ export function Popover({
     // decided whether a panel at the window's edge fitted or stuck out.
     const size = panel.getBoundingClientRect();
     /* The entry animation scales the panel from 0.96, and the rectangle is
-       taken while it runs: without dividing the scale out, a tall panel was
-       placed as if it were smaller and stuck out of the window at the bottom. */
+       taken while it runs: without dividing the scale out, a tall panel is
+       placed as if it were smaller and sticks out of the window at the bottom. */
     const transform = getComputedStyle(panel).transform;
     const scale = transform && transform !== "none" ? new DOMMatrixReadOnly(transform).a : 1;
     const next = computePosition(
@@ -202,9 +201,9 @@ export function Popover({
       });
     };
     const handleScroll = (event: Event) => {
-      /* A scroll inside the panel moves nothing the position depends on. It
-         was taken for a page scroll: the panel was measured anew, lost its
-         cut for the measurement, and jumped back to its top. */
+      /* A scroll inside the panel moves nothing the position depends on. Taken
+         for a page scroll, it would measure the panel anew, drop its cut for
+         the measurement and jump it back to its top. */
       if (event.target instanceof Node && panelRef.current?.contains(event.target)) return;
       if (hideOnScroll) close(false);
       else reposition();

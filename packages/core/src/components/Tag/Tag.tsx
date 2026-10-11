@@ -182,8 +182,8 @@ export const Tag = forwardRef<HTMLSpanElement, TagProps>(function Tag(
     if (neighbour) requestAnimationFrame(() => neighbour.focus());
   };
 
-  /* Composed with the caller's, as the group does it: `rest` used to replace
-     it, and Delete and Backspace removed nothing any more. */
+  /* Composed with the caller's, as the group does it: `rest` would replace
+     it, and Delete and Backspace would remove nothing. */
   const handleKeyDown = (event: ReactKeyboardEvent<HTMLSpanElement>) => {
     onKeyDown?.(event);
     if (event.defaultPrevented || !removable) return;
@@ -198,10 +198,9 @@ export const Tag = forwardRef<HTMLSpanElement, TagProps>(function Tag(
       ref={ref}
       data-tag={removable ? "" : undefined}
       role={inGroup ? "listitem" : undefined}
-      /* Being switched off was only a class so far. With that, the statement
-         in the accessibility tree was missing - and the contrast rule read the
-         pale text as an error, because nothing stood there that marked it as
-         inactive. */
+      /* Being switched off is more than a class: the accessibility tree needs
+         the statement, and the contrast rule reads the pale text as an error
+         where nothing marks it as inactive. */
       aria-disabled={disabled || undefined}
       /* Inside the group, the group manages the tab stop – here stands only
          the initial value, so that nothing blinks before the first effect. */

@@ -1,14 +1,12 @@
 /* The state-holding companion of the model. It holds search, sort, page and
    page size, calls the model and carries the selection along.
 
-   It guarantees what the application had to know until now: every change to
-   search, sort or page size resets to page one. That rule stood in the caller
-   five times by hand.
+   It guarantees that every change to search, sort or page size resets to page
+   one.
 
-   A change of the filter does not belong to it (table-filters, D4). The filter
+   A change of the filter does not belong to it. The filter
    comes from outside, and its identity says nothing: a function written in the
-   call is a new one on every render, and a reset during the render turned that
-   into an endless loop. Whoever changes the filter because the user chose
+   call is a new one on every render, and a reset during the render would loop endlessly. Whoever changes the filter because the user chose
    something resets the page there; otherwise the model clamps it. */
 
 import { useCallback, useMemo, useState } from "react";

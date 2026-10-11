@@ -185,7 +185,7 @@
   }
 
   /* The key's ground and the dragged zone's ground are what forced colours
-     repaint (forced-colors 02). The key keeps its outline from the edge rule;
+     repaint. The key keeps its outline from the edge rule;
      the zone under a drag takes the selection colour on its dashes. */
   @media (forced-colors: active) {
     .dragging {

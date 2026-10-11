@@ -14,8 +14,8 @@ import type { ListboxItem } from "../../lib/listbox";
 
 /* `size` is the controls' two heights here, as on every other field. The
    native `<select size>` - the number of rows a list box shows - is left out:
-   this select is a dropdown, and it used to be called `selectSize` to spare
-   that meaning, which made it the one field with another name (ADR-0041). */
+   this select is a dropdown, so `size` keeps the one meaning every field gives
+   it (ADR-0041). */
 /** The props of `Select`: a native select's attributes, with `size` meaning
     the control's height. */
 export interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, "size"> {
@@ -82,8 +82,8 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
   const [items, setItems] = useState<ListboxItem[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [listName, setListName] = useState("");
-  /* A select disabled with its list open forgets it, or the list came back
-     on its own once the field was enabled again (found in review). */
+  /* A select disabled with its list open forgets it, or the list would come back
+     on its own once the field was enabled again. */
   if (open && !ownList) setOpen(false);
   const pointerType = useRef("mouse");
   const typed = useRef({ text: "", at: 0 });
@@ -215,8 +215,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
           isInvalid && styles.invalid,
         )}
         {...rest}
-        /* The caller's handlers run first and can prevent the field's own
-           (P3 of core-passthrough). */
+        /* The caller's handlers run first and can prevent the field's own. */
         onPointerDown={(event) => {
           onPointerDown?.(event);
           pointerType.current = event.pointerType;

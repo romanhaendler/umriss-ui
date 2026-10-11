@@ -109,7 +109,7 @@
   }
 
   /* The Result: one step above its lines here too, and its double rule
-     drawn closer - at the regular offset it stood on the frame's edge. */
+     drawn closer - at the regular offset it would stand on the frame's edge. */
   .frame[data-compact] .line[data-kind="result"] > .amount {
     font-size: var(--u-text-sm);
     text-underline-offset: 3px;
@@ -658,7 +658,7 @@
     }
   }
 
-  /* Forced colours repaint every ground with the page's (forced-colors 03):
+  /* Forced colours repaint every ground with the page's:
      the hover coupling is a band of the accent's surface, and the open
      derivation's spine a ground as well. The band takes an outline in the
      system's selection colour - the quantity itself two pixels, its operands

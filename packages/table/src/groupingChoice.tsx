@@ -1,4 +1,4 @@
-/* Where a grouping is chosen and where it is named (table-grouping 03).
+/* Where a grouping is chosen and where it is named.
 
    The column menu offers every groupable column and every group key; pressing
    one adds a level, pressing it again takes the level away, and at three levels

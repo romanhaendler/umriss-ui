@@ -8,7 +8,7 @@
    round, because the colour is the easy part.
 
    The same rule stands a second time in @umriss-ui/charts, and that is
-   deliberate. charts may import nothing from ui (R-1.2); making ui depend on
+   deliberate. charts may import nothing from ui; making ui depend on
    charts would pull a canvas library into the bundle of every consumer who
    wanted a coloured tile; and a third package for thirty lines would be a
    build, a version and a release for thirty lines. So the rule stands twice,
@@ -144,8 +144,7 @@ function isMoreSevere(candidate: Violation, best: Violation): boolean {
  *
  * No hysteresis: that would need the previous state, and a function of a
  * single value has none. Exactly that is what makes this module safe to
- * duplicate; the trailing of an alarm belongs to its lifecycle and not to a
- * bound.
+ * duplicate; the trailing of an alarm is not a property of a bound.
  */
 export function assess(value: number | null | undefined, set: LimitSet = {}): Assessment {
   if (!isMeasurable(value)) return { verdict: "unknown" };

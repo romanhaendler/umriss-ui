@@ -1,4 +1,4 @@
-/* Scales (R-2.14, R-2.15).
+/* Scales.
    The Scale interface is fixed; V0 implements only LinearScale.
 
    The drawing code assumes no concrete class, but it does assume affinity: it

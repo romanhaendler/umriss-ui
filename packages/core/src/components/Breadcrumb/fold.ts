@@ -1,5 +1,5 @@
 /* How many middle levels of a breadcrumb fold into its menu - measured, not
-   guessed (core-foundations 06). Pure arithmetic over widths the component
+   guessed. Pure arithmetic over widths the component
    reads off a hidden copy of the full trail.
 
    The first level and the current page always stand: the first says where

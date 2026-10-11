@@ -9,11 +9,10 @@ export function prefersReducedMotion(): boolean {
 /**
  * A duration from a token, in milliseconds - and read WITH its unit.
  *
- * This is not precautionary polish but a defect that was already there.
  * `tokens.css` writes `240ms`; in the built bundle it says `.24s`, because a
  * CSS minifier may rewrite times in the shorter notation. A bare `parseFloat`
- * reads 0.24 out of that - a quarter of a thousandth of a second. The
- * transition did in fact run, but too briefly to be seen.
+ * reads 0.24 out of that - a quarter of a thousandth of a second, too brief
+ * to be seen.
  *
  * Whoever reads a token back reads the unit with it. With lengths that does not
  * show, because `px` is the only one occurring; with times there are two.

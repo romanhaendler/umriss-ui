@@ -1,4 +1,4 @@
-/* The front page's tile previews (.scratch/site-front-page): each package's
+/* The front page's tile previews: each package's
    first scenario, light and dark, 1200 x 750 - ten PNGs in
    `scripts/previews/`, checked in, which `build-pages.mjs` copies into the
    site and its guard holds to being there and under 300 kB.

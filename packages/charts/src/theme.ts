@@ -1,4 +1,4 @@
-/* Theme module (R-1.7):
+/* Theme module:
    Canvas knows no CSS variables. The resolved values are read **once** per chart
    root and cached as a ResolvedTheme. Invalidation:
    (a) a global MutationObserver on document.documentElement (attribute
@@ -20,7 +20,7 @@
 
    Under `forced-colors: active` - the Windows contrast mode - the browser
    forces the colours of every element, and of nothing drawn on a canvas. So
-   the chart forces itself (charts-alternatives C4): the theme resolves to the
+   the chart forces itself: the theme resolves to the
    system colours the page around it now wears - text and marks in
    `CanvasText`, the ground in `Canvas`, the grid in `GrayText`, the two
    severities in `Highlight` - and every series, told apart no longer by

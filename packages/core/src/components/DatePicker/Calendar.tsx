@@ -17,9 +17,8 @@ import styles from "./DatePicker.module.css";
 import { IconButton } from "../Button";
 import { DEFAULT_WORDING, useFormats, useWording } from "../../lib/language";
 
-/* The weekday heads now stand in the wording. This constant remains as a
-   pass-through, because it belongs to the public extent of the calendar
-   module. */
+/* A pass-through of the wording's weekday heads; part of the calendar
+   module's public extent. */
 export const WEEKDAYS = DEFAULT_WORDING.weekdays;
 
 export { monthFormat, longFormat } from "./format";

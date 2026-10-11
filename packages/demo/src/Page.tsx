@@ -1,6 +1,6 @@
 /* A page: everything the demo says about one component.
 
-   The skeleton (.scratch/demo-rework/spec.md): rubric and name, the lede, the
+   The skeleton: rubric and name, the lede, the
    import line to copy, what a user must know where there is something, the
    first example without a heading, the run of examples from simple to rich,
    the reference tables a page carries (the Language page's wording), when to
@@ -99,7 +99,7 @@ function PreviewOf({ definition }: { definition: ApiDefinitionModel }) {
     like any other.
 
     Only here, in the app, does a link to a definition preview it in core's
-    Tooltip (.scratch/a11y-and-finish, 07): the written link gives way to the
+    Tooltip: the written link gives way to the
     same link under a tooltip, mounted where it stood. The prerendered page
     and the twin keep the link alone, which leads to the whole definition. */
 function ApiTables({ api }: { api: ApiSection }) {
@@ -199,8 +199,7 @@ export function Page({ demo, page }: PageProps) {
   const [allOpen, setAllOpen] = useState(false);
 
   /* A configurator takes the first example's slot, and the first example
-     moves into the run as its first titled one, anchor and all
-     (.scratch/configurator). */
+     moves into the run as its first titled one, anchor and all. */
   const configurator = demo.configurators.find((one) => one.pageId === page.id);
   const examples = examplesOf(demo.examples, page.id);
   const first = configurator === undefined ? examples[0] : undefined;
@@ -208,7 +207,7 @@ export function Page({ demo, page }: PageProps) {
   const api = apiSection(page, demo.addresses.ALL_PAGES, demo.tables);
   const { tables } = api;
   /* A page without a table of its own shows the rows its examples use, where
-     the API section would stand (.scratch/props-to-examples, 02). */
+     the API section would stand. */
   const cut: ApiSection = { tables: propsOnPage(page, demo.addresses.ALL_PAGES, demo.tables), definitions: [] };
   const known = new Set(demo.addresses.ALL_PAGES.map((one) => one.id));
   const nameOf = (id: string) => demo.addresses.ALL_PAGES.find((one) => one.id === id)?.name ?? id;

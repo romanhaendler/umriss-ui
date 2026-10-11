@@ -1,4 +1,4 @@
-/* The grid's walk (table-grid-mode 01, ADR-0034): where the **Active cell**
+/* The grid's walk (ADR-0034): where the **Active cell**
    goes next, over the lines of a table in grid mode. Pure, so the keys can be
    tested without a DOM; the table turns a position into the cell it focuses.
 

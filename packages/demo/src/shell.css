@@ -3,8 +3,8 @@
    The page content itself - examples, code blocks, props tables - stands in
    `page.css`.
 
-   The jump palette has no styles here any more: it is `CommandPalette` from the
-   library and brings its own (`command-palette` 07).
+   The jump palette has no styles here: it is `CommandPalette` from the
+   library and brings its own.
 
    Every colour, spacing and radius comes from the tokens - the demo allows
    itself nothing the library does not offer. */

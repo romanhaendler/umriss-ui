@@ -1,4 +1,4 @@
-/* HTML layer of the tooltip (R-4.8, R-4.9).
+/* HTML layer of the tooltip.
    The content is re-rendered only when the hit changes - the positioning runs
    imperatively in the scene through transform, so that a mouse movement without a
    change of hit triggers no React render. */
@@ -31,7 +31,7 @@ export function TooltipHtml({ scene }: { scene: ChartScene }): ReactNode {
   );
 
   // Reposition after every change of content: only after the commit is the
-  // actual tooltip size known (R-4.9).
+  // actual tooltip size known.
   useEffect(() => {
     scene.markOverlayDirty();
   }, [scene, snapshot.version]);
@@ -74,7 +74,7 @@ export function TooltipHtml({ scene }: { scene: ChartScene }): ReactNode {
                             <span className="uc-tooltip-value">{part.value}</span>
                           </div>
                         ))}
-                        {/* A stack's total follows its last member (charts-stacking K4). */}
+                        {/* A stack's total follows its last member. */}
                         {snapshot.totals
                           .filter((t) => t.after === k)
                           .map((t) => (

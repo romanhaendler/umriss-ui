@@ -1,4 +1,4 @@
-/* Encoding without colour (charts-alternatives 02, C3).
+/* Encoding without colour.
 
    A verdict colour does not reach a colour-blind reader, and a series told
    apart by hue alone is told apart by nothing on a grey printout or under the
@@ -46,7 +46,7 @@ export function hatchFor(index: number): Hatch {
   return HATCHES[place(index, HATCHES.length)] as Hatch;
 }
 
-/** The hatch of each state by its name (charts-alternatives 04): the place
+/** The hatch of each state by its name: the place
     its name first takes across the chart's bands, in their order. Two bands
     listing one state at different places hatch it alike, and the legend,
     which shows it once, agrees with both. A single band keeps its index. */
@@ -96,7 +96,7 @@ export interface PathSink {
 }
 
 /** A filled marker of radius `r` at (cx, cy), as a closed sub-path - so that a
-    series' markers stay one path and one fill (R-2.12). The shapes are sized
+    series' markers stay one path and one fill. The shapes are sized
     to cover about the circle's area, so that none reads as heavier. */
 export function markerPath(path: PathSink, shape: MarkerShape, cx: number, cy: number, r: number): void {
   const polygon = (points: readonly (readonly [number, number])[]) => {

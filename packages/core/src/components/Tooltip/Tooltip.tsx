@@ -96,7 +96,7 @@ export function Tooltip({ content, children, delay = 300 }: TooltipProps) {
 
   const childProps = children.props;
   /* A tip that repeats the trigger's name is what the eye needs and the ear
-     has had: described by it, a screen reader said every icon button twice. */
+     hears already: described by it, a screen reader would say every icon button twice. */
   const describes = open && content !== childProps["aria-label"];
 
   return (

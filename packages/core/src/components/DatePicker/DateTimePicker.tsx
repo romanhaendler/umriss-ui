@@ -152,10 +152,9 @@ export const DateTimePicker = forwardRef<HTMLSpanElement, DateTimePickerProps>(f
     closePanel();
   };
 
-  /* "Now" is an exact instant and has nothing to resolve. It used to run through
-     the wall-clock fields and `resolveLocalTime`, and in the second 02:30 of the
-     daylight-saving change the first one came out of that - an hour old before
-     anybody had saved (library-audit 02). */
+  /* "Now" is an exact instant and has nothing to resolve: it must not run
+     through the wall-clock fields, or the second 02:30 of a daylight-saving
+     change would come out as the first. */
   const now = () => {
     onChange(truncateInstant(new Date(), withSeconds));
     closePanel();

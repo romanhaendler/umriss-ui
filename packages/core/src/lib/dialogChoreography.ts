@@ -6,9 +6,7 @@
    writes the duration down twice, and then the two windows eventually trail
    for different lengths.
 
-   That is exactly why this module exists and not first at the eighth caller:
-   `popover-seam` tidied up eleven modules that all began with a second copy
-   nobody thought worth a ticket. This is the second copy.
+   That is exactly why this module exists and not first at the eighth caller.
 
    Internal. The library offers Modal and CommandPalette, not the mechanics
    they share - the same decision as for `computePosition`. */
@@ -46,7 +44,7 @@ export interface DialogChoreography {
  * the name of a token read off the dialog while closing. The token is the
  * usual case: the duration then stands only once, and the stylesheet that
  * draws the motion and this hook that waits for its end cannot drift apart
- * (library-audit 07). `0` means no exit, the window is gone in the same frame.
+ * `0` means no exit, the window is gone in the same frame.
  * That is not a special case but a decision a calling component may make - a
  * sheet of paper may take its leave, a search window may not.
  *
@@ -55,7 +53,6 @@ export interface DialogChoreography {
  * `onClose` is the caller's listener. It is called through `beimSchliessen`
  * exactly when the browser closed - every gesture reports itself beforehand,
  * and a second time through the close event would be a duplicate report
- * (library-audit 01).
  */
 export function useDialogChoreography(
   open: boolean,

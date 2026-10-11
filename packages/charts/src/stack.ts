@@ -1,4 +1,4 @@
-/* Stacking (charts-stacking K1-K3, K5).
+/* Stacking.
 
    Series of one stack are summed per x in registration order: each member's
    baseline is the sum of the members below it, its top that sum plus its own
@@ -7,7 +7,7 @@
    drawn, hit and downsampled by the code that draws every other one.
 
    A gap stacks as zero for the members above it - the stack stays closed -
-   and stays a gap in its own member: not drawn, never hit (K3). Positive and
+   and stays a gap in its own member: not drawn, never hit. Positive and
    negative values stack apart, each from zero outwards, so that a negative
    member never cuts into the positive ones (the common convention).
 
@@ -37,7 +37,7 @@ export interface Stacked {
 }
 
 /** The members stacked in the order given. `normalize` makes every x sum to
-    100 (K5): each value becomes its share of the x' absolute sum, so
+    100: each value becomes its share of the x' absolute sum, so
     positives and negatives together span 100. */
 export function stackSeries(members: readonly StackInput[], normalize = false): Stacked[] {
   // ponytail: one Map lookup per point keyed by x; members that share one x

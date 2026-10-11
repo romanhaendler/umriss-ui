@@ -40,7 +40,7 @@ export function asPackage(source: string, packageName: string): string {
   });
 }
 
-/* One spelling. Both demos export `title` (english-and-umriss-ui 10 and 12);
+/* One spelling. Both demos export `title`;
    the alternation that bridged them is gone. */
 const TITLE_START = /^export const title\b/;
 const BOOKKEEPING = ["lead", "callouts", "builtFrom"].map((name) => new RegExp(`^export const ${name}\\b`));

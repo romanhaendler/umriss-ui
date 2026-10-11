@@ -40,7 +40,7 @@
 
   /* The keyboard's item carries the ring, not the hover surface: with the
      surface, the item under the resting pointer and the item the arrow keys
-     reached looked the same (visuelle-wertigkeit 04). Lifted, so that a
+     reached looked the same. Lifted, so that a
      neighbour's surface does not cover the ring's edge; the panel's padding
      leaves it room. */
   .item:focus-visible {

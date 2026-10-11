@@ -1,6 +1,6 @@
 /* <Area> - series configuration (4.3).
    Renders nothing itself: children are configuration collectors, the drawing
-   happens exclusively in the scene (R-2.1).
+   happens exclusively in the scene.
 
    Without a baseline the area fills down to 0, and that 0 enters the extent of
    its y axis - otherwise the axis would cut off the foot of the area. */
@@ -13,21 +13,17 @@ import type { ValueFunction, Value, AreaSeriesConfig } from "./types";
 /** The props of `Area`. */
 export interface AreaProps<T> {
   /** Upper edge - a number field of the row or a function of it;
-      null/undefined/NaN/±Infinity means a gap.
-      @remarks R-2.5 */
+      null/undefined/NaN/±Infinity means a gap. */
   value: Value<T>;
   /** Lower edge - a number field of the row or a function of it. In a `stack` the stack below is the lower edge, and this is
       not read.
       @default a fixed baseline at 0 */
   baseline?: Value<T>;
-  /** Binding to an x axis.
-      @remarks R-4.12 */
+  /** Binding to an x axis. */
   xAxisId?: string;
-  /** Binding to a y axis.
-      @remarks R-4.12 */
+  /** Binding to a y axis. */
   yAxisId?: string;
-  /** Series-own data; overrides the container data.
-      @remarks R-2.4 */
+  /** Series-own data; overrides the container data. */
   data?: readonly T[];
   /** The name in legend and tooltip. Without one a warning stands in DEV - an
       unnamed series is a colour nobody can look up.

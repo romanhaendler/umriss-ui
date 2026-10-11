@@ -1,4 +1,4 @@
-/* Column filters (table-filters 03): one interface for the list filter, the
+/* Column filters: one interface for the list filter, the
    range filter and an application's filter of its own.
 
    A filter is bound to a value type, not to a row kind - like `column<P>()` to
@@ -353,8 +353,7 @@ function NumberRangeInput({ condition, setCondition }: FilterInputProps<unknown,
 }
 
 function PeriodInput({ condition, setCondition }: FilterInputProps<unknown, Range>) {
-  /* The picker's two-click logic stays as it is (@umriss-ui/core HANDOFF
-     A.5 §5): it reports the period after the second click, and only then does
+  /* The picker's two-click logic stays as it is: it reports the period after the second click, and only then does
      the condition stand. */
   const period = isDate(condition?.from) && isDate(condition?.to) ? { from: condition.from, to: condition.to } : null;
   return (

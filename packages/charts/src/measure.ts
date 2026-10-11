@@ -1,4 +1,4 @@
-/* Text measurement for the layout measuring pass (R-3.3).
+/* Text measurement for the layout measuring pass.
    A single hidden, reused span inside the chart root - no canvas measureText, so
    that measurement and the later HTML rendering use exactly the same font
    resolution. Results are cached; a change of theme or font clears the cache. */

@@ -142,7 +142,7 @@ test("the import line copies itself as well", async ({ page, context }) => {
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(p.importLine);
 });
 
-/* What umriss-ui is not is a page of the site (.scratch/concepts-and-changelog-pages):
+/* What umriss-ui is not is a page of the site:
    the known limits stay on it, the closing line and every limit that names
    the ADR alike. */
 test("the known limits link what umriss-ui is not on the site", async ({ page }) => {
@@ -152,7 +152,7 @@ test("the known limits link what umriss-ui is not on the site", async ({ page })
   for (const link of await links.all()) await expect(link).toHaveAttribute("href", ADR_0032);
 });
 
-/* Suggest an edit (.scratch/concepts-and-changelog-pages): a page's last link
+/* Suggest an edit: a page's last link
    opens GitHub's new-issue form, already naming the page - its title and its
    address - on the first page and after a move to another. */
 test("the page ends with a suggested edit on GitHub that names it", async ({ page }) => {
@@ -172,8 +172,8 @@ test("the page ends with a suggested edit on GitHub that names it", async ({ pag
   await expectNamed();
 });
 
-/* Every row names the examples that show it, and is an address of its own
-   (.scratch/props-to-examples). A row outside a closed fold. */
+/* Every row names the examples that show it, and is an address of its own.
+   A row outside a closed fold. */
 const tablePage = p.tablePageId ?? p.pageId;
 const rows = (page: Page) => page.locator(".apiTables tbody tr").filter({ visible: true });
 
@@ -197,7 +197,7 @@ test("a row's name puts the row's anchor into the address", async ({ page }) => 
   await expect(row).toBeInViewport();
 });
 
-/* A feature page shows the props it is about (.scratch/props-to-examples, 02):
+/* A feature page shows the props it is about:
    "On this page" names the section, and a row's name leads to the full row on
    the page of the full table. */
 test("a feature page's \"Props on this page\" leads to the full row", async ({ page }) => {
@@ -215,7 +215,7 @@ test("a feature page's \"Props on this page\" leads to the full row", async ({ p
   await expect(page.locator(`tr[id="${id}"]`)).toBeInViewport();
 });
 
-/* "Copy page" (.scratch/pages-as-markdown, 03): what lands on the clipboard
+/* "Copy page": what lands on the clipboard
    is exactly what the server serves at the page's twin - and after a move in
    the app, the new page's, never the one the reader came from. */
 const head = (page: Page, pageId: string) => page.locator(`[data-block="${pageId}"] .pageHead`);
@@ -362,7 +362,7 @@ export function checkInstall({ open, pages, command }: InstallProbes): void {
   });
 
   /* The page that installs names its ADRs in most demos - and the shell links
-     them as the prerendered page does (.scratch/props-table-hygiene, 03). */
+     them as the prerendered page does. */
   test("the page that installs names no requirement and no ADR outside a link", async ({ page }) => {
     test.skip(test.info().project.name.endsWith("dark"), "a behaviour test runs once (light)");
     await open(page, pages.find((one) => one.installs === true)!.id);

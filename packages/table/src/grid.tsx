@@ -1,8 +1,8 @@
-/* Grid mode (table-grid-mode 02 and 03, ADR-0034): `<Table grid>` is one tab
+/* Grid mode (ADR-0034): `<Table grid>` is one tab
    stop with an **Active cell** the arrows walk (`model/gridWalk.ts`), and a
    column that declares `edit` is edited in place.
 
-   The Active cell is state, not DOM focus alone (G6): it holds on to its
+   The Active cell is state, not DOM focus alone: it holds on to its
    line's key and its column's id, so it survives sorting, filtering and a
    virtual window that renders its row away. The cells are the table's own
    `<td>` and `<th>`; which one carries the tab stop is written onto the DOM
@@ -11,9 +11,9 @@
 
    Inside a cell, its own controls - a checkbox, the row actions, a fold, a
    sort button, whatever a presentation renders - leave the tab order, and
-   Enter or F2 reaches them (G2, the APG grid's widget mode); Escape leaves.
+   Enter or F2 reaches them (the APG grid's widget mode); Escape leaves.
 
-   An edit is controlled (G3, the schedule's intent pattern, ADR-0023): the
+   An edit is controlled (the schedule's intent pattern, ADR-0023): the
    editor holds a draft, Enter or Tab reports it through `onCellEdit`, and the
    table applies nothing - the value changes when the caller's rows do.
 
@@ -189,7 +189,7 @@ export function GridFocus({
   lines: readonly GridLine[];
   ids: readonly string[];
   /** In a grid that edits: whether the cell at a position does. Every other
-      cell of its body and foot is `aria-readonly` (table-grid-mode 05). */
+      cell of its body and foot is `aria-readonly`. */
   editable?: (p: GridPosition) => boolean;
   /** While a cell's edit is open: what a click outside the grid does. */
   outside?: () => void;
@@ -662,11 +662,11 @@ function pageOf(cell: HTMLElement, table: HTMLTableElement): number {
 
 /** The editor in a cell: the core field for its kind, or the column's own,
     inside a `FormField` whose error is the message of a draft that did not
-    validate (G4, G5). Its name says what is edited, for which row.
+    validate. Its name says what is edited, for which row.
 
     It lies over the cell at the cell's size, and the message hangs beneath
-    it in a popover: nothing in the table shifts while a cell is edited
-    (table-grid-mode 05). The field's description stays the `FormField`'s
+    it in a popover: nothing in the table shifts while a cell is edited.
+    The field's description stays the `FormField`'s
     message, out of sight; the popover is its picture. */
 export function CellEditor({ entry, row, rowName, grid }: { entry: ColumnEntry; row: unknown; rowName: string; grid: GridContextValue }) {
   const formats = useFormats();

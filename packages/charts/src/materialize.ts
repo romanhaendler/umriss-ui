@@ -1,9 +1,9 @@
-/* Materialisation (R-2.7) and extents per axis (R-4.13).
+/* Materialisation and extents per axis.
 
    Deliberately free of the DOM and of scene state: the draw loop works only on
    the typed arrays produced here, and both functions are directly unit testable
    that way. Gaps (null/undefined/NaN/±Infinity out of the accessor) are
-   encoded as NaN (R-2.5). */
+   encoded as NaN. */
 
 import { lowerBound } from "./hit";
 import type { ValueFunction, BoxChannels, ListFunction, BoxExtras, BoxNumbers, MaterializedSeries } from "./types";
@@ -298,7 +298,7 @@ export function firstDisorderedBox(series: MaterializedSeries): number {
   return -1;
 }
 
-/** Index of the first unsorted x value, otherwise -1 (DEV check, R-2.6). */
+/** Index of the first unsorted x value, otherwise -1 (DEV check). */
 export function firstUnsortedIndex(x: Float64Array, n: number): number {
   for (let i = 1; i < n; i++) {
     if ((x[i] as number) < (x[i - 1] as number)) return i;
@@ -308,7 +308,7 @@ export function firstUnsortedIndex(x: Float64Array, n: number): number {
 
 /** The y extent of the points whose x lies in [from, to], a baseline channel
     included and gaps left out; [+∞, −∞] where none does. A binary search to
-    the first, then only the window - x ascending (R-2.6). */
+    the first, then only the window - x ascending. */
 export function visibleExtent(
   series: MaterializedSeries,
   from: number,
@@ -358,7 +358,7 @@ export interface Binding {
   extent: Extent | null;
 }
 
-/** Extent of an axis exclusively out of the series bound to it (R-4.13).
+/** Extent of an axis exclusively out of the series bound to it.
     Without a bound series: [0, 1]. */
 export function axisExtent(
   orientation: "x" | "y",

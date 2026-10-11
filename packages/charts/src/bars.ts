@@ -16,7 +16,7 @@
 import type { SeriesKind } from "./types";
 
 /** Smallest distance between two consecutive x values, in domain units.
-    Assumes ascending x values (R-2.6). 0 where there is no distance: with a
+    Assumes ascending x values. 0 where there is no distance: with a
     single point, and with nothing but equal x values. */
 export function measureStep(x: Float64Array, n: number): number {
   let smallest = Number.POSITIVE_INFINITY;
@@ -92,7 +92,7 @@ export interface BarGroup {
     and not "tiny"; it does not count.
 
     The members of one stack stand on top of each other, not beside: they take
-    one place, where the first of them stands (charts-stacking K1). */
+    one place, where the first of them stands. */
 export function barGroups(
   series: readonly BarCandidate[],
 ): Map<number, BarGroup> {

@@ -100,7 +100,7 @@ export function laneAt(view: Viewport, y: number): string | null {
 }
 
 export function subtaskBox(view: Viewport, subtask: Subtask, lane: string, slot: Slot, depth: number): SubtaskBox {
-  /* Per SLOT and no longer per lane height: a strip inside a folded group is
+  /* Per SLOT, not per lane height: a strip inside a folded group is
      a few pixels tall, and a bar on it has to be too. */
   const inset = slot.miniature ? 0 : BAR_INSET;
   const offset = slot.miniature ? 0 : MAX_DEPTH * DEPTH_STEP;
@@ -178,8 +178,7 @@ export function barLabelBox(
   const x = Math.max(box.mainFrom + capped, 0);
   const width = Math.min(box.mainTo - capped, plotWidth) - x;
   if (width < MIN_LABEL_WIDTH) return null;
-  /* The whole height, always: since schedule-lane-groups 02 no appearance
-     changes what a bar MEASURES. Muted work says it in saturation, not in
+  /* The whole height, always: no appearance changes what a bar MEASURES. Muted work says it in saturation, not in
      height, so every bar keeps its label at its full size. */
   return { x, width, y: box.y, height: box.height };
 }
@@ -228,7 +227,7 @@ function attachY(attach: DependencyAttachment, box: SubtaskBox, other: SubtaskBo
   const middle = Math.round(box.y + box.height / 2);
   /* Slots' tops rather than lane indices: a bar inside a folded group and one
      on a lane below it are still "the other lies below me", and a lane index
-     could not say so once the two are not both rows. */
+     could not say so, as the two are not both rows. */
   if (attach === "centre" || other.y === box.y) return middle;
   return Math.round(other.y > box.y ? box.y + box.height - 1 : box.y + 1);
 }

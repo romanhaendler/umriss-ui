@@ -1,8 +1,7 @@
-/* The one voice of the library's lists (listbox-announcements 01).
+/* The one voice of the library's lists.
 
    VoiceOver reads an `aria-activedescendant` option poorly - no count, no
-   selected state (React Aria's combobox study, docs/research/library-
-   comparison-2026-09/headless_a11y.md) - so the combobox, the multi-select and
+   selected state - so the combobox, the multi-select and
    the command palette say it themselves, through a polite live region. One
    region and not one per component: two lists open one after the other would
    otherwise speak over each other, and a region that is mounted in the same

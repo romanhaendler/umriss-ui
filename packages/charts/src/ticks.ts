@@ -1,7 +1,7 @@
-/* Tick algorithm (R-4.1): the classical 1-2-5 grid.
+/* Tick algorithm: the classical 1-2-5 grid.
    Step ∈ {1, 2, 5}·10ⁿ, ticks lie on multiples of the step, domain boundaries
    widened to ticks under "nice".
-   Purely functional and free of the DOM - fully unit tested (R-7.3). */
+   Purely functional and free of the DOM - fully unit tested. */
 
 /** Normalise −0 to +0 (arises from Math.ceil(-0.4)). */
 function normalizeZero(v: number): number {
@@ -24,7 +24,7 @@ export function tickStep(span: number, count: number): number {
   return factor * magnitude;
 }
 
-/** Decimal places a step calls for (0.25 → 2, R-4.1). */
+/** Decimal places a step calls for (0.25 → 2). */
 export function decimalsForStep(step: number): number {
   const magnitude = Math.abs(step);
   if (!Number.isFinite(magnitude) || magnitude === 0) return 0;
@@ -43,7 +43,7 @@ function roundTo(v: number, digits: number): number {
   return normalizeZero(Number(v.toFixed(Math.min(20, digits))));
 }
 
-/** Domain widened to nice boundaries. Constant series → ±1 (R-4.3). */
+/** Domain widened to nice boundaries. Constant series → ±1. */
 export function niceDomain(
   min: number,
   max: number,
@@ -59,7 +59,7 @@ export function niceDomain(
   ];
 }
 
-/** Exact domain from the data; constant series → ±1 (R-4.3). */
+/** Exact domain from the data; constant series → ±1. */
 export function dataDomain(min: number, max: number): [number, number] {
   if (!Number.isFinite(min) || !Number.isFinite(max)) return [0, 1];
   if (min === max) return [min - 1, max + 1];
@@ -85,7 +85,7 @@ export function ticksFor(min: number, max: number, count: number): number[] {
   return values;
 }
 
-/** A further axis' ticks on the first axis' grid (Q24): as many ticks as the
+/** A further axis' ticks on the first axis' grid: as many ticks as the
     first has, standing at the same shares of the domain, with a 1-2-5 step -
     the smallest whose grid holds [min, max]. The domain is widened to fit, and
     begins and ends where the first one's does, measured in steps: a first axis

@@ -1,10 +1,8 @@
 /* What an accessibility check of the demos counts as a finding - the same rule
-   for every demo (table-demo: "Tolerated colour pairs are the ones ui's suite
-   tolerates, with the same written reasons; none is added").
-
-   Brought over from `packages/core/tests-visual/accessibility.spec.ts`,
-   where the list came about and where its two guards stand: every entry
-   carries a reason, and an open one points at a follow-up. */
+   for every demo. Tolerated colour pairs are the ones core's suite tolerates
+   (`packages/core/tests-visual/accessibility.spec.ts`), with the same written
+   reasons; every entry carries a reason, and an open one points at a
+   follow-up. */
 
 import type AxeBuilder from "@axe-core/playwright";
 
@@ -14,8 +12,7 @@ import type AxeBuilder from "@axe-core/playwright";
    opinions as errors gets switched off rather than read. */
 export const STANDARDS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"];
 
-/* The one rule switched off, and only under forced colours (forced-colors
-   02): there every pair is the system's, chosen by whoever chose the contrast
+/* The one rule switched off, and only under forced colours: there every pair is the system's, chosen by whoever chose the contrast
    theme, so a finding could only be the theme's. And axe reads a text's
    colour from `-webkit-text-fill-color`, which Chromium resolves against the
    UNFORCED colour - the dark theme's primary button, white on black on the
@@ -68,14 +65,10 @@ export const EXCEPTIONS: readonly Exception[] = [
  * Findings that are real and still open - not defined away, but named and
  * handed on.
  *
- * For exactly this case the ticket says: better to land the check for one part
- * and open the rest as a follow-up than to have a check with blanket
- * suppression.
- *
- * Empty since tone-contrast: the danger tone's two roles are split into a
+ * Empty is the intended state: the danger tone's two roles are split into a
  * surface (`--u-color-danger`, with `--u-color-on-danger` on it) and a text
- * token (`--u-color-danger-text`), as the accent has them. Empty is the
- * intended state; a new entry names its follow-up under `.scratch/`.
+ * token (`--u-color-danger-text`), as the accent has them. A new entry names
+ * its follow-up.
  */
 export const OPEN: readonly Exception[] = [];
 

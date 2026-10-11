@@ -1,4 +1,4 @@
-/* What a reader's text may name, and how (.scratch/props-table-hygiene, 03).
+/* What a reader's text may name, and how.
 
    A reader of a page or a props table is sent nowhere they cannot go. A
    requirement number of a spec that is not on the site ("(R-4.12)") and a

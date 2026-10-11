@@ -25,10 +25,9 @@ export { ripple } from "./ripple";
 export { snapTime } from "./snap";
 export type { ZoomLimits } from "./timeAxis";
 
-/* What `schedule-refinement` added stands at the end, by the workspace's rule
-   for new exports - none of these modules brings a stylesheet, so no picture
-   could move by their place; the rule is kept anyway, so that nobody has to
-   check (as `packages/core/src/index.ts` keeps it for `ContextMenu`). */
+/* Further exports stand at the end, by the workspace's rule for new exports -
+   none of these modules brings a stylesheet, so no picture could move by their
+   place. */
 export type { ScheduleHandle } from "./Schedule";
 export type { ScheduleTooltipTarget, PlacingItem } from "./scene";
 export { subtaskFromPlace } from "./model";
@@ -39,27 +38,22 @@ export type { DependencyAttachment, DependencyEnds, DependencyRoute } from "./mo
 export { resolveAppearance } from "./appearance";
 export type { ResolvedAppearance, SubtaskAppearance } from "./appearance";
 
-/* What `schedule-lane-groups` added: the lane groups (ADR-0025), at the end by
-   the workspace's rule for new exports. */
+/* The lane groups (ADR-0025). */
 export type { LaneGroupProps } from "./parts";
 
-/* What `demo-rework` 08 added: blocked time per lane, at the end by the
-   workspace's rule for new exports. */
+/* Blocked time per lane. */
 export type { BlockedTimesProps } from "./parts";
 export type { BlockedTime } from "./model";
 export { inBlockedTime } from "./findings";
 export type { InBlockedTime } from "./findings";
 
-/* What `schedule-milestones` added: a point in time on a lane, at the end by
-   the workspace's rule for new exports. */
+/* A point in time on a lane. */
 export type { MilestonesProps } from "./parts";
 export type { Milestone } from "./model";
 
-/* What `component-view` 07 added: the schedule's view (ADR-0047), at the end
-   by the workspace's rule for new exports. */
+/* The schedule's view (ADR-0047). */
 export type { ScheduleView } from "./view";
 
-/* `useSchedule` (charts-bound-to-rows 08), at the end by the workspace's rule
-   for new exports: it brings the schedule's stylesheet, the only one here, so
-   its place moves no other one. */
+/* `useSchedule`, last: it brings the schedule's stylesheet, the only one here,
+   so its place moves no other one. */
 export { useSchedule, type ScheduleParts, type ScheduleOptions } from "./useSchedule";

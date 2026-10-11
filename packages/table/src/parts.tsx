@@ -412,7 +412,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
     table.style.setProperty("--u-table-head", `${head}px`);
     table.style.setProperty("--u-table-group-header", `${headerHeight}px`);
     /* The browser's own scroll into view - a focused cell, a walked one -
-       keeps what it brings in clear of the head (table-grid-mode 05). */
+       keeps what it brings in clear of the head. */
     table.parentElement?.style.setProperty("scroll-padding-top", `${head}px`);
     /* A virtual window draws its group headers anew as it scrolls: marked again after
        every render, not only on the scroll. */
@@ -435,7 +435,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
     }
   });
 
-  /* Server mode (M2): placeholders that stand where a page of rows stood
+  /* Server mode: placeholders that stand where a page of rows stood
      keep its columns' widths - the columns of an automatic layout would
      shift to the placeholders' while the answer is out. Their height is the
      pitch's (ADR-0042). Measured from the rendered rows, since only the
@@ -525,7 +525,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
   const spanEntry = lines && grouping.length > 1 ? entryOf(grouping.at(-1)) : undefined;
   const dataColumns = lines ? columns.filter((e) => !grouping.includes(e.spec.id)) : columns;
 
-  /* Tree rows (table-tree-rows): the first visible column carries the tree,
+  /* Tree rows: the first visible column carries the tree,
      wherever the row header stands - the structure reads down the left edge,
      as a grouping's span stands first. The flattening is the whole list, also
      under a virtual window: a row's parent and siblings may stand outside it. */
@@ -566,7 +566,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
     };
   }
 
-  /* A tree opens a row's detail with the row's own fold (table-tree-rows):
+  /* A tree opens a row's detail with the row's own fold:
      one chevron per row, in the first column at its level - no expander
      column, whose chevron stood left of the tree's own. */
   const expanderColumn = detail !== null && !entries;
@@ -635,7 +635,7 @@ function Frame({ registry, props }: { registry: Registry; props: TableProps<unkn
      the page - the walk finds it right beneath the head. */
   const fresh = grid.state.editing?.line === NEW_LINE ? grid.state.editing : null;
   if (fresh && gridLinesNow[0]) gridLinesNow.splice(1, 0, { key: NEW_LINE, cells: gridLinesNow[0].cells, at: -1, row: fresh.fresh });
-  /* Ctrl or Cmd with C (table-copy-rows): the selected rows, or - in a grid with
+  /* Ctrl or Cmd with C: the selected rows, or - in a grid with
      no selection - the Active cell. Heard here by bubbling from rows, cells and
      headers; the grid's own handler lets the key pass. The browser keeps the
      key only where the reader can have marked text of their own: a text-like
@@ -1123,7 +1123,7 @@ function PinPlacement({
     const scroller = table?.parentElement;
     if (!table || !scroller) return;
     /* The browser's own scroll into view keeps a cell it brings in clear of
-       the blocks (table-grid-mode 05); a pinned cell, which lies in that
+       the blocks; a pinned cell, which lies in that
        padding, shifts its target out of it by the same width (pinned.ts). */
     scroller.style.removeProperty("scroll-padding-left");
     scroller.style.removeProperty("scroll-padding-right");
@@ -2097,7 +2097,7 @@ function LoadingRows({ columns, rightAligned = [], rows = 4 }: { columns: number
 /* The virtualised body                                                     */
 /* ====================================================================== */
 
-/* Taken over from TableVirtualBody in @umriss-ui/core (umriss-table 05/10): two
+/* Taken over from TableVirtualBody in @umriss-ui/core: two
    filler rows keep the scrollbar at its full length, the arrow keys wander over
    rows that are not rendered yet - scroll first, then focus - and exactly one
    row carries the tab stop. */

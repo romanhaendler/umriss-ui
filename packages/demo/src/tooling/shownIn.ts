@@ -1,4 +1,4 @@
-/* Which example shows which row (.scratch/props-to-examples).
+/* Which example shows which row.
 
    The examples and scenarios are read as they are - nobody declares what an
    example teaches. One program over their files, which import the package's

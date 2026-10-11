@@ -1,5 +1,5 @@
 /* "On this page": what stands on a page, with the part the reader is in
-   marked (page-orientation 01).
+   marked.
 
    The entries come from the page's own data, the same the page renders - a
    new example or section appears here without anyone editing a list. This

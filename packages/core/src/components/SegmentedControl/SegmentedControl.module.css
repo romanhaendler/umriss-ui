@@ -220,7 +220,7 @@
   }
 
   /* The chosen segment is a ground in the ink, and forced colours repaint
-     every ground with the page's (forced-colors 02): it takes the system's
+     every ground with the page's: it takes the system's
      colours for a selection instead, as the switch's track does. Left to the
      system, its word got the page's backplate - dark on dark in a dark
      theme - so the segment keeps the two colours it names, and paints its

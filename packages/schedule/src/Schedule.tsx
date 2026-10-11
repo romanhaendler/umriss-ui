@@ -6,7 +6,7 @@
        .dayBand       the coarse band: local days          (holds still)
        .headers       one header per ROW, real text        (scrolls with the lanes only)
        .plot          catches the pointer, and is the one tab stop whose keys
-                      walk the subtasks (schedule-a11y, ADR-0030)
+                      walk the subtasks (ADR-0030)
          canvas       data: grid, dependencies, subtasks, findings, selection
          canvas       overlay: hover and the ghost
          .ghostLabel  the ghost's times and findings, while a drag is in flight
@@ -528,7 +528,7 @@ export const Schedule = forwardRef<ScheduleHandle, ScheduleProps & { scene: Sche
           style={{ cursor: snapshot.cursor }}
           /* One tab stop for the whole plot, with the application role: in
              browse mode a screen reader keeps the arrow keys for itself
-             (ADR-0030's reasoning holds here unchanged). */
+             (ADR-0030). */
           tabIndex={0}
           role="application"
           aria-roledescription={wording.scheduleRoleDescription}

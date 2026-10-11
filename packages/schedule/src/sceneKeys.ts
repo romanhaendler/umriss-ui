@@ -1,4 +1,4 @@
-/* The keyboard (schedule-a11y, ADR-0030): the plot is one tab stop, and the
+/* The keyboard (ADR-0030): the plot is one tab stop, and the
    keys move the **Active subtask** over the rows (`walk.ts`), follow a
    dependency, select and propose edits.
 

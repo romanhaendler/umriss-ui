@@ -1,5 +1,4 @@
-// Extended by absent values (umriss-table 07): `value` may be absent, and an
-// absent value sorts last in both directions and matches no search.
+// `value` may be absent; an absent value sorts last in both directions and matches no search.
 
 /* The model of the table: from rows and a description of the columns comes the
    projection - filtered, sorted, paged.
@@ -10,15 +9,12 @@
    value is read and compared - never for presentation.
 
    The order filter -> sort -> page is guaranteed, and figures such as the
-   selection's keys come from the filtered set, not from the visible page.
-   That is exactly what the application had to know, and to assemble correctly
-   itself, until now. */
+   selection's keys come from the filtered set, not from the visible page. */
 
 import { DEFAULT_FORMATS, treeModel } from "@umriss-ui/core";
 import type { FlatteningEntry, NodeReader } from "@umriss-ui/core";
 import { groupRows, linesOf, pageLines, rowsOf } from "./grouping";
 import type { AggregateColumn, GroupLevel, Line, RowGroup } from "./grouping";
-/* Once stood in `Table.tsx` of @umriss-ui/core. */
 /** The direction of one sort level: `asc` puts the smallest value on top,
     `desc` the largest. */
 export type SortDirection = "asc" | "desc";
@@ -92,7 +88,7 @@ export interface TableInput<Z = unknown, K extends string = string> {
   server?: { rowCount: number };
   /** Tree rows: the rows are the roots, and these read their children. The
       model then sorts every level on its own, filters by core's path rule and
-      pages nothing (table-tree-rows). */
+      pages nothing. */
   tree?: TreeInput<Z>;
 }
 
@@ -279,7 +275,7 @@ export function tableModel<Z, K extends string = string>(
   const filtered = sorted(rows.filter(matches));
 
   /* 3. Group - after the sort, so that the rows within a group keep its
-        order. A page then counts lines (table-grouping, Q9). */
+        order. A page then counts lines. */
   if (input.grouping?.levels.length) {
     const { folded, ...grouping } = input.grouping;
     const groups = groupRows(filtered, { ...grouping, sort: levels });

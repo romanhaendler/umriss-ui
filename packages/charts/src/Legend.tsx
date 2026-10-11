@@ -1,4 +1,4 @@
-/* <Legend> - the legend (R-4.11).
+/* <Legend> - the legend.
    Hovering an entry highlights the series it belongs to; the remaining series
    are drawn on the series layer at 0.25 alpha. This is not a mousemove path,
    which is why a redraw of the series layer is explicitly allowed here.
@@ -79,8 +79,7 @@ function LegendInner({ scene, placement }: { scene: ChartScene; placement: "top"
           </button>
         );
       })}
-      {/* The data table's key stands at the legend's end (charts-alternatives
-          C1): the legend is where a reader looks for what the colours mean,
+      {/* The data table's key stands at the legend's end: the legend is where a reader looks for what the colours mean,
           and the table is the other answer to that question. */}
       {table !== null && <DataKey scene={scene} state={table} />}
     </div>
@@ -89,8 +88,8 @@ function LegendInner({ scene, placement }: { scene: ChartScene; placement: "top"
 
 /* ---------------- The chip under encoding by marks ----------------
 
-   The canvas tells series apart by dash, marker and hatch as well as colour
-   (charts-alternatives C3), so the chip has to show the same - drawn from the
+   The canvas tells series apart by dash, marker and hatch as well as colour,
+   so the chip has to show the same - drawn from the
    same numbers (marks.ts), as SVG, so that it stays as crisp as the text. */
 
 const CHIP_HATCH = 3;
@@ -184,6 +183,6 @@ function markerD(shape: MarkerShape, cx: number, cy: number, r: number): string 
     region says so. */
 export function Legend({ placement = "top" }: LegendProps): ReactNode {
   const scene = useChartScene("Legend");
-  if (scene === null) return null; // PROD outside a Chart (R-2.3)
+  if (scene === null) return null; // PROD outside a Chart
   return <LegendInner scene={scene} placement={placement} />;
 }

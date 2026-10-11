@@ -1,7 +1,7 @@
 /* <LimitLine> and <LimitBand> - limits on the chart (judging-values 02).
 
    Both render nothing themselves: children are configuration collectors, the
-   drawing happens in the scene (R-2.1). And both are explicitly not series - no
+   drawing happens in the scene. And both are explicitly not series - no
    accessor, no data, no legend entry, no hit. A limit belongs to no series, it
    belongs to the axis.
 

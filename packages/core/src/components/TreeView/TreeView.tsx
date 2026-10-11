@@ -69,13 +69,13 @@ export const TreeView = forwardRef(function TreeView<K, S extends Key = string>(
   const wording = useWording();
   /* Namespace of the box ids: two trees with the same keys would otherwise
      hand out the same id, and a click on the label of the second one would
-     hit the box of the first (library-audit 04). */
+     hit the box of the first. */
   const idBase = useId();
   const rowWindow = tree.virtual;
   /* Virtualised, the root is at the same time the scroll area, and then its
      ref carries the window arithmetic - the table keeps it this way too.
      Otherwise its own. The caller's ref is handed the same element beside
-     it (core-passthrough). */
+     it. */
   const ownRef = useRef<HTMLDivElement | null>(null);
   const rootRef = rowWindow?.scrollRef ?? ownRef;
   /* The focus follows the active node only where it already lies inside the
@@ -211,8 +211,8 @@ export const TreeView = forwardRef(function TreeView<K, S extends Key = string>(
       aria-label={ariaLabel}
       className={cx(styles.tree, rowWindow !== undefined && styles.scrolls, className)}
       {...rest}
-      /* After `rest` and composed with the caller's, as `onKeyDown` already
-         was: a caller's `onFocus` or `onBlur` used to replace the tracking the
+      /* After `rest` and composed with the caller's, as `onKeyDown` is:
+         a caller's `onFocus` or `onBlur` would replace the tracking the
          focus-follows-the-active-node rule hangs on, and an `onScroll` the
          row window. The role stands here too - it is what the element is. */
       role="tree"

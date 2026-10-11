@@ -24,9 +24,9 @@ export interface ChartsWording {
       first. */
   readout: (x: string, rows: readonly { name: string; value: string; x: string }[]) => string;
   /** The last row of a stack in the tooltip and the readout: the sum of its
-      members at the point (charts-stacking K4). */
+      members at the point. */
   stackTotal: string;
-  /** A share in a normalised stack, its number already formatted (K5). */
+  /** A share in a normalised stack, its number already formatted. */
   percent: (value: string) => string;
   /** The keys that walk the chart. */
   walkHelp: string;
@@ -42,8 +42,7 @@ export interface ChartsWording {
   /** The control over a zoomed plot that brings every zoomed axis back to
       its own domain (component-view 04). */
   showAll: string;
-  /** The data table's disclosure key, closed and open (charts-alternatives
-      C1). */
+  /** The data table's disclosure key, closed and open. */
   showData: string;
   hideData: string;
   /** The heading of the table's x column where its axis has no `label`, and
@@ -68,7 +67,7 @@ export interface ChartsWording {
   notch: string;
   count: string;
   outlierList: (values: readonly string[], more: number) => string;
-  /** Added to the caption where the table shows the downsampled course (C2):
+  /** Added to the caption where the table shows the downsampled course:
       how many readings its rows stand for. */
   downsampled: (readings: number) => string;
 }

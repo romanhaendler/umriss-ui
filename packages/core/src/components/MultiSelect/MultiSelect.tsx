@@ -122,7 +122,7 @@ export const MultiSelect = forwardRef(function MultiSelect<T extends string = st
   const listRef = useRef<HTMLDivElement>(null);
   const panelId = useId();
 
-  /* What the list says through the shared announcer (listbox-announcements):
+  /* What the list says through the shared announcer:
      how many options the search and the scope leave - typing in the search
      otherwise gives no word of it - and what a gesture away from the
      checkboxes added or removed. A ticked checkbox with the focus says
@@ -165,9 +165,9 @@ export const MultiSelect = forwardRef(function MultiSelect<T extends string = st
     sayCount(target, search, chosenNow(target));
   };
 
-  /* Into the search as soon as the panel stands. An effect on `open` ran
-     before the popover had found its portal target, so the first opening
-     left the focus on the trigger. */
+  /* Into the search as soon as the panel stands. An effect on `open` runs
+     before the popover has found its portal target, so the first opening
+     would leave the focus on the trigger. */
   const attachPanel = useCallback((node: HTMLDivElement | null) => {
     if (node) searchRef.current?.focus();
   }, []);
@@ -307,8 +307,7 @@ export const MultiSelect = forwardRef(function MultiSelect<T extends string = st
     const counterWidth = children[children.length - 1]?.offsetWidth ?? 0;
     const chipWidths = children.slice(0, -1).map((child) => child.offsetWidth);
     const available = container.clientWidth;
-    /* The gap from the stylesheet. Here stood
-       8, with the token as a comment beside it (library-audit 07). */
+    /* The gap from the stylesheet, not a number kept in step with it. */
     const GAP = Number.parseFloat(getComputedStyle(measureRow).columnGap) || 0;
     let fitting = 1;
     for (let k = chipWidths.length; k >= 1; k -= 1) {
@@ -349,8 +348,8 @@ export const MultiSelect = forwardRef(function MultiSelect<T extends string = st
   return (
     <>
       {/* The caller's ref, class and rest go to the field, the element that
-          carries the ring (P1 of core-passthrough); its handlers run before
-          the field's own and can prevent them (P3). The caller's name and
+          carries the ring; its handlers run before
+          the field's own and can prevent them. The caller's name and
           description go to the button, for a field without `FormField`. */}
       <div
         ref={mergeRefs(fieldRef, ref)}

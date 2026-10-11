@@ -1,4 +1,4 @@
-/* The shell of the demos (table-demo, decision A).
+/* The shell of the demos.
 
    A private package, never published. All five packages use it from their
    `demo/` directories and browser suites, never from `src/` - the lint holds

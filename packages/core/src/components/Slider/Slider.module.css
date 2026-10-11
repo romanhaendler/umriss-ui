@@ -62,7 +62,7 @@
   }
 
   /* Invalid, the track takes the fields' danger edge; the thumb stays as it
-     is (core-foundations 07). */
+     is. */
   .range[aria-invalid="true"]::-webkit-slider-runnable-track {
     box-shadow: 0 0 0 1px var(--u-color-danger);
   }
@@ -186,7 +186,7 @@
   }
 
   /* The fill is a gradient in the track, and forced colours drop a gradient
-     with every other colour (forced-colors 02): only the thumb's place would
+     with every other colour: only the thumb's place would
      say the value. The track keeps its gradient, drawn in system colours -
      the selection colour up to the value - and so takes its colours out of
      the forcing; the moz track draws its fill as a ground of its own. */

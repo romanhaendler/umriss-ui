@@ -1,4 +1,4 @@
-/* The keyboard's walk (schedule-a11y, ADR-0030): where the **Active subtask**
+/* The keyboard's walk (ADR-0030): where the **Active subtask**
    goes next. Pure, so the keys can be tested without a canvas; the scene turns
    the answer into the hover the pointer would have made.
 

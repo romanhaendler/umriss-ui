@@ -63,9 +63,9 @@ export interface GestureHost {
 
 type EditMode = "move" | "stretch-from" | "stretch-to" | "leadIn" | "leadOut";
 
-/** What the application says it is dragging in, while it drags it
-    (schedule-refinement 07): the browser hands over the dragged data only on
-    the drop, so the ghost before the drop can only come from the caller. */
+/** What the application says it is dragging in, while it drags it: the
+    browser hands over the dragged data only on the drop, so the ghost before
+    the drop can only come from the caller. */
 export interface PlacingItem {
   /** The caller's key for the dragged item; it comes back in the intent. */
   readonly item: string;
@@ -267,8 +267,8 @@ export class SceneGestures {
     const selectedId = this.host.selectedSubtask();
     const selected = selectedId !== null ? (this.host.data.subtaskById.get(selectedId) ?? null) : null;
     if (event.pointerType === "touch") {
-      /* Touch pans and pinches; editing by touch is not part of this version
-         (spec, Out of Scope), so a finger on a subtask pans as well. */
+      /* Touch pans and pinches; editing by touch is not supported, so a
+         finger on a subtask pans as well. */
       this.gesture = { kind: "pending", pointerId: event.pointerId, x0: x, y0: y, mode: "pan", subtask: null };
     } else if ((grip === "leadIn" || grip === "leadOut") && selected !== null) {
       this.gesture = { kind: "pending", pointerId: event.pointerId, x0: x, y0: y, mode: grip, subtask: selected };
@@ -553,7 +553,7 @@ export class SceneGestures {
     this.report("contextmenu", this.host.view.hitAt(x, y), event.clientX, event.clientY, x, y);
   }
 
-  /** The wheel, as every scrolling area has it (schedule-refinement 02):
+  /** The wheel, as every scrolling area has it:
       vertical scrolls the lanes, and lets the page scroll on once they are at
       their end; Ctrl or ⌘ zooms - a trackpad pinch arrives as a wheel with
       Ctrl -; horizontal or Shift pans through time. */
@@ -680,8 +680,8 @@ export class SceneGestures {
     const standing = this.gesture.kind === "place" ? this.gesture.ghost : null;
     const ghost = wanted.ghost ?? (wanted.refused || wanted.blocked ? standing : null);
     /* The drop effect follows the GHOST and not the pointer. A ghost is the
-       promise of where a drop lands (schedule-refinement 07), and the browser
-       would break that promise if it were told "none" here: it then delivers
+       promise of where a drop lands, and the browser would break that promise
+       if it were told "none" here: it then delivers
        no drop at all, and a release over a refused lane would place nothing
        while the ghost still stood on a lane that allowed it. So "none" is said
        exactly when nothing WOULD be placed - when no ghost stands anywhere -

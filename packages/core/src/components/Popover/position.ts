@@ -2,11 +2,9 @@
    the half of the popover logic that can be tested - jsdom reports every
    element as zero-sized, there is no layout there.
 
-   Before this, the calculation stood in nine versions across the package, with
-   four different strategies: sometimes without clamping at the right edge,
-   sometimes with, sometimes right-aligned, and exactly once (Tooltip) with
-   flipping. The one function that reads the browser, `visibleViewport`,
-   stands at the end and only measures. */
+   One calculation serves every popover: clamping at both edges and flipping.
+   The one function that reads the browser, `visibleViewport`, stands at the
+   end and only measures. */
 
 export interface AnchorRect {
   top: number;
@@ -147,10 +145,10 @@ export function motionOrigin(side: Side, align: Align): string {
   return `${x} ${side === "bottom" ? "top" : "bottom"}`;
 }
 
-/** The visible part of the window, read from the browser. `innerWidth` and
-    `innerHeight` were read before: Safari reports the zoomed-in size there but
+/** The visible part of the window, read from the browser. Not `innerWidth` and
+    `innerHeight`: Safari reports the zoomed-in size there but
     positions from the unzoomed corner, and neither of them knows the on-screen
-    keyboard - on an iPhone the combobox's list stood above the field and cut
+    keyboard - on an iPhone the combobox's list would stand above the field and cut
     off at the left. Where `visualViewport` is missing (jsdom), the window. */
 export function visibleViewport(): Viewport {
   const v = window.visualViewport;

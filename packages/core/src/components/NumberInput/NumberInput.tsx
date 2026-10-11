@@ -238,9 +238,9 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
         }}
         {...rest}
         /* After `rest` and composed with the caller's: a form library hands
-           in `onBlur` as a matter of course, and it used to replace the
-           commit on leaving - the field then counted as focused for good and
-           took no value from outside any more. */
+           in `onBlur` as a matter of course, and replacing the
+           commit on leaving would leave the field counting as focused for good,
+           taking no value from outside any more. */
         onKeyDown={handleKeyDown}
         onFocus={(event) => {
           onFocus?.(event);

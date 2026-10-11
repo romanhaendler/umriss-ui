@@ -1,5 +1,5 @@
 /* The API index: one generated page per package with everything its entries
-   export (.scratch/api-index, ADR-0044).
+   export (ADR-0044).
 
    Grouped by what an export is - Components, Hooks, Functions, Constants,
    Types, then one group per subpath under its import path - and alphabetical

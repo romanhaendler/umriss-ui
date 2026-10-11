@@ -1,4 +1,4 @@
-/* A field's width, in characters (control-sizes 02, ADR-0041).
+/* A field's width, in characters (ADR-0041).
 
    The stylesheet half stands in `#own-styles` (`.extent`): a field fills the
    width its place gives it, and where the place asks how wide it is - a

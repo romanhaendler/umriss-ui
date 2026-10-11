@@ -1,10 +1,8 @@
 /* How this product writes numbers, dates and times - in exactly one place.
 
-   Before this, the language tag "de-DE" stood in twelve places across five
-   modules: in the date formats, in the offset label of the daylight-saving
-   change, in the number notation of the NumberInput, in the percentage bar, in
-   the counter of the filter bar and in the text sorting of the table. Every new
-   component added a thirteenth. Here they stand once.
+   A language tag written into each module (date formats, the daylight-saving
+   offset label, number notation, percentages, counters, text sorting) would
+   multiply with every component. Here the tag stands once.
 
    Why an object of functions and not the Intl objects themselves: an
    application that wants something written differently replaces one function.
@@ -16,9 +14,7 @@
    `formatsFor` builds them; `DEFAULT_FORMATS` is the English set every
    component renders without a provider, and `GERMAN_FORMATS` behind
    `@umriss-ui/core/wording/de` is freight a caller takes on purpose, beside
-   the German wording. ADR-0019 left this decision open when the wording became
-   English - "the locale of the formats is a decision about a different object
-   and deserves its own" - and ADR-0024 is that decision.
+   the German wording.
 
    The clock stays 24-hour. `en-GB` is chosen over `en-US` for exactly that:
    a screen that writes 3 pm where 15:00 was meant is read wrongly once
@@ -167,8 +163,7 @@ export interface Separators {
 /** The separators a set of formats writes, read off the formats themselves.
 
     A field that formats a number must be able to read its own output back, and
-    an application may have replaced `number` with anything (ADR-0024 moved the
-    default from German to English, which is how this came up). So the
+    an application may have replaced `number` with anything. So the
     separators are not declared a second time but measured: one number with one
     decimal place, digits struck out, and what remains is the notation's own
     punctuation. */

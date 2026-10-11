@@ -38,8 +38,8 @@ export function installCommand({ name, peerDependencies }: InstallManifest): str
   return ["npm install", name, ...umrissPeers(peerDependencies)].join(" ");
 }
 
-/** What a package needs, as the front page's tile says it
-    (.scratch/site-front-page): "stands alone", "needs core", "needs core and
+/** What a package needs, as the front page's tile says it:
+   "stands alone", "needs core", "needs core and
     charts" - from the same peers as the install command. */
 export function dependencyLine({ peerDependencies }: InstallManifest): string {
   const names = umrissPeers(peerDependencies).map((peer) => peer.slice("@umriss-ui/".length));

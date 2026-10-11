@@ -1,8 +1,7 @@
 /* Which role a message carries - in one place.
 
-   The table stood in `Alert`, and the toast had an answer of its own: a
-   `status` region for every tone. An error thereby meant two different things
-   to a screen reader on two surfaces (library-audit 03). Both now read this.
+   Alert and the toast read this one answer, so an error means the same thing
+   to a screen reader on both surfaces.
 
    Only the two urgent tones interrupt. `alert` reads out immediately and cuts
    off whatever is being read - which is impolite for a success message and

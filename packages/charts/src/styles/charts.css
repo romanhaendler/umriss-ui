@@ -1,4 +1,4 @@
-/* @umriss-ui/charts - design coupling exclusively through CSS variables (R-1.6).
+/* @umriss-ui/charts - design coupling exclusively through CSS variables.
    Every --uc-* variable falls back through the var() cascade onto the --u-* token
    of @umriss-ui/core (where the app loads it) and finally onto a literal.
    The --u-* names are checked against the real umriss-ui token set: Geist fonts,
@@ -6,7 +6,7 @@
    --u-color-surface. --u-chart-* palette tokens do not (yet) exist in umriss-ui -
    the literal fallbacks carry.
    A dark mode arises from this by itself; the library contains no dark mode code
-   of its own (R-1.8). */
+   of its own. */
 
 @layer umriss.tokens, umriss.base, umriss.components;
 
@@ -100,7 +100,7 @@
     min-width: 0;
   }
 
-  /* Read, not seen: the readout and the summary (charts-a11y 03). */
+  /* Read, not seen: the readout and the summary. */
   .uc-sr {
     position: absolute;
     width: 1px;
@@ -126,7 +126,7 @@
     position: absolute;
     inset: 0;
     display: block;
-    pointer-events: none; /* .uc-plot catches the mouse events (R-2.8) */
+    pointer-events: none; /* .uc-plot catches the mouse events */
   }
 
   /* Loading over a course keeps it (chart-loading): it dims and takes no
@@ -298,7 +298,7 @@
     color: var(--uc-color-text);
   }
 
-  /* Ticks of the y axes sit on the line, labels centred to them (R-4.16). */
+  /* Ticks of the y axes sit on the line, labels centred to them. */
   .uc-axis-y > .uc-tick > .uc-tick-label {
     top: 50%;
     transform: translateY(-50%);
@@ -335,7 +335,7 @@
     top: 0;
   }
 
-  /* Y titles stand rotated outside their axis (R-4.16). */
+  /* Y titles stand rotated outside their axis. */
   .uc-axis-y > .uc-axis-title {
     top: 50%;
     writing-mode: vertical-rl;
@@ -360,7 +360,7 @@
     color: var(--uc-color-text);
   }
 
-  /* ---------------- Legend (R-4.11) ---------------- */
+  /* ---------------- Legend ---------------- */
 
   .uc-legend {
     display: flex;
@@ -395,8 +395,8 @@
     border-radius: var(--uc-radius-chip);
   }
 
-  /* Under encoding by marks the chip draws the series' dash, marker or hatch
-     (charts-alternatives C3). Its colours are the canvas' own, already chosen
+  /* Under encoding by marks the chip draws the series' dash, marker or hatch.
+     Its colours are the canvas' own, already chosen
      for the contrast mode where it applies: the browser is not to force them
      away as it forces a background. */
   .uc-legend-mark {
@@ -497,7 +497,7 @@
     box-shadow: var(--uc-focus-ring);
   }
 
-  /* ---------------- Data table (charts-alternatives 01) ---------------- */
+  /* ---------------- Data table ---------------- */
 
   /* The key closes the legend's line, apart from the entries it does not
      explain. */
@@ -575,7 +575,7 @@
     font-family: var(--uc-font-mono);
   }
 
-  /* ---------------- Tooltip (R-4.8, R-4.9) ---------------- */
+  /* ---------------- Tooltip ---------------- */
 
   .uc-tooltip {
     position: absolute;
@@ -677,7 +677,7 @@
     }
   }
 
-  /* ---------------- Measuring span of the layout (R-3.3) ----------------
+  /* ---------------- Measuring span of the layout ----------------
      Must have the same font resolution as the real labels; the positioning of the
      label rules is reset here. */
 
@@ -697,7 +697,7 @@
   /* ---------------- Limits and calendar breaks in the axis band ----------------
 
      Both are axis decoration and therefore HTML like the ticks: same font, same
-     theme, same overflow behaviour, and no text on the canvas (R-2.8). */
+     theme, same overflow behaviour, and no text on the canvas. */
 
   .uc-limit-label {
     position: absolute;

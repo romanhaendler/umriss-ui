@@ -111,7 +111,7 @@ export const Slider = forwardRef<HTMLInputElement, SliderProps>(function Slider(
   const value = controlled ? valueProp : own;
   const show = (x: number) => (format ? format(x) : formats.number(x, decimalsOf(step)));
   const text = show(value);
-  /* The readout's room is its longest value's (control-sizes 09): the track
+  /* The readout's room is its longest value's: the track
      keeps its length while the figure changes, and a short figure stands at
      the track rather than six characters from it. */
   const room = Math.max(show(min).length, show(max).length);

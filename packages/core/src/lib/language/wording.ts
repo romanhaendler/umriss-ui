@@ -193,8 +193,7 @@ export interface Wording {
   };
 
   /* -------- Table ------------------------------------------------- */
-  /* The table's older entries, which moved with it to @umriss-ui/table
-     (umriss-table 14); it goes on reading them from here. */
+  /* The table's older entries; @umriss-ui/table reads them from here. */
   pagination: string;
   rows: string;
   rowsPerPage: string;
@@ -211,8 +210,7 @@ export interface Wording {
   /* -------- @umriss-ui/table --------------------------------------- */
   /* These entries belong to the table in @umriss-ui/table. They stand here and
      not in a register of that package, so that one provider switches both
-     packages with ONE value - overriding a wording stays a single act
-     (umriss-table 04). */
+     packages with ONE value - overriding a wording stays a single act. */
   /** The column menu's button. */
   columns: string;
   /** Accessible name of the list in the column menu. */
@@ -436,7 +434,7 @@ export interface Wording {
 
   /* -------- @umriss-ui/schedule ------------------------------------ */
   /* The schedule's entries stand here for the table's reason: one provider
-     switches every package with one value (schedule 06). */
+     switches every package with one value. */
   /** The two findings, named on the ghost of a drag. */
   scheduleOverlap: string;
   scheduleViolatedDependency: string;

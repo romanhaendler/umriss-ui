@@ -1,9 +1,9 @@
-/* One size for the controls in a place (control-sizes 01, ADR-0041).
+/* One size for the controls in a place (ADR-0041).
 
    A control with two heights takes `size`, `sm` or `md`. A container that sets
    one size for everything in it - @umriss-ui/table's toolbar - says it once
    with `ControlSizeProvider`, and every control inside takes it unless it says
-   its own. Without a provider a control is `md`, as it always was.
+   its own. Without a provider a control is `md`.
 
    A surface of its own starts without it: a popover, a dialog (and so a
    drawer), a tooltip. React carries a context through a portal, and a dialog

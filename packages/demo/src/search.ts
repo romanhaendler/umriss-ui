@@ -1,5 +1,4 @@
-/* What the palette searches, in one shape for every kind of find
-   (.scratch/one-search).
+/* What the palette searches, in one shape for every kind of find.
 
    The generator writes a package's entries as its search fragment
    (`demo/.generated/search.json`, `tooling/llms.ts`), from the same outline
@@ -49,7 +48,7 @@ export interface PropsOfPage {
   tables: readonly { name: string; groups: readonly { rows: readonly { name: string; origin?: string }[] }[] }[];
 }
 
-/** A package's props (.scratch/one-search 04): one entry per row, at its
+/** A package's props: one entry per row, at its
     anchor `#<Type>-<prop>`, grouped under its type - `size` of `ButtonProps`
     is not `size` of `TableProps`. A table shown on several pages is found on
     the first; a row inherited from a type whose own row is found already is
@@ -102,8 +101,8 @@ export function searchEntries(
   ];
 }
 
-/** A page's reference tables as entries, one a row, landing on the row
-    (.scratch/one-search 06): the Theming page's tokens, the Language page's
+/** A page's reference tables as entries, one a row, landing on the row:
+    the Theming page's tokens, the Language page's
     wording keys. A table with an English and a German column is wording, and
     its two texts are the keywords - a string seen on screen, in either
     language, finds the key behind it. A row's label is its first cell. */
@@ -130,7 +129,7 @@ export function referenceEntries(packageId: string, outline: readonly Rubric[], 
   );
 }
 
-/** A package's exports as its API index shows them (.scratch/one-search 05),
+/** A package's exports as its API index shows them 
     each landing on its entry there: `/core/api/#useToast`. An export the
     index only refers onwards is found where it leads - a component as its
     page, a type with a table by its props. */

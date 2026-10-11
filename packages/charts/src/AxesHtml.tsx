@@ -1,8 +1,8 @@
-/* HTML layer of the axes (R-2.8: axes, labels, legend and tooltip are HTML, not
+/* HTML layer of the axes (axes, labels, legend and tooltip are HTML, not
    canvas text). The positions come unchanged out of the layout calculation;
    nothing is recalculated here.
 
-   Tick labels of the right and top positions mirror their alignment (R-4.16),
+   Tick labels of the right and top positions mirror their alignment,
    y titles stand rotated outside their axis. */
 
 import { useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
@@ -33,7 +33,7 @@ function renderAxis(axis: AxisLayout, limits: readonly LimitLabel[], plot: Rect,
           means nothing (chart-loading 03). */}
       {ticksShown && axis.ticks.map((tick) => {
         // Anchor on whole pixels: that coincides exactly with the grid line on
-        // the canvas, which is aligned to half pixels (R-3.5).
+        // the canvas, which is aligned to half pixels.
         if (orientation === "y") {
           const anchor = Math.round(tick.px - band.y);
           // A limit's label is the weightier statement and covers the tick's;

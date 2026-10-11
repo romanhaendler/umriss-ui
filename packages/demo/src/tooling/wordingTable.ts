@@ -1,4 +1,4 @@
-/* A wording as a table (.scratch/theming-and-wording-reference, 04): every
+/* A wording as a table: every
    entry of a directory - core's `Wording`, the charts' `ChartsWording`, the
    formats - with its English and its German text side by side.
 

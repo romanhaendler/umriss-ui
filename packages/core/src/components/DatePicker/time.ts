@@ -47,7 +47,7 @@ export type DstChoice = "earlier" | "later";
  * A picker that reopens a value decomposes it into wall-clock fields and loses
  * in doing so which of the two occurrences it was. Without this question a
  * later 02:30 opened as the earlier one and slipped back by an hour on the next
- * "Apply" (library-audit 02).
+ * "Apply".
  *
  * "later" only for the later occurrence of a doubled hour; every unambiguous
  * time is "earlier", the pickers' default.
@@ -72,7 +72,7 @@ export function dstChoiceFor(instant: Date): DstChoice {
  *
  * It is calculated on the time axis and not through the wall-clock time: a
  * `setSeconds(0)` resolves a doubled wall-clock time to the earlier one
- * according to ECMAScript, and turned the later 02:30 back into the earlier
+ * according to ECMAScript, which would turn the later 02:30 into the earlier
  * one. An instant that is already settled has nothing to resolve.
  */
 export function truncateInstant(instant: Date, withSeconds: boolean): Date {
@@ -83,9 +83,7 @@ export function truncateInstant(instant: Date, withSeconds: boolean): Date {
 /**
  * The short form of the UTC offset, e.g. "GMT+2".
  *
- * The formatter behind it lies in the language seam. It used to be rebuilt here
- * on every call - the most expensive line in the most carefully built module of
- * the package.
+ * The formatter behind it lies in the language seam and is built once.
  */
 export const offsetLabel = (d: Date): string => DEFAULT_FORMATS.offset(d);
 
