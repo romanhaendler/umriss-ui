@@ -229,4 +229,6 @@ ticket 02) - put aside by the maintainer on 11 Oct 2026, not closed.
 
 Collapsing the dock onto its grip stays out of scope, because it doubles the
 state space. What core will not build at all stands in
-[ADR-0032](../../docs/adr/0032-what-umriss-is-not.md).
+[ADR-0032](../../docs/adr/0032-what-umriss-is-not.md). Validation is the
+caller's, and a dashboard a user arranges is never built; umriss shows the
+reader's time ([ADR-0060](../../docs/adr/0060-validation-and-a-layout-editor-are-never-time-zones-not-yet.md)).

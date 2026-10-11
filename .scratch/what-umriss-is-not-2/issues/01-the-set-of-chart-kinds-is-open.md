@@ -1,6 +1,6 @@
 # 01 - ADR: the set of chart kinds is open
 
-Status: ready-for-agent
+Status: done
 Type: task
 Size: S
 
@@ -78,4 +78,8 @@ the test. A request for pie is still answered with ADR-0032 and this one.
 
 ## Acceptance
 
-- [ ] The ADR as above; `grep -rn "set of kinds is closed" .` finds only ADR-0032.
+- [x] The ADR as above; `grep -rn "set of kinds is closed" .` finds only ADR-0032.
+
+## Comments
+
+- Done as ADR-0059. ADR-0032 status line and index row, `capabilities.md` (Out, Later) and the charts README brought into line; "set of kinds is closed" now stands only in ADR-0032 and a September research file.

@@ -373,7 +373,7 @@ axis with the map kept by the library: every promise above holds on it.
 | The table lies over the plot area; the plot keeps its size and is hidden meanwhile | C1 | Screenshot (`open-data-table`, `open-a-week-as-a-table`) |
 | The visible domain only; the x in the first column (the axis `label`, else "Position"), then one column per visible series | C1 | Unit (table, jsdom data table) |
 | Each value in the tooltip's format - the series' `format`, else its y axis' `tickFormat`; a gap and a missing reading leave the cell empty; a state by its name; a corridor by both edges | C1 | Unit (jsdom data table) |
-| A stacked series lists its own value, not its top; no total column | charts-stacking K4 | Unit (jsdom stacking) |
+| A stacked series lists its own value, not its top; the stack's total follows its last member, in the tooltip's format (a normalised stack's total is the readings' sum, not 100%), found by the row's x so a thinned table keeps it | charts-stacking K4, charts-stack-total-in-table | Unit (jsdom stacking) |
 | The series of one x axis merged on their x; a matrix in a table of its own, by column and row | C1 | Unit (table) |
 | Above 500 rows the downsampled course - first, lowest, highest and last per stretch; a state band its changes of state, as the keys walk it -, and the caption says from how many readings | C2, charts-alternatives 04 | Unit (table, jsdom data table), Screenshot (`open-a-week-as-a-table`) |
 | Column and row headings (`scope`), a caption, the scrolling panel a tab stop of its own; axe clean | C1 | Unit (jsdom data table), Accessibility |
@@ -447,8 +447,6 @@ constant over 5 s – the hysteresis from R-3.4 works (R-5.3).
 
 Wanted, not yet built (charts-review Q12). The entries pointing at a spec are no longer waiting for a caller (roadmap G1); the others still wait for one.
 
-* **A stack's total in the data table.** Specified, ready to build:
-  `.scratch/charts-stack-total-in-table/spec.md`.
 * **A range a reader marks.** Specified, ready to build:
   `.scratch/chart-range-selection-and-navigator/spec.md`.
 * **Line colour by limit.** A line that turns alarm-coloured above a limit; today
@@ -456,6 +454,12 @@ Wanted, not yet built (charts-review Q12). The entries pointing at a spec are no
 * **A navigator.** A small overview of the whole course under the plot, its
   window the span in view. It waits for a design session of its own, after the
   range: `.scratch/chart-navigator/spec.md`.
+* **Horizontal bars.** The next kind: a ranking with long names, read by name
+  (ADR-0059).
+* **Sankey.** What flows where, from stage to stage (ADR-0059).
+* **A bullet graph.** One value against a target and bands; a component of core
+  beside `Meter` (ADR-0059).
+* **A treemap.** The parts of a whole in two levels (ADR-0059).
 
 ## Out
 
@@ -487,17 +491,18 @@ here.
   renderer would double every kind.
 * **Stacked lines, streamgraphs.** A line is a course, not a share: `stack`
   is on the two kinds that fill a whole of parts (charts-stacking).
-* **Horizontal bars.** Bars grow along the Y axis from a baseline on the X axis.
 * **Violin plots.** A density estimate between the values is smoothing: it
   draws values nobody measured.
 * **Jittered or beeswarm points.** A random jitter gives a picture that does
   not repeat from one render to the next; a deterministic beeswarm would be a
   kind of its own.
-* **Pie, radar, candle.** The set of kinds is closed (no renderer interface for
-  third parties); none of the three answers a question of a data-dense screen.
+* **Pie, donut, radar, candle.** None answers a question a data-dense screen
+  asks (ADR-0059).
 
 ## Known limits
 
+* **Time zones.** umriss shows the reader's time; there is no other zone
+  (ADR-0060).
 * **The closure limit of change detection.** A `value` given as a function,
   `tickFormat` and the tooltip's `render` are compared by their source text,
   because inline ones are new on every render. Two functions of the same text

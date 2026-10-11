@@ -49,7 +49,7 @@ export interface FormFieldProps extends HTMLAttributes<HTMLDivElement> {
       Checkbox. The triggers of the pickers and of the MultiSelect are
       buttons, on which `aria-required` is not a permitted attribute; there
       the mark carries it alone. It validates nothing - validation belongs to
-      the caller. */
+      the caller (ADR-0060). */
   required?: boolean;
   /** Optional: a fixed id for the input element (instead of a generated
       one). */

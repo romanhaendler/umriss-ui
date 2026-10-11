@@ -161,7 +161,8 @@ label and time.
 ## Not yet
 
 What the schedule does not do today, and waits for a caller who needs it (what
-it never does stands in ADR-0032):
+it never does stands in ADR-0032): umriss shows the reader's time, and a
+plant's zone is not yet offered (ADR-0060).
 
 * **Stacked overlap** — overlapping subtasks packed into sub-lanes on request;
   today an overlap is always drawn offset, as the finding it is.

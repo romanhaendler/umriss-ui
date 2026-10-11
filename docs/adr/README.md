@@ -1,6 +1,6 @@
 # Decisions
 
-Fifty-eight decisions, each one written where it was made and kept afterwards. An
+Sixty decisions, each one written where it was made and kept afterwards. An
 ADR here is not an announcement: it states the question, the alternatives that
 were real at the time, and what the decision costs — which is what makes it
 worth reading a year later, when the code has changed and the reasoning has not.
@@ -45,7 +45,7 @@ half a later reader needs most. Exactly one is superseded today.
 | [0029](0029-a-row-groups-form-follows-its-level.md) | A row group's form follows its level | accepted | table |
 | [0030](0030-a-chart-is-one-tab-stop-that-walks-its-hits.md) | A chart is one tab stop that walks its hits | accepted, amended by ADR-0047 | charts |
 | [0031](0031-the-charts-carry-their-own-wording.md) | The charts carry their own wording | accepted | charts, language |
-| [0032](0032-what-umriss-is-not.md) | What umriss is not | accepted, superseded in one point by ADR-0052 | scope |
+| [0032](0032-what-umriss-is-not.md) | What umriss is not | accepted, superseded in two points by ADR-0052 (the x axis reads categories; still no band scale) and by ADR-0059 (the set of kinds is open; horizontal bars are the first to come); extended by ADR-0060 | scope |
 | [0033](0033-the-schedules-keys-walk-past-the-view.md) | The schedule's keys walk past the view | accepted | schedule |
 | [0034](0034-the-table-becomes-a-grid-only-on-request.md) | The table becomes a grid only on request | accepted | table |
 | [0035](0035-umriss-is-for-data-dense-applications.md) | umriss is for data-dense applications, not for plants alone | accepted | scope |
@@ -72,5 +72,7 @@ half a later reader needs most. Exactly one is superseded today.
 | [0056](0056-a-chart-reports-a-chosen-hit-and-holds-no-selection.md) | A chart reports a chosen hit and holds no selection | accepted | charts |
 | [0057](0057-the-alarm-list-offers-snoozing-the-application-decides.md) | The alarm list offers snoozing and reports it, and the application decides | accepted | limits and alarms |
 | [0058](0058-a-skill-points-an-agent-at-the-documentation.md) | A skill points a coding agent at the documentation, and there is no MCP server | accepted | architecture |
+| [0059](0059-the-set-of-chart-kinds-is-open.md) | The set of chart kinds is open, and a kind is added when it answers a question no kind there answers better | accepted, supersedes ADR-0032 in two points | charts |
+| [0060](0060-validation-and-a-layout-editor-are-never-time-zones-not-yet.md) | Form validation and a dashboard a user arranges are never built, and time zones are not yet | accepted, extends ADR-0032 | scope |
 
 The vocabulary these decisions are written in stands in [`CONTEXT.md`](../../CONTEXT.md).
