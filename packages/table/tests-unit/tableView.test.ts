@@ -7,7 +7,7 @@
 import { describe, expect, it } from "vitest";
 import { act, renderHook } from "@testing-library/react";
 import { column } from "../src/model/tableModel";
-import { useCompanion } from "../src/model/companion";
+import { useCompanion } from "../src/model/tableState";
 
 interface Row {
   id: string;
@@ -105,7 +105,7 @@ describe("useCompanion – a view handed in", () => {
       }),
     );
     expect(result.current.search).toBe("aur");
-    expect(result.current.sortDirectionOf("projekt")).toBe("desc");
+    expect(result.current.sort).toEqual([{ column: "projekt", direction: "desc" }]);
   });
 
   it("clamps a page beyond the range instead of staying empty", () => {
@@ -126,6 +126,6 @@ describe("useCompanion – a view handed in", () => {
         initialView: { sort: [{ column: "projekt", direction: "desc" }] },
       }),
     );
-    expect(result.current.sortDirectionOf("projekt")).toBe("desc");
+    expect(result.current.sort).toEqual([{ column: "projekt", direction: "desc" }]);
   });
 });

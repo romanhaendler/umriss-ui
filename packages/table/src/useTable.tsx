@@ -21,7 +21,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { allBranches, duplicateKey, useFormats, useWording } from "@umriss-ui/core";
 import type { NodeReader } from "@umriss-ui/core";
-import { useCompanion } from "./model/companion";
+import { declaredWidths, useCompanion } from "./model/tableState";
 import { MOST_LEVELS, livePaths } from "./model/grouping";
 import type { RowGroup } from "./model/grouping";
 import { pinsForView, withPin } from "./model/pinning";
@@ -162,9 +162,7 @@ function effectiveWidths(
   columns: readonly ModelColumn<unknown>[],
   dragged: Readonly<Record<string, number>>,
 ): Readonly<Record<string, number>> {
-  const out: Record<string, number> = {};
-  for (const s of columns) if (s.width !== undefined) out[s.id] = s.width;
-  return { ...out, ...dragged };
+  return { ...declaredWidths(columns), ...dragged };
 }
 
 /** A table over your rows: the hook holds its state - sort, filters, search,

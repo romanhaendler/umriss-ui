@@ -1,4 +1,4 @@
-/* The state-holding companion of the model. It holds search, sort, page and
+/* tableState.ts: the table's state - what the companion holds. It holds search, sort, page and
    page size, calls the model and carries the selection along.
 
    It guarantees that every change to search, sort or page size resets to page
@@ -12,13 +12,20 @@
 import { useCallback, useMemo, useState } from "react";
 import { useTableSelection } from "./useTableSelection";
 import type { TableSelection } from "./useTableSelection";
-import { orderColumns, tableModel } from "./tableModel";
+import { tableModel } from "./tableModel";
 import { rowsOf } from "./grouping";
 import type { ModelColumn, SortLevel, TableInput, TableProjection } from "./tableModel";
 import type { SortDirection } from "./tableModel";
 import type { TableView } from "./view";
 import { useVirtual } from "@umriss-ui/core";
 import type { VirtualRows } from "@umriss-ui/core";
+
+/** The widths the columns declare, by id. */
+export function declaredWidths<Z, K extends string>(columns: readonly ModelColumn<Z, K>[]): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const column of columns) if (column.width !== undefined) out[column.id] = column.width;
+  return out;
+}
 
 /** One sort level. The companion's older name for it; the sort itself is a
     list. */
@@ -74,11 +81,6 @@ export interface Companion<Z, K extends string> extends TableProjection<Z, K> {
    * stay untouched by that.
    */
   toggleSort: (column: K, additive?: boolean) => void;
-  /** The direction of this column, otherwise undefined – straight for Th. */
-  sortDirectionOf: (column: K) => SortDirection | undefined;
-  /** The 1-based rank of the level, but only from two levels on – straight for
-      Th. With a single level the figure would be nothing but noise. */
-  sortRankOf: (column: K) => number | undefined;
   setPage: (page: number) => void;
   pageSize: number;
   setPageSize: (size: number) => void;
@@ -88,11 +90,6 @@ export interface Companion<Z, K extends string> extends TableProjection<Z, K> {
       when they are named here. The page stays put: the set of rows does not
       change. */
   toggleColumn: (column: K) => void;
-  /** A ready-made template for a column menu: the columns that can be switched
-      away, in their current order, with label and visibility. Columns without a
-      label and those that are not hideable are absent – in the menu they would
-      be rows that do nothing. */
-  columnChoices: readonly { id: K; label: string; visible: boolean }[];
   /** Dragged column widths in pixels; what is absent the browser decides. */
   widths: Readonly<Record<string, number>>;
   /** Sets a width; `undefined` gives the column back to its content. */
@@ -104,7 +101,6 @@ export interface Companion<Z, K extends string> extends TableProjection<Z, K> {
   expanded: readonly string[];
   /** Expands a row or collapses it; several may be open. */
   toggleRow: (key: string) => void;
-  isExpanded: (key: string) => boolean;
   /** The part of the state an application can keep. The library puts it
       nowhere: whether and where belongs to the application. */
   view: TableView<K>;
@@ -112,7 +108,7 @@ export interface Companion<Z, K extends string> extends TableProjection<Z, K> {
   /**
    * The visible window when it virtualises - otherwise undefined.
    *
-   * It goes to `<Table virtual={…}>` and to `<TableVirtualBody>`; `visible`
+   * It goes to `<Table virtual={…}>`; `visible`
    * then carries the window instead of the page, so that a caller need not
    * touch its loop.
    */
@@ -146,11 +142,7 @@ export function useCompanion<Z, K extends string = string>(
   /* The widths come from the view, otherwise from the columns. */
   const widthsOf = (view: TableView<K> | undefined): Readonly<Record<string, number>> => {
     if (view?.widths) return { ...view.widths };
-    const out: Record<string, number> = {};
-    for (const column of columns) {
-      if (column.width !== undefined) out[column.id] = column.width;
-    }
-    return out;
+    return declaredWidths(columns);
   };
   const [search, setSearchRaw] = useState(initialView?.search ?? "");
   const [sort, setSort] = useState<readonly Sort<K>[]>(() => sortOf(initialView));
@@ -278,11 +270,6 @@ export function useCompanion<Z, K extends string = string>(
     );
   }, []);
 
-  const isExpanded = useCallback(
-    (key: string) => expanded.includes(key),
-    [expanded],
-  );
-
   /* Hiding deliberately does NOT reset the page: unlike search, sort and page
      size it does not change the set of rows, so there is no page that could
      become invalid. */
@@ -306,31 +293,6 @@ export function useCompanion<Z, K extends string = string>(
     });
   }, []);
 
-  const sortDirectionOf = useCallback(
-    (column: K) => sort.find((level) => level.column === column)?.direction,
-    [sort],
-  );
-
-  const sortRankOf = useCallback(
-    (column: K) => {
-      if (sort.length < 2) return undefined;
-      const index = sort.findIndex((level) => level.column === column);
-      return index === -1 ? undefined : index + 1;
-    },
-    [sort],
-  );
-
-  /* From the whole ordered list, not from the visible columns: a column that
-     has been switched away must stay in the menu, otherwise there would be no
-     way back to it. */
-  const columnChoices = useMemo(
-    () =>
-      orderColumns(columns, order)
-        .filter((s) => s.label !== undefined && s.hideable !== false)
-        .map((s) => ({ id: s.id, label: s.label!, visible: !hidden.includes(s.id) })),
-    [columns, order, hidden],
-  );
-
   /* What is reported is what deviates from the default - otherwise every kept
      view would carry a page size although the user did nothing. The default of
      the page size is the application's setting, not the built-in ten. */
@@ -339,13 +301,7 @@ export function useCompanion<Z, K extends string = string>(
   /* The widths declared in the columns are the default. Without this
      comparison every view would carry widths before the user had dragged at
      all – the same error as with the page size. */
-  const defaultWidths = useMemo(() => {
-    const out: Record<string, number> = {};
-    for (const s of columns) {
-      if (s.width !== undefined) out[s.id] = s.width;
-    }
-    return out;
-  }, [columns]);
+  const defaultWidths = useMemo(() => declaredWidths(columns), [columns]);
 
   const changedWidths = useMemo(() => {
     const out: Record<string, number> = {};
@@ -412,17 +368,13 @@ export function useCompanion<Z, K extends string = string>(
     setSearch,
     sort,
     toggleSort,
-    sortDirectionOf,
-    sortRankOf,
     setPage,
     pageSize,
     setPageSize,
     expanded,
     toggleRow,
-    isExpanded,
     hidden,
     toggleColumn,
-    columnChoices,
     order,
     setOrder,
     widths,

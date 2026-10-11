@@ -6,7 +6,7 @@
 import { describe, expect, it } from "vitest";
 import { act, renderHook } from "@testing-library/react";
 import { column, tableModel } from "../src/model/tableModel";
-import { useCompanion } from "../src/model/companion";
+import { useCompanion } from "../src/model/tableState";
 
 interface Row {
   id: string;
@@ -101,7 +101,6 @@ describe("useCompanion – switching sort levels", () => {
   it("begins without a sort", () => {
     const { result } = setUp();
     expect(result.current.sort).toEqual([]);
-    expect(result.current.sortDirectionOf("budget")).toBeUndefined();
   });
 
   it("replaces the whole list without the modifier key", () => {
@@ -117,12 +116,12 @@ describe("useCompanion – switching sort levels", () => {
   it("turns between up and down without the modifier key, as before", () => {
     const { result } = setUp();
     act(() => result.current.toggleSort("budget"));
-    expect(result.current.sortDirectionOf("budget")).toBe("asc");
+    expect(result.current.sort).toEqual([{ column: "budget", direction: "asc" }]);
     act(() => result.current.toggleSort("budget"));
-    expect(result.current.sortDirectionOf("budget")).toBe("desc");
+    expect(result.current.sort).toEqual([{ column: "budget", direction: "desc" }]);
     // The third press switches back to up - not off.
     act(() => result.current.toggleSort("budget"));
-    expect(result.current.sortDirectionOf("budget")).toBe("asc");
+    expect(result.current.sort).toEqual([{ column: "budget", direction: "asc" }]);
   });
 
   it("appends a level with the modifier key", () => {
@@ -153,16 +152,6 @@ describe("useCompanion – switching sort levels", () => {
     act(() => result.current.toggleSort("budget", true)); // desc
     act(() => result.current.toggleSort("budget", true)); // out
     expect(result.current.sort).toEqual([{ column: "abteilung", direction: "asc" }]);
-  });
-
-  it("reports the rank of a level only from two levels on", () => {
-    const { result } = setUp();
-    act(() => result.current.toggleSort("abteilung"));
-    expect(result.current.sortRankOf("abteilung")).toBeUndefined();
-
-    act(() => result.current.toggleSort("budget", true));
-    expect(result.current.sortRankOf("abteilung")).toBe(1);
-    expect(result.current.sortRankOf("budget")).toBe(2);
   });
 
   it("resets to page one when the sort changes", () => {

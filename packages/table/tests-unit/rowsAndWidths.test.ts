@@ -8,7 +8,7 @@ import { describe, expect, it } from "vitest";
 import { act, renderHook } from "@testing-library/react";
 
 import { column } from "../src/model/tableModel";
-import { useCompanion } from "../src/model/companion";
+import { useCompanion } from "../src/model/tableState";
 
 interface Row {
   id: string;
@@ -34,15 +34,15 @@ describe("useCompanion – expanding rows", () => {
   it("begins with every row collapsed", () => {
     const { result } = setUp();
     expect(result.current.expanded).toEqual([]);
-    expect(result.current.isExpanded("a")).toBe(false);
+    expect(result.current.expanded.includes("a")).toBe(false);
   });
 
   it("expands a row and collapses it again", () => {
     const { result } = setUp();
     act(() => result.current.toggleRow("a"));
-    expect(result.current.isExpanded("a")).toBe(true);
+    expect(result.current.expanded.includes("a")).toBe(true);
     act(() => result.current.toggleRow("a"));
-    expect(result.current.isExpanded("a")).toBe(false);
+    expect(result.current.expanded.includes("a")).toBe(false);
   });
 
   it("lets several rows be open at once", () => {
@@ -61,10 +61,10 @@ describe("useCompanion – expanding rows", () => {
     act(() => result.current.toggleRow("a"));
     act(() => result.current.setSearch("Basalt"));
     expect(result.current.visible.map((z) => z.id)).toEqual(["b"]);
-    expect(result.current.isExpanded("a")).toBe(true);
+    expect(result.current.expanded.includes("a")).toBe(true);
 
     act(() => result.current.setSearch(""));
-    expect(result.current.isExpanded("a")).toBe(true);
+    expect(result.current.expanded.includes("a")).toBe(true);
   });
 
   it("does not change the page when expanding", () => {

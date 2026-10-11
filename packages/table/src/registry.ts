@@ -34,7 +34,7 @@ import type { Formats } from "@umriss-ui/core";
 import type { RowFilter } from "./rowFilter";
 import { tableModel } from "./model/tableModel";
 import type { ModelColumn, TableProjection, TableInput } from "./model/tableModel";
-import type { Companion } from "./model/companion";
+import type { Companion } from "./model/tableState";
 import type { TableSnapshot } from "./types";
 import { warnOnce } from "./dev";
 import { columnKind, sortValue } from "./values";
