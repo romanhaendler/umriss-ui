@@ -6,7 +6,7 @@
 import { describe, expect, it } from "vitest";
 import { act, renderHook } from "@testing-library/react";
 import { column, tableModel } from "../src/model/tableModel";
-import { useCompanion } from "../src/model/tableState";
+import { useTableState } from "../src/model/tableState";
 
 interface Row {
   id: string;
@@ -94,9 +94,9 @@ describe("tableModel – multi-level sorting", () => {
   });
 });
 
-describe("useCompanion – switching sort levels", () => {
+describe("useTableState – switching sort levels", () => {
   const setUp = () =>
-    renderHook(() => useCompanion(ROWS, COLUMNS, { rowKey: (z) => z.id, pageSize: 10 }));
+    renderHook(() => useTableState(ROWS, COLUMNS, { rowKey: (z) => z.id, pageSize: 10 }));
 
   it("begins without a sort", () => {
     const { result } = setUp();
@@ -156,7 +156,7 @@ describe("useCompanion – switching sort levels", () => {
 
   it("resets to page one when the sort changes", () => {
     const { result } = renderHook(() =>
-      useCompanion(ROWS, COLUMNS, { rowKey: (z) => z.id, pageSize: 2 }),
+      useTableState(ROWS, COLUMNS, { rowKey: (z) => z.id, pageSize: 2 }),
     );
     act(() => result.current.setPage(3));
     expect(result.current.page).toBe(3);

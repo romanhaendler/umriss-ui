@@ -1,7 +1,7 @@
 /* useTable - where the row type is bound (ADR-0017).
 
    The hook derives the row type from the rows and hands out the parts that need
-   it. Its state is that of the companion from table-model (page one after
+   it. Its state is that of the tableState from table-model (page one after
    search, sort and page size; the three-step additional sort; the view without
    default values), taken over unchanged. What is new is where the columns come
    from: from the registration instead of from a field the caller writes.
@@ -21,7 +21,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { allBranches, duplicateKey, useFormats, useWording } from "@umriss-ui/core";
 import type { NodeReader } from "@umriss-ui/core";
-import { declaredWidths, useCompanion } from "./model/tableState";
+import { declaredWidths, useTableState } from "./model/tableState";
 import { MOST_LEVELS, livePaths } from "./model/grouping";
 import type { RowGroup } from "./model/grouping";
 import { pinsForView, withPin } from "./model/pinning";
@@ -242,7 +242,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
   const preFilter = (options.preFilter) as ((row: unknown) => boolean) | undefined;
   const admitted = useAdmitted(rowsUnknown, server ? undefined : preFilter);
 
-  /* The grouping is held here, not in the companion: which ids it may carry
+  /* The grouping is held here, not in the tableState: which ids it may carry
      only the registry knows. An id nothing groupable carries falls out on
      reading - as long as nothing has registered, the grouping stays as it is. */
   const [groupingState, setGroupingState] = useState<readonly string[]>(() =>
@@ -250,7 +250,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
   );
   const [foldedState, setFoldedState] = useState<readonly string[]>(() => start?.folded ?? []);
   /* The pins the user chose, whole; `null` while the declared ones hold. They
-     are held here and not in the companion for the grouping's reason: what is
+     are held here and not in the tableState for the grouping's reason: what is
      declared only the registry knows. */
   const [pinsChosen, setPinsChosen] = useState<Pins | null>(() => (start?.pinned ? { ...start.pinned } : null));
   const rowKey = options.rowKey as (row: unknown) => string;
@@ -314,7 +314,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     // eslint-disable-next-line react-hooks/exhaustive-deps -- the open keys by value; the rows the pre-filter admits stand for it
     [isTree, openKey, admitted, reader],
   );
-  const b = useCompanion(admitted, modelColumns, {
+  const b = useTableState(admitted, modelColumns, {
     rowKey,
     pageSize: options.pageSize,
     defaultSort: options.defaultSort,
@@ -571,7 +571,7 @@ export function useTable<Z>(rows: readonly Z[], options: TableOptions<Z>): Table
     rows: rowsUnknown,
     admitted,
     modelColumns,
-    companion: b,
+    tableState: b,
     filter,
     grouping,
     tree,

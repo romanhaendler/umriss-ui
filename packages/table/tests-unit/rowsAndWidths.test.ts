@@ -8,7 +8,7 @@ import { describe, expect, it } from "vitest";
 import { act, renderHook } from "@testing-library/react";
 
 import { column } from "../src/model/tableModel";
-import { useCompanion } from "../src/model/tableState";
+import { useTableState } from "../src/model/tableState";
 
 interface Row {
   id: string;
@@ -28,9 +28,9 @@ const COLUMNS = [
 ];
 
 const setUp = () =>
-  renderHook(() => useCompanion(ROWS, COLUMNS, { rowKey: (z) => z.id, pageSize: 10 }));
+  renderHook(() => useTableState(ROWS, COLUMNS, { rowKey: (z) => z.id, pageSize: 10 }));
 
-describe("useCompanion – expanding rows", () => {
+describe("useTableState – expanding rows", () => {
   it("begins with every row collapsed", () => {
     const { result } = setUp();
     expect(result.current.expanded).toEqual([]);
@@ -69,7 +69,7 @@ describe("useCompanion – expanding rows", () => {
 
   it("does not change the page when expanding", () => {
     const { result } = renderHook(() =>
-      useCompanion(ROWS, COLUMNS, { rowKey: (z) => z.id, pageSize: 1 }),
+      useTableState(ROWS, COLUMNS, { rowKey: (z) => z.id, pageSize: 1 }),
     );
     act(() => result.current.setPage(2));
     act(() => result.current.toggleRow("b"));
@@ -77,7 +77,7 @@ describe("useCompanion – expanding rows", () => {
   });
 });
 
-describe("useCompanion – column widths", () => {
+describe("useTableState – column widths", () => {
   it("takes the initial widths from the columns", () => {
     const { result } = setUp();
     expect(result.current.widths).toEqual({ budget: 120 });
@@ -106,7 +106,7 @@ describe("useCompanion – column widths", () => {
 
   it("does not change the page when dragging", () => {
     const { result } = renderHook(() =>
-      useCompanion(ROWS, COLUMNS, { rowKey: (z) => z.id, pageSize: 1 }),
+      useTableState(ROWS, COLUMNS, { rowKey: (z) => z.id, pageSize: 1 }),
     );
     act(() => result.current.setPage(3));
     act(() => result.current.setWidth("projekt", 220));
@@ -124,7 +124,7 @@ describe("Widths in the view", () => {
 
   it("takes widths from the view as the starting state", () => {
     const { result } = renderHook(() =>
-      useCompanion(ROWS, COLUMNS, { rowKey: (z) => z.id, initialView: { widths: { projekt: 180 } } }),
+      useTableState(ROWS, COLUMNS, { rowKey: (z) => z.id, initialView: { widths: { projekt: 180 } } }),
     );
     // The view beats the columns' specification - as with the sort.
     expect(result.current.widths).toEqual({ projekt: 180 });

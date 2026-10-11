@@ -151,7 +151,7 @@ function foldSiblings(group: RowGroup<unknown>, open: boolean, hook: HookSnapsho
       else walk(g.groups);
     }
   };
-  walk(hook.companion.groups ?? []);
+  walk(hook.tableState.groups ?? []);
   for (const g of siblings) {
     if (snapshot.folded.includes(g.path) === open) continue;
     snapshot.toggleFold(g.path);

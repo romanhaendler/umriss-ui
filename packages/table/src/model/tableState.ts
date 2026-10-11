@@ -1,4 +1,4 @@
-/* tableState.ts: the table's state - what the companion holds. It holds search, sort, page and
+/* tableState.ts: the table's state - what the tableState holds. It holds search, sort, page and
    page size, calls the model and carries the selection along.
 
    It guarantees that every change to search, sort or page size resets to page
@@ -27,11 +27,11 @@ export function declaredWidths<Z, K extends string>(columns: readonly ModelColum
   return out;
 }
 
-/** One sort level. The companion's older name for it; the sort itself is a
+/** One sort level. The tableState's older name for it; the sort itself is a
     list. */
 export type Sort<K extends string> = SortLevel<K>;
 
-export interface CompanionOptions<Z, K extends string> {
+export interface TableStateOptions<Z, K extends string> {
   /** A stable key per row – the basis of the selection. */
   rowKey: (row: Z) => string;
   pageSize?: number;
@@ -67,7 +67,7 @@ export interface CompanionOptions<Z, K extends string> {
   tree?: TableInput<Z, K>["tree"];
 }
 
-export interface Companion<Z, K extends string> extends TableProjection<Z, K> {
+export interface TableState<Z, K extends string> extends TableProjection<Z, K> {
   search: string;
   setSearch: (value: string) => void;
   /** The active levels in their order; empty means unsorted. */
@@ -123,11 +123,11 @@ export interface Companion<Z, K extends string> extends TableProjection<Z, K> {
   restart: (view: TableView<K>) => void;
 }
 
-export function useCompanion<Z, K extends string = string>(
+export function useTableState<Z, K extends string = string>(
   rows: readonly Z[],
   columns: readonly ModelColumn<Z, K>[],
-  options: CompanionOptions<Z, K>,
-): Companion<Z, K> {
+  options: TableStateOptions<Z, K>,
+): TableState<Z, K> {
   const { rowKey, filter, defaultSort = null, initialView, virtual, grouping, server, tree } = options;
 
   /* What a view sets, and what it leaves out falls back to: the start as well

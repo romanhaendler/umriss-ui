@@ -1,4 +1,4 @@
-/* The view, as the companion reports it (table-surface 02).
+/* The view, as the tableState reports it (table-surface 02).
 
    The guarantee at stake: what is reported is what deviates from the default. An
    untouched table yields an empty view - whoever keeps it keeps nothing the user
@@ -7,7 +7,7 @@
 import { describe, expect, it } from "vitest";
 import { act, renderHook } from "@testing-library/react";
 import { column } from "../src/model/tableModel";
-import { useCompanion } from "../src/model/tableState";
+import { useTableState } from "../src/model/tableState";
 
 interface Row {
   id: string;
@@ -22,9 +22,9 @@ const ROWS: Row[] = [
 const COLUMNS = [column<Row>("projekt", { label: "Projekt", value: (z) => z.project })];
 
 const setUp = (pageSize?: number) =>
-  renderHook(() => useCompanion(ROWS, COLUMNS, { rowKey: (z) => z.id, pageSize }));
+  renderHook(() => useTableState(ROWS, COLUMNS, { rowKey: (z) => z.id, pageSize }));
 
-describe("useCompanion – what is reported is the non-default", () => {
+describe("useTableState – what is reported is the non-default", () => {
   it("reports nothing for an untouched table", () => {
     const { result } = setUp();
     expect(result.current.view).toEqual({});
@@ -57,7 +57,7 @@ describe("useCompanion – what is reported is the non-default", () => {
 
   it("does not report the application's default as a sort", () => {
     const { result } = renderHook(() =>
-      useCompanion(ROWS, COLUMNS, {
+      useTableState(ROWS, COLUMNS, {
         rowKey: (z) => z.id,
         defaultSort: { column: "projekt", direction: "asc" },
       }),
@@ -67,7 +67,7 @@ describe("useCompanion – what is reported is the non-default", () => {
 
   it("reports the sort as soon as it deviates from the default", () => {
     const { result } = renderHook(() =>
-      useCompanion(ROWS, COLUMNS, {
+      useTableState(ROWS, COLUMNS, {
         rowKey: (z) => z.id,
         defaultSort: { column: "projekt", direction: "asc" },
       }),
@@ -80,7 +80,7 @@ describe("useCompanion – what is reported is the non-default", () => {
     /* The comparison is against the default, not against the view handed in -
        otherwise a kept view would lose exactly the sort it was kept for. */
     const { result } = renderHook(() =>
-      useCompanion(ROWS, COLUMNS, {
+      useTableState(ROWS, COLUMNS, {
         rowKey: (z) => z.id,
         defaultSort: { column: "projekt", direction: "asc" },
         initialView: { sort: [{ column: "projekt", direction: "desc" }] },
@@ -96,10 +96,10 @@ describe("useCompanion – what is reported is the non-default", () => {
   });
 });
 
-describe("useCompanion – a view handed in", () => {
+describe("useTableState – a view handed in", () => {
   it("takes over search and sort", () => {
     const { result } = renderHook(() =>
-      useCompanion(ROWS, COLUMNS, {
+      useTableState(ROWS, COLUMNS, {
         rowKey: (z) => z.id,
         initialView: { search: "aur", sort: [{ column: "projekt", direction: "desc" }] },
       }),
@@ -112,7 +112,7 @@ describe("useCompanion – a view handed in", () => {
     /* A kept page 999 must not yield an empty table: the number stays, the
        model clamps it. */
     const { result } = renderHook(() =>
-      useCompanion(ROWS, COLUMNS, { rowKey: (z) => z.id, pageSize: 1, initialView: { page: 999 } }),
+      useTableState(ROWS, COLUMNS, { rowKey: (z) => z.id, pageSize: 1, initialView: { page: 999 } }),
     );
     expect(result.current.page).toBe(2);
     expect(result.current.visible).toHaveLength(1);
@@ -120,7 +120,7 @@ describe("useCompanion – a view handed in", () => {
 
   it("lets the view beat the application's default", () => {
     const { result } = renderHook(() =>
-      useCompanion(ROWS, COLUMNS, {
+      useTableState(ROWS, COLUMNS, {
         rowKey: (z) => z.id,
         defaultSort: { column: "projekt", direction: "asc" },
         initialView: { sort: [{ column: "projekt", direction: "desc" }] },

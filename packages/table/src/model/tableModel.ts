@@ -143,7 +143,7 @@ export interface TableProjection<Z, K extends string = string> {
  * they are named; unnamed ones follow in natural order; unknown ids are
  * passed over.
  *
- * Lives here and not in the body of the model, because the companion needs the
+ * Lives here and not in the body of the model, because the tableState needs the
  * same order for the column menu – written twice they would be two orders that
  * can drift apart.
  */

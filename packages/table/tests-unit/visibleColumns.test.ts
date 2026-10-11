@@ -6,7 +6,7 @@
 import { describe, expect, it } from "vitest";
 import { act, renderHook } from "@testing-library/react";
 import { column, tableModel } from "../src/model/tableModel";
-import { useCompanion } from "../src/model/tableState";
+import { useTableState } from "../src/model/tableState";
 
 interface Row {
   id: string;
@@ -104,9 +104,9 @@ describe("tableModel – visible columns", () => {
   });
 });
 
-describe("useCompanion – switching columns", () => {
+describe("useTableState – switching columns", () => {
   const setUp = (pageSize = 10) =>
-    renderHook(() => useCompanion(ROWS, COLUMNS, { rowKey: (z) => z.id, pageSize }));
+    renderHook(() => useTableState(ROWS, COLUMNS, { rowKey: (z) => z.id, pageSize }));
 
   it("begins with every column visible", () => {
     const { result } = setUp();
